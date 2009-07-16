@@ -1537,7 +1537,7 @@ class Fnirt(CommandLine):
 # This seems quite clunky, and Cindee will hate that '/'!
 # At a minimum, this should probably be redone with a setattr_on_read property,
 # available currently in the model_dev branch
-fsf_header_fname = os.path.dirname(__file__) + '/feat_template1.txt'
+fsf_header_fname = os.path.dirname(__file__) + '/data/feat_template1.txt'
 fsf_header_txt = open(fsf_header_fname).read()
 fsf_header = Template(fsf_header_txt)
 
