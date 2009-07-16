@@ -44,6 +44,8 @@ The nipy package contains the following subpackages and modules:
    :style: UML  
 """
 
+from version import version as __version__
+
 __status__   = 'pre-alpha'
 __url__     = 'http://nipy.sourceforge.net/'
 
