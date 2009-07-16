@@ -22,7 +22,7 @@ def test_bet():
     cmd = better._compile_command()
     yield assert_equal, cmd, 'bet -f 0.50'
     betted = better.run('infile','outfile')
-    yield assert_not_equal, betted.err, ''
+    yield assert_not_equal, betted.retcode, 0
     yield assert_equal, betted.infile, 'infile'
     yield assert_equal, betted.outfile, 'outfile'
     yield assert_equal, betted.cmdline, 'bet infile outfile -f 0.50'
