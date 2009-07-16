@@ -24,9 +24,9 @@ Get rid of nipy dependency, call this something else?
 """
 from __future__ import with_statement
 
-from nipy.interfaces.base import Bunch, CommandLine, setattr_on_read
+from nipype.interfaces.base import Bunch, CommandLine, setattr_on_read
 from nifti import load
-from nipy.interfaces.matlab import run_matlab_script, fltcols
+from nipype.interfaces.matlab import run_matlab_script, fltcols
 from scipy.io import savemat
 import numpy as np
 import os

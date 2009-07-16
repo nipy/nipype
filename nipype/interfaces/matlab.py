@@ -5,7 +5,7 @@ import os
 import re
 import tempfile
 import numpy as np
-from nipy.interfaces.base import CommandLine
+from nipype.interfaces.base import CommandLine
 
 matlab_cmd = 'matlab -nojvm -nosplash'
 

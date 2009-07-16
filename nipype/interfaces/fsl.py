@@ -27,7 +27,7 @@ give an example on how to then access as nipy object (maybe add helper function 
 And then consider the fancy decorator
 """
 
-from nipy.interfaces.base import Bunch, CommandLine, setattr_on_read
+from nipype.interfaces.base import Bunch, CommandLine, setattr_on_read
 import os
 
 

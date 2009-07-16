@@ -4,8 +4,8 @@ Wraps interfaces modules to work with pipeline engine
 import os, re
 import hashlib
 import shutil
-from nipy.interfaces.base import CommandLine as cl
-import nipy.interfaces.fsl as fsl
+from nipype.interfaces.base import CommandLine as cl
+import nipype.interfaces.fsl as fsl
 
 
 class NodeWrapper(object):
