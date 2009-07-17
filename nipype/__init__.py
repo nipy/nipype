@@ -5,7 +5,7 @@ Neuroimaging tools for Python (NIPY).
 The aim of NIPY is to produce a platform-independent Python environment for
 the analysis of brain imaging data using an open development model.
 
-The main repositroy for NIPY is here:
+The main repository for NIPY is here:
 https://launchpad.net/nipy
 
 This repository is mainly focussed on implementing interfaces and pipelines.
@@ -46,14 +46,15 @@ The nipy package contains the following subpackages and modules:
 
 from version import version as __version__
 
-__status__   = 'pre-alpha'
+__status__   = 'alpha'
 __url__     = 'http://nipy.sourceforge.net/'
 
 # We require numpy 1.2 for our test suite.  If Tester fails to import,
 # check the version of numpy the user has and inform them they need to
 # upgrade.
 try:
-    from nipy.testing import Tester
+    #from nipy.testing import Tester
+    from numpy.testing import Tester
     test = Tester().test
     bench = Tester().bench
 except ImportError:
@@ -88,4 +89,11 @@ _test_local_install()
 
 # Cleanup namespace
 del _test_local_install
-del test, bench, Tester
+
+# If this file is exec after being imported, the following lines will
+# fail
+try:
+    del version
+    del Tester
+except:
+    pass
