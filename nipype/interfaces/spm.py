@@ -26,26 +26,34 @@ from __future__ import with_statement
 
 from nipype.interfaces.base import Bunch, CommandLine, setattr_on_read
 from nifti import load
-from nipype.interfaces.matlab import Matlab, fltcols
+from nipype.interfaces.matlab import fltcols
+import nipype.interfaces.matlab as matlab
 from scipy.io import savemat
 import numpy as np
 import os
 
-
+mlab = matlab.Matlab()
 
 class SpmInfo(object):
     @setattr_on_read
     def spm_path(self):
-        # fix with specified path
-        with InTemporaryDirectory() as tmpdir:
-            run_matlab_script("""
+        try:
+            try:
+                InTemporaryDirectory()
+                mlab.run_matlab_script("""
 spm_path = spm('dir');
 fid = fopen('spm_path.txt', 'wt');
 fprintf(fid, '%s', spm_path);
 fclose(fid);
 """)
-            spm_path = file('spm_path.txt', 'rt').read()
-        return spm_path
+                spm_path = file('spm_path.txt', 'rt').read()
+                return spm_path
+            except IOError:
+                return None
+        finally:
+            print 'Failed to return spm path'
+            return None
+
 
 spm_info = SpmInfo()
 
@@ -91,13 +99,17 @@ def make_mfile(jobtype, jobname, contents):
 
 def run_jobdef(jobdef):
     # fix with specified path
-    with InTemporaryDirectory():
+    try:
+        InTemporaryDirectory():
         savemat('pyjobs.mat', jobdef)
-        matlab_out=run_matlab_script("""
+        matlab_out=mlab.run_matlab_script("""
 load pyjobs;
 spm_jobman('run', jobs);
 """)
         return matlab_out
+    finally:
+        print 'Failed to run jobdef'
+        return None
 
 def scans_for_fname(fname):
     img = load(fname)
@@ -259,7 +271,8 @@ class Realign(CommandLine):
         job = newcoreg._compile_command(mfile)
 
         if mfile:
-            out, cmdline = run_matlab_script(job, script_name='pyscript_spmrealign')
+            out, cmdline = mlab.run_matlab_script(job, 
+                                                  script_name='pyscript_spmrealign')
         else:
             out = run_jobdef(job)
             cmdline = ''
