@@ -21,7 +21,7 @@ class Matlab(object):
     def set_matlabcmd(self, cmd):
         """reset the base matlab command
         """
-        self.mtalb_cmd = cmd
+        self.matlab_cmd = cmd
 
     def run_matlab(self,cmd):
         #subprocess.call('%s -r \"%s;exit\" ' % (matlab_cmd, cmd),
