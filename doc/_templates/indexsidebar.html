@@ -1,0 +1,20 @@
+{% block quicklinks %}
+<h3>Quick links</h3>
+
+<ul>
+<li><a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Mailing list</a></li>
+</ul>
+
+{% endblock %}
+
+<h3>Search mailing list archive</h3>
+<script type="text/javascript">
+  function mlsearch(curobj)
+  {
+    curobj.q.value="site:lists.neuroimaging.scipy.org/pipermail/nipy-devel/ "+curobj.userquery.value
+  }
+</script>
+<form action="http://www.google.com/search" method="get" onSubmit="mlsearch(this)">
+<input name="userquery" size="18" type="text" /> <input type="submit" value="Go" />
+<input name="q" type="hidden" />
+</form>
