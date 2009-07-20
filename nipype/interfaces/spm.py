@@ -26,7 +26,7 @@ from __future__ import with_statement
 
 from nipype.interfaces.base import Bunch, CommandLine, setattr_on_read
 from nifti import load
-from nipype.interfaces.matlab import run_matlab_script, fltcols
+from nipype.interfaces.matlab import Matlab, fltcols
 from scipy.io import savemat
 import numpy as np
 import os

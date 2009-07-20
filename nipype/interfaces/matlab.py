@@ -7,24 +7,38 @@ import tempfile
 import numpy as np
 from nipype.interfaces.base import CommandLine
 
-matlab_cmd = 'matlab -nojvm -nosplash'
 
-def run_matlab(cmd):
-    #subprocess.call('%s -r \"%s;exit\" ' % (matlab_cmd, cmd),
-    #                shell=True)
-    outcmd = '%s -r \"%s;exit\" '%(matlab_cmd, cmd)
-    out = CommandLine(outcmd).run()
-    return out,outcmd
+class Matlab(object):
+    """Object that sets up Matlab specific tools and interfaces
 
-def run_matlab_script(script_lines, script_name='pyscript'):
-    ''' Put multiline matlab script into script file and run '''
-    mfile = file(script_name + '.m', 'wt')
-    mfile.write(script_lines)
-    mfile.close()
-    return run_matlab(script_name)
+    """
+    def __init__(self, matlab_cmd='matlab -nojvm -nosplash'):
+        """initializes interface to matlab
+        (default 'matlab -nojvm -nosplash'
+        """
+        self.matlab_cmd = matlab_cmd
+
+    def set_matlabcmd(self, cmd):
+        """reset the base matlab command
+        """
+        self.mtalb_cmd = cmd
+
+    def run_matlab(self,cmd):
+        #subprocess.call('%s -r \"%s;exit\" ' % (matlab_cmd, cmd),
+        #                shell=True)
+        outcmd = '%s -r \"%s;exit\" '%(self.matlab_cmd, cmd)
+        out = CommandLine(outcmd).run()
+        return out,outcmd
+
+    def run_matlab_script(self,script_lines, script_name='pyscript'):
+        ''' Put multiline matlab script into script file and run '''
+        mfile = file(script_name + '.m', 'wt')
+        mfile.write(script_lines)
+        mfile.close()
+        return self.run_matlab(script_name)
 
 
-# Functions, classes and other top-level code
+# Useful Functions for working with matlab
 
 def fltcols(vals):
     ''' Trivial little function to make 1xN float vector '''
