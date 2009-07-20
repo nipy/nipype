@@ -38,8 +38,7 @@ class SpmInfo(object):
     @setattr_on_read
     def spm_path(self):
         try:
-            try:
-                InTemporaryDirectory()
+            try InTemporaryDirectory():
                 mlab.run_matlab_script("""
 spm_path = spm('dir');
 fid = fopen('spm_path.txt', 'wt');
