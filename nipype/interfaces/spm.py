@@ -22,7 +22,7 @@ Get rid of nipy dependency, call this something else?
 
 
 """
-from __future__ import with_statement
+#from __future__ import with_statement
 
 from nipype.interfaces.base import Bunch, CommandLine, setattr_on_read
 from nifti import load
