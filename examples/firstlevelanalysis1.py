@@ -1,4 +1,9 @@
-""" Example first level analysis. Realigns functionals to the mean EPI template and uses a subject specific condition model.
+""" Example first level analysis. Realigns functionals to the mean EPI
+template and uses a subject specific condition model.
+
+DOES NOT CONFORM TO CURRENT TRUNK
+NEEDS MODIFICATION - SG - XX
+
 """
 import nipy.interfaces.spm as spm
 import nipy.interfaces.mit as mit

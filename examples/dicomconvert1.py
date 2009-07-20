@@ -3,6 +3,9 @@ This script demonstrates how to setup a pipeline for batch conversion from Dicom
 
 Please change the paths and the variables below. These are project specific scripts and should not be used to test your setup. To go through a tutorial see the documentation.
 
+DOES NOT CONFORM TO CURRENT TRUNK
+NEEDS MODIFICATION - SG - XX
+
 """
 import nipy.interfaces.freesurfer as freesurfer
 import nipy.pipeline.engine as pe
