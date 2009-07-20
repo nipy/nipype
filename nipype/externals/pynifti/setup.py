@@ -1,6 +1,6 @@
 def configuration(parent_package='',top_path=None):
     from numpy.distutils.misc_util import Configuration
-    config = Configuration('nifti', parent_package, top_path)
+    config = Configuration('pynifti', parent_package, top_path)
 
 
     return config
