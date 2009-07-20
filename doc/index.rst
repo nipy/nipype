@@ -20,6 +20,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   users/index
+   devel/index
    license
 
 Indices and tables
