@@ -51,7 +51,7 @@ except ImportError:
 ################################################################################
 
 # We need to import nipy as late as possible, 
-from nipy import  __doc__
+from nipype import  __doc__
 
 def main(**extra_args):
     from numpy.distutils.core import setup
