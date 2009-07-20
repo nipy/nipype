@@ -64,6 +64,7 @@
 .. _python: http://www.python.org
 .. _mayavi: http://mayavi.sourceforge.net/
 .. _sympy: http://code.google.com/p/sympy/
+.. _networkx: http://networkx.lanl.gov/
 
 .. Python imaging projects
 .. _PyMVPA: http://www.pymvpa.org
