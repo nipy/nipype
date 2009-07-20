@@ -100,7 +100,7 @@ def make_mfile(jobtype, jobname, contents):
 def run_jobdef(jobdef):
     # fix with specified path
     try:
-        InTemporaryDirectory():
+        InTemporaryDirectory()
         savemat('pyjobs.mat', jobdef)
         matlab_out=mlab.run_matlab_script("""
 load pyjobs;
