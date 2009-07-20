@@ -39,21 +39,19 @@ class SpmInfo(object):
     @setattr_on_read
     def spm_path(self):
         try:
-            try:
-                InTemporaryDirectory()
-                mlab.run_matlab_script("""
+            InTemporaryDirectory()
+            mlab.run_matlab_script("""
 spm_path = spm('dir');
 fid = fopen('spm_path.txt', 'wt');
 fprintf(fid, '%s', spm_path);
 fclose(fid);
 """)
-                spm_path = file('spm_path.txt', 'rt').read()
-                return spm_path
-            except IOError:
-                return None
-        finally:
+            spm_path = file('spm_path.txt', 'rt').read()
+            return spm_path
+        except:
             print 'Failed to return spm path'
             return None
+       
 
 
 spm_info = SpmInfo()
