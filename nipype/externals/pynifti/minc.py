@@ -2,8 +2,8 @@ import numpy as np
 
 from scipy.io.netcdf import netcdf_file as netcdf
 
-from nifti.spatialimages import SpatialImage
-from nifti.volumeutils import allopen
+from nipype.externals.pynifti.spatialimages import SpatialImage
+from nipype.externals.pynifti.volumeutils import allopen
 
 _dt_dict = {
     ('b','unsigned'): np.uint8,
