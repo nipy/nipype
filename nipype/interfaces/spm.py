@@ -184,6 +184,10 @@ class Realign(CommandLine):
 
             infile : list
                 list of filenames to realign
+            write : bool
+                if True updates headers and generates
+                resliced files prepended with  'r'
+                if False just updates header files
             quality : float
                 0.1 = fastest, 1.0 = most precise
                 (spm5 default = 0.9)
@@ -202,25 +206,47 @@ class Realign(CommandLine):
                 filename of weighting image
                 if empty, no weighting 
                 (spm default = None)
+            wrap : list
+                Check if interpolation should wrap in [x,y,z]
+                (spm default [0,0,0])
             interp: float
                 degree of b-spline used for interpolation
                 (spm default = 2.0)
-            wrap : list
+            write_which : list of len()==2
+                if write is true, 
+                [inputimgs, mean]
+                [2,0] reslices all images, but not mean
+                [2,1] reslices all images, and mean
+                [1,0] reslices imgs 2:end, but not mean
+                [0,1] doesnt reslice any but generates resliced mean
+            write_interp: float
+                degree of b-spline used for interpolation when
+                writing resliced images
+                (spm default = 4.0)
+            write_wrap : list
                 Check if interpolation should wrap in [x,y,z]
-                (spm default = [0.0,0.0,0.0])
-            
+                (spm default [0,0,0])
+            write_mask: bool
+                if True, mask output image
+                if False, do not mask
+                        
             """
         print doc
 
     def _populate_opts(self):
         self.opts = Bunch(infile=None,
+                          write=None,
                           quality=None,
                           fwhm=None,
                           separation=None,
                           register_to_mean=None,
                           weight_img=None,
                           interp=None,
-                          wrap=None)
+                          wrap=None,
+                          write_which=None,
+                          write_interp=None,
+                          write_wrap=None
+                          write_mask=None)
         
     def _validate(self):
         """validate spm realign options
@@ -232,6 +258,8 @@ class Realign(CommandLine):
         [opts.update({k:v}) for k, v in self.opts.iteritems() if v is not None ]
         for opt in opts:
             if opt is 'infile':
+                continue
+            if opt is 'write':
                 continue
             if opt is 'quality':
                 eopts['eoptions'].update({'quality': float(opts[opt])})
@@ -256,6 +284,23 @@ class Realign(CommandLine):
                     raise ValueError('wrap must have 3 elements')
                 eopts['eoptions'].update({'wrap': opts[opt]})
                 continue
+            if opt is 'write_which':
+                if not len(opts[opt]) == 2:
+                    raise ValueError('write_which must have 2 elements')
+                eopts['roptions'].update({'which': opts[opt]})
+                continue
+            if opt is 'write_interp':
+                eopts['roptions'].update({'interp': opts[opt]})
+                continue
+            if opt is 'write_wrap':
+                if not len(opts[opt]) == 3:
+                    raise ValueError('write_wrap must have 3 elements')
+                eopts['roptions'].update({'wrap': opts[opt]})
+                continue
+            if opt is 'write_mask':
+                eopts['roptions'].update({'mask': int(opts[opt])})
+                continue
+                
             print 'option %s not supported'%(opt)
         return eopts
 
@@ -297,48 +342,88 @@ class Realign(CommandLine):
 
         if mfile:
             # create an mfile
-            if valid_opts is None:
-                mfile = make_mfile('spatial','realign',[{
-                                'estwrite':{
-                                    'data':sess_scans,
-                                    'eoptions':{}
-                                    }
-                                }]
-                                    )
-                
-            else:
-                key = valid_opts.keys()[0]
-                vals = valid_opts[key]
-                tmp = [{'estwrite':{'data':sess_scans,
-                                    key: vals
-                                    }}]
-                mfile = make_mfile('spatial','realign',tmp)
-                                    
-                
+            if self.opts.write: #chose reslice option
+
+                if valid_opts is None:
+                    mfile = make_mfile('spatial','realign',[{
+                                    'estwrite':{
+                                        'data':sess_scans,
+                                        'eoptions':{},
+                                        'roptions':{}
+                                        }
+                                    }]
+                                        )
+
+                else:
+                    key = valid_opts.keys()[0]
+                    vals = valid_opts[key]
+                    tmp = [{'estwrite':{'data':sess_scans,
+                                        key: vals
+                                        }}]
+                    mfile = make_mfile('spatial','realign',tmp)
+            else: #default no reslice option
+                if valid_opts is None:
+                    mfile = make_mfile('spatial','realign',[{
+                                    'estimate':{
+                                        'data':sess_scans,
+                                        'eoptions':{}
+                                        }
+                                    }]
+                                        )
+
+                else:
+                    key = valid_opts.keys()[0]
+                    vals = valid_opts[key]
+                    tmp = [{'estimate':{'data':sess_scans,
+                                        key: vals
+                                        }}]
+                    mfile = make_mfile('spatial','realign',tmp)
+
+
             return mfile
         else:
             # create job structure .mat
-            
-            if valid_opts is None:
-                
-                job = make_job(('spatial', 'realign', [{
-                                'estwrite':{
-                                    'data':sess_scans,
-                                    'eoptions': {}
-                                    }
-                                }]
-                                ))
+            if self.opts.write:
+                if valid_opts is None:
+
+                    job = make_job(('spatial', 'realign', [{
+                                    'estwrite':{
+                                        'data':sess_scans,
+                                        'eoptions': {},
+                                        'roptions': {}
+                                        }
+                                    }]
+                                    ))
+                else:
+                    key = valid_opts.keys()[0]
+                    vals = valid_opts[key]
+                    job = make_job(('spatial', 'realign', [{
+                                    'estwrite':{
+                                        'data':sess_scans,
+                                        key: vals
+                                        }
+                                    }]
+                                    ))
             else:
-                key = valid_opts.keys()[0]
-                vals = valid_opts[key]
-                job = make_job(('spatial', 'realign', [{
-                                'estwrite':{
-                                    'data':sess_scans,
-                                    key: vals
-                                    }
-                                }]
-                                ))
-                
+                if valid_opts is None:
+
+                    job = make_job(('spatial', 'realign', [{
+                                    'estimate':{
+                                        'data':sess_scans,
+                                        'eoptions': {}
+                                        }
+                                    }]
+                                    ))
+                else:
+                    key = valid_opts.keys()[0]
+                    vals = valid_opts[key]
+                    job = make_job(('spatial', 'realign', [{
+                                    'estimate':{
+                                        'data':sess_scans,
+                                        key: vals
+                                        }
+                                    }]
+                                    ))                
                     
             return job
         
