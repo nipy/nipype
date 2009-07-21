@@ -25,7 +25,7 @@ Get rid of nipy dependency, call this something else?
 #from __future__ import with_statement
 
 from nipype.interfaces.base import Bunch, CommandLine, setattr_on_read
-from nifti import load
+from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import fltcols
 import nipype.interfaces.matlab as matlab
 from scipy.io import savemat
@@ -245,7 +245,7 @@ class Realign(CommandLine):
                           wrap=None,
                           write_which=None,
                           write_interp=None,
-                          write_wrap=None
+                          write_wrap=None,
                           write_mask=None)
         
     def _validate(self):
