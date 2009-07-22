@@ -14,13 +14,6 @@ these functions include
 
     Segment: bias correction, segmentation
 
-
-Need to get rid of pynifti dependency, build in brifti?
-Get rid of nipy dependency, call this something else?
-
-
-
-
 """
 #from __future__ import with_statement
 

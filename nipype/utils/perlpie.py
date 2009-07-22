@@ -112,3 +112,6 @@ def main():
         oldstr = args[0]
         newstr = args[1]
         perl_dash_pie(oldstr, newstr)
+
+if __name__ == '__main_':
+    main()
