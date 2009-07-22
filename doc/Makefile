@@ -21,6 +21,7 @@ help:
 	      		"items (ChangeLog)"
 	@echo "  linkcheck check all external links for integrity"
 	@echo "  doctest   run all doctests embedded in the documentation"
+	@echo "  sf_cburns copy html files to sourceforge (cburns only)"
 
 clean:
 	-rm -rf _build/*
@@ -52,3 +53,10 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) _build/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in _build/doctest/output.txt."
+
+# Sourceforge doesn't appear to have a way of copying the files
+# without specifying a username.  So we'll probably have one target
+# for each project admin
+sf_cburns:
+	@echo "Copying html files to sourceforge..."
+	scp -r _build/html/* cburns,nipy@web.sourceforge.net:htdocs/nipype/
