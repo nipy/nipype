@@ -1,6 +1,6 @@
-=======================================
- Neuroimaging in Python (NIPY) : NYPIPE
-=======================================
+===============================================
+ Neuroimaging in Python (NIPY) Pipeline: NYPIPE
+===============================================
 
 Documentation
 -------------
@@ -32,7 +32,7 @@ For NIPYPE related issues, please add *NIPYPE* to the subject line
 
 
 NIPYPE structure
----------------
+----------------
 
 Currently NIPYPE consists of the following files and directories:
 
