@@ -1,5 +1,4 @@
-""" Example first level analysis. Realigns functionals to the mean EPI
-template and uses a subject specific condition model.
+""" Example first level analysis. Realigns functionals to the mean EPI template and uses a subject specific condition model.
 
 DOES NOT CONFORM TO CURRENT TRUNK
 NEEDS MODIFICATION - SG - XX
@@ -78,7 +77,6 @@ datasource.inputs.update(subj_template='%s',subj_info=subject_info,base_dir=nift
 datasource.iterables.update(subj_id=lambda:subjlist)
 
 ##### SETUP PREPROCESSING COMPONENTS #####
-
 realign    = pe.generate_pipeline_node(spm.Realign(rtm=True))
 normalize  = pe.generate_pipeline_node(spm.NonaffineNormalize())
 normalize.inputs.update(template=['/software/spm5_1782/templates/EPI.nii'])
@@ -95,6 +93,10 @@ modeldesign.inputs.update(RT=2,concatruns=False,temporalderiv=True)
 l1modelestimate = pe.generate_pipeline_node(spm.L1ModelEstimate())
 contrastestimate = pe.generate_pipeline_node(spm.ContrastEstimate())
 contrastestimate.inputs.update(contrasts=contrastlist)
+
+#### SETUP DATA SINK OPTIONS
+datasink = pe.generate_pipeline_node(mitio.MITsink())
+datasink.inputs.update(base_dir=os.path.join(niftidirbase,'L1analysis'),subj_template='%s')
 
 # Setup Level 1 Pipeline
 
@@ -117,6 +119,16 @@ level1pipeline.connect([
     (modelspec,modeldesign,[('modelspecfile','modelconfig')]),
     (modeldesign,l1modelestimate,[('spmmatfile','spmmatfile')]),
     (l1modelestimate,contrastestimate,[('spmmatfile','spmmatfile'),('betaimgs','betaimgs'),('maskimg','maskimg'),('resmsimg','resmsimg'),('rpvimg','rpvimg')]),
+    ])
+
+# Setup datasink connections
+level1pipeline.connect([
+    (datasource,datasink,[('subj_id','subj_id')]),
+    (realign,datasink,[('mean','realign.mean'),('parameters','realign.param')]),
+    (artdetect,datasink,[('artifactfiles','art.outliers'),('statfiles','art.stats')]),
+    (modeldesign,datasink,[('spmmatfile','model.prespm')]),
+    (l1modelestimate,datasink,[('spmmatfile','model.spm'),('betaimgs','model.beta'),('maskimg','model.mask'),('resmsimg','model.res'),('rpvimg','model.rpv')]),
+    (contrastestimate,datasink,[('conimgs','contrasts.con'),('spmTimgs','contrasts.T'),('essimgs','contrasts.ess'),('spmFimgs','contrasts.F')]),
     ])
 
 # In order to run the above pipeline inside ipython::
