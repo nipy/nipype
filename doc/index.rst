@@ -22,7 +22,6 @@ Contents:
 
    users/index
    devel/index
-   license
 
 Indices and tables
 ==================
