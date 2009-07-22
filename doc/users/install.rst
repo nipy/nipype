@@ -37,12 +37,13 @@ Matplotlib_
   Python plotting library.
 
 
-Installing from binary packages
--------------------------------
+Getting the latest release
+--------------------------
 
 This will be possible once we `release.
 <https://sourceforge.net/apps/trac/nipy/roadmap>`_
 
+The latest release is `here <http://sourceforge.net/projects/nipy/files/latest>`_.
 
 Building from source
 --------------------
