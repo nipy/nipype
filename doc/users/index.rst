@@ -10,7 +10,9 @@
 .. toctree::
    :maxdepth: 2
 
+   tutorial
+
 .. todo::
 
-    Add an introductory doc.
+    Add brief overview of the interfaces and pipeline.
 
