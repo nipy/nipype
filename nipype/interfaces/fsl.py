@@ -201,7 +201,7 @@ class Bet(CommandLine):
                           verbose=None, 
                           flags=None)
 
-    def _validate(self):
+    def _parseopts(self):
         """validate fsl bet options
         if set to None ignore
         """
@@ -316,7 +316,7 @@ class Bet(CommandLine):
 
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
-        valid_opts = self._validate()
+        valid_opts = self._parseopts()
         allargs =  [self.cmd] + self.args + valid_opts
         return ' '.join(allargs)
 
@@ -446,7 +446,7 @@ class Fast(CommandLine):
                           probability_maps=None,
                           flags=None)
 
-    def _validate(self):
+    def _parseopts(self):
         """validate fsl bet options
         if set to None ignore
         """
@@ -551,7 +551,7 @@ class Fast(CommandLine):
 
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
-        valid_opts = self._validate()
+        valid_opts = self._parseopts()
         allargs = [self.cmd] + self.args + valid_opts
         return ' '.join(allargs)
   
@@ -776,7 +776,7 @@ class Flirt(CommandLine):
                           verbose=None,
                           flags=None)
 
-    def _validate(self):
+    def _parseopts(self):
         """validate fsl bet options
         if set to None ignore
         """
@@ -902,7 +902,7 @@ class Flirt(CommandLine):
 
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
-        valid_opts = self._validate()
+        valid_opts = self._parseopts()
         allargs = self.args + valid_opts
         return ' '.join(allargs)
   
@@ -1059,7 +1059,7 @@ class Flirt(CommandLine):
 
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
-        valid_opts = self._validate()
+        valid_opts = self._parseopts()
         if valid_opts is None:
             allargs = [self.cmd] + self.args
         else:
@@ -1308,7 +1308,7 @@ class Fnirt(CommandLine):
                           applyrefmask=None,
                           applyimgmask=None)
 
-    def _validate(self):
+    def _parseopts(self):
         """validate fsl bet options
         if set to None ignore
         """
@@ -1438,7 +1438,7 @@ class Fnirt(CommandLine):
             
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
-        valid_opts = self._validate()
+        valid_opts = self._parseopts()
         allargs = self.args + valid_opts
         return ' '.join(allargs)
   
@@ -1494,7 +1494,7 @@ class Fnirt(CommandLine):
 
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
-        valid_opts = self._validate()
+        valid_opts = self._parseopts()
         
         if valid_opts is None:
             allargs = [self.cmd] + self.args
@@ -1517,7 +1517,7 @@ class Fnirt(CommandLine):
 
                 
         """
-        valid_opts = self._validate() 
+        valid_opts = self._parseopts() 
         try :
             fid = fopen(configfile, 'w+')
         except IOError:

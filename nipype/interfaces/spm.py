@@ -253,7 +253,7 @@ class Realign(CommandLine):
                           write_wrap=None,
                           write_mask=None)
         
-    def _validate(self):
+    def _parseopts(self):
         """validate spm realign options
         if set to None ignore
         """
@@ -339,7 +339,7 @@ class Realign(CommandLine):
         else generates a job structure and saves in .mat
         """
 
-        valid_opts = self._validate()
+        valid_opts = self._parseopts()
         if type(self.opts.infile) == type([]):
             sess_scans = scans_for_fnames(self.opts.infile)
         else:

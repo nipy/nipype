@@ -202,6 +202,7 @@ class SkullStripNode(NodeWrapper):
 
         
     def post_execute(self):
+        
         self.outputs['outfile'] = self.interface.outfile
         self.outputs['err'] = self.interface.err
         self.outputs['out'] = self.interface.out
