@@ -12,9 +12,9 @@ class Matlab(object):
     """Object that sets up Matlab specific tools and interfaces
 
     """
-    def __init__(self, matlab_cmd='matlab -nojvm -nosplash'):
+    def __init__(self, matlab_cmd='matlab -nodesktop -nosplash'):
         """initializes interface to matlab
-        (default 'matlab -nojvm -nosplash'
+        (default 'matlab -nodesktop -nosplash'
         """
         self.matlab_cmd = matlab_cmd
 
@@ -28,11 +28,28 @@ class Matlab(object):
         #                shell=True)
         outcmd = '%s -r \"%s;exit\" '%(self.matlab_cmd, cmd)
         out = CommandLine(outcmd).run()
+        if  'PyScriptException' in out.output['err']:
+            out.returncode = 1
         return out,outcmd
 
     def run_matlab_script(self,script_lines, script_name='pyscript'):
         ''' Put multiline matlab script into script file and run '''
         mfile = file(script_name + '.m', 'wt')
+        prescript  = "diary(sprintf('%s.log',mfilename))\n"
+        prescript  += "try,\n"
+        postscript = "\ncatch ME,\n"
+        postscript += "diary off\n"
+        postscript += "diary(sprintf('%s_error.log',mfilename))\n"
+        postscript += "ME\n"
+        postscript += "ME.stack\n"
+        postscript += "fprintf('%s\\n',ME.message); %stdout\n"
+        postscript += "fprintf(2,'<PyScriptException>') %stderr;\n"
+        postscript += "fprintf(2,'%s\\n',ME.message) %stderr;\n"
+        postscript += "fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);\n"
+        postscript += "fprintf(2,'</PyScriptException>') %stderr;\n"
+        postscript += "diary off\n"
+        postscript += "end;\n"
+        script_lines = prescript+script_lines+postscript
         mfile.write(script_lines)
         mfile.close()
         return self.run_matlab(script_name)

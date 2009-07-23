@@ -186,6 +186,7 @@ class Realign(CommandLine):
                 if True updates headers and generates
                 resliced files prepended with  'r'
                 if False just updates header files
+                (default == True, will reslice)
             quality : float
                 0.1 = fastest, 1.0 = most precise
                 (spm5 default = 0.9)
@@ -227,13 +228,15 @@ class Realign(CommandLine):
             write_mask: bool
                 if True, mask output image
                 if False, do not mask
+            flags : USE AT OWN RISK
+                #eg:'flags':{'eoptions':{'suboption':value}}
                         
             """
         print doc
 
     def _populate_opts(self):
         self.opts = Bunch(infile=None,
-                          write=None,
+                          write=True,
                           quality=None,
                           fwhm=None,
                           separation=None,
@@ -244,7 +247,8 @@ class Realign(CommandLine):
                           write_which=None,
                           write_interp=None,
                           write_wrap=None,
-                          write_mask=None)
+                          write_mask=None,
+                          flags=None)
         
     def _parseopts(self):
         """validate spm realign options
@@ -252,9 +256,12 @@ class Realign(CommandLine):
         """
         out_opts = []
         opts = {}
-        eopts = {'eoptions':{}}
+        eopts = {'eoptions':{},'roptions':{}}
+
         [opts.update({k:v}) for k, v in self.opts.iteritems() if v is not None ]
         for opt in opts:
+            if opt is 'flags':
+                eopts.update(opts[opt])
             if opt is 'infile':
                 continue
             if opt is 'write':
@@ -309,8 +316,8 @@ class Realign(CommandLine):
             else:
                 infile = self.opts.infile
                 
-        newcoreg = self.update(infile=infile)
-        job = newcoreg._compile_command(mfile)
+        newrealign = self.update(infile=infile)
+        job = newrealign._compile_command(mfile)
 
         if mfile:
             out, cmdline = mlab.run_matlab_script(job, 
@@ -319,11 +326,11 @@ class Realign(CommandLine):
             out = run_jobdef(job)
             cmdline = ''
 
-        newcoreg.out = out.output['out']
-        newcoreg.retcode = out.output['returncode']
-        newcoreg.err = out.output['err']
-        newcoreg.cmdline = cmdline
-        return newcoreg
+        newrealign.out = out.output['out']
+        newrealign.retcode = out.output['returncode']
+        newrealign.err = out.output['err']
+        newrealign.cmdline = cmdline
+        return newrealign
         
         
     def _compile_command(self,mfile=True):
@@ -331,99 +338,27 @@ class Realign(CommandLine):
         if mfile is True uses matlab .m file
         else generates a job structure and saves in .mat
         """
-
+        if self.opts.write:
+            jobtype = 'estwrite'
+        else:
+            jobtype = 'estimate'
         valid_opts = self._parseopts()
         if type(self.opts.infile) == type([]):
             sess_scans = scans_for_fnames(self.opts.infile)
         else:
             sess_scans = scans_for_fname(self.opts.infile)
 
+        
+        # create job structure form valid options and data
+        tmp = [{'%s'%(jobtype):{'data':sess_scans,
+                                'eoptions':valid_opts['eoptions'],
+                                'roptions':valid_opts['roptions']
+                                }}]
         if mfile:
-            # create an mfile
-            if self.opts.write: #chose reslice option
-
-                if valid_opts is None:
-                    mfile = make_mfile('spatial','realign',[{
-                                    'estwrite':{
-                                        'data':sess_scans,
-                                        'eoptions':{},
-                                        'roptions':{}
-                                        }
-                                    }]
-                                        )
-
-                else:
-                    key = valid_opts.keys()[0]
-                    vals = valid_opts[key]
-                    tmp = [{'estwrite':{'data':sess_scans,
-                                        key: vals
-                                        }}]
-                    mfile = make_mfile('spatial','realign',tmp)
-            else: #default no reslice option
-                if valid_opts is None:
-                    mfile = make_mfile('spatial','realign',[{
-                                    'estimate':{
-                                        'data':sess_scans,
-                                        'eoptions':{}
-                                        }
-                                    }]
-                                        )
-
-                else:
-                    key = valid_opts.keys()[0]
-                    vals = valid_opts[key]
-                    tmp = [{'estimate':{'data':sess_scans,
-                                        key: vals
-                                        }}]
-                    mfile = make_mfile('spatial','realign',tmp)
-
-
-            return mfile
+            return make_mfile('spatial','realign',tmp)
         else:
-            # create job structure .mat
-            if self.opts.write:
-                if valid_opts is None:
+            return make_job('spatial','realign',tmp)
 
-                    job = make_job(('spatial', 'realign', [{
-                                    'estwrite':{
-                                        'data':sess_scans,
-                                        'eoptions': {},
-                                        'roptions': {}
-                                        }
-                                    }]
-                                    ))
-                else:
-                    key = valid_opts.keys()[0]
-                    vals = valid_opts[key]
-                    job = make_job(('spatial', 'realign', [{
-                                    'estwrite':{
-                                        'data':sess_scans,
-                                        key: vals
-                                        }
-                                    }]
-                                    ))
-            else:
-                if valid_opts is None:
-
-                    job = make_job(('spatial', 'realign', [{
-                                    'estimate':{
-                                        'data':sess_scans,
-                                        'eoptions': {}
-                                        }
-                                    }]
-                                    ))
-                else:
-                    key = valid_opts.keys()[0]
-                    vals = valid_opts[key]
-                    job = make_job(('spatial', 'realign', [{
-                                    'estimate':{
-                                        'data':sess_scans,
-                                        key: vals
-                                        }
-                                    }]
-                                    ))                
-                    
-            return job
         
     def update(self, **opts):
         newrealign = Realign()
