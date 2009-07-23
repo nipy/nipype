@@ -89,15 +89,15 @@ def make_mfile(jobtype, jobname, contents):
     return mfile
     
 
-def run_jobdef(jobdef):
+def run_jobdef(jobdef,jobname='',workdir='.'):
     # fix with specified path
     try:
-        InTemporaryDirectory()
+        #InTemporaryDirectory()
         savemat('pyjobs.mat', jobdef)
         matlab_out=mlab.run_matlab_script("""
 load pyjobs;
 spm_jobman('run', jobs);
-""")
+""",cwd=workdir)
         return matlab_out
     finally:
         print 'Failed to run jobdef'

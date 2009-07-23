@@ -106,20 +106,22 @@ class CommandLine(object):
         """
         obj_to_run = self.update(*args, **kwargs)
         cmd = obj_to_run._compile_command()
-        returncode, out, err = obj_to_run._runner(cmd)
+        returncode, out, err = obj_to_run._runner(cmd,cwd=kwargs['cwd'])
         obj_to_run.output = {'returncode':returncode,
                              'out': out,
                              'err':err}
         return obj_to_run
         
 
-    def _runner(self, cmd, shell=True):
+    def _runner(self, cmd, shell=True,cwd=None):
         """Use subprocess.Popen to run command
         """
+        print cwd
         proc  = subprocess.Popen(cmd, 
                                  stdout=subprocess.PIPE, 
                                  stderr=subprocess.PIPE, 
-                                 shell=shell)
+                                 shell=shell,
+                                 cwd=cwd)
         out, err = proc.communicate()
         returncode = proc.returncode
         return returncode, out, err
@@ -127,7 +129,7 @@ class CommandLine(object):
     def _compile_command(self):
         return ' '.join(self.args)
 
-    def update(self, *args):
+    def update(self, *args,**kwargs):
         """create derivative command with additional arguments
         returns new CommandLine object
         """

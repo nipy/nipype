@@ -23,18 +23,18 @@ class Matlab(object):
         """
         self.matlab_cmd = cmd
 
-    def run_matlab(self,cmd):
+    def run_matlab(self,cmd,cwd='.'):
         #subprocess.call('%s -r \"%s;exit\" ' % (matlab_cmd, cmd),
         #                shell=True)
         outcmd = '%s -r \"%s;exit\" '%(self.matlab_cmd, cmd)
-        out = CommandLine(outcmd).run()
+        out = CommandLine(outcmd).run(cwd=cwd)
         if  'PyScriptException' in out.output['err']:
             out.returncode = 1
         return out,outcmd
 
-    def run_matlab_script(self,script_lines, script_name='pyscript'):
+    def run_matlab_script(self,script_lines, script_name='pyscript',cwd='.'):
         ''' Put multiline matlab script into script file and run '''
-        mfile = file(script_name + '.m', 'wt')
+        mfile = file(os.path.join(cwd,script_name + '.m'), 'wt')
         prescript  = "diary(sprintf('%s.log',mfilename))\n"
         prescript  += "try,\n"
         postscript = "\ncatch ME,\n"
@@ -52,7 +52,7 @@ class Matlab(object):
         script_lines = prescript+script_lines+postscript
         mfile.write(script_lines)
         mfile.close()
-        return self.run_matlab(script_name)
+        return self.run_matlab(script_name,cwd=cwd)
 
 
 # Useful Functions for working with matlab
