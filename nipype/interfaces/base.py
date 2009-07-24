@@ -128,7 +128,6 @@ class CommandLine(object):
     def _runner(self, cmd, shell=True,cwd=None):
         """Use subprocess.Popen to run command
         """
-        print cwd
         proc  = subprocess.Popen(cmd, 
                                  stdout=subprocess.PIPE, 
                                  stderr=subprocess.PIPE, 
