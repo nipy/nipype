@@ -367,12 +367,14 @@ class Realign(CommandLine):
         else:
             out = run_jobdef(job)
             cmdline = ''
-
-            output = Bunch(returncode=returncode,
-                           stdout=out,
-                           stderr=err,
-                           interface=self.copy())
-            return output
+            
+        outputs = Bunch(outfiles = fnames_prefix(self.inputs.infile,'r'))
+        output = Bunch(returncode=returncode,
+                       stdout=out,
+                       stderr=err,
+                       outputs=outputs,
+                       interface=self.copy())
+        return output
         
         
     def _compile_command(self,mfile=True):
