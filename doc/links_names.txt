@@ -9,7 +9,7 @@
    nipy, NIPY, Nipy, etc...
 
 .. _nipy: http://neuroimaging.scipy.org
-.. _`NIPY developer's guide`: http://nipy.sourceforge.net/home/devel
+.. _`NIPY developer resources`: http://nipy.sourceforge.net/home/devel
 .. _`Brain Imaging Center`: http://bic.berkeley.edu/
 
 .. Documentation tools
