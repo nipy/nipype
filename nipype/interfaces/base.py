@@ -106,7 +106,8 @@ class CommandLine(object):
         """
         obj_to_run = self.update(*args, **kwargs)
         cmd = obj_to_run._compile_command()
-        returncode, out, err = obj_to_run._runner(cmd,cwd=kwargs['cwd'])
+        returncode, out, err = obj_to_run._runner(cmd, 
+                                                  cwd=kwargs.get('cwd', None))
         obj_to_run.output = {'returncode':returncode,
                              'out': out,
                              'err':err}
