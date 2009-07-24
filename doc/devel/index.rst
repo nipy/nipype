@@ -14,6 +14,7 @@ conventions documented in the `NIPY Developers Guide
 .. toctree::
    :maxdepth: 2
    
+   development_quickstart
    usecases
 
 .. include:: ../links_names.txt
