@@ -61,6 +61,13 @@ class Bunch(object):
     """ Provide Elegant attribute access
 
     (Also provide inelegant dict-style access to make Satra's life easier)
+
+    Notes
+    -----
+    The Bunch pattern came from the Python Cookbook:
+    .. [1] A. Martelli, D. Hudgeon, "Collecting a Bunch of Named
+    Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
+
     """
     def __init__(self, **kwargs):
         self.__dict__.update(**kwargs)
