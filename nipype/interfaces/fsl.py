@@ -116,7 +116,9 @@ class Bet(CommandLine):
         """sets base command, not editable"""
         return 'bet'
 
+
     def inputs_help(self):
+
         doc = """
         Optional Parameters
         -------------------
@@ -241,9 +243,30 @@ class Bet(CommandLine):
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
         valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + self.args + valid_inputs
+        allargs =  [self.cmd] + valid_inputs
         self.cmdline = ' '.join(allargs)
 
+
+    def run(self):
+        """Execute the command.
+        
+        Returns
+        -------
+        results : Bunch
+            A `Bunch` object with a copy of self in `interface`
+
+         """
+
+        # This is expected to populate `command` for _runner to work
+        self._compile_command()
+        returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
+        outputs = Bunch(outfile = self.inputs.outfile)
+        return  Bunch(returncode=returncode,
+                      stdout=out,
+                      stderr=err,
+                      outputs = outputs,
+                      interface=self.copy())
+        
         
 
 class Fast(CommandLine):

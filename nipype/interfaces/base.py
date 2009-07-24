@@ -191,9 +191,11 @@ class CommandLine(Interface):
         # This is expected to populate `command` for _runner to work
         self._compile_command()
         returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
+        outputs = None
         return Bunch(returncode=returncode,
                      stdout=out,
                      stderr=err,
+                     outputs=outputs,
                      interface=self.copy())
         
     def _populate_inputs(self):

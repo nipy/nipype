@@ -17,7 +17,7 @@ these functions include
 """
 #from __future__ import with_statement
 
-from nipype.interfaces.base import Bunch, CommandLine, setattr_on_read
+from nipype.interfaces.base import Bunch, CommandLine, Interface
 from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import fltcols
 import nipype.interfaces.matlab as matlab
@@ -184,40 +184,45 @@ def fnames_presuffix(fnames, prefix='', suffix=''):
 
 
 class Realign(CommandLine):
-
-    _cmd = None
+    
     @property
     def cmd(self):
-        """sets base command, not editable"""
-        if self._cmd is None:
-            self._cmd = 'spm_realign'
-        return self._cmd
-
-    def __init__(self, **opts):
+        return 'spm_realign'
+    
+    def __init__(self, **inputs):
         """use spm_realign for estimating within modality
            rigid body alignment
+
+        Parameters
+        ----------
+        inputs : mapping 
+            key, value pairs that will update the Realign.inputs attributes
+            see self.inputs_help() for a list of Realign.inputs attributes
+           
+        Attributes
+        ----------
+        inputs : Bunch
+            a (dictionary-like) bunch of options that can be passed to 
+            spm_realign via a job structure
+        cmdline : string
+            string used to call matlab/spm via CommandLine interface
+        
+        
 
         Options
         -------
 
         To see optional arguments
-        Realign().opts_help()
+        Realign().inputs_help()
 
 
         Examples
         --------
         
         """
-
-        super(Realign,self).__init__()
-        self.args = []
-        self._populate_opts()
-        self.opts.update(**opts)
-        self.cmdline = ''
-        self.infile = ''
-        self.outfile = ''
         
-    def opts_help(self):
+        
+    def inputs_help(self):
         doc = """
             Optional Parameters
             -------------------
@@ -277,8 +282,8 @@ class Realign(CommandLine):
             """
         print doc
 
-    def _populate_opts(self):
-        self.opts = Bunch(infile=None,
+    def _populate_inputs(self):
+        self.inputs = Bunch(infile=None,
                           write=True,
                           quality=None,
                           fwhm=None,
@@ -293,74 +298,68 @@ class Realign(CommandLine):
                           write_mask=None,
                           flags=None)
         
-    def _parseopts(self):
+    def _parseinputs(self):
         """validate spm realign options
         if set to None ignore
         """
-        out_opts = []
-        opts = {}
-        eopts = {'eoptions':{},'roptions':{}}
+        out_inputs = []
+        inputs = {}
+        einputs = {'eoptions':{},'roptions':{}}
 
-        [opts.update({k:v}) for k, v in self.opts.iteritems() if v is not None ]
-        for opt in opts:
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt in inputs:
             if opt is 'flags':
-                eopts.update(opts[opt])
+                einputs.update(inputs[opt])
             if opt is 'infile':
                 continue
             if opt is 'write':
                 continue
             if opt is 'quality':
-                eopts['eoptions'].update({'quality': float(opts[opt])})
+                einputs['eoptions'].update({'quality': float(inputs[opt])})
                 continue
             if opt is 'fwhm':
-                eopts['eoptions'].update({'fwhm': float(opts[opt])})
+                einputs['eoptions'].update({'fwhm': float(inputs[opt])})
                 continue
             if opt is 'separation':
-                eopts['eoptions'].update({'sep': float(opts[opt])})
+                einputs['eoptions'].update({'sep': float(inputs[opt])})
                 continue
             if opt is 'register_to_mean':
-                eopts['eoptions'].update({'rtm': 1})
+                einputs['eoptions'].update({'rtm': 1})
                 continue
             if opt is 'weight_img':
-                eopts['eoptions'].update({'weight': opts[opt]})
+                einputs['eoptions'].update({'weight': inputs[opt]})
                 continue
             if opt is 'interp':
-                eopts['eoptions'].update({'interp': float(opts[opt])})
+                einputs['eoptions'].update({'interp': float(inputs[opt])})
                 continue
             if opt is 'wrap':
-                if not len(opts[opt]) == 3:
+                if not len(inputs[opt]) == 3:
                     raise ValueError('wrap must have 3 elements')
-                eopts['eoptions'].update({'wrap': opts[opt]})
+                einputs['eoptions'].update({'wrap': inputs[opt]})
                 continue
             if opt is 'write_which':
-                if not len(opts[opt]) == 2:
+                if not len(inputs[opt]) == 2:
                     raise ValueError('write_which must have 2 elements')
-                eopts['roptions'].update({'which': opts[opt]})
+                einputs['roptions'].update({'which': inputs[opt]})
                 continue
             if opt is 'write_interp':
-                eopts['roptions'].update({'interp': opts[opt]})
+                einputs['roptions'].update({'interp': inputs[opt]})
                 continue
             if opt is 'write_wrap':
-                if not len(opts[opt]) == 3:
+                if not len(inputs[opt]) == 3:
                     raise ValueError('write_wrap must have 3 elements')
-                eopts['roptions'].update({'wrap': opts[opt]})
+                einputs['roptions'].update({'wrap': inputs[opt]})
                 continue
             if opt is 'write_mask':
-                eopts['roptions'].update({'mask': int(opts[opt])})
+                einputs['roptions'].update({'mask': int(inputs[opt])})
                 continue
                 
             print 'option %s not supported'%(opt)
-        return eopts
+        return einputs
 
-    def run(self, infile=None, mfile=True):
-        if infile is None:
-            if self.opts.infile is None:
-                raise ValueError('infile is not specified')
-            else:
-                infile = self.opts.infile
-                
-        newrealign = self.update(infile=infile)
-        job = newrealign._compile_command(mfile)
+    def run(self, mfile=True):
+        
+        job = self._compile_command(mfile)
 
         if mfile:
             out, cmdline = mlab.run_matlab_script(job, 
@@ -369,11 +368,11 @@ class Realign(CommandLine):
             out = run_jobdef(job)
             cmdline = ''
 
-        newrealign.out = out.output['out']
-        newrealign.retcode = out.output['returncode']
-        newrealign.err = out.output['err']
-        newrealign.cmdline = cmdline
-        return newrealign
+            output = Bunch(returncode=returncode,
+                           stdout=out,
+                           stderr=err,
+                           interface=self.copy())
+            return output
         
         
     def _compile_command(self,mfile=True):
@@ -381,21 +380,21 @@ class Realign(CommandLine):
         if mfile is True uses matlab .m file
         else generates a job structure and saves in .mat
         """
-        if self.opts.write:
+        if self.inputs.write:
             jobtype = 'estwrite'
         else:
             jobtype = 'estimate'
-        valid_opts = self._parseopts()
-        if type(self.opts.infile) == type([]):
-            sess_scans = scans_for_fnames(self.opts.infile)
+        valid_inputs = self._parseinputs()
+        if type(self.inputs.infile) == type([]):
+            sess_scans = scans_for_fnames(self.inputs.infile)
         else:
-            sess_scans = scans_for_fname(self.opts.infile)
+            sess_scans = scans_for_fname(self.inputs.infile)
 
         
         # create job structure form valid options and data
         tmp = [{'%s'%(jobtype):{'data':sess_scans,
-                                'eoptions':valid_opts['eoptions'],
-                                'roptions':valid_opts['roptions']
+                                'eoptions':valid_inputs['eoptions'],
+                                'roptions':valid_inputs['roptions']
                                 }}]
         if mfile:
             return make_mfile('spatial','realign',tmp)
@@ -403,9 +402,4 @@ class Realign(CommandLine):
             return make_job('spatial','realign',tmp)
 
         
-    def update(self, **opts):
-        newrealign = Realign()
-        [newrealign.opts.__setattr__(k,v) for k, v in self.opts.iteritems() if v is not None ]
-        newrealign.opts.update(**opts)
-        return newrealign
         
