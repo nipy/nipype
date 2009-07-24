@@ -8,7 +8,7 @@ Requires Packages to be installed
 __docformat__ = 'restructuredtext'
 
 import subprocess
-from copy import copy
+from copy import deepcopy
 
 
 class OneTimeProperty(object):
@@ -90,9 +90,41 @@ class Bunch(object):
         '''deprecated, except for Satra'''
         return(self.__dict__[key])
 
+    def dictcopy(self):
+        return deepcopy(self.__dict__)
+
+class Interface(object):
+    '''Some notes:
+
+    Everything in inputs should also be a possible (explicit?) argument to
+    .__init__()''' 
+    def __init__(self, **inputs):
+        self._populate_inputs()
+        self.inputs.update(**inputs)
+        self.cmdline = ''
+
+    def run(self):
+        raise NotImplementedError
+
+    def copy(self):
+        """Return a copy of CommandLine
+        
+        This is comparable to a copy.deepcopy - such that any "reasonable"
+        modifications won't have long distance consequences.
+
+        Returns
+        -------
+        results : self.__class__
+            A new `CommandLine` instance otherwise identical with self 
+
+        """
+        return CommandLine(**self.inputs.dictcopy())
+
+    def _populate_inputs(self):
+        raise NotImplementedError
 
 
-class CommandLine(object):
+class CommandLine(Interface):
     """Encapsulate a command-line function along with the arguments and options.
 
     Provides a convenient mechanism to build a command line with it's
@@ -141,9 +173,6 @@ class CommandLine(object):
 
     """
 
-    def __init__(self, *args):
-        self.inputs = Bunch(args=args)
-
     def run(self):
         """Execute the command.
 
@@ -158,36 +187,25 @@ class CommandLine(object):
 
         """
 
-        cmd = self._compile_command()
-        returncode, out, err = self._runner(cmd, 
-                                            cwd=self.inputs.get('cwd', None))
+        # This is expected to populate `command` for _runner to work
+        self._compile_command()
+        returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
         output = Bunch(returncode=returncode,
                        stdout=out,
                        stderr=err,
                        interface=self.copy())
         return output
         
-    def copy(self):
-        """Return a copy of CommandLine
-        
-        This is comparable to a copy.deepcopy - such that any "reasonable"
-        modifications won't have long distance consequences.
+    def _populate_inputs(self):
+        self.inputs = Bunch(args=None)
 
-        Parameters
-        ----------
-        N/A
+    def _compile_command(self):
+        # This handles args like ['bet', '-f 0.2'] without crashing
+        self.cmdline = ' '.join(self.inputs.args)
 
-        Returns
-        -------
-        results : CommandLine
-            A new `CommandLine` instance otherwise identical with self 
-
-        """
-        return CommandLine(copy(self.inputs.args))
-
-    def _runner(self, cmd, shell=True, cwd=None):
+    def _runner(self, shell=True, cwd=None):
         """Run the command using subprocess.Popen."""
-        proc  = subprocess.Popen(cmd, 
+        proc  = subprocess.Popen(self.cmdline, 
                                  stdout=subprocess.PIPE, 
                                  stderr=subprocess.PIPE, 
                                  shell=shell,
@@ -196,6 +214,3 @@ class CommandLine(object):
         returncode = proc.returncode
         return returncode, out, err
     
-    def _compile_command(self):
-        # This handles args like ['bet', '-f 0.2'] without crashing
-        return ' '.join(self.inputs.args)

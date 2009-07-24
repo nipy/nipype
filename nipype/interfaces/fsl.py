@@ -14,18 +14,6 @@ See the docstrings for the individual classes (Bet, Fast, etc...) for
 
 """
 
-"""
-filename vs nipy image:
-I am wondering about a fancy decorator which would preprocess certain arguments
-to make sure they are nipy images, but would then allow filenames or file
-objects as well.  I would like to guarantee that we get a nipy object, as it
-makes it more flexible for us to assume things in the future. -DJC
-
-Im thinking we will do the not-cool thing to start with and deal with
-files, give an example on how to then access as nipy object (maybe add
-helper function to base.py) And then consider the fancy decorator
-"""
-
 import os
 import subprocess
 from string import Template
@@ -51,13 +39,13 @@ def fslversion():
     # /path/to/fsl/etc/fslversion
     clout = CommandLine('which fsl').run()
 
-    if clout.output['returncode'] is not 0:
+    if clout.returncode is not 0:
         # fsl not found
         return None
-    out = clout.output['out']
+    out = clout.stdout
     basedir = os.path.split(os.path.split(out)[0])[0]
-    clout = CommandLine('less %s/etc/fslversion'%(basedir)).run()
-    out = clout.output['out']
+    clout = CommandLine('cat %s/etc/fslversion'%(basedir)).run()
+    out = clout.stdout
     return out.strip('\n')
 
 
@@ -103,46 +91,32 @@ def fsloutputtype(ftype=None):
         
 
 class Bet(CommandLine):
+    """use fsl bet for skull stripping
 
-    _cmd = None
+    Options
+    -------
+
+    To see optianl arguments
+    Bet().inputs_help()
+
+
+    Examples
+    --------
+    >>> fsl.Bet().inputs_help()
+    >>> better = fsl.Bet(frac=0.5)
+    >>> betted = better.run('infile', 'outfile')
+    >>> better2 = better.update(frac=0.3)
+
+    >>> btr = fsl.Bet(infile='infile', outfile='outfile', frac=0.5)
+    >>> btd = btr.run()
+    """
+
     @property
     def cmd(self):
         """sets base command, not editable"""
-        if self._cmd is None:
-            self._cmd = 'bet'
-        return self._cmd
+        return 'bet'
 
-    def __init__(self, **opts):
-        """use fsl bet for skull stripping
-
-        Options
-        -------
-
-        To see optianl arguments
-        Bet().opts_help()
-
-
-        Examples
-        --------
-        >>> fsl.Bet().opts_help()
-        >>> better = fsl.Bet(frac=0.5)
-        >>> betted = better.run('infile', 'outfile')
-        >>> better2 = better.update(frac=0.3)
-
-        >>> btr = fsl.Bet(infile='infile', outfile='outfile', frac=0.5)
-        >>> btd = btr.run()
-        """
-        
-        super(Bet,self).__init__()
-        self.args = []
-        self._populate_opts()
-        self.opts.update(**opts)
-        self.cmdline = ''
-        self.infile = ''
-        self.outfile = ''
-        
-        
-    def opts_help(self):
+    def inputs_help(self):
         doc = """
         Optional Parameters
         -------------------
@@ -184,8 +158,8 @@ class Bet(CommandLine):
         """
         print doc
 
-    def _populate_opts(self):
-        self.opts = Bunch(infile=None,
+    def _populate_inputs(self):
+        self.inputs = Bunch(infile=None,
                           outfile=None,
                           outline=None,
                           mask=None,
@@ -200,155 +174,98 @@ class Bet(CommandLine):
                           verbose=None, 
                           flags=None)
 
-    def _parseopts(self):
+    def _parseinputs(self):
         """validate fsl bet options
         if set to None ignore
         """
-        out_opts = []
-        opts = {}
-        [opts.update({k:v}) for k, v in self.opts.iteritems() if v is not None ]
-        for opt in opts:
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt in inputs:
             if opt is 'infile':
                 continue
             if opt is 'outfile':
                 continue
             if opt is 'frac':
-                val = float(opts['frac'])
-                out_opts.extend(['-f','%.2f'%(val)])
+                val = float(inputs['frac'])
+                out_inputs.extend(['-f','%.2f'%(val)])
                 continue
             if opt is 'center':
-                val = [float(x) for x in opts['center']]
+                val = [float(x) for x in inputs['center']]
                 if len(val) is not 3:
                     raise ValueError('three values required for center option')
-                out_opts.extend(['-c' , '%s %s %s'%(val[0],val[1],val[2])])
+                out_inputs.extend(['-c' , '%s %s %s'%(val[0],val[1],val[2])])
                 continue
             if opt is 'vertical_gradient':
-                val = float(opts['vertical_gradient'])
-                out_opts.extend(['-g','%.2f'%(val)])
+                val = float(inputs['vertical_gradient'])
+                out_inputs.extend(['-g','%.2f'%(val)])
                 continue
             if opt is 'outline':
-                if opts[opt]:
-                    out_opts.extend(['--outline'])
+                if inputs[opt]:
+                    out_inputs.extend(['--outline'])
                 continue
             if opt is 'mask':
-                if opts[opt]:
-                    out_opts.extend(['--mask'])
+                if inputs[opt]:
+                    out_inputs.extend(['--mask'])
                 continue
             if opt is 'skull':
-                if opts[opt]:
-                    out_opts.extend(['--skull'])
+                if inputs[opt]:
+                    out_inputs.extend(['--skull'])
                 continue
             if opt is 'nooutput':
-                if opts[opt]:
-                    out_opts.extend(['--nooutput'])
+                if inputs[opt]:
+                    out_inputs.extend(['--nooutput'])
                 continue
             if opt is 'radius':
-                val = float(opts[opt])
-                out_opts.extend(['--radius %f'%(val)])
+                val = float(inputs[opt])
+                out_inputs.extend(['--radius %f'%(val)])
             if opt is 'threshold':
-                if opts[opt]:
-                    out_opts.extend(['--threshold'])
+                if inputs[opt]:
+                    out_inputs.extend(['--threshold'])
                 continue
             if opt is 'mesh':
-                if opts[opt]:
-                    out_opts.extend(['--mesh'])
+                if inputs[opt]:
+                    out_inputs.extend(['--mesh'])
                 continue
             if opt is 'verbose':
-                if opts[opt]:
-                    out_opts.extend(['--verbose'])
+                if inputs[opt]:
+                    out_inputs.extend(['--verbose'])
                 continue
             if opt is 'flags':
-                out_opts.extend(opts[opt])
+                out_inputs.extend(inputs[opt])
                 continue
             print 'option %s not supported'%(opt)
         
-        return out_opts
-
-    def run(self, infile=None, outfile=None):
-        """ runs bet command
-
-        Parameters 
-        ----------
-        (these can also be set as options)
-
-        infile : filename
-            file to skull strip 
-            (default = None)
-        outfile : filename
-            filename for skull-stripped image 
-            (default = None)
-
-        Options
-        -------
-        see Bet().opts_help()
-        
-        Returns
-        --------
-        bet : object
-
-        """
-        if infile is None:
-            if self.opts.infile is None:
-                raise ValueError('infile not a valid file')
-            else:
-                infile = self.opts.infile
-        if outfile is None:
-            if self.opts.outfile is None:
-                raise ValueError('outfile not a valid file')
-            else:
-                outfile =self.opts.outfile
-        
-        newbet = self.update(infile=infile, outfile=outfile)
-        
-        newbet.args = [infile, outfile]
-        cmd = newbet._compile_command()
-        
-        newbet.cmdline = cmd
-        newbet.infile = infile
-        newbet.outfile = outfile
-        (retcode, out, err) = newbet._runner(newbet.cmdline)
-        newbet.retcode = retcode
-        newbet.out = out
-        newbet.err = err
-        
-        return newbet
+        return out_inputs
 
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
-        valid_opts = self._parseopts()
-        allargs =  [self.cmd] + self.args + valid_opts
-        return ' '.join(allargs)
+        valid_inputs = self._parseinputs()
+        allargs =  [self.cmd] + self.args + valid_inputs
+        self.cmdline = ' '.join(allargs)
 
-    def update(self, **opts):
-        newbet = Bet()
-        [newbet.opts.__setattr__(k,v) for k, v in self.opts.iteritems() if v is not None ]
-        newbet.opts.update(**opts)
-        return newbet
         
 
 class Fast(CommandLine):
 
-    _cmd = None
     @property
     def cmd(self):
-        """sets base command"""
-        if self._cmd is None:
-            self._cmd = 'fast'
-        return self._cmd
+        """sets base command, not editable"""
+        return 'fast'
 
-    def __init__(self, **opts):
+    def __init__(self, **inputs):
         """use fsl fast for segmenting, bias correction
 
         Options
         -------
         see  
-        fsl.Fast().opts_help()
+        fsl.Fast().inputs_help()
         
         Example
         -------
         >>> faster = fsl.Fast(out_basename = 'myfasted')
         >>> fasted = faster.run(['file1','file2'])
-        >>> fsl.Fast().opts_help()
+        >>> fsl.Fast().inputs_help()
 
         >>> faster = fsl.Fast(infiles=['filea','fileb'], 
                               out_basename = 'myfasted')
@@ -357,12 +274,12 @@ class Fast(CommandLine):
         
         super(Fast,self).__init__()
         self.args = []
-        self._populate_opts()
-        self.opts.update(**opts)
+        self._populate_inputs()
+        self.inputs.update(**inputs)
         self.cmdline = ''
         self.infiles = []
 
-    def opts_help(self):
+    def inputs_help(self):
         doc = """
         POSSIBLE OPTIONS
         -----------------
@@ -419,8 +336,8 @@ class Fast(CommandLine):
         """
         print doc
 
-    def _populate_opts(self):
-        self.opts = Bunch(infiles=None,
+    def _populate_inputs(self):
+        self.inputs = Bunch(infiles=None,
                           number_classes=None,
                           bias_iters=None,
                           bias_lowpass=None,
@@ -445,113 +362,113 @@ class Fast(CommandLine):
                           probability_maps=None,
                           flags=None)
 
-    def _parseopts(self):
+    def _parseinputs(self):
         """validate fsl bet options
         if set to None ignore
         """
-        out_opts = []
-        opts = {}
-        [opts.update({k:v}) for k, v in self.opts.iteritems() if v is not None ]
-        for opt in opts:
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt in inputs:
             if opt is 'infiles':
                 continue
             if opt is 'number_classes':
-                val = int(opts['number_classes'])
-                out_opts.extend(['--class %d '%(val)])
+                val = int(inputs['number_classes'])
+                out_inputs.extend(['--class %d '%(val)])
                 continue
             if opt is 'bias_iters':
-                val = int(opts['bias_iters'])
-                out_opts.extend(['--iter %d'%(val)])
+                val = int(inputs['bias_iters'])
+                out_inputs.extend(['--iter %d'%(val)])
                 continue
             if opt is 'bias_lowpass':
-                val = int(opts['bias_lowpass'])
-                out_opts.extend(['--lowpass %d'%(val)])
+                val = int(inputs['bias_lowpass'])
+                out_inputs.extend(['--lowpass %d'%(val)])
                 continue
             if opt is 'img_type':
-                val = int(opts['img_type'])
-                out_opts.extend(['--type %d'%(val)])
+                val = int(inputs['img_type'])
+                out_inputs.extend(['--type %d'%(val)])
                 continue
             if opt is 'init_seg_smooth':
-                val = float(opts['init_seg_smooth'])
-                out_opts.extend(['--fHard %f'%(val)])
+                val = float(inputs['init_seg_smooth'])
+                out_inputs.extend(['--fHard %f'%(val)])
                 continue
             if opt is 'segments':
-                if opts['segments']:
-                    out_opts.extend(['--segments'])
+                if inputs['segments']:
+                    out_inputs.extend(['--segments'])
                 continue
             if opt is 'init_transform':
-                out_opts.extend(['-a %s'%(opts['init_transform'])])
+                out_inputs.extend(['-a %s'%(inputs['init_transform'])])
                 continue
             if opt is 'other_priors':
-                imgs = opts['other_priors']
-                out_opts.extend(['-A %s %s %s'%(imgs[0], imgs[1], imgs[2])])
+                imgs = inputs['other_priors']
+                out_inputs.extend(['-A %s %s %s'%(imgs[0], imgs[1], imgs[2])])
                 continue
             if opt is 'nopve':
-                if opts['nopve']:
-                    out_opts.extend(['--nopve'])
+                if inputs['nopve']:
+                    out_inputs.extend(['--nopve'])
                 continue
             if opt is 'output_biasfield':
-                if opts['output_biasfield']:
-                     out_opts.extend(['-b'])
+                if inputs['output_biasfield']:
+                     out_inputs.extend(['-b'])
                 continue
             if opt is 'output_biascorrected':
-                if opts['output_biascorrected']:
-                    out_opts.extend(['-B'])
+                if inputs['output_biascorrected']:
+                    out_inputs.extend(['-B'])
                 continue
             if opt is 'nobias':
-                if opts['nobias']:
-                    out_opts.extend(['--nobias'])
+                if inputs['nobias']:
+                    out_inputs.extend(['--nobias'])
                 continue
             if opt is 'n_inputimages':
-                val = int(opts['n_inputimages'])
-                out_opts.extend(['--channels %d'%(val)])
+                val = int(inputs['n_inputimages'])
+                out_inputs.extend(['--channels %d'%(val)])
                 continue
             if opt is 'out_basename':
-                out_opts.extend(['--out %s'%(opts['out_basename'])])
+                out_inputs.extend(['--out %s'%(inputs['out_basename'])])
                 continue
             if opt is 'use_priors':
-                if opts['use_priors']:
-                     out_opts.extend(['--Prior'])
+                if inputs['use_priors']:
+                     out_inputs.extend(['--Prior'])
                 continue
             if opt is 'segment_iters':
-                val = int(opts['segment_iters'])
-                out_opts.extend(['--init %d'%(val)])
+                val = int(inputs['segment_iters'])
+                out_inputs.extend(['--init %d'%(val)])
                 continue
             if opt is 'mixel_smooth':
-                 val = float(opts['mixel_smooth'])
-                 out_opts.extend(['--mixel %f'%(val)])
+                 val = float(inputs['mixel_smooth'])
+                 out_inputs.extend(['--mixel %f'%(val)])
                  continue
             if opt is 'iters_afterbias':
-                 val = int(opts['iters_afterbias'])
-                 out_opts.extend(['--fixed %d'%(val)])
+                 val = int(inputs['iters_afterbias'])
+                 out_inputs.extend(['--fixed %d'%(val)])
                  continue
             if opt is 'hyper':
-                val = float(opts['hyper'])
-                out_opts.extend(['--Hyper %f'%(val)])
+                val = float(inputs['hyper'])
+                out_inputs.extend(['--Hyper %f'%(val)])
                 continue
             if opt is 'verbose':
-                if opts['verbose']:
-                    out_opts.extend(['--verbose'])
+                if inputs['verbose']:
+                    out_inputs.extend(['--verbose'])
                 continue
             if opt is 'manualseg':
-                out_opts.extend(['--manualseg %s'%(opts['manualseg'])])
+                out_inputs.extend(['--manualseg %s'%(inputs['manualseg'])])
                 continue
             if opt is 'probability_maps':
-                if opts['probability_maps']:
-                    out_opts.extend(['-p'])
+                if inputs['probability_maps']:
+                    out_inputs.extend(['-p'])
                 continue
             if opt is 'flags':
-                out_opts.extend(opts['flags'])
+                out_inputs.extend(inputs['flags'])
                 continue
                                
             print 'option %s not supported'%(opt)
         
-        return out_opts
+        return out_inputs
 
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
-        valid_opts = self._parseopts()
-        allargs = [self.cmd] + self.args + valid_opts
+        valid_inputs = self._parseinputs()
+        allargs = [self.cmd] + self.args + valid_inputs
         return ' '.join(allargs)
   
     def run(self, infiles=None):
@@ -569,10 +486,10 @@ class Fast(CommandLine):
         """
         #newfast = self.update()
         if infiles is None:
-            if self.opts.infiles is None:
+            if self.inputs.infiles is None:
                 raise ValueError('infiles not specified')
             else:
-                infiles = self.opts.infiles
+                infiles = self.inputs.infiles
         
         if type(infiles) is not list:
             infiles = [infiles]
@@ -595,10 +512,10 @@ class Fast(CommandLine):
         
         return newfast
 
-    def update(self, **opts):
+    def update(self, **inputs):
         newfast = Fast()
-        [newfast.opts.__setattr__(k,v) for k, v in self.opts.iteritems() if v is not None ]
-        newfast.opts.update(**opts)
+        [newfast.inputs.__setattr__(k,v) for k, v in self.inputs.iteritems() if v is not None ]
+        newfast.inputs.update(**inputs)
         return newfast
   
 
@@ -608,16 +525,14 @@ class Flirt(CommandLine):
     @property
     def cmd(self):
         """sets base command, not editable"""
-        if self._cmd is None:
-            self._cmd = 'flirt'
-        return self._cmd
+        return "flirt"
 
-    def __init__(self, **opts):
+    def __init__(self, **inputs):
         """use fsl flirt for coregistration
 
         Options
         -------
-        fsl.Flirt().opts_help()
+        fsl.Flirt().inputs_help()
 
         Examples
         --------
@@ -636,7 +551,7 @@ class Flirt(CommandLine):
                                          inmatrix='in_to_ref.mat',
                                          outfile='moved.nii')
 
-        >>> fls.Flirt().opts_help()
+        >>> fls.Flirt().inputs_help()
 
 
         >>> flirter = fsl.Flirt(infile='subject.nii',
@@ -650,8 +565,8 @@ class Flirt(CommandLine):
         
         super(Flirt,self).__init__()
         self.args = []
-        self._populate_opts()
-        self.opts.update(**opts)
+        self._populate_inputs()
+        self.inputs.update(**inputs)
         self.cmdline = ''
         self.infile = ''
         self.outfile = ''
@@ -660,7 +575,7 @@ class Flirt(CommandLine):
         self.inmatrix = ''
         
         
-    def opts_help(self):
+    def inputs_help(self):
         doc = """
 
         POSSIBLE OPTIONS
@@ -739,8 +654,8 @@ class Flirt(CommandLine):
 
         """
         print doc
-    def _populate_opts(self):
-        self.opts = Bunch(infile=None,
+    def _populate_inputs(self):
+        self.inputs = Bunch(infile=None,
                           outfile=None,
                           reference=None,
                           outmatrix=None,
@@ -775,134 +690,134 @@ class Flirt(CommandLine):
                           verbose=None,
                           flags=None)
 
-    def _parseopts(self):
+    def _parseinputs(self):
         """validate fsl bet options
         if set to None ignore
         """
-        out_opts = []
-        opts = {}
-        [opts.update({k:v}) for k, v in self.opts.iteritems() if v is not None ]
-        for opt in opts:
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt in inputs:
             if opt in ['infile', 'outfile', 'reference', 'outmatrix','inmatrix']:
                 continue
             if opt is 'datatype':
-                val = opts['datatype']
-                out_opts.extend(['-datatype %s'%(val)])
+                val = inputs['datatype']
+                out_inputs.extend(['-datatype %s'%(val)])
                 continue
             if opt is 'cost':
-                val = opts['cost']
-                out_opts.extend(['-cost %s'%(val)])
+                val = inputs['cost']
+                out_inputs.extend(['-cost %s'%(val)])
                 continue
             if opt is 'searchcost':
-                val = opts['searchcost']
-                out_opts.extend(['-searchcost %s'%(val)])
+                val = inputs['searchcost']
+                out_inputs.extend(['-searchcost %s'%(val)])
                 continue
             if opt is 'usesqform':
-                if opts[opt]:
-                    out_opts.extend(['-usesqform'])
+                if inputs[opt]:
+                    out_inputs.extend(['-usesqform'])
                 continue
             if opt is 'displayinit':
-                if opts[opt]:
-                    out_opts.extend(['-displayinit'])
+                if inputs[opt]:
+                    out_inputs.extend(['-displayinit'])
                 continue
             if opt is 'anglerep':
-                val = opts[opt]
-                out_opts.extend(['-anglerep %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['-anglerep %s'%(val)])
                 continue
             if opt is 'interp':
-                val = opts[opt]
-                out_opts.extend(['-interp'])
+                val = inputs[opt]
+                out_inputs.extend(['-interp'])
                 continue
             if opt is 'sincwidth':
-                val = int(opts[opt])
-                out_opts.extend(['-sincwidth %d'%(val)])
+                val = int(inputs[opt])
+                out_inputs.extend(['-sincwidth %d'%(val)])
                 continue                    
             if opt is 'sincwindow':
-                val = opts[opt]
-                out_opts.extend(['-sincwindow %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['-sincwindow %s'%(val)])
                 continue
             if opt is 'bins':
-                val = int(opts[opt])
-                out_opts.extend(['-bins %d'%(val)])
+                val = int(inputs[opt])
+                out_inputs.extend(['-bins %d'%(val)])
                 continue
             if opt is 'dof':
-                val = int(opts[opt])
-                out_opts.extend(['-dof %d'%(val)])
+                val = int(inputs[opt])
+                out_inputs.extend(['-dof %d'%(val)])
                 continue
             if opt is 'noresample':
-                if opts[opt]:
-                    out_opts.extend(['-noresample'])
+                if inputs[opt]:
+                    out_inputs.extend(['-noresample'])
                 continue
             if opt is 'forcescaling':
-                if opts[opt]:
-                    out_opts.extend(['-forcescaling'])
+                if inputs[opt]:
+                    out_inputs.extend(['-forcescaling'])
                 continue
             if opt is 'minsampling':
-                val = float(opts[opt])
-                out_opts.extend(['-minsampling %f'%(val)])
+                val = float(inputs[opt])
+                out_inputs.extend(['-minsampling %f'%(val)])
                 continue
             if opt is 'paddingsize':
-                val = int(opts[opt])
-                out_opts.extend(['-padingsize %d'%(val)])
+                val = int(inputs[opt])
+                out_inputs.extend(['-padingsize %d'%(val)])
                 continue
             if opt is 'searchrx':
-                val = opts[opt]
-                out_opts.extend(['-searchrx %d %d'%(val[0], val[1])])
+                val = inputs[opt]
+                out_inputs.extend(['-searchrx %d %d'%(val[0], val[1])])
                 continue
             if opt is 'searchry':
-                val = opts[opt]
-                out_opts.extend(['-searchry %d %d'%(val[0], val[1])])
+                val = inputs[opt]
+                out_inputs.extend(['-searchry %d %d'%(val[0], val[1])])
                 continue                    
             if opt is 'searchrz':
-                val = opts[opt]
-                out_opts.extend(['-searchrz %d %d'%(val[0], val[1])])
+                val = inputs[opt]
+                out_inputs.extend(['-searchrz %d %d'%(val[0], val[1])])
                 continue
             if opt is 'nosearch':
-                if opts[opt]:
-                    out_opts.extend(['-nosearch'])
+                if inputs[opt]:
+                    out_inputs.extend(['-nosearch'])
                 continue
             if opt is 'coarsesearch':
-                val = int(opts[opt])
-                out_opts.extend(['-coarsesearch %d'%(val)])
+                val = int(inputs[opt])
+                out_inputs.extend(['-coarsesearch %d'%(val)])
                 continue                   
             if opt is 'finesearch':
-                val = int(opts[opt])
-                out_opts.extend(['-finesearch %d'%(val)])
+                val = int(inputs[opt])
+                out_inputs.extend(['-finesearch %d'%(val)])
                 continue   
             if opt is 'refweight':
-                val = opts[opt]
-                out_opts.extend(['-refweight %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['-refweight %s'%(val)])
                 continue                     
             if opt is 'inweight':
-                val = opts[opt]
-                out_opts.extend(['-refweight %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['-refweight %s'%(val)])
                 continue     
             if opt is 'noclamp':
-                if opts[opt]:
-                    out_opts.extend(['-noclamp'])
+                if inputs[opt]:
+                    out_inputs.extend(['-noclamp'])
                 continue     
             if opt is 'noresampblur':
-                if opts[opt]:
-                    out_opts.extend(['-noresampblur'])
+                if inputs[opt]:
+                    out_inputs.extend(['-noresampblur'])
                 continue     
             if opt is 'rigid2D':
-                if opts[opt]:
-                    out_opts.extend(['-2D'])
+                if inputs[opt]:
+                    out_inputs.extend(['-2D'])
                 continue
             if opt is 'verbose':
-                val = int(opts[opt])
-                out_opts.extend(['-v %d'%(val)])
+                val = int(inputs[opt])
+                out_inputs.extend(['-v %d'%(val)])
                 continue
             if opt is 'flags':
-                out_opts.extend(opts[opt])
+                out_inputs.extend(inputs[opt])
                 continue 
             print 'option %s not supported'%(opt)
-        return out_opts
+        return out_inputs
 
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
-        valid_opts = self._parseopts()
-        allargs = self.args + valid_opts
+        valid_inputs = self._parseinputs()
+        allargs = self.args + valid_inputs
         return ' '.join(allargs)
   
     def run(self, infile=None, reference=None, outfile=None, outmatrix=None):
@@ -937,33 +852,33 @@ class Flirt(CommandLine):
         """
         #newflirt = self.update()
         if infile is None:
-            if self.opts.infile is None:
+            if self.inputs.infile is None:
                 raise ValueError('infile is not specified')
             else:
-                infile = self.opts.infile
+                infile = self.inputs.infile
         if reference is None:
-            if self.opts.reference is None:
+            if self.inputs.reference is None:
                 raise ValueError('reference is not specified')
             else:
-                reference = self.opts.reference
+                reference = self.inputs.reference
         if outfile is None:
-            outfile = self.opts.outfile
+            outfile = self.inputs.outfile
         if outmatrix is None:
-            outmatrix = self.opts.outmatrix
+            outmatrix = self.inputs.outmatrix
         newflirt = self.update(infile=infile, 
                                reference=reference,
                                outfile=outfile,
                                outmatrix = outmatrix)
         #newflirt.args =  [newflirt.cmd]
-        newflirt.args.extend(['-in %s'%(newflirt.opts.infile)])
+        newflirt.args.extend(['-in %s'%(newflirt.inputs.infile)])
         newflirt.infile = infile
-        newflirt.args.extend(['-ref %s'%(newflirt.opts.reference)])
+        newflirt.args.extend(['-ref %s'%(newflirt.inputs.reference)])
         newflirt.reference = reference
-        if newflirt.opts.outfile:
-            newflirt.args.extend(['-out %s'%(newflirt.opts.outfile)])
+        if newflirt.inputs.outfile:
+            newflirt.args.extend(['-out %s'%(newflirt.inputs.outfile)])
             newflirt.outfile = outfile
-        if newflirt.opts.outmatrix:
-            newflirt.args.extend(['-omat %s'%(newflirt.opts.outmatrix)])
+        if newflirt.inputs.outmatrix:
+            newflirt.args.extend(['-omat %s'%(newflirt.inputs.outmatrix)])
             newflirt.outmatrix = outmatrix
         
             
@@ -1003,25 +918,25 @@ class Flirt(CommandLine):
         """
         #newflirt = self.update()
         if infile is None:
-            if self.opts.infile is None:
+            if self.inputs.infile is None:
                 raise ValueError('input not specfied')
             else:
-                infile = self.opts.infile
+                infile = self.inputs.infile
         if reference is None:
-            if self.opts.reference is None:
+            if self.inputs.reference is None:
                 raise ValueError('reference is not specified')
             else:
-                reference = self.opts.reference
+                reference = self.inputs.reference
         if outfile is None:
-            if self.opts.outfile is None:
+            if self.inputs.outfile is None:
                 raise ValueError('outfile not specified')
             else:
-                outfile = self.opts.outfile
+                outfile = self.inputs.outfile
         if inmatrix is None:
-            if self.opts.inmatrix is None:
+            if self.inputs.inmatrix is None:
                 raise ValueError('inmatrix is not specified')
             else:
-                inmatrix = self.opts.inmatrix
+                inmatrix = self.inputs.inmatrix
         newflirt = self.update(infile=infile, 
                                reference=reference,
                                outfile=outfile,
@@ -1033,8 +948,8 @@ class Flirt(CommandLine):
         newflirt.args.extend(['-ref %s'%(reference)])
         newflirt.reference = reference
         
-        if newflirt.opts.applyisoxfm is not None:
-            newflirt.args.extend(['-applyisoxfm %d'%(newflirt.opts['applyisoxfm'])])
+        if newflirt.inputs.applyisoxfm is not None:
+            newflirt.args.extend(['-applyisoxfm %d'%(newflirt.inputs['applyisoxfm'])])
             
         else:
             newflirt.args.extend(['-applyxfm'])
@@ -1058,17 +973,17 @@ class Flirt(CommandLine):
 
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
-        valid_opts = self._parseopts()
-        if valid_opts is None:
+        valid_inputs = self._parseinputs()
+        if valid_inputs is None:
             allargs = [self.cmd] + self.args
         else:
-            allargs = [self.cmd] + valid_opts + self.args
+            allargs = [self.cmd] + valid_inputs + self.args
         return ' '.join(allargs)
 
-    def update(self, **opts):
+    def update(self, **inputs):
         newflirt = Flirt()
-        [newflirt.opts.__setattr__(k,v) for k, v in self.opts.iteritems() if v is not None ]
-        newflirt.opts.update(**opts)
+        [newflirt.inputs.__setattr__(k,v) for k, v in self.inputs.iteritems() if v is not None ]
+        newflirt.inputs.update(**inputs)
         return newflirt
         
 
@@ -1080,35 +995,33 @@ class Fnirt(CommandLine):
     @property
     def cmd(self):
         """sets base command, not editable"""
-        if self._cmd is None:
-            self._cmd = 'fnirt'
-        return self._cmd
+        return 'fnirt'
 
-    def __init__(self, **opts):
+    def __init__(self, **inputs):
         """use fsl fnirt for non-linear registration
         
         Options
         -------
         see  
-        fsl.Fnirt().opts_help()
+        fsl.Fnirt().inputs_help()
         
         Example
         -------
         >>> fnirter = fsl.Fnirt(affine='affine.mat')
         >>> fnirted = fnirter.run(reference='ref.nii',moving='anat.nii')
-        >>> fsl.Fnirt().opts_help()
+        >>> fsl.Fnirt().inputs_help()
        
        
         """
         super(Fnirt,self).__init__()
         self.args = []
-        self._populate_opts()
-        self.opts.update(**opts)
+        self._populate_inputs()
+        self.inputs.update(**inputs)
         self.cmdline = ''
         self.infile = ''
         self.reference = ''
 
-    def opts_help(self):
+    def inputs_help(self):
         doc = """
 
         POSSIBLE OPTIONS
@@ -1281,8 +1194,8 @@ class Fnirt(CommandLine):
             provide information useful at initial steps
         """
         print doc
-    def _populate_opts(self):
-        self.opts = Bunch(infile=None,
+    def _populate_inputs(self):
+        self.inputs = Bunch(infile=None,
                           reference=None,
                           affine=None,
                           initwarp= None,
@@ -1307,138 +1220,138 @@ class Fnirt(CommandLine):
                           applyrefmask=None,
                           applyimgmask=None)
 
-    def _parseopts(self):
+    def _parseinputs(self):
         """validate fsl bet options
         if set to None ignore
         """
-        out_opts = []
-        opts = {}
-        [opts.update({k:v}) for k, v in self.opts.iteritems() if v is not None ]
-        for opt in opts:
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt in inputs:
             if opt in ['infile', 'reference']:
                 continue
             if opt is 'affine':
-                val = opts[opt]
-                out_opts.extend(['--aff %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['--aff %s'%(val)])
                 continue
             if opt is 'initwarp':
-                val = opts[opt]
-                out_opts.extend(['--inwarp %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['--inwarp %s'%(val)])
                 continue                
             if opt is 'initintensity':
-                val = opts[opt]
-                out_opts.extend(['--intin %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['--intin %s'%(val)])
                 continue
             if opt is 'configfile':
-                val = opts[opt]
-                out_opts.extend(['--config %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['--config %s'%(val)])
                 continue
             if opt is 'referencemask':
-                val = opts[opt]
-                out_opts.extend(['--refmask %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['--refmask %s'%(val)])
                 continue
             if opt is 'imagemask':
-                val = opts[opt]
-                out_opts.extend(['--inmask %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['--inmask %s'%(val)])
                 continue
             if opt is 'fieldcoeff_file':
-                val = opts[opt]
-                out_opts.extend(['--cout %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['--cout %s'%(val)])
                 continue
             if opt is 'outimage':
-                val = opts[opt]
-                out_opts.extend(['--iout %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['--iout %s'%(val)])
                 continue
             if opt is 'fieldfile':
-                val = opts[opt]
-                out_opts.extend(['--fout %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['--fout %s'%(val)])
                 continue
             if opt is 'jacobianfile':
-                val = opts[opt]
-                out_opts.extend(['--jout %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['--jout %s'%(val)])
                 continue
             if opt is 'reffile':
-                val = opts[opt]
-                out_opts.extend(['--refout %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['--refout %s'%(val)])
                 continue
             if opt is 'intensityfile':
-                val = opts[opt]
-                out_opts.extend(['--intout %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['--intout %s'%(val)])
                 continue
             if opt is 'logfile':
-                val = opts[opt]
-                out_opts.extend(['--logout %s'%(val)])
+                val = inputs[opt]
+                out_inputs.extend(['--logout %s'%(val)])
                 continue
             if opt is 'verbose':
-                if opts[opt]:
-                    out_opts.extend(['--verbose'])
+                if inputs[opt]:
+                    out_inputs.extend(['--verbose'])
                 continue
             if opt is 'sub_sampling':
-                val = opts[opt]
+                val = inputs[opt]
                 tmpstr = '--subsample '
                 for item in val:
                     tmpstr = tmpstr + '%d, '%(item)
-                out_opts.extend([tmpstr[:-2]])
+                out_inputs.extend([tmpstr[:-2]])
                 continue
             if opt is 'max_iter':
-                val = opts[opt]
+                val = inputs[opt]
                 tmpstr = '--miter '
                 for item in val:
                     tmpstr = tmpstr + '%d, '%(item)
-                out_opts.extend([tmpstr[:-2]])
+                out_inputs.extend([tmpstr[:-2]])
                 continue               
             if opt is 'referencefwhm':
-                val = opts[opt]
+                val = inputs[opt]
                 tmpstr = '--reffwhm '
                 for item in val:
                     tmpstr = tmpstr + '%d, '%(item)
-                out_opts.extend([tmpstr[:-2]])
+                out_inputs.extend([tmpstr[:-2]])
                 continue
             if opt is 'imgfwhm':
-                val = opts[opt]
+                val = inputs[opt]
                 tmpstr = '--infwhm '
                 for item in val:
                     tmpstr = tmpstr + '%d, '%(item)
-                out_opts.extend([tmpstr[:-2]])
+                out_inputs.extend([tmpstr[:-2]])
                 continue
             if opt is 'lambdas':
-                val = opts[opt]
+                val = inputs[opt]
                 tmpstr = '--lambda '
                 for item in val:
                     tmpstr = tmpstr + '%d, '%(item)
-                out_opts.extend([tmpstr[:-2]])
+                out_inputs.extend([tmpstr[:-2]])
                 continue
             if opt is 'estintensity':
-                val = opts[opt]
+                val = inputs[opt]
                 tmpstr = '--estint '
                 for item in val:
                     tmpstr = tmpstr + '%d, '%(item)
-                out_opts.extend([tmpstr[:-2]])
+                out_inputs.extend([tmpstr[:-2]])
                 continue
             if opt is 'applyrefmask':
-                val = opts[opt]
+                val = inputs[opt]
                 tmpstr = '--applyrefmask '
                 for item in val:
                     tmpstr = tmpstr + '%d, '%(item)
-                out_opts.extend([tmpstr[:-2]])
+                out_inputs.extend([tmpstr[:-2]])
                 continue
             if opt is 'applyimgmask':
-                val = opts[opt]
+                val = inputs[opt]
                 tmpstr = '--applyinmask '
                 for item in val:
                     tmpstr = tmpstr + '%d, '%(item)
-                out_opts.extend([tmpstr[:-2]])
+                out_inputs.extend([tmpstr[:-2]])
                 continue
             if opt is 'flags':
-                out_opts.extend(opts[opt])
+                out_inputs.extend(inputs[opt])
                 continue
             print 'option %s not supported'%(opt)
-        return out_opts
+        return out_inputs
             
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
-        valid_opts = self._parseopts()
-        allargs = self.args + valid_opts
+        valid_inputs = self._parseinputs()
+        allargs = self.args + valid_inputs
         return ' '.join(allargs)
   
     def run(self, infile=None, reference=None):
@@ -1466,15 +1379,15 @@ class Fnirt(CommandLine):
         """
         #newfnirt = self.update()
         if infile is None:
-            if self.opts.infile is None:
+            if self.inputs.infile is None:
                 raise ValueError('infile is not specified')
             else:
-                infile = self.opts.infile
+                infile = self.inputs.infile
         if reference is None:
-            if self.opts.reference is None:
+            if self.inputs.reference is None:
                 raise ValueError('reference is not specified')
             else:
-                reference = self.opts.reference
+                reference = self.inputs.reference
         newfnirt = self.update(infile=infile, reference=reference)
         newfnirt.args.extend(['--in %s'%(infile)])
         newfnirt.infile = infile
@@ -1493,18 +1406,18 @@ class Fnirt(CommandLine):
 
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
-        valid_opts = self._parseopts()
+        valid_inputs = self._parseinputs()
         
-        if valid_opts is None:
+        if valid_inputs is None:
             allargs = [self.cmd] + self.args
         else:
-            allargs = [self.cmd] + valid_opts + self.args
+            allargs = [self.cmd] + valid_inputs + self.args
         return ' '.join(allargs)
 
-    def update(self, **opts):
+    def update(self, **inputs):
         newfnirt = Fnirt()
-        [newfnirt.opts.__setattr__(k,v) for k, v in self.opts.iteritems() if v is not None ]
-        newfnirt.opts.update(**opts)
+        [newfnirt.inputs.__setattr__(k,v) for k, v in self.inputs.iteritems() if v is not None ]
+        newfnirt.inputs.update(**inputs)
         return newfnirt
 
     def write_config(self,configfile):
@@ -1516,13 +1429,13 @@ class Fnirt(CommandLine):
 
                 
         """
-        valid_opts = self._parseopts() 
+        valid_inputs = self._parseinputs() 
         try :
             fid = fopen(configfile, 'w+')
         except IOError:
             print ('unable to create config_file %s'%(configfile))
             
-        for item in valid_opts:
+        for item in valid_inputs:
             fid.write('%s\n'%(item))
         fid.close()
 
