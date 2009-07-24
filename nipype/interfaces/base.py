@@ -8,6 +8,7 @@ Requires Packages to be installed
 __docformat__ = 'restructuredtext'
 
 import subprocess
+from copy import copy
 
 
 class OneTimeProperty(object):
@@ -58,6 +59,8 @@ def setattr_on_read(func):
 
 class Bunch(object):
     """ Provide Elegant attribute access
+
+    (Also provide inelegant dict-style access to make Satra's life easier)
     """
     def __init__(self, **kwargs):
         self.__dict__.update(**kwargs)
@@ -67,6 +70,18 @@ class Bunch(object):
     
     def iteritems(self):
         return self.__dict__.iteritems()
+
+    def get(self, *args):
+        '''Need to consider how much of the dict interface we will support'''
+        return self.__dict__.get(*args)
+
+    def __setitem__(self, key, value):
+        '''deprecated, except for Satra'''
+        self.__dict__[key] = value
+
+    def __getitem__(self, key):
+        '''deprecated, except for Satra'''
+        return(self.__dict__[key])
 
 
 
@@ -88,9 +103,6 @@ class CommandLine(object):
     ----------
     args : tuple
         The command, it's arguments and options store in a tuple of strings.
-    output : dictionary
-        The result of running the command.  Contains three keys:
-        'err', 'out', 'returncode'
 
     Returns
     -------
@@ -102,8 +114,8 @@ class CommandLine(object):
 
     >>> lscmd = CommandLine('ls') # Create a command object
     >>> output = lscmd.run() # Execute the command
-    >>> output.output['out'] # Get output from the command
-    >>> output.output['err'] # Get error from command, if any
+    >>> output.out # Get output from the command
+    >>> output.err # Get error from command, if any
 
     # You could also pass in args like this
     >>> lscmd = CommandLine('ls', '-l', '-t')
@@ -116,7 +128,6 @@ class CommandLine(object):
     Notes
     -----
     When subclassing CommandLine, you will generally override at least:
-        update
         _compile_command
         
     Also quite possibly __init__ but generally not run or _runner
@@ -124,36 +135,49 @@ class CommandLine(object):
     """
 
     def __init__(self, *args):
-        self.args = args
-        self.output = None
+        self.inputs = Bunch(args=args)
 
-    def run(self, *args, **kwargs):
+    def run(self):
         """Execute the command.
 
         Parameters
         ----------
-        args : string(s), optional
-            Arguments to add to the command.
-        kwargs : string(s), optional
-            Options to add to the command.
-            This parameter is currently IGNORED.
-        
+        N/A
+
         Returns
         -------
-        cmd : CommandLine
-            A `CommandLine` object with the results store in `output`
+        results : Bunch
+            A `Bunch` object with a copy of self in `interface`
 
         """
 
-        obj_to_run = self.update(*args, **kwargs)
-        cmd = obj_to_run._compile_command()
-        returncode, out, err = obj_to_run._runner(cmd, 
-                                                  cwd=kwargs.get('cwd', None))
-        obj_to_run.output = {'returncode':returncode,
-                             'out': out,
-                             'err':err}
-        return obj_to_run
+        cmd = self._compile_command()
+        returncode, out, err = self._runner(cmd, 
+                                            cwd=self.inputs.get('cwd', None))
+        output = Bunch(returncode=returncode,
+                       stdout=out,
+                       stderr=err,
+                       interface=self.copy())
+        return output
         
+    def copy(self):
+        """Return a copy of CommandLine
+        
+        This is comparable to a copy.deepcopy - such that any "reasonable"
+        modifications won't have long distance consequences.
+
+        Parameters
+        ----------
+        N/A
+
+        Returns
+        -------
+        results : CommandLine
+            A new `CommandLine` instance otherwise identical with self 
+
+        """
+        return CommandLine(copy(self.inputs.args))
+
     def _runner(self, cmd, shell=True, cwd=None):
         """Run the command using subprocess.Popen."""
         proc  = subprocess.Popen(cmd, 
@@ -166,24 +190,5 @@ class CommandLine(object):
         return returncode, out, err
     
     def _compile_command(self):
-        return ' '.join(self.args)
-
-    def update(self, *args, **kwargs):
-        """Update the object with additional arguments and options.
-
-        Parameters
-        ----------
-        args : string(s), optional
-            Arguments to add to the command.
-        kwargs : string(s), optional
-            Options to add to the command.
-            This parameter is currently IGNORED.
-
-        Returns
-        -------
-        cmd : CommandLine
-            A new `CommandLine` object with the updated arguments.
-
-        """
-        
-        return CommandLine(*(self.args+args))
+        # This handles args like ['bet', '-f 0.2'] without crashing
+        return ' '.join(self.inputs.args)
