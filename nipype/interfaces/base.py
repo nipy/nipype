@@ -132,10 +132,11 @@ class CommandLine(object):
 
         Parameters
         ----------
-        args : string(s)
-            Arguments to add to the command, if any.
-        kwargs : string(s)
-            Options to add to the command, if any.
+        args : string(s), optional
+            Arguments to add to the command.
+        kwargs : string(s), optional
+            Options to add to the command.
+            This parameter is currently IGNORED.
         
         Returns
         -------
@@ -153,10 +154,8 @@ class CommandLine(object):
                              'err':err}
         return obj_to_run
         
-
-    def _runner(self, cmd, shell=True,cwd=None):
-        """Use subprocess.Popen to run command
-        """
+    def _runner(self, cmd, shell=True, cwd=None):
+        """Run the command using subprocess.Popen."""
         proc  = subprocess.Popen(cmd, 
                                  stdout=subprocess.PIPE, 
                                  stderr=subprocess.PIPE, 
@@ -169,9 +168,22 @@ class CommandLine(object):
     def _compile_command(self):
         return ' '.join(self.args)
 
-    def update(self, *args,**kwargs):
-        """create derivative command with additional arguments
-        returns new CommandLine object
+    def update(self, *args, **kwargs):
+        """Update the object with additional arguments and options.
+
+        Parameters
+        ----------
+        args : string(s), optional
+            Arguments to add to the command.
+        kwargs : string(s), optional
+            Options to add to the command.
+            This parameter is currently IGNORED.
+
+        Returns
+        -------
+        cmd : CommandLine
+            A new `CommandLine` object with the updated arguments.
+
         """
         
         return CommandLine(*(self.args+args))
