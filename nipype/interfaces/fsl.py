@@ -1,40 +1,37 @@
-"""
-The fsl module provides basic functions for interfacing with fsl to access fsl tools
+"""The fsl module provides basic functions for interfacing with fsl tools.
 
-these functions include 
-    
-    BET: brain extraction
+Currently these tools are supported:
 
-    FAST: segmentation and bias correction
-
-    FLIRT: linear registration
-
-    FNIRT: non-linear warp
+  * BET: brain extraction
+  * FAST: segmentation and bias correction
+  * FLIRT: linear registration
+  * FNIRT: non-linear warp
 
 Examples
 --------
-See documentation for bet, fast and flirt functions for 'working' examples.
+See the docstrings for the individual classes (Bet, Fast, etc...) for
+'working' examples.
 
+"""
 
+"""
 filename vs nipy image:
 I am wondering about a fancy decorator which would preprocess certain arguments
 to make sure they are nipy images, but would then allow filenames or file
 objects as well.  I would like to guarantee that we get a nipy object, as it
 makes it more flexible for us to assume things in the future. -DJC
 
-Im thinking we will do the not-cool thing to start with and deal with files, 
-give an example on how to then access as nipy object (maybe add helper function to base.py)
-And then consider the fancy decorator
+Im thinking we will do the not-cool thing to start with and deal with
+files, give an example on how to then access as nipy object (maybe add
+helper function to base.py) And then consider the fancy decorator
 """
 
-from nipype.interfaces.base import Bunch, CommandLine, setattr_on_read
 import os
-
-
-
 import subprocess
-import string
 from string import Template
+
+from nipype.interfaces.base import Bunch, CommandLine, setattr_on_read
+
 
 def fslversion():
     """Check for fsl version on system
@@ -50,7 +47,8 @@ def fslversion():
        or None if FSL not found
 
     """
-    # find which fsl being used....and get version from /path/to/fsl/etc/fslversion
+    # find which fsl being used....and get version from
+    # /path/to/fsl/etc/fslversion
     clout = CommandLine('which fsl').run()
 
     if clout.output['returncode'] is not 0:
@@ -61,6 +59,7 @@ def fslversion():
     clout = CommandLine('less %s/etc/fslversion'%(basedir)).run()
     out = clout.output['out']
     return out.strip('\n')
+
 
 def fsloutputtype(ftype=None):
     """Check and or set the global FSL output file type FSLOUTPUTTYPE
