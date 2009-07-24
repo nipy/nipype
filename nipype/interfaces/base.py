@@ -71,32 +71,43 @@ class Bunch(object):
 
 
 class CommandLine(object):
-    """ Base CommandLine class that handles arguments and generates command line string
-        That can be run using subprocess.Popen
+    """Encapsulate a command-line function along with the arguments and options.
 
-        
-    """
-    def __init__(self, *args):
-        """
-        base commandline class, handles arguments, uses subprocess.Popen
+    Parameters
+    ----------
+    args: arguments (includes command)
 
-        Parameters
-        ----------
-        args: arguments (includes command)
+    Returns
+    -------
+    CommandLine : object
 
+    Examples
+    --------
 
-        Returns
-        -------
-        CommandLine : object
-        
+    >>> lscmd = CommandLine('ls') # Create a command object
+    >>> output = lscmd.run() # Execute the command
+    >>> output.output['out'] # Get output from the command
+    >>> output.output['err'] # Get error from command, if any
 
-        When subclassing CommandLine, you will generally override at least:
+    # You could also pass in args like this
+    >>> lscmd = CommandLine('ls', '-l', '-t')
+    # Or
+    >>> lscmd = CommandLine('ls -l -t')
+
+    # One way to parse your output is to split on the newline '\n' character:
+    >>>  output.output['out'].splitlines()
+
+    Notes
+    -----
+    When subclassing CommandLine, you will generally override at least:
         update
         _compile_command
         
-        Also quite possibly __init__ but generally not run or _runner
+    Also quite possibly __init__ but generally not run or _runner
 
-        """ 
+    """
+
+    def __init__(self, *args):
         self.args = args
 
 
