@@ -1,11 +1,12 @@
 {% extends "!layout.html" %}
 
+{% set customsidebar = 'indexsidebar.html' %}
+
 
 {% block rootrellink %}
   <li><a href="http://nipy.sourceforge.net/home">Community Site</a> |&nbsp;</li>
-  <li><a href="http://nipy.sourceforge.net/home/devel">Developer's Guide</a> |&nbsp;</li>
-  <li><a href="http://nipy.sourceforge.net/home/nipy">NIPY Project</a> |&nbsp;</li>
   <li><a href="{{ pathto('index') }}">Nipype Project</a> |&nbsp;</li>
+  <li><a href="{{ pathto('documentation') }}">Docmentation</a> |&nbsp;</li>
 {% endblock %}
 
 

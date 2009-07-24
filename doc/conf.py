@@ -137,16 +137,19 @@ html_static_path = ['_static']
 # using the given strftime format.
 #html_last_updated_fmt = '%b %d, %Y'
 
+# Content template for the index page.
+html_index = 'index.html'
+
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-#html_sidebars = {'index': 'indexsidebar.html'}
+html_sidebars = {'index': 'indexsidebar.html'}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
-#html_additional_pages = {}
+#html_additional_pages = {'index': 'index.html'}
 
 # If false, no module index is generated.
 #html_use_modindex = True
