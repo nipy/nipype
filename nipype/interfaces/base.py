@@ -98,9 +98,10 @@ class Interface(object):
 
     Everything in inputs should also be a possible (explicit?) argument to
     .__init__()''' 
-    def __init__(self, **inputs):
+    def __init__(self, *args, **inputs):
         self._populate_inputs()
         self.inputs.update(**inputs)
+        self.inputs.args = args
         self.cmdline = ''
 
     def run(self):
@@ -190,11 +191,10 @@ class CommandLine(Interface):
         # This is expected to populate `command` for _runner to work
         self._compile_command()
         returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
-        output = Bunch(returncode=returncode,
-                       stdout=out,
-                       stderr=err,
-                       interface=self.copy())
-        return output
+        return Bunch(returncode=returncode,
+                     stdout=out,
+                     stderr=err,
+                     interface=self.copy())
         
     def _populate_inputs(self):
         self.inputs = Bunch(args=None)
