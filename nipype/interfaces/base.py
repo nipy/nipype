@@ -73,13 +73,29 @@ class Bunch(object):
 class CommandLine(object):
     """Encapsulate a command-line function along with the arguments and options.
 
+    Provides a convenient mechanism to build a command line with it's
+    arguments and options incrementally.  A `CommandLine` object can
+    be reused, and it's arguments and options updated.  The
+    `CommandLine` class is the base class for all nipype.interfaces
+    classes.
+
     Parameters
     ----------
-    args: arguments (includes command)
+    args : string
+        A string representing the command and it's arguments.
+
+    Attributes
+    ----------
+    args : tuple
+        The command, it's arguments and options store in a tuple of strings.
+    output : dictionary
+        The result of running the command.  Contains three keys:
+        'err', 'out', 'returncode'
 
     Returns
     -------
-    CommandLine : object
+    cmd : CommandLine
+        A `CommandLine` object that can be run and/or updated.
 
     Examples
     --------
@@ -109,12 +125,25 @@ class CommandLine(object):
 
     def __init__(self, *args):
         self.args = args
-
+        self.output = None
 
     def run(self, *args, **kwargs):
-        """updates arguments, compiles command, sends to runner, 
-        stores output and returns new object
+        """Execute the command.
+
+        Parameters
+        ----------
+        args : string(s)
+            Arguments to add to the command, if any.
+        kwargs : string(s)
+            Options to add to the command, if any.
+        
+        Returns
+        -------
+        cmd : CommandLine
+            A `CommandLine` object with the results store in `output`
+
         """
+
         obj_to_run = self.update(*args, **kwargs)
         cmd = obj_to_run._compile_command()
         returncode, out, err = obj_to_run._runner(cmd, 
