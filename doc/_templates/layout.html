@@ -3,6 +3,13 @@
 {% set customsidebar = 'quicklinks.html' %}
 
 
+{% block rootrellink %}
+  <li><a href="{{ pathto('about/index') }}">About</a> |&nbsp;</li>
+  <li><a href="{{ pathto('community/index') }}">Community</a> |&nbsp;</li>
+  <li><a href="{{ pathto('software/index') }}">Software</a> |&nbsp;</li>
+{% endblock %}
+
+
 {% block extrahead %}
   <meta name="keywords" content="nipy, neuroimaging, python, neuroscience">
 {% endblock %}
@@ -15,7 +22,6 @@
 {% endblock %}
 
 
-{% block relbar1 %}{% endblock %}
 {% block relbar2 %}{% endblock %}
 
 {% block sidebar1 %}{{ sidebar() }}{% endblock %}
