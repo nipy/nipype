@@ -17,7 +17,7 @@ these functions include
 """
 #from __future__ import with_statement
 
-from nipype.interfaces.base import Bunch, CommandLine, Interface
+from nipype.interfaces.base import Bunch, CommandLine, Interface, setattr_on_read
 from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import fltcols
 import nipype.interfaces.matlab as matlab
@@ -184,43 +184,40 @@ def fnames_presuffix(fnames, prefix='', suffix=''):
 
 
 class Realign(CommandLine):
+    """use spm_realign for estimating within modality
+    rigid body alignment
+
+    Parameters
+    ----------
+    inputs : mapping 
+    key, value pairs that will update the Realign.inputs attributes
+    see self.inputs_help() for a list of Realign.inputs attributes
+    
+    Attributes
+    ----------
+    inputs : Bunch
+    a (dictionary-like) bunch of options that can be passed to 
+    spm_realign via a job structure
+    cmdline : string
+    string used to call matlab/spm via CommandLine interface
+    
+    
+
+    Options
+    -------
+
+    To see optional arguments
+    Realign().inputs_help()
+
+
+    Examples
+    --------
+    
+    """
     
     @property
     def cmd(self):
         return 'spm_realign'
-    
-    def __init__(self, **inputs):
-        """use spm_realign for estimating within modality
-           rigid body alignment
-
-        Parameters
-        ----------
-        inputs : mapping 
-            key, value pairs that will update the Realign.inputs attributes
-            see self.inputs_help() for a list of Realign.inputs attributes
-           
-        Attributes
-        ----------
-        inputs : Bunch
-            a (dictionary-like) bunch of options that can be passed to 
-            spm_realign via a job structure
-        cmdline : string
-            string used to call matlab/spm via CommandLine interface
-        
-        
-
-        Options
-        -------
-
-        To see optional arguments
-        Realign().inputs_help()
-
-
-        Examples
-        --------
-        
-        """
-        
         
     def inputs_help(self):
         doc = """
@@ -405,43 +402,40 @@ class Realign(CommandLine):
 
 
 class Coregister(CommandLine):
+    """use spm_coreg for estimating cross-modality
+    rigid body alignment
+
+    Parameters
+    ----------
+    inputs : mapping 
+    key, value pairs that will update the Coregister.inputs attributes
+    see self.inputs_help() for a list of Coregister.inputs attributes
+    
+    Attributes
+    ----------
+    inputs : Bunch
+    a (dictionary-like) bunch of options that can be passed to 
+    spm_coreg via a job structure
+    cmdline : string
+    string used to call matlab/spm via CommandLine interface
+    
+    
+
+    Options
+    -------
+
+    To see optional arguments
+    Coregister().inputs_help()
+
+
+    Examples
+    --------
+    
+    """
     
     @property
     def cmd(self):
         return 'spm_coreg'
-    
-    def __init__(self, **inputs):
-        """use spm_coreg for estimating cross-modality
-           rigid body alignment
-
-        Parameters
-        ----------
-        inputs : mapping 
-            key, value pairs that will update the Coregister.inputs attributes
-            see self.inputs_help() for a list of Coregister.inputs attributes
-           
-        Attributes
-        ----------
-        inputs : Bunch
-            a (dictionary-like) bunch of options that can be passed to 
-            spm_coreg via a job structure
-        cmdline : string
-            string used to call matlab/spm via CommandLine interface
-        
-        
-
-        Options
-        -------
-
-        To see optional arguments
-        Coregister().inputs_help()
-
-
-        Examples
-        --------
-        
-        """
-        
         
     def inputs_help(self):
         doc = """
@@ -612,41 +606,39 @@ class Coregister(CommandLine):
 
         
 class Normalize(CommandLine):
+    """use spm_normalise for warping an image to a template
+
+    Parameters
+    ----------
+    inputs : mapping 
+    key, value pairs that will update the Normalize.inputs attributes
+    see self.inputs_help() for a list of Normalize.inputs attributes
+    
+    Attributes
+    ----------
+    inputs : Bunch
+    a (dictionary-like) bunch of options that can be passed to 
+    spm_normalise via a job structure
+    cmdline : string
+    string used to call matlab/spm via CommandLine interface
+    
+    
+
+    Options
+    -------
+
+    To see optional arguments
+    Normalize().inputs_help()
+
+
+    Examples
+    --------
+    
+    """
     
     @property
     def cmd(self):
         return 'spm_normalise'
-    
-    def __init__(self, **inputs):
-        """use spm_normalise for warping an image to a template
-
-        Parameters
-        ----------
-        inputs : mapping 
-            key, value pairs that will update the Normalize.inputs attributes
-            see self.inputs_help() for a list of Normalize.inputs attributes
-           
-        Attributes
-        ----------
-        inputs : Bunch
-            a (dictionary-like) bunch of options that can be passed to 
-            spm_normalise via a job structure
-        cmdline : string
-            string used to call matlab/spm via CommandLine interface
-        
-        
-
-        Options
-        -------
-
-        To see optional arguments
-        Normalize().inputs_help()
-
-
-        Examples
-        --------
-        
-        """
 
     def inputs_help(self):
         doc = """
@@ -845,41 +837,39 @@ class Normalize(CommandLine):
             return make_job('spatial','normalise',tmp)
 
 class Smooth(CommandLine):
+    """use spm_smooth for 3D Gaussian smoothing of image volumes.
+
+    Parameters
+    ----------
+    inputs : mapping 
+    key, value pairs that will update the Smooth.inputs attributes
+    see self.inputs_help() for a list of Smooth.inputs attributes
+    
+    Attributes
+    ----------
+    inputs : Bunch
+    a (dictionary-like) bunch of options that can be passed to 
+    spm_smooth via a job structure
+    cmdline : string
+    string used to call matlab/spm via CommandLine interface
+    
+    
+
+    Options
+    -------
+
+    To see optional arguments
+    Smooth().inputs_help()
+
+
+    Examples
+    --------
+    
+    """
     
     @property
     def cmd(self):
         return 'spm_smooth'
-    
-    def __init__(self, **inputs):
-        """use spm_smooth for 3D Gaussian smoothing of image volumes.
-
-        Parameters
-        ----------
-        inputs : mapping 
-            key, value pairs that will update the Smooth.inputs attributes
-            see self.inputs_help() for a list of Smooth.inputs attributes
-           
-        Attributes
-        ----------
-        inputs : Bunch
-            a (dictionary-like) bunch of options that can be passed to 
-            spm_smooth via a job structure
-        cmdline : string
-            string used to call matlab/spm via CommandLine interface
-        
-        
-
-        Options
-        -------
-
-        To see optional arguments
-        Smooth().inputs_help()
-
-
-        Examples
-        --------
-        
-        """
 
     def inputs_help(self):
         doc = """
