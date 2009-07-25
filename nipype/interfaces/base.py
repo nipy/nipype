@@ -94,7 +94,9 @@ class Bunch(object):
         return deepcopy(self.__dict__)
 
 class Interface(object):
-    '''Some notes:
+    '''Some notes: This is the template for Interface objects
+    It provide no functionality at this point, but is a reference
+    for how interfaces should interact
 
     Everything in inputs should also be a possible (explicit?) argument to
     .__init__()''' 
@@ -125,6 +127,7 @@ class Interface(object):
         raise NotImplementedError
 
 
+
 class CommandLine(Interface):
     """Encapsulate a command-line function along with the arguments and options.
 
@@ -138,7 +141,9 @@ class CommandLine(Interface):
     ----------
     args : string
         A string representing the command and it's arguments.
-
+    inputs : mapping
+        
+        
     Attributes
     ----------
     args : tuple
@@ -161,9 +166,13 @@ class CommandLine(Interface):
     >>> lscmd = CommandLine('ls', '-l', '-t')
     # Or
     >>> lscmd = CommandLine('ls -l -t')
+    # Or
+    >>> lscmd = CommandLine(args=['ls','-l'])
 
-    # One way to parse your output is to split on the newline '\n' character:
-    >>>  output.output['out'].splitlines()
+    # One way to view your stdout is to print
+    >>> print output.stdout
+    >>> output.returncode
+    >>> print output.stderr
 
     Notes
     -----
@@ -192,6 +201,7 @@ class CommandLine(Interface):
         self._compile_command()
         returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
         outputs = None
+                
         return Bunch(returncode=returncode,
                      stdout=out,
                      stderr=err,
