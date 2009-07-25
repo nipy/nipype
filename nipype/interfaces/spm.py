@@ -403,5 +403,210 @@ class Realign(CommandLine):
         else:
             return make_job('spatial','realign',tmp)
 
+
+class Coregister(CommandLine):
+    
+    @property
+    def cmd(self):
+        return 'spm_coreg'
+    
+    def __init__(self, **inputs):
+        """use spm_coreg for estimating cross-modality
+           rigid body alignment
+
+        Parameters
+        ----------
+        inputs : mapping 
+            key, value pairs that will update the Coregister.inputs attributes
+            see self.inputs_help() for a list of Coregister.inputs attributes
+           
+        Attributes
+        ----------
+        inputs : Bunch
+            a (dictionary-like) bunch of options that can be passed to 
+            spm_coreg via a job structure
+        cmdline : string
+            string used to call matlab/spm via CommandLine interface
         
+        
+
+        Options
+        -------
+
+        To see optional arguments
+        Coregister().inputs_help()
+
+
+        Examples
+        --------
+        
+        """
+        
+        
+    def inputs_help(self):
+        doc = """
+            Mandatory Parameters
+            -------------------- 
+            target : string
+                filename of nifti image to coregister to
+            source : string
+                filename of nifti image to coregister to the reference
+
+            Optional Parameters
+            -------------------
+            (all default to None and are unset)
+
+            infile : list
+                list of filenames to apply the estimated rigid body
+                transform from source to target 
+            write : bool
+                if True updates headers and generates resliced files
+                prepended with  'r' if False just updates header files
+                (default == True, will reslice) 
+            cost_function: string
+                maximise   or   minimise   some   objective
+                function. For inter-modal    registration,    use
+                Mutual   Information (mi), Normalised Mutual
+                Information (nmi), or  Entropy  Correlation
+                Coefficient (ecc). For within modality, you could also
+                use Normalised Cross Correlation (ncc).
+                (spm default = mi)
+            separation : float
+                separation in mm used to sample images
+                (spm default = 4.0)
+            tolerance: list of 12 floats
+                The   accuracy  for  each  parameter.  Iterations
+                stop  when differences  between  successive  estimates
+                are less than the required tolerance for each of the
+                12 parameters.
+            fwhm : float
+                full width half maximum gaussian kernel 
+                used to smoth images before coregistering
+                (spm default = 5.0)
+            write_interp: int
+                degree of b-spline used for interpolation when
+                writing resliced images (0 - Nearest neighbor, 1 - 
+                Trilinear, 2-7 - degree of b-spline)
+                (spm default = 0 - Nearest Neighbor)
+            write_wrap : list
+                Check if interpolation should wrap in [x,y,z]
+                (spm default [0,0,0])
+            write_mask: bool
+                if True, mask output image
+                if False, do not mask
+                (spm default = False)
+            flags : USE AT OWN RISK
+                #eg:'flags':{'eoptions':{'suboption':value}}
+                        
+            """
+        print doc
+
+    def _populate_inputs(self):
+        self.inputs = Bunch(target=None,
+                            source=None,
+                            infile=None,
+                            write=True,
+                            cost_function=None,
+                            separation=None,
+                            tolerance=None,
+                            fwhm=None,
+                            write_interp=None,
+                            write_wrap=None,
+                            write_mask=None,
+                            flags=None)
+        
+    def _parseinputs(self):
+        """validate spm coregister options
+        if set to None ignore
+        """
+        out_inputs = []
+        inputs = {}
+        einputs = {'eoptions':{},'roptions':{}}
+
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt in inputs:
+            if opt is 'target':
+                continue
+            if opt is 'source':
+                continue
+            if opt is 'infile':
+                continue
+            if opt is 'write':
+                continue
+            if opt is 'cost_function':
+                einputs['eoptions'].update({'cost_fun': inputs[opt]})
+                continue
+            if opt is 'separation':
+                einputs['eoptions'].update({'sep': float(inputs[opt])})
+                continue
+            if opt is 'tolerance':
+                einputs['eoptions'].update({'tol': inputs[opt]})
+                continue
+            if opt is 'fwhm':
+                einputs['eoptions'].update({'fwhm': float(inputs[opt])})
+                continue
+            if opt is 'write_interp':
+                einputs['roptions'].update({'interp': inputs[opt]})
+                continue
+            if opt is 'write_wrap':
+                if not len(inputs[opt]) == 3:
+                    raise ValueError('write_wrap must have 3 elements')
+                einputs['roptions'].update({'wrap': inputs[opt]})
+                continue
+            if opt is 'write_mask':
+                einputs['roptions'].update({'mask': int(inputs[opt])})
+                continue
+            if opt is 'flags':
+                einputs.update(inputs[opt])
+            print 'option %s not supported'%(opt)
+        return einputs
+
+    def run(self, mfile=True):
+        
+        job = self._compile_command(mfile)
+
+        if mfile:
+            out, cmdline = mlab.run_matlab_script(job, 
+                                                  script_name='pyscript_spmcoreg')
+        else:
+            out = run_jobdef(job)
+            cmdline = ''
+            
+        outputs = Bunch(outfiles = fnames_prefix(self.inputs.infile,'r'))
+        output = Bunch(returncode=returncode,
+                       stdout=out,
+                       stderr=err,
+                       outputs=outputs,
+                       interface=self.copy())
+        return output
+        
+        
+    def _compile_command(self,mfile=True):
+        """validates spm options and generates job structure
+        if mfile is True uses matlab .m file
+        else generates a job structure and saves in .mat
+        """
+        if self.inputs.write:
+            jobtype = 'estwrite'
+        else:
+            jobtype = 'estimate'
+        valid_inputs = self._parseinputs()
+        if type(self.inputs.infile) == type([]):
+            sess_scans = scans_for_fnames(self.inputs.infile)
+        else:
+            sess_scans = scans_for_fname(self.inputs.infile)
+
+        
+        # create job structure form valid options and data
+        tmp = [{'%s'%(jobtype):{'ref':self.inputs.target,
+                                'source':self.inputs.source,
+                                'other':sess_scans,
+                                'eoptions':valid_inputs['eoptions'],
+                                'roptions':valid_inputs['roptions']
+                                }}]
+        if mfile:
+            return make_mfile('spatial','coreg',tmp)
+        else:
+            return make_job('spatial','coreg',tmp)
+
         
