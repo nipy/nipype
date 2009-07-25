@@ -610,3 +610,236 @@ class Coregister(CommandLine):
             return make_job('spatial','coreg',tmp)
 
         
+class Normalize(CommandLine):
+    
+    @property
+    def cmd(self):
+        return 'spm_normalise'
+    
+    def __init__(self, **inputs):
+        """use spm_normalise for estimating cross-modality
+           rigid body alignment
+
+        Parameters
+        ----------
+        inputs : mapping 
+            key, value pairs that will update the Normalize.inputs attributes
+            see self.inputs_help() for a list of Normalize.inputs attributes
+           
+        Attributes
+        ----------
+        inputs : Bunch
+            a (dictionary-like) bunch of options that can be passed to 
+            spm_normalise via a job structure
+        cmdline : string
+            string used to call matlab/spm via CommandLine interface
+        
+        
+
+        Options
+        -------
+
+        To see optional arguments
+        Normalize().inputs_help()
+
+
+        Examples
+        --------
+        
+        """
+
+    def inputs_help(self):
+        doc = """
+            Mandatory Parameters
+            --------------------
+            template : string
+                filename of nifti image to normalize to
+            source : string
+                filename of nifti image to normalize
+
+            Optional Parameters
+            -------------------
+            (all default to None and are unset)
+
+            infile : list
+                list of filenames to apply the estimated normalization
+            write : bool
+                if True updates headers and generates resliced files
+                prepended with  'r' if False just updates header files
+                (default == True, will reslice)
+            source_weight : string
+                name of weighting image for source
+            template_weight : string
+                name of weighting image for template
+            source_image_smoothing: float
+            template_image_smoothing: float
+            affine_regularization_type: string
+                ICBM space template (mni), average sized template
+                (size), no regularization (none)
+            DCT_period_cutoff: int
+                Cutoff  of  DCT  bases. Only DCT bases of periods
+                longer than cutoff  are  used to describe the warps. 
+                spm default = 25
+            nonlinear_iterations: int
+                Number of iterations of nonlinear warping
+                spm default = 16
+            nonlinear_regularization: float
+                min = 0  max = 1
+                spm default = 1
+            write_preserve: int
+                Preserve  Concentrations (0): Spatially normalised images
+                are not "modulated".  The  warped  images preserve the
+                intensities of the original images. Preserve  Total (1):
+                Spatially normalised images are "modulated" in  order
+                to  preserve  the  total  amount  of signal in the
+                images.   Areas   that   are   expanded  during
+                warping  are correspondingly reduced in intensity.
+                spm default = 0 
+            write_bounding_box: 6-element list
+            write_voxel_sizes: 3-element list
+            write_interp: int
+                degree of b-spline used for interpolation when
+                writing resliced images (0 - Nearest neighbor, 1 - 
+                Trilinear, 2-7 - degree of b-spline)
+                (spm default = 0 - Nearest Neighbor)
+            write_wrap : list
+                Check if interpolation should wrap in [x,y,z]
+                (spm default [0,0,0])
+            flags : USE AT OWN RISK
+                #eg:'flags':{'eoptions':{'suboption':value}}
+            """
+        print doc
+
+    def _populate_inputs(self):
+        self.inputs = Bunch(template=None,
+                            source=None,
+                            infile=None,
+                            write=True,
+                            source_weight=None,
+                            template_weight=None,
+                            source_image_smoothing=None,
+                            template_image_smoothing=None,
+                            affine_regularization_type=None,
+                            DCT_period_cutoff=None,
+                            nonlinear_iterations=None,
+                            nonlinear_regularization=None,
+                            write_preserve=None,
+                            write_bounding_box=None,
+                            write_voxel_sizes=None,
+                            write_interp=None,
+                            write_wrap=None,
+                            flags=None)
+        
+    def _parseinputs(self):
+        """validate spm normalize options
+        if set to None ignore
+        """
+        out_inputs = []
+        inputs = {}
+        einputs = {'data':{},'eoptions':{},'roptions':{}}
+
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt in inputs:
+            if opt is 'template':
+                continue
+            if opt is 'source':
+                continue
+            if opt is 'infile':
+                continue
+            if opt is 'write':
+                continue
+            if opt is 'source_weight':
+                einputs['subj'].update({'wtsrc': inputs[opt]})
+                continue
+            if opt is 'template_weight':
+                einputs['eoptions'].update({'weight': inputs[opt]})
+                continue
+            if opt is 'source_image_smoothing':
+                einputs['eoptions'].update({'smosrc': float(inputs[opt])})
+                continue
+            if opt is 'template_image_smoothing':
+                einputs['eoptions'].update({'smoref': float(inputs[opt])})
+                continue
+            if opt is 'affine_regularization_type':
+                einputs['eoptions'].update({'regtype': inputs[opt]})
+                continue
+            if opt is 'DCT_period_cutoff':
+                einputs['eoptions'].update({'cutoff': inputs[opt]})
+                continue
+            if opt is 'nonlinear_iterations':
+                einputs['eoptions'].update({'nits': inputs[opt]})
+                continue
+            if opt is 'nonlinear_regularization':
+                einputs['eoptions'].update({'reg': float(inputs[opt])})
+                continue
+            if opt is 'write_preserve':
+                einputs['roptions'].update({'preserve': inputs[opt]})
+                continue
+            if opt is 'write_bounding_box':
+                einputs['roptions'].update({'bb': inputs[opt]})
+                continue
+            if opt is 'write_voxel_sizes':
+                einputs['roptions'].update({'vox': inputs[opt]})
+                continue
+            if opt is 'write_interp':
+                einputs['roptions'].update({'interp': inputs[opt]})
+                continue
+            if opt is 'write_wrap':
+                if not len(inputs[opt]) == 3:
+                    raise ValueError('write_wrap must have 3 elements')
+                einputs['roptions'].update({'wrap': inputs[opt]})
+                continue
+            if opt is 'flags':
+                einputs.update(inputs[opt])
+            print 'option %s not supported'%(opt)
+        return einputs
+
+    def run(self, mfile=True):
+        
+        job = self._compile_command(mfile)
+
+        if mfile:
+            out, cmdline = mlab.run_matlab_script(job, 
+                                                  script_name='pyscript_spmnormalize')
+        else:
+            out = run_jobdef(job)
+            cmdline = ''
+            
+        outputs = Bunch(outfiles = fnames_prefix(self.inputs.infile,'r'))
+        output = Bunch(returncode=returncode,
+                       stdout=out,
+                       stderr=err,
+                       outputs=outputs,
+                       interface=self.copy())
+        return output
+        
+        
+    def _compile_command(self,mfile=True):
+        """validates spm options and generates job structure
+        if mfile is True uses matlab .m file
+        else generates a job structure and saves in .mat
+        """
+        if self.inputs.write:
+            jobtype = 'estwrite'
+        else:
+            jobtype = 'est'
+        valid_inputs = self._parseinputs()
+        if type(self.inputs.infile) == type([]):
+            sess_scans = scans_for_fnames(self.inputs.infile)
+        else:
+            sess_scans = scans_for_fname(self.inputs.infile)
+
+        
+        # create job structure form valid options and data
+        tmp = [{'%s'%(jobtype):{'ref':self.inputs.target,
+                                'source':self.inputs.source,
+                                'other':sess_scans,
+                                'eoptions':valid_inputs['eoptions'],
+                                'roptions':valid_inputs['roptions']
+                                }}]
+        if mfile:
+            return make_mfile('spatial','normalize',tmp)
+        else:
+            return make_job('spatial','normalize',tmp)
+
+        
