@@ -32,7 +32,14 @@ if isfield(conf,'values'),
 end
 if isfield(conf,'val'),
     for i0=1:numel(conf.val),
-        sub_parse_config(conf.val{i0},level+1)
+        if isstruct(conf.val{i0}),
+            sub_parse_config(conf.val{i0},level+1)
+        else
+            if ischar(conf.val{i0})
+                fprintf('|%s-[default:%s]\n',char(repmat(' |',1,level)),conf.val{i0});
+            else
+                fprintf('|%s-[default:%s]\n',char(repmat(' |',1,level)),num2str(conf.val{i0}));
+            end
+        end
     end
-    
 end
