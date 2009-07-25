@@ -558,6 +558,7 @@ class Coregister(CommandLine):
                 continue
             if opt is 'flags':
                 einputs.update(inputs[opt])
+                continue
             print 'option %s not supported'%(opt)
         return einputs
 
@@ -617,8 +618,7 @@ class Normalize(CommandLine):
         return 'spm_normalise'
     
     def __init__(self, **inputs):
-        """use spm_normalise for estimating cross-modality
-           rigid body alignment
+        """use spm_normalise for warping an image to a template
 
         Parameters
         ----------
@@ -736,13 +736,15 @@ class Normalize(CommandLine):
         """
         out_inputs = []
         inputs = {}
-        einputs = {'data':{},'eoptions':{},'roptions':{}}
+        einputs = {'subj':{},'eoptions':{},'roptions':{}}
 
         [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
         for opt in inputs:
             if opt is 'template':
+                einputs['eoptions'].update({'template': inputs[opt]})
                 continue
             if opt is 'source':
+                einputs['subj'].update({'source': inputs[opt]})
                 continue
             if opt is 'infile':
                 continue
@@ -791,6 +793,7 @@ class Normalize(CommandLine):
                 continue
             if opt is 'flags':
                 einputs.update(inputs[opt])
+                continue
             print 'option %s not supported'%(opt)
         return einputs
 
@@ -829,17 +832,142 @@ class Normalize(CommandLine):
         else:
             sess_scans = scans_for_fname(self.inputs.infile)
 
+        valid_inputs['subj']['resample'] = sess_scans
         
         # create job structure form valid options and data
-        tmp = [{'%s'%(jobtype):{'ref':self.inputs.target,
-                                'source':self.inputs.source,
-                                'other':sess_scans,
+        tmp = [{'%s'%(jobtype):{'subj':valid_inputs['subj'],
                                 'eoptions':valid_inputs['eoptions'],
                                 'roptions':valid_inputs['roptions']
                                 }}]
         if mfile:
-            return make_mfile('spatial','normalize',tmp)
+            return make_mfile('spatial','normalise',tmp)
         else:
-            return make_job('spatial','normalize',tmp)
+            return make_job('spatial','normalise',tmp)
+
+class Smooth(CommandLine):
+    
+    @property
+    def cmd(self):
+        return 'spm_smooth'
+    
+    def __init__(self, **inputs):
+        """use spm_smooth for 3D Gaussian smoothing of image volumes.
+
+        Parameters
+        ----------
+        inputs : mapping 
+            key, value pairs that will update the Smooth.inputs attributes
+            see self.inputs_help() for a list of Smooth.inputs attributes
+           
+        Attributes
+        ----------
+        inputs : Bunch
+            a (dictionary-like) bunch of options that can be passed to 
+            spm_smooth via a job structure
+        cmdline : string
+            string used to call matlab/spm via CommandLine interface
+        
+        
+
+        Options
+        -------
+
+        To see optional arguments
+        Smooth().inputs_help()
+
+
+        Examples
+        --------
+        
+        """
+
+    def inputs_help(self):
+        doc = """
+            Mandatory Parameters
+            --------------------
+            infile : list
+                list of filenames to apply smoothing
+
+            Optional Parameters
+            -------------------
+            (all default to None and are unset)
+
+            fwhm : 3-list
+                list of fwhm for each dimension
+            data_type : int
+                spm default = 0
+            flags : USE AT OWN RISK
+                #eg:'flags':{'eoptions':{'suboption':value}}
+            """
+        print doc
+
+    def _populate_inputs(self):
+        self.inputs = Bunch(infile=None,
+                            fwhm=None,
+                            flags=None)
+        
+    def _parseinputs(self):
+        """validate spm normalize options
+        if set to None ignore
+        """
+        out_inputs = []
+        inputs = {}
+        einputs = {'fwhm':[],'dtype':0}
+
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt in inputs:
+            if opt is 'infile':
+                continue
+            if opt is 'fwhm':
+                einputs['fwhm'] = inputs[opt]
+                continue
+            if opt is 'data_type':
+                einputs['dtype'] = inputs[opt]
+                continue
+            if opt is 'flags':
+                einputs.update(inputs[opt])
+                continue
+            print 'option %s not supported'%(opt)
+        return einputs
+
+    def run(self, mfile=True):
+        
+        job = self._compile_command(mfile)
+
+        if mfile:
+            out, cmdline = mlab.run_matlab_script(job, 
+                                                  script_name='pyscript_spmnormalize')
+        else:
+            out = run_jobdef(job)
+            cmdline = ''
+            
+        outputs = Bunch(outfiles = fnames_prefix(self.inputs.infile,'r'))
+        output = Bunch(returncode=returncode,
+                       stdout=out,
+                       stderr=err,
+                       outputs=outputs,
+                       interface=self.copy())
+        return output
+        
+        
+    def _compile_command(self,mfile=True):
+        """validates spm options and generates job structure
+        if mfile is True uses matlab .m file
+        else generates a job structure and saves in .mat
+        """
+        valid_inputs = self._parseinputs()
+        if type(self.inputs.infile) == type([]):
+            sess_scans = scans_for_fnames(self.inputs.infile)
+        else:
+            sess_scans = scans_for_fname(self.inputs.infile)
+
+        # create job structure form valid options and data
+        tmp = [{'data':sess_scans,
+                'fwhm':valid_inputs['fwhm'],
+                }]
+        if mfile:
+            return make_mfile('spatial','smooth',tmp)
+        else:
+            return make_job('spatial','smooth',tmp)
 
         
