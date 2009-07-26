@@ -103,7 +103,8 @@ class Interface(object):
     def __init__(self, *args, **inputs):
         self._populate_inputs()
         self.inputs.update(**inputs)
-        self.inputs.args = args
+        if args:
+            self.inputs.args = args
         self.cmdline = ''
 
     def run(self):
@@ -126,7 +127,13 @@ class Interface(object):
     def _populate_inputs(self):
         raise NotImplementedError
 
-
+class InterfaceResult(object):
+    '''Describe the results of .run()-ing a particular Interface'''
+    def __init__(self, interface, provenance, outputs):
+        # I really don't like the name provenance, by the way
+        self.interface = interface
+        self.provenance = provenance
+        self.outputs = outputs
 
 class CommandLine(Interface):
     """Encapsulate a command-line function along with the arguments and options.
@@ -200,13 +207,11 @@ class CommandLine(Interface):
         # This is expected to populate `command` for _runner to work
         self._compile_command()
         returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
-        outputs = None
+        provenance = Bunch(returncode=returncode,
+                     messages=out,
+                     errmessages=err)
                 
-        return Bunch(returncode=returncode,
-                     stdout=out,
-                     stderr=err,
-                     outputs=outputs,
-                     interface=self.copy())
+        return InterfaceResults(self.copy(), provenance, outputs=None) 
         
     def _populate_inputs(self):
         self.inputs = Bunch(args=None)
