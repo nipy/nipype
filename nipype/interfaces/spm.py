@@ -960,4 +960,405 @@ class Smooth(CommandLine):
         else:
             return make_job('spatial','smooth',tmp)
 
+class Level1Design(CommandLine):
+    """Generate an SPM design matrix
+
+    Parameters
+    ----------
+    inputs : mapping 
+    key, value pairs that will update the Level1Design.inputs attributes
+    see self.inputs_help() for a list of Level1Design.inputs attributes
+    
+    Attributes
+    ----------
+    inputs : Bunch
+    a (dictionary-like) bunch of options that can be passed to 
+    spm_smooth via a job structure
+    cmdline : string
+    string used to call matlab/spm via CommandLine interface
+    
+    
+
+    Options
+    -------
+
+    To see optional arguments
+    Level1Design().inputs_help()
+
+
+    Examples
+    --------
+    
+    """
+    
+    @property
+    def cmd(self):
+        return 'spm_fmri_design'
+
+    def inputs_help(self):
+        doc = """
+            Mandatory Parameters
+            --------------------
+            dir : string
+                directory in which to store the SPM.mat file
+            timing_units : string
+                units for specification of onsets or blocks
+                (scans or secs) 
+            interscan_interval : float (in secs)
+                Interscan  interval,  TR, (specified in seconds). This
+                is the time  between  acquiring  a  plane of one
+                volume and the same plane  in  the  next  volume.  It
+                is  assumed to be constant throughout.
+
+            Optional Parameters
+            -------------------
+            (all default to None and are unset)
+            microtime_resolution : float (in secs)
+                The  microtime resolution, t, is the number of
+                time-bins per scan used when building regressors.
+                spm default = 16
+            microtime_onset : float (in secs)
+                The  microtime  onset, is the first time-bin at which
+                the regressors  are  resampled to coincide with data
+                acquisition. If  onset  =  1  then the regressors will be
+                appropriate for the first   slice.   If   you  want
+                to  temporally  realign  the regressors  so  that they
+                match responses in the middle slice then  make  onset  =
+                t/2  (assuming  there  is a negligible gap between
+                volume acquisitions).
+                Do not change the default settings for the above two
+                parameters unless you have a long TR.
+            session_info : list of dicts
+                Stores session specific information
+
+                Session parameters
+                ------------------
+                nscan : int
+                    Number of scans in a session
+                scans : list of filenames
+                    A single 4D nifti file or a list of 3D nifti files
+                hpf : float
+                    High pass filter cutoff
+                    SPM default = 128 secs
+                condition_info : mat filename or list of dicts 
+                    Stores condition specific information
+
+                    MAT file contents
+                    -----------------
+                    If  you  have multiple conditions then entering the details a
+                    condition  at  a time is very inefficient. This option can be
+                    used  to  load  all  the  required information in one go. You
+                    will  first  need  to  create  a  *.mat  file  containing the
+                    relevant information.
+         
+                    This  *.mat file must include the following cell arrays (each
+                    1  x  n):  names,  onsets and durations. eg. names=cell(1,5),
+                    onsets=cell(1,5),          durations=cell(1,5),          then
+                    names{2}='SSent-DSpeak',     onsets{2}=[3    5    19    222],
+                    durations{2}=[0  0  0 0], contain the required details of the
+                    second  condition. These cell arrays may be made available by
+                    your  stimulus  delivery  program,  eg.  COGENT. The duration
+                    vectors  can  contain  a  single  entry  if the durations are
+                    identical for all events.
+                                                                                                            
+                    Time  and  Parametric  effects can also be included. For time
+                    modulation  include  a  cell  array  (1  x n) called tmod. It
+                    should  have  a  have  a  single  number in each cell. Unused
+                    cells  may  contain  either  a 0 or be left empty. The number
+                    specifies  the  order  of  time  modulation  from 0 = No Time
+                    Modulation  to  6  = 6th Order Time Modulation. eg. tmod{3} =
+                    1, modulates the 3rd condition by a linear time effect.
+                                                                                                            
+                    For  parametric  modulation  include a structure array, which
+                    is  up  to 1 x n in size, called pmod. n must be less than or
+                    equal  to  the  number of cells in the names/onsets/durations
+                    cell  arrays.  The structure array pmod must have the fields:
+                    name,  param and poly. Each of these fields is in turn a cell
+                    array  to  allow  the  inclusion  of  one  or more parametric
+                    effects  per  column  of the design. The field name must be a
+                    cell  array  containing  strings.  The  field param is a cell
+                    array  containing  a  vector  of  parameters.  Remember  each
+                    parameter  must  be  the  same  length  as  its corresponding
+                    onsets   vector.   The  field  poly  is  a  cell  array  (for
+                    consistency)  with  each  cell  containing  a  single  number
+                    specifying the order of the polynomial expansion from 1 to 6.
+                                                                                                            
+                    Note  that each condition is assigned its corresponding entry
+                    in  the  structure  array  (condition 1 parametric modulators
+                    are  in  pmod(1),  condition  2  parametric modulators are in
+                    pmod(2),   etc.   Within   a  condition  multiple  parametric
+                    modulators  are  accessed via each fields cell arrays. So for
+                    condition  1,  parametric  modulator  1  would  be defined in
+                    pmod(1).name{1},  pmod(1).param{1},  and  pmod(1).poly{1}.  A
+                    second  parametric modulator for condition 1 would be defined
+                    as  pmod(1).name{2}, pmod(1).param{2} and pmod(1).poly{2}. If
+                    there  was  also a parametric modulator for condition 2, then
+                    remember  the  first  modulator for that condition is in cell
+                    array     1:     pmod(2).name{1},    pmod(2).param{1},    and
+                    pmod(2).poly{1}.   If   some,  but  not  all  conditions  are
+                    parametrically  modulated,  then the non-modulated indices in
+                    the  pmod  structure  can  be  left  blank.  For  example, if
+                    conditions  1  and  3 but not condition 2 are modulated, then
+                    specify  pmod(1)  and pmod(3). Similarly, if conditions 1 and
+                    2  are  modulated  but  there are 3 conditions overall, it is
+                    only necessary for pmod to be a 1 x 2 structure array.
+                                                                                                            
+                    EXAMPLE:
+                    Make an empty pmod structure: 
+                      pmod = struct('name',{''},'param',{},'poly',{});
+                    Specify one parametric regressor for the first condition: 
+                      pmod(1).name{1}  = 'regressor1';
+                      pmod(1).param{1} = [1 2 4 5 6];
+                      pmod(1).poly{1}  = 1;
+                    Specify 2 parametric regressors for the second condition: 
+                      pmod(2).name{1}  = 'regressor2-1';
+                      pmod(2).param{1} = [1 3 5 7]; 
+                      pmod(2).poly{1}  = 1;
+                      pmod(2).name{2}  = 'regressor2-2';
+                      pmod(2).param{2} = [2 4 6 8 10];
+                      pmod(2).poly{2}  = 1;
+                                                                                                            
+                    The   parametric   modulator  should  be  mean  corrected  if
+                    appropriate.  Unused structure entries should have all fields
+                    left empty.
+
+                    Condition parameters
+                    --------------------
+                    name : string
+                        Name of condition
+                    onset : list of numbers
+                        Onset times of each event/block
+                    duration: float or list
+                        Specify   the   event   durations.  Epoch  and
+                        event-related responses  are  modeled  in exactly
+                        the  same  way  but  by specifying their
+                        different  durations. Events are specified with  a
+                        duration  of 0. If you enter a single number for
+                        the durations  it will be assumed that all trials
+                        conform to this duration.  If you have multiple
+                        different durations, then the number must match
+                        the number of onset times.
+                    tmod : int
+                        This  option  allows  for  the
+                        characterisation of linear or nonlinear  time 
+                        effects.  For  example, 1st order modulation would
+                        model  the  stick functions and a linear change of
+                        the stick  function  heights  over  time. Higher
+                        order modulation will   introduce  further
+                        columns  that  contain  the  stick functions
+                        scaled by time squared, time cubed etc.
+                    pmod : list of dicts
+                        Model  interractions  with  user  specified
+                        parameters. This allows  nonlinear  effects
+                        relating to some other measure to be modelled in
+                        the design matrix.
+
+                        Parametric modulator parameters
+                        -------------------------------
+                        name : string
+                            Name of the parametric modulator
+                        param : list
+                            Numerical values of the parameter. One per
+                            each event of the condition.
+                        poly : int
+                            For  example,  1st  order  modulation
+                            would  model the stick functions  and  a
+                            linear change of the stick function heights
+                            over   different   values  of  the  parameter.
+                            Higher  order modulation  will  introduce
+                            further columns that contain the stick
+                            functions scaled by parameter squared, cubed
+                            etc.
+
+                regressor_info : mat/txt filename or list of dicts 
+                    Stores regressor specific information
+
+                    MAT/TXT file contents
+                    ---------------------
+                    You  will  first  need  to  create  a *.mat file
+                    containing a matrix  R  or  a  *.txt  file
+                    containing the regressors. Each column  of  R
+                    will  contain  a different regressor. When SPM
+                    creates  the  design  matrix the regressors will
+                    be named R1, R2, R3, ..etc.
+ 
+                    Regressor parameters
+                    --------------------
+                    name : string
+                        Name of regressor
+                    val : list 
+                        List of values for the regressor
+
+            factor_info : list of dicts
+                Stores factor specific information
+
+                Factor parameters
+                -----------------
+                name : string
+                    Name of factor (use condition name)
+                levels: int
+                    Number of levels for the factor
+
+            bases : dict {'name':{'basesparam1':val,...}}
+                name : string
+                    Name of basis function (hrf, fourier, fourier_han,
+                    gamma, fir)
+
+                Parameters
+                ----------
+                hrf :
+                    derivs : 2-element list
+                        Model  HRF  Derivatives. The canonical HRF combined with time
+                        and  dispersion derivatives comprise an 'informed' basis set,
+                        as  the  shape  of  the  canonical  response  conforms to the
+                        hemodynamic   response   that   is   commonly  observed.  The
+                        incorporation  of  the derivate terms allow for variations in
+                        subject-to-subject  and  voxel-to-voxel  responses.  The time
+                        derivative  allows the peak response to vary by plus or minus
+                        a  second  and  the dispersion derivative allows the width of
+                        the  response  to  vary.  The  informed basis set requires an
+                        SPM{F}  for  inference.  T-contrasts  over just the canonical
+                        are  perfectly  valid  but  assume constant delay/dispersion.
+                        The  informed  basis  set  compares  favourably  with eg. FIR
+                        bases on many data sets. No derivatives: [0,0],
+                        Time derivatives : [1,0], Time and Dispersion
+                        derivatives: [1,1]
+                fourier, fourier_han, gamma, fir:
+                    length : int
+                        Post-stimulus window length (in seconds)
+                    order : int
+                        Number of basis functions
+            volterra_expansion_order : int
+                Generalized convolution of inputs (U) with basis set
+                (bf). Do not model interactions (1) or model
+                interactions (2)
+                SPM default = 1
+            global_intensity_normalization : string
+                Global intensity normalization (scaling or none)
+                SPM default  = none
+            mask_image : filename
+                Specify  an  image  for  explicitly  masking  the
+                analysis. 
+            model_serial_correlations : string
+                Serial  correlations  in  fMRI  time  series  due  to
+                aliased biorhythms  and unmodelled neuronal activity
+                can be accounted for  using  an  autoregressive  AR(1)
+                model during Classical (ReML) parameter estimation.
+                AR(1) or none
+                SPM default = AR(1) 
+            flags : USE AT OWN RISK
+                #eg:'flags':{'eoptions':{'suboption':value}}
+            """
+        print doc
+
+    def _populate_inputs(self):
+        self.inputs = Bunch(dir=None,
+                            timing_units=None,
+                            interscan_interval=None,
+                            microtime_resolution=None,
+                            microtime_onset=None,
+                            session_info=None,
+                            factor_info=None,
+                            bases=None,
+                            volterra_expansion_order=None,
+                            global_intensity_normalization=None,
+                            mask_image=None,
+                            model_serial_correlations=None,
+                            flags=None)
+        
+    def _parseinputs(self):
+        """validate spm normalize options
+        if set to None ignore
+        """
+        out_inputs = []
+        inputs = {}
+        einputs = {'dir':'','timing':{},'sess':[],'fact':{},'bases':{},
+                   'volt':{},'global':{},'mask':{},'cvi':''}
+
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt in inputs:
+            if opt is 'dir':
+                einputs['dir'] = inputs[opt]
+                continue
+            if opt is 'timing_units':
+                einputs['timing'].update(units=inputs[opt])
+                continue
+            if opt is 'interscan_interval':
+                einputs['timing'].update(RT=inputs[opt])
+                continue
+            if opt is 'microtime_resolution':
+                einputs['timing'].update(fmri_t=inputs[opt])
+                continue
+            if opt is 'microtime_onset':
+                einputs['timing'].update(fmri_t0=inputs[opt])
+                continue
+            if opt is 'session_info':
+                einputs['sess'] = inputs[opt]
+                continue
+            if opt is 'factor_info':
+                einputs['fact'] = inputs[opt]
+                continue
+            if opt is 'bases':
+                einputs['bases'] = inputs[opt]
+                continue
+            if opt is 'volterra_expansion_order':
+                einputs['volt'] = inputs[opt]
+                continue
+            if opt is 'global_intensity_normalization':
+                einputs['global'] = inputs[opt]
+                continue
+            if opt is 'mask_image':
+                einputs['mask'] = inputs[opt]
+                continue
+            if opt is 'model_serial_correlations':
+                einputs['cvi'] = inputs[opt]
+                continue
+            if opt is 'flags':
+                einputs.update(inputs[opt])
+                continue
+            print 'option %s not supported'%(opt)
+        return einputs
+
+    def run(self, mfile=True):
+        
+        job = self._compile_command(mfile)
+
+        if mfile:
+            out, cmdline = mlab.run_matlab_script(job, 
+                                                  script_name='pyscript_spmnormalize')
+        else:
+            out = run_jobdef(job)
+            cmdline = ''
+            
+        outputs = Bunch(outfiles = fnames_prefix(self.inputs.infile,'r'))
+        output = Bunch(returncode=returncode,
+                       stdout=out,
+                       stderr=err,
+                       outputs=outputs,
+                       interface=self.copy())
+        return output
+        
+        
+    def _compile_command(self,mfile=True):
+        """validates spm options and generates job structure
+        if mfile is True uses matlab .m file
+        else generates a job structure and saves in .mat
+        """
+        valid_inputs = self._parseinputs()
+
+        # create job structure form valid options and data
+        tmp = [{'dir':valid_inputs['dir'],
+                'timing':valid_inputs['timing'],
+                'sess':valid_inputs['sess'],
+                'fact':valid_inputs['factors'],
+                'bases':valid_inputs['bases'],
+                'volt':valid_inputs['volt'],
+                'global':valid_inputs['global'],
+                'mask':valid_inputs['mask'],
+                'cvi':valid_inputs['cvi']
+                }]
+        if mfile:
+            return make_mfile('stats','fmri_spec',tmp)
+        else:
+            return make_job('stats','fmri_spec',tmp)
         
