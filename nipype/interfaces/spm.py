@@ -1362,3 +1362,143 @@ class Level1Design(CommandLine):
         else:
             return make_job('stats','fmri_spec',tmp)
         
+
+class EstimateModel(CommandLine):
+    """use spm_spm to estimate the parameters of a model
+
+    Parameters
+    ----------
+    inputs : mapping 
+    key, value pairs that will update the EstimateModel.inputs attributes
+    see self.inputs_help() for a list of EstimateModel.inputs attributes
+    
+    Attributes
+    ----------
+    inputs : Bunch
+    a (dictionary-like) bunch of options that can be passed to 
+    spm_spm via a job structure
+    cmdline : string
+    string used to call matlab/spm via CommandLine interface
+    
+    
+
+    Options
+    -------
+
+    To see optional arguments
+    EstimateModel().inputs_help()
+
+
+    Examples
+    --------
+    
+    """
+    
+    @property
+    def cmd(self):
+        return 'spm_spm'
+
+    def inputs_help(self):
+        doc = """
+            Mandatory Parameters
+            --------------------
+            spm_design_file : filename
+                Filename containing absolute path to SPM.mat
+            estimation_method: dict
+                There  are  three  possible  estimation  procedures  for fMRI
+                models  (1)  classical  (ReML)  estimation of first or second
+                level  models,  (2) Bayesian estimation of first level models
+                and  (3)  Bayesian  estimation of second level models. Option
+                (2)  uses  a  Variational Bayes (VB) algorithm that is new to
+                SPM5.  Option  (3)  uses  the  Empirical Bayes algorithm with
+                global shrinkage priors that was also in SPM2.
+
+                Options
+                -------
+                {'Classical': 1}
+                    Model  parameters  are  estimated  using  Restricted  Maximum
+                    Likelihood   (ReML).   This  assumes  the  error  correlation
+                    structure  is the same at each voxel.
+                {'Bayesian2': 1}
+                    Bayesian  estimation  of  2nd  level models. This option uses
+                    the  Empirical  Bayes  algorithm with global shrinkage priors
+                    that  was  previously  implemented in SPM2. Use of the global
+                    shrinkage  prior  embodies  a  prior  belief that, on average
+                    over  all  voxels,  there is no net experimental effect. Some
+                    voxels  will  respond  negatively  and some positively with a
+                    variability  determined  by  the  prior precision. This prior
+                    precision  can  be  estimated  from  the data using Empirical
+                    Bayes.
+                {'Bayesian' : dict}
+                    Model  parameters are estimated using Variational Bayes (VB).
+                    This  allows  you  to  specify  spatial priors for regression
+                    coefficients  and  regularised  voxel-wise  AR(P)  models for
+                    fMRI   noise   processes.  The  algorithm  does  not  require
+                    functional  images  to be spatially smoothed. Estimation will
+                    take  about  5 times longer than with the classical approach.
+                    This is why VB is not the default estimation option.
+                 USE IF YOU KNOW HOW TO SPECIFY PARAMETERS
+            flags : USE AT OWN RISK
+                #eg:'flags':{'eoptions':{'suboption':value}}
+            """
+        print doc
+
+    def _populate_inputs(self):
+        self.inputs = Bunch(spm_design_file=None,
+                            estimation_method=None,
+                            flags=None)
+        
+    def _parseinputs(self):
+        """validate spm normalize options
+        if set to None ignore
+        """
+        out_inputs = []
+        inputs = {}
+        einputs = {'spmmat':'','method':{}}
+
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt in inputs:
+            if opt is 'spm_design_file':
+                einputs['spmmat'] = inputs[opt]
+                continue
+            if opt is 'estimation_method':
+                einputs['method'].update(inputs[opt])
+                continue
+            if opt is 'flags':
+                einputs.update(inputs[opt])
+                continue
+            print 'option %s not supported'%(opt)
+        return einputs
+
+    def run(self, mfile=True):
+        
+        job = self._compile_command(mfile)
+
+        if mfile:
+            out, cmdline = mlab.run_matlab_script(job, 
+                                                  script_name='pyscript_spmnormalize')
+        else:
+            out = run_jobdef(job)
+            cmdline = ''
+            
+        outputs = Bunch(outfiles = fnames_prefix(self.inputs.infile,'r'))
+        output = Bunch(returncode=returncode,
+                       stdout=out,
+                       stderr=err,
+                       outputs=outputs,
+                       interface=self.copy())
+        return output
+        
+        
+    def _compile_command(self,mfile=True):
+        """validates spm options and generates job structure
+        if mfile is True uses matlab .m file
+        else generates a job structure and saves in .mat
+        """
+        valid_inputs = self._parseinputs()
+        # create job structure form valid options and data
+        tmp = [valid_inputs]
+        if mfile:
+            return make_mfile('stats','fmri_est',tmp)
+        else:
+            return make_job('stats','fmri_est',tmp)
