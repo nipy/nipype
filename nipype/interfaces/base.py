@@ -211,7 +211,7 @@ class CommandLine(Interface):
                      messages=out,
                      errmessages=err)
                 
-        return InterfaceResults(self.copy(), provenance, outputs=None) 
+        return InterfaceResult(self.copy(), provenance, outputs=None) 
         
     def _populate_inputs(self):
         self.inputs = Bunch(args=None)
