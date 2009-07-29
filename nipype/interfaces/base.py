@@ -9,6 +9,7 @@ __docformat__ = 'restructuredtext'
 
 import subprocess
 from copy import deepcopy
+from string import Template
 
 
 class OneTimeProperty(object):
@@ -55,7 +56,25 @@ def setattr_on_read(func):
     return OneTimeProperty(func)
 
 
+def load_template(name):
+    '''Load a template from the script_templates directory
 
+    Parameters
+    ----------
+      name : str
+        The name of the file to load
+
+    Returns
+    -------
+      template : string.Template
+    '''
+    full_fname = '/'.join([os.path.dirname(__file__), 'script_templates', name])
+    template_file = open(full_fname)
+    template = Template(template_file.read())
+    template_file.close()
+
+    return template
+    
 
 class Bunch(object):
     """ Provide Elegant attribute access

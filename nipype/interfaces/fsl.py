@@ -16,9 +16,9 @@ See the docstrings for the individual classes (Bet, Fast, etc...) for
 
 import os
 import subprocess
-from string import Template
 
-from nipype.interfaces.base import Bunch, CommandLine, setattr_on_read
+from nipype.interfaces.base import (Bunch, CommandLine, setattr_on_read, 
+                                    load_template)
 
 
 def fslversion():
@@ -1463,160 +1463,7 @@ class Fnirt(CommandLine):
         fid.close()
 
 
-# These should probably get read in from a separate file, but I don't know how
-# to do that safely in a module - lil' help? -DJC
 
-# Also these are still somewhat specific to my experiment, but should be so in
-# an obvious way.  Contrasts in particular need to be addressed more generally
-
-# This seems quite clunky, and Cindee will hate that '/'!
-# At a minimum, this should probably be redone with a setattr_on_read property,
-# available currently in the model_dev branch
-fsf_header_fname = os.path.dirname(__file__) + '/data/feat_template1.txt'
-fsf_header_txt = open(fsf_header_fname).read()
-fsf_header = Template(fsf_header_txt)
-
-fsf_ev_template = Template('''
-# EV title
-set fmri(evtitle$ev_num) "$ev_name"
-
-# Basic waveform shape
-# 0 : Square
-# 1 : Sinusoid
-# 2 : Custom (1 entry per volume)
-# 3 : Custom (3 column format)
-# 4 : Interaction
-# 10 : Empty (all zeros)
-set fmri(shape$ev_num) 3
-
-# Convolution
-# 0 : None
-# 1 : Gaussian
-# 2 : Gamma
-# 3 : Double-Gamma HRF
-# 4 : Gamma basis functions
-# 5 : Sine basis functions
-# 6 : FIR basis functions
-set fmri(convolve$ev_num) 2
-
-# Convolve phase
-set fmri(convolve_phase$ev_num) 0
-
-# Apply temporal filtering
-set fmri(tempfilt_yn$ev_num) 1
-
-# Add temporal derivative
-set fmri(deriv_yn$ev_num) 0
-
-# Custom EV file
-set fmri(custom$ev_num) "$base_dir/analysis/EVs/block$scan_num-$ev_name.txt"
-
-# Gamma sigma
-set fmri(gammasigma$ev_num) 3
-
-# Gamma delay
-set fmri(gammadelay$ev_num) 6
-''')
-
-fsf_ev_ortho = Template('''
-# Orthogonalise EV wrt EV
-set fmri(ortho$c0.$c1) 0
-''')
-
-contrasts_template = '''
-# Contrast & F-tests mode
-# real : control real EVs
-# orig : control original EVs
-set fmri(con_mode_old) orig
-set fmri(con_mode) orig
-
-# Display images for contrast_real 1
-set fmri(conpic_real.1) 1
-
-# Title for contrast_real 1
-set fmri(conname_real.1) "left>right"
-
-# Real contrast_real vector 1 element 1
-set fmri(con_real1.1) 1
-
-# Real contrast_real vector 1 element 2
-set fmri(con_real1.2) -1.0
-
-# Real contrast_real vector 1 element 3
-set fmri(con_real1.3) 1.0
-
-# Real contrast_real vector 1 element 4
-set fmri(con_real1.4) -1.0
-
-# Real contrast_real vector 1 element 5
-set fmri(con_real1.5) 1.0
-
-# Real contrast_real vector 1 element 6
-set fmri(con_real1.6) -1.0
-
-# Real contrast_real vector 1 element 7
-set fmri(con_real1.7) 1.0
-
-# Real contrast_real vector 1 element 8
-set fmri(con_real1.8) -1.0
-
-# Display images for contrast_orig 1
-set fmri(conpic_orig.1) 1
-
-# Title for contrast_orig 1
-set fmri(conname_orig.1) "left>right"
-
-# Real contrast_orig vector 1 element 1
-set fmri(con_orig1.1) 1
-
-# Real contrast_orig vector 1 element 2
-set fmri(con_orig1.2) -1.0
-
-# Real contrast_orig vector 1 element 3
-set fmri(con_orig1.3) 1.0
-
-# Real contrast_orig vector 1 element 4
-set fmri(con_orig1.4) -1.0
-
-# Real contrast_orig vector 1 element 5
-set fmri(con_orig1.5) 1.0
-
-# Real contrast_orig vector 1 element 6
-set fmri(con_orig1.6) -1.0
-
-# Real contrast_orig vector 1 element 7
-set fmri(con_orig1.7) 1.0
-
-# Real contrast_orig vector 1 element 8
-set fmri(con_orig1.8) -1.0
-
-# Contrast masking - use >0 instead of thresholding?
-set fmri(conmask_zerothresh_yn) 0
-
-# Do contrast masking at all?
-set fmri(conmask1_1) 0
-
-# Now options that don't appear in the GUI
-
-# Alternative example_func image (not derived from input 4D dataset)
-set fmri(alternative_example_func) ""
-
-# Alternative (to BETting) mask image
-set fmri(alternative_mask) ""
-
-# Initial structural space registration initialisation transform
-set fmri(init_initial_highres) ""
-
-# Structural space registration initialisation transform
-set fmri(init_highres) ""
-
-# Standard space registration initialisation transform
-set fmri(init_standard) ""
-
-
-# For full FEAT analysis: overwrite existing .feat output dir?
-set fmri(overwrite_yn) 1
-'''
 
 class FSFmaker:
     '''Use the template variables above to construct fsf files for feat.
@@ -1628,16 +1475,26 @@ class FSFmaker:
     FSFmaker(5, ['left', 'right', 'both'])
         
     '''
+    # These are still somewhat specific to my experiment, but should be so in an
+    # obvious way.  Contrasts in particular need to be addressed more generally.
+    # These should perhaps be redone with a setattr_on_read property, though we
+    # don't want to reload for each instance separately.
+    fsf_header = load_template('feat_fsf_header.tcl')
+    fsf_ev = load_template('feat_ev.tcl')
+    fsf_ev_ortho = load_template('feat_ev_ortho.tcl')
+    fsf_contrasts = load_template('feat_contrasts.tcl')
+
     def __init__(self, num_scans, cond_names):
         subj_dir = dirname(getcwd())
+        # This is more package general, and should happen at a higher level
         fsl_root = getenv('FSLDIR')
         for i in range(num_scans):
-            fsf_txt = fsf_header.substitute(num_evs=len(cond_names), 
-                                            base_dir=subj_dir, scan_num=i,
-                                            fsl_root=fsl_root)
+            fsf_txt = self.fsf_header.substitute(num_evs=len(cond_names), 
+                                                 base_dir=subj_dir, scan_num=i,
+                                                 fsl_root=fsl_root)
             for j, cond in enumerate(cond_names):
                 fsf_txt += self.gen_ev(i, j+1, cond, subj_dir, len(cond_names))
-            fsf_txt += contrasts_template
+            fsf_txt += self.fsf_contrasts.substitute()
 
             f = open('scan%d.fsf' % i, 'w')
             f.write(fsf_txt)
@@ -1648,11 +1505,11 @@ class FSFmaker:
         args = (cond_num, cond_name) + (cond_num,) * 6 + \
                 (scan, cond_name) + (cond_num, ) * 2
 
-        ev_txt = fsf_ev_template.substitute(ev_num=cond_num, ev_name=cond_name,
+        ev_txt = self.fsf_ev.substitute(ev_num=cond_num, ev_name=cond_name,
                                         scan_num=scan, base_dir=subj_dir)
 
         for i in range(total_conds + 1):
-            ev_txt += fsf_ev_ortho.substitute(c0=cond_num, c1=i) 
+            ev_txt += self.fsf_ev_ortho.substitute(c0=cond_num, c1=i) 
 
         return ev_txt
 
