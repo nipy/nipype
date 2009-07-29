@@ -215,6 +215,21 @@ class SkullStripNode(NodeWrapper):
         self.interface = self.interface.run()
         self.post_execute()
 
+table = {'spm': {'Realign': {'copyfiles': ['infile'], 'hash': [True]]}}
+
+node_wrapper(package,interface,overwrite=None):
+    interface = __import__('.'.join((package,interface)))
+    interface.get_modified_inputs()
+    
+
+interface=spm.Realign(),
+                copyfiles=['infile'],
+                hash=[True]):
+    if interface == spm.Realign:
+        wrapped_node = SpmRealignWrapper() # node_wrapper()
+    
+    return wrapped_node
+
 
 
         
