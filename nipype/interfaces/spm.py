@@ -363,9 +363,9 @@ class Realign(CommandLine):
         else:
             outputs = self._aggregate_outputs()
 
-        return InterfaceResult(provenance=Bunch(cmdline=self.cmdline,
-                                                returncode=returncode,
-                                                stdout=out,stderr=err),
+        return InterfaceResult(runtime=Bunch(cmdline=self.cmdline,
+                                             returncode=returncode,
+                                             stdout=out,stderr=err),
                                outputs=outputs,
                                interface=self.copy())
                 

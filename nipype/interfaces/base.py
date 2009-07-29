@@ -129,10 +129,9 @@ class Interface(object):
 
 class InterfaceResult(object):
     '''Describe the results of .run()-ing a particular Interface'''
-    def __init__(self, interface, provenance, outputs):
-        # I really don't like the name provenance, by the way
+    def __init__(self, interface, runtime, outputs):
         self.interface = interface
-        self.provenance = provenance
+        self.runtime = runtime
         self.outputs = outputs
 
 class CommandLine(Interface):
@@ -207,11 +206,11 @@ class CommandLine(Interface):
         # This is expected to populate `command` for _runner to work
         self._compile_command()
         returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
-        provenance = Bunch(returncode=returncode,
-                     messages=out,
-                     errmessages=err)
+        runtime = Bunch(returncode=returncode,
+                        messages=out,
+                        errmessages=err)
                 
-        return InterfaceResult(self.copy(), provenance, outputs=None) 
+        return InterfaceResult(self.copy(), runtime, outputs=None) 
         
     def _populate_inputs(self):
         self.inputs = Bunch(args=None)
