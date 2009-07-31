@@ -112,6 +112,9 @@ class Bunch(object):
     def dictcopy(self):
         return deepcopy(self.__dict__)
 
+    def __str__(self):
+       return self.__dict__.__str__()
+
 class Interface(object):
     '''Some notes: This is the template for Interface objects
     It provide no functionality at this point, but is a reference

@@ -5,37 +5,76 @@ import os
 import re
 import tempfile
 import numpy as np
-from nipype.interfaces.base import CommandLine
+from nipype.interfaces.base import CommandLine, InterfaceResult, Bunch
 
 
-class Matlab(object):
+class MatlabCommandLine(CommandLine):
     """Object that sets up Matlab specific tools and interfaces
 
     """
-    def __init__(self, matlab_cmd='matlab -nodesktop -nosplash'):
+    matlab_cmd = 'matlab -nodesktop -nosplash'
+    def __init__(self, matlab_cmd=None):
         """initializes interface to matlab
         (default 'matlab -nodesktop -nosplash'
         """
-        self.matlab_cmd = matlab_cmd
+        super(MatlabCommandLine,self).__init__()
+        if matlab_cmd is not None:
+            self.matlab_cmd = matlab_cmd
 
     def set_matlabcmd(self, cmd):
         """reset the base matlab command
         """
         self.matlab_cmd = cmd
+        
+    def inputs_help(self):
+        doc = """
+            Optional Parameters
+            -------------------
+            (all default to None and are unset)
 
-    def run_matlab(self,cmd,cwd='.'):
+            script_lines : string
+                matlab_script or function name or matlab code to run
+            cwd : string
+                working directory for command
+            """
+        print doc
+        
+    def _populate_inputs(self):
+        self.inputs = Bunch(script_lines='',
+                            script_name='pyscript',
+                            cwd='.')
+
+    def run(self):
         #subprocess.call('%s -r \"%s;exit\" ' % (matlab_cmd, cmd),
         #                shell=True)
-        outcmd = '%s -r \"%s;exit\" '%(self.matlab_cmd, cmd)
-        out = CommandLine(outcmd,inputs={'cwd':cwd}).run()
-        if  'PyScriptException' in out.output['err']:
-            out.returncode = 1
-        return out,outcmd
+        self._compile_command()
+        returncode, out, err = self._runner(cwd=self.inputs.get('cwd','.'))
+        if  'MatlabScriptException' in err:
+            returncode = 1
+        return InterfaceResult(runtime=Bunch(cmdline=self.cmdline,
+                                             returncode=returncode,
+                                             stdout=out,stderr=err),
+                               outputs=None,
+                               interface=self.copy())
 
-    def gen_matlab_command(self,script_lines, script_name='pyscript',cwd='.'):
-        ''' Put multiline matlab script into script file and run '''
+    def _compile_command(self):
+        self.cmdline = self.gen_matlab_command(script_lines=self.inputs.script_lines,
+                                               script_name=self.inputs.script_name,
+                                               cwd=self.inputs.cwd)
+        return self.cmdline
+
+    def gen_matlab_command(self,script_lines='',script_name='pyscript',cwd='.'):
+        """ Put multiline matlab script into script file and run
+        Arguments:
+        - `self`:
+        - `script_lines`:
+        - `script_name`:
+        - `cwd`:
+        """
         mfile = file(os.path.join(cwd,script_name + '.m'), 'wt')
         prescript  = "diary(sprintf('%s.log',mfilename))\n"
+        prescript += "fprintf('Executing %s at %s:\\n',mfilename,datestr(now));\n" 
+        prescript += "ver\n"
         prescript  += "try,\n"
         postscript = "\ncatch ME,\n"
         postscript += "diary off\n"
@@ -43,10 +82,10 @@ class Matlab(object):
         postscript += "ME\n"
         postscript += "ME.stack\n"
         postscript += "fprintf('%s\\n',ME.message); %stdout\n"
-        postscript += "fprintf(2,'<PyScriptException>') %stderr;\n"
+        postscript += "fprintf(2,'<MatlabScriptException>') %stderr;\n"
         postscript += "fprintf(2,'%s\\n',ME.message) %stderr;\n"
         postscript += "fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);\n"
-        postscript += "fprintf(2,'</PyScriptException>') %stderr;\n"
+        postscript += "fprintf(2,'</MatlabScriptException>') %stderr;\n"
         postscript += "diary off\n"
         postscript += "end;\n"
         script_lines = prescript+script_lines+postscript
