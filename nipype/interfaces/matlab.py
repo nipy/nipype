@@ -13,11 +13,11 @@ class MatlabCommandLine(CommandLine):
 
     """
     matlab_cmd = 'matlab -nodesktop -nosplash'
-    def __init__(self, matlab_cmd=None):
+    def __init__(self, matlab_cmd=None,**inputs):
         """initializes interface to matlab
         (default 'matlab -nodesktop -nosplash'
         """
-        super(MatlabCommandLine,self).__init__()
+        super(MatlabCommandLine,self).__init__(**inputs)
         if matlab_cmd is not None:
             self.matlab_cmd = matlab_cmd
 
