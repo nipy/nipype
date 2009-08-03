@@ -20,6 +20,7 @@ these functions include
 from nipype.interfaces.base import Bunch, setattr_on_read, InterfaceResult
 from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import fltcols, MatlabCommandLine
+from nipype.utils.filemanip import fname_presuffix, fnames_presuffix
 from scipy.io import savemat
 from glob import glob
 import numpy as np
@@ -164,22 +165,6 @@ def scans_for_fnames(fnames):
         sess_scans[0,sess] = scans_for_fname(fnames[sess])
     return sess_scans
 
-
-def fname_presuffix(fname, prefix='', suffix='', use_ext=True):
-    pth, fname = os.path.split(fname)
-    fname, ext = os.path.splitext(fname)
-    if not use_ext:
-        ext = ''
-    return os.path.join(pth, prefix+fname+suffix+ext)
-
-
-def fnames_presuffix(fnames, prefix='', suffix=''):
-    f2 = []
-    for fname in fnames:
-        f2.append(fname_presuffix(fname, prefix, suffix))
-    return f2
-
-
 class Realign(SpmMatlabCommandLine):
     """use spm_realign for estimating within modality rigid body alignment
     
@@ -316,6 +301,14 @@ class Realign(SpmMatlabCommandLine):
                           write_mask=None,
                           flags=None)
         
+
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool),...]
+        """
+        info = [Bunch(key='infile',copy=True)]
+        return info
+    
     def _parseinputs(self):
         """validate spm realign options if set to None ignore
         """

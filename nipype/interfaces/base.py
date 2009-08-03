@@ -263,3 +263,15 @@ class CommandLine(Interface):
         returncode = proc.returncode
         return returncode, out, err
     
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=input_field,copy=bool),...]
+
+            Example
+            -------
+
+            see `spm.Realign.get_input_info`
+        """
+        return []
+        
+    

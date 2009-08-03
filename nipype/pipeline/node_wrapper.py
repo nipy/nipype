@@ -1,9 +1,10 @@
 """
 Wraps interfaces modules to work with pipeline engine
 """
-import os, re
+import os
 import hashlib
-import shutil
+from nipype.utils.filemanip import copyfiles
+from nipype.interfaces.base import Bunch, InterfaceResult
 
 
 class NodeWrapper(object):
@@ -65,7 +66,6 @@ class NodeWrapper(object):
         >>> realign.inputs.infile = os.path.abspath('data/funcrun.nii')
         >>> realign.inputs.register_to_mean = True
         >>> realign.run()
-
         """
         # check to see if output directory and hash exist
         if self.diskbased:
@@ -84,18 +84,26 @@ class NodeWrapper(object):
                     print "Unable to open the file in readmode:", filename
                 fd.close()
                 # copy files over and change the inputs
-                
+                for info in self.interface.get_input_info():
+                    originalfile = self.inputs[info.key]
+                    path,name = os.path.split(originalfile)
+                    newfile = os.path.abspath(os.path.join(outdir,name))
+                    copyfiles(originalfile,newfile,copy=info.copy)
+                    self.inputs[info.key] = newfile
                 self.output = self.interface.run()
             else:
-                self.output.outputs = self.interface._aggregate_outputs()
+                self.output = InterfaceResult(interface=None,
+                                              runtime=None,
+                                              outputs=self.interface._aggregate_outputs())
         else:
                 self.output = self.interface.run()
         if self.diskbased:
             # Should pickle the output
             pass
-        
+        return self.output
+    
     def update(self, **opts):
-        self.interface.update(**opts)
+        self.inputs.update(**opts)
         
     def hash_inputs(self):
         """ Computes a hash of the input fields of the underlying
@@ -103,7 +111,7 @@ class NodeWrapper(object):
         return hashlib.md5(str(self.inputs)).hexdigest()
 
     def output_directory(self):
-        return os.path.join(self.output_directory_base,self.interface.cmd)
+        return os.path.abspath(os.path.join(self.output_directory_base,self.interface.cmd))
 
     def make_output_dir(self, outdir):
         """Make the output_dir if it doesn't exist, else raise an exception
@@ -115,73 +123,6 @@ class NodeWrapper(object):
             raise IOError('Directory %s exists'%(outdir))
         os.mkdir(outdir)
         return outdir
-
-    def md5file(self,filename, excludeline="", includeline=""):
-        """Compute md5 hash of the specified file"""
-        m = hashlib.md5()
-        try:
-            for line in open(filename,"rb"):
-                if excludeline and line.startswith(excludeline):
-                    continue
-                m.update(includeline)
-            return m.hexdigest()
-                 
-        except IOError:
-            print "Unable to open the file in readmode:", filename
-            
-
-    def hash_rename(self, filename, hash):
-        """renames a file given original filename and hash
-        and sets path to output_directory
-        """
-        path, name = os.path.split(filename)
-        name, ext = os.path.splitext(name)
-        newfilename = ''.join((name,'_0x',hash,ext))
-        return os.path.join(self.output_directory(),newfilename)
-        
-
-    def check_forhash(self, filename):
-        """checks if file has a hash in its filename"""
-        if type(filename) == type(list):
-            filename = filename[0]
-        path, name = os.path.split(filename)
-
-        if re.search('(_0x[a-z0-9]{32})',name):
-            hash = re.findall('(_0x[a-z0-9]{32})',name)
-            return True, hash
-        else:
-            return False, None
-
-    def copyfiles_to_cwd(self,originalfile, newfile,symlink=True):
-        """given a file moves it to a working directory
-
-        Parameters
-        ----------
-        originalfile : file
-            full path to original file
-        newfile : file
-            full path to new file
-        symlink : Bool
-            specifies whether to copy or symlink files
-            (default=True) but only for posix systems
-         
-        Returns
-        -------
-        output : dict
-            dictionary holding 'out', 'err', 'returncode'
-        """
-        if os.name is 'posix' and symlink:
-            os.symlink(originalfile,newfile)
-        else:
-            shutil.copyfile(originalfile, newfile)
-        # if no signature hash_rename
-
-        # join to output_directory
-
-        # copy or symlink file to new directory
-
-        # update new hashed name in output_directory 
-        # to hashedfiles dictionary
 
 
 
