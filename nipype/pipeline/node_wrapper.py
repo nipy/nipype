@@ -30,7 +30,6 @@ class NodeWrapper(object):
     renames them with hash
     moves hashed_files to hashed_output_directory
     
-
     """
     def __init__(self, interface=None, iterables={},
                  output_directory='.',diskbased=False,
@@ -39,6 +38,7 @@ class NodeWrapper(object):
         self.interface  = interface
         self.output     = None
         self.iterables  = iterables
+        self.parameterization = None
         self.output_directory_base  = output_directory
         self.diskbased = diskbased
         self.overwrite = overwrite
