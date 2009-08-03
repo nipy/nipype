@@ -68,12 +68,14 @@ def load_template(name):
     Returns
     -------
       template : string.Template
+
     '''
-    full_fname = '/'.join([os.path.dirname(__file__), 'script_templates', name])
+
+    full_fname = os.path.join(os.path.dirname(__file__), 
+                              'script_templates', name)
     template_file = open(full_fname)
     template = Template(template_file.read())
     template_file.close()
-
     return template
     
 
