@@ -7,6 +7,7 @@ Requires Packages to be installed
 """
 __docformat__ = 'restructuredtext'
 
+import os
 import subprocess
 from copy import deepcopy
 from string import Template
