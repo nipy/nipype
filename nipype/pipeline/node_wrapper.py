@@ -4,8 +4,6 @@ Wraps interfaces modules to work with pipeline engine
 import os, re
 import hashlib
 import shutil
-from nipype.interfaces.base import CommandLine as cl
-import nipype.interfaces.fsl as fsl
 
 
 class NodeWrapper(object):
@@ -34,42 +32,78 @@ class NodeWrapper(object):
 
     """
     def __init__(self, interface=None, iterables={},
-                 output_directory='.',diskbased=False):
+                 output_directory='.',diskbased=False,
+                 overwrite=None):
         #super(NodeWrapper,self).__init__(interface)
-        self.interface = interface
-        self.inputs = {}
-        self.outputs = {}
-        self.hashinputs = {}
-        self.hashinputs['files'] = []
-        self.iterables = iterables
+        self.interface  = interface
+        self.output     = None
+        self.iterables  = iterables
         self.output_directory_base  = output_directory
         self.diskbased = diskbased
+        self.overwrite = overwrite
 
-        
-    def pre_execute(self):
-        raise NotImplementedError("Child class must implement pre_execute()")
-        """ moves files to unique hashednames in unique hashed_dir"""
-        #self.update()
-        #[self.inputs.update({k:v}) for k, v in self.interface.opts.iteritems() if v is not None]
-        
-        #hashed_dir = self.make_output_dir(self.output_directory())
-        #self.hashinputs = 
-        
-    def post_execute(self):
-        raise NotImplementedError("Child class must implement post_execute()")
+    @property
+    def inputs(self):
+        return self.interface.inputs
 
-    def execute(self):
-        raise NotImplementedError("Child class must implement execute()")
+    def set_input(self,parameter,val,*args,**kwargs):
+        if callable(val):
+            self.interface.inputs[parameter] = val(*args,**kwargs)
+        else:
+            self.interface.inputs[parameter] = val
 
+    def get_output(self,parameter):
+        if self.output is not None:
+            self.output.outputs[parameter]
+        else:
+            return None
+        
+    def run(self):
+        """
+        >>> import nipype.interfaces.spm as spm
+        >>> realign = nw.NodeWrapper(interface=spm.Realign(),output_directory='test2',diskbased=True)
+        >>> realign.inputs.infile = os.path.abspath('data/funcrun.nii')
+        >>> realign.inputs.register_to_mean = True
+        >>> realign.run()
+
+        """
+        # check to see if output directory and hash exist
+        if self.diskbased:
+            try:
+                outdir = self.output_directory()
+                outdir = self.make_output_dir(outdir)
+            except:
+                print "directory %s exists\n"%outdir
+            hashvalue = self.hash_inputs()
+            hashfile = os.path.join(outdir,'_0x%s.txt'%hashvalue)
+            self.interface.inputs.cwd = outdir
+            if (os.path.exists(hashfile) and self.overwrite) or not os.path.exists(hashfile):
+                try:
+                    fd = open(hashfile,"wt")
+                except IOError:
+                    print "Unable to open the file in readmode:", filename
+                fd.close()
+                # copy files over and change the inputs
+                
+                self.output = self.interface.run()
+            else:
+                self.output.outputs = self.interface._aggregate_outputs()
+        else:
+                self.output = self.interface.run()
+        if self.diskbased:
+            # Should pickle the output
+            pass
+        
     def update(self, **opts):
-        self.interface = self.interface.update(**opts)
+        self.interface.update(**opts)
         
     def hash_inputs(self):
+        """ Computes a hash of the input fields of the underlying
+        interface """
         return hashlib.md5(str(self.inputs)).hexdigest()
 
     def output_directory(self):
-        return os.path.join(self.output_directory_base,
-                            ''.join((self.interface.cmd, '_0x', self.hash_inputs())))
+        return os.path.join(self.output_directory_base,self.interface.cmd)
 
     def make_output_dir(self, outdir):
         """Make the output_dir if it doesn't exist, else raise an exception
@@ -81,7 +115,6 @@ class NodeWrapper(object):
             raise IOError('Directory %s exists'%(outdir))
         os.mkdir(outdir)
         return outdir
-
 
     def md5file(self,filename, excludeline="", includeline=""):
         """Compute md5 hash of the specified file"""
@@ -138,10 +171,9 @@ class NodeWrapper(object):
             dictionary holding 'out', 'err', 'returncode'
         """
         if os.name is 'posix' and symlink:
-            clout = cl().run('ls -s %s %s'%(originalfile, newfile))
-        else:                
-            clout = cl().run('cp %s %s'%(originalfile, newfile))
-        return clout.output
+            os.symlink(originalfile,newfile)
+        else:
+            shutil.copyfile(originalfile, newfile)
         # if no signature hash_rename
 
         # join to output_directory
@@ -153,82 +185,7 @@ class NodeWrapper(object):
 
 
 
-class SkullStripNode(NodeWrapper):
-    """ Node Wrapper for skull stripping 
-            fsl.Bet()
-            spm.Segment()
-    """
-    def __init__(self,interface=None, iterables={},
-                 output_directory='.',diskbased=True):
-        NodeWrapper.__init__(self, interface, iterables,
-                             output_directory,diskbased)
 
-        self.update()
-        [self.inputs.update({k:v}) for k, v in self.interface.opts.iteritems() if v is not None]
-        
-    def pre_execute(self):
-        """ moves files to unique hashednames in unique hashed_dir"""
-        self.update()
-        [self.inputs.update({k:v}) for k, v in self.interface.opts.iteritems() if v is not None]
-        
-        hashed_dir = self.make_output_dir(self.output_directory())
-        # get hashed names
-        
-        if type(self.interface) == type(fsl.Bet()):
-            # only one file allowed
-        
-            inputf = self.inputs['infile'][0]
-            try:
-                outputf = self.inputs['outfile']
-            except KeyError:
-                
-                pth, nme = os.path.split(inputf)
-                outputf = os.path.join(pth,'ss_%s'%(nme))
-            hashash, hash =  self.check_forhash(inputf)
-            if hashash:
-                newinf = self.hash_rename(inputf,'')
-                newoutf = self.hash_rename(outputf,hash)
-
-            else:
-                hash =  self.md5file(inputf)
-                newinf = self.hash_rename(inputf,hash)
-                newoutf = self.hash_rename(outputf,hash)
-            self.copyfiles_to_cwd(inputf, newinf,symlink=False)
-            
-            self.hashinputs['infile'] = newinf
-            self.hashinputs['outfile'] = newoutf
-
-        self.update(**self.hashinputs)
-
-        
-    def post_execute(self):
-        
-        self.outputs['outfile'] = self.interface.outfile
-        self.outputs['err'] = self.interface.err
-        self.outputs['out'] = self.interface.out
-        self.outputs['retcode'] = self.interface.retcode
-
-
-    def execute(self):
-        """ runs node with updated inputs"""
-        self.pre_execute()
-        self.interface = self.interface.run()
-        self.post_execute()
-
-table = {'spm': {'Realign': {'copyfiles': ['infile'], 'hash': [True]]}}
-
-node_wrapper(package,interface,overwrite=None):
-    interface = __import__('.'.join((package,interface)))
-    interface.get_modified_inputs()
-    
-
-interface=spm.Realign(),
-                copyfiles=['infile'],
-                hash=[True]):
-    if interface == spm.Realign:
-        wrapped_node = SpmRealignWrapper() # node_wrapper()
-    
-    return wrapped_node
 
 
 

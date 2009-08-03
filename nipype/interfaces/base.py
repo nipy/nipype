@@ -112,8 +112,19 @@ class Bunch(object):
     def dictcopy(self):
         return deepcopy(self.__dict__)
 
+    def dict2str(self,anydict):
+        """ Converts a dict to an ordered representation """
+        outstr = '{'
+        for f in sorted(anydict):
+            if type(anydict[f]) is not type({}):
+                outstr = ''.join((outstr,str(f),':',str(anydict[f]),',\n'))
+            else:
+                outstr = ''.join((outstr,str(f),':',self.dict2str(anydict[f]),',\n'))
+        outstr = ''.join((outstr,'}'))
+        return outstr
+
     def __str__(self):
-       return self.__dict__.__str__()
+       return self.dict2str(self.__dict__)
 
 class Interface(object):
     '''Some notes: This is the template for Interface objects
