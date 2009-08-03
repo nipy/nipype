@@ -17,7 +17,7 @@ def test_bunch_attribute():
 #test CommandLine
 def test_commandline():
     cl = nii.CommandLine()
-    yield assert_equal, cl.args, ()
+    yield assert_equal, cl.inputs.args, ()
     yield assert_equal, cl._compile_command(), ''
     yield assert_not_equal, cl, cl.run()
     yield assert_not_equal, cl, cl.update()
