@@ -279,7 +279,6 @@ class Realign(SpmMatlabCommandLine):
                 if False, do not mask
             flags : USE AT OWN RISK
                 #eg:'flags':{'eoptions':{'suboption':value}}
-                        
             """
         print doc
 
@@ -304,7 +303,7 @@ class Realign(SpmMatlabCommandLine):
 
     def get_input_info(self):
         """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool),...]
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
         """
         info = [Bunch(key='infile',copy=True)]
         return info

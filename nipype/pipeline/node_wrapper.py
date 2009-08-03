@@ -80,9 +80,10 @@ class NodeWrapper(object):
             if (os.path.exists(hashfile) and self.overwrite) or not os.path.exists(hashfile):
                 try:
                     fd = open(hashfile,"wt")
+                    fd.writelines(str(self.interface.inputs))
+                    fd.close()
                 except IOError:
                     print "Unable to open the file in readmode:", filename
-                fd.close()
                 # copy files over and change the inputs
                 for info in self.interface.get_input_info():
                     originalfile = self.inputs[info.key]
@@ -92,11 +93,17 @@ class NodeWrapper(object):
                     self.inputs[info.key] = newfile
                 self.output = self.interface.run()
             else:
+                # change the inputs
+                for info in self.interface.get_input_info():
+                    originalfile = self.inputs[info.key]
+                    path,name = os.path.split(originalfile)
+                    newfile = os.path.abspath(os.path.join(outdir,name))
+                    self.inputs[info.key] = newfile
                 self.output = InterfaceResult(interface=None,
                                               runtime=None,
                                               outputs=self.interface._aggregate_outputs())
         else:
-                self.output = self.interface.run()
+            self.output = self.interface.run()
         if self.diskbased:
             # Should pickle the output
             pass
