@@ -1479,7 +1479,7 @@ class FSFmaker:
     # obvious way.  Contrasts in particular need to be addressed more generally.
     # These should perhaps be redone with a setattr_on_read property, though we
     # don't want to reload for each instance separately.
-    fsf_header = load_template('feat_fsf_header.tcl')
+    fsf_header = load_template('feat_header.tcl')
     fsf_ev = load_template('feat_ev.tcl')
     fsf_ev_ortho = load_template('feat_ev_ortho.tcl')
     fsf_contrasts = load_template('feat_contrasts.tcl')
