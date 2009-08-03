@@ -55,7 +55,7 @@ class NodeWrapper(object):
 
     def get_output(self,parameter):
         if self.output is not None:
-            self.output.outputs[parameter]
+            return self.output.outputs[parameter]
         else:
             return None
         
@@ -86,11 +86,19 @@ class NodeWrapper(object):
                     print "Unable to open the file in readmode:", filename
                 # copy files over and change the inputs
                 for info in self.interface.get_input_info():
-                    originalfile = self.inputs[info.key]
-                    path,name = os.path.split(originalfile)
-                    newfile = os.path.abspath(os.path.join(outdir,name))
-                    copyfiles(originalfile,newfile,copy=info.copy)
-                    self.inputs[info.key] = newfile
+                    files = self.inputs[info.key]
+                    if type(files) is not type([]):
+                        infiles = [files]
+                    else:
+                        infiles = files
+                    for i,f in enumerate(infiles):
+                        path,name = os.path.split(f)
+                        newfile = os.path.abspath(os.path.join(outdir,name))
+                        copyfiles(f,newfile,copy=info.copy)
+                        if type(files) is not type([]):
+                            self.inputs[info.key] = newfile
+                        else:
+                            self.inputs[info.key][i] = newfile
                 self.output = self.interface.run()
             else:
                 # change the inputs

@@ -8,6 +8,8 @@ import copy
 import networkx as nx
 import numpy as np
 from time import sleep
+import nipype.pipeline.engine as pe
+
 try:
     from IPython.kernel import client
     IPython_available = True
@@ -70,6 +72,7 @@ class Pipeline(object):
         self.config       = {}
         self.config['workdir'] = '.'
         self.config['use_parameterized_dirs'] = False
+        self.IPython_available = pe.IPython_available
 
     def connect(self,connection_list):
         """ Wraps the networkx functionality in a more semantically
@@ -188,13 +191,13 @@ class Pipeline(object):
         """ Executes the pipeline in serial or parallel mode depending
         on availability of ipython engines (clients/workers)
         """
-        if IPython_available:
+        if self.IPython_available:
             try:
                 self.mec = client.MultiEngineClient()
             except:
                 print "No clients found. running serially"
-                IPython_available = False
-        if IPython_available:
+                self.IPython_available = False
+        if self.IPython_available:
             self.run_with_manager()
         else:
             self.run_in_series()
@@ -216,8 +219,8 @@ class Pipeline(object):
                 for edge in graph.in_edges_iter(node):
                     data = graph.get_edge_data(*edge)
                     for sourcename,destname in data:
-                        node.inputs[destname] = edge[0].outputs[sourcename]
-                print "Executing: %s H: %s" % (node.iterface.cmd, node.hash_inputs())
+                        node.set_input(destname,edge[0].get_output(sourcename))
+                print "Executing: %s H: %s" % (node.interface.cmd, node.hash_inputs())
                 # For a disk node, provide it with an appropriate
                 # output directory
                 if node.diskbased:
@@ -239,13 +242,13 @@ class Pipeline(object):
         # Generate appropriate structures for worker-manager model
         self.generate_dependency_list()
         # retrieve clients again
-        if IPython_available:
+        if self.IPython_available:
             try:
                 self.mec = client.MultiEngineClient()
             except:
                 print "No clients found. running serially"
-                IPython_available = False
-        if not IPython_available:
+                self.IPython_available = False
+        if not self.IPython_available:
             self.run_in_series()
             return
         # execute pipeline
