@@ -129,39 +129,41 @@ class Bunch(object):
     def __str__(self):
        return self.dict2str(self.__dict__)
 
+
 class Interface(object):
-    '''Some notes: This is the template for Interface objects
-    It provide no functionality at this point, but is a reference
-    for how interfaces should interact
+    """This is the template for Interface objects.
+
+    It provides no functionality.  It defines the necessary attributes
+    and methods all Interface objects should have.
 
     Everything in inputs should also be a possible (explicit?) argument to
-    .__init__()''' 
+    .__init__()
+    """
+
     def __init__(self, *args, **inputs):
-        self._populate_inputs()
-        self.inputs.update(**inputs)
-        if args:
-            self.inputs.args = args
-        self.cmdline = ''
+       """Initialize command with given args and inputs."""
+       raise NotImplementedError
 
     def run(self):
-        raise NotImplementedError
+       """Execute the command."""
+       raise NotImplementedError
+
+    def _runner(self, shell=True, cwd=None):
+       """Performs the call to subprocess module to execute the command."""
+       raise NotImplementedError
 
     def copy(self):
-        """Return a copy of CommandLine
-        
-        This is comparable to a copy.deepcopy - such that any "reasonable"
-        modifications won't have long distance consequences.
-
-        Returns
-        -------
-        results : self.__class__
-            A new `CommandLine` instance otherwise identical with self 
-
-        """
-        return CommandLine(**self.inputs.dictcopy())
+       """Return a copy of the interface object."""
+       raise NotImplementedError
 
     def _populate_inputs(self):
-        raise NotImplementedError
+       """Initialize the inputs attribute."""
+       raise NotImplementedError
+
+    def _compile_command(self):
+       """Generate the command line string from the list of arguments."""
+       raise NotImplementedError
+    
 
 class InterfaceResult(object):
     '''Describe the results of .run()-ing a particular Interface'''
@@ -169,6 +171,7 @@ class InterfaceResult(object):
         self.interface = interface
         self.runtime = runtime
         self.outputs = outputs
+
 
 class CommandLine(Interface):
     """Encapsulate a command-line function along with the arguments and options.
@@ -224,6 +227,28 @@ class CommandLine(Interface):
     Also quite possibly __init__ but generally not run or _runner
 
     """
+
+    def __init__(self, *args, **inputs):
+        self._populate_inputs()
+        self.inputs.update(**inputs)
+        if args:
+            self.inputs.args = args
+        self.cmdline = ''
+
+    def copy(self):
+        """Return a copy of CommandLine
+        
+        This is comparable to a copy.deepcopy - such that any "reasonable"
+        modifications won't have long distance consequences.
+
+        Returns
+        -------
+        results : self.__class__
+            A new `CommandLine` instance otherwise identical with self 
+
+        """
+        return CommandLine(**self.inputs.dictcopy())
+
 
     def run(self):
         """Execute the command.
