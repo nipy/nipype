@@ -16,10 +16,11 @@ def test_bunch_attribute():
 
 #test CommandLine
 def test_commandline():
-    cl = nii.CommandLine()
-    yield assert_equal, cl.inputs.args, ()
-    yield assert_equal, cl._compile_command(), ''
+    cl = nii.CommandLine('echo', 'foo')
+    yield assert_equal, cl.inputs.args, ('echo', 'foo')
+    yield assert_equal, cl._compile_command(), None
     yield assert_not_equal, cl, cl.run()
+    """
     yield assert_not_equal, cl, cl.update()
     yield assert_not_equal, cl.run(), cl.update()
     cl2 = cl.run('-l')
@@ -31,10 +32,11 @@ def test_commandline():
     yield assert_equal, nii.CommandLine('ls','-l')._compile_command(),\
         nii.CommandLine('ls -l')._compile_command()
     yield assert_not_equal, nii.CommandLine('ls','-l').args, nii.CommandLine('ls -l').args
+    """
     clout = cl.run()
-    yield assert_equal, clout.output['returncode'], 0
-    yield assert_equal, clout.output['err'],  ''
-    yield assert_equal, clout.output['out'],  ''
+    yield assert_equal, clout.runtime.returncode, 0
+    yield assert_equal, clout.runtime.errmessages,  ''
+    yield assert_equal, clout.runtime.messages, 'foo\n'
 
 
 """
