@@ -237,7 +237,12 @@ class Bet(CommandLine):
                 out_inputs.extend(inputs[opt])
                 continue
             print 'option %s not supported'%(opt)
-        
+
+        if inputs['infile']:
+            out_inputs.insert(0, '%s' % inputs['infile'])
+        if inputs['outfile']:
+            out_inputs.insert(1, '%s' % inputs['outfile'])
+                              
         return out_inputs
 
     def _compile_command(self):
