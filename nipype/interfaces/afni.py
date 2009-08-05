@@ -49,18 +49,17 @@ class to3d(CommandLine):
         """
 
         out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
-             if v is not None]
+        inputs = dict([(k,v) for k, v in self.inputs.iteritems() \
+                           if v is not None])
         for opt in inputs:
             if opt is 'anat':
                 out_inputs.append('-anat')
             elif opt is 'datum':
-                out_inputs.extend(['-datum %s' % inputs[opt]])
+                out_inputs.append('-datum %s' % inputs[opt])
             elif opt is 'session':
-                out_inputs.extend(['-session %s' % inputs[opt]])
+                out_inputs.append('-session %s' % inputs[opt])
             elif opt is 'prefix':
-                out_inputs.extend(['-prefix %s' % inputs[opt]])
+                out_inputs.append('-prefix %s' % inputs[opt])
             elif opt is 'infiles':
                 pass # placeholder to suppress not supported warning
             else:
