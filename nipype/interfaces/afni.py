@@ -42,34 +42,34 @@ class to3d(CommandLine):
                            infiles=None)
 
     def _parseinputs(self):
-        """validate fsl bet options
-        if set to None ignore
+        """Parse valid input options for to3d command.
+
+        Ignore options set to None.
+
         """
+
         out_inputs = []
         inputs = {}
         [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
              if v is not None]
         for opt in inputs:
             if opt is 'anat':
-                if inputs[opt]:
-                    out_inputs.append('-anat')
-                continue
-            if opt is 'datum':
-                if inputs[opt]:
-                    out_inputs.extend(['-datum %s' % inputs[opt]])
-                continue
-            if opt is 'session':
-                if inputs[opt]:
-                    out_inputs.extend(['-session %s' % inputs[opt]])
-                continue
-            if opt is 'prefix':
-                if inputs[opt]:
-                    out_inputs.extend(['-prefix %s' % inputs[opt]])
-                continue
+                out_inputs.append('-anat')
+            elif opt is 'datum':
+                out_inputs.extend(['-datum %s' % inputs[opt]])
+            elif opt is 'session':
+                out_inputs.extend(['-session %s' % inputs[opt]])
+            elif opt is 'prefix':
+                out_inputs.extend(['-prefix %s' % inputs[opt]])
+            elif opt is 'infiles':
+                pass # placeholder to suppress not supported warning
+            else:
+                print '%s: option %s is not supported!' % (
+                    self.__class__.__name__, opt)
 
         # Handle positional arguments independently
-        if inputs['infiles']:
-            out_inputs.append('%s' % inputs['infiles'])
+        if self.inputs['infiles']:
+            out_inputs.append('%s' % self.inputs['infiles'])
 
         return out_inputs
 
