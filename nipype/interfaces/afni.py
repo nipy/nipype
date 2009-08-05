@@ -9,7 +9,7 @@ class to3d(CommandLine):
 
     Examples
     --------
-    
+
     >>> to3d = afni.to3d(anat=True)
     >>> to3d.inputs.datum = 'float'
     >>> to3d.run()
@@ -30,16 +30,16 @@ class to3d(CommandLine):
 
 
     def copy(self):
-       """Return a copy of the interface object."""
-       return to3d(**self.inputs.dictcopy())
+        """Return a copy of the interface object."""
+        return to3d(**self.inputs.dictcopy())
 
     def _populate_inputs(self):
-       """Initialize the inputs attribute."""
-       self.inputs = Bunch(anat=None,
-                           datum=None,
-                           session=None,
-                           prefix=None,
-                           infiles=None)
+        """Initialize the inputs attribute."""
+        self.inputs = Bunch(anat=None,
+                            datum=None,
+                            session=None,
+                            prefix=None,
+                            infiles=None)
 
     def _parseinputs(self):
         """Parse valid input options for to3d command.
@@ -74,8 +74,7 @@ class to3d(CommandLine):
         return out_inputs
 
     def _compile_command(self):
-       """Generate the command line string from the list of arguments."""
-       valid_inputs = self._parseinputs()
-       allargs =  [self.cmd] + valid_inputs
-       self.cmdline = ' '.join(allargs)
-    
+        """Generate the command line string from the list of arguments."""
+        valid_inputs = self._parseinputs()
+        allargs =  [self.cmd] + valid_inputs
+        self.cmdline = ' '.join(allargs)
