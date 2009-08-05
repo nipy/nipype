@@ -4,13 +4,13 @@
 from nipype.interfaces.base import Bunch, CommandLine
 
 
-class to3d(CommandLine):
+class To3d(CommandLine):
     """
 
     Examples
     --------
 
-    >>> to3d = afni.to3d(anat=True)
+    >>> to3d = afni.To3d(anat=True)
     >>> to3d.inputs.datum = 'float'
     >>> to3d.run()
 
@@ -18,7 +18,7 @@ class to3d(CommandLine):
 
     @property
     def cmd(self):
-        """Base command for to3d"""
+        """Base command for To3d"""
         return 'to3d'
 
     def inputs_help(self):
@@ -31,7 +31,7 @@ class to3d(CommandLine):
 
     def copy(self):
         """Return a copy of the interface object."""
-        return to3d(**self.inputs.dictcopy())
+        return To3d(**self.inputs.dictcopy())
 
     def _populate_inputs(self):
         """Initialize the inputs attribute."""
@@ -42,7 +42,7 @@ class to3d(CommandLine):
                             infiles=None)
 
     def _parseinputs(self):
-        """Parse valid input options for to3d command.
+        """Parse valid input options for To3d command.
 
         Ignore options set to None.
 
