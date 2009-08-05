@@ -14,3 +14,13 @@ def test_To3d():
     cmd.inputs.datum = 'float'
     cmd._compile_command()
     yield assert_equal, cmd.cmdline, 'to3d -datum float'
+    cmd = afni.To3d()
+    cmd.inputs.session = '/home/bobama'
+    cmd._compile_command()
+    yield assert_equal, cmd.cmdline, 'to3d -session /home/bobama'
+    cmd = afni.To3d(prefix='foo.nii.gz')
+    cmd._compile_command()
+    yield assert_equal, cmd.cmdline, 'to3d -prefix foo.nii.gz'
+    cmd = afni.To3d(infiles='/data/*.dcm')
+    cmd._compile_command()
+    yield assert_equal, cmd.cmdline, 'to3d /data/*.dcm'
