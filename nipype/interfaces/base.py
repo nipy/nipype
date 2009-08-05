@@ -14,34 +14,34 @@ from string import Template
 
 
 class OneTimeProperty(object):
-   """A descriptor to make special properties that become normal attributes.
-   """
-   def __init__(self,func):
-       """Create a OneTimeProperty instance.
+    """A descriptor to make special properties that become normal attributes.
+    """
+    def __init__(self,func):
+        """Create a OneTimeProperty instance.
 
-        Parameters
-        ----------
-          func : method
-          
-            The method that will be called the first time to compute a value.
-            Afterwards, the method's name will be a standard attribute holding
-            the value of this computation.
-            """
-       self.getter = func
-       self.name = func.func_name
+         Parameters
+         ----------
+           func : method
 
-   def __get__(self,obj,type=None):
-       """This will be called on attribute access on the class or instance. """
+             The method that will be called the first time to compute a value.
+             Afterwards, the method's name will be a standard attribute holding
+             the value of this computation.
+             """
+        self.getter = func
+        self.name = func.func_name
 
-       if obj is None:
-           # Being called on the class, return the original function. This way,
-           # introspection works on the class.
-           return func
+    def __get__(self,obj,type=None):
+        """This will be called on attribute access on the class or instance. """
 
-       val = self.getter(obj)
-       print "** setattr_on_read - loading '%s'" % self.name  # dbg
-       setattr(obj, self.name, val)
-       return val
+        if obj is None:
+            # Being called on the class, return the original function. This way,
+            # introspection works on the class.
+            return func
+
+        val = self.getter(obj)
+        print "** setattr_on_read - loading '%s'" % self.name  # dbg
+        setattr(obj, self.name, val)
+        return val
 
 
 def setattr_on_read(func):
@@ -71,13 +71,13 @@ def load_template(name):
 
     '''
 
-    full_fname = os.path.join(os.path.dirname(__file__), 
+    full_fname = os.path.join(os.path.dirname(__file__),
                               'script_templates', name)
     template_file = open(full_fname)
     template = Template(template_file.read())
     template_file.close()
     return template
-    
+
 
 class Bunch(object):
     """ Provide Elegant attribute access
@@ -93,10 +93,10 @@ class Bunch(object):
     """
     def __init__(self, **kwargs):
         self.__dict__.update(**kwargs)
-       
+
     def update(self, **kwargs):
         self.__dict__.update(**kwargs)
-    
+
     def iteritems(self):
         return self.__dict__.iteritems()
 
@@ -127,7 +127,7 @@ class Bunch(object):
         return outstr
 
     def __str__(self):
-       return self.dict2str(self.__dict__)
+        return self.dict2str(self.__dict__)
 
 
 class Interface(object):
@@ -141,29 +141,29 @@ class Interface(object):
     """
 
     def __init__(self, *args, **inputs):
-       """Initialize command with given args and inputs."""
-       raise NotImplementedError
+        """Initialize command with given args and inputs."""
+        raise NotImplementedError
 
     def run(self):
-       """Execute the command."""
-       raise NotImplementedError
+        """Execute the command."""
+        raise NotImplementedError
 
     def _runner(self, shell=True, cwd=None):
-       """Performs the call to subprocess module to execute the command."""
-       raise NotImplementedError
+        """Performs the call to subprocess module to execute the command."""
+        raise NotImplementedError
 
     def copy(self):
-       """Return a copy of the interface object."""
-       raise NotImplementedError
+        """Return a copy of the interface object."""
+        raise NotImplementedError
 
     def _populate_inputs(self):
-       """Initialize the inputs attribute."""
-       raise NotImplementedError
+        """Initialize the inputs attribute."""
+        raise NotImplementedError
 
     def _compile_command(self):
-       """Generate the command line string from the list of arguments."""
-       raise NotImplementedError
-    
+        """Generate the command line string from the list of arguments."""
+        raise NotImplementedError
+
 
 class InterfaceResult(object):
     '''Describe the results of .run()-ing a particular Interface'''
@@ -187,8 +187,8 @@ class CommandLine(Interface):
     args : string
         A string representing the command and it's arguments.
     inputs : mapping
-        
-        
+
+
     Attributes
     ----------
     args : tuple
@@ -223,7 +223,7 @@ class CommandLine(Interface):
     -----
     When subclassing CommandLine, you will generally override at least:
         _compile_command
-        
+
     Also quite possibly __init__ but generally not run or _runner
 
     """
@@ -237,14 +237,14 @@ class CommandLine(Interface):
 
     def copy(self):
         """Return a copy of CommandLine
-        
+
         This is comparable to a copy.deepcopy - such that any "reasonable"
         modifications won't have long distance consequences.
 
         Returns
         -------
         results : self.__class__
-            A new `CommandLine` instance otherwise identical with self 
+            A new `CommandLine` instance otherwise identical with self
 
         """
         return CommandLine(**self.inputs.dictcopy())
@@ -270,9 +270,9 @@ class CommandLine(Interface):
         runtime = Bunch(returncode=returncode,
                         messages=out,
                         errmessages=err)
-                
-        return InterfaceResult(self.copy(), runtime, outputs=None) 
-        
+
+        return InterfaceResult(self.copy(), runtime, outputs=None)
+
     def _populate_inputs(self):
         self.inputs = Bunch(args=None)
 
@@ -282,15 +282,15 @@ class CommandLine(Interface):
 
     def _runner(self, shell=True, cwd=None):
         """Run the command using subprocess.Popen."""
-        proc  = subprocess.Popen(self.cmdline, 
-                                 stdout=subprocess.PIPE, 
-                                 stderr=subprocess.PIPE, 
+        proc  = subprocess.Popen(self.cmdline,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
                                  shell=shell,
                                  cwd=cwd)
         out, err = proc.communicate()
         returncode = proc.returncode
         return returncode, out, err
-    
+
     def get_input_info(self):
         """ Provides information about inputs as a dict
             info = [Bunch(key=input_field,copy=bool),...]
@@ -301,5 +301,3 @@ class CommandLine(Interface):
             see `spm.Realign.get_input_info`
         """
         return []
-        
-    
