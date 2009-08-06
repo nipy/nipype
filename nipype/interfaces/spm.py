@@ -29,6 +29,7 @@ from nipype.utils import InTemporaryDirectory
 
 class SpmInfo(object):
     """ Return the path to the spm directory in the matlab path
+    >>> print spm.spmInfo()
     """
     @setattr_on_read
     def spm_path(self):
@@ -169,6 +170,8 @@ def scans_for_fnames(fnames):
 class Realign(SpmMatlabCommandLine):
     """use spm_realign for estimating within modality rigid body alignment
     
+    SPM docs
+    --------
     This  routine  realigns a time-series of images acquired from the
     same  subject  using  a  least  squares approach and a 6 parameter
     (rigid  body)spatial  transformation.  The  first image  in  the
@@ -217,7 +220,9 @@ class Realign(SpmMatlabCommandLine):
 
     Examples
     --------
-    
+    >>> realign = spm.Realign()
+    >>> realign.inputs.infile('a.nii')
+    >>> realign.run()
     """
     
     @property
@@ -226,12 +231,15 @@ class Realign(SpmMatlabCommandLine):
         
     def inputs_help(self):
         doc = """
+            Mandatory Parameters
+            -------------------- 
+            infile : list
+                list of filenames to realign
+
             Optional Parameters
             -------------------
             (all default to None and are unset)
 
-            infile : list
-                list of filenames to realign
             write : bool
                 if True updates headers and generates
                 resliced files prepended with  'r'
@@ -430,6 +438,8 @@ class Realign(SpmMatlabCommandLine):
 class Coregister(SpmMatlabCommandLine):
     """use spm_coreg for estimating cross-modality rigid body alignment
 
+    SPM docs
+    --------
     The  registration  method  used  here  is  based  on  work by
     Collignon  et al. The original interpolation method described in
     this  paper  has been changed in order to give a smoother cost
@@ -671,6 +681,8 @@ class Coregister(SpmMatlabCommandLine):
 class Normalize(SpmMatlabCommandLine):
     """use spm_normalise for warping an image to a template
 
+    SPM docs
+    --------
     Computes  the  warp  that  best  registers a source image (or
     series  of  source  images) to match a template, saving it to the
     file  imagename'_sn.mat'.  This  option  also allows the contents
@@ -792,6 +804,14 @@ class Normalize(SpmMatlabCommandLine):
                             write_interp=None,
                             write_wrap=None,
                             flags=None)
+
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = [Bunch(key='source',copy=False),
+                Bunch(key='apply_to_files',copy=False)]
+        return info
         
     def _parseinputs(self):
         """validate spm normalize options
@@ -927,6 +947,8 @@ class Segment(SpmMatlabCommandLine):
     """use spm_segment to separate structural images into different
     tissue classes.
 
+    SPM docs
+    --------
     Segment,  bias  correct  and spatially normalise - all in the same
     model.  This  function can be used for bias correcting, spatially
     normalising or segmenting your data. 
@@ -1112,6 +1134,13 @@ class Segment(SpmMatlabCommandLine):
                             mask_image=None,
                             flags=None)
 
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = [Bunch(key='data',copy=False)]
+        return info
+    
     def _parseinputs(self):
         """validate spm segment options
         if set to None ignore
@@ -1242,6 +1271,14 @@ class Segment(SpmMatlabCommandLine):
 class Smooth(SpmMatlabCommandLine):
     """use spm_smooth for 3D Gaussian smoothing of image volumes.
 
+    SPM docs
+    --------
+    This  is  for  smoothing (or convolving) image volumes with a
+    Gaussian  kernel  of  a  specified  width.  It  is  used as a
+    preprocessing  step  to  suppress  noise  and  effects due to
+    residual  differences  in functional and gyral anatomy during
+    inter-subject averaging.
+
     Parameters
     ----------
     inputs : mapping 
@@ -1255,8 +1292,6 @@ class Smooth(SpmMatlabCommandLine):
     spm_smooth via a job structure
     cmdline : string
     string used to call matlab/spm via SpmMatlabCommandLine interface
-    
-    
 
     Options
     -------
@@ -1303,6 +1338,13 @@ class Smooth(SpmMatlabCommandLine):
                             fwhm=None,
                             data_type=None,
                             flags=None)
+
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = [Bunch(key='infile',copy=False)]
+        return info
         
     def _parseinputs(self):
         """validate spm smooth options
@@ -1372,6 +1414,80 @@ class Smooth(SpmMatlabCommandLine):
 class Level1Design(SpmMatlabCommandLine):
     """Generate an SPM design matrix
 
+    SPM docs
+    --------
+    Statistical  analysis  of  fMRI  data  uses a mass-univariate
+    approach  based on General Linear Models (GLMs). It comprises
+    the  following  steps  (1)  specification  of  the GLM design
+    matrix,  fMRI  data files and filtering (2) estimation of GLM
+    paramaters  using  classical  or  Bayesian approaches and (3)
+    interrogation  of  results  using contrast vectors to produce
+    Statistical  Parametric  Maps (SPMs) or Posterior Probability
+    Maps (PPMs).
+
+    The  design  matrix  defines  the experimental design and the
+    nature  of  hypothesis  testing to be implemented. The design
+    matrix  has  one  row  for  each scan and one column for each
+    effect  or  explanatory  variable. (eg. regressor or stimulus
+    function).  You  can  build  design  matrices  with separable
+    session-specific  partitions.  Each partition may be the same
+    (in  which  case  it is only necessary to specify it once) or
+    different.
+
+    Responses  can  be  either  event- or epoch related, the only
+    distinction  is  the  duration  of  the  underlying  input or
+    stimulus  function.  Mathematically  they are both modeled by
+    convolving  a  series  of delta (stick) or box functions (u),
+    indicating  the  onset  of  an  event  or epoch with a set of
+    basis  functions. These basis functions model the hemodynamic
+    convolution,  applied  by  the  brain,  to  the  inputs. This
+    convolution  can  be first-order or a generalized convolution
+    modeled   to  second  order  (if  you  specify  the  Volterra
+    option).  The  same  inputs are used by the Hemodynamic model
+    or   Dynamic   Causal  Models  which  model  the  convolution
+    explicitly in terms of hidden state variables.
+ 
+    Basis  functions  can  be used to plot estimated responses to
+    single  events  once  the  parameters  (i.e.  basis  function
+    coefficients)  have  been  estimated. The importance of basis
+    functions  is that they provide a graceful transition between
+    simple  fixed  response  models (like the box-car) and finite
+    impulse  response  (FIR)  models,  where  there  is one basis
+    function  for  each  scan  following an event or epoch onset.
+    The  nice  thing  about  basis  functions,  compared  to  FIR
+    models,  is that data sampling and stimulus presentation does
+    not  have  to  be synchronized thereby allowing a uniform and
+    unbiased sampling of peri-stimulus time.
+    
+    Event-related  designs  may  be  stochastic or deterministic.
+    Stochastic  designs  involve  one  of a number of trial-types
+    occurring   with   a   specified  probability  at  successive
+    intervals   in   time.   These  probabilities  can  be  fixed
+    (stationary   designs)   or   time-dependent   (modulated  or
+    non-stationary  designs).  The  most efficient designs obtain
+    when  the  probabilities  of  every  trial  type are equal. A
+    critical  issue  in  stochastic designs is whether to include
+    null  events If you wish to estimate the evoked response to a
+    specific  event  type  (as opposed to differential responses)
+    then  a  null  event  must  be  included  (even  if it is not
+    modeled explicitly).
+ 
+    In  SPM,  analysis  of  data from multiple subjects typically
+    proceeds  in  two  stages  using  models at two 'levels'. The
+    'first  level'  models are used to implement a within-subject
+    analysis.  Typically there will be as many first level models
+    as  there  are subjects. Analysis proceeds as described using
+    the   'Specify  first  level'  and  'Estimate'  options.  The
+    results  of  these  analyses  can  then be presented as 'case
+    studies'.  More often, however, one wishes to make inferences
+    about  the  population  from  which  the subjects were drawn.
+    This  is an example of a 'Random-Effects (RFX) analysis' (or,
+    more   properly,  a  mixed-effects  analysis).  In  SPM,  RFX
+    analysis   is   implemented   using  the  'summary-statistic'
+    approach  where contrast images from each subject are used as
+    summary   measures  of  subject  responses.  These  are  then
+    entered as data into a 'second level' model.
+    
     Parameters
     ----------
     inputs : mapping 
@@ -1745,21 +1861,31 @@ class Level1Design(SpmMatlabCommandLine):
 class EstimateModel(SpmMatlabCommandLine):
     """use spm_spm to estimate the parameters of a model
 
+    SPM docs
+    --------
+    
+    Model  parameters  can  be  estimated using classical (ReML -
+    Restricted  Maximum Likelihood) or Bayesian algorithms. After
+    parameter  estimation,  the  RESULTS  button  can  be used to
+    specify  contrasts  that  will produce Statistical Parametric
+    Maps  (SPMs)  or Posterior Probability Maps (PPMs) and tables
+    of statistics.
+
     Parameters
     ----------
+    
     inputs : mapping 
     key, value pairs that will update the EstimateModel.inputs attributes
     see self.inputs_help() for a list of EstimateModel.inputs attributes
     
     Attributes
     ----------
+    
     inputs : Bunch
     a (dictionary-like) bunch of options that can be passed to 
     spm_spm via a job structure
     cmdline : string
     string used to call matlab/spm via SpmMatlabCommandLine interface
-    
-    
 
     Options
     -------
@@ -1829,6 +1955,13 @@ class EstimateModel(SpmMatlabCommandLine):
                             estimation_method=None,
                             flags=None)
         
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = [Bunch(key='spm_desgin_file',copy=True)]
+        return info
+    
     def _parseinputs(self):
         """validate spm normalize options
         if set to None ignore

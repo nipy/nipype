@@ -282,8 +282,7 @@ class Resample(CommandLine):
         results : InterfaceResult
             A `InterfaceResult` object with a copy of self in `interface`
 
-         """
-
+        """
         # This is expected to populate `cmdline` for _runner to work
         cmd,outfile = self._compile_command()
         returncode, out, err = self._runner(self.inputs.get('cwd','.'))

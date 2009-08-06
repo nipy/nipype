@@ -11,6 +11,10 @@ from nipype.interfaces.base import CommandLine, InterfaceResult, Bunch
 class MatlabCommandLine(CommandLine):
     """Object that sets up Matlab specific tools and interfaces
 
+    >>> matlab.MatlabCommandLine.matlab_cmd = "matlab.2009a -nodesktop -nosplash"
+    >>> mcmd = matlab.MatlabCommandLine()
+    >>> mcmd.inputs.script_lines = "which('who')"
+    >>> out = mcmd.run()
     """
     matlab_cmd = 'matlab -nodesktop -nosplash'
     def __init__(self, matlab_cmd=None,**inputs):
@@ -42,6 +46,7 @@ class MatlabCommandLine(CommandLine):
     def _populate_inputs(self):
         self.inputs = Bunch(script_lines='',
                             script_name='pyscript',
+                            mfile=True,
                             cwd='.')
 
     def run(self):
@@ -60,10 +65,11 @@ class MatlabCommandLine(CommandLine):
     def _compile_command(self):
         self.cmdline = self.gen_matlab_command(script_lines=self.inputs.script_lines,
                                                script_name=self.inputs.script_name,
-                                               cwd=self.inputs.cwd)
+                                               cwd=self.inputs.cwd,
+                                               mfile=self.inputs.mfile)
         return self.cmdline
 
-    def gen_matlab_command(self,script_lines='',script_name='pyscript',cwd='.'):
+    def gen_matlab_command(self,script_lines='',script_name='pyscript',cwd='.',mfile=True):
         """ Put multiline matlab script into script file and run
         Arguments:
         - `self`:
@@ -71,26 +77,36 @@ class MatlabCommandLine(CommandLine):
         - `script_name`:
         - `cwd`:
         """
-        mfile = file(os.path.join(cwd,script_name + '.m'), 'wt')
-        prescript  = "diary(sprintf('%s.log',mfilename))\n"
-        prescript += "fprintf('Executing %s at %s:\\n',mfilename,datestr(now));\n" 
-        prescript += "ver\n"
-        prescript  += "try,\n"
-        postscript = "\ncatch ME,\n"
-        postscript += "diary off\n"
-        postscript += "diary(sprintf('%s_error.log',mfilename))\n"
-        postscript += "ME\n"
-        postscript += "ME.stack\n"
-        postscript += "fprintf('%s\\n',ME.message); %stdout\n"
-        postscript += "fprintf(2,'<MatlabScriptException>') %stderr;\n"
-        postscript += "fprintf(2,'%s\\n',ME.message) %stderr;\n"
+        prescript  = ''
+        if mfile:
+            prescript += "diary(sprintf('%s.log',mfilename));\n"
+            prescript += "fprintf(1,'Executing %s at %s:\\n',mfilename,datestr(now));\n"
+        else:
+            prescript += "fprintf(1,'Executing code at %s:\\n',datestr(now));\n" 
+        prescript += "ver,\n"
+        prescript += "try,\n"
+        postscript  = ''
+        postscript += "\n,catch ME,\n"
+        if mfile:
+            postscript += "diary off;\n"
+            postscript += "diary(sprintf('%s_error.log',mfilename));\n"
+        postscript += "ME,\n"
+        postscript += "ME.stack,\n"
+        postscript += "fprintf('%s\\n',ME.message);\n"
+        postscript += "fprintf(2,'<MatlabScriptException>');\n"
+        postscript += "fprintf(2,'%s\\n',ME.message);\n"
         postscript += "fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);\n"
-        postscript += "fprintf(2,'</MatlabScriptException>') %stderr;\n"
-        postscript += "diary off\n"
+        postscript += "fprintf(2,'</MatlabScriptException>');\n"
+        if mfile:
+            postscript += "diary off,\n"
         postscript += "end;\n"
         script_lines = prescript+script_lines+postscript
-        mfile.write(script_lines)
-        mfile.close()
+        if mfile:
+            mfile = file(os.path.join(cwd,script_name + '.m'), 'wt')
+            mfile.write(script_lines)
+            mfile.close()
+        else:
+            script_name = ''.join(script_lines.split('\n'))
         return '%s -r \"%s;exit\" ' % (self.matlab_cmd, script_name)
 
 # Useful Functions for working with matlab
