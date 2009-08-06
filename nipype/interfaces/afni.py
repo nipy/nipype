@@ -44,8 +44,9 @@ class To3d(CommandLine):
         """
 
         out_inputs = []
-        inputs = dict([(k,v) for k, v in self.inputs.iteritems() \
-                           if v is not None])
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+             if v is not None]
         for opt in inputs:
             if opt is 'anat':
                 out_inputs.append('-anat')
