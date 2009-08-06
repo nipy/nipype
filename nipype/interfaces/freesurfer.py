@@ -85,7 +85,7 @@ class Dicom2Nifti(CommandLine):
     @property
     def cmd(self):
         """sets base command, not editable"""
-        return 'fs_dicom2nifti'
+        return 'mri_convert'
 
 
     def inputs_help(self):
@@ -172,7 +172,7 @@ class Dicom2Nifti(CommandLine):
             fname,ext  = os.path.splitext(fname)
             outfile = os.path.join(outdir,''.join((fname,'.nii')))
             if not os.path.exists(outfile):
-                single_cmd = 'mri_convert %s %s;' % (f, outfile)
+                single_cmd = '%s %s %s;' % (self.cmd, f, outfile)
                 cmd.extend([single_cmd])
         self.cmdline =  ' '.join(cmd)
         return self.cmdline,outdir
@@ -222,7 +222,7 @@ class Resample(CommandLine):
     @property
     def cmd(self):
         """sets base command, not editable"""
-        return 'fs_resample'
+        return 'mri_convert'
 
 
     def inputs_help(self):
@@ -289,7 +289,7 @@ class Resample(CommandLine):
             path,fname = os.path.split(f)
             outfile.insert(i,fname_presuffix(fname,suffix=self.inputs.outfile_postfix))
             outfile[i] = os.path.abspath(os.path.join(self.inputs.get('cwd','.'),outfile[i]))
-            single_cmd = 'mri_convert -vs %d %d %d %s %s;' % (vs[0],vs[1],vs[2], f, outfile[i])
+            single_cmd = '%s -vs %d %d %d %s %s;' % (self.cmd, vs[0],vs[1],vs[2], f, outfile[i])
             cmd.extend([single_cmd])
         self.cmdline =  ' '.join(cmd)
         return self.cmdline,outfile
@@ -320,7 +320,8 @@ class Resample(CommandLine):
         
 
 class ReconAll(CommandLine):
-    """use fs mri_convert to up or down-sample image files
+    """use fs recon-all to generate surfaces and parcellations of
+    structural data from an anatomical image of a subject.
 
     Options
     -------
@@ -342,7 +343,7 @@ class ReconAll(CommandLine):
     @property
     def cmd(self):
         """sets base command, not editable"""
-        return 'fs_recon-all'
+        return 'recon-all'
 
 
     def inputs_help(self):
@@ -434,6 +435,8 @@ class ReconAll(CommandLine):
             if opt is 'parent_dir':
                 out_inputs.extend(['-sd',os.path.abspath(inputs[opt])])
                 continue
+            if opt is 'flags':
+                out_inputs.extend([inputs[opt]])
             print 'option %s not supported'%(opt)
         
         return out_inputs
@@ -447,7 +450,7 @@ class ReconAll(CommandLine):
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
         valid_inputs = self._parseinputs()
-        allargs =  ['recon-all'] + valid_inputs
+        allargs =  [self.cmd] + valid_inputs
         self.cmdline = ' '.join(allargs)
         return self.cmdline
 
@@ -467,5 +470,164 @@ class ReconAll(CommandLine):
                                               stdout=out,
                                               stderr=err),
                                 outputs = None,
+                                interface=self.copy())
+        
+
+class BBRegister(CommandLine):
+    """use fs bbregister to register a volume two a surface mesh
+
+    This program performs within-subject, cross-modal registration using a
+    boundary-based cost function. The registration is constrained to be 6
+    DOF (rigid). It is required that you have an anatomical scan of the
+    subject that has been analyzed in freesurfer.
+
+    Options
+    -------
+
+    To see optional arguments
+    BBRegister().inputs_help()
+
+
+    Examples
+    --------
+   """
+
+    @property
+    def cmd(self):
+        """sets base command, not editable"""
+        return 'bbregister'
+
+
+    def inputs_help(self):
+        doc = """
+        Mandatory Parameters
+        --------------------
+        (all default to None and are unset)
+        subject_id: string or int
+            Identifier for subject
+        sourcefile: string
+            Filename of image volume that will be registered to
+        surface
+        initialize_with: string
+            One of the following options is required.
+            --init-fsl : initialize the registration with FSL
+            --init-spm : initialize the registration with SPM
+            --init-header : initialize the registration based on header goemetry
+            --init-reg initregfile : explicitly pass registration
+        contrast_type: string
+            One of the following is required.
+            --t1 : assume t1 contrast, ie, WM brighter than GM
+            --t2 : assume t2 contrast, ie, GM brighter than WM (default)
+            --bold : same as --t2
+            --dti  : same as --t2
+
+        Optional Parameters
+        -------------------
+        (all default to None and are unset)
+        outregfile: filename
+            Name of output registration file. By default the extension
+        of the sourcefile is replaced by _reg_[subject_id].dat
+        outfile: boolean or filename
+            Resampled source is saved as outfile. If set to True, an
+        outputfile is created with _bbout added to the filename.
+        flags:
+            unsupported flags, use at your own risk
+        """
+        print doc
+
+    def _populate_inputs(self):
+        self.inputs = Bunch(subject_id=None,
+                            sourcefile=None,
+                            initialize_with=None,
+                            contrast_type=None,
+                            outregfile=None,
+                            outfile=None,
+                            flags=None)
+
+    def _parseinputs(self):
+        """validate bbregister options
+        if set to None ignore
+        """
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt in inputs:
+            if opt is 'subject_id':
+                out_inputs.extend(['--s',inputs[opt]])
+                continue
+            if opt is 'sourcefile':
+                out_inputs.extend(['--mov',inputs[opt]])
+                continue
+            if opt is 'initialize_with':
+                out_inputs.extend([inputs[opt]])
+                continue
+            if opt is 'contrast_type':
+                out_inputs.extend([inputs[opt]])
+            if opt is 'outregfile':
+                out_inputs.extend(['--reg',inputs[opt]])
+                continue
+            if opt is 'outfile':
+                if type(inputs[opt]) is type(''):
+                    out_inputs.extend(['--o',inputs[opt]])
+                continue
+            if opt is 'flags':
+                out_inputs.extend([inputs[opt]])
+            print 'option %s not supported'%(opt)
+        if self.inputs.outregfile is None:
+            out_inputs.extend(['--reg',fname_presuffix(self.inputs.sourcefile,suffix='reg_%s.dat'%self.inputs_subject_id,use_ext=False)])
+        if self.inputs.outfile is True:
+            out_inputs.extend(['--o',fname_presuffix(self.inputs.sourcefile,suffix='_bbout'%self.inputs_subject_id)])
+        return out_inputs
+
+    def _compile_command(self):
+        """validates fsl options and generates command line argument"""
+        valid_inputs = self._parseinputs()
+        allargs =  [self.cmd] + valid_inputs
+        self.cmdline = ' '.join(allargs)
+        return self.cmdline
+
+    def outputs_help(self):
+        doc = """
+        outregfile: filename
+            Output registration file
+        outfile: filename
+            Registered and resampled source file
+        """
+        print doc
+
+    def _aggregate_outputs(self):
+        outputs = Bunch(outregfile=None,
+                        outfile=None)
+        if self.inputs.outregfile is None:
+            outregile = glob(fname_presuffix(self.inputs.sourcefile,suffix='reg_%s.dat'%self.inputs_subject_id))
+        else:
+            outregfile = glob(self.inputs.outregfile)
+        assert len(outregfile)==1, "No output registration file created"
+        outputs.outregfile = outregfile[0]
+        if self.inputs.outfile is True:
+            outfile = glob(fname_presuffix(self.inputs.sourcefile,suffix='_bbout'%self.inputs_subject_id))
+            assert len(outfile)==1, "No output file %s created"%outfile
+            outputs.outfile = outfile[0]
+        if type(self.inputs.outfile) == type(''):
+            outfile = glob(self.inputs.outfile)
+            assert len(outfile)==1, "No output file %s created"%outfile
+            outputs.outfile = outfile[0]
+    
+    def run(self):
+        """Execute the command.
+        
+        Returns
+        -------
+        results : InterfaceResult
+            A `InterfaceResult` object with a copy of self in `interface`
+
+        """
+        # This is expected to populate `cmdline` for _runner to work
+        self._compile_command()
+        returncode, out, err = self._runner(self.inputs.get('cwd','.'))
+        return  InterfaceResult(runtime=Bunch(returncode=returncode,
+                                              stdout=out,
+                                              stderr=err),
+                                outputs = self._aggregate_outputs(),
                                 interface=self.copy())
         

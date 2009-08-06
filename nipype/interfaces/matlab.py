@@ -6,7 +6,7 @@ import re
 import tempfile
 import numpy as np
 from nipype.interfaces.base import CommandLine, InterfaceResult, Bunch
-
+from copy import deepcopy
 
 class MatlabCommandLine(CommandLine):
     """Object that sets up Matlab specific tools and interfaces
@@ -60,7 +60,7 @@ class MatlabCommandLine(CommandLine):
                                              returncode=returncode,
                                              stdout=out,stderr=err),
                                outputs=None,
-                               interface=self.copy())
+                               interface=deepcopy(self))
 
     def _compile_command(self):
         self.cmdline = self.gen_matlab_command(script_lines=self.inputs.script_lines,

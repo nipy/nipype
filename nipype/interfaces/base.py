@@ -235,21 +235,6 @@ class CommandLine(Interface):
             self.inputs.args = args
         self.cmdline = ''
 
-    def copy(self):
-        """Return a copy of CommandLine
-
-        This is comparable to a copy.deepcopy - such that any "reasonable"
-        modifications won't have long distance consequences.
-
-        Returns
-        -------
-        results : self.__class__
-            A new `CommandLine` instance otherwise identical with self
-
-        """
-        return CommandLine(**self.inputs.dictcopy())
-
-
     def run(self):
         """Execute the command.
 
@@ -271,7 +256,7 @@ class CommandLine(Interface):
                         messages=out,
                         errmessages=err)
 
-        return InterfaceResult(self.copy(), runtime, outputs=None)
+        return InterfaceResult(deepcopy(self), runtime, outputs=None)
 
     def _populate_inputs(self):
         self.inputs = Bunch(args=None)

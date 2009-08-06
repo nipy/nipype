@@ -16,9 +16,9 @@ See the docstrings for the individual classes (Bet, Fast, etc...) for
 
 import os
 import subprocess
-
+from copy import deepcopy
 from nipype.interfaces.base import (Bunch, CommandLine, setattr_on_read, 
-                                    load_template)
+                                    load_template, InterfaceResult)
 
 
 def fslversion():
@@ -266,11 +266,11 @@ class Bet(CommandLine):
         self._compile_command()
         returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
         outputs = Bunch(outfile = self.inputs.outfile)
-        return  Bunch(returncode=returncode,
-                      stdout=out,
-                      stderr=err,
-                      outputs = outputs,
-                      interface=self.copy())
+        return  InterfaceResult(runtime=Bunch(returncode=returncode,
+                                              stdout=out,
+                                              stderr=err),
+                                outputs = outputs,
+                                interface=deepcopy(self))
         
         
 

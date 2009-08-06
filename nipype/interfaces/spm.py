@@ -23,6 +23,7 @@ from nipype.interfaces.matlab import fltcols, MatlabCommandLine
 from nipype.utils.filemanip import fname_presuffix, fnames_presuffix
 from scipy.io import savemat
 from glob import glob
+from copy import deepcopy
 import numpy as np
 import os
 from nipype.utils import InTemporaryDirectory
@@ -72,7 +73,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
                                              returncode=returncode,
                                              stdout=out,stderr=err),
                                outputs=outputs,
-                               interface=self.copy())
+                               interface=deepcopy(self))
 
     def _aggregate_outputs(self):
         """ Virtual function that needs to be implemented by the
