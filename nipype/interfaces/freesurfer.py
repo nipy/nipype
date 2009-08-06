@@ -43,6 +43,26 @@ def freesurferversion():
     fid.close()
     return version.split('-v')[1].strip('\n')
 
+def fssubjectsdir(subjects_dir=None):
+    """Check and or set the global SUBJECTS_DIR
+    
+    Parameters
+    ----------
+    subjects_dir :  string
+        The system defined subjects directory
+
+    Returns
+    -------
+    subject_dir : string
+        Represents the current environment setting of SUBJECTS_DIR
+
+    """
+    if subjects_dir is not None:
+        # set environment setting
+        os.environ['SUBJECTS_DIR'] = os.path.abspath(subjects_dir)
+    subjects_dir = os.getenv('SUBJECTS_DIR')
+    print 'SUBJECTS_DIR = %s'%subjects_dir
+    return subjects_dir
 
 class Dicom2Nifti(CommandLine):
     """use fs mri_convert to convert dicom files to nifti-1 files
@@ -296,5 +316,156 @@ class Resample(CommandLine):
                                               stdout=out,
                                               stderr=err),
                                 outputs = outputs,
+                                interface=self.copy())
+        
+
+class ReconAll(CommandLine):
+    """use fs mri_convert to up or down-sample image files
+
+    Options
+    -------
+
+    To see optianl arguments
+    ReconAll().inputs_help()
+
+
+    Examples
+    --------
+    >>> reconall = freesurfer.ReconAll()
+    >>> reconall.inputs.subject_id = 'foo'
+    >>> reconall.inputs.directive  = '-all'
+    >>> reconall.inputs.parent_dir = '.'
+    >>> reconall.inputs.T1file = 'structfile.nii'
+    >>> out = reconall.run()
+   """
+
+    @property
+    def cmd(self):
+        """sets base command, not editable"""
+        return 'fs_recon-all'
+
+
+    def inputs_help(self):
+        doc = """
+        Mandatory Parameters
+        --------------------
+        (all default to None and are unset)
+        subject_id: string or int
+            Identifier for subject
+        directive: string
+            Which part of the process to run 
+
+            Fully-Automated Directive:
+            --------------------------
+
+            -all           : performs all stages of cortical reconstruction
+            -autorecon-all : same as -all
+
+            Manual-Intervention Workflow Directives:
+            ----------------------------------------
+
+            -autorecon1    : process stages 1-5 (see below)
+            -autorecon2    : process stages 6-24
+                   after autorecon2, check final surfaces:
+                     a. if wm edit was required, then run -autorecon2-wm
+                     b. if control points added, then run -autorecon2-cp
+                     c. if edits made to correct pial, then run -autorecon2-pial
+                     d. proceed to run -autorecon3
+            -autorecon2-cp : process stages 12-24 (uses -f w/ mri_normalize, -keep w/ mri_seg)
+            -autorecon2-wm : process stages 15-24
+            -autorecon2-inflate1 : 6-18
+            -autorecon2-perhemi : tess, sm1, inf1, q, fix, sm2, inf2, finalsurf, ribbon
+            -autorecon3    : process stages 25-31
+
+
+        Optional Parameters
+        -------------------
+        (all default to None and are unset)
+             
+        T1files: filename(s)
+            T1 file or list of files to extract surfaces from. The T1
+            files must come from the same subject
+        hemi: string
+            just do lh or rh (default is to do both)
+        parent_dir: string
+            defaults to SUBJECTS_DIR environment variable. If the variable is
+            not set, it defaults to current working directory.
+        test:
+            Do everything but execute each command
+        flags:
+            unsupported flags, use at your own risk
+        """
+        print doc
+
+    def _populate_inputs(self):
+        self.inputs = Bunch(subject_id=None,
+                            directive=None,
+                            T1files=None,
+                            hemi=None,
+                            parent_dir=fssubjectsdir(),
+                            test=None,
+                            flags=None)
+
+    def _parseinputs(self):
+        """validate fsl bet options
+        if set to None ignore
+        """
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt in inputs:
+            if opt is 'subject_id':
+                out_inputs.extend(['-subjid',inputs[opt]])
+                continue
+            if opt is 'directive':
+                out_inputs.extend([inputs[opt]])
+                continue
+            if opt is 'T1files':
+                if type(inputs[opt]) is not type([]):
+                    files = [inputs[opt]]
+                else:
+                    files = inputs[opt]
+                for f in files:
+                    out_inputs.extend(['-i',f])
+                continue
+            if opt is 'hemi':
+                out_inputs.extend(['-hemi',inputs[opt]])
+                continue
+            if opt is 'parent_dir':
+                out_inputs.extend(['-sd',os.path.abspath(inputs[opt])])
+                continue
+            print 'option %s not supported'%(opt)
+        
+        return out_inputs
+
+    def outputs_help(self):
+        doc = """
+        No outputs
+        """
+        print doc
+
+    def _compile_command(self):
+        """validates fsl options and generates command line argument"""
+        valid_inputs = self._parseinputs()
+        allargs =  ['recon-all'] + valid_inputs
+        self.cmdline = ' '.join(allargs)
+        return self.cmdline
+
+    def run(self):
+        """Execute the command.
+        
+        Returns
+        -------
+        results : InterfaceResult
+            A `InterfaceResult` object with a copy of self in `interface`
+
+        """
+        # This is expected to populate `cmdline` for _runner to work
+        self._compile_command()
+        returncode, out, err = self._runner(self.inputs.get('cwd','.'))
+        return  InterfaceResult(runtime=Bunch(returncode=returncode,
+                                              stdout=out,
+                                              stderr=err),
+                                outputs = None,
                                 interface=self.copy())
         
