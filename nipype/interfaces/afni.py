@@ -28,11 +28,6 @@ class To3d(CommandLine):
         """
         print doc
 
-
-    def copy(self):
-        """Return a copy of the interface object."""
-        return To3d(**self.inputs.dictcopy())
-
     def _populate_inputs(self):
         """Initialize the inputs attribute."""
         self.inputs = Bunch(anat=None,
