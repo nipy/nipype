@@ -15,6 +15,7 @@ import os
 from glob import glob
 from nipype.interfaces.base import (Bunch, CommandLine, InterfaceResult, setattr_on_read)
 from nipype.utils.filemanip import fname_presuffix
+from copy import deepcopy
 
 def freesurferversion():
     """Check for freesurfer version on system
@@ -198,7 +199,7 @@ class Dicom2Nifti(CommandLine):
                                               stdout=out,
                                               stderr=err),
                                 outputs = outputs,
-                                interface=self.copy())
+                                interface=deepcopy(self))
         
 
 class Resample(CommandLine):
@@ -316,7 +317,7 @@ class Resample(CommandLine):
                                               stdout=out,
                                               stderr=err),
                                 outputs = outputs,
-                                interface=self.copy())
+                                interface=deepcopy(self))
         
 
 class ReconAll(CommandLine):
@@ -470,7 +471,7 @@ class ReconAll(CommandLine):
                                               stdout=out,
                                               stderr=err),
                                 outputs = None,
-                                interface=self.copy())
+                                interface=deepcopy(self))
         
 
 class BBRegister(CommandLine):
@@ -629,5 +630,5 @@ class BBRegister(CommandLine):
                                               stdout=out,
                                               stderr=err),
                                 outputs = self._aggregate_outputs(),
-                                interface=self.copy())
+                                interface=deepcopy(self))
         
