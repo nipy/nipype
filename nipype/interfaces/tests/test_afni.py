@@ -24,3 +24,12 @@ def test_To3d():
     cmd = afni.To3d(infiles='/data/*.dcm')
     cmd._compile_command()
     yield assert_equal, cmd.cmdline, 'to3d /data/*.dcm'
+    cmd = afni.To3d(epan=True)
+    cmd._compile_command()
+    yield assert_equal, cmd.cmdline, 'to3d -epan'
+    cmd = afni.To3d(skip_outliers=True)
+    cmd._compile_command()
+    yield assert_equal, cmd.cmdline, 'to3d -skip_outliers'
+    cmd = afni.To3d(assume_dicom_mosaic=True)
+    cmd._compile_command()
+    yield assert_equal, cmd.cmdline, 'to3d -assume_dicom_mosaic'

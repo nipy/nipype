@@ -30,11 +30,15 @@ class To3d(CommandLine):
 
     def _populate_inputs(self):
         """Initialize the inputs attribute."""
-        self.inputs = Bunch(anat=None,
+        self.inputs = Bunch(infiles=None,
+                            anat=None,
                             datum=None,
                             session=None,
                             prefix=None,
-                            infiles=None)
+                            epan=None,
+                            skip_outliers=None,
+                            assume_dicom_mosaic=None,
+                            )
 
     def _parseinputs(self):
         """Parse valid input options for To3d command.
@@ -43,12 +47,17 @@ class To3d(CommandLine):
 
         """
 
+        # Time: -time:zt nz nt TR tpattern  OR  -time:tz nt nz TR tpattern
+
+
         out_inputs = []
         inputs = {}
         [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
              if v is not None]
         for opt in inputs:
-            if opt is 'anat':
+            if opt is 'infiles':
+                pass # placeholder to suppress not supported warning
+            elif opt is 'anat':
                 out_inputs.append('-anat')
             elif opt is 'datum':
                 out_inputs.append('-datum %s' % inputs[opt])
@@ -56,8 +65,12 @@ class To3d(CommandLine):
                 out_inputs.append('-session %s' % inputs[opt])
             elif opt is 'prefix':
                 out_inputs.append('-prefix %s' % inputs[opt])
-            elif opt is 'infiles':
-                pass # placeholder to suppress not supported warning
+            elif opt is 'epan':
+                out_inputs.append('-epan')
+            elif opt is 'skip_outliers':
+                out_inputs.append('-skip_outliers')
+            elif opt is 'assume_dicom_mosaic':
+                out_inputs.append('-assume_dicom_mosaic')
             else:
                 print '%s: option %s is not supported!' % (
                     self.__class__.__name__, opt)
