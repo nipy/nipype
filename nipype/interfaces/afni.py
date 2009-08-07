@@ -86,3 +86,125 @@ class To3d(CommandLine):
         valid_inputs = self._parseinputs()
         allargs =  [self.cmd] + valid_inputs
         self.cmdline = ' '.join(allargs)
+
+class Threedrefit(CommandLine):
+    """
+    """
+
+    @property
+    def cmd(self):
+        """Base command for Threedrefit"""
+        return '3drefit'
+
+    def inputs_help(self):
+        doc = """
+          Optional Parameters
+          -------------------
+        """
+        print doc
+
+    def _populate_inputs(self):
+        """Initialize the inputs attribute."""
+        self.inputs = Bunch(deoblique=None,
+                            xorigin=None,
+                            yorigin=None,
+                            zorigin=None,
+                            infile=None)
+
+    def _parseinputs(self):
+        """Parse valid input options for Threedrefit command.
+
+        Ignore options set to None.
+
+        """
+
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+             if v is not None]
+        for opt in inputs:
+            if opt is 'deoblique':
+                out_inputs.append('-deoblique')
+            elif opt is 'xorigin':
+                out_inputs.append('-xorigin %s' % inputs[opt])
+            elif opt is 'yorigin':
+                out_inputs.append('-yorigin %s' % inputs[opt])
+            elif opt is 'zorigin':
+                out_inputs.append('-zorigin %s' % inputs[opt])
+            elif opt is 'infile':
+                pass # placeholder to suppress not supported warning
+            else:
+                print '%s: option %s is not supported!' % (
+                    self.__class__.__name__, opt)
+
+        # Handle positional arguments independently
+        if self.inputs['infile']:
+            out_inputs.append('%s' % self.inputs['infile'])
+
+        return out_inputs
+
+    def _compile_command(self):
+        """Generate the command line string from the list of arguments."""
+        valid_inputs = self._parseinputs()
+        allargs =  [self.cmd] + valid_inputs
+        self.cmdline = ' '.join(allargs)
+
+
+class Threedresample(CommandLine):
+    """
+    """
+
+    @property
+    def cmd(self):
+        """Base command for Threedresample"""
+        return '3dresample'
+
+    def inputs_help(self):
+        doc = """
+          Optional Parameters
+          -------------------
+        """
+        print doc
+
+    def _populate_inputs(self):
+        """Initialize the inputs attribute."""
+        self.inputs = Bunch(orient=None,
+                            outfile=None,
+                            infile=None)
+
+    def _parseinputs(self):
+        """Parse valid input options for Threedrefit command.
+
+        Ignore options set to None.
+
+        """
+
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+             if v is not None]
+
+        for opt in inputs:
+            if opt is 'orient':
+                out_inputs.append('-orient %s' % self.inputs['orient'])
+            elif opt is 'outfile':
+                pass # placeholder to suppress not supported warning
+            elif opt is 'infile':
+                pass # placeholder to suppress not supported warning
+            else:
+                print '%s: option %s is not supported!' % (
+                    self.__class__.__name__, opt)
+
+        if self.inputs['outfile']:
+            out_inputs.append('-prefix %s' % self.inputs['outfile'])
+
+        if self.inputs['infile']:
+            out_inputs.append('-inset %s' % self.inputs['infile'])
+
+        return out_inputs
+
+    def _compile_command(self):
+        """Generate the command line string from the list of arguments."""
+        valid_inputs = self._parseinputs()
+        allargs =  [self.cmd] + valid_inputs
+        self.cmdline = ' '.join(allargs)
