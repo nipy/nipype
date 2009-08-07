@@ -220,7 +220,7 @@ class Pipeline(object):
                     data = graph.get_edge_data(*edge)
                     for sourcename,destname in data:
                         node.set_input(destname,edge[0].get_output(sourcename))
-                print "Executing: %s H: %s" % (node.interface.cmd, node.hash_inputs())
+                print "Executing: %s H: %s" % (node.name, node.hash_inputs())
                 # For a disk node, provide it with an appropriate
                 # output directory
                 if node.diskbased:
@@ -323,7 +323,7 @@ class Pipeline(object):
                 self.procs[jobid].parameterization = graph.__dict__['name']
                 self.procs[jobid].output_directory_base = os.path.abspath(outputdir)
                 # Send job to worker, add callback and add to pending results
-                print 'Executing: %s ID: %d WID=%d H:%s' % (self.procs[jobid].interface.cmd,jobid,workerid,self.procs[jobid].hash_inputs())
+                print 'Executing: %s ID: %d WID=%d H:%s' % (self.procs[jobid].name,jobid,workerid,self.procs[jobid].hash_inputs())
                 self.mec.push(dict(task=self.procs[jobid],hashout=self.config['hash_outputdir_names']),targets=workerid,block=True)
                 cmdstr = 'task.execute(hashoutputdir=hashout)'
                 self.pendingresults.append(self.mec.execute(cmdstr,targets=workerid,block=False))

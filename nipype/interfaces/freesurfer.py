@@ -10,6 +10,7 @@ Examples
 See the docstrings for the individual classes for 'working' examples.
 
 """
+__docformat__ = 'restructuredtext'
 
 import os
 from glob import glob
@@ -178,6 +179,14 @@ class Dicom2Nifti(CommandLine):
         self.cmdline =  ' '.join(cmd)
         return self.cmdline,outdir
 
+    def _aggregate_outputs(self):
+        cmd,outdir = self._compile_command()
+        outputs = Bunch()
+        if self.inputs.file_mapping is not None:
+            for field,template in self.inputs.file_mapping:
+                outputs[field] = sorted(glob(os.path.join(outdir,template)))
+        return outputs
+    
     def run(self):
         """Execute the command.
         
@@ -187,18 +196,13 @@ class Dicom2Nifti(CommandLine):
             A `Bunch` object with a copy of self in `interface`
 
          """
-
         # This is expected to populate `command` for _runner to work
-        cmd,outdir = self._compile_command()
+        self._compile_command()
         returncode, out, err = self._runner(cwd='.')
-        outputs = Bunch()
-        if self.inputs.file_mapping is not None:
-            for field,template in self.inputs.file_mapping:
-                outputs[field] = sorted(glob(os.path.join(outdir,template)))
         return  InterfaceResult(runtime=Bunch(returncode=returncode,
                                               stdout=out,
                                               stderr=err),
-                                outputs = outputs,
+                                outputs = self._aggregate_outputs(),
                                 interface=deepcopy(self))
         
 
@@ -293,8 +297,20 @@ class Resample(CommandLine):
             single_cmd = '%s -vs %d %d %d %s %s;' % (self.cmd, vs[0],vs[1],vs[2], f, outfile[i])
             cmd.extend([single_cmd])
         self.cmdline =  ' '.join(cmd)
-        return self.cmdline,outfile
+        return self.cmdline
 
+    def _aggregate_outputs(self):
+        outputs = Bunch(outfile=[])
+        for i,f in enumerate(self.inputs.infile):
+            path,fname = os.path.split(f)
+            f = fname_presuffix(fname,suffix=self.inputs.outfile_postfix)
+            f = os.path.abspath(os.path.join(self.inputs.get('cwd','.'),f))
+            assert glob(f)==[f], 'outputfile %s was not generated'%f
+            outputs.outfile.insert(i,f)
+        if len(outfile)==1:
+            outputs.outfile = outputs.outfile[0]
+        return outputs
+        
     def run(self):
         """Execute the command.
         
@@ -305,14 +321,8 @@ class Resample(CommandLine):
 
         """
         # This is expected to populate `cmdline` for _runner to work
-        cmd,outfile = self._compile_command()
+        self._compile_command()
         returncode, out, err = self._runner(self.inputs.get('cwd','.'))
-        outputs = Bunch(outfile=[])
-        for i,f in enumerate(outfile):
-            assert glob(f)==[f], 'outputfile %s was not generated'%f
-            outputs.outfile.insert(i,f)
-        if len(outfile)==1:
-            outputs.outfile = outputs.outfile[0]
         return  InterfaceResult(runtime=Bunch(returncode=returncode,
                                               stdout=out,
                                               stderr=err),

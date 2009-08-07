@@ -15,7 +15,7 @@ these functions include
     Smooth: smooth with Gaussian kernel
 
 """
-#from __future__ import with_statement
+__docformat__ = 'restructuredtext'
 
 from nipype.interfaces.base import Bunch, setattr_on_read, InterfaceResult
 from nipype.externals.pynifti import load

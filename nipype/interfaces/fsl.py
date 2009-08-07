@@ -17,6 +17,8 @@ See the docstrings for the individual classes (Bet, Fast, etc...) for
 import os
 import subprocess
 from copy import deepcopy
+from glob import glob
+from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (Bunch, CommandLine, setattr_on_read, 
                                     load_template, InterfaceResult)
 
@@ -120,16 +122,19 @@ class Bet(CommandLine):
     def inputs_help(self):
 
         doc = """
-        Optional Parameters
-        -------------------
+        Mandatory Parameters
+        --------------------
         (all default to None and are unset)
         
         infile : /path/to/file
             file to skull strip 
-            --can be set as argument at .run(infile)
+
+        Optional Parameters
+        -------------------
+        (all default to None and are unset)
+        
         outfile : /path/to/outfile
             path/name of skullstripped file
-            --can be set as argument at .run(infile,outfile)
         outline : Bool
 	    generate brain surface outline overlaid onto original image
 	mask : Bool
@@ -238,10 +243,14 @@ class Bet(CommandLine):
                 continue
             print 'option %s not supported'%(opt)
 
-        if inputs['infile']:
-            out_inputs.insert(0, '%s' % inputs['infile'])
-        if inputs['outfile']:
-            out_inputs.insert(1, '%s' % inputs['outfile'])
+        if self.inputs['infile']:
+            out_inputs.insert(0, '%s' % self.inputs['infile'])
+        if self.inputs['outfile']:
+            out_inputs.insert(1, '%s' % self.inputs['outfile'])
+        else:
+            pth,fname = os.path.split(self.inputs['infile'])
+            out_inputs.insert(1, '%s' % os.path.join(self.inputs.get('cwd',pth),
+                                                     fname_presuffix(fname,suffix='_bet')))
                               
         return out_inputs
 
@@ -251,6 +260,39 @@ class Bet(CommandLine):
         allargs =  [self.cmd] + valid_inputs
         self.cmdline = ' '.join(allargs)
 
+    def outputs_help(self):
+
+        doc = """
+        Optional Parameters
+        -------------------
+        (all default to None and are unset)
+        
+        outfile : /path/to/outfile
+            path/name of skullstripped file
+	maskfile : Bool
+	    binary brain mask if generated
+        """
+        print doc
+
+    def _aggregate_outputs(self):
+        outputs = Bunch(outfile = None,
+                        maskfile = None)
+        if self.inputs.outfile:
+            outfile = glob(self.inputs.outfile)
+        else:
+            pth,fname = os.path.split(self.inputs['infile'])
+            outfile = os.path.join(self.inputs.get('cwd',pth),
+                                   fname_presuffix(fname,suffix='_bet'))
+            outfile = glob(outfile)
+        assert len(outfile)==1, "Incorrect number or no output files generated"
+        outputs.outfile = outfile[0]
+        maskfile = fname_presuffix(outfile[0],suffix='_mask')
+        outputs.maskfile = glob(maskfile)
+        if len(outputs.maskfile) > 0:
+            outputs.maskfile = outputs.maskfile[0]
+        else:
+            outputs.maskfile = None
+        return outputs
 
     def run(self):
         """Execute the command.
@@ -265,8 +307,12 @@ class Bet(CommandLine):
         # This is expected to populate `command` for _runner to work
         self._compile_command()
         returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
-        outputs = Bunch(outfile = self.inputs.outfile)
-        return  InterfaceResult(runtime=Bunch(returncode=returncode,
+        if returncode == 0:
+            outputs = self._aggregate_outputs()
+        else:
+            outputs = Bunch()
+        return  InterfaceResult(runtime=Bunch(cmdline=self.cmdline,
+                                              returncode=returncode,
                                               stdout=out,
                                               stderr=err),
                                 outputs = outputs,
