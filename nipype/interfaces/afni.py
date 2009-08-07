@@ -38,6 +38,7 @@ class To3d(CommandLine):
                             epan=None,
                             skip_outliers=None,
                             assume_dicom_mosaic=None,
+                            time=None,
                             )
 
     def _parseinputs(self):
@@ -46,8 +47,6 @@ class To3d(CommandLine):
         Ignore options set to None.
 
         """
-
-        # Time: -time:zt nz nt TR tpattern  OR  -time:tz nt nz TR tpattern
 
 
         out_inputs = []
@@ -71,6 +70,29 @@ class To3d(CommandLine):
                 out_inputs.append('-skip_outliers')
             elif opt is 'assume_dicom_mosaic':
                 out_inputs.append('-assume_dicom_mosaic')
+            elif opt is 'time':
+                # -time:zt nz nt TR tpattern  OR  -time:tz nt nz TR tpattern
+                # time : list
+                #    zt nz nt TR tpattern
+                #    tz nt nz TR tpattern
+                if len(inputs[opt]) != 5:
+                    raise ValueError('time requires five parameters')
+                slice_order = inputs[opt][0]
+                cmd = '-time:%s' % slice_order
+                if slice_order == 'zt':
+                    nz = int(inputs[opt][1])
+                    nt = int(inputs[opt][2])
+                    cmd += ' %d %d' % (nz, nt)
+                elif slice_order == 'tz':
+                    nt = int(inputs[opt][1])
+                    nz = int(inputs[opt][2])
+                    cmd += ' %d %d' % (nt, nz)
+                else:
+                    raise ValueError('Invalid slice input order!')
+                TR = float(inputs[opt][3])
+                tpattern = inputs[opt][4]
+                cmd += ' %f %s' % (TR, tpattern)
+                out_inputs.append(cmd)
             else:
                 print '%s: option %s is not supported!' % (
                     self.__class__.__name__, opt)

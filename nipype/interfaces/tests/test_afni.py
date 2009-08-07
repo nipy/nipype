@@ -33,3 +33,13 @@ def test_To3d():
     cmd = afni.To3d(assume_dicom_mosaic=True)
     cmd._compile_command()
     yield assert_equal, cmd.cmdline, 'to3d -assume_dicom_mosaic'
+    # Test slice time params
+    cmd = afni.To3d()
+    cmd.inputs.time = ['zt', 12, 150, 2000, 'alt+z']
+    cmd._compile_command()
+    yield assert_equal, cmd.cmdline, 'to3d -time:zt 12 150 2000.000000 alt+z'
+    cmd = afni.To3d()
+    cmd.inputs.time = ['tz', 150, 12, 2000, 'alt+z']
+    cmd._compile_command()
+    yield assert_equal, cmd.cmdline, 'to3d -time:tz 150 12 2000.000000 alt+z'
+
