@@ -109,6 +109,7 @@ class To3d(CommandLine):
         allargs =  [self.cmd] + valid_inputs
         self.cmdline = ' '.join(allargs)
 
+
 class Threedrefit(CommandLine):
     """
     """
@@ -206,22 +207,20 @@ class Threedresample(CommandLine):
         [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
              if v is not None]
 
-        for opt in inputs:
-            if opt is 'orient':
-                out_inputs.append('-orient %s' % self.inputs['orient'])
-            elif opt is 'outfile':
-                pass # placeholder to suppress not supported warning
-            elif opt is 'infile':
-                pass # placeholder to suppress not supported warning
-            else:
-                print '%s: option %s is not supported!' % (
-                    self.__class__.__name__, opt)
+        if inputs.has_key('orient'):
+	    val = inputs.pop('orient')
+            out_inputs.append('-orient %s' % val)
+	if inputs.has_key('outfile'):
+	    val = inputs.pop('outfile')
+            out_inputs.append('-outfile %s' % val)
+	if inputs.has_key('infile'):
+	    val = inputs.pop('infile')
+            out_inputs.append('-infile %s' % val)
 
-        if self.inputs['outfile']:
-            out_inputs.append('-prefix %s' % self.inputs['outfile'])
+	if len(inputs) > 0:
+            print '%s: unsupported options: %s' % (
+                self.__class__.__name__, inputs.keys())
 
-        if self.inputs['infile']:
-            out_inputs.append('-inset %s' % self.inputs['infile'])
 
         return out_inputs
 
