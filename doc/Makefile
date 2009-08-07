@@ -11,7 +11,7 @@ PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d _build/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
-.PHONY: help clean html latex changes linkcheck doctest
+.PHONY: help clean html api htmlonly latex changes linkcheck doctest
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -26,10 +26,13 @@ help:
 clean:
 	-rm -rf _build/*
 
-html:
+htmlonly:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."
+
+html: api htmlonly
+	@echo "Build HTML and API finished."
 
 latex:
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) _build/latex
@@ -37,6 +40,10 @@ latex:
 	@echo "Build finished; the LaTeX files are in _build/latex."
 	@echo "Run \`make all-pdf' or \`make all-ps' in that directory to" \
 	      "run these through (pdf)latex."
+
+api:
+	python ../tools/build_modref_templates.py
+	@echo "Build API docs finished."
 
 changes:
 	$(SPHINXBUILD) -b changes $(ALLSPHINXOPTS) _build/changes
