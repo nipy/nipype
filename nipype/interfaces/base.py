@@ -130,6 +130,14 @@ class Bunch(object):
         return self.dict2str(self.__dict__)
 
 
+class InterfaceResult(object):
+    '''Describe the results of .run()-ing a particular Interface'''
+    def __init__(self, interface, runtime, outputs):
+        self.interface = interface
+        self.runtime = runtime
+        self.outputs = outputs
+
+
 class Interface(object):
     """This is the template for Interface objects.
 
@@ -148,12 +156,8 @@ class Interface(object):
         """Execute the command."""
         raise NotImplementedError
 
-    def _runner(self, shell=True, cwd=None):
-        """Performs the call to subprocess module to execute the command."""
-        raise NotImplementedError
-
-    def copy(self):
-        """Return a copy of the interface object."""
+    def _runner(self):
+        """Performs the call to execute the command."""
         raise NotImplementedError
 
     def _populate_inputs(self):
@@ -163,14 +167,10 @@ class Interface(object):
     def _compile_command(self):
         """Generate the command line string from the list of arguments."""
         raise NotImplementedError
-
-
-class InterfaceResult(object):
-    '''Describe the results of .run()-ing a particular Interface'''
-    def __init__(self, interface, runtime, outputs):
-        self.interface = interface
-        self.runtime = runtime
-        self.outputs = outputs
+    
+    def _aggregate_ouputs(self):
+        """Called to populate outputs"""
+        raise NotImplementedError
 
 
 class CommandLine(Interface):
@@ -215,9 +215,9 @@ class CommandLine(Interface):
     >>> lscmd = CommandLine(args=['ls','-l'])
 
     # One way to view your stdout is to print
-    >>> print output.stdout
-    >>> output.returncode
-    >>> print output.stderr
+    >>> print output.runtime.messages
+    >>> output.runtime.returncode
+    >>> print output.runtime.errmessages
 
     Notes
     -----
@@ -277,8 +277,8 @@ class CommandLine(Interface):
         return returncode, out, err
 
     def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=input_field,copy=bool),...]
+        """ Provides information about file inputs to copy or link to
+            cwd.
 
             Example
             -------
@@ -286,3 +286,4 @@ class CommandLine(Interface):
             see `spm.Realign.get_input_info`
         """
         return []
+

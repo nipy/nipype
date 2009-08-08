@@ -200,8 +200,8 @@ class Dicom2Nifti(CommandLine):
         self._compile_command()
         returncode, out, err = self._runner(cwd='.')
         return  InterfaceResult(runtime=Bunch(returncode=returncode,
-                                              stdout=out,
-                                              stderr=err),
+                                              messages=out,
+                                              errmessages=err),
                                 outputs = self._aggregate_outputs(),
                                 interface=deepcopy(self))
         
@@ -324,8 +324,8 @@ class Resample(CommandLine):
         self._compile_command()
         returncode, out, err = self._runner(self.inputs.get('cwd','.'))
         return  InterfaceResult(runtime=Bunch(returncode=returncode,
-                                              stdout=out,
-                                              stderr=err),
+                                              messages=out,
+                                              errmessages=err),
                                 outputs = outputs,
                                 interface=deepcopy(self))
         
@@ -478,8 +478,8 @@ class ReconAll(CommandLine):
         self._compile_command()
         returncode, out, err = self._runner(self.inputs.get('cwd','.'))
         return  InterfaceResult(runtime=Bunch(returncode=returncode,
-                                              stdout=out,
-                                              stderr=err),
+                                              messages=out,
+                                              errmessages=err),
                                 outputs = None,
                                 interface=deepcopy(self))
         
@@ -637,8 +637,8 @@ class BBRegister(CommandLine):
         self._compile_command()
         returncode, out, err = self._runner(self.inputs.get('cwd','.'))
         return  InterfaceResult(runtime=Bunch(returncode=returncode,
-                                              stdout=out,
-                                              stderr=err),
+                                              messages=out,
+                                              errmessages=err),
                                 outputs = self._aggregate_outputs(),
                                 interface=deepcopy(self))
         

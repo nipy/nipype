@@ -71,7 +71,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
             outputs = self._aggregate_outputs()
         return InterfaceResult(runtime=Bunch(cmdline=self.cmdline,
                                              returncode=returncode,
-                                             stdout=out,stderr=err),
+                                             messages=out,errmessages=err),
                                outputs=outputs,
                                interface=deepcopy(self))
 
