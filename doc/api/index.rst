@@ -4,9 +4,7 @@
  API
 #####
 
-.. htmlonly::
-
-   :Release: |version|
-   :Date: |today|
+:Release: |version|
+:Date: |today|
 
 .. include:: generated/gen.rst
