@@ -16,7 +16,9 @@ ALLSPHINXOPTS   = -d _build/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  html      make the HTML documentation"
+	@echo "  api       	make API documents only"
 	@echo "  latex     make the LaTeX, you can set PAPER=a4 or PAPER=letter"
+	@echo "  pdf		make <latex> and run the PDF generation"
 	@echo "  changes   make an overview of all changed/added/deprecated" \
 	      		"items (ChangeLog)"
 	@echo "  linkcheck check all external links for integrity"
@@ -24,26 +26,30 @@ help:
 	@echo "  sf_cburns copy html files to sourceforge (cburns only)"
 
 clean:
-	-rm -rf _build/*
+	-rm -rf _build/* *~ api/generated
 
 htmlonly:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."
 
+api:    
+	python ../tools/build_modref_templates.py
+	@echo "Build API docs finished."
+
 html: api htmlonly
 	@echo "Build HTML and API finished."
 
-latex:
+latex: api
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) _build/latex
 	@echo
 	@echo "Build finished; the LaTeX files are in _build/latex."
 	@echo "Run \`make all-pdf' or \`make all-ps' in that directory to" \
 	      "run these through (pdf)latex."
+pdf: latex
+	cd _build/latex && make all-pdf
 
-api:
-	python ../tools/build_modref_templates.py
-	@echo "Build API docs finished."
+all: html pdf
 
 changes:
 	$(SPHINXBUILD) -b changes $(ALLSPHINXOPTS) _build/changes
