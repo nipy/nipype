@@ -64,7 +64,7 @@ The installation process is similar to other Python packages so it
 will be familiar if you have Python experience.
 
 Unpack the tarball and change into the source directory.  Once in the
-source directory, you can build the neuroimaging package using::
+source directory, you can build the nipype using::
 
     python setup.py install
 
