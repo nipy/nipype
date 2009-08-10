@@ -5,13 +5,13 @@ Exaples  FSL, matlab/SPM , afni
 
 Requires Packages to be installed
 """
-__docformat__ = 'restructuredtext'
 
 import os
 import subprocess
 from copy import deepcopy
 from string import Template
 
+__docformat__ = 'restructuredtext'
 
 class OneTimeProperty(object):
     """A descriptor to make special properties that become normal attributes.
@@ -58,7 +58,7 @@ def setattr_on_read(func):
 
 
 def load_template(name):
-    '''Load a template from the script_templates directory
+    """Load a template from the script_templates directory
 
     Parameters
     ----------
@@ -69,7 +69,7 @@ def load_template(name):
     -------
       template : string.Template
 
-    '''
+    """
 
     full_fname = os.path.join(os.path.dirname(__file__),
                               'script_templates', name)
@@ -78,7 +78,6 @@ def load_template(name):
     template_file.close()
     return template
 
-
 class Bunch(object):
     """ Provide Elegant attribute access
 
@@ -86,6 +85,7 @@ class Bunch(object):
 
     Notes
     -----
+    
     The Bunch pattern came from the Python Cookbook:
     .. [1] A. Martelli, D. Hudgeon, "Collecting a Bunch of Named
     Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
@@ -196,6 +196,7 @@ class CommandLine(Interface):
 
     Returns
     -------
+    
     cmd : CommandLine
         A `CommandLine` object that can be run and/or updated.
 
@@ -221,6 +222,7 @@ class CommandLine(Interface):
 
     Notes
     -----
+    
     When subclassing CommandLine, you will generally override at least:
         _compile_command
 
@@ -237,16 +239,16 @@ class CommandLine(Interface):
 
     def run(self):
         """Execute the command.
-
+        
         Parameters
         ----------
         N/A
-
+        
         Returns
         -------
         results : Bunch
             A `Bunch` object with a copy of self in `interface`
-
+        
         """
 
         # This is expected to populate `command` for _runner to work
@@ -277,13 +279,12 @@ class CommandLine(Interface):
         return returncode, out, err
 
     def get_input_info(self):
-        """ Provides information about file inputs to copy or link to
-            cwd.
-
-            Example
-            -------
-
-            see `spm.Realign.get_input_info`
+        """ Provides information about file inputs to copy or link to cwd.
+        
+        Example
+        -------
+        see `spm.Realign.get_input_info`
+            
         """
         return []
 

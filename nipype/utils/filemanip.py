@@ -69,9 +69,11 @@ def copyfiles(originalfile, newfile,copy=False):
          
     Returns
     -------
-    output : dict
-        dictionary holding 'out', 'err', 'returncode'
+    None
+    
     """
+    if os.path.exists(newfile):
+        return
     if os.name is 'posix' and not copy:
         os.symlink(originalfile,newfile)
     else:

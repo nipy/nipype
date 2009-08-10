@@ -8,7 +8,6 @@ import copy
 import networkx as nx
 import numpy as np
 from time import sleep
-import nipype.pipeline.engine as pe
 
 try:
     from IPython.kernel import client
@@ -72,7 +71,7 @@ class Pipeline(object):
         self.config       = {}
         self.config['workdir'] = '.'
         self.config['use_parameterized_dirs'] = False
-        self.IPython_available = pe.IPython_available
+        self.IPython_available = IPython_available
 
     def connect(self,connection_list):
         """ Wraps the networkx functionality in a more semantically
@@ -227,6 +226,8 @@ class Pipeline(object):
                     outputdir = self.config['workdir']
                     if self.config['use_parameterized_dirs'] and (graph.__dict__['name'] is not ''):
                         outputdir = os.path.join(outputdir,graph.__dict__['name'])
+                    if not os.path.exists(outputdir):
+                        os.mkdir(outputdir)
                     node.output_directory_base = os.path.abspath(outputdir)
                 node.parameterization = graph.__dict__['name']
                 node.run()

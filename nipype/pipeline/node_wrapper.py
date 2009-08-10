@@ -132,10 +132,18 @@ class NodeWrapper(object):
             else:
                 # change the inputs
                 for info in self.interface.get_input_info():
-                    originalfile = self.inputs[info.key]
-                    path,name = os.path.split(originalfile)
-                    newfile = os.path.abspath(os.path.join(outdir,name))
-                    self.inputs[info.key] = newfile
+                    files = self.inputs[info.key]
+                    if type(files) is not type([]):
+                        infiles = [files]
+                    else:
+                        infiles = files
+                    for i,f in enumerate(infiles):
+                        path,name = os.path.split(f)
+                        newfile = os.path.abspath(os.path.join(outdir,name))
+                        if type(files) is not type([]):
+                            self.inputs[info.key] = newfile
+                        else:
+                            self.inputs[info.key][i] = newfile
                 self.run_interface(execute=False)
         else:
             self.run_interface(execute=True)

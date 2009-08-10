@@ -10,7 +10,7 @@
 """
 from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult
 from copy import deepcopy
-from filemanip import copyfiles_to_cwd
+from nipype.utils.filemanip import copyfiles
 import glob
 import os
 
@@ -184,7 +184,7 @@ class DataSink(Interface):
                         tempoutdir = os.path.join(tempoutdir,d)
                         if not os.path.exists(tempoutdir):
                             os.mkdir(tempoutdir)
-                    copyfiles_to_cwd(self.inputs[k],tempoutdir,symlink=False)
+                    copyfiles(self.inputs[k],tempoutdir,symlink=False)
         runtime = Bunch(returncode=0,
                         messages=None,
                         errmessages=None)

@@ -555,6 +555,13 @@ class BBRegister(CommandLine):
                             outfile=None,
                             flags=None)
 
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = [Bunch(key='sourcefile',copy=False)]
+        return info
+    
     def _parseinputs(self):
         """validate bbregister options
         if set to None ignore
@@ -574,6 +581,7 @@ class BBRegister(CommandLine):
                 continue
             if opt is 'contrast_type':
                 out_inputs.extend([inputs[opt]])
+                continue
             if opt is 'outregfile':
                 out_inputs.extend(['--reg',inputs[opt]])
                 continue
@@ -585,9 +593,11 @@ class BBRegister(CommandLine):
                 out_inputs.extend([inputs[opt]])
             print 'option %s not supported'%(opt)
         if self.inputs.outregfile is None:
-            out_inputs.extend(['--reg',fname_presuffix(self.inputs.sourcefile,suffix='reg_%s.dat'%self.inputs_subject_id,use_ext=False)])
+            out_inputs.extend(['--reg',fname_presuffix(self.inputs.sourcefile,
+                                                       suffix='_reg_%s.dat'%self.inputs.subject_id,
+                                                       use_ext=False)])
         if self.inputs.outfile is True:
-            out_inputs.extend(['--o',fname_presuffix(self.inputs.sourcefile,suffix='_bbout'%self.inputs_subject_id)])
+            out_inputs.extend(['--o',fname_presuffix(self.inputs.sourcefile,suffix='_bbout'%self.inputs.subject_id)])
         return out_inputs
 
     def _compile_command(self):
@@ -610,13 +620,13 @@ class BBRegister(CommandLine):
         outputs = Bunch(outregfile=None,
                         outfile=None)
         if self.inputs.outregfile is None:
-            outregile = glob(fname_presuffix(self.inputs.sourcefile,suffix='reg_%s.dat'%self.inputs_subject_id))
+            outregfile = fname_presuffix(self.inputs.sourcefile,suffix='_reg_%s.dat'%self.inputs.subject_id)
         else:
-            outregfile = glob(self.inputs.outregfile)
-        assert len(outregfile)==1, "No output registration file created"
-        outputs.outregfile = outregfile[0]
+            outregfile = self.inputs.outregfile
+        assert len(glob(outregfile))==1, "No output registration file %s created"%outregfile
+        outputs.outregfile = outregfile
         if self.inputs.outfile is True:
-            outfile = glob(fname_presuffix(self.inputs.sourcefile,suffix='_bbout'%self.inputs_subject_id))
+            outfile = glob(fname_presuffix(self.inputs.sourcefile,suffix='_bbout'%self.inputs.subject_id))
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
         if type(self.inputs.outfile) == type(''):

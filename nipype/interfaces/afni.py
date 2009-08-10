@@ -1,19 +1,21 @@
 """Provide interface classed to AFNI commands."""
+__docformat__ = 'restructuredtext'
 
 
 from nipype.interfaces.base import Bunch, CommandLine
 
 
 class To3d(CommandLine):
-    """
+    """ `To3d` converts ...
+
+    This is an afni program
 
     Examples
     --------
-
     >>> to3d = afni.To3d(anat=True)
     >>> to3d.inputs.datum = 'float'
     >>> to3d.run()
-
+    
     """
 
     @property
