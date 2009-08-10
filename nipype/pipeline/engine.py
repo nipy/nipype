@@ -5,15 +5,17 @@ Base class for nipy.pipeline processing modules
 import hashlib
 import os
 import copy
+from time import sleep
+from warnings import warn
+
 import networkx as nx
 import numpy as np
-from time import sleep
 
 try:
     from IPython.kernel import client
     IPython_available = True
 except:
-    print "Ipython kernel not found"
+    warn("Ipython kernel not found", ImportWarning)
     IPython_available = False
 
 # unused from matplotlib import mlab
