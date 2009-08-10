@@ -6,12 +6,14 @@ from nipype.interfaces.base import Bunch, CommandLine
 
 
 class To3d(CommandLine):
-    """ `To3d` converts ...
+    """Create 3D dataset from 2D image files.
 
-    This is an afni program
+    Uses the AFNI command-line tool 'to3d'.
 
     Examples
     --------
+    Basic usage examples.
+
     >>> to3d = afni.To3d(anat=True)
     >>> to3d.inputs.datum = 'float'
     >>> to3d.run()
@@ -25,8 +27,6 @@ class To3d(CommandLine):
 
     def inputs_help(self):
         doc = """
-          Optional Parameters
-          -------------------
         """
         print doc
 

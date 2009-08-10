@@ -281,8 +281,8 @@ class CommandLine(Interface):
     def get_input_info(self):
         """ Provides information about file inputs to copy or link to cwd.
         
-        Example
-        -------
+        Notes
+        -----
         see `spm.Realign.get_input_info`
             
         """
