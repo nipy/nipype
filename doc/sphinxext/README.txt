@@ -18,3 +18,6 @@ base.
   * docscrape.py
   * docscrape_sphinx.py
   * numpydoc.py
+
+* From matplotlib:
+  * inheritance_diagram.py
