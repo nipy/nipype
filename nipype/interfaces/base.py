@@ -36,7 +36,7 @@ class OneTimeProperty(object):
         if obj is None:
             # Being called on the class, return the original function. This way,
             # introspection works on the class.
-            return func
+            return self.getter
 
         val = self.getter(obj)
         print "** setattr_on_read - loading '%s'" % self.name  # dbg
