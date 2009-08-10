@@ -172,8 +172,6 @@ def scans_for_fnames(fnames):
 class Realign(SpmMatlabCommandLine):
     """use spm_realign for estimating within modality rigid body alignment
     
-    SPM docs
-    --------
     This  routine  realigns a time-series of images acquired from the
     same  subject  using  a  least  squares approach and a 6 parameter
     (rigid  body)spatial  transformation.  The  first image  in  the
@@ -232,66 +230,62 @@ class Realign(SpmMatlabCommandLine):
         return 'spm_realign'
         
     def inputs_help(self):
-        doc = """
-            Mandatory Parameters
-            -------------------- 
-            infile : list
-                list of filenames to realign
+        """
+        Parameters
+        ----------
+        infile : list
+            list of filenames to realign
 
-            Optional Parameters
-            -------------------
-            (all default to None and are unset)
-
-            write : bool
-                if True updates headers and generates
-                resliced files prepended with  'r'
-                if False just updates header files
-                (default == True, will reslice)
-            quality : float
-                0.1 = fastest, 1.0 = most precise
-                (spm5 default = 0.9)
-            fwhm : float
-                full width half maximum gaussian kernel 
-                used to smoth images before realigning
-                (spm default = 5.0)
-            separation : float
-                separation in mm used to sample images
-                (spm default = 4.0)
-            register_to_mean: Bool
-                rtm if True uses a two pass method
-                realign -> calc mean -> realign all to mean
-                (spm default = False)
-            weight_img : file
-                filename of weighting image
-                if empty, no weighting 
-                (spm default = None)
-            wrap : list
-                Check if interpolation should wrap in [x,y,z]
-                (spm default [0,0,0])
-            interp: float
-                degree of b-spline used for interpolation
-                (spm default = 2.0)
-            write_which : list of len()==2
-                if write is true, 
-                [inputimgs, mean]
-                [2,0] reslices all images, but not mean
-                [2,1] reslices all images, and mean
-                [1,0] reslices imgs 2:end, but not mean
-                [0,1] doesnt reslice any but generates resliced mean
-            write_interp: float
-                degree of b-spline used for interpolation when
-                writing resliced images
-                (spm default = 4.0)
-            write_wrap : list
-                Check if interpolation should wrap in [x,y,z]
-                (spm default [0,0,0])
-            write_mask: bool
-                if True, mask output image
-                if False, do not mask
-            flags : USE AT OWN RISK
-                #eg:'flags':{'eoptions':{'suboption':value}}
-            """
-        print doc
+        write : bool, optional
+            if True updates headers and generates
+            resliced files prepended with  'r'
+            if False just updates header files
+            (default == True, will reslice)
+        quality : float, optional
+            0.1 = fastest, 1.0 = most precise
+            (spm5 default = 0.9)
+        fwhm : float, optional
+            full width half maximum gaussian kernel 
+            used to smoth images before realigning
+            (spm default = 5.0)
+        separation : float, optional
+            separation in mm used to sample images
+            (spm default = 4.0)
+        register_to_mean: Bool, optional
+            rtm if True uses a two pass method
+            realign -> calc mean -> realign all to mean
+            (spm default = False)
+        weight_img : file, optional
+            filename of weighting image
+            if empty, no weighting 
+            (spm default = None)
+        wrap : list, optional
+            Check if interpolation should wrap in [x,y,z]
+            (spm default [0,0,0])
+        interp: float, optional
+            degree of b-spline used for interpolation
+            (spm default = 2.0)
+        write_which : list of len()==2, optional
+            if write is true, 
+            [inputimgs, mean]
+            [2,0] reslices all images, but not mean
+            [2,1] reslices all images, and mean
+            [1,0] reslices imgs 2:end, but not mean
+            [0,1] doesnt reslice any but generates resliced mean
+        write_interp: float, optional
+            degree of b-spline used for interpolation when
+            writing resliced images
+            (spm default = 4.0)
+        write_wrap : list, optional
+            Check if interpolation should wrap in [x,y,z]
+            (spm default [0,0,0])
+        write_mask: bool, optional
+            if True, mask output image
+            if False, do not mask
+        flags : USE AT OWN RISK, optional
+            #eg:'flags':{'eoptions':{'suboption':value}}
+        """
+        print self.inputs_help.__doc__
 
     def _populate_inputs(self):
         """ Initializes the input fields of this interface.
