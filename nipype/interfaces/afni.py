@@ -14,10 +14,10 @@ class To3d(CommandLine):
     --------
     Basic usage examples.
 
-    >>> to3d = afni.To3d(anat=True)
+    >>> to3d = afni.To3d(datatype="anat")
     >>> to3d.inputs.datum = 'float'
     >>> to3d.run()
-    
+
     """
 
     @property
@@ -32,16 +32,14 @@ class To3d(CommandLine):
 
     def _populate_inputs(self):
         """Initialize the inputs attribute."""
-        self.inputs = Bunch(infiles=None,
-                            anat=None,
-                            datum=None,
-                            session=None,
-                            prefix=None,
-                            epan=None,
+        self.inputs = Bunch(datatype=None,
                             skip_outliers=None,
                             assume_dicom_mosaic=None,
-                            time=None,
-                            )
+                            datum=None,
+                            time_dependencies=None,
+                            session=None,
+                            prefix=None,
+                            infiles=None)
 
     def _parseinputs(self):
         """Parse valid input options for To3d command.
@@ -50,58 +48,91 @@ class To3d(CommandLine):
 
         """
 
-
         out_inputs = []
         inputs = {}
         [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
              if v is not None]
-        for opt in inputs:
-            if opt is 'infiles':
-                pass # placeholder to suppress not supported warning
-            elif opt is 'anat':
-                out_inputs.append('-anat')
-            elif opt is 'datum':
-                out_inputs.append('-datum %s' % inputs[opt])
-            elif opt is 'session':
-                out_inputs.append('-session %s' % inputs[opt])
-            elif opt is 'prefix':
-                out_inputs.append('-prefix %s' % inputs[opt])
-            elif opt is 'epan':
-                out_inputs.append('-epan')
-            elif opt is 'skip_outliers':
-                out_inputs.append('-skip_outliers')
-            elif opt is 'assume_dicom_mosaic':
-                out_inputs.append('-assume_dicom_mosaic')
-            elif opt is 'time':
-                # -time:zt nz nt TR tpattern  OR  -time:tz nt nz TR tpattern
-                # time : list
-                #    zt nz nt TR tpattern
-                #    tz nt nz TR tpattern
-                if len(inputs[opt]) != 5:
-                    raise ValueError('time requires five parameters')
-                slice_order = inputs[opt][0]
-                cmd = '-time:%s' % slice_order
-                if slice_order == 'zt':
-                    nz = int(inputs[opt][1])
-                    nt = int(inputs[opt][2])
-                    cmd += ' %d %d' % (nz, nt)
-                elif slice_order == 'tz':
-                    nt = int(inputs[opt][1])
-                    nz = int(inputs[opt][2])
-                    cmd += ' %d %d' % (nt, nz)
-                else:
-                    raise ValueError('Invalid slice input order!')
-                TR = float(inputs[opt][3])
-                tpattern = inputs[opt][4]
-                cmd += ' %f %s' % (TR, tpattern)
-                out_inputs.append(cmd)
-            else:
-                print '%s: option %s is not supported!' % (
-                    self.__class__.__name__, opt)
 
-        # Handle positional arguments independently
-        if self.inputs['infiles']:
-            out_inputs.append('%s' % self.inputs['infiles'])
+        if inputs.has_key('datatype'):
+            val = inputs.pop('datatype')
+            out_inputs.append('-%s' % val)
+        if inputs.has_key('skip_outliers'):
+            val = inputs.pop('skip_outliers')
+            out_inputs.append('-skip_outliers')
+        if inputs.has_key('assume_dicom_mosaic'):
+            val = inputs.pop('assume_dicom_mosaic')
+            out_inputs.append('-assume_dicom_mosaic')
+        if inputs.has_key('datum'):
+            val = inputs.pop('datum')
+            out_inputs.append('-datum %s' % val)
+        if inputs.has_key('time_dependencies'):
+            val = inputs.pop('time_dependencies')
+
+            # -time:zt nz nt TR tpattern  OR  -time:tz nt nz TR tpattern
+            # time : list
+            #    zt nz nt TR tpattern
+            #    tz nt nz TR tpattern
+            if val.has_key('slice_order'):
+                valsub = val.pop('slice_order')
+                out_inputs.append('-time:%s' % valsub)
+            else:
+                valsub=None
+                print('Warning: slice_order required for time_dependencies')
+
+            if valsub is 'zt':
+
+                if val.has_key('nz'):
+                    valsub = val.pop('nz')
+                    out_inputs.append('%s' % str(valsub))
+                else:
+                    print('Warning: nz required for time_dependencies')
+                if val.has_key('nt'):
+                    valsub = val.pop('nt')
+                    out_inputs.append('%s' % str(valsub))
+                else:
+                    print('Warning: nt required for time_dependencies')
+
+            if valsub is 'tz':
+
+                if val.has_key('nt'):
+                    valsub = val.pop('nt')
+                    out_inputs.append('%s' % str(valsub))
+                else:
+                    print('Warning: nz required for time_dependencies')
+                if val.has_key('nz'):
+                    valsub = val.pop('nz')
+                    out_inputs.append('%s' % str(valsub))
+                else:
+                    print('Warning: nt required for time_dependencies')
+
+            if val.has_key('TR'):
+                valsub = val.pop('TR')
+                out_inputs.append('%s' % str(valsub))
+            else:
+                print('Warning: TR required for time_dependencies')
+            if val.has_key('tpattern'):
+                valsub = val.pop('tpattern')
+                out_inputs.append('%s' % valsub)
+            else:
+                print('Warning: tpattern required for time_dependencies')
+
+            if len(val) > 0:
+                print '%s: unsupported time_dependencies options: %s' % (
+                    self.__class__.__name__, val.keys())
+
+        if inputs.has_key('session'):
+            val = inputs.pop('session')
+            out_inputs.append('-session %s' % val)
+        if inputs.has_key('prefix'):
+            val = inputs.pop('prefix')
+            out_inputs.append('-prefix %s' % val)
+        if inputs.has_key('infiles'):
+            val = inputs.pop('infiles')
+            out_inputs.append('%s' % val)
+
+        if len(inputs) > 0:
+            print '%s: unsupported options: %s' % (
+                self.__class__.__name__, inputs.keys())
 
         return out_inputs
 
@@ -147,24 +178,26 @@ class Threedrefit(CommandLine):
         inputs = {}
         [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
              if v is not None]
-        for opt in inputs:
-            if opt is 'deoblique':
-                out_inputs.append('-deoblique')
-            elif opt is 'xorigin':
-                out_inputs.append('-xorigin %s' % inputs[opt])
-            elif opt is 'yorigin':
-                out_inputs.append('-yorigin %s' % inputs[opt])
-            elif opt is 'zorigin':
-                out_inputs.append('-zorigin %s' % inputs[opt])
-            elif opt is 'infile':
-                pass # placeholder to suppress not supported warning
-            else:
-                print '%s: option %s is not supported!' % (
-                    self.__class__.__name__, opt)
 
-        # Handle positional arguments independently
-        if self.inputs['infile']:
-            out_inputs.append('%s' % self.inputs['infile'])
+        if inputs.has_key('deoblique'):
+            val = inputs.pop('deoblique')
+            out_inputs.append('-deoblique')
+        if inputs.has_key('xorigin'):
+            val = inputs.pop('xorigin')
+            out_inputs.append('-xorigin %s' % val)
+        if inputs.has_key('yorigin'):
+            val = inputs.pop('yorigin')
+            out_inputs.append('-yorigin %s' % val)
+        if inputs.has_key('zorigin'):
+            val = inputs.pop('zorigin')
+            out_inputs.append('-zorigin %s' % val)
+        if inputs.has_key('infile'):
+            val = inputs.pop('infile')
+            out_inputs.append('%s' % val)
+
+        if len(inputs) > 0:
+            print '%s: unsupported options: %s' % (
+                self.__class__.__name__, inputs.keys())
 
         return out_inputs
 
@@ -193,6 +226,7 @@ class Threedresample(CommandLine):
 
     def _populate_inputs(self):
         """Initialize the inputs attribute."""
+
         self.inputs = Bunch(orient=None,
                             outfile=None,
                             infile=None)
@@ -210,19 +244,18 @@ class Threedresample(CommandLine):
              if v is not None]
 
         if inputs.has_key('orient'):
-	    val = inputs.pop('orient')
+            val = inputs.pop('orient')
             out_inputs.append('-orient %s' % val)
-	if inputs.has_key('outfile'):
-	    val = inputs.pop('outfile')
+        if inputs.has_key('outfile'):
+            val = inputs.pop('outfile')
             out_inputs.append('-outfile %s' % val)
-	if inputs.has_key('infile'):
-	    val = inputs.pop('infile')
+        if inputs.has_key('infile'):
+            val = inputs.pop('infile')
             out_inputs.append('-infile %s' % val)
 
-	if len(inputs) > 0:
+        if len(inputs) > 0:
             print '%s: unsupported options: %s' % (
                 self.__class__.__name__, inputs.keys())
-
 
         return out_inputs
 
