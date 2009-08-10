@@ -17,7 +17,8 @@ these functions include
 """
 __docformat__ = 'restructuredtext'
 
-from nipype.interfaces.base import Bunch, setattr_on_read, InterfaceResult
+from nipype.interfaces.base import Bunch, InterfaceResult
+from nipype.utils import setattr_on_read
 from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import fltcols, MatlabCommandLine
 from nipype.utils.filemanip import fname_presuffix, fnames_presuffix
