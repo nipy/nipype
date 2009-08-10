@@ -14,8 +14,9 @@ __docformat__ = 'restructuredtext'
 
 import os
 from glob import glob
-from nipype.interfaces.base import (Bunch, CommandLine, InterfaceResult, setattr_on_read)
+from nipype.interfaces.base import Bunch, CommandLine, InterfaceResult
 from nipype.utils.filemanip import fname_presuffix
+from nipype.utils import setattr_on_read
 from copy import deepcopy
 
 def freesurferversion():

@@ -19,9 +19,9 @@ import subprocess
 from copy import deepcopy
 from glob import glob
 from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.base import (Bunch, CommandLine, setattr_on_read, 
+from nipype.interfaces.base import (Bunch, CommandLine, 
                                     load_template, InterfaceResult)
-
+from nipype.utils import setattr_on_read
 
 def fslversion():
     """Check for fsl version on system
