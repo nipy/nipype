@@ -25,16 +25,28 @@ SciPy_ 0.7 or later
 NetworkX_ 1.0dev
   Our releases will depend on a release of NetworkX.
 
+IPython_ 0.10
+  Interactive python environment. This is necessary for the parallel
+  components of the pipeline engine.
+  
+    * The IPython.kernel (parallel computing component) has the
+      following dependencies:
+      * `Twisted <http://twistedmatrix.com/trac/>`_
+      * zope.interface: which is also a dependecy of Twisted and was
+      installed automatically for me when I installed Twisted.
+
 
 Strong Recommandations
 ~~~~~~~~~~~~~~~~~~~~~~
 
-IPython_
-  Interactive python environment. This is necessary for the parallel
-  components of the pipeline engine.
-
 Matplotlib_
   Python plotting library.
+
+Sphinx_
+  Required for building the documentation
+
+`Graphviz <http://www.graphviz.org/>`_
+  Required for building the documentation
 
 
 Getting the latest release

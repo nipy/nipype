@@ -43,27 +43,11 @@ Checking out the latest version
 
 To check out the latest version of nipy you need subversion_ ::
 
-    svn co https://nipy.svn.sourceforge.net/svnroot/nipy nipy
+    svn co https://nipy.svn.sourceforge.net/svnroot/nipy/nipype/trunk/ nipype
 
-There are two methods to install a development version of nipype.  For
-both methods, build the extensions in place::
+Unpack the tarball and change into the source directory.  Once in the
+source directory, you can build the nipype using::
 
-    python setup.py build_ext --inplace
-
-Then you can either:
-
-#. Use the ``mynipy`` script in the tools directory of the nipy
-   source.  There are directions and examples in the docstring of that
-   file, but basically it updates a symbolic link in your
-   *site-packages* directory to the inplace build of your source.  The
-   advantage of this method is it does not require any modifications of
-   your PYTHONPATH.
-
-#. Place the source directory in your PYTHONPATH.
-
-With either method, all of the modifications made to your source tree
-will be picked up when nipy is imported.
-
-
+    python setup.py install
 
 .. include:: doc/links_names.txt
