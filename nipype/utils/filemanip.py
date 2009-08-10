@@ -72,8 +72,6 @@ def copyfiles(originalfile, newfile,copy=False):
     None
     
     """
-    if os.path.exists(newfile):
-        return
     if os.name is 'posix' and not copy:
         os.symlink(originalfile,newfile)
     else:

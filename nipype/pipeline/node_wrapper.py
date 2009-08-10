@@ -110,7 +110,8 @@ class NodeWrapper(object):
                     for i,f in enumerate(infiles):
                         path,name = os.path.split(f)
                         newfile = os.path.abspath(os.path.join(outdir,name))
-                        copyfiles(f,newfile,copy=info.copy)
+                        if not os.path.exists(newfile):
+                            copyfiles(f,newfile,copy=info.copy)
                         if type(files) is not type([]):
                             self.inputs[info.key] = newfile
                         else:

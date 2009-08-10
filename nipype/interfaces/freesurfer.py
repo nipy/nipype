@@ -621,7 +621,9 @@ class BBRegister(CommandLine):
         outputs = Bunch(outregfile=None,
                         outfile=None)
         if self.inputs.outregfile is None:
-            outregfile = fname_presuffix(self.inputs.sourcefile,suffix='_reg_%s.dat'%self.inputs.subject_id)
+            outregfile = fname_presuffix(self.inputs.sourcefile,
+                                         suffix='_reg_%s.dat'%self.inputs.subject_id,
+                                         use_ext=False)
         else:
             outregfile = self.inputs.outregfile
         assert len(glob(outregfile))==1, "No output registration file %s created"%outregfile
