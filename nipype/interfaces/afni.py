@@ -51,7 +51,7 @@ class To3d(CommandLine):
         out_inputs = []
         inputs = {}
         [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
-             if v is not None]
+            if v is not None]
 
         if inputs.has_key('datatype'):
             val = inputs.pop('datatype')
@@ -67,13 +67,16 @@ class To3d(CommandLine):
             out_inputs.append('-datum %s' % val)
         if inputs.has_key('time_dependencies'):
             val = inputs.pop('time_dependencies')
+            inputssub = {}
+            [inputssub.update({k:v}) for k, v in val.iteritems() \
+                if v is not None]
 
             # -time:zt nz nt TR tpattern  OR  -time:tz nt nz TR tpattern
             # time : list
             #    zt nz nt TR tpattern
             #    tz nt nz TR tpattern
-            if val.has_key('slice_order'):
-                valsub = val.pop('slice_order')
+            if inputssub.has_key('slice_order'):
+                valsub = inputssub.pop('slice_order')
                 out_inputs.append('-time:%s' % valsub)
             else:
                 valsub=None
@@ -81,44 +84,44 @@ class To3d(CommandLine):
 
             if valsub is 'zt':
 
-                if val.has_key('nz'):
-                    valsub = val.pop('nz')
+                if inputssub.has_key('nz'):
+                    valsub = inputssub.pop('nz')
                     out_inputs.append('%s' % str(valsub))
                 else:
                     print('Warning: nz required for time_dependencies')
-                if val.has_key('nt'):
-                    valsub = val.pop('nt')
+                if inputssub.has_key('nt'):
+                    valsub = inputssub.pop('nt')
                     out_inputs.append('%s' % str(valsub))
                 else:
                     print('Warning: nt required for time_dependencies')
 
             if valsub is 'tz':
 
-                if val.has_key('nt'):
-                    valsub = val.pop('nt')
+                if inputssub.has_key('nt'):
+                    valsub = inputssub.pop('nt')
                     out_inputs.append('%s' % str(valsub))
                 else:
                     print('Warning: nz required for time_dependencies')
-                if val.has_key('nz'):
-                    valsub = val.pop('nz')
+                if inputssub.has_key('nz'):
+                    valsub = inputssub.pop('nz')
                     out_inputs.append('%s' % str(valsub))
                 else:
                     print('Warning: nt required for time_dependencies')
 
-            if val.has_key('TR'):
-                valsub = val.pop('TR')
+            if inputssub.has_key('TR'):
+                valsub = inputssub.pop('TR')
                 out_inputs.append('%s' % str(valsub))
             else:
                 print('Warning: TR required for time_dependencies')
-            if val.has_key('tpattern'):
-                valsub = val.pop('tpattern')
+            if inputssub.has_key('tpattern'):
+                valsub = inputssub.pop('tpattern')
                 out_inputs.append('%s' % valsub)
             else:
                 print('Warning: tpattern required for time_dependencies')
 
-            if len(val) > 0:
+            if len(inputssub) > 0:
                 print '%s: unsupported time_dependencies options: %s' % (
-                    self.__class__.__name__, val.keys())
+                    self.__class__.__name__, inputssub.keys())
 
         if inputs.has_key('session'):
             val = inputs.pop('session')
