@@ -103,18 +103,19 @@ class NodeWrapper(object):
                 # copy files over and change the inputs
                 for info in self.interface.get_input_info():
                     files = self.inputs[info.key]
-                    if type(files) is not type([]):
-                        infiles = [files]
-                    else:
-                        infiles = files
-                    for i,f in enumerate(infiles):
-                        newfile = fname_presuffix(f,newpath=outdir)
-                        if not os.path.exists(newfile):
-                            copyfiles(f,newfile,copy=info.copy)
+                    if files is not None:
                         if type(files) is not type([]):
-                            self.inputs[info.key] = newfile
+                            infiles = [files]
                         else:
-                            self.inputs[info.key][i] = newfile
+                            infiles = files
+                        for i,f in enumerate(infiles):
+                            newfile = fname_presuffix(f,newpath=outdir)
+                            if not os.path.exists(newfile):
+                                copyfiles(f,newfile,copy=info.copy)
+                            if type(files) is not type([]):
+                                self.inputs[info.key] = newfile
+                            else:
+                                self.inputs[info.key][i] = newfile
                 self.run_interface(execute=True)
                 if type(self.output.runtime) == type([]):
                     returncode = 0
@@ -133,16 +134,19 @@ class NodeWrapper(object):
                 # change the inputs
                 for info in self.interface.get_input_info():
                     files = self.inputs[info.key]
-                    if type(files) is not type([]):
-                        infiles = [files]
-                    else:
-                        infiles = files
-                    for i,f in enumerate(infiles):
-                        newfile = fname_presuffix(f,newpath=outdir)
+                    if files is not None:
                         if type(files) is not type([]):
-                            self.inputs[info.key] = newfile
+                            infiles = [files]
                         else:
-                            self.inputs[info.key][i] = newfile
+                            infiles = files
+                        for i,f in enumerate(infiles):
+                            newfile = fname_presuffix(f,newpath=outdir)
+                            if not os.path.exists(newfile):
+                                copyfiles(f,newfile,copy=info.copy)
+                            if type(files) is not type([]):
+                                self.inputs[info.key] = newfile
+                            else:
+                                self.inputs[info.key][i] = newfile
                 self.run_interface(execute=False)
         else:
             self.run_interface(execute=True)
