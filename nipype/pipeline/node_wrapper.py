@@ -108,7 +108,7 @@ class NodeWrapper(object):
                     else:
                         infiles = files
                     for i,f in enumerate(infiles):
-                        newfile = fname_presuffix(f,path=outdir)
+                        newfile = fname_presuffix(f,newpath=outdir)
                         if not os.path.exists(newfile):
                             copyfiles(f,newfile,copy=info.copy)
                         if type(files) is not type([]):
@@ -138,7 +138,7 @@ class NodeWrapper(object):
                     else:
                         infiles = files
                     for i,f in enumerate(infiles):
-                        newfile = fname_presuffix(f,path=outdir)
+                        newfile = fname_presuffix(f,newpath=outdir)
                         if type(files) is not type([]):
                             self.inputs[info.key] = newfile
                         else:

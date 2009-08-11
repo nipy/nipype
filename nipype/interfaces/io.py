@@ -26,7 +26,7 @@ class DataSource(Interface):
         self.inputs.update(**inputs)
 
     def inputs_help(self):
-        doc = """
+        """
             Parameters
             --------------------
             (all default to None)
@@ -56,7 +56,7 @@ class DataSource(Interface):
                 In the above examples, the output fields of this
                 object will be the names 'anat', 'bold', etc.,.
             """
-        print doc
+        print self.inputs_help.__doc__
         
     def _populate_inputs(self):
         self.inputs = Bunch(base_directory=None,
@@ -66,9 +66,9 @@ class DataSource(Interface):
                             subject_info=None)
 
     def outputs_help(self):
-        doc = """
-            Mandatory parameters
-            --------------------
+        """
+            Parameters
+            ----------
 
             (all default to None)
 
@@ -81,7 +81,7 @@ class DataSource(Interface):
             inputs_help() for description of how to specify output
             fields 
             """
-        print doc
+        print self.outputs_help.__doc__
         
     def aggregate_outputs(self):
         outputs = Bunch(subject_id=None)
