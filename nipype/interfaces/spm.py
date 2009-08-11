@@ -196,7 +196,9 @@ def scans_for_fnames(fnames):
     n_sess = len(fnames)
     sess_scans = np.zeros((1,n_sess), dtype=object)
     for sess in range(n_sess):
-        sess_scans[0,sess] = '%s,1'%(fnames[sess]) #scans_for_fname(fnames[sess])
+        scans =  np.zeros((1, 1), dtype=object)
+        scans[0] = '%s,1'%(fnames[sess])
+        sess_scans[0,sess] = scans #scans_for_fname(fnames[sess])
     return sess_scans
 
 class Realign(SpmMatlabCommandLine):
