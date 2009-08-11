@@ -5,18 +5,20 @@ import os, re
 import hashlib
 import shutil
 
-def fname_presuffix(fname, prefix='', suffix='', use_ext=True):
+def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     pth, fname = os.path.split(fname)
     fname, ext = os.path.splitext(fname)
     if not use_ext:
         ext = ''
-    return os.path.join(pth, prefix+fname+suffix+ext)
+    if newpath is not None:
+        pth = os.path.abspath(newpath)
+     return os.path.join(pth, prefix+fname+suffix+ext)
 
 
-def fnames_presuffix(fnames, prefix='', suffix='', use_ext=True):
+def fnames_presuffix(fnames, prefix='', suffix='', newpath=None,use_ext=True):
     f2 = []
     for fname in fnames:
-        f2.append(fname_presuffix(fname, prefix, suffix, use_ext))
+        f2.append(fname_presuffix(fname, prefix, suffix, newpath, use_ext))
     return f2
 
 def md5file(filename, excludeline="", includeline=""):
