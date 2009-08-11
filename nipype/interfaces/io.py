@@ -83,7 +83,7 @@ class DataSource(Interface):
             """
         print doc
         
-    def _aggregate_outputs(self):
+    def aggregate_outputs(self):
         outputs = Bunch(subject_id=None)
         outputs.subject_id = self.inputs.subject_id
         subjdir = self.inputs.subject_directory
@@ -112,7 +112,7 @@ class DataSource(Interface):
         runtime = Bunch(returncode=0,
                         messages=None,
                         errmessages=None)
-        outputs=self._aggregate_outputs()
+        outputs=self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
 
     
@@ -157,7 +157,7 @@ class DataSink(Interface):
             """
         print doc
         
-    def _aggregate_outputs(self):
+    def aggregate_outputs(self):
         outputs = Bunch()
         return Bunch()
 
@@ -188,6 +188,6 @@ class DataSink(Interface):
         runtime = Bunch(returncode=0,
                         messages=None,
                         errmessages=None)
-        outputs=self._aggregate_outputs()
+        outputs=self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
 

@@ -12,7 +12,7 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
         ext = ''
     if newpath is not None:
         pth = os.path.abspath(newpath)
-     return os.path.join(pth, prefix+fname+suffix+ext)
+    return os.path.join(pth, prefix+fname+suffix+ext)
 
 
 def fnames_presuffix(fnames, prefix='', suffix='', newpath=None,use_ext=True):
