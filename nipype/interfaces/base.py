@@ -72,20 +72,29 @@ class Bunch(object):
     def dictcopy(self):
         return deepcopy(self.__dict__)
 
-    def dict2str(self,anydict):
-        """ Converts a dict to an ordered representation """
+    def dict2str(self, anydict):
+        # Converts a dict to an ordered representation
         outstr = '{'
         for f in sorted(anydict):
             if type(anydict[f]) is not type({}):
-                outstr = ''.join((outstr,str(f),':',str(anydict[f]),',\n'))
+                outstr = ''.join((outstr,str(f), ':', str(anydict[f]),',\n'))
             else:
-                outstr = ''.join((outstr,str(f),':',self.dict2str(anydict[f]),',\n'))
+                outstr = ''.join((outstr,str(f), ':', 
+                                  self.dict2str(anydict[f]),',\n'))
         outstr = ''.join((outstr,'}'))
         return outstr
 
     def __str__(self):
         return self.dict2str(self.__dict__)
 
+    def __repr__(self):
+        outstr = 'Bunch('
+        pairs = []
+        for k, v in self.iteritems():
+            pairs.append('%s=%s, ' % (k, v))
+        outstr += ''.join(pairs)
+        outstr += ')'
+        return outstr
 
 class InterfaceResult(object):
     '''Describe the results of .run()-ing a particular Interface'''
