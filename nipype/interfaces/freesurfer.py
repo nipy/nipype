@@ -158,7 +158,7 @@ class Dicom2Nifti(CommandLine):
         if subjid is None:
             path,fname = os.path.split(valid_inputs['dicomfiles'][0])
             subjid = fname.split('-')[0]
-        if self.input.subject_dir_template is not None:
+        if self.inputs.subject_dir_template is not None:
             subjid  = self.inputs.subject_dir_template % subjid
         basedir=self.inputs.base_output_dir
         if basedir is None:
