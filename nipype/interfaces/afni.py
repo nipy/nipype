@@ -267,3 +267,5 @@ class Threedresample(CommandLine):
         valid_inputs = self._parseinputs()
         allargs =  [self.cmd] + valid_inputs
         self.cmdline = ' '.join(allargs)
+
+
