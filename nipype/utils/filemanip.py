@@ -80,3 +80,16 @@ def copyfiles(originalfile, newfile,copy=False):
         shutil.copyfile(originalfile, newfile)
 
 
+def filename_to_list(filename):
+    if type(filename) == type(''):
+        return [filename]
+    elif type(filename) == type([]):
+        return filename
+    else:
+        return None
+
+def list_to_filename(filelist):
+    if len(filelist) == 1:
+        return filelist[0]
+    else:
+        return filelist
