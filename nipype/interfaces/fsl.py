@@ -41,13 +41,13 @@ def fslversion():
     # /path/to/fsl/etc/fslversion
     clout = CommandLine('which fsl').run()
 
-    if clout.returncode is not 0:
+    if clout.runtime.returncode is not 0:
         # fsl not found
         return None
-    out = clout.stdout
+    out = clout.runtime.messages
     basedir = os.path.split(os.path.split(out)[0])[0]
     clout = CommandLine('cat %s/etc/fslversion'%(basedir)).run()
-    out = clout.stdout
+    out = clout.runtime.messages
     return out.strip('\n')
 
 
@@ -278,15 +278,14 @@ class Bet(CommandLine):
         outputs = Bunch(outfile = None,
                         maskfile = None)
         if self.inputs.outfile:
-            outfile = glob(self.inputs.outfile)
+            outfile = self.inputs.outfile
         else:
             pth,fname = os.path.split(self.inputs['infile'])
             outfile = os.path.join(self.inputs.get('cwd',pth),
                                    fname_presuffix(fname,suffix='_bet'))
-            outfile = glob(outfile)
-        assert len(outfile)==1, "Incorrect number or no output files generated"
-        outputs.outfile = outfile[0]
-        maskfile = fname_presuffix(outfile[0],suffix='_mask')
+        assert len(glob(outfile))==1, "Incorrect number or no output files %s generated"%outfile
+        outputs.outfile = outfile
+        maskfile = fname_presuffix(outfile,suffix='_mask')
         outputs.maskfile = glob(maskfile)
         if len(outputs.maskfile) > 0:
             outputs.maskfile = outputs.maskfile[0]
