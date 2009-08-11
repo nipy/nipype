@@ -251,10 +251,10 @@ class Threedresample(CommandLine):
             out_inputs.append('-orient %s' % val)
         if inputs.has_key('outfile'):
             val = inputs.pop('outfile')
-            out_inputs.append('-outfile %s' % val)
+            out_inputs.append('-prefix %s' % val)
         if inputs.has_key('infile'):
             val = inputs.pop('infile')
-            out_inputs.append('-infile %s' % val)
+            out_inputs.append('-inset %s' % val)
 
         if len(inputs) > 0:
             print '%s: unsupported options: %s' % (
