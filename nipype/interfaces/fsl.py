@@ -274,7 +274,7 @@ class Bet(CommandLine):
         """
         print doc
 
-    def _aggregate_outputs(self):
+    def aggregate_outputs(self):
         outputs = Bunch(outfile = None,
                         maskfile = None)
         if self.inputs.outfile:
@@ -308,7 +308,7 @@ class Bet(CommandLine):
         self._compile_command()
         returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
         if returncode == 0:
-            outputs = self._aggregate_outputs()
+            outputs = self.aggregate_outputs()
         else:
             outputs = Bunch()
         return  InterfaceResult(runtime=Bunch(cmdline=self.cmdline,

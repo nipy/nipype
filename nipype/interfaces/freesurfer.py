@@ -180,7 +180,7 @@ class Dicom2Nifti(CommandLine):
         self.cmdline =  ' '.join(cmd)
         return self.cmdline,outdir
 
-    def _aggregate_outputs(self):
+    def aggregate_outputs(self):
         cmd,outdir = self._compile_command()
         outputs = Bunch()
         if self.inputs.file_mapping is not None:
@@ -203,7 +203,7 @@ class Dicom2Nifti(CommandLine):
         return  InterfaceResult(runtime=Bunch(returncode=returncode,
                                               messages=out,
                                               errmessages=err),
-                                outputs = self._aggregate_outputs(),
+                                outputs = self.aggregate_outputs(),
                                 interface=deepcopy(self))
         
 
@@ -300,7 +300,7 @@ class Resample(CommandLine):
         self.cmdline =  ' '.join(cmd)
         return self.cmdline
 
-    def _aggregate_outputs(self):
+    def aggregate_outputs(self):
         outputs = Bunch(outfile=[])
         for i,f in enumerate(self.inputs.infile):
             path,fname = os.path.split(f)
@@ -617,7 +617,7 @@ class BBRegister(CommandLine):
         """
         print doc
 
-    def _aggregate_outputs(self):
+    def aggregate_outputs(self):
         outputs = Bunch(outregfile=None,
                         outfile=None)
         if self.inputs.outregfile is None:
@@ -652,6 +652,6 @@ class BBRegister(CommandLine):
         return  InterfaceResult(runtime=Bunch(returncode=returncode,
                                               messages=out,
                                               errmessages=err),
-                                outputs = self._aggregate_outputs(),
+                                outputs = self.aggregate_outputs(),
                                 interface=deepcopy(self))
         

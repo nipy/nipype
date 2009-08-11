@@ -168,7 +168,7 @@ class NodeWrapper(object):
                     self.output.runtime.insert(i,output.runtime)
                     outputs = output.outputs
                 else:
-                    outputs = self.interface._aggregate_outputs()
+                    outputs = self.interface.aggregate_outputs()
                 for key,val in outputs.iteritems():
                     try:
                         self.output.outputs[key].insert(i,val)
@@ -181,7 +181,7 @@ class NodeWrapper(object):
             else:
                 self.output = InterfaceResult(interface=None,
                                               runtime=None,
-                                              outputs=self.interface._aggregate_outputs())
+                                              outputs=self.interface.aggregate_outputs())
         
     def update(self, **opts):
         self.inputs.update(**opts)
