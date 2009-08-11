@@ -356,9 +356,9 @@ class Realign(SpmMatlabCommandLine):
                 einputs.update(inputs[opt])
             if opt is 'infile':
                 if type(inputs[opt]) == type([]):
-                    sess_scans = scans_for_fnames(inputs[opt])
-                else:
                     sess_scans = scans_for_fname(inputs[opt])
+                else:
+                    sess_scans = scans_for_fnames(inputs[opt])
                 einputs['data'] = sess_scans
                 continue
             if opt is 'write':
