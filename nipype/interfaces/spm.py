@@ -196,7 +196,7 @@ def scans_for_fnames(fnames):
     n_sess = len(fnames)
     sess_scans = np.zeros((1,n_sess), dtype=object)
     for sess in range(n_sess):
-        sess_scans[0,sess] = scans_for_fname(fnames[sess])
+        sess_scans[0,sess] = '%s,1'%(fnames[sess]) #scans_for_fname(fnames[sess])
     return sess_scans
 
 class Realign(SpmMatlabCommandLine):
@@ -356,9 +356,9 @@ class Realign(SpmMatlabCommandLine):
                 einputs.update(inputs[opt])
             if opt is 'infile':
                 if type(inputs[opt]) == type([]):
-                    sess_scans = scans_for_fname(inputs[opt])
-                else:
                     sess_scans = scans_for_fnames(inputs[opt])
+                else:
+                    sess_scans = scans_for_fname(inputs[opt])
                 einputs['data'] = sess_scans
                 continue
             if opt is 'write':
