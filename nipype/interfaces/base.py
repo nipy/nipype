@@ -177,7 +177,8 @@ class CommandLine(Interface):
     >>> lscmd = CommandLine('ls -l -t')
     # Or
     >>> lscmd = CommandLine(args=['ls','-l'])
-
+    # Or
+    >>> lsout = CommandLine('echo').run('hello')
     # One way to view your stdout is to print
     >>> print output.runtime.messages
     >>> output.runtime.returncode
@@ -229,7 +230,7 @@ class CommandLine(Interface):
            
         Returns
         -------
-        results : Bunch
+        results : InterfaceResult Object
             A `Bunch` object with a copy of self in `interface`
         
         """
