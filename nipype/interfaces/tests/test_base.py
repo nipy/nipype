@@ -18,11 +18,16 @@ def test_bunch_repr():
     b = nii.Bunch(b=2,c=3,a=dict(n=1,m=2))
     yield assert_equal, repr(b), "Bunch(a={'m': 2, 'n': 1}, b=2, c=3, )"
 
-def test_bunch_update():
+def test_bunch_methods():
     b = nii.Bunch(a=2)
     b.update(a=3)
+    newb = b.dictcopy()
     yield assert_equal, b.a, 3
-    
+    yield assert_equal, b.get('a'), 3
+    yield assert_equal, b.get('badkey', 'otherthing'), 'otherthing'
+    yield assert_not_equal, b, newb
+    yield assert_equal, type(dict()), type(newb)
+    yield assert_equal, newb['a'], 3
     
 
 #test CommandLine
