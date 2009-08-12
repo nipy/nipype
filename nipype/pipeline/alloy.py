@@ -14,10 +14,14 @@ num_images = 302
 TR = 1370
 
 # more variables currently hardcoded.  these should be determined
-# by system or user input
+# by system, default variable file or user input
 data_path = '/home/despo/dte/Alloy/Template'
 num_cores = 4
 extension = '.nii.gz'
+mean_tag = 'Mean'
+mask_tag = 'Mask'
+name_delimiter = '-'
+ext_delimiter = '.'
 
 
 class DataFile(object):
@@ -35,21 +39,23 @@ class DataFile(object):
         XXX
     file_type : {'NIfTI', 'DICOM', 'Behavior'}
         data file type
+    selector : string
+        unique filetype identifying string
 
     """
 
-    def __init__(self, data_path=None, subject=None, session=None, name=None, 
-                 file_type=None):
+    def __init__(self, data_path=None, subject=None, session=None, name=None, file_type=None, selector=None):
         self.data_path = data_path
         self.subject = subject
         self.session = session
         self.file_type = file_type
         self.name = name # filename for nifti, directory for dicom
+        self.selector = selector
 
     def __repr__(self):
-        rep = 'DataFile: \n\t%s, \n\t%s, %s, %s, %s' % \
+        rep = 'DataFile: \n\t%s, \n\t%s, %s, %s, %s, %s' % \
             (self.data_path, self.subject, self.session, 
-             self.file_type, self.name)
+             self.file_type, self.name, self.selector)
         return rep
     
     def abspath(self):
@@ -265,7 +271,7 @@ def file_organize(data_path):
         run_commands(cmd3,out_file)
 
 
-def afni_mean(data_path):
+def afni_mean(in_file_info):
     """Generate a mean image for a set of functional images.
 
     If this module is run, it should be immediately after the initial
@@ -273,23 +279,74 @@ def afni_mean(data_path):
     """
 
     # collect all the first EPI file names
-    data_selection = ('001' + extension)
-    epi_list = get_data_selection(data_path,'','T','NIfTI',data_selection)
+    in_list = get_data_selection(in_file_info.data_path,
+        in_file_info.subject,in_file_info.session,
+        in_file_info.file_type,in_file_info.selector)
 
-    for epi_file in epi_list:
+    for in_file in in_list:
 
         out_file = DataFile()
-        out_file.data_path = epi_file.data_path
-        out_file.subject = epi_file.subject
-        out_file.session = epi_file.session
-        out_file.file_type = epi_file.file_type
-        out_file.name = (epi_file.subject + '-Mean' + extension)
+        out_file.data_path = in_file.data_path
+        out_file.subject = in_file.subject
+        out_file.session = in_file.session
+        out_file.file_type = in_file.file_type
+        out_file.name = (in_file.subject + '-' + mean_tag + extension)
+        out_file.selector = mean_tag
 
         cmd1 = [afni.ThreedTstat(
             outfile=out_file.abspath(),
-            infile=epi_file.abspath())]
+            infile=in_file.abspath())]
 
         run_commands(cmd1,out_file)
+
+    out_file_info = DataFile()
+    out_file_info.data_path = in_file_info.data_path
+    out_file_info.subject = in_file_info.subject
+    out_file_info.session = in_file_info.session
+    out_file_info.file_type = in_file_info.file_type
+    out_file_info.name = in_file_info.name
+    out_file_info.selector = mean_tag
+
+    return out_file_info
+
+
+def afni_mask(in_file_info):
+    """Generate a mean image for a set of functional images.
+
+    If this module is run, it should be immediately after the initial
+    conversion and before the rest of the preprocessing pipeline.
+    """
+
+    # collect all the first EPI file names
+    in_list = get_data_selection(in_file_info.data_path,
+        in_file_info.subject,in_file_info.session,
+        in_file_info.file_type,in_file_info.selector)
+
+    for in_file in in_list:
+
+        out_file = DataFile()
+        out_file.data_path = in_file.data_path
+        out_file.subject = in_file.subject
+        out_file.session = in_file.session
+        out_file.file_type = in_file.file_type
+        out_file.name = (in_file.subject + '-' + mask_tag + extension)
+
+        cmd1 = [afni.ThreedAutomask(
+            outfile=out_file.abspath(),
+            infile=in_file.abspath())]
+
+        run_commands(cmd1,out_file)
+
+    out_file_info = DataFile()
+    out_file_info.data_path = in_file_info.data_path
+    out_file_info.subject = in_file_info.subject
+    out_file_info.session = in_file_info.session
+    out_file_info.file_type = in_file_info.file_type
+    out_file_info.name = in_file_info.name
+    out_file_info.selector = mask_tag
+
+    return out_file_info
+
 
 # XXXXX UPGRADES NEEDED ELSEWHERE
     # running the commands needs to be structured in such a way that
@@ -394,18 +451,24 @@ def get_data_selection(data_path, subject, session, file_type, data_selection):
 
 		        for entry_four in list_four:
 
-			    entry_four_parts = entry_four.split('-')
+                            entry_four_parts = entry_four.split(name_delimiter)
 
-			    criteria = 0;
+                            last_entry_part = entry_four_parts.pop(-1)
+                            last_entry_parts = last_entry_part.split(ext_delimiter)
 
-			    for entry in entry_four_parts:
-			        if entry == data_selection:
-			            criteria = 1;
+                            for part in last_entry_parts:
+                                entry_four_parts.append(part)
 
-			    # select data files that match the selection criteria
-		            if entry_four[0] is not '.' and criteria is 1:
+                            criteria = 0;
 
-			    # Split the path into it's directory components and
+                            for entry in entry_four_parts:
+                                if entry == data_selection:
+                                    criteria = 1;
+
+                            # select data files that match the selection criteria
+                            if entry_four[0] is not '.' and criteria is 1:
+
+                            # Split the path into it's directory components and
                             # get the last two directories which will be the
                             # subject_id and the session_id
                                 elements = entry_path_three.split(os.path.sep)
@@ -427,4 +490,14 @@ if __name__ == '__main__':
      #afni_dicom_convert(data_path, '', '2', 'DICOM', 'T1')
      #afni_dicom_convert(data_path, '', '2', 'DICOM', 'EPI')
      #file_organize(data_path)
-     afni_mean(data_path)
+
+     start_file_info = DataFile()
+     start_file_info.data_path = data_path
+     start_file_info.subject = ''
+     start_file_info.session = 'T'
+     start_file_info.file_type = 'NIfTI'
+     start_file_info.name = ''
+     start_file_info.selector = '001'
+
+     mean_file_info = afni_mean(start_file_info)
+     mask_file_info = afni_mask(mean_file_info)

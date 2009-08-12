@@ -235,7 +235,7 @@ class Threedresample(CommandLine):
                             infile=None)
 
     def _parseinputs(self):
-        """Parse valid input options for Threedrefit command.
+        """Parse valid input options for Threedresample command.
 
         Ignore options set to None.
 
@@ -275,7 +275,7 @@ class ThreedTstat(CommandLine):
 
     @property
     def cmd(self):
-        """Base command for Threedresample"""
+        """Base command for ThreedTstat"""
         return '3dTstat'
 
     def inputs_help(self):
@@ -292,7 +292,7 @@ class ThreedTstat(CommandLine):
                             infile=None)
 
     def _parseinputs(self):
-        """Parse valid input options for Threedrefit command.
+        """Parse valid input options for ThreedTstat command.
 
         Ignore options set to None.
 
@@ -321,3 +321,59 @@ class ThreedTstat(CommandLine):
         valid_inputs = self._parseinputs()
         allargs =  [self.cmd] + valid_inputs
         self.cmdline = ' '.join(allargs)
+
+
+class ThreedAutomask(CommandLine):
+    """
+    """
+
+    @property
+    def cmd(self):
+        """Base command for ThreedAutomask"""
+        return '3dAutomask'
+
+    def inputs_help(self):
+        doc = """
+          Optional Parameters
+          -------------------
+        """
+        print doc
+
+    def _populate_inputs(self):
+        """Initialize the inputs attribute."""
+
+        self.inputs = Bunch(outfile=None,
+                            infile=None)
+
+    def _parseinputs(self):
+        """Parse valid input options for ThreedAutomask command.
+
+        Ignore options set to None.
+
+        """
+
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+             if v is not None]
+
+        if inputs.has_key('outfile'):
+            val = inputs.pop('outfile')
+            out_inputs.append('-prefix %s' % val)
+        if inputs.has_key('infile'):
+            val = inputs.pop('infile')
+            out_inputs.append('%s' % val)
+
+        if len(inputs) > 0:
+            print '%s: unsupported options: %s' % (
+                self.__class__.__name__, inputs.keys())
+
+        return out_inputs
+
+    def _compile_command(self):
+        """Generate the command line string from the list of arguments."""
+        valid_inputs = self._parseinputs()
+        allargs =  [self.cmd] + valid_inputs
+        self.cmdline = ' '.join(allargs)
+
+
