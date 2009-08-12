@@ -118,7 +118,7 @@ class Interface(object):
         raise NotImplementedError
 
     def _populate_inputs(self):
-        """Initialize the inputs attribute."""
+        """Initialize the inputs Bunch attributes."""
         raise NotImplementedError
 
     def _compile_command(self):
@@ -144,13 +144,21 @@ class CommandLine(Interface):
     args : string
         A string representing the command and it's arguments.
     inputs : mapping
+        key value pairs that populate a Bunch()
 
 
     Attributes
     ----------
-    args : tuple
-        The command, it's arguments and options store in a tuple of strings.
-
+    args : list
+        The command, it's arguments and options store in a list of strings.
+        ['ls', '-al']
+        These are added to command line string first
+    inputs : Bunch of key,value inputs
+        The only valid key for CommandLine is args
+        Other keys are not recognized in CommandLine, and
+        require parsing in subclasses
+        if there are args=['ls','-al'] 
+        These are added to command line string before simple positional args
     Returns
     -------
     
@@ -162,9 +170,7 @@ class CommandLine(Interface):
 
     >>> lscmd = CommandLine('ls') # Create a command object
     >>> output = lscmd.run() # Execute the command
-    >>> output.out # Get output from the command
-    >>> output.err # Get error from command, if any
-
+    
     # You could also pass in args like this
     >>> lscmd = CommandLine('ls', '-l', '-t')
     # Or
@@ -176,38 +182,71 @@ class CommandLine(Interface):
     >>> print output.runtime.messages
     >>> output.runtime.returncode
     >>> print output.runtime.errmessages
+    >>> print oputput.interface.cmdline 
 
     Notes
     -----
     
     When subclassing CommandLine, you will generally override at least:
-        _compile_command
+        _compile_command, and run
 
-    Also quite possibly __init__ but generally not run or _runner
+    Also quite possibly __init__ but generally not  _runner
 
     """
 
     def __init__(self, *args, **inputs):
         self._populate_inputs()
+        for k,v in inputs.items():
+            if k is 'args' and not type([])==type(v):
+                inputs.update(args=[v])
+            
         self.inputs.update(**inputs)
         if args:
-            self.inputs.args = args
+            if self.inputs.args:
+                [self.inputs.args.append(x) for x in list(args)]
+                
+            else:
+                self.inputs.update(args = list(args))
+            """
+            args = ' '.join(list(args))
+            if self.inputs.args:
+                self.inputs.update(args=' '.join([self.inputs.get('args'),args]))
+            else:
+                self.inputs.args = args
+            """
         self.cmdline = ''
 
-    def run(self):
+    def run(self, *args, **inputs):
         """Execute the command.
         
         Parameters
         ----------
-        N/A
-        
+        args : list
+            additional arguments that will be appended to inputs.args
+        inputs : mapping
+            additional key,value pairs will update inputs
+            it will overwrite existing key, value pairs
+           
         Returns
         -------
         results : Bunch
             A `Bunch` object with a copy of self in `interface`
         
         """
-
+        if inputs:
+            for k,v in inputs.items():
+                if k is 'args' and not type([])==type(v):
+                    inputs.update(args=[v])
+            self.inputs.update(**inputs) 
+        if args:
+            if self.inputs.args:
+                [self.inputs.args.append(x) for x in list(args)]
+                
+                #self.inputs.update(args=list(self.inputs.get('args')).append(list(args)))
+            else:
+                self.inputs.update(args = list(args))
+            
+            
         # This is expected to populate `command` for _runner to work
         self._compile_command()
         returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
@@ -222,7 +261,8 @@ class CommandLine(Interface):
 
     def _compile_command(self):
         # This handles args like ['bet', '-f 0.2'] without crashing
-        self.cmdline = ' '.join(self.inputs.args)
+        args = list(self.inputs.get('args'))
+        self.cmdline = ' '.join(args)
 
     def _runner(self, shell=True, cwd=None):
         """Run the command using subprocess.Popen."""

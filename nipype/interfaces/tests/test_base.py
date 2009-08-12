@@ -33,27 +33,20 @@ def test_bunch_methods():
 #test CommandLine
 def test_commandline():
     cl = nii.CommandLine('echo', 'foo')
-    yield assert_equal, cl.inputs.args, ('echo', 'foo')
+    yield assert_equal, cl.inputs.args, ['echo', 'foo']
     yield assert_equal, cl._compile_command(), None
     yield assert_not_equal, cl, cl.run()
-    """
-    yield assert_not_equal, cl, cl.update()
-    yield assert_not_equal, cl.run(), cl.update()
-    cl2 = cl.run('-l')
-    cl3 = cl.update('-l')
-    yield assert_not_equal, cl.args, cl2.args
-    yield assert_not_equal, cl.args, cl3.args
-    yield assert_equal, cl2.args, cl3.args
-    yield assert_equal, cl2._compile_command(), cl3._compile_command()
+    
+    yield assert_equal, nii.CommandLine('echo foo')._compile_command(),\
+        nii.CommandLine(args='echo foo')._compile_command()
     yield assert_equal, nii.CommandLine('ls','-l')._compile_command(),\
         nii.CommandLine('ls -l')._compile_command()
-    yield assert_not_equal, nii.CommandLine('ls','-l').args, nii.CommandLine('ls -l').args
-    """
     clout = cl.run()
     yield assert_equal, clout.runtime.returncode, 0
     yield assert_equal, clout.runtime.errmessages,  ''
     yield assert_equal, clout.runtime.messages, 'foo\n'
-
+    yield assert_equal, clout.interface.cmdline, cl.cmdline
+    yield assert_not_equal, clout.interface, cl
 
 """
 stuff =CommandLine('this is what I want to run')
