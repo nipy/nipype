@@ -265,6 +265,32 @@ def file_organize(data_path):
         run_commands(cmd3,out_file)
 
 
+def afni_mean(data_path):
+    """Generate a mean image for a set of functional images.
+
+    If this module is run, it should be immediately after the initial
+    conversion and before the rest of the preprocessing pipeline.
+    """
+
+    # collect all the first EPI file names
+    data_selection = ('001' + extension)
+    epi_list = get_data_selection(data_path,'','T','NIfTI',data_selection)
+
+    for epi_file in epi_list:
+
+        out_file = DataFile()
+        out_file.data_path = epi_file.data_path
+        out_file.subject = epi_file.subject
+        out_file.session = epi_file.session
+        out_file.file_type = epi_file.file_type
+        out_file.name = (epi_file.subject + '-Mean' + extension)
+
+        cmd1 = [afni.ThreedTstat(
+            outfile=out_file.abspath(),
+            infile=epi_file.abspath())]
+
+        run_commands(cmd1,out_file)
+
 # XXXXX UPGRADES NEEDED ELSEWHERE
     # running the commands needs to be structured in such a way that
     # the output of each command can be accessed independently of
@@ -398,7 +424,7 @@ def get_data_selection(data_path, subject, session, file_type, data_selection):
 
 
 if __name__ == '__main__':
-     afni_dicom_convert(data_path, '', '2', 'DICOM', 'T1')
-     afni_dicom_convert(data_path, '', '2', 'DICOM', 'EPI')
-     file_organize(data_path)
-
+     #afni_dicom_convert(data_path, '', '2', 'DICOM', 'T1')
+     #afni_dicom_convert(data_path, '', '2', 'DICOM', 'EPI')
+     #file_organize(data_path)
+     afni_mean(data_path)
