@@ -52,28 +52,33 @@ class Bunch(object):
         self.__dict__.update(**kwargs)
 
     def update(self, **kwargs):
+        """update existing attribute, or create new attribute"""
         self.__dict__.update(**kwargs)
 
     def iteritems(self):
+        """iterates over bunch attributes as key,value pairs"""
         return self.__dict__.iteritems()
 
     def get(self, *args):
-        '''Need to consider how much of the dict interface we will support'''
+        '''Support dictionary get() functionality 
+        '''
         return self.__dict__.get(*args)
 
     def __setitem__(self, key, value):
-        '''deprecated, except for Satra'''
+        '''deprecated, dict-like setting of attributes'''
         self.__dict__[key] = value
 
     def __getitem__(self, key):
-        '''deprecated, except for Satra'''
+        '''deprecated, dict-like getting of attributes'''
         return(self.__dict__[key])
 
     def dictcopy(self):
+        """returns a deep copy of existing Bunch as a dictionary"""
         return deepcopy(self.__dict__)
 
 
     def __repr__(self):
+        """representation of the sorted Bunch as a string"""
         outstr = 'Bunch('
         pairs = []
         for k, v in sorted(self.iteritems()):

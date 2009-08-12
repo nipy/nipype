@@ -14,6 +14,17 @@ def test_bunch_attribute():
     yield assert_equal, b.b, [2,3]
     yield assert_equal, b.c, None
 
+def test_bunch_repr():
+    b = nii.Bunch(b=2,c=3,a=dict(n=1,m=2))
+    yield assert_equal, repr(b), "Bunch(a={'m': 2, 'n': 1}, b=2, c=3, )"
+
+def test_bunch_update():
+    b = nii.Bunch(a=2)
+    b.update(a=3)
+    yield assert_equal, b.a, 3
+    
+    
+
 #test CommandLine
 def test_commandline():
     cl = nii.CommandLine('echo', 'foo')
