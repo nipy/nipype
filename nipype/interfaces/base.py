@@ -204,17 +204,10 @@ class CommandLine(Interface):
         self.inputs.update(**inputs)
         if args:
             if self.inputs.args:
-                [self.inputs.args.append(x) for x in list(args)]
-                
-            else:
-                self.inputs.update(args = list(args))
-            """
-            args = ' '.join(list(args))
-            if self.inputs.args:
-                self.inputs.update(args=' '.join([self.inputs.get('args'),args]))
+                self.inputs.args.extend(args)
             else:
                 self.inputs.args = args
-            """
+
         self.cmdline = ''
 
     def run(self, *args, **inputs):
