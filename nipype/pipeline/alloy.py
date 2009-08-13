@@ -17,9 +17,20 @@ TR = 1370
 # by system, default variable file or user input
 data_path = '/home/despo/dte/Alloy/Template'
 num_cores = 4
+nifti_folder = 'NIfTI'
+behavior_folder = 'Behavior'
 extension = '.nii.gz'
+
+anat_tag = 'T1'
+func_tag = 'EPI'
 mean_tag = 'Mean'
 mask_tag = 'Mask'
+
+afni_to3d_datatype_anat = 'anat'
+afni_to3d_datatype_func = 'epan'
+afni_to3d_datum = 'float'
+afni_3dresample_orient = 'RPI'
+
 name_delimiter = '-'
 ext_delimiter = '.'
 irrelevant_prefix = '.'
@@ -47,7 +58,7 @@ class DataFile(object):
 
     def __init__(self, data_path=None, subject=None,
                  session=None, file_type=None,
-                 selectors=None, extension=None):
+                 selectors=[], extension=[]):
         self.data_path = data_path
         self.subject = subject
         self.session = session
@@ -93,48 +104,40 @@ class DataFile(object):
                                 self.file_type)
 
 
-def afni_dicom_convert(data_path, subject, session, file_type, data_selection):
+def afni_dicom_convert(in_file_info):
     """Convert a set of dicom files into nifti files.
 
     Parameters
     ----------
-    data_path : string
-        path to the data directory
-    subject : string
-        subject ID. or ''
-    session : {'2', 'T', None}
-        session identifier character
-    file_type : {'NIfTI', 'DICOM', 'Behavior'}
-        data file type
-    data_selection : string
-        data identifier string
+    in_file_info : DataFile class
 
     """
 
     # Get list of dicom files
-    dicom_list = get_data_selection(data_path, subject, session, file_type,
-                                    data_selection)
+    dicom_list = get_data_selection(in_file_info)
 
     for dicom in dicom_list:
-        filename = (dicom.subject + '-' + dicom.session + '-' + dicom.name
+        filename = (dicom.subject + '-' + dicom.session + '-' + dicom.name()
                     + extension)
+
         nifti_file = DataFile()
         nifti_file.data_path = dicom.data_path
         nifti_file.subject = dicom.subject
         nifti_file.session = dicom.session
-        nifti_file.file_type = 'NIfTI'
-        nifti_file.name = filename
+        nifti_file.file_type = nifti_folder
+        nifti_file.selectors = dicom.selectors
+        nifti_file.extension = extension.split(ext_delimiter)
 
-        if data_selection == 'T1':
+        if dicom.selectors.__contains__(anat_tag):
 
             cmd1 = afni.To3d(
-                datatype='anat',
-                datum='float',
+                datatype=afni_to3d_datatype_anat,
+                datum=afni_to3d_datum,
                 session=nifti_file.partpath(4),
-                prefix=nifti_file.name,
+                prefix=nifti_file.name(),
                 infiles=dicom.abspath() + '/*.dcm')
 
-        if data_selection == 'EPI':
+        if dicom.selectors.__contains__(func_tag):
 
             td = {
                 'slice_order':'zt',
@@ -144,13 +147,13 @@ def afni_dicom_convert(data_path, subject, session, file_type, data_selection):
                 'tpattern':'alt+z2'}
 
             cmd1 = afni.To3d(
-                datatype='epan',
+                datatype=afni_to3d_datatype_func,
                 skip_outliers=True,
                 assume_dicom_mosaic=True,
-                datum='float',
+                datum=afni_to3d_datum,
                 time_dependencies=td,
                 session=nifti_file.partpath(4),
-                prefix=nifti_file.name,
+                prefix=nifti_file.name(),
                 infiles=dicom.abspath() + '/*.dcm')
 
         # command to deoblique and center volume
@@ -169,11 +172,11 @@ def afni_dicom_convert(data_path, subject, session, file_type, data_selection):
 
         # command to change volume orientation from LPI to RPI
         nifti_file_rpi = (nifti_file.partpath(4) + '/' +
-                          nifti_file.name[0:-len(extension)] +
-                          '-RPI' + extension)
+                          nifti_file.name()[0:-len(extension)] +
+                          '-' + afni_3dresample_orient + extension)
 
         cmd4 = afni.Threedresample(
-            orient='RPI',
+            orient=afni_3dresample_orient,
             outfile=nifti_file_rpi,
             infile=nifti_file.abspath())
 
@@ -433,7 +436,7 @@ def run_commands(cmd_list, out):
                 # before it is run.
             results = cmd.run()
             print 'Executing command:', cmd.cmdline
-            print results.runtime.errmessages + results.runtime.messages
+            print results.runtime.stderr + results.runtime.stdout
 
 
 def get_data_selection(in_file_info):
@@ -501,7 +504,7 @@ def get_data_selection(in_file_info):
 
                 for entry in file_name_parts:
                     if entry in in_file_info.selectors or in_file_info.selectors == ['']:
-                        if last_entry == in_file_info.extension:
+                        if last_entry == in_file_info.extension or in_file_info.extension == ['']:
                             criteria = 1
 
                 # select data files that match the selection criteria
@@ -526,22 +529,29 @@ def get_data_selection(in_file_info):
 
 
 if __name__ == '__main__':
-     #afni_dicom_convert(data_path, '', '2', 'DICOM', 'T1')
+     dicom_file_info = DataFile()
+     dicom_file_info.data_path = data_path
+     dicom_file_info.subject = ''
+     dicom_file_info.session = '2'
+     dicom_file_info.file_type = 'DICOM'
+     dicom_file_info.selectors = ['T1']
+
+     afni_dicom_convert(dicom_file_info)
      #afni_dicom_convert(data_path, '', '2', 'DICOM', 'EPI')
      #file_organize(data_path)
 
-     start_file_info = DataFile()
-     start_file_info.data_path = data_path
-     start_file_info.subject = ''
-     start_file_info.session = 'T'
-     start_file_info.file_type = 'NIfTI'
-     start_file_info.name = ''
-     start_file_info.selector = '001'
+     #start_file_info = DataFile()
+     #start_file_info.data_path = data_path
+     #start_file_info.subject = ''
+     #start_file_info.session = 'T'
+     #start_file_info.file_type = 'NIfTI'
+     #start_file_info.name = ''
+     #start_file_info.selector = '001'
 
-     mean_file_info = afni_mean(start_file_info)
-     mask_file_info = afni_mask(mean_file_info)
+     #mean_file_info = afni_mean(start_file_info)
+     #mask_file_info = afni_mask(mean_file_info)
 
-     start_file_info.selector = 'EPI'
+     #start_file_info.selector = 'EPI'
 
      #coreg_file_info = afni_coreg(start_file_info)
 
