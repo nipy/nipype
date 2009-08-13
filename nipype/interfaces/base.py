@@ -79,13 +79,11 @@ class Bunch(object):
 
     def __repr__(self):
         """representation of the sorted Bunch as a string"""
-        outstr = 'Bunch('
-        pairs = []
+        outstr = ['Bunch(']
         for k, v in sorted(self.iteritems()):
-            pairs.append('%s=%s, ' % (k, v))
-        outstr += ''.join(pairs)
-        outstr += ')'
-        return outstr
+            outstr.append('%s=%s, ' % (k, v))
+        outstr.append(')')
+        return ''.join(outstr)
 
 class InterfaceResult(object):
     '''Describe the results of .run()-ing a particular Interface'''
@@ -214,9 +212,9 @@ class CommandLine(Interface):
 
         if args:
             if self.inputs.args:
-                self.inputs.args.extend(args)
+                self.inputs.args.extend(list(args))
             else:
-                self.inputs.args = args
+                self.inputs.args = list(args)
 
     def run(self, *args, **inputs):
         """Execute the command.
