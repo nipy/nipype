@@ -51,9 +51,9 @@ class Bunch(object):
     def __init__(self, **kwargs):
         self.__dict__.update(**kwargs)
 
-    def update(self, **kwargs):
+    def update(self, *args, **kwargs):
         """update existing attribute, or create new attribute"""
-        self.__dict__.update(**kwargs)
+        self.__dict__.update(*args, **kwargs)
 
     def iteritems(self):
         """iterates over bunch attributes as key,value pairs"""
@@ -197,18 +197,26 @@ class CommandLine(Interface):
 
     def __init__(self, *args, **inputs):
         self._populate_inputs()
-        for k,v in inputs.items():
-            if k is 'args' and not type([])==type(v):
-                inputs.update(args=[v])
-            
+        self._update(*args, **inputs)
+
+        self.cmdline = ''
+
+    def _update(self, *args, **inputs):
+        '''Helper function to support DRY'''
+        try:
+            # if inputs['args'] exists and is splittable (thus, not a list)
+            inputs['args']  = inputs['args'].split()
+        # Maybe this should just be a bare except?
+        except (KeyError, AttributeError):
+            pass
+
         self.inputs.update(**inputs)
+
         if args:
             if self.inputs.args:
                 self.inputs.args.extend(args)
             else:
                 self.inputs.args = args
-
-        self.cmdline = ''
 
     def run(self, *args, **inputs):
         """Execute the command.
@@ -227,19 +235,7 @@ class CommandLine(Interface):
             A `Bunch` object with a copy of self in `interface`
         
         """
-        if inputs:
-            for k,v in inputs.items():
-                if k is 'args' and not type([])==type(v):
-                    inputs.update(args=[v])
-            self.inputs.update(**inputs) 
-        if args:
-            if self.inputs.args:
-                [self.inputs.args.append(x) for x in list(args)]
-                
-                #self.inputs.update(args=list(self.inputs.get('args')).append(list(args)))
-            else:
-                self.inputs.update(args = list(args))
-            
+        self._update(*args, **inputs) 
             
         # This is expected to populate `command` for _runner to work
         self._compile_command()
