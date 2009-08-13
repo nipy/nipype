@@ -22,10 +22,11 @@ mean_tag = 'Mean'
 mask_tag = 'Mask'
 name_delimiter = '-'
 ext_delimiter = '.'
+irrelevant_prefix = '.'
 
 
 class DataFile(object):
-    """A DataFile object contains all the path information to access a data file
+    """A DataFile object contains all the info to access data files
 
     Parameters
     ----------
@@ -35,43 +36,61 @@ class DataFile(object):
         subject ID or ''
     session : {'2', 'T', None}
         session identifier character
-    name : XXX
-        XXX
     file_type : {'NIfTI', 'DICOM', 'Behavior'}
         data file type
-    selector : string
-        unique filetype identifying string
+    selectors : list of strings
+        unique filetype identifying strings
+    extension : list of strings
+        file name extension strings
 
     """
 
-    def __init__(self, data_path=None, subject=None, session=None, name=None, file_type=None, selector=None):
+    def __init__(self, data_path=None, subject=None,
+                 session=None, file_type=None,
+                 selectors=None, extension=None):
         self.data_path = data_path
         self.subject = subject
         self.session = session
         self.file_type = file_type
-        self.name = name # filename for nifti, directory for dicom
-        self.selector = selector
+        self.selectors = selectors
+        self.extension = extension
 
     def __repr__(self):
-        rep = 'DataFile: \n\t%s, \n\t%s, %s, %s, %s, %s' % \
+        rep = 'DataFile: \n\t%s, \n\t%s, %s, %s, %s' % \
             (self.data_path, self.subject, self.session, 
-             self.file_type, self.name, self.selector)
+             self.file_type, self.name())
         return rep
-    
+
+    def name(self):
+        """Generate the file or folder name using selectors and extension.
+
+        For a folder, no extensions should be present, so it will skip
+        adding an extension.
+        """
+        name_main = name_delimiter.join(self.selectors)
+        if self.extension:
+            name_list = self.extension[:]
+            name_list.insert(0,name_main)
+            name_full = ext_delimiter.join(name_list)
+        else:
+            name_full = name_main
+
+        return name_full
+
     def abspath(self):
         return os.path.join(self.data_path, self.subject, self.session,
-                            self.file_type, self.name)
+                            self.file_type, self.name())
 
     def partpath(self, num_paths):
-	if num_paths is 1:
-	    return self.data_path
-	if num_paths is 2:
-	    return os.path.join(self.data_path, self.subject)
-	if num_paths is 3:
-	    return os.path.join(self.data_path, self.subject, self.session)
-	if num_paths is 4:
-	    return os.path.join(self.data_path, self.subject, self.session,
-				self.file_type)
+        if num_paths is 1:
+            return self.data_path
+        if num_paths is 2:
+            return os.path.join(self.data_path, self.subject)
+        if num_paths is 3:
+            return os.path.join(self.data_path, self.subject, self.session)
+        if num_paths is 4:
+            return os.path.join(self.data_path, self.subject, self.session,
+                                self.file_type)
 
 
 def afni_dicom_convert(data_path, subject, session, file_type, data_selection):
@@ -311,10 +330,10 @@ def afni_mean(in_file_info):
 
 
 def afni_mask(in_file_info):
-    """Generate a mean image for a set of functional images.
+    """Generate a mask image for a set of functional images.
 
-    If this module is run, it should be immediately after the initial
-    conversion and before the rest of the preprocessing pipeline.
+    This module should be run on a mean image for the corresponding
+    functional image group.
     """
 
     # collect all the first EPI file names
@@ -348,6 +367,47 @@ def afni_mask(in_file_info):
     return out_file_info
 
 
+#def afni_coreg(in_file_info):
+    #"""Coregister functional images with a corresponding mean image.
+
+    #This module will run a functional image set with a mean image
+    #corresponding to the subject number.
+    #"""
+
+    ## collect all the first EPI file names
+    #in_list = get_data_selection(in_file_info.data_path,
+        #in_file_info.subject,in_file_info.session,
+        #in_file_info.file_type,in_file_info.selector)
+
+    #for in_file in in_list:
+
+        
+
+        #out_file = DataFile()
+        #out_file.data_path = in_file.data_path
+        #out_file.subject = in_file.subject
+        #out_file.session = in_file.session
+        #out_file.file_type = in_file.file_type
+        #out_file.name = (in_file.subject + name_delimiter +
+                         #coreg_tag + extension)
+
+        #cmd1 = [afni.ThreedAutomask(
+            #outfile=out_file.abspath(),
+            #infile=in_file.abspath())]
+
+        #run_commands(cmd1,out_file)
+
+    #out_file_info = DataFile()
+    #out_file_info.data_path = in_file_info.data_path
+    #out_file_info.subject = in_file_info.subject
+    #out_file_info.session = in_file_info.session
+    #out_file_info.file_type = in_file_info.file_type
+    #out_file_info.name = in_file_info.name
+    #out_file_info.selector = mask_tag
+
+    #return out_file_info
+
+
 # XXXXX UPGRADES NEEDED ELSEWHERE
     # running the commands needs to be structured in such a way that
     # the output of each command can be accessed independently of
@@ -376,13 +436,13 @@ def run_commands(cmd_list, out):
             print results.runtime.errmessages + results.runtime.messages
 
 
-def get_data_selection(data_path, subject, session, file_type, data_selection):
-    """Build a list of specific data files from the data_dir directory.
+def get_data_selection(in_file_info):
+    """Build a list of specific data files using the selection criteria.
 
     Before using this function, the data should have already been
     sorted and renamed according to the established naming convention:
 
-        data_path/subject/session/file_type/data_selection
+        data_path/subject/session/file_type/selectors
 
     For example:
 
@@ -393,21 +453,12 @@ def get_data_selection(data_path, subject, session, file_type, data_selection):
         subject = 101
         session = 20080813
         file_type = DICOM
-        data_selection = 008-EPI-96-13TR-2
+        data_selection = [008, EPI, 96, 13TR, 2]
 
     Parameters
     ----------
-    data_path : string
-        path to the data directory
-    subject : string
-        subject ID. or ''
-    session : {'2', 'T', None}
-        session identifier character
-    file_type : {'NIfTI', 'DICOM', 'Behavior'}
-        data file type
-    data_selection : string
-        data identifier string
 
+    in_selection : DataFile class
     """
 
     # XXX NB: Reevaluate folder naming convention and selection
@@ -421,67 +472,55 @@ def get_data_selection(data_path, subject, session, file_type, data_selection):
     #     empty, all values in that category should be added to the list. 
 
     file_list = []
+    filters = ''
 
-    list_one = os.listdir(data_path)
-    list_one.sort()
+    for (path,dirs,files) in os.walk(in_file_info.data_path):
+        path = path.strip(in_file_info.data_path)
+        path = path.split(os.path.sep)
 
-    for entry_one in list_one:
-	entry_path_one = os.path.join(data_path, entry_one)
+        if path == ['']:
+            filters = in_file_info.subject
+        elif len(path) is 1:
+            filters = in_file_info.session
+        elif len(path) is 2:
+            filters = in_file_info.file_type
+        elif len(path) is 3:
+            if not in_file_info.extension:
+                files = []
+                for index, dir_name in enumerate(dirs):
+                    files.append(dir_name)
 
-	# select directories whose names are 3 characters long
-        if os.path.isdir(entry_path_one) and len(entry_one) is 3:
+            for file_name in files:
 
-	    list_two = os.listdir(entry_path_one)
-	    list_two.sort()
+                file_name_parts = file_name.split(name_delimiter)
 
-	    for entry_two in list_two:
-                entry_path_two = os.path.join(entry_path_one, entry_two)
+                last_entry = file_name_parts.pop(-1)
+                last_entry = last_entry.split(ext_delimiter)
+                file_name_parts.append(last_entry.pop(0))
+                criteria = 0
 
-                # select directories that start with the session char
-                # (unless no session char was entered)
-		if os.path.isdir(entry_path_two) and \
-                    (entry_two[0] is session or session is None):
+                for entry in file_name_parts:
+                    if entry in in_file_info.selectors or in_file_info.selectors == ['']:
+                        if last_entry == in_file_info.extension:
+                            criteria = 1
 
-		    # add file type folder to directory path
-		    entry_path_three = os.path.join(entry_path_two, file_type)
+                # select data files that match the selection criteria
+                if file_name_parts[0] != irrelevant_prefix and criteria is 1:
 
-                    try:
-                        list_four = os.listdir(entry_path_three)
-		        list_four.sort()
+                    datafile = DataFile()
+                    datafile.data_path = in_file_info.data_path
+                    datafile.subject = path[0]
+                    datafile.session = path[1]
+                    datafile.file_type = path[2]
+                    datafile.selectors = file_name_parts[:]
+                    datafile.extension = last_entry[:]
+                    file_list.append(datafile)
 
-		        for entry_four in list_four:
+            dirs = []
 
-                            entry_four_parts = entry_four.split(name_delimiter)
-
-                            last_entry_part = entry_four_parts.pop(-1)
-                            last_entry_parts = last_entry_part.split(ext_delimiter)
-
-                            for part in last_entry_parts:
-                                entry_four_parts.append(part)
-
-                            criteria = 0;
-
-                            for entry in entry_four_parts:
-                                if entry == data_selection:
-                                    criteria = 1;
-
-                            # select data files that match the selection criteria
-                            if entry_four[0] is not '.' and criteria is 1:
-
-                            # Split the path into it's directory components and
-                            # get the last two directories which will be the
-                            # subject_id and the session_id
-                                elements = entry_path_three.split(os.path.sep)
-                                datafile = DataFile()
-                                datafile.data_path = data_path
-                                datafile.name = entry_four
-                                datafile.subject = elements[-3]
-                                datafile.session = elements[-2]
-                                datafile.file_type = elements[-1]
-                                file_list.append(datafile)
-
-		    except OSError:
-                        pass
+        for dir_name in dirs:
+            if not dir_name.startswith(filters):
+                dirs.remove(dir_name)
 
     return file_list
 
@@ -501,3 +540,9 @@ if __name__ == '__main__':
 
      mean_file_info = afni_mean(start_file_info)
      mask_file_info = afni_mask(mean_file_info)
+
+     start_file_info.selector = 'EPI'
+
+     #coreg_file_info = afni_coreg(start_file_info)
+
+

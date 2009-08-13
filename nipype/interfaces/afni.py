@@ -382,3 +382,82 @@ class ThreedAutomask(CommandLine):
         self.cmdline = ' '.join(allargs)
 
 
+class Threedvolreg(CommandLine):
+    """
+    """
+
+    @property
+    def cmd(self):
+        """Base command for Threedvolreg"""
+        return '3dvolreg'
+
+    def inputs_help(self):
+        doc = """
+          Optional Parameters
+          -------------------
+        """
+        print doc
+
+    def _populate_inputs(self):
+        """Initialize the inputs attribute."""
+
+        self.inputs = Bunch(
+            verbose=None,
+            copy_origin=None,
+            time_shift=None,
+            basefile=None,
+            md1dfile=None,
+            onedfile=None,
+            outfile=None,
+            infile=None)
+
+    def _parseinputs(self):
+        """Parse valid input options for Threedvolreg command.
+
+        Ignore options set to None.
+
+        """
+
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+             if v is not None]
+
+        if inputs.has_key('verbose'):
+            val = inputs.pop('verbose')
+            out_inputs.append('-verbose')
+        if inputs.has_key('copy_origin'):
+            val = inputs.pop('copy_origin')
+            out_inputs.append('-twodup')
+        if inputs.has_key('time_shift'):
+            val = inputs.pop('time_shift')
+            out_inputs.append('-tshift %s' % str(val))
+        if inputs.has_key('basefile'):
+            val = inputs.pop('basefile')
+            out_inputs.append('-base %s' % val)
+        if inputs.has_key('md1dfile'):
+            val = inputs.pop('md1dfile')
+            out_inputs.append('-maxdisp1D %s' % val)
+        if inputs.has_key('onedfile'):
+            val = inputs.pop('onedfile')
+            out_inputs.append('-1Dfile %s' % val)
+        if inputs.has_key('outfile'):
+            val = inputs.pop('outfile')
+            out_inputs.append('-prefix %s' % val)
+        if inputs.has_key('infile'):
+            val = inputs.pop('infile')
+            out_inputs.append('%s' % val)
+
+        if len(inputs) > 0:
+            print '%s: unsupported options: %s' % (
+                self.__class__.__name__, inputs.keys())
+
+        return out_inputs
+
+    def _compile_command(self):
+        """Generate the command line string from the list of arguments."""
+        valid_inputs = self._parseinputs()
+        allargs =  [self.cmd] + valid_inputs
+        self.cmdline = ' '.join(allargs)
+
+
