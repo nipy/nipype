@@ -254,11 +254,12 @@ class Bet(CommandLine):
                               
         return out_inputs
 
-    def _compile_command(self):
+    @property
+    def cmdline(self):
         """validates fsl options and generates command line argument"""
         valid_inputs = self._parseinputs()
         allargs =  [self.cmd] + valid_inputs
-        self.cmdline = ' '.join(allargs)
+        return ' '.join(allargs)
 
     def outputs_help(self):
 
@@ -303,8 +304,6 @@ class Bet(CommandLine):
 
          """
 
-        # This is expected to populate `command` for _runner to work
-        self._compile_command()
         returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
         if returncode == 0:
             outputs = self.aggregate_outputs()
@@ -349,7 +348,6 @@ class Fast(CommandLine):
         self.args = []
         self._populate_inputs()
         self.inputs.update(inputs)
-        self.cmdline = ''
         self.infiles = []
 
     def inputs_help(self):
@@ -538,7 +536,8 @@ class Fast(CommandLine):
         
         return out_inputs
 
-    def _compile_command(self):
+    @property
+    def cmdline(self):
         """validates fsl options and generates command line argument"""
         valid_inputs = self._parseinputs()
         allargs = [self.cmd] + self.args + valid_inputs
@@ -574,9 +573,7 @@ class Fast(CommandLine):
         else:
             newfast.args.extend(infiles) 
             
-        cmd = newfast._compile_command()
         
-        newfast.cmdline = cmd
         newfast.infiles = list(infiles)
         (retcode, out, err) = newfast._runner(newfast.cmdline)
         newfast.retcode = retcode
@@ -640,7 +637,6 @@ class Flirt(CommandLine):
         self.args = []
         self._populate_inputs()
         self.inputs.update(**inputs)
-        self.cmdline = ''
         self.infile = ''
         self.outfile = ''
         self.reference = ''
@@ -887,7 +883,8 @@ class Flirt(CommandLine):
             print 'option %s not supported'%(opt)
         return out_inputs
 
-    def _compile_command(self):
+    @property
+    def cmdline(self):
         """validates fsl options and generates command line argument"""
         valid_inputs = self._parseinputs()
         allargs = self.args + valid_inputs
@@ -955,10 +952,6 @@ class Flirt(CommandLine):
             newflirt.outmatrix = outmatrix
         
             
-        cmd = newflirt._compile_command()
-        
-        newflirt.cmdline = cmd
-        
         (retcode, out, err) = newflirt._runner(newflirt.cmdline)
         newflirt.retcode = retcode
         newflirt.out = out
@@ -1033,10 +1026,6 @@ class Flirt(CommandLine):
         newflirt.args.extend(['-out %s'%(outfile)])
         newflirt.outfile = outfile
             
-        cmd = newflirt._compile_command()
-        
-        newflirt.cmdline = cmd
-
         (retcode, out, err) = newflirt._runner(newflirt.cmdline)
         newflirt.retcode = retcode
         newflirt.out = out
@@ -1044,7 +1033,8 @@ class Flirt(CommandLine):
         
         return newflirt
 
-    def _compile_command(self):
+    @property
+    def cmdline(self):
         """validates fsl options and generates command line argument"""
         valid_inputs = self._parseinputs()
         if valid_inputs is None:
@@ -1090,7 +1080,6 @@ class Fnirt(CommandLine):
         self.args = []
         self._populate_inputs()
         self.inputs.update(**inputs)
-        self.cmdline = ''
         self.infile = ''
         self.reference = ''
 
@@ -1421,7 +1410,8 @@ class Fnirt(CommandLine):
             print 'option %s not supported'%(opt)
         return out_inputs
             
-    def _compile_command(self):
+    @property
+    def cmdline(self):
         """validates fsl options and generates command line argument"""
         valid_inputs = self._parseinputs()
         allargs = self.args + valid_inputs
@@ -1467,8 +1457,6 @@ class Fnirt(CommandLine):
         newfnirt.args.extend(['--ref %s'%(reference)])
         newfnirt.reference = reference
         
-        cmd = newfnirt._compile_command()
-        newfnirt.cmdline = cmd
         
         (retcode, out, err) = newfnirt._runner(newfnirt.cmdline)
         newfnirt.retcode = retcode
@@ -1477,7 +1465,8 @@ class Fnirt(CommandLine):
         
         return newfnirt
 
-    def _compile_command(self):
+    @property
+    def cmdline(self):
         """validates fsl options and generates command line argument"""
         valid_inputs = self._parseinputs()
         

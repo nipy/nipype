@@ -11,8 +11,8 @@ def test_bet():
     
     yield assert_not_equal, better, better2
     yield assert_not_equal, better, better3
-    yield assert_equal, better.opts.frac, 0.5
-    yield assert_equal, better3.opts.frac, 0.1
+    yield assert_equal, better.inputs.frac, 0.5
+    yield assert_equal, better3.inputs.frac, 0.1
     
     yield assert_equal, better.cmd, 'bet'
     yield assert_equal, better.infile, ''
@@ -31,16 +31,16 @@ def test_bet():
 # test fast
 def test_fast():
     faster = fsl.Fast()
-    faster.opts.verbose = True
+    faster.inputs.verbose = True
     faster2 = faster.update(iters_afterbias=6)
     fasted = faster.run('infile')
     fasted2 = faster.run(['infile', 'otherfile'])
     
     yield assert_equal, faster.cmd, 'fast'
-    yield assert_equal, faster.opts.verbose, True
-    yield assert_equal, faster.opts.manualseg , None
-    yield assert_equal, faster2.opts.verbose, True
-    yield assert_equal, faster2.opts.iters_afterbias, 6
+    yield assert_equal, faster.inputs.verbose, True
+    yield assert_equal, faster.inputs.manualseg , None
+    yield assert_equal, faster2.inputs.verbose, True
+    yield assert_equal, faster2.inputs.iters_afterbias, 6
     yield assert_not_equal, faster, faster2
     yield assert_not_equal, faster, fasted
     yield assert_equal, fasted.cmdline, 'fast infile --verbose'
@@ -51,8 +51,8 @@ def test_fast():
 #test flirt
 def test_flirt():
     flirter = fsl.Flirt()
-    flirter.opts.bins = 256
-    flirter.opts.cost = 'mutualinfo'
+    flirter.inputs.bins = 256
+    flirter.inputs.cost = 'mutualinfo'
     flirted = flirter.run('infile','reffile','outfile','outmat.mat')
     flirt_est = flirter.run('infile','reffile',outfile=None,outmatrix='outmat.mat')
     flirt_apply = flirter.applyxfm('infile','reffile','inmatrix.mat','outimgfile')
@@ -62,9 +62,9 @@ def test_flirt():
     yield assert_not_equal, flirted, flirt_apply
 
     yield assert_equal, flirter.cmd, 'flirt'
-    yield assert_equal, flirter.opts.bins, flirted.opts.bins
-    yield assert_equal, flirter.opts.cost, flirt_est.opts.cost
-    yield assert_equal, flirter.opts.cost, flirt_apply.opts.cost
+    yield assert_equal, flirter.inputs.bins, flirted.inputs.bins
+    yield assert_equal, flirter.inputs.cost, flirt_est.inputs.cost
+    yield assert_equal, flirter.inputs.cost, flirt_apply.inputs.cost
     yield assert_not_equal, flirter.cmdline, flirt_apply.cmdline
     yield assert_equal, flirt_apply.cmdline,'flirt -cost mutualinfo -bins 256 -in infile -ref reffile -applyxfm -init inmatrix.mat -out outimgfile'
     

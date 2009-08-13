@@ -139,11 +139,12 @@ class To3d(CommandLine):
 
         return out_inputs
 
-    def _compile_command(self):
+    @property
+    def cmdline(self):
         """Generate the command line string from the list of arguments."""
         valid_inputs = self._parseinputs()
         allargs =  [self.cmd] + valid_inputs
-        self.cmdline = ' '.join(allargs)
+        return ' '.join(allargs)
 
 
 class Threedrefit(CommandLine):
@@ -204,11 +205,12 @@ class Threedrefit(CommandLine):
 
         return out_inputs
 
-    def _compile_command(self):
+    @property
+    def cmdline(self):
         """Generate the command line string from the list of arguments."""
         valid_inputs = self._parseinputs()
         allargs =  [self.cmd] + valid_inputs
-        self.cmdline = ' '.join(allargs)
+        return ' '.join(allargs)
 
 
 class Threedresample(CommandLine):
@@ -262,7 +264,8 @@ class Threedresample(CommandLine):
 
         return out_inputs
 
-    def _compile_command(self):
+    @property
+    def cmdline(self):
         """Generate the command line string from the list of arguments."""
         valid_inputs = self._parseinputs()
         allargs =  [self.cmd] + valid_inputs
@@ -316,7 +319,8 @@ class ThreedTstat(CommandLine):
 
         return out_inputs
 
-    def _compile_command(self):
+    @property
+    def cmdline(self):
         """Generate the command line string from the list of arguments."""
         valid_inputs = self._parseinputs()
         allargs =  [self.cmd] + valid_inputs
@@ -370,7 +374,8 @@ class ThreedAutomask(CommandLine):
 
         return out_inputs
 
-    def _compile_command(self):
+    @property
+    def cmdline(self):
         """Generate the command line string from the list of arguments."""
         valid_inputs = self._parseinputs()
         allargs =  [self.cmd] + valid_inputs
