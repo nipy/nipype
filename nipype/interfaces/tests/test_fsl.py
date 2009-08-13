@@ -5,7 +5,7 @@ from nose.tools import assert_true, assert_false, assert_raises, assert_equal, a
 # test Bet
 def test_bet():
     better = fsl.Bet()
-    better.opts.frac = 0.5
+    better.inputs.frac = 0.5
     better2 = better.update()
     better3 = better.update(frac=0.1)
     

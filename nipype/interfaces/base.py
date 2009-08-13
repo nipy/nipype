@@ -119,10 +119,6 @@ class Interface(object):
         """Initialize the inputs Bunch attributes."""
         raise NotImplementedError
 
-    def _compile_command(self):
-        """Generate the command line string from the list of arguments."""
-        raise NotImplementedError
-    
     def _aggregate_ouputs(self):
         """Called to populate outputs"""
         raise NotImplementedError
@@ -197,8 +193,6 @@ class CommandLine(Interface):
         self._populate_inputs()
         self._update(*args, **inputs)
 
-        self.cmdline = ''
-
     def _update(self, *args, **inputs):
         '''Helper function to support DRY'''
         try:
@@ -208,7 +202,7 @@ class CommandLine(Interface):
         except (KeyError, AttributeError):
             pass
 
-        self.inputs.update(**inputs)
+        self.inputs.update(inputs)
 
         if args:
             if self.inputs.args:
@@ -235,22 +229,22 @@ class CommandLine(Interface):
         """
         self._update(*args, **inputs) 
             
-        # This is expected to populate `command` for _runner to work
-        self._compile_command()
+        # Perhaps we should pass runtime to _runner so it can do whatever it
+        # thinks is relevant?
         returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
         runtime = Bunch(returncode=returncode,
-                        messages=out,
-                        errmessages=err)
+                        stdout=out,
+                        stderr=err)
 
         return InterfaceResult(deepcopy(self), runtime, outputs=None)
 
     def _populate_inputs(self):
         self.inputs = Bunch(args=None)
 
-    def _compile_command(self):
+    @property
+    def cmdline(self):
         # This handles args like ['bet', '-f 0.2'] without crashing
-        args = list(self.inputs.get('args'))
-        self.cmdline = ' '.join(args)
+        return ' '.join(self.inputs.args)
 
     def _runner(self, shell=True, cwd=None):
         """Run the command using subprocess.Popen."""

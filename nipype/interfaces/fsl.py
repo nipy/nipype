@@ -348,7 +348,7 @@ class Fast(CommandLine):
         super(Fast,self).__init__()
         self.args = []
         self._populate_inputs()
-        self.inputs.update(**inputs)
+        self.inputs.update(inputs)
         self.cmdline = ''
         self.infiles = []
 

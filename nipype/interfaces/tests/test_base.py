@@ -34,17 +34,17 @@ def test_bunch_methods():
 def test_commandline():
     cl = nii.CommandLine('echo', 'foo')
     yield assert_equal, cl.inputs.args, ['echo', 'foo']
-    yield assert_equal, cl._compile_command(), None
+    yield assert_equal, cl.cmdline, None
     yield assert_not_equal, cl, cl.run()
     
-    yield assert_equal, nii.CommandLine('echo foo')._compile_command(),\
-        nii.CommandLine(args='echo foo')._compile_command()
-    yield assert_equal, nii.CommandLine('ls','-l')._compile_command(),\
-        nii.CommandLine('ls -l')._compile_command()
+    yield assert_equal, nii.CommandLine('echo foo').cmdline,\
+        nii.CommandLine(args='echo foo').cmdline
+    yield assert_equal, nii.CommandLine('ls','-l').cmdline,\
+        nii.CommandLine('ls -l').cmdline
     clout = cl.run()
     yield assert_equal, clout.runtime.returncode, 0
-    yield assert_equal, clout.runtime.errmessages,  ''
-    yield assert_equal, clout.runtime.messages, 'foo\n'
+    yield assert_equal, clout.runtime.stderr,  ''
+    yield assert_equal, clout.runtime.stdout, 'foo\n'
     yield assert_equal, clout.interface.cmdline, cl.cmdline
     yield assert_not_equal, clout.interface, cl
 
