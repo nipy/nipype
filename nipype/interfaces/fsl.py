@@ -118,6 +118,13 @@ class Bet(CommandLine):
         """sets base command, not editable"""
         return 'bet'
 
+    @property
+    def cmdline(self):
+        """validates fsl options and generates command line argument"""
+        valid_inputs = self._parseinputs()
+        allargs =  [self.cmd] + valid_inputs
+        return ' '.join(allargs)
+
 
     def inputs_help(self):
 
@@ -136,28 +143,28 @@ class Bet(CommandLine):
         outfile : /path/to/outfile
             path/name of skullstripped file
         outline : Bool
-	    generate brain surface outline overlaid onto original image
-	mask : Bool
-	    generate binary brain mask
-	skull : Bool	
+            generate brain surface outline overlaid onto original image
+        mask : Bool
+            generate binary brain mask
+        skull : Bool	
             generate approximate skull image
-	nooutput : Bool	
+        nooutput : Bool	
             don't generate segmented brain image output
-	frac : float
-	    fractional intensity threshold (0->1); fsldefault=0.5; 
+        frac : float
+            fractional intensity threshold (0->1); fsldefault=0.5; 
             smaller values give larger brain outline estimates
-	vertical_gradient : float		
+        vertical_gradient : float		
             vertical gradient in fractional intensity threshold (-1->1); fsldefault=0
             positive values give larger brain outline at bottom, smaller at top
-	radius : float	
+        radius : float	
             head radius (mm not voxels); initial surface sphere is set to half of this
-	center : list of ints [x,y,z]
+        center : list of ints [x,y,z]
             centre-of-gravity (voxels not mm) of initial mesh surface.
-	threshold : Bool	
+        threshold : Bool	
             apply thresholding to segmented brain image and mask
-	mesh : Bool	
+        mesh : Bool	
             generates brain surface as mesh in vtk format
-	verbose : Bool	
+        verbose : Bool	
             switch on diagnostic messages
 	
         flags = unsupported flags, use at your own risk  ['-R']
@@ -254,13 +261,6 @@ class Bet(CommandLine):
                               
         return out_inputs
 
-    @property
-    def cmdline(self):
-        """validates fsl options and generates command line argument"""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        return ' '.join(allargs)
-
     def outputs_help(self):
 
         doc = """
@@ -304,19 +304,11 @@ class Bet(CommandLine):
 
          """
 
-        returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
-        if returncode == 0:
-            outputs = self.aggregate_outputs()
-        else:
-            outputs = Bunch()
-        return  InterfaceResult(runtime=Bunch(cmdline=self.cmdline,
-                                              returncode=returncode,
-                                              messages=out,
-                                              errmessages=err),
-                                outputs = outputs,
-                                interface=deepcopy(self))
-        
-        
+        results = self._runner(cwd=self.inputs.get('cwd', None))
+        if results.returncode == 0:
+            results.outputs = self.aggregate_outputs()
+
+        return results        
 
 class Fast(CommandLine):
 
@@ -325,6 +317,13 @@ class Fast(CommandLine):
         """sets base command, not editable"""
         return 'fast'
 
+    @property
+    def cmdline(self):
+        """validates fsl options and generates command line argument"""
+        valid_inputs = self._parseinputs()
+        allargs = [self.cmd] + self.args + valid_inputs
+        return ' '.join(allargs)
+  
     def __init__(self, **inputs):
         """use fsl fast for segmenting, bias correction
 
@@ -536,13 +535,6 @@ class Fast(CommandLine):
         
         return out_inputs
 
-    @property
-    def cmdline(self):
-        """validates fsl options and generates command line argument"""
-        valid_inputs = self._parseinputs()
-        allargs = [self.cmd] + self.args + valid_inputs
-        return ' '.join(allargs)
-  
     def run(self, infiles=None):
         """ runs fast command
 
@@ -597,6 +589,13 @@ class Flirt(CommandLine):
         """sets base command, not editable"""
         return "flirt"
 
+    @property
+    def cmdline(self):
+        """validates fsl options and generates command line argument"""
+        valid_inputs = self._parseinputs()
+        allargs = self.args + valid_inputs
+        return ' '.join(allargs)
+  
     def __init__(self, **inputs):
         """use fsl flirt for coregistration
 
@@ -636,7 +635,7 @@ class Flirt(CommandLine):
         super(Flirt,self).__init__()
         self.args = []
         self._populate_inputs()
-        self.inputs.update(**inputs)
+        self.inputs.update(inputs)
         self.infile = ''
         self.outfile = ''
         self.reference = ''
@@ -883,13 +882,6 @@ class Flirt(CommandLine):
             print 'option %s not supported'%(opt)
         return out_inputs
 
-    @property
-    def cmdline(self):
-        """validates fsl options and generates command line argument"""
-        valid_inputs = self._parseinputs()
-        allargs = self.args + valid_inputs
-        return ' '.join(allargs)
-  
     def run(self, infile=None, reference=None, outfile=None, outmatrix=None):
         """ runs flirt command
          

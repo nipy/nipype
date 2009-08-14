@@ -87,7 +87,7 @@ class Bunch(object):
 
 class InterfaceResult(object):
     '''Describe the results of .run()-ing a particular Interface'''
-    def __init__(self, interface, runtime, outputs):
+    def __init__(self, interface, runtime, outputs=None):
         self.interface = interface
         self.runtime = runtime
         self.outputs = outputs
@@ -229,14 +229,7 @@ class CommandLine(Interface):
         """
         self._update(*args, **inputs) 
             
-        # Perhaps we should pass runtime to _runner so it can do whatever it
-        # thinks is relevant?
-        returncode, out, err = self._runner(cwd=self.inputs.get('cwd', None))
-        runtime = Bunch(returncode=returncode,
-                        stdout=out,
-                        stderr=err)
-
-        return InterfaceResult(deepcopy(self), runtime, outputs=None)
+        return self._runner()
 
     def _populate_inputs(self):
         self.inputs = Bunch(args=None)
@@ -247,15 +240,31 @@ class CommandLine(Interface):
         return ' '.join(self.inputs.args)
 
     def _runner(self, shell=True, cwd=None):
-        """Run the command using subprocess.Popen."""
-        proc  = subprocess.Popen(self.cmdline,
+        """Run the command using subprocess.Popen.
+        
+        Arguments
+        ---------
+        
+        shell : bool
+            shell command passed to Popen, do we parse the cmdline?
+        cwd : str
+            Note that unlike calls to Popen, cwd=None will still check
+            self.inputs.cwd!  Use an alternative like '.' if you need it
+        """
+        if cwd is None:
+            cwd = self.inputs.get('cwd', None)
+        runtime = Bunch(cmdline=self.cmdline)
+
+        proc  = subprocess.Popen(runtime.cmdline,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
                                  shell=shell,
                                  cwd=cwd)
-        out, err = proc.communicate()
-        returncode = proc.returncode
-        return returncode, out, err
+
+        runtime.stdout, runtime.stderr = proc.communicate()
+        runtime.returncode = proc.returncode
+
+        return InterfaceResult(deepcopy(self), runtime)
 
     def get_input_info(self):
         """ Provides information about file inputs to copy or link to cwd.

@@ -16,6 +16,18 @@ class MatlabCommandLine(CommandLine):
     >>> mcmd.inputs.script_lines = "which('who')"
     >>> out = mcmd.run()
     """
+    _cmdline = None
+    _cmdline_inputs = None
+    @property
+    def cmdline(self):
+        # This is currently a very inefficient hash! We can become more
+        # efficient once we decide on our logic
+        if self._cmdline = None or self._cmdline_inputs != self.inputs:
+            self._compile_command()
+            self_cmdline_inputs = self.inputs
+
+        return self._cmdline
+
     matlab_cmd = 'matlab -nodesktop -nosplash'
     def __init__(self, matlab_cmd=None,**inputs):
         """initializes interface to matlab
@@ -26,10 +38,6 @@ class MatlabCommandLine(CommandLine):
         if matlab_cmd is not None:
             self.matlab_cmd = matlab_cmd
 
-    @property
-    def cmdline(self):
-        return self.cmdline2
-    
     def set_matlabcmd(self, cmd):
         """reset the base matlab command
         """
@@ -51,37 +59,41 @@ class MatlabCommandLine(CommandLine):
     def _populate_inputs(self):
         self.inputs = Bunch(script_lines='',
                             script_name='pyscript',
-                            mfile=True,
                             cwd='.')
 
     def run(self):
-        #subprocess.call('%s -r \"%s;exit\" ' % (matlab_cmd, cmd),
-        #                shell=True)
-        self._compile_command()
-        returncode, out, err = self._runner(cwd=self.inputs.get('cwd','.'))
+        results = self._runner()
         if  'MatlabScriptException' in err:
-            returncode = 1
-        return InterfaceResult(runtime=Bunch(cmdline=self.cmdline,
-                                             returncode=returncode,
-                                             stdout=out,stderr=err),
-                               outputs=None,
-                               interface=deepcopy(self))
+            results.runtime.returncode = 1
+        return results
 
-    def _compile_command(self):
-        self.cmdline = self.gen_matlab_command(script_lines=self.inputs.script_lines,
-                                               script_name=self.inputs.script_name,
-                                               cwd=self.inputs.cwd,
-                                               mfile=self.inputs.mfile)
-        return self.cmdline
+    def _compile_command(self, mfile=True):
+        '''Generate necessary Matlab files and cmdline
 
-    def gen_matlab_command(self,script_lines='',script_name='pyscript',cwd='.',mfile=True):
+        Note that this could be called before accessing .cmdline, and we won't
+        regenerate anything (unless the inputs have changed)
+        '''
+        self._cmdline = self.gen_matlab_command(
+                script_lines=self.inputs.script_lines,
+                script_name=self.inputs.script_name,
+                mfile=mfile)
+        return self._cmdline
+
+    def gen_matlab_command(self,script_lines='',script_name='pyscript',
+            cwd=None,mfile=True):
         """ Put multiline matlab script into script file and run
-        Arguments:
-        - `self`:
-        - `script_lines`:
-        - `script_name`:
-        - `cwd`:
+        Arguments
+        ---------
+
+        self :
+        script_lines :
+        script_name :
+        cwd :
+            Note that unlike calls to Popen, cwd=None will still check
+            self.inputs.cwd!  Use an alternative like '.' if you need it
         """
+        if cwd is None:
+            cwd = self.inputs.get('cwd', None)
         prescript  = ''
         if mfile:
             prescript += "diary(sprintf('%s.log',mfilename));\n"
