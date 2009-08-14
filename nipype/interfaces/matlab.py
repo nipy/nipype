@@ -22,9 +22,14 @@ class MatlabCommandLine(CommandLine):
         (default 'matlab -nodesktop -nosplash'
         """
         super(MatlabCommandLine,self).__init__(**inputs)
+        self.cmdline2 = None
         if matlab_cmd is not None:
             self.matlab_cmd = matlab_cmd
 
+    @property
+    def cmdline(self):
+        return self.cmdline2
+    
     def set_matlabcmd(self, cmd):
         """reset the base matlab command
         """

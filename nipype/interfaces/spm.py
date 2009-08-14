@@ -148,13 +148,17 @@ class SpmMatlabCommandLine(MatlabCommandLine):
             return jobstring
         if type(contents) == type(np.empty(1)):
             #Assumes list of filenames embedded in a numpy array
+            # does not support dicts embedded within a numpy array
             jobstring += "%s = {...\n"%(prefix)
             for item in contents[0]:
-                if type(item) == type(np.empty(1)):
-                    for f in item:
-                        jobstring += '\'%s\';...\n'%(f[0])
-                else:
-                    jobstring += '\'%s\';...\n'%(item)
+                for i,f in enumerate(item):
+                    if type(f) is type(''):
+                        jobstring += '\'%s\';...\n'%(f)
+                    if type(f) == type(np.empty(1)):
+                        jobstring += '['
+                        for v in f:
+                            jobstring += '%s,'%str(v)
+                        jobstring += '],...\n'
             jobstring += '};\n'
             return jobstring
         if type(contents) == type(''):
@@ -184,25 +188,28 @@ class SpmMatlabCommandLine(MatlabCommandLine):
 def scans_for_fname(fname):
     img = load(fname)
     if len(img.get_shape()) == 3:
-        scans = np.zeros((1, 1), dtype=object)
-        scans[0] = '%s,1'%(fname)
-        return scans
+        flist = [['%s,1'%fname]]
+        return np.array([flist],dtype=object)
     else:
         n_scans = img.get_shape()[3]
-        scans = np.zeros((n_scans, 1), dtype=object)
+        scans = []
         for sno in range(n_scans):
-            scans[sno] = '%s,%d' % (fname, sno+1)
-        return scans
+            scans.insert(sno,['%s,%d'% (fname, sno+1)])
+        return np.array([scans],dtype=object)
 
-
-def scans_for_fnames(fnames):
-    n_sess = len(fnames)
-    sess_scans = np.zeros((1,n_sess), dtype=object)
-    for sess in range(n_sess):
-        scans =  np.zeros((1, 1), dtype=object)
-        scans[0] = '%s,1'%(fnames[sess])
-        sess_scans[0,sess] = scans #scans_for_fname(fnames[sess])
-    return sess_scans
+def scans_for_fnames(fnames,keep4d=False):
+    if keep4d:
+        flist = [[f] for f in fnames]
+        return np.array([flist],dtype=object)
+    else:
+        n_sess = len(fnames)
+        scans = None
+        for sess in range(n_sess):
+            if scans is None:
+                scans = scans_for_fname(fnames[sess])[0]
+            else:
+                scans = np.concatenate((scans,scans_for_fname(fnames[sess])[0]))
+        return np.array([scans],dtype=object)
 
 class Realign(SpmMatlabCommandLine):
     """use spm_realign for estimating within modality rigid body alignment
@@ -360,11 +367,7 @@ class Realign(SpmMatlabCommandLine):
             if opt is 'flags':
                 einputs.update(inputs[opt])
             if opt is 'infile':
-                if type(inputs[opt]) == type([]):
-                    sess_scans = scans_for_fnames(inputs[opt])
-                else:
-                    sess_scans = scans_for_fname(inputs[opt])
-                einputs['data'] = sess_scans
+                einputs['data'] = scans_for_fnames(filename_to_list(inputs[opt]),keep4d=True)
                 continue
             if opt is 'write':
                 continue
@@ -425,7 +428,7 @@ class Realign(SpmMatlabCommandLine):
             parameters 
             """
         print self.outputs_help.__doc__
-        
+
     def _compile_command(self,mfile=True):
         """validates spm options and generates job structure
         if mfile is True uses matlab .m file
@@ -435,7 +438,7 @@ class Realign(SpmMatlabCommandLine):
             jobtype = 'estwrite'
         else:
             jobtype = 'estimate'
-        self.cmdline,mscript = self.make_matlab_command('spatial',
+        self.cmdline2,mscript = self.make_matlab_command('spatial',
                                                         'realign',
                                                         [{'%s'%(jobtype):self._parseinputs()}],
                                                         mfile,
@@ -2095,9 +2098,9 @@ class SpecifyModel(Interface):
                    modulated. Should default to None if not being used.
                 pmod : list of dicts corresponding to conditions
                     name : name of parametric modulator
-                    values : values of the modulator
-                    type : degree of modulation
-                regressors : list of dicts
+                    param : values of the modulator
+                    poly : degree of modulation
+                regressors : list of dicts or matfile
                     names : list of names corresponding to each
                        column. Should be None if automatically
                        assigned.
@@ -2111,13 +2114,18 @@ class SpecifyModel(Interface):
                 parameters.
             outlier_files : list of files
                 A list of files containing outliers that should be
-                tossed. One file per session. 
+                tossed. One file per session.
+            functional_runs : list of files
+                List of data files for model. One file per session
             input_units : string
                 Units of event onsets and durations (secs or scans) as
                 returned by the subject_info_func
             output_units : string
                 Units of event onsets and durations (secs or scans) as
                 sent to SPM design
+            polynomial_order : int
+                Number of polynomial functions used to model high pass
+                filter. 
             concatenate_runs : boolean
                 Allows concatenating all runs to look like a single
                 expermental session.
@@ -2133,6 +2141,8 @@ class SpecifyModel(Interface):
                 If number of volumes in a cluster is greater than one,
                 then it is assumed that a sparse-clustered acquisition
                 is being assumed.
+            model_hrf_cluster : boolean
+                Whether to model hrf for sparse clustered analysis
         """
         print self.inputs_help.__doc__
 
@@ -2169,8 +2179,45 @@ class SpecifyModel(Interface):
     
     def _generate_design(self):
         """
+        The multipart assignment in the for loop below is to ensure
+        compatibility with current scipy MAT objects. The
+        following pairs of operations return two different types of
+        numpy arrays.
+
+        >>> onsets = [[1,2,3],[2,3]]
+        >>> np.array([[[np.array(f)] for f in onsets]],dtype=object)
+        
+        >>> onsets = [[1,2,3],[1,2,3]]
+        >>> np.array([[[np.array(f)] for f in onsets]],dtype=object)
         """
-        pass
+        infolist = self.inputs.subject_info_func(self.inputs.subject_id)
+        sessinfo = []
+        for i,info in enumerate(infolist):
+            sessinfo.insert(i,dict())
+            sessinfo[i]['names']  = np.array([[[str(f)] for f in info.conditions]],dtype=object)
+            sessinfo[i]['onsets'] = np.array([[[1] for f in info.onsets]],dtype=object)
+            for j,f in enumerate(info.onsets):
+                sessinfo[i]['onsets'][0][j][0] = np.array(f)
+            sessinfo[i]['durations'] = np.array([[[1] for f in info.durations]],dtype=object)
+            for j,f in enumerate(info.durations):
+                sessinfo[i]['durations'][0][j][0] = np.array(f)
+            if info.tmod is not None:
+                sessinfo[i]['tmod'] = np.array([[[np.array([f])] for f in info.tmod]],dtype=object)
+            if info.pmod is not None:
+                sessinfo[i]['pmod'] = []
+                for j in range(len(info.conditions)):
+                    sessinfo[i]['pmod'].insert(j,dict(name=np.array([[['']]],dtype=object),
+                                                      param=np.array([[]],dtype=object),
+                                                      poly=np.array([[]],dtype=object)))
+                for j,v in info.pmod.items():
+                    sessinfo[i]['pmod'][j-1]['name'][0][0][0] = v.name
+                    sessinfo[i]['pmod'][j-1]['param'][0][0][0] = np.array(v.param,dtype=object)
+                    sessinfo[i]['pmod'][j-1]['poly'][0][0][0] = np.array(v.poly,dtype=object)
+        regressinfo = []
+        for i,info in enumerate(infolist):
+            regressinfo.insert(i,dict(name='',val=[]))
+            reg
+            
         
     
     def aggregate_outputs(self):
