@@ -22,7 +22,7 @@ class MatlabCommandLine(CommandLine):
     def cmdline(self):
         # This is currently a very inefficient hash! We can become more
         # efficient once we decide on our logic
-        if self._cmdline = None or self._cmdline_inputs != self.inputs:
+        if self._cmdline is None or self._cmdline_inputs != self.inputs:
             self._compile_command()
             self_cmdline_inputs = self.inputs
 

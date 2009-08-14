@@ -92,7 +92,39 @@ def fsloutputtype(ftype=None):
     return fsl_ftype,ftypes[fsl_ftype]
         
 
-class Bet(CommandLine):
+class FSLCommand(CommandLine):
+    '''General support for FSL commands'''
+    @property
+    def cmdline(self):
+        """validates fsl options and generates command line argument"""
+        valid_inputs = self._parseinputs()
+        allargs =  [self.cmd] + valid_inputs
+        return ' '.join(allargs)
+
+    def run(self):
+        """Execute the command.
+        
+        Returns
+        -------
+        results : Bunch
+            A `Bunch` object with a copy of self in `interface`
+
+        """
+        results = self._runner()
+        if results.returncode == 0:
+            results.outputs = self._aggregate_outputs()
+
+        return results        
+
+    def _parseinputs(self):
+        '''Generate a string based on inputs
+
+        This exists to get called by cmdline'''
+        raise NotImplementedError
+
+
+
+class Bet(FSLCommand):
     """use fsl bet for skull stripping
 
     Options
@@ -118,16 +150,7 @@ class Bet(CommandLine):
         """sets base command, not editable"""
         return 'bet'
 
-    @property
-    def cmdline(self):
-        """validates fsl options and generates command line argument"""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        return ' '.join(allargs)
-
-
     def inputs_help(self):
-
         doc = """
         Mandatory Parameters
         --------------------
@@ -251,9 +274,9 @@ class Bet(CommandLine):
             print 'option %s not supported'%(opt)
 
         if self.inputs['infile']:
-            out_inputs.insert(0, '%s' % self.inputs['infile'])
+            out_inputs.insert(0, str(self.inputs['infile']))
         if self.inputs['outfile']:
-            out_inputs.insert(1, '%s' % self.inputs['outfile'])
+            out_inputs.insert(1, str(self.inputs['outfile']))
         else:
             pth,fname = os.path.split(self.inputs['infile'])
             out_inputs.insert(1, '%s' % os.path.join(self.inputs.get('cwd',pth),
@@ -262,7 +285,6 @@ class Bet(CommandLine):
         return out_inputs
 
     def outputs_help(self):
-
         doc = """
         Optional Parameters
         -------------------
@@ -270,12 +292,12 @@ class Bet(CommandLine):
         
         outfile : /path/to/outfile
             path/name of skullstripped file
-	maskfile : Bool
-	    binary brain mask if generated
+        maskfile : Bool
+            binary brain mask if generated
         """
         print doc
 
-    def aggregate_outputs(self):
+    def _aggregate_outputs(self):
         outputs = Bunch(outfile = None,
                         maskfile = None)
         if self.inputs.outfile:
@@ -294,61 +316,31 @@ class Bet(CommandLine):
             outputs.maskfile = None
         return outputs
 
-    def run(self):
-        """Execute the command.
-        
-        Returns
-        -------
-        results : Bunch
-            A `Bunch` object with a copy of self in `interface`
 
-         """
+class Fast(FSLCommand):
+    """use fsl fast for segmenting, bias correction
 
-        results = self._runner(cwd=self.inputs.get('cwd', None))
-        if results.returncode == 0:
-            results.outputs = self.aggregate_outputs()
+    Options
+    -------
+    see  
+    fsl.Fast().inputs_help()
+    
+    Example
+    -------
+    >>> faster = fsl.Fast(out_basename = 'myfasted')
+    >>> fasted = faster.run(['file1','file2'])
+    >>> fsl.Fast().inputs_help()
 
-        return results        
-
-class Fast(CommandLine):
+    >>> faster = fsl.Fast(infiles=['filea','fileb'], 
+                          out_basename = 'myfasted')
+    >>> fasted = faster.run()
+    """
 
     @property
     def cmd(self):
         """sets base command, not editable"""
         return 'fast'
-
-    @property
-    def cmdline(self):
-        """validates fsl options and generates command line argument"""
-        valid_inputs = self._parseinputs()
-        allargs = [self.cmd] + self.args + valid_inputs
-        return ' '.join(allargs)
   
-    def __init__(self, **inputs):
-        """use fsl fast for segmenting, bias correction
-
-        Options
-        -------
-        see  
-        fsl.Fast().inputs_help()
-        
-        Example
-        -------
-        >>> faster = fsl.Fast(out_basename = 'myfasted')
-        >>> fasted = faster.run(['file1','file2'])
-        >>> fsl.Fast().inputs_help()
-
-        >>> faster = fsl.Fast(infiles=['filea','fileb'], 
-                              out_basename = 'myfasted')
-        >>> fasted = faster.run()
-        """
-        
-        super(Fast,self).__init__()
-        self.args = []
-        self._populate_inputs()
-        self.inputs.update(inputs)
-        self.infiles = []
-
     def inputs_help(self):
         doc = """
         POSSIBLE OPTIONS
@@ -437,149 +429,92 @@ class Fast(CommandLine):
         if set to None ignore
         """
         out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
-        for opt in inputs:
+        inputs = [(k, v) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt, value in inputs:
             if opt is 'infiles':
                 continue
             if opt is 'number_classes':
-                val = int(inputs['number_classes'])
-                out_inputs.extend(['--class %d '%(val)])
+                out_inputs.append('--class %d ' % value)
                 continue
             if opt is 'bias_iters':
-                val = int(inputs['bias_iters'])
-                out_inputs.extend(['--iter %d'%(val)])
+                out_inputs.append('--iter %d' % value)
                 continue
             if opt is 'bias_lowpass':
-                val = int(inputs['bias_lowpass'])
-                out_inputs.extend(['--lowpass %d'%(val)])
+                out_inputs.append('--lowpass %d' % value)
                 continue
             if opt is 'img_type':
-                val = int(inputs['img_type'])
-                out_inputs.extend(['--type %d'%(val)])
+                out_inputs.append('--type %d' % value)
                 continue
             if opt is 'init_seg_smooth':
-                val = float(inputs['init_seg_smooth'])
-                out_inputs.extend(['--fHard %f'%(val)])
+                out_inputs.append('--fHard %f' % value)
                 continue
             if opt is 'segments':
-                if inputs['segments']:
-                    out_inputs.extend(['--segments'])
+                if value:
+                    out_inputs.append('--segments')
                 continue
             if opt is 'init_transform':
-                out_inputs.extend(['-a %s'%(inputs['init_transform'])])
+                out_inputs.append('-a %s' % value)
                 continue
             if opt is 'other_priors':
-                imgs = inputs['other_priors']
-                out_inputs.extend(['-A %s %s %s'%(imgs[0], imgs[1], imgs[2])])
+                out_inputs.append('-A %s %s %s'% value)
                 continue
             if opt is 'nopve':
-                if inputs['nopve']:
-                    out_inputs.extend(['--nopve'])
+                if value:
+                    out_inputs.append('--nopve')
                 continue
             if opt is 'output_biasfield':
-                if inputs['output_biasfield']:
-                     out_inputs.extend(['-b'])
+                if value:
+                     out_inputs.append('-b')
                 continue
             if opt is 'output_biascorrected':
-                if inputs['output_biascorrected']:
-                    out_inputs.extend(['-B'])
+                if value:
+                    out_inputs.append('-B')
                 continue
             if opt is 'nobias':
-                if inputs['nobias']:
-                    out_inputs.extend(['--nobias'])
+                if value:
+                    out_inputs.append('--nobias')
                 continue
             if opt is 'n_inputimages':
-                val = int(inputs['n_inputimages'])
-                out_inputs.extend(['--channels %d'%(val)])
+                out_inputs.append('--channels %d' % value)
                 continue
             if opt is 'out_basename':
-                out_inputs.extend(['--out %s'%(inputs['out_basename'])])
+                out_inputs.append('--out %s' % value)
                 continue
             if opt is 'use_priors':
-                if inputs['use_priors']:
-                     out_inputs.extend(['--Prior'])
+                if value:
+                     out_inputs.append('--Prior')
                 continue
             if opt is 'segment_iters':
-                val = int(inputs['segment_iters'])
-                out_inputs.extend(['--init %d'%(val)])
+                out_inputs.append('--init %d' % value)
                 continue
             if opt is 'mixel_smooth':
-                 val = float(inputs['mixel_smooth'])
-                 out_inputs.extend(['--mixel %f'%(val)])
+                 out_inputs.append('--mixel %f' % value)
                  continue
             if opt is 'iters_afterbias':
-                 val = int(inputs['iters_afterbias'])
-                 out_inputs.extend(['--fixed %d'%(val)])
+                 out_inputs.append('--fixed %d' % value)
                  continue
             if opt is 'hyper':
-                val = float(inputs['hyper'])
-                out_inputs.extend(['--Hyper %f'%(val)])
+                out_inputs.append('--Hyper %f' % value)
                 continue
             if opt is 'verbose':
-                if inputs['verbose']:
-                    out_inputs.extend(['--verbose'])
+                if value:
+                    out_inputs.append('--verbose')
                 continue
             if opt is 'manualseg':
-                out_inputs.extend(['--manualseg %s'%(inputs['manualseg'])])
+                out_inputs.append('--manualseg %s' % value)
                 continue
             if opt is 'probability_maps':
-                if inputs['probability_maps']:
-                    out_inputs.extend(['-p'])
+                if value:
+                    out_inputs.append('-p')
                 continue
-            if opt is 'flags':
-                out_inputs.extend(inputs['flags'])
+            if opt is 'args':
+                out_inputs.extend(value)
                 continue
                                
-            print 'option %s not supported'%(opt)
+            print 'option %s not supported' % (opt)
         
         return out_inputs
 
-    def run(self, infiles=None):
-        """ runs fast command
-
-        Parameters
-        ----------
-        infiles : filename(s)
-            file(s) to segment/ bias-correct
-
-        Returns
-        --------
-        fast : object
-            return new fast object with updated fields
-        """
-        #newfast = self.update()
-        if infiles is None:
-            if self.inputs.infiles is None:
-                raise ValueError('infiles not specified')
-            else:
-                infiles = self.inputs.infiles
-        
-        if type(infiles) is not list:
-            infiles = [infiles]
-        
-        newfast = self.update(infiles = infiles)
-
-        if len(infiles) > 1:
-            newfast.args.extend([k for k in infiles])
-        else:
-            newfast.args.extend(infiles) 
-            
-        
-        newfast.infiles = list(infiles)
-        (retcode, out, err) = newfast._runner(newfast.cmdline)
-        newfast.retcode = retcode
-        newfast.out = out
-        newfast.err = err
-        
-        return newfast
-
-    def update(self, **inputs):
-        newfast = Fast()
-        [newfast.inputs.__setattr__(k,v) for k, v in self.inputs.iteritems() if v is not None ]
-        newfast.inputs.update(**inputs)
-        return newfast
-  
 
 class Flirt(CommandLine):
 
