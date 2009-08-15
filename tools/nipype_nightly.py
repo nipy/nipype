@@ -1,9 +1,7 @@
+#!/usr/bin/env python
+
 """Simple script to update the trunk nightly, build the docs and push
 to sourceforge.
-
-Usage:
-    python nipype_nightly.py
-
 """
 
 import os
@@ -11,11 +9,12 @@ import subprocess
 
 dirname = '/home/cburns/src/nipy-sf/nipype/trunk/'
 
-color_green = '\033[0;32m'
-color_null = '\033[0m'
+#color_green = '\033[0;32m'
+#color_null = '\033[0m'
 
 def run_cmd(cmd):
-    print color_green + cmd + color_null
+    #print color_green + cmd + color_null
+    print cmd
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, shell=True)
     output, error = proc.communicate()
