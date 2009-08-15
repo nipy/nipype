@@ -107,7 +107,7 @@ class FSLCommand(CommandLine):
     @property
     def cmdline(self):
         """validates fsl options and generates command line argument"""
-        allargs = self._parseinputs()
+        allargs = self._parse_inputs()
         allargs.insert(0, self.cmd)
         return ' '.join(allargs)
 
@@ -126,7 +126,7 @@ class FSLCommand(CommandLine):
 
         return results        
 
-    def _parseinputs(self, skip=()):
+    def _parse_inputs(self, skip=()):
         """validate options in the opt_map. If set to None ignore.
         """
         allargs = []
@@ -243,7 +243,7 @@ class Bet(FSLCommand):
                           verbose=None, 
                           flags=None)
 
-    def _parseinputs(self):
+    def _parse_inputs(self):
         """validate fsl bet options
         if set to None ignore
         """
@@ -484,10 +484,10 @@ class Fast(FSLCommand):
                           probability_maps=None,
                           flags=None)
 
-    def _parseinputs(self):
+    def _parse_inputs(self):
         '''Call our super-method, then add our input files'''
-        # Could do other checking above and beyond regular _parseinputs here
-        allargs = super(Fast, self)._parseinputs(skip=('infiles'))
+        # Could do other checking above and beyond regular _parse_inputs here
+        allargs = super(Fast, self)._parse_inputs(skip=('infiles'))
         allargs.extend(self.inputs.infiles)
 
         return allargs
@@ -504,7 +504,7 @@ class Flirt(CommandLine):
     @property
     def cmdline(self):
         """validates fsl options and generates command line argument"""
-        valid_inputs = self._parseinputs()
+        valid_inputs = self._parse_inputs()
         allargs = self.args + valid_inputs
         return ' '.join(allargs)
   
@@ -670,7 +670,7 @@ class Flirt(CommandLine):
                           verbose=None,
                           flags=None)
 
-    def _parseinputs(self):
+    def _parse_inputs(self):
         """validate fsl bet options
         if set to None ignore
         """
@@ -940,7 +940,7 @@ class Flirt(CommandLine):
     @property
     def cmdline(self):
         """validates fsl options and generates command line argument"""
-        valid_inputs = self._parseinputs()
+        valid_inputs = self._parse_inputs()
         if valid_inputs is None:
             allargs = [self.cmd] + self.args
         else:
@@ -1185,7 +1185,7 @@ class Fnirt(CommandLine):
                           applyrefmask=None,
                           applyimgmask=None)
 
-    def _parseinputs(self):
+    def _parse_inputs(self):
         """validate fsl bet options
         if set to None ignore
         """
@@ -1316,7 +1316,7 @@ class Fnirt(CommandLine):
     @property
     def cmdline(self):
         """validates fsl options and generates command line argument"""
-        valid_inputs = self._parseinputs()
+        valid_inputs = self._parse_inputs()
         allargs = self.args + valid_inputs
         return ' '.join(allargs)
   
@@ -1371,7 +1371,7 @@ class Fnirt(CommandLine):
     @property
     def cmdline(self):
         """validates fsl options and generates command line argument"""
-        valid_inputs = self._parseinputs()
+        valid_inputs = self._parse_inputs()
         
         if valid_inputs is None:
             allargs = [self.cmd] + self.args
@@ -1394,7 +1394,7 @@ class Fnirt(CommandLine):
 
                 
         """
-        valid_inputs = self._parseinputs() 
+        valid_inputs = self._parse_inputs() 
         try :
             fid = fopen(configfile, 'w+')
         except IOError:
