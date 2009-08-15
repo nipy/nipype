@@ -23,6 +23,16 @@ from nipype.interfaces.base import (Bunch, CommandLine,
                                     load_template, InterfaceResult)
 from nipype.utils import setattr_on_read
 
+import warnings
+warn = warnings.warn
+
+warnings.filterwarnings('always', category=UserWarning)
+# If we don't like the way python is desplaying things, we can override this,
+# e.g.:
+# def warnings.showwarning(message, category, filename, lineno, file=None,
+# line=None):
+#     print message
+
 def fslversion():
     """Check for fsl version on system
 
@@ -97,8 +107,8 @@ class FSLCommand(CommandLine):
     @property
     def cmdline(self):
         """validates fsl options and generates command line argument"""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
+        allargs = self._parseinputs()
+        allargs.insert(0, self.cmd)
         return ' '.join(allargs)
 
     def run(self):
@@ -116,12 +126,34 @@ class FSLCommand(CommandLine):
 
         return results        
 
-    def _parseinputs(self):
-        '''Generate a string based on inputs
-
-        This exists to get called by cmdline'''
-        raise NotImplementedError
-
+    def _parseinputs(self, skip=()):
+        """validate options in the opt_map. If set to None ignore.
+        """
+        allargs = []
+        inputs = [(k, v) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt, value in inputs:
+            if opt in skip:
+                continue
+            if opt == 'args':
+                allargs.extend(value)
+                continue
+            try:
+                argstr = self.opt_map[opt]
+                if argstr.find('%') == -1:
+                    if value is True:
+                        allargs.append(argstr)
+                    elif value is not False:
+                        raise TypeError('Boolean option %s set to %s' % 
+                                         (opt, str(value)) )
+                else:
+                    allargs.append(argstr % value)
+            except TypeError, err:
+                # Perhaps these should be proper warnings?
+                warn('For option %s in Fast, %s' % (opt, err.message))
+            except KeyError:                   
+                warn('option %s not supported' % (opt))
+        
+        return allargs
 
 
 class Bet(FSLCommand):
@@ -341,6 +373,32 @@ class Fast(FSLCommand):
         """sets base command, not editable"""
         return 'fast'
   
+    opt_map = {'number_classes':       '--class %d ',
+               'bias_iters':           '--iter %d',
+               'bias_lowpass':         '--lowpass %d',
+               'img_type':             '--type %d',
+               'init_seg_smooth':      '--fHard %f',
+               'segments':             '--segments',
+               'init_transform':       '-a %s',
+               # This option is not really documented on the Fast web page:
+               # http://www.fmrib.ox.ac.uk/fsl/fast4/index.html#fastcomm
+               # I'm not sure if there are supposed to be exactly 3 args or what
+               'other_priors':         '-A %s %s %s',
+               'nopve':                '--nopve',
+               'output_biasfield':     '-b',
+               'output_biascorrected': '-B',
+               'nobias':               '--nobias',
+               'n_inputimages':        '--channels %d',
+               'out_basename':         '--out %s',
+               'use_priors':           '--Prior',
+               'segment_iters':        '--init %d',
+               'mixel_smooth':         '--mixel %f',
+               'iters_afterbias':      '--fixed %d',
+               'hyper':                '--Hyper %f',
+               'verbose':              '--verbose',
+               'manualseg':            '--manualseg %s',
+               'probability_maps':     '-p'}
+
     def inputs_help(self):
         doc = """
         POSSIBLE OPTIONS
@@ -358,12 +416,14 @@ class Fast(FSLCommand):
         img_type : int
             type of image 1=T1, 2=T2, 3=PD; (default=T1)
         init_seg_smooth : float
-            initial segmentation spatial smoothness (during bias field estimation); default=0.02
+            initial segmentation spatial smoothness (during bias field
+            estimation); default=0.02
         segments : Boolean
             outputs a separate binary image for each tissue type
         init_transform : string filename
-            initialise using priors; you must supply a FLIRT transform <standard2input.mat>
-        other_priors : list of strings (filenames)
+            initialise using priors; you must supply a FLIRT transform
+            <standard2input.mat>
+        other_priors : tuple of strings (filenames)
             <prior1> <prior2> <prior3>    alternative prior images
         nopve :Boolean
             turn off PVE (partial volume estimation)
@@ -425,100 +485,17 @@ class Fast(FSLCommand):
                           flags=None)
 
     def _parseinputs(self):
-        """validate fsl bet options
-        if set to None ignore
-        """
-        out_inputs = []
-        inputs = [(k, v) for k, v in self.inputs.iteritems() if v is not None ]
-        for opt, value in inputs:
-            if opt is 'infiles':
-                continue
-            if opt is 'number_classes':
-                out_inputs.append('--class %d ' % value)
-                continue
-            if opt is 'bias_iters':
-                out_inputs.append('--iter %d' % value)
-                continue
-            if opt is 'bias_lowpass':
-                out_inputs.append('--lowpass %d' % value)
-                continue
-            if opt is 'img_type':
-                out_inputs.append('--type %d' % value)
-                continue
-            if opt is 'init_seg_smooth':
-                out_inputs.append('--fHard %f' % value)
-                continue
-            if opt is 'segments':
-                if value:
-                    out_inputs.append('--segments')
-                continue
-            if opt is 'init_transform':
-                out_inputs.append('-a %s' % value)
-                continue
-            if opt is 'other_priors':
-                out_inputs.append('-A %s %s %s'% value)
-                continue
-            if opt is 'nopve':
-                if value:
-                    out_inputs.append('--nopve')
-                continue
-            if opt is 'output_biasfield':
-                if value:
-                     out_inputs.append('-b')
-                continue
-            if opt is 'output_biascorrected':
-                if value:
-                    out_inputs.append('-B')
-                continue
-            if opt is 'nobias':
-                if value:
-                    out_inputs.append('--nobias')
-                continue
-            if opt is 'n_inputimages':
-                out_inputs.append('--channels %d' % value)
-                continue
-            if opt is 'out_basename':
-                out_inputs.append('--out %s' % value)
-                continue
-            if opt is 'use_priors':
-                if value:
-                     out_inputs.append('--Prior')
-                continue
-            if opt is 'segment_iters':
-                out_inputs.append('--init %d' % value)
-                continue
-            if opt is 'mixel_smooth':
-                 out_inputs.append('--mixel %f' % value)
-                 continue
-            if opt is 'iters_afterbias':
-                 out_inputs.append('--fixed %d' % value)
-                 continue
-            if opt is 'hyper':
-                out_inputs.append('--Hyper %f' % value)
-                continue
-            if opt is 'verbose':
-                if value:
-                    out_inputs.append('--verbose')
-                continue
-            if opt is 'manualseg':
-                out_inputs.append('--manualseg %s' % value)
-                continue
-            if opt is 'probability_maps':
-                if value:
-                    out_inputs.append('-p')
-                continue
-            if opt is 'args':
-                out_inputs.extend(value)
-                continue
-                               
-            print 'option %s not supported' % (opt)
-        
-        return out_inputs
+        '''Call our super-method, then add our input files'''
+        # Could do other checking above and beyond regular _parseinputs here
+        allargs = super(Fast, self)._parseinputs(skip=('infiles'))
+        allargs.extend(self.inputs.infiles)
+
+        return allargs
+
 
 
 class Flirt(CommandLine):
 
-    _cmd = None
     @property
     def cmd(self):
         """sets base command, not editable"""
@@ -981,7 +958,6 @@ class Flirt(CommandLine):
 
 class Fnirt(CommandLine):
 
-    _cmd = None
     @property
     def cmd(self):
         """sets base command, not editable"""
