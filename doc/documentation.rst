@@ -2,6 +2,11 @@
 Nipype Documentation
 ====================
 
+.. htmlonly::
+
+   :Release: |version|
+   :Date: |today|
+
 Contents:
 
 .. toctree::

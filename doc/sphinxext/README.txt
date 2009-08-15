@@ -22,3 +22,4 @@ base.
 * From matplotlib:
   * inheritance_diagram.py
   * ipython_console_highlighting.py
+  * only_directives.py

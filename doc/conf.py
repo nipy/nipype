@@ -30,6 +30,7 @@ extensions = ['sphinx.ext.autodoc',
               'numpydoc',
               'inheritance_diagram',
               'ipython_console_highlighting',
+              'only_directives',
               ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -65,7 +66,7 @@ release = '0.1.0-devel'
 # non-false value, then it is used:
 #today = ''
 # Else, today_fmt is used as the format for a strftime call.
-#today_fmt = '%B %d, %Y'
+today_fmt = '%B %d, %Y, %H:%M PDT'
 
 # List of documents that shouldn't be included in the build.
 #unused_docs = []
