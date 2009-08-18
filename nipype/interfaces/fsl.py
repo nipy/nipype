@@ -54,10 +54,10 @@ def fslversion():
     if clout.runtime.returncode is not 0:
         # fsl not found
         return None
-    out = clout.runtime.messages
+    out = clout.runtime.stdout
     basedir = os.path.split(os.path.split(out)[0])[0]
     clout = CommandLine('cat %s/etc/fslversion'%(basedir)).run()
-    out = clout.runtime.messages
+    out = clout.runtime.stdout
     return out.strip('\n')
 
 
@@ -121,8 +121,8 @@ class FSLCommand(CommandLine):
 
         """
         results = self._runner()
-        if results.returncode == 0:
-            results.outputs = self._aggregate_outputs()
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs()
 
         return results        
 
@@ -329,7 +329,7 @@ class Bet(FSLCommand):
         """
         print doc
 
-    def _aggregate_outputs(self):
+    def aggregate_outputs(self):
         outputs = Bunch(outfile = None,
                         maskfile = None)
         if self.inputs.outfile:

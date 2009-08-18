@@ -252,7 +252,7 @@ class CommandLine(Interface):
             self.inputs.cwd!  Use an alternative like '.' if you need it
         """
         if cwd is None:
-            cwd = self.inputs.get('cwd', None)
+            cwd = self.inputs.get('cwd', '.')
         runtime = Bunch(cmdline=self.cmdline)
 
         proc  = subprocess.Popen(runtime.cmdline,

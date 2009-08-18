@@ -131,7 +131,7 @@ class NodeWrapper(object):
                     except IOError:
                         print "Unable to open the file in readmode:", filename
                 else:
-                    print self.output.runtime.errmessages
+                    print self.output.runtime.stderr
                     print self.inputs
                     raise Exception("Could not run %s"%self.name)
             else:
