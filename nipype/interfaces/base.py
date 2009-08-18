@@ -49,7 +49,7 @@ class Bunch(object):
 
     """
     def __init__(self, **kwargs):
-        self.__dict__.update(**kwargs)
+        self.__dict__.update(kwargs)
 
     def update(self, *args, **kwargs):
         """update existing attribute, or create new attribute"""
@@ -75,7 +75,6 @@ class Bunch(object):
     def dictcopy(self):
         """returns a deep copy of existing Bunch as a dictionary"""
         return deepcopy(self.__dict__)
-
 
     def __repr__(self):
         """representation of the sorted Bunch as a string"""
