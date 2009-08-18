@@ -34,7 +34,7 @@ def test_bunch_methods():
 def test_commandline():
     cl = nii.CommandLine('echo', 'foo')
     yield assert_equal, cl.inputs.args, ['echo', 'foo']
-    yield assert_equal, cl.cmdline, None
+    yield assert_equal, cl.cmdline, 'echo foo'
     yield assert_not_equal, cl, cl.run()
     
     yield assert_equal, nii.CommandLine('echo foo').cmdline,\
