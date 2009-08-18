@@ -57,7 +57,7 @@ class NodeWrapper(object):
                  overwrite=None,name=None):
         #super(NodeWrapper,self).__init__(interface)
         self.interface  = interface
-        self.output     = None
+        self.result     = None
         self.iterables  = iterables
         self.iterfield  = []
         self.parameterization = None
@@ -80,8 +80,8 @@ class NodeWrapper(object):
             self.interface.inputs[parameter] = val
 
     def get_output(self,parameter):
-        if self.output is not None:
-            return self.output.outputs[parameter]
+        if self.result is not None:
+            return self.result.outputs[parameter]
         else:
             return None
         
@@ -117,12 +117,12 @@ class NodeWrapper(object):
                             else:
                                 self.inputs[info.key][i] = newfile
                 self.run_interface(execute=True)
-                if type(self.output.runtime) == type([]):
+                if type(self.result.runtime) == type([]):
                     returncode = 0
-                    for r in self.output.runtime:
+                    for r in self.result.runtime:
                         returncode = max(r.returncode,returncode)
                 else:
-                    returncode = self.output.runtime.returncode
+                    returncode = self.result.runtime.returncode
                 if returncode == 0:
                     try:
                         fd = open(hashfile,"wt")
@@ -131,7 +131,7 @@ class NodeWrapper(object):
                     except IOError:
                         print "Unable to open the file in readmode:", filename
                 else:
-                    print self.output.runtime.stderr
+                    print self.result.runtime.stderr
                     print self.inputs
                     raise Exception("Could not run %s"%self.name)
             else:
@@ -157,35 +157,35 @@ class NodeWrapper(object):
         if self.diskbased:
             # Should pickle the output
             pass
-        return self.output
+        return self.result
 
     def run_interface(self,execute=True):
         if len(self.iterfield) == 1:
             itervals = self.inputs[self.iterfield[0]]
             if type(itervals) is not type([]):
                 itervals = [itervals]
-            self.output = InterfaceResult(interface=[],runtime=[],outputs=Bunch())
+            self.result = InterfaceResult(interface=[],runtime=[],outputs=Bunch())
             for i,v in enumerate(itervals):
                 print "running %s on %s\n"%(self.name,self.iterfield[0])
                 self.inputs[self.iterfield[0]] = v
                 if execute:
-                    output = self.interface.run()
-                    self.output.interface.insert(i,output.interface)
-                    self.output.runtime.insert(i,output.runtime)
-                    outputs = output.outputs
+                    result = self.interface.run()
+                    self.result.interface.insert(i,output.interface)
+                    self.result.runtime.insert(i,output.runtime)
+                    outputs = result.outputs
                 else:
                     outputs = self.interface.aggregate_outputs()
                 for key,val in outputs.iteritems():
                     try:
-                        self.output.outputs[key].insert(i,val)
+                        self.result.outputs[key].insert(i,val)
                     except:
-                        self.output.outputs[key] = []
-                        self.output.outputs[key].insert(i,val)
+                        self.result.outputs[key] = []
+                        self.result.outputs[key].insert(i,val)
         else:
             if execute:
-                self.output = self.interface.run()
+                self.result = self.interface.run()
             else:
-                self.output = InterfaceResult(interface=None,
+                self.result = InterfaceResult(interface=None,
                                               runtime=None,
                                               outputs=self.interface.aggregate_outputs())
         
