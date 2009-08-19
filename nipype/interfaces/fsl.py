@@ -18,9 +18,6 @@ import os
 import subprocess
 from copy import deepcopy
 from glob import glob
-
-import enthought.traits.api as traits
-
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (Bunch, CommandLine, 
                                     load_template, InterfaceResult)
@@ -107,8 +104,6 @@ def fsloutputtype(ftype=None):
 
 class FSLCommand(CommandLine):
     '''General support for FSL commands'''
-    # Would be nice to use Traits
-    # @cached_property(depends_on='inputs.*')
     @property
     def cmdline(self):
         """validates fsl options and generates command line argument"""
@@ -131,34 +126,31 @@ class FSLCommand(CommandLine):
 
         return results        
 
-    def _parse_inputs(self):
-        """Convert options to strings. If set to None / default ignore.
+    def _parse_inputs(self, skip=()):
+        """validate options in the opt_map. If set to None ignore.
         """
         allargs = []
-
-        if self.args != self.trait('args').default:
-            allargs.extend(value)
-
-        # I'd like to just iterate through non-default traits
-        flags = self.inputs.traits(flag=lambda x: x is not None)
-        for opt, value in flags.items():
+        inputs = [(k, v) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt, value in inputs:
+            if opt in skip:
+                continue
+            if opt == 'args':
+                allargs.extend(value)
+                continue
             try:
-                argstr = value.flag
+                argstr = self.opt_map[opt]
                 if argstr.find('%') == -1:
                     if value is True:
                         allargs.append(argstr)
                     elif value is not False:
-                        # Rendered irrelevant by Traits
                         raise TypeError('Boolean option %s set to %s' % 
                                          (opt, str(value)) )
                 else:
                     allargs.append(argstr % value)
             except TypeError, err:
                 # Perhaps these should be proper warnings?
-                # Rendered irrelevant by Traits
                 warn('For option %s in Fast, %s' % (opt, err.message))
             except KeyError:                   
-                # Also rendered irrelevant by traits approach
                 warn('option %s not supported' % (opt))
         
         return allargs
@@ -356,71 +348,6 @@ class Bet(FSLCommand):
             outputs.maskfile = None
         return outputs
 
-class FastInputs(traits.HasTraits):
-    '''Inputs for Fast'''
-    inputs = traits.ListStr(
-        desc="files to run on ['/path/to/afile', /path/to/anotherfile']")
-    number_classes = traits.Int(flag='--class %d ',
-        desc='number of tissue-type classes, (default=3)')
-    bias_iters = traits.Int(flag='--iter %d',
-        desc='number of main-loop iterations during bias-field removal' \
-        '(default=4)')
-    bias_lowpass = traits.Int(flag='--lowpass %d',
-        desc='bias field smoothing extent (FWHM) in mm (default=20)')
-    img_type = traits.Int(flag='--type %d',
-        desc='type of image 1=T1, 2=T2, 3=PD; (default=T1)')
-    init_seg_smooth = traits.Float(flag='--fHard %f',
-        desc='initial segmentation spatial smoothness (during bias field' \
-        'estimation); default=0.02')
-    segments = traits.Bool(flag='--segments',
-        desc='outputs a separate binary image for each tissue type')
-    init_transform = traits.Str(flag='-a %s', # a valid filename
-        desc='initialise using priors; you must supply a FLIRT transform' \
-        '<standard2input.mat>')
-    # This option is not really documented on the Fast web page:
-    # http://www.fmrib.ox.ac.uk/fsl/fast4/index.html#fastcomm
-    # I'm not sure if there are supposed to be exactly 3 args or what
-    # May want to use a Tuple or a List Trait depending on how this is supposed
-    # to be
-    other_priors = traits.Tuple('', '', '',  # should be fnames
-        flag='-A %s %s %s',
-        desc="<prior1> <prior2> <prior3>    alternative prior images")
-    nopve = traits.Bool(flag='--nopve',
-        desc='turn off PVE (partial volume estimation)')
-    output_biasfield = traits.Bool(flag='-b',
-        desc='output estimated bias field')
-    output_biascorrected = traits.Bool(flag='-B',
-        desc='output bias-corrected image')
-    nobias = traits.Bool(flag='--nobias',
-        desc='do not remove bias field')
-    n_inputimages = traits.Int(flag='--channels %d',
-        desc='number of input images (channels); (default 1)')
-    out_basename = traits.Str(flag='--out %s', # should be a filename
-        desc='output basename for output images')
-    use_priors = traits.Bool(flag='--Prior',
-        desc='use priors throughout; you must also set the init_transform' \
-        'option')
-    segment_iters = traits.Int(flag='--init %d',
-        desc='number of segmentation-initialisation iterations; (default=15)')
-    mixel_smooth = traits.Float(flag='--mixel %f',
-        desc='spatial smoothness for mixeltype; (default=0.3)')
-    iters_afterbias = traits.Int(flag='--fixed %d',
-        desc='number of main-loop iterations after bias-field removal;' \
-        '(default=4)')
-    hyper = traits.Float(flag='--Hyper %f',
-        desc='segmentation spatial smoothness; (default=0.1)')
-    verbose = traits.Bool(flag='--verbose',
-        desc='switch on diagnostic messages')
-    manualseg = traits.Str(flag='--manualseg %s', # a filename
-        desc='Filename containing intensities')
-    probability_maps = traits.Bool(flag='-p',
-        desc='outputs individual probability maps')
-    args = traits.ListStr(
-        desc="unsupported flags, use at your own risk  ['-R']")
-
-    # hack for now - Traits does our "update" with "set"
-    def update(self, *args, **kwargs):
-        self.set(*args, **kwargs)
 
 class Fast(FSLCommand):
     """use fsl fast for segmenting, bias correction
@@ -446,24 +373,121 @@ class Fast(FSLCommand):
         """sets base command, not editable"""
         return 'fast'
   
+    opt_map = {'number_classes':       '--class %d ',
+               'bias_iters':           '--iter %d',
+               'bias_lowpass':         '--lowpass %d',
+               'img_type':             '--type %d',
+               'init_seg_smooth':      '--fHard %f',
+               'segments':             '--segments',
+               'init_transform':       '-a %s',
+               # This option is not really documented on the Fast web page:
+               # http://www.fmrib.ox.ac.uk/fsl/fast4/index.html#fastcomm
+               # I'm not sure if there are supposed to be exactly 3 args or what
+               'other_priors':         '-A %s %s %s',
+               'nopve':                '--nopve',
+               'output_biasfield':     '-b',
+               'output_biascorrected': '-B',
+               'nobias':               '--nobias',
+               'n_inputimages':        '--channels %d',
+               'out_basename':         '--out %s',
+               'use_priors':           '--Prior',
+               'segment_iters':        '--init %d',
+               'mixel_smooth':         '--mixel %f',
+               'iters_afterbias':      '--fixed %d',
+               'hyper':                '--Hyper %f',
+               'verbose':              '--verbose',
+               'manualseg':            '--manualseg %s',
+               'probability_maps':     '-p'}
 
     def inputs_help(self):
-        '''Generate help from our traits desc strings'''
-        template = "%s : %s\n    %s"
-        all_help = [template % (name, t.trait_type.info_text, t.get_help()) 
-                            for name, t in self.inputs.traits().items()]
-        print '\n'.join(all_help)
+        doc = """
+        POSSIBLE OPTIONS
+        -----------------
+        (all default to None and are unset)
+        infiles : list
+            files to run on ['/path/to/afile', /path/to/anotherfile']
+            can be set at runtime  .run(['/path/to/filea', 'fileb'])
+        number_classes : int
+            number of tissue-type classes, (default=3)
+        bias_iters : int
+            number of main-loop iterations during bias-field removal (default=4)
+        bias_lowpass : int
+            bias field smoothing extent (FWHM) in mm (default=20)
+        img_type : int
+            type of image 1=T1, 2=T2, 3=PD; (default=T1)
+        init_seg_smooth : float
+            initial segmentation spatial smoothness (during bias field
+            estimation); default=0.02
+        segments : Boolean
+            outputs a separate binary image for each tissue type
+        init_transform : string filename
+            initialise using priors; you must supply a FLIRT transform
+            <standard2input.mat>
+        other_priors : tuple of strings (filenames)
+            <prior1> <prior2> <prior3>    alternative prior images
+        nopve :Boolean
+            turn off PVE (partial volume estimation)
+        output_biasfield : Boolean
+            output estimated bias field
+        output_biascorrected : Boolean
+            output bias-corrected image
+        nobias : Boolean
+            do not remove bias field
+        n_inputimages : int
+            number of input images (channels); (default 1)
+        out_basename: string <filename>
+            output basename for output images
+        use_priors : Boolean
+            use priors throughout; you must also set the init_transform option
+        segment_iters : int
+            number of segmentation-initialisation iterations; (default=15)
+        mixel_smooth : float
+            spatial smoothness for mixeltype; (default=0.3)
+        iters_afterbias : int
+            number of main-loop iterations after bias-field removal; (default=4)
+        hyper : float
+            segmentation spatial smoothness; (default=0.1)
+        verbose : Boolean
+            switch on diagnostic messages
+        manualseg : string <filename>
+            Filename containing intensities
+        probability_maps : Boolean
+            outputs individual probability maps
+
+        flags = unsupported flags, use at your own risk  ['-R']
+        """
+        print doc
 
     def _populate_inputs(self):
-        self.inputs = FastInputs()
-        # Bunch(infiles=None)
-        # for key in self.opt_map:
-        #     self.inputs[key] = None
+        self.inputs = Bunch(infiles=None,
+                          number_classes=None,
+                          bias_iters=None,
+                          bias_lowpass=None,
+                          img_type=None,
+                          init_seg_smooth=None,
+                          segments=None,
+                          init_transform=None,
+                          other_priors=None,
+                          nopve=None,
+                          output_biasfield=None,
+                          output_biascorrected=None,
+                          nobias=None,
+                          n_inputimages=None,
+                          out_basename=None,
+                          use_priors=None,
+                          segment_iters=None,
+                          mixel_smooth=None,
+                          iters_afterbias=None,
+                          hyper=None,
+                          verbose=None,
+                          manualseg=None,
+                          probability_maps=None,
+                          flags=None)
 
     def _parse_inputs(self):
         '''Call our super-method, then add our input files'''
         # Could do other checking above and beyond regular _parse_inputs here
-        allargs = super(Fast, self)._parse_inputs()
+        allargs = super(Fast, self)._parse_inputs(skip=('infiles'))
         allargs.extend(self.inputs.infiles)
 
         return allargs
