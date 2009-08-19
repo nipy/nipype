@@ -67,7 +67,18 @@ def fssubjectsdir(subjects_dir=None):
     print 'SUBJECTS_DIR = %s'%subjects_dir
     return subjects_dir
 
-class Dicom2Nifti(CommandLine):
+class FSCommandLine(CommandLine):
+
+    def __init__(self):
+        super(FSCommandLine,self).__init__()
+        self._cmdline = ''
+        
+    @property
+    def cmdline(self):
+        # This handles args like ['bet', '-f 0.2'] without crashing
+        return self._cmdline
+
+class Dicom2Nifti(FSCommandLine):
     """use fs mri_convert to convert dicom files to nifti-1 files
 
     Options
@@ -177,8 +188,8 @@ class Dicom2Nifti(CommandLine):
             if not os.path.exists(outfile):
                 single_cmd = '%s %s %s;' % (self.cmd, f, outfile)
                 cmd.extend([single_cmd])
-        self.cmdline =  ' '.join(cmd)
-        return self.cmdline,outdir
+        self._cmdline =  ' '.join(cmd)
+        return self._cmdline,outdir
 
     def aggregate_outputs(self):
         cmd,outdir = self._compile_command()
@@ -207,7 +218,7 @@ class Dicom2Nifti(CommandLine):
                                 interface=deepcopy(self))
         
 
-class Resample(CommandLine):
+class Resample(FSCommandLine):
     """use fs mri_convert to up or down-sample image files
 
     Options
@@ -297,8 +308,8 @@ class Resample(CommandLine):
             outfile[i] = os.path.abspath(os.path.join(self.inputs.get('cwd','.'),outfile[i]))
             single_cmd = '%s -vs %d %d %d %s %s;' % (self.cmd, vs[0],vs[1],vs[2], f, outfile[i])
             cmd.extend([single_cmd])
-        self.cmdline =  ' '.join(cmd)
-        return self.cmdline
+        self._cmdline =  ' '.join(cmd)
+        return self._cmdline
 
     def aggregate_outputs(self):
         outputs = Bunch(outfile=[])
@@ -321,7 +332,7 @@ class Resample(CommandLine):
             A `InterfaceResult` object with a copy of self in `interface`
 
         """
-        # This is expected to populate `cmdline` for _runner to work
+        # This is expected to populate `_cmdline` for _runner to work
         self._compile_command()
         returncode, out, err = self._runner(self.inputs.get('cwd','.'))
         return  InterfaceResult(runtime=Bunch(returncode=returncode,
@@ -331,7 +342,7 @@ class Resample(CommandLine):
                                 interface=deepcopy(self))
         
 
-class ReconAll(CommandLine):
+class ReconAll(FSCommandLine):
     """use fs recon-all to generate surfaces and parcellations of
     structural data from an anatomical image of a subject.
 
@@ -463,8 +474,8 @@ class ReconAll(CommandLine):
         """validates fsl options and generates command line argument"""
         valid_inputs = self._parseinputs()
         allargs =  [self.cmd] + valid_inputs
-        self.cmdline = ' '.join(allargs)
-        return self.cmdline
+        self._cmdline = ' '.join(allargs)
+        return self._cmdline
 
     def run(self):
         """Execute the command.
@@ -475,7 +486,7 @@ class ReconAll(CommandLine):
             A `InterfaceResult` object with a copy of self in `interface`
 
         """
-        # This is expected to populate `cmdline` for _runner to work
+        # This is expected to populate `_cmdline` for _runner to work
         self._compile_command()
         returncode, out, err = self._runner(self.inputs.get('cwd','.'))
         return  InterfaceResult(runtime=Bunch(returncode=returncode,
@@ -485,7 +496,7 @@ class ReconAll(CommandLine):
                                 interface=deepcopy(self))
         
 
-class BBRegister(CommandLine):
+class BBRegister(FSCommandLine):
     """use fs bbregister to register a volume two a surface mesh
 
     This program performs within-subject, cross-modal registration using a
@@ -605,8 +616,8 @@ class BBRegister(CommandLine):
         """validates fsl options and generates command line argument"""
         valid_inputs = self._parseinputs()
         allargs =  [self.cmd] + valid_inputs
-        self.cmdline = ' '.join(allargs)
-        return self.cmdline
+        self._cmdline = ' '.join(allargs)
+        return self._cmdline
 
     def outputs_help(self):
         doc = """
@@ -646,7 +657,7 @@ class BBRegister(CommandLine):
             A `InterfaceResult` object with a copy of self in `interface`
 
         """
-        # This is expected to populate `cmdline` for _runner to work
+        # This is expected to populate `_cmdline` for _runner to work
         self._compile_command()
         returncode, out, err = self._runner(self.inputs.get('cwd','.'))
         return  InterfaceResult(runtime=Bunch(returncode=returncode,
