@@ -91,8 +91,8 @@ class NodeWrapper(object):
         # check to see if output directory and hash exist
         if self.diskbased:
             try:
-                outdir = self.output_directory()
-                outdir = self.make_output_dir(outdir)
+                outdir = self._output_directory()
+                outdir = self._make_output_dir(outdir)
             except:
                 print "directory %s exists\n"%outdir
             self.interface.inputs.cwd = outdir
@@ -116,7 +116,7 @@ class NodeWrapper(object):
                                 self.inputs[info.key] = newfile
                             else:
                                 self.inputs[info.key][i] = newfile
-                self.run_interface(execute=True)
+                self._run_interface(execute=True)
                 if type(self.result.runtime) == type([]):
                     returncode = 0
                     for r in self.result.runtime:
@@ -151,15 +151,15 @@ class NodeWrapper(object):
                                 self.inputs[info.key] = newfile
                             else:
                                 self.inputs[info.key][i] = newfile
-                self.run_interface(execute=False)
+                self._run_interface(execute=False)
         else:
-            self.run_interface(execute=True)
+            self._run_interface(execute=True)
         if self.diskbased:
             # Should pickle the output
             pass
         return self.result
 
-    def run_interface(self,execute=True):
+    def _run_interface(self,execute=True):
         if len(self.iterfield) == 1:
             itervals = self.inputs[self.iterfield[0]]
             if type(itervals) is not type([]):
@@ -170,8 +170,8 @@ class NodeWrapper(object):
                 self.inputs[self.iterfield[0]] = v
                 if execute:
                     result = self.interface.run()
-                    self.result.interface.insert(i,output.interface)
-                    self.result.runtime.insert(i,output.runtime)
+                    self.result.interface.insert(i,result.interface)
+                    self.result.runtime.insert(i,result.runtime)
                     outputs = result.outputs
                 else:
                     outputs = self.interface.aggregate_outputs()
@@ -197,10 +197,10 @@ class NodeWrapper(object):
         interface """
         return hashlib.md5(str(self.inputs)).hexdigest()
 
-    def output_directory(self):
+    def _output_directory(self):
         return os.path.abspath(os.path.join(self.output_directory_base,self.name))
 
-    def make_output_dir(self, outdir):
+    def _make_output_dir(self, outdir):
         """Make the output_dir if it doesn't exist, else raise an exception
         """
         # This needs to be changed to update dynamically based on a hash of
