@@ -131,31 +131,34 @@ class FSLCommand(CommandLine):
 
         return results        
 
-    def _parse_inputs(self, skip=()):
+    def _parse_inputs(self):
         """Convert options to strings. If set to None / default ignore.
         """
         allargs = []
+
+        if self.args != self.trait('args').default:
+            allargs.extend(value)
+
         # I'd like to just iterate through non-default traits
-        for opt, value in self.inputs.traits():
-            if opt in skip:
-                continue
-            if opt == 'args':
-                allargs.extend(value)
-                continue
+        flags = self.inputs.traits(flag=lambda x: x is not None)
+        for opt, value in flags.items():
             try:
                 argstr = value.flag
                 if argstr.find('%') == -1:
                     if value is True:
                         allargs.append(argstr)
                     elif value is not False:
+                        # Rendered irrelevant by Traits
                         raise TypeError('Boolean option %s set to %s' % 
                                          (opt, str(value)) )
                 else:
                     allargs.append(argstr % value)
             except TypeError, err:
                 # Perhaps these should be proper warnings?
+                # Rendered irrelevant by Traits
                 warn('For option %s in Fast, %s' % (opt, err.message))
             except KeyError:                   
+                # Also rendered irrelevant by traits approach
                 warn('option %s not supported' % (opt))
         
         return allargs
@@ -460,7 +463,7 @@ class Fast(FSLCommand):
     def _parse_inputs(self):
         '''Call our super-method, then add our input files'''
         # Could do other checking above and beyond regular _parse_inputs here
-        allargs = super(Fast, self)._parse_inputs(skip=('infiles'))
+        allargs = super(Fast, self)._parse_inputs()
         allargs.extend(self.inputs.infiles)
 
         return allargs
