@@ -14,10 +14,8 @@ __docformat__ = 'restructuredtext'
 
 import os
 from glob import glob
-from nipype.interfaces.base import Bunch, CommandLine, InterfaceResult
+from nipype.interfaces.base import Bunch, CommandLine
 from nipype.utils.filemanip import fname_presuffix
-from nipype.utils import setattr_on_read
-from copy import deepcopy
 
 def freesurferversion():
     """Check for freesurfer version on system
@@ -78,6 +76,21 @@ class FSCommandLine(CommandLine):
         # This handles args like ['bet', '-f 0.2'] without crashing
         return self._cmdline
 
+    def run(self):
+        """Execute the command.
+        
+        Returns
+        -------
+        results : InterfaceResult
+            A `InterfaceResult` object with a copy of self in `interface`
+
+        """
+        # This is expected to populate `_cmdline` for _runner to work
+        self._compile_command()
+        result = self._runner(cwd=self.inputs.get('cwd','.'))
+        result.outputs = self.aggregate_outputs()
+        return result
+    
 class Dicom2Nifti(FSCommandLine):
     """use fs mri_convert to convert dicom files to nifti-1 files
 
@@ -198,24 +211,6 @@ class Dicom2Nifti(FSCommandLine):
             for field,template in self.inputs.file_mapping:
                 outputs[field] = sorted(glob(os.path.join(outdir,template)))
         return outputs
-    
-    def run(self):
-        """Execute the command.
-        
-        Returns
-        -------
-        results : Bunch
-            A `Bunch` object with a copy of self in `interface`
-
-         """
-        # This is expected to populate `command` for _runner to work
-        self._compile_command()
-        returncode, out, err = self._runner(cwd='.')
-        return  InterfaceResult(runtime=Bunch(returncode=returncode,
-                                              messages=out,
-                                              errmessages=err),
-                                outputs = self.aggregate_outputs(),
-                                interface=deepcopy(self))
         
 
 class Resample(FSCommandLine):
@@ -322,24 +317,6 @@ class Resample(FSCommandLine):
         if len(outfile)==1:
             outputs.outfile = outputs.outfile[0]
         return outputs
-        
-    def run(self):
-        """Execute the command.
-        
-        Returns
-        -------
-        results : InterfaceResult
-            A `InterfaceResult` object with a copy of self in `interface`
-
-        """
-        # This is expected to populate `_cmdline` for _runner to work
-        self._compile_command()
-        returncode, out, err = self._runner(self.inputs.get('cwd','.'))
-        return  InterfaceResult(runtime=Bunch(returncode=returncode,
-                                              messages=out,
-                                              errmessages=err),
-                                outputs = outputs,
-                                interface=deepcopy(self))
         
 
 class ReconAll(FSCommandLine):
@@ -476,25 +453,9 @@ class ReconAll(FSCommandLine):
         allargs =  [self.cmd] + valid_inputs
         self._cmdline = ' '.join(allargs)
         return self._cmdline
-
-    def run(self):
-        """Execute the command.
         
-        Returns
-        -------
-        results : InterfaceResult
-            A `InterfaceResult` object with a copy of self in `interface`
-
-        """
-        # This is expected to populate `_cmdline` for _runner to work
-        self._compile_command()
-        returncode, out, err = self._runner(self.inputs.get('cwd','.'))
-        return  InterfaceResult(runtime=Bunch(returncode=returncode,
-                                              messages=out,
-                                              errmessages=err),
-                                outputs = None,
-                                interface=deepcopy(self))
-        
+    def aggregate_outputs(self):
+        return None
 
 class BBRegister(FSCommandLine):
     """use fs bbregister to register a volume two a surface mesh
@@ -648,21 +609,4 @@ class BBRegister(FSCommandLine):
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
     
-    def run(self):
-        """Execute the command.
-        
-        Returns
-        -------
-        results : InterfaceResult
-            A `InterfaceResult` object with a copy of self in `interface`
-
-        """
-        # This is expected to populate `_cmdline` for _runner to work
-        self._compile_command()
-        returncode, out, err = self._runner(self.inputs.get('cwd','.'))
-        return  InterfaceResult(runtime=Bunch(returncode=returncode,
-                                              messages=out,
-                                              errmessages=err),
-                                outputs = self.aggregate_outputs(),
-                                interface=deepcopy(self))
         
