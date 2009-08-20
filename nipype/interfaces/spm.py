@@ -104,7 +104,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
             MAT file is created. 
         
         """
-        self._compile_command(self.mfile)
+        self._compile_command()
         results = self._runner() 
         if 'MatlabScriptException' in results.runtime.stderr: 
             results.runtime.returncode = 1 
@@ -2241,6 +2241,8 @@ class SpecifyModel(Interface):
                     sessinfo[i]['regress'][j]['val'] = info.regressors[j]
             if functional_runs is not None:
                 sessinfo[i]['scans'] = scans_for_fnames(filename_to_list(functional_runs[i]),keep4d=False)
+            else:
+                raise Exception("No functional data information provided for model")
         if realignment_parameters is not None:
             for i,rp in enumerate(realignment_parameters):
                 mc = realignment_parameters[i]
@@ -2249,6 +2251,22 @@ class SpecifyModel(Interface):
                     sessinfo[i]['regress'].insert(colidx,dict(name='',val=[]))
                     sessinfo[i]['regress'][colidx]['name'] = 'Realign%d'%(col+1)
                     sessinfo[i]['regress'][colidx]['val']  = mc[:,col].tolist()
+        if outliers is not None:
+            for i,out in enumerate(outliers):
+                numscans = sessinfo[i]['scans'][0].shape[0] 
+                for j,scanno in enumerate(out):
+                    if True:
+                        colidx = len(sessinfo[i]['regress'])
+                        sessinfo[i]['regress'].insert(colidx,dict(name='',val=[]))
+                        sessinfo[i]['regress'][colidx]['name'] = 'Outlier%d'%(j+1)
+                        sessinfo[i]['regress'][colidx]['val']  = np.zeros((1,numscans))[0].tolist()
+                        sessinfo[i]['regress'][colidx]['val'][int(scanno)] = 1
+                    else:
+                        cid = len(sessinfo[i]['cond'])
+                        sessinfo[i]['cond'].insert(cid,dict())
+                        sessinfo[i]['cond'][cid]['name'] = "O%d"%(j+1)
+                        sessinfo[i]['cond'][cid]['onset'] = self._scaletimings([scanno])
+                        sessinfo[i]['cond'][cid]['duration'] = [0]
         return sessinfo
     
     def _concatenate_info(self,infolist):
@@ -2280,7 +2298,7 @@ class SpecifyModel(Interface):
                 for j,v in enumerate(info.regressors):
                     infoout.regressors[j].extend(info.regressors[j])
             #insert session regressors
-            if False:
+            if True:
                 if infoout.regressors is None:
                     infoout.regressors = []
                 onelist = np.zeros((1,sum(nscans)))
@@ -2293,25 +2311,37 @@ class SpecifyModel(Interface):
                 if infoout.tmod is not None:
                     infoout.tmod.insert(len(infoout.tmod),0)
             # insert outliers as new regressors
-        return [infoout]
+        return [infoout],nscans
     
     def _generate_design(self):
         infolist = self.inputs.subject_info_func(self.inputs.subject_id)
         if self.inputs.concatenate_runs:
-            infolist = self._concatenate_info(infolist)
+            infolist,nscans = self._concatenate_info(infolist)
             functional_runs = [self.inputs.functional_runs]
         else:
             functional_runs = self.inputs.functional_runs
+        realignment_parameters = []
         if self.inputs.realignment_parameters is not None:
-            realignment_parameters = []
-            realignment_parameters.insert(0,np.loadtxt(self.inputs.realignment_parameters[0]))
-            for rpf in self.inputs.realignment_parameters[1:]:
+            rpfiles = filename_to_list(self.inputs.realignment_parameters)
+            realignment_parameters.insert(0,np.loadtxt(rpfiles[0]))
+            for rpf in rpfiles[1:]:
                 mc = np.loadtxt(rpf)
                 if self.inputs.concatenate_runs:
                     realignment_parameters[0] = np.concatenate((realignment_parameters[0],mc))
                 else:
                     realignment_parameters.insert(len(realignment_parameters),mc)
-        outliers = self.inputs.outlier_files
+        outliers = []
+        if self.inputs.outlier_files is not None:
+            outfiles = filename_to_list(self.inputs.outlier_files)
+            outliers.insert(0,np.loadtxt(outfiles[0]))
+            for i,rpf in enumerate(outfiles[1:]):
+                out = np.loadtxt(rpf)
+                if self.inputs.concatenate_runs:
+                    if len(out)>0:
+                        outliers[0] = np.concatenate((outliers[0],
+                                                      (np.array(out)+sum(nscans[0:(i+1)])).tolist()))
+                else:
+                    outliers.insert(len(outliers),out)
         sessinfo = self._generate_standard_design(infolist,
                                                   functional_runs=functional_runs,
                                                   realignment_parameters=realignment_parameters,
