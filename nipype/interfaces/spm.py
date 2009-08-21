@@ -2144,7 +2144,7 @@ class SpecifyModel(Interface):
                 If number of volumes in a cluster is greater than one,
                 then it is assumed that a sparse-clustered acquisition
                 is being assumed.
-            model_hrf_cluster : boolean
+            model_hrf : boolean
                 Whether to model hrf for sparse clustered analysis
         """
         print self.inputs_help.__doc__
@@ -2162,7 +2162,8 @@ class SpecifyModel(Interface):
                             concatenate_runs=None,
                             time_acquisition=None,
                             time_repetition=None,
-                            volumes_in_cluster=None)
+                            volumes_in_cluster=None,
+                            model_hrf_sparse=None)
         
     def outputs_help(self):
         """
@@ -2176,7 +2177,6 @@ class SpecifyModel(Interface):
         """
         print self.outputs_help.__doc__
 
-#    def _calculate_scalefactor(self):
     def _scaletimings(self,timelist):
         if self.inputs.input_units==self.inputs.output_units:
             self._scalefactor = 1.
@@ -2191,45 +2191,56 @@ class SpecifyModel(Interface):
             timelist = [round(self._scalefactor*t) for t in timelist]
             
         return timelist
+
+    def _gen_regress(self,onsets,durations):
+        return []
+
+    def _cond_to_regress(self,info):
+        reg = []
+        for i,c in enumerate(info.conditions):
+            reg.insert(i,self._gen_regress(info.onsets[i],info.durations[i]))
+        return reg
     
-    def _generate_clustered_design(self):
+    def _generate_clustered_design(self,infolist):
         """
         """
-        pass
+        infoout = deepcopy(infolist)
+        for i,info in enumerate(infolist):
+            infoout[i].conditions = None
+            infoout[i].onsets = None
+            infoout[i].durations = None
+            if info.conditions is not None:
+                reg = self._cond_to_regress(info)
+                if infoout[i].regressors is None:
+                    infoout[i].regressors = []
+                for i,r in enumerate(reg):
+                    infoout[i].regressors.insert(len(infoout[i].regressors),r)
+        return infoout
     
     def _generate_standard_design(self,infolist,
                                   functional_runs=None,
                                   realignment_parameters=None,
                                   outliers=None):
-        """
-        The multipart assignment in the for loop below is to ensure
-        compatibility with current scipy MAT objects. The
-        following pairs of operations return two different types of
-        numpy arrays.
-
-        >>> onsets = [[1,2,3],[2,3]]
-        >>> np.array([[[np.array(f)] for f in onsets]],dtype=object)
-        
-        >>> onsets = [[1,2,3],[1,2,3]]
-        >>> np.array([[[np.array(f)] for f in onsets]],dtype=object)
+        """ Generates a standard design matrix paradigm
         """
         sessinfo = []
         for i,info in enumerate(infolist):
             sessinfo.insert(i,dict(cond=[]))
-            for cid,cond in enumerate(info.conditions):
-                sessinfo[i]['cond'].insert(cid,dict())
-                sessinfo[i]['cond'][cid]['name']  = info.conditions[cid]
-                sessinfo[i]['cond'][cid]['onset'] = self._scaletimings(info.onsets[cid])
-                sessinfo[i]['cond'][cid]['duration'] = self._scaletimings(info.durations[cid])
-                if info.tmod is not None:
-                    sessinfo[i]['cond'][cid]['tmod'] = info.tmod[cid]
-                if (info.pmod is not None) and info.pmod.has_key(cid+1):
-                    sessinfo[i]['cond'][cid]['pmod'] = []
-                    for j in range(len(info.pmod[cid+1].name)):
-                        sessinfo[i]['cond'][cid]['pmod'].insert(j,dict())
-                    for key,data in info.pmod[cid+1].iteritems():
-                        for k,val in enumerate(data):
-                            sessinfo[i]['cond'][cid]['pmod'][k][key] = val
+            if info.conditions is not None:
+                for cid,cond in enumerate(info.conditions):
+                    sessinfo[i]['cond'].insert(cid,dict())
+                    sessinfo[i]['cond'][cid]['name']  = info.conditions[cid]
+                    sessinfo[i]['cond'][cid]['onset'] = self._scaletimings(info.onsets[cid])
+                    sessinfo[i]['cond'][cid]['duration'] = self._scaletimings(info.durations[cid])
+                    if info.tmod is not None:
+                        sessinfo[i]['cond'][cid]['tmod'] = info.tmod[cid]
+                    if (info.pmod is not None) and info.pmod.has_key(cid+1):
+                        sessinfo[i]['cond'][cid]['pmod'] = []
+                        for j in range(len(info.pmod[cid+1].name)):
+                            sessinfo[i]['cond'][cid]['pmod'].insert(j,dict())
+                        for key,data in info.pmod[cid+1].iteritems():
+                            for k,val in enumerate(data):
+                                sessinfo[i]['cond'][cid]['pmod'][k][key] = val
             sessinfo[i]['regress']= []
             if info.regressors is not None:
                 for j,r in enumerate(info.regressors):
@@ -2279,19 +2290,20 @@ class SpecifyModel(Interface):
         infoout = infolist[0]
         for i,info in enumerate(infolist[1:]):
                 #info.[conditions,tmod] remain the same
-            for j,val in enumerate(info.onsets):
-                if self.inputs.input_units == 'secs':
-                    infoout.onsets[j].extend((np.array(info.onsets[j])+
-                                              self.inputs.time_repetition*sum(nscans[0:(i+1)])).tolist())
-                else:
-                    infoout.onsets[j].extend((np.array(info.onsets[j])+sum(nscans[0:(i+1)])).tolist())
-            for j,val in enumerate(info.durations):
-                if len(val) > 1:
-                    infoout.durations[j].extend(info.durations[j])
-            if info.pmod is not None:
-                for key,data in info.pmod.items():
-                    for j,v in enumerate(data.param):
-                        infoout.pmod[key].param[j].extend(v)
+            if info.onsets is not None:
+                for j,val in enumerate(info.onsets):
+                    if self.inputs.input_units == 'secs':
+                        infoout.onsets[j].extend((np.array(info.onsets[j])+
+                                                  self.inputs.time_repetition*sum(nscans[0:(i+1)])).tolist())
+                    else:
+                        infoout.onsets[j].extend((np.array(info.onsets[j])+sum(nscans[0:(i+1)])).tolist())
+                for j,val in enumerate(info.durations):
+                    if len(val) > 1:
+                        infoout.durations[j].extend(info.durations[j])
+                if info.pmod is not None:
+                    for key,data in info.pmod.items():
+                        for j,v in enumerate(data.param):
+                            infoout.pmod[key].param[j].extend(v)
             if info.regressors is not None:
                 #assumes same ordering of regressors across different
                 #runs and the same names for the regressors
@@ -2342,6 +2354,8 @@ class SpecifyModel(Interface):
                                                       (np.array(out)+sum(nscans[0:(i+1)])).tolist()))
                 else:
                     outliers.insert(len(outliers),out)
+        if self.inputs.volumes_in_cluster is not None:
+            infolist = self._generate_clustered_design(infolist)
         sessinfo = self._generate_standard_design(infolist,
                                                   functional_runs=functional_runs,
                                                   realignment_parameters=realignment_parameters,

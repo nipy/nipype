@@ -85,7 +85,7 @@ class Pipeline(object):
         - `connection_list`: A list of 3-tuples of the following form
         [(source1,destination1,[('namedoutput1','namedinput1'),...]),...]
         """
-        self.graph.add_edges_from(connection_list)
+        self.graph.add_edges_from([(u,v,{'connect':d}) for u,v,d in connection_list])
 
     def addmodules(self,modules):
         """ Wraps the networkx functionality in a more semantically
@@ -219,7 +219,7 @@ class Pipeline(object):
                 # edges connecting nodes
                 for edge in graph.in_edges_iter(node):
                     data = graph.get_edge_data(*edge)
-                    for sourcename,destname in data:
+                    for sourcename,destname in data['connect']:
                         node.set_input(destname,edge[0].get_output(sourcename))
                 print "Executing: %s H: %s" % (node.name, node.hash_inputs())
                 # For a disk node, provide it with an appropriate
@@ -351,7 +351,7 @@ class Pipeline(object):
         graph = self.listofgraphs[self.procs_graph_id[jobid]]
         for edge in graph.out_edges_iter(self.procs[jobid]):
             data = graph.get_edge_data(*edge)
-            for sourcename,destname in data:
+            for sourcename,destname in data['connect']:
                 edge[1].set_input(destname,self.procs[jobid].get_output(sourcename))
         # update the job dependency structure
         self.depidx[jobid,:] = False
