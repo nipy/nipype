@@ -2192,13 +2192,18 @@ class SpecifyModel(Interface):
             
         return timelist
 
-    def _gen_regress(self,onsets,durations):
+    def _gen_regress(self,onsets,durations,nscans):
+        TR = self.time_repetition*1000  # in ms
+        TA = self.time_acquisition*1000 # in ms
+        nvol = self.volumes_in_cluster
+        total_time = TR*(nscans-nvol)/nvol + TA*nvol
+        
         return []
 
-    def _cond_to_regress(self,info):
+    def _cond_to_regress(self,info,nscans):
         reg = []
         for i,c in enumerate(info.conditions):
-            reg.insert(i,self._gen_regress(info.onsets[i],info.durations[i]))
+            reg.insert(i,self._gen_regress(info.onsets[i],info.durations[i],nscans))
         return reg
     
     def _generate_clustered_design(self,infolist):
@@ -2210,7 +2215,9 @@ class SpecifyModel(Interface):
             infoout[i].onsets = None
             infoout[i].durations = None
             if info.conditions is not None:
-                reg = self._cond_to_regress(info)
+                img = load(self.inputs.functional_runs[i])
+                nscans = img.get_shape()[3]
+                reg = self._cond_to_regress(info,nscans)
                 if infoout[i].regressors is None:
                     infoout[i].regressors = []
                 for i,r in enumerate(reg):

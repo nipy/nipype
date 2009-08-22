@@ -11,6 +11,7 @@ these functions include
 from nipype.interfaces.base import Bunch, InterfaceResult, Interface
 from nipype.externals.pynifti import load
 from nipype.utils.filemanip import fname_presuffix, fnames_presuffix, filename_to_list, list_to_filename
+from nipype.utils.misc import find_indices
 import os
 from glob import glob
 from copy import deepcopy
@@ -18,7 +19,6 @@ import numpy as np
 from scipy import signal
 #import matplotlib as mpl
 #import matplotlib.pyplot as plt
-import matplotlib.pylab  as plab
 #import traceback
 
 
@@ -189,11 +189,11 @@ class ArtifactDetect(Interface):
         if self.inputs.use_norm:
             # calculate the norm of the motion parameters
             normval = np.sqrt(np.sum(mc*mc,1))
-            tidx = plab.find(normval>self.inputs.norm_threshold)
-            ridx = plab.find(normval<0)
+            tidx = find_indices(normval>self.inputs.norm_threshold)
+            ridx = find_indices(normval<0)
         else:
-            tidx = plab.find(np.sum(abs(traval)>self.inputs.translation_threshold,1)>0)
-            ridx = plab.find(np.sum(abs(rotval)>self.inputs.rotation_threshold,1)>0)
+            tidx = find_indices(np.sum(abs(traval)>self.inputs.translation_threshold,1)>0)
+            ridx = find_indices(np.sum(abs(rotval)>self.inputs.rotation_threshold,1)>0)
 
         # read in functional image
         nim = load(imgfile)
@@ -213,7 +213,7 @@ class ArtifactDetect(Interface):
                 for t0 in range(timepoints):
                     vol   = data[:,:,:,t0]                    
                     g[t0] = np.mean(vol[mask])
-                if len(plab.find(mask))<(np.prod((x,y,z))/10):
+                if len(find_indices(mask))<(np.prod((x,y,z))/10):
                     intersect_mask = False
                     g = np.zeros((timepoints,1))
             if not intersect_mask:
@@ -238,7 +238,7 @@ class ArtifactDetect(Interface):
         if self.inputs.use_differences:
             gz = np.concatenate( (np.zeros((1,1)),np.diff(gz,n=1,axis=0)) , axis=0)
         gz = (gz-np.mean(gz))/np.std(gz)    # normalize the detrended signal
-        iidx = plab.find(abs(gz)>self.inputs.zintensity_threshold)
+        iidx = find_indices(abs(gz)>self.inputs.zintensity_threshold)
 
         outliers = np.unique(np.union1d(iidx,np.union1d(tidx,ridx)))
         artifactfile,intensityfile,statsfile = self._get_output_filenames(imgfile,cwd)
