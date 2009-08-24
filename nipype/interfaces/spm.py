@@ -23,6 +23,9 @@ from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import fltcols, MatlabCommandLine
 from nipype.utils.filemanip import fname_presuffix, fnames_presuffix, filename_to_list, list_to_filename
 from scipy.io import savemat
+from scipy.signal import convolve
+from scipy.special import gammaln
+#from scipy.stats.distributions import gamma
 from glob import glob
 from copy import deepcopy
 import numpy as np
@@ -2036,7 +2039,6 @@ class EstimateModel(SpmMatlabCommandLine):
         outputs.spm_mat_file = spm[0]
         return outputs
 
-
 class SpecifyModel(Interface):
     """Makes a model specification SPM specific
 
@@ -2132,20 +2134,30 @@ class SpecifyModel(Interface):
             concatenate_runs : boolean
                 Allows concatenating all runs to look like a single
                 expermental session.
-            time_acquisition : float
-                Time in seconds to acquire a single image volume
             time_repetition : float
                 Time between the start of one volume to the start of
                 the next image volume. If a clustered acquisition is
                 used, then this should be the time between the start
                 of acquisition of one cluster to the start of
                 acquisition of the next cluster.
+
+            Sparse and clustered-sparse specific options
+            
+            time_acquisition : float
+                Time in seconds to acquire a single image volume
             volumes_in_cluster : int
                 If number of volumes in a cluster is greater than one,
                 then it is assumed that a sparse-clustered acquisition
                 is being assumed.
             model_hrf : boolean
                 Whether to model hrf for sparse clustered analysis
+            stimuli_as_impulses : boolean
+                Whether to treat each stimulus to be impulse like. If
+                not, the stimuli are convolved with their respective
+                durations.
+            scan_onset : float
+                Start of scanning relative to onset of run in
+                secs. default = 0 
         """
         print self.inputs_help.__doc__
 
@@ -2160,10 +2172,12 @@ class SpecifyModel(Interface):
                             input_units=None,
                             output_units=None,
                             concatenate_runs=None,
-                            time_acquisition=None,
                             time_repetition=None,
+                            time_acquisition=None,
                             volumes_in_cluster=None,
-                            model_hrf_sparse=None)
+                            model_hrf=None,
+                            stimuli_as_impulses=True,
+                            scan_onset=0.)
         
     def outputs_help(self):
         """
@@ -2177,12 +2191,19 @@ class SpecifyModel(Interface):
         """
         print self.outputs_help.__doc__
 
-    def _scaletimings(self,timelist):
-        if self.inputs.input_units==self.inputs.output_units:
+    def _scaletimings(self,timelist,input_units=None,output_units=None):
+        if input_units is None:
+            input_units = self.inputs.input_units
+        if output_units is None:
+            output_units = self.inputs.output_units
+        if input_units==output_units:
             self._scalefactor = 1.
-        if (self.inputs.input_units == 'scans') and (self.inputs.output_units == 'secs'):
-            self._scalefactor = self.inputs.time_repetition
-        if (self.inputs.input_units == 'secs') and (self.inputs.output_units == 'scans'):
+        if (input_units == 'scans') and (output_units == 'secs'):
+            if self.inputs.volumes_in_cluster > 1:
+                raise NotImplementedError("cannot scale timings if times are scans and acquisition is clustered")
+            else:
+                self._scalefactor = self.inputs.time_repetition
+        if (input_units == 'secs') and (output_units == 'scans'):
             self._scalefactor = 1./self.inputs.time_repetition
 
         if self._scalefactor > 1:
@@ -2191,19 +2212,143 @@ class SpecifyModel(Interface):
             timelist = [round(self._scalefactor*t) for t in timelist]
             
         return timelist
+    
+    def _gcd(self,a,b):
+        """Returns the greates common divisor of two integers
 
-    def _gen_regress(self,onsets,durations,nscans):
-        TR = self.time_repetition*1000  # in ms
-        TA = self.time_acquisition*1000 # in ms
-        nvol = self.volumes_in_cluster
-        total_time = TR*(nscans-nvol)/nvol + TA*nvol
+        uses Euclid's algorithm
+        """
+        while b > 0: a,b = b, a%b
+        return a
+
+    def _spm_hrf(self,RT,P=[],fMRI_T=16):
+        """ python implementation of spm_hrf
+        see spm_hrf for implementation details
+
+        % RT   - scan repeat time
+        % p    - parameters of the response function (two gamma
+        % functions)
+        % defaults  (seconds)
+        %	p(0) - delay of response (relative to onset)	   6
+        %	p(1) - delay of undershoot (relative to onset)    16
+        %	p(2) - dispersion of response			   1
+        %	p(3) - dispersion of undershoot			   1
+        %	p(4) - ratio of response to undershoot		   6
+        %	p(5) - onset (seconds)				   0
+        %	p(6) - length of kernel (seconds)		  32
+        %
+        % hrf  - hemodynamic response function
+        % p    - parameters of the response function
+
+        >>> _spm_hrf(2)
+        array([  0.00000000e+00,   8.65660810e-02,   3.74888236e-01,
+         3.84923382e-01,   2.16117316e-01,   7.68695653e-02,
+         1.62017720e-03,  -3.06078117e-02,  -3.73060781e-02,
+        -3.08373716e-02,  -2.05161334e-02,  -1.16441637e-02,
+        -5.82063147e-03,  -2.61854250e-03,  -1.07732374e-03,
+        -4.10443522e-04,  -1.46257507e-04])
+        """
+        p     = np.array([6,16,1,1,6,0,32],dtype=float)
+        if len(P)>0:
+            p[0:len(P)] = P
+
+        _spm_Gpdf = lambda x,h,l: np.exp(h*np.log(l)+(h-1)*np.log(x)-(l*x)-gammaln(h))
+        # modelled hemodynamic response function - {mixture of Gammas}
+        dt    = RT/float(fMRI_T)
+        u     = np.arange(0,int(p[6]/dt+1)) - p[5]/dt
+        # the following code using scipy.stats.distributions.gamma
+        # doesn't return the same result as the spm_Gpdf function
+        # hrf   = gamma.pdf(u,p[0]/p[2],scale=dt/p[2]) - gamma.pdf(u,p[1]/p[3],scale=dt/p[3])/p[4]
+        hrf   = _spm_Gpdf(u,p[0]/p[2],dt/p[2]) - _spm_Gpdf(u,p[1]/p[3],dt/p[3])/p[4]
+        idx   = np.arange(0,int((p[6]/RT)+1))*fMRI_T
+        hrf   = hrf[idx]
+        hrf   = hrf/np.sum(hrf)
+        return hrf
         
-        return []
+    def _gen_regress(self,i_onsets,i_durations,nscans,bplot=False):
+        """Generates a regressor for a sparse/clustered-sparse acquisition
+
+           see Ghosh et al. (2009) OHBM 2009
+        """
+        if bplot:
+            import matplotlib.pyplot as plt
+        TR = np.round(self.inputs.time_repetition*1000)  # in ms
+        if self.inputs.time_acquisition is None:
+            TA = TR # in ms
+        else:
+            TA = np.round(self.inputs.time_acquisition*1000) # in ms
+        nvol = self.inputs.volumes_in_cluster
+        SCANONSET = np.round(self.inputs.scan_onset*1000)
+        total_time = TR*(nscans-nvol)/nvol + TA*nvol + SCANONSET
+        SILENCE = TR-TA*nvol
+        dt = TA/10.;
+        durations  = np.round(np.array(i_durations)*1000)
+        if len(durations) == 1:
+            durations = durations*np.ones((len(i_onsets)))
+        onsets = np.round(np.array(i_onsets)*1000)
+        dttemp = self._gcd(TA,self._gcd(SILENCE,TR))
+        if dt < dttemp:
+            if dttemp % dt != 0:
+                dt = self._gcd(dttemp,dt)
+        if dt < 1:
+            raise Exception("Time multiple less than 1 ms")
+        print "Setting dt = %d ms\n" % dt
+        npts = int(total_time/dt)
+        times = np.arange(0,total_time,dt)*1e-3
+        timeline = np.zeros((npts))
+        timeline2 = np.zeros((npts))
+        hrf = self._spm_hrf(dt*1e-3)
+        for i,t in enumerate(onsets):
+            idx = int(t/dt)
+            timeline2[idx] = 1
+            if bplot:
+                plt.subplot(4,1,1)
+                plt.plot(times,timeline2)
+            if not self.inputs.stimuli_as_impulses:
+                if durations[i] == 0:
+                    durations[i] = TA*nvol
+                stimdur = np.ones((int(durations[i]/dt)))
+                timeline2 = convolve(timeline2,stimdur)[0:len(timeline2)]
+            timeline += timeline2
+            timeline2[:] = 0
+        if bplot:
+            plt.subplot(4,1,2)
+            plt.plot(times,timeline)
+        if self.inputs.model_hrf:
+            timeline = convolve(timeline,hrf)[0:len(timeline)]
+        if bplot:
+            plt.subplot(4,1,3)
+            plt.plot(times,timeline)
+        # sample timeline
+        timeline2 = np.zeros((npts))
+        reg = []
+        for i,trial in enumerate(np.arange(nscans)/nvol):
+            scanstart = int((SCANONSET + trial*TR + (i%nvol)*TA)/dt)
+            #print total_time/dt, SCANONSET, TR, TA, scanstart, trial, i%2, int(TA/dt)
+            scanidx = scanstart+np.arange(int(TA/dt))
+            timeline2[scanidx] = np.max(timeline)
+            reg.insert(i,np.mean(timeline[scanidx]))
+        if bplot:
+            plt.subplot(4,1,3)
+            plt.plot(times,timeline2)
+            plt.subplot(4,1,4)
+            plt.bar(np.arange(len(reg)),reg,width=0.5)
+        return reg
 
     def _cond_to_regress(self,info,nscans):
         reg = []
         for i,c in enumerate(info.conditions):
-            reg.insert(i,self._gen_regress(info.onsets[i],info.durations[i],nscans))
+            reg.insert(i,self._gen_regress(self._scaletimings(info.onsets[i],output_units='secs'),
+                                           self._scaletimings(info.durations[i],output_units='secs'),
+                                           nscans))
+            # need to deal with temporal and parametric modulators
+        # for sparse-clustered acquisitions enter T1-effect regressors
+        nvol = self.inputs.volumes_in_cluster
+        if nvol > 1:
+            for i in range(nvol-1):
+                treg = np.zeros((nscans/nvol,nvol))
+                treg[:,i] = 1
+                reg.insert(len(reg),treg.ravel().tolist())
         return reg
     
     def _generate_clustered_design(self,infolist):
