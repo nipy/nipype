@@ -462,3 +462,66 @@ class Threedvolreg(CommandLine):
         return ' '.join(allargs)
 
 
+class Threedmerge(CommandLine):
+    """
+    """
+
+    @property
+    def cmd(self):
+        """Base command for Threedmerge"""
+        return '3dmerge'
+
+    def inputs_help(self):
+        doc = """
+          Optional Parameters
+          -------------------
+        """
+        print doc
+
+    def _populate_inputs(self):
+        """Initialize the inputs attribute."""
+
+        self.inputs = Bunch(doall = True,
+                            gblur_fwhm = 5,
+                            outfile=None,
+                            infile=None)
+
+    def _parseinputs(self):
+        """Parse valid input options for Threedmerge command.
+
+        Ignore options set to None.
+
+        """
+
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+             if v is not None]
+
+        if inputs.has_key('doall'):
+            val = inputs.pop('doall')
+            out_inputs.append('-doall')
+        if inputs.has_key('gblur_fwhm'):
+            val = inputs.pop('gblur_fwhm')
+            out_inputs.append('-1blur_fwhm %s' % str(val))
+        if inputs.has_key('outfile'):
+            val = inputs.pop('outfile')
+            out_inputs.append('-prefix %s' % val)
+        if inputs.has_key('infile'):
+            val = inputs.pop('infile')
+            out_inputs.append('%s' % val)
+
+        if len(inputs) > 0:
+            print '%s: unsupported options: %s' % (
+                self.__class__.__name__, inputs.keys())
+
+        return out_inputs
+
+    @property
+    def cmdline(self):
+        """Generate the command line string from the list of arguments."""
+        valid_inputs = self._parseinputs()
+        allargs =  [self.cmd] + valid_inputs
+        return ' '.join(allargs)
+
+

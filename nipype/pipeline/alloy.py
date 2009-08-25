@@ -31,6 +31,7 @@ mask_tag = 'Mask'
 coreg_tag = 'Coreg'
 md1d_tag = 'MD1D'
 oned_tag = '1D'
+smooth_tag = 'Smooth'
 
 afni_to3d_datatype_anat = 'anat'
 afni_to3d_datatype_func = 'epan'
@@ -342,7 +343,7 @@ def afni_mean(in_file_info):
     conversion and before the rest of the preprocessing pipeline.
     """
 
-    # collect all the first EPI file names
+    # collect all the input file names
     in_list = get_data_selection(in_file_info)
 
     for in_file in in_list:
@@ -416,44 +417,67 @@ def afni_coreg(in_file_info):
     corresponding to the subject number.
     """
 
-    # collect all the first EPI file names
+    # collect all the input file names
+    in_list = get_data_selection(in_file_info)
+
+    for in_file in in_list:
+        if not in_file.selectors.__contains__(coreg_tag):
+
+            base_file = in_file.copy()
+            base_file.selectors = [in_file.subject, mean_tag]
+
+            out_file = in_file.copy()
+            out_file.selectors.append(coreg_tag)
+
+            md1d_file = out_file.copy()
+            md1d_file.selectors.append(md1d_tag)
+            md1d_file.extension = [d_extension]
+
+            oned_file = out_file.copy()
+            oned_file.selectors.append(oned_tag)
+            oned_file.extension = [d_extension]
+
+            cmd1 = [afni.Threedvolreg(
+                verbose = True,
+                copy_origin = True,
+                time_shift = True,
+                basefile = base_file.abspath(),
+                md1dfile = md1d_file.abspath(),
+                onedfile = oned_file.abspath(),
+                outfile = out_file.abspath(),
+                infile = in_file.abspath())]
+
+            run_commands(cmd1,out_file)
+
+    out_file_info = in_file_info.copy()
+    out_file_info.selectors = [coreg_tag]
+
+    return out_file_info
+
+
+def afni_smooth(in_file_info):
+    """Smooth functional images.
+
+    """
+
+    # collect all the input file names
     in_list = get_data_selection(in_file_info)
 
     for in_file in in_list:
 
-        base_file = in_file.copy()
-        base_file.selectors = [in_file.subject, mean_tag]
-
         out_file = in_file.copy()
-        out_file.selectors.append(coreg_tag)
+        out_file.selectors.append(smooth_tag)
 
-        md1d_file = out_file.copy()
-        md1d_file.selectors.append(md1d_tag)
-        md1d_file.extension = [d_extension]
-
-        oned_file = out_file.copy()
-        oned_file.selectors.append(oned_tag)
-        oned_file.extension = [d_extension]
-
-        cmd1 = [afni.Threedvolreg(
-            verbose = True,
-            copy_origin = True,
-            time_shift = True,
-            basefile = base_file.abspath(),
-            md1dfile = md1d_file.abspath(),
-            onedfile = oned_file.abspath(),
+        cmd1 = [afni.Threedmerge(
+            doall = True,
+            gblur_fwhm = 5,
             outfile = out_file.abspath(),
             infile = in_file.abspath())]
 
         run_commands(cmd1,out_file)
 
-    out_file_info = DataFile()
-    out_file_info.data_path = in_file_info.data_path
-    out_file_info.subject = in_file_info.subject
-    out_file_info.session = in_file_info.session
-    out_file_info.file_type = in_file_info.file_type
-    out_file_info.selectors = [coreg_tag]
-    out_file_info.extension = out_file_info.extension[:]
+    out_file_info = in_file_info.copy()
+    out_file_info.selectors = [smooth_tag]
 
     return out_file_info
 
@@ -592,12 +616,13 @@ if __name__ == '__main__':
 
      file_organize(out_file_info)
 
-     start_file_info = DataFile(data_path,'','T','NIfTI',['001'],[''])
+     start_file_info = DataFile(data_path,'','T','NIfTI',['001'],extension.split(ext_delimiter))
      mean_file_info = afni_mean(start_file_info)
      mask_file_info = afni_mask(mean_file_info)
 
      start_file_info.selectors = ['EPI']
 
      coreg_file_info = afni_coreg(start_file_info)
+     smooth_file_info = afni_smooth(coreg_file_info)
 
 
