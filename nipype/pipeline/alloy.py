@@ -19,12 +19,18 @@ data_path = '/home/despo/dte/Alloy/Template'
 num_cores = 4
 nifti_folder = 'NIfTI'
 behavior_folder = 'Behavior'
-extension = '.nii.gz'
+extension = 'nii.gz'
+data_extension = 'txt'
+d_extension = 'txt'
 
 anat_tag = 'T1'
 func_tag = 'EPI'
+data_tag = 'Data'
 mean_tag = 'Mean'
 mask_tag = 'Mask'
+coreg_tag = 'Coreg'
+md1d_tag = 'MD1D'
+oned_tag = '1D'
 
 afni_to3d_datatype_anat = 'anat'
 afni_to3d_datatype_func = 'epan'
@@ -103,6 +109,16 @@ class DataFile(object):
             return os.path.join(self.data_path, self.subject, self.session,
                                 self.file_type)
 
+    def copy(self):
+        new = DataFile()
+        new.data_path = self.data_path
+        new.subject = self.subject
+        new.session = self.session
+        new.file_type = self.file_type
+        new.selectors = self.selectors[:]
+        new.extension = self.extension[:]
+        return new
+
 
 def afni_dicom_convert(in_file_info):
     """Convert a set of dicom files into nifti files.
@@ -117,8 +133,6 @@ def afni_dicom_convert(in_file_info):
     dicom_list = get_data_selection(in_file_info)
 
     for dicom in dicom_list:
-        filename = (dicom.subject + '-' + dicom.session + '-' + dicom.name()
-                    + extension)
 
         nifti_file = DataFile()
         nifti_file.data_path = dicom.data_path
@@ -167,21 +181,26 @@ def afni_dicom_convert(in_file_info):
         # 3drefit only writes its output to the directory it was run in.
         # move the new file back to the appropriate directory
         cmd3 = CommandLine('mv', '-f',
-            nifti_file.name,
+            nifti_file.name(),
             nifti_file.abspath())
 
         # command to change volume orientation from LPI to RPI
-        nifti_file_rpi = (nifti_file.partpath(4) + '/' +
-                          nifti_file.name()[0:-len(extension)] +
-                          '-' + afni_3dresample_orient + extension)
+        nifti_file_rpi = DataFile()
+        nifti_file_rpi.data_path = nifti_file.data_path
+        nifti_file_rpi.subject = nifti_file.subject
+        nifti_file_rpi.session = nifti_file.session
+        nifti_file_rpi.file_type = nifti_file.file_type
+        nifti_file_rpi.selectors = nifti_file.selectors[:]
+        nifti_file_rpi.selectors.append('RPI')
+        nifti_file_rpi.extension = nifti_file.extension[:]
 
         cmd4 = afni.Threedresample(
             orient=afni_3dresample_orient,
-            outfile=nifti_file_rpi,
+            outfile=nifti_file_rpi.abspath(),
             infile=nifti_file.abspath())
 
         cmd5 = CommandLine('mv', '-f',
-            nifti_file_rpi,
+            nifti_file_rpi.abspath(),
             nifti_file.abspath())
 
 
@@ -189,19 +208,41 @@ def afni_dicom_convert(in_file_info):
 
         run_commands(cmds,nifti_file)
 
+    out_file_info = DataFile()
+    out_file_info.data_path = in_file_info.data_path
+    out_file_info.subject = in_file_info.subject
+    out_file_info.session = in_file_info.session
+    out_file_info.file_type = nifti_folder
+    out_file_info.selectors = in_file_info.selectors[:]
+    out_file_info.extension = extension.split(ext_delimiter)
 
-def file_organize(data_path):
+    return out_file_info
+
+
+def file_organize(in_file_info):
 
     out_file = DataFile()
 
+    in_file_info.session = '2'
+    in_file_info.extension = ['']
+
+    in_file_info.file_type = 'NIfTI'
+    in_file_info.selectors = ['T1']
+
     # collect all the anatomical file names
-    t1_list = get_data_selection(data_path,'','2','NIfTI','T1')
+    t1_list = get_data_selection(in_file_info)
+
+    in_file_info.file_type = 'NIfTI'
+    in_file_info.selectors = ['EPI']
 
     # collect all the functional file names
-    epi_list = get_data_selection(data_path,'','2','NIfTI','EPI')
+    epi_list = get_data_selection(in_file_info)
+
+    in_file_info.file_type = 'Behavior'
+    in_file_info.selectors = ['Data']
 
     # collect all the behavioral file names
-    data_list = get_data_selection(data_path,'','2','Behavior','Data')
+    data_list = get_data_selection(in_file_info)
 
     for t1_file in t1_list:
 
@@ -209,7 +250,8 @@ def file_organize(data_path):
         out_file.subject = t1_file.subject
         out_file.session = 'Total'
         out_file.file_type = t1_file.file_type
-        out_file.name = (t1_file.subject + '-T1' + extension)
+        out_file.selectors = [t1_file.subject, anat_tag]
+        out_file.extension = t1_file.extension[:]
 
         try:
             os.mkdir(out_file.partpath(3))
@@ -243,8 +285,8 @@ def file_organize(data_path):
         out_file.subject = epi_file.subject
         out_file.session = 'Total'
         out_file.file_type = epi_file.file_type
-        out_file.name = (epi_file.subject + '-EPI-' + 
-                         counter_string + extension)
+        out_file.selectors = [epi_file.subject, func_tag, counter_string]
+        out_file.extension = epi_file.extension[:]
 
         try:
             os.mkdir(out_file.partpath(3))
@@ -278,8 +320,8 @@ def file_organize(data_path):
         out_file.subject = data_file.subject
         out_file.session = 'Total'
         out_file.file_type = data_file.file_type
-        out_file.name = (data_file.subject + '-Data-' +
-                         counter_string + '.txt')
+        out_file.selectors = [data_file.subject, data_tag, counter_string]
+        out_file.extension =  data_file.extension[:]
 
         try:
             os.mkdir(out_file.partpath(3))
@@ -301,9 +343,7 @@ def afni_mean(in_file_info):
     """
 
     # collect all the first EPI file names
-    in_list = get_data_selection(in_file_info.data_path,
-        in_file_info.subject,in_file_info.session,
-        in_file_info.file_type,in_file_info.selector)
+    in_list = get_data_selection(in_file_info)
 
     for in_file in in_list:
 
@@ -312,8 +352,8 @@ def afni_mean(in_file_info):
         out_file.subject = in_file.subject
         out_file.session = in_file.session
         out_file.file_type = in_file.file_type
-        out_file.name = (in_file.subject + '-' + mean_tag + extension)
-        out_file.selector = mean_tag
+        out_file.selectors = [in_file.subject, mean_tag]
+        out_file.extension = in_file.extension[:]
 
         cmd1 = [afni.ThreedTstat(
             outfile=out_file.abspath(),
@@ -326,8 +366,8 @@ def afni_mean(in_file_info):
     out_file_info.subject = in_file_info.subject
     out_file_info.session = in_file_info.session
     out_file_info.file_type = in_file_info.file_type
-    out_file_info.name = in_file_info.name
-    out_file_info.selector = mean_tag
+    out_file_info.selectors = [mean_tag]
+    out_file_info.extension = in_file_info.extension
 
     return out_file_info
 
@@ -340,9 +380,7 @@ def afni_mask(in_file_info):
     """
 
     # collect all the first EPI file names
-    in_list = get_data_selection(in_file_info.data_path,
-        in_file_info.subject,in_file_info.session,
-        in_file_info.file_type,in_file_info.selector)
+    in_list = get_data_selection(in_file_info)
 
     for in_file in in_list:
 
@@ -351,7 +389,8 @@ def afni_mask(in_file_info):
         out_file.subject = in_file.subject
         out_file.session = in_file.session
         out_file.file_type = in_file.file_type
-        out_file.name = (in_file.subject + '-' + mask_tag + extension)
+        out_file.selectors = [in_file.subject, mask_tag]
+        out_file.extension = in_file.extension[:]
 
         cmd1 = [afni.ThreedAutomask(
             outfile=out_file.abspath(),
@@ -364,51 +403,59 @@ def afni_mask(in_file_info):
     out_file_info.subject = in_file_info.subject
     out_file_info.session = in_file_info.session
     out_file_info.file_type = in_file_info.file_type
-    out_file_info.name = in_file_info.name
-    out_file_info.selector = mask_tag
+    out_file_info.selectors = [mask_tag]
+    out_file_info.extension = in_file_info.extension[:]
 
     return out_file_info
 
 
-#def afni_coreg(in_file_info):
-    #"""Coregister functional images with a corresponding mean image.
+def afni_coreg(in_file_info):
+    """Coregister functional images with a corresponding mean image.
 
-    #This module will run a functional image set with a mean image
-    #corresponding to the subject number.
-    #"""
+    This module will run a functional image set with a mean image
+    corresponding to the subject number.
+    """
 
-    ## collect all the first EPI file names
-    #in_list = get_data_selection(in_file_info.data_path,
-        #in_file_info.subject,in_file_info.session,
-        #in_file_info.file_type,in_file_info.selector)
+    # collect all the first EPI file names
+    in_list = get_data_selection(in_file_info)
 
-    #for in_file in in_list:
+    for in_file in in_list:
 
-        
+        base_file = in_file.copy()
+        base_file.selectors = [in_file.subject, mean_tag]
 
-        #out_file = DataFile()
-        #out_file.data_path = in_file.data_path
-        #out_file.subject = in_file.subject
-        #out_file.session = in_file.session
-        #out_file.file_type = in_file.file_type
-        #out_file.name = (in_file.subject + name_delimiter +
-                         #coreg_tag + extension)
+        out_file = in_file.copy()
+        out_file.selectors.append(coreg_tag)
 
-        #cmd1 = [afni.ThreedAutomask(
-            #outfile=out_file.abspath(),
-            #infile=in_file.abspath())]
+        md1d_file = out_file.copy()
+        md1d_file.selectors.append(md1d_tag)
+        md1d_file.extension = [d_extension]
 
-        #run_commands(cmd1,out_file)
+        oned_file = out_file.copy()
+        oned_file.selectors.append(oned_tag)
+        oned_file.extension = [d_extension]
 
-    #out_file_info = DataFile()
-    #out_file_info.data_path = in_file_info.data_path
-    #out_file_info.subject = in_file_info.subject
-    #out_file_info.session = in_file_info.session
-    #out_file_info.file_type = in_file_info.file_type
-    #out_file_info.name = in_file_info.name
-    #out_file_info.selector = mask_tag
+        cmd1 = [afni.Threedvolreg(
+            verbose = True,
+            copy_origin = True,
+            time_shift = True,
+            basefile = base_file.abspath(),
+            md1dfile = md1d_file.abspath(),
+            onedfile = oned_file.abspath(),
+            outfile = out_file.abspath(),
+            infile = in_file.abspath())]
 
-    #return out_file_info
+        run_commands(cmd1,out_file)
+
+    out_file_info = DataFile()
+    out_file_info.data_path = in_file_info.data_path
+    out_file_info.subject = in_file_info.subject
+    out_file_info.session = in_file_info.session
+    out_file_info.file_type = in_file_info.file_type
+    out_file_info.selectors = [coreg_tag]
+    out_file_info.extension = out_file_info.extension[:]
+
+    return out_file_info
 
 
 # XXXXX UPGRADES NEEDED ELSEWHERE
@@ -434,8 +481,8 @@ def run_commands(cmd_list, out):
             # XXXXX UPGRADES NEEDED ELSEWHERE
                 # There should be a way to compile the command
                 # before it is run.
-            results = cmd.run()
             print 'Executing command:', cmd.cmdline
+            results = cmd.run()
             print results.runtime.stderr + results.runtime.stdout
 
 
@@ -478,8 +525,10 @@ def get_data_selection(in_file_info):
     filters = ''
 
     for (path,dirs,files) in os.walk(in_file_info.data_path):
-        path = path.strip(in_file_info.data_path)
+        path = path.lstrip(in_file_info.data_path)
         path = path.split(os.path.sep)
+        dirs.sort()
+        files.sort()
 
         if path == ['']:
             filters = in_file_info.subject
@@ -488,10 +537,9 @@ def get_data_selection(in_file_info):
         elif len(path) is 2:
             filters = in_file_info.file_type
         elif len(path) is 3:
+            filters = ''
             if not in_file_info.extension:
-                files = []
-                for index, dir_name in enumerate(dirs):
-                    files.append(dir_name)
+                files = dirs[:]
 
             for file_name in files:
 
@@ -503,6 +551,7 @@ def get_data_selection(in_file_info):
                 criteria = 0
 
                 for entry in file_name_parts:
+
                     if entry in in_file_info.selectors or in_file_info.selectors == ['']:
                         if last_entry == in_file_info.extension or in_file_info.extension == ['']:
                             criteria = 1
@@ -519,40 +568,36 @@ def get_data_selection(in_file_info):
                     datafile.extension = last_entry[:]
                     file_list.append(datafile)
 
-            dirs = []
+            dir_remove = dirs[:]
+
+            for dir_name in dir_remove:
+                dirs.remove(dir_name)
+
+        dir_remove = []
 
         for dir_name in dirs:
             if not dir_name.startswith(filters):
-                dirs.remove(dir_name)
+                dir_remove.append(dir_name)
+
+        for dir_name in dir_remove:
+            dirs.remove(dir_name)
 
     return file_list
 
 
 if __name__ == '__main__':
-     dicom_file_info = DataFile()
-     dicom_file_info.data_path = data_path
-     dicom_file_info.subject = ''
-     dicom_file_info.session = '2'
-     dicom_file_info.file_type = 'DICOM'
-     dicom_file_info.selectors = ['T1']
+     dicom_file_info = DataFile(data_path,'','2','DICOM',['T1', 'EPI'],[])
 
-     afni_dicom_convert(dicom_file_info)
-     #afni_dicom_convert(data_path, '', '2', 'DICOM', 'EPI')
-     #file_organize(data_path)
+     out_file_info = afni_dicom_convert(dicom_file_info)
 
-     #start_file_info = DataFile()
-     #start_file_info.data_path = data_path
-     #start_file_info.subject = ''
-     #start_file_info.session = 'T'
-     #start_file_info.file_type = 'NIfTI'
-     #start_file_info.name = ''
-     #start_file_info.selector = '001'
+     file_organize(out_file_info)
 
-     #mean_file_info = afni_mean(start_file_info)
-     #mask_file_info = afni_mask(mean_file_info)
+     start_file_info = DataFile(data_path,'','T','NIfTI',['001'],[''])
+     mean_file_info = afni_mean(start_file_info)
+     mask_file_info = afni_mask(mean_file_info)
 
-     #start_file_info.selector = 'EPI'
+     start_file_info.selectors = ['EPI']
 
-     #coreg_file_info = afni_coreg(start_file_info)
+     coreg_file_info = afni_coreg(start_file_info)
 
 
