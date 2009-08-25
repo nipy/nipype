@@ -2147,8 +2147,7 @@ class SpecifyModel(Interface):
                 Time in seconds to acquire a single image volume
             volumes_in_cluster : int
                 If number of volumes in a cluster is greater than one,
-                then it is assumed that a sparse-clustered acquisition
-                is being assumed.
+                then a sparse-clustered acquisition is being assumed.
             model_hrf : boolean
                 Whether to model hrf for sparse clustered analysis
             stimuli_as_impulses : boolean

@@ -3,7 +3,7 @@ Wraps interfaces modules to work with pipeline engine
 """
 import os
 import hashlib
-from nipype.utils.filemanip import copyfiles, fname_presuffix
+from nipype.utils.filemanip import copyfile, fname_presuffix
 from nipype.interfaces.base import Bunch, InterfaceResult
 
 
@@ -111,7 +111,7 @@ class NodeWrapper(object):
                         for i,f in enumerate(infiles):
                             newfile = fname_presuffix(f,newpath=outdir)
                             if not os.path.exists(newfile):
-                                copyfiles(f,newfile,copy=info.copy)
+                                copyfile(f,newfile,copy=info.copy)
                             if type(files) is not type([]):
                                 self.inputs[info.key] = newfile
                             else:

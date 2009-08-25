@@ -56,7 +56,7 @@ def check_forhash(filename):
     else:
         return False, None
 
-def copyfiles(originalfile, newfile,copy=False):
+def copyfile(originalfile, newfile,copy=False):
     """given a file moves it to a working directory
 
     Parameters
@@ -78,6 +78,34 @@ def copyfiles(originalfile, newfile,copy=False):
         os.symlink(originalfile,newfile)
     else:
         shutil.copyfile(originalfile, newfile)
+
+def copyfiles(filelist, dest, copy=False):
+    """given a file moves it to a working directory
+
+    Parameters
+    ----------
+    originalfile : file
+        full path to original file
+    dest : path/files
+        full path to destination. If it is a list of length greater
+        than 1, then it assumes that these are the names of the new
+        files. 
+    symlink : Bool
+        specifies whether to copy or symlink files
+        (default=True) but only for posix systems
+         
+    Returns
+    -------
+    None
+    
+    """
+    outfiles = filename_to_list(dest)
+    for i,f in enumerate(filename_to_list(filelist)):
+        if len(outfiles) > 1:
+            newfile = outfiles[i]
+        else:
+            newfile = fname_presuffix(f, newpath=outfiles[0])
+        copyfile(f,newfile,copy)
 
 
 def filename_to_list(filename):
