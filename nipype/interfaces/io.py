@@ -127,7 +127,7 @@ class DataSink(Interface):
         self.inputs.update(**inputs)
 
     def inputs_help(self):
-        doc = """
+        """
             Parameters
             ----------
             (all default to None)
@@ -143,8 +143,8 @@ class DataSink(Interface):
             directory under subject_directory with the fieldname as a
             new directory.
 
-            """
-        print doc
+        """
+        print self.inputs_help.__doc__
         
     def _populate_inputs(self):
         self.inputs = Bunch(base_directory=None,
@@ -152,10 +152,10 @@ class DataSink(Interface):
                             subject_id=None)
         
     def outputs_help(self):
-        doc = """
+        """
             No outputs 
-            """
-        print doc
+        """
+        print self.outputs_help.__doc__
         
     def aggregate_outputs(self):
         outputs = Bunch()

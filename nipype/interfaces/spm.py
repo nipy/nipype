@@ -2050,7 +2050,6 @@ class SpecifyModel(Interface):
     see self.inputs_help() for a list of SpecifyModel.inputs attributes
     
     Attributes
-    ----------
     
     inputs : Bunch
     a (dictionary-like) bunch of options that can be passed to 
@@ -2059,7 +2058,6 @@ class SpecifyModel(Interface):
     string used to call matlab/spm via SpmMatlabCommandLine interface
 
     Options
-    -------
 
     To see optional arguments
     SpecifyModel().inputs_help()
@@ -2591,7 +2589,7 @@ class EstimateContrast(SpmMatlabCommandLine):
     def _populate_inputs(self):
         """ Initializes the input fields of this interface.
         """
-        self.inputs = Bunch(spm_design_file=None,
+        self.inputs = Bunch(spm_mat_file=None,
                             contrasts=None,
                             beta_images=None,
                             residual_image=None,
@@ -2620,7 +2618,7 @@ class EstimateContrast(SpmMatlabCommandLine):
 
         [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
         for opt in inputs:
-            if opt is 'spm_design_file':
+            if opt is 'spm_mat_file':
                 einputs['spmmat'] = np.array([[[str(inputs[opt])]]],dtype=object)
                 continue
             if opt is 'contrasts':

@@ -22,10 +22,12 @@ def freesurferversion():
 
     Parameters
     ----------
+    
     None
 
     Returns
     -------
+    
     version : string
        version number as string 
        or None if freesurfer version not found
@@ -49,11 +51,13 @@ def fssubjectsdir(subjects_dir=None):
     
     Parameters
     ----------
+    
     subjects_dir :  string
         The system defined subjects directory
 
     Returns
     -------
+    
     subject_dir : string
         Represents the current environment setting of SUBJECTS_DIR
 
@@ -116,9 +120,10 @@ class Dicom2Nifti(FSCommandLine):
 
 
     def inputs_help(self):
-        doc = """
-        Optional Parameters
-        -------------------
+        """
+        Parameters
+        ----------
+        
         (all default to None and are unset)
         
         dicomdir : /path/to/dicomfiles
@@ -140,7 +145,7 @@ class Dicom2Nifti(FSCommandLine):
         flags = unsupported flags, use at your own risk
 
         """
-        print doc
+        print self.inputs_help.__doc__
 
     def _populate_inputs(self):
         self.inputs = Bunch(dicomdir=None,
@@ -238,7 +243,7 @@ class Resample(FSCommandLine):
 
 
     def inputs_help(self):
-        doc = """
+        """
         Optional Parameters
         -------------------
         (all default to None and are unset)
@@ -253,7 +258,7 @@ class Resample(FSCommandLine):
         flags = unsupported flags, use at your own risk
 
         """
-        print doc
+        print self.inputs_help.__doc__
 
     def _populate_inputs(self):
         self.inputs = Bunch(infile=None,
@@ -285,11 +290,11 @@ class Resample(FSCommandLine):
         return out_inputs
 
     def outputs_help(self):
-        doc = """
+        """
         outfile : string or list
             resampled file(s)
         """
-        print doc
+        print self.outputs_help.__doc__
 
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
@@ -324,7 +329,6 @@ class ReconAll(FSCommandLine):
     structural data from an anatomical image of a subject.
 
     Options
-    -------
 
     To see optianl arguments
     ReconAll().inputs_help()
@@ -332,6 +336,7 @@ class ReconAll(FSCommandLine):
 
     Examples
     --------
+    
     >>> reconall = freesurfer.ReconAll()
     >>> reconall.inputs.subject_id = 'foo'
     >>> reconall.inputs.directive  = '-all'
@@ -347,23 +352,23 @@ class ReconAll(FSCommandLine):
 
 
     def inputs_help(self):
-        doc = """
-        Mandatory Parameters
-        --------------------
+        """
+        Parameters
+        ----------
         (all default to None and are unset)
         subject_id: string or int
             Identifier for subject
         directive: string
             Which part of the process to run 
 
-            Fully-Automated Directive:
-            --------------------------
+            Fully-Automated Directive
+
 
             -all           : performs all stages of cortical reconstruction
             -autorecon-all : same as -all
 
-            Manual-Intervention Workflow Directives:
-            ----------------------------------------
+            Manual-Intervention Workflow Directives
+
 
             -autorecon1    : process stages 1-5 (see below)
             -autorecon2    : process stages 6-24
@@ -379,8 +384,8 @@ class ReconAll(FSCommandLine):
             -autorecon3    : process stages 25-31
 
 
-        Optional Parameters
-        -------------------
+        Parameters
+        ----------
         (all default to None and are unset)
              
         T1files: filename(s)
@@ -396,7 +401,7 @@ class ReconAll(FSCommandLine):
         flags:
             unsupported flags, use at your own risk
         """
-        print doc
+        print self.inputs_help.__doc__
 
     def _populate_inputs(self):
         self.inputs = Bunch(subject_id=None,
@@ -442,10 +447,10 @@ class ReconAll(FSCommandLine):
         return out_inputs
 
     def outputs_help(self):
-        doc = """
+        """
         No outputs
         """
-        print doc
+        print self.outputs_help.__doc__
 
     def _compile_command(self):
         """validates fsl options and generates command line argument"""
@@ -483,9 +488,10 @@ class BBRegister(FSCommandLine):
 
 
     def inputs_help(self):
-        doc = """
-        Mandatory Parameters
-        --------------------
+        """
+        Parameters
+        ----------
+        
         (all default to None and are unset)
         subject_id: string or int
             Identifier for subject
@@ -505,8 +511,9 @@ class BBRegister(FSCommandLine):
             --bold : same as --t2
             --dti  : same as --t2
 
-        Optional Parameters
-        -------------------
+        Parameters
+        ----------
+        
         (all default to None and are unset)
         outregfile: filename
             Name of output registration file. By default the extension
@@ -517,7 +524,7 @@ class BBRegister(FSCommandLine):
         flags:
             unsupported flags, use at your own risk
         """
-        print doc
+        print self.inputs_help.__doc__
 
     def _populate_inputs(self):
         self.inputs = Bunch(subject_id=None,
@@ -581,13 +588,13 @@ class BBRegister(FSCommandLine):
         return self._cmdline
 
     def outputs_help(self):
-        doc = """
+        """
         outregfile: filename
             Output registration file
         outfile: filename
             Registered and resampled source file
         """
-        print doc
+        print self.outputs_help.__doc__
 
     def aggregate_outputs(self):
         outputs = Bunch(outregfile=None,

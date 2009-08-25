@@ -86,6 +86,20 @@ class Pipeline(object):
         [(source1,destination1,[('namedoutput1','namedinput1'),...]),...]
         """
         self.graph.add_edges_from([(u,v,{'connect':d}) for u,v,d in connection_list])
+        print "PE: checking connections:\n"
+        for u,v,d in connection_list:
+            for source,dest in d:
+                try:
+                    if v.inputs.__dict__.has_key(dest) is not True:
+                        print "Module %s has no input called %s\n"%(v.name,dest)
+                except:
+                    print "unable to query inputs of module %s\n"%v.name
+                try:
+                    if not source in u.interface.outputs_help.__doc__:
+                        print "Module %s has no output called %s\n"%(u.name,source)
+                except:
+                    print "unable to query outputs of module %s\n"%u.name
+        print "PE: finished checking connections\n"
 
     def addmodules(self,modules):
         """ Wraps the networkx functionality in a more semantically

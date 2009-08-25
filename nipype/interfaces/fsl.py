@@ -183,7 +183,7 @@ class Bet(FSLCommand):
         return 'bet'
 
     def inputs_help(self):
-        doc = """
+        """
         Mandatory Parameters
         --------------------
         (all default to None and are unset)
@@ -225,7 +225,7 @@ class Bet(FSLCommand):
         flags = unsupported flags, use at your own risk  ['-R']
 
         """
-        print doc
+        print self.inputs_help.__doc__
 
     def _populate_inputs(self):
         self.inputs = Bunch(infile=None,
@@ -317,7 +317,7 @@ class Bet(FSLCommand):
         return out_inputs
 
     def outputs_help(self):
-        doc = """
+        """
         Optional Parameters
         -------------------
         (all default to None and are unset)
@@ -327,7 +327,7 @@ class Bet(FSLCommand):
         maskfile : Bool
             binary brain mask if generated
         """
-        print doc
+        print self.outputs_help.__doc__
 
     def aggregate_outputs(self):
         outputs = Bunch(outfile = None,

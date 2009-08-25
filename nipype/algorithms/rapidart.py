@@ -104,7 +104,7 @@ class ArtifactDetect(Interface):
                             intersect_mask=True)
         
     def outputs_help(self):
-        doc = """
+        """
             outlier_files : filename(s)
                 One file for each functional run containing a list of
                 0-based indices corresponding to outlier volumes
@@ -117,8 +117,8 @@ class ArtifactDetect(Interface):
                 if design info is provided then details of stimulus
                 correlated motion and a listing or artifacts by event
                 type. 
-            """
-        print doc
+        """
+        print self.outputs_help.__doc__
         
     def _get_output_filenames(self,motionfile,output_dir):
         """
