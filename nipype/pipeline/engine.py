@@ -115,7 +115,9 @@ class Pipeline(object):
     def showgraph(self,prog='dot'):
         """ Displays the graph layout of the pipeline
         """
-        nx.draw_graphviz(self.graph,prog=prog)
+        pos = nx.shell_layout(self.graph)
+        nx.draw(self.graph,pos)
+        #nx.draw_graphviz(self.graph,prog=prog)
 
     def generate_parameterized_graphs(self):
         """ Generates a new graph for each unique parameterization of

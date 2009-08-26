@@ -211,3 +211,6 @@ class NodeWrapper(object):
         os.mkdir(outdir)
         return outdir
 
+    def __repr__(self):
+        return self.name
+
