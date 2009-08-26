@@ -37,20 +37,22 @@ def test_flirt():
     flirter = fsl.Flirt()
     flirter.inputs.bins = 256
     flirter.inputs.cost = 'mutualinfo'
-    flirted = flirter.run('infile','reffile','outfile','outmat.mat')
-    flirt_est = flirter.run('infile','reffile',outfile=None,outmatrix='outmat.mat')
-    flirt_apply = flirter.applyxfm('infile','reffile','inmatrix.mat','outimgfile')
+    flirted = flirter.run(infile='infile',reference='reffile',
+                          outfile='outfile',outmatrix='outmat.mat')
+    flirt_est = flirter.run(infile='infile',reference='reffile',
+                            outfile=None,outmatrix='outmat.mat')
+    flirt_apply = flirter.applyxfm(infile='infile',reference='reffile',
+                                   inmatrix='inmatrix.mat',outfile='outimgfile')
     
     yield assert_not_equal, flirter, flirted
     yield assert_not_equal, flirted, flirt_est
     yield assert_not_equal, flirted, flirt_apply
 
     yield assert_equal, flirter.cmd, 'flirt'
-    yield assert_equal, flirter.inputs.bins, flirted.inputs.bins
-    yield assert_equal, flirter.inputs.cost, flirt_est.inputs.cost
-    yield assert_equal, flirter.inputs.cost, flirt_apply.inputs.cost
-    yield assert_not_equal, flirter.cmdline, flirt_apply.cmdline
-    yield assert_equal, flirt_apply.cmdline,'flirt -cost mutualinfo -bins 256 -in infile -ref reffile -applyxfm -init inmatrix.mat -out outimgfile'
+    yield assert_equal, flirter.inputs.bins, flirted.interface.inputs.bins
+    yield assert_equal, flirter.inputs.cost, flirt_est.interface.inputs.cost
+    yield assert_equal, flirter.inputs.cost, flirt_apply.interface.inputs.cost
+    yield assert_equal, flirt_apply.runtime.cmdline,'flirt -in infile -ref reffile -omat outmat.mat -init inmatrix.mat -out outimgfile -cost mutualinfo -applyxfm -bins 256'
     
    
     

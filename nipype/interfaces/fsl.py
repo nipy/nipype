@@ -563,66 +563,84 @@ class Fast(FSLCommand):
 
 
 
-class Flirt(CommandLine):
-
+class Flirt(FSLCommand):
+    """use fsl flirt for coregistration
+    
+    Options
+    -------
+    fsl.Flirt().inputs_help()
+    
+    Examples
+    --------
+    
+    >>> flirtter = fsl.Flirt(bins=640, searchcost='mutualinfo')
+    >>> flirtted = flirtter.run(infile='involume.nii', 
+    reference='reference.nii',
+    outfile='moved.nii', 
+    outmatrix='in_to_ref.mat')
+    >>> flirtted_est = flirtter.run(infile='involume.nii', 
+    reference='reference.nii',
+    outfile=None
+    outmatrix='in_to_ref.mat')
+    >>> xfm_apply = flirtter.applyxfm(infile='involume.nii', 
+    reference='reference.nii',
+    inmatrix='in_to_ref.mat',
+    outfile='moved.nii')
+    
+    >>> fls.Flirt().inputs_help()
+    
+    
+    >>> flirter = fsl.Flirt(infile='subject.nii',
+    reference='template.nii',
+    outfile='moved_subject.nii',
+    outmatrix='subject_to_template.mat')
+    >>> flitrd = flirter.run()
+    
+    
+    """
+        
     @property
     def cmd(self):
         """sets base command, not editable"""
         return "flirt"
 
-    @property
-    def cmdline(self):
-        """validates fsl options and generates command line argument"""
-        valid_inputs = self._parse_inputs()
-        allargs = self.args + valid_inputs
-        return ' '.join(allargs)
+    opt_map = {'datatype':           '-datatype %d ',
+               'cost':               '-cost %s',
+               'searchcost':         '-searchcost %s',
+               'usesqform':          '-usesqform',
+               'displayinit':        '-displayinit',
+               'anglerep':           '-anglerep %s',
+               'interp':             '-interp',
+               'sincwidth':          '-sincwidth %d',
+               'sincwindow':         '-sincwindow %s',
+               'bins':               '-bins %d',
+               'dof':                '-dof %d',
+               'noresample':         '-noresample',
+               'forcescaling':       '-forcescaling',
+               'minsampling':        '-minsamplig %f',
+               'paddingsize':        '-paddingsize %d',
+               'searchrx':           '-searchrx %d %d',
+               'searchry':           '-searchry %d %d',
+               'searchrz':           '-searchrz %d %d',
+               'nosearch':           '-nosearch',
+               'coarsesearch':       '-coarsesearch %d',
+               'finesearch':         '-finesearch %d',
+               'refweight':          '-refweight %s',
+               'inweight':           '-inweight %s',
+               'noclamp':            '-noclamp',
+               'noresampblur':       '-noresampblur',
+               'rigid2D':            '-2D',
+               'verbose':            '-v %d',
+               'flags':              '%s'}
+
+
+    #@property
+    #def cmdline(self):
+    #    """validates fsl options and generates command line argument"""
+    #    valid_inputs = self._parse_inputs()
+    #    allargs = self.args + valid_inputs
+    #    return ' '.join(allargs)
   
-    def __init__(self, **inputs):
-        """use fsl flirt for coregistration
-
-        Options
-        -------
-        fsl.Flirt().inputs_help()
-
-        Examples
-        --------
-
-        >>> flirtter = fsl.Flirt(bins=640, searchcost='mutualinfo')
-        >>> flirtted = flirtter.run(infile='involume.nii', 
-                                   reference='reference.nii',
-                                   outfile='moved.nii', 
-                                   outmatrix='in_to_ref.mat')
-        >>> flirtted_est = flirtter.run(infile='involume.nii', 
-                                       reference='reference.nii',
-                                       outfile=None
-                                       outmatrix='in_to_ref.mat')
-        >>> xfm_apply = flirtter.applyxfm(infile='involume.nii', 
-                                         reference='reference.nii',
-                                         inmatrix='in_to_ref.mat',
-                                         outfile='moved.nii')
-
-        >>> fls.Flirt().inputs_help()
-
-
-        >>> flirter = fsl.Flirt(infile='subject.nii',
-                                reference='template.nii',
-                                outfile='moved_subject.nii',
-                                outmatrix='subject_to_template.mat')
-        >>> flitrd = flirter.run()
-
-                          
-        """
-        
-        super(Flirt,self).__init__()
-        self.args = []
-        self._populate_inputs()
-        self.inputs.update(inputs)
-        self.infile = ''
-        self.outfile = ''
-        self.reference = ''
-        self.outmatrix = ''
-        self.inmatrix = ''
-        
         
     def inputs_help(self):
         doc = """
@@ -705,163 +723,58 @@ class Flirt(CommandLine):
         print doc
     def _populate_inputs(self):
         self.inputs = Bunch(infile=None,
-                          outfile=None,
-                          reference=None,
-                          outmatrix=None,
-                          inmatrix=None,
-                          datatype=None,
-                          cost=None,
-                          searchcost=None,
-                          usesqform=None,
-                          displayinit=None,
-                          anglerep=None,
-                          interp=None,
-                          sincwidth=None,
-                          sincwindow=None,
-                          bins=None,
-                          dof=None,
-                          noresample=None,
-                          forcescaling=None,
-                          minsampling=None,
-                          applyisoxfm=None,
-                          paddingsize=None,
-                          searchrx=None,
-                          searchry=None,
-                          searchrz=None,
-                          nosearch=None,
-                          coarsesearch=None,
-                          finesearch=None,
-                          refweight=None,
-                          inweight=None,
-                          noclamp=None,
-                          noresampblur=None,
-                          rigid2D=None,
-                          verbose=None,
-                          flags=None)
-
+                            outfile=None,
+                            reference=None,
+                            outmatrix=None,
+                            inmatrix=None,
+                            datatype=None,
+                            cost=None,
+                            searchcost=None,
+                            usesqform=None,
+                            displayinit=None,
+                            anglerep=None,
+                            interp=None,
+                            sincwidth=None,
+                            sincwindow=None,
+                            bins=None,
+                            dof=None,
+                            noresample=None,
+                            forcescaling=None,
+                            minsampling=None,
+                            applyisoxfm=None,
+                            paddingsize=None,
+                            searchrx=None,
+                            searchry=None,
+                            searchrz=None,
+                            nosearch=None,
+                            coarsesearch=None,
+                            finesearch=None,
+                            refweight=None,
+                            inweight=None,
+                            noclamp=None,
+                            noresampblur=None,
+                            rigid2D=None,
+                            verbose=None,
+                            flags=None)
     def _parse_inputs(self):
-        """validate fsl bet options
-        if set to None ignore
-        """
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
-        for opt in inputs:
-            if opt in ['infile', 'outfile', 'reference', 'outmatrix','inmatrix']:
-                continue
-            if opt is 'datatype':
-                val = inputs['datatype']
-                out_inputs.extend(['-datatype %s'%(val)])
-                continue
-            if opt is 'cost':
-                val = inputs['cost']
-                out_inputs.extend(['-cost %s'%(val)])
-                continue
-            if opt is 'searchcost':
-                val = inputs['searchcost']
-                out_inputs.extend(['-searchcost %s'%(val)])
-                continue
-            if opt is 'usesqform':
-                if inputs[opt]:
-                    out_inputs.extend(['-usesqform'])
-                continue
-            if opt is 'displayinit':
-                if inputs[opt]:
-                    out_inputs.extend(['-displayinit'])
-                continue
-            if opt is 'anglerep':
-                val = inputs[opt]
-                out_inputs.extend(['-anglerep %s'%(val)])
-                continue
-            if opt is 'interp':
-                val = inputs[opt]
-                out_inputs.extend(['-interp'])
-                continue
-            if opt is 'sincwidth':
-                val = int(inputs[opt])
-                out_inputs.extend(['-sincwidth %d'%(val)])
-                continue                    
-            if opt is 'sincwindow':
-                val = inputs[opt]
-                out_inputs.extend(['-sincwindow %s'%(val)])
-                continue
-            if opt is 'bins':
-                val = int(inputs[opt])
-                out_inputs.extend(['-bins %d'%(val)])
-                continue
-            if opt is 'dof':
-                val = int(inputs[opt])
-                out_inputs.extend(['-dof %d'%(val)])
-                continue
-            if opt is 'noresample':
-                if inputs[opt]:
-                    out_inputs.extend(['-noresample'])
-                continue
-            if opt is 'forcescaling':
-                if inputs[opt]:
-                    out_inputs.extend(['-forcescaling'])
-                continue
-            if opt is 'minsampling':
-                val = float(inputs[opt])
-                out_inputs.extend(['-minsampling %f'%(val)])
-                continue
-            if opt is 'paddingsize':
-                val = int(inputs[opt])
-                out_inputs.extend(['-padingsize %d'%(val)])
-                continue
-            if opt is 'searchrx':
-                val = inputs[opt]
-                out_inputs.extend(['-searchrx %d %d'%(val[0], val[1])])
-                continue
-            if opt is 'searchry':
-                val = inputs[opt]
-                out_inputs.extend(['-searchry %d %d'%(val[0], val[1])])
-                continue                    
-            if opt is 'searchrz':
-                val = inputs[opt]
-                out_inputs.extend(['-searchrz %d %d'%(val[0], val[1])])
-                continue
-            if opt is 'nosearch':
-                if inputs[opt]:
-                    out_inputs.extend(['-nosearch'])
-                continue
-            if opt is 'coarsesearch':
-                val = int(inputs[opt])
-                out_inputs.extend(['-coarsesearch %d'%(val)])
-                continue                   
-            if opt is 'finesearch':
-                val = int(inputs[opt])
-                out_inputs.extend(['-finesearch %d'%(val)])
-                continue   
-            if opt is 'refweight':
-                val = inputs[opt]
-                out_inputs.extend(['-refweight %s'%(val)])
-                continue                     
-            if opt is 'inweight':
-                val = inputs[opt]
-                out_inputs.extend(['-refweight %s'%(val)])
-                continue     
-            if opt is 'noclamp':
-                if inputs[opt]:
-                    out_inputs.extend(['-noclamp'])
-                continue     
-            if opt is 'noresampblur':
-                if inputs[opt]:
-                    out_inputs.extend(['-noresampblur'])
-                continue     
-            if opt is 'rigid2D':
-                if inputs[opt]:
-                    out_inputs.extend(['-2D'])
-                continue
-            if opt is 'verbose':
-                val = int(inputs[opt])
-                out_inputs.extend(['-v %d'%(val)])
-                continue
-            if opt is 'flags':
-                out_inputs.extend(inputs[opt])
-                continue 
-            print 'option %s not supported'%(opt)
-        return out_inputs
+        '''Call our super-method, then add our input files'''
+        # Could do other checking above and beyond regular _parse_inputs here
+        allargs = super(Flirt, self)._parse_inputs(skip=('infile','outfile',
+                                                         'reference', 'outmatrix',
+                                                         'inmatrix'))
+        possibleinputs = [(self.inputs.outfile,'-out'),
+                          (self.inputs.inmatrix, '-init'),
+                          (self.inputs.outmatrix, '-omat'),
+                          (self.inputs.reference, '-ref'),
+                          (self.inputs.infile, '-in')]
+        
+        for val, flag in possibleinputs:
+            if val:
+                allargs.insert(0,'%s %s'%(flag, val))
+        
+        return allargs
+
+    
 
     def run(self, infile=None, reference=None, outfile=None, outmatrix=None):
         """ runs flirt command
@@ -908,11 +821,11 @@ class Flirt(CommandLine):
             outfile = self.inputs.outfile
         if outmatrix is None:
             outmatrix = self.inputs.outmatrix
-        newflirt = self.update(infile=infile, 
-                               reference=reference,
-                               outfile=outfile,
-                               outmatrix = outmatrix)
-        #newflirt.args =  [newflirt.cmd]
+        self.inputs.update(infile=infile, 
+                           reference=reference,
+                           outfile=outfile,
+                           outmatrix = outmatrix)
+        """
         newflirt.args.extend(['-in %s'%(newflirt.inputs.infile)])
         newflirt.infile = infile
         newflirt.args.extend(['-ref %s'%(newflirt.inputs.reference)])
@@ -923,14 +836,14 @@ class Flirt(CommandLine):
         if newflirt.inputs.outmatrix:
             newflirt.args.extend(['-omat %s'%(newflirt.inputs.outmatrix)])
             newflirt.outmatrix = outmatrix
+        """
+
+        results = self._runner()
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs()
+
+        return results 
         
-            
-        (retcode, out, err) = newflirt._runner(newflirt.cmdline)
-        newflirt.retcode = retcode
-        newflirt.out = out
-        newflirt.err = err
-        
-        return newflirt
 
     def applyxfm(self, infile=None, reference=None, inmatrix=None, outfile=None):
         """ runs flirt command 
@@ -976,12 +889,20 @@ class Flirt(CommandLine):
                 raise ValueError('inmatrix is not specified')
             else:
                 inmatrix = self.inputs.inmatrix
-        newflirt = self.update(infile=infile, 
-                               reference=reference,
-                               outfile=outfile,
-                               inmatrix = inmatrix)        
+        self.inputs.update(infile=infile, 
+                           reference=reference,
+                           outfile=outfile,
+                           inmatrix = inmatrix,
+                           flags='-applyxfm')        
             
-        newflirt.args.extend(['-in %s'%(infile)])
+        results = self._runner()
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs()
+            
+        return results 
+        
+
+        """newflirt.args.extend(['-in %s'%(infile)])
         newflirt.infile = infile
         
         newflirt.args.extend(['-ref %s'%(reference)])
@@ -1005,22 +926,8 @@ class Flirt(CommandLine):
         newflirt.err = err
         
         return newflirt
+        """
 
-    @property
-    def cmdline(self):
-        """validates fsl options and generates command line argument"""
-        valid_inputs = self._parse_inputs()
-        if valid_inputs is None:
-            allargs = [self.cmd] + self.args
-        else:
-            allargs = [self.cmd] + valid_inputs + self.args
-        return ' '.join(allargs)
-
-    def update(self, **inputs):
-        newflirt = Flirt()
-        [newflirt.inputs.__setattr__(k,v) for k, v in self.inputs.iteritems() if v is not None ]
-        newflirt.inputs.update(**inputs)
-        return newflirt
         
 
 
