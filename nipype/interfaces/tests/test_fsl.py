@@ -6,22 +6,15 @@ from nose.tools import assert_true, assert_false, assert_raises, assert_equal, a
 def test_bet():
     better = fsl.Bet()
     better.inputs.frac = 0.5
-    # better2 = better.update()
-    # better3 = better.update(frac=0.1)
-    # 
-    # yield assert_not_equal, better, better2
-    # yield assert_not_equal, better, better3
-    # yield assert_equal, better.inputs.frac, 0.5
-    # yield assert_equal, better3.inputs.frac, 0.1
-    
+    better.inputs.infile = 'infile'
     yield assert_equal, better.cmd, 'bet'
 
-    yield assert_equal, better.cmdline, 'bet -f 0.50'
-    betted = better.run(infile='infile', outfile='outfile')
-    yield assert_not_equal, betted.retcode, 0
-    yield assert_equal, betted.inputs.infile, 'infile'
-    yield assert_equal, betted.inputs.outfile, 'outfile'
-    yield assert_equal, betted.runtime.cmdline, 'bet infile outfile -f 0.50'
+    yield assert_equal, better.cmdline, 'bet infile infile_bet -f 0.50'
+    betted = better.run(infile='infile2', outfile='outfile')
+    yield assert_not_equal, betted.runtime.returncode, 0
+    yield assert_equal, betted.interface.inputs.infile, 'infile2'
+    yield assert_equal, betted.interface.inputs.outfile, 'outfile'
+    yield assert_equal, betted.runtime.cmdline, 'bet infile2 outfile -f 0.50'
     
         
 # test fast

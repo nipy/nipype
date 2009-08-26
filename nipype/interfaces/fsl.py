@@ -316,6 +316,41 @@ class Bet(FSLCommand):
                               
         return out_inputs
 
+
+    def run(self, infile=None, outfile=None, **inputs):
+        """Execute the command.
+
+        Parameters
+        ----------
+        infile : filename
+            file to be skull stripped, can be passed as input
+        outfile : filename
+            file handle to save output, if None, <filename_bet> 
+            will be used
+
+        Returns
+        -------
+        results : Bunch
+            A `Bunch` object with a copy of self in `interface`
+            runtime : Bunch containing stdout, stderr, returncode, commandline
+            
+        """
+        self.inputs.update(**inputs)
+
+        if not infile and not self.inputs.infile:
+                raise AttributeError('bet requires an input file')
+        if infile:
+            self.inputs.infile = infile
+        if outfile:
+            self.inputs.outfile = outfile
+        
+        results = self._runner()
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs()
+
+        return results        
+
+
     def outputs_help(self):
         """
         Optional Parameters
@@ -1461,16 +1496,16 @@ class FSFmaker:
 
     
     
-def bet(*args, **kwargs):
-    bet_element = BetElement(*args, **kwargs)
+#def bet(*args, **kwargs):
+#   bet_element = BetElement(*args, **kwargs)
     
     # We should check the return value
-    bet_element.execute()
+#    bet_element.execute()
 
-    return load_image(bet_element.state['output'])
+#    return load_image(bet_element.state['output'])
 
-def flirt(target, moving, space=None, output_filename=None, **kwargs):
-    """Call flirt to register moving to target with optional space to define 
+#def flirt(target, moving, space=None, output_filename=None, **kwargs):
+"""Call flirt to register moving to target with optional space to define 
     space new image is resliced into
 
     Parameters
@@ -1498,8 +1533,8 @@ def flirt(target, moving, space=None, output_filename=None, **kwargs):
     ----------------
     xform_only : True
         Only computes the transform and only returns transform
-    """
-    target_filename = target.filename
+"""
+#    target_filename = target.filename
 
     
 def apply_transform(target, moving, transform, space=None, output_filename=None):
