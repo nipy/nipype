@@ -63,7 +63,7 @@ class MatlabCommandLine(CommandLine):
 
     def run(self):
         results = self._runner()
-        if  'MatlabScriptException' in err:
+        if  'MatlabScriptException' in results.runtime.stderr:
             results.runtime.returncode = 1
         return results
 
