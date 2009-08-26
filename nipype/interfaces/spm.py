@@ -21,7 +21,8 @@ from nipype.interfaces.base import Bunch, InterfaceResult, Interface
 from nipype.utils import setattr_on_read
 from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import fltcols, MatlabCommandLine
-from nipype.utils.filemanip import fname_presuffix, fnames_presuffix, filename_to_list, list_to_filename
+from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix, 
+                                    filename_to_list, list_to_filename)
 from scipy.io import savemat
 from scipy.signal import convolve
 from scipy.special import gammaln
@@ -156,7 +157,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
 
             return [newdict]
 
-    def generate_job(self,prefix='',contents=None):
+    def generate_job(self, prefix='', contents=None):
         """ Recursive function to generate spm job specification as a string
 
         Parameters
@@ -173,13 +174,13 @@ class SpmMatlabCommandLine(MatlabCommandLine):
             return jobstring
         if type(contents) == type([]):
             for i,value in enumerate(contents):
-                newprefix = "%s(%d)" % (prefix,i+1)
-                jobstring += self.generate_job(newprefix,value)
+                newprefix = "%s(%d)" % (prefix, i+1)
+                jobstring += self.generate_job(newprefix, value)
             return jobstring
         if type(contents) == type({}):
             for key,value in contents.items():
-                newprefix = "%s.%s" % (prefix,key)
-                jobstring += self.generate_job(newprefix,value)
+                newprefix = "%s.%s" % (prefix, key)
+                jobstring += self.generate_job(newprefix, value)
             return jobstring
         if type(contents) == type(np.empty(1)):
             #Assumes list of filenames embedded in a numpy array
@@ -221,15 +222,19 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         mscript += "spm_defaults;\n\n"
         if self.mfile:
             if jobname in ['smooth','preproc','fmri_spec','fmri_est'] :
-                mscript += self.generate_job('jobs{1}.%s{1}.%s(1)' % (jobtype,jobname) ,contents[0])
+                mscript += self.generate_job('jobs{1}.%s{1}.%s(1)' % 
+                                             (jobtype,jobname), contents[0])
             else:
-                mscript += self.generate_job('jobs{1}.%s{1}.%s{1}' % (jobtype,jobname) ,contents[0])
+                mscript += self.generate_job('jobs{1}.%s{1}.%s{1}' % 
+                                             (jobtype,jobname), contents[0])
         else:
-            jobdef = {'jobs':[{jobtype:[{jobname:self.reformat_dict_for_savemat(contents[0])}]}]}
+            jobdef = {'jobs':[{jobtype:[{jobname:self.reformat_dict_for_savemat
+                                         (contents[0])}]}]}
             savemat(os.path.join(cwd,'pyjobs_%s.mat'%jobname), jobdef)
             mscript = "load pyjobs_%s;\n spm_jobman('run', jobs);\n" % jobname
         mscript += 'spm_jobman(\'run\',jobs);'
-        cmdline = self.gen_matlab_command(mscript,cwd=cwd,script_name='pyscript_%s'%jobname) 
+        cmdline = self.gen_matlab_command(mscript, cwd=cwd, 
+                                          script_name='pyscript_%s' % jobname) 
         return cmdline, mscript
 
 
