@@ -15,22 +15,29 @@ these functions include
     Smooth: smooth with Gaussian kernel
 
 """
+from __future__ import with_statement
+
 __docformat__ = 'restructuredtext'
 
+# Standard library imports
+import os
+from glob import glob
+from copy import deepcopy
+
+# Third-party imports
+import numpy as np
+from scipy.io import savemat
+from scipy.signal import convolve
+from scipy.special import gammaln
+#from scipy.stats.distributions import gamma
+
+# Local imports
 from nipype.interfaces.base import Bunch, InterfaceResult, Interface
 from nipype.utils import setattr_on_read
 from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import fltcols, MatlabCommandLine
 from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix, 
                                     filename_to_list, list_to_filename)
-from scipy.io import savemat
-from scipy.signal import convolve
-from scipy.special import gammaln
-#from scipy.stats.distributions import gamma
-from glob import glob
-from copy import deepcopy
-import numpy as np
-import os
 from nipype.utils import InTemporaryDirectory
 
 def scans_for_fname(fname):
@@ -65,21 +72,20 @@ class SpmInfo(object):
     """
     @setattr_on_read
     def spm_path(self):
-        InTemporaryDirectory()
-        mlab = MatlabCommandLine()
-        mlab.inputs.script_name = 'spminfo'
-        mlab.inputs.script_lines = """
+        with InTemporaryDirectory() as tmpdir:
+            mlab = MatlabCommandLine()
+            mlab.inputs.script_name = 'spminfo'
+            mlab.inputs.script_lines = """
 spm_path = spm('dir');
 fid = fopen('spm_path.txt', 'wt');
 fprintf(fid, '%s', spm_path);
 fclose(fid);
 """
-        out = mlab.run()
-        if out.runtime.returncode == 0:
-            spm_path = file('spm_path.txt', 'rt').read()
-            return spm_path
-        else:
-            return None
+            out = mlab.run()
+            if out.runtime.returncode == 0:
+                spm_path = file('spm_path.txt', 'rt').read()
+                return spm_path
+        return None
 
 spm_info = SpmInfo()
 
