@@ -519,6 +519,40 @@ class Fast(FSLCommand):
                           probability_maps=None,
                           flags=None)
 
+
+    def run(self, infiles=None, **inputs):
+        """Execute the FSL fast command.
+
+        Parameters
+        ----------
+        infiles : filename(s)
+            file(s) to be segmented or bias corrected
+        
+        Returns
+        -------
+        results : Bunch
+            A `Bunch` object with a copy of self in `interface`
+            runtime : Bunch containing stdout, stderr, returncode, commandline
+            
+        """
+        self.inputs.update(**inputs)
+
+        if not infiles and not self.inputs.infiles:
+                raise AttributeError('fast requires input file(s)')
+        if infiles:
+            self.inputs.infiles = infiles
+        
+        if type(self.inputs.infiles) is not list:
+            self.inputs.infiles = [infiles]
+        
+        results = self._runner()
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs()
+
+        return results        
+
+
+
     def _parse_inputs(self):
         '''Call our super-method, then add our input files'''
         # Could do other checking above and beyond regular _parse_inputs here

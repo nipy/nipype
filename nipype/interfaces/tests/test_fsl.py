@@ -21,20 +21,15 @@ def test_bet():
 def test_fast():
     faster = fsl.Fast()
     faster.inputs.verbose = True
-    faster2 = faster.update(iters_afterbias=6)
-    fasted = faster.run('infile')
-    fasted2 = faster.run(['infile', 'otherfile'])
+    fasted = faster.run(infiles='infile')
+    fasted2 = faster.run(infiles=['infile', 'otherfile'])
     
     yield assert_equal, faster.cmd, 'fast'
     yield assert_equal, faster.inputs.verbose, True
     yield assert_equal, faster.inputs.manualseg , None
-    yield assert_equal, faster2.inputs.verbose, True
-    yield assert_equal, faster2.inputs.iters_afterbias, 6
-    yield assert_not_equal, faster, faster2
     yield assert_not_equal, faster, fasted
-    yield assert_equal, fasted.cmdline, 'fast infile --verbose'
-    yield assert_equal, faster.cmdline, ''
-    yield assert_not_equal, fasted.err, ''
+    yield assert_equal, fasted.runtime.cmdline, 'fast --verbose infile'
+    yield assert_equal, fasted2.runtime.cmdline, 'fast --verbose infile otherfile'
     
 
 #test flirt
