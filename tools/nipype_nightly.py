@@ -35,22 +35,6 @@ def build_docs():
     cmd = 'make html'
     run_cmd(cmd)
 
-    # DEBUGGING
-    """
-    print "Building API docs..."
-    execfile('../tools/build_modref_templates.py')
-    print "... API docs finished."
-    #cmd = 'sphinx-build -b html -d _build/doctrees . _build/html'
-    print '*'*50
-    print 'os.environ:'
-    print os.environ
-    print '*'*50
-
-    cmd = 'make htmlonly'
-    run_cmd(cmd)
-    print 'sphinx-build done!'
-    """
-
 def push_to_sf():
     """Push documentation to sourceforge."""
     os.chdir(dirname + 'doc')
@@ -67,6 +51,8 @@ def setup_paths():
     sys.path.insert(0, os.curdir)
     # Add our local path, where we install nipype, to sys.path
     sys.path.insert(0, pkg_path)
+    # Needed to add this to my path at one point otherwise import of
+    # apigen failed.
     #sys.path.insert(2, '/home/cburns/src/nipy-sf/nipype/trunk/tools')
 
     # Add networkx, twisted, zope.interface and foolscap.
@@ -89,37 +75,7 @@ def setup_paths():
     os.environ['PYTHONPATH'] = ':'.join(sys.path)
     
 if __name__ == '__main__':
-
     setup_paths()
-
-    # DEBUGGING
-    """
-    print 'sys.path:', sys.path
-
-    import nipype
-    print 'nipype.__path__:', nipype.__path__
-    import nipype.pipeline as nipe
-    print 'nipype.pipeline:', nipe.__file__
-    import networkx as nx
-    print 'networkx:', nx.__path__
-    import nipype.pipeline.engine as nieng
-    print 'nipype.pipeline.engine:', nieng.__file__
-
-    import twisted
-    print 'twisted:', twisted.__file__
-    import zope.interface as zint
-    print 'zope.interface:', zint.__file__
-
-    from IPython.kernel import client
-    print 'IPython.kernel.client:', client.__file__
-
-    print '*'*100
-
-    print "can't improt rapidart:"
-    import nipype.algorithms.rapidart as rpd
-    print 'rpd.__file__:', rpd.__file__
-    """
-
     prev_dir = os.path.abspath(os.curdir)
     update_repos()
     build_docs()
