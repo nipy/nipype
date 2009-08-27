@@ -1,9 +1,8 @@
-"""Provide interface classed to AFNI commands."""
+"""Provide interface to AFNI commands."""
+
 __docformat__ = 'restructuredtext'
 
-
 from nipype.interfaces.base import Bunch, CommandLine
-
 
 class To3d(CommandLine):
     """Create 3D dataset from 2D image files.
@@ -47,7 +46,6 @@ class To3d(CommandLine):
         Ignore options set to None.
 
         """
-
         out_inputs = []
         inputs = {}
         [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
@@ -75,49 +73,67 @@ class To3d(CommandLine):
             # time : list
             #    zt nz nt TR tpattern
             #    tz nt nz TR tpattern
+            # TODO: ABOVE DOC IS OLD
+
+            # dict(slice_order='zt', nz=12, nt=150, TR=2000, tpattern='alt+z')
+            _time_dep_doc = \
+            """
+            time_dependencies should be a dictionary with the follow keys 
+            assigned:
+            slice_order, nz, nt, TR, tpattern
+
+            """
+
+            """
             if inputssub.has_key('slice_order'):
                 valsub = inputssub.pop('slice_order')
                 out_inputs.append('-time:%s' % valsub)
             else:
                 valsub=None
                 print('Warning: slice_order required for time_dependencies')
+            """
+            try:
+                slice_order = inputssub.pop('slice_order')
+                out_inputs.append('-time:%s' % slice_order)
+            except KeyError:
+                raise KeyError('slice_order is required for time_dependencies')
 
-            if valsub is 'zt':
-
-                if inputssub.has_key('nz'):
+            if slice_order is 'zt':
+                try:
                     valsub = inputssub.pop('nz')
                     out_inputs.append('%s' % str(valsub))
-                else:
-                    print('Warning: nz required for time_dependencies')
-                if inputssub.has_key('nt'):
+                except KeyError:
+                    raise KeyError('nz required for time_dependencies')
+                try:
                     valsub = inputssub.pop('nt')
                     out_inputs.append('%s' % str(valsub))
-                else:
-                    print('Warning: nt required for time_dependencies')
+                except KeyError:
+                    raise KeyError('nt required for time_dependencies')
 
-            if valsub is 'tz':
-
-                if inputssub.has_key('nt'):
+            if slice_order is 'tz':
+                try:
                     valsub = inputssub.pop('nt')
                     out_inputs.append('%s' % str(valsub))
-                else:
-                    print('Warning: nz required for time_dependencies')
-                if inputssub.has_key('nz'):
+                except KeyError:
+                    raise KeyError('nz required for time_dependencies')
+
+                try:
                     valsub = inputssub.pop('nz')
                     out_inputs.append('%s' % str(valsub))
-                else:
-                    print('Warning: nt required for time_dependencies')
+                except KeyError:
+                    raise KeyError('nt required for time_dependencies')
 
-            if inputssub.has_key('TR'):
+            try:
                 valsub = inputssub.pop('TR')
                 out_inputs.append('%s' % str(valsub))
-            else:
-                print('Warning: TR required for time_dependencies')
-            if inputssub.has_key('tpattern'):
+            except KeyError:
+                raise KeyError('TR required for time_dependencies')
+
+            try:
                 valsub = inputssub.pop('tpattern')
                 out_inputs.append('%s' % valsub)
-            else:
-                print('Warning: tpattern required for time_dependencies')
+            except KeyError:
+                raise KeyError('tpattern required for time_dependencies')
 
             if len(inputssub) > 0:
                 print '%s: unsupported time_dependencies options: %s' % (
