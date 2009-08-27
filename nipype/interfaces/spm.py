@@ -15,14 +15,13 @@ these functions include
     Smooth: smooth with Gaussian kernel
 
 """
-from __future__ import with_statement
-
 __docformat__ = 'restructuredtext'
 
 # Standard library imports
 import os
 from glob import glob
 from copy import deepcopy
+import re
 
 # Third-party imports
 import numpy as np
@@ -38,9 +37,13 @@ from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import fltcols, MatlabCommandLine
 from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix, 
                                     filename_to_list, list_to_filename)
-from nipype.utils import InTemporaryDirectory
 
 def scans_for_fname(fname):
+    """Reads a nifti file and converts it to a numpy array storing
+    individual nifti volumes
+
+    >>> scans_for_fname('mynifti.nii')
+    """
     img = load(fname)
     if len(img.get_shape()) == 3:
         flist = [['%s,1'%fname]]
@@ -53,6 +56,13 @@ def scans_for_fname(fname):
         return np.array([scans],dtype=object)
 
 def scans_for_fnames(fnames,keep4d=False):
+    """Converts a list of files to a concatenated numpy array for each
+    volume.
+
+    keep4d : boolean
+        keeps the entries of the numpy array as 4d files instead of
+        extracting the individual volumes.
+    """
     if keep4d:
         flist = [[f] for f in fnames]
         return np.array([flist],dtype=object)
@@ -68,23 +78,23 @@ def scans_for_fnames(fnames,keep4d=False):
 
 class SpmInfo(object):
     """ Return the path to the spm directory in the matlab path
-    >>> print spm.spmInfo()
+    >>> print spm.spmInfo().spm_path
     """
     @setattr_on_read
     def spm_path(self):
-        with InTemporaryDirectory() as tmpdir:
-            mlab = MatlabCommandLine()
-            mlab.inputs.script_name = 'spminfo'
-            mlab.inputs.script_lines = """
+        mlab = MatlabCommandLine()
+        mlab.inputs.script_name = 'spminfo'
+        mlab.inputs.script_lines = """
 spm_path = spm('dir');
-fid = fopen('spm_path.txt', 'wt');
-fprintf(fid, '%s', spm_path);
-fclose(fid);
+fprintf(1, '<PATH>%s</PATH>', spm_path);
 """
-            out = mlab.run()
-            if out.runtime.returncode == 0:
-                spm_path = file('spm_path.txt', 'rt').read()
-                return spm_path
+        mlab._compile_command(mfile=False)
+        out = mlab.run()
+        if out.runtime.returncode == 0:
+            path = re.match('<PATH>(.*)</PATH>',out.runtime.stdout[out.runtime.stdout.find('<PATH>'):])
+            if path is not None:
+                path = path.groups()[0]
+            return path
         return None
 
 spm_info = SpmInfo()
