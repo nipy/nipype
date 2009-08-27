@@ -2355,6 +2355,7 @@ class SpecifyModel(Interface):
 
     def _cond_to_regress(self,info,nscans):
         reg = []
+        regnames = info.conditions
         for i,c in enumerate(info.conditions):
             reg.insert(i,self._gen_regress(self._scaletimings(info.onsets[i],output_units='secs'),
                                            self._scaletimings(info.durations[i],output_units='secs'),
@@ -2367,7 +2368,7 @@ class SpecifyModel(Interface):
                 treg = np.zeros((nscans/nvol,nvol))
                 treg[:,i] = 1
                 reg.insert(len(reg),treg.ravel().tolist())
-        return reg
+        return reg,regnames
     
     def _generate_clustered_design(self,infolist):
         """
@@ -2380,11 +2381,17 @@ class SpecifyModel(Interface):
             if info.conditions is not None:
                 img = load(self.inputs.functional_runs[i])
                 nscans = img.get_shape()[3]
-                reg = self._cond_to_regress(info,nscans)
+                reg,regnames = self._cond_to_regress(info,nscans)
                 if infoout[i].regressors is None:
                     infoout[i].regressors = []
-                for i,r in enumerate(reg):
-                    infoout[i].regressors.insert(len(infoout[i].regressors),r)
+                    infoout[i].regressor_names = []
+                else:
+                    if infoout[i].regressor_names is None:
+                        infoout[i].regressor_names = ['R%d'%j for j in range(len(infoout[i].regressors))] 
+                for j,r in enumerate(reg):
+                    regidx = len(infoout[i].regressors)
+                    infoout[i].regressor_names.insert(regidx,regnames[j])
+                    infoout[i].regressors.insert(regidx,r)
         return infoout
     
     def _generate_standard_design(self,infolist,
