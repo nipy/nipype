@@ -43,32 +43,29 @@ def test_To3d():
     cmd.inputs.time_dependencies = td
     yield assert_equal, cmd.cmdline, 'to3d -time:tz 150 12 2000 alt+z'
 
-    cmd = afni.To3d()
-    cmd.inputs.time_dependencies = dict()
-    #yield assert_equal, cmd.cmdline, 'to3d -time:tz 150 12 2000 alt+z'
-    #yield assert_raises, KeyError, cmd.cmdline
-    yield assert_raises, KeyError, getattr, cmd, 'cmdline'
-
     # These tests fill fail because they do not specify all required
     # args for the time_dependencies
     # dict(slice_order='zt', nz=12, nt=150, TR=2000, tpattern='alt+z')
-    # zt
+    cmd = afni.To3d()
+    cmd.inputs.time_dependencies = dict()
+    yield assert_raises, KeyError, getattr, cmd, 'cmdline'
+    # only slice_order
     cmd.inputs.time_dependencies = dict(slice_order='zt')
     yield assert_raises, KeyError, getattr, cmd, 'cmdline'
-    # tz
+    # only slice_order
     cmd.inputs.time_dependencies = dict(slice_order='tz')
     yield assert_raises, KeyError, getattr, cmd, 'cmdline'
-
+    # slice_order and nz
     cmd.inputs.time_dependencies = dict(slice_order='zt', nz=12)
     yield assert_raises, KeyError, getattr, cmd, 'cmdline'
-
+    # slice_order, nz, nt
     cmd.inputs.time_dependencies = dict(slice_order='zt', nz=12, nt=150)
     yield assert_raises, KeyError, getattr, cmd, 'cmdline'
-    
+    # slice_order, nz, nt, TR
     cmd.inputs.time_dependencies = dict(slice_order='zt', nz=12, nt=150,
                                         TR=2000)
     yield assert_raises, KeyError, getattr, cmd, 'cmdline'
-
+    # slice_order, nz, nt, tpattern
     cmd.inputs.time_dependencies = dict(slice_order='zt', nz=12, nt=150,
                                         tpattern='alt+z')
     yield assert_raises, KeyError, getattr, cmd, 'cmdline'

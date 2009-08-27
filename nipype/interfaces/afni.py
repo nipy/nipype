@@ -98,30 +98,20 @@ class To3d(CommandLine):
             except KeyError:
                 raise KeyError('slice_order is required for time_dependencies')
 
-            if slice_order is 'zt':
-                try:
-                    valsub = inputssub.pop('nz')
-                    out_inputs.append('%s' % str(valsub))
-                except KeyError:
-                    raise KeyError('nz required for time_dependencies')
-                try:
-                    valsub = inputssub.pop('nt')
-                    out_inputs.append('%s' % str(valsub))
-                except KeyError:
-                    raise KeyError('nt required for time_dependencies')
-
-            if slice_order is 'tz':
-                try:
-                    valsub = inputssub.pop('nt')
-                    out_inputs.append('%s' % str(valsub))
-                except KeyError:
-                    raise KeyError('nz required for time_dependencies')
-
-                try:
-                    valsub = inputssub.pop('nz')
-                    out_inputs.append('%s' % str(valsub))
-                except KeyError:
-                    raise KeyError('nt required for time_dependencies')
+            try:
+                nz = inputssub.pop('nz')
+            except KeyError:
+                raise KeyError('nz required for time_dependencies')
+            try:
+                nt = inputssub.pop('nt')
+            except KeyError:
+                raise KeyError('nt required for time_dependencies')
+            if slice_order == 'tz':
+                out_inputs.append('%s' % str(nt))
+                out_inputs.append('%s' % str(nz))
+            else:
+                out_inputs.append('%s' % str(nz))
+                out_inputs.append('%s' % str(nt))
 
             try:
                 valsub = inputssub.pop('TR')
