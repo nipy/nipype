@@ -471,7 +471,7 @@ def afni_t1_align(in_file_info):
         meanrs_file.selectors.append('RS')
 
         cmd3 = [afni.Threedresample(
-                rsmode='Cu'
+                rsmode='Cu',
                 gridfile = brain_file.abspath(),
                 outfile = meanrs_file.abspath(),
                 infile = mean_file.abspath())]
