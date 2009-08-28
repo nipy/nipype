@@ -3,7 +3,7 @@ Wraps interfaces modules to work with pipeline engine
 """
 import os
 import hashlib
-from nipype.utils.filemanip import copyfile, fname_presuffix
+from nipype.utils.filemanip import copyfile, fname_presuffix, cleandir
 from nipype.interfaces.base import Bunch, InterfaceResult
 
 
@@ -100,6 +100,7 @@ class NodeWrapper(object):
             inputstr  = str(self.inputs)
             hashfile = os.path.join(outdir,'_0x%s.txt'%hashvalue)
             if (os.path.exists(hashfile) and self.overwrite) or not os.path.exists(hashfile):
+                cleandir(outdir)
                 # copy files over and change the inputs
                 for info in self.interface.get_input_info():
                     files = self.inputs[info.key]

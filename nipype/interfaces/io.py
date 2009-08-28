@@ -10,7 +10,7 @@
 """
 from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult
 from copy import deepcopy
-from nipype.utils.filemanip import copyfiles
+from nipype.utils.filemanip import copyfiles, list_to_filename
 import glob
 import os
 
@@ -110,8 +110,8 @@ class DataSource(Interface):
         """Execute this module.
         """
         runtime = Bunch(returncode=0,
-                        messages=None,
-                        errmessages=None)
+                        stdout=None,
+                        stderr=None)
         outputs=self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
 
@@ -149,7 +149,9 @@ class DataSink(Interface):
     def _populate_inputs(self):
         self.inputs = Bunch(base_directory=None,
                             subject_directory=None,
+                            subject_template=None,
                             subject_id=None)
+        self.input_keys = self.inputs.__dict__.keys()
         
     def outputs_help(self):
         """
@@ -175,19 +177,95 @@ class DataSink(Interface):
         if subjdir is None:
             raise Exception('Subject directory not provided')
         outdir = subjdir
+        if not os.path.exists(outdir):
+            os.mkdir(outdir)
         for k,v in self.inputs.iteritems():
-            if type(v) is type([]):
-                if len(v) > 0:
-                    dirnames = k.split('.')
+            if k not in self.input_keys:
+                if v is not None:
                     tempoutdir = outdir
                     for d in k.split('.'):
+                        if d[0] == '@':
+                            continue
                         tempoutdir = os.path.join(tempoutdir,d)
                         if not os.path.exists(tempoutdir):
                             os.mkdir(tempoutdir)
-                    copyfiles(self.inputs[k],tempoutdir,symlink=False)
+                    copyfiles(self.inputs[k],tempoutdir,copy=True)
         runtime = Bunch(returncode=0,
-                        messages=None,
-                        errmessages=None)
+                        stdout=None,
+                        stderr=None)
         outputs=self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
 
+
+class DataGrabber(Interface):
+    """ Generic datagrabber module that wraps around glob in an
+        intelligent way for neuroimaging tasks 
+    """
+    
+    def __init__(self, *args, **inputs):
+        self._populate_inputs()
+        self.inputs.update(**inputs)
+
+    def inputs_help(self):
+        """
+            Parameters
+            --------------------
+            (all default to None)
+
+            file_template : string
+                template for filename
+            template_argtuple: tuple of arguments
+                arguments that fit into file_template
+
+            Alternatively can provide upto 3 additional arguments
+            to use as iterables
+            template_arg1: argument 1
+            template_arg2: argument 2
+            template_arg3: argument 3
+            """
+        print self.inputs_help.__doc__
+        
+    def _populate_inputs(self):
+        self.inputs = Bunch(file_template=None,
+                            template_argtuple=None,
+                            template_arg1=None,
+                            template_arg2=None,
+                            template_arg3=None
+                            )
+
+    def outputs_help(self):
+        """
+            Parameters
+            ----------
+
+            (all default to None)
+
+            file_list : list
+                list of files picked up by the grabber
+            """
+        print self.outputs_help.__doc__
+        
+    def aggregate_outputs(self):
+        outputs = Bunch(file_list=None)
+        args = []
+        if self.inputs.template_argtuple is not None:
+            args.extend(list(self.inputs.template_argtuple))
+
+        for i in range(3):
+            arg = self.inputs['template_arg%d'%(i+1)]
+            if arg is not None:
+                args.append(arg)
+        template = self.inputs.file_template
+        if len(args)>0:
+            template = template%tuple(args)
+        outputs.file_list = list_to_filename(glob.glob(template))
+        return outputs
+
+    def run(self):
+        """Execute this module.
+        """
+        runtime = Bunch(returncode=0,
+                        stdout=None,
+                        stderr=None)
+        outputs=self.aggregate_outputs()
+        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)

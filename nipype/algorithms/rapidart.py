@@ -111,7 +111,7 @@ class ArtifactDetect(Interface):
             intensity_files : filename(s)
                 One file for each functional run containing the global
                 intensity values determined from the brainmask
-            statistics_files : filename(s)
+            statistic_files : filename(s)
                 One file for each functional run containing
                 information about the different types of artifacts and
                 if design info is provided then details of stimulus

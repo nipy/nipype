@@ -4,6 +4,7 @@
 import os, re
 import hashlib
 import shutil
+from glob import glob
 
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     pth, fname = os.path.split(fname)
@@ -121,3 +122,11 @@ def list_to_filename(filelist):
         return filelist[0]
     else:
         return filelist
+
+def cleandir(dir):
+    """Cleans all nifti, img/hdr, txt and matfiles from dir"""
+    filetypes = ['*.nii','*.nii.gz','*.txt','*.img','*.hdr','*.mat']
+    for ftype in filetypes:
+        for f in glob(os.path.join(dir,ftype)):
+            os.remove(f)
+        
