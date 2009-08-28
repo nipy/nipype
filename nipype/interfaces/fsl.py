@@ -727,7 +727,6 @@ class Flirt(FSLCommand):
 
     def run(self, infile=None, reference=None, outfile=None, outmatrix=None,**inputs):
         """ runs flirt command
-         
 
         Parameters
         ----------
@@ -743,10 +742,11 @@ class Flirt(FSLCommand):
             if None, the output matrix will not be saved to a file
 
         Returns
-        --------
-        flirt : object
-            return new flirt object with updated fields
-
+        -------
+        results : Bunch
+            A `Bunch` object with a copy of self in `interface`
+            runtime : Bunch containing stdout, stderr, returncode, commandline
+        
         Examples
         --------
         flirted = Flirt().run(infile, reference, outfile)
@@ -786,8 +786,7 @@ class Flirt(FSLCommand):
     def applyxfm(self, infile=None, reference=None, inmatrix=None, outfile=None,**inputs):
         """ runs flirt command 
           eg.
-          flirted = flirtter.applyxfm(self, infile=None, reference=None, inmatrix=None, outfile=None)
-          flirt [options] -in <inputvol> -ref <refvol> -applyxfm -init <matrix> -out <outputvol>
+         flirt [options] -in <inputvol> -ref <refvol> -applyxfm -init <matrix> -out <outputvol>
 
         Parameters
         ----------
@@ -802,9 +801,17 @@ class Flirt(FSLCommand):
             if None,  only the transformation matrix will be calculated
 
         Returns
+        -------
+        results : Bunch
+            A `Bunch` object with a copy of self in `interface`
+            runtime : Bunch containing stdout, stderr, returncode, commandline
+
+        Examples
         --------
-        flirt : object
-            return new flirt object with updated fields
+        flirted = flirtter.applyxfm(infile=None, 
+                                    reference=None, 
+                                    inmatrix=None, 
+                                    outfile=None)
         """
         self.inputs.update(**inputs)
         if infile is None:
@@ -837,6 +844,169 @@ class Flirt(FSLCommand):
         if results.runtime.returncode == 0:
             results.outputs = self.aggregate_outputs()
             
+        return results 
+
+class McFlirt(FSLCommand):
+    """ use fsl mcflirt to do within-modality motion correction
+    
+    Options
+    -------
+    fsl.McFlirt().inputs_help()
+    
+    Example
+    --------
+    
+    >>> mcflirtter = fsl.McFlirt(infile='timeseries.nii',cost='mututalinfo')
+    >>> mcflirtted = mcflirtter.run()
+
+    """
+    @property
+    def cmd(self):
+        """sets base command, not editable"""
+        return 'mcflirt'
+    
+    def inputs_help(self):
+        doc = """
+
+        POSSIBLE OPTIONS    
+        -----------------
+        (all default to None and are unset)
+ 
+        http://www.fmrib.ox.ac.uk/fsl/mcflirt/index.html
+
+        ++++++
+        infile: <filename>
+            4D timseries volume
+        outfile: <filename>
+            file to save aligned images
+            (FSL default is <infile>_mcf)
+        cost: string
+            string representing cost function to use
+            ['mutualinfo','woods','corratio','normcorr',
+            'normmi','leastsquares']
+            (FSL default is normcorr)
+        bins: int
+            number of histogram bins
+            (FSL default is 256)
+        dof: int
+            number of transform dofs	
+            (FSL default is 6)
+        refvol: int
+            volume number of image to use as reference
+            (FSL default is middle volume)
+        scaling: int
+	    (FSL default is 6.0)
+        smooth: float
+            controls smoothing amount of cost function
+            (FSL default is 1.0)
+        rotation: float
+            specify scaling factor for rotation optimization tolerances
+        verbose: int	
+            (FSL default is 0 and least)
+        stages: int
+	    number of search stages	
+            (FSL default is 3) 
+            4 specifies final sinc interpolation
+        init: string <filename>	
+            initial transform matrix to apply to all vols
+        usegradient: Boolean
+	    run search on gradient images
+        usecontour: Boolean
+	    run search on contour images
+        meanvol: Boolean
+	    register timeseries to mean volume (overrides -refvol option)
+        statsimgs: Boolean
+	    produce variance and std. dev. images
+        savemats: Boolean
+	    save transformation matricies in subdirectory outfilename.mat
+        saveplots: Boolean
+	    save transformation parameters in file outputfilename.par
+        report: Boolean
+	    report progress to screen
+       """
+        print doc
+    opt_map = {
+        'outfile':     '-out %s',
+        'cost':        '-cost %s',
+        'bins':        '-bins %d',
+        'dof':         '-dof %d',
+        'refvol':      '-refvol %d',
+        'scaling':     '-scaling %.2f',
+        'smooth':      '-smooth %.2f',
+        'rotation':    '-rotation %d',
+        'verbose':     '-verbose',
+        'stages':      '-stages %d',
+        'init':        '-init %s',
+        'usegradient': '-gdt',
+        'usecontour':  '-edge',
+        'meanvol':     '-meanvol',
+        'statsimgs':   '-stats',
+        'savemats':    '-mats',
+        'saveplots':   '-plots',
+        'report':      '-report'}
+
+    def _populate_inputs(self):
+        self.inputs = Bunch(
+            outfile=     None,
+            cost=        None,
+            bins=        None,
+            dof=         None,
+            refvol=      None,
+            scaling=     None,
+            smooth=      None,
+            rotation=    None,
+            verbose=     None,
+            stages=      None,
+            init=        None,
+            usegradient= None,
+            usecontour=  None,
+            meanvol=     None,
+            statsimgs=   None,
+            savemats=    None,
+            saveplots=   None,
+            report=      None)
+        
+    @property
+    def cmdline(self):
+        """validates fsl options and generates command line argument"""
+        allargs = self._parse_inputs()
+        allargs.insert(0, self.cmd)
+        return ' '.join(allargs)
+    
+    def _parse_inputs(self):
+        """Call our super-method, then add our input files"""
+        allargs = super(McFlirt, self)._parse_inputs(skip=('infile'))
+        allargs.insert(0,'-in %s'%(self.inputs.infile))
+        return allargs
+
+    def run(self,infile=None, **inputs):
+        """ Runs mcflirt
+        
+        Parameters
+        ----------
+        infile : filename
+            filename of volume to be aligned
+
+        Returns
+        -------
+        results : Bunch
+            A `Bunch` object with a copy of self in `interface`
+            runtime : Bunch containing stdout, stderr, returncode, commandline
+
+        Example
+        -------
+        >>> mcflrt = fsl.McFlirt(cost='mutualinfo')
+        >>> mcflrtd = mcflrt.run(infile='timeseries.nii')
+        """
+        self.inputs.update(**inputs)
+        if infile is None:
+            if self.inputs.infile is None:
+                raise ValueError('infile is not specified')
+        else:    
+            self.inputs.infile = infile
+        results = self._runner()
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs()
         return results 
 
 class Fnirt(FSLCommand):
@@ -1111,9 +1281,9 @@ class Fnirt(FSLCommand):
         Examples
         --------
         >>> #T1-> MNI153
-        >>>fnirt_mprage = fsl.Fnirt(imgfwhm=[8,4,2],sub_sampling=[4,2,1],
-                                   warp_resolution=[6,6,6])
-        >>>fnirted_mprage = fnirt_mprage.run(infile='jnkT1.nii', reference='refimg.nii')
+        >>> fnirt_mprage = fsl.Fnirt(imgfwhm=[8,4,2],sub_sampling=[4,2,1],
+                                     warp_resolution=[6,6,6])
+        >>> fnirted_mprage = fnirt_mprage.run(infile='jnkT1.nii', reference='refimg.nii')
         """
         self.inputs.update(**inputs)
         if infile is None:
