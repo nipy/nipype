@@ -245,80 +245,27 @@ class Bet(FSLCommand):
                           verbose=None, 
                           flags=None)
 
+    opt_map = {
+        'frac':               '-f %.2f',
+        'center':             '-c %2.3f %2.3f %2.3f',
+        'vertical_gradient':  '-g %.2f',
+        'outline':            '--outline',
+        'mask':               '--mask',
+        'skull':              '--skull',
+        'nooutput':           '--nooutput',
+        'radius':             '--radius %f',
+        'threshold':          '--threshold',
+        'mesh':               '--mesh',
+        'verbose':            '--verbose',
+        'flags':              '%s'}
+
     def _parse_inputs(self):
-        """validate fsl bet options
-        if set to None ignore
-        """
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
-        for opt in inputs:
-            if opt is 'infile':
-                continue
-            if opt is 'outfile':
-                continue
-            if opt is 'frac':
-                val = float(inputs['frac'])
-                out_inputs.extend(['-f','%.2f'%(val)])
-                continue
-            if opt is 'center':
-                val = [float(x) for x in inputs['center']]
-                if len(val) is not 3:
-                    raise ValueError('three values required for center option')
-                out_inputs.extend(['-c' , '%s %s %s'%(val[0],val[1],val[2])])
-                continue
-            if opt is 'vertical_gradient':
-                val = float(inputs['vertical_gradient'])
-                out_inputs.extend(['-g','%.2f'%(val)])
-                continue
-            if opt is 'outline':
-                if inputs[opt]:
-                    out_inputs.extend(['--outline'])
-                continue
-            if opt is 'mask':
-                if inputs[opt]:
-                    out_inputs.extend(['--mask'])
-                continue
-            if opt is 'skull':
-                if inputs[opt]:
-                    out_inputs.extend(['--skull'])
-                continue
-            if opt is 'nooutput':
-                if inputs[opt]:
-                    out_inputs.extend(['--nooutput'])
-                continue
-            if opt is 'radius':
-                val = float(inputs[opt])
-                out_inputs.extend(['--radius %f'%(val)])
-            if opt is 'threshold':
-                if inputs[opt]:
-                    out_inputs.extend(['--threshold'])
-                continue
-            if opt is 'mesh':
-                if inputs[opt]:
-                    out_inputs.extend(['--mesh'])
-                continue
-            if opt is 'verbose':
-                if inputs[opt]:
-                    out_inputs.extend(['--verbose'])
-                continue
-            if opt is 'flags':
-                out_inputs.extend(inputs[opt])
-                continue
-            print 'option %s not supported'%(opt)
-
-        if self.inputs['infile']:
-            out_inputs.insert(0, str(self.inputs['infile']))
-        if self.inputs['outfile']:
-            out_inputs.insert(1, str(self.inputs['outfile']))
-        else:
-            pth,fname = os.path.split(self.inputs['infile'])
-            out_inputs.insert(1, '%s' % os.path.join(self.inputs.get('cwd',pth),
-                                                     fname_presuffix(fname,suffix='_bet')))
-                              
-        return out_inputs
-
-
+        """validate fsl bet options"""
+        allargs = super(Bet, self)._parse_inputs(skip=('infile','outfile'))
+        allargs.insert(0,self.inputs.outfile)
+        allargs.insert(0,self.inputs.infile)
+        return allargs
+        
     def run(self, infile=None, outfile=None, **inputs):
         """Execute the command.
 
@@ -1127,7 +1074,7 @@ class Fnirt(FSLCommand):
         'intensityfile':    '--intout %s',
         'logfile':          '--logout %s',
         'verbose':          '--verbose',
-        'sub_sampling':     '--subsample %f',
+        'sub_sampling':     '--subsample %d',
         'max_iter':         '--miter %f',
         'referencefwhm':    '--reffwhm %f',
         'imgfwhm':          '--infwhm %f',
@@ -1203,9 +1150,9 @@ class Fnirt(FSLCommand):
                          'applyimgmask']
         for item in itemstoupdate:
             if self.inputs.get(item):
-                tmps = self.opt_map[item].split()[0]
+                tmps = self.opt_map[item].split()
                 values = self.inputs.get(item)
-                valstr = tmps + ' %f'* len(values)
+                valstr = tmps[0] + ' %s'%(tmps[1])* len(values)
                     
                 self.opt_map[item]= valstr
    

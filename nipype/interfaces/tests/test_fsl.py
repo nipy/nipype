@@ -7,9 +7,10 @@ def test_bet():
     better = fsl.Bet()
     better.inputs.frac = 0.5
     better.inputs.infile = 'infile'
+    better.inputs.outfile = 'outfile'
     yield assert_equal, better.cmd, 'bet'
 
-    yield assert_equal, better.cmdline, 'bet infile infile_bet -f 0.50'
+    yield assert_equal, better.cmdline, 'bet infile outfile -f 0.50'
     betted = better.run(infile='infile2', outfile='outfile')
     yield assert_not_equal, betted.runtime.returncode, 0
     yield assert_equal, betted.interface.inputs.infile, 'infile2'
@@ -54,5 +55,15 @@ def test_flirt():
     yield assert_equal, flirter.inputs.cost, flirt_apply.interface.inputs.cost
     yield assert_equal, flirt_apply.runtime.cmdline,'flirt -in infile -ref reffile -omat outmat.mat -init inmatrix.mat -out outimgfile -cost mutualinfo -applyxfm -bins 256'
     
-   
-    
+#test fnirt
+def test_fnirt():
+    fnirt = fsl.Fnirt()
+    fnirt.inputs.sub_sampling = [8,6,4]
+    fnirt2 = fsl.Fnirt(sub_sampling=[8,2])
+    fnirtd = fnirt.run(infile='infile', reference='reference')
+    fnirtd2 = fnirt2.run(infile='infile', reference='reference')
+    yield assert_equal, fnirt.cmd, 'fnirt'
+    yield assert_equal, fnirt.inputs.sub_sampling, [8,6,4]
+    yield assert_equal, fnirtd2.runtime.cmdline, 'fnirt --in=infile --ref=reference --subsample 8 2'
+    yield assert_equal, fnirtd.runtime.cmdline,'fnirt --in=infile --ref=reference --subsample 8 6 4'
+ 
