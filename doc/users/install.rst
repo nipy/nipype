@@ -15,15 +15,14 @@ Must Have
 ~~~~~~~~~
 
 Python_ 2.5 or later
-  We are currently looking at lowering this dependency to python 2.4
 
 NumPy_ 1.3 or later
 
 SciPy_ 0.7 or later
   Numpy and Scipy are high-level, optimized scientific computing libraries.
 
-NetworkX_ 1.0dev
-  Our releases will depend on a release of NetworkX.
+NetworkX_ 1.0
+  Python package for working with complex networks.
 
 IPython_ 0.10
   Interactive python environment. This is necessary for the parallel
@@ -31,9 +30,10 @@ IPython_ 0.10
   
     * The IPython.kernel (parallel computing component) has the
       following dependencies:
+
       * `Twisted <http://twistedmatrix.com/trac/>`_
       * zope.interface: which is also a dependecy of Twisted and was
-      installed automatically for me when I installed Twisted.
+        installed automatically for me when I installed Twisted.
 
 
 Strong Recommandations
