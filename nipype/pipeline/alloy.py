@@ -421,17 +421,18 @@ def afni_smooth(in_file_info):
     in_list = get_data_selection(in_file_info)
 
     for in_file in in_list:
+        if not in_file.selectors.__contains__(smooth_tag):
 
-        out_file = in_file.copy()
-        out_file.selectors.append(smooth_tag)
+            out_file = in_file.copy()
+            out_file.selectors.append(smooth_tag)
 
-        cmd1 = [afni.Threedmerge(
-            doall = True,
-            gblur_fwhm = 5,
-            outfile = out_file.abspath(),
-            infile = in_file.abspath())]
+            cmd1 = [afni.Threedmerge(
+                doall = True,
+                gblur_fwhm = 5,
+                outfile = out_file.abspath(),
+                infile = in_file.abspath())]
 
-        run_commands(cmd1,out_file)
+            run_commands(cmd1,out_file)
 
     out_file_info = in_file_info.copy()
     out_file_info.selectors = [smooth_tag]
@@ -449,81 +450,85 @@ def afni_t1_align(in_file_info):
 
     for anat_file in anat_list:
 
-        mean_file = anat_file.copy()
-        mean_file.selectors = [mean_tag]
-
         cut_file = anat_file.copy()
         cut_file.selectors.append(cut_tag)
 
-        cmd1 = [afni.ThreedZcutup(
-                keep = {'from':80,'to':240},
-                outfile = cut_file_info.abspath(),
-                infile = anat_file_info.abspath())]
+        cmd1 = afni.ThreedZcutup(
+               keep = {'from':80,'to':240},
+               outfile = cut_file.abspath(),
+               infile = anat_file.abspath())
 
         brain_file = anat_file.copy()
         brain_file.selectors.append(brain_tag)
 
-        cmd2 = [afni.ThreedSkullStrip(
-                outfile = brain_file_info.abspath(),
-                infile = cut_file_info.abspath())]
+        cmd2 = afni.ThreedSkullStrip(
+               outfile = brain_file.abspath(),
+               infile = cut_file.abspath())
+
+        mean_file = anat_file.copy()
+        mean_file.selectors = [anat_file.subject, mean_tag]
 
         meanrs_file = mean_file.copy()
         meanrs_file.selectors.append('RS')
 
-        cmd3 = [afni.Threedresample(
-                rsmode='Cu',
-                gridfile = brain_file.abspath(),
-                outfile = meanrs_file.abspath(),
-                infile = mean_file.abspath())]
+        cmd3 = afni.Threedresample(
+               rsmode = 'Cu',
+               gridfile = brain_file.abspath(),
+               outfile = meanrs_file.abspath(),
+               infile = mean_file.abspath())
 
         meanbrain_file = meanrs_file.copy()
         meanbrain_file.selectors.append('Br')
 
-        cmd4 = [afni.ThreedSkullStrip(
-                outfile = meanbrain_file.abspath(),
-                infile = meanrs_file.abspath())]
+        cmd4 = afni.ThreedSkullStrip(
+               outfile = meanbrain_file.abspath(),
+               infile = meanrs_file.abspath())
 
-        cmd5 = [afni.ThreedBrickStat(
-                automask = True,
-                percentile = [90.0,1,90.0],
-                infile = meanbrain_file.abspath())]
+        cmd5 = afni.ThreedBrickStat(
+               automask = True,
+               percentile = {'p0':90.0,'pstep':1,'p1':90.0},
+               infile = meanbrain_file.abspath())
 
         meanthresh_file = meanbrain_file.copy()
         meanthresh_file.selectors.append('Thr')
 
-        cmd6 = [afni.Threedcalc(
-                datum = 'float',
-                outfile = meanthresh_file.abspath(),
-                a = meanbrain_file.abspath(),
-                expr = 'min(1,a/-999.0))')]
+        cmd6 = afni.Threedcalc(
+               infile_a = meanbrain_file.abspath(),
+               expr = '\'min(1,(a/-999.0))\'',
+               session = meanthresh_file.partpath(4),
+               datum = 'float',
+               outfile = meanthresh_file.name())
 
         t1align_file = brain_file.copy()
         t1align_file.selectors.append('Align')
 
-        trans_matrix_file = in_file.copy()
-        trans_matrix_file.selectors = [in_file.subject, oned_tag]
-        trans_matrix_file.extension = [d_extension.split(ext_delimiter)]
+        trans_matrix_file = anat_file.copy()
+        trans_matrix_file.selectors = [anat_file.subject, oned_tag]
+        trans_matrix_file.extension = d_extension.split(ext_delimiter)
 
-        cmd7 = [afni.ThreedAllineate(
-                lpc = True,
-                weight_frac = 1.0,
-                verbose = True,
-                warp = 'aff',
-                maxrot = 6,
-                maxshf = 10,
-                source_automask = 4,
-                transform_matrix = trans_matrix_file.abspath(),
-                base = meanthresh_file.abspath(),
-                outfile = t1align_file.abspath(),
-                infile = brain_file.abspath(),
-                weight = meanthresh_file.abspath())]
+        cmd7 = afni.ThreedAllineate(
+               lpc = True,
+               weight_frac = 1.0,
+               verbose = True,
+               warp = 'aff',
+               maxrot = 6,
+               maxshf = 10,
+               source_automask = 4,
+               transform_matrix = trans_matrix_file.abspath(),
+               base = meanthresh_file.abspath(),
+               outfile = t1align_file.abspath(),
+               infile = brain_file.abspath(),
+               weight = meanthresh_file.abspath())
 
         cmds = [cmd1, cmd2, cmd3, cmd4, cmd5, cmd6, cmd7]
+
+        out_file = anat_file.copy()
+        out_file.selectors = [brain_tag]
 
         run_commands(cmds,out_file)
 
     out_file_info = in_file_info.copy()
-    out_file_info.selectors = [smooth_tag]
+    out_file_info.selectors = [brain_tag]
 
     return out_file_info
 
@@ -671,4 +676,7 @@ if __name__ == '__main__':
      coreg_file_info = afni_coreg(start_file_info)
      smooth_file_info = afni_smooth(coreg_file_info)
 
+     t1_file_info = DataFile(data_path,'101','T','NIfTI',['T1'],extension.split(ext_delimiter))
+
+     brain_file_info = afni_t1_align(t1_file_info)
 

@@ -1,4 +1,4 @@
-"""Provide interface classed to AFNI commands."""
+"""Provide interface to AFNI commands."""
 __docformat__ = 'restructuredtext'
 
 
@@ -75,6 +75,17 @@ class To3d(CommandLine):
             # time : list
             #    zt nz nt TR tpattern
             #    tz nt nz TR tpattern
+            # TODO: ABOVE DOC IS OLD
+
+            # dict(slice_order='zt', nz=12, nt=150, TR=2000, tpattern='alt+z')
+            _time_dep_doc = \
+            """
+            time_dependencies should be a dictionary with the follow keys 
+            assigned:
+            slice_order, nz, nt, TR, tpattern
+
+            """
+
             if inputssub.has_key('slice_order'):
                 valsub = inputssub.pop('slice_order')
                 out_inputs.append('-time:%s' % valsub)
@@ -82,42 +93,37 @@ class To3d(CommandLine):
                 valsub=None
                 print('Warning: slice_order required for time_dependencies')
 
-            if valsub is 'zt':
+            try:
+                slice_order = inputssub.pop('slice_order')
+                out_inputs.append('-time:%s' % slice_order)
+            except KeyError:
+                raise KeyError('slice_order is required for time_dependencies')
+            try:
+                nz = inputssub.pop('nz')
+            except KeyError:
+                raise KeyError('nz required for time_dependencies')
+            try:
+                nt = inputssub.pop('nt')
+            except KeyError:
+                raise KeyError('nt required for time_dependencies')
 
-                if inputssub.has_key('nz'):
-                    valsub = inputssub.pop('nz')
-                    out_inputs.append('%s' % str(valsub))
-                else:
-                    print('Warning: nz required for time_dependencies')
-                if inputssub.has_key('nt'):
-                    valsub = inputssub.pop('nt')
-                    out_inputs.append('%s' % str(valsub))
-                else:
-                    print('Warning: nt required for time_dependencies')
+            if slice_order == 'tz':
+                out_inputs.append('%s' % str(nt))
+                out_inputs.append('%s' % str(nz))
+            else:
+                out_inputs.append('%s' % str(nz))
+                out_inputs.append('%s' % str(nt))
 
-            if valsub is 'tz':
-
-                if inputssub.has_key('nt'):
-                    valsub = inputssub.pop('nt')
-                    out_inputs.append('%s' % str(valsub))
-                else:
-                    print('Warning: nz required for time_dependencies')
-                if inputssub.has_key('nz'):
-                    valsub = inputssub.pop('nz')
-                    out_inputs.append('%s' % str(valsub))
-                else:
-                    print('Warning: nt required for time_dependencies')
-
-            if inputssub.has_key('TR'):
+            try:
                 valsub = inputssub.pop('TR')
                 out_inputs.append('%s' % str(valsub))
-            else:
-                print('Warning: TR required for time_dependencies')
-            if inputssub.has_key('tpattern'):
+            except KeyError:
+                raise KeyError('TR required for time_dependencies')
+            try:
                 valsub = inputssub.pop('tpattern')
                 out_inputs.append('%s' % valsub)
-            else:
-                print('Warning: tpattern required for time_dependencies')
+            except KeyError:
+                raise KeyError('tpattern required for time_dependencies')
 
             if len(inputssub) > 0:
                 print '%s: unsupported time_dependencies options: %s' % (
@@ -232,7 +238,9 @@ class Threedresample(CommandLine):
     def _populate_inputs(self):
         """Initialize the inputs attribute."""
 
-        self.inputs = Bunch(orient=None,
+        self.inputs = Bunch(rsmode=None,
+                            orient=None,
+                            gridfile=None,
                             outfile=None,
                             infile=None)
 
@@ -248,9 +256,15 @@ class Threedresample(CommandLine):
         [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
              if v is not None]
 
+        if inputs.has_key('rsmode'):
+            val = inputs.pop('rsmode')
+            out_inputs.append('-rmode %s' % val)
         if inputs.has_key('orient'):
             val = inputs.pop('orient')
             out_inputs.append('-orient %s' % val)
+        if inputs.has_key('gridfile'):
+            val = inputs.pop('gridfile')
+            out_inputs.append('-master %s' % val)
         if inputs.has_key('outfile'):
             val = inputs.pop('outfile')
             out_inputs.append('-prefix %s' % val)
@@ -481,10 +495,11 @@ class Threedmerge(CommandLine):
     def _populate_inputs(self):
         """Initialize the inputs attribute."""
 
-        self.inputs = Bunch(doall = True,
-                            gblur_fwhm = 5,
-                            outfile=None,
-                            infile=None)
+        self.inputs = Bunch(
+            doall=None,
+            gblur_fwhm=None,
+            outfile=None,
+            infile=None)
 
     def _parseinputs(self):
         """Parse valid input options for Threedmerge command.
@@ -640,6 +655,252 @@ class ThreedSkullStrip(CommandLine):
         if inputs.has_key('infile'):
             val = inputs.pop('infile')
             out_inputs.append('-input %s' % val)
+
+        if len(inputs) > 0:
+            print '%s: unsupported options: %s' % (
+                self.__class__.__name__, inputs.keys())
+
+        return out_inputs
+
+    @property
+    def cmdline(self):
+        """Generate the command line string from the list of arguments."""
+        valid_inputs = self._parseinputs()
+        allargs =  [self.cmd] + valid_inputs
+        return ' '.join(allargs)
+
+
+class ThreedBrickStat(CommandLine):
+    """
+    """
+
+    @property
+    def cmd(self):
+        """Base command for ThreedBrickStat"""
+        return '3dBrickStat'
+
+    def inputs_help(self):
+        doc = """
+          Optional Parameters
+          -------------------
+        """
+        print doc
+
+    def _populate_inputs(self):
+        """Initialize the inputs attribute."""
+
+        self.inputs = Bunch(automask=None,
+                            percentile=None,
+                            infile=None)
+
+    def _parseinputs(self):
+        """Parse valid input options for ThreedBrickStat command.
+
+        Ignore options set to None.
+
+        """
+
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+             if v is not None]
+
+        if inputs.has_key('automask'):
+            val = inputs.pop('automask')
+            out_inputs.append('-automask')
+        if inputs.has_key('percentile'):
+            val = inputs.pop('percentile')
+            inputssub = {}
+            [inputssub.update({k:v}) for k, v in val.iteritems() \
+                if v is not None]
+
+            if inputssub.has_key('p0'):
+                valsub = inputssub.pop('p0')
+                out_inputs.append('-percentile %s' % str(valsub))
+            else:
+                valsub=None
+                print('Warning: value \'p0\' required for percentile')
+            if inputssub.has_key('pstep'):
+                valsub = inputssub.pop('pstep')
+                out_inputs.append('%s' % str(valsub))
+            else:
+                valsub=None
+                print('Warning: value \'pstep\' required for percentile')
+            if inputssub.has_key('p1'):
+                valsub = inputssub.pop('p1')
+                out_inputs.append('%s' % str(valsub))
+            else:
+                valsub=None
+                print('Warning: value \'p1\' required for percentile')
+
+        if inputs.has_key('infile'):
+            val = inputs.pop('infile')
+            out_inputs.append('%s' % val)
+
+        if len(inputs) > 0:
+            print '%s: unsupported options: %s' % (
+                self.__class__.__name__, inputs.keys())
+
+        return out_inputs
+
+    @property
+    def cmdline(self):
+        """Generate the command line string from the list of arguments."""
+        valid_inputs = self._parseinputs()
+        allargs =  [self.cmd] + valid_inputs
+        return ' '.join(allargs)
+
+
+class Threedcalc(CommandLine):
+    """
+    """
+
+    @property
+    def cmd(self):
+        """Base command for Threedcalc"""
+        return '3dcalc'
+
+    def inputs_help(self):
+        doc = """
+          Optional Parameters
+          -------------------
+        """
+        print doc
+
+    def _populate_inputs(self):
+        """Initialize the inputs attribute."""
+
+        self.inputs = Bunch(
+            infile_a=None,
+            expr=None,
+            session=None,
+            datum=None,
+            outfile=None,
+)
+
+    def _parseinputs(self):
+        """Parse valid input options for Threedcalc command.
+
+        Ignore options set to None.
+
+        """
+
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+             if v is not None]
+
+        if inputs.has_key('infile_a'):
+            val = inputs.pop('infile_a')
+            out_inputs.append('-a %s' % val)
+        if inputs.has_key('expr'):
+            val = inputs.pop('expr')
+            out_inputs.append('-expr %s' % val)
+        if inputs.has_key('session'):
+            val = inputs.pop('session')
+            out_inputs.append('-session %s' % val)
+        if inputs.has_key('datum'):
+            val = inputs.pop('datum')
+            out_inputs.append('-datum %s' % val)
+        if inputs.has_key('outfile'):
+            val = inputs.pop('outfile')
+            out_inputs.append('-prefix %s' % val)
+
+        if len(inputs) > 0:
+            print '%s: unsupported options: %s' % (
+                self.__class__.__name__, inputs.keys())
+
+        return out_inputs
+
+    @property
+    def cmdline(self):
+        """Generate the command line string from the list of arguments."""
+        valid_inputs = self._parseinputs()
+        allargs =  [self.cmd] + valid_inputs
+        return ' '.join(allargs)
+
+
+class ThreedAllineate(CommandLine):
+    """
+    """
+
+    @property
+    def cmd(self):
+        """Base command for ThreedAllineate"""
+        return '3dAllineate'
+
+    def inputs_help(self):
+        doc = """
+          Optional Parameters
+          -------------------
+        """
+        print doc
+
+    def _populate_inputs(self):
+        """Initialize the inputs attribute."""
+
+        self.inputs = Bunch(
+            lpc=None,
+            weight_frac=None,
+            verbose=None,
+            warp=None,
+            maxrot=None,
+            maxshf=None,
+            source_automask=None,
+            transform_matrix=None,
+            base=None,
+            weight=None,
+            outfile=None,
+            infile=None)
+
+    def _parseinputs(self):
+        """Parse valid input options for ThreedSkullStrip command.
+
+        Ignore options set to None.
+
+        """
+
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+             if v is not None]
+
+        if inputs.has_key('lpc'):
+            val = inputs.pop('lpc')
+            out_inputs.append('-lpc')
+        if inputs.has_key('weight_frac'):
+            val = inputs.pop('weight_frac')
+            out_inputs.append('-weight_frac %s' % str(val))
+        if inputs.has_key('verbose'):
+            val = inputs.pop('verbose')
+            out_inputs.append('-VERB')
+        if inputs.has_key('warp'):
+            val = inputs.pop('warp')
+            out_inputs.append('-warp %s' % val)
+        if inputs.has_key('maxrot'):
+            val = inputs.pop('maxrot')
+            out_inputs.append('-maxrot %s' % str(val))
+        if inputs.has_key('maxshf'):
+            val = inputs.pop('maxshf')
+            out_inputs.append('-maxshf %s' % str(val))
+        if inputs.has_key('source_automask'):
+            val = inputs.pop('source_automask')
+            out_inputs.append('-source_automask+%s' % str(val))
+        if inputs.has_key('transform_matrix'):
+            val = inputs.pop('transform_matrix')
+            out_inputs.append('-1Dmatrix_save %s' % val)
+        if inputs.has_key('base'):
+            val = inputs.pop('base')
+            out_inputs.append('-base %s' % val)
+        if inputs.has_key('weight'):
+            val = inputs.pop('weight')
+            out_inputs.append('-weight %s' % val)
+        if inputs.has_key('outfile'):
+            val = inputs.pop('outfile')
+            out_inputs.append('-prefix %s' % val)
+        if inputs.has_key('infile'):
+            val = inputs.pop('infile')
+            out_inputs.append('-source %s' % val)
 
         if len(inputs) > 0:
             print '%s: unsupported options: %s' % (
