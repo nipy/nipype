@@ -145,6 +145,8 @@ class FSLCommand(CommandLine):
                     elif value is not False:
                         raise TypeError('Boolean option %s set to %s' % 
                                          (opt, str(value)) )
+                elif type(value) == type([]):
+                    allargs.append(argstr % tuple([x for x in value]))
                 else:
                     allargs.append(argstr % value)
             except TypeError, err:
@@ -776,7 +778,7 @@ class Flirt(FSLCommand):
 
     
 
-    def run(self, infile=None, reference=None, outfile=None, outmatrix=None):
+    def run(self, infile=None, reference=None, outfile=None, outmatrix=None,**inputs):
         """ runs flirt command
          
 
@@ -806,7 +808,8 @@ class Flirt(FSLCommand):
             
         
         """
-        #newflirt = self.update()
+        self.inputs.update(**inputs)
+
         if infile is None:
             if self.inputs.infile is None:
                 raise ValueError('infile is not specified')
@@ -825,19 +828,7 @@ class Flirt(FSLCommand):
                            reference=reference,
                            outfile=outfile,
                            outmatrix = outmatrix)
-        """
-        newflirt.args.extend(['-in %s'%(newflirt.inputs.infile)])
-        newflirt.infile = infile
-        newflirt.args.extend(['-ref %s'%(newflirt.inputs.reference)])
-        newflirt.reference = reference
-        if newflirt.inputs.outfile:
-            newflirt.args.extend(['-out %s'%(newflirt.inputs.outfile)])
-            newflirt.outfile = outfile
-        if newflirt.inputs.outmatrix:
-            newflirt.args.extend(['-omat %s'%(newflirt.inputs.outmatrix)])
-            newflirt.outmatrix = outmatrix
-        """
-
+        
         results = self._runner()
         if results.runtime.returncode == 0:
             results.outputs = self.aggregate_outputs()
@@ -845,7 +836,7 @@ class Flirt(FSLCommand):
         return results 
         
 
-    def applyxfm(self, infile=None, reference=None, inmatrix=None, outfile=None):
+    def applyxfm(self, infile=None, reference=None, inmatrix=None, outfile=None,**inputs):
         """ runs flirt command 
           eg.
           flirted = flirtter.applyxfm(self, infile=None, reference=None, inmatrix=None, outfile=None)
@@ -868,7 +859,7 @@ class Flirt(FSLCommand):
         flirt : object
             return new flirt object with updated fields
         """
-        #newflirt = self.update()
+        self.inputs.update(**inputs)
         if infile is None:
             if self.inputs.infile is None:
                 raise ValueError('input not specfied')
@@ -900,68 +891,28 @@ class Flirt(FSLCommand):
             results.outputs = self.aggregate_outputs()
             
         return results 
-        
 
-        """newflirt.args.extend(['-in %s'%(infile)])
-        newflirt.infile = infile
-        
-        newflirt.args.extend(['-ref %s'%(reference)])
-        newflirt.reference = reference
-        
-        if newflirt.inputs.applyisoxfm is not None:
-            newflirt.args.extend(['-applyisoxfm %d'%(newflirt.inputs['applyisoxfm'])])
-            
-        else:
-            newflirt.args.extend(['-applyxfm'])
-        
-        newflirt.args.extend(['-init %s'%(inmatrix)])
-        newflirt.inmatrix = inmatrix
-        
-        newflirt.args.extend(['-out %s'%(outfile)])
-        newflirt.outfile = outfile
-            
-        (retcode, out, err) = newflirt._runner(newflirt.cmdline)
-        newflirt.retcode = retcode
-        newflirt.out = out
-        newflirt.err = err
-        
-        return newflirt
-        """
-
-        
-
-
-
-class Fnirt(CommandLine):
-
+class Fnirt(FSLCommand):
+    """use fsl fnirt for non-linear registration
+    
+    Options
+    -------
+    see  
+    fsl.Fnirt().inputs_help()
+    
+    Example
+    -------
+    >>> fnirter = fsl.Fnirt(affine='affine.mat')
+    >>> fnirted = fnirter.run(reference='ref.nii',infile='anat.nii')
+    >>> fsl.Fnirt().inputs_help()
+    
+    
+    """
     @property
     def cmd(self):
         """sets base command, not editable"""
         return 'fnirt'
-
-    def __init__(self, **inputs):
-        """use fsl fnirt for non-linear registration
-        
-        Options
-        -------
-        see  
-        fsl.Fnirt().inputs_help()
-        
-        Example
-        -------
-        >>> fnirter = fsl.Fnirt(affine='affine.mat')
-        >>> fnirted = fnirter.run(reference='ref.nii',moving='anat.nii')
-        >>> fsl.Fnirt().inputs_help()
-       
-       
-        """
-        super(Fnirt,self).__init__()
-        self.args = []
-        self._populate_inputs()
-        self.inputs.update(**inputs)
-        self.infile = ''
-        self.reference = ''
-
+    
     def inputs_help(self):
         doc = """
 
@@ -1161,145 +1112,43 @@ class Fnirt(CommandLine):
                           applyrefmask=None,
                           applyimgmask=None)
 
-    def _parse_inputs(self):
-        """validate fsl bet options
-        if set to None ignore
-        """
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
-        for opt in inputs:
-            if opt in ['infile', 'reference']:
-                continue
-            if opt is 'affine':
-                val = inputs[opt]
-                out_inputs.extend(['--aff %s'%(val)])
-                continue
-            if opt is 'initwarp':
-                val = inputs[opt]
-                out_inputs.extend(['--inwarp %s'%(val)])
-                continue                
-            if opt is 'initintensity':
-                val = inputs[opt]
-                out_inputs.extend(['--intin %s'%(val)])
-                continue
-            if opt is 'configfile':
-                val = inputs[opt]
-                out_inputs.extend(['--config %s'%(val)])
-                continue
-            if opt is 'referencemask':
-                val = inputs[opt]
-                out_inputs.extend(['--refmask %s'%(val)])
-                continue
-            if opt is 'imagemask':
-                val = inputs[opt]
-                out_inputs.extend(['--inmask %s'%(val)])
-                continue
-            if opt is 'fieldcoeff_file':
-                val = inputs[opt]
-                out_inputs.extend(['--cout %s'%(val)])
-                continue
-            if opt is 'outimage':
-                val = inputs[opt]
-                out_inputs.extend(['--iout %s'%(val)])
-                continue
-            if opt is 'fieldfile':
-                val = inputs[opt]
-                out_inputs.extend(['--fout %s'%(val)])
-                continue
-            if opt is 'jacobianfile':
-                val = inputs[opt]
-                out_inputs.extend(['--jout %s'%(val)])
-                continue
-            if opt is 'reffile':
-                val = inputs[opt]
-                out_inputs.extend(['--refout %s'%(val)])
-                continue
-            if opt is 'intensityfile':
-                val = inputs[opt]
-                out_inputs.extend(['--intout %s'%(val)])
-                continue
-            if opt is 'logfile':
-                val = inputs[opt]
-                out_inputs.extend(['--logout %s'%(val)])
-                continue
-            if opt is 'verbose':
-                if inputs[opt]:
-                    out_inputs.extend(['--verbose'])
-                continue
-            if opt is 'sub_sampling':
-                val = inputs[opt]
-                tmpstr = '--subsample '
-                for item in val:
-                    tmpstr = tmpstr + '%d, '%(item)
-                out_inputs.extend([tmpstr[:-2]])
-                continue
-            if opt is 'max_iter':
-                val = inputs[opt]
-                tmpstr = '--miter '
-                for item in val:
-                    tmpstr = tmpstr + '%d, '%(item)
-                out_inputs.extend([tmpstr[:-2]])
-                continue               
-            if opt is 'referencefwhm':
-                val = inputs[opt]
-                tmpstr = '--reffwhm '
-                for item in val:
-                    tmpstr = tmpstr + '%d, '%(item)
-                out_inputs.extend([tmpstr[:-2]])
-                continue
-            if opt is 'imgfwhm':
-                val = inputs[opt]
-                tmpstr = '--infwhm '
-                for item in val:
-                    tmpstr = tmpstr + '%d, '%(item)
-                out_inputs.extend([tmpstr[:-2]])
-                continue
-            if opt is 'lambdas':
-                val = inputs[opt]
-                tmpstr = '--lambda '
-                for item in val:
-                    tmpstr = tmpstr + '%d, '%(item)
-                out_inputs.extend([tmpstr[:-2]])
-                continue
-            if opt is 'estintensity':
-                val = inputs[opt]
-                tmpstr = '--estint '
-                for item in val:
-                    tmpstr = tmpstr + '%d, '%(item)
-                out_inputs.extend([tmpstr[:-2]])
-                continue
-            if opt is 'applyrefmask':
-                val = inputs[opt]
-                tmpstr = '--applyrefmask '
-                for item in val:
-                    tmpstr = tmpstr + '%d, '%(item)
-                out_inputs.extend([tmpstr[:-2]])
-                continue
-            if opt is 'applyimgmask':
-                val = inputs[opt]
-                tmpstr = '--applyinmask '
-                for item in val:
-                    tmpstr = tmpstr + '%d, '%(item)
-                out_inputs.extend([tmpstr[:-2]])
-                continue
-            if opt is 'flags':
-                out_inputs.extend(inputs[opt])
-                continue
-            print 'option %s not supported'%(opt)
-        return out_inputs
-            
+    opt_map = {
+        'affine':           '--aff %s',
+        'initwarp':         '--inwarp %s',
+        'initintensity':    '--intin %s',
+        'configfile':       '--config %s',
+        'referencemask':    '--refmask %s',
+        'imagemask':        '--inmask %s',
+        'fieldcoeff_file':  '--cout %s',
+        'outimage':         '--iout %s',
+        'fieldfile':        '--fout %s',
+        'jacobianfile':     '--jout %s',
+        'reffile':          '--refout %s',
+        'intensityfile':    '--intout %s',
+        'logfile':          '--logout %s',
+        'verbose':          '--verbose',
+        'sub_sampling':     '--subsample %f',
+        'max_iter':         '--miter %f',
+        'referencefwhm':    '--reffwhm %f',
+        'imgfwhm':          '--infwhm %f',
+        'lambdas':          '--lambda %f',
+        'estintensity':     '--estint %f',
+        'applyrefmask':     '--applyrefmask %f',
+        'applyimgmask':     '--applyinmask %f',
+        'flags':            '%s'}
+
     @property
     def cmdline(self):
         """validates fsl options and generates command line argument"""
-        valid_inputs = self._parse_inputs()
-        allargs = self.args + valid_inputs
+        self.update_optmap()
+        allargs = self._parse_inputs()
+        allargs.insert(0, self.cmd)
         return ' '.join(allargs)
+            
   
-    def run(self, infile=None, reference=None):
+    def run(self, infile=None, reference=None, **inputs):
         """ runs fnirt command
-         
-
+  
         Parameters
         ----------
         infile : filename
@@ -1319,7 +1168,7 @@ class Fnirt(CommandLine):
                                    warp_resolution=[6,6,6])
         >>>fnirted_mprage = fnirt_mprage.run(infile='jnkT1.nii', reference='refimg.nii')
         """
-        #newfnirt = self.update()
+        self.inputs.update(**inputs)
         if infile is None:
             if self.inputs.infile is None:
                 raise ValueError('infile is not specified')
@@ -1330,36 +1179,49 @@ class Fnirt(CommandLine):
                 raise ValueError('reference is not specified')
             else:
                 reference = self.inputs.reference
-        newfnirt = self.update(infile=infile, reference=reference)
-        newfnirt.args.extend(['--in %s'%(infile)])
-        newfnirt.infile = infile
-        newfnirt.args.extend(['--ref %s'%(reference)])
-        newfnirt.reference = reference
         
-        
-        (retcode, out, err) = newfnirt._runner(newfnirt.cmdline)
-        newfnirt.retcode = retcode
-        newfnirt.out = out
-        newfnirt.err = err
-        
-        return newfnirt
 
-    @property
-    def cmdline(self):
-        """validates fsl options and generates command line argument"""
-        valid_inputs = self._parse_inputs()
-        
-        if valid_inputs is None:
-            allargs = [self.cmd] + self.args
-        else:
-            allargs = [self.cmd] + valid_inputs + self.args
-        return ' '.join(allargs)
+        self.inputs.update(infile=infile, 
+                           reference=reference)
+                                   
+        results = self._runner()
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs()
+            
+        return results 
 
-    def update(self, **inputs):
-        newfnirt = Fnirt()
-        [newfnirt.inputs.__setattr__(k,v) for k, v in self.inputs.iteritems() if v is not None ]
-        newfnirt.inputs.update(**inputs)
-        return newfnirt
+    def update_optmap(self):
+        """Updates opt_map for inout items with variable values
+        """
+        itemstoupdate = ['sub_sampling',
+                         'max_iter',
+                         'referencefwhm',
+                         'imgfwhm',
+                         'lambdas',
+                         'estintensity',
+                         'applyrefmask',
+                         'applyimgmask']
+        for item in itemstoupdate:
+            if self.inputs.get(item):
+                tmps = self.opt_map[item].split()[0]
+                values = self.inputs.get(item)
+                valstr = tmps + ' %f'* len(values)
+                    
+                self.opt_map[item]= valstr
+   
+    def _parse_inputs(self):
+        '''Call our super-method, then add our input files'''
+        # Could do other checking above and beyond regular _parse_inputs here
+        allargs = super(Fnirt, self)._parse_inputs(skip=('infile', 'reference'))
+        
+        possibleinputs = [(self.inputs.reference,'--ref='),
+                          (self.inputs.infile, '--in=')]
+        
+        for val, flag in possibleinputs:
+            if val:
+                allargs.insert(0,'%s%s'%(flag, val))
+        
+        return allargs
 
     def write_config(self,configfile):
         """Writes out currently set options to specified config file
@@ -1367,12 +1229,11 @@ class Fnirt(CommandLine):
         Parameters
         ----------
         configfile : /path/to/configfile
-
-                
         """
+        self.update_optmap()
         valid_inputs = self._parse_inputs() 
-        try :
-            fid = fopen(configfile, 'w+')
+        try:
+            fid = open(configfile, 'w+')
         except IOError:
             print ('unable to create config_file %s'%(configfile))
             
