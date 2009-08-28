@@ -19,6 +19,7 @@ data_path = '/home/despo/dte/Alloy/Template'
 num_cores = 4
 nifti_folder = 'NIfTI'
 behavior_folder = 'Behavior'
+total_folder = 'Total'
 extension = 'nii.gz'
 data_extension = 'txt'
 d_extension = 'txt'
@@ -32,6 +33,8 @@ coreg_tag = 'Coreg'
 md1d_tag = 'MD1D'
 oned_tag = '1D'
 smooth_tag = 'Smooth'
+cut_tag = 'Cut'
+brain_tag = 'Brain'
 
 afni_to3d_datatype_anat = 'anat'
 afni_to3d_datatype_func = 'epan'
@@ -135,12 +138,8 @@ def afni_dicom_convert(in_file_info):
 
     for dicom in dicom_list:
 
-        nifti_file = DataFile()
-        nifti_file.data_path = dicom.data_path
-        nifti_file.subject = dicom.subject
-        nifti_file.session = dicom.session
+        nifti_file = dicom.copy()
         nifti_file.file_type = nifti_folder
-        nifti_file.selectors = dicom.selectors
         nifti_file.extension = extension.split(ext_delimiter)
 
         if dicom.selectors.__contains__(anat_tag):
@@ -186,14 +185,8 @@ def afni_dicom_convert(in_file_info):
             nifti_file.abspath())
 
         # command to change volume orientation from LPI to RPI
-        nifti_file_rpi = DataFile()
-        nifti_file_rpi.data_path = nifti_file.data_path
-        nifti_file_rpi.subject = nifti_file.subject
-        nifti_file_rpi.session = nifti_file.session
-        nifti_file_rpi.file_type = nifti_file.file_type
-        nifti_file_rpi.selectors = nifti_file.selectors[:]
+        nifti_file_rpi = nifti_file.copy()
         nifti_file_rpi.selectors.append('RPI')
-        nifti_file_rpi.extension = nifti_file.extension[:]
 
         cmd4 = afni.Threedresample(
             orient=afni_3dresample_orient,
@@ -204,17 +197,12 @@ def afni_dicom_convert(in_file_info):
             nifti_file_rpi.abspath(),
             nifti_file.abspath())
 
-
         cmds = [cmd1, cmd2, cmd3, cmd4, cmd5]
 
         run_commands(cmds,nifti_file)
 
-    out_file_info = DataFile()
-    out_file_info.data_path = in_file_info.data_path
-    out_file_info.subject = in_file_info.subject
-    out_file_info.session = in_file_info.session
+    out_file_info = in_file_info.copy()
     out_file_info.file_type = nifti_folder
-    out_file_info.selectors = in_file_info.selectors[:]
     out_file_info.extension = extension.split(ext_delimiter)
 
     return out_file_info
@@ -222,37 +210,32 @@ def afni_dicom_convert(in_file_info):
 
 def file_organize(in_file_info):
 
-    out_file = DataFile()
-
     in_file_info.session = '2'
     in_file_info.extension = ['']
 
-    in_file_info.file_type = 'NIfTI'
-    in_file_info.selectors = ['T1']
+    in_file_info.file_type = nifti_folder
+    in_file_info.selectors = [anat_tag]
 
     # collect all the anatomical file names
     t1_list = get_data_selection(in_file_info)
 
-    in_file_info.file_type = 'NIfTI'
-    in_file_info.selectors = ['EPI']
+    in_file_info.file_type = nifti_folder
+    in_file_info.selectors = [func_tag]
 
     # collect all the functional file names
     epi_list = get_data_selection(in_file_info)
 
-    in_file_info.file_type = 'Behavior'
-    in_file_info.selectors = ['Data']
+    in_file_info.file_type = behavior_folder
+    in_file_info.selectors = [data_tag]
 
     # collect all the behavioral file names
     data_list = get_data_selection(in_file_info)
 
     for t1_file in t1_list:
 
-        out_file.data_path = t1_file.data_path
-        out_file.subject = t1_file.subject
-        out_file.session = 'Total'
-        out_file.file_type = t1_file.file_type
+        out_file = t1_file.copy()
+        out_file.session = total_folder
         out_file.selectors = [t1_file.subject, anat_tag]
-        out_file.extension = t1_file.extension[:]
 
         try:
             os.mkdir(out_file.partpath(3))
@@ -282,12 +265,9 @@ def file_organize(in_file_info):
         if counter_string.__len__() is 2:
             counter_string = ('0' + counter_string)
 
-        out_file.data_path = epi_file.data_path
-        out_file.subject = epi_file.subject
-        out_file.session = 'Total'
-        out_file.file_type = epi_file.file_type
+        out_file = epi_file.copy()
+        out_file.session = total_folder
         out_file.selectors = [epi_file.subject, func_tag, counter_string]
-        out_file.extension = epi_file.extension[:]
 
         try:
             os.mkdir(out_file.partpath(3))
@@ -317,12 +297,9 @@ def file_organize(in_file_info):
         if counter_string.__len__() is 2:
             counter_string = ('0' + counter_string)
 
-        out_file.data_path = data_file.data_path
-        out_file.subject = data_file.subject
-        out_file.session = 'Total'
-        out_file.file_type = data_file.file_type
+        out_file = data_file.copy()
+        out_file.session = total_folder
         out_file.selectors = [data_file.subject, data_tag, counter_string]
-        out_file.extension =  data_file.extension[:]
 
         try:
             os.mkdir(out_file.partpath(3))
@@ -348,13 +325,8 @@ def afni_mean(in_file_info):
 
     for in_file in in_list:
 
-        out_file = DataFile()
-        out_file.data_path = in_file.data_path
-        out_file.subject = in_file.subject
-        out_file.session = in_file.session
-        out_file.file_type = in_file.file_type
+        out_file = in_file.copy()
         out_file.selectors = [in_file.subject, mean_tag]
-        out_file.extension = in_file.extension[:]
 
         cmd1 = [afni.ThreedTstat(
             outfile=out_file.abspath(),
@@ -362,13 +334,8 @@ def afni_mean(in_file_info):
 
         run_commands(cmd1,out_file)
 
-    out_file_info = DataFile()
-    out_file_info.data_path = in_file_info.data_path
-    out_file_info.subject = in_file_info.subject
-    out_file_info.session = in_file_info.session
-    out_file_info.file_type = in_file_info.file_type
+    out_file_info = in_file_info.copy()
     out_file_info.selectors = [mean_tag]
-    out_file_info.extension = in_file_info.extension
 
     return out_file_info
 
@@ -385,13 +352,8 @@ def afni_mask(in_file_info):
 
     for in_file in in_list:
 
-        out_file = DataFile()
-        out_file.data_path = in_file.data_path
-        out_file.subject = in_file.subject
-        out_file.session = in_file.session
-        out_file.file_type = in_file.file_type
+        out_file = in_file.copy()
         out_file.selectors = [in_file.subject, mask_tag]
-        out_file.extension = in_file.extension[:]
 
         cmd1 = [afni.ThreedAutomask(
             outfile=out_file.abspath(),
@@ -399,13 +361,8 @@ def afni_mask(in_file_info):
 
         run_commands(cmd1,out_file)
 
-    out_file_info = DataFile()
-    out_file_info.data_path = in_file_info.data_path
-    out_file_info.subject = in_file_info.subject
-    out_file_info.session = in_file_info.session
-    out_file_info.file_type = in_file_info.file_type
+    out_file_info = in_file_info.copy()
     out_file_info.selectors = [mask_tag]
-    out_file_info.extension = in_file_info.extension[:]
 
     return out_file_info
 
@@ -475,6 +432,95 @@ def afni_smooth(in_file_info):
             infile = in_file.abspath())]
 
         run_commands(cmd1,out_file)
+
+    out_file_info = in_file_info.copy()
+    out_file_info.selectors = [smooth_tag]
+
+    return out_file_info
+
+
+def afni_t1_align(in_file_info):
+    """align anatomical to functional mean image.
+
+    """
+
+    # collect all the input file names
+    anat_list = get_data_selection(in_file_info)
+
+    for anat_file in anat_list:
+
+        mean_file = anat_file.copy()
+        mean_file.selectors = [mean_tag]
+
+        cut_file = anat_file.copy()
+        cut_file.selectors.append(cut_tag)
+
+        cmd1 = [afni.ThreedZcutup(
+                keep = {'from':80,'to':240},
+                outfile = cut_file_info.abspath(),
+                infile = anat_file_info.abspath())]
+
+        brain_file = anat_file.copy()
+        brain_file.selectors.append(brain_tag)
+
+        cmd2 = [afni.ThreedSkullStrip(
+                outfile = brain_file_info.abspath(),
+                infile = cut_file_info.abspath())]
+
+        meanrs_file = mean_file.copy()
+        meanrs_file.selectors.append('RS')
+
+        cmd3 = [afni.Threedresample(
+                rsmode='Cu'
+                gridfile = brain_file.abspath(),
+                outfile = meanrs_file.abspath(),
+                infile = mean_file.abspath())]
+
+        meanbrain_file = meanrs_file.copy()
+        meanbrain_file.selectors.append('Br')
+
+        cmd4 = [afni.ThreedSkullStrip(
+                outfile = meanbrain_file.abspath(),
+                infile = meanrs_file.abspath())]
+
+        cmd5 = [afni.ThreedBrickStat(
+                automask = True,
+                percentile = [90.0,1,90.0],
+                infile = meanbrain_file.abspath())]
+
+        meanthresh_file = meanbrain_file.copy()
+        meanthresh_file.selectors.append('Thr')
+
+        cmd6 = [afni.Threedcalc(
+                datum = 'float',
+                outfile = meanthresh_file.abspath(),
+                a = meanbrain_file.abspath(),
+                expr = 'min(1,a/-999.0))')]
+
+        t1align_file = brain_file.copy()
+        t1align_file.selectors.append('Align')
+
+        trans_matrix_file = in_file.copy()
+        trans_matrix_file.selectors = [in_file.subject, oned_tag]
+        trans_matrix_file.extension = [d_extension.split(ext_delimiter)]
+
+        cmd7 = [afni.ThreedAllineate(
+                lpc = True,
+                weight_frac = 1.0,
+                verbose = True,
+                warp = 'aff',
+                maxrot = 6,
+                maxshf = 10,
+                source_automask = 4,
+                transform_matrix = trans_matrix_file.abspath(),
+                base = meanthresh_file.abspath(),
+                outfile = t1align_file.abspath(),
+                infile = brain_file.abspath(),
+                weight = meanthresh_file.abspath())]
+
+        cmds = [cmd1, cmd2, cmd3, cmd4, cmd5, cmd6, cmd7]
+
+        run_commands(cmds,out_file)
 
     out_file_info = in_file_info.copy()
     out_file_info.selectors = [smooth_tag]
