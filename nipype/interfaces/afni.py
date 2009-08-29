@@ -86,13 +86,6 @@ class To3d(CommandLine):
 
             """
 
-            if inputssub.has_key('slice_order'):
-                valsub = inputssub.pop('slice_order')
-                out_inputs.append('-time:%s' % valsub)
-            else:
-                valsub=None
-                print('Warning: slice_order required for time_dependencies')
-
             try:
                 slice_order = inputssub.pop('slice_order')
                 out_inputs.append('-time:%s' % slice_order)
