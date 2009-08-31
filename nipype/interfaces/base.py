@@ -118,7 +118,7 @@ class Interface(object):
         """Initialize the inputs Bunch attributes."""
         raise NotImplementedError
 
-    def aggregate_ouputs(self):
+    def aggregate_outputs(self):
         """Called to populate outputs"""
         raise NotImplementedError
 
