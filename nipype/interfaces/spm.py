@@ -2523,20 +2523,26 @@ class SpecifyModel(Interface):
         if self.inputs.outlier_files is not None:
             outfiles = filename_to_list(self.inputs.outlier_files)
             try:
-                outliers.insert(0,np.loadtxt(outfiles[0]))
+                outindices = np.loadtxt(outfiles[0],dtype=int)
+                if outindices.size == 1:
+                    outliers.insert(0,[outindices.tolist()])
+                else:
+                    outliers.insert(0,outindices.tolist())
             except IOError:
-                outliers.insert(0,np.array([]))
+                outliers.insert(0,[])
             for i,rpf in enumerate(outfiles[1:]):
                 try:
-                    out = np.loadtxt(rpf)
+                    out = np.loadtxt(rpf,dtype=int)
                 except IOError:
                     out = np.array([])
                 if self.inputs.concatenate_runs:
                     if len(out)>0:
-                        outliers[0] = np.concatenate((outliers[0],
-                                                      (np.array(out)+sum(nscans[0:(i+1)])).tolist()))
+                        outliers[0].extend((np.array(out)+sum(nscans[0:(i+1)])).tolist())
                 else:
-                    outliers.insert(len(outliers),out)
+                    if out.size == 1:
+                        outliers.insert(len(outliers),[out.tolist()])
+                    else:
+                        outliers.insert(len(outliers),out.tolist())
         if self.inputs.volumes_in_cluster is not None:
             infolist = self._generate_clustered_design(infolist)
         sessinfo = self._generate_standard_design(infolist,
