@@ -262,7 +262,14 @@ class Bet(FSLCommand):
     def _parse_inputs(self):
         """validate fsl bet options"""
         allargs = super(Bet, self)._parse_inputs(skip=('infile','outfile'))
-        allargs.insert(0,self.inputs.outfile)
+        # Generate outfile if not provided based on infile
+        if self.inputs.outfile:
+            outfile = self.inputs.outfile
+        else:
+            pth,fname = os.path.split(self.inputs['infile'])
+            outfile = fname_presuffix(fname,suffix='_bet',
+                                      newpath=self.inputs.get('cwd',pth))
+        allargs.insert(0,outfile)
         allargs.insert(0,self.inputs.infile)
         return allargs
         
