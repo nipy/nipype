@@ -97,7 +97,12 @@ class DataSource(Interface):
         if subjdir is None:
             raise Exception('Subject directory not provided')
         outputs.subject_directory = subjdir
-        info = self.inputs.subject_info[self.inputs.subject_id]
+        if self.inputs.subject_info is None:
+            raise Exception('Subject info not provided')
+        try:
+            info = self.inputs.subject_info[self.inputs.subject_id]
+        except KeyError:
+            raise KeyError("Key [%s] does not exist in subject_info dictionary"%self.inputs.subject_id)
         for idx,type in info:
             outputs[type] = []
             for i in idx:
