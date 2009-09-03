@@ -69,3 +69,11 @@ def test_To3d():
     cmd.inputs.time_dependencies = dict(slice_order='zt', nz=12, nt=150,
                                         tpattern='alt+z')
     yield assert_raises, KeyError, getattr, cmd, 'cmdline'
+    # provide too many parameters for time_dependencies
+    cmd.inputs.time_dependencies = dict(slice_order='zt', nz=12, nt=150,
+                                        tpattern='alt+z', TR=2000, 
+                                        username='foo')
+    yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
+
+
+

@@ -119,8 +119,9 @@ class To3d(CommandLine):
                 raise KeyError('tpattern required for time_dependencies')
 
             if len(inputssub) > 0:
-                print '%s: unsupported time_dependencies options: %s' % (
+                msg = '%s: unsupported time_dependencies options: %s' % (
                     self.__class__.__name__, inputssub.keys())
+                raise AttributeError(msg)
 
         if inputs.has_key('session'):
             val = inputs.pop('session')
