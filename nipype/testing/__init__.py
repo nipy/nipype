@@ -2,6 +2,6 @@
 """
 
 from numpy.testing import *
-import decorators as dec
-from nose.tools import assert_true, assert_false
+# import decorators as dec
+from nose.tools import assert_true, assert_false, assert_not_equal
 
