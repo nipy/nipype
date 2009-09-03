@@ -1,5 +1,5 @@
 import nipype.interfaces.spm as spm
-from nose.tools import assert_true, assert_false, assert_raises, assert_equal, assert_not_equal
+from nipype.testing import *
 
 
 def test_spm_path():

@@ -145,12 +145,11 @@ class FSLCommand(CommandLine):
                     elif value is not False:
                         raise TypeError('Boolean option %s set to %s' % 
                                          (opt, str(value)) )
-                elif type(value) == type([]):
-                    allargs.append(argstr % tuple([x for x in value]))
+                elif type(value) == list:
+                    allargs.append(argstr % tuple(value))
                 else:
                     allargs.append(argstr % value)
             except TypeError, err:
-                # Perhaps these should be proper warnings?
                 warn('For option %s in Fast, %s' % (opt, err.message))
             except KeyError:                   
                 warn('option %s not supported' % (opt))
@@ -246,18 +245,19 @@ class Bet(FSLCommand):
                           flags=None)
 
     opt_map = {
+        'outline':            '-o',
+        'mask':               '-m',
+        'skull':              '-s',
+        'nooutput':           '-n',
         'frac':               '-f %.2f',
-        'center':             '-c %2.3f %2.3f %2.3f',
         'vertical_gradient':  '-g %.2f',
-        'outline':            '--outline',
-        'mask':               '--mask',
-        'skull':              '--skull',
-        'nooutput':           '--nooutput',
-        'radius':             '--radius %f',
-        'threshold':          '--threshold',
-        'mesh':               '--mesh',
-        'verbose':            '--verbose',
+        'radius':             '-r %d', # in mm
+        'center':             '-c %d %d %d', # in voxels
+        'threshold':          '-t',
+        'mesh':               '-e',
+        'verbose':            '-v',
         'flags':              '%s'}
+    # Currently we don't support -R, -S, -B, -Z, -F, -A or -A2
 
     def _parse_inputs(self):
         """validate fsl bet options"""
