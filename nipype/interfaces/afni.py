@@ -4,8 +4,16 @@ __docformat__ = 'restructuredtext'
 
 from nipype.interfaces.base import Bunch, CommandLine
 
+class AFNICommand(CommandLine):
+    @property
+    def cmdline(self):
+        """Generate the command line string from the list of arguments."""
+        allargs = self._parseinputs()
+        allargs.insert(0, self.cmd)
+        return ' '.join(allargs)
 
-class To3d(CommandLine):
+
+class To3d(AFNICommand):
     """Create 3D dataset from 2D image files.
 
     Uses the AFNI command-line tool 'to3d'.
@@ -139,15 +147,8 @@ class To3d(CommandLine):
 
         return out_inputs
 
-    @property
-    def cmdline(self):
-        """Generate the command line string from the list of arguments."""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        return ' '.join(allargs)
 
-
-class Threedrefit(CommandLine):
+class Threedrefit(AFNICommand):
     """
     """
 
@@ -205,15 +206,8 @@ class Threedrefit(CommandLine):
 
         return out_inputs
 
-    @property
-    def cmdline(self):
-        """Generate the command line string from the list of arguments."""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        return ' '.join(allargs)
 
-
-class Threedresample(CommandLine):
+class Threedresample(AFNICommand):
     """
     """
 
@@ -272,15 +266,8 @@ class Threedresample(CommandLine):
 
         return out_inputs
 
-    @property
-    def cmdline(self):
-        """Generate the command line string from the list of arguments."""
-        valid_inputs = self._parseinputs()
-        allargs = [self.cmd] + valid_inputs
-        return ' '.join(allargs)
 
-
-class ThreedTstat(CommandLine):
+class ThreedTstat(AFNICommand):
     """
     """
 
@@ -327,15 +314,8 @@ class ThreedTstat(CommandLine):
 
         return out_inputs
 
-    @property
-    def cmdline(self):
-        """Generate the command line string from the list of arguments."""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        return ' '.join(allargs)
 
-
-class ThreedAutomask(CommandLine):
+class ThreedAutomask(AFNICommand):
     """
     """
 
@@ -382,15 +362,8 @@ class ThreedAutomask(CommandLine):
 
         return out_inputs
 
-    @property
-    def cmdline(self):
-        """Generate the command line string from the list of arguments."""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        return ' '.join(allargs)
 
-
-class Threedvolreg(CommandLine):
+class Threedvolreg(AFNICommand):
     """
     """
 
@@ -462,15 +435,8 @@ class Threedvolreg(CommandLine):
 
         return out_inputs
 
-    @property
-    def cmdline(self):
-        """Generate the command line string from the list of arguments."""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        return ' '.join(allargs)
 
-
-class Threedmerge(CommandLine):
+class Threedmerge(AFNICommand):
     """
     """
 
@@ -526,15 +492,8 @@ class Threedmerge(CommandLine):
 
         return out_inputs
 
-    @property
-    def cmdline(self):
-        """Generate the command line string from the list of arguments."""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        return ' '.join(allargs)
 
-
-class ThreedZcutup(CommandLine):
+class ThreedZcutup(AFNICommand):
     """
     """
 
@@ -601,15 +560,8 @@ class ThreedZcutup(CommandLine):
 
         return out_inputs
 
-    @property
-    def cmdline(self):
-        """Generate the command line string from the list of arguments."""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        return ' '.join(allargs)
 
-
-class ThreedSkullStrip(CommandLine):
+class ThreedSkullStrip(AFNICommand):
     """
     """
 
@@ -656,15 +608,8 @@ class ThreedSkullStrip(CommandLine):
 
         return out_inputs
 
-    @property
-    def cmdline(self):
-        """Generate the command line string from the list of arguments."""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        return ' '.join(allargs)
 
-
-class ThreedBrickStat(CommandLine):
+class ThreedBrickStat(AFNICommand):
     """
     """
 
@@ -737,15 +682,8 @@ class ThreedBrickStat(CommandLine):
 
         return out_inputs
 
-    @property
-    def cmdline(self):
-        """Generate the command line string from the list of arguments."""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        return ' '.join(allargs)
 
-
-class Threedcalc(CommandLine):
+class Threedcalc(AFNICommand):
     """
     """
 
@@ -806,15 +744,8 @@ class Threedcalc(CommandLine):
 
         return out_inputs
 
-    @property
-    def cmdline(self):
-        """Generate the command line string from the list of arguments."""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        return ' '.join(allargs)
 
-
-class ThreedAllineate(CommandLine):
+class ThreedAllineate(AFNICommand):
     """
     """
 
@@ -901,12 +832,4 @@ class ThreedAllineate(CommandLine):
                 self.__class__.__name__, inputs.keys())
 
         return out_inputs
-
-    @property
-    def cmdline(self):
-        """Generate the command line string from the list of arguments."""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        return ' '.join(allargs)
-
 
