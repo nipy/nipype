@@ -364,11 +364,11 @@ class Fast(FSLCommand):
         """sets base command, not editable"""
         return 'fast'
   
-    opt_map = {'number_classes':       '--class %d ',
+    opt_map = {'number_classes':       '--class %d',
                'bias_iters':           '--iter %d',
-               'bias_lowpass':         '--lowpass %d',
+               'bias_lowpass':         '--lowpass %d', # in mm
                'img_type':             '--type %d',
-               'init_seg_smooth':      '--fHard %f',
+               'init_seg_smooth':      '--fHard %.3f',
                'segments':             '--segments',
                'init_transform':       '-a %s',
                # This option is not really documented on the Fast web page:
@@ -381,11 +381,11 @@ class Fast(FSLCommand):
                'nobias':               '--nobias',
                'n_inputimages':        '--channels %d',
                'out_basename':         '--out %s',
-               'use_priors':           '--Prior',
+               'use_priors':           '--Prior', # must also set -a!
                'segment_iters':        '--init %d',
-               'mixel_smooth':         '--mixel %f',
+               'mixel_smooth':         '--mixel %.2f',
                'iters_afterbias':      '--fixed %d',
-               'hyper':                '--Hyper %f',
+               'hyper':                '--Hyper %.2f',
                'verbose':              '--verbose',
                'manualseg':            '--manualseg %s',
                'probability_maps':     '-p'}

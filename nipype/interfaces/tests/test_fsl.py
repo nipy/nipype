@@ -53,8 +53,9 @@ def test_bet():
     # test each of our arguments
     for name, settings in opt_map.items():
         better = fsl.Bet(**{name: settings[1]})
-        yield assert_equal, [settings[0]], \
-                super(fsl.Bet, better)._parse_inputs()
+        # Could also test for containment, but that's less stringent
+        yield assert_equal, super(fsl.Bet, better)._parse_inputs(), \
+            [settings[0]]
     
         
 # test fast
@@ -70,7 +71,41 @@ def test_fast():
     yield assert_not_equal, faster, fasted
     yield assert_equal, fasted.runtime.cmdline, 'fast --verbose infile'
     yield assert_equal, fasted2.runtime.cmdline, 'fast --verbose infile otherfile'
-    
+   
+    # Our options and some test values for them
+    # Should parallel the opt_map structure in the class for clarity
+    opt_map = {'number_classes':       ('--class 4', 4),
+               'bias_iters':           ('--iter 5', 5),
+               'bias_lowpass':         ('--lowpass 15', 15),
+               'img_type':             ('--type 2', 2),
+               'init_seg_smooth':      ('--fHard 0.035', 0.035),
+               'segments':             ('--segments', True),
+               'init_transform':       ('-a xform.mat', 'xform.mat'),
+               'other_priors':         ('-A prior1.nii prior2.nii prior3.nii', 
+                       ('prior1.nii', 'prior2.nii', 'prior3.nii')),
+               'nopve':                ('--nopve', True),
+               'output_biasfield':     ('-b', True),
+               'output_biascorrected': ('-B', True),
+               'nobias':               ('--nobias', True),
+               'n_inputimages':        ('--channels 2', 2),
+               'out_basename':         ('--out fasted', 'fasted'),
+               'use_priors':           ('--Prior', True),
+               'segment_iters':        ('--init 14', 14),
+               'mixel_smooth':         ('--mixel 0.25', 0.25),
+               'iters_afterbias':      ('--fixed 3', 3),
+               'hyper':                ('--Hyper 0.15', 0.15),
+               'verbose':              ('--verbose', True), 
+               'manualseg':            ('--manualseg intensities.nii',
+                       'intensities.nii'),
+               'probability_maps':     ('-p', True),
+              }
+   
+    # test each of our arguments
+    for name, settings in opt_map.items():
+        faster = fsl.Fast(**{name: settings[1]})
+        # Could also test for containment, but that's less stringent
+        yield assert_equal, super(fsl.Fast, faster)._parse_inputs(), \
+                [settings[0]]
 
 #test flirt
 def test_flirt():
