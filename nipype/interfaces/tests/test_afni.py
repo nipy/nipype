@@ -1,7 +1,6 @@
+from nipype.testing import *
+
 from nipype.interfaces import afni
-
-from nose.tools import assert_equal, assert_raises
-
 
 def test_To3d():
     cmd = afni.To3d()
@@ -76,4 +75,23 @@ def test_To3d():
     yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
 
 
+def test_Threedrefit():
+    cmd = afni.Threedrefit()
+    yield assert_equal, cmd.cmdline, '3drefit'
+    # deoblique
+    cmd = afni.Threedrefit()
+    cmd.inputs.deoblique = True
+    yield assert_equal, cmd.cmdline, '3drefit -deoblique'
+    # xorigin
+    cmd = afni.Threedrefit()
+    cmd.inputs.xorigin = 12.34
+    yield assert_equal, cmd.cmdline, '3drefit -xorigin 12.34'
+    # yorigin
+    cmd = afni.Threedrefit()
+    cmd.inputs.yorigin = 12.34
+    yield assert_equal, cmd.cmdline, '3drefit -yorigin 12.34'
+    # zorigin
+    cmd = afni.Threedrefit()
+    cmd.inputs.zorigin = 12.34
+    yield assert_equal, cmd.cmdline, '3drefit -zorigin 12.34'
 
