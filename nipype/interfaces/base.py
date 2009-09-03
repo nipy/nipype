@@ -119,7 +119,10 @@ class Interface(object):
         raise NotImplementedError
 
     def aggregate_outputs(self):
-        """Called to populate outputs"""
+        """Called to populate outputs
+        
+        Currently, search for discussion of this on private e-mails between Dav
+        and Satra (ugh!).  This needs to get in here!"""
         raise NotImplementedError
 
 

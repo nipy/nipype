@@ -122,7 +122,9 @@ class FSLCommand(CommandLine):
         """
         results = self._runner()
         if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
+            pass
+            # Uncomment if implemented
+            # results.outputs = self.aggregate_outputs()
 
         return results        
 
@@ -503,7 +505,8 @@ class Fast(FSLCommand):
         
         results = self._runner()
         if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
+            pass
+            # Once implemented: results.outputs = self.aggregate_outputs()
 
         return results        
 
@@ -849,7 +852,9 @@ class Flirt(FSLCommand):
             
         results = self._runner()
         if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
+            pass
+            # run once implemented
+            # results.outputs = self.aggregate_outputs()
             
         return results 
 
@@ -1013,7 +1018,9 @@ class McFlirt(FSLCommand):
             self.inputs.infile = infile
         results = self._runner()
         if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
+            pass
+            # Uncomment once implemented
+            # results.outputs = self.aggregate_outputs()
         return results 
 
 class Fnirt(FSLCommand):
@@ -1310,7 +1317,9 @@ class Fnirt(FSLCommand):
                                    
         results = self._runner()
         if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
+            pass
+            # Uncomment once implemented
+            # results.outputs = self.aggregate_outputs()
             
         return results 
 
