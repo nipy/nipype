@@ -142,8 +142,9 @@ class To3d(AFNICommand):
             out_inputs.append('%s' % val)
 
         if len(inputs) > 0:
-            print '%s: unsupported options: %s' % (
+            msg = '%s: unsupported options: %s' % (
                 self.__class__.__name__, inputs.keys())
+            raise AttributeError(msg)
 
         return out_inputs
 
@@ -201,11 +202,30 @@ class Threedrefit(AFNICommand):
             out_inputs.append('%s' % val)
 
         if len(inputs) > 0:
-            print '%s: unsupported options: %s' % (
+            msg = '%s: unsupported options: %s' % (
                 self.__class__.__name__, inputs.keys())
+            raise AttributeError(msg)
 
         return out_inputs
 
+    def run(self, infile=None, **inputs):
+        """Execute the command.
+
+        Parameters
+        ----------
+        infile : filename
+            File whose header file will be updated by 3drefit
+        
+        """
+        self.inputs.update(**inputs)
+        if not infile and not self.inputs.infile:
+            raise AttributeError('Threedrefit requires an infile.')
+        if infile:
+            self.inputs.infile = infile
+        results = self._runner()
+        # XXX implement aggregate_outputs
+        return results
+        
 
 class Threedresample(AFNICommand):
     """

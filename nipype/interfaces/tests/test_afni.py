@@ -73,7 +73,10 @@ def test_To3d():
                                         tpattern='alt+z', TR=2000, 
                                         username='foo')
     yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
-
+    # provide unknown parameters
+    cmd = afni.To3d(datatype='anat', foo='bar')    
+    yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
+    
 
 def test_Threedrefit():
     cmd = afni.Threedrefit()
