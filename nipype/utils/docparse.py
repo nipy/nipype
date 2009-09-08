@@ -1,13 +1,23 @@
-"""Module testing code to pull in documentation from command-line tools."""
+"""Utilities to pull in documentation from command-line tools."""
 
-import sys
 import subprocess
 
 from nipype.interfaces import fsl
 
 def grab_doc(cmd):
-    # We need to redirect stderr to stdout for this.  Some of the
-    # docs, like Fast, print the help to stderr instead of stdout.
+    """Run cmd without args and grab documentation.
+
+    Parameters
+    ----------
+    cmd : string
+        Command line string
+
+    Returns
+    -------
+    doc : string
+        The command line documentation
+    """
+
     proc = subprocess.Popen(cmd,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
@@ -16,36 +26,54 @@ def grab_doc(cmd):
     if stderr:
         # A few programs, like fast and fnirt, send their help to
         # stderr instead of stdout.
+        # XXX: Test for error vs. doc in stderr
         return stderr
     return stdout
 
-def fsl_opts():
-    for item in dir(fsl):
-        intrfc = getattr(fsl, item)
-        if hasattr(intrfc, 'opt_map'):
-            print 'Object %s has opt_map:' % str(intrfc)
-            #print '  ', getattr(intrfc, 'opt_map')
-
 def reverse_opt_map(opt_map):
+    """Reverse the key/value pairs of the option map in the interface classes.
+
+    Parameters
+    ----------
+    opt_map : dict
+        Dictionary mapping the attribute name to a command line flag.
+        Each interface class defines these for the command it wraps.
+        
+    Returns
+    -------
+    rev_opt_map : dict
+       Dictionary mapping the flags to the attribute name.
+    """
+
     # For docs, we only care about the mapping from our attribute
     # names to the command-line flags.  The 'v.split()[0]' below
     # strips off the string format characters.
     return dict((v.split()[0], k) for k, v in opt_map.iteritems()
                 if k != 'flags')
 
-def print_parameters(linelist):
-    # print list of documentation lines
-    print 'Parameters\n----------\n',
-    for i in linelist:
-        print i
-
-def print_other_parameters(linelist):
-    # print list of documentation lines
-    print 'Others Parameters\n-----------------\n',
-    for i in linelist:
-        print i
-
 def format_params(paramlist, otherlist=None):
+    """Format the parameters according to the nipy style conventions.
+
+    Since the external programs do not conform to any conventions, the
+    resulting docstrings are not ideal.  But at a minimum the
+    Parameters section is reasonably close.
+
+    Parameters
+    ----------
+    paramlist : list
+        List of strings where each list item matches exactly one
+        parameter and it's description.  These items will go into the
+        'Parameters' section of the docstring.
+    otherlist : list
+        List of strings, similar to paramlist above.  These items will
+        go into the 'Other Parameters' section of the docstring.
+
+    Returns
+    -------
+    doc : string
+        The formatted docstring.
+    """
+
     #paramlist = copy(paramlist)
     #otherlist = copy(otherlist)
     hdr = 'Parameters'
