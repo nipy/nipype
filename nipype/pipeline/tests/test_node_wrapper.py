@@ -5,6 +5,7 @@ from copy import deepcopy
 from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult
 from nipype.utils.filemanip import cleandir
 from tempfile import mkdtemp
+from shutil import rmtree
 
 # nosetests -sv --with-coverage --cover-package=nipype.pipeline.node_wrapper test_node_wrapper.py
 
@@ -182,14 +183,11 @@ def test_output_directory():
 def test_make_output_dir():
     bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True)
     outdir = mkdtemp()
-    outdir1 = os.path.join(outdir,'footestfoo')
+    outdir1 = os.path.join(outdir, 'footestfoo')
     yield assert_equal, bi._make_output_dir(outdir1), os.path.abspath(outdir1)
     dirfunc = lambda : bi._make_output_dir(outdir1)
     yield assert_raises , IOError, dirfunc
-    if os.path.exists(outdir1):
-        os.rmdir(outdir1)
-    if os.path.exists(outdir):
-        os.rmdir(outdir)
+    rmtree(outdir) # Recursively delete the temp directory
 
 def test_repr():
     bi = nw.NodeWrapper(interface=BasicInterface(), name='foo.goo')
