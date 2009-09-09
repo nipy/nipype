@@ -1,8 +1,19 @@
-"""Utilities to pull in documentation from command-line tools."""
+"""Utilities to pull in documentation from command-line tools.
+
+Examples
+--------
+
+# Example building docstring for bet
+# Grab command line documentation
+doc = grab_doc('bet')
+# Reverse flag/attribute options
+opts = reverse_opt_map(fsl.Bet.opt_map)
+# build the docstring
+res = build_doc(doc, opts)
+
+"""
 
 import subprocess
-
-from nipype.interfaces import fsl
 
 def grab_doc(cmd):
     """Run cmd without args and grab documentation.
@@ -94,17 +105,34 @@ def format_params(paramlist, otherlist=None):
 def replace_opts(rep_doc, opts):
     """Replace flags with parameter names.
     
+    This is a simple operation where we replace the command line flags
+    with the attribute names.
+
     Parameters
     ----------
     rep_doc : string
         Documentation string
     opts : dict
-        Dictionary of option attributes and keys
+        Dictionary of option attributes and keys.  Use reverse_opt_map
+        to reverse flags and attrs from opt_map class attribute.
+
+    Returns
+    -------
+    rep_doc : string
+        New docstring with flags replaces with attribute names.
+    
+    Examples
+    --------
+    doc = grab_doc('bet')
+    opts = reverse_opt_map(fsl.Bet.opt_map)
+    rep_doc = replace_opts(doc, opts)
+
     """
 
     # Replace flags with attribute names
     for key, val in opts.iteritems():
         rep_doc = rep_doc.replace(key, val)
+    return rep_doc
 
 def build_doc(doc, opts):
     """Build docstring from doc and options
@@ -116,6 +144,12 @@ def build_doc(doc, opts):
     opts : dict
         Dictionary of option attributes and keys.  Use reverse_opt_map
         to reverse flags and attrs from opt_map class attribute.
+
+    Returns
+    -------
+    newdoc : string
+        The docstring with flags replaced with attribute names and
+        formated to match nipy standards (as best we can).
 
     """
     
@@ -148,11 +182,14 @@ def build_doc(doc, opts):
                 # start with alpha-numeric characters.  We only care
                 # about the flags.
                 flags_doc.append(line)
-    res = format_params(newdoc, flags_doc)
-    return res
+    return format_params(newdoc, flags_doc)
 
-def fsl_docs():
-    """Process all the fsl docs we have so far"""
+def _fsl_docs():
+    """Process all the fsl docs we have so far.  Used for debugging
+    during development.
+    """
+    from nipype.interfaces import fsl
+
     cmdlist = [('bet', 'fsl.Bet'), 
                ('fast', 'fsl.Fast'),
                ('flirt', 'fsl.Flirt'),
@@ -167,16 +204,4 @@ def fsl_docs():
         res = build_doc(doc, opts)
         fsl_doc_list.append((cmd[0], res))
     return fsl_doc_list
-
-def betdoc():
-    """Generate docs for bet."""
-    cmd = 'bet'
-    doc = grab_doc(cmd)
-    opts = reverse_opt_map(fsl.Bet.opt_map)
-    res = build_doc(doc, opts)
-    return res
-
-if __name__ == '__main__':
-    #rep_doc = replace_opts(doc, opts)
-    bet_docs = betdoc()
     
