@@ -10,21 +10,21 @@ def test_spm_path():
 
 def test_reformat_dict_for_savemat():
     mlab = spm.SpmMatlabCommandLine()
-    out = mlab.reformat_dict_for_savemat({'a':{'b':{'c':[]}}})
+    out = mlab._reformat_dict_for_savemat({'a':{'b':{'c':[]}}})
     yield assert_equal,out,[{'a': [{'b': [{'c': []}]}]}]
     
 def test_generate_job():
     mlab = spm.SpmMatlabCommandLine()
-    out = mlab.generate_job()
+    out = mlab._generate_job()
     yield assert_equal,out,''
     contents = {'contents':[1,2,3,4]}
-    out = mlab.generate_job(contents=contents)
+    out = mlab._generate_job(contents=contents)
     yield assert_equal,out,'.contents(1) = 1;\n.contents(2) = 2;\n.contents(3) = 3;\n.contents(4) = 4;\n'
     
 def test_make_matlab_command():
     mlab = spm.SpmMatlabCommandLine()
     contents = {'contents':[1,2,3,4]}
-    cmdline,script = mlab.make_matlab_command('jobtype','jobname',[contents])
+    cmdline,script = mlab._make_matlab_command('jobtype','jobname',[contents])
     yield assert_equal,cmdline,'matlab -nodesktop -nosplash -r "pyscript_jobname;exit" '
     yield assert_equal,'jobs{1}.jobtype{1}.jobname{1}.contents(3) = 3;' in script, True
 
