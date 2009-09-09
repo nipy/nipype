@@ -231,8 +231,6 @@ class NodeWrapper(object):
     def _make_output_dir(self, outdir):
         """Make the output_dir if it doesn't exist, else raise an exception
         """
-        # This needs to be changed to update dynamically based on a hash of
-        # CURRENT instance attributes
         odir = os.path.abspath(outdir)
         if os.path.exists(outdir):
             raise IOError('Directory %s exists'%(outdir))

@@ -4,6 +4,7 @@ import os
 from copy import deepcopy
 from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult
 from nipype.utils.filemanip import cleandir
+from tempfile import mkdtemp
 
 # nosetests -sv --with-coverage --cover-package=nipype.pipeline.node_wrapper test_node_wrapper.py
 
@@ -156,5 +157,44 @@ def test_run_interface():
     if os.path.exists(outdir):
         cleandir(outdir)
         os.rmdir(outdir)
+
+def test_update():
+    bi = nw.NodeWrapper(interface=BasicInterface())
+    bi.update(inputs1=2)
+    yield assert_equal, bi.inputs.inputs1, 2
+
+def test_hash_inputs():
+    bi = nw.NodeWrapper(interface=BasicInterface())
+    hashval = bi.hash_inputs()
+    # this will fail if you change the input structure of the basic
+    # interface class above. make sure to fix this in that case.
+    yield assert_equal, hashval, 'b3c82a2321f1e3555daa9bc6e8d7ba04'
+
+def test_output_directory():
+    bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True)
+    odir = bi._output_directory()
+    outdir = bi.output_directory_base
+    yield assert_equal, odir, os.path.join(outdir,bi.name)
+    if os.path.exists(outdir):
+        cleandir(outdir)
+        os.rmdir(outdir)
+
+def test_make_output_dir():
+    bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True)
+    outdir = mkdtemp()
+    outdir1 = os.path.join(outdir,'footestfoo')
+    yield assert_equal, bi._make_output_dir(outdir1), os.path.abspath(outdir1)
+    dirfunc = lambda : bi._make_output_dir(outdir1)
+    yield assert_raises , IOError, dirfunc
+    if os.path.exists(outdir1):
+        os.rmdir(outdir1)
+    if os.path.exists(outdir):
+        os.rmdir(outdir)
+
+def test_repr():
+    bi = nw.NodeWrapper(interface=BasicInterface(), name='foo.goo')
+    yield assert_equal, repr(bi), 'foo.goo'
+    
+
 
 
