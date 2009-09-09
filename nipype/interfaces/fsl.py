@@ -184,6 +184,7 @@ class Bet(FSLCommand):
         return 'bet'
 
     def inputs_help(self):
+        """Print command line documentation for BET."""
         print get_doc(self.cmd, self.opt_map)
 
     def _populate_inputs(self):
@@ -299,18 +300,16 @@ class Bet(FSLCommand):
 
 
 class Fast(FSLCommand):
-    """use fsl fast for segmenting, bias correction
+    """Use FSL FAST for segmenting and bias correction.
 
-    Options
-    -------
-    see  
-    fsl.Fast().inputs_help()
-    
+    To print out the command line help, use:
+        Fast().inputs_help()
+
     Example
     -------
+    >>> fsl.Fast().inputs_help()
     >>> faster = fsl.Fast(out_basename = 'myfasted')
     >>> fasted = faster.run(['file1','file2'])
-    >>> fsl.Fast().inputs_help()
 
     >>> faster = fsl.Fast(infiles=['filea','fileb'], 
                           out_basename = 'myfasted')
@@ -349,63 +348,8 @@ class Fast(FSLCommand):
                'probability_maps':     '-p'}
 
     def inputs_help(self):
-        doc = """
-        POSSIBLE OPTIONS
-        -----------------
-        (all default to None and are unset)
-        infiles : list
-            files to run on ['/path/to/afile', /path/to/anotherfile']
-            can be set at runtime  .run(['/path/to/filea', 'fileb'])
-        number_classes : int
-            number of tissue-type classes, (default=3)
-        bias_iters : int
-            number of main-loop iterations during bias-field removal (default=4)
-        bias_lowpass : int
-            bias field smoothing extent (FWHM) in mm (default=20)
-        img_type : int
-            type of image 1=T1, 2=T2, 3=PD; (default=T1)
-        init_seg_smooth : float
-            initial segmentation spatial smoothness (during bias field
-            estimation); default=0.02
-        segments : Boolean
-            outputs a separate binary image for each tissue type
-        init_transform : string filename
-            initialise using priors; you must supply a FLIRT transform
-            <standard2input.mat>
-        other_priors : tuple of strings (filenames)
-            <prior1> <prior2> <prior3>    alternative prior images
-        nopve :Boolean
-            turn off PVE (partial volume estimation)
-        output_biasfield : Boolean
-            output estimated bias field
-        output_biascorrected : Boolean
-            output bias-corrected image
-        nobias : Boolean
-            do not remove bias field
-        n_inputimages : int
-            number of input images (channels); (default 1)
-        out_basename: string <filename>
-            output basename for output images
-        use_priors : Boolean
-            use priors throughout; you must also set the init_transform option
-        segment_iters : int
-            number of segmentation-initialisation iterations; (default=15)
-        mixel_smooth : float
-            spatial smoothness for mixeltype; (default=0.3)
-        iters_afterbias : int
-            number of main-loop iterations after bias-field removal; (default=4)
-        hyper : float
-            segmentation spatial smoothness; (default=0.1)
-        verbose : Boolean
-            switch on diagnostic messages
-        manualseg : string <filename>
-            Filename containing intensities
-        probability_maps : Boolean
-            outputs individual probability maps
-
-        flags = unsupported flags, use at your own risk  ['-R']
-        """
-        print doc
+        """Print command line documentation for FAST."""
+        print get_doc(self.cmd, self.opt_map)
 
     def _populate_inputs(self):
         self.inputs = Bunch(infiles=None,
