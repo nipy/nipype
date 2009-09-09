@@ -8,6 +8,6 @@ setup(name='Nipype Tools',
       author='Nipype Developers',
       author_email='nipy-devel@neuroimaging.scipy.org',
       url='http://nipy.sourceforge.net',
-      scripts=['./nipype_nightly.py']
+      scripts=['./nipype_nightly.py', './report_coverage.py']
      )
 
