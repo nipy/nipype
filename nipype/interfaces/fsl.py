@@ -675,11 +675,11 @@ class Flirt(FSLCommand):
 class McFlirt(FSLCommand):
     """Use FSL MCFLIRT to do within-modality motion correction.
 
-    For complete details, see the `MCFLIRT Documentation 
+    For complete details, see the `MCFLIRT Documentation. 
     <http://www.fmrib.ox.ac.uk/fsl/mcflirt/index.html>`_
 
     To print out the command line help, use:
-        Bet().inputs_help()
+        McFlirt().inputs_help()
     
     Example
     --------
@@ -779,7 +779,7 @@ class McFlirt(FSLCommand):
 class Fnirt(FSLCommand):
     """Use FSL FNIRT for non-linear registration.
     
-    For complete details, see the `FLIRT Documentation
+    For complete details, see the `FNIRT Documentation.
     <http://www.fmrib.ox.ac.uk/fsl/fnirt/index.html>`_
 
     To print out the command line help, use:
@@ -799,7 +799,7 @@ class Fnirt(FSLCommand):
         return 'fnirt'
     
     def inputs_help(self):
-        """Print command line documentation for BET."""
+        """Print command line documentation for FNIRT."""
         print get_doc(self.cmd, self.opt_map)
 
     def _populate_inputs(self):
