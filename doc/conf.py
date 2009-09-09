@@ -95,6 +95,12 @@ pygments_style = 'sphinx'
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
 
+# -- Sphinxext configuration ---------------------------------------------------
+
+# Specify top-to-bottom layout of inheritance diagrams
+# I've tried setting randkir to LR and TB and see no difference. ???
+inheritance_graph_attrs = dict(rotate=1) #dict(rankdir="LR")
+
 # Flag to show todo items in rendered output
 todo_include_todos = True
 
