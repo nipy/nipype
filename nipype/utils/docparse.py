@@ -6,7 +6,7 @@ Examples
 # Example building docstring for bet
 # Grab command line documentation
 doc = grab_doc('bet')
-# Reverse flag/attribute options
+# Reverse attribute/flag options so we have flags as keys
 opts = reverse_opt_map(fsl.Bet.opt_map)
 # build the docstring
 res = build_doc(doc, opts)
@@ -102,38 +102,6 @@ def format_params(paramlist, otherlist=None):
         otherparams = '\n'.join(otherlist)
     return ''.join([params, otherparams])
 
-def replace_opts(rep_doc, opts):
-    """Replace flags with parameter names.
-    
-    This is a simple operation where we replace the command line flags
-    with the attribute names.
-
-    Parameters
-    ----------
-    rep_doc : string
-        Documentation string
-    opts : dict
-        Dictionary of option attributes and keys.  Use reverse_opt_map
-        to reverse flags and attrs from opt_map class attribute.
-
-    Returns
-    -------
-    rep_doc : string
-        New docstring with flags replaces with attribute names.
-    
-    Examples
-    --------
-    doc = grab_doc('bet')
-    opts = reverse_opt_map(fsl.Bet.opt_map)
-    rep_doc = replace_opts(doc, opts)
-
-    """
-
-    # Replace flags with attribute names
-    for key, val in opts.iteritems():
-        rep_doc = rep_doc.replace(key, val)
-    return rep_doc
-
 def build_doc(doc, opts):
     """Build docstring from doc and options
 
@@ -183,6 +151,38 @@ def build_doc(doc, opts):
                 # about the flags.
                 flags_doc.append(line)
     return format_params(newdoc, flags_doc)
+
+def replace_opts(rep_doc, opts):
+    """Replace flags with parameter names.
+    
+    This is a simple operation where we replace the command line flags
+    with the attribute names.
+
+    Parameters
+    ----------
+    rep_doc : string
+        Documentation string
+    opts : dict
+        Dictionary of option attributes and keys.  Use reverse_opt_map
+        to reverse flags and attrs from opt_map class attribute.
+
+    Returns
+    -------
+    rep_doc : string
+        New docstring with flags replaces with attribute names.
+    
+    Examples
+    --------
+    doc = grab_doc('bet')
+    opts = reverse_opt_map(fsl.Bet.opt_map)
+    rep_doc = replace_opts(doc, opts)
+
+    """
+
+    # Replace flags with attribute names
+    for key, val in opts.iteritems():
+        rep_doc = rep_doc.replace(key, val)
+    return rep_doc
 
 def _fsl_docs():
     """Process all the fsl docs we have so far.  Used for debugging
