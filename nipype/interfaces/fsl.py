@@ -164,9 +164,11 @@ class FSLCommand(CommandLine):
 class Bet(FSLCommand):
     """Use FSL BET command for skull stripping.
 
+    For complete details, see the `BET Documentation. 
+    <http://www.fmrib.ox.ac.uk/fsl/bet/index.html>`_
+
     To print out the command line help, use:
         Bet().inputs_help()
-
 
     Examples
     --------
@@ -303,6 +305,9 @@ class Bet(FSLCommand):
 class Fast(FSLCommand):
     """Use FSL FAST for segmenting and bias correction.
 
+    For complete details, see the `FAST Documentation. 
+    <http://www.fmrib.ox.ac.uk/fsl/fast/index.html>`_
+
     To print out the command line help, use:
         Fast().inputs_help()
 
@@ -426,6 +431,9 @@ class Fast(FSLCommand):
 class Flirt(FSLCommand):
     """Use FSL FLIRT for coregistration.
     
+    For complete details, see the `FLIRT Documentation. 
+    <http://www.fmrib.ox.ac.uk/fsl/flirt/index.html>`_
+
     To print out the command line help, use:
         Flirt().inputs_help()
 
