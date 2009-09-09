@@ -113,19 +113,18 @@ def test_run():
     bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True)
     bi.run()
     yield assert_equal, bi.get_output('output1'), ['ran',None]
-
-    bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True,base_directory=os.environ['TMPDIR'])
-    outdir = os.path.join(os.environ['TMPDIR'],bi.name)
+    basedir = os.environ.get('TMPDIR', mkdtemp())
+    bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True, 
+                        base_directory=basedir)
+    outdir = os.path.join(basedir, bi.name)
     if os.path.exists(outdir):
-        cleandir(outdir)
-        os.rmdir(outdir)
+        rmtree(outdir)
     bi.run()
     yield assert_equal, bi.get_output('output1'), ['ran',None]
     bi.run()
     yield assert_equal, bi.get_output('output1'), ['ran',None]
     if os.path.exists(outdir):
-        cleandir(outdir)
-        os.rmdir(outdir)
+        rmtree(outdir)
 
     bi.set_input('returncode',1)
     yield assert_raises, Exception, bi.run
@@ -143,12 +142,12 @@ def test_run_interface():
     bi.set_input('input1',1)
     result = bi.run()
     yield assert_equal, len(result.outputs.output1), 1
-
-    bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True,base_directory=os.environ['TMPDIR'])
-    outdir = os.path.join(os.environ['TMPDIR'],bi.name)
+    basedir = os.environ.get('TMPDIR', mkdtemp())
+    bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True, 
+                        base_directory=basedir)
+    outdir = os.path.join(basedir, bi.name)
     if os.path.exists(outdir):
-        cleandir(outdir)
-        os.rmdir(outdir)
+        rmtree(outdir)
     bi.iterfield = ['input1']
     bi.set_input('input1',[1,2,3,4])
     result = bi.run()
@@ -156,8 +155,7 @@ def test_run_interface():
     result = bi.run()
     yield assert_equal, len(result.outputs.output1), 4
     if os.path.exists(outdir):
-        cleandir(outdir)
-        os.rmdir(outdir)
+        rmtree(outdir)
 
 def test_update():
     bi = nw.NodeWrapper(interface=BasicInterface())
@@ -177,8 +175,7 @@ def test_output_directory():
     outdir = bi.output_directory_base
     yield assert_equal, odir, os.path.join(outdir,bi.name)
     if os.path.exists(outdir):
-        cleandir(outdir)
-        os.rmdir(outdir)
+        rmtree(outdir)
 
 def test_make_output_dir():
     bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True)
@@ -186,8 +183,9 @@ def test_make_output_dir():
     outdir1 = os.path.join(outdir, 'footestfoo')
     yield assert_equal, bi._make_output_dir(outdir1), os.path.abspath(outdir1)
     dirfunc = lambda : bi._make_output_dir(outdir1)
-    yield assert_raises , IOError, dirfunc
-    rmtree(outdir) # Recursively delete the temp directory
+    yield assert_raises, IOError, dirfunc
+    if os.path.exists(outdir):
+        rmtree(outdir)
 
 def test_repr():
     bi = nw.NodeWrapper(interface=BasicInterface(), name='foo.goo')
