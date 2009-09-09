@@ -22,6 +22,7 @@ from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (Bunch, CommandLine, 
                                     load_template, InterfaceResult)
 from nipype.utils import setattr_on_read
+from nipype.utils.docparse import get_doc
 
 import warnings
 warn = warnings.warn
@@ -160,13 +161,10 @@ class FSLCommand(CommandLine):
 
 
 class Bet(FSLCommand):
-    """use fsl bet for skull stripping
+    """Use FSL BET command for skull stripping.
 
-    Options
-    -------
-
-    To see optianl arguments
-    Bet().inputs_help()
+    To print out the command line help, use:
+        Bet().inputs_help()
 
 
     Examples
@@ -186,49 +184,7 @@ class Bet(FSLCommand):
         return 'bet'
 
     def inputs_help(self):
-        """
-        Mandatory Parameters
-        --------------------
-        (all default to None and are unset)
-        
-        infile : /path/to/file
-            file to skull strip 
-
-        Optional Parameters
-        -------------------
-        (all default to None and are unset)
-        
-        outfile : /path/to/outfile
-            path/name of skullstripped file
-        outline : Bool
-            generate brain surface outline overlaid onto original image
-        mask : Bool
-            generate binary brain mask
-        skull : Bool	
-            generate approximate skull image
-        nooutput : Bool	
-            don't generate segmented brain image output
-        frac : float
-            fractional intensity threshold (0->1); fsldefault=0.5; 
-            smaller values give larger brain outline estimates
-        vertical_gradient : float		
-            vertical gradient in fractional intensity threshold (-1->1); fsldefault=0
-            positive values give larger brain outline at bottom, smaller at top
-        radius : float	
-            head radius (mm not voxels); initial surface sphere is set to half of this
-        center : list of ints [x,y,z]
-            centre-of-gravity (voxels not mm) of initial mesh surface.
-        threshold : Bool	
-            apply thresholding to segmented brain image and mask
-        mesh : Bool	
-            generates brain surface as mesh in vtk format
-        verbose : Bool	
-            switch on diagnostic messages
-	
-        flags = unsupported flags, use at your own risk  ['-R']
-
-        """
-        print self.inputs_help.__doc__
+        print get_doc(self.cmd, self.opt_map)
 
     def _populate_inputs(self):
         self.inputs = Bunch(infile=None,
