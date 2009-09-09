@@ -105,6 +105,7 @@ def fsloutputtype(ftype=None):
 
 class FSLCommand(CommandLine):
     '''General support for FSL commands'''
+
     @property
     def cmdline(self):
         """validates fsl options and generates command line argument"""
@@ -423,12 +424,11 @@ class Fast(FSLCommand):
 
 
 class Flirt(FSLCommand):
-    """use fsl flirt for coregistration
+    """Use FSL FLIRT for coregistration.
     
-    Options
-    -------
-    fsl.Flirt().inputs_help()
-    
+    To print out the command line help, use:
+        Flirt().inputs_help()
+
     Examples
     --------
     
@@ -448,13 +448,11 @@ class Flirt(FSLCommand):
     
     >>> fls.Flirt().inputs_help()
     
-    
     >>> flirter = fsl.Flirt(infile='subject.nii',
     reference='template.nii',
     outfile='moved_subject.nii',
     outmatrix='subject_to_template.mat')
     >>> flitrd = flirter.run()
-    
     
     """
         
@@ -492,94 +490,10 @@ class Flirt(FSLCommand):
                'verbose':            '-v %d',
                'flags':              '%s'}
 
-
-    #@property
-    #def cmdline(self):
-    #    """validates fsl options and generates command line argument"""
-    #    valid_inputs = self._parse_inputs()
-    #    allargs = self.args + valid_inputs
-    #    return ' '.join(allargs)
-  
-        
     def inputs_help(self):
-        doc = """
+        """Print command line documentation for FLIRT."""
+        print get_doc(self.cmd, self.opt_map)
 
-        POSSIBLE OPTIONS
-        -----------------
-        (all default to None and are unset)
-        infile : /path/to/file
-            file to be moved/registered into space of
-            reference image
-        outfile : /path/to/newfilename
-            file to save the moved/registered image
-        reference : /path/to/reference_image
-            file of reference image
-        outmatrix : /path/to/matrixfile.mat
-            file that holds transform mapping infile to reference
-        datatype : string {'char','short','int','float','double'}
-            (force output data type)
-        cost : string {'mutualinfo','corratio','normcorr','normmi','leastsq','labeldiff'}  
-            (fsldefault is corratio)
-        searchcost : string 
-            {'mutualinfo','corratio','normcorr','normmi','leastsq','labeldiff'}  
-            (FSL default = 'corratio')
-        usesqform : Bool
-            (initialise using appropriate sform or qform)
-        displayinit : Bool
-            (display initial matrix)
-        anglerep :string {'quaternion','euler'}       
-            (fsldefault is euler)
-        interp : string  {'trilinear','nearestneighbour','sinc'}  
-            (final interpolation: fsldefault = trilinear)
-        sincwidth : int
-            full-width in voxels  (fsldefault is 7)
-        sincwindow : string {'rectangular','hanning','blackman'}
-            function on the data in the sinc window
-        bins : int 
-            number of histogram bins   (fsldefault is 256)
-        dof : int
-            number of transform dofs (degrees of freedom)(fsldefault is 12)
-        noresample : Bool                        
-            (do not change input sampling)
-        forcescaling : Bool                      
-            (force rescaling even for low-res images)
-        minsampling : float
-            vox_dim (set minimum voxel dimension for sampling (in mm))
-        applyisoxfm : float <scale>               
-            used with applyxfm only! but forces isotropic resampling)
-        paddingsize : int 
-            number of voxels (for applyxfm: interpolates outside image by size)
-        searchrx : list of ints [-90,90]
-            [<min_angle> <max_angle>]  (angles in degrees: fsldefault is -90 90)
-        searchry : list of ints [-90, 90]
-            [<min_angle> <max_angle>]  (angles in degrees: default is -90 90)
-        searchrz : list of ints [-90,90]
-            [<min_angle> <max_angle>]  (angles in degrees: default is -90 90)
-        nosearch : Bool
-            (sets all angular search ranges to 0 0)
-        coarsesearch : int <delta_angle>        
-            (angle in degrees: fsldefault is 60)
-        finesearch : int <delta_angle>          
-            (angle in degrees: default is 18)
-        refweight : string  <volume filename>                
-            (use weights for reference volume)
-        inweight : string <volume filename>                 
-            (use weights for input volume)
-        noclamp : Bool
-            (do not use intensity clamping)
-        noresampblur : Bool
-            (do not use blurring on downsampling)
-        rigid2D : Bool
-            (use 2D rigid body mode - ignores dof)
-        verbose : int <num>
-            controls amount of output (0 is least and is fsldefault)
-        
-        flags : list 
-            unsupported flags, use at your own risk!!  
-            flags = ['-i']
-
-        """
-        print doc
     def _populate_inputs(self):
         self.inputs = Bunch(infile=None,
                             outfile=None,
@@ -759,11 +673,13 @@ class Flirt(FSLCommand):
         return results 
 
 class McFlirt(FSLCommand):
-    """ use fsl mcflirt to do within-modality motion correction
-    
-    Options
-    -------
-    fsl.McFlirt().inputs_help()
+    """Use FSL MCFLIRT to do within-modality motion correction.
+
+    For complete details, see the `MCFLIRT Documentation 
+    <http://www.fmrib.ox.ac.uk/fsl/mcflirt/index.html>`_
+
+    To print out the command line help, use:
+        Bet().inputs_help()
     
     Example
     --------
@@ -778,65 +694,9 @@ class McFlirt(FSLCommand):
         return 'mcflirt'
     
     def inputs_help(self):
-        doc = """
+        """Print command line documentation for MCFLIRT."""
+        print get_doc(self.cmd, self.opt_map)
 
-        POSSIBLE OPTIONS    
-        -----------------
-        (all default to None and are unset)
- 
-        http://www.fmrib.ox.ac.uk/fsl/mcflirt/index.html
-
-        ++++++
-        infile: <filename>
-            4D timseries volume
-        outfile: <filename>
-            file to save aligned images
-            (FSL default is <infile>_mcf)
-        cost: string
-            string representing cost function to use
-            ['mutualinfo','woods','corratio','normcorr',
-            'normmi','leastsquares']
-            (FSL default is normcorr)
-        bins: int
-            number of histogram bins
-            (FSL default is 256)
-        dof: int
-            number of transform dofs	
-            (FSL default is 6)
-        refvol: int
-            volume number of image to use as reference
-            (FSL default is middle volume)
-        scaling: int
-	    (FSL default is 6.0)
-        smooth: float
-            controls smoothing amount of cost function
-            (FSL default is 1.0)
-        rotation: float
-            specify scaling factor for rotation optimization tolerances
-        verbose: int	
-            (FSL default is 0 and least)
-        stages: int
-	    number of search stages	
-            (FSL default is 3) 
-            4 specifies final sinc interpolation
-        init: string <filename>	
-            initial transform matrix to apply to all vols
-        usegradient: Boolean
-	    run search on gradient images
-        usecontour: Boolean
-	    run search on contour images
-        meanvol: Boolean
-	    register timeseries to mean volume (overrides -refvol option)
-        statsimgs: Boolean
-	    produce variance and std. dev. images
-        savemats: Boolean
-	    save transformation matricies in subdirectory outfilename.mat
-        saveplots: Boolean
-	    save transformation parameters in file outputfilename.par
-        report: Boolean
-	    report progress to screen
-       """
-        print doc
     opt_map = {
         'outfile':     '-out %s',
         'cost':        '-cost %s',
@@ -878,13 +738,6 @@ class McFlirt(FSLCommand):
             saveplots=   None,
             report=      None)
         
-    @property
-    def cmdline(self):
-        """validates fsl options and generates command line argument"""
-        allargs = self._parse_inputs()
-        allargs.insert(0, self.cmd)
-        return ' '.join(allargs)
-    
     def _parse_inputs(self):
         """Call our super-method, then add our input files"""
         allargs = super(McFlirt, self)._parse_inputs(skip=('infile'))
@@ -924,13 +777,14 @@ class McFlirt(FSLCommand):
         return results 
 
 class Fnirt(FSLCommand):
-    """use fsl fnirt for non-linear registration
+    """Use FSL FNIRT for non-linear registration.
     
-    Options
-    -------
-    see  
-    fsl.Fnirt().inputs_help()
-    
+    For complete details, see the `FLIRT Documentation
+    <http://www.fmrib.ox.ac.uk/fsl/fnirt/index.html>`_
+
+    To print out the command line help, use:
+        Fnirt().inputs_help()
+
     Example
     -------
     >>> fnirter = fsl.Fnirt(affine='affine.mat')
@@ -945,178 +799,9 @@ class Fnirt(FSLCommand):
         return 'fnirt'
     
     def inputs_help(self):
-        doc = """
+        """Print command line documentation for BET."""
+        print get_doc(self.cmd, self.opt_map)
 
-        POSSIBLE OPTIONS
-        -----------------
-        (all default to None and are unset)
- 
-        http://www.fmrib.ox.ac.uk/fsl/fnirt/index.html#fnirt_parameters
-
-        Parameters Specifying Input Files
-        +++++++++++++++++++++++++++++++++
-        infile : <filename>
-            file that gets moved/warped
-            can be set at .run(infile='infile')
-        reference : <filename>
-            file that specifies set space that infile
-            gets moved/warped to
-            can be set at .run(reference='reference')
-        affine : <filename>
-            name of file containing affine transform
-	initwarp : <filename>
-            name of file containing initial non-linear warps
-	initintensity : <filename>
-      	    name of file/files containing initial intensity maping
-	configfile : <filename> 
-	    Name of config file specifying command line arguments
-	referencemask : <filename>
-	    name of file with mask in reference space
-	imagemask : <filename>	
-            name of file with mask in input image space
-
-        Parameters Specifying Output Files
-        ++++++++++++++++++++++++++++++++++
-	fieldcoeff_file: <filename>
-	    name of output file with field coefficients
-	outimage : <filename>
-	    name of output image
-	fieldfile : <filename>
-	    name of output file with field
-	jacobianfile : <filename>
-	    name of file for writing out the Jacobian of the field 
-            (for diagnostic or VBM purposes)
-	reffile : <filename>	
-            name of file for writing out intensity modulated reference
-            (for diagnostic purposes)
-	intensityfile : <filename>
-	    name of files for writing information pertaining to 
-            intensity mapping
-	logfile : <filename>
-	    Name of log-file
-
-        verbose	: Bool
-            If True, Print diagonostic information while running
-
-        Parameters Specified "Once and for All"
-        +++++++++++++++++++++++++++++++++++++++
-        jacobian_range : [float,float]	
-            Allowed range of Jacobian determinants, (FSLdefault 0.01,100.0)
-            [0.01,100] generally ensures diffeomorphism (mapping invertible, 
-            and there is exactly one position V for each position in U 
-            (with mapping U -> V)
-            [-1] allows jacobians to take any value (pos or neg)
-            [0.2,5] suggested for VBM where the Jacobians are used to modulate 
-            tissue probabilities, otherwise may have non-normal distributions
-	warp_resolution: list [10.0,10.0,10.0]
-	    (approximate) resolution (in mm) of warp basis 
-            in x-, y- and z-direction, (FSLdefault 10,10,10)
-	splineorder : int
-	    Order of spline, 2->Qadratic spline, 3->Cubic spline. 
-            (FSLDefault=3)
-	implicit_refmask : Bool
-	    If =True, use implicit masking based on value in --ref image. 
-            (FSLDefault =1; True)
-            Specifies a value implying that we are outside the valid FOV. 
-            Typically that value will be zero, otherwise use
-            implicit_refmaskval to specify other value  . 
-            Occasionally a software will use some other value eg(NaN, 1024) 
-	implicit_imgmask : Bool
-	    If =1, use implicit masking based on value in --in image, 
-            (FSLDefault =1; True) See explanation for implicit_refmask above
-	implicit_refmaskval : float
-	    Value to mask out in --ref image. FSLDefault =0.0
-	implicit_imgmaskval : float
-	    Value to mask out in --in image. FSLDefault =0.0
-        ssqlambda : Bool	
-            If True (=1), lambda is weighted by current sum of squares
-            (FSLdefault =True), helps avoid solutions getting caught in 
-            local minima
-        regularization_model : string  {'membrane_energy', 'bending_energy'}
-	    Model for regularisation of warp-field, 
-            (FSLdefault 'bending_energy')
-            Helps keep points close together in original image,
-            close together in the warped image
-        refderiv : Bool
- 	    If True (1), reference image is used to calculate derivatives. 
-            (FSLDefault = 0 ; False) Limited applicability
-        intensity_model : string {'none', 'global_linear', 'global_non_linear',
-            'local_linear', 'global_non_linear_with_bias', 'local_non_linear'}	
-            Model for intensity-mapping: The purpose is to model intensity 
-            differences between reference and image to avoid these affecting 
-            the estimation of the warps. Modelling the intensity involves 
-            extra estimation parameters (in addition to modelling the warps) 
-            and willincrease both execution time and memory requirements. 
-        intorder : int 	
-            Determines the order of a polynomial that models a curvilinear 
-            relationship between the intensities in (reference, image)
-            (FSLdefault =  5)
-        bias_resolution: [int, int, int]
-            Determines the knot-spacing for splines used to model a bias-field.
-            Relevant for intensity_models {'local_linear', 
-            'global_non_linear_with_bias','local_non_linear'} 
-            (FSLdefault=[50,50,50])
-        bias_lambda : int
-            Determines relative weight of sum-of-squared differences and  
-            bending energy of the bias-field. Similar to the lambda paramter, 
-            but for the bias-field rather than the warp-fields. 
-            (FSLDefault is 10000) 
-        hessian_datatype : string {'double', 'float'}
-	    Precision for representing Hessian, Changing to float decreases
-            amount of RAM needed to store Hessian allowing slightly higher 
-            warp-resolution. Double used for most testing and validation 
-            (FSL default = 'double') 
-
-        Parameters Specified Once for each Sub-Sampling Level
-        +++++++++++++++++++++++++++++++++++++++++++++++++++++
-        Fnirt uses a multi-resolution, subsampling approach to
-        identify best warps, starting at a coarse level, refining at
-        higher resolutions.
-        These parameters need to be set for each level 
-        (typically 3 levels are used; greater levels = greater processing time)
-
-        sub_sampling : list [4,2,1] 
-	    sub-sampling scheme, default 4,2,1
-            means image will be upsampled (factor of 4) at level one,
-            upsampled (factor of 2) at level two, and
-            then (full resolution) at level three
-        max_iter : list [5,5,5]
-	    Maximum number of non-linear iterations, at each level
-            (FSLdefault 5,5,5)
-	referencefwhm : list [4,2,1]
-	    FWHM (in mm) of gaussian smoothing kernel for ref volume, 
-            Smoothing should mirror sub_sampling
-            sub_sampling = [4,2,1], referencefwhm = [8,4,1]
-            (FSLdefault 4,2,0,0) reference often smooth, so can be less than image
-	imgfwhm : list [6.0,4.0,2.0,2.0]
-	    FWHM (in mm) of gaussian smoothing kernel for input volume, 
-            Smoothing should mirror sub_sampling
-            sub_sampling = [4,2,1], imgfwhm = [10,6,2]
-            (FSLdefault 6,4,2,2)
-	lambdas : list [300, 75, 30]
-            Specifies relative weighting of the sum-of-squared differences 
-            and the regularisation (smoothness) of the warps.
-            FSLdefault depends on ssqlambda and regularization_model switches.
-            Different "types" of data require different values
-            You can specify **one** value, but best to modulate with 
-            sub_sampling
-        estintensity : list [1,1,0]
-            Determines if the parameters of the chosen intesity-model should be 
-            estimated at each level if intensity_model is not None
-            eg [1,1,0] Estimates at first two levels but not at last level
-            assuming estimates at that level are fairly correct
-        applyrefmask : list [1,1,1]
-	    Use specified refmask at each level
-            (FSLdefault 1 (true)) eg [0,0,1] to not use brain mask for 
-            initial coarse level registration, as extra-cranial tissue may
-            provide information useful at initial steps
-	applyimgmask : list [1,1,1]
-	    Use specified imagemask at each level
-            (FSLdefault 1 (true)) eg [0,0,1] to not use brain mask for 
-            initial coarse level registration, as extra-cranial tissue may
-            provide information useful at initial steps
-        """
-        print doc
     def _populate_inputs(self):
         self.inputs = Bunch(infile=None,
                           reference=None,
@@ -1171,6 +856,8 @@ class Fnirt(FSLCommand):
     @property
     def cmdline(self):
         """validates fsl options and generates command line argument"""
+        # XXX Why does this class override cmdline and use this
+        # update_optmap when no other classes do?
         self.update_optmap()
         allargs = self._parse_inputs()
         allargs.insert(0, self.cmd)
