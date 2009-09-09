@@ -67,8 +67,7 @@ class Pipeline(object):
     def __init__(self):
         """
         """
-        super(Pipeline,self).__init__()
-        self.graph        = nx.DiGraph()
+        self._graph        = nx.DiGraph()
         self.listofgraphs = []
         self.config       = {}
         self.config['workdir'] = '.'
@@ -85,7 +84,7 @@ class Pipeline(object):
         - `connection_list`: A list of 3-tuples of the following form
         [(source1,destination1,[('namedoutput1','namedinput1'),...]),...]
         """
-        self.graph.add_edges_from([(u,v,{'connect':d}) for u,v,d in connection_list])
+        self._graph.add_edges_from([(u,v,{'connect':d}) for u,v,d in connection_list])
         print "PE: checking connections:\n"
         for u,v,d in connection_list:
             for source,dest in d:
@@ -101,7 +100,7 @@ class Pipeline(object):
                     print "unable to query outputs of module %s\n"%u.name
         print "PE: finished checking connections\n"
 
-    def addmodules(self,modules):
+    def add_modules(self,modules):
         """ Wraps the networkx functionality in a more semantically
         relevant function name
 
@@ -110,16 +109,16 @@ class Pipeline(object):
         
         - `modules`: A list of modules such as [mod1,mod2,mod3,...]
         """
-        self.graph.add_nodes_from(modules)
+        self._graph.add_nodes_from(modules)
 
     def showgraph(self,prog='dot'):
         """ Displays the graph layout of the pipeline
         """
-        pos = nx.shell_layout(self.graph)
-        nx.draw(self.graph,pos)
-        #nx.draw_graphviz(self.graph,prog=prog)
+        pos = nx.shell_layout(self._graph)
+        nx.draw(self._graph,pos)
+        #nx.draw_graphviz(self._graph,prog=prog)
 
-    def generate_parameterized_graphs(self):
+    def _generate_parameterized_graphs(self):
         """ Generates a new graph for each unique parameterization of
         the modules. Parameterization is controlled using the
         `iterables` field of the pipeline elements. Thus if there are
@@ -130,18 +129,18 @@ class Pipeline(object):
         iterables = []
         self.listofgraphs = []
         # Create a list of iterables
-        for i,node in enumerate(nx.topological_sort(self.graph)):
+        for i,node in enumerate(nx.topological_sort(self._graph)):
             for key,func in node.iterables.items():
                 iterables.append(((i,key),func))
         # return a copy of the graph if there are no iterables
         if len(iterables) == 0:
-            self.listofgraphs.append(copy.deepcopy(self.graph))
+            self.listofgraphs.append(copy.deepcopy(self._graph))
             return
         # Walk through the list of iterables generating a unique set
         # of parameters.
         for i,params in enumerate(walk(iterables)):
             # copy the graph
-            graphcopy = copy.deepcopy(self.graph)
+            graphcopy = copy.deepcopy(self._graph)
             self.listofgraphs.append(graphcopy)
             # I don't know if the following is kosher, but it appears
             # to work
@@ -155,7 +154,7 @@ class Pipeline(object):
                 newname = ''.join((name,'_',key[1],'_',str(val)))
                 self.listofgraphs[-1].__dict__.update(name=newname)
 
-    def generate_dependency_list(self):
+    def _generate_dependency_list(self):
         """ Generates a dependency list for a list of graphs. Adds the
         following attributes to the pipeline:
 
@@ -225,7 +224,7 @@ class Pipeline(object):
         # in the absence of a dirty bit on the object, generate the
         # parameterization each time before running
         self.listofgraphs = []
-        self.generate_parameterized_graphs()
+        self._generate_parameterized_graphs()
 
         for graph in self.listofgraphs:
             order = nx.topological_sort(graph)
@@ -240,7 +239,7 @@ class Pipeline(object):
                 print "Executing: %s H: %s" % (node.name, node.hash_inputs())
                 # For a disk node, provide it with an appropriate
                 # output directory
-                if node.diskbased:
+                if node.disk_based:
                     outputdir = self.config['workdir']
                     if self.config['use_parameterized_dirs'] and (graph.__dict__['name'] is not ''):
                         outputdir = os.path.join(outputdir,graph.__dict__['name'])
@@ -257,9 +256,9 @@ class Pipeline(object):
         # in the absence of a dirty bit on the object, generate the
         # parameterization each time before running
         self.listofgraphs = []
-        self.generate_parameterized_graphs()
+        self._generate_parameterized_graphs()
         # Generate appropriate structures for worker-manager model
-        self.generate_dependency_list()
+        self._generate_dependency_list()
         # retrieve clients again
         if self.IPython_available:
             try:
