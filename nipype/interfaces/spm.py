@@ -143,7 +143,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         """ 
         raise NotImplementedError
     
-    def reformat_dict_for_savemat(self, contents):
+    def _reformat_dict_for_savemat(self, contents):
         """Encloses a dict representation within hierarchical lists.
 
         In order to create an appropriate SPM job structure, a Python
@@ -166,14 +166,14 @@ class SpmMatlabCommandLine(MatlabCommandLine):
             for key,value in contents.items():
                 if type(value) == dict:
                     if value:
-                        newdict[key] = self.reformat_dict_for_savemat(value)
+                        newdict[key] = self._reformat_dict_for_savemat(value)
                     # "else" - empty dicts are silently discarded here!
                 else:
                     newdict[key] = value
 
             return [newdict]
 
-    def generate_job(self, prefix='', contents=None):
+    def _generate_job(self, prefix='', contents=None):
         """ Recursive function to generate spm job specification as a string
 
         Parameters
@@ -191,12 +191,12 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         if type(contents) == type([]):
             for i,value in enumerate(contents):
                 newprefix = "%s(%d)" % (prefix, i+1)
-                jobstring += self.generate_job(newprefix, value)
+                jobstring += self._generate_job(newprefix, value)
             return jobstring
         if type(contents) == type({}):
             for key,value in contents.items():
                 newprefix = "%s.%s" % (prefix, key)
-                jobstring += self.generate_job(newprefix, value)
+                jobstring += self._generate_job(newprefix, value)
             return jobstring
         if type(contents) == type(np.empty(1)):
             #Assumes list of filenames embedded in a numpy array
@@ -222,7 +222,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         jobstring += "%s = %s;\n" % (prefix,str(contents))
         return jobstring
     
-    def make_matlab_command(self, jobtype, jobname, contents, cwd=None):
+    def _make_matlab_command(self, jobtype, jobname, contents, cwd=None):
         """ generates a mfile to build job structure
         Arguments
         ---------
@@ -238,10 +238,10 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         mscript += "spm_defaults;\n\n"
         if self.mfile:
             if jobname in ['smooth','preproc','fmri_spec','fmri_est'] :
-                mscript += self.generate_job('jobs{1}.%s{1}.%s(1)' % 
+                mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' % 
                                              (jobtype,jobname), contents[0])
             else:
-                mscript += self.generate_job('jobs{1}.%s{1}.%s{1}' % 
+                mscript += self._generate_job('jobs{1}.%s{1}.%s{1}' % 
                                              (jobtype,jobname), contents[0])
         else:
             jobdef = {'jobs':[{jobtype:[{jobname:self.reformat_dict_for_savemat
@@ -249,7 +249,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
             savemat(os.path.join(cwd,'pyjobs_%s.mat'%jobname), jobdef)
             mscript = "load pyjobs_%s;\n spm_jobman('run', jobs);\n" % jobname
         mscript += 'spm_jobman(\'run\',jobs);'
-        cmdline = self.gen_matlab_command(mscript, cwd=cwd, 
+        cmdline = self._gen_matlab_command(mscript, cwd=cwd, 
                                           script_name='pyscript_%s' % jobname) 
         return cmdline, mscript
 
@@ -481,7 +481,7 @@ class Realign(SpmMatlabCommandLine):
             jobtype = 'estwrite'
         else:
             jobtype = 'estimate'
-        self._cmdline, mscript = self.make_matlab_command('spatial', 'realign',
+        self._cmdline, mscript = self._make_matlab_command('spatial', 'realign',
                                         [{'%s'%(jobtype):self._parseinputs()}])
 
     def aggregate_outputs(self):
@@ -726,7 +726,7 @@ class Coregister(SpmMatlabCommandLine):
             jobtype = 'estwrite'
         else:
             jobtype = 'estimate'
-        self._cmdline, mscript =self.make_matlab_command('spatial',
+        self._cmdline, mscript =self._make_matlab_command('spatial',
                                        'coreg',
                                        [{'%s'%(jobtype):self._parseinputs()}])
 
@@ -941,7 +941,7 @@ class Normalize(SpmMatlabCommandLine):
             jobtype = 'estwrite'
         else:
             jobtype = 'est'
-        self._cmdline, mscript =self.make_matlab_command('spatial',
+        self._cmdline, mscript =self._make_matlab_command('spatial',
                                        'normalise',
                                        [{'%s'%(jobtype):self._parseinputs()}])
 
@@ -1244,7 +1244,7 @@ class Segment(SpmMatlabCommandLine):
         if mfile is True uses matlab .m file
         else generates a job structure and saves in .mat
         """
-        self._cmdline, mscript =self.make_matlab_command('spatial',
+        self._cmdline, mscript =self._make_matlab_command('spatial',
                                                        'preproc',
                                                        [self._parseinputs()])
 
@@ -1396,7 +1396,7 @@ class Smooth(SpmMatlabCommandLine):
         if mfile is True uses matlab .m file
         else generates a job structure and saves in .mat
         """
-        self._cmdline, mscript =self.make_matlab_command('spatial',
+        self._cmdline, mscript =self._make_matlab_command('spatial',
                                                        'smooth',
                                                        [self._parseinputs()])
 
@@ -1860,7 +1860,7 @@ class Level1Design(SpmMatlabCommandLine):
         if mfile is True uses matlab .m file
         else generates a job structure and saves in .mat
         """
-        self._cmdline, mscript =self.make_matlab_command('stats',
+        self._cmdline, mscript =self._make_matlab_command('stats',
                                                        'fmri_spec',
                                                        [self._parseinputs()])
 
@@ -2012,9 +2012,9 @@ class EstimateModel(SpmMatlabCommandLine):
         if mfile is True uses matlab .m file
         else generates a job structure and saves in .mat
         """
-        self._cmdline, mscript = self.make_matlab_command('stats',
-                                                       'fmri_est',
-                                                       [self._parseinputs()])
+        self._cmdline, mscript = self._make_matlab_command('stats',
+                                                           'fmri_est',
+                                                           [self._parseinputs()])
     
     def outputs_help(self):
         """
@@ -2760,4 +2760,131 @@ class EstimateContrast(SpmMatlabCommandLine):
         spmf = glob(os.path.join(pth,'spmF*.*'))
         if len(spmf)>0:
             outputs.spmF_images = sorted(spmf)
+        return outputs
+
+class OneSampleTTest(SpmMatlabCommandLine):
+    """use spm to perform a one-sample ttest on a set of images
+
+    Parameters
+    ----------
+    
+    inputs : mapping 
+    key, value pairs that will update the EstimateContrast.inputs attributes
+    see self.inputs_help() for a list of EstimateContrast.inputs attributes
+    
+    Attributes
+    ----------
+    
+    inputs : Bunch
+    a (dictionary-like) bunch of options that can be passed to 
+    spm_spm via a job structure
+    cmdline : string
+    string used to call matlab/spm via SpmMatlabCommandLine interface
+
+    Options
+    -------
+
+    To see optional arguments
+    EstimateContrast().inputs_help()
+
+
+    Examples
+    --------
+    
+    """
+    
+    @property
+    def cmd(self):
+        return 'spm_spm'
+
+    def inputs_help(self):
+        """
+            Parameters
+            ----------
+
+            con_images: list of filenames
+            flags : USE AT OWN RISK
+                #eg:'flags':{'eoptions':{'suboption':value}}
+        """
+        print self.inputs_help.__doc__
+
+    def _populate_inputs(self):
+        """ Initializes the input fields of this interface.
+        """
+        self.inputs = Bunch(con_images=None,
+                            flags=None)
+        
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = [Bunch(key='con_images',copy=False),
+                ]
+        return info
+    
+    def _parseinputs(self):
+        """validate spm normalize options
+        if set to None ignore
+        """
+        out_inputs = []
+        inputs = {}
+        einputs = {'con_images':''}
+
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt in inputs:
+            if opt is 'con_images':
+                continue
+            print 'option %s not supported'%(opt)
+        return einputs
+
+    def _compile_command(self):
+        """validates spm options and generates job structure
+        if mfile is True uses matlab .m file
+        else generates a job structure and saves in .mat
+        """
+        cwd = self.inputs('cwd','.')
+        script  = "%%auto generated by %s\n" % self.name
+        script += "spm_defaults;\n\n"
+        script += "% Setup Design;\n"
+        script += "jobs{1}.stats{1}.factorial_design.dir  = {'%s'};\n" % cwd
+        script += "jobs{1}.stats{1}.factorial_design.des.t1.scans = {};\n"
+        for f in filename_to_list(self.inputs.con_images):
+            script += "jobs{1}.stats{1}.factorial_design.des.t1.scans{end+1} = '%s';\n" % f
+        (head,fname) = os.path.split(f)
+        (conname,ext) = os.path.splitext(fname)
+        script += "\n% Estimate Model;\n"
+        script += "jobs{2}.stats{1}.fmri_est(1).spmmat = {'%s'};\n\n" % os.path.join(cwd,'SPM.mat')
+        script += "% Estimate Contrast;\n"
+        script += "jobs{3}.stats{1}.con.spmmat = {'%s'};\n"  % os.path.join(cwd,'SPM.mat')
+        script += "jobs{3}.stats{1}.con.consess{1}.tcon.name = '%s';\n" % conname
+        script += "jobs{3}.stats{1}.con.consess{1}.tcon.convec = [1];\n"
+        script += "spm_jobman('run',jobs);\n"
+        self._cmdline = self.gen_matlab_command(script,
+                                                cwd=cwd,
+                                                script_name='pyscript_onesamplettest') 
+    
+    def outputs_help(self):
+        """
+            Parameters
+            ----------
+            (all default to None)
+
+            con_images:
+                contrast images from a t-contrast
+            spmT_images:
+                stat images from a t-contrast
+        """
+        print self.outputs_help.__doc__
+        
+    def aggregate_outputs(self):
+        pth, fname = os.path.split(self.inputs.spm_mat_file)
+        outputs = Bunch(con_images=None,
+                        spmT_images=None)
+                                          
+        con = glob(os.path.join(pth,'con*.*'))
+        if len(con)>0:
+            outputs.con_images = sorted(con)
+        spmt = glob(os.path.join(pth,'spmT*.*'))
+        if len(spmt)>0:
+            outputs.spmT_images = sorted(spmt)
         return outputs

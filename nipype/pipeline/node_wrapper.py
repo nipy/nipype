@@ -3,9 +3,9 @@ Wraps interfaces modules to work with pipeline engine
 """
 import os
 import hashlib
-from nipype.utils.filemanip import copyfile, fname_presuffix, cleandir
+from nipype.utils.filemanip import copyfile, copyfiles, fname_presuffix, cleandir
 from nipype.interfaces.base import Bunch, InterfaceResult
-
+from tempfile import mkdtemp
 
 class NodeWrapper(object):
     """
@@ -52,36 +52,54 @@ class NodeWrapper(object):
     >>> realign.inputs.register_to_mean = True
     >>> realign.run()
     """
-    def __init__(self, interface=None, iterables={},iterfield=[],
-                 base_directory='.',diskbased=False,
-                 overwrite=None,name=None):
-        #super(NodeWrapper,self).__init__(interface)
-        self.interface  = interface
-        self.result     = None
+    def __init__(self, interface=None,
+                 iterables={},iterfield=[],
+                 diskbased=False,base_directory=None,
+                 overwrite=False,
+                 name=None):
+        # interface can only be set at initialization
+        if interface is None:
+            raise Exception('Interface must be provided')
+        self._interface  = interface
+        self._result     = None
         self.iterables  = iterables
-        self.iterfield  = []
+        self.iterfield  = iterfield
         self.parameterization = None
-        self.output_directory_base  = base_directory
-        self.diskbased = diskbased
-        self.overwrite = overwrite
+        self.disk_based = diskbased
+        self.output_directory_base  = None
+        self.overwrite = None
+        if not self.disk_based:
+            if base_directory is not None:
+                raise Exception('Setting base_directory requires a disk based interface')
+        if self.disk_based:
+            self.output_directory_base  = base_directory
+            self.overwrite = overwrite
         if name is None:
             self.name = '.'.join((interface.__class__.__name__,interface.__class__.__module__.split('.')[-1]))
         else:
             self.name = name
 
     @property
+    def interface(self):
+        return self._interface
+    
+    @property
+    def result(self):
+        return self._result
+
+    @property
     def inputs(self):
-        return self.interface.inputs
+        return self._interface.inputs
 
     def set_input(self,parameter,val,*args,**kwargs):
         if callable(val):
-            self.interface.inputs[parameter] = val(*args,**kwargs)
+            self._interface.inputs[parameter] = val(*args,**kwargs)
         else:
-            self.interface.inputs[parameter] = val
+            self._interface.inputs[parameter] = val
 
     def get_output(self,parameter):
-        if self.result is not None:
-            return self.result.outputs[parameter]
+        if self._result is not None:
+            return self._result.outputs[parameter]
         else:
             return None
         
@@ -89,20 +107,20 @@ class NodeWrapper(object):
         """Executes an interface within a directory.
         """
         # check to see if output directory and hash exist
-        if self.diskbased:
+        if self.disk_based:
             try:
                 outdir = self._output_directory()
                 outdir = self._make_output_dir(outdir)
             except:
                 print "directory %s exists\n"%outdir
-            self.interface.inputs.cwd = outdir
+            self._interface.inputs.cwd = outdir
             hashvalue = self.hash_inputs()
             inputstr  = str(self.inputs)
             hashfile = os.path.join(outdir,'_0x%s.txt'%hashvalue)
             if (os.path.exists(hashfile) and self.overwrite) or not os.path.exists(hashfile):
                 cleandir(outdir)
                 # copy files over and change the inputs
-                for info in self.interface.get_input_info():
+                for info in self._interface.get_input_info():
                     files = self.inputs[info.key]
                     if files is not None:
                         if type(files) is not type([]):
@@ -118,26 +136,26 @@ class NodeWrapper(object):
                             else:
                                 self.inputs[info.key][i] = newfile
                 self._run_interface(execute=True)
-                if type(self.result.runtime) == type([]):
+                if type(self._result.runtime) == type([]):
                     returncode = 0
-                    for r in self.result.runtime:
+                    for r in self._result.runtime:
                         returncode = max(r.returncode,returncode)
                 else:
-                    returncode = self.result.runtime.returncode
+                    returncode = self._result.runtime.returncode
                 if returncode == 0:
                     try:
                         fd = open(hashfile,"wt")
                         fd.writelines(inputstr)
                         fd.close()
                     except IOError:
-                        print "Unable to open the file in readmode:", filename
+                        print "Unable to open the file in readmode:", hashfile
                 else:
-                    print self.result.runtime.stderr
+                    print self._result.runtime.stderr
                     print self.inputs
                     raise Exception("Could not run %s"%self.name)
             else:
                 # change the inputs
-                for info in self.interface.get_input_info():
+                for info in self._interface.get_input_info():
                     files = self.inputs[info.key]
                     if files is not None:
                         if type(files) is not type([]):
@@ -155,40 +173,47 @@ class NodeWrapper(object):
                 self._run_interface(execute=False)
         else:
             self._run_interface(execute=True)
-        if self.diskbased:
+        if self.disk_based:
             # Should pickle the output
             pass
-        return self.result
+        return self._result
 
     def _run_interface(self,execute=True):
         if len(self.iterfield) == 1:
             itervals = self.inputs[self.iterfield[0]]
+            notlist = False
             if type(itervals) is not type([]):
+                notlist = True
                 itervals = [itervals]
-            self.result = InterfaceResult(interface=[],runtime=[],outputs=Bunch())
+            self._result = InterfaceResult(interface=[],runtime=[],outputs=Bunch())
             for i,v in enumerate(itervals):
                 print "running %s on %s\n"%(self.name,self.iterfield[0])
-                self.inputs[self.iterfield[0]] = v
+                self.set_input(self.iterfield[0],v)
                 if execute:
-                    result = self.interface.run()
-                    self.result.interface.insert(i,result.interface)
-                    self.result.runtime.insert(i,result.runtime)
+                    result = self._interface.run()
+                    self._result.interface.insert(i,result.interface)
+                    self._result.runtime.insert(i,result.runtime)
                     outputs = result.outputs
                 else:
-                    outputs = self.interface.aggregate_outputs()
+                    outputs = self._interface.aggregate_outputs()
                 for key,val in outputs.iteritems():
                     try:
-                        self.result.outputs[key].insert(i,val)
+                        self._result.outputs[key].insert(i,val)
                     except:
-                        self.result.outputs[key] = []
-                        self.result.outputs[key].insert(i,val)
+                        self._result.outputs[key] = []
+                        self._result.outputs[key].insert(i,val)
+            print itervals
+            if notlist:
+                self.set_input(self.iterfield[0],itervals.pop())
+            else:
+                self.set_input(self.iterfield[0],itervals)
         else:
             if execute:
-                self.result = self.interface.run()
+                self._result = self._interface.run()
             else:
-                self.result = InterfaceResult(interface=None,
-                                              runtime=None,
-                                              outputs=self.interface.aggregate_outputs())
+                self._result = InterfaceResult(interface=None,
+                                               runtime=None,
+                                               outputs=self._interface.aggregate_outputs())
         
     def update(self, **opts):
         self.inputs.update(**opts)
@@ -199,6 +224,8 @@ class NodeWrapper(object):
         return hashlib.md5(str(self.inputs)).hexdigest()
 
     def _output_directory(self):
+        if self.output_directory_base is None:
+                self.output_directory_base = mkdtemp()
         return os.path.abspath(os.path.join(self.output_directory_base,self.name))
 
     def _make_output_dir(self, outdir):

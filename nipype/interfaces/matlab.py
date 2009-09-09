@@ -73,13 +73,13 @@ class MatlabCommandLine(CommandLine):
         Note that this could be called before accessing .cmdline, and we won't
         regenerate anything (unless the inputs have changed)
         '''
-        self._cmdline = self.gen_matlab_command(
+        self._cmdline = self._gen_matlab_command(
                 script_lines=self.inputs.script_lines,
                 script_name=self.inputs.script_name,
                 mfile=mfile)
         return self._cmdline
 
-    def gen_matlab_command(self,script_lines='',script_name='pyscript',
+    def _gen_matlab_command(self,script_lines='',script_name='pyscript',
             cwd=None,mfile=True):
         """ Put multiline matlab script into script file and run
         Arguments
