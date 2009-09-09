@@ -3,6 +3,7 @@ __docformat__ = 'restructuredtext'
 
 
 from nipype.interfaces.base import Bunch, CommandLine
+from nipype.utils.docparse import get_doc
 
 class AFNICommand(CommandLine):
     @property
@@ -14,9 +15,13 @@ class AFNICommand(CommandLine):
 
 
 class To3d(AFNICommand):
-    """Create 3D dataset from 2D image files.
+    """Use AFNI to3d command to create a 3D dataset from 2D image files.
 
-    Uses the AFNI command-line tool 'to3d'.
+    For complete details, see the `to3d Documentation. 
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
+
+    To print out the command line help, use:
+        To3d().inputs_help()
 
     Examples
     --------
@@ -34,9 +39,9 @@ class To3d(AFNICommand):
         return 'to3d'
 
     def inputs_help(self):
-        doc = """
-        """
-        print doc
+        """Print command line documentation for to3d."""
+        #print get_doc(self.cmd, self.opt_map)
+        raise NotImplementedError
 
     def _populate_inputs(self):
         """Initialize the inputs attribute."""
@@ -151,6 +156,8 @@ class To3d(AFNICommand):
 
 class Threedrefit(AFNICommand):
     """
+    For complete details, see the `to3d Documentation. 
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3drefit.html>`_
     """
 
     @property
@@ -229,6 +236,8 @@ class Threedrefit(AFNICommand):
 
 class Threedresample(AFNICommand):
     """
+    For complete details, see the `to3d Documentation. 
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dresample.html>`_
     """
 
     @property
@@ -289,6 +298,8 @@ class Threedresample(AFNICommand):
 
 class ThreedTstat(AFNICommand):
     """
+    For complete details, see the `to3d Documentation. 
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html>`_
     """
 
     @property
@@ -337,6 +348,8 @@ class ThreedTstat(AFNICommand):
 
 class ThreedAutomask(AFNICommand):
     """
+    For complete details, see the `to3d Documentation. 
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutomask.html>`_
     """
 
     @property
@@ -385,6 +398,8 @@ class ThreedAutomask(AFNICommand):
 
 class Threedvolreg(AFNICommand):
     """
+    For complete details, see the `to3d Documentation. 
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dvolreg.html>`_
     """
 
     @property
@@ -458,6 +473,8 @@ class Threedvolreg(AFNICommand):
 
 class Threedmerge(AFNICommand):
     """
+    For complete details, see the `to3d Documentation. 
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html>`_
     """
 
     @property
@@ -515,6 +532,8 @@ class Threedmerge(AFNICommand):
 
 class ThreedZcutup(AFNICommand):
     """
+    For complete details, see the `to3d Documentation. 
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcutup.html>`_
     """
 
     @property
@@ -583,6 +602,8 @@ class ThreedZcutup(AFNICommand):
 
 class ThreedSkullStrip(AFNICommand):
     """
+    For complete details, see the `to3d Documentation. 
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSkullStrip.html>`_
     """
 
     @property
@@ -631,6 +652,8 @@ class ThreedSkullStrip(AFNICommand):
 
 class ThreedBrickStat(AFNICommand):
     """
+    For complete details, see the `to3d Documentation. 
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBrickStat.html>`_
     """
 
     @property
@@ -705,6 +728,8 @@ class ThreedBrickStat(AFNICommand):
 
 class Threedcalc(AFNICommand):
     """
+    For complete details, see the `to3d Documentation. 
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcalc.html>`_
     """
 
     @property
@@ -728,7 +753,7 @@ class Threedcalc(AFNICommand):
             session=None,
             datum=None,
             outfile=None,
-)
+            )
 
     def _parseinputs(self):
         """Parse valid input options for Threedcalc command.
@@ -767,6 +792,8 @@ class Threedcalc(AFNICommand):
 
 class ThreedAllineate(AFNICommand):
     """
+    For complete details, see the `to3d Documentation. 
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html>`_
     """
 
     @property
