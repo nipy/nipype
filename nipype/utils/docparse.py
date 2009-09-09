@@ -3,13 +3,11 @@
 Examples
 --------
 
-# Example building docstring for bet
-# Grab command line documentation
-doc = grab_doc('bet')
-# Reverse attribute/flag options so we have flags as keys
-opts = reverse_opt_map(fsl.Bet.opt_map)
-# build the docstring
-res = build_doc(doc, opts)
+# Instanciate bet object
+from nipype.interfaces import fsl
+from nipype.utils import docparse
+better = fsl.Bet()
+docstring = docparse.get_doc(better.cmd, better.opt_map)
 
 """
 
@@ -85,8 +83,6 @@ def format_params(paramlist, otherlist=None):
         The formatted docstring.
     """
 
-    #paramlist = copy(paramlist)
-    #otherlist = copy(otherlist)
     hdr = 'Parameters'
     delim = '----------'
     paramlist.insert(0, delim)
@@ -151,6 +147,26 @@ def build_doc(doc, opts):
                 # about the flags.
                 flags_doc.append(line)
     return format_params(newdoc, flags_doc)
+
+def get_doc(cmd, opt_map):
+    """Get the docstring from our command and options map.
+    
+    Parameters
+    ----------
+    cmd : string
+        The command whose documentation we are fetching
+    opt_map : dict
+        Dictionary of flags and option attributes.
+
+    Returns
+    -------
+    doc : string
+        The formated docstring
+
+    """
+    doc = grab_doc(cmd)
+    opts = reverse_opt_map(opt_map)
+    return build_doc(doc, opts)
 
 def replace_opts(rep_doc, opts):
     """Replace flags with parameter names.
