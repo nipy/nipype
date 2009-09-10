@@ -35,18 +35,15 @@ def test_To3d():
     # assume_dicom_mosaic
     cmd = afni.To3d(assume_dicom_mosaic=True)
     yield assert_equal, cmd.cmdline, 'to3d -assume_dicom_mosaic'
-
     # Test slice time params
     cmd = afni.To3d()
     td = dict(slice_order='zt', nz=12, nt=150, TR=2000, tpattern='alt+z')
     cmd.inputs.time_dependencies = td
     yield assert_equal, cmd.cmdline, 'to3d -time:zt 12 150 2000 alt+z'
-
     cmd = afni.To3d()
     td = dict(slice_order='tz', nt=150, nz=12, TR=2000, tpattern='alt+z')
     cmd.inputs.time_dependencies = td
     yield assert_equal, cmd.cmdline, 'to3d -time:tz 150 12 2000 alt+z'
-
     # These tests fill fail because they do not specify all required
     # args for the time_dependencies
     # dict(slice_order='zt', nz=12, nt=150, TR=2000, tpattern='alt+z')
@@ -177,6 +174,7 @@ def test_Threedresample():
     res = cmd.run(infile='foo.nii', outfile='bar.nii')
     yield assert_true, isinstance(res, InterfaceResult)
 
+
 def test_ThreedTstat():
     cmd = afni.ThreedTstat()
     yield assert_equal, cmd.cmdline, '3dTstat'
@@ -192,4 +190,39 @@ def test_ThreedTstat():
     cmd.inputs.infile = 'foo.nii'
     cmd.inputs.outfile = 'bar.nii'
     yield assert_equal, cmd.cmdline, '3dTstat -prefix bar.nii foo.nii'
+    # unknown params
+    cmd = afni.ThreedTstat(foo='bar')
+    yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
+    # infile not specified
+    cmd = afni.ThreedTstat()
+    yield assert_raises, AttributeError, cmd.run
+    # result should be InterfaceResult object
+    cmd = afni.ThreedTstat()
+    res = cmd.run(infile='foo.nii')
+    yield assert_true, isinstance(res, InterfaceResult)
+
+
+def test_ThreedAutomask():
+    cmd = afni.ThreedAutomask()
+    yield assert_equal, cmd.cmdline, '3dAutomask'
+    # outfile
+    cmd = afni.ThreedAutomask(outfile='bar.nii')
+    yield assert_equal, cmd.cmdline, '3dAutomask -prefix bar.nii'
+    # infile
+    cmd = afni.ThreedAutomask(infile='foo.nii')
+    yield assert_equal, cmd.cmdline, '3dAutomask foo.nii'
+    # order of params
+    cmd = afni.ThreedAutomask(infile='foo.nii')
+    cmd.inputs.outfile = 'bar.nii'
+    yield assert_equal, cmd.cmdline, '3dAutomask -prefix bar.nii foo.nii'
+    # unknown params
+    cmd = afni.ThreedAutomask(foo='bar')
+    yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
+    # infile not specified
+    cmd = afni.ThreedAutomask()
+    yield assert_raises, AttributeError, cmd.run
+    # result should be InterfaceResult object
+    cmd = afni.ThreedAutomask()
+    res = cmd.run(infile='foo.nii')
+    yield assert_true, isinstance(res, InterfaceResult)
 
