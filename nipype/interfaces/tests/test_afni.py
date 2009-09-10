@@ -275,3 +275,42 @@ def test_Threedvolreg():
     res = cmd.run(infile='foo.nii')
     yield assert_true, isinstance(res, InterfaceResult)
 
+
+def test_Threedmerge():
+    cmd = afni.Threedmerge()
+    yield assert_equal, cmd.cmdline, '3dmerge'
+    # doall
+    cmd = afni.Threedmerge(doall=True)
+    yield assert_equal, cmd.cmdline, '3dmerge -doall'
+    # gblur_fwhm
+    cmd = afni.Threedmerge()
+    cmd.inputs.gblur_fwhm = 2.0
+    yield assert_equal, cmd.cmdline, '3dmerge -1blur_fwhm 2.0'
+    # outfile
+    cmd = afni.Threedmerge(outfile='bar.nii')
+    yield assert_equal, cmd.cmdline, '3dmerge -prefix bar.nii'
+    # infile
+    cmd = afni.Threedmerge(infiles='foo.nii')
+    yield assert_equal, cmd.cmdline, '3dmerge foo.nii'
+    # infile list
+    cmd = afni.Threedmerge(infiles=['data/foo.nii', 'data/bar.nii'])
+    yield assert_equal, cmd.cmdline, '3dmerge data/foo.nii data/bar.nii'
+    # order of params
+    cmd = afni.Threedmerge(infiles='foo.nii')
+    cmd.inputs.outfile = 'bar.nii'
+    cmd.inputs.doall = True
+    cmd.inputs.gblur_fwhm = 2.0
+    realcmd = '3dmerge -doall -1blur_fwhm 2.0 -prefix bar.nii foo.nii'
+    yield assert_equal, cmd.cmdline, realcmd
+    # unknown params
+    cmd = afni.Threedmerge(foo='bar')
+    yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
+    # infile not specified
+    cmd = afni.Threedmerge()
+    yield assert_raises, AttributeError, cmd.run
+    # result should be InterfaceResult object
+    cmd = afni.Threedmerge()
+    res = cmd.run(infiles='foo.nii')
+    yield assert_true, isinstance(res, InterfaceResult)
+
+
