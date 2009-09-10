@@ -226,3 +226,52 @@ def test_ThreedAutomask():
     res = cmd.run(infile='foo.nii')
     yield assert_true, isinstance(res, InterfaceResult)
 
+
+def test_Threedvolreg():
+    cmd = afni.Threedvolreg()
+    yield assert_equal, cmd.cmdline, '3dvolreg'
+    # verbose
+    cmd = afni.Threedvolreg(verbose=True)
+    yield assert_equal, cmd.cmdline, '3dvolreg -verbose'
+    # copy_origin
+    cmd = afni.Threedvolreg(copy_origin=True)
+    yield assert_equal, cmd.cmdline, '3dvolreg -twodup'
+    # time_shift
+    cmd = afni.Threedvolreg()
+    cmd.inputs.time_shift = 14
+    yield assert_equal, cmd.cmdline, '3dvolreg -tshift 14'
+    # basefile 
+    cmd = afni.Threedvolreg()
+    cmd.inputs.basefile = 5
+    yield assert_equal, cmd.cmdline, '3dvolreg -base 5'
+    # md1dfile
+    cmd = afni.Threedvolreg(md1dfile='foo.nii')
+    yield assert_equal, cmd.cmdline, '3dvolreg -maxdisp1D foo.nii'
+    # onedfile
+    cmd = afni.Threedvolreg(onedfile='bar.nii')
+    yield assert_equal, cmd.cmdline, '3dvolreg -1Dfile bar.nii'
+    # outfile
+    cmd = afni.Threedvolreg(outfile='bar.nii')
+    yield assert_equal, cmd.cmdline, '3dvolreg -prefix bar.nii'
+    # infile
+    cmd = afni.Threedvolreg()
+    cmd.inputs.infile = 'foo.nii'
+    yield assert_equal, cmd.cmdline, '3dvolreg foo.nii'
+    # order of params
+    cmd = afni.Threedvolreg(infile='foo.nii')
+    cmd.inputs.time_shift = 14
+    cmd.inputs.copy_origin = True
+    cmd.inputs.outfile = 'bar.nii'
+    realcmd = '3dvolreg -twodup -tshift 14 -prefix bar.nii foo.nii'
+    yield assert_equal, cmd.cmdline, realcmd
+    # unknown params
+    cmd = afni.Threedvolreg(foo='bar')
+    yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
+    # infile not specified
+    cmd = afni.Threedvolreg()
+    yield assert_raises, AttributeError, cmd.run
+    # result should be InterfaceResult object
+    cmd = afni.Threedvolreg()
+    res = cmd.run(infile='foo.nii')
+    yield assert_true, isinstance(res, InterfaceResult)
+
