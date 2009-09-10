@@ -326,7 +326,7 @@ class Threedresample(AFNICommand):
         if outfile:
             self.inputs.outfile = outfile
         if not self.inputs.infile or not self.inputs.outfile:
-            msg = 'Threedresample requires and infile and an outfile.'
+            msg = 'Threedresample requires an infile and an outfile.'
             raise AttributeError(msg)
         self.inputs.update(**inputs)
         results = self._runner()
@@ -379,10 +379,36 @@ class ThreedTstat(AFNICommand):
             out_inputs.append('%s' % val)
 
         if len(inputs) > 0:
-            print '%s: unsupported options: %s' % (
+            msg = '%s: unsupported options: %s' % (
                 self.__class__.__name__, inputs.keys())
+            raise AttributeError(msg)
 
         return out_inputs
+
+    def run(self, infile=None, **inputs):
+        """Execute 3dTstat
+
+        Parameters
+        ----------
+        infile : filename
+            File that we be resampled
+        inputs : dict
+            Dictionary of any additional flags to send to 3dresample
+
+        Returns
+        -------
+        results : InterfaceResult
+            A `InterfaceResult` object with a copy of self in `interface`
+
+        """
+        if infile:
+            self.inputs.infile = infile
+        if not self.inputs.infile:
+            raise AttributeError('ThreedTstat requires an infile.')
+        self.inputs.update(**inputs)
+        results = self._runner()
+        # XXX implement aggregate_outputs
+        return results
 
 
 class ThreedAutomask(AFNICommand):
