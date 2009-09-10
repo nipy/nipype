@@ -230,11 +230,11 @@ class Threedrefit(AFNICommand):
             A `InterfaceResult` object with a copy of self in `interface`
 
         """
-        self.inputs.update(**inputs)
-        if not infile and not self.inputs.infile:
-            raise AttributeError('Threedrefit requires an infile.')
         if infile:
             self.inputs.infile = infile
+        if not self.inputs.infile:
+            raise AttributeError('Threedrefit requires an infile.')
+        self.inputs.update(**inputs)
         results = self._runner()
         # XXX implement aggregate_outputs
         return results
@@ -326,7 +326,7 @@ class Threedresample(AFNICommand):
         if outfile:
             self.inputs.outfile = outfile
         if not self.inputs.infile or not self.inputs.outfile:
-            msg = 'Threedresample requires and infile and an outfile'
+            msg = 'Threedresample requires and infile and an outfile.'
             raise AttributeError(msg)
         self.inputs.update(**inputs)
         results = self._runner()
