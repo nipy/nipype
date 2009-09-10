@@ -161,7 +161,7 @@ class To3d(AFNICommand):
 
         Parameters
         ----------
-        infile : list
+        infiles : string or list of strings
             File or list of files to combine into 3d file.
         inputs : dict
             Dictionary of any additional flags to send to to3d
@@ -622,8 +622,9 @@ class Threedvolreg(AFNICommand):
 
 
 class Threedmerge(AFNICommand):
-    """
-    For complete details, see the `to3d Documentation. 
+    """Merge or edit volumes using AFNI 3dmerge command.
+
+    For complete details, see the `3dmerge Documentation. 
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html>`_
     """
 
@@ -646,7 +647,7 @@ class Threedmerge(AFNICommand):
             doall=None,
             gblur_fwhm=None,
             outfile=None,
-            infile=None)
+            infiles=None)
 
     def _parseinputs(self):
         """Parse valid input options for Threedmerge command.
@@ -669,15 +670,45 @@ class Threedmerge(AFNICommand):
         if inputs.has_key('outfile'):
             val = inputs.pop('outfile')
             out_inputs.append('-prefix %s' % val)
-        if inputs.has_key('infile'):
-            val = inputs.pop('infile')
-            out_inputs.append('%s' % val)
+        if inputs.has_key('infiles'):
+            val = inputs.pop('infiles')
+            if type(val) == list:
+                out_inputs.append('%s' % ' '.join(val))
+            else:
+                out_inputs.append('%s' % val)
 
         if len(inputs) > 0:
-            print '%s: unsupported options: %s' % (
+            msg = '%s: unsupported options: %s' % (
                 self.__class__.__name__, inputs.keys())
+            raise AttributeError(msg)
 
         return out_inputs
+
+    def run(self, infiles=None, **inputs):
+        """Execute 3dmerge
+
+        Parameters
+        ----------
+        infiles : string or list of strings
+            Files to edit or merge
+        inputs : dict
+            Dictionary of any additional flags to send to 3dmerge
+
+        Returns
+        -------
+        results : InterfaceResult
+            A `InterfaceResult` object with a copy of self in `interface`
+
+        """
+        if infiles:
+            self.inputs.infiles = infiles
+        if not self.inputs.infiles:
+            raise AttributeError('Threedmerge requires an infile.')
+        self.inputs.update(**inputs)
+        results = self._runner()
+        # XXX implement aggregate_outputs
+        return results
+
 
 
 class ThreedZcutup(AFNICommand):
