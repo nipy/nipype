@@ -144,7 +144,10 @@ class To3d(AFNICommand):
             out_inputs.append('-prefix %s' % val)
         if inputs.has_key('infiles'):
             val = inputs.pop('infiles')
-            out_inputs.append('%s' % val)
+            if type(val) == list:
+                out_inputs.append('%s' % ' '.join(val))
+            else:
+                out_inputs.append('%s' % val)
 
         if len(inputs) > 0:
             msg = '%s: unsupported options: %s' % (
@@ -420,7 +423,7 @@ class ThreedTstat(AFNICommand):
         infile : filename
             File that we be resampled
         inputs : dict
-            Dictionary of any additional flags to send to 3dresample
+            Dictionary of any additional flags to send to 3dTstat
 
         Returns
         -------
