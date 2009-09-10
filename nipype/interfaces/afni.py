@@ -520,8 +520,9 @@ class ThreedAutomask(AFNICommand):
 
 
 class Threedvolreg(AFNICommand):
-    """
-    For complete details, see the `to3d Documentation. 
+    """Register input volumes to a base volume using AFNI 3dvolreg command.
+
+    For complete details, see the `3dvolreg Documentation. 
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dvolreg.html>`_
     """
 
@@ -588,10 +589,36 @@ class Threedvolreg(AFNICommand):
             out_inputs.append('%s' % val)
 
         if len(inputs) > 0:
-            print '%s: unsupported options: %s' % (
+            msg = '%s: unsupported options: %s' % (
                 self.__class__.__name__, inputs.keys())
+            raise AttributeError(msg)
 
         return out_inputs
+
+    def run(self, infile=None, **inputs):
+        """Execute 3dvolreg
+
+        Parameters
+        ----------
+        infile : string
+            File to register
+        inputs : dict
+            Dictionary of any additional flags to send to 3dvolreg
+
+        Returns
+        -------
+        results : InterfaceResult
+            A `InterfaceResult` object with a copy of self in `interface`
+
+        """
+        if infile:
+            self.inputs.infile = infile
+        if not self.inputs.infile:
+            raise AttributeError('Threedvolreg requires an infile.')
+        self.inputs.update(**inputs)
+        results = self._runner()
+        # XXX implement aggregate_outputs
+        return results
 
 
 class Threedmerge(AFNICommand):
