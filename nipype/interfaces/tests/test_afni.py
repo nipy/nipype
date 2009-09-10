@@ -77,7 +77,6 @@ def test_To3d():
     # provide unknown parameters
     cmd = afni.To3d(datatype='anat', foo='bar')    
     yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
-    
     # order of params
     cmd = afni.To3d(datatype='anat')
     cmd.inputs.skip_outliers = True
@@ -86,6 +85,14 @@ def test_To3d():
     cmd.inputs.datum = 'float'
     realcmd = 'to3d -anat -skip_outliers -datum float -prefix bar.nii foo.nii'
     yield assert_equal, cmd.cmdline, realcmd
+    # result should be InterfaceResult object
+    cmd = afni.To3d()
+    res = cmd.run('foo.nii')
+    yield assert_true, isinstance(res, InterfaceResult)
+    # don't specify infile and call run should raise error
+    cmd = afni.To3d()
+    yield assert_raises, AttributeError, cmd.run
+
 
 def test_Threedrefit():
     cmd = afni.Threedrefit()

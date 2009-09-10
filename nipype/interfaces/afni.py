@@ -153,6 +153,31 @@ class To3d(AFNICommand):
 
         return out_inputs
 
+    def run(self, infiles=None, **inputs):
+        """Execute the command.
+
+        Parameters
+        ----------
+        infile : list
+            File or list of files to combine into 3d file.
+        inputs : dict
+            Dictionary of any additional flags to send to to3d
+        
+        Returns
+        -------
+        results : InterfaceResult
+            A `InterfaceResult` object with a copy of self in `interface`
+
+        """
+        if infiles:
+            self.inputs.infiles = infiles
+        if not self.inputs.infiles:
+            raise AttributeError('To3d requires infiles.')
+        self.inputs.update(**inputs)
+        results = self._runner()
+        # XXX implement aggregate_outputs
+        return results
+
 
 class Threedrefit(AFNICommand):
     """Fix errors in AFNI header resulting from using to3d command.
@@ -223,6 +248,8 @@ class Threedrefit(AFNICommand):
         ----------
         infile : filename
             File whose header file will be updated by 3drefit
+        inputs : dict
+            Dictionary of any additional flags to send to 3drefit
         
         Returns
         -------
