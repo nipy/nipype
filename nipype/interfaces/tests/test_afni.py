@@ -78,6 +78,14 @@ def test_To3d():
     cmd = afni.To3d(datatype='anat', foo='bar')    
     yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
     
+    # order of params
+    cmd = afni.To3d(datatype='anat')
+    cmd.inputs.skip_outliers = True
+    cmd.inputs.infiles = 'foo.nii'
+    cmd.inputs.prefix = 'bar.nii'
+    cmd.inputs.datum = 'float'
+    realcmd = 'to3d -anat -skip_outliers -datum float -prefix bar.nii foo.nii'
+    yield assert_equal, cmd.cmdline, realcmd
 
 def test_Threedrefit():
     cmd = afni.Threedrefit()
@@ -99,6 +107,12 @@ def test_Threedrefit():
     # infile
     cmd = afni.Threedrefit(infile='foo.nii')
     yield assert_equal, cmd.cmdline, '3drefit foo.nii'
+    # order of params
+    cmd = afni.Threedrefit(deoblique=True)
+    cmd.inputs.zorigin = 34.5
+    cmd.inputs.infile = 'foo.nii'
+    realcmd = '3drefit -deoblique -zorigin 34.5 foo.nii'
+    yield assert_equal, cmd.cmdline, realcmd
     # provide unknown params
     cmd = afni.Threedrefit(foo='bar')
     yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
@@ -131,6 +145,13 @@ def test_Threedresample():
     # outfile
     cmd = afni.Threedresample(outfile='bar.nii')
     yield assert_equal, cmd.cmdline, '3dresample -prefix bar.nii'
+    # order of params
+    cmd = afni.Threedresample(rsmode='Li')
+    cmd.inputs.orient = 'lpi'
+    cmd.inputs.infile = 'foo.nii'
+    cmd.inputs.outfile = 'bar.nii'
+    realcmd = '3dresample -rmode Li -orient lpi -prefix bar.nii -inset foo.nii'
+    yield assert_equal, cmd.cmdline, realcmd
     # unknown params
     cmd = afni.Threedresample(foo='bar')
     yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
@@ -144,3 +165,20 @@ def test_Threedresample():
     cmd = afni.Threedresample()
     res = cmd.run(infile='foo.nii', outfile='bar.nii')
     yield assert_true, isinstance(res, InterfaceResult)
+
+def test_ThreedTstat():
+    cmd = afni.ThreedTstat()
+    yield assert_equal, cmd.cmdline, '3dTstat'
+    # outfile
+    cmd = afni.ThreedTstat(outfile='bar.nii')
+    yield assert_equal, cmd.cmdline, '3dTstat -prefix bar.nii'
+    # infile
+    cmd = afni.ThreedTstat()
+    cmd.inputs.infile = 'foo.nii'
+    yield assert_equal, cmd.cmdline, '3dTstat foo.nii'
+    # order of params
+    cmd = afni.ThreedTstat()
+    cmd.inputs.infile = 'foo.nii'
+    cmd.inputs.outfile = 'bar.nii'
+    yield assert_equal, cmd.cmdline, '3dTstat -prefix bar.nii foo.nii'
+
