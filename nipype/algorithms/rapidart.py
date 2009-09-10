@@ -165,6 +165,66 @@ class ArtifactDetect(Interface):
     def get_input_info(self):
         return []
 
+    def _get_affine_matrix(self,params):
+        """Returns an affine matrix given a set of parameters
+
+        params : np.array (upto 12 long)
+        [translation (3), rotation (3,xyz, radians), scaling (3),
+        shear/affine (3)]
+        
+        """
+        rotfunc = lambda x : np.array([[np.cos(x), np.sin(x)],[-np.sin(x),np.cos(x)]])
+        q = np.array([0,0,0,0,0,0,1,1,1,0,0,0])
+        if len(params)<12:
+            params=np.hstack((params,q[len(params):]))
+        params.shape = (len(params),)
+        T = np.eye(4)
+        T[0:3,-1] = params[0:3] #np.vstack((np.hstack((np.eye(3),params[0:3,])),np.array([0,0,0,1])))
+        Rx = np.eye(4)
+        Rx[1:3,1:3] = rotfunc(params[3])
+        Ry = np.eye(4)
+        Ry[(0,0,2,2),(0,2,0,2)] = rotfunc(params[4]).ravel()
+        Rz = np.eye(4)
+        Rz[0:2,0:2] = rotfunc(params[5])
+        S = np.eye(4)
+        S[0:3,0:3] = np.diag(params[6:9])
+        Sh = np.eye(4)
+        Sh[(0,0,1),(1,2,2)] = params[9:12]
+
+        return np.dot(T,np.dot(Rx,np.dot(Ry,np.dot(Rz,np.dot(S,Sh)))))
+        
+
+    def _calc_norm(self,mc):
+        """Calculates the maximum overall displacement of the midpoints
+        of the faces of a cube due to translation and rotation.
+
+        Inputs
+        ------
+
+        mc : motion parameter estimates
+        [3 translation, 3 rotation (radians)]
+
+        Returns
+        -------
+
+        norm : at each time point
+        
+        """
+        respos=np.diag([70,70,75]);resneg=np.diag([-70,-110,-45]);
+        cube_pts = np.vstack((np.hstack((respos,resneg)),np.ones((1,6))))
+        newpos = np.zeros((mc.shape[0],18))
+        for i in range(mc.shape[0]):
+            newpos[i,:] = np.dot(self._get_affine_matrix(mc[i,:]),cube_pts)[0:3,:].ravel()
+        normdata = np.zeros(mc.shape[0])
+        if self.inputs.use_differences:
+            newpos = np.concatenate((np.zeros((1,18)),np.diff(newpos,n=1,axis=0)),axis=0)
+            for i in range(newpos.shape[0]):
+                normdata[i] = np.max(np.sqrt(np.sum(np.reshape(newpos[i,:],(3,6))**2,axis=0)))
+        else:
+            newpos = signal.detrend(newpos,axis=0,type='constant')
+            normdata = np.sqrt(np.mean(newpos**2,axis=1))
+        return normdata
+    
     def _detect_outliers_core(self,imgfile,motionfile,cwd='.'):
         """
         Core routine for detecting outliers
@@ -177,21 +237,17 @@ class ArtifactDetect(Interface):
         """
         # read in motion parameters
         mc_in = np.loadtxt(motionfile)
-
-        # if using differences recompute mc
-        if self.inputs.use_differences:
-            mc = np.concatenate( (np.zeros((1,6)),np.diff(mc_in,n=1,axis=0)) , axis=0)
-        else:
-            mc = mc_in
-        
-        traval = mc[:,0:3]  # translation parameters (mm)
-        rotval = mc[:,3:6]  # rotation parameters (rad)
+        mc = mc_in
         if self.inputs.use_norm:
             # calculate the norm of the motion parameters
-            normval = np.sqrt(np.sum(mc*mc,1))
+            normval = self._calc_norm(mc)
             tidx = find_indices(normval>self.inputs.norm_threshold)
             ridx = find_indices(normval<0)
         else:
+            if self.inputs.use_differences:
+                mc = np.concatenate( (np.zeros((1,6)),np.diff(mc_in,n=1,axis=0)) , axis=0)
+            traval = mc[:,0:3]  # translation parameters (mm)
+            rotval = mc[:,3:6]  # rotation parameters (rad)
             tidx = find_indices(np.sum(abs(traval)>self.inputs.translation_threshold,1)>0)
             ridx = find_indices(np.sum(abs(rotval)>self.inputs.rotation_threshold,1)>0)
 
@@ -200,6 +256,7 @@ class ArtifactDetect(Interface):
 
         # compute global intensity signal
         (x,y,z,timepoints) = nim.get_shape()
+
         data = nim.get_data()
         g = np.zeros((timepoints,1))
         masktype = self.inputs.mask_type
