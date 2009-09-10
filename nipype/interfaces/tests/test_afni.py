@@ -105,6 +105,42 @@ def test_Threedrefit():
     # don't specify infile and call run should raise error
     cmd = afni.Threedrefit()
     yield assert_raises, AttributeError, cmd.run
+    # result should be InterfaceResult object
     cmd = afni.Threedrefit()
     res = cmd.run('foo.nii')
-    yield assert_equal, type(res), type(InterfaceResult)
+    yield assert_true, isinstance(res, InterfaceResult)
+
+
+def test_Threedresample():
+    cmd = afni.Threedresample()
+    yield assert_equal, cmd.cmdline, '3dresample'
+    # rsmode
+    cmd = afni.Threedresample(rsmode='Li')
+    yield assert_equal, cmd.cmdline, '3dresample -rmode Li'
+    # orient
+    cmd = afni.Threedresample()
+    cmd.inputs.orient = 'lpi'
+    yield assert_equal, cmd.cmdline, '3dresample -orient lpi'
+    # gridfile
+    cmd = afni.Threedresample(gridfile='dset+orig')
+    yield assert_equal, cmd.cmdline, '3dresample -master dset+orig'
+    # infile
+    cmd = afni.Threedresample()
+    cmd.inputs.infile = 'foo.nii'
+    yield assert_equal, cmd.cmdline, '3dresample -inset foo.nii'
+    # outfile
+    cmd = afni.Threedresample(outfile='bar.nii')
+    yield assert_equal, cmd.cmdline, '3dresample -prefix bar.nii'
+    # unknown params
+    cmd = afni.Threedresample(foo='bar')
+    yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
+    # infile not specified
+    cmd = afni.Threedresample(outfile='bar.nii')
+    yield assert_raises, AttributeError, cmd.run
+    # outfile not specified
+    cmd = afni.Threedresample(infile='foo.nii')
+    yield assert_raises, AttributeError, cmd.run
+    # result should be InterfaceResult object
+    cmd = afni.Threedresample()
+    res = cmd.run(infile='foo.nii', outfile='bar.nii')
+    yield assert_true, isinstance(res, InterfaceResult)
