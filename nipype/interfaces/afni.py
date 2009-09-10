@@ -15,7 +15,7 @@ class AFNICommand(CommandLine):
 
 
 class To3d(AFNICommand):
-    """Use AFNI to3d command to create a 3D dataset from 2D image files.
+    """Create a 3D dataset from 2D image files using AFNI to3d command.
 
     For complete details, see the `to3d Documentation. 
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
@@ -155,8 +155,9 @@ class To3d(AFNICommand):
 
 
 class Threedrefit(AFNICommand):
-    """
-    For complete details, see the `to3d Documentation. 
+    """Fix errors in AFNI header resulting from using to3d command.
+
+    For complete details, see the `3drefit Documentation. 
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3drefit.html>`_
     """
 
@@ -240,8 +241,9 @@ class Threedrefit(AFNICommand):
         
 
 class Threedresample(AFNICommand):
-    """
-    For complete details, see the `to3d Documentation. 
+    """Resample or reorient an image using AFNI 3dresample command.
+
+    For complete details, see the `3dresample Documentation. 
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dresample.html>`_
     """
 
