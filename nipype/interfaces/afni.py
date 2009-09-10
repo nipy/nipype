@@ -335,8 +335,9 @@ class Threedresample(AFNICommand):
 
         
 class ThreedTstat(AFNICommand):
-    """
-    For complete details, see the `to3d Documentation. 
+    """Compute voxel-wise statistices using AFNI 3dTstat command.
+
+    For complete details, see the `3dTstat Documentation. 
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html>`_
     """
 
