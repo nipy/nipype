@@ -1,6 +1,7 @@
 from nipype.testing import *
 
 from nipype.interfaces import afni
+from nipype.interfaces.base import InterfaceResult
 
 def test_To3d():
     cmd = afni.To3d()
@@ -90,11 +91,20 @@ def test_Threedrefit():
     cmd.inputs.xorigin = 12.34
     yield assert_equal, cmd.cmdline, '3drefit -xorigin 12.34'
     # yorigin
-    cmd = afni.Threedrefit()
-    cmd.inputs.yorigin = 12.34
+    cmd = afni.Threedrefit(yorigin=12.34)
     yield assert_equal, cmd.cmdline, '3drefit -yorigin 12.34'
     # zorigin
-    cmd = afni.Threedrefit()
-    cmd.inputs.zorigin = 12.34
+    cmd = afni.Threedrefit(zorigin=12.34)
     yield assert_equal, cmd.cmdline, '3drefit -zorigin 12.34'
-
+    # infile
+    cmd = afni.Threedrefit(infile='foo.nii')
+    yield assert_equal, cmd.cmdline, '3drefit foo.nii'
+    # provide unknown params
+    cmd = afni.Threedrefit(foo='bar')
+    yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
+    # don't specify infile and call run should raise error
+    cmd = afni.Threedrefit()
+    yield assert_raises, AttributeError, cmd.run
+    cmd = afni.Threedrefit()
+    res = cmd.run('foo.nii')
+    yield assert_equal, type(res), type(InterfaceResult)

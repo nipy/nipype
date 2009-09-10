@@ -223,6 +223,11 @@ class Threedrefit(AFNICommand):
         infile : filename
             File whose header file will be updated by 3drefit
         
+        Returns
+        -------
+        results : InterfaceResult
+            A `InterfaceResult` object with a copy of self in `interface`
+
         """
         self.inputs.update(**inputs)
         if not infile and not self.inputs.infile:
