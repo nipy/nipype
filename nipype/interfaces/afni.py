@@ -420,8 +420,8 @@ class ThreedTstat(AFNICommand):
 
         Parameters
         ----------
-        infile : filename
-            File that we be resampled
+        infile : string
+            File to compute statistics on.
         inputs : dict
             Dictionary of any additional flags to send to 3dTstat
 
@@ -442,8 +442,9 @@ class ThreedTstat(AFNICommand):
 
 
 class ThreedAutomask(AFNICommand):
-    """
-    For complete details, see the `to3d Documentation. 
+    """Create a brain-only mask of the image using AFNI 3dAutomask command.
+
+    For complete details, see the `3dAutomask Documentation. 
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutomask.html>`_
     """
 
@@ -485,10 +486,37 @@ class ThreedAutomask(AFNICommand):
             out_inputs.append('%s' % val)
 
         if len(inputs) > 0:
-            print '%s: unsupported options: %s' % (
+            msg = '%s: unsupported options: %s' % (
                 self.__class__.__name__, inputs.keys())
+            raise AttributeError(msg)
 
         return out_inputs
+
+    def run(self, infile=None, **inputs):
+        """Execute 3DAutomask
+
+        Parameters
+        ----------
+        infile : string
+            File to generate mask from.
+        inputs : dict
+            Dictionary of any additional flags to send to 3dTstat
+
+        Returns
+        -------
+        results : InterfaceResult
+            A `InterfaceResult` object with a copy of self in `interface`
+
+        """
+        if infile:
+            self.inputs.infile = infile
+        if not self.inputs.infile:
+            raise AttributeError('ThreedAutomask requires an infile.')
+        self.inputs.update(**inputs)
+        results = self._runner()
+        # XXX implement aggregate_outputs
+        return results
+
 
 
 class Threedvolreg(AFNICommand):
