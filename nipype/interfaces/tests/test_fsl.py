@@ -53,9 +53,7 @@ def test_bet():
     # test each of our arguments
     for name, settings in opt_map.items():
         better = fsl.Bet(**{name: settings[1]})
-        # Could also test for containment, but that's less stringent
-        yield assert_equal, super(fsl.Bet, better)._parse_inputs(), \
-            [settings[0]]
+        yield assert_equal, better.cmdline, ' '.join([better.cmd, settings[0]])
     
         
 # test fast
