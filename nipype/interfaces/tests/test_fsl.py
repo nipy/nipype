@@ -69,7 +69,13 @@ def test_fast():
     yield assert_not_equal, faster, fasted
     yield assert_equal, fasted.runtime.cmdline, 'fast --verbose infile'
     yield assert_equal, fasted2.runtime.cmdline, 'fast --verbose infile otherfile'
-   
+
+    faster = fsl.Fast()
+    faster.inputs.infiles = 'foo.nii'
+    yield assert_equal, faster.cmdline, 'fast foo.nii'
+    faster.inputs.infiles = ['foo.nii', 'bar.nii']
+    yield assert_equal, faster.cmdline, 'fast foo.nii bar.nii'
+    
     # Our options and some test values for them
     # Should parallel the opt_map structure in the class for clarity
     opt_map = {'number_classes':       ('--class 4', 4),

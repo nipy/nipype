@@ -412,8 +412,6 @@ class Fast(FSLCommand):
             self.inputs.infiles = infiles
         if not self.inputs.infiles:
             raise AttributeError('Fast requires input file(s)')
-        if type(self.inputs.infiles) is not list:
-            self.inputs.infiles = [infiles]
         self.inputs.update(**inputs)
         
         results = self._runner()
@@ -428,7 +426,10 @@ class Fast(FSLCommand):
         # Could do other checking above and beyond regular _parse_inputs here
         allargs = super(Fast, self)._parse_inputs(skip=('infiles'))
         if self.inputs.infiles:
-            allargs.extend(self.inputs.infiles)
+            if type(self.inputs.infiles) is list:
+                allargs.append('%s' % ' '.join(self.inputs.infiles))
+            else:
+                allargs.append(self.inputs.infiles)
 
         return allargs
 
