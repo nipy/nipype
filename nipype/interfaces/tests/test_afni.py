@@ -27,8 +27,12 @@ def test_To3d():
     yield assert_equal, cmd.cmdline, 'to3d /data/*.dcm'
     # infiles list
     cmd = afni.To3d()
-    cmd.inputs.infiles = ['data/foo.dcm', 'data/bar.dcm']
+    infiles = ['data/foo.dcm', 'data/bar.dcm']
+    cmd.inputs.infiles = infiles
     yield assert_equal, cmd.cmdline, 'to3d data/foo.dcm data/bar.dcm'
+    cmd = afni.To3d()
+    res = cmd.run(infiles=infiles)
+    yield assert_equal, res.interface.cmdline, 'to3d data/foo.dcm data/bar.dcm'
     # skip_outliers
     cmd = afni.To3d(skip_outliers=True)
     yield assert_equal, cmd.cmdline, 'to3d -skip_outliers'
