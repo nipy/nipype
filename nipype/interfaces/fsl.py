@@ -223,16 +223,20 @@ class Bet(FSLCommand):
 
     def _parse_inputs(self):
         """validate fsl bet options"""
-        allargs = super(Bet, self)._parse_inputs(skip=('infile','outfile'))
-        # Generate outfile if not provided based on infile
+        allargs = super(Bet, self)._parse_inputs(skip=('infile', 'outfile'))
+
+        # Add infile and outfile to the args if they are specified
+        if self.inputs.infile:
+            allargs.insert(0, self.inputs.infile)
+            if not self.inputs.outfile:
+                # If the outfile is not specified but the infile is,
+                # generate an outfile
+                pth, fname = os.path.split(self.inputs['infile'])
+                newpath=self.inputs.get('cwd', pth)
+                self.inputs.outfile = fname_presuffix(fname, suffix='_bet',
+                                                      newpath=newpath)
         if self.inputs.outfile:
-            outfile = self.inputs.outfile
-        else:
-            pth,fname = os.path.split(self.inputs['infile'])
-            outfile = fname_presuffix(fname,suffix='_bet',
-                                      newpath=self.inputs.get('cwd',pth))
-        allargs.insert(0,outfile)
-        allargs.insert(0,self.inputs.infile)
+            allargs.insert(1, self.inputs.outfile)
         return allargs
         
     def run(self, infile=None, outfile=None, **inputs):
