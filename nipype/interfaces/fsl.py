@@ -249,6 +249,8 @@ class Bet(FSLCommand):
         outfile : string, optional
             Filename to save output to. If not specified, the `infile`
             filename will be used with a "_bet" suffix.
+        inputs : dict
+            Dictionary of any additional flags to send to bet.
 
         Returns
         -------
@@ -395,6 +397,8 @@ class Fast(FSLCommand):
         ----------
         infiles : filename(s)
             file(s) to be segmented or bias corrected
+        inputs : dict
+            Dictionary of any additional flags to send to to3d
         
         Returns
         -------
@@ -403,15 +407,14 @@ class Fast(FSLCommand):
             runtime : Bunch containing stdout, stderr, returncode, commandline
             
         """
-        self.inputs.update(**inputs)
 
-        if not infiles and not self.inputs.infiles:
-                raise AttributeError('fast requires input file(s)')
         if infiles:
             self.inputs.infiles = infiles
-        
+        if not self.inputs.infiles:
+            raise AttributeError('Fast requires input file(s)')
         if type(self.inputs.infiles) is not list:
             self.inputs.infiles = [infiles]
+        self.inputs.update(**inputs)
         
         results = self._runner()
         if results.runtime.returncode == 0:
@@ -420,13 +423,12 @@ class Fast(FSLCommand):
 
         return results        
 
-
-
     def _parse_inputs(self):
         '''Call our super-method, then add our input files'''
         # Could do other checking above and beyond regular _parse_inputs here
         allargs = super(Fast, self)._parse_inputs(skip=('infiles'))
-        allargs.extend(self.inputs.infiles)
+        if self.inputs.infiles:
+            allargs.extend(self.inputs.infiles)
 
         return allargs
 
@@ -544,8 +546,10 @@ class Flirt(FSLCommand):
     def _parse_inputs(self):
         '''Call our super-method, then add our input files'''
         # Could do other checking above and beyond regular _parse_inputs here
-        allargs = super(Flirt, self)._parse_inputs(skip=('infile','outfile',
-                                                         'reference', 'outmatrix',
+        allargs = super(Flirt, self)._parse_inputs(skip=('infile', 
+                                                         'outfile',
+                                                         'reference', 
+                                                         'outmatrix',
                                                          'inmatrix'))
         possibleinputs = [(self.inputs.outfile,'-out'),
                           (self.inputs.inmatrix, '-init'),
@@ -555,13 +559,11 @@ class Flirt(FSLCommand):
         
         for val, flag in possibleinputs:
             if val:
-                allargs.insert(0,'%s %s'%(flag, val))
-        
+                allargs.insert(0, '%s %s' % (flag, val))
         return allargs
 
-    
-
-    def run(self, infile=None, reference=None, outfile=None, outmatrix=None,**inputs):
+    def run(self, infile=None, reference=None, outfile=None, outmatrix=None,
+            **inputs):
         """ runs flirt command
 
         Parameters
