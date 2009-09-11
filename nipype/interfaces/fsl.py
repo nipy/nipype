@@ -244,11 +244,11 @@ class Bet(FSLCommand):
 
         Parameters
         ----------
-        infile : filename
-            file to be skull stripped, can be passed as input
-        outfile : filename
-            file handle to save output, if None, <filename_bet> 
-            will be used
+        infile : string
+            Filename to be skull stripped, can be passed as input
+        outfile : string, optional
+            Filename to save output to. If not specified, the `infile`
+            filename will be used with a "_bet" suffix.
 
         Returns
         -------
@@ -257,14 +257,14 @@ class Bet(FSLCommand):
             runtime : Bunch containing stdout, stderr, returncode, commandline
             
         """
-        self.inputs.update(**inputs)
 
-        if not infile and not self.inputs.infile:
-                raise AttributeError('bet requires an input file')
         if infile:
             self.inputs.infile = infile
+        if not self.inputs.infile:
+            raise AttributeError('Bet requires an input file')
         if outfile:
             self.inputs.outfile = outfile
+        self.inputs.update(**inputs)
         
         results = self._runner()
         if results.runtime.returncode == 0:

@@ -712,8 +712,9 @@ class Threedmerge(AFNICommand):
 
 
 class ThreedZcutup(AFNICommand):
-    """
-    For complete details, see the `to3d Documentation. 
+    """Cut z-slices from a volume using AFNI 3dZcutup command.
+
+    For complete details, see the `3dZcutup Documentation. 
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcutup.html>`_
     """
 
@@ -775,8 +776,9 @@ class ThreedZcutup(AFNICommand):
             out_inputs.append('%s' % val)
 
         if len(inputs) > 0:
-            print '%s: unsupported options: %s' % (
+            msg = '%s: unsupported options: %s' % (
                 self.__class__.__name__, inputs.keys())
+            raise AttributeError(msg)
 
         return out_inputs
 
