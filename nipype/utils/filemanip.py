@@ -75,6 +75,7 @@ def copyfile(originalfile, newfile,copy=False):
     None
     
     """
+    print "copying %s to %s"%(originalfile,newfile)
     if os.name is 'posix' and not copy:
         os.symlink(originalfile,newfile)
     else:
@@ -91,7 +92,7 @@ def copyfiles(filelist, dest, copy=False):
         full path to destination. If it is a list of length greater
         than 1, then it assumes that these are the names of the new
         files. 
-    symlink : Bool
+    copy : Bool
         specifies whether to copy or symlink files
         (default=True) but only for posix systems
          
@@ -101,12 +102,17 @@ def copyfiles(filelist, dest, copy=False):
     
     """
     outfiles = filename_to_list(dest)
+    newfiles = []
     for i,f in enumerate(filename_to_list(filelist)):
         if len(outfiles) > 1:
-            newfile = outfiles[i]
+            destfile = outfiles[i]
         else:
-            newfile = fname_presuffix(f, newpath=outfiles[0])
-        copyfile(f,newfile,copy)
+            destfile = fname_presuffix(f, newpath=outfiles[0])
+        copyfile(f,destfile,copy)
+        newfiles.insert(i,destfile)
+    return newfiles
+
+    
 
 
 def filename_to_list(filename):

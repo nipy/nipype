@@ -11,6 +11,8 @@ from warnings import warn
 import networkx as nx
 import numpy as np
 
+from nipype.utils.misc import mktree
+
 try:
     from IPython.kernel import client
     IPython_available = True
@@ -244,7 +246,7 @@ class Pipeline(object):
                     if self.config['use_parameterized_dirs'] and (graph.__dict__['name'] is not ''):
                         outputdir = os.path.join(outputdir,graph.__dict__['name'])
                     if not os.path.exists(outputdir):
-                        os.mkdir(outputdir)
+                        mktree(outputdir)
                     node.output_directory_base = os.path.abspath(outputdir)
                 node.parameterization = graph.__dict__['name']
                 node.run()
@@ -338,6 +340,8 @@ class Pipeline(object):
                 outputdir = self.config['workdir']
                 if self.config['use_parameterized_dirs'] and (graph.__dict__['name'] is not ''):
                     outputdir = os.path.join(outputdir,graph.__dict__['name'])
+                if not os.path.exists(outputdir):
+                    mktree(outputdir)
                 self.procs[jobid].parameterization = graph.__dict__['name']
                 self.procs[jobid].output_directory_base = os.path.abspath(outputdir)
                 # Send job to worker, add callback and add to pending results
