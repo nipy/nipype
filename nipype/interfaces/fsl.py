@@ -23,6 +23,7 @@ from nipype.interfaces.base import (Bunch, CommandLine,
                                     load_template, InterfaceResult)
 from nipype.utils import setattr_on_read
 from nipype.utils.docparse import get_doc
+from nipype.utils.misc import container_to_string
 
 import warnings
 warn = warnings.warn
@@ -398,7 +399,7 @@ class Fast(FSLCommand):
         infiles : filename(s)
             file(s) to be segmented or bias corrected
         inputs : dict
-            Dictionary of any additional flags to send to to3d
+            Dictionary of any additional flags to send to fast
         
         Returns
         -------
@@ -426,11 +427,7 @@ class Fast(FSLCommand):
         # Could do other checking above and beyond regular _parse_inputs here
         allargs = super(Fast, self)._parse_inputs(skip=('infiles'))
         if self.inputs.infiles:
-            if type(self.inputs.infiles) is list:
-                allargs.append('%s' % ' '.join(self.inputs.infiles))
-            else:
-                allargs.append(self.inputs.infiles)
-
+            allargs.append(container_to_string(self.inputs.infiles))
         return allargs
 
 
