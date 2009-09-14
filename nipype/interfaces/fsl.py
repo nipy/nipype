@@ -45,8 +45,7 @@ def fslversion():
     Returns
     -------
     version : string
-       version number as string 
-       or None if FSL not found
+       Version number as string or None if FSL not found
 
     """
     # find which fsl being used....and get version from
@@ -69,9 +68,8 @@ def fsloutputtype(ftype=None):
     Parameters
     ----------
     ftype :  string
-        Represents the file type to set
-        based on string of valid FSL file types
-        ftype == None to get current setting/ options
+        Represents the file type to set based on string of valid FSL
+        file types ftype == None to get current setting/ options
 
     Returns
     -------
@@ -101,7 +99,7 @@ def fsloutputtype(ftype=None):
         os.environ['FSLOUTPUTTYPE'] = fsl_ftype
     
     print 'FSLOUTPUTTYPE = %s (\"%s\")'%(fsl_ftype, ftypes[fsl_ftype])
-    return fsl_ftype,ftypes[fsl_ftype]
+    return fsl_ftype, ftypes[fsl_ftype]
         
 
 class FSLCommand(CommandLine):

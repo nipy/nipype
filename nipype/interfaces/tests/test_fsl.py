@@ -1,7 +1,25 @@
-import nipype.interfaces.fsl as fsl
 import os
 
 from nipype.testing import *
+import nipype.interfaces.fsl as fsl
+
+
+def test_fslversion():
+    ver = fsl.fslversion().split('.')
+    yield assert_equal, ver[0], '4'
+
+    
+def test_fsloutputtype():
+    types = ['ANALYZE_GZ', 'NIFTI_PAIR_GZ', 'NIFTI', 'NIFTI_PAIR',
+             'NIFTI_GZ', 'ANALYZE']
+    out_type, ext = fsl.fsloutputtype()
+    yield assert_true, out_type in types
+    env_type = os.environ.get('FSLOUTPUTTYPE')
+    if env_type:
+        # Set to same value for test.
+        out_type, ext = fsl.fsloutputtype(env_type)
+        yield assert_equal, out_type, env_type
+
 
 # test Bet
 def test_bet():
