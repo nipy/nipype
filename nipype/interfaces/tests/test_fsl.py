@@ -133,6 +133,25 @@ def test_flirt():
     yield assert_equal, flirter.inputs.cost, flirt_apply.interface.inputs.cost
     yield assert_equal, flirt_apply.runtime.cmdline,'flirt -in infile -ref reffile -omat outmat.mat -init inmatrix.mat -out outimgfile -cost mutualinfo -applyxfm -bins 256'
     
+    flirter = fsl.Flirt()
+    # infile not specified
+    yield assert_raises, AttributeError, flirter.applyxfm
+    flirter.inputs.infile = 'foo.nii'
+    # reference not specified
+    yield assert_raises, AttributeError, flirter.applyxfm
+    flirter.inputs.reference = 'mni152.nii'
+    # inmatrix not specified
+    yield assert_raises, AttributeError, flirter.applyxfm
+    flirter.inputs.inmatrix = 'inmatrix.mat'
+    res = flirter.applyxfm()
+    realcmd = 'flirt -in foo.nii -ref mni152.nii -init inmatrix.mat -applyxfm'
+    yield assert_equal, res.interface.cmdline, realcmd
+    inputs = dict(flags='-v')
+    res = flirter.applyxfm(**inputs)
+    realcmd ='flirt -in foo.nii -ref mni152.nii -init inmatrix.mat -v -applyxfm'
+    yield assert_equal, res.interface.cmdline, realcmd
+
+
 #test fnirt
 def test_fnirt():
     fnirt = fsl.Fnirt()

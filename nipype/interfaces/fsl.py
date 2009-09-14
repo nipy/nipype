@@ -396,8 +396,8 @@ class Fast(FSLCommand):
 
         Parameters
         ----------
-        infiles : filename(s)
-            file(s) to be segmented or bias corrected
+        infiles : string or list of strings
+            File(s) to be segmented or bias corrected
         inputs : dict
             Dictionary of any additional flags to send to fast
         
@@ -562,20 +562,22 @@ class Flirt(FSLCommand):
 
     def run(self, infile=None, reference=None, outfile=None, outmatrix=None,
             **inputs):
-        """ runs flirt command
+        """Run the flirt command
 
         Parameters
         ----------
-        infile : filename
-            filename of volume to be moved
-        reference : filename
-            filename of volume used as target for registration
-        outfile : filename
-            filename of new volume of infile moved to space of reference
-            if None,  only the transformation matrix will be calculated
-        outmatrix : filename  q
-            filename holding transformation matrix in asci format
-            if None, the output matrix will not be saved to a file
+        infile : string
+            Filename of volume to be moved.
+        reference : string
+            Filename of volume used as target for registration.
+        outfile : string, optional
+            Filename of the output, registered volume.  If not specified, only
+            the transformation matrix will be calculated.
+        outmatrix : string, optional
+            Filename to output transformation matrix in asci format.
+            If not specified, the output matrix will not be saved to a file.
+        inputs : dict
+            Dictionary of any additional flags to send to flirt.
 
         Returns
         -------
@@ -589,28 +591,22 @@ class Flirt(FSLCommand):
         flirted_estimate = Flirt().run(infile, reference, outfile=None, outmatrix=outmatrix)
         flirt_apply = Flirt().applyxfm(infile, reference, inmatrix, outfile)
             
-        
         """
-        self.inputs.update(**inputs)
 
-        if infile is None:
-            if self.inputs.infile is None:
-                raise ValueError('infile is not specified')
-            else:
-                infile = self.inputs.infile
-        if reference is None:
-            if self.inputs.reference is None:
-                raise ValueError('reference is not specified')
-            else:
-                reference = self.inputs.reference
-        if outfile is None:
-            outfile = self.inputs.outfile
-        if outmatrix is None:
-            outmatrix = self.inputs.outmatrix
-        self.inputs.update(infile=infile, 
-                           reference=reference,
-                           outfile=outfile,
-                           outmatrix = outmatrix)
+        if infile:
+            self.inputs.infile = infile
+        if not self.inputs.infile:
+            raise AttributeError('Flirt requires an infile.')
+        if reference:
+            self.inputs.reference = reference
+        if not self.inputs.reference:
+            raise AttributeError('Flirt requires a reference file.')
+
+        if outfile:
+            self.inputs.outfile = outfile
+        if outmatrix:
+            self.inputs.outmatrix = outmatrix
+        self.inputs.update(**inputs)
         
         results = self._runner()
         if results.runtime.returncode == 0:
@@ -619,22 +615,26 @@ class Flirt(FSLCommand):
         return results 
         
 
-    def applyxfm(self, infile=None, reference=None, inmatrix=None, outfile=None,**inputs):
-        """ runs flirt command 
+    def applyxfm(self, infile=None, reference=None, inmatrix=None, 
+                 outfile=None, **inputs):
+        """Run flirt and apply the transformation to the image.
+
           eg.
-         flirt [options] -in <inputvol> -ref <refvol> -applyxfm -init <matrix> -out <outputvol>
+         flirt [options] -in <inputvol> -ref <refvol> -applyxfm -init
+         <matrix> -out <outputvol>
 
         Parameters
         ----------
-        infile : filename
-            filename of volume to be moved
-        reference : filename
-            filename of volume used as target for registration
-        inmatrix : filename  inmat.mat
-            filename holding transformation matrix in asci format
-        outfile : filename
-            filename of new volume of infile moved to space of reference
-            if None,  only the transformation matrix will be calculated
+        infile : string
+            Filename of volume to be moved.
+        reference : string
+            Filename of volume used as target for registration.
+        inmatrix : string
+            Filename for input transformation matrix, in asci format.
+        outfile : string, optional
+            Filename of the output, registered volume.  If not
+            specified, only the transformation matrix will be
+            calculated.
 
         Returns
         -------
@@ -649,32 +649,29 @@ class Flirt(FSLCommand):
                                     inmatrix=None, 
                                     outfile=None)
         """
+
+        if infile:
+            self.inputs.infile = infile
+        if not self.inputs.infile:
+            raise AttributeError('Flirt requires an infile.')
+        if reference:
+            self.inputs.reference = reference
+        if not self.inputs.reference:
+            raise AttributeError('Flirt requires a reference file.')
+        if inmatrix:
+            self.inputs.inmatrix = inmatrix
+        if not self.inputs.inmatrix:
+            raise AttributeError('Flirt applyxfm requires an inmatrix')
+        if outfile:
+            self.inputs.outfile = outfile
+        # If the inputs dict already has a set of flags, we want to
+        # update it, not overwrite it.
+        flags = inputs.get('flags', None)
+        if flags is None:
+            inputs['flags'] = '-applyxfm'
+        else:
+            inputs['flags'] = ' '.join([flags, '-applyxfm'])
         self.inputs.update(**inputs)
-        if infile is None:
-            if self.inputs.infile is None:
-                raise ValueError('input not specfied')
-            else:
-                infile = self.inputs.infile
-        if reference is None:
-            if self.inputs.reference is None:
-                raise ValueError('reference is not specified')
-            else:
-                reference = self.inputs.reference
-        if outfile is None:
-            if self.inputs.outfile is None:
-                raise ValueError('outfile not specified')
-            else:
-                outfile = self.inputs.outfile
-        if inmatrix is None:
-            if self.inputs.inmatrix is None:
-                raise ValueError('inmatrix is not specified')
-            else:
-                inmatrix = self.inputs.inmatrix
-        self.inputs.update(infile=infile, 
-                           reference=reference,
-                           outfile=outfile,
-                           inmatrix = inmatrix,
-                           flags='-applyxfm')        
             
         results = self._runner()
         if results.runtime.returncode == 0:
@@ -683,6 +680,7 @@ class Flirt(FSLCommand):
             # results.outputs = self.aggregate_outputs()
             
         return results 
+
 
 class McFlirt(FSLCommand):
     """Use FSL MCFLIRT to do within-modality motion correction.
