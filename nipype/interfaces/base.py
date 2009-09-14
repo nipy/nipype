@@ -197,17 +197,24 @@ class CommandLine(Interface):
 
     def _update(self, *args, **inputs):
         '''Helper function to support DRY'''
+        # XXX should rethink how CommandLine is to be used and work
+        # through the processing of args and inputs['args'].
         try:
             # if inputs['args'] exists and is splittable (thus, not a list)
-            inputs['args']  = inputs['args'].split()
-        # Maybe this should just be a bare except?
-        except (KeyError, AttributeError):
+            # Handles case like this: CommandLine(args='echo foo')
+            if hasattr(inputs['args'], 'split'):
+                inputs['args']  = inputs['args'].split()
+        except KeyError:
             pass
 
         self.inputs.update(inputs)
 
         if args:
-            if self.inputs.args:
+            # In general, only CommandLine objects have an 'args' attr
+            # in self.inputs.  Most of the subclasses of CommandLine
+            # (Bet, Fast, etc...) do not, so we need to confirm it
+            # exists before checking if it's None.
+            if hasattr(self.inputs, 'args') and self.inputs.args:
                 self.inputs.args.extend(list(args))
             else:
                 self.inputs.args = list(args)
