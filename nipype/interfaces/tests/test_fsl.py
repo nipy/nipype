@@ -107,9 +107,8 @@ def test_fast():
     # test each of our arguments
     for name, settings in opt_map.items():
         faster = fsl.Fast(**{name: settings[1]})
-        # Could also test for containment, but that's less stringent
-        yield assert_equal, super(fsl.Fast, faster)._parse_inputs(), \
-                [settings[0]]
+        yield assert_equal, faster.cmdline, ' '.join([faster.cmd, settings[0]])
+
 
 #test flirt
 def test_flirt():
