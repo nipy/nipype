@@ -21,6 +21,15 @@ def test_fsloutputtype():
         yield assert_equal, out_type, env_type
 
 
+def test_FSLCommand():
+    # Most methods in FSLCommand are tested in the subclasses.  Only
+    # testing the one item that is not.
+    cmd = fsl.FSLCommand()
+    cmd.cmd = 'bet' # Set the cmd to something
+    res = cmd.run()
+    yield assert_equal, type(res), fsl.InterfaceResult
+
+
 # test Bet
 def test_bet():
     better = fsl.Bet()

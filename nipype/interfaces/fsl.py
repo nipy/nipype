@@ -177,9 +177,11 @@ class FSLCommand(CommandLine):
                     # Append options using format string.
                     allargs.append(argstr % value)
             except TypeError, err:
-                warn('For option %s in Fast, %s' % (opt, err.message))
+                msg = 'Error when parsing option %s in class %s.\n%s' % \
+                    (opt, self.__class__.__name__, err.message)
+                warn(msg)
             except KeyError:                   
-                warn('option %s not supported' % (opt))
+                warn('Option %s not supported!' % (opt))
         
         return allargs
 
