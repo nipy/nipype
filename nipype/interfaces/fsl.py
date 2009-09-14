@@ -132,7 +132,25 @@ class FSLCommand(CommandLine):
         return results        
 
     def _parse_inputs(self, skip=()):
-        """validate options in the opt_map. If set to None ignore.
+        """Parse all inputs and format options using the opt_map format string.
+
+        Any inputs that are assigned (that are not None) are formatted
+        to be added to the command line.
+
+        Parameters
+        ----------
+        skip : tuple or list
+            Inputs to skip in the parsing.  This is for inputs that
+            require special handling, for example input files that
+            often must be at the end of the command line.  Inputs that
+            require special handling like this should be handled in a
+            _parse_inputs method in the subclass.
+        
+        Returns
+        -------
+        allargs : list
+            A list of all inputs formatted for the command line.
+
         """
         allargs = []
         inputs = [(k, v) for k, v in self.inputs.iteritems() if v is not None ]
@@ -140,11 +158,16 @@ class FSLCommand(CommandLine):
             if opt in skip:
                 continue
             if opt == 'args':
+                # XXX Where is this used?  Is self.inputs.args still
+                # used?  Or is it leftover from the original design of
+                # base.CommandLine?
                 allargs.extend(value)
                 continue
             try:
                 argstr = self.opt_map[opt]
                 if argstr.find('%') == -1:
+                    # Boolean options have no format string.  Just
+                    # append options if True.
                     if value is True:
                         allargs.append(argstr)
                     elif value is not False:
@@ -153,6 +176,7 @@ class FSLCommand(CommandLine):
                 elif type(value) == list:
                     allargs.append(argstr % tuple(value))
                 else:
+                    # Append options using format string.
                     allargs.append(argstr % value)
             except TypeError, err:
                 warn('For option %s in Fast, %s' % (opt, err.message))
