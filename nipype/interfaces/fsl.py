@@ -890,8 +890,6 @@ class Fnirt(FSLCommand):
     @property
     def cmdline(self):
         """validates fsl options and generates command line argument"""
-        # XXX Why does this class override cmdline and use this
-        # update_optmap when no other classes do?
         self.update_optmap()
         allargs = self._parse_inputs()
         allargs.insert(0, self.cmd)
@@ -899,19 +897,22 @@ class Fnirt(FSLCommand):
             
   
     def run(self, infile=None, reference=None, **inputs):
-        """ runs fnirt command
+        """Run the fnirt command
   
         Parameters
         ----------
-        infile : filename
-            filename of volume to be warped/moved
-        reference : filename
-            filename of volume used as target for  warp registration
+        infile : string
+            Filename of the volume to be warped/moved.
+        reference : string
+            Filename of volume used as target for warp registration.
+        inputs : dict
+            Dictionary of any additional flags to send to fnirt.
 
         Returns
         --------
-        fnirt : object
-            return new fnirt object with updated fields
+        results : Bunch
+            A `Bunch` object with a copy of self in `interface`
+            runtime : Bunch containing stdout, stderr, returncode, commandline
 
         Examples
         --------
@@ -919,22 +920,17 @@ class Fnirt(FSLCommand):
         >>> fnirt_mprage = fsl.Fnirt(imgfwhm=[8,4,2],sub_sampling=[4,2,1],
                                      warp_resolution=[6,6,6])
         >>> fnirted_mprage = fnirt_mprage.run(infile='jnkT1.nii', reference='refimg.nii')
-        """
-        self.inputs.update(**inputs)
-        if infile is None:
-            if self.inputs.infile is None:
-                raise ValueError('infile is not specified')
-            else:
-                infile = self.inputs.infile
-        if reference is None:
-            if self.inputs.reference is None:
-                raise ValueError('reference is not specified')
-            else:
-                reference = self.inputs.reference
-        
 
-        self.inputs.update(infile=infile, 
-                           reference=reference)
+        """
+        if infile:
+            self.inputs.infile = infile
+        if not self.inputs.infile:
+            raise AttributeError('Fnirt requires an infile.')
+        if reference:
+            self.inputs.reference = reference
+        if not self.inputs.reference:
+            raise AttributeError('Fnirt requires a reference file.')
+        self.inputs.update(**inputs)
                                    
         results = self._runner()
         if results.runtime.returncode == 0:
@@ -957,11 +953,14 @@ class Fnirt(FSLCommand):
                          'applyimgmask']
         for item in itemstoupdate:
             if self.inputs.get(item):
-                tmps = self.opt_map[item].split()
+                opt = self.opt_map[item].split()
                 values = self.inputs.get(item)
-                valstr = tmps[0] + ' %s'%(tmps[1])* len(values)
-                    
-                self.opt_map[item]= valstr
+                try:
+                    valstr = opt[0] + ' %s'%(opt[1])* len(values)
+                except TypeError:
+                    # TypeError is raised if values is not a list
+                    valstr = opt[0] + ' %s'%(opt[1])
+                self.opt_map[item] = valstr
    
     def _parse_inputs(self):
         '''Call our super-method, then add our input files'''
