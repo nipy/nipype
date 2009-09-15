@@ -184,6 +184,48 @@ def test_flirt():
     yield assert_equal, res.interface.cmdline, realcmd
 
 
+# Mcflirt
+def test_mcflirt():
+    frt = fsl.McFlirt()
+    yield assert_equal, frt.cmd, 'mcflirt'
+    
+    opt_map = {
+        'outfile':     ('-out bar.nii', 'bar.nii'),
+        'cost':        ('-cost mutualinfo', 'mutualinfo'),
+        'bins':        ('-bins 256', 256),
+        'dof':         ('-dof 6', 6),
+        'refvol':      ('-refvol 2', 2),
+        'scaling':     ('-scaling 6.00', 6.00),
+        'smooth':      ('-smooth 1.00', 1.00),
+        'rotation':    ('-rotation 2', 2),
+        'verbose':     ('-verbose', True),
+        'stages':      ('-stages 3', 3),
+        'init':        ('-init matrix.mat', 'matrix.mat'),
+        'usegradient': ('-gdt', True),
+        'usecontour':  ('-edge', True),
+        'meanvol':     ('-meanvol', True),
+        'statsimgs':   ('-stats', True),
+        'savemats':    ('-mats', True),
+        'saveplots':   ('-plots', True),
+        'report':      ('-report', True),
+        }
+
+    for name, settings in opt_map.items():
+        fnt = fsl.McFlirt(**{name : settings[1]})
+        yield assert_equal, fnt.cmdline, ' '.join([fnt.cmd, settings[0]])
+
+    # Test error is raised when missing required args
+    fnt = fsl.McFlirt()
+    yield assert_raises, AttributeError, fnt.run
+    # Test run result
+    fnt = fsl.McFlirt()
+    fnt.inputs.infile = 'foo.nii'
+    res = fnt.run()
+    yield assert_equal, type(res), fsl.InterfaceResult
+    res = fnt.run(infile='bar.nii')
+    yield assert_equal, type(res), fsl.InterfaceResult
+
+
 #test fnirt
 def test_fnirt():
     fnirt = fsl.Fnirt()
@@ -247,3 +289,4 @@ def test_fnirt():
     for name, settings in opt_map.items():
         fnirt = fsl.Fnirt(**{name : settings[1]})
         yield assert_equal, fnirt.cmdline, ' '.join([fnirt.cmd, settings[0]])
+

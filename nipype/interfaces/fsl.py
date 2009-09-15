@@ -659,6 +659,8 @@ class Flirt(FSLCommand):
             Filename of the output, registered volume.  If not
             specified, only the transformation matrix will be
             calculated.
+        inputs : dict
+            Dictionary of any additional flags to send to flirt
 
         Returns
         -------
@@ -752,39 +754,42 @@ class McFlirt(FSLCommand):
         'report':      '-report'}
 
     def _populate_inputs(self):
-        self.inputs = Bunch(
-            outfile=     None,
-            cost=        None,
-            bins=        None,
-            dof=         None,
-            refvol=      None,
-            scaling=     None,
-            smooth=      None,
-            rotation=    None,
-            verbose=     None,
-            stages=      None,
-            init=        None,
-            usegradient= None,
-            usecontour=  None,
-            meanvol=     None,
-            statsimgs=   None,
-            savemats=    None,
-            saveplots=   None,
-            report=      None)
+        self.inputs = Bunch(infile=None,
+                            outfile=None,
+                            cost=None,
+                            bins=None,
+                            dof=None,
+                            refvol=None,
+                            scaling=None,
+                            smooth=None,
+                            rotation=None,
+                            verbose=None,
+                            stages=None,
+                            init=None,
+                            usegradient=None,
+                            usecontour=None,
+                            meanvol=None,
+                            statsimgs=None,
+                            savemats=None,
+                            saveplots=None,
+                            report=None)
         
     def _parse_inputs(self):
         """Call our super-method, then add our input files"""
         allargs = super(McFlirt, self)._parse_inputs(skip=('infile'))
-        allargs.insert(0,'-in %s'%(self.inputs.infile))
+        if self.inputs.infile:
+            allargs.insert(0,'-in %s'%(self.inputs.infile))
         return allargs
 
-    def run(self,infile=None, **inputs):
-        """ Runs mcflirt
+    def run(self, infile=None, **inputs):
+        """Runs mcflirt
         
         Parameters
         ----------
-        infile : filename
-            filename of volume to be aligned
+        infile : string
+            Filename of volume to be aligned
+        inputs : dict
+            Dictionary of any additional flags to send to mcflirt
 
         Returns
         -------
@@ -792,23 +797,25 @@ class McFlirt(FSLCommand):
             A `Bunch` object with a copy of self in `interface`
             runtime : Bunch containing stdout, stderr, returncode, commandline
 
-        Example
-        -------
+        Examples
+        --------
         >>> mcflrt = fsl.McFlirt(cost='mutualinfo')
         >>> mcflrtd = mcflrt.run(infile='timeseries.nii')
+
         """
-        self.inputs.update(**inputs)
-        if infile is None:
-            if self.inputs.infile is None:
-                raise ValueError('infile is not specified')
-        else:    
+        if infile:
             self.inputs.infile = infile
+        if not self.inputs.infile:
+            raise AttributeError('McFlirt requires an infile.')
+
+        self.inputs.update(**inputs)
         results = self._runner()
         if results.runtime.returncode == 0:
             pass
             # Uncomment once implemented
             # results.outputs = self.aggregate_outputs()
         return results 
+
 
 class Fnirt(FSLCommand):
     """Use FSL FNIRT for non-linear registration.
