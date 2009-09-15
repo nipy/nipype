@@ -5,8 +5,11 @@ import nipype.interfaces.fsl as fsl
 
 
 def test_fslversion():
-    ver = fsl.fslversion().split('.')
-    yield assert_equal, ver[0], '4'
+    ver = fsl.fslversion()
+    if ver:
+        # If ver is None, fsl is not installed
+        ver = ver.split('.')
+        yield assert_equal, ver[0], '4'
 
     
 def test_fsloutputtype():
