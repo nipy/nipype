@@ -48,6 +48,14 @@ def test_To3d():
     td = dict(slice_order='tz', nt=150, nz=12, TR=2000, tpattern='alt+z')
     cmd.inputs.time_dependencies = td
     yield assert_equal, cmd.cmdline, 'to3d -time:tz 150 12 2000 alt+z'
+    
+    # time_dependencies provided as a tuple
+    # slice_order, nz, nt, TR, tpattern
+    td = ('zt', 12, 150, 2000, 'alt+z')
+    cmd = afni.To3d()
+    cmd.inputs.time_dependencies = td
+    yield assert_equal, cmd.cmdline, 'to3d -time:zt 12 150 2000 alt+z'
+
     # These tests fill fail because they do not specify all required
     # args for the time_dependencies
     # dict(slice_order='zt', nz=12, nt=150, TR=2000, tpattern='alt+z')

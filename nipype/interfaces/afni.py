@@ -4,6 +4,10 @@ __docformat__ = 'restructuredtext'
 
 from nipype.interfaces.base import Bunch, CommandLine
 from nipype.utils.docparse import get_doc
+from nipype.utils.misc import container_to_string
+
+import warnings
+warn = warnings.warn
 
 class AFNICommand(CommandLine):
     @property
@@ -12,6 +16,62 @@ class AFNICommand(CommandLine):
         allargs = self._parseinputs()
         allargs.insert(0, self.cmd)
         return ' '.join(allargs)
+
+    def _parseinputs(self, skip=()):
+        """Parse all inputs and format options using the opt_map format string.
+
+        Any inputs that are assigned (that are not None) are formatted
+        to be added to the command line.
+
+        Parameters
+        ----------
+        skip : tuple or list
+            Inputs to skip in the parsing.  This is for inputs that
+            require special handling, for example input files that
+            often must be at the end of the command line.  Inputs that
+            require special handling like this should be handled in a
+            _parse_inputs method in the subclass.
+        
+        Returns
+        -------
+        allargs : list
+            A list of all inputs formatted for the command line.
+
+        """
+        allargs = []
+        inputs = [(k, v) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt, value in inputs:
+            if opt in skip:
+                continue
+            if opt == 'args':
+                # XXX Where is this used?  Is self.inputs.args still
+                # used?  Or is it leftover from the original design of
+                # base.CommandLine?
+                allargs.extend(value)
+                continue
+            try:
+                argstr = self.opt_map[opt]
+                if argstr.find('%') == -1:
+                    # Boolean options have no format string.  Just
+                    # append options if True.
+                    if value is True:
+                        allargs.append(argstr)
+                    elif value is not False:
+                        raise TypeError('Boolean option %s set to %s' % 
+                                         (opt, str(value)) )
+                elif type(value) == list:
+                    allargs.append(argstr % tuple(value))
+                else:
+                    # Append options using format string.
+                    allargs.append(argstr % value)
+            except TypeError, err:
+                msg = 'Error when parsing option %s in class %s.\n%s' % \
+                    (opt, self.__class__.__name__, err.message)
+                warn(msg)
+            except KeyError:                   
+                warn('Option %s not supported!' % (opt))
+        
+        return allargs
 
 
 class To3d(AFNICommand):
@@ -54,7 +114,16 @@ class To3d(AFNICommand):
                             prefix=None,
                             infiles=None)
 
-    def _parseinputs(self):
+    opt_map = {'datatype' : '-%s',
+               'skip_outliers' : '-skip_outliers',
+               'assume_dicom_mosaic' : '-assume_dicom_mosaic',
+               'datum' : '-datum %s',
+               'time_dependencies' : '-time:%s %d %d %f %s',
+               'session' : '-session %s',
+               'prefix' : '-prefix %s',
+               }
+
+    def _parseinputs_old(self):
         """Parse valid input options for To3d command.
 
         Ignore options set to None.
@@ -155,6 +224,46 @@ class To3d(AFNICommand):
             raise AttributeError(msg)
 
         return out_inputs
+
+    def _parseinputs(self):
+        allargs = super(To3d, self)._parseinputs(skip=('infiles', 
+                                                       'time_dependencies'))
+        if self.inputs.time_dependencies:
+            # Accept time_dependencies as input from a dictionary or
+            # any container.
+            # -time:zt nz nt TR tpattern  OR  -time:tz nt nz TR tpattern
+            tin = self.inputs.time_dependencies
+            if hasattr(tin, 'keys'):
+                try:
+                    slice_order = tin['slice_order']
+                    nz = tin['nz']
+                    nt = tin['nt']
+                    TR = tin['TR']
+                    tpattern = tin['tpattern']
+                    tflag = ['-time:%s' % slice_order]
+                    if slice_order == 'zt':
+                        tflag.append(str(nz))
+                        tflag.append(str(nt))
+                    else:
+                        tflag.append(str(nt))
+                        tflag.append(str(nz))
+                    tflag.append(str(TR))
+                    tflag.append(str(tpattern))
+                    allargs.append(' '.join(tflag))
+                except KeyError:
+                    msg = 'time_dependencies is missing a required key!\n'
+                    msg += 'It should have: slice_order, nz, nt, TR, tpattern\n'
+                    msg += 'But is currently set to:\n%s' % tin
+                    raise KeyError(msg)
+            else:
+                # Assume it's just a container (list or tuple) and
+                # just use the format string.
+                allargs.append(self.opt_map['time_dependencies'] % tin)
+                
+        if self.inputs.infiles:
+            allargs.append(container_to_string(self.inputs.infiles))
+        return allargs
+
 
     def run(self, infiles=None, **inputs):
         """Execute the command.
@@ -734,7 +843,7 @@ class ThreedZcutup(AFNICommand):
         """Initialize the inputs attribute."""
 
         self.inputs = Bunch(
-            keep=[],
+            keep=None,
             outfile=None,
             infile=None)
 
