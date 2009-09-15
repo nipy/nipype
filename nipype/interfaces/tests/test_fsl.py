@@ -16,6 +16,9 @@ def test_fsloutputtype():
     types = ['ANALYZE_GZ', 'NIFTI_PAIR_GZ', 'NIFTI', 'NIFTI_PAIR',
              'NIFTI_GZ', 'ANALYZE']
     out_type, ext = fsl.fsloutputtype()
+    if out_type is None:
+        # Environment variable is not set.  FSL may not be installed.
+        return
     yield assert_true, out_type in types
     env_type = os.environ.get('FSLOUTPUTTYPE')
     if env_type:
