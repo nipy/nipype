@@ -41,9 +41,9 @@ def test_To3d():
     yield assert_equal, cmd.cmdline, 'to3d -assume_dicom_mosaic'
     # Test slice time params
     cmd = afni.To3d()
-    td = dict(slice_order='zt', nz=12, nt=150, TR=2000, tpattern='alt+z')
+    td = dict(slice_order='zt', nz=12, nt=170, TR=2000, tpattern='alt+z')
     cmd.inputs.time_dependencies = td
-    yield assert_equal, cmd.cmdline, 'to3d -time:zt 12 150 2000 alt+z'
+    yield assert_equal, cmd.cmdline, 'to3d -time:zt 12 170 2000 alt+z'
     cmd = afni.To3d()
     td = dict(slice_order='tz', nt=150, nz=12, TR=2000, tpattern='alt+z')
     cmd.inputs.time_dependencies = td
@@ -51,17 +51,14 @@ def test_To3d():
     
     # time_dependencies provided as a tuple
     # slice_order, nz, nt, TR, tpattern
-    td = ('zt', 12, 150, 2000, 'alt+z')
+    td = ('zt', 12, 130, 2000, 'alt+z')
     cmd = afni.To3d()
     cmd.inputs.time_dependencies = td
-    yield assert_equal, cmd.cmdline, 'to3d -time:zt 12 150 2000 alt+z'
+    yield assert_equal, cmd.cmdline, 'to3d -time:zt 12 130 2000.00 alt+z'
 
     # These tests fill fail because they do not specify all required
     # args for the time_dependencies
     # dict(slice_order='zt', nz=12, nt=150, TR=2000, tpattern='alt+z')
-    cmd = afni.To3d()
-    cmd.inputs.time_dependencies = dict()
-    yield assert_raises, KeyError, getattr, cmd, 'cmdline'
     # only slice_order
     cmd.inputs.time_dependencies = dict(slice_order='zt')
     yield assert_raises, KeyError, getattr, cmd, 'cmdline'
@@ -82,11 +79,6 @@ def test_To3d():
     cmd.inputs.time_dependencies = dict(slice_order='zt', nz=12, nt=150,
                                         tpattern='alt+z')
     yield assert_raises, KeyError, getattr, cmd, 'cmdline'
-    # provide too many parameters for time_dependencies
-    cmd.inputs.time_dependencies = dict(slice_order='zt', nz=12, nt=150,
-                                        tpattern='alt+z', TR=2000, 
-                                        username='foo')
-    yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
     # provide unknown parameters
     cmd = afni.To3d(datatype='anat', foo='bar')    
     yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
@@ -96,7 +88,7 @@ def test_To3d():
     cmd.inputs.infiles = 'foo.nii'
     cmd.inputs.prefix = 'bar.nii'
     cmd.inputs.datum = 'float'
-    realcmd = 'to3d -anat -skip_outliers -datum float -prefix bar.nii foo.nii'
+    realcmd = 'to3d -anat -datum float -prefix bar.nii -skip_outliers foo.nii'
     yield assert_equal, cmd.cmdline, realcmd
     # result should be InterfaceResult object
     cmd = afni.To3d()

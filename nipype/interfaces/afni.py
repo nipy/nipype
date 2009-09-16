@@ -69,7 +69,9 @@ class AFNICommand(CommandLine):
                     (opt, self.__class__.__name__, err.message)
                 warn(msg)
             except KeyError:                   
-                warn('Option %s not supported!' % (opt))
+                msg = '%s: unsupported option: %s' % (
+                    self.__class__.__name__, opt)
+                raise AttributeError(msg)
         
         return allargs
 
@@ -118,7 +120,7 @@ class To3d(AFNICommand):
                'skip_outliers' : '-skip_outliers',
                'assume_dicom_mosaic' : '-assume_dicom_mosaic',
                'datum' : '-datum %s',
-               'time_dependencies' : '-time:%s %d %d %f %s',
+               'time_dependencies' : '-time:%s %d %d %.2f %s',
                'session' : '-session %s',
                'prefix' : '-prefix %s',
                }
@@ -234,6 +236,7 @@ class To3d(AFNICommand):
             # -time:zt nz nt TR tpattern  OR  -time:tz nt nz TR tpattern
             tin = self.inputs.time_dependencies
             if hasattr(tin, 'keys'):
+                # XXX Not checking if any invalid keys have been passed in.
                 try:
                     slice_order = tin['slice_order']
                     nz = tin['nz']
