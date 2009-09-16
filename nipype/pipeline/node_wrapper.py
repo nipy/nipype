@@ -15,7 +15,6 @@ class NodeWrapper(object):
 
     Parameters
     ----------
-    
     interface : interface object
         node specific interface  (fsl.Bet(), spm.Coregister())
     iterables : generator
@@ -33,12 +32,10 @@ class NodeWrapper(object):
         already exists. If directory exists and hash matches it
         assumes that process has been executed
     name : string
-        Name of this node. By default node is named
-    modulename.classname
+        Name of this node. By default node is named modulename.classname
     
     Notes
     -----
-    
     creates output directory (hashname)
     discover files to work with
     renames them with hash
@@ -46,16 +43,16 @@ class NodeWrapper(object):
 
     Examples
     --------
-
     >>> import nipype.interfaces.spm as spm
-    >>> realign = NodeWrapper(interface=spm.Realign(),base_directory='test2',diskbased=True)
+    >>> realign = NodeWrapper(interface=spm.Realign(), base_directory='test2', diskbased=True)
     >>> realign.inputs.infile = os.path.abspath('data/funcrun.nii')
     >>> realign.inputs.register_to_mean = True
     >>> realign.run()
+
     """
     def __init__(self, interface=None,
-                 iterables={},iterfield=[],
-                 diskbased=False,base_directory=None,
+                 iterables={}, iterfield=[],
+                 diskbased=False, base_directory=None,
                  overwrite=False,
                  name=None):
         # interface can only be set at initialization
@@ -71,12 +68,15 @@ class NodeWrapper(object):
         self.overwrite = None
         if not self.disk_based:
             if base_directory is not None:
-                raise Exception('Setting base_directory requires a disk based interface')
+                msg = 'Setting base_directory requires a disk based interface'
+                raise ValueError(msg)
         if self.disk_based:
             self.output_directory_base  = base_directory
             self.overwrite = overwrite
         if name is None:
-            self.name = '.'.join((interface.__class__.__name__,interface.__class__.__module__.split('.')[-1]))
+            cname = interface.__class__.__name__
+            mname = interface.__class__.__module__.split('.')[-1]
+            self.name = '.'.join((cname, mname))
         else:
             self.name = name
 
@@ -92,13 +92,13 @@ class NodeWrapper(object):
     def inputs(self):
         return self._interface.inputs
 
-    def set_input(self,parameter,val,*args,**kwargs):
+    def set_input(self, parameter, val, *args, **kwargs):
         if callable(val):
-            self._interface.inputs[parameter] = val(*args,**kwargs)
+            self._interface.inputs[parameter] = val(*args, **kwargs)
         else:
             self._interface.inputs[parameter] = val
 
-    def get_output(self,parameter):
+    def get_output(self, parameter):
         if self._result is not None:
             return self._result.outputs[parameter]
         else:
@@ -113,12 +113,15 @@ class NodeWrapper(object):
                 outdir = self._output_directory()
                 outdir = self._make_output_dir(outdir)
             except:
-                print "directory %s exists\n"%outdir
+                # XXX Should not catch bare exceptions!
+                # Change this to catch a specific exception and raise an error.
+                print "directory %s exists\n" % outdir
             self._interface.inputs.cwd = outdir
             hashvalue = self.hash_inputs()
             inputstr  = str(self.inputs)
             hashfile = os.path.join(outdir,'_0x%s.txt'%hashvalue)
-            if (os.path.exists(hashfile) and self.overwrite) or not os.path.exists(hashfile):
+            if (os.path.exists(hashfile) and self.overwrite) or \
+                    not os.path.exists(hashfile):
                 print "continuing to execute\n"
                 cleandir(outdir)
                 # copy files over and change the inputs
@@ -126,13 +129,13 @@ class NodeWrapper(object):
                     files = self.inputs[info.key]
                     if files is not None:
                         infiles = filename_to_list(files)
-                        newfiles = copyfiles(infiles,[outdir],copy=info.copy)
+                        newfiles = copyfiles(infiles, [outdir], copy=info.copy)
                         self.inputs[info.key] = list_to_filename(newfiles)
                 self._run_interface(execute=True)
                 if type(self._result.runtime) == type([]):
                     returncode = 0
                     for r in self._result.runtime:
-                        returncode = max(r.returncode,returncode)
+                        returncode = max(r.returncode, returncode)
                 else:
                     returncode = self._result.runtime.returncode
                 if returncode == 0:
@@ -157,9 +160,9 @@ class NodeWrapper(object):
                         else:
                             infiles = files
                         for i,f in enumerate(infiles):
-                            newfile = fname_presuffix(f,newpath=outdir)
+                            newfile = fname_presuffix(f, newpath=outdir)
                             if not os.path.exists(newfile):
-                                copyfiles(f,newfile,copy=info.copy)
+                                copyfiles(f, newfile, copy=info.copy)
                             if type(files) is not type([]):
                                 self.inputs[info.key] = newfile
                             else:
@@ -179,55 +182,57 @@ class NodeWrapper(object):
             if type(itervals) is not type([]):
                 notlist = True
                 itervals = [itervals]
-            self._result = InterfaceResult(interface=[],runtime=[],outputs=Bunch())
+            self._result = InterfaceResult(interface=[], runtime=[],
+                                           outputs=Bunch())
             for i,v in enumerate(itervals):
-                print "running %s on %s\n"%(self.name,self.iterfield[0])
-                self.set_input(self.iterfield[0],v)
+                print "running %s on %s\n"%(self.name, self.iterfield[0])
+                self.set_input(self.iterfield[0], v)
                 if execute:
                     result = self._interface.run()
-                    self._result.interface.insert(i,result.interface)
-                    self._result.runtime.insert(i,result.runtime)
+                    self._result.interface.insert(i, result.interface)
+                    self._result.runtime.insert(i, result.runtime)
                     outputs = result.outputs
                 else:
                     outputs = self._interface.aggregate_outputs()
                 for key,val in outputs.iteritems():
                     try:
-                        self._result.outputs[key].insert(i,val)
+                        self._result.outputs[key].insert(i, val)
                     except:
                         self._result.outputs[key] = []
-                        self._result.outputs[key].insert(i,val)
+                        self._result.outputs[key].insert(i, val)
             print itervals
             if notlist:
-                self.set_input(self.iterfield[0],itervals.pop())
+                self.set_input(self.iterfield[0], itervals.pop())
             else:
-                self.set_input(self.iterfield[0],itervals)
+                self.set_input(self.iterfield[0], itervals)
         else:
             if execute:
                 self._result = self._interface.run()
             else:
+                aggouts = self._interface.aggregate_outputs()
                 self._result = InterfaceResult(interface=None,
                                                runtime=None,
-                                               outputs=self._interface.aggregate_outputs())
+                                               outputs=aggouts)
         
     def update(self, **opts):
         self.inputs.update(**opts)
         
     def hash_inputs(self):
-        """ Computes a hash of the input fields of the underlying
-        interface """
+        """Computes a hash of the input fields of the underlying interface."""
         return hashlib.md5(str(self.inputs)).hexdigest()
 
     def _output_directory(self):
         if self.output_directory_base is None:
-                self.output_directory_base = mkdtemp()
-        return os.path.abspath(os.path.join(self.output_directory_base,self.name))
+            self.output_directory_base = mkdtemp()
+        return os.path.abspath(os.path.join(self.output_directory_base,
+                                            self.name))
 
     def _make_output_dir(self, outdir):
         """Make the output_dir if it doesn't exist, else raise an exception
         """
         odir = os.path.abspath(outdir)
         if os.path.exists(outdir):
-            raise IOError('Directory %s exists'%(outdir))
+            raise IOError('Directory %s exists' % outdir)
         os.mkdir(outdir)
         return outdir
 
