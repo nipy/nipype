@@ -133,14 +133,15 @@ class ArtifactDetect(Interface):
         artifactfile  = os.path.join(output_dir,''.join(('art.',filename,'_outliers.txt')))
         intensityfile = os.path.join(output_dir,''.join(('global_intensity.',filename,'.txt')))
         statsfile     = os.path.join(output_dir,''.join(('stats.',filename,'.txt')))
-        return artifactfile,intensityfile,statsfile
+        normfile     = os.path.join(output_dir,''.join(('norm.',filename,'.txt')))
+        return artifactfile,intensityfile,statsfile,normfile
     
     def aggregate_outputs(self):
         outputs = Bunch(outlier_files=None,
                         intensity_files=None,
                         statistic_files=None)
         for i,f in enumerate(filename_to_list(self.inputs.realigned_files)):
-            outlierfile,intensityfile,statsfile = self._get_output_filenames(f,self.inputs.get('cwd','.'))
+            outlierfile,intensityfile,statsfile,normfile = self._get_output_filenames(f,self.inputs.get('cwd','.'))
             outlierfile = glob(outlierfile)
             assert len(outlierfile)==1, 'Outlier file %s not found'%outlierfile
             if outputs.outlier_files is None:
@@ -237,7 +238,7 @@ class ArtifactDetect(Interface):
         """
         # read in motion parameters
         mc_in = np.loadtxt(motionfile)
-        mc = mc_in
+        mc = deepcopy(mc_in)
         if self.inputs.use_norm:
             # calculate the norm of the motion parameters
             normval = self._calc_norm(mc)
@@ -280,9 +281,12 @@ class ArtifactDetect(Interface):
                     g[t0] = np.mean(vol[mask])
         elif masktype == 'file': # uses a mask image to determine intensity
             mask = load(self.inputs.mask_file).get_data()
-            g = np.mean(data[mask,:],axis=0)
+            mask = mask>0.5
+            for t0 in range(timepoints):
+                vol = data[:,:,:,t0]
+                g[t0] = np.mean(vol[mask])
         elif masktype == 'thresh': # uses a fixed signal threshold
-            for t0 in range(nim.timepoints):
+            for t0 in range(timepoints):
                 vol   = data[:,:,:,t0]
                 mask  = vol>self.inputs.mask_threshold
                 g[t0] = np.mean(vol[mask])
@@ -298,24 +302,42 @@ class ArtifactDetect(Interface):
         iidx = find_indices(abs(gz)>self.inputs.zintensity_threshold)
 
         outliers = np.unique(np.union1d(iidx,np.union1d(tidx,ridx)))
-        artifactfile,intensityfile,statsfile = self._get_output_filenames(imgfile,cwd)
+        artifactfile,intensityfile,statsfile,normfile = self._get_output_filenames(imgfile,cwd)
         
         # write output to outputfile
         np.savetxt(artifactfile, outliers, fmt='%d', delimiter=' ')
         np.savetxt(intensityfile, g, fmt='%.2f', delimiter=' ')
+        if self.inputs.use_norm:
+            np.savetxt(normfile, normval, fmt='%.4f', delimiter=' ')
 
         file = open(statsfile,'w')
         file.write("Stats for:\n")
         file.write("Motion file: %s\n" % motionfile)
         file.write("Functional file: %s\n" % imgfile)
         file.write("Motion:\n")
-        file.write("Mot-Outliers: %d\n"%len(np.union1d(tidx,ridx)))
-        file.write( ''.join(('mean: ',str(np.mean(mc,axis=0)),'\n')))
-        file.write( ''.join(('min: ',str(np.min(mc,axis=0)),'\n')))
-        file.write( ''.join(('max: ',str(np.max(mc,axis=0)),'\n')))
-        file.write( ''.join(('std: ',str(np.std(mc,axis=0)),'\n')))
+        file.write("Number of Motion Outliers: %d\n"%len(np.union1d(tidx,ridx)))
+        file.write("Motion (original):\n")
+        file.write( ''.join(('mean: ',str(np.mean(mc_in,axis=0)),'\n')))
+        file.write( ''.join(('min: ',str(np.min(mc_in,axis=0)),'\n')))
+        file.write( ''.join(('max: ',str(np.max(mc_in,axis=0)),'\n')))
+        file.write( ''.join(('std: ',str(np.std(mc_in,axis=0)),'\n')))
+        if self.inputs.use_norm:
+            if self.inputs.use_differences:
+                file.write("Motion (norm-differences):\n")
+            else:
+                file.write("Motion (norm):\n")
+            file.write( ''.join(('mean: ',str(np.mean(normval,axis=0)),'\n')))
+            file.write( ''.join(('min: ',str(np.min(normval,axis=0)),'\n')))
+            file.write( ''.join(('max: ',str(np.max(normval,axis=0)),'\n')))
+            file.write( ''.join(('std: ',str(np.std(normval,axis=0)),'\n')))
+        elif self.inputs.use_differences:
+            file.write("Motion (differences):\n")
+            file.write( ''.join(('mean: ',str(np.mean(mc,axis=0)),'\n')))
+            file.write( ''.join(('min: ',str(np.min(mc,axis=0)),'\n')))
+            file.write( ''.join(('max: ',str(np.max(mc,axis=0)),'\n')))
+            file.write( ''.join(('std: ',str(np.std(mc,axis=0)),'\n')))
         file.write("Normalized intensity:\n")
-        file.write("Int-Outliers: %d\n"%len(iidx))
+        file.write("Number of Intensity Outliers: %d\n"%len(iidx))
         file.write( ''.join(('min: ',str(np.min(gz,axis=0)),'\n')))
         file.write( ''.join(('max: ',str(np.max(gz,axis=0)),'\n')))
         file.write( ''.join(('mean: ',str(np.mean(gz,axis=0)),'\n')))

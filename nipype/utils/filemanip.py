@@ -75,10 +75,11 @@ def copyfile(originalfile, newfile,copy=False):
     None
     
     """
-    print "copying %s to %s"%(originalfile,newfile)
-    if os.name is 'posix' and not copy:
+    if os.name is 'posix' and not copy and not os.path.islink(newfile):
+        print "linking %s to %s"%(originalfile,newfile)
         os.symlink(originalfile,newfile)
     else:
+        print "copying %s to %s"%(originalfile,newfile)
         shutil.copyfile(originalfile, newfile)
 
 def copyfiles(filelist, dest, copy=False):

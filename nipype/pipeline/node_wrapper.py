@@ -119,13 +119,14 @@ class NodeWrapper(object):
             inputstr  = str(self.inputs)
             hashfile = os.path.join(outdir,'_0x%s.txt'%hashvalue)
             if (os.path.exists(hashfile) and self.overwrite) or not os.path.exists(hashfile):
+                print "continuing to execute\n"
                 cleandir(outdir)
                 # copy files over and change the inputs
                 for info in self._interface.get_input_info():
                     files = self.inputs[info.key]
                     if files is not None:
                         infiles = filename_to_list(files)
-                        newfiles = copyfiles(infiles,[outdir])
+                        newfiles = copyfiles(infiles,[outdir],copy=info.copy)
                         self.inputs[info.key] = list_to_filename(newfiles)
                 self._run_interface(execute=True)
                 if type(self._result.runtime) == type([]):
@@ -146,6 +147,7 @@ class NodeWrapper(object):
                     print self.inputs
                     raise Exception("Could not run %s"%self.name)
             else:
+                print "skipping\n"
                 # change the inputs
                 for info in self._interface.get_input_info():
                     files = self.inputs[info.key]

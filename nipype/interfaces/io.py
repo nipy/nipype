@@ -274,3 +274,4 @@ class DataGrabber(Interface):
                         stderr=None)
         outputs=self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+
