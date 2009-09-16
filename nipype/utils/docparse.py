@@ -128,7 +128,10 @@ def build_doc(doc, opts):
             # Probably an empty line
             continue
         # For lines we care about, the first item is the flag
-        flag = linelist[0]
+        if ',' in linelist[0]: #sometimes flags are only seperated by comma
+            flag = linelist[0].split(',')[0]
+        else:
+            flag = linelist[0]
         attr = opts.get(flag)
         if attr is not None:
             #newline = line.replace(flag, attr)
