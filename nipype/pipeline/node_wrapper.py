@@ -119,7 +119,7 @@ class NodeWrapper(object):
             self._interface.inputs.cwd = outdir
             hashvalue = self.hash_inputs()
             inputstr  = str(self.inputs)
-            hashfile = os.path.join(outdir,'_0x%s.txt'%hashvalue)
+            hashfile = os.path.join(outdir, '_0x%s.txt' % hashvalue)
             if (os.path.exists(hashfile) and self.overwrite) or \
                     not os.path.exists(hashfile):
                 print "continuing to execute\n"
@@ -133,6 +133,8 @@ class NodeWrapper(object):
                         self.inputs[info.key] = list_to_filename(newfiles)
                 self._run_interface(execute=True)
                 if type(self._result.runtime) == type([]):
+                    # XXX In what situation is runtime ever a list?
+                    # Normally is't a Bunch.
                     returncode = 0
                     for r in self._result.runtime:
                         returncode = max(r.returncode, returncode)
@@ -140,15 +142,16 @@ class NodeWrapper(object):
                     returncode = self._result.runtime.returncode
                 if returncode == 0:
                     try:
-                        fd = open(hashfile,"wt")
+                        fd = open(hashfile, "wt")
                         fd.writelines(inputstr)
                         fd.close()
                     except IOError:
                         print "Unable to open the file in readmode:", hashfile
                 else:
-                    print self._result.runtime.stderr
-                    print self.inputs
-                    raise Exception("Could not run %s"%self.name)
+                    msg = "Could not run %s" % self.name
+                    msg += "\nwith inputs:\n%s" % self.inputs
+                    msg += "\n\tstderr: %s" % self._result.runtime.stderr
+                    raise StandardError(msg)
             else:
                 print "skipping\n"
                 # change the inputs
@@ -175,7 +178,7 @@ class NodeWrapper(object):
             pass
         return self._result
 
-    def _run_interface(self,execute=True):
+    def _run_interface(self, execute=True):
         if len(self.iterfield) == 1:
             itervals = self.inputs[self.iterfield[0]]
             notlist = False
