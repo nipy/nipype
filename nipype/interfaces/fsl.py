@@ -372,8 +372,8 @@ class Fast(FSLCommand):
                'bias_iters':           '-I %d',
                'bias_lowpass':         '-l %d', # in mm
                'img_type':             '-t %d',
-               'init_seg_smooth':      '--fHard %.3f',
-               'segments':             '--segments',
+               'init_seg_smooth':      '-f %.3f',
+               'segments':             '-g',
                'init_transform':       '-a %s',
                # This option is not really documented on the Fast web page:
                # http://www.fmrib.ox.ac.uk/fsl/fast4/index.html#fastcomm
@@ -382,16 +382,16 @@ class Fast(FSLCommand):
                'nopve':                '--nopve',
                'output_biasfield':     '-b',
                'output_biascorrected': '-B',
-               'nobias':               '--nobias',
-               'n_inputimages':        '--channels %d',
-               'out_basename':         '--out %s',
-               'use_priors':           '--Prior', # must also set -a!
-               'segment_iters':        '--init %d',
-               'mixel_smooth':         '--mixel %.2f',
-               'iters_afterbias':      '--fixed %d',
-               'hyper':                '--Hyper %.2f',
-               'verbose':              '--verbose',
-               'manualseg':            '--manualseg %s',
+               'nobias':               '-N',
+               'n_inputimages':        '-S %d',
+               'out_basename':         '-o %s',
+               'use_priors':           '-P', # must also set -a!
+               'segment_iters':        '-W %d',
+               'mixel_smooth':         '-R %.2f',
+               'iters_afterbias':      '-O %d',
+               'hyper':                '-H %.2f',
+               'verbose':              '-v',
+               'manualseg':            '-s %s',
                'probability_maps':     '-p'}
 
     def inputs_help(self):
