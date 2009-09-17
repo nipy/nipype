@@ -500,9 +500,9 @@ class Fast(FSLCommand):
                         prob_maps=[])
         
         if not is_container(self.inputs.infiles):
-            infiles = [self.input.infiles]
+            infiles = [self.inputs.infiles]
         else:
-            infiles = self.input.infiles
+            infiles = self.inputs.infiles
         for item in infiles:
             # get basename (correct fsloutpputytpe extension)
             if self.inputs.out_basename:
