@@ -128,7 +128,11 @@ def filename_to_list(filename):
         return None
 
 def list_to_filename(filelist):
-    if len(filelist) == 1:
+    if is_container(filelist) and len(filelist) > 1:
+        raise IndexError('WARNING: list > 1, yet you are assuming you only want item 0')
+    elif  hasattr(filelist,'key'):
+        raise IndexError('Cannot index items in dictionary')
+    elif is_container(filelist):
         return filelist[0]
     else:
         return filelist
