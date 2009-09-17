@@ -352,8 +352,8 @@ class Fast(FSLCommand):
     To print out the command line help, use:
         Fast().inputs_help()
 
-    Example
-    -------
+    Examples
+    --------
     >>> fsl.Fast().inputs_help()
     >>> faster = fsl.Fast(out_basename = 'myfasted')
     >>> fasted = faster.run(['file1','file2'])
@@ -813,7 +813,7 @@ class McFlirt(FSLCommand):
     To print out the command line help, use:
         McFlirt().inputs_help()
     
-    Example
+    Examples
     --------
     
     >>> mcflirtter = fsl.McFlirt(infile='timeseries.nii',cost='mututalinfo')
@@ -922,8 +922,8 @@ class Fnirt(FSLCommand):
     To print out the command line help, use:
         Fnirt().inputs_help()
 
-    Example
-    -------
+    Examples
+    --------
     >>> fnirter = fsl.Fnirt(affine='affine.mat')
     >>> fnirted = fnirter.run(reference='ref.nii',infile='anat.nii')
     >>> fsl.Fnirt().inputs_help()
@@ -1105,8 +1105,8 @@ class FSFmaker:
     
     This doesn't actually run anything.
     
-    Example usage
-    -------------
+    Examples
+    --------
     FSFmaker(5, ['left', 'right', 'both'])
         
     '''
