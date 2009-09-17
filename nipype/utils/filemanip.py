@@ -5,6 +5,7 @@ import os, re
 import hashlib
 import shutil
 from glob import glob
+from nipype.utils.misc import is_container
 
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     pth, fname = os.path.split(fname)
@@ -121,6 +122,8 @@ def filename_to_list(filename):
         return [filename]
     elif type(filename) == type([]):
         return filename
+    elif is_container(filename):
+        return [x for x in filename]
     else:
         return None
 

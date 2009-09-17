@@ -491,14 +491,18 @@ class Fast(FSLCommand):
                         tissue_class_files=None,
                         restored_image=None,
                         bias_field=None)
-        if is_container(self.inputs.infiles):
-            for item in self.inputs.infiles:
+        if not is_container(self.inputs.infiles):
+            infiles = [self.input.infiles]
+        else:
+            infiles = self.input.infiles
+        for item in infiles:
                 # get basename
                 # get number of tissue classes
                 # always mixeltype
+                # always seg
                 # yes pve?
                 # yes bias corrected
-                continue
+                
         if self.inputs.out_basename:
             basename=self.inputs.out_basename
         else:
