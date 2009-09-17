@@ -96,8 +96,8 @@ def fsloutputtype(ftype=None):
     else:
         # set environment setting
         fsl_ftype = ftype
-        os.environ['FSLOUTPUTTYPE'] = fsl_ftype
-    
+        os.putenv('FSLOUTPUTTYPE',fsl_ftype)
+        os.environ['FSLOUTPUTTYPE'] = fsl_ftype # seems redundant but necessary
     print 'FSLOUTPUTTYPE = %s (\"%s\")'%(fsl_ftype, ftypes[fsl_ftype])
     return fsl_ftype, ftypes[fsl_ftype]
         
@@ -454,7 +454,7 @@ class Fast(FSLCommand):
             results.outputs = self.aggregate_outputs()
             # NOT checking if files exist
             # Once implemented: results.outputs = self.aggregate_outputs()
-
+            
         return results        
 
     def _parse_inputs(self):
@@ -509,7 +509,7 @@ class Fast(FSLCommand):
             if self.inputs.out_basename:
                 pth,nme = os.path.split(item)
                 jnk,ext = os.path.splitext(nme)
-                item = os.path.join(pth, self.inputs.out_basename+'.%s'%(envext))
+                item = self.inputs.out_basename+'.%s'%(envext)
             else:
                 nme,ext = os.path.splitext(item)
                 item = nme+'.%s'%(envext)
@@ -518,17 +518,16 @@ class Fast(FSLCommand):
                 nclasses = 3
             else:
                 nclasses = self.inputs.number_classes
-            # always mixeltype
-            outputs.mixeltype.append(fname_presuffix(item,suffix='_mixeltype'))
-            # always seg, (plus mutiple)
-            
+                        
+            # always seg, (plus mutiple?)
             outputs.seg.append(fname_presuffix(item,suffix='_seg'))
             if self.inputs.segments:
                 for i in range(nclasses):
                     outputs.seg.append(fname_presuffix(item,suffix='_seg_%d'%(i)))
-            # always pve unless nopve = True
+            # always pve,mixeltype unless nopve = True
             if not self.inputs.nopve:
                 outputs.partial_volume_map.append(fname_presuffix(item,suffix='_pveseg'))
+                outputs.mixeltype.append(fname_presuffix(item,suffix='_mixeltype'))
                 for i in range(nclasses):
                     outputs.partial_volume_files.append(fname_presuffix(item, suffix='_pve_%d'%(i)))
             # biasfield ? 
