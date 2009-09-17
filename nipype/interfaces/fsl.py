@@ -489,7 +489,7 @@ class Fast(FSLCommand):
         Else, list contains path,filename of generated outputfile(s)
              Raises Exception if file is not found        
         """
-        envext = fsloutputtype()[0]
+        envext = fsloutputtype()[1]
         outputs = Bunch(mixeltype = [],
                         seg = [],
                         partial_volume_map=[],
