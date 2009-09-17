@@ -346,8 +346,8 @@ class Pipeline(object):
                 self.procs[jobid].output_directory_base = os.path.abspath(outputdir)
                 # Send job to worker, add callback and add to pending results
                 print 'Executing: %s ID: %d WID=%d H:%s' % (self.procs[jobid].name,jobid,workerid,self.procs[jobid].hash_inputs())
-                self.mec.push(dict(task=self.procs[jobid],hashout=self.config['hash_outputdir_names']),targets=workerid,block=True)
-                cmdstr = 'task.execute(hashoutputdir=hashout)'
+                self.mec.push(dict(task=self.procs[jobid]),targets=workerid,block=True)
+                cmdstr = 'task.run()'
                 self.pendingresults.append(self.mec.execute(cmdstr,targets=workerid,block=False))
                 self.pendingresults[-1].add_callback(self.notifymanagercb,jobid=jobid,workerid=workerid)
             else:

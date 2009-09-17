@@ -109,6 +109,7 @@ class DataSource(Interface):
                 files = '*-%d-*.nii' % i
                 path = os.path.abspath(os.path.join(subjdir,files))
                 outputs[type].extend(glob.glob(path))
+            outputs[type] = list_to_filename(outputs[type])
         return outputs
 
     def run(self):
