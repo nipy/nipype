@@ -100,8 +100,8 @@ def test_fast():
     yield assert_equal, faster.inputs.verbose, True
     yield assert_equal, faster.inputs.manualseg , None
     yield assert_not_equal, faster, fasted
-    yield assert_equal, fasted.runtime.cmdline, 'fast --verbose infile'
-    yield assert_equal, fasted2.runtime.cmdline, 'fast --verbose infile otherfile'
+    yield assert_equal, fasted.runtime.cmdline, 'fast -v infile'
+    yield assert_equal, fasted2.runtime.cmdline, 'fast -v infile otherfile'
 
     faster = fsl.Fast()
     faster.inputs.infiles = 'foo.nii'
@@ -111,28 +111,28 @@ def test_fast():
     
     # Our options and some test values for them
     # Should parallel the opt_map structure in the class for clarity
-    opt_map = {'number_classes':       ('--class 4', 4),
-               'bias_iters':           ('--iter 5', 5),
-               'bias_lowpass':         ('--lowpass 15', 15),
-               'img_type':             ('--type 2', 2),
-               'init_seg_smooth':      ('--fHard 0.035', 0.035),
-               'segments':             ('--segments', True),
+    opt_map = {'number_classes':       ('-n 4', 4),
+               'bias_iters':           ('-I 5', 5),
+               'bias_lowpass':         ('-l 15', 15),
+               'img_type':             ('-t 2', 2),
+               'init_seg_smooth':      ('-f 0.035', 0.035),
+               'segments':             ('-g', True),
                'init_transform':       ('-a xform.mat', 'xform.mat'),
                'other_priors':         ('-A prior1.nii prior2.nii prior3.nii', 
                        ('prior1.nii', 'prior2.nii', 'prior3.nii')),
                'nopve':                ('--nopve', True),
                'output_biasfield':     ('-b', True),
                'output_biascorrected': ('-B', True),
-               'nobias':               ('--nobias', True),
-               'n_inputimages':        ('--channels 2', 2),
-               'out_basename':         ('--out fasted', 'fasted'),
-               'use_priors':           ('--Prior', True),
-               'segment_iters':        ('--init 14', 14),
-               'mixel_smooth':         ('--mixel 0.25', 0.25),
-               'iters_afterbias':      ('--fixed 3', 3),
-               'hyper':                ('--Hyper 0.15', 0.15),
-               'verbose':              ('--verbose', True), 
-               'manualseg':            ('--manualseg intensities.nii',
+               'nobias':               ('-N', True),
+               'n_inputimages':        ('-S 2', 2),
+               'out_basename':         ('-o fasted', 'fasted'),
+               'use_priors':           ('-P', True),
+               'segment_iters':        ('-W 14', 14),
+               'mixel_smooth':         ('-R 0.25', 0.25),
+               'iters_afterbias':      ('-O 3', 3),
+               'hyper':                ('-H 0.15', 0.15),
+               'verbose':              ('-v', True), 
+               'manualseg':            ('-s intensities.nii',
                        'intensities.nii'),
                'probability_maps':     ('-p', True),
               }
