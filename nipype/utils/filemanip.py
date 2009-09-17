@@ -10,6 +10,9 @@ from nipype.utils.misc import is_container
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     pth, fname = os.path.split(fname)
     fname, ext = os.path.splitext(fname)
+    if os.path.splitext(fname)[1]: # check for double extension nii.gz
+        fname,ext2 = os.path.splitext(fname)
+        ext = ext2 + ext
     if not use_ext:
         ext = ''
     if newpath is not None:

@@ -90,8 +90,8 @@ def fsloutputtype(ftype=None):
     if ftype is None:
         # get environment setting
         fsl_ftype = os.getenv('FSLOUTPUTTYPE')
-        for key in ftypes.keys():
-            print '%s = \"%s\"'%(key, ftypes[key])
+        #for key in ftypes.keys():
+        #    print '%s = \"%s\"'%(key, ftypes[key])
 
     else:
         # set environment setting
@@ -531,16 +531,25 @@ class Fast(FSLCommand):
                 outputs.partial_volume_map.append(fname_presuffix(item,suffix='_pveseg'))
                 for i in range(nclasses):
                     outputs.partial_volume_files.append(fname_presuffix(item, suffix='_pve_%d'%(i)))
-            # biasfield always (I think so??)
-            outputs.bias_field.append(fname_presuffix(item, suffix='_bias'))
-            # restored image (bias corrected)
+            # biasfield ? 
+            if self.inputs.output_biasfield:
+                outputs.bias_field.append(fname_presuffix(item, suffix='_bias'))
+            # restored image (bias corrected)?
             if self.inputs.output_biascorrected:
                 outputs.biascorrected.append(fname_presuffix(item, suffix='_restore'))
-            # probability maps
+            # probability maps ?
             if self.inputs.probability_maps:
                 for i in range(nclasses):
                     outputs.prob_maps.append(fname_presuffix(item, suffix='_prob_%d'%(i)))
-            return outputs
+
+        # check files all were created
+        for outtype, outlist in outputs.iteritems():
+            if len(outlist) > 0:
+                for outfile in outlist:
+                    if not len(glob(outfile))==1:
+                        raise IOError('outputfile %s of type %s not generated'%(outfile,outtype))
+                
+        return outputs
                     
 
 
