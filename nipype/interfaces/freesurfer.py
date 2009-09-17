@@ -98,10 +98,10 @@ class FSCommandLine(CommandLine):
 class Dicom2Nifti(FSCommandLine):
     """use fs mri_convert to convert dicom files to nifti-1 files
 
-    Options
-    -------
+    Parameters
+    ----------
 
-    To see optianl arguments
+    To see optional arguments
     Dicom2Nifti().inputs_help()
 
 
@@ -221,10 +221,10 @@ class Dicom2Nifti(FSCommandLine):
 class Resample(FSCommandLine):
     """use fs mri_convert to up or down-sample image files
 
-    Options
-    -------
+    Parameters
+    ----------
 
-    To see optianl arguments
+    To see optional arguments
     Resample().inputs_help()
 
 
@@ -328,9 +328,10 @@ class ReconAll(FSCommandLine):
     """use fs recon-all to generate surfaces and parcellations of
     structural data from an anatomical image of a subject.
 
-    Options
+    Parameters
+    ----------
 
-    To see optianl arguments
+    To see optional arguments
     ReconAll().inputs_help()
 
 
@@ -470,8 +471,8 @@ class BBRegister(FSCommandLine):
     DOF (rigid). It is required that you have an anatomical scan of the
     subject that has been analyzed in freesurfer.
 
-    Options
-    -------
+    Parameters
+    ----------
 
     To see optional arguments
     BBRegister().inputs_help()
