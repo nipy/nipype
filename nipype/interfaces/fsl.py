@@ -23,7 +23,7 @@ from nipype.interfaces.base import (Bunch, CommandLine,
                                     load_template, InterfaceResult)
 from nipype.utils import setattr_on_read
 from nipype.utils.docparse import get_doc
-from nipype.utils.misc import container_to_string
+from nipype.utils.misc import container_to_string, is_container
 
 import warnings
 warn = warnings.warn
@@ -472,11 +472,13 @@ class Fast(FSLCommand):
         Returns
         -------
         outputs : Bunch object
-            partial_volume_map : filename 
-            tissue_class_map : filename (each tissue has unique int value)
-            tissue_class_files : list filenames  [tissue_mask1, tissue_mask2,...],
-            restored_image : filename (bias corrected image)
-            bias_field : filename 
+            (if multiple infiles, multiple outfiles of each)
+            partial_volume_map : list  filenames [one for each input] 
+            partial_volume_files : list filenames [one for each class, for each input]
+            tissue_class_map : list filename(s) (each tissue has unique int value)
+            tissue_class_files : list filenames  [one for each class, for each input]
+            restored_image : list filename(s) (bias corrected image(s))
+            bias_field : list filename(s)  
         Notes
         -----
         For each item in Bunch:
@@ -489,8 +491,18 @@ class Fast(FSLCommand):
                         tissue_class_files=None,
                         restored_image=None,
                         bias_field=None)
+        if is_container(self.inputs.infiles):
+            for item in self.inputs.infiles:
+                # get basename
+                # get number of tissue classes
+                # always mixeltype
+                # yes pve?
+                # yes bias corrected
+                continue
         if self.inputs.out_basename:
-            basename=None
+            basename=self.inputs.out_basename
+        else:
+            basename = os.path.split(self.inputs.infiles
         if not self.inputs.number_classes:
             nclasses = 3
         return None

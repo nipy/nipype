@@ -17,6 +17,25 @@ def mktree(path):
       outdir = os.path.join(outdir,d)
       if not os.path.exists(outdir):
          os.mkdir(outdir)
+
+def is_container(item):
+   """Checks if item is a container (list, tuple, dict, set)
+   
+   Parameters
+   ----------
+   item : object 
+       object to check for .__iter__
+      
+   Returns
+   -------
+   output : Boolean
+       True if container
+       False if not (eg string)
+   """
+   if hasattr(item, '__iter__'):
+      return True
+   else:
+      return False
       
 def container_to_string(cont):
    """Convert a container to a command line string.
