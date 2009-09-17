@@ -492,7 +492,7 @@ class Fast(FSLCommand):
         envext = fsloutputtype()[0]
         outputs = Bunch(mixeltype = [],
                         seg = [],
-                        parital_volume_map=[],
+                        partial_volume_map=[],
                         tissue_class_map=[],
                         tissue_class_files=[],
                         bias_corrected=[],
