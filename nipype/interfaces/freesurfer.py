@@ -244,8 +244,8 @@ class Resample(FSCommandLine):
 
     def inputs_help(self):
         """
-        Optional Parameters
-        -------------------
+        Parameters
+        ----------
         (all default to None and are unset)
              
         infile : string or list

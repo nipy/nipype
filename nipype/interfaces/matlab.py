@@ -45,8 +45,8 @@ class MatlabCommandLine(CommandLine):
         
     def inputs_help(self):
         doc = """
-            Optional Parameters
-            -------------------
+            Parameters
+            ----------
             (all default to None and are unset)
 
             script_lines : string

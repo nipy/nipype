@@ -308,8 +308,6 @@ class Threedrefit(AFNICommand):
 
     def inputs_help(self):
         doc = """
-          Optional Parameters
-          -------------------
         """
         print doc
 
@@ -396,8 +394,6 @@ class Threedresample(AFNICommand):
 
     def inputs_help(self):
         doc = """
-          Optional Parameters
-          -------------------
         """
         print doc
 
@@ -490,8 +486,6 @@ class ThreedTstat(AFNICommand):
 
     def inputs_help(self):
         doc = """
-          Optional Parameters
-          -------------------
         """
         print doc
 
@@ -567,8 +561,6 @@ class ThreedAutomask(AFNICommand):
 
     def inputs_help(self):
         doc = """
-          Optional Parameters
-          -------------------
         """
         print doc
 
@@ -645,8 +637,6 @@ class Threedvolreg(AFNICommand):
 
     def inputs_help(self):
         doc = """
-          Optional Parameters
-          -------------------
         """
         print doc
 
@@ -747,8 +737,6 @@ class Threedmerge(AFNICommand):
 
     def inputs_help(self):
         doc = """
-          Optional Parameters
-          -------------------
         """
         print doc
 
@@ -837,8 +825,6 @@ class ThreedZcutup(AFNICommand):
 
     def inputs_help(self):
         doc = """
-          Optional Parameters
-          -------------------
         """
         print doc
 
@@ -908,8 +894,6 @@ class ThreedSkullStrip(AFNICommand):
 
     def inputs_help(self):
         doc = """
-          Optional Parameters
-          -------------------
         """
         print doc
 
@@ -958,8 +942,6 @@ class ThreedBrickStat(AFNICommand):
 
     def inputs_help(self):
         doc = """
-          Optional Parameters
-          -------------------
         """
         print doc
 
@@ -1034,8 +1016,6 @@ class Threedcalc(AFNICommand):
 
     def inputs_help(self):
         doc = """
-          Optional Parameters
-          -------------------
         """
         print doc
 
@@ -1098,8 +1078,6 @@ class ThreedAllineate(AFNICommand):
 
     def inputs_help(self):
         doc = """
-          Optional Parameters
-          -------------------
         """
         print doc
 

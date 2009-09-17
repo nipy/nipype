@@ -302,8 +302,8 @@ class Bet(FSLCommand):
 
     def outputs_help(self):
         """
-        Optional Parameters
-        -------------------
+        Parameters
+        ----------
         (all default to None and are unset)
         
         outfile : /path/to/outfile
