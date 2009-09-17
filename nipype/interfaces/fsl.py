@@ -523,12 +523,12 @@ class Fast(FSLCommand):
             
             outputs.seg.append(fname_presuffix(item,suffix='_seg'))
             if self.inputs.segments:
-                for i in nclasses:
+                for i in range(nclasses):
                     outputs.seg.append(fname_presuffix(item,suffix='_seg_%d'%(i)))
             # always pve unless nopve = True
             if not self.inputs.nopve:
                 outputs.partial_volume_map.append(fname_presuffix(item,suffix='_pveseg'))
-                for i in nclasses:
+                for i in range(nclasses):
                     outputs.partial_volume_files.append(fname_presuffix(item, suffix='_pve_%d'%(i)))
             # biasfield always (I think so??)
             outputs.bias_field.append(fname_presuffix(item, suffix='_bias'))
@@ -537,7 +537,7 @@ class Fast(FSLCommand):
                 outputs.biascorrected.append(fname_presuffix(item, suffix='_restore'))
             # probability maps
             if self.inputs.probability_maps:
-                for i in nclasses:
+                for i in range(nclasses):
                     outputs.prob_maps.append(fname_presuffix(item, suffix='_prob_%d'%(i)))
             return outputs
                     
