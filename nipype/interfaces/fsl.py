@@ -493,6 +493,7 @@ class Fast(FSLCommand):
         outputs = Bunch(mixeltype = [],
                         seg = [],
                         partial_volume_map=[],
+                        partial_volume_files=[],
                         tissue_class_map=[],
                         tissue_class_files=[],
                         bias_corrected=[],
