@@ -294,8 +294,8 @@ class Realign(SpmMatlabCommandLine):
     
     
 
-    Options
-    -------
+    Other Parameters
+    --------------- 
 
     To see optional arguments
     Realign().inputs_help()
@@ -546,8 +546,8 @@ class Coregister(SpmMatlabCommandLine):
     
     
 
-    Options
-    -------
+    Other Parameters
+    ----------------
 
     To see optional arguments
     Coregister().inputs_help()
@@ -757,8 +757,8 @@ class Normalize(SpmMatlabCommandLine):
     cmdline : string
     string used to call matlab/spm via SpmMatlabCommandLine interface
     
-    Options
-    -------
+    Other Parameters
+    ----------------
 
     To see optional arguments
     Normalize().inputs_help()
@@ -1005,8 +1005,8 @@ class Segment(SpmMatlabCommandLine):
     cmdline : string
     string used to call matlab/spm via SpmMatlabCommandLine interface
 
-    Options
-    -------
+    Other Parameters
+    ----------------
 
     To see optional arguments
     Segment().inputs_help()
@@ -1321,8 +1321,8 @@ class Smooth(SpmMatlabCommandLine):
     cmdline : string
     string used to call matlab/spm via SpmMatlabCommandLine interface
 
-    Options
-    -------
+    Other Parameters
+    ----------------
 
     To see optional arguments
     Smooth().inputs_help()
@@ -1520,8 +1520,8 @@ class Level1Design(SpmMatlabCommandLine):
     
     
 
-    Options
-    -------
+    Other Parameters
+    ----------------
 
     To see optional arguments
     Level1Design().inputs_help()
@@ -1913,8 +1913,8 @@ class EstimateModel(SpmMatlabCommandLine):
     cmdline : string
     string used to call matlab/spm via SpmMatlabCommandLine interface
 
-    Options
-    -------
+    Other Parameters
+    ----------------
 
     To see optional arguments
     EstimateModel().inputs_help()
@@ -2083,7 +2083,8 @@ class SpecifyModel(Interface):
     cmdline : string
     string used to call matlab/spm via SpmMatlabCommandLine interface
 
-    Options
+    Other Parameters
+    ----------------
 
     To see optional arguments
     SpecifyModel().inputs_help()
@@ -2594,8 +2595,8 @@ class EstimateContrast(SpmMatlabCommandLine):
     cmdline : string
     string used to call matlab/spm via SpmMatlabCommandLine interface
 
-    Options
-    -------
+    Other Parameters
+    ----------------
 
     To see optional arguments
     EstimateContrast().inputs_help()
@@ -2791,8 +2792,8 @@ class OneSampleTTest(SpmMatlabCommandLine):
     cmdline : string
     string used to call matlab/spm via SpmMatlabCommandLine interface
 
-    Options
-    -------
+    Other Parameters
+    ----------------
 
     To see optional arguments
     EstimateContrast().inputs_help()
