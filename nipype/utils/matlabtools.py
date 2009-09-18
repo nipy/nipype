@@ -1,4 +1,4 @@
-"""Create matlab-compatible temporary files."""
+""" Useful Functions for working with matlab"""
 
 # Stdlib imports
 import os
@@ -6,6 +6,10 @@ import re
 import tempfile
 
 # Functions, classes and other top-level code
+def fltcols(vals):
+    ''' Trivial little function to make 1xN float vector '''
+    return np.atleast_2d(np.array(vals, dtype=float))
+
 def mlab_tempfile(dir=None):
     """Returns a temporary file-like object with valid matlab name.
 
