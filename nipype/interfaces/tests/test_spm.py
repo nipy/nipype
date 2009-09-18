@@ -1,4 +1,4 @@
-from nipype.testing import *
+from nipype.testing import assert_equal, assert_false, assert_true
 
 import nipype.interfaces.spm as spm
 
