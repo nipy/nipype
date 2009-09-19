@@ -34,7 +34,7 @@ from scipy.special import gammaln
 from nipype.interfaces.base import Bunch, InterfaceResult, Interface
 from nipype.utils import setattr_on_read
 from nipype.externals.pynifti import load
-from nipype.interfaces.matlab import fltcols, MatlabCommandLine
+from nipype.interfaces.matlab import MatlabCommandLine
 from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix, 
                                     filename_to_list, list_to_filename)
 
