@@ -136,7 +136,7 @@ def list_to_filename(filelist):
     """
     if is_container(filelist) and len(filelist) > 1:
         return filelist
-    else
+    else:
         return filelist[0]
 
 def cleandir(dir):
