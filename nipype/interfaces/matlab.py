@@ -71,13 +71,18 @@ class MatlabCommandLine(CommandLine):
     def _compile_command(self):
         '''Generate necessary Matlab files and cmdline
 
-        Note that this could be called before accessing .cmdline, and we won't
+        Note that this could be called before accessing .cmdline, and we wont
         regenerate anything (unless the inputs have changed)
         '''
-        script_lines=self.inputs.script_lines
-        script_name=self.inputs.script_name
-        mfile = self.inputs.mfile
-        cwd = self.inputs.cwd
+        return self._gen_matlab_command(script_lines=self.inputs.script_lines,
+                                             script_name=self.inputs.script_name,
+                                             mfile = self.inputs.mfile,
+                                             cwd = self.inputs.cwd)
+    
+    def _gen_matlab_command(self,script_lines='',script_name='pyscript',
+                                 mfile = True,cwd = None):
+        if cwd is None:
+            cwd = self.inputs.get('cwd','.')
         # generate the script
         prescript  = ''
         if mfile:
