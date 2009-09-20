@@ -117,9 +117,6 @@ def copyfiles(filelist, dest, copy=False):
         newfiles.insert(i,destfile)
     return newfiles
 
-    
-
-
 def filename_to_list(filename):
     if type(filename) == type(''):
         return [filename]
@@ -134,7 +131,7 @@ def list_to_filename(filelist):
     """Returns a list if filelist is a list of length greater than 1, 
        otherwise returns the first element
     """
-    if is_container(filelist) and len(filelist) > 1:
+    if len(filelist) > 1:
         return filelist
     else:
         return filelist[0]
