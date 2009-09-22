@@ -1,8 +1,8 @@
 # module imports
-from nipype.externals.pynifti import volumeutils as vu
-from nipype.externals.pynifti import spm2analyze as spm2
-from nipype.externals.pynifti import nifti1
-from nipype.externals.pynifti import minc
+from nifti import volumeutils as vu
+from nifti import spm2analyze as spm2
+from nifti import nifti1
+from nifti import minc
 
 
 def load(filespec, *args, **kwargs):

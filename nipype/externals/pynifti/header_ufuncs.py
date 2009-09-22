@@ -97,7 +97,7 @@ def write_data(hdr, data, fileobj,
 
     Examples
     --------
-    >>> from nipype.externals.pynifti.analyze import AnalyzeHeader
+    >>> from nifti.analyze import AnalyzeHeader
     >>> hdr = AnalyzeHeader()
     >>> hdr.set_data_shape((1, 2, 3))
     >>> hdr.set_data_dtype(np.float64)
@@ -162,7 +162,7 @@ def adapt_header(hdr, data):
 
     Examples
     --------
-    >>> from nipype.externals.pynifti.analyze import AnalyzeHeader
+    >>> from nifti.analyze import AnalyzeHeader
     >>> hdr = AnalyzeHeader()
     >>> hdr.set_data_dtype(np.float32)
     >>> data = np.arange(6, dtype=np.float32).reshape(1,2,3)
@@ -216,7 +216,7 @@ def write_scaled_data(hdr, data, fileobj):
 
     Examples
     --------
-    >>> from nipype.externals.pynifti.analyze import AnalyzeHeader
+    >>> from nifti.analyze import AnalyzeHeader
     >>> hdr = AnalyzeHeader()
     >>> hdr.set_data_shape((1, 2, 3))
     >>> hdr.set_data_dtype(np.float64)

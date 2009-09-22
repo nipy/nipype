@@ -13,8 +13,8 @@ to the previous C-based implementation.
 __docformat__ = 'restructuredtext'
 
 import numpy as N
-from nipype.externals.pynifti.nifti1 import Nifti1Image
-from nipype.externals.pynifti.volumeutils import allopen
+from nifti.nifti1 import Nifti1Image
+from nifti.volumeutils import allopen
 
 class NiftiImage(Nifti1Image):
     def __init__(self, source, header=None, loadmeta=False):
@@ -22,12 +22,17 @@ class NiftiImage(Nifti1Image):
             raise NotImplementedError
 
         elif type(source) in (str, unicode):
-            # basically mimic from_filespec() + from_files()
+            # load image
             files = Nifti1Image.filespec_to_files(source)
-            header = Nifti1Image._header_maker.from_fileobj(
-                        allopen(files['header']))
-            affine = header.get_best_affine()
-            Nifti1Image.__init__(self, None, affine, header)
+            img = Nifti1Image.from_files(files)
+
+            # and init from temp image without assigning the data, for lazy
+            # loading
+            Nifti1Image.__init__(self,
+                                 None,
+                                 img.get_affine(),
+                                 img.get_header(),
+                                 img.extra)
 
             # store filenames? yes! otherwise get_data() will refuse to access
             # the data since it doesn't know where to get the image from
@@ -43,7 +48,7 @@ class NiftiImage(Nifti1Image):
 
 
     def asDict(self):
-        raise NotImplementedError
+        return self.get_header()
 
 
     def updateFromDict(self, hdrdict):
@@ -59,7 +64,7 @@ class NiftiImage(Nifti1Image):
 
 
     def getVoxDims(self):
-        raise NotImplementedError
+        return self.get_header().get_zooms()[:3]
 
 
     def setVoxDims(self, value):
@@ -71,11 +76,11 @@ class NiftiImage(Nifti1Image):
 
 
     def getPixDims(self):
-        raise NotImplementedError
+        return self.get_header()['pixdim'][1:]
 
 
     def getExtent(self):
-        raise NotImplementedError
+        return self.get_header().get_data_shape()
 
 
     def getVolumeExtent(self):
@@ -87,7 +92,7 @@ class NiftiImage(Nifti1Image):
 
 
     def getRepetitionTime(self):
-        raise NotImplementedError
+        return self.get_header().get_zooms()[3]
 
 
     def setRepetitionTime(self, value):
@@ -199,7 +204,10 @@ class NiftiImage(Nifti1Image):
 
 
     def save(self, filename=None, filetype = 'NIFTI', update_minmax=True):
-        raise NotImplementedError
+        if not filename is None:
+            filename = self.filespec_to_files(filename)
+
+        self.to_files(filename)
 
 
     def copy(self):
@@ -258,7 +266,7 @@ class NiftiImage(Nifti1Image):
 #    min =           property(fget=lambda self: self.__nimg.cal_min)
 #    sform_inv =     property(fget=getInverseSForm)
 #    qform_inv =     property(fget=getInverseQForm)
-#    extent =        property(fget=getExtent)
+    extent =        property(fget=getExtent)
 #    volextent =     property(fget=getVolumeExtent)
 #    timepoints =    property(fget=getTimepoints)
 #    raw_nimg =      property(fget=lambda self: self.__nimg)
@@ -272,11 +280,11 @@ class NiftiImage(Nifti1Image):
 #                             fset=setSlope)
 #    intercept =     property(fget=lambda self: self.__nimg.scl_inter,
 #                             fset=setIntercept)
-#    voxdim =        property(fget=getVoxDims, fset=setVoxDims)
-#    pixdim =        property(fget=getPixDims, fset=setPixDims)
+    voxdim =        property(fget=getVoxDims, fset=setVoxDims)
+    pixdim =        property(fget=getPixDims, fset=setPixDims)
 #    description =   property(fget=lambda self: self.__nimg.descrip,
 #                             fset=setDescription)
-#    header =        property(fget=asDict, fset=updateFromDict)
+    header =        property(fget=asDict)
 #    sform =         property(fget=getSForm, fset=setSForm)
 #    sform_code =    property(fget=getSFormCode, fset=setSFormCode)
 #    qform =         property(fget=getQForm, fset=setQForm)
@@ -284,6 +292,6 @@ class NiftiImage(Nifti1Image):
 #    quatern =       property(fget=getQuaternion, fset=setQuaternion)
 #    qoffset =       property(fget=getQOffset, fset=setQOffset)
 #    qfac =          property(fget=lambda self: self.__nimg.qfac, fset=setQFac)
-#    rtime =         property(fget=getRepetitionTime, fset=setRepetitionTime)
+    rtime =         property(fget=getRepetitionTime, fset=setRepetitionTime)
 #    xyz_unit =      property(fget=getXYZUnit, fset=setXYZUnit)
 #    time_unit =     property(fget=getTimeUnit, fset=setTimeUnit)

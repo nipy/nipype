@@ -96,17 +96,17 @@ The same for logging::
 
 import numpy as np
 
-from nipype.externals.pynifti.volumeutils import pretty_mapping, endian_codes, \
+from nifti.volumeutils import pretty_mapping, endian_codes, \
      native_code, swapped_code, hdr_getterfunc, \
      make_dt_codes, HeaderDataError, HeaderTypeError, allopen
 
-from nipype.externals.pynifti.header_ufuncs import read_data, write_data, adapt_header
+from nifti.header_ufuncs import read_data, write_data, adapt_header
 
-from nipype.externals.pynifti import imageglobals as imageglobals
-from nipype.externals.pynifti.spatialimages import SpatialImage
-from nipype.externals.pynifti import filetuples # module import
+from nifti import imageglobals as imageglobals
+from nifti.spatialimages import SpatialImage
+from nifti import filetuples # module import
 
-from nipype.externals.pynifti.batteryrunners import BatteryRunner, Report
+from nifti.batteryrunners import BatteryRunner, Report
 
 # Sub-parts of standard analyze header from 
 # Mayo dbh.h file
@@ -1138,7 +1138,7 @@ class AnalyzeImage(SpatialImage):
         '''
         files = self.filespec_to_files(filespec)
         self.to_files(files)
-    
+
     def to_files(self, files=None):
         ''' Write image to files passed, or self._files
         '''

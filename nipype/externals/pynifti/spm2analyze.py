@@ -2,9 +2,9 @@
 
 import numpy as np
 
-from nipype.externals.pynifti.volumeutils import HeaderDataError, HeaderTypeError
-from nipype.externals.pynifti.batteryrunners import Report
-from nipype.externals.pynifti import spm99analyze as spm99 # module import
+from nifti.volumeutils import HeaderDataError, HeaderTypeError
+from nifti.batteryrunners import Report
+from nifti import spm99analyze as spm99 # module import
 
 image_dimension_dtd = spm99.image_dimension_dtd[:]
 image_dimension_dtd[

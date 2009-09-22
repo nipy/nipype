@@ -1,9 +1,9 @@
 import numpy as np
 
-from scipy.io.netcdf import netcdf_file as netcdf
+from scipy.io.netcdf import netcdf_file
 
-from nipype.externals.pynifti.spatialimages import SpatialImage
-from nipype.externals.pynifti.volumeutils import allopen
+from nifti.spatialimages import SpatialImage
+from nifti.volumeutils import allopen
 
 _dt_dict = {
     ('b','unsigned'): np.uint8,
@@ -22,10 +22,18 @@ _default_dir_cos = {
     'zspace': [0,0,1]}
 
 
-class netcdf_fileobj(netcdf):
+class netcdf_fileobj(netcdf_file):
     def __init__(self, fileobj):
-        self._buffer = fileobj
-        self._parse()
+        # Older versions of netcdf_file expected filename and mode.
+        # Newer versions allow passing of file objects.  We check
+        # whether calling netcdf_file raises a TypeError (meaning we
+        # have the old version) and deal with it if we do.
+        try:
+            super(netcdf_fileobj, self).__init__(fileobj)
+        except TypeError:
+            self._buffer = fileobj
+            self._parse()
+
 
 class MincError(Exception):
     pass

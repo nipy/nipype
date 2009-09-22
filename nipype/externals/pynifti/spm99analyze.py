@@ -1,12 +1,13 @@
 ''' Header reading functions for SPM version of analyze format '''
+import warnings
 import numpy as np
 
-from nipype.externals.pynifti.volumeutils import HeaderDataError, HeaderTypeError, \
+from nifti.volumeutils import HeaderDataError, HeaderTypeError, \
     allopen
 
-from nipype.externals.pynifti import filetuples # module import
-from nipype.externals.pynifti.batteryrunners import Report
-from nipype.externals.pynifti import analyze # module import
+from nifti import filetuples # module import
+from nifti.batteryrunners import Report
+from nifti import analyze # module import
 
 ''' Support subtle variations of SPM version of Analyze '''
 header_key_dtd = analyze.header_key_dtd
@@ -223,7 +224,13 @@ class Spm99AnalyzeImage(analyze.AnalyzeImage):
             return ret
         mats = sio.loadmat(matf)
         if 'mat' in mats: # this overrides a 'M', and includes any flip
-            ret._affine = mats['mat']
+            mat = mats['mat']
+            if mat.ndim > 2:
+                warnings.warn('More than one affine in "mat" matrix, '
+                              'using first')
+                mat = mat[:,:,0]
+            ret._affine = mat
+            return ret
         elif 'M' in mats: # the 'M' matrix does not include flips
             hdr = ret._header
             if hdr.default_x_flip:
