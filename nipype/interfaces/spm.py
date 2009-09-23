@@ -37,6 +37,7 @@ from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import MatlabCommandLine
 from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix, 
                                     filename_to_list, list_to_filename)
+from nipype.utils.spm_docs import grab_doc
 
 def scans_for_fname(fname):
     """Reads a nifti file and converts it to a numpy array storing
@@ -248,17 +249,44 @@ class SpmMatlabCommandLine(MatlabCommandLine):
 
 
 class Realign(SpmMatlabCommandLine):
-    """use spm_realign for estimating within modality rigid body
-    alignment
+    """Use spm_realign for estimating within modality rigid body alignment
+
+    See Realign().spm_doc() for more information.
+
+    Parameters
+    ----------
+    inputs : mapping
+    key, value pairs that will update the Realign.inputs attributes
+    see self.inputs_help() for a list of Realign.inputs attributes
     
+    Attributes
+    ----------
+    inputs : Bunch
+    a (dictionary-like) bunch of options that can be passed to 
+    spm_realign via a job structure
+    cmdline : string
+    string used to call matlab/spm via SpmMatlabCommandLine interface
     
-    Example
-    -------
+
+    Other Parameters
+    --------------- 
+
+    To see optional arguments
+    Realign().inputs_help()
+
+    To see output fields
+    Realign().outputs_help()
+
+    Examples
+    --------
     >>> realign = spm.Realign()
     >>> realign.inputs.infile('a.nii')
     >>> realign.run()
     """
-    
+
+    def spm_doc(self):
+        print grab_doc(self.cmd)
+
     def inputs_help(self):
         """
         Parameters
