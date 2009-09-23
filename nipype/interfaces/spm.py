@@ -284,6 +284,10 @@ class Realign(SpmMatlabCommandLine):
     >>> realign.run()
     """
 
+    @property
+    def cmd(self):
+        return 'spm_realign'
+
     def spm_doc(self):
         print grab_doc(self.cmd)
 
