@@ -13,8 +13,8 @@ to the previous C-based implementation.
 __docformat__ = 'restructuredtext'
 
 import numpy as N
-from nifti.nifti1 import Nifti1Image
-from nifti.volumeutils import allopen
+from nipype.externals.pynifti.nifti1 import Nifti1Image
+from nipype.externals.pynifti.volumeutils import allopen
 
 class NiftiImage(Nifti1Image):
     def __init__(self, source, header=None, loadmeta=False):

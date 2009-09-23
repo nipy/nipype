@@ -6,16 +6,16 @@ Author: Matthew Brett
 import numpy as np
 import numpy.linalg as npl
 
-from nifti.volumeutils import Recoder, make_dt_codes, \
+from nipype.externals.pynifti.volumeutils import Recoder, make_dt_codes, \
      HeaderDataError, HeaderTypeError, allopen
-from nifti.batteryrunners import Report
-from nifti.quaternions import fillpositive, quat2mat, mat2quat
-from nifti import analyze # module import
-from nifti.spm99analyze import SpmAnalyzeHeader
-from nifti import filetuples # module import
-from nifti.spatialimages import SpatialImage
+from nipype.externals.pynifti.batteryrunners import Report
+from nipype.externals.pynifti.quaternions import fillpositive, quat2mat, mat2quat
+from nipype.externals.pynifti import analyze # module import
+from nipype.externals.pynifti.spm99analyze import SpmAnalyzeHeader
+from nipype.externals.pynifti import filetuples # module import
+from nipype.externals.pynifti.spatialimages import SpatialImage
 
-from nifti.header_ufuncs import write_data, adapt_header
+from nipype.externals.pynifti.header_ufuncs import write_data, adapt_header
 
 # nifti1 flat header definition for Analyze-like first 348 bytes
 # first number in comments indicates offset in file header in bytes

@@ -47,16 +47,16 @@ __version__ = '0.20090303.1'
 
 
 # module imports
-from nifti import analyze as ana
-from nifti import spm99analyze as spm99
-from nifti import spm2analyze as spm2
-from nifti import nifti1 as ni1
-from nifti import minc
+from nipype.externals.pynifti import analyze as ana
+from nipype.externals.pynifti import spm99analyze as spm99
+from nipype.externals.pynifti import spm2analyze as spm2
+from nipype.externals.pynifti import nifti1 as ni1
+from nipype.externals.pynifti import minc
 # object imports
-from nifti.loadsave import load, save
-from nifti.analyze import AnalyzeHeader, AnalyzeImage
-from nifti.spm99analyze import Spm99AnalyzeHeader, Spm99AnalyzeImage
-from nifti.spm2analyze import Spm2AnalyzeHeader, Spm2AnalyzeImage
-from nifti.nifti1 import Nifti1Header, Nifti1Image
-from nifti.minc import MincHeader, MincImage
-from nifti.funcs import squeeze_image, concat_images
+from nipype.externals.pynifti.loadsave import load, save
+from nipype.externals.pynifti.analyze import AnalyzeHeader, AnalyzeImage
+from nipype.externals.pynifti.spm99analyze import Spm99AnalyzeHeader, Spm99AnalyzeImage
+from nipype.externals.pynifti.spm2analyze import Spm2AnalyzeHeader, Spm2AnalyzeImage
+from nipype.externals.pynifti.nifti1 import Nifti1Header, Nifti1Image
+from nipype.externals.pynifti.minc import MincHeader, MincImage
+from nipype.externals.pynifti.funcs import squeeze_image, concat_images

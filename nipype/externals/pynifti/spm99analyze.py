@@ -2,12 +2,12 @@
 import warnings
 import numpy as np
 
-from nifti.volumeutils import HeaderDataError, HeaderTypeError, \
+from nipype.externals.pynifti.volumeutils import HeaderDataError, HeaderTypeError, \
     allopen
 
-from nifti import filetuples # module import
-from nifti.batteryrunners import Report
-from nifti import analyze # module import
+from nipype.externals.pynifti import filetuples # module import
+from nipype.externals.pynifti.batteryrunners import Report
+from nipype.externals.pynifti import analyze # module import
 
 ''' Support subtle variations of SPM version of Analyze '''
 header_key_dtd = analyze.header_key_dtd

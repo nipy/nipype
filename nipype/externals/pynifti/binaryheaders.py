@@ -22,7 +22,7 @@ and class methods::
     
 '''
 
-from nifti.headers import Header
+from nipype.externals.pynifti.headers import Header
 
 class BinaryHeader(Header):
     pass
