@@ -88,7 +88,7 @@ class SpmInfo(object):
 spm_path = spm('dir');
 fprintf(1, '<PATH>%s</PATH>', spm_path);
 """
-        mlab._compile_command(mfile=False)
+        mlab.inputs.mfile = False
         out = mlab.run()
         if out.runtime.returncode == 0:
             path = re.match('<PATH>(.*)</PATH>',out.runtime.stdout[out.runtime.stdout.find('<PATH>'):])
@@ -105,36 +105,28 @@ class SpmMatlabCommandLine(MatlabCommandLine):
     """
 
     mfile=True
-    def gen_mfile(self, use_mfile):
+    def _use_mfile(self, use_mfile):
         """reset the base matlab command
         """
         self.mfile = use_mfile
 
     def run(self):
         """Executes the SPM function using MATLAB
-
-        Redefines the run function of the baseclass to handle
-        generation of m-file job structure or a mat file job structure
-        and to aggregate outputs.
-
-        Parameters
-        ----------
-        mfile : boolean
-            Generate an m-file that defines an SPM job. If false, a
-            MAT file is created. 
-        
         """
-        #self._compile_command()
-        results = self._runner() 
-        if 'MatlabScriptException' in results.runtime.stderr: 
-            results.runtime.returncode = 1 
-        else:
-            results.outputs = self.aggregate_outputs() 
-            
+        results = super(SpmMatlabCommandLine,self).run()
+        if results.runtime.returncode == 0:
+            results.outputs = self._aggregate_outputs() 
         return results
 
-
-    def aggregate_outputs(self):
+    def _compile_command(self):
+        """Assembles the matlab code for SPM function
+        
+        Virtual function that needs to be implemented by the
+        subclass
+        """ 
+        raise NotImplementedError
+    
+    def _aggregate_outputs(self):
         """Collects all the outputs produced by an SPM function
         
         Virtual function that needs to be implemented by the
@@ -249,77 +241,30 @@ class SpmMatlabCommandLine(MatlabCommandLine):
             savemat(os.path.join(cwd,'pyjobs_%s.mat'%jobname), jobdef)
             mscript = "load pyjobs_%s;\n spm_jobman('run', jobs);\n" % jobname
         mscript += 'spm_jobman(\'run\',jobs);'
-        cmdline = self._gen_matlab_command(mscript, cwd=cwd, 
-                                          script_name='pyscript_%s' % jobname) 
+        cmdline = self._gen_matlab_command(mscript, cwd=cwd,
+                                           script_name='pyscript_%s' % jobname,
+                                           mfile=self.mfile) 
         return cmdline, mscript
 
 
 class Realign(SpmMatlabCommandLine):
-    """use spm_realign for estimating within modality rigid body alignment
-    
-    This  routine  realigns a time-series of images acquired from the
-    same  subject  using  a  least  squares approach and a 6 parameter
-    (rigid  body)spatial  transformation.  The  first image  in  the
-    list  specified  by  the  user  is  used as a reference  to  which
-    all subsequent scans are realigned. The reference   scan   does
-    not   have   to   the   the   first chronologically   and   it
-    may   be   wise   to   chose   a "representative scan" in this
-    role.
-
-    The  aim is primarily to remove movement artefact in fMRI and PET
-    time-series  (or  more generally longitudinal studies) . The
-    headers  are modified for each of the input images, such that they
-    reflect  the  relative orientations of the data. The  details  of
-    the  transformation  are  displayed  in the results  window  as
-    plots of translation and rotation. A set of  realignment
-    parameters are saved for each session, named rp_*.txt.  After
-    realignment,  the  images are resliced such that  they  match  the
-    first image selected voxel-for-voxel. The  resliced  images  are
-    named  the same as the originals, except that they are prefixed by
-    'r'.
-    
-    Parameters
-    ----------
-    inputs : mapping
-    key, value pairs that will update the Realign.inputs attributes
-    see self.inputs_help() for a list of Realign.inputs attributes
-    
-    Attributes
-    ----------
-    inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to 
-    spm_realign via a job structure
-    cmdline : string
-    string used to call matlab/spm via SpmMatlabCommandLine interface
+    """use spm_realign for estimating within modality rigid body
+    alignment
     
     
-
-    Other Parameters
-    --------------- 
-
-    To see optional arguments
-    Realign().inputs_help()
-
-    To see output fields
-    Realign().outputs_help()
-
-    Examples
-    --------
+    Example
+    -------
     >>> realign = spm.Realign()
     >>> realign.inputs.infile('a.nii')
     >>> realign.run()
     """
     
-    @property
-    def cmd(self):
-        return 'spm_realign'
-        
     def inputs_help(self):
         """
         Parameters
         ----------
         
-        infile: list
+        infile: string,list
             list of filenames to realign
         write : bool, optional
             if True updates headers and generates
