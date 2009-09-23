@@ -9,7 +9,7 @@ spm_config_doc = {'realign' : 'spm_config_realign',
 #                  'segment' : spm_config.values{2}.values{4}.help{1}, or spm_config_segment_old
 
 
-spm_doc_names = {'realign' : 'Realign: Estimate & Reslice',
+spm_doc_names = {'spm_realign' : 'Realign: Estimate & Reslice',
                  'coreg' : 'Coreg: Estimate & Reslice',
                  #'normalise' : '',
                  'segment' : 'Segment',
@@ -20,7 +20,7 @@ def grab_doc(funcname):
     
     Parameters
     ----------
-    funcname : {'realign', 'coreg'}
+    funcname : {'spm_realign', 'coreg'}
         Function for which we are grabbing documentation.
 
     """
