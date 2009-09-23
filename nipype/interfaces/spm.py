@@ -119,6 +119,10 @@ class SpmMatlabCommandLine(MatlabCommandLine):
             results.outputs = self._aggregate_outputs() 
         return results
 
+    def spm_doc(self):
+        """Print out SPM documentation."""
+        print grab_doc(self.cmd)
+
     def _compile_command(self):
         """Assembles the matlab code for SPM function
         
@@ -287,9 +291,6 @@ class Realign(SpmMatlabCommandLine):
     @property
     def cmd(self):
         return 'spm_realign'
-
-    def spm_doc(self):
-        print grab_doc(self.cmd)
 
     def inputs_help(self):
         """

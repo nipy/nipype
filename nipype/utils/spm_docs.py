@@ -5,9 +5,11 @@ import os
 from nipype.interfaces import matlab
 
 spm_doc_names = {'spm_realign' : 'Realign: Estimate & Reslice',
-                 'coreg' : 'Coreg: Estimate & Reslice',
-                 #'normalise' : '',
-                 'segment' : 'Segment',
+                 'spm_coreg' : 'Coreg: Estimate & Reslice',
+                 'spm_normalise' : 'Normalise: Estimate & Write',
+                 'spm_segment' : 'Segment',
+                 'spm_smooth' : 'Smooth',
+                 'spm_fmri_design' : 'fMRI model specification (design only)',
                  }
 
 def grab_doc(funcname):
