@@ -116,7 +116,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         """
         results = super(SpmMatlabCommandLine,self).run()
         if results.runtime.returncode == 0:
-            results.outputs = self._aggregate_outputs() 
+            results.outputs = self.aggregate_outputs() 
         return results
 
     def spm_doc(self):
@@ -131,7 +131,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         """ 
         raise NotImplementedError
     
-    def _aggregate_outputs(self):
+    def aggregate_outputs(self):
         """Collects all the outputs produced by an SPM function
         
         Virtual function that needs to be implemented by the

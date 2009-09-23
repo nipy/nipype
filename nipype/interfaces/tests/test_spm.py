@@ -41,7 +41,7 @@ def test_run():
     mlab._use_mfile(False)
     yield assert_raises, NotImplementedError, mlab.run
     class mlabsub2(mlabsub):
-        def _aggregate_outputs(self):
+        def aggregate_outputs(self):
             pass
     mlab = mlabsub2()
     mlab._use_mfile(False)
