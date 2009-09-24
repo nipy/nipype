@@ -1757,7 +1757,17 @@ class Level1Design(SpmMatlabCommandLine):
         self._cmdline, mscript =self._make_matlab_command('stats',
                                                        'fmri_spec',
                                                        [self._parseinputs()])
-
+        if self.inputs.mask_image is not None:
+            pass
+            """ Need to take care of inserting the mask threshold at
+                the appropriate place.
+            mscriptlines = mscript.split('\n')
+            mscript = "global defaults; defaults.mask.thresh = -inf\n"
+            self._cmdline = self._gen_matlab_command(mscript, cwd=self.inputs.get('cwd','.'),
+                                                     script_name='pyscript_fmri_spec',
+                                                     mfile=self.mfile) 
+            """
+            
     def outputs_help(self):
         """
             Parameters
@@ -1905,6 +1915,7 @@ class EstimateModel(SpmMatlabCommandLine):
         self._cmdline, mscript = self._make_matlab_command('stats',
                                                            'fmri_est',
                                                            [self._parseinputs()])
+        
     
     def outputs_help(self):
         """
