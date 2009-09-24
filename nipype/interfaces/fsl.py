@@ -945,6 +945,13 @@ class McFlirt(FSLCommand):
             parnme, ext = os.path.splitext(item)
             parnme = parnme + '.par'
             outputs.parfile = parnme
+        for outtype, outlist in outputs.iteritems():
+            # for each key, value in bunch
+            if outlist:
+                if not len(glob(outfile))==1:
+                    raise IOError('outputfile %s of type %s not generated'%(outfile,outtype))
+                
+        return outputs
         return outputs
  
 
