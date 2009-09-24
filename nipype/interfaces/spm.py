@@ -488,25 +488,7 @@ class Realign(SpmMatlabCommandLine):
 class Coregister(SpmMatlabCommandLine):
     """Use spm_coreg for estimating cross-modality rigid body alignment
 
-    The  registration  method  used  here  is  based  on  work by
-    Collignon  et al. The original interpolation method described in
-    this  paper  has been changed in order to give a smoother cost
-    function.  The images are also smoothed slightly, as is the
-    histogram.  This  is  all  in  order  to  make  the cost function
-    as  smooth  as possible, to give faster convergence and less
-    chance of local minima. 
- 
-    At  the  end  of  coregistration,  the  voxel-to-voxel affine
-    transformation   matrix   is   displayed,   along   with  the
-    histograms  for  the images in the original orientations, and the
-    final  orientations. The registered images are displayed at the
-    bottom. 
- 
-    Registration  parameters  are  stored  in  the headers of the
-    "source"  and  the  "other"  images.  These  images  are also
-    resliced  to  match  the  source  image  voxel-for-voxel. The
-    resliced  images  are  named the same as the originals except that
-    they are prefixed by 'r'. 
+    See Coregister().spm_doc() for more information.
 
     Parameters
     ----------
@@ -521,12 +503,9 @@ class Coregister(SpmMatlabCommandLine):
     spm_coreg via a job structure
     cmdline : string
     string used to call matlab/spm via SpmMatlabSpmMatlabCommandLine interface
-    
-    
 
     Other Parameters
     ----------------
-
     To see optional arguments
     Coregister().inputs_help()
 
@@ -719,11 +698,7 @@ class Coregister(SpmMatlabCommandLine):
 class Normalize(SpmMatlabCommandLine):
     """use spm_normalise for warping an image to a template
 
-    Computes  the  warp  that  best  registers a source image (or
-    series  of  source  images) to match a template, saving it to the
-    file  imagename'_sn.mat'.  This  option  also allows the contents
-    of  the imagename'_sn.mat' files to be applied to a series of
-    images.
+    See Normalize().spm_doc() for more information.
     
     Parameters
     ----------
@@ -973,9 +948,7 @@ class Segment(SpmMatlabCommandLine):
     """use spm_segment to separate structural images into different
     tissue classes.
 
-    Segment,  bias  correct  and spatially normalise - all in the same
-    model.  This  function can be used for bias correcting, spatially
-    normalising or segmenting your data. 
+    See Segment().spm_doc() for more information.
 
     Parameters
     ----------
@@ -993,10 +966,8 @@ class Segment(SpmMatlabCommandLine):
 
     Other Parameters
     ----------------
-
     To see optional arguments
     Segment().inputs_help()
-
 
     Examples
     --------
@@ -1291,11 +1262,7 @@ class Segment(SpmMatlabCommandLine):
 class Smooth(SpmMatlabCommandLine):
     """use spm_smooth for 3D Gaussian smoothing of image volumes.
 
-    This  is  for  smoothing (or convolving) image volumes with a
-    Gaussian  kernel  of  a  specified  width.  It  is  used as a
-    preprocessing  step  to  suppress  noise  and  effects due to
-    residual  differences  in functional and gyral anatomy during
-    inter-subject averaging.
+    See Smooth().spm_doc() for more information.
 
     Parameters
     ----------
@@ -1313,10 +1280,8 @@ class Smooth(SpmMatlabCommandLine):
 
     Other Parameters
     ----------------
-
     To see optional arguments
     Smooth().inputs_help()
-
 
     Examples
     --------
@@ -1426,77 +1391,7 @@ class Smooth(SpmMatlabCommandLine):
 class Level1Design(SpmMatlabCommandLine):
     """Generate an SPM design matrix
 
-    Statistical  analysis  of  fMRI  data  uses a mass-univariate
-    approach  based on General Linear Models (GLMs). It comprises
-    the  following  steps  (1)  specification  of  the GLM design
-    matrix,  fMRI  data files and filtering (2) estimation of GLM
-    paramaters  using  classical  or  Bayesian approaches and (3)
-    interrogation  of  results  using contrast vectors to produce
-    Statistical  Parametric  Maps (SPMs) or Posterior Probability
-    Maps (PPMs).
-
-    The  design  matrix  defines  the experimental design and the
-    nature  of  hypothesis  testing to be implemented. The design
-    matrix  has  one  row  for  each scan and one column for each
-    effect  or  explanatory  variable. (eg. regressor or stimulus
-    function).  You  can  build  design  matrices  with separable
-    session-specific  partitions.  Each partition may be the same
-    (in  which  case  it is only necessary to specify it once) or
-    different.
-
-    Responses  can  be  either  event- or epoch related, the only
-    distinction  is  the  duration  of  the  underlying  input or
-    stimulus  function.  Mathematically  they are both modeled by
-    convolving  a  series  of delta (stick) or box functions (u),
-    indicating  the  onset  of  an  event  or epoch with a set of
-    basis  functions. These basis functions model the hemodynamic
-    convolution,  applied  by  the  brain,  to  the  inputs. This
-    convolution  can  be first-order or a generalized convolution
-    modeled   to  second  order  (if  you  specify  the  Volterra
-    option).  The  same  inputs are used by the Hemodynamic model
-    or   Dynamic   Causal  Models  which  model  the  convolution
-    explicitly in terms of hidden state variables.
- 
-    Basis  functions  can  be used to plot estimated responses to
-    single  events  once  the  parameters  (i.e.  basis  function
-    coefficients)  have  been  estimated. The importance of basis
-    functions  is that they provide a graceful transition between
-    simple  fixed  response  models (like the box-car) and finite
-    impulse  response  (FIR)  models,  where  there  is one basis
-    function  for  each  scan  following an event or epoch onset.
-    The  nice  thing  about  basis  functions,  compared  to  FIR
-    models,  is that data sampling and stimulus presentation does
-    not  have  to  be synchronized thereby allowing a uniform and
-    unbiased sampling of peri-stimulus time.
-    
-    Event-related  designs  may  be  stochastic or deterministic.
-    Stochastic  designs  involve  one  of a number of trial-types
-    occurring   with   a   specified  probability  at  successive
-    intervals   in   time.   These  probabilities  can  be  fixed
-    (stationary   designs)   or   time-dependent   (modulated  or
-    non-stationary  designs).  The  most efficient designs obtain
-    when  the  probabilities  of  every  trial  type are equal. A
-    critical  issue  in  stochastic designs is whether to include
-    null  events If you wish to estimate the evoked response to a
-    specific  event  type  (as opposed to differential responses)
-    then  a  null  event  must  be  included  (even  if it is not
-    modeled explicitly).
- 
-    In  SPM,  analysis  of  data from multiple subjects typically
-    proceeds  in  two  stages  using  models at two 'levels'. The
-    'first  level'  models are used to implement a within-subject
-    analysis.  Typically there will be as many first level models
-    as  there  are subjects. Analysis proceeds as described using
-    the   'Specify  first  level'  and  'Estimate'  options.  The
-    results  of  these  analyses  can  then be presented as 'case
-    studies'.  More often, however, one wishes to make inferences
-    about  the  population  from  which  the subjects were drawn.
-    This  is an example of a 'Random-Effects (RFX) analysis' (or,
-    more   properly,  a  mixed-effects  analysis).  In  SPM,  RFX
-    analysis   is   implemented   using  the  'summary-statistic'
-    approach  where contrast images from each subject are used as
-    summary   measures  of  subject  responses.  These  are  then
-    entered as data into a 'second level' model.
+    See Level1Design().spm_doc() for more information.
     
     Parameters
     ----------
@@ -1511,15 +1406,11 @@ class Level1Design(SpmMatlabCommandLine):
     spm_smooth via a job structure
     cmdline : string
     string used to call matlab/spm via SpmMatlabCommandLine interface
-    
-    
 
     Other Parameters
     ----------------
-
     To see optional arguments
     Level1Design().inputs_help()
-
 
     Examples
     --------
@@ -1888,12 +1779,7 @@ class Level1Design(SpmMatlabCommandLine):
 class EstimateModel(SpmMatlabCommandLine):
     """use spm_spm to estimate the parameters of a model
 
-    Model  parameters  can  be  estimated using classical (ReML -
-    Restricted  Maximum Likelihood) or Bayesian algorithms. After
-    parameter  estimation,  the  RESULTS  button  can  be used to
-    specify  contrasts  that  will produce Statistical Parametric
-    Maps  (SPMs)  or Posterior Probability Maps (PPMs) and tables
-    of statistics.
+    See EstimateModel().spm_doc() for more information.
 
     Parameters
     ----------
@@ -1903,8 +1789,7 @@ class EstimateModel(SpmMatlabCommandLine):
     see self.inputs_help() for a list of EstimateModel.inputs attributes
     
     Attributes
-    ----------
-    
+    ----------    
     inputs : Bunch
     a (dictionary-like) bunch of options that can be passed to 
     spm_spm via a job structure
@@ -1913,10 +1798,8 @@ class EstimateModel(SpmMatlabCommandLine):
 
     Other Parameters
     ----------------
-
     To see optional arguments
     EstimateModel().inputs_help()
-
 
     Examples
     --------
@@ -2070,15 +1953,16 @@ class EstimateModel(SpmMatlabCommandLine):
 class SpecifyModel(Interface):
     """Makes a model specification SPM specific
 
+    See SpecifyModel().spm_doc() for more information.
+
     Parameters
     ----------
-    
     inputs : mapping 
     key, value pairs that will update the SpecifyModel.inputs attributes
     see self.inputs_help() for a list of SpecifyModel.inputs attributes
     
     Attributes
-    
+    ----------
     inputs : Bunch
     a (dictionary-like) bunch of options that can be passed to 
     spm_spm via a job structure
@@ -2087,10 +1971,8 @@ class SpecifyModel(Interface):
 
     Other Parameters
     ----------------
-
     To see optional arguments
     SpecifyModel().inputs_help()
-
 
     Examples
     --------
@@ -2587,14 +2469,12 @@ class EstimateContrast(SpmMatlabCommandLine):
 
     Parameters
     ----------
-    
     inputs : mapping 
     key, value pairs that will update the EstimateContrast.inputs attributes
     see self.inputs_help() for a list of EstimateContrast.inputs attributes
     
     Attributes
     ----------
-    
     inputs : Bunch
     a (dictionary-like) bunch of options that can be passed to 
     spm_spm via a job structure
@@ -2603,10 +2483,8 @@ class EstimateContrast(SpmMatlabCommandLine):
 
     Other Parameters
     ----------------
-
     To see optional arguments
     EstimateContrast().inputs_help()
-
 
     Examples
     --------
@@ -2784,14 +2662,12 @@ class OneSampleTTest(SpmMatlabCommandLine):
 
     Parameters
     ----------
-    
     inputs : mapping 
     key, value pairs that will update the EstimateContrast.inputs attributes
     see self.inputs_help() for a list of EstimateContrast.inputs attributes
     
     Attributes
     ----------
-    
     inputs : Bunch
     a (dictionary-like) bunch of options that can be passed to 
     spm_spm via a job structure
@@ -2800,10 +2676,8 @@ class OneSampleTTest(SpmMatlabCommandLine):
 
     Other Parameters
     ----------------
-
     To see optional arguments
     EstimateContrast().inputs_help()
-
 
     Examples
     --------
