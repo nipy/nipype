@@ -510,7 +510,7 @@ class Fast(FSLCommand):
             if self.inputs.out_basename:
                 pth, nme = os.path.split(item)
                 jnk, ext = os.path.splitext(nme)
-                item = self.inputs.out_basename + '.%s' % (envext)
+                item = pth + self.inputs.out_basename + '.%s' % (envext)
             else:
                 nme, ext = os.path.splitext(item)
                 item = nme + '.%s' % (envext)
@@ -915,6 +915,38 @@ class McFlirt(FSLCommand):
             # results.outputs = self.aggregate_outputs()
         return results 
 
+    def aggregate_outputs(self):
+        envext = fsloutputtype()[1]
+        outputs = Bunch(outfile=None,
+                        varianceimg=None,
+                        stdimg=None,
+                        meanimg=None,
+                        parfile=None,
+                        outmatfile=None)
+        # get basename (correct fsloutpputytpe extension)
+        if self.inputs.outfile:
+            pth, nme = os.path.split(self.inputs.outfile)
+            jnk, ext = os.path.splitext(nme)
+            item = self.inputs.out_basename + '.%s' % (envext)
+        else:
+            nme, ext = os.path.splitext(item)
+            item = nme + '_mcf.%s' % (envext) # auto suffix _mcf if no outfile
+        # always generates realigned 4D volume ``outfile``
+        outputs.outfile = item
+        if self.inputs.stats:
+            outputs.varianceimg = fname_presuffix(item, suffix='_variance')
+            outputs.stdimg = fname_presuffix(item, suffix='_sigma')
+            outputs.meanimg = fname_presuffix(item, suffix='_meanvol')
+        if self.inputs.savemats:
+            matnme, ext = os.path.splitext(item)
+            matnme = matnme + '.mat'
+            outputs.outmatfile = matnme
+        if self.inputs.saveplots:
+            parnme, ext = os.path.splitext(item)
+            parnme = parnme + '.par'
+            outputs.parfile = parnme
+        return outputs
+ 
 
 class Fnirt(FSLCommand):
     """Use FSL FNIRT for non-linear registration.
