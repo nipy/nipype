@@ -119,10 +119,6 @@ class SpmMatlabCommandLine(MatlabCommandLine):
             results.outputs = self.aggregate_outputs() 
         return results
 
-    def spm_doc(self):
-        """Print out SPM documentation."""
-        print grab_doc(self.cmd)
-
     def _compile_command(self):
         """Assembles the matlab code for SPM function
         
@@ -287,6 +283,10 @@ class Realign(SpmMatlabCommandLine):
     >>> realign.inputs.infile('a.nii')
     >>> realign.run()
     """
+
+    def spm_doc(self):
+        """Print out SPM documentation."""
+        print grab_doc('Realign: Estimate & Reslice')
 
     @property
     def cmd(self):
@@ -538,6 +538,10 @@ class Coregister(SpmMatlabCommandLine):
     
     """
     
+    def spm_doc(self):
+        """Print out SPM documentation."""
+        print grab_doc('Coreg: Estimate & Reslice')
+
     @property
     def cmd(self):
         return 'spm_coreg'
@@ -747,6 +751,10 @@ class Normalize(SpmMatlabCommandLine):
     
     """
     
+    def spm_doc(self):
+        """Print out SPM documentation."""
+        print grab_doc('Normalise: Estimate & Write')
+
     @property
     def cmd(self):
         return 'spm_normalise'
@@ -994,6 +1002,10 @@ class Segment(SpmMatlabCommandLine):
     --------
     
     """
+    
+    def spm_doc(self):
+        """Print out SPM documentation."""
+        print grab_doc('Segment')
     
     @property
     def cmd(self):
@@ -1310,6 +1322,10 @@ class Smooth(SpmMatlabCommandLine):
     --------
     
     """
+
+    def spm_doc(self):
+        """Print out SPM documentation."""
+        print grab_doc('Smooth')
     
     @property
     def cmd(self):
@@ -1510,6 +1526,10 @@ class Level1Design(SpmMatlabCommandLine):
     
     """
     
+    def spm_doc(self):
+        """Print out SPM documentation."""
+        print grab_doc('fMRI model specification (design only)')
+
     @property
     def cmd(self):
         return 'spm_fmri_design'
@@ -1903,6 +1923,10 @@ class EstimateModel(SpmMatlabCommandLine):
     
     """
     
+    def spm_doc(self):
+        """Print out SPM documentation."""
+        print grab_doc('Model estimation')
+
     @property
     def cmd(self):
         return 'spm_spm'
@@ -2073,6 +2097,10 @@ class SpecifyModel(Interface):
     
     """
     
+    def spm_doc(self):
+        """Print out SPM documentation."""
+        print grab_doc('fMRI model specification')
+
     def __init__(self, *args, **inputs):
         self._populate_inputs()
         self.inputs.update(**inputs)
