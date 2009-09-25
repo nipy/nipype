@@ -1,12 +1,14 @@
-"""The fsl module provides classes for interfacing with fsl command line tools.
+"""The fsl module provides classes for interfacing with the `FSL
+<http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.  This
+was written to work with FSL version 4.1.4.
 
 Currently these tools are supported:
 
-* BET: brain extraction
-* FAST: segmentation and bias correction
-* FLIRT: linear registration
+* BET v2.1: brain extraction
+* FAST v4.1: segmentation and bias correction
+* FLIRT v5.5: linear registration
 * MCFLIRT: motion correction
-* FNIRT: non-linear warp
+* FNIRT v1.0: non-linear warp
 
 Examples
 --------
@@ -190,7 +192,7 @@ class Bet(FSLCommand):
     """Use FSL BET command for skull stripping.
 
     For complete details, see the `BET Documentation. 
-    <http://www.fmrib.ox.ac.uk/fsl/bet/index.html>`_
+    <http://www.fmrib.ox.ac.uk/fsl/bet2/index.html>`_
 
     To print out the command line help, use:
         fsl.Bet().inputs_help()
@@ -384,7 +386,7 @@ class Fast(FSLCommand):
     """Use FSL FAST for segmenting and bias correction.
 
     For complete details, see the `FAST Documentation. 
-    <http://www.fmrib.ox.ac.uk/fsl/fast/index.html>`_
+    <http://www.fmrib.ox.ac.uk/fsl/fast4/index.html>`_
 
     To print out the command line help, use:
         fsl.Fast().inputs_help()
