@@ -181,7 +181,7 @@ class FSLCommand(CommandLine):
                     (opt, self.__class__.__name__, err.message)
                 warn(msg)
             except KeyError:                   
-                warn('Option %s not supported!' % (opt))
+                warn("Option '%s' is not supported!" % (opt))
         
         return allargs
 
@@ -193,17 +193,37 @@ class Bet(FSLCommand):
     <http://www.fmrib.ox.ac.uk/fsl/bet/index.html>`_
 
     To print out the command line help, use:
-        Bet().inputs_help()
+        fsl.Bet().inputs_help()
 
     Examples
     --------
-    >>> fsl.Bet().inputs_help()
-    >>> better = fsl.Bet(frac=0.5)
-    >>> betted = better.run('infile', 'outfile')
-    >>> better2 = better.update(frac=0.3)
+    Initialize Bet with no options, assigning them when calling run:
+
+    >>> from nipype.interfaces import fsl
+    >>> btr = fsl.Bet()
+    >>> res = btr.run('infile', 'outfile', frac=0.5)
+
+    Assign options through the ``inputs`` attribute:
+
+    >>> btr = fsl.Bet()
+    >>> btr.inputs.infile = 'foo.nii'
+    >>> btr.inputs.outfile = 'bar.nii'
+    >>> btr.inputs.frac = 0.7
+    >>> res = btr.run()
+
+    Specify options when creating a Bet instance:
 
     >>> btr = fsl.Bet(infile='infile', outfile='outfile', frac=0.5)
-    >>> btd = btr.run()
+    >>> res = btr.run()
+
+    Loop over many inputs (Note: the snippet below would overwrite the
+    outfile each time):
+
+    >>> btr = fsl.Bet(infile='infile', outfile='outfile')
+    >>> fracvals = [0.3, 0.4, 0.5]
+    >>> for val in fracvals:
+    ...     res = btr.run(frac=val)
+
     """
 
     @property
