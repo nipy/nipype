@@ -1,16 +1,16 @@
-"""The fsl module provides basic functions for interfacing with fsl tools.
+"""The fsl module provides classes for interfacing with fsl command line tools.
 
 Currently these tools are supported:
 
-  * BET: brain extraction
-  * FAST: segmentation and bias correction
-  * FLIRT: linear registration
-  * FNIRT: non-linear warp
+* BET: brain extraction
+* FAST: segmentation and bias correction
+* FLIRT: linear registration
+* MCFLIRT: motion correction
+* FNIRT: non-linear warp
 
 Examples
 --------
-See the docstrings for the individual classes (Bet, Fast, etc...) for
-'working' examples.
+See the docstrings of the individual classes for examples.
 
 """
 
