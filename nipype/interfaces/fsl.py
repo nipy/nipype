@@ -896,9 +896,9 @@ class McFlirt(FSLCommand):
     
     Examples
     --------
-    
-    >>> mcflirtter = fsl.McFlirt(infile='timeseries.nii',cost='mututalinfo')
-    >>> mcflirtted = mcflirtter.run()
+    >>> from nipype.interfaces import fsl
+    >>> mcflt = fsl.McFlirt(infile='timeseries.nii', cost='mututalinfo')
+    >>> res = mcflt.run()
 
     """
     @property
