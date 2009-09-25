@@ -966,7 +966,7 @@ class McFlirt(FSLCommand):
         infile : string
             Filename of volume to be aligned
         inputs : dict
-            Dictionary of any additional flags to send to mcflirt
+            Additional ``inputs`` assignments.
 
         Returns
         -------
@@ -976,6 +976,7 @@ class McFlirt(FSLCommand):
 
         Examples
         --------
+        >>> from nipype.interfaces import fsl
         >>> mcflrt = fsl.McFlirt(cost='mutualinfo')
         >>> mcflrtd = mcflrt.run(infile='timeseries.nii')
 
@@ -1024,8 +1025,10 @@ class McFlirt(FSLCommand):
         for outtype, outlist in outputs.iteritems():
             # for each key, value in bunch
             if outlist:
-                if not len(glob(outlist))==1:
-                    raise IOError('outputfile %s of type %s not generated'%(outlist,outtype))
+                if not glob(outlist):
+                    msg = "Output file '%s' of type '%s' was not generated" \
+                        % (outlist, outtype)
+                    raise IOError(msg)
                 
         return outputs
         
