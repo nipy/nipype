@@ -626,33 +626,20 @@ class Flirt(FSLCommand):
     <http://www.fmrib.ox.ac.uk/fsl/flirt/index.html>`_
 
     To print out the command line help, use:
-        Flirt().inputs_help()
+        fsl.Flirt().inputs_help()
 
     Examples
     --------
+    >>> from nipype.interfaces import fsl
+    >>> flt = fsl.Flirt(bins=640, searchcost='mutualinfo')
+    >>> flt.inputs.infile = 'subject.nii'
+    >>> flt.inputs.reference = 'template.nii'
+    >>> flt.inputs.outfile = 'moved_subject.nii'
+    >>> flt.inputs.outmatrix = 'subject_to_template.mat'
+    >>> res = flt.run()
     
-    >>> flirtter = fsl.Flirt(bins=640, searchcost='mutualinfo')
-    >>> flirtted = flirtter.run(infile='involume.nii', 
-    reference='reference.nii',
-    outfile='moved.nii', 
-    outmatrix='in_to_ref.mat')
-    >>> flirtted_est = flirtter.run(infile='involume.nii', 
-    reference='reference.nii',
-    outfile=None
-    outmatrix='in_to_ref.mat')
-    >>> xfm_apply = flirtter.applyxfm(infile='involume.nii', 
-    reference='reference.nii',
-    inmatrix='in_to_ref.mat',
-    outfile='moved.nii')
-    
-    >>> fls.Flirt().inputs_help()
-    
-    >>> flirter = fsl.Flirt(infile='subject.nii',
-    reference='template.nii',
-    outfile='moved_subject.nii',
-    outmatrix='subject_to_template.mat')
-    >>> flitrd = flirter.run()
-    
+    >>> xfm_applied = flt.applyxfm(inmatrix='xform.mat')
+
     """
         
     @property
@@ -815,7 +802,7 @@ class Flirt(FSLCommand):
         reference : string
             Filename of volume used as target for registration.
         inmatrix : string
-            Filename for input transformation matrix, in asci format.
+            Filename for input transformation matrix, in ascii format.
         outfile : string, optional
             Filename of the output, registered volume.  If not
             specified, only the transformation matrix will be
