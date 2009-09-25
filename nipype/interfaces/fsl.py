@@ -387,17 +387,17 @@ class Fast(FSLCommand):
     <http://www.fmrib.ox.ac.uk/fsl/fast/index.html>`_
 
     To print out the command line help, use:
-        Fast().inputs_help()
+        fsl.Fast().inputs_help()
 
     Examples
     --------
-    >>> fsl.Fast().inputs_help()
-    >>> faster = fsl.Fast(out_basename = 'myfasted')
+    >>> from nipype.interfaces import fsl
+    >>> faster = fsl.Fast(out_basename='myfasted')
     >>> fasted = faster.run(['file1','file2'])
 
-    >>> faster = fsl.Fast(infiles=['filea','fileb'], 
-                          out_basename = 'myfasted')
+    >>> faster = fsl.Fast(infiles=['filea','fileb'], out_basename='myfasted')
     >>> fasted = faster.run()
+
     """
 
     @property
@@ -470,8 +470,8 @@ class Fast(FSLCommand):
         infiles : string or list of strings
             File(s) to be segmented or bias corrected
         inputs : dict
-            Dictionary of any additional flags to send to fast
-        
+            Additional ``inputs`` assignments can be passed in.
+
         Returns
         -------
         results : Bunch
@@ -525,7 +525,12 @@ class Fast(FSLCommand):
         For each item in Bunch:
         If [] empty list, optional file was not generated
         Else, list contains path,filename of generated outputfile(s)
-             Raises Exception if file is not found        
+        
+        Raises
+        ------
+        IOError
+            If any expected output file is not found.
+
         """
         envext = fsloutputtype()[1]
         outputs = Bunch(mixeltype = [],
@@ -565,20 +570,29 @@ class Fast(FSLCommand):
                                                        suffix='_seg_%d'%(i)))
             # always pve,mixeltype unless nopve = True
             if not self.inputs.nopve:
-                outputs.partial_volume_map.append(fname_presuffix(item,suffix='_pveseg'))
-                outputs.mixeltype.append(fname_presuffix(item,suffix='_mixeltype'))
+                fname = fname_presuffix(item, suffix='_pveseg')
+                outputs.partial_volume_map.append(fname)
+                fname = fname_presuffix(item, suffix='_mixeltype')
+                outputs.mixeltype.append(fname)
+
                 for i in range(nclasses):
-                    outputs.partial_volume_files.append(fname_presuffix(item, suffix='_pve_%d'%(i)))
+                    fname = fname_presuffix(item, suffix='_pve_%d'%(i))
+                    outputs.partial_volume_files.append(fname)
+
             # biasfield ? 
             if self.inputs.output_biasfield:
                 outputs.bias_field.append(fname_presuffix(item, suffix='_bias'))
+
             # restored image (bias corrected)?
             if self.inputs.output_biascorrected:
-                outputs.biascorrected.append(fname_presuffix(item, suffix='_restore'))
+                fname = fname_presuffix(item, suffix='_restore')
+                outputs.biascorrected.append(fname)
+
             # probability maps ?
             if self.inputs.probability_maps:
                 for i in range(nclasses):
-                    outputs.prob_maps.append(fname_presuffix(item, suffix='_prob_%d'%(i)))
+                    fname = fname_presuffix(item, suffix='_prob_%d'%(i))
+                    outputs.prob_maps.append(fname)
 
         # For each output file-type (key), check that any expected
         # files in the output list exist.
@@ -586,11 +600,12 @@ class Fast(FSLCommand):
             if len(outlist) > 0:
                 for outfile in outlist:
                     if not len(glob(outfile))==1:
-                        raise IOError('outputfile %s of type %s not generated'%(outfile,outtype))
-                
+                        msg = "Output file '%s' of type '%s' was not generated"\
+                            % (outfile, outtype)
+                        raise IOError(msg)
+
         return outputs
                     
-
 
 class Flirt(FSLCommand):
     """Use FSL FLIRT for coregistration.
