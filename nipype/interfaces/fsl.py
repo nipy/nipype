@@ -751,19 +751,13 @@ class Flirt(FSLCommand):
             Filename to output transformation matrix in asci format.
             If not specified, the output matrix will not be saved to a file.
         inputs : dict
-            Dictionary of any additional flags to send to flirt.
+            Additional ``inputs`` assignments.
 
         Returns
         -------
         results : Bunch
             A `Bunch` object with a copy of self in `interface`
             runtime : Bunch containing stdout, stderr, returncode, commandline
-        
-        Examples
-        --------
-        flirted = Flirt().run(infile, reference, outfile)
-        flirted_estimate = Flirt().run(infile, reference, outfile=None, outmatrix=outmatrix)
-        flirt_apply = Flirt().applyxfm(infile, reference, inmatrix, outfile)
             
         """
 
@@ -808,7 +802,7 @@ class Flirt(FSLCommand):
             specified, only the transformation matrix will be
             calculated.
         inputs : dict
-            Dictionary of any additional flags to send to flirt
+            Additional ``inputs`` assignments.
 
         Returns
         -------
@@ -818,10 +812,11 @@ class Flirt(FSLCommand):
 
         Examples
         --------
-        flirted = flirtter.applyxfm(infile=None, 
-                                    reference=None, 
-                                    inmatrix=None, 
-                                    outfile=None)
+        >>> from nipype.interfaces import fsl
+        >>> flt = fsl.Flirt(infile='subject.nii', reference='template.nii')
+        >>> xformed = flt.applyxfm(inmatrix='xform.mat', 
+        ... outfile='xfm_subject.nii')
+
         """
 
         if infile:
