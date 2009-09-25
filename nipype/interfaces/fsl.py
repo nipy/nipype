@@ -510,15 +510,27 @@ class Fast(FSLCommand):
         Returns
         -------
         outputs : Bunch object
-            (if multiple infiles, multiple outfiles of each)
-            mixeltype : list filename(s)
-            partial_volume_map : list  filenames [one for each input] 
-            partial_volume_files : list filenames [one for each class, for each input]
-            tissue_class_map : list filename(s) (each tissue has unique int value)
-            tissue_class_files : list filenames  [one for each class, for each input]
-            restored_image : list filename(s) (bias corrected image(s))
-            bias_field : list filename(s) 
-            probability_maps : list filenames [one for each class, for each input]
+            Each attribute in ``outputs`` is a list.  There will be
+            one set of ``outputs`` for each file specified in
+            ``infiles``.  ``outputs`` will contain the following
+            files:
+            
+            mixeltype : list
+                filename(s)
+            partial_volume_map : list
+                filenames, one for each input
+            partial_volume_files : list
+                filenames, one for each class, for each input
+            tissue_class_map : list
+                filename(s), each tissue has unique int value
+            tissue_class_files : list
+                filenames, one for each class, for each input
+            restored_image : list 
+                filename(s) bias corrected image(s)
+            bias_field : list
+                filename(s) 
+            probability_maps : list
+                filenames, one for each class, for each input
 
         Notes
         -----
