@@ -1038,16 +1038,16 @@ class Fnirt(FSLCommand):
     <http://www.fmrib.ox.ac.uk/fsl/fnirt/index.html>`_
 
     To print out the command line help, use:
-        Fnirt().inputs_help()
+        fsl.Fnirt().inputs_help()
 
     Examples
     --------
-    >>> fnirter = fsl.Fnirt(affine='affine.mat')
-    >>> fnirted = fnirter.run(reference='ref.nii',infile='anat.nii')
-    >>> fsl.Fnirt().inputs_help()
-    
+    >>> from nipype.interfaces import fsl
+    >>> fnt = fsl.Fnirt(affine='affine.mat')
+    >>> res = fnt.run(reference='ref.nii', infile='anat.nii')
     
     """
+
     @property
     def cmd(self):
         """sets base command, not editable"""
@@ -1098,7 +1098,7 @@ class Fnirt(FSLCommand):
         'intensityfile':    '--intout %s',
         'logfile':          '--logout %s',
         'verbose':          '--verbose',
-        'sub_sampling':     '--subsample %d',
+        'sub_sampling':     '--subsamp %d',
         'max_iter':         '--miter %f',
         'referencefwhm':    '--reffwhm %f',
         'imgfwhm':          '--infwhm %f',
@@ -1127,7 +1127,7 @@ class Fnirt(FSLCommand):
         reference : string
             Filename of volume used as target for warp registration.
         inputs : dict
-            Dictionary of any additional flags to send to fnirt.
+            Additional ``inputs`` assignments.
 
         Returns
         --------
@@ -1137,10 +1137,23 @@ class Fnirt(FSLCommand):
 
         Examples
         --------
-        >>> #T1-> MNI153
-        >>> fnirt_mprage = fsl.Fnirt(imgfwhm=[8,4,2],sub_sampling=[4,2,1],
-                                     warp_resolution=[6,6,6])
-        >>> fnirted_mprage = fnirt_mprage.run(infile='jnkT1.nii', reference='refimg.nii')
+        # T1 -> Mni153
+        >>> from nipype.interfaces import fsl
+        >>> fnirt_mprage = fsl.Fnirt()
+        >>> fnirt_mprage.inputs.imgfwhm = [8, 4, 2]
+        >>> fnirt_mprage.inputs.sub_sampling = [4, 2, 1]
+        
+        Specify the resolution of the warps, currently not part of the
+        ``fnirt_mprage.inputs``:
+
+        >>> fnirt_mprage.inputs.flags = '--warpres 6, 6, 6'
+        >>> res = fnirt_mprage.run(infile='subj.nii', reference='mni.nii')
+
+        We can check the command line and confirm that it's what we expect.
+
+        >>> fnirt_mprage.cmdline  #doctest: +NORMALIZE_WHITESPACE
+        'fnirt --in=subj.nii --ref=mni.nii --subsamp 4 2 1 
+            --infwhm 8.000000 4.000000 2.000000 --warpres 6, 6, 6'
 
         """
         if infile:

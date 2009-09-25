@@ -235,16 +235,16 @@ def test_fnirt():
     fnirt.inputs.sub_sampling = [8,6,4]
     yield assert_equal, fnirt.inputs.sub_sampling, [8,6,4]
     fnirtd = fnirt.run(infile='infile', reference='reference')
-    realcmd = 'fnirt --in=infile --ref=reference --subsample 8 6 4'
+    realcmd = 'fnirt --in=infile --ref=reference --subsamp 8 6 4'
     yield assert_equal, fnirtd.runtime.cmdline, realcmd
 
     fnirt2 = fsl.Fnirt(sub_sampling=[8,2])
     fnirtd2 = fnirt2.run(infile='infile', reference='reference')
-    realcmd = 'fnirt --in=infile --ref=reference --subsample 8 2'
+    realcmd = 'fnirt --in=infile --ref=reference --subsamp 8 2'
     yield assert_equal, fnirtd2.runtime.cmdline, realcmd
 
     # Test case where input that can be a list is just a single value
-    params = [('sub_sampling', '--subsample'),
+    params = [('sub_sampling', '--subsamp'),
               ('max_iter', '--miter'),
               ('referencefwhm', '--reffwhm'),
               ('imgfwhm', '--infwhm'),
