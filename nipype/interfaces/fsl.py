@@ -910,9 +910,7 @@ class McFlirt(FSLCommand):
         self.inputs.update(**inputs)
         results = self._runner()
         if results.runtime.returncode == 0:
-            pass
-            # Uncomment once implemented
-            # results.outputs = self.aggregate_outputs()
+            results.outputs = self.aggregate_outputs()
         return results 
 
     def aggregate_outputs(self):
@@ -948,11 +946,11 @@ class McFlirt(FSLCommand):
         for outtype, outlist in outputs.iteritems():
             # for each key, value in bunch
             if outlist:
-                if not len(glob(outfile))==1:
-                    raise IOError('outputfile %s of type %s not generated'%(outfile,outtype))
+                if not len(glob(outlist))==1:
+                    raise IOError('outputfile %s of type %s not generated'%(outlist,outtype))
                 
         return outputs
-        return outputs
+        
  
 
 class Fnirt(FSLCommand):
@@ -1079,9 +1077,7 @@ class Fnirt(FSLCommand):
                                    
         results = self._runner()
         if results.runtime.returncode == 0:
-            pass
-            # Uncomment once implemented
-            # results.outputs = self.aggregate_outputs()
+            results.outputs = self.aggregate_outputs()
             
         return results 
 
@@ -1139,8 +1135,56 @@ class Fnirt(FSLCommand):
             fid.write('%s\n'%(item))
         fid.close()
 
+    def aggregate_outputs(self):
+        """Create a Bunch which contains all possible files generated
+        by running the interface.  Some files are always generated, others
+        depending on which ``inputs`` options are set.
+        
+        Returns
+        -------
+        outputs : Bunch object
+             coefficientsfile
+             warpedimage
+             warpfield
+             jacobianfield
+             modulatedreference
+             intensitymodulation
+             logfile
 
+        Notes
+        -----
+        For each item in Bunch:
+        If None, optional file was not generated
+        Else, contains path,filename of generated outputfile(s)
+             Raises Exception if file is not found        
+        """
+        outputs = Bunch(coefficientsfile=None,
+                        warpedimage=None,
+                        warpfield=None,
+                        jacobianfield=None,
+                        modulatedreference=None,
+                        intensitymodulation=None,
+                        logfile=None)
 
+        if self.inputs.fieldcoeff_file:
+            outputs.coefficientsfile = self.inputs.fieldcoeff_file
+        if self.inputs.outimage:
+            outputs.warpedimage = self.inputs.outimage
+        if self.inputs.fieldfile:
+            outputs.warpfield = self.inputs.fieldfile
+        if self.inputs.jacobianfile:
+            outputs.jacobianfield = self.inputs.jacobianfile
+        if self.inputs.reffile:
+            outputs.modulatedreference = self.inputs.reffile
+        if self.inputs.intensityfile:
+            outputs.intensitymodulation = self.inputs.intensityfile
+        if self.inputs.logfile:
+            outputs.logfile = self.inputs.logfile
+        # check if files were created
+        for item, file in outputs.iteritems():
+            if len(glob(file))<1:
+                raise IOError('file %s of type %s not generated'%(file,item))
+        return outputs
 
 class FSFmaker:
     '''Use the template variables above to construct fsf files for feat.
