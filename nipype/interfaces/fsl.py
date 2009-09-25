@@ -1142,7 +1142,8 @@ class Fnirt(FSLCommand):
 
         Examples
         --------
-        # T1 -> Mni153
+        T1 -> Mni153
+
         >>> from nipype.interfaces import fsl
         >>> fnirt_mprage = fsl.Fnirt()
         >>> fnirt_mprage.inputs.imgfwhm = [8, 4, 2]
