@@ -290,19 +290,31 @@ class Bet(FSLCommand):
         Parameters
         ----------
         infile : string
-            Filename to be skull stripped, can be passed as input
+            Filename to be skull stripped.
         outfile : string, optional
-            Filename to save output to. If not specified, the `infile`
+            Filename to save output to. If not specified, the ``infile``
             filename will be used with a "_bet" suffix.
         inputs : dict
-            Dictionary of any additional flags to send to bet.
+            Additional ``inputs`` assignments can be passed in.  See
+            Examples section.
 
         Returns
         -------
         results : Bunch
             A `Bunch` object with a copy of self in `interface`
             runtime : Bunch containing stdout, stderr, returncode, commandline
-            
+
+        Examples
+        --------
+        To pass command line arguments to ``bet`` that are not part of
+        the ``inputs`` attribute, pass them in with the ``flags``
+        input.
+
+        >>> from nipype.interfaces import fsl
+        >>> btr = fsl.Bet(infile='foo.nii', outfile='bar.nii', flags='-v')
+        >>> btr.cmdline
+        'bet foo.nii bar.nii -v'
+
         """
 
         if infile:
