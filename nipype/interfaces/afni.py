@@ -155,20 +155,14 @@ class To3d(AFNICommand):
             [inputssub.update({k:v}) for k, v in val.iteritems() \
                 if v is not None]
 
-            # -time:zt nz nt TR tpattern  OR  -time:tz nt nz TR tpattern
+            # The following are example input orders
+            # -time:zt nz nt TR tpattern
+            # -time:tz nt nz TR tpattern
             # time : list
             #    zt nz nt TR tpattern
             #    tz nt nz TR tpattern
-            # TODO: ABOVE DOC IS OLD
 
             # dict(slice_order='zt', nz=12, nt=150, TR=2000, tpattern='alt+z')
-            _time_dep_doc = \
-            """
-            time_dependencies should be a dictionary with the follow keys 
-            assigned:
-            slice_order, nz, nt, TR, tpattern
-
-            """
 
             try:
                 slice_order = inputssub.pop('slice_order')
@@ -233,7 +227,6 @@ class To3d(AFNICommand):
         if self.inputs.time_dependencies:
             # Accept time_dependencies as input from a dictionary or
             # any container.
-            # -time:zt nz nt TR tpattern  OR  -time:tz nt nz TR tpattern
             tin = self.inputs.time_dependencies
             if hasattr(tin, 'keys'):
                 # XXX Not checking if any invalid keys have been passed in.
