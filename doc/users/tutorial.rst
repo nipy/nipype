@@ -3,7 +3,95 @@
 =========
  Tutorial
 =========
+
+Specifying options
+------------------
+
+The nipype interface modules provide a python interface to external
+packages like FSL_ and SPM_.  Within the module are a series of python
+classes which wrap specific package functionality.  For example, in
+the fsl module, the class :class:`nipype.interfaces.fsl.Bet` wraps the
+``bet`` command-line tool.  Using the command-line tool, one would
+specify options using flags like ``-o``, ``-m``, ``-f <f>``, etc...
+However, in nipype, options are assigned to python attributes and can
+be specified in the following ways:
+
+Options can be assigned when you first create an interface object:
+
+.. testcode::
    
+   import nipype.interfaces.fsl as fsl
+   mybet = fsl.Bet(infile='foo.nii', outfile='bar.nii')
+   result = mybet.run()
+
+Options can be assigned through the ``inputs`` attribute:
+
+.. testcode::
+
+   import nipype.interfaces.fsl as fsl
+   mybet = fsl.Bet()
+   mybet.inputs.infile = 'foo.nii'
+   mybet.inputs.outfile = 'bar.nii'
+   result = mybet.run()
+
+Options can be assigned when calling the ``run`` method:
+
+.. testcode::
+
+   import nipype.interfaces.fsl as fsl
+   mybet = fsl.Bet()
+   result = mybet.run(infile='foo.nii', outfile='bar.nii', frac=0.5)   
+
+Getting Help
+------------
+
+In IPython_ you can view the docstrings which provide some basic
+documentation and examples.
+
+.. sourcecode:: ipython
+
+   In [5]: fsl.Fast?
+   Type:		type
+   Base Class:	<type 'type'>
+   String Form:	<class 'nipype.interfaces.fsl.Fast'>
+   Namespace:	Interactive
+   File:		/home/cburns/local/lib/python2.6/site-packages/nipype/interfaces/fsl.py
+   Docstring:
+       Use FSL FAST for segmenting and bias correction.
+
+       For complete details, see the `FAST Documentation. 
+       <http://www.fmrib.ox.ac.uk/fsl/fast4/index.html>`_
+
+       To print out the command line help, use:
+           fsl.Fast().inputs_help()
+
+       Examples
+       --------
+       >>> from nipype.interfaces import fsl
+       >>> faster = fsl.Fast(out_basename='myfasted')
+       >>> fasted = faster.run(['file1','file2'])
+
+       >>> faster = fsl.Fast(infiles=['filea','fileb'], out_basename='myfasted')
+       >>> fasted = faster.run()
+
+   Constructor information:
+   Definition:	fsl.Fast(self, *args, **inputs)
+
+
+
+All of the nipype.interfaces classes have an ``inputs_help`` method
+which provides information on each of the options.
+
+Our :ref:`api-index` documentation provides html versions of our
+docstrings and includes links to the specific package documentation
+which the class wraps. For instance, the
+:class:`nipype.interfaces.fsl.Bet` docstring has a direct link to the
+online BET Documentation.
+
+For complete details on each package, please see the package
+documentation.  Where possible, we've included links to the online
+documentation, for example, one could go `here for the BET Documentation.
+<http://www.fmrib.ox.ac.uk/fsl/bet2/index.html>`_.
 
 FSL interface example
 ---------------------
@@ -228,3 +316,5 @@ The anatomy of a pipeline script
 .. sourcecode:: ipython
 
    pipeline.run()
+
+.. include:: ../links_names.txt
