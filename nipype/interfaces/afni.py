@@ -876,7 +876,7 @@ class ThreedZcutup(AFNICommand):
 
 class ThreedSkullStrip(AFNICommand):
     """
-    For complete details, see the `to3d Documentation. 
+    For complete details, see the `3dSkullStrip Documentation. 
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSkullStrip.html>`_
     """
 
@@ -924,7 +924,7 @@ class ThreedSkullStrip(AFNICommand):
 
 class ThreedBrickStat(AFNICommand):
     """
-    For complete details, see the `to3d Documentation. 
+    For complete details, see the `3dBrickStat Documentation. 
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBrickStat.html>`_
     """
 
@@ -998,7 +998,7 @@ class ThreedBrickStat(AFNICommand):
 
 class Threedcalc(AFNICommand):
     """
-    For complete details, see the `to3d Documentation. 
+    For complete details, see the `3dcalc Documentation. 
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcalc.html>`_
     """
 
@@ -1060,7 +1060,7 @@ class Threedcalc(AFNICommand):
 
 class ThreedAllineate(AFNICommand):
     """
-    For complete details, see the `to3d Documentation. 
+    For complete details, see the `3dAllineate Documentation. 
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html>`_
     """
 
