@@ -80,18 +80,33 @@ documentation and examples.
 
 
 All of the nipype.interfaces classes have an ``inputs_help`` method
-which provides information on each of the options.
+which provides information on each of the options one can assign.
+
+.. sourcecode:: ipython
+
+   In [7]: fsl.Bet().inputs_help()
+   Parameters
+   ----------
+   outline : 
+        generate brain surface outline overlaid onto original image
+   mask : 
+        generate binary brain mask
+   skull : 
+        generate approximate skull image
+   nooutput : 
+        don't generate segmented brain image output
+   frac : 
+        <f> fractional intensity threshold (0->1); default=0.5; smaller values give larger brain outline estimates
+   vertical_gradient : 
+        <g> vertical gradient in fractional intensity threshold (-1->1); default=0; positive values give larger brain outline at bottom, smaller at top
+
+   <snip>
 
 Our :ref:`api-index` documentation provides html versions of our
-docstrings and includes links to the specific package documentation
-which the class wraps. For instance, the
-:class:`nipype.interfaces.fsl.Bet` docstring has a direct link to the
-online BET Documentation.
+docstrings and includes links to the specific package
+documentation. For instance, the :class:`nipype.interfaces.fsl.Bet`
+docstring has a direct link to the online BET Documentation.
 
-For complete details on each package, please see the package
-documentation.  Where possible, we've included links to the online
-documentation, for example, one could go `here for the BET Documentation.
-<http://www.fmrib.ox.ac.uk/fsl/bet2/index.html>`_.
 
 FSL interface example
 ---------------------
@@ -99,18 +114,14 @@ FSL interface example
 SPM interface example
 ---------------------
 
-There are three different ways in which you can call an SPM interface.
+Using SPM_ to realign a time-series:
 
-.. sourcecode:: ipython
+.. testcode::
    
    import nipype.interfaces.spm as spm
-   result = spm.realign().run(infile='epi.nii')
-
-   result = spm.realign(infile='epi.nii').run()
-   
-   realign = spm.Realign()
-   realign.inputs.infile = 'epi.nii'
-   result = realign.run()
+   realigner = spm.Realign()
+   realigner.inputs.infile = 'epi.nii'
+   result = realigner.run()
 
 
 Running a pipeline
