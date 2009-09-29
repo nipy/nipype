@@ -9,7 +9,6 @@ from apigen import ApiDocWriter
 
 #*****************************************************************************
 if __name__ == '__main__':
-    print 'In build_modref_templates.py'
     package = 'nipype'
     outdir = os.path.join('api','generated')
     docwriter = ApiDocWriter(package)
