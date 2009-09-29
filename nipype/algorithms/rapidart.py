@@ -34,57 +34,49 @@ class ArtifactDetect(Interface):
 
     def inputs_help(self):
         """
-            Parameters
-            ----------
-            (all default to None)
+        Parameters
+        ----------
+        realigned_files : filename(s)
+            Names of realigned functional data files
+        realignment_parameters : filename(s)
+            Names of realignment parameters corresponding to the
+            functional data files
+        design_matrix: filename
+            Currently limited to SPM design matrices
+        use_differences : boolean
+            Use differences between successive motion and
+            intensity paramter estimates in order to determine
+            outliers.  (default is True)
+        use_norm : boolean
+            Use the norm of the motion parameters in order to
+            determine outliers.  Requires ``norm_threshold`` to be set.
+            (default is True)
+        norm_threshold: float
+            Threshold to use to detect motion-related outliers when
+            normalized motion is being used (see ``use_norm``)
+        rotation_threshold : float
+            Threshold to use to detect rotation-related outliers
+        translation_threshold : float
+            Threshold to use to detect translation-related outliers
+        zintensity_threshold : float
+            Intensity Z-threshold use to detection images that
+            deviate from the mean
+        mask_type : {'spm_global', 'file', 'thresh'}
+            Type of mask that should be used to mask the functional
+            data.  *spm_global* uses an spm_global like calculation to
+            determine the brain mask.  *file* specifies a brain mask
+            file (should be an image file consisting of 0s and 1s).
+            *thresh* specifies a threshold to use.  By default all
+            voxels are used, unless one of these mask types are
+            defined.
+        mask_file : filename
+            Mask file to be used is mask_type is 'file'.
+        mask_threshold : float
+            Mask threshold to be used if mask_type is 'thresh'.
+        intersect_mask : boolean
+            Intersect the masks when computed from spm_global.
+            (default is True)
 
-            realigned_files : filename(s)
-                Names of realigned functional data files
-            realignment_parameters : filename(s)
-                Names of realignment parameters corresponding to the
-                functional data files
-            design_matrix: filename
-                Currently limited to SPM design matrices
-            use_differences : boolean
-                Use differences between successive motion and
-                intensity paramter estimates in order to determine
-                outliers 
-                default :  True
-            use_norm : boolean
-                Use the norm of the motion parameters in order to
-                determine outliers
-                default : True
-
-            Specify 
-                norm_threshold: float
-                    Threshold to use to detect motion-related outliers
-                    when normalized motion is being used (see use_norm)
-            or these 
-                rotation_threshold : float
-                    Threshold to use to detect rotation-related outliers
-                translation_threshold : float
-                    Threshold to use to detect translation-related outliers
-            zintensity_threshold :  float
-                Intensity Z-threshold use to detection images that
-                deviate from the mean
-            mask_type : string
-                Type of mask that should be used to mask the
-                functional data
-                spm_global : uses an spm_global like calculation to
-                    determine the brain mask
-                file : specifies a brain mask file (should be a
-                    an image file consisting of 0s and 1s)
-                thresh : specifies a threshold to use
-
-                By default all voxels are used, unless one of these
-                mask types are defined.
-            mask_file : filename
-                Mask file to be used is mask_type is 'file'
-            mask_threshold : float
-                Mask threshold to be used if mask_type is 'thresh'
-            intersect_mask : boolean
-                Intersect the masks when computed from spm_global
-                default: True
         """
         print self.inputs_help.__doc__
         
