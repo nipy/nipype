@@ -786,10 +786,10 @@ class Flirt(FSLCommand):
     def applyxfm(self, infile=None, reference=None, inmatrix=None, 
                  outfile=None, **inputs):
         """Run flirt and apply the transformation to the image.
-
-          eg.
-         flirt [options] -in <inputvol> -ref <refvol> -applyxfm -init
-         <matrix> -out <outputvol>
+        
+        eg.
+        flirt [options] -in <inputvol> -ref <refvol> -applyxfm -init
+        <matrix> -out <outputvol>
 
         Parameters
         ----------
