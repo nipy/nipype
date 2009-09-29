@@ -69,7 +69,7 @@ release = '0.1.0-devel'
 today_fmt = '%B %d, %Y, %H:%M PDT'
 
 # List of documents that shouldn't be included in the build.
-#unused_docs = []
+unused_docs = ['api/generated/gen']
 
 # List of directories, relative to source directory, that shouldn't be searched
 # for source files.
