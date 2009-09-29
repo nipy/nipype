@@ -47,7 +47,7 @@ class DataSource(Interface):
                 subject_id are keys and values are a list of tuples.
                 info[subject_id] = [([runnos],fieldname),...]
 
-                Example:
+                Examples
                 --------
 
                 info['s1'] = [([4,5],'anat'),([6,7],'bold'),([8],'dti')]
