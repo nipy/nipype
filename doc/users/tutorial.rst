@@ -99,9 +99,9 @@ The anatomy of a pipeline script
    import nipype.algorithms.rapidart as ra      # artifact detection
    import os                                    # system functions
 
-#. Setup any package specific configuration. The output file format for
- FSL routines is being set to NIFTI and a specific version of matlab
- is being used.
+#. Setup any package specific configuration. The output file format
+   for FSL routines is being set to NIFTI and a specific version of
+   matlab is being used.
 
 .. sourcecode:: ipython
 
@@ -112,10 +112,10 @@ The anatomy of a pipeline script
    mlab.MatlabCommandLine.matlab_cmd = "matlab.2009a -nodesktop -nosplash"
 
 #. The following lines of code sets up the necessary information
- required by the datasource module. It provides a mapping between run
- numbers (nifti files) and the mnemonic ('struct', 'func', etc.,.)
- that run should be called. These mnemonics or fields become the
- output fields of the datasource module.
+   required by the datasource module. It provides a mapping between
+   run numbers (nifti files) and the mnemonic ('struct', 'func',
+   etc.,.)  that run should be called. These mnemonics or fields
+   become the output fields of the datasource module.
 
 .. sourcecode:: ipython
 
@@ -126,10 +126,11 @@ The anatomy of a pipeline script
    info['s175'] = [([6],'multiecho'),([7],'struct'),([12,14,16],'func'),([20],'dti'),([8,18],'resting')]
 
 #. Setup nodes for performing the preprocessing with the data. The
- variable iterables for datasource tells the system, that it should
- perform any of the operations related to data source for each of the
- iterable items. In this case, the entire preprocessing and estimation
- will be repeated for each subject contained in subj_list.
+   variable iterables for datasource tells the system, that it should
+   perform any of the operations related to data source for each of
+   the iterable items. In this case, the entire preprocessing and
+   estimation will be repeated for each subject contained in
+   subj_list.
 
 .. sourcecode:: ipython
 
@@ -212,7 +213,7 @@ The anatomy of a pipeline script
   contrasts = [cont1,cont2,cont3,cont4,cont5,cont6,cont7,cont8,cont9]
 
 #. Setup the final nodes of the pipeline that are used for specifying
- the model and estimating model parameters.
+   the model and estimating model parameters.
 
 .. sourcecode:: ipython
 
