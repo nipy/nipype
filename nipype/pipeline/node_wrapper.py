@@ -23,7 +23,7 @@ class NodeWrapper(object):
         node.iterables = dict(frac=lambda:[0.5,0.6,0.7])
     base_directory : directory
         base output directory (will be hashed before creations)
-        default='.'
+        default=None, which results in the use of mkdtemp
     diskbased : Boolean
         Whether the underlying object requires disk space for
         operation and storage of output
