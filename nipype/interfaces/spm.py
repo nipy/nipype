@@ -547,20 +547,17 @@ class Coregister(SpmMatlabCommandLine):
             (default == True, will reslice)
         cost_function : string, optional
             maximise or minimise some objective
-            function. For inter-modal    registration,    use
-            Mutual   Information (mi), Normalised Mutual
-            Information (nmi), or  Entropy  Correlation
-            Coefficient (ecc). For within modality, you could also
-            use Normalised Cross Correlation (ncc).
-            (spm default = mi)
+            function. Valid options are Mutual
+            Information (mi), Normalised Mutual
+            Information (nmi), or  Entropy Correlation
+            Coefficient (ecc) and Normalised Cross Correlation (ncc).
+            (spm default = nmi)
         separation : float, optional
             separation in mm used to sample images (spm default = 4.0) 
         tolerance : list of 12 floats
-            The   accuracy  for  each  parameter.  Iterations stop
-            when differences  between  successive  estimates are less
-            than the required tolerance for each of the 12 parameters.
+            The acceptable tolerance for each of the 12 parameters.
         fwhm : float, optional
-            full width half maximum gaussian kernel used to smoth
+            full width half maximum gaussian kernel used to smooth
             images before coregistering (spm default = 5.0)
         write_interp : int, optional
             degree of b-spline used for interpolation when writing
@@ -763,8 +760,7 @@ class Normalize(SpmMatlabCommandLine):
             ICBM space template (mni), average sized template
             (size), no regularization (none)
         DCT_period_cutoff : int, optional
-            Cutoff  of  DCT  bases. Only DCT bases of periods
-            longer than cutoff  are  used to describe the warps.
+            Cutoff of for DCT bases.
             spm default = 25
         num_nonlinear_iterations : int, optional
             Number of iterations of nonlinear warping
@@ -772,14 +768,8 @@ class Normalize(SpmMatlabCommandLine):
         nonlinear_regularization : float, optional
             min = 0  max = 1
             spm default = 1
-        write_preserve : int, optional
-            Preserve  Concentrations (0): Spatially normalised images
-            are not "modulated".  The  warped  images preserve the
-            intensities of the original images. Preserve  Total (1):
-            Spatially normalised images are "modulated" in  order
-            to  preserve  the  total  amount  of signal in the
-            images.   Areas   that   are   expanded  during
-            warping  are correspondingly reduced in intensity.
+        write_preserve : boolean, optional
+            Indicates whether warped images are modulated. 
             spm default = 0
         write_bounding_box : 6-element list, optional
         write_voxel_sizes : 3-element list, optional
@@ -1008,78 +998,27 @@ class Segment(SpmMatlabCommandLine):
             Options to produce CSF images: c3*.img, wc3*.img and
             mwc3*.img. Same as GM options
         save_bias_corrected : bool, optional
-            This  is  the  option  to produce a bias corrected
-            version of your  image.  MR  images  are  usually
-            corrupted by a smooth, spatially  varying  artifact
-            that modulates the intensity of the  image  (bias).
-            These  artifacts, although not usually a problem   for
-            visual   inspection,   can  impede  automated
-            processing  of  the images. The bias corrected version
-            should have  more  uniform intensities within the
-            different types of tissues.
+            Option to produce a bias corrected image.
         clean_masks : int, optional
-            This  uses  a  crude  routine  for  extracting the
-            brain from segmentedimages.  It  begins  by taking the
-            white matter, and eroding  it  acouple  of  times to
-            get rid of any odd voxels. The  algorithmcontinues  on
-            to  do conditional dilations for several
-            iterations,where the condition is based upon gray or
-            white  matter  being  present.This  identified region
-            is then used  to  clean  up  the grey and whitematter
-            partitions, and has a slight influences on the CSF
-            partition. Dont do cleanup (0), Light Clean (1),
-            Thorough Clean (2)
+            Option to clean the gray and white matter masks using an
+            estimated brain mask. Dont do cleanup (0), Light Clean
+            (1), Thorough Clean (2)
         tissue_prob_maps : list of filenames, optional
-            These should be maps of   grey  matter,  white  matter
-            and  cerebro-spinal fluid probability.
+            Provide maps of grey matter, white matter and
+            cerebro-spinal fluid probability. 
         gaussians_per_class : 4-element list, optional
-            The  number  of  Gaussians  used  to  represent the
-            intensity distribution  for  each tissue class can be
-            greater than one. In  other  words,  a  tissue
-            probability map may be shared by several   clusters.
-            The  assumption  of  a  single  Gaussian distribution
-            for  each  class  does not hold for a number of
-            reasons. In  particular,  a  voxel  may not be purely
-            of one tissue  type,  and  instead  contain  signal
-            from a number of different  tissues  (partial  volume
-            effects).  Some partial volume  voxels  could fall at
-            the interface between different classes,  or  they
-            may fall in the middle of structures such as  the
-            thalamus,  which  may  be considered as being either
-            grey  or  white  matter.
+            The number of Gaussians used to represent the
+            intensity distribution for each tissue class.
         affine_regularization : string, optional
             No Affine Registration (''), ICBM space template -
             European brains (mni), ICBM space template - East
             Asian brains (eastern), Average sized template:
             (subj), No regularisation (none)
         warping_regularization : float, optional
-            The   objective   function   for   registering   the
-            tissue probability   maps   to   the   image  to
-            process,  involves minimising  the  sum  of two
-            terms. One term gives a function of  how  probable
-            the  data is given the warping parameters. The  other
-            is a function of how probable the parameters are, and
-            provides  a  penalty for unlikely
-            deformations. Smoother deformations  are  deemed  to
-            be more probable. The amount of regularisation
-            determines  the  tradeoff  between the terms. Pick  a
-            value around one. However, if your normalised images
-            appear  distorted,  then  it  may  be an idea to
-            increase the amount  of  regularisation  (by  an order
-            of magnitude). More regularisation   gives   smoother
-            deformations,  where  the smoothness  measure  is
-            determined  by the bending energy of the
-            deformations.
+            Controls balance between parameters and data.
             spm default = 1
         warp_frequency_cutoff : int, optional
-            Cutoff  of  DCT  bases. Only DCT bases of periods
-            longer than the  cutoff  are  used  to  describe  the
-            warps.  The number actually  used  will  depend  on
-            the cutoff and the field of view  of  your  image.  A
-            smaller cutoff frequency will allow more  detailed
-            deformations to be modelled, but unfortunately comes
-            at  a  cost of greatly increasing the amount of memory
-            needed, and the time taken.
+            Cutoff of DCT bases.
         bias_regularization : float, optional
             no regularisation (0), extremely light
             regularisation (0.00001), very light regularisation
@@ -1088,25 +1027,13 @@ class Segment(SpmMatlabCommandLine):
             very heavy regularisation (1), extremely heavy
             regularisation (10).
         bias_fwhm : int, optional
-            FWHM  of  Gaussian  smoothness  of  bias.  If  your
-            intensity non-uniformity  is  very  smooth,  then
-            choose a large FWHM. This  will  prevent  the
-            algorithm  from trying to model out intensity
-            variation due to different tissue types. 30mm to 150mm
+            FWHM of Gaussian smoothness of bias. 30mm to 150mm
             cutoff: (30-150 in steps of 10), No correction (inf).
         sampling_distance : float, optional
-            The   approximate   distance   between  sampled
-            points  when estimating  the  model
-            parameters. Smaller values use more of the data, but
-            the procedure is slower.
+            Sampling distance on data for parameter estimation.
         mask_image : filename, optional
-            The  segmentation  can be masked by an image that
-            conforms to the  same space as the images to be
-            segmented. If an image is selected,  then  it  must
-            match the image(s) voxel-for voxel, and  have the same
-            voxel-to-world mapping. Regions containing a  value
-            of  zero  in  this  image  do  not  contribute when
-            estimating the various parameters. 
+            An binary image to restrict parameter estimation to
+            certain parts of the brain.
         flags : USE AT OWN RISK, optional
             #eg:'flags':{'eoptions':{'suboption':value}}
         """
@@ -1440,26 +1367,14 @@ class Level1Design(SpmMatlabCommandLine):
             units for specification of onsets or blocks
             (scans or secs) 
         interscan_interval : float (in secs)
-            Interscan  interval,  TR, (specified in seconds). This
-            is the time  between  acquiring  a  plane of one
-            volume and the same plane  in  the  next  volume.  It
-            is  assumed to be constant throughout.
-
+            Interscan  interval,  TR.
         microtime_resolution : float (in secs)
-            The  microtime resolution, t, is the number of
-            time-bins per scan used when building regressors.
+            Specifies the number of time-bins per scan when building
+            regressors. 
             spm default = 16
         microtime_onset : float (in secs)
-            The  microtime  onset, is the first time-bin at which
-            the regressors  are  resampled to coincide with data
-            acquisition. If  onset  =  1  then the regressors will be
-            appropriate for the first   slice.   If   you  want
-            to  temporally  realign  the regressors  so  that they
-            match responses in the middle slice then  make  onset  =
-            t/2  (assuming  there  is a negligible gap between
-            volume acquisitions).
-            Do not change the default settings for the above two
-            parameters unless you have a long TR.
+            Specifies the onset/time-bin to which the regressors are
+            aligned.
         session_info : list of dicts
             Stores session specific information
 
@@ -1472,155 +1387,13 @@ class Level1Design(SpmMatlabCommandLine):
             hpf : float
                 High pass filter cutoff
                 SPM default = 128 secs
-            condition_info : mat filename or list of dicts 
-                Stores condition specific information
-
-                MAT file contents
-
-                If  you  have multiple conditions then entering the details a
-                condition  at  a time is very inefficient. This option can be
-                used  to  load  all  the  required information in one go. You
-                will  first  need  to  create  a  *.mat  file  containing the
-                relevant information.
-         
-                This  *.mat file must include the following cell arrays (each
-                1  x  n) :  names,  onsets and durations. eg. names=cell(1,5),
-                onsets=cell(1,5),          durations=cell(1,5),          then
-                names{2}='SSent-DSpeak',     onsets{2}=[3    5    19    222],
-                durations{2}=[0  0  0 0], contain the required details of the
-                second  condition. These cell arrays may be made available by
-                your  stimulus  delivery  program,  eg.  COGENT. The duration
-                vectors  can  contain  a  single  entry  if the durations are
-                identical for all events.
-                                                                                                         
-                Time  and  Parametric  effects can also be included. For time
-                modulation  include  a  cell  array  (1  x n) called tmod. It
-                should  have  a  have  a  single  number in each cell. Unused
-                cells  may  contain  either  a 0 or be left empty. The number
-                specifies  the  order  of  time  modulation  from 0 = No Time
-                Modulation  to  6  = 6th Order Time Modulation. eg. tmod{3} =
-                1, modulates the 3rd condition by a linear time effect.
-                                                                                                         
-                For  parametric  modulation  include a structure array, which
-                is  up  to 1 x n in size, called pmod. n must be less than or
-                equal  to  the  number of cells in the names/onsets/durations
-                cell  arrays.  The structure array pmod must have the fields:
-                name,  param and poly. Each of these fields is in turn a cell
-                array  to  allow  the  inclusion  of  one  or more parametric
-                effects  per  column  of the design. The field name must be a
-                cell  array  containing  strings.  The  field param is a cell
-                array  containing  a  vector  of  parameters.  Remember  each
-                parameter  must  be  the  same  length  as  its corresponding
-                onsets   vector.   The  field  poly  is  a  cell  array  (for
-                consistency)  with  each  cell  containing  a  single  number
-                specifying the order of the polynomial expansion from 1 to 6.
-                                                                                                            
-                Note  that each condition is assigned its corresponding entry
-                in  the  structure  array  (condition 1 parametric modulators
-                are  in  pmod(1),  condition  2  parametric modulators are in
-                pmod(2),   etc.   Within   a  condition  multiple  parametric
-                modulators  are  accessed via each fields cell arrays. So for
-                condition  1,  parametric  modulator  1  would  be defined in
-                pmod(1).name{1},  pmod(1).param{1},  and  pmod(1).poly{1}.  A
-                second  parametric modulator for condition 1 would be defined
-                as  pmod(1).name{2}, pmod(1).param{2} and pmod(1).poly{2}. If
-                there  was  also a parametric modulator for condition 2, then
-                remember  the  first  modulator for that condition is in cell
-                array     1:     pmod(2).name{1},    pmod(2).param{1},    and
-                pmod(2).poly{1}.   If   some,  but  not  all  conditions  are
-                parametrically  modulated,  then the non-modulated indices in
-                the  pmod  structure  can  be  left  blank.  For  example, if
-                conditions  1  and  3 but not condition 2 are modulated, then
-                specify  pmod(1)  and pmod(3). Similarly, if conditions 1 and
-                2  are  modulated  but  there are 3 conditions overall, it is
-                only necessary for pmod to be a 1 x 2 structure array.
-                                                                                                            
-                EXAMPLE:
-                Make an empty pmod structure: 
-                pmod = struct('name',{''},'param',{},'poly',{});
-                Specify one parametric regressor for the first condition: 
-                  pmod(1).name{1}  = 'regressor1';
-                  pmod(1).param{1} = [1 2 4 5 6];
-                  pmod(1).poly{1}  = 1;
-                Specify 2 parametric regressors for the second condition: 
-                  pmod(2).name{1}  = 'regressor2-1';
-                  pmod(2).param{1} = [1 3 5 7]; 
-                  pmod(2).poly{1}  = 1;
-                  pmod(2).name{2}  = 'regressor2-2';
-                  pmod(2).param{2} = [2 4 6 8 10];
-                  pmod(2).poly{2}  = 1;
-                                                                                                            
-                The   parametric   modulator  should  be  mean  corrected  if
-                appropriate.  Unused structure entries should have all fields
-                left empty.
-
-                Condition parameters
-
-                name : string
-                    Name of condition
-                onset : list of numbers
-                    Onset times of each event/block
-                duration: float or list
-                    Specify   the   event   durations.  Epoch  and
-                    event-related responses  are  modeled  in exactly
-                    the  same  way  but  by specifying their
-                    different  durations. Events are specified with  a
-                    duration  of 0. If you enter a single number for
-                    the durations  it will be assumed that all trials
-                    conform to this duration.  If you have multiple
-                    different durations, then the number must match
-                    the number of onset times.
-                tmod : int
-                    This  option  allows  for  the
-                    characterisation of linear or nonlinear  time 
-                    effects.  For  example, 1st order modulation would
-                    model  the  stick functions and a linear change of
-                    the stick  function  heights  over  time. Higher
-                    order modulation will   introduce  further
-                    columns  that  contain  the  stick functions
-                    scaled by time squared, time cubed etc.
-                pmod : list of dicts
-                    Model  interractions  with  user  specified
-                    parameters. This allows  nonlinear  effects
-                    relating to some other measure to be modelled in
-                    the design matrix.
-
-                    Parametric modulator parameters
-
-                    name : string
-                        Name of the parametric modulator
-                    param : list
-                        Numerical values of the parameter. One per
-                        each event of the condition.
-                    poly : int
-                        For  example,  1st  order  modulation
-                        would  model the stick functions  and  a
-                        linear change of the stick function heights
-                        over   different   values  of  the  parameter.
-                        Higher  order modulation  will  introduce
-                        further columns that contain the stick
-                        functions scaled by parameter squared, cubed
-                        etc.
-
+            condition_info : mat filename or list of dicts
+                The output of Specify>odel generates this
+                information.
             regressor_info : mat/txt filename or list of dicts 
                 Stores regressor specific information
-
-                MAT/TXT file contents
-
-                You  will  first  need  to  create  a *.mat file
-                containing a matrix  R  or  a  *.txt  file
-                containing the regressors. Each column  of  R
-                will  contain  a different regressor. When SPM
-                creates  the  design  matrix the regressors will
-                be named R1, R2, R3, ..etc.
- 
-                Regressor parameters
-
-                name : string
-                    Name of regressor
-                val : list 
-                    List of values for the regressor
-
+                The output of Specify>odel generates this
+                information.
         factor_info : list of dicts
             Stores factor specific information
 
@@ -1638,19 +1411,7 @@ class Level1Design(SpmMatlabCommandLine):
                 
                 hrf :
                     derivs : 2-element list
-                        Model  HRF  Derivatives. The canonical HRF combined with time
-                        and  dispersion derivatives comprise an 'informed' basis set,
-                        as  the  shape  of  the  canonical  response  conforms to the
-                        hemodynamic   response   that   is   commonly  observed.  The
-                        incorporation  of  the derivate terms allow for variations in
-                        subject-to-subject  and  voxel-to-voxel  responses.  The time
-                        derivative  allows the peak response to vary by plus or minus
-                        a  second  and  the dispersion derivative allows the width of
-                        the  response  to  vary.  The  informed basis set requires an
-                        SPM{F}  for  inference.  T-contrasts  over just the canonical
-                        are  perfectly  valid  but  assume constant delay/dispersion.
-                        The  informed  basis  set  compares  favourably  with eg. FIR
-                        bases on many data sets. No derivatives: [0,0],
+                        Model  HRF  Derivatives. No derivatives: [0,0],
                         Time derivatives : [1,0], Time and Dispersion
                         derivatives: [1,1]
                 fourier, fourier_han, gamma, fir:
@@ -1659,22 +1420,19 @@ class Level1Design(SpmMatlabCommandLine):
                     order : int
                         Number of basis functions
         volterra_expansion_order : int
-            Generalized convolution of inputs (U) with basis set
-            (bf). Do not model interactions (1) or model
-            interactions (2)
+            Do not model interactions (1) or model interactions (2)
             SPM default = 1
         global_intensity_normalization : string
             Global intensity normalization (scaling or none)
             SPM default  = none
         mask_image : filename
             Specify  an  image  for  explicitly  masking  the
-            analysis. 
+            analysis. NOTE: spm will still threshold within this mask.
+        mask_threshold : float
+            Option to modify SPM's default thresholding for the mask.
         model_serial_correlations : string
-            Serial  correlations  in  fMRI  time  series  due  to
-            aliased biorhythms  and unmodelled neuronal activity
-            can be accounted for  using  an  autoregressive  AR(1)
-            model during Classical (ReML) parameter estimation.
-            AR(1) or none
+            Option to model serial correlations using an
+            autoregressive estimator. AR(1) or none
             SPM default = AR(1) 
         flags : USE AT OWN RISK
                #eg:'flags':{'eoptions':{'suboption':value}}
@@ -1836,40 +1594,12 @@ class EstimateModel(SpmMatlabCommandLine):
             spm_design_file : filename
                 Filename containing absolute path to SPM.mat
             estimation_method: dict
-                There  are  three  possible  estimation  procedures  for fMRI
-                models  (1)  classical  (ReML)  estimation of first or second
-                level  models,  (2) Bayesian estimation of first level models
-                and  (3)  Bayesian  estimation of second level models. Option
-                (2)  uses  a  Variational Bayes (VB) algorithm that is new to
-                SPM5.  Option  (3)  uses  the  Empirical Bayes algorithm with
-                global shrinkage priors that was also in SPM2.
-
+                Estimate the specified model using one of three
+                different SPM options.
                 {'Classical' : 1}
-                    Model  parameters  are  estimated  using  Restricted  Maximum
-                    Likelihood   (ReML).   This  assumes  the  error  correlation
-                    structure  is the same at each voxel.
                 {'Bayesian2' : 1}
-                    Bayesian  estimation  of  2nd  level models. This option uses
-                    the  Empirical  Bayes  algorithm with global shrinkage priors
-                    that  was  previously  implemented in SPM2. Use of the global
-                    shrinkage  prior  embodies  a  prior  belief that, on average
-                    over  all  voxels,  there is no net experimental effect. Some
-                    voxels  will  respond  negatively  and some positively with a
-                    variability  determined  by  the  prior precision. This prior
-                    precision  can  be  estimated  from  the data using Empirical
-                    Bayes.
                 {'Bayesian' : dict}
-                    Model  parameters are estimated using Variational Bayes (VB).
-                    This  allows  you  to  specify  spatial priors for regression
-                    coefficients  and  regularised  voxel-wise  AR(P)  models for
-                    fMRI   noise   processes.  The  algorithm  does  not  require
-                    functional  images  to be spatially smoothed. Estimation will
-                    take  about  5 times longer than with the classical approach.
-                    This is why VB is not the default estimation
-                    option.
-                    
                     USE IF YOU KNOW HOW TO SPECIFY PARAMETERS
-                    
             flags : USE AT OWN RISK
                 #eg:'flags':{'eoptions':{'suboption':value}}
         """
@@ -2596,8 +2326,10 @@ class EstimateContrast(SpmMatlabCommandLine):
             contrasts.insert(i,Bunch(name=cont[0],
                                      stat=cont[1],
                                      conditions=cont[2],
-                                     weights=cont[3]))
-
+                                     weights=cont[3],
+                                     sessions=None))
+            if len(cont)==5:
+                contrasts[i].sessions = cont[4]
         script  = "% generated by nipype.interfaces.spm\n"
         script += "spm_defaults;\n"
         script += "jobs{1}.stats{1}.con.spmmat  = {'%s'};\n" % self.inputs.spm_mat_file
