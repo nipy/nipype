@@ -1555,27 +1555,22 @@ class EstimateModel(SpmMatlabCommandLine):
 
     Parameters
     ----------
-    
-    inputs : mapping 
-    key, value pairs that will update the EstimateModel.inputs attributes
-    see self.inputs_help() for a list of EstimateModel.inputs attributes
+    inputs : mapping
+        key, value pairs that will update the EstimateModel.inputs attributes
+        see self.inputs_help() for a list of attributes
     
     Attributes
-    ----------    
+    ----------
     inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to 
-    spm_spm via a job structure
+        a (dictionary-like) bunch of options that can be passed to
+        spm_spm via a job structure
     cmdline : string
-    string used to call matlab/spm via SpmMatlabCommandLine interface
+        string used to call matlab/spm via SpmMatlabCommandLine interface
 
     Other Parameters
     ----------------
-    To see optional arguments
-    EstimateModel().inputs_help()
+    To see optional arguments EstimateModel().inputs_help()
 
-    Examples
-    --------
-    
     """
     
     def spm_doc(self):
@@ -1702,26 +1697,23 @@ class SpecifyModel(Interface):
 
     Parameters
     ----------
-    inputs : mapping 
-    key, value pairs that will update the SpecifyModel.inputs attributes
-    see self.inputs_help() for a list of SpecifyModel.inputs attributes
+    inputs : mapping
+        key, value pairs that will update the SpecifyModel.inputs
+        attributes see self.inputs_help() for a list attributes
     
     Attributes
     ----------
     inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to 
-    spm_spm via a job structure
+        a (dictionary-like) bunch of options that can be passed to
+        spm_spm via a job structure
+
     cmdline : string
-    string used to call matlab/spm via SpmMatlabCommandLine interface
+        string used to call matlab/spm via SpmMatlabCommandLine interface
 
     Other Parameters
     ----------------
-    To see optional arguments
-    SpecifyModel().inputs_help()
+    To see optional arguments SpecifyModel().inputs_help()
 
-    Examples
-    --------
-    
     """
     
     def spm_doc(self):
@@ -1734,89 +1726,88 @@ class SpecifyModel(Interface):
 
     def inputs_help(self):
         """
-            Parameters
-            ----------
+        Parameters
+        ----------
+        subject_id : string or int
+            Subject identifier used as a parameter to the
+            subject_info_func.
+        subject_info_func : function
+            Returns subject specific condition information. If all
+            subjects had the same stimulus presentation schedule,
+            then this function can return the same structure
+            independent of the subject. This function must retun a
+            list of dicts with the list length equal to the number of
+            sessions. The dicts should contain the following
+            information.
 
-            subject_id : string or int
-                Subject identifier used as a parameter to the
-                subject_info_func.
-            subject_info_func : function
-                Returns subject specific condition information. If all
-                subjects had the same stimulus presentation schedule,
-                then this function can return the same structure
-                independent of the subject. This function must retun a
-                list of dicts with the list length equal to the number of
-                sessions. The dicts should contain the following
-                information.
+            conditions : list of names
+            onsets : lists of onsets corresponding to each
+                condition
+            durations : lists of durations corresponding to each
+                condition. Should be left to a single 0 if all
+                events are being modeled as impulses.
+            amplitudes : lists of amplitudes for each event. This
+                is ignored by SPM
+            tmod : lists of conditions that should be temporally
+               modulated. Should default to None if not being used.
+            pmod : list of dicts corresponding to conditions
+                name : name of parametric modulator
+                param : values of the modulator
+                poly : degree of modulation
+            regressors : list of dicts or matfile
+                names : list of names corresponding to each
+                   column. Should be None if automatically
+                   assigned.
+                values : lists of values for each regressor
+                matfile : MAT-file containing names and a matrix
+                    called R
+        realignment_parameters : list of files
+            Realignment parameters returned by some motion
+            correction algorithm. Assumes that each file is a text
+            file containing a row of translation and rotation
+            parameters.
+        outlier_files : list of files
+            A list of files containing outliers that should be
+            tossed. One file per session.
+        functional_runs : list of files
+            List of data files for model. One file per session
+        input_units : string
+            Units of event onsets and durations (secs or scans) as
+            returned by the subject_info_func
+        output_units : string
+            Units of event onsets and durations (secs or scans) as
+            sent to SPM design
+        high_pass_filter_cutoff : float, optional
+            High-pass filter cutoff in secs
+        polynomial_order : int, optional
+            Number of polynomial functions used to model high pass
+            filter. 
+        concatenate_runs : boolean, optional
+            Allows concatenating all runs to look like a single
+            expermental session.
+        time_repetition : float
+            Time between the start of one volume to the start of
+            the next image volume. If a clustered acquisition is
+            used, then this should be the time between the start
+            of acquisition of one cluster to the start of
+            acquisition of the next cluster.
 
-                conditions : list of names
-                onsets : lists of onsets corresponding to each
-                    condition
-                durations : lists of durations corresponding to each
-                    condition. Should be left to a single 0 if all
-                    events are being modeled as impulses.
-                amplitudes : lists of amplitudes for each event. This
-                    is ignored by SPM
-                tmod : lists of conditions that should be temporally
-                   modulated. Should default to None if not being used.
-                pmod : list of dicts corresponding to conditions
-                    name : name of parametric modulator
-                    param : values of the modulator
-                    poly : degree of modulation
-                regressors : list of dicts or matfile
-                    names : list of names corresponding to each
-                       column. Should be None if automatically
-                       assigned.
-                    values : lists of values for each regressor
-                    matfile : MAT-file containing names and a matrix
-                        called R
-            realignment_parameters : list of files
-                Realignment parameters returned by some motion
-                correction algorithm. Assumes that each file is a text
-                file containing a row of translation and rotation
-                parameters.
-            outlier_files : list of files
-                A list of files containing outliers that should be
-                tossed. One file per session.
-            functional_runs : list of files
-                List of data files for model. One file per session
-            input_units : string
-                Units of event onsets and durations (secs or scans) as
-                returned by the subject_info_func
-            output_units : string
-                Units of event onsets and durations (secs or scans) as
-                sent to SPM design
-            high_pass_filter_cutoff : float, optional
-                High-pass filter cutoff in secs
-            polynomial_order : int, optional
-                Number of polynomial functions used to model high pass
-                filter. 
-            concatenate_runs : boolean, optional
-                Allows concatenating all runs to look like a single
-                expermental session.
-            time_repetition : float
-                Time between the start of one volume to the start of
-                the next image volume. If a clustered acquisition is
-                used, then this should be the time between the start
-                of acquisition of one cluster to the start of
-                acquisition of the next cluster.
+        Sparse and clustered-sparse specific options
 
-            Sparse and clustered-sparse specific options
-            
-            time_acquisition : float
-                Time in seconds to acquire a single image volume
-            volumes_in_cluster : int
-                If number of volumes in a cluster is greater than one,
-                then a sparse-clustered acquisition is being assumed.
-            model_hrf : boolean
-                Whether to model hrf for sparse clustered analysis
-            stimuli_as_impulses : boolean
-                Whether to treat each stimulus to be impulse like. If
-                not, the stimuli are convolved with their respective
-                durations.
-            scan_onset : float
-                Start of scanning relative to onset of run in
-                secs. default = 0 
+        time_acquisition : float
+            Time in seconds to acquire a single image volume
+        volumes_in_cluster : int
+            If number of volumes in a cluster is greater than one,
+            then a sparse-clustered acquisition is being assumed.
+        model_hrf : boolean
+            Whether to model hrf for sparse clustered analysis
+        stimuli_as_impulses : boolean
+            Whether to treat each stimulus to be impulse like. If
+            not, the stimuli are convolved with their respective
+            durations.
+        scan_onset : float
+            Start of scanning relative to onset of run in
+            secs. default = 0 
         """
         print self.inputs_help.__doc__
 
