@@ -230,7 +230,7 @@ class ApiDocWriter(object):
         if len(classes):
             ad += '\nInheritance diagram for ``%s``:\n\n' % uri
             ad += '.. inheritance-diagram:: %s \n' % uri
-            ad += '   :parts: 3\n'
+            ad += '   :parts: 2\n'
 
         ad += '\n.. automodule:: ' + uri + '\n'
         ad += '\n.. currentmodule:: ' + uri + '\n'

@@ -27,8 +27,8 @@ extensions = ['sphinx.ext.autodoc',
               #'sphinx.ext.intersphinx',
               'sphinx.ext.todo',
               'sphinx.ext.pngmath',
+              'sphinx.ext.inheritance_diagram',
               'numpydoc',
-              'inheritance_diagram',
               'ipython_console_highlighting',
               'only_directives',
               ]
@@ -97,9 +97,11 @@ pygments_style = 'sphinx'
 
 # -- Sphinxext configuration ---------------------------------------------------
 
-# Specify top-to-bottom layout of inheritance diagrams
-# I've tried setting randkir to LR and TB and see no difference. ???
-inheritance_graph_attrs = dict(rotate=1) #dict(rankdir="LR")
+# Set attributes for layout of inheritance diagrams
+inheritance_graph_attrs = dict(rankdir="LR", size='"6.0, 8.0"', fontsize=14,
+                               ratio='compress')
+inheritance_node_attrs = dict(shape='ellipse', fontsize=14, height=0.75,
+                              color='dodgerblue1', style='filled')
 
 # Flag to show todo items in rendered output
 todo_include_todos = True
