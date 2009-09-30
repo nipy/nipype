@@ -12,9 +12,14 @@ if __name__ == '__main__':
     package = 'nipype'
     outdir = os.path.join('api','generated')
     docwriter = ApiDocWriter(package)
-    docwriter.package_skip_patterns += [r'\.fixes$',
-                                        r'\.externals$',
+    # Packages that should not be included in generated API docs.
+    docwriter.package_skip_patterns += ['\.externals$',
+                                        '\.utils$',
                                         ]
+    # Modules that should not be included in generated API docs.
+    docwriter.module_skip_patterns += ['\.version$',
+                                       '\.interfaces\.afni$',
+                                       ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'gen', relative_to='api')
     print '%d files written' % len(docwriter.written_modules)
