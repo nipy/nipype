@@ -2171,8 +2171,11 @@ class SpecifyModel(Interface):
                 except IOError:
                     out = np.array([])
                 if self.inputs.concatenate_runs:
-                    if len(out)>0:
-                        outliers[0].extend((np.array(out)+sum(nscans[0:(i+1)])).tolist())
+                    if out.size>0:
+                        if out.size == 1:
+                            outliers[0].extend([(np.array(out)+sum(nscans[0:(i+1)])).tolist()])
+                        else:
+                            outliers[0].extend((np.array(out)+sum(nscans[0:(i+1)])).tolist())
                 else:
                     if out.size == 1:
                         outliers.insert(len(outliers),[out.tolist()])
