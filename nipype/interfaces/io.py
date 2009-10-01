@@ -35,7 +35,10 @@ class DataSource(Interface):
                 Basedirectory consisting of subject data
             subject_template : string
                 Template encoding the subject directory name, indexed
-                by subject id. For example, the default
+                by subject id.
+            file_template : string
+                Template used for matching filenames.
+                Default = '*-%d-*.nii'
             subject_id: string or int
                 Subject identifier
             subject_directory : /path/to/dir
@@ -61,6 +64,7 @@ class DataSource(Interface):
     def _populate_inputs(self):
         self.inputs = Bunch(base_directory=None,
                             subject_template=None,
+                            file_template='*-%d-*.nii',
                             subject_id=None,
                             subject_directory=None,
                             subject_info=None)
@@ -106,7 +110,7 @@ class DataSource(Interface):
         for idx,type in info:
             outputs[type] = []
             for i in idx:
-                files = '*-%d-*.nii' % i
+                files = self.inputs.file_template % i
                 path = os.path.abspath(os.path.join(subjdir,files))
                 outputs[type].extend(glob.glob(path))
             outputs[type] = list_to_filename(outputs[type])
