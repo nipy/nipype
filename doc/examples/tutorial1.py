@@ -128,6 +128,7 @@ level1estimate.inputs.estimation_method = {'Classical' : 1}
 contrastestimate = nw.NodeWrapper(interface=spm.EstimateContrast(),diskbased=True)
 contrastestimate.inputs.contrasts = contrasts
 
+#################################################################################
 # Setup pipeline
 l1pipeline = pe.Pipeline()
 l1pipeline.config['workdir'] = os.path.abspath('./workingdir')
@@ -157,5 +158,50 @@ l1pipeline.connect([(datasource,realign,[('func','infile')]),
                                                   ('RPVimage','RPVimage')]),
                   ])
 
+######################################################################
+# Setup storage of results
+
+datasink = nw.NodeWrapper(interface=nio.DataSink())
+datasink.inputs.base_directory = os.path.abspath('l1output')
+
+# store relevant outputs from various stages of the 1st level analysis
+l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
+                    (realign,datasink,[('mean_image','realign.@mean'),
+                                       ('realignment_parameters','realign.@param')]),
+                    (art,datasink,[('outlier_files','art.@outliers'),
+                                   ('statistic_files','art.@stats')]),
+                    (level1design,datasink,[('spm_mat_file','model.pre-estimate')]),
+                    (level1estimate,datasink,[('spm_mat_file','model.@spm'),
+                                              ('beta_images','model.@beta'),
+                                              ('mask_image','model.@mask'),
+                                              ('residual_image','model.@res'),
+                                              ('RPVimage','model.@rpv')]),
+                    (contrastestimate,datasink,[('con_images','contrasts.@con'),
+                                                  ('spmT_images','contrasts.@T')]),
+                    ])
+
+#########################################################################
+# setup level 2 pipeline
+
+# collect all the con images for each contrast.
+contrast_ids = range(1,len(contrasts)+1)
+l2source = nw.NodeWrapper(nio.DataGrabber())
+l2source.inputs.file_template=os.path.abspath('l1output/*/con*/con_%04d.img')
+l2source.inputs.template_argnames=['con']
+
+# iterate over all contrast images
+l2source.iterables = dict(con=lambda:contrast_ids)
+
+# setup a 1-sample t-test node
+onesamplettest = nw.NodeWrapper(interface=spm.OneSampleTTest(),diskbased=True)
+
+# setup the pipeline
+l2pipeline = pe.Pipeline()
+l2pipeline.config['workdir'] = os.path.abspath('l2output')
+l2pipeline.config['use_parameterized_dirs'] = True
+l2pipeline.connect([(l2source,onesamplettest,[('file_list','con_images')])])
+
+
 #if __name__ == '__main__':
 #    l1pipeline.run()
+#    l2pipeline.run()
