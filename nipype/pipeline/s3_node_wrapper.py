@@ -12,6 +12,7 @@ from ConfigParser import RawConfigParser
 try:
     from boto.s3 import Connection
     import tables
+    from boto.s3.key import Key
 except:
     pass
 
@@ -118,6 +119,17 @@ class S3Transporter(object):
         self.make_dirs(os.path.dirname(full_fname))
         f = open(full_fname, 'w')
         key.get_file(f)
+        f.close()
+
+    def put(self, s3_path, local_path):
+        '''Put file from local path to s3 path'''
+        if s3_path is None:
+            s3_path = ''
+        full_key = os.path.join(self.s3_key_prefix, s3_path)
+        key = Key(self.bucket)
+        key.key = full_key
+        f = open(local_path, 'r')
+        key.send_file(f)
         f.close()
 
     def make_dirs(self, path):
