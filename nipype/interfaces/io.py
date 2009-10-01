@@ -11,6 +11,7 @@
 from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult
 from copy import deepcopy
 from nipype.utils.filemanip import copyfiles, list_to_filename
+from nipype.utils.misc import mktree
 import glob
 import os
 
@@ -188,7 +189,7 @@ class DataSink(Interface):
             raise Exception('Subject directory not provided')
         outdir = subjdir
         if not os.path.exists(outdir):
-            os.mkdir(outdir)
+            mktree(outdir)
         for k,v in self.inputs.iteritems():
             if k not in self.input_keys:
                 if v is not None:
@@ -226,21 +227,30 @@ class DataGrabber(Interface):
                 template for filename
             template_argtuple: tuple of arguments
                 arguments that fit into file_template
+            template_argnames: list of strings
+                provides names of inputs that will be used as
+                arguments to the template.
+                For example,
 
-            Alternatively can provide upto 3 additional arguments
-            to use as iterables
-            template_arg1: argument 1
-            template_arg2: argument 2
-            template_arg3: argument 3
+                dg.file_template = '%s/%s.nii'
+                
+                dg.template_argtuple = ('foo','foo')
+
+                is equivalent to
+
+                dg.inputs.arg1 = 'foo'
+                dg.inputs.arg2 = 'foo'
+                dg.inputs.template_argnames = ['arg1','arg2']
+
+                however this latter form can be used with iterables
+                and iterfield in a pipeline.
             """
         print self.inputs_help.__doc__
         
     def _populate_inputs(self):
         self.inputs = Bunch(file_template=None,
                             template_argtuple=None,
-                            template_arg1=None,
-                            template_arg2=None,
-                            template_arg3=None
+                            template_argnames=None,
                             )
 
     def outputs_help(self):
@@ -261,10 +271,12 @@ class DataGrabber(Interface):
         if self.inputs.template_argtuple is not None:
             args.extend(list(self.inputs.template_argtuple))
 
-        for i in range(3):
-            arg = self.inputs['template_arg%d'%(i+1)]
-            if arg is not None:
-                args.append(arg)
+        if self.inputs.template_argnames is not None:
+            for name in self.inputs.template_argnames:
+                arg = self.inputs[name]
+                print name, arg
+                if arg is not None:
+                    args.append(arg)
         template = self.inputs.file_template
         if len(args)>0:
             template = template%tuple(args)
