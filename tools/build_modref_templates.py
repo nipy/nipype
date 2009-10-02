@@ -19,6 +19,8 @@ if __name__ == '__main__':
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += ['\.version$',
                                        '\.interfaces\.afni$',
+                                       '\.pipeline\.alloy$',
+                                       '\.pipeline\.s3_node_wrapper$',
                                        ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'gen', relative_to='api')
