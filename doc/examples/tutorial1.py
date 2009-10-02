@@ -36,11 +36,10 @@ info['s3'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'))
 # returns pointers to the files in a structured format as determined
 # by the runtype names provided in the info structure above 
 datasource = nw.NodeWrapper(interface=nio.DataSource())
-datasource.inputs.base_directory = data_dir
-datasource.inputs.subject_id = 's1'
+datasource.inputs.base_directory   = data_dir
 datasource.inputs.subject_template = '%s'
-datasource.inputs.file_template = '%s.nii'
-datasource.inputs.subject_info = info
+datasource.inputs.file_template    = '%s.nii'
+datasource.inputs.subject_info     = info
 
 # iterables provides a mechanism to execute part of the processing
 # over multiple instances of the parameter. In the following example
@@ -54,11 +53,11 @@ realign.inputs.register_to_mean = True
 
 # run artifact detection
 art = nw.NodeWrapper(interface=ra.ArtifactDetect(),diskbased=True)
-art.inputs.use_differences = True
-art.inputs.use_norm = True
-art.inputs.norm_threshold = 0.5
+art.inputs.use_differences      = True
+art.inputs.use_norm             = True
+art.inputs.norm_threshold       = 0.5
 art.inputs.zintensity_threshold = 3
-art.inputs.mask_type = 'file'
+art.inputs.mask_type            = 'file'
 
 # run FSL's bet
 skullstrip = nw.NodeWrapper(interface=fsl.Bet(),diskbased=True)
@@ -79,8 +78,7 @@ smooth.inputs.fwhm = [6,6,8]
 #######################################################################
 # setup analysis components
 
-#define a function that reads a matlab file and returns subject
-#specific condition information
+#define a function that returns subject-specific condition information
 from nipype.interfaces.base import Bunch
 from copy import deepcopy
 def subjectinfo(subject_id):
@@ -107,18 +105,18 @@ contrasts = [cont1,cont2]
 
 # Setup model and spm estimation options
 modelspec = nw.NodeWrapper(interface=spm.SpecifyModel())
-modelspec.inputs.subject_info_func = subjectinfo
-modelspec.inputs.concatenate_runs = True
-modelspec.inputs.input_units = 'secs'
-modelspec.inputs.output_units = 'secs'
-modelspec.inputs.time_repetition = 3.
+modelspec.inputs.subject_info_func       = subjectinfo
+modelspec.inputs.concatenate_runs        = True
+modelspec.inputs.input_units             = 'secs'
+modelspec.inputs.output_units            = 'secs'
+modelspec.inputs.time_repetition         = 3.
 modelspec.inputs.high_pass_filter_cutoff = 120
 
 # create the SPM model
 level1design = nw.NodeWrapper(interface=spm.Level1Design(),diskbased=True)
-level1design.inputs.timing_units = modelspec.inputs.output_units
+level1design.inputs.timing_units       = modelspec.inputs.output_units
 level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
-level1design.inputs.bases = {'hrf':{'derivs': [0,0]}}
+level1design.inputs.bases              = {'hrf':{'derivs': [0,0]}}
 
 # setup the estimator for the model
 level1estimate = nw.NodeWrapper(interface=spm.EstimateModel(),diskbased=True)
@@ -202,6 +200,6 @@ l2pipeline.config['use_parameterized_dirs'] = True
 l2pipeline.connect([(l2source,onesamplettest,[('file_list','con_images')])])
 
 
-#if __name__ == '__main__':
-#    l1pipeline.run()
-#    l2pipeline.run()
+if __name__ == '__main__':
+    l1pipeline.run()
+    l2pipeline.run()

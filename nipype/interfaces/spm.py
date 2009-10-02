@@ -1708,8 +1708,9 @@ class SpecifyModel(Interface):
         spm_spm via a job structure
 
     cmdline : string
-        string used to call matlab/spm via SpmMatlabCommandLine interface
-
+        string used to call matlab/spm via SpmMatlabCommandLine
+        interface
+        
     Other Parameters
     ----------------
     To see optional arguments SpecifyModel().inputs_help()
