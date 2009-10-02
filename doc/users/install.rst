@@ -36,7 +36,7 @@ IPython_ 0.10
         installed automatically for me when I installed Twisted.
 
 
-Strong Recommandations
+Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Matplotlib_
@@ -51,6 +51,8 @@ Sphinx_
 Interface Dependencies
 ~~~~~~~~~~~~~~~~~~~~~~
 
+These are the software packages that nipype.interfaces wraps:
+
 FSL_
   4.1.0 or later
 
@@ -58,7 +60,7 @@ matlab_
   2008a or later
 
 SPM_
-  currently SPM5, SPM8 will be supported in version 0.2
+  SPM5 (SPM8 will be supported in version 0.2)
 
 
 

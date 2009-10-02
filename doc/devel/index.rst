@@ -9,7 +9,7 @@
 
 Since nipype is part of the NIPY_ project, we follow the same
 conventions documented in the `NIPY Developers Guide
-<http://nipy.sourceforge.net/devel>`_
+<http://nipy.sourceforge.net/devel>`_.
 
 .. toctree::
    :maxdepth: 2

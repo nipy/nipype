@@ -1,6 +1,8 @@
-====================
-Nipype Documentation
-====================
+.. _documentation:
+
+=============
+Documentation
+=============
 
 .. htmlonly::
 
