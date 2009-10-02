@@ -7,13 +7,13 @@
 Specifying options
 ------------------
 
-The nipype interface modules provide a python interface to external
-packages like FSL_ and SPM_.  Within the module are a series of python
+The nipype interface modules provide a Python interface to external
+packages like FSL_ and SPM_.  Within the module are a series of Python
 classes which wrap specific package functionality.  For example, in
 the fsl module, the class :class:`nipype.interfaces.fsl.Bet` wraps the
 ``bet`` command-line tool.  Using the command-line tool, one would
 specify options using flags like ``-o``, ``-m``, ``-f <f>``, etc...
-However, in nipype, options are assigned to python attributes and can
+However, in nipype, options are assigned to Python attributes and can
 be specified in the following ways:
 
 Options can be assigned when you first create an interface object:
@@ -189,3 +189,5 @@ Using SPM_ to realign a time-series:
    realigner = spm.Realign()
    realigner.inputs.infile = allepi
    result = realigner.run()
+
+.. include:: ../links_names.txt
