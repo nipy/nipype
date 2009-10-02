@@ -3,7 +3,9 @@
 ===========
 
 Below are some usecases written to demonstrate proposed APIs during
-development.  **Note: This document is slightly dated.**
+development.  **Note: These notes were taking during the Spring
+of 2009.  This may not accurately represent the current design of the
+software.**
 
 Interface Convenience API
 -------------------------
