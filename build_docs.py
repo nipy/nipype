@@ -19,7 +19,7 @@ from distutils.command.clean import clean
 # Sphinx import.
 from sphinx.setup_command import BuildDoc
 
-DOC_BUILD_DIR = os.path.join('_build', 'html')
+DOC_BUILD_DIR = os.path.join('doc', '_build', 'html')
 
 ################################################################################
 # Distutils Command class for installing nipype to a temporary location. 
