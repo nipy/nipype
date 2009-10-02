@@ -11,9 +11,8 @@
    :maxdepth: 2
 
    install
-   tutorial
    interface_tutorial
-
+   pipeline_tutorial
 
 
 Interfaces
