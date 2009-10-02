@@ -4,7 +4,6 @@ def configuration(parent_package='',top_path=None):
     config = Configuration('interfaces', parent_package, top_path)
 
     config.add_data_dir('tests')
-    config.add_data_dir('data')
     config.add_data_dir('script_templates')
 
     return config
