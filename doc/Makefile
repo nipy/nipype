@@ -26,7 +26,7 @@ help:
 	@echo "  sf_cburns copy html files to sourceforge (cburns only)"
 
 clean:
-	-rm -rf _build/* *~ api/generated
+	-rm -rf _build/* *~ api/generated documentation.zip
 
 htmlonly:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
