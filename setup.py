@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+"""Nipype : Neuroimaging in Python pipelines and interfaces package.
+
+Nipype intends to create python interfaces to other neuroimaging
+packages and create an API for specifying a full analysis pipeline in
+python.
+
+"""
+
 import sys
 
 
@@ -57,10 +65,10 @@ def main(**extra_args):
     from numpy.distutils.core import setup
     
     setup( name = 'nipype',
-           description = 'This is a neuroimaging python package',
+           description = 'Nipype, a Neuroimaging in Python package',
            author = 'Various',
            author_email = 'nipy-devel@neuroimaging.scipy.org',
-           url = 'http://neuroimaging.scipy.org',
+           url = 'http://nipy.sourceforge.net/nipype',
            long_description = __doc__,
            configuration = configuration,
            cmdclass = cmdclass,
