@@ -48,6 +48,19 @@ Sphinx_
 `Graphviz <http://www.graphviz.org/>`_
   Required for building the documentation
 
+Interface Dependencies
+~~~~~~~~~~~~~~~~~~~~~~
+
+FSL_
+  4.1.0 or later
+
+matlab_ 
+  2008a or later
+
+SPM_
+  currently SPM5, SPM8 will be supported in version 0.2
+
+
 
 Getting the latest release
 --------------------------
