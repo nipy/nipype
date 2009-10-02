@@ -13,7 +13,7 @@ try:
     from boto.s3 import Connection
     import tables
     from boto.s3.key import Key
-except:
+except ImportError:
     pass
 
 class S3NodeWrapper(object):
