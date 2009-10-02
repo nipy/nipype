@@ -48,7 +48,7 @@ Engine
 ~~~~~~
 
 This is the machinery that runs the pipeline. Controls the setup 
-and execution of the pipeline. the current Engine uses 
+and execution of the pipeline. The current Engine uses 
 `NetworkX <http://networkx.lanl.gov/>`_
 
 
