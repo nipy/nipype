@@ -8,23 +8,26 @@
 Source Code
 ===========
 
-NIPYPE uses sourceforge_ for our code hosting.  For immediate access to
-the source code, see the `nipy sourceforge`_ site.
+Nipype uses sourceforge_ for our code hosting.  For immediate access
+to the source code, see `the nipype developer wiki
+<http://sourceforge.net/apps/trac/nipy/wiki>`_.
 
-Please see the `NIPY developer resources`_ site.
+For information on coding style, writing documentation, writing tests
+or using nipy tools, please see the `NIPY developer resources`_ site.
 
 .. _trunk_download:
 
-Checking out the latest version
-===============================
+Check out the current version
+=============================
 
-To check out the latest version of nipy you need subversion_ ::
+To access the source code you need subversion_.  You can check out the
+current trunk with the following command::
 
     svn co https://nipy.svn.sourceforge.net/svnroot/nipy/nipype/trunk/ nipype
 
-Unpack the tarball and change into the source directory.  Once in the
-source directory, you can build the nipype using::
+Then change into the source directory and install nipype::
 
+    cd nipype
     python setup.py install
 
 .. include:: doc/links_names.txt
