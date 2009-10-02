@@ -215,7 +215,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         jobstring += "%s = %s;\n" % (prefix,str(contents))
         return jobstring
     
-    def _make_matlab_command(self, jobtype, jobname, contents, cwd=None,mod_defaults=None):
+    def _make_matlab_command(self, jobtype, jobname, contents, cwd=None, postscript=None):
         """ generates a mfile to build job structure
         Arguments
         ---------
@@ -231,8 +231,6 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         mscript += "fprintf('SPM version: %s\n',spm('ver'));\n"
         mscript += "fprintf('SPM path: %s\n',which('spm'));\n"
         mscript += "spm_defaults;\n\n"
-        if mod_defaults is not None:
-            mscript += mod_defaults
         if self.mfile:
             if jobname in ['smooth','preproc','fmri_spec','fmri_est'] :
                 mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' % 
@@ -246,7 +244,9 @@ class SpmMatlabCommandLine(MatlabCommandLine):
             savemat(os.path.join(cwd,'pyjobs_%s.mat'%jobname), jobdef)
             mscript += "load pyjobs_%s;\n\n" % jobname
         #mscript += "if strcmp(spm('ver'),'SPM8'), jobs=spm_jobman('spm5tospm8',jobs); end\n" 
-        mscript += 'spm_jobman(\'run\',jobs);'
+        mscript += 'spm_jobman(\'run\',jobs);\n'
+        if postscript is not None:
+            mscript += postscript
         cmdline = self._gen_matlab_command(mscript, cwd=cwd,
                                            script_name='pyscript_%s' % jobname,
                                            mfile=self.mfile) 
@@ -1522,14 +1522,21 @@ class Level1Design(SpmMatlabCommandLine):
         else generates a job structure and saves in .mat
         """
         if self.inputs.mask_image is not None:
-            mod_defaults = "global defaults; defaults.mask.thresh = -inf\n"
+            # SPM doesn't handle explicit masking properly, especially
+            # when you want to use the entire mask image
+            postscript = "load SPM;\n"
+            postscript += "SPM.xM.VM = spm_vol('%s');\n"%self.inputs.mask_image
+            postscript += "SPM.xM.I = 0;\n"
+            postscript += "SPM.xM.T = [];\n"
+            postscript += "SPM.xM.TH = ones(size(SPM.xM.TH))*(-Inf);\n"
+            postscript += "SPM.xM.xs = struct('Masking', 'explicit masking only');\n"
+            postscript += "save SPM SPM;\n"
         else:
-            mod_defaults = None
-            
+            postscript = None
         self._cmdline, mscript =self._make_matlab_command('stats',
                                                           'fmri_spec',
                                                           [self._parseinputs()],
-                                                          mod_defaults=mod_defaults)
+                                                          postscript=postscript)
             
     def outputs_help(self):
         """
