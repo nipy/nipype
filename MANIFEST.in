@@ -1,0 +1,9 @@
+include INSTALL
+include LICENSE
+include MANIFEST.in
+include	README
+include THANKS
+
+recursive-include doc *
+recursive-include matlabscripts *
+recursive-include tools *
