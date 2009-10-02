@@ -22,7 +22,7 @@ different pieces.
 .. literalinclude:: ../examples/tutorial1.py
 
 
-#. To execute the pipeline, call it's run function.
+4. To execute the pipeline, call it's run function.
 
 .. sourcecode:: ipython
 
