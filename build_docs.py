@@ -105,11 +105,17 @@ class MyBuildDoc(BuildDoc):
         self.run_command('api_docs')
         # We need to be in the doc directory for to plot_directive
         # and API generation to work
+        """
         os.chdir('doc')
         try:
             BuildDoc.run(self)
         finally:
             os.chdir('..')
+        """
+        # It put's the build in a doc/doc/_build directory with the
+        # above?!?!  I'm leaving the code above here but commented out
+        # in case I'm missing something?
+        BuildDoc.run(self)
         self.zip_docs()
     
     def zip_docs(self):
