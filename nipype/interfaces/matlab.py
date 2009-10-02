@@ -33,7 +33,7 @@ class MatlabCommandLine(CommandLine):
         # efficient once we decide on our logic
         if self._cmdline is None or self._cmdline_inputs != self.inputs:
             self._compile_command()
-            self._cmdline_inputs = self.inputs
+            self._cmdline_inputs = deepcopy(self.inputs)
 
         return self._cmdline
 

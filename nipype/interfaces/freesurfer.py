@@ -15,7 +15,9 @@ __docformat__ = 'restructuredtext'
 import os
 from glob import glob
 from nipype.interfaces.base import Bunch, CommandLine
-from nipype.utils.filemanip import fname_presuffix
+from nipype.interfaces.fsl import FSLCommand
+from nipype.utils.docparse import get_doc
+from nipype.utils.filemanip import fname_presuffix, filename_to_list
 
 def freesurferversion():
     """Check for freesurfer version on system
@@ -313,7 +315,7 @@ class Resample(FSCommandLine):
 
     def aggregate_outputs(self):
         outputs = Bunch(outfile=[])
-        for i,f in enumerate(self.inputs.infile):
+        for i,f in enumerate(filename_to_list(self.inputs.infile)):
             path,fname = os.path.split(f)
             f = fname_presuffix(fname,suffix=self.inputs.outfile_postfix)
             f = os.path.abspath(os.path.join(self.inputs.get('cwd','.'),f))
@@ -463,7 +465,7 @@ class ReconAll(FSCommandLine):
     def aggregate_outputs(self):
         return None
 
-class BBRegister(FSCommandLine):
+class BBRegister(FSLCommand):
     """use fs bbregister to register a volume two a surface mesh
 
     This program performs within-subject, cross-modal registration using a
@@ -480,6 +482,10 @@ class BBRegister(FSCommandLine):
 
     Examples
     --------
+    >>> from nipype.interfaces.freesurfer import BBRegister
+    >>> bbreg = BBRegister(subject_id='me',sourcefile='foo.nii',init_header=True,t2_contrast=True)
+    >>> bbreg.cmdline
+    'bbregister --mov foo.nii --init-header --t2 --s me --reg foo_reg_me.dat'
    """
 
     @property
@@ -489,53 +495,34 @@ class BBRegister(FSCommandLine):
 
 
     def inputs_help(self):
-        """
-        Parameters
-        ----------
-        
-        (all default to None and are unset)
-        subject_id: string or int
-            Identifier for subject
-        sourcefile: string
-            Filename of image volume that will be registered to
-        surface
-        initialize_with: string
-            One of the following options is required.
-            --init-fsl : initialize the registration with FSL
-            --init-spm : initialize the registration with SPM
-            --init-header : initialize the registration based on header goemetry
-            --init-reg initregfile : explicitly pass registration
-        contrast_type: string
-            One of the following is required.
-            --t1 : assume t1 contrast, ie, WM brighter than GM
-            --t2 : assume t2 contrast, ie, GM brighter than WM (default)
-            --bold : same as --t2
-            --dti  : same as --t2
-
-        Parameters
-        ----------
-        
-        (all default to None and are unset)
-        outregfile: filename
-            Name of output registration file. By default the extension
-        of the sourcefile is replaced by _reg_[subject_id].dat
-        outfile: boolean or filename
-            Resampled source is saved as outfile. If set to True, an
-        outputfile is created with _bbout added to the filename.
-        flags:
-            unsupported flags, use at your own risk
-        """
-        print self.inputs_help.__doc__
+        """Print command line documentation for bbregister."""
+        print get_doc(self.cmd, self.opt_map)
 
     def _populate_inputs(self):
         self.inputs = Bunch(subject_id=None,
                             sourcefile=None,
-                            initialize_with=None,
+                            init_spm=None,
+                            init_fsl=None,
+                            init_header=None,
+                            init_reg=None,
                             contrast_type=None,
                             outregfile=None,
                             outfile=None,
                             flags=None)
 
+    opt_map = {
+        'subject_id':         '--s %s',
+        'sourcefile':         '--mov %s',
+        'init_spm':           '--init-spm',
+        'init_fsl':           '--init-fsl',
+        'init_header':        '--init-header',
+        'init_reg':           '--init-reg %s',
+        't1_contrast':        '--t1',
+        't2_contrast':        '--t2',
+        'outregfile':         '--reg %s',
+        'outfile':            '--o %s',
+        'flags':              '%s'}
+    
     def get_input_info(self):
         """ Provides information about inputs as a dict
             info = [Bunch(key=string,copy=bool,ext='.nii'),...]
@@ -543,50 +530,27 @@ class BBRegister(FSCommandLine):
         info = [Bunch(key='sourcefile',copy=False)]
         return info
     
-    def _parseinputs(self):
-        """validate bbregister options
-        if set to None ignore
-        """
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
-        for opt in inputs:
-            if opt is 'subject_id':
-                out_inputs.extend(['--s',inputs[opt]])
-                continue
-            if opt is 'sourcefile':
-                out_inputs.extend(['--mov',inputs[opt]])
-                continue
-            if opt is 'initialize_with':
-                out_inputs.extend([inputs[opt]])
-                continue
-            if opt is 'contrast_type':
-                out_inputs.extend([inputs[opt]])
-                continue
-            if opt is 'outregfile':
-                out_inputs.extend(['--reg',inputs[opt]])
-                continue
-            if opt is 'outfile':
-                if type(inputs[opt]) is type(''):
-                    out_inputs.extend(['--o',inputs[opt]])
-                continue
-            if opt is 'flags':
-                out_inputs.extend([inputs[opt]])
-            print 'option %s not supported'%(opt)
-        if self.inputs.outregfile is None:
-            out_inputs.extend(['--reg',fname_presuffix(self.inputs.sourcefile,
-                                                       suffix='_reg_%s.dat'%self.inputs.subject_id,
+    def _parse_inputs(self):
+        """validate fs bbregister options"""
+        allargs = super(BBRegister, self)._parse_inputs(skip=('outfile'))
+
+        # Add infile and outfile to the args if they are specified
+        if self.inputs.outregfile is None and self.inputs.sourcefile is not None:
+            allargs.extend(['--reg',fname_presuffix(self.inputs.sourcefile,
+                                                       suffix='_bbreg_%s.dat'%self.inputs.subject_id,
                                                        use_ext=False)])
         if self.inputs.outfile is True:
-            out_inputs.extend(['--o',fname_presuffix(self.inputs.sourcefile,suffix='_bbout'%self.inputs.subject_id)])
-        return out_inputs
+            allargs.extend(['--o',fname_presuffix(self.inputs.sourcefile,suffix='_bbreg')])
+        return allargs
+    
+    def run(self):
+        """Execute the command.
+        """
+        results = self._runner()
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs()
 
-    def _compile_command(self):
-        """validates fsl options and generates command line argument"""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        self._cmdline = ' '.join(allargs)
-        return self._cmdline
+        return results        
 
     def outputs_help(self):
         """
@@ -602,19 +566,204 @@ class BBRegister(FSCommandLine):
                         outfile=None)
         if self.inputs.outregfile is None:
             outregfile = fname_presuffix(self.inputs.sourcefile,
-                                         suffix='_reg_%s.dat'%self.inputs.subject_id,
+                                         suffix='_bbreg_%s.dat'%self.inputs.subject_id,
                                          use_ext=False)
         else:
             outregfile = self.inputs.outregfile
         assert len(glob(outregfile))==1, "No output registration file %s created"%outregfile
         outputs.outregfile = outregfile
         if self.inputs.outfile is True:
-            outfile = glob(fname_presuffix(self.inputs.sourcefile,suffix='_bbout'%self.inputs.subject_id))
+            outfile = glob(fname_presuffix(self.inputs.sourcefile,suffix='_bbreg'))
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
         if type(self.inputs.outfile) == type(''):
             outfile = glob(self.inputs.outfile)
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
+
+class ApplyVolTransform(FSLCommand):
+    """use fs mri_vol2vol to apply a transform.
+
+
+    Parameters
+    ----------
+
+    To see optional arguments
+    ApplyVolTransform().inputs_help()
+
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import ApplyVolTransform
+    >>> applyreg = ApplyVolTransform(tkreg='me.dat',sourcefile='foo.nii',fstarg=True)
+    >>> applyreg.cmdline
+    'mri_vol2vol --reg me.dat --mov foo.nii --fstarg --o foo_warped.nii'
+   """
+
+    @property
+    def cmd(self):
+        """sets base command, not editable"""
+        return 'mri_vol2vol'
+
+    def inputs_help(self):
+        """Print command line documentation for mri_vol2vol."""
+        print get_doc(self.cmd, self.opt_map)
+
+    def _populate_inputs(self):
+        self.inputs = Bunch(sourcefile=None,
+                            targfile=None,
+                            fstarg=None,
+                            outfile=None,
+                            tkreg=None,
+                            fslreg=None,
+                            xfmreg=None,
+                            noresample=None,
+                            inverse=None,
+                            flags=None)
+
+    opt_map = {
+        'sourcefile':         '--mov %s',
+        'targfile':           '--targ %s',
+        'outfile':            '--o %s',
+        'fstarg':             '--fstarg',
+        'tkreg':              '--reg %s',
+        'fslreg':             '--fsl %s',
+        'xfmreg':             '--xfm %s',
+        'noresample':         '--no-resample',
+        'inverse':            '--inv', 
+        'flags':              '%s'}
     
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = [Bunch(key='sourcefile',copy=False)]
+        return info
+    
+    def _parse_inputs(self):
+        """validate fs bbregister options"""
+        allargs = super(ApplyVolTransform, self)._parse_inputs()
+
+        # Add outfile to the args if not specified
+        if self.inputs.outfile is None:
+            allargs.extend(['--o',fname_presuffix(self.inputs.sourcefile,suffix='_warped')])
+        return allargs
+    
+    def run(self):
+        """Execute the command.
+        """
+        results = self._runner()
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs()
+
+        return results        
+
+    def outputs_help(self):
+        """
+        outfile: filename
+            Warped source file
+        """
+        print self.outputs_help.__doc__
+
+    def aggregate_outputs(self):
+        outputs = Bunch(outfile=None)
+        if self.inputs.outfile is True:
+            outfile = glob(fname_presuffix(self.inputs.sourcefile,suffix='_warped'))
+            assert len(outfile)==1, "No output file %s created"%outfile
+            outputs.outfile = outfile[0]
+        if type(self.inputs.outfile) == type(''):
+            outfile = glob(self.inputs.outfile)
+            assert len(outfile)==1, "No output file %s created"%outfile
+            outputs.outfile = outfile[0]
+
+        
+class Smooth(FSLCommand):
+    """use fs mris_volsmooth to smooth a volume
+
+    This function smoothes cortical regions on a surface and
+    non-cortical regions in volume.
+
+    Parameters
+    ----------
+
+    To see optional arguments
+    Smooth().inputs_help()
+
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import Smooth
+    >>> smoothvol = Smooth(sourcefile='foo.nii',regfile='reg.dat',surface_fwhm=10,vol_fwhm=6)
+    >>> smoothvol.cmdline
+    'mris_volsmooth --reg reg.dat --vol-fwhm 6 --fwhm 10 --mov foo.nii --o foo_surfsmooth.nii'
+   """
+
+    @property
+    def cmd(self):
+        """sets base command, not editable"""
+        return 'mris_volsmooth'
+
+    def inputs_help(self):
+        """Print command line documentation for mris_volsmooth."""
+        print get_doc(self.cmd, self.opt_map)
+
+    def _populate_inputs(self):
+        self.inputs = Bunch(sourcefile=None,
+                            regfile=None,
+                            outfile=None,
+                            surface_fwhm=None,
+                            vol_fwhm=None,
+                            flags=None)
+
+    opt_map = {
+        'sourcefile':         '--i %s',
+        'regfile':            '--reg %s',
+        'outfile':            '--o %s',
+        'surface_fwhm':       '--fwhm %d',
+        'vol_fwhm':           '--vol-fwhm %d',
+        'flags':              '%s'}
+    
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = [Bunch(key='sourcefile',copy=False)]
+        return info
+    
+    def _parse_inputs(self):
+        """validate fs bbregister options"""
+        allargs = super(Smooth, self)._parse_inputs()
+
+        # Add outfile to the args if not specified
+        if self.inputs.outfile is None:
+            allargs.extend(['--o',fname_presuffix(self.inputs.sourcefile,suffix='_surfsmooth')])
+        return allargs
+    
+    def run(self):
+        """Execute the command.
+        """
+        results = self._runner()
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs()
+
+        return results        
+
+    def outputs_help(self):
+        """
+        outfile: filename
+            Smoothed input volume
+        """
+        print self.outputs_help.__doc__
+
+    def aggregate_outputs(self):
+        outputs = Bunch(outfile=None)
+        if self.inputs.outfile is True:
+            outfile = glob(fname_presuffix(self.inputs.sourcefile,suffix='_surfsmooth'))
+            assert len(outfile)==1, "No output file %s created"%outfile
+            outputs.outfile = outfile[0]
+        if type(self.inputs.outfile) == type(''):
+            outfile = glob(self.inputs.outfile)
+            assert len(outfile)==1, "No output file %s created"%outfile
+            outputs.outfile = outfile[0]
+
         
