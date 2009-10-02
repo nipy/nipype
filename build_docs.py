@@ -19,15 +19,15 @@ from distutils.command.clean import clean
 # Sphinx import.
 from sphinx.setup_command import BuildDoc
 
-DOC_BUILD_DIR = os.path.join('build', 'html')
+DOC_BUILD_DIR = os.path.join('_build', 'html')
 
 ################################################################################
-# Distutils Command class for installing nipy to a temporary location. 
+# Distutils Command class for installing nipype to a temporary location. 
 class TempInstall(Command):
     temp_install_dir = os.path.join('build', 'install')
 
     def run(self):
-        """ build and install nipy in a temporary location. """
+        """ build and install nipype in a temporary location. """
         install = self.distribution.get_command_obj('install')
         install.install_scripts = self.temp_install_dir
         install.install_base    = self.temp_install_dir
@@ -38,14 +38,14 @@ class TempInstall(Command):
         install.install_headers = self.temp_install_dir 
         install.run()
 
-        # Horrible trick to reload nipy with our temporary instal
+        # Horrible trick to reload nipype with our temporary instal
         for key in sys.modules.keys():
-            if key.startswith('nipy'):
+            if key.startswith('nipype'):
                 sys.modules.pop(key, None)
         sys.path.append(os.path.abspath(self.temp_install_dir))
         # Pop the cwd
         sys.path.pop(0)
-        import nipy
+        import nipype
 
     def initialize_options(self):
         pass
