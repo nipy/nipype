@@ -5,12 +5,12 @@ Neuroimaging tools for Python (NIPY).
 The aim of NIPY is to produce a platform-independent Python environment for
 the analysis of brain imaging data using an open development model.
 
-The main repository for NIPY is here:
-https://launchpad.net/nipy
+The main website for NIPY is here:
+http://nipy.sourceforge.net/
 
-This repository is mainly focussed on implementing interfaces and pipelines.
-Not considered separate from NIPY, it does haveits own release schdule, and 
-currently has no reliance on core modules in NIPY (...this will change)
+Nipype is the Neuroimaging in Python Pipelines and Interfaces package.
+It's aim is to create Python Interfaces to other neuroimaging packages
+and create an API for specifying a full analysis pipeline in Python.
 
 Interfaces
 
@@ -84,7 +84,8 @@ def _test_local_install():
         warnings.warn('Running the tests from the install directory may '
                      'trigger some failures')
 
-_test_local_install()
+# Commented this out as it's too noisy.
+#_test_local_install()
 
 
 # Cleanup namespace
