@@ -3,6 +3,7 @@ include LICENSE
 include MANIFEST.in
 include	README
 include THANKS
+include doc/documentation.zip
 
 recursive-include doc *
 recursive-include matlabscripts *
