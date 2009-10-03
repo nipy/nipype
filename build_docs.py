@@ -20,6 +20,7 @@ from distutils.command.clean import clean
 from sphinx.setup_command import BuildDoc
 
 DOC_BUILD_DIR = os.path.join('doc', '_build', 'html')
+DOC_DOCTREES_DIR = os.path.join('dod', '_build', 'doctrees')
 
 ################################################################################
 # Distutils Command class for installing nipype to a temporary location. 
@@ -165,6 +166,10 @@ class Clean(clean):
         if os.path.exists(DOC_BUILD_DIR):
             print "Removing %s" % DOC_BUILD_DIR 
             shutil.rmtree(DOC_BUILD_DIR)
+        if os.path.exists(DOC_DOCTREES_DIR):
+            print "Removing %s", % DOC_DOCTREES_DIR
+            shutil.rmtree(DOC_DOCTREES_DIR)
+
 
 # The command classes for distutils, used by the setup.py
 cmdclass = {'build_sphinx': MyBuildDoc,
