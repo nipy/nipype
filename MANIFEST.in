@@ -3,6 +3,9 @@ include LICENSE
 include MANIFEST.in
 include	README
 include THANKS
+include Makefile
+include build_docs.py
+include setup_egg.py
 include doc/documentation.zip
 
 recursive-include doc *
