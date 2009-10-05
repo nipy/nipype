@@ -3,10 +3,12 @@ def configuration(parent_package='',top_path=None):
     config = Configuration('nipype', parent_package, top_path)
 
     # List all packages to be loaded here
+    config.add_subpackage('algorithms')
     config.add_subpackage('interfaces')
     config.add_subpackage('pipeline')
     config.add_subpackage('utils')
     config.add_subpackage('externals')
+    config.add_subpackage('testing')
 
     # List all data directories to be loaded here
     return config
