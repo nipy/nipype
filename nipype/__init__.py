@@ -53,10 +53,27 @@ __url__     = 'http://nipy.sourceforge.net/'
 # check the version of numpy the user has and inform them they need to
 # upgrade.
 try:
-    #from nipy.testing import Tester
     from numpy.testing import Tester
-    test = Tester().test
-    bench = Tester().bench
+    
+    class NipypeTester(Tester):
+        def test(self, label='fast', verbose=1, extra_argv=None, 
+                 doctests=False, coverage=False):
+            # setuptools does a chmod +x on ALL python modules when it
+            # installs.  By default, as a security measure, nose refuses to
+            # import executable files.  To forse nose to execute our tests, we
+            # must supply the '--exe' flag.  List thread on this:
+            # http://www.mail-archive.com/distutils-sig@python.org/msg05009.html
+            if not extra_argv:
+                extra_argv = ['--exe']
+            else:
+                extra_argv.append('--exe')
+            super(NipypeTester, self).test(label, verbose, extra_argv, 
+                                           doctests, coverage)
+        # Grab the docstring from numpy
+        test.__doc__ = Tester.test.__doc__
+
+    test = NipypeTester().test
+    bench = NipypeTester().bench
 except ImportError:
     # If the user has an older version of numpy which does not have
     # the nose test framework, fail gracefully and prompt them to
@@ -86,7 +103,6 @@ def _test_local_install():
 
 # Commented this out as it's too noisy.
 #_test_local_install()
-
 
 # Cleanup namespace
 del _test_local_install
