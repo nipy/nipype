@@ -1,4 +1,4 @@
-
+# Makefile for building distributions of nipype.
 
 zipdoc:
 	@echo "Clean documentation directory."
@@ -14,7 +14,6 @@ sdist: zipdoc
 	@echo "Done building source distribution."
 
 egg: zipdoc
-	@echo "Not implemented yet!"
-	#@echo "Building egg..."
-	#python setup_egg.py
-	#@echo "Done building egg."
+	@echo "Building egg..."
+	python setup.py bdist_egg
+	@echo "Done building egg."
