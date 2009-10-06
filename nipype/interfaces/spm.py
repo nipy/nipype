@@ -56,17 +56,25 @@ def scans_for_fname(fname):
             scans.insert(sno,['%s,%d'% (fname, sno+1)])
         return np.array([scans],dtype=object)
 
-def scans_for_fnames(fnames,keep4d=False):
+def scans_for_fnames(fnames,keep4d=False,separate_sessions=False):
     """Converts a list of files to a concatenated numpy array for each
     volume.
 
     keep4d : boolean
         keeps the entries of the numpy array as 4d files instead of
         extracting the individual volumes.
+    separate_sessions: boolean
+        if 4d nifti files are being used, then separate_sessions
+        ensures a cell array per session is created in the structure.
     """
     if keep4d:
-        flist = [[f] for f in fnames]
-        return np.array([flist],dtype=object)
+        #flist = [[f] for f in fnames]
+        #return np.array([flist],dtype=object)
+        if not separate_sessions:
+            flist = [np.array((f,),dtype=object) for f in fnames]
+        else:
+            flist = np.array((tuple([np.array((f,),dtype=object) for f in fnames]),),dtype=object)
+        return np.array((flist,),dtype=object)
     else:
         n_sess = len(fnames)
         scans = None
@@ -200,13 +208,19 @@ class SpmMatlabCommandLine(MatlabCommandLine):
                     if type(f) == type(''):
                         jobstring += '\'%s\';...\n'%(f)
                     if type(f) == type(np.empty(1)):
-                        jobstring += '['
+                        if type(f[0]) == type(''):
+                            jobstring += '{'
+                        else:
+                            jobstring += '['
                         for v in f:
                             if type(v) == type(''):
-                                jobstring += '\'%s\','%v
+                                jobstring += '\'%s\';'%v
                             else:
-                                jobstring += '%s,'%str(v)
-                        jobstring += '],...\n'
+                                jobstring += '%s;'%str(v)
+                        if type(f[0]) == type(''):
+                            jobstring += '};...\n'
+                        else:
+                            jobstring += '];...\n'
             jobstring += '};\n'
             return jobstring
         if type(contents) == type(''):
@@ -243,7 +257,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
                                          (contents[0])}]}]}
             savemat(os.path.join(cwd,'pyjobs_%s.mat'%jobname), jobdef)
             mscript += "load pyjobs_%s;\n\n" % jobname
-        #mscript += "if strcmp(spm('ver'),'SPM8'), jobs=spm_jobman('spm5tospm8',jobs); end\n" 
+        mscript += "if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');jobs=spm_jobman('spm5tospm8',{jobs});end\n" 
         mscript += 'spm_jobman(\'run\',jobs);\n'
         if postscript is not None:
             mscript += postscript
@@ -394,9 +408,10 @@ class Realign(SpmMatlabCommandLine):
         for opt in inputs:
             if opt is 'flags':
                 einputs.update(inputs[opt])
+                continue
             if opt is 'infile':
-                einputs['data'] = scans_for_fnames(filename_to_list(inputs[opt])
-                                                   , keep4d=True)
+                einputs['data'] = scans_for_fnames(filename_to_list(inputs[opt]),
+                                                   keep4d=True,separate_sessions=True) 
                 continue
             if opt is 'write':
                 continue
@@ -614,10 +629,12 @@ class Coregister(SpmMatlabCommandLine):
         [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
         for opt in inputs:
             if opt is 'target':
-                einputs['ref'] = list_to_filename(inputs[opt])
+                #einputs['ref'] = list_to_filename(inputs[opt])
+                einputs['ref'] = scans_for_fnames(filename_to_list(inputs[opt]),keep4d=True)
                 continue
             if opt is 'source':
-                einputs['source'] = list_to_filename(inputs[opt])
+                #einputs['source'] = list_to_filename(inputs[opt])
+                einputs['source'] = scans_for_fnames(filename_to_list(inputs[opt]),keep4d=True)
                 continue
             if opt is 'apply_to_files':
                 sess_scans = scans_for_fnames(filename_to_list(inputs[opt]))
@@ -2364,6 +2381,7 @@ class EstimateContrast(SpmMatlabCommandLine):
             else:
                 raise Exception("Contrast Estimate: Unknown stat %s"%contrast.stat)
         script += "jobs{1}.stats{1}.con.consess = consess;\n"
+        script += "if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');jobs=spm_jobman('spm5tospm8',{jobs});end\n" 
         script += "spm_jobman('run',jobs);"
         self._cmdline = self._gen_matlab_command(script,
                                                 cwd=self.inputs.get('cwd','.'),
@@ -2491,6 +2509,7 @@ class OneSampleTTest(SpmMatlabCommandLine):
         script += "jobs{3}.stats{1}.con.spmmat = {'%s'};\n"  % os.path.join(cwd,'SPM.mat')
         script += "jobs{3}.stats{1}.con.consess{1}.tcon.name = '%s';\n" % conname
         script += "jobs{3}.stats{1}.con.consess{1}.tcon.convec = [1];\n"
+        script += "if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');jobs=spm_jobman('spm5tospm8',{jobs});end\n" 
         script += "spm_jobman('run',jobs);\n"
         self._cmdline = self._gen_matlab_command(script,
                                                 cwd=cwd,
