@@ -74,7 +74,7 @@ def test_generate_job():
     # cell array of vectors
     contents = {'onsets':np.array([[[np.array([1,2,3,4])]]])}
     out = mlab._generate_job(prefix='test',contents=contents)
-    yield assert_equal, out, 'test.onsets = {...\n[1,2,3,4,],...\n};\n'
+    yield assert_equal, out, 'test.onsets = {...\n[1;2;3;4;];...\n};\n'
     
 def test_make_matlab_command():
     mlab = spm.SpmMatlabCommandLine()
