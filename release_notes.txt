@@ -1,0 +1,14 @@
+This is the initial release of nipype, version 0.1.  Nipype is still
+in early stages of development, but we will be continuing to improve
+the software and will release versions regularly.
+
+The goals of this release were the following:
+
+* Basic repository structure
+* Basic development infrastructure (bug tracking, version numbers,
+  release process, etc.)
+* Minimal dependencies
+* Basic documentation of working features.
+* A working pipeline using SPM
+* Interfaces to a basic set of functionality for each of the main
+  packages: SPM, FSL, AFNI
