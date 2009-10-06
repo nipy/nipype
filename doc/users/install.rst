@@ -64,27 +64,47 @@ SPM_
 
 
 
-Getting the latest release
---------------------------
+Download
+--------
 
-This will be possible once we `release.
-<http://sourceforge.net/apps/trac/nipy/roadmap>`_
+Download the latest release from `our sourceforge
+page. <http://sourceforge.net/projects/nipy/files/>`_
 
-The latest release is `here <http://sourceforge.net/projects/nipy/files/latest>`_.
+You may also follow our `release schedule
+<http://sourceforge.net/apps/trac/nipy/roadmap>`_ to see when our next
+release is scheduled.
 
-Building from source
---------------------
+Install
+-------
 
 The installation process is similar to other Python packages so it
 will be familiar if you have Python experience.
 
-Unpack the tarball and change into the source directory.  Once in the
-source directory, you can build the nipype using::
+If you downloaded the source distribution tarball, named something
+like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
+``nipype-x.y`` directory and install nipype using::
 
     python setup.py install
 
-Or::
+**Note:** Depending on permissions you may need to use ``sudo``.
 
-    sudo python setup.py install
+If you downloaded an egg, named something like
+``nipype-x.y-py2.5.egg``, then install nipype using::
+
+    easy_install nipype-x.y-py2.5.egg
+
+
+Testing the install
+-------------------
+
+The best way to test the install is to run the test suite.  If you
+have nose_ installed, then do the following in ipython_::
+
+    import nipype
+    nipype.test()
+
+All tests should pass (unless you're missing a dependency). If any
+tests fail, please report them on our `bug tracker
+<http://sourceforge.net/apps/trac/nipy/report>`_.
 
 .. include:: ../links_names.txt
