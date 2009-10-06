@@ -1,4 +1,6 @@
 # Makefile for building distributions of nipype.
+# Files are then pushed to sourceforge using rsync with a command like this:
+# rsync -e ssh nipype-0.1-py2.5.egg cburns,nipy@frs.sourceforge.net:/home/frs/project/n/ni/nipy/nipype/nipype-0.1/
 
 zipdoc:
 	@echo "Clean documentation directory."
