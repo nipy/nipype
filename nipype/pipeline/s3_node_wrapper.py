@@ -133,7 +133,9 @@ class S3Transporter(object):
         f.close()
 
     def make_dirs(self, path):
-        '''Create intervening subdirectories as needed'''
+        '''Create intervening subdirectories as needed
+
+        This should probably be a util function'''
         if not os.path.exists(path):
             self.make_dirs(os.path.dirname(path))
             os.mkdir(path)

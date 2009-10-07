@@ -84,6 +84,22 @@ class Bunch(object):
         outstr.append(')')
         return ''.join(outstr)
 
+    def __pretty__(self, p, cycle):
+        if cycle:
+            p.text('Bunch(...)')
+        else:
+            p.begin_group(6, 'Bunch(')
+            first = True
+            for k, v in sorted(self.iteritems()):
+                if not first:
+                    p.text(',')
+                    p.breakable()
+                p.text(k + '=')
+                p.pretty(v)
+                first = False
+            p.end_group(6, ')')
+    
+
 class InterfaceResult(object):
     '''Describe the results of .run()-ing a particular Interface'''
     def __init__(self, interface, runtime, outputs=None):
