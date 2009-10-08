@@ -488,6 +488,22 @@ class Realign(SpmMatlabCommandLine):
         self._cmdline, mscript = self._make_matlab_command('spatial', 'realign',
                                         [{'%s'%(jobtype):self._parseinputs()}])
 
+    def run(self, infile=None,**inputs):
+        """Executes the SPM realign function using MATLAB
+        
+        Parameters
+        ----------
+        
+        infile: string, list
+            list of filenames to realign
+        """
+        if infile:
+            self.inputs.infile = infile
+        if not self.inputs.infile:
+            raise AttributeError('Realign requires an input file')
+        self.inputs.update(**inputs)
+        return super(Realign,self).run()
+    
     def aggregate_outputs(self):
         """ Initializes the output fields for this interface and then
         searches for and stores the data that go into those fields.
@@ -707,6 +723,28 @@ class Coregister(SpmMatlabCommandLine):
                     outputs.coregistered_files.append(c_file[0])
         return outputs
         
+    def run(self, target=None, source=None, **inputs):
+        """Executes the SPM coregister function using MATLAB
+        
+        Parameters
+        ----------
+        
+        target: string, list
+            image file to coregister source to
+        source: string, list
+            image file that will be coregistered to the template 
+        """
+        if target:
+            self.inputs.target = target
+        if not self.inputs.target:
+            raise AttributeError('Realign requires a target file')
+        if source:
+            self.inputs.source = source
+        if not self.inputs.source:
+            raise AttributeError('Realign requires a source file')
+        self.inputs.update(**inputs)
+        return super(Coregister,self).run()
+    
     def _compile_command(self):
         """validates spm options and generates job structure
         if mfile is True uses matlab .m file
@@ -916,6 +954,28 @@ class Normalize(SpmMatlabCommandLine):
             print 'option %s not supported'%(opt)
         return einputs
 
+    def run(self, template=None, source=None, **inputs):
+        """Executes the SPM normalize function using MATLAB
+        
+        Parameters
+        ----------
+        
+        template: string, list containing 1 filename
+            template image file to normalize to
+        source: source image file that is normalized
+            to template.
+        """
+        if template:
+            self.inputs.template = template
+        if not self.inputs.template:
+            raise AttributeError('Normalize requires a target file')
+        if source:
+            self.inputs.source = source
+        if not self.inputs.source:
+            raise AttributeError('Realign requires a source file')
+        self.inputs.update(**inputs)
+        return super(Normalize,self).run()
+    
     def _compile_command(self):
         """validates spm options and generates job structure
         if mfile is True uses matlab .m file
@@ -1161,6 +1221,22 @@ class Segment(SpmMatlabCommandLine):
             print 'option %s not supported'%(opt)
         return einputs
 
+    def run(self, data=None, **inputs):
+        """Executes the SPM segment function using MATLAB
+        
+        Parameters
+        ----------
+        
+        data: string, list
+            image file to segment
+        """
+        if data:
+            self.inputs.data = data
+        if not self.inputs.data:
+            raise AttributeError('Segment requires a data file')
+        self.inputs.update(**inputs)
+        return super(Segment,self).run()
+    
     def _compile_command(self):
         """validates spm options and generates job structure
         if mfile is True uses matlab .m file
@@ -1311,6 +1387,22 @@ class Smooth(SpmMatlabCommandLine):
             print 'option %s not supported'%(opt)
         return einputs
 
+    def run(self, infile=None, **inputs):
+        """Executes the SPM smooth function using MATLAB
+        
+        Parameters
+        ----------
+        
+        infile: string, list
+            image file(s) to smooth
+        """
+        if infile:
+            self.inputs.infile = infile
+        if not self.inputs.infile:
+            raise AttributeError('Smooth requires a file')
+        self.inputs.update(**inputs)
+        return super(Smooth,self).run()
+    
     def _compile_command(self):
         """validates spm options and generates job structure
         if mfile is True uses matlab .m file
