@@ -77,7 +77,13 @@ class Bunch(object):
         return deepcopy(self.__dict__)
 
     def __repr__(self):
-        """representation of the sorted Bunch as a string"""
+        """representation of the sorted Bunch as a string
+
+        Currently, this string representation of the `inputs` Bunch of
+        interfaces is hashed to determine if the process' dirty-bit
+        needs setting or not. Till that mechanism changes, only alter
+        this after careful consideration.
+        """
         outstr = ['Bunch(']
         for k, v in sorted(self.iteritems()):
             outstr.append('%s=%s, ' % (k, v))
