@@ -1339,9 +1339,21 @@ class Smooth(SpmMatlabCommandLine):
         fwhm : 3-list, optional
             list of fwhm for each dimension
         data_type : int, optional
-            Data-type  of output images. SAME (0) indicates the
-            same datatype as the original images.
-            spm default = 0
+            Data type of the output images. A value of 0 specifies to
+            use the same data type as the original images.  Integer
+            values are based on the NIfTI-1 specification::
+
+               2 = uint8
+               4 = int16
+               8 = int32
+              16 = float32
+              64 = float64
+             256 = int8
+             512 = uint16
+             768 = uint32
+
+            (spm default = 0, same data type as original image)
+
         flags : USE AT OWN RISK, optional
             #eg:'flags':{'eoptions':{'suboption':value}}
         """
