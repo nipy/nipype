@@ -2,6 +2,7 @@
 """
 import numpy as np
 import os
+from distutils.version import LooseVersion
 
 def find_indices(condition):
    "Return the indices where ravel(condition) is true"
@@ -61,3 +62,49 @@ def container_to_string(cont):
       return ' '.join(cont)
    else:
       return str(cont)
+
+
+# Dependency checks.  Copied this from Nipy, with some modificiations
+# (added app as a parameter).
+def package_check(pkg_name, version=None, app=None, checker=LooseVersion):
+    """Check that the minimal version of the required package is installed.
+
+    Parameters
+    ----------
+    pkg_name : string
+        Name of the required package.
+    version : string
+        Minimal version number for required package.
+    app : string
+        Application that is performing the check.  For instance, the
+        name of the tutorial being executed that depends on specific
+        packages.  Default is *Nipype*.
+    checker : object
+        The class that will perform the version checking.  Default is
+        distutils.version.LooseVersion.
+
+    Examples
+    --------
+    package_check('numpy', '1.3')
+    package_check('networkx', '1.0', 'tutorial1')
+
+    """
+
+    if app:
+        msg = '%s requires %s' % (app, pkg_name)
+    else:
+        msg = 'Nipype requires %s' % pkg_name
+    try:
+        mod = __import__(pkg_name)
+    except ImportError:
+        raise ImportError(msg)
+    if not version:
+        return
+    msg += ' >= %s' % version
+    try:
+        have_version = mod.__version__
+    except AttributeError:
+        raise RuntimeError('Cannot find version for %s' % pkg_name)
+    if checker(have_version) < checker(version):
+        raise RuntimeError(msg)
+

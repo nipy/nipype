@@ -22,6 +22,17 @@ import os                                    # system functions
 # Preliminaries
 
 """
+1b. Confirm package dependencies are installed.  (This is only for the
+tutorial, rarely would you put this in your own code.)
+"""
+from nipype.utils.misc import package_check
+
+package_check('numpy', '1.3', 'tutorial1')
+package_check('scipy', '0.7', 'tutorial1')
+package_check('networkx', '1.0', 'tutorial1')
+package_check('IPython', '0.10', 'tutorial1')
+
+"""
 2. Setup any package specific configuration. The output file format
    for FSL routines is being set to uncompressed NIFTI and a specific
    version of matlab is being used. The uncompressed format is
