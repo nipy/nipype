@@ -574,9 +574,10 @@ class Coregister(SpmMatlabCommandLine):
         ----------
         
         target : string
-            filename of nifti image to coregister to
+            Filename of nifti image to coregister to.  Also referred
+            to as the *reference image* or the *template image*.
         source : string
-            filename of nifti image to coregister to the reference
+            Filename of nifti image to coregister to the target image.
         apply_to_files : list, optional
             list of filenames to apply the estimated rigid body
             transform from source to target
