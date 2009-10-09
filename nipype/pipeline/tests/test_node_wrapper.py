@@ -167,7 +167,7 @@ def test_hash_inputs():
     hashval = bi.hash_inputs()
     # this will fail if you change the input structure of the basic
     # interface class above. make sure to fix this in that case.
-    yield assert_equal, hashval, 'b3c82a2321f1e3555daa9bc6e8d7ba04'
+    yield assert_equal, hashval, 'd1cf3db3de3092e0de0b7f72fc78842c'
 
 def test_output_directory():
     bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True)
