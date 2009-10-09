@@ -85,12 +85,19 @@ class Bunch(object):
         this after careful consideration.
         """
         outstr = ['Bunch(']
+        first = True
         for k, v in sorted(self.iteritems()):
-            outstr.append('%s=%s, ' % (k, v))
+            if not first:
+                outstr.append(', ')
+            outstr.append('%s=%r' % (k, v))
+            first = False
         outstr.append(')')
         return ''.join(outstr)
 
     def __pretty__(self, p, cycle):
+        '''Support for the pretty module
+        
+        pretty is included in ipython.externals for ipython > 0.10'''
         if cycle:
             p.text('Bunch(...)')
         else:
