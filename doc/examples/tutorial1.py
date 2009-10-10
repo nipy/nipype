@@ -117,7 +117,7 @@ realign.inputs.register_to_mean = True
    deviations in intensity or movement.
 """
 art = nw.NodeWrapper(interface=ra.ArtifactDetect(),diskbased=True)
-art.inputs.use_differences      = True
+art.inputs.use_differences      = [True,True]
 art.inputs.use_norm             = True
 art.inputs.norm_threshold       = 0.5
 art.inputs.zintensity_threshold = 3

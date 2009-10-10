@@ -43,10 +43,10 @@ class ArtifactDetect(Interface):
             functional data files
         design_matrix: filename
             Currently limited to SPM design matrices
-        use_differences : boolean
-            Use differences between successive motion and
-            intensity paramter estimates in order to determine
-            outliers.  (default is True)
+        use_differences : 2-element boolean list
+            Use differences between successive motion (first element)
+            and intensity paramter (second element) estimates in order
+            to determine outliers.  (default is [True, True])
         use_norm : boolean
             Use the norm of the motion parameters in order to
             determine outliers.  Requires ``norm_threshold`` to be set.
@@ -84,7 +84,7 @@ class ArtifactDetect(Interface):
         self.inputs = Bunch(realigned_files=None,
                             realignment_parameters=None,
                             design_matrix=None,
-                            use_differences=True,
+                            use_differences=[True,True],
                             use_norm=True,
                             norm_threshold=None,
                             rotation_threshold=None,
@@ -187,7 +187,7 @@ class ArtifactDetect(Interface):
         return np.dot(T,np.dot(Rx,np.dot(Ry,np.dot(Rz,np.dot(S,Sh)))))
         
 
-    def _calc_norm(self,mc):
+    def _calc_norm(self,mc,use_differences):
         """Calculates the maximum overall displacement of the midpoints
         of the faces of a cube due to translation and rotation.
 
@@ -196,6 +196,7 @@ class ArtifactDetect(Interface):
 
         mc : motion parameter estimates
         [3 translation, 3 rotation (radians)]
+        use_differences : boolean
 
         Returns
         -------
@@ -209,13 +210,13 @@ class ArtifactDetect(Interface):
         for i in range(mc.shape[0]):
             newpos[i,:] = np.dot(self._get_affine_matrix(mc[i,:]),cube_pts)[0:3,:].ravel()
         normdata = np.zeros(mc.shape[0])
-        if self.inputs.use_differences:
+        if use_differences:
             newpos = np.concatenate((np.zeros((1,18)),np.diff(newpos,n=1,axis=0)),axis=0)
             for i in range(newpos.shape[0]):
-                normdata[i] = np.max(np.sqrt(np.sum(np.reshape(newpos[i,:],(3,6))**2,axis=0)))
+                normdata[i] = np.max(np.sqrt(np.sum(np.reshape(np.power(np.abs(newpos[i,:]),2),(3,6)),axis=0)))
         else:
-            newpos = signal.detrend(newpos,axis=0,type='constant')
-            normdata = np.sqrt(np.mean(newpos**2,axis=1))
+            newpos = np.abs(signal.detrend(newpos,axis=0,type='constant'))
+            normdata = np.sqrt(np.mean(np.power(newpos,2),axis=1))
         return normdata
     
     def _detect_outliers_core(self,imgfile,motionfile,cwd='.'):
@@ -233,11 +234,11 @@ class ArtifactDetect(Interface):
         mc = deepcopy(mc_in)
         if self.inputs.use_norm:
             # calculate the norm of the motion parameters
-            normval = self._calc_norm(mc)
+            normval = self._calc_norm(mc,self.inputs.use_differences[0])
             tidx = find_indices(normval>self.inputs.norm_threshold)
             ridx = find_indices(normval<0)
         else:
-            if self.inputs.use_differences:
+            if self.inputs.use_differences[0]:
                 mc = np.concatenate( (np.zeros((1,6)),np.diff(mc_in,n=1,axis=0)) , axis=0)
             traval = mc[:,0:3]  # translation parameters (mm)
             rotval = mc[:,3:6]  # rotation parameters (rad)
@@ -288,7 +289,7 @@ class ArtifactDetect(Interface):
 
         # compute normalized intensity values
         gz = signal.detrend(g,axis=0)       # detrend the signal
-        if self.inputs.use_differences:
+        if self.inputs.use_differences[1]:
             gz = np.concatenate( (np.zeros((1,1)),np.diff(gz,n=1,axis=0)) , axis=0)
         gz = (gz-np.mean(gz))/np.std(gz)    # normalize the detrended signal
         iidx = find_indices(abs(gz)>self.inputs.zintensity_threshold)
@@ -314,7 +315,7 @@ class ArtifactDetect(Interface):
         file.write( ''.join(('max: ',str(np.max(mc_in,axis=0)),'\n')))
         file.write( ''.join(('std: ',str(np.std(mc_in,axis=0)),'\n')))
         if self.inputs.use_norm:
-            if self.inputs.use_differences:
+            if self.inputs.use_differences[0]:
                 file.write("Motion (norm-differences):\n")
             else:
                 file.write("Motion (norm):\n")
@@ -322,13 +323,16 @@ class ArtifactDetect(Interface):
             file.write( ''.join(('min: ',str(np.min(normval,axis=0)),'\n')))
             file.write( ''.join(('max: ',str(np.max(normval,axis=0)),'\n')))
             file.write( ''.join(('std: ',str(np.std(normval,axis=0)),'\n')))
-        elif self.inputs.use_differences:
+        elif self.inputs.use_differences[0]:
             file.write("Motion (differences):\n")
             file.write( ''.join(('mean: ',str(np.mean(mc,axis=0)),'\n')))
             file.write( ''.join(('min: ',str(np.min(mc,axis=0)),'\n')))
             file.write( ''.join(('max: ',str(np.max(mc,axis=0)),'\n')))
             file.write( ''.join(('std: ',str(np.std(mc,axis=0)),'\n')))
-        file.write("Normalized intensity:\n")
+        if self.inputs.use_differences[1]:
+            file.write("Normalized intensity:\n")
+        else:
+            file.write("Intensity:\n")
         file.write("Number of Intensity Outliers: %d\n"%len(iidx))
         file.write( ''.join(('min: ',str(np.min(gz,axis=0)),'\n')))
         file.write( ''.join(('max: ',str(np.max(gz,axis=0)),'\n')))
