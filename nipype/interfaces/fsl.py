@@ -112,6 +112,10 @@ class FSLInfo():
         print 'FSLOUTPUTTYPE = %s (\"%s\")' % (fsl_ftype, 
                                                self.ftypes[fsl_ftype] )
         return fsl_ftype, self.ftypes[fsl_ftype]
+
+    def standard_image(self, img_name):
+        fsldir = os.environ['FSLDIR']
+        return os.path.join(fsldir, 'data/standard', img_name)
     
 fsl_info = FSLInfo()
 
@@ -126,7 +130,8 @@ def fsloutputtype(ftype=None):
 
 class FSLCommand(CommandLine):
     '''General support for FSL commands'''
-
+    opt_map = {}
+    
     @property
     def cmdline(self):
         """validates fsl options and generates command line argument"""
@@ -173,10 +178,9 @@ class FSLCommand(CommandLine):
 
         """
         allargs = []
-        inputs = [(k, v) for k, v in self.inputs.iteritems() if v is not None ]
+        inputs = sorted((k, v) for k, v in self.inputs.iteritems() 
+                            if v is not None and k not in skip)
         for opt, value in inputs:
-            if opt in skip:
-                continue
             if opt == 'args':
                 # XXX Where is this used?  Is self.inputs.args still
                 # used?  Or is it leftover from the original design of
@@ -206,6 +210,9 @@ class FSLCommand(CommandLine):
                 warn("Option '%s' is not supported!" % (opt))
         
         return allargs
+
+    def _populate_inputs(self):
+        self.inputs = Bunch((k,None) for k in self.opt_map.keys())
 
 
 class Bet(FSLCommand):
@@ -257,22 +264,6 @@ class Bet(FSLCommand):
         """Print command line documentation for BET."""
         print get_doc(self.cmd, self.opt_map)
 
-    def _populate_inputs(self):
-        self.inputs = Bunch(infile=None,
-                          outfile=None,
-                          outline=None,
-                          mask=None,
-                          skull=None,
-                          nooutput=None,
-                          frac=None,
-                          vertical_gradient=None,
-                          radius=None,
-                          center=None,
-                          threshold=None,
-                          mesh=None,
-                          verbose=None, 
-                          flags=None)
-
     opt_map = {
         'outline':            '-o',
         'mask':               '-m',
@@ -285,8 +276,12 @@ class Bet(FSLCommand):
         'threshold':          '-t',
         'mesh':               '-e',
         'verbose':            '-v',
-        'flags':              '%s'}
+        'flags':              '%s',
+        'infile':             None,
+        'outfile':            None,
+        }
     # Currently we don't support -R, -S, -B, -Z, -F, -A or -A2
+    # -B is useful for our system... why not support it?
 
     def _parse_inputs(self):
         """validate fsl bet options"""
@@ -451,37 +446,13 @@ class Fast(FSLCommand):
                'hyper':                '-H %.2f',
                'verbose':              '-v',
                'manualseg':            '-s %s',
-               'probability_maps':     '-p'}
+               'probability_maps':     '-p',
+               'infiles':               None,
+               }
 
     def inputs_help(self):
         """Print command line documentation for FAST."""
         print get_doc(self.cmd, self.opt_map)
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(infiles=None,
-                            number_classes=None,
-                            bias_iters=None,
-                            bias_lowpass=None,
-                            img_type=None,
-                            init_seg_smooth=None,
-                            segments=None,
-                            init_transform=None,
-                            other_priors=None,
-                            nopve=None,
-                            output_biasfield=None,
-                            output_biascorrected=None,
-                            nobias=None,
-                            n_inputimages=None,
-                            out_basename=None,
-                            use_priors=None,
-                            segment_iters=None,
-                            mixel_smooth=None,
-                            iters_afterbias=None,
-                            hyper=None,
-                            verbose=None,
-                            manualseg=None,
-                            probability_maps=None,
-                            flags=None)
 
 
     def run(self, infiles=None, **inputs):
@@ -696,47 +667,19 @@ class Flirt(FSLCommand):
                'noresampblur':       '-noresampblur',
                'rigid2D':            '-2D',
                'verbose':            '-v %d',
-               'flags':              '%s'}
+               'flags':              '%s',
+               'infile':             None,
+               'outfile':            None,
+               'reference':          None,
+               'outmatrix':          None,
+               'inmatrix':           None,
+               }
 
     def inputs_help(self):
         """Print command line documentation for FLIRT."""
         print get_doc(self.cmd, self.opt_map)
 
-    def _populate_inputs(self):
-        self.inputs = Bunch(infile=None,
-                            outfile=None,
-                            reference=None,
-                            outmatrix=None,
-                            inmatrix=None,
-                            datatype=None,
-                            cost=None,
-                            searchcost=None,
-                            usesqform=None,
-                            displayinit=None,
-                            anglerep=None,
-                            interp=None,
-                            sincwidth=None,
-                            sincwindow=None,
-                            bins=None,
-                            dof=None,
-                            noresample=None,
-                            forcescaling=None,
-                            minsampling=None,
-                            applyisoxfm=None,
-                            paddingsize=None,
-                            searchrx=None,
-                            searchry=None,
-                            searchrz=None,
-                            nosearch=None,
-                            coarsesearch=None,
-                            finesearch=None,
-                            refweight=None,
-                            inweight=None,
-                            noclamp=None,
-                            noresampblur=None,
-                            rigid2D=None,
-                            verbose=None,
-                            flags=None)
+
     def _parse_inputs(self):
         '''Call our super-method, then add our input files'''
         # Could do other checking above and beyond regular _parse_inputs here
@@ -950,29 +893,10 @@ class McFlirt(FSLCommand):
         'statsimgs':   '-stats',
         'savemats':    '-mats',
         'saveplots':   '-plots',
-        'report':      '-report'}
+        'report':      '-report',
+        'infile':      None,
+        }
 
-    def _populate_inputs(self):
-        self.inputs = Bunch(infile=None,
-                            outfile=None,
-                            cost=None,
-                            bins=None,
-                            dof=None,
-                            refvol=None,
-                            scaling=None,
-                            smooth=None,
-                            rotation=None,
-                            verbose=None,
-                            stages=None,
-                            init=None,
-                            usegradient=None,
-                            usecontour=None,
-                            meanvol=None,
-                            statsimgs=None,
-                            savemats=None,
-                            saveplots=None,
-                            report=None)
-        
     def _parse_inputs(self):
         """Call our super-method, then add our input files"""
         allargs = super(McFlirt, self)._parse_inputs(skip=('infile'))
@@ -1072,7 +996,6 @@ class Fnirt(FSLCommand):
     >>> res = fnt.run(reference='ref.nii', infile='anat.nii')
     
     """
-
     @property
     def cmd(self):
         """sets base command, not editable"""
@@ -1081,32 +1004,6 @@ class Fnirt(FSLCommand):
     def inputs_help(self):
         """Print command line documentation for FNIRT."""
         print get_doc(self.cmd, self.opt_map)
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(infile=None,
-                          reference=None,
-                          affine=None,
-                          initwarp= None,
-                          initintensity=None,
-                          configfile=None,
-                          referencemask=None,
-                          imagemask=None,
-                          fieldcoeff_file=None,
-                          outimage=None,
-                          fieldfile=None,
-                          jacobianfile=None,
-                          reffile=None,
-                          intensityfile=None,
-                          logfile=None,
-                          verbose=None,
-                          sub_sampling=None,
-                          max_iter=None,
-                          referencefwhm=None,
-                          imgfwhm=None,
-                          lambdas=None,
-                          estintensity=None,
-                          applyrefmask=None,
-                          applyimgmask=None)
 
     opt_map = {
         'affine':           '--aff %s',
@@ -1131,7 +1028,10 @@ class Fnirt(FSLCommand):
         'estintensity':     '--estint %f',
         'applyrefmask':     '--applyrefmask %f',
         'applyimgmask':     '--applyinmask %f',
-        'flags':            '%s'}
+        'flags':            '%s',
+        'infile':           None,
+        'reference':        None,
+        }
 
     @property
     def cmdline(self):
@@ -1178,8 +1078,9 @@ class Fnirt(FSLCommand):
         We can check the command line and confirm that it's what we expect.
 
         >>> fnirt_mprage.cmdline  #doctest: +NORMALIZE_WHITESPACE
-        'fnirt --in=subj.nii --ref=mni.nii --subsamp 4 2 1 
-            --infwhm 8.000000 4.000000 2.000000 --warpres 6, 6, 6'
+        'fnirt --in=subj.nii --ref=mni.nii --warpres 6, 6, 6
+            --infwhm 8.000000 4.000000 2.000000 --subsamp 4 2 1 
+'
 
         """
         if infile:

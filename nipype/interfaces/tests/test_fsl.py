@@ -5,7 +5,7 @@ import nipype.interfaces.fsl as fsl
 
 
 def test_fslversion():
-    ver = fsl.fslversion()
+    ver = fsl.fsl_info.version
     if ver:
         # If ver is None, fsl is not installed
         ver = ver.split('.')
@@ -15,7 +15,7 @@ def test_fslversion():
 def test_fsloutputtype():
     types = ['ANALYZE_GZ', 'NIFTI_PAIR_GZ', 'NIFTI', 'NIFTI_PAIR',
              'NIFTI_GZ', 'ANALYZE']
-    out_type, ext = fsl.fsloutputtype()
+    out_type, ext = fsl.fsl_info.outputtype()
     if out_type is None:
         # Environment variable is not set.  FSL may not be installed.
         return
@@ -23,7 +23,7 @@ def test_fsloutputtype():
     env_type = os.environ.get('FSLOUTPUTTYPE')
     if env_type:
         # Set to same value for test.
-        out_type, ext = fsl.fsloutputtype(env_type)
+        out_type, ext = fsl.fsl_info.outputtype(env_type)
         yield assert_equal, out_type, env_type
 
 
@@ -163,7 +163,10 @@ def test_flirt():
     yield assert_equal, flirter.inputs.bins, flirted.interface.inputs.bins
     yield assert_equal, flirter.inputs.cost, flirt_est.interface.inputs.cost
     yield assert_equal, flirter.inputs.cost, flirt_apply.interface.inputs.cost
-    yield assert_equal, flirt_apply.runtime.cmdline,'flirt -in infile -ref reffile -omat outmat.mat -init inmatrix.mat -out outimgfile -cost mutualinfo -applyxfm -bins 256'
+    yield assert_equal, flirt_apply.runtime.cmdline, \
+            'flirt -in infile -ref reffile -omat outmat.mat ' \
+            '-init inmatrix.mat -out outimgfile -bins 256 -cost mutualinfo ' \
+            '-applyxfm'
     
     flirter = fsl.Flirt()
     # infile not specified

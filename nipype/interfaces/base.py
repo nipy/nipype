@@ -10,6 +10,7 @@ import os
 import subprocess
 from copy import deepcopy
 from string import Template
+from warnings import warn
 
 __docformat__ = 'restructuredtext'
 
@@ -38,8 +39,6 @@ def load_template(name):
 class Bunch(object):
     """ Provide Elegant attribute access
 
-    (Also provide inelegant dict-style access to make Satra's life easier)
-
     Notes
     -----
     
@@ -48,8 +47,8 @@ class Bunch(object):
     Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
 
     """
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
+    def __init__(self, *args, **kwargs):
+        self.__dict__.update(*args, **kwargs)
 
     def update(self, *args, **kwargs):
         """update existing attribute, or create new attribute"""
@@ -66,10 +65,14 @@ class Bunch(object):
 
     def __setitem__(self, key, value):
         '''deprecated, dict-like setting of attributes'''
+        # get rid of for 0.2?
+        warn(DeprecationWarning('please use direct attribute'))
         self.__dict__[key] = value
 
     def __getitem__(self, key):
         '''deprecated, dict-like getting of attributes'''
+        # get rid of for 0.2?
+        warn(DeprecationWarning('please use direct attribute'))
         return(self.__dict__[key])
 
     def dictcopy(self):
@@ -192,7 +195,7 @@ class CommandLine(Interface):
 
     Examples
     --------
-
+    # XXX These are not valid doctests for nose apparently
     >>> lscmd = CommandLine('ls') # Create a command object
     >>> output = lscmd.run() # Execute the command
     
@@ -205,10 +208,10 @@ class CommandLine(Interface):
     # Or
     >>> lsout = CommandLine('echo').run('hello')
     # One way to view your stdout is to print
-    >>> print output.runtime.messages
-    >>> output.runtime.returncode
-    >>> print output.runtime.errmessages
-    >>> print oputput.interface.cmdline 
+    >>> print output.runtime.stdout
+    >>> print output.runtime.returncode
+    >>> print output.runtime.stderr
+    >>> print output.interface.cmdline 
 
     Notes
     -----
