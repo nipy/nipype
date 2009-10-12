@@ -87,11 +87,10 @@ class To3d(AFNICommand):
 
     Examples
     --------
-    Basic usage examples.
-
+    >>> from nipype.interfaces import afni
     >>> to3d = afni.To3d(datatype="anat")
     >>> to3d.inputs.datum = 'float'
-    >>> to3d.run()
+    >>> res = to3d.run(infiles='data/*.dcm')
 
     """
 
