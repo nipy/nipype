@@ -37,50 +37,45 @@ warnings.filterwarnings('always', category=UserWarning)
 # line=None):
 #     print message
 
-def fslversion():
-    """Check for fsl version on system
 
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    version : string
-       Version number as string or None if FSL not found
-
-    """
-    # find which fsl being used....and get version from
-    # /path/to/fsl/etc/fslversion
-    clout = CommandLine('which fsl').run()
-
-    if clout.runtime.returncode is not 0:
-        # fsl not found
-        return None
-    out = clout.runtime.stdout
-    basedir = os.path.split(os.path.split(out)[0])[0]
-    clout = CommandLine('cat %s/etc/fslversion'%(basedir)).run()
-    out = clout.runtime.stdout
-    return out.strip('\n')
-
-
-def fsloutputtype(ftype=None):
-    """Check and or set the global FSL output file type FSLOUTPUTTYPE
+class FSLInfo():
+    '''A class to encapsulate stuff we'll need throughout the 
     
-    Parameters
-    ----------
-    ftype :  string
-        Represents the file type to set based on string of valid FSL
-        file types ftype == None to get current setting/ options
+    This should probably be a singleton class? or do we want to make it
+    possible to wrap a few versions of FSL? In any case, currently we
+    instantiate an instance here called fsl_info
+    
+    I'm also not sure this is the best ordering for the various attributes and
+    methods. Please feel free to reorder.'''
+    _version = None
+    @property
+    def version(self):
+        """Check for fsl version on system
 
-    Returns
-    -------
-    fsl_ftype : string
-        Represents the current environment setting of FSLOUTPUTTYPE
-    ext : string
-        The extension associated with the FSLOUTPUTTYPE
+        Parameters
+        ----------
+        None
 
-    """
+        Returns
+        -------
+        version : string
+           Version number as string or None if FSL not found
+
+        """
+        if self._version is None:
+            # find which fsl being used....and get version from
+            # /path/to/fsl/etc/fslversion
+            clout = CommandLine('which fsl').run()
+
+            if clout.runtime.returncode is 0:
+                out = clout.runtime.stdout
+                basedir = os.path.split(os.path.split(out)[0])[0]
+                clout = CommandLine('cat %s/etc/fslversion'%(basedir)).run()
+                out = clout.runtime.stdout
+                self._version = out.strip('\n')
+
+        return self._version
+
     ftypes = {'NIFTI':'nii',
               'ANALYZE':'hdr',
               'NIFTI_PAIR':'hdr',
@@ -88,21 +83,55 @@ def fsloutputtype(ftype=None):
               'NIFTI_GZ':'nii.gz',
               'NIFTI_PAIR_GZ':'hdr.gz',
               None: 'env variable FSLOUTPUTTYPE not set'}
-
-    if ftype is None:
-        # get environment setting
-        fsl_ftype = os.getenv('FSLOUTPUTTYPE')
-        #for key in ftypes.keys():
-        #    print '%s = \"%s\"'%(key, ftypes[key])
-
-    else:
-        # set environment setting
-        fsl_ftype = ftype
-        os.putenv('FSLOUTPUTTYPE',fsl_ftype)
-        os.environ['FSLOUTPUTTYPE'] = fsl_ftype # seems redundant but necessary
-    print 'FSLOUTPUTTYPE = %s (\"%s\")'%(fsl_ftype, ftypes[fsl_ftype])
-    return fsl_ftype, ftypes[fsl_ftype]
+    _outputtype = None
+    def outputtype(self, ftype=None):
+        """Check and or set the global FSL output file type FSLOUTPUTTYPE
         
+        Parameters
+        ----------
+        ftype :  string
+            Represents the file type to set based on string of valid FSL
+            file types ftype == None to get current setting/ options
+
+        Returns
+        -------
+        fsl_ftype : string
+            Represents the current environment setting of FSLOUTPUTTYPE
+        ext : string
+            The extension associated with the FSLOUTPUTTYPE
+
+        """
+
+        if ftype is None and self._outputtype is None:
+            # get environment setting
+            self._outputtype = os.getenv('FSLOUTPUTTYPE')
+
+        else:
+            # set environment setting - updating environ automatically calls
+            # putenv. Note, docs claim putenv may cause memory leaks on OSX and
+            # FreeBSD :\ I see no workarounds -DJC
+            # os.putenv('FSLOUTPUTTYPE',fsl_ftype)
+            if ftype in self.ftypes.keys():
+                os.environ['FSLOUTPUTTYPE'] = ftype 
+            else:
+                pass
+                # raise an exception?
+            self._outputtype = ftype
+
+        print 'FSLOUTPUTTYPE = %s (\"%s\")' % (self._outputtype, 
+                                               self.ftypes[self._outputtype] )
+        return self._outputtype, self.ftypes[self._outputtype]
+    
+fsl_info = FSLInfo()
+
+# Legacy to support old code. Should be deleted soon.
+def fslversion():
+    warn(DeprecationWarning('fslversion should be accessed via fsl_info'))
+    return(fsl_info.version)
+
+def fsloutputtype(ftype=None):
+    warn(DeprecationWarning('fsloutputtype should be accessed via fsl_info'))
+    return fsl_info.outputtype(ftype)
 
 class FSLCommand(CommandLine):
     '''General support for FSL commands'''
