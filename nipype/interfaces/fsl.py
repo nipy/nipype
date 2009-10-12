@@ -794,7 +794,7 @@ class ApplyXFM(Flirt):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> xfm = ApplyXFM(infile='subject.nii', bins=640)
+    >>> xfm = ApplyXFM(infile='subject.nii', reference='mni152.nii', bins=640)
     >>> xfm_applied = xfm.run(inmatrix='xform.mat')
     '''
     def run(self, infile=None, reference=None, inmatrix=None, 
@@ -830,8 +830,7 @@ class ApplyXFM(Flirt):
         --------
         >>> from nipype.interfaces import fsl
         >>> flt = fsl.Flirt(infile='subject.nii', reference='template.nii')
-        >>> xformed = flt.applyxfm(inmatrix='xform.mat', 
-        ... outfile='xfm_subject.nii')
+        >>> xformed = flt.run(inmatrix='xform.mat', outfile='xfm_subject.nii')
 
         """
 
