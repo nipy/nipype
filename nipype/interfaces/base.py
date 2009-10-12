@@ -20,12 +20,12 @@ def load_template(name):
 
     Parameters
     ----------
-      name : str
+    name : str
         The name of the file to load
 
     Returns
     -------
-      template : string.Template
+    template : string.Template
 
     """
 
@@ -37,14 +37,13 @@ def load_template(name):
     return template
 
 class Bunch(object):
-    """ Provide Elegant attribute access
+    """Provide elegant attribute access.
 
     Notes
     -----
-    
     The Bunch pattern came from the Python Cookbook:
     .. [1] A. Martelli, D. Hudgeon, "Collecting a Bunch of Named
-    Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
+           Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
 
     """
     def __init__(self, *args, **kwargs):
@@ -195,23 +194,26 @@ class CommandLine(Interface):
 
     Examples
     --------
-    # XXX These are not valid doctests for nose apparently
-    >>> lscmd = CommandLine('ls') # Create a command object
-    >>> output = lscmd.run() # Execute the command
-    
-    # You could also pass in args like this
+    >>> from nipype.interfaces.base import CommandLine
+    >>> cmd = CommandLine('echo')
+    >>> cmd.cmdline
+    'echo'
+    >>> res = cmd.run('foo')
+    >>> print res.runtime.stdout
+    foo
+    <BLANKLINE>
+
+    You could pass arguments in the following ways and all result in
+    the same command.
     >>> lscmd = CommandLine('ls', '-l', '-t')
-    # Or
-    >>> lscmd = CommandLine('ls -l -t')
-    # Or
-    >>> lscmd = CommandLine(args=['ls','-l'])
-    # Or
-    >>> lsout = CommandLine('echo').run('hello')
-    # One way to view your stdout is to print
-    >>> print output.runtime.stdout
-    >>> print output.runtime.returncode
-    >>> print output.runtime.stderr
-    >>> print output.interface.cmdline 
+    >>> lscmd.cmdline
+    'ls -l -t'
+    >>> lscmd = CommandLine('ls -l -t') 
+    >>> lscmd.cmdline
+    'ls -l -t'
+    >>> lscmd = CommandLine(args=['ls', '-l', '-t'])
+    >>> lscmd.cmdline
+    'ls -l -t'
 
     Notes
     -----
