@@ -121,8 +121,7 @@ class NodeWrapper(object):
             hashvalue = self.hash_inputs()
             inputstr  = str(self.inputs)
             hashfile = os.path.join(outdir, '_0x%s.txt' % hashvalue)
-            if (os.path.exists(hashfile) and self.overwrite) or \
-                    not os.path.exists(hashfile):
+            if self.overwrite or not os.path.exists(hashfile):
                 print "continuing to execute\n"
                 cleandir(outdir)
                 # copy files over and change the inputs
