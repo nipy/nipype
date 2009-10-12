@@ -139,7 +139,7 @@ class FSLCommand(CommandLine):
         allargs.insert(0, self.cmd)
         return ' '.join(allargs)
 
-    def run(self):
+    def run(self, cwd=None):
         """Execute the command.
         
         Returns
@@ -148,7 +148,7 @@ class FSLCommand(CommandLine):
             A `Bunch` object with a copy of self in `interface`
 
         """
-        results = self._runner()
+        results = self._runner(cwd=cwd)
         if results.runtime.returncode == 0:
             pass
             # Uncomment if implemented
@@ -293,7 +293,7 @@ class Bet(FSLCommand):
             if not self.inputs.outfile:
                 # If the outfile is not specified but the infile is,
                 # generate an outfile
-                pth, fname = os.path.split(self.inputs['infile'])
+                pth, fname = os.path.split(self.inputs.infile)
                 newpath=self.inputs.get('cwd', pth)
                 self.inputs.outfile = fname_presuffix(fname, suffix='_bet',
                                                       newpath=newpath)
@@ -340,11 +340,13 @@ class Bet(FSLCommand):
             raise AttributeError('Bet requires an input file')
         if outfile:
             self.inputs.outfile = outfile
+        if not self.inputs.outfile:
+            raise AttributeError('Bet requires an output file')
         self.inputs.update(**inputs)
         
         results = self._runner()
         if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
+            self.aggregate_outputs(results)
 
         return results        
 
@@ -362,11 +364,16 @@ class Bet(FSLCommand):
         """
         print self.outputs_help.__doc__
 
-    def aggregate_outputs(self):
+    def aggregate_outputs(self, cwd=None):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
 
+        Parameters
+        ----------
+        cwd : /path/to/outfiles
+            Where do we look for the outputs? None means look in same location
+            as infile
         Returns
         -------
         outputs : Bunch object
@@ -378,15 +385,18 @@ class Bet(FSLCommand):
 
         """
         outputs = Bunch(outfile = None,
-                        maskfile = None)
+                maskfile = None)
         if self.inputs.outfile:
             outfile = self.inputs.outfile
         else:
-            pth,fname = os.path.split(self.inputs['infile'])
-            outfile = os.path.join(self.inputs.get('cwd',pth),
-                                   fname_presuffix(fname,suffix='_bet'))
-        assert len(glob(outfile))==1, \
-            "Incorrect number or no output files %s generated"%outfile
+            path,fname = os.path.split(self.inputs['infile'])
+            if cwd is not None:
+                path = cwd
+
+            outfile = os.path.join(path,
+                    fname_presuffix(fname,suffix='_bet'))
+            assert len(glob(outfile))==1, \
+                    "Incorrect number or no output files %s generated"%outfile
         outputs.outfile = outfile
         maskfile = fname_presuffix(outfile,suffix='_mask')
         outputs.maskfile = glob(maskfile)
@@ -421,34 +431,34 @@ class Fast(FSLCommand):
     def cmd(self):
         """sets base command, not editable"""
         return 'fast'
-  
+
     opt_map = {'number_classes':       '-n %d',
-               'bias_iters':           '-I %d',
-               'bias_lowpass':         '-l %d', # in mm
-               'img_type':             '-t %d',
-               'init_seg_smooth':      '-f %.3f',
-               'segments':             '-g',
-               'init_transform':       '-a %s',
-               # This option is not really documented on the Fast web page:
-               # http://www.fmrib.ox.ac.uk/fsl/fast4/index.html#fastcomm
-               # I'm not sure if there are supposed to be exactly 3 args or what
-               'other_priors':         '-A %s %s %s',
-               'nopve':                '--nopve',
-               'output_biasfield':     '-b',
-               'output_biascorrected': '-B',
-               'nobias':               '-N',
-               'n_inputimages':        '-S %d',
-               'out_basename':         '-o %s',
-               'use_priors':           '-P', # must also set -a!
-               'segment_iters':        '-W %d',
-               'mixel_smooth':         '-R %.2f',
-               'iters_afterbias':      '-O %d',
-               'hyper':                '-H %.2f',
-               'verbose':              '-v',
-               'manualseg':            '-s %s',
-               'probability_maps':     '-p',
-               'infiles':               None,
-               }
+            'bias_iters':           '-I %d',
+            'bias_lowpass':         '-l %d', # in mm
+            'img_type':             '-t %d',
+            'init_seg_smooth':      '-f %.3f',
+            'segments':             '-g',
+            'init_transform':       '-a %s',
+            # This option is not really documented on the Fast web page:
+            # http://www.fmrib.ox.ac.uk/fsl/fast4/index.html#fastcomm
+            # I'm not sure if there are supposed to be exactly 3 args or what
+            'other_priors':         '-A %s %s %s',
+            'nopve':                '--nopve',
+            'output_biasfield':     '-b',
+            'output_biascorrected': '-B',
+            'nobias':               '-N',
+            'n_inputimages':        '-S %d',
+            'out_basename':         '-o %s',
+            'use_priors':           '-P', # must also set -a!
+            'segment_iters':        '-W %d',
+            'mixel_smooth':         '-R %.2f',
+            'iters_afterbias':      '-O %d',
+            'hyper':                '-H %.2f',
+            'verbose':              '-v',
+            'manualseg':            '-s %s',
+            'probability_maps':     '-p',
+            'infiles':               None,
+            }
 
     def inputs_help(self):
         """Print command line documentation for FAST."""
@@ -470,7 +480,7 @@ class Fast(FSLCommand):
         results : Bunch
             A `Bunch` object with a copy of self in `interface`
             runtime : Bunch containing stdout, stderr, returncode, commandline
-            
+
         """
 
         if infiles:
@@ -478,13 +488,13 @@ class Fast(FSLCommand):
         if not self.inputs.infiles:
             raise AttributeError('Fast requires input file(s)')
         self.inputs.update(**inputs)
-        
+
         results = self._runner()
         if results.runtime.returncode == 0:
             results.outputs = self.aggregate_outputs()
             # NOT checking if files exist
             # Once implemented: results.outputs = self.aggregate_outputs()
-            
+
         return results        
 
     def _parse_inputs(self):
@@ -499,7 +509,7 @@ class Fast(FSLCommand):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
-        
+
         Returns
         -------
         outputs : Bunch object
@@ -507,7 +517,7 @@ class Fast(FSLCommand):
             one set of ``outputs`` for each file specified in
             ``infiles``.  ``outputs`` will contain the following
             files:
-            
+
             mixeltype : list
                 filename(s)
             partial_volume_map : list
@@ -530,7 +540,7 @@ class Fast(FSLCommand):
         For each item in Bunch:
         If [] empty list, optional file was not generated
         Else, list contains path,filename of generated outputfile(s)
-        
+
         Raises
         ------
         IOError
@@ -539,15 +549,15 @@ class Fast(FSLCommand):
         """
         envext = fsloutputtype()[1]
         outputs = Bunch(mixeltype = [],
-                        seg = [],
-                        partial_volume_map=[],
-                        partial_volume_files=[],
-                        tissue_class_map=[],
-                        tissue_class_files=[],
-                        bias_corrected=[],
-                        bias_field=[],
-                        prob_maps=[])
-        
+                seg = [],
+                partial_volume_map=[],
+                partial_volume_files=[],
+                tissue_class_map=[],
+                tissue_class_files=[],
+                bias_corrected=[],
+                bias_field=[],
+                prob_maps=[])
+
         if not is_container(self.inputs.infiles):
             infiles = [self.inputs.infiles]
         else:
@@ -566,14 +576,14 @@ class Fast(FSLCommand):
                 nclasses = 3
             else:
                 nclasses = self.inputs.number_classes
-                        
+
             # always seg, (plus mutiple?)
             outputs.seg.append(fname_presuffix(item, suffix='_seg'))
             if self.inputs.segments:
                 for i in range(nclasses):
                     outputs.seg.append(fname_presuffix(item, 
-                                                       suffix='_seg_%d'%(i)))
-            # always pve,mixeltype unless nopve = True
+                        suffix='_seg_%d'%(i)))
+                    # always pve,mixeltype unless nopve = True
             if not self.inputs.nopve:
                 fname = fname_presuffix(item, suffix='_pveseg')
                 outputs.partial_volume_map.append(fname)
@@ -606,15 +616,15 @@ class Fast(FSLCommand):
                 for outfile in outlist:
                     if not len(glob(outfile))==1:
                         msg = "Output file '%s' of type '%s' was not generated"\
-                            % (outfile, outtype)
+                                % (outfile, outtype)
                         raise IOError(msg)
 
         return outputs
-                    
+
 
 class Flirt(FSLCommand):
     """Use FSL FLIRT for coregistration.
-    
+
     For complete details, see the `FLIRT Documentation. 
     <http://www.fmrib.ox.ac.uk/fsl/flirt/index.html>`_
 
@@ -630,49 +640,49 @@ class Flirt(FSLCommand):
     >>> flt.inputs.outfile = 'moved_subject.nii'
     >>> flt.inputs.outmatrix = 'subject_to_template.mat'
     >>> res = flt.run()
-    
+
 
     """
-        
+
     @property
     def cmd(self):
         """sets base command, not editable"""
         return "flirt"
 
     opt_map = {'datatype':           '-datatype %d ',
-               'cost':               '-cost %s',
-               'searchcost':         '-searchcost %s',
-               'usesqform':          '-usesqform',
-               'displayinit':        '-displayinit',
-               'anglerep':           '-anglerep %s',
-               'interp':             '-interp',
-               'sincwidth':          '-sincwidth %d',
-               'sincwindow':         '-sincwindow %s',
-               'bins':               '-bins %d',
-               'dof':                '-dof %d',
-               'noresample':         '-noresample',
-               'forcescaling':       '-forcescaling',
-               'minsampling':        '-minsamplig %f',
-               'paddingsize':        '-paddingsize %d',
-               'searchrx':           '-searchrx %d %d',
-               'searchry':           '-searchry %d %d',
-               'searchrz':           '-searchrz %d %d',
-               'nosearch':           '-nosearch',
-               'coarsesearch':       '-coarsesearch %d',
-               'finesearch':         '-finesearch %d',
-               'refweight':          '-refweight %s',
-               'inweight':           '-inweight %s',
-               'noclamp':            '-noclamp',
-               'noresampblur':       '-noresampblur',
-               'rigid2D':            '-2D',
-               'verbose':            '-v %d',
-               'flags':              '%s',
-               'infile':             None,
-               'outfile':            None,
-               'reference':          None,
-               'outmatrix':          None,
-               'inmatrix':           None,
-               }
+            'cost':               '-cost %s',
+            'searchcost':         '-searchcost %s',
+            'usesqform':          '-usesqform',
+            'displayinit':        '-displayinit',
+            'anglerep':           '-anglerep %s',
+            'interp':             '-interp',
+            'sincwidth':          '-sincwidth %d',
+            'sincwindow':         '-sincwindow %s',
+            'bins':               '-bins %d',
+            'dof':                '-dof %d',
+            'noresample':         '-noresample',
+            'forcescaling':       '-forcescaling',
+            'minsampling':        '-minsamplig %f',
+            'paddingsize':        '-paddingsize %d',
+            'searchrx':           '-searchrx %d %d',
+            'searchry':           '-searchry %d %d',
+            'searchrz':           '-searchrz %d %d',
+            'nosearch':           '-nosearch',
+            'coarsesearch':       '-coarsesearch %d',
+            'finesearch':         '-finesearch %d',
+            'refweight':          '-refweight %s',
+            'inweight':           '-inweight %s',
+            'noclamp':            '-noclamp',
+            'noresampblur':       '-noresampblur',
+            'rigid2D':            '-2D',
+            'verbose':            '-v %d',
+            'flags':              '%s',
+            'infile':             None,
+            'outfile':            None,
+            'reference':          None,
+            'outmatrix':          None,
+            'inmatrix':           None,
+            }
 
     def inputs_help(self):
         """Print command line documentation for FLIRT."""
@@ -683,16 +693,16 @@ class Flirt(FSLCommand):
         '''Call our super-method, then add our input files'''
         # Could do other checking above and beyond regular _parse_inputs here
         allargs = super(Flirt, self)._parse_inputs(skip=('infile', 
-                                                         'outfile',
-                                                         'reference', 
-                                                         'outmatrix',
-                                                         'inmatrix'))
+            'outfile',
+            'reference', 
+            'outmatrix',
+            'inmatrix'))
         possibleinputs = [(self.inputs.outfile,'-out'),
-                          (self.inputs.inmatrix, '-init'),
-                          (self.inputs.outmatrix, '-omat'),
-                          (self.inputs.reference, '-ref'),
-                          (self.inputs.infile, '-in')]
-        
+                (self.inputs.inmatrix, '-init'),
+                (self.inputs.outmatrix, '-omat'),
+                (self.inputs.reference, '-ref'),
+                (self.inputs.infile, '-in')]
+
         for val, flag in possibleinputs:
             if val:
                 allargs.insert(0, '%s %s' % (flag, val))
@@ -722,7 +732,7 @@ class Flirt(FSLCommand):
         results : Bunch
             A `Bunch` object with a copy of self in `interface`
             runtime : Bunch containing stdout, stderr, returncode, commandline
-            
+
         """
 
         if infile:
@@ -739,7 +749,7 @@ class Flirt(FSLCommand):
         if outmatrix:
             self.inputs.outmatrix = outmatrix
         self.inputs.update(**inputs)
-        
+
         results = self._runner()
         if results.runtime.returncode == 0:
             results.outputs = self.aggregate_outputs()
@@ -749,7 +759,7 @@ class Flirt(FSLCommand):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
-        
+
         Returns
         -------
         outputs : Bunch object
@@ -764,32 +774,34 @@ class Flirt(FSLCommand):
         """
 
         outputs = Bunch(outfile=None,
-                        outmatrix=None)
+                outmatrix=None)
 
         def raise_error(filename):
             raise IOError('File %s was not generated by Flirt' % filename)
 
         if self.inputs.outfile:
             outputs.outfile = os.path.join(self.inputs.get('cwd'),
-                                           self.inputs.outfile)
+                    self.inputs.outfile)
             if not glob(outputs.outfile):
                 raise_error(outputs.outfile)
         if self.inputs.outmatrix:
             outputs.outmatrix = os.path.join(self.inputs.get('cwd'),
-                                             self.inputs.outmatrix)
+                    self.inputs.outmatrix)
             if not glob(outputs.outmatrix):
                 raise_error(outputs.outmatrix)
-        
+
         return outputs
 
 class ApplyXFM(Flirt):
     '''Use FSL FLIRT to apply a linear transform matrix.
-    
+
     For complete details, see the `FLIRT Documentation. 
     <http://www.fmrib.ox.ac.uk/fsl/flirt/index.html>`_
 
     To print out the command line help, use:
         fsl.ApplyXFM().inputs_help()
+
+    Note: This class is currently untested. Use at your own risk!
 
     Examples
     --------
@@ -797,10 +809,10 @@ class ApplyXFM(Flirt):
     >>> xfm = ApplyXFM(infile='subject.nii', reference='mni152.nii', bins=640)
     >>> xfm_applied = xfm.run(inmatrix='xform.mat')
     '''
-    def run(self, infile=None, reference=None, inmatrix=None, 
+    def run(self, cwd=None, infile=None, reference=None, inmatrix=None, 
             outfile=None, **inputs):
         """Run flirt and apply the transformation to the image.
-        
+
         eg.
         flirt [options] -in <inputvol> -ref <refvol> -applyxfm -init
         <matrix> -out <outputvol>
@@ -856,8 +868,8 @@ class ApplyXFM(Flirt):
         else:
             inputs['flags'] = ' '.join([flags, '-applyxfm'])
         self.inputs.update(**inputs)
-            
-        results = self._runner()
+
+        results = self._runner(cwd=cwd)
         if results.runtime.returncode == 0:
             # applyxfm does not output the outmatrix
             results.outputs = self.aggregate_outputs(verify_outmatrix=False)
@@ -867,7 +879,7 @@ class ApplyXFM(Flirt):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
-        
+
         Returns
         -------
         outputs : Bunch object
@@ -882,15 +894,15 @@ class ApplyXFM(Flirt):
         """
 
         outputs = Bunch(outfile=None,
-                        outmatrix=None)
+                outmatrix=None)
         if self.inputs.outfile:
             outputs.outfile = self.inputs.outfile
         if self.inputs.outmatrix:
             outputs.outmatrix = self.inputs.outmatrix
-        
+
         def raise_error(filename):
             raise IOError('File %s was not generated by Flirt' % filename)
-            
+
         # Verify output files exist
         if not glob(outputs.outfile):
             raise_error(outputs.outfile)
@@ -907,7 +919,7 @@ class McFlirt(FSLCommand):
 
     To print out the command line help, use:
         McFlirt().inputs_help()
-    
+
     Examples
     --------
     >>> from nipype.interfaces import fsl
@@ -919,32 +931,32 @@ class McFlirt(FSLCommand):
     def cmd(self):
         """sets base command, not editable"""
         return 'mcflirt'
-    
+
     def inputs_help(self):
         """Print command line documentation for MCFLIRT."""
         print get_doc(self.cmd, self.opt_map)
 
     opt_map = {
-        'outfile':     '-out %s',
-        'cost':        '-cost %s',
-        'bins':        '-bins %d',
-        'dof':         '-dof %d',
-        'refvol':      '-refvol %d',
-        'scaling':     '-scaling %.2f',
-        'smooth':      '-smooth %.2f',
-        'rotation':    '-rotation %d',
-        'verbose':     '-verbose',
-        'stages':      '-stages %d',
-        'init':        '-init %s',
-        'usegradient': '-gdt',
-        'usecontour':  '-edge',
-        'meanvol':     '-meanvol',
-        'statsimgs':   '-stats',
-        'savemats':    '-mats',
-        'saveplots':   '-plots',
-        'report':      '-report',
-        'infile':      None,
-        }
+            'outfile':     '-out %s',
+            'cost':        '-cost %s',
+            'bins':        '-bins %d',
+            'dof':         '-dof %d',
+            'refvol':      '-refvol %d',
+            'scaling':     '-scaling %.2f',
+            'smooth':      '-smooth %.2f',
+            'rotation':    '-rotation %d',
+            'verbose':     '-verbose',
+            'stages':      '-stages %d',
+            'init':        '-init %s',
+            'usegradient': '-gdt',
+            'usecontour':  '-edge',
+            'meanvol':     '-meanvol',
+            'statsimgs':   '-stats',
+            'savemats':    '-mats',
+            'saveplots':   '-plots',
+            'report':      '-report',
+            'infile':      None,
+            }
 
     def _parse_inputs(self):
         """Call our super-method, then add our input files"""
@@ -955,7 +967,7 @@ class McFlirt(FSLCommand):
 
     def run(self, infile=None, **inputs):
         """Runs mcflirt
-        
+
         Parameters
         ----------
         infile : string
@@ -990,11 +1002,11 @@ class McFlirt(FSLCommand):
     def aggregate_outputs(self):
         envext = fsloutputtype()[1]
         outputs = Bunch(outfile=None,
-                        varianceimg=None,
-                        stdimg=None,
-                        meanimg=None,
-                        parfile=None,
-                        outmatfile=None)
+                varianceimg=None,
+                stdimg=None,
+                meanimg=None,
+                parfile=None,
+                outmatfile=None)
         # get basename (correct fsloutpputytpe extension)
         if self.inputs.outfile:
             pth, nme = os.path.split(self.inputs.outfile)
@@ -1022,16 +1034,16 @@ class McFlirt(FSLCommand):
             if outlist:
                 if not glob(outlist):
                     msg = "Output file '%s' of type '%s' was not generated" \
-                        % (outlist, outtype)
+                            % (outlist, outtype)
                     raise IOError(msg)
-                
+
         return outputs
-        
- 
+
+
 
 class Fnirt(FSLCommand):
     """Use FSL FNIRT for non-linear registration.
-    
+
     For complete details, see the `FNIRT Documentation.
     <http://www.fmrib.ox.ac.uk/fsl/fnirt/index.html>`_
 
@@ -1043,44 +1055,44 @@ class Fnirt(FSLCommand):
     >>> from nipype.interfaces import fsl
     >>> fnt = fsl.Fnirt(affine='affine.mat')
     >>> res = fnt.run(reference='ref.nii', infile='anat.nii')
-    
+
     """
     @property
     def cmd(self):
         """sets base command, not editable"""
         return 'fnirt'
-    
+
     def inputs_help(self):
         """Print command line documentation for FNIRT."""
         print get_doc(self.cmd, self.opt_map)
 
     opt_map = {
-        'affine':           '--aff %s',
-        'initwarp':         '--inwarp %s',
-        'initintensity':    '--intin %s',
-        'configfile':       '--config %s',
-        'referencemask':    '--refmask %s',
-        'imagemask':        '--inmask %s',
-        'fieldcoeff_file':  '--cout %s',
-        'outimage':         '--iout %s',
-        'fieldfile':        '--fout %s',
-        'jacobianfile':     '--jout %s',
-        'reffile':          '--refout %s',
-        'intensityfile':    '--intout %s',
-        'logfile':          '--logout %s',
-        'verbose':          '--verbose',
-        'sub_sampling':     '--subsamp %d',
-        'max_iter':         '--miter %f',
-        'referencefwhm':    '--reffwhm %f',
-        'imgfwhm':          '--infwhm %f',
-        'lambdas':          '--lambda %f',
-        'estintensity':     '--estint %f',
-        'applyrefmask':     '--applyrefmask %f',
-        'applyimgmask':     '--applyinmask %f',
-        'flags':            '%s',
-        'infile':           None,
-        'reference':        None,
-        }
+            'affine':           '--aff %s',
+            'initwarp':         '--inwarp %s',
+            'initintensity':    '--intin %s',
+            'configfile':       '--config %s',
+            'referencemask':    '--refmask %s',
+            'imagemask':        '--inmask %s',
+            'fieldcoeff_file':  '--cout %s',
+            'outimage':         '--iout %s',
+            'fieldfile':        '--fout %s',
+            'jacobianfile':     '--jout %s',
+            'reffile':          '--refout %s',
+            'intensityfile':    '--intout %s',
+            'logfile':          '--logout %s',
+            'verbose':          '--verbose',
+            'sub_sampling':     '--subsamp %d',
+            'max_iter':         '--miter %f',
+            'referencefwhm':    '--reffwhm %f',
+            'imgfwhm':          '--infwhm %f',
+            'lambdas':          '--lambda %f',
+            'estintensity':     '--estint %f',
+            'applyrefmask':     '--applyrefmask %f',
+            'applyimgmask':     '--applyinmask %f',
+            'flags':            '%s',
+            'infile':           None,
+            'reference':        None,
+            }
 
     @property
     def cmdline(self):
@@ -1089,11 +1101,16 @@ class Fnirt(FSLCommand):
         allargs = self._parse_inputs()
         allargs.insert(0, self.cmd)
         return ' '.join(allargs)
-            
-  
-    def run(self, infile=None, reference=None, **inputs):
+
+
+    def run(self, cwd=None, infile=None, reference=None, **inputs):
         """Run the fnirt command
-  
+
+        Note: technically, only one of infile OR reference need be specified.
+
+        You almost certainly want to start with a config file, such as
+        T1_2_MNI152_2mm
+
         Parameters
         ----------
         infile : string
@@ -1117,7 +1134,7 @@ class Fnirt(FSLCommand):
         >>> fnirt_mprage = fsl.Fnirt()
         >>> fnirt_mprage.inputs.imgfwhm = [8, 4, 2]
         >>> fnirt_mprage.inputs.sub_sampling = [4, 2, 1]
-        
+
         Specify the resolution of the warps, currently not part of the
         ``fnirt_mprage.inputs``:
 
@@ -1140,24 +1157,24 @@ class Fnirt(FSLCommand):
         if not self.inputs.reference:
             raise AttributeError('Fnirt requires a reference file.')
         self.inputs.update(**inputs)
-                                   
-        results = self._runner()
+
+        results = self._runner(cwd=cwd)
         if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
-            
+            results.outputs = self.aggregate_outputs(cwd)
+
         return results 
 
     def update_optmap(self):
         """Updates opt_map for inout items with variable values
         """
         itemstoupdate = ['sub_sampling',
-                         'max_iter',
-                         'referencefwhm',
-                         'imgfwhm',
-                         'lambdas',
-                         'estintensity',
-                         'applyrefmask',
-                         'applyimgmask']
+                'max_iter',
+                'referencefwhm',
+                'imgfwhm',
+                'lambdas',
+                'estintensity',
+                'applyrefmask',
+                'applyimgmask']
         for item in itemstoupdate:
             if self.inputs.get(item):
                 opt = self.opt_map[item].split()
@@ -1168,7 +1185,7 @@ class Fnirt(FSLCommand):
                     # TypeError is raised if values is not a list
                     valstr = opt[0] + ' %s'%(opt[1])
                 self.opt_map[item] = valstr
-   
+
     def _parse_inputs(self):
         '''Call our super-method, then add our input files'''
         # Could do other checking above and beyond regular _parse_inputs here
@@ -1201,7 +1218,7 @@ class Fnirt(FSLCommand):
             fid.write('%s\n'%(item))
         fid.close()
 
-    def aggregate_outputs(self):
+    def aggregate_outputs(self, cwd=None):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.

@@ -295,8 +295,9 @@ class CommandLine(Interface):
             self.inputs.cwd!  Use an alternative like '.' if you need it
         """
         if cwd is None:
+            # I'd like to deprecate this -DJC
             cwd = self.inputs.get('cwd', '.')
-        runtime = Bunch(cmdline=self.cmdline)
+        runtime = Bunch(cmdline=self.cmdline, cwd=cwd, shell=shell)
 
         proc  = subprocess.Popen(runtime.cmdline,
                                  stdout=subprocess.PIPE,

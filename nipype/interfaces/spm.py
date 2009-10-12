@@ -513,7 +513,7 @@ class Realign(SpmMatlabCommandLine):
                         mean_image=None)
         outputs.realigned_files = []
         outputs.realignment_parameters = []
-        if type(self.inputs.infile) == type([]):
+        if type(self.inputs.infile) == list:
             filelist = self.inputs.infile
         else:
             filelist = [self.inputs.infile]
