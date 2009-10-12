@@ -133,9 +133,9 @@ class NodeWrapper(object):
                         newfiles = copyfiles(infiles, [outdir], copy=info.copy)
                         self.inputs[info.key] = list_to_filename(newfiles)
                 self._run_interface(execute=True)
-                if type(self._result.runtime) == type([]):
+                if type(self._result.runtime) == list:
                     # XXX In what situation is runtime ever a list?
-                    # Normally is't a Bunch.
+                    # Normally it's a Bunch.
                     returncode = 0
                     for r in self._result.runtime:
                         returncode = max(r.returncode, returncode)

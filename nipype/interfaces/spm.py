@@ -392,7 +392,7 @@ class Realign(SpmMatlabCommandLine):
         
 
     def get_input_info(self):
-        """ Provides information about inputs as a dict
+        """ Provides information about inputs
             info = [Bunch(key=string,copy=bool,ext='.nii'),...]
         """
         info = [Bunch(key='infile',copy=True)]
