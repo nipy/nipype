@@ -31,12 +31,6 @@ import warnings
 warn = warnings.warn
 
 warnings.filterwarnings('always', category=UserWarning)
-# If we don't like the way python is desplaying things, we can override this,
-# e.g.:
-# def warnings.showwarning(message, category, filename, lineno, file=None,
-# line=None):
-#     print message
-
 
 class FSLInfo():
     '''A class to encapsulate stuff we'll need throughout the 
@@ -47,7 +41,6 @@ class FSLInfo():
     
     I'm also not sure this is the best ordering for the various attributes and
     methods. Please feel free to reorder.'''
-    _version = None
     @property
     def version(self):
         """Check for fsl version on system
@@ -62,19 +55,18 @@ class FSLInfo():
            Version number as string or None if FSL not found
 
         """
-        if self._version is None:
-            # find which fsl being used....and get version from
-            # /path/to/fsl/etc/fslversion
-            clout = CommandLine('which fsl').run()
+        # find which fsl being used....and get version from
+        # /path/to/fsl/etc/fslversion
+        clout = CommandLine('which fsl').run()
 
-            if clout.runtime.returncode is 0:
-                out = clout.runtime.stdout
-                basedir = os.path.split(os.path.split(out)[0])[0]
-                clout = CommandLine('cat %s/etc/fslversion'%(basedir)).run()
-                out = clout.runtime.stdout
-                self._version = out.strip('\n')
+        if clout.runtime.returncode is not 0:
+            return None
 
-        return self._version
+        out = clout.runtime.stdout
+        basedir = os.path.split(os.path.split(out)[0])[0]
+        clout = CommandLine('cat %s/etc/fslversion'%(basedir)).run()
+        out = clout.runtime.stdout
+        return out.strip('\n')
 
     ftypes = {'NIFTI':'nii',
               'ANALYZE':'hdr',
@@ -83,7 +75,7 @@ class FSLInfo():
               'NIFTI_GZ':'nii.gz',
               'NIFTI_PAIR_GZ':'hdr.gz',
               None: 'env variable FSLOUTPUTTYPE not set'}
-    _outputtype = None
+
     def outputtype(self, ftype=None):
         """Check and or set the global FSL output file type FSLOUTPUTTYPE
         
@@ -101,10 +93,9 @@ class FSLInfo():
             The extension associated with the FSLOUTPUTTYPE
 
         """
-
-        if ftype is None and self._outputtype is None:
+        if ftype is None:
             # get environment setting
-            self._outputtype = os.getenv('FSLOUTPUTTYPE')
+            fsl_ftype = os.getenv('FSLOUTPUTTYPE')
 
         else:
             # set environment setting - updating environ automatically calls
@@ -115,16 +106,16 @@ class FSLInfo():
                 os.environ['FSLOUTPUTTYPE'] = ftype 
             else:
                 pass
-                # raise an exception?
-            self._outputtype = ftype
+                # raise an exception? warning?
+            fsl_ftype = ftype
 
-        print 'FSLOUTPUTTYPE = %s (\"%s\")' % (self._outputtype, 
-                                               self.ftypes[self._outputtype] )
-        return self._outputtype, self.ftypes[self._outputtype]
+        print 'FSLOUTPUTTYPE = %s (\"%s\")' % (fsl_ftype, 
+                                               self.ftypes[fsl_ftype] )
+        return fsl_ftype, self.ftypes[fsl_ftype]
     
 fsl_info = FSLInfo()
 
-# Legacy to support old code. Should be deleted soon.
+# Legacy to support old code. Should be deleted soon. before 0.2?
 def fslversion():
     warn(DeprecationWarning('fslversion should be accessed via fsl_info'))
     return(fsl_info.version)
