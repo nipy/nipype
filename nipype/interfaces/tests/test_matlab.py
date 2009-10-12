@@ -5,7 +5,12 @@ from tempfile import mkdtemp
 
 import os
 
-res = CommandLine('which matlab').run()
+try:
+    matlab_cmd = os.environ['MATLABCMD']
+except:
+    matlab_cmd = 'matlab'
+
+res = CommandLine('which %s'%matlab_cmd).run()
 matlab_path = res.runtime.stdout.strip()
 
 if matlab_path != '':

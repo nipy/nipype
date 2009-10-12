@@ -41,13 +41,14 @@ class ArtifactDetect(Interface):
         realignment_parameters : filename(s)
             Names of realignment parameters corresponding to the
             functional data files
-        design_matrix: filename
-            Currently limited to SPM design matrices
+        parameter_source : string
+            Are the movement parameters from SPM or FSL or from
+            Siemens PACE data. Options: SPM, FSL or Siemens
         use_differences : 2-element boolean list
             Use differences between successive motion (first element)
             and intensity paramter (second element) estimates in order
             to determine outliers.  (default is [True, True])
-        use_norm : boolean
+        use_norm : boolean, optional
             Use the norm of the motion parameters in order to
             determine outliers.  Requires ``norm_threshold`` to be set.
             (default is True)
@@ -83,7 +84,7 @@ class ArtifactDetect(Interface):
     def _populate_inputs(self):
         self.inputs = Bunch(realigned_files=None,
                             realignment_parameters=None,
-                            design_matrix=None,
+                            parameter_source=None,
                             use_differences=[True,True],
                             use_norm=True,
                             norm_threshold=None,
@@ -215,6 +216,11 @@ class ArtifactDetect(Interface):
             for i in range(newpos.shape[0]):
                 normdata[i] = np.max(np.sqrt(np.sum(np.reshape(np.power(np.abs(newpos[i,:]),2),(3,6)),axis=0)))
         else:
+            #if not registered to mean we may want to use this
+            #mc_sum = np.sum(np.abs(mc),axis=1)
+            #ref_idx = find_indices(mc_sum == np.min(mc_sum))
+            #ref_idx = ref_idx[0]
+            #newpos = np.abs(newpos-np.kron(np.ones((newpos.shape[0],1)),newpos[ref_idx,:]))
             newpos = np.abs(signal.detrend(newpos,axis=0,type='constant'))
             normdata = np.sqrt(np.mean(np.power(newpos,2),axis=1))
         return normdata
@@ -232,6 +238,15 @@ class ArtifactDetect(Interface):
         # read in motion parameters
         mc_in = np.loadtxt(motionfile)
         mc = deepcopy(mc_in)
+        if self.inputs.parameter_source == 'SPM':
+            pass
+        elif self.inputs.parameter_source == 'FSL':
+            mc = mc[:,[3,4,5,0,1,2]]
+        elif self.inputs.parameter_source == 'Siemens':
+            Exception("Siemens PACE format not implemented yet")
+        else:
+            Exception("Unknown source for movement parameters")
+            
         if self.inputs.use_norm:
             # calculate the norm of the motion parameters
             normval = self._calc_norm(mc,self.inputs.use_differences[0])
