@@ -152,38 +152,54 @@ def test_flirt():
                           outfile='outfile',outmatrix='outmat.mat')
     flirt_est = flirter.run(infile='infile',reference='reffile',
                             outfile=None,outmatrix='outmat.mat')
-    flirt_apply = flirter.applyxfm(infile='infile',reference='reffile',
-                                   inmatrix='inmatrix.mat',outfile='outimgfile')
-    
+
     yield assert_not_equal, flirter, flirted
     yield assert_not_equal, flirted, flirt_est
-    yield assert_not_equal, flirted, flirt_apply
 
     yield assert_equal, flirter.cmd, 'flirt'
     yield assert_equal, flirter.inputs.bins, flirted.interface.inputs.bins
     yield assert_equal, flirter.inputs.cost, flirt_est.interface.inputs.cost
-    yield assert_equal, flirter.inputs.cost, flirt_apply.interface.inputs.cost
-    yield assert_equal, flirt_apply.runtime.cmdline, \
-            'flirt -in infile -ref reffile -omat outmat.mat ' \
-            '-init inmatrix.mat -out outimgfile -bins 256 -cost mutualinfo ' \
-            '-applyxfm'
-    
+    yield assert_equal, flirted.runtime.cmdline, \
+        'flirt -in infile -ref reffile -omat outmat.mat -out outfile ' \
+        '-bins 256 -cost mutualinfo'
+
     flirter = fsl.Flirt()
     # infile not specified
-    yield assert_raises, AttributeError, flirter.applyxfm
+    yield assert_raises, AttributeError, flirter.run
     flirter.inputs.infile = 'foo.nii'
     # reference not specified
-    yield assert_raises, AttributeError, flirter.applyxfm
+    yield assert_raises, AttributeError, flirter.run
     flirter.inputs.reference = 'mni152.nii'
-    # inmatrix not specified
-    yield assert_raises, AttributeError, flirter.applyxfm
-    flirter.inputs.inmatrix = 'inmatrix.mat'
-    res = flirter.applyxfm()
-    realcmd = 'flirt -in foo.nii -ref mni152.nii -init inmatrix.mat -applyxfm'
+    res = flirter.run()
+    realcmd = 'flirt -in foo.nii -ref mni152.nii'
     yield assert_equal, res.interface.cmdline, realcmd
     inputs = dict(flags='-v')
-    res = flirter.applyxfm(**inputs)
-    realcmd ='flirt -in foo.nii -ref mni152.nii -init inmatrix.mat -v -applyxfm'
+    res = flirter.run(**inputs)
+    realcmd ='flirt -in foo.nii -ref mni152.nii -v'
+    yield assert_equal, res.interface.cmdline, realcmd
+
+
+def test_applyxfm():
+    # ApplyXFM subclasses Flirt.
+    flt = fsl.ApplyXFM(infile='subj.nii', inmatrix='xfm.mat', 
+                       outfile='xfm_subj.nii', reference='mni152.nii')
+    flted = flt.run()
+    yield assert_equal, flt.cmdline, \
+        'flirt -in subj.nii -ref mni152.nii -init xfm.mat ' \
+        '-out xfm_subj.nii -applyxfm'
+    flt = fsl.ApplyXFM()
+    yield assert_raises, AttributeError, flt.run
+    flt.inputs.infile = 'subj.nii'
+    flt.inputs.outfile = 'xfm_subj.nii'
+    # reference not specified
+    yield assert_raises, AttributeError, flt.run
+    flt.inputs.reference = 'mni152.nii'
+    # inmatrix not specified
+    yield assert_raises, AttributeError, flt.run
+    flt.inputs.inmatrix = 'xfm.mat'
+    res = flt.run()
+    realcmd = 'flirt -in subj.nii -ref mni152.nii -init xfm.mat '\
+        '-out xfm_subj.nii -applyxfm'
     yield assert_equal, res.interface.cmdline, realcmd
 
 

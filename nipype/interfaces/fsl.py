@@ -797,7 +797,8 @@ class ApplyXFM(Flirt):
     >>> xfm = ApplyXFM(infile='subject.nii', bins=640)
     >>> xfm_applied = xfm.run(inmatrix='xform.mat')
     '''
-    def run(self, infile=None, inmatrix=None, outfile=None, **inputs):
+    def run(self, infile=None, reference=None, inmatrix=None, 
+            outfile=None, **inputs):
         """Run flirt and apply the transformation to the image.
         
         eg.
@@ -808,6 +809,8 @@ class ApplyXFM(Flirt):
         ----------
         infile : string
             Filename of volume to be moved.
+        reference : string
+            Filename of volume used as target for registration.
         inmatrix : string
             Filename for input transformation matrix, in ascii format.
         outfile : string, optional
@@ -835,15 +838,15 @@ class ApplyXFM(Flirt):
         if infile:
             self.inputs.infile = infile
         if not self.inputs.infile:
-            raise AttributeError('Flirt requires an infile.')
+            raise AttributeError('ApplyXFM requires an infile.')
         if reference:
             self.inputs.reference = reference
         if not self.inputs.reference:
-            raise AttributeError('Flirt requires a reference file.')
+            raise AttributeError('ApplyXFM requires a reference file.')
         if inmatrix:
             self.inputs.inmatrix = inmatrix
         if not self.inputs.inmatrix:
-            raise AttributeError('Flirt applyxfm requires an inmatrix')
+            raise AttributeError('ApplyXFM requires an inmatrix')
         if outfile:
             self.inputs.outfile = outfile
         # If the inputs dict already has a set of flags, we want to
