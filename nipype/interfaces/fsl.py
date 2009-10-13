@@ -1257,8 +1257,9 @@ class Fnirt(FSLCommand):
             outputs.logfile = self.inputs.logfile
         # check if files were created
         for item, file in outputs.iteritems():
-            if len(glob(file))<1:
-                raise IOError('file %s of type %s not generated'%(file,item))
+            if file is not None:
+                if len(glob(file))<1:
+                    raise IOError('file %s of type %s not generated'%(file,item))
         return outputs
 
 class ApplyWarp(FSLCommand):
