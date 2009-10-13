@@ -288,20 +288,12 @@ class Bet(FSLCommand):
         allargs = super(Bet, self)._parse_inputs(skip=('infile', 'outfile'))
 
         # Add infile and outfile to the args if they are specified
-        if self.inputs.infile:
-            allargs.insert(0, self.inputs.infile)
-            if not self.inputs.outfile:
-                # If the outfile is not specified but the infile is,
-                # generate an outfile
-                pth, fname = os.path.split(self.inputs.infile)
-                newpath=self.inputs.get('cwd', pth)
-                self.inputs.outfile = fname_presuffix(fname, suffix='_bet',
-                                                      newpath=newpath)
+        allargs.insert(0, self.inputs.infile)
         if self.inputs.outfile:
             allargs.insert(1, self.inputs.outfile)
         return allargs
         
-    def run(self, infile=None, outfile=None, **inputs):
+    def run(self, cwd=None, infile=None, outfile=None, **inputs):
         """Execute the command.
 
         Parameters
@@ -335,17 +327,24 @@ class Bet(FSLCommand):
         """
         if infile:
             self.inputs.infile = infile
-        if not self.inputs.infile:
+        if self.inputs.infile is None:
             raise AttributeError('Bet requires an input file')
         if outfile:
             self.inputs.outfile = outfile
-        if not self.inputs.outfile:
-            raise AttributeError('Bet requires an output file')
+        if cwd is None:
+            cwd = os.getcwd()
+
         self.inputs.update(**inputs)
+        if not self.inputs.outfile:
+            # If the outfile is not specified but the infile is,
+            # generate an outfile
+            pth, fname = os.path.split(self.inputs.infile)
+            self.inputs.outfile = fname_presuffix(fname, suffix='_bet',
+                                                  newpath=cwd)
         
-        results = self._runner()
+        results = self._runner(cwd=cwd)
         if results.runtime.returncode == 0:
-            self.aggregate_outputs(results)
+            results.outputs = self.aggregate_outputs(cwd)
 
         return results        
 
@@ -386,14 +385,13 @@ class Bet(FSLCommand):
         outputs = Bunch(outfile = None,
                 maskfile = None)
         if self.inputs.outfile:
-            outfile = self.inputs.outfile
+            outfile = os.realpath(self.inputs.outfile)
         else:
             path,fname = os.path.split(self.inputs['infile'])
-            if cwd is not None:
-                path = cwd
+            if cwd is None:
+                cwd = os.getcwd()
 
-            outfile = os.path.join(path,
-                    fname_presuffix(fname,suffix='_bet'))
+            outfile = os.path.join(cwd, fname_presuffix(fname,suffix='_bet'))
             assert len(glob(outfile))==1, \
                     "Incorrect number or no output files %s generated"%outfile
         outputs.outfile = outfile
