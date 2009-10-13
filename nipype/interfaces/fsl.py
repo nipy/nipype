@@ -1012,10 +1012,10 @@ class McFlirt(FSLCommand):
         if self.inputs.outfile:
             pth, nme = os.path.split(self.inputs.outfile)
             jnk, ext = os.path.splitext(nme)
-            item = self.inputs.out_basename + '.%s' % (envext)
+            item = self.inputs.out_basename + envext
         else:
             nme, ext = os.path.splitext(item)
-            item = nme + '_mcf.%s' % (envext) # auto suffix _mcf if no outfile
+            item = '%s_mcf.%s' % (nme, envext) # auto suffix _mcf if no outfile
         # always generates realigned 4D volume ``outfile``
         outputs.outfile = item
         if self.inputs.stats:
