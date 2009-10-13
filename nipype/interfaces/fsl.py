@@ -545,7 +545,7 @@ class Fast(FSLCommand):
             If any expected output file is not found.
 
         """
-        envext = fsloutputtype()[1]
+        _, ext = fsl_info.outputtype()
         outputs = Bunch(mixeltype = [],
                 seg = [],
                 partial_volume_map=[],
@@ -1233,6 +1233,9 @@ class Fnirt(FSLCommand):
         Else, contains path,filename of generated outputfile(s)
              Raises Exception if file is not found        
         """
+        if cwd is None:
+            cwd = os.getcwd()
+
         outputs = Bunch(coefficientsfile=None,
                         warpedimage=None,
                         warpfield=None,
@@ -1265,11 +1268,12 @@ class Fnirt(FSLCommand):
         ext = '.' + ext
 
         for item, file in outputs.iteritems():
+            file = os.path.join(cwd, file)
             if file is not None:
                 ls = glob(file) or glob(file + ext)
                 if len(ls) != 1:
                     raise IOError('file %s of type %s not generated'%(file,item))
-                outputs.update(**{item: ls[0]})
+                setattr(outputs.update, item, ls[0])
         return outputs
 
 class ApplyWarp(FSLCommand):
@@ -1289,6 +1293,29 @@ class ApplyWarp(FSLCommand):
                'reference':         '--ref=%s',
                'fieldcoeff_file':   '--warp=%s',
               }
+
+    def run(self, cwd=None, infile=None, outfile=None, reference=None,
+            fieldcoeff_file=None, **inputs):
+        def raise_attr(name):
+            raise AttributeError('applywarp requires %s' % name)
+
+        if infile:
+            self.inputs.infile = infile
+        if self.inputs.infile is None:
+            raise_attr('infile')
+        if reference:
+            self.inputs.reference = reference
+        if self.inputs.reference is None: 
+            raise_attr('reference')
+
+        # Doesn't do anything useful
+        self.inputs.update(**inputs)
+
+        results = self._runner(cwd=cwd)
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs(cwd)
+
+        return results 
 
     def aggregate_outputs(self, cwd=None):
         if cwd is None:
