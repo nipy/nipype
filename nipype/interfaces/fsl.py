@@ -1268,8 +1268,8 @@ class Fnirt(FSLCommand):
         ext = '.' + ext
 
         for item, file in outputs.iteritems():
-            file = os.path.join(cwd, file)
             if file is not None:
+                file = os.path.join(cwd, file)
                 ls = glob(file) or glob(file + ext)
                 if len(ls) != 1:
                     raise IOError('file %s of type %s not generated'%(file,item))
