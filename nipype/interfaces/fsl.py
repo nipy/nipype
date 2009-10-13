@@ -289,7 +289,8 @@ class Bet(FSLCommand):
         allargs = super(Bet, self)._parse_inputs(skip=('infile', 'outfile'))
 
         # Add infile and outfile to the args if they are specified
-        allargs.insert(0, self.inputs.infile)
+        if self.inputs.infile:
+            allargs.insert(0, self.inputs.infile)
         if self.inputs.outfile:
             allargs.insert(1, self.inputs.outfile)
         return allargs
