@@ -194,7 +194,7 @@ class NodeWrapper(object):
             raise ValueError('At most one iterfield is supported at this time\n'
                              'Got: %s in %s', (self.iterfield, self.name))
         if len(self.iterfield) == 1:
-            itervals = self.inputs.get(self.iterfield)[0]
+            itervals = self.inputs.get(self.iterfield[0])
             notlist = False
             if type(itervals) is not list:
                 notlist = True
