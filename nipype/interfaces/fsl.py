@@ -385,7 +385,7 @@ class Bet(FSLCommand):
         outputs = Bunch(outfile = None,
                 maskfile = None)
         if self.inputs.outfile:
-            outfile = os.realpath(self.inputs.outfile)
+            outfile = os.path.realpath(self.inputs.outfile)
         else:
             path,fname = os.path.split(self.inputs['infile'])
             if cwd is None:
@@ -1240,7 +1240,8 @@ class Fnirt(FSLCommand):
                         logfile=None)
 
         if self.inputs.fieldcoeff_file:
-            outputs.fieldcoeff_file = os.realpath(self.inputs.fieldcoeff_file)
+            outputs.fieldcoeff_file = \
+                    os.path.realpath(self.inputs.fieldcoeff_file)
         if self.inputs.outimage:
             outputs.warpedimage = self.inputs.outimage
         if self.inputs.fieldfile:
@@ -1278,7 +1279,7 @@ class ApplyWarp(FSLCommand):
               }
 
     def aggregate_outputs(self, cwd=None):
-        return Bunch(warpedimage=os.realpath(self.inputs.outfile))
+        return Bunch(warpedimage=os.path.realpath(self.inputs.outfile))
                 
 
 class FSFmaker:
