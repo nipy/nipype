@@ -1322,10 +1322,11 @@ class ApplyWarp(FSLCommand):
             cwd = os.getcwd()
 
         # check if files were created
-        type, ext = fsl_info.outputtype()
+        _, ext = fsl_info.outputtype()
         ext = '.' + ext
-
-        ls = glob(self.inputs.outfile) or glob(self.inputs.outfile + ext)
+        
+        fname = os.path.join(cwd, self.inputs.outfile)
+        ls = glob(fname) or glob(fname + ext)
         if len(ls) != 1:
             raise IOError('file %s of type %s not generated'%(file,item))
         return Bunch(warpedimage=ls[0])
