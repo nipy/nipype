@@ -954,6 +954,7 @@ class McFlirt(FSLCommand):
             'savemats':    '-mats',
             'saveplots':   '-plots',
             'report':      '-report',
+            'reffile':     '-reffile %s',
             'infile':      None,
             }
 
