@@ -1261,7 +1261,7 @@ class Fnirt(FSLCommand):
                 ls = glob(file + '.*')
                 if len(ls) != 1:
                     raise IOError('file %s of type %s not generated'%(file,item))
-                self.outputs.update(**{item, ls})
+                self.outputs.update(**{item: ls})
         return outputs
 
 class ApplyWarp(FSLCommand):
