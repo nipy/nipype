@@ -1273,7 +1273,7 @@ class Fnirt(FSLCommand):
                 ls = glob(file) or glob(file + ext)
                 if len(ls) != 1:
                     raise IOError('file %s of type %s not generated'%(file,item))
-                setattr(outputs.update, item, ls[0])
+                setattr(outputs, item, ls[0])
         return outputs
 
 class ApplyWarp(FSLCommand):
