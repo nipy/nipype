@@ -1255,10 +1255,14 @@ class Fnirt(FSLCommand):
             outputs.intensitymodulation = self.inputs.intensityfile
         if self.inputs.logfile:
             outputs.logfile = self.inputs.logfile
+
         # check if files were created
+        type, ext = fsl_info.outputtype()
+        ext = '.' + ext
+
         for item, file in outputs.iteritems():
             if file is not None:
-                ls = glob(file + '.*')
+                ls = glob(file) or glob(file + ext)
                 if len(ls) != 1:
                     raise IOError('file %s of type %s not generated'%(file,item))
                 self.outputs.update(**{item: ls})
