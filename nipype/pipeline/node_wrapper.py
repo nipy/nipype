@@ -9,6 +9,8 @@ from nipype.interfaces.base import Bunch, InterfaceResult
 from tempfile import mkdtemp
 from copy import deepcopy
 
+from nipype.interfaces.fsl import FSLCommand
+
 class NodeWrapper(object):
     """
     Base class wrapper for interface objects to create nodes that can
@@ -117,7 +119,10 @@ class NodeWrapper(object):
                 # XXX Should not catch bare exceptions!
                 # Change this to catch a specific exception and raise an error.
                 print "directory %s exists\n" % outdir
-            self._interface.inputs.cwd = outdir
+            # This is a temporary measure while exploring alternatives to
+            # dealing with cwd
+            if not isinstance(self._interface, FSLCommand):
+                self._interface.inputs.cwd = outdir
             hashvalue = self.hash_inputs()
             inputstr  = str(self.inputs)
             hashfile = os.path.join(outdir, '_0x%s.txt' % hashvalue)
@@ -131,7 +136,7 @@ class NodeWrapper(object):
                         infiles = filename_to_list(files)
                         newfiles = copyfiles(infiles, [outdir], copy=info.copy)
                         self.inputs[info.key] = list_to_filename(newfiles)
-                self._run_interface(execute=True)
+                self._run_interface(execute=True, cwd=outdir)
                 if type(self._result.runtime) == list:
                     # XXX In what situation is runtime ever a list?
                     # Normally it's a Bunch.
@@ -170,7 +175,7 @@ class NodeWrapper(object):
                                 self.inputs[info.key] = newfile
                             else:
                                 self.inputs[info.key][i] = newfile
-                self._run_interface(execute=False)
+                self._run_interface(execute=False, cwd=outdir)
         else:
             self._run_interface(execute=True)
         if self.disk_based:
@@ -178,11 +183,16 @@ class NodeWrapper(object):
             pass
         return self._result
 
-    def _run_interface(self, execute=True):
+    def _run_interface(self, execute=True, cwd=None):
+        # I think this should be OK... I don't get the iteration
+        # mechanism fully. -DJC
+        if cwd is not None:
+            old_cwd = os.getcwd()
+            os.chdir(cwd)
         if len(self.iterfield) == 1:
             itervals = self.inputs[self.iterfield[0]]
             notlist = False
-            if type(itervals) is not type([]):
+            if type(itervals) is not list:
                 notlist = True
                 itervals = [itervals]
             self._result = InterfaceResult(interface=[], runtime=[],
@@ -191,18 +201,34 @@ class NodeWrapper(object):
                 print "running %s on %s\n"%(self.name, self.iterfield[0])
                 self.set_input(self.iterfield[0], v)
                 if execute:
-                    result = self._interface.run()
+                    # Passing cwd in here is redundant, even for FSLCommand
+                    # instances. For FSLCommand, this is an example of another
+                    # way we might do it if we decide to ditch the setwd
+                    # approach. Again - something should be removed when we
+                    # settle on a solution
+
+                    # Again, I _think_ this should be OK... I don't get the
+                    # iteration mechanism fully. -DJC
+                    result = self._interface.run(cwd=cwd)
                     self._result.interface.insert(i, result.interface)
                     self._result.runtime.insert(i, result.runtime)
                     outputs = result.outputs
                 else:
+                    # Could also pass in cwd here...
                     outputs = self._interface.aggregate_outputs()
+
                 for key,val in outputs.iteritems():
                     try:
-                        self._result.outputs[key].insert(i, val)
-                    except:
-                        self._result.outputs[key] = []
-                        self._result.outputs[key].insert(i, val)
+                        # This has funny default behavior if the length of the
+                        # list is < i - 1. I'd like to simply use append... feel
+                        # free to second my vote here!
+                        self._result.outputs.get(key).insert(i, val)
+                    except AttributeError:
+                        # .insert(i, val) is equivalent to the following if
+                        # outputs.key == None, so this is far less likely to
+                        # produce subtle errors down the road!
+                        self._result.outputs.update(**{key: [val]})
+
             print itervals
             if notlist:
                 self.set_input(self.iterfield[0], itervals.pop())
@@ -212,11 +238,15 @@ class NodeWrapper(object):
             if execute:
                 self._result = self._interface.run()
             else:
+                # Likewise, cwd could go in here
                 aggouts = self._interface.aggregate_outputs()
                 self._result = InterfaceResult(interface=None,
                                                runtime=None,
                                                outputs=aggouts)
         
+        if cwd is not None:
+            os.chdir(old_cwd)
+
     def update(self, **opts):
         self.inputs.update(**opts)
         

@@ -30,7 +30,7 @@ class BasicInterface(Interface):
             outputs.output1 = [self.ran,self.inputs.input1]
         return outputs
     
-    def run(self):
+    def run(self, cwd=None):
         """Execute this module.
         """
         runtime = Bunch(returncode=self.inputs.returncode,

@@ -3,3 +3,7 @@ command in the "input" bunch.
 
 The .run() method of an Interface should include all required inputs as
 explicitly named parameters, and they should take a default value of None.
+
+Any Interface should at a minimum support cwd as a command-line argument to
+.run(). This may be accomplished by allowing cwd as an element of the input
+Bunch, or handled as a separate case.

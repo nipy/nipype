@@ -50,7 +50,9 @@ class Bunch(object):
         self.__dict__.update(*args, **kwargs)
 
     def update(self, *args, **kwargs):
-        """update existing attribute, or create new attribute"""
+        """update existing attribute, or create new attribute
+        
+        Note: update is very much like HasTraits.set"""
         self.__dict__.update(*args, **kwargs)
 
     def iteritems(self):
@@ -117,6 +119,8 @@ class Bunch(object):
 
 class InterfaceResult(object):
     '''Describe the results of .run()-ing a particular Interface'''
+
+    # We could actually call aggregate_outputs in here...
     def __init__(self, interface, runtime, outputs=None):
         self.interface = interface
         self.runtime = runtime
@@ -137,7 +141,7 @@ class Interface(object):
         """Initialize command with given args and inputs."""
         raise NotImplementedError
 
-    def run(self):
+    def run(self, cwd=None):
         """Execute the command."""
         raise NotImplementedError
 
@@ -253,7 +257,7 @@ class CommandLine(Interface):
             else:
                 self.inputs.args = list(args)
 
-    def run(self, *args, **inputs):
+    def run(self, cwd=None, *args, **inputs):
         """Execute the command.
         
         Parameters
@@ -272,7 +276,7 @@ class CommandLine(Interface):
         """
         self._update(*args, **inputs) 
             
-        return self._runner()
+        return self._runner(cwd=cwd)
 
     def _populate_inputs(self):
         self.inputs = Bunch(args=None)
@@ -282,27 +286,26 @@ class CommandLine(Interface):
         # This handles args like ['bet', '-f 0.2'] without crashing
         return ' '.join(self.inputs.args)
 
-    def _runner(self, shell=True, cwd=None):
+    def _runner(self, cwd=None):
         """Run the command using subprocess.Popen.
+
+        Currently, shell is set to True, i.e., a shell parses the command line
         
         Arguments
         ---------
-        
-        shell : bool
-            shell command passed to Popen, do we parse the cmdline?
         cwd : str
             Note that unlike calls to Popen, cwd=None will still check
             self.inputs.cwd!  Use an alternative like '.' if you need it
         """
         if cwd is None:
             # I'd like to deprecate this -DJC
-            cwd = self.inputs.get('cwd', '.')
-        runtime = Bunch(cmdline=self.cmdline, cwd=cwd, shell=shell)
+            cwd = self.inputs.get('cwd', os.getcwd())
+        runtime = Bunch(cmdline=self.cmdline, cwd=cwd)
 
         proc  = subprocess.Popen(runtime.cmdline,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
-                                 shell=shell,
+                                 shell=True,
                                  cwd=cwd)
 
         runtime.stdout, runtime.stderr = proc.communicate()
