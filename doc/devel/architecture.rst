@@ -13,6 +13,12 @@ Any Interface should at a minimum support cwd as a command-line argument to
 .run(). This may be accomplished by allowing cwd as an element of the input
 Bunch, or handled as a separate case.
 
+We need to decide on a consistent policy towards the maintinence of paths to
+files. It seems like the best strategy might be to do absolute (os.realpath?)
+filenames by default, allowing for relative paths by explicitly including
+something that doesn't start with a '/'. This could include '.' in some sort of
+path-spec.
+
 Design Principles
 -----------------
 
