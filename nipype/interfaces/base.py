@@ -67,13 +67,13 @@ class Bunch(object):
     def __setitem__(self, key, value):
         '''deprecated, dict-like setting of attributes'''
         # get rid of for 0.2?
-        warn(DeprecationWarning('please use direct attribute'))
+        warn(DeprecationWarning('please use direct attribute or .update()'))
         self.__dict__[key] = value
 
     def __getitem__(self, key):
         '''deprecated, dict-like getting of attributes'''
         # get rid of for 0.2?
-        warn(DeprecationWarning('please use direct attribute'))
+        warn(DeprecationWarning('please use direct attribute or .set()'))
         return(self.__dict__[key])
 
     def dictcopy(self):

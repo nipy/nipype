@@ -333,7 +333,6 @@ class Bet(FSLCommand):
         'bet foo.nii bar.nii -v'
 
         """
-
         if infile:
             self.inputs.infile = infile
         if not self.inputs.infile:
@@ -1062,6 +1061,15 @@ class Fnirt(FSLCommand):
         """sets base command, not editable"""
         return 'fnirt'
 
+    # Leaving this in place 'til we get round to a thread-safe version
+    @property
+    def cmdline(self):
+        """validates fsl options and generates command line argument"""
+        self.update_optmap()
+        allargs = self._parse_inputs()
+        allargs.insert(0, self.cmd)
+        return ' '.join(allargs)
+
     def inputs_help(self):
         """Print command line documentation for FNIRT."""
         print get_doc(self.cmd, self.opt_map)
@@ -1077,12 +1085,13 @@ class Fnirt(FSLCommand):
             'outimage':         '--iout %s',
             'fieldfile':        '--fout %s',
             'jacobianfile':     '--jout %s',
+            # XXX I think reffile is misleading / confusing
             'reffile':          '--refout %s',
             'intensityfile':    '--intout %s',
             'logfile':          '--logout %s',
             'verbose':          '--verbose',
             'sub_sampling':     '--subsamp %d',
-            'max_iter':         '--miter %f',
+            'max_iter':         '--miter %d',
             'referencefwhm':    '--reffwhm %f',
             'imgfwhm':          '--infwhm %f',
             'lambdas':          '--lambda %f',
@@ -1090,18 +1099,9 @@ class Fnirt(FSLCommand):
             'applyrefmask':     '--applyrefmask %f',
             'applyimgmask':     '--applyinmask %f',
             'flags':            '%s',
-            'infile':           None,
-            'reference':        None,
+            'infile':           '--in %s',
+            'reference':        '--ref %s',
             }
-
-    @property
-    def cmdline(self):
-        """validates fsl options and generates command line argument"""
-        self.update_optmap()
-        allargs = self._parse_inputs()
-        allargs.insert(0, self.cmd)
-        return ' '.join(allargs)
-
 
     def run(self, cwd=None, infile=None, reference=None, **inputs):
         """Run the fnirt command
@@ -1150,12 +1150,11 @@ class Fnirt(FSLCommand):
         """
         if infile:
             self.inputs.infile = infile
-        if not self.inputs.infile:
-            raise AttributeError('Fnirt requires an infile.')
         if reference:
             self.inputs.reference = reference
-        if not self.inputs.reference:
-            raise AttributeError('Fnirt requires a reference file.')
+        if self.inputs.reference is None and self.inputs.infile is None:
+            raise AttributeError('Fnirt requires at least a reference' \
+                                 'or input file.')
         self.inputs.update(**inputs)
 
         results = self._runner(cwd=cwd)
@@ -1164,9 +1163,16 @@ class Fnirt(FSLCommand):
 
         return results 
 
+    # This disturbs me a little, see my post on nipy-devel about the intent of
+    # opt_map. I'm leaving this here as a counterexample, and a fine example of
+    # me over-reacting -DJC
     def update_optmap(self):
-        """Updates opt_map for inout items with variable values
+        """Render the Fnirt class non-thread safe
+        
+        Updates opt_map AT THE CLASS LEVEL for inout items with variable values
         """
+        warn(DeprecationWarning('This is wrong. Do not do anything like this.'
+                                'Ever. (Please.)'))
         itemstoupdate = ['sub_sampling',
                 'max_iter',
                 'referencefwhm',
@@ -1185,20 +1191,6 @@ class Fnirt(FSLCommand):
                     # TypeError is raised if values is not a list
                     valstr = opt[0] + ' %s'%(opt[1])
                 self.opt_map[item] = valstr
-
-    def _parse_inputs(self):
-        '''Call our super-method, then add our input files'''
-        # Could do other checking above and beyond regular _parse_inputs here
-        allargs = super(Fnirt, self)._parse_inputs(skip=('infile', 'reference'))
-        
-        possibleinputs = [(self.inputs.reference,'--ref='),
-                          (self.inputs.infile, '--in=')]
-        
-        for val, flag in possibleinputs:
-            if val:
-                allargs.insert(0,'%s%s'%(flag, val))
-        
-        return allargs
 
     def write_config(self,configfile):
         """Writes out currently set options to specified config file
@@ -1250,7 +1242,7 @@ class Fnirt(FSLCommand):
                         logfile=None)
 
         if self.inputs.fieldcoeff_file:
-            outputs.coefficientsfile = self.inputs.fieldcoeff_file
+            outputs.fieldcoeff_file = os.realpath(self.inputs.fieldcoeff_file)
         if self.inputs.outimage:
             outputs.warpedimage = self.inputs.outimage
         if self.inputs.fieldfile:
@@ -1268,6 +1260,28 @@ class Fnirt(FSLCommand):
             if len(glob(file))<1:
                 raise IOError('file %s of type %s not generated'%(file,item))
         return outputs
+
+class ApplyWarp(FSLCommand):
+    '''Use FSL's applywarp to apply the results of a Fnirt registration
+    
+    Note how little actually needs to be done if we have truly order-independent
+    arguments!
+    
+    And yes, I know I am breaking the .run(required) convention. I'll fix it.
+    -DJC'''
+    @property
+    def cmd(self):
+        return 'applywarp'
+
+    opt_map = {'infile':            '--in=%s',
+               'outfile':           '--out=%s',
+               'reference':         '--ref=%s',
+               'fieldcoeff_file':   '--warp=%s',
+              }
+
+    def aggregate_outputs(self, cwd=None):
+        return Bunch(warpedimage=os.realpath(self.inputs.outfile))
+                
 
 class FSFmaker:
     '''Use the template variables above to construct fsf files for feat.
