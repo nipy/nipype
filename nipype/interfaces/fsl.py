@@ -705,8 +705,8 @@ class Flirt(FSLCommand):
                 allargs.insert(0, '%s %s' % (flag, val))
         return allargs
 
-    def run(self, infile=None, reference=None, outfile=None, outmatrix=None,
-            **inputs):
+    def run(self, cwd=None, infile=None, reference=None, outfile=None, 
+            outmatrix=None, **inputs):
         """Run the flirt command
 
         Parameters
@@ -749,7 +749,7 @@ class Flirt(FSLCommand):
 
         results = self._runner()
         if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
+            results.outputs = self.aggregate_outputs(cwd)
         return results 
 
     def aggregate_outputs(self, cwd=None):
