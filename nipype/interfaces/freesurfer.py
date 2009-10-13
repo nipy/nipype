@@ -94,7 +94,8 @@ class FSCommandLine(CommandLine):
         # This is expected to populate `_cmdline` for _runner to work
         self._compile_command()
         result = self._runner(cwd=self.inputs.get('cwd','.'))
-        result.outputs = self.aggregate_outputs()
+        if result.runtime.returncode == 0:
+            result.outputs = self.aggregate_outputs()
         return result
     
 class Dicom2Nifti(FSCommandLine):
@@ -109,10 +110,11 @@ class Dicom2Nifti(FSCommandLine):
 
     Examples
     --------
+    >>> from nipype.interfaces import freesurfer
     >>> cvt = freesurfer.Dicom2Nifti()
     >>> cvt.inputs.dicomdir = '/software/data/STUT/RAWDATA/TrioTim-35115-20090428-081900-234000/'
     >>> cvt.inputs.file_mapping = [('nifti','*.nii'),('info','dicom*.txt'),('dti','*dti.bv*')]
-    >>> out = cvt.run()
+    >>> #out = cvt.run() # commented out as above directories are not installed
    """
 
     @property
@@ -221,20 +223,20 @@ class Dicom2Nifti(FSCommandLine):
         
 
 class Resample(FSCommandLine):
-    """use fs mri_convert to up or down-sample image files
+    """Use FreeSurfer mri_convert to up or down-sample image files
 
     Parameters
     ----------
-
     To see optional arguments
     Resample().inputs_help()
 
 
     Examples
     --------
+    >>> from nipype.interfaces import freesurfer
     >>> resampler = freesurfer.Resample()
     >>> resampler.inputs.infile = 'infile.nii'
-    >>> resampler.voxel_size = [2,2,2]
+    >>> resampler.inputs.voxel_size = [2, 2, 2]
     >>> out = resampler.run()
    """
 
@@ -242,7 +244,6 @@ class Resample(FSCommandLine):
     def cmd(self):
         """sets base command, not editable"""
         return 'mri_convert'
-
 
     def inputs_help(self):
         """
@@ -274,7 +275,8 @@ class Resample(FSCommandLine):
         """
         out_inputs = {'infile':[]}
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() 
+         if v is not None ]
         for opt in inputs:
             if opt is 'infile':
                 out_inputs['infile'] = inputs[opt]
@@ -306,7 +308,7 @@ class Resample(FSCommandLine):
         outfile = []
         for i,f in enumerate(valid_inputs['infile']):
             path,fname = os.path.split(f)
-            outfile.insert(i,fname_presuffix(fname,suffix=self.inputs.outfile_postfix))
+            outfile.insert(i, fname_presuffix(fname, suffix=self.inputs.outfile_postfix))
             outfile[i] = os.path.abspath(os.path.join(self.inputs.get('cwd','.'),outfile[i]))
             single_cmd = '%s -vs %d %d %d %s %s;' % (self.cmd, vs[0],vs[1],vs[2], f, outfile[i])
             cmd.extend([single_cmd])
@@ -317,7 +319,7 @@ class Resample(FSCommandLine):
         outputs = Bunch(outfile=[])
         for i,f in enumerate(filename_to_list(self.inputs.infile)):
             path,fname = os.path.split(f)
-            f = fname_presuffix(fname,suffix=self.inputs.outfile_postfix)
+            f = fname_presuffix(fname, suffix=self.inputs.outfile_postfix)
             f = os.path.abspath(os.path.join(self.inputs.get('cwd','.'),f))
             assert glob(f)==[f], 'outputfile %s was not generated'%f
             outputs.outfile.insert(i,f)
@@ -327,7 +329,7 @@ class Resample(FSCommandLine):
         
 
 class ReconAll(FSCommandLine):
-    """use fs recon-all to generate surfaces and parcellations of
+    """Use FreeSurfer recon-all to generate surfaces and parcellations of
     structural data from an anatomical image of a subject.
 
     Parameters
@@ -339,12 +341,14 @@ class ReconAll(FSCommandLine):
 
     Examples
     --------
-    
+    >>> from nipype.interfaces import freesurfer
     >>> reconall = freesurfer.ReconAll()
+    SUBJECTS_DIR = None
+
     >>> reconall.inputs.subject_id = 'foo'
     >>> reconall.inputs.directive  = '-all'
     >>> reconall.inputs.parent_dir = '.'
-    >>> reconall.inputs.T1file = 'structfile.nii'
+    >>> reconall.inputs.T1files = 'structfile.nii'
     >>> out = reconall.run()
    """
 
@@ -466,7 +470,7 @@ class ReconAll(FSCommandLine):
         return None
 
 class BBRegister(FSLCommand):
-    """use fs bbregister to register a volume two a surface mesh
+    """Use FreeSurfer bbregister to register a volume two a surface mesh
 
     This program performs within-subject, cross-modal registration using a
     boundary-based cost function. The registration is constrained to be 6
@@ -483,9 +487,11 @@ class BBRegister(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces.freesurfer import BBRegister
-    >>> bbreg = BBRegister(subject_id='me',sourcefile='foo.nii',init_header=True,t2_contrast=True)
+    >>> bbreg = BBRegister(subject_id='me', sourcefile='foo.nii', \
+                           init_header=True, t2_contrast=True)
     >>> bbreg.cmdline
-    'bbregister --mov foo.nii --init-header --t2 --s me --reg foo_reg_me.dat'
+    'bbregister --init-header --mov foo.nii --s me --t2 --reg foo_bbreg_me.dat'
+
    """
 
     @property
@@ -582,23 +588,22 @@ class BBRegister(FSLCommand):
             outputs.outfile = outfile[0]
 
 class ApplyVolTransform(FSLCommand):
-    """use fs mri_vol2vol to apply a transform.
-
+    """Use FreeSurfer mri_vol2vol to apply a transform.
 
     Parameters
     ----------
-
     To see optional arguments
     ApplyVolTransform().inputs_help()
-
 
     Examples
     --------
     >>> from nipype.interfaces.freesurfer import ApplyVolTransform
-    >>> applyreg = ApplyVolTransform(tkreg='me.dat',sourcefile='foo.nii',fstarg=True)
+    >>> applyreg = ApplyVolTransform(tkreg='me.dat', sourcefile='foo.nii', \
+                                     fstarg=True)
     >>> applyreg.cmdline
-    'mri_vol2vol --reg me.dat --mov foo.nii --fstarg --o foo_warped.nii'
-   """
+    'mri_vol2vol --fstarg --mov foo.nii --reg me.dat --o foo_warped.nii'
+
+    """
 
     @property
     def cmd(self):
@@ -637,7 +642,7 @@ class ApplyVolTransform(FSLCommand):
         """ Provides information about inputs as a dict
             info = [Bunch(key=string,copy=bool,ext='.nii'),...]
         """
-        info = [Bunch(key='sourcefile',copy=False)]
+        info = [Bunch(key='sourcefile', copy=False)]
         return info
     
     def _parse_inputs(self):
@@ -646,7 +651,8 @@ class ApplyVolTransform(FSLCommand):
 
         # Add outfile to the args if not specified
         if self.inputs.outfile is None:
-            allargs.extend(['--o',fname_presuffix(self.inputs.sourcefile,suffix='_warped')])
+            allargs.extend(['--o', fname_presuffix(self.inputs.sourcefile, 
+                                                   suffix='_warped')])
         return allargs
     
     def run(self):
@@ -668,7 +674,8 @@ class ApplyVolTransform(FSLCommand):
     def aggregate_outputs(self):
         outputs = Bunch(outfile=None)
         if self.inputs.outfile is True:
-            outfile = glob(fname_presuffix(self.inputs.sourcefile,suffix='_warped'))
+            outfile = glob(fname_presuffix(self.inputs.sourcefile,
+                                           suffix='_warped'))
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
         if type(self.inputs.outfile) == type(''):
@@ -678,7 +685,7 @@ class ApplyVolTransform(FSLCommand):
 
         
 class Smooth(FSLCommand):
-    """use fs mris_volsmooth to smooth a volume
+    """Use FreeSurfer mris_volsmooth to smooth a volume
 
     This function smoothes cortical regions on a surface and
     non-cortical regions in volume.
@@ -693,9 +700,10 @@ class Smooth(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces.freesurfer import Smooth
-    >>> smoothvol = Smooth(sourcefile='foo.nii',regfile='reg.dat',surface_fwhm=10,vol_fwhm=6)
+    >>> smoothvol = Smooth(sourcefile='foo.nii', regfile='reg.dat', \
+                           surface_fwhm=10, vol_fwhm=6)
     >>> smoothvol.cmdline
-    'mris_volsmooth --reg reg.dat --vol-fwhm 6 --fwhm 10 --mov foo.nii --o foo_surfsmooth.nii'
+    'mris_volsmooth --reg reg.dat --i foo.nii --fwhm 10 --vol-fwhm 6 --o foo_surfsmooth.nii'
    """
 
     @property
@@ -736,7 +744,8 @@ class Smooth(FSLCommand):
 
         # Add outfile to the args if not specified
         if self.inputs.outfile is None:
-            allargs.extend(['--o',fname_presuffix(self.inputs.sourcefile,suffix='_surfsmooth')])
+            allargs.extend(['--o', fname_presuffix(self.inputs.sourcefile,
+                                                   suffix='_surfsmooth')])
         return allargs
     
     def run(self):
@@ -758,7 +767,8 @@ class Smooth(FSLCommand):
     def aggregate_outputs(self):
         outputs = Bunch(outfile=None)
         if self.inputs.outfile is True:
-            outfile = glob(fname_presuffix(self.inputs.sourcefile,suffix='_surfsmooth'))
+            outfile = glob(fname_presuffix(self.inputs.sourcefile,
+                                           suffix='_surfsmooth'))
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
         if type(self.inputs.outfile) == type(''):
