@@ -97,9 +97,10 @@ class NodeWrapper(object):
 
     def set_input(self, parameter, val, *args, **kwargs):
         if callable(val):
-            self._interface.inputs.get(parameter) = deepcopy(val(*args, **kwargs))
+            setattr(self._interface.inputs, parameter, 
+                    deepcopy(val(*args, **kwargs)))
         else:
-            self._interface.inputs.get(parameter) = deepcopy(val)
+            setattr(self._interface.inputs, parameter, deepcopy(val))
 
     def get_output(self, parameter):
         if self._result is not None:
