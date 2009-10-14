@@ -997,8 +997,7 @@ class McFlirt(FSLCommand):
         self.inputs.update(**inputs)
 
         if self.inputs.outfile is None:
-            name = os.path.basename(self.inputs.infile)
-            _, ext = os.path.
+            # XXX newpath could be cwd
             self.inputs.outfile = fname_presuffix(self.inputs.infile,
                                         suffix='_mcf', newpath='.')
 
