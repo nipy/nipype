@@ -129,7 +129,7 @@ class FSLInfo():
         # Could be made more faster / less clunky, but don't care until the API
         # is sorted out
         _, ext = self.outputtype()
-        files = self.glob(outfile) or glob(outfile + '.' + ext)
+        files = self.glob(fname) or glob(fname + '.' + ext)
     
 fsl_info = FSLInfo()
 
