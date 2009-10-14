@@ -277,12 +277,12 @@ class Bet(FSLCommand):
         'threshold':          '-t',
         'mesh':               '-e',
         'verbose':            '-v',
+        'functional':         '-F',
         'flags':              '%s',
         'infile':             None,
         'outfile':            None,
         }
-    # Currently we don't support -R, -S, -B, -Z, -F, -A or -A2
-    # -B is useful for our system... why not support it?
+    # Currently we don't support -R, -S, -B, -Z,-A or -A2
 
     def _parse_inputs(self):
         """validate fsl bet options"""

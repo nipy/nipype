@@ -91,7 +91,7 @@ class Pipeline(object):
         for u,v,d in connection_list:
             for source,dest in d:
                 try:
-                    if v.inputs.__dict__.has_key(dest) is not True:
+                    if dest not in v.inputs.__dict__:
                         print "Module %s has no input called %s\n"%(v.name,dest)
                 except:
                     print "unable to query inputs of module %s\n"%v.name
