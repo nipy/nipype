@@ -1018,7 +1018,7 @@ class McFlirt(FSLCommand):
             item = '%s_mcf.%s' % (nme, envext) # auto suffix _mcf if no outfile
         # always generates realigned 4D volume ``outfile``
         outputs.outfile = item
-        if self.inputs.stats:
+        if self.inputs.statsimgs:
             outputs.varianceimg = fname_presuffix(item, suffix='_variance')
             outputs.stdimg = fname_presuffix(item, suffix='_sigma')
             outputs.meanimg = fname_presuffix(item, suffix='_meanvol')
