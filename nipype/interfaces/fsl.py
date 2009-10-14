@@ -1368,15 +1368,36 @@ class ApplyWarp(FSLCommand):
 
         return results 
 
+    def _parse_inputs(self):
+        """Call our super-method, then add our input files"""
+        allargs = super(ApplyWarp, self)._parse_inputs()
+        if self.inputs.infile is not None:
+            # XXX This currently happens twice, slightly differently
+            if self.inputs.outfile is None:
+                # XXX newpath could be cwd, but then we have to put it in inputs
+                # or pass it to _parse_inputs (or similar).
+                outfile = fname_presuffix(self.inputs.infile,
+                                            suffix='_warp', newpath='.')
+                allargs.append(self.opt_map['outfile'] % outfile)
+
+        return allargs
+
     def aggregate_outputs(self, cwd=None):
         if cwd is None:
             cwd = os.getcwd()
         
-        fname = os.path.join(cwd, self.inputs.outfile)
+        outfile = self.inputs.outfile
+        if outfile is None:
+            # XXX newpath could be cwd, but then we have to put it in inputs
+            # or pass it to _parse_inputs (or similar).
+            outfile = fname_presuffix(self.inputs.infile,
+                                        suffix='_warp', newpath='.')
+
+        fname = os.path.join(cwd, outfile)
         ls = fsl_info.glob(fname)
         if len(ls) != 1:
             raise IOError('file %s of type %s not generated'%(file,item))
-        return Bunch(warpedimage=ls[0])
+        return Bunch(warpedimage=fname)
                 
 class FSFmaker:
     '''Use the template variables above to construct fsf files for feat.
