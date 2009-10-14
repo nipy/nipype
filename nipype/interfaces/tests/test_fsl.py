@@ -42,7 +42,7 @@ def test_bet():
     yield assert_equal, better.cmd, 'bet'
 
     # Test raising error with mandatory args absent
-    yield assert_raises, AttributeError, better.run
+    yield assert_raises, ValueError, better.run
 
     # .inputs based parameter setting
     better.inputs.frac = 0.5
@@ -63,7 +63,8 @@ def test_bet():
     better.inputs.infile = 'infile'
     res = better.run()
     outfile = os.path.join(os.path.abspath('.'), 'infile_bet')
-    yield assert_equal, better.inputs.outfile, outfile
+    # This behavior is bad, see Trac ticket #42
+    # yield assert_equal, better.inputs.outfile, outfile
 
     # Our options and some test values for them
     # Should parallel the opt_map structure in the class for clarity
@@ -255,12 +256,12 @@ def test_fnirt():
     fnirt.inputs.sub_sampling = [8,6,4]
     yield assert_equal, fnirt.inputs.sub_sampling, [8,6,4]
     fnirtd = fnirt.run(infile='infile', reference='reference')
-    realcmd = 'fnirt --in infile --ref reference --subsamp 8 6 4'
+    realcmd = 'fnirt --in=infile --ref=reference --subsamp=8 6 4'
     yield assert_equal, fnirtd.runtime.cmdline, realcmd
 
     fnirt2 = fsl.Fnirt(sub_sampling=[8,2])
     fnirtd2 = fnirt2.run(infile='infile', reference='reference')
-    realcmd = 'fnirt --in infile --ref reference --subsamp 8 2'
+    realcmd = 'fnirt --in=infile --ref=reference --subsamp=8 2'
     yield assert_equal, fnirtd2.runtime.cmdline, realcmd
 
     # Test case where input that can be a list is just a single value
@@ -275,9 +276,9 @@ def test_fnirt():
     for item, flag in params:
         fnirt = fsl.Fnirt(**{item : 5})
         if item in ('sub_sampling', 'max_iter'):
-            cmd = 'fnirt %s %d' % (flag, 5)
+            cmd = 'fnirt %s=%d' % (flag, 5)
         else:
-            cmd = 'fnirt %s %f' % (flag, 5)
+            cmd = 'fnirt %s=%f' % (flag, 5)
         yield assert_equal, fnirt.cmdline, cmd
 
     # Test error is raised when missing required args
@@ -291,19 +292,19 @@ def test_fnirt():
     yield assert_equal, type(res), fsl.InterfaceResult
 
     opt_map = {
-        'affine':           ('--aff affine.mat', 'affine.mat'),
-        'initwarp':         ('--inwarp warp.mat', 'warp.mat'),
-        'initintensity':    ('--intin inten.mat', 'inten.mat'),
-        'configfile':       ('--config conf.txt', 'conf.txt'),
-        'referencemask':    ('--refmask ref.mat', 'ref.mat'),
-        'imagemask':        ('--inmask mask.nii', 'mask.nii'),
-        'fieldcoeff_file':  ('--cout coef.txt', 'coef.txt'),
-        'outimage':         ('--iout out.nii', 'out.nii'),
-        'fieldfile':        ('--fout fld.txt', 'fld.txt'),
-        'jacobianfile':     ('--jout jaco.txt', 'jaco.txt'),
-        'reffile':          ('--refout refout.nii', 'refout.nii'),
-        'intensityfile':    ('--intout intout.txt', 'intout.txt'),
-        'logfile':          ('--logout log.txt', 'log.txt'),
+        'affine':           ('--aff=affine.mat', 'affine.mat'),
+        'initwarp':         ('--inwarp=warp.mat', 'warp.mat'),
+        'initintensity':    ('--intin=inten.mat', 'inten.mat'),
+        'configfile':       ('--config=conf.txt', 'conf.txt'),
+        'referencemask':    ('--refmask=ref.mat', 'ref.mat'),
+        'imagemask':        ('--inmask=mask.nii', 'mask.nii'),
+        'fieldcoeff_file':  ('--cout=coef.txt', 'coef.txt'),
+        'outimage':         ('--iout=out.nii', 'out.nii'),
+        'fieldfile':        ('--fout=fld.txt', 'fld.txt'),
+        'jacobianfile':     ('--jout=jaco.txt', 'jaco.txt'),
+        'reffile':          ('--refout=refout.nii', 'refout.nii'),
+        'intensityfile':    ('--intout=intout.txt', 'intout.txt'),
+        'logfile':          ('--logout=log.txt', 'log.txt'),
         'verbose':          ('--verbose', True),
         'flags':            ('--fake-flag', '--fake-flag')}
 

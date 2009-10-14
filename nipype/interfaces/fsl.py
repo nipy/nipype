@@ -115,8 +115,21 @@ class FSLInfo():
         return fsl_ftype, self.ftypes[fsl_ftype]
 
     def standard_image(self, img_name):
+        '''Grab an image from the standard location. 
+        
+        Could be made more fancy to allow for more relocatability'''
         fsldir = os.environ['FSLDIR']
         return os.path.join(fsldir, 'data/standard', img_name)
+
+    def glob(self, fname):
+        '''Check if, given a filename, FSL actually produced it. 
+        
+        The maing thing we're doing here is adding an appropriate extension
+        while globbing.'''
+        # Could be made more faster / less clunky, but don't care until the API
+        # is sorted out
+        _, ext = self.outputtype()
+        files = self.glob(outfile) or glob(outfile + '.' + ext)
     
 fsl_info = FSLInfo()
 
@@ -198,6 +211,7 @@ class FSLCommand(CommandLine):
                     elif value is not False:
                         raise TypeError('Boolean option %s set to %s' % 
                                          (opt, str(value)) )
+                # XXX This is where we could change the logic to like Fnirt
                 elif type(value) == list:
                     allargs.append(argstr % tuple(value))
                 else:
@@ -288,11 +302,18 @@ class Bet(FSLCommand):
         """validate fsl bet options"""
         allargs = super(Bet, self)._parse_inputs(skip=('infile', 'outfile'))
 
-        # Add infile and outfile to the args if they are specified
+        outfile = self.inputs.outfile
+
         if self.inputs.infile:
             allargs.insert(0, self.inputs.infile)
-        if self.inputs.outfile:
-            allargs.insert(1, self.inputs.outfile)
+
+            # XXX This default stuff gets done in two places :\
+            if outfile is None:
+                outfile = fname_presuffix(self.inputs.infile, suffix='_bet', 
+                                          newpath='.')
+        if outfile is not None:
+            allargs.insert(1, outfile)
+
         return allargs
         
     def run(self, cwd=None, infile=None, outfile=None, **inputs):
@@ -330,19 +351,13 @@ class Bet(FSLCommand):
         if infile:
             self.inputs.infile = infile
         if self.inputs.infile is None:
-            raise AttributeError('Bet requires an input file')
+            raise ValueError('Bet requires an input file')
         if outfile:
             self.inputs.outfile = outfile
         if cwd is None:
             cwd = os.getcwd()
 
         self.inputs.update(**inputs)
-        if not self.inputs.outfile:
-            # If the outfile is not specified but the infile is,
-            # generate an outfile
-            pth, fname = os.path.split(self.inputs.infile)
-            self.inputs.outfile = fname_presuffix(fname, suffix='_bet',
-                                                  newpath=cwd)
         
         results = self._runner(cwd=cwd)
         if results.runtime.returncode == 0:
@@ -386,23 +401,22 @@ class Bet(FSLCommand):
         """
         outputs = Bunch(outfile = None,
                 maskfile = None)
-        if self.inputs.outfile:
-            outfile = os.path.realpath(self.inputs.outfile)
-        else:
-            path,fname = os.path.split(self.inputs['infile'])
-            if cwd is None:
-                cwd = os.getcwd()
 
-            outfile = os.path.join(cwd, fname_presuffix(fname,suffix='_bet'))
-            assert len(glob(outfile))==1, \
-                    "Incorrect number or no output files %s generated"%outfile
+        outfile = self.inputs.outfile
+        if outfile is None:
+            outfile = fname_presuffix(self.inputs.infile, suffix='_bet', 
+                                      newpath='.')
+        outfile = os.path.realpath(outfile)
+        assert len(glob(outfile))==1, \
+                "Incorrect number or no output files %s generated"%outfile
         outputs.outfile = outfile
-        maskfile = fname_presuffix(outfile,suffix='_mask')
-        outputs.maskfile = glob(maskfile)
-        if len(outputs.maskfile) > 0:
-            outputs.maskfile = outputs.maskfile[0]
-        else:
-            outputs.maskfile = None
+        if self.inputs.mask:
+            maskfile = fname_presuffix(outfile,suffix='_mask')
+            outputs.maskfile = glob(maskfile)
+            if len(outputs.maskfile) == 1:
+                outputs.maskfile = outputs.maskfile[0]
+            else:
+                outputs.maskfile = None
         return outputs
 
 
@@ -962,8 +976,21 @@ class McFlirt(FSLCommand):
     def _parse_inputs(self):
         """Call our super-method, then add our input files"""
         allargs = super(McFlirt, self)._parse_inputs(skip=('infile'))
-        if self.inputs.infile:
+        # XXX This would be handled properly by the standard mechanisms,
+        # Why is it being done here?
+        if self.inputs.infile is not None:
             allargs.insert(0,'-in %s'%(self.inputs.infile))
+
+            # This IS contingent on self.inputs.infile being defined... don't
+            # de-dent!
+            # XXX This currently happens twice, slightly differently
+            if self.inputs.outfile is None:
+                # XXX newpath could be cwd, but then we have to put it in inputs or
+                # pass it to _parse_inputs (or similar).
+                outfile = fname_presuffix(self.inputs.infile,
+                                            suffix='_mcf', newpath='.')
+                allargs.append(self.opt_map['outfile'] % outfile)
+
         return allargs
 
     def run(self, infile=None, **inputs):
@@ -996,18 +1023,15 @@ class McFlirt(FSLCommand):
 
         self.inputs.update(**inputs)
 
-        if self.inputs.outfile is None:
-            # XXX newpath could be cwd
-            self.inputs.outfile = fname_presuffix(self.inputs.infile,
-                                        suffix='_mcf', newpath='.')
 
         results = self._runner()
         if results.runtime.returncode == 0:
             results.outputs = self.aggregate_outputs()
+
+        
         return results 
 
     def aggregate_outputs(self):
-        envext = fsloutputtype()[1]
         outputs = Bunch(outfile=None,
                 varianceimg=None,
                 stdimg=None,
@@ -1017,14 +1041,25 @@ class McFlirt(FSLCommand):
         # get basename (correct fsloutpputytpe extension)
         # We are generating outfile if it's not there already
         # if self.inputs.outfile:
+
         # XXX This is a pattern that needs to be abstracted
-        files = glob(self.inputs.outfile) or glob(self.inputs.outfile + ext)
+        outfile = self.inputs.outfile
+        if outfile is None:
+            # XXX newpath could be cwd, but then we have to put it in inputs or
+            # pass it to _parse_inputs AND agg_outputs.
+            outfile = fname_presuffix(self.inputs.infile,
+                                        suffix='_mcf', newpath='.')
+            allargs.append(self.opt_map['outfile'] % outfile)
+
+        files = fsl_info.glob(outfile)
+
         if len(files) == 1:
             outputs.outfile = files[0]
         else:
             raise ValueError('%s not generated by McFlirt' %
                                  self.inputs.outfile)
         # XXX Need to change 'item' below to something that exists
+        # These could be handled similarly to default values for inputs
         if self.inputs.statsimgs:
             outputs.varianceimg = fname_presuffix(item, suffix='_variance')
             outputs.stdimg = fname_presuffix(item, suffix='_sigma')
@@ -1082,6 +1117,8 @@ class Fnirt(FSLCommand):
         """Print command line documentation for FNIRT."""
         print get_doc(self.cmd, self.opt_map)
 
+    # XXX It's not clear if the '=' syntax (which is necessary for some
+    # arguments) supports ' ' separated lists. We might need ',' separated lists
     opt_map = {
             'affine':           '--aff=%s',
             'initwarp':         '--inwarp=%s',
@@ -1105,7 +1142,9 @@ class Fnirt(FSLCommand):
             'lambdas':          '--lambda=%f',
             'estintensity':     '--estint=%f',
             'applyrefmask':     '--applyrefmask=%f',
-            'applyimgmask':     '--applyinmask=%f',
+            # XXX The closeness of this alternative name might cause serious
+            # confusion
+            'applyimgmask':      '--applyinmask=%f',
             'flags':            '%s',
             'infile':           '--in=%s',
             'reference':        '--ref=%s',
@@ -1180,7 +1219,7 @@ class Fnirt(FSLCommand):
         Updates opt_map AT THE CLASS LEVEL for inout items with variable values
         """
         warn(DeprecationWarning('This is wrong. Do not do anything like this.'
-                                'Ever. (Please.)'))
+                                '(Please.)'))
         itemstoupdate = ['sub_sampling',
                 'max_iter',
                 'referencefwhm',
@@ -1189,15 +1228,21 @@ class Fnirt(FSLCommand):
                 'estintensity',
                 'applyrefmask',
                 'applyimgmask']
+        # XXX Idea for implementing comparable logic in _parse_inputs:
+        # if type(item) is list: to the opt split, then do:
+        # ','.join(opt[1] % v for f in item), or maybe ' '.join()
+        # _parse_inputs should probably split on ' ' or '='
         for item in itemstoupdate:
-            if self.inputs.get(item):
-                opt = self.opt_map[item].split()
-                values = self.inputs.get(item)
+            values = self.inputs.get(item)
+            if values:
+                opt = self.opt_map[item].split('=')
+                opt[1] = opt[1].split()[0]
                 try:
-                    valstr = opt[0] + ' %s'%(opt[1])* len(values)
+                    valstr = opt[0] + '=' + ' '.join(opt[1:2] * len(values))
                 except TypeError:
-                    # TypeError is raised if values is not a list
-                    valstr = opt[0] + ' %s'%(opt[1])
+                    # TypeError is raised if values is not a SEQUENCE
+                    # i.e., we are missing strings
+                    valstr = opt[0] + '=' + opt[1]
                 self.opt_map[item] = valstr
 
     def write_config(self,configfile):
@@ -1271,14 +1316,11 @@ class Fnirt(FSLCommand):
         if self.inputs.logfile:
             outputs.logfile = self.inputs.logfile
 
-        # check if files were created
-        type, ext = fsl_info.outputtype()
-        ext = '.' + ext
 
         for item, file in outputs.iteritems():
             if file is not None:
                 file = os.path.join(cwd, file)
-                ls = glob(file) or glob(file + ext)
+                ls = fsl_info.glob(file)
                 if len(ls) != 1:
                     raise IOError('file %s of type %s not generated'%(file,item))
                 setattr(outputs, item, ls[0])
@@ -1329,12 +1371,9 @@ class ApplyWarp(FSLCommand):
         if cwd is None:
             cwd = os.getcwd()
 
-        # check if files were created
-        _, ext = fsl_info.outputtype()
-        ext = '.' + ext
         
         fname = os.path.join(cwd, self.inputs.outfile)
-        ls = glob(fname) or glob(fname + ext)
+        ls = fsl_info.glob(fname)
         if len(ls) != 1:
             raise IOError('file %s of type %s not generated'%(file,item))
         return Bunch(warpedimage=ls[0])
