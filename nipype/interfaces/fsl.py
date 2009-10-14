@@ -1028,9 +1028,9 @@ class McFlirt(FSLCommand):
             matnme = matnme + '.mat'
             outputs.outmatfile = matnme
         if self.inputs.saveplots:
-            parnme, ext = os.path.splitext(item)
-            parnme = parnme + '.par'
-            outputs.parfile = parnme
+            # Note - if e.g. outfile has .nii.gz, you get .nii.gz.par, which is
+            # what mcflirt does!
+            outputs.parfile = self.inputs.outfile + '.par'
         for outtype, outlist in outputs.iteritems():
             # for each key, value in bunch
             if outlist:
