@@ -995,6 +995,13 @@ class McFlirt(FSLCommand):
             raise AttributeError('McFlirt requires an infile.')
 
         self.inputs.update(**inputs)
+
+        if self.inputs.outfile is None:
+            name = os.path.basename(self.inputs.infile)
+            _, ext = os.path.
+            self.inputs.outfile = fname_presuffix(self.inputs.infile,
+                                        suffix='_mcf', newpath='.')
+
         results = self._runner()
         if results.runtime.returncode == 0:
             results.outputs = self.aggregate_outputs()
@@ -1009,15 +1016,10 @@ class McFlirt(FSLCommand):
                 parfile=None,
                 outmatfile=None)
         # get basename (correct fsloutpputytpe extension)
-        if self.inputs.outfile:
-            pth, nme = os.path.split(self.inputs.outfile)
-            jnk, ext = os.path.splitext(nme)
-            item = self.inputs.out_basename + envext
-        else:
-            nme, ext = os.path.splitext(self.inputs.infile)
-            item = '%s_mcf.%s' % (nme, envext) # auto suffix _mcf if no outfile
-        # always generates realigned 4D volume ``outfile``
-        outputs.outfile = item
+        # We are generating outfile if it's not there already
+        # if self.inputs.outfile:
+        outputs.outfile = glob(self.inputs.outfile) or \
+                glob(self.inputs.outfile + ext)
         if self.inputs.statsimgs:
             outputs.varianceimg = fname_presuffix(item, suffix='_variance')
             outputs.stdimg = fname_presuffix(item, suffix='_sigma')
