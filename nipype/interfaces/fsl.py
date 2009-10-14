@@ -1342,23 +1342,24 @@ class ApplyWarp(FSLCommand):
                'outfile':           '--out=%s',
                'reference':         '--ref=%s',
                'fieldcoeff_file':   '--warp=%s',
+               'premat':            '--premat=%s',
+               'postmat':           '--postmat=%s',
               }
 
     def run(self, cwd=None, infile=None, outfile=None, reference=None,
             fieldcoeff_file=None, **inputs):
-        def raise_attr(name):
-            raise AttributeError('applywarp requires %s' % name)
+        def set_attr(name, value, error=True):
+            if value is not None:
+                setattr(self.inputs, name, value)
+            if self.inputs.get(name) is None and error:
+                raise AttributeError('applywarp requires %s' % name)
 
-        if infile:
-            self.inputs.infile = infile
-        if self.inputs.infile is None:
-            raise_attr('infile')
-        if reference:
-            self.inputs.reference = reference
-        if self.inputs.reference is None: 
-            raise_attr('reference')
+        # XXX Even this seems overly verbose
+        set_attr('infile', infile)
+        set_attr('outfile', outfile, error=False)
+        set_attr('reference', reference)
+        set_attr('fieldcoeff_file', fieldcoeff_file)
 
-        # Doesn't do anything useful
         self.inputs.update(**inputs)
 
         results = self._runner(cwd=cwd)
