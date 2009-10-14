@@ -1338,12 +1338,12 @@ class ApplyWarp(FSLCommand):
     def cmd(self):
         return 'applywarp'
 
-    opt_map = {'infile':            '--in=%s',
-               'outfile':           '--out=%s',
-               'reference':         '--ref=%s',
-               'fieldcoeff_file':   '--warp=%s',
-               'premat':            '--premat=%s',
-               'postmat':           '--postmat=%s',
+    opt_map = {'infile':            '--in %s',
+               'outfile':           '--out %s',
+               'reference':         '--ref %s',
+               'fieldcoeff_file':   '--warp %s',
+               'premat':            '--premat %s',
+               'postmat':           '--postmat %s',
               }
 
     def run(self, cwd=None, infile=None, outfile=None, reference=None,
@@ -1371,7 +1371,6 @@ class ApplyWarp(FSLCommand):
     def aggregate_outputs(self, cwd=None):
         if cwd is None:
             cwd = os.getcwd()
-
         
         fname = os.path.join(cwd, self.inputs.outfile)
         ls = fsl_info.glob(fname)
@@ -1379,7 +1378,6 @@ class ApplyWarp(FSLCommand):
             raise IOError('file %s of type %s not generated'%(file,item))
         return Bunch(warpedimage=ls[0])
                 
-
 class FSFmaker:
     '''Use the template variables above to construct fsf files for feat.
     

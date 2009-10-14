@@ -231,9 +231,8 @@ class NodeWrapper(object):
                         # .insert(i, val) is equivalent to the following if
                         # outputs.key == None, so this is far less likely to
                         # produce subtle errors down the road!
-                        self._result.outputs.update(**{key: [val]})
+                        setattr(self._result.outputs, key, [val])
 
-            print itervals
             if notlist:
                 self.set_input(self.iterfield[0], itervals.pop())
             else:
