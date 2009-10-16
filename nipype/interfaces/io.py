@@ -117,8 +117,10 @@ class DataSource(Interface):
             outputs[type] = list_to_filename(outputs[type])
         return outputs
 
-    def run(self):
+    def run(self, cwd=None):
         """Execute this module.
+
+        cwd is just there to make things "work" for now
         """
         runtime = Bunch(returncode=0,
                         stdout=None,
@@ -174,8 +176,10 @@ class DataSink(Interface):
         outputs = Bunch()
         return Bunch()
 
-    def run(self):
+    def run(self, cwd=None):
         """Execute this module.
+
+        cwd is just there to make things work for now
         """
         subjdir = self.inputs.subject_directory
         if subjdir is None:
@@ -283,7 +287,7 @@ class DataGrabber(Interface):
         outputs.file_list = list_to_filename(glob.glob(template))
         return outputs
 
-    def run(self):
+    def run(self, cwd=None):
         """Execute this module.
         """
         runtime = Bunch(returncode=0,
