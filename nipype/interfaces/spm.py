@@ -502,7 +502,7 @@ class Realign(SpmMatlabCommandLine):
         if not self.inputs.infile:
             raise AttributeError('Realign requires an input file')
         self.inputs.update(**inputs)
-        return super(Realign,self).run()
+        return super(SpmMatlabCommandLine,self).run()
     
     def aggregate_outputs(self):
         """ Initializes the output fields for this interface and then
