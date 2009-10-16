@@ -1409,13 +1409,13 @@ class ApplyWarp(FSLCommand):
             cwd = os.getcwd()
 
         outputs = Bunch()
-        outputs.warpedimage = fsl_info.gen_fname(self.inputs.infile,
+        outputs.outfile = fsl_info.gen_fname(self.inputs.infile,
                 self.inputs.outfile, cwd=cwd, suffix='_warp', check=True)
 
         return outputs
 
 class FSLSmooth(FSLCommand):
-    '''Use fslmaths to smooth the thing.
+    '''Use fslmaths to smooth the image
 
     This is dumb, of course - we should use nipy for such things! But it is a
     step along the way to get the "standard" FSL pipeline in place.
