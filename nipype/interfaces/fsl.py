@@ -1024,11 +1024,13 @@ class McFlirt(FSLCommand):
 
         return allargs
 
-    def run(self, infile=None, **inputs):
+    def run(self, cwd=None, infile=None, **inputs):
         """Runs mcflirt
 
         Parameters
         ----------
+        cwd : string
+            currently ignored
         infile : string
             Filename of volume to be aligned
         inputs : dict
@@ -1094,7 +1096,7 @@ class McFlirt(FSLCommand):
             # Note - if e.g. outfile has .nii.gz, you get .nii.gz.par, which is
             # what mcflirt does!
             outputs.parfile = outputs.outfile + '.par'
-            if not os.exists(outputs.parfile):
+            if not os.path.exists(outputs.parfile):
                 msg = "Output file '%s' for '%s' was not generated" \
                         % (outname, outtype)
                 raise IOError(msg)
@@ -1340,10 +1342,10 @@ class Fnirt(FSLCommand):
         for item, file in outputs.iteritems():
             if file is not None:
                 file = os.path.join(cwd, file)
-                ls = fsl_info.glob(file)
-                if len(ls) != 1:
+                file = fsl_info.glob(file)
+                if file is None:
                     raise IOError('file %s of type %s not generated'%(file,item))
-                setattr(outputs, item, ls[0])
+                setattr(outputs, item, file)
         return outputs
 
 class ApplyWarp(FSLCommand):
