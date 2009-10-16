@@ -1150,7 +1150,7 @@ class Fnirt(FSLCommand):
             'imagemask':        '--inmask=%s',
             'fieldcoeff_file':  '--cout=%s',
             'outimage':         '--iout=%s',
-            'fieldfile':        '--fout=%s',
+            'warpfile':        '--fout=%s',
             'jacobianfile':     '--jout=%s',
             # XXX I think reffile is misleading / confusing
             'reffile':          '--refout=%s',
@@ -1311,9 +1311,9 @@ class Fnirt(FSLCommand):
         if cwd is None:
             cwd = os.getcwd()
 
-        outputs = Bunch(coefficientsfile=None,
+        outputs = Bunch(fieldcoeff_file=None,
                         warpedimage=None,
-                        warpfield=None,
+                        warpfile=None,
                         jacobianfield=None,
                         modulatedreference=None,
                         intensitymodulation=None,
@@ -1329,7 +1329,7 @@ class Fnirt(FSLCommand):
             # This should end with _warp
             outputs.warpedimage = self.inputs.outimage
         if self.inputs.fieldfile:
-            outputs.warpfield = self.inputs.fieldfile
+            outputs.warpfile = self.inputs.warpfile
         if self.inputs.jacobianfile:
             outputs.jacobianfield = self.inputs.jacobianfile
         if self.inputs.reffile:
@@ -1353,23 +1353,23 @@ class ApplyWarp(FSLCommand):
     
     Note how little actually needs to be done if we have truly order-independent
     arguments!
-    
-    And yes, I know I am breaking the .run(required) convention. I'll fix it.
-    -DJC'''
+    '''
     @property
     def cmd(self):
         return 'applywarp'
 
-    opt_map = {'infile':            '--in %s',
-               'outfile':           '--out %s',
-               'reference':         '--ref %s',
-               'fieldcoeff_file':   '--warp %s',
-               'premat':            '--premat %s',
-               'postmat':           '--postmat %s',
+    opt_map = {'infile':            '--in=%s',
+               'outfile':           '--out=%s',
+               'reference':         '--ref=%s',
+               'warpfile':          '--warp=%s',
+               'premat':            '--premat=%s',
+               'postmat':           '--postmat=%s',
               }
 
     def run(self, cwd=None, infile=None, outfile=None, reference=None,
-            fieldcoeff_file=None, **inputs):
+            warpfile=None, **inputs):
+        '''Interesting point - you can use coeff_files, or warpfiles
+        interchangeably here'''
         def set_attr(name, value, error=True):
             if value is not None:
                 setattr(self.inputs, name, value)
@@ -1380,7 +1380,7 @@ class ApplyWarp(FSLCommand):
         set_attr('infile', infile)
         set_attr('outfile', outfile, error=False)
         set_attr('reference', reference)
-        set_attr('fieldcoeff_file', fieldcoeff_file)
+        set_attr('warpfile', warpcoeff_file)
 
         self.inputs.update(**inputs)
 
@@ -1400,7 +1400,7 @@ class ApplyWarp(FSLCommand):
                 # or pass it to _parse_inputs (or similar).
                 outfile = fname_presuffix(self.inputs.infile,
                                             suffix='_warp', newpath='.')
-                allargs.insert(1, self.opt_map['outfile'] % outfile)
+                allargs.append(self.opt_map['outfile'] % outfile)
 
         return allargs
 

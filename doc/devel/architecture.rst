@@ -41,3 +41,10 @@ will overwrite the old node)
 However, it should also be easy to identify and delete things you don't need anymore.
 
 Pipelines and bits of pipelines should be easy to share.
+
+Things that are the same should be called the same thing in most places. For
+interfaces that have an obvious meaning for the terms, "infiles" and
+"outfile(s)". If a file is in both the inputs and outputs, it should be called
+the same thing in both places. If it is produced by one interface and consumed
+by another, same thing
+should be used
