@@ -36,7 +36,9 @@ Unless otherwise called for, code should be thread safe, just in case.
 
 The pipeline should make it easy to change aspects of an analysis with minimal
 recomputation, downloading, etc. (This is not the case currently - any change
-will overwrite the old node)
+will overwrite the old node). Also, the fact that multiple files get rolled into
+a single node is problematic for similar reasons. E.g. - node([file1 ...
+file100]) will get recomputed if we add only one file!.
 
 However, it should also be easy to identify and delete things you don't need anymore.
 
@@ -48,3 +50,8 @@ interfaces that have an obvious meaning for the terms, "infiles" and
 the same thing in both places. If it is produced by one interface and consumed
 by another, same thing
 should be used
+
+Dancing about Architecture
+--------------------------
+
+Somewhat like talking about Jazz.
