@@ -184,9 +184,8 @@ class NodeWrapper(object):
             pass
         return self._result
 
+    # XXX This function really seriously needs to check returncodes and similar
     def _run_interface(self, execute=True, cwd=None):
-        # I think this should be OK... I don't get the iteration
-        # mechanism fully. -DJC
         if cwd is not None:
             old_cwd = os.getcwd()
             os.chdir(cwd)
@@ -202,7 +201,7 @@ class NodeWrapper(object):
             self._result = InterfaceResult(interface=[], runtime=[],
                                            outputs=Bunch())
             for i,v in enumerate(itervals):
-                print "running %s on %s\n"%(self.name, self.iterfield[0])
+                print "iterating %s on %s\n"%(self.name, self.iterfield[0])
                 self.set_input(self.iterfield[0], v)
                 if execute:
                     # Passing cwd in here is redundant, even for FSLCommand
@@ -210,10 +209,9 @@ class NodeWrapper(object):
                     # way we might do it if we decide to ditch the setwd
                     # approach. Again - something should be removed when we
                     # settle on a solution
-
-                    # Again, I _think_ this should be OK... I don't get the
-                    # iteration mechanism fully. -DJC
                     result = self._interface.run(cwd=cwd)
+                    if result.runtime.returncode != 0:
+                        print result.runtime.stderr
                     self._result.interface.insert(i, result.interface)
                     self._result.runtime.insert(i, result.runtime)
                     outputs = result.outputs
@@ -239,7 +237,9 @@ class NodeWrapper(object):
                 self.set_input(self.iterfield[0], itervals)
         else:
             if execute:
-                self._result = self._interface.run()
+                self._result = self._interface.run(cwd=cwd)
+                if self._result.runtime.returncode != 0:
+                    print self._result.runtime.stderr
             else:
                 # Likewise, cwd could go in here
                 aggouts = self._interface.aggregate_outputs()

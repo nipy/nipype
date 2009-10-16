@@ -1400,7 +1400,7 @@ class ApplyWarp(FSLCommand):
                 # or pass it to _parse_inputs (or similar).
                 outfile = fname_presuffix(self.inputs.infile,
                                             suffix='_warp', newpath='.')
-                allargs.append(self.opt_map['outfile'] % outfile)
+                allargs.insert(1, self.opt_map['outfile'] % outfile)
 
         return allargs
 
