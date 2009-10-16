@@ -248,11 +248,8 @@ class CommandLine(Interface):
         self.inputs.update(inputs)
 
         if args:
-            # In general, only CommandLine objects have an 'args' attr
-            # in self.inputs.  Most of the subclasses of CommandLine
-            # (Bet, Fast, etc...) do not, so we need to confirm it
-            # exists before checking if it's None.
-            if hasattr(self.inputs, 'args') and self.inputs.args:
+            # Note: .get() regurns None if key doesn't exist
+            if self.inputs.get('args') is not None:
                 self.inputs.args.extend(list(args))
             else:
                 self.inputs.args = list(args)
@@ -262,6 +259,8 @@ class CommandLine(Interface):
         
         Parameters
         ----------
+        cwd : path
+            Where do we effectively execute this command? (default: os.getcwd())
         args : list
             additional arguments that will be appended to inputs.args
         inputs : mapping

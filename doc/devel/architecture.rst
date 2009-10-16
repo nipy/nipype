@@ -13,6 +13,9 @@ Any Interface should at a minimum support cwd as a command-line argument to
 .run(). This may be accomplished by allowing cwd as an element of the input
 Bunch, or handled as a separate case.
 
+Relatedly, any Interface should output all files to cwd if it is set, and
+otherwise to os.getcwd() (or equivalent).
+
 We need to decide on a consistent policy towards the maintinence of paths to
 files. It seems like the best strategy might be to do absolute (os.realpath?)
 filenames by default, allowing for relative paths by explicitly including
