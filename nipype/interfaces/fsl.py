@@ -1503,10 +1503,10 @@ class L1FSFmaker:
             curr_func = inputs.cond_files[i]
             sorted_conds = sorted(curr_conds.keys())
             fsf_txt = self.fsf_header.substitute(num_evs=len(sorted_conds), 
-                         func_file=curr_func, num_vols=num_vols,
+                         func_file=curr_func, num_vols=self.inputs.num_vols,
                          struct_file=struct_file, scan_num=i)
             for j, cond in enumerate(sorted_conds):
-                fsf_txt += self.gen_ev(i, j+1, cond, curr_conds[cond], 
+                fsf_txt += self.gen_ev(j+1, cond, curr_conds[cond], 
                                        len(cond_names))
 
             fsf_txt += self.gen_fsf_contrasts(sorted_conds)
@@ -1519,7 +1519,6 @@ class L1FSFmaker:
 
     def aggregate_outputs(self):
         return Bunch()
-                
                 
     def gen_ev(self, cond_num, cond_name, cond_file, total_conds):
         ev_txt = self.fsf_ev.substitute(ev_num=cond_num, ev_name=cond_name,
