@@ -1508,7 +1508,8 @@ class L1FSFmaker:
             for j, cond in enumerate(sorted_conds):
                 fsf_txt += self.gen_ev(i, j+1, cond, curr_conds[cond], 
                                        len(cond_names))
-            fsf_txt += self.fsf_contrasts.substitute()
+
+            fsf_txt += self.gen_fsf_contrasts(sorted_conds)
 
             f = open(os.path.join(cwd, 'scan%d.fsf' % i), 'w')
             f.write(fsf_txt)
@@ -1528,3 +1529,8 @@ class L1FSFmaker:
             ev_txt += self.fsf_ev_ortho.substitute(c0=cond_num, c1=i) 
 
         return ev_txt
+
+    def gen_contrasts(self, sorted_conds):
+        # This obviously needs to be a lot more sophisticated
+        return self.fsf_contrasts.substitute()
+
