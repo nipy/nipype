@@ -1498,18 +1498,18 @@ class L1FSFmaker:
         if cwd is None:
             cwd = os.getcwd()
         self.inputs.update(inputs)
-        for i in range(len(inputs.func_files)):
-            curr_conds = inputs.cond_files[i]
-            curr_func = inputs.cond_files[i]
+        for i in range(len(self.inputs.func_files)):
+            curr_conds = self.inputs.cond_files[i]
+            curr_func = self.inputs.cond_files[i]
             sorted_conds = sorted(curr_conds.keys())
             fsf_txt = self.fsf_header.substitute(num_evs=len(sorted_conds), 
                          func_file=curr_func, num_vols=self.inputs.num_vols,
-                         struct_file=struct_file, scan_num=i)
+                         struct_file=self.inputs.struct_file, scan_num=i)
             for j, cond in enumerate(sorted_conds):
                 fsf_txt += self.gen_ev(j+1, cond, curr_conds[cond], 
-                                       len(cond_names))
+                                       len(sorted_conds))
 
-            fsf_txt += self.gen_fsf_contrasts(sorted_conds)
+            fsf_txt += self.gen_contrasts(sorted_conds)
 
             f = open(os.path.join(cwd, 'scan%d.fsf' % i), 'w')
             f.write(fsf_txt)

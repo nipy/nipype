@@ -244,7 +244,7 @@ set fmri(reghighres_dof) 6
 set fmri(regstandard_yn) 1
 
 # Standard image
-set fmri(regstandard) "$standard_image"
+set fmri(regstandard) "standard_image"
 
 # Search space for registration to standard space
 # 0   : No search
