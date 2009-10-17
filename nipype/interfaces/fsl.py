@@ -1508,7 +1508,10 @@ class L1FSFmaker:
             f.write(fsf_txt)
             f.close()
 
+        return InterfaceResult(self, Bunch(), Bunch())
 
+    def aggregate_outputs(self):
+        return Bunch()
                 
                 
     def gen_ev(self, scan, cond_num, cond_name, subj_dir, total_conds):
