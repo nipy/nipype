@@ -1454,7 +1454,7 @@ class FSLSmooth(FSLCommand):
 
     
 
-class FSFmaker:
+class L1FSFmaker:
     '''Use the template variables above to construct fsf files for feat.
     
     This doesn't actually run anything.
@@ -1473,14 +1473,22 @@ class FSFmaker:
     fsf_ev_ortho = load_template('feat_ev_ortho.tcl')
     fsf_contrasts = load_template('feat_contrasts.tcl')
 
-    def __init__(self, num_scans, cond_names):
-        subj_dir = dirname(getcwd())
+    # This is a very different animal, and I won't worry with specifying inputs
+    # properly yet. But here's a list:
+
+    # num_scans, cond_names, func_file, struct_file, 
+
+    def __init__(self, **inputs):
+        self.inputs = Bunch(inputs)
+        self.inputs.num_scans = num_scans
+        self.inputs.cond_names = cond_names
+
         # This is more package general, and should happen at a higher level
         fsl_root = getenv('FSLDIR')
         for i in range(num_scans):
             fsf_txt = self.fsf_header.substitute(num_evs=len(cond_names), 
-                                                 base_dir=subj_dir, scan_num=i,
-                                                 fsl_root=fsl_root)
+                         func_file=inputs.func_file, struct_file=struct_file, scan_num=i,
+                         standard_image=fsl_info.standard_image('MNI152_T1_2mm_brain'))
             for j, cond in enumerate(cond_names):
                 fsf_txt += self.gen_ev(i, j+1, cond, subj_dir, len(cond_names))
             fsf_txt += self.fsf_contrasts.substitute()
@@ -1491,9 +1499,6 @@ class FSFmaker:
                 
                 
     def gen_ev(self, scan, cond_num, cond_name, subj_dir, total_conds):
-        args = (cond_num, cond_name) + (cond_num,) * 6 + \
-                (scan, cond_name) + (cond_num, ) * 2
-
         ev_txt = self.fsf_ev.substitute(ev_num=cond_num, ev_name=cond_name,
                                         scan_num=scan, base_dir=subj_dir)
 

@@ -229,7 +229,7 @@ set fmri(reginitial_highres_search) 90
 set fmri(reginitial_highres_dof) 3
 
 # Registration to main structural
-set fmri(reghighres_yn) 1
+set fmri(reghighres_yn) 0
 
 # Search space for registration to main structural
 # 0   : No search
@@ -244,7 +244,7 @@ set fmri(reghighres_dof) 6
 set fmri(regstandard_yn) 1
 
 # Standard image
-set fmri(regstandard) "$fsl_root/data/standard/MNI152_T1_2mm_brain"
+set fmri(regstandard) "$standard_image"
 
 # Search space for registration to standard space
 # 0   : No search
@@ -265,7 +265,7 @@ set fmri(regstandard_nonlinear_warpres) 10
 set fmri(paradigm_hp) 100
 
 # 4D AVW data or FEAT directory (1)
-set feat_files(1) "$base_dir/functionals/ep2d128_${scan_num}_st_mcf_brain"
+set feat_files(1) "$func_file"
 
 # Subject's structural for analysis 1
-set highres_files(1) "$base_dir/extraction/t1_brain"
+set highres_files(1) "$struct_file"
