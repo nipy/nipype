@@ -38,7 +38,7 @@ set fmri(outputdir) "scan$scan_num"
 set fmri(tr) 2.0
 
 # Total volumes
-set fmri(npts) 198
+set fmri(npts) $num_vols
 
 # Delete volumes
 set fmri(ndelete) 0
