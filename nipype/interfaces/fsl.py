@@ -132,7 +132,7 @@ class FSLInfo():
         _, ext = self.outputtype()
         # While this function is a little globby, it may not be the best name.
         # Certainly, glob here is more expensive than necessary (could just use
-        # os.exists
+        # os.path.exists)
         files = glob(fname) or glob(fname + '.' + ext)
 
         try:
@@ -1478,9 +1478,13 @@ class L1FSFmaker:
     fsf_ev_ortho = load_template('feat_ev_ortho.tcl')
     fsf_contrasts = load_template('feat_contrasts.tcl')
 
-    opt_list = ('num_scans', 'cond_names', 'func_file', 'num_vols', 'struct_file')
+    # condition names are the keys of the cond_files dict
+    # func_files and cond_files should be lists of the same length, and
+    # correspond to one another
+    # Would be nice to use pynifti to get the num_vols... we shouldn't have to
+    # specify
+    opt_list = ('cond_files', 'func_files', 'num_vols', 'struct_file')
 
-    # num_scans, cond_names, func_file, num_vols, struct_file
     def __init__(self, **inputs):
         self._populate_inputs()
         self.inputs.update(inputs)
@@ -1494,14 +1498,16 @@ class L1FSFmaker:
         if cwd is None:
             cwd = os.getcwd()
         self.inputs.update(inputs)
-        # This is more package general, and should happen at a higher level
-        fsl_root = getenv('FSLDIR')
-        for i in range(num_scans):
-            fsf_txt = self.fsf_header.substitute(num_evs=len(cond_names), 
-                         func_file=inputs.func_file, num_vols=num_vols,
+        for i in range(len(inputs.func_files)):
+            curr_conds = inputs.cond_files[i]
+            curr_func = inputs.cond_files[i]
+            sorted_conds = sorted(curr_conds.keys())
+            fsf_txt = self.fsf_header.substitute(num_evs=len(sorted_conds), 
+                         func_file=curr_func, num_vols=num_vols,
                          struct_file=struct_file, scan_num=i)
-            for j, cond in enumerate(cond_names):
-                fsf_txt += self.gen_ev(i, j+1, cond, subj_dir, len(cond_names))
+            for j, cond in enumerate(sorted_conds):
+                fsf_txt += self.gen_ev(i, j+1, cond, curr_conds[cond], 
+                                       len(cond_names))
             fsf_txt += self.fsf_contrasts.substitute()
 
             f = open(os.path.join(cwd, 'scan%d.fsf' % i), 'w')
@@ -1514,9 +1520,9 @@ class L1FSFmaker:
         return Bunch()
                 
                 
-    def gen_ev(self, scan, cond_num, cond_name, subj_dir, total_conds):
+    def gen_ev(self, cond_num, cond_name, cond_file, total_conds):
         ev_txt = self.fsf_ev.substitute(ev_num=cond_num, ev_name=cond_name,
-                                        scan_num=scan, base_dir=subj_dir)
+                                        cond_file=cond_file)
 
         for i in range(total_conds + 1):
             ev_txt += self.fsf_ev_ortho.substitute(c0=cond_num, c1=i) 

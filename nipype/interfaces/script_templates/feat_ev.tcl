@@ -30,7 +30,7 @@ set fmri(tempfilt_yn$ev_num) 1
 set fmri(deriv_yn$ev_num) 0
 
 # Custom EV file
-set fmri(custom$ev_num) "$base_dir/analysis/EVs/block$scan_num-$ev_name.txt"
+set fmri(custom$ev_num) "$cond_file"
 
 # Gamma sigma
 set fmri(gammasigma$ev_num) 3
