@@ -1500,7 +1500,7 @@ class L1FSFmaker:
         self.inputs.update(inputs)
         for i in range(len(self.inputs.func_files)):
             curr_conds = self.inputs.cond_files[i]
-            curr_func = self.inputs.cond_files[i]
+            curr_func = self.inputs.func_files[i]
             sorted_conds = sorted(curr_conds.keys())
             fsf_txt = self.fsf_header.substitute(num_evs=len(sorted_conds), 
                          func_file=curr_func, num_vols=self.inputs.num_vols,
