@@ -206,9 +206,7 @@ class FSLCommand(CommandLine):
         """
         results = self._runner(cwd=cwd)
         if results.runtime.returncode == 0:
-            pass
-            # Uncomment if implemented
-            # results.outputs = self.aggregate_outputs()
+            results.outputs = self.aggregate_outputs()
 
         return results        
 
@@ -270,6 +268,10 @@ class FSLCommand(CommandLine):
 
     def _populate_inputs(self):
         self.inputs = Bunch((k,None) for k in self.opt_map.keys())
+
+    def aggregate_outputs(self):
+        raise NotImplementedError(
+                'Subclasses of FSLCommand must implement aggregate_outputs')
 
 
 class Bet(FSLCommand):
@@ -1150,7 +1152,7 @@ class Fnirt(FSLCommand):
             'imagemask':        '--inmask=%s',
             'fieldcoeff_file':  '--cout=%s',
             'outimage':         '--iout=%s',
-            'warpfile':        '--fout=%s',
+            'fieldfile':        '--fout=%s',
             'jacobianfile':     '--jout=%s',
             # XXX I think reffile is misleading / confusing
             'reffile':          '--refout=%s',
@@ -1313,7 +1315,7 @@ class Fnirt(FSLCommand):
 
         outputs = Bunch(fieldcoeff_file=None,
                         warpedimage=None,
-                        warpfile=None,
+                        fieldfile=None,
                         jacobianfield=None,
                         modulatedreference=None,
                         intensitymodulation=None,
@@ -1329,7 +1331,7 @@ class Fnirt(FSLCommand):
             # This should end with _warp
             outputs.warpedimage = self.inputs.outimage
         if self.inputs.fieldfile:
-            outputs.warpfile = self.inputs.warpfile
+            outputs.fieldfile = self.inputs.fieldfile
         if self.inputs.jacobianfile:
             outputs.jacobianfield = self.inputs.jacobianfile
         if self.inputs.reffile:
@@ -1361,14 +1363,14 @@ class ApplyWarp(FSLCommand):
     opt_map = {'infile':            '--in=%s',
                'outfile':           '--out=%s',
                'reference':         '--ref=%s',
-               'warpfile':          '--warp=%s',
+               'fieldfile':          '--warp=%s',
                'premat':            '--premat=%s',
                'postmat':           '--postmat=%s',
               }
 
     def run(self, cwd=None, infile=None, outfile=None, reference=None,
-            warpfile=None, **inputs):
-        '''Interesting point - you can use coeff_files, or warpfiles
+            fieldfile=None, **inputs):
+        '''Interesting point - you can use coeff_files, or fieldfiles
         interchangeably here'''
         def set_attr(name, value, error=True):
             if value is not None:
@@ -1380,7 +1382,7 @@ class ApplyWarp(FSLCommand):
         set_attr('infile', infile)
         set_attr('outfile', outfile, error=False)
         set_attr('reference', reference)
-        set_attr('warpfile', warpcoeff_file)
+        set_attr('fieldfile', fieldfile)
 
         self.inputs.update(**inputs)
 
@@ -1437,7 +1439,7 @@ class FSLSmooth(FSLCommand):
         if outfile is None:
             outfile = fname_presuffix(self.inputs.infile, suffix='_smooth',
                     newpath='.')
-        return ['%s -kernel gauss %d %s' % (self.inputs.infile, 
+        return ['%s -kernel gauss %d -fmean %s' % (self.inputs.infile, 
                                             self.inputs.fwhm,
                                             outfile)]
 
