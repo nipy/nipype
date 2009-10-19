@@ -241,7 +241,7 @@ set fmri(reghighres_search) 90
 set fmri(reghighres_dof) 6
 
 # Registration to standard image?
-set fmri(regstandard_yn) 1
+set fmri(regstandard_yn) 0
 
 # Standard image
 set fmri(regstandard) "standard_image"
