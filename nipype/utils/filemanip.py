@@ -33,9 +33,8 @@ def md5file(filename, excludeline="", includeline=""):
         for line in open(filename,"rb"):
             if excludeline and line.startswith(excludeline):
                 continue
-            m.update(includeline)
-            return m.hexdigest()
-        
+            m.update(line)
+        return m.hexdigest()
     except IOError:
         print "Unable to open the file in readmode:", filename
         
@@ -54,7 +53,6 @@ def check_forhash(filename):
     if type(filename) == type(list):
         filename = filename[0]
     path, name = os.path.split(filename)
-
     if re.search('(_0x[a-z0-9]{32})',name):
         hash = re.findall('(_0x[a-z0-9]{32})',name)
         return True, hash
