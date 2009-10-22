@@ -517,7 +517,9 @@ class Realign(SpmMatlabCommandLine):
             filelist = self.inputs.infile
         else:
             filelist = [self.inputs.infile]
-        outputs.mean_image = glob(fname_presuffix(filelist[0],prefix='mean'))[0]
+        if self.inputs.register_to_mean:
+            outputs.mean_image = glob(fname_presuffix(filelist[0],prefix='mean'))[0]
+        
         for f in filelist:
             r_file = glob(fname_presuffix(f, prefix='r', suffix='.nii',
                                           use_ext=False))
@@ -975,7 +977,7 @@ class Normalize(SpmMatlabCommandLine):
         if not self.inputs.source:
             raise AttributeError('Realign requires a source file')
         self.inputs.update(**inputs)
-        return super(Normalize,self).run()
+        return super(SpmMatlabCommandLine,self).run()
     
     def _compile_command(self):
         """validates spm options and generates job structure
