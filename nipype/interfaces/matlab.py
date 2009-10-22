@@ -64,6 +64,11 @@ class MatlabCommandLine(CommandLine):
 
     def run(self):
         results = self._runner()
+        if 'command not found' in results.runtime.stderr:
+            msg = 'Cannot find matlab!\n' + \
+                '\tTried command:  ' + results.runtime.cmdline + \
+                '\n\tShell reported: ' + results.runtime.stderr
+            raise IOError(msg)
         if  'MatlabScriptException' in results.runtime.stderr:
             results.runtime.returncode = 1
         return results
