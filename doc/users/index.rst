@@ -11,6 +11,7 @@
    :maxdepth: 2
 
    install
+   available_modules
    interface_tutorial
    pipeline_tutorial
 
