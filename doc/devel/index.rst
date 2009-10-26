@@ -16,6 +16,7 @@ conventions documented in the `NIPY Developers Guide
    
    development_quickstart
    architecture
+   proposed_interfaces
    usecases
 
 .. include:: ../links_names.txt
