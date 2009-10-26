@@ -15,6 +15,7 @@ conventions documented in the `NIPY Developers Guide
    :maxdepth: 2
    
    development_quickstart
+   architecture
    usecases
 
 .. include:: ../links_names.txt
