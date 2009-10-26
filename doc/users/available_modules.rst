@@ -47,7 +47,7 @@ FreeSurfer
 ----------
 
 #.  Dicom2Nifti - converts dicom to nifti files using mri_convert (knows
-a lot of siemens specific fields)
+    a lot of siemens specific fields)
 
 #.  Recon-all
 
@@ -62,15 +62,13 @@ Misc
 ----
 
 #. ArtifactDetection - detects outliers in functional runs based on
-motion and intensity.
+   motion and intensity.
 
 #. IO - these are generic routines for structuring data into and out of
-the pipelines
+   the pipelines
 
-    #.  DataSource
-
-    #.  DataSink
-
-    #.  DataGrabber
+  #.  DataSource
+  #.  DataSink
+  #.  DataGrabber
 
 .. include:: ../links_names.txt
