@@ -236,7 +236,12 @@ class Pipeline(object):
                 for edge in graph.in_edges_iter(node):
                     data = graph.get_edge_data(*edge)
                     for sourcename,destname in data['connect']:
-                        node.set_input(destname,edge[0].get_output(sourcename))
+                        if type(sourcename) == type(''):
+                            node.set_input(destname,edge[0].get_output(sourcename))
+                        elif type(sourcename) == type(()):
+                            node.set_input(destname,sourcename[1],edge[0].get_output(sourcename[0]),*sourcename[2:])
+                        else:
+                            raise Exception('Unknown input type in pipeline.connect: %s'%str(sourcename))
                 print "Executing: %s H: %s" % (node.name, node.hash_inputs())
                 # For a disk node, provide it with an appropriate
                 # output directory

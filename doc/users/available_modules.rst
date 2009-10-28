@@ -1,4 +1,4 @@
-.. _interface_tutorial:
+.. _available_modules:
 
 =================
 Available modules
