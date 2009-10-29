@@ -94,7 +94,7 @@ class SpmInfo(object):
         mlab = MatlabCommandLine()
         mlab.inputs.script_name = 'spminfo'
         mlab.inputs.script_lines = """
-if isempty(which('spm')), throw(MException('SPMCheck:NotFound','SPM not in matlab path'));end
+if isempty(which('spm')), throw(MException('SPMCheck:NotFound','SPM not in matlab path'));end;
 spm_path = spm('dir');
 fprintf(1, '<PATH>%s</PATH>', spm_path);
 """
