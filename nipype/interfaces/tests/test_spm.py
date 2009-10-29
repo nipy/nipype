@@ -1,10 +1,19 @@
-from nipype.testing import assert_equal, assert_false, assert_true, assert_raises
+from nipype.testing import (assert_equal, assert_false, assert_true, 
+                            assert_raises, skipif)
 import nipype.interfaces.spm as spm
 from nipype.interfaces.base import Bunch
 from tempfile import mkdtemp
 import os
 from shutil import rmtree
 import numpy as np
+
+def cannot_find_spm():
+    # See if we can find spm or not.
+    try:
+        spm.spm_info.spm_path
+        return False
+    except IOError:
+        return True
 
 # requires a nifti data file
 def test_scan_for_fnames():
@@ -30,6 +39,7 @@ def test_use_mfile():
     mlab._use_mfile(False)
     yield assert_false, mlab.mfile
 
+@skipif(cannot_find_spm, "SPM not found")
 def test_run():
     mlab = spm.SpmMatlabCommandLine()
     yield assert_raises, NotImplementedError, mlab.run
