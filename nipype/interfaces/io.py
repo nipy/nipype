@@ -95,7 +95,7 @@ class DataSource(Interface):
         if subjdir is None:
             #print self.inputs['subj_template'],self.inputs['subj_id']
             if self.inputs.subject_template is not None:
-                subjdir = self.inputs.subject_template % (self.inputs.subject_id)
+                subjdir = self.inputs.subject_template % self.inputs.subject_id
             else:
                 subjdir = self.inputs.subject_id
             subjdir = os.path.join(self.inputs.base_directory,subjdir)
@@ -107,14 +107,19 @@ class DataSource(Interface):
         try:
             info = self.inputs.subject_info[self.inputs.subject_id]
         except KeyError:
-            raise KeyError("Key [%s] does not exist in subject_info dictionary"%self.inputs.subject_id)
-        for idx,type in info:
-            outputs[type] = []
+            raise KeyError("Key [%s] does not exist in subject_info dictionary"
+                           % self.inputs.subject_id)
+        for idx, _type in info:
+            outputs[_type] = []
             for i in idx:
                 files = self.inputs.file_template % i
-                path = os.path.abspath(os.path.join(subjdir,files))
-                outputs[type].extend(glob.glob(path))
-            outputs[type] = list_to_filename(outputs[type])
+                path = os.path.abspath(os.path.join(subjdir, files))
+                files_found = glob.glob(path)
+                if len(files_found) == 0:
+                    msg = 'Unable to find file: %s' % path
+                    raise IOError(msg)
+                outputs[_type].extend(files_found)
+            outputs[_type] = list_to_filename(outputs[_type])
         return outputs
 
     def run(self, cwd=None):
