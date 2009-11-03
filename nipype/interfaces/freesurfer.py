@@ -82,7 +82,7 @@ class FSCommandLine(CommandLine):
         # This handles args like ['bet', '-f 0.2'] without crashing
         return self._cmdline
 
-    def run(self):
+    def run(self, **inputs):
         """Execute the command.
         
         Returns
@@ -549,7 +549,7 @@ class BBRegister(FSLCommand):
             allargs.extend(['--o',fname_presuffix(self.inputs.sourcefile,suffix='_bbreg')])
         return allargs
     
-    def run(self):
+    def run(self, **inputs):
         """Execute the command.
         """
         results = self._runner()
@@ -586,6 +586,7 @@ class BBRegister(FSLCommand):
             outfile = glob(self.inputs.outfile)
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
+        return outputs
 
 class ApplyVolTransform(FSLCommand):
     """Use FreeSurfer mri_vol2vol to apply a transform.
@@ -655,7 +656,7 @@ class ApplyVolTransform(FSLCommand):
                                                    suffix='_warped')])
         return allargs
     
-    def run(self):
+    def run(self, **inputs):
         """Execute the command.
         """
         results = self._runner()
@@ -682,6 +683,7 @@ class ApplyVolTransform(FSLCommand):
             outfile = glob(self.inputs.outfile)
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
+        return outputs
 
         
 class Smooth(FSLCommand):
@@ -748,7 +750,7 @@ class Smooth(FSLCommand):
                                                    suffix='_surfsmooth')])
         return allargs
     
-    def run(self):
+    def run(self, **inputs):
         """Execute the command.
         """
         results = self._runner()
@@ -766,7 +768,7 @@ class Smooth(FSLCommand):
 
     def aggregate_outputs(self):
         outputs = Bunch(outfile=None)
-        if self.inputs.outfile is True:
+        if self.inputs.outfile is None:
             outfile = glob(fname_presuffix(self.inputs.sourcefile,
                                            suffix='_surfsmooth'))
             assert len(outfile)==1, "No output file %s created"%outfile
@@ -775,5 +777,6 @@ class Smooth(FSLCommand):
             outfile = glob(self.inputs.outfile)
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
+        return outputs
 
         

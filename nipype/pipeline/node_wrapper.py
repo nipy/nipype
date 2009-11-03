@@ -240,11 +240,20 @@ class NodeWrapper(object):
                 self.set_input(self.iterfield[0], itervals)
         else:
             if execute:
+                cmdline = None
+                try:
+                    cmdline = self._interface.cmdline
+                except:
+                    pass
+                if cmdline is not None:
+                    print "Running command:"
+                    print cmdline
                 self._result = self._interface.run(cwd=cwd)
                 if self._result.runtime.returncode != 0:
                     print self._result.runtime.stderr
             else:
                 # Likewise, cwd could go in here
+                print "Not running command. just collecting outputs:"
                 aggouts = self._interface.aggregate_outputs()
                 self._result = InterfaceResult(interface=None,
                                                runtime=None,
