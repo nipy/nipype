@@ -20,7 +20,7 @@ Requirements
 
 #. FSL and matlab are available and callable from the command line
 
-#. SPM 5 is installed and callable in matlab
+#. SPM 5/8 is installed and callable in matlab
 
 #. 2.5 GB of space
 
@@ -34,7 +34,7 @@ Step 1.
 ~~~~~~~
 
 Ensure that all programs are available by calling ``bet``, ``matlab``
-and then ``which spm`` within matlab to ensure you have spm5 in your
+and then ``which spm`` within matlab to ensure you have spm5/8 in your
 matlab path.
 
 Step 2.
@@ -47,14 +47,18 @@ level results. The next section goes through each section of the
 tutorial script and describes what it is doing.
 
 
-The anatomy of a pipeline script
---------------------------------
+Tutorials
+---------
 
 In nipype, a pipeline is represented as an acyclic, directed data-flow
 graph, where each node of the graph is a process (e.g., realignment,
 smoothing) and the connections between the nodes control how data
 flows between the processes. 
 
-.. literalinclude:: ../examples/tutorial1.py
+.. toctree::
+   :maxdepth: 1
+
+   tutorial1
+   tutorial2
 
 .. include:: ../links_names.txt
