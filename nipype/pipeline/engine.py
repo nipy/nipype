@@ -2,7 +2,6 @@
 Base class for nipy.pipeline processing modules
 """
 
-import hashlib
 import os
 import copy
 from time import sleep
@@ -22,11 +21,13 @@ except:
 
 # unused from matplotlib import mlab
 
-def walk(children,level=0,path=None):
+def walk(children, level=0, path=None):
     """Generate all the full paths in a tree, as a dict.
     """
+
     # Entry point
-    if level==0: path = {}
+    if level == 0:
+        path = {}
     
     # Exit condition
     if not children:
@@ -34,15 +35,15 @@ def walk(children,level=0,path=None):
         return
 
     # Tree recursion
-    head, tail = children[0],children[1:]
-    name,func = head
+    head, tail = children[0], children[1:]
+    name, func = head
     for child in func():
         # We can use the arg name or the tree level as a key
         path[name] = child
         #path[level] = child
 
         # Recurse into the next level
-        for child_paths in walk(tail,level+1,path):
+        for child_paths in walk(tail, level+1, path):
             yield child_paths
         
 
@@ -52,23 +53,24 @@ class Pipeline(object):
     Attributes
     ----------
 
-    config: a dict containing various options for controlling the
-    pipeline
+    config : dict
+        A dictionary containing various options for controlling the
+        pipeline.
 
-    config['workdir']: What diskspace to use for pipeline operations
+    config['workdir'] : str
+        Path for which diskspace to use for pipeline operations.
 
-    config['use_parameterized_dirs']: Controls whether pipeline
-    outputs are stored in some hiearachical 2-level structure based on
-    parameterization or all output directories are created in the same
-    location.
+    config['use_parameterized_dirs'] : bool
+        Controls whether pipeline outputs are stored in some
+        hiearachical 2-level structure based on parameterization or
+        all output directories are created in the same location.
 
-    config['hash_outputdir_names']: Whether or not to hash the names
-    of the directories. In general it's a good idea.
+    config['hash_outputdir_names'] : bool
+        Whether or not to hash the names of the directories. In
+        general it's a good idea.  NotImplemented!
     """
 
     def __init__(self):
-        """
-        """
         self._graph        = nx.DiGraph()
         self.listofgraphs = []
         self.config       = {}
@@ -76,16 +78,24 @@ class Pipeline(object):
         self.config['use_parameterized_dirs'] = False
         self.IPython_available = IPython_available
 
-    def connect(self,connection_list):
-        """ Wraps the networkx functionality in a more semantically
-        relevant function name
+    def connect(self, connection_list):
+        """Connect nodes in the pipeline.
+
+        Creates edges in the directed graph using the nodes and edges
+        specified in the `connection_list`.  Uses the NetworkX method
+        DiGraph.add_edges_from.
 
         Parameters
         -----------
         
-        - `connection_list`: A list of 3-tuples of the following form
-        [(source1,destination1,[('namedoutput1','namedinput1'),...]),...]
+        connection_list : list
+
+            A list of 3-tuples of the following form:
+            [(source1, destination1, [('namedoutput1','namedinput1'),...]),
+            ...]
+
         """
+
         self._graph.add_edges_from([(u,v,{'connect':d}) for u,v,d in connection_list])
         print "PE: checking connections:\n"
         for u,v,d in connection_list:
