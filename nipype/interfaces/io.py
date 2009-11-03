@@ -28,38 +28,56 @@ class DataSource(Interface):
 
     def inputs_help(self):
         """
-            Parameters
-            --------------------
-            (all default to None)
+        Parameters
+        ----------
 
-            base_directory : /path/to/dir
-                Basedirectory consisting of subject data
-            subject_template : string
-                Template encoding the subject directory name, indexed
-                by subject id.
-            file_template : string
-                Template used for matching filenames.
-                Default = '*-%d-*.nii'
-            subject_id: string or int
-                Subject identifier
-            subject_directory : /path/to/dir
-                Path to subject directory
-            subject_info : dict
-                Provides information about how to map subject run
-                numbers to output fields
+        base_directory : str
+            Path to the base directory consisting of subject data.
+        subject_template : str
+            Template encoding the subject directory name, indexed
+            by subject id.
+        file_template : str
+            Template used for matching filenames.
+            Default = '*-%d-*.nii'
+        subject_id: str or int
+            The subject identifier.
+        subject_directory : str
+            Path to the subject directory.
+        subject_info : dict
+            Provides information about how to map subject run
+            numbers to the output fields.
 
-                subject_id are keys and values are a list of tuples.
-                info[subject_id] = [([runnos],fieldname),...]
+            `subject_id` are keys and the values are a list of tuples.
+            info[subject_id] = [([run_identifiers], output_fieldname), ...]
 
-                Examples
-                --------
+        Examples
+        --------
+     
+        Here our experiment data is stored in our home directory under
+        'data/exp001'.  In the exp001 directory we have a subdirectory
+        for our subject named 's1'.  In the 's1' directory we have
+        four functional images, 'f3', 'f5', 'f7', 'f10'.  In the
+        `info` dictionary we create an entry where the key is the
+        subject identifier 's1', and the value is a list of one
+        element, a tuple containing a list of the functional image
+        names and a field name 'func'.  The 'func' field name is the
+        output field name for this datasource object.  So for
+        instance, if we were doing motion correction using SPM
+        realign, the datasource output 'func' would map to the realign
+        input 'infile' in the pipeline.
 
-                info['s1'] = [([4,5],'anat'),([6,7],'bold'),([8],'dti')]
-                info[1] = [([3,4],'struct'),([6,7],'bold'),([8],'dti')]
+        >>> from nipype.interfaces.io import DataSource
+        >>> info = {}
+        >>> info['s1'] = [(['f3', 'f5', 'f7', 'f10'], 'func')]
+        >>> datasource = DataSource()
+        >>> data_dir = os.path.expanduser('~/data/exp001')
+        >>> datasource.inputs.base_directory = data_dir
+        >>> datasource.inputs.subject_template = '%s'
+        >>> datasource.inputs.file_template = '%s.nii'
+        >>> datasource.inputs.subject_info = info
+        >>> datasource.inputs.subject_id = 's1'
 
-                In the above examples, the output fields of this
-                object will be the names 'anat', 'bold', etc.,.
-            """
+        """
         print self.inputs_help.__doc__
         
     def _populate_inputs(self):
