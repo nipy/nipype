@@ -220,7 +220,7 @@ class NodeWrapper(object):
                     outputs = self._interface.aggregate_outputs()
 
                 if outputs is None:
-                    raise('%s failed to properly generate outputs (returncode'
+                    raise Exception('%s failed to properly generate outputs (returncode'
                           'was 0)' % self.name)
                 for key,val in outputs.iteritems():
                     try:
@@ -250,7 +250,7 @@ class NodeWrapper(object):
                                                runtime=None,
                                                outputs=aggouts)
             if self._result.outputs is None:
-                raise('%s failed to properly generate outputs (returncode'
+                raise Exception('%s failed to properly generate outputs (returncode'
                       'was 0)' % self.name)
         
         if cwd is not None:

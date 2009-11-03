@@ -30,6 +30,7 @@ def walk(children,level=0,path=None):
     
     # Exit condition
     if not children:
+        yield path.copy()
         return
 
     # Tree recursion

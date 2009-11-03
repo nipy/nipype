@@ -355,7 +355,7 @@ class ArtifactDetect(Interface):
         file.write( ''.join(('std: ',str(np.std(gz,axis=0)),'\n')))
         file.close()
 
-    def run(self):
+    def run(self, **inputs):
         """Execute this module.
         """
         funcfilelist = filename_to_list(self.inputs.realigned_files)

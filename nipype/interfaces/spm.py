@@ -120,7 +120,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         """
         self.mfile = use_mfile
 
-    def run(self):
+    def run(self, **inputs):
         """Executes the SPM function using MATLAB
         """
         results = super(SpmMatlabCommandLine,self).run()
@@ -977,7 +977,7 @@ class Normalize(SpmMatlabCommandLine):
         if not self.inputs.source:
             raise AttributeError('Realign requires a source file')
         self.inputs.update(**inputs)
-        return super(SpmMatlabCommandLine,self).run()
+        return super(Normalize,self).run()
     
     def _compile_command(self):
         """validates spm options and generates job structure
@@ -2329,7 +2329,7 @@ class SpecifyModel(Interface):
         outputs = Bunch(session_info=self._generate_design())
         return outputs
 
-    def run(self):
+    def run(self, **inputs):
         """
         """
         runtime = Bunch(returncode=0,
@@ -2584,7 +2584,7 @@ class OneSampleTTest(SpmMatlabCommandLine):
                             flags=None)
         
     def _parseinputs(self):
-        """validate spm normalize options
+        """validate spm1 sample t-test options
         if set to None ignore
         """
         out_inputs = []
