@@ -96,20 +96,26 @@ class Pipeline(object):
 
         """
 
-        self._graph.add_edges_from([(u,v,{'connect':d}) for u,v,d in connection_list])
+        self._graph.add_edges_from([(u, v, {'connect':d}) 
+                                    for u, v, d in connection_list])
         print "PE: checking connections:\n"
-        for u,v,d in connection_list:
-            for source,dest in d:
+        for u, v, d in connection_list:
+            for source, dest in d:
                 try:
                     if dest not in v.inputs.__dict__:
-                        print "Module %s has no input called %s\n"%(v.name,dest)
+                        print "Module %s has no input called %s\n" \
+                            % (v.name, dest)
                 except:
+                    # XXX Shouldn't catch bare exceptions.  What
+                    # exception are we catching?
                     print "unable to query inputs of module %s\n"%v.name
                 try:
                     if not source in u.interface.outputs_help.__doc__:
-                        print "Module %s has no output called %s\n"%(u.name,source)
+                        print "Module %s has no output called %s\n" \
+                            % (u.name, source)
                 except:
-                    print "unable to query outputs of module %s\n"%u.name
+                    # XXX Shouldn't catch bare exceptions.
+                    print "unable to query outputs of module %s\n" % u.name
         print "PE: finished checking connections\n"
 
     def add_modules(self,modules):
@@ -156,6 +162,7 @@ class Pipeline(object):
             self.listofgraphs.append(graphcopy)
             # I don't know if the following is kosher, but it appears
             # to work
+            # XXX Review for kosher-ness.  :)
             self.listofgraphs[-1].__dict__.update(name='')
             order = nx.topological_sort(graphcopy)
             for key,val in params.items():
@@ -223,6 +230,7 @@ class Pipeline(object):
             try:
                 self.mec = client.MultiEngineClient()
             except:
+                # XXX Shouldn't catch bare except.
                 print "No clients found. running serially"
                 self.IPython_available = False
         if self.IPython_available:
@@ -246,20 +254,27 @@ class Pipeline(object):
                 # edges connecting nodes
                 for edge in graph.in_edges_iter(node):
                     data = graph.get_edge_data(*edge)
-                    for sourcename,destname in data['connect']:
+                    for sourcename, destname in data['connect']:
                         if type(sourcename) == type(''):
-                            node.set_input(destname,edge[0].get_output(sourcename))
+                            node.set_input(destname, 
+                                           edge[0].get_output(sourcename))
                         elif type(sourcename) == type(()):
-                            node.set_input(destname,sourcename[1],edge[0].get_output(sourcename[0]),*sourcename[2:])
+                            node.set_input(destname, sourcename[1],
+                                           edge[0].get_output(sourcename[0]),
+                                           *sourcename[2:])
                         else:
-                            raise Exception('Unknown input type in pipeline.connect: %s'%str(sourcename))
+                            msg = 'Unknown input type in pipeline.connect: %s' \
+                                %str(sourcename)
+                            raise Exception(msg)
                 print "Executing: %s H: %s" % (node.name, node.hash_inputs())
                 # For a disk node, provide it with an appropriate
                 # output directory
                 if node.disk_based:
                     outputdir = self.config['workdir']
-                    if self.config['use_parameterized_dirs'] and (graph.__dict__['name'] is not ''):
-                        outputdir = os.path.join(outputdir,graph.__dict__['name'])
+                    if self.config['use_parameterized_dirs'] and \
+                            (graph.__dict__['name'] is not ''):
+                        outputdir = os.path.join(outputdir,
+                                                 graph.__dict__['name'])
                     if not os.path.exists(outputdir):
                         mktree(outputdir)
                     node.output_directory_base = os.path.abspath(outputdir)
