@@ -340,10 +340,11 @@ class Bet(FSLCommand):
         'verbose':            '-v',
         'functional':         '-F',
         'flags':              '%s',
+        'reduce_bias':        '-B',
         'infile':             None,
         'outfile':            None,
         }
-    # Currently we don't support -R, -S, -B, -Z,-A or -A2
+    # Currently we don't support -R, -S, -Z,-A or -A2
 
     def _parse_inputs(self):
         """validate fsl bet options"""
@@ -452,7 +453,7 @@ class Bet(FSLCommand):
                                 self.inputs.outfile, cwd=cwd, suffix='_bet', 
                                 check=True)
 
-        if self.inputs.mask:
+        if self.inputs.mask or self.inputs.reduce_bias:
             outputs.maskfile = fsl_info.gen_fname(outputs.outfile, cwd=cwd, 
                                                   suffix='_mask', check=True)
         else:

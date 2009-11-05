@@ -160,7 +160,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         
         .. notes: Need to talk to Matthew about cleaning up this code.
         """
-        # Satra, I didn't change the semantics, but got rid of extraneous stuff.
+        # XXX TODO Satra, I didn't change the semantics, but got rid of extraneous stuff.
         # This seems weird.  Please have a look and make sure you intend to
         # discard empty dicts. -DJC
         if type(contents) == dict:
@@ -201,7 +201,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
                 jobstring += self._generate_job(newprefix, value)
             return jobstring
         if type(contents) == type(np.empty(1)):
-            #Assumes list of filenames embedded in a numpy array
+            # XXX TODO Assumes list of filenames embedded in a numpy array
             # does not support dicts embedded within a numpy array
             jobstring += "%s = {...\n"%(prefix)
             for item in contents[0]:
