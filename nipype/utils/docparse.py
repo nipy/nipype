@@ -32,6 +32,10 @@ def grab_doc(cmd):
                             stderr=subprocess.PIPE,
                             shell=True)
     stdout, stderr = proc.communicate()
+    if proc.returncode:
+        msg = 'Attempting to run %s. Returned Error: %s'%(cmd,stderr)
+        raise IOError(msg)
+    
     if stderr:
         # A few programs, like fast and fnirt, send their help to
         # stderr instead of stdout.
