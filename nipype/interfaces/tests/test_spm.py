@@ -48,13 +48,13 @@ def test_run():
         def _compile_command(self):
             return self._gen_matlab_command('',mfile=self.mfile) 
     mlab = mlabsub()
-    mlab._use_mfile(False)
+    #mlab._use_mfile(False)
     yield assert_raises, NotImplementedError, mlab.run
     class mlabsub2(mlabsub):
         def aggregate_outputs(self):
             pass
     mlab = mlabsub2()
-    mlab._use_mfile(False)
+    #mlab._use_mfile(False)
     results = mlab.run()
     yield assert_equal, results.runtime.returncode, 0
     

@@ -143,10 +143,14 @@ class Interface(object):
 
     def run(self, cwd=None):
         """Execute the command."""
+        ### XXX TEST
+        print 'Interface'
         raise NotImplementedError
 
     def _runner(self):
         """Performs the call to execute the command."""
+        ### XXX
+        print 'Interface _runner'
         raise NotImplementedError
 
     def _populate_inputs(self):
@@ -273,6 +277,8 @@ class CommandLine(Interface):
             A `Bunch` object with a copy of self in `interface`
         
         """
+        ### XXX TEST
+        print 'CommandLine'
         self._update(*args, **inputs) 
             
         return self._runner(cwd=cwd)
@@ -296,6 +302,9 @@ class CommandLine(Interface):
             Note that unlike calls to Popen, cwd=None will still check
             self.inputs.cwd!  Use an alternative like '.' if you need it
         """
+        ### XXX 
+        print 'CommandLine _runner'
+        print self.cmdline
         if cwd is None:
             # I'd like to deprecate this -DJC
             cwd = self.inputs.get('cwd', os.getcwd())

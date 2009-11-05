@@ -502,7 +502,7 @@ class Realign(SpmMatlabCommandLine):
         if not self.inputs.infile:
             raise AttributeError('Realign requires an input file')
         self.inputs.update(**inputs)
-        return super(Realign, self).run()
+        return super(SpmMatlabCommandLine,self).run()
     
     def aggregate_outputs(self):
         """ Initializes the output fields for this interface and then
@@ -517,9 +517,7 @@ class Realign(SpmMatlabCommandLine):
             filelist = self.inputs.infile
         else:
             filelist = [self.inputs.infile]
-        if self.inputs.register_to_mean:
-            outputs.mean_image = glob(fname_presuffix(filelist[0],prefix='mean'))[0]
-        
+        outputs.mean_image = glob(fname_presuffix(filelist[0],prefix='mean'))[0]
         for f in filelist:
             r_file = glob(fname_presuffix(f, prefix='r', suffix='.nii',
                                           use_ext=False))

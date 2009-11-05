@@ -63,6 +63,8 @@ class MatlabCommandLine(CommandLine):
                             cwd='.')
 
     def run(self):
+        ### XXX TEST
+        print 'MatlabCommandLine'
         results = self._runner()
         if 'command not found' in results.runtime.stderr:
             msg = 'Cannot find matlab!\n' + \
