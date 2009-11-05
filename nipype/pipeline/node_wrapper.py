@@ -111,7 +111,7 @@ class NodeWrapper(object):
     def run(self):
         """Executes an interface within a directory.
         """
-        print "Inputs:\n" + str(self.inputs) +"\n"
+        print "\nInputs:\n" + str(self.inputs) +"\n"
         # check to see if output directory and hash exist
         if self.disk_based:
             try:
@@ -183,7 +183,7 @@ class NodeWrapper(object):
         if self.disk_based:
             # Should pickle the output
             pass
-        print "Outputs:\n" + str(self._result.outputs) +"\n"
+        print "\nOutputs:\n" + str(self._result.outputs) +"\n"
         return self._result
 
     # XXX This function really seriously needs to check returncodes and similar
