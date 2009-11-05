@@ -57,8 +57,10 @@ def reverse_opt_map(opt_map):
     # For docs, we only care about the mapping from our attribute
     # names to the command-line flags.  The 'v.split()[0]' below
     # strips off the string format characters.
+    # if (k != 'flags' and v) , key must not be flags as it is generic,
+    # v must not be None or it cannot be parsed by this line
     return dict((v.split()[0], k) for k, v in opt_map.iteritems()
-                if k != 'flags')
+                if (k != 'flags' and v))
 
 def format_params(paramlist, otherlist=None):
     """Format the parameters according to the nipy style conventions.
