@@ -1,4 +1,4 @@
-from nipype.testing import assert_raises, assert_equal
+from nipype.testing import assert_raises, assert_equal, assert_not_equal
 import nipype.pipeline.node_wrapper as nw
 import os
 from copy import deepcopy
@@ -39,6 +39,9 @@ class BasicInterface(Interface):
         self.ran = 'ran'
         outputs=self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+
+def get_tmp_dir():
+    return os.environ.get('TMPDIR', mkdtemp())
 
 def test_init():
     # Test raising error with mandatory keyword arg interface absent
@@ -113,7 +116,7 @@ def test_run():
     bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True)
     bi.run()
     yield assert_equal, bi.get_output('output1'), ['ran',None]
-    basedir = os.environ.get('TMPDIR', mkdtemp())
+    basedir = get_tmp_dir()
     bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True, 
                         base_directory=basedir)
     outdir = os.path.join(basedir, bi.name)
@@ -142,7 +145,7 @@ def test_run_interface():
     bi.set_input('input1',1)
     result = bi.run()
     yield assert_equal, len(result.outputs.output1), 1
-    basedir = os.environ.get('TMPDIR', mkdtemp())
+    basedir = get_tmp_dir()
     bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True, 
                         base_directory=basedir)
     outdir = os.path.join(basedir, bi.name)
@@ -192,5 +195,15 @@ def test_repr():
     yield assert_equal, repr(bi), 'foo.goo'
     
 
+def test_file_hashing():
+    basedir = get_tmp_dir()
+    bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True, 
+                        name='hash.test', base_directory=basedir)
+    bi.cmd = 'echo foo'
+    res1 = bi.run()
+    res2 = bi.run()
+    yield assert_not_equal, res1.runtime, res2.runtime
 
+    if os.path.exists(basedir):
+        rmtree(basedir)
 
