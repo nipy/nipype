@@ -107,18 +107,32 @@ class Bunch(object):
             stuff = [stuff]
         file_list = []
         for afile in stuff:
-            md5obj = hashlib.md5()
-            fp = file(afile, 'rb')
-            md5obj.update(fp.read())
-            fp.close()
-            file_list.append((afile, md5obj.hexdigest()))
+            if os.path.isfile(afile):
+                md5obj = hashlib.md5()
+                fp = file(afile, 'rb')
+                md5obj.update(fp.read())
+                fp.close()
+                md5hex = md5obj.hexdigest()
+            else:
+                md5hex = None
+            file_list.append((afile,md5hex ))
         return file_list
 
     def _get_bunch_hash(self):
-        """ checks for files to hash, hashes, returnes full hash"""
-        possible_infiles = ['infile', 'infiles', 'source']
-        infile_list = [item for item in self.__dict__.keys() 
-                       if item in possible_infiles]
+        """ checks for files to hash, hashes, returnes tuple
+        (new dict with hashes for files, an hash of newdict)"""
+        infile_list = []
+        for key, val in self.iteritems():
+            if is_container(val):
+                item = val[0]
+            else:
+                item = val
+            try:
+                if os.path.isfile(item):
+                    infile_list.append(key)
+            except:
+                # not a file that can be hashed
+                continue
         dict_withhash = self.dictcopy()
         for item in infile_list:
             dict_withhash[item] = self._hash_infile(dict_withhash, item)
