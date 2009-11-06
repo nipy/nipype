@@ -5,7 +5,16 @@ import os, re
 import hashlib
 import shutil
 from glob import glob
+
 from nipype.utils.misc import is_container
+
+try:
+    # json included in Python 2.6
+    import json
+except ImportError:
+    # simplejson is the json module that was included in 2.6 (I
+    # believe).  Used here for Python 2.5
+    import simplejson as json
 
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     pth, fname = os.path.split(fname)
@@ -141,3 +150,38 @@ def cleandir(dir):
         for f in glob(os.path.join(dir,ftype)):
             os.remove(f)
         
+def save_json(filename, data):
+    """Save data to a json file
+    
+    Parameters
+    ----------
+    filename : str
+        Filename to save data in.
+    data : dict
+        Dictionary to save in json file.
+
+    """
+
+    fp = file(filename, 'w')
+    json.dump(data, fp, sort_keys=True, indent=4)
+    fp.close()
+
+def load_json(filename):
+    """Load data from a json file
+
+    Parameters
+    ----------
+    filename : str
+        Filename to load data from.
+
+    Returns
+    -------
+    data : dict
+   
+    """
+
+    fp = file(filename, 'r')
+    data = json.load(fp)
+    fp.close()
+    return data
+
