@@ -11,6 +11,12 @@ import subprocess
 from copy import deepcopy
 from string import Template
 from warnings import warn
+import copy
+import hashlib
+from nipype.utils.misc import is_container
+ 
+ 
+
 
 __docformat__ = 'restructuredtext'
 
@@ -97,6 +103,31 @@ class Bunch(object):
             first = False
         outstr.append(')')
         return ''.join(outstr)
+
+    def _hash_infile(self,adict, key):
+        # Inject file hashes into adict[key]
+        stuff = adict[key]
+        if not is_container(stuff):
+            stuff = [stuff]
+        file_list = []
+        for afile in stuff:
+            md5obj = hashlib.md5()
+            fp = file(afile, 'rb')
+            md5obj.update(fp.read())
+            fp.close()
+            file_list.append((afile, md5obj.hexdigest()))
+        return file_list
+
+    def _get_bunch_hash(self):
+        """ checks for files to hash, hashes, returnes full hash"""
+        possible_infiles = ['infile', 'infiles', 'source']
+        infile_list = [item for item in self.__dict__.keys() if item in possible_infiles]
+        dict_withhash = self.dictcopy()
+        for item in infile_list:
+            dict_withhash[item] = self._hash_infile(dict_withhash, item)
+        return (dict_withhash, hashlib.md5(dict_withhash.__str__()).hexdigest())
+            
+
 
     def __pretty__(self, p, cycle):
         '''Support for the pretty module
