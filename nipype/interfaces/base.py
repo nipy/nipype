@@ -15,11 +15,7 @@ import copy
 import hashlib
 from nipype.utils.misc import is_container
  
- 
-
-
 __docformat__ = 'restructuredtext'
-
 
 def load_template(name):
     """Load a template from the script_templates directory
@@ -121,14 +117,13 @@ class Bunch(object):
     def _get_bunch_hash(self):
         """ checks for files to hash, hashes, returnes full hash"""
         possible_infiles = ['infile', 'infiles', 'source']
-        infile_list = [item for item in self.__dict__.keys() if item in possible_infiles]
+        infile_list = [item for item in self.__dict__.keys() 
+                       if item in possible_infiles]
         dict_withhash = self.dictcopy()
         for item in infile_list:
             dict_withhash[item] = self._hash_infile(dict_withhash, item)
         return (dict_withhash, hashlib.md5(dict_withhash.__str__()).hexdigest())
             
-
-
     def __pretty__(self, p, cycle):
         '''Support for the pretty module
         
