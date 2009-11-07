@@ -144,6 +144,7 @@ class Pipeline(object):
         will generate 4 graphs parameterized as (a=1,b=3), (a=1,b=4),
         (a=2,b=3) and (a=2,b=4). 
         """
+        print "PE: creating parameterized graphs"
         iterables = []
         self.listofgraphs = []
         # Create a list of iterables
@@ -172,6 +173,7 @@ class Pipeline(object):
                 name = self.listofgraphs[-1].__dict__['name']
                 newname = ''.join((name,'_',key[1],'_',str(val)))
                 self.listofgraphs[-1].__dict__.update(name=newname)
+        print "PE: done creating parameterized graphs"
 
     def _generate_dependency_list(self):
         """ Generates a dependency list for a list of graphs. Adds the

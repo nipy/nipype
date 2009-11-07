@@ -11,6 +11,7 @@
 
 import nipype.interfaces.io as nio           # Data i/o 
 import nipype.interfaces.fsl as fsl          # fsl
+import nipype.interfaces.spm as spm          # spm
 import nipype.pipeline.node_wrapper as nw    # nodes for pypelines
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
@@ -225,7 +226,7 @@ contrasts = [cont1,cont2]
 """
 modelspec = nw.NodeWrapper(interface=spm.SpecifyModel())
 modelspec.inputs.subject_info_func       = subjectinfo
-modelspec.inputs.concatenate_runs        = True
+modelspec.inputs.concatenate_runs        = False
 modelspec.inputs.input_units             = 'secs'
 modelspec.inputs.output_units            = 'secs'
 modelspec.inputs.time_repetition         = 3.
@@ -236,29 +237,26 @@ modelspec.inputs.high_pass_filter_cutoff = 120
    d. Use :class:`nipype.interfaces.spm.Level1Design` to generate a
    first level SPM.mat file for analysis
 """
-level1design = nw.NodeWrapper(interface=spm.Level1Design(),diskbased=True)
-level1design.inputs.timing_units       = modelspec.inputs.output_units
+level1design = nw.NodeWrapper(interface=fsl.Level1Design(),diskbased=True)
 level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
-level1design.inputs.bases              = {'hrf':{'derivs': [0,0]}}
-
+level1design.inputs.bases              = {'hrf':{'derivs': False}}
+level1design.inputs.contrasts          = contrasts
+level1design.overwrite = True
 
 """
    e. Use :class:`nipype.interfaces.spm.EstimateModel` to determine
    the parameters of the model.
 """
-level1estimate = nw.NodeWrapper(interface=spm.EstimateModel(),diskbased=True)
-level1estimate.inputs.estimation_method = {'Classical' : 1}
+#level1estimate = nw.NodeWrapper(interface=spm.EstimateModel(),diskbased=True)
+#level1estimate.inputs.estimation_method = {'Classical' : 1}
 
 
 """
    f. Use :class:`nipype.interfaces.spm.EstimateContrast` to estimate
    the first level contrasts specified in step 5(b).
 """
-contrastestimate = nw.NodeWrapper(interface=spm.EstimateContrast(),diskbased=True)
-contrastestimate.inputs.contrasts = contrasts
-
-
-
+#contrastestimate = nw.NodeWrapper(interface=spm.EstimateContrast(),diskbased=True)
+#contrastestimate.inputs.contrasts = contrasts
 
 
 
@@ -305,6 +303,11 @@ preproc.connect([# preprocessing in native space
                  (func_skullstrip, funcapplywarp, [('outfile', 'infile')]),
                  # Smooth :\
                  (funcapplywarp, smoothing, [('outfile', 'infile')]),
+                 # Model design
+                 (datasource,modelspec,[('subject_id','subject_id')]),
+                 (motion_correct,modelspec,[('realignment_parameters','realignment_parameters')]),
+                 (smoothing,modelspec,[('smoothedimage','functional_runs')]),
+                 (modelspec,level1design,[('session_info','session_info')]),                 
                 ])
 
 # store relevant outputs from various stages of preprocessing

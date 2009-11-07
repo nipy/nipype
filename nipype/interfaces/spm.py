@@ -1519,7 +1519,7 @@ class Level1Design(SpmMatlabCommandLine):
                 High pass filter cutoff
                 SPM default = 128 secs
             condition_info : mat filename or list of dicts
-                The output of Specify>odel generates this
+                The output of `SpecifyModel` generates this
                 information.
             regressor_info : mat/txt filename or list of dicts 
                 Stores regressor specific information
@@ -2122,6 +2122,8 @@ class SpecifyModel(Interface):
         return reg
 
     def _cond_to_regress(self,info,nscans):
+        """Converts condition information to full regressors
+        """
         reg = []
         regnames = info.conditions
         for i,c in enumerate(info.conditions):
@@ -2139,7 +2141,9 @@ class SpecifyModel(Interface):
         return reg,regnames
     
     def _generate_clustered_design(self,infolist):
-        """
+        """Generates condition information for sparse-clustered
+        designs.
+        
         """
         infoout = deepcopy(infolist)
         for i,info in enumerate(infolist):

@@ -20,13 +20,13 @@ import os
 import subprocess
 from copy import deepcopy
 from glob import glob
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.base import (Bunch, CommandLine, 
+from nipype.externals.pynifti import load
+from nipype.utils.filemanip import (fname_presuffix, list_to_filename)
+from nipype.interfaces.base import (Bunch, CommandLine, Interface,
                                     load_template, InterfaceResult)
 from nipype.utils import setattr_on_read
 from nipype.utils.docparse import get_doc
 from nipype.utils.misc import container_to_string, is_container
-from nipype.utils.filemanip import fname_presuffix
 import warnings
 warn = warnings.warn
 
@@ -1460,7 +1460,7 @@ class FSLSmooth(FSLCommand):
 
     
 
-class L1FSFmaker:
+class L1FSFmaker(object):
     '''Use the template variables above to construct fsf files for feat.
     
     This doesn't actually run anything.
@@ -1506,7 +1506,7 @@ class L1FSFmaker:
             fsf_txt = self.fsf_header.substitute(num_evs=len(sorted_conds), 
                          func_file=curr_func, num_vols=self.inputs.num_vols,
                          struct_file=self.inputs.struct_file, scan_num=i)
-            for j, cond in enumerate(sorted_conds):
+            for j,cond in enumerate(sorted_conds):
                 fsf_txt += self.gen_ev(j+1, cond, curr_conds[cond], 
                                        len(sorted_conds))
 
@@ -1534,3 +1534,227 @@ class L1FSFmaker:
         # This obviously needs to be a lot more sophisticated
         return self.fsf_contrasts.substitute()
 
+
+class Level1Design(Interface):
+    """Generate Feat specific files
+
+    See Level1Design().spm_doc() for more information.
+    
+    Parameters
+    ----------
+    inputs : mapping 
+    key, value pairs that will update the Level1Design.inputs attributes
+    see self.inputs_help() for a list of Level1Design.inputs attributes
+    
+    Attributes
+    ----------
+    inputs : Bunch
+    a (dictionary-like) bunch of options that can be passed to 
+    spm_smooth via a job structure
+    cmdline : string
+    string used to call matlab/spm via SpmMatlabCommandLine interface
+
+    Other Parameters
+    ----------------
+    To see optional arguments
+    Level1Design().inputs_help()
+
+    Examples
+    --------
+    
+    """
+    
+    def __init__(self, *args, **inputs):
+        self._populate_inputs()
+        self.inputs.update(**inputs)
+        
+    @property
+    def cmd(self):
+        return 'fsl_fmri_design'
+ 
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        return []
+   
+    def inputs_help(self):
+        """
+        Parameters
+        ----------
+        
+        interscan_interval : float (in secs)
+            Interscan  interval,  TR.
+        session_info : list of dicts
+            Stores session specific information
+
+            Session parameters
+
+            nscan : int
+                Number of scans in a session
+            scans : list of filenames
+                A single 4D nifti file or a list of 3D nifti files
+            hpf : float
+                High pass filter cutoff
+                SPM default = 128 secs
+            condition_info : mat filename or list of dicts
+                The output of Specify>odel generates this
+                information.
+            regressor_info : mat/txt filename or list of dicts 
+                Stores regressor specific information
+                The output of Specify>odel generates this
+                information.
+        bases : dict {'name':{'basesparam1':val,...}}
+            name : string
+                Name of basis function (hrf, fourier, fourier_han,
+                gamma, fir)
+                
+                hrf :
+                    derivs : boolean
+                        Model  HRF  Derivatives. 
+                fourier, fourier_han, gamma, fir:
+                    length : int
+                        Post-stimulus window length (in seconds)
+                    order : int
+                        Number of basis functions
+        model_serial_correlations : string
+            Option to model serial correlations using an
+            autoregressive estimator. AR(1) or none
+            SPM default = AR(1)
+        contrasts : list of dicts
+            List of contrasts with each list containing: 'name',
+            'stat', [condition list], [weight list]. 
+        """
+        print self.inputs_help.__doc__
+
+    def _populate_inputs(self):
+        """ Initializes the input fields of this interface.
+        """
+        self.inputs = Bunch(interscan_interval=None,
+                            session_info=None,
+                            bases=None,
+                            model_serial_correlations=None)
+
+    def _create_ev_file(self,evfname,evinfo):
+        f = open(evfname,'wt')
+        for i in evinfo:
+            f.write('%f %f %f\n'%(i[0],i[1],i[2]))
+        f.close()
+        
+    def _create_cond_files(self,cwd,runinfo,runidx,usetd,contrasts):
+        """
+        
+        Arguments:
+        - `runinfo`: contains session_info structure pertaining to
+        current run
+        - `runidx`:  index of current run
+        """
+        conds = {}
+        evnum = 0
+        evname = []
+        ev_gamma  = load_template('feat_ev_gamma.tcl')
+        ev_gamma_txt = ''
+        for i,cond in enumerate(runinfo['cond']):
+            evname.insert(i,cond['name'])
+            evnum += 1
+            evfname = os.path.join(cwd,'%s_%d_%d.txt'%(cond['name'],runidx,evnum))
+            evinfo = []
+            for j,onset in enumerate(cond['onset']):
+                if len(cond['duration'])>1:
+                    evinfo.insert(j,[onset,cond['duration'][j],1])
+                else:
+                    evinfo.insert(j,[onset,cond['duration'][0],1])
+            self._create_ev_file(evfname,evinfo)
+            conds[cond['name']] = evfname
+            ev_gamma_txt += ev_gamma.substitute(ev_num=evnum,
+                                                ev_name=cond['name'],
+                                                temporalderiv=usetd,
+                                                cond_file=evfname)
+            ev_gamma_txt += "\n"
+        # add orthogonalization
+        for i in range(1,evnum+1):
+            for j in range(evnum+1):
+                ev_gamma_txt += '#Orthogonalize EV %d wrt EV %d\nset fmri(ortho%d.%d) 0\n'%(i,j,i,j)
+        ev_gamma_txt += "\n"
+
+        # add contrast info
+        ev_gamma_txt +="""
+# Contrast & F-tests mode
+# real : control real EVs
+# orig : control original EVs
+set fmri(con_mode_old) orig
+set fmri(con_mode) orig\n
+        """
+
+        for j,con in enumerate(contrasts):
+            ev_gamma_txt += "# Display images for contrast_real %d\n"%(j+1)
+            ev_gamma_txt += "set fmri(conpic_real.%d) 1\n"%(j+1)
+            ev_gamma_txt += "# Title for contrast_real %d\n"%(j+1)
+            ev_gamma_txt += 'set fmri(conname_real.%d) "%s"\n'%(j+1,con[0])
+
+            for c in range(1,evnum+1):
+                ev_gamma_txt += "# Real contrast_real vector %d element %d\n"%(j+1,c)
+                if evname[c-1] in con[2]:
+                    ev_gamma_txt += "set fmri(con_real%d.%d) %f\n"%(j+1,c,con[3][con[2].index(evname[c-1])])
+                else:
+                    ev_gamma_txt += "set fmri(con_real%d.%d) 0.0\n"%(j+1,c)
+        ev_gamma_txt += "\n"
+
+        return conds,ev_gamma_txt
+    
+    def run(self, cwd=None, **inputs):
+        if cwd is None:
+            cwd = os.getcwd()
+        self.inputs.update(inputs)
+        fsf_header    = load_template('feat_header_l1.tcl')
+        fsf_postscript= load_template('feat_nongui.tcl')
+
+        prewhiten = int(self.inputs.model_serial_correlations == 'AR(1)')
+        if self.inputs.bases.has_key('hrf'):
+            usetd = int(self.inputs.bases['hrf']['derivs'])
+        else:
+            usetd = 0
+        for i,info in enumerate(self.inputs.session_info):
+            curr_conds,cond_txt  = self._create_cond_files(cwd,info,i,usetd,self.inputs.contrasts)
+            curr_func = info['scans'][0][0][0].split(',')[0]
+            nim = load(curr_func)
+            (x,y,z,timepoints) = nim.get_shape()
+            fsf_txt = fsf_header.substitute(scan_num=i,
+                                            interscan_interval=self.inputs.interscan_interval,
+                                            num_vols=timepoints,
+                                            prewhiten=prewhiten,
+                                            num_evs=len(curr_conds),
+                                            high_pass_filter_cutoff=info['hpf'],
+                                            func_file=curr_func)
+            fsf_txt += cond_txt
+            fsf_txt += fsf_postscript.substitute(overwrite=1)
+            
+            f = open(os.path.join(cwd, 'scan%d.fsf' % i), 'w')
+            f.write(fsf_txt)
+            f.close()
+
+        runtime = Bunch(returncode=0,
+                        messages=None,
+                        errmessages=None)
+        outputs=self.aggregate_outputs()
+        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+
+            
+    def outputs_help(self):
+        """
+            Parameters
+            ----------
+            (all default to None)
+
+            fsf_files:
+                FSL feat specification files
+            ev_files:
+                condition information files
+        """
+        print self.outputs_help.__doc__
+        
+    def aggregate_outputs(self):
+        outputs = Bunch(fsf_file=None,ev_files=None)
+        outputs.fsf_files = glob(os.path.abspath(os.path.join(self.inputs.cwd,'*.fsf')))
+        outputs.ev_files  = glob(os.path.abspath(os.path.join(self.inputs.cwd,'ev*.txt')))
+        return outputs
