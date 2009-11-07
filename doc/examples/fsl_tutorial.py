@@ -243,23 +243,6 @@ level1design.inputs.bases              = {'hrf':{'derivs': False}}
 level1design.inputs.contrasts          = contrasts
 level1design.overwrite = True
 
-"""
-   e. Use :class:`nipype.interfaces.spm.EstimateModel` to determine
-   the parameters of the model.
-"""
-#level1estimate = nw.NodeWrapper(interface=spm.EstimateModel(),diskbased=True)
-#level1estimate.inputs.estimation_method = {'Classical' : 1}
-
-
-"""
-   f. Use :class:`nipype.interfaces.spm.EstimateContrast` to estimate
-   the first level contrasts specified in step 5(b).
-"""
-#contrastestimate = nw.NodeWrapper(interface=spm.EstimateContrast(),diskbased=True)
-#contrastestimate.inputs.contrasts = contrasts
-
-
-
 
 ##########################
 # Setup storage of results
