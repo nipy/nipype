@@ -1463,19 +1463,19 @@ class FSLSmooth(FSLCommand):
 class L1FSFmaker(object):
     '''Use the template variables above to construct fsf files for feat.
     
-    This doesn't actually run anything.
+    This doesn't actually run anything, it just creates the .fsf files.
     
     Examples
     --------
-    FSFmaker(5, ['left', 'right', 'both'])
-        
+    Need to put a good example here. See opt_list for a list of acceptable
+    inputs.
     '''
     # These are still somewhat specific to my experiment, but should be so in an
     # obvious way.  Contrasts in particular need to be addressed more generally.
     # These should perhaps be redone with a setattr_on_read property, though we
     # don't want to reload for each instance separately.
     fsf_header = load_template('feat_header.tcl')
-    fsf_ev = load_template('feat_ev.tcl')
+    fsf_ev = load_template('feat_ev_gamma.tcl')
     fsf_ev_ortho = load_template('feat_ev_ortho.tcl')
     fsf_contrasts = load_template('feat_contrasts.tcl')
 
@@ -1521,9 +1521,11 @@ class L1FSFmaker(object):
     def aggregate_outputs(self):
         return Bunch()
                 
-    def gen_ev(self, cond_num, cond_name, cond_file, total_conds):
+    def gen_ev(self, cond_num, cond_name, cond_file, total_conds,
+                temporalderiv=False):
         ev_txt = self.fsf_ev.substitute(ev_num=cond_num, ev_name=cond_name,
-                                        cond_file=cond_file)
+                                        cond_file=cond_file,
+                                        temporalderiv=int(temporalderiv))
 
         for i in range(total_conds + 1):
             ev_txt += self.fsf_ev_ortho.substitute(c0=cond_num, c1=i) 
@@ -1534,6 +1536,9 @@ class L1FSFmaker(object):
         # This obviously needs to be a lot more sophisticated
         return self.fsf_contrasts.substitute()
 
+## Things to make
+# class ContrastFSFMaker
+# class HigherLevelFSFMaker
 
 class Level1Design(Interface):
     """Generate Feat specific files

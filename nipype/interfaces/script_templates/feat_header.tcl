@@ -17,7 +17,7 @@ set fmri(level) 1
 # 2 :             Stats
 # 6 :             Stats + Post-stats
 # 4 :                     Post-stats
-set fmri(analysis) 2
+set fmri(analysis) 6
 
 # Use relative filenames
 set fmri(relative_yn) 0
