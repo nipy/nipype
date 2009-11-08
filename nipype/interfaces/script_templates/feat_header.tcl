@@ -17,7 +17,7 @@ set fmri(level) 1
 # 2 :             Stats
 # 6 :             Stats + Post-stats
 # 4 :                     Post-stats
-set fmri(analysis) 6
+set fmri(analysis) $analysis_stages 
 
 # Use relative filenames
 set fmri(relative_yn) 0
@@ -157,8 +157,8 @@ set fmri(evs_real) $num_evs
 set fmri(evs_vox) 0
 
 # Number of contrasts
-set fmri(ncon_orig) 1
-set fmri(ncon_real) 1
+set fmri(ncon_orig) $num_contrasts 
+set fmri(ncon_real) $num_contrasts
 
 # Number of F-tests
 set fmri(nftests_orig) 0
@@ -168,7 +168,7 @@ set fmri(nftests_real) 0
 set fmri(constcol) 0
 
 # Carry out post-stats steps?
-set fmri(poststats_yn) 0
+set fmri(poststats_yn) $do_contrasts
 
 # Pre-threshold masking?
 set fmri(threshmask) ""
@@ -214,7 +214,7 @@ set fmri(bgimage) 1
 set fmri(tsplot_yn) 1
 
 #Registration?
-set fmri(reg_yn) 1
+set fmri(reg_yn) 0
 
 # Registration to initial structural
 set fmri(reginitial_highres_yn) 0

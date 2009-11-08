@@ -1590,6 +1590,9 @@ class L1FSFmaker(object):
     --------
     Need to put a good example here. See opt_list for a list of acceptable
     inputs.
+
+    Note that we currently do stats + post-stats. This is partly determined by 
+    the do_contrasts string substitutions below, and partly by the "6" in the feat_header.tcl.
     '''
     # These are still somewhat specific to my experiment, but should be so in an
     # obvious way.  Contrasts in particular need to be addressed more generally.
@@ -1605,7 +1608,17 @@ class L1FSFmaker(object):
     # correspond to one another
     # Would be nice to use pynifti to get the num_vols... we shouldn't have to
     # specify
-    opt_list = ('cond_files', 'func_files', 'num_vols', 'struct_file')
+
+    # This was short-sighted, an opt_map style construct would be more appropriate here
+    opt_list = ('cond_files', # list of file names
+                'func_files', # list of file names
+                'num_vols', # int
+                'struct_file', # High-res structural - currently not really used
+                'contrasts', # currently just number of contrasts - should eventually be an 
+                             # actual contrast spec, as with Satra's code or Jonathan 
+                             # Taylor's code)
+                             # Now, contrasts are taken verbatim from feat_contrasts.tcl
+               )
 
     def __init__(self, **inputs):
         self._populate_inputs()
@@ -1620,21 +1633,31 @@ class L1FSFmaker(object):
         if cwd is None:
             cwd = os.getcwd()
         self.inputs.update(inputs)
+
+        fsf_txt = []
         for i in range(len(self.inputs.func_files)):
             curr_conds = self.inputs.cond_files[i]
             curr_func = self.inputs.func_files[i]
             sorted_conds = sorted(curr_conds.keys())
-            fsf_txt = self.fsf_header.substitute(num_evs=len(sorted_conds), 
-                         func_file=curr_func, num_vols=self.inputs.num_vols,
-                         struct_file=self.inputs.struct_file, scan_num=i)
+            if self.inputs.contrasts > 0:
+                analysis_stages = 6
+            else:
+                analysis_stages = 2
+            fsf_txt.append(
+                    self.fsf_header.substitute(num_evs=len(sorted_conds), 
+                        func_file=curr_func, num_vols=self.inputs.num_vols,
+                        struct_file=self.inputs.struct_file, scan_num=i,
+                        analysis_stages=analysis_stages,
+                        num_contrasts=self.inputs.contrasts,
+                        do_contrasts=int(self.inputs.contrasts > 0) ) )
             for j,cond in enumerate(sorted_conds):
-                fsf_txt += self.gen_ev(j+1, cond, curr_conds[cond], 
-                                       len(sorted_conds))
+                fsf_txt.extend(self.gen_ev(j+1, cond, curr_conds[cond], 
+                                       len(sorted_conds)))
 
-            fsf_txt += self.gen_contrasts(sorted_conds)
+            fsf_txt.extend(self.gen_contrasts(sorted_conds))
 
             f = open(os.path.join(cwd, 'scan%d.fsf' % i), 'w')
-            f.write(fsf_txt)
+            f.writelines(fsf_txt)
             f.close()
 
         return InterfaceResult(self, Bunch(), Bunch())
@@ -1644,18 +1667,22 @@ class L1FSFmaker(object):
                 
     def gen_ev(self, cond_num, cond_name, cond_file, total_conds,
                 temporalderiv=False):
-        ev_txt = self.fsf_ev.substitute(ev_num=cond_num, ev_name=cond_name,
+        ev_txt = []
+        ev_txt.append(self.fsf_ev.substitute(ev_num=cond_num, ev_name=cond_name,
                                         cond_file=cond_file,
-                                        temporalderiv=int(temporalderiv))
+                                        temporalderiv=int(temporalderiv)))
 
         for i in range(total_conds + 1):
-            ev_txt += self.fsf_ev_ortho.substitute(c0=cond_num, c1=i) 
+            ev_txt.append(self.fsf_ev_ortho.substitute(c0=cond_num, c1=i)) 
 
         return ev_txt
 
     def gen_contrasts(self, sorted_conds):
         # This obviously needs to be a lot more sophisticated
-        return self.fsf_contrasts.substitute()
+        contrast_txt = []
+        contrast_txt.append(self.fsf_contrasts.substitute())
+
+        return contrast_txt
 
 ## Things to make
 # class ContrastFSFMaker
