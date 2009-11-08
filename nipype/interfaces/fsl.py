@@ -410,22 +410,28 @@ class Bet(FSLCommand):
         results = self._runner(cwd=cwd)
         if results.runtime.returncode == 0:
             results.outputs = self.aggregate_outputs(cwd)
-
         return results        
 
 
     def outputs_help(self):
+        """Print outputs help
         """
+        print self.outputs.__doc__
+        
+    def outputs(self):
+        """Returns a bunch structure with outputs
+        
         Parameters
         ----------
         (all default to None and are unset)
         
-        outfile : /path/to/outfile
-            path/name of skullstripped file
-        maskfile : Bool
-            binary brain mask if generated
+            outfile : string,file
+                path/name of skullstripped file
+            maskfile : string, file
+                binary brain mask if generated
         """
-        print self.outputs_help.__doc__
+        outputs = Bunch(outfile=None,maskfile=None)
+        return outputs
 
     def aggregate_outputs(self, cwd=None):
         """Create a Bunch which contains all possible files generated
@@ -447,18 +453,13 @@ class Bet(FSLCommand):
             Else, contains path, filename of generated outputfile
 
         """
-        outputs = Bunch()
-        
+        outputs = self.outputs()
         outputs.outfile = fsl_info.gen_fname(self.inputs.infile,
                                 self.inputs.outfile, cwd=cwd, suffix='_bet', 
                                 check=True)
-
         if self.inputs.mask or self.inputs.reduce_bias:
             outputs.maskfile = fsl_info.gen_fname(outputs.outfile, cwd=cwd, 
                                                   suffix='_mask', check=True)
-        else:
-            outputs.maskfile = None
-
         return outputs
 
 
@@ -560,14 +561,18 @@ class Fast(FSLCommand):
             allargs.append(container_to_string(self.inputs.infiles))
         return allargs
 
-    def aggregate_outputs(self):
-        """Create a Bunch which contains all possible files generated
-        by running the interface.  Some files are always generated, others
-        depending on which ``inputs`` options are set.
-
-        Returns
-        -------
-        outputs : Bunch object
+    def outputs_help(self):
+        """
+        """
+        print self.outputs.__doc__
+        
+    def outputs(self):
+        """Returns a bunch structure with outputs
+        
+        Parameters
+        ----------
+        (all default to None and are unset)
+        
             Each attribute in ``outputs`` is a list.  There will be
             one set of ``outputs`` for each file specified in
             ``infiles``.  ``outputs`` will contain the following
@@ -589,6 +594,26 @@ class Fast(FSLCommand):
                 filename(s) 
             probability_maps : list
                 filenames, one for each class, for each input
+        """
+        outputs = Bunch(mixeltype = [],
+                seg = [],
+                partial_volume_map=[],
+                partial_volume_files=[],
+                tissue_class_map=[],
+                tissue_class_files=[],
+                bias_corrected=[],
+                bias_field=[],
+                prob_maps=[])
+        return outputs
+        
+    def aggregate_outputs(self):
+        """Create a Bunch which contains all possible files generated
+        by running the interface.  Some files are always generated, others
+        depending on which ``inputs`` options are set.
+
+        Returns
+        -------
+        outputs : Bunch object
 
         Notes
         -----
@@ -603,15 +628,7 @@ class Fast(FSLCommand):
 
         """
         _, ext = fsl_info.outputtype()
-        outputs = Bunch(mixeltype = [],
-                seg = [],
-                partial_volume_map=[],
-                partial_volume_files=[],
-                tissue_class_map=[],
-                tissue_class_files=[],
-                bias_corrected=[],
-                bias_field=[],
-                prob_maps=[])
+        outputs = self.outputs()
 
         if not is_container(self.inputs.infiles):
             infiles = [self.inputs.infiles]
@@ -810,6 +827,20 @@ class Flirt(FSLCommand):
             results.outputs = self.aggregate_outputs(cwd)
         return results 
 
+    def outputs(self):
+        """Returns a bunch containing output parameters
+        
+        Parameters
+        ----------
+        
+           outfile : string, file
+           
+           outmatrix : string, file
+            
+        """
+        outputs = Bunch(outfile=None, outmatrix=None)
+        return outputs
+        
     def aggregate_outputs(self, cwd=None):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
@@ -827,7 +858,7 @@ class Flirt(FSLCommand):
             If expected output file(s) outfile or outmatrix are not found.
 
         """
-        outputs = Bunch(outfile=None, outmatrix=None)
+        outputs = self.outputs()
 
         def raise_error(filename):
             raise IOError('File %s was not generated by Flirt' % filename)
@@ -929,6 +960,24 @@ class ApplyXFM(Flirt):
             results.outputs = self.aggregate_outputs(verify_outmatrix=False)
         return results 
 
+    def outputs_help(self):
+        """
+        """
+        print self.outputs.__doc__
+        
+    def outputs(self):
+        """Returns a bunch structure with outputs
+        
+        Parameters
+        ----------
+        (all default to None and are unset)
+
+            outfile : string, filename
+            outmatrix : string, filename
+        """
+        outputs = Bunch(outfile=None,outmatrix=None)
+        return outputs
+    
     def aggregate_outputs(self):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
@@ -945,7 +994,7 @@ class ApplyXFM(Flirt):
             If expected output file(s) outfile or outmatrix are not found.
 
         """
-        outputs = Bunch(outfile=None)
+        outputs = self.outputs()
         if self.inputs.outfile:
             outputs.outfile = self.inputs.outfile
         if self.inputs.outmatrix:
@@ -1070,16 +1119,38 @@ class McFlirt(FSLCommand):
         
         return results 
 
+    def outputs_help(self):
+        """
+        """
+        print self.outputs.__doc__
+        
+    def outputs(self):
+        """Returns a bunch structure with outputs
+        
+        Parameters
+        ----------
+        (all default to None and are unset)
+
+            outfile : string, filename
+            varianceimg : string, filename
+            stdimg : string, filename
+            meanimg : string, filename
+            parfile : string, filename
+            outmatfile : string, filename
+        """
+        outputs = Bunch(outfile=None,
+                        varianceimg=None,
+                        stdimg=None,
+                        meanimg=None,
+                        parfile=None,
+                        outmatfile=None)
+        return outputs
+    
     def aggregate_outputs(self, cwd=None):
         if cwd is None:
             cwd = os.getcwd()
 
-        outputs = Bunch(outfile=None,
-                varianceimg=None,
-                stdimg=None,
-                meanimg=None,
-                parfile=None,
-                outmatfile=None)
+        outputs = self.outputs()
         # get basename (correct fsloutpputytpe extension)
         # We are generating outfile if it's not there already
         # if self.inputs.outfile:
@@ -1291,6 +1362,35 @@ class Fnirt(FSLCommand):
             fid.write('%s\n'%(item))
         fid.close()
 
+    def outputs_help(self):
+        """
+        """
+        print self.outputs.__doc__
+        
+    def outputs(self):
+        """Returns a bunch structure with outputs
+        
+        Parameters
+        ----------
+        (all default to None and are unset)
+
+             fieldcoeff_file
+             warpedimage
+             fieldfile
+             jacobianfield
+             modulatedreference
+             intensitymodulation
+             logfile
+        """
+        outputs = Bunch(fieldcoeff_file=None,
+                        warpedimage=None,
+                        fieldfile=None,
+                        jacobianfield=None,
+                        modulatedreference=None,
+                        intensitymodulation=None,
+                        logfile=None)
+        return outputs
+    
     def aggregate_outputs(self, cwd=None):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
@@ -1299,13 +1399,6 @@ class Fnirt(FSLCommand):
         Returns
         -------
         outputs : Bunch object
-             coefficientsfile
-             warpedimage
-             warpfield
-             jacobianfield
-             modulatedreference
-             intensitymodulation
-             logfile
 
         Notes
         -----
@@ -1317,13 +1410,7 @@ class Fnirt(FSLCommand):
         if cwd is None:
             cwd = os.getcwd()
 
-        outputs = Bunch(fieldcoeff_file=None,
-                        warpedimage=None,
-                        fieldfile=None,
-                        jacobianfield=None,
-                        modulatedreference=None,
-                        intensitymodulation=None,
-                        logfile=None)
+        outputs = self.outputs()
 
         # Note this is the only one that'll work with the pipeline code
         # currently
@@ -1410,11 +1497,28 @@ class ApplyWarp(FSLCommand):
 
         return allargs
 
+    def outputs_help(self):
+        """
+        """
+        print self.outputs.__doc__
+        
+    def outputs(self):
+        """Returns a bunch structure with outputs
+        
+        Parameters
+        ----------
+        (all default to None and are unset)
+
+             outfile
+        """
+        outputs = Bunch(outfile=None)
+        return outputs
+    
     def aggregate_outputs(self, cwd=None):
         if cwd is None:
             cwd = os.getcwd()
 
-        outputs = Bunch()
+        outputs = self.outputs()
         outputs.outfile = fsl_info.gen_fname(self.inputs.infile,
                 self.inputs.outfile, cwd=cwd, suffix='_warp', check=True)
 
@@ -1447,11 +1551,28 @@ class FSLSmooth(FSLCommand):
                                             self.inputs.fwhm,
                                             outfile)]
 
+    def outputs_help(self):
+        """
+        """
+        print self.outputs.__doc__
+        
+    def outputs(self):
+        """Returns a bunch structure with outputs
+        
+        Parameters
+        ----------
+        (all default to None and are unset)
+
+             smoothedimage
+        """
+        outputs = Bunch(smoothedimage=None)
+        return outputs
+    
     def aggregate_outputs(self, cwd=None):
         if cwd is None:
             cwd = os.getcwd()
         
-        outputs = Bunch()
+        outputs = self.outputs()
 
         outputs.smoothedimage = fsl_info.gen_fname(self.inputs.infile,
                 self.inputs.outfile, cwd=cwd, suffix='_smooth', check=True)
@@ -1543,7 +1664,7 @@ class L1FSFmaker(object):
 class Level1Design(Interface):
     """Generate Feat specific files
 
-    See Level1Design().spm_doc() for more information.
+    See Level1Design().inputs_help() for more information.
     
     Parameters
     ----------
@@ -1643,69 +1764,83 @@ class Level1Design(Interface):
     def _create_ev_file(self,evfname,evinfo):
         f = open(evfname,'wt')
         for i in evinfo:
-            f.write('%f %f %f\n'%(i[0],i[1],i[2]))
+            if len(i)==3:
+                f.write('%f %f %f\n'%(i[0],i[1],i[2]))
+            else:
+                f.write('%f\n'%i[0])
         f.close()
         
-    def _create_cond_files(self,cwd,runinfo,runidx,usetd,contrasts):
-        """
+    def _create_ev_files(self,cwd,runinfo,runidx,usetd,contrasts):
+        """Creates EV files from condition and regressor information. 
         
-        Arguments:
-        - `runinfo`: contains session_info structure pertaining to
-        current run
-        - `runidx`:  index of current run
+           Parameters:
+           -----------
+
+           runinfo : dict
+               Generated by `SpecifyModel` and contains information
+               about events and other regressors.
+           runidx  : int
+               Index to run number
+           usetd   : int
+               Whether or not to use temporal derivatives for
+               conditions
+           contrasts : list of lists
+               Information on contrasts to be evaluated
         """
         conds = {}
-        evnum = 0
         evname = []
         ev_gamma  = load_template('feat_ev_gamma.tcl')
-        ev_gamma_txt = ''
-        for i,cond in enumerate(runinfo['cond']):
-            evname.insert(i,cond['name'])
-            evnum += 1
-            evfname = os.path.join(cwd,'%s_%d_%d.txt'%(cond['name'],runidx,evnum))
-            evinfo = []
-            for j,onset in enumerate(cond['onset']):
-                if len(cond['duration'])>1:
-                    evinfo.insert(j,[onset,cond['duration'][j],1])
-                else:
-                    evinfo.insert(j,[onset,cond['duration'][0],1])
-            self._create_ev_file(evfname,evinfo)
-            conds[cond['name']] = evfname
-            ev_gamma_txt += ev_gamma.substitute(ev_num=evnum,
-                                                ev_name=cond['name'],
-                                                temporalderiv=usetd,
-                                                cond_file=evfname)
-            ev_gamma_txt += "\n"
+        ev_none   = load_template('feat_ev_none.tcl')
+        ev_ortho  = load_template('feat_ev_ortho.tcl')
+        contrast_header  = load_template('feat_contrast_header.tcl')
+        contrast_prolog  = load_template('feat_contrast_prolog.tcl')
+        contrast_element = load_template('feat_contrast_element.tcl') 
+        ev_txt = ''
+        # generate sections for conditions and other nuisance regressors
+        for field in ['cond','regress']:
+            for i,cond in enumerate(runinfo[field]):
+                name = cond['name']
+                evname.append(name) 
+                evfname = os.path.join(cwd,'ev_%s_%d_%d.txt'%(name,runidx,len(evname)))
+                evinfo = []
+                if field == 'cond':
+                    for j,onset in enumerate(cond['onset']):
+                        if len(cond['duration'])>1:
+                            evinfo.insert(j,[onset,cond['duration'][j],1])
+                        else:
+                            evinfo.insert(j,[onset,cond['duration'][0],1])
+                    ev_txt += ev_gamma.substitute(ev_num=len(evname),
+                                                  ev_name=name,
+                                                  temporalderiv=usetd,
+                                                  cond_file=evfname)
+                elif field == 'regress':
+                    evinfo = [[j] for j in cond['val']]
+                    ev_txt += ev_none.substitute(ev_num=len(evname),
+                                                 ev_name=name,
+                                                 cond_file=evfname)
+                ev_txt += "\n"
+                conds[name] = evfname
+                self._create_ev_file(evfname,evinfo)
         # add orthogonalization
-        for i in range(1,evnum+1):
-            for j in range(evnum+1):
-                ev_gamma_txt += '#Orthogonalize EV %d wrt EV %d\nset fmri(ortho%d.%d) 0\n'%(i,j,i,j)
-        ev_gamma_txt += "\n"
-
+        for i in range(1,len(evname)+1):
+            for j in range(len(evname)+1):
+                ev_txt += ev_ortho.substitute(c0=i,c1=j)
+                ev_txt += "\n"
         # add contrast info
-        ev_gamma_txt +="""
-# Contrast & F-tests mode
-# real : control real EVs
-# orig : control original EVs
-set fmri(con_mode_old) orig
-set fmri(con_mode) orig\n
-        """
-
+        ev_txt += contrast_header.substitute()
         for j,con in enumerate(contrasts):
-            ev_gamma_txt += "# Display images for contrast_real %d\n"%(j+1)
-            ev_gamma_txt += "set fmri(conpic_real.%d) 1\n"%(j+1)
-            ev_gamma_txt += "# Title for contrast_real %d\n"%(j+1)
-            ev_gamma_txt += 'set fmri(conname_real.%d) "%s"\n'%(j+1,con[0])
-
-            for c in range(1,evnum+1):
-                ev_gamma_txt += "# Real contrast_real vector %d element %d\n"%(j+1,c)
+            ev_txt += contrast_prolog.substitute(cnum=j+1,
+                                                 cname=con[0])
+            for c in range(1,len(evname)+1):
                 if evname[c-1] in con[2]:
-                    ev_gamma_txt += "set fmri(con_real%d.%d) %f\n"%(j+1,c,con[3][con[2].index(evname[c-1])])
+                    val = con[3][con[2].index(evname[c-1])]
                 else:
-                    ev_gamma_txt += "set fmri(con_real%d.%d) 0.0\n"%(j+1,c)
-        ev_gamma_txt += "\n"
-
-        return conds,ev_gamma_txt
+                    val = 0.0
+                ev_txt += contrast_element.substitute(cnum=j+1,
+                                           element=c,
+                                           val=val)
+                ev_txt += "\n"
+        return conds,ev_txt
     
     def run(self, cwd=None, **inputs):
         if cwd is None:
@@ -1720,7 +1855,7 @@ set fmri(con_mode) orig\n
         else:
             usetd = 0
         for i,info in enumerate(self.inputs.session_info):
-            curr_conds,cond_txt  = self._create_cond_files(cwd,info,i,usetd,self.inputs.contrasts)
+            curr_conds,cond_txt  = self._create_ev_files(cwd,info,i,usetd,self.inputs.contrasts)
             curr_func = info['scans'][0][0][0].split(',')[0]
             nim = load(curr_func)
             (x,y,z,timepoints) = nim.get_shape()
@@ -1734,7 +1869,7 @@ set fmri(con_mode) orig\n
             fsf_txt += cond_txt
             fsf_txt += fsf_postscript.substitute(overwrite=1)
             
-            f = open(os.path.join(cwd, 'scan%d.fsf' % i), 'w')
+            f = open(os.path.join(cwd, 'run%d.fsf' % i), 'w')
             f.write(fsf_txt)
             f.close()
 
@@ -1747,19 +1882,26 @@ set fmri(con_mode) orig\n
             
     def outputs_help(self):
         """
-            Parameters
-            ----------
-            (all default to None)
+        """
+        print self.outputs.__doc__
+        
+    def outputs(self):
+        """Returns a bunch structure with outputs
+        
+        Parameters
+        ----------
+        (all default to None and are unset)
 
             fsf_files:
                 FSL feat specification files
             ev_files:
                 condition information files
         """
-        print self.outputs_help.__doc__
-        
-    def aggregate_outputs(self):
         outputs = Bunch(fsf_file=None,ev_files=None)
-        outputs.fsf_files = glob(os.path.abspath(os.path.join(self.inputs.cwd,'*.fsf')))
-        outputs.ev_files  = glob(os.path.abspath(os.path.join(self.inputs.cwd,'ev*.txt')))
+        return outputs
+    
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        outputs.fsf_files = glob(os.path.abspath(os.path.join(self.inputs.cwd,'run*.fsf')))
+        outputs.ev_files  = glob(os.path.abspath(os.path.join(self.inputs.cwd,'ev_*.txt')))
         return outputs

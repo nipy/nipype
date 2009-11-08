@@ -110,12 +110,17 @@ class Pipeline(object):
                     # exception are we catching?
                     print "unable to query inputs of module %s\n"%v.name
                 try:
-                    if not source in u.interface.outputs_help.__doc__:
+                    if not source in u.interface.outputs().__dict__:
                         print "Module %s has no output called %s\n" \
                             % (u.name, source)
                 except:
-                    # XXX Shouldn't catch bare exceptions.
-                    print "unable to query outputs of module %s\n" % u.name
+                    try:
+                        if not source in u.interface.outputs_help.__doc__:
+                            print "Module %s has no output called %s\n" \
+                                % (u.name, source)
+                    except:
+                        # XXX Shouldn't catch bare exceptions.
+                        print "unable to query outputs of module %s\n" % u.name
         print "PE: finished checking connections\n"
 
     def add_modules(self,modules):

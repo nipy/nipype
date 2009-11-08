@@ -39,8 +39,8 @@ package_check('IPython', '0.10', 'tutorial1')
 """
 
 # Tell fsl to generate all output in uncompressed nifti format
-print fsl.fslversion()
-fsl.fsloutputtype('NIFTI')
+print fsl.fsl_info.version
+fsl.fsl_info.outputtype('NIFTI')
 
 
 """
@@ -288,7 +288,7 @@ preproc.connect([# preprocessing in native space
                  (funcapplywarp, smoothing, [('outfile', 'infile')]),
                  # Model design
                  (datasource,modelspec,[('subject_id','subject_id')]),
-                 (motion_correct,modelspec,[('realignment_parameters','realignment_parameters')]),
+                 (motion_correct,modelspec,[('parfile','realignment_parameters')]),
                  (smoothing,modelspec,[('smoothedimage','functional_runs')]),
                  (modelspec,level1design,[('session_info','session_info')]),                 
                 ])
@@ -311,7 +311,7 @@ preproc.connect([(datasource,datasink,[('subject_id','subject_id')]),
                     (funcapplywarp, datasink,
                         [('outfile', 'registration.@outfile')]),
                     (smoothing, datasink, 
-                        [('outfile', 'registration.@outfile')]),
+                        [('smoothedimage', 'registration.@outfile')]),
                     ])
 
 

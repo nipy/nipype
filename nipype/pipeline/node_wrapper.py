@@ -111,7 +111,7 @@ class NodeWrapper(object):
     def run(self):
         """Executes an interface within a directory.
         """
-        print "\nInputs:\n" + str(self.inputs) +"\n"
+        # print "\nInputs:\n" + str(self.inputs) +"\n"
         # check to see if output directory and hash exist
         if self.disk_based:
             try:
@@ -183,7 +183,7 @@ class NodeWrapper(object):
         if self.disk_based:
             # Should pickle the output
             pass
-        print "\nOutputs:\n" + str(self._result.outputs) +"\n"
+        # print "\nOutputs:\n" + str(self._result.outputs) +"\n"
         return self._result
 
     # XXX This function really seriously needs to check returncodes and similar
@@ -203,7 +203,7 @@ class NodeWrapper(object):
             self._result = InterfaceResult(interface=[], runtime=[],
                                            outputs=Bunch())
             for i,v in enumerate(itervals):
-                print "iterating %s on %s\n"%(self.name, self.iterfield[0])
+                print "iterating %s on %s: %s\n"%(self.name, self.iterfield[0], str(v))
                 self.set_input(self.iterfield[0], v)
                 if execute:
                     cmdline = None
