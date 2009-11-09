@@ -1,11 +1,14 @@
-from nipype.testing import assert_raises, assert_equal, assert_not_equal
-import nipype.pipeline.node_wrapper as nw
+
 import os
 from copy import deepcopy
-from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult
-from nipype.utils.filemanip import cleandir
 from tempfile import mkdtemp
 from shutil import rmtree
+
+from nipype.testing import assert_raises, assert_equal, assert_not_equal
+import nipype.pipeline.node_wrapper as nw
+from nipype.interfaces.base import (Interface, CommandLine, Bunch, 
+                                    InterfaceResult)
+from nipype.utils.filemanip import cleandir
 
 # nosetests -sv --with-coverage --cover-package=nipype.pipeline.node_wrapper test_node_wrapper.py
 
@@ -40,9 +43,11 @@ class BasicInterface(Interface):
         outputs=self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
 
-def get_tmp_dir():
-    return os.environ.get('TMPDIR', mkdtemp())
-
+def rm_dir(d):
+    # Remove the directory
+    if os.path.exists(d):
+        rmtree(d)
+    
 def test_init():
     # Test raising error with mandatory keyword arg interface absent
     yield assert_raises, Exception, nw.NodeWrapper
@@ -116,19 +121,16 @@ def test_run():
     bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True)
     bi.run()
     yield assert_equal, bi.get_output('output1'), ['ran',None]
-    basedir = get_tmp_dir()
+    basedir = mkdtemp()
     bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True, 
                         base_directory=basedir)
     outdir = os.path.join(basedir, bi.name)
-    if os.path.exists(outdir):
-        rmtree(outdir)
+    rm_dir(outdir)
     bi.run()
     yield assert_equal, bi.get_output('output1'), ['ran',None]
     bi.run()
     yield assert_equal, bi.get_output('output1'), ['ran',None]
-    if os.path.exists(outdir):
-        rmtree(outdir)
-
+    rm_dir(outdir)
     bi.set_input('returncode',1)
     yield assert_raises, Exception, bi.run
 
@@ -145,20 +147,18 @@ def test_run_interface():
     bi.set_input('input1',1)
     result = bi.run()
     yield assert_equal, len(result.outputs.output1), 1
-    basedir = get_tmp_dir()
+    basedir = mkdtemp()
     bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True, 
                         base_directory=basedir)
     outdir = os.path.join(basedir, bi.name)
-    if os.path.exists(outdir):
-        rmtree(outdir)
+    rm_dir(outdir)
     bi.iterfield = ['input1']
     bi.set_input('input1',[1,2,3,4])
     result = bi.run()
     yield assert_equal, len(result.outputs.output1), 4
     result = bi.run()
     yield assert_equal, len(result.outputs.output1), 4
-    if os.path.exists(outdir):
-        rmtree(outdir)
+    rm_dir(outdir)
 
 def test_update():
     bi = nw.NodeWrapper(interface=BasicInterface())
@@ -177,18 +177,14 @@ def test_output_directory():
     odir = bi._output_directory()
     outdir = bi.output_directory_base
     yield assert_equal, odir, os.path.join(outdir,bi.name)
-    if os.path.exists(outdir):
-        rmtree(outdir)
+    rm_dir(outdir)
 
 def test_make_output_dir():
     bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True)
     outdir = mkdtemp()
     outdir1 = os.path.join(outdir, 'footestfoo')
     yield assert_equal, bi._make_output_dir(outdir1), os.path.abspath(outdir1)
-    dirfunc = lambda : bi._make_output_dir(outdir1)
-    yield assert_raises, IOError, dirfunc
-    if os.path.exists(outdir):
-        rmtree(outdir)
+    rm_dir(outdir)
 
 def test_repr():
     bi = nw.NodeWrapper(interface=BasicInterface(), name='foo.goo')
@@ -196,14 +192,11 @@ def test_repr():
     
 
 def test_file_hashing():
-    basedir = get_tmp_dir()
+    basedir = mkdtemp()
     bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True, 
                         name='hash.test', base_directory=basedir)
     bi.cmd = 'echo foo'
     res1 = bi.run()
     res2 = bi.run()
     yield assert_not_equal, res1.runtime, res2.runtime
-
-    if os.path.exists(basedir):
-        rmtree(basedir)
-
+    rm_dir(basedir)

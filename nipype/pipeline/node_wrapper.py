@@ -3,13 +3,14 @@ Wraps interfaces modules to work with pipeline engine
 """
 import os
 import hashlib
-from nipype.utils.filemanip import (copyfiles,fname_presuffix, cleandir,
-                                    filename_to_list, list_to_filename)
-from nipype.interfaces.base import Bunch, InterfaceResult
 from tempfile import mkdtemp
 from copy import deepcopy
 
+from nipype.utils.filemanip import (copyfiles,fname_presuffix, cleandir,
+                                    filename_to_list, list_to_filename)
+from nipype.interfaces.base import Bunch, InterfaceResult
 from nipype.interfaces.fsl import FSLCommand
+from nipype.utils.filemanip import save_json
 
 class NodeWrapper(object):
     """
@@ -114,20 +115,16 @@ class NodeWrapper(object):
         # print "\nInputs:\n" + str(self.inputs) +"\n"
         # check to see if output directory and hash exist
         if self.disk_based:
-            try:
-                outdir = self._output_directory()
-                outdir = self._make_output_dir(outdir)
-            except:
-                # XXX Should not catch bare exceptions!
-                # Change this to catch a specific exception and raise an error.
-                print "directory %s exists\n" % outdir
+            outdir = self._output_directory()
+            outdir = self._make_output_dir(outdir)
             # This is a temporary measure while exploring alternatives to
             # dealing with cwd
             if not isinstance(self._interface, FSLCommand):
                 self._interface.inputs.cwd = outdir
-            hashvalue = self.hash_inputs()
-            inputstr  = str(self.inputs)
-            hashfile = os.path.join(outdir, '_0x%s.txt' % hashvalue)
+            # Get a dictionary with hashed filenames and a hashvalue
+            # of the dictionary itself.
+            hashed_inputs, hashvalue = self.inputs._get_bunch_hash()
+            hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
             if self.overwrite or not os.path.exists(hashfile):
                 print "continuing to execute\n"
                 cleandir(outdir)
@@ -149,9 +146,7 @@ class NodeWrapper(object):
                     returncode = self._result.runtime.returncode
                 if returncode == 0:
                     try:
-                        fd = open(hashfile, "wt")
-                        fd.writelines(inputstr)
-                        fd.close()
+                        save_json(hashfile, hashed_inputs)
                     except IOError:
                         print "Unable to open the file in readmode:", hashfile
                 else:
@@ -289,12 +284,15 @@ class NodeWrapper(object):
                                             self.name))
 
     def _make_output_dir(self, outdir):
-        """Make the output_dir if it doesn't exist, else raise an exception
+        """Make the output_dir if it doesn't exist.
         """
-        odir = os.path.abspath(outdir)
-        if os.path.exists(outdir):
-            raise IOError('Directory %s exists' % outdir)
-        os.mkdir(outdir)
+        if not os.path.exists(os.path.abspath(outdir)):
+            # XXX Should this use os.makedirs which will make any
+            # necessary parent directories?  I didn't because the one
+            # case where mkdir failed because a missing parent
+            # directory, something went wrong up-stream that caused an
+            # invalid path to be passed in for `outdir`.
+            os.mkdir(outdir)
         return outdir
 
     def __repr__(self):
