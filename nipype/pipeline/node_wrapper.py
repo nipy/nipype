@@ -147,7 +147,15 @@ class NodeWrapper(object):
                     try:
                         save_json(hashfile, hashed_inputs)
                     except IOError:
-                        print "Unable to open the file in readmode:", hashfile
+                        print "Unable to open the file in write mode:", hashfile
+                    except TypeError:
+                        # XXX - SG current workaround is to just
+                        # create the hashed file and not put anything
+                        # in it
+                        fd = open(hashfile,'wt')
+                        fd.writelines(str(hashed_inputs))
+                        fd.close()
+                        print "unable to write a particular type to the json file"
                 else:
                     msg = "Could not run %s" % self.name
                     msg += "\nwith inputs:\n%s" % self.inputs
