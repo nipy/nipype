@@ -421,6 +421,6 @@ l2pipeline.connect([(l2source,l2concat,[(('file_list',sort),'conimages')]),
    analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
    function needs to be called. 
 """
-#if __name__ == '__main__':
-#    l1pipeline.run()
-#    l2pipeline.run()
+if __name__ == '__main__':
+    l1pipeline.run_in_series()
+    l2pipeline.run_in_series()
