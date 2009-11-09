@@ -40,8 +40,8 @@ package_check('IPython', '0.10', 'tutorial1')
 """
 
 # Tell fsl to generate all output in uncompressed nifti format
-print fsl.fslversion()
-fsl.fsloutputtype('NIFTI')
+print fsl.fsl_info.version
+fsl.fsl_info.outputtype('NIFTI')
 
 # setup the way matlab should be called
 mlab.MatlabCommandLine.matlab_cmd = "matlab -nodesktop -nosplash"
@@ -266,7 +266,7 @@ contrastestimate.inputs.contrasts = contrasts
    of the processing nodes. 
 """
 l1pipeline = pe.Pipeline()
-l1pipeline.config['workdir'] = os.path.abspath('./workingdir')
+l1pipeline.config['workdir'] = os.path.abspath('spm/workingdir')
 l1pipeline.config['use_parameterized_dirs'] = True
 
 l1pipeline.connect([(datasource,realign,[('func','infile')]),
@@ -313,7 +313,7 @@ l1pipeline.connect([(datasource,realign,[('func','infile')]),
    directory. 
 """
 datasink = nw.NodeWrapper(interface=nio.DataSink())
-datasink.inputs.base_directory = os.path.abspath('l1output')
+datasink.inputs.base_directory = os.path.abspath('spm/l1output')
 
 # store relevant outputs from various stages of the 1st level analysis
 l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
@@ -346,7 +346,7 @@ l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
 # collect all the con images for each contrast.
 contrast_ids = range(1,len(contrasts)+1)
 l2source = nw.NodeWrapper(nio.DataGrabber())
-l2source.inputs.file_template=os.path.abspath('l1output/*/con*/con_%04d.img')
+l2source.inputs.file_template=os.path.abspath('spm/l1output/*/con*/con_%04d.img')
 l2source.inputs.template_argnames=['con']
 # iterate over all contrast images
 l2source.iterables = dict(con=lambda:contrast_ids)
@@ -366,7 +366,7 @@ onesamplettest = nw.NodeWrapper(interface=spm.OneSampleTTest(),diskbased=True)
   (l2source -> onesamplettest).
 """
 l2pipeline = pe.Pipeline()
-l2pipeline.config['workdir'] = os.path.abspath('l2output')
+l2pipeline.config['workdir'] = os.path.abspath('spm/l2output')
 l2pipeline.config['use_parameterized_dirs'] = True
 l2pipeline.connect([(l2source,onesamplettest,[('file_list','con_images')])])
 
@@ -383,5 +383,5 @@ l2pipeline.connect([(l2source,onesamplettest,[('file_list','con_images')])])
    function needs to be called. 
 """
 if __name__ == '__main__':
-    l1pipeline.run()
-    l2pipeline.run()
+    l1pipeline.run_in_series()
+    l2pipeline.run_in_series()

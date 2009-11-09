@@ -139,7 +139,13 @@ class Bunch(object):
         infile_list = []
         for key, val in self.iteritems():
             if is_container(val):
-                item = val[0]
+                # XXX - SG this probably doesn't catch numpy arrays
+                # containing embedded file names either. 
+                if type(val) == type({}):
+                    # XXX - SG should traverse dicts, but ignoring for now
+                    item = None
+                else:
+                    item = val[0]
             else:
                 item = val
             try:
