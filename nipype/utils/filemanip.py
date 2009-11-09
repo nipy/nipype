@@ -1,10 +1,18 @@
 """Miscellaneous file manipulation functions
 
 """
-import os, re
-import hashlib
+import os
+import re
 import shutil
 from glob import glob
+
+# The md5 module is deprecated in Python 2.6, but hashlib is only
+# available as an external package for versions of python before 2.6.
+# Both md5 algorithms appear to return the same result.
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
 
 from nipype.utils.misc import is_container
 
@@ -37,7 +45,7 @@ def fnames_presuffix(fnames, prefix='', suffix='', newpath=None,use_ext=True):
 
 def md5file(filename, excludeline="", includeline=""):
     """Compute md5 hash of the specified file"""
-    m = hashlib.md5()
+    m = md5()
     try:
         for line in open(filename,"rb"):
             if excludeline and line.startswith(excludeline):

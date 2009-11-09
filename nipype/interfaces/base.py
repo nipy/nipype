@@ -12,7 +12,8 @@ from copy import deepcopy
 from string import Template
 from warnings import warn
 import copy
-import hashlib
+
+from nipype.utils.filemanip import md5
 from nipype.utils.misc import is_container
  
 __docformat__ = 'restructuredtext'
@@ -108,7 +109,7 @@ class Bunch(object):
         file_list = []
         for afile in stuff:
             if os.path.isfile(afile):
-                md5obj = hashlib.md5()
+                md5obj = md5()
                 fp = file(afile, 'rb')
                 md5obj.update(fp.read())
                 fp.close()
@@ -119,8 +120,22 @@ class Bunch(object):
         return file_list
 
     def _get_bunch_hash(self):
-        """ checks for files to hash, hashes, returnes tuple
-        (new dict with hashes for files, an hash of newdict)"""
+        """Return a dictionary of our items with hashes for each file.
+
+        Searches through dictionary items and if an item is a file, it
+        calculates the md5 hash of the file contents and stores the
+        file name and hash value as the new key value.
+
+        Returns
+        -------
+        dict_withhash : dict
+            Copy of our dictionary with the new file hashes included
+            with each file.
+        hashvalue : str
+            The md5 hash value of the `dict_withhash`
+
+        """
+
         infile_list = []
         for key, val in self.iteritems():
             if is_container(val):
@@ -130,13 +145,13 @@ class Bunch(object):
             try:
                 if os.path.isfile(item):
                     infile_list.append(key)
-            except:
-                # not a file that can be hashed
+            except TypeError:
+                # `item` is not a file or string.
                 continue
         dict_withhash = self.dictcopy()
         for item in infile_list:
             dict_withhash[item] = self._hash_infile(dict_withhash, item)
-        return (dict_withhash, hashlib.md5(dict_withhash.__str__()).hexdigest())
+        return (dict_withhash, md5(str(dict_withhash)).hexdigest())
             
     def __pretty__(self, p, cycle):
         '''Support for the pretty module

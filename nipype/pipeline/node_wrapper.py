@@ -2,12 +2,11 @@
 Wraps interfaces modules to work with pipeline engine
 """
 import os
-import hashlib
 from tempfile import mkdtemp
 from copy import deepcopy
 
 from nipype.utils.filemanip import (copyfiles,fname_presuffix, cleandir,
-                                    filename_to_list, list_to_filename)
+                                    filename_to_list, list_to_filename, md5)
 from nipype.interfaces.base import Bunch, InterfaceResult
 from nipype.interfaces.fsl import FSLCommand
 from nipype.utils.filemanip import save_json
@@ -275,7 +274,7 @@ class NodeWrapper(object):
         
     def hash_inputs(self):
         """Computes a hash of the input fields of the underlying interface."""
-        return hashlib.md5(str(self.inputs)).hexdigest()
+        return md5(str(self.inputs)).hexdigest()
 
     def _output_directory(self):
         if self.output_directory_base is None:

@@ -32,12 +32,21 @@ def test_bunch_methods():
 
 def test_bunch_hash():
     pth = os.path.split(os.path.abspath(__file__))[0]
-    b = nii.Bunch(infile = os.path.join(pth,'realign_json.json'), 
+    json_pth = os.path.join(pth, 'realign_json.json')
+    b = nii.Bunch(infile = json_pth, 
                   otherthing = 'blue',
                   yat = True)
     newbdict, bhash = b._get_bunch_hash()
-    yield assert_equal, bhash, '401201372d8754c2c9185a966e24b5b6'
-    yield assert_equal, newbdict['infile'][0][1] , '02c64449bbd57ecd3c27fa6c024a18e1'
+    newbhash = nii.md5()
+    newbhash.update(str(newbdict))
+    # '401201372d8754c2c9185a966e24b5b6'
+    yield assert_equal, bhash, newbhash.hexdigest()
+    jshash = nii.md5()
+    fp = file(json_pth)
+    jshash.update(fp.read())
+    fp.close()
+    # '02c64449bbd57ecd3c27fa6c024a18e1'
+    yield assert_equal, newbdict['infile'][0][1], jshash.hexdigest()
     yield assert_equal, newbdict['yat'], True
 
 #test CommandLine

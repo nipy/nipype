@@ -3,7 +3,6 @@ Variant of node_wrapper that fetches and stores data on amazon's S3 using boto
 '''
 
 import os
-import hashlib
 from tempfile import mkdtemp
 from ConfigParser import RawConfigParser
 
