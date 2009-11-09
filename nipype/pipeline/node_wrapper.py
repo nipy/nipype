@@ -2,6 +2,7 @@
 Wraps interfaces modules to work with pipeline engine
 """
 import os
+import sys
 from tempfile import mkdtemp
 from copy import deepcopy
 
@@ -146,16 +147,18 @@ class NodeWrapper(object):
                 if returncode == 0:
                     try:
                         save_json(hashfile, hashed_inputs)
-                    except IOError:
-                        print "Unable to open the file in write mode:", hashfile
-                    except TypeError:
-                        # XXX - SG current workaround is to just
-                        # create the hashed file and not put anything
-                        # in it
-                        fd = open(hashfile,'wt')
-                        fd.writelines(str(hashed_inputs))
-                        fd.close()
-                        print "unable to write a particular type to the json file"
+                    except (IOError, TypeError):
+                        err_type = sys.exc_info()[0]
+                        if err_type is TypeError:
+                            # XXX - SG current workaround is to just
+                            # create the hashed file and not put anything
+                            # in it
+                            fd = open(hashfile,'wt')
+                            fd.writelines(str(hashed_inputs))
+                            fd.close()
+                            print "Unable to write a particular type to the json file"
+                        else:
+                            print "Unable to open the file in write mode:", hashfile
                 else:
                     msg = "Could not run %s" % self.name
                     msg += "\nwith inputs:\n%s" % self.inputs
