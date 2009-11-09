@@ -226,6 +226,7 @@ class NodeWrapper(object):
                 if outputs is None:
                     raise Exception('%s failed to properly generate outputs (returncode'
                           'was 0)' % self.name)
+                
                 for key,val in outputs.iteritems():
                     try:
                         # This has funny default behavior if the length of the
@@ -264,7 +265,9 @@ class NodeWrapper(object):
                                                outputs=aggouts)
             if self._result.outputs is None:
                 raise Exception('%s failed to properly generate outputs (returncode'
-                      'was 0)' % self.name)
+                                'was 0)\nSTDOUT:\n%s\nSTDERR:\n%s\n' % (self.name,
+                                                                  self._result.runtime.stdout,
+                                                                  self._result.runtime.stderr))
         
         if cwd is not None:
             os.chdir(old_cwd)

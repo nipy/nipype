@@ -780,3 +780,175 @@ class Smooth(FSLCommand):
         return outputs
 
         
+class SurfConcat(FSLCommand):
+    """Use FreeSurfer mris_preproc to prepare a group of contrasts for
+    a second level analysis
+    
+    Parameters
+    ----------
+
+    To see optional arguments
+    SurfConcat().inputs_help()
+
+
+    Examples
+    --------
+   """
+
+    @property
+    def cmd(self):
+        """sets base command, not editable"""
+        return 'mris_preproc'
+
+    def inputs_help(self):
+        """Print command line documentation for mris_preproc."""
+        print get_doc(self.cmd, self.opt_map)
+
+    def _populate_inputs(self):
+        self.inputs = Bunch(target=None,
+                            hemi=None,
+                            outfile=None,
+                            outprefix='surfconcat',
+                            conimages=None,
+                            regs=None,
+                            flags=None)
+
+    opt_map = {
+        'target':             '--target %s',
+        'hemi':               '--hemi %s',
+        'outfile':            '--out %s',
+        'outprefix':          None,
+        'conimages':          '--iv %s',
+        'regs':               '--iv %s',
+        'flags':              '%s'}
+#mris_preproc --target fsaverage --hemi lh --out test_spm_lh.mgh \
+#--ivp ../SAD_STUDY_Block/data/SAD_019/firstlevel_novelfaces/con_0001.hdr spm2fsfast/SAD_019_register.dat \
+
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = []
+        return info
+    
+    def _parse_inputs(self):
+        """validate fs surfconcat options"""
+        allargs = super(SurfConcat, self)._parse_inputs(skip=('outfile','outprefix','conimages','regs'))
+
+        # Add outfile to the args if not specified
+        if self.inputs.outfile is None:
+            fname = os.path.join(os.getcwd(),'_'.join((self.inputs.outprefix,
+                                                           self.inputs.target,
+                                                           '.'.join((self.inputs.hemi,'mgh')))))
+            allargs.extend(['--out', fname])
+        for i,conimg in enumerate(self.inputs.conimages):
+            allargs.extend(['--iv', conimg, self.inputs.regs[i]])
+        return allargs
+    
+    def run(self, **inputs):
+        """Execute the command.
+        """
+        results = self._runner()
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs()
+
+        return results        
+
+    def outputs_help(self):
+        """
+        outfile: filename
+            Concatenated volume
+        """
+        print self.outputs_help.__doc__
+
+    def aggregate_outputs(self):
+        outputs = Bunch(outfile=None)
+        if self.inputs.outfile is None:
+            fname = os.path.join(os.getcwd(),'_'.join((self.inputs.outprefix,
+                                                           self.inputs.target,
+                                                           '.'.join((self.inputs.hemi,'mgh')))))
+            outfile = glob(fname)
+            assert len(outfile)==1, "No output file %s created"%outfile
+            outputs.outfile = outfile[0]
+        if type(self.inputs.outfile) == type(''):
+            outfile = glob(self.inputs.outfile)
+            assert len(outfile)==1, "No output file %s created"%outfile
+            outputs.outfile = outfile[0]
+        return outputs
+
+class OneSampleTTest(FSLCommand):
+    """Use FreeSurfer mri_glmfit to prepare a group of contrasts for
+    a second level analysis
+    
+    Parameters
+    ----------
+
+    To see optional arguments
+    SurfConcat().inputs_help()
+
+
+    Examples
+    --------
+   """
+
+    @property
+    def cmd(self):
+        """sets base command, not editable"""
+        return 'mri_glmfit'
+
+    def inputs_help(self):
+        """Print command line documentation for mris_preproc."""
+        print get_doc(self.cmd, self.opt_map)
+
+    def _populate_inputs(self):
+        self.inputs = Bunch(surf=None,
+                            hemi=None,
+                            outdir=None,
+                            outdirprefix='glm',
+                            funcimage=None,
+                            flags=None)
+
+    opt_map = {
+        'surf':             '--surf %s',
+        'hemi':               '%s',
+        'outdir':             '--glmdir %s',
+        'outdirprefix':          None,
+        'funcimage':          '--y %s',
+        'flags':              '%s'}
+
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = []
+        return info
+    
+    def _parse_inputs(self):
+        """validate fs onesamplettest options"""
+        allargs = super(OneSampleTTest, self)._parse_inputs(skip=('surf','hemi','outdir','outdirprefix',))
+
+        # Add outfile to the args if not specified
+        allargs.extend(['--surf',self.inputs.surf,self.inputs.hemi])
+        allargs.extend(['--osgm'])
+        if self.inputs.outdir is None:
+            outdir = os.getcwd()
+            allargs.extend(['--glmdir', outdir])
+        return allargs
+    
+    def run(self, cwd=None,**inputs):
+        """Execute the command.
+        """
+        results = self._runner()
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs()
+
+        return results        
+
+    def outputs_help(self):
+        """
+        """
+        print self.outputs_help.__doc__
+
+    def aggregate_outputs(self):
+        return Bunch()
+        

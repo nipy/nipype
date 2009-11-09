@@ -41,8 +41,8 @@ package_check('IPython', '0.10', 'tutorial1')
 """
 
 # Tell fsl to generate all output in uncompressed nifti format
-print fsl.fslversion()
-fsl.fsloutputtype('NIFTI')
+print fsl.fsl_info.version
+fsl.fsl_info.outputtype('NIFTI')
 
 fs.fssubjectsdir(os.path.abspath('fsdata'))
 
@@ -203,6 +203,7 @@ def subjectinfo(subject_id):
 """
 cont1 = ['Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5]]
 cont2 = ['Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1]]
+cont3 = ['Fcontrast','F', [cont1,cont2]]
 contrasts = [cont1,cont2]
 
 """
@@ -269,32 +270,42 @@ contrastestimate.inputs.contrasts = contrasts
    of the processing nodes. 
 """
 l1pipeline = pe.Pipeline()
-l1pipeline.config['workdir'] = os.path.abspath('./surfworkingdir')
+l1pipeline.config['workdir'] = os.path.abspath('./surf/workingdir')
 l1pipeline.config['use_parameterized_dirs'] = True
 
+# function to select a single functional run for generating a mask
+# used in (smooth,skullstrip ...) connection below
 def pickone(filelist):
     return filelist[0]
 
-l1pipeline.connect([(datasource,realign,[('func','infile')]), 
-                  (datasource,surfregister,[('subject_id','subject_id')]),
-                  (realign,surfregister,[('mean_image', 'sourcefile')]),
-                  (surfregister, smooth, [('outregfile','regfile')]),
-		  (realign, smooth, [('realigned_files', 'sourcefile')]),
-                  (datasource,modelspec,[('subject_id','subject_id')]),
-                  (realign,modelspec,[('realignment_parameters','realignment_parameters')]),
-                  (smooth,modelspec,[('outfile','functional_runs')]),
-                  (smooth,skullstrip,[(('outfile',pickone), 'infile')]),
-                  (realign,art,[('realignment_parameters','realignment_parameters'),
-                                ('realigned_files','realigned_files')]),
-                  (skullstrip,art,[('maskfile','mask_file')]),
-                  (art,modelspec,[('outlier_files','outlier_files')]),
-                  (modelspec,level1design,[('session_info','session_info')]),
-                  (skullstrip,level1design,[('maskfile','mask_image')]),
-                  (level1design,level1estimate,[('spm_mat_file','spm_design_file')]),
-                  (level1estimate,contrastestimate,[('spm_mat_file','spm_mat_file'),
-                                                  ('beta_images','beta_images'),
-                                                  ('residual_image','residual_image'),
-                                                  ('RPVimage','RPVimage')]),
+l1pipeline.connect([(datasource,realign,[('func','infile')]),
+                    # register mean functional to subject surface
+                    (datasource,surfregister,[('subject_id','subject_id')]),
+                    (realign,surfregister,[('mean_image', 'sourcefile')]),
+                    # smooth using freesurfer's mixed-mode smoothing
+                    (surfregister, smooth, [('outregfile','regfile')]),
+                    (realign, smooth, [('realigned_files', 'sourcefile')]),
+                    # generate a mask
+                    (smooth,skullstrip,[(('outfile',pickone), 'infile')]),
+                    # find outliers
+                    (realign,art,[('realignment_parameters','realignment_parameters'),
+                                  ('realigned_files','realigned_files')]),
+                    (skullstrip,art,[('maskfile','mask_file')]),
+                    # design the model
+                    (datasource,modelspec,[('subject_id','subject_id')]),
+                    (realign,modelspec,[('realignment_parameters','realignment_parameters')]),
+                    (smooth,modelspec,[('outfile','functional_runs')]),
+                    (art,modelspec,[('outlier_files','outlier_files')]),
+                    # generate the SPM design matrix
+                    (modelspec,level1design,[('session_info','session_info')]),
+                    (skullstrip,level1design,[('maskfile','mask_image')]),
+                    # estimate the model parameters
+                    (level1design,level1estimate,[('spm_mat_file','spm_design_file')]),
+                    # evaluate the contrasts
+                    (level1estimate,contrastestimate,[('spm_mat_file','spm_mat_file'),
+                                                      ('beta_images','beta_images'),
+                                                      ('residual_image','residual_image'),
+                                                      ('RPVimage','RPVimage')]),
                   ])
 
 ######################################################################
@@ -317,7 +328,7 @@ l1pipeline.connect([(datasource,realign,[('func','infile')]),
    directory. 
 """
 datasink = nw.NodeWrapper(interface=nio.DataSink())
-datasink.inputs.base_directory = os.path.abspath('surfl1output')
+datasink.inputs.base_directory = os.path.abspath('./surf/l1output')
 
 # store relevant outputs from various stages of the 1st level analysis
 l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
@@ -325,6 +336,7 @@ l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
                                        ('realignment_parameters','realign.@param')]),
                     (art,datasink,[('outlier_files','art.@outliers'),
                                    ('statistic_files','art.@stats')]),
+                    (surfregister,datasink,[('outregfile','surfreg')]),
                     (level1design,datasink,[('spm_mat_file','model.pre-estimate')]),
                     (level1estimate,datasink,[('spm_mat_file','model.@spm'),
                                               ('beta_images','model.@beta'),
@@ -350,29 +362,52 @@ l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
 # collect all the con images for each contrast.
 contrast_ids = range(1,len(contrasts)+1)
 l2source = nw.NodeWrapper(nio.DataGrabber())
-l2source.inputs.file_template=os.path.abspath('l1output/*/con*/con_%04d.img')
+l2source.inputs.file_template=os.path.abspath('surf/l1output/*/con*/con_%04d.img')
 l2source.inputs.template_argnames=['con']
 # iterate over all contrast images
 l2source.iterables = dict(con=lambda:contrast_ids)
 
+l2regsource = nw.NodeWrapper(nio.DataGrabber())
+l2regsource.inputs.file_template=os.path.abspath('surf/l1output/*/surfreg/*bbreg_*.dat')
 
 """
-  b. Use :class:`nipype.interfaces.spm.OneSampleTTest` to perform a
+Project con image to fsaverage and concatenate
+"""
+l2concat = nw.NodeWrapper(interface=fs.SurfConcat(),diskbased=True)
+l2concat.inputs.target = 'fsaverage'
+l2concat.iterables = dict(hemi=lambda:['lh','rh'])
+
+"""
+  b. Use :class:`nipype.interfaces.fs.OneSampleTTest` to perform a
   simple statistical analysis of the contrasts from the group of
   subjects (n=2 in this example).
 """
 # setup a 1-sample t-test node
-onesamplettest = nw.NodeWrapper(interface=spm.OneSampleTTest(),diskbased=True)
-
+onesamplettest = nw.NodeWrapper(interface=fs.OneSampleTTest(),diskbased=True)
+onesamplettest.inputs.surf='fsaverage'
 
 """
   c. As before, we setup a pipeline to connect these two nodes
   (l2source -> onesamplettest).
 """
+def gethemi(filename):
+    path,name = os.path.split(filename)
+    if '_lh.' in name:
+        return 'lh'
+    else:
+        return 'rh'
+
+def sort(inputvals):
+    return sorted(inputvals)
+    
 l2pipeline = pe.Pipeline()
-l2pipeline.config['workdir'] = os.path.abspath('l2output')
+l2pipeline.config['workdir'] = os.path.abspath('./surf/l2output')
 l2pipeline.config['use_parameterized_dirs'] = True
-l2pipeline.connect([(l2source,onesamplettest,[('file_list','con_images')])])
+l2pipeline.connect([(l2source,l2concat,[(('file_list',sort),'conimages')]),
+                    (l2regsource,l2concat,[(('file_list',sort),'regs')]),
+                    (l2concat,onesamplettest,[('outfile','funcimage'),
+                                              (('outfile',gethemi),'hemi')]),
+                    ])
 
 
 ##########################################################################
