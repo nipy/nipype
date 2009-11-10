@@ -1591,8 +1591,9 @@ class L1FSFmaker(object):
     Need to put a good example here. See opt_list for a list of acceptable
     inputs.
 
-    Note that we currently do stats + post-stats. This is partly determined by 
-    the do_contrasts string substitutions below, and partly by the "6" in the feat_header.tcl.
+    Note that we currently do stats + post-stats. This is partly determined by
+    the do_contrasts string substitutions below, and partly by the "6" in the
+    feat_header.tcl.
     '''
     # These are still somewhat specific to my experiment, but should be so in an
     # obvious way.  Contrasts in particular need to be addressed more generally.
