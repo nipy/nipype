@@ -22,9 +22,13 @@ class NodeWrapper(object):
     interface : interface object
         node specific interface  (fsl.Bet(), spm.Coregister())
     iterables : generator
-        key and items to iterate
+        key and items to iterate using the pipeline engine
         for example to iterate over different frac values in fsl.Bet()
         node.iterables = dict(frac=lambda:[0.5,0.6,0.7])
+    iterfield : 1-element list
+        key over which to repeatedly call the function.
+        for example, to iterate FSL.Bet over multiple files, one can
+        set node.iterfield = ['infile']
     base_directory : directory
         base output directory (will be hashed before creations)
         default=None, which results in the use of mkdtemp
@@ -36,14 +40,16 @@ class NodeWrapper(object):
         already exists. If directory exists and hash matches it
         assumes that process has been executed
     name : string
-        Name of this node. By default node is named modulename.classname
+        Name of this node. By default node is named
+        modulename.classname. But when the same class is being used
+        several times, a different name ensures that output directory
+        is not overwritten each time the same functionality is run.
     
     Notes
     -----
-    creates output directory (hashname)
-    discover files to work with
-    renames them with hash
-    moves hashed_files to hashed_output_directory
+    creates output directory
+    copies/discovers files to work with
+    saves a hash.json file to indicate that a process has been completed
 
     Examples
     --------
@@ -108,8 +114,25 @@ class NodeWrapper(object):
             return self._result.outputs.get(parameter)
         else:
             return None
+
+    def _save_hashfile(self, hashfile, hashed_inputs):
+        try:
+            save_json(hashfile, hashed_inputs)
+        except (IOError, TypeError):
+            err_type = sys.exc_info()[0]
+            if err_type is TypeError:
+                # XXX - SG current workaround is to just
+                # create the hashed file and not put anything
+                # in it
+                fd = open(hashfile,'wt')
+                fd.writelines(str(hashed_inputs))
+                fd.close()
+                print "Unable to write a particular type to the json file"
+            else:
+                print "Unable to open the file in write mode:", hashfile
         
-    def run(self):
+        
+    def run(self,updatehash=None):
         """Executes an interface within a directory.
         """
         # print "\nInputs:\n" + str(self.inputs) +"\n"
@@ -125,7 +148,9 @@ class NodeWrapper(object):
             # of the dictionary itself.
             hashed_inputs, hashvalue = self.inputs._get_bunch_hash()
             hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
-            if self.overwrite or not os.path.exists(hashfile):
+            if updatehash:
+                self._save_hashfile(hashfile,hashed_inputs)
+            if not updatehash and (self.overwrite or not os.path.exists(hashfile)):
                 print "continuing to execute\n"
                 cleandir(outdir)
                 # copy files over and change the inputs
@@ -139,26 +164,15 @@ class NodeWrapper(object):
                 if type(self._result.runtime) == list:
                     # XXX In what situation is runtime ever a list?
                     # Normally it's a Bunch.
+                    # Ans[SG]: Runtime is a list when we are iterating
+                    # over an input field using iterfield 
                     returncode = 0
                     for r in self._result.runtime:
                         returncode = max(r.returncode, returncode)
                 else:
                     returncode = self._result.runtime.returncode
                 if returncode == 0:
-                    try:
-                        save_json(hashfile, hashed_inputs)
-                    except (IOError, TypeError):
-                        err_type = sys.exc_info()[0]
-                        if err_type is TypeError:
-                            # XXX - SG current workaround is to just
-                            # create the hashed file and not put anything
-                            # in it
-                            fd = open(hashfile,'wt')
-                            fd.writelines(str(hashed_inputs))
-                            fd.close()
-                            print "Unable to write a particular type to the json file"
-                        else:
-                            print "Unable to open the file in write mode:", hashfile
+                    self._save_hashfile(hashfile,hashed_inputs)
                 else:
                     msg = "Could not run %s" % self.name
                     msg += "\nwith inputs:\n%s" % self.inputs
@@ -200,6 +214,8 @@ class NodeWrapper(object):
             raise ValueError('At most one iterfield is supported at this time\n'
                              'Got: %s in %s', (self.iterfield, self.name))
         if len(self.iterfield) == 1:
+            # This branch of the if takes care of iterfield and
+            # basically calls the underlying interface each time 
             itervals = self.inputs.get(self.iterfield[0])
             notlist = False
             if type(itervals) is not list:
@@ -210,6 +226,8 @@ class NodeWrapper(object):
             for i,v in enumerate(itervals):
                 print "iterating %s on %s: %s\n"%(self.name, self.iterfield[0], str(v))
                 self.set_input(self.iterfield[0], v)
+                # XXX - SG - we might consider creating a sub
+                # directory for each v
                 if execute:
                     cmdline = None
                     try:

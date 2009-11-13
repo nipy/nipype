@@ -245,7 +245,7 @@ class Pipeline(object):
         else:
             self.run_in_series()
 
-    def run_in_series(self):
+    def run_in_series(self,relocate=None):
         """Executes a pre-defined pipeline in a serial order.
         """
         # in the absence of a dirty bit on the object, generate the
@@ -286,7 +286,10 @@ class Pipeline(object):
                         mktree(outputdir)
                     node.output_directory_base = os.path.abspath(outputdir)
                 node.parameterization = graph.__dict__['name']
-                node.run()
+                if relocate:
+                    node.run(updatehash=relocate)
+                else:
+                    node.run()
 
     def run_with_manager(self):
         """Executes a pre-defined pipeline is distributed approaches
