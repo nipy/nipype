@@ -154,26 +154,30 @@ class SpmMatlabCommandLine(MatlabCommandLine):
 
         Examples
         --------
-        >>> a = reformat_dict_for_savemat(dict(a=1,b=dict(c=2,d=3)))
+        >>> a = _reformat_dict_for_savemat(dict(a=1,b=dict(c=2,d=3)))
         >>> print a
         [{'a': 1, 'b': [{'c': 2, 'd': 3}]}]
         
-        .. notes: Need to talk to Matthew about cleaning up this code.
+        .. notes: XXX Need to talk to Matthew about cleaning up this code.
         """
         # XXX TODO Satra, I didn't change the semantics, but got rid of extraneous stuff.
         # This seems weird.  Please have a look and make sure you intend to
         # discard empty dicts. -DJC
-        if type(contents) == dict:
-            newdict = {}
-            for key,value in contents.items():
+        # if dict is empty, SPM falls back on defaults
+        # ...so empty dicts are discarded
+        newdict = {}
+        try:
+            for key, value in contents.items():
                 if type(value) == dict:
                     if value:
                         newdict[key] = self._reformat_dict_for_savemat(value)
-                    # "else" - empty dicts are silently discarded here!
+                    # if value is None, dont put in new dict
                 else:
                     newdict[key] = value
-
+                
             return [newdict]
+        except TypeError:
+            print 'Requires dict input'
 
     def _generate_job(self, prefix='', contents=None):
         """ Recursive function to generate spm job specification as a string
