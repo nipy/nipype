@@ -27,8 +27,10 @@ Requirements
 Step 0.
 ~~~~~~~
 
-Download and extract the `Pipeline tutorial data. 
-<http://cirl.berkeley.edu/nipy/nipype-tutorial.tgz>`_
+Download and extract the `Pipeline tutorial data (165MB). 
+<http://cirl.berkeley.edu/nipy/nipype-tutorial-0.2.tar.gz>`_  
+
+(checksum: d4dc710d074d19efa1bde96bd0e4a10f)
 
 Step 1.
 ~~~~~~~
