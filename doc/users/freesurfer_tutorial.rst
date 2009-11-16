@@ -23,7 +23,7 @@ this type:
 
 ::
 
-  cd fsdata
+  cd nipype-tutorial/fsdata
   ln -s $FREESURFER_HOME/subjects/fsaverage
   cd ..
 
