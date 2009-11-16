@@ -28,6 +28,6 @@ this type:
   cd ..
 
 
-.. literalinclude:: ../examples/freesurfer_tutorial.py
+.. literalinclude:: ../../examples/freesurfer_tutorial.py
 
 .. include:: ../links_names.txt
