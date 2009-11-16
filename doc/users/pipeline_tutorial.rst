@@ -60,7 +60,8 @@ flows between the processes.
 .. toctree::
    :maxdepth: 1
 
-   tutorial1
-   tutorial2
+   spm_tutorial
+   freesurfer_tutorial
+..   fsl_tutorial
 
 .. include:: ../links_names.txt
