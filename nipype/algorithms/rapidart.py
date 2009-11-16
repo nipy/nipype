@@ -2,9 +2,11 @@
 The rapidart module provides routines for artifact detection and region of
 interest analysis.
 
-these functions include 
+These functions include 
 
     ArtifactDetect: performs artifact detection on functional images
+    StimulusCorrelation: determines correlation between stimuli
+        schedule and movement/intensity parameters
 
 """
 
@@ -108,10 +110,10 @@ class ArtifactDetect(Interface):
         Parameters
         ----------
 
-            motionfile: file/string
-                Filename for motion parameter file
-            output_dir: string
-                output directory in which the files will be generated 
+        motionfile: file/string
+            Filename for motion parameter file
+        output_dir: string
+            output directory in which the files will be generated 
         """
         (filepath,filename) = os.path.split(motionfile)
         (filename,ext) = os.path.splitext(filename)
@@ -126,19 +128,18 @@ class ArtifactDetect(Interface):
 
         Parameters
         ----------
-        
-            outlier_files : filename(s)
-                One file for each functional run containing a list of
-                0-based indices corresponding to outlier volumes
-            intensity_files : filename(s)
-                One file for each functional run containing the global
-                intensity values determined from the brainmask
-            statistic_files : filename(s)
-                One file for each functional run containing
-                information about the different types of artifacts and
-                if design info is provided then details of stimulus
-                correlated motion and a listing or artifacts by event
-                type. 
+        outlier_files : filename(s)
+            One file for each functional run containing a list of
+            0-based indices corresponding to outlier volumes
+        intensity_files : filename(s)
+            One file for each functional run containing the global
+            intensity values determined from the brainmask
+        statistic_files : filename(s)
+            One file for each functional run containing
+            information about the different types of artifacts and
+            if design info is provided then details of stimulus
+            correlated motion and a listing or artifacts by event
+            type. 
         """
         outputs = Bunch(outlier_files=None,
                         intensity_files=None,
@@ -210,11 +211,10 @@ class ArtifactDetect(Interface):
         """Calculates the maximum overall displacement of the midpoints
         of the faces of a cube due to translation and rotation.
 
-        Inputs
-        ------
-
+        Parameters
+        ----------
         mc : motion parameter estimates
-        [3 translation, 3 rotation (radians)]
+            [3 translation, 3 rotation (radians)]
         use_differences : boolean
 
         Returns
@@ -249,12 +249,10 @@ class ArtifactDetect(Interface):
         """
         Core routine for detecting outliers
         
-        Parameters:
-        -----------
-        
-        - `imgfile`:
-        - `motionfile`:
-        - `artifactfile`:
+        Parameters
+        ----------
+        imgfile :
+        motionfile :
         """
         # read in motion parameters
         mc_in = np.loadtxt(motionfile)
@@ -437,11 +435,10 @@ class StimulusCorrelation(Interface):
 
         Parameters
         ----------
-
-            motionfile: file/string
-                Filename for motion parameter file
-            output_dir: string
-                output directory in which the files will be generated 
+        motionfile: file/string
+            Filename for motion parameter file
+        output_dir: string
+            output directory in which the files will be generated 
         """
         (filepath,filename) = os.path.split(motionfile)
         (filename,ext) = os.path.splitext(filename)
@@ -453,9 +450,8 @@ class StimulusCorrelation(Interface):
 
         Parameters
         ----------
-        
-            stimcorr_files: file/string
-                List of files containing correlation values
+        stimcorr_files: file/string
+            List of files containing correlation values
         """
         outputs = Bunch(stimcorr_files=None)
         return outputs
@@ -505,10 +501,8 @@ class StimulusCorrelation(Interface):
 
     def _get_spm_submatrix(self,spmmat,sessidx,rows=None):
         """
-        
         Parameters
         ----------
-        
         spmmat: scipy matlab object
             full SPM.mat file loaded into a scipy object
         sessidx: int
