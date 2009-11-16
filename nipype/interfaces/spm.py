@@ -114,7 +114,12 @@ class SpmMatlabCommandLine(MatlabCommandLine):
     formatting of matlab scripts.
     """
 
-    mfile=True
+    def __init__(self, matlab_cmd=None,**inputs): 
+        super(SpmMatlabCommandLine,self).__init__(**inputs)
+        self.jobtype = None
+        self.jobname = None
+        self.mfile = True
+
     def _use_mfile(self, use_mfile):
         """reset the base matlab command
         """
@@ -164,14 +169,14 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         # This seems weird.  Please have a look and make sure you intend to
         # discard empty dicts. -DJC
         # if dict is empty, SPM falls back on defaults
-        # ...so empty dicts are discarded
+        # ...so empty dicts are discarded -CM
         newdict = {}
         try:
             for key, value in contents.items():
                 if type(value) == dict:
                     if value:
                         newdict[key] = self._reformat_dict_for_savemat(value)
-                    # if value is None, dont put in new dict
+                    # if value is None, skip
                 else:
                     newdict[key] = value
                 
