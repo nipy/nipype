@@ -91,14 +91,10 @@ def test_make_matlab_command():
     outdir = mkdtemp()
     mlab.inputs.cwd = outdir
     contents = {'contents':[1,2,3,4]}
-    cmdline,script = mlab._make_matlab_command('jobtype', 'jobname', [contents])
+    cmdline,script = mlab._make_matlab_command([contents])
     yield assert_equal, cmdline, \
         'matlab -nodesktop -nosplash -r "pyscript_jobname;exit" '
     yield assert_true, 'jobs{1}.jobtype{1}.jobname{1}.contents(3) = 3;' in script
-    for jobname in ['smooth','preproc','fmri_spec','fmri_est'] :
-        contents = {'contents':[1,2,3,4]}
-        cmdline,script = mlab._make_matlab_command('jobtype', jobname, [contents])
-        yield assert_true, 'jobs{1}.jobtype{1}.%s(1).contents(3) = 3;'%jobname in script
     yield assert_true, os.path.exists(os.path.join(mlab.inputs.cwd,'pyscript_jobname.m'))
     if os.path.exists(outdir):
         rmtree(outdir)

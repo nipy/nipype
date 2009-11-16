@@ -116,9 +116,21 @@ class SpmMatlabCommandLine(MatlabCommandLine):
 
     def __init__(self, matlab_cmd=None,**inputs): 
         super(SpmMatlabCommandLine,self).__init__(**inputs)
-        self.jobtype = None
-        self.jobname = None
         self.mfile = True
+
+    @property
+    def jobtype(self):
+        """the jobtype used by spm/matlab
+        to specify the jobtype to run
+        jobs{1}.jobtype{1}.jobname"""
+        return 'jobtype' #raise NotImplementedError
+
+    @property
+    def jobname(self):
+        """the jobname used by spm/matlab
+        to specify the jobname to run
+        jobs{1}.jobtype{1}.jobname"""
+        return 'jobname' #raise NotImplementedError
 
     def _use_mfile(self, use_mfile):
         """reset the base matlab command
@@ -239,7 +251,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         jobstring += "%s = %s;\n" % (prefix,str(contents))
         return jobstring
     
-    def _make_matlab_command(self, jobtype, jobname, contents, cwd=None, postscript=None):
+    def _make_matlab_command(self, contents, cwd=None, postscript=None):
         """ generates a mfile to build job structure
         Arguments
         ---------
@@ -258,23 +270,23 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         mscript += "spm_defaults;\n\n"
         mscript += "if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');end\n" 
         if self.mfile:
-            if jobname in ['smooth','preproc','fmri_spec','fmri_est'] :
+            if self.jobname in ['smooth','preproc','fmri_spec','fmri_est'] :
                 mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' % 
-                                             (jobtype,jobname), contents[0])
+                                             (self.jobtype,self.jobname), contents[0])
             else:
                 mscript += self._generate_job('jobs{1}.%s{1}.%s{1}' % 
-                                             (jobtype,jobname), contents[0])
+                                             (self.jobtype,self.jobname), contents[0])
         else:
-            jobdef = {'jobs':[{jobtype:[{jobname:self.reformat_dict_for_savemat
+            jobdef = {'jobs':[{self.jobtype:[{self.jobname:self.reformat_dict_for_savemat
                                          (contents[0])}]}]}
-            savemat(os.path.join(cwd,'pyjobs_%s.mat'%jobname), jobdef)
-            mscript += "load pyjobs_%s;\n\n" % jobname
+            savemat(os.path.join(cwd,'pyjobs_%s.mat'%self.jobname), jobdef)
+            mscript += "load pyjobs_%s;\n\n" % self.jobname
         mscript += "if strcmp(spm('ver'),'SPM8'), jobs=spm_jobman('spm5tospm8',{jobs});end\n" 
         mscript += 'spm_jobman(\'run\',jobs);\n'
         if postscript is not None:
             mscript += postscript
         cmdline = self._gen_matlab_command(mscript, cwd=cwd,
-                                           script_name='pyscript_%s' % jobname,
+                                           script_name='pyscript_%s' % self.jobname,
                                            mfile=self.mfile) 
         return cmdline, mscript
 
@@ -322,6 +334,14 @@ class Realign(SpmMatlabCommandLine):
     @property
     def cmd(self):
         return 'spm_realign'
+
+    @property
+    def jobtype(self):
+         return 'spatial'
+
+    @property
+    def jobname(self):
+        return 'realign'
 
     def inputs_help(self):
         """
@@ -494,7 +514,7 @@ class Realign(SpmMatlabCommandLine):
             jobtype = 'estwrite'
         else:
             jobtype = 'estimate'
-        self._cmdline, mscript = self._make_matlab_command('spatial', 'realign',
+        self._cmdline, mscript = self._make_matlab_command(self.jobtype, self.jobname,
                                         [{'%s'%(jobtype):self._parseinputs()}])
 
     def run(self, infile=None,**inputs):
@@ -577,6 +597,14 @@ class Coregister(SpmMatlabCommandLine):
     @property
     def cmd(self):
         return 'spm_coreg'
+
+    @property
+    def jobtype(self):
+        return 'spatial'
+
+    @property
+    def jobname(self):
+        return 'coreg'
         
     def inputs_help(self):
         """
@@ -765,8 +793,8 @@ class Coregister(SpmMatlabCommandLine):
             jobtype = 'estwrite'
         else:
             jobtype = 'estimate'
-        self._cmdline, mscript =self._make_matlab_command('spatial',
-                                       'coreg',
+        self._cmdline, mscript =self._make_matlab_command(self.jobtype,
+                                       self.jobname,
                                        [{'%s'%(jobtype):self._parseinputs()}])
 
         
@@ -808,6 +836,15 @@ class Normalize(SpmMatlabCommandLine):
     @property
     def cmd(self):
         return 'spm_normalise'
+
+    @property
+    def jobtype(self):
+        return 'spatial'
+
+    @property
+    def jobname(self):
+        return 'normalise'
+    
 
     def inputs_help(self):
         """
@@ -996,8 +1033,8 @@ class Normalize(SpmMatlabCommandLine):
             jobtype = 'estwrite'
         else:
             jobtype = 'est'
-        self._cmdline, mscript =self._make_matlab_command('spatial',
-                                       'normalise',
+        self._cmdline, mscript =self._make_matlab_command(self.jobtype,
+                                       self.jobname,
                                        [{'%s'%(jobtype):self._parseinputs()}])
 
     def outputs_help(self):
@@ -1071,6 +1108,14 @@ class Segment(SpmMatlabCommandLine):
     @property
     def cmd(self):
         return 'spm_segment'
+
+    @property
+    def jobtype(self):
+        return 'spatial'
+
+    @property
+    def jobname(self):
+        return 'preproc'
 
     def inputs_help(self):
         """
@@ -1253,8 +1298,8 @@ class Segment(SpmMatlabCommandLine):
         if mfile is True uses matlab .m file
         else generates a job structure and saves in .mat
         """
-        self._cmdline, mscript =self._make_matlab_command('spatial',
-                                                       'preproc',
+        self._cmdline, mscript =self._make_matlab_command(self.jobtype,
+                                                       self.jobname,
                                                        [self._parseinputs()])
 
     def outputs_help(self):
@@ -1338,6 +1383,14 @@ class Smooth(SpmMatlabCommandLine):
     @property
     def cmd(self):
         return 'spm_smooth'
+
+    @property
+    def jobtype(self):
+        return 'spatial'
+
+    @property
+    def jobname(self):
+        return 'smooth'
 
     def inputs_help(self):
         """
@@ -1431,8 +1484,8 @@ class Smooth(SpmMatlabCommandLine):
         if mfile is True uses matlab .m file
         else generates a job structure and saves in .mat
         """
-        self._cmdline, mscript =self._make_matlab_command('spatial',
-                                                       'smooth',
+        self._cmdline, mscript =self._make_matlab_command(self.jobtype,
+                                                       self.jobname,
                                                        [self._parseinputs()])
 
     def outputs_help(self):
@@ -1495,6 +1548,14 @@ class Level1Design(SpmMatlabCommandLine):
     @property
     def cmd(self):
         return 'spm_fmri_design'
+
+    @property
+    def jobtype(self):
+        return 'stats'
+
+    @property
+    def jobname(self):
+        return 'fmri_spec'
 
     def inputs_help(self):
         """
@@ -1668,8 +1729,8 @@ class Level1Design(SpmMatlabCommandLine):
             postscript += "save SPM SPM;\n"
         else:
             postscript = None
-        self._cmdline, mscript =self._make_matlab_command('stats',
-                                                          'fmri_spec',
+        self._cmdline, mscript =self._make_matlab_command(self.jobtype,
+                                                          self.jobname,
                                                           [self._parseinputs()],
                                                           postscript=postscript)
             
@@ -1723,6 +1784,14 @@ class EstimateModel(SpmMatlabCommandLine):
     @property
     def cmd(self):
         return 'spm_spm'
+
+    @property
+    def jobtype(self):
+        return 'stats'
+
+    @property
+    def jobname(self):
+        return 'fmri_est'
 
     def inputs_help(self):
         """
@@ -2382,6 +2451,14 @@ class EstimateContrast(SpmMatlabCommandLine):
     def cmd(self):
         return 'spm_contrast'
 
+    @property
+    def jobtype(self):
+        return 'stats'
+
+    @property
+    def jobname(self):
+        return 'con'
+
     def inputs_help(self):
         """
             Parameters
@@ -2578,6 +2655,10 @@ class OneSampleTTest(SpmMatlabCommandLine):
     def cmd(self):
         return 'spm_spm'
 
+    @property
+    def jobtype(self):
+        return 'stats'
+
     def inputs_help(self):
         """
             Parameters
@@ -2693,6 +2774,10 @@ class TwoSampleTTest(SpmMatlabCommandLine):
     @property
     def cmd(self):
         return 'spm_spm'
+
+    @property
+    def jobtype(self):
+        return 'stats'
 
     def inputs_help(self):
         """
