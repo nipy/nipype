@@ -17,6 +17,7 @@ from glob import glob
 from copy import deepcopy
 import numpy as np
 from scipy import signal
+import scipy.io as sio
 #import matplotlib as mpl
 #import matplotlib.pyplot as plt
 #import traceback
@@ -97,7 +98,35 @@ class ArtifactDetect(Interface):
                             intersect_mask=True)
         
     def outputs_help(self):
+        """print out the help from the outputs routine
         """
+        print self.outputs.__doc__
+        
+    def _get_output_filenames(self,motionfile,output_dir):
+        """Generate output files based on motion filenames
+
+        Parameters
+        ----------
+
+            motionfile: file/string
+                Filename for motion parameter file
+            output_dir: string
+                output directory in which the files will be generated 
+        """
+        (filepath,filename) = os.path.split(motionfile)
+        (filename,ext) = os.path.splitext(filename)
+        artifactfile  = os.path.join(output_dir,''.join(('art.',filename,'_outliers.txt')))
+        intensityfile = os.path.join(output_dir,''.join(('global_intensity.',filename,'.txt')))
+        statsfile     = os.path.join(output_dir,''.join(('stats.',filename,'.txt')))
+        normfile     = os.path.join(output_dir,''.join(('norm.',filename,'.txt')))
+        return artifactfile,intensityfile,statsfile,normfile
+
+    def outputs(self):
+        """Generate a bunch containing the output fields.
+
+        Parameters
+        ----------
+        
             outlier_files : filename(s)
                 One file for each functional run containing a list of
                 0-based indices corresponding to outlier volumes
@@ -111,28 +140,13 @@ class ArtifactDetect(Interface):
                 correlated motion and a listing or artifacts by event
                 type. 
         """
-        print self.outputs_help.__doc__
-        
-    def _get_output_filenames(self,motionfile,output_dir):
-        """
-        
-        Arguments:
-        - `self`:
-        - `motionfile`:
-        - `cwd`:
-        """
-        (filepath,filename) = os.path.split(motionfile)
-        (filename,ext) = os.path.splitext(filename)
-        artifactfile  = os.path.join(output_dir,''.join(('art.',filename,'_outliers.txt')))
-        intensityfile = os.path.join(output_dir,''.join(('global_intensity.',filename,'.txt')))
-        statsfile     = os.path.join(output_dir,''.join(('stats.',filename,'.txt')))
-        normfile     = os.path.join(output_dir,''.join(('norm.',filename,'.txt')))
-        return artifactfile,intensityfile,statsfile,normfile
-    
-    def aggregate_outputs(self):
         outputs = Bunch(outlier_files=None,
                         intensity_files=None,
                         statistic_files=None)
+        return outputs
+        
+    def aggregate_outputs(self):
+        outputs = self.outputs()
         for i,f in enumerate(filename_to_list(self.inputs.realigned_files)):
             outlierfile,intensityfile,statsfile,normfile = self._get_output_filenames(f,self.inputs.get('cwd','.'))
             outlierfile = glob(outlierfile)
@@ -363,6 +377,162 @@ class ArtifactDetect(Interface):
         for i,imgf in enumerate(funcfilelist):
             self._detect_outliers_core(imgf,motparamlist[i],
                                        self.inputs.get('cwd','.'))
+        runtime = Bunch(returncode=0,
+                        messages=None,
+                        errmessages=None)
+        outputs=self.aggregate_outputs()
+        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+
+class StimulusCorrelation(Interface):
+    """Determines if stimuli are correlated with motion or intensity
+    parameters.
+
+    Currently this class supports an SPM generated design matrix and
+    requires intensity parameters. This implies that one must run
+    ArtifactDetect and `SPM.Level1Design' prior to running this or
+    provide an SPM.mat file and intensity parameters through some
+    other means. 
+    """
+
+    def __init__(self, *args, **inputs):
+        self._populate_inputs()
+        self.inputs.update(**inputs)
+
+    def inputs_help(self):
+        """
+        Parameters
+        ----------
+        realignment_parameters : filename(s)
+            Names of realignment parameters corresponding to the
+            functional data files
+        intensity_values : filename(s)
+            Name of file containing intensity values
+        spm_mat_file : filename
+            SPM mat file (use pre-estimate SPM.mat file)
+        concatenated_design : boolean
+            state if the design matrix contains concatenated sessions
+        """
+        print self.inputs_help.__doc__
+        
+    def _populate_inputs(self):
+        self.inputs = Bunch(realignment_parameters=None,
+                            intensity_values=None,
+                            spm_mat_file=None,
+                            concatenated_design=None)
+        
+    def outputs_help(self):
+        """print out the help from the outputs routine
+        """
+        print self.outputs.__doc__
+        
+    def _get_output_filenames(self,motionfile,output_dir):
+        """Generate output files based on motion filenames
+
+        Parameters
+        ----------
+
+            motionfile: file/string
+                Filename for motion parameter file
+            output_dir: string
+                output directory in which the files will be generated 
+        """
+        (filepath,filename) = os.path.split(motionfile)
+        (filename,ext) = os.path.splitext(filename)
+        corrfile  = os.path.join(output_dir,''.join(('qa.',filename,'_stimcorr.txt')))
+        return corrfile
+
+    def outputs(self):
+        """Generate a bunch containing the output fields.
+
+        Parameters
+        ----------
+        
+            stimcorr_files: file/string
+                List of files containing correlation values
+        """
+        outputs = Bunch(stimcorr_files=None)
+        return outputs
+        
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        for i,f in enumerate(filename_to_list(self.inputs.realignment_parameters)):
+            corrfile = self._get_output_filenames(f,self.inputs.get('cwd','.'))
+            stimcorrfile = glob(corrfile)
+            if outputs.stimcorr_files is None:
+                outputs.stimcorr_files = []
+            outputs.stimcorr_files.insert(i,stimcorrfile[0])
+        if outputs.stimcorr_files is not None:
+            outputs.stimcorr_files = list_to_filename(outputs.stimcorr_files)
+        return outputs
+
+    def get_input_info(self):
+        return []
+
+    def _stimcorr_core(self,motionfile,intensityfile,designmatrix,cwd='.'):
+        """
+        Core routine for determining stimulus correlation
+        
+        """
+        # read in motion parameters
+        mc_in = np.loadtxt(motionfile)
+        g_in  = np.loadtxt(intensityfile)
+        g_in.shape = g_in.shape[0],1
+        dcol = designmatrix.shape[1]
+        mccol= mc_in.shape[1]
+        concat_matrix = np.hstack((np.hstack((designmatrix,mc_in)),g_in))
+        cm = np.corrcoef(concat_matrix,rowvar=0)
+        corrfile = self._get_output_filenames(motionfile,cwd)
+        # write output to outputfile
+        file = open(corrfile,'w')
+        file.write("Stats for:\n")
+        file.write("Stimulus correlated motion:\n%s\n" % motionfile)
+        for i in range(dcol):
+            file.write("SCM.%d:"%i)
+            for v in cm[i,dcol+np.arange(mccol)]:
+                file.write(" %.2f"%v)
+            file.write('\n')
+        file.write("Stimulus correlated intensity:\n%s\n" % intensityfile)
+        for i in range(dcol):
+            file.write("SCI.%d: %.2f\n"%(i,cm[i,-1]))
+        file.close()
+
+    def _get_spm_submatrix(self,spmmat,sessidx,rows=None):
+        """
+        
+        Parameters
+        ----------
+        
+        spmmat: scipy matlab object
+            full SPM.mat file loaded into a scipy object
+        sessidx: int
+            index to session that needs to be extracted.
+        """
+        designmatrix = spmmat['SPM'][0][0].xX[0][0].X
+        U = spmmat['SPM'][0][0].Sess[0][sessidx].U[0]
+        if rows is None:
+            rows = spmmat['SPM'][0][0].Sess[0][sessidx].row[0]-1
+        cols = spmmat['SPM'][0][0].Sess[0][sessidx].col[0][range(len(U))]-1
+        outmatrix = designmatrix.take(rows.tolist(),axis=0).take(cols.tolist(),axis=1)
+        return outmatrix
+
+    def run(self, **inputs):
+        """Execute this module.
+        """
+        motparamlist = filename_to_list(self.inputs.realignment_parameters)
+        intensityfiles = filename_to_list(self.inputs.intensity_values)
+        spmmat = sio.loadmat(list_to_filename(self.inputs.spm_mat_file))
+        nrows = []
+        for i,imgf in enumerate(motparamlist):
+            sessidx = i
+            rows=None
+            if self.inputs.concatenated_design:
+                sessidx = 0
+                mc_in = np.loadtxt(motparamlist[i])
+                rows = np.sum(nrows)+np.arange(mc_in.shape[0])
+                nrows.append(mc_in.shape[0])
+            matrix = self._get_spm_submatrix(spmmat,sessidx,rows)
+            self._stimcorr_core(motparamlist[i],intensityfiles[i],
+                                matrix,self.inputs.get('cwd','.'))
         runtime = Bunch(returncode=0,
                         messages=None,
                         errmessages=None)
