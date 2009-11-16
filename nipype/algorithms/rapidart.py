@@ -186,16 +186,20 @@ class ArtifactDetect(Interface):
         if len(params)<12:
             params=np.hstack((params,q[len(params):]))
         params.shape = (len(params),)
+        # Translation
         T = np.eye(4)
         T[0:3,-1] = params[0:3] #np.vstack((np.hstack((np.eye(3),params[0:3,])),np.array([0,0,0,1])))
+        # Rotation
         Rx = np.eye(4)
         Rx[1:3,1:3] = rotfunc(params[3])
         Ry = np.eye(4)
         Ry[(0,0,2,2),(0,2,0,2)] = rotfunc(params[4]).ravel()
         Rz = np.eye(4)
         Rz[0:2,0:2] = rotfunc(params[5])
+        # Scaling
         S = np.eye(4)
         S[0:3,0:3] = np.diag(params[6:9])
+        # Shear
         Sh = np.eye(4)
         Sh[(0,0,1),(1,2,2)] = params[9:12]
 
@@ -220,6 +224,8 @@ class ArtifactDetect(Interface):
         
         """
         respos=np.diag([70,70,75]);resneg=np.diag([-70,-110,-45]);
+        # respos=np.diag([50,50,50]);resneg=np.diag([-50,-50,-50]);
+        # XXX - SG why not the above box
         cube_pts = np.vstack((np.hstack((respos,resneg)),np.ones((1,6))))
         newpos = np.zeros((mc.shape[0],18))
         for i in range(mc.shape[0]):
@@ -243,8 +249,9 @@ class ArtifactDetect(Interface):
         """
         Core routine for detecting outliers
         
-        Arguments:
-        - `self`:
+        Parameters:
+        -----------
+        
         - `imgfile`:
         - `motionfile`:
         - `artifactfile`:
