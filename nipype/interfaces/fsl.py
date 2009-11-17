@@ -292,7 +292,7 @@ class Bet(FSLCommand):
 
     >>> from nipype.interfaces import fsl
     >>> btr = fsl.Bet()
-    >>> res = btr.run('infile', 'outfile', frac=0.5)
+    >>> res = btr.run('infile', 'outfile', frac=0.5) # doctest: +SKIP
 
     Assign options through the ``inputs`` attribute:
 
@@ -300,12 +300,12 @@ class Bet(FSLCommand):
     >>> btr.inputs.infile = 'foo.nii'
     >>> btr.inputs.outfile = 'bar.nii'
     >>> btr.inputs.frac = 0.7
-    >>> res = btr.run()
+    >>> res = btr.run() # doctest: +SKIP
 
     Specify options when creating a Bet instance:
 
     >>> btr = fsl.Bet(infile='infile', outfile='outfile', frac=0.5)
-    >>> res = btr.run()
+    >>> res = btr.run() # doctest: +SKIP
 
     Loop over many inputs (Note: the snippet below would overwrite the
     outfile each time):
@@ -313,7 +313,7 @@ class Bet(FSLCommand):
     >>> btr = fsl.Bet(infile='infile', outfile='outfile')
     >>> fracvals = [0.3, 0.4, 0.5]
     >>> for val in fracvals:
-    ...     res = btr.run(frac=val)
+    ...     res = btr.run(frac=val) # doctest: +SKIP
 
     """
 
@@ -1195,7 +1195,7 @@ class Fnirt(FSLCommand):
     --------
     >>> from nipype.interfaces import fsl
     >>> fnt = fsl.Fnirt(affine='affine.mat')
-    >>> res = fnt.run(reference='ref.nii', infile='anat.nii')
+    >>> res = fnt.run(reference='ref.nii', infile='anat.nii') # doctests: +SKIP
 
     """
     @property
