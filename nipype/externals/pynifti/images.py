@@ -5,7 +5,7 @@
 A draft.
 '''
 
-import nifti.ioimps as ioimps
+import nipype.externals.pynifti.ioimps as ioimps
 
 class ImageError(Exception):
     pass

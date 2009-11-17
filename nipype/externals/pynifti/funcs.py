@@ -20,7 +20,7 @@ def squeeze_image(img):
 
     Examples
     --------
-    >>> import nifti as nf
+    >>> import nipype.externals.pynifti as nf
     >>> shape = (10,20,30,1,1)
     >>> data = np.arange(np.prod(shape)).reshape(shape)
     >>> affine = np.eye(4)

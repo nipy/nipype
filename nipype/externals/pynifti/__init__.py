@@ -20,7 +20,7 @@ image data is made available via NumPy arrays.
 
 Quickstart::
 
-   import nifti
+   import nipype.externals.pynifti
 
    img1 = nifti.load('my_file.nii')
    img2 = nifti.load('other_file.nii.gz')
