@@ -101,8 +101,7 @@ def _test_local_install():
         warnings.warn('Running the tests from the install directory may '
                      'trigger some failures')
 
-# Commented this out as it's too noisy.
-#_test_local_install()
+_test_local_install()
 
 # Cleanup namespace
 del _test_local_install
