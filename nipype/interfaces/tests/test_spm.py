@@ -15,10 +15,6 @@ def cannot_find_spm():
     except IOError:
         return True
 
-# requires a nifti data file
-def test_scan_for_fnames():
-    pass
-
 def test_scan_for_fnames():
     a = ['a.nii','b.nii']
     names = spm.scans_for_fnames(a,keep4d=True)
