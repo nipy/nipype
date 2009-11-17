@@ -54,10 +54,11 @@ class NodeWrapper(object):
     Examples
     --------
     >>> import nipype.interfaces.spm as spm
-    >>> realign = NodeWrapper(interface=spm.Realign(), base_directory='test2', diskbased=True)
+    >>> realign = NodeWrapper(interface=spm.Realign(), base_directory='test2', \
+            diskbased=True)
     >>> realign.inputs.infile = os.path.abspath('data/funcrun.nii')
     >>> realign.inputs.register_to_mean = True
-    >>> realign.run()
+    >>> realign.run() # doctest: +SKIP
 
     """
     def __init__(self, interface=None,
