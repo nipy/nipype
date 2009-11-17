@@ -91,7 +91,7 @@ def create_archive(out_path, git_path, git_tag):
     # Remove the tarball
     os.unlink(dst)
     # Remove temporary directory
-    shutil.rmtree(tpm_path)
+    shutil.rmtree(tmp_path)
 
 if __name__ == '__main__':
     create_archive(out_path, git_path, git_tag)
