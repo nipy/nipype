@@ -361,8 +361,10 @@ class Realign(SpmMatlabCommandLine):
 
     Examples
     --------
+    >>> #doctest: +SKIP
+    >>> import nipype.interfaces.spm as spm
     >>> realign = spm.Realign()
-    >>> realign.inputs.infile('a.nii')
+    >>> realign.inputs.infile = 'a.nii'
     >>> realign.run()
     """
 
@@ -2102,14 +2104,14 @@ class SpecifyModel(Interface):
         %
         % hrf  - hemodynamic response function
         % p    - parameters of the response function
-
+        
+        >>> import nipype.interfaces.spm as spm
         >>> print spm.SpecifyModel()._spm_hrf(2)
-        array([  0.00000000e+00,   8.65660810e-02,   3.74888236e-01,
-         3.84923382e-01,   2.16117316e-01,   7.68695653e-02,
-         1.62017720e-03,  -3.06078117e-02,  -3.73060781e-02,
-        -3.08373716e-02,  -2.05161334e-02,  -1.16441637e-02,
-        -5.82063147e-03,  -2.61854250e-03,  -1.07732374e-03,
-        -4.10443522e-04,  -1.46257507e-04])
+        [  0.00000000e+00   8.65660810e-02   3.74888236e-01   3.84923382e-01
+           2.16117316e-01   7.68695653e-02   1.62017720e-03  -3.06078117e-02
+          -3.73060781e-02  -3.08373716e-02  -2.05161334e-02  -1.16441637e-02
+          -5.82063147e-03  -2.61854250e-03  -1.07732374e-03  -4.10443522e-04
+          -1.46257507e-04]
         """
         p     = np.array([6,16,1,1,6,0,32],dtype=float)
         if len(P)>0:
