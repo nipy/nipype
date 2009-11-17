@@ -66,6 +66,8 @@
 .. _mayavi: http://mayavi.sourceforge.net/
 .. _sympy: http://code.google.com/p/sympy/
 .. _networkx: http://networkx.lanl.gov/
+.. _pythonxy: http://www.pythonxy.com/
+.. _EPD: http://www.enthought.com/products/epd.php
 
 .. Python imaging projects
 .. _PyMVPA: http://www.pymvpa.org

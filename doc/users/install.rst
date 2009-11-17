@@ -14,7 +14,7 @@ Dependencies
 Must Have
 ~~~~~~~~~
 
-Python_ 2.5 or later
+Python_ 2.5 or 2.6 
 
 NumPy_ 1.3 or later
 
@@ -35,6 +35,11 @@ IPython_ 0.10
       * zope.interface: which is also a dependecy of Twisted and was
         installed automatically for me when I installed Twisted.
 
+Note
+~~~~
+Full distributions such as pythonxy_ or EPD_ provide the above
+packages. For EPD, the version of networkx is still at 0.99 and needs
+to be replaced by the version above.
 
 Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -60,15 +65,20 @@ matlab_
   2008a or later
 
 SPM_
-  SPM5 (SPM8 will be supported in version 0.2)
+  SPM5/8
 
-
+FreeSurfer_
+  FreeSurfer version 4 and higher
 
 Download
 --------
 
 Download the latest release from `our sourceforge
 page. <http://sourceforge.net/projects/nipy/files/>`_
+
+To check out the svn version::
+
+   svn co https://nipy.svn.sourceforge.net/svnroot/nipy/nipype/trunk nipype
 
 You may also follow our `release schedule
 <http://sourceforge.net/apps/trac/nipy/roadmap>`_ to see when our next
@@ -80,13 +90,19 @@ Install
 The installation process is similar to other Python packages so it
 will be familiar if you have Python experience.
 
-If you downloaded the source distribution tarball, named something
+From source
+~~~~~~~~~~~
+
+If you downloaded the source distribution named something
 like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
 ``nipype-x.y`` directory and install nipype using::
 
     python setup.py install
 
 **Note:** Depending on permissions you may need to use ``sudo``.
+
+From egg
+~~~~~~~~
 
 If you downloaded an egg, named something like
 ``nipype-x.y-py2.5.egg``, then install nipype using::
