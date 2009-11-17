@@ -1,7 +1,5 @@
 import numpy as np
 
-from scipy.io.netcdf import netcdf_file
-
 from nipype.externals.pynifti.spatialimages import SpatialImage
 from nipype.externals.pynifti.volumeutils import allopen
 
@@ -21,18 +19,23 @@ _default_dir_cos = {
     'yspace': [0,1,0],
     'zspace': [0,0,1]}
 
-
-class netcdf_fileobj(netcdf_file):
-    def __init__(self, fileobj):
-        # Older versions of netcdf_file expected filename and mode.
-        # Newer versions allow passing of file objects.  We check
-        # whether calling netcdf_file raises a TypeError (meaning we
-        # have the old version) and deal with it if we do.
-        try:
-            super(netcdf_fileobj, self).__init__(fileobj)
-        except TypeError:
-            self._buffer = fileobj
-            self._parse()
+def get_netcdf_fileobj():
+    """Return netcdf fileobj.
+    The import of netcdf from scipy.io is slow, so only do it when needed.
+    """
+    from scipy.io.netcdf import netcdf_file
+    class netcdf_fileobj(netcdf_file):
+        def __init__(self, fileobj):
+            # Older versions of netcdf_file expected filename and mode.
+            # Newer versions allow passing of file objects.  We check
+            # whether calling netcdf_file raises a TypeError (meaning we
+            # have the old version) and deal with it if we do.
+            try:
+                super(netcdf_fileobj, self).__init__(fileobj)
+            except TypeError:
+                self._buffer = fileobj
+                self._parse()
+    return netcdf_fileobj
 
 
 class MincError(Exception):
@@ -88,6 +91,7 @@ class MincHeader(object):
 
     @classmethod
     def from_fileobj(klass, fileobj, endianness=None, check=True):
+        netcdf_fileobj = get_netcdf_fileobj()
         ncdf_obj = netcdf_fileobj(fileobj)
         return klass(ncdf_obj, endianness, check)
 
