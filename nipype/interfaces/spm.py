@@ -147,13 +147,16 @@ class SpmMatlabCommandLine(MatlabCommandLine):
             results.outputs = self.aggregate_outputs() 
         return results
 
+    def _parseinputs(self):
+        raise NotImplementedError
+    
     def _compile_command(self):
         """Assembles the matlab code for SPM function
         
         Virtual function that needs to be implemented by the
         subclass
         """ 
-        raise NotImplementedError
+        self._cmdline, mscript = self._make_matlab_command(self._parseinputs())
     
     def aggregate_outputs(self):
         """Collects all the outputs produced by an SPM function
@@ -317,6 +320,15 @@ class SpmMatlabCommandLine(MatlabCommandLine):
                                            mfile=self.mfile) 
         return cmdline, mscript
 
+    def outputs_help(self):
+        """ Prints the help of outputs
+        """
+        print self.outputs.__doc__
+
+    def outputs(self):
+        """
+        """
+        raise NotImplementedError
 
 class Realign(SpmMatlabCommandLine):
     """Use spm_realign for estimating within modality rigid body alignment
@@ -515,9 +527,14 @@ class Realign(SpmMatlabCommandLine):
                 continue
                 
             print 'option %s not supported'%(opt)
+        if self.inputs.write:
+            jobtype = 'estwrite'
+        else:
+            jobtype = 'estimate'
+        einputs = [{'%s'%(jobtype):einputs}]
         return einputs
 
-    def outputs_help(self):
+    def outputs(self):
         """
         Parameters
         ----------
@@ -529,20 +546,11 @@ class Realign(SpmMatlabCommandLine):
         realignment_parameters : rp*.txt
             files containing the estimated translation and rotation
             parameters 
-            """
-        print self.outputs_help.__doc__
-
-    def _compile_command(self):
-        """validates spm options and generates job structure
-        if mfile is True uses matlab .m file
-        else generates a job structure and saves in .mat
         """
-        if self.inputs.write:
-            jobtype = 'estwrite'
-        else:
-            jobtype = 'estimate'
-        self._cmdline, mscript = self._make_matlab_command(self.jobtype, self.jobname,
-                                        [{'%s'%(jobtype):self._parseinputs()}])
+        outputs = Bunch(realigned_files=None,
+                        realignment_parameters=None,
+                        mean_image=None)
+        return outputs
 
     def run(self, infile=None,**inputs):
         """Executes the SPM realign function using MATLAB
@@ -565,9 +573,7 @@ class Realign(SpmMatlabCommandLine):
         """ Initializes the output fields for this interface and then
         searches for and stores the data that go into those fields.
         """
-        outputs = Bunch(realigned_files=None,
-                        realignment_parameters=None,
-                        mean_image=None)
+        outputs = self.outputs()
         outputs.realigned_files = []
         outputs.realignment_parameters = []
         if type(self.inputs.infile) == list:
@@ -754,9 +760,14 @@ class Coregister(SpmMatlabCommandLine):
                 einputs.update(inputs[opt])
                 continue
             print 'option %s not supported'%(opt)
+        if self.inputs.write:
+            jobtype = 'estwrite'
+        else:
+            jobtype = 'estimate'
+        einputs = [{'%s'%(jobtype):einputs}]
         return einputs
 
-    def outputs_help(self):
+    def outputs(self):
         """
         Parameters
         ----------
@@ -766,11 +777,12 @@ class Coregister(SpmMatlabCommandLine):
         coregistered_files :
             coregistered files corresponding to inputs.infile
         """
-        print self.outputs_help.__doc__
-        
-    def aggregate_outputs(self):
         outputs = Bunch(coregistered_source=None,
                         coregistered_files=None)
+        return outputs
+        
+    def aggregate_outputs(self):
+        outputs = self.outputs()
         if self.inputs.write is False:
             outputs.coregistered_files = self.inputs.apply_to_files
         else:
@@ -810,21 +822,8 @@ class Coregister(SpmMatlabCommandLine):
             raise AttributeError('Realign requires a source file')
         self.inputs.update(**inputs)
         return super(Coregister,self).run()
-    
-    def _compile_command(self):
-        """validates spm options and generates job structure
-        if mfile is True uses matlab .m file
-        else generates a job structure and saves in .mat
-        """
-        if self.inputs.write:
-            jobtype = 'estwrite'
-        else:
-            jobtype = 'estimate'
-        self._cmdline, mscript =self._make_matlab_command(self.jobtype,
-                                       self.jobname,
-                                       [{'%s'%(jobtype):self._parseinputs()}])
 
-        
+
 class Normalize(SpmMatlabCommandLine):
     """use spm_normalise for warping an image to a template
 
@@ -1027,6 +1026,11 @@ class Normalize(SpmMatlabCommandLine):
                 einputs.update(inputs[opt])
                 continue
             print 'option %s not supported'%(opt)
+        if self.inputs.write:
+            jobtype = 'estwrite'
+        else:
+            jobtype = 'est'
+        einputs = [{'%s'%(jobtype):einputs}]
         return einputs
 
     def run(self, template=None, source=None, **inputs):
@@ -1051,20 +1055,8 @@ class Normalize(SpmMatlabCommandLine):
         self.inputs.update(**inputs)
         return super(Normalize,self).run()
     
-    def _compile_command(self):
-        """validates spm options and generates job structure
-        if mfile is True uses matlab .m file
-        else generates a job structure and saves in .mat
-        """
-        if self.inputs.write:
-            jobtype = 'estwrite'
-        else:
-            jobtype = 'est'
-        self._cmdline, mscript =self._make_matlab_command(self.jobtype,
-                                       self.jobname,
-                                       [{'%s'%(jobtype):self._parseinputs()}])
 
-    def outputs_help(self):
+    def outputs(self):
         """
         Parameters
         ----------
@@ -1077,12 +1069,13 @@ class Normalize(SpmMatlabCommandLine):
         normalized_files :
             normalized files corresponding to inputs.apply_to_files
         """
-        print self.outputs_help.__doc__
-        
-    def aggregate_outputs(self):
         outputs = Bunch(normalization_parameters=None,
                         normalized_source=None,
                         normalized_files=None)
+        return outputs
+        
+    def aggregate_outputs(self):
+        outputs = self.outputs()
         sourcefile = list_to_filename(self.inputs.source)
         n_param = glob(fname_presuffix(sourcefile,suffix='_sn.mat',use_ext=False))
         assert len(n_param) == 1, 'No normalization parameter files generated by SPM Normalize'
@@ -1302,7 +1295,7 @@ class Segment(SpmMatlabCommandLine):
                 einputs.update(inputs[opt])
                 continue
             print 'option %s not supported'%(opt)
-        return einputs
+        return [einputs]
 
     def run(self, data=None, **inputs):
         """Executes the SPM segment function using MATLAB
@@ -1319,17 +1312,8 @@ class Segment(SpmMatlabCommandLine):
             raise AttributeError('Segment requires a data file')
         self.inputs.update(**inputs)
         return super(Segment,self).run()
-    
-    def _compile_command(self):
-        """validates spm options and generates job structure
-        if mfile is True uses matlab .m file
-        else generates a job structure and saves in .mat
-        """
-        self._cmdline, mscript =self._make_matlab_command(self.jobtype,
-                                                       self.jobname,
-                                                       [self._parseinputs()])
 
-    def outputs_help(self):
+    def outputs(self):
         """
         Parameters
         ----------
@@ -1350,15 +1334,16 @@ class Segment(SpmMatlabCommandLine):
         inverse_transformation_mat :
             Transformation file for inverse normalizing an image
         """
-        print self.outputs_help.__doc__
-        
-    def aggregate_outputs(self):
         outputs = Bunch(native_class_images=None,
                         normalized_class_images=None,
                         modulated_class_images=None,
                         modulated_input_image=None,
                         transformation_mat=None,
                         inverse_transformation_mat=None)
+        return outputs
+        
+    def aggregate_outputs(self):
+        outputs = self.outputs()
         f = self.inputs.data
         m_file = glob(fname_presuffix(f,prefix='m',suffix='.nii',use_ext=False))
         outputs.modulated_input_image = m_file
@@ -1488,7 +1473,7 @@ class Smooth(SpmMatlabCommandLine):
                 einputs.update(inputs[opt])
                 continue
             print 'option %s not supported'%(opt)
-        return einputs
+        return [einputs]
 
     def run(self, infile=None, **inputs):
         """Executes the SPM smooth function using MATLAB
@@ -1505,17 +1490,8 @@ class Smooth(SpmMatlabCommandLine):
             raise AttributeError('Smooth requires a file')
         self.inputs.update(**inputs)
         return super(Smooth,self).run()
-    
-    def _compile_command(self):
-        """validates spm options and generates job structure
-        if mfile is True uses matlab .m file
-        else generates a job structure and saves in .mat
-        """
-        self._cmdline, mscript =self._make_matlab_command(self.jobtype,
-                                                       self.jobname,
-                                                       [self._parseinputs()])
 
-    def outputs_help(self):
+    def outputs(self):
         """
         Parameters
         ----------
@@ -1524,10 +1500,11 @@ class Smooth(SpmMatlabCommandLine):
         smoothed_files :
             smooth files corresponding to inputs.infile
         """
-        print self.outputs_help.__doc__
+        outputs = Bunch(smoothed_files=None)
+        return outputs
         
     def aggregate_outputs(self):
-        outputs = Bunch(smoothed_files=None)
+        outputs = self.outputs()
         outputs.smoothed_files = []
         if type(self.inputs.infile) == type([]):
             filelist = self.inputs.infile
@@ -1737,7 +1714,7 @@ class Level1Design(SpmMatlabCommandLine):
             print 'option %s not supported'%(opt)
             if einputs['dir'] == '':
                 einputs['dir'] = np.array([[[str(self.inputs.get('cwd','.'))]]],dtype=object)
-        return einputs
+        return [einputs]
 
     def _compile_command(self):
         """validates spm options and generates job structure
@@ -1756,12 +1733,10 @@ class Level1Design(SpmMatlabCommandLine):
             postscript += "save SPM SPM;\n"
         else:
             postscript = None
-        self._cmdline, mscript =self._make_matlab_command(self.jobtype,
-                                                          self.jobname,
-                                                          [self._parseinputs()],
+        self._cmdline, mscript =self._make_matlab_command(self._parseinputs(),
                                                           postscript=postscript)
             
-    def outputs_help(self):
+    def outputs(self):
         """
             Parameters
             ----------
@@ -1770,12 +1745,12 @@ class Level1Design(SpmMatlabCommandLine):
             spm_mat_file:
                 SPM mat file
         """
-        print self.outputs_help.__doc__
+        outputs = Bunch(spm_mat_file=None)
+        return outputs
         
     def aggregate_outputs(self):
-        outputs = Bunch(spm_mat_file=None)
+        outputs = self.outputs()
         spm = glob(os.path.join(self.inputs.get('cwd',os.getcwd()),'SPM.mat'))
-        assert len(spm) == 1, 'No spm mat files generated by SPM Estimate'
         outputs.spm_mat_file = spm[0]
         return outputs
     
@@ -1873,19 +1848,9 @@ class EstimateModel(SpmMatlabCommandLine):
                 einputs.update(inputs[opt])
                 continue
             print 'option %s not supported'%(opt)
-        return einputs
-
-    def _compile_command(self):
-        """validates spm options and generates job structure
-        if mfile is True uses matlab .m file
-        else generates a job structure and saves in .mat
-        """
-        self._cmdline, mscript = self._make_matlab_command('stats',
-                                                           'fmri_est',
-                                                           [self._parseinputs()])
-        
+        return [einputs]
     
-    def outputs_help(self):
+    def outputs(self):
         """
             Parameters
             ----------
@@ -1899,19 +1864,20 @@ class EstimateModel(SpmMatlabCommandLine):
             residual_image:
                 Mean-squared image of the residuals from each time point
             RPVimage:
-                ??? XXX ???
+                Resels per voxel image
             spm_mat_file:
                 Updated SPM mat file
         """
-        print self.outputs_help.__doc__
-        
-    def aggregate_outputs(self):
-        pth, fname = os.path.split(self.inputs.spm_design_file)
         outputs = Bunch(mask_image=None,
                         beta_images=None,
                         residual_image=None,
                         RPVimage=None,
                         spm_mat_file=None)
+        return outputs
+        
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        pth, fname = os.path.split(self.inputs.spm_design_file)
         mask = glob(os.path.join(pth,'mask.*'))
         assert len(mask) == 2, 'No mask image file generated by SPM Estimate'
         outputs.mask_image = mask
@@ -2070,7 +2036,7 @@ class SpecifyModel(Interface):
                             stimuli_as_impulses=True,
                             scan_onset=0.)
         
-    def outputs_help(self):
+    def outputs(self):
         """
             Parameters
             ----------
@@ -2080,7 +2046,13 @@ class SpecifyModel(Interface):
                 Python dict storing session info for input to
                 spm.Level1Design.inputs.session_info 
         """
-        print self.outputs_help.__doc__
+        outputs = Bunch(session_info=None)
+        return outputs
+
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        outputs.session_info = self._generate_design()
+        return outputs
 
     def _scaletimings(self,timelist,input_units=None,output_units=None):
         if input_units is None:
@@ -2433,10 +2405,6 @@ class SpecifyModel(Interface):
                                                   outliers=outliers)
         return sessinfo
     
-    def aggregate_outputs(self):
-        outputs = Bunch(session_info=self._generate_design())
-        return outputs
-
     def run(self, **inputs):
         """
         """
@@ -2613,7 +2581,7 @@ class EstimateContrast(SpmMatlabCommandLine):
                                                 cwd=self.inputs.get('cwd','.'),
                                                 script_name='pyscript_contrastestimate') 
     
-    def outputs_help(self):
+    def outputs(self):
         """
             Parameters
             ----------
@@ -2628,15 +2596,15 @@ class EstimateContrast(SpmMatlabCommandLine):
             spmF_images:
                 stat images from an F-contrast
         """
-        print self.outputs_help.__doc__
-        
-    def aggregate_outputs(self):
-        pth, fname = os.path.split(self.inputs.spm_mat_file)
         outputs = Bunch(con_images=None,
                         spmT_images=None,
                         ess_images=None,
                         spmF_images=None)
-                                          
+        return outputs
+        
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        pth, fname = os.path.split(self.inputs.spm_mat_file)
         con = glob(os.path.join(pth,'con*.*'))
         if len(con)>0:
             outputs.con_images = sorted(con)
@@ -2745,24 +2713,24 @@ class OneSampleTTest(SpmMatlabCommandLine):
                                                 cwd=cwd,
                                                 script_name='pyscript_onesamplettest') 
     
-    def outputs_help(self):
+    def outputs(self):
         """
-            Parameters
-            ----------
-            (all default to None)
+        Parameters
+        ----------
+        (all default to None)
 
-            con_images:
-                contrast images from a t-contrast
-            spmT_images:
-                stat images from a t-contrast
+        con_images:
+            contrast images from a t-contrast
+        spmT_images:
+            stat images from a t-contrast
         """
-        print self.outputs_help.__doc__
-        
-    def aggregate_outputs(self):
-        pth = self.inputs.get('cwd','.')
         outputs = Bunch(con_images=None,
                         spmT_images=None)
-                                          
+        return outputs
+        
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        pth = self.inputs.get('cwd','.')
         con = glob(os.path.join(pth,'con*.*'))
         if len(con)>0:
             outputs.con_images = sorted(con)
@@ -2890,24 +2858,24 @@ class TwoSampleTTest(SpmMatlabCommandLine):
                                                 cwd=cwd,
                                                 script_name='pyscript_onesamplettest') 
     
-    def outputs_help(self):
+    def outputs(self):
         """
-            Parameters
-            ----------
-            (all default to None)
+        Parameters
+        ----------
+        (all default to None)
 
-            con_images:
-                contrast images from a t-contrast
-            spmT_images:
-                stat images from a t-contrast
+        con_images:
+            contrast images from a t-contrast
+        spmT_images:
+            stat images from a t-contrast
         """
-        print self.outputs_help.__doc__
-        
-    def aggregate_outputs(self):
-        pth = self.inputs.get('cwd','.')
         outputs = Bunch(con_images=None,
                         spmT_images=None)
-                                          
+        return outputs
+        
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        pth = self.inputs.get('cwd','.')
         con = glob(os.path.join(pth,'con*.*'))
         if len(con)>0:
             outputs.con_images = sorted(con)

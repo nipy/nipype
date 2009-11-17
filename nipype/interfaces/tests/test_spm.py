@@ -124,6 +124,6 @@ def test_spm_get_input_info():
 def test_spm_parse_inputs():
     realign = spm.Realign(write=False)
     updatedopts = realign._parseinputs()
-    yield assert_equal, updatedopts, {'data':[],'eoptions':{},'roptions':{}}
+    yield assert_equal, updatedopts, [{'estimate': {'roptions': {}, 'eoptions': {}, 'data': []}}]
     yield assert_false, realign.inputs.write
 
