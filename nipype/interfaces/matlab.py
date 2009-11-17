@@ -11,10 +11,11 @@ from copy import deepcopy
 class MatlabCommandLine(CommandLine):
     """Object that sets up Matlab specific tools and interfaces
 
-    >>> matlab.MatlabCommandLine.matlab_cmd = "matlab.2009a -nodesktop -nosplash"
+    >>> import nipype.interfaces.matlab as matlab
+    >>> matlab.MatlabCommandLine().matlab_cmd = "matlab.2009a -nodesktop -nosplash"
     >>> mcmd = matlab.MatlabCommandLine()
     >>> mcmd.inputs.script_lines = "which('who')"
-    >>> out = mcmd.run()
+    >>> out = mcmd.run() # doctest: +SKIP
     """
     matlab_cmd = 'matlab -nodesktop -nosplash'
     def __init__(self, matlab_cmd=None,**inputs):
@@ -63,8 +64,7 @@ class MatlabCommandLine(CommandLine):
                             cwd='.')
 
     def run(self):
-        ### XXX TEST
-        print 'MatlabCommandLine'
+        
         results = self._runner()
         if 'command not found' in results.runtime.stderr:
             msg = 'Cannot find matlab!\n' + \
