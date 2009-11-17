@@ -361,11 +361,12 @@ class Realign(SpmMatlabCommandLine):
 
     Examples
     --------
-    >>> #doctest: +SKIP
+
     >>> import nipype.interfaces.spm as spm
     >>> realign = spm.Realign()
     >>> realign.inputs.infile = 'a.nii'
-    >>> realign.run()
+    >>> realign.run() # doctest: +SKIP
+
     """
 
     def spm_doc(self):
