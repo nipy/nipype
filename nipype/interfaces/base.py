@@ -263,7 +263,7 @@ class CommandLine(Interface):
     >>> cmd = CommandLine('echo')
     >>> cmd.cmdline
     'echo'
-    >>> res = cmd.run('foo')
+    >>> res = cmd.run(None, 'foo')
     >>> print res.runtime.stdout
     foo
     <BLANKLINE>
@@ -295,12 +295,41 @@ class CommandLine(Interface):
         self._update(*args, **inputs)
 
     def _update(self, *args, **inputs):
-        '''Helper function to support DRY'''
-        # XXX should rethink how CommandLine is to be used and work
-        # through the processing of args and inputs['args'].
+        """Update the `self.inputs` Bunch.
+
+        Updates the Bunch dictionary `self.inputs` with values from
+        `args` and `inputs`.  Positional arguments in `args` will be
+        appended to self.inputs.args if it exists.  Keyword arguments
+        in `inputs` will be added to the `self.inputs` dictionary.  As
+        with any dictionary, if the key already exists in
+        `self.inputs` the new value will overwrite the previous
+        values.  For example, if inputs['args'] is passed it, it will
+        overwrite the previous value of `self.inputs.args`.
+
+        Parameters
+        ----------
+        args : list
+            List of parameters to be assigned to self.inputs.args
+        inputs : dict
+            Dictionary whose items are used to update the self.inputs
+            dictionary.
+
+        Examples
+        --------
+        >>> from nipype.interfaces.base import CommandLine
+        >>> cmd = CommandLine('echo')
+        >>> cmd._update('foo', 'bar', new_input_var='whatever')
+        >>> cmd.inputs
+        Bunch(args=['echo', 'foo', 'bar'], new_input_var='whatever')
+
+        """
+
         try:
-            # if inputs['args'] exists and is splittable (thus, not a list)
-            # Handles case like this: CommandLine(args='echo foo')
+            # if inputs['args'] exists and is splittable (thus, not a
+            # list), split it.
+            # So if inputs['args'] == 'foo bar
+            # then after this block:
+            # inputs['args'] == ['foo', 'bar']
             if hasattr(inputs['args'], 'split'):
                 inputs['args']  = inputs['args'].split()
         except KeyError:
@@ -309,7 +338,7 @@ class CommandLine(Interface):
         self.inputs.update(inputs)
 
         if args:
-            # Note: .get() regurns None if key doesn't exist
+            # Note: .get() returns None if key doesn't exist
             if self.inputs.get('args') is not None:
                 self.inputs.args.extend(list(args))
             else:
