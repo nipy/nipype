@@ -42,8 +42,8 @@ from nipype.utils.spm_docs import grab_doc
 def scans_for_fname(fname):
     """Reads a nifti file and converts it to a numpy array storing
     individual nifti volumes
-
-    >>> scans_for_fname('mynifti.nii')
+    
+    Opens images so will fail if they are not found
     """
     img = load(fname)
     if len(img.get_shape()) == 3:
@@ -87,7 +87,7 @@ def scans_for_fnames(fnames,keep4d=False,separate_sessions=False):
 
 class SpmInfo(object):
     """ Return the path to the spm directory in the matlab path
-    >>> print spm.spmInfo().spm_path
+        If path not found, prints error asn returns None
     """
     @setattr_on_read
     def spm_path(self):
@@ -105,7 +105,9 @@ fprintf(1, '<PATH>%s</PATH>', spm_path);
             if path is not None:
                 path = path.groups()[0]
             return path
-        return None
+        else:
+            print out.runtime.stderr
+            return None
 
 spm_info = SpmInfo()
 
@@ -171,7 +173,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
 
         Examples
         --------
-        >>> a = _reformat_dict_for_savemat(dict(a=1,b=dict(c=2,d=3)))
+        >>> a = SpmMatlabCommandLine()._reformat_dict_for_savemat(dict(a=1,b=dict(c=2,d=3)))
         >>> print a
         [{'a': 1, 'b': [{'c': 2, 'd': 3}]}]
         
@@ -2129,7 +2131,7 @@ class SpecifyModel(Interface):
         % hrf  - hemodynamic response function
         % p    - parameters of the response function
 
-        >>> _spm_hrf(2)
+        >>> print spm.SpecifyModel()._spm_hrf(2)
         array([  0.00000000e+00,   8.65660810e-02,   3.74888236e-01,
          3.84923382e-01,   2.16117316e-01,   7.68695653e-02,
          1.62017720e-03,  -3.06078117e-02,  -3.73060781e-02,
