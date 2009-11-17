@@ -32,11 +32,15 @@ def mlab_tempfile(dir=None):
     Examples
     --------
 
-    >>> f = mlab_tempfile()
-    >>> '-' not in f.name
+    >>> fn = mlab_tempfile()
+    >>> import os
+    >>> filename = os.path.basename(fn.name)
+    >>> '-' not in filename
     True
-    >>> f.close()
+    >>> fn.close()
+
     """
+
     valid_name = re.compile(r'^\w+$')
 
     # Make temp files until we get one whose name is a valid matlab identifier,
