@@ -906,6 +906,8 @@ class OneSampleTTest(FSLCommand):
                             outdir=None,
                             outdirprefix='glm',
                             funcimage=None,
+                            osgm=None,
+                            design=None,
                             flags=None)
 
     opt_map = {
@@ -914,6 +916,8 @@ class OneSampleTTest(FSLCommand):
         'outdir':             '--glmdir %s',
         'outdirprefix':          None,
         'funcimage':          '--y %s',
+        'onesample':          '--osgm',
+        'design':             '--X %s',
         'flags':              '%s'}
 
     def get_input_info(self):
@@ -929,7 +933,6 @@ class OneSampleTTest(FSLCommand):
 
         # Add outfile to the args if not specified
         allargs.extend(['--surf',self.inputs.surf,self.inputs.hemi])
-        allargs.extend(['--osgm'])
         if self.inputs.outdir is None:
             outdir = os.getcwd()
             allargs.extend(['--glmdir', outdir])

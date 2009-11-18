@@ -203,7 +203,6 @@ def subjectinfo(subject_id):
 """
 cont1 = ['Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5]]
 cont2 = ['Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1]]
-cont3 = ['Fcontrast','F', [cont1,cont2]]
 contrasts = [cont1,cont2]
 
 """
@@ -384,7 +383,8 @@ l2concat.iterables = dict(hemi=lambda:['lh','rh'])
 """
 # setup a 1-sample t-test node
 onesamplettest = nw.NodeWrapper(interface=fs.OneSampleTTest(),diskbased=True)
-onesamplettest.inputs.surf='fsaverage'
+onesamplettest.inputs.surf     ='fsaverage'
+onesamplettest.inputs.onesample = True
 
 """
   c. As before, we setup a pipeline to connect these two nodes
