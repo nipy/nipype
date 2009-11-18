@@ -1207,7 +1207,7 @@ class Fnirt(FSLCommand):
     @property
     def cmdline(self):
         """validates fsl options and generates command line argument"""
-        self.update_optmap()
+        #self.update_optmap()
         allargs = self._parse_inputs()
         allargs.insert(0, self.cmd)
         return ' '.join(allargs)
@@ -1234,12 +1234,12 @@ class Fnirt(FSLCommand):
             'intensityfile':    '--intout=%s',
             'logfile':          '--logout=%s',
             'verbose':          '--verbose',
-            'sub_sampling':     '--subsamp=%d',
-            'max_iter':         '--miter=%d',
-            'referencefwhm':    '--reffwhm=%f',
-            'imgfwhm':          '--infwhm=%f',
-            'lambdas':          '--lambda=%f',
-            'estintensity':     '--estint=%f',
+            'sub_sampling':     '--subsamp=%s',
+            'max_iter':         '--miter=%s',
+            'referencefwhm':    '--reffwhm=%s',
+            'imgfwhm':          '--infwhm=%s',
+            'lambdas':          '--lambda=%s',
+            'estintensity':     '--estint=%s',
             'applyrefmask':     '--applyrefmask=%f',
             # XXX The closeness of this alternative name might cause serious
             # confusion
@@ -1278,8 +1278,8 @@ class Fnirt(FSLCommand):
 
         >>> from nipype.interfaces import fsl
         >>> fnirt_mprage = fsl.Fnirt()
-        >>> fnirt_mprage.inputs.imgfwhm = [8, 4, 2]
-        >>> fnirt_mprage.inputs.sub_sampling = [4, 2, 1]
+        >>> fnirt_mprage.inputs.imgfwhm = '8, 4, 2'
+        >>> fnirt_mprage.inputs.sub_sampling = '4, 2, 1'
 
         Specify the resolution of the warps, currently not part of the
         ``fnirt_mprage.inputs``:
@@ -1309,41 +1309,7 @@ class Fnirt(FSLCommand):
 
         return results 
 
-    # This disturbs me a little, see my post on nipy-devel about the intent of
-    # opt_map. I'm leaving this here as a counterexample, and a fine example of
-    # me over-reacting -DJC
-    def update_optmap(self):
-        """Render the Fnirt class non-thread safe
-        
-        Updates opt_map AT THE CLASS LEVEL for inout items with variable values
-        """
-        warn(DeprecationWarning('This is wrong. Do not do anything like this.'
-                                '(Please.)'))
-        itemstoupdate = ['sub_sampling',
-                'max_iter',
-                'referencefwhm',
-                'imgfwhm',
-                'lambdas',
-                'estintensity',
-                'applyrefmask',
-                'applyimgmask']
-        # XXX Idea for implementing comparable logic in _parse_inputs:
-        # if type(item) is list: to the opt split, then do:
-        # ','.join(opt[1] % v for f in item), or maybe ' '.join()
-        # _parse_inputs should probably split on ' ' or '='
-        for item in itemstoupdate:
-            values = self.inputs.get(item)
-            if values:
-                opt = self.opt_map[item].split('=')
-                opt[1] = opt[1].split()[0]
-                try:
-                    valstr = opt[0] + '=' + ' '.join(opt[1:2] * len(values))
-                except TypeError:
-                    # TypeError is raised if values is not a SEQUENCE
-                    # i.e., we are missing strings
-                    valstr = opt[0] + '=' + opt[1]
-                self.opt_map[item] = valstr
-
+    
     def write_config(self,configfile):
         """Writes out currently set options to specified config file
         
