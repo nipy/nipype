@@ -906,7 +906,7 @@ class OneSampleTTest(FSLCommand):
                             outdir=None,
                             outdirprefix='glm',
                             funcimage=None,
-                            osgm=None,
+                            onesample=None,
                             design=None,
                             flags=None)
 
