@@ -137,7 +137,7 @@ class Bunch(object):
         """
 
         infile_list = []
-        for key, val in self.iteritems():
+        for key, val in sorted(self.iteritems()):
             if is_container(val):
                 # XXX - SG this probably doesn't catch numpy arrays
                 # containing embedded file names either. 
