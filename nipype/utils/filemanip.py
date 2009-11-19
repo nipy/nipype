@@ -153,7 +153,7 @@ def list_to_filename(filelist):
 
 def cleandir(dir):
     """Cleans all nifti, img/hdr, txt and matfiles from dir"""
-    filetypes = ['*.nii','*.nii.gz','*.txt','*.img','*.hdr','*.mat']
+    filetypes = ['*.nii','*.nii.gz','*.txt','*.img','*.hdr','*.mat','*.json']
     for ftype in filetypes:
         for f in glob(os.path.join(dir,ftype)):
             os.remove(f)

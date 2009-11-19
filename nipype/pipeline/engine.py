@@ -101,26 +101,28 @@ class Pipeline(object):
         print "PE: checking connections:\n"
         for u, v, d in connection_list:
             for source, dest in d:
-                try:
-                    if dest not in v.inputs.__dict__:
-                        print "Module %s has no input called %s\n" \
-                            % (v.name, dest)
-                except:
+                if '.io' not in v.name:
+                    try:
+                        if dest not in v.inputs.__dict__:
+                            print "Module %s has no input called %s\n" \
+                                % (v.name, dest)
+                    except:
                     # XXX Shouldn't catch bare exceptions.  What
                     # exception are we catching?
-                    print "unable to query inputs of module %s\n"%v.name
-                try:
-                    if not source in u.interface.outputs().__dict__:
-                        print "Module %s has no output called %s\n" \
-                            % (u.name, source)
-                except:
+                        print "unable to query inputs of module %s\n"%v.name
+                if '.io' not in u.name:
                     try:
-                        if not source in u.interface.outputs_help.__doc__:
+                        if not source in u.interface.outputs().__dict__:
                             print "Module %s has no output called %s\n" \
                                 % (u.name, source)
                     except:
-                        # XXX Shouldn't catch bare exceptions.
-                        print "unable to query outputs of module %s\n" % u.name
+                        try:
+                            if not source in u.interface.outputs_help.__doc__:
+                                print "Module %s has no output called %s\n" \
+                                    % (u.name, source)
+                        except:
+                            # XXX Shouldn't catch bare exceptions.
+                            print "unable to query outputs of module %s\n" % u.name
         print "PE: finished checking connections\n"
 
     def add_modules(self,modules):
@@ -273,7 +275,8 @@ class Pipeline(object):
                             msg = 'Unknown input type in pipeline.connect: %s' \
                                 %str(sourcename)
                             raise Exception(msg)
-                print "Executing: %s H: %s" % (node.name, node.hash_inputs())
+                hashed_inputs, hashvalue = node.inputs._get_bunch_hash()
+                print "Executing: %s H: %s" % (node.name, hashvalue)
                 # For a disk node, provide it with an appropriate
                 # output directory
                 if node.disk_based:
@@ -345,9 +348,10 @@ class Pipeline(object):
         idx = np.flatnonzero((self.proc_done == False) & np.all(self.depidx==False,axis=0))
         # calculate the hashes of these processes
         for i in idx:
-            self.proc_hash[i] = self.procs[i].hash_inputs()
+            hashed_inputs, hashvalue = self.procs[i].inputs._get_bunch_hash()
+            self.proc_hash[i] = hashvalue
         # get only the unique hashes
-        hashes,i = np.unique1d(self.proc_hash[idx],return_index=True)
+        hashes,i = np.unique(self.proc_hash[idx],return_index=True)
         # add these to readytorun queue
         idx = idx.take(np.sort(i))
         self.readytorun.extend(np.setdiff1d(idx,self.readytorun))
@@ -384,8 +388,10 @@ class Pipeline(object):
                     mktree(outputdir)
                 self.procs[jobid].parameterization = graph.__dict__['name']
                 self.procs[jobid].output_directory_base = os.path.abspath(outputdir)
-                # Send job to worker, add callback and add to pending results
-                print 'Executing: %s ID: %d WID=%d H:%s' % (self.procs[jobid].name,jobid,workerid,self.procs[jobid].hash_inputs())
+                # Send job to worker, add callback and add to pending
+                # results
+                hashed_inputs, hashvalue = self.procs[jobid].inputs._get_bunch_hash()
+                print 'Executing: %s ID: %d WID=%d H:%s' % (self.procs[jobid].name,jobid,workerid,hashvalue)
                 self.mec.push(dict(task=self.procs[jobid]),targets=workerid,block=True)
                 cmdstr = 'task.run()'
                 self.pendingresults.append(self.mec.execute(cmdstr,targets=workerid,block=False))
@@ -405,14 +411,20 @@ class Pipeline(object):
         self.proc_pending[jobid] = False
         self.workeravailable[workerid] = True
         task = self.mec.pull('task',targets=workerid,block=True).pop()
-        self.procs[jobid].output = copy.deepcopy(task.output)
+        self.procs[jobid]._result = copy.deepcopy(task.result)
         # Update the inputs of all tasks that depend on this job's outputs
         graph = self.listofgraphs[self.procs_graph_id[jobid]]
         for edge in graph.out_edges_iter(self.procs[jobid]):
             data = graph.get_edge_data(*edge)
             for sourcename,destname in data['connect']:
-                edge[1].set_input(destname,self.procs[jobid].get_output(sourcename))
-        # update the job dependency structure
+                #edge[1].set_input(destname,self.procs[jobid].get_output(sourcename))
+                if type(sourcename) == type(''):
+                    edge[1].set_input(destname,
+                                   self.procs[jobid].get_output(sourcename))
+                elif type(sourcename) == type(()):
+                    edge[1].set_input(destname, sourcename[1],
+                                   self.procs[jobid].get_output(sourcename[0]),
+                                   *sourcename[2:])        # update the job dependency structure
         self.depidx[jobid,:] = False
         
 

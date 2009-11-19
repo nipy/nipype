@@ -68,7 +68,6 @@ def fssubjectsdir(subjects_dir=None):
         # set environment setting
         os.environ['SUBJECTS_DIR'] = os.path.abspath(subjects_dir)
     subjects_dir = os.getenv('SUBJECTS_DIR')
-    print 'SUBJECTS_DIR = %s'%subjects_dir
     return subjects_dir
 
 class FSCommandLine(CommandLine):
@@ -343,13 +342,11 @@ class ReconAll(FSCommandLine):
     --------
     >>> from nipype.interfaces import freesurfer
     >>> reconall = freesurfer.ReconAll()
-    SUBJECTS_DIR = None
-
     >>> reconall.inputs.subject_id = 'foo'
     >>> reconall.inputs.directive  = '-all'
     >>> reconall.inputs.parent_dir = '.'
     >>> reconall.inputs.T1files = 'structfile.nii'
-    >>> out = reconall.run()
+    >>> out = reconall.run() # doctest +SKIP
    """
 
     @property
@@ -415,7 +412,7 @@ class ReconAll(FSCommandLine):
                             directive=None,
                             T1files=None,
                             hemi=None,
-                            parent_dir=fssubjectsdir(),
+                            parent_dir=None,
                             test=None,
                             flags=None)
 
@@ -450,7 +447,10 @@ class ReconAll(FSCommandLine):
             if opt is 'flags':
                 out_inputs.extend([inputs[opt]])
             print 'option %s not supported'%(opt)
-        
+
+        if '-sd' not in out_inputs:
+                out_inputs.extend(['-sd',os.path.abspath(fssubjectsdir())])
+
         return out_inputs
 
     def outputs_help(self):
