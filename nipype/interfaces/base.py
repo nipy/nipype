@@ -137,7 +137,7 @@ class Bunch(object):
         """
 
         infile_list = []
-        for key, val in sorted(self.iteritems()):
+        for key, val in self.iteritems():
             if is_container(val):
                 # XXX - SG this probably doesn't catch numpy arrays
                 # containing embedded file names either. 
@@ -157,7 +157,11 @@ class Bunch(object):
         dict_withhash = self.dictcopy()
         for item in infile_list:
             dict_withhash[item] = self._hash_infile(dict_withhash, item)
-        return (dict_withhash, md5(str(dict_withhash)).hexdigest())
+        # Sort the items of the dictionary, before hashing the string
+        # representation so we get a predictable order of the
+        # dictionary.
+        sorted_dict = str(sorted(dict_withhash.items()))
+        return (dict_withhash, md5(sorted_dict).hexdigest())
             
     def __pretty__(self, p, cycle):
         '''Support for the pretty module

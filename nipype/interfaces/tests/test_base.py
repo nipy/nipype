@@ -31,6 +31,8 @@ def test_bunch_methods():
     yield assert_equal, newb['a'], 3
 
 def test_bunch_hash():
+    # NOTE: Since the path to the json file is included in the Bunch,
+    # the hash will be unique to each machine.
     pth = os.path.split(os.path.abspath(__file__))[0]
     json_pth = os.path.join(pth, 'realign_json.json')
     b = nii.Bunch(infile = json_pth, 
@@ -38,14 +40,14 @@ def test_bunch_hash():
                   yat = True)
     newbdict, bhash = b._get_bunch_hash()
     newbhash = nii.md5()
-    newbhash.update(str(newbdict))
-    # '401201372d8754c2c9185a966e24b5b6'
+    # Be sure to sort the dictionary before generating the hash.
+    newbhash.update(str(sorted(newbdict.items())))
     yield assert_equal, bhash, newbhash.hexdigest()
+    # Make sure the hash stored in the json file for `infile` is correct.
     jshash = nii.md5()
     fp = file(json_pth)
     jshash.update(fp.read())
     fp.close()
-    # '02c64449bbd57ecd3c27fa6c024a18e1'
     yield assert_equal, newbdict['infile'][0][1], jshash.hexdigest()
     yield assert_equal, newbdict['yat'], True
 
