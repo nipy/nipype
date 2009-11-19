@@ -1290,10 +1290,11 @@ class Fnirt(FSLCommand):
         We can check the command line and confirm that it's what we expect.
 
         >>> fnirt_mprage.cmdline  #doctest: +NORMALIZE_WHITESPACE
-        'fnirt --in=subj.nii --ref=mni.nii --warpres 6, 6, 6
-            --infwhm 8.000000 4.000000 2.000000 --subsamp 4 2 1'
+        'fnirt --warpres 6, 6, 6 --infwhm=8, 4, 2 --in=subj.nii 
+            --ref=mni.nii --subsamp=4, 2, 1'
 
         """
+
         if infile:
             self.inputs.infile = infile
         if reference:
