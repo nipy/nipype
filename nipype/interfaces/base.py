@@ -45,6 +45,7 @@ class Bunch(object):
     Notes
     -----
     The Bunch pattern came from the Python Cookbook:
+    
     .. [1] A. Martelli, D. Hudgeon, "Collecting a Bunch of Named
            Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
 
