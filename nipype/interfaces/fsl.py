@@ -255,6 +255,9 @@ class FSLCommand(CommandLine):
                         raise TypeError('Boolean option %s set to %s' % 
                                          (opt, str(value)) )
                 # XXX This is where we could change the logic to like Fnirt
+                elif type(value) == list and self.__class__.__name__ == 'Fnirt':
+                    argparts = argstr.split('=')
+                    allargs.append(argparts[0]+'='+','.join([argparts[1] % y for y in value]))
                 elif type(value) == list:
                     allargs.append(argstr % tuple(value))
                 else:
@@ -1234,11 +1237,11 @@ class Fnirt(FSLCommand):
             'intensityfile':    '--intout=%s',
             'logfile':          '--logout=%s',
             'verbose':          '--verbose',
-            'sub_sampling':     '--subsamp=%s',
-            'max_iter':         '--miter=%s',
-            'referencefwhm':    '--reffwhm=%s',
-            'imgfwhm':          '--infwhm=%s',
-            'lambdas':          '--lambda=%s',
+            'sub_sampling':     '--subsamp=%d',
+            'max_iter':         '--miter=%d',
+            'referencefwhm':    '--reffwhm=%d',
+            'imgfwhm':          '--infwhm=%d',
+            'lambdas':          '--lambda=%d',
             'estintensity':     '--estint=%s',
             'applyrefmask':     '--applyrefmask=%f',
             # XXX The closeness of this alternative name might cause serious
@@ -1278,8 +1281,8 @@ class Fnirt(FSLCommand):
 
         >>> from nipype.interfaces import fsl
         >>> fnirt_mprage = fsl.Fnirt()
-        >>> fnirt_mprage.inputs.imgfwhm = '8, 4, 2'
-        >>> fnirt_mprage.inputs.sub_sampling = '4, 2, 1'
+        >>> fnirt_mprage.inputs.imgfwhm = [8, 4, 2]
+        >>> fnirt_mprage.inputs.sub_sampling = [4, 2, 1]
 
         Specify the resolution of the warps, currently not part of the
         ``fnirt_mprage.inputs``:
@@ -1290,8 +1293,8 @@ class Fnirt(FSLCommand):
         We can check the command line and confirm that it's what we expect.
 
         >>> fnirt_mprage.cmdline  #doctest: +NORMALIZE_WHITESPACE
-        'fnirt --warpres 6, 6, 6 --infwhm=8, 4, 2 --in=subj.nii 
-            --ref=mni.nii --subsamp=4, 2, 1'
+        'fnirt --warpres 6, 6, 6 --infwhm=8,4,2 --in=subj.nii 
+            --ref=mni.nii --subsamp=4,2,1'
 
         """
 
