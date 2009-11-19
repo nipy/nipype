@@ -2,11 +2,12 @@
 The rapidart module provides routines for artifact detection and region of
 interest analysis.
 
-These functions include 
+These functions include:
 
-    ArtifactDetect: performs artifact detection on functional images
-    StimulusCorrelation: determines correlation between stimuli
-        schedule and movement/intensity parameters
+  * ArtifactDetect: performs artifact detection on functional images
+    
+  * StimulusCorrelation: determines correlation between stimuli
+    schedule and movement/intensity parameters
 
 """
 
@@ -394,9 +395,9 @@ class StimulusCorrelation(Interface):
 
     Currently this class supports an SPM generated design matrix and
     requires intensity parameters. This implies that one must run
-    ArtifactDetect and `SPM.Level1Design' prior to running this or
-    provide an SPM.mat file and intensity parameters through some
-    other means. 
+    ArtifactDetect and :class:`nipype.interfaces.spm.Level1Design`
+    prior to running this or provide an SPM.mat file and intensity
+    parameters through some other means.
     """
 
     def __init__(self, *args, **inputs):
