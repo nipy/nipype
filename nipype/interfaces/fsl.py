@@ -32,7 +32,7 @@ warn = warnings.warn
 
 warnings.filterwarnings('always', category=UserWarning)
 
-class FSLInfo():
+class FSLInfo(object):
     '''A class to encapsulate stuff we'll need throughout the 
     
     This should probably be a singleton class? or do we want to make it
@@ -204,7 +204,8 @@ class FSLCommand(CommandLine):
         Returns
         -------
         results : InterfaceResult
-            A `InterfaceResult` object with a copy of self in `interface`
+            An :class:`nipype.interfaces.base.InterfaceResult` object
+            with a copy of self in `interface`
 
         """
         results = self._runner(cwd=cwd)
@@ -390,8 +391,8 @@ class Bet(FSLCommand):
         Returns
         -------
         results : InterfaceResult
-            An `InterfaceResult` object with a copy of self in `interface`
-            runtime : InterfaceResult containing stdout, stderr, returncode, commandline
+            An :class:`nipype.interfaces.base.InterfaceResult` object
+            with a copy of self in `interface`
 
         Examples
         --------
@@ -543,8 +544,8 @@ class Fast(FSLCommand):
         Returns
         -------
         results : InterfaceResult
-            A `InterfaceResult` object with a copy of self in `interface`
-            runtime : InterfaceResult containing stdout, stderr, returncode, commandline
+            An :class:`nipype.interfaces.base.InterfaceResult` object
+            with a copy of self in `interface`
 
         """
 
@@ -811,8 +812,8 @@ class Flirt(FSLCommand):
         Returns
         -------
         results : InterfaceResult
-            An `InterfaceResult` object with a copy of self in `interface`
-            runtime : InterfaceResult containing stdout, stderr, returncode, commandline
+            An :class:`nipype.interfaces.base.InterfaceResult` object
+            with a copy of self in `interface`
 
         """
 
@@ -929,8 +930,8 @@ class ApplyXFM(Flirt):
         Returns
         -------
         results : InterfaceResult
-            An `InterfaceResult` object with a copy of self in `interface`
-            runtime : InterfaceResult containing stdout, stderr, returncode, commandline
+            An :class:`nipype.interfaces.base.InterfaceResult` object
+            with a copy of self in `interface`
 
         Examples
         --------
@@ -1103,8 +1104,8 @@ class McFlirt(FSLCommand):
         Returns
         -------
         results : InterfaceResult
-            An `InterfaceResult` object with a copy of self in `interface`
-            runtime : InterfaceResult containing stdout, stderr, returncode, commandline
+            An :class:`nipype.interfaces.base.InterfaceResult` object
+            with a copy of self in `interface`
 
         Examples
         --------
@@ -1278,8 +1279,8 @@ class Fnirt(FSLCommand):
         Returns
         --------
         results : InterfaceResult
-            A `InterfaceResult` object with a copy of self in `interface`
-            runtime : InterfaceResult containing stdout, stderr, returncode, commandline
+            An :class:`nipype.interfaces.base.InterfaceResult` object
+            with a copy of self in `interface`
 
         Examples
         --------
@@ -1348,15 +1349,13 @@ class Fnirt(FSLCommand):
         
         Parameters
         ----------
-        (all default to None and are unset)
-
-             fieldcoeff_file
-             warpedimage
-             fieldfile
-             jacobianfield
-             modulatedreference
-             intensitymodulation
-             logfile
+        fieldcoeff_file
+        warpedimage
+        fieldfile
+        jacobianfield
+        modulatedreference
+        intensitymodulation
+        logfile
         """
         outputs = Bunch(fieldcoeff_file=None,
                         warpedimage=None,
