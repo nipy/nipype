@@ -254,10 +254,16 @@ class FSLCommand(CommandLine):
                     elif value is not False:
                         raise TypeError('Boolean option %s set to %s' % 
                                          (opt, str(value)) )
-                # XXX This is where we could change the logic to like Fnirt
                 elif type(value) == list and self.__class__.__name__ == 'Fnirt':
+                    # XXX Hack to deal with special case where some
+                    # parameters to Fnirt can have a variable number
+                    # of arguments.  Splitting the argument string,
+                    # like '--infwhm=%d', then add as many format
+                    # strings as there are values to the right-hand
+                    # side.
                     argparts = argstr.split('=')
-                    allargs.append(argparts[0]+'='+','.join([argparts[1] % y for y in value]))
+                    allargs.append(argparts[0] + '=' +
+                                   ','.join([argparts[1] % y for y in value]))
                 elif type(value) == list:
                     allargs.append(argstr % tuple(value))
                 else:
