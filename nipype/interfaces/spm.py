@@ -115,7 +115,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
     formatting of matlab scripts.
     """
 
-    def __init__(self, matlab_cmd=None,**inputs): 
+    def __init__(self, matlab_cmd=None, **inputs): 
         super(SpmMatlabCommandLine,self).__init__(**inputs)
         self.mfile = True
 
@@ -334,17 +334,16 @@ class Realign(SpmMatlabCommandLine):
 
     Parameters
     ----------
-    inputs : mapping
-    key, value pairs that will update the Realign.inputs attributes
-    see self.inputs_help() for a list of Realign.inputs attributes
+    inputs : dict
+        key, value pairs that will update the Realign.inputs attributes.
+        See self.inputs_help() for a list of attributes
     
     Attributes
     ----------
-    inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to 
-    spm_realign via a job structure
-    cmdline : string
-    string used to call matlab/spm via SpmMatlabCommandLine interface
+    inputs : :class:`nipype.interfaces.base.Bunch`
+        Options that can be passed to spm_realign via a job structure
+    cmdline : str
+        String used to call matlab/spm via SpmMatlabCommandLine interface
     
 
     Other Parameters
@@ -598,17 +597,17 @@ class Coregister(SpmMatlabCommandLine):
 
     Parameters
     ----------
-    inputs : mapping 
-    key, value pairs that will update the Coregister.inputs attributes
-    see self.inputs_help() for a list of Coregister.inputs attributes
+    inputs : dict 
+        key, value pairs that will update the Coregister.inputs attributes.
+        See self.inputs_help() for a list of Coregister.inputs attributes
     
     Attributes
     ----------
-    inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to 
-    spm_coreg via a job structure
-    cmdline : string
-    string used to call matlab/spm via SpmMatlabSpmMatlabCommandLine interface
+    inputs : :class:`nipype.interfaces.base.Bunch`
+        Options that can be passed to spm_coreg via a job structure
+    cmdline : str
+        String used to call matlab/spm via SpmMatlabSpmMatlabCommandLine 
+        interface
 
     Other Parameters
     ----------------
@@ -831,17 +830,16 @@ class Normalize(SpmMatlabCommandLine):
     
     Parameters
     ----------
-    inputs : mapping 
-    key, value pairs that will update the Normalize.inputs attributes
-    see self.inputs_help() for a list of Normalize.inputs attributes
+    inputs : dict 
+        key, value pairs that will update the Normalize.inputs attributes.
+        See self.inputs_help() for a list of Normalize.inputs attributes.
     
     Attributes
     ----------
-    inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to 
-    spm_normalise via a job structure
-    cmdline : string
-    string used to call matlab/spm via SpmMatlabCommandLine interface
+    inputs : :class:`nipype.interfaces.base.Bunch`
+        Options that can be passed to spm_normalise via a job structure
+    cmdline : str
+        String used to call matlab/spm via SpmMatlabCommandLine interface
     
     Other Parameters
     ----------------
@@ -1099,17 +1097,16 @@ class Segment(SpmMatlabCommandLine):
 
     Parameters
     ----------
-    inputs : mapping 
-    key, value pairs that will update the Segment.inputs attributes
-    see self.inputs_help() for a list of Segment.inputs attributes
+    inputs : dict 
+        key, value pairs that will update the Segment.inputs attributes.
+        See self.inputs_help() for a list of Segment.inputs attributes.
     
     Attributes
     ----------
-    inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to 
-    spm_segment via a job structure
-    cmdline : string
-    string used to call matlab/spm via SpmMatlabCommandLine interface
+    inputs : :class:`nipype.interfaces.base.Bunch`
+        Options that can be passed to spm_segment via a job structure
+    cmdline : str
+        String used to call matlab/spm via SpmMatlabCommandLine interface
 
     Other Parameters
     ----------------
@@ -1366,17 +1363,16 @@ class Smooth(SpmMatlabCommandLine):
 
     Parameters
     ----------
-    inputs : mapping 
-    key, value pairs that will update the Smooth.inputs attributes
-    see self.inputs_help() for a list of Smooth.inputs attributes
+    inputs : dict 
+        key, value pairs that will update the Smooth.inputs attributes.
+        See self.inputs_help() for a list of Smooth.inputs attributes.
     
     Attributes
     ----------
-    inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to 
-    spm_smooth via a job structure
-    cmdline : string
-    string used to call matlab/spm via SpmMatlabCommandLine interface
+    inputs : :class:`nipype.interfaces.base.Bunch`
+        Options that can be passed to spm_smooth via a job structure
+    cmdline : str
+        String used to call matlab/spm via SpmMatlabCommandLine interface
 
     Other Parameters
     ----------------
@@ -1523,17 +1519,16 @@ class Level1Design(SpmMatlabCommandLine):
     
     Parameters
     ----------
-    inputs : mapping 
-    key, value pairs that will update the Level1Design.inputs attributes
-    see self.inputs_help() for a list of Level1Design.inputs attributes
+    inputs : dict 
+        key, value pairs that will update the Level1Design.inputs attributes.
+        See self.inputs_help() for a list of Level1Design.inputs attributes.
     
     Attributes
     ----------
-    inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to 
-    spm_smooth via a job structure
-    cmdline : string
-    string used to call matlab/spm via SpmMatlabCommandLine interface
+    inputs : :class:`nipype.interfaces.base.Bunch`
+        Options that can be passed to spm_smooth via a job structure
+    cmdline : str
+        String used to call matlab/spm via SpmMatlabCommandLine interface
 
     Other Parameters
     ----------------
@@ -1738,12 +1733,10 @@ class Level1Design(SpmMatlabCommandLine):
             
     def outputs(self):
         """
-            Parameters
-            ----------
-            (all default to None)
-
-            spm_mat_file:
-                SPM mat file
+        Parameters
+        ----------
+        spm_mat_file : str
+            SPM mat file
         """
         outputs = Bunch(spm_mat_file=None)
         return outputs
@@ -1761,15 +1754,14 @@ class EstimateModel(SpmMatlabCommandLine):
 
     Parameters
     ----------
-    inputs : mapping
-        key, value pairs that will update the EstimateModel.inputs attributes
-        see self.inputs_help() for a list of attributes
+    inputs : dict
+        key, value pairs that will update the EstimateModel.inputs attributes.
+        See self.inputs_help() for a list of attributes.
 
     Attributes
     ----------
-    inputs : Bunch
-        a (dictionary-like) bunch of options that can be passed to
-        spm_spm via a job structure
+    inputs : :class:`nipype.interfaces.base.Bunch`
+        Options that can be passed to spm_spm via a job structure
     cmdline : string
         string used to call matlab/spm via SpmMatlabCommandLine interface
 
@@ -1797,20 +1789,19 @@ class EstimateModel(SpmMatlabCommandLine):
 
     def inputs_help(self):
         """
-            Parameters
-            ----------
-            
-            spm_design_file : filename
-                Filename containing absolute path to SPM.mat
-            estimation_method: dict
-                Estimate the specified model using one of three
-                different SPM options.
-                {'Classical' : 1}
-                {'Bayesian2' : 1}
-                {'Bayesian' : dict}
-                    USE IF YOU KNOW HOW TO SPECIFY PARAMETERS
-            flags : USE AT OWN RISK
-                #eg:'flags':{'eoptions':{'suboption':value}}
+        Parameters
+        ----------
+        spm_design_file : filename
+            Filename containing absolute path to SPM.mat
+        estimation_method: dict
+            Estimate the specified model using one of three
+            different SPM options.
+            {'Classical' : 1}
+            {'Bayesian2' : 1}
+            {'Bayesian' : dict}
+                USE IF YOU KNOW HOW TO SPECIFY PARAMETERS
+        flags : USE AT OWN RISK
+            #eg:'flags':{'eoptions':{'suboption':value}}
         """
         print self.inputs_help.__doc__
 
@@ -1902,18 +1893,16 @@ class SpecifyModel(Interface):
 
     Parameters
     ----------
-    inputs : mapping
+    inputs : dict
         key, value pairs that will update the SpecifyModel.inputs
-        attributes see self.inputs_help() for a list attributes
+        attributes. See self.inputs_help() for a list attributes.
     
     Attributes
     ----------
-    inputs : Bunch
-        a (dictionary-like) bunch of options that can be passed to
-        spm_spm via a job structure
-
-    cmdline : string
-        string used to call matlab/spm via SpmMatlabCommandLine
+    inputs : :class:`nipype.interfaces.base.Bunch`
+        Options that can be passed to spm_spm via a job structure
+    cmdline : str
+        String used to call matlab/spm via SpmMatlabCommandLine
         interface
         
     Other Parameters
@@ -2434,17 +2423,17 @@ class EstimateContrast(SpmMatlabCommandLine):
 
     Parameters
     ----------
-    inputs : mapping 
-    key, value pairs that will update the EstimateContrast.inputs attributes
-    see self.inputs_help() for a list of EstimateContrast.inputs attributes
+    inputs : dict 
+        key, value pairs that will update the EstimateContrast.inputs 
+        attributes.  See self.inputs_help() for a list of 
+        EstimateContrast.inputs attributes.
     
     Attributes
     ----------
-    inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to 
-    spm_spm via a job structure
-    cmdline : string
-    string used to call matlab/spm via SpmMatlabCommandLine interface
+    inputs : :class:`nipype.interfaces.base.Bunch`
+        Options that can be passed to spm_spm via a job structure
+    cmdline : str
+        String used to call matlab/spm via SpmMatlabCommandLine interface
 
     Other Parameters
     ----------------
@@ -2648,17 +2637,17 @@ class OneSampleTTest(SpmMatlabCommandLine):
 
     Parameters
     ----------
-    inputs : mapping 
-    key, value pairs that will update the EstimateContrast.inputs attributes
-    see self.inputs_help() for a list of EstimateContrast.inputs attributes
+    inputs : dict 
+        key, value pairs that will update the EstimateContrast.inputs 
+        attributes.  See self.inputs_help() for a list of 
+        EstimateContrast.inputs attributes.
     
     Attributes
     ----------
-    inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to 
-    spm_spm via a job structure
-    cmdline : string
-    string used to call matlab/spm via SpmMatlabCommandLine interface
+    inputs : :class:`nipype.interfaces.base.Bunch`
+        Options that can be passed to spm_spm via a job structure
+    cmdline : str
+        String used to call matlab/spm via SpmMatlabCommandLine interface
 
     Other Parameters
     ----------------
@@ -2765,17 +2754,17 @@ class TwoSampleTTest(SpmMatlabCommandLine):
 
     Parameters
     ----------
-    inputs : mapping 
-    key, value pairs that will update the EstimateContrast.inputs attributes
-    see self.inputs_help() for a list of EstimateContrast.inputs attributes
+    inputs : dict 
+        key, value pairs that will update the EstimateContrast.inputs 
+        attributes.  See self.inputs_help() for a list of
+        EstimateContrast.inputs attributes.
     
     Attributes
     ----------
-    inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to 
-    spm_spm via a job structure
-    cmdline : string
-    string used to call matlab/spm via SpmMatlabCommandLine interface
+    inputs : :class:`nipype.interfaces.base.Bunch`
+        Options that can be passed to spm_spm via a job structure
+    cmdline : str
+        String used to call matlab/spm via SpmMatlabCommandLine interface
 
     Other Parameters
     ----------------
