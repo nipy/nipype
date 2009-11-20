@@ -87,16 +87,18 @@ class Pipeline(object):
 
         Parameters
         -----------
-        
         connection_list : list
+            A list of 3-tuples of the following form::
 
-            A list of 3-tuples of the following form:
-            [(source1, destination1, [('namedoutput1','namedinput1'),...]),
-            ...]
-            or 
-            [(source1, destination1, [(('namedoutput1',func,arg2,arg3,...),
-                                        'namedinput1'),...]),
-            ...]
+             [(source1, destination1, [('namedoutput1', 'namedinput1'),
+               ...]), 
+             ...]
+            
+            Or::
+
+             [(source1, destination1, [(('namedoutput1', func, arg2, arg3, ...),
+                                         'namedinput1'), ...]),
+             ...]
 
         """
 
