@@ -40,7 +40,22 @@ def load_template(name):
     return template
 
 class Bunch(object):
-    """Provide elegant attribute access.
+    """Dictionary-like class that provides attribute-style access to it's items.
+
+    A `Bunch` is a simple container that stores it's items as class
+    attributes.  Internally all items are stored in a dictionary and
+    the class exposes several of the dictionary methods.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.base import Bunch
+    >>> inputs = Bunch(infile='subj.nii', fwhm=6.0, register_to_mean=True)
+    >>> inputs
+    Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=True)
+    >>> inputs.register_to_mean = False
+    >>> inputs
+    Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=False)
+    
 
     Notes
     -----
