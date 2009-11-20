@@ -1795,11 +1795,13 @@ class EstimateModel(SpmMatlabCommandLine):
             Filename containing absolute path to SPM.mat
         estimation_method: dict
             Estimate the specified model using one of three
-            different SPM options.
-            {'Classical' : 1}
-            {'Bayesian2' : 1}
-            {'Bayesian' : dict}
-                USE IF YOU KNOW HOW TO SPECIFY PARAMETERS
+            different SPM options::
+
+                {'Classical' : 1}
+                {'Bayesian2' : 1}
+                {'Bayesian' : dict}
+                    USE IF YOU KNOW HOW TO SPECIFY PARAMETERS
+
         flags : USE AT OWN RISK
             #eg:'flags':{'eoptions':{'suboption':value}}
         """
