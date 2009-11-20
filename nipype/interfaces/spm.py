@@ -1,18 +1,17 @@
-"""
-The spm module provides basic functions for interfacing with matlab and spm to 
-access spm tools.
+"""The spm module provides basic functions for interfacing with matlab
+and spm to access spm tools.
 
-these functions include 
+These functions include:
     
-    Realign: within-modality registration
+* Realign: within-modality registration
 
-    Coregister: between modality registration
+* Coregister: between modality registration
     
-    Normalize: non-linear warping to standard space
+* Normalize: non-linear warping to standard space
 
-    Segment: bias correction, segmentation
+* Segment: bias correction, segmentation
 
-    Smooth: smooth with Gaussian kernel
+* Smooth: smooth with Gaussian kernel
 
 """
 __docformat__ = 'restructuredtext'
@@ -1758,7 +1757,7 @@ class Level1Design(SpmMatlabCommandLine):
         return outputs
     
 class EstimateModel(SpmMatlabCommandLine):
-    """use spm_spm to estimate the parameters of a model
+    """Use spm_spm to estimate the parameters of a model
 
     See EstimateModel().spm_doc() for more information.
 
@@ -1767,7 +1766,7 @@ class EstimateModel(SpmMatlabCommandLine):
     inputs : mapping
         key, value pairs that will update the EstimateModel.inputs attributes
         see self.inputs_help() for a list of attributes
-    
+
     Attributes
     ----------
     inputs : Bunch
@@ -1950,26 +1949,37 @@ class SpecifyModel(Interface):
             information.
 
             conditions : list of names
+
             onsets : lists of onsets corresponding to each
                 condition
+
             durations : lists of durations corresponding to each
                 condition. Should be left to a single 0 if all
                 events are being modeled as impulses.
+
             amplitudes : lists of amplitudes for each event. This
                 is ignored by SPM
+
             tmod : lists of conditions that should be temporally
                modulated. Should default to None if not being used.
+
             pmod : list of dicts corresponding to conditions
                 name : name of parametric modulator
+
                 param : values of the modulator
+
                 poly : degree of modulation
+
             regressors : list of dicts or matfile
                 names : list of names corresponding to each
                    column. Should be None if automatically
                    assigned.
+
                 values : lists of values for each regressor
+
                 matfile : MAT-file containing names and a matrix
                     called R
+
         realignment_parameters : list of files
             Realignment parameters returned by some motion
             correction algorithm. Assumes that each file is a text
