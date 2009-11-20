@@ -288,12 +288,10 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         end
         fprintf('SPM version: %s\\n',spm('ver'));
         fprintf('SPM path: %s\\n',which('spm'));
-        spm_defaults;\n
+        spm_defaults;
                   
-        if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');end
-        \n
+        if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');end\n
         """
-        
         if self.mfile:
             if self.jobname in ['smooth','preproc','fmri_spec','fmri_est'] :
                 mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' % 
@@ -2367,7 +2365,10 @@ class SpecifyModel(Interface):
         return [infoout],nscans
     
     def _generate_design(self):
-        infolist = self.inputs.subject_info_func(self.inputs.subject_id)
+        if callable(self.inputs.subject_info_func):
+            infolist = self.inputs.subject_info_func(self.inputs.subject_id)
+        else:
+            infolist = self.inputs.subject_info_func
         if self.inputs.concatenate_runs:
             infolist,nscans = self._concatenate_info(infolist)
             functional_runs = [self.inputs.functional_runs]

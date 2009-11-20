@@ -93,6 +93,10 @@ class Pipeline(object):
             A list of 3-tuples of the following form:
             [(source1, destination1, [('namedoutput1','namedinput1'),...]),
             ...]
+            or 
+            [(source1, destination1, [(('namedoutput1',func,arg2,arg3,...),
+                                        'namedinput1'),...]),
+            ...]
 
         """
 
