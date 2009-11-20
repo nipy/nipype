@@ -282,10 +282,22 @@ class FSLCommand(CommandLine):
     def _populate_inputs(self):
         self.inputs = Bunch((k,None) for k in self.opt_map.keys())
 
+    def inputs_help(self):
+        """Print command line documentation for the command."""
+        print get_doc(self.cmd, self.opt_map, '-h')
+        
     def aggregate_outputs(self):
         raise NotImplementedError(
                 'Subclasses of FSLCommand must implement aggregate_outputs')
 
+    def outputs_help(self):
+        """Print outputs help
+        """
+        print self.outputs.__doc__
+
+    def outputs(self):
+        raise NotImplementedError(
+                'Subclasses of FSLCommand must implement outputs')
 
 class Bet(FSLCommand):
     """Use FSL BET command for skull stripping.
@@ -332,10 +344,6 @@ class Bet(FSLCommand):
         """sets base command, immutable"""
         return 'bet'
 
-    def inputs_help(self):
-        """Print command line documentation for BET."""
-        print get_doc(self.cmd, self.opt_map)
-
     opt_map = {
         'outline':            '-o',
         'mask':               '-m',
@@ -356,6 +364,10 @@ class Bet(FSLCommand):
         }
     # Currently we don't support -R, -S, -Z,-A or -A2
 
+    def inputs_help(self):
+        """Print command line documentation for Bet."""
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
+        
     def _parse_inputs(self):
         """validate fsl bet options"""
         allargs = super(Bet, self)._parse_inputs(skip=('infile', 'outfile'))
@@ -421,12 +433,6 @@ class Bet(FSLCommand):
         if results.runtime.returncode == 0:
             results.outputs = self.aggregate_outputs(cwd)
         return results        
-
-
-    def outputs_help(self):
-        """Print outputs help
-        """
-        print self.outputs.__doc__
         
     def outputs(self):
         """Returns a bunch structure with outputs
@@ -528,9 +534,8 @@ class Fast(FSLCommand):
 
     def inputs_help(self):
         """Print command line documentation for FAST."""
-        print get_doc(self.cmd, self.opt_map)
-
-
+        print get_doc(self.cmd, self.opt_map,trap_error=False)
+        
     def run(self, infiles=None, **inputs):
         """Execute the FSL fast command.
 
@@ -571,11 +576,6 @@ class Fast(FSLCommand):
             allargs.append(container_to_string(self.inputs.infiles))
         return allargs
 
-    def outputs_help(self):
-        """
-        """
-        print self.outputs.__doc__
-        
     def outputs(self):
         """Returns a bunch structure with outputs
         
@@ -768,7 +768,7 @@ class Flirt(FSLCommand):
 
     def inputs_help(self):
         """Print command line documentation for FLIRT."""
-        print get_doc(self.cmd, self.opt_map)
+        print get_doc(self.cmd, self.opt_map,'-help')
 
 
     def _parse_inputs(self):
@@ -970,11 +970,6 @@ class ApplyXFM(Flirt):
             results.outputs = self.aggregate_outputs(verify_outmatrix=False)
         return results 
 
-    def outputs_help(self):
-        """
-        """
-        print self.outputs.__doc__
-        
     def outputs(self):
         """Returns a bunch structure with outputs
         
@@ -1044,7 +1039,7 @@ class McFlirt(FSLCommand):
 
     def inputs_help(self):
         """Print command line documentation for MCFLIRT."""
-        print get_doc(self.cmd, self.opt_map)
+        print get_doc(self.cmd, self.opt_map, '-help', False)
 
     opt_map = {
             'outfile':     '-out %s',
@@ -1129,11 +1124,6 @@ class McFlirt(FSLCommand):
         
         return results 
 
-    def outputs_help(self):
-        """
-        """
-        print self.outputs.__doc__
-        
     def outputs(self):
         """Returns a bunch structure with outputs
         
@@ -1224,7 +1214,7 @@ class Fnirt(FSLCommand):
 
     def inputs_help(self):
         """Print command line documentation for FNIRT."""
-        print get_doc(self.cmd, self.opt_map)
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
 
     # XXX It's not clear if the '=' syntax (which is necessary for some
     # arguments) supports ' ' separated lists. We might need ',' separated lists
@@ -1339,11 +1329,6 @@ class Fnirt(FSLCommand):
             fid.write('%s\n'%(item))
         fid.close()
 
-    def outputs_help(self):
-        """
-        """
-        print self.outputs.__doc__
-        
     def outputs(self):
         """Returns a bunch structure with outputs
         
@@ -1434,6 +1419,10 @@ class ApplyWarp(FSLCommand):
                'postmat':           '--postmat=%s',
               }
 
+    def inputs_help(self):
+        """Print command line documentation for applywarp."""
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
+        
     def run(self, cwd=None, infile=None, outfile=None, reference=None,
             fieldfile=None, **inputs):
         '''Interesting point - you can use coeff_files, or fieldfiles
@@ -1471,11 +1460,6 @@ class ApplyWarp(FSLCommand):
                 allargs.append(self.opt_map['outfile'] % outfile)
 
         return allargs
-
-    def outputs_help(self):
-        """
-        """
-        print self.outputs.__doc__
         
     def outputs(self):
         """Returns a bunch structure with outputs
@@ -1526,11 +1510,6 @@ class FSLSmooth(FSLCommand):
                                             self.inputs.fwhm,
                                             outfile)]
 
-    def outputs_help(self):
-        """
-        """
-        print self.outputs.__doc__
-        
     def outputs(self):
         """Returns a bunch structure with outputs
         

@@ -502,7 +502,7 @@ class BBRegister(FSLCommand):
 
     def inputs_help(self):
         """Print command line documentation for bbregister."""
-        print get_doc(self.cmd, self.opt_map)
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
 
     def _populate_inputs(self):
         self.inputs = Bunch(subject_id=None,
@@ -558,18 +558,19 @@ class BBRegister(FSLCommand):
 
         return results        
 
-    def outputs_help(self):
+    def outputs(self):
         """
         outregfile: filename
             Output registration file
         outfile: filename
             Registered and resampled source file
         """
-        print self.outputs_help.__doc__
-
-    def aggregate_outputs(self):
         outputs = Bunch(outregfile=None,
                         outfile=None)
+        return outputs
+
+    def aggregate_outputs(self):
+        outputs = self.outputs()
         if self.inputs.outregfile is None:
             outregfile = fname_presuffix(self.inputs.sourcefile,
                                          suffix='_bbreg_%s.dat'%self.inputs.subject_id,
@@ -613,7 +614,7 @@ class ApplyVolTransform(FSLCommand):
 
     def inputs_help(self):
         """Print command line documentation for mri_vol2vol."""
-        print get_doc(self.cmd, self.opt_map)
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
 
     def _populate_inputs(self):
         self.inputs = Bunch(sourcefile=None,
@@ -665,15 +666,15 @@ class ApplyVolTransform(FSLCommand):
 
         return results        
 
-    def outputs_help(self):
+    def outputs(self):
         """
         outfile: filename
             Warped source file
         """
-        print self.outputs_help.__doc__
+        return Bunch(outfile=None)
 
     def aggregate_outputs(self):
-        outputs = Bunch(outfile=None)
+        outputs = self.outputs()
         if self.inputs.outfile is True:
             outfile = glob(fname_presuffix(self.inputs.sourcefile,
                                            suffix='_warped'))
@@ -715,7 +716,7 @@ class Smooth(FSLCommand):
 
     def inputs_help(self):
         """Print command line documentation for mris_volsmooth."""
-        print get_doc(self.cmd, self.opt_map)
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
 
     def _populate_inputs(self):
         self.inputs = Bunch(sourcefile=None,
@@ -759,15 +760,15 @@ class Smooth(FSLCommand):
 
         return results        
 
-    def outputs_help(self):
+    def outputs(self):
         """
         outfile: filename
             Smoothed input volume
         """
-        print self.outputs_help.__doc__
+        return Bunch(outfile=None)
 
     def aggregate_outputs(self):
-        outputs = Bunch(outfile=None)
+        outputs = self.outputs()
         if self.inputs.outfile is None:
             outfile = glob(fname_presuffix(self.inputs.sourcefile,
                                            suffix='_surfsmooth'))
@@ -802,7 +803,7 @@ class SurfConcat(FSLCommand):
 
     def inputs_help(self):
         """Print command line documentation for mris_preproc."""
-        print get_doc(self.cmd, self.opt_map)
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
 
     def _populate_inputs(self):
         self.inputs = Bunch(target=None,
@@ -854,15 +855,15 @@ class SurfConcat(FSLCommand):
 
         return results        
 
-    def outputs_help(self):
+    def outputs(self):
         """
         outfile: filename
             Concatenated volume
         """
-        print self.outputs_help.__doc__
+        return Bunch(outfile=None)
 
     def aggregate_outputs(self):
-        outputs = Bunch(outfile=None)
+        outputs = self.outputs()
         if self.inputs.outfile is None:
             fname = os.path.join(os.getcwd(),'_'.join((self.inputs.outprefix,
                                                            self.inputs.target,
@@ -898,7 +899,7 @@ class OneSampleTTest(FSLCommand):
 
     def inputs_help(self):
         """Print command line documentation for mris_preproc."""
-        print get_doc(self.cmd, self.opt_map)
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
 
     def _populate_inputs(self):
         self.inputs = Bunch(surf=None,
@@ -947,11 +948,11 @@ class OneSampleTTest(FSLCommand):
 
         return results        
 
-    def outputs_help(self):
+    def outputs(self):
         """
         """
-        print self.outputs_help.__doc__
+        return Bunch()
 
     def aggregate_outputs(self):
-        return Bunch()
+        return self.outputs()
         

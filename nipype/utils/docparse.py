@@ -3,7 +3,7 @@
 Examples
 --------
 
-# Instanciate bet object
+# Instantiate bet object
 from nipype.interfaces import fsl
 from nipype.utils import docparse
 better = fsl.Bet()
@@ -13,13 +13,15 @@ docstring = docparse.get_doc(better.cmd, better.opt_map)
 
 import subprocess
 
-def grab_doc(cmd):
+def grab_doc(cmd, trap_error=True):
     """Run cmd without args and grab documentation.
 
     Parameters
     ----------
     cmd : string
         Command line string
+    trap_error : boolean
+        Ensure that returncode is 0
 
     Returns
     -------
@@ -32,7 +34,8 @@ def grab_doc(cmd):
                             stderr=subprocess.PIPE,
                             shell=True)
     stdout, stderr = proc.communicate()
-    if proc.returncode:
+
+    if trap_error and proc.returncode:
         msg = 'Attempting to run %s. Returned Error: %s'%(cmd,stderr)
         raise IOError(msg)
     
@@ -157,7 +160,7 @@ def build_doc(doc, opts):
                 flags_doc.append(line)
     return format_params(newdoc, flags_doc)
 
-def get_doc(cmd, opt_map):
+def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
     """Get the docstring from our command and options map.
     
     Parameters
@@ -166,6 +169,10 @@ def get_doc(cmd, opt_map):
         The command whose documentation we are fetching
     opt_map : dict
         Dictionary of flags and option attributes.
+    help_flag : string
+        Provide additional help flag. e.g., -h
+    trap_error : boolean
+        Override if underlying command returns a non-zero returncode 
 
     Returns
     -------
@@ -173,7 +180,9 @@ def get_doc(cmd, opt_map):
         The formated docstring
 
     """
-    doc = grab_doc(cmd)
+    if help_flag:
+        cmd = ' '.join((cmd,help_flag))
+    doc = grab_doc(cmd,trap_error)
     opts = reverse_opt_map(opt_map)
     return build_doc(doc, opts)
 
