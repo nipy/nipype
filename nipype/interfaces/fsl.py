@@ -1360,12 +1360,17 @@ class Fnirt(FSLCommand):
         -------
         outputs : Bunch object
 
+        Raises
+        ------
+        IOError
+             If the output file is not found.
+
         Notes
         -----
-        For each item in Bunch:
-        If None, optional file was not generated
-        Else, contains path,filename of generated outputfile(s)
-             Raises Exception if file is not found        
+        For each item in the ``outputs``, if it's value is None then
+        the optional file was not generated.  Otherwise it contains
+        the path/filename of generated output file(s).
+
         """
         if cwd is None:
             cwd = os.getcwd()
