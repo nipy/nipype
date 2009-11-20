@@ -12,6 +12,7 @@ docstring = docparse.get_doc(better.cmd, better.opt_map)
 """
 
 import subprocess
+from nipype.interfaces.base import CommandLine, Bunch
 
 def grab_doc(cmd, trap_error=True):
     """Run cmd without args and grab documentation.
@@ -180,6 +181,10 @@ def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
         The formated docstring
 
     """
+    res = CommandLine('which %s' % cmd.split(' ')[0]).run()
+    cmd_path = res.runtime.stdout.strip()
+    if cmd_path == '':
+        raise Exception('Command %s not found'%cmd.split(' ')[0])
     if help_flag:
         cmd = ' '.join((cmd,help_flag))
     doc = grab_doc(cmd,trap_error)
