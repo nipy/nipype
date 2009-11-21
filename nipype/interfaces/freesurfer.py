@@ -144,7 +144,10 @@ class Dicom2Nifti(FSCommandLine):
         file_mapping : list of tuples
             defines the output fields of interface and the kind of
             file type they store
-            Example: [('niftifiles','*.nii'),('dtiinfo','*mghdti.bv*')]
+            Example:  [('niftifiles','*.nii'),('dtiinfo','*mghdti.bv*')]
+        out_type : string
+            defines the type of output file produced.
+            possible options nii, nii.gz, mgz (default: nii)
         flags = unsupported flags, use at your own risk
 
         """
@@ -156,6 +159,7 @@ class Dicom2Nifti(FSCommandLine):
                             subject_dir_template=None,
                             subject_id=None,
                             file_mapping=None,
+                            out_type='nii',
                             flags=None)
 
     def _parseinputs(self):
@@ -205,7 +209,7 @@ class Dicom2Nifti(FSCommandLine):
         for f in valid_inputs['dicomfiles']:
             head,fname = os.path.split(f)
             fname,ext  = os.path.splitext(fname)
-            outfile = os.path.join(outdir,''.join((fname,'.nii')))
+            outfile = os.path.join(outdir,'.'.join((fname,self.inputs.out_type)))
             if not os.path.exists(outfile):
                 single_cmd = '%s %s %s;' % (self.cmd, f, outfile)
                 cmd.extend([single_cmd])
