@@ -14,8 +14,12 @@ sdist: zipdoc
 	@echo "Building source distribution..."
 	python setup.py sdist
 	@echo "Done building source distribution."
-
+	# XXX copy documentation.zip to dist directory.  
+	# XXX Somewhere the doc/_build directory is removed and causes
+        # this script to fail.
+	
 egg: zipdoc
 	@echo "Building egg..."
 	python setup.py bdist_egg
 	@echo "Done building egg."
+
