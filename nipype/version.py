@@ -1,4 +1,4 @@
-version = '0.2'
+version = '0.3'
 release  = False
 
 # Return the svn version as a string, raise a ValueError otherwise
