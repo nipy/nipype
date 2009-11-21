@@ -320,6 +320,7 @@ class Pipeline(object):
         if not self.IPython_available:
             self.run_in_series()
             return
+        self.mec.reset()
         # execute pipeline
         self.workeravailable = np.zeros(np.max(self.mec.get_ids())+1,dtype=bool)
         self.workeravailable[self.mec.get_ids()] = True
@@ -357,7 +358,12 @@ class Pipeline(object):
             hashed_inputs, hashvalue = self.procs[i].inputs._get_bunch_hash()
             self.proc_hash[i] = hashvalue
         # get only the unique hashes
-        hashes,i = np.unique(self.proc_hash[idx],return_index=True)
+        # XXX - SG - unique1d is deprecated in numpy 1.4.0 need to
+        # replace with unique
+        if np.version.short_version >= '1.4.0':
+            hashes,i = np.unique(self.proc_hash[idx],return_index=True)
+        else:
+            hashes,i = np.unique1d(self.proc_hash[idx],return_index=True)
         # add these to readytorun queue
         idx = idx.take(np.sort(i))
         self.readytorun.extend(np.setdiff1d(idx,self.readytorun))
@@ -399,7 +405,7 @@ class Pipeline(object):
                 hashed_inputs, hashvalue = self.procs[jobid].inputs._get_bunch_hash()
                 print 'Executing: %s ID: %d WID=%d H:%s' % (self.procs[jobid].name,jobid,workerid,hashvalue)
                 self.mec.push(dict(task=self.procs[jobid]),targets=workerid,block=True)
-                cmdstr = 'task.run()'
+                cmdstr = "task.run()"
                 self.pendingresults.append(self.mec.execute(cmdstr,targets=workerid,block=False))
                 self.pendingresults[-1].add_callback(self.notifymanagercb,jobid=jobid,workerid=workerid)
             else:

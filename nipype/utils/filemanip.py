@@ -174,6 +174,11 @@ def save_json(filename, data):
     json.dump(data, fp, sort_keys=True, indent=4)
     fp.close()
 
+def debuglog(inputlines,filename='/tmp/dbginputs.txt'):
+    fp=open(filename,'at')
+    fp.writelines(inputlines)
+    fp.close()
+
 def load_json(filename):
     """Load data from a json file
 
