@@ -35,6 +35,10 @@ IPython_ 0.10
       * zope.interface: which is also a dependecy of Twisted and was
         installed automatically for me when I installed Twisted.
 
+`simplejson <http://pypi.python.org/pypi/simplejson/2.0.9>`_
+  json is included in Python 2.6, but if you are using Python 2.5 you
+  will need to install simplejson.
+
 Note
 ~~~~
 Full distributions such as pythonxy_ or EPD_ provide the above
