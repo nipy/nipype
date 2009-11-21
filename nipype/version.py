@@ -1,5 +1,5 @@
 version = '0.2'
-release  = False
+release  = True
 
 # Return the svn version as a string, raise a ValueError otherwise
 # This code was copied from numpy trunk, revision 6873, and modified slightly
