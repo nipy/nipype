@@ -170,18 +170,20 @@ class Dicom2Nifti(FSCommandLine):
         inputs = {}
         [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
         for opt in inputs:
-            if opt is 'dicomdir':
+            if opt == 'dicomdir':
                 out_inputs['dicomfiles'] = glob(os.path.abspath(os.path.join(inputs[opt],'*-1.dcm')))
                 continue
-            if opt is 'base_output_dir':
+            if opt == 'base_output_dir':
                 continue
-            if opt is 'subject_dir_template':
+            if opt == 'subject_dir_template':
                 continue
-            if opt is 'subject_id':
+            if opt == 'subject_id':
                 continue
-            if opt is 'file_mapping':
+            if opt == 'file_mapping':
                 continue
-            if opt is 'flags':
+            if opt == 'out_type':
+                continue
+            if opt == 'flags':
                 continue
             print 'option %s not supported'%(opt)
         
@@ -281,16 +283,16 @@ class Resample(FSCommandLine):
         [inputs.update({k:v}) for k, v in self.inputs.iteritems() 
          if v is not None ]
         for opt in inputs:
-            if opt is 'infile':
+            if opt == 'infile':
                 out_inputs['infile'] = inputs[opt]
                 if type(inputs[opt]) is not type([]):
                     out_inputs['infile'] = [inputs[opt]]
                 continue
-            if opt is 'voxel_size':
+            if opt == 'voxel_size':
                 continue
-            if opt is 'outfile_postfix':
+            if opt == 'outfile_postfix':
                 continue
-            if opt is 'flags':
+            if opt == 'flags':
                 continue
             print 'option %s not supported'%(opt)
         
@@ -428,13 +430,13 @@ class ReconAll(FSCommandLine):
         inputs = {}
         [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
         for opt in inputs:
-            if opt is 'subject_id':
+            if opt == 'subject_id':
                 out_inputs.extend(['-subjid',inputs[opt]])
                 continue
-            if opt is 'directive':
+            if opt == 'directive':
                 out_inputs.extend([inputs[opt]])
                 continue
-            if opt is 'T1files':
+            if opt == 'T1files':
                 if type(inputs[opt]) is not type([]):
                     files = [inputs[opt]]
                 else:
@@ -442,13 +444,13 @@ class ReconAll(FSCommandLine):
                 for f in files:
                     out_inputs.extend(['-i',f])
                 continue
-            if opt is 'hemi':
+            if opt == 'hemi':
                 out_inputs.extend(['-hemi',inputs[opt]])
                 continue
-            if opt is 'parent_dir':
+            if opt == 'parent_dir':
                 out_inputs.extend(['-sd',os.path.abspath(inputs[opt])])
                 continue
-            if opt is 'flags':
+            if opt == 'flags':
                 out_inputs.extend([inputs[opt]])
             print 'option %s not supported'%(opt)
 
