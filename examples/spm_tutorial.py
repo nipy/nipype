@@ -383,5 +383,5 @@ l2pipeline.connect([(l2source,onesamplettest,[('file_list','con_images')])])
    function needs to be called. 
 """
 if __name__ == '__main__':
-    l1pipeline.run_in_series()
-    l2pipeline.run_in_series()
+    l1pipeline.run()
+    l2pipeline.run()

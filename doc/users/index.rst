@@ -14,7 +14,7 @@
    available_modules
    interface_tutorial
    pipeline_tutorial
-
+   parallel_processing
 
 Interfaces
 ----------

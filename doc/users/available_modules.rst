@@ -42,6 +42,12 @@ FSL
 
 #.  MCFLIRT
 
+#. FSLSmooth
+
+#. Level1Design
+
+#. FSFL1Maker
+
 
 FreeSurfer
 ----------
@@ -57,15 +63,19 @@ FreeSurfer
 
 #.  Smooth - integrated volume + surface smoothing
 
+#.  SurfConcat - projects and concatenates con images to a surface for a second level surface-based glm
+
+#.  OneSampleTTest - surface based glm for second level analysis
+
 
 Misc
 ----
 
-#. ArtifactDetection - detects outliers in functional runs based on
-   motion and intensity.
+#. ArtifactDetection - detects outliers in functional runs based on  motion and intensity.
 
-#. IO - these are generic routines for structuring data into and out of
-   the pipelines
+#. StimulusCorrelation -  detects if stimulus schedule is correlated with motion or intensity
+
+#. IO - these are generic routines for structuring data into and out of the pipelines
 
   #.  DataSource
   #.  DataSink
