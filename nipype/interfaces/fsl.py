@@ -1516,8 +1516,9 @@ class FSLSmooth(FSLCommand):
         if outfile is None:
             outfile = fname_presuffix(self.inputs.infile, suffix='_smooth',
                     newpath='.')
-        return ['%s -kernel gauss %d -fmean %s' % (self.inputs.infile, 
-                                            self.inputs.fwhm,
+        return ['%s -kernel gauss %f -fmean %s' % (self.inputs.infile, 
+                                            # ohinds: convert fwhm to stddev
+                                            self.inputs.fwhm/2.3548, 
                                             outfile)]
 
     def outputs(self):
