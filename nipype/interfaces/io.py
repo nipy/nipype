@@ -137,7 +137,8 @@ class DataSource(Interface):
                     msg = 'Unable to find file: %s' % path
                     raise IOError(msg)
                 outputs[_type].extend(files_found)
-            outputs[_type] = list_to_filename(outputs[_type])
+            if len(idx)>0:
+                outputs[_type] = list_to_filename(outputs[_type])
         return outputs
 
     def run(self, cwd=None):
