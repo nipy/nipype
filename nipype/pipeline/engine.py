@@ -440,3 +440,38 @@ class Pipeline(object):
         self.depidx[jobid,:] = False
         
 
+    def _generate_expanded_graph(self):
+        """ Generates an expanded graph based on the parameterization
+        of the modules. Parameterization is controlled using the
+        `iterables` field of the pipeline elements. Thus if there are
+        two nodes with iterables a=[1,2] and b=[3,4] this procedure
+        will generate a graph with sub-graphs parameterized as
+        (a=1,b=3), (a=1,b=4), (a=2,b=3) and (a=2,b=4). 
+        """
+        print "PE: expanding iterables"
+        iterables = []
+        self.listofgraphs = []
+        # Create a list of iterables
+        for i,node in enumerate(nx.topological_sort(self._graph)):
+            for key,func in node.iterables.items():
+                iterables.append(((i,key),func))
+        # return a copy of the graph if there are no iterables
+        if len(iterables) == 0:
+            self.listofgraphs.append(copy.deepcopy(self._graph))
+            return
+        # Walk through the list of iterables generating a unique set
+        # of parameters.
+        for i,params in enumerate(walk(iterables)):
+            # copy the graph
+            graphcopy = copy.deepcopy(self._graph)
+            self.listofgraphs.append(graphcopy)
+            self.listofgraphs[-1].__dict__.update(name='')
+            order = nx.topological_sort(graphcopy)
+            for key,val in params.items():
+                # assign values to the nodes
+                order[key[0]].inputs[key[1]] = val
+                # update name of graph based on parameterization
+                name = self.listofgraphs[-1].__dict__['name']
+                newname = ''.join((name,'_',key[1],'_',str(val)))
+                self.listofgraphs[-1].__dict__.update(name=newname)
+        print "PE: expanding iterables ... done"
