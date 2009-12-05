@@ -408,9 +408,11 @@ class Bet(FSLCommand):
         input.
 
         >>> from nipype.interfaces import fsl
+        >>> import os
         >>> btr = fsl.Bet(infile='foo.nii', outfile='bar.nii', flags='-v')
-        >>> btr.cmdline
-        'bet foo.nii bar.nii -v'
+        >>> cmdline = 'bet foo.nii %s -v'%os.path.join(os.getcwd(),'bar.nii')
+        >>> btr.cmdline == cmdline
+        True
 
         """
         if infile:

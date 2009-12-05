@@ -49,8 +49,8 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
 
     >>> from nipype.utils.filemanip import fname_presuffix
     >>> fname = 'foo.nii.gz'
-    >>> outfile = fname_presuffix(fname,'pre','post','/tmp')
-    /tmp/prefoopost.nii.gz
+    >>> fname_presuffix(fname,'pre','post','/tmp')
+    '/tmp/prefoopost.nii.gz'
     """
     pth, fname = os.path.split(fname)
     fname, ext = os.path.splitext(fname)
