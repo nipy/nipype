@@ -284,9 +284,7 @@ class Resample(FSCommandLine):
          if v is not None ]
         for opt in inputs:
             if opt == 'infile':
-                out_inputs['infile'] = inputs[opt]
-                if type(inputs[opt]) is not type([]):
-                    out_inputs['infile'] = [inputs[opt]]
+                out_inputs['infile'] = filename_to_list(inputs[opt])
                 continue
             if opt == 'voxel_size':
                 continue
@@ -437,10 +435,7 @@ class ReconAll(FSCommandLine):
                 out_inputs.extend([inputs[opt]])
                 continue
             if opt == 'T1files':
-                if type(inputs[opt]) is not type([]):
-                    files = [inputs[opt]]
-                else:
-                    files = inputs[opt]
+                files = filename_to_list(inputs[opt])
                 for f in files:
                     out_inputs.extend(['-i',f])
                 continue
@@ -589,7 +584,7 @@ class BBRegister(FSLCommand):
             outfile = glob(fname_presuffix(self.inputs.sourcefile,suffix='_bbreg'))
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
-        if type(self.inputs.outfile) == type(''):
+        if isinstance(self.inputs.outfile,str):
             outfile = glob(self.inputs.outfile)
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
@@ -686,7 +681,7 @@ class ApplyVolTransform(FSLCommand):
                                            suffix='_warped'))
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
-        if type(self.inputs.outfile) == type(''):
+        if isinstance(self.inputs.outfile,str):
             outfile = glob(self.inputs.outfile)
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
@@ -780,7 +775,7 @@ class Smooth(FSLCommand):
                                            suffix='_surfsmooth'))
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
-        if type(self.inputs.outfile) == type(''):
+        if isinstance(self.inputs.outfile,str):
             outfile = glob(self.inputs.outfile)
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
@@ -877,7 +872,7 @@ class SurfConcat(FSLCommand):
             outfile = glob(fname)
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
-        if type(self.inputs.outfile) == type(''):
+        if isinstance(self.inputs.outfile,str):
             outfile = glob(self.inputs.outfile)
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]

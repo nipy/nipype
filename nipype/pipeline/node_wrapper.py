@@ -7,7 +7,7 @@ from tempfile import mkdtemp
 from copy import deepcopy
 
 from nipype.utils.filemanip import (copyfiles,fname_presuffix, cleandir,
-                                    filename_to_list, list_to_filename, md5)
+                                    filename_to_list, list_to_filename)
 from nipype.interfaces.base import Bunch, InterfaceResult
 from nipype.interfaces.fsl import FSLCommand
 from nipype.utils.filemanip import save_json
@@ -90,6 +90,8 @@ class NodeWrapper(object):
             self.name = '.'.join((cname, mname))
         else:
             self.name = name
+        # for compatibility with node expansion using iterables
+        self.id = self.name
 
     @property
     def interface(self):
@@ -156,13 +158,13 @@ class NodeWrapper(object):
                 cleandir(outdir)
                 # copy files over and change the inputs
                 for info in self._interface.get_input_info():
-                    files = self.inputs[info.key]
+                    files = self.inputs.get(info.key)
                     if files is not None:
                         infiles = filename_to_list(files)
                         newfiles = copyfiles(infiles, [outdir], copy=info.copy)
-                        self.inputs[info.key] = list_to_filename(newfiles)
+                        setattr(self.inputs, info.key, list_to_filename(newfiles))
                 self._run_interface(execute=True, cwd=outdir)
-                if type(self._result.runtime) == list:
+                if isinstance(self._result.runtime, list):
                     # XXX In what situation is runtime ever a list?
                     # Normally it's a Bunch.
                     # Ans[SG]: Runtime is a list when we are iterating
@@ -183,20 +185,20 @@ class NodeWrapper(object):
                 print "skipping\n"
                 # change the inputs
                 for info in self._interface.get_input_info():
-                    files = self.inputs[info.key]
+                    files = self.inputs.get(info.key)
                     if files is not None:
-                        if type(files) is not type([]):
-                            infiles = [files]
-                        else:
+                        if isinstance(files,list):
                             infiles = files
+                        else:
+                            infiles = [files]
                         for i,f in enumerate(infiles):
                             newfile = fname_presuffix(f, newpath=outdir)
                             if not os.path.exists(newfile):
                                 copyfiles(f, newfile, copy=info.copy)
-                            if type(files) is not type([]):
-                                self.inputs[info.key] = newfile
+                            if isinstance(files,list):
+                                self.inputs.get(info.key)[i] = newfile
                             else:
-                                self.inputs[info.key][i] = newfile
+                                setattr(self.inputs, info.key, newfile)
                 self._run_interface(execute=False, cwd=outdir)
         else:
             self._run_interface(execute=True)
@@ -219,7 +221,7 @@ class NodeWrapper(object):
             # basically calls the underlying interface each time 
             itervals = self.inputs.get(self.iterfield[0])
             notlist = False
-            if type(itervals) is not list:
+            if not isinstance(itervals, list):
                 notlist = True
                 itervals = [itervals]
             self._result = InterfaceResult(interface=[], runtime=[],
@@ -306,8 +308,10 @@ class NodeWrapper(object):
         self.inputs.update(**opts)
         
     def hash_inputs(self):
-        """Computes a hash of the input fields of the underlying interface."""
-        return md5(str(self.inputs)).hexdigest()
+        """Computes a hash of the input fields of the underlying
+        interface."""
+        hashed_inputs, hashvalue = self.inputs._get_bunch_hash()
+        return hashvalue
 
     def _output_directory(self):
         if self.output_directory_base is None:

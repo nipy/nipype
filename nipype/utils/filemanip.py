@@ -6,6 +6,8 @@ import re
 import shutil
 from glob import glob
 
+import numpy as np
+
 # The md5 module is deprecated in Python 2.6, but hashlib is only
 # available as an external package for versions of python before 2.6.
 # Both md5 algorithms appear to return the same result.
@@ -25,6 +27,31 @@ except ImportError:
     import simplejson as json
 
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
+    """Manipulates path and name of input filename
+
+    Parameters
+    ----------
+    fname : string
+        A filename (may or may not include path
+    prefix : string
+        Characters to prepend to the filename
+    suffix : string
+        Characters to append to the filename
+    newpath : string
+        Path to replace the path of the input fname
+    use_ext : boolean
+        If True (default), appends the extension of the original file
+        to the output name.
+
+    Returns
+    -------
+    Absolute path of the modified filename
+
+    >>> from nipype.utils.filemanip import fname_presuffix
+    >>> fname = 'foo.nii.gz'
+    >>> outfile = fname_presuffix(fname,'pre','post','/tmp')
+    /tmp/prefoopost.nii.gz
+    """
     pth, fname = os.path.split(fname)
     fname, ext = os.path.splitext(fname)
     if os.path.splitext(fname)[1]: # check for double extension nii.gz
@@ -32,12 +59,14 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
         ext = ext2 + ext
     if not use_ext:
         ext = ''
-    if newpath is not None:
+    if newpath:
         pth = os.path.abspath(newpath)
     return os.path.join(pth, prefix+fname+suffix+ext)
 
 
 def fnames_presuffix(fnames, prefix='', suffix='', newpath=None,use_ext=True):
+    """Calls fname_presuffix for a list of files.
+    """
     f2 = []
     for fname in fnames:
         f2.append(fname_presuffix(fname, prefix, suffix, newpath, use_ext))
@@ -67,7 +96,7 @@ def hash_rename(filename, hash):
 
 def check_forhash(filename):
     """checks if file has a hash in its filename"""
-    if type(filename) == type(list):
+    if isinstance(filename,list):
         filename = filename[0]
     path, name = os.path.split(filename)
     if re.search('(_0x[a-z0-9]{32})',name):
@@ -133,9 +162,11 @@ def copyfiles(filelist, dest, copy=False):
     return newfiles
 
 def filename_to_list(filename):
-    if type(filename) == type(''):
+    """Returns a list given either a string or a list
+    """
+    if isinstance(filename,str):
         return [filename]
-    elif type(filename) == type([]):
+    elif isinstance(filename,list):
         return filename
     elif is_container(filename):
         return [x for x in filename]
@@ -198,3 +229,16 @@ def load_json(filename):
     fp.close()
     return data
 
+def loadflat(infile, *args):
+    """Load an npz file into a dict
+    """
+    data = np.load(infile)
+    out = {}
+    if args:
+        outargs = np.setdiff1d(args,data.keys())
+        if outargs:
+            raise IOError('File does not contain variables: '+str(outargs))
+    for k,v in data.items():
+        if k in args or not args:
+            out[k] = v.flat[0]
+    return out

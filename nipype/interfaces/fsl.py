@@ -255,7 +255,7 @@ class FSLCommand(CommandLine):
                     elif value is not False:
                         raise TypeError('Boolean option %s set to %s' % 
                                          (opt, str(value)) )
-                elif type(value) == list and self.__class__.__name__ == 'Fnirt':
+                elif isinstance(value, list) and self.__class__.__name__ == 'Fnirt':
                     # XXX Hack to deal with special case where some
                     # parameters to Fnirt can have a variable number
                     # of arguments.  Splitting the argument string,
@@ -265,7 +265,7 @@ class FSLCommand(CommandLine):
                     argparts = argstr.split('=')
                     allargs.append(argparts[0] + '=' +
                                    ','.join([argparts[1] % y for y in value]))
-                elif type(value) == list:
+                elif isinstance(value, list):
                     allargs.append(argstr % tuple(value))
                 else:
                     # Append options using format string.
@@ -1593,7 +1593,7 @@ class L1FSFmaker(object):
     def _populate_inputs(self):
         self.inputs = Bunch()
         for k in self.opt_list:
-            self.inputs[k] = None
+            setattr(self.inputs, k, None)
         
     def run(self, cwd=None, **inputs):
         if cwd is None:

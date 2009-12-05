@@ -83,18 +83,6 @@ class Bunch(object):
         '''
         return self.__dict__.get(*args)
 
-    def __setitem__(self, key, value):
-        '''deprecated, dict-like setting of attributes'''
-        # get rid of for 0.2?
-        warn(DeprecationWarning('please use direct attribute or .update()'))
-        self.__dict__[key] = value
-
-    def __getitem__(self, key):
-        '''deprecated, dict-like getting of attributes'''
-        # get rid of for 0.2?
-        warn(DeprecationWarning('please use direct attribute or .set()'))
-        return(self.__dict__[key])
-
     def dictcopy(self):
         """returns a deep copy of existing Bunch as a dictionary"""
         return deepcopy(self.__dict__)
@@ -157,7 +145,7 @@ class Bunch(object):
             if is_container(val):
                 # XXX - SG this probably doesn't catch numpy arrays
                 # containing embedded file names either. 
-                if type(val) == type({}):
+                if isinstance(val,dict):
                     # XXX - SG should traverse dicts, but ignoring for now
                     item = None
                 else:

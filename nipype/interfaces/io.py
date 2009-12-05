@@ -11,7 +11,6 @@
 from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult
 from copy import deepcopy
 from nipype.utils.filemanip import copyfiles, list_to_filename
-from nipype.utils.misc import mktree
 import glob
 import os
 
@@ -128,7 +127,7 @@ class DataSource(Interface):
             raise KeyError("Key [%s] does not exist in subject_info dictionary"
                            % self.inputs.subject_id)
         for idx, _type in info:
-            outputs[_type] = []
+            setattr(outputs, _type, [])
             for i in idx:
                 files = self.inputs.file_template % i
                 path = os.path.abspath(os.path.join(subjdir, files))
@@ -136,9 +135,9 @@ class DataSource(Interface):
                 if len(files_found) == 0:
                     msg = 'Unable to find file: %s' % path
                     raise IOError(msg)
-                outputs[_type].extend(files_found)
-            if len(idx)>0:
-                outputs[_type] = list_to_filename(outputs[_type])
+                outputs.get(_type).extend(files_found)
+            if idx:
+                setattr(outputs, _type, list_to_filename(outputs.get(_type)))
         return outputs
 
     def run(self, cwd=None):
@@ -217,7 +216,7 @@ class DataSink(Interface):
             raise Exception('Subject directory not provided')
         outdir = subjdir
         if not os.path.exists(outdir):
-            mktree(outdir)
+            os.makedirs(outdir)
         for k,v in self.inputs.iteritems():
             if k not in self.input_keys:
                 if v is not None:
@@ -228,7 +227,7 @@ class DataSink(Interface):
                         tempoutdir = os.path.join(tempoutdir,d)
                         if not os.path.exists(tempoutdir):
                             os.mkdir(tempoutdir)
-                    copyfiles(self.inputs[k],tempoutdir,copy=True)
+                    copyfiles(self.inputs.get(k),tempoutdir,copy=True)
         runtime = Bunch(returncode=0,
                         stdout=None,
                         stderr=None)
@@ -301,7 +300,7 @@ class DataGrabber(Interface):
 
         if self.inputs.template_argnames is not None:
             for name in self.inputs.template_argnames:
-                arg = self.inputs[name]
+                arg = self.inputs.get(name)
                 print name, arg
                 if arg is not None:
                     args.append(arg)

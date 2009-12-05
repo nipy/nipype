@@ -1,13 +1,15 @@
-from nipype.testing import assert_raises, assert_equal, assert_true, assert_false
-import nipype.pipeline.engine as pe
-import nipype.pipeline.node_wrapper as nw
+"""Tests for the engine module
+"""
 import os
 from copy import deepcopy
-from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult
-from nipype.utils.filemanip import cleandir
+
 import networkx as nx
 
-# nosetests --with-coverage --cover-package=nipype.pipeline.engine nipype/pipeline/tests/test_engine.py
+from nipype.testing import assert_raises, assert_equal, assert_true, assert_false
+from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult
+from nipype.utils.filemanip import cleandir
+import nipype.pipeline.engine as pe
+import nipype.pipeline.node_wrapper as nw
 
 
 class BasicInterface(Interface):
@@ -25,14 +27,14 @@ class BasicInterface(Interface):
     def get_input_info(self):
         return []
     
-    def outputs_help(self):
+    def outputs(self):
         """
            output1 : None
         """
-        print self.outputs_help.__doc__
+        return Bunch(output1=None)
         
     def aggregate_outputs(self):
-        outputs = Bunch(output1=None)
+        outputs = self.outputs()
         if self.ran is not None:
             outputs.output1 = [self.ran,self.inputs.input1]
         return outputs
@@ -50,10 +52,9 @@ class BasicInterface(Interface):
 def test_init():
     pipe = pe.Pipeline()
     yield assert_equal, type(pipe._graph), nx.DiGraph
-    yield assert_equal, pipe.listofgraphs, []
+    yield assert_equal, pipe._execgraph, None
     yield assert_equal, pipe.config['workdir'], '.'
-    yield assert_equal, pipe.config['use_parameterized_dirs'], False
-    yield assert_equal, pipe.IPython_available, pe.IPython_available
+    yield assert_equal, pipe.config['use_parameterized_dirs'], True
 
 def test_connect():
     pipe = pe.Pipeline()
@@ -65,42 +66,28 @@ def test_connect():
     yield assert_true, mod2 in pipe._graph.nodes()
     yield assert_equal, pipe._graph.get_edge_data(mod1,mod2), {'connect':[('output1','input1')]} 
 
-def test_add_modules():
+def test_add_nodes():
     pipe = pe.Pipeline()
     mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
     mod2 = nw.NodeWrapper(interface=BasicInterface(),name='mod2')
-    pipe.add_modules([mod1,mod2])
+    pipe.add_nodes([mod1,mod2])
 
     yield assert_true, mod1 in pipe._graph.nodes()
     yield assert_true, mod2 in pipe._graph.nodes()
 
-
-def test_generate_parameterized_graphs():
-    pipe = pe.Pipeline()
-    mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
-    mod2 = nw.NodeWrapper(interface=BasicInterface(),name='mod2')
-    pipe.connect([(mod1,mod2,[('output1','input1')])])
-    pipe._generate_parameterized_graphs()
-    yield assert_equal, len(pipe.listofgraphs), 1
-    
-    mod1.iterables = {'input1': lambda : [1,2]}
-    pipe._generate_parameterized_graphs()
-    yield assert_equal, len(pipe.listofgraphs), 2
 
 def test_generate_dependency_list():
     pipe = pe.Pipeline()
     mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
     mod2 = nw.NodeWrapper(interface=BasicInterface(),name='mod2')
     pipe.connect([(mod1,mod2,[('output1','input1')])])
-    pipe._generate_parameterized_graphs()
+    pipe._generate_expanded_graph()
     pipe._generate_dependency_list()
-    yield assert_equal, len(pipe.listofgraphs), 1
+    yield assert_false, pipe._execgraph == None
     yield assert_equal, len(pipe.procs), 2
-    yield assert_equal, pipe.proc_hash[1], ''
     yield assert_false, pipe.proc_done[1]
     yield assert_false, pipe.proc_pending[1]
-    yield assert_true, pipe.depidx[0,1]
-    
+    yield assert_equal, pipe.depidx[0,1], 1
 
 def test_run_in_series():
     pipe = pe.Pipeline()
@@ -108,11 +95,110 @@ def test_run_in_series():
     mod2 = nw.NodeWrapper(interface=BasicInterface(),name='mod2')
     pipe.connect([(mod1,mod2,[('output1','input1')])])
     pipe.run_in_series()
-    nodes = pipe.listofgraphs[0].nodes()
+    nodes = pipe._execgraph.nodes()
     names = [n.name for n in nodes]
     i = names.index('mod1')
     yield assert_equal, nodes[i].get_output('output1'), ['ran',None]
-    
 
+# Test graph expansion.  The following set tests the building blocks
+# of the graph expansion routine.
+# XXX - SG I'll create a graphical version of these tests and actually
+# ensure that all connections are tested later
+
+def test1():
+    pipe = pe.Pipeline()
+    mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
+    pipe.add_nodes([mod1])
+    pipe._generate_expanded_graph()
+    yield assert_equal, len(pipe._execgraph.nodes()), 1
+    yield assert_equal, len(pipe._execgraph.edges()), 0
+
+def test2():
+    pipe = pe.Pipeline()
+    mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
+    mod1.iterables = dict(input1=lambda:[1,2],input2=lambda:[1,2])
+    pipe.add_nodes([mod1])
+    pipe._generate_expanded_graph()
+    yield assert_equal, len(pipe._execgraph.nodes()), 4
+    yield assert_equal, len(pipe._execgraph.edges()), 0
+    
+def test3():
+    pipe = pe.Pipeline()
+    mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
+    mod1.iterables = {}
+    mod2 = nw.NodeWrapper(interface=BasicInterface(),name='mod2')
+    mod2.iterables = dict(input1=lambda:[1,2])
+    pipe.connect([(mod1,mod2,[('output1','input2')])])
+    pipe._generate_expanded_graph()
+    yield assert_equal, len(pipe._execgraph.nodes()), 3
+    yield assert_equal, len(pipe._execgraph.edges()), 2
+    
+def test4():
+    pipe = pe.Pipeline()
+    mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
+    mod2 = nw.NodeWrapper(interface=BasicInterface(),name='mod2')
+    mod1.iterables = dict(input1=lambda:[1,2])
+    mod2.iterables = {}
+    pipe.connect([(mod1,mod2,[('output1','input2')])])
+    pipe._generate_expanded_graph()
+    yield assert_equal, len(pipe._execgraph.nodes()), 4
+    yield assert_equal, len(pipe._execgraph.edges()), 2
+
+def test5():
+    pipe = pe.Pipeline()
+    mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
+    mod2 = nw.NodeWrapper(interface=BasicInterface(),name='mod2')
+    mod1.iterables = dict(input1=lambda:[1,2])
+    mod2.iterables = dict(input1=lambda:[1,2])
+    pipe.connect([(mod1,mod2,[('output1','input2')])])
+    pipe._generate_expanded_graph()
+    yield assert_equal, len(pipe._execgraph.nodes()), 6
+    yield assert_equal, len(pipe._execgraph.edges()), 4
+
+def test6():
+    pipe = pe.Pipeline()
+    mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
+    mod2 = nw.NodeWrapper(interface=BasicInterface(),name='mod2')
+    mod3 = nw.NodeWrapper(interface=BasicInterface(),name='mod3')
+    mod1.iterables = {}
+    mod2.iterables = dict(input1=lambda:[1,2])
+    mod3.iterables = {}
+    pipe.connect([(mod1,mod2,[('output1','input2')]),
+                  (mod2,mod3,[('output1','input2')])])
+    pipe._generate_expanded_graph()
+    yield assert_equal, len(pipe._execgraph.nodes()), 5
+    yield assert_equal, len(pipe._execgraph.edges()), 4
+
+def test7():
+    pipe = pe.Pipeline()
+    mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
+    mod2 = nw.NodeWrapper(interface=BasicInterface(),name='mod2')
+    mod3 = nw.NodeWrapper(interface=BasicInterface(),name='mod3')
+    mod1.iterables = dict(input1=lambda:[1,2])
+    mod2.iterables = {}
+    mod3.iterables = {}
+    pipe.connect([(mod1,mod3,[('output1','input2')]),
+                  (mod2,mod3,[('output1','input2')])])
+    pipe._generate_expanded_graph()
+    yield assert_equal, len(pipe._execgraph.nodes()), 5
+    yield assert_equal, len(pipe._execgraph.edges()), 4
+
+def test8():
+    pipe = pe.Pipeline()
+    mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
+    mod2 = nw.NodeWrapper(interface=BasicInterface(),name='mod2')
+    mod3 = nw.NodeWrapper(interface=BasicInterface(),name='mod3')
+    mod1.iterables = dict(input1=lambda:[1,2])
+    mod2.iterables = dict(input1=lambda:[1,2])
+    mod3.iterables = {}
+    pipe.connect([(mod1,mod3,[('output1','input2')]),
+                  (mod2,mod3,[('output1','input2')])])
+    pipe._generate_expanded_graph()
+    yield assert_equal, len(pipe._execgraph.nodes()), 8
+    yield assert_equal, len(pipe._execgraph.edges()), 8
+    edgenum = sorted([(len(pipe._execgraph.in_edges(node)) + \
+                           len(pipe._execgraph.out_edges(node))) \
+                          for node in pipe._execgraph.nodes()])
+    yield assert_true, edgenum[0]>0
     
     
