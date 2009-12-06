@@ -63,7 +63,7 @@ class NodeWrapper(object):
     """
     def __init__(self, interface=None,
                  iterables={}, iterfield=[],
-                 diskbased=False, base_directory=None,
+                 diskbased=True, base_directory=None,
                  overwrite=False,
                  name=None):
         # interface can only be set at initialization
@@ -157,12 +157,13 @@ class NodeWrapper(object):
                 print "continuing to execute\n"
                 cleandir(outdir)
                 # copy files over and change the inputs
-                for info in self._interface.get_input_info():
-                    files = self.inputs.get(info.key)
-                    if files is not None:
-                        infiles = filename_to_list(files)
-                        newfiles = copyfiles(infiles, [outdir], copy=info.copy)
-                        setattr(self.inputs, info.key, list_to_filename(newfiles))
+                if hasattr(self._interface,'get_input_info'):
+                    for info in self._interface.get_input_info():
+                        files = self.inputs.get(info.key)
+                        if files is not None:
+                            infiles = filename_to_list(files)
+                            newfiles = copyfiles(infiles, [outdir], copy=info.copy)
+                            setattr(self.inputs, info.key, list_to_filename(newfiles))
                 self._run_interface(execute=True, cwd=outdir)
                 if isinstance(self._result.runtime, list):
                     # XXX In what situation is runtime ever a list?
@@ -184,21 +185,22 @@ class NodeWrapper(object):
             else:
                 print "skipping\n"
                 # change the inputs
-                for info in self._interface.get_input_info():
-                    files = self.inputs.get(info.key)
-                    if files is not None:
-                        if isinstance(files,list):
-                            infiles = files
-                        else:
-                            infiles = [files]
-                        for i,f in enumerate(infiles):
-                            newfile = fname_presuffix(f, newpath=outdir)
-                            if not os.path.exists(newfile):
-                                copyfiles(f, newfile, copy=info.copy)
+                if hasattr(self._interface,'get_input_info'):
+                    for info in self._interface.get_input_info():
+                        files = self.inputs.get(info.key)
+                        if files:
                             if isinstance(files,list):
-                                self.inputs.get(info.key)[i] = newfile
+                                infiles = files
                             else:
-                                setattr(self.inputs, info.key, newfile)
+                                infiles = [files]
+                            for i,f in enumerate(infiles):
+                                newfile = fname_presuffix(f, newpath=outdir)
+                                if not os.path.exists(newfile):
+                                    copyfiles(f, newfile, copy=info.copy)
+                                if isinstance(files,list):
+                                    self.inputs.get(info.key)[i] = newfile
+                                else:
+                                    setattr(self.inputs, info.key, newfile)
                 self._run_interface(execute=False, cwd=outdir)
         else:
             self._run_interface(execute=True)

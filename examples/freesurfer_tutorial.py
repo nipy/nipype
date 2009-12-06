@@ -17,6 +17,7 @@ import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.pipeline.node_wrapper as nw    # nodes for pypelines
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
+import nipype.algorithms.modelgen as model   # model specification
 import os                                    # system functions
 
 #####################################################################
@@ -88,7 +89,7 @@ info['s3'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'))
    object and provides additional housekeeping and pipeline specific
    functionality. 
 """
-datasource = nw.NodeWrapper(interface=nio.DataSource())
+datasource = nw.NodeWrapper(interface=nio.DataSource(),diskbased=False)
 datasource.inputs.base_directory   = data_dir
 datasource.inputs.subject_template = '%s'
 datasource.inputs.file_template    = '%s.nii'
@@ -209,7 +210,7 @@ contrasts = [cont1,cont2]
    c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
    SPM-specific design information. 
 """
-modelspec = nw.NodeWrapper(interface=spm.SpecifyModel())
+modelspec = nw.NodeWrapper(interface=model.SpecifyModel())
 modelspec.inputs.subject_info_func       = subjectinfo
 modelspec.inputs.concatenate_runs        = True
 modelspec.inputs.input_units             = 'secs'
@@ -326,7 +327,7 @@ l1pipeline.connect([(datasource,realign,[('func','infile')]),
    'mean' would be created and the mean image would be copied to that
    directory. 
 """
-datasink = nw.NodeWrapper(interface=nio.DataSink())
+datasink = nw.NodeWrapper(interface=nio.DataSink(),diskbased=False)
 datasink.inputs.base_directory = os.path.abspath('./surf/l1output')
 
 # store relevant outputs from various stages of the 1st level analysis

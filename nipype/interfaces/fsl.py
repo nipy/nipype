@@ -1849,7 +1849,10 @@ class Level1Design(Interface):
             usetd = int(self.inputs.bases['hrf']['derivs'])
         else:
             usetd = 0
-        for i,info in enumerate(self.inputs.session_info):
+        key = 'session_info'
+        data = loadflat(self.inputs.session_info)
+        session_info = data[key]
+        for i,info in enumerate(session_info):
             curr_conds,cond_txt  = self._create_ev_files(cwd,info,i,usetd,self.inputs.contrasts)
             curr_func = info['scans'][0][0][0].split(',')[0]
             nim = load(curr_func)

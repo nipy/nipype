@@ -87,8 +87,6 @@ class Pipeline(object):
             warn("Ipython kernel not found.  Parallel execution will be" \
                      "unavailable", ImportWarning)
 
-
-
     def connect(self, connection_list):
         """Connect nodes in the pipeline.
 
@@ -172,7 +170,7 @@ class Pipeline(object):
         if self.ipythonclient:
             try:
                 self.mec = self.ipythonclient.MultiEngineClient()
-            except ConnectionRefusedError:
+            except:
                 warn("No clients found, running serially for now.")
         if self.mec:
             self.run_with_manager()

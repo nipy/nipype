@@ -235,10 +235,10 @@ def loadflat(infile, *args):
     data = np.load(infile)
     out = {}
     if args:
-        outargs = np.setdiff1d(args,data.keys())
+        outargs = np.setdiff1d(args,data.files)
         if outargs:
             raise IOError('File does not contain variables: '+str(outargs))
-    for k,v in data.items():
+    for k in data.files:
         if k in args or not args:
-            out[k] = v.flat[0]
+            out[k] = data[k].flat[0]
     return out

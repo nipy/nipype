@@ -16,6 +16,7 @@ import nipype.interfaces.fsl as fsl          # fsl
 import nipype.pipeline.node_wrapper as nw    # nodes for pypelines
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
+import nipype.algorithms.modelgen as model   # model specification
 import os                                    # system functions
 
 #####################################################################
@@ -85,7 +86,7 @@ info['s3'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'))
    object and provides additional housekeeping and pipeline specific
    functionality. 
 """
-datasource = nw.NodeWrapper(interface=nio.DataSource())
+datasource = nw.NodeWrapper(interface=nio.DataSource(),diskbased=False)
 datasource.inputs.base_directory   = data_dir
 datasource.inputs.subject_template = '%s'
 datasource.inputs.file_template    = '%s.nii'
@@ -108,7 +109,7 @@ datasource.iterables = dict(subject_id=lambda:subject_list)
    c. Use :class:`nipype.interfaces.spm.Realign` for motion correction
    and register all images to the mean image. 
 """
-realign = nw.NodeWrapper(interface=spm.Realign(),diskbased=True)
+realign = nw.NodeWrapper(interface=spm.Realign())
 realign.inputs.register_to_mean = True
 
 """
@@ -116,7 +117,7 @@ realign.inputs.register_to_mean = True
    the images in the functional series are outliers based on
    deviations in intensity or movement.
 """
-art = nw.NodeWrapper(interface=ra.ArtifactDetect(),diskbased=True)
+art = nw.NodeWrapper(interface=ra.ArtifactDetect())
 art.inputs.use_differences      = [True,True]
 art.inputs.use_norm             = True
 art.inputs.norm_threshold       = 0.5
@@ -128,7 +129,7 @@ art.inputs.mask_type            = 'file'
    e. Use :class:`nipype.interfaces.fsl.Bet` for skull strip
    structural images. 
 """
-skullstrip = nw.NodeWrapper(interface=fsl.Bet(),diskbased=True)
+skullstrip = nw.NodeWrapper(interface=fsl.Bet())
 skullstrip.inputs.mask = True
 
 
@@ -139,7 +140,7 @@ skullstrip.inputs.mask = True
    coregister is not resampled. Only the header information is
    updated. 
 """
-coregister = nw.NodeWrapper(interface=spm.Coregister(),diskbased=True)
+coregister = nw.NodeWrapper(interface=spm.Coregister())
 coregister.inputs.write = False
 
 
@@ -147,7 +148,7 @@ coregister.inputs.write = False
    g. Use :class:`nipype.interfaces.spm.Normalize` to warp functional
    and structural data to SPM's T1 template.
 """
-normalize = nw.NodeWrapper(interface=spm.Normalize(),diskbased=True)
+normalize = nw.NodeWrapper(interface=spm.Normalize())
 normalize.inputs.template = os.path.abspath('data/T1.nii')
 
 
@@ -155,7 +156,7 @@ normalize.inputs.template = os.path.abspath('data/T1.nii')
    h. Use :class:`nipype.interfaces.spm.Smooth` to smooth the
    functional data.
 """
-smooth = nw.NodeWrapper(interface=spm.Smooth(),diskbased=True)
+smooth = nw.NodeWrapper(interface=spm.Smooth())
 smooth.inputs.fwhm = [6,6,8]
 
 #######################################################################
@@ -206,7 +207,7 @@ contrasts = [cont1,cont2]
    c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
    SPM-specific design information. 
 """
-modelspec = nw.NodeWrapper(interface=spm.SpecifyModel())
+modelspec = nw.NodeWrapper(interface=model.SpecifyModel())
 modelspec.inputs.subject_info_func       = subjectinfo
 modelspec.inputs.concatenate_runs        = True
 modelspec.inputs.input_units             = 'secs'
@@ -219,7 +220,7 @@ modelspec.inputs.high_pass_filter_cutoff = 120
    d. Use :class:`nipype.interfaces.spm.Level1Design` to generate a
    first level SPM.mat file for analysis
 """
-level1design = nw.NodeWrapper(interface=spm.Level1Design(),diskbased=True)
+level1design = nw.NodeWrapper(interface=spm.Level1Design())
 level1design.inputs.timing_units       = modelspec.inputs.output_units
 level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
 level1design.inputs.bases              = {'hrf':{'derivs': [0,0]}}
@@ -229,7 +230,7 @@ level1design.inputs.bases              = {'hrf':{'derivs': [0,0]}}
    e. Use :class:`nipype.interfaces.spm.EstimateModel` to determine
    the parameters of the model.
 """
-level1estimate = nw.NodeWrapper(interface=spm.EstimateModel(),diskbased=True)
+level1estimate = nw.NodeWrapper(interface=spm.EstimateModel())
 level1estimate.inputs.estimation_method = {'Classical' : 1}
 
 
@@ -237,7 +238,7 @@ level1estimate.inputs.estimation_method = {'Classical' : 1}
    f. Use :class:`nipype.interfaces.spm.EstimateContrast` to estimate
    the first level contrasts specified in step 5(b).
 """
-contrastestimate = nw.NodeWrapper(interface=spm.EstimateContrast(),diskbased=True)
+contrastestimate = nw.NodeWrapper(interface=spm.EstimateContrast())
 contrastestimate.inputs.contrasts = contrasts
 
 
@@ -312,7 +313,7 @@ l1pipeline.connect([(datasource,realign,[('func','infile')]),
    'mean' would be created and the mean image would be copied to that
    directory. 
 """
-datasink = nw.NodeWrapper(interface=nio.DataSink())
+datasink = nw.NodeWrapper(interface=nio.DataSink(),diskbased=False)
 datasink.inputs.base_directory = os.path.abspath('spm/l1output')
 
 # store relevant outputs from various stages of the 1st level analysis
@@ -358,7 +359,7 @@ l2source.iterables = dict(con=lambda:contrast_ids)
   subjects (n=2 in this example).
 """
 # setup a 1-sample t-test node
-onesamplettest = nw.NodeWrapper(interface=spm.OneSampleTTest(),diskbased=True)
+onesamplettest = nw.NodeWrapper(interface=spm.OneSampleTTest())
 
 
 """
