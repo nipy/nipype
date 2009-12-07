@@ -63,7 +63,7 @@ class NodeWrapper(object):
     """
     def __init__(self, interface=None,
                  iterables={}, iterfield=[],
-                 diskbased=True, base_directory=None,
+                 diskbased=False, base_directory=None,
                  overwrite=False,
                  name=None):
         # interface can only be set at initialization
@@ -334,5 +334,5 @@ class NodeWrapper(object):
         return outdir
 
     def __repr__(self):
-        return self.name
+        return self.id
 

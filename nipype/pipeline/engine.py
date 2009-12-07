@@ -155,12 +155,57 @@ class Pipeline(object):
         """
         self._graph.add_nodes_from(nodes)
 
-    def show_graph(self, prog='dot'):
+    def show_graph(self, prog='dot', use_execgraph=False, show_connectinfo=False):
         """ Displays the graph layout of the pipeline
+
+        Parameters
+        ----------
+        prog : string
+            Graphviz program to use for networkx.graphviz_layout
+
+        use_execgraph : boolean
+            Indicates whether to use the specification graph or the
+            execution graph. default [False]
+       
+        show_connectioninfo : boolean
+            Indicates whether to show the edge data on the graph. This
+            makes the graph rather cluttered. default [False]
         """
-        pos = nx.shell_layout(self._graph)
-        nx.draw(self._graph,pos)
-        #nx.draw_graphviz(self._graph,prog=prog)
+        if self._execgraph and use_execgraph:
+            S = deepcopy(self._execgraph)
+            logger.debug('using execgraph')
+        else:
+            S = deepcopy(self._graph)
+            logger.debug('using input graph')
+        for e in S.edges():
+            data = S.get_edge_data(*e)
+            S.remove_edge(*e)
+            if show_connectinfo:
+                S.add_edge(e[0], e[1], l=str(data['connect']))
+            else:
+                S.add_edge(e[0], e[1])
+        """
+        # alternate attempt to show connection info
+        newedges = []
+        edgenames = []
+        for i,e in enumerate(self._graph.edges()):
+            data = self._graph.get_edge_data(*e)
+            prenode = '->'.join((e[0].name,e[1].name))
+            newedges.append((prenode,
+                             str(data['connect'])))
+            edgenames.append(prenode)
+        edgenames = sorted(edgenames)
+        for i in range(len(edgenames)-1):
+            newedges.append((edgenames[i],edgenames[i+1]))
+        if newedges:
+            S.add_edges_from(newedges)
+        """
+        pos = nx.graphviz_layout(S, prog=prog)
+        nx.draw(S, pos)
+        if show_connectinfo:
+            nx.draw_networkx_edge_labels(S, pos)
+        nx.write_dot(S, os.path.join(self.config['workdir'], 'graph.dot'))
+        return S
 
     def run(self):
         """ Executes the pipeline in serial or parallel mode depending
@@ -197,6 +242,7 @@ class Pipeline(object):
             # The dependencies are stored as data on edges connecting nodes.
             for edge in self._execgraph.in_edges_iter(node):
                 data = self._execgraph.get_edge_data(*edge)
+                logger.debug('setting input: %s->%s %s',edge[0],edge[1],str(data))
                 for sourcename, destname in data['connect']:
                     if isinstance(sourcename, str):
                         node.set_input(destname,
@@ -396,10 +442,10 @@ class Pipeline(object):
                 if edge[0] not in subgraph.nodes():
                     if n.id not in edgeinfo.keys():
                         edgeinfo[n.id] = []
-                    if len(edge)==3:
-                        edgeinfo[n.id].append((edge[0],edge[2]))
-                    else:
-                        edgeinfo[n.id].append((edge[0],None))
+                    #if len(edge)==3:
+                    edgeinfo[n.id].append((edge[0],supergraph.get_edge_data(*edge)))
+                    #else:
+                    #    edgeinfo[n.id].append((edge[0],None))
         supergraph.remove_nodes_from(nodes)
         for i,params in enumerate(walk(iterables.items())):
             Gc = deepcopy(subgraph)
@@ -420,10 +466,10 @@ class Pipeline(object):
             for n in Gc.nodes():
                 if n.id in edgeinfo.keys():
                     for ei in edgeinfo[n.id]:
-                        if ei[1]:
-                            supergraph.add_edges_from([(ei[0], n, ei[1])])
-                        else:
-                            supergraph.add_edges_from([(ei[0], n)])
+                        #if ei[1]:
+                        supergraph.add_edges_from([(ei[0], n, ei[1])])
+                        #else:
+                        #    supergraph.add_edges_from([(ei[0], n)])
                 n.id += str(i)
         return supergraph
 

@@ -211,7 +211,6 @@ contrasts = [cont1,cont2]
    SPM-specific design information. 
 """
 modelspec = nw.NodeWrapper(interface=model.SpecifyModel())
-modelspec.inputs.subject_info_func       = subjectinfo
 modelspec.inputs.concatenate_runs        = True
 modelspec.inputs.input_units             = 'secs'
 modelspec.inputs.output_units            = 'secs'
@@ -292,7 +291,9 @@ l1pipeline.connect([(datasource,realign,[('func','infile')]),
                                   ('realigned_files','realigned_files')]),
                     (skullstrip,art,[('maskfile','mask_file')]),
                     # design the model
-                    (datasource,modelspec,[('subject_id','subject_id')]),
+                    (datasource,modelspec,[('subject_id','subject_id'),
+                                           (('subject_id', subjectinfo),
+                                            'subject_info_func')]),
                     (realign,modelspec,[('realignment_parameters','realignment_parameters')]),
                     (smooth,modelspec,[('outfile','functional_runs')]),
                     (art,modelspec,[('outlier_files','outlier_files')]),
@@ -423,5 +424,5 @@ l2pipeline.connect([(l2source,l2concat,[(('file_list',sort),'conimages')]),
    function needs to be called. 
 """
 if __name__ == '__main__':
-    l1pipeline.run_in_series()
-    l2pipeline.run_in_series()
+    l1pipeline.run()
+    l2pipeline.run()
