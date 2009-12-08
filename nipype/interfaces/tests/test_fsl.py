@@ -3,7 +3,6 @@ import os
 from nipype.testing import *
 import nipype.interfaces.fsl as fsl
 
-
 def test_fslversion():
     ver = fsl.fsl_info.version
     if ver:
@@ -316,4 +315,491 @@ def test_fnirt():
     for name, settings in opt_map.items():
         fnirt = fsl.Fnirt(**{name : settings[1]})
         yield assert_equal, fnirt.cmdline, ' '.join([fnirt.cmd, settings[0]])
+
+
+
+
+# nosetests --with-doctest path_to/test_fsl.py
+#----------------------------------------------------------------------------------------------------------------
+
+# test bedpostx
+def test_bedpostx():
+    bpx = fsl.Bedpostx()
+
+    # make sure command gets called
+    yield assert_equal, bpx.cmd, 'bedpostx'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, AttributeError, bpx.run    
+    
+    # .inputs based parameters setting
+    bpx2 = fsl.Bedpostx()
+    bpx2.inputs.directory = 'inputDir'
+    bpx2.inputs.fibres = 2
+    bpx2.inputs.weight = 0.3
+    bpx2.inputs.burn_period = 200
+    bpx2.inputs.jumps = 500
+    bpx2.inputs.sampling = 20    
+    actualCmdline = sorted(bpx2.cmdline.split())
+    cmd = 'bedpostx inputDir -w 0.30 -n 2 -j 500 -b 200 -s 20'
+    desiredCmdline = sorted(cmd.split())    
+    yield assert_equal, actualCmdline, desiredCmdline
+          
+
+    # .run based parameter setting
+    bpx3 = fsl.Bedpostx(fibres=1,directory='inputDir')
+    yield assert_equal, bpx3.cmdline, 'bedpostx inputDir -n 1'
+
+    results=bpx3.run(fibres=1,directory='inputDir',noseTest=True)
+    yield assert_not_equal, results.runtime.returncode, 0
+    yield assert_equal, results.interface.inputs.fibres, 1
+    yield assert_equal, results.interface.inputs.directory, 'inputDir'
+    yield assert_equal, results.runtime.cmdline, 'bedpostx inputDir -n 1'
+    
+    # test arguments for opt_map
+    opt_map = {
+                'fibres':               ('-n 1', 1),
+                'weight':               ('-w 1.00',1.0),
+                'burn_period':          ('-b 1000',1000),
+                'jumps':                ('-j 1250',1250), 
+                'sampling':             ('-s 25',25)}
+
+    for name, settings in opt_map.items():
+        bpx4 = fsl.Bedpostx(directory='inputDir',**{name: settings[1]})
+        yield assert_equal, bpx4.cmdline, bpx4.cmd+' inputDir '+settings[0]
+
+    
+# test eddy_correct
+def test_eddy_correct():
+    eddy = fsl.Eddy_correct()
+
+    # make sure command gets called
+    yield assert_equal, eddy.cmd, 'eddy_correct'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, AttributeError, eddy.run 
+
+    # .inputs based parameters setting
+    eddy.inputs.infile='foo.nii'
+    eddy.inputs.outfile='foo_eddc.nii'
+    eddy.inputs.reference_vol=100
+    yield assert_equal, eddy.cmdline, 'eddy_correct foo.nii foo_eddc.nii 100'
+
+    # .run based parameter setting
+    eddy2 = fsl.Eddy_correct(infile='foo',outfile='foo_eddc',reference_vol=20)
+    yield assert_equal, eddy2.cmdline, 'eddy_correct foo foo_eddc 20'
+
+    eddy3 = fsl.Eddy_correct()
+    results=eddy3.run(infile='foo',outfile='foo_eddc',reference_vol=10)
+    yield assert_equal, results.interface.inputs.infile, 'foo'
+    yield assert_equal, results.interface.inputs.outfile, 'foo_eddc'
+    yield assert_equal, results.runtime.cmdline, 'eddy_correct foo foo_eddc 10'
+
+    # test arguments for opt_map
+    # eddy_correct class doesn't have opt_map{}
+    
+    
+# test dtifit  
+def test_dtifit():
+    dti=fsl.Dtifit()
+    
+    # make sure command gets called
+    yield assert_equal, dti.cmd, 'dtifit'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, AttributeError, dti.run 
+
+    # .inputs based parameters setting
+    dti.inputs.data='foo.nii'
+    dti.inputs.basename='foo.dti.nii'
+    dti.inputs.bet_binary_mask='nodif_brain_mask'
+    dti.inputs.min_z = 10
+    dti.inputs.max_z = 50
+    
+    actualCmdline = sorted(dti.cmdline.split())
+    cmd = 'dtifit -k foo.nii -o foo.dti.nii -m nodif_brain_mask -z 10 -Z 50'
+    desiredCmdline = sorted(cmd.split())    
+    yield assert_equal, actualCmdline, desiredCmdline
+
+    # .run based parameter setting
+    dti2 = fsl.Dtifit(data='foo2.nii')
+    yield assert_equal, dti2.cmdline, 'dtifit -k foo2.nii'
+
+    dti3 = fsl.Dtifit()
+    results=dti3.run(data='foo3.nii',noseTest=True)
+    yield assert_not_equal, results.runtime.returncode, 0
+    yield assert_equal, results.interface.inputs.data, 'foo3.nii'
+    yield assert_equal, results.runtime.cmdline, 'dtifit -k foo3.nii'
+
+    # test arguments for opt_map
+    opt_map = {
+                'data':                     ('-k subj1', 'subj1'),
+                'basename':                 ('-o subj1', 'subj1'),
+                'bet_binary_mask':          ('-m nodif_brain_mask','nodif_brain_mask'),
+                'b_vector_file':            ('-r bvecs','bvecs'), 
+                'b_value_file':             ('-b bvals','bvals'),
+                'min_z':                    ('-z 10', 10),
+                'max_z':                    ('-Z 20', 20),
+                'min_y':                    ('-y 10', 10),
+                'max_y':                    ('-Y 30', 30),
+                'min_x':                    ('-x 5', 5),
+                'max_x':                    ('-X 50', 50),
+                'verbose':                  ('-V', True),
+                'save_tensor':              ('--save_tensor', True),
+                'sum_squared_errors':       ('--sse', True),
+                'inp_confound_reg':         ('--cni', True),
+                'small_brain_area':         ('--littlebit', True)}
+
+    for name, settings in opt_map.items():
+        dti4 = fsl.Dtifit(**{name: settings[1]})
+        yield assert_equal, dti4.cmdline, dti4.cmd+' '+settings[0]
+
+    
+
+def test_fslroi():
+    roi = fsl.Fslroi()
+
+    # make sure command gets called
+    yield assert_equal, roi.cmd, 'fslroi'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, AttributeError, roi.run 
+
+    # .inputs based parameters setting
+    roi.inputs.infile='foo.nii'
+    roi.inputs.outfile='foo_roi.nii'
+    roi.inputs.tmin=10
+    roi.inputs.tsize=20
+    yield assert_equal, roi.cmdline, 'fslroi foo.nii foo_roi.nii 10 20'
+
+    # .run based parameter setting
+    roi2 = fsl.Fslroi(infile='foo2',
+                      outfile='foo2_roi',
+                      tmin=20,tsize=40,
+                      xmin=3,xsize=30,
+                      ymin=40,ysize=10,
+                      zmin=5,zsize=20)
+    yield assert_equal, roi2.cmdline, \
+          'fslroi foo2 foo2_roi 3 30 40 10 5 20 20 40'
+
+    roi3 = fsl.Fslroi()
+    results=roi3.run(infile='foo3',
+                     outfile='foo3_roi',
+                     xmin=3,xsize=30,
+                     ymin=40,ysize=10,
+                     zmin=5,zsize=20)
+    
+    roi3_dim = [ roi3.inputs.xmin,roi3.inputs.xsize,roi3.inputs.ymin,roi3.inputs.ysize,
+                 roi3.inputs.zmin,roi3.inputs.zsize,roi3.inputs.tmin,roi3.inputs.tsize]
+    desired_dim = [ 3,30,40,10,5,20,None,None ]    
+    yield assert_equal, roi3_dim, desired_dim
+    
+    yield assert_not_equal, results.runtime.returncode, 0
+    yield assert_equal, results.interface.inputs.infile, 'foo3'
+    yield assert_equal, results.interface.inputs.outfile, 'foo3_roi'
+    yield assert_equal, results.runtime.cmdline, 'fslroi foo3 foo3_roi 3 30 40 10 5 20'
+
+    # test arguments for opt_map
+    # Fslroi class doesn't have a filled opt_map{}
+    
+    
+# test fslmath 
+def test_fslmaths():
+    math = fsl.Fslmaths()
+
+    # make sure command gets called
+    yield assert_equal, math.cmd, 'fslmaths'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, AttributeError, math.run 
+
+    # .inputs based parameters setting
+    math.inputs.infile='foo.nii'
+    math.inputs.optstring='-add 2.5 -mul input_volume2'
+    math.inputs.outfile='foo_math.nii'
+    
+    yield assert_equal, math.cmdline, 'fslmaths foo.nii -add 2.5 -mul input_volume2 foo_math.nii'
+
+    # .run based parameter setting
+    math2 = fsl.Fslmaths(infile='foo2',optstring='-add 2.5',outfile='foo2_math')
+    yield assert_equal, math2.cmdline, 'fslmaths foo2 -add 2.5 foo2_math'
+
+    math3 = fsl.Fslmaths()
+    results=math3.run(infile='foo',outfile='foo_math',optstring='-add input_volume2')
+    yield assert_not_equal, results.runtime.returncode, 0
+    yield assert_equal, results.interface.inputs.infile, 'foo'
+    yield assert_equal, results.interface.inputs.outfile, 'foo_math'
+    yield assert_equal, results.runtime.cmdline, 'fslmaths foo -add input_volume2 foo_math'
+
+    # test arguments for opt_map
+    # Fslmath class doesn't have opt_map{}
+    
+
+# test tbss_1_preproc    
+def test_tbss_1_preproc():
+    
+    tbss1 = fsl.Tbss1preproc()
+
+    # make sure command gets called
+    yield assert_equal, tbss1.cmd, 'tbss_1_preproc'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, AttributeError, tbss1.run 
+    
+    # .inputs based parameters setting
+    tbss1.inputs.infiles='foo.nii  f002.nii  f003.nii'
+    yield assert_equal, tbss1.cmdline, 'tbss_1_preproc foo.nii  f002.nii  f003.nii'
+
+    tbss = fsl.Tbss1preproc()
+    results=tbss.run(infiles='*.nii.gz',noseTest=True)
+    yield assert_equal, results.interface.inputs.infiles, '*.nii.gz'
+    yield assert_equal, results.runtime.cmdline, 'tbss_1_preproc *.nii.gz'
+
+    # test arguments for opt_map
+    # Tbss_1_preproc class doesn't have opt_map{}
+    
+    
+
+# test tbss_2_reg   
+def test_tbss_2_reg():
+    
+    tbss2 = fsl.Tbss2reg()
+
+    # make sure command gets called
+    yield assert_equal, tbss2.cmd, 'tbss_2_reg'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, AttributeError, tbss2.run 
+
+    # .inputs based parameters setting
+    tbss2.inputs.FMRIB58_FA_1mm=True
+    yield assert_equal, tbss2.cmdline, 'tbss_2_reg -T'
+
+    # .run based parameter setting
+    tbss22 = fsl.Tbss2reg(targetImage='targetImg')
+    yield assert_equal, tbss22.cmdline,'tbss_2_reg -t targetImg'
+    
+    tbss222 = fsl.Tbss2reg(findTarget=True)
+    yield assert_equal, tbss222.cmdline,'tbss_2_reg -n'
+
+    tbss21 = fsl.Tbss2reg()
+    results = tbss21.run(FMRIB58_FA_1mm=True,noseTest=True)
+    yield assert_equal, results.runtime.cmdline, 'tbss_2_reg -T'
+    
+    # test arguments for opt_map
+    opt_map ={ 'FMRIB58_FA_1mm':    ('-T', True),
+               'targetImage':       ('-t allimgs', 'allimgs'),
+               'findTarget':        ('-n', True)}
+
+    for name, settings in opt_map.items():
+        tbss = fsl.Tbss2reg(**{name: settings[1]})
+        yield assert_equal, tbss.cmdline, tbss.cmd+' '+settings[0]
+
+    
+def test_tbss_3_postreg():    
+    
+    tbss = fsl.Tbss3postreg()
+
+    # make sure command gets called
+    yield assert_equal, tbss.cmd, 'tbss_3_postreg'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, AttributeError, tbss.run 
+
+    # .inputs based parameters setting
+    tbss.inputs.FMRIB58_FA=True
+    yield assert_equal, tbss.cmdline, 'tbss_3_postreg -T'
+
+    # .run based parameter setting
+    tbss2 = fsl.Tbss3postreg(subject_means=True)
+    yield assert_equal, tbss2.cmdline,'tbss_3_postreg -S'
+    
+    tbss3 = fsl.Tbss3postreg()
+    results = tbss3.run(FMRIB58_FA=True,noseTest=True)
+    yield assert_equal, results.runtime.cmdline, 'tbss_3_postreg -T'
+    
+    # test arguments for opt_map
+    opt_map ={ 'subject_means':     ('-S',True),
+               'FMRIB58_FA':        ('-T',True)}
+
+    for name, settings in opt_map.items():
+        tbss3 = fsl.Tbss3postreg(**{name: settings[1]})
+        yield assert_equal, tbss3.cmdline, tbss3.cmd+' '+settings[0]
+
+    
+def test_tbss_4_prestats():
+    pass
+    # make sure command gets called
+
+
+    # test raising error with mandatory args absent
+
+
+    # .inputs based parameters setting
+
+
+    # .run based parameter setting
+
+
+    # test generation of outfile
+
+
+    # test arguments for opt_map
+
+    
+def test_randomise():
+    pass
+    # make sure command gets called
+
+
+    # test raising error with mandatory args absent
+
+
+    # .inputs based parameters setting
+
+
+    # .run based parameter setting
+
+
+    # test generation of outfile
+
+
+    # test arguments for opt_map
+    opt_map ={'input_4D':                           '-i %s',
+              'output_rootname':                    '-o %s',
+              'demean_data':                        '-D',
+              'one_sample_gmean':                   '-1',
+              'mask_image':                         '-m %s',
+              'design_matrix':                      '-d %s',
+              't_contrast':                         '-t %s',
+              'f_contrast':                         '-f %s',
+              'xchange_block_labels':               '-e %s',
+              'print_unique_perm':                  '-q',
+              'print_info_parallelMode':            '-Q',
+              'num_permutations':                   '-n %d',
+              'vox_pvalus':                         '-x',
+              'fstats_only':                        '--fonly',
+              'thresh_free_cluster':                '-T',
+              'thresh_free_cluster_2Dopt':          '--T2',
+              'cluster_thresholding':               '-c %0.2f',
+              'cluster_mass_thresholding':          '-C %0.2f',
+              'fcluster_thresholding':              '-F %0.2f',
+              'fcluster_mass_thresholding':         '-S %0.2f',
+              'variance_smoothing':                 '-v %0.2f',
+              'diagnostics_off':                    '--quiet',
+              'output_raw':                         '-R',
+              'output_perm_vect':                   '-P',
+              'int_seed':                           '--seed %d',
+              'TFCE_height_param':                  '--tfce_H %0.2f',
+              'TFCE_extent_param':                  '--tfce_E %0.2f',
+              'TFCE_connectivity':                  '--tfce_C %0.2f',
+              'list_num_voxel_EVs_pos':             '--vxl %s',
+              'list_img_voxel_EVs':                 '--vxf %s'}
+
+
+def test_Randomise_parallel():
+    pass
+    # make sure command gets called
+
+
+    # test raising error with mandatory args absent
+
+
+    # .inputs based parameters setting
+
+
+    # .run based parameter setting
+
+
+    # test generation of outfile
+
+
+    # test arguments for opt_map
+
+
+
+def test_fsl_sub():
+    pass
+    # make sure command gets called
+
+
+    # test raising error with mandatory args absent
+
+
+    # .inputs based parameters setting
+
+
+    # .run based parameter setting
+
+
+    # test generation of outfile
+
+
+    # test arguments for opt_map
+
+
+def test_Probtrackx():
+    pass
+    # make sure command gets called
+
+
+    # test raising error with mandatory args absent
+
+
+    # .inputs based parameters setting
+
+
+    # .run based parameter setting
+
+
+    # test generation of outfile
+
+
+    # test arguments for opt_map
+
+
+def test_Proj_thresh():
+    pass
+    # make sure command gets called
+
+
+    # test raising error with mandatory args absent
+
+
+    # .inputs based parameters setting
+
+
+    # .run based parameter setting
+
+
+    # test generation of outfile
+
+
+    # test arguments for opt_map
+
+    
+
+def test_Find_the_biggest():
+    pass
+    # make sure command gets called
+
+
+    # test raising error with mandatory args absent
+
+
+    # .inputs based parameters setting
+
+
+    # .run based parameter setting
+
+
+    # test generation of outfile
+
+
+    # test arguments for opt_map
+    
+
+    
+#----------------------------------------------------------------------------------------------------------------
+
 
