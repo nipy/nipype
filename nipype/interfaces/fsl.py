@@ -17,9 +17,12 @@ See the docstrings of the individual classes for examples.
 """
 
 import os
+import re
 import subprocess
 from copy import deepcopy
 from glob import glob
+import warnings
+
 from nipype.externals.pynifti import load
 from nipype.utils.filemanip import (fname_presuffix, list_to_filename)
 from nipype.interfaces.base import (Bunch, CommandLine, Interface,
@@ -27,9 +30,8 @@ from nipype.interfaces.base import (Bunch, CommandLine, Interface,
 from nipype.utils import setattr_on_read
 from nipype.utils.docparse import get_doc
 from nipype.utils.misc import container_to_string, is_container
-import warnings
-warn = warnings.warn
 
+warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 class FSLInfo(object):
