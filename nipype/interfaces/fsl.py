@@ -1947,7 +1947,7 @@ class Fslroi(FSLCommand):
             if not self.inputs.outfile:
                 # If the outfile is not specified but the infile is,
                 # generate an outfile
-                pth, fname = os.path.split(self.inputs['infile'])
+                pth, fname = os.path.split(self.inputs.infile)
                 newpath=self.inputs.get('cwd', pth)
                 self.inputs.outfile = fname_presuffix(fname, suffix='_roi',
                                                       newpath=newpath)
@@ -2032,7 +2032,7 @@ class Fslroi(FSLCommand):
         if self.inputs.outfile:
             outfile = self.inputs.outfile
         else:
-            pth,fname = os.path.split(self.inputs['infile'])
+            pth,fname = os.path.split(self.inputs.infile)
             outfile = os.path.join(self.inputs.get('cwd',pth),
                                    fname_presuffix(fname,suffix='_roi'))
         assert len(glob(outfile))==1, \
