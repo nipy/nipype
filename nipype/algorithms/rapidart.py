@@ -60,9 +60,9 @@ class ArtifactDetect(Interface):
             Threshold to use to detect motion-related outliers when
             normalized motion is being used (see ``use_norm``)
         rotation_threshold : float
-            Threshold to use to detect rotation-related outliers
+            Threshold (in radians) to use to detect rotation-related outliers
         translation_threshold : float
-            Threshold to use to detect translation-related outliers
+            Threshold (in mm) to use to detect translation-related outliers
         zintensity_threshold : float
             Intensity Z-threshold use to detection images that
             deviate from the mean
@@ -75,7 +75,7 @@ class ArtifactDetect(Interface):
             voxels are used, unless one of these mask types are
             defined.
         mask_file : filename
-            Mask file to be used is mask_type is 'file'.
+            Mask file to be used if mask_type is 'file'.
         mask_threshold : float
             Mask threshold to be used if mask_type is 'thresh'.
         intersect_mask : boolean
