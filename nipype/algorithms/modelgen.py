@@ -233,8 +233,8 @@ class SpecifyModel(Interface):
         % hrf  - hemodynamic response function
         % p    - parameters of the response function
         
-        >>> import nipype.interfaces.spm as spm
-        >>> print spm.SpecifyModel()._spm_hrf(2)
+        >>> import nipype.algorithms.modelgen as model
+        >>> print model.SpecifyModel()._spm_hrf(2)
         [  0.00000000e+00   8.65660810e-02   3.74888236e-01   3.84923382e-01
            2.16117316e-01   7.68695653e-02   1.62017720e-03  -3.06078117e-02
           -3.73060781e-02  -3.08373716e-02  -2.05161334e-02  -1.16441637e-02

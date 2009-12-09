@@ -15,18 +15,21 @@ import networkx as nx
 import numpy as np
 
 from nipype.interfaces.base import CommandLine
+from nipype.utils.filemanip import fname_presuffix
 
 LOG_FILENAME = 'pypeline.log'
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(name)-2s %(levelname)-2s %(message)s',
+#logger.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(name)-2s '\
+                        '%(levelname)-2s %(message)s',
                     datefmt='%y-%m-%d %H:%M:%S',
                     filename=LOG_FILENAME,
-                    filemode='w')
+                    filemode='a')
+handler = logging.handlers.RotatingFileHandler(LOG_FILENAME,
+                                               maxBytes=50000,
+                                               backupCount=5)
 logger = logging.getLogger('engine')
-#logger.setLevel(logging.DEBUG)
-handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=50000, backupCount=5)
 logger.addHandler(handler)
-
 
 def walk(children, level=0, path=None, usename=True):
     """Generate all the full paths in a tree, as a dict.
@@ -155,14 +158,11 @@ class Pipeline(object):
         """
         self._graph.add_nodes_from(nodes)
 
-    def show_graph(self, prog='dot', use_execgraph=False, show_connectinfo=False):
+    def show_graph(self, use_execgraph=False, show_connectinfo=False, dotfilename='graph.dot'):
         """ Displays the graph layout of the pipeline
 
         Parameters
         ----------
-        prog : string
-            Graphviz program to use for networkx.graphviz_layout
-
         use_execgraph : boolean
             Indicates whether to use the specification graph or the
             execution graph. default [False]
@@ -184,27 +184,20 @@ class Pipeline(object):
                 S.add_edge(e[0], e[1], l=str(data['connect']))
             else:
                 S.add_edge(e[0], e[1])
-        """
-        # alternate attempt to show connection info
-        newedges = []
-        edgenames = []
-        for i,e in enumerate(self._graph.edges()):
-            data = self._graph.get_edge_data(*e)
-            prenode = '->'.join((e[0].name,e[1].name))
-            newedges.append((prenode,
-                             str(data['connect'])))
-            edgenames.append(prenode)
-        edgenames = sorted(edgenames)
-        for i in range(len(edgenames)-1):
-            newedges.append((edgenames[i],edgenames[i+1]))
-        if newedges:
-            S.add_edges_from(newedges)
-        """
-        pos = nx.graphviz_layout(S, prog=prog)
+        dotfilename = fname_presuffix(dotfilename,
+                                      suffix='.dot',
+                                      use_ext=False,
+                                      newpath=self.config['workdir'])
+        nx.write_dot(S, dotfilename)
+        logger.info('Creating dot file: %s'%dotfilename)
+        cmd = 'dot -Tpng -O %s'%dotfilename
+        res = CommandLine(cmd).run()
+        if res.runtime.returncode:
+            logger.warn('dot2png: %s',res.runtime.stderr)
+        pos = nx.graphviz_layout(S, prog='dot')
         nx.draw(S, pos)
         if show_connectinfo:
             nx.draw_networkx_edge_labels(S, pos)
-        nx.write_dot(S, os.path.join(self.config['workdir'], 'graph.dot'))
         return S
 
     def run(self):
@@ -215,7 +208,7 @@ class Pipeline(object):
         if self.ipythonclient:
             try:
                 self.mec = self.ipythonclient.MultiEngineClient()
-            except:
+            except RuntimeError:
                 warn("No clients found, running serially for now.")
         if self.mec:
             self.run_with_manager()
@@ -265,9 +258,18 @@ class Pipeline(object):
             if relocate:
                 node.run(updatehash=relocate)
             else:
-                node.run()
-                if issubclass(node._interface.__class__,CommandLine):
-                    logger.info('cmd: ' + node._interface.cmdline)
+                try:
+                    if issubclass(node._interface.__class__,CommandLine):
+                        logger.info('Running cmd: ' + node._interface.cmdline)
+                    if node.disk_based:
+                        logger.info('in: ' + node._output_directory())
+                    node.run()
+                except:
+                    # bare except, but i really don't know where a
+                    # node might fail
+                    message = ['Node %s failed to run.'%node.id]
+                    logger.error(message)
+                    raise
 
     def _generate_dependency_list(self):
         """ Generates a dependency list for a list of graphs. Adds the

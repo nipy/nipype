@@ -11,25 +11,26 @@ These functions include:
 
 """
 
+import os
+from glob import glob
+from copy import deepcopy
+
+import numpy as np
+from scipy import signal
+import scipy.io as sio
+
 from nipype.interfaces.base import Bunch, InterfaceResult, Interface
 from nipype.externals.pynifti import load
 from nipype.utils.filemanip import fname_presuffix, fnames_presuffix, filename_to_list, list_to_filename
 from nipype.utils.misc import find_indices
-import os
-from glob import glob
-from copy import deepcopy
-import numpy as np
-from scipy import signal
-import scipy.io as sio
 #import matplotlib as mpl
 #import matplotlib.pyplot as plt
 #import traceback
 
 
 class ArtifactDetect(Interface):
-    """Detects outliers in a functional imaging series depending on
-    the intensity and motion parameters. It also generates stimulus
-    correlated motion information and other statistics.
+    """Detects outliers in a functional imaging series depending on the
+    intensity and motion parameters.  It also generates other statistics.
     """
 
     def __init__(self, *args, **inputs):
@@ -40,9 +41,9 @@ class ArtifactDetect(Interface):
         """
         Parameters
         ----------
-        realigned_files : filename(s)
+        realigned_files : filename(s) string or list
             Names of realigned functional data files
-        realignment_parameters : filename(s)
+        realignment_parameters : filename(s) string or list
             Names of realignment parameters corresponding to the
             functional data files
         parameter_source : string
@@ -53,35 +54,33 @@ class ArtifactDetect(Interface):
             and intensity paramter (second element) estimates in order
             to determine outliers.  (default is [True, True])
         use_norm : boolean, optional
-            Use the norm of the motion parameters in order to
-            determine outliers.  Requires ``norm_threshold`` to be set.
-            (default is True)
+            Uses a composite of the motion parameters in order to determine
+            outliers.  Requires ``norm_threshold`` to be set.  (default is
+            True) 
         norm_threshold: float
             Threshold to use to detect motion-related outliers when
-            normalized motion is being used (see ``use_norm``)
+            composite motion is being used (see ``use_norm``)
         rotation_threshold : float
             Threshold (in radians) to use to detect rotation-related outliers
         translation_threshold : float
             Threshold (in mm) to use to detect translation-related outliers
         zintensity_threshold : float
-            Intensity Z-threshold use to detection images that
-            deviate from the mean
+            Intensity Z-threshold use to detection images that deviate from the
+            mean 
         mask_type : {'spm_global', 'file', 'thresh'}
-            Type of mask that should be used to mask the functional
-            data.  *spm_global* uses an spm_global like calculation to
-            determine the brain mask.  *file* specifies a brain mask
-            file (should be an image file consisting of 0s and 1s).
-            *thresh* specifies a threshold to use.  By default all
-            voxels are used, unless one of these mask types are
-            defined.
+            Type of mask that should be used to mask the functional data.
+            *spm_global* uses an spm_global like calculation to determine the
+            brain mask.  *file* specifies a brain mask file (should be an image
+            file consisting of 0s and 1s). *thresh* specifies a threshold to
+            use.  By default all voxels are used, unless one of these mask
+            types are defined.
         mask_file : filename
             Mask file to be used if mask_type is 'file'.
         mask_threshold : float
             Mask threshold to be used if mask_type is 'thresh'.
         intersect_mask : boolean
-            Intersect the masks when computed from spm_global.
-            (default is True)
-
+            Intersect the masks when computed from spm_global. (default is
+            True) 
         """
         print self.inputs_help.__doc__
         
@@ -130,17 +129,16 @@ class ArtifactDetect(Interface):
         Parameters
         ----------
         outlier_files : filename(s)
-            One file for each functional run containing a list of
-            0-based indices corresponding to outlier volumes
+            One file for each functional run containing a list of 0-based
+            indices corresponding to outlier volumes 
         intensity_files : filename(s)
-            One file for each functional run containing the global
-            intensity values determined from the brainmask
+            One file for each functional run containing the global intensity
+            values determined from the brainmask 
         statistic_files : filename(s)
-            One file for each functional run containing
-            information about the different types of artifacts and
-            if design info is provided then details of stimulus
-            correlated motion and a listing or artifacts by event
-            type. 
+            One file for each functional run containing information about the
+            different types of artifacts and if design info is provided then
+            details of stimulus correlated motion and a listing or artifacts by
+            event type. 
         """
         outputs = Bunch(outlier_files=None,
                         intensity_files=None,
