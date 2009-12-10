@@ -628,93 +628,176 @@ def test_tbss_3_postreg():
 
     
 def test_tbss_4_prestats():
-    pass
-    # make sure command gets called
+    tbss = fsl.Tbss4prestats()
 
+    # make sure command gets called
+    yield assert_equal, tbss.cmd, 'tbss_4_prestats'
 
     # test raising error with mandatory args absent
-
+    yield assert_raises, AttributeError, tbss.run
 
     # .inputs based parameters setting
-
-
-    # .run based parameter setting
-
-
-    # test generation of outfile
-
+    tbss.inputs.threshold=0.3
+    yield assert_equal, tbss.cmdline,'tbss_4_prestats 0.3'
+    
+    tbss2 = fsl.Tbss4prestats(threshold=0.4)
+    yield assert_equal, tbss2.cmdline,'tbss_4_prestats 0.4' 
+    
+    tbss3 = fsl.Tbss4prestats()
+    results = tbss3.run(threshold=0.2,noseTest=True)
+    yield assert_equal, results.runtime.cmdline, 'tbss_4_prestats 0.2'    
 
     # test arguments for opt_map
+    # Tbss4prestats doesn't have an opt_map{}
+
 
     
 def test_randomise():
-    pass
-    # make sure command gets called
 
+    rand = fsl.Randomise()
+
+    # make sure command gets called
+    yield assert_equal, rand.cmd, 'randomise'
 
     # test raising error with mandatory args absent
-
+    yield assert_raises, AttributeError, rand.run 
 
     # .inputs based parameters setting
-
+    rand.inputs.input_4D = 'infile.nii'
+    rand.inputs.output_rootname = 'outfile'
+    rand.inputs.design_matrix = 'design.mat'
+    rand.inputs.t_contrast = 'infile.con'
+    
+    actualCmdline = sorted(rand.cmdline.split())
+    cmd = 'randomise -i infile.nii -o outfile -d design.mat -t infile.con'
+    desiredCmdline = sorted(cmd.split())    
+    yield assert_equal, actualCmdline, desiredCmdline
 
     # .run based parameter setting
+    rand2 = fsl.Randomise(input_4D='infile2',
+                          output_rootname='outfile2',
+                          f_contrast='infile.f',
+                          one_sample_gmean=True,
+                          int_seed=4)
+              
+    actualCmdline = sorted(rand2.cmdline.split())
+    cmd = 'randomise -i infile2 -o outfile2 -1 -f infile.f --seed 4'
+    desiredCmdline = sorted(cmd.split())    
+    yield assert_equal, actualCmdline, desiredCmdline
 
-
-    # test generation of outfile
-
+    rand3=fsl.Randomise()
+    results=rand3.run(input_4D='infile3',
+                      output_rootname='outfile3')
+    yield assert_equal, results.runtime.cmdline, \
+          'randomise -i infile3 -o outfile3'    
 
     # test arguments for opt_map
-    opt_map ={'input_4D':                           '-i %s',
-              'output_rootname':                    '-o %s',
-              'demean_data':                        '-D',
-              'one_sample_gmean':                   '-1',
-              'mask_image':                         '-m %s',
-              'design_matrix':                      '-d %s',
-              't_contrast':                         '-t %s',
-              'f_contrast':                         '-f %s',
-              'xchange_block_labels':               '-e %s',
-              'print_unique_perm':                  '-q',
-              'print_info_parallelMode':            '-Q',
-              'num_permutations':                   '-n %d',
-              'vox_pvalus':                         '-x',
-              'fstats_only':                        '--fonly',
-              'thresh_free_cluster':                '-T',
-              'thresh_free_cluster_2Dopt':          '--T2',
-              'cluster_thresholding':               '-c %0.2f',
-              'cluster_mass_thresholding':          '-C %0.2f',
-              'fcluster_thresholding':              '-F %0.2f',
-              'fcluster_mass_thresholding':         '-S %0.2f',
-              'variance_smoothing':                 '-v %0.2f',
-              'diagnostics_off':                    '--quiet',
-              'output_raw':                         '-R',
-              'output_perm_vect':                   '-P',
-              'int_seed':                           '--seed %d',
-              'TFCE_height_param':                  '--tfce_H %0.2f',
-              'TFCE_extent_param':                  '--tfce_E %0.2f',
-              'TFCE_connectivity':                  '--tfce_C %0.2f',
-              'list_num_voxel_EVs_pos':             '--vxl %s',
-              'list_img_voxel_EVs':                 '--vxf %s'}
+    opt_map ={'demean_data':                        ('-D', True),
+              'one_sample_gmean':                   ('-1', True),
+              'mask_image':                         ('-m inp_mask', 'inp_mask'),
+              'design_matrix':                      ('-d design.mat', 'design.mat'),
+              't_contrast':                         ('-t input.con', 'input.con'),
+              'f_contrast':                         ('-f input.fts', 'input.fts'),
+              'xchange_block_labels':               ('-e design.grp', 'design.grp'),
+              'print_unique_perm':                  ('-q', True),
+              'print_info_parallelMode':            ('-Q', True),
+              'num_permutations':                   ('-n 10', 10),
+              'vox_pvalus':                         ('-x', True),
+              'fstats_only':                        ('--fonly', True),
+              'thresh_free_cluster':                ('-T', True),
+              'thresh_free_cluster_2Dopt':          ('--T2', True),
+              'cluster_thresholding':               ('-c 0.20', 0.20),
+              'cluster_mass_thresholding':          ('-C 0.40', 0.40),
+              'fcluster_thresholding':              ('-F 0.10', 0.10),
+              'fcluster_mass_thresholding':         ('-S 0.30', 0.30),
+              'variance_smoothing':                 ('-v 0.20', 0.20),
+              'diagnostics_off':                    ('--quiet', True),
+              'output_raw':                         ('-R', True),
+              'output_perm_vect':                   ('-P', True),
+              'int_seed':                           ('--seed 20', 20),
+              'TFCE_height_param':                  ('--tfce_H 0.11', 0.11),
+              'TFCE_extent_param':                  ('--tfce_E 0.50', 0.50),
+              'TFCE_connectivity':                  ('--tfce_C 0.30', 0.30),
+              'list_num_voxel_EVs_pos':             ('--vxl 1,2,3,4', '1,2,3,4'),
+              'list_img_voxel_EVs':                 ('--vxf 6,7,8,9,3', '6,7,8,9,3')}
 
+    for name, settings in opt_map.items():
+        rand4 = fsl.Randomise(input_4D='infile',output_rootname='root',**{name: settings[1]})
+        yield assert_equal, rand4.cmdline, rand4.cmd+' -i infile -o root '+settings[0]
+
+    
 
 def test_Randomise_parallel():
-    pass
-    # make sure command gets called
+    rand = fsl.Randomise_parallel()
 
+    # make sure command gets called
+    yield assert_equal, rand.cmd, 'randomise_parallel'
 
     # test raising error with mandatory args absent
-
+    yield assert_raises, AttributeError, rand.run 
 
     # .inputs based parameters setting
-
+    rand.inputs.input_4D = 'infile.nii'
+    rand.inputs.output_rootname = 'outfile'
+    rand.inputs.design_matrix = 'design.mat'
+    rand.inputs.t_contrast = 'infile.con'
+    
+    actualCmdline = sorted(rand.cmdline.split())
+    cmd = 'randomise_parallel -i infile.nii -o outfile -d design.mat -t infile.con'
+    desiredCmdline = sorted(cmd.split())    
+    yield assert_equal, actualCmdline, desiredCmdline
 
     # .run based parameter setting
+    rand2 = fsl.Randomise_parallel(input_4D='infile2',
+                          output_rootname='outfile2',
+                          f_contrast='infile.f',
+                          one_sample_gmean=True,
+                          int_seed=4)
+              
+    actualCmdline = sorted(rand2.cmdline.split())
+    cmd = 'randomise_parallel -i infile2 -o outfile2 -1 -f infile.f --seed 4'
+    desiredCmdline = sorted(cmd.split())    
+    yield assert_equal, actualCmdline, desiredCmdline
 
-
-    # test generation of outfile
-
+    rand3=fsl.Randomise_parallel()
+    results=rand3.run(input_4D='infile3',
+                      output_rootname='outfile3')
+    yield assert_equal, results.runtime.cmdline, \
+          'randomise_parallel -i infile3 -o outfile3'    
 
     # test arguments for opt_map
+    opt_map ={'demean_data':                        ('-D', True),
+              'one_sample_gmean':                   ('-1', True),
+              'mask_image':                         ('-m inp_mask', 'inp_mask'),
+              'design_matrix':                      ('-d design.mat', 'design.mat'),
+              't_contrast':                         ('-t input.con', 'input.con'),
+              'f_contrast':                         ('-f input.fts', 'input.fts'),
+              'xchange_block_labels':               ('-e design.grp', 'design.grp'),
+              'print_unique_perm':                  ('-q', True),
+              'print_info_parallelMode':            ('-Q', True),
+              'num_permutations':                   ('-n 10', 10),
+              'vox_pvalus':                         ('-x', True),
+              'fstats_only':                        ('--fonly', True),
+              'thresh_free_cluster':                ('-T', True),
+              'thresh_free_cluster_2Dopt':          ('--T2', True),
+              'cluster_thresholding':               ('-c 0.20', 0.20),
+              'cluster_mass_thresholding':          ('-C 0.40', 0.40),
+              'fcluster_thresholding':              ('-F 0.10', 0.10),
+              'fcluster_mass_thresholding':         ('-S 0.30', 0.30),
+              'variance_smoothing':                 ('-v 0.20', 0.20),
+              'diagnostics_off':                    ('--quiet', True),
+              'output_raw':                         ('-R', True),
+              'output_perm_vect':                   ('-P', True),
+              'int_seed':                           ('--seed 20', 20),
+              'TFCE_height_param':                  ('--tfce_H 0.11', 0.11),
+              'TFCE_extent_param':                  ('--tfce_E 0.50', 0.50),
+              'TFCE_connectivity':                  ('--tfce_C 0.30', 0.30),
+              'list_num_voxel_EVs_pos':             ('--vxl '+repr([1,2,3,4]), repr([1,2,3,4])),
+              'list_img_voxel_EVs':                 ('--vxf '+repr([6,7,8,9,3]), repr([6,7,8,9,3]))}
+
+    for name, settings in opt_map.items():
+        rand4 = fsl.Randomise_parallel(input_4D='infile',output_rootname='root',**{name: settings[1]})
+        yield assert_equal, rand4.cmdline, rand4.cmd+' -i infile -o root '+settings[0]
 
 
 
@@ -736,6 +819,23 @@ def test_fsl_sub():
 
 
     # test arguments for opt_map
+##     opt_map ={'EstimatedJobLength':            ('-T 0.22', 0.22),
+##               'QueueType':                     ('-q long', 'long'),
+##               'Architecture':                  ('-a amd64', 'amd64'),
+##               'JobPriority':                   ('-p 0', 0),
+##               'Email':                         ('-M %s',
+##               'Hold':                          ('-j %d',
+##               'CommandScript':                 ('-t %s',
+##               'Jobname':                       ('-N %s',
+##               'logFilePath':                   ('-l %s',
+##               'SGEmailOpts':                   ('-m %s',
+##               'ScriptFlags4SGEqueue':          ('-F',
+##               'Verbose':                       ('-v'}
+##     
+##    for name, settings in opt_map.items():
+##        fsub4 = fsl.Fsl_sub(input_4D='infile',output_rootname='root',**{name: settings[1]})
+##        yield assert_equal, fsub4.cmdline, fsub4.cmd+' -i infile -o root '+settings[0]
+##     
 
 
 def test_Probtrackx():
