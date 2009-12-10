@@ -1944,15 +1944,10 @@ class Fslroi(FSLCommand):
         # Add infile and outfile to the args if they are specified
         if self.inputs.infile:
             allargs.insert(0, self.inputs.infile)
-            if not self.inputs.outfile:
-                # If the outfile is not specified but the infile is,
-                # generate an outfile
-                pth, fname = os.path.split(self.inputs.infile)
-                newpath=self.inputs.get('cwd', pth)
-                self.inputs.outfile = fname_presuffix(fname, suffix='_roi',
-                                                      newpath=newpath)
-        if self.inputs.outfile:
-            allargs.insert(1, self.inputs.outfile)
+            outfile = fsl_info.gen_fname(self.inputs.infile,
+                                         self.inputs.outfile,
+                                         suffix='_roi')
+            allargs.insert(1, outfile)
 
         #concat all numeric variables into a string separated by space given the user's option
         dim = [ self.inputs.xmin,self.inputs.xsize,self.inputs.ymin,self.inputs.ysize,
@@ -1966,7 +1961,7 @@ class Fslroi(FSLCommand):
         
         return allargs
 
-    def run(self, infile=None, outfile=None, **inputs):
+    def run(self, cwd=None, infile=None, outfile=None, **inputs):
         """Execute the command.
         >>> from nipype.interfaces import fsl
         >>> fslroi = fsl.Fslroi(infile='foo.nii', outfile='bar.nii', tmin=0, tsize=1)
@@ -1981,11 +1976,14 @@ class Fslroi(FSLCommand):
             raise AttributeError('fslroi requires an input file')
         if outfile:
             self.inputs.outfile = outfile
+        if cwd is None:
+            cwd = os.getcwd()
+
         self.inputs.update(**inputs)
         
-        results = self._runner()
+        results = self._runner(cwd=cwd)
         if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
+            results.outputs = self.aggregate_outputs(cwd)
 
         return results
 
@@ -2013,7 +2011,7 @@ class Fslroi(FSLCommand):
         outputs = Bunch(outfile=None)
         return outputs
 
-    def aggregate_outputs(self):
+    def aggregate_outputs(self, cwd=None):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
@@ -2029,13 +2027,11 @@ class Fslroi(FSLCommand):
 
         """
         outputs = self.outputs()
-        if self.inputs.outfile:
-            outfile = self.inputs.outfile
-        else:
-            pth,fname = os.path.split(self.inputs.infile)
-            outfile = os.path.join(self.inputs.get('cwd',pth),
-                                   fname_presuffix(fname,suffix='_roi'))
-        assert len(glob(outfile))==1, \
+        outputs.outfile = fsl_info.gen_fname(self.inputs.infile,
+                                self.inputs.outfile, cwd=cwd, suffix='_roi', 
+                                check=True)
+        return outputs
+        assert len(glob(outputs.outfile))==1, \
             "Incorrect number or no output files %s generated"%outfile
         outputs.outfile = outfile
         
