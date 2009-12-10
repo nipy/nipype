@@ -5,9 +5,6 @@ import os
 import re
 import shutil
 from glob import glob
-
-import numpy as np
-
 # The md5 module is deprecated in Python 2.6, but hashlib is only
 # available as an external package for versions of python before 2.6.
 # Both md5 algorithms appear to return the same result.
@@ -15,6 +12,8 @@ try:
     from hashlib import md5
 except ImportError:
     from md5 import md5
+
+import numpy as np
 
 from nipype.utils.misc import is_container
 
@@ -124,10 +123,10 @@ def copyfile(originalfile, newfile,copy=False):
     
     """
     if os.name is 'posix' and not copy and not os.path.islink(newfile):
-        print "linking %s to %s"%(originalfile,newfile)
+        #print "linking %s to %s"%(originalfile,newfile)
         os.symlink(originalfile,newfile)
     else:
-        print "copying %s to %s"%(originalfile,newfile)
+        #print "copying %s to %s"%(originalfile,newfile)
         shutil.copyfile(originalfile, newfile)
 
 def copyfiles(filelist, dest, copy=False):

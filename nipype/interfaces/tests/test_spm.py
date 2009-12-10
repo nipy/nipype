@@ -93,15 +93,17 @@ def test_generate_job():
 def test_make_matlab_command():
     mlab = spm.SpmMatlabCommandLine()
     outdir = mkdtemp()
-    mlab.inputs.cwd = outdir
+    old_wd = os.getcwd()
+    os.chdir(outdir)
     contents = {'contents':[1,2,3,4]}
     cmdline,script = mlab._make_matlab_command([contents])
     yield assert_equal, cmdline, \
         ' '.join((matlab_cmd, '-r "pyscript_jobname;exit" '))
     yield assert_true, 'jobs{1}.jobtype{1}.jobname{1}.contents(3) = 3;' in script
-    yield assert_true, os.path.exists(os.path.join(mlab.inputs.cwd,'pyscript_jobname.m'))
+    yield assert_true, os.path.exists(os.path.join(os.getcwd(),'pyscript_jobname.m'))
     if os.path.exists(outdir):
         rmtree(outdir)
+    os.chdir(old_wd)
 
 def test_spm_realign_inputs():
     realign = spm.Realign()

@@ -1902,8 +1902,8 @@ class Level1Design(Interface):
     
     def aggregate_outputs(self):
         outputs = self.outputs()
-        outputs.fsf_files = glob(os.path.abspath(os.path.join(self.inputs.cwd,'run*.fsf')))
-        outputs.ev_files  = glob(os.path.abspath(os.path.join(self.inputs.cwd,'ev_*.txt')))
+        outputs.fsf_files = glob(os.path.abspath(os.path.join(os.getcwd(),'run*.fsf')))
+        outputs.ev_files  = glob(os.path.abspath(os.path.join(os.getcwd(),'ev_*.txt')))
         return outputs
 
 class Fslroi(FSLCommand):
@@ -2070,7 +2070,7 @@ class Eddy_correct(FSLCommand):
                 # If the outfile is not specified but the infile is,
                 # generate an outfile
                 pth, fname = os.path.split(self.inputs.infile)
-                newpath=self.inputs.get('cwd', pth)
+                newpath=os.getcwd()
                 self.inputs.outfile = fname_presuffix(fname, suffix='_eddc',
                                                       newpath=newpath)
         if self.inputs.outfile:
@@ -2147,7 +2147,7 @@ class Eddy_correct(FSLCommand):
             outfile = self.inputs.outfile
         else:
             pth,fname = os.path.split(self.inputs.infile)
-            outfile = os.path.join(self.inputs.get('cwd',pth),
+            outfile = os.path.join(os.getcwd(),
                                    fname_presuffix(fname,suffix='_eddc'))
             
         if len(glob(outfile))==1:
@@ -2527,7 +2527,7 @@ class Fslmaths(FSLCommand):
                 # If the outfile is not specified but the infile is,
                 # generate an outfile
                 pth, fname = os.path.split(self.inputs.infile)
-                newpath=self.inputs.get('cwd', pth)
+                newpath=os.getcwd()
                 self.inputs.outfile = fname_presuffix(fname, suffix='_maths',
                                                       newpath=newpath)
                 
@@ -2606,7 +2606,7 @@ class Fslmaths(FSLCommand):
             outfile = self.inputs.outfile
         else:
             pth,fname = os.path.split(self.inputs.infile)
-            outfile = os.path.join(self.inputs.get('cwd',pth),
+            outfile = os.path.join(os.getcwd(),
                                    fname_presuffix(fname,suffix='_maths'))
         assert len(glob(outfile))==1, \
             "Incorrect number or no output files %s generated"%outfile

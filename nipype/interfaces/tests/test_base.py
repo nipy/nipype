@@ -39,10 +39,7 @@ def test_bunch_hash():
                   otherthing = 'blue',
                   yat = True)
     newbdict, bhash = b._get_bunch_hash()
-    newbhash = nii.md5()
-    # Be sure to sort the dictionary before generating the hash.
-    newbhash.update(str(sorted(newbdict.items())))
-    yield assert_equal, bhash, newbhash.hexdigest()
+    yield assert_equal, bhash, 'ddcc7b4ec5675df8cf317a48bd1857fa'
     # Make sure the hash stored in the json file for `infile` is correct.
     jshash = nii.md5()
     fp = file(json_pth)

@@ -52,8 +52,14 @@ class MatlabCommandLine(CommandLine):
 
             script_lines : string
                 matlab_script or function name or matlab code to run
+            script_name : string
+                named of matlab script to generate if mfile is True
+                default [pyscript]
+            mfile : boolean
+                True if an m-file containing the script is generated.
+                default [True]
             cwd : string
-                working directory for command
+                working directory for command.  default [os.getcwd()]
         """
         print self.inputs_help.__doc__
         
@@ -61,9 +67,9 @@ class MatlabCommandLine(CommandLine):
         self.inputs = Bunch(script_lines='',
                             script_name='pyscript',
                             mfile=True,
-                            cwd='.')
+                            cwd=None)
 
-    def run(self):
+    def run(self,**kwargs):
         
         results = self._runner()
         if 'command not found' in results.runtime.stderr:
@@ -89,7 +95,7 @@ class MatlabCommandLine(CommandLine):
     def _gen_matlab_command(self,script_lines='',script_name='pyscript',
                                  mfile = True,cwd = None):
         if cwd is None:
-            cwd = self.inputs.get('cwd','.')
+            cwd = os.getcwd()
         # generate the script
         prescript  = ''
         if mfile:

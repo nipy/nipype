@@ -92,7 +92,7 @@ class FSCommandLine(CommandLine):
         """
         # This is expected to populate `_cmdline` for _runner to work
         self._compile_command()
-        result = self._runner(cwd=self.inputs.get('cwd','.'))
+        result = self._runner(cwd=os.getcwd())
         if result.runtime.returncode == 0:
             result.outputs = self.aggregate_outputs()
         return result
@@ -312,7 +312,7 @@ class Resample(FSCommandLine):
         for i,f in enumerate(valid_inputs['infile']):
             path,fname = os.path.split(f)
             outfile.insert(i, fname_presuffix(fname, suffix=self.inputs.outfile_postfix))
-            outfile[i] = os.path.abspath(os.path.join(self.inputs.get('cwd','.'),outfile[i]))
+            outfile[i] = os.path.abspath(os.path.join(os.getcwd(),outfile[i]))
             single_cmd = '%s -vs %d %d %d %s %s;' % (self.cmd, vs[0],vs[1],vs[2], f, outfile[i])
             cmd.extend([single_cmd])
         self._cmdline =  ' '.join(cmd)
@@ -323,7 +323,7 @@ class Resample(FSCommandLine):
         for i,f in enumerate(filename_to_list(self.inputs.infile)):
             path,fname = os.path.split(f)
             f = fname_presuffix(fname, suffix=self.inputs.outfile_postfix)
-            f = os.path.abspath(os.path.join(self.inputs.get('cwd','.'),f))
+            f = os.path.abspath(os.path.join(os.getcwd(),f))
             assert glob(f)==[f], 'outputfile %s was not generated'%f
             outputs.outfile.insert(i,f)
         if len(outfile)==1:

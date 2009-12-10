@@ -159,12 +159,14 @@ class Bunch(object):
                 # `item` is not a file or string.
                 continue
         dict_withhash = self.dictcopy()
+        dict_nofilename = self.dictcopy()
         for item in infile_list:
             dict_withhash[item] = self._hash_infile(dict_withhash, item)
+            dict_nofilename[item] = [val[1] for val in dict_withhash[item]]
         # Sort the items of the dictionary, before hashing the string
         # representation so we get a predictable order of the
         # dictionary.
-        sorted_dict = str(sorted(dict_withhash.items()))
+        sorted_dict = str(sorted(dict_nofilename.items()))
         return (dict_withhash, md5(sorted_dict).hexdigest())
             
     def __pretty__(self, p, cycle):
@@ -413,12 +415,10 @@ class CommandLine(Interface):
         Arguments
         ---------
         cwd : str
-            Note that unlike calls to Popen, cwd=None will still check
-            self.inputs.cwd!  Use an alternative like '.' if you need it
+            default os.getcwd()
         """
         if cwd is None:
-            # I'd like to deprecate this -DJC
-            cwd = self.inputs.get('cwd', os.getcwd())
+            cwd = os.getcwd()
         runtime = Bunch(cmdline=self.cmdline, cwd=cwd)
 
         proc  = subprocess.Popen(runtime.cmdline,

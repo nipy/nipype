@@ -22,7 +22,7 @@ import scipy.io as sio
 from nipype.interfaces.base import Bunch, InterfaceResult, Interface
 from nipype.externals.pynifti import load
 from nipype.utils.filemanip import fname_presuffix, fnames_presuffix, filename_to_list, list_to_filename
-from nipype.utils.misc import find_indices
+from nipype.utils.misc import find_indices, is_container
 #import matplotlib as mpl
 #import matplotlib.pyplot as plt
 #import traceback
@@ -148,7 +148,7 @@ class ArtifactDetect(Interface):
     def aggregate_outputs(self):
         outputs = self.outputs()
         for i,f in enumerate(filename_to_list(self.inputs.realigned_files)):
-            outlierfile,intensityfile,statsfile,normfile = self._get_output_filenames(f,self.inputs.get('cwd','.'))
+            outlierfile,intensityfile,statsfile,normfile = self._get_output_filenames(f,os.getcwd())
             outlierfile = glob(outlierfile)
             assert len(outlierfile)==1, 'Outlier file %s not found'%outlierfile
             if outputs.outlier_files is None:
@@ -244,7 +244,7 @@ class ArtifactDetect(Interface):
             normdata = np.sqrt(np.mean(np.power(newpos,2),axis=1))
         return normdata
     
-    def _detect_outliers_core(self,imgfile,motionfile,cwd='.'):
+    def _detect_outliers_core(self, imgfile, motionfile, runidx, cwd=None):
         """
         Core routine for detecting outliers
         
@@ -253,6 +253,8 @@ class ArtifactDetect(Interface):
         imgfile :
         motionfile :
         """
+        if not cwd:
+            cwd = os.getcwd()
         # read in motion parameters
         mc_in = np.loadtxt(motionfile)
         mc = deepcopy(mc_in)
@@ -379,8 +381,7 @@ class ArtifactDetect(Interface):
         funcfilelist = filename_to_list(self.inputs.realigned_files)
         motparamlist = filename_to_list(self.inputs.realignment_parameters)
         for i,imgf in enumerate(funcfilelist):
-            self._detect_outliers_core(imgf,motparamlist[i],
-                                       self.inputs.get('cwd','.'))
+            self._detect_outliers_core(imgf ,motparamlist[i], i, os.getcwd())
         runtime = Bunch(returncode=0,
                         messages=None,
                         errmessages=None)
@@ -458,7 +459,7 @@ class StimulusCorrelation(Interface):
     def aggregate_outputs(self):
         outputs = self.outputs()
         for i,f in enumerate(filename_to_list(self.inputs.realignment_parameters)):
-            corrfile = self._get_output_filenames(f,self.inputs.get('cwd','.'))
+            corrfile = self._get_output_filenames(f,os.getcwd())
             stimcorrfile = glob(corrfile)
             if outputs.stimcorr_files is None:
                 outputs.stimcorr_files = []
@@ -470,11 +471,13 @@ class StimulusCorrelation(Interface):
     def get_input_info(self):
         return []
 
-    def _stimcorr_core(self,motionfile,intensityfile,designmatrix,cwd='.'):
+    def _stimcorr_core(self,motionfile,intensityfile,designmatrix,cwd=None):
         """
         Core routine for determining stimulus correlation
         
         """
+        if not cwd:
+            cwd = os.getcwd()
         # read in motion parameters
         mc_in = np.loadtxt(motionfile)
         g_in  = np.loadtxt(intensityfile)
@@ -532,7 +535,7 @@ class StimulusCorrelation(Interface):
                 nrows.append(mc_in.shape[0])
             matrix = self._get_spm_submatrix(spmmat,sessidx,rows)
             self._stimcorr_core(motparamlist[i],intensityfiles[i],
-                                matrix,self.inputs.get('cwd','.'))
+                                matrix,os.getcwd())
         runtime = Bunch(returncode=0,
                         messages=None,
                         errmessages=None)

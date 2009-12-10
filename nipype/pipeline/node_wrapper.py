@@ -5,12 +5,16 @@ import os
 import sys
 from tempfile import mkdtemp
 from copy import deepcopy
+import logging
 
 from nipype.utils.filemanip import (copyfiles,fname_presuffix, cleandir,
                                     filename_to_list, list_to_filename)
-from nipype.interfaces.base import Bunch, InterfaceResult
+from nipype.interfaces.base import Bunch, InterfaceResult, CommandLine
 from nipype.interfaces.fsl import FSLCommand
 from nipype.utils.filemanip import save_json
+import nipype.pipeline.engine as pe
+
+logger = logging.getLogger('nodewrapper')
 
 class NodeWrapper(object):
     """
@@ -130,9 +134,11 @@ class NodeWrapper(object):
                 fd = open(hashfile,'wt')
                 fd.writelines(str(hashed_inputs))
                 fd.close()
-                print "Unable to write a particular type to the json file"
+                logger.warn('Unable to write a particular type to the json '\
+                                'file') 
             else:
-                print "Unable to open the file in write mode:", hashfile
+                logger.critical('Unable to open the file in write mode: %s'% \
+                                    hashfile)
         
         
     def run(self,updatehash=None):
@@ -140,21 +146,20 @@ class NodeWrapper(object):
         """
         # print "\nInputs:\n" + str(self.inputs) +"\n"
         # check to see if output directory and hash exist
+        logger.info("Executing node: %s"%self.id)
         if self.disk_based:
             outdir = self._output_directory()
             outdir = self._make_output_dir(outdir)
-            # This is a temporary measure while exploring alternatives to
-            # dealing with cwd
-            if not isinstance(self._interface, FSLCommand):
-                self._interface.inputs.cwd = outdir
+            logger.info("in dir: %s"%outdir)
             # Get a dictionary with hashed filenames and a hashvalue
             # of the dictionary itself.
             hashed_inputs, hashvalue = self.inputs._get_bunch_hash()
             hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
+            logger.info("Node hash: %s"%hashvalue)
             if updatehash:
                 self._save_hashfile(hashfile,hashed_inputs)
             if not updatehash and (self.overwrite or not os.path.exists(hashfile)):
-                print "continuing to execute\n"
+                logger.debug("continuing to execute\n")
                 cleandir(outdir)
                 # copy files over and change the inputs
                 if hasattr(self._interface,'get_input_info'):
@@ -183,7 +188,7 @@ class NodeWrapper(object):
                     msg += "\n\tstderr: %s" % self._result.runtime.stderr
                     raise StandardError(msg)
             else:
-                print "skipping\n"
+                logger.debug("skipping execution\n")
                 # change the inputs
                 if hasattr(self._interface,'get_input_info'):
                     for info in self._interface.get_input_info():
@@ -204,10 +209,6 @@ class NodeWrapper(object):
                 self._run_interface(execute=False, cwd=outdir)
         else:
             self._run_interface(execute=True)
-        if self.disk_based:
-            # Should pickle the output
-            pass
-        # print "\nOutputs:\n" + str(self._result.outputs) +"\n"
         return self._result
 
     # XXX This function really seriously needs to check returncodes and similar
@@ -229,38 +230,29 @@ class NodeWrapper(object):
             self._result = InterfaceResult(interface=[], runtime=[],
                                            outputs=Bunch())
             for i,v in enumerate(itervals):
-                print "iterating %s on %s: %s\n"%(self.name, self.iterfield[0], str(v))
+                logger.debug("iterating %s on %s: %s\n"%(self.name,
+                                                         self.iterfield[0],
+                                                         str(v)))
                 self.set_input(self.iterfield[0], v)
                 # XXX - SG - we might consider creating a sub
                 # directory for each v
+                if issubclass(self._interface.__class__,CommandLine):
+                    logger.info('cmd: %s'%self._interface.cmdline)
                 if execute:
-                    cmdline = None
-                    try:
-                        cmdline = self._interface.cmdline
-                    except:
-                        pass
-                    if cmdline is not None:
-                        print "Running command:"
-                        print cmdline
                     # Passing cwd in here is redundant, even for FSLCommand
                     # instances. For FSLCommand, this is an example of another
                     # way we might do it if we decide to ditch the setwd
                     # approach. Again - something should be removed when we
                     # settle on a solution
                     result = self._interface.run(cwd=cwd)
-                    if result.runtime.returncode != 0:
-                        print result.runtime.stderr
+                    if result.runtime.returncode:
+                        raise RuntimeError(result.runtime.stderr)
                     self._result.interface.insert(i, result.interface)
                     self._result.runtime.insert(i, result.runtime)
                     outputs = result.outputs
                 else:
                     # Could also pass in cwd here...
                     outputs = self._interface.aggregate_outputs()
-
-                if outputs is None:
-                    raise Exception('%s failed to properly generate outputs (returncode'
-                          'was 0)' % self.name)
-                
                 for key,val in outputs.iteritems():
                     try:
                         # This has funny default behavior if the length of the
@@ -278,31 +270,19 @@ class NodeWrapper(object):
             else:
                 self.set_input(self.iterfield[0], itervals)
         else:
+            if issubclass(self._interface.__class__,CommandLine):
+                logger.info('cmd: %s'%self._interface.cmdline)
             if execute:
-                cmdline = None
-                try:
-                    cmdline = self._interface.cmdline
-                except:
-                    pass
-                if cmdline is not None:
-                    print "Running command:"
-                    print cmdline
                 self._result = self._interface.run(cwd=cwd)
-                if self._result.runtime.returncode != 0:
-                    print self._result.runtime.stderr
+                if self._result.runtime.returncode:
+                    raise RuntimeError(self._result.runtime.stderr)
             else:
                 # Likewise, cwd could go in here
-                print "Not running command. just collecting outputs:"
+                logger.info("Not running command. just collecting outputs:")
                 aggouts = self._interface.aggregate_outputs()
                 self._result = InterfaceResult(interface=None,
                                                runtime=None,
                                                outputs=aggouts)
-            if self._result.outputs is None:
-                raise Exception('%s failed to properly generate outputs (returncode'
-                                'was 0)\nSTDOUT:\n%s\nSTDERR:\n%s\n' % (self.name,
-                                                                  self._result.runtime.stdout,
-                                                                  self._result.runtime.stderr))
-        
         if cwd is not None:
             os.chdir(old_cwd)
 

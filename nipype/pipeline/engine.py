@@ -6,10 +6,11 @@ The `Pipeline` class provides core functionality for batch processing.
 import os
 import sys
 from copy import deepcopy
-from time import sleep
+from time import sleep, strftime
 from warnings import warn
 import logging
 import logging.handlers
+from traceback import extract_tb
 
 import networkx as nx
 import numpy as np
@@ -18,18 +19,20 @@ from nipype.interfaces.base import CommandLine
 from nipype.utils.filemanip import fname_presuffix
 
 LOG_FILENAME = 'pypeline.log'
-#logger.setLevel(logging.DEBUG)
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(name)-2s '\
-                        '%(levelname)-2s %(message)s',
-                    datefmt='%y-%m-%d %H:%M:%S',
-                    filename=LOG_FILENAME,
-                    filemode='a')
-handler = logging.handlers.RotatingFileHandler(LOG_FILENAME,
-                                               maxBytes=50000,
-                                               backupCount=5)
+logging.basicConfig()
 logger = logging.getLogger('engine')
-logger.addHandler(handler)
+nwlogger = logging.getLogger('nodewrapper')
+hdlr = logging.handlers.RotatingFileHandler(LOG_FILENAME,
+                                            maxBytes=50000,
+                                            backupCount=5)
+formatter = logging.Formatter('%(asctime)s %(name)-2s '\
+                        '%(levelname)-2s:\n\t %(message)s')
+hdlr.setFormatter(formatter)
+logger.addHandler(hdlr)
+logger.setLevel(logging.INFO)
+nwlogger.addHandler(hdlr)
+nwlogger.setLevel(logging.INFO)
+
 
 def walk(children, level=0, path=None, usename=True):
     """Generate all the full paths in a tree, as a dict.
@@ -80,6 +83,7 @@ class Pipeline(object):
         self.config = {}
         self.config['workdir'] = '.'
         self.config['use_parameterized_dirs'] = True
+        self.config['crashdump_dir'] = None
         self.ipythonclient = None
         self.mec = None
         try:
@@ -158,7 +162,22 @@ class Pipeline(object):
         """
         self._graph.add_nodes_from(nodes)
 
-    def show_graph(self, use_execgraph=False, show_connectinfo=False, dotfilename='graph.dot'):
+    def _create_pickleable_graph(self, graph, show_connectinfo=False):
+        """Create a graph that can be pickled.
+
+        Ensures that edge info is pickleable.
+        """
+        S = deepcopy(graph)
+        for e in S.edges():
+            data = S.get_edge_data(*e)
+            S.remove_edge(*e)
+            if show_connectinfo:
+                S.add_edge(e[0], e[1], l=str(data['connect']))
+            else:
+                S.add_edge(e[0], e[1])
+        return S
+
+    def export_graph(self, show = True, use_execgraph=False, show_connectinfo=False, dotfilename='graph.dot'):
         """ Displays the graph layout of the pipeline
 
         Parameters
@@ -177,13 +196,7 @@ class Pipeline(object):
         else:
             S = deepcopy(self._graph)
             logger.debug('using input graph')
-        for e in S.edges():
-            data = S.get_edge_data(*e)
-            S.remove_edge(*e)
-            if show_connectinfo:
-                S.add_edge(e[0], e[1], l=str(data['connect']))
-            else:
-                S.add_edge(e[0], e[1])
+        S = self._create_pickleable_graph(S, show_connectinfo)
         dotfilename = fname_presuffix(dotfilename,
                                       suffix='.dot',
                                       use_ext=False,
@@ -194,11 +207,11 @@ class Pipeline(object):
         res = CommandLine(cmd).run()
         if res.runtime.returncode:
             logger.warn('dot2png: %s',res.runtime.stderr)
-        pos = nx.graphviz_layout(S, prog='dot')
-        nx.draw(S, pos)
-        if show_connectinfo:
-            nx.draw_networkx_edge_labels(S, pos)
-        return S
+        if show:
+            pos = nx.graphviz_layout(S, prog='dot')
+            nx.draw(S, pos)
+            if show_connectinfo:
+                nx.draw_networkx_edge_labels(S, pos)
 
     def run(self):
         """ Executes the pipeline in serial or parallel mode depending
@@ -208,8 +221,8 @@ class Pipeline(object):
         if self.ipythonclient:
             try:
                 self.mec = self.ipythonclient.MultiEngineClient()
-            except RuntimeError:
-                warn("No clients found, running serially for now.")
+            except:
+                logger.warn("No clients found, running serially for now.")
         if self.mec:
             self.run_with_manager()
         else:
@@ -244,8 +257,8 @@ class Pipeline(object):
                         node.set_input(destname, sourcename[1],
                                        edge[0].get_output(sourcename[0]),
                                        *sourcename[2:])
-            hashed_inputs, hashvalue = node.inputs._get_bunch_hash()
-            logger.info("Executing: %s H: %s" % (node.name, hashvalue))
+            #hashed_inputs, hashvalue = node.inputs._get_bunch_hash()
+            #logger.info("Executing: %s H: %s" % (node.name, hashvalue))
             # For a disk node, provide it with an appropriate
             # output directory
             if node.disk_based:
@@ -259,17 +272,32 @@ class Pipeline(object):
                 node.run(updatehash=relocate)
             else:
                 try:
-                    if issubclass(node._interface.__class__,CommandLine):
-                        logger.info('Running cmd: ' + node._interface.cmdline)
-                    if node.disk_based:
-                        logger.info('in: ' + node._output_directory())
+                    old_wd = os.getcwd()
                     node.run()
                 except:
+                    os.chdir(old_wd)
+                    exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
                     # bare except, but i really don't know where a
                     # node might fail
                     message = ['Node %s failed to run.'%node.id]
                     logger.error(message)
+                    self._report_crash(node, extract_tb(exceptionTraceback))
                     raise
+                
+    def _report_crash(self, node, traceback):
+        """Writes crash related information to a file
+        """
+        timeofcrash = strftime('%Y%m%d-%H%M%S')
+        crashfile = 'crashdump-%s-%s.npz'%(timeofcrash,
+                                           os.getlogin())
+        if self.config['crashdump_dir']:
+            crashfile = os.path.join(self.config['crashdump_dir'],
+                                     crashfile)
+        else:
+            crashfile = os.path.join(os.getcwd(),crashfile)
+        S = self._create_pickleable_graph(self._execgraph, show_connectinfo=True)
+        logger.info('Saving crash info to %s'%crashfile)
+        np.savez(crashfile, node=node, execgraph=S, traceback=traceback)
 
     def _generate_dependency_list(self):
         """ Generates a dependency list for a list of graphs. Adds the
