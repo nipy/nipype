@@ -10,7 +10,7 @@ from time import sleep, strftime
 from warnings import warn
 import logging
 import logging.handlers
-from traceback import extract_tb
+from traceback import format_tb
 
 import networkx as nx
 import numpy as np
@@ -242,6 +242,7 @@ class Pipeline(object):
         """
         # In the absence of a dirty bit on the object, generate the
         # parameterization each time before running
+        logger.info("Running serially.")
         self._generate_expanded_graph()
         for node in nx.topological_sort(self._execgraph):
             # Assign outputs from dependent executed nodes to current node.
@@ -261,13 +262,7 @@ class Pipeline(object):
             #logger.info("Executing: %s H: %s" % (node.name, hashvalue))
             # For a disk node, provide it with an appropriate
             # output directory
-            if node.disk_based:
-                outputdir = self.config['workdir']
-                if self.config['use_parameterized_dirs']:
-                    outputdir = os.path.join(outputdir, node.parameterization)
-                if not os.path.exists(outputdir):
-                    os.makedirs(outputdir)
-                node.output_directory_base = os.path.abspath(outputdir)
+            self._set_output_directory_base(node)                        
             if relocate:
                 node.run(updatehash=relocate)
             else:
@@ -276,17 +271,18 @@ class Pipeline(object):
                     node.run()
                 except:
                     os.chdir(old_wd)
-                    exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
                     # bare except, but i really don't know where a
                     # node might fail
-                    message = ['Node %s failed to run.'%node.id]
-                    logger.error(message)
-                    self._report_crash(node, extract_tb(exceptionTraceback))
+                    self._report_crash(node)
                     raise
                 
-    def _report_crash(self, node, traceback):
+    def _report_crash(self, node):
         """Writes crash related information to a file
         """
+        message = ['Node %s failed to run.'%node.id]
+        logger.error(message)
+        exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+        traceback = repr(format_tb(exceptionTraceback))
         timeofcrash = strftime('%Y%m%d-%H%M%S')
         crashfile = 'crashdump-%s-%s.npz'%(timeofcrash,
                                            os.getlogin())
@@ -299,6 +295,17 @@ class Pipeline(object):
         logger.info('Saving crash info to %s'%crashfile)
         np.savez(crashfile, node=node, execgraph=S, traceback=traceback)
 
+    def _set_output_directory_base(self, node):
+        if node.disk_based:
+            # update parameterization of output directory
+            outputdir = self.config['workdir']
+            if self.config['use_parameterized_dirs'] and \
+                    node.parameterization:
+                outputdir = os.path.join(outputdir, node.parameterization)
+            if not os.path.exists(outputdir):
+                os.makedirs(outputdir)
+            node.output_directory_base = os.path.abspath(outputdir)
+            
     def _generate_dependency_list(self):
         """ Generates a dependency list for a list of graphs. Adds the
         following attributes to the pipeline:
@@ -329,11 +336,6 @@ class Pipeline(object):
         """Executes a pre-defined pipeline is distributed approaches
         based on IPython's parallel processing interface
         """
-        # in the absence of a dirty bit on the object, generate the
-        # parameterization each time before running
-        self._generate_expanded_graph()
-        # Generate appropriate structures for worker-manager model
-        self._generate_dependency_list()
         # retrieve clients again
         if not self.mec:
             try:
@@ -342,7 +344,13 @@ class Pipeline(object):
                 warn("No clients found, running serially for now.")
                 self.run_in_series()
                 return
+        logger.info("Running in parallel.")
         self.mec.reset()
+        # in the absence of a dirty bit on the object, generate the
+        # parameterization each time before running
+        self._generate_expanded_graph()
+        # Generate appropriate structures for worker-manager model
+        self._generate_dependency_list()
         # get number of ipython clients available
         self.workeravailable = np.zeros(np.max(self.mec.get_ids())+1, dtype=bool)
         self.workeravailable[self.mec.get_ids()] = True
@@ -354,7 +362,13 @@ class Pipeline(object):
             # trigger callbacks for any pending results
             while self.pendingresults:
                 a = self.pendingresults.pop()
-                res = a.get_result(block=False)
+                try:
+                    res = a[0].get_result(block=False)
+                except:
+                    # bare except, but i really don't know where a
+                    # node might fail
+                    self._report_crash(self.procs[a[1]])
+                    raise
                 if not res:
                     toappend.append(a)
             self.pendingresults.extend(toappend)
@@ -400,14 +414,7 @@ class Pipeline(object):
                 # change worker status in appropriate queues
                 workerid = self.workeravailable.tolist().index(True)
                 self.workeravailable[workerid] = False
-                # update parameterization of output directory
-                outputdir = self.config['workdir']
-                if self.config['use_parameterized_dirs']:
-                    outputdir = os.path.join(outputdir,
-                                             self.procs[jobid].parameterization)
-                if not os.path.exists(outputdir):
-                    os.makedirs(outputdir)
-                self.procs[jobid].output_directory_base = os.path.abspath(outputdir)
+                self._set_output_directory_base(self.procs[jobid])
                 # Send job to worker, add callback and add to pending results
                 hashed_inputs, hashvalue = self.procs[jobid].inputs._get_bunch_hash()
                 logger.info('Executing: %s ID: %d WID=%d H:%s' % \
@@ -416,12 +423,13 @@ class Pipeline(object):
                               targets=workerid,
                               block=True)
                 cmdstr = "task.run()"
-                self.pendingresults.append(self.mec.execute(cmdstr,
+                self.pendingresults.append((self.mec.execute(cmdstr,
                                                             targets=workerid,
-                                                            block=False))
-                self.pendingresults[-1].add_callback(self.notifymanagercb,
-                                                     jobid=jobid,
-                                                     workerid=workerid)
+                                                            block=False),
+                                            jobid))
+                self.pendingresults[-1][0].add_callback(self.notifymanagercb,
+                                                        jobid=jobid,
+                                                        workerid=workerid)
             else:
                 break
 
@@ -439,8 +447,6 @@ class Pipeline(object):
         self.workeravailable[workerid] = True
         task = self.mec.pull('task',targets=workerid,block=True).pop()
         self.procs[jobid]._result = deepcopy(task.result)
-        if issubclass(self.procs[jobid]._interface.__class__,CommandLine):
-            logger.info('cmd: ' + self.procs[jobid]._interface.cmdline)
         # Update the inputs of all tasks that depend on this job's outputs
         graph = self._execgraph
         for edge in graph.out_edges_iter(self.procs[jobid]):
@@ -472,10 +478,7 @@ class Pipeline(object):
                 if edge[0] not in subgraph.nodes():
                     if n.id not in edgeinfo.keys():
                         edgeinfo[n.id] = []
-                    #if len(edge)==3:
                     edgeinfo[n.id].append((edge[0],supergraph.get_edge_data(*edge)))
-                    #else:
-                    #    edgeinfo[n.id].append((edge[0],None))
         supergraph.remove_nodes_from(nodes)
         for i,params in enumerate(walk(iterables.items())):
             Gc = deepcopy(subgraph)
@@ -496,10 +499,7 @@ class Pipeline(object):
             for n in Gc.nodes():
                 if n.id in edgeinfo.keys():
                     for ei in edgeinfo[n.id]:
-                        #if ei[1]:
                         supergraph.add_edges_from([(ei[0], n, ei[1])])
-                        #else:
-                        #    supergraph.add_edges_from([(ei[0], n)])
                 n.id += str(i)
         return supergraph
 
