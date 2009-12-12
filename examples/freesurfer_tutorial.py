@@ -8,6 +8,8 @@
 """
 1. Tell python where to find the appropriate functions.
 """
+import os                                    # system functions
+import sys
 
 import nipype.interfaces.io as nio           # Data i/o 
 import nipype.interfaces.spm as spm          # spm
@@ -18,7 +20,6 @@ import nipype.pipeline.node_wrapper as nw    # nodes for pypelines
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
 import nipype.algorithms.modelgen as model   # model specification
-import os                                    # system functions
 
 #####################################################################
 # Preliminaries
@@ -210,7 +211,7 @@ contrasts = [cont1,cont2]
    c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
    SPM-specific design information. 
 """
-modelspec = nw.NodeWrapper(interface=model.SpecifyModel())
+modelspec = nw.NodeWrapper(interface=model.SpecifyModel(),diskbased=True)
 modelspec.inputs.concatenate_runs        = True
 modelspec.inputs.input_units             = 'secs'
 modelspec.inputs.output_units            = 'secs'
@@ -362,13 +363,13 @@ l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
 """
 # collect all the con images for each contrast.
 contrast_ids = range(1,len(contrasts)+1)
-l2source = nw.NodeWrapper(nio.DataGrabber())
+l2source = nw.NodeWrapper(nio.DataGrabber(),diskbased=False)
 l2source.inputs.file_template=os.path.abspath('surf/l1output/*/con*/con_%04d.img')
 l2source.inputs.template_argnames=['con']
 # iterate over all contrast images
 l2source.iterables = dict(con=lambda:contrast_ids)
 
-l2regsource = nw.NodeWrapper(nio.DataGrabber())
+l2regsource = nw.NodeWrapper(nio.DataGrabber(),diskbased=False)
 l2regsource.inputs.file_template=os.path.abspath('surf/l1output/*/surfreg/*bbreg_*.dat')
 
 """
@@ -404,7 +405,6 @@ def sort(inputvals):
     
 l2pipeline = pe.Pipeline()
 l2pipeline.config['workdir'] = os.path.abspath('./surf/l2output')
-l2pipeline.config['use_parameterized_dirs'] = True
 l2pipeline.connect([(l2source,l2concat,[(('file_list',sort),'conimages')]),
                     (l2regsource,l2concat,[(('file_list',sort),'regs')]),
                     (l2concat,onesamplettest,[('outfile','funcimage'),

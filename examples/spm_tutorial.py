@@ -157,7 +157,8 @@ normalize.inputs.template = os.path.abspath('data/T1.nii')
    functional data.
 """
 smooth = nw.NodeWrapper(interface=spm.Smooth(),diskbased=True)
-smooth.inputs.fwhm = [6,6,8]
+#smooth.inputs.fwhm = [6,6,8]
+smooth.iterables = dict(fwhm=lambda:[4,8])
 
 #######################################################################
 # setup analysis components
@@ -315,7 +316,8 @@ l1pipeline.connect([(datasource,realign,[('func','infile')]),
    directory. 
 """
 datasink = nw.NodeWrapper(interface=nio.DataSink(),diskbased=False)
-datasink.inputs.base_directory = os.path.abspath('spm/l1output')
+#datasink.inputs.base_directory = os.path.abspath('spm/l1output')
+datasink.inputs.subject_directory = os.path.abspath('spm/l1output')
 
 # store relevant outputs from various stages of the 1st level analysis
 l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
@@ -330,7 +332,8 @@ l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
                                               ('residual_image','model.@res'),
                                               ('RPVimage','model.@rpv')]),
                     (contrastestimate,datasink,[('con_images','contrasts.@con'),
-                                                  ('spmT_images','contrasts.@T')]),
+                                                ('spmT_images','contrasts.@T'),
+                                                ('parameterization','parameterization')]),
                     ])
 
 
@@ -348,10 +351,10 @@ l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
 # collect all the con images for each contrast.
 contrast_ids = range(1,len(contrasts)+1)
 l2source = nw.NodeWrapper(nio.DataGrabber())
-l2source.inputs.file_template=os.path.abspath('spm/l1output/*/con*/con_%04d.img')
-l2source.inputs.template_argnames=['con']
+l2source.inputs.file_template=os.path.abspath('spm/l1output/*/_fwhm_%d/con*/con_%04d.img')
+l2source.inputs.template_argnames=['fwhm','con']
 # iterate over all contrast images
-l2source.iterables = dict(con=lambda:contrast_ids)
+l2source.iterables = dict(fwhm=lambda:[4,8],con=lambda:contrast_ids)
 
 
 """
@@ -360,7 +363,7 @@ l2source.iterables = dict(con=lambda:contrast_ids)
   subjects (n=2 in this example).
 """
 # setup a 1-sample t-test node
-onesamplettest = nw.NodeWrapper(interface=spm.OneSampleTTest())
+onesamplettest = nw.NodeWrapper(interface=spm.OneSampleTTest(), diskbased=True)
 
 
 """
@@ -384,6 +387,6 @@ l2pipeline.connect([(l2source,onesamplettest,[('file_list','con_images')])])
    analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
    function needs to be called. 
 """
-if __name__ == '__main__':
+#if __name__ == '__main__':
     l1pipeline.run()
     l2pipeline.run()
