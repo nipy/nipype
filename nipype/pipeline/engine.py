@@ -128,7 +128,7 @@ class Pipeline(object):
                 # determine their inputs/outputs depending on
                 # connection settings.  Skip these modules in the check
                 if '.io' not in v.name:
-                    if dest not in v.inputs.__dict__:
+                    if not v.check_inputs(dest):
                         not_found.append(['in',v.name,dest])
                 if '.io' not in u.name:
                     if isinstance(source,tuple):
@@ -141,7 +141,7 @@ class Pipeline(object):
                         raise Exception('Unknown source specification in' \
                                          'connection from output of %s'%
                                         u.name)
-                    if not sourcename in u.interface.outputs().__dict__:
+                    if sourcename and not u.check_outputs(sourcename):
                         not_found.append(['out',u.name,sourcename])
         logger.info("checking connections: done")
         for c in not_found: 
@@ -228,6 +228,17 @@ class Pipeline(object):
         else:
             self.run_in_series()
 
+
+    def _set_node_input(self, node, param, source, sourceinfo):
+        """Set inputs of a node given the edge connection"""
+        if isinstance(sourceinfo, str):
+            val = source.get_output(sourceinfo)
+        elif isinstance(sourceinfo,tuple):
+            if callable(sourceinfo[1]):
+                val = sourceinfo[1](source.get_output(sourceinfo[0]),
+                                    *sourceinfo[2:])
+        node.set_input(param, deepcopy(val))
+    
     def run_in_series(self, relocate=False):
         """Executes a pre-defined pipeline in a serial order.
 
@@ -250,14 +261,8 @@ class Pipeline(object):
             for edge in self._execgraph.in_edges_iter(node):
                 data = self._execgraph.get_edge_data(*edge)
                 logger.debug('setting input: %s->%s %s',edge[0],edge[1],str(data))
-                for sourcename, destname in data['connect']:
-                    if isinstance(sourcename, str):
-                        node.set_input(destname,
-                                       edge[0].get_output(sourcename))
-                    else: # tuple
-                        node.set_input(destname, sourcename[1],
-                                       edge[0].get_output(sourcename[0]),
-                                       *sourcename[2:])
+                for sourceinfo, destname in data['connect']:
+                    self._set_node_input(node, destname, edge[0], sourceinfo)
             #hashed_inputs, hashvalue = node.inputs._get_bunch_hash()
             #logger.info("Executing: %s H: %s" % (node.name, hashvalue))
             # For a disk node, provide it with an appropriate
@@ -451,14 +456,9 @@ class Pipeline(object):
         graph = self._execgraph
         for edge in graph.out_edges_iter(self.procs[jobid]):
             data = graph.get_edge_data(*edge)
-            for sourcename,destname in data['connect']:
-                if isinstance(sourcename,str):
-                    edge[1].set_input(destname,
-                                   self.procs[jobid].get_output(sourcename))
-                else:
-                    edge[1].set_input(destname, sourcename[1],
-                                   self.procs[jobid].get_output(sourcename[0]),
-                                   *sourcename[2:])
+            for sourceinfo,destname in data['connect']:
+                self._set_node_input(edge[1], destname,
+                                     self.procs[jobid], sourceinfo)
         # update the job dependency structure
         self.depidx[jobid,:] = 0.
 

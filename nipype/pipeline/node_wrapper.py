@@ -109,18 +109,24 @@ class NodeWrapper(object):
     def inputs(self):
         return self._interface.inputs
 
-    def set_input(self, parameter, val, *args, **kwargs):
-        if callable(val):
-            setattr(self._interface.inputs, parameter, 
-                    deepcopy(val(*args, **kwargs)))
-        else:
-            setattr(self._interface.inputs, parameter, deepcopy(val))
+    def set_input(self, parameter, val):
+        setattr(self._interface.inputs, parameter, deepcopy(val))
 
     def get_output(self, parameter):
-        if self._result is not None:
-            return self._result.outputs.get(parameter)
-        else:
-            return None
+        val = None
+        if self._result:
+            if hasattr(self._result.outputs, parameter):
+                val = getattr(self._result.outputs, parameter)
+            else:
+                val = getattr(self, parameter)
+        return val
+
+    def check_outputs(self, parameter):
+        return hasattr(self,parameter) or \
+            hasattr(self._interface.outputs(), parameter)
+    
+    def check_inputs(self, parameter):
+        return hasattr(self._interface.inputs,parameter)
 
     def _save_hashfile(self, hashfile, hashed_inputs):
         try:

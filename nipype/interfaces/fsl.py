@@ -375,11 +375,7 @@ class Bet(FSLCommand):
         allargs = super(Bet, self)._parse_inputs(skip=('infile', 'outfile'))
         
         if self.inputs.infile:
-            # TODO: This should not be here but since _parse_inputs is called by 
-            # the logger through cmdline before run it needs to be included twice
-            self.inputs.infile = list_to_filename(self.inputs.infile)
-            
-            allargs.insert(0, self.inputs.infile)
+            allargs.insert(0, list_to_filename(self.inputs.infile))
             outfile = fsl_info.gen_fname(self.inputs.infile,
                                          self.inputs.outfile,
                                          suffix='_bet')
@@ -425,8 +421,7 @@ class Bet(FSLCommand):
             self.inputs.infile = infile
         if self.inputs.infile is None:
             raise ValueError('Bet requires an input file')
-        self.inputs.infile = list_to_filename(self.inputs.infile)
-        if isinstance(self.inputs.infile, list):
+        if isinstance(self.inputs.infile, list) and len(self.inputs.infile)>1:
             raise ValueError('Bet does not support multiple input files')
         if outfile:
             self.inputs.outfile = outfile

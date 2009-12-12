@@ -174,6 +174,8 @@ class DataSink(Interface):
                 Subject identifier
             subject_directory : /path/to/dir
                 Path to subject directory
+            parameterization : string
+                Includes parameterization for creating directory structure
 
             Any fields that are set as lists will be copied to a
             directory under subject_directory with the fieldname as a
@@ -184,6 +186,7 @@ class DataSink(Interface):
         
     def _populate_inputs(self):
         self.inputs = Bunch(base_directory=None,
+                            parameterization=None,
                             subject_directory=None,
                             subject_template=None,
                             subject_id=None)
@@ -205,9 +208,9 @@ class DataSink(Interface):
         cwd is just there to make things work for now
         """
         subjdir = self.inputs.subject_directory
-        if subjdir is None:
+        if not subjdir:
             #print self.inputs['subj_template'],self.inputs['subj_id']
-            if self.inputs.subject_template is not None:
+            if self.inputs.subject_template:
                 subjdir = self.inputs.subject_template % (self.inputs.subject_id)
             else:
                 subjdir = self.inputs.subject_id
@@ -215,6 +218,8 @@ class DataSink(Interface):
         if subjdir is None:
             raise Exception('Subject directory not provided')
         outdir = subjdir
+        if self.inputs.parameterization:
+            outdir = os.path.join(outdir,self.inputs.parameterization)
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         for k,v in self.inputs.iteritems():
@@ -225,8 +230,8 @@ class DataSink(Interface):
                         if d[0] == '@':
                             continue
                         tempoutdir = os.path.join(tempoutdir,d)
-                        if not os.path.exists(tempoutdir):
-                            os.mkdir(tempoutdir)
+                    if not os.path.exists(tempoutdir):
+                        os.makedirs(tempoutdir)
                     copyfiles(self.inputs.get(k),tempoutdir,copy=True)
         runtime = Bunch(returncode=0,
                         stdout=None,
@@ -295,18 +300,19 @@ class DataGrabber(Interface):
     def aggregate_outputs(self):
         outputs = Bunch(file_list=None)
         args = []
-        if self.inputs.template_argtuple is not None:
+        if self.inputs.template_argtuple:
             args.extend(list(self.inputs.template_argtuple))
-
-        if self.inputs.template_argnames is not None:
+        if self.inputs.template_argnames:
             for name in self.inputs.template_argnames:
                 arg = self.inputs.get(name)
                 print name, arg
-                if arg is not None:
+                if arg:
                     args.append(arg)
         template = self.inputs.file_template
-        if len(args)>0:
+        if args:
             template = template%tuple(args)
+        print args
+        print template
         outputs.file_list = list_to_filename(glob.glob(template))
         return outputs
 
@@ -319,3 +325,68 @@ class DataGrabber(Interface):
         outputs=self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
 
+
+class FreeSurferSource(Interface):
+    """Generates freesurfer subject info from their directories
+    """
+
+    def __init__(self, *args, **inputs):
+        self._populate_inputs()
+        self.inputs.update(**inputs)
+
+    def inputs_help(self):
+        """
+            Parameters
+            --------------------
+            (all default to None)
+
+            subjects_dir : string
+                freesurfer subjects directory.  The program will try to
+                retrieve it from the environment if available.
+            subject_id : string
+                The subject for whom data needs to be retrieved
+            """
+        print self.inputs_help.__doc__
+        
+    def _populate_inputs(self):
+        self.inputs = Bunch(subjects_dir=None,
+                            subject_id=None,
+                            )
+
+    def outputs_help(self):
+        """Print description of outputs provided by the module"""
+        print self.outputs.__doc__
+
+    def outputs(self):
+        """Set of output names that are generated
+        """
+        outputs = Bunch(brainmask=None,
+                        T1=None,
+                        lh_white=None,
+                        lh_pial=None,
+                        lh_curv=None,
+                        rh_white=None,
+                        rh_pial=None,
+                        rh_curv=None,
+                        aparc=None,
+                        aparc2005=None,
+                        aparc2009=None)
+        return outputs
+        
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        return outputs
+
+    def run(self, cwd=None):
+        """Execute this module.
+
+        cwd is just there to make things "work" for now
+        """
+        runtime = Bunch(returncode=0,
+                        stdout=None,
+                        stderr=None)
+        outputs=self.aggregate_outputs()
+        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+        
+        
+        
