@@ -120,8 +120,9 @@ class Pipeline(object):
         connection_list : list
             A list of 3-tuples of the following form::
 
-             [(source1, destination1, [('namedoutput1', 'namedinput1'),
-               ...]), 
+             [(source1, destination1,
+                 [('namedoutput1/attribute', 'namedinput1'),
+                 ...]), 
              ...]
             
             Or::
