@@ -387,6 +387,6 @@ l2pipeline.connect([(l2source,onesamplettest,[('file_list','con_images')])])
    analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
    function needs to be called. 
 """
-#if __name__ == '__main__':
+if __name__ == '__main__':
     l1pipeline.run()
     l2pipeline.run()
