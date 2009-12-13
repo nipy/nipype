@@ -161,10 +161,11 @@ class NodeWrapper(object):
             # of the dictionary itself.
             hashed_inputs, hashvalue = self.inputs._get_bunch_hash()
             hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
-            logger.info("Node hash: %s"%hashvalue)
             if updatehash:
+                logger.info("Updating hash: %s"%hashvalue)
                 self._save_hashfile(hashfile,hashed_inputs)
             if not updatehash and (self.overwrite or not os.path.exists(hashfile)):
+                logger.info("Node hash: %s"%hashvalue)
                 logger.debug("continuing to execute\n")
                 cleandir(outdir)
                 # copy files over and change the inputs
@@ -194,7 +195,7 @@ class NodeWrapper(object):
                     msg += "\n\tstderr: %s" % self._result.runtime.stderr
                     raise StandardError(msg)
             else:
-                logger.debug("skipping execution\n")
+                logger.debug("Hashfile exists. Skipping execution\n")
                 # change the inputs
                 if hasattr(self._interface,'get_input_info'):
                     for info in self._interface.get_input_info():

@@ -18,15 +18,18 @@ import numpy as np
 from nipype.interfaces.base import CommandLine
 from nipype.utils.filemanip import fname_presuffix
 
+"""Sets up logging for pipeline and nodewrapper execution.
+"""
 LOG_FILENAME = 'pypeline.log'
 logging.basicConfig()
 logger = logging.getLogger('engine')
 nwlogger = logging.getLogger('nodewrapper')
 hdlr = logging.handlers.RotatingFileHandler(LOG_FILENAME,
-                                            maxBytes=50000,
-                                            backupCount=5)
-formatter = logging.Formatter('%(asctime)s %(name)-2s '\
-                        '%(levelname)-2s:\n\t %(message)s')
+                                            maxBytes=256000,
+                                            backupCount=4)
+formatter = logging.Formatter(fmt='%(asctime)s,%(msecs)d %(name)-2s '\
+                                  '%(levelname)-2s:\n\t %(message)s',
+                              datefmt='%y%m%d-%H:%M:%S')
 hdlr.setFormatter(formatter)
 logger.addHandler(hdlr)
 logger.setLevel(logging.INFO)
@@ -75,6 +78,9 @@ class Pipeline(object):
         2-level structure based on parameterization or all output directories
         are created in the same location. 
         default [True]
+        
+    config['crashdump_dir'] ; string
+        Specifies where crashdumps will be stored. Default = cwd
     """
 
     def __init__(self):
@@ -93,6 +99,11 @@ class Pipeline(object):
         except ImportError:
             warn("Ipython kernel not found.  Parallel execution will be" \
                      "unavailable", ImportWarning)
+        # attributes for running with manager
+        self.procs = None
+        self.depidx = None
+        self.proc_done = None
+        self.proc_pending = None
 
     def connect(self, connection_list):
         """Connect nodes in the pipeline.
@@ -180,6 +191,9 @@ class Pipeline(object):
     def export_graph(self, show = True, use_execgraph=False, show_connectinfo=False, dotfilename='graph.dot'):
         """ Displays the graph layout of the pipeline
 
+        This function requires that pygraphviz and matplotlib are available on
+        the system.
+
         Parameters
         ----------
         use_execgraph : boolean
@@ -228,6 +242,21 @@ class Pipeline(object):
         else:
             self.run_in_series()
 
+    def updatehash(self, force_execute=[]):
+        """Updates the hashfile for each diskbased node.
+
+        This function allows one to rerun a pipeline and update all the hashes
+        without actually executing any of the underlying interfaces. This is
+        useful when moving the working directory from one location to
+        another. It is also useful when the hashing function itself changes
+        (although we hope that this will not happen often).
+
+        Parameters
+        ----------
+        force_execute : list of node names
+            This forces execution of a node even if updatehash is True
+        """
+        self.run_in_series(updatehash=True, force_execute=force_execute)
 
     def _set_node_input(self, node, param, source, sourceinfo):
         """Set inputs of a node given the edge connection"""
@@ -238,18 +267,20 @@ class Pipeline(object):
                 val = sourceinfo[1](source.get_output(sourceinfo[0]),
                                     *sourceinfo[2:])
         node.set_input(param, deepcopy(val))
-    
-    def run_in_series(self, relocate=False):
+
+    def run_in_series(self, updatehash=False, force_execute=[]):
         """Executes a pre-defined pipeline in a serial order.
 
         Parameters
         ----------
-        relocate : boolean
+        updatehash : boolean
             Allows one to rerun a pipeline and update all the hashes without
             actually executing any of the underlying interfaces. This is useful
             when moving the working directory from one location to another. It
             is also useful when the hashing function itself changes (although
             we hope that this will not happen often). default [False]
+        force_execute : list of strings
+            This forces execution of a node even if updatehash is True
         """
         # In the absence of a dirty bit on the object, generate the
         # parameterization each time before running
@@ -267,9 +298,9 @@ class Pipeline(object):
             #logger.info("Executing: %s H: %s" % (node.name, hashvalue))
             # For a disk node, provide it with an appropriate
             # output directory
-            self._set_output_directory_base(node)                        
-            if relocate:
-                node.run(updatehash=relocate)
+            self._set_output_directory_base(node)
+            if updatehash and not (node.name in force_execute):
+                node.run(updatehash=updatehash)
             else:
                 try:
                     old_wd = os.getcwd()
@@ -465,9 +496,33 @@ class Pipeline(object):
     def _merge_graphs(self, supergraph, nodes, subgraph, nodeid, iterables):
         """Merges two graphs that share a subset of nodes.
 
-        If the subgraph needs to be replicated, the merge happens with every
-        copy of the subgraph
+        If the subgraph needs to be replicated for multiple iterables, the
+        merge happens with every copy of the subgraph. Assumes that edges
+        between nodes of supergraph and subgraph contain data.
+
+        Parameters
+        ----------
+        supergraph : networkx graph
+            Parent graph from which subgraph was selected
+        nodes : networkx nodes
+            Nodes of the parent graph from which the subgraph was initially
+            constructed.
+        subgraph : networkx graph
+            A subgraph that contains as a subset nodes from the supergraph.
+            These nodes connect the subgraph to the supergraph
+        nodeid : string
+            Identifier of a node for which parameterization has been sought
+        iterables : dict of functions
+            see `pipeline.NodeWrapper` for iterable requirements
+
+        Returns
+        -------
+        Returns a merged graph containing copies of the subgraph with
+        appropriate edge connections to the supergraph.
+        
         """
+        # Retrieve edge information connecting nodes of the subgraph to other
+        # nodes of the supergraph.
         supernodes = supergraph.nodes()
         ids = [n.id for n in supernodes]
         edgeinfo = {}
@@ -480,6 +535,7 @@ class Pipeline(object):
                         edgeinfo[n.id] = []
                     edgeinfo[n.id].append((edge[0],supergraph.get_edge_data(*edge)))
         supergraph.remove_nodes_from(nodes)
+        # Add copies of the subgraph depending on the number of iterables
         for i,params in enumerate(walk(iterables.items())):
             Gc = deepcopy(subgraph)
             ids = [n.id for n in Gc.nodes()]
@@ -489,6 +545,14 @@ class Pipeline(object):
                 paramstr = '_'.join((paramstr, key, str(val)))
                 setattr(Gc.nodes()[nodeidx].inputs, key, val)
             for n in Gc.nodes():
+                """
+                update parameterization of the node to reflect the location of
+                the output directory.  For example, if the iterables along a
+                path of the directed graph consisted of the variables 'a' and
+                'b', then every node in the path including and after the node
+                with iterable 'b' will be placed in a directory
+                _a_aval/_b_bval/. 
+                """
                 if n.parameterization:
                     n.parameterization = os.path.join(paramstr,
                                                       n.parameterization)
@@ -518,9 +582,7 @@ class Pipeline(object):
             nodes = nx.topological_sort(graph_in)
             nodes.reverse()
             inodes = [node for node in nodes if len(node.iterables.keys())>0]
-            if len(inodes)==0:
-                moreiterables = False
-            else:
+            if inodes:
                 node = inodes[0]
                 iterables = node.iterables.copy()
                 node.iterables = {}
@@ -529,6 +591,8 @@ class Pipeline(object):
                 Gn = graph_in.subgraph(subnodes)
                 graph_in = self._merge_graphs(graph_in, subnodes, Gn, node.id,
                                               iterables)
+            else:
+                moreiterables = False
         self._execgraph = graph_in
         logger.info("PE: expanding iterables ... done")
 

@@ -2385,6 +2385,9 @@ class SpecifyModel():
 
             spm.SpecifyModel --> model.SpecifyModel
 
+        If you are using it with NodeWrapper ensure that diskbased is set to
+        True as the model.SpecifyModel now generates an npz file.
+
         This message will be removed in future versions of this software.
         """
         raise Exception(message)

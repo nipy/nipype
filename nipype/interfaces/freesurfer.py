@@ -823,8 +823,6 @@ class SurfConcat(FSLCommand):
         'conimages':          '--iv %s',
         'regs':               '--iv %s',
         'flags':              '%s'}
-#mris_preproc --target fsaverage --hemi lh --out test_spm_lh.mgh \
-#--ivp ../SAD_STUDY_Block/data/SAD_019/firstlevel_novelfaces/con_0001.hdr spm2fsfast/SAD_019_register.dat \
 
     def get_input_info(self):
         """ Provides information about inputs as a dict
