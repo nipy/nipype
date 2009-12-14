@@ -95,21 +95,6 @@ def test_set_input():
     bi.set_input('input1',1)
     yield assert_equal, bi.inputs.input1, 1
 
-    def func():
-        return 2
-    bi.set_input('input2',func)
-    yield assert_equal, bi.inputs.input2, 2
-
-    def func(val1,val2):
-        return [val1,val2]
-    bi.set_input('input2',func,1,2)
-    yield assert_equal, bi.inputs.input2, [1,2]
-
-    def func(val1,val2,foo=None):
-        return [val1,val2,foo]
-    bi.set_input('input2',func,1,2,foo=3)
-    yield assert_equal, bi.inputs.input2, [1,2,3]
-
 def test_get_output():
     bi = nw.NodeWrapper(interface=BasicInterface())
     yield assert_equal, bi.get_output('output1'), None

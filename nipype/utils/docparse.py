@@ -191,6 +191,78 @@ def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
     opts = reverse_opt_map(opt_map)
     return build_doc(doc, opts)
 
+def _parse_doc(doc, style=['--']):
+    """Parses a help doc for inputs
+
+    Parameters
+    ----------
+    doc : string
+        Documentation string
+    style : string default ['--']
+        The help command style (--, -)
+
+    Returns
+    -------
+    optmap : dict of input parameters
+    """
+    
+    # Split doc into line elements.  Generally, each line is an
+    # individual flag/option.
+    doclist = doc.split('\n')
+    optmap = {}
+    if isinstance(style,str):
+        style = [style]
+    for line in doclist:
+        linelist = line.split()
+        flag =[item for i,item in enumerate(linelist) if i<2 and \
+                   any([item.startswith(s) for s in style]) and \
+                   len(item)>1]
+        if flag:
+            if len(flag)==1:
+                style_idx = [flag[0].startswith(s) for s in style].index(True)
+                flag = flag[0]
+            else:
+                style_idx = []
+                for f in flag:
+                    for i,s in enumerate(style):
+                        if f.startswith(s):
+                            style_idx.append(i)
+                            break
+                flag = flag[style_idx.index(min(style_idx))]
+                style_idx = min(style_idx)
+            optmap[flag.split(style[style_idx])[1]] = '%s %%s'%flag
+    return optmap
+
+def get_params_from_doc(cmd, style='--', help_flag=None, trap_error=True):
+    """Auto-generate option map from command line help
+    
+    Parameters
+    ----------
+    cmd : string
+        The command whose documentation we are fetching
+    style : string default ['--']
+        The help command style (--, -). Multiple styles can be provided in a
+        list e.g. ['--','-']. 
+    help_flag : string
+        Provide additional help flag. e.g., -h
+    trap_error : boolean
+        Override if underlying command returns a non-zero returncode 
+
+    Returns
+    -------
+    optmap : dict
+        Contains a mapping from input to command line variables
+
+    """
+    res = CommandLine('which %s' % cmd.split(' ')[0]).run()
+    cmd_path = res.runtime.stdout.strip()
+    if cmd_path == '':
+        raise Exception('Command %s not found'%cmd.split(' ')[0])
+    if help_flag:
+        cmd = ' '.join((cmd,help_flag))
+    doc = grab_doc(cmd,trap_error)
+    return _parse_doc(doc,style)
+
 def replace_opts(rep_doc, opts):
     """Replace flags with parameter names.
     

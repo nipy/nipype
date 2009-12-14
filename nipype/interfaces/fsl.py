@@ -298,6 +298,7 @@ class FSLCommand(CommandLine):
         print self.outputs.__doc__
 
     def outputs(self):
+        """Virtual function"""
         raise NotImplementedError(
                 'Subclasses of FSLCommand must implement outputs')
 

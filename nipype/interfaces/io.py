@@ -329,6 +329,31 @@ class DataGrabber(Interface):
 class FreeSurferSource(Interface):
     """Generates freesurfer subject info from their directories
     """
+    dirmap = dict(T1='mri',
+                  aseg='mri',
+                  brain='mri',
+                  brainmask='mri',
+                  filled='mri',
+                  norm='mri',
+                  nu='mri',
+                  orig='mri',
+                  rawavg='mri',
+                  ribbon='mri',
+                  wm='mri',
+                  wmparc='mri',
+                  curv='surf',
+                  inflated='surf',
+                  pial='surf',
+                  smoothwm='surf',
+                  sphere='surf',
+                  sulc='surf',
+                  thickness='surf',
+                  volume='surf',
+                  white='surf',
+                  label='label',
+                  annot='label')
+    dirmap['aparc+aseg']='mri'
+    dirmap['sphere.reg']='surf'
 
     def __init__(self, *args, **inputs):
         self._populate_inputs()
@@ -345,36 +370,93 @@ class FreeSurferSource(Interface):
                 retrieve it from the environment if available.
             subject_id : string
                 The subject for whom data needs to be retrieved
+            hemi : string
+                Selects hemisphere specific outputs
             """
         print self.inputs_help.__doc__
         
     def _populate_inputs(self):
         self.inputs = Bunch(subjects_dir=None,
                             subject_id=None,
+                            hemi=None,
                             )
 
+    def _get_files(self, path, key):
+        dirval = self.dirmap[key]
+        globsuffix = ''
+        if dirval == 'mri':
+            globsuffix = '.mgz'
+        if key == 'ribbon' or dirval in ['surf', 'label']:
+            if self.inputs.hemi:
+                globprefix = self.inputs.hemi+'.'
+            else:
+                globprefix = '*h.'
+                if key == 'ribbon' or key == 'label':
+                    globprefix = '*'
+            if key == 'annot':
+                globprefix += '*'
+        else:
+            globprefix = ''
+        if key in ['annot','label']:
+            globsuffix = ''
+        keydir = os.path.join(path,dirval)
+        globpattern = os.path.join(keydir,''.join((globprefix,key,globsuffix)))
+        outfiles = glob.glob(globpattern)
+        if outfiles:
+            return deepcopy(list_to_filename(outfiles))
+        else:
+            return None
+    
     def outputs_help(self):
         """Print description of outputs provided by the module"""
         print self.outputs.__doc__
 
     def outputs(self):
-        """Set of output names that are generated
+        """Set of output names that are generated.
+
+        If hemi is specified only that particular hemisphere's data is returned
+        for those variables that care about hemisphere (noted below).
+        Otherwise the returned items contain left and right in sequence.
+
+        Parameters
+        ----------
+        
+        T1
+        aseg
+        aparc+aseg
+        brain
+        brainmask
+        filled
+        norm
+        nu
+        orig
+        rawavg
+        ribbon : lh, rh, combined
+        wm
+        wmparc
+        white : lh, rh
+        pial : lh, rh
+        curv : lh, rh
+        labels
+        annot : lh, rh
         """
-        outputs = Bunch(brainmask=None,
-                        T1=None,
-                        lh_white=None,
-                        lh_pial=None,
-                        lh_curv=None,
-                        rh_white=None,
-                        rh_pial=None,
-                        rh_curv=None,
-                        aparc=None,
-                        aparc2005=None,
-                        aparc2009=None)
+        outputs = Bunch(self.dirmap)
+        for k,v in outputs.iteritems():
+            setattr(outputs,k,None)
         return outputs
         
     def aggregate_outputs(self):
+        subjects_dir = self.inputs.subjects_dir
+        if not subjects_dir:
+            subjects_dir = os.getenv('SUBJECTS_DIR')
+        if not subjects_dir:
+            raise Exception('SUBJECTS_DIR variable must be set or '\
+                                'provided as input to FreeSurferSource.')
+        subject_path = os.path.join(subjects_dir,self.inputs.subject_id)
         outputs = self.outputs()
+        for k,v in outputs.iteritems():
+            val = self._get_files(subject_path,k)
+            setattr(outputs,k, val)
         return outputs
 
     def run(self, cwd=None):

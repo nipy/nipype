@@ -18,6 +18,7 @@ from nipype.interfaces.base import Bunch, CommandLine
 from nipype.interfaces.fsl import FSLCommand
 from nipype.utils.docparse import get_doc
 from nipype.utils.filemanip import fname_presuffix, filename_to_list
+from nipype.interfaces.io import FreeSurferSource
 
 def freesurferversion():
     """Check for freesurfer version on system
@@ -227,7 +228,7 @@ class Dicom2Nifti(FSCommandLine):
         return outputs
         
 
-class Resample(FSCommandLine):
+class Resample(FSLCommand):
     """Use FreeSurfer mri_convert to up or down-sample image files
 
     Parameters
@@ -241,8 +242,9 @@ class Resample(FSCommandLine):
     >>> from nipype.interfaces import freesurfer
     >>> resampler = freesurfer.Resample()
     >>> resampler.inputs.infile = 'infile.nii'
-    >>> resampler.inputs.voxel_size = [2, 2, 2]
-    >>> out = resampler.run()
+    >>> resampler.inputs.voxel_size = [2.1, 2.1, 2.1]
+    >>> resampler.cmdline
+    'mri_convert -i infile.nii -vs 2.10 2.10 2.10 -o infile_resample.nii'
    """
 
     @property
@@ -251,87 +253,49 @@ class Resample(FSCommandLine):
         return 'mri_convert'
 
     def inputs_help(self):
-        """
-        Parameters
-        ----------
-        (all default to None and are unset)
-             
-        infile : string or list
-            file(s) to resample
-        voxel_size: 3-element list
-            size of x, y and z voxels in mm of resampled image
-        outfile_postfix : string
-            string appended to input file name to generate output file
-            name. Default: '_fsresample'
-        flags = unsupported flags, use at your own risk
+        """Print command line documentation for bbregister."""
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
 
-        """
-        print self.inputs_help.__doc__
+    opt_map = {
+        'infile':         '-i %s',
+        'outfile':        '-o %s',
+        'voxel_size':     '-vs %.2f %.2f %.2f', 
+        'flags':           '%s'}
+    
+    def _parse_inputs(self):
+        """validate fs bbregister options"""
+        allargs = super(Resample, self)._parse_inputs()
 
-    def _populate_inputs(self):
-        self.inputs = Bunch(infile=None,
-                            voxel_size=None,
-                            outfile_postfix='_fsresample',
-                            flags=None)
-
-    def _parseinputs(self):
-        """validate fsl bet options
-        if set to None ignore
+        # Add outfile to the args if not specified
+        if self.inputs.outfile is None:
+            allargs.extend(['-o', fname_presuffix(self.inputs.infile,
+                                                   suffix='_resample')])
+        return allargs
+    
+    def run(self, **inputs):
+        """Execute the command.
         """
-        out_inputs = {'infile':[]}
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() 
-         if v is not None ]
-        for opt in inputs:
-            if opt == 'infile':
-                out_inputs['infile'] = filename_to_list(inputs[opt])
-                continue
-            if opt == 'voxel_size':
-                continue
-            if opt == 'outfile_postfix':
-                continue
-            if opt == 'flags':
-                continue
-            print 'option %s not supported'%(opt)
-        
-        return out_inputs
+        return super(Resample, self).run()
 
-    def outputs_help(self):
+    def outputs(self):
         """
-        outfile : string or list
-            resampled file(s)
+        outfile: filename
+            Smoothed input volume
         """
-        print self.outputs_help.__doc__
-
-    def _compile_command(self):
-        """validates fsl options and generates command line argument"""
-        valid_inputs = self._parseinputs()
-        cmd = []
-        vs = self.inputs.voxel_size
-        outfile = []
-        for i,f in enumerate(valid_inputs['infile']):
-            path,fname = os.path.split(f)
-            outfile.insert(i, fname_presuffix(fname, suffix=self.inputs.outfile_postfix))
-            outfile[i] = os.path.abspath(os.path.join(os.getcwd(),outfile[i]))
-            single_cmd = '%s -vs %d %d %d %s %s;' % (self.cmd, vs[0],vs[1],vs[2], f, outfile[i])
-            cmd.extend([single_cmd])
-        self._cmdline =  ' '.join(cmd)
-        return self._cmdline
+        return Bunch(outfile=None)
 
     def aggregate_outputs(self):
-        outputs = Bunch(outfile=[])
-        for i,f in enumerate(filename_to_list(self.inputs.infile)):
-            path,fname = os.path.split(f)
-            f = fname_presuffix(fname, suffix=self.inputs.outfile_postfix)
-            f = os.path.abspath(os.path.join(os.getcwd(),f))
-            assert glob(f)==[f], 'outputfile %s was not generated'%f
-            outputs.outfile.insert(i,f)
-        if len(outfile)==1:
-            outputs.outfile = outputs.outfile[0]
+        outputs = self.outputs()
+        if self.inputs.outfile is None:
+            outfile = glob(fname_presuffix(self.inputs.infile,
+                                           suffix='_resample'))
+            outputs.outfile = outfile[0]
+        if isinstance(self.inputs.outfile,str):
+            outfile = glob(self.inputs.outfile)
+            outputs.outfile = outfile[0]
         return outputs
-        
 
-class ReconAll(FSCommandLine):
+class ReconAll(FSLCommand):
     """Use FreeSurfer recon-all to generate surfaces and parcellations of
     structural data from an anatomical image of a subject.
 
@@ -347,10 +311,11 @@ class ReconAll(FSCommandLine):
     >>> from nipype.interfaces import freesurfer
     >>> reconall = freesurfer.ReconAll()
     >>> reconall.inputs.subject_id = 'foo'
-    >>> reconall.inputs.directive  = '-all'
-    >>> reconall.inputs.parent_dir = '.'
-    >>> reconall.inputs.T1files = 'structfile.nii'
-    >>> out = reconall.run() # doctest +SKIP
+    >>> reconall.inputs.all  = True
+    >>> reconall.inputs.subjects_dir = '.'
+    >>> reconall.inputs.T1file = 'structfile.nii'
+    >>> reconall.cmdline
+    'recon-all --i structfile.nii --all -subjid foo -sd .'
    """
 
     @property
@@ -358,117 +323,32 @@ class ReconAll(FSCommandLine):
         """sets base command, not editable"""
         return 'recon-all'
 
-
     def inputs_help(self):
+        """Print command line documentation for bbregister."""
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
+
+    opt_map = {
+        'subject_id':         '-subjid %s',
+        'all':                '--all',
+        'T1file':             '--i %s',
+        'hemi':               '-hemi %s',
+        'subjects_dir':       '-sd %s',
+        'flags':              '%s'}
+    
+    def run(self, **inputs):
+        """Execute the command.
         """
-        Parameters
-        ----------
-        (all default to None and are unset)
-        subject_id: string or int
-            Identifier for subject
-        directive: string
-            Which part of the process to run 
+        return super(ReconAll, self).run()
 
-            Fully-Automated Directive
-
-
-            -all           : performs all stages of cortical reconstruction
-            -autorecon-all : same as -all
-
-            Manual-Intervention Workflow Directives
-
-
-            -autorecon1    : process stages 1-5 (see below)
-            -autorecon2    : process stages 6-24
-                   after autorecon2, check final surfaces:
-                     a. if wm edit was required, then run -autorecon2-wm
-                     b. if control points added, then run -autorecon2-cp
-                     c. if edits made to correct pial, then run -autorecon2-pial
-                     d. proceed to run -autorecon3
-            -autorecon2-cp : process stages 12-24 (uses -f w/ mri_normalize, -keep w/ mri_seg)
-            -autorecon2-wm : process stages 15-24
-            -autorecon2-inflate1 : 6-18
-            -autorecon2-perhemi : tess, sm1, inf1, q, fix, sm2, inf2, finalsurf, ribbon
-            -autorecon3    : process stages 25-31
-
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-             
-        T1files: filename(s)
-            T1 file or list of files to extract surfaces from. The T1
-            files must come from the same subject
-        hemi: string
-            just do lh or rh (default is to do both)
-        parent_dir: string
-            defaults to SUBJECTS_DIR environment variable. If the variable is
-            not set, it defaults to current working directory.
-        test:
-            Do everything but execute each command
-        flags:
-            unsupported flags, use at your own risk
+    def outputs(self):
         """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(subject_id=None,
-                            directive=None,
-                            T1files=None,
-                            hemi=None,
-                            parent_dir=None,
-                            test=None,
-                            flags=None)
-
-    def _parseinputs(self):
-        """validate fsl bet options
-        if set to None ignore
+        See io.FreeSurferSource.outputs for the list of outputs returned
         """
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
-        for opt in inputs:
-            if opt == 'subject_id':
-                out_inputs.extend(['-subjid',inputs[opt]])
-                continue
-            if opt == 'directive':
-                out_inputs.extend([inputs[opt]])
-                continue
-            if opt == 'T1files':
-                files = filename_to_list(inputs[opt])
-                for f in files:
-                    out_inputs.extend(['-i',f])
-                continue
-            if opt == 'hemi':
-                out_inputs.extend(['-hemi',inputs[opt]])
-                continue
-            if opt == 'parent_dir':
-                out_inputs.extend(['-sd',os.path.abspath(inputs[opt])])
-                continue
-            if opt == 'flags':
-                out_inputs.extend([inputs[opt]])
-            print 'option %s not supported'%(opt)
+        return FreeSurferSource().outputs()
 
-        if '-sd' not in out_inputs:
-                out_inputs.extend(['-sd',os.path.abspath(fssubjectsdir())])
-
-        return out_inputs
-
-    def outputs_help(self):
-        """
-        No outputs
-        """
-        print self.outputs_help.__doc__
-
-    def _compile_command(self):
-        """validates fsl options and generates command line argument"""
-        valid_inputs = self._parseinputs()
-        allargs =  [self.cmd] + valid_inputs
-        self._cmdline = ' '.join(allargs)
-        return self._cmdline
-        
     def aggregate_outputs(self):
-        return None
+        return FreeSurferSource(subject_id=self.inputs.subject_id,
+                                subjects_dir=self.inputs.subjects_dir).aggregate_outputs()
 
 class BBRegister(FSLCommand):
     """Use FreeSurfer bbregister to register a volume two a surface mesh
@@ -504,18 +384,6 @@ class BBRegister(FSLCommand):
     def inputs_help(self):
         """Print command line documentation for bbregister."""
         print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(subject_id=None,
-                            sourcefile=None,
-                            init_spm=None,
-                            init_fsl=None,
-                            init_header=None,
-                            init_reg=None,
-                            contrast_type=None,
-                            outregfile=None,
-                            outfile=None,
-                            flags=None)
 
     opt_map = {
         'subject_id':         '--s %s',
@@ -553,11 +421,7 @@ class BBRegister(FSLCommand):
     def run(self, **inputs):
         """Execute the command.
         """
-        results = self._runner()
-        if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
-
-        return results        
+        return super(BBRegister, self).run()
 
     def outputs(self):
         """
@@ -617,18 +481,6 @@ class ApplyVolTransform(FSLCommand):
         """Print command line documentation for mri_vol2vol."""
         print get_doc(self.cmd, self.opt_map, trap_error=False)
 
-    def _populate_inputs(self):
-        self.inputs = Bunch(sourcefile=None,
-                            targfile=None,
-                            fstarg=None,
-                            outfile=None,
-                            tkreg=None,
-                            fslreg=None,
-                            xfmreg=None,
-                            noresample=None,
-                            inverse=None,
-                            flags=None)
-
     opt_map = {
         'sourcefile':         '--mov %s',
         'targfile':           '--targ %s',
@@ -661,11 +513,7 @@ class ApplyVolTransform(FSLCommand):
     def run(self, **inputs):
         """Execute the command.
         """
-        results = self._runner()
-        if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
-
-        return results        
+        return super(ApplyVolTransform, self).run()
 
     def outputs(self):
         """
@@ -719,14 +567,6 @@ class Smooth(FSLCommand):
         """Print command line documentation for mris_volsmooth."""
         print get_doc(self.cmd, self.opt_map, trap_error=False)
 
-    def _populate_inputs(self):
-        self.inputs = Bunch(sourcefile=None,
-                            regfile=None,
-                            outfile=None,
-                            surface_fwhm=None,
-                            vol_fwhm=None,
-                            flags=None)
-
     opt_map = {
         'sourcefile':         '--i %s',
         'regfile':            '--reg %s',
@@ -755,11 +595,7 @@ class Smooth(FSLCommand):
     def run(self, **inputs):
         """Execute the command.
         """
-        results = self._runner()
-        if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
-
-        return results        
+        return super(Smooth, self).run()
 
     def outputs(self):
         """
@@ -806,15 +642,6 @@ class SurfConcat(FSLCommand):
         """Print command line documentation for mris_preproc."""
         print get_doc(self.cmd, self.opt_map, trap_error=False)
 
-    def _populate_inputs(self):
-        self.inputs = Bunch(target=None,
-                            hemi=None,
-                            outfile=None,
-                            outprefix='surfconcat',
-                            conimages=None,
-                            regs=None,
-                            flags=None)
-
     opt_map = {
         'target':             '--target %s',
         'hemi':               '--hemi %s',
@@ -824,13 +651,6 @@ class SurfConcat(FSLCommand):
         'regs':               '--iv %s',
         'flags':              '%s'}
 
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = []
-        return info
-    
     def _parse_inputs(self):
         """validate fs surfconcat options"""
         allargs = super(SurfConcat, self)._parse_inputs(skip=('outfile','outprefix','conimages','regs'))
@@ -848,12 +668,8 @@ class SurfConcat(FSLCommand):
     def run(self, **inputs):
         """Execute the command.
         """
-        results = self._runner()
-        if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
-
-        return results        
-
+        return super(SurfConcat, self).run()
+    
     def outputs(self):
         """
         outfile: filename
@@ -863,7 +679,7 @@ class SurfConcat(FSLCommand):
 
     def aggregate_outputs(self):
         outputs = self.outputs()
-        if self.inputs.outfile is None:
+        if not self.inputs.outfile:
             fname = os.path.join(os.getcwd(),'_'.join((self.inputs.outprefix,
                                                            self.inputs.target,
                                                            '.'.join((self.inputs.hemi,'mgh')))))
@@ -900,16 +716,6 @@ class OneSampleTTest(FSLCommand):
         """Print command line documentation for mris_preproc."""
         print get_doc(self.cmd, self.opt_map, trap_error=False)
 
-    def _populate_inputs(self):
-        self.inputs = Bunch(surf=None,
-                            hemi=None,
-                            outdir=None,
-                            outdirprefix='glm',
-                            funcimage=None,
-                            onesample=None,
-                            design=None,
-                            flags=None)
-
     opt_map = {
         'surf':             '--surf %s',
         'hemi':               '%s',
@@ -920,13 +726,6 @@ class OneSampleTTest(FSLCommand):
         'design':             '--X %s',
         'flags':              '%s'}
 
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = []
-        return info
-    
     def _parse_inputs(self):
         """validate fs onesamplettest options"""
         allargs = super(OneSampleTTest, self)._parse_inputs(skip=('surf','hemi','outdir','outdirprefix',))
@@ -938,14 +737,10 @@ class OneSampleTTest(FSLCommand):
             allargs.extend(['--glmdir', outdir])
         return allargs
     
-    def run(self, cwd=None,**inputs):
+    def run(self, **inputs):
         """Execute the command.
         """
-        results = self._runner()
-        if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
-
-        return results        
+        return super(OneSampleTTest, self).run()
 
     def outputs(self):
         """
@@ -955,3 +750,101 @@ class OneSampleTTest(FSLCommand):
     def aggregate_outputs(self):
         return self.outputs()
         
+
+class Threshold(FSLCommand):
+    """Use FreeSurfer mri_binarize to threshold an input volume
+
+    Parameters
+    ----------
+
+    To see optional arguments
+    Threshold().inputs_help()
+
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import Threshold
+    >>> binvol = Threshold(infile='foo.nii', min=10, outfile='foo_out.nii')
+    >>> binvol.cmdline
+    'mri_binarize --i foo.nii --min 10.000000 --o foo_out.nii'
+   """
+
+    @property
+    def cmd(self):
+        """sets base command, not editable"""
+        return 'mri_binarize'
+
+
+    def inputs_help(self):
+        """Print command line documentation for mri_binarize."""
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
+
+    opt_map = {'abs': '--abs',
+               'bincol': '--bincol',
+               'binval': '--binval %f',
+               'binvalnot': '--binvalnot %f',
+               'count': '--count %s',
+               'dilate': '--dilate %d',
+               'erode': '--erode %d',
+               'erode2d': '--erode2d %d',
+               'frame': '--frame %d',
+               'infile': '--i %s',
+               'inv': '--inv',
+               'mask': '--mask %s',
+               'mask-thresh': '--mask-thresh %f',
+               'match': '--match %d',
+               'max': '--max %f',
+               'merge': '--merge %s',
+               'min': '--min %f',
+               'outfile': '--o %s',
+               'rmax': '--rmax %f',
+               'rmin': '--rmin %f',
+               'ventricles': '--ventricles',
+               'wm': '--wm',
+               'wm+vcsf': '--wm+vcsf',
+               'zero-edges': '--zero-edges',
+               'zero-slice-edges': '--zero-slice-edges',
+               'flags' : '%s'}
+    
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = [Bunch(key='infile',copy=False)]
+        return info
+    
+    def _parse_inputs(self):
+        """validate fs bbregister options"""
+        allargs = super(Threshold, self)._parse_inputs()
+
+        # Add infile and outfile to the args if they are specified
+        if not self.inputs.outfile and self.inputs.infile:
+            allargs.extend(['--o',fname_presuffix(self.inputs.infile,
+                                                  suffix='_out',
+                                                  newpath=os.getcwd())])
+        
+        return allargs
+    
+    def run(self, **inputs):
+        """Execute the command.
+        """
+        return super(Threshold, self).run()
+
+    def outputs(self):
+        """
+        outfile: filename
+            thresholded output file
+        """
+        outputs = Bunch(outfile=None)
+        return outputs
+
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        if isinstance(self.inputs.outfile,str):
+            outfile = glob(self.inputs.outfile)
+            outputs.outfile = outfile[0]
+        elif not self.inputs.outfile and self.inputs.infile:
+            outfile = glob(fname_presuffix(self.inputs.infile,
+                                           suffix='_out', newpath=os.getcwd())) 
+            outputs.outfile = outfile[0]
+        return outputs
