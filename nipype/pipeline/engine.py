@@ -105,7 +105,7 @@ class Pipeline(object):
         self.proc_done = None
         self.proc_pending = None
 
-    def connect(self, connection_list):
+    def connect(self, *args):
         """Connect nodes in the pipeline.
 
         This routine also checks if inputs and outputs are actually provided by
@@ -117,22 +117,38 @@ class Pipeline(object):
 
         Parameters
         ----------
-        connection_list : list
+        args : list or a set of four positional arguments
+
+            Four positional arguments of the form::
+            
+              connect(source, sourceoutput, dest, destinput)
+              
+            source : nodewrapper node
+            sourceoutput : string (must be in source.outputs)
+            dest : nodewrapper node
+            destinput : string (must be in dest.inputs)
+        
             A list of 3-tuples of the following form::
 
-             [(source1, destination1,
-                 [('namedoutput1/attribute', 'namedinput1'),
+             [(source, target,
+                 [('sourceoutput/attribute', 'targetinput'),
                  ...]), 
              ...]
             
             Or::
 
-             [(source1, destination1, [(('namedoutput1', func, arg2, ...),
-                                         'namedinput1'), ...]),
+             [(source, target, [(('sourceoutput1', func, arg2, ...),
+                                         'targetinput'), ...]),
              ...]
-             namedoutput1 will always be the first argument to func.
+             sourceoutput1 will always be the first argument to func
+             and func will be evaluated and the results sent ot targetinput
         """
-        logger.info("checking connections:")
+        if len(args)==1:
+            connection_list = args[0]
+        elif len(args)==4:
+            connection_list = [(args[0],args[2],[(args[1],args[3])])]
+        else:
+             raise Exception('unknown set of parameters to connect function')                   
         not_found = []
         for u, v, d in connection_list:
             for source, dest in d:
@@ -155,7 +171,6 @@ class Pipeline(object):
                                         u.name)
                     if sourcename and not u.check_outputs(sourcename):
                         not_found.append(['out',u.name,sourcename])
-        logger.info("checking connections: done")
         for c in not_found: 
             warn("Module %s has no %sput called %s\n"%(c[1],c[0],c[2]))
         if not_found:
