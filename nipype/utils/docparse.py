@@ -108,6 +108,59 @@ def format_params(paramlist, otherlist=None):
         otherparams = '\n'.join(otherlist)
     return ''.join([params, otherparams])
 
+def insert_doc(doc, new_items):
+    """Insert ``new_items`` into the beginning of the ``doc``
+
+    Docstrings in ``new_items`` will be inserted right after the
+    *Parameters* header but before the existing docs.
+
+    Parameters
+    ----------
+    doc : str
+        The existing docstring we're inserting docmentation into.
+    new_items : list
+        List of strings to be inserted in the ``doc``.
+
+    Examples
+    --------
+    >>> from nipype.utils.docparse import insert_doc
+    >>> doc = '''Parameters
+    ... ----------
+    ... outline : 
+    ...     something about an outline'''
+
+    >>> new_items = ['infile : str', '    The name of the input file']
+    >>> new_items.extend(['outfile : str', '    The name of the output file'])
+    >>> newdoc = insert_doc(doc, new_items)
+    >>> print newdoc
+    Parameters
+    ----------
+    infile : str
+        The name of the input file
+    outfile : str
+        The name of the output file
+    outline : 
+        something about an outline
+
+    """
+
+    # Insert new_items after the Parameters header
+    doclist = doc.split('\n')
+    tmpdoc = doclist[:2]
+    # Add new_items
+    tmpdoc.extend(new_items)
+    # Add rest of documents
+    tmpdoc.extend(doclist[2:])
+    # Insert newlines
+    newdoc = []
+    for line in tmpdoc:
+        newdoc.append(line)
+        newdoc.append('\n')
+    # We add one too many newlines, remove it.
+    newdoc.pop(-1)
+    return ''.join(newdoc)
+
+
 def build_doc(doc, opts):
     """Build docstring from doc and options
 

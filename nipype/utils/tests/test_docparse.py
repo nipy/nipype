@@ -1,6 +1,6 @@
 from nipype.testing import *
 
-from nipype.utils.docparse import reverse_opt_map, build_doc
+from nipype.utils.docparse import reverse_opt_map, build_doc, insert_doc
 
 class Foo(object):
     opt_map = {'outline': '-o', 'fun': '-f %.2f', 'flags': '%s'}
@@ -38,3 +38,23 @@ def test_build_doc():
     doc = build_doc(foo_doc, opts)
     assert_equal(doc, fmtd_doc)
 
+inserted_doc = """Parameters
+----------
+infile : str
+    The name of the input file
+outfile : str
+    The name of the output file
+outline : 
+     something about an outline
+fun : 
+     <f> intensity of fun factor
+
+Others Parameters
+-----------------
+  -v        verbose"""
+
+def test_insert_doc():
+    new_items = ['infile : str', '    The name of the input file']
+    new_items.extend(['outfile : str', '    The name of the output file'])
+    newdoc = insert_doc(fmtd_doc, new_items)
+    assert_equal(newdoc, inserted_doc)
