@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from nipype.testing import *
 import nipype.interfaces.fsl as fsl
@@ -561,6 +562,10 @@ def test_tbss_1_preproc():
 
     # test arguments for opt_map
     # Tbss_1_preproc class doesn't have opt_map{}
+
+    # remove the default directories this command creates
+    shutil.rmtree(os.path.join(os.getcwd(),'FA'))
+    shutil.rmtree(os.path.join(os.getcwd(),'origdata'))
     
     
 
@@ -630,7 +635,7 @@ def test_tbss_3_postreg():
         tbss3 = fsl.Tbss3postreg(**{name: settings[1]})
         yield assert_equal, tbss3.cmdline, tbss3.cmd+' '+settings[0]
 
-    
+        
 def test_tbss_4_prestats():
     tbss = fsl.Tbss4prestats()
 
@@ -804,44 +809,6 @@ def test_Randomise_parallel():
         yield assert_equal, rand4.cmdline, rand4.cmd+' -i infile -o root '+settings[0]
 
 
-
-def test_fsl_sub():
-    pass
-    # make sure command gets called
-
-
-    # test raising error with mandatory args absent
-
-
-    # .inputs based parameters setting
-
-
-    # .run based parameter setting
-
-
-    # test generation of outfile
-
-
-    # test arguments for opt_map
-##     opt_map ={'EstimatedJobLength':            ('-T 0.22', 0.22),
-##               'QueueType':                     ('-q long', 'long'),
-##               'Architecture':                  ('-a amd64', 'amd64'),
-##               'JobPriority':                   ('-p 0', 0),
-##               'Email':                         ('-M %s',
-##               'Hold':                          ('-j %d',
-##               'CommandScript':                 ('-t %s',
-##               'Jobname':                       ('-N %s',
-##               'logFilePath':                   ('-l %s',
-##               'SGEmailOpts':                   ('-m %s',
-##               'ScriptFlags4SGEqueue':          ('-F',
-##               'Verbose':                       ('-v'}
-##     
-##    for name, settings in opt_map.items():
-##        fsub4 = fsl.Fsl_sub(input_4D='infile',output_rootname='root',**{name: settings[1]})
-##        yield assert_equal, fsub4.cmdline, fsub4.cmd+' -i infile -o root '+settings[0]
-##     
-
-
 def test_Probtrackx():
     pass
     # make sure command gets called
@@ -861,49 +828,167 @@ def test_Probtrackx():
 
     # test arguments for opt_map
 
+    
 
+# test proj_thresh
 def test_Proj_thresh():
-    pass
-    # make sure command gets called
+    proj = fsl.Proj_thresh()
 
+    # make sure command gets called
+    yield assert_equal, proj.cmd, 'proj_thresh'
 
     # test raising error with mandatory args absent
-
+    yield assert_raises, AttributeError, proj.run
 
     # .inputs based parameters setting
+    proj.inputs.volumes=['vol1','vol2','vol3']
+    proj.inputs.threshold=3
+    yield assert_equal, proj.cmdline,'proj_thresh vol1 vol2 vol3 3'
+    
+    proj2 = fsl.Proj_thresh(threshold=10, volumes=['vola','volb'])
+    yield assert_equal, proj2.cmdline,'proj_thresh vola volb 10' 
 
-
-    # .run based parameter setting
-
-
-    # test generation of outfile
-
+    # .run based parameters setting
+    proj3 = fsl.Proj_thresh()
+    results = proj3.run(volumes=['inp1','inp3','inp2'],threshold=2)
+    yield assert_equal, results.runtime.cmdline, 'proj_thresh inp1 inp3 inp2 2'
+    yield assert_not_equal, results.runtime.returncode, 0
+    yield assert_equal, isinstance(results.interface.inputs.volumes,list), True
+    yield assert_equal, results.interface.inputs.threshold, 2
 
     # test arguments for opt_map
+    # Proj_thresh doesn't have an opt_map{}    
 
     
+# test vec_reg
+def test_Vec_reg():
+    
+    vrg = fsl.Vecreg()
 
+    # make sure command gets called
+    yield assert_equal, vrg.cmd, 'vecreg'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, AttributeError, vrg.run 
+
+    # .inputs based parameters setting
+    vrg.inputs.infile = 'infile'
+    vrg.inputs.outfile = 'outfile'
+    vrg.inputs.refVolName = 'MNI152'
+    vrg.inputs.affineTmat = 'tmat.mat'  
+    yield assert_equal, vrg.cmdline, 'vecreg -i infile -o outfile -r MNI152 -t tmat.mat'
+
+    # .run based parameter setting
+    vrg2 = fsl.Vecreg( infile='infile2',
+                       outfile='outfile2',
+                       refVolName='MNI152',
+                       affineTmat='tmat2.mat',
+                       brainMask='nodif_brain_mask')
+              
+    actualCmdline = sorted(vrg2.cmdline.split())
+    cmd = 'vecreg -i infile2 -o outfile2 -r MNI152 -t tmat2.mat -m nodif_brain_mask'
+    desiredCmdline = sorted(cmd.split())    
+    yield assert_equal, actualCmdline, desiredCmdline
+
+    vrg3=fsl.Vecreg()
+    results=vrg3.run(infile='infile3',
+                     outfile='outfile3',
+                     refVolName='MNI152',
+                     affineTmat='tmat3.mat',)
+    
+    yield assert_equal, results.runtime.cmdline, \
+          'vecreg -i infile3 -o outfile3 -r MNI152 -t tmat3.mat'
+    yield assert_not_equal, results.runtime.returncode, 0
+    yield assert_equal, results.interface.inputs.infile, 'infile3'
+    yield assert_equal, results.interface.inputs.outfile, 'outfile3'
+    yield assert_equal, results.interface.inputs.refVolName, 'MNI152'
+    yield assert_equal, results.interface.inputs.affineTmat, 'tmat3.mat'
+
+    # test arguments for opt_map
+    opt_map ={ 'verbose':           ('-v',True),
+               'helpDoc':           ('-h', True),
+               'tensor':            ('--tensor',True),
+               'affineTmat':        ('-t Tmat','Tmat'),
+               'warpFile':          ('-w wrpFile','wrpFile'),
+               'interpolation':     ('--interp sinc', 'sinc'),
+               'brainMask':         ('-m mask','mask')}
+
+    for name, settings in opt_map.items():
+        vrg4 = fsl.Vecreg(infile='infile',outfile='outfile',refVolName='MNI152',**{name: settings[1]})
+        yield assert_equal, vrg4.cmdline, vrg4.cmd+' -i infile -o outfile -r MNI152 '+settings[0]
+
+    
+# test find_the_biggest
 def test_Find_the_biggest():
-    pass
-    # make sure command gets called
+    fbg = fsl.Find_the_biggest()
 
+    # make sure command gets called
+    yield assert_equal, fbg.cmd, 'find_the_biggest'
 
     # test raising error with mandatory args absent
-
+    yield assert_raises, AttributeError, fbg.run
 
     # .inputs based parameters setting
+    fbg.inputs.infile='seed*'
+    fbg.inputs.outfile='fbgfile'
+    yield assert_equal, fbg.cmdline,'find_the_biggest seed* fbgfile'
+    
+    fbg2 = fsl.Find_the_biggest(infile='seed2*',outfile='fbgfile2')
+    yield assert_equal, fbg2.cmdline,'find_the_biggest seed2* fbgfile2' 
 
-
-    # .run based parameter setting
-
-
-    # test generation of outfile
-
+    # .run based parameters setting
+    fbg3 = fsl.Find_the_biggest()
+    results = fbg3.run(infile='seed3',outfile='out3')
+    yield assert_equal, results.runtime.cmdline, 'find_the_biggest seed3 out3'    
 
     # test arguments for opt_map
-    
+    # Find_the_biggest doesn't have an opt_map{}
+
 
     
 #----------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
