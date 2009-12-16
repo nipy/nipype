@@ -643,7 +643,7 @@ class Coregister(SpmMatlabCommandLine):
             list of filenames to apply the estimated rigid body
             transform from source to target
         jobtype : string
-            One of 'estwrite', 'write' or 'est'. default: estwrite
+            One of 'estwrite', 'write' or 'estimate'. default: estwrite
         cost_function : string, optional
             maximise or minimise some objective
             function. Valid options are Mutual
