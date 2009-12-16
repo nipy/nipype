@@ -25,7 +25,7 @@ import warnings
 
 from nipype.externals.pynifti import load
 from nipype.utils.filemanip import (fname_presuffix, list_to_filename,
-                                    filename_to_list)
+                                    filename_to_list, loadflat)
 from nipype.interfaces.base import (Bunch, CommandLine, Interface,
                                     load_template, InterfaceResult)
 from nipype.utils import setattr_on_read
@@ -140,7 +140,6 @@ class FSLInfo(object):
             if fname.endswith(ext):
                 fname = fname[:-(len(ext)+1)]
                 break
-        print fname
             
         _, ext = self.outputtype()           
         files = glob(fname) or glob(fname + '.' + ext)
