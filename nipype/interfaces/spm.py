@@ -768,7 +768,7 @@ class Coregister(SpmMatlabCommandLine):
         
     def aggregate_outputs(self):
         outputs = self.outputs()
-        if self.inputs.jobtype == "est":
+        if self.inputs.jobtype == "estimate":
             if self.inputs.apply_to_files != None:
                 outputs.coregistered_files = self.inputs.apply_to_files
             else:
