@@ -72,11 +72,9 @@ class FSLInfo(object):
         return out.strip('\n')
 
     ftypes = {'NIFTI':'nii',
-              'ANALYZE':'hdr',
-              'NIFTI_PAIR':'hdr',
-              'ANALYZE_GZ':'hdr.gz',
+              'NIFTI_PAIR':'img',
               'NIFTI_GZ':'nii.gz',
-              'NIFTI_PAIR_GZ':'hdr.gz',
+              'NIFTI_PAIR_GZ':'img.gz',
               None: 'env variable FSLOUTPUTTYPE not set'}
 
     def outputtype(self, ftype=None):
@@ -98,7 +96,7 @@ class FSLInfo(object):
         """
         if ftype is None:
             # get environment setting
-            fsl_ftype = os.getenv('FSLOUTPUTTYPE')
+            fsl_ftype = os.getenv('FSLOUTPUTTYPE','NIFTI_GZ')
 
         else:
             # set environment setting - updating environ automatically calls
@@ -108,8 +106,7 @@ class FSLInfo(object):
             if ftype in self.ftypes.keys():
                 os.environ['FSLOUTPUTTYPE'] = ftype 
             else:
-                pass
-                # raise an exception? warning?
+                raise IOError('FSLOUTPUTTYPE %s is not supported' % (ftype))
             fsl_ftype = ftype
 
         # This is inappropriate in a utility function
@@ -132,10 +129,20 @@ class FSLInfo(object):
         (different from glob.glob)'''
         # Could be made more faster / less clunky, but don't care until the API
         # is sorted out
-        _, ext = self.outputtype()
+        
         # While this function is a little globby, it may not be the best name.
         # Certainly, glob here is more expensive than necessary (could just use
         # os.path.exists)
+        
+        # stripping the filename of extensions that FSL will recognize and 
+        # substitute
+        for ext in self.ftypes.values():
+            if fname.endswith(ext):
+                fname = fname[:-(len(ext)+1)]
+                break
+        print fname
+            
+        _, ext = self.outputtype()           
         files = glob(fname) or glob(fname + '.' + ext)
 
         try:
@@ -167,7 +174,7 @@ class FSLInfo(object):
             cwd = os.getcwd()
 
         if fname is None:
-            fname = fname_presuffix(basename, suffix=suffix, newpath=cwd)
+            fname = fname_presuffix(list_to_filename(basename), suffix=suffix, newpath=cwd)
 
         if check:
             fname = fsl_info.glob(fname)
@@ -886,11 +893,11 @@ class Flirt(FSLCommand):
 
         if self.inputs.outfile:
             outputs.outfile = os.path.join(cwd, self.inputs.outfile)
-            if not glob(outputs.outfile):
+            if not fsl_info.glob(outputs.outfile):
                 raise_error(outputs.outfile)
         if self.inputs.outmatrix:
             outputs.outmatrix = os.path.join(cwd, self.inputs.outmatrix)
-            if not glob(outputs.outmatrix):
+            if not fsl_info.glob(outputs.outmatrix):
                 raise_error(outputs.outmatrix)
 
         return outputs
@@ -2515,8 +2522,17 @@ class Fslmaths(FSLCommand):
 
     def _populate_inputs(self):
         self.inputs = Bunch(infile=None,
+                            infile2=None,
                             outfile=None,
                             optstring=None)
+    def _extract_filename(self,input):
+        if isinstance(input, list):
+            newInput = [x.replace(".img","") for x in input if not x.endswith(".hdr")]
+            if len(newInput) == 1:
+                return newInput[0]
+            else:
+                return newInput
+                
 
     def _parse_inputs(self):
         """validate fsl fslmaths options"""
@@ -2524,24 +2540,22 @@ class Fslmaths(FSLCommand):
         # Add infile and outfile to the args if they are specified
         allargs=[]
         if self.inputs.infile:
-            allargs.insert(0, self.inputs.infile)
-            if not self.inputs.outfile:
-                # If the outfile is not specified but the infile is,
-                # generate an outfile
-                pth, fname = os.path.split(self.inputs.infile)
-                newpath=os.getcwd()
-                self.inputs.outfile = fname_presuffix(fname, suffix='_maths',
-                                                      newpath=newpath)
-                
+            allargs.insert(0, list_to_filename(self.inputs.infile))
+            outfile = fsl_info.gen_fname(self.inputs.infile,
+                                         self.inputs.outfile,
+                                         suffix='_maths')             
         if self.inputs.optstring:
             allargs.insert(1, self.inputs.optstring)
-
-        if self.inputs.outfile:
-            allargs.insert(2, self.inputs.outfile)
+            
+        if self.inputs.infile2:
+            allargs.insert(2, list_to_filename(self.inputs.infile2))
+            allargs.insert(3, outfile)            
+        else:
+            allargs.insert(2, outfile)
             
         return allargs
 
-    def run(self, infile=None, outfile=None, **inputs):
+    def run(self, infile=None, infile2=None, outfile=None, cwd=None, **inputs):
         """Execute the command.
         >>> from nipype.interfaces import fsl
         >>> maths = fsl.Fslmaths(infile='foo.nii', optstring= '-add 5', outfile='foo_maths.nii')
@@ -2552,15 +2566,20 @@ class Fslmaths(FSLCommand):
 
         if infile:
             self.inputs.infile = infile
+        if infile2:
+            self.inputs.infile = infile2
         if not self.inputs.infile:
             raise AttributeError('Fslmaths requires an input file')
         if outfile:
             self.inputs.outfile = outfile
+        if cwd is None:
+            cwd = os.getcwd()
+
         self.inputs.update(**inputs)
         
-        results = self._runner()       
+        results = self._runner(cwd=cwd)     
         if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
+            results.outputs = self.aggregate_outputs(cwd=cwd)
 
         return results
 
@@ -2588,7 +2607,7 @@ class Fslmaths(FSLCommand):
         outputs = Bunch(outfile=None)
         return outputs
 
-    def aggregate_outputs(self):
+    def aggregate_outputs(self, cwd=None):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
@@ -2604,16 +2623,9 @@ class Fslmaths(FSLCommand):
 
         """
         outputs = self.outputs()
-        if self.inputs.outfile:
-            outfile = self.inputs.outfile
-        else:
-            pth,fname = os.path.split(self.inputs.infile)
-            outfile = os.path.join(os.getcwd(),
-                                   fname_presuffix(fname,suffix='_maths'))
-        assert len(glob(outfile))==1, \
-            "Incorrect number or no output files %s generated"%outfile
-        outputs.outfile = outfile
-        
+        outputs.outfile = fsl_info.gen_fname(self.inputs.infile,
+                                self.inputs.outfile, cwd=cwd, suffix='_maths', 
+                                check=True)  
         return outputs
 
 

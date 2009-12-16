@@ -128,6 +128,11 @@ def copyfile(originalfile, newfile,copy=False):
     else:
         #print "copying %s to %s"%(originalfile,newfile)
         shutil.copyfile(originalfile, newfile)
+        
+    if originalfile.endswith(".img"):
+        hdrofile = originalfile[:-4] + ".hdr"
+        hdrnfile = newfile[:-4] + ".hdr"
+        copyfile(hdrofile,hdrnfile)
 
 def copyfiles(filelist, dest, copy=False):
     """given a file moves it to a working directory
