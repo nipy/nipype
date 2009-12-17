@@ -1,4 +1,5 @@
 import os
+import tempfile
 import shutil
 
 from nipype.testing import *
@@ -521,20 +522,19 @@ def test_fslmaths():
     # .inputs based parameters setting
     math.inputs.infile='foo.nii'
     math.inputs.optstring='-add 2.5 -mul input_volume2'
-    math.inputs.outfile='foo_math.nii'
-    
-    yield assert_equal, math.cmdline, 'fslmaths foo.nii -add 2.5 -mul input_volume2 foo_math.nii'
+    math.inputs.outfile='foo_math.nii'    
+    yield assert_equal, math.cmdline, 'fslmaths foo.nii -add 2.5 -mul input_volume2 '+os.getcwd()+'/foo_math.nii'
 
     # .run based parameter setting
     math2 = fsl.Fslmaths(infile='foo2',optstring='-add 2.5',outfile='foo2_math')
-    yield assert_equal, math2.cmdline, 'fslmaths foo2 -add 2.5 foo2_math'
+    yield assert_equal, math2.cmdline, 'fslmaths foo2 -add 2.5 '+os.getcwd()+'/foo2_math'
 
     math3 = fsl.Fslmaths()
     results=math3.run(infile='foo',outfile='foo_math',optstring='-add input_volume2')
     yield assert_not_equal, results.runtime.returncode, 0
     yield assert_equal, results.interface.inputs.infile, 'foo'
     yield assert_equal, results.interface.inputs.outfile, 'foo_math'
-    yield assert_equal, results.runtime.cmdline, 'fslmaths foo -add input_volume2 foo_math'
+    yield assert_equal, results.runtime.cmdline, 'fslmaths foo -add input_volume2 '+os.getcwd()+'/foo_math'
 
     # test arguments for opt_map
     # Fslmath class doesn't have opt_map{}
@@ -548,15 +548,17 @@ def test_tbss_1_preproc():
     # make sure command gets called
     yield assert_equal, tbss1.cmd, 'tbss_1_preproc'
 
+    tbssDir = tempfile.mkdtemp()
+
     # test raising error with mandatory args absent
-    yield assert_raises, AttributeError, tbss1.run 
+    yield assert_raises, AttributeError, tbss1.run
     
     # .inputs based parameters setting
     tbss1.inputs.infiles='foo.nii  f002.nii  f003.nii'
     yield assert_equal, tbss1.cmdline, 'tbss_1_preproc foo.nii  f002.nii  f003.nii'
 
     tbss = fsl.Tbss1preproc()
-    results=tbss.run(infiles='*.nii.gz',noseTest=True)
+    results=tbss.run(infiles='*.nii.gz',noseTest=True,cwd=tbssDir)
     yield assert_equal, results.interface.inputs.infiles, '*.nii.gz'
     yield assert_equal, results.runtime.cmdline, 'tbss_1_preproc *.nii.gz'
 
@@ -564,8 +566,7 @@ def test_tbss_1_preproc():
     # Tbss_1_preproc class doesn't have opt_map{}
 
     # remove the default directories this command creates
-    shutil.rmtree(os.path.join(os.getcwd(),'FA'))
-    shutil.rmtree(os.path.join(os.getcwd(),'origdata'))
+    shutil.rmtree(tbssDir)
     
     
 
@@ -573,6 +574,7 @@ def test_tbss_1_preproc():
 def test_tbss_2_reg():
     
     tbss2 = fsl.Tbss2reg()
+    tbssDir = tempfile.mkdtemp()
 
     # make sure command gets called
     yield assert_equal, tbss2.cmd, 'tbss_2_reg'
@@ -592,7 +594,7 @@ def test_tbss_2_reg():
     yield assert_equal, tbss222.cmdline,'tbss_2_reg -n'
 
     tbss21 = fsl.Tbss2reg()
-    results = tbss21.run(FMRIB58_FA_1mm=True,noseTest=True)
+    results = tbss21.run(FMRIB58_FA_1mm=True,noseTest=True,cwd=tbssDir)
     yield assert_equal, results.runtime.cmdline, 'tbss_2_reg -T'
     
     # test arguments for opt_map
@@ -603,6 +605,9 @@ def test_tbss_2_reg():
     for name, settings in opt_map.items():
         tbss = fsl.Tbss2reg(**{name: settings[1]})
         yield assert_equal, tbss.cmdline, tbss.cmd+' '+settings[0]
+
+    # remove the default directories this command creates
+    shutil.rmtree(tbssDir)
 
     
 def test_tbss_3_postreg():    

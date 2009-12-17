@@ -2657,7 +2657,7 @@ class Tbss2reg(FSLCommand):
         allargs = super(Tbss2reg,self)._parse_inputs()
         return allargs
 
-    def run(self, noseTest=False, **inputs):
+    def run(self, cwd=None, noseTest=False, **inputs):
         """Execute the command.
         >>> from nipype.interfaces import fsl
         >>> tbss2 = fsl.Tbss2reg(FMRIB58_FA_1mm=True)
@@ -2666,10 +2666,18 @@ class Tbss2reg(FSLCommand):
 
         """
         self.inputs.update(**inputs)
+
+        if (self.inputs.FMRIB58_FA_1mm is None) and \
+           (self.inputs.targetImage is None) and \
+           (self.inputs.findTarget is None):
+            raise AttributeError('Tbss2reg needs at least one option')        
         
-        results = self._runner()
+        if cwd is None:
+            cwd=os.getcwd()
+        
+        results = self._runner(cwd=cwd)
         if not noseTest:
-            results.outputs = self.aggregate_outputs()
+            results.outputs = self.aggregate_outputs(cwd)
 
         return results
 
@@ -2720,6 +2728,8 @@ class Tbss2reg(FSLCommand):
         
         return outputs
 
+
+
 #----------------------------------------------------------------------------------------------------------
 
 def bedpostX_datacheck_ok(directory):
@@ -2756,17 +2766,17 @@ def bedpostX_datacheck_ok(directory):
 
 #----------------------------------------------------------------------------------------------------------
 
-def tbss_1_2_getOutputFiles(outputs):
+def tbss_1_2_getOutputFiles(outputs,cwd):
     """
         Extracts path and filename from the FA folder that ought to have been created
         if tbss_1_preproc and tbss_2_reg was executed correctly
     """
     
-    if os.path.isdir(os.getcwd()+'/FA'):
-            FA_files = glob(os.getcwd()+'/FA/*')
-            origdata = glob(os.getcwd()+'/origdata/*.nii.gz')
+    if os.path.isdir(cwd+'/FA'):
+            FA_files = glob(cwd+'/FA/*')
+            origdata = glob(cwd+'/origdata/*.nii.gz')
     else:
-        raise AttributeError('No FA subdirectory was found in cwd: \n'+os.getcwd())
+        raise AttributeError('No FA subdirectory was found in cwd: \n'+cwd)
 
     outputs.outfiles=[]
     for line in origdata:
@@ -2806,7 +2816,7 @@ class Tbss1preproc(FSLCommand):
         """validate fsl tbss_1_preproc options"""
         return [self.inputs.infiles]
 
-    def run(self, noseTest=False, **inputs):
+    def run(self, cwd=None, noseTest=False, **inputs):
         """Execute the command.
         >>> from nipype.interfaces import fsl
         >>> tbss1 = fsl.Tbss1preproc(infiles='*.nii.gz')
@@ -2817,10 +2827,13 @@ class Tbss1preproc(FSLCommand):
         self.inputs.update(**inputs)
         if self.inputs.infiles is None:
             raise AttributeError('tbss_1_preproc requires input files')
+
+        if cwd is None:
+            cwd=os.getcwd()
         
-        results = self._runner()       
+        results = self._runner(cwd=cwd)       
         if not noseTest:
-            results.outputs = self.aggregate_outputs()
+            results.outputs = self.aggregate_outputs(cwd)
 
         return results
 
@@ -2848,7 +2861,7 @@ class Tbss1preproc(FSLCommand):
         outputs = Bunch(outfiles=None)
         return outputs
 
-    def aggregate_outputs(self):
+    def aggregate_outputs(self,cwd):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
@@ -2864,7 +2877,7 @@ class Tbss1preproc(FSLCommand):
 
         """
         outputs=self.outputs()
-        outputs = tbss_1_2_getOutputFiles(outputs)        
+        outputs = tbss_1_2_getOutputFiles(outputs,cwd)        
         if not outputs.outfiles:
             raise AttributeError('No output files created for tbss_1_preproc')
         
