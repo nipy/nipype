@@ -141,7 +141,7 @@ skullstrip.inputs.mask = True
    updated. 
 """
 coregister = nw.NodeWrapper(interface=spm.Coregister(),diskbased=True)
-coregister.inputs.jobtype = 'est'
+coregister.inputs.jobtype = 'estimate'
 
 
 """
