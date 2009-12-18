@@ -2524,15 +2524,7 @@ class Fslmaths(FSLCommand):
                             infile2=None,
                             outfile=None,
                             optstring=None)
-    def _extract_filename(self,input):
-        if isinstance(input, list):
-            newInput = [x.replace(".img","") for x in input if not x.endswith(".hdr")]
-            if len(newInput) == 1:
-                return newInput[0]
-            else:
-                return newInput
                 
-
     def _parse_inputs(self):
         """validate fsl fslmaths options"""
 
