@@ -357,15 +357,15 @@ class SpecifyModel(Interface):
             infoout[i].conditions = None
             infoout[i].onsets = None
             infoout[i].durations = None
-            if info.conditions is not None:
+            if info.conditions:
                 img = load(self.inputs.functional_runs[i])
                 nscans = img.get_shape()[3]
                 reg,regnames = self._cond_to_regress(info,nscans)
-                if infoout[i].regressors is None:
+                if not infoout[i].regressors:
                     infoout[i].regressors = []
                     infoout[i].regressor_names = []
                 else:
-                    if infoout[i].regressor_names is None:
+                    if not infoout[i].regressor_names:
                         infoout[i].regressor_names = ['R%d'%j for j in range(len(infoout[i].regressors))] 
                 for j,r in enumerate(reg):
                     regidx = len(infoout[i].regressors)
@@ -530,7 +530,7 @@ class SpecifyModel(Interface):
                         outliers.insert(len(outliers),[out.tolist()])
                     else:
                         outliers.insert(len(outliers),out.tolist())
-        if self.inputs.volumes_in_cluster is not None:
+        if self.inputs.volumes_in_cluster:
             infolist = self._generate_clustered_design(infolist)
         sessinfo = self._generate_standard_design(infolist,
                                                   functional_runs=functional_runs,

@@ -400,12 +400,20 @@ def gethemi(filename):
     else:
         return 'rh'
 
+def getconname(filename):
+    path,name = os.path.split(filename[0])
+    name,ext = os.path.splitext(name)
+    if name.endswith('.nii'):
+        name,ext = os.path.splitext(name)
+    return name
+
 def sort(inputvals):
     return sorted(inputvals)
     
 l2pipeline = pe.Pipeline()
 l2pipeline.config['workdir'] = os.path.abspath('./surf/l2output')
-l2pipeline.connect([(l2source,l2concat,[(('file_list',sort),'conimages')]),
+l2pipeline.connect([(l2source,l2concat,[(('file_list',sort),'conimages'),
+                                        (('file_list',getconname),'outprefix')]),
                     (l2regsource,l2concat,[(('file_list',sort),'regs')]),
                     (l2concat,onesamplettest,[('outfile','funcimage'),
                                               (('outfile',gethemi),'hemi')]),

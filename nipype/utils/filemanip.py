@@ -53,7 +53,7 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     """
     pth, fname = os.path.split(fname)
     fname, ext = os.path.splitext(fname)
-    if os.path.splitext(fname)[1]: # check for double extension nii.gz
+    if fname.endswith('.nii'): # check for double extension nii.gz
         fname,ext2 = os.path.splitext(fname)
         ext = ext2 + ext
     if not use_ext:
@@ -104,7 +104,7 @@ def check_forhash(filename):
     else:
         return False, None
 
-def copyfile(originalfile, newfile,copy=False):
+def copyfile(originalfile, newfile, copy=False):
     """given a file moves it to a working directory
 
     Parameters
@@ -113,9 +113,9 @@ def copyfile(originalfile, newfile,copy=False):
         full path to original file
     newfile : file
         full path to new file
-    symlink : Bool
+    copy : Bool
         specifies whether to copy or symlink files
-        (default=True) but only for posix systems
+        (default=False) but only for posix systems
          
     Returns
     -------
@@ -132,7 +132,7 @@ def copyfile(originalfile, newfile,copy=False):
     if originalfile.endswith(".img"):
         hdrofile = originalfile[:-4] + ".hdr"
         hdrnfile = newfile[:-4] + ".hdr"
-        copyfile(hdrofile,hdrnfile)
+        copyfile(hdrofile, hdrnfile, copy)
 
 def copyfiles(filelist, dest, copy=False):
     """given a file moves it to a working directory
@@ -147,7 +147,7 @@ def copyfiles(filelist, dest, copy=False):
         files. 
     copy : Bool
         specifies whether to copy or symlink files
-        (default=True) but only for posix systems
+        (default=False) but only for posix systems
          
     Returns
     -------

@@ -305,14 +305,11 @@ class DataGrabber(Interface):
         if self.inputs.template_argnames:
             for name in self.inputs.template_argnames:
                 arg = self.inputs.get(name)
-                print name, arg
                 if arg:
                     args.append(arg)
         template = self.inputs.file_template
         if args:
             template = template%tuple(args)
-        print args
-        print template
         outputs.file_list = list_to_filename(glob.glob(template))
         return outputs
 
