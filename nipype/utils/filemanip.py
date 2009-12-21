@@ -244,5 +244,7 @@ def loadflat(infile, *args):
             raise IOError('File does not contain variables: '+str(outargs))
     for k in data.files:
         if k in args or not args:
-            out[k] = data[k].flat[0]
+            out[k] = [f for f in data[k].flat]
+            if len(out[k])==1:
+                out[k] = out[k].pop()
     return out
