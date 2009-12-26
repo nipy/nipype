@@ -250,13 +250,13 @@ class InterfaceHelpWriter(object):
             __import__(uri)
             classinst = sys.modules[uri].__dict__[c]()
             helpstr = None
-            for i,v in classinst.inputs.iteritems():
+            for i,v in sorted(classinst.inputs.iteritems()):
                 if not helpstr:
                     helpstr = 'Inputs:: \n\n\t'
                 helpstr +=  i + '\n\t'
             if [i for i,v in classinst.outputs().iteritems()]:
                 helpstr += '\nOutputs:: \n\n\t'
-                for i,v in classinst.outputs().iteritems():
+                for i,v in sorted(classinst.outputs().iteritems()):
                     helpstr +=  i + '\n\t'
             if helpstr:
                 ad += '\n' + helpstr + '\n'
