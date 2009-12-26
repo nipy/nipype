@@ -1,6 +1,6 @@
-===========
-Nipype Home
-===========
+=============
+ Nipype Home
+=============
 
 This is the documentation for NIPY's interfaces and pipelines project,
 *nipype*.  Nipype intends to create Python interfaces to other

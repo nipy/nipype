@@ -219,9 +219,12 @@ class Dicom2Nifti(FSCommandLine):
         self._cmdline =  ' '.join(cmd)
         return self._cmdline,outdir
 
+    def outputs(self):
+        return Bunch()
+
     def aggregate_outputs(self):
         cmd,outdir = self._compile_command()
-        outputs = Bunch()
+        outputs = self.outputs()
         if self.inputs.file_mapping:
             for field,template in self.inputs.file_mapping:
                 setattr(outputs, field, sorted(glob(os.path.join(outdir,

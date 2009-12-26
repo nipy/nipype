@@ -1647,8 +1647,11 @@ class L1FSFmaker(object):
 
         return InterfaceResult(self, Bunch(), Bunch())
 
-    def aggregate_outputs(self):
+    def outputs(self):
         return Bunch()
+    
+    def aggregate_outputs(self):
+        return self.outputs()
                 
     def gen_ev(self, cond_num, cond_name, cond_file, total_conds,
                 temporalderiv=False):

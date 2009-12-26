@@ -15,5 +15,6 @@ Contents:
    :maxdepth: 2
 
    users/index
+   interfaces/index
    devel/index
    api/index

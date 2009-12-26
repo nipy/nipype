@@ -88,6 +88,9 @@ class DataSource(Interface):
                             subject_info=None)
 
     def outputs_help(self):
+        print self.outputs.__doc__
+
+    def outputs(self):
         """
             Parameters
             ----------
@@ -103,10 +106,11 @@ class DataSource(Interface):
             inputs_help() for description of how to specify output
             fields 
             """
-        print self.outputs_help.__doc__
+        return Bunch(subject_id=None,
+                     subject_directory=None)
         
     def aggregate_outputs(self):
-        outputs = Bunch(subject_id=None)
+        outputs = self.outputs()
         outputs.subject_id = self.inputs.subject_id
         subjdir = self.inputs.subject_directory
         if subjdir is None:
@@ -191,16 +195,20 @@ class DataSink(Interface):
                             subject_template=None,
                             subject_id=None)
         self.input_keys = self.inputs.__dict__.keys()
-        
+
+    def outputs(self):
+        """
+        """
+        return Bunch()
+    
     def outputs_help(self):
         """
             No outputs 
         """
-        print self.outputs_help.__doc__
+        print self.outputs.__doc__
         
     def aggregate_outputs(self):
-        outputs = Bunch()
-        return Bunch()
+        return self.outputs()
 
     def run(self, cwd=None):
         """Execute this module.
@@ -286,6 +294,9 @@ class DataGrabber(Interface):
                             )
 
     def outputs_help(self):
+        print self.outputs.__doc__
+
+    def outputs(self):
         """
             Parameters
             ----------
@@ -294,11 +305,11 @@ class DataGrabber(Interface):
 
             file_list : list
                 list of files picked up by the grabber
-            """
-        print self.outputs_help.__doc__
-        
+        """
+        return Bunch(file_list=None)
+    
     def aggregate_outputs(self):
-        outputs = Bunch(file_list=None)
+        outputs = self.outputs()
         args = []
         if self.inputs.template_argtuple:
             args.extend(list(self.inputs.template_argtuple))

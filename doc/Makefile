@@ -35,6 +35,7 @@ htmlonly:
 
 api:    
 	python ../tools/build_modref_templates.py
+	python ../tools/build_interface_docs.py
 	@echo "Build API docs finished."
 
 html: api htmlonly
