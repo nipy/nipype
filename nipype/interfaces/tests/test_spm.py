@@ -26,8 +26,8 @@ def cannot_find_spm():
 def test_scan_for_fnames():
     a = ['a.nii','b.nii']
     names = spm.scans_for_fnames(a,keep4d=True)
-    yield assert_equal, names[0][0], 'a.nii'
-    yield assert_equal, names[0][1], 'b.nii'
+    yield assert_equal, names[0], 'a.nii'
+    yield assert_equal, names[1], 'b.nii'
 
 save_time = True
 if not save_time:
@@ -86,9 +86,10 @@ def test_generate_job():
     out = mlab._generate_job(prefix='test',contents=contents)
     yield assert_equal, out, "test = 'foo';\n"
     # cell array of vectors
-    contents = {'onsets':np.array([[[np.array([1,2,3,4])]]])}
+    contents = {'onsets':np.array((1,),dtype=object)}
+    contents['onsets'][0] = [1,2,3,4]
     out = mlab._generate_job(prefix='test',contents=contents)
-    yield assert_equal, out, 'test.onsets = {...\n[1;2;3;4;];...\n};\n'
+    yield assert_equal, out, 'test.onsets = {...\n[1, 2, 3, 4];...\n};\n'
     
 def test_make_matlab_command():
     mlab = spm.SpmMatlabCommandLine()

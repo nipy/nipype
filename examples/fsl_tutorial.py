@@ -15,6 +15,7 @@ import nipype.interfaces.spm as spm          # spm
 import nipype.pipeline.node_wrapper as nw    # nodes for pypelines
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
+import nipype.algorithms.modelgen as model   # artifact detection
 import os                                    # system functions
 
 #####################################################################
@@ -224,7 +225,7 @@ contrasts = [cont1,cont2]
    c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
    SPM-specific design information. 
 """
-modelspec = nw.NodeWrapper(interface=spm.SpecifyModel())
+modelspec = nw.NodeWrapper(interface=model.SpecifyModel())
 modelspec.inputs.subject_info_func       = subjectinfo
 modelspec.inputs.concatenate_runs        = False
 modelspec.inputs.input_units             = 'secs'
@@ -326,6 +327,6 @@ preproc.connect([(datasource,datasink,[('subject_id','subject_id')]),
    analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
    function needs to be called. 
 """
-#if __name__ == '__main__':
-#    l1pipeline.run()
+if __name__ == '__main__':
+    preproc.run()
 #    l2pipeline.run()

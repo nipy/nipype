@@ -380,25 +380,29 @@ class SpecifyModel(Interface):
         """ Generates a standard design matrix paradigm
         """
         sessinfo = []
+        #                dt = np.dtype({'names':['name', 'param', 'poly'],
+        #                               'formats':[object, object, object]})
+        #                sessinfo[i]['pmod'] = np.zeros((len(info.pmod),), dtype=dt)
         for i,info in enumerate(infolist):
             sessinfo.insert(i,dict(cond=[]))
             if self.inputs.high_pass_filter_cutoff is not None:
                 sessinfo[i]['hpf'] = np.float(self.inputs.high_pass_filter_cutoff)
-            if info.conditions is not None:
+            if info.conditions:
                 for cid,cond in enumerate(info.conditions):
                     sessinfo[i]['cond'].insert(cid,dict())
                     sessinfo[i]['cond'][cid]['name']  = info.conditions[cid]
                     sessinfo[i]['cond'][cid]['onset'] = self._scaletimings(info.onsets[cid])
                     sessinfo[i]['cond'][cid]['duration'] = self._scaletimings(info.durations[cid])
-                    if info.tmod is not None:
+                    if info.tmod and len(info.tmod)>cid:
                         sessinfo[i]['cond'][cid]['tmod'] = info.tmod[cid]
-                    if (info.pmod is not None) and info.pmod.has_key(cid+1):
-                        sessinfo[i]['cond'][cid]['pmod'] = []
-                        for j in range(len(info.pmod[cid+1].name)):
-                            sessinfo[i]['cond'][cid]['pmod'].insert(j,dict())
-                        for key,data in info.pmod[cid+1].iteritems():
-                            for k,val in enumerate(data):
-                                sessinfo[i]['cond'][cid]['pmod'][k][key] = val
+                    if info.pmod and len(info.pmod)>cid:
+                        if info.pmod[cid]:
+                            sessinfo[i]['cond'][cid]['pmod'] = []
+                            for j,name in enumerate(info.pmod[cid].name):
+                                sessinfo[i]['cond'][cid]['pmod'].insert(j,{})
+                                sessinfo[i]['cond'][cid]['pmod'][j]['name'] = name
+                                sessinfo[i]['cond'][cid]['pmod'][j]['poly'] = info.pmod[cid].poly[j]
+                                sessinfo[i]['cond'][cid]['pmod'][j]['param'] = info.pmod[cid].param[j]
             sessinfo[i]['regress']= []
             if info.regressors is not None:
                 for j,r in enumerate(info.regressors):
@@ -422,7 +426,8 @@ class SpecifyModel(Interface):
                     sessinfo[i]['regress'][colidx]['val']  = mc[:,col].tolist()
         if outliers is not None:
             for i,out in enumerate(outliers):
-                numscans = sessinfo[i]['scans'][0].shape[0] 
+                numscans = len(sessinfo[i]['scans'])
+                print numscans
                 for j,scanno in enumerate(out):
                     if True:
                         colidx = len(sessinfo[i]['regress'])
@@ -448,7 +453,7 @@ class SpecifyModel(Interface):
         infoout = infolist[0]
         for i,info in enumerate(infolist[1:]):
                 #info.[conditions,tmod] remain the same
-            if info.onsets is not None:
+            if info.onsets:
                 for j,val in enumerate(info.onsets):
                     if self.inputs.input_units == 'secs':
                         infoout.onsets[j].extend((np.array(info.onsets[j])+
@@ -458,29 +463,22 @@ class SpecifyModel(Interface):
                 for j,val in enumerate(info.durations):
                     if len(val) > 1:
                         infoout.durations[j].extend(info.durations[j])
-                if info.pmod is not None:
-                    for key,data in info.pmod.items():
-                        for j,v in enumerate(data.param):
-                            infoout.pmod[key].param[j].extend(v)
-            if info.regressors is not None:
+                if info.pmod:
+                    for j,val in enumerate(info.pmod):
+                        if val:
+                            for key,data in enumerate(val.param):
+                                infoout.pmod[j].param[key].extend(data)
+            if info.regressors:
                 #assumes same ordering of regressors across different
                 #runs and the same names for the regressors
                 for j,v in enumerate(info.regressors):
                     infoout.regressors[j].extend(info.regressors[j])
             #insert session regressors
-            if True:
-                if infoout.regressors is None:
-                    infoout.regressors = []
-                onelist = np.zeros((1,sum(nscans)))
-                onelist[0,sum(nscans[0:(i)]):sum(nscans[0:(i+1)])] = 1
-                infoout.regressors.insert(len(infoout.regressors),onelist.tolist()[0])
-            else:
-                infoout.conditions.append('Session%d'%i)
-                infoout.onsets.insert(len(infoout.onsets),[sum(nscans[0:i])])
-                infoout.durations.insert(len(infoout.durations),[nscans[i]])
-                if infoout.tmod is not None:
-                    infoout.tmod.insert(len(infoout.tmod),0)
-            # insert outliers as new regressors
+            if not infoout.regressors:
+                infoout.regressors = []
+            onelist = np.zeros((1,sum(nscans)))
+            onelist[0,sum(nscans[0:(i)]):sum(nscans[0:(i+1)])] = 1
+            infoout.regressors.insert(len(infoout.regressors),onelist.tolist()[0])
         return [infoout],nscans
     
     def _generate_design(self):

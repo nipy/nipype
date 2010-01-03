@@ -240,6 +240,8 @@ class NodeWrapper(object):
                 logger.debug("iterating %s on %s: %s\n"%(self.name,
                                                          self.iterfield[0],
                                                          str(v)))
+                #subdir = 
+                #logger.debug("subdir: %s"%subdir)
                 self.set_input(self.iterfield[0], v)
                 # XXX - SG - we might consider creating a sub
                 # directory for each v
