@@ -166,10 +166,10 @@ class DicomDirInfo(FSLCommand):
 
     def outputs(self):
         """
-        outfile: filename
+        dicominfo: filename
             file containing dicom information
         """
-        return Bunch(outfile=None)
+        return Bunch(dicominfo=None)
 
     def aggregate_outputs(self):
         outputs = self.outputs()
@@ -177,7 +177,7 @@ class DicomDirInfo(FSLCommand):
             outfile = self._get_outfile_name()
         if isinstance(self.inputs.outfile,str):
             outfile = self.inputs.outfile
-        outputs.outfile = glob(outfile)[0]
+        outputs.dicominfo = glob(outfile)[0]
         return outputs
 
 class DicomConvert(FSCommandLine):

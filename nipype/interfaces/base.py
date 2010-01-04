@@ -441,4 +441,3 @@ class CommandLine(Interface):
             
         """
         return []
-

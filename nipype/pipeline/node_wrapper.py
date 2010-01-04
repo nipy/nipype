@@ -112,7 +112,14 @@ class NodeWrapper(object):
         return self._interface.inputs
 
     def set_input(self, parameter, val):
-        setattr(self._interface.inputs, parameter, deepcopy(val))
+        """ Set interface input value or nodewrapper attribute
+
+        Priority goes to interface.
+        """
+        if hasattr(self._interface.inputs, parameter):
+            setattr(self._interface.inputs, parameter, deepcopy(val))
+        else:
+            setattr(self, parameter, deepcopy(val))
 
     def get_output(self, parameter):
         val = None
@@ -124,11 +131,12 @@ class NodeWrapper(object):
         return val
 
     def check_outputs(self, parameter):
-        return hasattr(self,parameter) or \
+        return hasattr(self, parameter) or \
             hasattr(self._interface.outputs(), parameter)
     
     def check_inputs(self, parameter):
-        return hasattr(self._interface.inputs,parameter)
+        return hasattr(self._interface.inputs, parameter) or \
+            hasattr(self, parameter)
 
     def _save_hashfile(self, hashfile, hashed_inputs):
         try:
