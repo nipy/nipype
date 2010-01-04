@@ -290,7 +290,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');end\n
         """
         if self.mfile:
-            if self.jobname in ['smooth','preproc','fmri_spec','fmri_est'] :
+            if self.jobname in ['st','smooth','preproc','fmri_spec','fmri_est'] :
                 mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' % 
                                              (self.jobtype,self.jobname), contents[0])
             else:
@@ -324,6 +324,174 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         """
         raise NotImplementedError
 
+class SliceTiming(SpmMatlabCommandLine):
+    """use spm_smooth for 3D Gaussian smoothing of image volumes.
+
+    See Smooth().spm_doc() for more information.
+
+    Parameters
+    ----------
+    inputs : dict 
+        key, value pairs that will update the Smooth.inputs attributes.
+        See self.inputs_help() for a list of Smooth.inputs attributes.
+    
+    Attributes
+    ----------
+    inputs : :class:`nipype.interfaces.base.Bunch`
+        Options that can be passed to spm_smooth via a job structure
+    cmdline : str
+        String used to call matlab/spm via SpmMatlabCommandLine interface
+
+    Other Parameters
+    ----------------
+    To see optional arguments
+    SliceTiming().inputs_help()
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.spm import SliceTiming
+    >>> st = SliceTiming()
+    >>> st.inputs.infile = 'func.nii'
+    >>> st.inputs.num_slices = 32
+    >>> st.inputs.time_repetition = 6.0
+    >>> st.inputs.time_acquisition = 6. - 6./32.
+    >>> st.inputs.slice_order = range(32,0,-1)
+    >>> st.inputs.ref_slice = 1
+    """
+
+    def spm_doc(self):
+        """Print out SPM documentation."""
+        print grab_doc('SliceTiming')
+    
+    @property
+    def cmd(self):
+        return 'spm_st'
+
+    @property
+    def jobtype(self):
+        return 'temporal'
+
+    @property
+    def jobname(self):
+        return 'st'
+
+    def inputs_help(self):
+        """
+        Parameters
+        ----------
+        infile : list
+            list of filenames to apply slice timing
+        num_slices : int
+            number of slices in a volume
+        time_repetition: float
+            time between volume acquisitions (start to start time)
+        time_acquisition: float
+            time of volume acquisition. usually calculated as
+            TR-(TR/num_slices) 
+        slice_order : list
+            order in which slices are acquired. ensure that this is a 1-based
+            list. 
+        ref_slice : int
+            Number of the reference slice. Remember 1-based numbering
+        flags : USE AT OWN RISK, optional
+            #eg:'flags':{'eoptions':{'suboption':value}}
+        """
+        print self.inputs_help.__doc__
+
+    def _populate_inputs(self):
+        """ Initializes the input fields of this interface.
+        """
+        self.inputs = Bunch(infile=None,
+                            num_slices=None,
+                            time_repetition=None,
+                            time_acquisition=None,
+                            slice_order=None,
+                            ref_slice=None,
+                            flags=None)
+
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = [Bunch(key='infile',copy=False)]
+        return info
+        
+    def _parseinputs(self):
+        """validate spm smooth options
+        if set to None ignore
+        """
+        out_inputs = []
+        inputs = {}
+        einputs = {'scans':[]}
+
+        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        for opt in inputs:
+            if opt == 'infile':
+                sess_scans = scans_for_fnames(filename_to_list(inputs[opt]),
+                                              separate_sessions=True)
+                einputs['scans'] = sess_scans
+                continue
+            if opt == 'num_slices':
+                einputs['nslices'] = int(inputs[opt])
+                continue
+            if opt == 'time_repetition':
+                einputs['tr'] = inputs[opt]
+                continue
+            if opt == 'time_acquisition':
+                einputs['ta'] = inputs[opt]
+                continue
+            if opt == 'slice_order':
+                einputs['so'] = inputs[opt]
+                continue
+            if opt == 'ref_slice':
+                einputs['refslice'] = inputs[opt]
+                continue
+            if opt == 'flags':
+                einputs.update(inputs[opt])
+                continue
+            print 'option %s not supported'%(opt)
+        return [einputs]
+
+    def run(self, infile=None, **inputs):
+        """Executes the SPM slice timing function using MATLAB
+        
+        Parameters
+        ----------
+        
+        infile: string, list
+            image file(s) to smooth
+        """
+        if infile:
+            self.inputs.infile = infile
+        if not self.inputs.infile:
+            raise AttributeError('Slice timing requires a file')
+        self.inputs.update(**inputs)
+        return super(SliceTiming,self).run()
+
+    def outputs(self):
+        """
+        Parameters
+        ----------
+        (all default to None)
+        
+        smoothed_files :
+            smooth files corresponding to inputs.infile
+        """
+        outputs = Bunch(timecorrected_files=None)
+        return outputs
+        
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        outputs.timecorrected_files = []
+        filelist = filename_to_list(self.inputs.infile)
+        for f in filelist:
+            s_file = glob(fname_presuffix(f, prefix='a',
+                                          suffix='.nii',use_ext=False))
+            assert len(s_file) == 1, 'No slice time corrected file generated by SPM Slice Timing'
+            outputs.timecorrected_files.append(s_file[0])
+        return outputs
+    
 class Realign(SpmMatlabCommandLine):
     """Use spm_realign for estimating within modality rigid body alignment
 

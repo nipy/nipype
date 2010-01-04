@@ -1974,7 +1974,6 @@ class FeatModel(FSLCommand):
         input.
 
         >>> from nipype.interfaces import fsl
-        >>> import os
         >>> fmodel = fsl.FeatModel(fsf_file='foo.fsf')
         """
         if fsf_file:
@@ -2040,8 +2039,8 @@ class FilmGLS(FSLCommand):
 
     Specify options when creating an instance:
 
-    >>> fgls = fsl.FilmGLS(infile='filtered_func_data',
-                           designfile='design.mat',
+    >>> fgls = fsl.FilmGLS(infile='filtered_func_data', \
+                           designfile='design.mat', \
                            thresh=10, rn='stats')
     >>> res = fgls.run()
 
@@ -2136,9 +2135,9 @@ class FilmGLS(FSLCommand):
 
         >>> from nipype.interfaces import fsl
         >>> import os
-        >>> fgls = fsl.FilmGLS(infile='foo.nii',
-                               designfile='design.mat',
-                               thresh=10,
+        >>> fgls = fsl.FilmGLS(infile='foo.nii', \
+                               designfile='design.mat', \
+                               thresh=10, \
                                flags='-ven')
         """
         if infile:
