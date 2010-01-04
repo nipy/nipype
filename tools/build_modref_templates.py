@@ -3,12 +3,14 @@
 """
 # stdlib imports
 import os
+import sys
 
 # local imports
 from apigen import ApiDocWriter
 
 #*****************************************************************************
 if __name__ == '__main__':
+    sys.path.insert(1,os.path.abspath('../nipype'))
     package = 'nipype'
     outdir = os.path.join('api','generated')
     docwriter = ApiDocWriter(package)

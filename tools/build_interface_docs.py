@@ -3,12 +3,14 @@
 """
 # stdlib imports
 import os
+import sys
 
 # local imports
 from interfacedocgen import InterfaceHelpWriter
 
 #*****************************************************************************
 if __name__ == '__main__':
+    sys.path.insert(1,os.path.abspath('../nipype'))
     package = 'nipype'
     outdir = os.path.join('interfaces','generated')
     docwriter = InterfaceHelpWriter(package)
