@@ -127,7 +127,10 @@ def copyfile(originalfile, newfile, copy=False):
         os.symlink(originalfile,newfile)
     else:
         #print "copying %s to %s"%(originalfile,newfile)
-        shutil.copyfile(originalfile, newfile)
+        try:
+            shutil.copyfile(originalfile, newfile)
+        except shutil.Error:
+            print "File already exists"
         
     if originalfile.endswith(".img"):
         hdrofile = originalfile[:-4] + ".hdr"
