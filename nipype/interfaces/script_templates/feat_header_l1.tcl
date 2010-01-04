@@ -157,8 +157,8 @@ set fmri(evs_real) $num_evs
 set fmri(evs_vox) 0
 
 # Number of contrasts
-set fmri(ncon_orig) 1
-set fmri(ncon_real) 1
+set fmri(ncon_orig) 0
+set fmri(ncon_real) 0
 
 # Number of F-tests
 set fmri(nftests_orig) 0

@@ -1743,9 +1743,6 @@ class Level1Design(Interface):
             Option to model serial correlations using an
             autoregressive estimator. AR(1) or none
             SPM default = AR(1)
-        contrasts : list of dicts
-            List of contrasts with each list containing: 'name',
-            'stat', [condition list], [weight list].
         """
         print self.inputs_help.__doc__
 
@@ -1766,7 +1763,7 @@ class Level1Design(Interface):
                 f.write('%f\n'%i[0])
         f.close()
 
-    def _create_ev_files(self,cwd,runinfo,runidx,usetd,contrasts):
+    def _create_ev_files(self,cwd,runinfo,runidx,usetd):
         """Creates EV files from condition and regressor information.
 
            Parameters:
@@ -1780,17 +1777,12 @@ class Level1Design(Interface):
            usetd   : int
                Whether or not to use temporal derivatives for
                conditions
-           contrasts : list of lists
-               Information on contrasts to be evaluated
         """
         conds = {}
         evname = []
         ev_gamma  = load_template('feat_ev_gamma.tcl')
         ev_none   = load_template('feat_ev_none.tcl')
         ev_ortho  = load_template('feat_ev_ortho.tcl')
-        contrast_header  = load_template('feat_contrast_header.tcl')
-        contrast_prolog  = load_template('feat_contrast_prolog.tcl')
-        contrast_element = load_template('feat_contrast_element.tcl')
         ev_txt = ''
         # generate sections for conditions and other nuisance regressors
         for field in ['cond','regress']:
@@ -1822,20 +1814,6 @@ class Level1Design(Interface):
             for j in range(len(evname)+1):
                 ev_txt += ev_ortho.substitute(c0=i,c1=j)
                 ev_txt += "\n"
-        # add contrast info
-        ev_txt += contrast_header.substitute()
-        for j,con in enumerate(contrasts):
-            ev_txt += contrast_prolog.substitute(cnum=j+1,
-                                                 cname=con[0])
-            for c in range(1,len(evname)+1):
-                if evname[c-1] in con[2]:
-                    val = con[3][con[2].index(evname[c-1])]
-                else:
-                    val = 0.0
-                ev_txt += contrast_element.substitute(cnum=j+1,
-                                           element=c,
-                                           val=val)
-                ev_txt += "\n"
         return conds,ev_txt
 
     def run(self, cwd=None, **inputs):
@@ -1853,7 +1831,7 @@ class Level1Design(Interface):
         session_info = self._get_session_info(self.inputs.session_info)
         func_files = self._get_func_files(session_info)
         for i,info in enumerate(session_info):
-            curr_conds,cond_txt  = self._create_ev_files(cwd,info,i,usetd,self.inputs.contrasts)
+            curr_conds,cond_txt  = self._create_ev_files(cwd,info,i,usetd)
             nim = load(func_files[i])
             (x,y,z,timepoints) = nim.get_shape()
             fsf_txt = fsf_header.substitute(scan_num=i,

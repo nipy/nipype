@@ -240,7 +240,6 @@ modelspec.inputs.high_pass_filter_cutoff = 120
 level1design = nw.NodeWrapper(interface=fsl.Level1Design(),diskbased=True)
 level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
 level1design.inputs.bases              = {'hrf':{'derivs': False}}
-level1design.inputs.contrasts          = contrasts
 level1design.overwrite = True
 
 """
