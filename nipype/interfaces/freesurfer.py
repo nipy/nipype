@@ -235,6 +235,9 @@ class DicomConvert(FSCommandLine):
             File containing summary information from mri_parse_sdcmdir
         seq_list : list of strings
             list of pulse sequence names to be converted.
+        ignore_single_slice : boolean
+            ignores volumes containing a single slice. dicominfo needs to be
+            available. 
         flags = unsupported flags, use at your own risk
 
         """
@@ -249,6 +252,7 @@ class DicomConvert(FSCommandLine):
                             out_type='nii',
                             dicominfo=None,
                             seq_list=None,
+                            ignore_single_slice=None,
                             flags=None)
 
     def _parseinputs(self):
@@ -295,8 +299,12 @@ class DicomConvert(FSCommandLine):
         runs = []
         for s in seq:
             if self.inputs.seq_list:
-                if any([s[12].startswith(sn) for sn in self.inputs.seq_list]):
-                    runs.append(int(s[2]))
+                if self.inputs.ignore_single_slice:
+                    if (int(s[8]) > 1) and any([s[12].startswith(sn) for sn in self.inputs.seq_list]):
+                        runs.append(int(s[2]))
+                else:
+                    if any([s[12].startswith(sn) for sn in self.inputs.seq_list]):
+                        runs.append(int(s[2]))
             else:
                 runs.append(int(s[2]))
         return runs
