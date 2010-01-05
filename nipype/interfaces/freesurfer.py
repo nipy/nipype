@@ -78,11 +78,13 @@ class FSCommandLine(CommandLine):
 
     def __init__(self):
         super(FSCommandLine,self).__init__()
-        self._cmdline = ''
+        self._cmdline = None
         
     @property
     def cmdline(self):
         # This handles args like ['bet', '-f 0.2'] without crashing
+        if not self._cmdline:
+            self._cmdline = self._compile_command()
         return self._cmdline
 
     def run(self, **inputs):
