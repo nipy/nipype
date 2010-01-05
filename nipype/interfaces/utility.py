@@ -26,8 +26,9 @@ class IdentityInterface(Interface):
         """
         """
         self._populate_inputs()
-        for f in fields:
-            setattr(self.inputs, f, None)
+        if fields:
+            for f in fields:
+                setattr(self.inputs, f, None)
         
     def _populate_inputs(self):
         self.inputs = Bunch()
