@@ -268,7 +268,7 @@ class DicomConvert(FSCommandLine):
                 continue
             if opt in ['base_output_dir', 'subject_dir_template', 'subject_id', \
                            'file_mapping', 'out_type', 'dicominfo', 'seq_list', \
-                           'flags']:
+                           'ignore_single_slice', 'flags']:
                 continue
             print 'option %s not supported'%(opt)
         
