@@ -475,8 +475,8 @@ class SliceTiming(SpmMatlabCommandLine):
         ----------
         (all default to None)
         
-        smoothed_files :
-            smooth files corresponding to inputs.infile
+        timecorrected_files :
+            slice time corrected files corresponding to inputs.infile
         """
         outputs = Bunch(timecorrected_files=None)
         return outputs
