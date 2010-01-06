@@ -337,10 +337,11 @@ class DicomConvert(FSCommandLine):
         if not os.path.exists(outdir):
             cmdstr = 'mkdir %s' % outdir
             cmd.extend([cmdstr])
-        cmdstr = 'dcmdir-info-mgh %s > %s' % (self.inputs.dicomdir,
-                                              os.path.join(outdir,
-                                                           'shortinfo.txt'))
-        cmd.extend([cmdstr])
+        infofile = os.path.join(outdir, 'shortinfo.txt')
+        if not os.path.exists(infofile):
+            cmdstr = 'dcmdir-info-mgh %s > %s' % (self.inputs.dicomdir,
+                                                  infofile)
+            cmd.extend([cmdstr])
         files = self._get_filelist(outdir)
         for infile,outfile in files:
             if not os.path.exists(outfile):
