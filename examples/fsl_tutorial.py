@@ -58,7 +58,7 @@ fsl.fsl_info.outputtype('NIFTI')
 # The following lines create some information about location of your
 # data. 
 data_dir = os.path.abspath('data')
-subject_list = ['s1','s3']
+subject_list = ['s1'] #, 's3']
 # The following info structure helps the DataSource module organize
 # nifti files into fields/attributes of a data object. With DataSource
 # this object is of type Bunch.
@@ -219,6 +219,7 @@ def subjectinfo(subject_id):
 """
 cont1 = ['Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5]]
 cont2 = ['Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1]]
+cont3 = ['Task','F', [cont1, cont2]]
 contrasts = [cont1,cont2]
 
 """
@@ -240,7 +241,7 @@ modelspec.inputs.high_pass_filter_cutoff = 120
 level1design = nw.NodeWrapper(interface=fsl.Level1Design(),diskbased=True)
 level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
 level1design.inputs.bases              = {'hrf':{'derivs': False}}
-level1design.overwrite = True
+level1design.inputs.contrasts          = contrasts
 
 """
    e. Use :class:`nipype.interfaces.fsl.FeatModel` to generate a
@@ -256,6 +257,13 @@ modelgen.iterfield = ['fsf_file']
 modelestimate = nw.NodeWrapper(interface=fsl.FilmGLS(),diskbased=True)
 modelestimate.inputs.thresh = 10
 modelestimate.iterfield = ['designfile','infile']
+
+"""
+   f. Use :class:`nipype.interfaces.fsl.ContrastMgr` to estimate
+   contrasts
+"""
+conestimate = nw.NodeWrapper(interface=fsl.ContrastMgr(),diskbased=True)
+conestimate.iterfield = ['tconfile','statsdir']
 
 ##########################
 # Setup storage of results
@@ -308,6 +316,8 @@ l1pipeline.connect([# preprocessing in native space
                  (level1design,modelgen,[('fsf_files','fsf_file')]),
                  (level1design,modelestimate,[('func_files','infile')]),
                  (modelgen,modelestimate,[('designfile','designfile')]),
+                 (modelgen,conestimate,[('confile','tconfile')]),
+                 (modelestimate,conestimate,[('statsdir','statsdir')]),
                 ])
 
 # store relevant outputs from various stages of preprocessing

@@ -1743,6 +1743,9 @@ class Level1Design(Interface):
             Option to model serial correlations using an
             autoregressive estimator. AR(1) or none
             SPM default = AR(1)
+        contrasts : list of dicts
+            List of contrasts with each list containing: 'name', 'stat',
+            [condition list], [weight list]. 
         """
         print self.inputs_help.__doc__
 
@@ -1752,7 +1755,8 @@ class Level1Design(Interface):
         self.inputs = Bunch(interscan_interval=None,
                             session_info=None,
                             bases=None,
-                            model_serial_correlations=None)
+                            model_serial_correlations=None,
+                            contrasts=None)
 
     def _create_ev_file(self,evfname,evinfo):
         f = open(evfname,'wt')
@@ -1763,7 +1767,7 @@ class Level1Design(Interface):
                 f.write('%f\n'%i[0])
         f.close()
 
-    def _create_ev_files(self,cwd,runinfo,runidx,usetd):
+    def _create_ev_files(self,cwd,runinfo,runidx,usetd,contrasts):
         """Creates EV files from condition and regressor information.
 
            Parameters:
@@ -1777,12 +1781,17 @@ class Level1Design(Interface):
            usetd   : int
                Whether or not to use temporal derivatives for
                conditions
+           contrasts : list of lists
+               Information on contrasts to be evaluated               
         """
         conds = {}
         evname = []
         ev_gamma  = load_template('feat_ev_gamma.tcl')
         ev_none   = load_template('feat_ev_none.tcl')
         ev_ortho  = load_template('feat_ev_ortho.tcl')
+        contrast_header  = load_template('feat_contrast_header.tcl')
+        contrast_prolog  = load_template('feat_contrast_prolog.tcl')
+        contrast_element = load_template('feat_contrast_element.tcl')
         ev_txt = ''
         # generate sections for conditions and other nuisance regressors
         for field in ['cond','regress']:
@@ -1814,6 +1823,21 @@ class Level1Design(Interface):
             for j in range(len(evname)+1):
                 ev_txt += ev_ortho.substitute(c0=i,c1=j)
                 ev_txt += "\n"
+        # add t contrast info
+        ev_txt += contrast_header.substitute()
+        for ctype in ['real','orig']:
+            for j,con in enumerate(contrasts):
+                ev_txt += contrast_prolog.substitute(cnum=j+1,
+                                                     ctype=ctype,
+                                                     cname=con[0])
+                for c in range(1,len(evname)+1):
+                    if evname[c-1] in con[2]:
+                        val = con[3][con[2].index(evname[c-1])]
+                    else:
+                        val = 0.0
+                    ev_txt += contrast_element.substitute(cnum=j+1, element=c,
+                                                          ctype=ctype, val=val)
+                    ev_txt += "\n"
         return conds,ev_txt
 
     def run(self, cwd=None, **inputs):
@@ -1830,8 +1854,20 @@ class Level1Design(Interface):
             usetd = 0
         session_info = self._get_session_info(self.inputs.session_info)
         func_files = self._get_func_files(session_info)
+
+        n_tcon = 0
+        n_fcon = 0
+        for i,c in enumerate(self.inputs.contrasts):
+            if c[1] == 'T':
+                n_tcon+=1
+            elif c[1] == 'F':
+                n_fcon+=1
+            else:
+                print "unknown contrast type: %s"%str(c)
+        print [n_tcon, n_fcon]
+        
         for i,info in enumerate(session_info):
-            curr_conds,cond_txt  = self._create_ev_files(cwd,info,i,usetd)
+            curr_conds,cond_txt  = self._create_ev_files(cwd,info,i,usetd,self.inputs.contrasts)
             nim = load(func_files[i])
             (x,y,z,timepoints) = nim.get_shape()
             fsf_txt = fsf_header.substitute(scan_num=i,
@@ -1839,6 +1875,8 @@ class Level1Design(Interface):
                                             num_vols=timepoints,
                                             prewhiten=prewhiten,
                                             num_evs=len(curr_conds),
+                                            num_tcon=n_tcon,
+                                            num_fcon=n_fcon,
                                             high_pass_filter_cutoff=info['hpf'],
                                             func_file=func_files[i])
             fsf_txt += cond_txt
@@ -1978,16 +2016,22 @@ class FeatModel(FSLCommand):
 
             designfile:
                 Mat file containing ascii matrix for design
+            confile:
+                Contrast file containing contrast vectors
         """
-        outputs = Bunch(designfile=None)
+        outputs = Bunch(designfile=None,
+                        confile=None)
         return outputs
         
     def aggregate_outputs(self, cwd=None):
         outputs = self.outputs()
         root = self._get_design_root(list_to_filename(self.inputs.fsf_file))
         designfile = glob(os.path.join(os.getcwd(),'%s*.mat'%root))
-        assert len(designfile) >= 1, 'No pe volumes generated by FSL Estimate'
-        outputs.designfile = designfile
+        assert len(designfile) == 1, 'No pe volumes generated by FSL Estimate'
+        outputs.designfile = designfile[0]
+        confile = glob(os.path.join(os.getcwd(),'%s*.con'%root))
+        assert len(confile) == 1, 'No pe volumes generated by FSL Estimate'
+        outputs.confile = confile[0]
         return outputs
     
 # interface to fsl command line model fit routines
@@ -2066,8 +2110,7 @@ class FilmGLS(FSLCommand):
 
         # special defaults
         if not self.inputs.rn:
-            self.inputs.rn = "stats"
-            allargs.append("-rn stats")
+            allargs.append("-rn %s"%self._get_statsdir())
         if not self.inputs.sa:
             allargs.append("-sa")
         if not self.inputs.ms:
@@ -2083,6 +2126,12 @@ class FilmGLS(FSLCommand):
 
         return allargs
 
+    def _get_statsdir(self):
+        statsdir = self.inputs.rn
+        if not statsdir:
+            statsdir = 'stats'
+        return statsdir
+        
     def run(self, infile=None, designfile=None, thresh=None, cwd=None, **inputs):
         """Execute the command.
 
@@ -2137,10 +2186,9 @@ class FilmGLS(FSLCommand):
             cwd = os.getcwd()
         self.inputs.update(**inputs)
 
-        # remove old fit directory
-        # XX - is this necessary?
-        if self.inputs.rn and os.access(os.path.join(cwd, self.inputs.rn), os.F_OK):
-            rmtree(os.path.join(cwd, self.inputs.rn))
+        statsdir = self._get_statsdir()
+        if os.access(os.path.join(cwd, statsdir), os.F_OK):
+            rmtree(os.path.join(cwd, statsdir))
 
         results = self._runner(cwd=cwd)
 
@@ -2163,21 +2211,21 @@ class FilmGLS(FSLCommand):
                 degrees of freedom
             sigmasquareds:
                 See Woolrich, et. al., 2001
+            statsdir :
+                directory storing model estimation output
         """
         outputs = Bunch(pes=None,
                         res4d=None,
                         dof=None,
-                        sigmasquareds=None)
+                        sigmasquareds=None,
+                        statsdir=None)
         return outputs
         
     def aggregate_outputs(self, cwd=None):
         outputs = self.outputs()
         if not cwd:
             cwd = os.getcwd()
-        if self.inputs.rn:
-            pth = os.path.join(cwd, self.inputs.rn)
-        else:
-            pth = cwd
+        pth = os.path.join(cwd, self._get_statsdir())
 
         pes = glob(os.path.join(pth,'pe[0-9]*.*'))
         assert len(pes) >= 1, 'No pe volumes generated by FSL Estimate'
@@ -2194,8 +2242,156 @@ class FilmGLS(FSLCommand):
         sigmasquareds = glob(os.path.join(pth,'sigmasquareds.*'))
         assert len(sigmasquareds) == 1, 'No sigmasquareds volume generated by FSL Estimate'
         outputs.sigmasquareds = sigmasquareds[0];
+
+        statsdir = self.inputs.rn
+        if not statsdir:
+            statsdir = 'stats'
+        outputs.statsdir = os.path.join(os.getcwd(),statsdir)
+
         return outputs
 
+class ContrastMgr(FSLCommand):
+    """Use FSL contrast_mgr command to evaluate contrasts
+
+    To print out the command line help, use:
+        fsl.ContrastMgr().inputs_help()
+
+    Examples
+    --------
+    """
+
+    @property
+    def cmd(self):
+        """sets base command, immutable"""
+        return 'contrast_mgr'
+
+    opt_map = {
+        'tconfile':      None,
+        'fconfile':      '-f %a', 
+        'statsdir':       None,
+        'cope':          '-cope %d',
+        'suffix':        '-suffix %s',
+        }
+
+    def inputs_help(self):
+        """Print command line documentation for film_gls."""
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
+
+    def _parse_inputs(self):
+        """validate fsl contrast_mgr options"""
+        allargs = super(ContrastMgr, self)._parse_inputs(skip=('tconfile',
+                                                               'statsdir',))
+        if self.inputs.statsdir:
+            allargs.append(list_to_filename(self.inputs.statsdir))
+        else:
+            raise Exception('statsdir is mandatory')
+        if self.inputs.tconfile:
+            allargs.append(list_to_filename(self.inputs.tconfile))
+        else:
+            raise Exception('tconfile is mandatory')
+        return allargs
+
+    def run(self, tconfile=None, statsdir=None, cwd=None, **inputs):
+        """Execute the command.
+
+        Parameters
+        ----------
+        tconfile : file
+            contrast specification file generated by FeatModel
+        statsdir : directory
+            directory containing model fit data
+        inputs : dict
+            Additional ``inputs`` assignments can be passed in.  See
+            Examples section.
+
+        Returns
+        -------
+        results : InterfaceResult
+            An :class:`nipype.interfaces.base.InterfaceResult` object
+            with a copy of self in `interface`
+
+        Examples
+        --------
+
+        >>> from nipype.interfaces import fsl
+        >>> import os
+        >>> fgls = fsl.ContrastMgr(statsdir='stats',tconfile='run0.con')
+        >>> fgls.cmdline
+        'contrast_mgr stats run0.con'
+        
+        """
+        if tconfile:
+            self.inputs.tconfile = tconfile
+        if not self.inputs.tconfile:
+            raise ValueError('ContrastMgr requires an tconfile')
+        if isinstance(self.inputs.tconfile, list):
+            raise ValueError('ContrastMgr does not support multiple tcon files')
+        if statsdir:
+            self.inputs.statsdir = statsdir
+        if not self.inputs.statsdir:
+            raise ValueError('ContrastMgr requires a statsdir')
+        if isinstance(self.inputs.statsdir, list):
+            raise ValueError('ContrastMgr does not support multiple statsdirs')
+
+        if not cwd:
+            cwd = os.getcwd()
+        self.inputs.update(**inputs)
+
+        results = self._runner(cwd=cwd)
+
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs(cwd)
+        return results
+
+    def outputs(self):
+        """
+            Parameters
+            ----------
+            (all default to None)
+
+            copes:
+                Contrast estimates for each contrast
+            varcopes:
+                Variance estimates for each contrast
+            zstats:
+                z-stat file for each contrast
+            tstats:
+                t-stat file for each contrast
+            neff:
+                neff file??
+        """
+        outputs = Bunch(copes=None,
+                        varcopes=None,
+                        zstats=None,
+                        tstats=None,
+                        neffs=None)
+        return outputs
+        
+    def aggregate_outputs(self, cwd=None):
+        outputs = self.outputs()
+        pth = self.inputs.statsdir
+
+        copes = glob(os.path.join(pth,'cope[0-9]*.*'))
+        assert len(copes) >= 1, 'No cope volumes generated by FSL CEstimate'
+        outputs.copes = copes
+
+        varcopes = glob(os.path.join(pth,'varcope[0-9]*.*'))
+        assert len(varcopes) >= 1, 'No varcope volumes generated by FSL CEstimate'
+        outputs.varcopes = varcopes
+
+        zstats = glob(os.path.join(pth,'zstat[0-9]*.*'))
+        assert len(zstats) >= 1, 'No zstat volumes generated by FSL CEstimate'
+        outputs.zstats = zstats
+
+        tstats = glob(os.path.join(pth,'tstat[0-9]*.*'))
+        assert len(tstats) >= 1, 'No tstat volumes generated by FSL CEstimate'
+        outputs.tstats = tstats
+
+        neffs = glob(os.path.join(pth,'neff[0-9]*.*'))
+        assert len(neffs) >= 1, 'No neff volumes generated by FSL CEstimate'
+        outputs.neffs = neffs
+        
+        return outputs
 
 
 class Fslroi(FSLCommand):

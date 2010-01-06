@@ -157,12 +157,12 @@ set fmri(evs_real) $num_evs
 set fmri(evs_vox) 0
 
 # Number of contrasts
-set fmri(ncon_orig) 0
-set fmri(ncon_real) 0
+set fmri(ncon_orig) $num_tcon
+set fmri(ncon_real) $num_tcon
 
 # Number of F-tests
-set fmri(nftests_orig) 0
-set fmri(nftests_real) 0
+set fmri(nftests_orig) $num_fcon
+set fmri(nftests_real) $num_fcon
 
 # Add constant column to design matrix? (obsolete)
 set fmri(constcol) 0

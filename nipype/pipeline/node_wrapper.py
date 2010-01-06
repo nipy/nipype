@@ -259,14 +259,15 @@ class NodeWrapper(object):
                     cwd = subdir
                     logger.debug("subdir: %s"%subdir)
                 for field in self.iterfield:
+                    newval = itervals[field][i]
                     if self.disk_based:
-                        newfile = list_to_filename(copyfiles(itervals[field][i], [subdir], copy=False))
-                    else:
-                        newfile = itervals[field][i]
-                    self.set_input(field, newfile)
+                        if os.path.isfile(newval):
+                            newval = list_to_filename(copyfiles(newval, [subdir],
+                                                                copy=False))
+                    self.set_input(field, newval)
                     logger.debug("iterating %s on %s: %s\n"%(self.name,
                                                              field,
-                                                             newfile))
+                                                             newval))
                 if issubclass(self._interface.__class__,CommandLine):
                     logger.info('cmd: %s'%self._interface.cmdline)
                 if execute:

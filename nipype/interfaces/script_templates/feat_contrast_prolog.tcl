@@ -1,5 +1,5 @@
-# Display images for contrast_real $cnum
-set fmri(conpic_real.$cnum) 1
+# Display images for contrast_$ctype $cnum
+set fmri(conpic_$ctype.$cnum) 1
 
-# Title for contrast_real 1
-set fmri(conname_real.$cnum) "$cname"
+# Title for contrast_$ctype $cnum
+set fmri(conname_$ctype.$cnum) "$cname"
