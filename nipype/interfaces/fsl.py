@@ -174,7 +174,8 @@ class FSLInfo(object):
             cwd = os.getcwd()
 
         if fname is None:
-            fname = fname_presuffix(list_to_filename(basename), suffix=suffix, newpath=cwd)
+            fname = fname_presuffix(list_to_filename(basename), suffix=suffix, 
+                                    newpath=cwd)
 
         if check:
             fname = fsl_info.glob(fname)
@@ -392,7 +393,7 @@ class Bet(FSLCommand):
             allargs.insert(0, self.inputs.infile)
             outfile = fsl_info.gen_fname(self.inputs.infile,
                                          self.inputs.outfile,
-                                         suffix='_bet')
+                                         suffix='_brain')
             allargs.insert(1, outfile)
 
         return allargs
@@ -406,7 +407,7 @@ class Bet(FSLCommand):
             Filename to be skull stripped.
         outfile : string, optional
             Filename to save output to. If not specified, the ``infile``
-            filename will be used with a "_bet" suffix.
+            filename will be used with a "_brain" suffix.
         inputs : dict
             Additional ``inputs`` assignments can be passed in.  See
             Examples section.
@@ -489,7 +490,7 @@ class Bet(FSLCommand):
         if not cwd:
             cwd = os.getcwd()
         outputs.outfile = fsl_info.gen_fname(self.inputs.infile,
-                                self.inputs.outfile, cwd=cwd, suffix='_bet',
+                                self.inputs.outfile, cwd=cwd, suffix='_brain',
                                 check=True)
         if self.inputs.mask or self.inputs.reduce_bias:
             outputs.maskfile = fsl_info.gen_fname(outputs.outfile, cwd=cwd,
