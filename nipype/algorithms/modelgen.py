@@ -488,9 +488,9 @@ class SpecifyModel(Interface):
             infolist = self.inputs.subject_info_func
         if self.inputs.concatenate_runs:
             infolist,nscans = self._concatenate_info(infolist)
-            functional_runs = [self.inputs.functional_runs]
+            functional_runs = [filename_to_list(self.inputs.functional_runs)]
         else:
-            functional_runs = self.inputs.functional_runs
+            functional_runs = filename_to_list(self.inputs.functional_runs)
         realignment_parameters = []
         if self.inputs.realignment_parameters is not None:
             rpfiles = filename_to_list(self.inputs.realignment_parameters)
