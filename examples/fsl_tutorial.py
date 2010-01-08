@@ -41,7 +41,7 @@ package_check('IPython', '0.10', 'tutorial1')
 
 # Tell fsl to generate all output in uncompressed nifti format
 print fsl.fsl_info.version
-fsl.fsl_info.outputtype('NIFTI')
+fsl.fsl_info.outputtype('NIFTI_GZ')
 
 
 """
