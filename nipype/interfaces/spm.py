@@ -1934,7 +1934,10 @@ class Level1Design(SpmMatlabCommandLine):
             if opt == 'session_info':
                 key = 'session_info'
                 data = loadflat(inputs[opt],key)
-                einputs['sess'] = data[key]
+                if isinstance(data[key],dict):
+                    einputs['sess'] = [data[key]]
+                else:
+                    einputs['sess'] = data[key]
                 continue
             if opt == 'factor_info':
                 einputs['fact'] = inputs[opt]

@@ -1897,6 +1897,8 @@ class Level1Design(Interface):
         key = 'session_info'
         data = loadflat(session_info_file)
         session_info = data[key]
+        if isinstance(session_info,dict):
+            session_info = [session_info]
         return session_info
         
     def _get_func_files(self, session_info):
