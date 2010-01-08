@@ -256,6 +256,8 @@ modelgen.iterfield = ['fsf_file']
 """
 modelestimate = nw.NodeWrapper(interface=fsl.FilmGLS(),diskbased=True)
 modelestimate.inputs.thresh = 10
+modelestimate.inputs.sa = True
+modelestimate.inputs.ms = 5
 modelestimate.iterfield = ['designfile','infile']
 
 """
@@ -313,11 +315,11 @@ l1pipeline.connect([# preprocessing in native space
                  (motion_correct,modelspec,[('parfile','realignment_parameters')]),
                  (smoothing,modelspec,[('smoothedimage','functional_runs')]),
                  (modelspec,level1design,[('session_info','session_info')]),
-                 #(level1design,modelgen,[('fsf_files','fsf_file')]),
-                 #(level1design,modelestimate,[('func_files','infile')]),
-                 #(modelgen,modelestimate,[('designfile','designfile')]),
-                 #(modelgen,conestimate,[('confile','tconfile')]),
-                 #(modelestimate,conestimate,[('statsdir','statsdir')]),
+                 (level1design,modelgen,[('fsf_files','fsf_file')]),
+                 (level1design,modelestimate,[('func_files','infile')]),
+                 (modelgen,modelestimate,[('designfile','designfile')]),
+                 (modelgen,conestimate,[('confile','tconfile')]),
+                 (modelestimate,conestimate,[('statsdir','statsdir')]),
                 ])
 
 # store relevant outputs from various stages of preprocessing
@@ -339,6 +341,7 @@ l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
                         [('outfile', 'registration.@outfile')]),
                     (smoothing, datasink, 
                         [('smoothedimage', 'registration.@outfile')]),
+                    (conestimate,datasink,[('statsdir','stats')]),
                     ])
 
 

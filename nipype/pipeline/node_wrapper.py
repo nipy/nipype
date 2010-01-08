@@ -3,11 +3,12 @@ Wraps interfaces modules to work with pipeline engine
 """
 import os
 import sys
-from tempfile import mkdtemp
 from copy import deepcopy
 import logging
+from shutil import rmtree
+from tempfile import mkdtemp
 
-from nipype.utils.filemanip import (copyfiles,fname_presuffix, cleandir,
+from nipype.utils.filemanip import (copyfiles, fname_presuffix,
                                     filename_to_list, list_to_filename)
 from nipype.interfaces.base import Bunch, InterfaceResult, CommandLine
 from nipype.interfaces.fsl import FSLCommand
@@ -118,8 +119,10 @@ class NodeWrapper(object):
         """
         if hasattr(self._interface.inputs, parameter):
             setattr(self._interface.inputs, parameter, deepcopy(val))
-        else:
+        elif hasattr(self, parameter):
             setattr(self, parameter, deepcopy(val))
+        else:
+            setattr(self._interface.inputs, parameter, deepcopy(val))
 
     def get_output(self, parameter):
         val = None
@@ -176,8 +179,10 @@ class NodeWrapper(object):
                 self._save_hashfile(hashfile,hashed_inputs)
             if not updatehash and (self.overwrite or not os.path.exists(hashfile)):
                 logger.info("Node hash: %s"%hashvalue)
-                logger.debug("continuing to execute\n")
-                cleandir(outdir)
+                logger.debug("Removing %s and its contents"%outdir)
+                rmtree(outdir)
+                logger.info("Recreating %s"%outdir)
+                outdir = self._make_output_dir(outdir)
                 # copy files over and change the inputs
                 if hasattr(self._interface,'get_input_info'):
                     for info in self._interface.get_input_info():

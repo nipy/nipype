@@ -294,6 +294,7 @@ class Pipeline(object):
             if callable(sourceinfo[1]):
                 val = sourceinfo[1](source.get_output(sourceinfo[0]),
                                     *sourceinfo[2:])
+        logger.debug('setting input: %s->%s',param,str(val))
         node.set_input(param, deepcopy(val))
 
     def run_in_series(self, updatehash=False, force_execute=[]):

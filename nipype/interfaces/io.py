@@ -8,11 +8,13 @@
     XNATSource, XNATSink
 
 """
-from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult
 from copy import deepcopy
-from nipype.utils.filemanip import copyfiles, list_to_filename
 import glob
 import os
+import shutil
+
+from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult
+from nipype.utils.filemanip import copyfiles, list_to_filename, filename_to_list
 
 
 class DataSource(Interface):
@@ -240,7 +242,13 @@ class DataSink(Interface):
                         tempoutdir = os.path.join(tempoutdir,d)
                     if not os.path.exists(tempoutdir):
                         os.makedirs(tempoutdir)
-                    copyfiles(self.inputs.get(k),tempoutdir,copy=True)
+                    for src in filename_to_list(self.inputs.get(k)):
+                        if os.path.isfile(src):
+                            copyfiles(src,tempoutdir,copy=True)
+                        elif os.path.isdir(src):
+                            dirname = os.path.split(os.path.join(src,''))[0]
+                            newdir = dirname.split(os.path.sep)[-1]
+                            shutil.copytree(dirname,os.path.join(tempoutdir,newdir))
         runtime = Bunch(returncode=0,
                         stdout=None,
                         stderr=None)

@@ -1729,21 +1729,16 @@ class Level1Design(Interface):
             ``modelgen.SpecifyModel`` 
         bases : dict {'name':{'basesparam1':val,...}}
             name : string
-                Name of basis function (hrf, fourier, fourier_han,
-                gamma, fir)
+                Name of basis function (hrf - double gamma hrf)
 
                 hrf :
                     derivs : boolean
                         Model  HRF  Derivatives.
-                fourier, fourier_han, gamma, fir:
-                    length : int
-                        Post-stimulus window length (in seconds)
-                    order : int
-                        Number of basis functions
         model_serial_correlations : string
             Option to model serial correlations using an
-            autoregressive estimator. AR(1) or none
-            SPM default = AR(1)
+            autoregressive estimator. Setting this option is only
+            useful in the context of the fsf file. You need to repeat
+            this option for FilmGLS
         contrasts : list of dicts
             List of contrasts with each list containing: 'name', 'stat',
             [condition list], [weight list]. 
@@ -1787,7 +1782,7 @@ class Level1Design(Interface):
         """
         conds = {}
         evname = []
-        ev_gamma  = load_template('feat_ev_gamma.tcl')
+        ev_hrf  = load_template('feat_ev_hrf.tcl')
         ev_none   = load_template('feat_ev_none.tcl')
         ev_ortho  = load_template('feat_ev_ortho.tcl')
         contrast_header  = load_template('feat_contrast_header.tcl')
@@ -1811,10 +1806,10 @@ class Level1Design(Interface):
                             evinfo.insert(j,[onset,cond['duration'][j],1])
                         else:
                             evinfo.insert(j,[onset,cond['duration'][0],1])
-                    ev_txt += ev_gamma.substitute(ev_num=num_evs[0],
-                                                  ev_name=name,
-                                                  temporalderiv=usetd,
-                                                  cond_file=evfname)
+                    ev_txt += ev_hrf.substitute(ev_num=num_evs[0],
+                                                ev_name=name,
+                                                temporalderiv=usetd,
+                                                cond_file=evfname)
                     if usetd:
                         evname.append(name+'TD')
                         num_evs[1] += 1
@@ -1828,7 +1823,7 @@ class Level1Design(Interface):
                 self._create_ev_file(evfname,evinfo)
         # add orthogonalization
         for i in range(1,num_evs[0]+1):
-            for j in range(1,num_evs[0]+1):
+            for j in range(0,num_evs[0]+1):
                 ev_txt += ev_ortho.substitute(c0=i,c1=j)
                 ev_txt += "\n"
         # add t contrast info
@@ -1860,7 +1855,7 @@ class Level1Design(Interface):
         fsf_postscript= load_template('feat_nongui.tcl')
 
         prewhiten = int(self.inputs.model_serial_correlations == 'AR(1)')
-        if self.inputs.bases.has_key('hrf'):
+        if self.inputs.bases and self.inputs.bases.has_key('hrf'):
             usetd = int(self.inputs.bases['hrf']['derivs'])
         else:
             usetd = 0
@@ -2117,19 +2112,15 @@ class FilmGLS(FSLCommand):
                                                            'designfile',
                                                            'thresh'))
 
+        # special defaults
+        if not self.inputs.rn:
+            allargs.append("-rn %s"%self._get_statsdir())
+
         if self.inputs.infile:
             # TODO: This should not be here but since _parse_inputs is
             # called by the logger through cmdline before run it needs
             # to be included twice
-            allargs.insert(0, list_to_filename(self.inputs.infile))
-
-        # special defaults
-        if not self.inputs.rn:
-            allargs.append("-rn %s"%self._get_statsdir())
-        if not self.inputs.sa:
-            allargs.append("-sa")
-        if not self.inputs.ms:
-            allargs.append("-ms 5")
+            allargs.append(list_to_filename(self.inputs.infile))
 
         if self.inputs.designfile:
             allargs.append(list_to_filename(self.inputs.designfile))
@@ -2144,7 +2135,8 @@ class FilmGLS(FSLCommand):
     def _get_statsdir(self):
         statsdir = self.inputs.rn
         if not statsdir:
-            statsdir = 'stats'
+            path,name = os.path.split(list_to_filename(self.inputs.designfile))
+            statsdir = '.'.join((os.path.splitext(name)[0],'stats'))
         return statsdir
         
     def run(self, infile=None, designfile=None, thresh=None, cwd=None, **inputs):
@@ -2374,12 +2366,15 @@ class ContrastMgr(FSLCommand):
                 t-stat file for each contrast
             neff:
                 neff file??
+            statsdir :
+                directory storing model estimation output
         """
         outputs = Bunch(copes=None,
                         varcopes=None,
                         zstats=None,
                         tstats=None,
-                        neffs=None)
+                        neffs=None,
+                        statsdir=None)
         return outputs
         
     def aggregate_outputs(self, cwd=None):
@@ -2405,6 +2400,8 @@ class ContrastMgr(FSLCommand):
         neffs = glob(os.path.join(pth,'neff[0-9]*.*'))
         assert len(neffs) >= 1, 'No neff volumes generated by FSL CEstimate'
         outputs.neffs = neffs
+        
+        outputs.statsdir = self.inputs.statsdir
         
         return outputs
 
