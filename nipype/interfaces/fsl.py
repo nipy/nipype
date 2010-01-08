@@ -1794,34 +1794,41 @@ class Level1Design(Interface):
         contrast_prolog  = load_template('feat_contrast_prolog.tcl')
         contrast_element = load_template('feat_contrast_element.tcl')
         ev_txt = ''
-        # generate sections for conditions and other nuisance regressors
+        # generate sections for conditions and other nuisance
+        # regressors
+        num_evs = [0,0]
         for field in ['cond','regress']:
             for i,cond in enumerate(runinfo[field]):
                 name = cond['name']
                 evname.append(name)
                 evfname = os.path.join(cwd,'ev_%s_%d_%d.txt'%(name,runidx,len(evname)))
                 evinfo = []
+                num_evs[0] += 1
+                num_evs[1] += 1
                 if field == 'cond':
                     for j,onset in enumerate(cond['onset']):
                         if len(cond['duration'])>1:
                             evinfo.insert(j,[onset,cond['duration'][j],1])
                         else:
                             evinfo.insert(j,[onset,cond['duration'][0],1])
-                    ev_txt += ev_gamma.substitute(ev_num=len(evname),
+                    ev_txt += ev_gamma.substitute(ev_num=num_evs[0],
                                                   ev_name=name,
                                                   temporalderiv=usetd,
                                                   cond_file=evfname)
+                    if usetd:
+                        evname.append(name+'TD')
+                        num_evs[1] += 1
                 elif field == 'regress':
                     evinfo = [[j] for j in cond['val']]
-                    ev_txt += ev_none.substitute(ev_num=len(evname),
+                    ev_txt += ev_none.substitute(ev_num=num_evs[0],
                                                  ev_name=name,
                                                  cond_file=evfname)
                 ev_txt += "\n"
                 conds[name] = evfname
                 self._create_ev_file(evfname,evinfo)
         # add orthogonalization
-        for i in range(1,len(evname)+1):
-            for j in range(len(evname)+1):
+        for i in range(1,num_evs[0]+1):
+            for j in range(1,num_evs[0]+1):
                 ev_txt += ev_ortho.substitute(c0=i,c1=j)
                 ev_txt += "\n"
         # add t contrast info
@@ -1831,15 +1838,19 @@ class Level1Design(Interface):
                 ev_txt += contrast_prolog.substitute(cnum=j+1,
                                                      ctype=ctype,
                                                      cname=con[0])
+                count = 0
                 for c in range(1,len(evname)+1):
+                    if evname[c-1].endswith('TD') and ctype == 'orig':
+                        continue
+                    count = count+1
                     if evname[c-1] in con[2]:
                         val = con[3][con[2].index(evname[c-1])]
                     else:
                         val = 0.0
-                    ev_txt += contrast_element.substitute(cnum=j+1, element=c,
+                    ev_txt += contrast_element.substitute(cnum=j+1, element=count,
                                                           ctype=ctype, val=val)
                     ev_txt += "\n"
-        return conds,ev_txt
+        return num_evs,ev_txt
 
     def run(self, cwd=None, **inputs):
         if cwd is None:
@@ -1868,15 +1879,15 @@ class Level1Design(Interface):
         print [n_tcon, n_fcon]
         
         for i,info in enumerate(session_info):
-            curr_conds,cond_txt  = self._create_ev_files(cwd,info,i,usetd,self.inputs.contrasts)
+            num_evs,cond_txt  = self._create_ev_files(cwd,info,i,usetd,self.inputs.contrasts)
             nim = load(func_files[i])
             (x,y,z,timepoints) = nim.get_shape()
             fsf_txt = fsf_header.substitute(scan_num=i,
                                             interscan_interval=self.inputs.interscan_interval,
                                             num_vols=timepoints,
                                             prewhiten=prewhiten,
-                                            num_evs=len(curr_conds),
-                                            num_evs_real=len(curr_conds)*(usetd+1),
+                                            num_evs=num_evs[0],
+                                            num_evs_real=num_evs[1],
                                             num_tcon=n_tcon,
                                             num_fcon=n_fcon,
                                             high_pass_filter_cutoff=info['hpf'],

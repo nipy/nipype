@@ -240,7 +240,7 @@ modelspec.inputs.high_pass_filter_cutoff = 120
 """
 level1design = nw.NodeWrapper(interface=fsl.Level1Design(),diskbased=True)
 level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
-level1design.inputs.bases              = {'hrf':{'derivs': False}}
+level1design.inputs.bases              = {'hrf':{'derivs': True}}
 level1design.inputs.contrasts          = contrasts
 
 """
@@ -313,11 +313,11 @@ l1pipeline.connect([# preprocessing in native space
                  (motion_correct,modelspec,[('parfile','realignment_parameters')]),
                  (smoothing,modelspec,[('smoothedimage','functional_runs')]),
                  (modelspec,level1design,[('session_info','session_info')]),
-                 (level1design,modelgen,[('fsf_files','fsf_file')]),
-                 (level1design,modelestimate,[('func_files','infile')]),
-                 (modelgen,modelestimate,[('designfile','designfile')]),
-                 (modelgen,conestimate,[('confile','tconfile')]),
-                 (modelestimate,conestimate,[('statsdir','statsdir')]),
+                 #(level1design,modelgen,[('fsf_files','fsf_file')]),
+                 #(level1design,modelestimate,[('func_files','infile')]),
+                 #(modelgen,modelestimate,[('designfile','designfile')]),
+                 #(modelgen,conestimate,[('confile','tconfile')]),
+                 #(modelestimate,conestimate,[('statsdir','statsdir')]),
                 ])
 
 # store relevant outputs from various stages of preprocessing
