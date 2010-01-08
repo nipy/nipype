@@ -153,7 +153,7 @@ set fmri(mixed_yn) 2
 
 # Number of EVs
 set fmri(evs_orig) $num_evs
-set fmri(evs_real) $num_evs
+set fmri(evs_real) $num_evs_real
 set fmri(evs_vox) 0
 
 # Number of contrasts

@@ -1876,6 +1876,7 @@ class Level1Design(Interface):
                                             num_vols=timepoints,
                                             prewhiten=prewhiten,
                                             num_evs=len(curr_conds),
+                                            num_evs_real=len(curr_conds)*(usetd+1),
                                             num_tcon=n_tcon,
                                             num_fcon=n_fcon,
                                             high_pass_filter_cutoff=info['hpf'],
