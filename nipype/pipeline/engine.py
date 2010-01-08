@@ -175,8 +175,20 @@ class Pipeline(object):
             warn("Module %s has no %sput called %s\n"%(c[1],c[0],c[2]))
         if not_found:
             raise Exception('Some connections were not found')
-        self._graph.add_edges_from([(u, v, {'connect':d}) 
-                                    for u, v, d in connection_list])
+        for u, v, d in connection_list:
+            edge_data = self._graph.get_edge_data(u,v,None)
+            if edge_data:
+                logger.debug('(%s, %s): Edge data exists: %s' % \
+                                 (u, v, str(edge_data)))
+                for data in d:
+                    if data not in edge_data['connect']:
+                        edge_data['connect'].append(data)
+                self._graph.add_edges_from([(u, v, edge_data)])
+            else:
+                logger.debug('(%s, %s): No edge data' % (u, v))
+                self._graph.add_edges_from([(u, v, {'connect':d})])
+            edge_data = self._graph.get_edge_data(u,v,None)
+            logger.debug('(%s, %s): new edge data: %s'% (u, v, str(edge_data)))
 
     def add_nodes(self,nodes):
         """ Wraps the networkx functionality in a more semantically

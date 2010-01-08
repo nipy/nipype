@@ -130,6 +130,10 @@ class Bunch(object):
         calculates the md5 hash of the file contents and stores the
         file name and hash value as the new key value.
 
+        However, the overall bunch hash is calculated only on the hash
+        value of a file. The path and name of the file are not used in
+        the overall hash calculation.
+
         Returns
         -------
         dict_withhash : dict
