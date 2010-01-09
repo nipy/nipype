@@ -2,6 +2,7 @@ import os
 import tempfile
 import shutil
 
+
 from nipype.testing import *
 import nipype.interfaces.fsl as fsl
 
@@ -566,9 +567,7 @@ def test_tbss_1_preproc():
     # Tbss_1_preproc class doesn't have opt_map{}
 
     # remove the default directories this command creates
-    shutil.rmtree(tbssDir)
-    
-    
+    shutil.rmtree(tbssDir)    
 
 # test tbss_2_reg   
 def test_tbss_2_reg():
@@ -613,6 +612,7 @@ def test_tbss_2_reg():
 def test_tbss_3_postreg():    
     
     tbss = fsl.Tbss3postreg()
+    tbssDir = tempfile.mkdtemp()
 
     # make sure command gets called
     yield assert_equal, tbss.cmd, 'tbss_3_postreg'
@@ -629,7 +629,7 @@ def test_tbss_3_postreg():
     yield assert_equal, tbss2.cmdline,'tbss_3_postreg -S'
     
     tbss3 = fsl.Tbss3postreg()
-    results = tbss3.run(FMRIB58_FA=True,noseTest=True)
+    results = tbss3.run(FMRIB58_FA=True,noseTest=True,cwd=tbssDir)
     yield assert_equal, results.runtime.cmdline, 'tbss_3_postreg -T'
     
     # test arguments for opt_map
@@ -640,9 +640,13 @@ def test_tbss_3_postreg():
         tbss3 = fsl.Tbss3postreg(**{name: settings[1]})
         yield assert_equal, tbss3.cmdline, tbss3.cmd+' '+settings[0]
 
+    # remove the default directories this command creates
+    shutil.rmtree(tbssDir)
+
         
 def test_tbss_4_prestats():
     tbss = fsl.Tbss4prestats()
+    tbssDir = tempfile.mkdtemp()
 
     # make sure command gets called
     yield assert_equal, tbss.cmd, 'tbss_4_prestats'
@@ -658,11 +662,14 @@ def test_tbss_4_prestats():
     yield assert_equal, tbss2.cmdline,'tbss_4_prestats 0.4' 
     
     tbss3 = fsl.Tbss4prestats()
-    results = tbss3.run(threshold=0.2,noseTest=True)
+    results = tbss3.run(threshold=0.2,noseTest=True,cwd=tbssDir)
     yield assert_equal, results.runtime.cmdline, 'tbss_4_prestats 0.2'    
 
     # test arguments for opt_map
     # Tbss4prestats doesn't have an opt_map{}
+
+    # remove the default directories this command creates
+    shutil.rmtree(tbssDir)
 
 
     
