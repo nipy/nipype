@@ -3389,7 +3389,7 @@ class Tbss3postreg(FSLCommand):
         allargs = super(Tbss3postreg,self)._parse_inputs()
         return allargs
 
-    def run(self, noseTest=False, **inputs):
+    def run(self,noseTest=False,cwd=None,**inputs):
         """Execute the command.
         >>> from nipype.interfaces import fsl
         >>> tbss3 = fsl.Tbss3postreg(subject_means=True)
@@ -3401,9 +3401,12 @@ class Tbss3postreg(FSLCommand):
         if (self.inputs.subject_means is None) and (self.inputs.FMRIB58_FA is None):
             raise AttributeError('tbss_1_preproc requires at least one option flag to be set')
 
-        results = self._runner()
+        if cwd is None:
+            cwd=os.getcwd()
+
+        results = self._runner(cwd=cwd)
         if not noseTest:
-            results.outputs = self.aggregate_outputs()
+            results.outputs = self.aggregate_outputs(cwd)
 
         return results
 
@@ -3435,7 +3438,7 @@ class Tbss3postreg(FSLCommand):
                         mean_FA_mask=None)
         return outputs
 
-    def aggregate_outputs(self):
+    def aggregate_outputs(self,cwd):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
@@ -3452,10 +3455,10 @@ class Tbss3postreg(FSLCommand):
         """
 
         outputs=self.outputs()
-        if os.path.isdir(os.getcwd()+'/stats'):
-            stats_files = glob(os.getcwd()+'/stats/*')
+        if os.path.isdir(cwd+'/stats'):
+            stats_files = glob(cwd+'/stats/*')
         else:
-            raise AttributeError('No stats subdirectory was found in cwd: \n'+os.getcwd())
+            raise AttributeError('No stats subdirectory was found in cwd: \n'+cwd)
 
         for imagePath in stats_files:
             if re.search('all_FA\.',imagePath):
@@ -3504,7 +3507,7 @@ class Tbss4prestats(FSLCommand):
 
         return allargs
 
-    def run(self, noseTest=False, **inputs):
+    def run(self, noseTest=False, cwd=None,**inputs):
         """Execute the command.
         >>> from nipype.interfaces import dti
         >>> tbss4 = fsl.Tbss4prestats(threshold=0.3)
@@ -3513,10 +3516,12 @@ class Tbss4prestats(FSLCommand):
 
         """
         self.inputs.update(**inputs)
+        if cwd is None:
+            cwd=os.getcwd()
 
-        results = self._runner()
+        results = self._runner(cwd=cwd)
         if not noseTest:
-            results.outputs = self.aggregate_outputs()
+            results.outputs = self.aggregate_outputs(cwd)
 
         return results
 
@@ -3545,7 +3550,7 @@ class Tbss4prestats(FSLCommand):
                         mean_FA_skeleton_mask=None)
         return outputs
 
-    def aggregate_outputs(self):
+    def aggregate_outputs(self,cwd):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
@@ -3562,10 +3567,10 @@ class Tbss4prestats(FSLCommand):
         """
         outputs = self.outputs()
 
-        if os.path.isdir(os.getcwd()+'/stats'):
-            stats_files = glob(os.getcwd()+'/stats/*')
+        if os.path.isdir(cwd+'/stats'):
+            stats_files = glob(cwd+'/stats/*')
         else:
-            raise AttributeError('No stats subdirectory was found in cwd: \n'+os.getcwd())
+            raise AttributeError('No stats subdirectory was found in cwd: \n'+cwd)
 
         for imagePath in stats_files:
             if re.search('all_FA_skeletonised\.',imagePath):
@@ -3673,7 +3678,7 @@ class Randomise(FSLCommand):
 
         return allargs
 
-    def run(self, input_4D=None,output_rootname=None,**inputs):
+    def run(self, input_4D=None,output_rootname=None,cwd=None,**inputs):
         """Execute the command.
         >>> from nipype.interfaces import fsl
         >>> rand = fsl.Randomise(input_4D='infile2',output_rootname='outfile2',f_contrast='infile.f',one_sample_gmean=True,int_seed=4)
@@ -3690,9 +3695,12 @@ class Randomise(FSLCommand):
 
         self.inputs.update(**inputs)
 
-        results = self._runner()
+        if cwd is None:
+            cwd=os.getcwd()
+
+        results = self._runner(cwd=cwd)
         if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
+            results.outputs = self.aggregate_outputs(cwd)
 
         return results
 
@@ -3720,7 +3728,7 @@ class Randomise(FSLCommand):
         outputs = Bunch(tstat=None)
         return outputs
 
-    def aggregate_outputs(self):
+    def aggregate_outputs(self,cwd):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
