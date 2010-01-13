@@ -4,6 +4,7 @@ The `Pipeline` class provides core functionality for batch processing.
 """
 
 import os
+import pwd
 import sys
 from copy import deepcopy
 from time import sleep, strftime
@@ -349,8 +350,9 @@ class Pipeline(object):
         exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
         traceback = repr(format_tb(exceptionTraceback))
         timeofcrash = strftime('%Y%m%d-%H%M%S')
+        login_name = pwd.getpwuid(os.geteuid())[0]
         crashfile = 'crashdump-%s-%s.npz'%(timeofcrash,
-                                           os.getlogin())
+                                           login_name)
         if self.config['crashdump_dir']:
             crashfile = os.path.join(self.config['crashdump_dir'],
                                      crashfile)
