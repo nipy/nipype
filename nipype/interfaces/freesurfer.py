@@ -926,16 +926,23 @@ class SurfConcat(FSLCommand):
         'regs':               '--iv %s',
         'flags':              '%s'}
 
+    def _get_outfname(self):
+        if self.inputs.outprefix:
+            fname = os.path.join(os.getcwd(),'_'.join((self.inputs.outprefix,
+                                                       self.inputs.target,
+                                                       '.'.join((self.inputs.hemi,'mgh')))))
+        else:
+            fname = os.path.join(os.getcwd(),'_'.join((self.inputs.target,
+                                                       '.'.join((self.inputs.hemi,'mgh')))))
+        return fname
+        
     def _parse_inputs(self):
         """validate fs surfconcat options"""
         allargs = super(SurfConcat, self)._parse_inputs(skip=('outfile','outprefix','conimages','regs'))
 
         # Add outfile to the args if not specified
         if self.inputs.outfile is None:
-            fname = os.path.join(os.getcwd(),'_'.join((self.inputs.outprefix,
-                                                           self.inputs.target,
-                                                           '.'.join((self.inputs.hemi,'mgh')))))
-            allargs.extend(['--out', fname])
+            allargs.extend(['--out', self._get_outfname()])
         for i,conimg in enumerate(self.inputs.conimages):
             allargs.extend(['--iv', conimg, self.inputs.regs[i]])
         return allargs
@@ -954,10 +961,9 @@ class SurfConcat(FSLCommand):
 
     def aggregate_outputs(self):
         outputs = self.outputs()
+        outfname = self._get_outfname()
         if not self.inputs.outfile:
-            fname = os.path.join(os.getcwd(),'_'.join((self.inputs.outprefix,
-                                                           self.inputs.target,
-                                                           '.'.join((self.inputs.hemi,'mgh')))))
+            fname = self._get_outfname()
             outfile = glob(fname)
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
