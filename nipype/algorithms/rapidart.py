@@ -20,7 +20,7 @@ from scipy import signal
 import scipy.io as sio
 
 from nipype.interfaces.base import Bunch, InterfaceResult, Interface
-from nipype.externals.pynifti import load
+from nipype.externals.pynifti import load, funcs
 from nipype.utils.filemanip import fname_presuffix, fnames_presuffix, filename_to_list, list_to_filename
 from nipype.utils.misc import find_indices, is_container
 #import matplotlib as mpl
@@ -115,7 +115,13 @@ class ArtifactDetect(Interface):
         output_dir: string
             output directory in which the files will be generated 
         """
-        (filepath,filename) = os.path.split(motionfile)
+        if isinstance(motionfile,str):
+            infile = motionfile
+        elif isinstance(motionfile,list):
+            infile = motionfile[0]
+        else:
+            raise Exception("Unknown type of file")
+        (filepath,filename) = os.path.split(infile)
         (filename,ext) = os.path.splitext(filename)
         artifactfile  = os.path.join(output_dir,''.join(('art.',filename,'_outliers.txt')))
         intensityfile = os.path.join(output_dir,''.join(('global_intensity.',filename,'.txt')))
@@ -281,7 +287,14 @@ class ArtifactDetect(Interface):
             ridx = find_indices(np.sum(abs(rotval)>self.inputs.rotation_threshold,1)>0)
 
         # read in functional image
-        nim = load(imgfile)
+        if isinstance(imgfile,str):
+            nim = load(imgfile)
+        elif isinstance(imgfile,list):
+            if len(imgfile) == 1:
+                nim = load(imgfile[0])
+            else:
+                images = [load(f) for f in imgfile]
+                nim = funcs.concat_images(images)
 
         # compute global intensity signal
         (x,y,z,timepoints) = nim.get_shape()
