@@ -799,7 +799,7 @@ class ApplyVolTransform(FSLCommand):
 
     def aggregate_outputs(self):
         outputs = self.outputs()
-        if self.inputs.outfile is True:
+        if not self.inputs.outfile:
             outfile = glob(fname_presuffix(self.inputs.sourcefile,
                                            suffix='_warped'))
             assert len(outfile)==1, "No output file %s created"%outfile
