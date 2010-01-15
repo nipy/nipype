@@ -258,7 +258,7 @@ class SpecifyModel(Interface):
         hrf   = hrf/np.sum(hrf)
         return hrf
         
-    def _gen_regress(self,i_onsets,i_durations,nscans,bplot=False):
+    def _gen_regress(self,i_onsets,i_durations,i_amplitudes,nscans,bplot=False):
         """Generates a regressor for a sparse/clustered-sparse acquisition
 
            see Ghosh et al. (2009) OHBM 2009
@@ -293,7 +293,13 @@ class SpecifyModel(Interface):
         hrf = self._spm_hrf(dt*1e-3)
         for i,t in enumerate(onsets):
             idx = int(t/dt)
-            timeline2[idx] = 1
+            if i_amplitudes:
+                if len(i_amplitudes)>1:
+                    timeline2[idx] = i_amplitudes[i]
+                else:
+                    timeline2[idx] = i_amplitudes[0]
+            else:
+                timeline2[idx] = 1
             if bplot:
                 plt.subplot(4,1,1)
                 plt.plot(times,timeline2)
@@ -334,8 +340,13 @@ class SpecifyModel(Interface):
         reg = []
         regnames = info.conditions
         for i,c in enumerate(info.conditions):
+            if info.amplitudes:
+                amplitudes = info.amplitudes[i]
+            else:
+                amplitudes = None
             reg.insert(i,self._gen_regress(self._scaletimings(info.onsets[i],output_units='secs'),
                                            self._scaletimings(info.durations[i],output_units='secs'),
+                                           amplitudes,
                                            nscans))
             # need to deal with temporal and parametric modulators
         # for sparse-clustered acquisitions enter T1-effect regressors
