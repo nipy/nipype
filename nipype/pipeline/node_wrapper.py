@@ -223,7 +223,7 @@ class NodeWrapper(object):
                             for i,f in enumerate(infiles):
                                 newfile = fname_presuffix(f, newpath=outdir)
                                 if not os.path.exists(newfile):
-                                    copyfiles(f, newfile, copy=info.copy)
+                                    copyfiles(f, [outdir], copy=info.copy)
                                 if isinstance(files,list):
                                     self.inputs.get(info.key)[i] = newfile
                                 else:
