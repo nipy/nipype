@@ -122,8 +122,9 @@ def copyfile(originalfile, newfile, copy=False):
     None
     
     """
-    if os.name is 'posix' and not copy and not os.path.islink(newfile):
-        #print "linking %s to %s"%(originalfile,newfile)
+    if os.name is 'posix' and not copy:
+        if os.path.lexists(newfile):
+            os.unlink(newfile)
         os.symlink(originalfile,newfile)
     else:
         #print "copying %s to %s"%(originalfile,newfile)
