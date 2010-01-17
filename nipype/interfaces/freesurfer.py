@@ -922,8 +922,8 @@ class SurfConcat(FSLCommand):
         'hemi':               '--hemi %s',
         'outfile':            '--out %s',
         'outprefix':          None,
-        'conimages':          '--iv %s',
-        'regs':               '--iv %s',
+        'volimages':          '--iv %s',
+        'volregs':            '--iv %s',
         'flags':              '%s'}
 
     def _get_outfname(self):
@@ -938,13 +938,13 @@ class SurfConcat(FSLCommand):
         
     def _parse_inputs(self):
         """validate fs surfconcat options"""
-        allargs = super(SurfConcat, self)._parse_inputs(skip=('outfile','outprefix','conimages','regs'))
+        allargs = super(SurfConcat, self)._parse_inputs(skip=('outprefix','volimages','volregs'))
 
         # Add outfile to the args if not specified
         if self.inputs.outfile is None:
             allargs.extend(['--out', self._get_outfname()])
-        for i,conimg in enumerate(self.inputs.conimages):
-            allargs.extend(['--iv', conimg, self.inputs.regs[i]])
+        for i,volimg in enumerate(self.inputs.volimages):
+            allargs.extend(['--iv', volimg, self.inputs.volregs[i]])
         return allargs
     
     def run(self, **inputs):
@@ -1128,5 +1128,221 @@ class Threshold(FSLCommand):
         elif not self.inputs.outfile and self.inputs.infile:
             outfile = glob(fname_presuffix(self.inputs.infile,
                                            suffix='_out', newpath=os.getcwd())) 
+            outputs.outfile = outfile[0]
+        return outputs
+
+class Concatenate(FSLCommand):
+    """Use FreeSurfer mri_concat for ROI analysis
+
+    Parameters
+    ----------
+
+    To see optional arguments
+    Concatenate().inputs_help()
+
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import MRI_Concat
+    >>> binvol = MRI_Concat(infile='foo.nii', min=10, outfile='foo_out.nii')
+    >>> binvol.cmdline
+    'mri_concat --i foo.nii --min 10.000000 --o foo_out.nii'
+    
+   """
+
+    @property
+    def cmd(self):
+        """sets base command, not editable"""
+        return 'mri_concat'
+
+
+    def inputs_help(self):
+        """Print command line documentation for mri_concat."""
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
+
+    opt_map = {'invol': '--i %s',
+               'outvol': '--o %s',
+               'paired_sum': '--paired-sum',
+               'paired_avg': '--paired-avg',
+               'paired_diff': '--paired-diff',
+               'paired_diff_norm': '--paired-diff-norm',
+               'paired_diff_norm1': '--paired-diff-norm1',
+               'paired_diff_norm2': '--paired-diff-norm2',
+               'matrix_multiply': '--mtx %s',
+               'gmean': '--gmean %f',
+               'combine': '--combine',
+               'keep_datatype': '--keep-datatype',
+               'abs': '--abs',
+               'keep_pos': '--pos',
+               'keep_neg': '--neg',
+               'mean': '--mean',
+               'mean_div_n': '--mean-div-n',
+               'sum': '--sum',
+               'var': '--var',
+               'std': '--std',
+               'max': '--max',
+               'max_index': '--max-index',
+               'min': '--min',
+               'vote': '--vote',
+               'sort': '--sort',
+               'max_and_bonf_correct' : '--max-bonfcor',
+               'mul': '--mul %f',
+               'add': '--add %f',
+               'mask': '--mask %s'}
+    
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = [Bunch(key='invol',copy=False)]
+        return info
+
+    def _get_outfile(self):
+        outfile = self.inputs.outfile
+        if not outfile:
+            outfile = fname_presuffix(self.inputs.infile,
+                                      suffix='_concat',
+                                      newpath=os.getcwd())]
+        return outfile
+    
+    def _parse_inputs(self):
+        """validate fs mri_concat options"""
+        allargs = super(Concatenate, self)._parse_inputs(skip=('invol'))
+
+        # Add infile and outfile to the args if they are specified
+        for f in filename_to_list(self.inputs.invol):
+            allargs.extend(['--i', f])
+        if not self.inputs.outfile and self.inputs.infile:
+            allargs.extend(['--o',self._get_outfile()])
+        return allargs
+    
+    def run(self, **inputs):
+        """Execute the command.
+        """
+        return super(Concatenate, self).run()
+
+    def outputs(self):
+        """
+        outfile: filename
+              output file
+        """
+        outputs = Bunch(outfile=None)
+        return outputs
+
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        if isinstance(self.inputs.outfile,str):
+            outfile = glob(self.inputs.outfile)
+            outputs.outfile = outfile[0]
+        elif not self.inputs.outfile and self.inputs.infile:
+            outfile = glob(self._get_outfile())
+            outputs.outfile = outfile[0]
+        return outputs
+
+class SegStats(FSLCommand):
+    """Use FreeSurfer mri_segstats for ROI analysis
+
+    Parameters
+    ----------
+
+    To see optional arguments
+    SegStats().inputs_help()
+
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import SegStats
+    >>> binvol = SegStats(infile='foo.nii', min=10, outfile='foo_out.nii')
+    >>> binvol.cmdline
+    'mri_segstats --i foo.nii --min 10.000000 --o foo_out.nii'
+    
+   """
+
+    @property
+    def cmd(self):
+        """sets base command, not editable"""
+        return 'mri_segstats'
+
+
+    def inputs_help(self):
+        """Print command line documentation for mri_segstats."""
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
+
+    opt_map = {'segvol': '--seg %s',
+               'annot': '--annot %s %s %s',
+               'slabel': '--slabel %s %s %s',
+               'sumfile': '--sum %s',
+               'parvol': '--pv %s',
+               'invol': '--i %s',
+               'frame': '--frame %f',
+               'square': '--sqr',
+               'squareroot': '--sqrt',
+               'multiply': '--mul %f',
+               'savemeanstd': '--snr',
+               'colortable': '--ctab %s',
+               'ctab_default': '--ctab-default',
+               'ctab_gca': '--ctab-gca',
+               'segid': '--id %s',
+               'excludeid': '--exclueid %s',
+               'excl_ctxgmwm': '--excl-ctxgmwm',
+               'surf_wm_vol': '--surf-wm-vol',
+               'surf_ctx_vol': '--surf-ctx-vol',
+               'nonempty': '--nonempty',
+               'maskvol': '--mask %s',
+               'maskthresh': '--maskthresh %f',
+               'masksign': '--masksign %s',
+               'maskframe': '--maskframe %f',
+               'maskinvert': '--maskinvert',
+               'maskerode' : '--maskerode %f',
+               'brain_vol_from_seg': '--brain-vol-from-seg',
+               'brainmask': '--brainmask',
+               'talicv': '--etiv',
+               'talicv_only': '--etiv-only',
+               'avgwftxt': '--avgwf %s',
+               'avgwfvol': '--avgwfvol %s',
+               'savgmsf' : '--sfavg %s',		
+               'vox': '--vox ***',
+               'flags': '%s'}
+    
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = [Bunch(key='infile',copy=False)]
+        return info
+    
+    def _parse_inputs(self):
+        """validate fs mri_segstats options"""
+        allargs = super(SegStats, self)._parse_inputs()
+
+        # Add infile and outfile to the args if they are specified
+        if not self.inputs.outfile and self.inputs.infile:
+            allargs.extend(['--avgwf',fname_presuffix(self.inputs.infile,
+                                                  suffix='_avgwf',
+                                                  newpath=os.getcwd())])
+        
+        return allargs
+    
+    def run(self, **inputs):
+        """Execute the command.
+        """
+        return super(SegStats, self).run()
+
+    def outputs(self):
+        """
+        outfile: filename
+              output file
+        """
+        outputs = Bunch(outfile=None)
+        return outputs
+
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        if isinstance(self.inputs.outfile,str):
+            outfile = glob(self.inputs.outfile)
+            outputs.outfile = outfile[0]
+        elif not self.inputs.outfile and self.inputs.infile:
+            outfile = glob(fname_presuffix(self.inputs.infile,
+                                           suffix='_avgwf', newpath=os.getcwd())) 
             outputs.outfile = outfile[0]
         return outputs
