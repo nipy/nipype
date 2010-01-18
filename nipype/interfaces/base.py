@@ -115,7 +115,11 @@ class Bunch(object):
             if os.path.isfile(afile):
                 md5obj = md5()
                 fp = file(afile, 'rb')
-                md5obj.update(fp.read())
+                while True:
+                    data = fp.read(8192)
+                    if not data:
+                        break
+                    md5obj.update(data)
                 fp.close()
                 md5hex = md5obj.hexdigest()
             else:
