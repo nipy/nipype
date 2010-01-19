@@ -1202,7 +1202,7 @@ class Concatenate(FSLCommand):
         if not outfile:
             outfile = fname_presuffix(self.inputs.infile,
                                       suffix='_concat',
-                                      newpath=os.getcwd())]
+                                      newpath=os.getcwd())
         return outfile
     
     def _parse_inputs(self):
