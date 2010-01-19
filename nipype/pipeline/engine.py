@@ -251,15 +251,10 @@ class Pipeline(object):
                                                    str(v).replace('.',''),ipstrip))
                     if inport not in inports:
                         inports.append(inport)
-            if inports:
-                inputstr = '{'
-                for ip in inports:
-                    if inputstr[-1] != '{':
-                        inputstr += '|'
-                    inputstr += '<%s> %s'%(replacefunk(ip),ip)
-                inputstr += '}'
-            else:
-                inputstr = ''
+            inputstr = '{IN'
+            for ip in inports:
+                inputstr += '|<%s> %s'%(replacefunk(ip),ip)
+            inputstr += '}'
             outports = []
             for u,v,d in graph.out_edges_iter(nbunch=n,data=True):
                 for cd in d['connect']:
@@ -269,15 +264,10 @@ class Pipeline(object):
                         outport = cd[0][0]
                     if outport not in outports:
                         outports.append(outport)
-            if outports:
-                outputstr = '{'
-                for op in outports:
-                    if outputstr[-1] != '{':
-                        outputstr += '|'
-                    outputstr += '<%s> %s'%(replacefunk(op),op)
-                outputstr += '}'
-            else:
-                outputstr = ''
+            outputstr = '{OUT'
+            for op in outports:
+                outputstr += '|<%s> %s'%(replacefunk(op),op)
+            outputstr += '}'
             text += ['%s [label="%s|%s|%s"];'%(nodename.replace('.',''),
                                                inputstr,
                                                nodename,
@@ -292,7 +282,7 @@ class Pipeline(object):
         return text
         
         
-    def export_graph(self, show = True, use_execgraph=False, show_connectinfo=False, dotfilename='graph.dot'):
+    def export_graph(self, show = False, use_execgraph=False, show_connectinfo=False, dotfilename='graph.dot'):
         """ Displays the graph layout of the pipeline
 
         This function requires that pygraphviz and matplotlib are available on
@@ -300,6 +290,11 @@ class Pipeline(object):
 
         Parameters
         ----------
+
+        show : boolean
+            Indicate whether to generate pygraphviz output fromn
+            networkx. default [False]
+            
         use_execgraph : boolean
             Indicates whether to use the specification graph or the
             execution graph. default [False]
