@@ -263,9 +263,8 @@ class NodeWrapper(object):
                 for field in self.iterfield:
                     newval = itervals[field][i]
                     if self.disk_based:
-                        if os.path.isfile(newval):
-                            newval = list_to_filename(copyfiles(newval, [subdir],
-                                                                copy=False))
+                        newval = list_to_filename(copyfiles(newval, [subdir],
+                                                            copy=False))
                     self.set_input(field, newval)
                     logger.debug("iterating %s on %s: %s\n"%(self.name,
                                                              field,

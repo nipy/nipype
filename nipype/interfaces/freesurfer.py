@@ -856,6 +856,11 @@ class Smooth(FSLCommand):
         """
         info = [Bunch(key='sourcefile',copy=False)]
         return info
+
+    def _get_outfile(self):
+        return fname_presuffix(self.inputs.sourcefile,
+                               newpath=os.getcwd(),
+                               suffix='_surfsmooth')        
     
     def _parse_inputs(self):
         """validate fs bbregister options"""
@@ -863,8 +868,7 @@ class Smooth(FSLCommand):
 
         # Add outfile to the args if not specified
         if self.inputs.outfile is None:
-            allargs.extend(['--o', fname_presuffix(self.inputs.sourcefile,
-                                                   suffix='_surfsmooth')])
+            allargs.extend(['--o', self._get_outfile()])
         return allargs
     
     def run(self, **inputs):
@@ -881,9 +885,8 @@ class Smooth(FSLCommand):
 
     def aggregate_outputs(self):
         outputs = self.outputs()
-        if self.inputs.outfile is None:
-            outfile = glob(fname_presuffix(self.inputs.sourcefile,
-                                           suffix='_surfsmooth'))
+        if not self.inputs.outfile:
+            outfile = glob(self._get_outfile())
             assert len(outfile)==1, "No output file %s created"%outfile
             outputs.outfile = outfile[0]
         if isinstance(self.inputs.outfile,str):
