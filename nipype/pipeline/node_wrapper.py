@@ -160,12 +160,12 @@ class NodeWrapper(object):
                                     hashfile)
         
         
-    def run(self,updatehash=None):
+    def run(self,updatehash=None,force_execute=False):
         """Executes an interface within a directory.
         """
         # print "\nInputs:\n" + str(self.inputs) +"\n"
         # check to see if output directory and hash exist
-        logger.info("Executing node: %s"%self.id)
+        logger.info("Node: %s"%self.id)
         if self.disk_based:
             outdir = self._output_directory()
             outdir = self._make_output_dir(outdir)
@@ -177,12 +177,12 @@ class NodeWrapper(object):
             if updatehash:
                 logger.info("Updating hash: %s"%hashvalue)
                 self._save_hashfile(hashfile,hashed_inputs)
-            if not updatehash and (self.overwrite or not os.path.exists(hashfile)):
+            if force_execute or (not updatehash and (self.overwrite or not os.path.exists(hashfile))):
                 logger.info("Node hash: %s"%hashvalue)
-                logger.debug("Removing %s and its contents"%outdir)
-                rmtree(outdir)
-                logger.info("Recreating %s"%outdir)
-                outdir = self._make_output_dir(outdir)
+                if os.path.exists(outdir):
+                    logger.debug("Removing old %s and its contents"%outdir)
+                    rmtree(outdir)
+                    outdir = self._make_output_dir(outdir)
                 # copy files over and change the inputs
                 if hasattr(self._interface,'get_input_info'):
                     for info in self._interface.get_input_info():
@@ -215,15 +215,10 @@ class NodeWrapper(object):
                 if hasattr(self._interface,'get_input_info'):
                     for info in self._interface.get_input_info():
                         files = self.inputs.get(info.key)
-                        if files:
-                            if isinstance(files,list):
-                                infiles = files
-                            else:
-                                infiles = [files]
+                        if files is not None:
+                            infiles = filename_to_list(files)
                             for i,f in enumerate(infiles):
                                 newfile = fname_presuffix(f, newpath=outdir)
-                                if not os.path.exists(newfile):
-                                    copyfiles(f, [outdir], copy=info.copy)
                                 if isinstance(files,list):
                                     self.inputs.get(info.key)[i] = newfile
                                 else:
@@ -253,8 +248,10 @@ class NodeWrapper(object):
                 if not isinstance(itervals[field], list):
                     notlist[field] = True
                     itervals[field] = [itervals[field]]
+            self._itervals = deepcopy(itervals)
             self._result = InterfaceResult(interface=[], runtime=[],
                                            outputs=Bunch())
+            logger.info("Iterfields: %s"%str(self.iterfield))
             for i,v in enumerate(itervals[self.iterfield[0]]):
                 if self.disk_based:
                     subdir = os.path.join(basewd,'%s_%d'%(self.iterfield[0], i))
@@ -273,30 +270,17 @@ class NodeWrapper(object):
                     logger.debug("iterating %s on %s: %s\n"%(self.name,
                                                              field,
                                                              newval))
-                if issubclass(self._interface.__class__,CommandLine):
-                    logger.info('cmd: %s'%self._interface.cmdline)
+                result = self._run_command(execute, cwd)
                 if execute:
-                    # Passing cwd in here is redundant, even for FSLCommand
-                    # instances. For FSLCommand, this is an example of another
-                    # way we might do it if we decide to ditch the setwd
-                    # approach. Again - something should be removed when we
-                    # settle on a solution
-                    result = self._interface.run(cwd=cwd)
-                    if result.runtime.returncode:
-                        self._itervals = itervals
-                        raise RuntimeError(result.runtime.stderr)
                     self._result.interface.insert(i, result.interface)
                     self._result.runtime.insert(i, result.runtime)
-                    outputs = result.outputs
-                else:
-                    # Could also pass in cwd here...
-                    outputs = self._interface.aggregate_outputs()
+                outputs = result.outputs
                 for key,val in outputs.iteritems():
                     try:
                         # This has funny default behavior if the length of the
                         # list is < i - 1. I'd like to simply use append... feel
                         # free to second my vote here!
-                        self._result.outputs.get(key).insert(i, val)
+                        self._result.outputs.get(key).append(val)
                     except AttributeError:
                         # .insert(i, val) is equivalent to the following if
                         # outputs.key == None, so this is far less likely to
@@ -309,21 +293,32 @@ class NodeWrapper(object):
                 else:
                     self.set_input(field, itervals[field])
         else:
-            if issubclass(self._interface.__class__,CommandLine):
-                logger.info('cmd: %s'%self._interface.cmdline)
-            if execute:
-                self._result = self._interface.run(cwd=cwd)
-                if self._result.runtime.returncode:
-                    raise RuntimeError(self._result.runtime.stderr)
-            else:
-                # Likewise, cwd could go in here
-                logger.info("Not running command. just collecting outputs:")
-                aggouts = self._interface.aggregate_outputs()
-                self._result = InterfaceResult(interface=None,
-                                               runtime=None,
-                                               outputs=aggouts)
+            self._result = self._run_command(execute, cwd)
         if cwd:
             os.chdir(old_cwd)
+            
+    def _run_command(self, execute, cwd):
+        if execute:
+            if issubclass(self._interface.__class__,CommandLine):
+                cmd = self._interface.cmdline
+                logger.info('cmd: %s'%cmd)
+                cmdfile = os.path.join(cwd,'command.txt')
+                fd = open(cmdfile,'wt')
+                fd.writelines(cmd)
+                fd.close()
+            logger.info('Executing node')
+            result = self._interface.run(cwd=cwd)
+            if result.runtime.returncode:
+                raise RuntimeError(result.runtime.stderr)
+        else:
+            # Likewise, cwd could go in here
+            logger.info("Collecting precomputed outputs:")
+            aggouts = self._interface.aggregate_outputs()
+            result = InterfaceResult(interface=None,
+                                     runtime=None,
+                                     outputs=aggouts)
+        return result
+        
 
     def update(self, **opts):
         self.inputs.update(**opts)
@@ -349,6 +344,7 @@ class NodeWrapper(object):
             # case where mkdir failed because a missing parent
             # directory, something went wrong up-stream that caused an
             # invalid path to be passed in for `outdir`.
+            logger.info("Creating %s"%outdir)
             os.mkdir(outdir)
         return outdir
 

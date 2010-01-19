@@ -409,12 +409,13 @@ class Pipeline(object):
             # For a disk node, provide it with an appropriate
             # output directory
             self._set_output_directory_base(node)
-            if updatehash and not (node.name in force_execute):
+            redo = any([node.name.lower()==l.lower() for l in force_execute])
+            if updatehash and not redo:
                 node.run(updatehash=updatehash)
             else:
                 try:
                     old_wd = os.getcwd()
-                    node.run()
+                    node.run(force_execute=redo)
                 except:
                     os.chdir(old_wd)
                     # bare except, but i really don't know where a

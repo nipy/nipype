@@ -248,7 +248,10 @@ class DataSink(Interface):
                         elif os.path.isdir(src):
                             dirname = os.path.split(os.path.join(src,''))[0]
                             newdir = dirname.split(os.path.sep)[-1]
-                            shutil.copytree(dirname,os.path.join(tempoutdir,newdir))
+                            newoutdir = os.path.join(tempoutdir,newdir)
+                            if os.path.exists(newoutdir):
+                                shutil.rmtree(newoutdir)
+                            shutil.copytree(dirname,newoutdir)
         runtime = Bunch(returncode=0,
                         stdout=None,
                         stderr=None)
