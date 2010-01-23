@@ -398,7 +398,8 @@ class Pipeline(object):
         self._generate_expanded_graph()
         for node in nx.topological_sort(self._execgraph):
             # Assign outputs from dependent executed nodes to current node.
-            # The dependencies are stored as data on edges connecting nodes.
+            # The dependencies are stored as data on edges connecting
+            # nodes.
             for edge in self._execgraph.in_edges_iter(node):
                 data = self._execgraph.get_edge_data(*edge)
                 logger.debug('setting input: %s->%s %s',edge[0],edge[1],str(data))

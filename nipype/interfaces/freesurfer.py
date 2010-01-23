@@ -335,7 +335,7 @@ class DicomConvert(FSCommandLine):
         outdir = self._get_outdir()
         cmd = []
         if not os.path.exists(outdir):
-            cmdstr = 'mkdir %s' % outdir
+            cmdstr = 'python -c "import os; os.makedirs(\'%s\')";' % outdir
             cmd.extend([cmdstr])
         infofile = os.path.join(outdir, 'shortinfo.txt')
         if not os.path.exists(infofile):
@@ -477,9 +477,11 @@ class Dicom2Nifti(FSCommandLine):
         outdir = self._get_outdir()
         cmd = []
         if not os.path.exists(outdir):
-            cmdstr = 'mkdir %s;' % outdir
+            cmdstr = 'python -c "import os; os.makedirs(\'%s\')";' % outdir
             cmd.extend([cmdstr])
-        cmdstr = 'dcmdir-info-mgh %s > %s;' % (self.inputs.dicomdir,os.path.join(outdir,'dicominfo.txt'))
+        dicominfotxt = os.path.join(outdir,'dicominfo.txt')
+        if not os.path.exists(dicominfotxt):
+            cmdstr = 'dcmdir-info-mgh %s > %s;' % (self.inputs.dicomdir, dicominfotxt)
         cmd.extend([cmdstr])
         for f in valid_inputs['dicomfiles']:
             head,fname = os.path.split(f)
@@ -764,6 +766,7 @@ class ApplyVolTransform(FSLCommand):
         'tkreg':              '--reg %s',
         'fslreg':             '--fsl %s',
         'xfmreg':             '--xfm %s',
+        'interp':             '--interp %s',
         'noresample':         '--no-resample',
         'inverse':            '--inv', 
         'flags':              '%s'}
@@ -1001,13 +1004,14 @@ class OneSampleTTest(FSLCommand):
         print get_doc(self.cmd, self.opt_map, trap_error=False)
 
     opt_map = {
-        'surf':             '--surf %s',
+        'surf':               '--surf %s',
         'hemi':               '%s',
         'outdir':             '--glmdir %s',
-        'outdirprefix':          None,
+        'outdirprefix':       None,
         'funcimage':          '--y %s',
         'onesample':          '--osgm',
         'design':             '--X %s',
+        'groupfile':          '--fsgd %s',
         'flags':              '%s'}
 
     def _parse_inputs(self):
@@ -1304,7 +1308,7 @@ class SegStats(FSLCommand):
                'avgwftxt': '--avgwf %s',
                'avgwfvol': '--avgwfvol %s',
                'savgmsf' : '--sfavg %s',		
-               'vox': '--vox ***',
+               'vox': '--vox %d %d %d',
                'flags': '%s'}
     
     def get_input_info(self):
@@ -1316,14 +1320,39 @@ class SegStats(FSLCommand):
     
     def _parse_inputs(self):
         """validate fs mri_segstats options"""
-        allargs = super(SegStats, self)._parse_inputs()
+        allargs = super(SegStats, self)._parse_inputs(skip=('sumfile','segid','avgwftxt','avgwfvol'))
 
         # Add infile and outfile to the args if they are specified
-        if not self.inputs.outfile and self.inputs.infile:
-            allargs.extend(['--avgwf',fname_presuffix(self.inputs.infile,
-                                                  suffix='_avgwf',
-                                                  newpath=os.getcwd())])
-        
+        if self.inputs.segid:
+            if isinstance(self.inputs.segid,list):
+                for id in self.inputs.segid:
+                    allargs.extend(['--id', str(id)])
+            else:
+                allargs.extend(['--id', str(self.inputs.segid)])
+        if self.inputs.invol:
+            if isinstance(self.inputs.sumfile,str):
+                allargs.extend(['--sum',self.inputs.sumfile])
+            else:
+                allargs.extend(['--sum',fname_presuffix(self.inputs.invol,
+                                                          suffix='_summary.txt',
+                                                          use_ext=False,
+                                                          newpath=os.getcwd())])
+        if self.inputs.avgwftxt and self.inputs.invol:
+            if isinstance(self.inputs.avgwftxt,str):
+                allargs.extend(['--avgwf',self.inputs.avgwftxt])
+            else:
+                allargs.extend(['--avgwf',fname_presuffix(self.inputs.invol,
+                                                          suffix='_avgwf.txt',
+                                                          use_ext=False,
+                                                          newpath=os.getcwd())])
+        if self.inputs.avgwfvol and self.inputs.invol:
+            if isinstance(self.inputs.avgwfvol,str):
+                allargs.extend(['--avgwfvol',self.inputs.avgwfvol])
+            else:
+                allargs.extend(['--avgwfvol',fname_presuffix(self.inputs.invol,
+                                                          suffix='_avgwfvol.nii.gz',
+                                                          use_ext=False,
+                                                          newpath=os.getcwd())])
         return allargs
     
     def run(self, **inputs):
@@ -1336,16 +1365,11 @@ class SegStats(FSLCommand):
         outfile: filename
               output file
         """
-        outputs = Bunch(outfile=None)
+        outputs = Bunch(sumfile=None,
+                        avgwffile=None,
+                        avgwfvol=None)
         return outputs
 
     def aggregate_outputs(self):
         outputs = self.outputs()
-        if isinstance(self.inputs.outfile,str):
-            outfile = glob(self.inputs.outfile)
-            outputs.outfile = outfile[0]
-        elif not self.inputs.outfile and self.inputs.infile:
-            outfile = glob(fname_presuffix(self.inputs.infile,
-                                           suffix='_avgwf', newpath=os.getcwd())) 
-            outputs.outfile = outfile[0]
         return outputs
