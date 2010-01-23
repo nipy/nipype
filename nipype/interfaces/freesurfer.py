@@ -1150,10 +1150,10 @@ class Concatenate(FSLCommand):
 
     Examples
     --------
-    >>> from nipype.interfaces.freesurfer import MRI_Concat
-    >>> binvol = MRI_Concat(infile='foo.nii', min=10, outfile='foo_out.nii')
-    >>> binvol.cmdline
-    'mri_concat --i foo.nii --min 10.000000 --o foo_out.nii'
+    >>> from nipype.interfaces.freesurfer import Concatenate
+    >>> concat = Concatenate(infile='foo.nii', mean=True, outfile='foo_out.nii')
+    >>> concat.cmdline
+    'mri_concat --mean --o foo_out.nii --i foo.nii'
     
    """
 
@@ -1205,9 +1205,9 @@ class Concatenate(FSLCommand):
         return info
 
     def _get_outfile(self):
-        outfile = self.inputs.outfile
+        outfile = self.inputs.outvol
         if not outfile:
-            outfile = fname_presuffix(self.inputs.infile,
+            outfile = fname_presuffix(self.inputs.invol,
                                       suffix='_concat',
                                       newpath=os.getcwd())
         return outfile
@@ -1219,7 +1219,7 @@ class Concatenate(FSLCommand):
         # Add infile and outfile to the args if they are specified
         for f in filename_to_list(self.inputs.invol):
             allargs.extend(['--i', f])
-        if not self.inputs.outfile and self.inputs.infile:
+        if not self.inputs.outvol and self.inputs.invol:
             allargs.extend(['--o',self._get_outfile()])
         return allargs
     
@@ -1238,10 +1238,10 @@ class Concatenate(FSLCommand):
 
     def aggregate_outputs(self):
         outputs = self.outputs()
-        if isinstance(self.inputs.outfile,str):
-            outfile = glob(self.inputs.outfile)
+        if isinstance(self.inputs.outvol,str):
+            outfile = glob(self.inputs.outvol)
             outputs.outfile = outfile[0]
-        elif not self.inputs.outfile and self.inputs.infile:
+        elif not self.inputs.outvol and self.inputs.invol:
             outfile = glob(self._get_outfile())
             outputs.outfile = outfile[0]
         return outputs
@@ -1259,9 +1259,9 @@ class SegStats(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces.freesurfer import SegStats
-    >>> binvol = SegStats(infile='foo.nii', min=10, outfile='foo_out.nii')
-    >>> binvol.cmdline
-    'mri_segstats --i foo.nii --min 10.000000 --o foo_out.nii'
+    >>> segstat = SegStats(segvol='seg.nii', invol='foo.nii', segid=18, sumfile='foo_sum.txt')
+    >>> segstat.cmdline
+    'mri_segstats --i foo.nii --seg seg.nii --id 18 --sum foo_sum.txt'
     
    """
 
