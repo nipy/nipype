@@ -191,14 +191,23 @@ class FSLInfo(object):
 
 fsl_info = FSLInfo()
 
-# Legacy to support old code. Should be deleted soon. before 0.2?
 def fslversion():
-    warn(DeprecationWarning('fslversion should be accessed via fsl_info'))
-    return(fsl_info.version)
+    msg = """fsl.fslversion is no longer available. instead replace with:
+
+             fsl.fsl_info.version
+
+             This message will be removed in the next release
+          """
+    raise Exception(msg)
 
 def fsloutputtype(ftype=None):
-    warn(DeprecationWarning('fsloutputtype should be accessed via fsl_info'))
-    return fsl_info.outputtype(ftype)
+    msg = """fsl.fsloutputtype is no longer available. instead replace with:
+
+             fsl.fsl_info.outputtype(...)
+
+             This message will be removed in the next release
+          """
+    raise Exception(msg)
 
 class FSLCommand(CommandLine):
     '''General support for FSL commands'''

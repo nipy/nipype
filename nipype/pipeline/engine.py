@@ -396,33 +396,31 @@ class Pipeline(object):
         # parameterization each time before running
         logger.info("Running serially.")
         self._generate_expanded_graph()
+        old_wd = os.getcwd()
         for node in nx.topological_sort(self._execgraph):
             # Assign outputs from dependent executed nodes to current node.
             # The dependencies are stored as data on edges connecting
             # nodes.
-            for edge in self._execgraph.in_edges_iter(node):
-                data = self._execgraph.get_edge_data(*edge)
-                logger.debug('setting input: %s->%s %s',edge[0],edge[1],str(data))
-                for sourceinfo, destname in data['connect']:
-                    self._set_node_input(node, destname, edge[0], sourceinfo)
-            #hashed_inputs, hashvalue = node.inputs._get_bunch_hash()
-            #logger.info("Executing: %s H: %s" % (node.name, hashvalue))
-            # For a disk node, provide it with an appropriate
-            # output directory
-            self._set_output_directory_base(node)
-            redo = any([node.name.lower()==l.lower() for l in force_execute])
-            if updatehash and not redo:
-                node.run(updatehash=updatehash)
-            else:
-                try:
-                    old_wd = os.getcwd()
+            try:
+                for edge in self._execgraph.in_edges_iter(node):
+                    data = self._execgraph.get_edge_data(*edge)
+                    logger.debug('setting input: %s->%s %s',
+                                 edge[0],edge[1],str(data))
+                    for sourceinfo, destname in data['connect']:
+                        self._set_node_input(node, destname,
+                                             edge[0], sourceinfo)
+                self._set_output_directory_base(node)
+                redo = any([node.name.lower()==l.lower() for l in force_execute])
+                if updatehash and not redo:
+                    node.run(updatehash=updatehash)
+                else:
                     node.run(force_execute=redo)
-                except:
-                    os.chdir(old_wd)
-                    # bare except, but i really don't know where a
-                    # node might fail
-                    self._report_crash(node)
-                    raise
+            except:
+                os.chdir(old_wd)
+                # bare except, but i really don't know where a
+                # node might fail
+                self._report_crash(node)
+                raise
                 
     def _report_crash(self, node):
         """Writes crash related information to a file
