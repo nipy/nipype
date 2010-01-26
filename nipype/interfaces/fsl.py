@@ -1546,7 +1546,7 @@ class FSLSmooth(FSLCommand):
         return [self.inputs.infile,
                 # ohinds: convert fwhm to stddev
                 '-kernel gauss', self.inputs.fwhm/2.3548, 
-                '-fmean'
+                '-fmean',
                 self._get_outfile(os.getcwd())]
 
     def outputs(self):
