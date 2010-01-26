@@ -58,7 +58,7 @@ fsl.fsl_info.outputtype('NIFTI_GZ')
 # The following lines create some information about location of your
 # data. 
 data_dir = os.path.abspath('data')
-subject_list = ['s1'] #, 's3']
+subject_list = ['s1', 's3']
 # The following info structure helps the DataSource module organize
 # nifti files into fields/attributes of a data object. With DataSource
 # this object is of type Bunch.
@@ -130,7 +130,15 @@ smoothing = nw.NodeWrapper(interface=fsl.FSLSmooth(), diskbased=True)
 smoothing.iterfield = ['infile']
 smoothing.inputs.fwhm = 5
 
-hpfilter = nw.NodeWrapper(interface=fsl.Fslmaths(), diskbased=True)
+inorm = nw.NodeWrapper(interface = fsl.Fslmaths(optstring = '-inm 10000',
+                                                suffix = '_inm',
+                                                outdatatype = 'float'),
+                       name = 'inorm.fsl',
+                       diskbased            = True)
+inorm.iterfield = ['infile']
+
+hpfilter = nw.NodeWrapper(interface=fsl.Fslmaths(),
+                          diskbased=True)
 hpcutoff = 120
 TR = 3.
 hpfilter.inputs.suffix = '_hpf'
@@ -250,7 +258,8 @@ l1pipeline.connect([# preprocessing in native space
                  (datasource,modelspec,[('subject_id','subject_id'),
                                         (('subject_id',subjectinfo),'subject_info_func')]),
                  (motion_correct,modelspec,[('parfile','realignment_parameters')]),
-                 (smoothing,hpfilter,[('smoothedimage','infile')]),
+                 (smoothing,inorm,[('smoothedimage','infile')]),
+                 (inorm,hpfilter,[('outfile','infile')]),
                  (hpfilter,modelspec,[('outfile','functional_runs')]),
                  #(skullstrip,level1design,[('outfile','reg_image')]),
                  (modelspec,level1design,[('session_info','session_info')]),
@@ -269,6 +278,8 @@ l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
                         [('parfile', 'skullstrip.@parfile')]),
                     (smoothing, datasink, 
                         [('smoothedimage', 'registration.@outfile')]),
+                    (featfemodel, datasink, 
+                        [('featdir', 'modelestimate.@fixedeffects')]),
                     ])
 
 

@@ -106,7 +106,8 @@ class SpecifyModel(Interface):
             A list of files containing outliers that should be
             tossed. One file per session.
         functional_runs : list of files
-            List of data files for model. One file per session
+            List of data files for model. List of 4D files or list of
+            list of 3D files per session
         input_units : string
             Units of event onsets and durations (secs or scans) as
             returned by the subject_info_func
@@ -457,10 +458,16 @@ class SpecifyModel(Interface):
     def _concatenate_info(self,infolist):
         nscans = []
         for i,f in enumerate(self.inputs.functional_runs):
-            img = load(f)
-            nscans.insert(i,img.get_shape()[3])
-            # now combine all fields into 1
-            # names,onsets,durations,amplitudes,pmod,tmod,regressor_names,regressors
+            if isinstance(f,list):
+                numscans = len(f)
+            elif isinstance(f,str):
+                img = load(f)
+                numscans = img.get_shape()[3]
+            else:
+                raise Exception('Functional input not specified correctly')
+            nscans.insert(i, numscans)
+        # now combine all fields into 1
+        # names,onsets,durations,amplitudes,pmod,tmod,regressor_names,regressors
         infoout = infolist[0]
         for i,info in enumerate(infolist[1:]):
                 #info.[conditions,tmod] remain the same

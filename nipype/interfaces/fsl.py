@@ -1535,11 +1535,62 @@ class FSLSmooth(FSLCommand):
               }
 
 
+    def _get_outfile(self, cwd, check=False):
+        return fsl_info.gen_fname(self.inputs.infile,
+                                  self.inputs.outfile,
+                                  cwd=cwd,
+                                  suffix='_smooth',
+                                  check=check)
+        
+    def _parse_inputs(self):
+        return [self.inputs.infile,
+                # ohinds: convert fwhm to stddev
+                '-kernel gauss', self.inputs.fwhm/2.3548, 
+                '-fmean'
+                self._get_outfile(os.getcwd())]
+
+    def outputs(self):
+        """Returns a bunch structure with outputs
+
+        Parameters
+        ----------
+        (all default to None and are unset)
+
+             smoothedimage
+        """
+        outputs = Bunch(smoothedimage=None)
+        return outputs
+
+    def aggregate_outputs(self, cwd=None):
+        if cwd is None:
+            cwd = os.getcwd()
+        outputs = self.outputs()
+        outputs.smoothedimage = self._get_outfile(cwd, check=True)
+        return outputs
+
+class FSLmerge(FSLCommand):
+    '''Use fslmaths to smooth the image
+
+    This is dumb, of course - we should use nipy for such things! But it is a
+    step along the way to get the "standard" FSL pipeline in place.
+
+    This is meant to be a throwaway class, so it's not currently very robust.
+    Effort would be better spent integrating basic numpy into nipype'''
+    @property
+    def cmd(self):
+        return 'fslmerge'
+
+    opt_map = {'infile':  None,
+               'dimension':    None,
+               'outfile': None,
+              }
+
+
     def _parse_inputs(self):
         outfile = self.inputs.outfile
         if outfile is None:
-            outfile = fname_presuffix(self.inputs.infile, suffix='_smooth',
-                    newpath='.')
+            outfile = fname_presuffix(self.inputs.infile[0], suffix='_merge',
+                                      newpath=os.getcwd())
         return ['%s -kernel gauss %f -fmean %s' % (self.inputs.infile,
                                             # ohinds: convert fwhm to stddev
                                             self.inputs.fwhm/2.3548,
