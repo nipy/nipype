@@ -7,7 +7,7 @@ set fmri(inmelodic) 0
 # Analysis level
 # 1 : First-level analysis
 # 2 : Higher-level analysis
-set fmri(level) 1
+set fmri(level) 2
 
 # Which stages to run
 # 0 : No first-level analysis (registration and/or group stats only)
@@ -17,7 +17,7 @@ set fmri(level) 1
 # 2 :             Stats
 # 6 :             Stats + Post-stats
 # 4 :                     Post-stats
-set fmri(analysis) 6
+set fmri(analysis) 0
 
 # Use relative filenames
 set fmri(relative_yn) 0
@@ -26,19 +26,19 @@ set fmri(relative_yn) 0
 set fmri(help_yn) 1
 
 # Run Featwatcher
-set fmri(featwatcher_yn) 0
+set fmri(featwatcher_yn) 1
 
 # Cleanup first-level standard-space images
 set fmri(sscleanup_yn) 0
 
 # Output directory
-set fmri(outputdir) "run$run_num"
+set fmri(outputdir) ""
 
 # TR(s)
-set fmri(tr) $interscan_interval
+set fmri(tr) 3
 
 # Total volumes
-set fmri(npts) $num_vols
+set fmri(npts) 2
 
 # Delete volumes
 set fmri(ndelete) 0
@@ -47,7 +47,7 @@ set fmri(ndelete) 0
 set fmri(tagfirst) 1
 
 # Number of first-level analyses
-set fmri(multiple) 1
+set fmri(multiple) ${num_runs}
 
 # Higher-level input type
 # 1 : Inputs are lower-level FEAT directories
@@ -57,7 +57,7 @@ set fmri(inputtype) 1
 # Carry out pre-stats processing?
 set fmri(filtering_yn) 0
 
-# Brain/background threshold, 
+# Brain/background threshold, %
 set fmri(brain_thresh) 10
 
 # Critical z for design efficiency calculation
@@ -77,7 +77,7 @@ set fmri(newdir_yn) 0
 # Motion correction
 # 0 : None
 # 1 : MCFLIRT
-set fmri(mc) 0
+set fmri(mc) 1
 
 # Spin-history (currently obsolete)
 set fmri(sh_yn) 0
@@ -91,7 +91,7 @@ set fmri(dwell) 0.7
 # EPI TE (ms)
 set fmri(te) 35
 
-#  Signal loss threshold
+# % Signal loss threshold
 set fmri(signallossthresh) 10
 
 # Unwarp direction
@@ -110,10 +110,10 @@ set fmri(st) 0
 set fmri(st_file) ""
 
 # BET brain extraction
-set fmri(bet_yn) 0
+set fmri(bet_yn) 1
 
 # Spatial smoothing FWHM (mm)
-set fmri(smooth) 0
+set fmri(smooth) 5
 
 # Intensity normalization
 set fmri(norm_yn) 0
@@ -134,7 +134,7 @@ set fmri(melodic_yn) 0
 set fmri(stats_yn) 1
 
 # Carry out prewhitening?
-set fmri(prewhiten_yn) $prewhiten
+set fmri(prewhiten_yn) 1
 
 # Add motion parameters to model
 # 0 : No
@@ -149,20 +149,20 @@ set fmri(robust_yn) 0
 # 0 : Mixed Effects: Simple OLS
 # 2 : Mixed Effects: FLAME 1
 # 1 : Mixed Effects: FLAME 1+2
-set fmri(mixed_yn) 2
+set fmri(mixed_yn) 3
 
 # Number of EVs
-set fmri(evs_orig) $num_evs
-set fmri(evs_real) $num_evs_real
+set fmri(evs_orig) 0
+set fmri(evs_real) 0
 set fmri(evs_vox) 0
 
 # Number of contrasts
-set fmri(ncon_orig) $num_tcon
-set fmri(ncon_real) $num_tcon
+set fmri(ncon_orig) 0
+set fmri(ncon_real) 0
 
 # Number of F-tests
-set fmri(nftests_orig) $num_fcon
-set fmri(nftests_real) $num_fcon
+set fmri(nftests_orig) 0
+set fmri(nftests_real) 0
 
 # Add constant column to design matrix? (obsolete)
 set fmri(constcol) 0
@@ -213,7 +213,7 @@ set fmri(bgimage) 1
 # Create time series plots
 set fmri(tsplot_yn) 1
 
-#Registration?
+# Registration?
 set fmri(reg_yn) 0
 
 # Registration to initial structural
@@ -241,10 +241,10 @@ set fmri(reghighres_search) 90
 set fmri(reghighres_dof) 6
 
 # Registration to standard image?
-set fmri(regstandard_yn) $register
+set fmri(regstandard_yn) 1
 
 # Standard image
-set fmri(regstandard) "${reg_image}"
+set fmri(regstandard) "$regimage"
 
 # Search space for registration to standard space
 # 0   : No search
@@ -253,7 +253,7 @@ set fmri(regstandard) "${reg_image}"
 set fmri(regstandard_search) 90
 
 # Degrees of Freedom for registration to standard space
-set fmri(regstandard_dof) ${reg_dof}
+set fmri(regstandard_dof) $regdof
 
 # Do nonlinear registration from structural to standard space?
 set fmri(regstandard_nonlinear_yn) 0
@@ -262,10 +262,8 @@ set fmri(regstandard_nonlinear_yn) 0
 set fmri(regstandard_nonlinear_warpres) 10 
 
 # High pass filter cutoff
-set fmri(paradigm_hp) $high_pass_filter_cutoff
+set fmri(paradigm_hp) 100
 
-# 4D AVW data or FEAT directory (1)
-set feat_files(1) "$func_file"
+# Number of lower-level copes feeding into higher-level analysis
+set fmri(ncopeinputs) ${num_runs}
 
-# Subject's structural for analysis 1
-set highres_files(1) ""

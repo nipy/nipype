@@ -1635,7 +1635,16 @@ class Level1Design(Interface):
             this option for FilmGLS
         contrasts : list of dicts
             List of contrasts with each list containing: 'name', 'stat',
-            [condition list], [weight list]. 
+            [condition list], [weight list].
+        register : boolean
+            Run registration at the end of session specific analysis.
+            default - True
+        reg_image : file
+            image volume to register to. default -
+                    MNI152_T1_2mm_brain.nii.gz
+        reg_dof : int
+            registration degrees of freedom. default - 12
+            
         """
         print self.inputs_help.__doc__
 
@@ -1646,7 +1655,10 @@ class Level1Design(Interface):
                             session_info=None,
                             bases=None,
                             model_serial_correlations=None,
-                            contrasts=None)
+                            contrasts=None,
+                            register=True,
+                            reg_image=None,
+                            reg_dof=12)
 
     def _create_ev_file(self,evfname,evinfo):
         f = open(evfname,'wt')
@@ -1682,6 +1694,9 @@ class Level1Design(Interface):
         contrast_header  = load_template('feat_contrast_header.tcl')
         contrast_prolog  = load_template('feat_contrast_prolog.tcl')
         contrast_element = load_template('feat_contrast_element.tcl')
+        contrastmask_header  = load_template('feat_contrastmask_header.tcl')
+        contrastmask_footer  = load_template('feat_contrastmask_footer.tcl')
+        contrastmask_element = load_template('feat_contrastmask_element.tcl')
         ev_txt = ''
         # generate sections for conditions and other nuisance
         # regressors
@@ -1739,6 +1754,14 @@ class Level1Design(Interface):
                     ev_txt += contrast_element.substitute(cnum=j+1, element=count,
                                                           ctype=ctype, val=val)
                     ev_txt += "\n"
+        # add contrast mask info
+        ev_txt += contrastmask_header.substitute()
+        for j,con1 in enumerate(contrasts):
+            for k,con2 in enumerate(contrasts):
+                if j != k:
+                    ev_txt += contrastmask_element.substitute(c1=j+1,
+                                                              c2=k+1)
+        ev_txt += contrastmask_footer.substitute()
         return num_evs,ev_txt
 
     def run(self, cwd=None, **inputs):
@@ -1766,12 +1789,18 @@ class Level1Design(Interface):
             else:
                 print "unknown contrast type: %s"%str(c)
         print [n_tcon, n_fcon]
-        
+
+        register = int(self.inputs.register)
+        if register:
+            reg_image = self.inputs.reg_image
+            if not reg_image:
+                reg_image = fsl_info.standard_image('MNI152_T1_2mm_brain.nii.gz')
+        reg_dof = self.inputs.reg_dof
         for i,info in enumerate(session_info):
             num_evs,cond_txt  = self._create_ev_files(cwd,info,i,usetd,self.inputs.contrasts)
             nim = load(func_files[i])
             (x,y,z,timepoints) = nim.get_shape()
-            fsf_txt = fsf_header.substitute(scan_num=i,
+            fsf_txt = fsf_header.substitute(run_num=i,
                                             interscan_interval=self.inputs.interscan_interval,
                                             num_vols=timepoints,
                                             prewhiten=prewhiten,
@@ -1780,7 +1809,10 @@ class Level1Design(Interface):
                                             num_tcon=n_tcon,
                                             num_fcon=n_fcon,
                                             high_pass_filter_cutoff=info['hpf'],
-                                            func_file=func_files[i])
+                                            func_file=func_files[i],
+                                            register=register,
+                                            reg_image=reg_image,
+                                            reg_dof=reg_dof)
             fsf_txt += cond_txt
             fsf_txt += fsf_postscript.substitute(overwrite=1)
 
@@ -1841,6 +1873,89 @@ class Level1Design(Interface):
         outputs.fsf_files = glob(os.path.abspath(os.path.join(os.getcwd(),'run*.fsf')))
         outputs.func_files = func_files
         outputs.ev_files  = glob(os.path.abspath(os.path.join(os.getcwd(),'ev_*.txt')))
+        return outputs
+
+# satra: 2010-01-03
+class Feat(FSLCommand):
+    """Uses FSL feat to calculate first level stats
+    """
+    @property
+    def cmd(self):
+        """sets base command, immutable"""
+        return 'feat'
+
+    opt_map = {
+        'fsf_file':         None,
+        }
+
+    def inputs_help(self):
+        """Print command line documentation for feat_model."""
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
+
+    def _parse_inputs(self):
+        """validate fsl feat_model options"""
+        allargs = super(Feat, self)._parse_inputs(skip=('fsf_file'))
+
+        if self.inputs.fsf_file:
+            allargs.insert(0, self.inputs.fsf_file)
+        return allargs
+
+    def run(self, fsf_file=None, cwd=None, **inputs):
+        """Execute the command.
+
+        Parameters
+        ----------
+        fsf_file : string
+            File specifying the feat design spec file
+
+        Returns
+        -------
+        results : InterfaceResult
+            An :class:`nipype.interfaces.base.InterfaceResult` object
+            with a copy of self in `interface`
+
+        Examples
+        --------
+        To pass command line arguments to ``feat_model`` that are not part of
+        the ``inputs`` attribute, pass them in with the ``flags``
+        input.
+
+        >>> from nipype.interfaces import fsl
+        >>> fmodel = fsl.FeatModel(fsf_file='foo.fsf')
+        """
+        if fsf_file:
+            self.inputs.fsf_file = fsf_file
+        if not self.inputs.fsf_file:
+            raise ValueError('FeatModel requires an input file')
+        if isinstance(self.inputs.fsf_file, list):
+            raise ValueError('FeatModel does not support multiple input files')
+        if not cwd:
+            cwd = os.getcwd()
+        self.inputs.update(**inputs)
+
+        results = self._runner(cwd=cwd)
+
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs(cwd)
+        return results
+
+    def outputs(self):
+        """
+            Parameters
+            ----------
+            (all default to None)
+
+            statsdir:
+                Directory containing the output of feat
+        """
+        outputs = Bunch(featdir=None)
+        return outputs
+        
+    def aggregate_outputs(self, cwd=None):
+        outputs = self.outputs()
+        if not cwd:
+            cwd = os.getcwd()
+        outputs.featdir = glob(os.path.join(cwd,'*feat'))[0]
         return outputs
 
 # interface to fsl command line model generation routine
@@ -1931,10 +2046,10 @@ class FeatModel(FSLCommand):
         outputs = self.outputs()
         root = self._get_design_root(list_to_filename(self.inputs.fsf_file))
         designfile = glob(os.path.join(os.getcwd(),'%s*.mat'%root))
-        assert len(designfile) == 1, 'No pe volumes generated by FSL Estimate'
+        assert len(designfile) == 1, 'No mat file generated by Feat Model'
         outputs.designfile = designfile[0]
         confile = glob(os.path.join(os.getcwd(),'%s*.con'%root))
-        assert len(confile) == 1, 'No pe volumes generated by FSL Estimate'
+        assert len(confile) == 1, 'No con file generated by Feat Model'
         outputs.confile = confile[0]
         return outputs
     
@@ -2147,6 +2262,240 @@ class FilmGLS(FSLCommand):
         outputs.statsdir = os.path.join(os.getcwd(),self._get_statsdir())
 
         return outputs
+
+# satra: 2010-01-23
+class FixedEffectsModel(Interface):
+    """Generate Feat specific files
+
+    See FixedEffectsModel().inputs_help() for more information.
+
+    Parameters
+    ----------
+    inputs : mapping
+    key, value pairs that will update the FixedEffectsModel.inputs attributes
+    see self.inputs_help() for a list of FixedEffectsModel.inputs attributes
+
+    Attributes
+    ----------
+    inputs : Bunch
+    a (dictionary-like) bunch of options that can be passed to
+    spm_smooth via a job structure
+    cmdline : string
+    string used to call matlab/spm via SpmMatlabCommandLine interface
+
+    Other Parameters
+    ----------------
+    To see optional arguments
+    FixedEffectsModel().inputs_help()
+
+    Examples
+    --------
+
+    """
+
+    def __init__(self, *args, **inputs):
+        self._populate_inputs()
+        self.inputs.update(**inputs)
+
+    @property
+    def cmd(self):
+        return 'feat_fe_design'
+
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        return []
+
+    def inputs_help(self):
+        """
+        Parameters
+        ----------
+
+        feat_dirs : list of directory names
+            Lower level feat dirs
+        num_copes : int
+            number of copes evaluated in each session
+        """
+        print self.inputs_help.__doc__
+
+    def _populate_inputs(self):
+        """ Initializes the input fields of this interface.
+        """
+        self.inputs = Bunch(feat_dirs=None,
+                            num_copes=None
+                            )
+
+    def run(self, cwd=None, **inputs):
+        if cwd is None:
+            cwd = os.getcwd()
+        self.inputs.update(inputs)
+        fsf_header = load_template('feat_fe_header.tcl')
+        fsf_footer = load_template('feat_fe_footer.tcl')
+        fsf_copes = load_template('feat_fe_copes.tcl')
+        fsf_dirs = load_template('feat_fe_featdirs.tcl')
+        fsf_ev_header = load_template('feat_fe_ev_header.tcl')
+        fsf_ev_element = load_template('feat_fe_ev_element.tcl')
+
+        num_runs = len(filename_to_list(self.inputs.feat_dirs))
+        fsf_txt = fsf_header.substitute(num_runs=num_runs,
+                                        num_copes=self.inputs.num_copes)
+        for i in range(self.inputs.num_copes):
+            fsf_txt += fsf_copes.substitute(copeno = i+1)
+        for i, rundir in enumerate(filename_to_list(self.inputs.feat_dirs)):
+            fsf_txt += fsf_dirs.substitute(runno = i+1,
+                                           rundir = os.path.abspath(rundir))
+        fsf_txt += fsf_ev_header.substitute()
+        for i in range(1,num_runs+1):
+            fsf_txt += fsf_ev_element.substitute(input = i)
+        fsf_txt += fsf_footer.substitute(overwrite=1)
+        
+        f = open(os.path.join(cwd, 'fixedeffects.fsf'), 'wt')
+        f.write(fsf_txt)
+        f.close()
+
+        runtime = Bunch(returncode=0,
+                        messages=None,
+                        errmessages=None)
+        outputs=self.aggregate_outputs()
+        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+
+    def outputs_help(self):
+        """
+        """
+        print self.outputs.__doc__
+
+    def outputs(self):
+        """Returns a bunch structure with outputs
+
+        Parameters
+        ----------
+        (all default to None and are unset)
+
+            fsf_file:
+                FSL feat specification file
+        """
+        outputs = Bunch(fsf_file=None)
+        return outputs
+
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        outputs.fsf_file = glob(os.path.abspath(os.path.join(os.getcwd(),'fixed*.fsf')))[0]
+        return outputs
+
+# satra: 2010-01-23
+class FeatRegister(Interface):
+    """Generate Feat specific files
+
+    See FixedEffectsModel().inputs_help() for more information.
+
+    Parameters
+    ----------
+    inputs : mapping
+    key, value pairs that will update the FixedEffectsModel.inputs attributes
+    see self.inputs_help() for a list of FixedEffectsModel.inputs attributes
+
+    Attributes
+    ----------
+    inputs : Bunch
+    a (dictionary-like) bunch of options that can be passed to
+    spm_smooth via a job structure
+    cmdline : string
+    string used to call matlab/spm via SpmMatlabCommandLine interface
+
+    Other Parameters
+    ----------------
+    To see optional arguments
+    FixedEffectsModel().inputs_help()
+
+    Examples
+    --------
+
+    """
+
+    def __init__(self, *args, **inputs):
+        self._populate_inputs()
+        self.inputs.update(**inputs)
+
+    @property
+    def cmd(self):
+        return 'feat_register'
+
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        return []
+
+    def inputs_help(self):
+        """
+        Parameters
+        ----------
+
+        feat_dirs : list of directory names
+            Lower level feat dirs
+        reg_image : file
+            image to register to (will be treated as standard)
+        reg_dof : int
+            registration degrees of freedom [ default : 12 ]
+        """
+        print self.inputs_help.__doc__
+
+    def _populate_inputs(self):
+        """ Initializes the input fields of this interface.
+        """
+        self.inputs = Bunch(feat_dirs=None,
+                            reg_image=None,
+                            reg_dof=12)
+
+    def run(self, cwd=None, **inputs):
+        if cwd is None:
+            cwd = os.getcwd()
+        self.inputs.update(inputs)
+        fsf_header = load_template('featreg_header.tcl')
+        fsf_footer = load_template('feat_nongui.tcl')
+        fsf_dirs = load_template('feat_fe_featdirs.tcl')
+
+        num_runs = len(filename_to_list(self.inputs.feat_dirs))
+        fsf_txt = fsf_header.substitute(num_runs=num_runs,
+                                        regimage=self.inputs.reg_image,
+                                        regdof=self.inputs.reg_dof)
+        for i, rundir in enumerate(filename_to_list(self.inputs.feat_dirs)):
+            fsf_txt += fsf_dirs.substitute(runno = i+1,
+                                           rundir = os.path.abspath(rundir))
+        f = open(os.path.join(cwd, 'register.fsf'), 'wt')
+        f.write(fsf_txt)
+        f.close()
+
+        runtime = Bunch(returncode=0,
+                        messages=None,
+                        errmessages=None)
+        outputs=self.aggregate_outputs()
+        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+
+    def outputs_help(self):
+        """
+        """
+        print self.outputs.__doc__
+
+    def outputs(self):
+        """Returns a bunch structure with outputs
+
+        Parameters
+        ----------
+        (all default to None and are unset)
+
+            fsf_file:
+                FSL feat specification file
+        """
+        outputs = Bunch(fsf_file=None)
+        return outputs
+
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        outputs.fsf_files = glob(os.path.abspath(os.path.join(os.getcwd(),'reg*.fsf')))
+        return outputs
+
 
 # interface to fsl command line higher level model fit
 # satra: 2010-01-09
@@ -3073,20 +3422,23 @@ class Fslmaths(FSLCommand):
                             suffix=None,      # ohinds: outfile suffix
                             outdatatype=None) # ohinds: change outdatatype
 
-    def _parse_inputs(self):
-        """validate fsl fslmaths options"""
-
+    def _get_outfile(self):
         suffix = '_maths' # ohinds: build suffix
         if self.inputs.suffix:
             suffix = self.inputs.suffix
+        return fsl_info.gen_fname(self.inputs.infile,
+                                  self.inputs.outfile,
+                                  suffix=suffix)
+    
+
+    def _parse_inputs(self):
+        """validate fsl fslmaths options"""
 
         # Add infile and outfile to the args if they are specified
         allargs=[]
         if self.inputs.infile:
             allargs.insert(0, list_to_filename(self.inputs.infile))
-            self.outfile = fsl_info.gen_fname(self.inputs.infile,
-                                              self.inputs.outfile,
-                                              suffix=suffix)
+            self.outfile = self._get_outfile()
         if self.inputs.optstring:
             allargs.insert(1, self.inputs.optstring)
 
@@ -3169,7 +3521,7 @@ class Fslmaths(FSLCommand):
 
         """
         outputs = self.outputs()
-        outputs.outfile = self.outfile
+        outputs.outfile = glob(self._get_outfile())[0]
         return outputs
 
 
