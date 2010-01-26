@@ -42,6 +42,11 @@ def scans_for_fname(fname):
     
     Opens images so will fail if they are not found
     """
+    if isinstance(fname,list):
+        scans = np.zeros((len(fname),),dtype=object)
+        for sno,f in enumerate(fname):
+            scans[sno] = '%s,1'%f
+        return scans
     img = load(fname)
     if len(img.get_shape()) == 3:
         return np.array(('%s,1'%fname,),dtype=object)
