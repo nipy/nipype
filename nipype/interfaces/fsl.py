@@ -1585,16 +1585,18 @@ class FSLmerge(FSLCommand):
                'outfile': None,
               }
 
-
+    def _get_outfile(self, cwd, check=False):
+        return fsl_info.gen_fname(self.inputs.infile[0],
+                                  self.inputs.outfile,
+                                  cwd=cwd,
+                                  suffix='_merged',
+                                  check=check)
+        
     def _parse_inputs(self):
-        outfile = self.inputs.outfile
-        if outfile is None:
-            outfile = fname_presuffix(self.inputs.infile[0], suffix='_merge',
-                                      newpath=os.getcwd())
-        return ['%s -kernel gauss %f -fmean %s' % (self.inputs.infile,
-                                            # ohinds: convert fwhm to stddev
-                                            self.inputs.fwhm/2.3548,
-                                            outfile)]
+        allargs =  [self.inputs.dimension,
+                    self._get_outfile(os.getcwd())]
+        allargs.extend(self.inputs.infile)
+        return allargs
 
     def outputs(self):
         """Returns a bunch structure with outputs
@@ -1603,9 +1605,9 @@ class FSLmerge(FSLCommand):
         ----------
         (all default to None and are unset)
 
-             smoothedimage
+             mergedimage
         """
-        outputs = Bunch(smoothedimage=None)
+        outputs = Bunch(mergedimage=None)
         return outputs
 
     def aggregate_outputs(self, cwd=None):
@@ -1613,10 +1615,7 @@ class FSLmerge(FSLCommand):
             cwd = os.getcwd()
 
         outputs = self.outputs()
-
-        outputs.smoothedimage = fsl_info.gen_fname(self.inputs.infile,
-                self.inputs.outfile, cwd=cwd, suffix='_smooth', check=True)
-
+        outputs.mergedimage = self._get_outfile(os.getcwd(), check=True)
         return outputs
 
 class Level1Design(Interface):
