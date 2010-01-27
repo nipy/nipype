@@ -1545,7 +1545,7 @@ class FSLSmooth(FSLCommand):
     def _parse_inputs(self):
         return [self.inputs.infile,
                 # ohinds: convert fwhm to stddev
-                '-kernel gauss', self.inputs.fwhm/2.3548, 
+                '-kernel gauss', str(self.inputs.fwhm/2.3548), 
                 '-fmean',
                 self._get_outfile(os.getcwd())]
 
@@ -1569,13 +1569,9 @@ class FSLSmooth(FSLCommand):
         return outputs
 
 class FSLmerge(FSLCommand):
-    '''Use fslmaths to smooth the image
-
-    This is dumb, of course - we should use nipy for such things! But it is a
-    step along the way to get the "standard" FSL pipeline in place.
-
-    This is meant to be a throwaway class, so it's not currently very robust.
-    Effort would be better spent integrating basic numpy into nipype'''
+    """Use fslmerge to concatenate images
+    """
+    
     @property
     def cmd(self):
         return 'fslmerge'
