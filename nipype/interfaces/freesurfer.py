@@ -1373,3 +1373,96 @@ class SegStats(FSLCommand):
     def aggregate_outputs(self):
         outputs = self.outputs()
         return outputs
+
+class Label2Vol(FSLCommand):
+    """Make a binary volume from a Freesurfer label
+
+    Parameters
+    ----------
+
+    To see optional arguments
+    Label2Vol().inputs_help()
+
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import Label2Vol
+    >>> binvol = Label2Vol(label='foo.label', templatevol='bar.nii', regmat='foo_reg.dat',fillthresh=0.5,outvol='foo_out.nii')
+    >>> binvol.cmdline
+    'mri_label2vol --i foo.nii --temp bar.nii --reg foo_reg.dat --fillthresh 0.5 --o foo_out.nii'
+    
+   """
+
+    @property
+    def cmd(self):
+        """sets base command, not editable"""
+        return 'mri_label2vol'
+
+
+    def inputs_help(self):
+        """Print command line documentation for mri_label2vol."""
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
+
+    opt_map = {'label': '--label %s',
+               'annotfile': '--annot %s',
+               'segpath': '--seg %s',
+               'aparc+aseg': '--aparc+aseg',
+               'templatevol': '--temp %s',
+               'regmat': '--reg %s',
+               'volid': '--regheader %s',
+               'identity': '--identity',
+               'invertmtx': '--invertmtx',
+               'fillthresh': '--fillthresh %f',
+               'voxvol': '--labvoxvol %s',
+               'proj': '--proj %s %f %f %f',
+               'subjectid': '--subject %s',
+               'hemi': '--hemi %s',
+               'outvol': '--o %s',
+               'hitvolid': '--hits %f',
+               'statvol': '--label-stat %s',
+               'native-vox2ras': '--native-vox2ras'
+               }
+    
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = [Bunch(key='infile',copy=False)]
+        return info
+
+    def _get_outfile(self):
+        outfile = self.inputs.outvol
+        if outfile is None:
+            outfile = fname_presuffix(self.inputs.label,
+                                      suffix='_vol.nii',
+                                      use_ext=False,
+                                      newpath=os.getcwd())
+        return outfile
+        
+    def _parse_inputs(self):
+        """validate fs mri_label2vol options"""
+        allargs = super(Label2Vol, self)._parse_inputs()
+
+        # Add infile and outfile to the args if they are specified
+        if not self.inputs.outvol and self.inputs.label:
+            allargs.extend(['--o', self._get_outfile()])
+        
+        return allargs
+    
+    def run(self, **inputs):
+        """Execute the command.
+        """
+        return super(Label2Vol, self).run()
+
+    def outputs(self):
+        """
+        outfile: filename
+              output file
+        """
+        outputs = Bunch(outfile=None)
+        return outputs
+
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        outputs.outfile = glob(self._get_outfile())[0]
+        return outputs
