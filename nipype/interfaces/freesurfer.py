@@ -1290,7 +1290,7 @@ class SegStats(FSLCommand):
                'ctab_default': '--ctab-default',
                'ctab_gca': '--ctab-gca',
                'segid': '--id %s',
-               'excludeid': '--exclueid %s',
+               'excludeid': '--excludeid %s',
                'excl_ctxgmwm': '--excl-ctxgmwm',
                'surf_wm_vol': '--surf-wm-vol',
                'surf_ctx_vol': '--surf-ctx-vol',
