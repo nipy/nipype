@@ -2,53 +2,58 @@
  Auto-generated filenames
 ==========================
 
-I'm trying to think through the different ways that filenames are
-generated and if the interface is consistent.  I'm working with
-fsl.Bet because I'm doing this while refactoring in the traitlets
-branch.  Other interface classes may handle this differently and I
-suspect some do.  We should agree on a convention.
+In refactoring the inputs in the traitlets branch I'm working through
+the different ways that filenames are generated and want to make sure
+the interface is consistent.  The notes below are all using fsl.Bet as
+that's the first class we're Traiting. Other interface classes may
+handle this differently, but should agree on a convention and apply it
+across all Interfaces (if possible).
 
 Current Rules
 -------------
 
-* Absolute paths for ``infile`` and ``outfile`` are respected when
-  specified.
-* If ``outfile`` is not specified, a filename is generated.
-* Generated filenames, for ``outfile``, are based on:
+At least what I can figure out for fsl.Bet.
 
-  1) ``infile``, the filename minus the extensions.
 
-  2) A suffix specified by the Interface. For example Bet uses
+1. Absolute paths for ``infile`` and ``outfile`` are respected when
+   specified.
+2. If ``outfile`` is not specified, a filename is generated.
+3. Generated filenames, for ``outfile``, are based on:
+
+  * ``infile``, the filename minus the extensions.
+
+  * A suffix specified by the Interface. For example Bet uses
     '_brain' suffix.
 
-  3) The current working directory, os.getcwd().
+  * The current working directory, os.getcwd().  Example:
 
-     * Example:
+    If ``infile`` == 'foo.nii' and the cwd is ``/home/cburns`` then
+    generated ``outfile`` for Bet will be
+    ``/home/cburns/foo_brain.nii.gz``
 
-     If ``infile`` == 'foo.nii' and the cwd is ``/home/cburns`` then
-     generated ``outfile`` for Bet will be
-     ``/home/cburns/foo_brain.nii.gz``
-
-* If ``outfile`` is not an absolute path, just a filename, the
-  absolute path is generated using ``os.path.realpath``. The generated
-  abspath is __not__ assigned to ``self.inputs.outfile``.
-* Assignments to ``infile`` and ``outfile`` through the initializer::
+4. If ``outfile`` is not an absolute path, just a filename, the
+   absolute path is generated using ``os.path.realpath``. The
+   generated abspath is __not__ assigned to ``self.inputs.outfile``,
+   it's only used in the ``cmdline`` at runtime.
+5. Assignments to ``infile`` and ``outfile`` through the initializer::
 
       btr = fsl.Bet(infile='foo.nii', outfile='bar.nii')
 
-  and through the inputs::
+   and through the inputs::
 
       btr = fsl.Bet()
       btr.inputs.infile = 'foo.nii'
       btr.inputs.outfile = 'bar.nii'
 
-  have the same behavior.
+   have the same behavior, as described in the above bullet points.
 
-* The ``run`` methods also accept ``infile`` and ``outfile``
-  parameters.  These assignments are handled differently then in the
-  above two use-cases.  Values passed in for ``infile`` and
-  ``outfile`` will overwrite ``self.inputs.infile`` and
-  ``self.inputs.outfile`` and used when running the command.
+6. The ``run`` method behaves differently then the above two
+   use-cases.  It also accept ``infile`` and ``outfile`` parameters.
+   Values passed in for ``infile`` and ``outfile`` will overwrite
+   ``self.inputs.infile`` and ``self.inputs.outfile`` and be used when
+   running the command.  Is this a BUG?  Should these params be
+   handled like in #4 above where they are used for the cmdline at
+   runtime, but do not update ``self.inputs``?
 
 
 Walking through some examples
@@ -73,7 +78,10 @@ generated in ``Bet._parse_inputs`` based on ``infile``.  The generated
     Out[19]: 'bet foo.nii /Users/cburns/src/nipy-sf/nipype/trunk/nipype/interfaces/tests/foo_brain.nii.gz'
 
     In [21]: mybet.inputs
-    Out[21]: Bunch(center=None, flags=None, frac=None, functional=None, infile='foo.nii', mask=None, mesh=None, nooutput=None, outfile=None, outline=None, radius=None, reduce_bias=None, skull=None, threshold=None, verbose=None, vertical_gradient=None)
+    Out[21]: Bunch(center=None, flags=None, frac=None, functional=None,
+    infile='foo.nii', mask=None, mesh=None, nooutput=None, outfile=None,
+    outline=None, radius=None, reduce_bias=None, skull=None, threshold=None,
+    verbose=None, vertical_gradient=None)
 
     In [24]: mybet.cmdline
     Out[24]: 'bet foo.nii /Users/cburns/src/nipy-sf/nipype/trunk/nipype/interfaces/tests/foo_brain.nii.gz'
@@ -94,7 +102,10 @@ We get the same behavior here when we assign ``infile`` at initialization:
     Out[29]: 'bet foo.nii /Users/cburns/src/nipy-sf/nipype/trunk/nipype/interfaces/tests/foo_brain.nii.gz'
 
     In [30]: mybet.inputs
-    Out[30]: Bunch(center=None, flags=None, frac=None, functional=None, infile='foo.nii', mask=None, mesh=None, nooutput=None, outfile=None, outline=None, radius=None, reduce_bias=None, skull=None, threshold=None, verbose=None, vertical_gradient=None)
+    Out[30]: Bunch(center=None, flags=None, frac=None, functional=None,
+    infile='foo.nii', mask=None, mesh=None, nooutput=None, outfile=None,
+    outline=None, radius=None, reduce_bias=None, skull=None, threshold=None,
+    verbose=None, vertical_gradient=None)
 
     In [31]: res = mybet.run()
 
@@ -146,27 +157,25 @@ case?
     Out[115]: 'bet foo.nii /Users/cburns/tmp/junk/not_bar.nii'
 
 
-
-
 In this case we provide ``outfile`` but not as an absolue path, so the
-absolue path is calculated and used for the ``cmdline`` when run, but
+absolue path is generated and used for the ``cmdline`` when run, but
 ``mybet.inputs.outfile`` is not updated with the absolute path.
 
 .. sourcecode:: ipython
 
-In [74]: mybet = fsl.Bet(infile='foo.nii', outfile='bar.nii')
+    In [74]: mybet = fsl.Bet(infile='foo.nii', outfile='bar.nii')
 
-In [75]: mybet.inputs.outfile
-Out[75]: 'bar.nii'
+    In [75]: mybet.inputs.outfile
+    Out[75]: 'bar.nii'
 
-In [76]: mybet.cmdline
-Out[76]: 'bet foo.nii /Users/cburns/src/nipy-sf/nipype/trunk/nipype/interfaces/tests/bar.nii'
+    In [76]: mybet.cmdline
+    Out[76]: 'bet foo.nii /Users/cburns/src/nipy-sf/nipype/trunk/nipype/interfaces/tests/bar.nii'
 
-In [77]: res = mybet.run()
+    In [77]: res = mybet.run()
 
-In [78]: res.runtime.cmdline
-Out[78]: 'bet foo.nii /Users/cburns/src/nipy-sf/nipype/trunk/nipype/interfaces/tests/bar.nii'
+    In [78]: res.runtime.cmdline
+    Out[78]: 'bet foo.nii /Users/cburns/src/nipy-sf/nipype/trunk/nipype/interfaces/tests/bar.nii'
 
-In [80]: res.interface.inputs.outfile
-Out[80]: 'bar.nii'
+    In [80]: res.interface.inputs.outfile
+    Out[80]: 'bar.nii'
 
