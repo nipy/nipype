@@ -2574,10 +2574,10 @@ class TwoSampleTTest(SpmMatlabCommandLine):
         script += "jobs{1}.stats{1}.factorial_design.dir  = {'%s'};\n" % cwd
         script += "jobs{1}.stats{1}.factorial_design.des.t2.scans1 = {};\n"
         for f in filename_to_list(self.inputs.images_group1):
-            script += "jobs{1}.stats{1}.factorial_design.des.t2.scans1{end+1} = '%s';\n" % f
+            script += "jobs{1}.stats{1}.factorial_design.des.t2.scans1{end+1,1} = '%s';\n" % f
         script += "jobs{1}.stats{1}.factorial_design.des.t2.scans2 = {};\n"
         for f in filename_to_list(self.inputs.images_group2):
-            script += "jobs{1}.stats{1}.factorial_design.des.t2.scans2{end+1} = '%s';\n" % f
+            script += "jobs{1}.stats{1}.factorial_design.des.t2.scans2{end+1,1} = '%s';\n" % f
         if self.inputs.dependent:
             script += "jobs{1}.stats{1}.factorial_design.des.t2.dept = %d;\n" % self.inputs.dependent
         if self.inputs.unequal_variance:
