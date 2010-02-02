@@ -58,6 +58,14 @@ outputs, it should be called the same thing in both places. If it is
 produced by one interface and consumed by another, same thing should
 be used.
 
+Discussions
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   filename_generation
+
 Dancing about Architecture
 --------------------------
 
