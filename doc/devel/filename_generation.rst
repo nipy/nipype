@@ -18,7 +18,7 @@ fsl and spm Interfaces.
 Bet has two mandatory parameters, ``infile`` and ``outfile``.  These
 are the rules for how they are handled in different use cases.
 
-1. If ``infile`` or ``outfile`` are absolute paths, they are uses
+1. If ``infile`` or ``outfile`` are absolute paths, they are used
    as-is and never changed.  This allows users to override any
    filename/path generation.
 
@@ -45,24 +45,6 @@ are the rules for how they are handled in different use cases.
    ``cmdline`` at runtime and does __not__ overwrite the class attr
    ``self.inputs.outfile``.  It is generated only when the ``cmdline``
    is invoked.
-
-5. Assignments to ``infile`` and ``outfile`` through the initializer::
-
-      btr = fsl.Bet(infile='foo.nii', outfile='bar.nii')
-
-   and through the inputs::
-
-      btr = fsl.Bet()
-      btr.inputs.infile = 'foo.nii'
-      btr.inputs.outfile = 'bar.nii'
-
-   have the same behavior, as described in the above bullet points.
-
-6. The ``run`` method also accepts ``infile`` and ``outfile``
-   parameters.  Values passed in for ``infile`` and ``outfile`` will
-   overwrite ``self.inputs.infile`` and ``self.inputs.outfile`` and be
-   used when running the command.  Should these parameters update the
-   ``self.inputs`` attributes?
 
 
 Walking through some examples
