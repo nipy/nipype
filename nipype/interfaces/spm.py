@@ -2578,10 +2578,10 @@ class TwoSampleTTest(SpmMatlabCommandLine):
         script += "jobs{1}.stats{1}.factorial_design.des.t2.scans2 = {};\n"
         for f in filename_to_list(self.inputs.images_group2):
             script += "jobs{1}.stats{1}.factorial_design.des.t2.scans2{end+1} = '%s';\n" % f
-        if self.inputs.independent:
-            script += "jobs{1}.stats{1}.factorial_design.des.t2.dept = %d;\n" % self.inputs.independent
-        if self.inputs.variance:
-            script += "jobs{1}.stats{1}.factorial_design.des.t2.variance = %d;\n" % self.inputs.variance
+        if self.inputs.dependent:
+            script += "jobs{1}.stats{1}.factorial_design.des.t2.dept = %d;\n" % self.inputs.dependent
+        if self.inputs.unequal_variance:
+            script += "jobs{1}.stats{1}.factorial_design.des.t2.variance = %d;\n" % self.inputs.unequal_variance
         (head,fname) = os.path.split(f)
         (conname,ext) = os.path.splitext(fname)
         script += "\n% Estimate Model;\n"
