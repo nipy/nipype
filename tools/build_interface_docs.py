@@ -28,6 +28,7 @@ if __name__ == '__main__':
                                        '\.interfaces\.base$',
                                        '\.interfaces\.matlab$',
                                        '\.interfaces\.rest$',
+                                       '\.interfaces\.pymvpa$',
                                        '\.pipeline\.alloy$',
                                        '\.pipeline\.s3_node_wrapper$',
                                        ]
