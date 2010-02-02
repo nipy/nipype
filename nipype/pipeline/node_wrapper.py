@@ -9,7 +9,8 @@ from shutil import rmtree
 from tempfile import mkdtemp
 
 from nipype.utils.filemanip import (copyfiles, fname_presuffix,
-                                    filename_to_list, list_to_filename)
+                                    filename_to_list, list_to_filename,
+                                    fnames_presuffix)
 from nipype.interfaces.base import Bunch, InterfaceResult, CommandLine
 from nipype.interfaces.fsl import FSLCommand
 from nipype.utils.filemanip import save_json
@@ -187,7 +188,7 @@ class NodeWrapper(object):
                 if hasattr(self._interface,'get_input_info'):
                     for info in self._interface.get_input_info():
                         files = self.inputs.get(info.key)
-                        if files is not None:
+                        if files is not None and not (self.iterfield and (info.key in self.iterfield or info.copy)):
                             infiles = filename_to_list(files)
                             newfiles = copyfiles(infiles, [outdir], copy=info.copy)
                             setattr(self.inputs, info.key, list_to_filename(newfiles))
@@ -215,7 +216,7 @@ class NodeWrapper(object):
                 if hasattr(self._interface,'get_input_info'):
                     for info in self._interface.get_input_info():
                         files = self.inputs.get(info.key)
-                        if files is not None:
+                        if files is not None and not (self.iterfield and (info.key in self.iterfield or info.copy)):
                             infiles = filename_to_list(files)
                             for i,f in enumerate(infiles):
                                 newfile = fname_presuffix(f, newpath=outdir)
@@ -260,15 +261,31 @@ class NodeWrapper(object):
                     os.chdir(subdir)
                     cwd = subdir
                     logger.debug("subdir: %s"%subdir)
-                for field in self.iterfield:
-                    newval = itervals[field][i]
-                    if self.disk_based:
-                        newval = list_to_filename(copyfiles(newval, [subdir],
-                                                            copy=False))
-                    self.set_input(field, newval)
-                    logger.debug("iterating %s on %s: %s\n"%(self.name,
-                                                             field,
-                                                             newval))
+
+                
+                if self.disk_based:
+                    info = None
+                    curvals = []
+                    for info in self._interface.get_input_info():
+                        files = self.inputs.get(info.key)
+                        if files is not None:
+                            if info.key in self.iterfield:
+                                infiles = filename_to_list(itervals[info.key][i])
+                                curvals.append(infiles)                           
+                            elif info.copy:                          
+                                infiles = filename_to_list(files)
+                            else:
+                                continue
+                            if execute:
+                                newfiles = copyfiles(infiles, [subdir], copy=info.copy)
+                                setattr(self.inputs, info.key, list_to_filename(newfiles))
+                            else:
+                                newfiles = fnames_presuffix(infiles, newpath=subdir)
+                                setattr(self.inputs, info.key, list_to_filename(newfiles))                           
+                                            
+                logger.debug("iterating %s on %s: %s\n"%(self.name,
+                                                         self.iterfield,
+                                                         curvals))
                 result = self._run_command(execute, cwd)
                 if execute:
                     self._result.interface.insert(i, result.interface)
