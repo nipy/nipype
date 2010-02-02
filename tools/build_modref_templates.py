@@ -18,6 +18,7 @@ if __name__ == '__main__':
     # Packages that should not be included in generated API docs.
     docwriter.package_skip_patterns += ['\.externals$',
                                         '\.utils$',
+                                        '\.interfaces\.gorlin_glue$',
                                         ]
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += ['\.version$',
