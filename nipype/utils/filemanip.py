@@ -122,9 +122,11 @@ def copyfile(originalfile, newfile, copy=False):
     None
     
     """
+    if os.path.lexists(newfile):
+        os.unlink(newfile)
+        #TODO: use logging
+        print "File: %s already exists, overwriting with %s, copy:%d"%(newfile, originalfile, copy)
     if os.name is 'posix' and not copy:
-        if os.path.lexists(newfile):
-            os.unlink(newfile)
         os.symlink(originalfile,newfile)
     else:
         #print "copying %s to %s"%(originalfile,newfile)
