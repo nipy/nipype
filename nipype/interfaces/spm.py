@@ -2566,10 +2566,10 @@ class TwoSampleTTest(SpmMatlabCommandLine):
         script += "% Setup Design;\n"
         script += "jobs{1}.stats{1}.factorial_design.dir  = {'%s'};\n" % cwd
         script += "jobs{1}.stats{1}.factorial_design.des.t2.scans1 = {};\n"
-        for f in filename_to_list(self.inputs.group_images1):
+        for f in filename_to_list(self.inputs.images_group1):
             script += "jobs{1}.stats{1}.factorial_design.des.t2.scans1{end+1} = '%s';\n" % f
         script += "jobs{1}.stats{1}.factorial_design.des.t2.scans2 = {};\n"
-        for f in filename_to_list(self.inputs.group_images2):
+        for f in filename_to_list(self.inputs.images_group2):
             script += "jobs{1}.stats{1}.factorial_design.des.t2.scans2{end+1} = '%s';\n" % f
         if self.inputs.independent:
             script += "jobs{1}.stats{1}.factorial_design.des.t2.dept = %d;\n" % self.inputs.independent
