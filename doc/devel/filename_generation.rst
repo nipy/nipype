@@ -12,18 +12,24 @@ across all Interfaces (if possible).
 Current Rules
 -------------
 
-At least what I can figure out for fsl.Bet.
+These rules are for fsl.Bet, but it appears they are the same for all
+fsl and spm Interfaces.
 
+Bet has two mandatory parameters, ``infile`` and ``outfile``.  These
+are the rules for how they are handled in different use cases.
 
-1. Absolute paths for ``infile`` and ``outfile`` are respected when
-   specified.
+1. If ``infile`` or ``outfile`` are absolute paths, they are uses
+   as-is and never changed.  This allows users to override any
+   filename/path generation.
+
 2. If ``outfile`` is not specified, a filename is generated.
-3. Generated filenames, for ``outfile``, are based on:
+
+3. Generated filenames (at least for ``outfile``) are based on:
 
   * ``infile``, the filename minus the extensions.
 
   * A suffix specified by the Interface. For example Bet uses
-    '_brain' suffix.
+    *_brain* suffix.
 
   * The current working directory, os.getcwd().  Example:
 
@@ -31,10 +37,15 @@ At least what I can figure out for fsl.Bet.
     generated ``outfile`` for Bet will be
     ``/home/cburns/foo_brain.nii.gz``
 
-4. If ``outfile`` is not an absolute path, just a filename, the
-   absolute path is generated using ``os.path.realpath``. The
-   generated abspath is __not__ assigned to ``self.inputs.outfile``,
-   it's only used in the ``cmdline`` at runtime.
+4. If ``outfile`` is not an absolute path, for instance just a
+   filename, the absolute path is generated using
+   ``os.path.realpath``. This absolute path is needed to make sure the
+   packages (Bet in this case) write the output file to a location of
+   our choosing.  The generated absolute path is only used in the
+   ``cmdline`` at runtime and does __not__ overwrite the class attr
+   ``self.inputs.outfile``.  It is generated only when the ``cmdline``
+   is invoked.
+
 5. Assignments to ``infile`` and ``outfile`` through the initializer::
 
       btr = fsl.Bet(infile='foo.nii', outfile='bar.nii')
@@ -47,13 +58,11 @@ At least what I can figure out for fsl.Bet.
 
    have the same behavior, as described in the above bullet points.
 
-6. The ``run`` method behaves differently then the above two
-   use-cases.  It also accept ``infile`` and ``outfile`` parameters.
-   Values passed in for ``infile`` and ``outfile`` will overwrite
-   ``self.inputs.infile`` and ``self.inputs.outfile`` and be used when
-   running the command.  Is this a BUG?  Should these params be
-   handled like in #4 above where they are used for the cmdline at
-   runtime, but do not update ``self.inputs``?
+6. The ``run`` method also accepts ``infile`` and ``outfile``
+   parameters.  Values passed in for ``infile`` and ``outfile`` will
+   overwrite ``self.inputs.infile`` and ``self.inputs.outfile`` and be
+   used when running the command.  Should these parameters update the
+   ``self.inputs`` attributes?
 
 
 Walking through some examples
