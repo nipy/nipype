@@ -374,7 +374,7 @@ def test_bedpostx():
     
 # test eddy_correct
 def test_eddy_correct():
-    eddy = fsl.Eddy_correct()
+    eddy = fsl.EddyCorrect()
 
     # make sure command gets called
     yield assert_equal, eddy.cmd, 'eddy_correct'
@@ -389,10 +389,10 @@ def test_eddy_correct():
     yield assert_equal, eddy.cmdline, 'eddy_correct foo.nii foo_eddc.nii 100'
 
     # .run based parameter setting
-    eddy2 = fsl.Eddy_correct(infile='foo',outfile='foo_eddc',reference_vol=20)
+    eddy2 = fsl.EddyCorrect(infile='foo',outfile='foo_eddc',reference_vol=20)
     yield assert_equal, eddy2.cmdline, 'eddy_correct foo foo_eddc 20'
 
-    eddy3 = fsl.Eddy_correct()
+    eddy3 = fsl.EddyCorrect()
     results=eddy3.run(infile='foo',outfile='foo_eddc',reference_vol=10)
     yield assert_equal, results.interface.inputs.infile, 'foo'
     yield assert_equal, results.interface.inputs.outfile, 'foo_eddc'
@@ -460,7 +460,7 @@ def test_dtifit():
     
 
 def test_fslroi():
-    roi = fsl.Fslroi()
+    roi = fsl.ExtractRoi()
 
     # make sure command gets called
     yield assert_equal, roi.cmd, 'fslroi'
@@ -477,7 +477,7 @@ def test_fslroi():
         os.path.join(os.getcwd(),'foo_roi.nii')
 
     # .run based parameter setting
-    roi2 = fsl.Fslroi(infile='foo2',
+    roi2 = fsl.ExtractRoi(infile='foo2',
                       outfile='foo2_roi',
                       tmin=20,tsize=40,
                       xmin=3,xsize=30,
@@ -487,7 +487,7 @@ def test_fslroi():
           'fslroi foo2 %s 3 30 40 10 5 20 20 40' % \
           os.path.join(os.getcwd(),'foo2_roi')
 
-    roi3 = fsl.Fslroi()
+    roi3 = fsl.ExtractRoi()
     results=roi3.run(infile='foo3',
                      outfile='foo3_roi',
                      xmin=3,xsize=30,
@@ -512,7 +512,7 @@ def test_fslroi():
     
 # test fslmath 
 def test_fslmaths():
-    math = fsl.Fslmaths()
+    math = fsl.ImageMaths()
 
     # make sure command gets called
     yield assert_equal, math.cmd, 'fslmaths'
@@ -527,10 +527,10 @@ def test_fslmaths():
     yield assert_equal, math.cmdline, 'fslmaths foo.nii -add 2.5 -mul input_volume2 '+os.getcwd()+'/foo_math.nii'
 
     # .run based parameter setting
-    math2 = fsl.Fslmaths(infile='foo2',optstring='-add 2.5',outfile='foo2_math')
+    math2 = fsl.ImageMaths(infile='foo2',optstring='-add 2.5',outfile='foo2_math')
     yield assert_equal, math2.cmdline, 'fslmaths foo2 -add 2.5 '+os.getcwd()+'/foo2_math'
 
-    math3 = fsl.Fslmaths()
+    math3 = fsl.ImageMaths()
     results=math3.run(infile='foo',outfile='foo_math',optstring='-add input_volume2')
     yield assert_not_equal, results.runtime.returncode, 0
     yield assert_equal, results.interface.inputs.infile, 'foo'
