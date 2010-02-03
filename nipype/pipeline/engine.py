@@ -653,7 +653,7 @@ class Pipeline(object):
             nodeidx = ids.index(nodeid)
             paramstr = ''
             for key,val in sorted(params.items()):
-                paramstr = '_'.join((paramstr, key, str(val)))
+                paramstr = '_'.join((paramstr, key, str(val).replace(os.sep,'_')))
                 setattr(Gc.nodes()[nodeidx].inputs, key, val)
             for n in Gc.nodes():
                 """
