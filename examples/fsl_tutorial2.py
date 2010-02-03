@@ -58,13 +58,13 @@ fsl.fsl_info.outputtype('NIFTI_GZ')
 # The following lines create some information about location of your
 # data. 
 data_dir = os.path.abspath('data')
-subject_list = ['s1', 's3']
+subject_list = ['s1']#, 's3']
 # The following info structure helps the DataSource module organize
 # nifti files into fields/attributes of a data object. With DataSource
 # this object is of type Bunch.
 info = {}
-info['s1'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'),(['ref'],'func_ref'))
-info['s3'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'),(['ref'],'func_ref'))
+info['s1'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'))#,(['ref'],'func_ref'))
+info['s3'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'))#,(['ref'],'func_ref'))
 
 ######################################################################
 # Setup preprocessing pipeline nodes
@@ -103,41 +103,44 @@ datasource.iterables = dict(subject_id=lambda:subject_list)
 
 ## from the FLIRT web doc
 
+extract_ref = nw.NodeWrapper(interface=fsl.ExtractRoi(tmin=42,
+                                                      tsize=1),
+                             name = 'middlevol.fsl',
+                             diskbased=True)
 # run FSL's bet
 # bet my_structural my_betted_structural
 skullstrip = nw.NodeWrapper(interface=fsl.Bet(mask = True,
                                               frac = 0.34),
+                            name = 'struct_bet.fsl',
                             diskbased=True)
 
 # Preprocess functionals
 motion_correct = nw.NodeWrapper(interface=fsl.McFlirt(saveplots = True),
+                                name='mcflirt.fsl',
                                 diskbased=True)
 motion_correct.iterfield = ['infile']
 
 func_skullstrip = nw.NodeWrapper(interface=fsl.Bet(functional = True),
                                  diskbased=True,
-                                 name='func_Bet.fsl')
+                                 name='func_bet.fsl')
 func_skullstrip.iterfield = ['infile']
-
-ref_skullstrip = nw.NodeWrapper(interface=fsl.Bet(), diskbased=True,
-                                name='ref_Bet.fsl')
-ref_skullstrip.inputs.update(functional = True)
 
 
 # Finally do some smoothing!
 
-smoothing = nw.NodeWrapper(interface=fsl.FSLSmooth(), diskbased=True)
+smoothing = nw.NodeWrapper(interface=fsl.Smooth(), diskbased=True)
 smoothing.iterfield = ['infile']
 smoothing.inputs.fwhm = 5
 
-inorm = nw.NodeWrapper(interface = fsl.Fslmaths(optstring = '-inm 10000',
+inorm = nw.NodeWrapper(interface = fsl.ImageMaths(optstring = '-inm 10000',
                                                 suffix = '_inm',
                                                 outdatatype = 'float'),
                        name = 'inorm.fsl',
                        diskbased            = True)
 inorm.iterfield = ['infile']
 
-hpfilter = nw.NodeWrapper(interface=fsl.Fslmaths(),
+hpfilter = nw.NodeWrapper(interface=fsl.ImageMaths(),
+                          name='highpass.fsl',
                           diskbased=True)
 hpcutoff = 120
 TR = 3.
@@ -245,24 +248,25 @@ l1pipeline = pe.Pipeline()
 l1pipeline.config['workdir'] = os.path.abspath('./fsl/workingdir')
 l1pipeline.config['use_parameterized_dirs'] = True
 
+def pickfirst(files):
+    return files[0]
+
 l1pipeline.connect([# preprocessing in native space
-                 (datasource, skullstrip,[('struct','infile')]),
-                 (datasource, motion_correct, 
-                     [('func', 'infile'), ('func_ref', 'reffile')]),
-                 (motion_correct, func_skullstrip,
-                     [('outfile', 'infile')]),
-                 (datasource, ref_skullstrip, [('func_ref', 'infile')]),
+                 (datasource, skullstrip, [('struct','infile')]),
+                 (datasource, motion_correct, [('func', 'infile')]),
+                 (datasource, extract_ref, [(('func', pickfirst), 'infile')]),
+                 (extract_ref, motion_correct,[('outfile', 'reffile')]),
+                 (motion_correct, func_skullstrip, [('outfile', 'infile')]),
                  # Smooth :\
                  (func_skullstrip, smoothing, [('outfile', 'infile')]),
-                 # Model design
-                 (datasource,modelspec,[('subject_id','subject_id'),
-                                        (('subject_id',subjectinfo),'subject_info_func')]),
-                 (motion_correct,modelspec,[('parfile','realignment_parameters')]),
                  #(smoothing,inorm,[('smoothedimage','infile')]),
                  #(inorm,hpfilter,[('outfile','infile')]),
                  (smoothing,hpfilter,[('smoothedimage','infile')]),
+                 # Model design
                  (hpfilter,modelspec,[('outfile','functional_runs')]),
-                 #(skullstrip,level1design,[('outfile','reg_image')]),
+                 (datasource,modelspec,[('subject_id','subject_id'),
+                                        (('subject_id',subjectinfo),'subject_info_func')]),
+                 (motion_correct,modelspec,[('parfile','realignment_parameters')]),
                  (modelspec,level1design,[('session_info','session_info')]),
                  (level1design,featmodel,[('fsf_files','fsf_file')]),
                  (featmodel,fedesign,[('featdir','feat_dirs')]),

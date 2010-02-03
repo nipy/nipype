@@ -1517,7 +1517,7 @@ class ApplyWarp(FSLCommand):
 
         return outputs
 
-class FSLSmooth(FSLCommand):
+class Smooth(FSLCommand):
     '''Use fslmaths to smooth the image
 
     This is dumb, of course - we should use nipy for such things! But it is a
@@ -1568,7 +1568,7 @@ class FSLSmooth(FSLCommand):
         outputs.smoothedimage = self._get_outfile(cwd, check=True)
         return outputs
 
-class FSLmerge(FSLCommand):
+class Merge(FSLCommand):
     """Use fslmerge to concatenate images
     """
     
@@ -2862,7 +2862,7 @@ class ContrastMgr(FSLCommand):
         return outputs
 
 
-class Fslroi(FSLCommand):
+class ExtractRoi(FSLCommand):
     """Uses FSL Fslroi command to extract region of interest (ROI) from an image.
     You can a) take a 3D ROI from a 3D data set (or if it is 4D, the same ROI is taken
     from each time point and a new 4D data set is created), b) extract just some
@@ -3092,7 +3092,7 @@ class Split(FSLCommand):
         outputs.outfiles = sorted(glob(os.path.join(cwd,'vol*.' + ext)))
         return outputs
 
-class Eddy_correct(FSLCommand):
+class EddyCorrect(FSLCommand):
     """Use FSL eddy_correct command for correction of eddy current distortion
     """
     opt_map ={}
@@ -3544,7 +3544,7 @@ class Dtifit(FSLCommand):
 
 #--------------------------------------------------------------------------------------------------------------
 
-class Fslmaths(FSLCommand):
+class ImageMaths(FSLCommand):
     """
         Use FSL fslmaths command to allow mathematical manipulation of images
     """
