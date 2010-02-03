@@ -300,9 +300,9 @@ class NodeWrapper(object):
                 if files:
                     infiles = filename_to_list(files)
                     if execute:
-                        newfiles = copyfiles(infiles, [subdir], copy=info.copy)
+                        newfiles = copyfiles(infiles, [outdir], copy=info.copy)
                     else:
-                        newfiles = fnames_presuffix(infiles, newpath=subdir)
+                        newfiles = fnames_presuffix(infiles, newpath=outdir)
                     if not isinstance(files, list):
                         newfiles = list_to_filename(newfiles)
                     setattr(self.inputs, info.key, newfiles)
