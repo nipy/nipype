@@ -13,8 +13,11 @@ import logging
 import logging.handlers
 from traceback import format_tb
 
-import networkx as nx
 import numpy as np
+
+from nipype.utils.misc import package_check
+package_check('networkx', '1.0')
+import networkx as nx
 
 from nipype.interfaces.base import CommandLine
 from nipype.utils.filemanip import fname_presuffix
