@@ -56,22 +56,28 @@ def container_to_string(cont):
 
 # Dependency checks.  Copied this from Nipy, with some modificiations
 # (added app as a parameter).
-def package_check(pkg_name, version=None, app=None, checker=LooseVersion):
+def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
+                  exc_failed_import=ImportError,
+                  exc_failed_check=RuntimeError):
     """Check that the minimal version of the required package is installed.
 
     Parameters
     ----------
     pkg_name : string
         Name of the required package.
-    version : string
+    version : string, optional
         Minimal version number for required package.
-    app : string
+    app : string, optional
         Application that is performing the check.  For instance, the
         name of the tutorial being executed that depends on specific
         packages.  Default is *Nipype*.
-    checker : object
+    checker : object, optional
         The class that will perform the version checking.  Default is
         distutils.version.LooseVersion.
+    exc_failed_import : Exception, optional
+        Class of the exception to be thrown if import failed.
+    exc_failed_check : Exception, optional
+        Class of the exception to be thrown if version check failed.
 
     Examples
     --------
@@ -84,17 +90,19 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion):
         msg = '%s requires %s' % (app, pkg_name)
     else:
         msg = 'Nipype requires %s' % pkg_name
+    if version:
+      msg += ' with version >= %s' % (version,)
     try:
         mod = __import__(pkg_name)
     except ImportError:
-        raise ImportError(msg)
+        raise exc_failed_import(msg)
     if not version:
         return
     msg += ' >= %s' % version
     try:
         have_version = mod.__version__
     except AttributeError:
-        raise RuntimeError('Cannot find version for %s' % pkg_name)
+        raise exc_failed_check('Cannot find version for %s' % pkg_name)
     if checker(have_version) < checker(version):
-        raise RuntimeError(msg)
+        raise exc_failed_check(msg)
 
