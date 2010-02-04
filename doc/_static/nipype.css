@@ -2,6 +2,7 @@
 
 body {
     background-color: #E5E2E2;
+    min-width: 70em;
 }
 
 div.sphinxsidebar h4, div.sphinxsidebar h3 {
