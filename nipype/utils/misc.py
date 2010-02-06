@@ -98,7 +98,6 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
         raise exc_failed_import(msg)
     if not version:
         return
-    msg += ' >= %s' % version
     try:
         have_version = mod.__version__
     except AttributeError:
