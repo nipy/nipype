@@ -75,6 +75,46 @@ Milestone 0.3
   these inputs ... got back these outputs ...".  Not exactly like
   that, but would contain that information.
 
+* doc cleanup:
+
+  * fix all tutorials
+
+  * new documentation for pipeline creation, execution and debugging
+
+Functional changes
+~~~~~~~~~~~~~~~~~~
+
+* extract spm field props limits from spm_config
+
+* add utility nodes to pipeline (combine, split, select)
+
+* add regression tests
+
+* finish pymvpa functionality
+
+* clean iterable specification blah.iterables = [(fieldname1, list1),
+  (fieldname2, list2), ...]
+
+* ability to attach pipelines
+
+* ability to run arbitrary interface code from urls
+
+Structural changes
+~~~~~~~~~~~~~~~~~~
+
+* split fsl/spm/freesurfer into multiple files:
+
+  * preprocessing
+  * model spec/estimate/analysis
+  * dti
+  * utils
+
+* repository for people to dump interfaces
+
+* split input/output spec into separate files 
+
+* ease of install (what's our requirements)
+
 
 Somewhere in the future
 -----------------------
