@@ -129,7 +129,7 @@ Structural changes
   * dti
   * utils
 
-This still
+This still exposes fsl.Smooth as fsl.Smooth instead of fsl.preproc.Smooth.
 
 Administrative changes
 ~~~~~~~~~~~~~~~~~~~~~~
