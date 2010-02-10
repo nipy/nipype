@@ -154,7 +154,7 @@ class DicomDirInfo(FSLCommand):
             allargs.extend(['--o', self._get_outfile_name()])
         return allargs
     
-    def run(self, dicomdir=None, cwd=None, **inputs):
+    def run(self, dicomdir=None, **inputs):
         """Execute the command.
         """
         if dicomdir:
@@ -162,8 +162,6 @@ class DicomDirInfo(FSLCommand):
         if not self.inputs.dicomdir:
             raise AttributeError('DicomDirInfo requires a dicomdir input')
         self.inputs.update(**inputs)
-        if cwd:
-            os.chdir(cwd)
         return super(DicomDirInfo, self).run()
 
     def outputs(self):
