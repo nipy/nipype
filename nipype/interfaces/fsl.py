@@ -269,6 +269,13 @@ class FSLCommand(CommandLine):
                 continue
             try:
                 argstr = self.opt_map[opt]
+                if is_container(argstr):
+                    # The value in opt_map may be a tuple whose first
+                    # element is the format string and second element
+                    # a one-line docstring.  This docstring will
+                    # become the desc field in the traited version of
+                    # the code.
+                    argstr = argstr[0]
                 if argstr.find('%') == -1:
                     # Boolean options have no format string.  Just
                     # append options if True.
@@ -1074,7 +1081,8 @@ class McFlirt(FSLCommand):
         if self.inputs.infile:
             infile = list_to_filename(self.inputs.infile)
             allargs.insert(0,'-in %s'%infile)
-            outfile = fsl_info.gen_fname(infile, self.inputs.outfile, suffix='_mcf')
+            outfile = fsl_info.gen_fname(infile, self.inputs.outfile,
+                                         suffix='_mcf')
             allargs.append(self.opt_map['outfile'] % outfile)
         
         return allargs
@@ -3051,12 +3059,12 @@ class Bedpostx(FSLCommand):
     """
 
     opt_map = {
-        'fibres':               '-n %d',
-        'weight':               '-w %.2f',
-        'burn_period':          '-b %d',
-        'jumps':                '-j %d',
-        'sampling':             '-s %d'}
-
+        'fibres':               ('-n %d', 'number of fibres per voxel'),
+        'weight':               ('-w %.2f', 'ARD weight'),
+        'burn_period':          ('-b %d', 'burnin period'),
+        'jumps':                ('-j %d', 'number of jumps'),
+        'sampling':             ('-s %d', 'sampling interval'),
+                                 }
     @property
     def cmd(self):
         """sets base command, immutable"""

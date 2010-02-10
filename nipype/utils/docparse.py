@@ -13,6 +13,7 @@ docstring = docparse.get_doc(better.cmd, better.opt_map)
 
 import subprocess
 from nipype.interfaces.base import CommandLine, Bunch
+from nipype.utils.misc import is_container
 
 def grab_doc(cmd, trap_error=True):
     """Run cmd without args and grab documentation.
@@ -67,8 +68,16 @@ def reverse_opt_map(opt_map):
     # strips off the string format characters.
     # if (k != 'flags' and v) , key must not be flags as it is generic,
     # v must not be None or it cannot be parsed by this line
-    return dict((v.split()[0], k) for k, v in opt_map.iteritems()
-                if (k != 'flags' and v))
+    revdict = {}
+    for key, value in opt_map.iteritems():
+        if is_container(value):
+            # The value is a tuple where the first element is the
+            # format string and the second element is a docstring.
+            value = value[0]
+        if (key != 'flags' and value is not None):
+            revdict[value.split()[0]] = key
+    return revdict
+
 
 def format_params(paramlist, otherlist=None):
     """Format the parameters according to the nipy style conventions.

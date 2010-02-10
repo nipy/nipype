@@ -22,6 +22,8 @@ import os
 import re
 import sys
 
+from nipype.utils.misc import is_container
+
 # Functions and classes
 class InterfaceHelpWriter(object):
     ''' Class for automatic detection and parsing of API docs
@@ -246,14 +248,28 @@ class InterfaceHelpWriter(object):
             ad += '\n:class:`' + c + '`\n' \
                   + self.rst_section_levels[2] * \
                   (len(c)+9) + '\n\n'
-            print uri
             __import__(uri)
             classinst = sys.modules[uri].__dict__[c]()
             helpstr = None
-            for i,v in sorted(classinst.inputs.iteritems()):
+            print 'Generating inputs/outputs doc for:', uri, \
+                classinst.__class__.__name__
+            if hasattr(classinst, 'opt_map') and len(classinst.opt_map):
+                # If the class has an opt_map, use that so we can grab
+                # any docstrings from it. Otherwise use the inputs.
+                iterator = classinst.opt_map.iteritems
+            else:
+                iterator = classinst.inputs.iteritems
+            for i,v in sorted(iterator()):
                 if not helpstr:
                     helpstr = 'Inputs:: \n\n\t'
-                helpstr +=  i + '\n\t'
+                helpstr +=  i
+                if is_container(v) and isinstance(v[1], str):
+                    # Handle cases where we've added a docstring to
+                    # the opt_map.  The value is then a tuple where
+                    # the first element is the format string and the
+                    # second element is the docstring.
+                    helpstr += ' : ' + v[1]
+                helpstr += '\n\t'
             if [i for i,v in classinst.outputs().iteritems()]:
                 helpstr += '\nOutputs:: \n\n\t'
                 for i,v in sorted(classinst.outputs().iteritems()):
