@@ -282,6 +282,7 @@ class NodeWrapper(object):
             logger.info('Executing node')
             result = self._interface.run(cwd=cwd)
             if result.runtime.returncode:
+                logger.error(result.runtime.stderr)
                 raise RuntimeError(result.runtime.stderr)
         else:
             # Likewise, cwd could go in here
