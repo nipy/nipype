@@ -1151,7 +1151,7 @@ class Concatenate(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces.freesurfer import Concatenate
-    >>> concat = Concatenate(infile='foo.nii', mean=True, outfile='foo_out.nii')
+    >>> concat = Concatenate(invol='foo.nii', mean=True, outfile='foo_out.nii')
     >>> concat.cmdline
     'mri_concat --mean --o foo_out.nii --i foo.nii'
     
@@ -1216,7 +1216,7 @@ class Concatenate(FSLCommand):
         """validate fs mri_concat options"""
         allargs = super(Concatenate, self)._parse_inputs(skip=('invol'))
 
-        # Add infile and outfile to the args if they are specified
+        # Add invol and outvol to the args if they are specified
         for f in filename_to_list(self.inputs.invol):
             allargs.extend(['--i', f])
         if not self.inputs.outvol and self.inputs.invol:
@@ -1315,14 +1315,14 @@ class SegStats(FSLCommand):
         """ Provides information about inputs as a dict
             info = [Bunch(key=string,copy=bool,ext='.nii'),...]
         """
-        info = [Bunch(key='infile',copy=False)]
+        info = [Bunch(key='invol',copy=False)]
         return info
     
     def _parse_inputs(self):
         """validate fs mri_segstats options"""
         allargs = super(SegStats, self)._parse_inputs(skip=('sumfile','segid','avgwftxt','avgwfvol'))
 
-        # Add infile and outfile to the args if they are specified
+        # Add invol to the args if they are specified
         if self.inputs.segid:
             if isinstance(self.inputs.segid,list):
                 for id in self.inputs.segid:
