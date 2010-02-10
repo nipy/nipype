@@ -306,7 +306,8 @@ class Pipeline(object):
             Indicates whether to show the edge data on the graph. This
             makes the graph rather cluttered. default [False]
         """
-        if self._execgraph and use_execgraph:
+        if use_execgraph:
+            self._generate_expanded_graph()
             S = deepcopy(self._execgraph)
             logger.debug('using execgraph')
         else:
