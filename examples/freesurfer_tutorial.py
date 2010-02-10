@@ -412,9 +412,9 @@ def sort(inputvals):
     
 l2pipeline = pe.Pipeline()
 l2pipeline.config['workdir'] = os.path.abspath('./surf/l2output')
-l2pipeline.connect([(l2source,l2concat,[(('file_list',sort),'conimages'),
+l2pipeline.connect([(l2source,l2concat,[(('file_list',sort),'volimages'),
                                         (('file_list',getconname),'outprefix')]),
-                    (l2regsource,l2concat,[(('file_list',sort),'regs')]),
+                    (l2regsource,l2concat,[(('file_list',sort),'volregs')]),
                     (l2concat,onesamplettest,[('outfile','funcimage'),
                                               (('outfile',gethemi),'hemi')]),
                     ])

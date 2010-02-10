@@ -979,7 +979,8 @@ class SurfConcat(FSLCommand):
             outputs.outfile = outfile[0]
         return outputs
 
-class OneSampleTTest(FSLCommand):
+    
+class GlmFit(FSLCommand):
     """Use FreeSurfer mri_glmfit to prepare a group of contrasts for
     a second level analysis
     
@@ -1007,7 +1008,6 @@ class OneSampleTTest(FSLCommand):
         'surf':               '--surf %s',
         'hemi':               '%s',
         'outdir':             '--glmdir %s',
-        'outdirprefix':       None,
         'funcimage':          '--y %s',
         'onesample':          '--osgm',
         'design':             '--X %s',
@@ -1016,7 +1016,7 @@ class OneSampleTTest(FSLCommand):
 
     def _parse_inputs(self):
         """validate fs onesamplettest options"""
-        allargs = super(OneSampleTTest, self)._parse_inputs(skip=('surf','hemi','outdir','outdirprefix',))
+        allargs = super(GlmFit, self)._parse_inputs(skip=('surf','hemi','outdir',))
 
         # Add outfile to the args if not specified
         allargs.extend(['--surf',self.inputs.surf,self.inputs.hemi])
@@ -1028,7 +1028,7 @@ class OneSampleTTest(FSLCommand):
     def run(self, **inputs):
         """Execute the command.
         """
-        return super(OneSampleTTest, self).run()
+        return super(GlmFit, self).run()
 
     def outputs(self):
         """
@@ -1038,6 +1038,14 @@ class OneSampleTTest(FSLCommand):
     def aggregate_outputs(self):
         return self.outputs()
         
+class OneSampleTTest(GlmFit):
+    opt_map = {
+        'surf':               '--surf %s',
+        'hemi':               '%s',
+        'outdir':             '--glmdir %s',
+        'funcimage':          '--y %s',
+        'onesample':          '--osgm',
+        'flags':              '%s'}
 
 class Threshold(FSLCommand):
     """Use FreeSurfer mri_binarize to threshold an input volume
