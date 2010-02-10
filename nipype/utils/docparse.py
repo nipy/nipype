@@ -108,6 +108,7 @@ def format_params(paramlist, otherlist=None):
     paramlist.insert(0, hdr)
     params = '\n'.join(paramlist)
     otherparams = []
+    doc = ''.join(params)
     if otherlist:
         hdr = 'Others Parameters'
         delim = '-----------------'
@@ -115,7 +116,8 @@ def format_params(paramlist, otherlist=None):
         otherlist.insert(0, hdr)
         otherlist.insert(0, '\n')
         otherparams = '\n'.join(otherlist)
-    return ''.join([params, otherparams])
+        doc = ''.join([doc, otherparams])
+    return doc
 
 def insert_doc(doc, new_items):
     """Insert ``new_items`` into the beginning of the ``doc``
