@@ -185,13 +185,13 @@ def test_flirt():
 
 def test_applyxfm():
     # ApplyXFM subclasses Flirt.
-    flt = fsl.ApplyXFM(infile='subj.nii', inmatrix='xfm.mat', 
+    flt = fsl.ApplyXfm(infile='subj.nii', inmatrix='xfm.mat', 
                        outfile='xfm_subj.nii', reference='mni152.nii')
     flted = flt.run()
     yield assert_equal, flt.cmdline, \
         'flirt -in subj.nii -ref mni152.nii -init xfm.mat ' \
         '-applyxfm -out xfm_subj.nii'
-    flt = fsl.ApplyXFM()
+    flt = fsl.ApplyXfm()
     yield assert_raises, AttributeError, flt.run
     flt.inputs.infile = 'subj.nii'
     flt.inputs.outfile = 'xfm_subj.nii'
@@ -573,7 +573,9 @@ def test_tbss_1_preproc():
 def test_tbss_2_reg():
     
     tbss2 = fsl.Tbss2reg()
+    cwd = os.getcwd()
     tbssDir = tempfile.mkdtemp()
+    os.chdir(tbssDir)
 
     # make sure command gets called
     yield assert_equal, tbss2.cmd, 'tbss_2_reg'
@@ -593,7 +595,7 @@ def test_tbss_2_reg():
     yield assert_equal, tbss222.cmdline,'tbss_2_reg -n'
 
     tbss21 = fsl.Tbss2reg()
-    results = tbss21.run(FMRIB58_FA_1mm=True,noseTest=True,cwd=tbssDir)
+    results = tbss21.run(FMRIB58_FA_1mm=True,noseTest=True)
     yield assert_equal, results.runtime.cmdline, 'tbss_2_reg -T'
     
     # test arguments for opt_map
@@ -606,6 +608,7 @@ def test_tbss_2_reg():
         yield assert_equal, tbss.cmdline, tbss.cmd+' '+settings[0]
 
     # remove the default directories this command creates
+    os.chdir(cwd)
     shutil.rmtree(tbssDir)
 
     
@@ -613,6 +616,8 @@ def test_tbss_3_postreg():
     
     tbss = fsl.Tbss3postreg()
     tbssDir = tempfile.mkdtemp()
+    cwd = os.getcwd()
+    os.chdir(tbssDir)
 
     # make sure command gets called
     yield assert_equal, tbss.cmd, 'tbss_3_postreg'
@@ -629,7 +634,7 @@ def test_tbss_3_postreg():
     yield assert_equal, tbss2.cmdline,'tbss_3_postreg -S'
     
     tbss3 = fsl.Tbss3postreg()
-    results = tbss3.run(FMRIB58_FA=True,noseTest=True,cwd=tbssDir)
+    results = tbss3.run(FMRIB58_FA=True,noseTest=True)
     yield assert_equal, results.runtime.cmdline, 'tbss_3_postreg -T'
     
     # test arguments for opt_map
@@ -641,6 +646,7 @@ def test_tbss_3_postreg():
         yield assert_equal, tbss3.cmdline, tbss3.cmd+' '+settings[0]
 
     # remove the default directories this command creates
+    os.chdir(cwd)
     shutil.rmtree(tbssDir)
 
         
@@ -844,7 +850,7 @@ def test_Probtrackx():
 
 # test proj_thresh
 def test_Proj_thresh():
-    proj = fsl.Proj_thresh()
+    proj = fsl.ProjThresh()
 
     # make sure command gets called
     yield assert_equal, proj.cmd, 'proj_thresh'
@@ -857,11 +863,11 @@ def test_Proj_thresh():
     proj.inputs.threshold=3
     yield assert_equal, proj.cmdline,'proj_thresh vol1 vol2 vol3 3'
     
-    proj2 = fsl.Proj_thresh(threshold=10, volumes=['vola','volb'])
+    proj2 = fsl.ProjThresh(threshold=10, volumes=['vola','volb'])
     yield assert_equal, proj2.cmdline,'proj_thresh vola volb 10' 
 
     # .run based parameters setting
-    proj3 = fsl.Proj_thresh()
+    proj3 = fsl.ProjThresh()
     results = proj3.run(volumes=['inp1','inp3','inp2'],threshold=2)
     yield assert_equal, results.runtime.cmdline, 'proj_thresh inp1 inp3 inp2 2'
     yield assert_not_equal, results.runtime.returncode, 0
@@ -932,7 +938,7 @@ def test_Vec_reg():
     
 # test find_the_biggest
 def test_Find_the_biggest():
-    fbg = fsl.Find_the_biggest()
+    fbg = fsl.FindTheBiggest()
 
     # make sure command gets called
     yield assert_equal, fbg.cmd, 'find_the_biggest'
@@ -945,11 +951,11 @@ def test_Find_the_biggest():
     fbg.inputs.outfile='fbgfile'
     yield assert_equal, fbg.cmdline,'find_the_biggest seed* fbgfile'
     
-    fbg2 = fsl.Find_the_biggest(infile='seed2*',outfile='fbgfile2')
+    fbg2 = fsl.FindTheBiggest(infile='seed2*',outfile='fbgfile2')
     yield assert_equal, fbg2.cmdline,'find_the_biggest seed2* fbgfile2' 
 
     # .run based parameters setting
-    fbg3 = fsl.Find_the_biggest()
+    fbg3 = fsl.FindTheBiggest()
     results = fbg3.run(infile='seed3',outfile='out3')
     yield assert_equal, results.runtime.cmdline, 'find_the_biggest seed3 out3'    
 

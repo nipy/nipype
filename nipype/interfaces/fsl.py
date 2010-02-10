@@ -903,7 +903,7 @@ class ApplyXfm(Flirt):
     '''
     def _parse_inputs(self):
         '''Call our super-method, then add our input files'''
-        allargs = super(ApplyXFM, self)._parse_inputs()
+        allargs = super(ApplyXfm, self)._parse_inputs()
         if not self.inputs.outfile:
             outfile = fsl_info.gen_fname(self.inputs.infile,
                                          self.inputs.outfile,
@@ -3542,7 +3542,7 @@ class Tbss2reg(FSLCommand):
         cwd=os.getcwd()
         results = self._runner(cwd=cwd)
         if not noseTest:
-            results.outputs = self.aggregate_outputs(cwd)
+            results.outputs = self.aggregate_outputs()
         return results
 
     def outputs_help(self):
@@ -3585,7 +3585,7 @@ class Tbss2reg(FSLCommand):
 
         """
         outputs = self.outputs()
-        outputs = tbss_1_2_getOutputFiles(outputs)
+        outputs = tbss_1_2_getOutputFiles(outputs, os.getcwd())
 
         if not outputs.outfiles:
             raise AttributeError('No output files created for tbss_2_reg')
@@ -3630,7 +3630,7 @@ def bedpostX_datacheck_ok(directory):
 
 #----------------------------------------------------------------------------------------------------------
 
-def tbss_1_2_getOutputFiles(outputs,cwd):
+def tbss_1_2_getOutputFiles(outputs, cwd):
     """
         Extracts path and filename from the FA folder that ought to have been created
         if tbss_1_preproc and tbss_2_reg was executed correctly
