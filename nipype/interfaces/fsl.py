@@ -29,7 +29,6 @@ from nipype.utils.filemanip import (fname_presuffix, list_to_filename,
                                     filename_to_list, loadflat)
 from nipype.interfaces.base import (Bunch, CommandLine, Interface,
                                     load_template, InterfaceResult)
-from nipype.utils import setattr_on_read
 from nipype.utils.docparse import get_doc
 from nipype.utils.misc import container_to_string, is_container
 
@@ -187,7 +186,8 @@ class FSLInfo(object):
         # XXX This should ultimately somehow allow for relative paths if cwd is
         # specified or similar. For now, though, this needs to happen to make
         # the pipeline code work
-        return os.path.realpath(fname)
+        # return os.path.realpath(fname)
+        return fname
 
 fsl_info = FSLInfo()
 
@@ -442,9 +442,8 @@ class Bet(FSLCommand):
         >>> from nipype.interfaces import fsl
         >>> import os
         >>> btr = fsl.Bet(infile='foo.nii', outfile='bar.nii', flags='-v')
-        >>> cmdline = 'bet foo.nii %s -v'%os.path.join(os.getcwd(),'bar.nii')
-        >>> btr.cmdline == cmdline
-        True
+        >>> btr.cmdline
+        'bet foo.nii bar.nii -v'
 
         """
         if infile:
@@ -650,7 +649,7 @@ class Fast(FSLCommand):
             If any expected output file is not found.
 
         """
-        _, ext = fsl_info.outputtype()
+        _, envext = fsl_info.outputtype()
         outputs = self.outputs()
 
         if not is_container(self.inputs.infiles):
@@ -1171,7 +1170,7 @@ class McFlirt(FSLCommand):
             outputs.parfile = outputs.outfile + '.par'
             if not os.path.exists(outputs.parfile):
                 msg = "Output file '%s' for '%s' was not generated" \
-                        % (outname, outtype)
+                        % (outputs.parfile, self.cmd)
                 raise IOError(msg)
         return outputs
 
@@ -2416,6 +2415,7 @@ class FeatRegister(Interface):
         for i, rundir in enumerate(filename_to_list(self.inputs.feat_dirs)):
             fsf_txt += fsf_dirs.substitute(runno = i+1,
                                            rundir = os.path.abspath(rundir))
+        fsf_txt += fsf_footer.substitute()
         f = open(os.path.join(os.getcwd(), 'register.fsf'), 'wt')
         f.write(fsf_txt)
         f.close()
@@ -2788,7 +2788,7 @@ class ExtractRoi(FSLCommand):
     def run(self, infile=None, outfile=None, **inputs):
         """Execute the command.
         >>> from nipype.interfaces import fsl
-        >>> fslroi = fsl.Fslroi(infile='foo.nii', outfile='bar.nii', tmin=0, tsize=1)
+        >>> fslroi = fsl.ExtractRoi(infile='foo.nii', outfile='bar.nii', tmin=0, tsize=1)
         >>> fslroi.cmdline
         'fslroi foo.nii bar.nii 0 1'
 
@@ -2853,7 +2853,12 @@ class ExtractRoi(FSLCommand):
 class Split(FSLCommand):
     """Uses FSL Fslsplit command to split a 4D file into a series of 3D files.
     """
-    opt_map={}
+    opt_map={'outbasename': None, # output basename
+             'time': '-t', #separate images in time (default behaviour)
+             'xdir': '-x', #separate images in the x direction
+             'ydir': '-y', #separate images in the y direction
+             'zdir': '-z', #separate images in the z direction
+             }
 
     @property
     def cmd(self):
@@ -2864,27 +2869,20 @@ class Split(FSLCommand):
         """Print command line documentation for fslsplit."""
         print get_doc(self.cmd,self.opt_map,trap_error=False)
 
-    def _populate_inputs(self):
-        self.inputs = Bunch(infile=None)
-
     def _parse_inputs(self):
         """validate fsl fslroi options"""
         
         allargs = super(Split, self)._parse_inputs(skip=('infile'))
-        # Add infile and outfile to the args if they are specified
-        if isinstance(self.inputs.infile, list):
-            self.inputs.infile = self.inputs.infile[0]
         if self.inputs.infile:
             allargs.insert(0, self.inputs.infile)
-            
-        allargs.insert(1, '-t')
-
+        if self.inputs.outbasename:
+            allargs.insert(0, self.inputs.outbasename)
         return allargs
 
-    def run(self, infile=None, outfile=None, **inputs):
+    def run(self, infile=None, **inputs):
         """Execute the command.
         >>> from nipype.interfaces import fsl
-        >>> fslsplit = fsl.FSLSplit(infile='foo.nii')
+        >>> fslsplit = fsl.Split(infile='foo.nii',time=True)
         >>> fslsplit.cmdline
         'fslsplit foo.nii -t'
 
@@ -2938,7 +2936,10 @@ class Split(FSLCommand):
         """
         outputs = self.outputs()
         type, ext = fsl_info.outputtype()
-        outputs.outfiles = sorted(glob(os.path.join(os.getcwd(),'vol*.' + ext)))
+        outbase = 'vol*.'
+        if self.inputs.outbasename:
+            outbase = '%s*.'%self.inputs.outbasename
+        outputs.outfiles = sorted(glob(os.path.join(os.getcwd(), outbase + ext)))
         return outputs
 
 class EddyCorrect(FSLCommand):
@@ -2983,7 +2984,7 @@ class EddyCorrect(FSLCommand):
     def run(self, infile=None, outfile=None, **inputs):
         """Execute the command.
         >>> from nipype.interfaces import fsl
-        >>> edd = fsl.Eddy_correct(infile='foo.nii', outfile='bar.nii', reference_vol=10)
+        >>> edd = fsl.EddyCorrect(infile='foo.nii', outfile='bar.nii', reference_vol=10)
         >>> edd.cmdline
         'eddy_correct foo.nii bar.nii 10'
 
@@ -3100,7 +3101,7 @@ class Bedpostx(FSLCommand):
         >>> from nipype.interfaces import fsl
         >>> bedp = fsl.Bedpostx(directory='subj1', fibres=1)
         >>> bedp.cmdline
-        'bedpostx subj1 1'
+        'bedpostx subj1 -n 1'
 
         """
 
@@ -3444,7 +3445,8 @@ class ImageMaths(FSLCommand):
     def run(self, infile=None, infile2=None, outfile=None, **inputs):
         """Execute the command.
         >>> from nipype.interfaces import fsl
-        >>> maths = fsl.Fslmaths(infile='foo.nii', optstring= '-add 5', outfile='foo_maths.nii')
+        >>> import os
+        >>> maths = fsl.ImageMaths(infile='foo.nii', optstring= '-add 5', outfile='foo_maths.nii')
         >>> maths.cmdline
         'fslmaths foo.nii -add 5 foo_maths.nii'
 
@@ -3539,7 +3541,7 @@ class Tbss2reg(FSLCommand):
         >>> from nipype.interfaces import fsl
         >>> tbss2 = fsl.Tbss2reg(FMRIB58_FA_1mm=True)
         >>> tbss2.cmdline
-        'tbss_2_reg foo -T foo.out'
+        'tbss_2_reg -T'
 
         """
         self.inputs.update(**inputs)
@@ -3893,10 +3895,10 @@ class Tbss4prestats(FSLCommand):
 
     def run(self, noseTest=False, **inputs):
         """Execute the command.
-        >>> from nipype.interfaces import dti
+        >>> from nipype.interfaces import fsl
         >>> tbss4 = fsl.Tbss4prestats(threshold=0.3)
         >>> tbss4.cmdline
-        'tbss_4_postreg 0.3'
+        'tbss_4_prestats 0.3'
 
         """
         self.inputs.update(**inputs)
@@ -4063,7 +4065,7 @@ class Randomise(FSLCommand):
         >>> from nipype.interfaces import fsl
         >>> rand = fsl.Randomise(input_4D='infile2',output_rootname='outfile2',f_contrast='infile.f',one_sample_gmean=True,int_seed=4)
         >>> rand.cmdline
-        'randomise -i infile2 -o outfile2 -1 -f infile.f --seed 4'
+        'randomise -i infile2 -o outfile2 -f infile.f --seed 4 -1'
         """
         if input_4D:
             self.inputs.input_4D = input_4D
@@ -4445,7 +4447,7 @@ class Vecreg(FSLCommand):
     def run(self, infile=None, outfile=None, refVolName=None, **inputs):
         """Execute the command.
         >>> from nipype.interfaces import fsl
-        >>> vreg = fsl.Vecreg(infile='inf',output='infout',refVolName='MNI152')
+        >>> vreg = fsl.Vecreg(infile='inf',outfile='infout',refVolName='MNI152')
         >>> vreg.cmdline
         'vecreg -i inf -o infout -r MNI152'
 
@@ -4630,35 +4632,35 @@ class FindTheBiggest(FSLCommand):
         print get_doc(self.cmd,self.opt_map,trap_error=False)
 
     def _populate_inputs(self):
-        self.inputs = Bunch(infile=None,
+        self.inputs = Bunch(infiles=None,
                             outfile=None)
 
     def _parse_inputs(self):
         """validate fsl Find_the_biggest options"""
         allargs=[]
-        if self.inputs.infile:
-            allargs.insert(0, self.inputs.infile)
+        if self.inputs.infiles:
+            allargs.insert(0, self.inputs.infiles)
         if self.inputs.outfile:
             allargs.insert(1, self.inputs.outfile)
         else:
-            outfile = fsl_info.gen_fname(self.inputs.infile,
+            outfile = fsl_info.gen_fname(self.inputs.infiles,
                                          fname=self.inputs.outfile,
                                          suffix='_fbg')
             allargs.insert(1, outfile)
 
         return allargs
 
-    def run(self, infile=None, outfile=None, **inputs):
+    def run(self, infiles=None, outfile=None, **inputs):
         """Execute the command.
         >>> from nipype.interfaces import fsl
-        >>> fBig = fsl.Find_the_biggest(volumes='all*',outfile='biggestOut')
+        >>> fBig = fsl.FindTheBiggest(infiles='all*',outfile='biggestOut')
         >>> fBig.cmdline
         'find_the_biggest all* biggestOut'
 
         """
-        if infile:
-            self.inputs.infile=infile
-        if not self.inputs.infile:
+        if infiles:
+            self.inputs.infiles=infiles
+        if not self.inputs.infiles:
             raise AttributeError('find_the_biggest requires input file(s)')
         if outfile:
             self.inputs.outfile=outfile

@@ -196,7 +196,6 @@ class DicomConvert(FSCommandLine):
     >>> cvt = freesurfer.DicomConvert()
     >>> cvt.inputs.dicomdir = '/incoming/TrioTim-35115-2009-1900-123456/'
     >>> cvt.inputs.file_mapping = [('nifti','*.nii'),('info','dicom*.txt'),('dti','*dti.bv*')]
-    >>> cvt.run()
 
    """
     @property
@@ -828,9 +827,9 @@ class Smooth(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces.freesurfer import Smooth
-    >>> smoothvol = Smooth(sourcefile='foo.nii', regfile='reg.dat', surface_fwhm=10, vol_fwhm=6)
+    >>> smoothvol = Smooth(sourcefile='foo.nii', outfile = 'foo_out.nii', regfile='reg.dat', surface_fwhm=10, vol_fwhm=6)
     >>> smoothvol.cmdline
-    'mris_volsmooth --reg reg.dat --i foo.nii --fwhm 10 --vol-fwhm 6 --o foo_surfsmooth.nii'
+    'mris_volsmooth --o foo_out.nii --reg reg.dat --i foo.nii --fwhm 10 --vol-fwhm 6'
     
    """
 
@@ -1157,7 +1156,7 @@ class Concatenate(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces.freesurfer import Concatenate
-    >>> concat = Concatenate(invol='foo.nii', mean=True, outfile='foo_out.nii')
+    >>> concat = Concatenate(invol='foo.nii', mean=True, outvol='foo_out.nii')
     >>> concat.cmdline
     'mri_concat --mean --o foo_out.nii --i foo.nii'
     
@@ -1395,7 +1394,7 @@ class Label2Vol(FSLCommand):
     >>> from nipype.interfaces.freesurfer import Label2Vol
     >>> binvol = Label2Vol(label='foo.label', templatevol='bar.nii', regmat='foo_reg.dat',fillthresh=0.5,outvol='foo_out.nii')
     >>> binvol.cmdline
-    'mri_label2vol --i foo.nii --temp bar.nii --reg foo_reg.dat --fillthresh 0.5 --o foo_out.nii'
+    'mri_label2vol --fillthresh 0.500000 --label foo.label --o foo_out.nii --reg foo_reg.dat --temp bar.nii'
     
    """
 
