@@ -169,7 +169,7 @@ funcapplywarp.inputs.update(reference = target_image)
 
 # Finally do some smoothing!
 
-smoothing = nw.NodeWrapper(interface=fsl.FSLSmooth(), diskbased=True)
+smoothing = nw.NodeWrapper(interface=fsl.Smooth(), diskbased=True)
 smoothing.iterfield = ['infile']
 smoothing.inputs.fwhm = 5
 
