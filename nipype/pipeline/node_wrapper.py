@@ -19,9 +19,8 @@ import nipype.pipeline.engine as pe
 logger = logging.getLogger('nodewrapper')
 
 class NodeWrapper(object):
-    """
-    Base class wrapper for interface objects to create nodes that can
-    be used in the pipeline engine.
+    """Wraps interface objects for use in pipeline
+    
 
     Parameters
     ----------
@@ -280,7 +279,7 @@ class NodeWrapper(object):
                 fd.writelines(cmd)
                 fd.close()
             logger.info('Executing node')
-            result = self._interface.run(cwd=cwd)
+            result = self._interface.run()
             if result.runtime.returncode:
                 logger.error(result.runtime.stderr)
                 raise RuntimeError(result.runtime.stderr)
