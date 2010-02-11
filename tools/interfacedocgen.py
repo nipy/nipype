@@ -250,7 +250,7 @@ class InterfaceHelpWriter(object):
                   (len(c)+9) + '\n\n'
             __import__(uri)
             classinst = sys.modules[uri].__dict__[c]()
-            helpstr = None
+            helpstr = ''
             print 'Generating inputs/outputs doc for:', uri, \
                 classinst.__class__.__name__
             if hasattr(classinst, 'opt_map') and len(classinst.opt_map):
