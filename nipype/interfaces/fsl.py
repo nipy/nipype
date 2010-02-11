@@ -423,7 +423,7 @@ class Bet(FSLCommand):
         outfile : string, optional
             Filename to save output to. If not specified, the ``infile``
             filename will be used with a "_brain" suffix.
-        inputs : dict
+        inputs : dict, optional
             Additional ``inputs`` assignments can be passed in.  See
             Examples section.
 
@@ -458,17 +458,17 @@ class Bet(FSLCommand):
         return super(Bet, self).run()
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
-        (all default to None and are unset)
+        outfile : string, file
+            path/name of skullstripped file
+        maskfile : string, file
+            binary brain mask if generated
 
-            outfile : string,file
-                path/name of skullstripped file
-            maskfile : string, file
-                binary brain mask if generated
         """
+ 
         outputs = Bunch(outfile=None,maskfile=None)
         return outputs
 
@@ -510,10 +510,10 @@ class Fast(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> faster = fsl.Fast(out_basename='myfasted')
-    >>> fasted = faster.run(['file1','file2'])
+    >>> faster = fsl.Fast(out_basename = 'myfasted')
+    >>> fasted = faster.run(['file1', 'file2'])
 
-    >>> faster = fsl.Fast(infiles=['filea','fileb'], out_basename='myfasted')
+    >>> faster = fsl.Fast(infiles=['filea', 'fileb'], out_basename='myfasted')
     >>> fasted = faster.run()
 
     """
@@ -562,7 +562,7 @@ class Fast(FSLCommand):
         ----------
         infiles : string or list of strings
             File(s) to be segmented or bias corrected
-        inputs : dict
+        inputs : dict, optional
             Additional ``inputs`` assignments can be passed in.
 
         Returns
@@ -589,34 +589,34 @@ class Fast(FSLCommand):
         return allargs
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
-        (all default to None and are unset)
+        Each attribute in ``outputs`` is a list.  There will be
+        one set of ``outputs`` for each file specified in
+        ``infiles``.  ``outputs`` will contain the following
+        files:
 
-            Each attribute in ``outputs`` is a list.  There will be
-            one set of ``outputs`` for each file specified in
-            ``infiles``.  ``outputs`` will contain the following
-            files:
+        mixeltype : list
+            filename(s)
+        partial_volume_map : list
+            filenames, one for each input
+        partial_volume_files : list
+            filenames, one for each class, for each input
+        tissue_class_map : list
+            filename(s), each tissue has unique int value
+        tissue_class_files : list
+            filenames, one for each class, for each input
+        restored_image : list
+            filename(s) bias corrected image(s)
+        bias_field : list
+            filename(s)
+        probability_maps : list
+            filenames, one for each class, for each input
 
-            mixeltype : list
-                filename(s)
-            partial_volume_map : list
-                filenames, one for each input
-            partial_volume_files : list
-                filenames, one for each class, for each input
-            tissue_class_map : list
-                filename(s), each tissue has unique int value
-            tissue_class_files : list
-                filenames, one for each class, for each input
-            restored_image : list
-                filename(s) bias corrected image(s)
-            bias_field : list
-                filename(s)
-            probability_maps : list
-                filenames, one for each class, for each input
         """
+
         outputs = Bunch(mixeltype = [],
                 seg = [],
                 partial_volume_map=[],
@@ -735,7 +735,6 @@ class Flirt(FSLCommand):
     >>> flt.inputs.outmatrix = 'subject_to_template.mat'
     >>> res = flt.run()
 
-
     """
 
     @property
@@ -849,10 +848,9 @@ class Flirt(FSLCommand):
 
         Parameters
         ----------
+        outfile : string, file
 
-           outfile : string, file
-
-           outmatrix : string, file
+        outmatrix : string, file
 
         """
         outputs = Bunch(outfile=None, outmatrix=None)
@@ -976,7 +974,7 @@ class ApplyXfm(Flirt):
         return super(ApplyXfm, self).run()
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -1118,7 +1116,7 @@ class McFlirt(FSLCommand):
         return super(McFlirt, self).run()
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -1317,7 +1315,7 @@ class Fnirt(FSLCommand):
         fid.close()
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -1447,7 +1445,7 @@ class ApplyWarp(FSLCommand):
         return allargs
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -1496,7 +1494,7 @@ class Smooth(FSLCommand):
                 self._get_outfile()]
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -1538,7 +1536,7 @@ class Merge(FSLCommand):
         return allargs
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -1833,7 +1831,7 @@ class Level1Design(Interface):
         print self.outputs.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -2320,7 +2318,7 @@ class FixedEffectsModel(Interface):
         print self.outputs.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -2432,7 +2430,7 @@ class FeatRegister(Interface):
         print self.outputs.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -2815,7 +2813,7 @@ class ExtractRoi(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -2907,7 +2905,7 @@ class Split(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -3011,7 +3009,7 @@ class EddyCorrect(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -3150,7 +3148,7 @@ class Bedpostx(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -3320,7 +3318,7 @@ class Dtifit(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -3475,7 +3473,7 @@ class ImageMaths(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -3567,7 +3565,7 @@ class Tbss2reg(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -3719,7 +3717,7 @@ class Tbss1preproc(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -3808,7 +3806,7 @@ class Tbss3postreg(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -3919,7 +3917,7 @@ class Tbss4prestats(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -4093,7 +4091,7 @@ class Randomise(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -4316,7 +4314,7 @@ class Probtrackx(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -4476,7 +4474,7 @@ class Vecreg(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -4578,7 +4576,7 @@ class ProjThresh(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
@@ -4678,7 +4676,7 @@ class FindTheBiggest(FSLCommand):
         print self.outputs_help.__doc__
 
     def outputs(self):
-        """Returns a bunch structure with outputs
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
 
         Parameters
         ----------
