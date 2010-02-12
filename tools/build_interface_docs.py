@@ -26,6 +26,7 @@ if __name__ == '__main__':
     docwriter.module_skip_patterns += ['\.version$',
                                        '\.interfaces\.afni$',
                                        '\.interfaces\.base$',
+                                       '\.interfaces\.gorlin_glue',
                                        '\.interfaces\.matlab$',
                                        '\.interfaces\.rest$',
                                        '\.interfaces\.pymvpa$',

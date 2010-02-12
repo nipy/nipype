@@ -259,19 +259,38 @@ class InterfaceHelpWriter(object):
                 iterator = classinst.opt_map.iteritems
             else:
                 iterator = classinst.inputs.iteritems
+            mandhelpstr = None # mandatory inputs
+            opthelpstr = None  # optional inputs
             for i,v in sorted(iterator()):
                 if not helpstr:
                     helpstr = 'Inputs:: \n\n\t'
-                helpstr +=  i
+                fieldstr =  i
                 if is_container(v) and isinstance(v[1], str):
                     # Handle cases where we've added a docstring to
                     # the opt_map.  The value is then a tuple where
                     # the first element is the format string and the
                     # second element is the docstring.
-                    helpstr += ' : ' + v[1]
-                helpstr += '\n\t'
+                    fieldstr += ' : ' + v[1]
+                if '(opt' in fieldstr:
+                    if not opthelpstr:
+                        opthelpstr = ['[Optional]']
+                    opthelpstr += [fieldstr]
+                else:
+                    if not mandhelpstr:
+                        mandhelpstr = ['[Mandatory]']
+                    mandhelpstr += [fieldstr]
+            if mandhelpstr:
+                helpstr += '\n\t'.join(mandhelpstr)
+                helpstr += '\n\n\t'
+            if opthelpstr:
+                helpstr += '\n\t'.join(opthelpstr)
+            if helpstr:
+                helpstr += '\n\n'
             if [i for i,v in classinst.outputs().iteritems()]:
-                helpstr += '\nOutputs:: \n\n\t'
+                if not helpstr:
+                    helpstr = '\nOutputs:: \n\n\t'
+                else:
+                    helpstr += '\nOutputs:: \n\n\t'
                 for i,v in sorted(classinst.outputs().iteritems()):
                     helpstr +=  i + '\n\t'
             if helpstr:

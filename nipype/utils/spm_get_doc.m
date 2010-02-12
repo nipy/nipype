@@ -6,6 +6,7 @@ function doc = spm_get_doc(docname)
 % documentation whose name matches docname.
 cfgstruct = spm_flat_config(0);
 [rows, cols] = size(cfgstruct);
+docstruct.help={'None'};
 % Loop over cell array and search for the docname
 for i = 1:cols
   if strcmp(cfgstruct{i}.name, docname)

@@ -7,7 +7,12 @@ function cfgstruct = spm_flat_config(print_names)
 % print_names is true (value of 1) it will print out the configuration
 % names. If print_names is false (value of 0), it will only return
 % the flattened structure.
-cfg = spm_config();
+if strcmp(spm('ver'),'SPM5')
+    cfg = spm_config();
+else
+    cfgstruct = [];
+    return;
+end
 cfgstruct = spm_cfg_list(cfg, {});
 if print_names
   [rows, cols] = size(cfgstruct);

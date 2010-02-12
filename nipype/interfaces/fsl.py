@@ -3070,7 +3070,7 @@ class Bedpostx(FSLCommand):
         'burn_period':          ('-b %d', 'burnin period'),
         'jumps':                ('-j %d', 'number of jumps'),
         'sampling':             ('-s %d', 'sampling interval'),
-                                 }
+        }
     @property
     def cmd(self):
         """sets base command, immutable"""

@@ -158,7 +158,7 @@ normalize.inputs.template = os.path.abspath('data/T1.nii')
 """
 smooth = nw.NodeWrapper(interface=spm.Smooth(),diskbased=True)
 #smooth.inputs.fwhm = [6,6,8]
-smooth.iterables = dict(fwhm=lambda:[4,8])
+smooth.iterables = dict(fwhm=lambda:[6])
 
 #######################################################################
 # setup analysis components

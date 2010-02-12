@@ -35,6 +35,8 @@ from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix,
                                     filename_to_list, list_to_filename,
                                     loadflat)
 from nipype.utils.spm_docs import grab_doc
+import logging
+logger = logging.getLogger('spmlogger')
 
 def scans_for_fname(fname):
     """Reads a nifti file and converts it to a numpy array storing
@@ -119,6 +121,8 @@ class SpmMatlabCommandLine(MatlabCommandLine):
     formatting of matlab scripts.
     """
 
+    opt_map = {}
+
     def __init__(self, matlab_cmd=None, **inputs): 
         super(SpmMatlabCommandLine,self).__init__(**inputs)
         self.mfile = True
@@ -150,8 +154,51 @@ class SpmMatlabCommandLine(MatlabCommandLine):
             results.outputs = self.aggregate_outputs() 
         return results
 
-    def _parseinputs(self):
-        raise NotImplementedError
+    def _populate_inputs(self):
+        self.inputs = Bunch()
+        for k,v in self.opt_map.items():
+            if len(v)<3:
+                setattr(self.inputs, k, None)
+            else:
+                setattr(self.inputs, k, v[2])
+        #self.inputs = Bunch((k,None) for k in self.opt_map.keys())
+
+    def inputs_help(self):
+        helpstr = ['Parameters','----------','']
+        opthelpstr = []
+        manhelpstr = []
+        for k,v in sorted(self.opt_map.items()):
+            if '(opt' in v[1]:
+                opthelpstr += ['%s: %s'%(k,v[1])]
+            else:
+                manhelpstr += ['%s: %s'%(k,v[1])]
+                
+        print '\n'.join(helpstr+manhelpstr+opthelpstr)
+        #return (helpstr,manhelpstr,opthelpstr)
+        
+    def _convert_inputs(self, opt, val):
+        """Convert input to appropriate format for spm
+        """
+        return val
+    
+    def _parse_inputs(self, skip=()):
+        spmdict = {}
+        inputs = sorted((k, v) for k, v in self.inputs.iteritems()
+                            if v is not None and k not in skip)
+        for opt, value in inputs:
+            try:
+                argstr = self.opt_map[opt][0]
+                if '.' in argstr:
+                    fields = argstr.split('.')
+                    if fields[0] not in spmdict.keys():
+                        spmdict[fields[0]] = {}
+                    spmdict[fields[0]][fields[1]] = self._convert_inputs(opt,value)
+                else:
+                    spmdict[argstr] = self._convert_inputs(opt,value)
+            except KeyError:
+                logger.warn("Option '%s' is not supported!" % (opt))
+                raise
+        return [spmdict]
     
     def _compile_command(self):
         """Assembles the matlab code for SPM function
@@ -159,7 +206,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         Virtual function that needs to be implemented by the
         subclass
         """ 
-        self._cmdline, mscript = self._make_matlab_command(deepcopy(self._parseinputs()))
+        self._cmdline, mscript = self._make_matlab_command(deepcopy(self._parse_inputs()))
     
     def aggregate_outputs(self):
         """Collects all the outputs produced by an SPM function
@@ -330,27 +377,9 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         raise NotImplementedError
 
 class SliceTiming(SpmMatlabCommandLine):
-    """use spm_smooth for 3D Gaussian smoothing of image volumes.
+    """Use spm to perform slice timing correction.
 
-    See Smooth().spm_doc() for more information.
-
-    Parameters
-    ----------
-    inputs : dict 
-        key, value pairs that will update the Smooth.inputs attributes.
-        See self.inputs_help() for a list of Smooth.inputs attributes.
-    
-    Attributes
-    ----------
-    inputs : :class:`nipype.interfaces.base.Bunch`
-        Options that can be passed to spm_smooth via a job structure
-    cmdline : str
-        String used to call matlab/spm via SpmMatlabCommandLine interface
-
-    Other Parameters
-    ----------------
-    To see optional arguments
-    SliceTiming().inputs_help()
+    See SliceTiming().spm_doc() for more information.
 
     Examples
     --------
@@ -381,82 +410,36 @@ class SliceTiming(SpmMatlabCommandLine):
     def jobname(self):
         return 'st'
 
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-        infile : list
-            list of filenames to apply slice timing
-        num_slices : int
-            number of slices in a volume
-        time_repetition: float
-            time between volume acquisitions (start to start time)
-        time_acquisition: float
-            time of volume acquisition. usually calculated as
-            TR-(TR/num_slices) 
-        slice_order : list
-            order in which slices are acquired. ensure that this is a 1-based
-            list. 
-        ref_slice : int
-            Number of the reference slice. Remember 1-based numbering
-        flags : USE AT OWN RISK, optional
-            #eg:'flags':{'eoptions':{'suboption':value}}
-        """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        """ Initializes the input fields of this interface.
-        """
-        self.inputs = Bunch(infile=None,
-                            num_slices=None,
-                            time_repetition=None,
-                            time_acquisition=None,
-                            slice_order=None,
-                            ref_slice=None,
-                            flags=None)
-
+    opt_map = {'infile': ('scans',
+                          'list of filenames to apply slice timing'),
+               'num_slices': ('nslices',
+                              'number of slices in a volume'),
+               'time_repetition': ('tr',
+                                   'time between volume acquisitions ' \
+                                       '(start to start time)'),
+               'time_acquisition': ('ta',
+                                    'time of volume acquisition. usually ' \
+                                        'calculated as TR-(TR/num_slices)'),
+               'slice_order': ('so',
+                               '1-based order in which slices are acquired'),
+               'ref_slice': ('refslice',
+                             '1-based Number of the reference slice')
+               }
+        
     def get_input_info(self):
         """ Provides information about inputs as a dict
             info = [Bunch(key=string,copy=bool,ext='.nii'),...]
         """
         info = [Bunch(key='infile',copy=False)]
         return info
-        
-    def _parseinputs(self):
-        """validate spm smooth options
-        if set to None ignore
-        """
-        out_inputs = []
-        inputs = {}
-        einputs = {'scans':[]}
 
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
-        for opt in inputs:
-            if opt == 'infile':
-                sess_scans = scans_for_fnames(filename_to_list(inputs[opt]),
-                                              separate_sessions=True)
-                einputs['scans'] = sess_scans
-                continue
-            if opt == 'num_slices':
-                einputs['nslices'] = int(inputs[opt])
-                continue
-            if opt == 'time_repetition':
-                einputs['tr'] = inputs[opt]
-                continue
-            if opt == 'time_acquisition':
-                einputs['ta'] = inputs[opt]
-                continue
-            if opt == 'slice_order':
-                einputs['so'] = inputs[opt]
-                continue
-            if opt == 'ref_slice':
-                einputs['refslice'] = inputs[opt]
-                continue
-            if opt == 'flags':
-                einputs.update(inputs[opt])
-                continue
-            print 'option %s not supported'%(opt)
-        return [einputs]
+    def _convert_inputs(self, opt, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt == 'infile':
+            return scans_for_fnames(filename_to_list(val),
+                                    separate_sessions=True)
+        return val
 
     def run(self, infile=None, **inputs):
         """Executes the SPM slice timing function using MATLAB
@@ -500,37 +483,13 @@ class SliceTiming(SpmMatlabCommandLine):
 class Realign(SpmMatlabCommandLine):
     """Use spm_realign for estimating within modality rigid body alignment
 
-    See Realign().spm_doc() for more information.
-
-    Parameters
-    ----------
-    inputs : dict
-        key, value pairs that will update the Realign.inputs attributes.
-        See self.inputs_help() for a list of attributes
-    
-    Attributes
-    ----------
-    inputs : :class:`nipype.interfaces.base.Bunch`
-        Options that can be passed to spm_realign via a job structure
-    cmdline : str
-        String used to call matlab/spm via SpmMatlabCommandLine interface
-    
-
-    Other Parameters
-    --------------- 
-
-    To see optional arguments
-    Realign().inputs_help()
-
-    To see output fields
-    Realign().outputs_help()
-
     Examples
     --------
 
     >>> import nipype.interfaces.spm as spm
     >>> realign = spm.Realign()
     >>> realign.inputs.infile = 'a.nii'
+    >>> realign.inputs.register_to_mean = True
     >>> realign.run() # doctest: +SKIP
 
     """
@@ -551,82 +510,29 @@ class Realign(SpmMatlabCommandLine):
     def jobname(self):
         return 'realign'
 
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-        
-        infile: string, list
-            list of filenames to realign
-        write : bool, optional
-            if True updates headers and generates
-            resliced files prepended with  'r'
-            if False just updates header files
-            (default == True, will reslice)
-        quality : float, optional
-            0.1 = fastest, 1.0 = most precise
-            (spm5 default = 0.9)
-        fwhm : float, optional
-            full width half maximum gaussian kernel 
-            used to smooth images before realigning
-            (spm default = 5.0)
-        separation : float, optional
-            separation in mm used to sample images
-            (spm default = 4.0)
-        register_to_mean: Bool, optional
-            rtm if True uses a two pass method
-            realign -> calc mean -> realign all to mean
-            (spm default = False)
-        weight_img : file, optional
-            filename of weighting image
-            if empty, no weighting 
-            (spm default = None)
-        wrap : list, optional
-            Check if interpolation should wrap in [x,y,z]
-            (spm default [0,0,0])
-        interp : float, optional
-            degree of b-spline used for interpolation
-            (spm default = 2.0)
-        write_which : list of len()==2, optional
-            if write is true, 
-            [inputimgs, mean]
-            [2,0] reslices all images, but not mean
-            [2,1] reslices all images, and mean
-            [1,0] reslices imgs 2:end, but not mean
-            [0,1] doesnt reslice any but generates resliced mean
-        write_interp : float, optional
-            degree of b-spline used for interpolation when
-            writing resliced images
-            (spm default = 4.0)
-        write_wrap : list, optional
-            Check if interpolation should wrap in [x,y,z]
-            (spm default [0,0,0])
-        write_mask : bool, optional
-            if True, mask output image
-            if False, do not mask
-        flags : USE AT OWN RISK, optional
-            #eg:'flags':{'eoptions':{'suboption':value}}
-        """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        """ Initializes the input fields of this interface.
-        """
-        self.inputs = Bunch(infile=None,
-                          write=True,
-                          quality=None,
-                          fwhm=None,
-                          separation=None,
-                          register_to_mean=None,
-                          weight_img=None,
-                          interp=None,
-                          wrap=None,
-                          write_which=None,
-                          write_interp=None,
-                          write_wrap=None,
-                          write_mask=None,
-                          flags=None)
-        
+    opt_map = {'infile': ('data', 'list of filenames to realign'),
+               'jobtype': (None, 'one of: estimate, write, estwrite (opt, estwrite)', 'estwrite'),
+               'quality': ('eoptions.quality',
+                           '0.1 = fast, 1.0 = precise (opt, 0.9)'),
+               'fwhm': ('eoptions.fwhm',
+                        'gaussian smoothing kernel width (opt, 5)'),
+               'separation': ('eoptions.sep',
+                              'sampling separation in mm (opt, 4))'),
+               'register_to_mean': ('eoptions.rtm', 'True/False (opt, False)'),
+               'weight_img': ('eoptions.weight',
+                              'filename of weighting image (opt, None)'),
+               'interp': ('eoptions.interp',
+                          'degree of b-spline used for interpolation (opt, 2)'),
+               'wrap': ('eoptions.wrap',
+                        'Check if interpolation should wrap in [x,y,z] (opt, [0,0,0])'),
+               'write_which': ('roptions.which',
+                               'determines which images to reslice (opt, [2, 1])'),
+               'write_interp': ('roptions.interp',
+                           'degree of b-spline used for interpolation (opt, 4)'),
+               'write_wrap': ('roptions.wrap',
+                        'Check if interpolation should wrap in [x,y,z] (opt, [0,0,0])'),
+               'write_mask': ('roptions.mask', 'True/False mask output image (opt,)')
+               }
 
     def get_input_info(self):
         """ Provides information about inputs
@@ -634,72 +540,30 @@ class Realign(SpmMatlabCommandLine):
         """
         info = [Bunch(key='infile',copy=True)]
         return info
+
+    def _convert_inputs(self, opt, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt == 'infile':
+            return scans_for_fnames(filename_to_list(val),
+                                    keep4d=True,
+                                    separate_sessions=True)
+        if opt == 'register_to_mean': # XX check if this is necessary
+            return int(val)
+        if opt in ['wrap','write_wrap']:
+            if len(val) != 3:
+                raise ValueError('%s must have 3 elements'%opt)
+        if opt == 'write_which':
+            if len(val) != 2:
+                raise ValueError('write_which must have 2 elements')
+        return val
     
-    def _parseinputs(self):
+    def _parse_inputs(self):
         """validate spm realign options if set to None ignore
         """
-        out_inputs = []
-        inputs = {}
-        einputs = {'data':[],'eoptions':{},'roptions':{}}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() 
-         if v is not None ]
-        for opt in inputs:
-            if opt == 'flags':
-                einputs.update(inputs[opt])
-                continue
-            if opt == 'infile':
-                einputs['data'] = scans_for_fnames(filename_to_list(inputs[opt]),
-                                                   keep4d=True,separate_sessions=True)
-                continue
-            if opt == 'write':
-                continue
-            if opt == 'quality':
-                einputs['eoptions'].update({'quality': float(inputs[opt])})
-                continue
-            if opt == 'fwhm':
-                einputs['eoptions'].update({'fwhm': float(inputs[opt])})
-                continue
-            if opt == 'separation':
-                einputs['eoptions'].update({'sep': float(inputs[opt])})
-                continue
-            if opt == 'register_to_mean':
-                einputs['eoptions'].update({'rtm': int(inputs[opt])})
-                continue
-            if opt == 'weight_img':
-                einputs['eoptions'].update({'weight': inputs[opt]})
-                continue
-            if opt == 'interp':
-                einputs['eoptions'].update({'interp': float(inputs[opt])})
-                continue
-            if opt == 'wrap':
-                if not len(inputs[opt]) == 3:
-                    raise ValueError('wrap must have 3 elements')
-                einputs['eoptions'].update({'wrap': inputs[opt]})
-                continue
-            if opt == 'write_which':
-                if not len(inputs[opt]) == 2:
-                    raise ValueError('write_which must have 2 elements')
-                einputs['roptions'].update({'which': inputs[opt]})
-                continue
-            if opt == 'write_interp':
-                einputs['roptions'].update({'interp': inputs[opt]})
-                continue
-            if opt == 'write_wrap':
-                if not len(inputs[opt]) == 3:
-                    raise ValueError('write_wrap must have 3 elements')
-                einputs['roptions'].update({'wrap': inputs[opt]})
-                continue
-            if opt == 'write_mask':
-                einputs['roptions'].update({'mask': int(inputs[opt])})
-                continue
-                
-            print 'option %s not supported'%(opt)
-        if self.inputs.write:
-            jobtype = 'estwrite'
-        else:
-            jobtype = 'estimate'
-        einputs = [{'%s'%(jobtype):einputs}]
-        return einputs
+        einputs = super(Realign, self)._parse_inputs(skip=('jobtype'))
+        jobtype =  self.inputs.jobtype
+        return [{'%s'%(jobtype):einputs[0]}]
 
     def outputs(self):
         """
@@ -759,32 +623,14 @@ class Realign(SpmMatlabCommandLine):
 class Coregister(SpmMatlabCommandLine):
     """Use spm_coreg for estimating cross-modality rigid body alignment
 
-    See Coregister().spm_doc() for more information.
-
-    Parameters
-    ----------
-    inputs : dict 
-        key, value pairs that will update the Coregister.inputs attributes.
-        See self.inputs_help() for a list of Coregister.inputs attributes
-    
-    Attributes
-    ----------
-    inputs : :class:`nipype.interfaces.base.Bunch`
-        Options that can be passed to spm_coreg via a job structure
-    cmdline : str
-        String used to call matlab/spm via SpmMatlabSpmMatlabCommandLine 
-        interface
-
-    Other Parameters
-    ----------------
-    To see optional arguments
-    Coregister().inputs_help()
-
-    To see output fields
-    Coregister().outputs_help()
-
     Examples
     --------
+    
+    >>> import nipype.interfaces.spm as spm
+    >>> coreg = spm.Coregister()
+    >>> coreg.inputs.infile = 'a.nii'
+    >>> coreg.inputs.register_to_mean = True
+    >>> coreg.run() # doctest: +SKIP
     
     """
     
@@ -804,64 +650,25 @@ class Coregister(SpmMatlabCommandLine):
     def jobname(self):
         return 'coreg'
         
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-        
-        target : string
-            Filename of nifti image to coregister to.  Also referred
-            to as the *reference image* or the *template image*.
-        source : string
-            Filename of nifti image to coregister to the target image.
-        apply_to_files : list, optional
-            list of filenames to apply the estimated rigid body
-            transform from source to target
-        jobtype : string
-            One of 'estwrite', 'write' or 'estimate'. default: estwrite
-        cost_function : string, optional
-            maximise or minimise some objective
-            function. Valid options are Mutual
-            Information (mi), Normalised Mutual
-            Information (nmi), or  Entropy Correlation
-            Coefficient (ecc) and Normalised Cross Correlation (ncc).
-            (spm default = nmi)
-        separation : float, optional
-            separation in mm used to sample images (spm default = 4.0) 
-        tolerance : list of 12 floats
-            The acceptable tolerance for each of the 12 parameters.
-        fwhm : float, optional
-            full width half maximum gaussian kernel used to smooth
-            images before coregistering (spm default = 5.0)
-        write_interp : int, optional
-            degree of b-spline used for interpolation when writing
-            resliced images (0 - Nearest neighbor, 1 - Trilinear, 2-7
-            - degree of b-spline) (spm default = 0 - Nearest Neighbor)
-        write_wrap : list, optional
-            Check if interpolation should wrap in [x,y,z]
-            (spm default [0,0,0])
-        write_mask : bool, optional
-            if True, mask output image, if False, do not mask.
-            (spm default = False)
-        flags : USE AT OWN RISK
-        """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        """ Initializes the input fields of this interface.
-        """
-        self.inputs = Bunch(target=None,
-                            source=None,
-                            apply_to_files=None,
-                            jobtype='estwrite',
-                            cost_function=None,
-                            separation=None,
-                            tolerance=None,
-                            fwhm=None,
-                            write_interp=None,
-                            write_wrap=None,
-                            write_mask=None,
-                            flags=None)
+    opt_map = {'target': ('ref', 'reference file to register to'),
+               'source': ('source', 'file to register to target'),
+               'jobtype': (None, 'one of: estimate, write, estwrite (opt,estwrite)','estwrite'),
+               'apply_to_files': ('other', 'files to apply transformation to (opt,)'),
+               'cost_function': ('eoptions.cost_fun',
+                              'objective cost function (opt, nmi))'),
+               'fwhm': ('eoptions.fwhm',
+                        'gaussian smoothing kernel width (opt, 5)'),
+               'separation': ('eoptions.sep',
+                              'sampling separation in mm (opt, 4))'),
+               'tolerance': ('eoptions.tol',
+                             'acceptable tolerance for each of 12 params (opt,))'),
+               'write_interp': ('roptions.interp',
+                           'degree of b-spline used for interpolation (opt, 0)'),
+               'write_wrap': ('roptions.wrap',
+                        'Check if interpolation should wrap in [x,y,z] (opt, [0,0,0])'),
+               'write_mask': ('roptions.mask',
+                              'True/False mask output image (opt, False)')
+               }
 
     def get_input_info(self):
         """ Provides information about inputs as a dict
@@ -872,60 +679,26 @@ class Coregister(SpmMatlabCommandLine):
                 Bunch(key='apply_to_files',copy=True)]
         return info
 
-    def _parseinputs(self):
-        """validate spm coregister options
-        if set to None ignore
+    def _convert_inputs(self, opt, val):
+        """Convert input to appropriate format for spm
         """
-        out_inputs = []
-        inputs = {}
-        einputs = {'ref':'','source':'','other':[],'eoptions':{},'roptions':{}}
-
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
-        for opt in inputs:
-            if opt == 'target':
-                #einputs['ref'] = list_to_filename(inputs[opt])
-                einputs['ref'] = scans_for_fnames(filename_to_list(inputs[opt]),keep4d=True)
-                continue
-            if opt == 'source':
-                #einputs['source'] = list_to_filename(inputs[opt])
-                einputs['source'] = scans_for_fnames(filename_to_list(inputs[opt]),keep4d=True)
-                continue
-            if opt == 'apply_to_files':
-                sess_scans = scans_for_fnames(filename_to_list(inputs[opt]))
-                einputs['other'] = sess_scans
-                continue
-            if opt == 'cost_function':
-                einputs['eoptions'].update({'cost_fun': inputs[opt]})
-                continue
-            if opt == 'separation':
-                einputs['eoptions'].update({'sep': float(inputs[opt])})
-                continue
-            if opt == 'tolerance':
-                einputs['eoptions'].update({'tol': inputs[opt]})
-                continue
-            if opt == 'fwhm':
-                einputs['eoptions'].update({'fwhm': float(inputs[opt])})
-                continue
-            if opt == 'write_interp':
-                einputs['roptions'].update({'interp': inputs[opt]})
-                continue
-            if opt == 'write_wrap':
-                if not len(inputs[opt]) == 3:
-                    raise ValueError('write_wrap must have 3 elements')
-                einputs['roptions'].update({'wrap': inputs[opt]})
-                continue
-            if opt == 'write_mask':
-                einputs['roptions'].update({'mask': int(inputs[opt])})
-                continue
-            if opt == 'flags':
-                einputs.update(inputs[opt])
-                continue
-            if opt == 'jobtype':
-                continue
-            print 'option %s not supported'%(opt)
-        jobtype = self.inputs.jobtype
-        einputs = [{'%s'%(jobtype):einputs}]
-        return einputs
+        if opt == 'target':
+            return scans_for_fnames(filename_to_list(val),keep4d=True)
+        if opt == 'source':
+            return scans_for_fnames(filename_to_list(val),keep4d=True)
+        if opt == 'apply_to_files':
+            return scans_for_fnames(filename_to_list(val))
+        if opt in ['write_wrap']:
+            if len(val) != 3:
+                raise ValueError('%s must have 3 elements'%opt)
+        return val
+    
+    def _parse_inputs(self):
+        """validate spm realign options if set to None ignore
+        """
+        einputs = super(Coregister, self)._parse_inputs(skip=('jobtype'))
+        jobtype =  self.inputs.jobtype
+        return [{'%s'%(jobtype):einputs[0]}]
 
     def outputs(self):
         """
@@ -1006,28 +779,6 @@ class Coregister(SpmMatlabCommandLine):
 class Normalize(SpmMatlabCommandLine):
     """use spm_normalise for warping an image to a template
 
-    See Normalize().spm_doc() for more information.
-    
-    Parameters
-    ----------
-    inputs : dict 
-        key, value pairs that will update the Normalize.inputs attributes.
-        See self.inputs_help() for a list of Normalize.inputs attributes.
-    
-    Attributes
-    ----------
-    inputs : :class:`nipype.interfaces.base.Bunch`
-        Options that can be passed to spm_normalise via a job structure
-    cmdline : str
-        String used to call matlab/spm via SpmMatlabCommandLine interface
-    
-    Other Parameters
-    ----------------
-
-    To see optional arguments
-    Normalize().inputs_help()
-
-
     Examples
     --------
     
@@ -1049,80 +800,38 @@ class Normalize(SpmMatlabCommandLine):
     def jobname(self):
         return 'normalise'
     
-
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-        
-        template : string
-            filename of nifti image to normalize to
-        source : string
-            filename of nifti image to normalize
-        apply_to_files : list, optional
-            list of filenames to apply the estimated normalization
-        parameter_file : string
-            An spm estimted warp file (*_sn.mat)
-        jobtype : string
-            One of 'estwrite', 'write' or 'est'. default: estwrite
-        source_weight : string, optional
-            name of weighting image for source
-        template_weight : string, optional
-            name of weighting image for template
-        source_image_smoothing : float, optional
-        template_image_smoothing : float, optional
-        affine_regularization_type : string, optional
-            ICBM space template (mni), average sized template
-            (size), no regularization (none)
-        DCT_period_cutoff : int, optional
-            Cutoff of for DCT bases.
-            spm default = 25
-        num_nonlinear_iterations : int, optional
-            Number of iterations of nonlinear warping
-            spm default = 16
-        nonlinear_regularization : float, optional
-            min = 0  max = 1
-            spm default = 1
-        write_preserve : boolean, optional
-            Indicates whether warped images are modulated. 
-            spm default = 0
-        write_bounding_box : 6-element list, optional
-        write_voxel_sizes : 3-element list, optional
-        write_interp : int, optional
-            degree of b-spline used for interpolation when
-            writing resliced images (0 - Nearest neighbor, 1 -
-            Trilinear, 2-7 - degree of b-spline)
-            (spm default = 0 - Nearest Neighbor)
-        write_wrap : list, optional
-            Check if interpolation should wrap in [x,y,z]
-            (spm default [0,0,0])
-        flags : USE AT OWN RISK, optional
-            #eg:'flags':{'eoptions':{'suboption':value}}
-        """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        """ Initializes the input fields of this interface.
-        """
-        self.inputs = Bunch(template=None,
-                            source=None,
-                            apply_to_files=None,
-                            parameter_file=None,
-                            jobtype='estwrite',
-                            source_weight=None,
-                            template_weight=None,
-                            source_image_smoothing=None,
-                            template_image_smoothing=None,
-                            affine_regularization_type=None,
-                            DCT_period_cutoff=None,
-                            num_nonlinear_iterations=None,
-                            nonlinear_regularization=None,
-                            write_preserve=None,
-                            write_bounding_box=None,
-                            write_voxel_sizes=None,
-                            write_interp=None,
-                            write_wrap=None,
-                            flags=None)
+    opt_map = {'template': ('eoptions.template', 'template file to normalize to'),
+               'source': ('subj.source', 'file to normalize to template'),
+               'jobtype': (None, 'one of: estimate, write, estwrite (opt, estwrite)', 'estwrite'),
+               'apply_to_files': ('subj.resample',
+                                  'files to apply transformation to (opt,)'),
+               'parameter_file': ('subj.matname',
+                                  'normalization parameter file*_sn.mat'),
+               'source_weight': ('subj.wtsrc',
+                                 'name of weighting image for source (opt)'),
+               'template_weight': ('eoptions.weight',
+                                   'name of weighting image for template (opt)'),
+               'source_image_smoothing': ('eoptions.smosrc',
+                                          'source smoothing (opt)'),
+               'template_image_smoothing': ('eoptions.smoref',
+                                            'template smoothing (opt)'),
+               'affine_regularization_type': ('eoptions.regype',
+                                              'mni, size, none (opt)'),
+               'DCT_period_cutoff': ('eoptions.cutoff',
+                                     'Cutoff of for DCT bases (opt, 25)'),
+               'nonlinear_iterations': ('eoptions.nits',
+                     'Number of iterations of nonlinear warping (opt, 16)'),
+               'nonlinear_regularization': ('eoptions.reg',
+                                            'min = 0; max = 1 (opt, 1)'),
+               'write_preserve': ('roptions.preserve',
+                     'True/False warped images are modulated (opt, False)'),
+               'write_bounding_box': ('roptions.bb', '6-element list (opt,)'),
+               'write_voxel_sizes': ('roptions.vox', '3-element list (opt,)'),
+               'write_interp': ('roptions.interp',
+                           'degree of b-spline used for interpolation (opt, 0)'),
+               'write_wrap': ('roptions.wrap',
+                        'Check if interpolation should wrap in [x,y,z] (opt, [0,0,0])'),
+               }
 
     def get_input_info(self):
         """ Provides information about inputs as a dict
@@ -1133,87 +842,38 @@ class Normalize(SpmMatlabCommandLine):
                 Bunch(key='apply_to_files',copy=False)]
         return info
         
-    def _parseinputs(self):
-        """validate spm normalize options
-        if set to None ignore
+    def _convert_inputs(self, opt, val):
+        """Convert input to appropriate format for spm
         """
-        out_inputs = []
-        inputs = {}
-        einputs = {'subj':{'resample':[]},'eoptions':{},'roptions':{}}
+        if opt == 'template':
+            return scans_for_fname(filename_to_list(val))
+        if opt == 'source':
+            return scans_for_fname(filename_to_list(val))
+        if opt == 'apply_to_files':
+            return scans_for_fnames(filename_to_list(val))
+        if opt == 'parameter_file':
+            return np.array([list_to_filename(val)],dtype=object)
+        if opt in ['write_wrap']:
+            if len(val) != 3:
+                raise ValueError('%s must have 3 elements'%opt)
+        return val
 
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
-        for opt in inputs:
-            if opt == 'template':
-                einputs['eoptions'].update({'template': scans_for_fname(list_to_filename(inputs[opt]))})
-                continue
-            if opt == 'source':
-                einputs['subj'].update({'source': scans_for_fname(list_to_filename(inputs[opt]))})
-                continue
-            if opt == 'apply_to_files':
-                inputfiles = deepcopy(filename_to_list(inputs[opt]))
-                if self.inputs.source != None:
-                    inputfiles.append(list_to_filename(self.inputs.source))
-                einputs['subj']['resample'] = scans_for_fnames(inputfiles)
-                continue
-            if opt == 'parameter_file':
-                einputs['subj']['matname'] = np.array([list_to_filename(inputs[opt])],dtype=object)
-                continue
-            if opt == 'jobtype':
-                if inputs[opt] in ['estwrite', 'write']:
-                    if self.inputs.apply_to_files is None:
-                        # SPM requires at least one file to normalize
-                        # if estwrite is being used.
-                        if self.inputs.source:
-                            einputs['subj']['resample'] = scans_for_fname(self.inputs.source)
-                continue
-            if opt == 'source_weight':
-                einputs['subj'].update({'wtsrc': inputs[opt]})
-                continue
-            if opt == 'template_weight':
-                einputs['eoptions'].update({'weight': inputs[opt]})
-                continue
-            if opt == 'source_image_smoothing':
-                einputs['eoptions'].update({'smosrc': float(inputs[opt])})
-                continue
-            if opt == 'template_image_smoothing':
-                einputs['eoptions'].update({'smoref': float(inputs[opt])})
-                continue
-            if opt == 'affine_regularization_type':
-                einputs['eoptions'].update({'regtype': inputs[opt]})
-                continue
-            if opt == 'DCT_period_cutoff':
-                einputs['eoptions'].update({'cutoff': inputs[opt]})
-                continue
-            if opt == 'num_nonlinear_iterations':
-                einputs['eoptions'].update({'nits': inputs[opt]})
-                continue
-            if opt == 'nonlinear_regularization':
-                einputs['eoptions'].update({'reg': float(inputs[opt])})
-                continue
-            if opt == 'write_preserve':
-                einputs['roptions'].update({'preserve': inputs[opt]})
-                continue
-            if opt == 'write_bounding_box':
-                einputs['roptions'].update({'bb': inputs[opt]})
-                continue
-            if opt == 'write_voxel_sizes':
-                einputs['roptions'].update({'vox': inputs[opt]})
-                continue
-            if opt == 'write_interp':
-                einputs['roptions'].update({'interp': inputs[opt]})
-                continue
-            if opt == 'write_wrap':
-                if not len(inputs[opt]) == 3:
-                    raise ValueError('write_wrap must have 3 elements')
-                einputs['roptions'].update({'wrap': inputs[opt]})
-                continue
-            if opt == 'flags':
-                einputs.update(inputs[opt])
-                continue
-            print 'option %s not supported'%(opt)
-        jobtype = self.inputs.jobtype
-        einputs = [{'%s'%(jobtype):einputs}]
-        return einputs
+    def _parse_inputs(self):
+        """validate spm realign options if set to None ignore
+        """
+        einputs = super(Normalize, self)._parse_inputs(skip=('jobtype',
+                                                             'apply_to_files'))
+        if self.inputs.apply_to_files:
+            inputfiles = deepcopy(filename_to_list(self.inputs.apply_to_files))
+            if self.inputs.source:
+                inputfiles.append(list_to_filename(self.inputs.source))
+            einputs[0]['subj']['resample'] = scans_for_fnames(inputfiles)
+        jobtype =  self.inputs.jobtype
+        if jobtype in ['estwrite', 'write']:
+            if self.inputs.apply_to_files is None:
+                if self.inputs.source:
+                    einputs[0]['subj']['resample'] = scans_for_fname(self.inputs.source)            
+        return [{'%s'%(jobtype):einputs[0]}]
 
     def run(self, template=None, source=None, parameter_file=None, apply_to_files=None, **inputs):
         """Executes the SPM normalize function using MATLAB
@@ -1235,7 +895,8 @@ class Normalize(SpmMatlabCommandLine):
         if apply_to_files:
             self.inputs.apply_to_files = apply_to_files
             
-        if self.inputs.jobtype.startswith('est'):        
+        jobtype =  self.inputs.jobtype
+        if jobtype.startswith('est'):
             if not self.inputs.template:
                 raise AttributeError('Normalize estimation requires a target file')
             if not self.inputs.source:
@@ -1271,7 +932,8 @@ class Normalize(SpmMatlabCommandLine):
     def aggregate_outputs(self):
            
         outputs = self.outputs()
-        if self.inputs.jobtype.startswith('est'):
+        jobtype =  self.inputs.jobtype
+        if jobtype.startswith('est'):
             if isinstance(self.inputs.source, list):
                 source_ext = self.inputs.source[0][-4:]
             else:
@@ -1303,26 +965,6 @@ class Segment(SpmMatlabCommandLine):
     """use spm_segment to separate structural images into different
     tissue classes.
 
-    See Segment().spm_doc() for more information.
-
-    Parameters
-    ----------
-    inputs : dict 
-        key, value pairs that will update the Segment.inputs attributes.
-        See self.inputs_help() for a list of Segment.inputs attributes.
-    
-    Attributes
-    ----------
-    inputs : :class:`nipype.interfaces.base.Bunch`
-        Options that can be passed to spm_segment via a job structure
-    cmdline : str
-        String used to call matlab/spm via SpmMatlabCommandLine interface
-
-    Other Parameters
-    ----------------
-    To see optional arguments
-    Segment().inputs_help()
-
     Examples
     --------
     
@@ -1344,88 +986,38 @@ class Segment(SpmMatlabCommandLine):
     def jobname(self):
         return 'preproc'
 
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-
-        data : structural image file
-            One scan per subject
-        gm_output_type : 3-element list, optional
-            Options to produce grey matter images: c1*.img,
-            wc1*.img and mwc1*.img. None: [0,0,0], Native Space:
-            [0,0,1], Unmodulated Normalised: [0,1,0], Modulated
-            Normalised: [1,0,0], Native + Unmodulated Normalised:
-            [0,1,1], Native + Modulated Normalised: [1,0,1],
-            Native + Modulated + Unmodulated: [1,1,1], Modulated +
-            Unmodulated Normalised: [1,1,0] 
-        wm_output_type : 3-element list, optional
-            Options to produce white matter images: c2*.img,
-            wc2*.img and mwc2*.img. Same as GM options
-        csf_output_type : 3-element list, optional
-            Options to produce CSF images: c3*.img, wc3*.img and
-            mwc3*.img. Same as GM options
-        save_bias_corrected : bool, optional
-            Option to produce a bias corrected image.
-        clean_masks : int, optional
-            Option to clean the gray and white matter masks using an
-            estimated brain mask. Dont do cleanup (0), Light Clean
-            (1), Thorough Clean (2)
-        tissue_prob_maps : list of filenames, optional
-            Provide maps of grey matter, white matter and
-            cerebro-spinal fluid probability. 
-        gaussians_per_class : 4-element list, optional
-            The number of Gaussians used to represent the
-            intensity distribution for each tissue class.
-        affine_regularization : string, optional
-            No Affine Registration (''), ICBM space template -
-            European brains (mni), ICBM space template - East
-            Asian brains (eastern), Average sized template:
-            (subj), No regularisation (none)
-        warping_regularization : float, optional
-            Controls balance between parameters and data.
-            spm default = 1
-        warp_frequency_cutoff : int, optional
-            Cutoff of DCT bases.
-        bias_regularization : float, optional
-            no regularisation (0), extremely light
-            regularisation (0.00001), very light regularisation
-            (0.0001), light regularisation (0.001), medium
-            regularisation (0.01), heavy regularisation (0.1),
-            very heavy regularisation (1), extremely heavy
-            regularisation (10).
-        bias_fwhm : int, optional
-            FWHM of Gaussian smoothness of bias. 30mm to 150mm
-            cutoff: (30-150 in steps of 10), No correction (inf).
-        sampling_distance : float, optional
-            Sampling distance on data for parameter estimation.
-        mask_image : filename, optional
-            An binary image to restrict parameter estimation to
-            certain parts of the brain.
-        flags : USE AT OWN RISK, optional
-            #eg:'flags':{'eoptions':{'suboption':value}}
-        """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        """ Initializes the input fields of this interface.
-        """
-        self.inputs = Bunch(data=None,
-                            gm_output_type=None,
-                            wm_output_type=None,
-                            csf_output_type=None,
-                            save_bias_corrected=None,
-                            clean_masks=None,
-                            tissue_prob_maps=None,
-                            gaussians_per_class=None,
-                            affine_regularization=None,
-                            warping_regularization=None,
-                            warp_frequency_cutoff=None,
-                            bias_regularization=None,
-                            bias_fwhm=None,
-                            sampling_distance=None,
-                            mask_image=None,
-                            flags=None)
+    #Options to produce grey matter images: c1*.img, wc1*.img and
+    #mwc1*.img. None: [0,0,0], Native Space: [0,0,1], Unmodulated Normalised:
+    #[0,1,0], Modulated Normalised: [1,0,0], Native + Unmodulated Normalised:
+    #[0,1,1], Native + Modulated Normalised: [1,0,1], Native + Modulated +
+    #Unmodulated: [1,1,1], Modulated + Unmodulated Normalised: [1,1,0]
+    
+    opt_map = {'data': ('data', 'one scan per subject'),
+               'gm_output_type': ('output.GM', '3-element list (opt,)'),
+               'wm_output_type': ('output.WM', '3-element list (opt,)'),
+               'csf_output_type': ('output.CSF', '3-element list (opt,)'),
+               'save_bias_corrected': ('output.biascor',
+                     'True/False produce a bias corrected image (opt, )'),
+               'clean_masks': ('output.cleanup',
+                     'clean using estimated brain mask 0(no)-2 (opt, )'),
+               'tissue_prob_maps': ('opts.tpm',
+                     'list of gray, white & csf prob. (opt,)'),
+               'gaussians_per_class': ('opts.ngaus',
+                     'num Gaussians capture intensity distribution (opt,)'),
+               'affine_regularization': ('opts.regtype',
+                      'mni, eastern, subj, none (opt,)'),
+               'warping_regularization': ('opts.warpreg',
+                      'Controls balance between parameters and data (opt, 1)'),
+               'warp_frequency_cutoff': ('opts.warpco', 'Cutoff of DCT bases (opt,)'),
+               'bias_regularization': ('opts.biasreg',
+                      'no(0) - extremely heavy (10), (opt, )'),
+               'bias_fwhm': ('opts.biasfwhm',
+                      'FWHM of Gaussian smoothness of bias (opt,)'),
+               'sampling_distance': ('opts.samp',
+                      'Sampling distance on data for parameter estimation (opt,)'),
+               'mask_image': ('opts.msk',
+                      'Binary image to restrict parameter estimation (opt,)'),
+               }
 
     def get_input_info(self):
         """ Provides information about inputs as a dict
@@ -1434,75 +1026,19 @@ class Segment(SpmMatlabCommandLine):
         info = [Bunch(key='data',copy=False)]
         return info
     
-    def _parseinputs(self):
-        """validate spm segment options
-        if set to None ignore
+    def _convert_inputs(self, opt, val):
+        """Convert input to appropriate format for spm
         """
-        out_inputs = []
-        inputs = {}
-        einputs = {'data':[],'output':{},'opts':{}}
-
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
-        for opt in inputs:
-            if opt == 'data':
-                if isinstance(inputs[opt], list):
-                    sess_scans = scans_for_fnames(inputs[opt])
-                else:
-                    sess_scans = scans_for_fname(inputs[opt])
-                einputs['data'] = sess_scans
-                continue
-            if opt == 'gm_output_type':
-                einputs['output']['GM'] = inputs[opt]
-                continue
-            if opt == 'wm_output_type':
-                einputs['output']['WM'] = inputs[opt]
-                continue
-            if opt == 'csf_output_type':
-                einputs['output']['CSF'] = inputs[opt]
-                continue
-            if opt == 'save_bias_corrected':
-                einputs['output']['biascor'] = int(inputs[opt])
-                continue
-            if opt == 'clean_masks':
-                einputs['output']['cleanup'] = inputs[opt]
-                continue
-            if opt == 'tissue_prob_maps':
-                if isinstance(inputs[opt], list):
-                    sess_scans = scans_for_fnames(inputs[opt])
-                else:
-                    sess_scans = scans_for_fname(inputs[opt])
-                einputs['opts']['tpm'] = sess_scans
-                continue
-            if opt == 'gaussians_per_class':
-                einputs['opts']['ngaus'] = inputs[opt]
-                continue
-            if opt == 'affine_regularization':
-                einputs['opts']['regtype'] = inputs[opt]
-                continue
-            if opt == 'warping_regularization':
-                einputs['opts']['warpreg'] = inputs[opt]
-                continue
-            if opt == 'warp_frequency_cutoff':
-                einputs['opts']['warpco'] = inputs[opt]
-                continue
-                continue
-            if opt == 'bias_regularization':
-                einputs['opts']['biasreg'] = inputs[opt]
-                continue
-            if opt == 'bias_fwhm':
-                einputs['opts']['biasfwhm'] = inputs[opt]
-                continue
-            if opt == 'sampling_distance':
-                einputs['opts']['samp'] = inputs[opt]
-                continue
-            if opt == 'mask_image':
-                einputs['opts']['msk'] = scans_for_fname(inputs[opt])
-                continue
-            if opt == 'flags':
-                einputs.update(inputs[opt])
-                continue
-            print 'option %s not supported'%(opt)
-        return [einputs]
+        if opt in ['data', 'tissue_prob_maps']:
+            if isinstance(val, list):
+                return scans_for_fnames(val)
+            else:
+                return scans_for_fname(val)
+        if opt == 'save_bias_corrected':
+            return int(val)
+        if opt == 'mask_image':
+            return scans_for_fname(val)
+        return val
 
     def run(self, data=None, **inputs):
         """Executes the SPM segment function using MATLAB
@@ -1618,26 +1154,6 @@ class Segment(SpmMatlabCommandLine):
 class Smooth(SpmMatlabCommandLine):
     """use spm_smooth for 3D Gaussian smoothing of image volumes.
 
-    See Smooth().spm_doc() for more information.
-
-    Parameters
-    ----------
-    inputs : dict 
-        key, value pairs that will update the Smooth.inputs attributes.
-        See self.inputs_help() for a list of Smooth.inputs attributes.
-    
-    Attributes
-    ----------
-    inputs : :class:`nipype.interfaces.base.Bunch`
-        Options that can be passed to spm_smooth via a job structure
-    cmdline : str
-        String used to call matlab/spm via SpmMatlabCommandLine interface
-
-    Other Parameters
-    ----------------
-    To see optional arguments
-    Smooth().inputs_help()
-
     Examples
     --------
     
@@ -1659,44 +1175,11 @@ class Smooth(SpmMatlabCommandLine):
     def jobname(self):
         return 'smooth'
 
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-        
-        infile : list
-            list of filenames to apply smoothing
-        fwhm : 3-list, optional
-            list of fwhm for each dimension
-        data_type : int, optional
-            Data type of the output images. A value of 0 specifies to
-            use the same data type as the original images.  Integer
-            values are based on the NIfTI-1 specification::
-
-               2 = uint8
-               4 = int16
-               8 = int32
-              16 = float32
-              64 = float64
-             256 = int8
-             512 = uint16
-             768 = uint32
-
-            (spm default = 0, same data type as original image)
-
-        flags : USE AT OWN RISK, optional
-            #eg:'flags':{'eoptions':{'suboption':value}}
-        """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        """ Initializes the input fields of this interface.
-        """
-        self.inputs = Bunch(infile=None,
-                            fwhm=None,
-                            data_type=None,
-                            flags=None)
-
+    opt_map = {'infile': ('data', 'list of files to smooth'),
+              'fwhm': ('fwhm', '3-list of fwhm for each dimension (opt, 8)'),
+              'data_type': ('dtype', 'Data type of the output images (opt, 0)'),
+              }
+    
     def get_input_info(self):
         """ Provides information about inputs as a dict
             info = [Bunch(key=string,copy=bool,ext='.nii'),...]
@@ -1704,31 +1187,12 @@ class Smooth(SpmMatlabCommandLine):
         info = [Bunch(key='infile',copy=False)]
         return info
         
-    def _parseinputs(self):
-        """validate spm smooth options
-        if set to None ignore
+    def _convert_inputs(self, opt, val):
+        """Convert input to appropriate format for spm
         """
-        out_inputs = []
-        inputs = {}
-        einputs = {'data':[],'fwhm':[],'dtype':0}
-
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
-        for opt in inputs:
-            if opt == 'infile':
-                sess_scans = scans_for_fnames(filename_to_list(inputs[opt]))
-                einputs['data'] = sess_scans
-                continue
-            if opt == 'fwhm':
-                einputs['fwhm'] = inputs[opt]
-                continue
-            if opt == 'data_type':
-                einputs['dtype'] = inputs[opt]
-                continue
-            if opt == 'flags':
-                einputs.update(inputs[opt])
-                continue
-            print 'option %s not supported'%(opt)
-        return [einputs]
+        if opt in ['infile']:
+            return scans_for_fnames(filename_to_list(val))
+        return val
 
     def run(self, infile=None, **inputs):
         """Executes the SPM smooth function using MATLAB
@@ -1918,7 +1382,7 @@ class Level1Design(SpmMatlabCommandLine):
         info = [Bunch(key='mask_image',copy=False)]
         return info
         
-    def _parseinputs(self):
+    def _parse_inputs(self):
         """validate spm normalize options
         if set to None ignore
         """
@@ -1995,7 +1459,7 @@ class Level1Design(SpmMatlabCommandLine):
             postscript += "save SPM SPM;\n"
         else:
             postscript = None
-        self._cmdline, mscript =self._make_matlab_command(self._parseinputs(),
+        self._cmdline, mscript =self._make_matlab_command(self._parse_inputs(),
                                                           postscript=postscript)
             
     def outputs(self):
@@ -2054,33 +1518,12 @@ class EstimateModel(SpmMatlabCommandLine):
     def jobname(self):
         return 'fmri_est'
 
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-        spm_design_file : filename
-            Filename containing absolute path to SPM.mat
-        estimation_method: dict
-            Estimate the specified model using one of three
-            different SPM options::
+    opt_map = {'spm_design_file': ('spmmat', 'absolute path to SPM.mat'),
+               'estimation_method': ('method',
+                                     'Classical, Bayesian2, Bayesian (dict)'),
+               'flags': (None, 'optional arguments (opt, None)')
+               }
 
-                {'Classical' : 1}
-                {'Bayesian2' : 1}
-                {'Bayesian' : dict}
-                    USE IF YOU KNOW HOW TO SPECIFY PARAMETERS
-
-        flags : USE AT OWN RISK
-            #eg:'flags':{'eoptions':{'suboption':value}}
-        """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        """ Initializes the input fields of this interface.
-        """
-        self.inputs = Bunch(spm_design_file=None,
-                            estimation_method=None,
-                            flags=None)
-        
     def get_input_info(self):
         """ Provides information about inputs as a dict
             info = [Bunch(key=string,copy=bool,ext='.nii'),...]
@@ -2088,27 +1531,25 @@ class EstimateModel(SpmMatlabCommandLine):
         info = [Bunch(key='spm_design_file',copy=True)]
         return info
     
-    def _parseinputs(self):
-        """validate spm normalize options
-        if set to None ignore
+    def _convert_inputs(self, opt, val):
+        """Convert input to appropriate format for spm
         """
-        out_inputs = []
-        inputs = {}
-        einputs = {'spmmat':'','method':{}}
-
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
-        for opt in inputs:
-            if opt == 'spm_design_file':
-                einputs['spmmat'] = np.array([str(inputs[opt])],dtype=object)
-                continue
-            if opt == 'estimation_method':
-                einputs['method'].update(inputs[opt])
-                continue
-            if opt == 'flags':
-                einputs.update(inputs[opt])
-                continue
-            print 'option %s not supported'%(opt)
-        return [einputs]
+        if opt == 'spm_design_file':
+            return np.array([str(val)],dtype=object)
+        if opt == 'estimation_method':
+            if isinstance(val, str):
+                return {'%s'%val:1}
+            else:
+                return val
+        return val
+    
+    def _parse_inputs(self):
+        """validate spm realign options if set to None ignore
+        """
+        einputs = super(EstimateModel, self)._parse_inputs(skip=('flags'))
+        if self.inputs.flags:
+            einputs[0].update(self.inputs.flags)
+        return einputs
     
     def outputs(self):
         """
@@ -2241,7 +1682,7 @@ class EstimateContrast(SpmMatlabCommandLine):
                 ]
         return info
     
-    def _parseinputs(self):
+    def _parse_inputs(self):
         """validate spm normalize options
         if set to None ignore
         """
@@ -2418,7 +1859,7 @@ class OneSampleTTest(SpmMatlabCommandLine):
         """
         self.inputs = Bunch(con_images=None)
         
-    def _parseinputs(self):
+    def _parse_inputs(self):
         """validate spm1 sample t-test options
         if set to None ignore
         """
@@ -2545,7 +1986,7 @@ class TwoSampleTTest(SpmMatlabCommandLine):
                             dependent=None,
                             unequal_variance=None)
         
-    def _parseinputs(self):
+    def _parse_inputs(self):
         """validate spm normalize options
         if set to None ignore
         """

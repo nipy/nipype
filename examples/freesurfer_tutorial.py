@@ -434,3 +434,5 @@ l2pipeline.connect([(l2source,l2concat,[(('file_list',sort),'volimages'),
 if __name__ == '__main__':
     l1pipeline.run()
     l2pipeline.run()
+    l1pipeline.export_graph()
+    l2pipeline.export_graph()
