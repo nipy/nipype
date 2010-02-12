@@ -2856,13 +2856,14 @@ class ExtractRoi(FSLCommand):
 
 #-------------------------------------------------------------------------------------------------------
 class Split(FSLCommand):
-    """Uses FSL Fslsplit command to split a 4D file into a series of 3D files.
+    """Uses FSL Fslsplit command to separate a volume into images in time, x, y or z dimension.
     """
     opt_map={'outbasename': None, # output basename
              'time': '-t', #separate images in time (default behaviour)
              'xdir': '-x', #separate images in the x direction
              'ydir': '-y', #separate images in the y direction
              'zdir': '-z', #separate images in the z direction
+             'infile': None
              }
 
     @property
