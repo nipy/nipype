@@ -25,7 +25,7 @@ sorry this is kind of stream-of-consciousness responses.  we can talk more in pe
 
 
 - how steep did you feel was the learning curve? what kind of tutorials would have helped?
-    * very steep.  AFNI used to have nice tutorials that explained the rationale of the neuroimaging analysis steps alongside the relevant AFNI tools that made them happen. (`http://afni.nimh.nih.gov/afni/doc/howto`)  A similar step-by-step guide (rather than just that big bucket Tutorial, which, while very helpful and well commented, is still rather daunting) would be a plus.  see, e.g.: `http://afni.nimh.nih.gov/pub/dist/HOWTO//howto/ht01_ARzs/html/index.shtm`l and in particular `http://afni.nimh.nih.gov/pub/dist/HOWTO//howto/ht01_ARzs/html/ARzs_analyze.shtml`
+    * very steep.  AFNI used to have nice tutorials that explained the rationale of the neuroimaging analysis steps alongside the relevant AFNI tools that made them happen. (http://afni.nimh.nih.gov/afni/doc/howto)  A similar step-by-step guide (rather than just that big bucket Tutorial, which, while very helpful and well commented, is still rather daunting) would be a plus.  see, e.g.: http://afni.nimh.nih.gov/pub/dist/HOWTO//howto/ht01_ARzs/html/index.shtml and in particular http://afni.nimh.nih.gov/pub/dist/HOWTO//howto/ht01_ARzs/html/ARzs_analyze.shtml
 
 
 - do you know you can visualize a simple and detailed visual representation of your workflow with export_graph()? if so, is it useful?
