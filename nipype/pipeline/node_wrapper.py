@@ -27,9 +27,12 @@ class NodeWrapper(object):
     interface : interface object
         node specific interface  (fsl.Bet(), spm.Coregister())
     iterables : generator
-        key and items to iterate using the pipeline engine
+        input field and list to iterate using the pipeline engine
         for example to iterate over different frac values in fsl.Bet()
-        node.iterables = dict(frac=lambda:[0.5,0.6,0.7])
+        for a single field the input can be a tuple, otherwise a list
+        of tuples
+        node.iterables = ('frac',[0.5,0.6,0.7])
+        node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
     iterfield : 1+-element list
         key(s) over which to repeatedly call the interface.
         for example, to iterate FSL.Bet over multiple files, one can

@@ -99,7 +99,7 @@ datasource.inputs.subject_info     = info
    entire first level preprocessing and estimation will be repeated
    for each subject contained in subject_list.
 """
-datasource.iterables = dict(subject_id=lambda:subject_list)
+datasource.iterables = ('subject_id',subject_list)
 
 ## from the FLIRT web doc
 

@@ -102,7 +102,7 @@ datasource.inputs.subject_info     = info
    entire first level preprocessing and estimation will be repeated
    for each subject contained in subject_list.
 """
-datasource.iterables = dict(subject_id=lambda:subject_list)
+datasource.iterables = ('subject_id', subject_list)
 
 
 """
@@ -158,7 +158,7 @@ normalize.inputs.template = os.path.abspath('data/T1.nii')
 """
 smooth = nw.NodeWrapper(interface=spm.Smooth(),diskbased=True)
 #smooth.inputs.fwhm = [6,6,8]
-smooth.iterables = dict(fwhm=lambda:[6])
+smooth.iterables = ('fwhm',[4,8])
 
 #######################################################################
 # setup analysis components
@@ -354,7 +354,8 @@ l2source = nw.NodeWrapper(nio.DataGrabber())
 l2source.inputs.file_template=os.path.abspath('spm/l1output/*/_fwhm_%d/con*/con_%04d.img')
 l2source.inputs.template_argnames=['fwhm','con']
 # iterate over all contrast images
-l2source.iterables = dict(fwhm=lambda:[4,8],con=lambda:contrast_ids)
+l2source.iterables = [('fwhm',[4,8]),
+                      ('con',contrast_ids)]
 
 
 """

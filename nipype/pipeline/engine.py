@@ -693,6 +693,14 @@ class Pipeline(object):
         logger.info("PE: expanding iterables")
         graph_in = deepcopy(self._graph)
         moreiterables = True
+        # convert list of tuples to dict fields
+        for node in graph_in.nodes():
+            if isinstance(node.iterables, tuple):
+                node.iterables = [node.iterables]
+        for node in graph_in.nodes():
+            if isinstance(node.iterables, list):
+                node.iterables = dict(map(lambda(x):(x[0],lambda:x[1]),
+                                          node.iterables))
         while moreiterables:
             nodes = nx.topological_sort(graph_in)
             nodes.reverse()

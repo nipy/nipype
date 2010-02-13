@@ -7,7 +7,7 @@ Below are user feedback on pipeline usage.
 User 1
 ======
 
-sorry this is kind of stream-of-consciousness responses.  we can talk more in person if you want.  I have to say, though, now that my pipelines are up and running, I'm about 95% satisfied with the whole thing.  Not sure how I'll feel when I want to go do something new and different, but still, so far so good.
+[...] I have to say, though, now that my pipelines are up and running, I'm about 95% satisfied with the whole thing.  Not sure how I'll feel when I want to go do something new and different, but still, so far so good.
 
 
 - what features of the current setup do you like/dislike?
@@ -38,7 +38,7 @@ sorry this is kind of stream-of-consciousness responses.  we can talk more in pe
     * (3) of course, that GUI for building pipelines would be nice :),
     * (4) oh man I wish I wish it could be strictly terminal-based and that there was some way to repress the ridiculous X-windows requirements of SPM,
     * (5) the output written to the screen during a running pipeline is not very good for seeing how "far along" it is, especially since it seems to run multiple subjects in parallel (?) or in very strange orders at least.  While I'm dreaming, maybe some sort of multifunctional display (like htop has) that shows you individual subject progress and overall progress and line-by-line output still... just dreaming here, but that would be nice for batches. 
-        * (6) Also if one subject fails, maybe it could just drop that subject and the error messages until the end and keep running the pipeline on everyone else?  for me it's usually something stupid like I got the onsets wrong or the wrong dicoms, and then if I walk away from the computer and it stops halfway, I lose all that processing time when it could still have been doing everyone else.
+    * (6) Also if one subject fails, maybe it could just drop that subject and the error messages until the end and keep running the pipeline on everyone else?  for me it's usually something stupid like I got the onsets wrong or the wrong dicoms, and then if I walk away from the computer and it stops halfway, I lose all that processing time when it could still have been doing everyone else.
 
 
 - does the ability to mix programs from different packages really appeal to you? or is the learning curve to understand these different packages too great and makes you to stick to what you know best?

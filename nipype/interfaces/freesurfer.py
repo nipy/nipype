@@ -960,10 +960,12 @@ class SurfConcat(FSLCommand):
         outfile: filename
             Concatenated volume
         """
-        return Bunch(outfile=None)
+        return Bunch(outfile=None,
+                     hemi=None)
 
     def aggregate_outputs(self):
         outputs = self.outputs()
+        outputs.hemi = self.inputs.hemi
         outfname = self._get_outfname()
         if not self.inputs.outfile:
             fname = self._get_outfname()
@@ -1041,8 +1043,13 @@ class OneSampleTTest(GlmFit):
         'hemi':               '%s',
         'outdir':             '--glmdir %s',
         'funcimage':          '--y %s',
-        'onesample':          '--osgm',
         'flags':              '%s'}
+    
+    def _parse_inputs(self):
+        """validate fs onesamplettest options"""
+        allargs = super(OneSampleTTest, self)._parse_inputs()
+        allargs.extend(['--osgm'])
+        return allargs
 
 class Threshold(FSLCommand):
     """Use FreeSurfer mri_binarize to threshold an input volume
