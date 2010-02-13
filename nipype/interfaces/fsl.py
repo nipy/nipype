@@ -3066,11 +3066,11 @@ class Bedpostx(FSLCommand):
     """
 
     opt_map = {
-        'fibres':               ('-n %d', 'number of fibres per voxel'),
-        'weight':               ('-w %.2f', 'ARD weight'),
-        'burn_period':          ('-b %d', 'burnin period'),
-        'jumps':                ('-j %d', 'number of jumps'),
-        'sampling':             ('-s %d', 'sampling interval'),
+        'fibres': ('-n %d', 'number of fibres per voxel (opt, )'),
+        'weight': ('-w %.2f', 'ARD weight (opt,)'),
+        'burn_period': ('-b %d', 'burnin period (opt,)'),
+        'jumps': ('-j %d', 'number of jumps (opt,)'),
+        'sampling': ('-s %d', 'sampling interval (opt,)'),
         }
     @property
     def cmd(self):

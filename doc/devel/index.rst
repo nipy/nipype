@@ -19,5 +19,6 @@ conventions documented in the `NIPY Developers Guide
    planning
    proposed_interfaces
    usecases
+   userfeedback
 
 .. include:: ../links_names.txt

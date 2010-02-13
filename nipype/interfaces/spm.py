@@ -2069,26 +2069,3 @@ class TwoSampleTTest(SpmMatlabCommandLine):
         if len(spmt)>0:
             outputs.spmT_images = sorted(spmt)
         return outputs
-
-class SpecifyModel():
-    """This class is now deprecated"""
-    
-    def __init__(self):
-        message = """
-        The interface class spm.SpecifyModel is now deprecated.  The
-        functionality has been moved to nipype.algorithms.modelgen.  In order
-        to use the new class please add the following import to your script::
-
-            import nipype.algorithms.modelgen as model
-
-        Then replace any occurences of spm.SpecifyModel with
-        model.SpecifyModel::
-
-            spm.SpecifyModel --> model.SpecifyModel
-
-        If you are using it with NodeWrapper ensure that diskbased is set to
-        True as the model.SpecifyModel now generates an npz file.
-
-        This message will be removed in future versions of this software.
-        """
-        raise Exception(message)
