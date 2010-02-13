@@ -332,7 +332,7 @@ class DicomConvert(FSCommandLine):
         outdir = self._get_outdir()
         cmd = []
         if not os.path.exists(outdir):
-            cmdstr = 'python -c "import os; os.makedirs(\'%s\')";' % outdir
+            cmdstr = 'python -c "import os; os.makedirs(\'%s\')"' % outdir
             cmd.extend([cmdstr])
         infofile = os.path.join(outdir, 'shortinfo.txt')
         if not os.path.exists(infofile):
@@ -479,7 +479,7 @@ class Dicom2Nifti(FSCommandLine):
         dicominfotxt = os.path.join(outdir,'dicominfo.txt')
         if not os.path.exists(dicominfotxt):
             cmdstr = 'dcmdir-info-mgh %s > %s;' % (self.inputs.dicomdir, dicominfotxt)
-        cmd.extend([cmdstr])
+            cmd.extend([cmdstr])
         for f in valid_inputs['dicomfiles']:
             head,fname = os.path.split(f)
             fname,ext  = os.path.splitext(fname)
