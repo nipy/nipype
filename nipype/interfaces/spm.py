@@ -1193,6 +1193,11 @@ class Smooth(SpmMatlabCommandLine):
         """
         if opt in ['infile']:
             return scans_for_fnames(filename_to_list(val))
+        if opt == 'smooth':
+            if not isinstance(val, list):
+                return [val,val,val]
+            else:
+                return val
         return val
 
     def run(self, infile=None, **inputs):
