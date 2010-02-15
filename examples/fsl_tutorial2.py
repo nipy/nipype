@@ -211,7 +211,7 @@ level1design = nw.NodeWrapper(interface=fsl.Level1Design(),diskbased=True)
 level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
 level1design.inputs.bases = {'hrf':{'derivs': True}}
 level1design.inputs.contrasts = contrasts
-level1design.inputs.reg_image = fsl.fsl_info.standard_image('MNI152_T1_2mm_brain.nii.gz')
+level1design.inputs.reg_image = fsl.FSLInfo.standard_image('MNI152_T1_2mm_brain.nii.gz')
 level1design.inputs.reg_dof = 12 
 
 """

@@ -45,7 +45,7 @@ package_check('IPython', '0.10', 'tutorial1')
 print fsl.FSLInfo.version()
 fsl.FSLInfo.outputtype('NIFTI')
 
-fs.fssubjectsdir(os.path.abspath('fsdata'))
+fs.FSInfo.subjectsdir(os.path.abspath('fsdata'))
 
 # setup the way matlab should be called
 mlab.MatlabCommandLine.matlab_cmd = "matlab -nodesktop -nosplash"

@@ -17,62 +17,89 @@ from glob import glob
 
 import numpy as np
 
-from nipype.interfaces.base import Bunch, CommandLine
-from nipype.interfaces.fsl import FSLCommand
+from nipype.interfaces.base import Bunch, CommandLine, OptMapCommand
 from nipype.utils.docparse import get_doc
 from nipype.utils.filemanip import fname_presuffix, filename_to_list
 from nipype.interfaces.io import FreeSurferSource
 
-def freesurferversion():
-    """Check for freesurfer version on system
-
-    Parameters
-    ----------
+class FSInfo(object):
+    __subjectsdir = os.getenv('SUBJECTS_DIR')
+    @staticmethod
+    def version():
+        """Check for freesurfer version on system
     
-    None
-
-    Returns
-    -------
+        Parameters
+        ----------
+        
+        None
     
-    version : string
-       version number as string 
-       or None if freesurfer version not found
-
-    """
-    # find which freesurfer is being used....and get version from
-    # /path/to/freesurfer/
-    fs_home = os.getenv('FREESURFER_HOME')
-    if fs_home is None:
-        return fs_home
-    versionfile = os.path.join(fs_home,'build-stamp.txt')
-    if not os.path.exists(versionfile):
-        return None
-    fid = open(versionfile,'rt')
-    version = fid.readline()
-    fid.close()
-    return version.split('-v')[1].strip('\n')
-
-def fssubjectsdir(subjects_dir=None):
-    """Check and or set the global SUBJECTS_DIR
+        Returns
+        -------
+        
+        version : string
+           version number as string 
+           or None if freesurfer version not found
     
-    Parameters
-    ----------
+        """
+        # find which freesurfer is being used....and get version from
+        # /path/to/freesurfer/
+        fs_home = os.getenv('FREESURFER_HOME')
+        if fs_home is None:
+            return fs_home
+        versionfile = os.path.join(fs_home,'build-stamp.txt')
+        if not os.path.exists(versionfile):
+            return None
+        fid = open(versionfile,'rt')
+        version = fid.readline()
+        fid.close()
+        return version.split('-v')[1].strip('\n')
     
-    subjects_dir :  string
-        The system defined subjects directory
-
-    Returns
-    -------
+    @classmethod
+    def subjectsdir(cls, subjects_dir=None):
+        """Check and or set the global SUBJECTS_DIR
+        
+        Parameters
+        ----------
+        
+        subjects_dir :  string
+            The system defined subjects directory
     
-    subject_dir : string
-        Represents the current environment setting of SUBJECTS_DIR
+        Returns
+        -------
+        
+        subject_dir : string
+            Represents the current environment setting of SUBJECTS_DIR
+    
+        """
+        if subjects_dir is not None:
+            # set environment setting
+            cls.__subjectsdir = os.path.abspath(subjects_dir)
+        return cls.__subjectsdir
+    
+class FSCommand(OptMapCommand):
+    '''General support for FreeSurfer commands'''
+    
+    def __init__(self, *args, **inputs):
+        super(FSCommand,self).__init__(**inputs)
+        
+        if 'subjectsdir' not in inputs or inputs['subjectsdir'] == None:
+            subjectsdir = FSInfo.subjectsdir()
+        else:
+            subjectsdir = os.path.abspath(inputs['subjectsdir'])
+        self._subjectsdir = subjectsdir
+        
+    def run(self):
+        """Execute the command.
 
-    """
-    if subjects_dir is not None:
-        # set environment setting
-        os.environ['SUBJECTS_DIR'] = os.path.abspath(subjects_dir)
-    subjects_dir = os.getenv('SUBJECTS_DIR')
-    return subjects_dir
+        Returns
+        -------
+        results : InterfaceResult
+            An :class:`nipype.interfaces.base.InterfaceResult` object
+            with a copy of self in `interface`
+
+        """
+        self.environ = {'SUBJECTS_DIR':self._subjectsdir}
+        return super(FSCommand,self).run()
 
 class FSCommandLine(CommandLine):
 
@@ -103,7 +130,7 @@ class FSCommandLine(CommandLine):
             result.outputs = self.aggregate_outputs()
         return result
 
-class DicomDirInfo(FSLCommand):
+class DicomDirInfo(FSCommand):
     """uses mri_parse_sdcmdir to get information from dicom
     directories
     
@@ -502,7 +529,7 @@ class Dicom2Nifti(FSCommandLine):
                                                                  template))))
         return outputs
 
-class Resample(FSLCommand):
+class Resample(FSCommand):
     """Use FreeSurfer mri_convert to up or down-sample image files
 
     Parameters
@@ -570,7 +597,7 @@ class Resample(FSLCommand):
             outputs.outfile = outfile[0]
         return outputs
 
-class ReconAll(FSLCommand):
+class ReconAll(FSCommand):
     """Use FreeSurfer recon-all to generate surfaces and parcellations of
     structural data from an anatomical image of a subject.
 
@@ -626,7 +653,7 @@ class ReconAll(FSLCommand):
         return FreeSurferSource(subject_id=self.inputs.subject_id,
                                 subjects_dir=self.inputs.subjects_dir).aggregate_outputs()
 
-class BBRegister(FSLCommand):
+class BBRegister(FSCommand):
     """Use FreeSurfer bbregister to register a volume two a surface mesh
 
     This program performs within-subject, cross-modal registration using a
@@ -729,7 +756,7 @@ class BBRegister(FSLCommand):
             outputs.outfile = outfile[0]
         return outputs
 
-class ApplyVolTransform(FSLCommand):
+class ApplyVolTransform(FSCommand):
     """Use FreeSurfer mri_vol2vol to apply a transform.
 
     Parameters
@@ -811,7 +838,7 @@ class ApplyVolTransform(FSLCommand):
         return outputs
 
         
-class Smooth(FSLCommand):
+class Smooth(FSCommand):
     """Use FreeSurfer mris_volsmooth to smooth a volume
 
     This function smoothes cortical regions on a surface and
@@ -896,7 +923,7 @@ class Smooth(FSLCommand):
         return outputs
 
         
-class SurfConcat(FSLCommand):
+class SurfConcat(FSCommand):
     """Use FreeSurfer mris_preproc to prepare a group of contrasts for
     a second level analysis
     
@@ -979,7 +1006,7 @@ class SurfConcat(FSLCommand):
         return outputs
 
     
-class GlmFit(FSLCommand):
+class GlmFit(FSCommand):
     """Use FreeSurfer mri_glmfit to prepare a group of contrasts for
     a second level analysis
     
@@ -1051,7 +1078,7 @@ class OneSampleTTest(GlmFit):
         allargs.extend(['--osgm'])
         return allargs
 
-class Threshold(FSLCommand):
+class Threshold(FSCommand):
     """Use FreeSurfer mri_binarize to threshold an input volume
 
     Parameters
@@ -1150,7 +1177,7 @@ class Threshold(FSLCommand):
             outputs.outfile = outfile[0]
         return outputs
 
-class Concatenate(FSLCommand):
+class Concatenate(FSCommand):
     """Use FreeSurfer mri_concat for ROI analysis
 
     Parameters
@@ -1258,7 +1285,7 @@ class Concatenate(FSLCommand):
             outputs.outfile = outfile[0]
         return outputs
 
-class SegStats(FSLCommand):
+class SegStats(FSCommand):
     """Use FreeSurfer mri_segstats for ROI analysis
 
     Parameters
@@ -1386,7 +1413,7 @@ class SegStats(FSLCommand):
         outputs = self.outputs()
         return outputs
 
-class Label2Vol(FSLCommand):
+class Label2Vol(FSCommand):
     """Make a binary volume from a Freesurfer label
 
     Parameters
