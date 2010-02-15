@@ -94,27 +94,29 @@ class SpmInfo(object):
     """ Return the path to the spm directory in the matlab path
         If path not found, prints error asn returns None
     """
-    @setattr_on_read
-    def spm_path(self):
-        mlab = MatlabCommandLine()
-        mlab.inputs.script_name = 'spminfo'
-        mlab.inputs.script_lines = """
-if isempty(which('spm')), throw(MException('SPMCheck:NotFound','SPM not in matlab path'));end;
-spm_path = spm('dir');
-fprintf(1, '<PATH>%s</PATH>', spm_path);
-"""
-        mlab.inputs.mfile = False
-        out = mlab.run()
-        if out.runtime.returncode == 0:
-            path = re.match('<PATH>(.*)</PATH>',out.runtime.stdout[out.runtime.stdout.find('<PATH>'):])
-            if path is not None:
-                path = path.groups()[0]
-            return path
-        else:
-            print out.runtime.stderr
-            return None
-
-spm_info = SpmInfo()
+    __path = None
+    @classmethod
+    def spm_path(cls):
+        if cls.__path == None:
+            mlab = MatlabCommandLine()
+            mlab.inputs.script_name = 'spminfo'
+            mlab.inputs.script_lines = """
+    if isempty(which('spm')), throw(MException('SPMCheck:NotFound','SPM not in matlab path'));end;
+    spm_path = spm('dir');
+    fprintf(1, '<PATH>%s</PATH>', spm_path);
+    """
+            mlab.inputs.mfile = False
+            out = mlab.run()
+            if out.runtime.returncode == 0:
+                path = re.match('<PATH>(.*)</PATH>',out.runtime.stdout[out.runtime.stdout.find('<PATH>'):])
+                if path is not None:
+                    path = path.groups()[0]
+                cls.__path = path
+            else:
+                print out.runtime.stderr
+                return None
+            
+        return cls.__path
 
 class SpmMatlabCommandLine(MatlabCommandLine):
     """ Extends the `MatlabCommandLine` class to handle SPM specific
