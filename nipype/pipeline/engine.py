@@ -16,6 +16,7 @@ from traceback import format_tb
 import numpy as np
 
 from nipype.utils.misc import package_check
+from IPython.kernel.error import CompositeError
 package_check('networkx', '1.0')
 import networkx as nx
 
@@ -515,6 +516,10 @@ class Pipeline(object):
                 a = self.pendingresults.pop()
                 try:
                     res = a[0].get_result(block=False)
+                except CompositeError, e:
+                    self._report_crash(self.procs[a[1]])
+                    e.print_tracebacks()
+                    e.raise_exception()
                 except:
                     # bare except, but i really don't know where a
                     # node might fail
