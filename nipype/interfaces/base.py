@@ -430,12 +430,23 @@ class CommandLine(Interface):
         if cwd is None:
             cwd = os.getcwd()
         runtime = Bunch(cmdline=self.cmdline, cwd=cwd)
-
-        proc  = subprocess.Popen(runtime.cmdline,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE,
-                                 shell=True,
-                                 cwd=cwd)
+        
+        env = None
+        if hasattr(self, 'environ') and self.environ != None:
+            env = deepcopy(os.environ)
+            env.update(self.environ)
+            proc  = subprocess.Popen(runtime.cmdline,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE,
+                                     shell=True,
+                                     cwd=cwd,
+                                     env=env)
+        else:
+            proc  = subprocess.Popen(runtime.cmdline,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE,
+                                     shell=True,
+                                     cwd=cwd)
 
         runtime.stdout, runtime.stderr = proc.communicate()
         runtime.returncode = proc.returncode

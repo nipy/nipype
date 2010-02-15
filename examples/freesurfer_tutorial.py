@@ -9,7 +9,6 @@
 1. Tell python where to find the appropriate functions.
 """
 import os                                    # system functions
-import sys
 
 import nipype.interfaces.io as nio           # Data i/o 
 import nipype.interfaces.spm as spm          # spm
@@ -43,8 +42,8 @@ package_check('IPython', '0.10', 'tutorial1')
 """
 
 # Tell fsl to generate all output in uncompressed nifti format
-print fsl.fsl_info.version
-fsl.fsl_info.outputtype('NIFTI')
+print fsl.FSLInfo.version()
+fsl.FSLInfo.outputtype('NIFTI')
 
 fs.fssubjectsdir(os.path.abspath('fsdata'))
 

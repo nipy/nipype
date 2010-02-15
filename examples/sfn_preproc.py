@@ -8,7 +8,7 @@ import nipype.algorithms.rapidart as ra      # artifact detection
 
 
 # Tell fsl to generate all output in uncompressed nifti format
-print fsl.fsl_info.version
+print fsl.FSLInfo.version()
 # I actually like gzipping
 # fsl.fsloutputtype('NIFTI')
 

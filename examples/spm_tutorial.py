@@ -41,8 +41,8 @@ package_check('IPython', '0.10', 'tutorial1')
 """
 
 # Tell fsl to generate all output in uncompressed nifti format
-print fsl.fsl_info.version
-fsl.fsl_info.outputtype('NIFTI')
+print fsl.FSLInfo.version()
+fsl.FSLInfo.outputtype('NIFTI')
 
 # setup the way matlab should be called
 mlab.MatlabCommandLine.matlab_cmd = "matlab -nodesktop -nosplash"
