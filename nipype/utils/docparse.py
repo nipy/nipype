@@ -12,7 +12,7 @@ docstring = docparse.get_doc(better.cmd, better.opt_map)
 """
 
 import subprocess
-from nipype.interfaces.base import CommandLine, Bunch
+from nipype.interfaces.base import CommandLine
 from nipype.utils.misc import is_container
 
 def grab_doc(cmd, trap_error=True):
@@ -358,25 +358,3 @@ def replace_opts(rep_doc, opts):
     for key, val in opts.iteritems():
         rep_doc = rep_doc.replace(key, val)
     return rep_doc
-
-def _fsl_docs():
-    """Process all the fsl docs we have so far.  Used for debugging
-    during development.
-    """
-    from nipype.interfaces import fsl
-
-    cmdlist = [('bet', 'fsl.Bet'), 
-               ('fast', 'fsl.Fast'),
-               ('flirt', 'fsl.Flirt'),
-               ('mcflirt', 'fsl.McFlirt'),
-               ('fnirt', 'fsl.Fnirt')]
-
-    fsl_doc_list = []
-    for cmd in cmdlist:
-        doc = grab_doc(cmd[0])
-        opt_map = cmd[1] + '.opt_map'
-        opts = reverse_opt_map(eval(opt_map))
-        res = build_doc(doc, opts)
-        fsl_doc_list.append((cmd[0], res))
-    return fsl_doc_list
-    

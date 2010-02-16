@@ -463,7 +463,6 @@ class CommandLine(Interface):
         return []
     
     
-from nipype.utils.docparse import get_doc    
 class OptMapCommand(CommandLine):
     '''Common FreeSurfer and FSL commands support'''
     opt_map = {}
@@ -569,6 +568,7 @@ class OptMapCommand(CommandLine):
 
     def inputs_help(self):
         """Print command line documentation for the command."""
+        from nipype.utils.docparse import get_doc
         print get_doc(self.cmd, self.opt_map, '-h')
 
     def outputs_help(self):
