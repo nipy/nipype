@@ -71,18 +71,6 @@ def fnames_presuffix(fnames, prefix='', suffix='', newpath=None,use_ext=True):
         f2.append(fname_presuffix(fname, prefix, suffix, newpath, use_ext))
     return f2
 
-def md5file(filename, excludeline="", includeline=""):
-    """Compute md5 hash of the specified file"""
-    m = md5()
-    try:
-        for line in open(filename,"rb"):
-            if excludeline and line.startswith(excludeline):
-                continue
-            m.update(line)
-        return m.hexdigest()
-    except IOError:
-        print "Unable to open the file in readmode:", filename
-        
 def hash_rename(filename, hash):
     """renames a file given original filename and hash
     and sets path to output_directory
