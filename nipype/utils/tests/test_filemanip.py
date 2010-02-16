@@ -5,7 +5,7 @@ from nipype.testing import assert_equal, assert_true, assert_false
 from nipype.utils.filemanip import (save_json, load_json, loadflat,
                                     fname_presuffix, fnames_presuffix,
                                     hash_rename, check_forhash,
-                                    copyfile)
+                                    copyfile, copyfiles)
 
 import numpy as np
 
@@ -39,11 +39,16 @@ def test_check_forhash():
     yield assert_false, result
     yield assert_equal, hash, None
 
-def test_copyfile():
+def _temp_analyze_files():
+    """Generate temporary analyze file pair."""
     fd, orig_img = mkstemp(suffix = '.img')
     orig_hdr = orig_img[:-4] + '.hdr'
     fp = file(orig_hdr, 'w+')
     fp.close()
+    return orig_img, orig_hdr
+
+def test_copyfile():
+    orig_img, orig_hdr = _temp_analyze_files()
     pth, fname = os.path.split(orig_img)
     new_img = os.path.join(pth, 'newfile.img')
     new_hdr = os.path.join(pth, 'newfile.hdr')
@@ -61,6 +66,30 @@ def test_copyfile():
     # final cleanup
     os.unlink(orig_img)
     os.unlink(orig_hdr)
+
+def test_copyfiles():
+    orig_img1, orig_hdr1 = _temp_analyze_files()
+    orig_img2, orig_hdr2 = _temp_analyze_files()
+    pth, fname = os.path.split(orig_img1)
+    new_img1 = os.path.join(pth, 'newfile.img')
+    new_hdr1 = os.path.join(pth, 'newfile.hdr')
+    pth, fname = os.path.split(orig_img2)
+    new_img2 = os.path.join(pth, 'secondfile.img')
+    new_hdr2 = os.path.join(pth, 'secondfile.hdr')
+    newfiles = copyfiles([orig_img1, orig_img2], [new_img1, new_img2])
+    yield assert_true, os.path.exists(new_img1)
+    yield assert_true, os.path.exists(new_hdr1)
+    yield assert_true, os.path.exists(new_img2)
+    yield assert_true, os.path.exists(new_hdr2)
+    # cleanup
+    os.unlink(orig_img1)
+    os.unlink(orig_hdr1)
+    os.unlink(orig_img2)
+    os.unlink(orig_hdr2)
+    os.unlink(new_img1)
+    os.unlink(new_hdr1)
+    os.unlink(new_img2)
+    os.unlink(new_hdr2)
 
 def test_json():
     # Simple roundtrip test of json files, just a sanity check.
