@@ -77,8 +77,8 @@ def hash_rename(filename, hash):
     """
     path, name = os.path.split(filename)
     name, ext = os.path.splitext(name)
-    newfilename = ''.join((name,'_0x',hash,ext))
-    return os.path.join(path,newfilename)
+    newfilename = ''.join((name,'_0x', hash, ext))
+    return os.path.join(path, newfilename)
              
 
 def check_forhash(filename):
@@ -86,20 +86,20 @@ def check_forhash(filename):
     if isinstance(filename,list):
         filename = filename[0]
     path, name = os.path.split(filename)
-    if re.search('(_0x[a-z0-9]{32})',name):
-        hash = re.findall('(_0x[a-z0-9]{32})',name)
+    if re.search('(_0x[a-z0-9]{32})', name):
+        hash = re.findall('(_0x[a-z0-9]{32})', name)
         return True, hash
     else:
         return False, None
 
 def copyfile(originalfile, newfile, copy=False):
-    """given a file moves it to a working directory
+    """Copy or symlink ``originalfile`` to ``newfile``.
 
     Parameters
     ----------
-    originalfile : file
+    originalfile : str
         full path to original file
-    newfile : file
+    newfile : str
         full path to new file
     copy : Bool
         specifies whether to copy or symlink files
@@ -113,7 +113,8 @@ def copyfile(originalfile, newfile, copy=False):
     if os.path.lexists(newfile):
         os.unlink(newfile)
         #TODO: use logging
-        print "File: %s already exists, overwriting with %s, copy:%d"%(newfile, originalfile, copy)
+        print "File: %s already exists, overwriting with %s, copy:%d" \
+            % (newfile, originalfile, copy)
     if os.name is 'posix' and not copy:
         os.symlink(originalfile,newfile)
     else:
@@ -129,12 +130,12 @@ def copyfile(originalfile, newfile, copy=False):
         copyfile(hdrofile, hdrnfile, copy)
 
 def copyfiles(filelist, dest, copy=False):
-    """given a file moves it to a working directory
+    """Copy or symlink files in ``filelist`` to ``dest`` directory.
 
     Parameters
     ----------
-    originalfile : file
-        full path to original file
+    filelist : list
+        List of files to copy.
     dest : path/files
         full path to destination. If it is a list of length greater
         than 1, then it assumes that these are the names of the new

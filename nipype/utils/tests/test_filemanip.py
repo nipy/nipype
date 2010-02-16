@@ -1,9 +1,10 @@
 import os
 from tempfile import mkstemp
 
-from nipype.testing import assert_equal, assert_true
+from nipype.testing import assert_equal, assert_true, assert_false
 from nipype.utils.filemanip import (save_json, load_json, loadflat,
-                                    fname_presuffix, fnames_presuffix)
+                                    fname_presuffix, fnames_presuffix,
+                                    hash_rename, check_forhash)
 
 import numpy as np
 
@@ -21,6 +22,23 @@ def test_fnames_presuffix():
     fnames = ['foo.nii', 'bar.nii']
     pths = fnames_presuffix(fnames, 'pre_', '_post', '/tmp')
     yield assert_equal, pths, ['/tmp/pre_foo_post.nii', '/tmp/pre_bar_post.nii']
+
+def test_hash_rename():
+    new_name = hash_rename('foobar.nii', 'abc123')
+    assert_equal(new_name, 'foobar_0xabc123.nii')
+
+def test_check_forhash():
+    fname = 'foobar'
+    orig_hash = '_0x4323dbcefdc51906decd8edcb3327943'
+    #hashed_name = 'foobar_0x4323dbcefdc51906decd8edcb3327943.nii'
+    hashed_name = ''.join((fname, orig_hash, '.nii'))
+    result, hash = check_forhash(hashed_name)
+    yield assert_true, result
+    yield assert_equal, hash, [orig_hash]
+    result, hash = check_forhash('foobar.nii')
+    yield assert_false, result
+    yield assert_equal, hash, None
+
 
 def test_json():
     # Simple roundtrip test of json files, just a sanity check.
