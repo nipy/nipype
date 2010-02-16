@@ -109,7 +109,7 @@ def test_make_matlab_command():
 def test_spm_realign_inputs():
     realign = spm.Realign()
     definputs = Bunch(infile=None,
-                      write=True,
+                      jobtype='estwrite',
                       quality=None,
                       fwhm=None,
                       separation=None,
@@ -120,8 +120,8 @@ def test_spm_realign_inputs():
                       write_which=None,
                       write_interp=None,
                       write_wrap=None,
-                      write_mask=None,
-                      flags=None)
+                      write_mask=None)
+                      
     yield assert_equal, str(realign.inputs), str(definputs)
 
 def test_spm_get_input_info():
@@ -129,8 +129,8 @@ def test_spm_get_input_info():
     yield assert_equal, str(realign.get_input_info()[0]), str(Bunch(key='infile',copy=True))
     
 def test_spm_parse_inputs():
-    realign = spm.Realign(write=False)
-    updatedopts = realign._parseinputs()
-    yield assert_equal, updatedopts, [{'estimate': {'roptions': {}, 'eoptions': {}, 'data': []}}]
-    yield assert_false, realign.inputs.write
+    realign = spm.Realign(jobtype='estimate')
+    updatedopts = realign._parse_inputs()
+    yield assert_equal, updatedopts, [{'estimate': {}}]
+    yield assert_equal, 'estimate', realign.inputs.jobtype
 
