@@ -144,7 +144,9 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         return 'jobname' 
 
     def _use_mfile(self, use_mfile):
-        """reset the base matlab command
+        """boolean,
+        if true generates a matlab <filename>.m file
+        if false generates a binary .mat file
         """
         self.mfile = use_mfile
 

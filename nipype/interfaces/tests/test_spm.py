@@ -18,7 +18,7 @@ mlab.MatlabCommandLine.matlab_cmd = matlab_cmd
 def cannot_find_spm():
     # See if we can find spm or not.
     try:
-        spm.spm_info.spm_path
+        spm.SpmInfo.spm_path()
         return False
     except IOError:
         return True
