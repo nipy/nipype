@@ -287,7 +287,7 @@ class DicomConvert(FSCommandLine):
         """
         out_inputs = {'dicomfiles':None}
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v]
+        [inputs.update({k:v}) for k, v in self.inputs.items() if v]
         for opt in inputs:
             if opt == 'dicomdir':
                 out_inputs['dicomfiles'] = glob(os.path.abspath(os.path.join(inputs[opt],'*-1.dcm')))
@@ -459,7 +459,7 @@ class Dicom2Nifti(FSCommandLine):
         """
         out_inputs = {'dicomfiles':None}
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        [inputs.update({k:v}) for k, v in self.inputs.items() if v is not None ]
         for opt in inputs:
             if opt == 'dicomdir':
                 out_inputs['dicomfiles'] = glob(os.path.abspath(os.path.join(inputs[opt],'*-1.dcm')))

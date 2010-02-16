@@ -74,9 +74,14 @@ class Bunch(object):
         Note: update is very much like HasTraits.set"""
         self.__dict__.update(*args, **kwargs)
 
+    def items(self):
+        """iterates over bunch attributes as key,value pairs"""
+        return self.__dict__.items()
+
     def iteritems(self):
         """iterates over bunch attributes as key,value pairs"""
-        return self.__dict__.iteritems()
+        warn('iteritems is deprecated, use items instead')
+        return self.items()
 
     def get(self, *args):
         '''Support dictionary get() functionality 
@@ -97,7 +102,7 @@ class Bunch(object):
         """
         outstr = ['Bunch(']
         first = True
-        for k, v in sorted(self.iteritems()):
+        for k, v in sorted(self.items()):
             if not first:
                 outstr.append(', ')
             outstr.append('%s=%r' % (k, v))
@@ -149,7 +154,7 @@ class Bunch(object):
         """
 
         infile_list = []
-        for key, val in self.iteritems():
+        for key, val in self.items():
             if is_container(val):
                 # XXX - SG this probably doesn't catch numpy arrays
                 # containing embedded file names either. 
@@ -188,7 +193,7 @@ class Bunch(object):
         else:
             p.begin_group(6, 'Bunch(')
             first = True
-            for k, v in sorted(self.iteritems()):
+            for k, v in sorted(self.items()):
                 if not first:
                     p.text(',')
                     p.breakable()
@@ -512,7 +517,7 @@ class OptMapCommand(CommandLine):
 
         """
         allargs = []
-        inputs = sorted((k, v) for k, v in self.inputs.iteritems()
+        inputs = sorted((k, v) for k, v in self.inputs.items()
                             if v is not None and k not in skip)
         for opt, value in inputs:
             if opt == 'args':

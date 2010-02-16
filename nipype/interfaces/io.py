@@ -232,7 +232,7 @@ class DataSink(Interface):
             outdir = os.path.join(outdir,self.inputs.parameterization)
         if not os.path.exists(outdir):
             os.makedirs(outdir)
-        for k,v in self.inputs.iteritems():
+        for k,v in self.inputs.items():
             if k not in self.input_keys:
                 if v is not None:
                     tempoutdir = outdir
@@ -460,7 +460,7 @@ class FreeSurferSource(Interface):
         annot : lh, rh
         """
         outputs = Bunch(self.dirmap)
-        for k,v in outputs.iteritems():
+        for k,v in outputs.items():
             setattr(outputs,k,None)
         return outputs
         
@@ -473,7 +473,7 @@ class FreeSurferSource(Interface):
                                 'provided as input to FreeSurferSource.')
         subject_path = os.path.join(subjects_dir,self.inputs.subject_id)
         outputs = self.outputs()
-        for k,v in outputs.iteritems():
+        for k,v in outputs.items():
             val = self._get_files(subject_path,k)
             setattr(outputs,k, val)
         return outputs

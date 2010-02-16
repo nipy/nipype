@@ -39,7 +39,7 @@ class AFNICommand(CommandLine):
 
         """
         allargs = []
-        inputs = [(k, v) for k, v in self.inputs.iteritems() if v is not None ]
+        inputs = [(k, v) for k, v in self.inputs.items() if v is not None ]
         for opt, value in inputs:
             if opt in skip:
                 continue
@@ -133,7 +133,7 @@ class To3d(AFNICommand):
 
         out_inputs = []
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+        [inputs.update({k:v}) for k, v in self.inputs.items() \
             if v is not None]
 
         if inputs.has_key('datatype'):
@@ -151,7 +151,7 @@ class To3d(AFNICommand):
         if inputs.has_key('time_dependencies'):
             val = inputs.pop('time_dependencies')
             inputssub = {}
-            [inputssub.update({k:v}) for k, v in val.iteritems() \
+            [inputssub.update({k:v}) for k, v in val.items() \
                 if v is not None]
 
             # The following are example input orders
@@ -320,7 +320,7 @@ class Threedrefit(AFNICommand):
 
         out_inputs = []
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+        [inputs.update({k:v}) for k, v in self.inputs.items() \
              if v is not None]
 
         if inputs.has_key('deoblique'):
@@ -407,7 +407,7 @@ class Threedresample(AFNICommand):
 
         out_inputs = []
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+        [inputs.update({k:v}) for k, v in self.inputs.items() \
              if v is not None]
 
         if inputs.has_key('rsmode'):
@@ -496,7 +496,7 @@ class ThreedTstat(AFNICommand):
 
         out_inputs = []
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+        [inputs.update({k:v}) for k, v in self.inputs.items() \
              if v is not None]
 
         if inputs.has_key('outfile'):
@@ -571,7 +571,7 @@ class ThreedAutomask(AFNICommand):
 
         out_inputs = []
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+        [inputs.update({k:v}) for k, v in self.inputs.items() \
              if v is not None]
 
         if inputs.has_key('outfile'):
@@ -654,7 +654,7 @@ class Threedvolreg(AFNICommand):
 
         out_inputs = []
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+        [inputs.update({k:v}) for k, v in self.inputs.items() \
              if v is not None]
 
         if inputs.has_key('verbose'):
@@ -750,7 +750,7 @@ class Threedmerge(AFNICommand):
 
         out_inputs = []
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+        [inputs.update({k:v}) for k, v in self.inputs.items() \
              if v is not None]
 
         if inputs.has_key('doall'):
@@ -837,13 +837,13 @@ class ThreedZcutup(AFNICommand):
 
         out_inputs = []
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+        [inputs.update({k:v}) for k, v in self.inputs.items() \
              if v is not None]
 
         if inputs.has_key('keep'):
             val = inputs.pop('keep')
             inputssub = {}
-            [inputssub.update({k:v}) for k, v in val.iteritems() \
+            [inputssub.update({k:v}) for k, v in val.items() \
                 if v is not None]
 
             if inputssub.has_key('from'):
@@ -904,7 +904,7 @@ class ThreedSkullStrip(AFNICommand):
 
         out_inputs = []
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+        [inputs.update({k:v}) for k, v in self.inputs.items() \
              if v is not None]
 
         if inputs.has_key('outfile'):
@@ -953,7 +953,7 @@ class ThreedBrickStat(AFNICommand):
 
         out_inputs = []
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+        [inputs.update({k:v}) for k, v in self.inputs.items() \
              if v is not None]
 
         if inputs.has_key('automask'):
@@ -962,7 +962,7 @@ class ThreedBrickStat(AFNICommand):
         if inputs.has_key('percentile'):
             val = inputs.pop('percentile')
             inputssub = {}
-            [inputssub.update({k:v}) for k, v in val.iteritems() \
+            [inputssub.update({k:v}) for k, v in val.items() \
                 if v is not None]
 
             if inputssub.has_key('p0'):
@@ -1031,7 +1031,7 @@ class Threedcalc(AFNICommand):
 
         out_inputs = []
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+        [inputs.update({k:v}) for k, v in self.inputs.items() \
              if v is not None]
 
         if inputs.has_key('infile_a'):
@@ -1099,7 +1099,7 @@ class ThreedAllineate(AFNICommand):
 
         out_inputs = []
         inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() \
+        [inputs.update({k:v}) for k, v in self.inputs.items() \
              if v is not None]
 
         if inputs.has_key('lpc'):

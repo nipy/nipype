@@ -187,7 +187,7 @@ class SpmMatlabCommandLine(MatlabCommandLine):
     
     def _parse_inputs(self, skip=()):
         spmdict = {}
-        inputs = sorted((k, v) for k, v in self.inputs.iteritems()
+        inputs = sorted((k, v) for k, v in self.inputs.items()
                             if v is not None and k not in skip)
         for opt, value in inputs:
             try:
@@ -1404,7 +1404,7 @@ class Level1Design(SpmMatlabCommandLine):
         einputs = {'dir':'','timing':{},'sess':[],'fact':{},'bases':{},
                    'volt':{},'global':{},'mask':{}}
 
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        [inputs.update({k:v}) for k, v in self.inputs.items() if v is not None ]
         for opt in inputs:
             if opt == 'spmmat_dir':
                 einputs['dir'] = np.array([str(inputs[opt])],dtype=object)
@@ -1703,7 +1703,7 @@ class EstimateContrast(SpmMatlabCommandLine):
         inputs = {}
         einputs = {'spmmat':'','method':{}}
 
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        [inputs.update({k:v}) for k, v in self.inputs.items() if v is not None ]
         for opt in inputs:
             if opt == 'spm_mat_file':
                 einputs['spmmat'] = np.array([str(inputs[opt])],dtype=object)
@@ -1880,7 +1880,7 @@ class OneSampleTTest(SpmMatlabCommandLine):
         inputs = {}
         einputs = {'con_images':''}
 
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        [inputs.update({k:v}) for k, v in self.inputs.items() if v is not None ]
         for opt in inputs:
             if opt == 'con_images':
                 continue
@@ -2007,7 +2007,7 @@ class TwoSampleTTest(SpmMatlabCommandLine):
         inputs = {}
         einputs = {'images_group1':None,'images_group2':None}
 
-        [inputs.update({k:v}) for k, v in self.inputs.iteritems() if v is not None ]
+        [inputs.update({k:v}) for k, v in self.inputs.items() if v is not None ]
         for opt in inputs:
             if opt == 'images_group1':
                 continue

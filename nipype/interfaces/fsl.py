@@ -590,7 +590,7 @@ class Fast(FSLCommand):
 
         # For each output file-type (key), check that any expected
         # files in the output list exist.
-        for outtype, outlist in outputs.iteritems():
+        for outtype, outlist in outputs.items():
             if len(outlist) > 0:
                 for outfile in outlist:
                     if not len(glob(outfile))==1:
@@ -1265,7 +1265,7 @@ class Fnirt(FSLCommand):
         if self.inputs.logfile:
             outputs.logfile = self.inputs.logfile
 
-        for item, file in outputs.iteritems():
+        for item, file in outputs.items():
             if file is not None:
                 file = os.path.join(cwd, file)
                 file = self._glob(file)

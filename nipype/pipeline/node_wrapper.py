@@ -250,7 +250,7 @@ class NodeWrapper(object):
                     self._result.interface.insert(i, result.interface)
                     self._result.runtime.insert(i, result.runtime)
                 outputs = result.outputs
-                for key,val in outputs.iteritems():
+                for key,val in outputs.items():
                     try:
                         # This has funny default behavior if the length of the
                         # list is < i - 1. I'd like to simply use append... feel

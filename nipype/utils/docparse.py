@@ -69,7 +69,7 @@ def reverse_opt_map(opt_map):
     # if (k != 'flags' and v) , key must not be flags as it is generic,
     # v must not be None or it cannot be parsed by this line
     revdict = {}
-    for key, value in opt_map.iteritems():
+    for key, value in opt_map.items():
         if is_container(value):
             # The value is a tuple where the first element is the
             # format string and the second element is a docstring.
@@ -355,6 +355,6 @@ def replace_opts(rep_doc, opts):
     """
 
     # Replace flags with attribute names
-    for key, val in opts.iteritems():
+    for key, val in opts.items():
         rep_doc = rep_doc.replace(key, val)
     return rep_doc

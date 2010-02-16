@@ -53,13 +53,13 @@ class IdentityInterface(BasicInterface):
     
     def outputs(self):
         outputs = Bunch()
-        for k,v in self.inputs.iteritems():
+        for k,v in self.inputs.items():
             setattr(outputs, k, None)
         return outputs
     
     def aggregate_outputs(self):
         outputs = self.outputs()
-        for k,v in self.inputs.iteritems():
+        for k,v in self.inputs.items():
             setattr(outputs, k, v)
         return outputs
 
@@ -89,7 +89,7 @@ class Merge(BasicInterface):
     
     def aggregate_outputs(self):
         outputs = self.outputs()
-        for k,v in self.inputs.iteritems():
+        for k,v in self.inputs.items():
             if v:
                 if isinstance(v, list):
                     outputs.out.extend(v)
