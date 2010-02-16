@@ -1,12 +1,13 @@
 import os
-from tempfile import mkstemp
+from tempfile import mkstemp, mkdtemp
 
 from nipype.testing import assert_equal, assert_true, assert_false
 from nipype.utils.filemanip import (save_json, load_json, loadflat,
                                     fname_presuffix, fnames_presuffix,
                                     hash_rename, check_forhash,
                                     copyfile, copyfiles,
-                                    filename_to_list, list_to_filename)
+                                    filename_to_list, list_to_filename,
+                                    cleandir)
 
 import numpy as np
 
@@ -99,12 +100,31 @@ def test_filename_to_list():
     yield assert_equal, x, ['foo.nii']
     x = filename_to_list(('foo', 'bar'))
     yield assert_equal, x, ['foo', 'bar']
+    x = filename_to_list(12.34)
+    yield assert_equal, x, None
 
 def test_list_to_filename():
     x = list_to_filename(['foo.nii'])
     yield assert_equal, x, 'foo.nii'
     x = list_to_filename(['foo', 'bar'])
     yield assert_equal, x, ['foo', 'bar']
+
+def test_cleandir():
+    filetypes = ['*.nii','*.nii.gz','*.txt','*.img','*.hdr','*.mat','*.json']
+    tmpdir = mkdtemp()
+    def tmpfile(suffix, dir=tmpdir):
+        _, name = mkstemp(suffix=suffix[1:], dir=dir)
+        return name
+
+    fnames = []
+    for ft in filetypes:
+        x = tmpfile(ft)
+        fnames.append(x)
+        yield assert_true, os.path.exists(x)
+
+    cleandir(tmpdir)
+    for fp in fnames:
+        yield assert_false, os.path.exists(fp)
 
 def test_json():
     # Simple roundtrip test of json files, just a sanity check.
