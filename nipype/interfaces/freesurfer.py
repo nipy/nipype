@@ -1480,7 +1480,15 @@ class Label2Vol(FSCommand):
         
     def _parse_inputs(self):
         """validate fs mri_label2vol options"""
-        allargs = super(Label2Vol, self)._parse_inputs()
+        allargs = super(Label2Vol, self)._parse_inputs(skip=('label'))
+
+        # Add invol to the args if they are specified
+        if self.inputs.label:
+            if isinstance(self.inputs.label,list):
+                for id in self.inputs.label:
+                    allargs.extend(['--label', str(id)])
+            else:
+                allargs.extend(['--label', str(self.inputs.segid)])
 
         # Add infile and outfile to the args if they are specified
         if not self.inputs.outvol and self.inputs.label:

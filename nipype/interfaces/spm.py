@@ -1200,8 +1200,11 @@ class Smooth(SpmMatlabCommandLine):
         if opt == 'fwhm':
             if not isinstance(val, list):
                 return [val,val,val]
-            else:
-                return val
+            if isinstance(val, list):
+                if len(val) == 1:
+                    return [val[0],val[0],val[0]]
+                else:
+                    return val
         return val
 
     def run(self, infile=None, **inputs):

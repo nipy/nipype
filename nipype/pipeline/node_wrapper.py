@@ -7,13 +7,14 @@ from copy import deepcopy
 import logging
 from shutil import rmtree
 from tempfile import mkdtemp
+import numpy as np
 
 from nipype.utils.filemanip import (copyfiles, fname_presuffix,
                                     filename_to_list, list_to_filename,
                                     fnames_presuffix)
 from nipype.interfaces.base import Bunch, InterfaceResult, CommandLine
 from nipype.interfaces.fsl import FSLCommand
-from nipype.utils.filemanip import save_json
+from nipype.utils.filemanip import save_json, loadflat
 import nipype.pipeline.engine as pe
 
 logger = logging.getLogger('nodewrapper')
@@ -273,6 +274,8 @@ class NodeWrapper(object):
             
     def _run_command(self, execute, cwd):
         self._copyfiles_to_wd(cwd,execute)
+        if self.disk_based:
+            resultsfile = os.path.join(cwd,'result.npz')
         if execute:
             if issubclass(self._interface.__class__,CommandLine):
                 cmd = self._interface.cmdline
@@ -286,13 +289,29 @@ class NodeWrapper(object):
             if result.runtime.returncode:
                 logger.error(result.runtime.stderr)
                 raise RuntimeError(result.runtime.stderr)
+            else:
+                if self.disk_based:
+                    np.savez(resultsfile,result=result)
         else:
             # Likewise, cwd could go in here
             logger.info("Collecting precomputed outputs:")
-            aggouts = self._interface.aggregate_outputs()
-            result = InterfaceResult(interface=None,
-                                     runtime=None,
-                                     outputs=aggouts)
+            if self.disk_based:
+                if os.path.exists(resultsfile):
+                    result = loadflat(resultsfile,'result')['result']
+                else:
+                    # for backwards compatibility
+                    logger.debug('result.npz not found, aggregating ' \
+                                 'and storing results')
+                    aggouts = self._interface.aggregate_outputs()
+                    result = InterfaceResult(interface=None,
+                                             runtime=None,
+                                             outputs=aggouts)
+                    np.savez(resultsfile,result=result)
+            else:
+                aggouts = self._interface.aggregate_outputs()
+                result = InterfaceResult(interface=None,
+                                         runtime=None,
+                                         outputs=aggouts)
         return result
     
     def _copyfiles_to_wd(self, outdir, execute):
