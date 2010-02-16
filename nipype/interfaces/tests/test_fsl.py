@@ -7,7 +7,7 @@ from nipype.testing import assert_equal, assert_not_equal, assert_true, assert_r
 import nipype.interfaces.fsl as fsl
 
 def test_fslversion():
-    ver = fsl.fsl_info.version
+    ver = fsl.FSLInfo.version()
     if ver:
         # If ver is None, fsl is not installed
         ver = ver.split('.')
@@ -17,7 +17,7 @@ def test_fslversion():
 def test_fsloutputtype():
     types = ['ANALYZE_GZ', 'NIFTI_PAIR_GZ', 'NIFTI', 'NIFTI_PAIR',
              'NIFTI_GZ', 'ANALYZE']
-    out_type, ext = fsl.fsl_info.outputtype()
+    out_type, ext = fsl.FSLInfo.outputtype()
     if out_type is None:
         # Environment variable is not set.  FSL may not be installed.
         return
@@ -25,7 +25,7 @@ def test_fsloutputtype():
     env_type = os.environ.get('FSLOUTPUTTYPE')
     if env_type:
         # Set to same value for test.
-        out_type, ext = fsl.fsl_info.outputtype(env_type)
+        out_type, ext = fsl.FSLInfo.outputtype(env_type)
         yield assert_equal, out_type, env_type
 
 
