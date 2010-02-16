@@ -5,7 +5,8 @@ from nipype.testing import assert_equal, assert_true, assert_false
 from nipype.utils.filemanip import (save_json, load_json, loadflat,
                                     fname_presuffix, fnames_presuffix,
                                     hash_rename, check_forhash,
-                                    copyfile, copyfiles)
+                                    copyfile, copyfiles,
+                                    filename_to_list, list_to_filename)
 
 import numpy as np
 
@@ -90,6 +91,20 @@ def test_copyfiles():
     os.unlink(new_hdr1)
     os.unlink(new_img2)
     os.unlink(new_hdr2)
+
+def test_filename_to_list():
+    x = filename_to_list('foo.nii')
+    yield assert_equal, x, ['foo.nii']
+    x = filename_to_list(['foo.nii'])
+    yield assert_equal, x, ['foo.nii']
+    x = filename_to_list(('foo', 'bar'))
+    yield assert_equal, x, ['foo', 'bar']
+
+def test_list_to_filename():
+    x = list_to_filename(['foo.nii'])
+    yield assert_equal, x, 'foo.nii'
+    x = list_to_filename(['foo', 'bar'])
+    yield assert_equal, x, ['foo', 'bar']
 
 def test_json():
     # Simple roundtrip test of json files, just a sanity check.
