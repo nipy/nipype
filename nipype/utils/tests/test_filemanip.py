@@ -4,7 +4,8 @@ from tempfile import mkstemp
 from nipype.testing import assert_equal, assert_true, assert_false
 from nipype.utils.filemanip import (save_json, load_json, loadflat,
                                     fname_presuffix, fnames_presuffix,
-                                    hash_rename, check_forhash)
+                                    hash_rename, check_forhash,
+                                    copyfile)
 
 import numpy as np
 
@@ -30,7 +31,6 @@ def test_hash_rename():
 def test_check_forhash():
     fname = 'foobar'
     orig_hash = '_0x4323dbcefdc51906decd8edcb3327943'
-    #hashed_name = 'foobar_0x4323dbcefdc51906decd8edcb3327943.nii'
     hashed_name = ''.join((fname, orig_hash, '.nii'))
     result, hash = check_forhash(hashed_name)
     yield assert_true, result
@@ -39,6 +39,28 @@ def test_check_forhash():
     yield assert_false, result
     yield assert_equal, hash, None
 
+def test_copyfile():
+    fd, orig_img = mkstemp(suffix = '.img')
+    orig_hdr = orig_img[:-4] + '.hdr'
+    fp = file(orig_hdr, 'w+')
+    fp.close()
+    pth, fname = os.path.split(orig_img)
+    new_img = os.path.join(pth, 'newfile.img')
+    new_hdr = os.path.join(pth, 'newfile.hdr')
+    copyfile(orig_img, new_img)
+    yield assert_true, os.path.exists(new_img)
+    yield assert_true, os.path.exists(new_hdr)
+    os.unlink(new_img)
+    os.unlink(new_hdr)
+    # Test with copy=True
+    copyfile(orig_img, new_img, copy=True)
+    yield assert_true, os.path.exists(new_img)
+    yield assert_true, os.path.exists(new_hdr)
+    os.unlink(new_img)
+    os.unlink(new_hdr)
+    # final cleanup
+    os.unlink(orig_img)
+    os.unlink(orig_hdr)
 
 def test_json():
     # Simple roundtrip test of json files, just a sanity check.
