@@ -2,8 +2,25 @@ import os
 from tempfile import mkstemp
 
 from nipype.testing import assert_equal, assert_true
-from nipype.utils.filemanip import save_json, load_json, loadflat
+from nipype.utils.filemanip import (save_json, load_json, loadflat,
+                                    fname_presuffix, fnames_presuffix)
+
 import numpy as np
+
+def test_fname_presuffix():
+    fname = 'foo.nii'
+    pth = fname_presuffix(fname, 'pre_', '_post', '/tmp')
+    yield assert_equal, pth, '/tmp/pre_foo_post.nii'
+    fname += '.gz'
+    pth = fname_presuffix(fname, 'pre_', '_post', '/tmp')
+    yield assert_equal, pth, '/tmp/pre_foo_post.nii.gz'
+    pth = fname_presuffix(fname, 'pre_', '_post', '/tmp', use_ext=False)
+    yield assert_equal, pth, '/tmp/pre_foo_post'
+
+def test_fnames_presuffix():
+    fnames = ['foo.nii', 'bar.nii']
+    pths = fnames_presuffix(fnames, 'pre_', '_post', '/tmp')
+    yield assert_equal, pths, ['/tmp/pre_foo_post.nii', '/tmp/pre_bar_post.nii']
 
 def test_json():
     # Simple roundtrip test of json files, just a sanity check.

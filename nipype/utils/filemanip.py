@@ -13,10 +13,6 @@ try:
 except ImportError:
     from md5 import md5
 
-import numpy as np
-
-from nipype.utils.misc import is_container
-
 try:
     # json included in Python 2.6
     import json
@@ -24,6 +20,10 @@ except ImportError:
     # simplejson is the json module that was included in 2.6 (I
     # believe).  Used here for Python 2.5
     import simplejson as json
+
+import numpy as np
+
+from nipype.utils.misc import is_container
 
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     """Manipulates path and name of input filename
