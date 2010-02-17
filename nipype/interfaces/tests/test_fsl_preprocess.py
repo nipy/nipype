@@ -6,6 +6,7 @@ from nipype.testing import (assert_equal, assert_not_equal, assert_true,
                             assert_raises)
 
 import nipype.interfaces.fsl_preprocess as fsl
+from nipype.interfaces.base import InterfaceResult
 
 # test Bet
 def test_bet():
@@ -213,9 +214,9 @@ def test_mcflirt():
     fnt = fsl.McFlirt()
     fnt.inputs.infile = 'foo.nii'
     res = fnt.run()
-    yield assert_equal, type(res), fsl.InterfaceResult
+    yield assert_equal, type(res), InterfaceResult
     res = fnt.run(infile='bar.nii')
-    yield assert_equal, type(res), fsl.InterfaceResult
+    yield assert_equal, type(res), InterfaceResult
 
 
 #test fnirt
@@ -265,7 +266,7 @@ def test_fnirt():
     # yield assert_raises, AttributeError, fnirt.run
     fnirt.inputs.reference = 'mni152.nii'
     res = fnirt.run()
-    yield assert_equal, type(res), fsl.InterfaceResult
+    yield assert_equal, type(res), InterfaceResult
 
     opt_map = {
         'affine':           ('--aff=affine.mat', 'affine.mat'),
