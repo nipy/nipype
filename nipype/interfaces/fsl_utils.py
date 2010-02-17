@@ -9,20 +9,13 @@ See the docstrings of the individual classes for examples.
 """
 
 import os
-import re
-import subprocess
-from copy import deepcopy
 from glob import glob
 import warnings
-from shutil import rmtree # to delete dirs
 
-from nipype.externals.pynifti import load
-from nipype.utils.filemanip import (fname_presuffix, list_to_filename,
-                                    filename_to_list, loadflat)
-from nipype.interfaces.base import (Bunch, OptMapCommand, CommandLine, 
-                                    Interface, load_template, InterfaceResult)
+from nipype.interfaces.fsl import FSLCommand, FSLInfo
+from nipype.utils.filemanip import list_to_filename
+from nipype.interfaces.base import Bunch
 from nipype.utils.docparse import get_doc
-from nipype.utils.misc import container_to_string, is_container
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -118,12 +111,16 @@ class Merge(FSLCommand):
         return outputs
 
 class ExtractRoi(FSLCommand):
-    """Uses FSL Fslroi command to extract region of interest (ROI) from an image.
-    You can a) take a 3D ROI from a 3D data set (or if it is 4D, the same ROI is taken
-    from each time point and a new 4D data set is created), b) extract just some
-    time points from a 4D data set, or c) control time and space limits to the ROI.
-    Note that the arguments are minimum index and size (not maximum index).
-    So to extract voxels 10 to 12 inclusive you would specify 10 and 3 (not 10 and 12).
+    """Uses FSL Fslroi command to extract region of interest (ROI)
+    from an image.
+
+    You can a) take a 3D ROI from a 3D data set (or if it is 4D, the
+    same ROI is taken from each time point and a new 4D data set is
+    created), b) extract just some time points from a 4D data set, or
+    c) control time and space limits to the ROI.  Note that the
+    arguments are minimum index and size (not maximum index).  So to
+    extract voxels 10 to 12 inclusive you would specify 10 and 3 (not
+    10 and 12).
     """
     opt_map={}
 
@@ -160,9 +157,12 @@ class ExtractRoi(FSLCommand):
                                          suffix='_roi')
             allargs.insert(1, outfile)
 
-        #concat all numeric variables into a string separated by space given the user's option
-        dim = [ self.inputs.xmin,self.inputs.xsize,self.inputs.ymin,self.inputs.ysize,
-                self.inputs.zmin,self.inputs.zsize,self.inputs.tmin,self.inputs.tsize]
+        #concat all numeric variables into a string separated by space
+        #given the user's option
+        dim = [ self.inputs.xmin, self.inputs.xsize, self.inputs.ymin,
+                self.inputs.ysize,
+                self.inputs.zmin, self.inputs.zsize, self.inputs.tmin,
+                self.inputs.tsize]
         args=[]
         for num in dim:
             if num is not None:
@@ -175,7 +175,8 @@ class ExtractRoi(FSLCommand):
     def run(self, infile=None, outfile=None, **inputs):
         """Execute the command.
         >>> from nipype.interfaces import fsl
-        >>> fslroi = fsl.ExtractRoi(infile='foo.nii', outfile='bar.nii', tmin=0, tsize=1)
+        >>> fslroi = fsl.ExtractRoi(infile='foo.nii', outfile='bar.nii',
+                                    tmin=0, tsize=1)
         >>> fslroi.cmdline
         'fslroi foo.nii bar.nii 0 1'
 
@@ -235,10 +236,9 @@ class ExtractRoi(FSLCommand):
         return outputs
 
 
-
-#-------------------------------------------------------------------------------------------------------
 class Split(FSLCommand):
-    """Uses FSL Fslsplit command to separate a volume into images in time, x, y or z dimension.
+    """Uses FSL Fslsplit command to separate a volume into images in
+    time, x, y or z dimension.
     """
     opt_map={'outbasename': None, # output basename
              'time': '-t', #separate images in time (default behaviour)
@@ -327,12 +327,12 @@ class Split(FSLCommand):
         outbase = 'vol*.'
         if self.inputs.outbasename:
             outbase = '%s*.'%self.inputs.outbasename
-        outputs.outfiles = sorted(glob(os.path.join(os.getcwd(), outbase + ext)))
+        outputs.outfiles = sorted(glob(os.path.join(os.getcwd(),
+                                                    outbase + ext)))
         return outputs
 
 class ImageMaths(FSLCommand):
-    """
-        Use FSL fslmaths command to allow mathematical manipulation of images
+    """Use FSL fslmaths command to allow mathematical manipulation of images
     """
     opt_map ={}
 
@@ -388,7 +388,8 @@ class ImageMaths(FSLCommand):
         """Execute the command.
         >>> from nipype.interfaces import fsl
         >>> import os
-        >>> maths = fsl.ImageMaths(infile='foo.nii', optstring= '-add 5', outfile='foo_maths.nii')
+        >>> maths = fsl.ImageMaths(infile='foo.nii', optstring= '-add 5',
+                                   outfile='foo_maths.nii')
         >>> maths.cmdline
         'fslmaths foo.nii -add 5 foo_maths.nii'
 
