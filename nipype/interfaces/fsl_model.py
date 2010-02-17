@@ -14,13 +14,13 @@ from glob import glob
 import warnings
 from shutil import rmtree
 
-from nipype.externals.pynifti import load
-from nipype.utils.filemanip import (list_to_filename, filename_to_list,
-                                    loadflat)
+from nipype.interfaces.fsl import FSLCommand, FSLInfo
 from nipype.interfaces.base import (Bunch, Interface, load_template,
                                     InterfaceResult)
+from nipype.utils.filemanip import (list_to_filename, filename_to_list,
+                                    loadflat)
 from nipype.utils.docparse import get_doc
-from nipype.interfaces.fsl import FSLCommand, FSLInfo
+from nipype.externals.pynifti import load
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)

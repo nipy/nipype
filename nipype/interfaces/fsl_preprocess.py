@@ -12,15 +12,14 @@ import os
 from glob import glob
 import warnings
 
-from nipype.utils.filemanip import fname_presuffix, list_to_filename
+from nipype.interfaces.fsl import FSLCommand, FSLInfo
 from nipype.interfaces.base import Bunch
+from nipype.utils.filemanip import fname_presuffix, list_to_filename
 from nipype.utils.docparse import get_doc
 from nipype.utils.misc import container_to_string, is_container
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
-
-from nipype.interfaces.fsl import FSLCommand, FSLInfo
 
 class Bet(FSLCommand):
     """Use FSL BET command for skull stripping.
