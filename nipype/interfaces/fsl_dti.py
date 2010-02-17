@@ -14,7 +14,7 @@ import subprocess
 from glob import glob
 import warnings
 
-from nipype.interfaces.fsl import FSLCommand
+from nipype.interfaces.fsl_base import FSLCommand
 from nipype.interfaces.base import Bunch
 from nipype.utils.filemanip import fname_presuffix, filename_to_list
 from nipype.utils.docparse import get_doc
@@ -1403,7 +1403,7 @@ class Vecreg(FSLCommand):
         Examples
         --------
         >>> from nipype.interfaces import fsl
-        >>> vreg = fsl.Vecreg(infile='inf', outfile='infout',
+        >>> vreg = fsl.Vecreg(infile='inf', outfile='infout', \
                               refVolName='MNI152')
         >>> vreg.cmdline
         'vecreg -i inf -o infout -r MNI152'
@@ -1488,7 +1488,7 @@ class ProjThresh(FSLCommand):
         Examples
         --------
         >>> from nipype.interfaces import fsl
-        >>> pThresh = fsl.ProjThresh(volumes = ['seeds_to_M1', 'seeds_to_M2'],
+        >>> pThresh = fsl.ProjThresh(volumes = ['seeds_to_M1', 'seeds_to_M2'], \
                                      threshold = 3)
         >>> pThresh.cmdline
         'proj_thresh seeds_to_M1 seeds_to_M2 3'
