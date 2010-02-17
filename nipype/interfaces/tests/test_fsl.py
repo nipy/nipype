@@ -1,8 +1,9 @@
 import os
 
-from nipype.testing import assert_equal, assert_true,
+from nipype.testing import assert_equal, assert_true
 
 import nipype.interfaces.fsl as fsl
+from nipype.interfaces.base import InterfaceResult
 
 def test_fslversion():
     ver = fsl.FSLInfo.version()
@@ -33,4 +34,4 @@ def test_FSLCommand():
     cmd = fsl.FSLCommand()
     cmd.cmd = 'bet' # Set the cmd to something
     res = cmd.run()
-    yield assert_equal, type(res), fsl.InterfaceResult
+    yield assert_equal, type(res), InterfaceResult
