@@ -25,6 +25,9 @@ import numpy as np
 
 from nipype.utils.misc import is_container
 
+class FileNotFoundError(Exception):
+    pass
+
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     """Manipulates path and name of input filename
 
