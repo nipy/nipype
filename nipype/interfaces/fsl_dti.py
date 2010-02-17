@@ -11,18 +11,13 @@ See the docstrings of the individual classes for examples.
 import os
 import re
 import subprocess
-from copy import deepcopy
 from glob import glob
 import warnings
-from shutil import rmtree # to delete dirs
 
-from nipype.externals.pynifti import load
-from nipype.utils.filemanip import (fname_presuffix, list_to_filename,
-                                    filename_to_list, loadflat)
-from nipype.interfaces.base import (Bunch, OptMapCommand, CommandLine, 
-                                    Interface, load_template, InterfaceResult)
+from nipype.interfaces.fsl import FSLCommand
+from nipype.interfaces.base import Bunch
+from nipype.utils.filemanip import fname_presuffix, filename_to_list
 from nipype.utils.docparse import get_doc
-from nipype.utils.misc import container_to_string, is_container
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
