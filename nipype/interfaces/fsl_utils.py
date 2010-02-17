@@ -12,7 +12,7 @@ import os
 from glob import glob
 import warnings
 
-from nipype.interfaces.fsl import FSLCommand, FSLInfo
+from nipype.interfaces.fsl_base import FSLCommand, FSLInfo
 from nipype.utils.filemanip import list_to_filename
 from nipype.interfaces.base import Bunch
 from nipype.utils.docparse import get_doc
@@ -175,7 +175,7 @@ class ExtractRoi(FSLCommand):
     def run(self, infile=None, outfile=None, **inputs):
         """Execute the command.
         >>> from nipype.interfaces import fsl
-        >>> fslroi = fsl.ExtractRoi(infile='foo.nii', outfile='bar.nii',
+        >>> fslroi = fsl.ExtractRoi(infile='foo.nii', outfile='bar.nii', \
                                     tmin=0, tsize=1)
         >>> fslroi.cmdline
         'fslroi foo.nii bar.nii 0 1'
@@ -388,7 +388,7 @@ class ImageMaths(FSLCommand):
         """Execute the command.
         >>> from nipype.interfaces import fsl
         >>> import os
-        >>> maths = fsl.ImageMaths(infile='foo.nii', optstring= '-add 5',
+        >>> maths = fsl.ImageMaths(infile='foo.nii', optstring= '-add 5', \
                                    outfile='foo_maths.nii')
         >>> maths.cmdline
         'fslmaths foo.nii -add 5 foo_maths.nii'

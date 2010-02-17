@@ -12,7 +12,7 @@ import os
 from glob import glob
 import warnings
 
-from nipype.interfaces.fsl import FSLCommand, FSLInfo
+from nipype.interfaces.fsl_base import FSLCommand, FSLInfo
 from nipype.interfaces.base import Bunch
 from nipype.utils.filemanip import fname_presuffix, list_to_filename
 from nipype.utils.docparse import get_doc
