@@ -19,7 +19,8 @@ import numpy as np
 
 from nipype.interfaces.base import Bunch, CommandLine, OptMapCommand
 from nipype.utils.docparse import get_doc
-from nipype.utils.filemanip import fname_presuffix, filename_to_list
+from nipype.utils.filemanip import (fname_presuffix, filename_to_list,
+                                    FileNotFoundError)
 from nipype.interfaces.io import FreeSurferSource
 
 class FSInfo(object):
@@ -204,7 +205,10 @@ class DicomDirInfo(FSCommand):
             outfile = self._get_outfile_name()
         if isinstance(self.inputs.outfile,str):
             outfile = self.inputs.outfile
-        outputs.dicominfo = glob(outfile)[0]
+        try:
+            outputs.dicominfo = glob(outfile)[0]
+        except IndexError:
+            raise FileNotFoundError(outfile)
         return outputs
 
 class DicomConvert(FSCommandLine):
@@ -574,11 +578,6 @@ class Resample(FSCommand):
                                                    suffix='_resample')])
         return allargs
     
-    def run(self, **inputs):
-        """Execute the command.
-        """
-        return super(Resample, self).run()
-
     def outputs(self):
         """
         outfile: filename
@@ -591,10 +590,11 @@ class Resample(FSCommand):
         if self.inputs.outfile is None:
             outfile = glob(fname_presuffix(self.inputs.infile,
                                            suffix='_resample'))
-            outputs.outfile = outfile[0]
         if isinstance(self.inputs.outfile,str):
             outfile = glob(self.inputs.outfile)
-            outputs.outfile = outfile[0]
+        if not outfile:
+            raise FileNotFoundError(outfile)
+        outputs.outfile = outfile[0]
         return outputs
 
 class ReconAll(FSCommand):
@@ -638,11 +638,6 @@ class ReconAll(FSCommand):
         'subjects_dir':       '-sd %s',
         'flags':              '%s'}
     
-    def run(self, **inputs):
-        """Execute the command.
-        """
-        return super(ReconAll, self).run()
-
     def outputs(self):
         """
         See io.FreeSurferSource.outputs for the list of outputs returned
@@ -706,25 +701,27 @@ class BBRegister(FSCommand):
         """
         info = [Bunch(key='sourcefile',copy=False)]
         return info
+
+    def _get_outfiles(self):
+        outregfile = self.inputs.outregfile
+        if not self.inputs.outregfile and self.inputs.sourcefile:
+            outregfile = fname_presuffix(self.inputs.sourcefile,
+                                         suffix='_bbreg_%s.dat'%self.inputs.subject_id,
+                                         use_ext=False)
+        outfile = self.inputs.outfile
+        if self.inputs.outfile == True:
+            outfile = fname_presuffix(self.inputs.sourcefile,suffix='_bbreg')
+        return (outregfile, outfile)
     
     def _parse_inputs(self):
         """validate fs bbregister options"""
-        allargs = super(BBRegister, self)._parse_inputs(skip=('outfile'))
-
-        # Add infile and outfile to the args if they are specified
-        if self.inputs.outregfile is None and self.inputs.sourcefile is not None:
-            allargs.extend(['--reg',fname_presuffix(self.inputs.sourcefile,
-                                                       suffix='_bbreg_%s.dat'%self.inputs.subject_id,
-                                                       use_ext=False)])
-        if self.inputs.outfile is True:
-            allargs.extend(['--o',fname_presuffix(self.inputs.sourcefile,suffix='_bbreg')])
+        allargs = super(BBRegister, self)._parse_inputs(skip=('outfile', 'outregfile'))
+        outregfile, outfile = self._get_outfiles()
+        allargs.extend(['--reg',outregfile])
+        if outfile:
+            allargs.extend(['--o',outfile])
         return allargs
     
-    def run(self, **inputs):
-        """Execute the command.
-        """
-        return super(BBRegister, self).run()
-
     def outputs(self):
         """
         outregfile: filename
@@ -738,22 +735,14 @@ class BBRegister(FSCommand):
 
     def aggregate_outputs(self):
         outputs = self.outputs()
-        if self.inputs.outregfile is None:
-            outregfile = fname_presuffix(self.inputs.sourcefile,
-                                         suffix='_bbreg_%s.dat'%self.inputs.subject_id,
-                                         use_ext=False)
-        else:
-            outregfile = self.inputs.outregfile
-        assert len(glob(outregfile))==1, "No output registration file %s created"%outregfile
+        outregfile, outfile = self._get_outfiles()
+        if not glob(outregfile):
+            raise FileNotFoundError(outregfile)
         outputs.outregfile = outregfile
-        if self.inputs.outfile is True:
-            outfile = glob(fname_presuffix(self.inputs.sourcefile,suffix='_bbreg'))
-            assert len(outfile)==1, "No output file %s created"%outfile
-            outputs.outfile = outfile[0]
-        if isinstance(self.inputs.outfile,str):
-            outfile = glob(self.inputs.outfile)
-            assert len(outfile)==1, "No output file %s created"%outfile
-            outputs.outfile = outfile[0]
+        if outfile:
+            if not glob(outfile):
+                raise FileNotFoundError(outfile)
+            outputs.outfile = outfile
         return outputs
 
 class ApplyVolTransform(FSCommand):
@@ -801,22 +790,22 @@ class ApplyVolTransform(FSCommand):
         """
         info = [Bunch(key='sourcefile', copy=False)]
         return info
+
+    def _get_outfile(self):
+        outfile = self.inputs.outfile
+        if not outfile:
+            outfile = fname_presuffix(self.inputs.sourcefile,
+                                      suffix='_warped')
+        return outfile
     
     def _parse_inputs(self):
         """validate fs bbregister options"""
-        allargs = super(ApplyVolTransform, self)._parse_inputs()
-
-        # Add outfile to the args if not specified
-        if self.inputs.outfile is None:
-            allargs.extend(['--o', fname_presuffix(self.inputs.sourcefile, 
-                                                   suffix='_warped')])
+        allargs = super(ApplyVolTransform, self)._parse_inputs(skip=('outfile'))
+        outfile = self._get_outfile()
+        if outfile:
+            allargs.extend(['--o', outfile])
         return allargs
     
-    def run(self, **inputs):
-        """Execute the command.
-        """
-        return super(ApplyVolTransform, self).run()
-
     def outputs(self):
         """
         outfile: filename
@@ -826,15 +815,10 @@ class ApplyVolTransform(FSCommand):
 
     def aggregate_outputs(self):
         outputs = self.outputs()
-        if not self.inputs.outfile:
-            outfile = glob(fname_presuffix(self.inputs.sourcefile,
-                                           suffix='_warped'))
-            assert len(outfile)==1, "No output file %s created"%outfile
-            outputs.outfile = outfile[0]
-        if isinstance(self.inputs.outfile,str):
-            outfile = glob(self.inputs.outfile)
-            assert len(outfile)==1, "No output file %s created"%outfile
-            outputs.outfile = outfile[0]
+        outfile = self._get_outfile()
+        if not glob(outfile):
+            raise FileNotFoundError(outfile)
+        outputs.outfile = outfile
         return outputs
 
         
@@ -885,24 +869,19 @@ class Smooth(FSCommand):
         return info
 
     def _get_outfile(self):
-        return fname_presuffix(self.inputs.sourcefile,
-                               newpath=os.getcwd(),
-                               suffix='_surfsmooth')        
+        outfile = self.inputs.outfile
+        if not outfile:
+            outfile = fname_presuffix(self.inputs.sourcefile,
+                                      newpath=os.getcwd(),
+                                      suffix='_surfsmooth')
+        return outfile
     
     def _parse_inputs(self):
         """validate fs bbregister options"""
-        allargs = super(Smooth, self)._parse_inputs()
-
-        # Add outfile to the args if not specified
-        if self.inputs.outfile is None:
-            allargs.extend(['--o', self._get_outfile()])
+        allargs = super(Smooth, self)._parse_inputs(skip=('outfile'))
+        allargs.extend(['--o', self._get_outfile()])
         return allargs
     
-    def run(self, **inputs):
-        """Execute the command.
-        """
-        return super(Smooth, self).run()
-
     def outputs(self):
         """
         outfile: filename
@@ -912,14 +891,10 @@ class Smooth(FSCommand):
 
     def aggregate_outputs(self):
         outputs = self.outputs()
-        if not self.inputs.outfile:
-            outfile = glob(self._get_outfile())
-            assert len(outfile)==1, "No output file %s created"%outfile
-            outputs.outfile = outfile[0]
-        if isinstance(self.inputs.outfile,str):
-            outfile = glob(self.inputs.outfile)
-            assert len(outfile)==1, "No output file %s created"%outfile
-            outputs.outfile = outfile[0]
+        outfile = self._get_outfile()
+        if not glob(outfile):
+            raise FileNotFoundError(outfile)
+        outputs.outfile = outfile
         return outputs
 
         
@@ -956,31 +931,25 @@ class SurfConcat(FSCommand):
         'volregs':            '--iv %s',
         'flags':              '%s'}
 
-    def _get_outfname(self):
-        if self.inputs.outprefix:
-            fname = os.path.join(os.getcwd(),'_'.join((self.inputs.outprefix,
-                                                       self.inputs.target,
-                                                       '.'.join((self.inputs.hemi,'mgh')))))
-        else:
-            fname = os.path.join(os.getcwd(),'_'.join((self.inputs.target,
-                                                       '.'.join((self.inputs.hemi,'mgh')))))
-        return fname
+    def _get_outfile(self):
+        outfile = self.inputs.outfile
+        if not outfile:
+            if self.inputs.outprefix:
+                outfile = os.path.join(os.getcwd(),'_'.join((self.inputs.outprefix,
+                                                           self.inputs.target,
+                                                           '.'.join((self.inputs.hemi,'mgh')))))
+            else:
+                outfile = os.path.join(os.getcwd(),'_'.join((self.inputs.target,
+                                                           '.'.join((self.inputs.hemi,'mgh')))))
+        return outfile
         
     def _parse_inputs(self):
         """validate fs surfconcat options"""
         allargs = super(SurfConcat, self)._parse_inputs(skip=('outprefix','volimages','volregs'))
-
-        # Add outfile to the args if not specified
-        if self.inputs.outfile is None:
-            allargs.extend(['--out', self._get_outfname()])
+        allargs.extend(['--out', self._get_outfile()])
         for i,volimg in enumerate(self.inputs.volimages):
             allargs.extend(['--iv', volimg, self.inputs.volregs[i]])
         return allargs
-    
-    def run(self, **inputs):
-        """Execute the command.
-        """
-        return super(SurfConcat, self).run()
     
     def outputs(self):
         """
@@ -993,16 +962,10 @@ class SurfConcat(FSCommand):
     def aggregate_outputs(self):
         outputs = self.outputs()
         outputs.hemi = self.inputs.hemi
-        outfname = self._get_outfname()
-        if not self.inputs.outfile:
-            fname = self._get_outfname()
-            outfile = glob(fname)
-            assert len(outfile)==1, "No output file %s created"%outfile
-            outputs.outfile = outfile[0]
-        if isinstance(self.inputs.outfile,str):
-            outfile = glob(self.inputs.outfile)
-            assert len(outfile)==1, "No output file %s created"%outfile
-            outputs.outfile = outfile[0]
+        outfile = self._get_outfile()
+        if not glob(outfile):
+            raise FileNotFoundError(outfile)
+        outputs.outfile = outfile
         return outputs
 
     
@@ -1051,11 +1014,6 @@ class GlmFit(FSCommand):
             allargs.extend(['--glmdir', outdir])
         return allargs
     
-    def run(self, **inputs):
-        """Execute the command.
-        """
-        return super(GlmFit, self).run()
-
     def outputs(self):
         """
         """
@@ -1140,24 +1098,21 @@ class Threshold(FSCommand):
         """
         info = [Bunch(key='infile',copy=False)]
         return info
-    
+
+    def _get_outfile(self):
+        outfile = self.inputs.outfile
+        if not outfile and self.inputs.infile:
+            outfile = fname_presuffix(self.inputs.infile,
+                                      suffix='_out',
+                                      newpath=os.getcwd())
+        return outfile
+            
     def _parse_inputs(self):
         """validate fs bbregister options"""
-        allargs = super(Threshold, self)._parse_inputs()
-
-        # Add infile and outfile to the args if they are specified
-        if not self.inputs.outfile and self.inputs.infile:
-            allargs.extend(['--o',fname_presuffix(self.inputs.infile,
-                                                  suffix='_out',
-                                                  newpath=os.getcwd())])
-        
+        allargs = super(Threshold, self)._parse_inputs(skip=('outfile'))
+        allargs.extend(['--o',self._get_outfile()])
         return allargs
     
-    def run(self, **inputs):
-        """Execute the command.
-        """
-        return super(Threshold, self).run()
-
     def outputs(self):
         """
         outfile: filename
@@ -1168,13 +1123,10 @@ class Threshold(FSCommand):
 
     def aggregate_outputs(self):
         outputs = self.outputs()
-        if isinstance(self.inputs.outfile,str):
-            outfile = glob(self.inputs.outfile)
-            outputs.outfile = outfile[0]
-        elif not self.inputs.outfile and self.inputs.infile:
-            outfile = glob(fname_presuffix(self.inputs.infile,
-                                           suffix='_out', newpath=os.getcwd())) 
-            outputs.outfile = outfile[0]
+        outfile = self._get_outfile()
+        if not glob(outfile):
+            raise FileNotFoundError(outfile)
+        outputs.outfile = outfile
         return outputs
 
 class Concatenate(FSCommand):
@@ -1245,7 +1197,7 @@ class Concatenate(FSCommand):
 
     def _get_outfile(self):
         outfile = self.inputs.outvol
-        if not outfile:
+        if not outfile and self.inputs.invol:
             outfile = fname_presuffix(self.inputs.invol,
                                       suffix='_concat',
                                       newpath=os.getcwd())
@@ -1253,20 +1205,14 @@ class Concatenate(FSCommand):
     
     def _parse_inputs(self):
         """validate fs mri_concat options"""
-        allargs = super(Concatenate, self)._parse_inputs(skip=('invol'))
+        allargs = super(Concatenate, self)._parse_inputs(skip=('invol', 'outvol'))
 
         # Add invol and outvol to the args if they are specified
         for f in filename_to_list(self.inputs.invol):
             allargs.extend(['--i', f])
-        if not self.inputs.outvol and self.inputs.invol:
-            allargs.extend(['--o',self._get_outfile()])
+        allargs.extend(['--o',self._get_outfile()])
         return allargs
     
-    def run(self, **inputs):
-        """Execute the command.
-        """
-        return super(Concatenate, self).run()
-
     def outputs(self):
         """
         outfile: filename
@@ -1277,12 +1223,10 @@ class Concatenate(FSCommand):
 
     def aggregate_outputs(self):
         outputs = self.outputs()
-        if isinstance(self.inputs.outvol,str):
-            outfile = glob(self.inputs.outvol)
-            outputs.outfile = outfile[0]
-        elif not self.inputs.outvol and self.inputs.invol:
-            outfile = glob(self._get_outfile())
-            outputs.outfile = outfile[0]
+        outfile = self._get_outfile()
+        if not glob(outfile):
+            raise FileNotFoundError(outfile)
+        outputs.outfile = outfile
         return outputs
 
 class SegStats(FSCommand):
@@ -1394,11 +1338,6 @@ class SegStats(FSCommand):
                                                           newpath=os.getcwd())])
         return allargs
     
-    def run(self, **inputs):
-        """Execute the command.
-        """
-        return super(SegStats, self).run()
-
     def outputs(self):
         """
         outfile: filename
@@ -1471,8 +1410,12 @@ class Label2Vol(FSCommand):
 
     def _get_outfile(self):
         outfile = self.inputs.outvol
-        if outfile is None:
-            outfile = fname_presuffix(self.inputs.label,
+        if not outfile:
+            if isinstance(self.inputs.label,list):
+                label = self.inputs.label[0]
+            else:
+                label = self.inputs.label
+            outfile = fname_presuffix(label,
                                       suffix='_vol.nii',
                                       use_ext=False,
                                       newpath=os.getcwd())
@@ -1480,7 +1423,7 @@ class Label2Vol(FSCommand):
         
     def _parse_inputs(self):
         """validate fs mri_label2vol options"""
-        allargs = super(Label2Vol, self)._parse_inputs(skip=('label'))
+        allargs = super(Label2Vol, self)._parse_inputs(skip=('label','outvol'))
 
         # Add invol to the args if they are specified
         if self.inputs.label:
@@ -1488,19 +1431,11 @@ class Label2Vol(FSCommand):
                 for id in self.inputs.label:
                     allargs.extend(['--label', str(id)])
             else:
-                allargs.extend(['--label', str(self.inputs.segid)])
-
-        # Add infile and outfile to the args if they are specified
-        if not self.inputs.outvol and self.inputs.label:
-            allargs.extend(['--o', self._get_outfile()])
+                allargs.extend(['--label', str(self.inputs.label)])
+        allargs.extend(['--o', self._get_outfile()])
         
         return allargs
     
-    def run(self, **inputs):
-        """Execute the command.
-        """
-        return super(Label2Vol, self).run()
-
     def outputs(self):
         """
         outfile: filename
@@ -1511,5 +1446,8 @@ class Label2Vol(FSCommand):
 
     def aggregate_outputs(self):
         outputs = self.outputs()
-        outputs.outfile = glob(self._get_outfile())[0]
+        outfile = self._get_outfile()
+        if not glob(outfile):
+            raise FileNotFoundError(outfile)
+        outputs.outfile = outfile
         return outputs
