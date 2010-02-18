@@ -27,6 +27,22 @@ absolute (os.realpath?)  filenames by default, allowing for relative
 paths by explicitly including something that doesn't start with a
 '/'. This could include '.' in some sort of path-spec.
 
+Class attributes should never be modified by an instance of that class. And
+probably not ever.
+
+Providing for Provenance
+------------------------
+The following is a specific discussion that should be thought out an more
+generally applied to the way we handle auto-generation / or "sourcing" of
+settings in an interface.
+
+There are two possible sources (at a minimum) from which the interface instance could obtain "outputtype" - itself, or FSLInfo. Currently, the outputtype gets read from FSLInfo if self.outputtype (er, _outputtype?) is None.
+
+In the case of other opt_map specifications, there are defaults that get specified if the value is None. For example output filenames are often auto-generated. If you look at the code for fsl.Bet for example, there is no way for the outfile to get picked up at the pipeline level, because it is a transient variable. This is OK, as the generation of the outfile name is contingent ONLY on inputs which ARE available to the pipeline machinery (i.e., via inspection of the Bet instance's attributes).
+
+However, with outputtype, we are in a situation in which "autogeneration" incorporates potentially transient information external to the instance itself. Thus, some care needs to be taken in always ensuring this information is hashable.
+
+
 Design Principles
 -----------------
 
@@ -65,8 +81,3 @@ Discussions
    :maxdepth: 1
 
    filename_generation
-
-Dancing about Architecture
---------------------------
-
-Somewhat like talking about Jazz.
