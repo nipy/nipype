@@ -1,6 +1,6 @@
 
 from nipype.testing import assert_equal, assert_not_equal, assert_raises
-import nipype.interfaces.fsl_utils as fsl
+import nipype.interfaces.fsl.utils as fsl
 
 def test_fslroi():
     roi = fsl.ExtractRoi()

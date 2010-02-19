@@ -4,7 +4,7 @@ import shutil
 
 
 from nipype.testing import assert_equal, assert_not_equal, assert_raises
-import nipype.interfaces.fsl_dti as fsl
+import nipype.interfaces.fsl.dti as fsl
 
 # nosetests --with-doctest path_to/test_fsl.py
 

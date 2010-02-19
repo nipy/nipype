@@ -14,7 +14,7 @@ from glob import glob
 import warnings
 from shutil import rmtree
 
-from nipype.interfaces.fsl_base import FSLCommand, FSLInfo
+from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
 from nipype.interfaces.base import (Bunch, Interface, load_template,
                                     InterfaceResult)
 from nipype.utils.filemanip import (list_to_filename, filename_to_list,

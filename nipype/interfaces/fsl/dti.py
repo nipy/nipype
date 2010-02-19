@@ -14,7 +14,7 @@ import subprocess
 from glob import glob
 import warnings
 
-from nipype.interfaces.fsl_base import FSLCommand
+from nipype.interfaces.fsl.base import FSLCommand
 from nipype.interfaces.base import Bunch
 from nipype.utils.filemanip import fname_presuffix, filename_to_list
 from nipype.utils.docparse import get_doc

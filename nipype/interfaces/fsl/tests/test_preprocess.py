@@ -2,7 +2,7 @@ import os
 
 from nipype.testing import assert_equal, assert_not_equal, assert_raises
 
-import nipype.interfaces.fsl_preprocess as fsl
+import nipype.interfaces.fsl.preprocess as fsl
 from nipype.interfaces.base import InterfaceResult
 
 # test Bet
