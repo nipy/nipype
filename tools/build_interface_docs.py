@@ -34,10 +34,10 @@ if __name__ == '__main__':
                                        '\.pipeline\.s3_node_wrapper$',
                                        ]
     docwriter.class_skip_patterns += ['FSL',
+                                      'FS',
                                       'spm.\SpecifyModel',
                                       'SpmInfo',
-                                      'FSCommandLine',
-                                      'SpmMatlab'
+                                      'SpmMatlab',
                                       ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'gen', relative_to='interfaces')

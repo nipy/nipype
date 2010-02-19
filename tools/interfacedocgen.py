@@ -256,9 +256,9 @@ class InterfaceHelpWriter(object):
             if hasattr(classinst, 'opt_map') and len(classinst.opt_map):
                 # If the class has an opt_map, use that so we can grab
                 # any docstrings from it. Otherwise use the inputs.
-                iterator = classinst.opt_map.iteritems
+                iterator = classinst.opt_map.items
             else:
-                iterator = classinst.inputs.iteritems
+                iterator = classinst.inputs.items
             mandhelpstr = None # mandatory inputs
             opthelpstr = None  # optional inputs
             for i,v in sorted(iterator()):
@@ -286,12 +286,12 @@ class InterfaceHelpWriter(object):
                 helpstr += '\n\t'.join(opthelpstr)
             if helpstr:
                 helpstr += '\n\n'
-            if [i for i,v in classinst.outputs().iteritems()]:
+            if [i for i,v in classinst.outputs().items()]:
                 if not helpstr:
                     helpstr = '\nOutputs:: \n\n\t'
                 else:
                     helpstr += '\nOutputs:: \n\n\t'
-                for i,v in sorted(classinst.outputs().iteritems()):
+                for i,v in sorted(classinst.outputs().items()):
                     helpstr +=  i + '\n\t'
             if helpstr:
                 ad += '\n' + helpstr + '\n'

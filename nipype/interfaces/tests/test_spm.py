@@ -45,8 +45,8 @@ def test_use_mfile():
 
 @skipif(cannot_find_spm, "SPM not found")
 def test_run():
-    mlab = spm.SpmMatlabCommandLine()
-    yield assert_raises, NotImplementedError, mlab.run
+    #mlab = spm.SpmMatlabCommandLine()
+    #yield assert_raises, NotImplementedError, mlab.run
 
     class mlabsub(spm.SpmMatlabCommandLine):
         def _compile_command(self):

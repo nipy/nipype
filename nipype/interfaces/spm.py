@@ -1248,66 +1248,8 @@ class Smooth(SpmMatlabCommandLine):
 class Level1Design(SpmMatlabCommandLine):
     """Generate an SPM design matrix
 
-    See Level1Design().spm_doc() for more information.
-    
     Parameters
     ----------
-    inputs : dict 
-        key, value pairs that will update the Level1Design.inputs attributes.
-        See self.inputs_help() for a list of Level1Design.inputs attributes.
-    
-    Attributes
-    ----------
-    inputs : :class:`nipype.interfaces.base.Bunch`
-        Options that can be passed to spm_smooth via a job structure
-    cmdline : str
-        String used to call matlab/spm via SpmMatlabCommandLine interface
-
-    Other Parameters
-    ----------------
-    To see optional arguments
-    Level1Design().inputs_help()
-
-    Examples
-    --------
-    
-    """
-    
-    def spm_doc(self):
-        """Print out SPM documentation."""
-        print grab_doc('fMRI model specification (design only)')
-
-    @property
-    def cmd(self):
-        return 'spm_fmri_design'
-
-    @property
-    def jobtype(self):
-        return 'stats'
-
-    @property
-    def jobname(self):
-        return 'fmri_spec'
-
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-        
-        spmmat_dir : string
-            directory in which to store the SPM.mat file
-        timing_units : string
-            units for specification of onsets or blocks
-            (scans or secs) 
-        interscan_interval : float (in secs)
-            Interscan  interval,  TR.
-        microtime_resolution : float (in secs)
-            Specifies the number of time-bins per scan when building
-            regressors. 
-            spm default = 16
-        microtime_onset : float (in secs)
-            Specifies the onset/time-bin to which the regressors are
-            aligned.
         session_info : list of dicts
             Stores session specific information
 
@@ -1352,42 +1294,50 @@ class Level1Design(SpmMatlabCommandLine):
                         Post-stimulus window length (in seconds)
                     order : int
                         Number of basis functions
-        volterra_expansion_order : int
-            Do not model interactions (1) or model interactions (2)
-            SPM default = 1
-        global_intensity_normalization : string
-            Global intensity normalization (scaling or none)
-            SPM default  = none
-        mask_image : filename
-            Specify  an  image  for  explicitly  masking  the
-            analysis. NOTE: spm will still threshold within this mask.
-        mask_threshold : float
-            Option to modify SPM's default thresholding for the mask.
-        model_serial_correlations : string
-            Option to model serial correlations using an
-            autoregressive estimator. AR(1) or none
-            SPM default = AR(1) 
-        flags : USE AT OWN RISK
-               #eg:'flags':{'eoptions':{'suboption':value}}
-        """
-        print self.inputs_help.__doc__
 
-    def _populate_inputs(self):
-        """ Initializes the input fields of this interface.
-        """
-        self.inputs = Bunch(spmmat_dir=None,
-                            timing_units=None,
-                            interscan_interval=None,
-                            microtime_resolution=None,
-                            microtime_onset=None,
-                            session_info=None,
-                            factor_info=None,
-                            bases=None,
-                            volterra_expansion_order=None,
-                            global_intensity_normalization=None,
-                            mask_image=None,
-                            model_serial_correlations=None,
-                            flags=None)
+    Examples
+    --------
+    
+    """
+    
+    def spm_doc(self):
+        """Print out SPM documentation."""
+        print grab_doc('fMRI model specification (design only)')
+
+    @property
+    def cmd(self):
+        return 'spm_fmri_design'
+
+    @property
+    def jobtype(self):
+        return 'stats'
+
+    @property
+    def jobname(self):
+        return 'fmri_spec'
+
+    opt_map = {'spmmat_dir' : ('dir', 'directory to store SPM.mat file (opt, cwd)'),
+               'timing_units' : ('timing.units','units for specification of onsets'),
+               'interscan_interval' : ('timing.RT', 'Interscan interval in secs'),
+               'microtime_resolution' : ('timing.fmri_t',
+                        'Number of time-bins per scan in secs (opt,16)'),
+               'microtime_onset' : ('timing.fmri_t0',
+                        'The onset/time-bin in seconds for alignment (opt,)'),
+               'session_info' : ('sess', 'Session specific information file'),
+               'factor_info' : ('fact', 'Factor specific information file (opt,)'),
+               'bases' : ('bases', 'Basis function used'),
+               'volterra_expansion_order' : ('volt',
+                     'Model interactions - yes:1, no:2 (opt, 1)'),
+               'global_intensity_normalization' : ('global'
+                      'Global intensity normalization - scaling or none (opt, none)'),
+               'mask_image' : ('mask',
+                      'Image  for  explicitly  masking the analysis (opt,)'),
+               'mask_threshold' : (None,
+                      "Thresholding for the mask (opt, '-Inf')",'-Inf'),
+               'model_serial_correlations' : ('cvi',
+                      'Model serial correlations AR(1) or none (opt, AR(1))'),
+               }
+    
     def get_input_info(self):
         """ Provides information about inputs as a dict
             info = [Bunch(key=string,copy=bool,ext='.nii'),...]
@@ -1395,79 +1345,40 @@ class Level1Design(SpmMatlabCommandLine):
         info = [Bunch(key='mask_image',copy=False)]
         return info
         
-    def _parse_inputs(self):
-        """validate spm normalize options
-        if set to None ignore
+    def _convert_inputs(self, opt, val):
+        """Convert input to appropriate format for spm
         """
-        out_inputs = []
-        inputs = {}
-        einputs = {'dir':'','timing':{},'sess':[],'fact':{},'bases':{},
-                   'volt':{},'global':{},'mask':{}}
-
-        [inputs.update({k:v}) for k, v in self.inputs.items() if v is not None ]
-        for opt in inputs:
-            if opt == 'spmmat_dir':
-                einputs['dir'] = np.array([str(inputs[opt])],dtype=object)
-                continue
-            if opt == 'timing_units':
-                einputs['timing'].update(units=inputs[opt])
-                continue
-            if opt == 'interscan_interval':
-                einputs['timing'].update(RT=inputs[opt])
-                continue
-            if opt == 'microtime_resolution':
-                einputs['timing'].update(fmri_t=inputs[opt])
-                continue
-            if opt == 'microtime_onset':
-                einputs['timing'].update(fmri_t0=inputs[opt])
-                continue
-            if opt == 'session_info':
-                key = 'session_info'
-                data = loadflat(inputs[opt],key)
-                if isinstance(data[key],dict):
-                    einputs['sess'] = [data[key]]
-                else:
-                    einputs['sess'] = data[key]
-                continue
-            if opt == 'factor_info':
-                einputs['fact'] = inputs[opt]
-                continue
-            if opt == 'bases':
-                einputs['bases'] = inputs[opt]
-                continue
-            if opt == 'volterra_expansion_order':
-                einputs['volt'] = inputs[opt]
-                continue
-            if opt == 'global_intensity_normalization':
-                einputs['global'] = inputs[opt]
-                continue
-            if opt == 'mask_image':
-                einputs['mask'] = np.array([str(inputs[opt])],dtype=object)
-                continue
-            if opt == 'model_serial_correlations':
-                einputs['cvi'] = inputs[opt]
-                continue
-            if opt == 'flags':
-                einputs.update(inputs[opt])
-                continue
-            print 'option %s not supported'%(opt)
-        if einputs['dir'] == '':
-            einputs['dir'] = np.array([str(os.getcwd())],dtype=object)
-        return [einputs]
+        if opt in ['spmmat_dir', 'mask_image']:
+            return np.array([str(val)],dtype=object)
+        if opt in ['session_info', 'factor_info']:
+            data = loadflat(val,opt)
+            if isinstance(data[opt],dict):
+                return [data[opt]]
+            else:
+                return data[opt]
+        return val
+    
+    def _parse_inputs(self):
+        """validate spm realign options if set to None ignore
+        """
+        einputs = super(Level1Design, self)._parse_inputs(skip=('mask_threshold'))
+        if not self.inputs.spmmat_dir:
+            einputs[0]['dir'] = np.array([str(os.getcwd())],dtype=object)
+        return einputs
 
     def _compile_command(self):
         """validates spm options and generates job structure
         if mfile is True uses matlab .m file
         else generates a job structure and saves in .mat
         """
-        if self.inputs.mask_image is not None:
+        if self.inputs.mask_image:
             # SPM doesn't handle explicit masking properly, especially
             # when you want to use the entire mask image
             postscript = "load SPM;\n"
             postscript += "SPM.xM.VM = spm_vol('%s');\n"%list_to_filename(self.inputs.mask_image)
             postscript += "SPM.xM.I = 0;\n"
             postscript += "SPM.xM.T = [];\n"
-            postscript += "SPM.xM.TH = ones(size(SPM.xM.TH))*(-Inf);\n"
+            postscript += "SPM.xM.TH = ones(size(SPM.xM.TH))*(%s);\n"%self.inputs.mask_threshold
             postscript += "SPM.xM.xs = struct('Masking', 'explicit masking only');\n"
             postscript += "save SPM SPM;\n"
         else:
@@ -1493,25 +1404,6 @@ class Level1Design(SpmMatlabCommandLine):
     
 class EstimateModel(SpmMatlabCommandLine):
     """Use spm_spm to estimate the parameters of a model
-
-    See EstimateModel().spm_doc() for more information.
-
-    Parameters
-    ----------
-    inputs : dict
-        key, value pairs that will update the EstimateModel.inputs attributes.
-        See self.inputs_help() for a list of attributes.
-
-    Attributes
-    ----------
-    inputs : :class:`nipype.interfaces.base.Bunch`
-        Options that can be passed to spm_spm via a job structure
-    cmdline : string
-        string used to call matlab/spm via SpmMatlabCommandLine interface
-
-    Other Parameters
-    ----------------
-    To see optional arguments EstimateModel().inputs_help()
 
     """
     
@@ -1612,24 +1504,14 @@ class EstimateModel(SpmMatlabCommandLine):
 class EstimateContrast(SpmMatlabCommandLine):
     """use spm_contrasts to estimate contrasts of interest
 
+
     Parameters
     ----------
-    inputs : dict 
-        key, value pairs that will update the EstimateContrast.inputs 
-        attributes.  See self.inputs_help() for a list of 
-        EstimateContrast.inputs attributes.
     
-    Attributes
-    ----------
-    inputs : :class:`nipype.interfaces.base.Bunch`
-        Options that can be passed to spm_spm via a job structure
-    cmdline : str
-        String used to call matlab/spm via SpmMatlabCommandLine interface
-
-    Other Parameters
-    ----------------
-    To see optional arguments
-    EstimateContrast().inputs_help()
+    contrasts : List of contrasts with each contrast being a list of the form -
+    ['name', 'stat', [condition list], [weight list], [session list]]. if
+    session list is None or not provided, all sessions are used. For F
+    contrasts, the condition list should contain previously defined T-contrasts. 
 
     Examples
     --------
@@ -1648,42 +1530,16 @@ class EstimateContrast(SpmMatlabCommandLine):
     def jobname(self):
         return 'con'
 
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-       
-        spm_mat_file : filename
-            Filename containing absolute path to SPM.mat
-        contrasts : list of dicts
-            List of contrasts with each contrast being a list
-            of the form - ['name', 'stat', [condition list],
-            [weight list], [session list]]. if session list is
-            None or not provided, all sessions are used. For F
-            contrasts, the condition list should contain
-            previously defined T-contrasts. 
-        beta_images: filenames
-            Parameter estimates for each column of the design matrix
-        residual_image: filename
-            Mean-squared image of the residuals from each time point
-        RPVimage: filename
-            Resels per voxel image
-        ignore_derivs : boolean
-            Whether to ignore derivatives from contrast
-            estimation. default : True
-        """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        """ Initializes the input fields of this interface.
-        """
-        self.inputs = Bunch(spm_mat_file=None,
-                            contrasts=None,
-                            beta_images=None,
-                            residual_image=None,
-                            RPVimage=None,
-                            ignore_derivs=True)
-        
+    opt_map = {'spm_mat_file' : ('spmmat','Absolute path to SPM.mat'),
+               'contrasts' : (None, 'List of dicts see class docstring'),
+               'beta_images' : (None,'Parameter estimates of the design matrix'),
+               'residual_image': (None,'Mean-squared image of the residuals'),
+               'RPVimage': (None,'Resels per voxel image'),
+               'ignore_derivs' : (None,
+                                  'ignore derivatives for estimation. (opt,True)',
+                                  True),
+               }
+    
     def get_input_info(self):
         """ Provides information about inputs as a dict
             info = [Bunch(key=string,copy=bool,ext='.nii'),...]
@@ -1695,38 +1551,8 @@ class EstimateContrast(SpmMatlabCommandLine):
                 ]
         return info
     
-    def _parse_inputs(self):
-        """validate spm normalize options
-        if set to None ignore
-        """
-        out_inputs = []
-        inputs = {}
-        einputs = {'spmmat':'','method':{}}
-
-        [inputs.update({k:v}) for k, v in self.inputs.items() if v is not None ]
-        for opt in inputs:
-            if opt == 'spm_mat_file':
-                einputs['spmmat'] = np.array([str(inputs[opt])],dtype=object)
-                continue
-            if opt == 'contrasts':
-                continue
-            if opt == 'beta_images':
-                continue
-            if opt == 'residual_image':
-                continue
-            if opt == 'RPVimage':
-                continue
-            if opt == 'flags':
-                continue
-            if opt == 'ignore_derivs':
-                continue
-            print 'option %s not supported'%(opt)
-        return einputs
-
     def _compile_command(self):
         """validates spm options and generates job structure
-        if mfile is True uses matlab .m file
-        else generates a job structure and saves in .mat
         """
         contrasts = []
         cname = []
@@ -1826,25 +1652,6 @@ class EstimateContrast(SpmMatlabCommandLine):
 class OneSampleTTest(SpmMatlabCommandLine):
     """use spm to perform a one-sample ttest on a set of images
 
-    Parameters
-    ----------
-    inputs : dict 
-        key, value pairs that will update the EstimateContrast.inputs 
-        attributes.  See self.inputs_help() for a list of 
-        EstimateContrast.inputs attributes.
-    
-    Attributes
-    ----------
-    inputs : :class:`nipype.interfaces.base.Bunch`
-        Options that can be passed to spm_spm via a job structure
-    cmdline : str
-        String used to call matlab/spm via SpmMatlabCommandLine interface
-
-    Other Parameters
-    ----------------
-    To see optional arguments
-    EstimateContrast().inputs_help()
-
     Examples
     --------
     
@@ -1858,39 +1665,10 @@ class OneSampleTTest(SpmMatlabCommandLine):
     def jobtype(self):
         return 'stats'
 
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-
-        con_images: list of filenames
-        """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        """ Initializes the input fields of this interface.
-        """
-        self.inputs = Bunch(con_images=None)
-        
-    def _parse_inputs(self):
-        """validate spm1 sample t-test options
-        if set to None ignore
-        """
-        out_inputs = []
-        inputs = {}
-        einputs = {'con_images':''}
-
-        [inputs.update({k:v}) for k, v in self.inputs.items() if v is not None ]
-        for opt in inputs:
-            if opt == 'con_images':
-                continue
-            print 'option %s not supported'%(opt)
-        return einputs
+    opt_map = {'con_images': (None, 'List of contrast images')}
 
     def _compile_command(self):
         """validates spm options and generates job structure
-        if mfile is True uses matlab .m file
-        else generates a job structure and saves in .mat
         """
         cwd = os.getcwd()
         script  = "% generated by nipype.interfaces.spm\n"
@@ -1943,25 +1721,6 @@ class OneSampleTTest(SpmMatlabCommandLine):
 class TwoSampleTTest(SpmMatlabCommandLine):
     """use spm to perform a two-sample ttest on a set of images
 
-    Parameters
-    ----------
-    inputs : dict 
-        key, value pairs that will update the EstimateContrast.inputs 
-        attributes.  See self.inputs_help() for a list of
-        EstimateContrast.inputs attributes.
-    
-    Attributes
-    ----------
-    inputs : :class:`nipype.interfaces.base.Bunch`
-        Options that can be passed to spm_spm via a job structure
-    cmdline : str
-        String used to call matlab/spm via SpmMatlabCommandLine interface
-
-    Other Parameters
-    ----------------
-    To see optional arguments
-    EstimateContrast().inputs_help()
-
     Examples
     --------
     
@@ -1975,46 +1734,15 @@ class TwoSampleTTest(SpmMatlabCommandLine):
     def jobtype(self):
         return 'stats'
 
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-
-        images_group1: list of filenames
-        images_group2: list of filenames
-        dependent: bool, optional
-            are the measurements independent between levels
-            SPM default: False
-        unequal_variance: bool, optional
-            are the variances equal or unequal between groups
-            SPM default: True
-        """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        """ Initializes the input fields of this interface.
-        """
-        self.inputs = Bunch(images_group1=None,
-                            images_group2=None,
-                            dependent=None,
-                            unequal_variance=None)
-        
-    def _parse_inputs(self):
-        """validate spm normalize options
-        if set to None ignore
-        """
-        out_inputs = []
-        inputs = {}
-        einputs = {'images_group1':None,'images_group2':None}
-
-        [inputs.update({k:v}) for k, v in self.inputs.items() if v is not None ]
-        for opt in inputs:
-            if opt == 'images_group1':
-                continue
-            if opt == 'images_group2':
-                continue
-            print 'option %s not supported'%(opt)
-        return einputs
+    opt_map = {'images_group1': (None, 'con images from group 1'),
+               'images_group2': (None, 'con images from group 2'),
+               'dependent': (None,
+                             'Are the measurements independent between levels (opt, False)',
+                             False),
+               'unequal_variance': (None,
+                                    'Are the variances equal or unequal between groups (opt, True)',
+                                    True)
+               }
 
     def _compile_command(self):
         """validates spm options and generates job structure
