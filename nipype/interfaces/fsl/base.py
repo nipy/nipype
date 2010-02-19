@@ -28,6 +28,7 @@ from nipype.interfaces.base import OptMapCommand, CommandLine
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+
 class FSLInfo(object):
     '''A class to encapsulate stuff we'll need throughout the
 
@@ -38,11 +39,11 @@ class FSLInfo(object):
     I'm also not sure this is the best ordering for the various attributes and
     methods. Please feel free to reorder.'''
     __outputtype = 'NIFTI'
-    ftypes = {'NIFTI':'nii',
-          'NIFTI_PAIR':'img',
-          'NIFTI_GZ':'nii.gz',
-          'NIFTI_PAIR_GZ':'img.gz'}
-        
+    ftypes = {'NIFTI': 'nii',
+          'NIFTI_PAIR': 'img',
+          'NIFTI_GZ': 'nii.gz',
+          'NIFTI_PAIR_GZ': 'img.gz'}
+
     @staticmethod
     def version():
         """Check for fsl version on system
@@ -66,10 +67,10 @@ class FSLInfo(object):
 
         out = clout.runtime.stdout
         basedir = os.path.split(os.path.split(out)[0])[0]
-        clout = CommandLine('cat %s/etc/fslversion'%(basedir)).run()
+        clout = CommandLine('cat %s/etc/fslversion' % (basedir)).run()
         out = clout.runtime.stdout
         return out.strip('\n')
-    
+
     @classmethod
     def outputtypeToExt(cls, outputtype):
         if outputtype in cls.ftypes.keys():
@@ -108,6 +109,7 @@ class FSLInfo(object):
         fsldir = os.environ['FSLDIR']
         return os.path.join(fsldir, 'data/standard', img_name)
 
+
 def fslversion():
     msg = """fsl.fslversion is no longer available. instead replace with:
 
@@ -116,6 +118,7 @@ def fslversion():
              This message will be removed in the next release
           """
     raise Exception(msg)
+
 
 def fsloutputtype(ftype=None):
     msg = """fsl.fsloutputtype is no longer available. instead replace with:
@@ -126,13 +129,14 @@ def fsloutputtype(ftype=None):
           """
     raise Exception(msg)
 
+
 class FSLCommand(OptMapCommand):
     '''General support for FSL commands. Every FSL command accepts 'outputtype'
     input. For example:
     fsl.ExtractRoi(tmin=42, tsize=1, outputtype='NIFTI')'''
     
     def __init__(self, *args, **inputs):
-        super(FSLCommand,self).__init__(**inputs)
+        super(FSLCommand, self).__init__(**inputs)
         
         if 'outputtype' not in inputs or inputs['outputtype'] == None:
             outputtype, _ = FSLInfo.outputtype()
@@ -150,8 +154,8 @@ class FSLCommand(OptMapCommand):
             with a copy of self in `interface`
 
         """
-        self.environ = {'FSLOUTPUTTYPE':self._outputtype}
-        return super(FSLCommand,self).run()
+        self.environ = {'FSLOUTPUTTYPE': self._outputtype}
+        return super(FSLCommand, self).run()
     
     def _glob(self, fname):
         '''Check if, given a filename, FSL actually produced it.
