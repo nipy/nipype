@@ -1051,7 +1051,7 @@ class Segment(SpmMatlabCommandLine):
                'native_csf_image' : ('native space csf probability map',),
                'normalized_csf_image' : ('normalized csf probability map',),
                'modulated_csf_image' : ('modulated, normalized csf probability map'),
-               'modulated_input_images' : ('modulated version of input image',),
+               'modulated_input_image' : ('modulated version of input image',),
                'transformation_mat' : ('Normalization transformation',),
                'inverse_transformation_mat' : ('Inverse normalization info',),
                }
