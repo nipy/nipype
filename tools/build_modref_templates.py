@@ -5,14 +5,13 @@
 import os
 import sys
 
-# local imports
-from apigen import ApiDocWriter
-
 #*****************************************************************************
 if __name__ == '__main__':
     nipypepath = os.path.abspath('..')
     sys.path.insert(1,nipypepath)
     package = 'nipype'
+    # local imports
+    from apigen import ApiDocWriter
     outdir = os.path.join('api','generated')
     docwriter = ApiDocWriter(package)
     # Packages that should not be included in generated API docs.

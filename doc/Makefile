@@ -34,7 +34,9 @@ htmlonly:
 	@echo "Build finished. The HTML pages are in _build/html."
 
 api:    
+	rm -rf api/generated
 	python ../tools/build_modref_templates.py
+	rm -rf interfaces/generated
 	python ../tools/build_interface_docs.py
 	@echo "Build API docs finished."
 
