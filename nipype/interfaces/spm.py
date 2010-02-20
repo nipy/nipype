@@ -167,17 +167,31 @@ class SpmMatlabCommandLine(MatlabCommandLine):
                 setattr(self.inputs, k, v[2])
         #self.inputs = Bunch((k,None) for k in self.opt_map.keys())
 
-    def inputs_help(self):
-        helpstr = ['Parameters','----------','']
-        opthelpstr = []
-        manhelpstr = []
-        for k,v in sorted(self.opt_map.items()):
+    @classmethod
+    def help(cls):
+        cls.inputs_help()
+        print ''
+        cls.outputs_help()
+        
+    @classmethod
+    def inputs_help(cls):
+        helpstr = ['Inputs','------']
+        opthelpstr = None
+        manhelpstr = None
+        for k,v in sorted(cls.opt_map.items()):
             if '(opt' in v[1]:
+                if not opthelpstr:
+                    opthelpstr = ['','Optional:']
                 opthelpstr += ['%s: %s'%(k,v[1])]
             else:
+                if not manhelpstr:
+                    manhelpstr = ['','Mandatory:']
                 manhelpstr += ['%s: %s'%(k,v[1])]
-                
-        print '\n'.join(helpstr+manhelpstr+opthelpstr)
+        if manhelpstr:
+            helpstr += manhelpstr
+        if opthelpstr:
+            helpstr += opthelpstr
+        print '\n'.join(helpstr)
         #return (helpstr,manhelpstr,opthelpstr)
         
     def _convert_inputs(self, opt, val):
@@ -203,6 +217,23 @@ class SpmMatlabCommandLine(MatlabCommandLine):
                 logger.warn("Option '%s' is not supported!" % (opt))
                 raise
         return [spmdict]
+
+    @classmethod
+    def outputs_help(cls):
+        """ Prints the help of outputs
+        """
+        helpstr = ['Outputs','-------']
+        for k,v in sorted(cls.out_map.items()):
+            helpstr += ['%s: %s'%(k,v[0])]
+        print '\n'.join(helpstr)
+
+    def outputs(self):
+        """
+        """
+        outputs = Bunch()
+        for k in self.out_map.keys():
+            setattr(outputs, k, None)
+        return outputs
     
     def _compile_command(self):
         """Assembles the matlab code for SPM function
@@ -370,15 +401,6 @@ class SpmMatlabCommandLine(MatlabCommandLine):
                                            mfile=self.mfile) 
         return cmdline, mscript
 
-    def outputs_help(self):
-        """ Prints the help of outputs
-        """
-        print self.outputs.__doc__
-
-    def outputs(self):
-        """
-        """
-        raise NotImplementedError
 
 class SliceTiming(SpmMatlabCommandLine):
     """Use spm to perform slice timing correction.
@@ -461,17 +483,7 @@ class SliceTiming(SpmMatlabCommandLine):
         self.inputs.update(**inputs)
         return super(SliceTiming,self).run()
 
-    def outputs(self):
-        """
-        Parameters
-        ----------
-        (all default to None)
-        
-        timecorrected_files :
-            slice time corrected files corresponding to inputs.infile
-        """
-        outputs = Bunch(timecorrected_files=None)
-        return outputs
+    out_map = {'timecorrected_files' : ('slice time corrected files','infile')}
         
     def aggregate_outputs(self):
         outputs = self.outputs()
@@ -569,23 +581,10 @@ class Realign(SpmMatlabCommandLine):
         jobtype =  self.inputs.jobtype
         return [{'%s'%(jobtype):einputs[0]}]
 
-    def outputs(self):
-        """
-        Parameters
-        ----------
-
-        realigned_files :
-            list of realigned files
-        mean_image : 
-            mean image file from the realignment process
-        realignment_parameters : rp*.txt
-            files containing the estimated translation and rotation
-            parameters 
-        """
-        outputs = Bunch(realigned_files=None,
-                        realignment_parameters=None,
-                        mean_image=None)
-        return outputs
+    out_map = {'realigned_files' : ('Realigned files',),
+               'mean_image' : ('Mean image file from the realignment',),
+               'realignment_parameters' : ('Estimated translation and rotation parameters',)
+               }
 
     def run(self, infile=None,**inputs):
         """Executes the SPM realign function using MATLAB
@@ -705,19 +704,10 @@ class Coregister(SpmMatlabCommandLine):
         jobtype =  self.inputs.jobtype
         return [{'%s'%(jobtype):einputs[0]}]
 
-    def outputs(self):
-        """
-        Parameters
-        ----------
-
-        coregistered_source :
-            coregistered source file
-        coregistered_files :
-            coregistered files corresponding to inputs.infile
-        """
-        outputs = Bunch(coregistered_source=None,
-                        coregistered_files=None)
-        return outputs
+    out_map = {'coregistered_source' : ('Coregistered source file',),
+               'coregistered_files' : ('Coregistered other files',
+                                       'apply_to_files')
+               }
         
     def aggregate_outputs(self):
         if isinstance(self.inputs.source, list):
@@ -916,23 +906,11 @@ class Normalize(SpmMatlabCommandLine):
         return super(Normalize,self).run()
     
 
-    def outputs(self):
-        """
-        Parameters
-        ----------
-        (all default to None)
-
-        normalization_parameters :
-            MAT file containing the normalization parameters
-        normalized_source :
-            normalized source file
-        normalized_files :
-            normalized files corresponding to inputs.apply_to_files
-        """
-        outputs = Bunch(normalization_parameters=None,
-                        normalized_source=None,
-                        normalized_files=None)
-        return outputs
+    out_map = {'normalization_parameters' : ('MAT file containing the normalization parameters',),
+               'normalized_source' : ('Normalized source file',),
+               'normalized_files' : ('Normalized other files',
+                                     'apply_to_files')
+               }
         
     def aggregate_outputs(self):
            
@@ -1061,61 +1039,22 @@ class Segment(SpmMatlabCommandLine):
         self.inputs.update(**inputs)
         return super(Segment,self).run()
 
-    def outputs(self):
-        """
-        Parameters
-        ----------
-        (all default to None)
-
-        native_class_images :
-            native space images for each of the three tissue types
-        normalized_class_images :
-            normalized class images for each of the three tissue 
-            types
-        modulated_class_images :
-            modulated, normalized class images for each of the three tissue
-            types
-        native_gm_image :
-            native space grey matter probability map
-        normalized_gm_image :
-            normalized grey matter probability map
-        modulated_gm_image :
-            modulated, normalized grey matter probability map
-        native_wm_image :
-            native space white matter probability map
-        normalized_wm_image :
-            normalized white matter probability map
-        modulated_wm_image :
-            modulated, normalized white matter probability map 
-        native_csf_image :
-            native space cerebrospinal fluid probability map
-        normalized_csf_image :
-            normalized cerebrospinal fluid probability map
-        modulated_csf_image :
-            modulated, normalized cerebrospinal fluid probability map
-        modulated_input_images :
-            modulated version of input image
-        transformation_mat :
-            Transformation file for normalizing image
-        inverse_transformation_mat :
-            Transformation file for inverse normalizing an image
-        """
-        outputs = Bunch(native_class_images=None,
-                        normalized_class_images=None,
-                        modulated_class_images=None,
-                        native_gm_image=None,
-                        normalized_gm_image=None,
-                        modulated_gm_image=None,
-                        native_wm_image=None,
-                        normalized_wm_image=None,
-                        modulated_wm_image=None,
-                        native_csf_image=None,
-                        normalized_csf_image=None,
-                        modulated_csf_image=None,
-                        modulated_input_image=None,
-                        transformation_mat=None,
-                        inverse_transformation_mat=None)
-        return outputs
+    out_map = {'native_class_images' : ('native images for the 3 tissue types',),
+               'normalized_class_images' : ('normalized images',),
+               'modulated_class_images' : ('modulated, normalized images',),
+               'native_gm_image' : ('native space grey probability map',),
+               'normalized_gm_image' : ('normalized grey probability map',),
+               'modulated_gm_image' : ('modulated, normalized grey probability map',),
+               'native_wm_image' : ('native space white probability map',),
+               'normalized_wm_image' : ('normalized white probability map',),
+               'modulated_wm_image' : ('modulated, normalized white probability map',),
+               'native_csf_image' : ('native space csf probability map',),
+               'normalized_csf_image' : ('normalized csf probability map',),
+               'modulated_csf_image' : ('modulated, normalized csf probability map'),
+               'modulated_input_images' : ('modulated version of input image',),
+               'transformation_mat' : ('Normalization transformation',),
+               'inverse_transformation_mat' : ('Inverse normalization info',),
+               }
         
     def aggregate_outputs(self):
         outputs = self.outputs()
@@ -1223,18 +1162,8 @@ class Smooth(SpmMatlabCommandLine):
         self.inputs.update(**inputs)
         return super(Smooth,self).run()
 
-    def outputs(self):
-        """
-        Parameters
-        ----------
-        (all default to None)
-        
-        smoothed_files :
-            smooth files corresponding to inputs.infile
-        """
-        outputs = Bunch(smoothed_files=None)
-        return outputs
-        
+    out_map = {'smoothed_files' : ('smoothed files',)}
+    
     def aggregate_outputs(self):
         outputs = self.outputs()
         outputs.smoothed_files = []
@@ -1328,7 +1257,7 @@ class Level1Design(SpmMatlabCommandLine):
                'bases' : ('bases', 'Basis function used'),
                'volterra_expansion_order' : ('volt',
                      'Model interactions - yes:1, no:2 (opt, 1)'),
-               'global_intensity_normalization' : ('global'
+               'global_intensity_normalization' : ('global', 
                       'Global intensity normalization - scaling or none (opt, none)'),
                'mask_image' : ('mask',
                       'Image  for  explicitly  masking the analysis (opt,)'),
@@ -1385,16 +1314,8 @@ class Level1Design(SpmMatlabCommandLine):
             postscript = None
         self._cmdline, mscript =self._make_matlab_command(self._parse_inputs(),
                                                           postscript=postscript)
-            
-    def outputs(self):
-        """
-        Parameters
-        ----------
-        spm_mat_file : str
-            SPM mat file
-        """
-        outputs = Bunch(spm_mat_file=None)
-        return outputs
+
+    out_map = {'spm_mat_file' : ('SPM mat file',)}
         
     def aggregate_outputs(self):
         outputs = self.outputs()
@@ -1455,31 +1376,13 @@ class EstimateModel(SpmMatlabCommandLine):
         if self.inputs.flags:
             einputs[0].update(self.inputs.flags)
         return einputs
-    
-    def outputs(self):
-        """
-            Parameters
-            ----------
-            (all default to None)
 
-            mask_image:
-                binary brain mask within which estimation was
-                performed
-            beta_images:
-                Parameter estimates for each column of the design matrix
-            residual_image:
-                Mean-squared image of the residuals from each time point
-            RPVimage:
-                Resels per voxel image
-            spm_mat_file:
-                Updated SPM mat file
-        """
-        outputs = Bunch(mask_image=None,
-                        beta_images=None,
-                        residual_image=None,
-                        RPVimage=None,
-                        spm_mat_file=None)
-        return outputs
+    out_map = {'mask_image' : ('binary mask to constrain estimation',),
+               'beta_images' : ('design parameter estimates',),
+               'residual_image' : ('Mean-squared image of the residuals',),
+               'RPVimage' : ('Resels per voxel image',),
+               'spm_mat_file' : ('Updated SPM mat file',)
+               }
         
     def aggregate_outputs(self):
         outputs = self.outputs()
@@ -1610,27 +1513,12 @@ class EstimateContrast(SpmMatlabCommandLine):
         self._cmdline = self._gen_matlab_command(script,
                                                 cwd=os.getcwd(),
                                                 script_name='pyscript_contrastestimate') 
-    
-    def outputs(self):
-        """
-        Parameters
-        ----------
-        (all default to None)
 
-        con_images:
-            contrast images from a t-contrast
-        spmT_images:
-            stat images from a t-contrast
-        ess_images:
-            contrast images from an F-contrast
-        spmF_images:
-            stat images from an F-contrast
-        """
-        outputs = Bunch(con_images=None,
-                        spmT_images=None,
-                        ess_images=None,
-                        spmF_images=None)
-        return outputs
+    out_map = {'con_images' : ('contrast images from a t-contrast',),
+               'spmT_images' : ('stat images from a t-contrast',),
+               'ess_images' : ('contrast images from an F-contrast',),
+               'spmF_images' : ('stat images from an F-contrast',)
+               }
         
     def aggregate_outputs(self):
         outputs = self.outputs()
@@ -1691,21 +1579,10 @@ class OneSampleTTest(SpmMatlabCommandLine):
         self._cmdline = self._gen_matlab_command(script,
                                                 cwd=cwd,
                                                 script_name='pyscript_onesamplettest') 
-    
-    def outputs(self):
-        """
-        Parameters
-        ----------
-        (all default to None)
 
-        con_images:
-            contrast images from a t-contrast
-        spmT_images:
-            stat images from a t-contrast
-        """
-        outputs = Bunch(con_images=None,
-                        spmT_images=None)
-        return outputs
+    out_map = {'con_images' : ('contrast images from a t-contrast',),
+               'spmT_images' : ('stat images from a t-contrast',),
+               }
         
     def aggregate_outputs(self):
         outputs = self.outputs()
@@ -1719,7 +1596,7 @@ class OneSampleTTest(SpmMatlabCommandLine):
         return outputs
 
 class TwoSampleTTest(SpmMatlabCommandLine):
-    """use spm to perform a two-sample ttest on a set of images
+    """Perform a two-sample ttest using two groups of images
 
     Examples
     --------
@@ -1783,21 +1660,10 @@ class TwoSampleTTest(SpmMatlabCommandLine):
         self._cmdline = self._gen_matlab_command(script,
                                                 cwd=cwd,
                                                 script_name='pyscript_onesamplettest') 
-    
-    def outputs(self):
-        """
-        Parameters
-        ----------
-        (all default to None)
 
-        con_images:
-            contrast images from a t-contrast
-        spmT_images:
-            stat images from a t-contrast
-        """
-        outputs = Bunch(con_images=None,
-                        spmT_images=None)
-        return outputs
+    out_map = {'con_images' : ('contrast images from a t-contrast',),
+               'spmT_images' : ('stat images from a t-contrast',)
+               }
         
     def aggregate_outputs(self):
         outputs = self.outputs()
