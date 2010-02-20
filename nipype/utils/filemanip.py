@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 from glob import glob
+import logging
 # The md5 module is deprecated in Python 2.6, but hashlib is only
 # available as an external package for versions of python before 2.6.
 # Both md5 algorithms appear to return the same result.
@@ -24,6 +25,9 @@ except ImportError:
 import numpy as np
 
 from nipype.utils.misc import is_container
+
+fmlogger = logging.getLogger("filemanip")
+
 
 class FileNotFoundError(Exception):
     pass
@@ -114,18 +118,17 @@ def copyfile(originalfile, newfile, copy=False):
     
     """
     if os.path.lexists(newfile):
-        os.unlink(newfile)
-        #TODO: use logging
-        print "File: %s already exists, overwriting with %s, copy:%d" \
-            % (newfile, originalfile, copy)
+        fmlogger.warn("File: %s already exists, overwriting with %s, copy:%d" \
+            % (newfile, originalfile, copy))
     if os.name is 'posix' and not copy:
+        if os.path.lexists(newfile):
+            os.unlink(newfile)
         os.symlink(originalfile,newfile)
     else:
-        #print "copying %s to %s"%(originalfile,newfile)
         try:
             shutil.copyfile(originalfile, newfile)
-        except shutil.Error:
-            print "File already exists"
+        except shutil.Error, e:
+            fmlogger.warn(e.message)
         
     if originalfile.endswith(".img"):
         hdrofile = originalfile[:-4] + ".hdr"

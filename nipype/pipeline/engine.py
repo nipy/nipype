@@ -29,6 +29,7 @@ LOG_FILENAME = 'pypeline.log'
 logging.basicConfig()
 logger = logging.getLogger('engine')
 nwlogger = logging.getLogger('nodewrapper')
+fmlogger = logging.getLogger('filemanip')
 hdlr = logging.handlers.RotatingFileHandler(LOG_FILENAME,
                                             maxBytes=256000,
                                             backupCount=4)
@@ -40,7 +41,8 @@ logger.addHandler(hdlr)
 logger.setLevel(logging.INFO)
 nwlogger.addHandler(hdlr)
 nwlogger.setLevel(logging.INFO)
-
+fmlogger.addHandler(hdlr)
+fmlogger.setLevel(logging.INFO)
 
 def walk(children, level=0, path=None, usename=True):
     """Generate all the full paths in a tree, as a dict.
