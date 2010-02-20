@@ -293,13 +293,22 @@ class InterfaceHelpWriter(object):
                 iterator = classinst.out_map.items
             else:
                 iterator = classinst.outputs().items
-            if [i for i,v in iterator()]:
+            outstr = []
+            for i,v in sorted(iterator()):
+                fieldstr =  i
+                if isinstance(v,tuple) and isinstance(v[0], str):
+                    # Handle cases where we've added a docstring to
+                    # the opt_map.  The value is then a tuple where
+                    # the first element is the format string and the
+                    # second element is the docstring.
+                    fieldstr += ' : ' + v[0]
+                outstr += [fieldstr]
+            if outstr:
                 if not helpstr:
                     helpstr = '\nOutputs:: \n\n\t'
                 else:
                     helpstr += '\nOutputs:: \n\n\t'
-                for i,v in sorted(classinst.outputs().items()):
-                    helpstr +=  i + '\n\t'
+                helpstr += '\n\t'.join(outstr)
             if helpstr:
                 ad += '\n' + helpstr + '\n'
 
