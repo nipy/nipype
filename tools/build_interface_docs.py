@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Script to auto-generate our API docs.
+"""Script to auto-generate interface docs.
 """
 # stdlib imports
 import os
@@ -35,9 +35,8 @@ if __name__ == '__main__':
                                        ]
     docwriter.class_skip_patterns += ['FSL',
                                       'FS',
-                                      'spm.\SpecifyModel',
-                                      'SpmInfo',
-                                      'SpmMatlab',
+                                      'Spm',
+                                      'Spm',
                                       ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'gen', relative_to='interfaces')
