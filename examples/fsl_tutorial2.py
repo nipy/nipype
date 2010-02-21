@@ -298,5 +298,5 @@ l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
    function needs to be called. 
 """
 if __name__ == '__main__':
-    l1pipeline.run_in_series()
+    l1pipeline.run()
 #    l2pipeline.run()
