@@ -20,6 +20,7 @@ from nipype.utils.docparse import get_doc
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+
 class Smooth(FSLCommand):
     '''Use fslmaths to smooth the image
 
@@ -37,17 +38,16 @@ class Smooth(FSLCommand):
                'outfile': None,
               }
 
-
     def _get_outfile(self, check=False):
         return self._gen_fname(self.inputs.infile,
                                   self.inputs.outfile,
                                   suffix='_smooth',
                                   check=check)
-        
+
     def _parse_inputs(self):
         return [self.inputs.infile,
                 # ohinds: convert fwhm to stddev
-                '-kernel gauss', str(self.inputs.fwhm/2.3548), 
+                '-kernel gauss', str(self.inputs.fwhm / 2.3548),
                 '-fmean',
                 self._get_outfile()]
 
@@ -68,10 +68,11 @@ class Smooth(FSLCommand):
         outputs.smoothedimage = self._get_outfile(check=True)
         return outputs
 
+
 class Merge(FSLCommand):
     """Use fslmerge to concatenate images
     """
-    
+
     @property
     def cmd(self):
         return 'fslmerge'
@@ -86,9 +87,9 @@ class Merge(FSLCommand):
                                   self.inputs.outfile,
                                   suffix='_merged',
                                   check=check)
-        
+
     def _parse_inputs(self):
-        allargs =  [self.inputs.dimension,
+        allargs = [self.inputs.dimension,
                     self._get_outfile()]
         allargs.extend(self.inputs.infile)
         return allargs
@@ -110,6 +111,7 @@ class Merge(FSLCommand):
         outputs.mergedimage = self._get_outfile(check=True)
         return outputs
 
+
 class ExtractRoi(FSLCommand):
     """Uses FSL Fslroi command to extract region of interest (ROI)
     from an image.
@@ -122,7 +124,7 @@ class ExtractRoi(FSLCommand):
     extract voxels 10 to 12 inclusive you would specify 10 and 3 (not
     10 and 12).
     """
-    opt_map={}
+    opt_map = {}
 
     @property
     def cmd(self):
@@ -131,7 +133,7 @@ class ExtractRoi(FSLCommand):
 
     def inputs_help(self):
         """Print command line documentation for fslroi."""
-        print get_doc(self.cmd,self.opt_map,trap_error=False)
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
 
     def _populate_inputs(self):
         self.inputs = Bunch(infile=None,
@@ -148,7 +150,7 @@ class ExtractRoi(FSLCommand):
     def _parse_inputs(self):
         """validate fsl fslroi options"""
 
-        allargs=[]
+        allargs = []
         # Add infile and outfile to the args if they are specified
         if self.inputs.infile:
             allargs.insert(0, self.inputs.infile)
@@ -159,16 +161,16 @@ class ExtractRoi(FSLCommand):
 
         #concat all numeric variables into a string separated by space
         #given the user's option
-        dim = [ self.inputs.xmin, self.inputs.xsize, self.inputs.ymin,
-                self.inputs.ysize,
-                self.inputs.zmin, self.inputs.zsize, self.inputs.tmin,
-                self.inputs.tsize]
-        args=[]
+        dim = [self.inputs.xmin, self.inputs.xsize, self.inputs.ymin,
+               self.inputs.ysize,
+               self.inputs.zmin, self.inputs.zsize, self.inputs.tmin,
+               self.inputs.tsize]
+        args = []
         for num in dim:
             if num is not None:
                 args.append(repr(num))
 
-        allargs.insert(2,' '.join(args))
+        allargs.insert(2, ' '.join(args))
 
         return allargs
 
@@ -240,13 +242,12 @@ class Split(FSLCommand):
     """Uses FSL Fslsplit command to separate a volume into images in
     time, x, y or z dimension.
     """
-    opt_map={'outbasename': None, # output basename
-             'time': '-t', #separate images in time (default behaviour)
-             'xdir': '-x', #separate images in the x direction
-             'ydir': '-y', #separate images in the y direction
-             'zdir': '-z', #separate images in the z direction
-             'infile': None
-             }
+    opt_map = {'outbasename': None,  # output basename
+               'time': '-t',  # separate images in time (default behaviour)
+               'xdir': '-x',  # separate images in the x direction
+               'ydir': '-y',  # separate images in the y direction
+               'zdir': '-z',  # separate images in the z direction
+               'infile': None}
 
     @property
     def cmd(self):
@@ -255,11 +256,11 @@ class Split(FSLCommand):
 
     def inputs_help(self):
         """Print command line documentation for fslsplit."""
-        print get_doc(self.cmd,self.opt_map,trap_error=False)
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
 
     def _parse_inputs(self):
         """validate fsl fslroi options"""
-        
+
         allargs = super(Split, self)._parse_inputs(skip=('infile'))
         if self.inputs.infile:
             allargs.insert(0, self.inputs.infile)
@@ -326,15 +327,16 @@ class Split(FSLCommand):
         type, ext = FSLInfo.outputtype()
         outbase = 'vol*.'
         if self.inputs.outbasename:
-            outbase = '%s*.'%self.inputs.outbasename
+            outbase = '%s*.' % self.inputs.outbasename
         outputs.outfiles = sorted(glob(os.path.join(os.getcwd(),
                                                     outbase + ext)))
         return outputs
 
+
 class ImageMaths(FSLCommand):
     """Use FSL fslmaths command to allow mathematical manipulation of images
     """
-    opt_map ={}
+    opt_map = {}
 
     @property
     def cmd(self):
@@ -343,30 +345,29 @@ class ImageMaths(FSLCommand):
 
     def inputs_help(self):
         """Print command line documentation for fslmaths."""
-        print get_doc(self.cmd,self.opt_map,trap_error=False)
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
 
     def _populate_inputs(self):
         self.inputs = Bunch(infile=None,
                             infile2=None,
                             outfile=None,
                             optstring=None,
-                            suffix=None,      # ohinds: outfile suffix
-                            outdatatype=None) # ohinds: change outdatatype
+                            suffix=None,  # ohinds: outfile suffix
+                            outdatatype=None)  # ohinds: change outdatatype
 
     def _get_outfile(self):
-        suffix = '_maths' # ohinds: build suffix
+        suffix = '_maths'  # ohinds: build suffix
         if self.inputs.suffix:
             suffix = self.inputs.suffix
         return self._gen_fname(self.inputs.infile,
                                   self.inputs.outfile,
                                   suffix=suffix)
-    
 
     def _parse_inputs(self):
         """validate fsl fslmaths options"""
 
         # Add infile and outfile to the args if they are specified
-        allargs=[]
+        allargs = []
         if self.inputs.infile:
             allargs.insert(0, list_to_filename(self.inputs.infile))
             self.outfile = self._get_outfile()
@@ -379,8 +380,8 @@ class ImageMaths(FSLCommand):
         else:
             allargs.insert(2, self.outfile)
 
-        if self.inputs.outdatatype: # ohinds: assign odt
-            allargs.append('-odt ' + self.inputs.outdatatype);
+        if self.inputs.outdatatype:  # ohinds: assign odt
+            allargs.append('-odt ' + self.inputs.outdatatype)
 
         return allargs
 

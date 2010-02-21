@@ -72,7 +72,7 @@ class FSLInfo(object):
         return out.strip('\n')
 
     @classmethod
-    def outputtypeToExt(cls, outputtype):
+    def outputtype_to_ext(cls, outputtype):
         if outputtype in cls.ftypes.keys():
             return cls.ftypes[outputtype]
         else:
@@ -99,8 +99,8 @@ class FSLInfo(object):
         if ftype is not None:
             if ftype in cls.ftypes.keys():
                 cls.__outputtype = ftype
-        return cls.__outputtype, cls.outputtypeToExt(cls.__outputtype)
-    
+        return cls.__outputtype, cls.outputtype_to_ext(cls.__outputtype)
+
     @staticmethod
     def standard_image(img_name):
         '''Grab an image from the standard location.
@@ -134,16 +134,16 @@ class FSLCommand(OptMapCommand):
     '''General support for FSL commands. Every FSL command accepts 'outputtype'
     input. For example:
     fsl.ExtractRoi(tmin=42, tsize=1, outputtype='NIFTI')'''
-    
+
     def __init__(self, *args, **inputs):
         super(FSLCommand, self).__init__(**inputs)
-        
+
         if 'outputtype' not in inputs or inputs['outputtype'] == None:
             outputtype, _ = FSLInfo.outputtype()
         else:
-            outputtype = inputs['outputtype'] 
+            outputtype = inputs['outputtype']
         self._outputtype = outputtype
-    
+
     def run(self):
         """Execute the command.
 
@@ -154,9 +154,9 @@ class FSLCommand(OptMapCommand):
             with a copy of self in `interface`
 
         """
-        self.environ = {'FSLOUTPUTTYPE': self._outputtype}
+        self._environ = {'FSLOUTPUTTYPE': self._outputtype}
         return super(FSLCommand, self).run()
-    
+
     def _glob(self, fname):
         '''Check if, given a filename, FSL actually produced it.
 
@@ -174,17 +174,17 @@ class FSLCommand(OptMapCommand):
         # substitute
         for ext in FSLInfo.ftypes.values():
             if fname.endswith(ext):
-                fname = fname[:-(len(ext)+1)]
+                fname = fname[:-(len(ext) + 1)]
                 break
 
-        ext = FSLInfo.outputtypeToExt(self._outputtype)
+        ext = FSLInfo.outputtype_to_ext(self._outputtype)
         files = glob(fname) or glob(fname + '.' + ext)
 
         try:
             return files[0]
         except IndexError:
             return None
-    
+
     def _gen_fname(self, basename, fname=None, cwd=None, suffix='_fsl',
                   check=False, cmd='unknown'):
         '''Define a generic mapping for a single outfile
@@ -209,8 +209,8 @@ class FSLCommand(OptMapCommand):
             cwd = os.getcwd()
 
         if fname is None:
-            ext = FSLInfo.outputtypeToExt(self._outputtype)
-            suffix = '.'.join((suffix,ext))
+            ext = FSLInfo.outputtype_to_ext(self._outputtype)
+            suffix = '.'.join((suffix, ext))
             fname = fname_presuffix(list_to_filename(basename), suffix=suffix,
                                     use_ext=False, newpath=cwd)
 

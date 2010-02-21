@@ -17,4 +17,4 @@ from nipype.interfaces.fsl.dti import (EddyCorrect, Bedpostx, Dtifit, Tbss2reg,
                                        Tbss1preproc, Tbss3postreg,
                                        Tbss4prestats, Randomise,
                                        Randomise_parallel, Probtrackx,
-                                       Vecreg, ProjThresh,  FindTheBiggest)
+                                       Vecreg, ProjThresh, FindTheBiggest)

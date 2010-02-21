@@ -21,6 +21,7 @@ from nipype.utils.misc import container_to_string, is_container
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+
 class Bet(FSLCommand):
     """Use FSL BET command for skull stripping.
 
@@ -73,8 +74,8 @@ class Bet(FSLCommand):
         'nooutput':           '-n',
         'frac':               '-f %.2f',
         'vertical_gradient':  '-g %.2f',
-        'radius':             '-r %d', # in mm
-        'center':             '-c %d %d %d', # in voxels
+        'radius':             '-r %d',  # in mm
+        'center':             '-c %d %d %d',  # in voxels
         'threshold':          '-t',
         'mesh':               '-e',
         'verbose':            '-v',
@@ -159,8 +160,8 @@ class Bet(FSLCommand):
             binary brain mask if generated
 
         """
- 
-        outputs = Bunch(outfile=None,maskfile=None)
+
+        outputs = Bunch(outfile=None, maskfile=None)
         return outputs
 
     def aggregate_outputs(self):
@@ -203,7 +204,7 @@ class Fast(FSLCommand):
 
     opt_map = {'number_classes':       '-n %d',
             'bias_iters':           '-I %d',
-            'bias_lowpass':         '-l %d', # in mm
+            'bias_lowpass':         '-l %d',  # in mm
             'img_type':             '-t %d',
             'init_seg_smooth':      '-f %.3f',
             'segments':             '-g',
@@ -218,7 +219,7 @@ class Fast(FSLCommand):
             'nobias':               '-N',
             'n_inputimages':        '-S %d',
             'out_basename':         '-o %s',
-            'use_priors':           '-P', # must also set -a!
+            'use_priors':           '-P',  # must also set -a!
             'segment_iters':        '-W %d',
             'mixel_smooth':         '-R %.2f',
             'iters_afterbias':      '-O %d',
@@ -231,7 +232,7 @@ class Fast(FSLCommand):
 
     def inputs_help(self):
         """Print command line documentation for FAST."""
-        print get_doc(self.cmd, self.opt_map,trap_error=False)
+        print get_doc(self.cmd, self.opt_map, trap_error=False)
 
     def run(self, infiles=None, **inputs):
         """Execute the FSL fast command.
@@ -295,8 +296,8 @@ class Fast(FSLCommand):
 
         """
 
-        outputs = Bunch(mixeltype = [],
-                seg = [],
+        outputs = Bunch(mixeltype=[],
+                seg=[],
                 partial_volume_map=[],
                 partial_volume_files=[],
                 tissue_class_map=[],
@@ -338,10 +339,10 @@ class Fast(FSLCommand):
             # get basename (correct fsloutpputytpe extension)
             if self.inputs.out_basename:
                 pth, nme = os.path.split(item)
-                jnk, ext = os.path.splitext(nme)
+                _, _ = os.path.splitext(nme)
                 item = pth + self.inputs.out_basename + '.%s' % (envext)
             else:
-                nme, ext = os.path.splitext(item)
+                nme, _ = os.path.splitext(item)
                 item = nme + '.%s' % (envext)
             # get number of tissue classes
             if not self.inputs.number_classes:
@@ -354,7 +355,7 @@ class Fast(FSLCommand):
             if self.inputs.segments:
                 for i in range(nclasses):
                     outputs.seg.append(fname_presuffix(item,
-                        suffix='_seg_%d'%(i)))
+                        suffix='_seg_%d' % (i)))
                     # always pve,mixeltype unless nopve = True
             if not self.inputs.nopve:
                 fname = fname_presuffix(item, suffix='_pveseg')
@@ -363,7 +364,7 @@ class Fast(FSLCommand):
                 outputs.mixeltype.append(fname)
 
                 for i in range(nclasses):
-                    fname = fname_presuffix(item, suffix='_pve_%d'%(i))
+                    fname = fname_presuffix(item, suffix='_pve_%d' % (i))
                     outputs.partial_volume_files.append(fname)
 
             # biasfield ?
@@ -378,7 +379,7 @@ class Fast(FSLCommand):
             # probability maps ?
             if self.inputs.probability_maps:
                 for i in range(nclasses):
-                    fname = fname_presuffix(item, suffix='_prob_%d'%(i))
+                    fname = fname_presuffix(item, suffix='_prob_%d' % (i))
                     outputs.prob_maps.append(fname)
 
         # For each output file-type (key), check that any expected
@@ -386,7 +387,7 @@ class Fast(FSLCommand):
         for outtype, outlist in outputs.items():
             if len(outlist) > 0:
                 for outfile in outlist:
-                    if not len(glob(outfile))==1:
+                    if not len(glob(outfile)) == 1:
                         msg = "Output file '%s' of type '%s' was not generated"\
                                 % (outfile, outtype)
                         raise IOError(msg)
@@ -457,8 +458,7 @@ class Flirt(FSLCommand):
 
     def inputs_help(self):
         """Print command line documentation for FLIRT."""
-        print get_doc(self.cmd, self.opt_map,'-help')
-
+        print get_doc(self.cmd, self.opt_map, '-help')
 
     def _parse_inputs(self):
         '''Call our super-method, then add our input files'''
@@ -468,7 +468,7 @@ class Flirt(FSLCommand):
             'reference',
             'outmatrix',
             'inmatrix'))
-        possibleinputs = [(self.inputs.outfile,'-out'),
+        possibleinputs = [(self.inputs.outfile, '-out'),
                 (self.inputs.inmatrix, '-init'),
                 (self.inputs.outmatrix, '-omat'),
                 (self.inputs.reference, '-ref'),
@@ -566,6 +566,7 @@ class Flirt(FSLCommand):
                 raise_error(outputs.outmatrix)
         return outputs
 
+
 class ApplyXfm(Flirt):
     '''Use FSL FLIRT to apply a linear transform matrix.
 
@@ -590,11 +591,11 @@ class ApplyXfm(Flirt):
             outfile = self._gen_fname(self.inputs.infile,
                                          self.inputs.outfile,
                                          suffix='_axfm')
-            allargs.append(' '.join(('-out',outfile)))
-        for idx,arg in enumerate(allargs):
+            allargs.append(' '.join(('-out', outfile)))
+        for idx, arg in enumerate(allargs):
             if '-out' in arg:
                 continue
-        allargs.insert(idx,'-applyxfm')
+        allargs.insert(idx, '-applyxfm')
         return allargs
 
     def run(self, infile=None, reference=None, inmatrix=None,
@@ -661,10 +662,10 @@ class ApplyXfm(Flirt):
             outfile : string, filename
             outmatrix : string, filename
         """
-        outputs = Bunch(outfile=None,outmatrix=None)
+        outputs = Bunch(outfile=None, outmatrix=None)
         return outputs
 
-    def aggregate_outputs(self,verify_outmatrix=False):
+    def aggregate_outputs(self, verify_outmatrix=False):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
@@ -699,6 +700,7 @@ class ApplyXfm(Flirt):
             else:
                 outputs.outmatrix = outmatrix
         return outputs
+
 
 class McFlirt(FSLCommand):
     """Use FSL MCFLIRT to do within-modality motion correction.
@@ -755,11 +757,11 @@ class McFlirt(FSLCommand):
         # Why is it being done here?
         if self.inputs.infile:
             infile = list_to_filename(self.inputs.infile)
-            allargs.insert(0,'-in %s'%infile)
+            allargs.insert(0, '-in %s' % infile)
             outfile = self._gen_fname(infile, self.inputs.outfile,
                                          suffix='_mcf')
             allargs.append(self.opt_map['outfile'] % outfile)
-        
+
         return allargs
 
     def run(self, infile=None, **inputs):
@@ -837,7 +839,7 @@ class McFlirt(FSLCommand):
             outputs.meanimg = self._gen_fname(list_to_filename(self.inputs.infile),
                 self.inputs.outfile, cwd=cwd, suffix='_meanvol', check=True)
         if self.inputs.savemats:
-            matnme, ext = os.path.splitext(list_to_filename(self.inputs.infile))
+            matnme, _ = os.path.splitext(list_to_filename(self.inputs.infile))
             matnme = matnme + '.mat'
             outputs.outmatfile = matnme
         if self.inputs.saveplots:
@@ -974,7 +976,7 @@ class Fnirt(FSLCommand):
         self.inputs.update(**inputs)
         return super(Fnirt, self).run()
 
-    def write_config(self,configfile):
+    def write_config(self, configfile):
         """Writes out currently set options to specified config file
 
         Parameters
@@ -986,10 +988,10 @@ class Fnirt(FSLCommand):
         try:
             fid = open(configfile, 'w+')
         except IOError:
-            print ('unable to create config_file %s'%(configfile))
+            print ('unable to create config_file %s' % (configfile))
 
         for item in valid_inputs:
-            fid.write('%s\n'%(item))
+            fid.write('%s\n' % (item))
         fid.close()
 
     def outputs(self):
@@ -1063,9 +1065,10 @@ class Fnirt(FSLCommand):
                 file = os.path.join(cwd, file)
                 file = self._glob(file)
                 if file is None:
-                    raise IOError('file %s of type %s not generated'%(file,item))
+                    raise IOError('file %s of type %s not generated' % (file, item))
                 setattr(outputs, item, file)
         return outputs
+
 
 class ApplyWarp(FSLCommand):
     '''Use FSL's applywarp to apply the results of a Fnirt registration

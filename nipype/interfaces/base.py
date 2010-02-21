@@ -340,6 +340,7 @@ class CommandLine(Interface):
     def __init__(self, *args, **inputs):
         self._populate_inputs()
         self._update(*args, **inputs)
+        self._environ = {}
 
     def _update(self, *args, **inputs):
         """Update the `self.inputs` Bunch.
@@ -436,9 +437,9 @@ class CommandLine(Interface):
             cwd = os.getcwd()
         runtime = Bunch(cmdline=self.cmdline, cwd=cwd)
         
-        if hasattr(self, 'environ') and self.environ != None:
+        if hasattr(self, '_environ') and self._environ != None:
             env = deepcopy(os.environ.data)
-            env.update(self.environ)  
+            env.update(self._environ)  
             proc  = subprocess.Popen(runtime.cmdline,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,

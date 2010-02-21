@@ -99,7 +99,7 @@ class FSCommand(OptMapCommand):
             with a copy of self in `interface`
 
         """
-        self.environ = {'SUBJECTS_DIR':self._subjectsdir}
+        self._environ = {'SUBJECTS_DIR':self._subjectsdir}
         return super(FSCommand,self).run()
 
 class FSCommandLine(CommandLine):
@@ -130,6 +130,11 @@ class FSCommandLine(CommandLine):
         if result.runtime.returncode == 0:
             result.outputs = self.aggregate_outputs()
         return result
+    
+    def _compile_command(self):
+        """Virtual function"""
+        raise NotImplementedError(
+                'Subclasses of FSCommandLine must implement _compile_command')
 
 class DicomDirInfo(FSCommand):
     """uses mri_parse_sdcmdir to get information from dicom
