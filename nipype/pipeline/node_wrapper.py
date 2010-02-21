@@ -301,6 +301,7 @@ class NodeWrapper(object):
                                          runtime=None,
                                          outputs=aggouts)
             except FileNotFoundError:
+                logger.info("Some of the outputs were not found: rerunnig node.")
                 result = self._interface.run()
         return result
     
