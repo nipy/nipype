@@ -97,7 +97,7 @@ class NodeWrapper(object):
             self.overwrite = overwrite
         if name is None:
             cname = interface.__class__.__name__
-            mname = interface.__class__.__module__.split('.')[-1]
+            mname = interface.__class__.__module__.split('.')[2]
             self.name = '.'.join((cname, mname))
         else:
             self.name = name
@@ -272,8 +272,9 @@ class NodeWrapper(object):
         if cwd:
             os.chdir(old_cwd)
             
-    def _run_command(self, execute, cwd):
-        self._copyfiles_to_wd(cwd,execute)
+    def _run_command(self, execute, cwd, copyfiles=True):
+        if copyfiles:
+            self._copyfiles_to_wd(cwd,execute)
         if self.disk_based:
             resultsfile = os.path.join(cwd,'result.npz')
         if execute:
@@ -302,7 +303,7 @@ class NodeWrapper(object):
                                          outputs=aggouts)
             except FileNotFoundError:
                 logger.info("Some of the outputs were not found: rerunnig node.")
-                result = self._interface.run()
+                result = self._run_command(execute=True, cwd=cwd, copyfiles=False)
         return result
     
     def _copyfiles_to_wd(self, outdir, execute):

@@ -43,3 +43,12 @@ User 1
 
 - does the ability to mix programs from different packages really appeal to you? or is the learning curve to understand these different packages too great and makes you to stick to what you know best?
     * This I think is the #1 advantage of pipeline over batching by hand in bash or matlab.  The ease of integration across packages is really the most meaningful contribution of the pipeline to the NI community, imho.
+
+User 2
+======
+
+1.  online documentation has improved greatly - it's very helpful to have clear definitions of input and output parameters/options, for example.
+2.  error messages (and detailed crashdumps) are also very helpful - nice to be able to see exactly where the script is crashing (specifically, what lines, inputs, etc.)
+3.  for event-related paradigms (i haven't even looked at ours yet), is there a way to feed a spm.mat file into the pipeline?  i've spoken to several people who already have onsets and other model information in a .mat file, which they would like to be able to feed into the pipeline (as opposed to writing out onsets in python).
+4.  i do have the export_graph() line in my script, but i haven't looked at the output, to be perfectly honest.  what's the best way to view the visual output on the cluster?  where does it output this picture?
+5.  i know that my whole lab group and i love the ability to mix and match different packages, which really makes nipype so appealing.  ...  took me a little while to get used to the python syntax, but once i familiarized myself with the input/output module syntax, things became much clearer.

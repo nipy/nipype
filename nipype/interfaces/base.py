@@ -9,7 +9,9 @@ Requires Packages to be installed
 import os
 import subprocess
 from copy import deepcopy
+from socket import gethostname
 from string import Template
+from time import time
 from warnings import warn
 
 from nipype.utils.filemanip import md5
@@ -435,11 +437,17 @@ class CommandLine(Interface):
         """
         if cwd is None:
             cwd = os.getcwd()
-        runtime = Bunch(cmdline=self.cmdline, cwd=cwd)
+        runtime = Bunch(cmdline=self.cmdline, cwd=cwd,
+                        stdout = None, stderr = None,
+                        returncode = None, duration = None,
+                        environ=deepcopy(os.environ.data),
+                        hostname = gethostname())
         
+        t = time()
         if hasattr(self, '_environ') and self._environ != None:
             env = deepcopy(os.environ.data)
-            env.update(self._environ)  
+            env.update(self._environ)
+            runtime.environ = env
             proc  = subprocess.Popen(runtime.cmdline,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
@@ -454,6 +462,7 @@ class CommandLine(Interface):
                                      cwd=cwd)
 
         runtime.stdout, runtime.stderr = proc.communicate()
+        runtime.duration = time()-t
         runtime.returncode = proc.returncode
 
         return InterfaceResult(deepcopy(self), runtime)

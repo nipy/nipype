@@ -42,6 +42,17 @@ nodes. The following example will result in failure to execute.::
        pipeline.run_with_manager() # will fail
 
 
+Sending environment updates to hosts over ssh::
+
+        from IPython.kernel.client import MultiEngineClient
+        mec = MultiEngineClient()
+        mec.get_ids()
+        env = dict(DISPLAY='hostname:displayport',
+           FSLOUTPUTTYPE='NIFTI')
+        mec.push(dict(env=env))
+        mec.execute('import os')
+        mec.execute('os.environ.update(env)')
+
 Using other distribution engines with nipype
 --------------------------------------------
 
