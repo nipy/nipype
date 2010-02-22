@@ -187,8 +187,8 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
             if edge[0] not in subgraph.nodes():
                 if n.id not in edgeinfo.keys():
                     edgeinfo[n.id] = []
-                    edgeinfo[n.id].append((edge[0],
-                                           supergraph.get_edge_data(*edge)))
+                edgeinfo[n.id].append((edge[0],
+                                       supergraph.get_edge_data(*edge)))
     supergraph.remove_nodes_from(nodes)
     # Add copies of the subgraph depending on the number of iterables
     for i, params in enumerate(walk(iterables.items())):
@@ -498,6 +498,7 @@ class Pipeline(object):
                         self._set_node_input(node, destname,
                                              edge[0], sourceinfo)
                 self._set_output_directory_base(node)
+                redo = None
                 if force_execute:
                     if isinstance(force_execute, str):
                         force_execute = [force_execute]
@@ -520,9 +521,10 @@ class Pipeline(object):
         message = ['Node %s failed to run.' % node.id]
         logger.error(message)
         if not traceback:
-            traceback = format_exception(sys.last_type,
-                                         sys.last_value,
-                                         sys.last_traceback)
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            traceback = format_exception(exc_type,
+                                         exc_value,
+                                         exc_traceback)
         timeofcrash = strftime('%Y%m%d-%H%M%S')
         login_name = pwd.getpwuid(os.geteuid())[0]
         crashfile = 'crashdump-%s-%s.npz' % (timeofcrash,
@@ -684,10 +686,11 @@ class Pipeline(object):
         for edge in graph.out_edges_iter(self.procs[jobid]):
             data = graph.get_edge_data(*edge)
             for sourceinfo, destname in data['connect']:
+                logger.info('%s %s %s %s',edge[1], destname, self.procs[jobid], sourceinfo)
                 self._set_node_input(edge[1], destname,
                                      self.procs[jobid], sourceinfo)
         # update the job dependency structure
-        self.depidx[jobid, :] = 0
+        self.depidx[jobid, :] = 0.
 
 
     def _generate_expanded_graph(self):
