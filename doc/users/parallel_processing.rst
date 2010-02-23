@@ -20,11 +20,13 @@ cluster locally and log all client messages to the file in
 /tmp/pipeline.::
 
         ipcluster local -n 8 --logdir /tmp/pipeline
+        ipcluster ssh -n 8 --ipclusterfile=clusterfile.py --sshx=loginprofile.sh
 
 Once the clients have been started, any pipeline executed with the run
 command or the run_with_manager command will automatically start
 getting distributed to the clients. The pipeline engine handles
 dependencies between processes.
+
 
 Notes
 ~~~~~
@@ -41,6 +43,7 @@ nodes. The following example will result in failure to execute.::
        pipeline.add_modules([node])
        pipeline.run_with_manager() # will fail
 
+instead such functions should be embedded in pipeline.connect()
 
 Sending environment updates to hosts over ssh::
 
@@ -52,6 +55,8 @@ Sending environment updates to hosts over ssh::
         mec.push(dict(env=env))
         mec.execute('import os')
         mec.execute('os.environ.update(env)')
+        # or for fun
+        mec.execute('os.system("xeyes")')
 
 Using other distribution engines with nipype
 --------------------------------------------

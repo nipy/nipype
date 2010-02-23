@@ -45,11 +45,11 @@ class NodeWrapper(object):
         default=None, which results in the use of mkdtemp
     diskbased : Boolean
         Whether the underlying object requires disk space for
-        operation and storage of output
+        operation and storage of output (default: True)
     overwrite : Boolean
         Whether to overwrite contents of output directory if it
         already exists. If directory exists and hash matches it
-        assumes that process has been executed
+        assumes that process has been executed (default : False)
     name : string
         Name of this node. By default node is named
         modulename.classname. But when the same class is being used
@@ -74,7 +74,7 @@ class NodeWrapper(object):
     """
     def __init__(self, interface=None,
                  iterables={}, iterfield=[],
-                 diskbased=False, base_directory=None,
+                 diskbased=True, base_directory=None,
                  overwrite=False,
                  name=None):
         # interface can only be set at initialization

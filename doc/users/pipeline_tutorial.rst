@@ -4,28 +4,44 @@
  Tutorial : Pipeline
 =====================
 
+This section presents several tutorials on how to setup and use pipelines. Make
+sure that you have the requirements satisfied and go through the steps required
+for the analysis tutorials.
 
-Running a pipeline
--------------------
+Tutorials
+=========
 
-This is a step by step guide to setting up and running a pipelined
-analysis. For this tutorial we will be using a slightly modified
-version of the FBIRN Phase I travelling data set. The tutorial is
-based on an SPM analysis, with a few non-SPM things thrown into the
-mix. 
+.. toctree::
+   :maxdepth: 1
+
+   basics_tutorial
+   tutorial_102
+   spm_tutorial
+   freesurfer_tutorial
 
 Requirements
+============
 
-#. Release 0.1 of nipype and it's dependencies have been installed
+  All tutorials
 
-#. FSL and matlab are available and callable from the command line
+  - Release 0.3 of nipype and it's dependencies have been installed
 
-#. SPM 5/8 is installed and callable in matlab
+  Analysis tutorials
 
-#. 2.5 GB of space
+  - FSL_, FreeSurfer_ and MATLAB_ are available and callable from the command line
 
-Step 0.
-~~~~~~~
+  - SPM_ 5/8 is installed and callable in matlab
+
+  - 4(? XX) GB of space
+
+Checklist for analysis tutorials
+================================
+
+For the analysis tutorials, we will be using a slightly modified version of the
+FBIRN Phase I travelling data set. 
+
+Step 0
+~~~~~~
 
 Download and extract the `Pipeline tutorial data (429MB). 
 <http://cirl.berkeley.edu/nipy/nipype-tutorial-0.2.tar.gz>`_  
@@ -48,21 +64,5 @@ within the nipype-tutorial directory. This will run a full first level
 analysis on two subjects following by a 1-sample t-test on their first
 level results. The next section goes through each section of the
 tutorial script and describes what it is doing.
-
-
-Tutorials
----------
-
-In nipype, a pipeline is represented as an acyclic, directed data-flow
-graph, where each node of the graph is a process (e.g., realignment,
-smoothing) and the connections between the nodes control how data
-flows between the processes. 
-
-.. toctree::
-   :maxdepth: 1
-
-   spm_tutorial
-   freesurfer_tutorial
-..   fsl_tutorial
 
 .. include:: ../links_names.txt
