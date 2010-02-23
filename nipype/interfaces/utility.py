@@ -2,6 +2,7 @@ from copy import deepcopy
 
 import numpy as np
 
+from nipype.utils.filemanip import (filename_to_list, list_to_filename)
 from nipype.interfaces.base import (Bunch, CommandLine, Interface,
                                     load_template, InterfaceResult)
 
@@ -166,5 +167,44 @@ class Select(BasicInterface):
         if len(out) == 1:
             out = out[0]
         outputs.out = out
+        return outputs
+
+class SubstringMatch(BasicInterface):
+    """Basic interface class to match list items containing specific substrings
+
+    Examples
+    --------
+    
+    >>> from nipype.interfaces.utility import SubstringMatch
+    >>> match = SubstringMatch()
+    >>> match.inputs.update(inlist=['foo', 'goo', 'zoo'], substrings='oo')
+    >>> out = match.run()
+    >>> out.outputs.out
+    ['foo', 'goo', 'zoo']
+    >>> match.inputs.update(inlist=['foo', 'goo', 'zoo'], substrings=['foo'])
+    >>> out = match.run()
+    >>> out.outputs.out
+    'foo'
+    
+    """
+    def __init__(self):
+        self.inputs = Bunch(inlist=None,
+                            substrings=None)
+        
+    def outputs(self):
+        outputs = Bunch(out=None)
+        return outputs
+    
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        outputs.out = []
+        for val in filename_to_list(self.inputs.inlist):
+            match = [val for pat in filename_to_list(self.inputs.substrings) if val.find(pat) >= 0]
+            if match:
+                outputs.out.append(val)
+        if not outputs.out:
+            outputs.out = None
+        else:
+            outputs.out = list_to_filename(outputs.out)
         return outputs
 
