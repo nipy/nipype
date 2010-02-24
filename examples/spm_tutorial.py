@@ -81,15 +81,13 @@ info['s3'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'))
 Preprocessing pipeline nodes
 ----------------------------
 
-Setting up an instance of the interface
-:class:`nipype.interfaces.io.DataSource`. This node looks into the
-directory containing Nifti files and returns pointers to the files in
-a structured format as determined by the field/attribute names
-provided in the info structure above. The
+Now we create a :class:`nipype.interfaces.io.DataSource` object and
+fill in the information from above about the layout of our data.  The
 :class:`nipype.pipeline.NodeWrapper` module wraps the interface object
 and provides additional housekeeping and pipeline specific
 functionality.
 """
+
 datasource = nw.NodeWrapper(interface=nio.DataSource(),diskbased=False)
 datasource.inputs.base_directory   = data_dir
 datasource.inputs.subject_template = '%s'
@@ -97,30 +95,29 @@ datasource.inputs.file_template    = '%s.nii'
 datasource.inputs.subject_info     = info
 
 
+"""Here we set up iteration over all the subjects. The following line
+is a particular example of the flexibility of the system.  The
+``datasource`` attribute ``iterables`` tells the pipeline engine that
+it should repeat the analysis on each of the items in the
+``subject_list``. In the current example, the entire first level
+preprocessing and estimation will be repeated for each subject
+contained in subject_list.
 """
-   b. Setting up iteration over all subjects. The following line is a
-   particular example of the flexibility of the system.  The  variable
-   `iterables` for datasource tells the pipeline engine that it should
-   repeat any of the processes that are descendents of the datasource
-   process on each of the iterable items. In the current example, the
-   entire first level preprocessing and estimation will be repeated
-   for each subject contained in subject_list.
-"""
+
 datasource.iterables = ('subject_id', subject_list)
 
+"""Use :class:`nipype.interfaces.spm.Realign` for motion correction
+and register all images to the mean image.
+"""
 
-"""
-   c. Use :class:`nipype.interfaces.spm.Realign` for motion correction
-   and register all images to the mean image. 
-"""
 realign = nw.NodeWrapper(interface=spm.Realign(),diskbased=True)
 realign.inputs.register_to_mean = True
 
+"""Use :class:`nipype.algorithms.rapidart` to determine which of the
+images in the functional series are outliers based on deviations in
+intensity or movement.
 """
-   d. Use :class:`nipype.algorithms.rapidart` to determine which of
-   the images in the functional series are outliers based on
-   deviations in intensity or movement.
-"""
+
 art = nw.NodeWrapper(interface=ra.ArtifactDetect(),diskbased=True)
 art.inputs.use_differences      = [True,True]
 art.inputs.use_norm             = True
@@ -128,56 +125,49 @@ art.inputs.norm_threshold       = 0.5
 art.inputs.zintensity_threshold = 3
 art.inputs.mask_type            = 'file'
 
+"""Skull strip structural images using
+:class:`nipype.interfaces.fsl.Bet`.
+"""
 
-"""
-   e. Use :class:`nipype.interfaces.fsl.Bet` for skull strip
-   structural images. 
-"""
 skullstrip = nw.NodeWrapper(interface=fsl.Bet(),diskbased=True)
 skullstrip.inputs.mask = True
 
+"""Use :class:`nipype.interfaces.spm.Coregister` to perform a rigid
+body registration of the functional data to the structural data.
+"""
 
-"""
-   f. Use :class:`nipype.interfaces.spm.Coregister` to perform a rigid
-   body registration of the functional data to the structural
-   data. Setting `write` to False ensures that the output of
-   coregister is not resampled. Only the header information is
-   updated. 
-"""
 coregister = nw.NodeWrapper(interface=spm.Coregister(),diskbased=True)
 coregister.inputs.jobtype = 'estimate'
 
 
+"""Warp functional and structural data to SPM's T1 template using
+:class:`nipype.interfaces.spm.Normalize`.  The tutorial data set
+includes the template image, T1.nii.
 """
-   g. Use :class:`nipype.interfaces.spm.Normalize` to warp functional
-   and structural data to SPM's T1 template.
-"""
+
 normalize = nw.NodeWrapper(interface=spm.Normalize(),diskbased=True)
 normalize.inputs.template = os.path.abspath('data/T1.nii')
 
 
+"""Smooth the functional data using
+:class:`nipype.interfaces.spm.Smooth`.
 """
-   h. Use :class:`nipype.interfaces.spm.Smooth` to smooth the
-   functional data.
-"""
+
 smooth = nw.NodeWrapper(interface=spm.Smooth(),diskbased=True)
 #smooth.inputs.fwhm = [6,6,8]
 smooth.iterables = ('fwhm',[4,8])
 
-#######################################################################
-# setup analysis components
-#######################################################################
-
-
 """
-   a. Setup a function that returns subject-specific information about
-   the experimental paradigm. This is used by the
-   :class:`nipype.interfaces.spm.SpecifyModel` to create the
-   information necessary to generate an SPM design matrix. In this
-   tutorial, the same paradigm was used for every participant. Other
-   examples of this function are available in the `doc/examples`
-   folder. Note: Python knowledge required here.
+Set up analysis components
+--------------------------
+
+Here we create a function that returns subject-specific information
+about the experimental paradigm. This is used by the
+:class:`nipype.interfaces.spm.SpecifyModel` to create the information
+necessary to generate an SPM design matrix. In this tutorial, the same
+paradigm was used for every participant.
 """
+
 from nipype.interfaces.base import Bunch
 from copy import deepcopy
 def subjectinfo(subject_id):
@@ -197,21 +187,21 @@ def subjectinfo(subject_id):
                             regressors=None))
     return output
 
+"""Setup the contrast structure that needs to be evaluated. This is a
+list of lists. The inner list specifies the contrasts and has the
+following format - [Name,Stat,[list of condition names],[weights on
+those conditions]. The condition names must match the `names` listed
+in the `subjectinfo` function described above.
 """
-   b. Setup the contrast structure that needs to be evaluated. This is
-   a list of lists. The inner list specifies the contrasts and has the
-   following format - [Name,Stat,[list of condition names],[weights on
-   those conditions]. The condition names must match the `names`
-   listed in the `subjectinfo` function described above. 
-"""
+
 cont1 = ['Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5]]
 cont2 = ['Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1]]
 contrasts = [cont1,cont2]
 
+"""Generate SPM-specific design information using
+:class:`nipype.interfaces.spm.SpecifyModel`.
 """
-   c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
-   SPM-specific design information. 
-"""
+
 modelspec = nw.NodeWrapper(interface=model.SpecifyModel(),diskbased=True)
 modelspec.inputs.concatenate_runs        = True
 modelspec.inputs.input_units             = 'secs'
@@ -219,57 +209,54 @@ modelspec.inputs.output_units            = 'secs'
 modelspec.inputs.time_repetition         = 3.
 modelspec.inputs.high_pass_filter_cutoff = 120
 
+"""Generate a first level SPM.mat file for analysis
+:class:`nipype.interfaces.spm.Level1Design`.
+"""
 
-"""
-   d. Use :class:`nipype.interfaces.spm.Level1Design` to generate a
-   first level SPM.mat file for analysis
-"""
 level1design = nw.NodeWrapper(interface=spm.Level1Design(),diskbased=True)
 level1design.inputs.timing_units       = modelspec.inputs.output_units
 level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
 level1design.inputs.bases              = {'hrf':{'derivs': [0,0]}}
 
 
+"""Use :class:`nipype.interfaces.spm.EstimateModel` to determine the
+parameters of the model.
 """
-   e. Use :class:`nipype.interfaces.spm.EstimateModel` to determine
-   the parameters of the model.
-"""
+
 level1estimate = nw.NodeWrapper(interface=spm.EstimateModel(),diskbased=True)
 level1estimate.inputs.estimation_method = {'Classical' : 1}
 
+"""Use :class:`nipype.interfaces.spm.EstimateContrast` to estimate the
+first level contrasts specified in a few steps above.
+"""
 
-"""
-   f. Use :class:`nipype.interfaces.spm.EstimateContrast` to estimate
-   the first level contrasts specified in step 5(b).
-"""
-contrastestimate = nw.NodeWrapper(interface=spm.EstimateContrast(),diskbased=True)
+contrastestimate = nw.NodeWrapper(interface = spm.EstimateContrast(),
+                                  diskbased=True)
 contrastestimate.inputs.contrasts = contrasts
 
-
-#################################################################################
-# Setup pipeline
-#################################################################################
-
 """
-   The nodes setup above do not describe the flow of data. They merely
-   describe the parameters used for each function. In this section we
-   setup the connections between the nodes such that appropriate
-   outputs from nodes are piped into appropriate inputs of other
-   nodes.  
+Setup the pipeline
+------------------
 
-   a. Use :class:`nipype.pipeline.engine.Pipeline` to create a
-   graph-based execution pipeline for first level analysis. The config
-   options tells the pipeline engine to use `workdir` as the disk
-   location to use when running the processes and keeping their
-   outputs. The `use_parameterized_dirs` tells the engine to create
-   sub-directories under `workdir` corresponding to the iterables in
-   the pipeline. Thus for this pipeline there will be subject specific
-   sub-directories. 
+The nodes created above do not describe the flow of data. They merely
+describe the parameters used for each function. In this section we
+setup the connections between the nodes such that appropriate outputs
+from nodes are piped into appropriate inputs of other nodes.
 
-   The ``nipype.pipeline.engine.Pipeline.connect`` function creates the
-   links between the processes, i.e., how data should flow in and out
-   of the processing nodes. 
+Use the :class:`nipype.pipeline.engine.Pipeline` to create a
+graph-based execution pipeline for first level analysis. The config
+options tells the pipeline engine to use `workdir` as the disk
+location to use when running the processes and keeping their
+outputs. The `use_parameterized_dirs` tells the engine to create
+sub-directories under `workdir` corresponding to the iterables in the
+pipeline. Thus for this pipeline there will be subject specific
+sub-directories.
+
+The ``nipype.pipeline.engine.Pipeline.connect`` function creates the
+links between the processes, i.e., how data should flow in and out of
+the processing nodes.
 """
+
 l1pipeline = pe.Pipeline()
 l1pipeline.config['workdir'] = os.path.abspath('spm/workingdir')
 l1pipeline.config['use_parameterized_dirs'] = True
@@ -300,25 +287,27 @@ l1pipeline.connect([(datasource,realign,[('func','infile')]),
                                                   ('RPVimage','RPVimage')]),
                   ])
 
-######################################################################
-# Setup storage of results
 
 """
-   b. Use :class:`nipype.interfaces.io.DataSink` to store selected
-   outputs from the pipeline in a specific location. This allows the
-   user to selectively choose important output bits from the analysis
-   and keep them.
 
-   The first step is to create a datasink node and then to connect
-   outputs from the modules above to storage locations. These take the
-   following form directory_name[.[@]subdir] where parts between []
-   are optional. For example 'realign.@mean' below creates a
-   directory called realign in 'l1output/subject_id/' and stores the
-   mean image output from the Realign process in the realign
-   directory. If the @ is left out, then a sub-directory with the name
-   'mean' would be created and the mean image would be copied to that
-   directory. 
+Setup storage results
+---------------------
+
+Use :class:`nipype.interfaces.io.DataSink` to store selected outputs
+from the pipeline in a specific location. This allows the user to
+selectively choose important output bits from the analysis and keep
+them.
+
+The first step is to create a datasink node and then to connect
+outputs from the modules above to storage locations. These take the
+following form directory_name[.[@]subdir] where parts between [] are
+optional. For example 'realign.@mean' below creates a directory called
+realign in 'l1output/subject_id/' and stores the mean image output
+from the Realign process in the realign directory. If the @ is left
+out, then a sub-directory with the name 'mean' would be created and
+the mean image would be copied to that directory.
 """
+
 datasink = nw.NodeWrapper(interface=nio.DataSink(),diskbased=False)
 #datasink.inputs.base_directory = os.path.abspath('spm/l1output')
 datasink.inputs.subject_directory = os.path.abspath('spm/l1output')
@@ -341,17 +330,16 @@ l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
                     ])
 
 
-
-#########################################################################
-# setup level 2 pipeline
-#########################################################################
-
 """
-  a. Use :class:`nipype.interfaces.io.DataGrabber` to extract the
-  contrast images across a group of first level subjects. Unlike the
-  previous pipeline that iterated over subjects, this pipeline will
-  iterate over contrasts.
+Setup level 2 pipeline
+----------------------
+
+Use :class:`nipype.interfaces.io.DataGrabber` to extract the contrast
+images across a group of first level subjects. Unlike the previous
+pipeline that iterated over subjects, this pipeline will iterate over
+contrasts.
 """
+
 # collect all the con images for each contrast.
 contrast_ids = range(1,len(contrasts)+1)
 l2source = nw.NodeWrapper(nio.DataGrabber())
@@ -362,36 +350,35 @@ l2source.iterables = [('fwhm',[4,8]),
                       ('con',contrast_ids)]
 
 
+"""Use :class:`nipype.interfaces.spm.OneSampleTTest` to perform a
+simple statistical analysis of the contrasts from the group of
+subjects (n=2 in this example).
 """
-  b. Use :class:`nipype.interfaces.spm.OneSampleTTest` to perform a
-  simple statistical analysis of the contrasts from the group of
-  subjects (n=2 in this example).
-"""
+
 # setup a 1-sample t-test node
 onesamplettest = nw.NodeWrapper(interface=spm.OneSampleTTest(), diskbased=True)
 
 
+"""As before, we setup a pipeline to connect these two nodes (l2source
+-> onesamplettest).
 """
-  c. As before, we setup a pipeline to connect these two nodes
-  (l2source -> onesamplettest).
-"""
+
 l2pipeline = pe.Pipeline()
 l2pipeline.config['workdir'] = os.path.abspath('spm/l2output')
 l2pipeline.config['use_parameterized_dirs'] = True
 l2pipeline.connect([(l2source,onesamplettest,[('file_list','con_images')])])
 
-
-##########################################################################
-# Execute the pipeline
-##########################################################################
-
 """
-   The code discussed above sets up all the necessary data structures
-   with appropriate parameters and the connectivity between the
-   processes, but does not generate any output. To actually run the
-   analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
-   function needs to be called. 
+Execute the pipeline
+--------------------
+
+The code discussed above sets up all the necessary data structures
+with appropriate parameters and the connectivity between the
+processes, but does not generate any output. To actually run the
+analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
+function needs to be called.
 """
+
 if __name__ == '__main__':
     l1pipeline.run()
     l2pipeline.run()
