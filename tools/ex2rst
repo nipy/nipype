@@ -1,14 +1,8 @@
 #!/usr/bin/env python
-# emacs: -*- coding: utf-8; mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
-# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""Helper to automagically generate ReST versions of examples.
 
-### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ##
-#
-#   See COPYING file distributed along with the PyMVPA package for the
-#   copyright and license terms.
-#
-### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ##
-"""Helper to automagically generate ReST versions of examples"""
+This module was copied from the PyMVPA package.
+"""
 
 __docformat__ = 'restructuredtext'
 
@@ -140,7 +134,7 @@ def exfile2rst(filename):
                 if line:
                     if first_codeline_in_block and leading_whitespace \
                             and not preserved_indent:
-                        s += ' »%s\n' % line
+                        s += ' >>%s\n' % line
                         preserved_indent = True
                     else:
                         s += '  %s\n' % line

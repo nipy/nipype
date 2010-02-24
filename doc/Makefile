@@ -47,7 +47,8 @@ examples2rst:
 	python ../tools/ex2rst \
 			--project Nipype \
 			--outdir $(CURDIR)/examples \
-			../examples/fsl_tutorial.py
+			../examples/fsl_tutorial.py \
+			../examples/spm_tutorial.py
 	@echo "examples2rst finished."
 
 latex: api
