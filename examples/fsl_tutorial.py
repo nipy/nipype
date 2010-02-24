@@ -1,11 +1,11 @@
 """
-   A pipeline example that uses intergrates several interfaces to
-   perform a first and second level analysis on a two-subject data
-   set. 
-"""
 
+Using FSL for analysis
+======================
 
-"""
+A pipeline example that uses intergrates several interfaces to
+perform a first and second level analysis on a two-subject data set.
+
 1. Tell python where to find the appropriate functions.
 """
 
@@ -18,13 +18,15 @@ import nipype.algorithms.rapidart as ra      # artifact detection
 import nipype.algorithms.modelgen as model   # model generation
 import os                                    # system functions
 
-#####################################################################
-# Preliminaries
 
 """
+Preliminaries
+-------------
+
 1b. Confirm package dependencies are installed.  (This is only for the
 tutorial, rarely would you put this in your own code.)
 """
+
 from nipype.utils.misc import package_check
 
 package_check('numpy', '1.3', 'tutorial1')
@@ -66,23 +68,23 @@ info = {}
 info['s1'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'),(['ref'],'func_ref'))
 info['s3'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'),(['ref'],'func_ref'))
 
-######################################################################
-# Setup preprocessing pipeline nodes
 
 """
+Setup preprocessing pipeline nodes
+----------------------------------
+
 4. Setup various nodes for preprocessing the data. 
+
+a. Setting up an instance of the interface
+:class:`nipype.interfaces.io.DataSource`. This node looks into the
+directory containing Nifti files and returns pointers to the files in
+a structured format as determined by the field/attribute names
+provided in the info structure above. The
+:class:`nipype.pipeline.NodeWrapper` module wraps the interface object
+and provides additional housekeeping and pipeline specific
+functionality.
 """
 
-"""
-   a. Setting up an instance of the interface
-   :class:`nipype.interfaces.io.DataSource`. This node looks into the
-   directory containing Nifti files and returns pointers to the files
-   in a structured format as determined by the field/attribute names
-   provided in the info structure above. The
-   :class:`nipype.pipeline.NodeWrapper` module wraps the interface
-   object and provides additional housekeeping and pipeline specific
-   functionality. 
-"""
 datasource = nw.NodeWrapper(interface=nio.DataSource())
 datasource.inputs.base_directory   = data_dir
 datasource.inputs.subject_template = '%s'
@@ -91,25 +93,25 @@ datasource.inputs.subject_info     = info
 
 
 """
-   b. Setting up iteration over all subjects. The following line is a
-   particular example of the flexibility of the system.  The  variable
-   `iterables` for datasource tells the pipeline engine that it should
-   repeat any of the processes that are descendents of the datasource
-   process on each of the iterable items. In the current example, the
-   entire first level preprocessing and estimation will be repeated
-   for each subject contained in subject_list.
+b. Setting up iteration over all subjects. The following line is a
+particular example of the flexibility of the system.  The variable
+`iterables` for datasource tells the pipeline engine that it should
+repeat any of the processes that are descendents of the datasource
+process on each of the iterable items. In the current example, the
+entire first level preprocessing and estimation will be repeated for
+each subject contained in subject_list.
 """
+
 datasource.iterables = dict(subject_id=lambda:subject_list)
 
-## from the FLIRT web doc
+"""Skull strip."""
 
-# run FSL's bet
-# bet my_structural my_betted_structural
 skullstrip = nw.NodeWrapper(interface=fsl.Bet(mask = True,
                                               frac = 0.34),
                             diskbased=True)
 
-# Preprocess functionals
+"""Preprocess functionals"""
+
 motion_correct = nw.NodeWrapper(interface=fsl.McFlirt(saveplots = True),
                                 diskbased=True)
 motion_correct.iterfield = ['infile']
@@ -124,7 +126,7 @@ ref_skullstrip = nw.NodeWrapper(interface=fsl.Bet(), diskbased=True,
 ref_skullstrip.inputs.update(functional = True)
 
 
-## Now for registration
+"""Registration"""
 
 target_image = fsl.fsl_info.standard_image('MNI152_T1_2mm')
 
@@ -135,13 +137,15 @@ t1reg2std = nw.NodeWrapper(interface=fsl.Flirt(), diskbased=True)
 t1reg2std.inputs.update(reference = target_image,
                         outmatrix = 't1reg2std.xfm')
 
-# It may seem that these should be able to be run in one step. But, then you get
-# an empty "fnirted" image.
-# they would be faster (I think) to do together, but the applywarp is super-fast
-# anyway.
-# fnirt --in=my_structural --aff=my_affine_transf.mat --cout=my_nonlinear_transf --config=T1_2_MNI152_2mm
-# applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=my_structural --warp=my_nonlinear_transf --out
-# =my_warped_structural
+"""
+It may seem that these should be able to be run in one step. But, then you get
+an empty "fnirted" image.
+they would be faster (I think) to do together, but the applywarp is super-fast
+anyway.
+fnirt --in=my_structural --aff=my_affine_transf.mat --cout=my_nonlinear_transf --config=T1_2_MNI152_2mm
+applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=my_structural --warp=my_nonlinear_transf --out
+=my_warped_structural
+"""
 
 t1warp2std = nw.NodeWrapper(interface=fsl.Fnirt(), diskbased=True)
 t1warp2std.inputs.update(configfile = 'T1_2_MNI152_2mm',
@@ -174,22 +178,19 @@ smoothing.iterfield = ['infile']
 smoothing.inputs.fwhm = 5
 
 
-
-
-#######################################################################
-# setup analysis components
-#######################################################################
-
-
 """
-   a. Setup a function that returns subject-specific information about
-   the experimental paradigm. This is used by the
-   :class:`nipype.interfaces.spm.SpecifyModel` to create the
-   information necessary to generate an SPM design matrix. In this
-   tutorial, the same paradigm was used for every participant. Other
-   examples of this function are available in the `doc/examples`
-   folder. Note: Python knowledge required here.
+Setup analysis components
+-------------------------
+
+a. Setup a function that returns subject-specific information about
+the experimental paradigm. This is used by the
+:class:`nipype.interfaces.spm.SpecifyModel` to create the information
+necessary to generate an SPM design matrix. In this tutorial, the same
+paradigm was used for every participant. Other examples of this
+function are available in the `doc/examples` folder. Note: Python
+knowledge required here.
 """
+
 from nipype.interfaces.base import Bunch
 from copy import deepcopy
 def subjectinfo(subject_id):
@@ -210,21 +211,23 @@ def subjectinfo(subject_id):
     return output
 
 """
-   b. Setup the contrast structure that needs to be evaluated. This is
-   a list of lists. The inner list specifies the contrasts and has the
-   following format - [Name,Stat,[list of condition names],[weights on
-   those conditions]. The condition names must match the `names`
-   listed in the `subjectinfo` function described above. 
+b. Setup the contrast structure that needs to be evaluated. This is a
+list of lists. The inner list specifies the contrasts and has the
+following format - [Name,Stat,[list of condition names],[weights on
+those conditions]. The condition names must match the `names` listed
+in the `subjectinfo` function described above.
 """
+
 cont1 = ['Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5]]
 cont2 = ['Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1]]
 cont3 = ['Task','F', [cont1, cont2]]
 contrasts = [cont1,cont2]
 
 """
-   c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
-   SPM-specific design information. 
+c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
+SPM-specific design information.
 """
+
 modelspec = nw.NodeWrapper(interface=model.SpecifyModel(), diskbased=True)
 modelspec.inputs.concatenate_runs        = False
 modelspec.inputs.input_units             = 'secs'
@@ -234,18 +237,20 @@ modelspec.inputs.high_pass_filter_cutoff = 120
 
 
 """
-   d. Use :class:`nipype.interfaces.fsl.Level1Design` to generate a
-   run specific fsf file for analysis
+d. Use :class:`nipype.interfaces.fsl.Level1Design` to generate a run
+specific fsf file for analysis
 """
+
 level1design = nw.NodeWrapper(interface=fsl.Level1Design(),diskbased=True)
 level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
 level1design.inputs.bases              = {'hrf':{'derivs': True}}
 level1design.inputs.contrasts          = contrasts
 
 """
-   e. Use :class:`nipype.interfaces.fsl.FeatModel` to generate a
-   run specific mat file for use by FilmGLS
+e. Use :class:`nipype.interfaces.fsl.FeatModel` to generate a run
+specific mat file for use by FilmGLS
 """
+
 modelgen = nw.NodeWrapper(interface=fsl.FeatModel(),diskbased=True)
 modelgen.iterfield = ['fsf_file']
 
@@ -256,6 +261,7 @@ featmodel.iterfield = ['fsf_file']
    f. Use :class:`nipype.interfaces.fsl.FilmGLS` to estimate a model
    specified by a mat file and a functional run
 """
+
 modelestimate = nw.NodeWrapper(interface=fsl.FilmGLS(),diskbased=True)
 modelestimate.inputs.thresh = 10
 modelestimate.inputs.sa = True
@@ -263,24 +269,21 @@ modelestimate.inputs.ms = 5
 modelestimate.iterfield = ['designfile','infile']
 
 """
-   f. Use :class:`nipype.interfaces.fsl.ContrastMgr` to estimate
-   contrasts
+f. Use :class:`nipype.interfaces.fsl.ContrastMgr` to estimate
+contrasts
 """
+
 conestimate = nw.NodeWrapper(interface=fsl.ContrastMgr(),diskbased=True)
 conestimate.iterfield = ['tconfile','statsdir']
 
-##########################
-# Setup storage of results
-##########################
+"""Setup storage of results"""
 
 datasink = nw.NodeWrapper(interface=nio.DataSink())
 # I'd like this one to actually be preproc, but for now, I don't want to change
 # the pipeline around because of data already being on S3
 datasink.inputs.base_directory = os.path.abspath('./fsl/l1output')
 
-#####################
-# Set up l1pipeline pype
-#####################
+"""Set up l1pipeline pype"""
 
 l1pipeline = pe.Pipeline()
 l1pipeline.config['workdir'] = os.path.abspath('./fsl/workingdir')
@@ -347,17 +350,18 @@ l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
                     ])
 
 
-##########################################################################
-# Execute the pipeline
-##########################################################################
+"""
 
+Execute the pipeline
+--------------------
+
+The code discussed above sets up all the necessary data structures
+with appropriate parameters and the connectivity between the
+processes, but does not generate any output. To actually run the
+analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
+function needs to be called.
 """
-   The code discussed above sets up all the necessary data structures
-   with appropriate parameters and the connectivity between the
-   processes, but does not generate any output. To actually run the
-   analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
-   function needs to be called. 
-"""
+
 if __name__ == '__main__':
     l1pipeline.run_in_series()
 #    l2pipeline.run()

@@ -40,8 +40,15 @@ api:
 	python ../tools/build_interface_docs.py
 	@echo "Build API docs finished."
 
-html: api htmlonly
+html: examples2rst api htmlonly
 	@echo "Build HTML and API finished."
+
+examples2rst:
+	python ../tools/ex2rst \
+			--project Nipype \
+			--outdir $(CURDIR)/examples \
+			../examples/fsl_tutorial.py
+	@echo "examples2rst finished."
 
 latex: api
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) _build/latex
