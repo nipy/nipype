@@ -14,10 +14,12 @@ Tutorials
 .. toctree::
    :maxdepth: 1
 
-   basics_tutorial
+   tutorial_101
    tutorial_102
+   tutorial_103
    spm_tutorial
    freesurfer_tutorial
+   fsl_tutorial
 
 Requirements
 ============

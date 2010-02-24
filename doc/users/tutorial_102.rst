@@ -5,16 +5,18 @@ Pipeline 102
 ============
 
 Now that you know how to construct a pipeline and execute it, we will
-go into more advanced concepts.
+go into more advanced concepts. This tutorial focuses on NodeWrapper
+options. 
 
 NodeWrapper options
 ===================
 
-The following options allow you to manipulate various aspects of the
-pipeline, such as, where the node is executed and outputs stored, how
-to repeat some part or the entire pipeline over some parameters and
-how to run an interface over multiple inputs when it only accepts a
-single one.
+NodeWrapper provides the glue that enables interfaces to be used
+within the nipype pipeline. The following options allow you to
+manipulate various aspects of the pipeline, such as, where the node is
+executed and outputs stored, how to repeat some part or the entire
+pipeline over some parameters and how to run an interface over
+multiple inputs when it only accepts a single one.
 
 name
 ----
@@ -155,88 +157,6 @@ This can be extended to run it on pairwise inputs. For example,
 The above will be equivalent to running transform by taking corresponding items from
 each of the two fields in iterfield. The subdirectories get always
 named with respect to the first iterfield.
-
-
-Distributed computation
-=======================
-
-The pipeline engine has built-in support for distributed computation
-on clusters via the IPython_ distributed computing interface. As long
-as the user sets up a workflow on a shared filesystem and has
-configured the environment for distributed computation using IPython_,
-the pipeline engine's :func:`~nipype.pipeline.engine.Pipeline.run` function will automatically take advantage
-of the cluster. In some cases it may be advantageous to run the
-workflow in series locally (e.g., debugging, small-short pipelines,
-large memory only interfaces, relocating working directory/updating
-hashes).
-
-.. testcode::
-
-   workflow.run_in_series()
-
-Some details of setting up your cluster can be found in
-:ref:`parallel_processing`.
-
-Relocation of workdir
-=====================
-
-In some circumstances, one might decide to move their entire working
-directory to a new location. It would be convenient to rerun only
-necessary components of the pipeline, instead of running all the nodes
-all over again. It is possible to do that with the
-:func:`~nipype.pipeline.engine.Pipeline.updatehash` function.
-
-.. testcode::
-
-   workflow.updatehash()
-
-This will execute the workflow and update all the hash values that
-were stored without actually running any of the interfaces.
-
-Caveats
--------
-
-Any interface that stores a filename within a generated file will trip
-(e.g., ``spm/fsl.Level1Design``, `SpecifyModel.modelgen`). This is because
-the outputs are not regenerated in this hash update. If your workflow
-contains such an interfaces and none of your parameters or underlying
-packages have changed, then you can relocate and re-execute:
-
-.. testcode::
-
-   workflow.updatehash(force_execute=['spm.level1design',
-                                      'specifymodel.modelgen'])
-
-The names for ``force_execute`` has to correspond to the directories that
-were created.
-
-Debugging
-=========
-
-When a crash happens while running a pipeline, a crashdump is stored
-in the pipeline's working directory unless
-``pipeline.config['crashdumpdir']`` has been set. The crashdump is a `dict`
-containing three fields:
-
-  1. node - the node that failed
-  2. execgraph - the graph that the node came from
-  3. traceback - from local or remote session for the failure.
-
-we keep extending the information contained in the file and making
-it easier to troubleshoot the failures. However, in the meantime the following
-can help to recover information related to the failure.
-
-in IPython_ do (``%pdb`` in IPython_ is similar to ``dbstop`` if error in Matlab):
-
-.. testcode::
-
-   from nipype.utils.filemanip import loadflat
-   crashinfo = loadflat('crashdump....npz')
-   %pdb
-   crashinfo['node'].run()  # re-creates the crash
-   pdb> up  #typically, but not necessarily the crash is one stack frame up
-   pdb> inspect variables
-   pdb>quit
 
 
 .. include:: ../links_names.txt

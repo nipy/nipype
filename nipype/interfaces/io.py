@@ -344,6 +344,120 @@ class DataGrabber(Interface):
         outputs=self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
 
+class ContrastGrabber(Interface):
+    """ Contrast grabber module to pick up SPM or FSL contrast files
+
+    subject_id if provided is always the first arg to the templates
+    
+    Examples
+    --------
+
+    >>> from nipype.interfaces.io import ContrastGrabber
+    >>> cg = ContrastGrabber()
+    >>> cg.inputs.con_template = 'l1output/*/model*/*/cope%d.feat/*/cope*.gz'
+    >>> cg.inputs.contrast_id = 2
+    >>> res = cg.run() # doctest: +SKIP
+
+    Now return cope and varcopes
+    >>> cg.inputs.var_template = 'l1output/*/model*/*/cope%d.feat/*/varcope*.gz'
+    >>> res = cg.run() # doctest: +SKIP
+
+    """
+    
+    def __init__(self, *args, **inputs):
+        self._populate_inputs()
+        self.inputs.update(**inputs)
+
+    def inputs_help(self):
+        """
+            Parameters
+            --------------------
+            (all default to None)
+
+            con_template : str
+                template to pickup up contrasts
+            var_template : str
+                template to pickup up variance estimates
+            subject_id : list
+                Only return contrasts for these subjects
+            contrast_id : int/list
+                index of contrast to be picked up
+            """
+        print self.inputs_help.__doc__
+        
+    def _populate_inputs(self):
+        self.inputs = Bunch(con_template=None,
+                            var_template=None,
+                            subject_id=None,
+                            contrast_id=None)
+
+    def outputs_help(self):
+        print self.outputs.__doc__
+
+    def outputs(self):
+        """
+            Parameters
+            ----------
+
+            (all default to None)
+
+            con_images : list
+                list of contrast images
+            var_images : list
+                list of variance images if they exist
+        """
+        return Bunch(con_images=None,
+                     var_images=None)
+    
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        if self.inputs.contrast_id is None:
+            return outputs
+        outputs.con_images = []
+        outputs.var_images = []
+        subject_id = self.inputs.subject_id
+        if not subject_id:
+            subject_id = [None]
+        if not isinstance(subject_id, list):
+            subject_id = [subject_id]
+        contrast_id = self.inputs.contrast_id
+        if not isinstance(contrast_id, list):
+            contrast_id = [contrast_id]
+        for subj in subject_id:
+            for cont in contrast_id:
+                if subj:
+                    basedir = self.inputs.con_template % (subj, cont)
+                else:
+                    basedir = self.inputs.con_template % cont
+                print basedir
+                conimg = glob.glob(basedir)
+                outputs.con_images.extend(conimg)
+                if self.inputs.var_template:
+                    if subj:
+                        basedir = self.inputs.var_template % (subj, cont)
+                    else:
+                        basedir = self.inputs.var_template % cont
+                    varimg = glob.glob(basedir)
+                    outputs.var_images.extend(varimg)
+        if outputs.con_images:
+            outputs.con_images = list_to_filename(outputs.con_images)
+        else:
+            outputs.con_images = None
+        if outputs.var_images:
+            outputs.var_images = list_to_filename(outputs.var_images)
+        else:
+            outputs.var_images = None
+        return outputs
+
+    def run(self, cwd=None):
+        """Execute this module.
+        """
+        runtime = Bunch(returncode=0,
+                        stdout=None,
+                        stderr=None)
+        outputs=self.aggregate_outputs()
+        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+
 
 class FreeSurferSource(Interface):
     """Generates freesurfer subject info from their directories

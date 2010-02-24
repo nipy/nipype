@@ -12,6 +12,6 @@ tutorial from inside the nipype tutorial directory.
         python spm_tutorial.py
 
 
-.. literalinclude:: ../../examples/spm_tutorial.py
+.. include:: ../examples/spm_tutorial.rst
 
 .. include:: ../links_names.txt

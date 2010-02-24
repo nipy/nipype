@@ -1,4 +1,4 @@
-.. _basics_tutorial:
+.. _tutorial_101:
 
 ============
 Pipeline 101
