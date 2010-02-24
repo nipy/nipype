@@ -1,13 +1,16 @@
 """
-   A pipeline example that uses intergrates several interfaces to
-   perform a first and second level analysis on a two-subject data
-   set. 
+Using SPM for analysis
+=======================
+
+The spm_tutorial.py integrates several interfaces to perform a first
+and second level analysis on a two-subject data set.  The tutorial can
+be found in the examples folder.  Run the tutorial from inside the
+nipype tutorial directory:
 """
 
+    python spm_tutorial.py
 
-"""
-1. Tell python where to find the appropriate functions.
-"""
+"""Import necessary modules from nipype."""
 
 import nipype.interfaces.io as nio           # Data i/o 
 import nipype.interfaces.spm as spm          # spm
@@ -19,13 +22,15 @@ import nipype.algorithms.rapidart as ra      # artifact detection
 import nipype.algorithms.modelgen as model   # model specification
 import os                                    # system functions
 
-#####################################################################
-# Preliminaries
-
 """
-1b. Confirm package dependencies are installed.  (This is only for the
+
+Preliminaries
+-------------
+
+Confirm package dependencies are installed.  (This is only for the
 tutorial, rarely would you put this in your own code.)
 """
+
 from nipype.utils.misc import package_check
 
 package_check('numpy', '1.3', 'tutorial1')
@@ -33,58 +38,57 @@ package_check('scipy', '0.7', 'tutorial1')
 package_check('networkx', '1.0', 'tutorial1')
 package_check('IPython', '0.10', 'tutorial1')
 
-"""
-2. Setup any package specific configuration. The output file format
-   for FSL routines is being set to uncompressed NIFTI and a specific
-   version of matlab is being used. The uncompressed format is
-   required because SPM does not handle compressed NIFTI.
+"""Set any package specific configuration. The output file format
+for FSL routines is being set to uncompressed NIFTI and a specific
+version of matlab is being used. The uncompressed format is required
+because SPM does not handle compressed NIFTI.
 """
 
 # Tell fsl to generate all output in uncompressed nifti format
 print fsl.FSLInfo.version()
 fsl.FSLInfo.outputtype('NIFTI')
 
-# setup the way matlab should be called
+# Set the way matlab should be called
 mlab.MatlabCommandLine.matlab_cmd = "matlab -nodesktop -nosplash"
 
-"""
-3. The following lines of code sets up the necessary information
-   required by the datasource module. It provides a mapping between
-   run numbers (nifti files) and the mnemonic ('struct', 'func',
-   etc.,.)  that particular run should be called. These mnemonics or
-   fields become the output fields of the datasource module. In the
-   example below, run 'f3' is of type 'func'. The 'f3' gets mapped to
-   a nifti filename through a template '%s.nii'. So 'f3' would become
-   'f3.nii'.
+"""The nipype tutorial contains data for two subjects.  Subject data
+is in two subdirectories, ``s1`` and ``s2``.  Each subject directory
+contains four functional volumes: f3.nii, f5.nii, f7.nii, f10.nii. And
+one anatomical volume named struct.nii.
+
+Below we set some variables to inform the ``datasource`` about the
+layout of our data.  We specify the location of the data, the subject
+sub-directories and a dictionary that maps each run to a mnemonic (or
+field) for the run type (``struct`` or ``func``).  These fields become
+the output fields of the ``datasource`` node in the pipeline.
+
+In the example below, run 'f3' is of type 'func' and gets mapped to a
+nifti filename through a template '%s.nii'. So 'f3' would become
+'f3.nii'.
+
 """
 
-# The following lines create some information about location of your
-# data. 
+# Specify the location of the data.
 data_dir = os.path.abspath('data')
+# Specify the subject directories
 subject_list = ['s1','s3']
-# The following info structure helps the DataSource module organize
-# nifti files into fields/attributes of a data object. With DataSource
-# this object is of type Bunch.
+# Map field names to individual subject runs.
 info = {}
 info['s1'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'))
 info['s3'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'))
 
-######################################################################
-# Setup preprocessing pipeline nodes
+"""
+Preprocessing pipeline nodes
+----------------------------
 
-"""
-4. Setup various nodes for preprocessing the data. 
-"""
-
-"""
-   a. Setting up an instance of the interface
-   :class:`nipype.interfaces.io.DataSource`. This node looks into the
-   directory containing Nifti files and returns pointers to the files
-   in a structured format as determined by the field/attribute names
-   provided in the info structure above. The
-   :class:`nipype.pipeline.NodeWrapper` module wraps the interface
-   object and provides additional housekeeping and pipeline specific
-   functionality. 
+Setting up an instance of the interface
+:class:`nipype.interfaces.io.DataSource`. This node looks into the
+directory containing Nifti files and returns pointers to the files in
+a structured format as determined by the field/attribute names
+provided in the info structure above. The
+:class:`nipype.pipeline.NodeWrapper` module wraps the interface object
+and provides additional housekeeping and pipeline specific
+functionality.
 """
 datasource = nw.NodeWrapper(interface=nio.DataSource(),diskbased=False)
 datasource.inputs.base_directory   = data_dir
