@@ -74,13 +74,14 @@ class APIDocs(TempInstall):
             # We are running the API-building script via an
             # system call, but overriding the import path.
             toolsdir = os.path.abspath(pjoin('..', 'tools'))
-            build_templates = pjoin(toolsdir, 'build_modref_templates.py')
-            cmd = """%s -c 'import sys; sys.path.append("%s"); sys.path.append("%s"); execfile("%s", dict(__name__="__main__"))'""" \
-                % (sys.executable, 
-                   toolsdir,
-                   self.temp_install_dir,
-                   build_templates)
-            os.system(cmd)
+            for docbuilder in ['build_modref_templates.py', 'build_interface_docs.py']:
+                build_templates = pjoin(toolsdir, docbuilder)
+                cmd = """%s -c 'import sys; sys.path.append("%s"); sys.path.append("%s"); execfile("%s", dict(__name__="__main__"))'""" \
+                    % (sys.executable,
+                       toolsdir,
+                       self.temp_install_dir,
+                       build_templates)
+                os.system(cmd)
         finally:
             os.chdir('..')
 
@@ -163,6 +164,10 @@ class Clean(clean):
         if os.path.exists(api_path):
             print "Removing %s" % api_path
             shutil.rmtree(api_path)
+        interface_path = os.path.join('doc', 'interfaces', 'generated')
+        if os.path.exists(interface_path):
+            print "Removing %s" % interface_path
+            shutil.rmtree(interface_path)
         if os.path.exists(DOC_BUILD_DIR):
             print "Removing %s" % DOC_BUILD_DIR 
             shutil.rmtree(DOC_BUILD_DIR)
