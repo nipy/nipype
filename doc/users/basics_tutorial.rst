@@ -6,7 +6,7 @@ Pipeline 101
 
 A workflow or pipeline is built by connecting processes or nodes to each
 other. In the context of nipype, every interface can be treated as a pipeline
-node having defined inputs and outputs. Creating a workflow, then is a matter
+node having defined inputs and outputs. Creating a workflow then is a matter
 of connecting appropriate outputs to inputs. Currently, workflows are limited
 to being directional and cannot have any loops, thereby creating an ordering to
 data flow. The following nipype component architecture might help understanding
@@ -18,8 +18,8 @@ some of the tutorials presented here.
 My first pipeline
 =================
 
-Although the most trivial case of a pipeline consists of a single node, we will
-create a pipeline with two nodes. We will create a realign node that will send
+Although the most trivial pipeline consists of a single node, we will
+create a pipeline with two nodes: a realign node that will send
 the realigned functional data to a smoothing node. It is important to note that
 setting up a pipeline is separate from executing it.
 
@@ -32,11 +32,11 @@ setting up a pipeline is separate from executing it.
    import nipype.pipeline.engine as pe          # the workflow
 
 **2. Define nodes**
-   
+
 Here we take instances of interfaces and make them pipeline compatible by
-wrapping them pipeline specific elements. To determine the inputs and outputs
+wrapping them with pipeline specific elements. To determine the inputs and outputs
 of a given interface, please see :ref:`interface_tutorial`. Let's
-start with defining a realign node using the interface 
+start with defining a realign node using the interface
 :class:`nipype.interfaces.spm.Realign`
 
 .. testcode::
@@ -55,7 +55,7 @@ This would be equivalent to:
 In Pythonic terms, this is saying that interface option in NodeWrapper accepts
 an *instance* of an interface. The inputs to this interface can be set either
 later or while initializing the interface. Similar to the realigner node, we
-now set up a smoothing node. 
+now set up a smoothing node.
 
 .. testcode::
 
@@ -66,7 +66,7 @@ an input file for the smoothing node. This will be done by connecting the
 realigner to the smoother in step 5.
 
 **3. Creating and configuring a pipeline**
-   
+
 Here we create an instance of a pipeline and indicate that it should operate in
 the current directory.
 
@@ -114,23 +114,23 @@ This results in a workflow containing two connected nodes:
 **6. Visualizing the workflow**
 
 The workflow is represented as a directed acyclic graph (DAG) and one
-can visualize this using the following command. In fact the pictures
-above were generated using this. 
+can visualize this using the following command. In fact, the pictures
+above were generated using this.
 
 .. testcode::
    
    workflow.export_graph()
 
-This will create two files graph.dot and graph_detailed.dot and if
-graphviz_ is installed on your system it will automatically convert it
+This creates two files graph.dot and graph_detailed.dot and if
+graphviz_ is installed on your system it automatically converts it
 to png files. If graphviz is not installed you can take the dot files
-and load them in a graphviz visualizer. 
+and load them in a graphviz visualizer elsewhere.
 
 
 **7. Extend it**
 
 Now that you have seen a basic pipeline let's add another node to the
-above pipeline. 
+above pipeline.
 
 .. testcode::
    
@@ -140,22 +140,22 @@ above pipeline.
    art.inputs.use_norm = True
    art.inputs.norm_threshold = 0.5
    art.inputs.zintensity_threshold = 3
-   workflow.connect([(realigner, artdetect, 
+   workflow.connect([(realigner, artdetect,
                       [('realigned_files', 'realigned_files'),
                        ('realignment_parameters','realignment_parameters')]
                      )])
 
-Note: 
+.. note::
 
-      a) how the alternate form of connect is used to connect multiple
+      a) How an alternative form of connect was used to connect multiple
       output fields from the realign node to corresponding input
-      fields of the artifact detection node. 
+      fields of the artifact detection node.
 
       b) The current visualization only shows connected input and
       output ports. It does not show all the parameters that you have
-      set for a node. 
+      set for a node.
 
-This results in.
+This results in
 
 .. image:: images/threecomponentpipe.png
    :width: 650 px
