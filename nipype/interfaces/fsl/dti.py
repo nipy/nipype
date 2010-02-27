@@ -500,8 +500,7 @@ class Tbss2reg(FSLCommand):
            (self.inputs.targetImage is None) and \
            (self.inputs.findTarget is None):
             raise AttributeError('Tbss2reg needs at least one option')
-        cwd = os.getcwd()
-        results = self._runner(cwd=cwd)
+        results = self._runner()
         if not noseTest:
             results.outputs = self.aggregate_outputs()
         return results
@@ -646,8 +645,7 @@ class Tbss1preproc(FSLCommand):
         self.inputs.update(**inputs)
         if self.inputs.infiles is None:
             raise AttributeError('tbss_1_preproc requires input files')
-        cwd = os.getcwd()
-        results = self._runner(cwd=cwd)
+        results = self._runner()
         if not noseTest:
             results.outputs = self.aggregate_outputs()
         return results
@@ -735,7 +733,7 @@ class Tbss3postreg(FSLCommand):
         self.inputs.update(**inputs)
         if (self.inputs.subject_means is None) and (self.inputs.FMRIB58_FA is None):
             raise AttributeError('tbss_1_preproc requires at least one option flag to be set')
-        results = self._runner(cwd=os.getcwd())
+        results = self._runner()
         if not noseTest:
             results.outputs = self.aggregate_outputs()
         return results
@@ -844,7 +842,7 @@ class Tbss4prestats(FSLCommand):
 
         """
         self.inputs.update(**inputs)
-        results = self._runner(cwd=os.getcwd())
+        results = self._runner()
         if not noseTest:
             results.outputs = self.aggregate_outputs()
         return results
@@ -1016,7 +1014,7 @@ class Randomise(FSLCommand):
             self.inputs.output_rootname = output_rootname
 
         self.inputs.update(**inputs)
-        results = self._runner(cwd=os.getcwd())
+        results = self._runner()
         if results.runtime.returncode == 0:
             results.outputs = self.aggregate_outputs()
         return results
@@ -1215,18 +1213,14 @@ class Probtrackx(FSLCommand):
         # incorporate user options
         self.inputs.update(**inputs)
 
-        # if data directory specified, check existence of standardized
-        # files
-        cwd = os.getcwd()
-
         if not noseTest:
-            directory = os.path.join(cwd, self.inputs.basename)
+            directory = os.path.join(os.getcwd(), self.inputs.basename)
             if os.path.isdir(directory):
                 if not self.__datacheck_ok(directory):
                     raise AttributeError('Not all standardized files found \
                                          in input directory: %s' % directory)
 
-        results = self._runner(cwd=cwd)
+        results = self._runner()
         if not noseTest:
             results.outputs = self.aggregate_outputs()
 
