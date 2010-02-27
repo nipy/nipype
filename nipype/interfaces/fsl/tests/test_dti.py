@@ -311,10 +311,14 @@ def test_randomise():
     opt_map = {'demean_data':                        ('-D', True),
               'one_sample_gmean':                   ('-1', True),
               'mask_image':                         ('-m inp_mask', 'inp_mask'),
-              'design_matrix':                      ('-d design.mat', 'design.mat'),
-              't_contrast':                         ('-t input.con', 'input.con'),
-              'f_contrast':                         ('-f input.fts', 'input.fts'),
-              'xchange_block_labels':               ('-e design.grp', 'design.grp'),
+              'design_matrix':                      ('-d design.mat',
+                                                     'design.mat'),
+              't_contrast':                         ('-t input.con',
+                                                     'input.con'),
+              'f_contrast':                         ('-f input.fts',
+                                                     'input.fts'),
+              'xchange_block_labels':               ('-e design.grp',
+                                                     'design.grp'),
               'print_unique_perm':                  ('-q', True),
               'print_info_parallelMode':            ('-Q', True),
               'num_permutations':                   ('-n 10', 10),
@@ -334,14 +338,16 @@ def test_randomise():
               'TFCE_height_param':                  ('--tfce_H 0.11', 0.11),
               'TFCE_extent_param':                  ('--tfce_E 0.50', 0.50),
               'TFCE_connectivity':                  ('--tfce_C 0.30', 0.30),
-              'list_num_voxel_EVs_pos':             ('--vxl 1,2,3,4', '1,2,3,4'),
-              'list_img_voxel_EVs':                 ('--vxf 6,7,8,9,3', '6,7,8,9,3')}
+              'list_num_voxel_EVs_pos':             ('--vxl 1,2,3,4',
+                                                     '1,2,3,4'),
+              'list_img_voxel_EVs':                 ('--vxf 6,7,8,9,3',
+                                                     '6,7,8,9,3')}
 
     for name, settings in opt_map.items():
-        rand4 = fsl.Randomise(input_4D='infile', output_rootname='root', **{name: settings[1]})
-        yield assert_equal, rand4.cmdline, rand4.cmd + ' -i infile -o root ' + settings[0]
-
-
+        rand4 = fsl.Randomise(input_4D='infile', output_rootname='root', 
+                              **{name: settings[1]})
+        yield assert_equal, rand4.cmdline, rand4.cmd + ' -i infile -o root ' \
+            + settings[0]
 
 def test_Randomise_parallel():
     rand = fsl.Randomise_parallel()
@@ -385,10 +391,14 @@ def test_Randomise_parallel():
     opt_map = {'demean_data':                        ('-D', True),
               'one_sample_gmean':                   ('-1', True),
               'mask_image':                         ('-m inp_mask', 'inp_mask'),
-              'design_matrix':                      ('-d design.mat', 'design.mat'),
-              't_contrast':                         ('-t input.con', 'input.con'),
-              'f_contrast':                         ('-f input.fts', 'input.fts'),
-              'xchange_block_labels':               ('-e design.grp', 'design.grp'),
+              'design_matrix':                      ('-d design.mat',
+                                                     'design.mat'),
+              't_contrast':                         ('-t input.con',
+                                                     'input.con'),
+              'f_contrast':                         ('-f input.fts',
+                                                     'input.fts'),
+              'xchange_block_labels':               ('-e design.grp',
+                                                     'design.grp'),
               'print_unique_perm':                  ('-q', True),
               'print_info_parallelMode':            ('-Q', True),
               'num_permutations':                   ('-n 10', 10),
@@ -408,12 +418,19 @@ def test_Randomise_parallel():
               'TFCE_height_param':                  ('--tfce_H 0.11', 0.11),
               'TFCE_extent_param':                  ('--tfce_E 0.50', 0.50),
               'TFCE_connectivity':                  ('--tfce_C 0.30', 0.30),
-              'list_num_voxel_EVs_pos':             ('--vxl ' + repr([1, 2, 3, 4]), repr([1, 2, 3, 4])),
-              'list_img_voxel_EVs':                 ('--vxf ' + repr([6, 7, 8, 9, 3]), repr([6, 7, 8, 9, 3]))}
+              'list_num_voxel_EVs_pos':             ('--vxl ' \
+                                                         + repr([1, 2, 3, 4]), 
+                                                     repr([1, 2, 3, 4])),
+              'list_img_voxel_EVs':               ('--vxf ' \
+                                                       + repr([6, 7, 8, 9, 3]), 
+                                                     repr([6, 7, 8, 9, 3]))}
 
     for name, settings in opt_map.items():
-        rand4 = fsl.Randomise_parallel(input_4D='infile', output_rootname='root', **{name: settings[1]})
-        yield assert_equal, rand4.cmdline, rand4.cmd + ' -i infile -o root ' + settings[0]
+        rand4 = fsl.Randomise_parallel(input_4D='infile', 
+                                       output_rootname='root', 
+                                       **{name: settings[1]})
+        yield assert_equal, rand4.cmdline, rand4.cmd + ' -i infile -o root ' \
+            + settings[0]
 
 
 def test_Probtrackx():
@@ -483,7 +500,8 @@ def test_Vec_reg():
     vrg.inputs.outfile = 'outfile'
     vrg.inputs.refVolName = 'MNI152'
     vrg.inputs.affineTmat = 'tmat.mat'
-    yield assert_equal, vrg.cmdline, 'vecreg -i infile -o outfile -r MNI152 -t tmat.mat'
+    yield assert_equal, vrg.cmdline, \
+        'vecreg -i infile -o outfile -r MNI152 -t tmat.mat'
 
     # .run based parameter setting
     vrg2 = fsl.Vecreg(infile='infile2',
@@ -521,8 +539,10 @@ def test_Vec_reg():
                'brainMask':         ('-m mask', 'mask')}
 
     for name, settings in opt_map.items():
-        vrg4 = fsl.Vecreg(infile='infile', outfile='outfile', refVolName='MNI152', **{name: settings[1]})
-        yield assert_equal, vrg4.cmdline, vrg4.cmd + ' -i infile -o outfile -r MNI152 ' + settings[0]
+        vrg4 = fsl.Vecreg(infile='infile', outfile='outfile', 
+                          refVolName='MNI152', **{name: settings[1]})
+        yield assert_equal, vrg4.cmdline, vrg4.cmd + \
+            ' -i infile -o outfile -r MNI152 ' + settings[0]
 
 
 # test find_the_biggest
@@ -550,52 +570,3 @@ def test_Find_the_biggest():
 
     # test arguments for opt_map
     # Find_the_biggest doesn't have an opt_map{}
-
-
-
-#----------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
