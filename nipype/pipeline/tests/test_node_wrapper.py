@@ -54,10 +54,10 @@ def test_init():
 
     bi = nw.NodeWrapper(interface=BasicInterface())
     yield assert_equal, bi.output_directory_base, None
-    yield assert_equal, bi.name, 'BasicInterface.test_node_wrapper'
-    yield assert_equal, bi.disk_based, False
+    yield assert_equal, bi.name, 'BasicInterface.tests'
+    yield assert_equal, bi.disk_based, True
     yield assert_equal, bi.result, None
-    yield assert_equal, bi.overwrite, None
+    yield assert_equal, bi.overwrite, False
     yield assert_equal, bi.iterables, {}
     yield assert_equal, bi.iterfield, []
     yield assert_equal, bi.parameterization, None
@@ -66,10 +66,11 @@ def test_init():
     yield assert_equal, bi.output_directory_base, None
     yield assert_equal, bi.overwrite, False
     
-    bi = nw.NodeWrapper(interface=BasicInterface(),diskbased=True,base_directory='.')
+    bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True,
+                        base_directory='.')
     yield assert_equal, bi.output_directory_base, '.'
 
-    bi = lambda x: nw.NodeWrapper(interface=BasicInterface(),base_directory=x)
+    bi = lambda x: nw.NodeWrapper(interface=BasicInterface(), base_directory=x)
     yield assert_raises, Exception, bi, '.'
 
     bi = nw.NodeWrapper(interface=BasicInterface(),name='foo')

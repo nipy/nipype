@@ -302,7 +302,7 @@ class NodeWrapper(object):
                                          runtime=None,
                                          outputs=aggouts)
             except FileNotFoundError:
-                logger.info("Some of the outputs were not found: rerunnig node.")
+                logger.info("Some of the outputs were not found: rerunning node.")
                 result = self._run_command(execute=True, cwd=cwd, copyfiles=False)
         return result
     
