@@ -1,7 +1,7 @@
 import os
 import tempfile
 import shutil
-
+from nose import with_setup
 
 from nipype.testing import assert_equal, assert_not_equal, assert_raises
 import nipype.interfaces.fsl.dti as fsl
@@ -141,41 +141,48 @@ def test_dtifit():
         yield assert_equal, dti4.cmdline, dti4.cmd + ' ' + settings[0]
 
 
-# test tbss_1_preproc    
-def test_tbss_1_preproc():
+# Globals to store paths for tbss tests
+tbss_dir = None
+test_dir = None
+def setup_tbss():
+    # Setup function is called before each test.  Setup is called only
+    # once for each generator function.
+    global tbss_dir, test_dir
+    test_dir = os.getcwd()
+    tbss_dir = tempfile.mkdtemp()
+    os.chdir(tbss_dir)
 
+def teardown_tbss():
+    # Teardown is called after each test to perform cleanup
+    os.chdir(test_dir)
+    shutil.rmtree(tbss_dir)
+
+@with_setup(setup_tbss, teardown_tbss)
+def test_tbss_1_preproc():
     tbss1 = fsl.Tbss1preproc()
 
     # make sure command gets called
     yield assert_equal, tbss1.cmd, 'tbss_1_preproc'
-
-    tbssDir = tempfile.mkdtemp()
 
     # test raising error with mandatory args absent
     yield assert_raises, AttributeError, tbss1.run
 
     # .inputs based parameters setting
     tbss1.inputs.infiles = 'foo.nii  f002.nii  f003.nii'
-    yield assert_equal, tbss1.cmdline, 'tbss_1_preproc foo.nii  f002.nii  f003.nii'
+    yield assert_equal, tbss1.cmdline, \
+        'tbss_1_preproc foo.nii  f002.nii  f003.nii'
 
     tbss = fsl.Tbss1preproc()
-    results = tbss.run(infiles='*.nii.gz', noseTest=True, cwd=tbssDir)
+    results = tbss.run(infiles='*.nii.gz', noseTest=True)
     yield assert_equal, results.interface.inputs.infiles, '*.nii.gz'
     yield assert_equal, results.runtime.cmdline, 'tbss_1_preproc *.nii.gz'
 
     # test arguments for opt_map
     # Tbss_1_preproc class doesn't have opt_map{}
 
-    # remove the default directories this command creates
-    shutil.rmtree(tbssDir)
-
-# test tbss_2_reg   
+@with_setup(setup_tbss, teardown_tbss)
 def test_tbss_2_reg():
-
     tbss2 = fsl.Tbss2reg()
-    cwd = os.getcwd()
-    tbssDir = tempfile.mkdtemp()
-    os.chdir(tbssDir)
 
     # make sure command gets called
     yield assert_equal, tbss2.cmd, 'tbss_2_reg'
@@ -207,17 +214,9 @@ def test_tbss_2_reg():
         tbss = fsl.Tbss2reg(**{name: settings[1]})
         yield assert_equal, tbss.cmdline, tbss.cmd + ' ' + settings[0]
 
-    # remove the default directories this command creates
-    os.chdir(cwd)
-    shutil.rmtree(tbssDir)
-
-
+@with_setup(setup_tbss, teardown_tbss)
 def test_tbss_3_postreg():
-
     tbss = fsl.Tbss3postreg()
-    tbssDir = tempfile.mkdtemp()
-    cwd = os.getcwd()
-    os.chdir(tbssDir)
 
     # make sure command gets called
     yield assert_equal, tbss.cmd, 'tbss_3_postreg'
@@ -245,14 +244,9 @@ def test_tbss_3_postreg():
         tbss3 = fsl.Tbss3postreg(**{name: settings[1]})
         yield assert_equal, tbss3.cmdline, tbss3.cmd + ' ' + settings[0]
 
-    # remove the default directories this command creates
-    os.chdir(cwd)
-    shutil.rmtree(tbssDir)
-
-
+@with_setup(setup_tbss, teardown_tbss)
 def test_tbss_4_prestats():
     tbss = fsl.Tbss4prestats()
-    tbssDir = tempfile.mkdtemp()
 
     # make sure command gets called
     yield assert_equal, tbss.cmd, 'tbss_4_prestats'
@@ -268,16 +262,11 @@ def test_tbss_4_prestats():
     yield assert_equal, tbss2.cmdline, 'tbss_4_prestats 0.4'
 
     tbss3 = fsl.Tbss4prestats()
-    results = tbss3.run(threshold=0.2, noseTest=True, cwd=tbssDir)
+    results = tbss3.run(threshold=0.2, noseTest=True)
     yield assert_equal, results.runtime.cmdline, 'tbss_4_prestats 0.2'
 
     # test arguments for opt_map
     # Tbss4prestats doesn't have an opt_map{}
-
-    # remove the default directories this command creates
-    shutil.rmtree(tbssDir)
-
-
 
 def test_randomise():
 
