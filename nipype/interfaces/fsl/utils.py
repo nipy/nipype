@@ -155,8 +155,8 @@ class ExtractRoi(FSLCommand):
         if self.inputs.infile:
             allargs.insert(0, self.inputs.infile)
             outfile = self._gen_fname(self.inputs.infile,
-                                         self.inputs.outfile,
-                                         suffix='_roi')
+                                      self.inputs.outfile,
+                                      suffix='_roi')
             allargs.insert(1, outfile)
 
         #concat all numeric variables into a string separated by space
@@ -235,6 +235,10 @@ class ExtractRoi(FSLCommand):
         outputs = self.outputs()
         outputs.outfile = self._gen_fname(self.inputs.infile,
                                 self.inputs.outfile, suffix='_roi', check=True)
+
+        if self.inputs.outfile:
+            outputs.outfile = os.path.abspath(glob(self.inputs.outfile+'*')[0])
+            
         return outputs
 
 
