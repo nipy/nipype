@@ -235,10 +235,6 @@ class ExtractRoi(FSLCommand):
         outputs = self.outputs()
         outputs.outfile = self._gen_fname(self.inputs.infile,
                                 self.inputs.outfile, suffix='_roi', check=True)
-
-        if self.inputs.outfile:
-            outputs.outfile = os.path.abspath(glob(self.inputs.outfile+'*')[0])
-            
         return outputs
 
 
