@@ -704,25 +704,6 @@ class FixedEffectsModel(Interface):
 
     See FixedEffectsModel().inputs_help() for more information.
 
-    Parameters
-    ----------
-    inputs : mapping
-    key, value pairs that will update the FixedEffectsModel.inputs attributes
-    see self.inputs_help() for a list of FixedEffectsModel.inputs attributes
-
-    Attributes
-    ----------
-    inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to
-    spm_smooth via a job structure
-    cmdline : string
-    string used to call matlab/spm via SpmMatlabCommandLine interface
-
-    Other Parameters
-    ----------------
-    To see optional arguments
-    FixedEffectsModel().inputs_help()
-
     Examples
     --------
 
@@ -818,28 +799,9 @@ class FixedEffectsModel(Interface):
 
 # satra: 2010-01-23
 class FeatRegister(Interface):
-    """Generate Feat specific files
+    """Register feat directories to a specific standard
 
     See FixedEffectsModel().inputs_help() for more information.
-
-    Parameters
-    ----------
-    inputs : mapping
-    key, value pairs that will update the FixedEffectsModel.inputs attributes
-    see self.inputs_help() for a list of FixedEffectsModel.inputs attributes
-
-    Attributes
-    ----------
-    inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to
-    spm_smooth via a job structure
-    cmdline : string
-    string used to call matlab/spm via SpmMatlabCommandLine interface
-
-    Other Parameters
-    ----------------
-    To see optional arguments
-    FixedEffectsModel().inputs_help()
 
     Examples
     --------
@@ -1203,4 +1165,121 @@ class ContrastMgr(FSLCommand):
 
         outputs.statsdir = self.inputs.statsdir
 
+        return outputs
+
+# satra: 2010-01-23
+class L2Model(Interface):
+    """Generate design files for level 2 models
+
+    Examples
+    --------
+
+    """
+
+    def __init__(self, *args, **inputs):
+        self._populate_inputs()
+        self.inputs.update(**inputs)
+
+    @property
+    def cmd(self):
+        return 'level2_design'
+
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        return []
+
+    def inputs_help(self):
+        """
+        Parameters
+        ----------
+
+        num_copes : int
+            number of copes evaluated in each session
+        """
+        print self.inputs_help.__doc__
+
+    def _populate_inputs(self):
+        """ Initializes the input fields of this interface.
+        """
+        self.inputs = Bunch(num_copes=None)
+
+    def run(self, **inputs):
+        cwd = os.getcwd()
+
+        mat_txt = ['/NumWaves       1',
+                   '/NumPoints      %d' % self.inputs.num_copes,
+                   '/PPheights      %e' % 1,
+                   '',
+                   '/Matrix']
+        for i in range(self.inputs.num_copes):
+            mat_txt += ['%e' % 1]
+        mat_txt = '\n'.join(mat_txt)
+        
+        con_txt = ['/ContrastName1   group mean',
+                   '/NumWaves       1',
+                   '/NumContrasts   1',
+                   '/PPheights          %e' % 1,
+                   '/RequiredEffect     100.0', #XX where does this
+                   #number come from
+                   '',
+                   '/Matrix',
+                   '%e' % 1]
+        con_txt = '\n'.join(con_txt)
+
+        grp_txt = ['/NumWaves       1',
+                   '/NumPoints      %d' % self.inputs.num_copes,
+                   '',
+                   '/Matrix']
+        for i in range(self.inputs.num_copes):
+            grp_txt += ['1']
+        grp_txt = '\n'.join(grp_txt)
+        
+        txt = {'design.mat' : mat_txt,
+               'design.con' : con_txt,
+               'design.grp' : grp_txt}
+
+        # write design files
+        for i, name in enumerate(['design.mat','design.con','design.grp']):
+            f = open(os.path.join(cwd, name), 'wt')
+            f.write(txt[name])
+            f.close()
+
+        runtime = Bunch(returncode=0,
+                        messages=None,
+                        errmessages=None)
+        outputs = self.aggregate_outputs()
+        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+
+    def outputs_help(self):
+        """
+        """
+        print self.outputs.__doc__
+
+    def outputs(self):
+        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
+
+        Parameters
+        ----------
+        (all default to None and are unset)
+
+            design_mat:
+                flameo design.mat file
+            design_con:
+                flameo design.con file
+            design_grp:
+                flameo design.grp file
+        """
+        outputs = Bunch(design_mat=None,
+                        design_con=None,
+                        design_grp=None)
+        return outputs
+
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        for field, value in outputs.items():
+            setattr(outputs, field,
+                    list_to_filename(glob(os.path.join(os.getcwd(),
+                                                       field.replace('_','.')))))
         return outputs
