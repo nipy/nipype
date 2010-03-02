@@ -276,7 +276,7 @@ class NodeWrapper(object):
         if copyfiles:
             self._copyfiles_to_wd(cwd,execute)
         if self.disk_based:
-            resultsfile = os.path.join(cwd,'result.npz')
+            resultsfile = os.path.join(cwd, 'result_%s.npz' % self.id)
         if execute:
             if issubclass(self._interface.__class__,CommandLine):
                 cmd = self._interface.cmdline
@@ -288,7 +288,9 @@ class NodeWrapper(object):
             logger.info('Executing node')
             result = self._interface.run()
             if result.runtime.returncode:
-                logger.error(result.runtime.stderr)
+                logger.error('STDERR:' + result.runtime.stderr)
+                logger.error('STDOUT:' + result.runtime.stdout)
+                self._result = result
                 raise RuntimeError(result.runtime.stderr)
             else:
                 if self.disk_based:
