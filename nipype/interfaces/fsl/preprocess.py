@@ -347,10 +347,10 @@ class Fast(FSLCommand):
             if self.inputs.out_basename:
                 pth, nme = os.path.split(item)
                 _, _ = os.path.splitext(nme)
-                item = pth + self.inputs.out_basename + '.%s' % (envext)
+                item = pth + self.inputs.out_basename + envext
             else:
                 nme, _ = os.path.splitext(item)
-                item = nme + '.%s' % (envext)
+                item = nme + envext
             # get number of tissue classes
             if not self.inputs.number_classes:
                 nclasses = 3
