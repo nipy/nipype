@@ -753,14 +753,14 @@ class McFlirt(FSLCommand):
     def _parse_inputs(self):
         """Call our super-method, then add our input files"""
         allargs = super(McFlirt, self)._parse_inputs(skip=('infile'))
-        # XXX This would be handled properly by the standard mechanisms,
-        # Why is it being done here?
+
         if self.inputs.infile:
             infile = list_to_filename(self.inputs.infile)
             allargs.insert(0, '-in %s' % infile)
-            outfile = self._gen_fname(infile, self.inputs.outfile,
-                                         suffix='_mcf')
-            allargs.append(self.opt_map['outfile'] % outfile)
+            if self.inputs.outfile is None:
+                outfile = self._gen_fname(infile, self.inputs.outfile,
+                                          suffix='_mcf')
+                allargs.append(self.opt_map['outfile'] % outfile)
 
         return allargs
 

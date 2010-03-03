@@ -178,6 +178,15 @@ def test_applyxfm():
 def test_mcflirt():
     frt = fsl.McFlirt()
     yield assert_equal, frt.cmd, 'mcflirt'
+    # Test generated outfile name
+    frt.inputs.infile = '/data/foo.nii'
+    outfile = os.path.join(os.getcwd(), 'foo_mcf.nii')
+    realcmd = 'mcflirt -in /data/foo.nii -out ' + outfile
+    yield assert_equal, frt.cmdline, realcmd
+    # Test specified outfile name
+    frt.inputs.outfile = '/newdata/bar.nii'
+    realcmd = 'mcflirt -in /data/foo.nii -out /newdata/bar.nii'
+    yield assert_equal, frt.cmdline, realcmd
 
     opt_map = {
         'outfile':     ('-out bar.nii', 'bar.nii'),
