@@ -15,14 +15,14 @@ def test_bet():
 
     # Test generated outfile name
     name, ext = fsl.FSLInfo.outputtype()
-    infile = 'foo.' + ext
+    infile = 'foo' + ext
     better.inputs.infile = infile
-    outfile = 'foo_brain.' + ext
+    outfile = 'foo_brain' + ext
     outpath = os.path.join(os.getcwd(), outfile)
     realcmd = 'bet %s %s' % (infile, outpath)
     yield assert_equal, better.cmdline, realcmd
     # Test specified outfile name
-    outfile = '/newdata/bar.' + ext
+    outfile = '/newdata/bar' + ext
     better.inputs.outfile = outfile
     realcmd = 'bet %s %s' % (infile, outfile)
     yield assert_equal, better.cmdline, realcmd

@@ -34,12 +34,12 @@ class FSLInfo(object):
     """
 
     __outputtype = 'NIFTI'
-    ftypes = {'NIFTI': 'nii',
-              'NIFTI_PAIR': 'img',
-              'NIFTI_GZ': 'nii.gz',
-              'NIFTI_PAIR_GZ': 'img.gz',
-              'ANALYZE_GZ': 'hdr.gz',
-              'ANALYZE': 'hdr'}
+    ftypes = {'NIFTI': '.nii',
+              'NIFTI_PAIR': '.img',
+              'NIFTI_GZ': '.nii.gz',
+              'NIFTI_PAIR_GZ': '.img.gz',
+              'ANALYZE_GZ': '.hdr.gz',
+              'ANALYZE': '.hdr'}
 
     @staticmethod
     def version():
@@ -192,11 +192,11 @@ class FSLCommand(OptMapCommand):
         # substitute
         for ext in FSLInfo.ftypes.values():
             if fname.endswith(ext):
-                fname = fname[:-(len(ext) + 1)]
+                fname = fname[:-len(ext)]
                 break
 
         ext = FSLInfo.outputtype_to_ext(self._outputtype)
-        files = glob(fname) or glob(fname + '.' + ext)
+        files = glob(fname) or glob(fname + ext)
 
         try:
             return files[0]
@@ -228,7 +228,8 @@ class FSLCommand(OptMapCommand):
 
         ext = FSLInfo.outputtype_to_ext(self._outputtype)
         if fname is None:            
-            suffix = '.'.join((suffix, ext))
+            suffix = ''.join((suffix, ext))
+            print 'suffix: ', suffix
             fname = fname_presuffix(list_to_filename(basename), suffix=suffix,
                                     use_ext=False, newpath=cwd)
         if check:
