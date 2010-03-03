@@ -163,7 +163,6 @@ def test_flirt():
     realcmd = 'flirt -in foo.nii -ref mni152.nii -v'
     yield assert_equal, res.interface.cmdline, realcmd
 
-
 def test_applyxfm():
     # ApplyXFM subclasses Flirt.
     flt = fsl.ApplyXfm(infile='subj.nii', inmatrix='xfm.mat',
@@ -186,7 +185,13 @@ def test_applyxfm():
     realcmd = 'flirt -in subj.nii -ref mni152.nii -init xfm.mat '\
         '-applyxfm -out xfm_subj.nii'
     yield assert_equal, res.interface.cmdline, realcmd
-
+    # Test generated outfile name
+    infile = fsl_name('foo')
+    xfm = fsl.ApplyXfm(infile = infile)
+    outfile = os.path.join(os.getcwd(), fsl_name('foo_axfm'))
+    #xfm.inputs.outfile = outfile
+    realcmd = 'flirt -in %s -applyxfm -out %s' % (infile, outfile)
+    yield assert_equal, xfm.cmdline, realcmd
 
 # Mcflirt
 def test_mcflirt():
