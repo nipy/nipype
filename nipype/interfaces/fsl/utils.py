@@ -325,9 +325,9 @@ class Split(FSLCommand):
         """
         outputs = self.outputs()
         type, ext = FSLInfo.outputtype()
-        outbase = 'vol*.'
+        outbase = 'vol*'
         if self.inputs.outbasename:
-            outbase = '%s*.' % self.inputs.outbasename
+            outbase = '%s*' % self.inputs.outbasename
         outputs.outfiles = sorted(glob(os.path.join(os.getcwd(),
                                                     outbase + ext)))
         return outputs
