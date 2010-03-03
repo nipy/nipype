@@ -189,7 +189,6 @@ def test_applyxfm():
     infile = fsl_name('foo')
     xfm = fsl.ApplyXfm(infile = infile)
     outfile = os.path.join(os.getcwd(), fsl_name('foo_axfm'))
-    #xfm.inputs.outfile = outfile
     realcmd = 'flirt -in %s -applyxfm -out %s' % (infile, outfile)
     yield assert_equal, xfm.cmdline, realcmd
 
@@ -315,3 +314,23 @@ def test_fnirt():
     for name, settings in opt_map.items():
         fnirt = fsl.Fnirt(**{name : settings[1]})
         yield assert_equal, fnirt.cmdline, ' '.join([fnirt.cmd, settings[0]])
+
+def test_applywarp():
+    opt_map = {
+        'infile':            ('--in=foo.nii', 'foo.nii'),
+        'outfile':           ('--out=bar.nii', 'bar.nii'),
+        'reference':         ('--ref=refT1.nii', 'refT1.nii'),
+        'fieldfile':         ('--warp=warp_field.nii', 'warp_field.nii'),
+        'premat':            ('--premat=prexform.mat', 'prexform.mat'),
+        'postmat':           ('--postmat=postxform.mat', 'postxform.mat')
+        }
+
+    for name, settings in opt_map.items():
+        awarp = fsl.ApplyWarp(**{name : settings[1]})
+        if name == 'infile':
+            outfile = os.path.join(os.getcwd(), fsl_name('foo_warp'))
+            realcmd = 'applywarp --in=foo.nii --out=%s' % outfile
+            yield assert_equal, awarp.cmdline, realcmd
+        else:
+            yield assert_equal, awarp.cmdline, \
+                ' '.join([awarp.cmd, settings[0]])
