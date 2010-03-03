@@ -395,12 +395,10 @@ class Feat(FSLCommand):
 
     def outputs(self):
         """
-            Parameters
-            ----------
-            (all default to None)
-
-            statsdir:
-                Directory containing the output of feat
+        Parameters
+        ----------
+        featdir: str
+            Directory containing the output of feat
         """
         outputs = Bunch(featdir=None)
         return outputs
