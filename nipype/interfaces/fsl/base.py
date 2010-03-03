@@ -30,14 +30,9 @@ warnings.filterwarnings('always', category=UserWarning)
 
 
 class FSLInfo(object):
-    '''A class to encapsulate stuff we'll need throughout the
+    """Handle fsl output type and version information.
+    """
 
-    This should probably be a singleton class? or do we want to make it
-    possible to wrap a few versions of FSL? In any case, currently we
-    instantiate an instance here called fsl_info
-
-    I'm also not sure this is the best ordering for the various attributes and
-    methods. Please feel free to reorder.'''
     __outputtype = 'NIFTI'
     ftypes = {'NIFTI': 'nii',
               'NIFTI_PAIR': 'img',
@@ -56,7 +51,7 @@ class FSLInfo(object):
 
         Returns
         -------
-        version : string
+        version : str
            Version number as string or None if FSL not found
 
         """
@@ -75,10 +70,25 @@ class FSLInfo(object):
 
     @classmethod
     def outputtype_to_ext(cls, outputtype):
-        if outputtype in cls.ftypes.keys():
+        """Get the file extension for the given output type.
+
+        Parameters
+        ----------
+        outputtype : {'ANALYZE_GZ', 'NIFTI_PAIR_GZ', 'NIFTI',
+                      'NIFTI_PAIR', 'NIFTI_GZ', 'ANALYZE'}
+            String specifying the output type.
+
+        Returns
+        -------
+        extension : str
+            The file extension for the output type.
+        """
+
+        try:
             return cls.ftypes[outputtype]
-        else:
-            raise IOError('FSLOUTPUTTYPE %s is not supported' % (outputtype))
+        except KeyError:
+            msg = 'Invalid FSLOUTPUTTYPE: ', outputtype
+            raise KeyError(msg)
 
     @classmethod
     def outputtype(cls, ftype=None):
@@ -105,7 +115,7 @@ class FSLInfo(object):
                 ext = cls.ftypes[ftype]
                 cls.__outputtype = ftype
             except KeyError:
-                msg = 'Unknown fsl output type: ', ftype
+                msg = 'Invalid FSLOUTPUTTYPE: ', ftype
                 raise KeyError(msg)
         return cls.__outputtype, cls.outputtype_to_ext(cls.__outputtype)
 

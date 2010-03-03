@@ -41,6 +41,12 @@ def test_fsloutputtype():
     out_type = fsl.FSLInfo.outputtype()
     yield assert_raises, KeyError, fsl.FSLInfo.outputtype, out_type
 
+def test_outputtype_to_ext():
+    for ftype, ext in fsl.FSLInfo.ftypes.items():
+        res = fsl.FSLInfo.outputtype_to_ext(ftype)
+        yield assert_equal, res, ext
+
+    yield assert_raises, KeyError, fsl.FSLInfo.outputtype_to_ext, 'JUNK'
 
 def test_FSLCommand():
     # Most methods in FSLCommand are tested in the subclasses.  Only
