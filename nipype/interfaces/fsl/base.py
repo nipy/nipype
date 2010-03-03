@@ -40,9 +40,11 @@ class FSLInfo(object):
     methods. Please feel free to reorder.'''
     __outputtype = 'NIFTI'
     ftypes = {'NIFTI': 'nii',
-          'NIFTI_PAIR': 'img',
-          'NIFTI_GZ': 'nii.gz',
-          'NIFTI_PAIR_GZ': 'img.gz'}
+              'NIFTI_PAIR': 'img',
+              'NIFTI_GZ': 'nii.gz',
+              'NIFTI_PAIR_GZ': 'img.gz',
+              'ANALYZE_GZ': 'hdr.gz',
+              'ANALYZE': 'hdr'}
 
     @staticmethod
     def version():
@@ -97,8 +99,14 @@ class FSLInfo(object):
 
         """
         if ftype is not None:
-            if ftype in cls.ftypes.keys():
+            try:
+                # Grabbing extension only to confirm given ftype is a
+                # valid key
+                ext = cls.ftypes[ftype]
                 cls.__outputtype = ftype
+            except KeyError:
+                msg = 'Unknown fsl output type: ', ftype
+                raise KeyError(msg)
         return cls.__outputtype, cls.outputtype_to_ext(cls.__outputtype)
 
     @staticmethod
@@ -213,10 +221,6 @@ class FSLCommand(OptMapCommand):
             suffix = '.'.join((suffix, ext))
             fname = fname_presuffix(list_to_filename(basename), suffix=suffix,
                                     use_ext=False, newpath=cwd)
-        else:
-            suffix='.'+ext
-            fname = fname_presuffix(fname,suffix=suffix,use_ext=False, newpath=cwd)
-
         if check:
             new_fname = self._glob(fname)
             if new_fname is None:

@@ -95,12 +95,19 @@ class Bet(FSLCommand):
         """validate fsl bet options"""
         allargs = super(Bet, self)._parse_inputs(skip=('infile', 'outfile'))
 
+        infile = None
+        outfile = None
         if self.inputs.infile:
             infile = list_to_filename(self.inputs.infile)
-            allargs.insert(0, infile)
+        if self.inputs.outfile:
+            outfile = list_to_filename(self.inputs.outfile)
+        elif infile is not None:
             outfile = self._gen_fname(infile,
-                                         self.inputs.outfile,
-                                         suffix='_brain')
+                                      self.inputs.outfile,
+                                      suffix='_brain')
+        if infile is not None:
+            allargs.insert(0, infile)
+        if outfile is not None:
             allargs.insert(1, outfile)
 
         return allargs

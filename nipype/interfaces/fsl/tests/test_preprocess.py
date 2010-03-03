@@ -13,12 +13,21 @@ def test_bet():
     # Test raising error with mandatory args absent
     yield assert_raises, ValueError, better.run
 
-    # .inputs based parameter setting
-    better.inputs.frac = 0.5
-    better.inputs.infile = 'infile'
-    better.inputs.outfile = 'outfile'
-    yield assert_equal, better.cmdline, 'bet infile outfile -f 0.50'
+    # Test generated outfile name
+    name, ext = fsl.FSLInfo.outputtype()
+    infile = 'foo.' + ext
+    better.inputs.infile = infile
+    outfile = 'foo_brain.' + ext
+    outpath = os.path.join(os.getcwd(), outfile)
+    realcmd = 'bet %s %s' % (infile, outpath)
+    yield assert_equal, better.cmdline, realcmd
+    # Test specified outfile name
+    outfile = '/newdata/bar.' + ext
+    better.inputs.outfile = outfile
+    realcmd = 'bet %s %s' % (infile, outfile)
+    yield assert_equal, better.cmdline, realcmd
 
+    better.inputs.frac = 0.50
     # .run() based parameter setting
     betted = better.run(infile='infile2', outfile='outfile')
     # Non-existant files, shouldn't finish cleanly
