@@ -5,6 +5,12 @@ from nipype.testing import assert_equal, assert_not_equal, assert_raises
 import nipype.interfaces.fsl.preprocess as fsl
 from nipype.interfaces.base import InterfaceResult
 
+def fsl_name(fname):
+    """Create valid fsl name, including file extension for output type.
+    """
+    ftype, ext = fsl.FSLInfo.outputtype()
+    return fname + ext
+
 # test Bet
 def test_bet():
     better = fsl.Bet()
@@ -14,15 +20,14 @@ def test_bet():
     yield assert_raises, ValueError, better.run
 
     # Test generated outfile name
-    name, ext = fsl.FSLInfo.outputtype()
-    infile = 'foo' + ext
+    infile = fsl_name('foo') 
     better.inputs.infile = infile
-    outfile = 'foo_brain' + ext
+    outfile = fsl_name('foo_brain')
     outpath = os.path.join(os.getcwd(), outfile)
     realcmd = 'bet %s %s' % (infile, outpath)
     yield assert_equal, better.cmdline, realcmd
     # Test specified outfile name
-    outfile = '/newdata/bar' + ext
+    outfile = fsl_name('/newdata/bar')
     better.inputs.outfile = outfile
     realcmd = 'bet %s %s' % (infile, outfile)
     yield assert_equal, better.cmdline, realcmd
@@ -188,13 +193,15 @@ def test_mcflirt():
     frt = fsl.McFlirt()
     yield assert_equal, frt.cmd, 'mcflirt'
     # Test generated outfile name
-    frt.inputs.infile = '/data/foo.nii'
-    outfile = os.path.join(os.getcwd(), 'foo_mcf.nii')
-    realcmd = 'mcflirt -in /data/foo.nii -out ' + outfile
+    infile = fsl_name('/data/foo')
+    frt.inputs.infile = infile
+    outfile = os.path.join(os.getcwd(), fsl_name('foo_mcf'))
+    realcmd = 'mcflirt -in ' + infile + ' -out ' + outfile
     yield assert_equal, frt.cmdline, realcmd
     # Test specified outfile name
-    frt.inputs.outfile = '/newdata/bar.nii'
-    realcmd = 'mcflirt -in /data/foo.nii -out /newdata/bar.nii'
+    outfile = fsl_name('/newdata/bar')
+    frt.inputs.outfile = outfile
+    realcmd = 'mcflirt -in ' + infile + ' -out ' + outfile
     yield assert_equal, frt.cmdline, realcmd
 
     opt_map = {
