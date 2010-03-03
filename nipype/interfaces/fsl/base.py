@@ -229,7 +229,6 @@ class FSLCommand(OptMapCommand):
         ext = FSLInfo.outputtype_to_ext(self._outputtype)
         if fname is None:            
             suffix = ''.join((suffix, ext))
-            print 'suffix: ', suffix
             fname = fname_presuffix(list_to_filename(basename), suffix=suffix,
                                     use_ext=False, newpath=cwd)
         if check:
