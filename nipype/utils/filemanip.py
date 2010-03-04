@@ -133,6 +133,10 @@ def copyfile(originalfile, newfile, copy=False):
     if originalfile.endswith(".img"):
         hdrofile = originalfile[:-4] + ".hdr"
         hdrnfile = newfile[:-4] + ".hdr"
+        matofile = originalfile[:-4] + ".mat"
+        if os.path.exists(matofile):
+            matnfile = newfile[:-4] + ".mat"
+            copyfile(matofile, matnfile, copy)
         copyfile(hdrofile, hdrnfile, copy)
 
 def copyfiles(filelist, dest, copy=False):
