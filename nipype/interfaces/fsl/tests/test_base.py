@@ -1,7 +1,5 @@
 import os
 
-from nose import with_setup
-
 from nipype.testing import assert_equal, assert_true, assert_raises
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces.base import InterfaceResult
