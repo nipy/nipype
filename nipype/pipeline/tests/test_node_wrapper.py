@@ -62,19 +62,19 @@ def test_init():
     yield assert_equal, bi.iterfield, []
     yield assert_equal, bi.parameterization, None
     
-    bi = nw.NodeWrapper(interface=BasicInterface(),diskbased=True)
+    bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True)
     yield assert_equal, bi.output_directory_base, None
     yield assert_equal, bi.overwrite, False
     
-    bi = nw.NodeWrapper(interface=BasicInterface(), diskbased=True,
-                        base_directory='.')
+    bi = nw.NodeWrapper(interface = BasicInterface(),
+                        diskbased = True,
+                        base_directory = '.')
     yield assert_equal, bi.output_directory_base, '.'
 
-    # XXX: I don't understand this test.  It's currently failing, if
-    # it's tests something useful, we should fix it, otherwise, remove
-    # it.
-    # bi = lambda x: nw.NodeWrapper(interface=BasicInterface(),
-    # base_directory=x) yield assert_raises, Exception, bi, '.'
+    bi = lambda x: nw.NodeWrapper(interface = BasicInterface(),
+                                  diskbased = False,
+                                  base_directory = x)
+    yield assert_raises, Exception, bi, '.'
 
     bi = nw.NodeWrapper(interface=BasicInterface(),name='foo')
     yield assert_equal, bi.name, 'foo'
