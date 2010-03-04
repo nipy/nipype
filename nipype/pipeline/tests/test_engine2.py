@@ -2,11 +2,16 @@
 """
 import os
 from copy import deepcopy
+from tempfile import mkdtemp
+from shutil import rmtree
+from nose import with_setup
 
 import networkx as nx
 
-from nipype.testing import assert_raises, assert_equal, assert_true, assert_false
-from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult
+from nipype.testing import (assert_raises, assert_equal, assert_true,
+                            assert_false)
+from nipype.interfaces.base import (Interface, CommandLine, Bunch,
+                                    InterfaceResult)
 from nipype.utils.filemanip import cleandir
 import nipype.pipeline.engine2 as pe
 import nipype.pipeline.node_wrapper as nw
@@ -49,6 +54,16 @@ class BasicInterface(Interface):
         outputs=self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
 
+working_dir = os.getcwd()
+temp_dir = None
+def setup_pipe():
+    global temp_dir
+    temp_dir = mkdtemp(prefix='test_engine_')
+    os.chdir(temp_dir)
+def teardown_pipe():
+    os.chdir(working_dir)
+    rmtree(temp_dir)
+
 def test_init():
     pipe = pe.Pipeline()
     yield assert_equal, type(pipe._graph), nx.DiGraph
@@ -89,6 +104,7 @@ def test_generate_dependency_list():
     yield assert_false, pipe.proc_pending[1]
     yield assert_equal, pipe.depidx[0,1], 1
 
+@with_setup(setup_pipe, teardown_pipe)
 def test_run_in_series():
     pipe = pe.Pipeline()
     mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
@@ -98,7 +114,11 @@ def test_run_in_series():
     nodes = pipe._execgraph.nodes()
     names = [n.name for n in nodes]
     i = names.index('mod1')
-    yield assert_equal, nodes[i].get_output('output1'), ['ran',None]
+    result = nodes[i].get_output('output1')
+    # NOTE: yield statements in nose cause the setup function to be
+    # called at this point in the code, after all of the above is
+    # executed!
+    assert_equal(result, ['ran', None])
 
 # Test graph expansion.  The following set tests the building blocks
 # of the graph expansion routine.
