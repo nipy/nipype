@@ -13,26 +13,10 @@ def test_fslversion():
         ver = ver.split('.')
         yield assert_equal, ver[0], '4'
 
-# The setup and teardown are here to reset any changes to the fsl
-# output type that occur in the testing function.  When running tests
-# with nose, if we change the outputtype in fsl.FSLInfo, it will
-# affect any test modules that import fsl after this test.  At least
-# this was my experience, and was causing tests to fail or pass based
-# on the order in which they were run.
-fsl_output_type = None
-def setup_func():
-    global fsl_output_type
-    fsl_output_type, _ = fsl.FSLInfo.outputtype()
-def teardown_func():
-    global fsl_output_type
-    if fsl_output_type is not None:
-        fsl.FSLInfo.outputtype(fsl_output_type)
-
-@with_setup(setup_func, teardown_func)
 def test_fsloutputtype():
     types = fsl.FSLInfo.ftypes
-    out_type, _ = fsl.FSLInfo.outputtype()
-    yield assert_true, out_type in types
+    orig_out_type, _ = fsl.FSLInfo.outputtype()
+    yield assert_true, orig_out_type in types
     for ftype in types.keys():
         out_type, _ = fsl.FSLInfo.outputtype(ftype)
         yield assert_equal, out_type, fsl.FSLInfo.outputtype()[0]
@@ -40,6 +24,11 @@ def test_fsloutputtype():
     # Test for possible common mistake of passing in outputtype tuple
     out_type = fsl.FSLInfo.outputtype()
     yield assert_raises, KeyError, fsl.FSLInfo.outputtype, out_type
+
+    # Restore original output type, otherwise the last one set in this
+    # test will affect any tests that import fsl that follow this when
+    # nose is run.
+    _, _ = fsl.FSLInfo.outputtype(orig_out_type)
 
 def test_outputtype_to_ext():
     for ftype, ext in fsl.FSLInfo.ftypes.items():
