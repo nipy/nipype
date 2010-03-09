@@ -439,6 +439,13 @@ class FeatModel(FSLCommand):
         _, fname = os.path.split(infile)
         return fname.split('.')[0]
 
+    def get_input_info(self):
+        """ Provides information about inputs as a dict
+            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
+        """
+        info = [Bunch(key='fsf_file',copy=False)]
+        return info
+
     def run(self, fsf_file=None, **inputs):
         """Execute the command.
 
