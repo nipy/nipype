@@ -14,8 +14,6 @@ from nipype.utils.filemanip import (copyfiles, fname_presuffix,
                                     fnames_presuffix, save_json,
                                     FileNotFoundError)
 from nipype.interfaces.base import Bunch, InterfaceResult, CommandLine
-from nipype.interfaces.fsl import FSLCommand
-import nipype.pipeline.engine as pe
 
 logger = logging.getLogger('nodewrapper')
 
