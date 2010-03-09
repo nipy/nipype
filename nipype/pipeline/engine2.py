@@ -16,9 +16,12 @@ from traceback import format_exception
 import numpy as np
 
 from nipype.utils.misc import package_check
-from IPython.kernel.contexts import ConnectionRefusedError
 package_check('networkx', '1.0')
 import networkx as nx
+try:
+    from IPython.kernel.contexts import ConnectionRefusedError
+except:
+    pass
 
 from nipype.interfaces.base import CommandLine
 from nipype.utils.filemanip import fname_presuffix
@@ -367,6 +370,13 @@ class Pipeline(object):
         """
         self._graph.add_nodes_from(nodes)
 
+    def add_pipeline(self, pipeline, connections):
+        """ Adds a prebuilt pipeline to the graph
+        """
+        graph = deepcopy(pipeline._graph)
+        self._graph.add_nodes_from(graph.nodes())
+        self._graph.add_edges_from(graph.edges(data=True))
+        self.connect(connections)
         
     def export_graph(self, show = False, use_execgraph=False,
                      show_connectinfo=False, dotfilename='graph.dot'):
