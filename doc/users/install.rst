@@ -42,8 +42,7 @@ IPython_ 0.10
 Note
 ~~~~
 Full distributions such as pythonxy_ or EPD_ provide the above
-packages. For EPD, the version of networkx is still at 0.99 and needs
-to be replaced by the version above.
+packages. 
 
 Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
