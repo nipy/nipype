@@ -12,6 +12,8 @@ import os
 from glob import glob
 import warnings
 
+import numpy as np
+
 from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
 from nipype.utils.filemanip import list_to_filename
 from nipype.interfaces.base import Bunch
@@ -47,7 +49,7 @@ class Smooth(FSLCommand):
     def _parse_inputs(self):
         return [self.inputs.infile,
                 # ohinds: convert fwhm to stddev
-                '-kernel gauss', str(self.inputs.fwhm / 2.3548),
+                '-kernel gauss', str(float(self.inputs.fwhm) / np.sqrt(8 * np.log(2))),
                 '-fmean',
                 self._get_outfile()]
 

@@ -272,6 +272,8 @@ class NodeWrapper(object):
             os.chdir(old_cwd)
             
     def _run_command(self, execute, cwd, copyfiles=True):
+        if execute and copyfiles:
+            self._originputs = deepcopy(self._interface.inputs)
         if copyfiles:
             self._copyfiles_to_wd(cwd,execute)
         if self.disk_based:
