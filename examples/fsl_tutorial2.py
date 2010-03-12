@@ -218,7 +218,7 @@ level1design.inputs.reg_dof = 12
    e. Use :class:`nipype.interfaces.fsl.FeatModel` to generate a
    run specific mat file for use by FilmGLS
 """
-featmodel = nw.NodeWrapper(interface=fsl.Feat(),diskbased=True)
+featmodel = nw.NodeWrapper(interface=fsl.FeatModel(),diskbased=True)
 featmodel.iterfield = ['fsf_file']
 
 fedesign = nw.NodeWrapper(interface=fsl.FixedEffectsModel(num_copes=2),diskbased=True)
@@ -267,9 +267,11 @@ l1pipeline.connect([# preprocessing in native space
                  (motion_correct,modelspec,[('parfile','realignment_parameters')]),
                  (modelspec,level1design,[('session_info','session_info')]),
                  (level1design,featmodel,[('fsf_files','fsf_file')]),
+                ])
+"""
                  (featmodel,fedesign,[('featdir','feat_dirs')]),
                  (fedesign,featfemodel,[('fsf_file','fsf_file')]),
-                ])
+"""
 
 # store relevant outputs from various stages of preprocessing
 l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
@@ -281,9 +283,11 @@ l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
                         [('parfile', 'skullstrip.@parfile')]),
                     (smoothing, datasink, 
                         [('smoothedimage', 'registration.@outfile')]),
+                    ])
+"""
                     (featfemodel, datasink, 
                         [('featdir', 'modelestimate.@fixedeffects')]),
-                    ])
+"""
 
 
 ##########################################################################

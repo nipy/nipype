@@ -128,26 +128,6 @@ class FSLInfo(object):
         return os.path.join(fsldir, 'data/standard', img_name)
 
 
-def fslversion():
-    msg = """fsl.fslversion is no longer available. instead replace with:
-
-             fsl.FSLInfo.version()
-
-             This message will be removed in the next release
-          """
-    raise Exception(msg)
-
-
-def fsloutputtype(ftype=None):
-    msg = """fsl.fsloutputtype is no longer available. instead replace with:
-
-             fsl.FSLInfo.outputtype(...)
-
-             This message will be removed in the next release
-          """
-    raise Exception(msg)
-
-
 class FSLCommand(OptMapCommand):
     '''General support for FSL commands. Every FSL command accepts 'outputtype'
     input. For example:
