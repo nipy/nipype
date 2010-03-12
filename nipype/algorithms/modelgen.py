@@ -19,7 +19,9 @@ from scipy.special import gammaln
 
 from nipype.externals.pynifti import load
 from nipype.interfaces.base import Bunch, InterfaceResult, Interface
-from nipype.utils.filemanip import fname_presuffix, fnames_presuffix, filename_to_list, list_to_filename
+from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix,
+                                    filename_to_list, list_to_filename,
+                                    FileNotFoundError)
 from nipype.interfaces.spm import scans_for_fnames
 
 class SpecifyModel(Interface):
@@ -178,11 +180,6 @@ class SpecifyModel(Interface):
                 to spm and fsl Level1Design modules
         """
         outputs = Bunch(session_info=None)
-        return outputs
-
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outputs.session_info = self._get_outfilename()
         return outputs
 
     def _scaletimings(self,timelist,input_units=None,output_units=None):
@@ -457,7 +454,7 @@ class SpecifyModel(Interface):
     
     def _concatenate_info(self,infolist):
         nscans = []
-        for i,f in enumerate(self.inputs.functional_runs):
+        for i,f in enumerate(filename_to_list(self.inputs.functional_runs)):
             if isinstance(f,list):
                 numscans = len(f)
             elif isinstance(f,str):
@@ -555,9 +552,6 @@ class SpecifyModel(Interface):
         
         np.savez(self._get_outfilename(),session_info=sessinfo)
 
-    def _get_outfilename(self):
-        return os.path.join(os.getcwd(),'%s_modelspec.npz'%self.inputs.subject_id)
-
     def run(self, **inputs):
         """
         """
@@ -568,4 +562,14 @@ class SpecifyModel(Interface):
         outputs=self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
     
+    def _get_outfilename(self):
+        return os.path.join(os.getcwd(),'%s_modelspec.npz'%self.inputs.subject_id)
 
+    def aggregate_outputs(self):
+        outputs = self.outputs()
+        outfile = self._get_outfilename()
+        session_info = glob(outfile)
+        if not session_info:
+            raise FileNotFoundError('Session Info file: %s' % outfile)
+        outputs.session_info = list_to_filename(session_info)
+        return outputs
