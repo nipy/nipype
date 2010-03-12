@@ -632,8 +632,6 @@ class Pipeline(object):
                                                crashfile = crashfile))
                             for node in subnodes:
                                 idx = self.procs.index(node)
-                                logger.info(self.procs[idx].id)
-                                logger.info(node.id)
                                 self.proc_done[idx] = True
                                 self.proc_pending[idx] = False
                     else:
