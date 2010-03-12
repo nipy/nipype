@@ -226,6 +226,17 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
             node.id += str(i)
     return supergraph
 
+def _report_nodes_not_run(notrun):
+    if notrun:
+        logger.info("***********************************")
+        for info in notrun:
+            logger.error("could not run node: %s" % info['node'].id)
+            logger.info("crashfile: %s" % info['crashfile'])
+            logger.debug("The following dependent nodes were not run")
+            for subnode in info['dependents']:
+                logger.debug(subnode.id)
+        logger.info("***********************************")
+
 
 class Pipeline(object):
     """Controls the setup and execution of a pipeline of processes
@@ -495,11 +506,15 @@ class Pipeline(object):
         logger.info("Running serially.")
         self._generate_expanded_graph()
         old_wd = os.getcwd()
+        notrun = []
+        donotrun = []
         for node in nx.topological_sort(self._execgraph):
             # Assign outputs from dependent executed nodes to current node.
             # The dependencies are stored as data on edges connecting
             # nodes.
             try:
+                if node in donotrun:
+                    continue
                 for edge in self._execgraph.in_edges_iter(node):
                     data = self._execgraph.get_edge_data(*edge)
                     logger.debug('setting input: %s->%s %s',
@@ -522,8 +537,15 @@ class Pipeline(object):
                 os.chdir(old_wd)
                 # bare except, but i really don't know where a
                 # node might fail
-                self._report_crash(node)
-                raise
+                crashfile = self._report_crash(node)
+                # remove dependencies from queue
+                subnodes = nx.dfs_preorder(self._execgraph, node)
+                notrun.append(dict(node = node,
+                                   dependents = subnodes,
+                                   crashfile = crashfile))
+                donotrun.extend(subnodes)
+        _report_nodes_not_run(notrun)
+
                 
     def _report_crash(self, node, traceback=None):
         """Writes crash related information to a file
@@ -537,8 +559,9 @@ class Pipeline(object):
                                          exc_traceback)
         timeofcrash = strftime('%Y%m%d-%H%M%S')
         login_name = pwd.getpwuid(os.geteuid())[0]
-        crashfile = 'crashdump-%s-%s.npz' % (timeofcrash,
-                                             login_name)
+        crashfile = 'crash-%s-%s-%s.npz' % (timeofcrash,
+                                            login_name,
+                                            node.id)
         if self.config['crashdump_dir']:
             crashfile = os.path.join(self.config['crashdump_dir'],
                                      crashfile)
@@ -645,13 +668,7 @@ class Pipeline(object):
             self._send_procs_to_workers()
             sleep(2)
         self.taskclient.clear()
-        if notrun:
-            for info in notrun:
-                logger.error("could not run node: %s" % info['node'].id)
-                logger.info("crashfile: %s" % info['crashfile'])
-                logger.debug("The following dependent nodes were not run")
-                for subnode in info['dependents']:
-                    logger.debug(subnode.id)
+        _report_nodes_not_run(notrun)
                 
     def _send_procs_to_workers(self):
         """ Sends jobs to workers using ipython's taskclient interface

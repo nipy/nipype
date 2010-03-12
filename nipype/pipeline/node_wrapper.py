@@ -6,6 +6,7 @@ import sys
 from copy import deepcopy
 import logging
 from shutil import rmtree
+from socket import gethostname
 from tempfile import mkdtemp
 import numpy as np
 
@@ -284,7 +285,17 @@ class NodeWrapper(object):
                 fd.writelines(cmd)
                 fd.close()
             logger.info('Executing node')
-            result = self._interface.run()
+            try:
+                result = self._interface.run()
+            except:
+                result = InterfaceResult(interface=None,
+                                         runtime=None,
+                                         outputs=None)
+                result.runtime.returncode = 1
+                result.runtime.environ = deepcopy(os.environ.data)
+                result.runtime.hostname = gethostname()
+                self._result = result
+                raise
             if result.runtime.returncode:
                 logger.error('STDERR:' + result.runtime.stderr)
                 logger.error('STDOUT:' + result.runtime.stdout)
@@ -292,7 +303,9 @@ class NodeWrapper(object):
                 raise RuntimeError(result.runtime.stderr)
             else:
                 if self.disk_based:
-                    np.savez(resultsfile,result=result)
+                    # to remove problem with thread unsafeness of savez
+                    outdict = {'result_%s' % self.id : result}
+                    np.savez(resultsfile,**outdict)
         else:
             # Likewise, cwd could go in here
             logger.info("Collecting precomputed outputs:")
