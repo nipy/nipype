@@ -1511,7 +1511,8 @@ class EstimateContrast(SpmMatlabCommandLine):
                     tidx = cname.index(fcont[0])
                     script += "consess{%d}.fcon.convec{%d} = consess{%d}.tcon.convec;\n" % (i+1,cl0+1,tidx+1)
             else:
-                raise Exception("Contrast Estimate: Unknown stat %s"%contrast.stat)
+                raise Exception("Contrast Estimate: Unknown stat %s for " \
+                                    "contrast %d" % (contrast.stat, i))
         script += "jobs{1}.stats{1}.con.consess = consess;\n"
         script += "if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');jobs=spm_jobman('spm5tospm8',{jobs});end\n" 
         script += "spm_jobman('run',jobs);"
