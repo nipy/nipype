@@ -640,7 +640,10 @@ class Pipeline(object):
                         self._task_finished_cb(res['result'], a[1])
                 else:
                     toappend.insert(0, a)
-            self.pending_tasks.extend(toappend)
+            if toappend:
+                self.pending_tasks.extend(toappend)
+            else:
+                self.taskclient.clear()
             self._send_procs_to_workers()
             sleep(2)
         self.taskclient.clear()
