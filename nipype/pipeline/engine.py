@@ -548,6 +548,7 @@ class Pipeline(object):
                                             show_connectinfo=True)
         logger.info('Saving crash info to %s' % crashfile)
         np.savez(crashfile, node=node, execgraph=pklgraph, traceback=traceback)
+        return crashfile
 
     def _set_output_directory_base(self, node):
         """Determine output directory and create it
@@ -611,6 +612,7 @@ class Pipeline(object):
         self.pending_tasks = []
         self.readytorun = []
         # setup polling
+        notrun = []
         while np.any(self.proc_done==False) | np.any(self.proc_pending==True):
             toappend = []
             # trigger callbacks for any pending results
@@ -622,8 +624,18 @@ class Pipeline(object):
                         try:
                             res.raise_exception()
                         except:
-                            self._report_crash(self.procs[a[1]])
-                            raise
+                            crashfile = self._report_crash(self.procs[a[1]])
+                            # remove dependencies from queue
+                            subnodes = nx.dfs_preorder(self._execgraph, self.procs[a[1]])
+                            notrun.append(dict(node = self.procs[a[1]],
+                                               dependents = subnodes,
+                                               crashfile = crashfile))
+                            for node in subnodes:
+                                idx = self.procs.index(node)
+                                logger.info(self.procs[idx].id)
+                                logger.info(node.id)
+                                self.proc_done[idx] = True
+                                self.proc_pending[idx] = False
                     else:
                         self._task_finished_cb(res['result'], a[1])
                 else:
@@ -632,6 +644,13 @@ class Pipeline(object):
             self._send_procs_to_workers()
             sleep(2)
         self.taskclient.clear()
+        if notrun:
+            for info in notrun:
+                logger.error("could not run node: %s" % info['node'].id)
+                logger.info("crashfile: %s" % info['crashfile'])
+                logger.debug("The following dependent nodes were not run")
+                for subnode in info['dependents']:
+                    logger.debug(subnode.id)
                 
     def _send_procs_to_workers(self):
         """ Sends jobs to workers using ipython's taskclient interface
@@ -642,6 +661,7 @@ class Pipeline(object):
                                         np.all(self.depidx==0, axis=0))
             if len(jobids)>0:
                 # send all available jobs
+                logger.info('Submitting %d jobs' % len(jobids))
                 for jobid in jobids:
                     # change job status in appropriate queues
                     self.proc_done[jobid] = True
