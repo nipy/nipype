@@ -640,7 +640,7 @@ class Pipeline(object):
             # Check to see if a job is available
             jobids = np.flatnonzero((self.proc_done == False) & \
                                         np.all(self.depidx==0, axis=0))
-            if jobids:
+            if len(jobids)>0:
                 # send all available jobs
                 for jobid in jobids:
                     # change job status in appropriate queues
@@ -675,7 +675,7 @@ class Pipeline(object):
         for edge in graph.out_edges_iter(self.procs[jobid]):
             data = graph.get_edge_data(*edge)
             for sourceinfo, destname in data['connect']:
-                logger.info('%s %s %s %s',edge[1], destname, self.procs[jobid], sourceinfo)
+                logger.debug('%s %s %s %s',edge[1], destname, self.procs[jobid], sourceinfo)
                 self._set_node_input(edge[1], destname,
                                      self.procs[jobid], sourceinfo)
         # update the job dependency structure
