@@ -853,7 +853,7 @@ class NEW_CommandLine(NEW_BaseInterface):
     def _format_arg(self, trait_spec, value):
         '''A helper function for _parse_inputs'''
         argstr = trait_spec.argstr
-        if isinstance(trait_spec, traits.Bool):
+        if trait_spec.is_trait_type(traits.Bool):
             if value:
                 # Boolean options have no format string. Just append options
                 # if True.
@@ -867,7 +867,7 @@ class NEW_CommandLine(NEW_BaseInterface):
                     "string for attr '%s' with value '%s'."  \
                     % (self, trait_spec.name, value)
                 raise ValueError(msg)
-        elif isinstance(trait_spec, traits.List):
+        elif trait_spec.is_trait_type(traits.List):
             # This is a bit simple-minded at present, and should be
             # construed as the default. If more sophisticated behavior
             # is needed, it can be accomplished with metadata (e.g.

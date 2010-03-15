@@ -19,9 +19,7 @@ from nipype.utils.filemanip import fname_presuffix, list_to_filename
 from nipype.utils.docparse import get_doc
 from nipype.utils.misc import container_to_string, is_container
 
-# We are shooting for interoperability for now - Traits or Traitlets
-import nipype.externals.traitlets as traits
-# import enthought.traits.api as traits
+import enthought.traits.api as traits
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -98,7 +96,7 @@ class Bet(NEW_FSLCommand):
         # consistency with the Traits API. Likewise for minlen and maxlen.
         # XXX Currently, default_value won't work for a List
         center = traits.List(desc = 'center of gravity in voxels',
-                             argstr='-c %s', trait=traits.Int, minlen=3,
+                             argstr='-c %s', trait=traits.Int, minlen=0,
                              maxlen=3, units='voxels')
         threshold = traits.Bool(argstr='-t')
         mesh = traits.Bool(argstr='-e')
