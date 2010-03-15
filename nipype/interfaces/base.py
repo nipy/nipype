@@ -14,11 +14,416 @@ from string import Template
 from time import time
 from warnings import warn
 
+import enthought.traits.api as traits
+
 from nipype.utils.filemanip import md5
 from nipype.utils.misc import is_container
 
- 
 __docformat__ = 'restructuredtext'
+
+# New style architecture
+#
+# New base classes
+#
+class NEW_Interface(object):
+    """This is the template for Interface objects.
+
+    It provides no functionality.  It defines the necessary attributes
+    and methods all Interface objects should have.
+
+    Everything in inputs should also be a possible (explicit?) argument to
+    .__init__()
+    """
+
+    input_spec = None
+    output_spec = None
+
+    def __init__(self, **inputs):
+        """Initialize command with given args and inputs."""
+        raise NotImplementedError
+
+    def run(self, cwd=None):
+        """Execute the command."""
+        raise NotImplementedError
+
+    def aggregate_outputs(self):
+        """Called to populate outputs"""
+        raise NotImplementedError
+
+    def get_input_info(self):
+        """ Provides information about file inputs to copy or link to cwd.
+            Necessary for pipeline operation
+        """
+        raise NotImplementedError
+
+class NEW_BaseInterface(NEW_Interface):
+
+    def __init__(self, **inputs):
+        self.inputs = self.input_spec(**inputs)
+
+    @classmethod
+    def help(cls):
+        """ Prints class help
+        """
+        # XXX Creates new object!  Need to make sure this is cheap.
+        obj = cls()
+        obj._inputs_help()
+        print ''
+        obj._outputs_help()
+
+    def _inputs_help(self):
+        """ Prints the help of inputs
+        """
+        helpstr = ['Inputs','------']
+        opthelpstr = None
+        manhelpstr = None
+        for name, trait_spec in self.inputs.items():
+            desc = trait_spec.get_metadata('desc')
+            if trait_spec.get_metadata('mandatory'):
+                if not manhelpstr:
+                    manhelpstr = ['','Mandatory:']
+                manhelpstr += [' %s: %s' % (name, desc)]
+            else:
+                if not opthelpstr:
+                    opthelpstr = ['','Optional:']
+                # We do not what the "trait default" which is the
+                # default value for that type of trait and what is
+                # returned from get_metadata('default').  We want the
+                # default value from the package, which we set in the
+                # input_spec class definition.
+                default = trait_spec.get_default_value()
+                if default not in [None, '', []]:
+                    opthelpstr += [' %s: %s (default=%s)' % (name,
+                                                             desc,
+                                                             default)]
+                else:
+                    opthelpstr += [' %s: %s' % (name, desc)]
+        if manhelpstr:
+            helpstr += manhelpstr
+        if opthelpstr:
+            helpstr += opthelpstr
+        print '\n'.join(helpstr)
+
+    def _outputs_help(self):
+        """ Prints the help of outputs
+        """
+        helpstr = ['Outputs','-------']
+        output_spec = self.output_spec()
+        for name, trait_spec in sorted(output_spec.traits().items()):
+            desc = trait_spec.get_metadata('desc')
+            helpstr += ['%s: %s' % (name, desc)]
+        print '\n'.join(helpstr)
+
+    def _outputs(self):
+        """ Returns a bunch containing output fields for the class
+        """
+        outputs = Bunch()
+        output_spec = self.output_spec()
+        for name, trait_spec in sorted(output_spec.traits().items()):
+            setattr(outputs, name, None)
+        return outputs
+
+    def _check_mandatory_inputs(self):
+        for name, trait_spec in self.inputs.items():
+            if trait_spec.get_metadata('mandatory'):
+                # mandatory parameters must be set and therefore
+                # should not have the default value.  XXX It seems
+                # possible that a default value would be a valid
+                # 'value'?  Currently most of the required params are
+                # filenames where the default_value is the empty
+                # string, so this may not be an issue.
+                value = getattr(self.inputs, name)
+                if value == trait_spec.get_default_value():
+                    msg = "%s requires a value for input '%s'" % \
+                        (self.__class__.__name__, name)
+                    raise ValueError(msg)
+
+    def run(self):
+        """Execute this module.
+        """
+        # XXX What is the purpose of this method here?
+        self._check_mandatory_inputs()
+        runtime = Bunch(returncode=0,
+                        stdout=None,
+                        stderr=None)
+        outputs = self.aggregate_outputs()
+        return InterfaceResult(deepcopy(self), runtime, outputs = outputs)
+
+    def get_input_info(self):
+        """ Provides information about file inputs to copy or link to cwd.
+            Necessary for pipeline operation
+        """
+        return []
+
+class NEW_CommandLine(NEW_BaseInterface):
+    def __init__(self, command=None, **inputs):
+        super(NEW_CommandLine, self).__init__(**inputs)
+        self._environ = {}
+        self._cmd = command # XXX Currently I don't see any code using
+                            # this feature.  Each class overrides the
+                            # cmd property.  Delete?
+
+    @property
+    def cmd(self):
+        """sets base command, immutable"""
+        return self._cmd
+
+    @property
+    def cmdline(self):
+        """validates fsl options and generates command line argument"""
+        allargs = self._parse_inputs()
+        allargs.insert(0, self.cmd)
+        return ' '.join(allargs)
+
+    def run(self, cwd=None, **inputs):
+        """Execute the command.
+
+        Parameters
+        ----------
+        cwd : path
+            Where do we effectively execute this command? (default: os.getcwd())
+        inputs : mapping
+            additional key,value pairs will update inputs
+            it will overwrite existing key, value pairs
+
+        Returns
+        -------
+        results : InterfaceResult Object
+            A `Bunch` object with a copy of self in `interface`
+
+        """
+        #self.inputs.update(inputs)
+        for key, val in inputs.items():
+            setattr(self.inputs, key, val)
+
+        self._check_mandatory_inputs()
+        if cwd is None:
+            cwd = os.getcwd()
+        # initialize provenance tracking
+        runtime = Bunch(cmdline=self.cmdline, cwd=cwd,
+                        stdout = None, stderr = None,
+                        returncode = None, duration = None,
+                        environ=deepcopy(os.environ.data),
+                        hostname = gethostname())
+
+        t = time()
+        if hasattr(self, '_environ') and self._environ != None:
+            env = deepcopy(os.environ.data)
+            env.update(self._environ)
+            runtime.environ = env
+            proc  = subprocess.Popen(runtime.cmdline,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE,
+                                     shell=True,
+                                     cwd=cwd,
+                                     env=env)
+        else:
+            proc  = subprocess.Popen(runtime.cmdline,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE,
+                                     shell=True,
+                                     cwd=cwd)
+
+        runtime.stdout, runtime.stderr = proc.communicate()
+        runtime.duration = time()-t
+        runtime.returncode = proc.returncode
+
+        results = InterfaceResult(deepcopy(self), runtime)
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs()
+        return results
+
+    def _gen_outfiles(self, check = False):
+        return self._outputs()
+
+    def aggregate_outputs(self):
+        return self._gen_outfiles(check = True)
+
+    def _convert_inputs(self, opt, val):
+        """Convert input to appropriate format. Override this function for
+        class specific modifications that do not fall into general format:
+
+        For example fnirt should implement this:
+
+            elif isinstance(value, list) and self.__class__.__name__ == 'Fnirt':
+                # XXX Hack to deal with special case where some
+                # parameters to Fnirt can have a variable number
+                # of arguments.  Splitting the argument string,
+                # like '--infwhm=%d', then add as many format
+                # strings as there are values to the right-hand
+                # side.
+                argparts = argstr.split('=')
+                allargs.append(argparts[0] + '=' +
+                               ','.join([argparts[1] % y for y in value]))
+
+        """
+        return val
+
+    def _format_arg(self, trait_spec, value):
+        '''A helper function for _parse_inputs'''
+        argstr = trait_spec.get_metadata('argstr')
+        if isinstance(trait_spec, traits.Bool):
+            if value:
+                # Boolean options have no format string. Just append options
+                # if True.
+                return argstr
+            else:
+                # If we end up here we're trying to add a Boolean to
+                # the arg string but whose value is False.  This
+                # should not happen, something went wrong upstream.
+                # Raise an error.
+                msg = "Object '%s' attempting to format argument " \
+                    "string for attr '%s' with value '%s'."  \
+                    % (self, trait_spec.name, value)
+                raise ValueError(msg)
+        elif isinstance(trait_spec, traits.List):
+            # This is a bit simple-minded at present, and should be
+            # construed as the default. If more sophisticated behavior
+            # is needed, it can be accomplished with metadata (e.g.
+            # format string for list member str'ification, specifying
+            # the separator, etc.)
+
+            # Depending on whether we stick with traitlets, and whether or
+            # not we beef up traitlets.List, we may want to put some
+            # type-checking code here as well
+
+            return argstr % ' '.join(str(elt) for elt in value)
+        else:
+            # Append options using format string.
+            return argstr % value
+
+    def _parse_inputs(self):
+        """Parse all inputs using the ``argstr`` format string in the Trait.
+
+        Any inputs that are assigned (not the default_value) are formatted
+        to be added to the command line.
+
+        Returns
+        -------
+        all_args : list
+            A list of all inputs formatted for the command line.
+
+        """
+        all_args = []
+        initial_args = {}
+        final_args = {}
+        for name, trait_spec in self.inputs.items():
+            value = getattr(self.inputs, name)
+            if value == trait_spec.get_default_value():
+                # For inputs that have the genfile metadata flag, we
+                # call the _convert_inputs method to get the generated
+                # value.
+                genfile = trait_spec.get_metadata('genfile')
+                if genfile is not None:
+                    gen_val = self._convert_inputs(name, value)
+                    value = gen_val
+                else:
+                    # skip attrs that haven't been assigned
+                    continue
+            arg = self._format_arg(trait_spec, value)
+            pos = trait_spec.get_metadata('position')
+            if pos is not None:
+                if pos >= 0:
+                    initial_args[pos] = arg
+                else:
+                    final_args[pos] = arg
+            else:
+                all_args.append(arg)
+
+        first_args = [arg for pos, arg in sorted(initial_args.items())]
+        last_args = [arg for pos, arg in sorted(final_args.items())]
+        return first_args + all_args + last_args
+
+
+class TraitedAttr(traits.HasTraits):
+    """Provide a few methods necessary to support the Bunch interface.
+
+    In refactoring to Traits, the self.inputs attrs call some methods
+    of the Bunch class that the Traited classes do not inherit from
+    traits.HasTraits.  We can provide those methods here.
+
+    XXX Reconsider this in the long run, but it seems like the best
+    solution to move forward on the refactoring.
+    """
+
+    # XXX These are common inputs that I believe all CommandLine
+    # objects are suppose to have.  Should we define these here?  As
+    # opposed to in each input_spec.  They would not make sense for
+    # the output_spec, but I don't know if output_spec needs a parent
+    # class like this one.
+    # XXX flags and args.  Are these both necessary?
+    flags = traits.Str(argstr='%s')
+    args = traits.Str(argstr='%s')
+
+    def __init__(self, *args, **kwargs):
+        # XXX Should we accept args anymore?
+        self._generate_handlers()
+        # NOTE: In python 2.6, object.__init__ no longer accepts input
+        # arguments.  HasTraits does not define an __init__ and
+        # therefore these args were being ignored.
+        #super(TraitedAttr, self).__init__(*args, **kwargs)
+        super(TraitedAttr, self).__init__()
+        for key, val in kwargs.items():
+            setattr(self, key, val)
+
+    def __repr__(self):
+        outstr = []
+        for name, trait_spec in self.items():
+            value = getattr(self, name)
+            outstr.append('%s = %s' % (name, value))
+        return '\n'.join(outstr)
+
+    def __deepcopy__(self, memo):
+        # When I added the dynamic trait notifiers via
+        # on_trait_change, tests errored when the run method was
+        # called.  I would get this error: 'TypeError: instancemethod
+        # expected at least 2 arguments, got 0' and a traceback deep
+        # in the copy module triggered by the
+        # 'InterfaceResult(deepcopy(self), runtime)' line returned
+        # from CommandLine._runner.  To fix this, I create a new
+        # instance of self, then assign all traited attrs with
+        # deepcopied values.
+        id_self = id(self)
+        if id_self in memo:
+            return memo[id_self]
+        # Create new dictionary of trait items with deep copies of elements
+        dup_dict = {}
+        for key in self.traits():
+            dup_dict[key] = deepcopy(getattr(self, key), memo)
+        # create new instance and update with copied values
+        dup = self.__class__()
+        dup.update(**dup_dict)
+        return dup
+
+    def items(self):
+        for name, trait_spec in sorted(self.traits().items()):
+            yield name, trait_spec
+
+    def _generate_handlers(self):
+        # Find all traits with the 'xor' metadata and attach an event
+        # handler to them.
+        def has_xor(item):
+            if is_container(item):
+                return item
+        xors = self.trait_names(xor=has_xor)
+        for elem in xors:
+            self.on_trait_change(self._xor_warn, elem)
+
+    def _xor_warn(self, name, old, new):
+        trait_spec = self.traits()[name]
+        if new:
+            xor_names = trait_spec.get_metadata('xor')
+            # for each xor, set to default_value
+            for trait_name in xor_names:
+                if trait_name == name:
+                    # skip ourself
+                    continue
+                tspec = self.traits()[trait_name]
+                setattr(self, trait_name, tspec.get_default_value())
+
+
+
+##########################################################
 
 def load_template(name):
     """Load a template from the script_templates directory
