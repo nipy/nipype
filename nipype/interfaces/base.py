@@ -15,8 +15,8 @@ from time import time
 from warnings import warn
 
 # We are shooting for interoperability for now - Traits or Traitlets
-import nipype.externals.traitlets as traits
-# import enthought.traits.api as traits
+#import nipype.externals.traitlets as traits
+import enthought.traits.api as traits
 
 from nipype.utils.filemanip import md5
 from nipype.utils.misc import is_container
@@ -677,8 +677,10 @@ class NEW_BaseInterface(NEW_Interface):
         opthelpstr = None
         manhelpstr = None
         for name, trait_spec in self.inputs.items():
-            desc = trait_spec.get_metadata('desc')
-            if trait_spec.get_metadata('mandatory'):
+            #desc = trait_spec.get_metadata('desc')
+            desc = trait_spec.desc
+            #if trait_spec.get_metadata('mandatory'):
+            if trait_spec.mandatory:
                 if not manhelpstr:
                     manhelpstr = ['','Mandatory:']
                 manhelpstr += [' %s: %s' % (name, desc)]
@@ -690,7 +692,8 @@ class NEW_BaseInterface(NEW_Interface):
                 # returned from get_metadata('default').  We want the
                 # default value from the package, which we set in the
                 # in_spec class definition.
-                default = trait_spec.get_default_value()
+                #default = trait_spec.get_default_value()
+                default = trait_spec.default
                 if default not in [None, '', []]:
                     opthelpstr += [' %s: %s (default=%s)' % (name,
                                                              desc,
@@ -709,7 +712,8 @@ class NEW_BaseInterface(NEW_Interface):
         helpstr = ['Outputs','-------']
         out_spec = self.out_spec()
         for name, trait_spec in sorted(out_spec.traits().items()):
-            desc = trait_spec.get_metadata('desc')
+            #desc = trait_spec.get_metadata('desc')
+            desc = trait_spec.desc
             helpstr += ['%s: %s' % (name, desc)]
         print '\n'.join(helpstr)
 
@@ -724,7 +728,8 @@ class NEW_BaseInterface(NEW_Interface):
 
     def _check_mandatory_inputs(self):
         for name, trait_spec in self.inputs.items():
-            if trait_spec.get_metadata('mandatory'):
+            #if trait_spec.get_metadata('mandatory'):
+            if trait_spec.mandatory:
                 # mandatory parameters must be set and therefore
                 # should not have the default value.  XXX It seems
                 # possible that a default value would be a valid
@@ -732,7 +737,8 @@ class NEW_BaseInterface(NEW_Interface):
                 # filenames where the default_value is the empty
                 # string, so this may not be an issue.
                 value = getattr(self.inputs, name)
-                if value == trait_spec.get_default_value():
+                #if value == trait_spec.get_default_value():
+                if value == trait_spec.default:
                     msg = "%s requires a value for input '%s'" % \
                         (self.__class__.__name__, name)
                     raise ValueError(msg)
@@ -860,7 +866,8 @@ class NEW_CommandLine(NEW_BaseInterface):
 
     def _format_arg(self, trait_spec, value):
         '''A helper function for _parse_inputs'''
-        argstr = trait_spec.get_metadata('argstr')
+        #argstr = trait_spec.get_metadata('argstr')
+        argstr = trait_spec.argstr
         if isinstance(trait_spec, traits.Bool):
             if value:
                 # Boolean options have no format string. Just append options
@@ -908,19 +915,21 @@ class NEW_CommandLine(NEW_BaseInterface):
         final_args = {}
         for name, trait_spec in self.inputs.items():
             value = getattr(self.inputs, name)
-            if value == trait_spec.get_default_value():
+            #if value == trait_spec.get_default_value():
+            if value == trait_spec.default:
                 # For inputs that have the genfile metadata flag, we
                 # call the _convert_inputs method to get the generated
                 # value.
-                genfile = trait_spec.get_metadata('genfile')
-                if genfile is not None:
+                #genfile = trait_spec.get_metadata('genfile')
+                if trait_spec.genfile is not None:
                     gen_val = self._convert_inputs(name, value)
                     value = gen_val
                 else:
                     # skip attrs that haven't been assigned
                     continue
             arg = self._format_arg(trait_spec, value)
-            pos = trait_spec.get_metadata('position')
+            #pos = trait_spec.get_metadata('position')
+            pos = trait_spec.position
             if pos is not None:
                 if pos >= 0:
                     initial_args[pos] = arg
@@ -988,6 +997,9 @@ class TraitedAttr(traits.HasTraits):
         # Create new dictionary of trait items with deep copies of elements
         dup_dict = {}
         for key in self.traits():
+            if key in ['trait_added', 'trait_modified']:
+                # Skip these trait api functions
+                continue
             dup_dict[key] = deepcopy(getattr(self, key), memo)
         # create new instance and update with copied values
         dup = self.__class__()
@@ -996,6 +1008,9 @@ class TraitedAttr(traits.HasTraits):
 
     def items(self):
         for name, trait_spec in sorted(self.traits().items()):
+            if name in ['trait_added', 'trait_modified']:
+                # Skip these trait api functions
+                continue
             yield name, trait_spec
 
     def _generate_handlers(self):
@@ -1011,14 +1026,16 @@ class TraitedAttr(traits.HasTraits):
     def _xor_warn(self, name, old, new):
         trait_spec = self.traits()[name]
         if new:
-            xor_names = trait_spec.get_metadata('xor')
+            #xor_names = trait_spec.get_metadata('xor')
+            xor_names = trait_spec.xor
             # for each xor, set to default_value
             for trait_name in xor_names:
                 if trait_name == name:
                     # skip ourself
                     continue
                 tspec = self.traits()[trait_name]
-                setattr(self, trait_name, tspec.get_default_value())
+                #setattr(self, trait_name, tspec.get_default_value())
+                setattr(self, trait_name, tspec.default)
 
     # XXX This is redundant, need to do a global find-replace and remove this
     update = traits.HasTraits.set
@@ -1040,7 +1057,7 @@ class Foo(NEW_CommandLine):
         fakey = traits.Bool(argstr = '-fake') # Test for no desc, and
                                               # minimal metadata
 
-        center = traits.List(argstr='-c %s', trait=traits.Int, minlen=3,
+        center = traits.List(argstr='-c %s', trait=traits.Int, minlen=0,
                              maxlen=3, units='voxels')
         _xor_inputs = ('functional', 'reduce_bias')
         functional = traits.Bool(argstr='-F', xor=_xor_inputs)
@@ -1085,6 +1102,31 @@ def test_Foo():
     realcmd = 'bet /data/foo.nii /tmp/bar.nii'
     assert_equal(foo.cmdline, realcmd)
     assert_equal(res.runtime.cmdline, realcmd)
+
+"""
+Inputs
+------
+
+Mandatory:
+ infile: Input file for Bet
+ outfile: Filename for skull stripped image
+
+Optional:
+ args: None
+ center: None
+ fakey: None (default=False)
+ flags: None
+ frac: Threshold for fractional intensity (default=0.0)
+ functional: None (default=False)
+ mask: Create mask image (default=False)
+ reduce_bias: None (default=False)
+
+Outputs
+-------
+maskfile: Filename of binary brain mask (if generated)
+outfile: Filename for skull stripped image
+
+"""
 
 if __name__ == '__main__':
     test_Foo()
