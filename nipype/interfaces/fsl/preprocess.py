@@ -13,16 +13,21 @@ from glob import glob
 import warnings
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
-from nipype.interfaces.base import Bunch
+from nipype.interfaces.fsl.base import NEW_FSLCommand
+from nipype.interfaces.base import Bunch, TraitedAttr
 from nipype.utils.filemanip import fname_presuffix, list_to_filename
 from nipype.utils.docparse import get_doc
 from nipype.utils.misc import container_to_string, is_container
+
+# We are shooting for interoperability for now - Traits or Traitlets
+import nipype.externals.traitlets as traits
+# import enthought.traits.api as traits
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 
-class Bet(FSLCommand):
+class Bet(NEW_FSLCommand):
     """Use FSL BET command for skull stripping.
 
     For complete details, see the `BET Documentation.
@@ -67,121 +72,71 @@ class Bet(FSLCommand):
         """sets base command, immutable"""
         return 'bet'
 
-    opt_map = {
-        'outline':            '-o',
-        'mask':               '-m',
-        'skull':              '-s',
-        'nooutput':           '-n',
-        'frac':               '-f %.2f',
-        'vertical_gradient':  '-g %.2f',
-        'radius':             '-r %d',  # in mm
-        'center':             '-c %d %d %d',  # in voxels
-        'threshold':          '-t',
-        'mesh':               '-e',
-        'verbose':            '-v',
-        'functional':         '-F',
-        'flags':              '%s',
-        'reduce_bias':        '-B',
-        'infile':             None,
-        'outfile':            None,
-        }
-    # Currently we don't support -R, -S, -Z,-A or -A2
+    class in_spec(TraitedAttr):
+        '''Note: Currently we don't support -R, -S, -Z,-A or -A2'''
+        # We use position args here as list indices - so a negative number will
+        # put something on the end
+        # Also, it would be nice to use traits.File types here, but Traitlets
+        # doesn't support that (Yet)
+        infile = traits.Str(desc = 'input file to skull strip',
+                            argstr='%s', position=0, mandatory=True)
+        outfile = traits.Str(desc = 'name of output skull stripped image',
+                             argstr='%s', position=1, genfile=True)
+        outline = traits.Bool(desc = 'create surface outline image',
+                              argstr='-o')
+        mask = traits.Bool(False, desc = 'create binary mask image', 
+                           argstr='-m')
+        skull = traits.Bool(desc = 'create skull image',
+                            argstr='-s')
+        nooutput = traits.Bool(argstr='-n')
+        frac = traits.Float(0.5, desc = 'fractional intensity threshold',
+                            argstr='-f %.2f')
+        vertical_gradient = traits.Float(0.0, argstr='-g %.2f')
+        radius = traits.Int(argstr='-r %d', units='mm')
+        # Note - Traitlets doesn't actually support the 'trait' metadata, so it
+        # is just plain ol' metadata. But we use the same 'trait' id here for
+        # consistency with the Traits API. Likewise for minlen and maxlen.
+        # XXX Currently, default_value won't work for a List
+        center = traits.List(desc = 'center of gravity in voxels',
+                             argstr='-c %s', trait=traits.Int, minlen=3,
+                             maxlen=3, units='voxels')
+        threshold = traits.Bool(argstr='-t')
+        mesh = traits.Bool(argstr='-e')
+        verbose = traits.Bool(argstr='-v')
+        _xor_inputs = ('functional', 'reduce_bias')
+        functional = traits.Bool(argstr='-F', xor=_xor_inputs)
+        reduce_bias = traits.Bool(argstr='-B', xor=_xor_inputs)
 
-    def inputs_help(self):
-        """Print command line documentation for Bet."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
+    class out_spec(traits.HasTraits):
+        # Note - desc has special meaning in Traits, similar to __doc__
+        outfile = traits.Str(desc="path/name of skullstripped file")
+        maskfile = traits.Str(
+                        desc="path/name of binary brain mask (if generated)")
 
-    def _parse_inputs(self):
-        """validate fsl bet options"""
-        allargs = super(Bet, self)._parse_inputs(skip=('infile', 'outfile'))
-
-        infile = None
-        outfile = None
-        if self.inputs.infile:
-            infile = list_to_filename(self.inputs.infile)
-        if self.inputs.outfile:
-            outfile = list_to_filename(self.inputs.outfile)
-        elif infile is not None:
-            outfile = self._gen_fname(infile,
-                                      self.inputs.outfile,
-                                      suffix='_brain')
-        if infile is not None:
-            allargs.insert(0, infile)
-        if outfile is not None:
-            allargs.insert(1, outfile)
-
-        return allargs
-
-    def run(self, infile=None, outfile=None, **inputs):
-        """Execute the command.
-
-        Parameters
-        ----------
-        infile : string
-            Filename to be skull stripped.
-        outfile : string, optional
-            Filename to save output to. If not specified, the ``infile``
-            filename will be used with a "_brain" suffix.
-        inputs : dict, optional
-            Additional ``inputs`` assignments can be passed in.  See
-            Examples section.
-
-        Returns
-        -------
-        results : InterfaceResult
-            An :class:`nipype.interfaces.base.InterfaceResult` object
-            with a copy of self in `interface`
-
-        Examples
-        --------
-        To pass command line arguments to ``bet`` that are not part of
-        the ``inputs`` attribute, pass them in with the ``flags``
-        input.
-
-        >>> from nipype.interfaces import fsl
-        >>> import os
-        >>> btr = fsl.Bet(infile='foo.nii', outfile='bar.nii', flags='-v')
-        >>> btr.cmdline
-        'bet foo.nii bar.nii -v'
-
-        """
-        if infile:
-            self.inputs.infile = infile
-        if self.inputs.infile is None:
-            raise ValueError('Bet requires an input file')
-        if isinstance(self.inputs.infile, list):
-            raise ValueError('Bet does not support multiple input files')
-        if outfile:
-            self.inputs.outfile = outfile
-        self.inputs.update(**inputs)
-        return super(Bet, self).run()
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        outfile : string, file
-            path/name of skullstripped file
-        maskfile : string, file
-            binary brain mask if generated
-
-        """
-
-        outputs = Bunch(outfile=None, maskfile=None)
-        return outputs
-
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        cwd = os.getcwd()
-        outputs.outfile = self._gen_fname(self.inputs.infile,
-                                self.inputs.outfile, cwd=cwd, suffix='_brain',
-                                check=True)
+    def _gen_outfiles(self, check = False):
+        outputs = self._outputs()
+        outputs.outfile = self.inputs.outfile
+        if not outputs.outfile and self.inputs.infile:
+            outputs.outfile = self._gen_fname(self.inputs.infile,
+                                              suffix = '_brain',
+                                              check = check)
+        if self.inputs.mesh:
+            outputs.meshfile = self._gen_fname(outputs.outfile,
+                                               suffix = '_mesh.vtk',
+                                               change_ext = False,
+                                               check = check)
         if self.inputs.mask or self.inputs.reduce_bias:
-            outputs.maskfile = self._gen_fname(outputs.outfile, cwd=cwd,
-                                                  suffix='_mask', check=True)
+            outputs.maskfile = self._gen_fname(outputs.outfile,
+                                               suffix = '_mask',
+                                               check = check)
         return outputs
-    aggregate_outputs.__doc__ = FSLCommand.aggregate_outputs.__doc__
+
+    def _convert_inputs(self, opt, value):
+        if opt == 'outfile':
+            if not value:
+                outputs = self._gen_outfiles()
+                return outputs.outfile
+        return value
 
 
 class Fast(FSLCommand):
