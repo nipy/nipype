@@ -632,8 +632,8 @@ class NEW_Interface(object):
     .__init__()
     """
 
-    in_spec = None
-    out_spec = None
+    input_spec = None
+    output_spec = None
 
     def __init__(self, **inputs):
         """Initialize command with given args and inputs."""
@@ -656,7 +656,7 @@ class NEW_Interface(object):
 class NEW_BaseInterface(NEW_Interface):
 
     def __init__(self, **inputs):
-        self.inputs = self.in_spec(**inputs)
+        self.inputs = self.input_spec(**inputs)
 
     @classmethod
     def help(cls):
@@ -700,8 +700,8 @@ class NEW_BaseInterface(NEW_Interface):
         """ Prints the help of outputs
         """
         helpstr = ['Outputs','-------']
-        out_spec = self.out_spec()
-        for name, trait_spec in sorted(out_spec.traits().items()):
+        output_spec = self.output_spec()
+        for name, trait_spec in sorted(output_spec.traits().items()):
             helpstr += ['%s: %s' % (name, trait_spec.desc)]
         print '\n'.join(helpstr)
 
@@ -709,8 +709,8 @@ class NEW_BaseInterface(NEW_Interface):
         """ Returns a bunch containing output fields for the class
         """
         outputs = Bunch()
-        out_spec = self.out_spec()
-        for name, trait_spec in sorted(out_spec.traits().items()):
+        output_spec = self.output_spec()
+        for name, trait_spec in sorted(output_spec.traits().items()):
             setattr(outputs, name, None)
         return outputs
 
@@ -938,7 +938,7 @@ class TraitedAttr(traits.HasTraits):
 
     # XXX These are common inputs that I believe all CommandLine
     # objects are suppose to have.  Should we define these here?  As
-    # opposed to in each in_spec.  They would not make sense for
+    # opposed to in each input_spec.  They would not make sense for
     # the output_spec, but I don't know if output_spec needs a parent
     # class like this one.
     # XXX flags and args.  Are these both necessary?

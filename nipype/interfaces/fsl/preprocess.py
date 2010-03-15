@@ -70,7 +70,7 @@ class Bet(NEW_FSLCommand):
         """sets base command, immutable"""
         return 'bet'
 
-    class in_spec(TraitedAttr):
+    class input_spec(TraitedAttr):
         '''Note: Currently we don't support -R, -S, -Z,-A or -A2'''
         # We use position args here as list indices - so a negative number will
         # put something on the end
@@ -105,7 +105,7 @@ class Bet(NEW_FSLCommand):
         functional = traits.Bool(argstr='-F', xor=_xor_inputs)
         reduce_bias = traits.Bool(argstr='-B', xor=_xor_inputs)
 
-    class out_spec(traits.HasTraits):
+    class output_spec(traits.HasTraits):
         # Note - desc has special meaning in Traits, similar to __doc__
         outfile = traits.Str(desc="path/name of skullstripped file")
         maskfile = traits.Str(
