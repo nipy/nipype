@@ -925,7 +925,7 @@ class NEW_CommandLine(NEW_BaseInterface):
         return first_args + all_args + last_args
 
 
-class TraitedAttr(traits.HasTraits):
+class TraitedSpec(traits.HasTraits):
     """Provide a few methods necessary to support the Bunch interface.
 
     In refactoring to Traits, the self.inputs attrs call some methods
@@ -951,8 +951,8 @@ class TraitedAttr(traits.HasTraits):
         # NOTE: In python 2.6, object.__init__ no longer accepts input
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
-        #super(TraitedAttr, self).__init__(*args, **kwargs)
-        super(TraitedAttr, self).__init__()
+        #super(TraitedSpec, self).__init__(*args, **kwargs)
+        super(TraitedSpec, self).__init__()
         for key, val in kwargs.items():
             setattr(self, key, val)
 

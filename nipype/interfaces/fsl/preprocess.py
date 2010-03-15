@@ -14,7 +14,7 @@ import warnings
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
 from nipype.interfaces.fsl.base import NEW_FSLCommand
-from nipype.interfaces.base import Bunch, TraitedAttr
+from nipype.interfaces.base import Bunch, TraitedSpec
 from nipype.utils.filemanip import fname_presuffix, list_to_filename
 from nipype.utils.docparse import get_doc
 from nipype.utils.misc import container_to_string, is_container
@@ -70,7 +70,7 @@ class Bet(NEW_FSLCommand):
         """sets base command, immutable"""
         return 'bet'
 
-    class input_spec(TraitedAttr):
+    class input_spec(TraitedSpec):
         '''Note: Currently we don't support -R, -S, -Z,-A or -A2'''
         # We use position args here as list indices - so a negative number will
         # put something on the end
