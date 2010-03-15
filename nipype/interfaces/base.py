@@ -1022,3 +1022,70 @@ class TraitedAttr(traits.HasTraits):
 
     # XXX This is redundant, need to do a global find-replace and remove this
     update = traits.HasTraits.set
+
+#
+# DEBUG
+# XXX: Simple class to test base classes!
+#
+class Foo(NEW_CommandLine):
+    class in_spec(TraitedAttr):
+        infile = traits.Str(argstr='%s', position=0, mandatory=True,
+                            desc = 'Input file for Bet')
+        outfile = traits.Str(argstr='%s', position=1, mandatory=True,
+                             desc = 'Filename for skull stripped image')
+        mask = traits.Bool(argstr='-m',
+                           desc = 'Create mask image')
+        frac = traits.Float(argstr='-f %.2f',
+                            desc = 'Threshold for fractional intensity')
+        fakey = traits.Bool(argstr = '-fake') # Test for no desc, and
+                                              # minimal metadata
+
+        center = traits.List(argstr='-c %s', trait=traits.Int, minlen=3,
+                             maxlen=3, units='voxels')
+        _xor_inputs = ('functional', 'reduce_bias')
+        functional = traits.Bool(argstr='-F', xor=_xor_inputs)
+        reduce_bias = traits.Bool(argstr='-B', xor=_xor_inputs)
+
+    class out_spec(traits.HasTraits):
+        # Note - desc has special meaning in Traits, similar to __doc__
+        outfile = traits.Str(desc = 'Filename for skull stripped image')
+        # Would like to do this:
+        #    desc = Foo.in_spec.outfile.get_metadata('desc'))
+        maskfile = traits.Str(
+                        desc = "Filename of binary brain mask (if generated)")
+
+    @property
+    def cmd(self):
+        """sets base command, immutable"""
+        return 'bet'
+
+    # def run(self):
+    #     print 'Foo.run'
+
+    def get_input_info(self):
+        print 'Foo.get_input_info'
+
+def test_Foo():
+    from nipype.testing import assert_equal, assert_not_equal, assert_raises
+    foo = Foo(infile = '/data/foo.nii')
+    assert_equal(foo.inputs.infile, '/data/foo.nii')
+    foo.help() # print without error?
+    print '\noutputs:'
+    outputs = foo.aggregate_outputs()
+    print outputs
+    assert isinstance(outputs, Bunch)
+    assert hasattr(outputs, 'outfile')
+    assert hasattr(outputs, 'maskfile')
+    # run
+    foo.inputs.outfile = '/tmp/bar.nii'
+    res = foo.run()
+    assert isinstance(res, InterfaceResult)
+    assert isinstance(res.runtime, Bunch)
+    assert_equal(res.runtime.returncode, 1)
+    realcmd = 'bet /data/foo.nii /tmp/bar.nii'
+    assert_equal(foo.cmdline, realcmd)
+    assert_equal(res.runtime.cmdline, realcmd)
+
+if __name__ == '__main__':
+    test_Foo()
+
