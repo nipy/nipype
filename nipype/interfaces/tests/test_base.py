@@ -1,8 +1,6 @@
 import nipype.interfaces.base as nii
-from nipype.testing import assert_equal, assert_not_equal
+from nipype.testing import *
 import os
-
-#NEW_ tests
 
 #test Bunch
 def test_bunch():
