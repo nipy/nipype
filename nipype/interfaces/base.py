@@ -752,17 +752,15 @@ class TraitedSpec(traits.HasTraits):
         return (dict_withhash, md5(sorted_dict).hexdigest())
 
 class NEW_Interface(object):
-    """This is the template for Interface objects.
+    """This is an abstract defintion for Interface objects.
 
     It provides no functionality.  It defines the necessary attributes
     and methods all Interface objects should have.
 
-    Everything in inputs should also be a possible (explicit?) argument to
-    .__init__()
     """
 
-    input_spec = None
-    output_spec = None
+    input_spec = None # A traited input specification
+    output_spec = None # A traited output specification
 
     def __init__(self, **inputs):
         """Initialize command with given args and inputs."""
@@ -776,13 +774,47 @@ class NEW_Interface(object):
         """Called to populate outputs"""
         raise NotImplementedError
 
-    def get_input_info(self):
+    @classmethod
+    def help(cls):
+        """ Prints class help"""
+        raise NotImplementedError
+        
+    def _inputs_help(self):
+        """ Prints inputs help"""
+        raise NotImplementedError
+    
+    def _outputs_help(self):
+        """ Prints outputs help"""
+        raise NotImplementedError
+    
+    def _outputs(self):
+        """ Initializes outputs"""
+        raise NotImplementedError
+        
+    def _get_filecopy_info(self):
         """ Provides information about file inputs to copy or link to cwd.
             Necessary for pipeline operation
         """
         raise NotImplementedError
 
 class NEW_BaseInterface(NEW_Interface):
+    """Implements common interface functionality.
+
+    Implements
+    ----------
+
+    * Initializes inputs/outputs from input_spec/output_spec
+    * Provides help based on input_spec and output_spec
+    * Checks for mandatory inputs before running an interface
+    * Runs an interface and returns results
+    * Determines which inputs should be copied or linked to cwd
+
+    This class does not implement aggregate_outputs, input_spec or
+    output_spec. These should be defined by derived classes.
+
+    This class cannot be instantiated.
+    
+    """
 
     def __init__(self, **inputs):
         if not self.input_spec:
@@ -808,7 +840,7 @@ class NEW_BaseInterface(NEW_Interface):
         manhelpstr = None
         for name, trait_spec in self.inputs.items():
             desc = trait_spec.desc
-            if trait_spec.mandatory:
+            if hasattr(trait_spec, 'mandatory') and trait_spec.mandatory:
                 if not manhelpstr:
                     manhelpstr = ['','Mandatory:']
                 manhelpstr += [' %s: %s' % (name, desc)]
@@ -850,7 +882,7 @@ class NEW_BaseInterface(NEW_Interface):
 
     def _check_mandatory_inputs(self):
         for name, trait_spec in self.inputs.items():
-            if trait_spec.mandatory:
+            if hasattr(trait_spec, 'mandatory') and trait_spec.mandatory:
                 # mandatory parameters must be set and therefore
                 # should not have the default value.  XXX It seems
                 # possible that a default value would be a valid
@@ -874,7 +906,7 @@ class NEW_BaseInterface(NEW_Interface):
         outputs = self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs = outputs)
 
-    def get_filecopy_info(self):
+    def _get_filecopy_info(self):
         """ Provides information about file inputs to copy or link to cwd.
             Necessary for pipeline operation
         """
@@ -889,7 +921,7 @@ class NEW_BaseInterface(NEW_Interface):
 
 
 class NEW_CommandLine(NEW_BaseInterface):
-    """
+    """Implements functionality to interact with command line programs
 
     >>> from nipype.interfaces.base import NEW_CommandLine
     >>> cli = NEW_CommandLine(command='which')
@@ -922,7 +954,8 @@ class NEW_CommandLine(NEW_BaseInterface):
 
     @property
     def cmdline(self):
-        """validates fsl options and generates command line argument"""
+        """validates options and generates command line"""
+        self._check_mandatory_inputs()
         allargs = self._parse_inputs()
         allargs.insert(0, self.cmd)
         return ' '.join(allargs)
@@ -941,14 +974,12 @@ class NEW_CommandLine(NEW_BaseInterface):
         Returns
         -------
         results : InterfaceResult Object
-            A `Bunch` object with a copy of self in `interface`
+            A result object with a copy of self in `interface`
 
         """
-        #self.inputs.update(inputs)
         for key, val in inputs.items():
             setattr(self.inputs, key, val)
 
-        self._check_mandatory_inputs()
         if cwd is None:
             cwd = os.getcwd()
         # initialize provenance tracking
@@ -985,31 +1016,14 @@ class NEW_CommandLine(NEW_BaseInterface):
             results.outputs = self.aggregate_outputs()
         return results
 
+    def _gen_filename(self, name):
+        raise NotImplementedError
+    
     def _gen_outfiles(self, check = False):
         return self._outputs()
 
     def aggregate_outputs(self):
         return self._gen_outfiles(check = True)
-
-    def _convert_inputs(self, opt, val):
-        """Convert input to appropriate format. Override this function for
-        class specific modifications that do not fall into general format:
-
-        For example fnirt should implement this:
-
-            elif isinstance(value, list) and self.__class__.__name__ == 'Fnirt':
-                # XXX Hack to deal with special case where some
-                # parameters to Fnirt can have a variable number
-                # of arguments.  Splitting the argument string,
-                # like '--infwhm=%d', then add as many format
-                # strings as there are values to the right-hand
-                # side.
-                argparts = argstr.split('=')
-                allargs.append(argparts[0] + '=' +
-                               ','.join([argparts[1] % y for y in value]))
-
-        """
-        return val
 
     def _format_arg(self, trait_spec, value):
         '''A helper function for _parse_inputs'''
@@ -1071,8 +1085,9 @@ class NEW_CommandLine(NEW_BaseInterface):
                 # For inputs that have the genfile metadata flag, we
                 # call the _convert_inputs method to get the generated
                 # value.
-                if trait_spec.genfile is not None:
-                    gen_val = self._convert_inputs(name, value)
+                if hasattr(trait_spec, 'genfile') and \
+                        trait_spec.genfile is not None:
+                    gen_val = self._gen_filename(name)
                     value = gen_val
                 else:
                     # skip attrs that haven't been assigned
@@ -1090,6 +1105,8 @@ class NEW_CommandLine(NEW_BaseInterface):
         first_args = [arg for pos, arg in sorted(initial_args.items())]
         last_args = [arg for pos, arg in sorted(final_args.items())]
         return first_args + all_args + last_args
+
+
 
 class MultiPath(traits.List):
     """ Implements a user friendly traits that accepts one or more
