@@ -17,24 +17,18 @@ These functions include:
 __docformat__ = 'restructuredtext'
 
 # Standard library imports
-import os
 from glob import glob
 from copy import deepcopy
-import re
 
 # Third-party imports
 import numpy as np
-from scipy.io import savemat
 
 # Local imports
-from nipype.interfaces.spm import SpmMatlabCommandLine
-from nipype.interfaces.base import Bunch, InterfaceResult, Interface
-from nipype.utils import setattr_on_read
-from nipype.externals.pynifti import load
-from nipype.interfaces.matlab import MatlabCommandLine
-from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix, 
-                                    filename_to_list, list_to_filename,
-                                    loadflat)
+from nipype.interfaces.spm import (SpmMatlabCommandLine, scans_for_fname,
+                                   scans_for_fnames)
+from nipype.interfaces.base import Bunch
+from nipype.utils.filemanip import (fname_presuffix, filename_to_list, 
+                                    list_to_filename)
 from nipype.utils.spm_docs import grab_doc
 import logging
 logger = logging.getLogger('spmlogger')
