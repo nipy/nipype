@@ -890,14 +890,8 @@ class NEW_BaseInterface(NEW_Interface):
     def _check_mandatory_inputs(self):
         for name, trait_spec in self.inputs.items():
             if hasattr(trait_spec, 'mandatory') and trait_spec.mandatory:
-                # mandatory parameters must be set and therefore
-                # should not have the default value.  XXX It seems
-                # possible that a default value would be a valid
-                # 'value'?  Currently most of the required params are
-                # filenames where the default_value is the empty
-                # string, so this may not be an issue.
                 value = getattr(self.inputs, name)
-                if value == trait_spec.default:
+                if not value:
                     msg = "%s requires a value for input '%s'" % \
                         (self.__class__.__name__, name)
                     raise ValueError(msg)
@@ -959,6 +953,9 @@ class NEW_CommandLine(NEW_BaseInterface):
         """sets base command, immutable"""
         return self._cmd
 
+    def set_cmd(self, cmd):
+        self._cmd = cmd
+
     @property
     def cmdline(self):
         """validates options and generates command line"""
@@ -967,6 +964,11 @@ class NEW_CommandLine(NEW_BaseInterface):
         allargs.insert(0, self.cmd)
         return ' '.join(allargs)
 
+    def _update_env(self):
+        env = deepcopy(os.environ.data)
+        env.update(self._environ)
+        return env
+        
     def run(self, cwd=None, **inputs):
         """Execute the command.
 
@@ -997,9 +999,8 @@ class NEW_CommandLine(NEW_BaseInterface):
                         hostname = gethostname())
 
         t = time()
-        if hasattr(self, '_environ') and self._environ != None:
-            env = deepcopy(os.environ.data)
-            env.update(self._environ)
+        if hasattr(self, '_environ') and self._environ:
+            env = self._update_env()
             runtime.environ = env
             proc  = subprocess.Popen(runtime.cmdline,
                                      stdout=subprocess.PIPE,
@@ -1032,7 +1033,7 @@ class NEW_CommandLine(NEW_BaseInterface):
     def aggregate_outputs(self):
         return self._gen_outfiles(check = True)
 
-    def _format_arg(self, trait_spec, value):
+    def _format_arg(self, name, trait_spec, value):
         '''A helper function for _parse_inputs'''
         argstr = trait_spec.argstr
         if trait_spec.is_trait_type(traits.Bool):
@@ -1071,7 +1072,7 @@ class NEW_CommandLine(NEW_BaseInterface):
             # Append options using format string.
             return argstr % value
             
-    def _parse_inputs(self):
+    def _parse_inputs(self, skip=None):
         """Parse all inputs using the ``argstr`` format string in the Trait.
 
         Any inputs that are assigned (not the default_value) are formatted
@@ -1087,8 +1088,10 @@ class NEW_CommandLine(NEW_BaseInterface):
         initial_args = {}
         final_args = {}
         for name, trait_spec in self.inputs.items():
+            if skip and name in skip:
+                continue
             value = getattr(self.inputs, name)
-            if value == trait_spec.default:
+            if value is not None:
                 # For inputs that have the genfile metadata flag, we
                 # call the _convert_inputs method to get the generated
                 # value.
@@ -1096,11 +1099,13 @@ class NEW_CommandLine(NEW_BaseInterface):
                         trait_spec.genfile is not None:
                     gen_val = self._gen_filename(name)
                     value = gen_val
-                else:
-                    # skip attrs that haven't been assigned
-                    continue
-            arg = self._format_arg(trait_spec, value)
-            pos = trait_spec.position
+            else:
+                # skip attrs that haven't been assigned
+                continue
+            arg = self._format_arg(name, trait_spec, value)
+            pos = None
+            if hasattr(trait_spec, 'position'):
+                pos = trait_spec.position
             if pos is not None:
                 if pos >= 0:
                     initial_args[pos] = arg
@@ -1108,7 +1113,6 @@ class NEW_CommandLine(NEW_BaseInterface):
                     final_args[pos] = arg
             else:
                 all_args.append(arg)
-
         first_args = [arg for pos, arg in sorted(initial_args.items())]
         last_args = [arg for pos, arg in sorted(final_args.items())]
         return first_args + all_args + last_args

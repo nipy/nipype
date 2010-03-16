@@ -1,12 +1,16 @@
 """ General matlab interface code """
 
 # Stdlib imports
+from copy import deepcopy
 import os
 import re
 import tempfile
+
 import numpy as np
+
 from nipype.interfaces.base import CommandLine, InterfaceResult, Bunch
-from copy import deepcopy
+from nipype.interfaces.base import (NEW_CommandLine, InterfaceResult, traits,
+                                    TraitedSpec)
 
 class MatlabCommandLine(CommandLine):
     """Object that sets up Matlab specific tools and interfaces
@@ -132,3 +136,94 @@ class MatlabCommandLine(CommandLine):
     
 
 
+class NEW_MatlabCommandLine(NEW_CommandLine):
+    """Interface that runs matlab code
+
+    >>> import nipype.interfaces.matlab as matlab
+    >>> mlab = matlab.NEW_MatlabCommandLine()
+    >>> mlab.inputs.script = "which('who')"
+    >>> out = mlab.run() # doctest: +SKIP
+    """
+
+    matlab_cmd = 'matlab'
+
+    class input_spec(TraitedSpec):
+        script  = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
+                             mandatory=True)
+        nodesktop = traits.Bool(True, argstr='-nodesktop',
+                                desc='Switch off desktop mode on unix platforms')
+        nosplash = traits.Bool(True, argstr='-nosplash',
+                               descr='Switch of splash screen')
+        logfile = traits.File(argstr='-logfile %s',
+                              desc='Save matlab output to log')
+        # non-commandline options
+        mfile   = traits.Bool(False, desc='Run m-code using m-file')
+        script_file = traits.File('pyscript.m',
+                                  desc='Name of file to write m-code to')
+        paths   = traits.List(traits.Directory, desc='Paths to add to matlabpath')
+    
+    def __init__(self, matlab_cmd = None, **inputs):
+        """initializes interface to matlab
+        (default 'matlab -nodesktop -nosplash'
+        """
+        super(NEW_MatlabCommandLine,self).__init__(**inputs)
+        self._cmd = self.matlab_cmd
+        if matlab_cmd is not None:
+            self._cmd = matlab_cmd
+
+    def run(self,**kwargs):
+        results = super(NEW_MatlabCommandLine, self).run(**kwargs)
+        if 'command not found' in results.runtime.stderr:
+            msg = 'Cannot find matlab!\n' + \
+                '\tTried command:  ' + results.runtime.cmdline + \
+                '\n\tShell reported: ' + results.runtime.stderr
+            raise IOError(msg)
+        if  'MatlabScriptException' in results.runtime.stderr:
+            results.runtime.returncode = 1
+        return results
+
+    def _parse_inputs(self, skip = None):
+        args = super(NEW_MatlabCommandLine, self)._parse_inputs(skip=['mfile',
+                                                                      'paths',
+                                                                      'script_file'])
+        return args
+
+    def _format_arg(self, name, trait_spec, value):
+        if name in ['script']:
+            return self._gen_matlab_command(trait_spec.argstr, value)
+        return super(NEW_MatlabCommandLine, self)._format_arg(name, trait_spec, value)
+
+    def _gen_matlab_command(self, argstr, script_lines):
+        cwd = os.getcwd()
+        mfile = self.inputs.mfile
+        # prescript
+        prescript  = ''
+        if mfile:
+            prescript += "fprintf(1,'Executing %s at %s:\\n',mfilename,datestr(now));\n"
+        else:
+            prescript += "fprintf(1,'Executing code at %s:\\n',datestr(now));\n" 
+        prescript += "ver,\n"
+        prescript += "try,\n"
+        prescript += "addpath('%s');\n" % cwd
+        for path in self.inputs.paths:
+            prescript += "addpath('%s');\n" % path
+        # postscript
+        postscript  = ''
+        postscript += "\n,catch ME,\n"
+        postscript += "ME,\n"
+        postscript += "ME.stack,\n"
+        postscript += "fprintf('%s\\n',ME.message);\n"
+        postscript += "fprintf(2,'<MatlabScriptException>');\n"
+        postscript += "fprintf(2,'%s\\n',ME.message);\n"
+        postscript += "fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);\n"
+        postscript += "fprintf(2,'</MatlabScriptException>');\n"
+        postscript += "end;\n"
+        script_lines = prescript+script_lines+postscript
+        if mfile:
+            mfile = file(os.path.join(cwd,self.inputs.script_file), 'wt')
+            mfile.write(script_lines)
+            mfile.close()
+            script = self.inputs.script_file.split('.')[0]
+        else:
+            script = ''.join(script_lines.split('\n'))
+        return argstr % script
