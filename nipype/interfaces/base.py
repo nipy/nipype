@@ -16,7 +16,7 @@ from warnings import warn
 
 import enthought.traits.api as traits
 
-from nipype.utils.filemanip import md5
+from nipype.utils.filemanip import md5, hash_infile
 from nipype.utils.misc import is_container
 
  
@@ -707,6 +707,74 @@ class TraitedSpec(traits.HasTraits):
                 #setattr(self, trait_name, tspec.get_default_value())
                 setattr(self, trait_name, tspec.default)
 
+    def _dictcopy(self):
+        out_dict = {}
+        for name, trait_spec in self.items():
+            out_dict[name] = getattr(self, name)
+        return out_dict
+
+    def _hash_infile(self, adict, key):
+        # Inject file hashes into adict[key]
+        stuff = adict[key]
+        if not is_container(stuff):
+            stuff = [stuff]
+        file_list = []
+        for afile in stuff:
+            file_list.append((afile, hash_infile(afile) ))
+        return file_list
+
+    def _get_bunch_hash(self):
+        """Return a dictionary of our items with hashes for each file.
+
+        Searches through dictionary items and if an item is a file, it
+        calculates the md5 hash of the file contents and stores the
+        file name and hash value as the new key value.
+
+        However, the overall bunch hash is calculated only on the hash
+        value of a file. The path and name of the file are not used in
+        the overall hash calculation.
+
+        Returns
+        -------
+        dict_withhash : dict
+            Copy of our dictionary with the new file hashes included
+            with each file.
+        hashvalue : str
+            The md5 hash value of the traited spec
+
+        """
+
+        infile_list = []
+        for name, trait_spec in self.items():
+            val = getattr(self, name)
+            if is_container(val):
+                # XXX - SG this probably doesn't catch numpy arrays
+                # containing embedded file names either. 
+                if isinstance(val,dict):
+                    # XXX - SG should traverse dicts, but ignoring for now
+                    item = None
+                else:
+                    if len(val) == 0:
+                        raise AttributeError('%s attribute is empty'%key)
+                    item = val[0]
+            else:
+                item = val
+            try:
+                if os.path.isfile(item):
+                    infile_list.append(name)
+            except TypeError:
+                # `item` is not a file or string.
+                continue
+        dict_withhash = self._dictcopy()
+        dict_nofilename = self._dictcopy()
+        for item in infile_list:
+            dict_withhash[item] = self._hash_infile(dict_withhash, item)
+            dict_nofilename[item] = [val[1] for val in dict_withhash[item]]
+        # Sort the items of the dictionary, before hashing the string
+        # representation so we get a predictable order of the
+        # dictionary.
+        sorted_dict = str(sorted(dict_nofilename.items()))
+        return (dict_withhash, md5(sorted_dict).hexdigest())
 
 class NEW_Interface(object):
     """This is the template for Interface objects.
@@ -846,9 +914,24 @@ class NEW_BaseInterface(NEW_Interface):
 
 
 class NEW_CommandLine(NEW_BaseInterface):
+    """
+
+    >>> from nipype.interfaces.base import NEW_CommandLine
+    >>> cli = NEW_CommandLine(command='which')
+    >>> cli.inputs.args = 'ls'
+    >>> cli.cmdline
+    'which ls'
+    
+    >>> cli.inputs._dictcopy()
+    {'args' : 'ls'}
+
+    >>> cli.inputs._get_bunch_hash()
+    ({'args': 'ls'}, 'dacab83636459a3a76bc73e1f70b6d4e')
+
+    """
 
     class input_spec(TraitedSpec):
-        args = traits.Str(desc='Parameters to the command')
+        args = traits.Str(argstr='%s', desc='Parameters to the command')
         
     def __init__(self, command=None, **inputs):
         super(NEW_CommandLine, self).__init__(**inputs)
@@ -1033,46 +1116,53 @@ class NEW_CommandLine(NEW_BaseInterface):
         last_args = [arg for pos, arg in sorted(final_args.items())]
         return first_args + all_args + last_args
 
-class FileList2(traits.List):
-    """ Implements a user friendly traits that accepts one or more files
-    """
-    info_text = 'a list of files'
+class MultiPath(traits.List):
+    """ Implements a user friendly traits that accepts one or more
+    paths to files or directories
+
+    XXX This needs to be vetted by somebody who understands traits
+
+    >>> from nipype.interfaces.base import MultiPath
+    >>> class A(traits.HasTraits):
+    ...     foo = MultiPath(traits.File(exists=False))
+    >>> a = A()
+    >>> a
+    []
     
-    def __init__(self, value = None, exists=False, **metadata):
-        self._exists = exists
-        super(FileList2, self).__init__(traits.File(exists=exists), value,
+    >>> a.foo = '/software/temp/foo.txt'
+    >>> a.foo
+    '/software/temp/foo.txt'
+
+    >>> a.foo = ['/software/temp/foo.txt']
+    >>> a.foo
+    '/software/temp/foo.txt'
+
+    >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
+    >>> a.foo
+    ['/software/temp/foo.txt', '/software/temp/goo.txt']
+    
+    """
+    info_text = 'a list of paths'
+    
+    def __init__(self, trait  = None, value = None, **metadata):
+        if trait:
+            self.info_text = 'a list of %s' % trait.info()
+        super(MultiPath, self).__init__(trait, value,
                                         **metadata)
 
-    """
     def get(self, object, name):
-        print name
-        value = super(FileList2, self).get(object, name)
+        value = self.get_value(object, name)
         if value:
-            if len(value) == 1:
+            if len(value)==1:
                 return value[0]
         return value
 
-
     def set(self, object, name, value):
-        print name
-        print value
-        if isinstance(value, str):
-            value = [value]
-        super(FileList2, self).set(object, name, value)
-    """
-
-    def get_value(self, object, name, trait = None):
-        value = super(FileList2, self).get_value( object, name, trait)
-        newvalue = value
-        if isinstance(value, list):
-            if len(value) == 1:
-                newvalue = value[0]
-        return newvalue
+        self.set_value(object, name, value)
 
     def validate(self, object, name, value):
-        print name
-        print value
         newvalue = value
         if isinstance(value, str):
             newvalue = [value]
-        return super(FileList2, self).validate(object, name, newvalue)
+        return super(MultiPath, self).validate(object, name, newvalue)
+
