@@ -99,6 +99,22 @@ def check_forhash(filename):
     else:
         return False, None
 
+
+def hash_infile(self, afile, chunk_len=8192):
+    """ Computes md5 hash of a file"""
+    md5hex = None
+    if os.path.isfile(afile):
+        md5obj = md5()
+        fp = file(afile, 'rb')
+        while True:
+            data = fp.read(chunk_len)
+            if not data:
+                break
+            md5obj.update(data)
+        fp.close()
+        md5hex = md5obj.hexdigest()
+    return md5hex
+
 def copyfile(originalfile, newfile, copy=False):
     """Copy or symlink ``originalfile`` to ``newfile``.
 

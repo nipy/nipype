@@ -622,6 +622,92 @@ class OptMapCommand(CommandLine):
 #
 # New base classes
 #
+
+class TraitedSpec(traits.HasTraits):
+    """Provide a few methods necessary to support the Bunch interface.
+
+    In refactoring to Traits, the self.inputs attrs call some methods
+    of the Bunch class that the Traited classes do not inherit from
+    traits.HasTraits.  We can provide those methods here.
+
+    XXX Reconsider this in the long run, but it seems like the best
+    solution to move forward on the refactoring.
+    """
+
+    def __init__(self, **kwargs):
+        self._generate_handlers()
+        # NOTE: In python 2.6, object.__init__ no longer accepts input
+        # arguments.  HasTraits does not define an __init__ and
+        # therefore these args were being ignored.
+        #super(TraitedSpec, self).__init__(*args, **kwargs)
+        super(TraitedSpec, self).__init__()
+        for key, val in kwargs.items():
+            setattr(self, key, val)
+
+    def __repr__(self):
+        outstr = []
+        for name, trait_spec in self.items():
+            value = getattr(self, name)
+            outstr.append('%s = %s' % (name, value))
+        return '\n'.join(outstr)
+
+    """
+    def __deepcopy__(self, memo):
+        # When I added the dynamic trait notifiers via
+        # on_trait_change, tests errored when the run method was
+        # called.  I would get this error: 'TypeError: instancemethod
+        # expected at least 2 arguments, got 0' and a traceback deep
+        # in the copy module triggered by the
+        # 'InterfaceResult(deepcopy(self), runtime)' line returned
+        # from CommandLine._runner.  To fix this, I create a new
+        # instance of self, then assign all traited attrs with
+        # deepcopied values.
+        id_self = id(self)
+        if id_self in memo:
+            return memo[id_self]
+        # Create new dictionary of trait items with deep copies of elements
+        dup_dict = {}
+        for key in self.traits():
+            if key in ['trait_added', 'trait_modified']:
+                # Skip these trait api functions
+                continue
+            dup_dict[key] = deepcopy(getattr(self, key), memo)
+        # create new instance and update with copied values
+        dup = self.__class__()
+        dup.set(**dup_dict)
+        return dup
+    """
+
+    def items(self):
+        for name, trait_spec in sorted(self.traits().items()):
+            if name in ['trait_added', 'trait_modified']:
+                # Skip these trait api functions
+                continue
+            yield name, trait_spec
+
+    def _generate_handlers(self):
+        # Find all traits with the 'xor' metadata and attach an event
+        # handler to them.
+        def has_xor(item):
+            if is_container(item):
+                return item
+        xors = self.trait_names(xor=has_xor)
+        for elem in xors:
+            self.on_trait_change(self._xor_warn, elem)
+
+    def _xor_warn(self, name, old, new):
+        trait_spec = self.traits()[name]
+        if new:
+            # for each xor, set to default_value
+            for trait_name in trait_spec.xor:
+                if trait_name == name:
+                    # skip ourself
+                    continue
+                tspec = self.traits()[trait_name]
+                #setattr(self, trait_name, tspec.get_default_value())
+                setattr(self, trait_name, tspec.default)
+
+
 class NEW_Interface(object):
     """This is the template for Interface objects.
 
@@ -656,6 +742,9 @@ class NEW_Interface(object):
 class NEW_BaseInterface(NEW_Interface):
 
     def __init__(self, **inputs):
+        if not self.input_spec:
+            raise Exception('No input_spec in class: %s' % \
+                          self.__class__.__name__)
         self.inputs = self.input_spec(**inputs)
 
     @classmethod
@@ -700,18 +789,20 @@ class NEW_BaseInterface(NEW_Interface):
         """ Prints the help of outputs
         """
         helpstr = ['Outputs','-------']
-        output_spec = self.output_spec()
-        for name, trait_spec in sorted(output_spec.traits().items()):
-            helpstr += ['%s: %s' % (name, trait_spec.desc)]
+        if self.output_spec:
+            output_spec = self.output_spec()
+            for name, trait_spec in sorted(output_spec.traits().items()):
+                helpstr += ['%s: %s' % (name, trait_spec.desc)]
+        else:
+            helpstr += ['None']
         print '\n'.join(helpstr)
 
     def _outputs(self):
         """ Returns a bunch containing output fields for the class
         """
-        outputs = Bunch()
-        output_spec = self.output_spec()
-        for name, trait_spec in sorted(output_spec.traits().items()):
-            setattr(outputs, name, None)
+        outputs = None
+        if self.output_spec:
+            outputs = self.output_spec()
         return outputs
 
     def _check_mandatory_inputs(self):
@@ -740,13 +831,25 @@ class NEW_BaseInterface(NEW_Interface):
         outputs = self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs = outputs)
 
-    def get_input_info(self):
+    def get_filecopy_info(self):
         """ Provides information about file inputs to copy or link to cwd.
             Necessary for pipeline operation
         """
-        return []
+        info = []
+        for name, trait_spec in sorted(output_spec.traits().items()):
+            if trait_spec.is_trait_type(traits.File) or \
+                    trait_spec.is_trait_type(traits.FileList):
+                if trait_spec.copyfile is not None:
+                    info.append(dict(key=name,
+                                     copy=trait_spec.copyfile))
+        return info
+
 
 class NEW_CommandLine(NEW_BaseInterface):
+
+    class input_spec(TraitedSpec):
+        args = traits.Str(desc='Parameters to the command')
+        
     def __init__(self, command=None, **inputs):
         super(NEW_CommandLine, self).__init__(**inputs)
         self._environ = {}
@@ -877,12 +980,18 @@ class NEW_CommandLine(NEW_BaseInterface):
             # Depending on whether we stick with traitlets, and whether or
             # not we beef up traitlets.List, we may want to put some
             # type-checking code here as well
-
-            return argstr % ' '.join(str(elt) for elt in value)
+            if argstr.endswith('...'):
+                # repeatable option
+                # --id %d... will expand to
+                # --id 1 --id 2 --id 3 etc.,.
+                argstr = argstr.replace('...','')
+                return ' '.join([argstr % elt for elt in value])
+            else:
+                return argstr % ' '.join(str(elt) for elt in value)
         else:
             # Append options using format string.
             return argstr % value
-
+            
     def _parse_inputs(self):
         """Parse all inputs using the ``argstr`` format string in the Trait.
 
@@ -924,98 +1033,46 @@ class NEW_CommandLine(NEW_BaseInterface):
         last_args = [arg for pos, arg in sorted(final_args.items())]
         return first_args + all_args + last_args
 
+class FileList2(traits.List):
+    """ Implements a user friendly traits that accepts one or more files
+    """
+    info_text = 'a list of files'
+    
+    def __init__(self, value = None, exists=False, **metadata):
+        self._exists = exists
+        super(FileList2, self).__init__(traits.File(exists=exists), value,
+                                        **metadata)
 
-class TraitedSpec(traits.HasTraits):
-    """Provide a few methods necessary to support the Bunch interface.
+    """
+    def get(self, object, name):
+        print name
+        value = super(FileList2, self).get(object, name)
+        if value:
+            if len(value) == 1:
+                return value[0]
+        return value
 
-    In refactoring to Traits, the self.inputs attrs call some methods
-    of the Bunch class that the Traited classes do not inherit from
-    traits.HasTraits.  We can provide those methods here.
 
-    XXX Reconsider this in the long run, but it seems like the best
-    solution to move forward on the refactoring.
+    def set(self, object, name, value):
+        print name
+        print value
+        if isinstance(value, str):
+            value = [value]
+        super(FileList2, self).set(object, name, value)
     """
 
-    # XXX These are common inputs that I believe all CommandLine
-    # objects are suppose to have.  Should we define these here?  As
-    # opposed to in each input_spec.  They would not make sense for
-    # the output_spec, but I don't know if output_spec needs a parent
-    # class like this one.
-    # XXX flags and args.  Are these both necessary?
-    flags = traits.Str(argstr='%s')
-    args = traits.Str(argstr='%s')
+    def get_value(self, object, name, trait = None):
+        value = super(FileList2, self).get_value( object, name, trait)
+        newvalue = value
+        if isinstance(value, list):
+            if len(value) == 1:
+                newvalue = value[0]
+        return newvalue
 
-    def __init__(self, *args, **kwargs):
-        # XXX Should we accept args anymore?
-        self._generate_handlers()
-        # NOTE: In python 2.6, object.__init__ no longer accepts input
-        # arguments.  HasTraits does not define an __init__ and
-        # therefore these args were being ignored.
-        #super(TraitedSpec, self).__init__(*args, **kwargs)
-        super(TraitedSpec, self).__init__()
-        for key, val in kwargs.items():
-            setattr(self, key, val)
-
-    def __repr__(self):
-        outstr = []
-        for name, trait_spec in self.items():
-            value = getattr(self, name)
-            outstr.append('%s = %s' % (name, value))
-        return '\n'.join(outstr)
-
-    def __deepcopy__(self, memo):
-        # When I added the dynamic trait notifiers via
-        # on_trait_change, tests errored when the run method was
-        # called.  I would get this error: 'TypeError: instancemethod
-        # expected at least 2 arguments, got 0' and a traceback deep
-        # in the copy module triggered by the
-        # 'InterfaceResult(deepcopy(self), runtime)' line returned
-        # from CommandLine._runner.  To fix this, I create a new
-        # instance of self, then assign all traited attrs with
-        # deepcopied values.
-        id_self = id(self)
-        if id_self in memo:
-            return memo[id_self]
-        # Create new dictionary of trait items with deep copies of elements
-        dup_dict = {}
-        for key in self.traits():
-            if key in ['trait_added', 'trait_modified']:
-                # Skip these trait api functions
-                continue
-            dup_dict[key] = deepcopy(getattr(self, key), memo)
-        # create new instance and update with copied values
-        dup = self.__class__()
-        dup.update(**dup_dict)
-        return dup
-
-    def items(self):
-        for name, trait_spec in sorted(self.traits().items()):
-            if name in ['trait_added', 'trait_modified']:
-                # Skip these trait api functions
-                continue
-            yield name, trait_spec
-
-    def _generate_handlers(self):
-        # Find all traits with the 'xor' metadata and attach an event
-        # handler to them.
-        def has_xor(item):
-            if is_container(item):
-                return item
-        xors = self.trait_names(xor=has_xor)
-        for elem in xors:
-            self.on_trait_change(self._xor_warn, elem)
-
-    def _xor_warn(self, name, old, new):
-        trait_spec = self.traits()[name]
-        if new:
-            # for each xor, set to default_value
-            for trait_name in trait_spec.xor:
-                if trait_name == name:
-                    # skip ourself
-                    continue
-                tspec = self.traits()[trait_name]
-                #setattr(self, trait_name, tspec.get_default_value())
-                setattr(self, trait_name, tspec.default)
-
-    # XXX This is redundant, need to do a global find-replace and remove this
-    update = traits.HasTraits.set
+    def validate(self, object, name, value):
+        print name
+        print value
+        newvalue = value
+        if isinstance(value, str):
+            newvalue = [value]
+        return super(FileList2, self).validate(object, name, newvalue)
