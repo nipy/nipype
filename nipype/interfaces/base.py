@@ -619,9 +619,11 @@ class OptMapCommand(CommandLine):
         raise NotImplementedError(
                 'Subclasses of OptMapCommand must implement outputs')
 
+#####################################################################
 #
 # New base classes
 #
+#####################################################################
 
 class TraitedSpec(traits.HasTraits):
     """Provide a few methods necessary to support the Bunch interface.
@@ -650,33 +652,6 @@ class TraitedSpec(traits.HasTraits):
             value = getattr(self, name)
             outstr.append('%s = %s' % (name, value))
         return '\n'.join(outstr)
-
-    """
-    def __deepcopy__(self, memo):
-        # When I added the dynamic trait notifiers via
-        # on_trait_change, tests errored when the run method was
-        # called.  I would get this error: 'TypeError: instancemethod
-        # expected at least 2 arguments, got 0' and a traceback deep
-        # in the copy module triggered by the
-        # 'InterfaceResult(deepcopy(self), runtime)' line returned
-        # from CommandLine._runner.  To fix this, I create a new
-        # instance of self, then assign all traited attrs with
-        # deepcopied values.
-        id_self = id(self)
-        if id_self in memo:
-            return memo[id_self]
-        # Create new dictionary of trait items with deep copies of elements
-        dup_dict = {}
-        for key in self.traits():
-            if key in ['trait_added', 'trait_modified']:
-                # Skip these trait api functions
-                continue
-            dup_dict[key] = deepcopy(getattr(self, key), memo)
-        # create new instance and update with copied values
-        dup = self.__class__()
-        dup.set(**dup_dict)
-        return dup
-    """
 
     def items(self):
         for name, trait_spec in sorted(self.traits().items()):
@@ -710,7 +685,7 @@ class TraitedSpec(traits.HasTraits):
     def _dictcopy(self):
         out_dict = {}
         for name, trait_spec in self.items():
-            out_dict[name] = getattr(self, name)
+            out_dict[name] = deepcopy(getattr(self, name))
         return out_dict
 
     def _hash_infile(self, adict, key):
@@ -1119,6 +1094,9 @@ class NEW_CommandLine(NEW_BaseInterface):
 class MultiPath(traits.List):
     """ Implements a user friendly traits that accepts one or more
     paths to files or directories
+
+    XXX This should only be used as a final resort. We should stick to
+    established Traits to the extent possible.
 
     XXX This needs to be vetted by somebody who understands traits
 
