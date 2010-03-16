@@ -670,7 +670,7 @@ class TraitedSpec(traits.HasTraits):
         for elem in xors:
             self.on_trait_change(self._xor_warn, elem)
 
-    def _xor_warn(self, name, old, new):
+    def _xor_warn(self, obj, name, old, new):
         trait_spec = self.traits()[name]
         if new:
             # for each xor, set to default_value
@@ -678,9 +678,16 @@ class TraitedSpec(traits.HasTraits):
                 if trait_name == name:
                     # skip ourself
                     continue
-                tspec = self.traits()[trait_name]
-                #setattr(self, trait_name, tspec.get_default_value())
-                setattr(self, trait_name, tspec.default)
+                value = getattr(self, trait_name)
+                if value == new:
+                    tspec = self.traits()[trait_name]
+                    setattr(self, trait_name, tspec.default)
+                    msg = 'Input %s is mutually exclusive with inputs:  %s' \
+                        % (name, ', '.join(trait_spec.xor))
+                    msg += '\nResetting %s to %s' % (trait_name,
+                                                     tspec.default)
+                    warn(msg)
+
 
     def _dictcopy(self):
         out_dict = {}
@@ -1160,4 +1167,3 @@ class MultiPath(traits.List):
         if isinstance(value, str):
             newvalue = [value]
         return super(MultiPath, self).validate(object, name, newvalue)
-
