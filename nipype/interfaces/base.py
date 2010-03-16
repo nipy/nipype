@@ -1091,7 +1091,7 @@ class NEW_CommandLine(NEW_BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if value is not None:
+            if value:
                 # For inputs that have the genfile metadata flag, we
                 # call the _convert_inputs method to get the generated
                 # value.
