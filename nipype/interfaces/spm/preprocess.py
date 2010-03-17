@@ -908,5 +908,77 @@ class NEW_Realign(NEW_SPMCommand):
         outputs['mean_image'] = fname_presuffix(self.inputs.infile[0], prefix='mean')
         return outputs
         
+class NEW_Coregister(NEW_SPMCommand):
+    """Use spm_coreg for estimating cross-modality rigid body alignment
 
+    Examples
+    --------
+    
+    >>> import nipype.interfaces.spm as spm
+    >>> coreg = spm.Coregister()
+    >>> coreg.inputs.target = 'a.nii'
+    >>> coreg.inputs.source = 'b.nii'
+    >>> coreg.run() # doctest: +SKIP
+    
+    """
+    @property
+    def jobtype(self):
+        return 'spatial'
+
+    @property
+    def jobname(self):
+        return 'coreg'
+    
+    class input_spec(TraitedSpec):
+        target = traits.File(exists=True, field='ref', mandatory=True,
+                             desc='reference file to register to')
+        source = traits.List(traits.File(exists=True), field='source',
+                             desc='file to register to target', copyfile=True)
+        jobtype = traits.Enum('estimate', 'write', 'estwrite', value='estwrite',
+                              desc='one of: estimate, write, estwrite (opt,estwrite)')
+        apply_to_files = traits.List(traits.File(exists=True), field='other',
+                                     desc='files to apply transformation to (opt)', copyfile=True)
+        cost_function = traits.Enum('mi', 'nmi', 'ecc', 'ncc', field = 'eoptions.cost_fun',
+                                    desc = "cost function, one of: 'mi' - Mutual Information, " +
+                                    "'nmi' - Normalised Mutual Information, 'ecc' - Entropy Correlation Coefficient, " +
+                                    "'ncc' - Normalised Cross Correlation (opt)")
+        fwhm = traits.Float(field = 'eoptions.fwhm', desc = 'gaussian smoothing kernel width (opt)')
+        separation = traits.List(traits.Float(), field = 'eoptions.sep', desc = 'sampling separation in mm (opt)')
+        tolerance =  traits.List(traits.Float(), field = 'eoptions.tol',
+                                  desc = 'acceptable tolerance for each of 12 params (opt)')
+        write_interp = traits.Range(low = 0, hign = 7, field = 'roptions.interp',
+                                    desc = 'degree of b-spline used for interpolation (opt)')
+        write_wrap = traits.List(traits.Bool(), min_len = 3, max_len = 3, field = 'roptions.wrap',
+                                 desc = 'Check if interpolation should wrap in [x,y,z] (opt)')
+        write_mask = traits.Bool(field = 'roptions.mask',
+                                 desc = 'True/False mask output image (opt)')
+        
+    class output_spec(TraitedSpec):
+        coregistered_source = traits.List(traits.File(exists=True), desc = 'Coregistered source files')
+        coregistered_files = traits.List(traits.File(exists=True), desc = 'Coregistered other files')
+    
+    
+    def _parse_inputs(self):
+        """validate spm coregister options if set to None ignore
+        """
+        einputs = super(NEW_Realign, self)._parse_inputs(skip=('jobtype'))
+        jobtype =  self.inputs.jobtype
+        return [{'%s'%(jobtype):einputs[0]}]
+    
+    def _list_outputs(self):
+        outputs = self._outputs()._dictcopy()
+        
+        if self.inputs.jobtype == "estimate":
+            if self.inputs.apply_to_files != None:
+                outputs.coregistered_files = self.inputs.apply_to_files
+            outputs.coregistered_source = self.inputs.source
+        elif self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
+            if self.inputs.apply_to_files != None:
+                for imgf in self.inputs.apply_to_files:
+                    outputs['coregistered_files'].append(fname_presuffix(imgf, prefix='r'))
+                    
+            for imgf in self.inputs.source:
+                outputs['coregistered_source'].append(fname_presuffix(imgf, prefix='r'))
+                
+        return outputs
 
