@@ -25,7 +25,7 @@ warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 
-class Bet(NEW_FSLCommand):
+class NEW_Bet(NEW_FSLCommand):
     """Use FSL BET command for skull stripping.
 
     For complete details, see the `BET Documentation.
@@ -74,67 +74,69 @@ class Bet(NEW_FSLCommand):
         '''Note: Currently we don't support -R, -S, -Z,-A or -A2'''
         # We use position args here as list indices - so a negative number will
         # put something on the end
-        # Also, it would be nice to use traits.File types here, but Traitlets
-        # doesn't support that (Yet)
-        infile = traits.Str(desc = 'input file to skull strip',
-                            argstr='%s', position=0, mandatory=True)
-        outfile = traits.Str(desc = 'name of output skull stripped image',
-                             argstr='%s', position=1, genfile=True)
+        infile = traits.File(exists=True,
+                             desc = 'input file to skull strip',
+                             argstr='%s', position=0, mandatory=True)
+        outfile = traits.File(desc = 'name of output skull stripped image',
+                              argstr='%s', position=1, genfile=True)
         outline = traits.Bool(desc = 'create surface outline image',
                               argstr='-o')
-        mask = traits.Bool(False, desc = 'create binary mask image', 
+        mask = traits.Bool(desc = 'create binary mask image', 
                            argstr='-m')
         skull = traits.Bool(desc = 'create skull image',
                             argstr='-s')
-        nooutput = traits.Bool(argstr='-n')
+        nooutput = traits.Bool(argstr='-n',
+                               desc="Don't generate segmented output")
         frac = traits.Float(desc = 'fractional intensity threshold',
                             argstr='-f %.2f')
-        vertical_gradient = traits.Float(argstr='-g %.2f')
-        radius = traits.Int(argstr='-r %d', units='mm')
-        # Note - Traitlets doesn't actually support the 'trait' metadata, so it
-        # is just plain ol' metadata. But we use the same 'trait' id here for
-        # consistency with the Traits API. Likewise for minlen and maxlen.
-        # XXX Currently, default_value won't work for a List
-        center = traits.List(desc = 'center of gravity in voxels',
-                             argstr='-c %s', trait=traits.Int, minlen=0,
-                             maxlen=3, units='voxels')
-        threshold = traits.Bool(argstr='-t')
-        mesh = traits.Bool(argstr='-e')
-        verbose = traits.Bool(argstr='-v')
+        vertical_gradient = traits.Float(argstr='-g %.2f',
+                            desc='vertical gradient in fractional intensity ' \
+                                             'threshold (-1, 1)')
+        radius = traits.Int(argstr='-r %d', units='mm',
+                            desc="head radius")
+        center = traits.List(traits.Int, desc = 'center of gravity in voxels',
+                             argstr='-c %s', minlen=0, maxlen=3,
+                             units='voxels')
+        threshold = traits.Bool(argstr='-t',
+                      desc="apply thresholding to segmented brain image and mask")
+        mesh = traits.Bool(argstr='-e',
+                           desc="generate a vtk mesh brain surface")
+        # XXX how do we know these two are mutually exclusive?
         _xor_inputs = ('functional', 'reduce_bias')
-        functional = traits.Bool(argstr='-F', xor=_xor_inputs)
-        reduce_bias = traits.Bool(argstr='-B', xor=_xor_inputs)
+        functional = traits.Bool(argstr='-F', xor=_xor_inputs,
+                                 desc="apply to 4D fMRI data")
+        reduce_bias = traits.Bool(argstr='-B', xor=_xor_inputs,
+                                  desc="bias field and neck cleanup")
 
-    class output_spec(traits.HasTraits):
-        # Note - desc has special meaning in Traits, similar to __doc__
-        outfile = traits.Str(desc="path/name of skullstripped file")
-        maskfile = traits.Str(
+    class output_spec(TraitedSpec):
+        outfile = traits.File(exists=True,
+                              desc="path/name of skullstripped file")
+        maskfile = traits.File(
                         desc="path/name of binary brain mask (if generated)")
+        outlinefile = traits.File(
+                        desc="path/name of outline file (if generated)")
+        meshfile = traits.File(
+                        desc="path/name of vtk mesh file (if generated)")
 
-    def _gen_outfiles(self, check = False):
-        outputs = self._outputs()
-        outputs.outfile = self.inputs.outfile
-        if not outputs.outfile and self.inputs.infile:
-            outputs.outfile = self._gen_fname(self.inputs.infile,
-                                              suffix = '_brain',
-                                              check = check)
+    def _list_outputs(self):
+        outputs = self.output_spec()._dictcopy()
+        outputs['outfile'] = self.inputs.outfile
+        if not outputs['outfile'] and self.inputs.infile:
+            outputs['outfile'] = self._gen_fname(self.inputs.infile,
+                                              suffix = '_brain')
         if self.inputs.mesh:
-            outputs.meshfile = self._gen_fname(outputs.outfile,
+            outputs['meshfile'] = self._gen_fname(outputs['outfile'],
                                                suffix = '_mesh.vtk',
-                                               change_ext = False,
-                                               check = check)
+                                               change_ext = False)
         if self.inputs.mask or self.inputs.reduce_bias:
-            outputs.maskfile = self._gen_fname(outputs.outfile,
-                                               suffix = '_mask',
-                                               check = check)
+            outputs['maskfile'] = self._gen_fname(outputs['outfile'],
+                                               suffix = '_mask')
         return outputs
 
-    def _convert_inputs(self, opt, value):
-        if opt == 'outfile':
-            if not value:
-                outputs = self._gen_outfiles()
-                return outputs.outfile
-        return value
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._list_outputs()[name]
+        return None
 
 
 class Fast(FSLCommand):

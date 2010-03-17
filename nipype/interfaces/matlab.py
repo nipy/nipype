@@ -136,11 +136,11 @@ class MatlabCommandLine(CommandLine):
     
 
 
-class NEW_MatlabCommandLine(NEW_CommandLine):
+class NEW_MatlabCommand(NEW_CommandLine):
     """Interface that runs matlab code
 
     >>> import nipype.interfaces.matlab as matlab
-    >>> mlab = matlab.NEW_MatlabCommandLine()
+    >>> mlab = matlab.NEW_MatlabCommand()
     >>> mlab.inputs.script = "which('who')"
     >>> out = mlab.run() # doctest: +SKIP
     """
@@ -149,7 +149,7 @@ class NEW_MatlabCommandLine(NEW_CommandLine):
 
     class input_spec(TraitedSpec):
         script  = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
-                             mandatory=True)
+                             mandatory=True, position=-1)
         nodesktop = traits.Bool(True, argstr='-nodesktop',
                                 desc='Switch off desktop mode on unix platforms')
         nosplash = traits.Bool(True, argstr='-nosplash',
@@ -166,13 +166,13 @@ class NEW_MatlabCommandLine(NEW_CommandLine):
         """initializes interface to matlab
         (default 'matlab -nodesktop -nosplash'
         """
-        super(NEW_MatlabCommandLine,self).__init__(**inputs)
+        super(NEW_MatlabCommand,self).__init__(**inputs)
         self._cmd = self.matlab_cmd
         if matlab_cmd is not None:
             self._cmd = matlab_cmd
 
     def run(self,**kwargs):
-        results = super(NEW_MatlabCommandLine, self).run(**kwargs)
+        results = super(NEW_MatlabCommand, self).run(**kwargs)
         if 'command not found' in results.runtime.stderr:
             msg = 'Cannot find matlab!\n' + \
                 '\tTried command:  ' + results.runtime.cmdline + \
@@ -183,7 +183,7 @@ class NEW_MatlabCommandLine(NEW_CommandLine):
         return results
 
     def _parse_inputs(self, skip = None):
-        args = super(NEW_MatlabCommandLine, self)._parse_inputs(skip=['mfile',
+        args = super(NEW_MatlabCommand, self)._parse_inputs(skip=['mfile',
                                                                       'paths',
                                                                       'script_file'])
         return args
@@ -191,7 +191,7 @@ class NEW_MatlabCommandLine(NEW_CommandLine):
     def _format_arg(self, name, trait_spec, value):
         if name in ['script']:
             return self._gen_matlab_command(trait_spec.argstr, value)
-        return super(NEW_MatlabCommandLine, self)._format_arg(name, trait_spec, value)
+        return super(NEW_MatlabCommand, self)._format_arg(name, trait_spec, value)
 
     def _gen_matlab_command(self, argstr, script_lines):
         cwd = os.getcwd()
@@ -204,7 +204,6 @@ class NEW_MatlabCommandLine(NEW_CommandLine):
             prescript += "fprintf(1,'Executing code at %s:\\n',datestr(now));\n" 
         prescript += "ver,\n"
         prescript += "try,\n"
-        prescript += "addpath('%s');\n" % cwd
         for path in self.inputs.paths:
             prescript += "addpath('%s');\n" % path
         # postscript
@@ -223,7 +222,7 @@ class NEW_MatlabCommandLine(NEW_CommandLine):
             mfile = file(os.path.join(cwd,self.inputs.script_file), 'wt')
             mfile.write(script_lines)
             mfile.close()
-            script = self.inputs.script_file.split('.')[0]
+            script = "addpath('%s');%s" % (cwd, self.inputs.script_file.split('.')[0])
         else:
             script = ''.join(script_lines.split('\n'))
         return argstr % script

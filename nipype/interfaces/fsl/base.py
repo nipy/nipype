@@ -224,66 +224,132 @@ class FSLCommand(OptMapCommand):
         # return os.path.realpath(fname)
         return fname
 
+###################################
 #
-# New FSL base class
+# NEW_ FSL base class
 #
+###################################
+class NEW_Info(object):
+    """Handle fsl output type and version information.
+    """
+
+    ftypes = {'NIFTI': '.nii',
+              'NIFTI_PAIR': '.img',
+              'NIFTI_GZ': '.nii.gz',
+              'NIFTI_PAIR_GZ': '.img.gz',
+              'ANALYZE_GZ': '.hdr.gz',
+              'ANALYZE': '.hdr'}
+
+    @staticmethod
+    def version():
+        """Check for fsl version on system
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        version : str
+           Version number as string or None if FSL not found
+
+        """
+        # find which fsl being used....and get version from
+        # /path/to/fsl/etc/fslversion
+        clout = NEW_CommandLine(command='which', args='fsl').run()
+
+        if clout.runtime.returncode is not 0:
+            return None
+
+        out = clout.runtime.stdout
+        basedir = os.path.split(os.path.split(out)[0])[0]
+        clout = NEW_CommandLine(command='cat', args='%s/etc/fslversion' % (basedir)).run()
+        out = clout.runtime.stdout
+        return out.strip('\n')
+
+    @classmethod
+    def outputtype_to_ext(cls, outputtype):
+        """Get the file extension for the given output type.
+
+        Parameters
+        ----------
+        outputtype : {'ANALYZE_GZ', 'NIFTI_PAIR_GZ', 'NIFTI',
+                      'NIFTI_PAIR', 'NIFTI_GZ', 'ANALYZE'}
+            String specifying the output type.
+
+        Returns
+        -------
+        extension : str
+            The file extension for the output type.
+        """
+
+        try:
+            return cls.ftypes[outputtype]
+        except KeyError:
+            msg = 'Invalid FSLOUTPUTTYPE: ', outputtype
+            raise KeyError(msg)
+
+    @classmethod
+    def outputtype(cls, ftype=None):
+        """Check the global FSL output file type FSLOUTPUTTYPE
+
+        Parameters
+        ----------
+        ftype :  string
+            Represents the file type to set based on string of valid FSL
+            file types ftype == None to get current setting/ options
+
+        Returns
+        -------
+        fsl_ftype : string
+            Represents the current environment setting of FSLOUTPUTTYPE
+        ext : string
+            The extension associated with the FSLOUTPUTTYPE
+
+        """
+        if not ftype:
+            try:
+                ftype = os.environ['FSLOUTPUTTYPE']
+            except KeyError:
+                raise Exception('FSL environment variables not set')
+        return ftype, cls.outputtype_to_ext(ftype)
+
+    @staticmethod
+    def standard_image(img_name):
+        '''Grab an image from the standard location.
+
+        Could be made more fancy to allow for more relocatability'''
+        try:
+            fsldir = os.environ['FSLDIR']
+        except KeyError:
+            raise Exception('FSL environment variables not set')
+        return os.path.join(fsldir, 'data/standard', img_name)
+
+
 class NEW_FSLCommand(NEW_CommandLine):
     '''General support for FSL commands. Every FSL command accepts 'outputtype'
     input. For example:
     fsl.ExtractRoi(tmin=42, tsize=1, outputtype='NIFTI')'''
+    
+    _outputtype = None
 
-    def __init__(self, *args, **inputs):
+    def __init__(self, outputtype = None, **inputs):
         super(NEW_FSLCommand, self).__init__(**inputs)
 
-        if 'outputtype' not in inputs or inputs['outputtype'] == None:
-            outputtype, _ = FSLInfo.outputtype()
-        else:
-            outputtype = inputs['outputtype']
-        self._outputtype = outputtype
-
-    def run(self, **inputs):
-        """Execute the command.
-
-        Returns
-        -------
-        results : InterfaceResult
-            An :class:`nipype.interfaces.base.InterfaceResult` object
-            with a copy of self in `interface`
-
-        """
+        if not self._outputtype:
+            self._outputtype, _ = NEW_Info.outputtype()
+        if outputtype:
+            self._outputtype = outputtype
         self._environ = {'FSLOUTPUTTYPE': self._outputtype}
-        return super(NEW_FSLCommand, self).run(**inputs)
 
-    def _glob(self, fname):
-        '''Check if, given a filename, FSL actually produced it.
-
-        The maing thing we're doing here is adding an appropriate extension
-        while globbing. Note that it returns a single string, not a list
-        (different from glob.glob)'''
-        # Could be made more faster / less clunky, but don't care until the API
-        # is sorted out
-
-        # While this function is a little globby, it may not be the best name.
-        # Certainly, glob here is more expensive than necessary (could just use
-        # os.path.exists)
-
-        # stripping the filename of extensions that FSL will recognize and
-        # substitute
-        for ext in FSLInfo.ftypes.values():
-            if fname.endswith(ext):
-                fname = fname[:-len(ext)]
-                break
-
-        ext = FSLInfo.outputtype_to_ext(self._outputtype)
-        files = glob(fname) or glob(fname + ext)
-
-        try:
-            return files[0]
-        except IndexError:
-            return None
+    def set_environ(self, newenv, update=True):
+        if update:
+            self._environ.update(newenv)
+        else:
+            self._environ = deepcopy(newenv)
 
     def _gen_fname(self, basename, fname=None, cwd=None, suffix='_fsl',
-                   change_ext=True, check=False):
+                   change_ext=True):
         '''Define a generic mapping for a single outfile
 
         The filename is potentially autogenerated by suffixing inputs.infile
@@ -300,32 +366,19 @@ class NEW_FSLCommand(NEW_CommandLine):
             default suffix
         change_ext : bool
             change the extension to program's output type (default True)
-        check : bool
-            check if file exists, adding appropriate extension, raise exception
-            if it doesn't
         '''
         if basename == '':
             msg = 'Unable to generate filename for command %s. ' % self.cmd
             msg += 'basename is not set!'
             raise ValueError(msg)
-
         if cwd is None:
             cwd = os.getcwd()
-
         ext = FSLInfo.outputtype_to_ext(self._outputtype)
         if change_ext:
-            suffix = ''.join((suffix, ext))
-        if fname is None:
-            fname = list_to_filename(basename)
-        fname = fname_presuffix(fname, suffix=suffix,
+            if suffix:
+                suffix = ''.join((suffix, ext))
+            else:
+                suffix = ext
+        fname = fname_presuffix(basename, suffix=suffix,
                                 use_ext=not change_ext, newpath=cwd)
-        if check:
-            new_fname = self._glob(fname)
-            if new_fname is None:
-                raise IOError('file %s not generated by %s' % (fname, cmd))
-           
-        # XXX This should ultimately somehow allow for relative paths if cwd is
-        # specified or similar. For now, though, this needs to happen to make
-        # the pipeline code work
-        # return os.path.realpath(fname)
         return fname

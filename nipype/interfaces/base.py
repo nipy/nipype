@@ -797,6 +797,10 @@ class NEW_Interface(object):
     def _outputs(self):
         """ Initializes outputs"""
         raise NotImplementedError
+
+    def _list_outputs(self):
+        """ List expected outputs"""
+        raise NotImplementedError
         
     def _get_filecopy_info(self):
         """ Provides information about file inputs to copy or link to cwd.
@@ -847,7 +851,7 @@ class NEW_BaseInterface(NEW_Interface):
         manhelpstr = None
         for name, trait_spec in self.inputs.items():
             desc = trait_spec.desc
-            if hasattr(trait_spec, 'mandatory') and trait_spec.mandatory:
+            if trait_spec.mandatory:
                 if not manhelpstr:
                     manhelpstr = ['','Mandatory:']
                 manhelpstr += [' %s: %s' % (name, desc)]
@@ -873,7 +877,7 @@ class NEW_BaseInterface(NEW_Interface):
         helpstr = ['Outputs','-------']
         if self.output_spec:
             output_spec = self.output_spec()
-            for name, trait_spec in sorted(output_spec.traits().items()):
+            for name, trait_spec in sorted(output_spec.items()):
                 helpstr += ['%s: %s' % (name, trait_spec.desc)]
         else:
             helpstr += ['None']
@@ -889,7 +893,7 @@ class NEW_BaseInterface(NEW_Interface):
 
     def _check_mandatory_inputs(self):
         for name, trait_spec in self.inputs.items():
-            if hasattr(trait_spec, 'mandatory') and trait_spec.mandatory:
+            if trait_spec.mandatory:
                 value = getattr(self.inputs, name)
                 if not value:
                     msg = "%s requires a value for input '%s'" % \
@@ -906,18 +910,17 @@ class NEW_BaseInterface(NEW_Interface):
                         stderr=None)
         outputs = self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs = outputs)
-
-    def _get_filecopy_info(self):
+    
+    @classmethod
+    def _get_filecopy_info(cls):
         """ Provides information about file inputs to copy or link to cwd.
             Necessary for pipeline operation
         """
         info = []
-        for name, trait_spec in sorted(output_spec.traits().items()):
-            if trait_spec.is_trait_type(traits.File) or \
-                    trait_spec.is_trait_type(traits.FileList):
-                if trait_spec.copyfile is not None:
-                    info.append(dict(key=name,
-                                     copy=trait_spec.copyfile))
+        for name, trait_spec in cls.input_spec().items():
+            if trait_spec.copyfile is not None:
+                info.append(dict(key=name,
+                                 copy=trait_spec.copyfile))
         return info
 
 
@@ -1027,11 +1030,19 @@ class NEW_CommandLine(NEW_BaseInterface):
     def _gen_filename(self, name):
         raise NotImplementedError
     
-    def _gen_outfiles(self, check = False):
-        return self._outputs()
+    def _list_outputs(self):
+        if self.output_spec:
+            return self._outputs()._dictcopy()
+        else:
+            return None
 
     def aggregate_outputs(self):
-        return self._gen_outfiles(check = True)
+        outputs = self._outputs()
+        expected_outputs = self._list_outputs()
+        if expected_outputs:
+            for key, val in expected_outputs.items():
+                setattr(outputs, key, val)
+        return outputs
 
     def _format_arg(self, name, trait_spec, value):
         '''A helper function for _parse_inputs'''
@@ -1091,21 +1102,14 @@ class NEW_CommandLine(NEW_BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if value:
-                # For inputs that have the genfile metadata flag, we
-                # call the _convert_inputs method to get the generated
-                # value.
-                if hasattr(trait_spec, 'genfile') and \
-                        trait_spec.genfile is not None:
+            if not value:
+                if trait_spec.genfile:
                     gen_val = self._gen_filename(name)
                     value = gen_val
-            else:
-                # skip attrs that haven't been assigned
-                continue
+                else:
+                    continue
             arg = self._format_arg(name, trait_spec, value)
-            pos = None
-            if hasattr(trait_spec, 'position'):
-                pos = trait_spec.position
+            pos = trait_spec.position
             if pos is not None:
                 if pos >= 0:
                     initial_args[pos] = arg
