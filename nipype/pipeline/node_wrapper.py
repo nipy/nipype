@@ -138,7 +138,7 @@ class NodeWrapper(object):
 
     def check_outputs(self, parameter):
         return hasattr(self, parameter) or \
-            hasattr(self._interface.outputs(), parameter)
+            hasattr(self._interface._outputs(), parameter)
     
     def check_inputs(self, parameter):
         return hasattr(self._interface.inputs, parameter) or \
