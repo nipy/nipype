@@ -737,7 +737,7 @@ class TraitedSpec(traits.HasTraits):
                     item = None
                 else:
                     if len(val) == 0:
-                        raise AttributeError('%s attribute is empty'%key)
+                        raise AttributeError('%s attribute is empty'%name)
                     item = val[0]
             else:
                 item = val
