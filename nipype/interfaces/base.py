@@ -767,7 +767,6 @@ class TraitedSpec(traits.HasTraits):
     def _anytrait_changed(self, name):
         if name in ['trait_added', 'trait_modified', 'hashval', 'trigger']:
             return
-        print name
         self.trigger = True
 
     def set(self, **kwargs):

@@ -1,17 +1,36 @@
 import os
+import tempfile
+import shutil
 
-from nipype.testing import assert_equal, assert_not_equal, assert_raises
+from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
+                            with_setup)
 
 import nipype.interfaces.fsl.preprocess as fsl
+from nipype.interfaces.fsl import Info
 from nipype.interfaces.base import InterfaceResult
 
 def fsl_name(fname):
     """Create valid fsl name, including file extension for output type.
     """
-    ftype, ext = fsl.FSLInfo.outputtype()
+    ftype, ext = Info.outputtype()
     return fname + ext
 
+tmp_infile = None
+tmp_dir = None
+def setup_infile():
+    global tmp_infile, tmp_dir
+    ftype, ext = Info.outputtype()
+    #_, tmp_infile = tempfile.mkstemp(suffix=ext)
+    tmp_dir = tempfile.mkdtemp()
+    tmp_infile = os.path.join(tmp_dir, 'foo' + ext)
+    file(tmp_infile, 'w')
+
+def teardown_infile():
+    #os.remove(tmp_infile)
+    shutil.rmtree(tmp_dir)
+
 # test Bet
+@with_setup(setup_infile, teardown_infile)
 def test_bet():
     better = fsl.Bet()
     yield assert_equal, better.cmd, 'bet'
@@ -20,7 +39,7 @@ def test_bet():
     yield assert_raises, ValueError, better.run
 
     # Test generated outfile name
-    infile = fsl_name('foo') 
+    infile = tmp_infile
     better.inputs.infile = infile
     outfile = fsl_name('foo_brain')
     outpath = os.path.join(os.getcwd(), outfile)
@@ -34,7 +53,7 @@ def test_bet():
 
     better.inputs.frac = 0.40
     # .run() based parameter setting
-    betted = better.run(infile='infile2', outfile='outfile')
+    betted = better.run(infile=tmp_infile, outfile='outfile.nii')
     # Non-existant files, shouldn't finish cleanly
     yield assert_not_equal, betted.runtime.returncode, 0
     yield assert_equal, betted.interface.inputs.infile, 'infile2'

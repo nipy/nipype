@@ -229,7 +229,7 @@ class FSLCommand(OptMapCommand):
 # NEW_ FSL base class
 #
 ###################################
-class NEW_Info(object):
+class Info(object):
     """Handle fsl output type and version information.
     """
 
@@ -337,7 +337,7 @@ class NEW_FSLCommand(NEW_CommandLine):
         super(NEW_FSLCommand, self).__init__(**inputs)
 
         if not self._outputtype:
-            self._outputtype, _ = NEW_Info.outputtype()
+            self._outputtype, _ = Info.outputtype()
         if outputtype:
             self._outputtype = outputtype
         self._environ = {'FSLOUTPUTTYPE': self._outputtype}
