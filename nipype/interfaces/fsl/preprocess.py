@@ -25,7 +25,7 @@ warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 
-class NEW_Bet(NEW_FSLCommand):
+class Bet(NEW_FSLCommand):
     """Use FSL BET command for skull stripping.
 
     For complete details, see the `BET Documentation.

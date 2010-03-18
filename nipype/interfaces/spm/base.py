@@ -478,6 +478,8 @@ class NEW_SPMCommand(NEW_BaseInterface):
         """
         outputs = self._outputs()
         for key, val in self._list_outputs().items():
+            print key
+            print val
             setattr(outputs, key, val)
         return outputs
         
@@ -492,7 +494,7 @@ class NEW_SPMCommand(NEW_BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if not value:
+            if value == trait_spec.default and not trait_spec.usedefault:
                 continue
             field = trait_spec.field
             if '.' in field:

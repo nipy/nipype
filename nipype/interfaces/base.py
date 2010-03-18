@@ -636,26 +636,44 @@ class TraitedSpec(traits.HasTraits):
     solution to move forward on the refactoring.
     """
 
+    #hashval = traits.Property(depends_on='moo')
+    
     def __init__(self, **kwargs):
         self._generate_handlers()
         # NOTE: In python 2.6, object.__init__ no longer accepts input
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
         #super(TraitedSpec, self).__init__(*args, **kwargs)
-        super(TraitedSpec, self).__init__()
-        for key, val in kwargs.items():
-            setattr(self, key, val)
+        super(TraitedSpec, self).__init__(**kwargs)
+
+        # XX kwargs always appears to be empty
+        #for key, val in kwargs.items():
+        #    setattr(self, key, val)
+
+        depends = [k for k, _ in self.items()]
+        #print depends
+        # XX depends_on is not working, so caching has been disabled below
+        self.add_trait('hashval',
+                       traits.Property(desc='hash of spec',
+                                       fget = self._get_hashval,
+                                       depends_on = depends))
+                                       
+        #for k, _ in self.traits().items():
+        #    print k
 
     def __repr__(self):
         outstr = []
         for name, trait_spec in self.items():
             value = getattr(self, name)
-            outstr.append('%s = %s' % (name, value))
+            if value == trait_spec.default and not trait_spec.usedefault:
+                outstr.append('%s = Undefined' % name)
+            else:
+                outstr.append('%s = %s' % (name, value))
         return '\n'.join(outstr)
 
     def items(self):
         for name, trait_spec in sorted(self.traits().items()):
-            if name in ['trait_added', 'trait_modified']:
+            if name in ['trait_added', 'trait_modified', 'hashval']:
                 # Skip these trait api functions
                 continue
             yield name, trait_spec
@@ -705,7 +723,8 @@ class TraitedSpec(traits.HasTraits):
             file_list.append((afile, hash_infile(afile) ))
         return file_list
 
-    def _get_bunch_hash(self):
+    #@traits.cached_property
+    def _get_hashval(self):
         """Return a dictionary of our items with hashes for each file.
 
         Searches through dictionary items and if an item is a file, it
@@ -725,20 +744,17 @@ class TraitedSpec(traits.HasTraits):
             The md5 hash value of the traited spec
 
         """
-
+        #print "calc hash"
         infile_list = []
         for name, trait_spec in self.items():
             val = getattr(self, name)
+            item = None
             if is_container(val):
-                # XXX - SG this probably doesn't catch numpy arrays
-                # containing embedded file names either. 
-                if isinstance(val,dict):
-                    # XXX - SG should traverse dicts, but ignoring for now
-                    item = None
-                else:
-                    if len(val) == 0:
-                        raise AttributeError('%s attribute is empty'%name)
-                    item = val[0]
+                # XX need to revamp this for hierarchical searching of
+                # dicts 
+                if isinstance(val, list):
+                    if val:
+                        item=val[0]
             else:
                 item = val
             try:
@@ -757,6 +773,13 @@ class TraitedSpec(traits.HasTraits):
         # dictionary.
         sorted_dict = str(sorted(dict_nofilename.items()))
         return (dict_withhash, md5(sorted_dict).hexdigest())
+
+    """
+    def _anytrait_changed(self, name):
+        if name in ['trait_added', 'trait_modified', '_hash', '_dirty']:
+            return
+        self._dirty = True
+    """
 
 class NEW_Interface(object):
     """This is an abstract defintion for Interface objects.
@@ -830,8 +853,9 @@ class NEW_BaseInterface(NEW_Interface):
     def __init__(self, **inputs):
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' % \
-                          self.__class__.__name__)
-        self.inputs = self.input_spec(**inputs)
+                                self.__class__.__name__)
+        self.inputs = self.input_spec()
+        self.inputs.set(**inputs)
 
     @classmethod
     def help(cls):
@@ -859,7 +883,7 @@ class NEW_BaseInterface(NEW_Interface):
                 if not opthelpstr:
                     opthelpstr = ['','Optional:']
                 default = trait_spec.default
-                if default not in [None, '', []]:
+                if default not in [None, '', []] and trait_spec.usedefault:
                     opthelpstr += [' %s: %s (default=%s)' % (name,
                                                              desc,
                                                              default)]
@@ -895,7 +919,7 @@ class NEW_BaseInterface(NEW_Interface):
         for name, trait_spec in self.inputs.items():
             if trait_spec.mandatory:
                 value = getattr(self.inputs, name)
-                if not value:
+                if value == trait_spec.default:
                     msg = "%s requires a value for input '%s'" % \
                         (self.__class__.__name__, name)
                     raise ValueError(msg)
@@ -1102,7 +1126,7 @@ class NEW_CommandLine(NEW_BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if not value:
+            if value == trait_spec.default and not trait_spec.usedefault:
                 if trait_spec.genfile:
                     gen_val = self._gen_filename(name)
                     value = gen_val

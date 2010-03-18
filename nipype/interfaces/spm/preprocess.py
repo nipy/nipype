@@ -131,7 +131,8 @@ class SliceTiming(SpmMatlabCommandLine):
             outputs.timecorrected_files.append(s_file[0])
         return outputs
     
-class Realign(SpmMatlabCommandLine):
+
+class Realign(NEW_SPMCommand):
     """Use spm_realign for estimating within modality rigid body alignment
 
     Examples
@@ -145,14 +146,6 @@ class Realign(SpmMatlabCommandLine):
 
     """
 
-    def spm_doc(self):
-        """Print out SPM documentation."""
-        print grab_doc('Realign: Estimate & Reslice')
-
-    @property
-    def cmd(self):
-        return 'spm_realign'
-
     @property
     def jobtype(self):
          return 'spatial'
@@ -161,38 +154,45 @@ class Realign(SpmMatlabCommandLine):
     def jobname(self):
         return 'realign'
 
-    opt_map = {'infile': ('data', 'list of filenames to realign'),
-               'jobtype': (None, 'one of: estimate, write, estwrite (opt, estwrite)', 'estwrite'),
-               'quality': ('eoptions.quality',
-                           '0.1 = fast, 1.0 = precise (opt, 0.9)'),
-               'fwhm': ('eoptions.fwhm',
-                        'gaussian smoothing kernel width (opt, 5)'),
-               'separation': ('eoptions.sep',
-                              'sampling separation in mm (opt, 4))'),
-               'register_to_mean': ('eoptions.rtm', 'True/False (opt, False)'),
-               'weight_img': ('eoptions.weight',
-                              'filename of weighting image (opt, None)'),
-               'interp': ('eoptions.interp',
-                          'degree of b-spline used for interpolation (opt, 2)'),
-               'wrap': ('eoptions.wrap',
-                        'Check if interpolation should wrap in [x,y,z] (opt, [0,0,0])'),
-               'write_which': ('roptions.which',
-                               'determines which images to reslice (opt, [2, 1])'),
-               'write_interp': ('roptions.interp',
-                           'degree of b-spline used for interpolation (opt, 4)'),
-               'write_wrap': ('roptions.wrap',
-                        'Check if interpolation should wrap in [x,y,z] (opt, [0,0,0])'),
-               'write_mask': ('roptions.mask', 'True/False mask output image (opt,)')
-               }
+    class input_spec(TraitedSpec):
+        infile = traits.List(traits.File(exists=True), field='data', mandatory=True,
+                             desc='list of filenames to realign', copyfile=True)
+        jobtype = traits.Enum('estwrite', 'estimate', 'write',
+                              desc='one of: estimate, write, estwrite',
+                              usedefault=True)
+        quality = traits.Range(low=0.0, high=1.0, field = 'eoptions.quality',
+                               desc = '0.1 = fast, 1.0 = precise')
+        fwhm = traits.Range(low=0.0, field = 'eoptions.fwhm',
+                            desc = 'gaussian smoothing kernel width')
+        separation = traits.Range(low=0.0, field = 'eoptions.sep',
+                                  desc = 'sampling separation in mm')
+        register_to_mean = traits.Bool(field='eoptions.rtm',
+                 desc='Indicate whether realignment is done to the mean image')
+        weight_img = traits.File(exists=True, field='eoptions.weight',
+                                 desc='filename of weighting image')
+        interp = traits.Range(low=0, high=7, field='eoptions.interp',
+                   desc='degree of b-spline used for interpolation')
+        wrap = traits.List(traits.Int, field='eoptions.wrap', min_len=3, max_len=3,
+                      desc='Check if interpolation should wrap in [x,y,z]')
+        write_which = traits.List(traits.Int, field='roptions.which',
+                                  min_len=2, max_len=2,
+                                  desc = 'determines which images to reslice')
+        write_interp = traits.Range(low=0, high=7, field='roptions.interp',
+                             desc='degree of b-spline used for interpolation')
+        write_wrap = traits.List(traits.Int, field='eoptions.wrap',
+                                 min_len=3, max_len=3,
+                      desc='Check if interpolation should wrap in [x,y,z]')
+        write_mask = traits.Bool(field='roptions.mask',
+                                 desc='True/False mask output image')
 
-    def get_input_info(self):
-        """ Provides information about inputs
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='infile',copy=True)]
-        return info
+    class output_spec(TraitedSpec):
+        mean_image = traits.File(exists=True,
+                                 desc='Mean image file from the realignment')
+        realigned_files = traits.List(traits.File, desc='Realigned files')
+        realignment_parameters = traits.List(traits.File,
+                          desc='Estimated translation and rotation parameters')
 
-    def _convert_inputs(self, opt, val):
+    def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
         """
         if opt == 'infile':
@@ -201,12 +201,6 @@ class Realign(SpmMatlabCommandLine):
                                     separate_sessions=True)
         if opt == 'register_to_mean': # XX check if this is necessary
             return int(val)
-        if opt in ['wrap','write_wrap']:
-            if len(val) != 3:
-                raise ValueError('%s must have 3 elements'%opt)
-        if opt == 'write_which':
-            if len(val) != 2:
-                raise ValueError('write_which must have 2 elements')
         return val
     
     def _parse_inputs(self):
@@ -216,49 +210,19 @@ class Realign(SpmMatlabCommandLine):
         jobtype =  self.inputs.jobtype
         return [{'%s'%(jobtype):einputs[0]}]
 
-    out_map = {'realigned_files' : ('Realigned files',),
-               'mean_image' : ('Mean image file from the realignment',),
-               'realignment_parameters' : ('Estimated translation and rotation parameters',)
-               }
-
-    def run(self, infile=None,**inputs):
-        """Executes the SPM realign function using MATLAB
-        
-        Parameters
-        ----------
-        
-        infile: string, list
-            list of filenames to realign
-        """
-        if infile:
-            self.inputs.infile = infile
-        if not self.inputs.infile:
-            raise AttributeError('Realign requires an input file')
-        self.inputs.update(**inputs)
-        # The following line should call the run function of Realign's
-        # parent class.
-        return super(Realign,self).run()
-    
-    def aggregate_outputs(self):
-        """ Initializes the output fields for this interface and then
-        searches for and stores the data that go into those fields.
-        """
-        outputs = self.outputs()
-        outputs.realigned_files = []
-        outputs.realignment_parameters = []
-        filelist = filename_to_list(self.inputs.infile)
-        outputs.mean_image = glob(fname_presuffix(filelist[0],prefix='mean'))[0]
-        for f in filelist:
-            r_file = glob(fname_presuffix(f, prefix='r'))
-            assert len(r_file) == 1, 'No realigned file generated by SPM Realign'
-            outputs.realigned_files.append(r_file[0])
-            rp_file = glob(fname_presuffix(f,prefix='rp_',suffix='.txt',use_ext=False))
-            assert len(rp_file) == 1, 'No realignment parameter file generated by SPM Realign'
-            outputs.realignment_parameters.append(rp_file[0])
-        outputs.realigned_files = list_to_filename(outputs.realigned_files)
+    def _list_outputs(self):
+        outputs = self._outputs()._dictcopy()
+        outputs['mean_image'] = fname_presuffix(self.inputs.infile[0], prefix='mean')
+        if self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
+            for imgf in self.inputs.infile:
+                outputs['realigned_files'].append(fname_presuffix(imgf, prefix='r'))
+                outputs['realignment_parameters'].append(fname_presuffix(imgf,
+                                                                   prefix='rp_',
+                                                                   suffix='.txt',
+                                                                   use_ext=False))
         return outputs
-
-class Coregister(SpmMatlabCommandLine):
+        
+class Coregister(NEW_SPMCommand):
     """Use spm_coreg for estimating cross-modality rigid body alignment
 
     Examples
@@ -266,20 +230,12 @@ class Coregister(SpmMatlabCommandLine):
     
     >>> import nipype.interfaces.spm as spm
     >>> coreg = spm.Coregister()
-    >>> coreg.inputs.infile = 'a.nii'
-    >>> coreg.inputs.register_to_mean = True
+    >>> coreg.inputs.target = 'a.nii'
+    >>> coreg.inputs.source = 'b.nii'
     >>> coreg.run() # doctest: +SKIP
     
     """
     
-    def spm_doc(self):
-        """Print out SPM documentation."""
-        print grab_doc('Coreg: Estimate & Reslice')
-
-    @property
-    def cmd(self):
-        return 'spm_coreg'
-
     @property
     def jobtype(self):
         return 'spatial'
@@ -287,125 +243,60 @@ class Coregister(SpmMatlabCommandLine):
     @property
     def jobname(self):
         return 'coreg'
+    
+    class input_spec(TraitedSpec):
+        target = traits.File(exists=True, field='ref', mandatory=True,
+                             desc='reference file to register to')
+        source = traits.List(traits.File(exists=True), field='source',
+                             desc='file to register to target', copyfile=True)
+        jobtype = traits.Enum('estwrite','estimate', 'write',
+                              desc='one of: estimate, write, estwrite',
+                              usedefault=True)
+        apply_to_files = traits.List(traits.File(exists=True), field='other',
+                                     desc='files to apply transformation to', copyfile=True)
+        cost_function = traits.Enum('mi', 'nmi', 'ecc', 'ncc', field = 'eoptions.cost_fun',
+                                    desc = "cost function, one of: 'mi' - Mutual Information, " +
+                                    "'nmi' - Normalised Mutual Information, 'ecc' - Entropy Correlation Coefficient, " +
+                                    "'ncc' - Normalised Cross Correlation")
+        fwhm = traits.Float(field = 'eoptions.fwhm', desc = 'gaussian smoothing kernel width')
+        separation = traits.List(traits.Float(), field = 'eoptions.sep', desc = 'sampling separation in mm')
+        tolerance =  traits.List(traits.Float(), field = 'eoptions.tol',
+                                  desc = 'acceptable tolerance for each of 12 params')
+        write_interp = traits.Range(low = 0, hign = 7, field = 'roptions.interp',
+                                    desc = 'degree of b-spline used for interpolation')
+        write_wrap = traits.List(traits.Bool(), min_len = 3, max_len = 3, field = 'roptions.wrap',
+                                 desc = 'Check if interpolation should wrap in [x,y,z]')
+        write_mask = traits.Bool(field = 'roptions.mask',
+                                 desc = 'True/False mask output image')
         
-    opt_map = {'target': ('ref', 'reference file to register to'),
-               'source': ('source', 'file to register to target'),
-               'jobtype': (None, 'one of: estimate, write, estwrite (opt,estwrite)','estwrite'),
-               'apply_to_files': ('other', 'files to apply transformation to (opt,)'),
-               'cost_function': ('eoptions.cost_fun',
-                              'objective cost function (opt, nmi))'),
-               'fwhm': ('eoptions.fwhm',
-                        'gaussian smoothing kernel width (opt, 5)'),
-               'separation': ('eoptions.sep',
-                              'sampling separation in mm (opt, 4))'),
-               'tolerance': ('eoptions.tol',
-                             'acceptable tolerance for each of 12 params (opt,))'),
-               'write_interp': ('roptions.interp',
-                           'degree of b-spline used for interpolation (opt, 0)'),
-               'write_wrap': ('roptions.wrap',
-                        'Check if interpolation should wrap in [x,y,z] (opt, [0,0,0])'),
-               'write_mask': ('roptions.mask',
-                              'True/False mask output image (opt, False)')
-               }
-
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='target',copy=False),
-                Bunch(key='source',copy=True),
-                Bunch(key='apply_to_files',copy=True)]
-        return info
-
-    def _convert_inputs(self, opt, val):
-        """Convert input to appropriate format for spm
-        """
-        if opt == 'target':
-            return scans_for_fnames(filename_to_list(val),keep4d=True)
-        if opt == 'source':
-            return scans_for_fnames(filename_to_list(val),keep4d=True)
-        if opt == 'apply_to_files':
-            return scans_for_fnames(filename_to_list(val))
-        if opt in ['write_wrap']:
-            if len(val) != 3:
-                raise ValueError('%s must have 3 elements'%opt)
-        return val
+    class output_spec(TraitedSpec):
+        coregistered_source = traits.List(traits.File(exists=True), desc = 'Coregistered source files')
+        coregistered_files = traits.List(traits.File, desc = 'Coregistered other files')
+    
     
     def _parse_inputs(self):
-        """validate spm realign options if set to None ignore
+        """validate spm coregister options if set to None ignore
         """
         einputs = super(Coregister, self)._parse_inputs(skip=('jobtype'))
         jobtype =  self.inputs.jobtype
         return [{'%s'%(jobtype):einputs[0]}]
-
-    out_map = {'coregistered_source' : ('Coregistered source file',),
-               'coregistered_files' : ('Coregistered other files',
-                                       'apply_to_files')
-               }
+    
+    def _list_outputs(self):
+        outputs = self._outputs()._dictcopy()
         
-    def aggregate_outputs(self):
-        if isinstance(self.inputs.source, list):
-            source_ext = self.inputs.source[0][-4:]
-        else:
-            source_ext = self.inputs.source[-4:]         
-        
-        outputs = self.outputs()
         if self.inputs.jobtype == "estimate":
             if self.inputs.apply_to_files != None:
                 outputs.coregistered_files = self.inputs.apply_to_files
-                outputs.coregistered_source = self.inputs.source
-            else:
-                outputs.coregistered_source = self.inputs.source
-        elif self.inputs.jobtype == "write":
-            outputs.coregistered_files = []
-            filelist = filename_to_list(self.inputs.source)
-            for f in filelist:
-                c_file = glob(fname_presuffix(f,prefix='r',suffix=source_ext,use_ext=False))
-                assert len(c_file) == 1, 'No coregistered file generated by SPM Coregister %s'
-                outputs.coregistered_files.append(c_file[0])
-        else:
-            c_source = glob(fname_presuffix(self.inputs.source,prefix='r',suffix=source_ext,use_ext=False))
-            assert len(c_source) == 1, 'No coregistered files generated by SPM Coregister'
-            outputs.coregistered_source = c_source[0]
-            outputs.coregistered_files = []
-            if self.inputs.apply_to_files:
-                filelist = filename_to_list(self.inputs.apply_to_files)
-                for f in filelist:
-                    c_file = glob(fname_presuffix(f,prefix='r',suffix=source_ext,use_ext=False))
-                    assert len(c_file) == 1, 'No coregistered file generated by SPM Coregister'
-                    outputs.coregistered_files.append(c_file[0])
-        outputs.coregistered_files = list_to_filename(outputs.coregistered_files)
-        print outputs
-        return outputs
-        
-    def run(self, target=None, source=None, **inputs):
-        """Executes the SPM coregister function using MATLAB
-        
-        Parameters
-        ----------
-        
-        target: string, list
-            image file to coregister source to
-        source: string, list
-            image file that will be coregistered to the template 
-        """
-        if target:
-            self.inputs.target = target
-        if not self.inputs.target:
-            raise AttributeError('Realign requires a target file')
-        if source:
-            self.inputs.source = source
-        if not self.inputs.source:
-            raise AttributeError('Realign requires a source file')
-        
-        self.inputs.update(**inputs)
-        
-        if self.inputs.jobtype == 'write':
+            outputs.coregistered_source = self.inputs.source
+        elif self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
             if self.inputs.apply_to_files != None:
-                raise AttributeError('Reslice does not accept apply_to_files. Use source instead.')
-                 
-        return super(Coregister,self).run()
-
+                for imgf in self.inputs.apply_to_files:
+                    outputs['coregistered_files'].append(fname_presuffix(imgf, prefix='r'))
+                    
+            for imgf in self.inputs.source:
+                outputs['coregistered_source'].append(fname_presuffix(imgf, prefix='r'))
+                
+        return outputs
 
 class Normalize(SpmMatlabCommandLine):
     """use spm_normalise for warping an image to a template
@@ -820,165 +711,4 @@ class Smooth(SpmMatlabCommandLine):
 # NEW_ classes
 #
 ###################################
-
-class NEW_Realign(NEW_SPMCommand):
-    """Use spm_realign for estimating within modality rigid body alignment
-
-    Examples
-    --------
-
-    >>> import nipype.interfaces.spm as spm
-    >>> realign = spm.Realign()
-    >>> realign.inputs.infile = 'a.nii'
-    >>> realign.inputs.register_to_mean = True
-    >>> realign.run() # doctest: +SKIP
-
-    """
-
-    @property
-    def jobtype(self):
-         return 'spatial'
-
-    @property
-    def jobname(self):
-        return 'realign'
-
-    class input_spec(TraitedSpec):
-        infile = traits.List(traits.File(exists=True), field='data', mandatory=True,
-                             desc='list of filenames to realign', copyfile=True)
-        jobtype = traits.Enum('estwrite', 'estimate', 'write', 'estwrite',
-                              desc='one of: estimate, write, estwrite')
-        quality = traits.Float(field = 'eoptions.quality',
-                               desc = '0.1 = fast, 1.0 = precise')
-        fwhm = traits.Float(field = 'eoptions.fwhm',
-                            desc = 'gaussian smoothing kernel width')
-        separation = traits.Float(field = 'eoptions.sep',
-                                  desc = 'sampling separation in mm')
-        register_to_mean = traits.Bool(field='eoptions.rtm',
-                 desc='Indicate whether realignment is done to the mean image')
-        weight_img = traits.File(exists=True, field='eoptions.weight',
-                                 desc='filename of weighting image')
-        interp = traits.Int(field='eoptions.interp',
-                   desc='degree of b-spline used for interpolation')
-        wrap = traits.List(traits.Int, field='eoptions.wrap',
-                      desc='Check if interpolation should wrap in [x,y,z]')
-        write_which = traits.List(traits.Int, field='roptions.which',
-                                  desc = 'determines which images to reslice')
-        write_interp = traits.Int(field='roptions.interp',
-                             desc='degree of b-spline used for interpolation')
-        write_wrap = traits.List(traits.Int, field='eoptions.wrap',
-                      desc='Check if interpolation should wrap in [x,y,z]')
-        write_mask = traits.Bool(field='roptions.mask',
-                                 desc='True/False mask output image')
-
-    class output_spec(TraitedSpec):
-        mean_image = traits.File(exists=True,
-                                 desc='Mean image file from the realignment')
-        realigned_files = traits.List(traits.File(exists=True),
-                                      desc='Realigned files')
-        realignment_parameters = traits.List(traits.File(exists=True),
-                          desc='Estimated translation and rotation parameters')
-
-    def _format_arg(self, opt, val):
-        """Convert input to appropriate format for spm
-        """
-        if opt == 'infile':
-            return scans_for_fnames(filename_to_list(val),
-                                    keep4d=True,
-                                    separate_sessions=True)
-        if opt == 'register_to_mean': # XX check if this is necessary
-            return int(val)
-        return val
-    
-    def _parse_inputs(self):
-        """validate spm realign options if set to None ignore
-        """
-        einputs = super(NEW_Realign, self)._parse_inputs(skip=('jobtype'))
-        jobtype =  self.inputs.jobtype
-        return [{'%s'%(jobtype):einputs[0]}]
-
-    def _list_outputs(self):
-        outputs = self._outputs()._dictcopy()
-        for imgf in self.inputs.infile:
-            outputs['realigned_files'].append(fname_presuffix(imgf, prefix='r'))
-            outputs['realignment_parameters'].append(fname_presuffix(imgf,
-                                                                   prefix='rp_',
-                                                                   suffix='.txt',
-                                                                   use_ext=False))
-        outputs['mean_image'] = fname_presuffix(self.inputs.infile[0], prefix='mean')
-        return outputs
-        
-class NEW_Coregister(NEW_SPMCommand):
-    """Use spm_coreg for estimating cross-modality rigid body alignment
-
-    Examples
-    --------
-    
-    >>> import nipype.interfaces.spm as spm
-    >>> coreg = spm.Coregister()
-    >>> coreg.inputs.target = 'a.nii'
-    >>> coreg.inputs.source = 'b.nii'
-    >>> coreg.run() # doctest: +SKIP
-    
-    """
-    @property
-    def jobtype(self):
-        return 'spatial'
-
-    @property
-    def jobname(self):
-        return 'coreg'
-    
-    class input_spec(TraitedSpec):
-        target = traits.File(exists=True, field='ref', mandatory=True,
-                             desc='reference file to register to')
-        source = traits.List(traits.File(exists=True), field='source',
-                             desc='file to register to target', copyfile=True)
-        jobtype = traits.Enum('estimate', 'write', 'estwrite', value='estwrite',
-                              desc='one of: estimate, write, estwrite (opt,estwrite)')
-        apply_to_files = traits.List(traits.File(exists=True), field='other',
-                                     desc='files to apply transformation to (opt)', copyfile=True)
-        cost_function = traits.Enum('mi', 'nmi', 'ecc', 'ncc', field = 'eoptions.cost_fun',
-                                    desc = "cost function, one of: 'mi' - Mutual Information, " +
-                                    "'nmi' - Normalised Mutual Information, 'ecc' - Entropy Correlation Coefficient, " +
-                                    "'ncc' - Normalised Cross Correlation (opt)")
-        fwhm = traits.Float(field = 'eoptions.fwhm', desc = 'gaussian smoothing kernel width (opt)')
-        separation = traits.List(traits.Float(), field = 'eoptions.sep', desc = 'sampling separation in mm (opt)')
-        tolerance =  traits.List(traits.Float(), field = 'eoptions.tol',
-                                  desc = 'acceptable tolerance for each of 12 params (opt)')
-        write_interp = traits.Range(low = 0, hign = 7, field = 'roptions.interp',
-                                    desc = 'degree of b-spline used for interpolation (opt)')
-        write_wrap = traits.List(traits.Bool(), min_len = 3, max_len = 3, field = 'roptions.wrap',
-                                 desc = 'Check if interpolation should wrap in [x,y,z] (opt)')
-        write_mask = traits.Bool(field = 'roptions.mask',
-                                 desc = 'True/False mask output image (opt)')
-        
-    class output_spec(TraitedSpec):
-        coregistered_source = traits.List(traits.File(exists=True), desc = 'Coregistered source files')
-        coregistered_files = traits.List(traits.File(exists=True), desc = 'Coregistered other files')
-    
-    
-    def _parse_inputs(self):
-        """validate spm coregister options if set to None ignore
-        """
-        einputs = super(NEW_Realign, self)._parse_inputs(skip=('jobtype'))
-        jobtype =  self.inputs.jobtype
-        return [{'%s'%(jobtype):einputs[0]}]
-    
-    def _list_outputs(self):
-        outputs = self._outputs()._dictcopy()
-        
-        if self.inputs.jobtype == "estimate":
-            if self.inputs.apply_to_files != None:
-                outputs.coregistered_files = self.inputs.apply_to_files
-            outputs.coregistered_source = self.inputs.source
-        elif self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
-            if self.inputs.apply_to_files != None:
-                for imgf in self.inputs.apply_to_files:
-                    outputs['coregistered_files'].append(fname_presuffix(imgf, prefix='r'))
-                    
-            for imgf in self.inputs.source:
-                outputs['coregistered_source'].append(fname_presuffix(imgf, prefix='r'))
-                
-        return outputs
 

@@ -150,14 +150,15 @@ class NEW_MatlabCommand(NEW_CommandLine):
     class input_spec(TraitedSpec):
         script  = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
                              mandatory=True, position=-1)
-        nodesktop = traits.Bool(True, argstr='-nodesktop',
+        nodesktop = traits.Bool(True, argstr='-nodesktop', usedefault=True,
                                 desc='Switch off desktop mode on unix platforms')
-        nosplash = traits.Bool(True, argstr='-nosplash',
+        nosplash = traits.Bool(True, argstr='-nosplash', usedefault=True,
                                descr='Switch of splash screen')
         logfile = traits.File(argstr='-logfile %s',
                               desc='Save matlab output to log')
         # non-commandline options
-        mfile   = traits.Bool(False, desc='Run m-code using m-file')
+        mfile   = traits.Bool(False, desc='Run m-code using m-file',
+                              usedefault=True)
         script_file = traits.File('pyscript.m',
                                   desc='Name of file to write m-code to')
         paths   = traits.List(traits.Directory, desc='Paths to add to matlabpath')
@@ -184,8 +185,8 @@ class NEW_MatlabCommand(NEW_CommandLine):
 
     def _parse_inputs(self, skip = None):
         args = super(NEW_MatlabCommand, self)._parse_inputs(skip=['mfile',
-                                                                      'paths',
-                                                                      'script_file'])
+                                                                  'paths',
+                                                                  'script_file'])
         return args
 
     def _format_arg(self, name, trait_spec, value):

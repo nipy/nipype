@@ -8,8 +8,7 @@ Top-level namespace for fsl.  Perhaps should just make fsl a package!
 from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
 from nipype.interfaces.fsl.base import NEW_FSLCommand, NEW_Info
 from nipype.interfaces.fsl.preprocess import (Fast, Flirt, ApplyXfm,
-                                              NEW_Bet,
-                                              McFlirt, Fnirt, ApplyWarp)
+                                              Bet, McFlirt, Fnirt, ApplyWarp)
 from nipype.interfaces.fsl.model import (Level1Design, Feat, FeatModel,
                                          FilmGLS, FixedEffectsModel,
                                          FeatRegister, Flameo, ContrastMgr,
