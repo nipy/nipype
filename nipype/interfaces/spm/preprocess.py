@@ -286,6 +286,16 @@ class Coregister(NEW_SPMCommand):
     _jobtype = 'spatial'
     _jobname = 'coreg'
     
+    def _format_arg(self, opt, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt == 'target' or opt == 'source':
+            return scans_for_fnames(filename_to_list(val),
+                                    keep4d=True)
+        if opt == 'apply_to_files':
+            return scans_for_fnames(filename_to_list(val))
+        return val
+    
     def _parse_inputs(self):
         """validate spm coregister options if set to None ignore
         """
