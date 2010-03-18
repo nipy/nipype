@@ -30,7 +30,7 @@ from nipype.interfaces.spm import (NEW_SPMCommand, scans_for_fname,
                                    scans_for_fnames, logger)
 from nipype.interfaces.base import Bunch
 
-from nipype.interfaces.base import TraitedSpec, traits
+from nipype.interfaces.base import TraitedSpec, traits, MultiPath
 
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list, 
                                     list_to_filename, FileNotFoundError)
@@ -232,8 +232,8 @@ class Realign(NEW_SPMCommand):
 ####################################
 class CoregisterInputSpec(TraitedSpec):
     target = traits.File(exists=True, field='ref', mandatory=True,
-                         desc='reference file to register to')
-    source = traits.File(exists=True, field='source',
+                         desc='reference file to register to', copyfile=False)
+    source = MultiPath(exists=True, field='source',
                          desc='file to register to target', copyfile=True)
     jobtype = traits.Enum('estwrite','estimate', 'write',
                           desc='one of: estimate, write, estwrite',
@@ -262,9 +262,9 @@ class CoregisterInputSpec(TraitedSpec):
                              desc = 'True/False mask output image')
 
 class CoregisterOutputSpec(TraitedSpec):
-    coregistered_source = traits.List(traits.File(exists=True),
+    coregistered_source = MultiPath(traits.File(exists=True),
                                       desc = 'Coregistered source files')
-    coregistered_files = traits.List(traits.File, desc = 'Coregistered other files')
+    coregistered_files = MultiPath(traits.File(exists=True), desc = 'Coregistered other files')
     
 
 class Coregister(NEW_SPMCommand):
@@ -298,8 +298,8 @@ class Coregister(NEW_SPMCommand):
         
         if self.inputs.jobtype == "estimate":
             if self.inputs.apply_to_files != None:
-                outputs.coregistered_files = self.inputs.apply_to_files
-            outputs.coregistered_source = self.inputs.source
+                outputs['coregistered_files'] = self.inputs.apply_to_files
+            outputs['coregistered_source'] = self.inputs.source
         elif self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
             if self.inputs.apply_to_files != None:
                 for imgf in self.inputs.apply_to_files:
