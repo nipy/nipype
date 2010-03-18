@@ -132,6 +132,49 @@ class SliceTiming(SpmMatlabCommandLine):
         return outputs
     
 
+####################################
+#
+#   Realign
+#
+####################################
+class RealignInputSpec(TraitedSpec):
+    infile = traits.List(traits.File(exists=True), field='data', mandatory=True,
+                         desc='list of filenames to realign', copyfile=True)
+    jobtype = traits.Enum('estwrite', 'estimate', 'write',
+                          desc='one of: estimate, write, estwrite',
+                          usedefault=True)
+    quality = traits.Range(low=0.0, high=1.0, field = 'eoptions.quality',
+                           desc = '0.1 = fast, 1.0 = precise')
+    fwhm = traits.Range(low=0.0, field = 'eoptions.fwhm',
+                        desc = 'gaussian smoothing kernel width')
+    separation = traits.Range(low=0.0, field = 'eoptions.sep',
+                              desc = 'sampling separation in mm')
+    register_to_mean = traits.Bool(field='eoptions.rtm',
+                desc='Indicate whether realignment is done to the mean image')
+    weight_img = traits.File(exists=True, field='eoptions.weight',
+                             desc='filename of weighting image')
+    interp = traits.Range(low=0, high=7, field='eoptions.interp',
+                          desc='degree of b-spline used for interpolation')
+    wrap = traits.List(traits.Int, field='eoptions.wrap', min_len=3, max_len=3,
+                       desc='Check if interpolation should wrap in [x,y,z]')
+    write_which = traits.List(traits.Int, field='roptions.which',
+                              min_len=2, max_len=2,
+                              desc = 'determines which images to reslice')
+    write_interp = traits.Range(low=0, high=7, field='roptions.interp',
+                         desc='degree of b-spline used for interpolation')
+    write_wrap = traits.List(traits.Int, field='eoptions.wrap',
+                             min_len=3, max_len=3,
+                   desc='Check if interpolation should wrap in [x,y,z]')
+    write_mask = traits.Bool(field='roptions.mask',
+                             desc='True/False mask output image')
+
+
+class RealignOutputSpec(TraitedSpec):
+    mean_image = traits.File(desc='Mean image file from the realignment')
+    realigned_files = traits.List(traits.File, desc='Realigned files')
+    realignment_parameters = traits.List(traits.File,
+                    desc='Estimated translation and rotation parameters')
+
 class Realign(NEW_SPMCommand):
     """Use spm_realign for estimating within modality rigid body alignment
 
@@ -146,51 +189,11 @@ class Realign(NEW_SPMCommand):
 
     """
 
-    @property
-    def jobtype(self):
-         return 'spatial'
-
-    @property
-    def jobname(self):
-        return 'realign'
-
-    class input_spec(TraitedSpec):
-        infile = traits.List(traits.File(exists=True), field='data', mandatory=True,
-                             desc='list of filenames to realign', copyfile=True)
-        jobtype = traits.Enum('estwrite', 'estimate', 'write',
-                              desc='one of: estimate, write, estwrite',
-                              usedefault=True)
-        quality = traits.Range(low=0.0, high=1.0, field = 'eoptions.quality',
-                               desc = '0.1 = fast, 1.0 = precise')
-        fwhm = traits.Range(low=0.0, field = 'eoptions.fwhm',
-                            desc = 'gaussian smoothing kernel width')
-        separation = traits.Range(low=0.0, field = 'eoptions.sep',
-                                  desc = 'sampling separation in mm')
-        register_to_mean = traits.Bool(field='eoptions.rtm',
-                 desc='Indicate whether realignment is done to the mean image')
-        weight_img = traits.File(exists=True, field='eoptions.weight',
-                                 desc='filename of weighting image')
-        interp = traits.Range(low=0, high=7, field='eoptions.interp',
-                   desc='degree of b-spline used for interpolation')
-        wrap = traits.List(traits.Int, field='eoptions.wrap', min_len=3, max_len=3,
-                      desc='Check if interpolation should wrap in [x,y,z]')
-        write_which = traits.List(traits.Int, field='roptions.which',
-                                  min_len=2, max_len=2,
-                                  desc = 'determines which images to reslice')
-        write_interp = traits.Range(low=0, high=7, field='roptions.interp',
-                             desc='degree of b-spline used for interpolation')
-        write_wrap = traits.List(traits.Int, field='eoptions.wrap',
-                                 min_len=3, max_len=3,
-                      desc='Check if interpolation should wrap in [x,y,z]')
-        write_mask = traits.Bool(field='roptions.mask',
-                                 desc='True/False mask output image')
-
-    class output_spec(TraitedSpec):
-        mean_image = traits.File(exists=True,
-                                 desc='Mean image file from the realignment')
-        realigned_files = traits.List(traits.File, desc='Realigned files')
-        realignment_parameters = traits.List(traits.File,
-                          desc='Estimated translation and rotation parameters')
+    input_spec = RealignInputSpec
+    output_spec = RealignOutputSpec
+    
+    _jobtype = 'spatial'
+    _jobname = 'realign'
 
     def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
@@ -221,7 +224,49 @@ class Realign(NEW_SPMCommand):
                                                                    suffix='.txt',
                                                                    use_ext=False))
         return outputs
-        
+
+####################################
+#
+#   Coregister
+#
+####################################
+class CoregisterInputSpec(TraitedSpec):
+    target = traits.File(exists=True, field='ref', mandatory=True,
+                         desc='reference file to register to')
+    source = traits.File(exists=True, field='source',
+                         desc='file to register to target', copyfile=True)
+    jobtype = traits.Enum('estwrite','estimate', 'write',
+                          desc='one of: estimate, write, estwrite',
+                          usedefault=True)
+    apply_to_files = traits.List(traits.File(exists=True), field='other',
+                                 desc='files to apply transformation to',
+                                 copyfile=True)
+    cost_function = traits.Enum('mi', 'nmi', 'ecc', 'ncc',
+                                field = 'eoptions.cost_fun',
+                 desc = "cost function, one of: 'mi' - Mutual Information, " +
+                        "'nmi' - Normalised Mutual Information, " +
+                        "'ecc' - Entropy Correlation Coefficient, " +
+                        "'ncc' - Normalised Cross Correlation")
+    fwhm = traits.Float(field = 'eoptions.fwhm',
+                        desc = 'gaussian smoothing kernel width (mm)')
+    separation = traits.List(traits.Float(), field = 'eoptions.sep',
+                             desc = 'sampling separation in mm')
+    tolerance =  traits.List(traits.Float(), field = 'eoptions.tol',
+                        desc = 'acceptable tolerance for each of 12 params')
+    write_interp = traits.Range(low = 0, hign = 7, field = 'roptions.interp',
+                        desc = 'degree of b-spline used for interpolation')
+    write_wrap = traits.List(traits.Bool(), min_len = 3, max_len = 3,
+                             field = 'roptions.wrap',
+                     desc = 'Check if interpolation should wrap in [x,y,z]')
+    write_mask = traits.Bool(field = 'roptions.mask',
+                             desc = 'True/False mask output image')
+
+class CoregisterOutputSpec(TraitedSpec):
+    coregistered_source = traits.List(traits.File(exists=True),
+                                      desc = 'Coregistered source files')
+    coregistered_files = traits.List(traits.File, desc = 'Coregistered other files')
+    
+
 class Coregister(NEW_SPMCommand):
     """Use spm_coreg for estimating cross-modality rigid body alignment
 
@@ -235,44 +280,11 @@ class Coregister(NEW_SPMCommand):
     >>> coreg.run() # doctest: +SKIP
     
     """
-    
-    @property
-    def jobtype(self):
-        return 'spatial'
 
-    @property
-    def jobname(self):
-        return 'coreg'
-    
-    class input_spec(TraitedSpec):
-        target = traits.File(exists=True, field='ref', mandatory=True,
-                             desc='reference file to register to')
-        source = traits.List(traits.File(exists=True), field='source',
-                             desc='file to register to target', copyfile=True)
-        jobtype = traits.Enum('estwrite','estimate', 'write',
-                              desc='one of: estimate, write, estwrite',
-                              usedefault=True)
-        apply_to_files = traits.List(traits.File(exists=True), field='other',
-                                     desc='files to apply transformation to', copyfile=True)
-        cost_function = traits.Enum('mi', 'nmi', 'ecc', 'ncc', field = 'eoptions.cost_fun',
-                                    desc = "cost function, one of: 'mi' - Mutual Information, " +
-                                    "'nmi' - Normalised Mutual Information, 'ecc' - Entropy Correlation Coefficient, " +
-                                    "'ncc' - Normalised Cross Correlation")
-        fwhm = traits.Float(field = 'eoptions.fwhm', desc = 'gaussian smoothing kernel width')
-        separation = traits.List(traits.Float(), field = 'eoptions.sep', desc = 'sampling separation in mm')
-        tolerance =  traits.List(traits.Float(), field = 'eoptions.tol',
-                                  desc = 'acceptable tolerance for each of 12 params')
-        write_interp = traits.Range(low = 0, hign = 7, field = 'roptions.interp',
-                                    desc = 'degree of b-spline used for interpolation')
-        write_wrap = traits.List(traits.Bool(), min_len = 3, max_len = 3, field = 'roptions.wrap',
-                                 desc = 'Check if interpolation should wrap in [x,y,z]')
-        write_mask = traits.Bool(field = 'roptions.mask',
-                                 desc = 'True/False mask output image')
-        
-    class output_spec(TraitedSpec):
-        coregistered_source = traits.List(traits.File(exists=True), desc = 'Coregistered source files')
-        coregistered_files = traits.List(traits.File, desc = 'Coregistered other files')
-    
+    input_spec = CoregisterInputSpec
+    output_spec = CoregisterOutputSpec
+    _jobtype = 'spatial'
+    _jobname = 'coreg'
     
     def _parse_inputs(self):
         """validate spm coregister options if set to None ignore
@@ -473,6 +485,7 @@ class Normalize(SpmMatlabCommandLine):
         outputs.normalized_files = list_to_filename(outputs.normalized_files)
         return outputs
         
+
 class Segment(SpmMatlabCommandLine):
     """use spm_segment to separate structural images into different
     tissue classes.

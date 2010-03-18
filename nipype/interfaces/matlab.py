@@ -135,6 +135,21 @@ class MatlabCommandLine(CommandLine):
         return self._cmdline
     
 
+class MatlabInputSpec(TraitedSpec):
+    script  = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
+                         mandatory=True, position=-1)
+    nodesktop = traits.Bool(True, argstr='-nodesktop', usedefault=True,
+                            desc='Switch off desktop mode on unix platforms')
+    nosplash = traits.Bool(True, argstr='-nosplash', usedefault=True,
+                           descr='Switch of splash screen')
+    logfile = traits.File(argstr='-logfile %s',
+                          desc='Save matlab output to log')
+    # non-commandline options
+    mfile   = traits.Bool(False, desc='Run m-code using m-file',
+                          usedefault=True)
+    script_file = traits.File('pyscript.m',
+                              desc='Name of file to write m-code to')
+    paths   = traits.List(traits.Directory, desc='Paths to add to matlabpath')
 
 class NEW_MatlabCommand(NEW_CommandLine):
     """Interface that runs matlab code
@@ -146,22 +161,7 @@ class NEW_MatlabCommand(NEW_CommandLine):
     """
 
     matlab_cmd = 'matlab'
-
-    class input_spec(TraitedSpec):
-        script  = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
-                             mandatory=True, position=-1)
-        nodesktop = traits.Bool(True, argstr='-nodesktop', usedefault=True,
-                                desc='Switch off desktop mode on unix platforms')
-        nosplash = traits.Bool(True, argstr='-nosplash', usedefault=True,
-                               descr='Switch of splash screen')
-        logfile = traits.File(argstr='-logfile %s',
-                              desc='Save matlab output to log')
-        # non-commandline options
-        mfile   = traits.Bool(False, desc='Run m-code using m-file',
-                              usedefault=True)
-        script_file = traits.File('pyscript.m',
-                                  desc='Name of file to write m-code to')
-        paths   = traits.List(traits.Directory, desc='Paths to add to matlabpath')
+    input_spec = MatlabInputSpec
     
     def __init__(self, matlab_cmd = None, **inputs):
         """initializes interface to matlab

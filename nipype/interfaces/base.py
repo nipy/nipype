@@ -948,6 +948,9 @@ class NEW_BaseInterface(NEW_Interface):
         return info
 
 
+class CommandLineInputSpec(TraitedSpec):
+    args = traits.Str(argstr='%s', desc='Parameters to the command')
+
 class NEW_CommandLine(NEW_BaseInterface):
     """Implements functionality to interact with command line programs
 
@@ -965,15 +968,14 @@ class NEW_CommandLine(NEW_BaseInterface):
 
     """
 
-    class input_spec(TraitedSpec):
-        args = traits.Str(argstr='%s', desc='Parameters to the command')
+    input_spec = CommandLineInputSpec
+    _cmd = None
         
     def __init__(self, command=None, **inputs):
         super(NEW_CommandLine, self).__init__(**inputs)
         self._environ = {}
-        self._cmd = command # XXX Currently I don't see any code using
-                            # this feature.  Each class overrides the
-                            # cmd property.  Delete?
+        if command:
+            self._cmd = command
 
     @property
     def cmd(self):

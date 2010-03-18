@@ -24,6 +24,53 @@ import enthought.traits.api as traits
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+class BetInputSpec(TraitedSpec):
+    '''Note: Currently we don't support -R, -S, -Z,-A or -A2'''
+    # We use position args here as list indices - so a negative number
+    # will put something on the end
+    infile = traits.File(exists=True,
+                         desc = 'input file to skull strip',
+                         argstr='%s', position=0, mandatory=True)
+    outfile = traits.File(desc = 'name of output skull stripped image',
+                          argstr='%s', position=1, genfile=True)
+    outline = traits.Bool(desc = 'create surface outline image',
+                          argstr='-o')
+    mask = traits.Bool(desc = 'create binary mask image',
+                       argstr='-m')
+    skull = traits.Bool(desc = 'create skull image',
+                        argstr='-s')
+    nooutput = traits.Bool(argstr='-n',
+                           desc="Don't generate segmented output")
+    frac = traits.Float(desc = 'fractional intensity threshold',
+                        argstr='-f %.2f')
+    vertical_gradient = traits.Float(argstr='-g %.2f',
+             desc='vertical gradient in fractional intensity ' \
+                                         'threshold (-1, 1)')
+    radius = traits.Int(argstr='-r %d', units='mm',
+                        desc="head radius")
+    center = traits.List(traits.Int, desc = 'center of gravity in voxels',
+                         argstr='-c %s', minlen=0, maxlen=3,
+                         units='voxels')
+    threshold = traits.Bool(argstr='-t',
+                   desc="apply thresholding to segmented brain image and mask")
+    mesh = traits.Bool(argstr='-e',
+                       desc="generate a vtk mesh brain surface")
+    # XXX how do we know these two are mutually exclusive?
+    _xor_inputs = ('functional', 'reduce_bias')
+    functional = traits.Bool(argstr='-F', xor=_xor_inputs,
+                             desc="apply to 4D fMRI data")
+    reduce_bias = traits.Bool(argstr='-B', xor=_xor_inputs,
+                              desc="bias field and neck cleanup")
+
+class BetOutputSpec(TraitedSpec):
+    outfile = traits.File(exists=True,
+                          desc="path/name of skullstripped file")
+    maskfile = traits.File(
+        desc="path/name of binary brain mask (if generated)")
+    outlinefile = traits.File(
+        desc="path/name of outline file (if generated)")
+    meshfile = traits.File(
+        desc="path/name of vtk mesh file (if generated)")
 
 class Bet(NEW_FSLCommand):
     """Use FSL BET command for skull stripping.
@@ -65,58 +112,9 @@ class Bet(NEW_FSLCommand):
 
     """
 
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'bet'
-
-    class input_spec(TraitedSpec):
-        '''Note: Currently we don't support -R, -S, -Z,-A or -A2'''
-        # We use position args here as list indices - so a negative number will
-        # put something on the end
-        infile = traits.File(exists=True,
-                             desc = 'input file to skull strip',
-                             argstr='%s', position=0, mandatory=True)
-        outfile = traits.File(desc = 'name of output skull stripped image',
-                              argstr='%s', position=1, genfile=True)
-        outline = traits.Bool(desc = 'create surface outline image',
-                              argstr='-o')
-        mask = traits.Bool(desc = 'create binary mask image', 
-                           argstr='-m')
-        skull = traits.Bool(desc = 'create skull image',
-                            argstr='-s')
-        nooutput = traits.Bool(argstr='-n',
-                               desc="Don't generate segmented output")
-        frac = traits.Float(desc = 'fractional intensity threshold',
-                            argstr='-f %.2f')
-        vertical_gradient = traits.Float(argstr='-g %.2f',
-                            desc='vertical gradient in fractional intensity ' \
-                                             'threshold (-1, 1)')
-        radius = traits.Int(argstr='-r %d', units='mm',
-                            desc="head radius")
-        center = traits.List(traits.Int, desc = 'center of gravity in voxels',
-                             argstr='-c %s', minlen=0, maxlen=3,
-                             units='voxels')
-        threshold = traits.Bool(argstr='-t',
-                      desc="apply thresholding to segmented brain image and mask")
-        mesh = traits.Bool(argstr='-e',
-                           desc="generate a vtk mesh brain surface")
-        # XXX how do we know these two are mutually exclusive?
-        _xor_inputs = ('functional', 'reduce_bias')
-        functional = traits.Bool(argstr='-F', xor=_xor_inputs,
-                                 desc="apply to 4D fMRI data")
-        reduce_bias = traits.Bool(argstr='-B', xor=_xor_inputs,
-                                  desc="bias field and neck cleanup")
-
-    class output_spec(TraitedSpec):
-        outfile = traits.File(exists=True,
-                              desc="path/name of skullstripped file")
-        maskfile = traits.File(
-                        desc="path/name of binary brain mask (if generated)")
-        outlinefile = traits.File(
-                        desc="path/name of outline file (if generated)")
-        meshfile = traits.File(
-                        desc="path/name of vtk mesh file (if generated)")
+    _cmd = 'bet'
+    input_spec = BetInputSpec
+    output_spec = BetOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec()._dictcopy()

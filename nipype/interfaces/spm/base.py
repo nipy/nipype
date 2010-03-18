@@ -437,18 +437,12 @@ class NEW_SPMCommand(NEW_BaseInterface):
             self.__class__.__name__.split('.')[-1].lower()
 
     @property
-    def jobtype(self):
-        """the jobtype used by spm/matlab
-        to specify the jobtype to run
-        jobs{1}.jobtype{1}.jobname"""
-        raise NotImplementedError
+    def jobtype(cls):
+        return cls._jobtype
 
     @property
-    def jobname(self):
-        """the jobname used by spm/matlab
-        to specify the jobname to run
-        jobs{1}.jobtype{1}.jobname"""
-        raise NotImplementedError
+    def jobname(cls):
+        return cls._jobname
 
     def use_mfile(self, use_mfile):
         """boolean,
@@ -478,8 +472,6 @@ class NEW_SPMCommand(NEW_BaseInterface):
         """
         outputs = self._outputs()
         for key, val in self._list_outputs().items():
-            print key
-            print val
             setattr(outputs, key, val)
         return outputs
         
