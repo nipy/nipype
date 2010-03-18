@@ -174,7 +174,7 @@ class NodeWrapper(object):
             logger.info("in dir: %s"%outdir)
             # Get a dictionary with hashed filenames and a hashvalue
             # of the dictionary itself.
-            hashed_inputs, hashvalue = self.inputs._get_bunch_hash()
+            hashed_inputs, hashvalue = self.inputs._get_hashval()
             hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
             if updatehash:
                 logger.info("Updating hash: %s"%hashvalue)
@@ -307,7 +307,7 @@ class NodeWrapper(object):
                 if self.disk_based:
                     # to remove problem with thread unsafeness of savez
                     outdict = {'result_%s' % self.id : result}
-                    np.savez(resultsfile,**outdict)
+                    #np.savez(resultsfile,**outdict)
         else:
             # Likewise, cwd could go in here
             logger.info("Collecting precomputed outputs:")
@@ -342,7 +342,7 @@ class NodeWrapper(object):
     def hash_inputs(self):
         """Computes a hash of the input fields of the underlying
         interface."""
-        hashed_inputs, hashvalue = self.inputs._get_bunch_hash()
+        hashed_inputs, hashvalue = self.inputs._get_hashval()
         return hashvalue
 
     def _output_directory(self):

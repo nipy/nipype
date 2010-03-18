@@ -100,7 +100,7 @@ def check_forhash(filename):
         return False, None
 
 
-def hash_infile(self, afile, chunk_len=8192):
+def hash_infile(afile, chunk_len=8192):
     """ Computes md5 hash of a file"""
     md5hex = None
     if os.path.isfile(afile):
