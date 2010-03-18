@@ -290,12 +290,10 @@ class NodeWrapper(object):
             try:
                 result = self._interface.run()
             except:
+                runtime = Bunch(returncode = 1, environ = deepcopy(os.environ.data), hostname = gethostname())
                 result = InterfaceResult(interface=None,
-                                         runtime=None,
+                                         runtime=runtime,
                                          outputs=None)
-                result.runtime.returncode = 1
-                result.runtime.environ = deepcopy(os.environ.data)
-                result.runtime.hostname = gethostname()
                 self._result = result
                 raise
             if result.runtime.returncode:
@@ -323,18 +321,18 @@ class NodeWrapper(object):
     
     def _copyfiles_to_wd(self, outdir, execute):
         """ copy files over and change the inputs"""
-        if hasattr(self._interface,'get_input_info') and self.disk_based:
-            for info in self._interface.get_input_info():
-                files = self.inputs.get(info.key)
+        if hasattr(self._interface,'_get_filecopy_info') and self.disk_based:
+            for info in self._interface._get_filecopy_info():
+                files = self.inputs._dictcopy().get(info['key'])
                 if files:
                     infiles = filename_to_list(files)
                     if execute:
-                        newfiles = copyfiles(infiles, [outdir], copy=info.copy)
+                        newfiles = copyfiles(infiles, [outdir], copy=info['copy'])
                     else:
                         newfiles = fnames_presuffix(infiles, newpath=outdir)
                     if not isinstance(files, list):
                         newfiles = list_to_filename(newfiles)
-                    setattr(self.inputs, info.key, newfiles)
+                    setattr(self.inputs, info['key'], newfiles)
 
     def update(self, **opts):
         self.inputs.update(**opts)
