@@ -636,7 +636,8 @@ class TraitedSpec(traits.HasTraits):
     solution to move forward on the refactoring.
     """
 
-    #hashval = traits.Property(depends_on='moo')
+    trigger = traits.Event
+    hashval = traits.Property(depends_on='trigger', trait=traits.Tuple(dict, str))
     
     def __init__(self, **kwargs):
         self._generate_handlers()
@@ -650,30 +651,20 @@ class TraitedSpec(traits.HasTraits):
         #for key, val in kwargs.items():
         #    setattr(self, key, val)
 
-        depends = [k for k, _ in self.items()]
-        #print depends
-        # XX depends_on is not working, so caching has been disabled below
-        self.add_trait('hashval',
-                       traits.Property(desc='hash of spec',
-                                       fget = self._get_hashval,
-                                       depends_on = depends))
-                                       
-        #for k, _ in self.traits().items():
-        #    print k
 
     def __repr__(self):
         outstr = []
         for name, trait_spec in self.items():
             value = getattr(self, name)
             if value == trait_spec.default and not trait_spec.usedefault:
-                outstr.append('%s = Undefined' % name)
+                outstr.append('%s = <NOT SET>' % name)
             else:
                 outstr.append('%s = %s' % (name, value))
         return '\n'.join(outstr)
 
     def items(self):
         for name, trait_spec in sorted(self.traits().items()):
-            if name in ['trait_added', 'trait_modified', 'hashval']:
+            if name in ['trait_added', 'trait_modified', 'hashval', 'trigger']:
                 # Skip these trait api functions
                 continue
             yield name, trait_spec
@@ -710,7 +701,7 @@ class TraitedSpec(traits.HasTraits):
     def _dictcopy(self):
         out_dict = {}
         for name, trait_spec in self.items():
-            out_dict[name] = deepcopy(getattr(self, name))
+            out_dict[name] = getattr(self, name)
         return out_dict
 
     def _hash_infile(self, adict, key):
@@ -723,7 +714,7 @@ class TraitedSpec(traits.HasTraits):
             file_list.append((afile, hash_infile(afile) ))
         return file_list
 
-    #@traits.cached_property
+    @traits.cached_property
     def _get_hashval(self):
         """Return a dictionary of our items with hashes for each file.
 
@@ -744,7 +735,6 @@ class TraitedSpec(traits.HasTraits):
             The md5 hash value of the traited spec
 
         """
-        #print "calc hash"
         infile_list = []
         for name, trait_spec in self.items():
             val = getattr(self, name)
@@ -774,12 +764,10 @@ class TraitedSpec(traits.HasTraits):
         sorted_dict = str(sorted(dict_nofilename.items()))
         return (dict_withhash, md5(sorted_dict).hexdigest())
 
-    """
     def _anytrait_changed(self, name):
-        if name in ['trait_added', 'trait_modified', '_hash', '_dirty']:
+        if name in ['trait_added', 'trait_modified', 'hashval', 'trigger']:
             return
-        self._dirty = True
-    """
+        self.trigger = True
 
 class NEW_Interface(object):
     """This is an abstract defintion for Interface objects.
