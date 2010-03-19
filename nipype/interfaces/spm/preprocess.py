@@ -590,7 +590,7 @@ class Segment(SpmMatlabCommandLine):
 
 class SmoothInputSpec(TraitedSpec):
     infile = MultiPath(traits.File(exists=True), field='data', desc='list of files to smooth', madatrory=True, copyfile=False)
-    fwhm = traits.List(traits.Float(), min_len = 3, max_len = 3, field= 'fwhm', desc = '3-list of fwhm for each dimension (opt)')
+    fwhm = traits.Either(traits.List(traits.Float(), min_len = 3, max_len = 3),traits.Float(), field= 'fwhm', desc = '3-list of fwhm for each dimension (opt)')
     data_type =  traits.Int(field = 'dtype', desc = 'Data type of the output images (opt)')
 
 class SmoothOutputSpec(TraitedSpec):
