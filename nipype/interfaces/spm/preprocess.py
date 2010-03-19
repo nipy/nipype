@@ -327,38 +327,39 @@ class Coregister(NEW_SPMCommand):
         return outputs
 
 class NormalizeInputSpec(TraitedSpec):
-    template = traits.File(exists=True, field='eoptions.template', desc= 'template file to normalize to', copyfile=False)
-    source = MultiPath(exists=True, field='subj.source', desc= 'file to normalize to template', mandatory=True, copyfile=True)
-    jobtype = traits.Enum('estwrite','estimate', 'write', 
-                          desc = 'one of: estimate, write, estwrite (opt, estwrite)', usedefault=True)
-    apply_to_files = MultiPath(exists=True, field='subj.resample', 
-                               desc='files to apply transformation to (opt)', copyfile=True),
-    parameter_file = traits.File(field= 'subj.matname',
-                                  desc = 'normalization parameter file*_sn.mat',copyfile=False)
-    source_weight = traits.File(field = 'subj.wtsrc',
-                                 desc = 'name of weighting image for source (opt)', copyfile=False),
-    template_weight = traits.File(field = 'eoptions.weight',
-                                   desc = 'name of weighting image for template (opt)', copyfile=False),
-    source_image_smoothing = traits.Float(field = 'eoptions.smosrc',
-                                          desc = 'source smoothing (opt)')
-    template_image_smoothing = traits.Float(field = 'eoptions.smoref',
-                                            desc = 'template smoothing (opt)')
-    affine_regularization_type = traits.Enum('mni', 'size', 'none', field = 'eoptions.regype',
-                                              desc = 'mni, size, none (opt)')
-    DCT_period_cutoff =  traits.Float(field = 'eoptions.cutoff',
-                                     desc = 'Cutoff of for DCT bases (opt)')
-    nonlinear_iterations =  traits.Int(field = 'eoptions.nits',
-                     desc = 'Number of iterations of nonlinear warping (opt)')
-    nonlinear_regularization = traits.Float(field = 'eoptions.reg',
-                                            desc = 'the amount of the regularization for the nonlinear part of the normalization (opt)'),
-    write_preserve =  traits.Bool(field = 'roptions.preserve',
-                     desc = 'True/False warped images are modulated (opt,)'),
-    write_bounding_box =  traits.List(traits.Float(), field = 'roptions.bb', min_len = 6, max_len = 6, desc = '6-element list (opt)'),
-    write_voxel_sizes =  traits.List(traits.Float(), field = 'roptions.vox', min_len = 3, max_len = 3, desc = '3-element list (opt)'),
-    write_interp = traits.Range(low = 0, hign = 7, field = 'roptions.interp',
-                        desc = 'degree of b-spline used for interpolation')
-    write_wrap =  traits.List(traits.Bool(), field = 'roptions.wrap',
-                        desc = 'Check if interpolation should wrap in [x,y,z] - list of bools (opt)')
+    template = traits.File(exists=True, field='eoptions.template', desc='template file to normalize to', copyfile=False)
+    source = MultiPath(exists=True, field='subj.source', desc='file to normalize to template', mandatory = True, copyfile=True)
+    jobtype = traits.Enum('estwrite', 'estimate', 'write',
+                          desc='one of: estimate, write, estwrite (opt, estwrite)', usedefault=True)
+    apply_to_files = MultiPath(exists=True, field='subj.resample',
+                               desc='files to apply transformation to (opt)', copyfile=True)
+    parameter_file = traits.File(field='subj.matname',
+                                  desc='normalization parameter file*_sn.mat', copyfile=False)
+    source_weight = traits.File(field='subj.wtsrc',
+                                 desc='name of weighting image for source (opt)', copyfile=False)
+    template_weight = traits.File(field='eoptions.weight',
+                                   desc='name of weighting image for template (opt)', copyfile=False)
+    source_image_smoothing = traits.Float(field='eoptions.smosrc',
+                                          desc='source smoothing (opt)')
+    template_image_smoothing = traits.Float(field='eoptions.smoref',
+                                            desc='template smoothing (opt)')
+    affine_regularization_type = traits.Enum('mni', 'size', 'none', field='eoptions.regype',
+                                              desc='mni, size, none (opt)')
+    DCT_period_cutoff = traits.Float(field='eoptions.cutoff',
+                                     desc='Cutoff of for DCT bases (opt)')
+    nonlinear_iterations = traits.Int(field='eoptions.nits',
+                     desc='Number of iterations of nonlinear warping (opt)')
+    nonlinear_regularization = traits.Float(field='eoptions.reg',
+                                            desc='the amount of the regularization for the nonlinear part of the normalization (opt)')
+    write_preserve = traits.Bool(field='roptions.preserve',
+                     desc='True/False warped images are modulated (opt,)')
+    write_bounding_box = traits.List(traits.Float(), field='roptions.bb', min_len=6, max_len=6, desc='6-element list (opt)')
+    write_voxel_sizes = traits.List(traits.Float(), field='roptions.vox', min_len=3, max_len=3, desc='3-element list (opt)')
+    write_interp = traits.Range(low=0, hign=7, field='roptions.interp',
+                        desc='degree of b-spline used for interpolation')
+    write_wrap = traits.List(traits.Bool(), field='roptions.wrap',
+                        desc='Check if interpolation should wrap in [x,y,z] - list of bools (opt)')
+
     
 class NormalizeOutputSpec(TraitedSpec):
     normalization_parameters = MultiPath(traits.File(exists=True), desc='MAT files containing the normalization parameters')
