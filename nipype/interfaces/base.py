@@ -754,6 +754,11 @@ class TraitedSpec(traits.HasTraits):
         dict_withhash = self._dictcopy()
         dict_nofilename = self._dictcopy()
         for key, spec in self.items():
+            #do not hash values which are not set
+            if dict_withhash[key] == None:
+                del dict_withhash[key]
+                del dict_nofilename[key]
+                continue
             innertype = []
             if spec.inner_traits:
                 innertype = [1 for inner in spec.inner_traits \
@@ -958,7 +963,13 @@ class NEW_BaseInterface(NEW_Interface):
                 info.append(dict(key=name,
                                  copy=trait_spec.copyfile))
         return info
-
+    
+    def aggregate_outputs(self):
+        outputs = self._outputs()
+        expected_outputs = self._list_outputs()
+        if expected_outputs:
+            outputs.set(**expected_outputs)
+        return outputs
 
 class CommandLineInputSpec(TraitedSpec):
     args = traits.Str(argstr='%s', desc='Parameters to the command')
@@ -1072,13 +1083,6 @@ class NEW_CommandLine(NEW_BaseInterface):
             return self._outputs()._dictcopy()
         else:
             return None
-
-    def aggregate_outputs(self):
-        outputs = self._outputs()
-        expected_outputs = self._list_outputs()
-        if expected_outputs:
-            outputs.set(**expected_outputs)
-        return outputs
 
     def _format_arg(self, name, trait_spec, value):
         '''A helper function for _parse_inputs'''
