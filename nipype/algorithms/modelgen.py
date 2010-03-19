@@ -18,51 +18,23 @@ from scipy.special import gammaln
 #from scipy.stats.distributions import gamma
 
 from nipype.externals.pynifti import load
-from nipype.interfaces.base import Bunch, InterfaceResult, Interface
+from nipype.interfaces.base import Bunch, InterfaceResult, Interface,\
+    NEW_BaseInterface, TraitedSpec, MultiPath, traits
 from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix,
                                     filename_to_list, list_to_filename,
                                     FileNotFoundError)
 from nipype.interfaces.spm import scans_for_fnames
 
-class SpecifyModel(Interface):
-    """Makes a model specification
-
-    Parameters
-    ----------
-    inputs : dict
-        key, value pairs that will update the SpecifyModel.inputs
-        attributes. See self.inputs_help() for a list attributes.
-    
-    Attributes
-    ----------
-    inputs : :class:`nipype.interfaces.base.Bunch`
-        Options that can be passed to spm_spm via a job structure
-    cmdline : str
-        String used to call matlab/spm via SpmMatlabCommandLine
-        interface
-        
-    Other Parameters
-    ----------------
-    To see optional arguments SpecifyModel().inputs_help()
-
-    """
-    
-    def __init__(self, *args, **inputs):
-        self._populate_inputs()
-        self.inputs.update(**inputs)
-
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-        subject_id : string or int
+class SpecifyModelInputSpec(TraitedSpec):
+    subject_id = traits.Either(traits.Str(),traits.Int(), desc ="""string or int
             Subject identifier used as a parameter to the
             subject_info_func.
-        subject_info_func : function
-            Returns subject specific condition information. If all
+""")
+    subject_info_func = traits.List(desc= """List
+            Subject specific condition information. If all
             subjects had the same stimulus presentation schedule,
             then this function can return the same structure
-            independent of the subject. This function must retun a
+            independent of the subject. This function must return a
             list of dicts with the list length equal to the number of
             sessions. The dicts should contain the following
             information.
@@ -74,7 +46,7 @@ class SpecifyModel(Interface):
 
             durations : lists of durations corresponding to each
                 condition. Should be left to a single 0 if all
-                events are being modeled as impulses.
+                events are being modelled as impulses.
 
             amplitudes : lists of amplitudes for each event. This
                 is ignored by SPM
@@ -98,90 +70,101 @@ class SpecifyModel(Interface):
 
                 matfile : MAT-file containing names and a matrix
                     called R
-
-        realignment_parameters : list of files
+""")
+    realignment_parameters = traits.List(traits.File(exists=True), desc = """list of files
             Realignment parameters returned by some motion
             correction algorithm. Assumes that each file is a text
             file containing a row of translation and rotation
             parameters.
-        outlier_files : list of files
+""", filecopy=False)
+    outlier_files = traits.List(traits.File(exists=True), desc="""list of files
             A list of files containing outliers that should be
             tossed. One file per session.
-        functional_runs : list of files
+""", filecopy=False)
+    functional_runs = traits.List(traits.File(exists=True), desc="""list of files
             List of data files for model. List of 4D files or list of
             list of 3D files per session
-        input_units : string
+""", filecopy=False)
+    input_units = traits.Enum('secs', 'scans', desc = """string
             Units of event onsets and durations (secs or scans) as
             returned by the subject_info_func
-        output_units : string
+""")
+    output_units = traits.Enum('secs', 'scans', desc = """string
             Units of event onsets and durations (secs or scans) as
             sent to SPM design
-        high_pass_filter_cutoff : float, optional
+""")
+    high_pass_filter_cutoff = traits.Float(desc = """float, optional
             High-pass filter cutoff in secs
-        polynomial_order : int, optional
+""")
+    polynomial_order = traits.Int(desc ="""int, optional
             Number of polynomial functions used to model high pass
             filter. 
-        concatenate_runs : boolean, optional
+""")
+    concatenate_runs = traits.Bool(desc="""boolean, optional
             Allows concatenating all runs to look like a single
             expermental session.
-        time_repetition : float
+""")
+    time_repetition = traits.Float(desc = """float
             Time between the start of one volume to the start of
             the next image volume. If a clustered acquisition is
             used, then this should be the time between the start
             of acquisition of one cluster to the start of
             acquisition of the next cluster.
+""")
 
-        Sparse and clustered-sparse specific options
+        #Sparse and clustered-sparse specific options
 
-        time_acquisition : float
+    time_acquisition = traits.Float(desc = """float
             Time in seconds to acquire a single image volume
-        volumes_in_cluster : int
+""")
+    volumes_in_cluster = traits.Int(desc="""int
             If number of volumes in a cluster is greater than one,
             then a sparse-clustered acquisition is being assumed.
-        model_hrf : boolean
+""")
+    model_hrf = traits.Bool(desc="""boolean
             Whether to model hrf for sparse clustered analysis
-        stimuli_as_impulses : boolean
+""")
+    stimuli_as_impulses = traits.Bool(desc = """boolean
             Whether to treat each stimulus to be impulse like. If
             not, the stimuli are convolved with their respective
             durations.
-        scan_onset : float
+""", default=True, usedefault=True)
+    scan_onset = traits.Float(0.0, desc="""float
             Start of scanning relative to onset of run in
-            secs. default = 0 
-        """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        """ Initializes the input fields of this interface.
-        """
-        self.inputs = Bunch(subject_id=None,
-                            subject_info_func=None,
-                            realignment_parameters=None,
-                            outlier_files=None,
-                            functional_runs=None,
-                            input_units=None,
-                            output_units=None,
-                            concatenate_runs=None,
-                            time_repetition=None,
-                            time_acquisition=None,
-                            high_pass_filter_cutoff=None,
-                            volumes_in_cluster=None,
-                            model_hrf=None,
-                            stimuli_as_impulses=True,
-                            scan_onset=0.)
-        
-    def outputs(self):
-        """
-            Parameters
-            ----------
-            (all default to None)
-
-            session_info: file
+            secs. default = 0
+""", usedefault=True)
+    
+class SpecifyModelOutputSpec(TraitedSpec):
+    session_info = traits.File(exists=True, desc="""file
                 Numpy file that saves a python dict that can be input
                 to spm and fsl Level1Design modules
-        """
-        outputs = Bunch(session_info=None)
-        return outputs
+""")
 
+class SpecifyModel(NEW_BaseInterface):
+    """Makes a model specification
+
+    Parameters
+    ----------
+    inputs : dict
+        key, value pairs that will update the SpecifyModel.inputs
+        attributes. See self.inputs_help() for a list attributes.
+    
+    Attributes
+    ----------
+    inputs : :class:`nipype.interfaces.base.Bunch`
+        Options that can be passed to spm_spm via a job structure
+    cmdline : str
+        String used to call matlab/spm via SpmMatlabCommandLine
+        interface
+        
+    Other Parameters
+    ----------------
+    To see optional arguments SpecifyModel().inputs_help()
+
+    """
+    input_spec = SpecifyModelInputSpec
+    output_spec = SpecifyModelOutputSpec
+    
     def _scaletimings(self,timelist,input_units=None,output_units=None):
         if input_units is None:
             input_units = self.inputs.input_units
@@ -565,11 +548,10 @@ class SpecifyModel(Interface):
     def _get_outfilename(self):
         return os.path.join(os.getcwd(),'%s_modelspec.npz'%self.inputs.subject_id)
 
-    def aggregate_outputs(self):
-        outputs = self.outputs()
+    def _list_outputs(self):
+        outputs = self._outputs()._dictcopy()
+        
         outfile = self._get_outfilename()
         session_info = glob(outfile)
-        if not session_info:
-            raise FileNotFoundError('Session Info file: %s' % outfile)
-        outputs.session_info = list_to_filename(session_info)
+        outputs['session_info'] = list_to_filename(session_info)
         return outputs
