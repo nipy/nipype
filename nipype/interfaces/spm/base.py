@@ -454,8 +454,7 @@ class NEW_SPMCommand(NEW_BaseInterface):
     def run(self, **inputs):
         """Executes the SPM function using MATLAB
         """
-        for key, val in inputs.items():
-            setattr(self.inputs, key, val)
+        self.inputs.set(**inputs)
         self.mlab.inputs.script = self._make_matlab_command(deepcopy(self._parse_inputs()))
         results = self.mlab.run()
         if results.runtime.returncode == 0:
@@ -486,7 +485,8 @@ class NEW_SPMCommand(NEW_BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if value == trait_spec.default and not trait_spec.usedefault:
+            if value == trait_spec.default and \
+                    not (trait_spec.usedefault or name in self.inputs.explicitset):
                 continue
             field = trait_spec.field
             if '.' in field:

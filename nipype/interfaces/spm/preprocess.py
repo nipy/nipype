@@ -172,7 +172,7 @@ class RealignInputSpec(TraitedSpec):
 class RealignOutputSpec(TraitedSpec):
     mean_image = traits.File(desc='Mean image file from the realignment')
     realigned_files = traits.List(traits.File, desc='Realigned files')
-    realignment_parameters = traits.List(traits.File,
+    realignment_parameters = traits.List(traits.File(exists=True),
                     desc='Estimated translation and rotation parameters')
 
 class Realign(NEW_SPMCommand):
@@ -215,14 +215,18 @@ class Realign(NEW_SPMCommand):
 
     def _list_outputs(self):
         outputs = self._outputs()._dictcopy()
-        outputs['mean_image'] = fname_presuffix(self.inputs.infile[0], prefix='mean')
+        if self.inputs.infile:
+            outputs['realigned_files'] = []
+            outputs['realignment_parameters'] = []
+        for imgf in self.inputs.infile:
+            outputs['realignment_parameters'].append(fname_presuffix(imgf,
+                                                                     prefix='rp_',
+                                                                     suffix='.txt',
+                                                                     use_ext=False))
         if self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
+            outputs['mean_image'] = fname_presuffix(self.inputs.infile[0], prefix='mean')
             for imgf in self.inputs.infile:
                 outputs['realigned_files'].append(fname_presuffix(imgf, prefix='r'))
-                outputs['realignment_parameters'].append(fname_presuffix(imgf,
-                                                                   prefix='rp_',
-                                                                   suffix='.txt',
-                                                                   use_ext=False))
         return outputs
 
 ####################################
@@ -729,9 +733,4 @@ class Smooth(SpmMatlabCommandLine):
             outputs.smoothed_files.append(s_file[0])
         return outputs
 
-###################################
-#
-# NEW_ classes
-#
-###################################
 

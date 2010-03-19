@@ -638,6 +638,7 @@ class TraitedSpec(traits.HasTraits):
 
     trigger = traits.Event
     hashval = traits.Property(depends_on='trigger', trait=traits.Tuple(dict, str))
+    explicitset = traits.List(traits.Str)
     
     def __init__(self, **kwargs):
         self._generate_handlers()
@@ -646,6 +647,8 @@ class TraitedSpec(traits.HasTraits):
         # therefore these args were being ignored.
         #super(TraitedSpec, self).__init__(*args, **kwargs)
         super(TraitedSpec, self).__init__(**kwargs)
+        for name, value in kwargs.items():
+            self._add_to_explicitset(name, value)
 
         # XX kwargs always appears to be empty
         #for key, val in kwargs.items():
@@ -654,20 +657,31 @@ class TraitedSpec(traits.HasTraits):
 
     def __repr__(self):
         outstr = []
-        for name, trait_spec in self.items():
-            value = getattr(self, name)
-            if value == trait_spec.default and not trait_spec.usedefault:
-                outstr.append('%s = <NOT SET>' % name)
-            else:
+        for name, value in self.itemvalues():
+            if value:
                 outstr.append('%s = %s' % (name, value))
+            else:
+                outstr.append('%s = <NOT SET>' % name)
         return '\n'.join(outstr)
 
     def items(self):
         for name, trait_spec in sorted(self.traits().items()):
-            if name in ['trait_added', 'trait_modified', 'hashval', 'trigger']:
+            if name in ['trait_added', 'trait_modified', 'hashval', 'trigger', 'explicitset']:
                 # Skip these trait api functions
                 continue
             yield name, trait_spec
+            
+    def itemvalues(self):
+        for name, trait_spec in sorted(self.traits().items()):
+            if name in ['trait_added', 'trait_modified', 'hashval', 'trigger', 'explicitset']:
+                # Skip these trait api functions
+                continue
+            value = getattr(self, name)
+            if value == trait_spec.default and \
+                    not (trait_spec.usedefault or name in self.explicitset):
+                yield name, None
+            else:
+                yield name, value
 
     def _generate_handlers(self):
         # Find all traits with the 'xor' metadata and attach an event
@@ -697,11 +711,12 @@ class TraitedSpec(traits.HasTraits):
                                                      tspec.default)
                     warn(msg)
 
-
     def _dictcopy(self):
         out_dict = {}
-        for name, trait_spec in self.items():
-            out_dict[name] = getattr(self, name)
+        for name, value in self.itemvalues():
+            out_dict[name] = None
+            if value:
+                out_dict[name] = value
         return out_dict
 
     def _hash_infile(self, adict, key):
@@ -736,45 +751,47 @@ class TraitedSpec(traits.HasTraits):
 
         """
         infile_list = []
-        for name, trait_spec in self.items():
-            val = getattr(self, name)
-            item = None
-            if is_container(val):
-                # XX need to revamp this for hierarchical searching of
-                # dicts 
-                if isinstance(val, list):
-                    if val:
-                        item=val[0]
-            else:
-                item = val
-            try:
-                if os.path.isfile(item):
-                    infile_list.append(name)
-            except TypeError:
-                # `item` is not a file or string.
-                continue
         dict_withhash = self._dictcopy()
         dict_nofilename = self._dictcopy()
-        for item in infile_list:
-            dict_withhash[item] = self._hash_infile(dict_withhash, item)
-            dict_nofilename[item] = [val[1] for val in dict_withhash[item]]
+        for key, spec in self.items():
+            innertype = []
+            if spec.inner_traits:
+                innertype = [1 for inner in spec.inner_traits \
+                                 if inner.is_trait_type(traits.File)]
+            if spec.is_trait_type(traits.File) or innertype:
+                if dict_withhash[key]:
+                    dict_withhash[key] = self._hash_infile(dict_withhash, key)
+                    dict_nofilename[key] = [val[1] for val in dict_withhash[key]]
         # Sort the items of the dictionary, before hashing the string
         # representation so we get a predictable order of the
         # dictionary.
         sorted_dict = str(sorted(dict_nofilename.items()))
         return (dict_withhash, md5(sorted_dict).hexdigest())
 
-    def _anytrait_changed(self, name):
-        if name in ['trait_added', 'trait_modified', 'hashval', 'trigger']:
+    def _anytrait_changed(self, name, old, value):
+        if name in ['trait_added', 'trait_modified', 'hashval', 'trigger', 'explicitset']:
             return
         self.trigger = True
 
+    def _add_to_explicitset(self, name, value):
+        if value == self.traits()[name].default:
+            if name not in self.explicitset:
+                self.explicitset.append(name)
+        elif name in self.explicitset:
+            self.explicitset.remove(name)
+
     def set(self, **kwargs):
-        super( TraitedSpec, self).set(**kwargs)
-        for key, spec in self.traits().items():
-            if key in kwargs.keys():
-                if kwargs[key] == spec.default:
-                    setattr(spec, 'usedefault', True)
+        for name, value in kwargs.items():
+            if name in self.trait_names():
+                setattr(self, name, value)
+                self._add_to_explicitset(name, value)
+    
+    def __getstate__ ( self ):
+        state = super( TraitedSpec, self ).__getstate__()
+        for key, value in self.itemvalues():
+            if not value:
+                del state[key]
+        return state
 
 class NEW_Interface(object):
     """This is an abstract defintion for Interface objects.
@@ -1010,8 +1027,7 @@ class NEW_CommandLine(NEW_BaseInterface):
             A result object with a copy of self in `interface`
 
         """
-        for key, val in inputs.items():
-            setattr(self.inputs, key, val)
+        self.inputs.set(**inputs)
 
         if cwd is None:
             cwd = os.getcwd()
@@ -1061,8 +1077,7 @@ class NEW_CommandLine(NEW_BaseInterface):
         outputs = self._outputs()
         expected_outputs = self._list_outputs()
         if expected_outputs:
-            for key, val in expected_outputs.items():
-                setattr(outputs, key, val)
+            outputs.set(**expected_outputs)
         return outputs
 
     def _format_arg(self, name, trait_spec, value):
@@ -1123,7 +1138,8 @@ class NEW_CommandLine(NEW_BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if value == trait_spec.default and not trait_spec.usedefault:
+            if value == trait_spec.default and \
+                    not (trait_spec.usedefault or name in self.inputs.explicitset):
                 if trait_spec.genfile:
                     gen_val = self._gen_filename(name)
                     value = gen_val
@@ -1195,4 +1211,4 @@ class MultiPath(traits.List):
         newvalue = value
         if isinstance(value, str):
             newvalue = [value]
-        return super(MultiPath, self).validate(object, name, newvalue)
+        super(MultiPath, self).validate(object, name, newvalue)
