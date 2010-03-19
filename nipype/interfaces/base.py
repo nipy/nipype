@@ -1211,4 +1211,4 @@ class MultiPath(traits.List):
         newvalue = value
         if isinstance(value, str):
             newvalue = [value]
-        super(MultiPath, self).validate(object, name, newvalue)
+        return super(MultiPath, self).validate(object, name, newvalue)
