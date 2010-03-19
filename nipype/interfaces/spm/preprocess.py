@@ -316,15 +316,56 @@ class Coregister(NEW_SPMCommand):
             outputs['coregistered_source'] = self.inputs.source
         elif self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
             if self.inputs.apply_to_files != None:
-                for imgf in self.inputs.apply_to_files:
+                outputs['coregistered_files'] = []
+                for imgf in filename_to_list(self.inputs.apply_to_files):
                     outputs['coregistered_files'].append(fname_presuffix(imgf, prefix='r'))
-                    
-            for imgf in self.inputs.source:
+            
+            outputs['coregistered_source'] = []        
+            for imgf in filename_to_list(self.inputs.source):
                 outputs['coregistered_source'].append(fname_presuffix(imgf, prefix='r'))
                 
         return outputs
 
-class Normalize(SpmMatlabCommandLine):
+class NormalizeInputSpec(TraitedSpec):
+    template = traits.File(exists=True, field='eoptions.template', desc= 'template file to normalize to', copyfile=False)
+    source = MultiPath(exists=True, field='subj.source', desc= 'file to normalize to template', mandatory=True, copyfile=True)
+    jobtype = traits.Enum('estwrite','estimate', 'write', 
+                          desc = 'one of: estimate, write, estwrite (opt, estwrite)', usedefault=True)
+    apply_to_files = MultiPath(exists=True, field='subj.resample', 
+                               desc='files to apply transformation to (opt)', copyfile=True),
+    parameter_file = traits.File(field= 'subj.matname',
+                                  desc = 'normalization parameter file*_sn.mat',copyfile=False)
+    source_weight = traits.File(field = 'subj.wtsrc',
+                                 desc = 'name of weighting image for source (opt)', copyfile=False),
+    template_weight = traits.File(field = 'eoptions.weight',
+                                   desc = 'name of weighting image for template (opt)', copyfile=False),
+    source_image_smoothing = traits.Float(field = 'eoptions.smosrc',
+                                          desc = 'source smoothing (opt)')
+    template_image_smoothing = traits.Float(field = 'eoptions.smoref',
+                                            desc = 'template smoothing (opt)')
+    affine_regularization_type = traits.Enum('mni', 'size', 'none', field = 'eoptions.regype',
+                                              desc = 'mni, size, none (opt)')
+    DCT_period_cutoff =  traits.Float(field = 'eoptions.cutoff',
+                                     desc = 'Cutoff of for DCT bases (opt)')
+    nonlinear_iterations =  traits.Int(field = 'eoptions.nits',
+                     desc = 'Number of iterations of nonlinear warping (opt)')
+    nonlinear_regularization = traits.Float(field = 'eoptions.reg',
+                                            desc = 'the amount of the regularization for the nonlinear part of the normalization (opt)'),
+    write_preserve =  traits.Bool(field = 'roptions.preserve',
+                     desc = 'True/False warped images are modulated (opt,)'),
+    write_bounding_box =  traits.List(traits.Float(), field = 'roptions.bb', min_len = 6, max_len = 6, desc = '6-element list (opt)'),
+    write_voxel_sizes =  traits.List(traits.Float(), field = 'roptions.vox', min_len = 3, max_len = 3, desc = '3-element list (opt)'),
+    write_interp = traits.Range(low = 0, hign = 7, field = 'roptions.interp',
+                        desc = 'degree of b-spline used for interpolation')
+    write_wrap =  traits.List(traits.Bool(), field = 'roptions.wrap',
+                        desc = 'Check if interpolation should wrap in [x,y,z] - list of bools (opt)')
+    
+class NormalizeOutputSpec(TraitedSpec):
+    normalization_parameters = MultiPath(traits.File(exists=True), desc='MAT files containing the normalization parameters')
+    normalized_source = MultiPath(traits.File(exists=True), desc='Normalized source files')
+    normalized_files = MultiPath(traits.File(exists=True), desc = 'Normalized other files')
+
+class Normalize(NEW_SPMCommand):
     """use spm_normalise for warping an image to a template
 
     Examples
@@ -332,65 +373,12 @@ class Normalize(SpmMatlabCommandLine):
     
     """
     
-    def spm_doc(self):
-        """Print out SPM documentation."""
-        print grab_doc('Normalise: Estimate & Write')
-
-    @property
-    def cmd(self):
-        return 'spm_normalise'
-
-    @property
-    def jobtype(self):
-        return 'spatial'
-
-    @property
-    def jobname(self):
-        return 'normalise'
+    input_spec = NormalizeInputSpec
+    output_spec = NormalizeOutputSpec
+    _jobtype = 'spatial'
+    _jobname = 'normalise'
     
-    opt_map = {'template': ('eoptions.template', 'template file to normalize to'),
-               'source': ('subj.source', 'file to normalize to template'),
-               'jobtype': (None, 'one of: estimate, write, estwrite (opt, estwrite)', 'estwrite'),
-               'apply_to_files': ('subj.resample',
-                                  'files to apply transformation to (opt,)'),
-               'parameter_file': ('subj.matname',
-                                  'normalization parameter file*_sn.mat'),
-               'source_weight': ('subj.wtsrc',
-                                 'name of weighting image for source (opt)'),
-               'template_weight': ('eoptions.weight',
-                                   'name of weighting image for template (opt)'),
-               'source_image_smoothing': ('eoptions.smosrc',
-                                          'source smoothing (opt)'),
-               'template_image_smoothing': ('eoptions.smoref',
-                                            'template smoothing (opt)'),
-               'affine_regularization_type': ('eoptions.regype',
-                                              'mni, size, none (opt)'),
-               'DCT_period_cutoff': ('eoptions.cutoff',
-                                     'Cutoff of for DCT bases (opt, 25)'),
-               'nonlinear_iterations': ('eoptions.nits',
-                     'Number of iterations of nonlinear warping (opt, 16)'),
-               'nonlinear_regularization': ('eoptions.reg',
-                                            'min = 0; max = 1 (opt, 1)'),
-               'write_preserve': ('roptions.preserve',
-                     'True/False warped images are modulated (opt, False)'),
-               'write_bounding_box': ('roptions.bb', '6-element list (opt,)'),
-               'write_voxel_sizes': ('roptions.vox', '3-element list (opt,)'),
-               'write_interp': ('roptions.interp',
-                           'degree of b-spline used for interpolation (opt, 0)'),
-               'write_wrap': ('roptions.wrap',
-                        'Check if interpolation should wrap in [x,y,z] (opt, [0,0,0])'),
-               }
-
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='source',copy=False),
-                Bunch(key='parameter_file',copy=False),
-                Bunch(key='apply_to_files',copy=False)]
-        return info
-        
-    def _convert_inputs(self, opt, val):
+    def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
         """
         if opt == 'template':
@@ -405,7 +393,7 @@ class Normalize(SpmMatlabCommandLine):
             if len(val) != 3:
                 raise ValueError('%s must have 3 elements'%opt)
         return val
-
+    
     def _parse_inputs(self):
         """validate spm realign options if set to None ignore
         """
@@ -422,83 +410,31 @@ class Normalize(SpmMatlabCommandLine):
                 if self.inputs.source:
                     einputs[0]['subj']['resample'] = scans_for_fname(self.inputs.source)            
         return [{'%s'%(jobtype):einputs[0]}]
-
-    def run(self, template=None, source=None, parameter_file=None, apply_to_files=None, **inputs):
-        """Executes the SPM normalize function using MATLAB
-        
-        Parameters
-        ----------
-        
-        template: string, list containing 1 filename
-            template image file to normalize to
-        source: source image file that is normalized
-            to template.
-        """
-        if template:
-            self.inputs.template = template
-        if source:
-            self.inputs.source = source
-        if parameter_file:
-            self.inputs.parameter_file = parameter_file
-        if apply_to_files:
-            self.inputs.apply_to_files = apply_to_files
-            
-        jobtype =  self.inputs.jobtype
-        if jobtype.startswith('est'):
-            if not self.inputs.template:
-                raise AttributeError('Normalize estimation requires a target file')
-            if not self.inputs.source:
-                raise AttributeError('Realign requires a source file')
-        else:
-            if not self.inputs.apply_to_files:
-                raise AttributeError('Normalize write requires a files to apply')
-            if not self.inputs.parameter_file:
-                raise AttributeError('Normalize write requires a transformation matrix')
-            
-        self.inputs.update(**inputs)
-        return super(Normalize,self).run()
     
-
-    out_map = {'normalization_parameters' : ('MAT file containing the normalization parameters',),
-               'normalized_source' : ('Normalized source file',),
-               'normalized_files' : ('Normalized other files',
-                                     'apply_to_files')
-               }
+    def _list_outputs(self):
+        outputs = self._outputs()._dictcopy()
         
-    def aggregate_outputs(self):
-           
-        outputs = self.outputs()
         jobtype =  self.inputs.jobtype
         if jobtype.startswith('est'):
-            sourcefile = list_to_filename(self.inputs.source)
-            n_param = glob(fname_presuffix(sourcefile,suffix='_sn.mat',use_ext=False))
-            assert len(n_param) == 1, 'No normalization parameter files '\
-                'generated by SPM Normalize'
-            outputs.normalization_parameters = n_param
-        outputs.normalized_files = []
-        if self.inputs.source is not None:
-            if isinstance(self.inputs.source, list):
-                source_ext = self.inputs.source[0][-4:]
-            else:
-                source_ext = self.inputs.source[-4:]
-                
-            sourcefile = list_to_filename(self.inputs.source)
-            n_source = glob(fname_presuffix(sourcefile,prefix='w',suffix=source_ext,use_ext=False))
-            outputs.normalized_source = list_to_filename(n_source)
-        if self.inputs.apply_to_files is not None:
-            if isinstance(self.inputs.apply_to_files, list):
-                files_ext = self.inputs.apply_to_files[0][-4:]
-            else:
-                files_ext = self.inputs.apply_to_files[-4:]
-                
-            filelist = filename_to_list(self.inputs.apply_to_files)
-            for f in filelist:
-                n_file = glob(fname_presuffix(f,prefix='w',suffix=files_ext,use_ext=False))
-                assert len(n_file) == 1, 'No normalized file %s generated by SPM Normalize'%n_file
-                outputs.normalized_files.append(n_file[0])
-        outputs.normalized_files = list_to_filename(outputs.normalized_files)
-        return outputs
+            outputs['normalization_parameters'] = []
+            for imgf in filename_to_list(self.inputs.source):
+                outputs['normalization_parameters'].append(fname_presuffix(imgf, suffix='_sn.mat',use_ext=False))
         
+        if self.inputs.jobtype == "estimate":
+            if self.inputs.apply_to_files != None:
+                outputs['normalized_files'] = self.inputs.apply_to_files
+            outputs['normalized_source'] = self.inputs.source
+        elif self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
+            outputs['normalized_files'] = []
+            if self.inputs.apply_to_files != None:
+                for imgf in filename_to_list(self.inputs.apply_to_files):
+                    outputs['normalized_files'].append(fname_presuffix(imgf, prefix='w'))
+            
+            outputs['normalized_source'] = []
+            for imgf in filename_to_list(self.inputs.source):
+                outputs['normalized_source'].append(fname_presuffix(imgf, prefix='w'))
+                
+        return outputs
 
 class Segment(SpmMatlabCommandLine):
     """use spm_segment to separate structural images into different
