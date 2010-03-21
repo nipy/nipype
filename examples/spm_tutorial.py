@@ -47,8 +47,8 @@ because SPM does not handle compressed NIFTI.
 """
 
 # Tell fsl to generate all output in uncompressed nifti format
-print fsl.FSLInfo.version()
-fsl.FSLInfo.outputtype('NIFTI')
+print fsl.Info.version()
+fsl.NEW_FSLCommand.outputtype('NIFTI')
 
 # Set the way matlab should be called
 mlab.MatlabCommandLine.matlab_cmd = "matlab -nodesktop -nosplash"
@@ -272,7 +272,7 @@ l1pipeline.connect([(datasource,realign,[('func','infile')]),
 		  (normalize, smooth, [('normalized_files', 'infile')]),
                   (datasource,modelspec,[('subject_id','subject_id'),
                                          (('subject_id', subjectinfo),
-                                          'subject_info_func')]),
+                                          'subject_info')]),
                   (realign,modelspec,[('realignment_parameters','realignment_parameters')]),
                   (smooth,modelspec,[('smoothed_files','functional_runs')]),
                   (normalize,skullstrip,[('normalized_source','infile')]),

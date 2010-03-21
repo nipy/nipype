@@ -164,7 +164,7 @@ class Level1Design(SpmMatlabCommandLine):
     out_map = {'spm_mat_file' : ('SPM mat file',)}
         
     def aggregate_outputs(self):
-        outputs = self.outputs()
+        outputs = self._outputs()
         spm = glob(os.path.join(os.getcwd(),'SPM.mat'))
         outputs.spm_mat_file = spm[0]
         return outputs

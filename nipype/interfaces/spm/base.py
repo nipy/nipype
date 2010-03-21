@@ -218,6 +218,9 @@ class SpmMatlabCommandLine(MatlabCommandLine):
         for k in self.out_map.keys():
             setattr(outputs, k, None)
         return outputs
+
+    def _outputs(self):
+        return self.outputs()
     
     def _compile_command(self):
         """Assembles the matlab code for SPM function

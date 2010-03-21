@@ -187,6 +187,9 @@ class Bunch(object):
         # dictionary.
         sorted_dict = str(sorted(dict_nofilename.items()))
         return (dict_withhash, md5(sorted_dict).hexdigest())
+
+    def _get_hashval(self):
+        return self._get_bunch_hash()
             
     def __pretty__(self, p, cycle):
         '''Support for the pretty module
@@ -636,8 +639,13 @@ class TraitedSpec(traits.HasTraits):
     solution to move forward on the refactoring.
     """
 
-    trigger = traits.Event
-    hashval = traits.Property(depends_on='trigger', trait=traits.Tuple(dict, str))
+    # XX temporarily disabling auto hash update because hash is only
+    # used in pipeline. Will re-enable once we calculate hash individually
+    #trigger = traits.Event
+    #hashval = traits.Property(depends_on='trigger', trait=traits.Tuple(dict, str))
+    
+    hashval = traits.Property(trait=traits.Tuple(dict, str))
+    # a list which 
     explicitset = traits.List(traits.Str)
     
     def __init__(self, **kwargs):
@@ -647,8 +655,7 @@ class TraitedSpec(traits.HasTraits):
         # therefore these args were being ignored.
         #super(TraitedSpec, self).__init__(*args, **kwargs)
         super(TraitedSpec, self).__init__(**kwargs)
-        for name, value in kwargs.items():
-            self._add_to_explicitset(name, value)
+        self.set(**kwargs)
 
         # XX kwargs always appears to be empty
         #for key, val in kwargs.items():
@@ -658,7 +665,7 @@ class TraitedSpec(traits.HasTraits):
     def __repr__(self):
         outstr = []
         for name, value in self.itemvalues():
-            if value:
+            if value is not None:
                 outstr.append('%s = %s' % (name, value))
             else:
                 outstr.append('%s = <NOT SET>' % name)
@@ -715,7 +722,7 @@ class TraitedSpec(traits.HasTraits):
         out_dict = {}
         for name, value in self.itemvalues():
             out_dict[name] = None
-            if value:
+            if value is not None:
                 out_dict[name] = value
         return out_dict
 
@@ -729,7 +736,7 @@ class TraitedSpec(traits.HasTraits):
             file_list.append((afile, hash_infile(afile) ))
         return file_list
 
-    @traits.cached_property
+    #@traits.cached_property
     def _get_hashval(self):
         """Return a dictionary of our items with hashes for each file.
 
@@ -755,7 +762,7 @@ class TraitedSpec(traits.HasTraits):
         dict_nofilename = self._dictcopy()
         for key, spec in self.items():
             #do not hash values which are not set
-            if dict_withhash[key] == None:
+            if dict_withhash[key] is None:
                 del dict_withhash[key]
                 del dict_nofilename[key]
                 continue
@@ -794,7 +801,7 @@ class TraitedSpec(traits.HasTraits):
     def __getstate__ ( self ):
         state = super( TraitedSpec, self ).__getstate__()
         for key, value in self.itemvalues():
-            if not value:
+            if value is None:
                 del state[key]
         return state
 
@@ -968,6 +975,9 @@ class NEW_BaseInterface(NEW_Interface):
         outputs = self._outputs()
         expected_outputs = self._list_outputs()
         if expected_outputs:
+            for key, val in expected_outputs.items():
+                if val is None:
+                    del expected_outputs[key]
             outputs.set(**expected_outputs)
         return outputs
 

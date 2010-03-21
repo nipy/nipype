@@ -184,10 +184,9 @@ class NEW_MatlabCommand(NEW_CommandLine):
         return results
 
     def _parse_inputs(self, skip = None):
-        args = super(NEW_MatlabCommand, self)._parse_inputs(skip=['mfile',
+        return super(NEW_MatlabCommand, self)._parse_inputs(skip=['mfile',
                                                                   'paths',
                                                                   'script_file'])
-        return args
 
     def _format_arg(self, name, trait_spec, value):
         if name in ['script']:

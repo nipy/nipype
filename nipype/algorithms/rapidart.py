@@ -129,7 +129,7 @@ class ArtifactDetect(Interface):
         normfile     = os.path.join(output_dir,''.join(('norm.',filename,'.txt')))
         return artifactfile,intensityfile,statsfile,normfile
 
-    def outputs(self):
+    def _outputs(self):
         """Generate a bunch containing the output fields.
 
         Parameters
@@ -152,7 +152,7 @@ class ArtifactDetect(Interface):
         return outputs
         
     def aggregate_outputs(self):
-        outputs = self.outputs()
+        outputs = self._outputs()
         for i,f in enumerate(filename_to_list(self.inputs.realigned_files)):
             outlierfile,intensityfile,statsfile,normfile = self._get_output_filenames(f,os.getcwd())
             outlierfile = glob(outlierfile)

@@ -24,7 +24,7 @@ import warnings
 
 from nipype.utils.filemanip import (fname_presuffix, list_to_filename,
                                     FileNotFoundError)
-from nipype.interfaces.base import NEW_CommandLine
+from nipype.interfaces.base import NEW_CommandLine, traits, TraitedSpec
 from nipype.interfaces.base import OptMapCommand, CommandLine
 
 warn = warnings.warn
@@ -326,6 +326,9 @@ class Info(object):
         return os.path.join(fsldir, 'data/standard', img_name)
 
 
+class FSLTraitedSpec(TraitedSpec):
+    outputtype =  traits.Enum('NIFTI_GZ', Info.ftypes.keys(), usedefault=True)
+    
 class NEW_FSLCommand(NEW_CommandLine):
     '''General support for FSL commands. Every FSL command accepts 'outputtype'
     input. For example:
@@ -335,18 +338,33 @@ class NEW_FSLCommand(NEW_CommandLine):
 
     def __init__(self, outputtype = None, **inputs):
         super(NEW_FSLCommand, self).__init__(**inputs)
-
         if not self._outputtype:
             self._outputtype, _ = Info.outputtype()
+        self.inputs.on_trait_change(self._output_update, 'outputtype')
+        self.inputs.outputtype = self._outputtype
         if outputtype:
-            self._outputtype = outputtype
-        self._environ = {'FSLOUTPUTTYPE': self._outputtype}
+            self.inputs.outputtype = self.outputtype
+        self.set_environ({'FSLOUTPUTTYPE': self._outputtype})
+
+    @classmethod
+    def outputtype(cls, outputtype=None):
+        if outputtype:
+            cls._outputtype, _ = Info.outputtype(ftype=outputtype)
+        else:
+            return cls._outputtype
+
+    def _output_update(self):
+        self._outputtype, _ = Info.outputtype(ftype=self.inputs.outputtype)
+        self.set_environ({'FSLOUTPUTTYPE': self._outputtype})
 
     def set_environ(self, newenv, update=True):
         if update:
             self._environ.update(newenv)
         else:
             self._environ = deepcopy(newenv)
+
+    def _parse_inputs(self, skip = None):
+        return super(NEW_FSLCommand, self)._parse_inputs(skip=['outputtype'])
 
     def _gen_fname(self, basename, fname=None, cwd=None, suffix='_fsl',
                    change_ext=True):
@@ -373,7 +391,7 @@ class NEW_FSLCommand(NEW_CommandLine):
             raise ValueError(msg)
         if cwd is None:
             cwd = os.getcwd()
-        ext = FSLInfo.outputtype_to_ext(self._outputtype)
+        ext = Info.outputtype_to_ext(self.inputs.outputtype)
         if change_ext:
             if suffix:
                 suffix = ''.join((suffix, ext))

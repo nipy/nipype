@@ -13,7 +13,7 @@ from glob import glob
 import warnings
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
-from nipype.interfaces.fsl.base import NEW_FSLCommand
+from nipype.interfaces.fsl.base import NEW_FSLCommand, FSLTraitedSpec
 from nipype.interfaces.base import Bunch, TraitedSpec
 from nipype.utils.filemanip import fname_presuffix, list_to_filename
 from nipype.utils.docparse import get_doc
@@ -24,7 +24,7 @@ import enthought.traits.api as traits
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
-class BetInputSpec(TraitedSpec):
+class BetInputSpec(FSLTraitedSpec):
     '''Note: Currently we don't support -R, -S, -Z,-A or -A2'''
     # We use position args here as list indices - so a negative number
     # will put something on the end

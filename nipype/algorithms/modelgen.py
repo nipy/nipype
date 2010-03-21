@@ -26,12 +26,11 @@ from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix,
 from nipype.interfaces.spm import scans_for_fnames
 
 class SpecifyModelInputSpec(TraitedSpec):
-    subject_id = traits.Either(traits.Str(),traits.Int(), desc ="""string or int
-            Subject identifier used as a parameter to the
-            subject_info_func.
-""")
-    subject_info_func = traits.List(desc= """List
-            Subject specific condition information. If all
+    subject_id = traits.Either(traits.Str(),traits.Int(),
+        desc ="Subject identifier used as a parameter to the subject_info_func.")
+    subject_info = traits.List(mandatory=True,
+                          desc= "List subject specific condition information")
+    """    . If all
             subjects had the same stimulus presentation schedule,
             then this function can return the same structure
             independent of the subject. This function must return a
@@ -65,80 +64,59 @@ class SpecifyModelInputSpec(TraitedSpec):
                 names : list of names corresponding to each
                    column. Should be None if automatically
                    assigned.
-
                 values : lists of values for each regressor
+                kernel : list of convolution kernel
 
-                matfile : MAT-file containing names and a matrix
-                    called R
-""")
-    realignment_parameters = traits.List(traits.File(exists=True), desc = """list of files
-            Realignment parameters returned by some motion
-            correction algorithm. Assumes that each file is a text
-            file containing a row of translation and rotation
-            parameters.
-""", filecopy=False)
-    outlier_files = traits.List(traits.File(exists=True), desc="""list of files
-            A list of files containing outliers that should be
-            tossed. One file per session.
-""", filecopy=False)
-    functional_runs = traits.List(traits.File(exists=True), desc="""list of files
-            List of data files for model. List of 4D files or list of
-            list of 3D files per session
-""", filecopy=False)
-    input_units = traits.Enum('secs', 'scans', desc = """string
-            Units of event onsets and durations (secs or scans) as
-            returned by the subject_info_func
-""")
-    output_units = traits.Enum('secs', 'scans', desc = """string
-            Units of event onsets and durations (secs or scans) as
-            sent to SPM design
-""")
-    high_pass_filter_cutoff = traits.Float(desc = """float, optional
-            High-pass filter cutoff in secs
-""")
-    polynomial_order = traits.Int(desc ="""int, optional
-            Number of polynomial functions used to model high pass
-            filter. 
-""")
-    concatenate_runs = traits.Bool(desc="""boolean, optional
-            Allows concatenating all runs to look like a single
-            expermental session.
-""")
-    time_repetition = traits.Float(desc = """float
-            Time between the start of one volume to the start of
-            the next image volume. If a clustered acquisition is
-            used, then this should be the time between the start
-            of acquisition of one cluster to the start of
-            acquisition of the next cluster.
-""")
+    """
+    realignment_parameters = traits.List(traits.File(exists=True),
+       desc = "Realignment parameters returned by motion correction algorithm",
+                                         filecopy=False)
+    outlier_files = traits.List(traits.File(exists=True),
+         desc="Files containing scan outlier indices that should be tossed",
+                                filecopy=False)
+    functional_runs = traits.List(traits.File(exists=True),
+                                  mandatory=True,
+            desc="Data files for model. List of 4D files or list of" \
+                                      "list of 3D files per session",
+                                  filecopy=False)
+    input_units = traits.Enum('secs', 'scans', mandatory=True,
+             desc = "Units of event onsets and durations (secs or scans)")
+    output_units = traits.Enum('secs', 'scans', mandatory=True,
+             desc = "Units of design event onsets and durations " \
+                                   "(secs or scans)")
+    high_pass_filter_cutoff = traits.Float(desc = \
+                                     "High-pass filter cutoff in secs")
+    concatenate_runs = traits.Bool(False, usedefault=True,
+            desc="Concatenating all runs to look like a single session.")
+    time_repetition = traits.Float(mandatory=True,
+        desc = "Time between the start of one volume to the start of " \
+                                       "the next image volume.")
+    
+    # Not implemented yet
+    #polynomial_order = traits.Range(-1, low=-1, 
+    #        desc ="Number of polynomial functions to model high pass filter.")
+    #generate_design = traits.Bool(False, usedefault=True,
+    #      desc="Generate a design matrix")
 
         #Sparse and clustered-sparse specific options
-
-    time_acquisition = traits.Float(desc = """float
-            Time in seconds to acquire a single image volume
-""")
-    volumes_in_cluster = traits.Int(desc="""int
-            If number of volumes in a cluster is greater than one,
-            then a sparse-clustered acquisition is being assumed.
-""")
-    model_hrf = traits.Bool(desc="""boolean
-            Whether to model hrf for sparse clustered analysis
-""")
-    stimuli_as_impulses = traits.Bool(desc = """boolean
-            Whether to treat each stimulus to be impulse like. If
-            not, the stimuli are convolved with their respective
-            durations.
-""", default=True, usedefault=True)
-    scan_onset = traits.Float(0.0, desc="""float
-            Start of scanning relative to onset of run in
-            secs. default = 0
-""", usedefault=True)
+    is_sparse = traits.Bool(False, usedefault = True,
+                            desc="indicates whether paradigm is sparse")
+    time_acquisition = traits.Float(0,
+                  desc = "Time in seconds to acquire a single image volume")
+    volumes_in_cluster = traits.Range(low=0,
+            desc="Number of scan volumes in a cluster")
+    model_hrf = traits.Bool(desc="model sparse events with hrf")
+    stimuli_as_impulses = traits.Bool(True,
+              desc = "Treat each stimulus to be impulse like.",
+                                      usedefault=True)
+    scan_onset = traits.Float(0.0,
+              desc="Start of scanning relative to onset of run in secs",
+                              usedefault=True)
     
 class SpecifyModelOutputSpec(TraitedSpec):
-    session_info = traits.File(exists=True, desc="""file
-                Numpy file that saves a python dict that can be input
-                to spm and fsl Level1Design modules
-""")
+    session_info = traits.File(exists=True,
+          desc="session info saved in a numpy file for level1designs")
+    #design_file = traits.File(desc="design file")
 
 class SpecifyModel(NEW_BaseInterface):
     """Makes a model specification
@@ -247,10 +225,10 @@ class SpecifyModel(NEW_BaseInterface):
         if bplot:
             import matplotlib.pyplot as plt
         TR = np.round(self.inputs.time_repetition*1000)  # in ms
-        if self.inputs.time_acquisition is None:
-            TA = TR # in ms
-        else:
+        if self.inputs.time_acquisition:
             TA = np.round(self.inputs.time_acquisition*1000) # in ms
+        else:
+            TA = TR # in ms
         nvol = self.inputs.volumes_in_cluster
         SCANONSET = np.round(self.inputs.scan_onset*1000)
         total_time = TR*(nscans-nvol)/nvol + TA*nvol + SCANONSET
@@ -377,7 +355,7 @@ class SpecifyModel(NEW_BaseInterface):
         #                sessinfo[i]['pmod'] = np.zeros((len(info.pmod),), dtype=dt)
         for i,info in enumerate(infolist):
             sessinfo.insert(i,dict(cond=[]))
-            if self.inputs.high_pass_filter_cutoff is not None:
+            if self.inputs.high_pass_filter_cutoff:
                 sessinfo[i]['hpf'] = np.float(self.inputs.high_pass_filter_cutoff)
             if info.conditions:
                 for cid,cond in enumerate(info.conditions):
@@ -480,17 +458,14 @@ class SpecifyModel(NEW_BaseInterface):
         return [infoout],nscans
     
     def _generate_design(self):
-        if callable(self.inputs.subject_info_func):
-            infolist = self.inputs.subject_info_func(self.inputs.subject_id)
-        else:
-            infolist = self.inputs.subject_info_func
+        infolist = self.inputs.subject_info
         if self.inputs.concatenate_runs:
             infolist,nscans = self._concatenate_info(infolist)
             functional_runs = [filename_to_list(self.inputs.functional_runs)]
         else:
             functional_runs = filename_to_list(self.inputs.functional_runs)
         realignment_parameters = []
-        if self.inputs.realignment_parameters is not None:
+        if self.inputs.realignment_parameters:
             rpfiles = filename_to_list(self.inputs.realignment_parameters)
             realignment_parameters.insert(0,np.loadtxt(rpfiles[0]))
             for rpf in rpfiles[1:]:
@@ -500,7 +475,7 @@ class SpecifyModel(NEW_BaseInterface):
                 else:
                     realignment_parameters.insert(len(realignment_parameters),mc)
         outliers = []
-        if self.inputs.outlier_files is not None:
+        if self.inputs.outlier_files:
             outfiles = filename_to_list(self.inputs.outlier_files)
             try:
                 outindices = np.loadtxt(outfiles[0],dtype=int)
@@ -526,7 +501,7 @@ class SpecifyModel(NEW_BaseInterface):
                         outliers.insert(len(outliers),[out.tolist()])
                     else:
                         outliers.insert(len(outliers),out.tolist())
-        if self.inputs.volumes_in_cluster:
+        if self.inputs.is_sparse:
             infolist = self._generate_clustered_design(infolist)
         sessinfo = self._generate_standard_design(infolist,
                                                   functional_runs=functional_runs,
@@ -538,9 +513,10 @@ class SpecifyModel(NEW_BaseInterface):
     def run(self, **inputs):
         """
         """
+        self.inputs.set(**inputs)
         runtime = Bunch(returncode=0,
-                        messages=None,
-                        errmessages=None)
+                        stdout=None,
+                        stderr=None)
         self._generate_design()
         outputs=self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
@@ -550,8 +526,5 @@ class SpecifyModel(NEW_BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs()._dictcopy()
-        
-        outfile = self._get_outfilename()
-        session_info = glob(outfile)
-        outputs['session_info'] = list_to_filename(session_info)
+        outputs['session_info'] = self._get_outfilename()
         return outputs
