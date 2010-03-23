@@ -138,6 +138,23 @@ class Bet(NEW_FSLCommand):
         return None
 
 
+class FastInputSpec(FSLTraitedSpec):
+    """ Defines inputs (trait classes) for Fast """
+    infiles = traits.File(exists=True,
+                          desc = 'image, or multi-channel set of images, to be segmented',
+                         argstr='%s', position=-1, mandatory=True)
+    out_basename = traits.File(desc = 'base name of output files',
+                          argstr='-o %s', genfile=True) # maybe not genfile
+    number_classes = traits.Int( desc = 'number of tissue-type classes',
+                                 argstr = '-n %d')
+    output_biasfield = traits.Bool( desc = 'output estimated bias field',
+                                    argstr = '-B', genfile=True)
+    output_biascorrected = traits.Bool(desc = 'output restored image (bias-corrected image)',
+                                       argstr = '-b', genfile = True)
+    img_type = traits.Int(desc = 'type of image: (T1 = 1, T2 = 2, PD = 3)',
+                          argstr = '-t %d')
+    
+
 class Fast(FSLCommand):
     """Use FSL FAST for segmenting and bias correction.
 
