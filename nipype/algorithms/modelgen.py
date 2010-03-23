@@ -19,7 +19,7 @@ from scipy.special import gammaln
 
 from nipype.externals.pynifti import load
 from nipype.interfaces.base import Bunch, InterfaceResult, Interface,\
-    NEW_BaseInterface, TraitedSpec, MultiPath, traits
+    NEW_BaseInterface, TraitedSpec, MultiPath, traits, isdefined
 from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix,
                                     filename_to_list, list_to_filename,
                                     FileNotFoundError)
@@ -382,11 +382,11 @@ class SpecifyModel(NEW_BaseInterface):
                     else:
                         sessinfo[i]['regress'][j]['name'] = 'UR%d'%(j+1)
                     sessinfo[i]['regress'][j]['val'] = info.regressors[j]
-            if functional_runs is not None:
+            if isdefined(functional_runs):
                 sessinfo[i]['scans'] = scans_for_fnames(filename_to_list(functional_runs[i]),keep4d=False)
             else:
                 raise Exception("No functional data information provided for model")
-        if realignment_parameters is not None:
+        if isdefined(realignment_parameters):
             for i,rp in enumerate(realignment_parameters):
                 mc = realignment_parameters[i]
                 for col in range(mc.shape[1]):
@@ -394,7 +394,7 @@ class SpecifyModel(NEW_BaseInterface):
                     sessinfo[i]['regress'].insert(colidx,dict(name='',val=[]))
                     sessinfo[i]['regress'][colidx]['name'] = 'Realign%d'%(col+1)
                     sessinfo[i]['regress'][colidx]['val']  = mc[:,col].tolist()
-        if outliers is not None:
+        if isdefined(outliers):
             for i,out in enumerate(outliers):
                 numscans = len(sessinfo[i]['scans'])
                 print numscans
