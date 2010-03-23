@@ -24,8 +24,10 @@ import warnings
 
 from nipype.utils.filemanip import (fname_presuffix, list_to_filename,
                                     FileNotFoundError)
-from nipype.interfaces.base import NEW_CommandLine, traits, TraitedSpec
+from nipype.interfaces.base import NEW_CommandLine, traits, TraitedSpec,\
+    CommandLineInputSpec, Undefined
 from nipype.interfaces.base import OptMapCommand, CommandLine
+from copy import deepcopy
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -236,9 +238,7 @@ class Info(object):
     ftypes = {'NIFTI': '.nii',
               'NIFTI_PAIR': '.img',
               'NIFTI_GZ': '.nii.gz',
-              'NIFTI_PAIR_GZ': '.img.gz',
-              'ANALYZE_GZ': '.hdr.gz',
-              'ANALYZE': '.hdr'}
+              'NIFTI_PAIR_GZ': '.img.gz'}
 
     @staticmethod
     def version():
@@ -326,45 +326,34 @@ class Info(object):
         return os.path.join(fsldir, 'data/standard', img_name)
 
 
-class FSLTraitedSpec(TraitedSpec):
-    outputtype =  traits.Enum('NIFTI_GZ', Info.ftypes.keys(), usedefault=True)
+class FSLTraitedSpec(CommandLineInputSpec):
+    outputtype =  traits.Enum('NIFTI', Info.ftypes.keys())
     
 class NEW_FSLCommand(NEW_CommandLine):
     '''General support for FSL commands. Every FSL command accepts 'outputtype'
     input. For example:
     fsl.ExtractRoi(tmin=42, tsize=1, outputtype='NIFTI')'''
     
-    _outputtype = None
+    input_spec = FSLTraitedSpec
+    
+    _outputtype = 'NIFTI'
 
-    def __init__(self, outputtype = None, **inputs):
+    def __init__(self, **inputs):
         super(NEW_FSLCommand, self).__init__(**inputs)
-        if not self._outputtype:
-            self._outputtype, _ = Info.outputtype()
         self.inputs.on_trait_change(self._output_update, 'outputtype')
-        self.inputs.outputtype = self._outputtype
-        if outputtype:
-            self.inputs.outputtype = self.outputtype
-        self.set_environ({'FSLOUTPUTTYPE': self._outputtype})
 
-    @classmethod
-    def outputtype(cls, outputtype=None):
-        if outputtype:
-            cls._outputtype, _ = Info.outputtype(ftype=outputtype)
+        if self.inputs.outputtype is Undefined:
+            self.inputs.outputtype = self._outputtype
         else:
-            return cls._outputtype
+            self._output_update()
 
     def _output_update(self):
-        self._outputtype, _ = Info.outputtype(ftype=self.inputs.outputtype)
-        self.set_environ({'FSLOUTPUTTYPE': self._outputtype})
-
-    def set_environ(self, newenv, update=True):
-        if update:
-            self._environ.update(newenv)
-        else:
-            self._environ = deepcopy(newenv)
-
-    def _parse_inputs(self, skip = None):
-        return super(NEW_FSLCommand, self)._parse_inputs(skip=['outputtype'])
+        outputtype, _ = Info.outputtype(ftype=self.inputs.outputtype)
+        self.inputs.environ.update({'FSLOUTPUTTYPE': outputtype})
+    
+    @classmethod
+    def set_default_outputtype(cls, outputtype):
+        cls._outputtype, _ = Info.outputtype(ftype=outputtype)
 
     def _gen_fname(self, basename, fname=None, cwd=None, suffix='_fsl',
                    change_ext=True):

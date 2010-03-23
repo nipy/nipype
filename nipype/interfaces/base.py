@@ -814,6 +814,9 @@ class NEW_Interface(object):
         """
         raise NotImplementedError
 
+class BaseInterfaceInputSpec(TraitedSpec):
+    environ = traits.DictStrStr(desc='Environment variables', usedefault=True)
+
 class NEW_BaseInterface(NEW_Interface):
     """Implements common interface functionality.
 
@@ -832,6 +835,7 @@ class NEW_BaseInterface(NEW_Interface):
     This class cannot be instantiated.
     
     """
+    input_spec = BaseInterfaceInputSpec
 
     def __init__(self, **inputs):
         if not self.input_spec:
@@ -945,10 +949,12 @@ class NEW_BaseInterface(NEW_Interface):
         self.inputs.set(**inputs)
         self._check_mandatory_inputs()
         # initialize provenance tracking
+        env = deepcopy(os.environ.data)
+        env.update(self.inputs.environ)
         runtime = Bunch(cwd=os.getcwd(),
                         returncode = None,
                         duration = None,
-                        environ=deepcopy(os.environ.data),
+                        environ=env,
                         hostname = gethostname())
         t = time()
         runtime = self._run_interface(runtime)
@@ -978,7 +984,7 @@ class NEW_BaseInterface(NEW_Interface):
         return outputs
 
 
-class CommandLineInputSpec(TraitedSpec):
+class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = traits.Str(argstr='%s', desc='Parameters to the command')
 
 class NEW_CommandLine(NEW_BaseInterface):

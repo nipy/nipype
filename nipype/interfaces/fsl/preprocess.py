@@ -117,7 +117,7 @@ class Bet(NEW_FSLCommand):
     output_spec = BetOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec()._dictcopy()
+        outputs = self.output_spec().get()
         outputs['outfile'] = self.inputs.outfile
         if not outputs['outfile'] and self.inputs.infile:
             outputs['outfile'] = self._gen_fname(self.inputs.infile,
