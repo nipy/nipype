@@ -16,12 +16,16 @@ from warnings import warn
 
 import enthought.traits.api as traits
 from enthought.traits.api import Undefined
+from enthought.traits.trait_base import _Undefined
 
 from nipype.utils.filemanip import md5, hash_infile
 from nipype.utils.misc import is_container
 
  
 __docformat__ = 'restructuredtext'
+
+def isdefined(object):
+    return not isinstance(object, _Undefined)
 
 def load_template(name):
     """Load a template from the script_templates directory
@@ -188,10 +192,10 @@ class Bunch(object):
         # dictionary.
         sorted_dict = str(sorted(dict_nofilename.items()))
         return (dict_withhash, md5(sorted_dict).hexdigest())
-            
+
     def _get_hashval(self):
         return self._get_bunch_hash()
-    
+            
     def __pretty__(self, p, cycle):
         '''Support for the pretty module
         
@@ -737,12 +741,11 @@ class TraitedSpec(traits.HasStrictTraits):
             The md5 hash value of the traited spec
 
         """
-        infile_list = []
         dict_withhash = self.get()
         dict_nofilename = self.get()
         for key, spec in self.items():
             #do not hash values which are not set
-            if dict_withhash[key] is Undefined:
+            if not isdefined(dict_withhash[key]):
                 del dict_withhash[key]
                 del dict_nofilename[key]
                 continue
@@ -923,7 +926,7 @@ class NEW_BaseInterface(NEW_Interface):
         """ Raises an exception if a mandatory input is Undefined
         """
         for name, value in self.inputs.trait_get(mandatory=True).items():
-            if value == Undefined:
+            if not isdefined(value):
                 msg = "%s requires a value for input '%s'" % \
                     (self.__class__.__name__, name)
                 self.help()
@@ -1127,7 +1130,7 @@ class NEW_CommandLine(NEW_BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if value is Undefined:
+            if not isdefined(value):
                 if spec.genfile:
                     value = self._gen_filename(name)
                 else:
@@ -1197,4 +1200,7 @@ class MultiPath(traits.List):
         newvalue = value
         if isinstance(value, str):
             newvalue = [value]
-        return super(MultiPath, self).validate(object, name, newvalue)
+        if not isdefined(value):
+            return value
+        else:
+            return super(MultiPath, self).validate(object, name, newvalue)
