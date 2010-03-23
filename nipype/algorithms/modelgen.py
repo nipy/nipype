@@ -19,13 +19,14 @@ from scipy.special import gammaln
 
 from nipype.externals.pynifti import load
 from nipype.interfaces.base import Bunch, InterfaceResult, Interface,\
-    NEW_BaseInterface, TraitedSpec, MultiPath, traits, isdefined
+    NEW_BaseInterface, TraitedSpec, MultiPath, traits, isdefined,\
+    BaseInterfaceInputSpec
 from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix,
                                     filename_to_list, list_to_filename,
                                     FileNotFoundError)
 from nipype.interfaces.spm import scans_for_fnames
 
-class SpecifyModelInputSpec(TraitedSpec):
+class SpecifyModelInputSpec(BaseInterfaceInputSpec):
     subject_id = traits.Either(traits.Str(),traits.Int(),
         desc ="Subject identifier used as a parameter to the subject_info_func.")
     subject_info = traits.List(mandatory=True,

@@ -19,90 +19,63 @@ import numpy as np
 from scipy import signal
 import scipy.io as sio
 
-from nipype.interfaces.base import Bunch, InterfaceResult, Interface
+from nipype.interfaces.base import Bunch, InterfaceResult, Interface,\
+    NEW_BaseInterface, BaseInterfaceInputSpec, traits, MultiPath, TraitedSpec,\
+    isdefined
 from nipype.externals.pynifti import load, funcs
-from nipype.utils.filemanip import fname_presuffix, fnames_presuffix, filename_to_list, list_to_filename
-from nipype.utils.misc import find_indices, is_container
+from nipype.utils.filemanip import filename_to_list, list_to_filename
+from nipype.utils.misc import find_indices
 #import matplotlib as mpl
 #import matplotlib.pyplot as plt
 #import traceback
 
+class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
+    realigned_files = MultiPath(exists=True, desc="Names of realigned functional data files", mandatory=True)
+    realignment_parameters = MultiPath(exists=True, desc="Names of realignment parameters corresponding to the" \
+            "functional data files")
+    parameter_source = traits.Enum("SPM", "FSL", "Siemens", desc="Are the movement parameters from SPM or FSL or from" \
+            "Siemens PACE data. Options: SPM, FSL or Siemens")
+    use_differences = traits.ListBool([True, True], min_len = 2, max_len = 2, usedefault=True,
+            desc="Use differences between successive motion (first element)" \
+            "and intensity paramter (second element) estimates in order" \
+            "to determine outliers.  (default is [True, True])")
+    use_norm = traits.Bool(True, desc = "Uses a composite of the motion parameters in order to determine" \
+            "outliers.  Requires ``norm_threshold`` to be set.  (default is" \
+            "True) ", usedefault=True)
+    norm_threshold = traits.Float(desc="Threshold to use to detect motion-related outliers when" \
+            "composite motion is being used (see ``use_norm``)")
+    rotation_threshold = traits.Float(desc="Threshold (in radians) to use to detect rotation-related outliers")
+    translation_threshold = traits.Float(desc="Threshold (in mm) to use to detect translation-related outliers")
+    zintensity_threshold = traits.Float(desc="Intensity Z-threshold use to detection images that deviate from the" \
+            "mean") 
+    mask_type = traits.Enum('spm_global', 'file', 'thresh', desc="Type of mask that should be used to mask the functional data." \
+            "*spm_global* uses an spm_global like calculation to determine the" \
+            "brain mask.  *file* specifies a brain mask file (should be an image" \
+            "file consisting of 0s and 1s). *thresh* specifies a threshold to" \
+            "use.  By default all voxels are used, unless one of these mask" \
+            "types are defined.")
+    mask_file = traits.File(exists=True, desc="Mask file to be used if mask_type is 'file'.")
+    mask_threshold = traits.Float(desc="Mask threshold to be used if mask_type is 'thresh'.")
+    intersect_mask = traits.Bool(True, desc = "Intersect the masks when computed from spm_global. (default is" \
+            "True)") 
+    
+class ArtifactDetectOutputSpec(TraitedSpec):
+    outlier_files = MultiPath(exists=True,desc="One file for each functional run containing a list of 0-based" \
+            "indices corresponding to outlier volumes") 
+    intensity_files = MultiPath(exists=True,desc="One file for each functional run containing the global intensity" \
+            "values determined from the brainmask") 
+    statistic_files = MultiPath(exists=True,desc="One file for each functional run containing information about the" \
+            "different types of artifacts and if design info is provided then" \
+            "details of stimulus correlated motion and a listing or artifacts by" \
+            "event type.")
 
-class ArtifactDetect(Interface):
+class ArtifactDetect(NEW_BaseInterface):
     """Detects outliers in a functional imaging series depending on the
     intensity and motion parameters.  It also generates other statistics.
     """
-
-    def __init__(self, *args, **inputs):
-        self._populate_inputs()
-        self.inputs.update(**inputs)
-
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-        realigned_files : filename(s) string or list
-            Names of realigned functional data files
-        realignment_parameters : filename(s) string or list
-            Names of realignment parameters corresponding to the
-            functional data files
-        parameter_source : string
-            Are the movement parameters from SPM or FSL or from
-            Siemens PACE data. Options: SPM, FSL or Siemens
-        use_differences : 2-element boolean list
-            Use differences between successive motion (first element)
-            and intensity paramter (second element) estimates in order
-            to determine outliers.  (default is [True, True])
-        use_norm : boolean, optional
-            Uses a composite of the motion parameters in order to determine
-            outliers.  Requires ``norm_threshold`` to be set.  (default is
-            True) 
-        norm_threshold: float
-            Threshold to use to detect motion-related outliers when
-            composite motion is being used (see ``use_norm``)
-        rotation_threshold : float
-            Threshold (in radians) to use to detect rotation-related outliers
-        translation_threshold : float
-            Threshold (in mm) to use to detect translation-related outliers
-        zintensity_threshold : float
-            Intensity Z-threshold use to detection images that deviate from the
-            mean 
-        mask_type : {'spm_global', 'file', 'thresh'}
-            Type of mask that should be used to mask the functional data.
-            *spm_global* uses an spm_global like calculation to determine the
-            brain mask.  *file* specifies a brain mask file (should be an image
-            file consisting of 0s and 1s). *thresh* specifies a threshold to
-            use.  By default all voxels are used, unless one of these mask
-            types are defined.
-        mask_file : filename
-            Mask file to be used if mask_type is 'file'.
-        mask_threshold : float
-            Mask threshold to be used if mask_type is 'thresh'.
-        intersect_mask : boolean
-            Intersect the masks when computed from spm_global. (default is
-            True) 
-        """
-        print self.inputs_help.__doc__
-        
-    def _populate_inputs(self):
-        self.inputs = Bunch(realigned_files=None,
-                            realignment_parameters=None,
-                            parameter_source=None,
-                            use_differences=[True,True],
-                            use_norm=True,
-                            norm_threshold=None,
-                            rotation_threshold=None,
-                            translation_threshold=None,
-                            zintensity_threshold=None,
-                            mask_type=None,
-                            mask_file=None,
-                            mask_threshold=None,
-                            intersect_mask=True)
-        
-    def outputs_help(self):
-        """print out the help from the outputs routine
-        """
-        print self.outputs.__doc__
+    
+    input_spec = ArtifactDetectInputSpec
+    output_spec = ArtifactDetectOutputSpec
         
     def _get_output_filenames(self,motionfile,output_dir):
         """Generate output files based on motion filenames
@@ -128,56 +101,32 @@ class ArtifactDetect(Interface):
         statsfile     = os.path.join(output_dir,''.join(('stats.',filename,'.txt')))
         normfile     = os.path.join(output_dir,''.join(('norm.',filename,'.txt')))
         return artifactfile,intensityfile,statsfile,normfile
-
-    def _outputs(self):
-        """Generate a bunch containing the output fields.
-
-        Parameters
-        ----------
-        outlier_files : filename(s)
-            One file for each functional run containing a list of 0-based
-            indices corresponding to outlier volumes 
-        intensity_files : filename(s)
-            One file for each functional run containing the global intensity
-            values determined from the brainmask 
-        statistic_files : filename(s)
-            One file for each functional run containing information about the
-            different types of artifacts and if design info is provided then
-            details of stimulus correlated motion and a listing or artifacts by
-            event type. 
-        """
-        outputs = Bunch(outlier_files=None,
-                        intensity_files=None,
-                        statistic_files=None)
-        return outputs
         
-    def aggregate_outputs(self):
-        outputs = self._outputs()
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        
+        outputs['outlier_files'] = []
+        outputs['intensity_files'] = []
+        outputs['statistic_files'] = []
         for i,f in enumerate(filename_to_list(self.inputs.realigned_files)):
             outlierfile,intensityfile,statsfile,normfile = self._get_output_filenames(f,os.getcwd())
             outlierfile = glob(outlierfile)
-            assert len(outlierfile)==1, 'Outlier file %s not found'%outlierfile
-            if outputs.outlier_files is None:
-                outputs.outlier_files = []
-            outputs.outlier_files.insert(i,outlierfile[0])
+            assert len(outlierfile)==1, 'Outlier file %s not found'%outlierfile   
+            outputs['outlier_files'].insert(i,outlierfile[0])
+            
             intensityfile = glob(intensityfile)
             assert len(intensityfile)==1, 'Outlier file %s not found'%intensityfile
-            if outputs.intensity_files is None:
-                outputs.intensity_files = []
-            outputs.intensity_files.insert(i,intensityfile[0])
+            outputs['intensity_files'].insert(i,intensityfile[0])
+            
             statsfile = glob(statsfile)
             assert len(statsfile)==1, 'Outlier file %s not found'%statsfile
-            if outputs.statistic_files is None:
-                outputs.statistic_files = []
-            outputs.statistic_files.insert(i,statsfile[0])
-        if outputs.outlier_files is not None:
-            outputs.outlier_files = list_to_filename(outputs.outlier_files)
-            outputs.intensity_files = list_to_filename(outputs.intensity_files)
-            outputs.statistic_files = list_to_filename(outputs.statistic_files)
-        return outputs
+            
+            outputs['statistic_files'].insert(i,statsfile[0])
 
-    def get_input_info(self):
-        return []
+        outputs['outlier_files'] = list_to_filename(outputs['outlier_files'])
+        outputs['intensity_files'] = list_to_filename(outputs['intensity_files'])
+        outputs['statistic_files'] = list_to_filename(outputs['statistic_files'])
+        return outputs
 
     def _get_affine_matrix(self,params):
         """Returns an affine matrix given a set of parameters
@@ -398,7 +347,7 @@ class ArtifactDetect(Interface):
         runtime = Bunch(returncode=0,
                         messages=None,
                         errmessages=None)
-        outputs=self.aggregate_outputs()
+        outputs=self._list_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
 
 class StimulusCorrelation(Interface):
