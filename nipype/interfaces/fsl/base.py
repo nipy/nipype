@@ -25,7 +25,7 @@ import warnings
 from nipype.utils.filemanip import (fname_presuffix, list_to_filename,
                                     FileNotFoundError)
 from nipype.interfaces.base import NEW_CommandLine, traits, TraitedSpec,\
-    CommandLineInputSpec, Undefined
+    CommandLineInputSpec, isdefined
 from nipype.interfaces.base import OptMapCommand, CommandLine
 from copy import deepcopy
 
@@ -342,7 +342,7 @@ class NEW_FSLCommand(NEW_CommandLine):
         super(NEW_FSLCommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, 'outputtype')
 
-        if self.inputs.outputtype is Undefined:
+        if not isdefined(self.inputs.outputtype):
             self.inputs.outputtype = self._outputtype
         else:
             self._output_update()

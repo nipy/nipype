@@ -14,7 +14,7 @@ from nipype.utils.filemanip import (copyfiles, fname_presuffix,
                                     filename_to_list, list_to_filename,
                                     fnames_presuffix, save_json,
                                     FileNotFoundError)
-from nipype.interfaces.base import Bunch, InterfaceResult, CommandLine
+from nipype.interfaces.base import Bunch, InterfaceResult, CommandLine, isdefined
 
 logger = logging.getLogger('nodewrapper')
 
@@ -174,7 +174,7 @@ class NodeWrapper(object):
             logger.info("in dir: %s"%outdir)
             # Get a dictionary with hashed filenames and a hashvalue
             # of the dictionary itself.
-            hashed_inputs, hashvalue = self.inputs._get_hashval()
+            hashed_inputs, hashvalue = self.inputs.hashval
             hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
             if updatehash:
                 logger.info("Updating hash: %s"%hashvalue)
@@ -323,7 +323,9 @@ class NodeWrapper(object):
         """ copy files over and change the inputs"""
         if hasattr(self._interface,'_get_filecopy_info') and self.disk_based:
             for info in self._interface._get_filecopy_info():
-                files = self.inputs._dictcopy().get(info['key'])
+                files = self.inputs.get().get(info['key'])
+                if not isdefined(files):
+                    continue
                 if files:
                     infiles = filename_to_list(files)
                     if execute:
@@ -340,7 +342,7 @@ class NodeWrapper(object):
     def hash_inputs(self):
         """Computes a hash of the input fields of the underlying
         interface."""
-        hashed_inputs, hashvalue = self.inputs._get_hashval()
+        hashed_inputs, hashvalue = self.inputs.hashval
         return hashvalue
 
     def _output_directory(self):

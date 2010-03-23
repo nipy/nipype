@@ -14,7 +14,8 @@ import numpy as np
 from scipy.io import savemat
 
 # Local imports
-from nipype.interfaces.base import Bunch, NEW_BaseInterface, traits, TraitedSpec, Undefined
+from nipype.interfaces.base import Bunch, NEW_BaseInterface, traits, TraitedSpec,\
+    isdefined
 from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import MatlabCommandLine
 from nipype.interfaces.matlab import NEW_MatlabCommand
@@ -492,7 +493,7 @@ class NEW_SPMCommand(NEW_BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if value is Undefined:
+            if not isdefined(value):
                 continue
             field = spec.field
             if '.' in field:

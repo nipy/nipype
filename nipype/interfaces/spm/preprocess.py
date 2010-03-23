@@ -28,9 +28,9 @@ from nipype.interfaces.spm import (SpmMatlabCommandLine, scans_for_fname,
                                    scans_for_fnames)
 from nipype.interfaces.spm import (NEW_SPMCommand, scans_for_fname,
                                    scans_for_fnames, logger)
-from nipype.interfaces.base import Bunch
+from nipype.interfaces.base import Bunch, BaseInterfaceInputSpec, isdefined
 
-from nipype.interfaces.base import TraitedSpec, traits, MultiPath, Undefined
+from nipype.interfaces.base import TraitedSpec, traits, MultiPath
 
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list, 
                                     list_to_filename, FileNotFoundError)
@@ -137,7 +137,7 @@ class SliceTiming(SpmMatlabCommandLine):
 #   Realign
 #
 ####################################
-class RealignInputSpec(TraitedSpec):
+class RealignInputSpec(BaseInterfaceInputSpec):
     infile = traits.List(traits.File(exists=True), field='data', mandatory=True,
                          desc='list of filenames to realign', copyfile=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
@@ -214,7 +214,7 @@ class Realign(NEW_SPMCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if self.inputs.infile is not Undefined:
+        if isdefined(self.inputs.infile):
             outputs['realignment_parameters'] = []
         for imgf in self.inputs.infile:
             outputs['realignment_parameters'].append(fname_presuffix(imgf,
@@ -233,7 +233,7 @@ class Realign(NEW_SPMCommand):
 #   Coregister
 #
 ####################################
-class CoregisterInputSpec(TraitedSpec):
+class CoregisterInputSpec(BaseInterfaceInputSpec):
     target = traits.File(exists=True, field='ref', mandatory=True,
                          desc='reference file to register to', copyfile=False)
     source = MultiPath(exists=True, field='source',
@@ -307,14 +307,14 @@ class Coregister(NEW_SPMCommand):
         return [{'%s'%(jobtype):einputs[0]}]
     
     def _list_outputs(self):
-        outputs = self._outputs()._dictcopy()
+        outputs = self._outputs().get()
         
         if self.inputs.jobtype == "estimate":
-            if self.inputs.apply_to_files != None:
+            if isdefined(self.inputs.apply_to_files):
                 outputs['coregistered_files'] = self.inputs.apply_to_files
             outputs['coregistered_source'] = self.inputs.source
         elif self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
-            if self.inputs.apply_to_files != None:
+            if isdefined(self.inputs.apply_to_files):
                 outputs['coregistered_files'] = []
                 for imgf in filename_to_list(self.inputs.apply_to_files):
                     outputs['coregistered_files'].append(fname_presuffix(imgf, prefix='r'))
@@ -325,7 +325,7 @@ class Coregister(NEW_SPMCommand):
                 
         return outputs
 
-class NormalizeInputSpec(TraitedSpec):
+class NormalizeInputSpec(BaseInterfaceInputSpec):
     template = traits.File(exists=True, field='eoptions.template', desc='template file to normalize to', copyfile=False)
     source = MultiPath(exists=True, field='subj.source', desc='file to normalize to template', mandatory = True, copyfile=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
@@ -412,7 +412,7 @@ class Normalize(NEW_SPMCommand):
         return [{'%s'%(jobtype):einputs[0]}]
     
     def _list_outputs(self):
-        outputs = self._outputs()._dictcopy()
+        outputs = self._outputs().get()
         
         jobtype =  self.inputs.jobtype
         if jobtype.startswith('est'):
@@ -421,12 +421,12 @@ class Normalize(NEW_SPMCommand):
                 outputs['normalization_parameters'].append(fname_presuffix(imgf, suffix='_sn.mat',use_ext=False))
         
         if self.inputs.jobtype == "estimate":
-            if self.inputs.apply_to_files != None:
+            if isdefined(self.inputs.apply_to_files):
                 outputs['normalized_files'] = self.inputs.apply_to_files
             outputs['normalized_source'] = self.inputs.source
         elif self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
             outputs['normalized_files'] = []
-            if self.inputs.apply_to_files != None:
+            if isdefined(self.inputs.apply_to_files):
                 for imgf in filename_to_list(self.inputs.apply_to_files):
                     outputs['normalized_files'].append(fname_presuffix(imgf, prefix='w'))
             
@@ -588,7 +588,7 @@ class Segment(SpmMatlabCommandLine):
         outputs.inverse_transformation_mat = invt_mat
         return outputs
 
-class SmoothInputSpec(TraitedSpec):
+class SmoothInputSpec(BaseInterfaceInputSpec):
     infile = MultiPath(traits.File(exists=True), field='data', desc='list of files to smooth', madatrory=True, copyfile=False)
     fwhm = traits.Either(traits.List(traits.Float(), min_len = 3, max_len = 3),traits.Float(), field= 'fwhm', desc = '3-list of fwhm for each dimension (opt)')
     data_type =  traits.Int(field = 'dtype', desc = 'Data type of the output images (opt)')
@@ -623,7 +623,7 @@ class Smooth(NEW_SPMCommand):
         return val
     
     def _list_outputs(self):
-        outputs = self._outputs()._dictcopy()
+        outputs = self._outputs().get()
         outputs['smoothed_files'] = []
         
         for imgf in filename_to_list(self.inputs.infile):

@@ -525,6 +525,6 @@ class SpecifyModel(NEW_BaseInterface):
         return os.path.join(os.getcwd(),'%s_modelspec.npz'%self.inputs.subject_id)
 
     def _list_outputs(self):
-        outputs = self._outputs()._dictcopy()
+        outputs = self._outputs().get()
         outputs['session_info'] = self._get_outfilename()
         return outputs

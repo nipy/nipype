@@ -8,9 +8,10 @@ import tempfile
 
 import numpy as np
 
-from nipype.interfaces.base import CommandLine, InterfaceResult, Bunch
+from nipype.interfaces.base import CommandLine, InterfaceResult, Bunch,\
+    BaseInterfaceInputSpec, isdefined
 from nipype.interfaces.base import (NEW_CommandLine, InterfaceResult, traits,
-                                    TraitedSpec, Undefined)
+                                    TraitedSpec)
 
 class MatlabCommandLine(CommandLine):
     """Object that sets up Matlab specific tools and interfaces
@@ -135,7 +136,7 @@ class MatlabCommandLine(CommandLine):
         return self._cmdline
     
 
-class MatlabInputSpec(TraitedSpec):
+class MatlabInputSpec(BaseInterfaceInputSpec):
     script  = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
                          mandatory=True, position=-1)
     nodesktop = traits.Bool(True, argstr='-nodesktop', usedefault=True,
@@ -191,7 +192,7 @@ class NEW_MatlabCommand(NEW_CommandLine):
         cwd = os.getcwd()
         mfile = self.inputs.mfile
         paths = []
-        if self.inputs.paths is not Undefined:
+        if isdefined(self.inputs.paths):
             paths = self.inputs.paths
         # prescript
         prescript  = ''
