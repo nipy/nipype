@@ -14,7 +14,7 @@ import numpy as np
 from scipy.io import savemat
 
 # Local imports
-from nipype.interfaces.base import Bunch, NEW_BaseInterface, traits, TraitedSpec
+from nipype.interfaces.base import Bunch, NEW_BaseInterface, traits, TraitedSpec, Undefined
 from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import MatlabCommandLine
 from nipype.interfaces.matlab import NEW_MatlabCommand
@@ -425,17 +425,20 @@ class NEW_SPMCommand(NEW_BaseInterface):
     """ Extends `NEW_BaseInterface` class to implement SPM specific interfaces.
     """
 
-    paths = None
+    _paths = None
+    _matlab_cmd = None
 
     def __init__(self, matlab_cmd=None, paths=None,
                  mfile = True, **inputs): 
         super(NEW_SPMCommand, self).__init__(**inputs)
-        self.mlab = NEW_MatlabCommand(matlab_cmd=matlab_cmd)
+        if matlab_cmd:
+            self._matlab_cmd = matlab_cmd
+        self.mlab = NEW_MatlabCommand(matlab_cmd=self._matlab_cmd)
         self.mlab.inputs.mfile = mfile
         if paths:
-            self.paths = paths
-        if self.paths:
-            self.mlab.inputs.paths = self.paths
+            self._paths = paths
+        if self._paths:
+            self.mlab.inputs.paths = self._paths
         self.mlab.inputs.script_file = 'pyscript_%s.m' % \
             self.__class__.__name__.split('.')[-1].lower()
 
@@ -454,15 +457,15 @@ class NEW_SPMCommand(NEW_BaseInterface):
         """
         self.mlab.inputs.mfile = use_mfile
 
-    def run(self, **inputs):
+    def _run_interface(self, runtime):
         """Executes the SPM function using MATLAB
         """
-        self.inputs.set(**inputs)
         self.mlab.inputs.script = self._make_matlab_command(deepcopy(self._parse_inputs()))
         results = self.mlab.run()
-        if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs() 
-        return results
+        runtime.returncode = results.runtime.returncode
+        runtime.stdout = results.runtime.stdout
+        runtime.stderr = results.runtime.stderr
+        return runtime
     
     def _list_outputs(self):
         """ Determine the expected outputs based on inputs """
@@ -484,14 +487,14 @@ class NEW_SPMCommand(NEW_BaseInterface):
     
     def _parse_inputs(self, skip=()):
         spmdict = {}
-        for name, trait_spec in self.inputs.items():
+        metadata=dict(field=lambda t : t is not None)
+        for name, spec in self.inputs.traits(**metadata).items():
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if value == trait_spec.default and \
-                    not (trait_spec.usedefault or name in self.inputs.explicitset):
+            if value is Undefined:
                 continue
-            field = trait_spec.field
+            field = spec.field
             if '.' in field:
                 fields = field.split('.')
                 if fields[0] not in spmdict.keys():
@@ -620,11 +623,13 @@ class NEW_SPMCommand(NEW_BaseInterface):
         """
         if self.mlab.inputs.mfile:
             if self.jobname in ['st','smooth','preproc','fmri_spec','fmri_est'] :
-                mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' % 
-                                             (self.jobtype,self.jobname), contents[0])
+                # parentheses
+                mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' %
+                                              (self.jobtype,self.jobname), contents[0])
             else:
-                mscript += self._generate_job('jobs{1}.%s{1}.%s{1}' % 
-                                             (self.jobtype,self.jobname), contents[0])
+                #curly brackets
+                mscript += self._generate_job('jobs{1}.%s{1}.%s{1}' %
+                                              (self.jobtype,self.jobname), contents[0])
         else:
             jobdef = {'jobs':[{self.jobtype:[{self.jobname:self.reformat_dict_for_savemat
                                          (contents[0])}]}]}

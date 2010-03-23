@@ -30,7 +30,7 @@ from nipype.interfaces.spm import (NEW_SPMCommand, scans_for_fname,
                                    scans_for_fnames, logger)
 from nipype.interfaces.base import Bunch
 
-from nipype.interfaces.base import TraitedSpec, traits, MultiPath
+from nipype.interfaces.base import TraitedSpec, traits, MultiPath, Undefined
 
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list, 
                                     list_to_filename, FileNotFoundError)
@@ -209,14 +209,12 @@ class Realign(NEW_SPMCommand):
     def _parse_inputs(self):
         """validate spm realign options if set to None ignore
         """
-        einputs = super(Realign, self)._parse_inputs(skip=('jobtype'))
-        jobtype =  self.inputs.jobtype
-        return [{'%s'%(jobtype):einputs[0]}]
+        einputs = super(Realign, self)._parse_inputs()
+        return [{'%s'%(self.inputs.jobtype):einputs[0]}]
 
     def _list_outputs(self):
-        outputs = self._outputs()._dictcopy()
-        if self.inputs.infile:
-            outputs['realigned_files'] = []
+        outputs = self._outputs().get()
+        if self.inputs.infile is not Undefined:
             outputs['realignment_parameters'] = []
         for imgf in self.inputs.infile:
             outputs['realignment_parameters'].append(fname_presuffix(imgf,
@@ -225,6 +223,7 @@ class Realign(NEW_SPMCommand):
                                                                      use_ext=False))
         if self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
             outputs['mean_image'] = fname_presuffix(self.inputs.infile[0], prefix='mean')
+            outputs['realigned_files'] = []
             for imgf in self.inputs.infile:
                 outputs['realigned_files'].append(fname_presuffix(imgf, prefix='r'))
         return outputs

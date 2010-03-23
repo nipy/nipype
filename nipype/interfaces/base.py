@@ -1029,14 +1029,6 @@ class NEW_CommandLine(NEW_BaseInterface):
         allargs.insert(0, self.cmd)
         return ' '.join(allargs)
 
-    def _update_env(self, env=None):
-        """
-        """
-        if env is None:
-            env = deepcopy(os.environ.data)
-        if hasattr(self, '_environ') and isinstance(self._environ, dict):
-            env.update(self._environ)
-        return env
         
     def _run_interface(self, runtime):
         """Execute command via subprocess
@@ -1052,7 +1044,6 @@ class NEW_CommandLine(NEW_BaseInterface):
         """
         setattr(runtime, 'stdout', None)
         setattr(runtime, 'stderr', None)
-        runtime.environ = self._update_env(runtime.environ)
         setattr(runtime, 'cmdline', self.cmdline)
         proc  = subprocess.Popen(runtime.cmdline,
                                  stdout=subprocess.PIPE,

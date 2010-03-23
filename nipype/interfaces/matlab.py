@@ -10,7 +10,7 @@ import numpy as np
 
 from nipype.interfaces.base import CommandLine, InterfaceResult, Bunch
 from nipype.interfaces.base import (NEW_CommandLine, InterfaceResult, traits,
-                                    TraitedSpec)
+                                    TraitedSpec, Undefined)
 
 class MatlabCommandLine(CommandLine):
     """Object that sets up Matlab specific tools and interfaces
@@ -147,7 +147,7 @@ class MatlabInputSpec(TraitedSpec):
     # non-commandline options
     mfile   = traits.Bool(False, desc='Run m-code using m-file',
                           usedefault=True)
-    script_file = traits.File('pyscript.m',
+    script_file = traits.File('pyscript.m', usedefault=True,
                               desc='Name of file to write m-code to')
     paths   = traits.List(traits.Directory, desc='Paths to add to matlabpath')
 
@@ -160,7 +160,7 @@ class NEW_MatlabCommand(NEW_CommandLine):
     >>> out = mlab.run() # doctest: +SKIP
     """
 
-    matlab_cmd = 'matlab'
+    _cmd = 'matlab'
     input_spec = MatlabInputSpec
     
     def __init__(self, matlab_cmd = None, **inputs):
@@ -168,25 +168,19 @@ class NEW_MatlabCommand(NEW_CommandLine):
         (default 'matlab -nodesktop -nosplash'
         """
         super(NEW_MatlabCommand,self).__init__(**inputs)
-        self._cmd = self.matlab_cmd
         if matlab_cmd is not None:
             self._cmd = matlab_cmd
 
-    def run(self,**kwargs):
-        results = super(NEW_MatlabCommand, self).run(**kwargs)
-        if 'command not found' in results.runtime.stderr:
+    def _run_interface(self,runtime):
+        runtime = super(NEW_MatlabCommand, self)._run_interface(runtime)
+        if 'command not found' in runtime.stderr:
             msg = 'Cannot find matlab!\n' + \
-                '\tTried command:  ' + results.runtime.cmdline + \
-                '\n\tShell reported: ' + results.runtime.stderr
+                '\tTried command:  ' + runtime.cmdline + \
+                '\n\tShell reported: ' + runtime.stderr
             raise IOError(msg)
-        if  'MatlabScriptException' in results.runtime.stderr:
-            results.runtime.returncode = 1
-        return results
-
-    def _parse_inputs(self, skip = None):
-        return super(NEW_MatlabCommand, self)._parse_inputs(skip=['mfile',
-                                                                  'paths',
-                                                                  'script_file'])
+        if  'MatlabScriptException' in runtime.stderr:
+            runtime.returncode = 1
+        return runtime
 
     def _format_arg(self, name, trait_spec, value):
         if name in ['script']:
@@ -196,6 +190,9 @@ class NEW_MatlabCommand(NEW_CommandLine):
     def _gen_matlab_command(self, argstr, script_lines):
         cwd = os.getcwd()
         mfile = self.inputs.mfile
+        paths = []
+        if self.inputs.paths is not Undefined:
+            paths = self.inputs.paths
         # prescript
         prescript  = ''
         if mfile:
@@ -204,7 +201,7 @@ class NEW_MatlabCommand(NEW_CommandLine):
             prescript += "fprintf(1,'Executing code at %s:\\n',datestr(now));\n" 
         prescript += "ver,\n"
         prescript += "try,\n"
-        for path in self.inputs.paths:
+        for path in paths:
             prescript += "addpath('%s');\n" % path
         # postscript
         postscript  = ''

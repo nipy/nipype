@@ -14,7 +14,7 @@ import warnings
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
 from nipype.interfaces.fsl.base import NEW_FSLCommand, FSLTraitedSpec
-from nipype.interfaces.base import Bunch, TraitedSpec
+from nipype.interfaces.base import Bunch, TraitedSpec, Undefined
 from nipype.utils.filemanip import fname_presuffix, list_to_filename
 from nipype.utils.docparse import get_doc
 from nipype.utils.misc import container_to_string, is_container
@@ -119,14 +119,15 @@ class Bet(NEW_FSLCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['outfile'] = self.inputs.outfile
-        if not outputs['outfile'] and self.inputs.infile:
+        if outputs['outfile'] is Undefined and self.inputs.infile:
             outputs['outfile'] = self._gen_fname(self.inputs.infile,
                                               suffix = '_brain')
-        if self.inputs.mesh:
+        if self.inputs.mesh is not Undefined and self.inputs.mesh:
             outputs['meshfile'] = self._gen_fname(outputs['outfile'],
                                                suffix = '_mesh.vtk',
                                                change_ext = False)
-        if self.inputs.mask or self.inputs.reduce_bias:
+        if (self.inputs.mask is not Undefined and self.inputs.mask) or \
+                (self.inputs.reduce_bias is not Undefined and self.inputs.reduce_bias):
             outputs['maskfile'] = self._gen_fname(outputs['outfile'],
                                                suffix = '_mask')
         return outputs

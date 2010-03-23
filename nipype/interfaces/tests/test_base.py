@@ -171,12 +171,11 @@ def test_NEW_Interface():
     yield assert_raises, NotImplementedError, nif._get_filecopy_info
 
 def test_NEW_BaseInterface():
-    yield assert_raises, Exception, nib.NEW_BaseInterface
     yield assert_equal, nib.NEW_BaseInterface.help(), None
     yield assert_equal, nib.NEW_BaseInterface._outputs(), None
     yield assert_equal, nib.NEW_BaseInterface._get_filecopy_info(), []
 
-    class InputSpec(nib.TraitedSpec):
+    class InputSpec(nib.BaseInterfaceInputSpec):
         foo = nib.traits.Int(desc='a random int')
         goo = nib.traits.Int(desc='a random int', mandatory=True)
         hoo = nib.traits.Int(desc='a random int', usedefault=True)
@@ -227,6 +226,9 @@ def test_NEW_BaseInterface():
             return runtime
     yield assert_raises, NotImplementedError, DerivedInterface5(goo=1).run
 
+    nib.NEW_BaseInterface.input_spec = None
+    yield assert_raises, Exception, nib.NEW_BaseInterface
+
 def test_NEW_Commandline():
     yield assert_raises, Exception, nib.NEW_CommandLine
     ci = nib.NEW_CommandLine(command='which')
@@ -234,12 +236,10 @@ def test_NEW_Commandline():
     yield assert_equal, ci.inputs.args, Undefined
     ci2 = nib.NEW_CommandLine(command='which', args='ls')
     yield assert_equal, ci2.cmdline, 'which ls'
-    env = os.environ.data
-    yield assert_equal, ci2._update_env(), env
-    ci2._environ = {'MYENV' : 'foo'}
-    yield assert_equal, ci2._update_env()['MYENV'], 'foo'
     ci3 = nib.NEW_CommandLine(command='echo')
+    ci3.inputs.environ = {'MYENV' : 'foo'}
     res = ci3.run()
+    yield assert_equal, res.runtime.environ['MYENV'], 'foo'
     yield assert_equal, res.outputs, None
 
     class CommandLineInputSpec(nib.TraitedSpec):
