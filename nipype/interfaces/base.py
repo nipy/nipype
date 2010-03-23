@@ -188,10 +188,10 @@ class Bunch(object):
         # dictionary.
         sorted_dict = str(sorted(dict_nofilename.items()))
         return (dict_withhash, md5(sorted_dict).hexdigest())
-
+            
     def _get_hashval(self):
         return self._get_bunch_hash()
-            
+    
     def __pretty__(self, p, cycle):
         '''Support for the pretty module
         
@@ -759,6 +759,9 @@ class TraitedSpec(traits.HasStrictTraits):
         # dictionary.
         sorted_dict = str(sorted(dict_nofilename.items()))
         return (dict_withhash, md5(sorted_dict).hexdigest())
+    
+    def _get_hashval(self):
+        return self.hashval
 
 class NEW_Interface(object):
     """This is an abstract defintion for Interface objects.
