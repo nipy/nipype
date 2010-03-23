@@ -995,18 +995,32 @@ class CommandLineInputSpec(BaseInterfaceInputSpec):
 
 class NEW_CommandLine(NEW_BaseInterface):
     """Implements functionality to interact with command line programs
+    class must be instantiated with a command argument
 
+    Parameters
+    ----------
+
+    command : string
+        define base immutable `command` you wish to run 
+
+    args : string, optional
+        optional arguments passed to base `command`
+
+
+    Examples
+    --------
+        
     >>> from nipype.interfaces.base import NEW_CommandLine
-    >>> cli = NEW_CommandLine(command='which')
-    >>> cli.inputs.args = 'ls'
+    >>> cli = NEW_CommandLine(command='ls')
+    >>> cli.inputs.args = '-al'
     >>> cli.cmdline
-    'which ls'
+    'ls -al'
     
     >>> cli.inputs.trait_get()
-    {'args' : 'ls'}
+    {'args': '-al', 'environ': {}}
 
     >>> cli.inputs.hashval
-    ({'args': 'ls'}, 'dacab83636459a3a76bc73e1f70b6d4e')
+    ({'args': '-al', 'environ': {}}, 'c005b3eb45d97fd5733997ae75689457')
 
     """
 
@@ -1029,7 +1043,8 @@ class NEW_CommandLine(NEW_BaseInterface):
 
     @property
     def cmdline(self):
-        """validates options and generates command line"""
+        """ `command` plus any arguments (args)
+        validates arguments and generates command line"""
         self._check_mandatory_inputs()
         allargs = self._parse_inputs()
         allargs.insert(0, self.cmd)
