@@ -2,6 +2,7 @@
 and spm to access spm tools.
 
 """
+from nipype.interfaces.spm.base import NEW_SPMCommand
 __docformat__ = 'restructuredtext'
 
 # Standard library imports
@@ -13,14 +14,58 @@ import numpy as np
 
 # Local imports
 from nipype.interfaces.spm import SpmMatlabCommandLine
-from nipype.interfaces.base import Bunch
+from nipype.interfaces.base import Bunch, BaseInterfaceInputSpec, traits,\
+    TraitedSpec, isdefined
 from nipype.utils.filemanip import (filename_to_list, list_to_filename,
                                     loadflat)
 from nipype.utils.spm_docs import grab_doc
 import logging
 logger = logging.getLogger('spmlogger')
 
-class Level1Design(SpmMatlabCommandLine):
+class Level1DesignInputSpec(BaseInterfaceInputSpec):
+    spmmat_dir = traits.Directory(exists=True, field='dir', desc='directory to store SPM.mat file (opt)')
+    timing_units = traits.Enum('secs', 'scans', field='timing.units', desc='units for specification of onsets')
+    interscan_interval = traits.Float(field='timing.RT', desc='Interscan interval in secs')
+    microtime_resolution = traits.Int(field='timing.fmri_t',
+                        desc='Number of time-bins per scan in secs (opt)')
+    microtime_onset = traits.Float(field='timing.fmri_t0',
+                        desc='The onset/time-bin in seconds for alignment (opt)')
+    session_info = traits.File(exists=True, field='sess', desc='Session specific information file')
+    factor_info = traits.File(exists=True, field='fact', desc='Factor specific information file (opt)')
+    bases = traits.Dict(traits.Enum('hrf', 'fourier', 'fourier_han',
+                'gamma', 'fir'), field='bases', desc="""
+            dict {'name':{'basesparam1':val,...}}
+            name : string
+                Name of basis function (hrf, fourier, fourier_han,
+                gamma, fir)
+                
+                hrf :
+                    derivs : 2-element list
+                        Model  HRF  Derivatives. No derivatives: [0,0],
+                        Time derivatives : [1,0], Time and Dispersion
+                        derivatives: [1,1]
+                fourier, fourier_han, gamma, fir:
+                    length : int
+                        Post-stimulus window length (in seconds)
+                    order : int
+                        Number of basis functions
+""")
+    volterra_expansion_order = traits.Enum(1, 2 , field='volt',
+                     desc='Model interactions - yes:1, no:2 (opt)')
+    global_intensity_normalization = traits.Enum('none', 'scaling', field='global',
+                      desc='Global intensity normalization - scaling or none (opt)')
+    mask_image = traits.File(exists=True, field='mask', copyfile=False,
+                      desc='Image  for  explicitly  masking the analysis (opt)')
+    mask_threshold = traits.Either(traits.Float(), traits.Enum('-Inf'),
+                      desc="Thresholding for the mask (opt, '-Inf')")
+    model_serial_correlations = traits.Enum('AR(1)', 'none', field='cvi',
+                      desc='Model serial correlations AR(1) or none (opt)')
+
+class Level1DesignOutputSpec(TraitedSpec):
+    spm_mat_file = traits.File(exists=True, desc='SPM mat file')
+
+
+class Level1Design(NEW_SPMCommand):
     """Generate an SPM design matrix
 
     Parameters
@@ -75,52 +120,13 @@ class Level1Design(SpmMatlabCommandLine):
     
     """
     
-    def spm_doc(self):
-        """Print out SPM documentation."""
-        print grab_doc('fMRI model specification (design only)')
-
-    @property
-    def cmd(self):
-        return 'spm_fmri_design'
-
-    @property
-    def jobtype(self):
-        return 'stats'
-
-    @property
-    def jobname(self):
-        return 'fmri_spec'
-
-    opt_map = {'spmmat_dir' : ('dir', 'directory to store SPM.mat file (opt, cwd)'),
-               'timing_units' : ('timing.units','units for specification of onsets'),
-               'interscan_interval' : ('timing.RT', 'Interscan interval in secs'),
-               'microtime_resolution' : ('timing.fmri_t',
-                        'Number of time-bins per scan in secs (opt,16)'),
-               'microtime_onset' : ('timing.fmri_t0',
-                        'The onset/time-bin in seconds for alignment (opt,)'),
-               'session_info' : ('sess', 'Session specific information file'),
-               'factor_info' : ('fact', 'Factor specific information file (opt,)'),
-               'bases' : ('bases', 'Basis function used'),
-               'volterra_expansion_order' : ('volt',
-                     'Model interactions - yes:1, no:2 (opt, 1)'),
-               'global_intensity_normalization' : ('global', 
-                      'Global intensity normalization - scaling or none (opt, none)'),
-               'mask_image' : ('mask',
-                      'Image  for  explicitly  masking the analysis (opt,)'),
-               'mask_threshold' : (None,
-                      "Thresholding for the mask (opt, '-Inf')",'-Inf'),
-               'model_serial_correlations' : ('cvi',
-                      'Model serial correlations AR(1) or none (opt, AR(1))'),
-               }
+    input_spec = Level1DesignInputSpec
+    output_spec = Level1DesignOutputSpec
     
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='mask_image',copy=False)]
-        return info
+    _jobtype = 'stats'
+    _jobname = 'fmri_spec'
         
-    def _convert_inputs(self, opt, val):
+    def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
         """
         if opt in ['spmmat_dir', 'mask_image']:
@@ -137,7 +143,7 @@ class Level1Design(SpmMatlabCommandLine):
         """validate spm realign options if set to None ignore
         """
         einputs = super(Level1Design, self)._parse_inputs(skip=('mask_threshold'))
-        if not self.inputs.spmmat_dir:
+        if not isdefined(self.inputs.spmmat_dir):
             einputs[0]['dir'] = np.array([str(os.getcwd())],dtype=object)
         return einputs
 
@@ -158,52 +164,39 @@ class Level1Design(SpmMatlabCommandLine):
             postscript += "save SPM SPM;\n"
         else:
             postscript = None
-        self._cmdline, mscript =self._make_matlab_command(self._parse_inputs(),
+        self._cmdline, _ =self._make_matlab_command(self._parse_inputs(),
                                                           postscript=postscript)
-
-    out_map = {'spm_mat_file' : ('SPM mat file',)}
         
-    def aggregate_outputs(self):
-        outputs = self._outputs()
-        spm = glob(os.path.join(os.getcwd(),'SPM.mat'))
-        outputs.spm_mat_file = spm[0]
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        spm = os.path.join(os.getcwd(),'SPM.mat')
+        outputs['spm_mat_file'] = spm
         return outputs
-    
-class EstimateModel(SpmMatlabCommandLine):
+
+
+class EstimateModelInputSpec(BaseInterfaceInputSpec):
+    spm_design_file = traits.File(exists=True, field='spmmat', desc='absolute path to SPM.mat', copyfile=True)
+    estimation_method = traits.Dict(traits.Enum('Classical', 'Bayesian2', 'Bayesian'), field='method',
+                                     desc='Classical, Bayesian2, Bayesian (dict)')
+    flags = traits.Str(desc = 'optional arguments (opt)')
+
+class EstimateModelOutputSpec(TraitedSpec):
+    mask_image = traits.File(exists=True, desc='binary mask to constrain estimation')
+    beta_images = traits.List(traits.File(exists=True), desc ='design parameter estimates')
+    residual_image = traits.File(exists=True, desc = 'Mean-squared image of the residuals')
+    RPVimage = traits.File(exists=True, desc = 'Resels per voxel image')
+    spm_mat_file = traits.File(exist=True, desc = 'Updated SPM mat file')
+               
+class EstimateModel(NEW_SPMCommand):
     """Use spm_spm to estimate the parameters of a model
 
     """
+    input_spec = EstimateModelInputSpec
+    output_spec = EstimateModelOutputSpec
+    _jobtype = 'stats'
+    _jobname = 'fmri_est'
     
-    def spm_doc(self):
-        """Print out SPM documentation."""
-        print grab_doc('Model estimation')
-
-    @property
-    def cmd(self):
-        return 'spm_spm'
-
-    @property
-    def jobtype(self):
-        return 'stats'
-
-    @property
-    def jobname(self):
-        return 'fmri_est'
-
-    opt_map = {'spm_design_file': ('spmmat', 'absolute path to SPM.mat'),
-               'estimation_method': ('method',
-                                     'Classical, Bayesian2, Bayesian (dict)'),
-               'flags': (None, 'optional arguments (opt, None)')
-               }
-
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='spm_design_file',copy=True)]
-        return info
-    
-    def _convert_inputs(self, opt, val):
+    def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
         """
         if opt == 'spm_design_file':
@@ -219,35 +212,24 @@ class EstimateModel(SpmMatlabCommandLine):
         """validate spm realign options if set to None ignore
         """
         einputs = super(EstimateModel, self)._parse_inputs(skip=('flags'))
-        if self.inputs.flags:
+        if isdefined(self.inputs.flags):
             einputs[0].update(self.inputs.flags)
         return einputs
 
-    out_map = {'mask_image' : ('binary mask to constrain estimation',),
-               'beta_images' : ('design parameter estimates',),
-               'residual_image' : ('Mean-squared image of the residuals',),
-               'RPVimage' : ('Resels per voxel image',),
-               'spm_mat_file' : ('Updated SPM mat file',)
-               }
-        
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        pth, fname = os.path.split(self.inputs.spm_design_file)
-        mask = glob(os.path.join(pth,'mask.img'))
-        assert len(mask) == 1, 'No mask image file generated by SPM Estimate'
-        outputs.mask_image = mask
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        pth, _ = os.path.split(self.inputs.spm_design_file)
+        mask = os.path.join(pth,'mask.img')
+        outputs['mask_image'] = mask
         betas = glob(os.path.join(pth,'beta*.img'))
         assert len(betas) >= 1, 'No beta image files generated by SPM Estimate'
-        outputs.beta_images = betas
-        resms = glob(os.path.join(pth,'ResMS.img'))
-        assert len(resms) == 1, 'No residual image files generated by SPM Estimate'
-        outputs.residual_image = resms
-        rpv = glob(os.path.join(pth,'RPV.img'))
-        assert len(rpv) == 1, 'No residual image files generated by SPM Estimate'
-        outputs.RPVimage = rpv
-        spm = glob(os.path.join(pth,'SPM.mat'))
-        assert len(spm) == 1, 'No spm mat files generated by SPM Estimate'
-        outputs.spm_mat_file = spm[0]
+        outputs['beta_images'] = betas
+        resms = os.path.join(pth,'ResMS.img')
+        outputs['residual_image'] = resms
+        rpv = os.path.join(pth,'RPV.img')
+        outputs['RPVimage'] = rpv
+        spm = os.path.join(pth,'SPM.mat')
+        outputs['spm_mat_file'] = spm
         return outputs
 
 class EstimateContrast(SpmMatlabCommandLine):

@@ -109,19 +109,10 @@ class ArtifactDetect(NEW_BaseInterface):
         outputs['intensity_files'] = []
         outputs['statistic_files'] = []
         for i,f in enumerate(filename_to_list(self.inputs.realigned_files)):
-            outlierfile,intensityfile,statsfile,normfile = self._get_output_filenames(f,os.getcwd())
-            outlierfile = glob(outlierfile)
-            assert len(outlierfile)==1, 'Outlier file %s not found'%outlierfile   
-            outputs['outlier_files'].insert(i,outlierfile[0])
-            
-            intensityfile = glob(intensityfile)
-            assert len(intensityfile)==1, 'Outlier file %s not found'%intensityfile
-            outputs['intensity_files'].insert(i,intensityfile[0])
-            
-            statsfile = glob(statsfile)
-            assert len(statsfile)==1, 'Outlier file %s not found'%statsfile
-            
-            outputs['statistic_files'].insert(i,statsfile[0])
+            outlierfile,intensityfile,statsfile, _ = self._get_output_filenames(f,os.getcwd())
+            outputs['outlier_files'].insert(i,outlierfile)
+            outputs['intensity_files'].insert(i,intensityfile)     
+            outputs['statistic_files'].insert(i,statsfile)
 
         outputs['outlier_files'] = list_to_filename(outputs['outlier_files'])
         outputs['intensity_files'] = list_to_filename(outputs['intensity_files'])
@@ -347,7 +338,7 @@ class ArtifactDetect(NEW_BaseInterface):
         runtime = Bunch(returncode=0,
                         messages=None,
                         errmessages=None)
-        outputs=self._list_outputs()
+        outputs=self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
 
 class StimulusCorrelation(Interface):
