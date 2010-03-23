@@ -101,23 +101,178 @@ cmd1 = CommandLine('ls -l *')
 cmd2 = CommandLine.update('-a -h').remove('-l')
 """
 
-class spec(nii.TraitedSpec):
-    foo = nii.traits.Int
-    goo = nii.traits.Float
-    hoo = nii.traits.List(nii.traits.File)
+import os
+import tempfile
+import shutil
 
+from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
+                            assert_true, assert_false, with_setup)
+import nipype.interfaces.base as nib
+from nipype.interfaces.base import Undefined
+from nipype.interfaces.base import InterfaceResult
+
+tmp_infile = None
+tmp_dir = None
+def setup_file():
+    global tmp_infile, tmp_dir
+    tmp_dir = tempfile.mkdtemp()
+    tmp_infile = os.path.join(tmp_dir, 'foo.txt')
+    open(tmp_infile, 'w').writelines('123456789')
+
+def teardown_file():
+    shutil.rmtree(tmp_dir)
+
+@with_setup(setup_file, teardown_file)
 def test_TraitedSpec():
-    infields = spec(foo=1, goo=2.0, hoo=['foo.nii'])
-    yield assert_true, hasattr(infields, 'hashval')
-    yield assert_equal, infields.hashval[1], 'e941c7ea9138f6db1f04c81a94da9098'
-     
+    yield assert_true, nib.TraitedSpec().hashval
+    yield assert_equal, nib.TraitedSpec().__repr__(), ''
+    
+    class spec(nib.TraitedSpec):
+        foo = nib.traits.Int
+        goo = nib.traits.Float(usedefault=True)
+
+    # This should fail currently and is consistent with traits, but
+    # inconsistent with nipype interface api
+    yield assert_equal, spec().foo, Undefined
+    yield assert_equal, spec().goo, 0.0
+    specfunc = lambda x : spec(hoo=x)
+    yield assert_raises, nib.traits.TraitError, specfunc, 1
+    infields = spec(foo=1)
+    hashval = ({'goo': 0.0, 'foo': 1}, 'a83c1cb761df797f176bd23c7ca30a69')
+    yield assert_equal, infields.hashval[0], hashval[0]
+    yield assert_equal, infields.hashval[1], hashval[1]
+    yield assert_equal, infields.__repr__(), 'foo = 1\ngoo = 0.0'
+
+    global tmp_infile
+    class spec2(nib.TraitedSpec):
+        moo = nib.traits.File(exists=True)
+        doo = nib.traits.List(nib.traits.File(exists=True))
+    infields = spec2(moo=tmp_infile,doo=[tmp_infile])
+    yield assert_equal, infields.hashval[1], 'c687052171787b46d06ba55dbb74e6a3'
+
     
 def test_NEW_Interface():
-    pass
+    yield assert_equal, nib.NEW_Interface.input_spec, None
+    yield assert_equal, nib.NEW_Interface.output_spec, None
+    yield assert_raises, NotImplementedError, nib.NEW_Interface
+    yield assert_raises, NotImplementedError, nib.NEW_Interface.help
+    yield assert_raises, NotImplementedError, nib.NEW_Interface._inputs_help
+    yield assert_raises, NotImplementedError, nib.NEW_Interface._outputs_help
+    yield assert_raises, NotImplementedError, nib.NEW_Interface._outputs
+
+    class DerivedInterface(nib.NEW_Interface):
+        def __init__(self):
+            pass
+        
+    nif = DerivedInterface()
+    yield assert_raises, NotImplementedError, nif.run
+    yield assert_raises, NotImplementedError, nif.aggregate_outputs
+    yield assert_raises, NotImplementedError, nif._list_outputs
+    yield assert_raises, NotImplementedError, nif._get_filecopy_info
 
 def test_NEW_BaseInterface():
-    pass
+    yield assert_raises, Exception, nib.NEW_BaseInterface
+    yield assert_equal, nib.NEW_BaseInterface.help(), None
+    yield assert_equal, nib.NEW_BaseInterface._outputs(), None
+    yield assert_equal, nib.NEW_BaseInterface._get_filecopy_info(), []
+
+    class InputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int')
+        goo = nib.traits.Int(desc='a random int', mandatory=True)
+        hoo = nib.traits.Int(desc='a random int', usedefault=True)
+        zoo = nib.traits.File(desc='a file', copyfile=False)
+        woo = nib.traits.File(desc='a file', copyfile=True)
+    class OutputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int')
+    class DerivedInterface(nib.NEW_BaseInterface):
+        input_spec = InputSpec
+        
+    yield assert_equal, DerivedInterface.help(), None
+    yield assert_equal, DerivedInterface._outputs(), None
+    yield assert_equal, DerivedInterface._get_filecopy_info()[0]['key'], 'woo'
+    yield assert_true, DerivedInterface._get_filecopy_info()[0]['copy']
+    yield assert_equal, DerivedInterface._get_filecopy_info()[1]['key'], 'zoo'
+    yield assert_false, DerivedInterface._get_filecopy_info()[1]['copy']
+    yield assert_equal, DerivedInterface().inputs.foo, Undefined
+    yield assert_raises, ValueError, DerivedInterface()._check_mandatory_inputs
+    yield assert_equal, DerivedInterface(goo=1)._check_mandatory_inputs(), None
+    yield assert_raises, ValueError, DerivedInterface().run
+    yield assert_raises, NotImplementedError, DerivedInterface(goo=1).run
+    
+    class DerivedInterface2(DerivedInterface):
+        output_spec = OutputSpec
+        def _run_interface(self, runtime):
+            return runtime
+
+    yield assert_equal, DerivedInterface2.help(), None
+    yield assert_equal, DerivedInterface2._outputs().foo, Undefined
+    yield assert_raises, Exception, DerivedInterface2(goo=1).run
+
+    class DerivedInterface3(DerivedInterface2):
+        def _run_interface(self, runtime):
+            runtime.returncode = 1
+            return runtime
+
+    yield assert_equal, DerivedInterface3(goo=1).run().outputs, None
+    
+    class DerivedInterface4(DerivedInterface):
+        def _run_interface(self, runtime):
+            runtime.returncode = 0
+            return runtime
+    yield assert_equal, DerivedInterface4(goo=1).run().outputs, None
+
+    class DerivedInterface5(DerivedInterface2):
+        def _run_interface(self, runtime):
+            runtime.returncode = 0
+            return runtime
+    yield assert_raises, NotImplementedError, DerivedInterface5(goo=1).run
 
 def test_NEW_Commandline():
-    pass
+    yield assert_raises, Exception, nib.NEW_CommandLine
+    ci = nib.NEW_CommandLine(command='which')
+    yield assert_equal, ci.cmd, 'which'
+    yield assert_equal, ci.inputs.args, Undefined
+    ci2 = nib.NEW_CommandLine(command='which', args='ls')
+    yield assert_equal, ci2.cmdline, 'which ls'
+    env = os.environ.data
+    yield assert_equal, ci2._update_env(), env
+    ci2._environ = {'MYENV' : 'foo'}
+    yield assert_equal, ci2._update_env()['MYENV'], 'foo'
+    ci3 = nib.NEW_CommandLine(command='echo')
+    res = ci3.run()
+    yield assert_equal, res.outputs, None
 
+    class CommandLineInputSpec(nib.TraitedSpec):
+        foo = nib.traits.Str(argstr='%s', desc='a str')
+        goo = nib.traits.Bool(argstr='-g', desc='a bool', position=0)
+        hoo = nib.traits.List(argstr='-l %s', desc='a list')
+        moo = nib.traits.List(argstr='-i %d...', desc='a repeated list',
+                              position=-1)
+        noo = nib.traits.Int(argstr='-x %d', desc='an int')
+        roo = nib.traits.Str(desc='not on command line')
+    nib.NEW_CommandLine.input_spec = CommandLineInputSpec
+    ci4 = nib.NEW_CommandLine(command='cmd')
+    ci4.inputs.foo = 'foo'
+    ci4.inputs.goo = True
+    ci4.inputs.hoo = ['a', 'b']
+    ci4.inputs.moo = [1, 2, 3]
+    ci4.inputs.noo = 0
+    ci4.inputs.roo = 'hello'
+    cmd = ci4._parse_inputs()
+    yield assert_equal, cmd[0], '-g'
+    yield assert_equal, cmd[-1], '-i 1 -i 2 -i 3'
+    yield assert_true, 'hello' not in ' '.join(cmd)
+    
+    class CommandLineInputSpec2(nib.TraitedSpec):
+        foo = nib.traits.File(argstr='%s', desc='a str', genfile=True)
+    nib.NEW_CommandLine.input_spec = CommandLineInputSpec2
+    ci5 = nib.NEW_CommandLine(command='cmd')
+    yield assert_raises, NotImplementedError, ci5._parse_inputs
+
+    class DerivedClass(nib.NEW_CommandLine):
+        input_spec = CommandLineInputSpec2
+        def _gen_filename(self, name):
+            return 'filename'
+        
+    ci6 = DerivedClass(command='cmd')
+    yield assert_equal, ci6._parse_inputs()[0], 'filename'

@@ -15,6 +15,7 @@ from time import time
 from warnings import warn
 
 import enthought.traits.api as traits
+from enthought.traits.api import Undefined
 
 from nipype.utils.filemanip import md5, hash_infile
 from nipype.utils.misc import is_container
@@ -628,67 +629,53 @@ class OptMapCommand(CommandLine):
 #
 #####################################################################
 
-class TraitedSpec(traits.HasTraits):
-    """Provide a few methods necessary to support the Bunch interface.
+class TraitedSpec(traits.HasStrictTraits):
+    """Provide a few methods necessary to support nipype interface api
 
-    In refactoring to Traits, the self.inputs attrs call some methods
-    of the Bunch class that the Traited classes do not inherit from
-    traits.HasTraits.  We can provide those methods here.
+    The inputs attribute of interfaces call certain methods that are not
+    available in traits.HasTraits. These are provided here.
+
+    new metadata:
+
+    * usedefault : set this to True if the default value of the trait should be
+      used. Unless this is set, the attributes are set to traits.Undefined
+
+    new attribute:
+
+    * hashval : returns a tuple containing the state of the trait as a dict and
+      hashvalue corresponding to dict.
 
     XXX Reconsider this in the long run, but it seems like the best
     solution to move forward on the refactoring.
     """
-
-    # XX temporarily disabling auto hash update because hash is only
-    # used in pipeline. Will re-enable once we calculate hash individually
-    #trigger = traits.Event
-    #hashval = traits.Property(depends_on='trigger', trait=traits.Tuple(dict, str))
-    
-    hashval = traits.Property(trait=traits.Tuple(dict, str))
-    # a list which 
-    explicitset = traits.List(traits.Str)
     
     def __init__(self, **kwargs):
-        self._generate_handlers()
+        """ Initialize handlers and inputs"""
         # NOTE: In python 2.6, object.__init__ no longer accepts input
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
         #super(TraitedSpec, self).__init__(*args, **kwargs)
         super(TraitedSpec, self).__init__(**kwargs)
+        undefined_traits = {}
+        for trait in self.copyable_trait_names():
+            if not self.traits()[trait].usedefault:
+                undefined_traits[trait] = Undefined
+        self.trait_set(trait_change_notify=False, **undefined_traits)
+        self._generate_handlers()
         self.set(**kwargs)
-
-        # XX kwargs always appears to be empty
-        #for key, val in kwargs.items():
-        #    setattr(self, key, val)
-
+        
+    def items(self):
+        """ Name, trait generator for user modifiable traits
+        """
+        for name in sorted(self.copyable_trait_names()):
+            yield name, self.traits()[name]
 
     def __repr__(self):
+        """ Return a well-formatted representation of the traits """
         outstr = []
-        for name, value in self.itemvalues():
-            if value is not None:
-                outstr.append('%s = %s' % (name, value))
-            else:
-                outstr.append('%s = <NOT SET>' % name)
+        for name, value in sorted(self.trait_get().items()):
+            outstr.append('%s = %s' % (name, value))
         return '\n'.join(outstr)
-
-    def items(self):
-        for name, trait_spec in sorted(self.traits().items()):
-            if name in ['trait_added', 'trait_modified', 'hashval', 'trigger', 'explicitset']:
-                # Skip these trait api functions
-                continue
-            yield name, trait_spec
-            
-    def itemvalues(self):
-        for name, trait_spec in sorted(self.traits().items()):
-            if name in ['trait_added', 'trait_modified', 'hashval', 'trigger', 'explicitset']:
-                # Skip these trait api functions
-                continue
-            value = getattr(self, name)
-            if value == trait_spec.default and \
-                    not (trait_spec.usedefault or name in self.explicitset):
-                yield name, None
-            else:
-                yield name, value
 
     def _generate_handlers(self):
         # Find all traits with the 'xor' metadata and attach an event
@@ -718,14 +705,6 @@ class TraitedSpec(traits.HasTraits):
                                                      tspec.default)
                     warn(msg)
 
-    def _dictcopy(self):
-        out_dict = {}
-        for name, value in self.itemvalues():
-            out_dict[name] = None
-            if value is not None:
-                out_dict[name] = value
-        return out_dict
-
     def _hash_infile(self, adict, key):
         # Inject file hashes into adict[key]
         stuff = adict[key]
@@ -737,7 +716,8 @@ class TraitedSpec(traits.HasTraits):
         return file_list
 
     #@traits.cached_property
-    def _get_hashval(self):
+    @property
+    def hashval(self):
         """Return a dictionary of our items with hashes for each file.
 
         Searches through dictionary items and if an item is a file, it
@@ -758,11 +738,11 @@ class TraitedSpec(traits.HasTraits):
 
         """
         infile_list = []
-        dict_withhash = self._dictcopy()
-        dict_nofilename = self._dictcopy()
+        dict_withhash = self.get()
+        dict_nofilename = self.get()
         for key, spec in self.items():
             #do not hash values which are not set
-            if dict_withhash[key] is None:
+            if dict_withhash[key] is Undefined:
                 del dict_withhash[key]
                 del dict_nofilename[key]
                 continue
@@ -780,31 +760,6 @@ class TraitedSpec(traits.HasTraits):
         sorted_dict = str(sorted(dict_nofilename.items()))
         return (dict_withhash, md5(sorted_dict).hexdigest())
 
-    def _anytrait_changed(self, name, old, value):
-        if name in ['trait_added', 'trait_modified', 'hashval', 'trigger', 'explicitset']:
-            return
-        self.trigger = True
-
-    def _add_to_explicitset(self, name, value):
-        if value == self.traits()[name].default:
-            if name not in self.explicitset:
-                self.explicitset.append(name)
-        elif name in self.explicitset:
-            self.explicitset.remove(name)
-
-    def set(self, **kwargs):
-        for name, value in kwargs.items():
-            if name in self.trait_names():
-                setattr(self, name, value)
-                self._add_to_explicitset(name, value)
-    
-    def __getstate__ ( self ):
-        state = super( TraitedSpec, self ).__getstate__()
-        for key, value in self.itemvalues():
-            if value is None:
-                del state[key]
-        return state
-
 class NEW_Interface(object):
     """This is an abstract defintion for Interface objects.
 
@@ -820,7 +775,27 @@ class NEW_Interface(object):
         """Initialize command with given args and inputs."""
         raise NotImplementedError
 
-    def run(self, cwd=None):
+    @classmethod
+    def help(cls):
+        """ Prints class help"""
+        raise NotImplementedError
+        
+    @classmethod
+    def _inputs_help(cls):
+        """ Prints inputs help"""
+        raise NotImplementedError
+    
+    @classmethod
+    def _outputs_help(cls):
+        """ Prints outputs help"""
+        raise NotImplementedError
+
+    @classmethod
+    def _outputs(cls):
+        """ Initializes outputs"""
+        raise NotImplementedError
+    
+    def run(self):
         """Execute the command."""
         raise NotImplementedError
 
@@ -828,22 +803,6 @@ class NEW_Interface(object):
         """Called to populate outputs"""
         raise NotImplementedError
 
-    @classmethod
-    def help(cls):
-        """ Prints class help"""
-        raise NotImplementedError
-        
-    def _inputs_help(self):
-        """ Prints inputs help"""
-        raise NotImplementedError
-    
-    def _outputs_help(self):
-        """ Prints outputs help"""
-        raise NotImplementedError
-    
-    def _outputs(self):
-        """ Initializes outputs"""
-        raise NotImplementedError
 
     def _list_outputs(self):
         """ List expected outputs"""
@@ -878,108 +837,146 @@ class NEW_BaseInterface(NEW_Interface):
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' % \
                                 self.__class__.__name__)
-        self.inputs = self.input_spec()
-        self.inputs.set(**inputs)
+        self.inputs = self.input_spec(**inputs)
 
     @classmethod
     def help(cls):
         """ Prints class help
         """
-        # XXX Creates new object!  Need to make sure this is cheap.
-        obj = cls()
-        obj._inputs_help()
+        cls._inputs_help()
         print ''
-        obj._outputs_help()
+        cls._outputs_help()
 
-    def _inputs_help(self):
-        """ Prints the help of inputs
+    @classmethod
+    def _inputs_help(cls):
+        """ Prints description for input parameters
         """
         helpstr = ['Inputs','------']
         opthelpstr = None
         manhelpstr = None
-        for name, trait_spec in self.inputs.items():
-            desc = trait_spec.desc
-            if trait_spec.mandatory:
-                if not manhelpstr:
-                    manhelpstr = ['','Mandatory:']
-                manhelpstr += [' %s: %s' % (name, desc)]
-            else:
-                if not opthelpstr:
-                    opthelpstr = ['','Optional:']
-                default = trait_spec.default
-                if default not in [None, '', []] and trait_spec.usedefault:
-                    opthelpstr += [' %s: %s (default=%s)' % (name,
-                                                             desc,
-                                                             default)]
-                else:
-                    opthelpstr += [' %s: %s' % (name, desc)]
+        if cls.input_spec is None:
+            helpstr += ['None']
+            print '\n'.join(helpstr)
+            return
+        for name, spec in sorted(cls.input_spec().traits(mandatory=True).items()):
+            desc = spec.desc
+            if not manhelpstr:
+                manhelpstr = ['','Mandatory:']
+            manhelpstr += [' %s: %s' % (name, desc)]
+        for name, spec in sorted(cls.input_spec().traits(mandatory=None,
+                                                         transient=None).items()):
+            desc = spec.desc
+            if not opthelpstr:
+                opthelpstr = ['','Optional:']
+            opthelpstr += [' %s: %s' % (name, desc)]
+            if spec.usedefault:
+                opthelpstr[-1] += ' (default=%s)' % spec.default
         if manhelpstr:
             helpstr += manhelpstr
         if opthelpstr:
             helpstr += opthelpstr
         print '\n'.join(helpstr)
 
-    def _outputs_help(self):
-        """ Prints the help of outputs
+    @classmethod
+    def _outputs_help(cls):
+        """ Prints description for output parameters
         """
         helpstr = ['Outputs','-------']
-        if self.output_spec:
-            output_spec = self.output_spec()
-            for name, trait_spec in sorted(output_spec.items()):
-                helpstr += ['%s: %s' % (name, trait_spec.desc)]
+        if cls.output_spec:
+            for name, spec in sorted(cls.output_spec().traits(transient=None).items()):
+                helpstr += ['%s: %s' % (name, spec.desc)]
         else:
             helpstr += ['None']
         print '\n'.join(helpstr)
 
-    def _outputs(self):
+    @classmethod
+    def _outputs(cls):
         """ Returns a bunch containing output fields for the class
         """
         outputs = None
-        if self.output_spec:
-            outputs = self.output_spec()
+        if cls.output_spec:
+            outputs = cls.output_spec()
         return outputs
 
-    def _check_mandatory_inputs(self):
-        for name, trait_spec in self.inputs.items():
-            if trait_spec.mandatory:
-                value = getattr(self.inputs, name)
-                if value == trait_spec.default:
-                    msg = "%s requires a value for input '%s'" % \
-                        (self.__class__.__name__, name)
-                    raise ValueError(msg)
-
-    def run(self):
-        """Execute this module.
-        """
-        # XXX What is the purpose of this method here?
-        self._check_mandatory_inputs()
-        runtime = Bunch(returncode=0,
-                        stdout=None,
-                        stderr=None)
-        outputs = self.aggregate_outputs()
-        return InterfaceResult(deepcopy(self), runtime, outputs = outputs)
-    
     @classmethod
     def _get_filecopy_info(cls):
         """ Provides information about file inputs to copy or link to cwd.
             Necessary for pipeline operation
         """
         info = []
-        for name, trait_spec in cls.input_spec().items():
-            if trait_spec.copyfile is not None:
-                info.append(dict(key=name,
-                                 copy=trait_spec.copyfile))
+        if cls.input_spec is None:
+            return info
+        metadata = dict(copyfile = lambda t : t is not None)
+        for name, spec in sorted(cls.input_spec().traits(**metadata).items()):
+            info.append(dict(key=name,
+                             copy=spec.copyfile))
         return info
     
+    def _check_mandatory_inputs(self):
+        """ Raises an exception if a mandatory input is Undefined
+        """
+        for name, value in self.inputs.trait_get(mandatory=True).items():
+            if value == Undefined:
+                msg = "%s requires a value for input '%s'" % \
+                    (self.__class__.__name__, name)
+                self.help()
+                raise ValueError(msg)
+
+    def _run_interface(self, runtime):
+        """ Core function that executes interface
+        """
+        raise NotImplementedError
+    
+    def run(self, **inputs):
+        """Execute this interface.
+
+        This interface will not raise an exception if runtime.returncode is
+        non-zero.
+
+        Parameters
+        ----------
+        inputs : allows the interface settings to be updated
+
+        Returns
+        -------
+        results :  an InterfaceResult object containing a copy of the instance
+        that was executed, provenance information and, if successful, results
+        """
+        self.inputs.set(**inputs)
+        self._check_mandatory_inputs()
+        # initialize provenance tracking
+        runtime = Bunch(cwd=os.getcwd(),
+                        returncode = None,
+                        duration = None,
+                        environ=deepcopy(os.environ.data),
+                        hostname = gethostname())
+        t = time()
+        runtime = self._run_interface(runtime)
+        runtime.duration = time()-t
+        results = InterfaceResult(deepcopy(self), runtime)
+        if results.runtime.returncode is None:
+            raise Exception('Returncode from an interface cannot be None')
+        if results.runtime.returncode == 0:
+            results.outputs = self.aggregate_outputs()
+        return results
+    
+    def _list_outputs(self):
+        """ List the expected outputs
+        """
+        if self.output_spec:
+            raise NotImplementedError
+        else:
+            return None
+    
     def aggregate_outputs(self):
+        """ Collate expected outputs and check for existence
+        """
         outputs = self._outputs()
         expected_outputs = self._list_outputs()
         if expected_outputs:
-            for key, val in expected_outputs.items():
-                if val is None:
-                    del expected_outputs[key]
             outputs.set(**expected_outputs)
         return outputs
+
 
 class CommandLineInputSpec(TraitedSpec):
     args = traits.Str(argstr='%s', desc='Parameters to the command')
@@ -993,20 +990,23 @@ class NEW_CommandLine(NEW_BaseInterface):
     >>> cli.cmdline
     'which ls'
     
-    >>> cli.inputs._dictcopy()
+    >>> cli.inputs.trait_get()
     {'args' : 'ls'}
 
-    >>> cli.inputs._get_bunch_hash()
+    >>> cli.inputs.hashval
     ({'args': 'ls'}, 'dacab83636459a3a76bc73e1f70b6d4e')
 
     """
 
     input_spec = CommandLineInputSpec
-    _cmd = None
         
     def __init__(self, command=None, **inputs):
         super(NEW_CommandLine, self).__init__(**inputs)
-        self._environ = {}
+        self._environ = None
+        if not hasattr(self, '_cmd'):
+            self._cmd = None
+        if self.cmd is None and command is None:
+            raise Exception("Missing command")
         if command:
             self._cmd = command
 
@@ -1014,9 +1014,6 @@ class NEW_CommandLine(NEW_BaseInterface):
     def cmd(self):
         """sets base command, immutable"""
         return self._cmd
-
-    def set_cmd(self, cmd):
-        self._cmd = cmd
 
     @property
     def cmdline(self):
@@ -1026,76 +1023,53 @@ class NEW_CommandLine(NEW_BaseInterface):
         allargs.insert(0, self.cmd)
         return ' '.join(allargs)
 
-    def _update_env(self):
-        env = deepcopy(os.environ.data)
-        env.update(self._environ)
+    def _update_env(self, env=None):
+        """
+        """
+        if env is None:
+            env = deepcopy(os.environ.data)
+        if hasattr(self, '_environ') and isinstance(self._environ, dict):
+            env.update(self._environ)
         return env
         
-    def run(self, cwd=None, **inputs):
-        """Execute the command.
+    def _run_interface(self, runtime):
+        """Execute command via subprocess
 
         Parameters
         ----------
-        cwd : path
-            Where do we effectively execute this command? (default: os.getcwd())
-        inputs : mapping
-            additional key,value pairs will update inputs
-            it will overwrite existing key, value pairs
+        runtime : passed by the run function
 
         Returns
         -------
-        results : InterfaceResult Object
-            A result object with a copy of self in `interface`
+        runtime : updated runtime information
 
         """
-        self.inputs.set(**inputs)
-
-        if cwd is None:
-            cwd = os.getcwd()
-        # initialize provenance tracking
-        runtime = Bunch(cmdline=self.cmdline, cwd=cwd,
-                        stdout = None, stderr = None,
-                        returncode = None, duration = None,
-                        environ=deepcopy(os.environ.data),
-                        hostname = gethostname())
-
-        t = time()
-        if hasattr(self, '_environ') and self._environ:
-            env = self._update_env()
-            runtime.environ = env
-            proc  = subprocess.Popen(runtime.cmdline,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     shell=True,
-                                     cwd=cwd,
-                                     env=env)
-        else:
-            proc  = subprocess.Popen(runtime.cmdline,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     shell=True,
-                                     cwd=cwd)
-
+        setattr(runtime, 'stdout', None)
+        setattr(runtime, 'stderr', None)
+        runtime.environ = self._update_env(runtime.environ)
+        setattr(runtime, 'cmdline', self.cmdline)
+        proc  = subprocess.Popen(runtime.cmdline,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 shell=True,
+                                 cwd=runtime.cwd,
+                                 env=runtime.environ)
         runtime.stdout, runtime.stderr = proc.communicate()
-        runtime.duration = time()-t
         runtime.returncode = proc.returncode
-
-        results = InterfaceResult(deepcopy(self), runtime)
-        if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
-        return results
+        return runtime
 
     def _gen_filename(self, name):
+        """ Generate filename attributes before running.
+
+        Called when trait.genfile = True and trait is Undefined
+        """
         raise NotImplementedError
     
-    def _list_outputs(self):
-        if self.output_spec:
-            return self._outputs()._dictcopy()
-        else:
-            return None
-
     def _format_arg(self, name, trait_spec, value):
-        '''A helper function for _parse_inputs'''
+        """A helper function for _parse_inputs
+
+        Formats a trait containing argstr metadata
+        """
         argstr = trait_spec.argstr
         if trait_spec.is_trait_type(traits.Bool):
             if value:
@@ -1148,19 +1122,18 @@ class NEW_CommandLine(NEW_BaseInterface):
         all_args = []
         initial_args = {}
         final_args = {}
-        for name, trait_spec in self.inputs.items():
+        metadata=dict(argstr=lambda t : t is not None)
+        for name, spec in self.inputs.traits(**metadata).items():
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if value == trait_spec.default and \
-                    not (trait_spec.usedefault or name in self.inputs.explicitset):
-                if trait_spec.genfile:
-                    gen_val = self._gen_filename(name)
-                    value = gen_val
+            if value is Undefined:
+                if spec.genfile:
+                    value = self._gen_filename(name)
                 else:
                     continue
-            arg = self._format_arg(name, trait_spec, value)
-            pos = trait_spec.position
+            arg = self._format_arg(name, spec, value)
+            pos = spec.position
             if pos is not None:
                 if pos >= 0:
                     initial_args[pos] = arg
@@ -1171,7 +1144,6 @@ class NEW_CommandLine(NEW_BaseInterface):
         first_args = [arg for pos, arg in sorted(initial_args.items())]
         last_args = [arg for pos, arg in sorted(final_args.items())]
         return first_args + all_args + last_args
-
 
 
 class MultiPath(traits.List):
