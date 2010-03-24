@@ -1,6 +1,7 @@
 import os
 
-from nipype.testing import assert_equal, assert_true, assert_raises
+from nipype.testing import (assert_equal, assert_true, assert_raises,
+                            assert_not_equal)
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces.base import InterfaceResult
 
@@ -52,6 +53,7 @@ def test_NEW_FSLCommand():
 
     for out_type in fsl.Info.ftypes:
         cmd.set_default_outputtype(out_type)
-        print cmd._outputtype, cmd.inputs.outputtype
         yield assert_equal, cmd._outputtype, out_type
-        yield assert_equal, cmd.inputs.outputtype, out_type
+        if out_type != 'NIFTI':
+            #  Setting class outputtype should not effect existing instances
+            yield assert_not_equal, cmd.inputs.outputtype, out_type
