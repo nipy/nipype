@@ -234,8 +234,16 @@ class EstimateModel(NEW_SPMCommand):
 
 class EstimateContrastInputsSpec(BaseInterfaceInputSpec):
     spm_mat_file = File(exists=True, field='spmmat', desc='Absolute path to SPM.mat', copyfile=True)
-    contrasts = traits.List(traits.List(minlen=4, maxlen=4), desc="""List of contrasts with each contrast being a list of the form -
-    ['name', 'stat', [condition list], [weight list], [session list]]. if
+    contrasts = traits.List(traits.Either(
+                                          traits.Tuple(traits.Str,traits.Enum('T'),traits.List(traits.Str),traits.List(traits.Float)),
+                                          traits.Tuple(traits.Str,traits.Enum('T'),traits.List(traits.Str),traits.List(traits.Float),traits.List(traits.Float)),
+                                          traits.Tuple(traits.Str,traits.Enum('F'),traits.List(traits.Either(
+                                                                                                             traits.Tuple(traits.Str,traits.Enum('T'),traits.List(traits.Str),traits.List(traits.Float)),
+                                                                                                             traits.Tuple(traits.Str,traits.Enum('T'),traits.List(traits.Str),traits.List(traits.Float),traits.List(traits.Float))
+                                                                                                             )
+                                          ))
+            ), desc="""List of contrasts with each contrast being a list of the form -
+    [('name', 'stat', [condition list], [weight list], [session list])]. if
     session list is None or not provided, all sessions are used. For F
     contrasts, the condition list should contain previously defined T-contrasts. 
 """)
