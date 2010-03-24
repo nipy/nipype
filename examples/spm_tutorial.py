@@ -346,10 +346,11 @@ contrasts.
 contrast_ids = range(1,len(contrasts)+1)
 l2source = nw.NodeWrapper(nio.DataGrabber())
 l2source.inputs.file_template=os.path.abspath('spm/l1output/*/_fwhm_%d/con*/con_%04d.img')
-l2source.inputs.template_argnames=['fwhm','con']
+#l2source.inputs.template_argnames=['fwhm','con']
 # iterate over all contrast images
-l2source.iterables = [('fwhm',[4,8]),
-                      ('con',contrast_ids)]
+#l2source.iterables = [('fwhm',[4,8]),
+#                      ('con',contrast_ids)]
+l2source.iterables = ('template_argtuple', [(4, id) for id in contrast_ids]+ [(8, id) for id in contrast_ids])
 
 
 """Use :class:`nipype.interfaces.spm.OneSampleTTest` to perform a
