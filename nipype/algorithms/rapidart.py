@@ -35,7 +35,7 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
             "functional data files")
     parameter_source = traits.Enum("SPM", "FSL", "Siemens", desc="Are the movement parameters from SPM or FSL or from" \
             "Siemens PACE data. Options: SPM, FSL or Siemens")
-    use_differences = traits.ListBool([True, True], min_len = 2, max_len = 2, usedefault=True,
+    use_differences = traits.ListBool([True, True], minlen = 2, maxlen = 2, usedefault=True,
             desc="Use differences between successive motion (first element)" \
             "and intensity paramter (second element) estimates in order" \
             "to determine outliers.  (default is [True, True])")

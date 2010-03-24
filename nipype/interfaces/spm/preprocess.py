@@ -155,15 +155,15 @@ class RealignInputSpec(BaseInterfaceInputSpec):
                              desc='filename of weighting image')
     interp = traits.Range(low=0, high=7, field='eoptions.interp',
                           desc='degree of b-spline used for interpolation')
-    wrap = traits.List(traits.Int, field='eoptions.wrap', min_len=3, max_len=3,
+    wrap = traits.List(traits.Int, field='eoptions.wrap', minlen=3, maxlen=3,
                        desc='Check if interpolation should wrap in [x,y,z]')
     write_which = traits.List(traits.Int, field='roptions.which',
-                              min_len=2, max_len=2,
+                              minlen=2, maxlen=2,
                               desc = 'determines which images to reslice')
     write_interp = traits.Range(low=0, high=7, field='roptions.interp',
                          desc='degree of b-spline used for interpolation')
     write_wrap = traits.List(traits.Int, field='eoptions.wrap',
-                             min_len=3, max_len=3,
+                             minlen=3, maxlen=3,
                    desc='Check if interpolation should wrap in [x,y,z]')
     write_mask = traits.Bool(field='roptions.mask',
                              desc='True/False mask output image')
@@ -258,7 +258,7 @@ class CoregisterInputSpec(BaseInterfaceInputSpec):
                         desc = 'acceptable tolerance for each of 12 params')
     write_interp = traits.Range(low = 0, hign = 7, field = 'roptions.interp',
                         desc = 'degree of b-spline used for interpolation')
-    write_wrap = traits.List(traits.Bool(), min_len = 3, max_len = 3,
+    write_wrap = traits.List(traits.Bool(), minlen = 3, maxlen = 3,
                              field = 'roptions.wrap',
                      desc = 'Check if interpolation should wrap in [x,y,z]')
     write_mask = traits.Bool(field = 'roptions.mask',
@@ -352,8 +352,8 @@ class NormalizeInputSpec(BaseInterfaceInputSpec):
                                             desc='the amount of the regularization for the nonlinear part of the normalization (opt)')
     write_preserve = traits.Bool(field='roptions.preserve',
                      desc='True/False warped images are modulated (opt,)')
-    write_bounding_box = traits.List(traits.Float(), field='roptions.bb', min_len=6, max_len=6, desc='6-element list (opt)')
-    write_voxel_sizes = traits.List(traits.Float(), field='roptions.vox', min_len=3, max_len=3, desc='3-element list (opt)')
+    write_bounding_box = traits.List(traits.Float(), field='roptions.bb', minlen=6, maxlen=6, desc='6-element list (opt)')
+    write_voxel_sizes = traits.List(traits.Float(), field='roptions.vox', minlen=3, maxlen=3, desc='3-element list (opt)')
     write_interp = traits.Range(low=0, hign=7, field='roptions.interp',
                         desc='degree of b-spline used for interpolation')
     write_wrap = traits.List(traits.Bool(), field='roptions.wrap',
@@ -590,7 +590,7 @@ class Segment(SpmMatlabCommandLine):
 
 class SmoothInputSpec(BaseInterfaceInputSpec):
     infile = MultiPath(File(exists=True), field='data', desc='list of files to smooth', madatrory=True, copyfile=False)
-    fwhm = traits.Either(traits.List(traits.Float(), min_len = 3, max_len = 3),traits.Float(), field= 'fwhm', desc = '3-list of fwhm for each dimension (opt)')
+    fwhm = traits.Either(traits.List(traits.Float(), minlen = 3, maxlen = 3),traits.Float(), field= 'fwhm', desc = '3-list of fwhm for each dimension (opt)')
     data_type =  traits.Int(field = 'dtype', desc = 'Data type of the output images (opt)')
 
 class SmoothOutputSpec(TraitedSpec):
