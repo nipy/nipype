@@ -3,7 +3,7 @@ import tempfile
 import shutil
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
-                            with_setup)
+                            with_setup, TraitError)
 
 import nipype.interfaces.fsl.preprocess as fsl
 from nipype.interfaces.fsl import Info
@@ -20,13 +20,11 @@ tmp_dir = None
 def setup_infile():
     global tmp_infile, tmp_dir
     ftype, ext = Info.outputtype()
-    #_, tmp_infile = tempfile.mkstemp(suffix=ext)
     tmp_dir = tempfile.mkdtemp()
     tmp_infile = os.path.join(tmp_dir, 'foo' + ext)
     file(tmp_infile, 'w')
 
 def teardown_infile():
-    #os.remove(tmp_infile)
     shutil.rmtree(tmp_dir)
 
 # test Bet
@@ -51,14 +49,20 @@ def test_bet():
     realcmd = 'bet %s %s' % (infile, outfile)
     yield assert_equal, better.cmdline, realcmd
 
-    better.inputs.frac = 0.40
+    # infile foo.nii doesn't exist
+    def func():
+        better.run(infile='foo.nii', outfile='bar.nii')
+    yield assert_raises, TraitError, func
+
     # .run() based parameter setting
-    betted = better.run(infile=tmp_infile, outfile='outfile.nii')
-    # Non-existant files, shouldn't finish cleanly
-    yield assert_not_equal, betted.runtime.returncode, 0
-    yield assert_equal, betted.interface.inputs.infile, 'infile2'
-    yield assert_equal, betted.interface.inputs.outfile, 'outfile'
-    yield assert_equal, betted.runtime.cmdline, 'bet infile2 outfile -f 0.40'
+    better = fsl.Bet()
+    better.inputs.frac = 0.40
+    outfile = fsl_name('outfile')
+    betted = better.run(infile=tmp_infile, outfile=outfile)
+    yield assert_equal, betted.interface.inputs.infile, tmp_infile
+    yield assert_equal, betted.interface.inputs.outfile, outfile
+    realcmd = 'bet %s %s -f 0.40' % (tmp_infile, outfile)
+    yield assert_equal, betted.runtime.cmdline, realcmd
 
     # Our options and some test values for them
     # Should parallel the opt_map structure in the class for clarity
@@ -73,13 +77,13 @@ def test_bet():
         'center':             ('-c 54 75 80', [54, 75, 80]),
         'threshold':          ('-t', True),
         'mesh':               ('-e', True),
-        'verbose':            ('-v', True),
-        'flags':              ('--i-made-this-up', '--i-made-this-up'),
+        #'verbose':            ('-v', True),
+        #'flags':              ('--i-made-this-up', '--i-made-this-up'),
             }
     # Currently we don't test -R, -S, -B, -Z, -F, -A or -A2
 
     # test each of our arguments
-    infile = fsl_name('foo')
+    infile = tmp_infile
     outfile = fsl_name('foo_brain')
     outpath = os.path.join(os.getcwd(), outfile)
     for name, settings in opt_map.items():
