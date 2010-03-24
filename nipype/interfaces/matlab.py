@@ -11,7 +11,7 @@ import numpy as np
 from nipype.interfaces.base import CommandLine, InterfaceResult, Bunch,\
     BaseInterfaceInputSpec, isdefined
 from nipype.interfaces.base import (NEW_CommandLine, InterfaceResult, traits,
-                                    TraitedSpec)
+                                    TraitedSpec, File)
 
 class MatlabCommandLine(CommandLine):
     """Object that sets up Matlab specific tools and interfaces

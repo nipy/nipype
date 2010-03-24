@@ -30,7 +30,7 @@ from nipype.interfaces.spm import (NEW_SPMCommand, scans_for_fname,
                                    scans_for_fnames, logger)
 from nipype.interfaces.base import Bunch, BaseInterfaceInputSpec, isdefined
 
-from nipype.interfaces.base import TraitedSpec, traits, MultiPath
+from nipype.interfaces.base import TraitedSpec, traits, MultiPath, File
 
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list, 
                                     list_to_filename, FileNotFoundError)

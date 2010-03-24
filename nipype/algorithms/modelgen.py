@@ -20,7 +20,7 @@ from scipy.special import gammaln
 from nipype.externals.pynifti import load
 from nipype.interfaces.base import Bunch, InterfaceResult, Interface,\
     NEW_BaseInterface, TraitedSpec, MultiPath, traits, isdefined,\
-    BaseInterfaceInputSpec
+    BaseInterfaceInputSpec, File
 from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix,
                                     filename_to_list, list_to_filename,
                                     FileNotFoundError)
