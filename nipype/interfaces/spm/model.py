@@ -232,6 +232,24 @@ class EstimateModel(NEW_SPMCommand):
         outputs['spm_mat_file'] = spm
         return outputs
 
+class EstimateContrastInputsSpec(BaseInterfaceInputSpec):
+    spm_mat_file = File(exists=True, field='spmmat', desc='Absolute path to SPM.mat', copyfile=True)
+    contrasts = traits.List(traits.List(minlen=4, maxlen=4), desc="""List of contrasts with each contrast being a list of the form -
+    ['name', 'stat', [condition list], [weight list], [session list]]. if
+    session list is None or not provided, all sessions are used. For F
+    contrasts, the condition list should contain previously defined T-contrasts. 
+""")
+    beta_images = traits.List(File(exists=True), 'Parameter estimates of the design matrix', copyfile=False)
+    residual_image = traits.File(exists=True, desc='Mean-squared image of the residuals', copyfile=False)
+    RPVimage = traits.File(exists=True, desc='Resels per voxel image', copyfile=False)
+    ignore_derivs = traits.Bool(True, desc='ignore derivatives for estimation. (opt,True)', usedefault=True)
+
+class EstimateContrastOutputSpec(TraitedSpec):
+    con_images = traits.List(File(exists=True), desc='contrast images from a t-contrast')
+    spmT_images = traits.List(File(exists=True), desc='stat images from a t-contrast')
+    ess_images = traits.List(File(exists=True), desc='contrast images from an F-contrast')
+    spmF_images = traits.List(File(exists=True), desc='stat images from an F-contrast')
+
 class EstimateContrast(SpmMatlabCommandLine):
     """use spm_contrasts to estimate contrasts of interest
 
@@ -249,38 +267,10 @@ class EstimateContrast(SpmMatlabCommandLine):
     
     """
     
-    @property
-    def cmd(self):
-        return 'spm_contrast'
-
-    @property
-    def jobtype(self):
-        return 'stats'
-
-    @property
-    def jobname(self):
-        return 'con'
-
-    opt_map = {'spm_mat_file' : ('spmmat','Absolute path to SPM.mat'),
-               'contrasts' : (None, 'List of dicts see class docstring'),
-               'beta_images' : (None,'Parameter estimates of the design matrix'),
-               'residual_image': (None,'Mean-squared image of the residuals'),
-               'RPVimage': (None,'Resels per voxel image'),
-               'ignore_derivs' : (None,
-                                  'ignore derivatives for estimation. (opt,True)',
-                                  True),
-               }
-    
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='spm_mat_file',copy=True),
-                Bunch(key='beta_images',copy=False),
-                Bunch(key='residual_image',copy=False),
-                Bunch(key='RPVimage',copy=False),
-                ]
-        return info
+    input_spec = EstimateContrastInputsSpec
+    output_spec = EstimateContrastOutputSpec
+    _jobtype = 'stats'
+    _jobname = 'con'
     
     def _compile_command(self):
         """validates spm options and generates job structure
@@ -342,28 +332,22 @@ class EstimateContrast(SpmMatlabCommandLine):
         self._cmdline = self._gen_matlab_command(script,
                                                 cwd=os.getcwd(),
                                                 script_name='pyscript_contrastestimate') 
-
-    out_map = {'con_images' : ('contrast images from a t-contrast',),
-               'spmT_images' : ('stat images from a t-contrast',),
-               'ess_images' : ('contrast images from an F-contrast',),
-               'spmF_images' : ('stat images from an F-contrast',)
-               }
         
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        pth, fname = os.path.split(self.inputs.spm_mat_file)
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        pth, _ = os.path.split(self.inputs.spm_mat_file)
         con = glob(os.path.join(pth,'con*.img'))
         if len(con)>0:
-            outputs.con_images = sorted(con)
+            outputs['con_images'] = sorted(con)
         spmt = glob(os.path.join(pth,'spmT*.img'))
         if len(spmt)>0:
-            outputs.spmT_images = sorted(spmt)
+            outputs['spmT_images'] = sorted(spmt)
         ess = glob(os.path.join(pth,'ess*.img'))
         if len(ess)>0:
-            outputs.ess_images = sorted(ess)
+            outputs['ess_images'] = sorted(ess)
         spmf = glob(os.path.join(pth,'spmF*.img'))
         if len(spmf)>0:
-            outputs.spmF_images = sorted(spmf)
+            outputs['spmF_images'] = sorted(spmf)
         return outputs
 
 class OneSampleTTest(SpmMatlabCommandLine):
