@@ -273,8 +273,7 @@ class Info(object):
 
         Parameters
         ----------
-        outputtype : {'ANALYZE_GZ', 'NIFTI_PAIR_GZ', 'NIFTI',
-                      'NIFTI_PAIR', 'NIFTI_GZ', 'ANALYZE'}
+        outputtype : {'NIFTI', 'NIFTI_GZ', 'NIFTI_PAIR', 'NIFTI_PAIR_GZ'}
             String specifying the output type.
 
         Returns
@@ -290,29 +289,21 @@ class Info(object):
             raise KeyError(msg)
 
     @classmethod
-    def outputtype(cls, ftype=None):
-        """Check the global FSL output file type FSLOUTPUTTYPE
+    def outputtype(cls):
+        """Get the global FSL output file type FSLOUTPUTTYPE.
 
-        Parameters
-        ----------
-        ftype :  string
-            Represents the file type to set based on string of valid FSL
-            file types ftype == None to get current setting/ options
+        This returns the value of the environment variable
+        FSLOUTPUTTYPE.  An exception is raised if it is not defined.
 
         Returns
         -------
         fsl_ftype : string
             Represents the current environment setting of FSLOUTPUTTYPE
-        ext : string
-            The extension associated with the FSLOUTPUTTYPE
-
         """
-        if not ftype:
-            try:
-                ftype = os.environ['FSLOUTPUTTYPE']
-            except KeyError:
-                raise Exception('FSL environment variables not set')
-        return ftype, cls.outputtype_to_ext(ftype)
+        try:
+            return os.environ['FSLOUTPUTTYPE']
+        except KeyError:
+            raise Exception('FSL environment variables not set')
 
     @staticmethod
     def standard_image(img_name):
@@ -348,12 +339,22 @@ class NEW_FSLCommand(NEW_CommandLine):
             self._output_update()
 
     def _output_update(self):
-        outputtype, _ = Info.outputtype(ftype=self.inputs.outputtype)
-        self.inputs.environ.update({'FSLOUTPUTTYPE': outputtype})
+        self.inputs.environ.update({'FSLOUTPUTTYPE': self.inputs.outputtype})
     
     @classmethod
     def set_default_outputtype(cls, outputtype):
-        cls._outputtype, _ = Info.outputtype(ftype=outputtype)
+        """Set the default output type for FSL classes.
+
+        This method is used to set the default output type for all fSL
+        subclasses.  However, setting this will not update the output
+        type for any existing instances.  For these, assign the
+        <instance>.inputs.outputtype.
+        """
+
+        if outputtype in Info.ftypes:
+            cls._outputtype = outputtype
+        else:
+            raise AttributeError('Invalid FSL outputtype: %s' % outputtype)
 
     def _gen_fname(self, basename, fname=None, cwd=None, suffix='_fsl',
                    change_ext=True):

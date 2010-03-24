@@ -19,7 +19,7 @@ tmp_infile = None
 tmp_dir = None
 def setup_infile():
     global tmp_infile, tmp_dir
-    ftype, ext = Info.outputtype()
+    ext = Info.outputtype_to_ext(Info.outputtype())
     tmp_dir = tempfile.mkdtemp()
     tmp_infile = os.path.join(tmp_dir, 'foo' + ext)
     file(tmp_infile, 'w')
