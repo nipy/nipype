@@ -9,10 +9,10 @@ import nipype.interfaces.fsl.preprocess as fsl
 from nipype.interfaces.fsl import Info
 from nipype.interfaces.base import InterfaceResult
 
-def fsl_name(fname):
+def fsl_name(obj, fname):
     """Create valid fsl name, including file extension for output type.
     """
-    ftype, ext = Info.outputtype()
+    ext = Info.outputtype_to_ext(obj.inputs.outputtype)
     return fname + ext
 
 tmp_infile = None
@@ -39,12 +39,12 @@ def test_bet():
     # Test generated outfile name
     infile = tmp_infile
     better.inputs.infile = infile
-    outfile = fsl_name('foo_brain')
+    outfile = fsl_name(better, 'foo_brain')
     outpath = os.path.join(os.getcwd(), outfile)
     realcmd = 'bet %s %s' % (infile, outpath)
     yield assert_equal, better.cmdline, realcmd
     # Test specified outfile name
-    outfile = fsl_name('/newdata/bar')
+    outfile = fsl_name(better, '/newdata/bar')
     better.inputs.outfile = outfile
     realcmd = 'bet %s %s' % (infile, outfile)
     yield assert_equal, better.cmdline, realcmd
@@ -57,7 +57,7 @@ def test_bet():
     # .run() based parameter setting
     better = fsl.Bet()
     better.inputs.frac = 0.40
-    outfile = fsl_name('outfile')
+    outfile = fsl_name(better, 'outfile')
     betted = better.run(infile=tmp_infile, outfile=outfile)
     yield assert_equal, betted.interface.inputs.infile, tmp_infile
     yield assert_equal, betted.interface.inputs.outfile, outfile
@@ -83,8 +83,9 @@ def test_bet():
     # Currently we don't test -R, -S, -B, -Z, -F, -A or -A2
 
     # test each of our arguments
+    better = fsl.Bet()
     infile = tmp_infile
-    outfile = fsl_name('foo_brain')
+    outfile = fsl_name(better, 'foo_brain')
     outpath = os.path.join(os.getcwd(), outfile)
     for name, settings in opt_map.items():
         better = fsl.Bet(**{name: settings[1]})
@@ -206,9 +207,9 @@ def test_applyxfm():
         '-applyxfm -out xfm_subj.nii'
     yield assert_equal, res.interface.cmdline, realcmd
     # Test generated outfile name
-    infile = fsl_name('foo')
+    infile = 'foo.nii'
     xfm = fsl.ApplyXfm(infile = infile)
-    outfile = os.path.join(os.getcwd(), fsl_name('foo_axfm'))
+    outfile = os.path.join(os.getcwd(), 'foo_axfm.nii')
     realcmd = 'flirt -in %s -applyxfm -out %s' % (infile, outfile)
     yield assert_equal, xfm.cmdline, realcmd
 
@@ -217,13 +218,13 @@ def test_mcflirt():
     frt = fsl.McFlirt()
     yield assert_equal, frt.cmd, 'mcflirt'
     # Test generated outfile name
-    infile = fsl_name('/data/foo')
+    infile = '/data/foo.nii'
     frt.inputs.infile = infile
-    outfile = os.path.join(os.getcwd(), fsl_name('foo_mcf'))
+    outfile = os.path.join(os.getcwd(), 'foo_mcf.nii')
     realcmd = 'mcflirt -in ' + infile + ' -out ' + outfile
     yield assert_equal, frt.cmdline, realcmd
     # Test specified outfile name
-    outfile = fsl_name('/newdata/bar')
+    outfile = '/newdata/bar.nii'
     frt.inputs.outfile = outfile
     realcmd = 'mcflirt -in ' + infile + ' -out ' + outfile
     yield assert_equal, frt.cmdline, realcmd
@@ -348,7 +349,7 @@ def test_applywarp():
     for name, settings in opt_map.items():
         awarp = fsl.ApplyWarp(**{name : settings[1]})
         if name == 'infile':
-            outfile = os.path.join(os.getcwd(), fsl_name('foo_warp'))
+            outfile = os.path.join(os.getcwd(), 'foo_warp.nii')
             realcmd = 'applywarp --in=foo.nii --out=%s' % outfile
             yield assert_equal, awarp.cmdline, realcmd
         else:
