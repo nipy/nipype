@@ -2,7 +2,7 @@
 and spm to access spm tools.
 
 """
-from nipype.interfaces.spm.base import NEW_SPMCommand
+
 __docformat__ = 'restructuredtext'
 
 # Standard library imports
@@ -14,6 +14,7 @@ import numpy as np
 
 # Local imports
 from nipype.interfaces.spm import SpmMatlabCommandLine
+from nipype.interfaces.spm.base import NEW_SPMCommand
 from nipype.interfaces.base import Bunch, BaseInterfaceInputSpec, traits,\
     TraitedSpec, isdefined, File
 from nipype.utils.filemanip import (filename_to_list, list_to_filename,
@@ -56,8 +57,8 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
                       desc='Global intensity normalization - scaling or none (opt)')
     mask_image = File(exists=True, field='mask', copyfile=False,
                       desc='Image  for  explicitly  masking the analysis (opt)')
-    mask_threshold = traits.Either(traits.Float(), traits.Enum('-Inf'),
-                      desc="Thresholding for the mask (opt, '-Inf')")
+    mask_threshold = traits.Either(traits.Enum('-Inf'), traits.Float(),
+                      desc="Thresholding for the mask (opt, '-Inf')", default='-Inf', usedefault=True)
     model_serial_correlations = traits.Enum('AR(1)', 'none', field='cvi',
                       desc='Model serial correlations AR(1) or none (opt)')
 
@@ -147,12 +148,12 @@ class Level1Design(NEW_SPMCommand):
             einputs[0]['dir'] = np.array([str(os.getcwd())],dtype=object)
         return einputs
 
-    def _compile_command(self):
+    def _make_matlab_command(self, content):
         """validates spm options and generates job structure
         if mfile is True uses matlab .m file
         else generates a job structure and saves in .mat
         """
-        if self.inputs.mask_image:
+        if isdefined(self.inputs.mask_image):
             # SPM doesn't handle explicit masking properly, especially
             # when you want to use the entire mask image
             postscript = "load SPM;\n"
@@ -164,8 +165,7 @@ class Level1Design(NEW_SPMCommand):
             postscript += "save SPM SPM;\n"
         else:
             postscript = None
-        self._cmdline, _ =self._make_matlab_command(self._parse_inputs(),
-                                                          postscript=postscript)
+        return super(Level1Design, self)._make_matlab_command(content, postscript=postscript)
         
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -250,7 +250,7 @@ class EstimateContrastOutputSpec(TraitedSpec):
     ess_images = traits.List(File(exists=True), desc='contrast images from an F-contrast')
     spmF_images = traits.List(File(exists=True), desc='stat images from an F-contrast')
 
-class EstimateContrast(SpmMatlabCommandLine):
+class EstimateContrast(NEW_SPMCommand):
     """use spm_contrasts to estimate contrasts of interest
 
 
@@ -272,7 +272,7 @@ class EstimateContrast(SpmMatlabCommandLine):
     _jobtype = 'stats'
     _jobname = 'con'
     
-    def _compile_command(self):
+    def _make_matlab_command(self, _):
         """validates spm options and generates job structure
         """
         contrasts = []
@@ -329,9 +329,7 @@ class EstimateContrast(SpmMatlabCommandLine):
         script += "jobs{1}.stats{1}.con.consess = consess;\n"
         script += "if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');jobs=spm_jobman('spm5tospm8',{jobs});end\n" 
         script += "spm_jobman('run',jobs);"
-        self._cmdline = self._gen_matlab_command(script,
-                                                cwd=os.getcwd(),
-                                                script_name='pyscript_contrastestimate') 
+        return script
         
     def _list_outputs(self):
         outputs = self._outputs().get()
