@@ -13,7 +13,9 @@ import glob
 import os
 import shutil
 
-from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult
+from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult,\
+    NEW_Interface, TraitedSpec, traits, File, isdefined, BaseInterfaceInputSpec,\
+    NEW_BaseInterface
 from nipype.utils.filemanip import copyfiles, list_to_filename, filename_to_list
 
 
@@ -259,27 +261,10 @@ class DataSink(Interface):
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
 
 
-class DataGrabber(Interface):
-    """ Generic datagrabber module that wraps around glob in an
-        intelligent way for neuroimaging tasks 
-    """
-    
-    def __init__(self, *args, **inputs):
-        self._populate_inputs()
-        self.inputs.update(**inputs)
-
-    def inputs_help(self):
-        """
-            Parameters
-            --------------------
-            (all default to None)
-
-            file_template : string
-                template for filename
-            template_argtuple: tuple of arguments
-                arguments that fit into file_template
-            template_argnames: list of strings
-                provides names of inputs that will be used as
+class DataGrabberInputSpec(BaseInterfaceInputSpec):
+    file_template = traits.Either(traits.Str(),File(), desc="template or filename")
+    template_argtuple = traits.Tuple(desc="arguments that fit into file_template")
+    template_argnames = traits.List(traits.Str(), desc="""provides names of inputs that will be used as
                 arguments to the template.
                 For example,
 
@@ -295,36 +280,24 @@ class DataGrabber(Interface):
 
                 however this latter form can be used with iterables
                 and iterfield in a pipeline.
-            """
-        print self.inputs_help.__doc__
-        
-    def _populate_inputs(self):
-        self.inputs = Bunch(file_template=None,
-                            template_argtuple=None,
-                            template_argnames=None,
-                            )
+""")
 
-    def outputs_help(self):
-        print self.outputs.__doc__
-
-    def outputs(self):
-        """
-            Parameters
-            ----------
-
-            (all default to None)
-
-            file_list : list
-                list of files picked up by the grabber
-        """
-        return Bunch(file_list=None)
+class DataGrabberOutputSpec(TraitedSpec):
+    file_list = traits.List(File(exists=True), desc='list of files picked up by the grabber')
     
-    def aggregate_outputs(self):
-        outputs = self.outputs()
+class DataGrabber(NEW_BaseInterface):
+    """ Generic datagrabber module that wraps around glob in an
+        intelligent way for neuroimaging tasks 
+    """
+    input_spec = DataGrabberInputSpec
+    output_spec = DataGrabberOutputSpec
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
         args = []
-        if self.inputs.template_argtuple:
+        if isdefined(self.inputs.template_argtuple):
             args.extend(list(self.inputs.template_argtuple))
-        if self.inputs.template_argnames:
+        if isdefined(self.inputs.template_argnames):
             for name in self.inputs.template_argnames:
                 arg = self.inputs.get(name)
                 if arg:
@@ -332,7 +305,7 @@ class DataGrabber(Interface):
         template = self.inputs.file_template
         if args:
             template = template%tuple(args)
-        outputs.file_list = list_to_filename(glob.glob(template))
+        outputs['file_list'] = list_to_filename(glob.glob(template))
         return outputs
 
     def run(self, cwd=None):
