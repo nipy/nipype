@@ -348,25 +348,25 @@ class EstimateContrast(NEW_SPMCommand):
             outputs['spmF_images'] = sorted(spmf)
         return outputs
 
-class OneSampleTTest(SpmMatlabCommandLine):
+class OneSampleTTestInputSpec(BaseInterfaceInputSpec):
+    con_images = traits.List(File(exist=True, desc = 'List of contrast images'), mandatory=True)
+    
+class OneSampleTTestOutputSpec(TraitedSpec):
+    con_images = traits.List(File(exist=True, desc = 'contrast images from a t-contrast'))
+    spmT_images = traits.List(File(exist=True, desc = 'stat images from a t-contrast'))
+
+class OneSampleTTest(NEW_SPMCommand):
     """use spm to perform a one-sample ttest on a set of images
 
     Examples
     --------
     
     """
-    
-    @property
-    def cmd(self):
-        return 'spm_spm'
+    input_spec = OneSampleTTestInputSpec
+    output_spec = OneSampleTTestOutputSpec
+    _jobtype = 'stats'
 
-    @property
-    def jobtype(self):
-        return 'stats'
-
-    opt_map = {'con_images': (None, 'List of contrast images')}
-
-    def _compile_command(self):
+    def _make_matlab_command(self, _):
         """validates spm options and generates job structure
         """
         cwd = os.getcwd()
@@ -387,23 +387,17 @@ class OneSampleTTest(SpmMatlabCommandLine):
         script += "jobs{3}.stats{1}.con.consess{1}.tcon.convec = [1];\n"
         script += "if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');jobs=spm_jobman('spm5tospm8',{jobs});end\n" 
         script += "spm_jobman('run',jobs);\n"
-        self._cmdline = self._gen_matlab_command(script,
-                                                cwd=cwd,
-                                                script_name='pyscript_onesamplettest') 
-
-    out_map = {'con_images' : ('contrast images from a t-contrast',),
-               'spmT_images' : ('stat images from a t-contrast',),
-               }
+        return script
         
-    def aggregate_outputs(self):
-        outputs = self.outputs()
+    def _list_outputs(self):
+        outputs = self._outputs().get()
         pth = os.getcwd()
         con = glob(os.path.join(pth,'con*.img'))
         if len(con)>0:
-            outputs.con_images = sorted(con)
+            outputs['con_images'] = sorted(con)
         spmt = glob(os.path.join(pth,'spmT*.img'))
         if len(spmt)>0:
-            outputs.spmT_images = sorted(spmt)
+            outputs['spmT_images'] = sorted(spmt)
         return outputs
 
 class TwoSampleTTest(SpmMatlabCommandLine):
