@@ -138,7 +138,7 @@ class SliceTiming(SpmMatlabCommandLine):
 #
 ####################################
 class RealignInputSpec(BaseInterfaceInputSpec):
-    infile = traits.List(traits.File(exists=True), field='data', mandatory=True,
+    infile = traits.List(File(exists=True), field='data', mandatory=True,
                          desc='list of filenames to realign', copyfile=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
                           desc='one of: estimate, write, estwrite',
@@ -151,7 +151,7 @@ class RealignInputSpec(BaseInterfaceInputSpec):
                               desc = 'sampling separation in mm')
     register_to_mean = traits.Bool(field='eoptions.rtm',
                 desc='Indicate whether realignment is done to the mean image')
-    weight_img = traits.File(exists=True, field='eoptions.weight',
+    weight_img = File(exists=True, field='eoptions.weight',
                              desc='filename of weighting image')
     interp = traits.Range(low=0, high=7, field='eoptions.interp',
                           desc='degree of b-spline used for interpolation')
@@ -170,9 +170,9 @@ class RealignInputSpec(BaseInterfaceInputSpec):
 
 
 class RealignOutputSpec(TraitedSpec):
-    mean_image = traits.File(desc='Mean image file from the realignment')
+    mean_image = File(desc='Mean image file from the realignment')
     realigned_files = traits.List(traits.File, desc='Realigned files')
-    realignment_parameters = traits.List(traits.File(exists=True),
+    realignment_parameters = traits.List(File(exists=True),
                     desc='Estimated translation and rotation parameters')
 
 class Realign(NEW_SPMCommand):
@@ -234,14 +234,14 @@ class Realign(NEW_SPMCommand):
 #
 ####################################
 class CoregisterInputSpec(BaseInterfaceInputSpec):
-    target = traits.File(exists=True, field='ref', mandatory=True,
+    target = File(exists=True, field='ref', mandatory=True,
                          desc='reference file to register to', copyfile=False)
     source = MultiPath(exists=True, field='source',
                          desc='file to register to target', copyfile=True)
     jobtype = traits.Enum('estwrite','estimate', 'write',
                           desc='one of: estimate, write, estwrite',
                           usedefault=True)
-    apply_to_files = traits.List(traits.File(exists=True), field='other',
+    apply_to_files = traits.List(File(exists=True), field='other',
                                  desc='files to apply transformation to',
                                  copyfile=True)
     cost_function = traits.Enum('mi', 'nmi', 'ecc', 'ncc',
@@ -265,9 +265,9 @@ class CoregisterInputSpec(BaseInterfaceInputSpec):
                              desc = 'True/False mask output image')
 
 class CoregisterOutputSpec(TraitedSpec):
-    coregistered_source = MultiPath(traits.File(exists=True),
+    coregistered_source = MultiPath(File(exists=True),
                                       desc = 'Coregistered source files')
-    coregistered_files = MultiPath(traits.File(exists=True), desc = 'Coregistered other files')
+    coregistered_files = MultiPath(File(exists=True), desc = 'Coregistered other files')
     
 
 class Coregister(NEW_SPMCommand):
@@ -326,17 +326,17 @@ class Coregister(NEW_SPMCommand):
         return outputs
 
 class NormalizeInputSpec(BaseInterfaceInputSpec):
-    template = traits.File(exists=True, field='eoptions.template', desc='template file to normalize to', copyfile=False)
+    template = File(exists=True, field='eoptions.template', desc='template file to normalize to', copyfile=False)
     source = MultiPath(exists=True, field='subj.source', desc='file to normalize to template', mandatory = True, copyfile=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
                           desc='one of: estimate, write, estwrite (opt, estwrite)', usedefault=True)
     apply_to_files = MultiPath(exists=True, field='subj.resample',
                                desc='files to apply transformation to (opt)', copyfile=True)
-    parameter_file = traits.File(field='subj.matname',
+    parameter_file = File(field='subj.matname',
                                   desc='normalization parameter file*_sn.mat', copyfile=False)
-    source_weight = traits.File(field='subj.wtsrc',
+    source_weight = File(field='subj.wtsrc',
                                  desc='name of weighting image for source (opt)', copyfile=False)
-    template_weight = traits.File(field='eoptions.weight',
+    template_weight = File(field='eoptions.weight',
                                    desc='name of weighting image for template (opt)', copyfile=False)
     source_image_smoothing = traits.Float(field='eoptions.smosrc',
                                           desc='source smoothing (opt)')
@@ -361,9 +361,9 @@ class NormalizeInputSpec(BaseInterfaceInputSpec):
 
     
 class NormalizeOutputSpec(TraitedSpec):
-    normalization_parameters = MultiPath(traits.File(exists=True), desc='MAT files containing the normalization parameters')
-    normalized_source = MultiPath(traits.File(exists=True), desc='Normalized source files')
-    normalized_files = MultiPath(traits.File(exists=True), desc = 'Normalized other files')
+    normalization_parameters = MultiPath(File(exists=True), desc='MAT files containing the normalization parameters')
+    normalized_source = MultiPath(File(exists=True), desc='Normalized source files')
+    normalized_files = MultiPath(File(exists=True), desc = 'Normalized other files')
 
 class Normalize(NEW_SPMCommand):
     """use spm_normalise for warping an image to a template
@@ -589,12 +589,12 @@ class Segment(SpmMatlabCommandLine):
         return outputs
 
 class SmoothInputSpec(BaseInterfaceInputSpec):
-    infile = MultiPath(traits.File(exists=True), field='data', desc='list of files to smooth', madatrory=True, copyfile=False)
+    infile = MultiPath(File(exists=True), field='data', desc='list of files to smooth', madatrory=True, copyfile=False)
     fwhm = traits.Either(traits.List(traits.Float(), min_len = 3, max_len = 3),traits.Float(), field= 'fwhm', desc = '3-list of fwhm for each dimension (opt)')
     data_type =  traits.Int(field = 'dtype', desc = 'Data type of the output images (opt)')
 
 class SmoothOutputSpec(TraitedSpec):
-    smoothed_files = MultiPath(traits.File(exists=True), desc ='smoothed files')
+    smoothed_files = MultiPath(File(exists=True), desc ='smoothed files')
 
 class Smooth(NEW_SPMCommand):
     """use spm_smooth for 3D Gaussian smoothing of image volumes.

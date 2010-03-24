@@ -1264,7 +1264,7 @@ class MultiPath(traits.List):
 
     >>> from nipype.interfaces.base import MultiPath
     >>> class A(traits.HasTraits):
-    ...     foo = MultiPath(traits.File(exists=False))
+    ...     foo = MultiPath(File(exists=False))
     >>> a = A()
     >>> a
     []

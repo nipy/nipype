@@ -145,8 +145,8 @@ def test_TraitedSpec():
 
     global tmp_infile
     class spec2(nib.TraitedSpec):
-        moo = nib.traits.File(exists=True)
-        doo = nib.traits.List(nib.traits.File(exists=True))
+        moo = nib.File(exists=True)
+        doo = nib.traits.List(nib.File(exists=True))
     infields = spec2(moo=tmp_infile,doo=[tmp_infile])
     yield assert_equal, infields.hashval[1], 'c687052171787b46d06ba55dbb74e6a3'
 
@@ -179,8 +179,8 @@ def test_NEW_BaseInterface():
         foo = nib.traits.Int(desc='a random int')
         goo = nib.traits.Int(desc='a random int', mandatory=True)
         hoo = nib.traits.Int(desc='a random int', usedefault=True)
-        zoo = nib.traits.File(desc='a file', copyfile=False)
-        woo = nib.traits.File(desc='a file', copyfile=True)
+        zoo = nib.File(desc='a file', copyfile=False)
+        woo = nib.File(desc='a file', copyfile=True)
     class OutputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
     class DerivedInterface(nib.NEW_BaseInterface):
@@ -264,7 +264,7 @@ def test_NEW_Commandline():
     yield assert_true, 'hello' not in ' '.join(cmd)
     
     class CommandLineInputSpec2(nib.TraitedSpec):
-        foo = nib.traits.File(argstr='%s', desc='a str', genfile=True)
+        foo = nib.File(argstr='%s', desc='a str', genfile=True)
     nib.NEW_CommandLine.input_spec = CommandLineInputSpec2
     ci5 = nib.NEW_CommandLine(command='cmd')
     yield assert_raises, NotImplementedError, ci5._parse_inputs

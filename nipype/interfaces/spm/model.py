@@ -30,8 +30,8 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
                         desc='Number of time-bins per scan in secs (opt)')
     microtime_onset = traits.Float(field='timing.fmri_t0',
                         desc='The onset/time-bin in seconds for alignment (opt)')
-    session_info = traits.File(exists=True, field='sess', desc='Session specific information file')
-    factor_info = traits.File(exists=True, field='fact', desc='Factor specific information file (opt)')
+    session_info = File(exists=True, field='sess', desc='Session specific information file')
+    factor_info = File(exists=True, field='fact', desc='Factor specific information file (opt)')
     bases = traits.Dict(traits.Enum('hrf', 'fourier', 'fourier_han',
                 'gamma', 'fir'), field='bases', desc="""
             dict {'name':{'basesparam1':val,...}}
@@ -54,7 +54,7 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
                      desc='Model interactions - yes:1, no:2 (opt)')
     global_intensity_normalization = traits.Enum('none', 'scaling', field='global',
                       desc='Global intensity normalization - scaling or none (opt)')
-    mask_image = traits.File(exists=True, field='mask', copyfile=False,
+    mask_image = File(exists=True, field='mask', copyfile=False,
                       desc='Image  for  explicitly  masking the analysis (opt)')
     mask_threshold = traits.Either(traits.Float(), traits.Enum('-Inf'),
                       desc="Thresholding for the mask (opt, '-Inf')")
@@ -62,7 +62,7 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
                       desc='Model serial correlations AR(1) or none (opt)')
 
 class Level1DesignOutputSpec(TraitedSpec):
-    spm_mat_file = traits.File(exists=True, desc='SPM mat file')
+    spm_mat_file = File(exists=True, desc='SPM mat file')
 
 
 class Level1Design(NEW_SPMCommand):
@@ -175,17 +175,17 @@ class Level1Design(NEW_SPMCommand):
 
 
 class EstimateModelInputSpec(BaseInterfaceInputSpec):
-    spm_design_file = traits.File(exists=True, field='spmmat', desc='absolute path to SPM.mat', copyfile=True)
+    spm_design_file = File(exists=True, field='spmmat', desc='absolute path to SPM.mat', copyfile=True)
     estimation_method = traits.Dict(traits.Enum('Classical', 'Bayesian2', 'Bayesian'), field='method',
                                      desc='Classical, Bayesian2, Bayesian (dict)')
     flags = traits.Str(desc = 'optional arguments (opt)')
 
 class EstimateModelOutputSpec(TraitedSpec):
-    mask_image = traits.File(exists=True, desc='binary mask to constrain estimation')
-    beta_images = traits.List(traits.File(exists=True), desc ='design parameter estimates')
-    residual_image = traits.File(exists=True, desc = 'Mean-squared image of the residuals')
-    RPVimage = traits.File(exists=True, desc = 'Resels per voxel image')
-    spm_mat_file = traits.File(exist=True, desc = 'Updated SPM mat file')
+    mask_image = File(exists=True, desc='binary mask to constrain estimation')
+    beta_images = traits.List(File(exists=True), desc ='design parameter estimates')
+    residual_image = File(exists=True, desc = 'Mean-squared image of the residuals')
+    RPVimage = File(exists=True, desc = 'Resels per voxel image')
+    spm_mat_file = File(exist=True, desc = 'Updated SPM mat file')
                
 class EstimateModel(NEW_SPMCommand):
     """Use spm_spm to estimate the parameters of a model

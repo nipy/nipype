@@ -143,12 +143,12 @@ class MatlabInputSpec(BaseInterfaceInputSpec):
                             desc='Switch off desktop mode on unix platforms')
     nosplash = traits.Bool(True, argstr='-nosplash', usedefault=True,
                            descr='Switch of splash screen')
-    logfile = traits.File(argstr='-logfile %s',
+    logfile = File(argstr='-logfile %s',
                           desc='Save matlab output to log')
     # non-commandline options
     mfile   = traits.Bool(False, desc='Run m-code using m-file',
                           usedefault=True)
-    script_file = traits.File('pyscript.m', usedefault=True,
+    script_file = File('pyscript.m', usedefault=True,
                               desc='Name of file to write m-code to')
     paths   = traits.List(traits.Directory, desc='Paths to add to matlabpath')
 

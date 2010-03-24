@@ -69,13 +69,13 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
                 kernel : list of convolution kernel
 
     """
-    realignment_parameters = traits.List(traits.File(exists=True),
+    realignment_parameters = traits.List(File(exists=True),
        desc = "Realignment parameters returned by motion correction algorithm",
                                          filecopy=False)
-    outlier_files = traits.List(traits.File(exists=True),
+    outlier_files = traits.List(File(exists=True),
          desc="Files containing scan outlier indices that should be tossed",
                                 filecopy=False)
-    functional_runs = traits.List(traits.File(exists=True),
+    functional_runs = traits.List(File(exists=True),
                                   mandatory=True,
             desc="Data files for model. List of 4D files or list of" \
                                       "list of 3D files per session",
@@ -115,9 +115,9 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
                               usedefault=True)
     
 class SpecifyModelOutputSpec(TraitedSpec):
-    session_info = traits.File(exists=True,
+    session_info = File(exists=True,
           desc="session info saved in a numpy file for level1designs")
-    #design_file = traits.File(desc="design file")
+    #design_file = File(desc="design file")
 
 class SpecifyModel(NEW_BaseInterface):
     """Makes a model specification
