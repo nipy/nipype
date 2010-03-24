@@ -1057,10 +1057,7 @@ class NEW_BaseInterface(NEW_Interface):
         results = InterfaceResult(deepcopy(self), runtime)
         if results.runtime.returncode is None:
             raise Exception('Returncode from an interface cannot be None')
-        # Sometimes the returncode is meaningless, for instance with
-        # fsl.Bet.  Here we check for both a valid returncode and an
-        # empty stderr.
-        if results.runtime.returncode == 0 and not results.runtime.stderr:
+        if results.runtime.returncode == 0:
             results.outputs = self.aggregate_outputs()
         return results
     

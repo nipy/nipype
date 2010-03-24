@@ -116,6 +116,15 @@ class Bet(NEW_FSLCommand):
     input_spec = BetInputSpec
     output_spec = BetOutputSpec
 
+    def _run_interface(self, runtime):
+        # The returncode is meaningless in Bet.  So check the output
+        # in stderr and if it's set, then update the returncode
+        # accordingly.
+        runtime = super(Bet, self)._run_interface(runtime)
+        if runtime.stderr:
+            runtime.returncode = 1
+        return runtime
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['outfile'] = self.inputs.outfile
