@@ -14,7 +14,7 @@ import warnings
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
 from nipype.interfaces.fsl.base import NEW_FSLCommand, FSLTraitedSpec
-from nipype.interfaces.base import Bunch, TraitedSpec, isdefined
+from nipype.interfaces.base import Bunch, TraitedSpec, isdefined, File
 from nipype.utils.filemanip import fname_presuffix, list_to_filename
 from nipype.utils.docparse import get_doc
 from nipype.utils.misc import container_to_string, is_container
@@ -28,11 +28,11 @@ class BetInputSpec(FSLTraitedSpec):
     '''Note: Currently we don't support -R, -S, -Z,-A or -A2'''
     # We use position args here as list indices - so a negative number
     # will put something on the end
-    infile = traits.File(exists=True,
-                         desc = 'input file to skull strip',
-                         argstr='%s', position=0, mandatory=True)
-    outfile = traits.File(desc = 'name of output skull stripped image',
-                          argstr='%s', position=1, genfile=True)
+    infile = File(exists=True,
+                  desc = 'input file to skull strip',
+                  argstr='%s', position=0, mandatory=True)
+    outfile = File(desc = 'name of output skull stripped image',
+                   argstr='%s', position=1, genfile=True)
     outline = traits.Bool(desc = 'create surface outline image',
                           argstr='-o')
     mask = traits.Bool(desc = 'create binary mask image',
@@ -63,13 +63,13 @@ class BetInputSpec(FSLTraitedSpec):
                               desc="bias field and neck cleanup")
 
 class BetOutputSpec(TraitedSpec):
-    outfile = traits.File(exists=True,
-                          desc="path/name of skullstripped file")
-    maskfile = traits.File(
+    outfile = File(exists=True,
+                   desc="path/name of skullstripped file")
+    maskfile = File(
         desc="path/name of binary brain mask (if generated)")
-    outlinefile = traits.File(
+    outlinefile = File(
         desc="path/name of outline file (if generated)")
-    meshfile = traits.File(
+    meshfile = File(
         desc="path/name of vtk mesh file (if generated)")
 
 class Bet(NEW_FSLCommand):
@@ -140,20 +140,53 @@ class Bet(NEW_FSLCommand):
 
 class FastInputSpec(FSLTraitedSpec):
     """ Defines inputs (trait classes) for Fast """
-    infiles = traits.File(exists=True,
-                          desc = 'image, or multi-channel set of images, to be segmented',
-                         argstr='%s', position=-1, mandatory=True)
-    out_basename = traits.File(desc = 'base name of output files',
-                          argstr='-o %s', genfile=True) # maybe not genfile
+    infiles = File(exists=True,
+                   desc = 'image, or multi-channel set of images, to be segmented',
+                   argstr='%s', position=-1, mandatory=True)
+    out_basename = File(desc = 'base name of output files',
+                        argstr='-o %s', genfile=True) # maybe not genfile
     number_classes = traits.Int( desc = 'number of tissue-type classes',
                                  argstr = '-n %d')
     output_biasfield = traits.Bool( desc = 'output estimated bias field',
                                     argstr = '-B', genfile=True)
     output_biascorrected = traits.Bool(desc = 'output restored image (bias-corrected image)',
                                        argstr = '-b', genfile = True)
-    img_type = traits.Int(desc = 'type of image: (T1 = 1, T2 = 2, PD = 3)',
+    img_type = traits.Int(desc = 'int specifying type of image: (1 = T1, 2 = T2, 3 = PD)',
                           argstr = '-t %d')
+    bias_iters = traits.Int(desc = 'number of main-loop iterations during bias-field removal',
+                            argstr = '-I %d')
+    bias_lowpass = traits.Int(desc = 'bias field smoothing extent (FWHM) in mm', 
+                              argstr = '-l %d', units = 'mm')
+    init_seg_smooth = traits.Float(desc = 'initial segmentation spatial smoothness (during bias field estimation)',
+                                   argstr = '-f %.3f')
+    segments = traits.Bool(desc = ' outputs a separate binary image for each tissue type',
+                           argstr = '-g', genfile=True)
+    init_transform = File(exists=True, desc =  '<standard2input.mat> initialise using priors',
+                          argstr = '-a %s')
+    other_priors = traits.List(File, desc = 'alternative prior images',
+                               argstr = '-A %s',minlen=3, maxlen=3)
+    nopve = traits.Bool(desc = 'turn off PVE (partial volume estimation)',
+                        argstr = '--nopve')
+    nobias = traits.Bool(desc = 'do not remove bias field',
+                         argstr = '-N')
+    use_priors = traits.Bool(desc = 'use priors throughout',
+                             argstr = '-P')   # must also set -a!, mutually inclusive??
+    segment_iters = traits.Int(desc = 'number of segmentation-initialisation iterations',
+                               argstr = '-W %d')
+    mixel_smooth = traits.Float(desc = 'spatial smoothness for mixeltype',
+                                argstr = '-R %.2f')
+    iters_afterbias = traits.Int(desc = 'number of main-loop iterations after bias-field removal',
+                                 argstr = '-O %d')
+    hyper = traits.Float(desc = 'segmentation spatial smoothness',
+                         argstr = '-H %.2f')
+    verbose = traits.Bool(desc = 'switch on diagnostic messages',
+                          argstr = '-v')
+    manualseg = File(exists=True, desc = 'Filename containing intensities',
+                     argstr = '-s %s')
+    probability_maps = traits.Bool(desc = 'outputs individual probability maps',
+                                   argstr = '-p', genfile = True)
     
+
 
 class Fast(FSLCommand):
     """Use FSL FAST for segmenting and bias correction.
