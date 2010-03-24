@@ -42,3 +42,16 @@ def test_FSLCommand():
     cmd.cmd = 'bet' # Set the cmd to something
     res = cmd.run()
     yield assert_equal, type(res), InterfaceResult
+
+def test_NEW_FSLCommand():
+    # Check default output type and environ
+    cmd = fsl.NEW_FSLCommand(command='junk')
+    yield assert_equal, cmd._outputtype, 'NIFTI'
+    yield assert_equal, cmd.inputs.environ['FSLOUTPUTTYPE'], cmd._outputtype
+    yield assert_true, cmd._outputtype in fsl.Info.ftypes
+
+    for out_type in fsl.Info.ftypes:
+        cmd.set_default_outputtype(out_type)
+        print cmd._outputtype, cmd.inputs.outputtype
+        yield assert_equal, cmd._outputtype, out_type
+        yield assert_equal, cmd.inputs.outputtype, out_type
