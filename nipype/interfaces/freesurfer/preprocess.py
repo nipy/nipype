@@ -144,15 +144,16 @@ class BBRegisterInputSpec(FSTraitedSpec):
                             mandatory=True)
     sourcefile = File(argstr='--mov %s', desc='source file to be registered',
                       mandatory=True)
-    init_flag = traits.Either(traits.Enum('spm', 'fsl', 'header', argstr='--init-%s'),
-                       File(exists=True, argstr='--init-reg %s'),
+    init_reg = traits.Either(traits.Enum('spm', 'fsl', 'header'),
+                              File(exists=True),argstr = '',
                        desc='initialize registration spm, fsl, header or existing File',
                               mandatory=True,)
     contrast_type = traits.Enum('t1', 't2', argstr='--%s',
                                 desc='contrast type of image', mandatory=True)
     outregfile = File(argstr='--reg %s', desc='output registration file',
                       genfile=True)
-    outfile = traits.Either(traits.Bool, File, argstr='--o %s', desc='output warped sourcefile')
+    outfile = traits.Either(traits.Bool, File, argstr='--o %s',
+                            desc='output warped sourcefile either True or filename')
     flags = traits.Str(argstr='%s', desc='any additional flags')
 
 class BBRegisterOutputSpec(TraitedSpec):
@@ -206,6 +207,11 @@ class BBRegister(NEW_FSCommand):
             else:
                 fname = value
             return '--o %s' % fname
+        if name == 'init_reg':
+            if os.path.isfile(value):
+                return '--init-reg %s' % value
+            else:
+                return '--init-%s' % value
         return super(BBRegister, self)._format_arg(name, spec, value)
     
     def _gen_filename(self, name):
