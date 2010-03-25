@@ -30,8 +30,8 @@ from nipype.utils.misc import find_indices
 #import traceback
 
 class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
-    realigned_files = MultiPath(exists=True, desc="Names of realigned functional data files", mandatory=True)
-    realignment_parameters = MultiPath(exists=True, desc="Names of realignment parameters corresponding to the" \
+    realigned_files = MultiPath(File(exists=True), desc="Names of realigned functional data files", mandatory=True)
+    realignment_parameters = MultiPath(File(exists=True), desc="Names of realignment parameters corresponding to the" \
             "functional data files")
     parameter_source = traits.Enum("SPM", "FSL", "Siemens", desc="Are the movement parameters from SPM or FSL or from" \
             "Siemens PACE data. Options: SPM, FSL or Siemens")
@@ -60,11 +60,11 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
             "True)") 
     
 class ArtifactDetectOutputSpec(TraitedSpec):
-    outlier_files = MultiPath(exists=True,desc="One file for each functional run containing a list of 0-based" \
+    outlier_files = MultiPath(File(exists=True),desc="One file for each functional run containing a list of 0-based" \
             "indices corresponding to outlier volumes") 
-    intensity_files = MultiPath(exists=True,desc="One file for each functional run containing the global intensity" \
+    intensity_files = MultiPath(File(exists=True),desc="One file for each functional run containing the global intensity" \
             "values determined from the brainmask") 
-    statistic_files = MultiPath(exists=True,desc="One file for each functional run containing information about the" \
+    statistic_files = MultiPath(File(exists=True),desc="One file for each functional run containing information about the" \
             "different types of artifacts and if design info is provided then" \
             "details of stimulus correlated motion and a listing or artifacts by" \
             "event type.")

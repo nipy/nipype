@@ -236,7 +236,7 @@ class Realign(NEW_SPMCommand):
 class CoregisterInputSpec(BaseInterfaceInputSpec):
     target = File(exists=True, field='ref', mandatory=True,
                          desc='reference file to register to', copyfile=False)
-    source = MultiPath(exists=True, field='source',
+    source = MultiPath(File(exists=True), field='source',
                          desc='file to register to target', copyfile=True)
     jobtype = traits.Enum('estwrite','estimate', 'write',
                           desc='one of: estimate, write, estwrite',
@@ -327,10 +327,10 @@ class Coregister(NEW_SPMCommand):
 
 class NormalizeInputSpec(BaseInterfaceInputSpec):
     template = File(exists=True, field='eoptions.template', desc='template file to normalize to', copyfile=False)
-    source = MultiPath(exists=True, field='subj.source', desc='file to normalize to template', mandatory = True, copyfile=True)
+    source = MultiPath(File(exists=True), field='subj.source', desc='file to normalize to template', mandatory = True, copyfile=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
                           desc='one of: estimate, write, estwrite (opt, estwrite)', usedefault=True)
-    apply_to_files = MultiPath(exists=True, field='subj.resample',
+    apply_to_files = MultiPath(File(exists=True), field='subj.resample',
                                desc='files to apply transformation to (opt)', copyfile=True)
     parameter_file = File(field='subj.matname',
                                   desc='normalization parameter file*_sn.mat', copyfile=False)
