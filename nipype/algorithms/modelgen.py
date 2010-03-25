@@ -75,7 +75,7 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
     outlier_files = traits.List(File(exists=True),
          desc="Files containing scan outlier indices that should be tossed",
                                 filecopy=False)
-    functional_runs = traits.List(File(exists=True),
+    functional_runs = MultiPath(trait=File(exists=True),
                                   mandatory=True,
             desc="Data files for model. List of 4D files or list of" \
                                       "list of 3D files per session",
@@ -466,7 +466,7 @@ class SpecifyModel(NEW_BaseInterface):
         else:
             functional_runs = filename_to_list(self.inputs.functional_runs)
         realignment_parameters = []
-        if self.inputs.realignment_parameters:
+        if isdefined(self.inputs.realignment_parameters):
             rpfiles = filename_to_list(self.inputs.realignment_parameters)
             realignment_parameters.insert(0,np.loadtxt(rpfiles[0]))
             for rpf in rpfiles[1:]:
@@ -476,7 +476,7 @@ class SpecifyModel(NEW_BaseInterface):
                 else:
                     realignment_parameters.insert(len(realignment_parameters),mc)
         outliers = []
-        if self.inputs.outlier_files:
+        if isdefined(self.inputs.outlier_files):
             outfiles = filename_to_list(self.inputs.outlier_files)
             try:
                 outindices = np.loadtxt(outfiles[0],dtype=int)
@@ -504,6 +504,7 @@ class SpecifyModel(NEW_BaseInterface):
                         outliers.insert(len(outliers),out.tolist())
         if self.inputs.is_sparse:
             infolist = self._generate_clustered_design(infolist)
+            
         sessinfo = self._generate_standard_design(infolist,
                                                   functional_runs=functional_runs,
                                                   realignment_parameters=realignment_parameters,
