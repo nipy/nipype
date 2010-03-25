@@ -21,6 +21,9 @@ from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
 from nipype.interfaces.io import FreeSurferSource
 from nipype.interfaces.freesurfer import FSCommand
 
+from nipype.interfaces.freesurfer.base import NEW_FSCommand, FSTraitedSpec
+from nipype.interfaces.base import Bunch, TraitedSpec, isdefined, File, traits
+
 class Resample(FSCommand):
     """Use FreeSurfer mri_convert to up or down-sample image files
 
@@ -136,7 +139,27 @@ class ReconAll(FSCommand):
         return FreeSurferSource(subject_id=self.inputs.subject_id,
                                 subjects_dir=self.inputs.subjects_dir).aggregate_outputs()
 
-class BBRegister(FSCommand):
+class BBRegisterInputSpec(FSTraitedSpec):
+    subject_id = traits.Str(argstr='--s %s', desc='freesurfer subject id',
+                            mandatory=True)
+    sourcefile = File(argstr='--mov %s', desc='source file to be registered',
+                      mandatory=True)
+    init_flag = traits.Either(traits.Enum('spm', 'fsl', 'header', argstr='--init-%s'),
+                       File(exists=True, argstr='--init-reg %s'),
+                       desc='initialize registration spm, fsl, header or existing File',
+                              mandatory=True,)
+    contrast_type = traits.Enum('t1', 't2', argstr='--%s',
+                                desc='contrast type of image', mandatory=True)
+    outregfile = File(argstr='--reg %s', desc='output registration file',
+                      genfile=True)
+    outfile = traits.Either(traits.Bool, File, argstr='--o %s', desc='output warped sourcefile')
+    flags = traits.Str(argstr='%s', desc='any additional flags')
+
+class BBRegisterOutputSpec(TraitedSpec):
+    outregfile = File(exists=True, desc='Output registration file')
+    outfile = File(desc='Registered and resampled source file')
+
+class BBRegister(NEW_FSCommand):
     """Use FreeSurfer bbregister to register a volume two a surface mesh
 
     This program performs within-subject, cross-modal registration using a
@@ -160,78 +183,35 @@ class BBRegister(FSCommand):
 
    """
 
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'bbregister'
-
-
-    def inputs_help(self):
-        """Print command line documentation for bbregister."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    opt_map = {
-        'subject_id':         '--s %s',
-        'sourcefile':         '--mov %s',
-        'init_spm':           '--init-spm',
-        'init_fsl':           '--init-fsl',
-        'init_header':        '--init-header',
-        'init_reg':           '--init-reg %s',
-        't1_contrast':        '--t1',
-        't2_contrast':        '--t2',
-        'outregfile':         '--reg %s',
-        'outfile':            '--o %s',
-        'flags':              '%s'}
+    _cmd = 'bbregister'
+    input_spec = BBRegisterInputSpec
+    output_spec =  BBRegisterOutputSpec
     
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='sourcefile',copy=False)]
-        return info
-
-    def _get_outfiles(self):
-        outregfile = self.inputs.outregfile
-        if not self.inputs.outregfile and self.inputs.sourcefile:
-            outregfile = fname_presuffix(self.inputs.sourcefile,
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['outregfile'] = self.inputs.outregfile
+        if not isdefined(self.inputs.outregfile) and self.inputs.sourcefile:
+            outputs['outregfile'] = fname_presuffix(self.inputs.sourcefile,
                                          suffix='_bbreg_%s.dat'%self.inputs.subject_id,
                                          use_ext=False)
-        outfile = self.inputs.outfile
-        if self.inputs.outfile == True:
-            outfile = fname_presuffix(self.inputs.sourcefile,suffix='_bbreg')
-        return (outregfile, outfile)
-    
-    def _parse_inputs(self):
-        """validate fs bbregister options"""
-        allargs = super(BBRegister, self)._parse_inputs(skip=('outfile', 'outregfile'))
-        outregfile, outfile = self._get_outfiles()
-        allargs.extend(['--reg',outregfile])
-        if outfile:
-            allargs.extend(['--o',outfile])
-        return allargs
-    
-    def outputs(self):
-        """
-        outregfile: filename
-            Output registration file
-        outfile: filename
-            Registered and resampled source file
-        """
-        outputs = Bunch(outregfile=None,
-                        outfile=None)
+        outputs['outfile'] = self.inputs.outfile
+        if isinstance(self.inputs.outfile, bool):
+            outputs['outfile'] = fname_presuffix(self.inputs.sourcefile,suffix='_bbreg')
         return outputs
 
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outregfile, outfile = self._get_outfiles()
-        if not glob(outregfile):
-            raise FileNotFoundError(outregfile)
-        outputs.outregfile = outregfile
-        if outfile:
-            if not glob(outfile):
-                raise FileNotFoundError(outfile)
-            outputs.outfile = outfile
-        return outputs
+    def _format_arg(self, name, spec, value):
+        if name == 'outfile':
+            if isinstance(value, bool):
+                fname = self._list_outputs()[name]
+            else:
+                fname = value
+            return '--o %s' % fname
+        return super(BBRegister, self)._format_arg(name, spec, value)
+    
+    def _gen_filename(self, name):
+        if name == 'outregfile':
+            return self._list_outputs()[name]
+        return None    
 
 class ApplyVolTransform(FSCommand):
     """Use FreeSurfer mri_vol2vol to apply a transform.
@@ -309,8 +289,27 @@ class ApplyVolTransform(FSCommand):
         outputs.outfile = outfile
         return outputs
 
-        
-class Smooth(FSCommand):
+class SmoothInputSpec(FSTraitedSpec):
+    sourcefile= File(exists=True, desc='source volume',
+                     argstr='--i %s',mandatory=True)
+    regfile = File(desc='registers volume to surface anatomical ',
+                   argstr='--reg %s', mandatory=True,
+                   exists=True)
+    outfile = File(desc='output volume', argstr='--o %s', genfile=True)
+    projfrac_avg=traits.Tuple(traits.Float,traits.Float,traits.Float,
+                              desc='average a long normal min max delta',
+                              argstr='--projfrac-avg %s')
+    projfrac = traits.Float(desc='project frac of thickness a long surface normal',
+                          argstr='--projfrac %s')
+    surface_fwhm = traits.Float(min=0,desc='surface FWHM in mm',argstr='--fwhm %d')
+    vol_fwhm = traits.Float(min=0, argstr= '--vol-fwhm %d',
+                            desc='volumesmoothing outside of surface')
+    flags = traits.Str(desc='maps additional commands', argstr='%s')
+
+class SmoothOutputSpec(FSTraitedSpec):
+    outfile= File(exist=True,desc='smoothed input volume')	
+         
+class Smooth(NEW_FSCommand):
     """Use FreeSurfer mris_volsmooth to smooth a volume
 
     This function smoothes cortical regions on a surface and
@@ -330,57 +329,22 @@ class Smooth(FSCommand):
     >>> smoothvol.cmdline
     'mris_volsmooth --o foo_out.nii --reg reg.dat --i foo.nii --fwhm 10 --vol-fwhm 6'
     
-   """
+    """
 
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'mris_volsmooth'
+    _cmd = 'mris_volsmooth'
+    input_spec = SmoothInputSpec
+    output_spec = SmoothOutputSpec
 
-    def inputs_help(self):
-        """Print command line documentation for mris_volsmooth."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    opt_map = {
-        'sourcefile':         '--i %s',
-        'regfile':            '--reg %s',
-        'outfile':            '--o %s',
-        'surface_fwhm':       '--fwhm %d',
-        'vol_fwhm':           '--vol-fwhm %d',
-        'flags':              '%s'}
-    
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='sourcefile',copy=False)]
-        return info
-
-    def _get_outfile(self):
-        outfile = self.inputs.outfile
-        if not outfile:
-            outfile = fname_presuffix(self.inputs.sourcefile,
-                                      newpath=os.getcwd(),
-                                      suffix='_surfsmooth')
-        return outfile
-    
-    def _parse_inputs(self):
-        """validate fs bbregister options"""
-        allargs = super(Smooth, self)._parse_inputs(skip=('outfile'))
-        allargs.extend(['--o', self._get_outfile()])
-        return allargs
-    
-    def outputs(self):
-        """
-        outfile: filename
-            Smoothed input volume
-        """
-        return Bunch(outfile=None)
-
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outfile = self._get_outfile()
-        if not glob(outfile):
-            raise FileNotFoundError(outfile)
-        outputs.outfile = outfile
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['outfile'] = self.inputs.outfile
+        if not isdefined(outputs['outfile']) and isdefined(self.inputs.sourcefile):
+            outputs['outfile'] = self._gen_fname(self.inputs.sourcefile,
+                                              suffix = '_smooth')
         return outputs
+
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._list_outputs()[name]
+        return None
+
