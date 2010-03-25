@@ -156,8 +156,8 @@ normalize.inputs.template = os.path.abspath('data/T1.nii')
 """
 
 smooth = nw.NodeWrapper(interface=spm.Smooth())
-#smooth.inputs.fwhm = [6,6,8]
-smooth.iterables = ('fwhm',[4,8])
+fwhmlist = [4]
+smooth.iterables = ('fwhm',fwhmlist)
 
 """
 Set up analysis components
@@ -261,7 +261,6 @@ the processing nodes.
 
 l1pipeline = pe.Pipeline()
 l1pipeline.config['workdir'] = os.path.abspath('spm/workingdir')
-l1pipeline.config['use_parameterized_dirs'] = True
 
 l1pipeline.connect([(datasource,realign,[('func','infile')]),
                   (realign,coregister,[('mean_image', 'source'),
@@ -350,7 +349,7 @@ l2source.inputs.file_template=os.path.abspath('spm/l1output/*/_fwhm_%d/con*/con_
 # iterate over all contrast images
 #l2source.iterables = [('fwhm',[4,8]),
 #                      ('con',contrast_ids)]
-l2source.iterables = ('template_argtuple', [(4, id) for id in contrast_ids]+ [(8, id) for id in contrast_ids])
+l2source.iterables = ('template_argtuple', [(fwhm, id) for id in contrast_ids for fwhm in fwhmlist])
 
 
 """Use :class:`nipype.interfaces.spm.OneSampleTTest` to perform a
