@@ -171,7 +171,7 @@ class RealignInputSpec(BaseInterfaceInputSpec):
 
 class RealignOutputSpec(TraitedSpec):
     mean_image = File(desc='Mean image file from the realignment')
-    realigned_files = traits.List(traits.File, desc='Realigned files')
+    realigned_files = traits.List(File, desc='Realigned files')
     realignment_parameters = traits.List(File(exists=True),
                     desc='Estimated translation and rotation parameters')
 

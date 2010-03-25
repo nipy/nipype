@@ -248,8 +248,8 @@ class EstimateContrastInputsSpec(BaseInterfaceInputSpec):
     contrasts, the condition list should contain previously defined T-contrasts. 
 """)
     beta_images = traits.List(File(exists=True), 'Parameter estimates of the design matrix', copyfile=False)
-    residual_image = traits.File(exists=True, desc='Mean-squared image of the residuals', copyfile=False)
-    RPVimage = traits.File(exists=True, desc='Resels per voxel image', copyfile=False)
+    residual_image = File(exists=True, desc='Mean-squared image of the residuals', copyfile=False)
+    RPVimage = File(exists=True, desc='Resels per voxel image', copyfile=False)
     ignore_derivs = traits.Bool(True, desc='ignore derivatives for estimation. (opt,True)', usedefault=True)
 
 class EstimateContrastOutputSpec(TraitedSpec):
