@@ -326,12 +326,14 @@ class NEW_FSLCommand(NEW_CommandLine):
     fsl.ExtractRoi(tmin=42, tsize=1, outputtype='NIFTI')'''
     
     input_spec = FSLTraitedSpec
-    
-    _outputtype = 'NIFTI'
+    _outputtype = None
 
     def __init__(self, **inputs):
         super(NEW_FSLCommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, 'outputtype')
+
+        if self._outputtype is None:
+            self._outputtype = Info.outputtype()
 
         if not isdefined(self.inputs.outputtype):
             self.inputs.outputtype = self._outputtype
@@ -339,6 +341,7 @@ class NEW_FSLCommand(NEW_CommandLine):
             self._output_update()
 
     def _output_update(self):
+        self._outputtype = self.inputs.outputtype
         self.inputs.environ.update({'FSLOUTPUTTYPE': self.inputs.outputtype})
     
     @classmethod

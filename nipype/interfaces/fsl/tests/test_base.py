@@ -47,13 +47,15 @@ def test_FSLCommand():
 def test_NEW_FSLCommand():
     # Check default output type and environ
     cmd = fsl.NEW_FSLCommand(command='junk')
-    yield assert_equal, cmd._outputtype, 'NIFTI'
+    yield assert_equal, cmd._outputtype, fsl.Info.outputtype()
     yield assert_equal, cmd.inputs.environ['FSLOUTPUTTYPE'], cmd._outputtype
     yield assert_true, cmd._outputtype in fsl.Info.ftypes
 
+    cmd = fsl.NEW_FSLCommand
+    cmdinst = fsl.NEW_FSLCommand(command='junk')
     for out_type in fsl.Info.ftypes:
         cmd.set_default_outputtype(out_type)
         yield assert_equal, cmd._outputtype, out_type
-        if out_type != 'NIFTI':
+        if out_type != fsl.Info.outputtype():
             #  Setting class outputtype should not effect existing instances
-            yield assert_not_equal, cmd.inputs.outputtype, out_type
+            yield assert_not_equal, cmdinst.inputs.outputtype, out_type
