@@ -150,7 +150,7 @@ class MatlabInputSpec(BaseInterfaceInputSpec):
                           usedefault=True)
     script_file = File('pyscript.m', usedefault=True,
                               desc='Name of file to write m-code to')
-    paths   = traits.List(traits.Directory, desc='Paths to add to matlabpath')
+    paths   = traits.List(Directory, desc='Paths to add to matlabpath')
 
 class NEW_MatlabCommand(NEW_CommandLine):
     """Interface that runs matlab code

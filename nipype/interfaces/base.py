@@ -927,8 +927,8 @@ class TraitedSpec(traits.HasStrictTraits):
             innertype = []
             if spec.inner_traits:
                 innertype = [1 for inner in spec.inner_traits \
-                                 if inner.is_trait_type(traits.File)]
-            if spec.is_trait_type(traits.File) or innertype:
+                                 if inner.is_trait_type(File)]
+            if spec.is_trait_type(File) or innertype:
                 if dict_withhash[key]:
                     dict_withhash[key] = self._hash_infile(dict_withhash, key)
                     dict_nofilename[key] = [val[1] for val in dict_withhash[key]]
