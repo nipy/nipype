@@ -226,7 +226,7 @@ class EstimateModel(NEW_SPMCommand):
         spm = sio.loadmat(self.inputs.spm_design_file)
         betas = []
         for colidx in range(spm['SPM'][0][0].xX[0][0].X.shape[1]):
-            betas.append(os.path.join(pth,'beta_%04d.img' % colidx+1))
+            betas.append(os.path.join(pth,'beta_%04d.img' % (colidx+1)))
         if betas:
             outputs['beta_images'] = betas
         resms = os.path.join(pth,'ResMS.img')
