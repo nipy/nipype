@@ -149,24 +149,27 @@ class Bet(NEW_FSLCommand):
 
 class FastInputSpec(FSLTraitedSpec):
     """ Defines inputs (trait classes) for Fast """
-    infiles = File(exists=True,
-                   desc = 'image, or multi-channel set of images, to be segmented',
-                   argstr='%s', position=-1, mandatory=True)
+    infiles = traits.List(File(exists=True),
+                          desc = 'image, or multi-channel set of images, to be segmented',
+                          argstr='%s', position=-1, mandatory=True)
     out_basename = File(desc = 'base name of output files',
                         argstr='-o %s', genfile=True) # maybe not genfile
-    number_classes = traits.Int( desc = 'number of tissue-type classes',
-                                 argstr = '-n %d')
+    number_classes = traits.Range(low=1, high=10, desc = 'number of tissue-type classes',
+                                  argstr = '-n %d')
     output_biasfield = traits.Bool( desc = 'output estimated bias field',
                                     argstr = '-B', genfile=True)
     output_biascorrected = traits.Bool(desc = 'output restored image (bias-corrected image)',
                                        argstr = '-b', genfile = True)
-    img_type = traits.Int(desc = 'int specifying type of image: (1 = T1, 2 = T2, 3 = PD)',
-                          argstr = '-t %d')
-    bias_iters = traits.Int(desc = 'number of main-loop iterations during bias-field removal',
-                            argstr = '-I %d')
-    bias_lowpass = traits.Int(desc = 'bias field smoothing extent (FWHM) in mm', 
-                              argstr = '-l %d', units = 'mm')
-    init_seg_smooth = traits.Float(desc = 'initial segmentation spatial smoothness (during bias field estimation)',
+    img_type = traits.Enum((1,2,3),desc = 'int specifying type of image: (1 = T1, 2 = T2, 3 = PD)',
+                           argstr = '-t %d')
+    bias_iters = traits.Range(low = 1, high = 10, 
+                              desc = 'number of main-loop iterations during bias-field removal',
+                              argstr = '-I %d')
+    bias_lowpass = traits.Range(low = 4, high = 40, 
+                                desc = 'bias field smoothing extent (FWHM) in mm', 
+                                argstr = '-l %d', units = 'mm')
+    init_seg_smooth = traits.Range(low=0.0001, high = 0.1, 
+                                   desc = 'initial segmentation spatial smoothness (during bias field estimation)',
                                    argstr = '-f %.3f')
     segments = traits.Bool(desc = ' outputs a separate binary image for each tissue type',
                            argstr = '-g', genfile=True)
@@ -180,13 +183,17 @@ class FastInputSpec(FSLTraitedSpec):
                          argstr = '-N')
     use_priors = traits.Bool(desc = 'use priors throughout',
                              argstr = '-P')   # must also set -a!, mutually inclusive??
-    segment_iters = traits.Int(desc = 'number of segmentation-initialisation iterations',
-                               argstr = '-W %d')
-    mixel_smooth = traits.Float(desc = 'spatial smoothness for mixeltype',
+    segment_iters = traits.Range(low=1, high=50, 
+                                 desc = 'number of segmentation-initialisation iterations',
+                                 argstr = '-W %d')
+    mixel_smooth = traits.Range(low = 0.0, high=1.0, 
+                                desc = 'spatial smoothness for mixeltype',
                                 argstr = '-R %.2f')
-    iters_afterbias = traits.Int(desc = 'number of main-loop iterations after bias-field removal',
-                                 argstr = '-O %d')
-    hyper = traits.Float(desc = 'segmentation spatial smoothness',
+    iters_afterbias = traits.Range(low = 1, hight = 20,
+                                   desc = 'number of main-loop iterations after bias-field removal',
+                                   argstr = '-O %d')
+    hyper = traits.Range(low = 0.0, high = 1.0, 
+                         desc = 'segmentation spatial smoothness',
                          argstr = '-H %.2f')
     verbose = traits.Bool(desc = 'switch on diagnostic messages',
                           argstr = '-v')
@@ -196,6 +203,56 @@ class FastInputSpec(FSLTraitedSpec):
                                    argstr = '-p', genfile = True)
     
 
+class FastOutputSpec(TraitedSpec):
+    """Specify possible outputs from Fast"""
+    tissue_class_map = File(exists=True,
+                            desc="path/name of binary segmented volume file one val for each class  _seg")
+    tissue_class_files = File(desc="path/name of binary segmented volumes one file for each class  _seg_x")
+    restored_image = File(desc = 'restored images (one for each input image) named according to the input images _restore')
+
+    mixeltype  = File(desc = "path/name of mixeltype volume file _mixeltype")
+
+    partial_volume_map = File(desc = "path/name of partial volume file _pveseg")
+    partial_volume_files  = File(desc = "path/name of partial volumes files one for each class, _pve_x")
+    
+    bias_field = File(desc = 'Estimated bias field _bias')
+    probability_maps = File(desc= 'filenames, one for each class, for each input, prob_x')
+
+
+class NEW_Fast(NEW_FSLCommand):
+    """ Use FSL FAST for segmenting and bias correction.
+
+    For complete details, see the `FAST Documentation.
+    <http://www.fmrib.ox.ac.uk/fsl/fast4/index.html>`_
+    """
+    _cmd = 'fast'
+    input_spec = FastInputSpec
+    output_spec = FastOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        orignames = self.inputs.infiles
+        if isdefined(self.inputs.out_basename):
+            basepth, basename = os.path.split(self.inputs.out_basename)
+        
+        for item in self.inputs.infiles:
+            print item
+        outputs['tissue_class_map'] = 'FIX'
+        if not isdefined(outputs['outfile']) and isdefined(self.inputs.infile):
+            outputs['outfile'] = self._gen_fname(self.inputs.infile,
+                                              suffix = '_brain')
+        if isdefined(self.inputs.mesh) and self.inputs.mesh:
+            outputs['meshfile'] = self._gen_fname(outputs['outfile'],
+                                               suffix = '_mesh.vtk',
+                                               change_ext = False)
+        if (isdefined(self.inputs.mask) and self.inputs.mask) or \
+                (isdefined(self.inputs.reduce_bias) and self.inputs.reduce_bias):
+            outputs['maskfile'] = self._gen_fname(outputs['outfile'],
+                                               suffix = '_mask')
+        return outputs 
+
+
+   
 
 class Fast(FSLCommand):
     """Use FSL FAST for segmenting and bias correction.

@@ -16,7 +16,7 @@ import numpy as np
 from nipype.interfaces.spm import SpmMatlabCommandLine
 from nipype.interfaces.spm.base import NEW_SPMCommand
 from nipype.interfaces.base import Bunch, BaseInterfaceInputSpec, traits,\
-    TraitedSpec, isdefined, File
+    TraitedSpec, isdefined, File, Directory
 from nipype.utils.filemanip import (filename_to_list, list_to_filename,
                                     loadflat)
 from nipype.utils.spm_docs import grab_doc
@@ -24,7 +24,7 @@ import logging
 logger = logging.getLogger('spmlogger')
 
 class Level1DesignInputSpec(BaseInterfaceInputSpec):
-    spmmat_dir = traits.Directory(exists=True, field='dir', desc='directory to store SPM.mat file (opt)')
+    spmmat_dir = Directory(exists=True, field='dir', desc='directory to store SPM.mat file (opt)')
     timing_units = traits.Enum('secs', 'scans', field='timing.units', desc='units for specification of onsets')
     interscan_interval = traits.Float(field='timing.RT', desc='Interscan interval in secs')
     microtime_resolution = traits.Int(field='timing.fmri_t',
