@@ -22,7 +22,7 @@ from nipype.interfaces.base import Bunch, CommandLine, OptMapCommand
 from nipype.utils.docparse import get_doc
 from nipype.utils.filemanip import FileNotFoundError, fname_presuffix
 from nipype.interfaces.base import NEW_CommandLine, traits, TraitedSpec,\
-    BaseInterfaceInputSpec, isdefined
+    BaseInterfaceInputSpec, isdefined, Directory
 
 
 class FSInfo(object):
@@ -601,7 +601,7 @@ class Info(object):
 
 
 class FSTraitedSpec(BaseInterfaceInputSpec):
-    subjectsdir =  traits.Directory(exists=True, desc='subjects directory')
+    subjectsdir =  Directory(exists=True, desc='subjects directory')
     
 class NEW_FSCommand(NEW_CommandLine):
     '''General support for FS commands. Every FS command accepts
