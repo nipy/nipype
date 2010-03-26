@@ -1164,7 +1164,7 @@ class NEW_BaseInterface(NEW_Interface):
 
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
-    args = traits.Str(argstr='%s', desc='Parameters to the command')
+    args = traits.Str(argstr='%s', desc='Additional parameters to the command')
 
 class NEW_CommandLine(NEW_BaseInterface):
     """Implements functionality to interact with command line programs

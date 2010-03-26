@@ -9,7 +9,7 @@ import tempfile
 import numpy as np
 
 from nipype.interfaces.base import CommandLine, InterfaceResult, Bunch,\
-    BaseInterfaceInputSpec, isdefined
+    CommandLineInputSpec, isdefined
 from nipype.interfaces.base import (NEW_CommandLine, InterfaceResult, traits,
                                     TraitedSpec, File, Directory)
 
@@ -136,7 +136,7 @@ class MatlabCommandLine(CommandLine):
         return self._cmdline
     
 
-class MatlabInputSpec(BaseInterfaceInputSpec):
+class MatlabInputSpec(CommandLineInputSpec):
     script  = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
                          mandatory=True, position=-1)
     nodesktop = traits.Bool(True, argstr='-nodesktop', usedefault=True,

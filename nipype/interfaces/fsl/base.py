@@ -25,7 +25,7 @@ import warnings
 from nipype.utils.filemanip import (fname_presuffix, list_to_filename,
                                     FileNotFoundError)
 from nipype.interfaces.base import NEW_CommandLine, traits, TraitedSpec,\
-    BaseInterfaceInputSpec, isdefined
+    CommandLineInputSpec, isdefined
 from nipype.interfaces.base import OptMapCommand, CommandLine
 from copy import deepcopy
 
@@ -317,7 +317,7 @@ class Info(object):
         return os.path.join(fsldir, 'data/standard', img_name)
 
 
-class FSLTraitedSpec(BaseInterfaceInputSpec):
+class FSLTraitedSpec(CommandLineInputSpec):
     outputtype =  traits.Enum('NIFTI', Info.ftypes.keys())
     
 class NEW_FSLCommand(NEW_CommandLine):
