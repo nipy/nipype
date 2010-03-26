@@ -225,8 +225,8 @@ class EstimateModel(NEW_SPMCommand):
         outputs['mask_image'] = mask
         spm = sio.loadmat(self.inputs.spm_design_file)
         betas = []
-        for colidx in range(spm['SPM'][0][0].xX[0][0].X.shape[1]):
-            betas.append(os.path.join(pth,'beta_%04d.img' % (colidx+1)))
+        for vbeta in spm['SPM'][0,0].Vbeta[0]:
+            betas.append(os.path.join(pth,vbeta.fname[0]))
         if betas:
             outputs['beta_images'] = betas
         resms = os.path.join(pth,'ResMS.img')
@@ -275,6 +275,7 @@ class EstimateContrastOutputSpec(TraitedSpec):
     spmT_images = traits.List(File(exists=True), desc='stat images from a t-contrast')
     ess_images = traits.List(File(exists=True), desc='contrast images from an F-contrast')
     spmF_images = traits.List(File(exists=True), desc='stat images from an F-contrast')
+    spm_mat_file = File(exist=True, desc = 'Updated SPM mat file')
 
 class EstimateContrast(NEW_SPMCommand):
     """use spm_contrasts to estimate contrasts of interest
@@ -372,6 +373,7 @@ class EstimateContrast(NEW_SPMCommand):
         spmf = glob(os.path.join(pth,'spmF*.img'))
         if len(spmf)>0:
             outputs['spmF_images'] = sorted(spmf)
+        outputs['spm_mat_file'] = self.inputs.spm_mat_file
         return outputs
 
 class OneSampleTTestInputSpec(BaseInterfaceInputSpec):
