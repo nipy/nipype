@@ -19,7 +19,7 @@ import enthought.traits.api as traits
 from enthought.traits.api import Undefined
 from enthought.traits.trait_base import _Undefined
 
-from nipype.utils.filemanip import md5, hash_infile
+from nipype.utils.filemanip import md5, hash_infile, FileNotFoundError
 from nipype.utils.misc import is_container
 
  
@@ -71,10 +71,8 @@ class BaseFile ( traits.BaseStr ):
         
         if os.path.isfile( value ):
             return value
-        
-        self.error( object, name, value )
- 
-
+        else:
+            raise FileNotFoundError
 	
 class File ( BaseFile ):
     """ Defines a trait whose value must be the name of a file using a C-level
