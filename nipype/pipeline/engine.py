@@ -686,7 +686,7 @@ class Pipeline(object):
                     self.proc_pending[jobid] = True
                     self._set_output_directory_base(self.procs[jobid])
                     # Send job to task manager and add to pending tasks
-                    _, hashvalue = self.procs[jobid].inputs._get_bunch_hash()
+                    _, hashvalue = self.procs[jobid].inputs._get_hashval()
                     logger.info('Executing: %s ID: %d H:%s' % \
                                     (self.procs[jobid].name, jobid, hashvalue))
                     cmdstr = "result = task.run()"

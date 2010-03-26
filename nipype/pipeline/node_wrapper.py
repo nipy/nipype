@@ -174,7 +174,7 @@ class NodeWrapper(object):
             logger.info("in dir: %s"%outdir)
             # Get a dictionary with hashed filenames and a hashvalue
             # of the dictionary itself.
-            hashed_inputs, hashvalue = self.inputs.hashval
+            hashed_inputs, hashvalue = self.inputs._get_hashval()
             hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
             if updatehash:
                 logger.info("Updating hash: %s"%hashvalue)
@@ -339,12 +339,6 @@ class NodeWrapper(object):
     def update(self, **opts):
         self.inputs.update(**opts)
         
-    def hash_inputs(self):
-        """Computes a hash of the input fields of the underlying
-        interface."""
-        hashed_inputs, hashvalue = self.inputs.hashval
-        return hashvalue
-
     def _output_directory(self):
         if self.output_directory_base is None:
             self.output_directory_base = mkdtemp()

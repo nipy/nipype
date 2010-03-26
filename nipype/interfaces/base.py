@@ -875,11 +875,11 @@ class TraitedSpec(traits.HasStrictTraits):
                 value = getattr(self, trait_name)
                 if value == new:
                     tspec = self.traits()[trait_name]
-                    setattr(self, trait_name, tspec.default)
+                    setattr(self, trait_name, Undefined)
                     msg = 'Input %s is mutually exclusive with inputs:  %s' \
                         % (name, ', '.join(trait_spec.xor))
                     msg += '\nResetting %s to %s' % (trait_name,
-                                                     tspec.default)
+                                                     Undefined)
                     warn(msg)
 
     def _hash_infile(self, adict, key):
