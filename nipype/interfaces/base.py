@@ -21,6 +21,7 @@ from enthought.traits.trait_base import _Undefined
 
 from nipype.utils.filemanip import md5, hash_infile, FileNotFoundError
 from nipype.utils.misc import is_container
+from enthought.traits.trait_errors import TraitError
 
  
 __docformat__ = 'restructuredtext'
@@ -71,9 +72,11 @@ class BaseFile ( traits.BaseStr ):
         
         if os.path.isfile( value ):
             return value
-        else:
-            raise FileNotFoundError
-	
+        
+        self.error( object, name, value )
+ 
+
+    
 class File ( BaseFile ):
     """ Defines a trait whose value must be the name of a file using a C-level
     fast validator.
@@ -1157,9 +1160,16 @@ class NEW_BaseInterface(NEW_Interface):
         """ Collate expected outputs and check for existence
         """
         outputs = self._outputs()
-        expected_outputs = self._list_outputs()
-        if expected_outputs:
-            outputs.set(**expected_outputs)
+        predicted_outputs = self._list_outputs()
+        if predicted_outputs:
+            for key, val in predicted_outputs.items():
+                try:
+                    setattr(outputs, key, val)
+                except TraitError as error:
+                    if error.info == "a file name":
+                        raise FileNotFoundError
+                    else:
+                        raise error
         return outputs
 
 

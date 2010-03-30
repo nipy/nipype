@@ -472,14 +472,6 @@ class NEW_SPMCommand(NEW_BaseInterface):
         """ Determine the expected outputs based on inputs """
         raise NotImplementedError
     
-    def aggregate_outputs(self):
-        """ Initializes the output fields for this interface and then
-        searches for and stores the data that go into those fields.
-        """
-        outputs = self._outputs()
-        for key, val in self._list_outputs().items():
-            setattr(outputs, key, val)
-        return outputs
         
     def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
