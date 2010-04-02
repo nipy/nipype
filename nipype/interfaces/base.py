@@ -1165,7 +1165,7 @@ class NEW_BaseInterface(NEW_Interface):
             for key, val in predicted_outputs.items():
                 try:
                     setattr(outputs, key, val)
-                except TraitError as error:
+                except TraitError, error:
                     if error.info == "a file name":
                         raise FileNotFoundError
                     else:
