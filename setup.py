@@ -27,6 +27,7 @@ def configuration(parent_package='',top_path=None):
     config.get_version('nipype/version.py') # sets config.version
 
     config.add_subpackage('nipype', 'nipype')
+    config.add_subpackage('nipype.testing.numpytesting')
 
     return config
 
