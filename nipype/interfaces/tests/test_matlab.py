@@ -2,7 +2,8 @@ import os
 from tempfile import mkdtemp
 from shutil import rmtree
 
-from nipype.testing import assert_equal, assert_true, assert_false, assert_raises
+from nipype.testing import (assert_equal, assert_true, assert_false, 
+                            assert_raises, skipif)
 import nipype.interfaces.matlab as mlab
 from nipype.interfaces.base import NEW_CommandLine, Bunch
 
@@ -80,6 +81,7 @@ def test_NEW_init():
     mc = mlab.NEW_MatlabCommand(matlab_cmd='foo_m')
     yield assert_equal, mc.cmd, 'foo_m'
     
+@skipif(no_matlab)
 def test_NEW_run_interface():
     mc = mlab.NEW_MatlabCommand(matlab_cmd='foo_m')
     yield assert_raises, ValueError, mc.run # script is mandatory
