@@ -6,7 +6,7 @@ from distutils.version import LooseVersion
 
 from nose.tools import (assert_true, assert_false, assert_not_equal,
                         assert_raises)
-from nose import SkipTest
+from nose import SkipTest, with_setup
 
 if LooseVersion(np.__version__) >= '1.2':
     from numpy.testing import *
