@@ -14,29 +14,15 @@ import os
 import shutil
 
 from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult,\
-    NEW_Interface, TraitedSpec, traits, File, isdefined, BaseInterfaceInputSpec,\
+    NEW_Interface, TraitedSpec, traits, File, Directory, isdefined, BaseInterfaceInputSpec,\
     NEW_BaseInterface
 from nipype.utils.filemanip import copyfiles, list_to_filename, filename_to_list
 
 
-class DataSource(Interface):
-    """ Generic datasource module that takes a directory containing a
-        list of nifti files and provides a set of structured output
-        fields.
-    """
-    
-    def __init__(self, *args, **inputs):
-        self._populate_inputs()
-        self.inputs.update(**inputs)
-
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-
-        base_directory : str
-            Path to the base directory consisting of subject data.
-        subject_template : str
+class DataSourceInputSpec(BaseInterfaceInputSpec):
+    base_directory = Directory(exists=True,
+            desc='Path to the base directory consisting of subject data.')
+    subject_template = traits.Str(: str
             Template encoding the subject directory name, indexed
             by subject id.
         file_template : str
@@ -52,6 +38,12 @@ class DataSource(Interface):
 
             `subject_id` are keys and the values are a list of tuples.
             info[subject_id] = [([run_identifiers], output_fieldname), ...]
+
+
+class DataSource(NEW_BaseInterface):
+    """ Generic datasource module that takes a directory containing a
+        list of nifti files and provides a set of structured output
+        fields.
 
         Examples
         --------
@@ -81,18 +73,6 @@ class DataSource(Interface):
         >>> datasource.inputs.subject_id = 's1'
 
         """
-        print self.inputs_help.__doc__
-        
-    def _populate_inputs(self):
-        self.inputs = Bunch(base_directory=None,
-                            subject_template=None,
-                            file_template='*-%d-*.nii',
-                            subject_id=None,
-                            subject_directory=None,
-                            subject_info=None)
-
-    def outputs_help(self):
-        print self.outputs.__doc__
 
     def outputs(self):
         """
