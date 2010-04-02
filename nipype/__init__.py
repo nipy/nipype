@@ -23,7 +23,7 @@ Interfaces
         c. freesurfer
 
         d. afni
-        
+
     2. pipeline functionality for batch processing data
 
         a. wrappers to provide common basic interface independent functionality
@@ -36,12 +36,12 @@ Interfaces
 
         d. tools for providence tracking, subject specific flags
 
-Package Organization 
-==================== 
-The nipy package contains the following subpackages and modules: 
+Package Organization
+====================
+The nipy package contains the following subpackages and modules:
 
-.. packagetree:: 
-   :style: UML  
+.. packagetree::
+   :style: UML
 """
 
 from version import version as __version__
@@ -54,9 +54,9 @@ __url__     = 'http://nipy.sourceforge.net/'
 # upgrade.
 try:
     from numpy.testing import Tester
-    
+
     class NipypeTester(Tester):
-        def test(self, label='fast', verbose=1, extra_argv=None, 
+        def test(self, label='fast', verbose=1, extra_argv=None,
                  doctests=False, coverage=False):
             # setuptools does a chmod +x on ALL python modules when it
             # installs.  By default, as a security measure, nose refuses to
@@ -67,7 +67,7 @@ try:
                 extra_argv = ['--exe']
             else:
                 extra_argv.append('--exe')
-            super(NipypeTester, self).test(label, verbose, extra_argv, 
+            super(NipypeTester, self).test(label, verbose, extra_argv,
                                            doctests, coverage)
         # Grab the docstring from numpy
         test.__doc__ = Tester.test.__doc__
@@ -76,19 +76,19 @@ try:
     bench = NipypeTester().bench
 except ImportError:
     # If the user has an older version of numpy which does not have
-    # the nose test framework, fail gracefully and prompt them to
-    # upgrade.
-    import numpy as np
-    npver = np.__version__.split('.')
-    npver = '.'.join((npver[0], npver[1]))
-    npver = float(npver)
-    if npver < 1.2:
-        raise ImportError('Nipy/nipype requires numpy version 1.2 or greater. '
-                          '\n    You have numpy version %s installed.'
-                          '\n    Please upgrade numpy:  '
-                          'http://www.scipy.org/NumPy' 
-                          % np.__version__)
-
+    # the nose test framework, verify that at least numpy 1.1 is available
+    # and instruct to use nose directly for unittesting if test or bench
+    # is called
+    from nipype.utils.misc import package_check
+    package_check('numpy', version='1.1')
+    def test():
+        raise NotImplementedError(
+            'Since you are running numpy version prior 1.2, you '
+            'would need to use nosetests directly, i.e no '
+            'nipype.test(), nipype.bench() are provided.')
+    # so "nosetests nipype" doesn't collect these poor buggers
+    test.__test__ = False
+    bench = test
 
 def _test_local_install():
     """ Warn the user that running with nipy being
