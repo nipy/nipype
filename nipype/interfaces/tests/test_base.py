@@ -172,8 +172,8 @@ def test_NEW_Interface():
 
 def test_NEW_BaseInterface():
     yield assert_equal, nib.NEW_BaseInterface.help(), None
-    yield assert_equal, nib.NEW_BaseInterface._outputs(), None
     yield assert_equal, nib.NEW_BaseInterface._get_filecopy_info(), []
+    yield assert_equal, nib.NEW_BaseInterface()._outputs(), None
 
     class InputSpec(nib.BaseInterfaceInputSpec):
         foo = nib.traits.Int(desc='a random int')

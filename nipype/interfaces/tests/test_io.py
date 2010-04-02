@@ -1,18 +1,17 @@
 import os
-
-from nipype.testing import *
-
+import shutil
+from tempfile import mkdtemp
+from nipype.testing import assert_equal
 import nipype.interfaces.io as nio
 
 def test_aggregate_outputs():
-    # Testing is datasource has a bad path and input files cannot be
-    # found.
-    ds = nio.DataSource()
-    ds.inputs.base_directory = os.getcwd()
-    ds.inputs.subject_template = '%s'
-    ds.inputs.file_template = '%s.nii'
-    info = {}
-    info['s1'] = ((['f3','f5','f7','f10'],'func'), (['struct'],'struct'))
-    ds.inputs.subject_info = info
+    basedir = mkdtemp()
+    os.makedirs(os.path.join(basedir,'s1'))
+    ds = nio.SubjectSource()
+    ds.inputs.base_directory = basedir
+    ds.inputs.file_layout = '%s.nii'
+    ds.inputs.subject_info = dict(func=['1'])
     ds.inputs.subject_id = 's1'
-    yield assert_raises, IOError, ds.aggregate_outputs
+    res = ds.run()
+    yield assert_equal, res.runtime.returncode, 0
+    shutil.rmtree(basedir)
