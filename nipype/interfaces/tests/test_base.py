@@ -187,7 +187,7 @@ def test_NEW_BaseInterface():
         input_spec = InputSpec
         
     yield assert_equal, DerivedInterface.help(), None
-    yield assert_equal, DerivedInterface._outputs(), None
+    yield assert_equal, DerivedInterface()._outputs(), None
     yield assert_equal, DerivedInterface._get_filecopy_info()[0]['key'], 'woo'
     yield assert_true, DerivedInterface._get_filecopy_info()[0]['copy']
     yield assert_equal, DerivedInterface._get_filecopy_info()[1]['key'], 'zoo'
@@ -204,7 +204,7 @@ def test_NEW_BaseInterface():
             return runtime
 
     yield assert_equal, DerivedInterface2.help(), None
-    yield assert_equal, DerivedInterface2._outputs().foo, Undefined
+    yield assert_equal, DerivedInterface2()._outputs().foo, Undefined
     yield assert_raises, Exception, DerivedInterface2(goo=1).run
 
     class DerivedInterface3(DerivedInterface2):
@@ -242,7 +242,7 @@ def test_NEW_Commandline():
     yield assert_equal, res.runtime.environ['MYENV'], 'foo'
     yield assert_equal, res.outputs, None
 
-    class CommandLineInputSpec(nib.TraitedSpec):
+    class CommandLineInputSpec1(nib.TraitedSpec):
         foo = nib.traits.Str(argstr='%s', desc='a str')
         goo = nib.traits.Bool(argstr='-g', desc='a bool', position=0)
         hoo = nib.traits.List(argstr='-l %s', desc='a list')
@@ -250,7 +250,7 @@ def test_NEW_Commandline():
                               position=-1)
         noo = nib.traits.Int(argstr='-x %d', desc='an int')
         roo = nib.traits.Str(desc='not on command line')
-    nib.NEW_CommandLine.input_spec = CommandLineInputSpec
+    nib.NEW_CommandLine.input_spec = CommandLineInputSpec1
     ci4 = nib.NEW_CommandLine(command='cmd')
     ci4.inputs.foo = 'foo'
     ci4.inputs.goo = True
@@ -276,3 +276,4 @@ def test_NEW_Commandline():
         
     ci6 = DerivedClass(command='cmd')
     yield assert_equal, ci6._parse_inputs()[0], 'filename'
+    nib.NEW_CommandLine.input_spec = nib.CommandLineInputSpec
