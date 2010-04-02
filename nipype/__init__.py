@@ -52,43 +52,35 @@ __url__     = 'http://nipy.sourceforge.net/'
 # We require numpy 1.2 for our test suite.  If Tester fails to import,
 # check the version of numpy the user has and inform them they need to
 # upgrade.
-try:
+import numpy as np
+from nipype.utils.misc import package_check
+package_check('numpy', version='1.1')
+
+from distutils.version import LooseVersion
+if LooseVersion(np.__version__) >= '1.2':
     from numpy.testing import Tester
+else:
+    from testing.numpytesting import Tester
 
-    class NipypeTester(Tester):
-        def test(self, label='fast', verbose=1, extra_argv=None,
-                 doctests=False, coverage=False):
-            # setuptools does a chmod +x on ALL python modules when it
-            # installs.  By default, as a security measure, nose refuses to
-            # import executable files.  To forse nose to execute our tests, we
-            # must supply the '--exe' flag.  List thread on this:
-            # http://www.mail-archive.com/distutils-sig@python.org/msg05009.html
-            if not extra_argv:
-                extra_argv = ['--exe']
-            else:
-                extra_argv.append('--exe')
-            super(NipypeTester, self).test(label, verbose, extra_argv,
-                                           doctests, coverage)
-        # Grab the docstring from numpy
-        test.__doc__ = Tester.test.__doc__
+class NipypeTester(Tester):
+    def test(self, label='fast', verbose=1, extra_argv=None,
+             doctests=False, coverage=False):
+        # setuptools does a chmod +x on ALL python modules when it
+        # installs.  By default, as a security measure, nose refuses to
+        # import executable files.  To forse nose to execute our tests, we
+        # must supply the '--exe' flag.  List thread on this:
+        # http://www.mail-archive.com/distutils-sig@python.org/msg05009.html
+        if not extra_argv:
+            extra_argv = ['--exe']
+        else:
+            extra_argv.append('--exe')
+        super(NipypeTester, self).test(label, verbose, extra_argv,
+                                       doctests, coverage)
+    # Grab the docstring from numpy
+    test.__doc__ = Tester.test.__doc__
 
-    test = NipypeTester().test
-    bench = NipypeTester().bench
-except ImportError:
-    # If the user has an older version of numpy which does not have
-    # the nose test framework, verify that at least numpy 1.1 is available
-    # and instruct to use nose directly for unittesting if test or bench
-    # is called
-    from nipype.utils.misc import package_check
-    package_check('numpy', version='1.1')
-    def test():
-        raise NotImplementedError(
-            'Since you are running numpy version prior 1.2, you '
-            'would need to use nosetests directly, i.e no '
-            'nipype.test(), nipype.bench() are provided.')
-    # so "nosetests nipype" doesn't collect these poor buggers
-    test.__test__ = False
-    bench = test
+test = NipypeTester().test
+bench = NipypeTester().bench
 
 def _test_local_install():
     """ Warn the user that running with nipy being

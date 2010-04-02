@@ -1,14 +1,15 @@
-"""Minimalistic extract from numpy.testing as of version 1.3.0
+"""Common test support for all numpy test scripts.
 
-to provide necessary functionality for nipype tests to be usable on
-systems with elderly NumPy such as 1.1.  So far, following files were
-borrowed:
-
-decorators.py
-
-Copyright (c) 2005-2009, NumPy Developers
-License terms the same as of Nipype: BSD-new
+This single module should provide all the common functionality for numpy tests
+in a single location, so that test scripts can just import it and work right
+away.
 """
 
-__copyright__ = "Copyright (c) 2005-2009, NumPy Developers"
-__license__ = "BSD"
+from unittest import TestCase
+
+import decorators as dec
+from utils import *
+from numpytest import *
+from nosetester import NoseTester as Tester
+from nosetester import run_module_suite
+test = Tester().test
