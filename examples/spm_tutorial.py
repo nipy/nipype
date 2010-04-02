@@ -75,9 +75,7 @@ data_dir = os.path.abspath('data')
 # Specify the subject directories
 subject_list = ['s1','s3']
 # Map field names to individual subject runs.
-info = {}
-info['s1'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'))
-info['s3'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'))
+info = dict(func=['f3','f5','f7','f10'], struct=['struct'])
 
 """
 Preprocessing pipeline nodes
@@ -90,11 +88,10 @@ and provides additional housekeeping and pipeline specific
 functionality.
 """
 
-datasource = nw.NodeWrapper(interface=nio.DataSource(),diskbased=False)
-datasource.inputs.base_directory   = data_dir
-datasource.inputs.subject_template = '%s'
-datasource.inputs.file_template    = '%s.nii'
-datasource.inputs.subject_info     = info
+datasource = nw.NodeWrapper(interface=nio.SubjectSource())
+datasource.inputs.base_directory = data_dir
+datasource.inputs.layout = '%s.nii'
+datasource.inputs.subject_info = info
 
 
 """Here we set up iteration over all the subjects. The following line

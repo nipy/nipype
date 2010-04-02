@@ -15,32 +15,48 @@ import shutil
 
 from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult,\
     NEW_Interface, TraitedSpec, traits, File, Directory, isdefined, BaseInterfaceInputSpec,\
-    NEW_BaseInterface
+    NEW_BaseInterface, MultiPath
 from nipype.utils.filemanip import copyfiles, list_to_filename, filename_to_list
 
+class IOBase(NEW_BaseInterface):
 
-class DataSourceInputSpec(BaseInterfaceInputSpec):
-    base_directory = Directory(exists=True,
+    def _run_interface(self, runtime):
+        runtime.returncode = 0
+        return runtime
+
+    def _list_outputs(self):
+        raise NotImplementedError
+
+    def _outputs(self):
+        return self._add_output_traits(super(IOBase, self)._outputs())
+    
+    def _add_output_traits(self, base):
+        return base
+    
+class SubjectSourceInputSpec(BaseInterfaceInputSpec):
+    base_directory = Directory(exists=True, mandatory=True,
             desc='Path to the base directory consisting of subject data.')
-    subject_template = traits.Str(: str
-            Template encoding the subject directory name, indexed
-            by subject id.
-        file_template : str
-            Template used for matching filenames.
-            Default = '*-%d-*.nii'
-        subject_id: str or int
-            The subject identifier.
-        subject_directory : str
-            Path to the subject directory.
-        subject_info : dict
+    subject_id = traits.Either(traits.Str, traits.Int, mandatory=True,
+                               desc = 'subject identifier')
+    file_layout = traits.Either(traits.Str, traits.DictStrStr,
+                                mandatory=True,
+                                desc='Layout used to get files.')
+    subject_info = traits.DictStrList(mandatory=True,
+                                      desc="""
             Provides information about how to map subject run
             numbers to the output fields.
 
             `subject_id` are keys and the values are a list of tuples.
             info[subject_id] = [([run_identifiers], output_fieldname), ...]
+            """)
 
+class SubjectSourceOutputSpec(TraitedSpec):
+    subject_id = traits.Either(traits.Str, traits.Int,
+                               desc = 'subject identifier')
+    subject_directory = Directory(exists=True,
+                                  desc='Path to the subject directory')
 
-class DataSource(NEW_BaseInterface):
+class SubjectSource(IOBase):
     """ Generic datasource module that takes a directory containing a
         list of nifti files and provides a set of structured output
         fields.
@@ -48,97 +64,58 @@ class DataSource(NEW_BaseInterface):
         Examples
         --------
      
-        Here our experiment data is stored in our home directory under
-        'data/exp001'.  In the exp001 directory we have a subdirectory
-        for our subject named 's1'.  In the 's1' directory we have
-        four functional images, 'f3', 'f5', 'f7', 'f10'.  In the
-        `info` dictionary we create an entry where the key is the
-        subject identifier 's1', and the value is a list of one
-        element, a tuple containing a list of the functional image
-        names and a field name 'func'.  The 'func' field name is the
-        output field name for this datasource object.  So for
-        instance, if we were doing motion correction using SPM
-        realign, the datasource output 'func' would map to the realign
-        input 'infile' in the pipeline.
+        Here our experiment data is stored in our the directory
+        '/software/data'.  In the data directory we have a subdirectory
+        for our subject named 'S03'.  In the 'S03' directory we have
+        four types of data. In the `info` dictionary we create an
+        entry where the keys are the output fields and the value is a
+        list of run numbers corresponding to the template in layout.
 
-        >>> from nipype.interfaces.io import DataSource
-        >>> info = {}
-        >>> info['s1'] = [(['f3', 'f5', 'f7', 'f10'], 'func')]
-        >>> datasource = DataSource()
-        >>> data_dir = os.path.expanduser('~/data/exp001')
-        >>> datasource.inputs.base_directory = data_dir
-        >>> datasource.inputs.subject_template = '%s'
-        >>> datasource.inputs.file_template = '%s.nii'
-        >>> datasource.inputs.subject_info = info
-        >>> datasource.inputs.subject_id = 's1'
+        >>> from nipype.interfaces.io import SubjectSource
+        >>> info = dict(dti=[7], bold=[14, 16, 18], mprage=[4], fieldmap=[5,6])
+        >>> ds = SubjectSource()
+        >>> ds.inputs.base_directory = '/software/data'
+        >>> ds.inputs.subject_id = 'S03'
+        >>> ds.inputs.file_layout = 'nii/s*-%d.nii'
+        >>> ds.inputs.subject_info = info
+        >>> 'dti' in ds._outputs().trait_names()
+        True
 
-        """
-
-    def outputs(self):
-        """
-            Parameters
-            ----------
-
-            (all default to None)
-
-            subject_id : string
-                Subject identifier
-            subject_directory: /path/to/dir
-                Location of subject directory containing nifti files
-
-            remaining fields are defined by user. See subject_info in
-            inputs_help() for description of how to specify output
-            fields 
-            """
-        return Bunch(subject_id=None,
-                     subject_directory=None)
+        We can also have a different layout per field:
+        >>> ds.inputs.file_layout = dict(dti='dwiscans/*-%d.nii', bold='boldruns/*-%d.nii')
+        >>> info = dict(dti=[7], bold=[14, 16, 18])
+        >>> ds.inputs.subject_info = info
         
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outputs.subject_id = self.inputs.subject_id
-        subjdir = self.inputs.subject_directory
-        if subjdir is None:
-            #print self.inputs['subj_template'],self.inputs['subj_id']
-            if self.inputs.subject_template is not None:
-                subjdir = self.inputs.subject_template % self.inputs.subject_id
+       """
+
+    input_spec = SubjectSourceInputSpec
+    output_spec = SubjectSourceOutputSpec
+
+    def _add_output_traits(self, base):
+        undefined_traits = {}
+        if isdefined(self.inputs.subject_info):
+            for key in self.inputs.subject_info.keys():
+                base.add_trait(key, traits.List(File(exists=True), traits.Undefined))
+        return base
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['subject_id'] = self.inputs.subject_id
+        subjdir = os.path.join(self.inputs.base_directory, str(self.inputs.subject_id))
+        outputs['subject_directory'] = subjdir 
+        for outfield, fileinfo in self.inputs.subject_info.items():
+            if isinstance(self.inputs.file_layout, str):
+                file_template = self.inputs.file_layout
             else:
-                subjdir = self.inputs.subject_id
-            subjdir = os.path.join(self.inputs.base_directory,subjdir)
-        if subjdir is None:
-            raise Exception('Subject directory not provided')
-        outputs.subject_directory = subjdir
-        if self.inputs.subject_info is None:
-            raise Exception('Subject info not provided')
-        try:
-            info = self.inputs.subject_info[self.inputs.subject_id]
-        except KeyError:
-            raise KeyError("Key [%s] does not exist in subject_info dictionary"
-                           % self.inputs.subject_id)
-        for idx, _type in info:
-            setattr(outputs, _type, [])
-            for i in idx:
-                files = self.inputs.file_template % i
-                path = os.path.abspath(os.path.join(subjdir, files))
-                files_found = glob.glob(path)
-                if len(files_found) == 0:
-                    msg = 'Unable to find file: %s' % path
-                    raise IOError(msg)
-                outputs.get(_type).extend(files_found)
-            if idx:
-                setattr(outputs, _type, list_to_filename(outputs.get(_type)))
+                file_template = self.inputs.file_layout[outfield]
+            files_found = []
+            for val in fileinfo:
+                path = os.path.abspath(os.path.join(subjdir,
+                                                    file_template % val))
+                files_found.extend(glob.glob(path))
+            if fileinfo:
+                outputs[outfield] = filename_to_list(deepcopy(files_found))
         return outputs
-
-    def run(self, cwd=None):
-        """Execute this module.
-
-        cwd is just there to make things "work" for now
-        """
-        runtime = Bunch(returncode=0,
-                        stdout=None,
-                        stderr=None)
-        outputs=self.aggregate_outputs()
-        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
-
     
 class DataSink(Interface):
     """ Generic datasink module that takes a directory containing a
@@ -272,6 +249,9 @@ class DataGrabber(NEW_BaseInterface):
     input_spec = DataGrabberInputSpec
     output_spec = DataGrabberOutputSpec
     
+    def _run_interface(self, runtime):
+        return runtime
+    
     def _list_outputs(self):
         outputs = self._outputs().get()
         args = []
@@ -287,15 +267,6 @@ class DataGrabber(NEW_BaseInterface):
             template = template%tuple(args)
         outputs['file_list'] = list_to_filename(glob.glob(template))
         return outputs
-
-    def run(self, cwd=None):
-        """Execute this module.
-        """
-        runtime = Bunch(returncode=0,
-                        stdout=None,
-                        stderr=None)
-        outputs=self.aggregate_outputs()
-        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
 
 class ContrastGrabber(Interface):
     """ Contrast grabber module to pick up SPM or FSL contrast files

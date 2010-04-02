@@ -1075,13 +1075,12 @@ class NEW_BaseInterface(NEW_Interface):
             helpstr += ['None']
         print '\n'.join(helpstr)
 
-    @classmethod
-    def _outputs(cls):
+    def _outputs(self):
         """ Returns a bunch containing output fields for the class
         """
         outputs = None
-        if cls.output_spec:
-            outputs = cls.output_spec()
+        if self.output_spec:
+            outputs = self.output_spec()
         return outputs
 
     @classmethod
