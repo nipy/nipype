@@ -14,9 +14,10 @@ import warnings
 
 import numpy as np
 
-from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
+from nipype.interfaces.fsl.base import FSLCommand, FSLInfo, NEW_FSLCommand,\
+    FSLTraitedSpec
 from nipype.utils.filemanip import list_to_filename
-from nipype.interfaces.base import Bunch
+from nipype.interfaces.base import Bunch, traits, TraitedSpec, isdefined
 from nipype.utils.docparse import get_doc
 
 warn = warnings.warn
@@ -113,8 +114,22 @@ class Merge(FSLCommand):
         outputs.mergedimage = self._get_outfile(check=True)
         return outputs
 
+class ExtractRoiInputSpec(FSLTraitedSpec):
+    infile = traits.File(exists=True, argstr="%s", position=0, desc="input file", mandatory=True)
+    outfile = traits.File(exists=True, argstr="%s", position=1, desc="output file", genfile=True)
+    xmin = traits.Float(argstr="%f", position=2)
+    xsize = traits.Float(argstr="%f", position=3)
+    ymin = traits.Float(argstr="%f", position=4)
+    ysize = traits.Float(argstr="%f", position=5)
+    zmin = traits.Float(argstr="%f", position=6)
+    zsize = traits.Float(argstr="%f", position=7)
+    tmin = traits.Int(argstr="%d", position=8)
+    tsize = traits.Int(argstr="%d", position=9)
+    
+class ExtractRoiOutputSpec(TraitedSpec):
+    outfile = traits.File(exists=True)
 
-class ExtractRoi(FSLCommand):
+class ExtractRoi(NEW_FSLCommand):
     """Uses FSL Fslroi command to extract region of interest (ROI)
     from an image.
 
@@ -125,101 +140,19 @@ class ExtractRoi(FSLCommand):
     arguments are minimum index and size (not maximum index).  So to
     extract voxels 10 to 12 inclusive you would specify 10 and 3 (not
     10 and 12).
+    
+    >>> from nipype.interfaces import fsl
+    >>> fslroi = fsl.ExtractRoi(infile='foo.nii', outfile='bar.nii', \
+                                tmin=0, tsize=1)
+    >>> fslroi.cmdline
+    'fslroi foo.nii bar.nii 0 1'
     """
-    opt_map = {}
+    
+    _cmd = 'fslroi'
+    input_spec = ExtractRoiInputSpec
+    output_spec = ExtractRoiOutputSpec
 
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'fslroi'
-
-    def inputs_help(self):
-        """Print command line documentation for fslroi."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(infile=None,
-                            outfile=None,
-                            xmin=None,
-                            xsize=None,
-                            ymin=None,
-                            ysize=None,
-                            zmin=None,
-                            zsize=None,
-                            tmin=None,
-                            tsize=None)
-
-    def _parse_inputs(self):
-        """validate fsl fslroi options"""
-
-        allargs = []
-        # Add infile and outfile to the args if they are specified
-        if self.inputs.infile:
-            allargs.insert(0, self.inputs.infile)
-            outfile = self._gen_fname(self.inputs.infile,
-                                      self.inputs.outfile,
-                                      suffix='_roi')
-            allargs.insert(1, outfile)
-
-        #concat all numeric variables into a string separated by space
-        #given the user's option
-        dim = [self.inputs.xmin, self.inputs.xsize, self.inputs.ymin,
-               self.inputs.ysize,
-               self.inputs.zmin, self.inputs.zsize, self.inputs.tmin,
-               self.inputs.tsize]
-        args = []
-        for num in dim:
-            if num is not None:
-                args.append(repr(num))
-
-        allargs.insert(2, ' '.join(args))
-
-        return allargs
-
-    def run(self, infile=None, outfile=None, **inputs):
-        """Execute the command.
-        >>> from nipype.interfaces import fsl
-        >>> fslroi = fsl.ExtractRoi(infile='foo.nii', outfile='bar.nii', \
-                                    tmin=0, tsize=1)
-        >>> fslroi.cmdline
-        'fslroi foo.nii bar.nii 0 1'
-
-        """
-
-        if infile:
-            self.inputs.infile = infile
-        if not self.inputs.infile:
-            raise AttributeError('fslroi requires an input file')
-        if outfile:
-            self.inputs.outfile = outfile
-        self.inputs.update(**inputs)
-        return super(ExtractRoi, self).run()
-
-    def outputs_help(self):
-        """
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-        outfile : /path/to/outfile
-            path and filename of resulting file with desired ROI
-        """
-        print self.outputs_help.__doc__
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-            outfile : string,file
-                path/name of file with ROI extracted
-        """
-        outputs = Bunch(outfile=None)
-        return outputs
-
-    def aggregate_outputs(self):
+    def _list_outputs(self):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
@@ -234,83 +167,33 @@ class ExtractRoi(FSLCommand):
             Else, contains path, filename of generated outputfile
 
         """
-        outputs = self.outputs()
-        outputs.outfile = self._gen_fname(self.inputs.infile,
-                                self.inputs.outfile, suffix='_roi', check=True)
+        outputs = self._outputs().get()
+        outputs['outfile'] = self._gen_fname(self.inputs.infile,
+                                self.inputs.outfile, suffix='_roi')
         return outputs
+    
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._list_outputs()[name]
+        return None
 
+class SplitInputSpec(FSLTraitedSpec):
+    infile = traits.File(exists=True, argstr="%s", position = 0, desc="input filename")
+    outbasename = traits.Str(argstr="%s", position=1, desc="outputs prefix")
+    dimension = traits.Enum('t','x','y','z', argstr="-%s", position=2, desc="dimension along which the file will be split")
+    
+class SplitOutputSpec(TraitedSpec):
+    outfiles = traits.List(traits.File(exists=True))
 
-class Split(FSLCommand):
+class Split(NEW_FSLCommand):
     """Uses FSL Fslsplit command to separate a volume into images in
     time, x, y or z dimension.
     """
-    opt_map = {'outbasename': None,  # output basename
-               'time': '-t',  # separate images in time (default behaviour)
-               'xdir': '-x',  # separate images in the x direction
-               'ydir': '-y',  # separate images in the y direction
-               'zdir': '-z',  # separate images in the z direction
-               'infile': None}
+    _cmd = 'fslsplit'
+    input_spec = SplitInputSpec
+    output_spec = SplitOutputSpec
 
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'fslsplit'
-
-    def inputs_help(self):
-        """Print command line documentation for fslsplit."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    def _parse_inputs(self):
-        """validate fsl fslroi options"""
-
-        allargs = super(Split, self)._parse_inputs(skip=('infile'))
-        if self.inputs.infile:
-            allargs.insert(0, self.inputs.infile)
-        if self.inputs.outbasename:
-            allargs.insert(0, self.inputs.outbasename)
-        return allargs
-
-    def run(self, infile=None, **inputs):
-        """Execute the command.
-        >>> from nipype.interfaces import fsl
-        >>> fslsplit = fsl.Split(infile='foo.nii',time=True)
-        >>> fslsplit.cmdline
-        'fslsplit foo.nii -t'
-
-        """
-
-        if infile:
-            self.inputs.infile = infile
-        if not self.inputs.infile:
-            raise AttributeError('fslsplit requires an input file')
-        self.inputs.update(**inputs)
-        return super(Split, self).run()
-
-    def outputs_help(self):
-        """
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-        outfiles : /path/to/outfile
-            path/name of files with 3D volumes
-        """
-        print self.outputs_help.__doc__
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-            outfiles : string,file
-                path/name of files with 3D volumes
-        """
-        outputs = Bunch(outfiles=None)
-        return outputs
-
-    def aggregate_outputs(self):
+    def _list_outputs(self):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
@@ -325,12 +208,12 @@ class Split(FSLCommand):
             Else, contains path, filename of generated outputfile
 
         """
-        outputs = self.outputs()
+        outputs = self._outputs().get()
         type, ext = FSLInfo.outputtype()
         outbase = 'vol*'
-        if self.inputs.outbasename:
+        if isdefined(self.inputs.outbasename):
             outbase = '%s*' % self.inputs.outbasename
-        outputs.outfiles = sorted(glob(os.path.join(os.getcwd(),
+        outputs['outfiles'] = sorted(glob(os.path.join(os.getcwd(),
                                                     outbase + ext)))
         return outputs
 
