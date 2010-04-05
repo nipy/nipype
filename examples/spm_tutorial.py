@@ -90,7 +90,7 @@ functionality.
 
 datasource = nw.NodeWrapper(interface=nio.SubjectSource())
 datasource.inputs.base_directory = data_dir
-datasource.inputs.layout = '%s.nii'
+datasource.inputs.file_layout = '%s.nii'
 datasource.inputs.subject_info = info
 
 
@@ -193,8 +193,8 @@ those conditions]. The condition names must match the `names` listed
 in the `subjectinfo` function described above.
 """
 
-cont1 = ['Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5]]
-cont2 = ['Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1]]
+cont1 = ('Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5])
+cont2 = ('Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1])
 contrasts = [cont1,cont2]
 
 """Generate SPM-specific design information using
