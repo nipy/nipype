@@ -95,7 +95,9 @@ class SubjectSource(IOBase):
         undefined_traits = {}
         if isdefined(self.inputs.subject_info):
             for key in self.inputs.subject_info.keys():
-                base.add_trait(key, traits.List(File(exists=True), traits.Undefined))
+                base.add_trait(key, MultiPath(File(exists=True), default=traits.Undefined))
+                undefined_traits[key] = traits.Undefined
+            base.trait_set(trait_change_notify=False, **undefined_traits)
         return base
 
     def _list_outputs(self):
@@ -114,7 +116,7 @@ class SubjectSource(IOBase):
                                                     file_template % val))
                 files_found.extend(glob.glob(path))
             if fileinfo:
-                outputs[outfield] = filename_to_list(deepcopy(files_found))
+                outputs[outfield] = list_to_filename(deepcopy(files_found))
         return outputs
     
 class DataSink(Interface):

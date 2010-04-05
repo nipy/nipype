@@ -1346,7 +1346,7 @@ class NEW_CommandLine(NEW_BaseInterface):
         return first_args + all_args + last_args
 
 
-class MultiPath(traits.List):
+class MultiPath(traits.Either):
     """ Implements a user friendly traits that accepts one or more
     paths to files or directories
 
@@ -1377,27 +1377,6 @@ class MultiPath(traits.List):
     """
     info_text = 'a list of paths'
     
-    def __init__(self, trait  = None, value = None, **metadata):
-        if trait:
-            self.info_text = 'a list of %s' % trait.info()
-        super(MultiPath, self).__init__(trait, value,
-                                        **metadata)
+    def __init__(self, trait  = None, **metadata):
+        super(MultiPath, self).__init__(traits.List(trait), trait, **metadata)
 
-    def get(self, object, name):
-        value = self.get_value(object, name)
-        if value:
-            if len(value)==1:
-                return value[0]
-        return value
-
-    def set(self, object, name, value):
-        self.set_value(object, name, value)
-
-    def validate(self, object, name, value):
-        newvalue = value
-        if isinstance(value, str):
-            newvalue = [value]
-        if not isdefined(value):
-            return value
-        else:
-            return super(MultiPath, self).validate(object, name, newvalue)
