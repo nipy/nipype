@@ -138,7 +138,7 @@ class SliceTiming(SpmMatlabCommandLine):
 #
 ####################################
 class RealignInputSpec(BaseInterfaceInputSpec):
-    infile = traits.List(File(exists=True), field='data', mandatory=True,
+    infile = MultiPath(File(exists=True), field='data', mandatory=True,
                          desc='list of filenames to realign', copyfile=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
                           desc='one of: estimate, write, estwrite',
@@ -170,9 +170,9 @@ class RealignInputSpec(BaseInterfaceInputSpec):
 
 
 class RealignOutputSpec(TraitedSpec):
-    mean_image = File(desc='Mean image file from the realignment')
-    realigned_files = traits.List(File, desc='Realigned files')
-    realignment_parameters = traits.List(File(exists=True),
+    mean_image = File(exists=True, desc='Mean image file from the realignment')
+    realigned_files = MultiPath(File(exists=True), desc='Realigned files')
+    realignment_parameters = MultiPath(File(exists=True),
                     desc='Estimated translation and rotation parameters')
 
 class Realign(NEW_SPMCommand):
@@ -216,15 +216,15 @@ class Realign(NEW_SPMCommand):
         outputs = self._outputs().get()
         if isdefined(self.inputs.infile):
             outputs['realignment_parameters'] = []
-        for imgf in self.inputs.infile:
+        for imgf in filename_to_list(self.inputs.infile):
             outputs['realignment_parameters'].append(fname_presuffix(imgf,
                                                                      prefix='rp_',
                                                                      suffix='.txt',
                                                                      use_ext=False))
         if self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
-            outputs['mean_image'] = fname_presuffix(self.inputs.infile[0], prefix='mean')
+            outputs['mean_image'] = fname_presuffix(filename_to_list(self.inputs.infile)[0], prefix='mean')
             outputs['realigned_files'] = []
-            for imgf in self.inputs.infile:
+            for imgf in filename_to_list(self.inputs.infile):
                 outputs['realigned_files'].append(fname_presuffix(imgf, prefix='r'))
         return outputs
 
@@ -419,6 +419,7 @@ class Normalize(NEW_SPMCommand):
             outputs['normalization_parameters'] = []
             for imgf in filename_to_list(self.inputs.source):
                 outputs['normalization_parameters'].append(fname_presuffix(imgf, suffix='_sn.mat',use_ext=False))
+            outputs['normalization_parameters'] = list_to_filename(outputs['normalization_parameters'])
         
         if self.inputs.jobtype == "estimate":
             if isdefined(self.inputs.apply_to_files):
@@ -429,10 +430,12 @@ class Normalize(NEW_SPMCommand):
             if isdefined(self.inputs.apply_to_files):
                 for imgf in filename_to_list(self.inputs.apply_to_files):
                     outputs['normalized_files'].append(fname_presuffix(imgf, prefix='w'))
+                outputs['normalized_files'] = list_to_filename(outputs['normalized_files'])
             
             outputs['normalized_source'] = []
             for imgf in filename_to_list(self.inputs.source):
                 outputs['normalized_source'].append(fname_presuffix(imgf, prefix='w'))
+            outputs['normalized_source'] = list_to_filename(outputs['normalized_source'])
                 
         return outputs
 
