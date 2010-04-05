@@ -3,7 +3,8 @@ Created on 24 Feb 2010
 
 @author: filo
 '''
-from nipype.interfaces.base import Interface, Bunch, InterfaceResult
+from nipype.interfaces.base import Bunch, InterfaceResult,\
+    NEW_BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec, isdefined
 import nipype.externals.pynifti as nifti
 import numpy as np
 from math import floor, ceil
@@ -12,37 +13,25 @@ from copy import deepcopy
 import os
 from nipype.utils.filemanip import fname_presuffix
 
-class PickAtlas(Interface):
+class PickAtlasInputSpec(BaseInterfaceInputSpec):
+    atlas = traits.File(exists=True, desc="Location of the atlas that will be used.", compulsory=True)
+    labels = traits.Either(traits.Int, traits.List(traits.Int), 
+                           desc="Labels of regions that will be included in the mask. Must be \
+                                compatible with the atlas used.", compulsory=True)
+    hemi = traits.Enum('both','left','right', desc="Restrict the mask to only one hemisphere: left or right", use_default=True)
+    dilation_size = traits.Float(desc="Defines how much the mask will be dilated (expanded in 3D).", use_default = True)
+    output_file = traits.File(desc="Where to store the output mask.")
+
+class PickAtlasOutputSpec(TraitedSpec):
+    mask_file = traits.File(exists=True)
+
+class PickAtlas(NEW_BaseInterface):
     '''
     Returns ROI masks given an atlas and a list of labels. Supports dilation
     and left right masking (assuming the atlas is properly aligned).
     '''
-    
-    def __init__(self, *args, **inputs):
-        self.inputs = Bunch(atlas=None,
-                            labels=None,
-                            hemi='both',
-                            dilation_size=0,
-                            output_file=None)
-        self.inputs.update(**inputs)
-        
-        def inputs_help(self):
-            """
-            Parameters
-            ----------
-            atlas : filename string
-                Location of the atlas that will be used.
-            labels : int or list of ints
-                Labels of regions that will be included in the mask. Must be
-                compatible with the atlas used.
-            hemi : string 'both', 'left' or 'right'
-                Restrict the mask to only one hemisphere. Optional.
-            dilation_size : int
-                Defines how much the mask will be dilated (expanded in 3D). Optional.
-            output_file : string
-                Where to store the output mask. Optional.
-            """
-            print self.inputs_help.__doc__
+    input_spec = PickAtlasInputSpec
+    output_spec = PickAtlasOutputSpec
 
     def run(self, cwd=None):
         nim = self._get_brodmann_area()
@@ -55,7 +44,7 @@ class PickAtlas(Interface):
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
 
     def _gen_output_filename(self):
-        if self.inputs.output_file is None:
+        if not isdefined(self.inputs.output_file):
             output = fname_presuffix(fname=self.inputs.atlas, suffix = "_mask",
                                      newpath= os.getcwd(), use_ext = True)
         else:
@@ -85,10 +74,7 @@ class PickAtlas(Interface):
 
         return nifti.Nifti1Image(newdata, nii.get_affine(), nii.get_header())
 
-    def outputs(self):
-        return Bunch(mask_file=None)
-
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outputs.mask_file = self._gen_output_filename()
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['mask_file'] = self._gen_output_filename()
         return outputs
