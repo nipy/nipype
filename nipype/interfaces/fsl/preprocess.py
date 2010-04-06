@@ -544,8 +544,36 @@ class FlirtInputSpec(FSLTraitedSpec):
     forcescaling = traits.Bool(argstr = '-forcescaling',
                                desc = 'force rescaling even for low-res images')
     minsampling = traits.Float(argstr = '-minsampling %f', units = 'mm',
-                               desc = 'set minimum voxel dimension for sampling')
-
+                               desc ='set minimum voxel dimension for sampling')
+    paddingsize = traits.Int(argstr = '-paddingsize %d', units = 'voxels',
+                             desc = 'for applyxfm: interpolates outside image '\
+                                 'by size')
+    searchrx = traits.List(traits.Int, minlen = 2, maxlen = 2, units ='degrees',
+                           desc = 'search angles along x-axis, in degrees')
+    searchry = traits.List(traits.Int, minlen = 2, maxlen = 2, units ='degrees',
+                           desc = 'search angles along y-axis, in degrees')
+    searchrz = traits.List(traits.Int, minlen = 2, maxlen = 2, units ='degrees',
+                           desc = 'search angles along z-axis, in degrees')
+    nosearch = traits.Bool(argstr = '-nosearch',
+                           desc = 'set all angular searches to ranges 0 to 0')
+    coarsesearch = traits.Int(argstr = '-coarsesearch %d', units = 'degrees',
+                              desc = 'coarse search delta angle')
+    finesearch = traits.Int(argstr = '-finesearch %d', units = 'degrees',
+                            desc = 'fine search delta angle')
+    schedule = File(exists = True, argstr = '-schedule %s',
+                    desc = 'replaces default schedule')
+    refweight = File(exists = True, argstr = '-refweight %s',
+                     desc = 'File for reference weighting volume')
+    inweight = File(exists = True, argstr = '-inweight %s',
+                    desc = 'File for input weighting volume')
+    noclamp = traits.Bool(argstr = '-noclamp',
+                          desc = 'do not use intensity clamping')
+    noresampblur = traits.Bool(argstr = '-noresampblur',
+                               desc = 'do not use blurring on downsampling')
+    rigid2D = traits.Bool(argstr = '-2D',
+                          desc = 'use 2D rigid body mode - ignores dof')
+    verbose = traits.Int(argstr = '-verbose %d',
+                         desc = 'verbose mode, 0 is least')
 
 
 class Flirt(FSLCommand):
