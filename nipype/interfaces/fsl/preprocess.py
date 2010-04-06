@@ -509,8 +509,44 @@ class FlirtInputSpec(FSLTraitedSpec):
     inmatrix = File(argstr = '-init', desc = 'input 4x4 affine matrix')
 
     datatype = traits.Enum('char', 'short', 'int', 'float', 'double',
-                           argstr = '-datatype %d',
+                           argstr = '-datatype %s',
                            desc = 'force output data type')
+    cost = traits.Enum('mutualinfo', 'corratio', 'normcorr', 'normmi',
+                       'leastsq', 'labeldiff',
+                       argstr = '-cost %s',
+                       desc = 'cost function')
+    # XXX What is the difference between 'cost' and 'searchcost'?  Are
+    # these both necessary or do they map to the same variable.
+    searchcost = traits.Enum('mutualinfo', 'corratio', 'normcorr', 'normmi',
+                             'leastsq', 'labeldiff',
+                             argstr = '-searchcost %',
+                             desc = 'cost function')
+    usesqform = traits.Bool(argstr = '-usesqform',
+                            desc = 'initialize using sform or qform')
+    displayinit = traits.Bool(argstr = '-displayinit',
+                              desc = 'display initial matrix')
+    anglerep = traits.Enum('quaternion', 'euler',
+                           argstr = '-anglerep %s',
+                           desc = 'representation of rotation angles')
+    interp = traits.Enum('trilinear', 'nearestneighbour', 'sinc',
+                         argstr = '-interp %s',
+                         desc = 'final interpolation method used in reslicing')
+    sincwidth = traits.Int(argstr = '-sincwidth %d', units = 'voxels',
+                           desc = 'full-width in voxels')
+    sincwindow = traits.Enum('rectangular', 'hanning', 'blackman',
+                             argstr = '-sincwindow %s',
+                             desc = 'sinc window') # XXX better doc
+    bins = traits.Int(argstr = '-bins %d', desc = 'number of histogram bins')
+    dof = traits.Int(argstr = '-dof %d',
+                     desc = 'number of transform degrees of freedom')
+    noresample = traits.Bool(argstr = '-noresample',
+                             desc = 'do not change input sampling')
+    forcescaling = traits.Bool(argstr = '-forcescaling',
+                               desc = 'force rescaling even for low-res images')
+    minsampling = traits.Float(argstr = '-minsampling %f', units = 'mm',
+                               desc = 'set minimum voxel dimension for sampling')
+
+
 
 class Flirt(FSLCommand):
     """Use FSL FLIRT for coregistration.
@@ -538,13 +574,13 @@ class Flirt(FSLCommand):
         """sets base command, not editable"""
         return "flirt"
 
-    opt_map = {'datatype':           '-datatype %d ',
+    opt_map = {'datatype':           '-datatype %d ', # XXX argstr wrong
             'cost':               '-cost %s',
             'searchcost':         '-searchcost %s',
             'usesqform':          '-usesqform',
             'displayinit':        '-displayinit',
             'anglerep':           '-anglerep %s',
-            'interp':             '-interp',
+            'interp':             '-interp', # XXX argstr wrong
             'sincwidth':          '-sincwidth %d',
             'sincwindow':         '-sincwindow %s',
             'bins':               '-bins %d',
