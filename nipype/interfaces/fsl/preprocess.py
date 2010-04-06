@@ -587,6 +587,24 @@ class FlirtOutputSpec(TraitedSpec):
     outfile = File(exists = True, desc = 'path/name of registered file')
     outmatrix = File(desc = 'path/name of calculated affine transform')
 
+# XXX Using NEW_Flirt since the tests for Flirt are incomplete and
+# there's few elements I'm unsure about.
+class NEW_Flirt(NEW_FSLCommand):
+    _cmd = 'flirt'
+    input_spec = FlirtInputSpec
+    output_spec = FlirtOutputSpec
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if not isdefined(self.inputs.outfile) and isdefined(self.inputs.infile):
+            outputs['outfile'] = self._gen_fname(self.inputs.infile,
+                                                 suffix = '_reg')
+
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._list_outputs()[name]
+        return None
+
 class Flirt(FSLCommand):
     """Use FSL FLIRT for coregistration.
 
