@@ -492,6 +492,25 @@ class Fast(FSLCommand):
 
         return outputs
 
+class FlirtInputSpec(FSLTraitedSpec):
+    infile = File(exists = True, argstr = '-in %s', mandatory = True,
+                  position = 0, desc = 'input file')
+    # XXX Not clear if position is required for mandatory flirt inputs
+    # since they are prefixed with argstrs.  But doing it to follow
+    # our previous convention and so we can test the generated command
+    # line.
+    reference = File(exists = True, argstr = '-ref %s', mandatory = True,
+                     position = 1, desc = 'reference file')
+    # XXX need to review outfile, outmatrix and inmatrix for mandatory
+    # and position metadata
+    outfile = File(argstr = '-out', desc = 'output file')
+    outmatrix = File(argstr = '-omat', desc = 'output affine matris in 4x4 ' \
+                         'asciii format')
+    inmatrix = File(argstr = '-init', desc = 'input 4x4 affine matrix')
+
+    datatype = traits.Enum('char', 'short', 'int', 'float', 'double',
+                           argstr = '-datatype %d',
+                           desc = 'force output data type')
 
 class Flirt(FSLCommand):
     """Use FSL FLIRT for coregistration.
