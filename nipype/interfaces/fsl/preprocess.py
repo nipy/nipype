@@ -501,10 +501,7 @@ class FlirtInputSpec(FSLTraitedSpec):
     # line.
     reference = File(exists = True, argstr = '-ref %s', mandatory = True,
                      position = 1, desc = 'reference file')
-    # XXX need to review outfile, outmatrix and inmatrix for mandatory
-    # and position metadata
-    outfile = File(argstr = '-out', genfile = True,
-                   desc = 'registered output file')
+    outfile = File(argstr = '-out', desc = 'registered output file')
     outmatrix = File(argstr = '-omat', desc = 'output affine matrix in 4x4 ' \
                          'asciii format')
     inmatrix = File(argstr = '-init', desc = 'input 4x4 affine matrix')
@@ -577,15 +574,9 @@ class FlirtInputSpec(FSLTraitedSpec):
                          desc = 'verbose mode, 0 is least')
 
 class FlirtOutputSpec(TraitedSpec):
-    # XXX From my experimentation with flirt, outfile and outmatrix
-    # are only generated if -out or -omat are provided.  If neither of
-    # these are provided, it just prints the affine transform to
-    # stdout.  I'm not sure how useful that is, so I set the InputSpec
-    # to generate the -out filename if it's not provided, via the
-    # 'genfile' metadata, so setting the outfile 'exists = True'.
-    # It's not clear to me if we want to do the same with outmatrix.
-    outfile = File(exists = True, desc = 'path/name of registered file')
-    outmatrix = File(desc = 'path/name of calculated affine transform')
+    outfile = File(desc = 'path/name of registered file (if generated)')
+    outmatrix = File(desc = 'path/name of calculated affine transform ' \
+                         '(if generated)')
 
 # XXX Using NEW_Flirt since the tests for Flirt are incomplete and
 # there's few elements I'm unsure about.
@@ -596,14 +587,14 @@ class NEW_Flirt(NEW_FSLCommand):
     
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if not isdefined(self.inputs.outfile) and isdefined(self.inputs.infile):
-            outputs['outfile'] = self._gen_fname(self.inputs.infile,
-                                                 suffix = '_reg')
+        if isdefined(self.inputs.outfile) and self.inputs.outfile:
+            outputs['outfile'] = self._gen_fname(self.inputs.outfile,
+                                                 suffix = '')
+        if isdefined(self.inputs.outmatrix) and self.inputs.outmatrix:
+            outputs['outmatrix' = self._gen_fname(self.inputs.outmatrix,
+                                                  suffix = '')
+        return outputs
 
-    def _gen_filename(self, name):
-        if name == 'outfile':
-            return self._list_outputs()[name]
-        return None
 
 class Flirt(FSLCommand):
     """Use FSL FLIRT for coregistration.
