@@ -20,7 +20,7 @@ documentation to get a general understanding:
   * `User Manual Intro to traits and metadata
     <http://code.enthought.com/projects/traits/docs/html/traits_user_manual/defining.html>`_
   * `Gael wrote a good tutorial
-<http://code.enthought.com/projects/traits/docs/html/tutorials/traits_ui_scientific_app.html>`_
+    <http://code.enthought.com/projects/traits/docs/html/tutorials/traits_ui_scientific_app.html>`_
 
 We're using Traits version 3.x which can be install as part of `EPD
 <http://enthought.com/products/epd.php>`_ or from `pypi
