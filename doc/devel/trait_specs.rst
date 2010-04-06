@@ -1,3 +1,38 @@
+Trait Specifications
+--------------------
+
+We're using the `Enthought Traits
+<http://code.enthought.com/projects/traits/>`_ package for all of our
+inputs and outputs.  Traits allows us to validate user inputs and
+provides a mechanism to handle all the *special cases* in a simple and
+concise way though metadata.  With the metadata, each input/output can
+have an optional set of metadata attributes (described in more detail
+below).  The machinery for handling the metadata is located in the
+base classes, so all subclasses use the same code to handle these
+cases.  This is in contrast to our previous code where every class
+defined it's own _parse_inputs, run and aggregate_outputs methods to
+handle these cases.
+
+Traits is a big package.  Below are a few starting points in the
+documentation to get a general understanding:
+
+  * `User Manual Introduction <http://code.enthought.com/projects/traits/docs/html/traits_user_manual/intro.html>`_
+  * `User Manual Intro to traits and metadata
+    <http://code.enthought.com/projects/traits/docs/html/traits_user_manual/defining.html>`_
+  * `Gael wrote a good tutorial
+<http://code.enthought.com/projects/traits/docs/html/tutorials/traits_ui_scientific_app.html>`_
+
+We're using Traits version 3.x which can be install as part of `EPD
+<http://enthought.com/products/epd.php>`_ or from `pypi
+<http://pypi.python.org/pypi/Traits/3.3.0>`_
+
+Not everything is documented in the User Manual, in those cases the
+`enthought-dev mailing list
+<https://mail.enthought.com/mailman/listinfo/enthought-dev>`_ or the
+`API docs
+<http://code.enthought.com/projects/files/ETS32_API/enthought.traits.html>`_
+is your next place to look.
+
 Specifications
 --------------
 
