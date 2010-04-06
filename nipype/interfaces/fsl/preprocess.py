@@ -503,8 +503,9 @@ class FlirtInputSpec(FSLTraitedSpec):
                      position = 1, desc = 'reference file')
     # XXX need to review outfile, outmatrix and inmatrix for mandatory
     # and position metadata
-    outfile = File(argstr = '-out', desc = 'output file')
-    outmatrix = File(argstr = '-omat', desc = 'output affine matris in 4x4 ' \
+    outfile = File(argstr = '-out', genfile = True,
+                   desc = 'registered output file')
+    outmatrix = File(argstr = '-omat', desc = 'output affine matrix in 4x4 ' \
                          'asciii format')
     inmatrix = File(argstr = '-init', desc = 'input 4x4 affine matrix')
 
@@ -575,6 +576,16 @@ class FlirtInputSpec(FSLTraitedSpec):
     verbose = traits.Int(argstr = '-verbose %d',
                          desc = 'verbose mode, 0 is least')
 
+class FlirtOutputSpec(TraitedSpec):
+    # XXX From my experimentation with flirt, outfile and outmatrix
+    # are only generated if -out or -omat are provided.  If neither of
+    # these are provided, it just prints the affine transform to
+    # stdout.  I'm not sure how useful that is, so I set the InputSpec
+    # to generate the -out filename if it's not provided, via the
+    # 'genfile' metadata, so setting the outfile 'exists = True'.
+    # It's not clear to me if we want to do the same with outmatrix.
+    outfile = File(exists = True, desc = 'path/name of registered file')
+    outmatrix = File(desc = 'path/name of calculated affine transform')
 
 class Flirt(FSLCommand):
     """Use FSL FLIRT for coregistration.
