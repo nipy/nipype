@@ -591,8 +591,8 @@ class NEW_Flirt(NEW_FSLCommand):
             outputs['outfile'] = self._gen_fname(self.inputs.outfile,
                                                  suffix = '')
         if isdefined(self.inputs.outmatrix) and self.inputs.outmatrix:
-            outputs['outmatrix' = self._gen_fname(self.inputs.outmatrix,
-                                                  suffix = '')
+            outputs['outmatrix'] = self._gen_fname(self.inputs.outmatrix,
+                                                   suffix = '')
         return outputs
 
 
