@@ -16,6 +16,7 @@ conventions documented in the `NIPY Developers Guide
    
    development_quickstart
    architecture
+   trait_specs
    planning
    proposed_interfaces
    usecases
