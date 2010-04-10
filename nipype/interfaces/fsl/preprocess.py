@@ -518,7 +518,7 @@ class FlirtInputSpec(FSLTraitedSpec):
     # these both necessary or do they map to the same variable.
     searchcost = traits.Enum('mutualinfo', 'corratio', 'normcorr', 'normmi',
                              'leastsq', 'labeldiff',
-                             argstr = '-searchcost %',
+                             argstr = '-searchcost %s',
                              desc = 'cost function')
     usesqform = traits.Bool(argstr = '-usesqform',
                             desc = 'initialize using sform or qform')
