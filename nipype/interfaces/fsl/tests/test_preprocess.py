@@ -37,16 +37,15 @@ def test_bet():
     yield assert_raises, ValueError, better.run
 
     # Test generated outfile name
-    infile = tmp_infile
-    better.inputs.infile = infile
+    better.inputs.infile = tmp_infile
     outfile = fsl_name(better, 'foo_brain')
     outpath = os.path.join(os.getcwd(), outfile)
-    realcmd = 'bet %s %s' % (infile, outpath)
+    realcmd = 'bet %s %s' % (tmp_infile, outpath)
     yield assert_equal, better.cmdline, realcmd
     # Test specified outfile name
     outfile = fsl_name(better, '/newdata/bar')
     better.inputs.outfile = outfile
-    realcmd = 'bet %s %s' % (infile, outfile)
+    realcmd = 'bet %s %s' % (tmp_infile, outfile)
     yield assert_equal, better.cmdline, realcmd
 
     # infile foo.nii doesn't exist
@@ -84,14 +83,13 @@ def test_bet():
 
     # test each of our arguments
     better = fsl.Bet()
-    infile = tmp_infile
     outfile = fsl_name(better, 'foo_brain')
     outpath = os.path.join(os.getcwd(), outfile)
     for name, settings in opt_map.items():
         better = fsl.Bet(**{name: settings[1]})
         # Add mandatory input
-        better.inputs.infile = infile
-        realcmd =  ' '.join([better.cmd, infile, outpath, settings[0]])
+        better.inputs.infile = tmp_infile
+        realcmd =  ' '.join([better.cmd, tmp_infile, outpath, settings[0]])
         yield assert_equal, better.cmdline, realcmd
 
 
