@@ -1346,9 +1346,43 @@ class NEW_CommandLine(NEW_BaseInterface):
         return first_args + all_args + last_args
 
 
-class MultiPath(traits.Either):
+class MultiPath(traits.List):
+    """ Abstract class - shared functionality of input and output MultiPath
+    """
+    
+    info_text = 'a list of paths'
+    
+    def __init__(self, trait  = None, value = None, **metadata):
+        if trait:
+            self.info_text = 'a list of %s' % trait.info()
+        super(MultiPath, self).__init__(trait, value,
+                                        **metadata)
+        
+    def get(self, object, name):
+        raise NotImplementedError()
+    
+    def set(self, object, name, value):
+        self.set_value(object, name,self.validate(object,name,value))
+    
+    def validate(self, object, name, value):
+        if not isdefined(value):
+            return value
+        newvalue = value
+        if isinstance(value, str):
+            newvalue = [value]
+        value = super(MultiPath, self).validate(object, name, newvalue)
+        
+        if len(value) > 0:
+            return value
+
+        self.error( object, name, value )
+
+class OutputMultiPath(MultiPath):
     """ Implements a user friendly traits that accepts one or more
-    paths to files or directories
+    paths to files or directories. This is the output version which 
+    return a single string whenever possible (when it was set to a 
+    single value or a list of length 1). Default value of this trait
+    is _Undefined. It does not accept empty lists.
 
     XXX This should only be used as a final resort. We should stick to
     established Traits to the extent possible.
@@ -1359,8 +1393,8 @@ class MultiPath(traits.Either):
     >>> class A(traits.HasTraits):
     ...     foo = MultiPath(File(exists=False))
     >>> a = A()
-    >>> a
-    []
+    >>> a.foo
+    <undefined>
     
     >>> a.foo = '/software/temp/foo.txt'
     >>> a.foo
@@ -1375,8 +1409,51 @@ class MultiPath(traits.Either):
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
     
     """
-    info_text = 'a list of paths'
-    
-    def __init__(self, trait  = None, **metadata):
-        super(MultiPath, self).__init__(traits.List(trait), trait, **metadata)
+       
+    def get(self, object, name):
+        value = self.get_value(object, name)
+        if len(value) == 0:
+            return _Undefined()
+        elif len(value)==1:
+            return value[0]
+        else:
+            return value
+        
+class InputMultiPath(MultiPath):
+    """ Implements a user friendly traits that accepts one or more
+    paths to files or directories. This is the input version which 
+    always returns a list. Default value of this trait
+    is _Undefined. It does not accept empty lists.
 
+    XXX This should only be used as a final resort. We should stick to
+    established Traits to the extent possible.
+
+    XXX This needs to be vetted by somebody who understands traits
+
+    >>> from nipype.interfaces.base import MultiPath
+    >>> class A(traits.HasTraits):
+    ...     foo = MultiPath(File(exists=False))
+    >>> a = A()
+    >>> a.foo
+    <undefined>
+    
+    >>> a.foo = '/software/temp/foo.txt'
+    >>> a.foo
+    ['/software/temp/foo.txt']
+
+    >>> a.foo = ['/software/temp/foo.txt']
+    >>> a.foo
+    ['/software/temp/foo.txt']
+
+    >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
+    >>> a.foo
+    ['/software/temp/foo.txt', '/software/temp/goo.txt']
+    
+    """
+
+    def get(self, object, name):
+        value = self.get_value(object, name)
+        if len(value) == 0:
+            return _Undefined()
+        else:
+            return value

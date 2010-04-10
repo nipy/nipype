@@ -9,7 +9,7 @@ import tempfile
 import numpy as np
 
 from nipype.interfaces.base import CommandLine, InterfaceResult, Bunch,\
-    CommandLineInputSpec, isdefined
+    CommandLineInputSpec, isdefined, InputMultiPath
 from nipype.interfaces.base import (NEW_CommandLine, InterfaceResult, traits,
                                     TraitedSpec, File, Directory)
 
@@ -150,7 +150,7 @@ class MatlabInputSpec(CommandLineInputSpec):
                           usedefault=True)
     script_file = File('pyscript.m', usedefault=True,
                               desc='Name of file to write m-code to')
-    paths   = traits.List(Directory, desc='Paths to add to matlabpath')
+    paths   = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
 
 class NEW_MatlabCommand(NEW_CommandLine):
     """Interface that runs matlab code

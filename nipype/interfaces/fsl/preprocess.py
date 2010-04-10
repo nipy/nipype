@@ -14,7 +14,8 @@ import warnings
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
 from nipype.interfaces.fsl.base import NEW_FSLCommand, FSLTraitedSpec
-from nipype.interfaces.base import Bunch, TraitedSpec, isdefined, File
+from nipype.interfaces.base import Bunch, TraitedSpec, isdefined, File,\
+    InputMultiPath
 from nipype.utils.filemanip import fname_presuffix, list_to_filename
 from nipype.utils.docparse import get_doc
 from nipype.utils.misc import container_to_string, is_container
@@ -150,7 +151,7 @@ class Bet(NEW_FSLCommand):
 
 class FastInputSpec(FSLTraitedSpec):
     """ Defines inputs (trait classes) for Fast """
-    infiles = traits.List(File(exists=True),
+    infiles = InputMultiPath(File(exists=True),
                           desc = 'image, or multi-channel set of images, ' \
                               'to be segmented',
                           argstr='%s', position=-1, mandatory=True)
@@ -184,7 +185,7 @@ class FastInputSpec(FSLTraitedSpec):
     init_transform = File(exists=True, desc = '<standard2input.mat> initialise'\
                               ' using priors',
                           argstr = '-a %s')
-    other_priors = traits.List(File, desc = 'alternative prior images',
+    other_priors = InputMultiPath(File(exist=True), desc = 'alternative prior images',
                                argstr = '-A %s', minlen=3, maxlen=3)
     nopve = traits.Bool(desc = 'turn off PVE (partial volume estimation)',
                         argstr = '--nopve')

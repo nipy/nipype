@@ -18,7 +18,7 @@ import scipy.io as sio
 from nipype.interfaces.spm import SpmMatlabCommandLine
 from nipype.interfaces.spm.base import NEW_SPMCommand
 from nipype.interfaces.base import Bunch, BaseInterfaceInputSpec, traits,\
-    TraitedSpec, isdefined, File, Directory
+    TraitedSpec, isdefined, File, Directory, OutputMultiPath, InputMultiPath
 from nipype.utils.filemanip import (filename_to_list, list_to_filename,
                                     loadflat)
 from nipype.utils.spm_docs import grab_doc
@@ -184,7 +184,7 @@ class EstimateModelInputSpec(BaseInterfaceInputSpec):
 
 class EstimateModelOutputSpec(TraitedSpec):
     mask_image = File(exists=True, desc='binary mask to constrain estimation')
-    beta_images = traits.List(File(exists=True), desc ='design parameter estimates')
+    beta_images = OutputMultiPath(File(exists=True), desc ='design parameter estimates')
     residual_image = File(exists=True, desc = 'Mean-squared image of the residuals')
     RPVimage = File(exists=True, desc = 'Resels per voxel image')
     spm_mat_file = File(exist=True, desc = 'Updated SPM mat file')
@@ -237,7 +237,7 @@ class EstimateModel(NEW_SPMCommand):
         outputs['spm_mat_file'] = spm
         return outputs
 
-class EstimateContrastInputsSpec(BaseInterfaceInputSpec):
+class EstimateContrastInputSpec(BaseInterfaceInputSpec):
     spm_mat_file = File(exists=True, field='spmmat', desc='Absolute path to SPM.mat', copyfile=True)
     contrasts = traits.List(
         traits.Either(traits.Tuple(traits.Str,
@@ -265,16 +265,15 @@ class EstimateContrastInputsSpec(BaseInterfaceInputSpec):
     session list is None or not provided, all sessions are used. For F
     contrasts, the condition list should contain previously defined
     T-contrasts.""")
-    beta_images = traits.List(File(exists=True), 'Parameter estimates of the design matrix', copyfile=False)
+    beta_images = InputMultiPath(File(exists=True), desc = 'Parameter estimates of the design matrix', copyfile=False)
     residual_image = File(exists=True, desc='Mean-squared image of the residuals', copyfile=False)
-    RPVimage = File(exists=True, desc='Resels per voxel image', copyfile=False)
     ignore_derivs = traits.Bool(True, desc='ignore derivatives for estimation', usedefault=True)
 
 class EstimateContrastOutputSpec(TraitedSpec):
-    con_images = traits.List(File(exists=True), desc='contrast images from a t-contrast')
-    spmT_images = traits.List(File(exists=True), desc='stat images from a t-contrast')
-    ess_images = traits.List(File(exists=True), desc='contrast images from an F-contrast')
-    spmF_images = traits.List(File(exists=True), desc='stat images from an F-contrast')
+    con_images = OutputMultiPath(File(exists=True), desc='contrast images from a t-contrast')
+    spmT_images = OutputMultiPath(File(exists=True), desc='stat images from a t-contrast')
+    ess_images = OutputMultiPath(File(exists=True), desc='contrast images from an F-contrast')
+    spmF_images = OutputMultiPath(File(exists=True), desc='stat images from an F-contrast')
     spm_mat_file = File(exist=True, desc = 'Updated SPM mat file')
 
 class EstimateContrast(NEW_SPMCommand):
@@ -294,7 +293,7 @@ class EstimateContrast(NEW_SPMCommand):
     
     """
     
-    input_spec = EstimateContrastInputsSpec
+    input_spec = EstimateContrastInputSpec
     output_spec = EstimateContrastOutputSpec
     _jobtype = 'stats'
     _jobname = 'con'
@@ -377,11 +376,11 @@ class EstimateContrast(NEW_SPMCommand):
         return outputs
 
 class OneSampleTTestInputSpec(BaseInterfaceInputSpec):
-    con_images = traits.List(File(exist=True, desc = 'List of contrast images'), mandatory=True)
+    con_images = InputMultiPath(File(exist=True, desc = 'List of contrast images'), mandatory=True)
     
 class OneSampleTTestOutputSpec(TraitedSpec):
-    con_images = traits.List(File(exist=True, desc = 'contrast images from a t-contrast'))
-    spmT_images = traits.List(File(exist=True, desc = 'stat images from a t-contrast'))
+    con_images = OutputMultiPath(File(exist=True, desc = 'contrast images from a t-contrast'))
+    spmT_images = OutputMultiPath(File(exist=True, desc = 'stat images from a t-contrast'))
 
 class OneSampleTTest(NEW_SPMCommand):
     """use spm to perform a one-sample ttest on a set of images

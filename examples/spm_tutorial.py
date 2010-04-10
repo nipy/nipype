@@ -281,8 +281,7 @@ l1pipeline.connect([(datasource,realign,[('func','infile')]),
                   (level1design,level1estimate,[('spm_mat_file','spm_design_file')]),
                   (level1estimate,contrastestimate,[('spm_mat_file','spm_mat_file'),
                                                   ('beta_images','beta_images'),
-                                                  ('residual_image','residual_image'),
-                                                  ('RPVimage','RPVimage')]),
+                                                  ('residual_image','residual_image')]),
                   ])
 
 

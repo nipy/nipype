@@ -28,9 +28,10 @@ from nipype.interfaces.spm import (SpmMatlabCommandLine, scans_for_fname,
                                    scans_for_fnames)
 from nipype.interfaces.spm import (NEW_SPMCommand, scans_for_fname,
                                    scans_for_fnames, logger)
-from nipype.interfaces.base import Bunch, BaseInterfaceInputSpec, isdefined
+from nipype.interfaces.base import Bunch, BaseInterfaceInputSpec, isdefined,\
+    OutputMultiPath
 
-from nipype.interfaces.base import TraitedSpec, traits, MultiPath, File
+from nipype.interfaces.base import TraitedSpec, traits, InputMultiPath, File
 
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list, 
                                     list_to_filename, FileNotFoundError)
@@ -138,7 +139,7 @@ class SliceTiming(SpmMatlabCommandLine):
 #
 ####################################
 class RealignInputSpec(BaseInterfaceInputSpec):
-    infile = MultiPath(File(exists=True), field='data', mandatory=True,
+    infile = InputMultiPath(File(exists=True), field='data', mandatory=True,
                          desc='list of filenames to realign', copyfile=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
                           desc='one of: estimate, write, estwrite',
@@ -171,8 +172,8 @@ class RealignInputSpec(BaseInterfaceInputSpec):
 
 class RealignOutputSpec(TraitedSpec):
     mean_image = File(exists=True, desc='Mean image file from the realignment')
-    realigned_files = MultiPath(File(exists=True), desc='Realigned files')
-    realignment_parameters = MultiPath(File(exists=True),
+    realigned_files = OutputMultiPath(File(exists=True), desc='Realigned files')
+    realignment_parameters = OutputMultiPath(File(exists=True),
                     desc='Estimated translation and rotation parameters')
 
 class Realign(NEW_SPMCommand):
@@ -236,12 +237,12 @@ class Realign(NEW_SPMCommand):
 class CoregisterInputSpec(BaseInterfaceInputSpec):
     target = File(exists=True, field='ref', mandatory=True,
                          desc='reference file to register to', copyfile=False)
-    source = MultiPath(File(exists=True), field='source',
+    source = InputMultiPath(File(exists=True), field='source',
                          desc='file to register to target', copyfile=True)
     jobtype = traits.Enum('estwrite','estimate', 'write',
                           desc='one of: estimate, write, estwrite',
                           usedefault=True)
-    apply_to_files = traits.List(File(exists=True), field='other',
+    apply_to_files = InputMultiPath(File(exists=True), field='other',
                                  desc='files to apply transformation to',
                                  copyfile=True)
     cost_function = traits.Enum('mi', 'nmi', 'ecc', 'ncc',
@@ -265,9 +266,9 @@ class CoregisterInputSpec(BaseInterfaceInputSpec):
                              desc = 'True/False mask output image')
 
 class CoregisterOutputSpec(TraitedSpec):
-    coregistered_source = MultiPath(File(exists=True),
+    coregistered_source = OutputMultiPath(File(exists=True),
                                       desc = 'Coregistered source files')
-    coregistered_files = MultiPath(File(exists=True), desc = 'Coregistered other files')
+    coregistered_files = OutputMultiPath(File(exists=True), desc = 'Coregistered other files')
     
 
 class Coregister(NEW_SPMCommand):
@@ -327,10 +328,10 @@ class Coregister(NEW_SPMCommand):
 
 class NormalizeInputSpec(BaseInterfaceInputSpec):
     template = File(exists=True, field='eoptions.template', desc='template file to normalize to', copyfile=False)
-    source = MultiPath(File(exists=True), field='subj.source', desc='file to normalize to template', mandatory = True, copyfile=True)
+    source = InputMultiPath(File(exists=True), field='subj.source', desc='file to normalize to template', mandatory = True, copyfile=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
                           desc='one of: estimate, write, estwrite (opt, estwrite)', usedefault=True)
-    apply_to_files = MultiPath(File(exists=True), field='subj.resample',
+    apply_to_files = InputMultiPath(File(exists=True), field='subj.resample',
                                desc='files to apply transformation to (opt)', copyfile=True)
     parameter_file = File(field='subj.matname',
                                   desc='normalization parameter file*_sn.mat', copyfile=False)
@@ -361,9 +362,9 @@ class NormalizeInputSpec(BaseInterfaceInputSpec):
 
     
 class NormalizeOutputSpec(TraitedSpec):
-    normalization_parameters = MultiPath(File(exists=True), desc='MAT files containing the normalization parameters')
-    normalized_source = MultiPath(File(exists=True), desc='Normalized source files')
-    normalized_files = MultiPath(File(exists=True), desc = 'Normalized other files')
+    normalization_parameters = OutputMultiPath(File(exists=True), desc='MAT files containing the normalization parameters')
+    normalized_source = OutputMultiPath(File(exists=True), desc='Normalized source files')
+    normalized_files = OutputMultiPath(File(exists=True), desc = 'Normalized other files')
 
 class Normalize(NEW_SPMCommand):
     """use spm_normalise for warping an image to a template
@@ -592,12 +593,12 @@ class Segment(SpmMatlabCommandLine):
         return outputs
 
 class SmoothInputSpec(BaseInterfaceInputSpec):
-    infile = MultiPath(File(exists=True), field='data', desc='list of files to smooth', madatrory=True, copyfile=False)
+    infile = InputMultiPath(File(exists=True), field='data', desc='list of files to smooth', madatrory=True, copyfile=False)
     fwhm = traits.Either(traits.List(traits.Float(), minlen = 3, maxlen = 3),traits.Float(), field= 'fwhm', desc = '3-list of fwhm for each dimension (opt)')
     data_type =  traits.Int(field = 'dtype', desc = 'Data type of the output images (opt)')
 
 class SmoothOutputSpec(TraitedSpec):
-    smoothed_files = MultiPath(File(exists=True), desc ='smoothed files')
+    smoothed_files = OutputMultiPath(File(exists=True), desc ='smoothed files')
 
 class Smooth(NEW_SPMCommand):
     """use spm_smooth for 3D Gaussian smoothing of image volumes.

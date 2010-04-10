@@ -17,7 +17,8 @@ import numpy as np
 from nipype.interfaces.fsl.base import FSLCommand, FSLInfo, NEW_FSLCommand,\
     FSLTraitedSpec
 from nipype.utils.filemanip import list_to_filename
-from nipype.interfaces.base import Bunch, traits, TraitedSpec, isdefined
+from nipype.interfaces.base import Bunch, traits, TraitedSpec, isdefined,\
+    OutputMultiPath
 from nipype.utils.docparse import get_doc
 
 warn = warnings.warn
@@ -183,7 +184,7 @@ class SplitInputSpec(FSLTraitedSpec):
     dimension = traits.Enum('t','x','y','z', argstr="-%s", position=2, desc="dimension along which the file will be split")
     
 class SplitOutputSpec(TraitedSpec):
-    outfiles = traits.List(traits.File(exists=True))
+    outfiles = OutputMultiPath(traits.File(exists=True))
 
 class Split(NEW_FSLCommand):
     """Uses FSL Fslsplit command to separate a volume into images in

@@ -18,8 +18,8 @@ from scipy.special import gammaln
 #from scipy.stats.distributions import gamma
 
 from nipype.externals.pynifti import load
-from nipype.interfaces.base import Bunch, InterfaceResult, Interface,\
-    NEW_BaseInterface, TraitedSpec, MultiPath, traits, isdefined,\
+from nipype.interfaces.base import Bunch, InterfaceResult,\
+    NEW_BaseInterface, TraitedSpec, InputMultiPath, traits, isdefined,\
     BaseInterfaceInputSpec, File
 from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix,
                                     filename_to_list, list_to_filename,
@@ -69,13 +69,14 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
                 kernel : list of convolution kernel
 
     """
-    realignment_parameters = traits.List(File(exists=True),
+    realignment_parameters = InputMultiPath(File(exists=True),
        desc = "Realignment parameters returned by motion correction algorithm",
                                          filecopy=False)
-    outlier_files = traits.List(File(exists=True),
+    outlier_files = InputMultiPath(File(exists=True),
          desc="Files containing scan outlier indices that should be tossed",
                                 filecopy=False)
-    functional_runs = MultiPath(trait=File(exists=True),
+    functional_runs = traits.Either(traits.List(traits.List(traits.File(exists=True))),
+                                    InputMultiPath(traits.File(exists=True)),        
                                   mandatory=True,
             desc="Data files for model. List of 4D files or list of" \
                                       "list of 3D files per session",

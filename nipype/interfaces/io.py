@@ -15,7 +15,7 @@ import shutil
 
 from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult,\
     NEW_Interface, TraitedSpec, traits, File, Directory, isdefined, BaseInterfaceInputSpec,\
-    NEW_BaseInterface, MultiPath
+    NEW_BaseInterface, OutputMultiPath
 from nipype.utils.filemanip import copyfiles, list_to_filename, filename_to_list
 
 class IOBase(NEW_BaseInterface):
@@ -95,7 +95,7 @@ class SubjectSource(IOBase):
         undefined_traits = {}
         if isdefined(self.inputs.subject_info):
             for key in self.inputs.subject_info.keys():
-                base.add_trait(key, MultiPath(File(exists=True), default=traits.Undefined))
+                base.add_trait(key, OutputMultiPath(File(exists=True), default=traits.Undefined))
                 undefined_traits[key] = traits.Undefined
             base.trait_set(trait_change_notify=False, **undefined_traits)
         return base
@@ -242,7 +242,7 @@ class DataGrabberInputSpec(BaseInterfaceInputSpec):
 """)
 
 class DataGrabberOutputSpec(TraitedSpec):
-    file_list = traits.List(File(exists=True), desc='list of files picked up by the grabber')
+    file_list = OutputMultiPath(File(exists=True), desc='list of files picked up by the grabber')
     
 class DataGrabber(NEW_BaseInterface):
     """ Generic datagrabber module that wraps around glob in an
