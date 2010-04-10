@@ -1323,7 +1323,7 @@ class NEW_CommandLine(NEW_BaseInterface):
         initial_args = {}
         final_args = {}
         metadata=dict(argstr=lambda t : t is not None)
-        for name, spec in self.inputs.traits(**metadata).items():
+        for name, spec in sorted(self.inputs.traits(**metadata).items()):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
