@@ -146,41 +146,52 @@ def test_fast():
         faster = fsl.Fast(**{name: settings[1]})
         yield assert_equal, faster.cmdline, ' '.join([faster.cmd, settings[0]])
 
+def setup_flirt():
+    ext = Info.outputtype_to_ext(Info.outputtype())
+    tmpdir = tempfile.mkdtemp()
+    _, infile = tempfile.mkstemp(suffix = ext, dir = tmpdir)
+    _, reffile = tempfile.mkstemp(suffix = ext, dir = tmpdir)
+    return tmpdir, infile, reffile
 
-#test flirt
+def teardown_flirt(tmpdir):
+    shutil.rmtree(tmpdir)
+
 def test_flirt():
+    tmpdir, infile, reffile = setup_flirt()
     flirter = fsl.Flirt()
     flirter.inputs.bins = 256
     flirter.inputs.cost = 'mutualinfo'
-    flirted = flirter.run(infile='infile', reference='reffile',
-                          outfile='outfile', outmatrix='outmat.mat')
-    flirt_est = flirter.run(infile='infile', reference='reffile',
-                            outfile=None, outmatrix='outmat.mat')
 
+    flirted = flirter.run(infile=infile, reference=reffile,
+                          outfile='outfile', outmatrix='outmat.mat')
+    flirt_est = flirter.run(infile=infile, reference=reffile,
+                            outfile=None, outmatrix='outmat.mat')
     yield assert_not_equal, flirter, flirted
     yield assert_not_equal, flirted, flirt_est
 
     yield assert_equal, flirter.cmd, 'flirt'
     yield assert_equal, flirter.inputs.bins, flirted.interface.inputs.bins
     yield assert_equal, flirter.inputs.cost, flirt_est.interface.inputs.cost
-    yield assert_equal, flirted.runtime.cmdline, \
-        'flirt -in infile -ref reffile -omat outmat.mat -out outfile ' \
-        '-bins 256 -cost mutualinfo'
+    realcmd = 'flirt -in %s -ref %s -omat outmat.mat -out outfile ' \
+        '-bins 256 -cost mutualinfo' % (infile, reffile)
+    yield assert_equal, flirted.runtime.cmdline, realcmd
 
     flirter = fsl.Flirt()
     # infile not specified
     yield assert_raises, AttributeError, flirter.run
-    flirter.inputs.infile = 'foo.nii'
+    flirter.inputs.infile = infile
     # reference not specified
     yield assert_raises, AttributeError, flirter.run
-    flirter.inputs.reference = 'mni152.nii'
+    flirter.inputs.reference = reffile
     res = flirter.run()
-    realcmd = 'flirt -in foo.nii -ref mni152.nii'
+    realcmd = 'flirt -in %s -ref %s' % (infile, reffile)
     yield assert_equal, res.interface.cmdline, realcmd
     inputs = dict(flags='-v')
     res = flirter.run(**inputs)
-    realcmd = 'flirt -in foo.nii -ref mni152.nii -v'
+    realcmd = 'flirt -in %s -ref %s -v' % (infile, reffile)
     yield assert_equal, res.interface.cmdline, realcmd
+
+    teardown_flirt(tmpdir)
 
 def test_applyxfm():
     # ApplyXFM subclasses Flirt.
