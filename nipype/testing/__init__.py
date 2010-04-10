@@ -18,3 +18,5 @@ else:
 from utils import *
 from enthought.traits.api import TraitError
 
+# import Fernando's lightunit for parametric tests
+from lightunit import ParametricTestCase, parametric
