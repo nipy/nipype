@@ -165,7 +165,7 @@ def test_flirt():
     flirted = flirter.run(infile=infile, reference=reffile,
                           outfile='outfile', outmatrix='outmat.mat')
     flirt_est = flirter.run(infile=infile, reference=reffile,
-                            outfile=None, outmatrix='outmat.mat')
+                            outmatrix='outmat.mat')
     yield assert_not_equal, flirter, flirted
     yield assert_not_equal, flirted, flirt_est
 
@@ -186,7 +186,7 @@ def test_flirt():
     res = flirter.run()
     realcmd = 'flirt -in %s -ref %s' % (infile, reffile)
     yield assert_equal, res.interface.cmdline, realcmd
-    inputs = dict(flags='-v')
+    inputs = dict(args='-v')
     res = flirter.run(**inputs)
     realcmd = 'flirt -in %s -ref %s -v' % (infile, reffile)
     yield assert_equal, res.interface.cmdline, realcmd

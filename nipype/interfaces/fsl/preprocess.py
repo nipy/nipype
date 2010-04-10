@@ -502,10 +502,10 @@ class FlirtInputSpec(FSLTraitedSpec):
     # line.
     reference = File(exists = True, argstr = '-ref %s', mandatory = True,
                      position = 1, desc = 'reference file')
-    outfile = File(argstr = '-out', desc = 'registered output file')
-    outmatrix = File(argstr = '-omat', desc = 'output affine matrix in 4x4 ' \
-                         'asciii format')
-    inmatrix = File(argstr = '-init', desc = 'input 4x4 affine matrix')
+    outfile = File(argstr = '-out %s', desc = 'registered output file')
+    outmatrix = File(argstr = '-omat %s',
+                     desc = 'output affine matrix in 4x4 asciii format')
+    inmatrix = File(argstr = '-init %s', desc = 'input 4x4 affine matrix')
 
     datatype = traits.Enum('char', 'short', 'int', 'float', 'double',
                            argstr = '-datatype %s',
@@ -581,7 +581,7 @@ class FlirtOutputSpec(TraitedSpec):
 
 # XXX Using NEW_Flirt since the tests for Flirt are incomplete and
 # there's few elements I'm unsure about.
-class NEW_Flirt(NEW_FSLCommand):
+class Flirt(NEW_FSLCommand):
     _cmd = 'flirt'
     input_spec = FlirtInputSpec
     output_spec = FlirtOutputSpec
@@ -597,7 +597,7 @@ class NEW_Flirt(NEW_FSLCommand):
         return outputs
 
 
-class Flirt(FSLCommand):
+class OLD_Flirt(FSLCommand):
     """Use FSL FLIRT for coregistration.
 
     For complete details, see the `FLIRT Documentation.
