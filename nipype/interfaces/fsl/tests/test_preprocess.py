@@ -3,7 +3,7 @@ import tempfile
 import shutil
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
-                            with_setup, TraitError)
+                            with_setup, TraitError, parametric)
 
 import nipype.interfaces.fsl.preprocess as fsl
 from nipype.interfaces.fsl import Info
@@ -156,6 +156,7 @@ def setup_flirt():
 def teardown_flirt(tmpdir):
     shutil.rmtree(tmpdir)
 
+@parametric
 def test_flirt():
     tmpdir, infile, reffile = setup_flirt()
     flirter = fsl.Flirt()
@@ -166,30 +167,30 @@ def test_flirt():
                           outfile='outfile', outmatrix='outmat.mat')
     flirt_est = flirter.run(infile=infile, reference=reffile,
                             outmatrix='outmat.mat')
-    yield assert_not_equal, flirter, flirted
-    yield assert_not_equal, flirted, flirt_est
+    yield assert_not_equal(flirter, flirted)
+    yield assert_not_equal(flirted, flirt_est)
 
-    yield assert_equal, flirter.cmd, 'flirt'
-    yield assert_equal, flirter.inputs.bins, flirted.interface.inputs.bins
-    yield assert_equal, flirter.inputs.cost, flirt_est.interface.inputs.cost
-    realcmd = 'flirt -in %s -ref %s -omat outmat.mat -out outfile ' \
-        '-bins 256 -cost mutualinfo' % (infile, reffile)
-    yield assert_equal, flirted.runtime.cmdline, realcmd
+    yield assert_equal(flirter.cmd, 'flirt')
+    yield assert_equal(flirter.inputs.bins, flirted.interface.inputs.bins)
+    yield assert_equal(flirter.inputs.cost, flirt_est.interface.inputs.cost)
+    realcmd = 'flirt -in %s -ref %s -bins 256 -cost mutualinfo ' \
+        '-out outfile -omat outmat.mat' % (infile, reffile)
+    yield assert_equal(flirted.runtime.cmdline, realcmd)
 
     flirter = fsl.Flirt()
     # infile not specified
-    yield assert_raises, AttributeError, flirter.run
+    yield assert_raises(ValueError, flirter.run)
     flirter.inputs.infile = infile
     # reference not specified
-    yield assert_raises, AttributeError, flirter.run
+    yield assert_raises(ValueError, flirter.run)
     flirter.inputs.reference = reffile
     res = flirter.run()
     realcmd = 'flirt -in %s -ref %s' % (infile, reffile)
-    yield assert_equal, res.interface.cmdline, realcmd
+    yield assert_equal(res.interface.cmdline, realcmd)
     inputs = dict(args='-v')
     res = flirter.run(**inputs)
     realcmd = 'flirt -in %s -ref %s -v' % (infile, reffile)
-    yield assert_equal, res.interface.cmdline, realcmd
+    yield assert_equal(res.interface.cmdline, realcmd)
 
     teardown_flirt(tmpdir)
 
