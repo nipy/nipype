@@ -18,6 +18,7 @@ import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
 import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.fsl as fsl          # fsl
+import nipype.interfaces.utility as util     # utility 
 import nipype.pipeline.node_wrapper as nw    # nodes for pypelines
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
@@ -73,9 +74,23 @@ nifti filename through a template '%s.nii'. So 'f3' would become
 # Specify the location of the data.
 data_dir = os.path.abspath('data')
 # Specify the subject directories
-subject_list = ['s1','s3']
+subject_list = ['s1']
 # Map field names to individual subject runs.
-info = dict(func=['f3','f5','f7','f10'], struct=['struct'])
+info = dict(func=[['subject_id', ['f3','f5','f7','f10']]],
+            struct=[['subject_id','struct']])
+
+infosource = nw.NodeWrapper(interface=util.IdentityInterface(fields=['subject_id']))
+
+"""Here we set up iteration over all the subjects. The following line
+is a particular example of the flexibility of the system.  The
+``datasource`` attribute ``iterables`` tells the pipeline engine that
+it should repeat the analysis on each of the items in the
+``subject_list``. In the current example, the entire first level
+preprocessing and estimation will be repeated for each subject
+contained in subject_list.
+"""
+
+infosource.iterables = ('subject_id', subject_list)
 
 """
 Preprocessing pipeline nodes
@@ -88,22 +103,13 @@ and provides additional housekeeping and pipeline specific
 functionality.
 """
 
-datasource = nw.NodeWrapper(interface=nio.SubjectSource())
+datasource = nw.NodeWrapper(interface=nio.DataGrabber(infields=['subject_id'],
+                                                      outfields=['func', 'struct']),
+                            name = 'datasource')
 datasource.inputs.base_directory = data_dir
-datasource.inputs.file_layout = '%s.nii'
-datasource.inputs.subject_info = info
+datasource.inputs.template = '%s/%s.nii'
+datasource.inputs.template_args = info
 
-
-"""Here we set up iteration over all the subjects. The following line
-is a particular example of the flexibility of the system.  The
-``datasource`` attribute ``iterables`` tells the pipeline engine that
-it should repeat the analysis on each of the items in the
-``subject_list``. In the current example, the entire first level
-preprocessing and estimation will be repeated for each subject
-contained in subject_list.
-"""
-
-datasource.iterables = ('subject_id', subject_list)
 
 """Use :class:`nipype.interfaces.spm.Realign` for motion correction
 and register all images to the mean image.
@@ -259,14 +265,15 @@ the processing nodes.
 l1pipeline = pe.Pipeline()
 l1pipeline.config['workdir'] = os.path.abspath('spm/workingdir')
 
-l1pipeline.connect([(datasource,realign,[('func','infile')]),
+l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
+                  (datasource,realign,[('func','infile')]),
                   (realign,coregister,[('mean_image', 'source'),
                                        ('realigned_files','apply_to_files')]),
 		  (datasource,coregister,[('struct', 'target')]),
 		  (datasource,normalize,[('struct', 'source')]),
 		  (coregister, normalize, [('coregistered_files','apply_to_files')]),
 		  (normalize, smooth, [('normalized_files', 'infile')]),
-                  (datasource,modelspec,[('subject_id','subject_id'),
+                  (infosource,modelspec,[('subject_id','subject_id'),
                                          (('subject_id', subjectinfo),
                                           'subject_info')]),
                   (realign,modelspec,[('realignment_parameters','realignment_parameters')]),
@@ -305,12 +312,15 @@ out, then a sub-directory with the name 'mean' would be created and
 the mean image would be copied to that directory.
 """
 
-datasink = nw.NodeWrapper(interface=nio.DataSink(),diskbased=False)
-#datasink.inputs.base_directory = os.path.abspath('spm/l1output')
-datasink.inputs.subject_directory = os.path.abspath('spm/l1output')
+datasink = nw.NodeWrapper(interface=nio.DataSink())
+datasink.inputs.base_directory = os.path.abspath('spm/l1output')
+
+def getstripdir(subject_id):
+    return os.path.join(os.path.abspath('spm/workingdir'),'_subject_id_%s' % subject_id)
 
 # store relevant outputs from various stages of the 1st level analysis
-l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
+l1pipeline.connect([(infosource,datasink,[('subject_id','container'),
+                                          (('subject_id', getstripdir),'strip_dir')]),
                     (realign,datasink,[('mean_image','realign.@mean'),
                                        ('realignment_parameters','realign.@param')]),
                     (art,datasink,[('outlier_files','art.@outliers'),
@@ -322,8 +332,7 @@ l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
                                               ('residual_image','model.@res'),
                                               ('RPVimage','model.@rpv')]),
                     (contrastestimate,datasink,[('con_images','contrasts.@con'),
-                                                ('spmT_images','contrasts.@T'),
-                                                ('parameterization','parameterization')]),
+                                                ('spmT_images','contrasts.@T')]),
                     ])
 
 
@@ -339,13 +348,11 @@ contrasts.
 
 # collect all the con images for each contrast.
 contrast_ids = range(1,len(contrasts)+1)
-l2source = nw.NodeWrapper(nio.DataGrabber())
-l2source.inputs.file_template=os.path.abspath('spm/l1output/*/_fwhm_%d/con*/con_%04d.img')
-#l2source.inputs.template_argnames=['fwhm','con']
+l2source = nw.NodeWrapper(nio.DataGrabber(infields=['fwhm', 'con']))
+l2source.inputs.template=os.path.abspath('spm/l1output/*/_fwhm_%d/con*/con_%04d.img')
 # iterate over all contrast images
-#l2source.iterables = [('fwhm',[4,8]),
-#                      ('con',contrast_ids)]
-l2source.iterables = ('template_argtuple', [(fwhm, id) for id in contrast_ids for fwhm in fwhmlist])
+l2source.iterables = [('fwhm',fwhmlist),
+                      ('con',contrast_ids)]
 
 
 """Use :class:`nipype.interfaces.spm.OneSampleTTest` to perform a
@@ -379,4 +386,4 @@ function needs to be called.
 
 if __name__ == '__main__':
     l1pipeline.run()
-    l2pipeline.run()
+    #l2pipeline.run()

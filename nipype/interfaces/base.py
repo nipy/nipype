@@ -809,7 +809,7 @@ class OptMapCommand(CommandLine):
 #
 #####################################################################
 
-class TraitedSpec(traits.HasStrictTraits):
+class TraitedSpec(traits.HasTraits):
     """Provide a few methods necessary to support nipype interface api
 
     The inputs attribute of interfaces call certain methods that are not
@@ -843,7 +843,39 @@ class TraitedSpec(traits.HasStrictTraits):
         self.trait_set(trait_change_notify=False, **undefined_traits)
         self._generate_handlers()
         self.set(**kwargs)
-        
+
+    def __deepcopy__(self, memo):
+        """ bug in deepcopy for HasTraits results in weird cloning behavior for
+        added traits
+        """
+        id_self = id(self)
+        if id_self in memo:
+            return memo[id_self]
+        dup_dict = deepcopy(self.get(), memo)
+        # access all keys
+        for key in self.copyable_trait_names():
+            value = getattr(self, key)
+        # clone once
+        dup = self.clone_traits(memo=memo)
+        for key in self.copyable_trait_names():
+            try:
+                value = getattr(dup, key)
+            except:
+                pass
+        # clone twice
+        dup = self.clone_traits(memo=memo)
+        dup.set(**dup_dict)
+        return dup
+        """
+        for key in self.traits():
+            if key in ['trait_added', 'trait_modified']:
+                # Skip these trait api functions
+                continue
+            dup_dict[key] = deepcopy(getattr(self, key), memo)
+        dup = self.clone_traits()
+        return self.clone_traits()
+        """
+
     def items(self):
         """ Name, trait generator for user modifiable traits
         """

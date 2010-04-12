@@ -18,6 +18,15 @@ from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResul
     NEW_BaseInterface, OutputMultiPath
 from nipype.utils.filemanip import copyfiles, list_to_filename, filename_to_list
 
+def add_traits(base, names):
+    undefined_traits = {}
+    for key in names:
+        print "adding trait", key
+        base.add_trait(key, traits.Any)
+        undefined_traits[key] = traits.Undefined
+    base.trait_set(trait_change_notify=False, **undefined_traits)
+    return base
+
 class IOBase(NEW_BaseInterface):
 
     def _run_interface(self, runtime):
@@ -57,12 +66,16 @@ class DataSink(IOBase):
 
     def _get_dst(self, src):
         #print 'isrc', src
+        path, fname = os.path.split(src)
         if self.inputs.parameterization:
-            dst = src
+            dst = path
             if isdefined(self.inputs.strip_dir):
                 dst = dst.replace(self.inputs.strip_dir,'')
+            folders = [folder for folder in dst.split(os.path.sep) if folder.startswith('_')]
+            dst = os.path.sep.join(folders)
+            if fname:
+                dst = os.path.join(dst,fname)
         else:
-            path, fname = os.path.split(src)
             if fname:
                 dst = fname
             else:
@@ -81,7 +94,7 @@ class DataSink(IOBase):
         outdir = os.path.abspath(outdir)
         if isdefined(self.inputs.container):
             outdir = os.path.join(outdir, self.inputs.container)
-    
+        print outdir
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         for key,files in self.inputs._outputs.items():
@@ -124,7 +137,7 @@ class DataGrabberInputSpec(BaseInterfaceInputSpec):
             desc='Path to the base directory consisting of subject data.')
     template = traits.Str(mandatory=True,
              desc='Layout used to get files. relative to base directory if defined')
-    template_args = traits.Dict(traits.Enum('outfiles'),
+    template_args = traits.Dict(traits.Str,
                                 traits.List(traits.List),
                                 value=dict(outfiles=[]), usedefault=True,
                                 desc='Information to plug into template')
@@ -143,7 +156,7 @@ class DataGrabber(IOBase):
 
         Pick file foo/foo.nii from current directory
         >>> dg.inputs.template = '%s/%s.nii'
-        >>> dg.inputs.template_args['outfiles']=[('foo','foo')]
+        >>> dg.inputs.template_args['outfiles']=[['foo','foo']]
 
         Same thing but with dynamically created fields
         >>> dg = DataGrabber(infields=['arg1','arg2'])
@@ -182,20 +195,6 @@ class DataGrabber(IOBase):
         outfields: list of str
             Indicates output fields to be dynamically created
 
-<<<<<<< HEAD
-class DataGrabberOutputSpec(TraitedSpec):
-    file_list = OutputMultiPath(File(exists=True), desc='list of files picked up by the grabber')
-    
-class DataGrabber(NEW_BaseInterface):
-    """ Generic datagrabber module that wraps around glob in an
-        intelligent way for neuroimaging tasks 
-    """
-    input_spec = DataGrabberInputSpec
-    output_spec = DataGrabberOutputSpec
-    
-    def _run_interface(self, runtime):
-        return runtime
-=======
         See class examples for usage
         
         """
@@ -212,21 +211,24 @@ class DataGrabber(NEW_BaseInterface):
                                   traits.Dict(traits.Enum(outfields),
                                     desc="arguments that fit into template"))
             undefined_traits['field_template'] = traits.Undefined
-            self.inputs.remove_trait('template_args')
+            #self.inputs.remove_trait('template_args')
             outdict = {}
             for key in outfields:
                 outdict[key] = []
+            self.inputs.template_args =  outdict
+            """
             self.inputs.add_trait('template_args',
                       traits.Dict(traits.Enum(outfields),
                                   traits.List,
                                   value=outdict, usedefault=True,
                                   desc="arguments that fit into template"))
+            """
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
         
     def _add_output_traits(self, base):
         undefined_traits = {}
         for key in self.inputs.template_args.keys():
-            base.add_trait(key, MultiPath(File(exists=True), default=traits.Undefined))
+            base.add_trait(key, OutputMultiPath(File(exists=True)))
             undefined_traits[key] = traits.Undefined
         base.trait_set(trait_change_notify=False, **undefined_traits)
         return base
@@ -297,32 +299,32 @@ class FSSourceOutputSpec(TraitedSpec):
                 loc='mri')
     rawavg = File(exists=True, desc='averaged input images to recon-all',
                   loc='mri')
-    ribbon = MultiPath(File(exists=True), desc='cortical ribbon', loc='mri',
+    ribbon = OutputMultiPath(File(exists=True), desc='cortical ribbon', loc='mri',
                        altkey='*ribbon')
     wm = File(exists=True, desc='white matter image', loc='mri')
     wmparc = File(exists=True, desc='white matter parcellation', loc='mri')
-    curv = MultiPath(File(exists=True), desc='surface curvature files',
+    curv = OutputMultiPath(File(exists=True), desc='surface curvature files',
                      loc='surf')
-    inflated = MultiPath(File(exists=True), desc='inflated surface meshes',
+    inflated = OutputMultiPath(File(exists=True), desc='inflated surface meshes',
                          loc='surf')
-    pial = MultiPath(File(exists=True), desc='pial surface meshes', loc='surf')
-    smoothwm = MultiPath(File(exists=True), loc='surf',
+    pial = OutputMultiPath(File(exists=True), desc='pial surface meshes', loc='surf')
+    smoothwm = OutputMultiPath(File(exists=True), loc='surf',
                          desc='smooth white-matter surface meshes')
-    sphere = MultiPath(File(exists=True), desc='spherical surface meshes',
+    sphere = OutputMultiPath(File(exists=True), desc='spherical surface meshes',
                        loc='surf')
-    sulc = MultiPath(File(exists=True), desc='surface sulci files', loc='surf')
-    thickness = MultiPath(File(exists=True), loc='surf',
+    sulc = OutputMultiPath(File(exists=True), desc='surface sulci files', loc='surf')
+    thickness = OutputMultiPath(File(exists=True), loc='surf',
                           desc='surface thickness files')
-    volume = MultiPath(File(exists=True), desc='surface volume files', loc='surf')
-    white = MultiPath(File(exists=True), desc='white matter surface meshes',
+    volume = OutputMultiPath(File(exists=True), desc='surface volume files', loc='surf')
+    white = OutputMultiPath(File(exists=True), desc='white matter surface meshes',
                       loc='surf')
-    label = MultiPath(File(exists=True), desc='volume and surface label files',
+    label = OutputMultiPath(File(exists=True), desc='volume and surface label files',
                       loc='label', altkey='*label')
-    annot = MultiPath(File(exists=True), desc='surface annotation files',
+    annot = OutputMultiPath(File(exists=True), desc='surface annotation files',
                       loc='label', altkey='*annot')
-    aparc_aseg = MultiPath(File(exists=True), loc='mri', altkey='aparc*aseg',
+    aparc_aseg = OutputMultiPath(File(exists=True), loc='mri', altkey='aparc*aseg',
                            desc='aparc+aseg file')
-    sphere_reg = MultiPath(File(exists=True), loc='surf', altkey='sphere.reg',
+    sphere_reg = OutputMultiPath(File(exists=True), loc='surf', altkey='sphere.reg',
                            desc='spherical registration file')
 
 class FreeSurferSource(IOBase):

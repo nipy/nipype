@@ -3,31 +3,11 @@ from copy import deepcopy
 import numpy as np
 
 from nipype.utils.filemanip import (filename_to_list, list_to_filename)
-from nipype.interfaces.base import (Bunch, CommandLine, Interface,
-                                    load_template, InterfaceResult)
+from nipype.interfaces.base import traits, TraitedSpec, BaseInterfaceInputSpec
+from nipype.interfaces.io import IOBase, add_traits
 
-class BasicInterface(Interface):
-    """Basic interface class to merge inputs into a single list
-    """
-    def __init__(self):
-        self.inputs = Bunch()
-        
-    def get_input_info(self):
-        return []
-
-    def outputs(self):
-        return Bunch()
     
-    def run(self):
-        """Execute this module.
-        """
-        runtime = Bunch(returncode=0,
-                        stdout=None,
-                        stderr=None)
-        outputs=self.aggregate_outputs()
-        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
-
-class IdentityInterface(BasicInterface):
+class IdentityInterface(IOBase):
     """Basic interface class generates identity mappings
 
     Examples
@@ -46,25 +26,36 @@ class IdentityInterface(BasicInterface):
     'foo'
     
     """
+    input_spec = BaseInterfaceInputSpec
+    output_spec = TraitedSpec
+    
     def __init__(self, fields=None, **inputs):
-        self.inputs = Bunch()
-        if fields:
-            for f in fields:
-                setattr(self.inputs, f, None)
-    
-    def outputs(self):
-        outputs = Bunch()
-        for k,v in self.inputs.items():
-            setattr(outputs, k, None)
-        return outputs
-    
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        for k,v in self.inputs.items():
-            setattr(outputs, k, v)
+        super(IdentityInterface, self).__init__(**inputs)
+        if fields is None or not fields:
+            raise Exception('Identity Interface fields must be a non-empty list')
+        self._fields = fields
+        add_traits(self.inputs, fields)
+
+    def _add_output_traits(self, base):
+        undefined_traits = {}
+        for key in self._fields:
+            base.add_trait(key, traits.Any)
+            undefined_traits[key] = traits.Undefined
+        base.trait_set(trait_change_notify=False, **undefined_traits)
+        return base
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        for key in self._fields:
+            val = getattr(self.inputs, key)
+            if val:
+                outputs[key] = val
         return outputs
 
-class Merge(BasicInterface):
+class MergeOutputSpec(TraitedSpec):
+    out = traits.List(desc='Merged output')
+
+class Merge(IOBase):
     """Basic interface class to merge inputs into a single list
 
     Examples
@@ -80,24 +71,24 @@ class Merge(BasicInterface):
     [1, 2, 5, 3]
     
     """
-    def __init__(self, numinputs=0):
-        self.inputs = Bunch()
-        for i in range(numinputs):
-            setattr(self.inputs, 'in%d'%(i+1), None)
-        
-    def outputs(self):
-        return Bunch(out=[])
+    input_spec = BaseInterfaceInputSpec
+    output_spec = MergeOutputSpec
     
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        for k,v in self.inputs.items():
-            if v:
-                if isinstance(v, list):
-                    outputs.out.extend(v)
+    def __init__(self, numinputs=0, **inputs):
+        super(Merge, self).__init__(**inputs)
+        add_traits(self.inputs, ['in%d'%(i+1) for i in range(numinputs)])
+        
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        for value in self.inputs.get().values():
+            if value:
+                if isinstance(value, list):
+                    outputs['out'].extend(value)
                 else:
-                    outputs.out.append(v)
+                    outputs['out'].append(value)
         return outputs
 
+'''
 class Split(BasicInterface):
     """Basic interface class to split lists into multiple outputs
 
@@ -207,4 +198,4 @@ class SubstringMatch(BasicInterface):
         else:
             outputs.out = list_to_filename(outputs.out)
         return outputs
-
+'''
