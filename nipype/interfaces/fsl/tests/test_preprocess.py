@@ -218,11 +218,19 @@ def test_flirt():
             param = trait_spec.argstr % value
         cmdline = 'flirt -in %s -ref %s' % (infile, reffile)
         cmdline = ' '.join([cmdline, param])
-        obj = fsl.Flirt(infile = infile, reference = reffile)
-        setattr(obj.inputs, key, value)
-        yield assert_equal(obj.cmdline, cmdline)
+        flirter = fsl.Flirt(infile = infile, reference = reffile)
+        setattr(flirter.inputs, key, value)
+        yield assert_equal(flirter.cmdline, cmdline)
 
-
+    # Test OutputSpec
+    flirter = fsl.Flirt(infile = infile, reference = reffile)
+    flirter.inputs.outfile = fsl_name(flirter, 'foo')
+    flirter.inputs.outmatrix = fsl_name(flirter, 'bar')
+    outs = flirter.aggregate_outputs()
+    yield assert_equal(outs.outfile,
+                       os.path.join(os.getcwd(), flirter.inputs.outfile))
+    yield assert_equal(outs.outmatrix,
+                       os.path.join(os.getcwd(), flirter.inputs.outmatrix))
 
     teardown_flirt(tmpdir)
 
