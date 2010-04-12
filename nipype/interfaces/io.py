@@ -33,214 +33,156 @@ class IOBase(NEW_BaseInterface):
     def _add_output_traits(self, base):
         return base
     
-class SubjectSourceInputSpec(BaseInterfaceInputSpec):
-    base_directory = Directory(exists=True, mandatory=True,
-            desc='Path to the base directory consisting of subject data.')
-    subject_id = traits.Either(traits.Str, traits.Int, mandatory=True,
-                               desc = 'subject identifier')
-    file_layout = traits.Either(traits.Str, traits.DictStrStr,
-                                mandatory=True,
-                                desc='Layout used to get files.')
-    subject_info = traits.DictStrList(mandatory=True,
-                                      desc="""
-            Provides information about how to map subject run
-            numbers to the output fields.
-
-            `subject_id` are keys and the values are a list of tuples.
-            info[subject_id] = [([run_identifiers], output_fieldname), ...]
-            """)
-
-class SubjectSourceOutputSpec(TraitedSpec):
-    subject_id = traits.Either(traits.Str, traits.Int,
-                               desc = 'subject identifier')
-    subject_directory = Directory(exists=True,
-                                  desc='Path to the subject directory')
-
-class SubjectSource(IOBase):
-    """ Generic datasource module that takes a directory containing a
-        list of nifti files and provides a set of structured output
-        fields.
-
-        Examples
-        --------
-     
-        Here our experiment data is stored in our the directory
-        '/software/data'.  In the data directory we have a subdirectory
-        for our subject named 'S03'.  In the 'S03' directory we have
-        four types of data. In the `info` dictionary we create an
-        entry where the keys are the output fields and the value is a
-        list of run numbers corresponding to the template in layout.
-
-        >>> from nipype.interfaces.io import SubjectSource
-        >>> info = dict(dti=[7], bold=[14, 16, 18], mprage=[4], fieldmap=[5,6])
-        >>> ds = SubjectSource()
-        >>> ds.inputs.base_directory = '/software/data'
-        >>> ds.inputs.subject_id = 'S03'
-        >>> ds.inputs.file_layout = 'nii/s*-%d.nii'
-        >>> ds.inputs.subject_info = info
-        >>> 'dti' in ds._outputs().trait_names()
-        True
-
-        We can also have a different layout per field:
-        >>> ds.inputs.file_layout = dict(dti='dwiscans/*-%d.nii', bold='boldruns/*-%d.nii')
-        >>> info = dict(dti=[7], bold=[14, 16, 18])
-        >>> ds.inputs.subject_info = info
-        
-       """
-
-    input_spec = SubjectSourceInputSpec
-    output_spec = SubjectSourceOutputSpec
-
-    def _add_output_traits(self, base):
-        undefined_traits = {}
-        if isdefined(self.inputs.subject_info):
-            for key in self.inputs.subject_info.keys():
-                base.add_trait(key, OutputMultiPath(File(exists=True), default=traits.Undefined))
-                undefined_traits[key] = traits.Undefined
-            base.trait_set(trait_change_notify=False, **undefined_traits)
-        return base
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['subject_id'] = self.inputs.subject_id
-        subjdir = os.path.join(self.inputs.base_directory, str(self.inputs.subject_id))
-        outputs['subject_directory'] = subjdir 
-        for outfield, fileinfo in self.inputs.subject_info.items():
-            if isinstance(self.inputs.file_layout, str):
-                file_template = self.inputs.file_layout
-            else:
-                file_template = self.inputs.file_layout[outfield]
-            files_found = []
-            for val in fileinfo:
-                path = os.path.abspath(os.path.join(subjdir,
-                                                    file_template % val))
-                files_found.extend(glob.glob(path))
-            if fileinfo:
-                outputs[outfield] = list_to_filename(deepcopy(files_found))
-        return outputs
+class DataSinkInputSpec(BaseInterfaceInputSpec):
+    base_directory = Directory( 
+        desc='Path to the base directory consisting of subject data.')
+    container = traits.Str(desc = 'Folder within basedirectory in which to store output')
+    parameterization = traits.Bool(True, usedefault=True,
+                                   desc='store output in parameterized structure')
+    strip_dir = Directory(desc='path to strip out of filename')
+    _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
     
-class DataSink(Interface):
+    def __setattr__(self, key, value):
+        if key not in self.copyable_trait_names():
+            self._outputs[key] = value
+        else:
+            super(DataSinkInputSpec, self).__setattr__(key, value)
+    
+class DataSink(IOBase):
     """ Generic datasink module that takes a directory containing a
         list of nifti files and provides a set of structured output
         fields.
     """
-    
-    def __init__(self, *args, **inputs):
-        self._populate_inputs()
-        self.inputs.update(**inputs)
+    input_spec = DataSinkInputSpec
 
-    def inputs_help(self):
-        """
-            Parameters
-            ----------
-            (all default to None)
-
-            base_directory : /path/to/dir
-                Basedirectory consisting of subject data
-            subject_id: string or int
-                Subject identifier
-            subject_directory : /path/to/dir
-                Path to subject directory
-            parameterization : string
-                Includes parameterization for creating directory structure
-
-            Any fields that are set as lists will be copied to a
-            directory under subject_directory with the fieldname as a
-            new directory.
-
-        """
-        print self.inputs_help.__doc__
-        
-    def _populate_inputs(self):
-        self.inputs = Bunch(base_directory=None,
-                            parameterization=None,
-                            subject_directory=None,
-                            subject_template=None,
-                            subject_id=None)
-        self.input_keys = self.inputs.__dict__.keys()
-
-    def outputs(self):
-        """
-        """
-        return Bunch()
-    
-    def outputs_help(self):
-        """
-            No outputs 
-        """
-        print self.outputs.__doc__
-        
-    def aggregate_outputs(self):
-        return self.outputs()
-
-    def run(self, cwd=None):
-        """Execute this module.
-
-        cwd is just there to make things work for now
-        """
-        subjdir = self.inputs.subject_directory
-        if not subjdir:
-            #print self.inputs['subj_template'],self.inputs['subj_id']
-            if self.inputs.subject_template:
-                subjdir = self.inputs.subject_template % (self.inputs.subject_id)
-            else:
-                subjdir = self.inputs.subject_id
-            subjdir = os.path.join(self.inputs.base_directory,subjdir)
-        if subjdir is None:
-            raise Exception('Subject directory not provided')
-        outdir = subjdir
+    def _get_dst(self, src):
+        #print 'isrc', src
         if self.inputs.parameterization:
-            outdir = os.path.join(outdir,self.inputs.parameterization)
+            dst = src
+            if isdefined(self.inputs.strip_dir):
+                dst = dst.replace(self.inputs.strip_dir,'')
+        else:
+            path, fname = os.path.split(src)
+            if fname:
+                dst = fname
+            else:
+                dst = path.split(os.path.sep)[-1]
+        if dst[0] == os.path.sep:
+            dst = dst[1:]
+        #print 'dst', dst
+        return dst
+        
+    def _list_outputs(self):
+        """Execute this module.
+        """
+        outdir = self.inputs.base_directory
+        if not isdefined(outdir):
+            outdir = '.'
+        outdir = os.path.abspath(outdir)
+        if isdefined(self.inputs.container):
+            outdir = os.path.join(outdir, self.inputs.container)
+    
         if not os.path.exists(outdir):
             os.makedirs(outdir)
-        for k,v in self.inputs.items():
-            if k not in self.input_keys:
-                if v is not None:
-                    tempoutdir = outdir
-                    for d in k.split('.'):
-                        if d[0] == '@':
-                            continue
-                        tempoutdir = os.path.join(tempoutdir,d)
-                    if not os.path.exists(tempoutdir):
-                        os.makedirs(tempoutdir)
-                    for src in filename_to_list(self.inputs.get(k)):
-                        if os.path.isfile(src):
-                            copyfiles(src,tempoutdir,copy=True)
-                        elif os.path.isdir(src):
-                            dirname = os.path.split(os.path.join(src,''))[0]
-                            newdir = dirname.split(os.path.sep)[-1]
-                            newoutdir = os.path.join(tempoutdir,newdir)
-                            if os.path.exists(newoutdir):
-                                shutil.rmtree(newoutdir)
-                            shutil.copytree(dirname,newoutdir)
-        runtime = Bunch(returncode=0,
-                        stdout=None,
-                        stderr=None)
-        outputs=self.aggregate_outputs()
-        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+        for key,files in self.inputs._outputs.items():
+            files = filename_to_list(files)
+            outfiles = []
+            tempoutdir = outdir
+            for d in key.split('.'):
+                if d[0] == '@':
+                    continue
+                tempoutdir = os.path.join(tempoutdir,d)
+            if not os.path.exists(tempoutdir):
+                #print 'tmpoutdir', tempoutdir
+                os.makedirs(tempoutdir)
+            for src in filename_to_list(files):
+                #print 'src',src
+                src = os.path.abspath(src)
+                if os.path.isfile(src):
+                    dst = self._get_dst(src)
+                    dst = os.path.join(tempoutdir, dst)
+                    path,_ = os.path.split(dst)
+                    if not os.path.exists(path):
+                        #print 'path',path
+                        os.makedirs(path)
+                    #print 'copyfile',src, dst
+                    shutil.copyfile(src, dst)
+                elif os.path.isdir(src):
+                    dst = self._get_dst(os.path.join(src,''))
+                    dst = os.path.join(tempoutdir, dst)
+                    path,_ = os.path.split(dst)
+                    if os.path.exists(path):
+                        #print "removing: ", path
+                        shutil.rmtree(path)
+                    print "copydir", src, dst
+                    shutil.copytree(src, dst)
+        return None
 
 
 class DataGrabberInputSpec(BaseInterfaceInputSpec):
-    file_template = traits.Either(traits.Str(),File(), desc="template or filename")
-    template_argtuple = traits.Tuple(desc="arguments that fit into file_template")
-    template_argnames = traits.List(traits.Str(), desc="""provides names of inputs that will be used as
-                arguments to the template.
-                For example,
+    base_directory = Directory(exists=True,
+            desc='Path to the base directory consisting of subject data.')
+    template = traits.Str(mandatory=True,
+             desc='Layout used to get files. relative to base directory if defined')
+    template_args = traits.Dict(traits.Enum('outfiles'),
+                                traits.List(traits.List),
+                                value=dict(outfiles=[]), usedefault=True,
+                                desc='Information to plug into template')
 
-                dg.file_template = '%s/%s.nii'
-                
-                dg.template_argtuple = ('foo','foo')
+class DataGrabber(IOBase):
+    """ Generic datagrabber module that wraps around glob in an
+        intelligent way for neuroimaging tasks
 
-                is equivalent to
+        Examples
+        --------
+        >>> from nipype.interfaces.io import DataGrabber
 
-                dg.inputs.arg1 = 'foo'
-                dg.inputs.arg2 = 'foo'
-                dg.inputs.template_argnames = ['arg1','arg2']
+        Pick all files from current directory
+        >>> dg = DataGrabber()
+        >>> dg.inputs.template = '*'
 
-                however this latter form can be used with iterables
-                and iterfield in a pipeline.
-""")
+        Pick file foo/foo.nii from current directory
+        >>> dg.inputs.template = '%s/%s.nii'
+        >>> dg.inputs.template_args['outfiles']=[('foo','foo')]
 
+        Same thing but with dynamically created fields
+        >>> dg = DataGrabber(infields=['arg1','arg2'])
+        >>> dg.inputs.template = '%s/%s.nii'
+        >>> dg.inputs.arg1 = 'foo'
+        >>> dg.inputs.arg2 = 'foo'
+
+        however this latter form can be used with iterables and iterfield in a
+        pipeline.
+
+        Dynamically created, user-defined input and output fields
+        >>> dg = DataGrabber(infields=['sid'], outfields=['func','struct','ref'])
+        >>> dg.inputs.base_directory = 'nipype-tutorial/data/'
+        >>> dg.inputs.template = '%s/%s.nii'
+        >>> dg.inputs.template_args['func'] = [['sid',['f3','f5']]]
+        >>> dg.inputs.template_args['struct'] = [['sid',['struct']]]
+        >>> dg.inputs.template_args['ref'] = [['sid','ref']]
+        >>> dg.inputs.sid = 's1'
+
+        Change the template only for output field struct. The rest use the
+        general template
+        >>> dg.inputs.field_template = dict(struct='%s/struct.nii')
+        >>> dg.inputs.template_args['struct'] = [['sid']]
+
+    """
+    input_spec = DataGrabberInputSpec
+    output_spec = TraitedSpec
+
+    def __init__(self, infields=None, outfields=None, **kwargs):
+        """
+        Parameters
+        ----------
+        infields : list of str
+            Indicates the input fields to be dynamically created
+
+        outfields: list of str
+            Indicates output fields to be dynamically created
+
+<<<<<<< HEAD
 class DataGrabberOutputSpec(TraitedSpec):
     file_list = OutputMultiPath(File(exists=True), desc='list of files picked up by the grabber')
     
@@ -253,281 +195,189 @@ class DataGrabber(NEW_BaseInterface):
     
     def _run_interface(self, runtime):
         return runtime
+=======
+        See class examples for usage
+        
+        """
+        super(DataGrabber, self).__init__(**kwargs)
+        undefined_traits = {}
+        if infields:
+            for key in infields:
+                self.inputs.add_trait(key, traits.Any)
+                undefined_traits[key] = traits.Undefined
+            self.inputs.template_args['outfiles'] = [[infields]]
+        if outfields:
+            # add ability to insert field specific templates
+            self.inputs.add_trait('field_template',
+                                  traits.Dict(traits.Enum(outfields),
+                                    desc="arguments that fit into template"))
+            undefined_traits['field_template'] = traits.Undefined
+            self.inputs.remove_trait('template_args')
+            outdict = {}
+            for key in outfields:
+                outdict[key] = []
+            self.inputs.add_trait('template_args',
+                      traits.Dict(traits.Enum(outfields),
+                                  traits.List,
+                                  value=outdict, usedefault=True,
+                                  desc="arguments that fit into template"))
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+        
+    def _add_output_traits(self, base):
+        undefined_traits = {}
+        for key in self.inputs.template_args.keys():
+            base.add_trait(key, MultiPath(File(exists=True), default=traits.Undefined))
+            undefined_traits[key] = traits.Undefined
+        base.trait_set(trait_change_notify=False, **undefined_traits)
+        return base
     
     def _list_outputs(self):
         outputs = self._outputs().get()
-        args = []
-        if isdefined(self.inputs.template_argtuple):
-            args.extend(list(self.inputs.template_argtuple))
-        if isdefined(self.inputs.template_argnames):
-            for name in self.inputs.template_argnames:
-                arg = self.inputs.get(name)
-                if arg:
-                    args.append(arg)
-        template = self.inputs.file_template
-        if args:
-            template = template%tuple(args)
-        outputs['file_list'] = list_to_filename(glob.glob(template))
+        for key, args in self.inputs.template_args.items():
+            outputs[key] = []
+            template = self.inputs.template
+            if hasattr(self.inputs, 'field_template') and \
+                    isdefined(self.inputs.field_template) and \
+                    self.inputs.field_template.has_key(key):
+                template = self.inputs.field_template[key]
+            if isdefined(self.inputs.base_directory):
+                template = os.path.join(os.path.abspath(self.inputs.base_directory), template)
+            else:
+                template = os.path.abspath(template)
+            if not args:
+                outputs[key] = list_to_filename(glob.glob(template))
+            for argnum, arglist in enumerate(args):
+                maxlen = 1
+                for arg in arglist:
+                    if isinstance(arg, str) and hasattr(self.inputs, arg):
+                        arg = getattr(self.inputs, arg)
+                    if isinstance(arg, list):
+                        if (maxlen > 1) and (len(arg) != maxlen):
+                            raise ValueError('incompatible number of arguments for %s' % key)
+                        if len(arg)>maxlen:
+                            maxlen = len(arg)
+                outfiles = []
+                for i in range(maxlen):
+                    argtuple = []
+                    for arg in arglist:
+                        if isinstance(arg, str) and hasattr(self.inputs, arg):
+                            arg = getattr(self.inputs, arg)
+                        if isinstance(arg, list):
+                            argtuple.append(arg[i])
+                        else:
+                            argtuple.append(arg)
+                    if argtuple:
+                        outfiles = list_to_filename(glob.glob(template%tuple(argtuple)))
+                    else:
+                        outfiles = list_to_filename(glob.glob(template))
+                    outputs[key].insert(i,outfiles)
+            if len(outputs[key]) == 1:
+                outputs[key] = outputs[key][0]
         return outputs
 
-class ContrastGrabber(Interface):
-    """ Contrast grabber module to pick up SPM or FSL contrast files
 
-    subject_id if provided is always the first arg to the templates
-    
+class FSSourceInputSpec(BaseInterfaceInputSpec):
+    subjects_dir = Directory(desc='Freesurfer subjects directory. The ' \
+                                 'program will try to retrieve it from the ' \
+                                 'environment if available.')
+    subject_id = traits.Str(mandatory=True,
+                            desc='Subject name for whom to retrieve data')
+    hemi = traits.Enum('both', 'lh', 'rh', usedefault=True,
+                       desc='Selects hemisphere specific outputs')
+
+class FSSourceOutputSpec(TraitedSpec):
+    T1 = File(exists=True, desc='T1 image', loc='mri')
+    aseg = File(exists=True, desc='Auto-seg image', loc='mri')
+    brain = File(exists=True, desc='brain only image', loc='mri')
+    brainmask = File(exists=True, desc='brain binary mask', loc='mri')
+    filled = File(exists=True, desc='?', loc='mri')
+    norm = File(exists=True, desc='intensity normalized image', loc='mri')
+    nu = File(exists=True, desc='?', loc='mri')
+    orig = File(exists=True, desc='original image conformed to FS space',
+                loc='mri')
+    rawavg = File(exists=True, desc='averaged input images to recon-all',
+                  loc='mri')
+    ribbon = MultiPath(File(exists=True), desc='cortical ribbon', loc='mri',
+                       altkey='*ribbon')
+    wm = File(exists=True, desc='white matter image', loc='mri')
+    wmparc = File(exists=True, desc='white matter parcellation', loc='mri')
+    curv = MultiPath(File(exists=True), desc='surface curvature files',
+                     loc='surf')
+    inflated = MultiPath(File(exists=True), desc='inflated surface meshes',
+                         loc='surf')
+    pial = MultiPath(File(exists=True), desc='pial surface meshes', loc='surf')
+    smoothwm = MultiPath(File(exists=True), loc='surf',
+                         desc='smooth white-matter surface meshes')
+    sphere = MultiPath(File(exists=True), desc='spherical surface meshes',
+                       loc='surf')
+    sulc = MultiPath(File(exists=True), desc='surface sulci files', loc='surf')
+    thickness = MultiPath(File(exists=True), loc='surf',
+                          desc='surface thickness files')
+    volume = MultiPath(File(exists=True), desc='surface volume files', loc='surf')
+    white = MultiPath(File(exists=True), desc='white matter surface meshes',
+                      loc='surf')
+    label = MultiPath(File(exists=True), desc='volume and surface label files',
+                      loc='label', altkey='*label')
+    annot = MultiPath(File(exists=True), desc='surface annotation files',
+                      loc='label', altkey='*annot')
+    aparc_aseg = MultiPath(File(exists=True), loc='mri', altkey='aparc*aseg',
+                           desc='aparc+aseg file')
+    sphere_reg = MultiPath(File(exists=True), loc='surf', altkey='sphere.reg',
+                           desc='spherical registration file')
+
+class FreeSurferSource(IOBase):
+    """Generates freesurfer subject info from their directories
+
     Examples
     --------
 
-    >>> from nipype.interfaces.io import ContrastGrabber
-    >>> cg = ContrastGrabber()
-    >>> cg.inputs.con_template = 'l1output/*/model*/*/cope%d.feat/*/cope*.gz'
-    >>> cg.inputs.contrast_id = 2
-    >>> res = cg.run() # doctest: +SKIP
+    >>> from nipype.interfaces.io import FreeSurferSource
+    >>> fs = FreeSurferSource()
+    >>> #fs.inputs.subjects_dir = '/software/data/STUT/FSDATA/'
+    >>> fs.inputs.subject_id = 'PWS04'
+    >>> res = fs.run()
 
-    Now return cope and varcopes
-    >>> cg.inputs.var_template = 'l1output/*/model*/*/cope%d.feat/*/varcope*.gz'
-    >>> res = cg.run() # doctest: +SKIP
+    >>> fs.inputs.hemi = 'lh'
+    >>> res = fs.run()
 
     """
-    
-    def __init__(self, *args, **inputs):
-        self._populate_inputs()
-        self.inputs.update(**inputs)
+    input_spec = FSSourceInputSpec
+    output_spec = FSSourceOutputSpec
 
-    def inputs_help(self):
-        """
-            Parameters
-            --------------------
-            (all default to None)
-
-            con_template : str
-                template to pickup up contrasts
-            var_template : str
-                template to pickup up variance estimates
-            subject_id : list
-                Only return contrasts for these subjects
-            contrast_id : int/list
-                index of contrast to be picked up
-            """
-        print self.inputs_help.__doc__
-        
-    def _populate_inputs(self):
-        self.inputs = Bunch(con_template=None,
-                            var_template=None,
-                            subject_id=None,
-                            contrast_id=None)
-
-    def outputs_help(self):
-        print self.outputs.__doc__
-
-    def outputs(self):
-        """
-            Parameters
-            ----------
-
-            (all default to None)
-
-            con_images : list
-                list of contrast images
-            var_images : list
-                list of variance images if they exist
-        """
-        return Bunch(con_images=None,
-                     var_images=None)
-    
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        if self.inputs.contrast_id is None:
-            return outputs
-        outputs.con_images = []
-        outputs.var_images = []
-        subject_id = self.inputs.subject_id
-        if not subject_id:
-            subject_id = [None]
-        if not isinstance(subject_id, list):
-            subject_id = [subject_id]
-        contrast_id = self.inputs.contrast_id
-        if not isinstance(contrast_id, list):
-            contrast_id = [contrast_id]
-        for subj in subject_id:
-            for cont in contrast_id:
-                if subj:
-                    basedir = self.inputs.con_template % (subj, cont)
-                else:
-                    basedir = self.inputs.con_template % cont
-                print basedir
-                conimg = glob.glob(basedir)
-                outputs.con_images.extend(conimg)
-                if self.inputs.var_template:
-                    if subj:
-                        basedir = self.inputs.var_template % (subj, cont)
-                    else:
-                        basedir = self.inputs.var_template % cont
-                    varimg = glob.glob(basedir)
-                    outputs.var_images.extend(varimg)
-        if outputs.con_images:
-            outputs.con_images = list_to_filename(outputs.con_images)
-        else:
-            outputs.con_images = None
-        if outputs.var_images:
-            outputs.var_images = list_to_filename(outputs.var_images)
-        else:
-            outputs.var_images = None
-        return outputs
-
-    def run(self, cwd=None):
-        """Execute this module.
-        """
-        runtime = Bunch(returncode=0,
-                        stdout=None,
-                        stderr=None)
-        outputs=self.aggregate_outputs()
-        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
-
-
-class FreeSurferSource(Interface):
-    """Generates freesurfer subject info from their directories
-    """
-    dirmap = dict(T1='mri',
-                  aseg='mri',
-                  brain='mri',
-                  brainmask='mri',
-                  filled='mri',
-                  norm='mri',
-                  nu='mri',
-                  orig='mri',
-                  rawavg='mri',
-                  ribbon='mri',
-                  wm='mri',
-                  wmparc='mri',
-                  curv='surf',
-                  inflated='surf',
-                  pial='surf',
-                  smoothwm='surf',
-                  sphere='surf',
-                  sulc='surf',
-                  thickness='surf',
-                  volume='surf',
-                  white='surf',
-                  label='label',
-                  annot='label')
-    dirmap['aparc+aseg']='mri'
-    dirmap['sphere.reg']='surf'
-
-    def __init__(self, *args, **inputs):
-        self._populate_inputs()
-        self.inputs.update(**inputs)
-
-    def inputs_help(self):
-        """
-            Parameters
-            --------------------
-            (all default to None)
-
-            subjects_dir : string
-                freesurfer subjects directory.  The program will try to
-                retrieve it from the environment if available.
-            subject_id : string
-                The subject for whom data needs to be retrieved
-            hemi : string
-                Selects hemisphere specific outputs
-            """
-        print self.inputs_help.__doc__
-        
-    def _populate_inputs(self):
-        self.inputs = Bunch(subjects_dir=None,
-                            subject_id=None,
-                            hemi=None,
-                            )
-
-    def _get_files(self, path, key):
-        dirval = self.dirmap[key]
+    def _get_files(self, path, key, dirval, altkey=None):
         globsuffix = ''
         if dirval == 'mri':
             globsuffix = '.mgz'
+        globprefix = ''
         if key == 'ribbon' or dirval in ['surf', 'label']:
-            if self.inputs.hemi:
+            if self.inputs.hemi != 'both':
                 globprefix = self.inputs.hemi+'.'
             else:
-                globprefix = '*h.'
-                if key == 'ribbon' or key == 'label':
-                    globprefix = '*'
-            if key == 'annot':
-                globprefix += '*'
-        else:
-            globprefix = ''
-        if key in ['annot','label']:
-            globsuffix = ''
+                globprefix = '*'
         keydir = os.path.join(path,dirval)
+        if altkey:
+            key = altkey
         globpattern = os.path.join(keydir,''.join((globprefix,key,globsuffix)))
-        outfiles = glob.glob(globpattern)
-        if outfiles:
-            return deepcopy(list_to_filename(outfiles))
-        else:
-            return None
+        print globpattern
+        return glob.glob(globpattern)
     
-    def outputs_help(self):
-        """Print description of outputs provided by the module"""
-        print self.outputs.__doc__
-
-    def outputs(self):
-        """Set of output names that are generated.
-
-        If hemi is specified only that particular hemisphere's data is returned
-        for those variables that care about hemisphere (noted below).
-        Otherwise the returned items contain left and right in sequence.
-
-        Parameters
-        ----------
-        
-        T1
-        aseg
-        aparc+aseg
-        brain
-        brainmask
-        filled
-        norm
-        nu
-        orig
-        rawavg
-        ribbon : lh, rh, combined
-        wm
-        wmparc
-        white : lh, rh
-        pial : lh, rh
-        curv : lh, rh
-        labels
-        annot : lh, rh
-        """
-        outputs = Bunch(self.dirmap)
-        for k,v in outputs.items():
-            setattr(outputs,k,None)
-        return outputs
-        
-    def aggregate_outputs(self):
+    def _list_outputs(self):
         subjects_dir = self.inputs.subjects_dir
         if not subjects_dir:
             subjects_dir = os.getenv('SUBJECTS_DIR')
         if not subjects_dir:
             raise Exception('SUBJECTS_DIR variable must be set or '\
                                 'provided as input to FreeSurferSource.')
-        subject_path = os.path.join(subjects_dir,self.inputs.subject_id)
-        outputs = self.outputs()
-        for k,v in outputs.items():
-            val = self._get_files(subject_path,k)
-            setattr(outputs,k, val)
+        subject_path = os.path.join(subjects_dir, self.inputs.subject_id)
+        output_traits = self._outputs()
+        outputs = output_traits.get()
+        for k in outputs.keys():
+            val = self._get_files(subject_path, k,
+                                  output_traits.traits()[k].loc,
+                                  output_traits.traits()[k].altkey)
+            if val:
+                outputs[k] = list_to_filename(val)
         return outputs
-
-    def run(self, cwd=None):
-        """Execute this module.
-
-        cwd is just there to make things "work" for now
-        """
-        runtime = Bunch(returncode=0,
-                        stdout=None,
-                        stderr=None)
-        outputs=self.aggregate_outputs()
-        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
         
         
         
