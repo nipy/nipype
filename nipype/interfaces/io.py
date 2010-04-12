@@ -16,7 +16,7 @@ import shutil
 from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult,\
     NEW_Interface, TraitedSpec, traits, File, Directory, isdefined, BaseInterfaceInputSpec,\
     NEW_BaseInterface, OutputMultiPath
-from nipype.utils.filemanip import copyfiles, list_to_filename, filename_to_list
+from nipype.utils.filemanip import copyfile, list_to_filename, filename_to_list
 
 def add_traits(base, names):
     undefined_traits = {}
@@ -94,7 +94,6 @@ class DataSink(IOBase):
         outdir = os.path.abspath(outdir)
         if isdefined(self.inputs.container):
             outdir = os.path.join(outdir, self.inputs.container)
-        print outdir
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         for key,files in self.inputs._outputs.items():
@@ -119,7 +118,7 @@ class DataSink(IOBase):
                         #print 'path',path
                         os.makedirs(path)
                     #print 'copyfile',src, dst
-                    shutil.copyfile(src, dst)
+                    copyfile(src, dst, copy=True)
                 elif os.path.isdir(src):
                     dst = self._get_dst(os.path.join(src,''))
                     dst = os.path.join(tempoutdir, dst)
@@ -204,7 +203,7 @@ class DataGrabber(IOBase):
             for key in infields:
                 self.inputs.add_trait(key, traits.Any)
                 undefined_traits[key] = traits.Undefined
-            self.inputs.template_args['outfiles'] = [[infields]]
+            self.inputs.template_args['outfiles'] = [infields]
         if outfields:
             # add ability to insert field specific templates
             self.inputs.add_trait('field_template',
@@ -216,13 +215,6 @@ class DataGrabber(IOBase):
             for key in outfields:
                 outdict[key] = []
             self.inputs.template_args =  outdict
-            """
-            self.inputs.add_trait('template_args',
-                      traits.Dict(traits.Enum(outfields),
-                                  traits.List,
-                                  value=outdict, usedefault=True,
-                                  desc="arguments that fit into template"))
-            """
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
         
     def _add_output_traits(self, base):
@@ -230,6 +222,7 @@ class DataGrabber(IOBase):
         for key in self.inputs.template_args.keys():
             base.add_trait(key, OutputMultiPath(File(exists=True)))
             undefined_traits[key] = traits.Undefined
+            value = getattr(base, key)
         base.trait_set(trait_change_notify=False, **undefined_traits)
         return base
     

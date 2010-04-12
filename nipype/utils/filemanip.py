@@ -189,7 +189,7 @@ def copyfiles(filelist, dest, copy=False):
 def filename_to_list(filename):
     """Returns a list given either a string or a list
     """
-    if isinstance(filename,str):
+    if isinstance(filename,(str, unicode)):
         return [filename]
     elif isinstance(filename,list):
         return filename

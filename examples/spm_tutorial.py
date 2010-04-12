@@ -74,7 +74,7 @@ nifti filename through a template '%s.nii'. So 'f3' would become
 # Specify the location of the data.
 data_dir = os.path.abspath('data')
 # Specify the subject directories
-subject_list = ['s1']
+subject_list = ['s1', 's3']
 # Map field names to individual subject runs.
 info = dict(func=[['subject_id', ['f3','f5','f7','f10']]],
             struct=[['subject_id','struct']])
@@ -349,7 +349,7 @@ contrasts.
 # collect all the con images for each contrast.
 contrast_ids = range(1,len(contrasts)+1)
 l2source = nw.NodeWrapper(nio.DataGrabber(infields=['fwhm', 'con']))
-l2source.inputs.template=os.path.abspath('spm/l1output/*/_fwhm_%d/con*/con_%04d.img')
+l2source.inputs.template=os.path.abspath('spm/l1output/*/con*/_fwhm_%d/con_%04d.img')
 # iterate over all contrast images
 l2source.iterables = [('fwhm',fwhmlist),
                       ('con',contrast_ids)]
@@ -371,7 +371,7 @@ onesamplettest = nw.NodeWrapper(interface=spm.OneSampleTTest(), diskbased=True)
 l2pipeline = pe.Pipeline()
 l2pipeline.config['workdir'] = os.path.abspath('spm/l2output')
 l2pipeline.config['use_parameterized_dirs'] = True
-l2pipeline.connect([(l2source,onesamplettest,[('file_list','con_images')])])
+l2pipeline.connect([(l2source,onesamplettest,[('outfiles','con_images')])])
 
 """
 Execute the pipeline
