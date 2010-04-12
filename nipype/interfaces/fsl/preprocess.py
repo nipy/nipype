@@ -548,10 +548,13 @@ class FlirtInputSpec(FSLTraitedSpec):
                              desc = 'for applyxfm: interpolates outside image '\
                                  'by size')
     searchrx = traits.List(traits.Int, minlen = 2, maxlen = 2, units ='degrees',
+                           argstr = '-searchrx %s',
                            desc = 'search angles along x-axis, in degrees')
     searchry = traits.List(traits.Int, minlen = 2, maxlen = 2, units ='degrees',
+                           argstr = '-searchry %s',
                            desc = 'search angles along y-axis, in degrees')
     searchrz = traits.List(traits.Int, minlen = 2, maxlen = 2, units ='degrees',
+                           argstr = '-searchrz %s',
                            desc = 'search angles along z-axis, in degrees')
     nosearch = traits.Bool(argstr = '-nosearch',
                            desc = 'set all angular searches to ranges 0 to 0')

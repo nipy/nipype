@@ -7,7 +7,7 @@ from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
 
 import nipype.interfaces.fsl.preprocess as fsl
 from nipype.interfaces.fsl import Info
-from nipype.interfaces.base import InterfaceResult
+from nipype.interfaces.base import InterfaceResult, File
 
 def fsl_name(obj, fname):
     """Create valid fsl name, including file extension for output type.
@@ -158,8 +158,12 @@ def teardown_flirt(tmpdir):
 
 @parametric
 def test_flirt():
+    # setup
     tmpdir, infile, reffile = setup_flirt()
+
     flirter = fsl.Flirt()
+    yield assert_equal(flirter.cmd, 'flirt')
+
     flirter.inputs.bins = 256
     flirter.inputs.cost = 'mutualinfo'
 
@@ -170,7 +174,6 @@ def test_flirt():
     yield assert_not_equal(flirter, flirted)
     yield assert_not_equal(flirted, flirt_est)
 
-    yield assert_equal(flirter.cmd, 'flirt')
     yield assert_equal(flirter.inputs.bins, flirted.interface.inputs.bins)
     yield assert_equal(flirter.inputs.cost, flirt_est.interface.inputs.cost)
     realcmd = 'flirt -in %s -ref %s -bins 256 -cost mutualinfo ' \
@@ -187,10 +190,39 @@ def test_flirt():
     res = flirter.run()
     realcmd = 'flirt -in %s -ref %s' % (infile, reffile)
     yield assert_equal(res.interface.cmdline, realcmd)
-    inputs = dict(args='-v')
-    res = flirter.run(**inputs)
-    realcmd = 'flirt -in %s -ref %s -v' % (infile, reffile)
-    yield assert_equal(res.interface.cmdline, realcmd)
+
+    _, tmpfile = tempfile.mkstemp(suffix = '.nii', dir = tmpdir)
+    # Loop over all inputs, set a reasonable value and make sure the
+    # cmdline is updated correctly.
+    for key, trait_spec in sorted(fsl.Flirt.input_spec().traits().items()):
+        # Skip mandatory inputs and the trait methods
+        if key in ('trait_added', 'trait_modified', 'infile', 'reference',
+                   'environ', 'outputtype'):
+            continue
+        param = None
+        value = None
+        if key == 'args':
+            param = '-v'
+            value = '-v'
+        elif isinstance(trait_spec.trait_type, File):
+            value = tmpfile
+            param = trait_spec.argstr  % value
+        elif trait_spec.default is False:
+            param = trait_spec.argstr
+            value = True
+        elif key in ('searchrx', 'searchry', 'searchrz'):
+            value = [-45, 45]
+            param = trait_spec.argstr % ' '.join(str(elt) for elt in value)
+        else:
+            value = trait_spec.default
+            param = trait_spec.argstr % value
+        cmdline = 'flirt -in %s -ref %s' % (infile, reffile)
+        cmdline = ' '.join([cmdline, param])
+        obj = fsl.Flirt(infile = infile, reference = reffile)
+        setattr(obj.inputs, key, value)
+        yield assert_equal(obj.cmdline, cmdline)
+
+
 
     teardown_flirt(tmpdir)
 
