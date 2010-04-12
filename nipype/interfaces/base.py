@@ -1198,7 +1198,9 @@ class NEW_BaseInterface(NEW_Interface):
                     setattr(outputs, key, val)
                 except TraitError, error:
                     if error.info == "a file name":
-                        raise FileNotFoundError
+                        msg = "File '%s' not found for %s output '%s'." \
+                            % (val, self.__class__.__name__, key)
+                        raise FileNotFoundError(msg)
                     else:
                         raise error
         return outputs
