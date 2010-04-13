@@ -226,7 +226,7 @@ class EstimateModel(NEW_SPMCommand):
         spm = sio.loadmat(self.inputs.spm_design_file)
         betas = []
         for vbeta in spm['SPM'][0,0].Vbeta[0]:
-            betas.append(os.path.join(pth,vbeta.fname[0]))
+            betas.append(str(os.path.join(pth,vbeta.fname[0])))
         if betas:
             outputs['beta_images'] = betas
         resms = os.path.join(pth,'ResMS.img')
@@ -360,12 +360,15 @@ class EstimateContrast(NEW_SPMCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         pth, _ = os.path.split(self.inputs.spm_mat_file)
-        con = glob(os.path.join(pth,'con*.img'))
-        if len(con)>0:
-            outputs['con_images'] = sorted(con)
-        spmt = glob(os.path.join(pth,'spmT*.img'))
-        if len(spmt)>0:
-            outputs['spmT_images'] = sorted(spmt)
+        spm = sio.loadmat(self.inputs.spm_mat_file)
+        con_images = []
+        spmT_images = []
+        for con in spm['SPM'][0,0].xCon[0]:
+            con_images.append(str(os.path.join(pth,con.Vcon[0,0].fname[0])))
+            spmT_images.append(str(os.path.join(pth,con.Vspm[0,0].fname[0])))
+        if con_images:
+            outputs['con_images'] = con_images
+            outputs['spmT_images'] = spmT_images
         ess = glob(os.path.join(pth,'ess*.img'))
         if len(ess)>0:
             outputs['ess_images'] = sorted(ess)
