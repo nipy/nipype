@@ -22,6 +22,7 @@ from enthought.traits.trait_base import _Undefined
 from nipype.utils.filemanip import md5, hash_infile, FileNotFoundError
 from nipype.utils.misc import is_container
 from enthought.traits.trait_errors import TraitError
+from nipype.pipeline.pipelet import SimplePipelet
 
  
 __docformat__ = 'restructuredtext'
@@ -29,14 +30,14 @@ __docformat__ = 'restructuredtext'
 class BaseFile ( traits.BaseStr ):
     """ Defines a trait whose value must be the name of a file.
     """
-	
+    
     # A description of the type of value this trait accepts:
     info_text = 'a file name'
-	
+    
     def __init__ ( self, value = '', filter = None, auto_set = False,
                    entries = 0, exists = False, **metadata ):
         """ Creates a File trait.
-	
+    
         Parameters
         ----------
         value : string
@@ -50,7 +51,7 @@ class BaseFile ( traits.BaseStr ):
         exists : boolean
         Indicates whether the trait value must be an existing file or
         not.
-	
+    
         Default Value
         -------------
         *value* or ''
@@ -59,9 +60,9 @@ class BaseFile ( traits.BaseStr ):
         self.auto_set = auto_set
         self.entries = entries
         self.exists = exists
-	
+    
         super( BaseFile, self ).__init__( value, **metadata )
-	
+    
     def validate ( self, object, name, value ):
         """ Validates that a specified value is valid for this trait.
         
@@ -85,7 +86,7 @@ class File ( BaseFile ):
     def __init__ ( self, value = '', filter = None, auto_set = False,
                    entries = 0, exists = False, **metadata ):
         """ Creates a File trait.
-	
+    
         Parameters
         ----------
         value : string
@@ -99,7 +100,7 @@ class File ( BaseFile ):
         exists : boolean
         Indicates whether the trait value must be an existing file or
         not.
-	
+    
         Default Value
         -------------
         *value* or ''
@@ -107,10 +108,10 @@ class File ( BaseFile ):
         if not exists:
             # Define the C-level fast validator to use:
             fast_validate = ( 11, basestring )
-	
+    
         super( File, self ).__init__( value, filter, auto_set, entries, exists,
                                       **metadata )
-	
+    
 
 class BaseDirectory ( traits.BaseStr ):
     """ Defines a trait whose value must be the name of a directory.
@@ -122,7 +123,7 @@ class BaseDirectory ( traits.BaseStr ):
     def __init__ ( self, value = '', auto_set = False, entries = 0,
                    exists = False, **metadata ):
         """ Creates a BaseDirectory trait.
-	
+    
         Parameters
         ----------
         value : string
@@ -425,7 +426,7 @@ class InterfaceResult(object):
 #
 # Original base classes
 #
-class Interface(object):
+class Interface(SimplePipelet):
     """This is the template for Interface objects.
 
     It provides no functionality.  It defines the necessary attributes
@@ -437,7 +438,7 @@ class Interface(object):
 
     def __init__(self, *args, **inputs):
         """Initialize command with given args and inputs."""
-        raise NotImplementedError
+        return super(Interface, self).__init__()
 
     def run(self, cwd=None):
         """Execute the command."""
@@ -974,7 +975,7 @@ class TraitedSpec(traits.HasTraits):
     def _get_hashval(self):
         return self.hashval
 
-class NEW_Interface(object):
+class NEW_Interface(SimplePipelet):
     """This is an abstract defintion for Interface objects.
 
     It provides no functionality.  It defines the necessary attributes
@@ -985,9 +986,9 @@ class NEW_Interface(object):
     input_spec = None # A traited input specification
     output_spec = None # A traited output specification
 
-    def __init__(self, **inputs):
+    def __init__(self, *args, **inputs):
         """Initialize command with given args and inputs."""
-        raise NotImplementedError
+        return super(Interface, self).__init__()
 
     @classmethod
     def help(cls):
@@ -1052,6 +1053,7 @@ class NEW_BaseInterface(NEW_Interface):
     input_spec = BaseInterfaceInputSpec
 
     def __init__(self, **inputs):
+        super(NEW_Interface, self).__init__()
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' % \
                                 self.__class__.__name__)
