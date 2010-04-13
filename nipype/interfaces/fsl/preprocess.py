@@ -502,9 +502,11 @@ class FlirtInputSpec(FSLTraitedSpec):
     # line.
     reference = File(exists = True, argstr = '-ref %s', mandatory = True,
                      position = 1, desc = 'reference file')
-    outfile = File(argstr = '-out %s', desc = 'registered output file')
+    outfile = File(argstr = '-out %s', desc = 'registered output file',
+                   genfile = True)
     outmatrix = File(argstr = '-omat %s',
-                     desc = 'output affine matrix in 4x4 asciii format')
+                     desc = 'output affine matrix in 4x4 asciii format',
+                     genfile = True)
     inmatrix = File(argstr = '-init %s', desc = 'input 4x4 affine matrix')
 
     datatype = traits.Enum('char', 'short', 'int', 'float', 'double',
@@ -578,8 +580,10 @@ class FlirtInputSpec(FSLTraitedSpec):
                          desc = 'verbose mode, 0 is least')
 
 class FlirtOutputSpec(TraitedSpec):
-    outfile = File(desc = 'path/name of registered file (if generated)')
-    outmatrix = File(desc = 'path/name of calculated affine transform ' \
+    outfile = File(exists = True,
+                   desc = 'path/name of registered file (if generated)')
+    outmatrix = File(exists = True,
+                     desc = 'path/name of calculated affine transform ' \
                          '(if generated)')
 
 class Flirt(NEW_FSLCommand):
@@ -608,13 +612,25 @@ class Flirt(NEW_FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if isdefined(self.inputs.outfile) and self.inputs.outfile:
-            outputs['outfile'] = self._gen_fname(self.inputs.outfile,
-                                                 suffix = '')
-        if isdefined(self.inputs.outmatrix) and self.inputs.outmatrix:
-            outputs['outmatrix'] = self._gen_fname(self.inputs.outmatrix,
-                                                   suffix = '')
+        outputs['outfile'] = self.inputs.outfile
+        # Generate an outfile if one is not provided
+        if not isdefined(outputs['outfile']) and isdefined(self.inputs.infile):
+            outputs['outfile'] = self._gen_fname(self.inputs.infile,
+                                                 suffix = '_flirt')
+        outputs['outmatrix'] = self.inputs.outmatrix
+        # Generate an outmatrix file if one is not provided
+        if not isdefined(outputs['outmatrix']) and \
+                isdefined(self.inputs.infile):
+            outputs['outmatrix'] = self._gen_fname(self.inputs.infile,
+                                                   suffix = '_flirt.mat',
+                                                   change_ext = False)
         return outputs
+
+    def _gen_filename(self, name):
+        if name in ('outfile', 'outmatrix'):
+            return self._list_outputs()[name]
+        else:
+            return None
 
 
 class ApplyXfm(Flirt):
