@@ -866,15 +866,6 @@ class TraitedSpec(traits.HasTraits):
         dup = self.clone_traits(memo=memo)
         dup.set(**dup_dict)
         return dup
-        """
-        for key in self.traits():
-            if key in ['trait_added', 'trait_modified']:
-                # Skip these trait api functions
-                continue
-            dup_dict[key] = deepcopy(getattr(self, key), memo)
-        dup = self.clone_traits()
-        return self.clone_traits()
-        """
 
     def items(self):
         """ Name, trait generator for user modifiable traits
@@ -1384,25 +1375,11 @@ class MultiPath(traits.List):
     """ Abstract class - shared functionality of input and output MultiPath
     """
     
-    info_text = 'a list of paths'
-    
-    def __init__(self, trait  = None, value = None, **metadata):
-        if trait:
-            self.info_text = 'a list of %s' % trait.info()
-        super(MultiPath, self).__init__(trait, value,
-                                        **metadata)
-        
-    def get(self, object, name):
-        raise NotImplementedError()
-    
-    def set(self, object, name, value):
-        self.set_value(object, name,self.validate(object,name,value))
-    
     def validate(self, object, name, value):
-        if not isdefined(value):
-            return value
+        if not isdefined(value) or (isinstance(value, list) and len(value)==0):
+            return _Undefined()
         newvalue = value
-        if isinstance(value, str):
+        if not isinstance(value, list):
             newvalue = [value]
         value = super(MultiPath, self).validate(object, name, newvalue)
         
@@ -1452,6 +1429,9 @@ class OutputMultiPath(MultiPath):
             return value[0]
         else:
             return value
+
+    def set(self, object, name, value):
+        super(OutputMultiPath, self).set_value(object, name, value)
         
 class InputMultiPath(MultiPath):
     """ Implements a user friendly traits that accepts one or more
@@ -1484,10 +1464,4 @@ class InputMultiPath(MultiPath):
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
     
     """
-
-    def get(self, object, name):
-        value = self.get_value(object, name)
-        if len(value) == 0:
-            return _Undefined()
-        else:
-            return value
+    pass

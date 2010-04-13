@@ -18,13 +18,21 @@ from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResul
     NEW_BaseInterface, OutputMultiPath
 from nipype.utils.filemanip import copyfile, list_to_filename, filename_to_list
 
-def add_traits(base, names):
+def add_traits(base, names, trait_type=None):
+    """ Add traits to a traited class.
+
+    All traits are set to Undefined by default
+    """
+    if trait_type is None:
+        trait_type = traits.Any
     undefined_traits = {}
     for key in names:
-        print "adding trait", key
-        base.add_trait(key, traits.Any)
+        base.add_trait(key, trait_type)
         undefined_traits[key] = traits.Undefined
     base.trait_set(trait_change_notify=False, **undefined_traits)
+    # access each trait
+    for key in names:
+        value = getattr(base, key)
     return base
 
 class IOBase(NEW_BaseInterface):
