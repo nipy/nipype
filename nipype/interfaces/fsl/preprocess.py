@@ -503,10 +503,10 @@ class FlirtInputSpec(FSLTraitedSpec):
     reference = File(exists = True, argstr = '-ref %s', mandatory = True,
                      position = 1, desc = 'reference file')
     outfile = File(argstr = '-out %s', desc = 'registered output file',
-                   genfile = True)
+                   genfile = True, position = 2)
     outmatrix = File(argstr = '-omat %s',
                      desc = 'output affine matrix in 4x4 asciii format',
-                     genfile = True)
+                     genfile = True, position = 3)
     inmatrix = File(argstr = '-init %s', desc = 'input 4x4 affine matrix')
 
     datatype = traits.Enum('char', 'short', 'int', 'float', 'double',

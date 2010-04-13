@@ -5,6 +5,7 @@ import shutil
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
                             with_setup, TraitError, parametric)
 
+from nipype.utils.filemanip import split_filename
 import nipype.interfaces.fsl.preprocess as fsl
 from nipype.interfaces.fsl import Info
 from nipype.interfaces.base import InterfaceResult, File
@@ -176,8 +177,8 @@ def test_flirt():
 
     yield assert_equal(flirter.inputs.bins, flirted.interface.inputs.bins)
     yield assert_equal(flirter.inputs.cost, flirt_est.interface.inputs.cost)
-    realcmd = 'flirt -in %s -ref %s -bins 256 -cost mutualinfo ' \
-        '-out outfile -omat outmat.mat' % (infile, reffile)
+    realcmd = 'flirt -in %s -ref %s -out outfile -omat outmat.mat ' \
+        '-bins 256 -cost mutualinfo' % (infile, reffile)
     yield assert_equal(flirted.runtime.cmdline, realcmd)
 
     flirter = fsl.Flirt()
@@ -188,7 +189,14 @@ def test_flirt():
     yield assert_raises(ValueError, flirter.run)
     flirter.inputs.reference = reffile
     res = flirter.run()
-    realcmd = 'flirt -in %s -ref %s' % (infile, reffile)
+    # Generate outfile and outmatrix
+    pth, fname, ext = split_filename(infile)
+    outfile = '%s_flirt%s' % (fname, ext)
+    outfile = os.path.join(os.getcwd(), outfile)
+    outmat = '%s_flirt.mat' % fname
+    outmat = os.path.join(os.getcwd(), outmat)
+    realcmd = 'flirt -in %s -ref %s -out %s -omat %s' % (infile, reffile,
+                                                         outfile, outmat)
     yield assert_equal(res.interface.cmdline, realcmd)
 
     _, tmpfile = tempfile.mkstemp(suffix = '.nii', dir = tmpdir)
@@ -197,7 +205,7 @@ def test_flirt():
     for key, trait_spec in sorted(fsl.Flirt.input_spec().traits().items()):
         # Skip mandatory inputs and the trait methods
         if key in ('trait_added', 'trait_modified', 'infile', 'reference',
-                   'environ', 'outputtype'):
+                   'environ', 'outputtype', 'outfile', 'outmatrix'):
             continue
         param = None
         value = None
@@ -217,20 +225,29 @@ def test_flirt():
             value = trait_spec.default
             param = trait_spec.argstr % value
         cmdline = 'flirt -in %s -ref %s' % (infile, reffile)
-        cmdline = ' '.join([cmdline, param])
+        # Handle autogeneration of outfile
+        pth, fname, ext = split_filename(infile)
+        outfile = '%s_flirt%s' % (fname, ext)
+        outfile = os.path.join(os.getcwd(), outfile)
+        outfile = ' '.join(['-out', outfile])
+        # Handle autogeneration of outmatrix
+        outmatrix = '%s_flirt.mat' % fname
+        outmatrix = os.path.join(os.getcwd(), outmatrix)
+        outmatrix = ' '.join(['-omat', outmatrix])
+        # Build command line
+        cmdline = ' '.join([cmdline, outfile, outmatrix, param])
         flirter = fsl.Flirt(infile = infile, reference = reffile)
         setattr(flirter.inputs, key, value)
         yield assert_equal(flirter.cmdline, cmdline)
 
     # Test OutputSpec
     flirter = fsl.Flirt(infile = infile, reference = reffile)
-    flirter.inputs.outfile = fsl_name(flirter, 'foo')
-    flirter.inputs.outmatrix = fsl_name(flirter, 'bar')
-    outs = flirter.aggregate_outputs()
-    yield assert_equal(outs.outfile,
-                       os.path.join(os.getcwd(), flirter.inputs.outfile))
-    yield assert_equal(outs.outmatrix,
-                       os.path.join(os.getcwd(), flirter.inputs.outmatrix))
+    pth, fname, ext = split_filename(infile)
+    flirter.inputs.outfile = ''.join(['foo', ext])
+    flirter.inputs.outmatrix = ''.join(['bar', ext])
+    outs = flirter._list_outputs()
+    yield assert_equal(outs['outfile'], flirter.inputs.outfile)
+    yield assert_equal(outs['outmatrix'], flirter.inputs.outmatrix)
 
     teardown_flirt(tmpdir)
 
