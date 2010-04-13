@@ -32,6 +32,47 @@ fmlogger = logging.getLogger("filemanip")
 class FileNotFoundError(Exception):
     pass
 
+def split_filename(fname):
+    """Split a filename into parts: path, base filename and extension.
+
+    Parameters
+    ----------
+    fname : str
+        file or path name
+
+    Returns
+    -------
+    pth : str
+        base path from fname
+    fname : str
+        filename from fname, without extension
+    ext : str
+        file extenstion from fname
+
+    Examples
+    --------
+    >>> from nipype.utils.filemanip import split_filename
+    >>> pth, fname, ext = split_filename('/home/data/subject.nii.gz')
+    >>> pth
+    '/home/data'
+
+    >>> fname
+    'subject'
+
+    >>> ext
+    '.nii.gz'
+
+    """
+
+    pth, fname = os.path.split(fname)
+    tmp = '.none'
+    ext = []
+    while tmp:
+        fname, tmp = os.path.splitext(fname)
+        ext.append(tmp)
+    ext.reverse()
+    return pth, fname, ''.join(ext)
+
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     """Manipulates path and name of input filename
 
