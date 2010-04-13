@@ -98,12 +98,9 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     >>> fname = 'foo.nii.gz'
     >>> fname_presuffix(fname,'pre','post','/tmp')
     '/tmp/prefoopost.nii.gz'
+
     """
-    pth, fname = os.path.split(fname)
-    fname, ext = os.path.splitext(fname)
-    if fname.endswith('.nii'): # check for double extension nii.gz
-        fname,ext2 = os.path.splitext(fname)
-        ext = ext2 + ext
+    pth, fname, ext = split_filename(fname)
     if not use_ext:
         ext = ''
     if newpath:
@@ -123,8 +120,7 @@ def hash_rename(filename, hash):
     """renames a file given original filename and hash
     and sets path to output_directory
     """
-    path, name = os.path.split(filename)
-    name, ext = os.path.splitext(name)
+    path, name, ext = split_filename(filename)
     newfilename = ''.join((name,'_0x', hash, ext))
     return os.path.join(path, newfilename)
              

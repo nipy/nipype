@@ -39,9 +39,12 @@ def test_fnames_presuffix():
     pths = fnames_presuffix(fnames, 'pre_', '_post', '/tmp')
     yield assert_equal, pths, ['/tmp/pre_foo_post.nii', '/tmp/pre_bar_post.nii']
 
+@parametric
 def test_hash_rename():
     new_name = hash_rename('foobar.nii', 'abc123')
-    assert_equal(new_name, 'foobar_0xabc123.nii')
+    yield assert_equal(new_name, 'foobar_0xabc123.nii')
+    new_name = hash_rename('foobar.nii.gz', 'abc123')
+    yield assert_equal(new_name, 'foobar_0xabc123.nii.gz')
 
 def test_check_forhash():
     fname = 'foobar'
