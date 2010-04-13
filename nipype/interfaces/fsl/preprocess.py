@@ -582,25 +582,7 @@ class FlirtOutputSpec(TraitedSpec):
     outmatrix = File(desc = 'path/name of calculated affine transform ' \
                          '(if generated)')
 
-# XXX Using NEW_Flirt since the tests for Flirt are incomplete and
-# there's few elements I'm unsure about.
 class Flirt(NEW_FSLCommand):
-    _cmd = 'flirt'
-    input_spec = FlirtInputSpec
-    output_spec = FlirtOutputSpec
-    
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.outfile) and self.inputs.outfile:
-            outputs['outfile'] = self._gen_fname(self.inputs.outfile,
-                                                 suffix = '')
-        if isdefined(self.inputs.outmatrix) and self.inputs.outmatrix:
-            outputs['outmatrix'] = self._gen_fname(self.inputs.outmatrix,
-                                                   suffix = '')
-        return outputs
-
-
-class OLD_Flirt(FSLCommand):
     """Use FSL FLIRT for coregistration.
 
     For complete details, see the `FLIRT Documentation.
@@ -620,155 +602,18 @@ class OLD_Flirt(FSLCommand):
     >>> res = flt.run()
 
     """
+    _cmd = 'flirt'
+    input_spec = FlirtInputSpec
+    output_spec = FlirtOutputSpec
 
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return "flirt"
-
-    opt_map = {'datatype':           '-datatype %d ', # XXX argstr wrong
-            'cost':               '-cost %s',
-            'searchcost':         '-searchcost %s',
-            'usesqform':          '-usesqform',
-            'displayinit':        '-displayinit',
-            'anglerep':           '-anglerep %s',
-            'interp':             '-interp', # XXX argstr wrong
-            'sincwidth':          '-sincwidth %d',
-            'sincwindow':         '-sincwindow %s',
-            'bins':               '-bins %d',
-            'dof':                '-dof %d',
-            'noresample':         '-noresample',
-            'forcescaling':       '-forcescaling',
-            'minsampling':        '-minsamplig %f',
-            'paddingsize':        '-paddingsize %d',
-            'searchrx':           '-searchrx %d %d',
-            'searchry':           '-searchry %d %d',
-            'searchrz':           '-searchrz %d %d',
-            'nosearch':           '-nosearch',
-            'coarsesearch':       '-coarsesearch %d',
-            'finesearch':         '-finesearch %d',
-            'refweight':          '-refweight %s',
-            'inweight':           '-inweight %s',
-            'noclamp':            '-noclamp',
-            'noresampblur':       '-noresampblur',
-            'rigid2D':            '-2D',
-            'verbose':            '-v %d',
-            'flags':              '%s',
-            'infile':             None,
-            'outfile':            None,
-            'reference':          None,
-            'outmatrix':          None,
-            'inmatrix':           None,
-            }
-
-    def inputs_help(self):
-        """Print command line documentation for FLIRT."""
-        print get_doc(self.cmd, self.opt_map, '-help')
-
-    def _parse_inputs(self):
-        '''Call our super-method, then add our input files'''
-        # Could do other checking above and beyond regular _parse_inputs here
-        allargs = super(Flirt, self)._parse_inputs(skip=('infile',
-            'outfile',
-            'reference',
-            'outmatrix',
-            'inmatrix'))
-        possibleinputs = [(self.inputs.outfile, '-out'),
-                (self.inputs.inmatrix, '-init'),
-                (self.inputs.outmatrix, '-omat'),
-                (self.inputs.reference, '-ref'),
-                (self.inputs.infile, '-in')]
-
-        for val, flag in possibleinputs:
-            if val:
-                allargs.insert(0, '%s %s' % (flag, val))
-        return allargs
-
-    def run(self, infile=None, reference=None, outfile=None,
-            outmatrix=None, **inputs):
-        """Run the flirt command
-
-        Parameters
-        ----------
-        infile : string
-            Filename of volume to be moved.
-        reference : string
-            Filename of volume used as target for registration.
-        outfile : string, optional
-            Filename of the output, registered volume.  If not specified, only
-            the transformation matrix will be calculated.
-        outmatrix : string, optional
-            Filename to output transformation matrix in asci format.
-            If not specified, the output matrix will not be saved to a file.
-        inputs : dict
-            Additional ``inputs`` assignments.
-
-        Returns
-        -------
-        results : InterfaceResult
-            An :class:`nipype.interfaces.base.InterfaceResult` object
-            with a copy of self in `interface`
-
-        """
-
-        if infile:
-            self.inputs.infile = infile
-        if not self.inputs.infile:
-            raise AttributeError('Flirt requires an infile.')
-        if reference:
-            self.inputs.reference = reference
-        if not self.inputs.reference:
-            raise AttributeError('Flirt requires a reference file.')
-        if outfile:
-            self.inputs.outfile = outfile
-        if outmatrix:
-            self.inputs.outmatrix = outmatrix
-        self.inputs.update(**inputs)
-        return super(Flirt, self).run()
-
-    def outputs(self):
-        """Returns a bunch containing output parameters
-
-        Parameters
-        ----------
-        outfile : string, file
-
-        outmatrix : string, file
-
-        """
-        outputs = Bunch(outfile=None, outmatrix=None)
-        return outputs
-
-    def aggregate_outputs(self):
-        """Create a Bunch which contains all possible files generated
-        by running the interface.  Some files are always generated, others
-        depending on which ``inputs`` options are set.
-
-        Returns
-        -------
-        outputs : Bunch object
-            outfile
-            outmatrix
-
-        Raises
-        ------
-        IOError
-            If expected output file(s) outfile or outmatrix are not found.
-
-        """
-        outputs = self.outputs()
-
-        def raise_error(filename):
-            raise IOError('File %s was not generated by Flirt' % filename)
-        cwd = os.getcwd()
-        if self.inputs.outfile:
-            outputs.outfile = os.path.join(cwd, self.inputs.outfile)
-            if not self._glob(outputs.outfile):
-                raise_error(outputs.outfile)
-        if self.inputs.outmatrix:
-            outputs.outmatrix = os.path.join(cwd, self.inputs.outmatrix)
-            if not self._glob(outputs.outmatrix):
-                raise_error(outputs.outmatrix)
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.outfile) and self.inputs.outfile:
+            outputs['outfile'] = self._gen_fname(self.inputs.outfile,
+                                                 suffix = '')
+        if isdefined(self.inputs.outmatrix) and self.inputs.outmatrix:
+            outputs['outmatrix'] = self._gen_fname(self.inputs.outmatrix,
+                                                   suffix = '')
         return outputs
 
 
