@@ -1125,9 +1125,9 @@ class NEW_BaseInterface(NEW_Interface):
         """
         for name, value in self.inputs.trait_get(mandatory=True).items():
             if not isdefined(value):
-                msg = "%s requires a value for input '%s'" % \
-                    (self.__class__.__name__, name)
-                self.help()
+                msg = "%s requires a value for input '%s'. " \
+                    "For a list of required inputs, see %s.help()" % \
+                    (self.__class__.__name__, name, self.__class__.__name__)
                 raise ValueError(msg)
 
     def _run_interface(self, runtime):
