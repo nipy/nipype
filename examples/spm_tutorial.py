@@ -386,4 +386,4 @@ function needs to be called.
 
 if __name__ == '__main__':
     l1pipeline.run()
-    l2pipeline.run()
+    #l2pipeline.run()

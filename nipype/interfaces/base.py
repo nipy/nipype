@@ -22,7 +22,6 @@ from enthought.traits.trait_base import _Undefined
 from nipype.utils.filemanip import md5, hash_infile, FileNotFoundError
 from nipype.utils.misc import is_container
 from enthought.traits.trait_errors import TraitError
-from nipype.pipeline.pipelet import SimplePipelet
 
  
 __docformat__ = 'restructuredtext'
@@ -30,14 +29,14 @@ __docformat__ = 'restructuredtext'
 class BaseFile ( traits.BaseStr ):
     """ Defines a trait whose value must be the name of a file.
     """
-    
+	
     # A description of the type of value this trait accepts:
     info_text = 'a file name'
-    
+	
     def __init__ ( self, value = '', filter = None, auto_set = False,
                    entries = 0, exists = False, **metadata ):
         """ Creates a File trait.
-    
+	
         Parameters
         ----------
         value : string
@@ -51,7 +50,7 @@ class BaseFile ( traits.BaseStr ):
         exists : boolean
         Indicates whether the trait value must be an existing file or
         not.
-    
+	
         Default Value
         -------------
         *value* or ''
@@ -60,9 +59,9 @@ class BaseFile ( traits.BaseStr ):
         self.auto_set = auto_set
         self.entries = entries
         self.exists = exists
-    
+	
         super( BaseFile, self ).__init__( value, **metadata )
-    
+	
     def validate ( self, object, name, value ):
         """ Validates that a specified value is valid for this trait.
         
@@ -86,7 +85,7 @@ class File ( BaseFile ):
     def __init__ ( self, value = '', filter = None, auto_set = False,
                    entries = 0, exists = False, **metadata ):
         """ Creates a File trait.
-    
+	
         Parameters
         ----------
         value : string
@@ -100,7 +99,7 @@ class File ( BaseFile ):
         exists : boolean
         Indicates whether the trait value must be an existing file or
         not.
-    
+	
         Default Value
         -------------
         *value* or ''
@@ -108,10 +107,10 @@ class File ( BaseFile ):
         if not exists:
             # Define the C-level fast validator to use:
             fast_validate = ( 11, basestring )
-    
+	
         super( File, self ).__init__( value, filter, auto_set, entries, exists,
                                       **metadata )
-    
+	
 
 class BaseDirectory ( traits.BaseStr ):
     """ Defines a trait whose value must be the name of a directory.
@@ -123,7 +122,7 @@ class BaseDirectory ( traits.BaseStr ):
     def __init__ ( self, value = '', auto_set = False, entries = 0,
                    exists = False, **metadata ):
         """ Creates a BaseDirectory trait.
-    
+	
         Parameters
         ----------
         value : string
@@ -426,7 +425,7 @@ class InterfaceResult(object):
 #
 # Original base classes
 #
-class Interface(SimplePipelet):
+class Interface(object):
     """This is the template for Interface objects.
 
     It provides no functionality.  It defines the necessary attributes
@@ -438,7 +437,7 @@ class Interface(SimplePipelet):
 
     def __init__(self, *args, **inputs):
         """Initialize command with given args and inputs."""
-        return super(Interface, self).__init__()
+        raise NotImplementedError
 
     def run(self, cwd=None):
         """Execute the command."""
@@ -829,7 +828,7 @@ class TraitedSpec(traits.HasTraits):
     XXX Reconsider this in the long run, but it seems like the best
     solution to move forward on the refactoring.
     """
-
+    
     def __init__(self, **kwargs):
         """ Initialize handlers and inputs"""
         # NOTE: In python 2.6, object.__init__ no longer accepts input
@@ -861,12 +860,21 @@ class TraitedSpec(traits.HasTraits):
         for key in self.copyable_trait_names():
             try:
                 value = getattr(dup, key)
-            except AttributeError:
+            except:
                 pass
         # clone twice
         dup = self.clone_traits(memo=memo)
         dup.set(**dup_dict)
         return dup
+        """
+        for key in self.traits():
+            if key in ['trait_added', 'trait_modified']:
+                # Skip these trait api functions
+                continue
+            dup_dict[key] = deepcopy(getattr(self, key), memo)
+        dup = self.clone_traits()
+        return self.clone_traits()
+        """
 
     def items(self):
         """ Name, trait generator for user modifiable traits
@@ -966,7 +974,7 @@ class TraitedSpec(traits.HasTraits):
     def _get_hashval(self):
         return self.hashval
 
-class NEW_Interface(SimplePipelet):
+class NEW_Interface(object):
     """This is an abstract defintion for Interface objects.
 
     It provides no functionality.  It defines the necessary attributes
@@ -977,9 +985,9 @@ class NEW_Interface(SimplePipelet):
     input_spec = None # A traited input specification
     output_spec = None # A traited output specification
 
-    def __init__(self, *args, **inputs):
+    def __init__(self, **inputs):
         """Initialize command with given args and inputs."""
-        return super(Interface, self).__init__()
+        raise NotImplementedError
 
     @classmethod
     def help(cls):
@@ -1044,7 +1052,6 @@ class NEW_BaseInterface(NEW_Interface):
     input_spec = BaseInterfaceInputSpec
 
     def __init__(self, **inputs):
-        super(NEW_Interface, self).__init__()
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' % \
                                 self.__class__.__name__)
@@ -1377,11 +1384,25 @@ class MultiPath(traits.List):
     """ Abstract class - shared functionality of input and output MultiPath
     """
     
+    info_text = 'a list of paths'
+    
+    def __init__(self, trait  = None, value = None, **metadata):
+        if trait:
+            self.info_text = 'a list of %s' % trait.info()
+        super(MultiPath, self).__init__(trait, value,
+                                        **metadata)
+        
+    def get(self, object, name):
+        raise NotImplementedError()
+    
+    def set(self, object, name, value):
+        self.set_value(object, name,self.validate(object,name,value))
+    
     def validate(self, object, name, value):
-        if not isdefined(value) or (isinstance(value, list) and len(value)==0):
-            return _Undefined()
+        if not isdefined(value):
+            return value
         newvalue = value
-        if not isinstance(value, list):
+        if isinstance(value, str):
             newvalue = [value]
         value = super(MultiPath, self).validate(object, name, newvalue)
         
@@ -1431,9 +1452,6 @@ class OutputMultiPath(MultiPath):
             return value[0]
         else:
             return value
-
-    def set(self, object, name, value):
-        super(OutputMultiPath, self).set_value(object, name, value)
         
 class InputMultiPath(MultiPath):
     """ Implements a user friendly traits that accepts one or more
@@ -1466,4 +1484,10 @@ class InputMultiPath(MultiPath):
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
     
     """
-    pass
+
+    def get(self, object, name):
+        value = self.get_value(object, name)
+        if len(value) == 0:
+            return _Undefined()
+        else:
+            return value
