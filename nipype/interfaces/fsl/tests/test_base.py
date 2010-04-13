@@ -1,7 +1,7 @@
 import os
 
 from nipype.testing import (assert_equal, assert_true, assert_raises,
-                            assert_not_equal)
+                            assert_not_equal, parametric)
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces.base import InterfaceResult
 
@@ -59,3 +59,26 @@ def test_NEW_FSLCommand():
         if out_type != fsl.Info.outputtype():
             #  Setting class outputtype should not effect existing instances
             yield assert_not_equal, cmdinst.inputs.outputtype, out_type
+
+@parametric
+def test_gen_fname():
+    # Test _gen_fname method of NEW_FSLCommand
+    cmd = fsl.NEW_FSLCommand(command = 'junk')
+    pth = os.getcwd()
+    # just the filename
+    fname = cmd._gen_fname('foo.nii.gz')
+    desired = os.path.join(pth, 'foo_fsl.nii.gz')
+    yield assert_equal(fname, desired)
+    # filename with suffix
+    fname = cmd._gen_fname('foo.nii.gz', suffix = '_brain')
+    desired = os.path.join(pth, 'foo_brain.nii.gz')
+    yield assert_equal(fname, desired)
+    # filename with suffix and working directory
+    fname = cmd._gen_fname('foo.nii.gz', suffix = '_brain', cwd = '/data')
+    desired = os.path.join('/data', 'foo_brain.nii.gz')
+    yield assert_equal(fname, desired)
+    # filename with suffix and no file extension change
+    fname = cmd._gen_fname('foo.nii.gz', suffix = '_brain.mat',
+                           change_ext = False)
+    desired = os.path.join(pth, 'foo_brain.mat')
+    yield assert_equal(fname, desired)

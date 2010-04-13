@@ -390,6 +390,6 @@ class NEW_FSLCommand(NEW_CommandLine):
                 suffix = ''.join((suffix, ext))
             else:
                 suffix = ext
-        fname = fname_presuffix(basename, suffix=suffix,
-                                use_ext=not change_ext, newpath=cwd)
+        fname = fname_presuffix(basename, suffix = suffix,
+                                use_ext = False, newpath = cwd)
         return fname
