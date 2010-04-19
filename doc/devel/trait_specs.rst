@@ -213,7 +213,8 @@ is one of those and is used as a simple, one-line docstring.  The
 field
 ^^^^^
 
-XXX: Get description from Satra!
+XXX: Get description from Satra.  Clearly this maps to some field
+structure in spm.
 
 **Required:** This metadata is required by all matlab-mediated
   interface classes.
@@ -221,23 +222,65 @@ XXX: Get description from Satra!
 position
 ^^^^^^^^
 
-This is used to specify the position of required, positional
-arguments.  Both positive and negative values are accepted.  'position
-= 0' will position this argument as the first parameter after the
-command name. 'position = -1' will position this argument as the last
+This metadata is used to specify the position of arguments.  Both
+positive and negative values are accepted.  ``position = 0`` will
+position this argument as the first parameter after the command
+name. ``position = -1`` will position this argument as the last
 parameter, after all other parameters.
 
 genfile
 ^^^^^^^
 
-If True, specifies that a filename should be generated for this
-parameter if-and-only-if the user did not provide one.
+If True, the ``genfile`` metadata specifies that a filename should be
+generated for this parameter *if-and-only-if* the user did not provide
+one.  The nipype convention is to automatically generate output
+filenames when not specified by the user both as a convenience for the
+user and so the pipeline can easily gather the outputs.
 
 usedefault
 ^^^^^^^^^^
 
-Set this metadata to True when the default value for this traited
-attribute is an acceptable value.  XXX Add example to clarify.
+Set this metadata to True when the *default value* for the trait type
+of this attribute is an acceptable value.  All trait objects have a
+default value, ``traits.Int`` has a default of ``0``, ``traits.Float``
+has a default of ``0.0``, etc...  You can also define a default value
+when you define the class.  For example, in the code below all objects
+of ``Foo`` will have a default value of 12 for ``x``::
+
+    >>> import enthought.traits.api as traits
+    >>> class Foo(traits.HasTraits):
+    ...     x = traits.Int(12)
+    ...     y = traits.Int
+    ...
+    >>> foo = Foo()
+    >>> foo.x
+    12
+    >>> foo.y
+    0
+
+Nipype only passes ``inputs`` on to the underlying package if they
+have been defined (more on this later).  So if you specify
+``usedefault = True``, you are telling the parser to pass the default
+value on to the underlying package.  Let's look at the InputSpec for
+SPM Realign::
+
+    class RealignInputSpec(BaseInterfaceInputSpec):
+        jobtype = traits.Enum('estwrite', 'estimate', 'write',
+                              desc='one of: estimate, write, estwrite',
+                              usedefault=True)
+
+Here we've defined ``jobtype`` to be an enumerated trait type,
+``Enum``, which can be set to one of the following: ``estwrite``,
+``estimate``, or ``write``.  In a container, the default is always the
+first element.  So in this case, the default will be ``estwrite``::
+
+    >>> from nipype.interfaces import spm
+    >>> rlgn = spm.Realign()
+    >>> rlgn.inputs.infile
+    <undefined>
+    >>> rlgn.inputs.jobtype
+    'estwrite'
+
 
 units
 ^^^^^
@@ -272,5 +315,5 @@ pipeline.
 
 
 
-
+XXX Undefined and isdefined
 
