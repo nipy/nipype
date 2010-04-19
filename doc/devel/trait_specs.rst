@@ -1,5 +1,9 @@
-Trait Specifications
---------------------
+================================
+ Trait Interface Specifications
+================================
+
+Overview
+--------
 
 We're using the `Enthought Traits
 <http://code.enthought.com/projects/traits/>`_ package for all of our
@@ -11,20 +15,39 @@ below).  The machinery for handling the metadata is located in the
 base classes, so all subclasses use the same code to handle these
 cases.  This is in contrast to our previous code where every class
 defined it's own _parse_inputs, run and aggregate_outputs methods to
-handle these cases.
+handle these cases.  Which of course leads to a dozen different ways
+to solve the same problem.
 
-Traits is a big package.  Below are a few starting points in the
-documentation to get a general understanding:
+Traits is a big package with a lot to learn in order to take full
+advantage of.  But don't be intimidated!  To write a Nipype Trait
+Specification, you only need to learn a few of the basics of Traits.
+Here are a few starting points in the documentation:
 
-  * `User Manual Introduction <http://code.enthought.com/projects/traits/docs/html/traits_user_manual/intro.html>`_
-  * `User Manual Intro to traits and metadata
-    <http://code.enthought.com/projects/traits/docs/html/traits_user_manual/defining.html>`_
-  * `Gael wrote a good tutorial
-    <http://code.enthought.com/projects/traits/docs/html/tutorials/traits_ui_scientific_app.html>`_
+* What are Traits?  The `Introduction in the User Manual
+  <http://code.enthought.com/projects/traits/docs/html/traits_user_manual/intro.html>`_
+  gives a brief description of the functionality traits provides.
+
+* Traits and metadata.  The `second section of the User Manual
+  <http://code.enthought.com/projects/traits/docs/html/traits_user_manual/defining.html>`_
+  gives more details on traits and how to use them.  Plus there a
+  section describing metadata, including the metadata all traits have.
+
+* If your interested in more of a *big picture* overview, `Gael wrote
+  a good tutorial
+  <http://code.enthought.com/projects/traits/docs/html/tutorials/traits_ui_scientific_app.html>`_
+  that shows how to write a scientific application using traits for
+  the benefit of the generated UI components.  (For now, Nipype is not
+  taking advantage of the generated UI feature of traits.)
+
+Traits version
+^^^^^^^^^^^^^^
 
 We're using Traits version 3.x which can be install as part of `EPD
 <http://enthought.com/products/epd.php>`_ or from `pypi
 <http://pypi.python.org/pypi/Traits/3.3.0>`_
+
+More documentation
+^^^^^^^^^^^^^^^^^^
 
 Not everything is documented in the User Manual, in those cases the
 `enthought-dev mailing list
@@ -33,8 +56,8 @@ Not everything is documented in the User Manual, in those cases the
 <http://code.enthought.com/projects/files/ETS32_API/enthought.traits.html>`_
 is your next place to look.
 
-Specifications
---------------
+Nipype Interface Specifications
+-------------------------------
 
 Each interface subclass defines two specifications: InputSpec and
 OutputSpec.  Each of these are prefixed with the class name of the
@@ -53,6 +76,8 @@ NIFTI_PAIR, etc...)  for all generated output files.
 OutputSpecs inherit from interfaces.base.TraitedSpec which is the base
 class for all traited specifications.  It provides some
 initialization, nipype specific methods and any trait handlers.
+
+NOTE: Doc BaseInterfaceInputSpec, CommandLineInputSpec, FSLInputSpec....
 
 Traited Attributes
 ^^^^^^^^^^^^^^^^^^
