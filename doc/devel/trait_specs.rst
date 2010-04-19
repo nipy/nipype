@@ -59,28 +59,89 @@ is your next place to look.
 Nipype Interface Specifications
 -------------------------------
 
-Each interface subclass defines two specifications: InputSpec and
-OutputSpec.  Each of these are prefixed with the class name of the
-interfaces.  For example, Bet has these specs:
+Each interface class defines two specifications: 1) an InputSpec and
+2) an OutputSpec.  Each of these are prefixed with the class name of
+the interfaces.  For example, Bet has these specs:
 
   - BetInputSpec
   - BetOutputSpec
 
-The InputSpec consists of traited attributes which are the same as the
-keys in the opt_map dicts.  These will be the attrs in self.inputs.
+Each of these Specs are classes, derived from a base TraitedSpec class
+(more on these below).  The InputSpec consists of attributes which
+correspond to different parameters for the tool they wrap/interface.
+In the case of a command-line tool like Bet, the InputSpec attributes
+correspond to the different command-line parameters that can be passed
+to Bet.  If you are familiar with the Nipype 0.2 code-base, these
+attributes are the same as the keys in the opt_map dictionaries.  When
+an interfaces class is instantiated, the InputSpec is bound to the
+``inputs`` attribute of that object.  Below is an example of how the
+``inputs`` appear to a user for Bet::
 
-FSL InputSpecs inherit from interfaces.fsl.base.FSLTraitedSpec, which
-defines an outputtype attr that stores the file type (NIFTI,
-NIFTI_PAIR, etc...)  for all generated output files.
+  >>> from nipype.interfaces import fsl
+  >>> bet = fsl.Bet()
+  >>> type(bet.inputs)
+  <class 'nipype.interfaces.fsl.preprocess.BetInputSpec'>
+  >>> bet.inputs.<TAB>
+  bet.inputs.__class__           bet.inputs.center
+  bet.inputs.__delattr__         bet.inputs.environ
+  bet.inputs.__doc__             bet.inputs.frac
+  bet.inputs.__getattribute__    bet.inputs.functional
+  bet.inputs.__hash__            bet.inputs.hashval
+  bet.inputs.__init__            bet.inputs.infile
+  bet.inputs.__new__             bet.inputs.items
+  bet.inputs.__reduce__          bet.inputs.mask
+  bet.inputs.__reduce_ex__       bet.inputs.mesh
+  bet.inputs.__repr__            bet.inputs.nooutput
+  bet.inputs.__setattr__         bet.inputs.outfile
+  bet.inputs.__str__             bet.inputs.outline
+  bet.inputs._generate_handlers  bet.inputs.outputtype
+  bet.inputs._get_hashval        bet.inputs.radius
+  bet.inputs._hash_infile        bet.inputs.reduce_bias
+  bet.inputs._xor_inputs         bet.inputs.skull
+  bet.inputs._xor_warn           bet.inputs.threshold
+  bet.inputs.args                bet.inputs.vertical_gradient
 
-OutputSpecs inherit from interfaces.base.TraitedSpec which is the base
-class for all traited specifications.  It provides some
-initialization, nipype specific methods and any trait handlers.
 
-NOTE: Doc BaseInterfaceInputSpec, CommandLineInputSpec, FSLInputSpec....
+Each Spec inherits from a parent Spec.  The parent Specs provide
+attribute(s) that are common to all child classes.  For example, FSL
+InputSpecs inherit from interfaces.fsl.base.FSLTraitedSpec.
+FSLTraitedSpec defines an ``outputtype`` attribute, which stores the
+file type (NIFTI, NIFTI_PAIR, etc...) for all generated output files.
+
+BetInputSpec class hierarchy
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Below is the current class hierarchy for FSL InputSpec classes (from
+base class down to subclasses).:
+
+  ``TraitedSpec``: Nipype's primary base class for all Specs.
+  Provides initialization, some nipype-specific methods and any trait
+  handlers we define. Inherits from traits.HasTraits.
+
+    ``BaseInterfaceInputSpec``: Defines inputs common to all
+    interfaces (``environ``)
+
+      ``CommandLineInputSpec``: Defines inputs common to all
+      command-line classes (``args``)
+
+        ``FSLTraitedSpec``: Defines inputs common to all FSL classes
+        (``outputtype``)
+
+	  ``BetInputSpec``: Defines inputs specific to Bet
+
+Most developers will only need to code at the package-level
+(``FSLTraitedSpec``) or the interface-level (``BetInputSpec``).
+
+Output Specs
+^^^^^^^^^^^^
+
+The OutputSpec defines the outputs that are generated, or possibly
+generated depending on inputs, by the tool.  OutputSpecs inherit from
+``interfaces.base.TraitedSpec`` directly.
+
 
 Traited Attributes
-^^^^^^^^^^^^^^^^^^
+------------------
 
 Individual specification attributes are instances of Trait classes.
 These classes encapsulate many standard Python types like Float and
