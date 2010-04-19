@@ -143,15 +143,17 @@ generated depending on inputs, by the tool.  OutputSpecs inherit from
 Traited Attributes
 ------------------
 
-Individual specification attributes are instances of Trait classes.
-These classes encapsulate many standard Python types like Float and
-Int, but with additional behavior like type checking.  To handle
+Each specification attribute is an instance of a Trait class.  These
+classes encapsulate many standard Python types like Float and Int, but
+with additional behavior like type checking.  (*See the documentation
+on traits for more information on these trait types.*) To handle
 unique behaviors of our attributes we us traits metadata.  These are
 keyword arguments supplied in the initialization of the attributes.
-The base classes NEW_BaseInterface and NEW_CommandLine (in
-nipype.interfaces.base) check for the existence/or value of these
-metadata and handle the inputs/outputs accordingly.  For example, all
-mandatory parameters will have the 'mandatory = True' metadata::
+The base classes ``NEW_BaseInterface`` and ``NEW_CommandLine``
+(defined in ``nipype.interfaces.base``) check for the existence/or
+value of these metadata and handle the inputs/outputs accordingly.
+For example, all mandatory parameters will have the ``mandatory =
+True`` metadata::
 
   class BetInputSpec(FSLTraitedSpec):
     infile = File(exists=True,
@@ -162,22 +164,59 @@ mandatory parameters will have the 'mandatory = True' metadata::
 File
 ^^^^
 
-For files, use nipype.interfaces.base.File as the trait type.  If the
-file must exist for the package to execute, specify 'exists = True' in
-the initialization of File. This will trigger the underlying traits
-code to confirm the given file actually exists.
+For files, use ``nipype.interfaces.base.File`` as the trait type.  If
+the file must exist for the tool to execute, specify ``exists = True``
+in the initialization of File (as shown in BetInputSpec above). This
+will trigger the underlying traits code to confirm the file assigned
+to that *input* actually exists.  If it does not exist, the user will
+be presented with an error message::
+
+    >>> bet.inputs.infile = 'does_not_exist.nii'
+    ------------------------------------------------------------
+    Traceback (most recent call last):
+      File "<ipython console>", line 1, in <module>
+      File "/Users/cburns/local/lib/python2.5/site-packages/nipype/interfaces/base.py", line 76, in validate
+        self.error( object, name, value )
+      File "/Users/cburns/local/lib/python2.5/site-packages/enthought/traits/trait_handlers.py", line 175, in error
+        value )
+    TraitError: The 'infile' trait of a BetInputSpec instance must be a file 
+    name, but a value of 'does_not_exist.nii' <type 'str'> was specified.
+
 
 argstr
 ^^^^^^
 
-Format strings for the parameters, what was the 'value' in the opt_map
-dictionaries, are supplied through the 'argstr' metadata.
+``argstr`` is the metadata keyword for specifying the format strings
+for the parameters. This was the *value* string in the opt_map
+dictionaries of Nipype 0.2 code.  If we look at the
+``FlirtInputSpec``, the ``argstr`` for the reference file corresponds
+to the argument string I would need to provide with the command-line
+version of ``flirt``::
+
+    class FlirtInputSpec(FSLTraitedSpec):
+        reference = File(exists = True, argstr = '-ref %s', mandatory = True,
+                         position = 1, desc = 'reference file')
+
+**Required:** This metadata is required by all command-line interface
+  classes.
 
 desc
 ^^^^
 
-One-line docstrings are given via the 'desc' metadata.  This
-information is used in the help() methods.
+All trait objects have a set of default metadata attributes.  ``desc``
+is one of those and is used as a simple, one-line docstring.  The
+``desc`` is printed when users use the ``help()`` methods.
+
+**Required:** This metadata is required by all nipype interface
+  classes.
+
+field
+^^^^^
+
+XXX: Get description from Satra!
+
+**Required:** This metadata is required by all matlab-mediated
+  interface classes.
 
 position
 ^^^^^^^^
