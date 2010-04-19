@@ -285,8 +285,61 @@ first element.  So in this case, the default will be ``estwrite``::
 units
 ^^^^^
 
-XXX value of units.  How are these used in traits?
+XXX value of units.  Not sure how are these used in traits?
 
+Defining an interface class
+---------------------------
+
+When you define an interface class, you will define these attributes
+and methods:
+
+* ``input_spec``: the InputSpec
+* ``output_spec``: the OutputSpec
+* ``_list_outputs()``: Returns a dictionary will all outputs and
+  associated paths.
+* ``_get_filename()``: Returns a string that is the generated filename
+  for the requested output.
+
+For command-line interfaces:
+
+* ``_cmd``: the command-line command
+
+For matlab-mediated interfaces:
+
+* ``_jobtype``: XXX
+* ``_jobname``: XXX
+
+This is the class definition for Flirt, minus the docstring::
+
+    class Flirt(NEW_FSLCommand):
+        _cmd = 'flirt'
+        input_spec = FlirtInputSpec
+        output_spec = FlirtOutputSpec
+
+        def _list_outputs(self):
+            outputs = self.output_spec().get()
+            outputs['outfile'] = self.inputs.outfile
+            # Generate an outfile if one is not provided
+            if not isdefined(outputs['outfile']) and isdefined(self.inputs.infile):
+                outputs['outfile'] = self._gen_fname(self.inputs.infile,
+                                                     suffix = '_flirt')
+            outputs['outmatrix'] = self.inputs.outmatrix
+            # Generate an outmatrix file if one is not provided
+            if not isdefined(outputs['outmatrix']) and \
+                    isdefined(self.inputs.infile):
+                outputs['outmatrix'] = self._gen_fname(self.inputs.infile,
+                                                       suffix = '_flirt.mat',
+                                                       change_ext = False)
+            return outputs
+
+        def _gen_filename(self, name):
+            if name in ('outfile', 'outmatrix'):
+                return self._list_outputs()[name]
+            else:
+                return None
+
+There are two possible output files ``outfile`` and ``outmatrix``,
+both of which can be generated if not specified by the user.
 
 NEW_CommandLine._gen_filename
 -----------------------------
@@ -294,15 +347,15 @@ NEW_CommandLine._gen_filename
 Generate filename, used for filenames that nipype generates as a
 convenience for users.  This is for parameters that are required by
 the wrapped package, but we're generating from some other parameter.
-For example, Bet.inputs.outfile is required by bet but we can generate
-the name from Bet.inputs.infile.  Override this method in subclass to
-handle.
+For example, ``Bet.inputs.outfile`` is required by bet but we can
+generate the name from ``Bet.inputs.infile``.  Override this method in
+subclass to handle.
 
 NEW_FSLCommand._gen_fname
 -------------------------
 
 Generates filenames for FSL commands making sure to use the
-appropriate file extension.  Used by subclasses but should not be
+appropriate file extension.  Used by subclasses but should **not** be
 overridden.
 
 NEW_Interface._list_outputs
@@ -310,10 +363,81 @@ NEW_Interface._list_outputs
 
 Returns a dictionary containing names of generated files that are
 expected after package completes execution.  This is used by
-NEW_BaseInterface.aggregate_outputs to gather all output files for the
-pipeline.
+``NEW_BaseInterface.aggregate_outputs`` to gather all output files for
+the pipeline.
 
 
+Undefined inputs
+----------------
 
-XXX Undefined and isdefined
+XXX Explain <undefined> and the isdefined function.
 
+Example of inputs
+-----------------
+
+Below we have an example of using Bet.  We can see from the help which
+inputs are mandatory and which are optional, along with the one-line
+description provided by the ``desc`` metadata::
+
+    >>> from nipype.interfaces import fsl
+    >>> fsl.Bet.help()
+    Inputs
+    ------
+
+    Mandatory:
+     infile: input file to skull strip
+
+    Optional:
+     args: Additional parameters to the command
+     center: center of gravity in voxels
+     environ: Environment variables (default={})
+     frac: fractional intensity threshold
+     functional: apply to 4D fMRI data
+     mask: create binary mask image
+     mesh: generate a vtk mesh brain surface
+     nooutput: Don't generate segmented output
+     outfile: name of output skull stripped image
+     outline: create surface outline image
+     outputtype: None
+     radius: head radius
+     reduce_bias: bias field and neck cleanup
+     skull: create skull image
+     threshold: apply thresholding to segmented brain image and mask
+     vertical_gradient: vertical gradient in fractional intensity threshold (-1, 1)
+
+    Outputs
+    -------
+    maskfile: path/name of binary brain mask (if generated)
+    meshfile: path/name of vtk mesh file (if generated)
+    outfile: path/name of skullstripped file
+    outlinefile: path/name of outline file (if generated)
+
+
+Here we create a bet object and specify the required input. We then
+check our inputs to see which are defined and which are not::
+
+    >>> bet = fsl.Bet(infile = 'f3.nii')
+    >>> bet.inputs
+    args = <undefined>
+    center = <undefined>
+    environ = {'FSLOUTPUTTYPE': 'NIFTI_GZ'}
+    frac = <undefined>
+    functional = <undefined>
+    infile = f3.nii
+    mask = <undefined>
+    mesh = <undefined>
+    nooutput = <undefined>
+    outfile = <undefined>
+    outline = <undefined>
+    outputtype = NIFTI_GZ
+    radius = <undefined>
+    reduce_bias = <undefined>
+    skull = <undefined>
+    threshold = <undefined>
+    vertical_gradient = <undefined>
+    >>> bet.cmdline
+    'bet f3.nii /Users/cburns/data/nipype/s1/f3_brain.nii.gz'
+
+We also checked the command-line that will be generated when we run
+the command and can see the generated output filename
+``f3_brain.nii.gz``.
