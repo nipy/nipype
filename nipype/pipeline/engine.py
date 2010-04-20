@@ -576,18 +576,9 @@ class Node(Pipelet):
         of tuples
         node.iterables = ('frac',[0.5,0.6,0.7])
         node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
-    iterfield : 1+-element list
-        key(s) over which to repeatedly call the interface.
-        for example, to iterate FSL.Bet over multiple files, one can
-        set node.iterfield = ['infile'].  If this list has more than 1 item
-        then the inputs are selected in order simultaneously from each of these
-        fields and each field will need to have the same number of members.
     base_directory : directory
         base output directory (will be hashed before creations)
         default=None, which results in the use of mkdtemp
-    diskbased : Boolean
-        Whether the underlying object requires disk space for
-        operation and storage of output (default: True)
     overwrite : Boolean
         Whether to overwrite contents of output directory if it
         already exists. If directory exists and hash matches it
@@ -615,8 +606,7 @@ class Node(Pipelet):
 
     """
     def __init__(self, interface=None,
-                 iterables={},
-                 diskbased=True, base_directory=None,
+                 iterables={}, base_directory=None,
                  overwrite=False, **kwargs):
         # interface can only be set at initialization
         super(Node, self).__init__(**kwargs)
@@ -626,16 +616,8 @@ class Node(Pipelet):
         self._result     = None
         self.iterables  = iterables
         self.parameterization = None
-        self.disk_based = diskbased
-        self.output_directory_base  = None
+        self.output_directory_base  = base_directory
         self.overwrite = None
-        if not self.disk_based:
-            if base_directory is not None:
-                msg = 'Setting base_directory requires a disk based interface'
-                raise ValueError(msg)
-        if self.disk_based:
-            self.output_directory_base  = base_directory
-            self.overwrite = overwrite
 
     @property
     def interface(self):
@@ -848,7 +830,18 @@ class Node(Pipelet):
 class MapNode(Node):
     
     def __init__(self, iterfield=None, **kwargs):
-        # interface can only be set at initialization
+        """
+
+        Parameters
+        ----------
+
+        iterfield : 1+-element list
+        key(s) over which to repeatedly call the interface.
+        for example, to iterate FSL.Bet over multiple files, one can
+        set node.iterfield = ['infile'].  If this list has more than 1 item
+        then the inputs are selected in order simultaneously from each of these
+        fields and each field will need to have the same number of members.
+        """
         super(MapNode, self).__init__(**kwargs)
         if self.iterfield is None:
             raise Exception("Iterfield must be provided")
@@ -856,7 +849,7 @@ class MapNode(Node):
         self._inputs = deepcopy(self._interface.inputs)
         # TODO modify iterields to lists
         for field in iterfield:
-            self._inputs.add_trait(field, List('underlying type'))
+            self._inputs.add_trait(field, List(self._inputs.traits()[field].trait_type.__class__))
 
     @property
     def inputs(self):
@@ -865,7 +858,7 @@ class MapNode(Node):
     def _outputs():
         outputs = self._interface._outputs()
         for field in outputs.get().keys():
-            outputs.add_trait(field, List('underlying type'))
+            outputs.add_trait(field, List(outputs.traits()[field].trait_type.__class__))
         
     @property
     def outputs(self):
