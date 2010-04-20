@@ -3,16 +3,8 @@
 The `Pipeline` class provides core functionality for batch processing. 
 """
 
-import os
-import pwd
-import sys
-from copy import deepcopy
-from time import sleep, strftime
-from warnings import warn
-import logging
+import os, sys
 import logging.handlers
-from traceback import format_exception
-
 import numpy as np
 
 from nipype.utils.misc import package_check
@@ -23,9 +15,17 @@ try:
 except:
     pass
 
-from nipype.interfaces.base import (NEW_CommandLine, traits, File, Directory,
-                                    InputMultiPath, OutputMultiPath, TraitedSpec)
-from nipype.utils.filemanip import fname_presuffix
+from copy import deepcopy
+from warnings import warn
+from tempfile import mkdtemp
+from shutil import rmtree
+from socket import gethostname
+
+from nipype.interfaces.base import traits, File, Directory, InputMultiPath,\
+    OutputMultiPath, TraitedSpec, CommandLine, Bunch, InterfaceResult,\
+    isdefined
+from nipype.utils.filemanip import fname_presuffix, save_json, FileNotFoundError,\
+    filename_to_list, list_to_filename, copyfiles, fnames_presuffix
 
 #Sets up logging for pipeline and nodewrapper execution
 LOG_FILENAME = 'pypeline.log'
@@ -325,7 +325,7 @@ class Pipelet(object):
             filename = 'temp.npz'
         np.savez(filename, object=self)
 
-    def load(filename):
+    def load(self, filename):
         np.load(filename)
 
 class Workflow(Pipelet):
@@ -508,7 +508,7 @@ class Workflow(Pipelet):
                 setattr(outputdict, node.name, node.outputs)
             else:
                 outputs = TraitedSpec() 
-                for key, trait in node.outputs.items():
+                for key, _ in node.outputs.items():
                     outputs.add_trait(key, traits.Any(node=node))
                     setattr(outputs, key, None)
                 setattr(outputdict, node.name, outputs)
@@ -805,7 +805,6 @@ class Node(Pipelet):
         if not cwd and self.disk_based:
             cwd = self._output_directory()
             os.chdir(cwd)
-        basewd = cwd
         self._result = self._run_command(execute, cwd)
         if cwd:
             os.chdir(old_cwd)
@@ -934,7 +933,6 @@ class MapNode(Node):
         if not cwd and self.disk_based:
             cwd = self._output_directory()
             os.chdir(cwd)
-        basewd = cwd
 
         iterflow = Workflow()
         for i in enumerate(self.iterfield):
