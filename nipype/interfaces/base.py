@@ -19,9 +19,11 @@ import enthought.traits.api as traits
 from enthought.traits.api import Undefined
 from enthought.traits.trait_base import _Undefined
 
-from nipype.utils.filemanip import md5, hash_infile, FileNotFoundError
+from nipype.utils.filemanip import md5, hash_infile, FileNotFoundError,\
+    hash_timestamp
 from nipype.utils.misc import is_container
 from enthought.traits.trait_errors import TraitError
+from nipype.utils.config import config
 
  
 __docformat__ = 'restructuredtext'
@@ -893,7 +895,14 @@ class BaseTraitedSpec(traits.HasTraits):
             stuff = [stuff]
         file_list = []
         for afile in stuff:
-            file_list.append((afile, hash_infile(afile) ))
+            if config.get('execution', 'hash_method').lower() == 'timestamp':
+                hash = hash_timestamp(afile)
+            elif config.get('execution', 'hash_method').lower() == 'content':
+                hash = hash_infile(afile)
+            else:
+                raise Exception("Unknown hash method: %s"%config.get('execution', 'hash_method'))
+            
+            file_list.append((afile, hash ))
         return file_list
 
     #@traits.cached_property

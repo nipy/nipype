@@ -14,6 +14,7 @@ filemanip_level = INFO
 
 [execution]
 stop_on_first_crash = false
+hash_method = content
 """)
 
 config = ConfigParser.ConfigParser()
