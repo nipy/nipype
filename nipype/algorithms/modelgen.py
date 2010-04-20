@@ -75,8 +75,8 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
     outlier_files = InputMultiPath(File(exists=True),
          desc="Files containing scan outlier indices that should be tossed",
                                 filecopy=False)
-    functional_runs = traits.Either(traits.List(traits.List(traits.File(exists=True))),
-                                    InputMultiPath(traits.File(exists=True)),        
+    functional_runs = traits.Either(traits.List(traits.List(File(exists=True))),
+                                    InputMultiPath(File(exists=True)),        
                                   mandatory=True,
             desc="Data files for model. List of 4D files or list of" \
                                       "list of 3D files per session",

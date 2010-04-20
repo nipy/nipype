@@ -4,7 +4,8 @@ Created on 24 Feb 2010
 @author: filo
 '''
 from nipype.interfaces.base import Bunch, InterfaceResult,\
-    NEW_BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec, isdefined
+    NEW_BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec,\
+    isdefined, File
 import nipype.externals.pynifti as nifti
 import numpy as np
 from math import floor, ceil
@@ -14,16 +15,16 @@ import os
 from nipype.utils.filemanip import fname_presuffix
 
 class PickAtlasInputSpec(BaseInterfaceInputSpec):
-    atlas = traits.File(exists=True, desc="Location of the atlas that will be used.", compulsory=True)
+    atlas = File(exists=True, desc="Location of the atlas that will be used.", compulsory=True)
     labels = traits.Either(traits.Int, traits.List(traits.Int), 
                            desc="Labels of regions that will be included in the mask. Must be \
                                 compatible with the atlas used.", compulsory=True)
     hemi = traits.Enum('both','left','right', desc="Restrict the mask to only one hemisphere: left or right", use_default=True)
     dilation_size = traits.Float(desc="Defines how much the mask will be dilated (expanded in 3D).", use_default = True)
-    output_file = traits.File(desc="Where to store the output mask.")
+    output_file = File(desc="Where to store the output mask.")
 
 class PickAtlasOutputSpec(TraitedSpec):
-    mask_file = traits.File(exists=True)
+    mask_file = File(exists=True)
 
 class PickAtlas(NEW_BaseInterface):
     '''

@@ -18,7 +18,7 @@ from nipype.interfaces.fsl.base import FSLCommand, FSLInfo, NEW_FSLCommand,\
     FSLTraitedSpec
 from nipype.utils.filemanip import list_to_filename
 from nipype.interfaces.base import Bunch, traits, TraitedSpec, isdefined,\
-    OutputMultiPath
+    OutputMultiPath, File
 from nipype.utils.docparse import get_doc
 
 warn = warnings.warn
@@ -116,8 +116,8 @@ class Merge(FSLCommand):
         return outputs
 
 class ExtractRoiInputSpec(FSLTraitedSpec):
-    infile = traits.File(exists=True, argstr="%s", position=0, desc="input file", mandatory=True)
-    outfile = traits.File(exists=True, argstr="%s", position=1, desc="output file", genfile=True)
+    infile = File(exists=True, argstr="%s", position=0, desc="input file", mandatory=True)
+    outfile = File(exists=True, argstr="%s", position=1, desc="output file", genfile=True)
     xmin = traits.Float(argstr="%f", position=2)
     xsize = traits.Float(argstr="%f", position=3)
     ymin = traits.Float(argstr="%f", position=4)
@@ -128,7 +128,7 @@ class ExtractRoiInputSpec(FSLTraitedSpec):
     tsize = traits.Int(argstr="%d", position=9)
     
 class ExtractRoiOutputSpec(TraitedSpec):
-    outfile = traits.File(exists=True)
+    outfile = File(exists=True)
 
 class ExtractRoi(NEW_FSLCommand):
     """Uses FSL Fslroi command to extract region of interest (ROI)
@@ -179,12 +179,12 @@ class ExtractRoi(NEW_FSLCommand):
         return None
 
 class SplitInputSpec(FSLTraitedSpec):
-    infile = traits.File(exists=True, argstr="%s", position = 0, desc="input filename")
+    infile = File(exists=True, argstr="%s", position = 0, desc="input filename")
     outbasename = traits.Str(argstr="%s", position=1, desc="outputs prefix")
     dimension = traits.Enum('t','x','y','z', argstr="-%s", position=2, desc="dimension along which the file will be split")
     
 class SplitOutputSpec(TraitedSpec):
-    outfiles = OutputMultiPath(traits.File(exists=True))
+    outfiles = OutputMultiPath(File(exists=True))
 
 class Split(NEW_FSLCommand):
     """Uses FSL Fslsplit command to separate a volume into images in
