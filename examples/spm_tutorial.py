@@ -19,7 +19,6 @@ import nipype.interfaces.spm as spm          # spm
 import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility 
-import nipype.pipeline.node_wrapper as nw    # nodes for pypelines
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
 import nipype.algorithms.modelgen as model   # model specification
@@ -79,7 +78,7 @@ subject_list = ['s1', 's3']
 info = dict(func=[['subject_id', ['f3','f5','f7','f10']]],
             struct=[['subject_id','struct']])
 
-infosource = nw.NodeWrapper(interface=util.IdentityInterface(fields=['subject_id']))
+infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
 
 """Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
@@ -103,7 +102,7 @@ and provides additional housekeeping and pipeline specific
 functionality.
 """
 
-datasource = nw.NodeWrapper(interface=nio.DataGrabber(infields=['subject_id'],
+datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                       outfields=['func', 'struct']),
                             name = 'datasource')
 datasource.inputs.base_directory = data_dir
@@ -115,7 +114,7 @@ datasource.inputs.template_args = info
 and register all images to the mean image.
 """
 
-realign = nw.NodeWrapper(interface=spm.Realign())
+realign = pe.Node(interface=spm.Realign(), name="ralign")
 realign.inputs.register_to_mean = True
 
 """Use :class:`nipype.algorithms.rapidart` to determine which of the
@@ -123,7 +122,7 @@ images in the functional series are outliers based on deviations in
 intensity or movement.
 """
 
-art = nw.NodeWrapper(interface=ra.ArtifactDetect())
+art = pe.Node(interface=ra.ArtifactDetect(), name="art")
 art.inputs.use_differences      = [True,True]
 art.inputs.use_norm             = True
 art.inputs.norm_threshold       = 0.5
@@ -134,14 +133,14 @@ art.inputs.mask_type            = 'file'
 :class:`nipype.interfaces.fsl.Bet`.
 """
 
-skullstrip = nw.NodeWrapper(interface=fsl.Bet())
+skullstrip = pe.Node(interface=fsl.Bet(), name="skullstrip")
 skullstrip.inputs.mask = True
 
 """Use :class:`nipype.interfaces.spm.Coregister` to perform a rigid
 body registration of the functional data to the structural data.
 """
 
-coregister = nw.NodeWrapper(interface=spm.Coregister())
+coregister = pe.Node(interface=spm.Coregister(), name="coregister")
 coregister.inputs.jobtype = 'estimate'
 
 
@@ -150,7 +149,7 @@ coregister.inputs.jobtype = 'estimate'
 includes the template image, T1.nii.
 """
 
-normalize = nw.NodeWrapper(interface=spm.Normalize())
+normalize = pe.Node(interface=spm.Normalize(), name = "normalize")
 normalize.inputs.template = os.path.abspath('data/T1.nii')
 
 
@@ -158,7 +157,7 @@ normalize.inputs.template = os.path.abspath('data/T1.nii')
 :class:`nipype.interfaces.spm.Smooth`.
 """
 
-smooth = nw.NodeWrapper(interface=spm.Smooth())
+smooth = pe.Node(interface=spm.Smooth(), name = "smooth")
 fwhmlist = [4]
 smooth.iterables = ('fwhm',fwhmlist)
 
@@ -207,7 +206,7 @@ contrasts = [cont1,cont2]
 :class:`nipype.interfaces.spm.SpecifyModel`.
 """
 
-modelspec = nw.NodeWrapper(interface=model.SpecifyModel())
+modelspec = pe.Node(interface=model.SpecifyModel(), name= "modelspec")
 modelspec.inputs.concatenate_runs        = True
 modelspec.inputs.input_units             = 'secs'
 modelspec.inputs.output_units            = 'secs'
@@ -218,7 +217,7 @@ modelspec.inputs.high_pass_filter_cutoff = 120
 :class:`nipype.interfaces.spm.Level1Design`.
 """
 
-level1design = nw.NodeWrapper(interface=spm.Level1Design())
+level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")
 level1design.inputs.timing_units       = modelspec.inputs.output_units
 level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
 level1design.inputs.bases              = {'hrf':{'derivs': [0,0]}}
@@ -228,15 +227,14 @@ level1design.inputs.bases              = {'hrf':{'derivs': [0,0]}}
 parameters of the model.
 """
 
-level1estimate = nw.NodeWrapper(interface=spm.EstimateModel())
+level1estimate = pe.Node(interface=spm.EstimateModel(), name="level1estimate")
 level1estimate.inputs.estimation_method = {'Classical' : 1}
 
 """Use :class:`nipype.interfaces.spm.EstimateContrast` to estimate the
 first level contrasts specified in a few steps above.
 """
 
-contrastestimate = nw.NodeWrapper(interface = spm.EstimateContrast(),
-                                  diskbased=True)
+contrastestimate = pe.Node(interface = spm.EstimateContrast(), name="contrastestimate")
 contrastestimate.inputs.contrasts = contrasts
 
 """
@@ -262,7 +260,7 @@ links between the processes, i.e., how data should flow in and out of
 the processing nodes.
 """
 
-l1pipeline = pe.Pipeline()
+l1pipeline = pe.Workflow(name="level1")
 l1pipeline.config['workdir'] = os.path.abspath('spm/workingdir')
 
 l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
@@ -312,7 +310,7 @@ out, then a sub-directory with the name 'mean' would be created and
 the mean image would be copied to that directory.
 """
 
-datasink = nw.NodeWrapper(interface=nio.DataSink())
+datasink = pe.Node(interface=nio.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.abspath('spm/l1output')
 
 def getstripdir(subject_id):
@@ -348,7 +346,7 @@ contrasts.
 
 # collect all the con images for each contrast.
 contrast_ids = range(1,len(contrasts)+1)
-l2source = nw.NodeWrapper(nio.DataGrabber(infields=['fwhm', 'con']))
+l2source = pe.Node(nio.DataGrabber(infields=['fwhm', 'con']), name="l2source")
 l2source.inputs.template=os.path.abspath('spm/l1output/*/con*/_fwhm_%d/con_%04d.img')
 # iterate over all contrast images
 l2source.iterables = [('fwhm',fwhmlist),
@@ -361,14 +359,14 @@ subjects (n=2 in this example).
 """
 
 # setup a 1-sample t-test node
-onesamplettest = nw.NodeWrapper(interface=spm.OneSampleTTest(), diskbased=True)
+onesamplettest = pe.Node(interface=spm.OneSampleTTest(), name="onesamplettest")
 
 
 """As before, we setup a pipeline to connect these two nodes (l2source
 -> onesamplettest).
 """
 
-l2pipeline = pe.Pipeline()
+l2pipeline = pe.Workflow(name="level2")
 l2pipeline.config['workdir'] = os.path.abspath('spm/l2output')
 l2pipeline.config['use_parameterized_dirs'] = True
 l2pipeline.connect([(l2source,onesamplettest,[('outfiles','con_images')])])
