@@ -341,7 +341,21 @@ class Workflow(Pipelet):
     def __init__(self, **kwargs):
         super(Workflow, self).__init__(**kwargs)
         self._graph = nx.DiGraph()
-        self._inputs = TraitedSpec()
+        self.ipyclient = None
+        self.taskclient = None
+        try:
+            name = 'IPython.kernel.client'
+            __import__(name)
+            self.ipyclient = sys.modules[name]
+        except ImportError:
+            warn("Ipython kernel not found.  Parallel execution will be" \
+                     "unavailable", ImportWarning)
+        # attributes for running with manager
+        self.procs = None
+        self.depidx = None
+        self.proc_done = None
+        self.proc_pending = None
+        self._execgraph = None
 
     def connect(self, *args):
         """Connect nodes in the pipeline.
@@ -454,6 +468,11 @@ class Workflow(Pipelet):
     def outputs(self):
         return self.get_outputs()
 
+    def get_exec_node(self, name):
+        if self._execgraph:
+            return [node  for node in self._execgraph.nodes() if name == str(node)]
+        return None
+    
     def _has_attr(self, parameter, subtype='in'):
         if subtype == 'in':
             subobject = self.inputs
@@ -579,7 +598,9 @@ class Workflow(Pipelet):
                 nx.draw_networkx_edge_labels(pklgraph, pos)
 
     def run(self):
-        self.execute_in_series()
+        self._create_flat_graph()
+        self._generate_expanded_graph()
+        self._execute_with_manager()
 
     def _set_node_input(self, node, param, source, sourceinfo):
         """Set inputs of a node given the edge connection"""
@@ -592,7 +613,7 @@ class Workflow(Pipelet):
         logger.debug('setting input: %s->%s', param, str(val))
         node.set_input(param, deepcopy(val))
 
-    def execute_in_series(self, updatehash=False, force_execute=None):
+    def _execute_in_series(self, updatehash=False, force_execute=None):
         """Executes a pre-defined pipeline in a serial order.
 
         Parameters
@@ -770,7 +791,165 @@ class Workflow(Pipelet):
                 self._graph.add_edges_from(node._graph.edges(data=True))
         if nodes2remove:
             self._graph.remove_nodes_from(nodes2remove)
-    
+
+    def _generate_dependency_list(self):
+        """ Generates a dependency list for a list of graphs. Adds the
+        following attributes to the pipeline:
+
+        New attributes:
+        ---------------
+        
+        procs: list (N) of underlying interface elements to be
+        processed 
+        proc_done: a boolean vector (N) signifying whether a process
+        has been executed
+        proc_pending: a boolean vector (N) signifying whether a
+        process is currently running. 
+        Note: A process is finished only when both proc_done==True and
+        proc_pending==False
+        depidx: a boolean matrix (NxN) storing the dependency
+        structure accross processes. Process dependencies are derived
+        from each column. 
+        """
+        if not self._execgraph:
+            raise Exception('Execution graph has not been generated')
+        self.procs = self._execgraph.nodes()
+        self.depidx = nx.adj_matrix(self._execgraph).__array__()
+        self.proc_done    = np.zeros(len(self.procs), dtype=bool)
+        self.proc_pending = np.zeros(len(self.procs), dtype=bool)
+
+    def _remove_node_deps(self, jobid, crashfile):
+        subnodes = nx.dfs_preorder(self._execgraph, self.procs[jobid])
+        for node in subnodes:
+            idx = self.procs.index(node)
+            self.proc_done[idx] = True
+            self.proc_pending[idx] = False
+        return dict(node = self.procs[jobid],
+                    dependents = subnodes,
+                    crashfile = crashfile)
+
+    def _run_local(self, jobid, reason='None'):
+        "docstring for _run_local"
+        logger.info('node: %s Reason: %s. try to ' \
+                        'run locally' % (self.procs[jobid]._id,
+                                         reason))
+        try:
+            res = self.procs[jobid].run()
+            self._task_finished_cb(res, jobid)
+        except:
+            crashfile = self._report_crash(self.procs[jobid])
+            # remove dependencies from queue
+            return self._remove_node_deps(jobid, crashfile)
+        return None
+        
+    def _execute_with_manager(self):
+        """Executes a pre-defined pipeline is distributed approaches
+        based on IPython's parallel processing interface
+        """
+        # retrieve clients again
+        if not self.taskclient:
+            try:
+                self.taskclient = self.ipyclient.TaskClient()
+            except ConnectionRefusedError:
+                warn("No clients found, running serially for now.")
+                self._execute_in_series()
+                return
+        logger.info("Running in parallel.")
+        self.taskclient.clear()
+        # in the absence of a dirty bit on the object, generate the
+        # parameterization each time before running
+        # Generate appropriate structures for worker-manager model
+        self._generate_dependency_list()
+        # get number of ipython clients available
+        self.pending_tasks = []
+        self.readytorun = []
+        # setup polling
+        notrun = []
+        while np.any(self.proc_done==False) | np.any(self.proc_pending==True):
+            toappend = []
+            # trigger callbacks for any pending results
+            while self.pending_tasks:
+                a = self.pending_tasks.pop()
+                res = self.taskclient.get_task_result(a[0], block=False)
+                if res:
+                    if res.failure:
+                        try:
+                            res.raise_exception()
+                        except:
+                            out = self._run_local(a[1], 'parallel execution error')
+                            if out:
+                                notrun.append(out)
+                    else:
+                        # workaround for OutputMultiPath not returning
+                        # appropriate values post pickling
+                        try:
+                            self._task_finished_cb(res['result'], a[1])
+                        except AttributeError:
+                            out = self._run_local(a[1], 'attribute error')
+                            if out:
+                                notrun.append(out)
+                else:
+                    toappend.insert(0, a)
+            if toappend:
+                self.pending_tasks.extend(toappend)
+            else:
+                self.taskclient.clear()
+            self._send_procs_to_workers()
+            sleep(2)
+        self.taskclient.clear()
+        _report_nodes_not_run(notrun)
+                
+    def _send_procs_to_workers(self):
+        """ Sends jobs to workers using ipython's taskclient interface
+        """
+        while np.any(self.proc_done == False):
+            # Check to see if a job is available
+            jobids = np.flatnonzero((self.proc_done == False) & \
+                                        np.all(self.depidx==0, axis=0))
+            if len(jobids)>0:
+                # send all available jobs
+                logger.info('Submitting %d jobs' % len(jobids))
+                for jobid in jobids:
+                    # change job status in appropriate queues
+                    self.proc_done[jobid] = True
+                    self.proc_pending[jobid] = True
+                    self._set_output_directory_base(self.procs[jobid])
+                    # Send job to task manager and add to pending tasks
+                    _, hashvalue = self.procs[jobid].inputs._get_hashval()
+                    logger.info('Executing: %s ID: %d H:%s' % \
+                                    (self.procs[jobid]._id, jobid, hashvalue))
+                    cmdstr = "result = task.run()"
+                    task = self.ipyclient.StringTask(cmdstr,
+                                                     push = dict(task=self.procs[jobid]),
+                                                     pull = 'result')
+                    tid = self.taskclient.run(task, block = False)
+                    self.pending_tasks.insert(0, (tid, jobid))
+            else:
+                break
+
+    def _task_finished_cb(self, result, jobid):
+        """ Extract outputs and assign to inputs of dependent tasks
+
+        This is called when a job is completed.
+        """
+        logger.info('[Job finished] jobname: %s jobid: %d' % \
+                        (self.procs[jobid]._id, jobid))
+        # Update job and worker queues
+        self.proc_pending[jobid] = False
+        self.procs[jobid]._result = deepcopy(result)
+        # Update the inputs of all tasks that depend on this job's outputs
+        graph = self._execgraph
+        for edge in graph.out_edges_iter(self.procs[jobid]):
+            data = graph.get_edge_data(*edge)
+            for sourceinfo, destname in data['connect']:
+                logger.debug('%s %s %s %s',edge[1], destname, self.procs[jobid], sourceinfo)
+                self._set_node_input(edge[1], destname,
+                                     self.procs[jobid], sourceinfo)
+        # update the job dependency structure
+        self.depidx[jobid, :] = 0.
+
+
+
 class Node(Pipelet):
     """Wraps interface objects for use in pipeline
     
