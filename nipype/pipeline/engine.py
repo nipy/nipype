@@ -916,7 +916,8 @@ class Workflow(Pipelet):
                         (self.procs[jobid]._id, jobid))
         # Update job and worker queues
         self.proc_pending[jobid] = False
-        self.procs[jobid]._result = deepcopy(result)
+        if self.procs[jobid]._result != result:
+            self.procs[jobid]._result = result
         # Update the inputs of all tasks that depend on this job's outputs
         graph = self._execgraph
         for edge in graph.out_edges_iter(self.procs[jobid]):
