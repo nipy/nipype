@@ -13,10 +13,12 @@ import glob
 import os
 import shutil
 
+from enthought.traits.trait_errors import TraitError
+
 from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult,\
     NEW_Interface, TraitedSpec, traits, File, Directory, isdefined, BaseInterfaceInputSpec,\
-    NEW_BaseInterface, OutputMultiPath, DynamicTraitedSpec
-from nipype.utils.filemanip import copyfile, list_to_filename, filename_to_list
+    NEW_BaseInterface, OutputMultiPath, DynamicTraitedSpec, BaseTraitedSpec
+from nipype.utils.filemanip import copyfile, list_to_filename, filename_to_list, FileNotFoundError
 
 def add_traits(base, names, trait_type=None):
     """ Add traits to a traited class.
@@ -151,7 +153,9 @@ class DataGrabberInputSpec(DynamicTraitedSpec): #InterfaceInputSpec):
 
 class DataGrabber(IOBase):
     """ Generic datagrabber module that wraps around glob in an
-        intelligent way for neuroimaging tasks
+        intelligent way for neuroimaging tasks to grab files
+
+        Doesn't support directories currently
 
         Examples
         --------
@@ -224,18 +228,12 @@ class DataGrabber(IOBase):
                 outdict[key] = []
             self.inputs.template_args =  outdict
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
-        
+
     def _add_output_traits(self, base):
-        undefined_traits = {}
-        for key in self.inputs.template_args.keys():
-            base.add_trait(key, OutputMultiPath(File(exists=True)))
-            undefined_traits[key] = traits.Undefined
-            value = getattr(base, key)
-        base.trait_set(trait_change_notify=False, **undefined_traits)
-        return base
-    
+        return add_traits(base, self.inputs.template_args.keys())
+
     def _list_outputs(self):
-        outputs = self._outputs().get()
+        outputs = {}
         for key, args in self.inputs.template_args.items():
             outputs[key] = []
             template = self.inputs.template
@@ -274,8 +272,40 @@ class DataGrabber(IOBase):
                     else:
                         outfiles = list_to_filename(glob.glob(template))
                     outputs[key].insert(i,outfiles)
-            if len(outputs[key]) == 1:
+            if len(outputs[key]) == 0:
+                outputs[key] = None
+            elif len(outputs[key]) == 1:
                 outputs[key] = outputs[key][0]
+        return outputs
+
+    def aggregate_outputs(self):
+        """ Collate expected outputs and check for existence
+
+        Overriding aggregate_outputs to modify output trait types from
+        outputmultipath to either List(File) or File
+        """
+        
+        predicted_outputs = self._list_outputs()
+        outputs = self._outputs()
+        if predicted_outputs:
+            for key, val in predicted_outputs.items():
+                outputs.remove_trait(key)
+                if val is None:
+                    outputs.add_trait(key, traits.Any)
+                elif isinstance(val, list):
+                    outputs.add_trait(key,
+                                      traits.List(File(exists=True)))
+                else:
+                    outputs.add_trait(key, File(exists=True))
+                try:
+                    setattr(outputs, key, val)
+                except TraitError, error:
+                    if error.info == "a file name":
+                        msg = "File '%s' not found for %s output '%s'." \
+                            % (val, self.__class__.__name__, key)
+                        raise FileNotFoundError(msg)
+                    else:
+                        raise error
         return outputs
 
 
