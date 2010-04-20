@@ -239,33 +239,55 @@ def _report_nodes_not_run(notrun):
         logger.info("***********************************")
 
 
-class Pipelet(object):
-    """ Define basic entities for workflow and nodes
+def make_output_dir(outdir):
+    """Make the output_dir if it doesn't exist.
+
+    Parameters
+    ----------
+    outdir : output directory to create
     
     """
+    if not os.path.exists(os.path.abspath(outdir)):
+        # XXX Should this use os.makedirs which will make any
+        # necessary parent directories?  I didn't because the one
+        # case where mkdir failed because a missing parent
+        # directory, something went wrong up-stream that caused an
+        # invalid path to be passed in for `outdir`.
+        logger.info("Creating %s" % outdir)
+        os.mkdir(outdir)
 
-    def __init__(self, name=None, **kwargs):
+class Pipelet(object):
+    """ Define common attributes and functions for workflows and nodes
+    """
+
+    def __init__(self, name=None, base_dir=None,
+                 overwrite=False, **kwargs):
+        """ Initialize base parameters of a workflow or node
+
+        Parameters
+        ----------
+        
+        base_dir : directory
+            base output directory (will be hashed before creations)
+            default=None, which results in the use of mkdtemp
+        overwrite : Boolean
+            Whether to overwrite contents of output directory if it already
+            exists. If directory exists and hash matches it
+            assumes that process has been executed (default : False)
+        name : string (mandatory)
+            Name of this node. By default node is named
+            modulename.classname. But when the same class is being used several
+            times, a different name ensures that output directory is not
+            overwritten each time the same functionality is run. 
         """
-    base_directory : directory
-        base output directory (will be hashed before creations)
-        default=None, which results in the use of mkdtemp
-    overwrite : Boolean
-        Whether to overwrite contents of output directory if it
-        already exists. If directory exists and hash matches it
-        assumes that process has been executed (default : False)
-    name : string
-        Name of this node. By default node is named
-        modulename.classname. But when the same class is being used
-        several times, a different name ensures that output directory
-        is not overwritten each time the same functionality is run.
-        """
-        self.base_directory = None
-        self.overwrite = None
+        self.base_dir = base_dir
+        self.overwrite = overwrite
         if name is None:
-            raise Exception("please provide a name")
+            raise Exception("init requires a name for this %s" % self.__class__.__name__)
         self.name = name
+        
         # for compatibility with node expansion using iterables
-        self.id = self.name
+        self._id = self.name
 
     def execute(self):
         print "Executing workflow/node"
@@ -277,7 +299,14 @@ class Pipelet(object):
         raise NotImplementedError
     
     def __repr__(self):
-        return self.id
+        return self._id
+
+    def _output_directory(self):
+        if self.base_dir is None:
+            self.base_dir = mkdtemp()
+        return os.path.abspath(os.path.join(self.base_dir,
+                                            self.name))
+
 
 class Workflow(Pipelet):
     """Controls the setup and execution of a pipeline of processes
@@ -577,18 +606,6 @@ class Node(Pipelet):
         of tuples
         node.iterables = ('frac',[0.5,0.6,0.7])
         node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
-    base_directory : directory
-        base output directory (will be hashed before creations)
-        default=None, which results in the use of mkdtemp
-    overwrite : Boolean
-        Whether to overwrite contents of output directory if it
-        already exists. If directory exists and hash matches it
-        assumes that process has been executed (default : False)
-    name : string
-        Name of this node. By default node is named
-        modulename.classname. But when the same class is being used
-        several times, a different name ensures that output directory
-        is not overwritten each time the same functionality is run.
     
     Notes
     -----
@@ -606,9 +623,7 @@ class Node(Pipelet):
     >>> realign.run() # doctest: +SKIP
 
     """
-    def __init__(self, interface,
-                 iterables={}, base_directory=None,
-                 overwrite=False, **kwargs):
+    def __init__(self, interface, iterables={}, **kwargs):
         # interface can only be set at initialization
         super(Node, self).__init__(**kwargs)
         if interface is None:
@@ -617,7 +632,7 @@ class Node(Pipelet):
         self._result     = None
         self.iterables  = iterables
         self.parameterization = None
-        self.output_directory_base  = base_directory
+        self.output_directory_base  = self.base_directory
         self.overwrite = None
 
     @property
@@ -809,24 +824,6 @@ class Node(Pipelet):
     def update(self, **opts):
         self.inputs.update(**opts)
         
-    def _output_directory(self):
-        if self.output_directory_base is None:
-            self.output_directory_base = mkdtemp()
-        return os.path.abspath(os.path.join(self.output_directory_base,
-                                            self.name))
-
-    def _make_output_dir(self, outdir):
-        """Make the output_dir if it doesn't exist.
-        """
-        if not os.path.exists(os.path.abspath(outdir)):
-            # XXX Should this use os.makedirs which will make any
-            # necessary parent directories?  I didn't because the one
-            # case where mkdir failed because a missing parent
-            # directory, something went wrong up-stream that caused an
-            # invalid path to be passed in for `outdir`.
-            logger.info("Creating %s"%outdir)
-            os.mkdir(outdir)
-        return outdir
 
 class MapNode(Node):
     
@@ -889,7 +886,6 @@ class MapNode(Node):
         iterflow = Workflow()
         for i in enumerate(self.iterfield):
             newnode = Node(deepcopy(self.interface), name=self.name+i)
-            # TODO set inputs
             for field in self.iterfield:
                 setattr(newnode.inputs, field,
                         getattr(self.inputs, field)[i])
