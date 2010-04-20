@@ -36,6 +36,7 @@ from nipype.utils.filemanip import (save_json, FileNotFoundError,
 from nipype.pipeline.utils import (_generate_expanded_graph,
                                    _create_pickleable_graph, export_graph,
                                    _report_nodes_not_run, make_output_dir)
+from nipype.utils.config import config
 
 #Sets up logging for pipeline and nodewrapper execution
 LOG_FILENAME = 'pypeline.log'
@@ -51,11 +52,11 @@ formatter = logging.Formatter(fmt='%(asctime)s,%(msecs)d %(name)-2s '\
                               datefmt='%y%m%d-%H:%M:%S')
 hdlr.setFormatter(formatter)
 logger.addHandler(hdlr)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.getLevelName(config.get('logging','workflow_level')))
 nwlogger.addHandler(hdlr)
-nwlogger.setLevel(logging.INFO)
+nwlogger.setLevel(logging.getLevelName(config.get('logging','node_level')))
 fmlogger.addHandler(hdlr)
-fmlogger.setLevel(logging.INFO)
+fmlogger.setLevel(logging.getLevelName(config.get('logging','filemanip_level')))
 
 class WorkflowBase(object):
     """ Define common attributes and functions for workflows and nodes
