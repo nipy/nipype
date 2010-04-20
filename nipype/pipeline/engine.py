@@ -3,8 +3,18 @@
 The `Pipeline` class provides core functionality for batch processing. 
 """
 
-import os, sys
+from copy import deepcopy
 import logging.handlers
+import os
+import pwd
+from shutil import rmtree
+from socket import gethostname
+import sys
+from tempfile import mkdtemp
+from time import sleep, strftime
+from traceback import format_exception
+from warnings import warn
+
 import numpy as np
 
 from nipype.utils.misc import package_check
@@ -15,11 +25,6 @@ try:
 except:
     pass
 
-from copy import deepcopy
-from warnings import warn
-from tempfile import mkdtemp
-from shutil import rmtree
-from socket import gethostname
 
 from nipype.interfaces.base import traits, File, Directory, InputMultiPath,\
     OutputMultiPath, TraitedSpec, CommandLine, Bunch, InterfaceResult,\
@@ -30,8 +35,8 @@ from nipype.utils.filemanip import fname_presuffix, save_json, FileNotFoundError
 #Sets up logging for pipeline and nodewrapper execution
 LOG_FILENAME = 'pypeline.log'
 logging.basicConfig()
-logger = logging.getLogger('engine')
-nwlogger = logging.getLogger('nodewrapper')
+logger = logging.getLogger('workflow')
+nwlogger = logging.getLogger('node')
 fmlogger = logging.getLogger('filemanip')
 hdlr = logging.handlers.RotatingFileHandler(LOG_FILENAME,
                                             maxBytes=256000,
@@ -182,22 +187,22 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
     # Retrieve edge information connecting nodes of the subgraph to other
     # nodes of the supergraph.
     supernodes = supergraph.nodes()
-    ids = [n.id for n in supernodes]
+    ids = [n._id for n in supernodes]
     edgeinfo = {}
     for n in subgraph.nodes():
-        nidx = ids.index(n.id)
+        nidx = ids.index(n._id)
         for edge in supergraph.in_edges_iter(supernodes[nidx]):
                 #make sure edge is not part of subgraph
             if edge[0] not in subgraph.nodes():
-                if n.id not in edgeinfo.keys():
-                    edgeinfo[n.id] = []
-                edgeinfo[n.id].append((edge[0],
+                if n._id not in edgeinfo.keys():
+                    edgeinfo[n._id] = []
+                edgeinfo[n._id].append((edge[0],
                                        supergraph.get_edge_data(*edge)))
     supergraph.remove_nodes_from(nodes)
     # Add copies of the subgraph depending on the number of iterables
     for i, params in enumerate(walk(iterables.items())):
         Gc = deepcopy(subgraph)
-        ids = [n.id for n in Gc.nodes()]
+        ids = [n._id for n in Gc.nodes()]
         nodeidx = ids.index(nodeid)
         paramstr = ''
         for key, val in sorted(params.items()):
@@ -221,21 +226,21 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
         supergraph.add_nodes_from(Gc.nodes())
         supergraph.add_edges_from(Gc.edges(data=True))
         for node in Gc.nodes():
-            if node.id in edgeinfo.keys():
-                for info in edgeinfo[node.id]:
+            if node._id in edgeinfo.keys():
+                for info in edgeinfo[node._id]:
                     supergraph.add_edges_from([(info[0], node, info[1])])
-            node.id += str(i)
+            node._id += str(i)
     return supergraph
 
 def _report_nodes_not_run(notrun):
     if notrun:
         logger.info("***********************************")
         for info in notrun:
-            logger.error("could not run node: %s" % info['node'].id)
+            logger.error("could not run node: %s" % info['node']._id)
             logger.info("crashfile: %s" % info['crashfile'])
             logger.debug("The following dependent nodes were not run")
             for subnode in info['dependents']:
-                logger.debug(subnode.id)
+                logger.debug(subnode._id)
         logger.info("***********************************")
 
 
@@ -255,6 +260,7 @@ def make_output_dir(outdir):
         # invalid path to be passed in for `outdir`.
         logger.info("Creating %s" % outdir)
         os.mkdir(outdir)
+    return outdir
 
 class Pipelet(object):
     """ Define common attributes and functions for workflows and nodes
@@ -337,7 +343,6 @@ class Workflow(Pipelet):
         self._graph = nx.DiGraph()
         self._inputs = TraitedSpec()
 
-
     def connect(self, *args):
         """Connect nodes in the pipeline.
 
@@ -388,10 +393,10 @@ class Workflow(Pipelet):
                 # Currently datasource/sink/grabber.io modules
                 # determine their inputs/outputs depending on
                 # connection settings.  Skip these modules in the check
-                if not destnode.check_inputs(dest):
-                    not_found.append(['in', destnode.name, dest])
-                # TODO XXX
-                if '.io' not in srcnode.name:
+                if not (hasattr(destnode, '_interface') and '.io' in str(destnode._interface.__class__)):
+                    if not destnode.check_inputs(dest):
+                        not_found.append(['in', destnode.name, dest])
+                if not (hasattr(srcnode, '_interface') and '.io' in str(srcnode._interface.__class__)):
                     if isinstance(source, tuple):
                         # handles the case that source is specified
                         # with a function
@@ -549,7 +554,7 @@ class Workflow(Pipelet):
         outfname = fname_presuffix(dotfilename,
                                    suffix='_detailed.dot',
                                    use_ext=False,
-                                   newpath=self.config['workdir'])
+                                   newpath=self.base_dir)
         logger.info('Creating detailed dot file: %s'%outfname)
         _write_detailed_dot(graph, outfname)
         cmd = 'dot -Tpng -O %s' % outfname
@@ -560,7 +565,7 @@ class Workflow(Pipelet):
         outfname = fname_presuffix(dotfilename,
                                    suffix='.dot',
                                    use_ext=False,
-                                   newpath=self.config['workdir'])
+                                   newpath=self.base_dir)
         nx.write_dot(pklgraph, outfname)
         logger.info('Creating dot file: %s' % outfname)
         cmd = 'dot -Tpng -O %s' % outfname
@@ -574,10 +579,118 @@ class Workflow(Pipelet):
                 nx.draw_networkx_edge_labels(pklgraph, pos)
 
     def run(self):
+        self.execute_in_series()
+
+    def _set_node_input(self, node, param, source, sourceinfo):
+        """Set inputs of a node given the edge connection"""
+        if isinstance(sourceinfo, str):
+            val = source.get_output(sourceinfo)
+        elif isinstance(sourceinfo, tuple):
+            if callable(sourceinfo[1]):
+                val = sourceinfo[1](source.get_output(sourceinfo[0]),
+                                    *sourceinfo[2:])
+        logger.debug('setting input: %s->%s', param, str(val))
+        node.set_input(param, deepcopy(val))
+
+    def execute_in_series(self, updatehash=False, force_execute=None):
+        """Executes a pre-defined pipeline in a serial order.
+
+        Parameters
+        ----------
+        updatehash : boolean
+            Allows one to rerun a pipeline and update all the hashes without
+            actually executing any of the underlying interfaces. This is useful
+            when moving the working directory from one location to another. It
+            is also useful when the hashing function itself changes (although
+            we hope that this will not happen often). default [False]
+        force_execute : list of strings
+            This forces execution of a node even if updatehash is True
+        """
+        # In the absence of a dirty bit on the object, generate the
+        # parameterization each time before running
+        logger.info("Running serially.")
         self._create_flat_graph()
         self._generate_expanded_graph()
-        self.execute()
-        
+        old_wd = os.getcwd()
+        notrun = []
+        donotrun = []
+        for node in nx.topological_sort(self._execgraph):
+            # Assign outputs from dependent executed nodes to current node.
+            # The dependencies are stored as data on edges connecting
+            # nodes.
+            try:
+                if node in donotrun:
+                    continue
+                for edge in self._execgraph.in_edges_iter(node):
+                    data = self._execgraph.get_edge_data(*edge)
+                    logger.debug('setting input: %s->%s %s',
+                                 edge[0], edge[1], str(data))
+                    for sourceinfo, destname in data['connect']:
+                        self._set_node_input(node, destname,
+                                             edge[0], sourceinfo)
+                self._set_output_directory_base(node)
+                redo = None
+                if force_execute:
+                    if isinstance(force_execute, str):
+                        force_execute = [force_execute]
+                    redo = any([node.name.lower()==l.lower() \
+                                    for l in force_execute])
+                if updatehash and not redo:
+                    node.run(updatehash=updatehash)
+                else:
+                    node.run(force_execute=redo)
+            except:
+                os.chdir(old_wd)
+                # bare except, but i really don't know where a
+                # node might fail
+                crashfile = self._report_crash(node)
+                # remove dependencies from queue
+                subnodes = nx.dfs_preorder(self._execgraph, node)
+                notrun.append(dict(node = node,
+                                   dependents = subnodes,
+                                   crashfile = crashfile))
+                donotrun.extend(subnodes)
+        _report_nodes_not_run(notrun)
+
+                
+    def _report_crash(self, node, traceback=None):
+        """Writes crash related information to a file
+        """
+        message = ['Node %s failed to run.' % node._id]
+        logger.error(message)
+        if not traceback:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            traceback = format_exception(exc_type,
+                                         exc_value,
+                                         exc_traceback)
+        timeofcrash = strftime('%Y%m%d-%H%M%S')
+        login_name = pwd.getpwuid(os.geteuid())[0]
+        crashfile = 'crash-%s-%s-%s.npz' % (timeofcrash,
+                                            login_name,
+                                            node._id)
+        if hasattr(self, 'config') and self.config['crashdump_dir']:
+            crashfile = os.path.join(self.config['crashdump_dir'],
+                                     crashfile)
+        else:
+            crashfile = os.path.join(os.getcwd(), crashfile)
+        pklgraph = _create_pickleable_graph(self._execgraph,
+                                            show_connectinfo=True)
+        logger.info('Saving crash info to %s' % crashfile)
+        np.savez(crashfile, node=node, execgraph=pklgraph, traceback=traceback)
+        return crashfile
+
+    def _set_output_directory_base(self, node):
+        """Determine output directory and create it
+        """
+        # update parameterization of output directory
+        outputdir = self.base_dir
+        if node.parameterization:
+            outputdir = os.path.join(outputdir, node.parameterization)
+        if not os.path.exists(outputdir):
+            os.makedirs(outputdir)
+        node.base_dir = os.path.abspath(outputdir)
+            
+
     def _generate_expanded_graph(self):
         """Generates an expanded graph based on node parameterization
 
@@ -605,11 +718,11 @@ class Workflow(Pipelet):
                 node = inodes[0]
                 iterables = node.iterables.copy()
                 node.iterables = {}
-                node.id += 'I'
+                node._id += 'I'
                 subnodes = nx.dfs_preorder(graph_in, node)
                 subgraph = graph_in.subgraph(subnodes)
                 graph_in = _merge_graphs(graph_in, subnodes,
-                                         subgraph, node.id,
+                                         subgraph, node._id,
                                          iterables)
             else:
                 moreiterables = False
@@ -620,39 +733,42 @@ class Workflow(Pipelet):
     def _create_flat_graph(self):
         workflowcopy = deepcopy(self)
         workflowcopy._generate_execgraph()
-        self._flatgraph = workflowcopy._graph()
+        self._flatgraph = workflowcopy._graph
         
     def _generate_execgraph(self):
-        # TODO : change from in-place to copy modification
         nodes2remove = []
         for node in self._graph.nodes():
             if isinstance(node, Workflow):
                 nodes2remove.append(node)
-                node._generate_execgraph()
-                self._graph.add_nodes_from(node._graph.nodes())
-                self._graph.add_edges_from(node._graph.edges(data=True))
                 for u, _, d in self._graph.in_edges_iter(nbunch=node, data=True):
                     for cd in d['connect']:
-                        print "in", cd
-                        dstnode = self.get_parameter_node(cd[1],subtype='in')
+                        logger.info("in: %s" % str (cd))
+                        dstnode = node.get_parameter_node(cd[1],subtype='in')
                         srcnode = u
-                        # XX simple source format used here.
-                        # TODO implement functional format
                         srcout = cd[0]
                         dstin = cd[1].split('.')[-1]
                         self.connect(srcnode, srcout, dstnode, dstin)
                 for _, v, d in self._graph.out_edges_iter(nbunch=node, data=True):
                     for cd in d['connect']:
-                        print "out", cd
+                        logger.info("out: %s" % str (cd))
                         dstnode = v
-                        srcnode = self.get_parameter_node(cd[0], subtype='out')
-                        # XX simple source format used here.
-                        # TODO implement functional format
-                        srcout = cd[0].split('.')[-1]
+                        if isinstance(cd[0], tuple):
+                            parameter = cd[0][0]
+                        else:
+                            parameter = cd[0]
+                        srcnode = node.get_parameter_node(parameter, subtype='out')
+                        if isinstance(cd[0], tuple):
+                            srcout = cd[0]
+                            srcout[0] = parameter.split('.')[-1]
+                        else:
+                            srcout = parameter.split('.')[-1]
                         dstin = cd[1]
                         self.connect(srcnode, srcout, dstnode, dstin)
+                # expand the workflow node
+                node._generate_execgraph()
+                self._graph.add_nodes_from(node._graph.nodes())
+                self._graph.add_edges_from(node._graph.edges(data=True))
         if nodes2remove:
-            print nodes2remove
             self._graph.remove_nodes_from(nodes2remove)
     
 class Node(Pipelet):
@@ -680,8 +796,7 @@ class Node(Pipelet):
     Examples
     --------
     >>> import nipype.interfaces.spm as spm
-    >>> realign = NodeWrapper(interface=spm.Realign(), base_directory='test2', \
-            diskbased=True)
+    >>> realign = Node(interface=spm.Realign(), base_directory='test2')
     >>> realign.inputs.infile = os.path.abspath('data/funcrun.nii')
     >>> realign.inputs.register_to_mean = True
     >>> realign.run() # doctest: +SKIP
@@ -757,65 +872,58 @@ class Node(Pipelet):
         """Executes an interface within a directory.
         """
         # check to see if output directory and hash exist
-        logger.info("Node: %s"%self.id)
-        if self.disk_based:
-            outdir = self._output_directory()
-            outdir = self._make_output_dir(outdir)
-            logger.info("in dir: %s"%outdir)
-            # Get a dictionary with hashed filenames and a hashvalue
-            # of the dictionary itself.
-            hashed_inputs, hashvalue = self.inputs._get_hashval()
-            hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
-            if updatehash:
-                logger.info("Updating hash: %s"%hashvalue)
-                self._save_hashfile(hashfile,hashed_inputs)
-            if force_execute or (not updatehash and (self.overwrite or not os.path.exists(hashfile))):
-                logger.info("Node hash: %s"%hashvalue)
-                if os.path.exists(outdir):
-                    logger.debug("Removing old %s and its contents"%outdir)
-                    rmtree(outdir)
-                    outdir = self._make_output_dir(outdir)
-                self._run_interface(execute=True, cwd=outdir)
-                if isinstance(self._result.runtime, list):
-                    # XXX In what situation is runtime ever a list?
-                    # Normally it's a Bunch.
-                    # Ans[SG]: Runtime is a list when we are iterating
-                    # over an input field using iterfield 
-                    returncode = max([r.returncode for r in self._result.runtime])
-                else:
-                    returncode = self._result.runtime.returncode
-                if returncode == 0:
-                    self._save_hashfile(hashfile,hashed_inputs)
-                else:
-                    msg = "Could not run %s" % self.name
-                    msg += "\nwith inputs:\n%s" % self.inputs
-                    msg += "\n\tstderr: %s" % self._result.runtime.stderr
-                    raise RuntimeError(msg)
+        logger.info("Node: %s"%self._id)
+        outdir = self._output_directory()
+        outdir = make_output_dir(outdir)
+        logger.info("in dir: %s"%outdir)
+        # Get a dictionary with hashed filenames and a hashvalue
+        # of the dictionary itself.
+        hashed_inputs, hashvalue = self.inputs._get_hashval()
+        hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
+        if updatehash:
+            logger.info("Updating hash: %s"%hashvalue)
+            self._save_hashfile(hashfile,hashed_inputs)
+        if force_execute or (not updatehash and (self.overwrite or not os.path.exists(hashfile))):
+            logger.info("Node hash: %s"%hashvalue)
+            if os.path.exists(outdir):
+                logger.debug("Removing old %s and its contents"%outdir)
+                rmtree(outdir)
+                outdir = make_output_dir(outdir)
+            self._run_interface(execute=True, cwd=outdir)
+            if isinstance(self._result.runtime, list):
+                # XXX In what situation is runtime ever a list?
+                # Normally it's a Bunch.
+                # Ans[SG]: Runtime is a list when we are iterating
+                # over an input field using iterfield
+                returncode = max([r.returncode for r in self._result.runtime])
             else:
-                logger.debug("Hashfile exists. Skipping execution\n")
-                self._run_interface(execute=False, cwd=outdir)
+                returncode = self._result.runtime.returncode
+            if returncode == 0:
+                self._save_hashfile(hashfile,hashed_inputs)
+            else:
+                msg = "Could not run %s" % self.name
+                msg += "\nwith inputs:\n%s" % self.inputs
+                msg += "\n\tstderr: %s" % self._result.runtime.stderr
+                raise RuntimeError(msg)
         else:
-            self._run_interface(execute=True)
+            logger.debug("Hashfile exists. Skipping execution\n")
+            self._run_interface(execute=False, cwd=outdir)
         return self._result
 
     def _run_interface(self, execute=True, cwd=None):
         old_cwd = os.getcwd()
-        if cwd:
-            os.chdir(cwd)
-        if not cwd and self.disk_based:
+        if not cwd:
             cwd = self._output_directory()
-            os.chdir(cwd)
+        os.chdir(cwd)
         self._result = self._run_command(execute, cwd)
-        if cwd:
-            os.chdir(old_cwd)
+        os.chdir(old_cwd)
             
     def _run_command(self, execute, cwd, copyfiles=True):
         if execute and copyfiles:
             self._originputs = deepcopy(self._interface.inputs)
         if copyfiles:
             self._copyfiles_to_wd(cwd,execute)
-        if self.disk_based:
-            resultsfile = os.path.join(cwd, 'result_%s.npz' % self.id)
+        resultsfile = os.path.join(cwd, 'result_%s.npz' % self._id)
         if execute:
             if issubclass(self._interface.__class__, CommandLine):
                 cmd = self._interface.cmdline
@@ -858,7 +966,7 @@ class Node(Pipelet):
     
     def _copyfiles_to_wd(self, outdir, execute):
         """ copy files over and change the inputs"""
-        if hasattr(self._interface,'_get_filecopy_info') and self.disk_based:
+        if hasattr(self._interface,'_get_filecopy_info'):
             for info in self._interface._get_filecopy_info():
                 files = self.inputs.get().get(info['key'])
                 if not isdefined(files):
@@ -928,11 +1036,9 @@ class MapNode(Node):
 
     def _run_interface(self, execute=True, cwd=None):
         old_cwd = os.getcwd()
-        if cwd:
-            os.chdir(cwd)
-        if not cwd and self.disk_based:
+        if not cwd:
             cwd = self._output_directory()
-            os.chdir(cwd)
+        os.chdir(cwd)
 
         iterflow = Workflow()
         for i in enumerate(self.iterfield):
@@ -962,5 +1068,4 @@ class MapNode(Node):
                     # outputs.key == None, so this is far less likely to
                     # produce subtle errors down the road!
                     setattr(self._result.outputs, key, [val])
-        if cwd:
-            os.chdir(old_cwd)
+        os.chdir(old_cwd)

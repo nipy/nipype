@@ -261,7 +261,7 @@ the processing nodes.
 """
 
 l1pipeline = pe.Workflow(name="level1")
-l1pipeline.config['workdir'] = os.path.abspath('spm/workingdir')
+l1pipeline.base_dir = os.path.abspath('spm/workingdir')
 
 l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                   (datasource,realign,[('func','infile')]),
@@ -367,8 +367,7 @@ onesamplettest = pe.Node(interface=spm.OneSampleTTest(), name="onesamplettest")
 """
 
 l2pipeline = pe.Workflow(name="level2")
-l2pipeline.config['workdir'] = os.path.abspath('spm/l2output')
-l2pipeline.config['use_parameterized_dirs'] = True
+l2pipeline.base_dir = os.path.abspath('spm/l2output')
 l2pipeline.connect([(l2source,onesamplettest,[('outfiles','con_images')])])
 
 """
