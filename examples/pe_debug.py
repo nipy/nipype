@@ -1,0 +1,19 @@
+import nipype.pipeline.engine as pe
+import nipype.interfaces.spm as spm
+import nipype.interfaces.fsl as fsl
+
+reload(pe)
+
+realign = pe.Node(spm.Realign(), name = 'spmrealign')
+coreg = pe.Node(spm.Coregister(), name = 'coreg')
+realign2 = pe.Node(spm.Realign(), name = 'spmrealign2')
+bet = pe.MapNode(fsl.Bet(), iterfield=['infile'], name='bet')
+
+w1 = pe.Workflow(name='spm')
+w1.connect([(realign, coreg, [('realigned_files', 'source')])])
+
+w2 = pe.Workflow(name='cplx')
+w2.connect(w1, 'coreg.coregistered_files', realign2, 'infile')
+
+inputs = w2.inputs
+#w2._generate_execgraph()

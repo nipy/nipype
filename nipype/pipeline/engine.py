@@ -24,7 +24,7 @@ except:
     pass
 
 from nipype.interfaces.base import (NEW_CommandLine, traits, File, Directory,
-                                    InputMultiPath, OutputMultiPath)
+                                    InputMultiPath, OutputMultiPath, TraitedSpec)
 from nipype.utils.filemanip import fname_presuffix
 
 #Sets up logging for pipeline and nodewrapper execution
@@ -289,14 +289,27 @@ class Pipelet(object):
         # for compatibility with node expansion using iterables
         self._id = self.name
 
-    def execute(self):
-        print "Executing workflow/node"
+    @property
+    def inputs(self):
+        raise NotImplementedError
+
+    @property
+    def outputs(self):
+        raise NotImplementedError
+
+    def clone(self, name):
+        if name is None:
+            raise Exception('Cloning requires a new name')
+        clone = deepcopy(self)
+        clone.name = name
+        clone._id = name
+        return clone
 
     def check_outputs(self, parameter):
-        raise NotImplementedError
+        return hasattr(self.outputs, parameter)
     
     def check_inputs(self, parameter):
-        raise NotImplementedError
+        return hasattr(self.inputs, parameter)
     
     def __repr__(self):
         return self._id
@@ -307,6 +320,13 @@ class Pipelet(object):
         return os.path.abspath(os.path.join(self.base_dir,
                                             self.name))
 
+    def save(self, filename=None):
+        if filename is None:
+            filename = 'temp.npz'
+        np.savez(filename, object=self)
+
+    def load(filename):
+        np.load(filename)
 
 class Workflow(Pipelet):
     """Controls the setup and execution of a pipeline of processes
@@ -315,6 +335,8 @@ class Workflow(Pipelet):
     def __init__(self, **kwargs):
         super(Workflow, self).__init__(**kwargs)
         self._graph = nx.DiGraph()
+        self._inputs = TraitedSpec()
+
 
     def connect(self, *args):
         """Connect nodes in the pipeline.
@@ -412,51 +434,88 @@ class Workflow(Pipelet):
         Parameters
         ----------
         nodes : list
-            A list of node-wrapped interfaces
+            A list of Pipelet-based objects
         """
-        self._graph.add_nodes_from(nodes)
+        for node in nodes:
+            if not issubclass(node.__class__, Pipelet):
+                raise Exception('Node %s must be a subclass of Pipelet' % str(node))
+            self._graph.add_nodes_from([node])
 
+    @property
+    def inputs(self):
+        return self.get_inputs()
+
+    @property
+    def outputs(self):
+        return self.get_outputs()
+
+    def _has_attr(self, parameter, subtype='in'):
+        if subtype == 'in':
+            subobject = self.inputs
+        else:
+            subobject = self.outputs
+        attrlist = parameter.split('.')
+        cur_out = subobject
+        for attr in attrlist:
+            if not hasattr(cur_out, attr):
+                return False
+            cur_out = getattr(cur_out, attr)
+        return True
+
+    def get_parameter_node(self, parameter, subtype='in'):
+        if subtype == 'in':
+            subobject = self.inputs
+        else:
+            subobject = self.outputs
+        attrlist = parameter.split('.')
+        cur_out = subobject
+        for attr in attrlist[:-1]:
+            cur_out = getattr(cur_out, attr)
+        return cur_out.traits()[attrlist[-1]].node
+        
+    def check_outputs(self, parameter):
+        return self._has_attr(parameter, subtype='out')
+    
+    def check_inputs(self, parameter):
+        return self._has_attr(parameter, subtype='in')
+    
     def get_inputs(self):
-        inputdict = {}
+        inputdict = TraitedSpec()
         for node in self._graph.nodes():
+            inputdict.add_trait(node.name, traits.Instance(TraitedSpec))
             if isinstance(node, Workflow):
-                for key, value in node.get_inputs().items():
-                    nodename = '.'.join((node.name, key))
-                    inputdict[nodename] = value
+                setattr(inputdict, node.name, node.inputs)
             else:
                 taken_inputs = []
                 for _, _, d in self._graph.in_edges_iter(nbunch=node, data=True):
                     for cd in d['connect']:
                         taken_inputs.append(cd[1])
-                for key in node.inputs.copyable_trait_names():
+                unconnectedinputs = TraitedSpec() 
+                for key, trait in node.inputs.items():
                     if key not in taken_inputs:
-                        nodename = '.'.join((node.name, key))
-                        inputdict[nodename] = node
+                        unconnectedinputs.add_trait(key, traits.Trait(trait, node=node))
+                        value = getattr(node.inputs, key)
+                        setattr(unconnectedinputs, key, value)
+                setattr(inputdict, node.name, unconnectedinputs)
+                getattr(inputdict, node.name).on_trait_change(self.set_input)
         return inputdict
         
     def get_outputs(self):
-        outputdict = {}
+        outputdict = TraitedSpec()
         for node in self._graph.nodes():
+            outputdict.add_trait(node.name, traits.Instance(TraitedSpec))
             if isinstance(node, Workflow):
-                for key, value in node.get_outputs().items():
-                    nodename = '.'.join((node.name, key))
-                    outputdict[nodename] = value
+                setattr(outputdict, node.name, node.outputs)
             else:
-                for key in node.outputs.copyable_trait_names():
-                    nodename = '.'.join((node.name, key))
-                    outputdict[nodename] = node
+                outputs = TraitedSpec() 
+                for key, trait in node.outputs.items():
+                    outputs.add_trait(key, traits.Any(node=node))
+                    setattr(outputs, key, None)
+                setattr(outputdict, node.name, outputs)
         return outputdict
         
-    def check_outputs(self, parameter):
-        return parameter in self.get_outputs().keys()
-    
-    def check_inputs(self, parameter):
-        return parameter in self.get_inputs().keys()
-
-    def set_input(self, key, value):
-        inputdict = self.get_inputs()
-        nodeinput = key.split('.')[-1]
-        setattr(inputdict[key].inputs, nodeinput, value)
+    def set_input(self, object, name, newvalue):
+        setattr(object.traits()[name].node.inputs, name, newvalue)
 
     def export_graph(self, show = False, use_execgraph=False,
                      show_connectinfo=False, dotfilename='graph.dot'):
@@ -515,9 +574,9 @@ class Workflow(Pipelet):
                 nx.draw_networkx_edge_labels(pklgraph, pos)
 
     def run(self):
-        execgraph = generate_execgraph(self._graph)
-        fullgraph = self.generate_expanded_graph(execgraph)
-        self.execute(fullgraph)
+        self._create_flat_graph()
+        self._generate_expanded_graph()
+        self.execute()
         
     def _generate_expanded_graph(self):
         """Generates an expanded graph based on node parameterization
@@ -528,7 +587,7 @@ class Workflow(Pipelet):
         parameterized as (a=1,b=3), (a=1,b=4), (a=2,b=3) and (a=2,b=4). 
         """
         logger.info("PE: expanding iterables")
-        graph_in = deepcopy(self._graph)
+        graph_in = deepcopy(self._flatgraph)
         moreiterables = True
         # convert list of tuples to dict fields
         for node in graph_in.nodes():
@@ -558,19 +617,24 @@ class Workflow(Pipelet):
         logger.info("PE: expanding iterables ... done")
 
 
-    def generate_execgraph(self):
+    def _create_flat_graph(self):
+        workflowcopy = deepcopy(self)
+        workflowcopy._generate_execgraph()
+        self._flatgraph = workflowcopy._graph()
+        
+    def _generate_execgraph(self):
         # TODO : change from in-place to copy modification
         nodes2remove = []
         for node in self._graph.nodes():
             if isinstance(node, Workflow):
                 nodes2remove.append(node)
-                node.generate_execgraph()
+                node._generate_execgraph()
                 self._graph.add_nodes_from(node._graph.nodes())
                 self._graph.add_edges_from(node._graph.edges(data=True))
                 for u, _, d in self._graph.in_edges_iter(nbunch=node, data=True):
                     for cd in d['connect']:
                         print "in", cd
-                        dstnode = node.get_inputs()[cd[1]]
+                        dstnode = self.get_parameter_node(cd[1],subtype='in')
                         srcnode = u
                         # XX simple source format used here.
                         # TODO implement functional format
@@ -581,7 +645,7 @@ class Workflow(Pipelet):
                     for cd in d['connect']:
                         print "out", cd
                         dstnode = v
-                        srcnode = node.get_outputs()[cd[0]]
+                        srcnode = self.get_parameter_node(cd[0], subtype='out')
                         # XX simple source format used here.
                         # TODO implement functional format
                         srcout = cd[0].split('.')[-1]
@@ -632,8 +696,6 @@ class Node(Pipelet):
         self._result     = None
         self.iterables  = iterables
         self.parameterization = None
-        self.output_directory_base  = self.base_directory
-        self.overwrite = None
 
     @property
     def interface(self):
@@ -671,14 +733,6 @@ class Node(Pipelet):
             else:
                 val = getattr(self, parameter)
         return val
-
-    def check_outputs(self, parameter):
-        return hasattr(self, parameter) or \
-            hasattr(self._interface._outputs(), parameter)
-    
-    def check_inputs(self, parameter):
-        return hasattr(self._interface.inputs, parameter) or \
-            hasattr(self, parameter)
 
     def _save_hashfile(self, hashfile, hashed_inputs):
         try:
@@ -787,10 +841,9 @@ class Node(Pipelet):
                 self._result = result
                 raise RuntimeError(result.runtime.stderr)
             else:
-                if self.disk_based:
-                    # to remove problem with thread unsafeness of savez
-                    outdict = {'result_%s' % self.id : result}
-                    #np.savez(resultsfile,**outdict)
+                # to remove problem with thread unsafeness of savez
+                outdict = {'result_%s' % self._id : result}
+                np.savez(resultsfile, **outdict)
         else:
             # Likewise, cwd could go in here
             logger.info("Collecting precomputed outputs:")
@@ -858,6 +911,10 @@ class MapNode(Node):
     def inputs(self):
         return self._inputs
 
+    @property
+    def outputs(self):
+        return self._outputs()
+    
     def _outputs(self):
         outputs = self._interface._outputs()
         for field in outputs.get().keys():
@@ -869,10 +926,6 @@ class MapNode(Node):
                 outputs.remove_trait(field)
                 outputs.add_trait(field, traits.List(trait_type))
         return outputs
-        
-    @property
-    def outputs(self):
-        return self._outputs()
 
     def _run_interface(self, execute=True, cwd=None):
         old_cwd = os.getcwd()

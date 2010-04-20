@@ -878,7 +878,7 @@ class TraitedSpec(traits.HasTraits):
         outstr = []
         for name, value in sorted(self.trait_get().items()):
             outstr.append('%s = %s' % (name, value))
-        return '\n'.join(outstr)
+        return '\n' + '\n'.join(outstr) + '\n'
 
     def _generate_handlers(self):
         # Find all traits with the 'xor' metadata and attach an event
