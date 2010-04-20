@@ -3,7 +3,7 @@ from copy import deepcopy
 import numpy as np
 
 from nipype.utils.filemanip import (filename_to_list, list_to_filename)
-from nipype.interfaces.base import traits, TraitedSpec, BaseInterfaceInputSpec
+from nipype.interfaces.base import traits, TraitedSpec, DynamicTraitedSpec, BaseInterfaceInputSpec
 from nipype.interfaces.io import IOBase, add_traits
 
     
@@ -26,8 +26,8 @@ class IdentityInterface(IOBase):
     'foo'
     
     """
-    input_spec = BaseInterfaceInputSpec
-    output_spec = TraitedSpec
+    input_spec = DynamicTraitedSpec
+    output_spec = DynamicTraitedSpec
     
     def __init__(self, fields=None, **inputs):
         super(IdentityInterface, self).__init__(**inputs)
@@ -71,7 +71,7 @@ class Merge(IOBase):
     [1, 2, 5, 3]
     
     """
-    input_spec = BaseInterfaceInputSpec
+    input_spec = DynamicTraitedSpec
     output_spec = MergeOutputSpec
     
     def __init__(self, numinputs=0, **inputs):
