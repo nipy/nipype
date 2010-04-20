@@ -697,6 +697,7 @@ class Workflow(Pipelet):
         pklgraph = _create_pickleable_graph(self._execgraph,
                                             show_connectinfo=True)
         logger.info('Saving crash info to %s' % crashfile)
+        logger.info(''.join(traceback))
         np.savez(crashfile, node=node, execgraph=pklgraph, traceback=traceback)
         return crashfile
 
@@ -827,20 +828,6 @@ class Workflow(Pipelet):
         return dict(node = self.procs[jobid],
                     dependents = subnodes,
                     crashfile = crashfile)
-
-    def _run_local(self, jobid, reason='None'):
-        "docstring for _run_local"
-        logger.info('node: %s Reason: %s. try to ' \
-                        'run locally' % (self.procs[jobid]._id,
-                                         reason))
-        try:
-            res = self.procs[jobid].run()
-            self._task_finished_cb(res, jobid)
-        except:
-            crashfile = self._report_crash(self.procs[jobid])
-            # remove dependencies from queue
-            return self._remove_node_deps(jobid, crashfile)
-        return None
         
     def _execute_with_manager(self):
         """Executes a pre-defined pipeline is distributed approaches
@@ -869,27 +856,20 @@ class Workflow(Pipelet):
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
-                a = self.pending_tasks.pop()
-                res = self.taskclient.get_task_result(a[0], block=False)
+                taskid, jobid = self.pending_tasks.pop()
+                res = self.taskclient.get_task_result(taskid, block=False)
                 if res:
                     if res.failure:
                         try:
                             res.raise_exception()
                         except:
-                            out = self._run_local(a[1], 'parallel execution error')
-                            if out:
-                                notrun.append(out)
+                            crashfile = self._report_crash(self.procs[jobid])
+                            # remove dependencies from queue
+                            notrun.append(self._remove_node_deps(jobid, crashfile))
                     else:
-                        # workaround for OutputMultiPath not returning
-                        # appropriate values post pickling
-                        try:
-                            self._task_finished_cb(res['result'], a[1])
-                        except AttributeError:
-                            out = self._run_local(a[1], 'attribute error')
-                            if out:
-                                notrun.append(out)
+                        self._task_finished_cb(res['result'], jobid)
                 else:
-                    toappend.insert(0, a)
+                    toappend.insert(0, (taskid, jobid))
             if toappend:
                 self.pending_tasks.extend(toappend)
             else:
@@ -1012,20 +992,12 @@ class Node(Pipelet):
 
         Priority goes to interface.
         """
-        if hasattr(self._interface.inputs, parameter):
-            setattr(self._interface.inputs, parameter, deepcopy(val))
-        elif hasattr(self, parameter):
-            setattr(self, parameter, deepcopy(val))
-        else:
-            setattr(self._interface.inputs, parameter, deepcopy(val))
+        setattr(self._interface.inputs, parameter, deepcopy(val))
 
     def get_output(self, parameter):
         val = None
         if self._result:
-            if hasattr(self._result.outputs, parameter):
-                val = getattr(self._result.outputs, parameter)
-            else:
-                val = getattr(self, parameter)
+            val = getattr(self._result.outputs, parameter)
         return val
 
     def _save_hashfile(self, hashfile, hashed_inputs):
