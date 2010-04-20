@@ -114,7 +114,7 @@ datasource.inputs.template_args = info
 and register all images to the mean image.
 """
 
-realign = pe.Node(interface=spm.Realign(), name="ralign")
+realign = pe.Node(interface=spm.Realign(), name="realign")
 realign.inputs.register_to_mean = True
 
 """Use :class:`nipype.algorithms.rapidart` to determine which of the
