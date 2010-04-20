@@ -944,6 +944,11 @@ class BaseTraitedSpec(traits.HasTraits):
         return self.hashval
 
 class DynamicTraitedSpec(BaseTraitedSpec):
+    """ A subclass to handle dynamic traits
+
+    This class is a workaround for add_traits and clone_traits not
+    functioning well together.
+    """
     def __deepcopy__(self, memo):
         """ bug in deepcopy for HasTraits results in weird cloning behavior for
         added traits
@@ -968,6 +973,10 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         return dup
     
 class TraitedSpec(BaseTraitedSpec):
+    """ Create a subclass with strict traits.
+
+    This is used in 90% of the cases.
+    """
     _ = traits.Disallow
 
 class NEW_Interface(object):
@@ -1185,12 +1194,13 @@ class NEW_BaseInterface(NEW_Interface):
     def aggregate_outputs(self):
         """ Collate expected outputs and check for existence
         """
-        outputs = self._outputs()
         predicted_outputs = self._list_outputs()
+        outputs = self._outputs()
         if predicted_outputs:
             for key, val in predicted_outputs.items():
                 try:
                     setattr(outputs, key, val)
+                    value = getattr(outputs, key)
                 except TraitError, error:
                     if error.info == "a file name":
                         msg = "File '%s' not found for %s output '%s'." \
