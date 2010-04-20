@@ -23,7 +23,8 @@ try:
 except:
     pass
 
-from nipype.interfaces.base import CommandLine
+from nipype.interfaces.base import (NEW_CommandLine, traits, File, Directory,
+                                    InputMultiPath, OutputMultiPath)
 from nipype.utils.filemanip import fname_presuffix
 
 #Sets up logging for pipeline and nodewrapper execution
@@ -605,7 +606,7 @@ class Node(Pipelet):
     >>> realign.run() # doctest: +SKIP
 
     """
-    def __init__(self, interface=None,
+    def __init__(self, interface,
                  iterables={}, base_directory=None,
                  overwrite=False, **kwargs):
         # interface can only be set at initialization
@@ -829,7 +830,7 @@ class Node(Pipelet):
 
 class MapNode(Node):
     
-    def __init__(self, iterfield=None, **kwargs):
+    def __init__(self, interface, iterfield=None, **kwargs):
         """
 
         Parameters
@@ -842,23 +843,35 @@ class MapNode(Node):
         then the inputs are selected in order simultaneously from each of these
         fields and each field will need to have the same number of members.
         """
-        super(MapNode, self).__init__(**kwargs)
+        super(MapNode, self).__init__(interface, **kwargs)
+        self.iterfield  = iterfield
         if self.iterfield is None:
             raise Exception("Iterfield must be provided")
-        self.iterfield  = iterfield
         self._inputs = deepcopy(self._interface.inputs)
-        # TODO modify iterields to lists
         for field in iterfield:
-            self._inputs.add_trait(field, List(self._inputs.traits()[field].trait_type.__class__))
+            trait_type = self._inputs.traits()[field].trait_type
+            if isinstance(trait_type, (File, Directory)):
+                self._inputs.remove_trait(field) # XX NOT SURE IF NECESSARY
+                self._inputs.add_trait(field, InputMultiPath(trait_type))
+            else:
+                self._inputs.remove_trait(field)
+                self._inputs.add_trait(field, traits.List(trait_type))
 
     @property
     def inputs(self):
         return self._inputs
 
-    def _outputs():
+    def _outputs(self):
         outputs = self._interface._outputs()
         for field in outputs.get().keys():
-            outputs.add_trait(field, List(outputs.traits()[field].trait_type.__class__))
+            trait_type = outputs.traits()[field].trait_type
+            if isinstance(trait_type, (File, Directory)):
+                outputs.remove_trait(field)
+                outputs.add_trait(field, OutputMultiPath(trait_type))
+            else:
+                outputs.remove_trait(field)
+                outputs.add_trait(field, traits.List(trait_type))
+        return outputs
         
     @property
     def outputs(self):
