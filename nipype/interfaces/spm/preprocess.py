@@ -24,22 +24,34 @@ from copy import deepcopy
 import numpy as np
 
 # Local imports
-from nipype.interfaces.spm import (SpmMatlabCommandLine, scans_for_fname,
+from nipype.interfaces.spm.base import (NEW_SPMCommand, scans_for_fname,
                                    scans_for_fnames)
-from nipype.interfaces.spm import (NEW_SPMCommand, scans_for_fname,
-                                   scans_for_fnames, logger)
-from nipype.interfaces.base import Bunch, BaseInterfaceInputSpec, isdefined,\
-    OutputMultiPath
-
-from nipype.interfaces.base import TraitedSpec, traits, InputMultiPath, File
-
+from nipype.interfaces.base import BaseInterfaceInputSpec, isdefined,\
+    OutputMultiPath, TraitedSpec, traits, InputMultiPath, File
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list, 
-                                    list_to_filename, FileNotFoundError)
-from nipype.utils.spm_docs import grab_doc
+                                    list_to_filename)
 
+class SliceTimingInputSpec(BaseInterfaceInputSpec):
+    infile = InputMultiPath(File(exists=True), field='scans',
+                          desc='list of filenames to apply slice timing',
+                          mandatory=True, copyfile=False)
+    num_slices = traits.Int(field='nslices',
+                              desc='number of slices in a volume')
+    time_repetition = traits.Float(field='tr',
+                                   desc='time between volume acquisitions ' \
+                                       '(start to start time)')
+    time_acquisition = traits.Float(field='ta',
+                                    desc='time of volume acquisition. usually ' \
+                                        'calculated as TR-(TR/num_slices)')
+    slice_order = traits.List(traits.Int(), field='so',
+                               desc='1-based order in which slices are acquired')
+    ref_slice = traits.Int(field='refslice',
+                             desc='1-based Number of the reference slice')
 
+class SliceTimingOutputSpec(TraitedSpec):
+    timecorrected_files = OutputMultiPath(File(exist=True, desc='slice time corrected files'))
 
-class SliceTiming(SpmMatlabCommandLine):
+class SliceTiming(NEW_SPMCommand):
     """Use spm to perform slice timing correction.
 
     See SliceTiming().spm_doc() for more information.
@@ -57,79 +69,24 @@ class SliceTiming(SpmMatlabCommandLine):
     >>> st.inputs.ref_slice = 1
     """
 
-    def spm_doc(self):
-        """Print out SPM documentation."""
-        print grab_doc('SliceTiming')
-    
-    @property
-    def cmd(self):
-        return 'spm_st'
+    _jobtype = 'temporal'
+    _jobname = 'st'
 
-    @property
-    def jobtype(self):
-        return 'temporal'
-
-    @property
-    def jobname(self):
-        return 'st'
-
-    opt_map = {'infile': ('scans',
-                          'list of filenames to apply slice timing'),
-               'num_slices': ('nslices',
-                              'number of slices in a volume'),
-               'time_repetition': ('tr',
-                                   'time between volume acquisitions ' \
-                                       '(start to start time)'),
-               'time_acquisition': ('ta',
-                                    'time of volume acquisition. usually ' \
-                                        'calculated as TR-(TR/num_slices)'),
-               'slice_order': ('so',
-                               '1-based order in which slices are acquired'),
-               'ref_slice': ('refslice',
-                             '1-based Number of the reference slice')
-               }
-        
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='infile',copy=False)]
-        return info
-
-    def _convert_inputs(self, opt, val):
+    def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
         """
         if opt == 'infile':
             return scans_for_fnames(filename_to_list(val),
                                     separate_sessions=True)
         return val
-
-    def run(self, infile=None, **inputs):
-        """Executes the SPM slice timing function using MATLAB
         
-        Parameters
-        ----------
-        
-        infile: string, list
-            image file(s) to smooth
-        """
-        if infile:
-            self.inputs.infile = infile
-        if not self.inputs.infile:
-            raise AttributeError('Slice timing requires a file')
-        self.inputs.update(**inputs)
-        return super(SliceTiming,self).run()
-
-    out_map = {'timecorrected_files' : ('slice time corrected files','infile')}
-        
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outputs.timecorrected_files = []
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['timecorrected_files'] = []
         filelist = filename_to_list(self.inputs.infile)
         for f in filelist:
-            s_file = glob(fname_presuffix(f, prefix='a'))
-            assert len(s_file) == 1, 'No slice time corrected file generated by SPM Slice Timing'
-            outputs.timecorrected_files.append(s_file[0])
+            s_file = fname_presuffix(f, prefix='a')
+            outputs['timecorrected_files'].append(s_file)
         return outputs
     
 
@@ -439,8 +396,66 @@ class Normalize(NEW_SPMCommand):
             outputs['normalized_source'] = list_to_filename(outputs['normalized_source'])
                 
         return outputs
+    
+class SegmentInputSpec(BaseInterfaceInputSpec):
+    data = InputMultiPath(File(exists=True), field='data', desc='one scan per subject', 
+                          copyfile=False, mandatory=True)
+    gm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.GM', 
+                                 desc="""Options to produce grey matter images: c1*.img, wc1*.img and
+mwc1*.img. None: [0,0,0], Native Space: [0,0,1], Unmodulated Normalised:
+[0,1,0], Modulated Normalised: [1,0,0], Native + Unmodulated Normalised:
+[0,1,1], Native + Modulated Normalised: [1,0,1], Native + Modulated +
+Unmodulated: [1,1,1], Modulated + Unmodulated Normalised: [1,1,0]""")
+    wm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.WM', 
+                                 desc="""Options to produce white matter images: c2*.img, wc2*.img and
+mwc2*.img. None: [0,0,0], Native Space: [0,0,1], Unmodulated Normalised:
+[0,1,0], Modulated Normalised: [1,0,0], Native + Unmodulated Normalised:
+[0,1,1], Native + Modulated Normalised: [1,0,1], Native + Modulated +
+Unmodulated: [1,1,1], Modulated + Unmodulated Normalised: [1,1,0]""")
+    csf_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.CSF', 
+                                  desc="""Options to produce CSF images: c3*.img, wc3*.img and
+mwc3*.img. None: [0,0,0], Native Space: [0,0,1], Unmodulated Normalised:
+[0,1,0], Modulated Normalised: [1,0,0], Native + Unmodulated Normalised:
+[0,1,1], Native + Modulated Normalised: [1,0,1], Native + Modulated +
+Unmodulated: [1,1,1], Modulated + Unmodulated Normalised: [1,1,0]""")
+    save_bias_corrected = traits.Bool(field='output.biascor',
+                     desc='True/False produce a bias corrected image')
+    clean_masks = traits.Enum('no', 'light', 'thorough', field='output.cleanup',
+                     desc="clean using estimated brain mask ('no','light','thorough')")
+    tissue_prob_maps = traits.List(File(exists=True), field='opts.tpm',
+                     'list of gray, white & csf prob. (opt,)')
+    gaussians_per_class = traits.List(traits.Int(), field='opts.ngaus',
+                     'num Gaussians capture intensity distribution')
+    affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', field='opts.regtype',
+                      desc='mni, eastern, subj, none ')
+    warping_regularization = traits.Float(field='opts.warpreg',
+                      desc='Controls balance between parameters and data')
+    warp_frequency_cutoff = traits.Float(field='opts.warpco', desc='Cutoff of DCT bases')
+    bias_regularization = traits.Enum(0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, field='opts.biasreg',
+                      desc='no(0) - extremely heavy (10)')
+    bias_fwhm = traits.Enum(30, 40, 50, 60, 70 , 80, 90, 100, 110, 120, 130, 'Inf', field='opts.biasfwhm',
+                      desc='FWHM of Gaussian smoothness of bias')
+    sampling_distance = traits.Float(field='opts.samp',
+                      desc='Sampling distance on data for parameter estimation')
+    mask_image = File(exists=True, field='opts.msk',
+                      desc='Binary image to restrict parameter estimation ')
+    
+    
+class SegmentOutputSpec(TraitedSpec):
+    native_gm_image = File(exists=True, desc='native space grey probability map')
+    normalized_gm_image = File(exists=True, desc='normalized grey probability map',)
+    modulated_gm_image = File(exists=True, desc='modulated, normalized grey probability map')
+    native_wm_image = File(exists=True, desc='native space white probability map')
+    normalized_wm_image = File(exists=True, desc='normalized white probability map')
+    modulated_wm_image = File(exists=True, desc='modulated, normalized white probability map')
+    native_csf_image = File(exists=True, desc='native space csf probability map')
+    normalized_csf_image = File(exists=True, desc='normalized csf probability map')
+    modulated_csf_image = File(exists=True, desc='modulated, normalized csf probability map')
+    modulated_input_image = File(exists=True, desc='modulated version of input image')
+    transformation_mat = File(exists=True, desc='Normalization transformation')
+    inverse_transformation_mat = File(exists=True, desc='Inverse normalization info')
 
-class Segment(SpmMatlabCommandLine):
+class Segment(NEW_SPMCommand):
     """use spm_segment to separate structural images into different
     tissue classes.
 
@@ -448,66 +463,15 @@ class Segment(SpmMatlabCommandLine):
     --------
     
     """
-    
-    def spm_doc(self):
-        """Print out SPM documentation."""
-        print grab_doc('Segment')
-    
-    @property
-    def cmd(self):
-        return 'spm_segment'
 
-    @property
-    def jobtype(self):
-        return 'spatial'
-
-    @property
-    def jobname(self):
-        return 'preproc'
-
-    #Options to produce grey matter images: c1*.img, wc1*.img and
-    #mwc1*.img. None: [0,0,0], Native Space: [0,0,1], Unmodulated Normalised:
-    #[0,1,0], Modulated Normalised: [1,0,0], Native + Unmodulated Normalised:
-    #[0,1,1], Native + Modulated Normalised: [1,0,1], Native + Modulated +
-    #Unmodulated: [1,1,1], Modulated + Unmodulated Normalised: [1,1,0]
+    _jobtype = 'spatial'
+    _jobname = 'preproc'
     
-    opt_map = {'data': ('data', 'one scan per subject'),
-               'gm_output_type': ('output.GM', '3-element list (opt,)'),
-               'wm_output_type': ('output.WM', '3-element list (opt,)'),
-               'csf_output_type': ('output.CSF', '3-element list (opt,)'),
-               'save_bias_corrected': ('output.biascor',
-                     'True/False produce a bias corrected image (opt, )'),
-               'clean_masks': ('output.cleanup',
-                     'clean using estimated brain mask 0(no)-2 (opt, )'),
-               'tissue_prob_maps': ('opts.tpm',
-                     'list of gray, white & csf prob. (opt,)'),
-               'gaussians_per_class': ('opts.ngaus',
-                     'num Gaussians capture intensity distribution (opt,)'),
-               'affine_regularization': ('opts.regtype',
-                      'mni, eastern, subj, none (opt,)'),
-               'warping_regularization': ('opts.warpreg',
-                      'Controls balance between parameters and data (opt, 1)'),
-               'warp_frequency_cutoff': ('opts.warpco', 'Cutoff of DCT bases (opt,)'),
-               'bias_regularization': ('opts.biasreg',
-                      'no(0) - extremely heavy (10), (opt, )'),
-               'bias_fwhm': ('opts.biasfwhm',
-                      'FWHM of Gaussian smoothness of bias (opt,)'),
-               'sampling_distance': ('opts.samp',
-                      'Sampling distance on data for parameter estimation (opt,)'),
-               'mask_image': ('opts.msk',
-                      'Binary image to restrict parameter estimation (opt,)'),
-               }
-
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='data',copy=False)]
-        return info
-    
-    def _convert_inputs(self, opt, val):
+    def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
         """
+        clean_masks_dict = {'no':0,'light':1,'thorough':2}
+        
         if opt in ['data', 'tissue_prob_maps']:
             if isinstance(val, list):
                 return scans_for_fnames(val)
@@ -517,79 +481,39 @@ class Segment(SpmMatlabCommandLine):
             return int(val)
         if opt == 'mask_image':
             return scans_for_fname(val)
+        if opt == 'clean_masks':
+            return clean_masks_dict[val]
         return val
-
-    def run(self, data=None, **inputs):
-        """Executes the SPM segment function using MATLAB
         
-        Parameters
-        ----------
-        
-        data: string, list
-            image file to segment
-        """
-        if data:
-            self.inputs.data = data
-        if not self.inputs.data:
-            raise AttributeError('Segment requires a data file')
-        self.inputs.update(**inputs)
-        return super(Segment,self).run()
-
-    out_map = {'native_class_images' : ('native images for the 3 tissue types',),
-               'normalized_class_images' : ('normalized images',),
-               'modulated_class_images' : ('modulated, normalized images',),
-               'native_gm_image' : ('native space grey probability map',),
-               'normalized_gm_image' : ('normalized grey probability map',),
-               'modulated_gm_image' : ('modulated, normalized grey probability map',),
-               'native_wm_image' : ('native space white probability map',),
-               'normalized_wm_image' : ('normalized white probability map',),
-               'modulated_wm_image' : ('modulated, normalized white probability map',),
-               'native_csf_image' : ('native space csf probability map',),
-               'normalized_csf_image' : ('normalized csf probability map',),
-               'modulated_csf_image' : ('modulated, normalized csf probability map'),
-               'modulated_input_image' : ('modulated version of input image',),
-               'transformation_mat' : ('Normalization transformation',),
-               'inverse_transformation_mat' : ('Inverse normalization info',),
-               }
-        
-    def aggregate_outputs(self):
-        outputs = self.outputs()
+    def _list_outputs(self):
+        outputs = self._outputs().get()
         f = self.inputs.data
-        files_ext = f[0][-4:]
-        m_file = glob(fname_presuffix(f,prefix='m',suffix=files_ext,use_ext=False))
-        outputs.modulated_input_image = m_file
-        c_files = glob(fname_presuffix(f,prefix='c*',suffix=files_ext,use_ext=False))
-        outputs.native_class_images = c_files
-        wc_files = glob(fname_presuffix(f,prefix='wc*',suffix=files_ext,use_ext=False))
-        outputs.normalized_class_images = wc_files
-        mwc_files = glob(fname_presuffix(f,prefix='mwc*',suffix=files_ext,use_ext=False))
-        outputs.modulated_class_images = mwc_files
         
-        c_files = glob(fname_presuffix(f,prefix='c1',suffix=files_ext,use_ext=False))
-        outputs.native_gm_image = c_files
-        wc_files = glob(fname_presuffix(f,prefix='wc1',suffix=files_ext,use_ext=False))
-        outputs.normalized_gm_image = wc_files
-        mwc_files = glob(fname_presuffix(f,prefix='mwc1',suffix=files_ext,use_ext=False))
-        outputs.modulated_gm_image = mwc_files
+        c_file = fname_presuffix(f,prefix='c1')
+        outputs['native_gm_image'] = c_file
+        wc_file = fname_presuffix(f,prefix='wc1')
+        outputs['normalized_gm_image'] = wc_file
+        mwc_file = fname_presuffix(f,prefix='mwc1')
+        outputs['modulated_gm_image'] = mwc_file
         
-        c_files = glob(fname_presuffix(f,prefix='c2',suffix=files_ext,use_ext=False))
-        outputs.native_wm_image = c_files
-        wc_files = glob(fname_presuffix(f,prefix='wc2',suffix=files_ext,use_ext=False))
-        outputs.normalized_wm_image = wc_files
-        mwc_files = glob(fname_presuffix(f,prefix='mwc2',suffix=files_ext,use_ext=False))
-        outputs.modulated_wm_image = mwc_files
+        c_file = fname_presuffix(f,prefix='c2')
+        outputs['native_wm_image'] = c_file
+        wc_file = fname_presuffix(f,prefix='wc2')
+        outputs['normalized_wm_image'] = wc_file
+        mwc_file = fname_presuffix(f,prefix='mwc2')
+        outputs['modulated_wm_image'] = mwc_file
         
-        c_files = glob(fname_presuffix(f,prefix='c3',suffix=files_ext,use_ext=False))
-        outputs.native_csf_image = c_files
-        wc_files = glob(fname_presuffix(f,prefix='wc3',suffix=files_ext,use_ext=False))
-        outputs.normalized_csf_image = wc_files
-        mwc_files = glob(fname_presuffix(f,prefix='mwc3',suffix=files_ext,use_ext=False))
-        outputs.modulated_csf_image = mwc_files
+        c_file = fname_presuffix(f,prefix='c3')
+        outputs['native_csf_image'] = c_file
+        wc_file = fname_presuffix(f,prefix='wc3')
+        outputs['normalized_csf_image'] = wc_file
+        mwc_file = fname_presuffix(f,prefix='mwc3')
+        outputs['modulated_csf_image'] = mwc_file
         
         t_mat = glob(fname_presuffix(f,suffix='_seg_sn.mat',use_ext=False))
-        outputs.transformation_mat = t_mat
+        outputs['transformation_mat'] = t_mat
         invt_mat = glob(fname_presuffix(f,suffix='_seg_inv_sn.mat',use_ext=False))
-        outputs.inverse_transformation_mat = invt_mat
+        outputs['inverse_transformation_mat'] = invt_mat
         return outputs
 
 class SmoothInputSpec(BaseInterfaceInputSpec):
