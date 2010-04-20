@@ -16,4 +16,4 @@ w2 = pe.Workflow(name='cplx')
 w2.connect(w1, 'coreg.coregistered_files', realign2, 'infile')
 
 inputs = w2.inputs
-#w2._generate_execgraph()
+w2._generate_execgraph()
