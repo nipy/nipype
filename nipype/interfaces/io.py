@@ -15,7 +15,7 @@ import shutil
 
 from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult,\
     NEW_Interface, TraitedSpec, traits, File, Directory, isdefined, BaseInterfaceInputSpec,\
-    NEW_BaseInterface, OutputMultiPath
+    NEW_BaseInterface, OutputMultiPath, DynamicTraitedSpec
 from nipype.utils.filemanip import copyfile, list_to_filename, filename_to_list
 
 def add_traits(base, names, trait_type=None):
@@ -139,7 +139,7 @@ class DataSink(IOBase):
         return None
 
 
-class DataGrabberInputSpec(BaseInterfaceInputSpec):
+class DataGrabberInputSpec(DynamicTraitedSpec): #InterfaceInputSpec):
     base_directory = Directory(exists=True,
             desc='Path to the base directory consisting of subject data.')
     template = traits.Str(mandatory=True,
@@ -190,7 +190,7 @@ class DataGrabber(IOBase):
 
     """
     input_spec = DataGrabberInputSpec
-    output_spec = TraitedSpec
+    output_spec = DynamicTraitedSpec
 
     def __init__(self, infields=None, outfields=None, **kwargs):
         """
