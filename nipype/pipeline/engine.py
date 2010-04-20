@@ -486,11 +486,11 @@ class Workflow(WorkflowBase):
                     node.run(force_execute=redo)
             except:
                 os.chdir(old_wd)
+                if config.getboolean('execution', 'stop_on_first_crash'):
+                    raise
                 # bare except, but i really don't know where a
                 # node might fail
                 crashfile = node._report_crash(execgraph=self._execgraph)
-                if config.getboolean('execution', 'stop_on_first_crash'):
-                    break
                 # remove dependencies from queue
                 subnodes = nx.dfs_preorder(self._execgraph, node)
                 notrun.append(dict(node = node,
