@@ -243,7 +243,7 @@ class Pipelet(object):
     
     """
 
-    def __init__(self, ):
+    def __init__(self, name=None, **kwargs):
         """
     base_directory : directory
         base output directory (will be hashed before creations)
@@ -258,10 +258,13 @@ class Pipelet(object):
         several times, a different name ensures that output directory
         is not overwritten each time the same functionality is run.
         """
-        self.name = None
-        self.id = None
         self.base_directory = None
         self.overwrite = None
+        if name is None:
+            raise Exception("please provide a name")
+        self.name = name
+        # for compatibility with node expansion using iterables
+        self.id = self.name
 
     def execute(self):
         print "Executing workflow/node"
@@ -271,13 +274,16 @@ class Pipelet(object):
     
     def check_inputs(self, parameter):
         raise NotImplementedError
+    
+    def __repr__(self):
+        return self.id
 
 class Workflow(Pipelet):
     """Controls the setup and execution of a pipeline of processes
     """
 
-    def __init__(self):
-        super(Workflow, self).__init__()
+    def __init__(self, **kwargs):
+        super(Workflow, self).__init__(**kwargs)
         self._graph = nx.DiGraph()
 
     def connect(self, *args):
@@ -389,7 +395,7 @@ class Workflow(Pipelet):
                     inputdict[nodename] = value
             else:
                 taken_inputs = []
-                for u, v, d in self._graph.in_edges_iter(nbunch=node, data=True):
+                for _, _, d in self._graph.in_edges_iter(nbunch=node, data=True):
                     for cd in d['connect']:
                         taken_inputs.append(cd[1])
                 for key in node.inputs.copyable_trait_names():
@@ -521,6 +527,40 @@ class Workflow(Pipelet):
         self._execgraph = graph_in
         logger.info("PE: expanding iterables ... done")
 
+
+    def generate_execgraph(self):
+        # TODO : change from in-place to copy modification
+        nodes2remove = []
+        for node in self._graph.nodes():
+            if isinstance(node, Workflow):
+                nodes2remove.append(node)
+                node.generate_execgraph()
+                self._graph.add_nodes_from(node._graph.nodes())
+                self._graph.add_edges_from(node._graph.edges(data=True))
+                for u, _, d in self._graph.in_edges_iter(nbunch=node, data=True):
+                    for cd in d['connect']:
+                        print "in", cd
+                        dstnode = node.get_inputs()[cd[1]]
+                        srcnode = u
+                        # XX simple source format used here.
+                        # TODO implement functional format
+                        srcout = cd[0]
+                        dstin = cd[1].split('.')[-1]
+                        self.connect(srcnode, srcout, dstnode, dstin)
+                for _, v, d in self._graph.out_edges_iter(nbunch=node, data=True):
+                    for cd in d['connect']:
+                        print "out", cd
+                        dstnode = v
+                        srcnode = node.get_outputs()[cd[0]]
+                        # XX simple source format used here.
+                        # TODO implement functional format
+                        srcout = cd[0].split('.')[-1]
+                        dstin = cd[1]
+                        self.connect(srcnode, srcout, dstnode, dstin)
+        if nodes2remove:
+            print nodes2remove
+            self._graph.remove_nodes_from(nodes2remove)
+    
 class Node(Pipelet):
     """Wraps interface objects for use in pipeline
     
@@ -575,17 +615,16 @@ class Node(Pipelet):
 
     """
     def __init__(self, interface=None,
-                 iterables={}, iterfield=[],
+                 iterables={},
                  diskbased=True, base_directory=None,
-                 overwrite=False,
-                 name=None):
+                 overwrite=False, **kwargs):
         # interface can only be set at initialization
+        super(Node, self).__init__(**kwargs)
         if interface is None:
             raise Exception('Interface must be provided')
         self._interface  = interface
         self._result     = None
         self.iterables  = iterables
-        self.iterfield  = iterfield
         self.parameterization = None
         self.disk_based = diskbased
         self.output_directory_base  = None
@@ -597,14 +636,6 @@ class Node(Pipelet):
         if self.disk_based:
             self.output_directory_base  = base_directory
             self.overwrite = overwrite
-        if name is None:
-            cname = interface.__class__.__name__
-            mname = interface.__class__.__module__.split('.')[2]
-            self.name = '.'.join((cname, mname))
-        else:
-            self.name = name
-        # for compatibility with node expansion using iterables
-        self.id = self.name
 
     @property
     def interface(self):
@@ -723,58 +754,7 @@ class Node(Pipelet):
             cwd = self._output_directory()
             os.chdir(cwd)
         basewd = cwd
-        if self.iterfield:
-            # This branch of the if takes care of iterfield and
-            # basically calls the underlying interface each time
-            itervals = {}
-            notlist = {} 
-            for field in self.iterfield:
-                itervals[field] = self.inputs.get(field)
-                notlist[field] = False
-                if not isinstance(itervals[field], list):
-                    notlist[field] = True
-                    itervals[field] = [itervals[field]]
-            self._itervals = deepcopy(itervals)
-            self._result = InterfaceResult(interface=[], runtime=[],
-                                           outputs=Bunch())
-            logger.info("Iterfields: %s"%str(self.iterfield))
-            for i in range(len(itervals[self.iterfield[0]])):
-                logger.debug("%s : Iteration %02d\n"%(self.name, i))
-                for field,val in itervals.items():
-                    setattr(self.inputs, field, val[i])
-                    logger.debug("Field : %s val : %s\n"%(field,
-                                                          val[i]))
-                if self.disk_based:
-                    subdir = os.path.join(basewd,'%s_%d'%(self.iterfield[0], i))
-                    if not os.path.exists(subdir):
-                        os.mkdir(subdir)
-                    os.chdir(subdir)
-                    cwd = subdir
-                    logger.debug("subdir: %s"%subdir)
-                result = self._run_command(execute, cwd)
-                if execute:
-                    self._result.interface.insert(i, result.interface)
-                    self._result.runtime.insert(i, result.runtime)
-                outputs = result.outputs
-                for key,val in outputs.items():
-                    try:
-                        # This has funny default behavior if the length of the
-                        # list is < i - 1. I'd like to simply use append... feel
-                        # free to second my vote here!
-                        self._result.outputs.get(key).append(val)
-                    except AttributeError:
-                        # .insert(i, val) is equivalent to the following if
-                        # outputs.key == None, so this is far less likely to
-                        # produce subtle errors down the road!
-                        setattr(self._result.outputs, key, [val])
-            # restore input state
-            for field in self.iterfield:
-                if notlist[field]:
-                    self.set_input(field, itervals[field].pop())
-                else:
-                    self.set_input(field, itervals[field])
-        else:
-            self._result = self._run_command(execute, cwd)
+        self._result = self._run_command(execute, cwd)
         if cwd:
             os.chdir(old_cwd)
             
@@ -786,7 +766,7 @@ class Node(Pipelet):
         if self.disk_based:
             resultsfile = os.path.join(cwd, 'result_%s.npz' % self.id)
         if execute:
-            if issubclass(self._interface.__class__,CommandLine):
+            if issubclass(self._interface.__class__, CommandLine):
                 cmd = self._interface.cmdline
                 logger.info('cmd: %s'%cmd)
                 cmdfile = os.path.join(cwd,'command.txt')
@@ -865,6 +845,69 @@ class Node(Pipelet):
             os.mkdir(outdir)
         return outdir
 
-    def __repr__(self):
-        return self.id
+class MapNode(Node):
+    
+    def __init__(self, iterfield=None, **kwargs):
+        # interface can only be set at initialization
+        super(MapNode, self).__init__(**kwargs)
+        if self.iterfield is None:
+            raise Exception("Iterfield must be provided")
+        self.iterfield  = iterfield
+        self._inputs = deepcopy(self._interface.inputs)
+        # TODO modify iterields to lists
+        for field in iterfield:
+            self._inputs.add_trait(field, List('underlying type'))
 
+    @property
+    def inputs(self):
+        return self._inputs
+
+    def _outputs():
+        outputs = self._interface._outputs()
+        for field in outputs.get().keys():
+            outputs.add_trait(field, List('underlying type'))
+        
+    @property
+    def outputs(self):
+        return self._outputs()
+
+    def _run_interface(self, execute=True, cwd=None):
+        old_cwd = os.getcwd()
+        if cwd:
+            os.chdir(cwd)
+        if not cwd and self.disk_based:
+            cwd = self._output_directory()
+            os.chdir(cwd)
+        basewd = cwd
+
+        iterflow = Workflow()
+        for i in enumerate(self.iterfield):
+            newnode = Node(deepcopy(self.interface), name=self.name+i)
+            # TODO set inputs
+            for field in self.iterfield:
+                setattr(newnode.inputs, field,
+                        getattr(self.inputs, field)[i])
+            iterflow.add_nodes([newnode])
+        # TODO set output directory
+        #iterflow... 
+        iterflow.execute()
+        # TODO collect results
+        # TODO ensure workflow returns results
+        self._result = InterfaceResult(interface=[], runtime=[],
+                                       outputs=Bunch())
+        for i, node in enumerate(self._execgraph.nodes()):
+            self._result.interface.insert(i, result.interface)
+            self._result.runtime.insert(i, result.runtime)
+            for key, val in node.result.outputs.get().items():
+                try:
+                    # This has funny default behavior if the length of the
+                    # list is < i - 1. I'd like to simply use append... feel
+                    # free to second my vote here!
+                    self._result.outputs.get(key).append(val)
+                except AttributeError:
+                    # .insert(i, val) is equivalent to the following if
+                    # outputs.key == None, so this is far less likely to
+                    # produce subtle errors down the road!
+                    setattr(self._result.outputs, key, [val])
+        if cwd:
+            os.chdir(old_cwd)
