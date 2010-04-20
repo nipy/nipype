@@ -230,6 +230,11 @@ class DataGrabber(IOBase):
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
     def _add_output_traits(self, base):
+        """
+
+        Using traits.Any instead out OutputMultiPath till add_trait bug
+        is fixed.
+        """
         return add_traits(base, self.inputs.template_args.keys())
 
     def _list_outputs(self):
@@ -276,36 +281,6 @@ class DataGrabber(IOBase):
                 outputs[key] = None
             elif len(outputs[key]) == 1:
                 outputs[key] = outputs[key][0]
-        return outputs
-
-    def aggregate_outputs(self):
-        """ Collate expected outputs and check for existence
-
-        Overriding aggregate_outputs to modify output trait types from
-        outputmultipath to either List(File) or File
-        """
-        
-        predicted_outputs = self._list_outputs()
-        outputs = self._outputs()
-        if predicted_outputs:
-            for key, val in predicted_outputs.items():
-                outputs.remove_trait(key)
-                if val is None:
-                    outputs.add_trait(key, traits.Any)
-                elif isinstance(val, list):
-                    outputs.add_trait(key,
-                                      traits.List(File(exists=True)))
-                else:
-                    outputs.add_trait(key, File(exists=True))
-                try:
-                    setattr(outputs, key, val)
-                except TraitError, error:
-                    if error.info == "a file name":
-                        msg = "File '%s' not found for %s output '%s'." \
-                            % (val, self.__class__.__name__, key)
-                        raise FileNotFoundError(msg)
-                    else:
-                        raise error
         return outputs
 
 
