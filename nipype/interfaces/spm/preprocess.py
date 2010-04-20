@@ -423,9 +423,9 @@ Unmodulated: [1,1,1], Modulated + Unmodulated Normalised: [1,1,0]""")
     clean_masks = traits.Enum('no', 'light', 'thorough', field='output.cleanup',
                      desc="clean using estimated brain mask ('no','light','thorough')")
     tissue_prob_maps = traits.List(File(exists=True), field='opts.tpm',
-                     'list of gray, white & csf prob. (opt,)')
+                     desc='list of gray, white & csf prob. (opt,)')
     gaussians_per_class = traits.List(traits.Int(), field='opts.ngaus',
-                     'num Gaussians capture intensity distribution')
+                     desc='num Gaussians capture intensity distribution')
     affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', field='opts.regtype',
                       desc='mni, eastern, subj, none ')
     warping_regularization = traits.Float(field='opts.warpreg',
