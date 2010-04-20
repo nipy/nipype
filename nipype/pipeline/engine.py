@@ -130,7 +130,7 @@ class WorkflowBase(object):
     def load(self, filename):
         np.load(filename)
         
-    def _report_crash(self, traceback=None):
+    def _report_crash(self, traceback=None, execgraph=None):
         """Writes crash related information to a file
         """
         message = ['Node %s failed to run.' % self._id]
@@ -150,7 +150,7 @@ class WorkflowBase(object):
                                      crashfile)
         else:
             crashfile = os.path.join(os.getcwd(), crashfile)
-        pklgraph = _create_pickleable_graph(self._execgraph,
+        pklgraph = _create_pickleable_graph(execgraph,
                                             show_connectinfo=True)
         logger.info('Saving crash info to %s' % crashfile)
         logger.info(''.join(traceback))
@@ -488,7 +488,9 @@ class Workflow(WorkflowBase):
                 os.chdir(old_wd)
                 # bare except, but i really don't know where a
                 # node might fail
-                crashfile = node._report_crash()
+                crashfile = node._report_crash(execgraph=self._execgraph)
+                if config.getboolean('execution', 'stop_on_first_crash'):
+                    break
                 # remove dependencies from queue
                 subnodes = nx.dfs_preorder(self._execgraph, node)
                 notrun.append(dict(node = node,
@@ -579,7 +581,7 @@ class Workflow(WorkflowBase):
                         try:
                             res.raise_exception()
                         except:
-                            crashfile = self.procs[jobid]._report_crash()
+                            crashfile = self.procs[jobid]._report_crash(execgraph=self._execgraph)
                             # remove dependencies from queue
                             notrun.append(self._remove_node_deps(jobid, crashfile))
                     else:

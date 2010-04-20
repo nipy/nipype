@@ -11,6 +11,9 @@ default_cfg = StringIO("""
 workflow_level = INFO
 node_level = INFO
 filemanip_level = INFO
+
+[execution]
+stop_on_first_crash = false
 """)
 
 config = ConfigParser.ConfigParser()
