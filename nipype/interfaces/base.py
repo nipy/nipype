@@ -809,7 +809,7 @@ class OptMapCommand(CommandLine):
 #
 #####################################################################
 
-class TraitedSpec(traits.HasTraits):
+class BaseTraitedSpec(traits.HasTraits):
     """Provide a few methods necessary to support nipype interface api
 
     The inputs attribute of interfaces call certain methods that are not
@@ -835,7 +835,7 @@ class TraitedSpec(traits.HasTraits):
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
         #super(TraitedSpec, self).__init__(*args, **kwargs)
-        super(TraitedSpec, self).__init__(**kwargs)
+        super(BaseTraitedSpec, self).__init__(**kwargs)
         undefined_traits = {}
         for trait in self.copyable_trait_names():
             if not self.traits()[trait].usedefault:
@@ -844,28 +844,6 @@ class TraitedSpec(traits.HasTraits):
         self._generate_handlers()
         self.set(**kwargs)
 
-    def __deepcopy__(self, memo):
-        """ bug in deepcopy for HasTraits results in weird cloning behavior for
-        added traits
-        """
-        id_self = id(self)
-        if id_self in memo:
-            return memo[id_self]
-        dup_dict = deepcopy(self.get(), memo)
-        # access all keys
-        for key in self.copyable_trait_names():
-            value = getattr(self, key)
-        # clone once
-        dup = self.clone_traits(memo=memo)
-        for key in self.copyable_trait_names():
-            try:
-                value = getattr(dup, key)
-            except:
-                pass
-        # clone twice
-        dup = self.clone_traits(memo=memo)
-        dup.set(**dup_dict)
-        return dup
 
     def items(self):
         """ Name, trait generator for user modifiable traits
@@ -964,6 +942,33 @@ class TraitedSpec(traits.HasTraits):
     
     def _get_hashval(self):
         return self.hashval
+
+class DynamicTraitedSpec(BaseTraitedSpec):
+    def __deepcopy__(self, memo):
+        """ bug in deepcopy for HasTraits results in weird cloning behavior for
+        added traits
+        """
+        id_self = id(self)
+        if id_self in memo:
+            return memo[id_self]
+        dup_dict = deepcopy(self.get(), memo)
+        # access all keys
+        for key in self.copyable_trait_names():
+            value = getattr(self, key)
+        # clone once
+        dup = self.clone_traits(memo=memo)
+        for key in self.copyable_trait_names():
+            try:
+                value = getattr(dup, key)
+            except:
+                pass
+        # clone twice
+        dup = self.clone_traits(memo=memo)
+        dup.set(**dup_dict)
+        return dup
+    
+class TraitedSpec(BaseTraitedSpec):
+    _ = traits.Disallow
 
 class NEW_Interface(object):
     """This is an abstract defintion for Interface objects.
@@ -1154,7 +1159,6 @@ class NEW_BaseInterface(NEW_Interface):
         self._check_mandatory_inputs()
         # initialize provenance tracking
         env = deepcopy(os.environ.data)
-        env.update(self.inputs.environ)
         runtime = Bunch(cwd=os.getcwd(),
                         returncode = None,
                         duration = None,
@@ -1273,6 +1277,7 @@ class NEW_CommandLine(NEW_BaseInterface):
         setattr(runtime, 'stdout', None)
         setattr(runtime, 'stderr', None)
         setattr(runtime, 'cmdline', self.cmdline)
+        runtime.environ.update(self.inputs.environ)
         proc  = subprocess.Popen(runtime.cmdline,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
@@ -1377,7 +1382,7 @@ class MultiPath(traits.List):
     
     def validate(self, object, name, value):
         if not isdefined(value) or (isinstance(value, list) and len(value)==0):
-            return _Undefined()
+            return Undefined
         newvalue = value
         if not isinstance(value, list):
             newvalue = [value]
@@ -1420,18 +1425,18 @@ class OutputMultiPath(MultiPath):
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
     
     """
-       
+
     def get(self, object, name):
         value = self.get_value(object, name)
         if len(value) == 0:
-            return _Undefined()
+            return Undefined
         elif len(value)==1:
             return value[0]
         else:
             return value
 
     def set(self, object, name, value):
-        super(OutputMultiPath, self).set_value(object, name, value)
+        self.set_value(object, name, value)
         
 class InputMultiPath(MultiPath):
     """ Implements a user friendly traits that accepts one or more
