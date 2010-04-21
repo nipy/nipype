@@ -4,7 +4,7 @@ Created on 20 Apr 2010
 @author: Chris Filo Gorgolewski
 '''
 import ConfigParser, os
-from io import StringIO
+from StringIO import StringIO
 
 default_cfg = StringIO("""
 [logging]
