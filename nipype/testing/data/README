@@ -1,0 +1,6 @@
+This directory contains empty, dummy files which are meant to be used
+in the doctests of nipype.  For verion 0.3 of nipype, we're using
+Traits and for input files, the code checks to confirm the assigned
+files actually exist.  It doesn't matter what the files are, or even
+if they contain "real data", only that they exist.  Again, these files
+are only meant to serve as documentation in the doctests.
