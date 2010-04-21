@@ -6,6 +6,7 @@ import re
 import shutil
 from glob import glob
 import logging
+from nipype.utils.misc import isdefined
 # The md5 module is deprecated in Python 2.6, but hashlib is only
 # available as an external package for versions of python before 2.6.
 # Both md5 algorithms appear to return the same result.
@@ -103,7 +104,7 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     pth, fname, ext = split_filename(fname)
     if not use_ext:
         ext = ''
-    if newpath:
+    if newpath and isdefined(newpath):
         pth = os.path.abspath(newpath)
     return os.path.join(pth, prefix+fname+suffix+ext)
 

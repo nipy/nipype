@@ -22,7 +22,8 @@ from nipype.interfaces.base import Bunch, CommandLine, OptMapCommand
 from nipype.utils.docparse import get_doc
 from nipype.utils.filemanip import FileNotFoundError, fname_presuffix
 from nipype.interfaces.base import NEW_CommandLine, traits, TraitedSpec,\
-    BaseInterfaceInputSpec, isdefined, Directory
+    BaseInterfaceInputSpec, Directory
+from nipype.utils.misc import isdefined
 
 
 class FSInfo(object):

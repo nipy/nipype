@@ -14,8 +14,8 @@ import numpy as np
 from scipy.io import savemat
 
 # Local imports
-from nipype.interfaces.base import Bunch, NEW_BaseInterface, traits, TraitedSpec,\
-    isdefined
+from nipype.interfaces.base import Bunch, NEW_BaseInterface, traits, TraitedSpec
+from nipype.utils.misc import isdefined
 from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import MatlabCommandLine
 from nipype.interfaces.matlab import NEW_MatlabCommand

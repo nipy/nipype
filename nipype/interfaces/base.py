@@ -17,14 +17,13 @@ from warnings import warn
 
 import enthought.traits.api as traits
 from enthought.traits.api import Undefined
-from enthought.traits.trait_base import _Undefined
 
 from nipype.utils.filemanip import md5, hash_infile, FileNotFoundError,\
     hash_timestamp
 from nipype.utils.misc import is_container
 from enthought.traits.trait_errors import TraitError
 from nipype.utils.config import config
-
+from nipype.utils.misc import isdefined
  
 __docformat__ = 'restructuredtext'
 
@@ -199,11 +198,6 @@ class Directory ( BaseDirectory ):
 
         super( Directory, self ).__init__( value, auto_set, entries, exists,
                                            **metadata )
-
-    
-
-def isdefined(object):
-    return not isinstance(object, _Undefined)
 
 def load_template(name):
     """Load a template from the script_templates directory

@@ -3,6 +3,10 @@
 import numpy as np
 import os
 from distutils.version import LooseVersion
+from enthought.traits.trait_base import _Undefined
+
+def isdefined(object):
+    return not isinstance(object, _Undefined)
 
 def find_indices(condition):
    "Return the indices where ravel(condition) is true"

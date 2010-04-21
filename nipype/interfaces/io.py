@@ -16,8 +16,9 @@ import shutil
 from enthought.traits.trait_errors import TraitError
 
 from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult,\
-    NEW_Interface, TraitedSpec, traits, File, Directory, isdefined, BaseInterfaceInputSpec,\
+    NEW_Interface, TraitedSpec, traits, File, Directory, BaseInterfaceInputSpec,\
     NEW_BaseInterface, OutputMultiPath, DynamicTraitedSpec, BaseTraitedSpec
+from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import copyfile, list_to_filename, filename_to_list, FileNotFoundError
 
 def add_traits(base, names, trait_type=None):

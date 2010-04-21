@@ -25,7 +25,8 @@ import warnings
 from nipype.utils.filemanip import (fname_presuffix, list_to_filename,
                                     FileNotFoundError)
 from nipype.interfaces.base import NEW_CommandLine, traits, TraitedSpec,\
-    CommandLineInputSpec, isdefined
+    CommandLineInputSpec
+from nipype.utils.misc import isdefined
 from nipype.interfaces.base import OptMapCommand, CommandLine
 from copy import deepcopy
 

@@ -14,7 +14,8 @@ from nipype.utils.filemanip import (copyfiles, fname_presuffix,
                                     filename_to_list, list_to_filename,
                                     fnames_presuffix, save_json,
                                     FileNotFoundError)
-from nipype.interfaces.base import Bunch, InterfaceResult, CommandLine, isdefined
+from nipype.interfaces.base import Bunch, InterfaceResult, CommandLine
+from nipype.utils.misc import isdefined
 
 logger = logging.getLogger('nodewrapper')
 

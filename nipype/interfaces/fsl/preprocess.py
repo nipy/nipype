@@ -14,11 +14,11 @@ import warnings
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
 from nipype.interfaces.fsl.base import NEW_FSLCommand, FSLTraitedSpec
-from nipype.interfaces.base import Bunch, TraitedSpec, isdefined, File,\
+from nipype.interfaces.base import Bunch, TraitedSpec, File,\
     InputMultiPath
 from nipype.utils.filemanip import fname_presuffix, list_to_filename
 from nipype.utils.docparse import get_doc
-from nipype.utils.misc import container_to_string, is_container
+from nipype.utils.misc import container_to_string, is_container, isdefined
 
 import enthought.traits.api as traits
 

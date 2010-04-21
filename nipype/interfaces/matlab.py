@@ -9,7 +9,8 @@ import tempfile
 import numpy as np
 
 from nipype.interfaces.base import CommandLine, InterfaceResult, Bunch,\
-    CommandLineInputSpec, isdefined, InputMultiPath
+    CommandLineInputSpec, InputMultiPath
+from nipype.utils.misc import isdefined
 from nipype.interfaces.base import (NEW_CommandLine, InterfaceResult, traits,
                                     TraitedSpec, File, Directory)
 

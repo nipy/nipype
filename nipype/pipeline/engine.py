@@ -28,7 +28,8 @@ except:
 from nipype.interfaces.base import (traits, File, Directory, InputMultiPath,
                                     NEW_CommandLine,
                                     OutputMultiPath, TraitedSpec,
-                                    Bunch, InterfaceResult, isdefined)
+                                    Bunch, InterfaceResult)
+from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (save_json, FileNotFoundError,
                                     filename_to_list, list_to_filename,
                                     copyfiles, fnames_presuffix)

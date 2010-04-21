@@ -18,7 +18,8 @@ import scipy.io as sio
 from nipype.interfaces.spm import SpmMatlabCommandLine
 from nipype.interfaces.spm.base import NEW_SPMCommand
 from nipype.interfaces.base import Bunch, BaseInterfaceInputSpec, traits,\
-    TraitedSpec, isdefined, File, Directory, OutputMultiPath, InputMultiPath
+    TraitedSpec, File, Directory, OutputMultiPath, InputMultiPath
+from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (filename_to_list, list_to_filename,
                                     loadflat)
 from nipype.utils.spm_docs import grab_doc

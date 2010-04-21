@@ -17,8 +17,9 @@ import numpy as np
 from nipype.interfaces.fsl.base import FSLCommand, FSLInfo, NEW_FSLCommand,\
     FSLTraitedSpec
 from nipype.utils.filemanip import list_to_filename
-from nipype.interfaces.base import Bunch, traits, TraitedSpec, isdefined,\
+from nipype.interfaces.base import Bunch, traits, TraitedSpec,\
     OutputMultiPath, File
+from nipype.utils.misc import isdefined
 from nipype.utils.docparse import get_doc
 
 warn = warnings.warn
@@ -72,52 +73,38 @@ class Smooth(FSLCommand):
         outputs.smoothedimage = self._get_outfile(check=True)
         return outputs
 
+class MergeInputSpec(FSLTraitedSpec):
+    infiles = traits.List(File(exists=True), argstr="%s", position=2, mandatory=True)
+    dimension = traits.Enum('t', 'x', 'y', 'z', argstr="-%s", position=0,
+                            desc="dimension along which the file will be merged",
+                            mandatory=True)
+    outfile = File(argstr="%s", position=1, genfile=True)
 
-class Merge(FSLCommand):
+class MergeOutputSpec(TraitedSpec):
+    outfile = File(exists=True)
+
+class Merge(NEW_FSLCommand):
     """Use fslmerge to concatenate images
     """
 
-    @property
-    def cmd(self):
-        return 'fslmerge'
+    _cmd = 'fslmerge'
+    input_spec = MergeInputSpec
+    output_spec = MergeOutputSpec
 
-    opt_map = {'infile':  None,
-               'dimension':    None,
-               'outfile': None,
-              }
-
-    def _get_outfile(self, check=False):
-        return self._gen_fname(self.inputs.infile[0],
-                                  self.inputs.outfile,
-                                  suffix='_merged',
-                                  check=check)
-
-    def _parse_inputs(self):
-        allargs = [self.inputs.dimension,
-                    self._get_outfile()]
-        allargs.extend(self.inputs.infile)
-        return allargs
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-             mergedimage
-        """
-        outputs = Bunch(mergedimage=None)
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['outfile'] = self._gen_fname(self.inputs.infiles[0],
+                                self.inputs.outfile, suffix='_merged')
         return outputs
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._list_outputs()[name]
+        return None
 
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outputs.mergedimage = self._get_outfile(check=True)
-        return outputs
 
 class ExtractRoiInputSpec(FSLTraitedSpec):
     infile = File(exists=True, argstr="%s", position=0, desc="input file", mandatory=True)
-    outfile = File(exists=True, argstr="%s", position=1, desc="output file", genfile=True)
+    outfile = File(argstr="%s", position=1, desc="output file", genfile=True)
     xmin = traits.Float(argstr="%f", position=2)
     xsize = traits.Float(argstr="%f", position=3)
     ymin = traits.Float(argstr="%f", position=4)

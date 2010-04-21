@@ -22,7 +22,8 @@ from nipype.interfaces.io import FreeSurferSource
 from nipype.interfaces.freesurfer import FSCommand
 
 from nipype.interfaces.freesurfer.base import NEW_FSCommand, FSTraitedSpec
-from nipype.interfaces.base import Bunch, TraitedSpec, isdefined, File, traits
+from nipype.interfaces.base import Bunch, TraitedSpec, File, traits
+from nipype.utils.misc import isdefined
 
 class Resample(FSCommand):
     """Use FreeSurfer mri_convert to up or down-sample image files

@@ -5,7 +5,8 @@ Created on 24 Feb 2010
 '''
 from nipype.interfaces.base import Bunch, InterfaceResult,\
     NEW_BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec,\
-    isdefined, File
+    File
+from nipype.utils.misc import isdefined
 import nipype.externals.pynifti as nifti
 import numpy as np
 from math import floor, ceil

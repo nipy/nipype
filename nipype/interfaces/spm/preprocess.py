@@ -26,8 +26,9 @@ import numpy as np
 # Local imports
 from nipype.interfaces.spm.base import (NEW_SPMCommand, scans_for_fname,
                                    scans_for_fnames)
-from nipype.interfaces.base import BaseInterfaceInputSpec, isdefined,\
+from nipype.interfaces.base import BaseInterfaceInputSpec,\
     OutputMultiPath, TraitedSpec, traits, InputMultiPath, File
+from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list, 
                                     list_to_filename)
 
