@@ -88,6 +88,7 @@ class Merge(NEW_FSLCommand):
         outputs['outfile'] = self._gen_fname(self.inputs.infiles[0],
                                 self.inputs.outfile, suffix='_merged')
         return outputs
+    
     def _gen_filename(self, name):
         if name == 'outfile':
             return self._list_outputs()[name]
@@ -196,121 +197,47 @@ class Split(NEW_FSLCommand):
         outputs['outfiles'] = sorted(glob(os.path.join(os.getcwd(),
                                                     outbase + ext)))
         return outputs
+    
+class ImageMathsInputSpec(FSLTraitedSpec):
+    infile = File(exists=True, argstr="%s", mandatory=True, position=0)
+    infile2 = File(exists=True, argstr="%s", position=2)
+    outfile = File(argstr="%s", position=3, genfile=True)
+    optstring = traits.Str(argstr="%s", mandatory=True, position=1,
+                           desc="string defining the operation, i. e. -add")
+    suffix = traits.Str(argstr="%s", desc="outfile suffix")
+    outdatatype = traits.Enum('char', 'short', 'int', 'float', 'double',
+                              'input', argstr="-odt %s", position=4,
+                              desc="output datatype, one of (char, short, int, float, double, input)")
 
+class ImageMathsOutputSpec(TraitedSpec):
+    outfile = File(exists=True)
 
-class ImageMaths(FSLCommand):
+class ImageMaths(NEW_FSLCommand):
     """Use FSL fslmaths command to allow mathematical manipulation of images
+    Example:
+    >>> from nipype.interfaces import fsl
+    >>> import os
+    >>> maths = fsl.ImageMaths(infile='foo.nii', optstring= '-add 5', \
+                               outfile='foo_maths.nii')
+    >>> maths.cmdline
+    'fslmaths foo.nii -add 5 foo_maths.nii'
+
     """
-    opt_map = {}
+    input_spec = ImageMathsInputSpec
+    output_spec = ImageMathsOutputSpec
 
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'fslmaths'
+    _cmd = 'fslmaths'
 
-    def inputs_help(self):
-        """Print command line documentation for fslmaths."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._list_outputs()[name]
+        return None
 
-    def _populate_inputs(self):
-        self.inputs = Bunch(infile=None,
-                            infile2=None,
-                            outfile=None,
-                            optstring=None,
-                            suffix=None,  # ohinds: outfile suffix
-                            outdatatype=None)  # ohinds: change outdatatype
-
-    def _get_outfile(self):
+    def _list_outputs(self):
         suffix = '_maths'  # ohinds: build suffix
-        if self.inputs.suffix:
+        if isdefined(self.inputs.suffix):
             suffix = self.inputs.suffix
-        return self._gen_fname(self.inputs.infile,
-                                  self.inputs.outfile,
-                                  suffix=suffix)
-
-    def _parse_inputs(self):
-        """validate fsl fslmaths options"""
-
-        # Add infile and outfile to the args if they are specified
-        allargs = []
-        if self.inputs.infile:
-            allargs.insert(0, list_to_filename(self.inputs.infile))
-            self.outfile = self._get_outfile()
-        if self.inputs.optstring:
-            allargs.insert(1, self.inputs.optstring)
-
-        if self.inputs.infile2:
-            allargs.insert(2, list_to_filename(self.inputs.infile2))
-            allargs.insert(3, self.outfile)
-        else:
-            allargs.insert(2, self.outfile)
-
-        if self.inputs.outdatatype:  # ohinds: assign odt
-            allargs.append('-odt ' + self.inputs.outdatatype)
-
-        return allargs
-
-    def run(self, infile=None, infile2=None, outfile=None, **inputs):
-        """Execute the command.
-        >>> from nipype.interfaces import fsl
-        >>> import os
-        >>> maths = fsl.ImageMaths(infile='foo.nii', optstring= '-add 5', \
-                                   outfile='foo_maths.nii')
-        >>> maths.cmdline
-        'fslmaths foo.nii -add 5 foo_maths.nii'
-
-        """
-
-        if infile:
-            self.inputs.infile = infile
-        if infile2:
-            self.inputs.infile = infile2
-        if not self.inputs.infile:
-            raise AttributeError('Fslmaths requires an input file')
-        if outfile:
-            self.inputs.outfile = outfile
-        self.inputs.update(**inputs)
-        return super(ImageMaths, self).run()
-
-    def outputs_help(self):
-        """
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-        outfile : /path/to/outfile
-            path and filename to computed image
-        """
-        print self.outputs_help.__doc__
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-            outfile : string,file
-                path/name of file of fslmaths image
-        """
-        outputs = Bunch(outfile=None)
-        return outputs
-
-    def aggregate_outputs(self):
-        """Create a Bunch which contains all possible files generated
-        by running the interface.  Some files are always generated, others
-        depending on which ``inputs`` options are set.
-
-        Returns
-        -------
-        outputs : Bunch object
-            Bunch object containing all possible files generated by
-            interface object.
-
-            If None, file was not generated
-            Else, contains path, filename of generated outputfile
-
-        """
-        outputs = self.outputs()
-        outputs.outfile = glob(self._get_outfile())[0]
+        outputs = self._outputs().get()
+        outputs['outfile'] = self._gen_fname(self.inputs.infile,
+                                self.inputs.outfile, suffix=suffix)
         return outputs
