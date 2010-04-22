@@ -9,7 +9,7 @@ from nose import with_setup
 import networkx as nx
 
 from nipype.testing import (assert_raises, assert_equal, assert_true,
-                            assert_false)
+                            assert_false, skipif)
 from nipype.interfaces.base import (Interface, CommandLine, Bunch,
                                     InterfaceResult)
 from nipype.utils.filemanip import cleandir
@@ -64,6 +64,7 @@ def teardown_pipe():
     os.chdir(working_dir)
     rmtree(temp_dir)
 
+@skipif(True, "XXX: Update Pipeline tests to Workflow")
 def test_init():
     pipe = pe.Pipeline()
     yield assert_equal, type(pipe._graph), nx.DiGraph
@@ -71,6 +72,7 @@ def test_init():
     yield assert_equal, pipe.config['workdir'], '.'
     yield assert_equal, pipe.config['use_parameterized_dirs'], True
 
+@skipif(True, "XXX: Update Pipeline tests to Workflow")
 def test_connect():
     pipe = pe.Pipeline()
     mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
@@ -81,6 +83,7 @@ def test_connect():
     yield assert_true, mod2 in pipe._graph.nodes()
     yield assert_equal, pipe._graph.get_edge_data(mod1,mod2), {'connect':[('output1','input1')]} 
 
+@skipif(True, "XXX: Update Pipeline tests to Workflow")
 def test_add_nodes():
     pipe = pe.Pipeline()
     mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
@@ -90,7 +93,7 @@ def test_add_nodes():
     yield assert_true, mod1 in pipe._graph.nodes()
     yield assert_true, mod2 in pipe._graph.nodes()
 
-
+@skipif(True, "XXX: Update Pipeline tests to Workflow")
 def test_generate_dependency_list():
     pipe = pe.Pipeline()
     mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
@@ -104,6 +107,7 @@ def test_generate_dependency_list():
     yield assert_false, pipe.proc_pending[1]
     yield assert_equal, pipe.depidx[0,1], 1
 
+@skipif(True, "XXX: Update Pipeline tests to Workflow")
 @with_setup(setup_pipe, teardown_pipe)
 def test_run_in_series():
     pipe = pe.Pipeline()
@@ -125,6 +129,7 @@ def test_run_in_series():
 # XXX - SG I'll create a graphical version of these tests and actually
 # ensure that all connections are tested later
 
+@skipif(True, "XXX: Update Pipeline tests to Workflow")
 def test1():
     pipe = pe.Pipeline()
     mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
@@ -133,6 +138,7 @@ def test1():
     yield assert_equal, len(pipe._execgraph.nodes()), 1
     yield assert_equal, len(pipe._execgraph.edges()), 0
 
+@skipif(True, "XXX: Update Pipeline tests to Workflow")
 def test2():
     pipe = pe.Pipeline()
     mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
@@ -142,6 +148,7 @@ def test2():
     yield assert_equal, len(pipe._execgraph.nodes()), 4
     yield assert_equal, len(pipe._execgraph.edges()), 0
     
+@skipif(True, "XXX: Update Pipeline tests to Workflow")
 def test3():
     pipe = pe.Pipeline()
     mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
@@ -153,6 +160,7 @@ def test3():
     yield assert_equal, len(pipe._execgraph.nodes()), 3
     yield assert_equal, len(pipe._execgraph.edges()), 2
     
+@skipif(True, "XXX: Update Pipeline tests to Workflow")
 def test4():
     pipe = pe.Pipeline()
     mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
@@ -164,6 +172,7 @@ def test4():
     yield assert_equal, len(pipe._execgraph.nodes()), 4
     yield assert_equal, len(pipe._execgraph.edges()), 2
 
+@skipif(True, "XXX: Update Pipeline tests to Workflow")
 def test5():
     pipe = pe.Pipeline()
     mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
@@ -175,6 +184,7 @@ def test5():
     yield assert_equal, len(pipe._execgraph.nodes()), 6
     yield assert_equal, len(pipe._execgraph.edges()), 4
 
+@skipif(True, "XXX: Update Pipeline tests to Workflow")
 def test6():
     pipe = pe.Pipeline()
     mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
@@ -189,6 +199,7 @@ def test6():
     yield assert_equal, len(pipe._execgraph.nodes()), 5
     yield assert_equal, len(pipe._execgraph.edges()), 4
 
+@skipif(True, "XXX: Update Pipeline tests to Workflow")
 def test7():
     pipe = pe.Pipeline()
     mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
@@ -203,6 +214,7 @@ def test7():
     yield assert_equal, len(pipe._execgraph.nodes()), 5
     yield assert_equal, len(pipe._execgraph.edges()), 4
 
+@skipif(True, "XXX: Update Pipeline tests to Workflow")
 def test8():
     pipe = pe.Pipeline()
     mod1 = nw.NodeWrapper(interface=BasicInterface(),name='mod1')
