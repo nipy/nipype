@@ -15,897 +15,364 @@ from glob import glob
 import warnings
 
 from nipype.interfaces.fsl.base import FSLCommand
-from nipype.interfaces.base import Bunch
+from nipype.interfaces.fsl.base import NEW_FSLCommand, FSLTraitedSpec
+from nipype.interfaces.base import Bunch, TraitedSpec, isdefined, File,\
+    InputMultiPath,Directory
+
 from nipype.utils.filemanip import fname_presuffix, filename_to_list
 from nipype.utils.docparse import get_doc
+
+import enthought.traits.api as traits
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+class DtifitInputSpec(FSLTraitedSpec):
+    
+    dwi = File(exists=True, desc = 'diffusion weighted image data file',
+                  argstr='-k %s', position=0, mandatory=True)
+    basename = traits.Str( desc = 'basename that all output files will start with',
+                           argstr='-o %s', position=1, mandatory=True)
+    mask = File(exists=True, desc = 'bet binary mask file',
+                argstr='-m %s', position=2, mandatory=True)    
+    bvec = File(exists=True, desc = 'b vectors file',
+                argstr='-r %s', position=3, mandatory=True)
+    bval = File(exists=True,desc = 'b values file',
+                argstr='-b %s', position=4, mandatory=True)
+    min_z = traits.Int(argstr='-z %d', desc='min z')
+    max_z = traits.Int(argstr='-Z %d', desc='max z')
+    min_y = traits.Int(argstr='-y %d', desc='min y')
+    max_y = traits.Int(argstr='-Y %d', desc='max y')
+    min_x = traits.Int(argstr='-x %d', desc='min x')
+    max_x = traits.Int(argstr='-X %d', desc='max x')
+    save =  traits.Bool(desc = 'save the elements of the tensor',
+                        argstr='--save_tensor')
+    sse =  traits.Bool(desc = 'output sum of squared errors', argstr='--sse')
+    cni = File(exists=True, desc = 'input counfound regressors', argstr='-cni %s')
+    littlebit =  traits.Bool(desc = 'only process small area of brain',
+                             argstr='--littlebit')
 
-class EddyCorrect(FSLCommand):
-    """Use FSL eddy_correct command for correction of eddy current distortion
-    """
-    opt_map = {}
+class DtifitOutputSpec(FSLTraitedSpec):
+    
+    V1 = File(exists = True, desc = 'path/name of file with the 1st eigenvector')
+    V2 = File(exists = True, desc = 'path/name of file with the 2nd eigenvector')
+    V3 = File(exists = True, desc = 'path/name of file with the 3rd eigenvector')
+    L1 = File(exists = True, desc = 'path/name of file with the 1st eigenvalue')
+    L2 = File(exists = True, desc = 'path/name of file with the 2nd eigenvalue')
+    L3 = File(exists = True, desc = 'path/name of file with the 3rd eigenvalue')
+    MD = File(exists = True, desc = 'path/name of file with the mean diffusivity')
+    FA = File(exists = True, desc = 'path/name of file with the fractional anisotropy')
+    S0 = File(exists = True, desc = 'path/name of file with the raw T2 signal with no diffusion weighting')    
 
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'eddy_correct'
-
-    def inputs_help(self):
-        """Print command line documentation for eddy_correct."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(infile=None, outfile=None, reference_vol=None)
-
-    def _parse_inputs(self):
-        """validate fsl eddy_correct options"""
-
-        # Add infile and outfile to the args if they are specified
-        allargs = []
-        if self.inputs.infile:
-            allargs.insert(0, self.inputs.infile)
-            if not self.inputs.outfile:
-                # If the outfile is not specified but the infile is,
-                # generate an outfile
-                _, fname = os.path.split(self.inputs.infile)
-                newpath = os.getcwd()
-                self.inputs.outfile = fname_presuffix(fname, suffix='_eddc',
-                                                      newpath=newpath)
-        if self.inputs.outfile:
-            allargs.insert(1, self.inputs.outfile)
-
-        if self.inputs.reference_vol:
-            allargs.insert(2, repr(self.inputs.reference_vol))
-
-        return allargs
-
-    def run(self, infile=None, outfile=None, **inputs):
-        """Execute the command.
+class Dtifit(NEW_FSLCommand):
+    """ Use FSL  dtifit command for fitting a diffusion tensor model at each voxel
+        Example:
         >>> from nipype.interfaces import fsl
-        >>> edd = fsl.EddyCorrect(infile='foo.nii', outfile='bar.nii', reference_vol=10)
-        >>> edd.cmdline
-        'eddy_correct foo.nii bar.nii 10'
-
-        """
-
-        if infile:
-            self.inputs.infile = infile
-        if not self.inputs.infile:
-            raise AttributeError('Eddy_correct requires an input file')
-        if outfile:
-            self.inputs.outfile = outfile
-        self.inputs.update(**inputs)
-        return super(EddyCorrect, self).run()
-
-    def outputs_help(self):
-        """
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-        outfile : /path/to/outfile
-            filename of resulting eddy current corrected file
-        """
-        print self.outputs_help.__doc__
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-            outfile : string,file
-                path/name of file of eddy-corrected image
-        """
-        outputs = Bunch(outfile=None)
-        return outputs
-
-    def aggregate_outputs(self):
-        """Create a Bunch which contains all possible files generated
-        by running the interface.  Some files are always generated, others
-        depending on which ``inputs`` options are set.
-
-        Returns
-        -------
-        outputs : Bunch object
-            Bunch object containing all possible files generated by
-            interface object.
-
-            If None, file was not generated
-            Else, contains path, filename of generated outputfile
-
-        """
-        outputs = self.outputs()
-        if self.inputs.outfile:
-            outfile = self.inputs.outfile
-        else:
-            _, fname = os.path.split(self.inputs.infile)
-            outfile = os.path.join(os.getcwd(),
-                                   fname_presuffix(fname, suffix='_eddc'))
-
-        if len(glob(outfile)) == 1:
-            outputs.outfile = outfile
-
-        return outputs
-
-
-class Bedpostx(FSLCommand):
-    """ Use FSL  bedpostx command for local modelling of diffusion parameters
-    """
-
-    opt_map = {
-        'fibres': ('-n %d', 'number of fibres per voxel (opt, )'),
-        'weight': ('-w %.2f', 'ARD weight (opt,)'),
-        'burn_period': ('-b %d', 'burnin period (opt,)'),
-        'jumps': ('-j %d', 'number of jumps (opt,)'),
-        'sampling': ('-s %d', 'sampling interval (opt,)'),
-        }
-
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'bedpostx'
-
-    def inputs_help(self):
-        """Print command line documentation for eddy_correct."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(directory=None,
-                            fibres=None,
-                            weight=None,
-                            burn_period=None,
-                            jumps=None,
-                            sampling=None)
-
-    def _parse_inputs(self):
-        """validate fsl bedpostx options"""
-        allargs = super(Bedpostx, self)._parse_inputs(skip=('directory'))
-
-        # Add directory to the args if they are specified
-        if self.inputs.directory:
-            allargs.insert(0, self.inputs.directory)
-        else:
-            raise AttributeError('Bedpostx requires a directory \
-                                    name where all input files are')
-
-        return allargs
-
-    def run(self, directory=None, noseTest=False, **inputs):
-        """Execute the command.
-        >>> from nipype.interfaces import fsl
-        >>> bedp = fsl.Bedpostx(directory='subj1', fibres=1)
-        >>> bedp.cmdline
-        'bedpostx subj1 -n 1'
-
-        """
-
-        if directory:
-            self.inputs.directory = directory
-        if not self.inputs.directory:
-            raise AttributeError('Bedpostx requires a directory with standardized files')
-
-        # incorporate other user options
-        self.inputs.update(**inputs)
-
-        # check that input directory has all the input files required
-        if not noseTest:
-            if not bedpostX_datacheck_ok(self.inputs.directory):
-                raise AttributeError('Not all required files found in input \
-                                    directory: %s' % self.inputs.directory)
-
-        results = self._runner()
-        if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
-
-        return results
-
-    def outputs_help(self):
-        """
-        Parameters
-        ----------
-        (all default input values set to None)
-
-        outfile : /path/to/directory_with_input_files/files
-            the files are
-            1) merged_th<i-th fibre>samples - 4D volume - Samples from the distribution on theta
-            2) merged_ph<i-th fibre>samples - Samples from the distribution on phi
-            3) merged_f<i-th fibre>samples - 4D volume - Samples from the
-                distribution on anisotropic volume fraction (see technical report).
-            4) mean_th<i-th fibre>samples - 3D Volume - Mean of distribution on theta
-            5) mean_ph<i-th fibre>samples - 3D Volume - Mean of distribution on phi
-            6) mean_f<i-th fibre>samples - 3D Volume - Mean of distribution on f anisotropy
-            7) dyads<i-th fibre> - Mean of PDD distribution in vector form.
-            8) nodif_brain - brain extracted version of nodif - copied from input directory
-            9) nodif_brain_mask - binary mask created from nodif_brain - copied from input directory
-
-        """
-        print self.outputs_help.__doc__
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-            outfile : string,file
-                path/name of file of bedpostx image
-        """
-        outputs = Bunch(bvals=None,
-                        bvecs=None,
-                        nodif_brain=None,
-                        nodif_brain_mask=None)
-        return outputs
-
-    def aggregate_outputs(self):
-        """Create a Bunch which contains all possible files generated
-        by running the interface.  Some files are always generated, others
-        depending on which ``inputs`` options are set.
-
-        Returns
-        -------
-        outputs : Bunch object
-            Bunch object containing all possible files generated by
-            interface object.
-
-            If None, file was not generated
-            Else, contains path, filename of generated outputfile
-
-        For bedpostx, the jobs get send to the sge if available and thus
-
-        """
-
-        outputs = self.outputs()
-        #get path and names of the essential files that were generated by bedpostx
-        files = glob(self.inputs.directory + '.bedpostX/*')
-        for line in files:
-            if re.search('bvals', line) is not None:
-                outputs.bvals = line
-
-            elif re.search('bvecs', line) is not None:
-                outputs.bvecs = line
-
-            elif re.search('nodif_brain\.', line) is not None:
-                outputs.nodif_brain = line
-
-            elif re.search('nodif_brain_mask\.', line) is not None:
-                outputs.nodif_brain_mask = line
-
-        return outputs
-
-
-class Dtifit(FSLCommand):
-    """Use FSL  dtifit command for fitting a diffusion tensor model at each voxel
-    """
-
-    opt_map = {
-        'data':                     '-k %s',
-        'basename':                 '-o %s',
-        'bet_binary_mask':          '-m %s',
-        'b_vector_file':            '-r %s',
-        'b_value_file':             '-b %s',
-        'min_z':                    '-z %d',
-        'max_z':                    '-Z %d',
-        'min_y':                    '-y %d',
-        'max_y':                    '-Y %d',
-        'min_x':                    '-x %d',
-        'max_x':                    '-X %d',
-        'verbose':                  '-V',
-        'save_tensor':              '--save_tensor',
-        'sum_squared_errors':       '--sse',
-        'inp_confound_reg':         '--cni',
-        'small_brain_area':         '--littlebit'}
-
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'dtifit'
-
-    def inputs_help(self):
-        """Print command line documentation for dtifit."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(data=None,
-                            basename=None,
-                            bet_binary_mask=None,
-                            b_vector_file=None,
-                            b_value_file=None,
-                            min_z=None,
-                            max_z=None,
-                            min_y=None,
-                            max_y=None,
-                            min_x=None,
-                            max_x=None,
-                            verbose=None,
-                            save_tensor=None,
-                            sum_squared_errors=None,
-                            inp_confound_reg=None,
-                            small_brain_area=None)
-
-    def _parse_inputs(self):
-        """validate fsl dtifit options"""
-        allargs = super(Dtifit, self)._parse_inputs()
-        return allargs
-
-    def run(self, data=None, noseTest=False, **inputs):
-        """Execute the command.
-        >>> from nipype.interfaces import fsl
-        >>> dti = fsl.Dtifit(data='subj1Test')
+        >>> dti = fsl.Dtifit()
+        >>> dti.inputs.dwi = data.nii.gz
+        >>> dti.inputs.bvec = bvecs
+        >>> dti.inputs.bval = bvals
+        >>> dti.inputs.basename = TP
+        >>> dti.inputs.mask = nodif_brain_mask.nii.gz
         >>> dti.cmdline
-        'dtifit -k subj1Test'
-        """
-
-        if data:
-            self.inputs.data = data
-        if not self.inputs.data:
-            raise AttributeError('Dtifit requires input data')
-
-        # incorporate other user options
-        self.inputs.update(**inputs)
-
-        # if data is a directory check existence of standardized files
-        if not noseTest:
-
-            if os.path.isdir(self.inputs.data):
-                if not bedpostX_datacheck_ok(self.inputs.data):
-                    raise AttributeError('Not all standardized files found \
-                                        in input directory: %s' \
-                                       % self.inputs.data)
-
-            # if data is not a directory, check existences of inputs
-            elif os.path.isfile(self.inputs.data):
-                if not (os.path.exists(self.inputs.b_vector_file) \
-                        and os.path.exists(self.inputs.b_value_file) \
-                        and os.path.exists(self.inputs.bet_binary_mask)):
-                    raise AttributeError('Not all standardized files have been supplied \
-                            (ie. b_values_file, b_vector_file, and bet_binary_mask')
-
-            else:
-                raise AttributeError('Wrong input for Dtifit')
-
-        results = self._runner()
-        if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
-
-        return results
-
-    def outputs_help(self):
-        """
-        Parameters
-        ----------
-        (all default input values set to None)
-
-        outfile : /path/to/directory_with_output_files/files
-            the files are
-            1) <basename>_V1 - 1st eigenvector
-            2) <basename>_V2 - 2nd eigenvector
-            3) <basename>_V3 - 3rd eigenvector
-            4) <basename>_L1 - 1st eigenvalue
-            5) <basename>_L2 - 2nd eigenvalue
-            6) <basename>_L3 - 3rd eigenvalue
-            7) <basename>_MD - mean diffusivity
-            8) <basename>_FA - fractional anisotropy
-            9) <basename>_SO - raw T2 signal with no diffusion weighting
-        """
-        print self.outputs_help.__doc__
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-            outfile : string,file
-                path/name of file of dtifit image
-        """
-        outputs = Bunch(V1=None, V2=None, V3=None,
-                        L1=None, L2=None, L3=None,
-                        MD=None, FA=None, SO=None)
-
-        return outputs
-
-    def aggregate_outputs(self):
-        """Create a Bunch which contains all possible files generated
-        by running the interface.  Some files are always generated, others
-        depending on which ``inputs`` options are set.
-
-        Returns
-        -------
-        outputs : Bunch object
-            Bunch object containing all possible files generated by
-            interface object.
-
-            If None, file was not generated
-            Else, contains path, filename of generated outputfile
-
-        """
-        outputs = self.outputs()
-        #get path and names of the essential files that were generated by dtifit
-        files = glob(os.getcwd() + '/' + self.inputs.basename + '*')
-        for line in files:
-            if re.search('_V1\.', line) is not None:
-                outputs.V1 = line
-
-            elif re.search('_V2\.', line) is not None:
-                outputs.V2 = line
-
-            elif re.search('_V3\.', line) is not None:
-                outputs.V3 = line
-
-            elif re.search('_L1\.', line) is not None:
-                outputs.L1 = line
-
-            elif re.search('_L2\.', line) is not None:
-                outputs.L2 = line
-
-            elif re.search('_L3\.', line) is not None:
-                outputs.L3 = line
-
-            elif re.search('_MD\.', line) is not None:
-                outputs.MD = line
-
-            elif re.search('_FA\.', line) is not None:
-                outputs.FA = line
-
-            elif re.search('_SO\.', line) is not None:
-                outputs.SO = line
-
-        return outputs
-
-
-class Tbss2reg(FSLCommand):
+        'dtifit -k data.nii.gz -o TP -m nodif_brain_mask.nii.gz -r bvecs -b bvals'
     """
-        Use FSL Tbss2reg for applying nonlinear registration of all FA images into standard space
-    """
-    opt_map = {'FMRIB58_FA_1mm':    '-T',
-               'targetImage':       '-t %s',
-               'findTarget':        '-n'}
-
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'tbss_2_reg'
-
-    def inputs_help(self):
-        """Print command line documentation for tbss_2_reg."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(FMRIB58_FA_1mm=None,
-                            targetImage=None,
-                            findTarget=None)
-
-    def _parse_inputs(self):
-        """validate fsl tbss_2_reg options"""
-        allargs = super(Tbss2reg, self)._parse_inputs()
-        return allargs
-
-    def run(self, noseTest=False, **inputs):
-        """Execute the command.
-        >>> from nipype.interfaces import fsl
-        >>> tbss2 = fsl.Tbss2reg(FMRIB58_FA_1mm=True)
-        >>> tbss2.cmdline
-        'tbss_2_reg -T'
-
-        """
-        self.inputs.update(**inputs)
-        if (self.inputs.FMRIB58_FA_1mm is None) and \
-           (self.inputs.targetImage is None) and \
-           (self.inputs.findTarget is None):
-            raise AttributeError('Tbss2reg needs at least one option')
-        results = self._runner()
-        if not noseTest:
-            results.outputs = self.aggregate_outputs()
-        return results
-
-    def outputs_help(self):
-        """
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-        outfile : /path/to/outfile
-            path and filename to registered images with accompanying mask files
-        """
-        print self.outputs_help.__doc__
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-            outfile : string,file
-                path/name of file of tbss_2_reg image
-        """
-        outputs = Bunch(outfiles=None)
+    _cmd = 'dtifit'
+    input_spec = DtifitInputSpec
+    output_spec = DtifitOutputSpec
+        
+    def _list_outputs(self):        
+        outputs = self.output_spec().get()
+        pth,basename = os.path.split(self.inputs.basename)        
+        for k in outputs.keys():
+            if k not in ('outputtype','environ','args'):
+                outputs[k] = self._gen_fname(basename,cwd=os.path.abspath(pth),
+                                             suffix = '_'+k)
         return outputs
 
-    def aggregate_outputs(self):
-        """Create a Bunch which contains all possible files generated
-        by running the interface.  Some files are always generated, others
-        depending on which ``inputs`` options are set.
-
-        Returns
-        -------
-        outputs : Bunch object
-            Bunch object containing all possible files generated by
-            interface object.
-
-            If None, file was not generated
-            Else, contains path, filename of generated outputfile
-
-        """
-        outputs = self.outputs()
-        outputs = tbss_1_2_getOutputFiles(outputs, os.getcwd())
-
-        if not outputs.outfiles:
-            raise AttributeError('No output files created for tbss_2_reg')
-
-        return outputs
-
-
-def bedpostX_datacheck_ok(directory):
-        """ checks if all the required files for bedpostx/dtifit have been supplied by the user"""
-
-        proc = subprocess.Popen('bedpostx_datacheck  ' + directory,
-                     shell=True,
-                     cwd=directory,
-                     stdout=subprocess.PIPE,
-                     stderr=subprocess.PIPE)
-        [stdout, _] = proc.communicate()
-
-        bvalandbvec = []
-        totalVols = []
-
-        output = stdout.split('\n')
-        for line in output:
-            if re.search('data\s+does\s+not\s+exist\s*$', line) is not None:
-                raise AttributeError('No 4D series of data volumes specified.\n')
-            elif re.search('nodif_brain_mask\s+does\s+not\s+exist\s*$', line) is not None:
-                raise AttributeError('No nodif_brain_mask specified.\n')
-            elif re.match('^dim4\s+', line) is not None:
-                totalVols.append(int(line.split(' ')[-1]))
-            elif line.isdigit():
-                bvalandbvec.append(int(line))
-
-        # check that the bvals and bvecs are in the right order
-        if (bvalandbvec[1] == totalVols[0]) and (bvalandbvec[1] * bvalandbvec[2] == bvalandbvec[3]):
-            return True
+    def _gen_filename(self, name):
+        if name in ('V1','V2','V3','L1','L2','L3','MD','FA','S0'):
+            return self._list_outputs()[name]
         else:
-            print 'bvals and bvecs values do not correspond with volumes in data.\n'
+            return None
+    
+class EddycorrectInputSpec(FSLTraitedSpec):
+    infile = File(exists=True,desc = '4D input file',argstr='%s', position=0, mandatory=True)
+    outfile = File(exists=True,desc = '4D output file',argstr='%s', position=1, genfile=True)
+    refnum = traits.Int(argstr='%d', position=2, desc='reference number',mandatory=True)
 
-        return False
+class EddycorrectOutputSpec(FSLTraitedSpec):
+    outfile = File(exists=True, desc='path/name of 4D eddy corrected output file')
 
-
-def tbss_1_2_getOutputFiles(outputs, cwd):
+class Eddycorrect(NEW_FSLCommand):
+    """ Use FSL eddy_correct command for correction of eddy current distortion
+        Example:
+        >>> from nipype.interfaces import fsl
+        >>> eddyc = fsl.Eddycorrect(infile='/data.nii.gz',refnum=0)
+        >>> print dti.cmdline
+        'eddy_correct data.nii.gz data_edc.nii.gz 0'
     """
-        Extracts path and filename from the FA folder that ought to have been created
-        if tbss_1_preproc and tbss_2_reg was executed correctly
+    _cmd = 'eddy_correct'
+    input_spec = EddycorrectInputSpec
+    output_spec = EddycorrectOutputSpec
+
+    def _run_interface(self, runtime):
+        runtime = super(Eddycorrect, self)._run_interface(runtime)
+        if runtime.stderr:
+            runtime.returncode = 1
+        return runtime
+
+    def _list_outputs(self):        
+        outputs = self.output_spec().get()
+        if not isdefined(outputs['outfile']) and isdefined(self.inputs.infile):
+            pth,basename = os.path.split(self.inputs.infile) 
+            outputs['outfile'] = self._gen_fname(basename,cwd=os.path.abspath(pth),
+                                                 suffix = '_edc')        
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'outfile':
+            return self._list_outputs()[name]
+        else:
+            return None
+
+class BedpostxInputSpec(FSLTraitedSpec):
+    bpxdirectory = Directory(exists=True, field='dir',
+                             desc = 'directory with all bedpostx standard files: data, bvecs, bvals, nodif_brain_mask',
+                             argstr='%s', position=0, mandatory=True)
+    fibres = traits.Int(argstr='-n %d', desc='number of fibres per voxel, default 2')
+    weight = traits.Float(argstr='-w %.2f', desc='ARD weight, more weight means less secondary fibres per voxel, default 1')
+    burn_period = traits.Int(argstr='-b %d', desc='burnin period, default 1000')
+    jumps = traits.Int(argstr='-j %d', desc='number of jumps, default 1250')
+    sampling = traits.Int(argstr='-s %d', desc='sample every, default 25')
+    
+class BedpostxOutputSpec(FSLTraitedSpec):
+    bpxdirectory = Directory(exists=True, field='dir', desc = 'path/name of directory with all bedpostx output files')
+    xfmsdirectory = Directory(exists=True, field='dir', desc = 'path/name of directory with the tranformation matrices')
+    merged_th1samples = File(exists=True, desc='path/name of 4D volume with samples from the distribution on theta')
+    merged_ph1samples = File(exists=True, desc='path/name of file with samples from the distribution on phi')
+    merged_f1samples = File(exists=True,desc='path/name of 4D volume with samples from the distribution on anisotropic volume fraction')
+    mean_th1samples = File(exists=True, desc='path/name of 3D volume with mean of distribution on theta')
+    mean_ph1samples = File(exists=True, desc='path/name of 3D volume with mean of distribution on phi')
+    mean_f1samples = File(exists=True, desc='path/name of 3D volume with mean of distribution on f anisotropy')
+    dyads1 = File(exists=True, desc='path/name of mean of PDD distribution in vector form')
+    nodif_brain = File(exists=True, desc='path/name of brain extracted version of nodif')
+    nodif_brain_mask = File(exists=True, desc='path/name of binary mask created from nodif_brain')
+    
+class Bedpostx(NEW_FSLCommand):
+    """ Use FSL  bedpostx command for local modelling of diffusion parameters
+        Example:
+        >>> from nipype.interfaces import fsl
+        >>> bedp = fsl.Bedpostx(directory='subjdir', fibres=1)
+        >>> bedp.cmdline
+        'bedpostx subjdir -n 1'
     """
+    _cmd = 'bedpostx'
+    input_spec = BedpostxInputSpec
+    output_spec = BedpostxOutputSpec
 
-    if os.path.isdir(cwd + '/FA'):
-            FA_files = glob(cwd + '/FA/*')
-            origdata = glob(cwd + '/origdata/*.nii.gz')
-    else:
-        raise AttributeError('No FA subdirectory was found in cwd: \n' + cwd)
+    def _list_outputs(self):        
+        outputs = self.output_spec().get()
+        for k in outputs.keys():
+            if k not in ('outputtype','environ','args'):
+                if k is 'bpxdirectory':
+                    outputs[k] = self.inputs.bpxdirectory
+                elif k is 'xfmsdirectory':
+                    outputs[k] = os.path.join(self.inputs.bpxdirectory,'xfms')
+                else:
+                    outputs[k] = self._gen_fname(k,cwd=os.path.abspath(self.inputs.bpxdirectory),suffix='')                 
+        return outputs
 
-    outputs.outfiles = []
-    for line in origdata:
-        _, fname = os.path.split(line)
-        brainId = fname.split('.')[0]
-        subject = [brainId, line]
+    def _gen_filename(self, name):
+        if name in ('merged_th1samples','merged_ph1samples','merged_f1samples',
+                    'mean_th1samples','mean_ph1samples','mean_f1samples','dyads1',
+                    'nodif_brain','nodif_brain_mask','bpxdirectory','xfmsdirectory'):
+            return self._list_outputs()[name]
+        else:
+            return None
 
-        for FA in FA_files:
-            if re.search(brainId, FA) is not None:
-                subject.append(FA)
-        outputs.outfiles.append(subject)
+class Tbss1preprocInputSpec(FSLTraitedSpec):
+    imglist = traits.List(traits.Str, desc = 'list with filenames of the FA images',
+                          argstr='%s',mandatory=True)
+    tbssdir = Directory(exists=True, field='dir',
+                        desc='path/name of directory in which this command will be executed (note: directory must contain the FA images)',
+                        mandatory=True)
+    
+class Tbss1preprocOutputSpec(FSLTraitedSpec):
+    tbssdir = Directory(exists=True, field='dir',
+                        desc='path/name of directory where this command was executed')
 
-    return outputs
-
-
-class Tbss1preproc(FSLCommand):
+class Tbss1preproc(NEW_FSLCommand):
     """
         Use FSL Tbss1preproc for preparing your FA data in your TBSS working directory in the right format
-    """
-    opt_map = {}
-
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'tbss_1_preproc'
-
-    def inputs_help(self):
-        """Print command line documentation for tbss_1_preproc."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(infiles=None)
-
-    def _parse_inputs(self):
-        """validate fsl tbss_1_preproc options"""
-        return [self.inputs.infiles]
-
-    def run(self, noseTest=False, **inputs):
-        """Execute the command.
+        Example:
         >>> from nipype.interfaces import fsl
-        >>> tbss1 = fsl.Tbss1preproc(infiles='*.nii.gz')
+        >>> tbss1 = fsl.Tbss1preproc(imglist=[f1,f2,f3],tbssdir='/home')
         >>> tbss1.cmdline
-        'tbss_1_preproc *.nii.gz'
+        'tbss_1_preproc f1 f2 f3'
+    """
+    _cmd = 'tbss_1_preproc'
+    input_spec = Tbss1preprocInputSpec
+    output_spec = Tbss1preprocOutputSpec
 
-        """
-        self.inputs.update(**inputs)
-        if self.inputs.infiles is None:
-            raise AttributeError('tbss_1_preproc requires input files')
-        results = self._runner()
-        if not noseTest:
-            results.outputs = self.aggregate_outputs()
-        return results
+    def _run_interface(self, runtime):        
+        runtime.cwd = self.inputs.tbssdir
+        return super(Tbss1preproc, self)._run_interface(runtime)
 
-    def outputs_help(self):
-        """
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-        outfile : /path/to/outfile
-            path and filename to the tbss preprocessed images
-        """
-        print self.outputs_help.__doc__
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-            outfile : string,file
-                path/name of file of tbss_1_preproc image
-        """
-        outputs = Bunch(outfiles=None)
+    def _list_outputs(self):        
+        outputs = self.output_spec().get()
+        outputs['tbssdir'] = self.inputs.tbssdir             
         return outputs
 
-    def aggregate_outputs(self):
-        """Create a Bunch which contains all possible files generated
-        by running the interface.  Some files are always generated, others
-        depending on which ``inputs`` options are set.
+    def _gen_filename(self, name):
+        if name is 'tbssdir':
+            return self._list_outputs()[name]
+        else:
+            return None
+        
+class Tbss2regInputSpec(FSLTraitedSpec):
+    tbssdir = Directory(exists=True, field='dir',
+                        desc = 'path/name of directory containing the FA and origdata folders generated by tbss_1_preproc',
+                        mandatory=True)
+    _xor_inputs = ('FMRIB58FA', 'targetImg','findTarget')
+    FMRIB58FA = traits.Bool(desc='use FMRIB58_FA_1mm as target for nonlinear registrations',
+                            argstr='-T', xor=_xor_inputs)                            
+    targetImg = traits.Str(desc='use given image as target for nonlinear registrations',
+                           argstr='-t %s', xor=_xor_inputs)
+    findTarget = traits.Bool(desc='find best target from all images in FA',
+                             argstr='-n', xor=_xor_inputs)
+    
+class Tbss2regOutputSpec(FSLTraitedSpec):
+    tbssdir = Directory(exists=True, field='dir',
+                        desc='path/name of directory containing the FA and origdata folders generated by tbss_1_preproc')
+   
+class Tbss2reg(NEW_FSLCommand):
+    """
+        Use FSL Tbss2reg for applying nonlinear registration of all FA images into standard space
+        Example:
+        >>> from nipype.interfaces import fsl
+        >>> tbss2 = fsl.Tbss2reg(tbssdir=os.getcwd(),FMRIB58FA=True)
+        >>> tbss2.cmdline
+        'tbss_2_reg -T'
+    """
+    _cmd = 'tbss_2_reg'
+    input_spec = Tbss2regInputSpec
+    output_spec = Tbss2regOutputSpec
 
-        Returns
-        -------
-        outputs : Bunch object
-            Bunch object containing all possible files generated by
-            interface object.
+    def _run_interface(self, runtime):        
+        runtime.cwd = self.inputs.tbssdir
+        return super(Tbss2reg, self)._run_interface(runtime)
 
-            If None, file was not generated
-            Else, contains path, filename of generated outputfile
-
-        """
-        outputs = self.outputs()
-        outputs = tbss_1_2_getOutputFiles(outputs, os.getcwd())
-        if not outputs.outfiles:
-            raise AttributeError('No output files created for tbss_1_preproc')
-
+    def _list_outputs(self):        
+        outputs = self.output_spec().get()
+        outputs['tbssdir'] = self.inputs.tbssdir             
         return outputs
 
+    def _gen_filename(self, name):
+        if name is 'tbssdir':
+            return self._list_outputs()[name]
+        else:
+            return None
 
-class Tbss3postreg(FSLCommand):
+class Tbss3postregInputSpec(FSLTraitedSpec):
+    tbssdir = Directory(exists=True, field='dir',
+                        desc = 'path/name of directory containing the FA and origdata folders generated by tbss_1_preproc',
+                        mandatory=True)
+    _xor_inputs = ('subjectmean', 'FMRIB58FA')
+    subjectmean = traits.Bool(desc='derive mean_FA and mean_FA_skeleton from mean of all subjects in study',
+                              argstr='-S', xor=_xor_inputs)
+    FMRIB58FA = traits.Bool(desc='use FMRIB58_FA and its skeleton instead of study-derived mean and skeleton',
+                            argstr='-T', xor=_xor_inputs)
+   
+class Tbss3postregOutputSpec(FSLTraitedSpec):
+    tbssdir = Directory(exists=True, field='dir',
+                        desc='path/name of directory containing the FA, origdata, and stats folders generated by tbss_1_preproc and this command')
+    all_FA = File(exists=True, desc='path/name of 4D volume with all FA images') 
+    mean_FA_skeleton = File(exists=True, desc='path/name of 3D volume with mean FA skeleton')     
+    mean_FA = File(exists=True, desc='path/name of 3D volume with mean FA image')
+    
+  
+class Tbss3postreg(NEW_FSLCommand):
     """
         Use FSL Tbss3postreg for creating the mean FA image and skeletonise it
-    """
-    opt_map = {'subject_means':     '-S',
-               'FMRIB58_FA':        '-T'}
-
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'tbss_3_postreg'
-
-    def inputs_help(self):
-        """Print command line documentation for tbss_3_postreg."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(subject_means=None,
-                            FMRIB58_FA=None)
-
-    def _parse_inputs(self):
-        """validate fsl tbss_3_postreg options"""
-        allargs = super(Tbss3postreg, self)._parse_inputs()
-        return allargs
-
-    def run(self, noseTest=False, **inputs):
-        """Execute the command.
+        Example:
         >>> from nipype.interfaces import fsl
-        >>> tbss3 = fsl.Tbss3postreg(subject_means=True)
+        >>> tbss3 = fsl.Tbss3postreg(subjectmean=True)
         >>> tbss3.cmdline
         'tbss_3_postreg -S'
+    """
+    _cmd = 'tbss_3_postreg'
+    input_spec = Tbss3postregInputSpec
+    output_spec = Tbss3postregOutputSpec
 
-        """
-        self.inputs.update(**inputs)
-        if (self.inputs.subject_means is None) and (self.inputs.FMRIB58_FA is None):
-            raise AttributeError('tbss_1_preproc requires at least one option flag to be set')
-        results = self._runner()
-        if not noseTest:
-            results.outputs = self.aggregate_outputs()
-        return results
-
-    def outputs_help(self):
-        """
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-        outfile : /path/to/outfile
-            path and filename to tbss post-registration processed image
-        """
-        print self.outputs_help.__doc__
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-            outfile : string,file
-                path/name of file of tbss_3_postreg image
-        """
-        outputs = Bunch(all_FA=None,
-                        mean_FA_skeleton=None,
-                        mean_FA_skeleton_mask=None,
-                        mean_FA=None,
-                        mean_FA_mask=None)
+    def _run_interface(self, runtime):        
+        runtime.cwd = self.inputs.tbssdir
+        return super(Tbss3postreg, self)._run_interface(runtime)
+    
+    def _list_outputs(self):        
+        outputs = self.output_spec().get()
+        outputs['tbssdir'] = self.inputs.tbssdir
+        stats = os.path.join(self.inputs.tbssdir,'stats')
+        outputs['all_FA'] = self._gen_fname('all_FA',
+                                            cwd=os.path.abspath(stats),suffix='' )
+        outputs['mean_FA_skeleton'] = self._gen_fname('mean_FA_skeleton',
+                                                      cwd=os.path.abspath(stats),suffix='' )
+        outputs['mean_FA'] = self._gen_fname('mean_FA',
+                                             cwd=os.path.abspath(stats),suffix='' )        
         return outputs
 
-    def aggregate_outputs(self):
-        """Create a Bunch which contains all possible files generated
-        by running the interface.  Some files are always generated, others
-        depending on which ``inputs`` options are set.
-
-        Returns
-        -------
-        outputs : Bunch object
-            Bunch object containing all possible files generated by
-            interface object.
-
-            If None, file was not generated
-            Else, contains path, filename of generated outputfile
-
-        """
-        cwd = os.getcwd()
-        outputs = self.outputs()
-        if os.path.isdir(cwd + '/stats'):
-            stats_files = glob(cwd + '/stats/*')
+    def _gen_filename(self, name):
+        if name in ('all_FA','mean_FA_skeleton','mean_FA'):
+            return self._list_outputs()[name]
         else:
-            raise AttributeError('No stats subdirectory was found in cwd: \n' + cwd)
+            return None
 
-        for imagePath in stats_files:
-            if re.search('all_FA\.', imagePath):
-                outputs.all_FA = imagePath
-            elif re.search('mean_FA_skeleton\.', imagePath):
-                outputs.mean_FA_skeleton = imagePath
-            elif re.search('mean_FA\.', imagePath):
-                outputs.mean_FA = imagePath
-            elif re.search('mean_FA_mask\.', imagePath):
-                outputs.mean_FA_mask = imagePath
+class Tbss4prestatsInputSpec(FSLTraitedSpec):
+    tbssdir = Directory(exists=True, field='dir',
+                        desc = 'path/name of directory containing the FA, origdata, and stats folders generated by tbss_1_preproc and tbss_3_postreg',
+                        mandatory=True)
+    threshold = traits.Float(argstr='%.3f', desc='threshold value',mandatory=True)
 
-        if (not outputs.all_FA) and (not outputs.mean_FA_skeleton):
-            raise AttributeError('tbss_3_postreg did not create the desired files')
+class Tbss4prestatsOutputSpec(FSLTraitedSpec):
+    all_FA_skeletonised = File(exists=True, desc='path/name of 4D volume with all FA images skeletonized')
+    tbssdir = Directory(exists=True, field='dir',
+                        desc = 'path/name of directory containing the FA, origdata, and stats folders generated by tbss_1_preproc and tbss_3_postreg')
 
-        return outputs
-
-
-class Tbss4prestats(FSLCommand):
+class Tbss4prestats(NEW_FSLCommand):
     """
         Use FSL Tbss4prestats thresholds the mean FA skeleton image at the chosen threshold
-    """
-    opt_map = {}
-
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'tbss_4_prestats'
-
-    def inputs_help(self):
-        """Print command line documentation for tbss_4_prestats."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(threshold=None)
-
-    def _parse_inputs(self):
-        """validate fsl tbss_4_prestats options"""
-        allargs = []
-        # Add source files to the args if they are specified
-        if self.inputs.threshold:
-            allargs.append(str(self.inputs.threshold))
-        else:
-            raise AttributeError('tbss_4_prestats requires threshold')
-
-        return allargs
-
-    def run(self, noseTest=False, **inputs):
-        """Execute the command.
+        Example:
         >>> from nipype.interfaces import fsl
         >>> tbss4 = fsl.Tbss4prestats(threshold=0.3)
         >>> tbss4.cmdline
         'tbss_4_prestats 0.3'
+    """
+    _cmd = 'tbss_4_prestats'
+    input_spec = Tbss4prestatsInputSpec
+    output_spec = Tbss4prestatsOutputSpec
 
-        """
-        self.inputs.update(**inputs)
-        results = self._runner()
-        if not noseTest:
-            results.outputs = self.aggregate_outputs()
-        return results
-
-    def outputs_help(self):
-        """
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-        outfile : /path/to/outfile
-            path and filename to tbss prestats thresholded mean FA image
-        """
-        print self.outputs_help.__doc__
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-            outfile : string,file
-                path/name of file of tbss_4_prestats image
-        """
-        outputs = Bunch(all_FA_skeletonised=None,
-                        mean_FA_skeleton_mask=None)
+    def _run_interface(self, runtime):        
+        runtime.cwd = self.inputs.tbssdir
+        return super(Tbss4prestats, self)._run_interface(runtime)
+   
+    def _list_outputs(self):        
+        outputs = self.output_spec().get()
+        outputs['tbssdir'] = self.inputs.tbssdir
+        stats = os.path.join(self.inputs.tbssdir,'stats')
+        outputs['all_FA_skeletonised'] = self._gen_fname('all_FA_skeletonised',
+                                                         cwd=os.path.abspath(stats),
+                                                         suffix='' )
         return outputs
 
-    def aggregate_outputs(self):
-        """Create a Bunch which contains all possible files generated
-        by running the interface.  Some files are always generated, others
-        depending on which ``inputs`` options are set.
-
-        Returns
-        -------
-        outputs : Bunch object
-            Bunch object containing all possible files generated by
-            interface object.
-
-            If None, file was not generated
-            Else, contains path, filename of generated outputfile
-
-        """
-        outputs = self.outputs()
-        cwd = os.getcwd()
-        if os.path.isdir(cwd + '/stats'):
-            stats_files = glob(cwd + '/stats/*')
+    def _gen_filename(self, name):
+        if name in ('tbssdir','all_FA_skeletonised'):
+            return self._list_outputs()[name]
         else:
-            raise AttributeError('No stats subdirectory was found in cwd: \n' + cwd)
-
-        for imagePath in stats_files:
-            if re.search('all_FA_skeletonised\.', imagePath):
-                outputs.all_FA_skeletonised = imagePath
-            elif re.search('mean_FA_skeleton_mask\.', imagePath):
-                outputs.mean_FA_skeleton_mask = imagePath
-
-        if not outputs.all_FA_skeletonised:
-                raise AttributeError('tbss_4_prestats did not create the desired files')
-
-        return outputs
+            return None
 
 
+#----------------------------------------------------------------------------------------------------------------
+## randomise -i all_FA_skeletonised -o tbss -m mean_FA_skeleton_mask -d design.mat -t design.con -n 500 --T2 -V
 class Randomise(FSLCommand):
     """
         FSL Randomise: feeds the 4D projected FA data into GLM modelling and thresholding
@@ -1070,22 +537,6 @@ class Randomise(FSLCommand):
             raise AttributeError('randomise did not create the desired files')
 
         return outputs
-
-
-class Randomise_parallel(Randomise):
-    """
-        FSL Randomise_parallel: feeds the 4D projected FA data into GLM modelling and thresholding
-        in order to find voxels which correlate with your model
-    """
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'randomise_parallel'
-
-    def inputs_help(self):
-        """Print command line documentation for randomise."""
-        print get_doc('randomise', self.opt_map, trap_error=False)
-
 
 class Probtrackx(FSLCommand):
 
@@ -1569,4 +1020,5 @@ class FindTheBiggest(FSLCommand):
                                              check=True)
 
         return outputs
+    
     aggregate_outputs.__doc__ = FSLCommand.aggregate_outputs.__doc__
