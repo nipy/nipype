@@ -444,6 +444,13 @@ class TwoSampleTTestOutputSpec(TraitedSpec):
 class TwoSampleTTest(NEW_SPMCommand):
     """Perform a two-sample ttest using two groups of images
 
+    4 contrasts are automatically created corresponding to:
+
+    * group 1
+    * group 2
+    * group 1 - group 2
+    * group 2 - group 1
+    
     Examples
     --------
     
@@ -542,7 +549,15 @@ class MultipleRegression(NEW_SPMCommand):
 
     Examples
     --------
-    
+
+    >>> from nipype.interfaces.spm import MultipleRegression
+    >>> mreg= MultipleRegression()
+    >>> covariates = dict(names=['reg1', 'reg2'], centering=[1,1])
+    >>> covariates['vectors'] = [[12,24],[0.6 -0.9]]
+    >>> mreg.inputs.covariates = covariates
+    >>> mreg.inputs.images = ['subj1con1.img', 'subj2con1.img']
+    >>> mreg.inputs.contrasts = [['reg2 > reg1', 'T', ['reg1','reg2'], [-1,1]]]
+   
     """
 
     _jobtype = 'stats'
