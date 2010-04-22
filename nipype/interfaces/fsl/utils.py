@@ -25,8 +25,16 @@ from nipype.utils.docparse import get_doc
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+class SmoothInputSpec(FSLTraitedSpec):
+    infile = File(exists=True, argstr="%s", position=0, mandatory=True)
+    fwhm = traits.Float(argstr="-kernel gauss %f -fmean", position=1,
+                            mandatory=True)
+    outfile = File(argstr="%s", position=2, genfile=True)
 
-class Smooth(FSLCommand):
+class SmoothOutputSpec(TraitedSpec):
+    smoothedimage = File(exists=True)
+
+class Smooth(NEW_FSLCommand):
     '''Use fslmaths to smooth the image
 
     This is dumb, of course - we should use nipy for such things! But it is a
@@ -34,44 +42,28 @@ class Smooth(FSLCommand):
 
     This is meant to be a throwaway class, so it's not currently very robust.
     Effort would be better spent integrating basic numpy into nipype'''
-    @property
-    def cmd(self):
-        return 'fslmaths'
+    
+    input_spec = SmoothInputSpec
+    output_spec = SmoothOutputSpec
+    _cmd = 'fslmaths'
 
-    opt_map = {'infile':  None,
-               'fwhm':    None,
-               'outfile': None,
-              }
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._list_outputs()['smoothedimage']
+        return None
 
-    def _get_outfile(self, check=False):
-        return self._gen_fname(self.inputs.infile,
-                                  self.inputs.outfile,
-                                  suffix='_smooth',
-                                  check=check)
-
-    def _parse_inputs(self):
-        return [self.inputs.infile,
-                # ohinds: convert fwhm to stddev
-                '-kernel gauss', str(float(self.inputs.fwhm) / np.sqrt(8 * np.log(2))),
-                '-fmean',
-                self._get_outfile()]
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-             smoothedimage
-        """
-        outputs = Bunch(smoothedimage=None)
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['smoothedimage'] = self._gen_fname(self.inputs.infile,
+                                self.inputs.outfile, suffix='_smooth')
         return outputs
-
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outputs.smoothedimage = self._get_outfile(check=True)
-        return outputs
+    
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'fwhm':
+            # ohinds: convert fwhm to stddev
+            return super(Smooth, self)._format_arg(name, trait_spec, float(value) / np.sqrt(8 * np.log(2)))
+        else:
+            return super(Smooth, self)._format_arg(name, trait_spec, value)
 
 class MergeInputSpec(FSLTraitedSpec):
     infiles = traits.List(File(exists=True), argstr="%s", position=2, mandatory=True)
