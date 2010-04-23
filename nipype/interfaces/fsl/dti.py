@@ -116,9 +116,9 @@ class Eddycorrect(NEW_FSLCommand):
 
     def _list_outputs(self):        
         outputs = self.output_spec().get()
-        if not isdefined(self.inputs.outfile) and isdefined(self.inputs.infile):
-            pth,basename = os.path.split(self.inputs.infile) 
-            outputs['outfile'] = self._gen_fname(basename,cwd=os.path.abspath(pth),
+        outputs['outfile'] = self.inputs.outfile
+        if not isdefined(outputs['outfile']):
+            outputs['outfile'] = self._gen_fname(self.inputs.infile,
                                                  suffix = '_edc')        
         return outputs
 
@@ -160,7 +160,7 @@ class Bedpostx(NEW_FSLCommand):
     """ Use FSL  bedpostx command for local modelling of diffusion parameters
         Example:
         >>> from nipype.interfaces import fsl
-        >>> bedp = fsl.Bedpostx(directory='subjdir', fibres=1)
+        >>> bedp = fsl.Bedpostx(bpxdirectory='subjdir', fibres=1)
         >>> bedp.cmdline
         'bedpostx subjdir -n 1'
     """
@@ -540,7 +540,7 @@ class Probtrackx(NEW_FSLCommand):
                                                     suffix='.log',change_ext=False)            
             outputs['waytotal'] = self._gen_fname('waytotal',cwd=self.inputs.outdir,
                                                   suffix='',change_ext=False)
-            if self.inputs.pathsfile:                
+            if isdefined(self.inputs.pathsfile):                
                 outputs['fdt_paths'] = self._gen_fname(self.inputs.pathsfile,
                                                        cwd=self.inputs.outdir,suffix='')
             else:
@@ -549,7 +549,7 @@ class Probtrackx(NEW_FSLCommand):
         else:
             outputs['probtrackx'] = self._gen_fname('probtrackx',suffix='.log',change_ext=False)
             outputs['waytotal'] = self._gen_fname('waytotal',suffix='',change_ext=False)
-            if self.inputs.pathsfile:
+            if isdefined(self.inputs.pathsfile):
                 outputs['fdt_paths'] = self._gen_fname(self.inputs.pathsfile,suffix='')
             else:
                 outputs['fdt_paths'] = self._gen_fname('fdt_paths',suffix='')
