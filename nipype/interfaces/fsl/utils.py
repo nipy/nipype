@@ -14,13 +14,11 @@ import warnings
 
 import numpy as np
 
-from nipype.interfaces.fsl.base import FSLCommand, FSLInfo, NEW_FSLCommand,\
-    FSLTraitedSpec
-from nipype.utils.filemanip import list_to_filename
-from nipype.interfaces.base import Bunch, traits, TraitedSpec,\
+from nipype.interfaces.fsl.base import NEW_FSLCommand,\
+    FSLTraitedSpec, Info
+from nipype.interfaces.base import traits, TraitedSpec,\
     OutputMultiPath, File
 from nipype.utils.misc import isdefined
-from nipype.utils.docparse import get_doc
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -54,8 +52,10 @@ class Smooth(NEW_FSLCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['smoothedimage'] = self._gen_fname(self.inputs.infile,
-                                self.inputs.outfile, suffix='_smooth')
+        outputs['smoothedimage'] = self.inputs.outfile
+        if not isdefined(outputs['smoothedimage']):
+            outputs['smoothedimage'] = self._gen_fname(self.inputs.infile,
+                                              suffix = '_smooth')
         return outputs
     
     def _format_arg(self, name, trait_spec, value):
@@ -85,8 +85,10 @@ class Merge(NEW_FSLCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['outfile'] = self._gen_fname(self.inputs.infiles[0],
-                                self.inputs.outfile, suffix='_merged')
+        outputs['outfile'] = self.inputs.outfile
+        if not isdefined(outputs['outfile']):
+            outputs['outfile'] = self._gen_fname(self.inputs.infile,
+                                              suffix = '_merged')
         return outputs
     
     def _gen_filename(self, name):
@@ -149,8 +151,10 @@ class ExtractRoi(NEW_FSLCommand):
 
         """
         outputs = self._outputs().get()
-        outputs['outfile'] = self._gen_fname(self.inputs.infile,
-                                self.inputs.outfile, suffix='_roi')
+        outputs['outfile'] = self.inputs.outfile
+        if not isdefined(outputs['outfile']):
+            outputs['outfile'] = self._gen_fname(self.inputs.infile,
+                                              suffix = '_roi')
         return outputs
     
     def _gen_filename(self, name):
@@ -190,7 +194,7 @@ class Split(NEW_FSLCommand):
 
         """
         outputs = self._outputs().get()
-        type, ext = FSLInfo.outputtype()
+        ext =  Info.outputtype_to_ext(self.inputs.outputtype)
         outbase = 'vol*'
         if isdefined(self.inputs.outbasename):
             outbase = '%s*' % self.inputs.outbasename
@@ -238,6 +242,8 @@ class ImageMaths(NEW_FSLCommand):
         if isdefined(self.inputs.suffix):
             suffix = self.inputs.suffix
         outputs = self._outputs().get()
-        outputs['outfile'] = self._gen_fname(self.inputs.infile,
-                                self.inputs.outfile, suffix=suffix)
+        outputs['outfile'] = self.inputs.outfile
+        if not isdefined(outputs['outfile']):
+            outputs['outfile'] = self._gen_fname(self.inputs.infile,
+                                              suffix=suffix)
         return outputs
