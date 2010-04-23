@@ -633,7 +633,7 @@ class Flirt(NEW_FSLCommand):
             return None
 
 
-class ApplyXfm(Flirt):
+class ApplyXfm(FSLCommand): #Flirt):
     '''Use FSL FLIRT to apply a linear transform matrix.
 
     For complete details, see the `FLIRT Documentation.

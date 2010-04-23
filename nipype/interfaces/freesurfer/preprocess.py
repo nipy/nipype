@@ -134,7 +134,7 @@ class ReconAll(FSCommand):
         """
         See io.FreeSurferSource.outputs for the list of outputs returned
         """
-        return FreeSurferSource().outputs()
+        return FreeSurferSource()._outputs().get()
 
     def aggregate_outputs(self):
         return FreeSurferSource(subject_id=self.inputs.subject_id,

@@ -23,6 +23,7 @@ import re
 import sys
 
 from nipype.utils.misc import is_container
+from nipype.interfaces.base import Interface
 
 # Functions and classes
 class InterfaceHelpWriter(object):
@@ -249,36 +250,64 @@ class InterfaceHelpWriter(object):
                   + self.rst_section_levels[2] * \
                   (len(c)+9) + '\n\n'
             __import__(uri)
-            classinst = sys.modules[uri].__dict__[c]()
+            print c
+            try:
+                classinst = sys.modules[uri].__dict__[c]()
+            except:
+                continue
             helpstr = ''
             print 'Generating inputs/outputs doc for:', uri, \
                 classinst.__class__.__name__
-            if hasattr(classinst, 'opt_map') and len(classinst.opt_map):
-                # If the class has an opt_map, use that so we can grab
-                # any docstrings from it. Otherwise use the inputs.
-                iterator = classinst.opt_map.items
+            opt_map = False
+            if isinstance(classinst, Interface):
+                opt_map = True
+                if hasattr(classinst, 'opt_map') and len(classinst.opt_map):
+                    iterator = classinst.opt_map.items
+                else:
+                    iterator = classinst.inputs.items
             else:
-                iterator = classinst.inputs.items
+                if hasattr(classinst, 'inputs'):
+                    iterator = classinst.inputs.items
+                else:
+                    continue
             mandhelpstr = None # mandatory inputs
             opthelpstr = None  # optional inputs
             for i,v in sorted(iterator()):
                 if not helpstr:
-                    helpstr = 'Inputs:: \n\n\t'
+                    if opt_map:
+                        helpstr = 'Inputs (Untraited):: \n\n\t'
+                    else:
+                        helpstr = 'Inputs:: \n\n\t'
                 fieldstr =  i
-                if is_container(v) and isinstance(v[1], str):
+                if opt_map:
+                    if isinstance(v,tuple) and isinstance(v[1], str):
                     # Handle cases where we've added a docstring to
                     # the opt_map.  The value is then a tuple where
                     # the first element is the format string and the
                     # second element is the docstring.
-                    fieldstr += ' : ' + v[1]
-                if '(opt' in fieldstr:
-                    if not opthelpstr:
-                        opthelpstr = ['[Optional]']
-                    opthelpstr += [fieldstr]
+                        fieldstr += ' : ' + v[1]
+                    if '(opt' in fieldstr:
+                        if not opthelpstr:
+                            opthelpstr = ['[Optional]']
+                        opthelpstr += [fieldstr]
+                    else:
+                        if not mandhelpstr:
+                            mandhelpstr = ['[Mandatory]']
+                        mandhelpstr += [fieldstr]
                 else:
-                    if not mandhelpstr:
-                        mandhelpstr = ['[Mandatory]']
-                    mandhelpstr += [fieldstr]
+                    try:
+                        fieldstr += ' : ' + getattr(v, 'desc')
+                    except:
+                        fieldstr += ' : Unknown'
+                    if getattr(v, 'mandatory'):
+                        if not mandhelpstr:
+                            mandhelpstr = ['[Mandatory]']
+                        mandhelpstr += [fieldstr]
+                    else:
+                        if not opthelpstr:
+                            opthelpstr = ['[Optional]']
+                        opthelpstr += [fieldstr]
+                        
             if mandhelpstr:
                 helpstr += '\n\t'.join(mandhelpstr)
                 helpstr += '\n\n\t'
@@ -287,21 +316,31 @@ class InterfaceHelpWriter(object):
             if helpstr:
                 helpstr += '\n\n'
                 
-            if hasattr(classinst, 'out_map') and len(classinst.out_map):
-                # If the class has an opt_map, use that so we can grab
-                # any docstrings from it. Otherwise use the inputs.
-                iterator = classinst.out_map.items
+            if isinstance(classinst, Interface):
+                opt_map = True
+                if hasattr(classinst, 'out_map') and len(classinst.out_map):
+                    # If the class has an opt_map, use that so we can
+                    # grab
+                    # any docstrings from it. Otherwise use the inputs.
+                    iterator = classinst.out_map.items
+                else:
+                    iterator = classinst.outputs().items
             else:
-                iterator = classinst.outputs().items
+                if classinst._outputs():
+                    iterator = classinst._outputs().items
+                else:
+                    iterator = {}.items
             outstr = []
             for i,v in sorted(iterator()):
                 fieldstr =  i
-                if isinstance(v,tuple) and isinstance(v[0], str):
-                    # Handle cases where we've added a docstring to
-                    # the opt_map.  The value is then a tuple where
-                    # the first element is the format string and the
-                    # second element is the docstring.
-                    fieldstr += ' : ' + v[0]
+                if opt_map:
+                    if isinstance(v,tuple) and isinstance(v[0], str):
+                        fieldstr += ' : ' + v[0]
+                else:
+                    try:
+                        fieldstr += ' : ' + getattr(v, 'desc')
+                    except:
+                        fieldstr += ' : Unknown'
                 outstr += [fieldstr]
             if outstr:
                 if not helpstr:

@@ -319,7 +319,8 @@ class Info(object):
 
 
 class FSLTraitedSpec(CommandLineInputSpec):
-    outputtype =  traits.Enum('NIFTI', Info.ftypes.keys())
+    outputtype =  traits.Enum('NIFTI', Info.ftypes.keys(),
+                              desc='FSL output type')
     
 class NEW_FSLCommand(NEW_CommandLine):
     '''General support for FSL commands. Every FSL command accepts 'outputtype'
