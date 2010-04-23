@@ -7,5 +7,6 @@ from nipype.interfaces.spm.preprocess import (SliceTiming, Realign, Coregister,
                                               Normalize, Segment, Smooth)
 from nipype.interfaces.spm.model import (Level1Design, EstimateModel,
                                          EstimateContrast, OneSampleTTest,
-                                         TwoSampleTTest, MultipleRegression)
+                                         TwoSampleTTest, MultipleRegression,
+                                         Threshold)
 
