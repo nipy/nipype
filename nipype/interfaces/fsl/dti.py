@@ -117,9 +117,10 @@ class Eddycorrect(NEW_FSLCommand):
     def _list_outputs(self):        
         outputs = self.output_spec().get()
         outputs['outfile'] = self.inputs.outfile
-        if not isdefined(outputs['outfile']):
-            outputs['outfile'] = self._gen_fname(self.inputs.infile,
-                                                 suffix = '_edc')        
+        if not isdefined(outputs['outfile']) and isdefined(self.inputs.infile):
+            pth,basename = os.path.split(self.inputs.infile) 
+            outputs['outfile'] = self._gen_fname(basename,cwd=os.path.abspath(pth),
+                                                 suffix = '_edc')
         return outputs
 
     def _gen_filename(self, name):
