@@ -18,4 +18,4 @@ from nipype.interfaces.fsl.utils import (Smooth, Merge, ExtractRoi, Split,
 from nipype.interfaces.fsl.dti import (Eddycorrect, Bedpostx, Dtifit, Tbss2reg,
                                        Tbss1preproc, Tbss3postreg,
                                        Tbss4prestats, Randomise,
-                                       Probtrackx,Vecreg, ProjThresh, FindTheBiggest)
+                                       Probtrackx, Vecreg, Projthresh, Findthebiggest)
