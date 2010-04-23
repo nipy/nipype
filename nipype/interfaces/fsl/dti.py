@@ -11,16 +11,11 @@ See the docstrings of the individual classes for examples.
 import os
 import warnings
 
-from nipype.interfaces.fsl.base import FSLCommand
 from nipype.interfaces.fsl.base import NEW_FSLCommand, FSLTraitedSpec
 from nipype.interfaces.base import Bunch, TraitedSpec, isdefined, File,\
     InputMultiPath,Directory
-
 from nipype.utils.filemanip import fname_presuffix, filename_to_list
-from nipype.utils.docparse import get_doc
-
 import enthought.traits.api as traits
-
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
@@ -95,7 +90,7 @@ class Dtifit(NEW_FSLCommand):
     
 class EddycorrectInputSpec(FSLTraitedSpec):
     infile = File(exists=True,desc = '4D input file',argstr='%s', position=0, mandatory=True)
-    outfile = File(exists=True,desc = '4D output file',argstr='%s', position=1, genfile=True)
+    outfile = File(desc = '4D output file',argstr='%s', position=1, genfile=True)
     refnum = traits.Int(argstr='%d', position=2, desc='reference number',mandatory=True)
 
 class EddycorrectOutputSpec(FSLTraitedSpec):
@@ -121,7 +116,7 @@ class Eddycorrect(NEW_FSLCommand):
 
     def _list_outputs(self):        
         outputs = self.output_spec().get()
-        if not isdefined(outputs['outfile']) and isdefined(self.inputs.infile):
+        if not isdefined(self.inputs.outfile) and isdefined(self.inputs.infile):
             pth,basename = os.path.split(self.inputs.infile) 
             outputs['outfile'] = self._gen_fname(basename,cwd=os.path.abspath(pth),
                                                  suffix = '_edc')        
@@ -382,8 +377,8 @@ class Tbss4prestats(NEW_FSLCommand):
 class RandomiseInputSpec(FSLTraitedSpec):
     
     infile = File(exists=True,desc = '4D input file',argstr='-i %s', position=0, mandatory=True)
-    basename = File(desc = 'the rootname that all generated files will have',argstr='-o %s',
-                    position=1, genfile=True)
+    basename = traits.Str(desc = 'the rootname that all generated files will have',
+                          argstr='-o %s', position=1, mandatory=True)
     designmat = File(exists=True,desc = 'design matrix file',argstr='-d %s', position=2, mandatory=True)
     tcon = File(exists=True,desc = 't contrasts file',argstr='-t %s', position=3, mandatory=True)
     fcon = File(exists=True,desc = 'f contrasts file',argstr='-f %s')
@@ -452,220 +447,121 @@ class Randomise(NEW_FSLCommand):
             return None
 
 class ProbtrackxInputSpec(FSLTraitedSpec):
-    pass
+    samplesbasename = traits.Str(desc = 'the rootname/basename for samples files',
+                                 argstr='-s %s', position=0, mandatory=True)	
+    mask	 = File(exists=True, desc='bet binary mask file in diffusion space',
+                 argstr='-m %s', position=1, mandatory=True)
+    seedfile = 	File(exists=True, desc='seed volume, or voxel, or ascii file with multiple'+
+                     'volumes, or freesurfer label file',argstr='-x %s', position=2, mandatory=True)	
+    mode	= traits.Str(desc='options: simple (single seed voxel), seedmask (mask of seed voxels),'+
+                     'twomask_symm (two bet binary masks) ', argstr='--mode=%s')                             
+    targetmasks	= File(exits=True,desc='file containing a list of target masks - '+
+                       'required for seeds_to_targets classification', argstr='--targetmasks=%s')    
+    mask2	=File(exists=True,desc='second bet binary mask (in diffusion space) in twomask_symm mode',
+                argstr='--mask2=%s')
+    waypoints	= File(exists=True, desc='waypoint mask or ascii list of waypoint masks - '+
+                    'only keep paths going through ALL the masks',argstr='--waypoints=%s')
+    network	= traits.Bool(desc='activate network mode - only keep paths going through '+
+                         'at least one seed mask (required if multiple seed masks)',
+                          argstr='--network')
+    mesh = File(exists=True,desc='Freesurfer-type surface descriptor (in ascii format)',
+                argstr='--mesh=%s')
+    seedref	= File(exists=True, desc='reference vol to define seed space in '+
+                   'simple mode - diffusion space assumed if absent',
+                   argstr='--seedref=%s')
+    outdir	= Directory(exists=True,desc='directory to put the final volumes in - '+
+                      'code makes this directory - default is logdir',argstr='--dir=%s')
+    forcedir	= traits.Bool(desc='use the actual directory name given - i.e. '+
+                          'do not add + to make a new directory',argstr='--forcedir')
+    showpd = traits.Bool(desc='outputs the distribution of paths',argstr='--opd')
+    correctpd	= traits.Bool(desc='correct path distribution for the length of the pathways',
+                            argstr='--pd')
+    os2t	= traits.Bool(desc='Outputs seeds to targets',argstr='--os2t')
+    pathsfile = File(desc='produces an output file (default is fdt_paths)',
+                        argstr='--out=%s')
+    avoidmp = File(exists=True, desc='reject pathways passing through locations given by this mask',
+                   argstr='--avoid=%s')
+    stopinmask = File(exists=True,argstr='--stop=%s',
+                      desc='stop tracking at locations given by this mask file')	
+    xfm = File(exists=True, argstr='--xfm=%s',
+               desc='transformation matrix taking seed space to DTI space '+
+                '(either FLIRT matrix or FNIRT warpfield) - default is identity')    
+    invxfm = File( argstr='--invxfm=%s',desc='transformation matrix taking DTI space to seed'+
+                    ' space (compulsory when using a warpfield for seeds_to_dti)')
+    nsamples = traits.Int(argstr='--nsamples=%d',desc='number of samples - default=5000')
+    nsteps = traits.Int(argstr='--nsteps=%d',desc='number of steps per sample - default=2000')
+    distthresh = traits.Float(argstr='--distthresh=%.3f',desc='discards samples shorter than '+
+                              'this threshold (in mm - default=0)')    
+    cthresh = traits.Float(argstr='--cthr=%.3f',desc='curvature threshold - default=0.2')
+    samrandp = traits.Bool(argstr='--sampvox',desc='sample random points within seed voxels')
+    steplength = traits.Float(argstr='--steplength=%.3f',desc='steplength in mm - default=0.5')
+    loopcheck = traits.Bool(argstr='--loopcheck',desc='perform loopchecks on paths -'+
+                            ' slower, but allows lower curvature threshold')
+    usef = traits.Bool(argstr='--usef',desc='use anisotropy to constrain tracking')
+    randfib = traits.Bool(argstr='--randfib',desc='options: 0 - default, 1 - to randomly sample'+
+                          ' initial fibres (with f > fibthresh), 2 - to sample in '+
+                          'proportion fibres (with f>fibthresh) to f, 3 - to sample ALL '+
+                          'populations at random (even if f<fibthresh)')
+    fibst = traits.Int(argstr='--fibst=%d',desc='force a starting fibre for tracking - '+
+                       'default=1, i.e. first fibre orientation. Only works if randfib==0')
+    modeuler = traits.Bool(argstr='--modeuler',desc='use modified euler streamlining')
+    rseed = traits.Bool(argstr='--rseed',desc='random seed')
+    s2tastext = traits.Bool(argstr='--s2tastext',desc='output seed-to-target counts as a'+
+                            ' text file (useful when seeding from a mesh)')
+
 class ProbtrackxOutputSpec(FSLTraitedSpec):
-    pass
+    probtrackx = File(exists=True, desc='a text record of the command that was run')
+    fdt_paths = File(exists=True, desc='a 3D image file containing the output '+
+                     'connectivity distribution to the seed mask')
+    waytotal = File(exists=True, desc='a text file containing a single number '+
+                    'corresponding to the total number of generated tracts that '+
+                    'have not been rejected by inclusion/exclusion mask criteria')
+    
 class Probtrackx(NEW_FSLCommand):
 
-    """Use FSL  probtrackx for tractography on bedpostx results
-    """
-    pass
+    """ Use FSL  probtrackx for tractography on bedpostx results
+        Example:
+        >>> from nipype.interfaces import fsl
+        >>> pbx = Probtrackx( basename='subj1',
+                            binaryMask='nodif_brain_mask',
+                            seedFile='standard')
+        >>> pbx.cmdline
+        'probtrackx -s subj1 -m nodif_brain_mask -x standard'
 
-##
-##    opt_map = {'basename':                      '-s %s',
-##               'binaryMask':                    '-m %s',
-##               'seedFile':                      '-x %s',
-##               'verbose':                       '-V %d',
-##               'helpDoc':                       '-h',
-##               'mode':                          '--mode=%s',  # options: simple, seedmask
-##               'targetMasks':                   '--targetmasks=%s',
-##               'secondMask':                    '--mask2=%s',
-##               'wayPointsMask':                 '--waypoints=%s',
-##               'activateNetwork':               '--network',
-##               'surfaceDescriptor':             '--mesh=%s',
-##               'refVol4seedVoxels':             '--seedref=%s',
-##               'finalVolDir':                   '--dir=%s',
-##               'useActualDirName':              '--forcedir',
-##               'outputPathDistribution':        '--opd',
-##               'correctPathDistribution':       '--pd',
-##               'outputSeeds2targets':           '--os2t',
-##               'outfBasename':                   '-o %s',
-##               'rejectMaskPaths':               '--avoid=%s',
-##               'noTrackingMask':                '--stop=%s',
-##               'preferedOrientation':           '--prefdir=%s',
-##               'Tmatrix':                       '--xfm=%s',
-##               'numOfSamples':                  '-P %d',
-##               'nstepsPersample':               '-S %d',
-##               'curvatureThreshold':            '-c %.2f',
-##               'steplength':                    '--steplength=%.2f',
-##               'performLoopcheck':              '-l',
-##               'useAnisotropy':                 '-f',
-##               'selectRandfibres':              '--randfib',
-##               'forceAstartingFibre':           '--fibst=%d',
-##               'modifiedEulerStreamlining':     '--modeuler',
-##               'randSeed':                      '--rseed',
-##               'outS2Tcounts':                  '--seedcountastext'}
-##
-##    @property
-##    def cmd(self):
-##        """sets base command, immutable"""
-##        return 'probtrackx'
-##
-##    def inputs_help(self):
-##        """Print command line documentation for probtrackx."""
-##        print get_doc(self.cmd, self.opt_map, trap_error=False)
-##
-##    def _populate_inputs(self):
-##        self.inputs = Bunch(basename=None,
-##                                binaryMask=None,
-##                                seedFile=None,
-##                                verbose=None,
-##                                helpDoc=None,
-##                                mode=None,
-##                                targetMasks=None,
-##                                secondMask=None,
-##                                wayPointsMask=None,
-##                                activateNetwork=None,
-##                                surfaceDescriptor=None,
-##                                refVol4seedVoxels=None,
-##                                finalVolDir=None,
-##                                useActualDirName=None,
-##                                outputPathDistribution=None,
-##                                correctPathDistribution=None,
-##                                outputSeeds2targets=None,
-##                                outfBasename=None,
-##                                rejectMaskPaths=None,
-##                                noTrackingMask=None,
-##                                preferedOrientation=None,
-##                                Tmatrix=None,
-##                                numOfSamples=None,
-##                                nstepsPersample=None,
-##                                curvatureThreshold=None,
-##                                steplength=None,
-##                                performLoopcheck=None,
-##                                useAnisotropy=None,
-##                                selectRandfibres=None,
-##                                forceAstartingFibre=None,
-##                                modifiedEulerStreamlining=None,
-##                                randSeed=None,
-##                                outS2Tcounts=None)
-##
-##    def _parse_inputs(self):
-##        """validate fsl probtrackx options"""
-##        allargs = super(Probtrackx, self)._parse_inputs(skip=('basename', 'binaryMask', 'seedFile'))
-##
-##        # Add source files to the args if they are specified
-##        if self.inputs.basename:
-##            allargs.insert(0, '-s ' + self.inputs.basename)
-##        else:
-##            raise AttributeError('probtrackx needs a basename as input')
-##
-##        if self.inputs.binaryMask:
-##            allargs.insert(1, '-m ' + self.inputs.binaryMask)
-##        else:
-##            raise AttributeError('probtrackx needs a binary mask as input')
-##
-##        if self.inputs.seedFile:
-##            allargs.insert(2, '-x ' + self.inputs.seedFile)
-##        else:
-##            raise AttributeError('probtrackx needs a seed volume, or voxel, \
-##                                    or ascii file with multiple volumes as input')
-##
-##        return allargs
-##
-##    def run(self, basename=None, binaryMask=None, seedFile=None, noseTest=False, **inputs):
-##        """Execute the command.
-##        >>> from nipype.interfaces import fsl
-##        >>> pbx = Probtrackx(basename='subj1',binaryMask='nodif_brain_mask',seedFile='standard')
-##        >>> pbx.cmdline
-##        'probtrackx -s subj1 -m nodif_brain_mask -x standard'
-##        """
-##
-##        if basename:
-##            self.inputs.basename = basename
-##
-##        if binaryMask:
-##            self.inputs.binaryMask = binaryMask
-##
-##        if seedFile:
-##            self.inputs.seedFile = seedFile
-##
-##        # incorporate user options
-##        self.inputs.update(**inputs)
-##
-##        if not noseTest:
-##            directory = os.path.join(os.getcwd(), self.inputs.basename)
-##            if os.path.isdir(directory):
-##                if not self.__datacheck_ok(directory):
-##                    raise AttributeError('Not all standardized files found \
-##                                         in input directory: %s' % directory)
-##
-##        results = self._runner()
-##        if not noseTest:
-##            results.outputs = self.aggregate_outputs()
-##
-##        return results
-##
-##    def outputs_help(self):
-##        """
-##        Parameters
-##        ----------
-##        (all default input values set to None)
-##
-##        outfile : /path/to/directory_with_output_files/files
-##            the files are
-##
-##        """
-##        print self.outputs_help.__doc__
-##
-##    def outputs(self):
-##        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-##
-##        Parameters
-##        ----------
-##        (all default to None and are unset)
-##
-##            outfile : string,file
-##                path/name of file of probtrackx image
-##        """
-##        outputs = Bunch(outfile=None)
-##        return outputs
-##
-##    def aggregate_outputs(self):
-##        """Create a Bunch which contains all possible files generated
-##        by running the interface.  Some files are always generated, others
-##        depending on which ``inputs`` options are set.
-##
-##        Returns
-##        -------
-##        outputs : Bunch object
-##            Bunch object containing all possible files generated by
-##            interface object.
-##
-##            If None, file was not generated
-##            Else, contains path, filename of generated outputfile
-##
-##        """
-##        outputs = self.outputs()
-##        outputs.outfile = self._gen_fname(self.inputs.basename,
-##                                             fname=self.inputs.outfile,
-##                                             suffix='_pbx',
-##                                             check=True)
-##        return outputs
-##
-##    def _datacheck_ok(self, directory):
-##        """ checks whether the directory given to -s <directory> flag contains
-##            the three required standardized files """
-##
-##        merged_ph = False
-##        merged_th = False
-##        nodif_brain_mask = False
-##
-##        f1 = self._glob(os.path.join(directory, 'merged_ph*'))
-##        if f1 is not None:
-##            merged_ph = True
-##
-##        f2 = self._glob(os.path.join(directory, 'merged_th*'))
-##        if f2 is not None:
-##            merged_th = True
-##
-##        f3 = self._glob(os.path.join(directory, 'nodif_brain_mask*'))
-##        if f3 is not None:
-##            nodif_brain_mask = True
-##
-##        return (merged_ph and merged_th and nodif_brain_mask)
-##
-##
+    """
+    _cmd = 'probtrackx'
+    input_spec = ProbtrackxInputSpec
+    output_spec = ProbtrackxOutputSpec
+    
+    def _list_outputs(self):        
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.outdir):
+            outputs['probtrackx'] = self._gen_fname('probtrackx',cwd=self.inputs.outdir,
+                                                    suffix='.log',change_ext=False)            
+            outputs['waytotal'] = self._gen_fname('waytotal',cwd=self.inputs.outdir,
+                                                  suffix='',change_ext=False)
+            if self.inputs.pathsfile:                
+                outputs['fdt_paths'] = self._gen_fname(self.inputs.pathsfile,
+                                                       cwd=self.inputs.outdir,suffix='')
+            else:
+                outputs['fdt_paths'] = self._gen_fname(self.inputs.pathsfile,
+                                                       cwd=self.inputs.outdir,suffix='')
+        else:
+            outputs['probtrackx'] = self._gen_fname('probtrackx',suffix='.log',change_ext=False)
+            outputs['waytotal'] = self._gen_fname('waytotal',suffix='',change_ext=False)
+            if self.inputs.pathsfile:
+                outputs['fdt_paths'] = self._gen_fname(self.inputs.pathsfile,suffix='')
+            else:
+                outputs['fdt_paths'] = self._gen_fname('fdt_paths',suffix='')
+                
+        return outputs
+
+    def _gen_filename(self, name):
+        if name in ('probtrackx','waytotal','fdt_paths'):
+            return self._list_outputs()[name]
+        else:
+            return None
+
 
 class VecregInputSpec(FSLTraitedSpec):
     pass
@@ -876,9 +772,9 @@ class Projthresh(NEW_FSLCommand):
 ##
 ##
 
-class FindthebiggestInputSpec():
+class FindthebiggestInputSpec(FSLTraitedSpec):
     pass
-class FindthebiggestOutputSpec():
+class FindthebiggestOutputSpec(FSLTraitedSpec):
     pass
 class Findthebiggest(NEW_FSLCommand):
     """Use FSL find_the_biggest for performing hard segmentation on
