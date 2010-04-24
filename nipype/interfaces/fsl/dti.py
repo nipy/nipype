@@ -12,9 +12,7 @@ import os
 import warnings
 
 from nipype.interfaces.fsl.base import NEW_FSLCommand, FSLTraitedSpec
-from nipype.interfaces.base import Bunch, TraitedSpec, isdefined, File,\
-    InputMultiPath,Directory
-from nipype.utils.filemanip import fname_presuffix, filename_to_list
+from nipype.interfaces.base import Bunch, TraitedSpec, isdefined, File,Directory
 import enthought.traits.api as traits
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -109,6 +107,10 @@ class Eddycorrect(NEW_FSLCommand):
     output_spec = EddycorrectOutputSpec
 
     def _run_interface(self, runtime):
+        if not isdefined(self.inputs.outfile):
+            pth,basename = os.path.split(self.inputs.infile) 
+            self.inputs.outfile = self._gen_fname(basename,cwd=os.path.abspath(pth),
+                                                 suffix = '_edc')
         runtime = super(Eddycorrect, self)._run_interface(runtime)
         if runtime.stderr:
             runtime.returncode = 1
@@ -375,8 +377,7 @@ class Tbss4prestats(NEW_FSLCommand):
         else:
             return None
 
-class RandomiseInputSpec(FSLTraitedSpec):
-    
+class RandomiseInputSpec(FSLTraitedSpec):    
     infile = File(exists=True,desc = '4D input file',argstr='-i %s', position=0, mandatory=True)
     basename = traits.Str(desc = 'the rootname that all generated files will have',
                           argstr='-o %s', position=1, mandatory=True)
@@ -417,7 +418,7 @@ class RandomiseInputSpec(FSLTraitedSpec):
                       '(list order corresponds to numbers in vxl option)')
              
 class RandomiseOutputSpec(FSLTraitedSpec):
-    tstat1file = File(exists=True,desc = 'tstat image corresponding to the first t contrast')  
+    tstat1file = File(exists=True,desc = 'path/name of tstat image corresponding to the first t contrast')  
 
 class Randomise(NEW_FSLCommand):
     """
@@ -449,11 +450,13 @@ class Randomise(NEW_FSLCommand):
 
 class ProbtrackxInputSpec(FSLTraitedSpec):
     samplesbasename = traits.Str(desc = 'the rootname/basename for samples files',
-                                 argstr='-s %s', position=0, mandatory=True)	
+                                 argstr='-s %s', mandatory=True)
+    bpxdirectory = Directory(exists=True, field='dir', desc = 'path/name of directory with all '+
+                             'bedpostx output files')
     mask	 = File(exists=True, desc='bet binary mask file in diffusion space',
-                 argstr='-m %s', position=1, mandatory=True)
+                 argstr='-m %s', mandatory=True)
     seedfile = 	File(exists=True, desc='seed volume, or voxel, or ascii file with multiple'+
-                     'volumes, or freesurfer label file',argstr='-x %s', position=2, mandatory=True)	
+                     'volumes, or freesurfer label file',argstr='-x %s', mandatory=True)	
     mode	= traits.Str(desc='options: simple (single seed voxel), seedmask (mask of seed voxels),'+
                      'twomask_symm (two bet binary masks) ', argstr='--mode=%s')                             
     targetmasks	= File(exits=True,desc='file containing a list of target masks - '+
@@ -474,7 +477,7 @@ class ProbtrackxInputSpec(FSLTraitedSpec):
                       'code makes this directory - default is logdir',argstr='--dir=%s')
     forcedir	= traits.Bool(desc='use the actual directory name given - i.e. '+
                           'do not add + to make a new directory',argstr='--forcedir')
-    showpd = traits.Bool(desc='outputs the distribution of paths',argstr='--opd')
+    opd = traits.Bool(desc='outputs path distributions',argstr='--opd')
     correctpd	= traits.Bool(desc='correct path distribution for the length of the pathways',
                             argstr='--pd')
     os2t	= traits.Bool(desc='Outputs seeds to targets',argstr='--os2t')
@@ -511,10 +514,10 @@ class ProbtrackxInputSpec(FSLTraitedSpec):
                             ' text file (useful when seeding from a mesh)')
 
 class ProbtrackxOutputSpec(FSLTraitedSpec):
-    probtrackx = File(exists=True, desc='a text record of the command that was run')
-    fdt_paths = File(exists=True, desc='a 3D image file containing the output '+
+    probtrackx = File(exists=True, desc='path/name of a text record of the command that was run')
+    fdt_paths = File(exists=True, desc='path/name of a 3D image file containing the output '+
                      'connectivity distribution to the seed mask')
-    waytotal = File(exists=True, desc='a text file containing a single number '+
+    waytotal = File(exists=True, desc='path/name of a text file containing a single number '+
                     'corresponding to the total number of generated tracts that '+
                     'have not been rejected by inclusion/exclusion mask criteria')
     
@@ -523,16 +526,25 @@ class Probtrackx(NEW_FSLCommand):
     """ Use FSL  probtrackx for tractography on bedpostx results
         Example:
         >>> from nipype.interfaces import fsl
-        >>> pbx = Probtrackx( basename='subj1',
-                            binaryMask='nodif_brain_mask',
-                            seedFile='standard')
+        >>> pbx = fsl.Probtrackx(samplesbasename='merged', mask='nodif_brain_mask.nii.gz',
+                     seedfile='MASK_average_thal_right.nii.gz', mode='seedmask',
+                     xfm='standard2diff.mat', nsamples=3, nsteps=10, forcedir=True, opd=True, os2t=True,
+                     outdir='dtiout', targetmasks = 'THAL2CTX_right/targets.txt',
+                     pathsfile='nipype_fdtpaths')
         >>> pbx.cmdline
-        'probtrackx -s subj1 -m nodif_brain_mask -x standard'
-
+        'probtrackx --forcedir -m nodif_brain_mask.nii.gz --mode=seedmask
+        --nsamples=3 --nsteps=10 --opd --os2t --dir=dtiout --out=nipype_fdtpaths
+        -s merged -x MASK_average_thal_right.nii.gz
+        --targetmasks=/THAL2CTX_right/targets.txt --xfm=standard2diff.mat'
     """
     _cmd = 'probtrackx'
     input_spec = ProbtrackxInputSpec
     output_spec = ProbtrackxOutputSpec
+
+    def _run_interface(self, runtime):        
+        if isdefined(self.inputs.bpxdirectory) and not isdefined(self.inputs.samplesbasename):
+            self.inputs.samplesbasename = os.path.join(self.inputs.bpxdirectory,'merged')
+        return super(Probtrackx, self)._run_interface(runtime)
     
     def _list_outputs(self):        
         outputs = self.output_spec().get()
@@ -553,8 +565,7 @@ class Probtrackx(NEW_FSLCommand):
             if isdefined(self.inputs.pathsfile):
                 outputs['fdt_paths'] = self._gen_fname(self.inputs.pathsfile,suffix='')
             else:
-                outputs['fdt_paths'] = self._gen_fname('fdt_paths',suffix='')
-                
+                outputs['fdt_paths'] = self._gen_fname('fdt_paths',suffix='')                
         return outputs
 
     def _gen_filename(self, name):
@@ -564,214 +575,103 @@ class Probtrackx(NEW_FSLCommand):
             return None
 
 
-class VecregInputSpec(FSLTraitedSpec):
-    pass
+class VecregInputSpec(FSLTraitedSpec):    
+    infile = File(exists=True,argstr='-i %s',desc='filename for input vector or tensor field',
+                  mandatory=True)    
+    outfile = File(argstr='-o %s',desc='filename for output registered vector or tensor field',
+                   genfile=True)
+    refvol = File(exists=True,argstr='-r %s',desc='filename for reference (target) volume',
+                  mandatory=True)    
+    affinemat = File(exists=True,argstr='-t %s',desc='filename for affine transformation matrix')
+    warpfield = File(exists=True,argstr='-w %s',desc='filename for 4D warp field for nonlinear registration')
+    rotmat = File(exists=True,argstr='--rotmat=%s',desc='filename for secondary affine matrix'+
+                  'if set, this will be used for the rotation of the vector/tensor field')
+    rotwarp = File(exists=True,argstr='--rotwarp=%s',desc='filename for secondary warp field'+
+                   'if set, this will be used for the rotation of the vector/tensor field') 
+    interp = traits.Str(argstr='--interp=%s',desc='interpolation method : '+
+                        'nearestneighbour, trilinear (default), sinc or spline')
+    mask = File(exists=True,argstr='-m %s',desc='brain mask in input space')
+    refmask = File(exists=True,argstr='--refmask=%s',desc='brain mask in output space '+
+                   '(useful for speed up of nonlinear reg)')
+
 class VecregOutputSpec(FSLTraitedSpec):
-    pass
+    outfile = File(exists=True,desc='path/name of filename for the registered vector or tensor field')
+    
 class Vecreg(NEW_FSLCommand):
     """Use FSL vecreg for registering vector data
-
     For complete details, see the `FDT Documentation
     <http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_vecreg.html>`_
-
+    Example:
+    >>> from nipype.interfaces import fsl
+    >>> vreg = fsl.Vecreg(infile='dyads1.nii.gz',
+                 affinemat='diff2standard.mat',
+                 refvol='/usr/share/fsl/data/standard/MNI152_T1_2mm.nii.gz')
+    >>> print vreg.cmdline
+    'vecreg -t diff2standard.mat -i dyads1.nii.gz -o dyads1_vreg.nii.gz
+    -r /usr/share/fsl/data/standard/MNI152_T1_2mm.nii.gz'
     """
-    pass
+    _cmd = 'vecreg'
+    input_spec = VecregInputSpec
+    output_spec = VecregOutputSpec
 
-##    opt_map = {'infile':            '-i %s',
-##               'outfile':           '-o %s',
-##               'refVolName':        '-r %s',
-##               'verbose':           '-v',
-##               'helpDoc':           '-h',
-##               'tensor':            '--tensor',
-##               'affineTmat':        '-t %s',
-##               'warpFile':          '-w %s',
-##               'interpolation':     '--interp %s',
-##               'brainMask':         '-m %s'}
-##
-##    @property
-##    def cmd(self):
-##        """sets base command, immutable"""
-##        return 'vecreg'
-##
-##    def inputs_help(self):
-##        """Print command line documentation for Vecreg."""
-##        print get_doc(self.cmd, self.opt_map, trap_error=False)
-##
-##    def _populate_inputs(self):
-##        self.inputs = Bunch(infile=None,
-##                            outfile=None,
-##                            refVolName=None,
-##                            verbose=None,
-##                            helpDoc=None,
-##                            tensor=None,
-##                            affineTmat=None,
-##                            warpFile=None,
-##                            interpolation=None,
-##                            brainMask=None,
-##                            cwd=None)
-##
-##    def _parse_inputs(self):
-##        """validate fsl vecreg options"""
-##        allargs = super(Vecreg, self)._parse_inputs(skip=('infile', 'outfile',
-##                                                         'refVolName', 'cwd'))
-##
-##        # Add source files to the args if they are specified
-##        if self.inputs.infile:
-##            allargs.insert(0, '-i ' + self.inputs.infile)
-##        else:
-##            raise AttributeError('vecreg needs an input file')
-##
-##        if self.inputs.outfile:
-##            allargs.insert(1, '-o ' + self.inputs.outfile)
-##        else:
-##            outfile = self._gen_fname(self.inputs.infile,
-##                                         cwd=self.inputs.cwd,
-##                                         suffix='_vrg')
-##            self.inputs.outfile = outfile
-##            allargs.insert(1, '-o ' + outfile)
-##
-##        if self.inputs.refVolName:
-##            allargs.insert(2, '-r ' + self.inputs.refVolName)
-##        else:
-##            raise AttributeError('vecreg needs a reference volume')
-##
-##        return allargs
-##
-##    def run(self, infile=None, outfile=None, refVolName=None, **inputs):
-##        """Execute the command.
-##
-##        Examples
-##        --------
-##        >>> from nipype.interfaces import fsl
-##        >>> vreg = fsl.Vecreg(infile='inf', outfile='infout', \
-##                              refVolName='MNI152')
-##        >>> vreg.cmdline
-##        'vecreg -i inf -o infout -r MNI152'
-##
-##        """
-##        if infile:
-##            self.inputs.infile = infile
-##
-##        if outfile:
-##            self.inputs.outfile = outfile
-##
-##        if refVolName:
-##            self.inputs.refVolName = refVolName
-##
-##        self.inputs.update(**inputs)
-##        return super(Vecreg, self).run()
-##
-##    def outputs(self):
-##        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-##
-##        Parameters
-##        ----------
-##        outfile : str
-##            path/name of file of probtrackx image
-##        """
-##        outputs = Bunch(outfile=None)
-##        return outputs
-##
-##    def aggregate_outputs(self):
-##        outputs = self.outputs()
-##        outputs.outfile = self._gen_fname(self.inputs.infile,
-##                                             fname=self.inputs.outfile,
-##                                             cwd=self.inputs.cwd,
-##                                             suffix='_vrg',
-##                                             check=True)
-##        return outputs
-##    aggregate_outputs.__doc__ = FSLCommand.aggregate_outputs.__doc__
-##
-##
+    def _run_interface(self, runtime):        
+        if not isdefined(self.inputs.outfile):
+            pth,basename = os.path.split(self.inputs.infile) 
+            self.inputs.outfile = self._gen_fname(basename,cwd=os.path.abspath(pth),
+                                                 suffix = '_vreg')
+        return super(Vecreg, self)._run_interface(runtime)
+    
+    def _list_outputs(self):        
+        outputs = self.output_spec().get()
+        outputs['outfile'] = self.inputs.outfile
+        if not isdefined(outputs['outfile']) and isdefined(self.inputs.infile):
+            pth,basename = os.path.split(self.inputs.infile) 
+            outputs['outfile'] = self._gen_fname(basename,cwd=os.path.abspath(pth),
+                                                 suffix = '_vreg')
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'outfile':
+            return self._list_outputs()[name]
+        else:
+            return None
+    
 
 class ProjthreshInputSpec(FSLTraitedSpec):
-    pass
+    infiles = traits.List(traits.Str,argstr='%s',desc='input volume',mandatory=True)
+    threshold = traits.Float(argstr='%.3f',desc='threshold',mandatory=True)
+    
 class ProjthreshOuputSpec(FSLTraitedSpec):
-    pass
+    outfile = traits.List(traits.Str,desc='path/name of output volume after thresholding')
+    
 class Projthresh(NEW_FSLCommand):
     """Use FSL proj_thresh for thresholding some outputs of probtrack
 
         For complete details, see the `FDT Documentation
         <http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_thresh.html>`_
+        Example:
+        >>> from nipype.interfaces import fsl
+        >>> pThresh = fsl.Projthresh(involumes=['seeds_to_M1', 'seeds_to_M2'], \
+                                     threshold=3)
+        >>> pThresh.cmdline
+        'proj_thresh seeds_to_M1 seeds_to_M2 3'
 
     """
     pass
+##    _cmd = 'proj_thresh'
+##    input_spec = ProjthreshInputSpec
+##    output_spec = ProjthreshOuputSpec
+##
+##    def _list_outputs(self):        
+##        outputs = self.output_spec().get()
+##        return outputs
+##
+##    def _gen_filename(self, name):
+##        if name is 'outfile':
+##            return self._list_outputs()[name]
+##        else:
+##            return None
 
-##    opt_map = {}
-##
-##    @property
-##    def cmd(self):
-##        """sets base command, immutable"""
-##        return 'proj_thresh'
-##
-##    def inputs_help(self):
-##        """Print command line documentation for Proj_thresh."""
-##        print get_doc(self.cmd, self.opt_map, trap_error=False)
-##
-##    def _populate_inputs(self):
-##        self.inputs = Bunch(volumes=None, threshold=None, cwd=None)
-##
-##    def _parse_inputs(self):
-##        """validate fsl Proj_thresh options"""
-##        allargs = []
-##
-##        if self.inputs.volumes:
-##            for vol in self.inputs.volumes:
-##                allargs.append(vol)
-##        else:
-##            raise AttributeError('proj_thresh needs input volumes')
-##
-##        if self.inputs.threshold:
-##            allargs.append(repr(self.inputs.threshold))
-##        else:
-##            raise AttributeError('proj_thresh needs a threshold value')
-##
-##        return allargs
-##
-##    def run(self, volumes=None, threshold=None, **inputs):
-##        """Execute the command.
-##
-##        Examples
-##        --------
-##        >>> from nipype.interfaces import fsl
-##        >>> pThresh = fsl.ProjThresh(volumes = ['seeds_to_M1', 'seeds_to_M2'], \
-##                                     threshold = 3)
-##        >>> pThresh.cmdline
-##        'proj_thresh seeds_to_M1 seeds_to_M2 3'
-##
-##        """
-##
-##        if volumes is not None:
-##            self.inputs.volumes = filename_to_list(volumes)
-##
-##        if threshold is not None:
-##            self.inputs.threshold = threshold
-##
-##        self.inputs.update(**inputs)
-##        return super(ProjThresh, self).run()
-##
-##    def outputs(self):
-##        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-##
-##        Parameters
-##        ----------
-##        outfile : str
-##            path/name of file of probtrackx image
-##        """
-##        outputs = Bunch(outfile=None)
-##        return outputs
-##
-##    def aggregate_outputs(self):
-##        outputs = self.outputs()
-##        outputs.outfile = []
-##
-##        for files in self.inputs.volumes:
-##            outputs.outfile.append(self._glob(files + '_proj_seg_thr_*'))
-##
-##        return outputs
-##    aggregate_outputs.__doc__ = FSLCommand.aggregate_outputs.__doc__
-##
-##
 
 class FindthebiggestInputSpec(FSLTraitedSpec):
     pass
@@ -780,80 +680,24 @@ class FindthebiggestOutputSpec(FSLTraitedSpec):
 class Findthebiggest(NEW_FSLCommand):
     """Use FSL find_the_biggest for performing hard segmentation on
        the outputs of connectivity-based thresholding in probtrack.
-
        For complete details, see the `FDT
        Documentation. <http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_biggest.html>`_
+       Example:
+        >>> from nipype.interfaces import fsl
+        >>> fBig = fsl.FindTheBiggest(infiles='all*', outfile='biggestOut')
+        >>> fBig.cmdline
+        'find_the_biggest all* biggestOut'      
 
     """
     pass
+##    _cmd='find_the_biggest'
+##    input_spec = FindthebiggestInputSpec
+##    output_spec = FindthebiggestOutputSpec
 
-##    opt_map = {}
-##
-##    @property
-##    def cmd(self):
-##        """sets base command, immutable"""
-##        return 'find_the_biggest'
-##
-##    def inputs_help(self):
-##        """Print command line documentation for Find_the_biggest."""
-##        print get_doc(self.cmd, self.opt_map, trap_error=False)
-##
-##    def _populate_inputs(self):
-##        self.inputs = Bunch(infiles=None,
-##                            outfile=None)
-##
-##    def _parse_inputs(self):
-##        """validate fsl Find_the_biggest options"""
-##        allargs = []
-##        if self.inputs.infiles:
-##            allargs.insert(0, self.inputs.infiles)
-##        if self.inputs.outfile:
-##            allargs.insert(1, self.inputs.outfile)
-##        else:
-##            outfile = self._gen_fname(self.inputs.infiles,
-##                                         fname=self.inputs.outfile,
-##                                         suffix='_fbg')
-##            allargs.insert(1, outfile)
-##
-##        return allargs
-##
-##    def run(self, infiles=None, outfile=None, **inputs):
-##        """Execute the command.
-##
-##        Examples
-##        --------
-##        >>> from nipype.interfaces import fsl
-##        >>> fBig = fsl.FindTheBiggest(infiles='all*', outfile='biggestOut')
-##        >>> fBig.cmdline
-##        'find_the_biggest all* biggestOut'
-##
-##        """
-##        if infiles:
-##            self.inputs.infiles = infiles
-##        if not self.inputs.infiles:
-##            raise AttributeError('find_the_biggest requires input file(s)')
-##        if outfile:
-##            self.inputs.outfile = outfile
-##        return super(FindTheBiggest, self).run()
-##
-##    def outputs(self):
-##        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-##
-##        Parameters
-##        ----------
-##        outfile : str
-##            path/name of file of probtrackx image
-##        """
-##        outputs = Bunch(outfile=None)
-##        return outputs
-##
-##    def aggregate_outputs(self):
-##        outputs = self.outputs()
-##        outputs.outfile = self._gen_fname(self.inputs.infile,
-##                                             fname=self.inputs.outfile,
-##                                             suffix='_fbg',
-##                                             check=True)
-##
-##        return outputs
-##    
-##    aggregate_outputs.__doc__ = FSLCommand.aggregate_outputs.__doc__
+
+
+
+
+
+
+
