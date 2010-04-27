@@ -360,7 +360,7 @@ class NEW_FSLCommand(NEW_CommandLine):
         else:
             raise AttributeError('Invalid FSL outputtype: %s' % outputtype)
 
-    def _gen_fname(self, basename, cwd=None, suffix='_fsl', change_ext=True):
+    def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True):
         """Generate a filename based on the given parameters.
 
         The filename will take the form: cwd/basename<suffix><ext>.
