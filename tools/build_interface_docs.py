@@ -19,13 +19,11 @@ if __name__ == '__main__':
                                         '\.utils$',
                                         '\.pipeline',
                                         '.\testing',
-                                        '\.interfaces\.gorlin_glue',
                                         ]
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += ['\.version$',
                                        '\.interfaces\.afni$',
                                        '\.interfaces\.base$',
-                                       '\.interfaces\.gorlin_glue',
                                        '\.interfaces\.matlab$',
                                        '\.interfaces\.rest$',
                                        '\.interfaces\.pymvpa$',
