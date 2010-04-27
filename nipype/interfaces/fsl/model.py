@@ -14,9 +14,10 @@ from glob import glob
 import warnings
 from shutil import rmtree
 
-from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
+from nipype.interfaces.fsl.base import FSLCommand, FSLInfo, FSLTraitedSpec,\
+    NEW_FSLCommand
 from nipype.interfaces.base import (Bunch, Interface, load_template,
-                                    InterfaceResult)
+                                    InterfaceResult, File, traits, TraitedSpec)
 from nipype.utils.filemanip import (list_to_filename, filename_to_list,
                                     loadflat)
 from nipype.utils.docparse import get_doc
@@ -1314,4 +1315,35 @@ class L2Model(Interface):
             setattr(outputs, field,
                     list_to_filename(glob(os.path.join(os.getcwd(),
                                                        field.replace('_','.')))))
+        return outputs
+
+class SMMInputSpec(FSLTraitedSpec):
+    spatialdatafile = File(exists=True, position=0, argstr="--sdf=%s", mandatory=True,
+                           desc="statistics spatial map")
+    mask = File(exist=True, position=1, argstr="--mask=%s", mandatory=True,
+                desc="mask file")
+    zfstatmode = traits.Bool(position=2, argstr="--zfstatmode",
+                             desc="enforces no deactivation class")
+
+class SMMOutputSpec(TraitedSpec):
+    null_p_map = File(exists=True)
+    activation_p_map = File(exists=True)
+    deactivation_p_map = File(exists=True)
+
+class SMM(NEW_FSLCommand):
+    '''
+    Spatial Mixture Modelling. For more detail on the spatial mixture modelling see 
+    Mixture Models with Adaptive Spatial Regularisation for Segmentation with an Application to FMRI Data; 
+    Woolrich, M., Behrens, T., Beckmann, C., and Smith, S.; IEEE Trans. Medical Imaging, 24(1):1-11, 2005. 
+    '''
+    _cmd = 'mm'
+    input_spec = SMMInputSpec
+    output_spec = SMMOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        #TODO get the true logdir from the stdout
+        outputs['null_p_map'] = self._gen_fname(basename="w1_mean", cwd="logdir")
+        outputs['activation_p_map'] = self._gen_fname(basename="w2_mean", cwd="logdir")
+        outputs['deactivation_p_map'] = self._gen_fname(basename="w3_mean", cwd="logdir")
         return outputs
