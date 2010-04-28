@@ -467,6 +467,9 @@ class Segment(NEW_SPMCommand):
 
     _jobtype = 'spatial'
     _jobname = 'preproc'
+
+    input_spec = SegmentInputSpec
+    output_spec = SegmentOutputSpec
     
     def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
