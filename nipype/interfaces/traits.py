@@ -5,6 +5,7 @@
 """
 
 import enthought.traits.api as traits
+import os
 
 class BaseFile ( traits.BaseStr ):
     """ Defines a trait whose value must be the name of a file.
