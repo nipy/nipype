@@ -27,13 +27,18 @@ if __name__ == '__main__':
                                        '\.interfaces\.matlab$',
                                        '\.interfaces\.rest$',
                                        '\.interfaces\.pymvpa$',
+                                       '\.interfaces\.traits',
                                        '\.pipeline\.alloy$',
                                        '\.pipeline\.s3_node_wrapper$',
+                                       '.\testing',
                                        ]
     docwriter.class_skip_patterns += ['FSL',
                                       'FS',
                                       'Spm',
-                                      'Spm',
+                                      'Tester',
+                                      'Spec$',
+                                      'afni',
+                                      'Numpy'
                                       ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'gen', relative_to='interfaces')

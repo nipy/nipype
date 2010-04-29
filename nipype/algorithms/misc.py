@@ -25,7 +25,7 @@ class PickAtlasInputSpec(BaseInterfaceInputSpec):
     output_file = File(desc="Where to store the output mask.")
 
 class PickAtlasOutputSpec(TraitedSpec):
-    mask_file = File(exists=True)
+    mask_file = File(exists=True, desc="output mask file")
 
 class PickAtlas(NEW_BaseInterface):
     '''
