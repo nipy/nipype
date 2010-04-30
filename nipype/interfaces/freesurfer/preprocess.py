@@ -22,7 +22,8 @@ from nipype.interfaces.io import FreeSurferSource
 from nipype.interfaces.freesurfer import FSCommand
 
 from nipype.interfaces.freesurfer.base import FSCommandLine, NEW_FSCommand, FSTraitedSpec
-from nipype.interfaces.base import Bunch, TraitedSpec, File, traits, Directory
+from nipype.interfaces.base import (Bunch, TraitedSpec, File, traits,
+                                    Directory, InputMultiPath)
 from nipype.utils.misc import isdefined
 
 
@@ -388,14 +389,19 @@ class Dicom2Nifti(FSCommandLine):
                                                                  template))))
         return outputs
 
-class Resample(FSCommand):
+class ResampleInputSpec(FSTraitedSpec):
+    infile = File(exists=True, argstr='-i %s', mandatory=True,
+                  desc='file to resample')
+    outfile = File(argstr='-o %s', desc='output filename', genfile=True)
+    voxelsize = traits.List(argstr='-vs %s', desc='triplet of output voxel sizes',
+                     mandatory=True)
+        
+class ResampleOutputSpec(TraitedSpec):
+    outfile = File(exists=True,
+                   desc='output filename')
+    
+class Resample(NEW_FSCommand):
     """Use FreeSurfer mri_convert to up or down-sample image files
-
-    Parameters
-    ----------
-    To see optional arguments
-    Resample().inputs_help()
-
 
     Examples
     --------
@@ -408,60 +414,46 @@ class Resample(FSCommand):
     
    """
 
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'mri_convert'
+    _cmd = 'mri_convert'
+    input_spec = ResampleInputSpec
+    output_spec = ResampleOutputSpec
 
-    def inputs_help(self):
-        """Print command line documentation for bbregister."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    opt_map = {
-        'infile':         '-i %s',
-        'outfile':        '-o %s',
-        'voxel_size':     '-vs %.2f %.2f %.2f', 
-        'flags':           '%s'}
-    
-    def _parse_inputs(self):
-        """validate fs bbregister options"""
-        allargs = super(Resample, self)._parse_inputs()
-
-        # Add outfile to the args if not specified
-        if self.inputs.outfile is None:
-            allargs.extend(['-o', fname_presuffix(self.inputs.infile,
-                                                   suffix='_resample')])
-        return allargs
-    
-    def outputs(self):
-        """
-        outfile: filename
-            Smoothed input volume
-        """
-        return Bunch(outfile=None)
-
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        if self.inputs.outfile is None:
-            outfile = glob(fname_presuffix(self.inputs.infile,
-                                           suffix='_resample'))
-        if isinstance(self.inputs.outfile,str):
-            outfile = glob(self.inputs.outfile)
-        if not outfile:
-            raise FileNotFoundError(outfile)
-        outputs.outfile = outfile[0]
+    def _get_outfilename(self):
+        if isdefined(self.inputs.outfile):
+            outfile = self.inputs.outfile
+        else:
+            outfile = fname_presuffix(self.inputs.infile,
+                                      newpath = os.getcwd(),
+                                      suffix='_resample')
+        return outfile
+            
+        
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['outfile'] = self._get_outfilename()
         return outputs
+    
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._get_outfilename()
+        return None
 
-class ReconAll(FSCommand):
+class ReconAllInputSpec(FSTraitedSpec):
+    subject_id = traits.Str(argstr='-subjid %s', desc='subject name',
+                            mandatory=True)
+    directive = traits.Enum('all', 'autorecon1', 'autorecon2', 'autorecon2-cp',
+                            'autorecon2-wm', 'autorecon2-inflate1', 'autorecon2-perhemi',
+                            'autorecon3', argstr='-%s', desc='process directive',
+                            mandatory=True)
+    hemi = traits.Enum('lh', 'rh', desc='hemisphere to process')
+    T1file = InputMultiPath(argstr='--i %s...', desc='name of T1 file to process')
+    subjectsdir = Directory(exists=True, argstr='-sd %s',
+                             desc='path to subjects directory')
+    flags = traits.Str(argstr='%s', desc='additional parameters')
+
+class ReconAll(NEW_FSCommand):
     """Use FreeSurfer recon-all to generate surfaces and parcellations of
     structural data from an anatomical image of a subject.
-
-    Parameters
-    ----------
-
-    To see optional arguments
-    ReconAll().inputs_help()
-
 
     Examples
     --------
@@ -476,32 +468,16 @@ class ReconAll(FSCommand):
     
    """
 
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'recon-all'
+    _cmd = 'recon-all'
+    input_spec = ReconAllInputSpec
+    output_spec = FreeSurferSource.output_spec
 
-    def inputs_help(self):
-        """Print command line documentation for bbregister."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    opt_map = {
-        'subject_id':         '-subjid %s',
-        'all':                '--all',
-        'T1file':             '--i %s',
-        'hemi':               '-hemi %s',
-        'subjects_dir':       '-sd %s',
-        'flags':              '%s'}
-    
-    def outputs(self):
+    def _list_outputs(self):
         """
         See io.FreeSurferSource.outputs for the list of outputs returned
         """
-        return FreeSurferSource()._outputs().get()
-
-    def aggregate_outputs(self):
-        return FreeSurferSource(subject_id=self.inputs.subject_id,
-                                subjects_dir=self.inputs.subjects_dir).aggregate_outputs()
+        FreeSurferSource(subject_id=self.inputs.subject_id,
+                         subjects_dir=self.inputs.subjects_dir)._outputs().get()
 
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s', desc='freesurfer subject id',
