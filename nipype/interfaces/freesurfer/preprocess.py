@@ -483,11 +483,12 @@ class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s', desc='freesurfer subject id',
                             mandatory=True)
     sourcefile = File(argstr='--mov %s', desc='source file to be registered',
-                      mandatory=True)
-    init_reg = traits.Either(traits.Enum('spm', 'fsl', 'header'),
-                              File(exists=True),argstr = '',
-                       desc='initialize registration spm, fsl, header or existing File',
-                              mandatory=True,)
+                      mandatory=True, copyfile=False)
+    _reg_inputs = ('init', 'initreg')
+    init = traits.Enum('spm', 'fsl', 'header', argstr='--init-%s', xor=_reg_inputs,
+                       desc='initialize registration spm, fsl, header')
+    initreg = File(exists=True, desc='existing registration file', xor=_reg_inputs,
+                   mandatory=True)
     contrast_type = traits.Enum('t1', 't2', argstr='--%s',
                                 desc='contrast type of image', mandatory=True)
     outregfile = File(argstr='--reg %s', desc='output registration file',
@@ -540,11 +541,6 @@ class BBRegister(NEW_FSCommand):
             else:
                 fname = value
             return '--o %s' % fname
-        if name == 'init_reg':
-            if os.path.isfile(value):
-                return '--init-reg %s' % value
-            else:
-                return '--init-%s' % value
         return super(BBRegister, self)._format_arg(name, spec, value)
     
     def _gen_filename(self, name):
@@ -554,7 +550,7 @@ class BBRegister(NEW_FSCommand):
 
 class ApplyVolTransformInputSpec(FSTraitedSpec):
     sourcefile = File(exists = True, argstr = '--mov %s',
-                      copyfile=True, mandatory = True,
+                      copyfile=False, mandatory = True,
                       desc = 'Input volume you wish to transform')
     outfile = File(desc = 'Output volume', argstr='--o %s', genfile=True)
     _targ_xor = ('targetfile', 'tal', 'fstarg')
