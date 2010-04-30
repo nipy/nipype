@@ -13,6 +13,9 @@
 
 import sys, os
 
+nipypepath = os.path.abspath('..')
+sys.path.insert(1,nipypepath)
+
 import nipype
 
 # If extensions (or modules to document with autodoc) are in another directory,
