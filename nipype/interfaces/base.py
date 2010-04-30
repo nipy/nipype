@@ -1045,7 +1045,6 @@ class NEW_BaseInterface(NEW_Interface):
                 raise ValueError(msg)
         for name, spec in self.inputs.traits(mandatory=None,
                                              transient=None).items():
-            self._check_xor(spec, name, value)
             self._check_requires(spec, name, getattr(self.inputs, name))
 
     def _run_interface(self, runtime):
