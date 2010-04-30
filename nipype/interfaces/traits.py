@@ -189,28 +189,30 @@ class Directory ( BaseDirectory ):
         super( Directory, self ).__init__( value, auto_set, entries, exists,
                                            **metadata )
 
-#-------------------------------------------------------------------------------
-#  Singleton 'Undefined' object (used as undefined trait name and/or value):
-#-------------------------------------------------------------------------------
+"""
+The functions that pop-up the Traits GUIs, edit_traits and
+configure_traits, were failing because all of our inputs default to
+Undefined deep and down in traits/ui/wx/list_editor.py it checks for
+the len() of the elements of the list.  The _Undefined class in traits
+does not define the __len__ method and would error.  I tried defining
+our own Undefined and even sublassing Undefined, but both of those
+failed with a TraitError in our initializer when we assign the
+Undefined to the inputs because of an incompatible type:
 
-class _Undefined ( object ):
+TraitError: The 'vertical_gradient' trait of a BetInputSpec instance must be a float, but a value of <undefined> <class 'nipype.interfaces.traits._Undefined'> was specified.
 
-    def __repr__ ( self ):
-        return '<undefined>'
+So... in order to keep the same type but add the missing method, I
+monkey patched.
+"""
 
-    def __eq__( self, other ):
-        return type(self) is type(other)
+from enthought.traits.trait_base import _Undefined
 
-    def __ne__( self, other ):
-        return type(self) is not type(other)
+def length(self):
+    return 0
 
-    def __len__(self):
-        return 0
+##########################################################################
+# Apply monkeypatch here
+_Undefined.__len__ = length
+##########################################################################
 
-# Singleton object that indicates that a trait attribute has not yet had a
-# value set (i.e., its value is undefined). This object is used instead of
-# None, because None often has other meanings, such as that a value is not 
-# used. When a trait attribute is first assigned a value, and its associated
-# trait notification handlers are called, Undefined is passed as the *old* 
-# parameter, to indicate that the attribute previously had no value.
 Undefined = _Undefined()
