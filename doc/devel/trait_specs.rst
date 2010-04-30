@@ -281,6 +281,16 @@ first element.  So in this case, the default will be ``estwrite``::
     >>> rlgn.inputs.jobtype
     'estwrite'
 
+xor and requires
+^^^^^^^^^^^^^^^^
+
+Both of these accept a list of trait names. The xor metadata reflects
+mutually exclusive traits, while the requires metadata reflects traits
+that have to be set together. When a xor-ed trait is set, all other
+traits belonging to the list are set to Undefined. The function
+check_mandatory_inputs ensures that all requirements (both mandatory and
+via the requires metadata are satisfied). These are also reflected in
+the help function. 
 
 units
 ^^^^^
