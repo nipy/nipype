@@ -20,7 +20,12 @@ from nipype.utils.docparse import get_doc
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list,
                                     FileNotFoundError)
 from nipype.interfaces.freesurfer import FSCommand
-        
+
+from nipype.interfaces.freesurfer.base import NEW_FSCommand, FSTraitedSpec
+from nipype.interfaces.base import (Bunch, TraitedSpec, File, traits,
+                                    Directory, InputMultiPath)
+from nipype.utils.misc import isdefined
+
 class SurfConcat(FSCommand):
     """Use FreeSurfer mris_preproc to prepare a group of contrasts for
     a second level analysis
@@ -252,104 +257,70 @@ class Threshold(FSCommand):
         outputs.outfile = outfile
         return outputs
 
-class Concatenate(FSCommand):
-    """Use FreeSurfer mri_concat for ROI analysis
+class ConcatenateInputSpec(FSTraitedSpec):
+    invol = InputMultiPath(exists=True,
+                 desc = 'Individual volumes to be concatenated',
+                 argstr='--i %s...',mandatory=True)
+    outvol = File('concat_output.nii.gz', desc = 'Output volume', argstr='--o %s',
+                  usedefault=True)
+    sign = traits.Enum('abs','pos','neg', argstr='--%s',
+          desc = 'Take only pos or neg voxles from input, or take abs')
+    stats = traits.Enum('sum','var','std','max','min', 'mean', argstr='--%s',
+          desc = 'Compute the sum, var, std, max, min or mean of the input volumes')
+    pairedstats = traits.Enum('sum','avg','diff', 'diff-norm','diff-norm1',
+                              'diff-norm2', argstr='--paired-%s',
+                              desc = 'Compute paired sum, avg, or diff')
+    gmean = traits.Int(argstr='--gmean %d',
+                       desc = 'create matrix to average Ng groups, Nper=Ntot/Ng')
+    meandivn = traits.Bool(argstr='--mean-div-n',
+                           desc='compute mean/nframes (good for var)')
+    multiplyby = traits.Float(argstr='--mul %f',
+          desc = 'Multiply input volume by some amount')
+    addval = traits.Float(argstr='--add %f',
+                          desc = 'Add some amount to the input volume')
+    multiplymatrix = File(exists=True, argstr='--mtx %s',
+          desc = 'Multiply input by an ascii matrix in file')
+    combine = traits.Bool(argstr='--combine',
+          desc = 'Combine non-zero values into single frame volume')
+    keepdtype = traits.Bool(argstr='--keep-datatype',
+          desc = 'Keep voxelwise precision type (default is float')
+    maxbonfcor = traits.Bool(argstr='--max-bonfcor',
+          desc = 'Compute max and bonferroni correct (assumes -log10(ps))')
+    maxindex = traits.Bool(argstr='--max-index',
+          desc = 'Compute the index of max voxel in concatenated volumes')
+    mask = File(exists=True, argstr='--mask %s', desc = 'Mask input with a volume')
+    vote = traits.Bool(argstr='--vote',
+          desc = 'Most frequent value at each voxel and fraction of occurances')
+    sort = traits.Bool(argstr='--sort',
+          desc = 'Sort each voxel by ascending frame value')
 
-    Parameters
-    ----------
+class ConcatenateOutputSpec(TraitedSpec):
+    outvol = File(exists=True,
+                  desc='Path/name of the output volume')
 
-    To see optional arguments
-    Concatenate().inputs_help()
-
+class Concatenate(NEW_FSCommand):
+    """Use Freesurfer mri_concat to combine several input volumes
+    into one output volume.  Can concatenate by frames, or compute
+    a variety of statistics on the input volumes.
 
     Examples
     --------
-    >>> from nipype.interfaces.freesurfer import Concatenate
-    >>> concat = Concatenate(invol='foo.nii', mean=True, outvol='foo_out.nii')
-    >>> concat.cmdline
-    'mri_concat --mean --o foo_out.nii --i foo.nii'
-    
-   """
 
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'mri_concat'
+    Combine two input volumes into one volume with two frames
 
+    >>> concat = fs.Concatenate()
+    >>> concat.inputs.infile = ['foo.nii,goo.nii']
+    >>> concat.inputs.outfile 'bar.nii'
 
-    def inputs_help(self):
-        """Print command line documentation for mri_concat."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
+    """
 
-    opt_map = {'invol': '--i %s',
-               'outvol': '--o %s',
-               'paired_sum': '--paired-sum',
-               'paired_avg': '--paired-avg',
-               'paired_diff': '--paired-diff',
-               'paired_diff_norm': '--paired-diff-norm',
-               'paired_diff_norm1': '--paired-diff-norm1',
-               'paired_diff_norm2': '--paired-diff-norm2',
-               'matrix_multiply': '--mtx %s',
-               'gmean': '--gmean %f',
-               'combine': '--combine',
-               'keep_datatype': '--keep-datatype',
-               'abs': '--abs',
-               'keep_pos': '--pos',
-               'keep_neg': '--neg',
-               'mean': '--mean',
-               'mean_div_n': '--mean-div-n',
-               'sum': '--sum',
-               'var': '--var',
-               'std': '--std',
-               'max': '--max',
-               'max_index': '--max-index',
-               'min': '--min',
-               'vote': '--vote',
-               'sort': '--sort',
-               'max_and_bonf_correct' : '--max-bonfcor',
-               'mul': '--mul %f',
-               'add': '--add %f',
-               'mask': '--mask %s'}
-    
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='invol',copy=False)]
-        return info
+    _cmd = 'mri_concat'
+    input_spec = ConcatenateInputSpec
+    output_spec = ConcatenateOutputSpec
 
-    def _get_outfile(self):
-        outfile = self.inputs.outvol
-        if not outfile and self.inputs.invol:
-            outfile = fname_presuffix(self.inputs.invol,
-                                      suffix='_concat',
-                                      newpath=os.getcwd())
-        return outfile
-    
-    def _parse_inputs(self):
-        """validate fs mri_concat options"""
-        allargs = super(Concatenate, self)._parse_inputs(skip=('invol', 'outvol'))
-
-        # Add invol and outvol to the args if they are specified
-        for f in filename_to_list(self.inputs.invol):
-            allargs.extend(['--i', f])
-        allargs.extend(['--o',self._get_outfile()])
-        return allargs
-    
-    def outputs(self):
-        """
-        outfile: filename
-              output file
-        """
-        outputs = Bunch(outfile=None)
-        return outputs
-
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outfile = self._get_outfile()
-        if not glob(outfile):
-            raise FileNotFoundError(outfile)
-        outputs.outfile = outfile
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['outvol'] = self.inputs.outvol
         return outputs
 
 class SegStats(FSCommand):
