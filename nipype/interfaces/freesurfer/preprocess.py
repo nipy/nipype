@@ -21,9 +21,372 @@ from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
 from nipype.interfaces.io import FreeSurferSource
 from nipype.interfaces.freesurfer import FSCommand
 
-from nipype.interfaces.freesurfer.base import NEW_FSCommand, FSTraitedSpec
-from nipype.interfaces.base import Bunch, TraitedSpec, File, traits
+from nipype.interfaces.freesurfer.base import FSCommandLine, NEW_FSCommand, FSTraitedSpec
+from nipype.interfaces.base import Bunch, TraitedSpec, File, traits, Directory
 from nipype.utils.misc import isdefined
+
+
+class ParseDicomDirInputSpec(FSTraitedSpec):
+    dicomdir = Directory(exists=True, argstr='--d %s', mandatory=True,
+                         desc='path to siemens dicom directory')
+    outfile = File('dicominfo.txt', argstr='--o %s', usedefault=True,
+                   desc='write results to outfile')
+    sortbyrun = traits.Bool(argstr='--sortbyrun', desc='assign run numbers')
+    summarize = traits.Bool(argstr='--summarize',
+                            desc='only print out info for run leaders')
+
+class ParseDicomDirOutputSpec(TraitedSpec):
+    outfile = File(exists=True,
+                   desc='text file containing dicom information')
+
+class ParseDicomDir(NEW_FSCommand):
+    """uses mri_parse_sdcmdir to get information from dicom directories
+    
+    Examples
+    --------
+
+    >>> from nipype.interfaces.freesurfer import ParseDicomDir
+    >>> import os
+    >>> dcminfo = ParseDicomDir()
+    >>> dcminfo.inputs.dicomdir = '.'
+    >>> dcminfo.inputs.sortbyrun = True
+    >>> dcminfo.inputs.summarize = True
+    >>> dcminfo.cmdline
+    'mri_parse_sdcmdir --d . --o dicominfo.txt --sortbyrun --summarize'
+    
+   """
+
+    _cmd = 'mri_parse_sdcmdir'
+    input_spec = ParseDicomDirInputSpec
+    output_spec = ParseDicomDirOutputSpec
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.outfile):
+            outputs['outfile'] = self.inputs.outfile
+        return outputs
+
+class DicomConvert(FSCommandLine):
+    """use fs mri_convert to convert dicom files
+
+    Parameters
+    ----------
+
+    To see optional arguments
+    DicomConvert().inputs_help()
+
+
+    Examples
+    --------
+    >>> from nipype.interfaces import freesurfer
+    >>> cvt = freesurfer.DicomConvert()
+    >>> cvt.inputs.dicomdir = '/incoming/TrioTim-35115-2009-1900-123456/'
+    >>> cvt.inputs.file_mapping = [('nifti','*.nii'),('info','dicom*.txt'),('dti','*dti.bv*')]
+
+   """
+    @property
+    def cmd(self):
+        """sets base command, not editable"""
+        return 'mri_convert'
+
+
+    def inputs_help(self):
+        """
+        Parameters
+        ----------
+        
+        (all default to None and are unset)
+        
+        dicomdir : /path/to/dicomfiles
+            directory from which to convert dicom files
+        base_output_dir : /path/to/outputdir
+            base output directory in which subject specific
+            directories are created to store the nifti files
+        subject_dir_template : string
+            template for subject directory name
+            Default:'S.%04d'
+        subject_id : string or int
+            subject identifier to insert into template. For the
+            example above template subject_identifier should be an
+            integer. Default: id from Dicom file name 
+        file_mapping : list of tuples
+            defines the output fields of interface and the kind of
+            file type they store
+            Example:  [('niftifiles','*.nii'),('dtiinfo','*mghdti.bv*')]
+        out_type : string
+            defines the type of output file produced.
+            possible options nii, nii.gz, mgz (default: nii)
+        dicominfo : file
+            File containing summary information from mri_parse_sdcmdir
+        seq_list : list of strings
+            list of pulse sequence names to be converted.
+        ignore_single_slice : boolean
+            ignores volumes containing a single slice. dicominfo needs to be
+            available. 
+        flags = unsupported flags, use at your own risk
+
+        """
+        print self.inputs_help.__doc__
+
+    def _populate_inputs(self):
+        self.inputs = Bunch(dicomdir=None,
+                            base_output_dir=None,
+                            subject_dir_template=None,
+                            subject_id=None,
+                            file_mapping=None,
+                            out_type='nii',
+                            dicominfo=None,
+                            seq_list=None,
+                            ignore_single_slice=None,
+                            flags=None)
+
+    def _parseinputs(self):
+        """validate fsl bet options
+        if set to None ignore
+        """
+        out_inputs = {'dicomfiles':None}
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.items() if v]
+        for opt in inputs:
+            if opt == 'dicomdir':
+                out_inputs['dicomfiles'] = glob(os.path.abspath(os.path.join(inputs[opt],'*-1.dcm')))
+                continue
+            if opt in ['base_output_dir', 'subject_dir_template', 'subject_id', \
+                           'file_mapping', 'out_type', 'dicominfo', 'seq_list', \
+                           'ignore_single_slice', 'flags']:
+                continue
+            print 'option %s not supported'%(opt)
+        
+        return out_inputs
+
+    def _get_outdir(self):
+        """returns output directory"""
+        valid_inputs = self._parseinputs()
+        subjid = self.inputs.subject_id
+        if not subjid:
+            path,fname = os.path.split(valid_inputs['dicomfiles'][0])
+            subjid = fname.split('-')[0]
+        if self.inputs.subject_dir_template:
+            subjid  = self.inputs.subject_dir_template % subjid
+        basedir=self.inputs.base_output_dir
+        if not basedir:
+            basedir = os.path.abspath('.')
+        outdir = os.path.abspath(os.path.join(basedir,subjid))
+        return outdir
+
+    def _get_runs(self):
+        """Returns list of dicom series that should be converted.
+
+        Requires a dicom info summary file generated by ``DicomDirInfo``
+
+        """
+        seq = np.genfromtxt(self.inputs.dicominfo,dtype=object)
+        runs = []
+        for s in seq:
+            if self.inputs.seq_list:
+                if self.inputs.ignore_single_slice:
+                    if (int(s[8]) > 1) and any([s[12].startswith(sn) for sn in self.inputs.seq_list]):
+                        runs.append(int(s[2]))
+                else:
+                    if any([s[12].startswith(sn) for sn in self.inputs.seq_list]):
+                        runs.append(int(s[2]))
+            else:
+                runs.append(int(s[2]))
+        return runs
+
+    def _get_filelist(self, outdir):
+        """Returns list of files to be converted"""
+        valid_inputs = self._parseinputs()
+        filemap = {}
+        for f in valid_inputs['dicomfiles']:
+            head,fname = os.path.split(f)
+            fname,ext = os.path.splitext(fname)
+            fileparts = fname.split('-')
+            runno = int(fileparts[1])
+            outfile = os.path.join(outdir,'.'.join(('%s-%02d'% (fileparts[0],
+                                                                runno),
+                                                    self.inputs.out_type)))
+            filemap[runno] = (f,outfile)
+        if self.inputs.dicominfo:
+            files = [filemap[r] for r in self._get_runs()]
+        else:
+            files = [filemap[r] for r in filemap.keys()]
+        return files
+
+    def _compile_command(self):
+        """validates fsl options and generates command line argument"""
+        outdir = self._get_outdir()
+        cmd = []
+        if not os.path.exists(outdir):
+            cmdstr = 'python -c "import os; os.makedirs(\'%s\')"' % outdir
+            cmd.extend([cmdstr])
+        infofile = os.path.join(outdir, 'shortinfo.txt')
+        if not os.path.exists(infofile):
+            cmdstr = 'dcmdir-info-mgh %s > %s' % (self.inputs.dicomdir,
+                                                  infofile)
+            cmd.extend([cmdstr])
+        files = self._get_filelist(outdir)
+        for infile,outfile in files:
+            if not os.path.exists(outfile):
+                single_cmd = '%s %s %s' % (self.cmd, infile,
+                                           os.path.join(outdir, outfile))
+                cmd.extend([single_cmd])
+        self._cmdline =  '; '.join(cmd)
+        return self._cmdline
+
+    def outputs(self):
+        return Bunch()
+
+    def aggregate_outputs(self):
+        outdir = self._get_outdir()
+        outputs = self.outputs()
+        if self.inputs.file_mapping:
+            for field,template in self.inputs.file_mapping:
+                setattr(outputs, field, sorted(glob(os.path.join(outdir,
+                                                                 template))))
+        return outputs
+
+class Dicom2Nifti(FSCommandLine):
+    """use fs mri_convert to convert dicom files to nifti-1 files
+
+    Parameters
+    ----------
+
+    To see optional arguments
+    Dicom2Nifti().inputs_help()
+
+
+    Examples
+    --------
+    >>> from nipype.interfaces import freesurfer
+    >>> cvt = freesurfer.Dicom2Nifti()
+    >>> cvt.inputs.dicomdir = '/software/data/STUT/RAWDATA/TrioTim-35115-20090428-081900-234000/'
+    >>> cvt.inputs.file_mapping = [('nifti','*.nii'),('info','dicom*.txt'),('dti','*dti.bv*')]
+    >>> #out = cvt.run() # commented out as above directories are not installed
+
+   """
+
+    @property
+    def cmd(self):
+        """sets base command, not editable"""
+        return 'mri_convert'
+
+
+    def inputs_help(self):
+        """
+        Parameters
+        ----------
+        
+        (all default to None and are unset)
+        
+        dicomdir : /path/to/dicomfiles
+            directory from which to convert dicom files
+        base_output_dir : /path/to/outputdir
+            base output directory in which subject specific
+            directories are created to store the nifti files
+        subject_dir_template : string
+            template for subject directory name
+            Default:'S.%04d'
+        subject_id : string or int
+            subject identifier to insert into template. For the
+            example above template subject_identifier should be an
+            integer. Default: id from Dicom file name 
+        file_mapping : list of tuples
+            defines the output fields of interface and the kind of
+            file type they store
+            Example:  [('niftifiles','*.nii'),('dtiinfo','*mghdti.bv*')]
+        out_type : string
+            defines the type of output file produced.
+            possible options nii, nii.gz, mgz (default: nii)
+        flags = unsupported flags, use at your own risk
+
+        """
+        print self.inputs_help.__doc__
+
+    def _populate_inputs(self):
+        self.inputs = Bunch(dicomdir=None,
+                            base_output_dir=None,
+                            subject_dir_template=None,
+                            subject_id=None,
+                            file_mapping=None,
+                            out_type='nii',
+                            flags=None)
+
+    def _parseinputs(self):
+        """validate fsl bet options
+        if set to None ignore
+        """
+        out_inputs = {'dicomfiles':None}
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.items() if v is not None ]
+        for opt in inputs:
+            if opt == 'dicomdir':
+                out_inputs['dicomfiles'] = glob(os.path.abspath(os.path.join(inputs[opt],'*-1.dcm')))
+                continue
+            if opt == 'base_output_dir':
+                continue
+            if opt == 'subject_dir_template':
+                continue
+            if opt == 'subject_id':
+                continue
+            if opt == 'file_mapping':
+                continue
+            if opt == 'out_type':
+                continue
+            if opt == 'flags':
+                continue
+            print 'option %s not supported'%(opt)
+        
+        return out_inputs
+
+    def _get_outdir(self):
+        """returns output directory"""
+        valid_inputs = self._parseinputs()
+        subjid = self.inputs.subject_id
+        if not subjid:
+            path,fname = os.path.split(valid_inputs['dicomfiles'][0])
+            subjid = fname.split('-')[0]
+        if self.inputs.subject_dir_template:
+            subjid  = self.inputs.subject_dir_template % subjid
+        basedir=self.inputs.base_output_dir
+        if not basedir:
+            basedir = os.path.abspath('.')
+        outdir = os.path.abspath(os.path.join(basedir,subjid))
+        return outdir
+    
+    def _compile_command(self):
+        """validates fsl options and generates command line argument"""
+        valid_inputs = self._parseinputs()
+        outdir = self._get_outdir()
+        cmd = []
+        if not os.path.exists(outdir):
+            cmdstr = 'python -c "import os; os.makedirs(\'%s\')";' % outdir
+            cmd.extend([cmdstr])
+        dicominfotxt = os.path.join(outdir,'dicominfo.txt')
+        if not os.path.exists(dicominfotxt):
+            cmdstr = 'dcmdir-info-mgh %s > %s;' % (self.inputs.dicomdir, dicominfotxt)
+            cmd.extend([cmdstr])
+        for f in valid_inputs['dicomfiles']:
+            head,fname = os.path.split(f)
+            fname,ext  = os.path.splitext(fname)
+            outfile = os.path.join(outdir,'.'.join((fname,self.inputs.out_type)))
+            if not os.path.exists(outfile):
+                single_cmd = '%s %s %s;' % (self.cmd, f, outfile)
+                cmd.extend([single_cmd])
+        self._cmdline =  ' '.join(cmd)
+        return self._cmdline
+
+    def outputs(self):
+        return Bunch()
+
+    def aggregate_outputs(self):
+        outdir = self._get_outdir()
+        outputs = self.outputs()
+        if self.inputs.file_mapping:
+            for field,template in self.inputs.file_mapping:
+                setattr(outputs, field, sorted(glob(os.path.join(outdir,
+                                                                 template))))
+        return outputs
 
 class Resample(FSCommand):
     """Use FreeSurfer mri_convert to up or down-sample image files
@@ -168,13 +531,6 @@ class BBRegister(NEW_FSCommand):
     boundary-based cost function. The registration is constrained to be 6
     DOF (rigid). It is required that you have an anatomical scan of the
     subject that has been analyzed in freesurfer.
-
-    Parameters
-    ----------
-
-    To see optional arguments
-    BBRegister().inputs_help()
-
 
     Examples
     --------
