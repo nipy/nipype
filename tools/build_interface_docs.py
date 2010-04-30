@@ -18,7 +18,7 @@ if __name__ == '__main__':
     docwriter.package_skip_patterns += ['\.externals$',
                                         '\.utils$',
                                         '\.pipeline',
-                                        '.\testing',
+                                        '\.testing',
                                         ]
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += ['\.version$',
