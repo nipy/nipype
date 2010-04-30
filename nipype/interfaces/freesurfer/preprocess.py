@@ -650,7 +650,7 @@ class SmoothInputSpec(FSTraitedSpec):
                               argstr='--projfrac-avg %s')
     projfrac = traits.Float(desc='project frac of thickness a long surface normal',
                           argstr='--projfrac %s')
-    surface_fwhm = traits.Float(min=0,desc='surface FWHM in mm',argstr='--fwhm %d')
+    surface_fwhm = traits.Float(min=0, desc='surface FWHM in mm', argstr='--fwhm %d')
     vol_fwhm = traits.Float(min=0, argstr= '--vol-fwhm %d',
                             desc='volumesmoothing outside of surface')
     flags = traits.Str(desc='maps additional commands', argstr='%s')
@@ -663,13 +663,6 @@ class Smooth(NEW_FSCommand):
 
     This function smoothes cortical regions on a surface and
     non-cortical regions in volume.
-
-    Parameters
-    ----------
-
-    To see optional arguments
-    Smooth().inputs_help()
-
 
     Examples
     --------
