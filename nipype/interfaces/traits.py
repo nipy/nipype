@@ -1,6 +1,16 @@
-""" Redefine enthought traits to support installations without TraitsUI
+"""This module contains Trait classes that we've pulled from the
+traits source and fixed due to various bugs.  File and Directory are
+redefined as the release version had dependencies on TraitsUI, which
+we do not want Nipype to depend on.  At least not yet.
 
-    This bug has been fixed in enthought svn
+Undefined class was missing the __len__ operator, causing edit_traits
+and configure_traits to fail on List objects.  Even though we don't
+require TraitsUI, this bug was the only thing preventing us from
+popping up GUIs which users like.
+
+These bugs have been in Traits v3.3.0 and v3.2.1.  We have reported
+all of these bugs and they've been fixed in enthought svn repository
+(usually by Robert Kern).
 
 """
 
@@ -178,3 +188,29 @@ class Directory ( BaseDirectory ):
 
         super( Directory, self ).__init__( value, auto_set, entries, exists,
                                            **metadata )
+
+#-------------------------------------------------------------------------------
+#  Singleton 'Undefined' object (used as undefined trait name and/or value):
+#-------------------------------------------------------------------------------
+
+class _Undefined ( object ):
+
+    def __repr__ ( self ):
+        return '<undefined>'
+
+    def __eq__( self, other ):
+        return type(self) is type(other)
+
+    def __ne__( self, other ):
+        return type(self) is not type(other)
+
+    def __len__(self):
+        return 0
+
+# Singleton object that indicates that a trait attribute has not yet had a
+# value set (i.e., its value is undefined). This object is used instead of
+# None, because None often has other meanings, such as that a value is not 
+# used. When a trait attribute is first assigned a value, and its associated
+# trait notification handlers are called, Undefined is passed as the *old* 
+# parameter, to indicate that the attribute previously had no value.
+Undefined = _Undefined()
