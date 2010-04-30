@@ -552,81 +552,91 @@ class BBRegister(NEW_FSCommand):
             return self._list_outputs()[name]
         return None    
 
-class ApplyVolTransform(FSCommand):
-    """Use FreeSurfer mri_vol2vol to apply a transform.
+class ApplyVolTransformInputSpec(FSTraitedSpec):
+    sourcefile = File(exists = True, argstr = '--mov %s',
+                      copyfile=True, mandatory = True,
+                      desc = 'Input volume you wish to transform')
+    outfile = File(desc = 'Output volume', argstr='--o %s', genfile=True)
+    _targ_xor = ('targetfile', 'tal', 'fstarg')
+    targetfile = File(exists = True, argstr = '--targ %s', xor=_targ_xor,
+                      desc = 'Output template volume', mandatory=True)
+    tal = traits.Bool(argstr='--tal', xor=_targ_xor, mandatory=True,
+                      desc='map to a sub FOV of MNI305 (with --reg only)')
+    _fstarg_requires = ('fstarg', 'regfile')
+    fstarg = traits.Bool(argstr='--fstarg',xor=_targ_xor, mandatory=True,
+                         requires=_fstarg_requires,
+                         desc='use orig.mgz from subject in regfile as target')
+    _reg_xor = ('regfile', 'fslregfile', 'xfmregfile', 'regheader', 'subject')
+    regfile = File(exists=True, xor=_reg_xor, argstr='--reg %s',
+                   requires=_fstarg_requires,  mandatory=True,
+                   desc= 'tkRAS-to-tkRAS matrix   (tkregister2 format)')
+    fslregfile = File(exists=True, xor=_reg_xor, argstr='--fsl %s',
+                   mandatory=True,
+                   desc= 'fslRAS-to-fslRAS matrix (FSL format)')
+    xfmregfile = File(exists=True, xor=_reg_xor, argstr='--xfm %s',
+                   mandatory=True,
+                   desc= 'ScannerRAS-to-ScannerRAS matrix (MNI format)')
+    regheader = traits.Bool(xor=_reg_xor, argstr='--regheader',
+                   mandatory=True,
+                   desc= 'ScannerRAS-to-ScannerRAS matrix = identity')
+    subject = traits.Str(xor=_reg_xor, argstr='--s %s',
+                   mandatory=True,
+                   desc= 'set matrix = identity and use subject for any templates')
+    inverse = traits.Bool(desc = 'sample from target to source',
+                          argstr = '--inv')
+    interp = traits.Enum('trilin', 'nearest', argstr = '--interp %s',
+                         desc = 'Interpolation method (<trilin> or nearest)')
+    noresample = traits.Bool(desc = 'Do not resample; just change vox2ras matrix',
+                             argstr = '--no-resample')
+    flags = traits.Str(desc = 'any additional args',
+                       argstr = '%s')
 
-    Parameters
-    ----------
-    To see optional arguments
-    ApplyVolTransform().inputs_help()
+class ApplyVolTransformOutputSpec(TraitedSpec):
+    outfile = File(exists=True, desc = 'Path to output file if used normally')
+
+class ApplyVolTransform(NEW_FSCommand):
+    """Use FreeSurfer mri_vol2vol to apply a transform.
 
     Examples
     --------
     >>> from nipype.interfaces.freesurfer import ApplyVolTransform
-    >>> applyreg = ApplyVolTransform(tkreg='me.dat', sourcefile='foo.nii', fstarg=True)
+    >>> applyreg = ApplyVolTransform()
+    >>> applyreg.inputs.sourcefile = 'struct.nii'
+    >>> applyreg.inputs.regfile = 'register.dat'
+    >>> applyreg.inputs.fstarg = True
     >>> applyreg.cmdline
-    'mri_vol2vol --fstarg --mov foo.nii --reg me.dat --o foo_warped.nii'
+    'mri_vol2vol --fstarg --o struct_warped.nii --reg register.dat --mov struct.nii'
 
     """
 
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'mri_vol2vol'
-
-    def inputs_help(self):
-        """Print command line documentation for mri_vol2vol."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    opt_map = {
-        'sourcefile':         '--mov %s',
-        'targfile':           '--targ %s',
-        'outfile':            '--o %s',
-        'fstarg':             '--fstarg',
-        'tkreg':              '--reg %s',
-        'fslreg':             '--fsl %s',
-        'xfmreg':             '--xfm %s',
-        'interp':             '--interp %s',
-        'noresample':         '--no-resample',
-        'inverse':            '--inv', 
-        'flags':              '%s'}
-    
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='sourcefile', copy=False)]
-        return info
+    _cmd = 'mri_vol2vol'
+    input_spec = ApplyVolTransformInputSpec
+    output_spec = ApplyVolTransformOutputSpec
 
     def _get_outfile(self):
         outfile = self.inputs.outfile
-        if not outfile:
-            outfile = fname_presuffix(self.inputs.sourcefile,
+        if not isdefined(outfile):
+            if self.inputs.inverse == True:
+                if self.inputs.fstarg == True:
+                    src = 'orig.mgz'
+                else:
+                    src = self.inputs.target
+            else:
+                src = self.inputs.sourcefile
+            outfile = fname_presuffix(src,
+                                      newpath=os.getcwd(),
                                       suffix='_warped')
         return outfile
-    
-    def _parse_inputs(self):
-        """validate fs bbregister options"""
-        allargs = super(ApplyVolTransform, self)._parse_inputs(skip=('outfile'))
-        outfile = self._get_outfile()
-        if outfile:
-            allargs.extend(['--o', outfile])
-        return allargs
-    
-    def outputs(self):
-        """
-        outfile: filename
-            Warped source file
-        """
-        return Bunch(outfile=None)
 
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outfile = self._get_outfile()
-        if not glob(outfile):
-            raise FileNotFoundError(outfile)
-        outputs.outfile = outfile
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['outfile'] = self._get_outfile()
         return outputs
+    
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._get_outfile()
+        return None    
 
 class SmoothInputSpec(FSTraitedSpec):
     sourcefile= File(exists=True, desc='source volume',
