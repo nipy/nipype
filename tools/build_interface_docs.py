@@ -39,6 +39,10 @@ if __name__ == '__main__':
                                       'Spec$',
                                       'afni',
                                       'Numpy'
+                                      # NipypeTester raises an
+                                      # exception when instantiated in
+                                      # InterfaceHelpWriter.generate_api_doc
+                                      'NipypeTester',
                                       ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'gen', relative_to='interfaces')
