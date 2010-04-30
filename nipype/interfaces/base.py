@@ -694,30 +694,46 @@ class BaseTraitedSpec(traits.HasTraits):
     def _generate_handlers(self):
         # Find all traits with the 'xor' metadata and attach an event
         # handler to them.
-        def has_xor(item):
-            if is_container(item):
-                return item
-        xors = self.trait_names(xor=has_xor)
+        has_xor = dict(xor = lambda t : t is not None)
+        xors = self.trait_names(**has_xor)
         for elem in xors:
             self.on_trait_change(self._xor_warn, elem)
+        has_requires = dict(requires = lambda t : t is not None)
+        requires = self.trait_names(**has_requires)
+        for elem in requires:
+            self.on_trait_change(self._requires_warn, elem)
 
     def _xor_warn(self, obj, name, old, new):
-        trait_spec = self.traits()[name]
-        if new:
+        if isdefined(new):
+            trait_spec = self.traits()[name]
+            msg = None
             # for each xor, set to default_value
+            undefined_traits = {}
             for trait_name in trait_spec.xor:
                 if trait_name == name:
                     # skip ourself
                     continue
-                value = getattr(self, trait_name)
-                if value == new:
-                    tspec = self.traits()[trait_name]
-                    setattr(self, trait_name, Undefined)
-                    msg = 'Input %s is mutually exclusive with inputs:  %s' \
-                        % (name, ', '.join(trait_spec.xor))
-                    msg += '\nResetting %s to %s' % (trait_name,
-                                                     Undefined)
-                    warn(msg)
+                if isdefined(getattr(self, trait_name)):
+                    undefined_traits[trait_name] = Undefined
+                    if not msg:
+                        msg = 'Input %s is mutually exclusive with inputs: %s' \
+                            % (name, ', '.join(trait_spec.xor))
+                    msg += '\nResetting %s to %s' % (trait_name, Undefined)
+            if msg:
+                warn(msg)
+            self.trait_set(trait_change_notify=False, **undefined_traits)
+
+    def _requires_warn(self, obj, name, old, new):
+        if new:
+            trait_spec = self.traits()[name]
+            msg = None
+            for trait_name in trait_spec.requires:
+                if not isdefined(getattr(self, trait_name)):
+                    if not msg:
+                        msg = 'Input %s requires inputs: %s' \
+                            % (name, ', '.join(trait_spec.requires))
+            if msg:
+                warn(msg)
 
     def _hash_infile(self, adict, key):
         # Inject file hashes into adict[key]
@@ -921,19 +937,36 @@ class NEW_BaseInterface(NEW_Interface):
             helpstr += ['None']
             print '\n'.join(helpstr)
             return
+        xor_done = []
         for name, spec in sorted(cls.input_spec().traits(mandatory=True).items()):
             desc = spec.desc
+            xor = spec.xor
+            requires = spec.requires
             if not manhelpstr:
                 manhelpstr = ['','Mandatory:']
             manhelpstr += [' %s: %s' % (name, desc)]
+            if xor: # and name not in xor_done:
+                xor_done.extend(xor)
+                manhelpstr += ['  mutually exclusive: %s' % ', '.join(xor)]
+            if requires: # and name not in xor_done:
+                others = [field for field in requires if field != name]
+                manhelpstr += ['  requires: %s' % ', '.join(others)]
         for name, spec in sorted(cls.input_spec().traits(mandatory=None,
                                                          transient=None).items()):
             desc = spec.desc
+            xor = spec.xor
+            requires = spec.requires
             if not opthelpstr:
                 opthelpstr = ['','Optional:']
             opthelpstr += [' %s: %s' % (name, desc)]
             if spec.usedefault:
                 opthelpstr[-1] += ' (default=%s)' % spec.default
+            if xor: # and name not in xor_done:
+                xor_done.extend(xor)
+                opthelpstr += ['  mutually exclusive: %s' % ', '.join(xor)]
+            if requires: # and name not in xor_done:
+                others = [field for field in requires if field != name]
+                opthelpstr += ['  requires: %s' % ', '.join(others)]
         if manhelpstr:
             helpstr += manhelpstr
         if opthelpstr:
@@ -973,16 +1006,47 @@ class NEW_BaseInterface(NEW_Interface):
             info.append(dict(key=name,
                              copy=spec.copyfile))
         return info
+
+    def _check_requires(self, spec, name, value):
+        """ check if required inputs are satisfied
+        """
+        if spec.requires:
+            values = [isdefined(getattr(self.inputs, field)) for field in spec.requires]
+            if any(values) and not isdefined(value):
+                msg = "%s requires a value for input '%s' because one of %s is set. " \
+                    "For a list of required inputs, see %s.help()" % \
+                    (self.__class__.__name__, name,
+                     ', '.join(spec.requires), self.__class__.__name__)
+                raise ValueError(msg)
+            
+    def _check_xor(self, spec, name, value):
+        """ check if mutually exclusive inputs are satisfied
+        """
+        if spec.xor:
+            values = [isdefined(getattr(self.inputs, field)) for field in spec.xor]
+            if not any(values) and not isdefined(value):
+                msg = "%s requires a value for one of the inputs '%s'. " \
+                    "For a list of required inputs, see %s.help()" % \
+                    (self.__class__.__name__, ', '.join(spec.xor),
+                     self.__class__.__name__)
+                raise ValueError(msg)
     
     def _check_mandatory_inputs(self):
         """ Raises an exception if a mandatory input is Undefined
         """
-        for name, value in self.inputs.trait_get(mandatory=True).items():
-            if not isdefined(value):
+        for name, spec in self.inputs.traits(mandatory=True).items():
+            value = getattr(self.inputs, name)
+            self._check_xor(spec, name, value)
+            self._check_requires(spec, name, value)
+            if not isdefined(value) and spec.xor is None:
                 msg = "%s requires a value for input '%s'. " \
                     "For a list of required inputs, see %s.help()" % \
                     (self.__class__.__name__, name, self.__class__.__name__)
                 raise ValueError(msg)
+        for name, spec in self.inputs.traits(mandatory=None,
+                                             transient=None).items():
+            self._check_xor(spec, name, value)
+            self._check_requires(spec, name, getattr(self.inputs, name))
 
     def _run_interface(self, runtime):
         """ Core function that executes interface
