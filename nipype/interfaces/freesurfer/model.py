@@ -323,128 +323,131 @@ class Concatenate(NEW_FSCommand):
         outputs['outvol'] = self.inputs.outvol
         return outputs
 
-class SegStats(FSCommand):
+class SegStatsInputSpec(FSTraitedSpec):
+    _xor_inputs = ('segvol', 'annot', 'surflabel')
+    segvol = File(exists=True, argstr='--seg %s', xor=_xor_inputs,
+                  mandatory=True, desc='segmentation volume path')
+    annot = traits.Tuple(traits.Str,traits.Enum('lh','rh'),traits.Str,
+                         argstr='--annot %s %s %s', xor=_xor_inputs,
+                         mandatory=True,
+                         desc='subject hemi parc : use surface parcellation')
+    surflabel = traits.Tuple(traits.Str,traits.Enum('lh','rh'),traits.Str,
+                             argstr='--slabel %s %s %s', xor=_xor_inputs,
+                             mandatory=True,
+                             desc='subject hemi label : use surface label')
+    sumfile = File(argstr='--sum %s', genfile=True,
+                   desc='Segmentation stats summary table file')
+    parvol = File(exists=True, argstr='--pv %f',
+                  desc='Compensate for partial voluming')
+    invol = File(exists=True, argstr='--i %s',
+                 desc='Use the segmentation to report stats on this volume')
+    frame = traits.Int(argstr='--frame %d',
+                       desc='Report stats on nth frame of input volume')
+    multiply = traits.Float(argstr='--mul %f', desc='multiply input by val')
+    calcsnr = traits.Bool(argstr='--snr', desc='save mean/std as extra column in output table')
+    calcpower = traits.Enum('sqr','sqrt',argstr='--%s',
+                          desc='Compute either the sqr or the sqrt of the input')
+    _ctab_inputs = ('ctab', 'ctabdefault', 'ctabgca')
+    ctab = File(exists=True, argstr='--ctab %s', xor=_ctab_inputs,
+                desc='color table file with seg id names')
+    ctabdefault = traits.Bool(argstr='--ctab-default', xor=_ctab_inputs,
+                desc='use $FREESURFER_HOME/FreeSurferColorLUT.txt')
+    ctabgca = File(exists=True, argstr='--ctab-gca %s', xor=_ctab_inputs,
+                desc='get color table from GCA (CMA)')
+    segid = traits.List(argstr='--id %d...',desc='Manually specify segmentation ids')
+    excludeid = traits.Int(argstr='--excludeid %d',desc='Exclude seg id from report')
+    excludectxgmwm = traits.Bool(argstr='--excl-ctxgmwm',
+                                 desc='exclude cortical gray and white matter')
+    surfwm = traits.Bool(argstr='--surf-wm-vol',desc='Compute wm volume from surf')
+    surfctx = traits.Bool(argstr='--surf-ctx-vol',desc='Compute cortex volume from surf')
+    nonempty = traits.Bool(argstr='--nonempty',desc='Only report nonempty segmentations')
+    maskvol = File(exists=True, argstr='--mask %s',
+                   desc='Mask volume (same size as seg')
+    maskthresh = traits.Float(argstr='--maskthresh %f',
+                              desc='binarize mask with this threshold <0.5>')
+    masksign = traits.Enum('abs','pos','neg','--masksign %s',
+                           desc='Sign for mask threshold: pos, neg, or abs')
+    maskframe = traits.Int('--maskframe %d',
+                           desc='Mask with this (0 based) frame of the mask volume')
+    maskinvert = traits.Bool(argstr='--maskinvert', desc='Invert binarized mask volume')
+    maskerode = traits.Int(argstr='--maskerode %d', desc='Erode mask by some amount')
+    brainvol = traits.Enum('brain-vol-from-seg','brainmask','--%s',
+         desc='Compute brain volume either with ``brainmask`` or ``brain-vol-from-seg``')
+    etiv = traits.Bool(argstr='--etiv',desc='Compute ICV from talairach transform')
+    etivonly = traits.Enum('etiv','old-etiv','--%s-only',
+                           desc='Compute etiv and exit.  Use ``etiv`` or ``old-etiv``')
+    avgwftxt = traits.Either(traits.Bool, File, argstr='--avgwf %s',
+                             desc='Save average waveform into file (bool or filename)')
+    avgwfvol = traits.Either(traits.Bool, File, argstr='--avgwfvol %s',
+                             desc='Save as binary volume (bool or filename)')
+    sfavg = traits.Either(traits.Bool, File, argstr='--sfavg %s',
+                          desc='Save mean across space and time')
+    vox = traits.List(traits.Int, argstr='--vox %s',
+                     desc='Replace seg with all 0s except at C R S (three int inputs)')
+
+class SegStatsOutputSpec(TraitedSpec):
+    sumfile = File(exists=True,desc='Segmentation summary statistics table')
+    avgwftxt = File(desc='Text file with functional statistics averaged over segs')
+    avgwfvol = File(desc='Volume with functional statistics averaged over segs')
+    sfavg = File(desc='Text file with func statistics averaged over segs and framss')
+
+
+class SegStats(NEW_FSCommand):
     """Use FreeSurfer mri_segstats for ROI analysis
-
-    Parameters
-    ----------
-
-    To see optional arguments
-    SegStats().inputs_help()
-
 
     Examples
     --------
-    >>> from nipype.interfaces.freesurfer import SegStats
-    >>> segstat = SegStats(segvol='seg.nii', invol='foo.nii', segid=18, sumfile='foo_sum.txt')
-    >>> segstat.cmdline
-    'mri_segstats --i foo.nii --seg seg.nii --id 18 --sum foo_sum.txt'
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> ss = fs.SegStats()
+    >>> ss.inputs.annot = ('PWS04', 'lh', 'aparc')
+    >>> ss.inputs.environ['SUBJECTS_DIR'] = '/somepath/FSDATA'
+    >>> ss.inputs.avgwftxt = True
+    >>> ss.cmdline
+    'mri_segstats --annot PWS04 lh aparc --avgwf ./PWS04_lh_aparc_avgwf.txt --sum ./summary.stats'
     
-   """
+    """
 
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'mri_segstats'
+    _cmd = 'mri_segstats'
+    input_spec = SegStatsInputSpec
+    output_spec = SegStatsOutputSpec
 
-
-    def inputs_help(self):
-        """Print command line documentation for mri_segstats."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    opt_map = {'segvol': '--seg %s',
-               'annot': '--annot %s %s %s',
-               'slabel': '--slabel %s %s %s',
-               'sumfile': '--sum %s',
-               'parvol': '--pv %s',
-               'invol': '--i %s',
-               'frame': '--frame %f',
-               'square': '--sqr',
-               'squareroot': '--sqrt',
-               'multiply': '--mul %f',
-               'savemeanstd': '--snr',
-               'colortable': '--ctab %s',
-               'ctab_default': '--ctab-default',
-               'ctab_gca': '--ctab-gca',
-               'segid': '--id %s',
-               'excludeid': '--excludeid %s',
-               'excl_ctxgmwm': '--excl-ctxgmwm',
-               'surf_wm_vol': '--surf-wm-vol',
-               'surf_ctx_vol': '--surf-ctx-vol',
-               'nonempty': '--nonempty',
-               'maskvol': '--mask %s',
-               'maskthresh': '--maskthresh %f',
-               'masksign': '--masksign %s',
-               'maskframe': '--maskframe %f',
-               'maskinvert': '--maskinvert',
-               'maskerode' : '--maskerode %f',
-               'brain_vol_from_seg': '--brain-vol-from-seg',
-               'brainmask': '--brainmask',
-               'talicv': '--etiv',
-               'talicv_only': '--etiv-only',
-               'avgwftxt': '--avgwf %s',
-               'avgwfvol': '--avgwfvol %s',
-               'savgmsf' : '--sfavg %s',		
-               'vox': '--vox %d %d %d',
-               'flags': '%s'}
-    
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='invol',copy=False)]
-        return info
-    
-    def _parse_inputs(self):
-        """validate fs mri_segstats options"""
-        allargs = super(SegStats, self)._parse_inputs(skip=('sumfile','segid','avgwftxt','avgwfvol'))
-
-        # Add invol to the args if they are specified
-        if self.inputs.segid:
-            if isinstance(self.inputs.segid,list):
-                for id in self.inputs.segid:
-                    allargs.extend(['--id', str(id)])
-            else:
-                allargs.extend(['--id', str(self.inputs.segid)])
-        if self.inputs.invol:
-            if isinstance(self.inputs.sumfile,str):
-                allargs.extend(['--sum',self.inputs.sumfile])
-            else:
-                allargs.extend(['--sum',fname_presuffix(self.inputs.invol,
-                                                          suffix='_summary.txt',
-                                                          use_ext=False,
-                                                          newpath=os.getcwd())])
-        if self.inputs.avgwftxt and self.inputs.invol:
-            if isinstance(self.inputs.avgwftxt,str):
-                allargs.extend(['--avgwf',self.inputs.avgwftxt])
-            else:
-                allargs.extend(['--avgwf',fname_presuffix(self.inputs.invol,
-                                                          suffix='_avgwf.txt',
-                                                          use_ext=False,
-                                                          newpath=os.getcwd())])
-        if self.inputs.avgwfvol and self.inputs.invol:
-            if isinstance(self.inputs.avgwfvol,str):
-                allargs.extend(['--avgwfvol',self.inputs.avgwfvol])
-            else:
-                allargs.extend(['--avgwfvol',fname_presuffix(self.inputs.invol,
-                                                          suffix='_avgwfvol.nii.gz',
-                                                          use_ext=False,
-                                                          newpath=os.getcwd())])
-        return allargs
-    
-    def outputs(self):
-        """
-        outfile: filename
-              output file
-        """
-        outputs = Bunch(sumfile=None,
-                        avgwffile=None,
-                        avgwfvol=None)
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['sumfile'] = self.inputs.sumfile
+        if not isdefined(outputs['sumfile']):
+            outputs['sumfile'] = os.path.join(os.getcwd(), 'summary.stats')
+        suffices =dict(avgwftxt='_avgwf.txt', avgwfvol='_avgwf.nii.gz',
+                     sfavg='sfavg.txt')
+        if isdefined(self.inputs.segvol):
+            _, src = os.path.split(self.inputs.segvol)
+        if isdefined(self.inputs.annot):
+            src = '_'.join(self.inputs.annot)
+        if isdefined(self.inputs.surflabel):
+            src = '_'.join(self.inputs.surflabel)
+        for name, suffix in suffices.items():
+            value = getattr(self.inputs, name)
+            if isdefined(value):
+                if isinstance(value, bool):
+                    outputs[name] = fname_presuffix(src, suffix=suffix,
+                                                    newpath=os.getcwd(),
+                                                    use_ext=False)
+                else:
+                    outputs[name] = value
         return outputs
 
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        return outputs
+    def _format_arg(self, name, spec, value):
+        if name in ['avgwftxt', 'avgwfvol', 'sfavg']:
+            if isinstance(value, bool):
+                fname = self._list_outputs()[name]
+            else:
+                fname = value
+            return spec.argstr % fname
+        return super(SegStats, self)._format_arg(name, spec, value)
+    
+    def _gen_filename(self, name):
+        if name == 'sumfile':
+            return self._list_outputs()[name]
+        return None    
 
 class Label2Vol(FSCommand):
     """Make a binary volume from a Freesurfer label
