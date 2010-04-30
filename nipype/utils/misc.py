@@ -3,7 +3,7 @@
 import numpy as np
 import os
 from distutils.version import LooseVersion
-from enthought.traits.trait_base import _Undefined
+from nipype.interfaces.traits import _Undefined
 
 def isdefined(object):
     return not isinstance(object, _Undefined)

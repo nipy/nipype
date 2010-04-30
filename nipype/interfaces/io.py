@@ -15,11 +15,15 @@ import shutil
 
 from enthought.traits.trait_errors import TraitError
 
-from nipype.interfaces.base import Interface, CommandLine, Bunch, InterfaceResult,\
-    NEW_Interface, TraitedSpec, traits, File, Directory, BaseInterfaceInputSpec,\
-    NEW_BaseInterface, OutputMultiPath, DynamicTraitedSpec, BaseTraitedSpec
+from nipype.interfaces.base import (Interface, CommandLine, Bunch,
+                                    InterfaceResult, NEW_Interface,
+                                    TraitedSpec, traits, File, Directory,
+                                    BaseInterfaceInputSpec, NEW_BaseInterface,
+                                    OutputMultiPath, DynamicTraitedSpec,
+                                    BaseTraitedSpec, Undefined)
 from nipype.utils.misc import isdefined
-from nipype.utils.filemanip import copyfile, list_to_filename, filename_to_list, FileNotFoundError
+from nipype.utils.filemanip import (copyfile, list_to_filename,
+                                    filename_to_list, FileNotFoundError)
 
 def add_traits(base, names, trait_type=None):
     """ Add traits to a traited class.
@@ -31,7 +35,7 @@ def add_traits(base, names, trait_type=None):
     undefined_traits = {}
     for key in names:
         base.add_trait(key, trait_type)
-        undefined_traits[key] = traits.Undefined
+        undefined_traits[key] = Undefined
     base.trait_set(trait_change_notify=False, **undefined_traits)
     # access each trait
     for key in names:
@@ -215,14 +219,14 @@ class DataGrabber(IOBase):
         if infields:
             for key in infields:
                 self.inputs.add_trait(key, traits.Any)
-                undefined_traits[key] = traits.Undefined
+                undefined_traits[key] = Undefined
             self.inputs.template_args['outfiles'] = [infields]
         if outfields:
             # add ability to insert field specific templates
             self.inputs.add_trait('field_template',
                                   traits.Dict(traits.Enum(outfields),
                                     desc="arguments that fit into template"))
-            undefined_traits['field_template'] = traits.Undefined
+            undefined_traits['field_template'] = Undefined
             #self.inputs.remove_trait('template_args')
             outdict = {}
             for key in outfields:

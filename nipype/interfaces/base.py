@@ -16,7 +16,7 @@ from warnings import warn
 
 
 import enthought.traits.api as traits
-from enthought.traits.api import Undefined
+from nipype.interfaces.traits import Undefined
 
 from nipype.utils.filemanip import md5, hash_infile, FileNotFoundError,\
     hash_timestamp
@@ -24,7 +24,7 @@ from nipype.utils.misc import is_container
 from enthought.traits.trait_errors import TraitError
 from nipype.utils.config import config
 from nipype.utils.misc import isdefined
- 
+
 __docformat__ = 'restructuredtext'
 
 try:

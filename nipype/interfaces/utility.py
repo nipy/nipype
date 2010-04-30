@@ -3,7 +3,8 @@ from copy import deepcopy
 import numpy as np
 
 from nipype.utils.filemanip import (filename_to_list, list_to_filename)
-from nipype.interfaces.base import traits, TraitedSpec, DynamicTraitedSpec, BaseInterfaceInputSpec
+from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec,
+                                    BaseInterfaceInputSpec, Undefined)
 from nipype.interfaces.io import IOBase, add_traits
 
     
@@ -40,7 +41,7 @@ class IdentityInterface(IOBase):
         undefined_traits = {}
         for key in self._fields:
             base.add_trait(key, traits.Any)
-            undefined_traits[key] = traits.Undefined
+            undefined_traits[key] = Undefined
         base.trait_set(trait_change_notify=False, **undefined_traits)
         return base
 
