@@ -15,15 +15,10 @@ __docformat__ = 'restructuredtext'
 import os
 from glob import glob
 
-from nipype.interfaces.base import Bunch
-from nipype.utils.docparse import get_doc
-from nipype.utils.filemanip import (fname_presuffix, filename_to_list,
-                                    FileNotFoundError)
-from nipype.interfaces.freesurfer import FSCommand
-
+from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.freesurfer.base import NEW_FSCommand, FSTraitedSpec
-from nipype.interfaces.base import (Bunch, TraitedSpec, File, traits,
-                                    Directory, InputMultiPath)
+from nipype.interfaces.base import (Bunch, TraitedSpec, File,
+                                    traits, InputMultiPath)
 from nipype.utils.misc import isdefined
 
 class MrisPreprocInputSpec(FSTraitedSpec):
