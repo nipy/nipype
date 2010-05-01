@@ -97,82 +97,201 @@ class SurfConcat(FSCommand):
         return outputs
 
     
-class GlmFit(FSCommand):
+class GlmFitInputSpec(FSTraitedSpec):
+    hemi = traits.Str(desc='im not sure what hemi does ',
+        argstr='%s')
+    surf=traits.Str(desc='subject hemi',argstr='--surf %s')
+
+    glmdir = traits.Str(argstr='--glmdir %s', desc='save outputs to dir')
+    infile = File(desc='input file', argstr='--y %s', mandatory=True,
+                  copyfile=False)
+    _design_xor = ('fsgd', 'design', 'onesample')
+    fsgd = traits.Tuple(File(exists=True),traits.Enum('doss', 'dods'),
+                        argstr='--fsgd %s %s', xor= _design_xor,
+                        desc='freesurfer descriptor file')
+    design = File(exists=True, argstr='--X %s', xor= _design_xor,
+                  desc='design matrix file')
+    contrast = InputMultiPath(exists=True, argstr='--C %s...',
+                              desc='contrast file')
+    
+    onesample = traits.Bool(argstr='--osgm',
+                            xor=('onesample', 'fsgd', 'design', 'contrast'),
+                            desc='construct X and C as a one-sample group mean')
+    nocontrastsok - traits.Bool(argstr='--no-contrasts-ok',
+                                desc='do not fail if no contrasts specified')
+    pervoxelreg = InputMultiPath(argstr='--pvr %s...',
+                                 desc='per-voxel regressors')
+    selfreg = traits.Tuple(traits.Int, traits.Int, trsits.Int,
+                           argstr='--selfreg %d %d %d',
+                           desc='self-regressor from index col row slice')
+    weightedls = File(exists=True, argstr='--wls %s',
+                      xor = ('weightfile', 'weightinv', 'weightsqrt') 
+                      desc='weighted least squares')
+    fixedfxvar = File(exists=True, argstr='--yffxvar %s',
+                      desc='for fixed effects analysis')
+    fixedfxdof = traits.Int(argstr='--ffxdof %d',
+                            xor=('fixedfxdof','fixedfxdoffile'),
+                            desc='dof for fixed effects analysis')
+    fixedfxdoffile = File(argstr='--ffxdofdat %d',
+                          xor=('fixedfxdof','fixedfxdoffile'),
+                          desc='text file with dof for fixed effects analysis')
+    weightfile = File(exists=True, xor = ('weightedls', 'weightfile'),
+                      desc='weight for each input at each voxel')
+    weightinv = traits.Bool(argstr='--w-inv' desc='invert weights',
+                            xor = ('weightedls', 'weightinv'))
+    weightsqrt = traits.Bool(argstr='--w-sqrt' desc='sqrt of weights',
+                            xor = ('weightedls', 'weightsqrt'))
+    fwhm = traits.Float(min=0, argstr='--fwhm %f',
+                        desc='smooth input by fwhm')
+    varfwhm = traits.Float(min=0, argstr='--var-fwhm %f',
+                        desc='smooth variance by fwhm')
+    nomasksmooth = traits.Bool(argstr='--no-mask-smooth',
+                               desc='do not mask when smoothing')
+    noestfwhm = traits.Bool(argstr='--no-est-fwhm',
+                            desc='turn off FWHM output estimation')
+    maskfile = File(exists=True, argstr='--mask %s', desc='binary mask')
+    labelfile = File(exists=True, argstr='--label %s',
+                     xor=('labelfile','cortex'),
+                     desc='use label as mask, surfaces only')
+    cortex = traits.Bool(argstr='--cortex',
+                         xor=('labelfile','cortex'),
+                         desc='use subjects ?h.cortex.label as label')
+    invertmask = traits.Bool(argstr='--mask-inv',
+                             desc='invert mask')
+    prune = traits.Bool(argstr='--prune',
+       desc='remove voxels that do not have a non-zero value at each frame (def)')
+    noprune = traits.Bool(argstr='--no-prune',
+                          xor = ('noprune', 'prunethresh')
+                          desc='do not prune')
+    prunethresh = traits.Float(argstr='--prune_thr %f',
+                               xor = ('noprune', 'prunethresh')
+                               desc='prune threshold. Default is FLT_MIN')
+    logy = traits.Bool(argstr='--logy',
+                       desc='compute natural log of y prior to
+                            analysis')
+    saveestimate = traits.Bool(argstr='--yhat-save',
+                               desc='save signal estimate (yhat)')
+    saveresidual = traits.Bool(argstr='--eres-save',
+                               desc='save residual error (eres)')
+    saverescorrmtx = traits.Bool(argstr='--eres-scm',
+       desc='save residual error spatial correlation matrix (eres.scm). Big!')
+    surf = traits.Tuple(traits.Str, traits.Enum('lh', 'rh'),
+                        traits.enum('white','pial','smoothwm','inflated'),
+                        desc='needed for some flags (uses white by default)')
+    simulation = traits.Tuple(traits.Enum('perm','mc-full','mc-z'),
+                              traits.Int(min=1), traits.Float, traits.Str,
+                              argstr='--sim %s %d %f %s',
+                              desc='nulltype nsim thresh csdbasename')
+    simsign = traits.Enum('abs', 'pos', 'neg', argstr='--sim-sign %s',
+                          desc='abs, pos, or neg')
+    uniform = traits.Tuple(traits.Float, traits.Float,
+                           argstr='--uniform %f %f',
+                      desc='use uniform distribution instead of gaussian')
+    pca = traits.Bool(argstr='--pca',
+                      desc='perform pca/svd analysis on residual')
+    calcAR1 = traits.Bool(argstr='--tar1',
+                          desc='compute and save temporal AR1 of
+                            residual')
+    savecond = traits.Bool(argstr='--save-cond',
+            desc='flag to save design matrix condition at each voxel')
+    voxdump = traits.Tuple(traits.Int, traits.Int, traits.Int,
+                           argstr='--voxdump %d %d %d'
+                           desc='dump voxel GLM and exit')
+    seed = traits.Int(argstr='--seed %d', desc='used for synthesizing noise')
+    synth = traits.Bool(argstr='--synth', desc='replace input with gaussian')
+    resynthtest = traits.Int(argstr='--resynthtest %d', desc='test GLM by resynthsis')
+    profile = traits.Int(argstr='--profile %d', desc='niters : test speed')
+    forceperm = traits.Bool(argstr='--perm-force',
+              desc='force perumtation test, even when design matrix is not orthog')
+    diag = traits.Int('--diag %d', desc='Gdiag_no : set diagnositc level')
+    diagcluster = traits.Bool(argstr='--diag-cluster',
+                            desc='save sig volume and exit from first sim loop')
+    debug = traits.Bool(argstr='--debug', desc='turn on debugging')
+    checkopts = traits.Bool(argstr='--checkopts',
+                            desc="don't run anything, just check options and exit")
+    allowsubjrep = traits.Bool(argstr='--allowsubjrep',
+      desc='allow subject names to repeat in the fsgd file (must appear before --fsgd')
+    illcond = traits.Bool(argstr='--illcond',
+                 desc='allow ill-conditioned design matrices')
+    simdonefile = File(argstr='--sim-done %s',
+                   desc='create file when simulation finished')
+    
+class GlmFit(NEW_FSCommand):
     """Use FreeSurfer mri_glmfit to prepare a group of contrasts for
     a second level analysis
     
-    Parameters
-    ----------
-
-    To see optional arguments
-    SurfConcat().inputs_help()
-
-
     Examples
     --------
-   """
+    """
 
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'mri_glmfit'
-
-    def inputs_help(self):
-        """Print command line documentation for mris_preproc."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    opt_map = {
-        'surf':               '--surf %s',
-        'hemi':               '%s',
-        'outdir':             '--glmdir %s',
-        'funcimage':          '--y %s',
-        'onesample':          '--osgm',
-        'design':             '--X %s',
-        'groupfile':          '--fsgd %s',
-        'flags':              '%s'}
-
-    def _parse_inputs(self):
-        """validate fs onesamplettest options"""
-        allargs = super(GlmFit, self)._parse_inputs(skip=('surf','hemi','outdir',))
-
-        # Add outfile to the args if not specified
-        allargs.extend(['--surf',self.inputs.surf,self.inputs.hemi])
-        if self.inputs.outdir is None:
-            outdir = os.getcwd()
-            allargs.extend(['--glmdir', outdir])
-        return allargs
-    
-    def outputs(self):
-        """
-        """
-        return Bunch()
-
-    def aggregate_outputs(self):
-        return self.outputs()
+    _cmd = 'mri_glmfit'
+    input_spec = GlmFitInputSpec
         
 class OneSampleTTest(GlmFit):
-    opt_map = {
-        'surf':               '--surf %s',
-        'hemi':               '%s',
-        'outdir':             '--glmdir %s',
-        'funcimage':          '--y %s',
-        'flags':              '%s'}
+
+    def __init__(self, **kwargs):
+        super(OneSampleTTest, self).__init__(**kwargs)
+        self.inputs.onesample = True
+
+class BinarizeInputSpec(FSTraitedSpec):
+    infile = File(exists=True, argstr='--i %s', mandatory=True,
+                  copyfile=False, desc='input volume')
+    min = traits.Float(argstr='--min %f',
+                       desc='min thresh')
+    max = traits.Float(argstr='--max %f',
+                       desc='max thresh')
+    rmin = traits.Float(argstr='--rmin %f',
+                        desc='compute min based on rmin*globalmean')
+    rmax = traits.Float(argstr='--rmax %f',
+                        desc='compute max based on rmax*globalmean')
+    match = traits.List(traits.Int, argstr='--match %d...',
+                        desc='match instead of threshold')
+    wm = traits.Bool(argstr='--wm',
+         desc='set match vals to 2 and 41 (aseg for cerebral WM)')
+    ventricles = traits.Bool(argstr='--ventricles',
+         desc='set match vals those for aseg ventricles+choroid (not 4th)')
+    wmvcsf = traits.Bool(argstr='--wm+vcsf',
+          desc='WM and ventricular CSF, including choroid (not 4th)')
+    outfile = File(argstr='--o %s', genfile=True,
+                  desc='output volume')
+    countfile = traits.Either(traits.Bool, File,
+                              argstr='--count %s',
+                  desc='save number of hits in ascii file (hits,ntotvox,pct)')
+    binval = traits.Int(argstr='--binval %d',
+                        desc='set vox within thresh to val (default is 1)')
+    binvalnot = traits.Int(argstr='--binvalnot %d',
+                        desc='set vox outside range to val (default is 0)')
+    invert = traits.Bool(argstr='--inv',
+                         desc='set binval=0, binvalnot=1')
+    frameno = traits.Int(argstr='--frame %s',
+                         desc='use 0-based frame of input (default is 0)')
+    mergevol = File(exists=True, argstr='--merge %s',
+                    desc='merge with mergevol') 
+    maskvol = File(exists=True, argstr='--mask maskvol',
+                   desc='must be within mask')
+    maskthresh = traits.Float(argstr='--mask-thresh %f',
+                    desc='set thresh for mask')
+    abs = traits.Bool(argstr='--abs',
+                      desc='take abs of invol first (ie, make unsigned)')
+    bincol = traits.Bool(argstr='--bincol',
+                desc='set binarized voxel value to its column number')
+    zeroedges = traits.Bool(argstr='--zero-edges',
+                            desc='zero the edge voxels')
+    zerosliceedge = traits.Bool(argstr='--zero-slice-edges',
+                       desc='zero the edge slice voxels')
+    dilate = traits.Int(argstr='--dilate %d',
+                        desc='niters: dilate binarization in 3D')
+    erode = traits.Int(argstr='--erode  %d',
+                       desc='nerode: erode binarization in 3D (after any dilation)')
+    erode2d = traits.Int(argstr='--erode2d %d',
+                         desc='nerode2d: erode binarization in 2D (after any 3D erosion)')
+
+class BinarizeOutputSpec(TraitedSpec):
+    outfile = File(exists=True, desc='binarized output volume')
+    countfile = File(desc='ascii file containing number of hits')
     
-    def _parse_inputs(self):
-        """validate fs onesamplettest options"""
-        allargs = super(OneSampleTTest, self)._parse_inputs()
-        allargs.extend(['--osgm'])
-        return allargs
-
-class Threshold(FSCommand):
+class Binarize(NEW_FSCommand):
     """Use FreeSurfer mri_binarize to threshold an input volume
-
-    Parameters
-    ----------
-
-    To see optional arguments
-    Threshold().inputs_help()
-
 
     Examples
     --------
@@ -183,79 +302,43 @@ class Threshold(FSCommand):
     
    """
 
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'mri_binarize'
+    _cmd = 'mri_binarize'
+    input_spec = BinarizeInputSpec
+    output_spec = BinarizeOutputSpec
 
-
-    def inputs_help(self):
-        """Print command line documentation for mri_binarize."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    opt_map = {'abs': '--abs',
-               'bincol': '--bincol',
-               'binval': '--binval %f',
-               'binvalnot': '--binvalnot %f',
-               'count': '--count %s',
-               'dilate': '--dilate %d',
-               'erode': '--erode %d',
-               'erode2d': '--erode2d %d',
-               'frame': '--frame %d',
-               'infile': '--i %s',
-               'inv': '--inv',
-               'mask': '--mask %s',
-               'mask-thresh': '--mask-thresh %f',
-               'match': '--match %d',
-               'max': '--max %f',
-               'merge': '--merge %s',
-               'min': '--min %f',
-               'outfile': '--o %s',
-               'rmax': '--rmax %f',
-               'rmin': '--rmin %f',
-               'ventricles': '--ventricles',
-               'wm': '--wm',
-               'wm+vcsf': '--wm+vcsf',
-               'zero-edges': '--zero-edges',
-               'zero-slice-edges': '--zero-slice-edges',
-               'flags' : '%s'}
-    
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='infile',copy=False)]
-        return info
-
-    def _get_outfile(self):
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
         outfile = self.inputs.outfile
-        if not outfile and self.inputs.infile:
-            outfile = fname_presuffix(self.inputs.infile,
-                                      suffix='_out',
-                                      newpath=os.getcwd())
-        return outfile
-            
-    def _parse_inputs(self):
-        """validate fs bbregister options"""
-        allargs = super(Threshold, self)._parse_inputs(skip=('outfile'))
-        allargs.extend(['--o',self._get_outfile()])
-        return allargs
-    
-    def outputs(self):
-        """
-        outfile: filename
-            thresholded output file
-        """
-        outputs = Bunch(outfile=None)
+        if not isdefined(outfile):
+            outputs['outfile'] = fname_presuffix(self.inputs.infile,
+                                            newpath=os.getcwd(),
+                                            suffix='_thresh')
+        value = self.inputs.countfile
+        if isdefined(value):
+            if isinstance(value, bool):
+                outputs['countfile'] = fname_presuffix(self.inputs.infile,
+                                                       suffix='_count.txt',
+                                                       newpath=os.getcwd(),
+                                                       use_ext=False)
         return outputs
 
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outfile = self._get_outfile()
-        if not glob(outfile):
-            raise FileNotFoundError(outfile)
-        outputs.outfile = outfile
-        return outputs
+    def _format_arg(self, name, spec, value):
+        if name == 'countfile':
+            if isinstance(value, bool):
+                fname = self._list_outputs()[name]
+            else:
+                fname = value
+            return spec.argstr % fname
+        return super(Binarize, self)._format_arg(name, spec, value)
+    
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._list_outputs()[name]
+        return None    
+
+class Threshold(Binarize):
+    pass
+    
 
 class ConcatenateInputSpec(FSTraitedSpec):
     invol = InputMultiPath(exists=True,
