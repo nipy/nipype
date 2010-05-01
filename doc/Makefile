@@ -35,7 +35,7 @@ htmlonly:
 
 api:    
 	rm -rf api/generated
-	python ../tools/build_modref_templates.py
+	#python ../tools/build_modref_templates.py
 	rm -rf interfaces/generated
 	python ../tools/build_interface_docs.py
 	@echo "Build API docs finished."
