@@ -26,77 +26,88 @@ from nipype.interfaces.base import (Bunch, TraitedSpec, File, traits,
                                     Directory, InputMultiPath)
 from nipype.utils.misc import isdefined
 
-class SurfConcat(FSCommand):
+class MrisPreprocInputSpec(FSTraitedSpec):
+    outfile = File(argstr='--out %s', genfile=True,
+                   desc='output filename')
+    target = traits.Str(argstr='--target %s', mandatory=True,
+                         desc='target subject name')
+    hemi = traits.Enum('lh', 'rh', argstr='--hemi %s',
+                       mandatory=True,
+                       desc='hemisphere for source and target')
+    surfmeasure = traits.Str(argstr='--meas %s',
+                             xor = ('surfmeasure', 'surfmeasfile', 'surfarea'),
+                desc='Use subject/surf/hemi.surfmeasure as input')
+    surfarea = traits.Str(argstr='--area %s',
+                          xor = ('surfmeasure', 'surfmeasfile', 'surfarea'),
+       desc='Extract vertex area from subject/surf/hemi.surfname to use as input.')
+    subjects = traits.List(argstr='--s %s...',
+                           xor = ('subjects', 'fsgdfile', 'subjectfile'),
+                   desc='subjects from who measures are calculated')
+    fsgdfile = File(exists=True, argstr='--fsgd %s',
+                    xor = ('subjects', 'fsgdfile', 'subjectfile'),
+                    desc='specify subjects using fsgd file')
+    subjectfile = File(exists=True, argstr='--f %s',
+                    xor = ('subjects', 'fsgdfile', 'subjectfile'),
+                    desc='file specifying subjects separated by white space')
+    surfmeasfile = InputMultiPath(File(exists=True), argstr='--is %s...',
+                           xor = ('surfmeasure', 'surfmeasfile', 'surfarea'),
+          desc='file alternative to surfmeas, still requires list of subjects')
+    srcfmt = traits.Str(argstr='--srcfmt %s', desc='source format')
+    surfdir = traits.Str(argstr='--surfdir %s',
+                         desc='alternative directory (instead of surf)')
+    volmeasfile = InputMultiPath(traits.Tuple(File(exists=True),File(exists=True)),
+                                 argstr='--iv %s %s...',
+                         desc = 'list of volume measure and reg file tuples')
+    projfrac = traits.Float(argstr='--projfrac %s',
+                            desc='projection fraction for vol2surf')
+    fwhm = traits.Float(argstr='--fwhm %f',
+                        xor = ('fwhm', 'niters'),
+                        desc='smooth by fwhm mm on the target surface') 
+    fwhmsrc = traits.Float(argstr='--fwhm-src %f',
+                        xor = ('fwhmsrc', 'niterssrc'),
+                        desc='smooth by fwhm mm on the source surface')
+    niters = traits.Int(argstr='--niters %d',
+                        xor = ('fwhm', 'niters'),
+                        desc='niters : smooth by niters on the target surface')
+    niterssrc = traits.Int(argstr='--niterssrc %d',
+                        xor = ('fwhmsrc', 'niterssrc'),
+                        desc='niters : smooth by niters on the source surface')
+    smoothcortexonly = traits.Bool(argstr='--smooth-cortex-only',
+                       desc='only smooth cortex (ie, exclude medial wall)')
+
+class MrisPreprocOutputSpec(TraitedSpec):
+    outfile = File(exists=True, desc='concatenated output file')
+    
+class MrisPreproc(NEW_FSCommand):
     """Use FreeSurfer mris_preproc to prepare a group of contrasts for
     a second level analysis
     
-    Parameters
-    ----------
-
-    To see optional arguments
-    SurfConcat().inputs_help()
-
-
     Examples
     --------
-   """
+    """
 
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'mris_preproc'
+    _cmd = 'mris_preproc'
+    input_spec = MrisPreprocInputSpec
+    output_spec = MrisPreprocOutputSpec
 
-    def inputs_help(self):
-        """Print command line documentation for mris_preproc."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    opt_map = {
-        'target':             '--target %s',
-        'hemi':               '--hemi %s',
-        'outfile':            '--out %s',
-        'outprefix':          None,
-        'volimages':          '--iv %s',
-        'volregs':            '--iv %s',
-        'flags':              '%s'}
-
-    def _get_outfile(self):
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
         outfile = self.inputs.outfile
-        if not outfile:
-            if self.inputs.outprefix:
-                outfile = os.path.join(os.getcwd(),'_'.join((self.inputs.outprefix,
-                                                           self.inputs.target,
-                                                           '.'.join((self.inputs.hemi,'mgh')))))
-            else:
-                outfile = os.path.join(os.getcwd(),'_'.join((self.inputs.target,
-                                                           '.'.join((self.inputs.hemi,'mgh')))))
-        return outfile
-        
-    def _parse_inputs(self):
-        """validate fs surfconcat options"""
-        allargs = super(SurfConcat, self)._parse_inputs(skip=('outprefix','volimages','volregs'))
-        allargs.extend(['--out', self._get_outfile()])
-        for i,volimg in enumerate(self.inputs.volimages):
-            allargs.extend(['--iv', volimg, self.inputs.volregs[i]])
-        return allargs
-    
-    def outputs(self):
-        """
-        outfile: filename
-            Concatenated volume
-        """
-        return Bunch(outfile=None,
-                     hemi=None)
-
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outputs.hemi = self.inputs.hemi
-        outfile = self._get_outfile()
-        if not glob(outfile):
-            raise FileNotFoundError(outfile)
-        outputs.outfile = outfile
+        if not isdefined(outfile):
+            outputs['outfile'] = fname_presuffix(self.inputs.infile,
+                                                 newpath=os.getcwd(),
+                                                 suffix='_concat.mgz',
+                                                 use_ext=False)
         return outputs
-
     
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._list_outputs()[name]
+        return None    
+
+class SurfConcat(MrisPreproc):
+    pass
+
 class GlmFitInputSpec(FSTraitedSpec):
     hemi = traits.Str(desc='im not sure what hemi does ',
         argstr='%s')
@@ -111,21 +122,21 @@ class GlmFitInputSpec(FSTraitedSpec):
                         desc='freesurfer descriptor file')
     design = File(exists=True, argstr='--X %s', xor= _design_xor,
                   desc='design matrix file')
-    contrast = InputMultiPath(exists=True, argstr='--C %s...',
+    contrast = InputMultiPath(File(exists=True), argstr='--C %s...',
                               desc='contrast file')
     
     onesample = traits.Bool(argstr='--osgm',
                             xor=('onesample', 'fsgd', 'design', 'contrast'),
                             desc='construct X and C as a one-sample group mean')
-    nocontrastsok - traits.Bool(argstr='--no-contrasts-ok',
+    nocontrastsok = traits.Bool(argstr='--no-contrasts-ok',
                                 desc='do not fail if no contrasts specified')
-    pervoxelreg = InputMultiPath(argstr='--pvr %s...',
+    pervoxelreg = InputMultiPath(File(exists=True), argstr='--pvr %s...',
                                  desc='per-voxel regressors')
-    selfreg = traits.Tuple(traits.Int, traits.Int, trsits.Int,
+    selfreg = traits.Tuple(traits.Int, traits.Int, traits.Int,
                            argstr='--selfreg %d %d %d',
                            desc='self-regressor from index col row slice')
     weightedls = File(exists=True, argstr='--wls %s',
-                      xor = ('weightfile', 'weightinv', 'weightsqrt') 
+                      xor = ('weightfile', 'weightinv', 'weightsqrt'), 
                       desc='weighted least squares')
     fixedfxvar = File(exists=True, argstr='--yffxvar %s',
                       desc='for fixed effects analysis')
@@ -137,9 +148,9 @@ class GlmFitInputSpec(FSTraitedSpec):
                           desc='text file with dof for fixed effects analysis')
     weightfile = File(exists=True, xor = ('weightedls', 'weightfile'),
                       desc='weight for each input at each voxel')
-    weightinv = traits.Bool(argstr='--w-inv' desc='invert weights',
+    weightinv = traits.Bool(argstr='--w-inv', desc='invert weights',
                             xor = ('weightedls', 'weightinv'))
-    weightsqrt = traits.Bool(argstr='--w-sqrt' desc='sqrt of weights',
+    weightsqrt = traits.Bool(argstr='--w-sqrt', desc='sqrt of weights',
                             xor = ('weightedls', 'weightsqrt'))
     fwhm = traits.Float(min=0, argstr='--fwhm %f',
                         desc='smooth input by fwhm')
@@ -161,14 +172,13 @@ class GlmFitInputSpec(FSTraitedSpec):
     prune = traits.Bool(argstr='--prune',
        desc='remove voxels that do not have a non-zero value at each frame (def)')
     noprune = traits.Bool(argstr='--no-prune',
-                          xor = ('noprune', 'prunethresh')
+                          xor = ('noprune', 'prunethresh'),
                           desc='do not prune')
     prunethresh = traits.Float(argstr='--prune_thr %f',
-                               xor = ('noprune', 'prunethresh')
+                               xor = ('noprune', 'prunethresh'),
                                desc='prune threshold. Default is FLT_MIN')
     logy = traits.Bool(argstr='--logy',
-                       desc='compute natural log of y prior to
-                            analysis')
+                       desc='compute natural log of y prior to analysis')
     saveestimate = traits.Bool(argstr='--yhat-save',
                                desc='save signal estimate (yhat)')
     saveresidual = traits.Bool(argstr='--eres-save',
@@ -176,7 +186,7 @@ class GlmFitInputSpec(FSTraitedSpec):
     saverescorrmtx = traits.Bool(argstr='--eres-scm',
        desc='save residual error spatial correlation matrix (eres.scm). Big!')
     surf = traits.Tuple(traits.Str, traits.Enum('lh', 'rh'),
-                        traits.enum('white','pial','smoothwm','inflated'),
+                        traits.Enum('white','pial','smoothwm','inflated'),
                         desc='needed for some flags (uses white by default)')
     simulation = traits.Tuple(traits.Enum('perm','mc-full','mc-z'),
                               traits.Int(min=1), traits.Float, traits.Str,
@@ -190,12 +200,11 @@ class GlmFitInputSpec(FSTraitedSpec):
     pca = traits.Bool(argstr='--pca',
                       desc='perform pca/svd analysis on residual')
     calcAR1 = traits.Bool(argstr='--tar1',
-                          desc='compute and save temporal AR1 of
-                            residual')
+                          desc='compute and save temporal AR1 of residual')
     savecond = traits.Bool(argstr='--save-cond',
             desc='flag to save design matrix condition at each voxel')
     voxdump = traits.Tuple(traits.Int, traits.Int, traits.Int,
-                           argstr='--voxdump %d %d %d'
+                           argstr='--voxdump %d %d %d',
                            desc='dump voxel GLM and exit')
     seed = traits.Int(argstr='--seed %d', desc='used for synthesizing noise')
     synth = traits.Bool(argstr='--synth', desc='replace input with gaussian')
@@ -341,7 +350,7 @@ class Threshold(Binarize):
     
 
 class ConcatenateInputSpec(FSTraitedSpec):
-    invol = InputMultiPath(exists=True,
+    invol = InputMultiPath(File(exists=True),
                  desc = 'Individual volumes to be concatenated',
                  argstr='--i %s...',mandatory=True)
     outvol = File('concat_output.nii.gz', desc = 'Output volume', argstr='--o %s',
@@ -532,15 +541,69 @@ class SegStats(NEW_FSCommand):
             return self._list_outputs()[name]
         return None    
 
-class Label2Vol(FSCommand):
+class Label2VolInputSpec(FSTraitedSpec):
+    labelfile = InputMultiPath(File(exists=True), argstr='--label %s...',
+                   xor = ('labelfile', 'annotfile', 'segfile', 'aparcaseg'),
+                               copyfile=False,
+                               mandatory=True,
+                               desc='list of label files')
+    annotfile = File(exists=True, argstr='--annot %s',
+                     xor = ('labelfile', 'annotfile', 'segfile', 'aparcaseg'),
+                     requires = ('subjectid', 'hemi'),
+                     mandatory=True,
+                     copyfile=False,
+                     desc='surface annotation file')
+    segfile = File(exists=True, argstr='--seg %s',
+                   xor = ('labelfile', 'annotfile', 'segfile', 'aparcaseg'),
+                   mandatory=True,
+                   copyfile=False,
+                   desc='segmentation file')
+    aparcaseg = traits.Bool(argstr='--aparc+aseg',
+                            xor = ('labelfile', 'annotfile', 'segfile', 'aparcaseg'),
+                            mandatory=True,
+                            desc='use aparc+aseg.mgz in subjectdir as seg')
+    template = File(exists=True, argstr='--temp %s', mandatory=True,
+                    desc='output template volume')
+    regmatfile = File(exists=True, argstr='--reg %s',
+                      xor = ('regmatfile', 'regheader', 'identity'),
+                 desc='tkregister style matrix VolXYZ = R*LabelXYZ')
+    regheader = File(exists=True, argstr='--regheader %s',
+                      xor = ('regmatfile', 'regheader', 'identity'),
+                     desc= 'label template volume')
+    identity = traits.Bool(argstr='--identity',
+                           xor = ('regmatfile', 'regheader', 'identity'),
+                           desc='set R=I')
+    invertmtx = traits.Bool(argstr='--invertmtx',
+                            desc='Invert the registration matrix')
+    fillthresh = traits.Range(0., 1., argstr='--fillthresh %.f',
+                              desc='thresh : between 0 and 1')
+    labvoxvol = traits.Float(argstr='--labvoxvol %f',
+                             desc='volume of each label point (def 1mm3)')
+    proj = traits.Tuple(traits.Enum('abs','frac'), traits.Float,
+                        traits.Float, traits.Float,
+                        argstr='--proj %s %f %f %f',
+                        requries = ('subjectid', 'hemi'),
+                        desc='project along surface normal')
+    subjectid = traits.Str(argstr='--subject %s',
+                           desc='subject id')
+    hemi = traits.Enum('lh', 'rh', argstr='--hemi %s',
+                       desc='hemisphere to use lh or rh')
+    surface = traits.Str(argstr='--surf %s',
+                         desc='use surface instead of white')
+    outfile = traits.File(argstr='--o %s', genfile=True,
+                          desc='output volume')
+    hitvolid = traits.File(argstr='--hits %s',
+                           desc='each frame is nhits for a label')
+    labelstat = traits.File(argstr='--label-stat %s',
+                    desc='map the label stats field into the vol')
+    nativevox2ras = traits.Bool(argstr='--native-vox2ras',
+               desc='use native vox2ras xform instead of  tkregister-style')
+
+class Label2VolOutputSpec(TraitedSpec):
+    outfile = File(exists=True, desc='output volume')
+
+class Label2Vol(NEW_FSCommand):
     """Make a binary volume from a Freesurfer label
-
-    Parameters
-    ----------
-
-    To see optional arguments
-    Label2Vol().inputs_help()
-
 
     Examples
     --------
@@ -551,83 +614,26 @@ class Label2Vol(FSCommand):
     
    """
 
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'mri_label2vol'
+    _cmd = 'mri_label2vol'
+    input_spec = Label2VolInputSpec
+    output_spec = Label2VolOutputSpec
 
-
-    def inputs_help(self):
-        """Print command line documentation for mri_label2vol."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    opt_map = {'label': '--label %s',
-               'annotfile': '--annot %s',
-               'segpath': '--seg %s',
-               'aparc+aseg': '--aparc+aseg',
-               'templatevol': '--temp %s',
-               'regmat': '--reg %s',
-               'volid': '--regheader %s',
-               'identity': '--identity',
-               'invertmtx': '--invertmtx',
-               'fillthresh': '--fillthresh %f',
-               'voxvol': '--labvoxvol %s',
-               'proj': '--proj %s %f %f %f',
-               'subjectid': '--subject %s',
-               'hemi': '--hemi %s',
-               'outvol': '--o %s',
-               'hitvolid': '--hits %f',
-               'statvol': '--label-stat %s',
-               'native-vox2ras': '--native-vox2ras'
-               }
-    
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        info = [Bunch(key='infile',copy=False)]
-        return info
-
-    def _get_outfile(self):
-        outfile = self.inputs.outvol
-        if not outfile:
-            if isinstance(self.inputs.label,list):
-                label = self.inputs.label[0]
-            else:
-                label = self.inputs.label
-            outfile = fname_presuffix(label,
-                                      suffix='_vol.nii',
-                                      use_ext=False,
-                                      newpath=os.getcwd())
-        return outfile
-        
-    def _parse_inputs(self):
-        """validate fs mri_label2vol options"""
-        allargs = super(Label2Vol, self)._parse_inputs(skip=('label','outvol'))
-
-        # Add invol to the args if they are specified
-        if self.inputs.label:
-            if isinstance(self.inputs.label,list):
-                for id in self.inputs.label:
-                    allargs.extend(['--label', str(id)])
-            else:
-                allargs.extend(['--label', str(self.inputs.label)])
-        allargs.extend(['--o', self._get_outfile()])
-        
-        return allargs
-    
-    def outputs(self):
-        """
-        outfile: filename
-              output file
-        """
-        outputs = Bunch(outfile=None)
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outfile = self.inputs.outfile
+        if not isdefined(outfile):
+            for key in ['labelfile', 'annotfile', 'segfile']:
+                if isdefined(self.inputs.labelfile):
+                    _, src = os.path.split(getattr(self.inputs, key))
+            if isdefined(self.inputs.aparcaaseg):
+                src = 'aparc+aseg.mgz'
+            outfile = fname_presuffix(src, suffix='_vol.nii.gz',
+                                      newpath=os.getcwd(),
+                                      use_ext=False)
+        outputs['outfile'] = outfile
         return outputs
 
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outfile = self._get_outfile()
-        if not glob(outfile):
-            raise FileNotFoundError(outfile)
-        outputs.outfile = outfile
-        return outputs
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._list_outputs()[name]
+        return None
