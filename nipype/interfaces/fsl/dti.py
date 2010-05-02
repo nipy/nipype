@@ -8,7 +8,7 @@ See the docstrings of the individual classes for examples.
 
 """
 
-import os
+import os,shutil
 import warnings
 
 from nipype.interfaces.fsl.base import NEW_FSLCommand, FSLTraitedSpec
@@ -21,8 +21,8 @@ class DtifitInputSpec(FSLTraitedSpec):
     
     dwi = File(exists=True, desc = 'diffusion weighted image data file',
                   argstr='-k %s', position=0, mandatory=True)
-    basename = traits.Str( desc = 'basename that all output files will start with',
-                           argstr='-o %s', position=1, mandatory=True)
+    basename = traits.Str("dtifit_", desc = 'basename that all output files will start with',
+                           argstr='-o %s', position=1, usedefault=True)
     mask = File(exists=True, desc = 'bet binary mask file',
                 argstr='-m %s', position=2, mandatory=True)    
     bvecs = File(exists=True, desc = 'b vectors file',
@@ -125,12 +125,16 @@ class Eddycorrect(NEW_FSLCommand):
         else:
             return None
 
-class BedpostxInputSpec(FSLTraitedSpec):
-    bpxdirectory = Directory(exists=True, field='dir',
-                             desc = 'directory with all bedpostx standard files: data, bvecs, '+
-                             'bvals, nodif_brain_mask',
-                             argstr='%s', position=0, mandatory=True)
-    fibres = traits.Int(argstr='-n %d', desc='number of fibres per voxel, default 2')
+class BedpostxInputSpec(FSLTraitedSpec):    
+    dwi = File(exists=True, desc = 'diffusion weighted image data file',mandatory=True)
+    mask = File(exists=True, desc = 'bet binary mask file',mandatory=True)    
+    bvecs = File(exists=True, desc = 'b vectors file',mandatory=True)
+    bvals = File(exists=True,desc = 'b values file',mandatory=True)
+    subject_id = traits.Str(desc='the name of this subject',mandatory=True)    
+    bpxdirectory = Directory(exists=True, field='dir',argstr='%s', position=0,mandatory=True,
+                             desc = 'directory for creating bedpostx folders')
+    
+    fibres = traits.Int(1,argstr='-n %d', desc='number of fibres per voxel, default 2',usedefault=True)
     weight = traits.Float(argstr='-w %.2f', desc='ARD weight, more weight means less secondary fibres '+
                           'per voxel, default 1')
     burn_period = traits.Int(argstr='-b %d', desc='burnin period, default 1000')
@@ -138,20 +142,25 @@ class BedpostxInputSpec(FSLTraitedSpec):
     sampling = traits.Int(argstr='-s %d', desc='sample every, default 25')
     
 class BedpostxOutputSpec(TraitedSpec):
-    bpxdirectory = Directory(exists=True, field='dir', desc = 'path/name of directory with all '+
+    bpxoutdirectory = Directory(exists=True, field='dir', desc = 'path/name of directory with all '+
                              'bedpostx output files')
     xfmsdirectory = Directory(exists=True, field='dir', desc = 'path/name of directory with the '+
                               'tranformation matrices')
-    merged_th1samples = File(exists=True, desc='path/name of 4D volume with samples from the distribution on theta')
-    merged_ph1samples = File(exists=True, desc='path/name of file with samples from the distribution on phi')
-    merged_f1samples = File(exists=True,desc='path/name of 4D volume with samples from the distribution on'+
+    merged_thsamples = traits.List(File, exists=True,
+                                    desc='path/name of 4D volume with samples from the distribution on theta')
+    merged_phsamples = traits.List(File, exists=True,
+                                    desc='path/name of file with samples from the distribution on phi')
+    merged_fsamples = traits.List(File, exists=True,
+                                   desc='path/name of 4D volume with samples from the distribution on'+
                             ' anisotropic volume fraction')
-    mean_th1samples = File(exists=True, desc='path/name of 3D volume with mean of distribution on theta')
-    mean_ph1samples = File(exists=True, desc='path/name of 3D volume with mean of distribution on phi')
-    mean_f1samples = File(exists=True, desc='path/name of 3D volume with mean of distribution on f anisotropy')
-    dyads1 = File(exists=True, desc='path/name of mean of PDD distribution in vector form')
-    nodif_brain = File(exists=True, desc='path/name of brain extracted version of nodif')
-    nodif_brain_mask = File(exists=True, desc='path/name of binary mask created from nodif_brain')
+    mean_thsamples = traits.List(File, exists=True,
+                                  desc='path/name of 3D volume with mean of distribution on theta')
+    mean_phsamples = traits.List(File, exists=True,
+                                  desc='path/name of 3D volume with mean of distribution on phi')
+    mean_fsamples = traits.List(File, exists=True,
+                                 desc='path/name of 3D volume with mean of distribution on f anisotropy')
+    dyads = traits.List(File, exists=True,  desc='path/name of mean of PDD distribution in vector form')
+
     
 class Bedpostx(NEW_FSLCommand):
     """ Use FSL  bedpostx command for local modelling of diffusion parameters
@@ -165,17 +174,37 @@ class Bedpostx(NEW_FSLCommand):
     input_spec = BedpostxInputSpec
     output_spec = BedpostxOutputSpec
 
+    def _run_interface(self, runtime):
+        #create the subject specific bpxdirectory
+        bpxdirectory = os.path.join(self.inputs.bpxdirectory,'trackdir',self.inputs.subject_id)
+        if not os.path.isdir(bpxdirectory):
+            os.makedirs(bpxdirectory)
+        self.inputs.bpxdirectory = bpxdirectory
+
+        # copy the dwi,bvals,bvecs, and mask files to that directory
+        shutil.copyfile(self.inputs.mask,self._gen_fname('nodif_brain_mask',suffix='',cwd=self.inputs.bpxdirectory))
+        shutil.copyfile(self.inputs.dwi,self._gen_fname('data',suffix='',cwd=self.inputs.bpxdirectory))
+        shutil.copyfile(self.inputs.bvals,os.path.join(self.inputs.bpxdirectory,'bvals'))
+        shutil.copyfile(self.inputs.bvecs,os.path.join(self.inputs.bpxdirectory,'bvecs'))
+        
+        return super(Bedpostx, self)._run_interface(runtime)
+
     def _list_outputs(self):        
         outputs = self.output_spec().get()
-        for k in outputs.keys():
-            if k not in ('outputtype','environ','args'):
-                if k is 'bpxdirectory':
-                    outputs[k] = self.inputs.bpxdirectory
-                elif k is 'xfmsdirectory':
-                    outputs[k] = os.path.join(self.inputs.bpxdirectory,'xfms')
-                else:
-                    outputs[k] = self._gen_fname(k,cwd=os.path.abspath(self.inputs.bpxdirectory),suffix='')                 
+        pth2bpxout,bpx = os.path.split(self.inputs.bpxdirectory)
+        outputs['bpxoutdirectory'] = os.path.join(pth2bpxout,bpx+'.bedpostX')
+        outputs['xfmsdirectory'] = os.path.join(pth2bpxout,bpx+'.bedpostX','xfms')
+
+        for n in range(self.inputs.fibres):            
+            merged_thsamples.append(self._gen_fname('merged_th'+repr(n+1)+'samples',suffix='',cwd=outputs['bpxoutdirectory']))
+            merged_phsamples.append(self._gen_fname('merged_ph'+repr(n+1)+'samples',suffix='',cwd=outputs['bpxoutdirectory']))
+            merged_fsamples.append(self._gen_fname('merged_f'+repr(n+1)+'samples',suffix='',cwd=outputs['bpxoutdirectory']))            
+            mean_thsamples.append(self._gen_fname('mean_th'+repr(n+1)+'samples',suffix='',cwd=outputs['bpxoutdirectory']))
+            mean_phsamples.append(self._gen_fname('mean_ph'+repr(n+1)+'samples',suffix='',cwd=outputs['bpxoutdirectory']))
+            mean_fsamples.append(self._gen_fname('mean_f'+repr(n+1)+'samples',suffix='',cwd=outputs['bpxoutdirectory']))        
+            dyads.append(self._gen_fname('dyads'+repr(n+1)+'samples',suffix='',cwd=outputs['bpxoutdirectory']))            
         return outputs
+
 
 class Tbss1preprocInputSpec(FSLTraitedSpec):
     imglist = traits.List(File, exists=True, desc = 'list with filenames of the FA images',
@@ -308,6 +337,7 @@ class Tbss4prestatsInputSpec(FSLTraitedSpec):
 
 class Tbss4prestatsOutputSpec(TraitedSpec):
     all_FA_skeletonised = File(exists=True, desc='path/name of 4D volume with all FA images skeletonized')
+    mean_FA_skeleton_mask = File(exists=True, desc='path/name of mean FA skeleton mask') 
     tbssdir = Directory(exists=True, field='dir',
                         desc = 'path/name of directory containing the FA, origdata, and stats '+
                         'folders generated by tbss_1_preproc and tbss_3_postreg')
@@ -334,6 +364,9 @@ class Tbss4prestats(NEW_FSLCommand):
         outputs['tbssdir'] = self.inputs.tbssdir
         stats = os.path.join(self.inputs.tbssdir,'stats')
         outputs['all_FA_skeletonised'] = self._gen_fname('all_FA_skeletonised',
+                                                         cwd=os.path.abspath(stats),
+                                                         suffix='' )
+        outputs['mean_FA_skeleton_mask'] = self._gen_fname('mean_FA_skeleton_mask',
                                                          cwd=os.path.abspath(stats),
                                                          suffix='' )
         return outputs
@@ -404,10 +437,9 @@ class Randomise(NEW_FSLCommand):
         return outputs
 
 class ProbtrackxInputSpec(FSLTraitedSpec):
-    samplesbasename = traits.Str(desc = 'the rootname/basename for samples files',
-                                 argstr='-s %s', mandatory=True)
+    samplesbasename = traits.Str(desc = 'the rootname/basename for samples files',argstr='-s %s')
     bpxdirectory = Directory(exists=True, field='dir', desc = 'path/name of directory with all '+
-                             'bedpostx output files')
+                             'bedpostx output files',mandatory=True)
     mask	 = File(exists=True, desc='bet binary mask file in diffusion space',
                  argstr='-m %s', mandatory=True)
     seedfile = 	File(exists=True, desc='seed volume, or voxel, or ascii file with multiple'+
@@ -496,8 +528,8 @@ class Probtrackx(NEW_FSLCommand):
     input_spec = ProbtrackxInputSpec
     output_spec = ProbtrackxOutputSpec
 
-    def _run_interface(self, runtime):        
-        if isdefined(self.inputs.bpxdirectory) and not isdefined(self.inputs.samplesbasename):
+    def _run_interface(self, runtime):
+        if not isdefined(self.inputs.samplesbasename):
             self.inputs.samplesbasename = os.path.join(self.inputs.bpxdirectory,'merged')
         return super(Probtrackx, self)._run_interface(runtime)
     
