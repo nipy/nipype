@@ -776,7 +776,7 @@ class FlameoInputSpec(FSLTraitedSpec):
     nopeoutput = traits.Bool(argstr='--nopeoutput')
     sigma_dofs = traits.Int(argstr='--sigma_dofs=%d')
     outlier_iter = traits.Int(argstr='--ioni=%d')
-    statsdir = traits.Directory("stats", argstr='--ld=%s', usedefaults=True) # ohinds
+    statsdir = Directory("stats", argstr='--ld=%s', usedefaults=True) # ohinds
     flags = traits.Str(argstr='%s')
     # no support for ven, vef
 
