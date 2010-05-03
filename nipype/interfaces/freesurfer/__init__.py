@@ -3,6 +3,7 @@
 from nipype.interfaces.freesurfer.base import (FSInfo, FSCommand, FSCommandLine,
                                                Info, NEW_FSCommand)
 from nipype.interfaces.freesurfer.preprocess import (ParseDicomDir,
+                                                     UnpackSDcmdir, MriConvert,
                                                      Resample, ReconAll,
                                                      BBRegister,
                                                      ApplyVolTransform,
