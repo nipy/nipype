@@ -752,6 +752,40 @@ class FeatRegister(NEW_BaseInterface):
         outputs['fsf_file'] = os.path.abspath(os.path.join(os.getcwd(), 'register.fsf'))
         return outputs
 
+class FlameoInputSpec(FSLTraitedSpec):
+    copefile = File(exists=True, argstr='--copefile=%s', madatory=True)
+    varcopefile = File(exists=True, argstr='--varcopefile=%s')
+    dofvarcopefile = File(exists=True, argstr='--dofvarcopefile=%s')
+    maskfile = File(exists=True, argstr='--maskfile=%s', madatory=True)
+    designfile = File(exists=True, argstr='--designfile=%s', madatory=True)
+    tconfile = File(exists=True, argstr='--tcontrastsfile=%s', madatory=True)
+    fconfile = File(exists=True, argstr='--fcontrastsfile=%s')
+    covsplitfile = File(exists=True, argstr='--covsplitfile=%s', madatory=True)
+    runmode = traits.Enum('fe', 'ols', 'flame1', 'flame12', argstr='--runmode=%s', madatory=True)
+    njumps = traits.Int(argstr='--njumps=%d')
+    burnin = traits.Int(argstr='--burnin=%d')
+    sampleevery = traits.Int(argstr='--sampleevery=%d')
+    fixmean = traits.Bool(argstr='--fixmean')
+    inferoutliers = traits.Bool(argstr='--inferoutliers')
+    nopeoutput = traits.Bool(argstr='--nopeoutput')
+    sigma_dofs = traits.Int(argstr='--sigma_dofs=%d')
+    outlier_iter = traits.Int(argstr='--ioni=%d')
+    statsdir = traits.Directory("stats", argstr='--ld=%s', usedefaults=True) # ohinds
+    flags = traits.Str(argstr='%s')
+    # no support for ven, vef
+
+
+class FlameoOutputSpec(TraitedSpec):
+    pes = OutputMultiPath(exists=True, desc="Parameter estimates for each column of the design matrix" +
+                "for each voxel")
+    varcopes = OutputMultiPath(exists=True, desc="Variance estimates")
+    res4d = OutputMultiPath(exists=True, desc="Model fit residual mean-squared error for each time point")
+    copes = OutputMultiPath(exists=True, desc="Contrast estimates for each contrast")
+    varcopes = OutputMultiPath(exists=True, desc="Variance estimates for each contrast")
+    zstats = OutputMultiPath(exists=True, desc="z-stat file for each contrast")
+    tstats = OutputMultiPath(exists=True, desc="t-stat file for each contrast")
+    statsdir = Directory(exists=True, desc="directory storing model estimation output")
+
 
 # interface to fsl command line higher level model fit
 # satra: 2010-01-09
@@ -779,140 +813,62 @@ class Flameo(FSLCommand):
     >>> flameo.cmdline
     'flameo --copefile=cope.nii.gz --designfile=design.mat --runmode=fe --tcontrastsfile=design.con --varcopefile=varcope.nii.gz'
     """
-
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'flameo'
-
-    opt_map = {
-        'copefile':       '--copefile=%s',
-        'varcopefile':    '--varcopefile=%s',
-        'dofvarcopefile': '--dofvarcopefile=%s',
-        'maskfile':       '--maskfile=%s',
-        'designfile':     '--designfile=%s',
-        'tconfile':       '--tcontrastsfile=%s',
-        'fconfile':       '--fcontrastsfile=%s',
-        'covsplitfile':   '--covsplitfile=%s',
-        'runmode':        '--runmode=%s',
-        'njumps':         '--njumps=%d',
-        'burnin':         '--burnin=%d',
-        'sampleevery':    '--sampleevery=%d',
-        'fixmean':        '--fixmean',
-        'inferoutliers':  '--inferoutliers',
-        'nopeoutput':     '--nopeoutput',
-        'modelselect':    '--msm=%s',
-        'sigma_dofs':     '--sigma_dofs=%s',
-        'outlier_iter':   '--ioni=%d',
-        'statsdir':       '--ld=%s', # ohinds
-        'flags':          '%s'}
-        # no support for ven, vef
-
-    def inputs_help(self):
-        """Print command line documentation for flameo."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
+    _cmd = 'flameo'
+    input_spec = FlameoInputSpec
+    output_spec = FlameoOutputSpec
 
     # ohinds: 2010-04-06
-    def _parse_inputs(self):
-        allargs = super(Flameo, self)._parse_inputs()
-
-        # special defaults
-        if not self.inputs.statsdir:
-            self.inputs.statsdir="stats"
-            allargs.append("--ld=stats")
-
-        return allargs
-
-    # ohinds: 2010-04-06
-    def run(self):
+    def _run_interface(self, runtime):
         statsdir = self.inputs.statsdir
         cwd = os.getcwd()
         if os.access(os.path.join(cwd, statsdir), os.F_OK):
             rmtree(os.path.join(cwd, statsdir))
 
-        print "using statsdir " + os.path.join(cwd, statsdir)
-        return super(Flameo, self).run()
-
-
-    def outputs(self):
-        """
-            Parameters
-            ----------
-            (all default to None)
-            pes:
-                Parameter estimates for each column of the design matrix
-                for each voxel
-            varcopes:
-                Variance estimates
-            res4d:
-                Model fit residual mean-squared error for each time point
-            copes:
-                Contrast estimates for each contrast
-            varcopes:
-                Variance estimates for each contrast
-            zstats:
-                z-stat file for each contrast
-            tstats:
-                t-stat file for each contrast
-            statsdir :
-                directory storing model estimation output
-
-        """
-        outputs = Bunch(pes=None,
-                        res4d=None,
-                        copes=None,
-                        varcopes=None,
-                        zstats=None,
-                        tstats=None,
-                        mrefs=None,
-                        tdof=None,
-                        weights=None,
-                        statsdir=None)
-        return outputs
+        return super(Flameo, self)._run_interface(runtime)
 
     # ohinds: 2010-04-06
     # made these compatible with flameo
-    def aggregate_outputs(self):
-        outputs = self.outputs()
+    def _list_outputs(self):
+        outputs = self._outputs().get()
         pth = os.path.join(os.getcwd(), self.inputs.statsdir)
 
         pes = glob(os.path.join(pth, 'pe[0-9]*.*'))
         assert len(pes) >= 1, 'No pe volumes generated by FSL Estimate'
-        outputs.pes = pes
+        outputs['pes'] = pes
 
         res4d = glob(os.path.join(pth, 'res4d.*'))
         assert len(res4d) == 1, 'No residual volume generated by FSL Estimate'
-        outputs.res4d = res4d[0]
+        outputs['res4d'] = res4d[0]
 
         copes = glob(os.path.join(pth, 'cope[0-9]*.*'))
         assert len(copes) >= 1, 'No cope volumes generated by FSL CEstimate'
-        outputs.copes = copes
+        outputs['copes'] = copes
 
         varcopes = glob(os.path.join(pth, 'varcope[0-9]*.*'))
         assert len(varcopes) >= 1, 'No varcope volumes generated by FSL CEstimate'
-        outputs.varcopes = varcopes
+        outputs['varcopes'] = varcopes
 
         zstats = glob(os.path.join(pth, 'zstat[0-9]*.*'))
         assert len(zstats) >= 1, 'No zstat volumes generated by FSL CEstimate'
-        outputs.zstats = zstats
+        outputs['zstats'] = zstats
 
         tstats = glob(os.path.join(pth, 'tstat[0-9]*.*'))
         assert len(tstats) >= 1, 'No tstat volumes generated by FSL CEstimate'
-        outputs.tstats = tstats
+        outputs['tstats'] = tstats
 
         mrefs = glob(os.path.join(pth, 'mean_random_effects_var[0-9]*.*'))
         assert len(mrefs) >= 1, 'No mean random effects volumes generated by Flameo'
-        outputs.mrefs = mrefs
+        outputs['mrefs'] = mrefs
 
         tdof = glob(os.path.join(pth, 'tdof_t[0-9]*.*'))
         assert len(tdof) >= 1, 'No T dof volumes generated by Flameo'
-        outputs.tdof = tdof
+        outputs['tdof'] = tdof
 
         weights = glob(os.path.join(pth, 'weights[0-9]*.*'))
         assert len(weights) >= 1, 'No weight volumes generated by Flameo'
-        outputs.weights = weights
+        outputs['weights'] = weights
 
-        outputs.statsdir = pth
+        outputs['statsdir'] = pth
 
         return outputs
 
