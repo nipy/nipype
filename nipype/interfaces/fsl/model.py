@@ -17,7 +17,8 @@ from shutil import rmtree
 from nipype.interfaces.fsl.base import FSLCommand, FSLInfo, FSLTraitedSpec,\
     NEW_FSLCommand
 from nipype.interfaces.base import (Bunch, Interface, load_template,
-                                    InterfaceResult, File, traits, TraitedSpec)
+                                    InterfaceResult, File, traits, TraitedSpec,
+    InputMultiPath, OutputMultiPath, NEW_BaseInterface, BaseInterfaceInputSpec)
 from nipype.utils.filemanip import (list_to_filename, filename_to_list,
                                     loadflat)
 from nipype.utils.docparse import get_doc
@@ -697,9 +698,18 @@ class FixedEffectsModel(Interface):
         outputs.fsf_file = glob(os.path.abspath(os.path.join(os.getcwd(), 'fixed*.fsf')))[0]
         return outputs
 
-
-# satra: 2010-01-23
-class FeatRegister(Interface):
+class FeatRegisterInputSpec(BaseInterfaceInputSpec):
+    feat_dirs = InputMultiPath(Directory(), exist=True, desc="Lower level feat dirs",
+                               mandatory=True)
+    reg_image = File(exist=True, desc="image to register to (will be treated as standard)",
+                     mandatory=True)
+    reg_dof = traits.Int(12, desc="registration degrees of freedom", usedefault=True)
+    
+class FeatRegisterOutputSpec(TraitedSpec):
+    fsf_file = File(exists=True,
+                                desc="FSL feat specification file")
+    
+class FeatRegister(NEW_BaseInterface):
     """Register feat directories to a specific standard
 
     See FixedEffectsModel().inputs_help() for more information.
@@ -708,34 +718,8 @@ class FeatRegister(Interface):
     --------
 
     """
-
-    def __init__(self, *args, **inputs):
-        self._populate_inputs()
-        self.inputs.update(**inputs)
-
-    @property
-    def cmd(self):
-        return 'feat_register'
-
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        return []
-
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-
-        feat_dirs : list of directory names
-            Lower level feat dirs
-        reg_image : file
-            image to register to (will be treated as standard)
-        reg_dof : int
-            registration degrees of freedom [ default : 12 ]
-        """
-        print self.inputs_help.__doc__
+    input_spec = FeatRegisterInputSpec
+    output_spec = FeatRegisterOutputSpec
 
     def _populate_inputs(self):
         """ Initializes the input fields of this interface.
@@ -744,13 +728,12 @@ class FeatRegister(Interface):
                             reg_image=None,
                             reg_dof=12)
 
-    def run(self, **inputs):
-        self.inputs.update(inputs)
+    def _run_interface(self, runtime):
         fsf_header = load_template('featreg_header.tcl')
         fsf_footer = load_template('feat_nongui.tcl')
         fsf_dirs = load_template('feat_fe_featdirs.tcl')
 
-        num_runs = len(filename_to_list(self.inputs.feat_dirs))
+        num_runs = len(self.inputs.feat_dirs)
         fsf_txt = fsf_header.substitute(num_runs=num_runs,
                                         regimage=self.inputs.reg_image,
                                         regdof=self.inputs.reg_dof)
@@ -761,34 +744,12 @@ class FeatRegister(Interface):
         f = open(os.path.join(os.getcwd(), 'register.fsf'), 'wt')
         f.write(fsf_txt)
         f.close()
+    
+        return super(FeatRegister, self)._run_interface(runtime)
 
-        runtime = Bunch(returncode=0,
-                        messages=None,
-                        errmessages=None)
-        outputs = self.aggregate_outputs()
-        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
-
-    def outputs_help(self):
-        """
-        """
-        print self.outputs.__doc__
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-            fsf_file:
-                FSL feat specification file
-        """
-        outputs = Bunch(fsf_file=None)
-        return outputs
-
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outputs.fsf_files = glob(os.path.abspath(os.path.join(os.getcwd(), 'reg*.fsf')))
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['fsf_file'] = os.path.abspath(os.path.join(os.getcwd(), 'register.fsf'))
         return outputs
 
 
