@@ -15,13 +15,13 @@ __docformat__ = 'restructuredtext'
 import os
 from glob import glob
 
+from nipype.externals.pynifti import load
 from nipype.interfaces.base import Bunch
 from nipype.utils.docparse import get_doc
 from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
 from nipype.interfaces.io import FreeSurferSource
-from nipype.interfaces.freesurfer import FSCommand
 
-from nipype.interfaces.freesurfer.base import FSCommandLine, NEW_FSCommand, FSTraitedSpec
+from nipype.interfaces.freesurfer.base import NEW_FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (Bunch, TraitedSpec, File, traits,
                                     Directory, InputMultiPath)
 from nipype.utils.misc import isdefined
@@ -67,110 +67,364 @@ class ParseDicomDir(NEW_FSCommand):
             outputs['outfile'] = self.inputs.outfile
         return outputs
 
-class DicomConvert(FSCommandLine):
-    """use fs mri_convert to convert dicom files
+class UnpackSDcmdirInputSpec(FSTraitedSpec):
+    srcdir = Directory(exists=True, argstr='-src %s',
+                       mandatory=True,
+                       desc='directory with the DICOM files')
+    targdir = Directory(argstr='-targ %s',
+        desc='top directory into which the files will be unpacked')
+    runinfo = traits.Tuple(traits.Int, traits.Str, traits.Str, traits.Str,
+                           mandatory=True,
+                           argstr='-run %d %s %s %s',
+                           xor = ('runinfo', 'config', 'seqconfig'),
+        desc='runno subdir format name : spec unpacking rules on cmdline')
+    config = File(exists=True, argstr='-cfg %s',
+                  mandatory=True,
+                  xor = ('runinfo', 'config', 'seqconfig'),
+                  desc='specify unpacking rules in file')
+    seqconfig = File(exists=True, argstr='-seqcfg %s',
+                     mandatory=True,
+                     xor = ('runinfo', 'config', 'seqconfig'),
+                     desc='specify unpacking rules based on sequence')
+    dirstruct = traits.Enum('fsfast', 'generic', argstr='-%s',
+                     desc='unpack to specified directory structures')
+    noinfodump = traits.Bool(argstr='-noinfodump',
+                             desc='do not create infodump file')
+    scanonly = File(exists=True, argstr='-scanonly %s',
+                    desc='only scan the directory and put result in file')
+    logfile = File(exists=True, argstr='-log %s',
+                   desc='explicilty set log file')
+    spmzeropad = traits.Int(argstr='-nspmzeropad %d',
+                            desc='set frame number zero padding width for SPM')
+    nounpackerr = traits.Bool(argstr='-no-unpackerr',
+                              desc='do not try to unpack runs with errors')
 
-    Parameters
-    ----------
-
-    To see optional arguments
-    DicomConvert().inputs_help()
-
+class UnpackSDcmdir(NEW_FSCommand):
+    """use fs unpacksdcmdir to convert dicom files
 
     Examples
     --------
-    >>> from nipype.interfaces import freesurfer
-    >>> cvt = freesurfer.DicomConvert()
+    """
+    _cmd = 'unpacksdcmdir'
+    input_spec = UnpackSDcmdirInputSpec
+
+
+class MriConvertInputSpec(FSTraitedSpec):
+    readonly = traits.Bool(argstr='--read_only',
+                            desc='read the input volume')
+    nowrite = traits.Bool(argstr='--no_write',
+                           desc='do not write output')
+    ininfo = traits.Bool(argstr='--in_info',
+                         desc='display input info')
+    outinfo = traits.Bool(argstr='--out_info',
+                          desc='display output info')
+    instats = traits.Bool(argstr='--in_stats',
+                          desc='display input stats')
+    outstats = traits.Bool(argstr='--out_stats',
+                           desc='display output stats')
+    inmatrix = traits.Bool(argstr='--in_matrix',
+                           desc='display input matrix')
+    outmatrix = traits.Bool(argstr='--out_matrix',
+                            desc='display output matrix')
+    in_i_size = traits.Int(argstr='--in_i_size %d',
+                           desc='input i size')
+    in_j_size = traits.Int(argstr='--in_j_size %d',
+                           desc='input j size')
+    in_k_size = traits.Int(argstr='--in_k_size %d',
+                           desc='input k size')
+    forceras = traits.Bool(argstr='--force_ras_good',
+                           desc='use default when orientation info absent')
+    in_i_dir = traits.Tuple(traits.Float, traits.Float,traits.Float,
+                           argstr='--in_i_direction %f %f %f',
+                           desc='<R direction> <A direction> <S direction>')
+    in_j_dir = traits.Tuple(traits.Float, traits.Float,traits.Float,
+                           argstr='--in_j_direction %f %f %f',
+                           desc='<R direction> <A direction> <S direction>')
+    in_k_dir = traits.Tuple(traits.Float, traits.Float,traits.Float,
+                           argstr='--in_k_direction %f %f %f',
+                           desc='<R direction> <A direction> <S direction>')
+    #[''.join([i['x'],i['y'],i['z']]) for i in \
+    #    walk(dict(x=lambda:['L','R'],y=lambda:['A','P'],z=lambda:['I','S']).items())]
+    _orientations = ['LAI', 'LAS', 'RAI', 'RAS', 'LPI', 'LPS', 'RPI', 'RPS']
+    inorientation = traits.Enum(_orientations,
+                                argstr='--in_orientation %s',
+                                desc='specify the input orientation')
+    incenter = traits.List(traits.Float, maxlen=3,
+                           argstr='--in_center %s',
+                           desc='<R coordinate> <A coordinate> <S coordinate>')
+    sphinx = traits.Bool(argstr='--sphinx',
+                         desc='change orientation info to sphinx')
+    out_i_count = traits.Int(argstr='--out_i_count %d',
+                             desc='some count ?? in i direction')
+    out_j_count = traits.Int(argstr='--out_j_count %d',
+                             desc='some count ?? in j direction')
+    out_k_count = traits.Int(argstr='--out_k_count %d',
+                             desc='some count ?? in k direction')
+    voxsize = traits.Tuple(traits.Float, traits.Float,traits.Float,
+                           argstr='--voxsize %f %f %f',
+                           desc='<size_x> <size_y> <size_z> specify the size (mm) - useful for upsampling or downsampling')
+    out_i_size = traits.Int(argstr='--out_i_size %d',
+                            desc='output i size')
+    out_j_size = traits.Int(argstr='--out_j_size %d',
+                            desc='output j size')
+    out_k_size = traits.Int(argstr='--out_k_size %d',
+                            desc='output k size')
+    out_i_dir = traits.Tuple(traits.Float, traits.Float,traits.Float,
+                           argstr='--out_i_direction %f %f %f',
+                           desc='<R direction> <A direction> <S direction>')
+    out_j_dir = traits.Tuple(traits.Float, traits.Float,traits.Float,
+                           argstr='--out_j_direction %f %f %f',
+                           desc='<R direction> <A direction> <S direction>')
+    out_k_dir = traits.Tuple(traits.Float, traits.Float,traits.Float,
+                             argstr='--out_k_direction %f %f %f',
+                             desc='<R direction> <A direction> <S direction>')
+    outorientation = traits.Enum(_orientations,
+                                argstr='--out_orientation %s',
+                                desc='specify the output orientation')
+    outcenter = traits.Tuple(traits.Float, traits.Float,traits.Float,
+                           argstr='--out_center %f %f %f',
+                           desc='<R coordinate> <A coordinate> <S coordinate>')
+    outdatatype = traits.Enum('uchar', 'short', 'int', 'float',
+                              argstr='--out_data_type %s',
+                              descr='output data type <uchar|short|int|float>')
+    resampletype = traits.Enum('interpolate', 'weighted', 'nearest', 'sinc', 'cubic',
+                               argstr='--resample_type %s',
+                               desc='<interpolate|weighted|nearest|sinc|cubic> (default is interpolate)')
+    noscale = traits.Bool(argstr='--no_scale 1',
+                          desc='dont rescale values for COR')
+    nochange = traits.Bool(argstr='--nochange',
+                           desc="don't change type of input to that of template")
+    autoalignmtx = File(exists=True, argstr='--autoalign %s',
+                        desc='text file with autoalign matrix')
+    unwarpgradient = traits.Bool(argstr='--unwarp_gradient_nonlinearity',
+                                 desc='unwarp gradient nonlinearity')
+    applyxfm = File(exists=True, argstr='--apply_transform %s',
+                    desc='apply xfm file')
+    applyinvxfm = File(exists=True, argstr='--apply_inverse_transform %s',
+                       desc='apply inverse transformation xfm file')
+    devolvexfm = traits.Str(argstr='--devolvexfm %s',
+                            desc='subject id')
+    cropcenter = traits.Tuple(traits.Int, traits.Int, traits.Int,
+                              argstr='--crop %d %d %d',
+                              desc='<x> <y> <z> crop to 256 around center (x,y,z)')
+    cropsize = traits.Tuple(traits.Int, traits.Int, traits.Int,
+                            argstr='--cropsize %d %d %d',
+                            desc='<dx> <dy> <dz> crop to size <dx, dy, dz>')
+    cutends = traits.Int(argstr='--cutends %d',
+                         desc='remove ncut slices from the ends')
+    slicecrop = traits.Tuple(traits.Int, traits.Int,
+                             argstr='--slice-crop %d %d',
+                             desc='s_start s_end : keep slices s_start to s_end')
+    slicereverse = traits.Bool(argstr='--slice-reverse',
+                               desc='reverse order of slices, update vox2ras')
+    slicebias = traits.Float(argstr='--slice-bias %f',
+                             desc='apply half-cosine bias field')
+    fwhm = traits.Float(argstr='--fwhm %f',
+                        desc='smooth input volume by fwhm mm')
+    _filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
+                  'analyze4d', 'spm', 'afni', 'brik', 'bshort',
+                  'bfloat', 'sdt', 'outline', 'otl', 'gdf',
+                  'nifti1', 'nii', 'niigz']
+    _infiletypes = ['ge', 'gelx', 'lx','ximg', 'siemens', 'dicom', 'siemens+dicom']
+    intype = traits.Enum(_filetypes + _infiletypes, argstr='--in_type %s',
+                        desc='input file type')
+    outtype = traits.Enum(_filetypes, argstr='--out_type %s',
+                        desc='output file type')
+    ascii = traits.Bool(argstr='--ascii',
+                        desc='save output as ascii col>row>slice>frame')
+    reorder = traits.Tuple(traits.Int, traits.Int, traits.Int,
+                           argstr='--reorder %d %d %d',
+                           desc='olddim1 olddim2 olddim3')
+    invertcontrast = traits.Float(argstr='--invert_contrast %f',
+                                  desc='threshold for inversting contrast')
+    infile = File(exists=True, mandatory=True,
+                  position=-2,
+                  argstr='--input_volume %s',
+                  desc='File to read/convert')
+    outfile = File(argstr='--output_volume %s', 
+                   position=-1, genfile=True,
+                   desc='output filename or True to generate one')
+    conform = traits.Bool(argstr='--conform',
+                          desc='conform to 256^3')
+    conformmin = traits.Bool(argstr='--conform_min',
+                             desc='conform to smallest size')
+    conformsize = traits.Float(argstr='--conform_size %s',
+                               desc='conform to size_in_mm')
+    parseonly = traits.Bool(argstr='--parse_only',
+                            desc='parse input only')
+    subjectname = traits.Str(argstr='--subject_name %s',
+                             desc = 'subject name ???')
+    reslicelike = File(exists=True, argstr='--reslice_like %s',
+                       desc='reslice output to match file')
+    templatetype = traits.Enum(_filetypes + _infiletypes,
+                               argstr='--template_type %s',
+                               desc='template file type')
+    split = traits.Bool(argstr='--split',
+                        desc='split output frames into separate output files.')
+    frame = traits.Int(argstr='--frame %d',
+                       desc='keep only 0-based frame number')
+    midframe = traits.Bool(argstr='--mid-frame',
+                           desc='keep only the middle frame')
+    skipn = traits.Int(argstr='--nskip %d',
+                       desc='skip the first n frames')
+    dropn = traits.Int(argstr='--ndrop %d',
+                       desc='drop the last n frames')
+    framesubsample = traits.Tuple(traits.Int, traits.Int, traits.Int,
+                                  argstr='--fsubsample %d %d %d',
+                                  desc='start delta end : frame subsampling (end = -1 for end)')
+    inscale = traits.Float(argstr='--scale %f',
+                         desc='input intensity scale factor')
+    outscale = traits.Float(argstr='--out-scale %d',
+                            desc='output intensity scale factor')
+    inlike = File(exists=True, argstr='--in_like %s',
+                  desc='input looks like')
+    fillparcellation = traits.Bool(argstr='--fill_parcellation',
+                                   desc='fill parcellation')
+    smoothparcellation = traits.Bool(argstr='--smooth_parcellation',
+                                     desc='smooth parcellation')
+    zerooutlines = traits.Bool(argstr='--zero_outlines',
+                               desc='zero outlines')
+    colorfile = File(exists=True, argstr='--color_file %s',
+                     desc='color file')
+    notranslate = traits.Bool(argstr='--no_translate',
+                              desc='???')
+    statusfile = File(argstr='--status %s',
+                      desc='status file for DICOM conversion')
+    sdcmlist = File(exists=True, argstr='--sdcmlist %s',
+                    desc='list of DICOM files for conversion')
+    templateinfo = traits.Bool('--template_info',
+                               desc='dump info about template')
+    crop_gdf = traits.Bool(argstr='--crop_gdf',
+                           desc='apply GDF cropping')
+    zerogezoffset = traits.Bool(argstr='--zero_ge_z_offset',
+                               desc='zero ge z offset ???')
+
+class MriConvertOutputSpec(TraitedSpec):
+    outfile = File(exists=True, desc='converted output file')
+
+class MriConvert(NEW_FSCommand):
+    """use fs mri_convert to manipulate files
+
+    adds niigz as an output type option
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.freesurfer import MriConvert
+    >>> mc = MriConvert()
+    >>> mc.inputs.infile = 'anatomical.nii'
+    >>> mc.inputs.outtype = 'mgz'
+    >>> mc.cmdline
+    'mri_convert --out_type mgz --input_volume struct.nii --output_volume struct_out.mgz'
+    
+    """
+    _cmd = 'mri_convert'
+    input_spec = MriConvertInputSpec
+    output_spec = MriConvertOutputSpec
+
+    filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
+                   afni='brik', brik='brik', bshort='bshort',
+                   spm='img', analyze='img', analyze4d='img',
+                   bfloat='bfloat', nifti1='img', nii='nii',
+                   niigz='nii.gz')
+
+    def _format_arg(self, name, spec, value):
+        if name in ['intype', 'outtype', 'templatetype']:
+            if value == 'niigz':
+                return spec.argstr % 'nii'
+        return super(MriConvert, self)._format_arg(name, spec, value)
+    
+    def _get_outfilename(self):
+        outfile = self.inputs.outfile
+        if not isdefined(outfile):
+            if isdefined(self.inputs.outtype):
+                suffix = '_out.' + self.filemap[self.inputs.outtype]
+            else:
+                suffix = '_out.nii.gz'
+            outfile = fname_presuffix(self.inputs.infile,
+                                      newpath=os.getcwd(),
+                                      suffix=suffix,
+                                      use_ext=False)
+        return outfile
+        
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outfile = self._get_outfilename()
+        if isdefined(self.inputs.outtype):
+            if self.inputs.outtype in ['spm', 'analyze']:
+                # generate all outputs
+                size = load(self.inputs.infile).get_shape()
+                if len(size)==3:
+                    tp = 1
+                else:
+                    tp = size[-1]
+                # have to take care of all the frame manipulations
+                warn('Not taking frame manipulations into account')
+                outfiles = []
+                for i in range(tp):
+                    outfiles.append(fname_presuffix(outfile,
+                                                    suffix='%03d'%(i+1)))
+                outfile = outfiles
+        outputs['outfile'] = outfile
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._get_outfilename()
+        return None    
+
+class DicomConvertInputSpec(FSTraitedSpec):
+    dicomdir = Directory(exists=True, mandatory=True,
+                         desc='dicom directory from which to convert dicom files')
+    base_output_dir = Directory(mandatory=True,
+            desc='directory in which subject directories are created')
+    subject_dir_template = traits.Str('S.%04d', usedefault=True,
+                          desc='template for subject directory name')
+    subject_id = traits.Any(desc = 'subject identifier to insert into template')
+    file_mapping = traits.List(traits.Tuple(traits.Str, traits.Str),
+               desc='defines the output fields of interface')
+    out_type = traits.Enum('niigz', MriConvertInputSpec._filetypes,
+                           usedefault=True,
+               desc='defines the type of output file produced')
+    dicominfo = File(exists=True,
+               desc='File containing summary information from mri_parse_sdcmdir')
+    seq_list = traits.List(traits.Str,
+                           requires=['dicominfo'],
+               desc='list of pulse sequence names to be converted.')
+    ignore_single_slice = traits.Bool(requires=['dicominfo'],
+               desc='ignore volumes containing a single slice')
+
+class DicomConvert(NEW_FSCommand):
+    """use fs mri_convert to convert dicom files
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import DicomConvert
+    >>> cvt = DicomConvert()
     >>> cvt.inputs.dicomdir = '/incoming/TrioTim-35115-2009-1900-123456/'
     >>> cvt.inputs.file_mapping = [('nifti','*.nii'),('info','dicom*.txt'),('dti','*dti.bv*')]
 
-   """
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'mri_convert'
+    """
+    _cmd = 'mri_convert'
+    input_spec = DicomConvertInputSpec
 
-
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-        
-        (all default to None and are unset)
-        
-        dicomdir : /path/to/dicomfiles
-            directory from which to convert dicom files
-        base_output_dir : /path/to/outputdir
-            base output directory in which subject specific
-            directories are created to store the nifti files
-        subject_dir_template : string
-            template for subject directory name
-            Default:'S.%04d'
-        subject_id : string or int
-            subject identifier to insert into template. For the
-            example above template subject_identifier should be an
-            integer. Default: id from Dicom file name 
-        file_mapping : list of tuples
-            defines the output fields of interface and the kind of
-            file type they store
-            Example:  [('niftifiles','*.nii'),('dtiinfo','*mghdti.bv*')]
-        out_type : string
-            defines the type of output file produced.
-            possible options nii, nii.gz, mgz (default: nii)
-        dicominfo : file
-            File containing summary information from mri_parse_sdcmdir
-        seq_list : list of strings
-            list of pulse sequence names to be converted.
-        ignore_single_slice : boolean
-            ignores volumes containing a single slice. dicominfo needs to be
-            available. 
-        flags = unsupported flags, use at your own risk
-
-        """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(dicomdir=None,
-                            base_output_dir=None,
-                            subject_dir_template=None,
-                            subject_id=None,
-                            file_mapping=None,
-                            out_type='nii',
-                            dicominfo=None,
-                            seq_list=None,
-                            ignore_single_slice=None,
-                            flags=None)
-
-    def _parseinputs(self):
+    def _get_dicomfiles(self):
         """validate fsl bet options
         if set to None ignore
         """
-        out_inputs = {'dicomfiles':None}
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.items() if v]
-        for opt in inputs:
-            if opt == 'dicomdir':
-                out_inputs['dicomfiles'] = glob(os.path.abspath(os.path.join(inputs[opt],'*-1.dcm')))
-                continue
-            if opt in ['base_output_dir', 'subject_dir_template', 'subject_id', \
-                           'file_mapping', 'out_type', 'dicominfo', 'seq_list', \
-                           'ignore_single_slice', 'flags']:
-                continue
-            print 'option %s not supported'%(opt)
-        
-        return out_inputs
+        return glob(os.path.abspath(os.path.join(self.inputs.dicomdir,
+                                                 '*-1.dcm')))
 
     def _get_outdir(self):
         """returns output directory"""
-        valid_inputs = self._parseinputs()
         subjid = self.inputs.subject_id
-        if not subjid:
-            path,fname = os.path.split(valid_inputs['dicomfiles'][0])
-            subjid = fname.split('-')[0]
-        if self.inputs.subject_dir_template:
+        if not isdefined(subjid):
+            path,fname = os.path.split(self._get_dicomfiles()[0])
+            subjid = int(fname.split('-')[0])
+        if isdefined(self.inputs.subject_dir_template):
             subjid  = self.inputs.subject_dir_template % subjid
         basedir=self.inputs.base_output_dir
-        if not basedir:
+        if not isdefined(basedir):
             basedir = os.path.abspath('.')
         outdir = os.path.abspath(os.path.join(basedir,subjid))
         return outdir
@@ -181,7 +435,7 @@ class DicomConvert(FSCommandLine):
         Requires a dicom info summary file generated by ``DicomDirInfo``
 
         """
-        seq = np.genfromtxt(self.inputs.dicominfo,dtype=object)
+        seq = np.genfromtxt(self.inputs.dicominfo, dtype=object)
         runs = []
         for s in seq:
             if self.inputs.seq_list:
@@ -197,16 +451,16 @@ class DicomConvert(FSCommandLine):
 
     def _get_filelist(self, outdir):
         """Returns list of files to be converted"""
-        valid_inputs = self._parseinputs()
         filemap = {}
-        for f in valid_inputs['dicomfiles']:
+        for f in self._get_dicomfiles():
             head,fname = os.path.split(f)
             fname,ext = os.path.splitext(fname)
             fileparts = fname.split('-')
             runno = int(fileparts[1])
+            out_type = MriConvert.filemap[self.inputs.out_type]
             outfile = os.path.join(outdir,'.'.join(('%s-%02d'% (fileparts[0],
                                                                 runno),
-                                                    self.inputs.out_type)))
+                                                    out_type)))
             filemap[runno] = (f,outfile)
         if self.inputs.dicominfo:
             files = [filemap[r] for r in self._get_runs()]
@@ -214,8 +468,11 @@ class DicomConvert(FSCommandLine):
             files = [filemap[r] for r in filemap.keys()]
         return files
 
-    def _compile_command(self):
-        """validates fsl options and generates command line argument"""
+    @property
+    def cmdline(self):
+        """ `command` plus any arguments (args)
+        validates arguments and generates command line"""
+        self._check_mandatory_inputs()
         outdir = self._get_outdir()
         cmd = []
         if not os.path.exists(outdir):
@@ -232,162 +489,7 @@ class DicomConvert(FSCommandLine):
                 single_cmd = '%s %s %s' % (self.cmd, infile,
                                            os.path.join(outdir, outfile))
                 cmd.extend([single_cmd])
-        self._cmdline =  '; '.join(cmd)
-        return self._cmdline
-
-    def outputs(self):
-        return Bunch()
-
-    def aggregate_outputs(self):
-        outdir = self._get_outdir()
-        outputs = self.outputs()
-        if self.inputs.file_mapping:
-            for field,template in self.inputs.file_mapping:
-                setattr(outputs, field, sorted(glob(os.path.join(outdir,
-                                                                 template))))
-        return outputs
-
-class Dicom2Nifti(FSCommandLine):
-    """use fs mri_convert to convert dicom files to nifti-1 files
-
-    Parameters
-    ----------
-
-    To see optional arguments
-    Dicom2Nifti().inputs_help()
-
-
-    Examples
-    --------
-    >>> from nipype.interfaces import freesurfer
-    >>> cvt = freesurfer.Dicom2Nifti()
-    >>> cvt.inputs.dicomdir = '/software/data/STUT/RAWDATA/TrioTim-35115-20090428-081900-234000/'
-    >>> cvt.inputs.file_mapping = [('nifti','*.nii'),('info','dicom*.txt'),('dti','*dti.bv*')]
-    >>> #out = cvt.run() # commented out as above directories are not installed
-
-   """
-
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'mri_convert'
-
-
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-        
-        (all default to None and are unset)
-        
-        dicomdir : /path/to/dicomfiles
-            directory from which to convert dicom files
-        base_output_dir : /path/to/outputdir
-            base output directory in which subject specific
-            directories are created to store the nifti files
-        subject_dir_template : string
-            template for subject directory name
-            Default:'S.%04d'
-        subject_id : string or int
-            subject identifier to insert into template. For the
-            example above template subject_identifier should be an
-            integer. Default: id from Dicom file name 
-        file_mapping : list of tuples
-            defines the output fields of interface and the kind of
-            file type they store
-            Example:  [('niftifiles','*.nii'),('dtiinfo','*mghdti.bv*')]
-        out_type : string
-            defines the type of output file produced.
-            possible options nii, nii.gz, mgz (default: nii)
-        flags = unsupported flags, use at your own risk
-
-        """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(dicomdir=None,
-                            base_output_dir=None,
-                            subject_dir_template=None,
-                            subject_id=None,
-                            file_mapping=None,
-                            out_type='nii',
-                            flags=None)
-
-    def _parseinputs(self):
-        """validate fsl bet options
-        if set to None ignore
-        """
-        out_inputs = {'dicomfiles':None}
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.items() if v is not None ]
-        for opt in inputs:
-            if opt == 'dicomdir':
-                out_inputs['dicomfiles'] = glob(os.path.abspath(os.path.join(inputs[opt],'*-1.dcm')))
-                continue
-            if opt == 'base_output_dir':
-                continue
-            if opt == 'subject_dir_template':
-                continue
-            if opt == 'subject_id':
-                continue
-            if opt == 'file_mapping':
-                continue
-            if opt == 'out_type':
-                continue
-            if opt == 'flags':
-                continue
-            print 'option %s not supported'%(opt)
-        
-        return out_inputs
-
-    def _get_outdir(self):
-        """returns output directory"""
-        valid_inputs = self._parseinputs()
-        subjid = self.inputs.subject_id
-        if not subjid:
-            path,fname = os.path.split(valid_inputs['dicomfiles'][0])
-            subjid = fname.split('-')[0]
-        if self.inputs.subject_dir_template:
-            subjid  = self.inputs.subject_dir_template % subjid
-        basedir=self.inputs.base_output_dir
-        if not basedir:
-            basedir = os.path.abspath('.')
-        outdir = os.path.abspath(os.path.join(basedir,subjid))
-        return outdir
-    
-    def _compile_command(self):
-        """validates fsl options and generates command line argument"""
-        valid_inputs = self._parseinputs()
-        outdir = self._get_outdir()
-        cmd = []
-        if not os.path.exists(outdir):
-            cmdstr = 'python -c "import os; os.makedirs(\'%s\')";' % outdir
-            cmd.extend([cmdstr])
-        dicominfotxt = os.path.join(outdir,'dicominfo.txt')
-        if not os.path.exists(dicominfotxt):
-            cmdstr = 'dcmdir-info-mgh %s > %s;' % (self.inputs.dicomdir, dicominfotxt)
-            cmd.extend([cmdstr])
-        for f in valid_inputs['dicomfiles']:
-            head,fname = os.path.split(f)
-            fname,ext  = os.path.splitext(fname)
-            outfile = os.path.join(outdir,'.'.join((fname,self.inputs.out_type)))
-            if not os.path.exists(outfile):
-                single_cmd = '%s %s %s;' % (self.cmd, f, outfile)
-                cmd.extend([single_cmd])
-        self._cmdline =  ' '.join(cmd)
-        return self._cmdline
-
-    def outputs(self):
-        return Bunch()
-
-    def aggregate_outputs(self):
-        outdir = self._get_outdir()
-        outputs = self.outputs()
-        if self.inputs.file_mapping:
-            for field,template in self.inputs.file_mapping:
-                setattr(outputs, field, sorted(glob(os.path.join(outdir,
-                                                                 template))))
-        return outputs
+        return  '; '.join(cmd)
 
 class ResampleInputSpec(FSTraitedSpec):
     infile = File(exists=True, argstr='-i %s', mandatory=True,
