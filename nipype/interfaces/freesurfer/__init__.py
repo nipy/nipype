@@ -6,8 +6,7 @@ from nipype.interfaces.freesurfer.preprocess import (ParseDicomDir,
                                                      Resample, ReconAll,
                                                      BBRegister,
                                                      ApplyVolTransform,
-                                                     Smooth, DicomConvert,
-                                                     Dicom2Nifti)
+                                                     Smooth, DicomConvert)
 from nipype.interfaces.freesurfer.model import (MrisPreproc, SurfConcat, GlmFit,
                                                 OneSampleTTest, Binarize, Threshold,
                                                 Concatenate, SegStats, Label2Vol)
