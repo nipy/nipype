@@ -23,6 +23,7 @@ from nipype.utils.filemanip import (list_to_filename, filename_to_list,
 from nipype.utils.docparse import get_doc
 from nipype.externals.pynifti import load
 from nipype.utils.misc import isdefined
+from nipype.interfaces.traits import Directory
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -338,76 +339,23 @@ class Level1Design(Interface):
         return outputs
 
 
-# satra: 2010-01-03
-class Feat(FSLCommand):
+class FeatInputSpec(FSLTraitedSpec):
+    fsf_file = File(exist=True, mandatory=True,argstr="%s", position=0, 
+                    desc="File specifying the feat design spec file")
+    
+class FeatOutputSpec(TraitedSpec):
+    featdir = Directory(exists=True)
+
+class Feat(NEW_FSLCommand):
     """Uses FSL feat to calculate first level stats
     """
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'feat'
+    _cmd = 'feat'
+    input_spec = FeatInputSpec
+    output_spec = FeatOutputSpec
 
-    opt_map = {
-        'fsf_file':         None,
-        }
-
-    def inputs_help(self):
-        """Print command line documentation for feat_model."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    def _parse_inputs(self):
-        """validate fsl feat_model options"""
-        allargs = super(Feat, self)._parse_inputs(skip=('fsf_file'))
-
-        if self.inputs.fsf_file:
-            allargs.insert(0, self.inputs.fsf_file)
-        return allargs
-
-    def run(self, fsf_file=None, **inputs):
-        """Execute the command.
-
-        Parameters
-        ----------
-        fsf_file : string
-            File specifying the feat design spec file
-
-        Returns
-        -------
-        results : InterfaceResult
-            An :class:`nipype.interfaces.base.InterfaceResult` object
-            with a copy of self in `interface`
-
-        Examples
-        --------
-        To pass command line arguments to ``feat_model`` that are not part of
-        the ``inputs`` attribute, pass them in with the ``flags``
-        input.
-
-        >>> from nipype.interfaces import fsl
-        >>> fmodel = fsl.FeatModel(fsf_file='foo.fsf')
-        """
-        if fsf_file:
-            self.inputs.fsf_file = fsf_file
-        if not self.inputs.fsf_file:
-            raise ValueError('FeatModel requires an input file')
-        if isinstance(self.inputs.fsf_file, list):
-            raise ValueError('FeatModel does not support multiple input files')
-        self.inputs.update(**inputs)
-        return super(Feat, self).run()
-
-    def outputs(self):
-        """
-        Parameters
-        ----------
-        featdir: str
-            Directory containing the output of feat
-        """
-        outputs = Bunch(featdir=None)
-        return outputs
-
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outputs.featdir = glob(os.path.join(os.getcwd(), '*feat'))[0]
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['featdir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
         return outputs
 
 
