@@ -220,12 +220,6 @@ level1design.inputs.reg_dof = 12
 featmodel = pe.MapNode(interface=fsl.FeatModel(),diskbased=True, name="featmodel.fsl",
                        iterfield = ['fsf_file'])
 
-fedesign = pe.Node(interface=fsl.FixedEffectsModel(num_copes=2),diskbased=True, name="featdesign")
-
-featfemodel = pe.Node(interface=fsl.Feat(),
-                             name='FixedEffects.feat',
-                             diskbased=True)
-
 
 
 ##########################
@@ -248,6 +242,7 @@ def pickfirst(files):
     return files[0]
 
 l1pipeline.connect([# preprocessing in native space
+                    (infosource, datasource, [('subject_id', 'subject_id')]),
                  (datasource, skullstrip, [('struct','infile')]),
                  (datasource, motion_correct, [('func', 'infile')]),
                  (datasource, extract_ref, [(('func', pickfirst), 'infile')]),
@@ -261,15 +256,11 @@ l1pipeline.connect([# preprocessing in native space
                  # Model design
                  (hpfilter,modelspec,[('outfile','functional_runs')]),
                  (datasource,modelspec,[('subject_id','subject_id'),
-                                        (('subject_id',subjectinfo),'subject_info_func')]),
+                                        (('subject_id',subjectinfo),'subject_info')]),
                  (motion_correct,modelspec,[('parfile','realignment_parameters')]),
                  (modelspec,level1design,[('session_info','session_info')]),
                  (level1design,featmodel,[('fsf_files','fsf_file')]),
                 ])
-"""
-                 (featmodel,fedesign,[('featdir','feat_dirs')]),
-                 (fedesign,featfemodel,[('fsf_file','fsf_file')]),
-"""
 
 # store relevant outputs from various stages of preprocessing
 l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
