@@ -216,6 +216,8 @@ class DataGrabber(IOBase):
         """
         super(DataGrabber, self).__init__(**kwargs)
         undefined_traits = {}
+        # used for mandatory inputs check
+        self._infields = infields
         if infields:
             for key in infields:
                 self.inputs.add_trait(key, traits.Any)
@@ -243,6 +245,16 @@ class DataGrabber(IOBase):
         return add_traits(base, self.inputs.template_args.keys())
 
     def _list_outputs(self):
+        # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
+        # hence manual check
+        if self._infields:
+            for key in self._infields:
+                value = getattr(self.inputs,key)
+                if not isdefined(value):
+                    msg = "%s requires a value for input '%s' because it was listed in 'infields'" % \
+                    (self.__class__.__name__, key)
+                    raise ValueError(msg)
+                
         outputs = {}
         for key, args in self.inputs.template_args.items():
             outputs[key] = []
