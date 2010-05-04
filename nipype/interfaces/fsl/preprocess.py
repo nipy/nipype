@@ -16,7 +16,8 @@ from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
 from nipype.interfaces.fsl.base import NEW_FSLCommand, FSLTraitedSpec
 from nipype.interfaces.base import Bunch, TraitedSpec, File,\
     InputMultiPath
-from nipype.utils.filemanip import fname_presuffix, list_to_filename
+from nipype.utils.filemanip import fname_presuffix, list_to_filename,\
+    split_filename
 from nipype.utils.docparse import get_doc
 from nipype.utils.misc import container_to_string, is_container, isdefined
 
@@ -768,7 +769,35 @@ class ApplyXfm(FSLCommand): #Flirt):
         return outputs
 
 
-class McFlirt(FSLCommand):
+class McFlirtInputSpec(FSLTraitedSpec):
+    infile = File(exists=True, position= 0, argstr="-in %s", mandatory=True)
+    outfile = File(exists=True, argstr='-out %s', genfile=True)
+    cost = traits.Enum('mutualinfo','woods','corratio','normcorr','normmi','leastsquares', argstr='-cost %s')
+    bins = traits.Int(argstr='-bins %d')
+    dof = traits.Int(argstr='-dof %d')
+    refvol = traits.Int(argstr='-refvol %d')
+    scaling = traits.Float(argstr='-scaling %.2f')
+    smooth = traits.Float(argstr='-smooth %.2f')
+    rotation = traits.Int(argstr='-rotation %d')
+    stages = traits.Int(argstr='-stages %d')
+    init = File(exists=True, argstr='-init %s')
+    usegradient = traits.Bool(argstr='-gdt')
+    usecontour = traits.Bool(argstr='-edge')
+    meanvol = traits.Bool(argstr='-meanvol')
+    statsimgs = traits.Bool(argstr='-stats')
+    savemats = traits.Bool(argstr='-mats')
+    saveplots = traits.Bool(argstr='-plots')
+    reffile = File(exists=True, argstr='-reffile %s')
+    
+class McFlirtOutputSpec(TraitedSpec):
+    outfile = File(exists=True)
+    varianceimg = File(exists=True)
+    stdimg = File(exists=True)
+    meanimg = File(exists=True)
+    parfile = File(exists=True)
+    outmatfile = File(exists=True)
+
+class McFlirt(NEW_FSLCommand):
     """Use FSL MCFLIRT to do within-modality motion correction.
 
     For complete details, see the `MCFLIRT Documentation.
@@ -784,140 +813,40 @@ class McFlirt(FSLCommand):
     >>> res = mcflt.run()
 
     """
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'mcflirt'
+    _cmd = 'mcflirt'
+    input_spec = McFlirtInputSpec
+    output_spec = McFlirtOutputSpec
 
-    def inputs_help(self):
-        """Print command line documentation for MCFLIRT."""
-        print get_doc(self.cmd, self.opt_map, '-help', False)
-
-    opt_map = {
-            'outfile':     '-out %s',
-            'cost':        '-cost %s',
-            'bins':        '-bins %d',
-            'dof':         '-dof %d',
-            'refvol':      '-refvol %d',
-            'scaling':     '-scaling %.2f',
-            'smooth':      '-smooth %.2f',
-            'rotation':    '-rotation %d',
-            'verbose':     '-verbose',
-            'stages':      '-stages %d',
-            'init':        '-init %s',
-            'usegradient': '-gdt',
-            'usecontour':  '-edge',
-            'meanvol':     '-meanvol',
-            'statsimgs':   '-stats',
-            'savemats':    '-mats',
-            'saveplots':   '-plots',
-            'report':      '-report',
-            'reffile':     '-reffile %s',
-            'infile':      None,
-            }
-
-    def _parse_inputs(self):
-        """Call our super-method, then add our input files"""
-        allargs = super(McFlirt, self)._parse_inputs(skip=('infile'))
-
-        if self.inputs.infile:
-            infile = list_to_filename(self.inputs.infile)
-            allargs.insert(0, '-in %s' % infile)
-            if self.inputs.outfile is None:
-                outfile = self._gen_fname(infile, self.inputs.outfile,
-                                          suffix='_mcf')
-                allargs.append(self.opt_map['outfile'] % outfile)
-
-        return allargs
-
-    def run(self, infile=None, **inputs):
-        """Runs mcflirt
-
-        Parameters
-        ----------
-        infile : string
-            Filename of volume to be aligned
-        inputs : dict
-            Additional ``inputs`` assignments.
-
-        Returns
-        -------
-        results : InterfaceResult
-            An :class:`nipype.interfaces.base.InterfaceResult` object
-            with a copy of self in `interface`
-
-        Examples
-        --------
-        >>> from nipype.interfaces import fsl
-        >>> mcflrt = fsl.McFlirt(cost='mutualinfo')
-        >>> mcflrtd = mcflrt.run(infile='timeseries.nii')
-
-        """
-        if infile:
-            self.inputs.infile = infile
-        if not self.inputs.infile:
-            raise AttributeError('McFlirt requires an infile.')
-
-        self.inputs.update(**inputs)
-        return super(McFlirt, self).run()
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-            outfile : string, filename
-            varianceimg : string, filename
-            stdimg : string, filename
-            meanimg : string, filename
-            parfile : string, filename
-            outmatfile : string, filename
-        """
-        outputs = Bunch(outfile=None,
-                        varianceimg=None,
-                        stdimg=None,
-                        meanimg=None,
-                        parfile=None,
-                        outmatfile=None)
-        return outputs
-
-    def aggregate_outputs(self):
+    def _list_outputs(self):
         cwd = os.getcwd()
-
-        outputs = self.outputs()
-        # get basename (correct fsloutpputytpe extension)
-        # We are generating outfile if it's not there already
-        # if self.inputs.outfile:
-
-        outputs.outfile = self._gen_fname(list_to_filename(self.inputs.infile),
-                self.inputs.outfile, cwd=cwd, suffix='_mcf', check=True)
-
+        outputs = self._outputs().get()
+        
+        outputs['outfile'] = self.inputs.outfile
+        if not isdefined(outputs['outfile']):
+            outputs['outfile'] = self._gen_fname(self.inputs.infile,
+                                              suffix = '_mcf')
+        
         # XXX Need to change 'item' below to something that exists
         # outfile? infile?
         # These could be handled similarly to default values for inputs
-        if self.inputs.statsimgs:
-            outputs.varianceimg = self._gen_fname(list_to_filename(self.inputs.infile),
-                self.inputs.outfile, cwd=cwd, suffix='_variance', check=True)
-            outputs.stdimg = self._gen_fname(list_to_filename(self.inputs.infile),
-                self.inputs.outfile, cwd=cwd, suffix='_sigma', check=True)
-            outputs.meanimg = self._gen_fname(list_to_filename(self.inputs.infile),
-                self.inputs.outfile, cwd=cwd, suffix='_meanvol', check=True)
-        if self.inputs.savemats:
-            matnme, _ = os.path.splitext(list_to_filename(self.inputs.infile))
-            matnme = matnme + '.mat'
-            outputs.outmatfile = matnme
-        if self.inputs.saveplots:
+        if isdefined(self.inputs.statsimgs):
+            outputs['varianceimg'] = self._gen_fname(self.inputs.infile, cwd=cwd, suffix='_variance')
+            outputs['stdimg'] = self._gen_fname(self.inputs.infile, cwd=cwd, suffix='_sigma')
+            outputs['meanimg'] = self._gen_fname(self.inputs.infile, cwd=cwd, suffix='_meanvol')
+        if isdefined(self.inputs.savemats):
+            pth, basename, _ = split_filename(self.inputs.infile)
+            matname = os.path.join(pth, basename + '.mat')
+            outputs['outmatfile'] = matname
+        if isdefined(self.inputs.saveplots):
             # Note - if e.g. outfile has .nii.gz, you get .nii.gz.par, which is
             # what mcflirt does!
-            outputs.parfile = outputs.outfile + '.par'
-            if not os.path.exists(outputs.parfile):
-                msg = "Output file '%s' for '%s' was not generated" \
-                        % (outputs.parfile, self.cmd)
-                raise IOError(msg)
+            outputs['parfile'] = outputs.outfile + '.par'
         return outputs
-
+    
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._list_outputs()[name]
+        return None
 
 class Fnirt(FSLCommand):
     """Use FSL FNIRT for non-linear registration.
