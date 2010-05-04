@@ -597,13 +597,6 @@ class FeatRegister(NEW_BaseInterface):
     input_spec = FeatRegisterInputSpec
     output_spec = FeatRegisterOutputSpec
 
-    def _populate_inputs(self):
-        """ Initializes the input fields of this interface.
-        """
-        self.inputs = Bunch(feat_dirs=None,
-                            reg_image=None,
-                            reg_dof=12)
-
     def run(self, **inputs):
         self.inputs.set(**inputs)
         runtime = Bunch(returncode=0,
