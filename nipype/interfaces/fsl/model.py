@@ -17,7 +17,7 @@ from shutil import rmtree
 from nipype.interfaces.fsl.base import (FSLCommand, FSLInfo, FSLTraitedSpec,
                                         NEW_FSLCommand)
 from nipype.interfaces.base import (Bunch, Interface, load_template,
-                                    InterfaceResult, File, traits,
+                                    InterfaceResult, File, Directory, traits,
                                     BaseInterfaceInputSpec, TraitedSpec,
                                     NEW_BaseInterface,
                                     InputMultiPath, OutputMultiPath)
@@ -279,9 +279,7 @@ class Level1Design(NEW_BaseInterface):
             f.write(fsf_txt)
             f.close()
 
-        runtime = Bunch(returncode=0,
-                        messages=None,
-                        errmessages=None)
+        runtime.returncode = 0
         return runtime
 
     def _list_outputs(self):
@@ -365,15 +363,60 @@ class FeatModel(NEW_FSLCommand):
 
 # interface to fsl command line model fit routines
 # ohinds: 2009-12-28
-class FilmGLS(FSLCommand):
-    """Use FSL film_gls command to fit a design matrix to voxel timeseries
+class FilmGLSInputSpec(FSLTraitedSpec):
+    infile = File(exists=True, mandatory=True, position=-3,
+                  argstr='%s',
+                  desc='input data file')
+    design_file = File(exists=True, position=-2,
+                       argstr='%s',
+                       desc='design matrix file')
+    threshold = traits.Float(1000, min=0, argstr='%f',
+                             position=-1,
+                             desc='threshold')      
+    smooth_autocorr = traits.Bool(argstr='-sa',
+                                  desc='Smooth auto corr estimates')
+    mask_size = traits.Int(argstr='-ms %d',
+                           desc="susan mask size")
+    brightness_threshold = traits.Int(min=0, argstr='-epith %d',
+        desc='susan brightness threshold, otherwise it is estimated')
+    full_data = traits.Bool(argstr='-v', desc='output full data')
+    # Are these mutually exclusive? [SG]
+    _estimate_xor = ['autocorr_estimate', 'fit_armodel', 'tukey_window',
+                     'multitaper_product', 'use_pava', 'autocorr_noestimate']
+    autocorr_estimate = traits.Bool(argstr='-ac',
+                                    xor=['autocorr_noestimate'],
+                   desc='perform autocorrelation estimatation only')
+    fit_armodel = traits.Bool(argstr='-ar',
+        desc='fits autoregressive model - default is to use tukey with M=sqrt(numvols)')                      
+    tukey_window = traits.Int(argstr='-tukey %d',
+        desc='tukey window size to estimate autocorr')
+    multitaper_product = traits.Int(argstr='-mt %d',
+               desc='multitapering with slepian tapers and num is the time-bandwidth product')
+    use_pava = traits.Bool(argstr='-pava', desc='estimates autocorr using PAVA')
+    autocorr_noestimate = traits.Bool(argstr='-noest',
+                                      xor=['autocorr_estimate'],
+                   desc='do not estimate autocorrs')
+    output_pwdata = traits.Bool(argstr='-output_pwdata',
+                   desc='output prewhitened data and average design matrix')
+    results_dir = Directory('results', argstr='-rn %s', usedefault=True,
+                            desc='directory to store results in')
 
-    To print out the command line help, use:
-        fsl.FilmGLS().inputs_help()
+class FilmGLSOutputSpec(TraitedSpec):
+    param_estimates = OutputMultiPath(File(exists=True),
+          desc='Parameter estimates for each column of the design matrix')
+    residual4d = File(exists=True,
+          desc='Model fit residual mean-squared error for each time point')
+    dof_file = File(exists=True, desc='degrees of freedom')
+    sigmasquareds = File(exists=True, desc='summary of residuals, See Woolrich, et. al., 2001')
+    results_dir = Directory(exists=True,
+                         desc='directory storing model estimation output')
+
+class FilmGLS(NEW_FSLCommand):
+    """Use FSL film_gls command to fit a design matrix to voxel timeseries
 
     Examples
     --------
-    Initialize Bet with no options, assigning them when calling run:
+    Initialize with no options, assigning them when calling run:
 
     >>> from nipype.interfaces import fsl
     >>> fgls = fsl.FilmGLS()
@@ -397,171 +440,42 @@ class FilmGLS(FSLCommand):
 
     """
 
-    @property
-    def cmd(self):
-        """sets base command, immutable"""
-        return 'film_gls'
+    _cmd = 'film_gls'
+    input_spec = FilmGLSInputSpec
+    output_spec = FilmGLSOutputSpec
 
-    opt_map = {
-        'sa':             '-sa',
-        'ms':             '-ms %d',
-        'epith':          '-epith %d',
-        'v':              '-v',
-        'ac':             '-ac',
-        'ar':             '-ar',
-        'tukey':          '-tukey %d',
-        'mt':             '-mt %d',
-        'pava':           '-pava',
-        'noest':          '-noest',
-        'output_pwdata':  '-output_pwdata',
-        'rn':             '-rn %s',
-        'infile':         None,
-        'designfile':     None,
-        'thresh':         None,
-        }
-    # Currently we don't support -ven, -vef
-
-    def inputs_help(self):
-        """Print command line documentation for film_gls."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    def _parse_inputs(self):
-        """validate fsl film_gls options"""
-        allargs = super(FilmGLS, self)._parse_inputs(skip=('infile',
-                                                           'designfile',
-                                                           'thresh'))
-
-        # special defaults
-        if not self.inputs.rn:
-            allargs.append("-rn %s" % self._get_statsdir())
-
-        if self.inputs.infile:
-            allargs.append(list_to_filename(self.inputs.infile))
-
-        if self.inputs.designfile:
-            allargs.append(list_to_filename(self.inputs.designfile))
-
-        if self.inputs.thresh:
-            allargs.append(str(self.inputs.thresh))
-        else:
-            allargs.append('1000')
-
-        return allargs
-
-    def _get_statsdir(self):
-        statsdir = self.inputs.rn
-        if not statsdir:
-            _, name = os.path.split(list_to_filename(self.inputs.designfile))
-            statsdir = '.'.join((os.path.splitext(name)[0], 'stats'))
-        return statsdir
-
-    def run(self, infile=None, designfile=None, thresh=None, **inputs):
-        """Execute the command.
-
-        Parameters
-        ----------
-        infile : string
-            File specifying the functional data to be fit
-        designfile : string
-            File specifying design matrix
-        thresh : float
-            Some sort of threshold, not even sure this is used?
-
-        inputs : dict
-            Additional ``inputs`` assignments can be passed in.  See
-            Examples section.
-
-        Returns
-        -------
-        results : InterfaceResult
-            An :class:`nipype.interfaces.base.InterfaceResult` object
-            with a copy of self in `interface`
-
-        Examples
-        --------
-        To pass command line arguments to ``film_gls`` that are not part of
-        the ``inputs`` attribute, pass them in with the ``flags``
-        input.
-
-        >>> from nipype.interfaces import fsl
-        >>> import os
-        >>> fgls = fsl.FilmGLS(infile='foo.nii', \
-                               designfile='design.mat', \
-                               thresh=10, \
-                               flags='-ven')
-        """
-        if infile:
-            self.inputs.infile = infile
-        if self.inputs.infile is None:
-            raise ValueError('FilmGLS requires an input file')
-        if isinstance(self.inputs.infile, list):
-            raise ValueError('FilmGLS does not support multiple input files')
-        if designfile:
-            self.inputs.designfile = designfile
-        if self.inputs.designfile is None:
-            raise ValueError('FilmGLS requires a design file')
-        if isinstance(self.inputs.designfile, list):
-            raise ValueError('FilmGLS does not support multiple design files')
-        if thresh:
-            self.inputs.thresh = thresh
-        self.inputs.update(**inputs)
+    def _get_pe_files(self):
+        files = None
+        if isdefined(self.inputs.designfile):
+            fp = open(self.inputs.designfile, 'rt')
+            for line in fp.readlines():
+                if line.startswith('/NumWaves'):
+                    numpes = int(line.split()[-1])
+                    files = []
+                    cwd = os.getcwd()
+                    for i in range(numpes):
+                        files.append(self._gen_fname(os.path.join(cwd,
+                                                                  'pe%d.nii'%(i+1))))
+                    break
+            fp.close()
+        return files
+        
+    def _list_outputs(self):
+        outputs = self._outputs().get()
         cwd = os.getcwd()
-        statsdir = self._get_statsdir()
-        if os.access(os.path.join(cwd, statsdir), os.F_OK):
-            rmtree(os.path.join(cwd, statsdir))
-        return super(FilmGLS, self).run()
-
-    def outputs(self):
-        """
-            Parameters
-            ----------
-            (all default to None)
-
-            pes:
-                Parameter estimates for each column of the design matrix
-                for each voxel
-            res4d:
-                Model fit residual mean-squared error for each time point
-            dof:
-                degrees of freedom
-            sigmasquareds:
-                See Woolrich, et. al., 2001
-            statsdir :
-                directory storing model estimation output
-        """
-        outputs = Bunch(pes=None,
-                        res4d=None,
-                        dof=None,
-                        sigmasquareds=None,
-                        statsdir=None)
-        return outputs
-
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        pth = os.path.join(os.getcwd(), self._get_statsdir())
-
-        pes = glob(os.path.join(pth, 'pe[0-9]*.*'))
-        assert len(pes) >= 1, 'No pe volumes generated by FSL Estimate'
-        outputs.pes = pes
-
-        res4d = glob(os.path.join(pth, 'res4d.*'))
-        assert len(res4d) == 1, 'No residual volume generated by FSL Estimate'
-        outputs.res4d = res4d[0]
-
-        dof = glob(os.path.join(pth, 'dof'))
-        assert len(dof) == 1, 'No degrees of freedom files generated by FSL Estimate'
-        outputs.dof = dof
-
-        sigmasquareds = glob(os.path.join(pth, 'sigmasquareds.*'))
-        assert len(sigmasquareds) == 1, 'No sigmasquareds volume generated by FSL Estimate'
-        outputs.sigmasquareds = sigmasquareds[0]
-
-        outputs.statsdir = os.path.join(os.getcwd(), self._get_statsdir())
-
+        outputs['results_dir'] = os.path.join(cwd,
+                                              self.inputs.results_dir)
+        pe_files = self._get_pe_files()
+        if pe_files:
+            outputs['parameter_estimates'] = pe_files
+        outputs['residual4d'] = self._gen_fname(os.path.join(cwd,'res4d.nii'))
+        outputs['dof_file'] = os.path.join(cwd,'dof')
+        outputs['sigmasquareds'] = self._gen_fname(os.path.join(cwd,'sigmasquareds.nii'))
         return outputs
 
 
 # satra: 2010-01-23
+''' 
 class FixedEffectsModel(Interface):
     """Generate Feat specific files
 
@@ -658,6 +572,7 @@ class FixedEffectsModel(Interface):
         outputs = self.outputs()
         outputs.fsf_file = glob(os.path.abspath(os.path.join(os.getcwd(), 'fixed*.fsf')))[0]
         return outputs
+'''
 
 class FeatRegisterInputSpec(BaseInterfaceInputSpec):
     feat_dirs = InputMultiPath(Directory(), exist=True, desc="Lower level feat dirs",
@@ -979,47 +894,32 @@ class ContrastMgr(FSLCommand):
 
         return outputs
 
-# satra: 2010-01-23
-class L2Model(Interface):
-    """Generate design files for level 2 models
+
+class L2ModelInputSpec(BaseInterfaceInputSpec):
+    num_copes = traits.Int(min=1, mandatory=True,
+                             desc='number of copes to be combined')
+
+class L2ModelOutputSpec(TraitedSpec):
+    design_mat = File(exists=True, desc='design matrix file')
+    design_con = File(exists=True, desc='design contrast file')
+    design_grp = File(exists=True, desc='design group file')
+
+class L2Model(NEW_BaseInterface):
+    """Generate subject specific second level model
 
     Examples
     --------
 
+    >>> from nipype.interfaces.fsl import L2Model
+    >>> model = L2Model(num_copes=3) # 3 sessions
+
     """
 
-    def __init__(self, *args, **inputs):
-        self._populate_inputs()
-        self.inputs.update(**inputs)
+    input_spec = L2ModelInputSpec
+    output_spec = L2ModelOutputSpec
 
-    @property
-    def cmd(self):
-        return 'level2_design'
-
-    def get_input_info(self):
-        """ Provides information about inputs as a dict
-            info = [Bunch(key=string,copy=bool,ext='.nii'),...]
-        """
-        return []
-
-    def inputs_help(self):
-        """
-        Parameters
-        ----------
-
-        num_copes : int
-            number of copes evaluated in each session
-        """
-        print self.inputs_help.__doc__
-
-    def _populate_inputs(self):
-        """ Initializes the input fields of this interface.
-        """
-        self.inputs = Bunch(num_copes=None)
-
-    def run(self, **inputs):
+    def _run_interface(self, runtime):
         cwd = os.getcwd()
-
         mat_txt = ['/NumWaves       1',
                    '/NumPoints      %d' % self.inputs.num_copes,
                    '/PPheights      %e' % 1,
@@ -1058,42 +958,14 @@ class L2Model(Interface):
             f.write(txt[name])
             f.close()
 
-        runtime = Bunch(returncode=0,
-                        messages=None,
-                        errmessages=None)
-        outputs = self.aggregate_outputs()
-        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+        runtime.returncode=0
+        return runtime
 
-    def outputs_help(self):
-        """
-        """
-        print self.outputs.__doc__
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-            design_mat:
-                flameo design.mat file
-            design_con:
-                flameo design.con file
-            design_grp:
-                flameo design.grp file
-        """
-        outputs = Bunch(design_mat=None,
-                        design_con=None,
-                        design_grp=None)
-        return outputs
-
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        for field, value in outputs.items():
-            setattr(outputs, field,
-                    list_to_filename(glob(os.path.join(os.getcwd(),
-                                                       field.replace('_','.')))))
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        for field in outputs.keys():
+            setattr(outputs, field, os.path.join(os.getcwd(),
+                                                 field.replace('_','.')))
         return outputs
 
 class SMMInputSpec(FSLTraitedSpec):
