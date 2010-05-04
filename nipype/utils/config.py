@@ -19,5 +19,5 @@ hash_method = content
 
 config = ConfigParser.ConfigParser()
 config.readfp(default_cfg)
-config.read(['nipype.cfg', os.path.expanduser('~/.nipype.cfg')])
+config.read([os.path.expanduser('~/.nipype.cfg'), 'nipype.cfg'])
 
