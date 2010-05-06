@@ -219,7 +219,6 @@ class Level1Design(NEW_BaseInterface):
 
     def _run_interface(self, runtime):
         cwd = os.getcwd()
-        self.inputs.update(inputs)
         fsf_header = load_template('feat_header_l1.tcl')
         fsf_postscript = load_template('feat_nongui.tcl')
 
@@ -284,6 +283,7 @@ class Level1Design(NEW_BaseInterface):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
+        cwd = os.getcwd()
         outputs['fsf_files'] = []
         outputs['ev_files'] = []
         for runno, runinfo in enumerate(self._get_session_info(self.inputs.session_info)):
@@ -293,7 +293,7 @@ class Level1Design(NEW_BaseInterface):
                 for i, cond in enumerate(runinfo[field]):
                     name = cond['name']
                     evname.append(name)
-                    evfname = os.path.join(cwd, 'ev_%s_%d_%d.txt' % (name, runidx,
+                    evfname = os.path.join(cwd, 'ev_%s_%d_%d.txt' % (name, runno,
                                                                      len(evname)))
                     outputs['ev_files'].append(evfname)
         return outputs
