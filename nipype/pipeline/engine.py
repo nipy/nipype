@@ -26,8 +26,9 @@ except:
     pass
 
 from nipype.interfaces.base import (traits, File, Directory, InputMultiPath,
-                                    NEW_CommandLine,
+                                    NEW_CommandLine, Undefined,
                                     OutputMultiPath, TraitedSpec,
+                                    DynamicTraitedSpec,
                                     Bunch, InterfaceResult)
 from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (save_json, FileNotFoundError,
@@ -712,7 +713,7 @@ class Node(WorkflowBase):
 
         Priority goes to interface.
         """
-        setattr(self._interface.inputs, parameter, deepcopy(val))
+        setattr(self.inputs, parameter, deepcopy(val))
 
     def get_output(self, parameter):
         val = None
@@ -827,8 +828,9 @@ class Node(WorkflowBase):
             logger.info("Collecting precomputed outputs:")
             try:
                 aggouts = self._interface.aggregate_outputs()
+                runtime = Bunch(returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
                 result = InterfaceResult(interface=None,
-                                         runtime=None,
+                                         runtime=runtime,
                                          outputs=aggouts)
             except FileNotFoundError:
                 logger.info("Some of the outputs were not found: rerunning node.")
@@ -875,15 +877,42 @@ class MapNode(Node):
         self.iterfield  = iterfield
         if self.iterfield is None:
             raise Exception("Iterfield must be provided")
-        self._inputs = deepcopy(self._interface.inputs)
-        for field in iterfield:
-            trait_type = self._inputs.traits()[field].trait_type
-            if isinstance(trait_type, (File, Directory)):
-                self._inputs.remove_trait(field) # XX NOT SURE IF NECESSARY
-                self._inputs.add_trait(field, InputMultiPath(trait_type))
+        self._inputs = self._create_dynamic_traits(self._interface.inputs,
+                                                   fields=self.iterfield,
+                                                   input=True)
+
+    def _create_dynamic_traits(self, basetraits, fields=None, input=None):
+        """Convert specific fields of a trait to accept multiple inputs
+        """
+        output = DynamicTraitedSpec()
+        if input:
+            container = InputMultiPath
+        else:
+            container = OutputMultiPath
+        if fields is None:
+            fields = basetraits.copyable_trait_names()
+        for name, spec in basetraits.items():
+            if name in fields:
+                trait_type = spec.trait_type
+                if isinstance(trait_type, (File, Directory)):
+                    #self._inputs.remove_trait(name) # XX NOT SURE IF NECESSARY
+                    output.add_trait(name, container(trait_type))
+                else:
+                    #self._inputs.remove_trait(name)
+                    output.add_trait(name, traits.List(trait_type))
             else:
-                self._inputs.remove_trait(field)
-                self._inputs.add_trait(field, traits.List(trait_type))
+                output.add_trait(name, traits.Trait(spec))
+            setattr(output, name, Undefined)
+        if input:
+            output.on_trait_change(self._set_mapnode_input)
+        return output
+
+    def _set_mapnode_input(self, object, name, newvalue):
+        print name, newvalue
+        if name in self.iterfield:
+            setattr(self._inputs, name, newvalue)
+        else:
+            setattr(self._interface.inputs, name, newvalue)
 
     @property
     def inputs(self):
@@ -894,16 +923,8 @@ class MapNode(Node):
         return self._outputs()
     
     def _outputs(self):
-        outputs = self._interface._outputs()
-        for field in outputs.get().keys():
-            trait_type = outputs.traits()[field].trait_type
-            if isinstance(trait_type, (File, Directory)):
-                outputs.remove_trait(field)
-                outputs.add_trait(field, OutputMultiPath(trait_type))
-            else:
-                outputs.remove_trait(field)
-                outputs.add_trait(field, traits.List(trait_type))
-        return outputs
+        return self._create_dynamic_traits(self._interface._outputs(),
+                                           input=False)
 
     def _run_interface(self, execute=True, cwd=None):
         old_cwd = os.getcwd()
@@ -911,32 +932,35 @@ class MapNode(Node):
             cwd = self._output_directory()
         os.chdir(cwd)
 
-        iterflow = Workflow()
-        for i in enumerate(self.iterfield):
-            newnode = Node(deepcopy(self.interface), name=self.name+i)
+        workflowname = 'workflow'
+        iterflow = Workflow(name=workflowname)
+        iterflow.base_dir = cwd
+        for i, _ in enumerate(getattr(self.inputs, self.iterfield[0])):
+            newnode = Node(deepcopy(self._interface), name=self.name+str(i))
             for field in self.iterfield:
                 setattr(newnode.inputs, field,
                         getattr(self.inputs, field)[i])
             iterflow.add_nodes([newnode])
-        # TODO set output directory
-        #iterflow... 
-        iterflow.execute()
-        # TODO collect results
-        # TODO ensure workflow returns results
+        iterflow.run()
         self._result = InterfaceResult(interface=[], runtime=[],
                                        outputs=Bunch())
-        for i, node in enumerate(self._execgraph.nodes()):
-            self._result.interface.insert(i, node.result.interface)
+        for i, node in enumerate(iterflow._execgraph.nodes()):
             self._result.runtime.insert(i, node.result.runtime)
-            for key, val in node.result.outputs.get().items():
-                try:
-                    # This has funny default behavior if the length of the
-                    # list is < i - 1. I'd like to simply use append... feel
-                    # free to second my vote here!
-                    self._result.outputs.get(key).append(val)
-                except AttributeError:
-                    # .insert(i, val) is equivalent to the following if
-                    # outputs.key == None, so this is far less likely to
-                    # produce subtle errors down the road!
-                    setattr(self._result.outputs, key, [val])
+            if node.result.runtime.returncode == 0:
+                self._result.interface.insert(i, node.result.interface)
+                for key, val in node.result.outputs.get().items():
+                    try:
+                        # This has funny default behavior if the length
+                        # of the
+                        # list is < i - 1. I'd like to simply use
+                        # append... feel
+                        # free to second my vote here!
+                        self._result.outputs.get(key).append(val)
+                    except AttributeError:
+                        # .insert(i, val) is equivalent to the following if
+                        # outputs.key == None, so this is far less likely to
+                        # produce subtle errors down the road!
+                        setattr(self._result.outputs, key, [val])
+            else:
+                raise Exception('iternode %d did not run')
         os.chdir(old_cwd)
