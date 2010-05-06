@@ -664,7 +664,7 @@ class FlameoOutputSpec(TraitedSpec):
 
 # interface to fsl command line higher level model fit
 # satra: 2010-01-09
-class Flameo(FSLCommand):
+class Flameo(NEW_FSLCommand):
     """Use FSL flameo command to perform higher level model fits
 
     To print out the command line help, use:
@@ -776,7 +776,7 @@ class ContrastMgrOutputSpec(TraitedSpec):
     neff_files =  OutputMultiPath(File(exists=True),
                                  desc='neff file ?? for each contrast')
 
-class ContrastMgr(FSLCommand):
+class ContrastMgr(NEW_FSLCommand):
     """Use FSL contrast_mgr command to evaluate contrasts
 
     Examples
