@@ -709,7 +709,7 @@ class McFlirt(NEW_FSLCommand):
         if isdefined(self.inputs.saveplots):
             # Note - if e.g. outfile has .nii.gz, you get .nii.gz.par, which is
             # what mcflirt does!
-            outputs['parfile'] = outputs.outfile + '.par'
+            outputs['parfile'] = outputs['outfile'] + '.par'
         return outputs
     
     def _gen_filename(self, name):
@@ -728,9 +728,8 @@ class FnirtInputSpec(FSLTraitedSpec):
                        desc='name of file containing initial non-linear warps')
     in_intensitymap_file = File(exists=True, argstr='--intin=%s',
                              desc='name of file/files containing initial intensity maping')
-    fieldcoeff_file = traits.Either(traits.Bool, File, genfile=True,
-                                    argstr='--cout=%s',
-                                    desc='name of output file with field coefficients or true')
+    fieldcoeff_file = File(genfile=True, argstr='--cout=%s',
+                           desc='name of output file with field coefficients or true')
     outfile = traits.Either(traits.Bool, File, genfile=True,
                             argstr='--iout=%s',
                             desc='name of output image or true')
@@ -857,8 +856,7 @@ class Fnirt(NEW_FSLCommand):
     input_spec = FnirtInputSpec
     output_spec = FnirtOutputSpec
 
-    out_map = dict(fieldcoeff_file='_coeff',
-                   outfile='_warp', field_file='_field',
+    out_map = dict(outfile='_warp', field_file='_field',
                    jacobian_file='_field_jacobian',
                    modulatedref_file='_modulated',
                    out_intensitymap_file='_intmap',
@@ -884,6 +882,10 @@ class Fnirt(NEW_FSLCommand):
         
     def _list_outputs(self):
         outputs = self._outputs().get()
+        outputs['fieldcoeff_file']=self.inputs.fieldcoeff_file
+        if not isdefined(self.inputs.fieldcoeff_file):
+            outputs['fieldcoeff_file'] = self._gen_fname(self.inputs.file,
+                                                         suffix='_warpcoef')
         for name, suffix in out_map.items():
             src = self.inputs.infile
             if name == 'modulatedref_file':
