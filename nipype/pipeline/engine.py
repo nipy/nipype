@@ -881,7 +881,7 @@ class MapNode(Node):
                                                    fields=self.iterfield,
                                                    input=True)
 
-    def _create_dynamic_traits(self, basetraits, fields=None, input=None):
+    def _create_dynamic_traits(self, basetraits, fields=None, input=False):
         """Convert specific fields of a trait to accept multiple inputs
         """
         output = DynamicTraitedSpec()
