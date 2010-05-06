@@ -631,9 +631,10 @@ class BBRegister(NEW_FSCommand):
             outputs['outregfile'] = fname_presuffix(self.inputs.sourcefile,
                                          suffix='_bbreg_%s.dat'%self.inputs.subject_id,
                                          use_ext=False)
-        outputs['outfile'] = self.inputs.outfile
-        if isinstance(self.inputs.outfile, bool):
-            outputs['outfile'] = fname_presuffix(self.inputs.sourcefile,suffix='_bbreg')
+        if isdefined(self.inputs.outfile):
+            outputs['outfile'] = self.inputs.outfile
+            if isinstance(self.inputs.outfile, bool):
+                outputs['outfile'] = fname_presuffix(self.inputs.sourcefile,suffix='_bbreg')
         return outputs
 
     def _format_arg(self, name, spec, value):
@@ -642,7 +643,7 @@ class BBRegister(NEW_FSCommand):
                 fname = self._list_outputs()[name]
             else:
                 fname = value
-            return '--o %s' % fname
+            return spec.argstr % fname
         return super(BBRegister, self)._format_arg(name, spec, value)
     
     def _gen_filename(self, name):
