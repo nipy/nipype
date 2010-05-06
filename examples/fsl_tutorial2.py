@@ -92,8 +92,8 @@ functionality.
 """
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                                      outfields=['func', 'struct']),
-                            name = 'datasource')
+                                               outfields=['func', 'struct']),
+                     name = 'datasource')
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
@@ -101,45 +101,41 @@ datasource.inputs.template_args = info
 ## from the FLIRT web doc
 
 extract_ref = pe.Node(interface=fsl.ExtractRoi(tmin=42,
-                                                      tsize=1),
-                             name = 'middlevol.fsl',
-                             diskbased=True)
+                                               tsize=1),
+                      name = 'middlevol.fsl')
+
 # run FSL's bet
 # bet my_structural my_betted_structural
 skullstrip = pe.Node(interface=fsl.Bet(mask = True,
-                                              frac = 0.34),
-                            name = 'struct_bet.fsl',
-                            diskbased=True)
+                                       frac = 0.34),
+                     name = 'struct_bet.fsl')
 
 # Preprocess functionals
 motion_correct = pe.MapNode(interface=fsl.McFlirt(saveplots = True),
-                                name='mcflirt.fsl',
-                                diskbased=True,
-                                iterfield = ['infile'])
+                            name='mcflirt.fsl',
+                            iterfield = ['infile'])
 
 func_skullstrip = pe.MapNode(interface=fsl.Bet(functional = True),
-                                 diskbased=True,
-                                 name='func_bet.fsl',
-                                 iterfield = ['infile'])
+                             name='func_bet.fsl',
+                             iterfield = ['infile'])
 
 
 # Finally do some smoothing!
 
-smoothing = pe.MapNode(interface=fsl.Smooth(), diskbased=True, name="smooth.fsl",
+smoothing = pe.MapNode(interface=fsl.Smooth(),
+                       name="smooth.fsl",
                        iterfield = ['infile'])
 smoothing.inputs.fwhm = 5
 
 inorm = pe.MapNode(interface = fsl.ImageMaths(optstring = '-inm 10000',
-                                                suffix = '_inm',
-                                                outdatatype = 'float'),
+                                              suffix = '_inm',
+                                              outdatatype = 'float'),
                        name = 'inorm.fsl',
-                       diskbased            = True,
                        iterfield = ['infile'])
 
 hpfilter = pe.MapNode(interface=fsl.ImageMaths(),
-                          name='highpass.fsl',
-                          diskbased=True,
-                          iterfield = ['infile'])
+                      name='highpass.fsl',
+                      iterfield = ['infile'])
 hpcutoff = 120
 TR = 3.
 hpfilter.inputs.suffix = '_hpf'
@@ -194,7 +190,7 @@ contrasts = [cont1,cont2]
    c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
    SPM-specific design information. 
 """
-modelspec = pe.Node(interface=model.SpecifyModel(), diskbased=True, name="modelspec.fsl")
+modelspec = pe.Node(interface=model.SpecifyModel(),  name="modelspec.fsl")
 modelspec.inputs.concatenate_runs        = False
 modelspec.inputs.input_units             = 'secs'
 modelspec.inputs.output_units            = 'secs'
@@ -206,10 +202,11 @@ modelspec.inputs.high_pass_filter_cutoff = hpcutoff
    d. Use :class:`nipype.interfaces.fsl.Level1Design` to generate a
    run specific fsf file for analysis
 """
-level1design = pe.Node(interface=fsl.Level1Design(),diskbased=True, name="level1design.fsl")
+level1design = pe.Node(interface=fsl.Level1Design(), name="level1design.fsl")
 level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
 level1design.inputs.bases = {'hrf':{'derivs': True}}
 level1design.inputs.contrasts = contrasts
+level1design.inputs.register = True
 level1design.inputs.reg_image = fsl.FSLInfo.standard_image('MNI152_T1_2mm_brain.nii.gz')
 level1design.inputs.reg_dof = 12 
 
@@ -217,7 +214,7 @@ level1design.inputs.reg_dof = 12
    e. Use :class:`nipype.interfaces.fsl.FeatModel` to generate a
    run specific mat file for use by FilmGLS
 """
-featmodel = pe.MapNode(interface=fsl.FeatModel(),diskbased=True, name="featmodel.fsl",
+featmodel = pe.MapNode(interface=fsl.FeatModel(), name="featmodel.fsl",
                        iterfield = ['fsf_file'])
 
 
@@ -255,7 +252,7 @@ l1pipeline.connect([# preprocessing in native space
                  (smoothing,hpfilter,[('smoothedimage','infile')]),
                  # Model design
                  (hpfilter,modelspec,[('outfile','functional_runs')]),
-                 (datasource,modelspec,[('subject_id','subject_id'),
+                 (infosource,modelspec,[('subject_id','subject_id'),
                                         (('subject_id',subjectinfo),'subject_info')]),
                  (motion_correct,modelspec,[('parfile','realignment_parameters')]),
                  (modelspec,level1design,[('session_info','session_info')]),
@@ -263,7 +260,7 @@ l1pipeline.connect([# preprocessing in native space
                 ])
 
 # store relevant outputs from various stages of preprocessing
-l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
+l1pipeline.connect([(infosource,datasink,[('subject_id','subject_id')]),
                     (skullstrip, datasink, 
                         [('outfile', 'skullstrip.@outfile')]),
                     (func_skullstrip, datasink,
