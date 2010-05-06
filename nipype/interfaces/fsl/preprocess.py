@@ -1137,3 +1137,54 @@ class ApplyWarp(FSLCommand):
         outputs.outfile = self._gen_fname(self.inputs.infile,
                 self.inputs.outfile, suffix='_warp', check=True)
         return outputs
+
+class SliceTimerInputSpec(FSLTraitedSpec):
+    infile = File(exists=True, argstr='--in %s',
+                  mandatory=True, position=0,
+                  desc='filename of input timeseries')
+    outfile = File(argstr='--out %s', genfile=True,
+                   desc='filename of output timeseries')
+    index_dir = traits.Bool(argstr='--down',
+              desc='slice indexing from top to bottom')
+    time_repetition = traits.Float(argstr='--repeat %f',
+                                   desc='Specify TR of data - default is 3s')
+    slice_direction = traits.enum(1,2,3, argstr='--direction %d',
+                                  desc='direction of slice acquisition (x=1,y=2,z=3) - default is z')
+    interleaved = traits.Bool(argstr='--odd',
+                              desc='use interleaved acquisition')
+    custom_timings = File(exists=True, argstr='--tcustom %s',
+                          desc='slice timings, in fractions of TR, range 0:1 (default is 0.5 = no shift)')
+    global_shift = traits.Float(argstr='--tglobal',
+                                desc='shift in fraction of TR, range 0:1 (default is 0.5 = no shift)')
+    custom_order = File(exists=True, argstr='--ocustom %s',
+                        desc='filename of single-column custom interleave order file (first slice is referred to as 1 not 0)')
+
+class SliceTimerOutputSpec(TraitedSpec):
+    outfile = File(exists=True, desc='slice time corrected file')
+
+class SliceTimer(NEW_FSLCommand):
+    """ use FSL slicetimer to perform slice timing correction.
+
+    Examples
+    --------
+    
+    """
+
+    _cmd = 'slicetimer'
+    input_spec = SliceTimerInputSpec
+    output_spec = SliceTimerOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outfile = self.inputs.outfile
+        if not isdefined(outfile):
+            outfile = self._gen_fname(self.inputs.infile,
+                                      newpath=os.getcwd(),
+                                      suffix='_st')
+        outputs['outfile'] = outfile
+        return outputs
+    
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._list_outputs()[name]
+        return None
