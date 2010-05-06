@@ -242,7 +242,7 @@ class FastOutputSpec(TraitedSpec):
                                 'input, prob_x')
 
 
-class NEW_Fast(NEW_FSLCommand):
+class Fast(NEW_FSLCommand):
     """ Use FSL FAST for segmenting and bias correction.
 
     For complete details, see the `FAST Documentation.
@@ -276,7 +276,7 @@ class NEW_Fast(NEW_FSLCommand):
 
 
    
-
+'''
 class Fast(FSLCommand):
     """Use FSL FAST for segmenting and bias correction.
 
@@ -360,7 +360,7 @@ class Fast(FSLCommand):
         return super(Fast, self).run()
 
     def _parse_inputs(self):
-        '''Call our super-method, then add our input files'''
+        """Call our super-method, then add our input files"""
         # Could do other checking above and beyond regular _parse_inputs here
         allargs = super(Fast, self)._parse_inputs(skip=('infiles'))
         if self.inputs.infiles:
@@ -493,7 +493,8 @@ class Fast(FSLCommand):
                         raise IOError(msg)
 
         return outputs
-
+'''
+        
 class FlirtInputSpec(FSLTraitedSpec):
     infile = File(exists = True, argstr = '-in %s', mandatory = True,
                   position = 0, desc = 'input file')
