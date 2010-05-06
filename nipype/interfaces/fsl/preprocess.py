@@ -848,14 +848,115 @@ class McFlirt(NEW_FSLCommand):
             return self._list_outputs()[name]
         return None
 
-class Fnirt(FSLCommand):
+class FnirtInputSpec(FSLTraitedSpec):
+    ref_file = File(exists=True, argstr='--ref=%s', mandatory=True,
+                    desc='name of reference image')
+    infile = File(exists=True, argstr='--in=%s', mandatory=True,
+                  desc='name of input image')
+    affine_file = File(exists=True, argstr='--aff=%s',
+                       desc='name of file containing affine transform')
+    inwarp_file = File(exists=True, argstr='--inwarp=%s',
+                       desc='name of file containing initial non-linear warps')
+    in_intensitymap_file = File(exists=True, argstr='--intin=%s',
+                             desc='name of file/files containing initial intensity maping')
+    fieldcoeff_file = traits.Either(traits.Bool, File, genfile=True,
+                                    argstr='--cout=%s',
+                                    desc='name of output file with field coefficients or true')
+    outfile = traits.Either(traits.Bool, File, genfile=True,
+                            argstr='--iout=%s',
+                            desc='name of output image or true')
+    field_file = traits.Either(traits.Bool, File, genfile=True,
+                               argstr='--fout=%s',
+                               desc='name of output file with field or true')
+    jacobian_file = traits.Either(traits.Bool, File, genfile=True,
+                                  argstr='--jout=%s',
+                                  desc='name of file for writing out the Jacobian of the field (for diagnostic or VBM purposes)')
+    modulatedref_file = traits.Either(traits.Bool, File, genfile=True,
+                                      argstr='--refout=%s',
+                                      desc='name of file for writing out intensity modulated --ref (for diagnostic purposes)')
+    out_intensitymap_file = traits.Either(traits.Bool, File, genfile=True,
+                                      argstr='--intout=%s',
+                                      desc='name of files for writing information pertaining to intensity mapping')
+    log_file = traits.Either(traits.Bool, File, genfile=True,
+                             argstr='--logout=%s',
+                             desc='Name of log-file')
+    config_file = File(exists=True, argstr='--config=%s',
+                       desc='Name of config file specifying command line arguments')
+    refmask_file = File(exists=True, argstr='--refmask=%s',
+                        desc='name of file with mask in reference space')
+    inmask_file = File(exists=True, argstr='--inmask=%s',
+                       desc='name of file with mask in input image space')
+    skiprefmask = traits.Bool(argstr='--applyrefmask 0',
+                              requires=['refmask_file'],
+                              desc='Skip specified refmask if set, default false')
+    skipinmask = traits.Bool(argstr='--applyinmask 0',
+                             requires=['inmask_file'],
+                             desc='skip specified inmask if set, default false')
+    skipimplicitrefmasking = traits.Bool(argstr='--imprefm 0',
+                                      desc='skip implicit masking  based on value in --ref image. Default = 0')
+    skipimplicitinmasking = traits.Bool(argstr='--impinm 0',
+                                      desc='skip implicit masking  based on value in --in image. Default = 0')
+    refmask_val = traits.Float(argstr='--imprefval=%f',
+                              desc='Value to mask out in --ref image. Default =0.0')
+    inmask_val = traits.Float(argstr='--impinval=%f',
+                              desc='Value to mask out in --in image. Default =0.0')
+    max_nonlin_iter = traits.Tuple(traits.Int,traits.Int,traits.Int,traits.Int,
+                                   argstr='--miter=%d,%d,%d,%d',
+                                   desc='Max # of non-linear iterations, default 5,5,5,5')
+    subsampling_scheme = traits.Tuple(traits.Int,traits.Int,traits.Int,traits.Int,
+                                   argstr='--subsamp=%d,%d,%d,%d',
+                                   desc='sub-sampling scheme, default 4,2,1,1')
+    warp_resolution = traits.Tuple(traits.Int, traits.Int, traits.Int,
+                                   argstr='--warpres=%d,%d,%d',
+                                   desc='(approximate) resolution (in mm) of warp basis in x-, y- and z-direction, default 10,10,10')
+    spline_order = traits.Int(argstr='--splineorder=%d',
+                              desc='Order of spline, 2->Qadratic spline, 3->Cubic spline. Default=3')
+    in_fwhm = traits.Tuple(traits.Int,traits.Int,traits.Int,traits.Int,
+                           argstr='--infwhm=%d,%d,%d,%d',
+                           desc='FWHM (in mm) of gaussian smoothing kernel for input volume, default 6,4,2,2')
+    ref_fwhm = traits.Tuple(traits.Int,traits.Int,traits.Int,traits.Int,
+                           argstr='--reffwhm=%d,%d,%d,%d',
+                           desc='FWHM (in mm) of gaussian smoothing kernel for ref volume, default 4,2,0,0')
+    regularization_model = traits.Enum('membrane_energy', 'bending_energy',
+                                       argstr='--regmod=%s',
+        desc='Model for regularisation of warp-field [membrane_energy bending_energy], default bending_energy')
+    regularization_lambda = traits.Float(argstr='--lambda=%f',
+        desc='Weight of regularisation, default depending on --ssqlambda and --regmod switches. See user documetation.')
+    skip_lambda_ssq = traits.Bool(argstr='--ssqlambda 0',
+                                  desc='If true, lambda is not weighted by current ssq, default false')
+    jacobian_range = traits.Tuple(traits.Float, traits.Float,
+                                  argstr='--jacrange=%f,%f',
+                                  desc='Allowed range of Jacobian determinants, default 0.01,100.0')
+    derive_from_ref = traits.Bool(argstr='--refderiv',
+                                  desc='If true, ref image is used to calculate derivatives. Default false')
+    intensity_mapping_model = traits.Enum('none', 'global_linear', 'global_non_linear'
+                                          'local_linear', 'global_non_linear_with_bias',
+                                          'local_non_linear', argstr='--intmod=%s',
+                                          desc='Model for intensity-mapping')
+    intensity_mapping_order = traits.Int(argstr='--intorder=%d',
+                                         desc='Order of poynomial for mapping intensities, default 5')
+    biasfield_resolution = traits.Tuple(traits.Int, traits.Int, traits.Int,
+                                        argstr='--biasres=%d,%d,%d',
+                                        desc='Resolution (in mm) of bias-field modelling local intensities, default 50,50,50')
+    bias_regularization_lambda = traits.Float(argstr='--biaslambda=%f',
+                                              desc='Weight of regularisation for bias-field, default 10000')
+    skip_intensity_mapping = traits.Bool(argstr='--estint 0',
+                                         desc='Skip estimate intensity-mapping deafult false')
+    hessian_precision = traits.Enum('double', 'float', argstr='--numprec=%s',
+                                    desc='Precision for representing Hessian, double or float. Default double')
+
+class FnirtOutputSpec(TraitedSpec):
+    fieldcoeff_file = File(exists=True, desc='file with field coefficients')
+    outfile = File(exists=True, desc='warped image')
+    field_file = File(exists=True, desc='file with warp field')
+    jacobian_file = File(exists=True, desc='file containing Jacobian of the field')
+    modulatedref_file = File(exists=True, desc='file containing intensity modulated --ref')
+    out_intensitymap_file = File(exists=True,
+                        desc='file containing info pertaining to intensity mapping')
+    log_file = File(exists=True, desc='Name of log-file')
+
+class Fnirt(NEW_FSLCommand):
     """Use FSL FNIRT for non-linear registration.
-
-    For complete details, see the `FNIRT Documentation.
-    <http://www.fmrib.ox.ac.uk/fsl/fnirt/index.html>`_
-
-    To print out the command line help, use:
-        fsl.Fnirt().inputs_help()
 
     Examples
     --------
@@ -863,207 +964,91 @@ class Fnirt(FSLCommand):
     >>> fnt = fsl.Fnirt(affine='affine.mat')
     >>> res = fnt.run(reference='ref.nii', infile='anat.nii') # doctests: +SKIP
 
+    T1 -> Mni153
+    
+    >>> from nipype.interfaces import fsl
+    >>> fnirt_mprage = fsl.Fnirt()
+    >>> fnirt_mprage.inputs.imgfwhm = [8, 4, 2]
+    >>> fnirt_mprage.inputs.sub_sampling = [4, 2, 1]
+
+    Specify the resolution of the warps, currently not part of the
+    ``fnirt_mprage.inputs``:
+    
+    >>> fnirt_mprage.inputs.flags = '--warpres 6, 6, 6'
+    >>> res = fnirt_mprage.run(infile='subj.nii', reference='mni.nii')
+    
+    We can check the command line and confirm that it's what we expect.
+    
+    >>> fnirt_mprage.cmdline  #doctest: +NORMALIZE_WHITESPACE
+    'fnirt --warpres 6, 6, 6 --infwhm=8,4,2 --in=subj.nii --ref=mni.nii --subsamp=4,2,1'
+
     """
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'fnirt'
+    
+    _cmd = 'fnirt'
+    input_spec = FnirtInputSpec
+    output_spec = FnirtOutputSpec
 
-    # Leaving this in place 'til we get round to a thread-safe version
-    @property
-    def cmdline(self):
-        """validates fsl options and generates command line argument"""
-        #self.update_optmap()
-        allargs = self._parse_inputs()
-        allargs.insert(0, self.cmd)
-        return ' '.join(allargs)
+    out_map = dict(fieldcoeff_file='_coeff',
+                   outfile='_warp', field_file='_field',
+                   jacobian_file='_field_jacobian',
+                   modulatedref_file='_modulated',
+                   out_intensitymap_file='_intmap',
+                   log_file='.log')
+    def _format_arg(self, name, spec, value):
+        if name in out_map.keys():
+            if isinstance(value, bool):
+                fname = self._list_outputs()[name]
+            else:
+                fname = value
+            return spec.argstr % fname
+        return super(Fnirt, self)._format_arg(name, spec, value)
 
-    def inputs_help(self):
-        """Print command line documentation for FNIRT."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    # XXX It's not clear if the '=' syntax (which is necessary for some
-    # arguments) supports ' ' separated lists. We might need ',' separated lists
-    opt_map = {
-            'affine':           '--aff=%s',
-            'initwarp':         '--inwarp=%s',
-            'initintensity':    '--intin=%s',
-            'configfile':       '--config=%s',
-            'referencemask':    '--refmask=%s',
-            'imagemask':        '--inmask=%s',
-            'fieldcoeff_file':  '--cout=%s',
-            'outimage':         '--iout=%s',
-            'fieldfile':        '--fout=%s',
-            'jacobianfile':     '--jout=%s',
-            # XXX I think reffile is misleading / confusing
-            'reffile':          '--refout=%s',
-            'intensityfile':    '--intout=%s',
-            'logfile':          '--logout=%s',
-            'verbose':          '--verbose',
-            'sub_sampling':     '--subsamp=%d',
-            'max_iter':         '--miter=%d',
-            'referencefwhm':    '--reffwhm=%d',
-            'imgfwhm':          '--infwhm=%d',
-            'lambdas':          '--lambda=%d',
-            'estintensity':     '--estint=%s',
-            'applyrefmask':     '--applyrefmask=%f',
-            # XXX The closeness of this alternative name might cause serious
-            # confusion
-            'applyimgmask':      '--applyinmask=%f',
-            'flags':            '%s',
-            'infile':           '--in=%s',
-            'reference':        '--ref=%s',
-            }
-
-    def run(self, infile=None, reference=None, **inputs):
-        """Run the fnirt command
-
-        Note: technically, only one of infile OR reference need be specified.
-
-        You almost certainly want to start with a config file, such as
-        T1_2_MNI152_2mm
-
-        Parameters
-        ----------
-        infile : string
-            Filename of the volume to be warped/moved.
-        reference : string
-            Filename of volume used as target for warp registration.
-        inputs : dict
-            Additional ``inputs`` assignments.
-
-        Returns
-        --------
-        results : InterfaceResult
-            An :class:`nipype.interfaces.base.InterfaceResult` object
-            with a copy of self in `interface`
-
-        Examples
-        --------
-        T1 -> Mni153
-
-        >>> from nipype.interfaces import fsl
-        >>> fnirt_mprage = fsl.Fnirt()
-        >>> fnirt_mprage.inputs.imgfwhm = [8, 4, 2]
-        >>> fnirt_mprage.inputs.sub_sampling = [4, 2, 1]
-
-        Specify the resolution of the warps, currently not part of the
-        ``fnirt_mprage.inputs``:
-
-        >>> fnirt_mprage.inputs.flags = '--warpres 6, 6, 6'
-        >>> res = fnirt_mprage.run(infile='subj.nii', reference='mni.nii')
-
-        We can check the command line and confirm that it's what we expect.
-
-        >>> fnirt_mprage.cmdline  #doctest: +NORMALIZE_WHITESPACE
-        'fnirt --warpres 6, 6, 6 --infwhm=8,4,2 --in=subj.nii
-            --ref=mni.nii --subsamp=4,2,1'
-
-        """
-
-        if infile:
-            self.inputs.infile = infile
-        if reference:
-            self.inputs.reference = reference
-        if self.inputs.reference is None and self.inputs.infile is None:
-            raise AttributeError('Fnirt requires at least a reference' \
-                                 'or input file.')
-        self.inputs.update(**inputs)
-        return super(Fnirt, self).run()
+    def _set_output(self, field, src, suffix, change_ext=True):
+        val = getattr(self.inputs, field)
+        if isdefined(val):
+            if isinstance(val, bool):
+                val = self._gen_fname(src, suffix=suffix,
+                                      change_ext=change_ext)
+        else:
+            val = None
+        return val
+        
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        for name, suffix in out_map.items():
+            src = self.inputs.infile
+            if name == 'modulatedref_file':
+                src = self.inputs.ref_file
+            if name == 'log_file':
+                val = self._set_output(name, src, suffix, change_ext=False)
+            else:
+                val = self._set_output(name, src, suffix)
+            if val:
+                outputs[name] = val
+        return outputs
+    
+    def _gen_filename(self, name):
+        if name in out_map.keys():
+            return self._list_outputs()[name]
+        return None
 
     def write_config(self, configfile):
         """Writes out currently set options to specified config file
+
+        XX TODO : need to figure out how the config file is written
 
         Parameters
         ----------
         configfile : /path/to/configfile
         """
-        self.update_optmap()
-        valid_inputs = self._parse_inputs()
         try:
             fid = open(configfile, 'w+')
         except IOError:
             print ('unable to create config_file %s' % (configfile))
 
-        for item in valid_inputs:
+        for item in self.inputs.get().items():
             fid.write('%s\n' % (item))
         fid.close()
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        fieldcoeff_file
-        warpedimage
-        fieldfile
-        jacobianfield
-        modulatedreference
-        intensitymodulation
-        logfile
-        """
-        outputs = Bunch(fieldcoeff_file=None,
-                        warpedimage=None,
-                        fieldfile=None,
-                        jacobianfield=None,
-                        modulatedreference=None,
-                        intensitymodulation=None,
-                        logfile=None)
-        return outputs
-
-    def aggregate_outputs(self):
-        """Create a Bunch which contains all possible files generated
-        by running the interface.  Some files are always generated, others
-        depending on which ``inputs`` options are set.
-
-        Returns
-        -------
-        outputs : Bunch object
-
-        Raises
-        ------
-        IOError
-             If the output file is not found.
-
-        Notes
-        -----
-        For each item in the ``outputs``, if it's value is None then
-        the optional file was not generated.  Otherwise it contains
-        the path/filename of generated output file(s).
-
-        """
-        cwd = os.getcwd()
-        outputs = self.outputs()
-
-        # Note this is the only one that'll work with the pipeline code
-        # currently
-        if self.inputs.fieldcoeff_file:
-            outputs.fieldcoeff_file = \
-                    os.path.realpath(self.inputs.fieldcoeff_file)
-        # the rest won't XX
-        if self.inputs.outimage:
-            # This should end with _warp
-            outputs.warpedimage = self.inputs.outimage
-        if self.inputs.fieldfile:
-            outputs.fieldfile = self.inputs.fieldfile
-        if self.inputs.jacobianfile:
-            outputs.jacobianfield = self.inputs.jacobianfile
-        if self.inputs.reffile:
-            outputs.modulatedreference = self.inputs.reffile
-        if self.inputs.intensityfile:
-            outputs.intensitymodulation = self.inputs.intensityfile
-        if self.inputs.logfile:
-            outputs.logfile = self.inputs.logfile
-
-        for item, file in outputs.items():
-            if file is not None:
-                file = os.path.join(cwd, file)
-                file = self._glob(file)
-                if file is None:
-                    raise IOError('file %s of type %s not generated' % (file, item))
-                setattr(outputs, item, file)
-        return outputs
-
 
 class ApplyWarpInputSpec(FSLTraitedSpec):
     infile = File(exists=True, argstr='--in=%s',
@@ -1112,7 +1097,6 @@ class ApplyWarp(NEW_FSLCommand):
     _cmd = 'applywarp'
     input_spec = ApplyWarpInputSpec
     output_spec = ApplyWarpOutputSpec
-    
 
     def _format_arg(self, name, spec, value):
         if name == 'superlevel':
@@ -1121,6 +1105,7 @@ class ApplyWarp(NEW_FSLCommand):
     
     def _list_outputs(self):
         outputs = self._outputs().get()
+                             
         outputs['outfile'] = self._gen_fname(self.inputs.infile,
                                              suffix='_warp')
         return outputs
