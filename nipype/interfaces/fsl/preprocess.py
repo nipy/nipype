@@ -1065,98 +1065,90 @@ class Fnirt(FSLCommand):
         return outputs
 
 
-class ApplyWarp(FSLCommand):
-    '''Use FSL's applywarp to apply the results of a Fnirt registration
+class ApplyWarpInputSpec(FSLTraitedSpec):
+    infile = File(exists=True, argstr='--in=%s',
+                  mandatory=True,
+                  desc='image to be warped')
+    outfile = File(argstr='--out=%s', genfile=True,
+                   desc='output filename')
+    ref_file = File(exists=True, argstr='--ref=%s',
+                     mandatory=True,
+                     desc='reference image')
+    fieldfile = File(exists=True, argstr='--warp=%s',
+                     mandatory=True,
+                     desc='file containing warp field')
+    abswarp = traits.Bool(argstr='--abs', xor=['relwarp'],
+                          desc="treat warp field as absolute: x' = w(x)")
+    relwarp = traits.Bool(argstr='--rel', xor=['abswarp'],
+                          desc="treat warp field as relative: x' = x + w(x)")
+    datatype = traits.Enum('char', 'short', 'int', 'float', 'double',
+                           argstr='--datatype=%s',
+                           desc='Force output data type [char short int float double].')
+    supersample = traits.Bool(argstr='--super',
+                              desc='intermediary supersampling of output, default is off')
+    superlevel = traits.Either(traits.Enum('a'), traits.Int,
+                               argstr='--superlevel=%s',
+                desc="level of intermediary supersampling, a for 'automatic' or integer level. Default = 2")
+    premat = File(exists=True, argstr='--premat=%s',
+                  desc='filename for pre-transform (affine matrix)')
+    postmat = File(exists=True, argstr='--postmat=%s',
+                  desc='filename for post-transform (affine matrix)')
+    maskfile = File(exists=True, argstr='--mask=%s',
+                    desc='filename for mask image (in reference space)')
+    interp = traits.Enum('nn', 'trilinear', 'sinc', argstr='--interp=%s',
+                         desc='interpolation method {nn,trilinear,sinc}')
 
-    Note how little actually needs to be done if we have truly order-independent
-    arguments!
-    '''
-    @property
-    def cmd(self):
-        return 'applywarp'
+class ApplyWarpOutputSpec(TraitedSpec):
+    outfile = File(exists=True, desc='Warped output file')
 
-    opt_map = {'infile':            '--in=%s',
-               'outfile':           '--out=%s',
-               'reference':         '--ref=%s',
-               'fieldfile':          '--warp=%s',
-               'premat':            '--premat=%s',
-               'postmat':           '--postmat=%s',
-              }
+class ApplyWarp(NEW_FSLCommand):
+    """Use FSL's applywarp to apply the results of a Fnirt registration
 
-    def inputs_help(self):
-        """Print command line documentation for applywarp."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
+    Examples
+    --------
+    
+    """
+    
+    _cmd = 'applywarp'
+    input_spec = ApplyWarpInputSpec
+    output_spec = ApplyWarpOutputSpec
+    
 
-    def run(self, infile=None, outfile=None, reference=None,
-            fieldfile=None, **inputs):
-        '''Interesting point - you can use coeff_files, or fieldfiles
-        interchangeably here'''
-        def set_attr(name, value, error=True):
-            if value is not None:
-                setattr(self.inputs, name, value)
-            if self.inputs.get(name) is None and error:
-                raise AttributeError('applywarp requires %s' % name)
-
-        # XXX Even this seems overly verbose
-        set_attr('infile', infile)
-        set_attr('outfile', outfile, error=False)
-        set_attr('reference', reference)
-        set_attr('fieldfile', fieldfile)
-
-        self.inputs.update(**inputs)
-        return super(ApplyWarp, self).run()
-
-    def _parse_inputs(self):
-        """Call our super-method, then add our input files"""
-        allargs = super(ApplyWarp, self)._parse_inputs()
-        if self.inputs.infile is not None:
-            # XXX This currently happens twice, slightly differently
-            if self.inputs.outfile is None:
-                # XXX newpath could be cwd, but then we have to put it in inputs
-                # or pass it to _parse_inputs (or similar).
-                outfile = fname_presuffix(self.inputs.infile,
-                                            suffix='_warp', newpath='.')
-                allargs.append(self.opt_map['outfile'] % outfile)
-
-        return allargs
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        (all default to None and are unset)
-
-             outfile
-        """
-        outputs = Bunch(outfile=None)
+    def _format_arg(self, name, spec, value):
+        if name == 'superlevel':
+            return spec.argstr%str(value)
+        return super(ApplyWarp, self)._format_arg(name, spec, value)
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['outfile'] = self._gen_fname(self.inputs.infile,
+                                             suffix='_warp')
         return outputs
-
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outputs.outfile = self._gen_fname(self.inputs.infile,
-                self.inputs.outfile, suffix='_warp', check=True)
-        return outputs
+    
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._list_outputs()[name]
+        return None
 
 class SliceTimerInputSpec(FSLTraitedSpec):
-    infile = File(exists=True, argstr='--in %s',
+    infile = File(exists=True, argstr='--in=%s',
                   mandatory=True, position=0,
                   desc='filename of input timeseries')
-    outfile = File(argstr='--out %s', genfile=True,
+    outfile = File(argstr='--out=%s', genfile=True,
                    desc='filename of output timeseries')
     index_dir = traits.Bool(argstr='--down',
               desc='slice indexing from top to bottom')
-    time_repetition = traits.Float(argstr='--repeat %f',
+    time_repetition = traits.Float(argstr='--repeat=%f',
                                    desc='Specify TR of data - default is 3s')
-    slice_direction = traits.enum(1,2,3, argstr='--direction %d',
+    slice_direction = traits.Enum(1,2,3, argstr='--direction=%d',
                                   desc='direction of slice acquisition (x=1,y=2,z=3) - default is z')
     interleaved = traits.Bool(argstr='--odd',
                               desc='use interleaved acquisition')
-    custom_timings = File(exists=True, argstr='--tcustom %s',
+    custom_timings = File(exists=True, argstr='--tcustom=%s',
                           desc='slice timings, in fractions of TR, range 0:1 (default is 0.5 = no shift)')
     global_shift = traits.Float(argstr='--tglobal',
                                 desc='shift in fraction of TR, range 0:1 (default is 0.5 = no shift)')
-    custom_order = File(exists=True, argstr='--ocustom %s',
+    custom_order = File(exists=True, argstr='--ocustom=%s',
                         desc='filename of single-column custom interleave order file (first slice is referred to as 1 not 0)')
 
 class SliceTimerOutputSpec(TraitedSpec):
@@ -1179,7 +1171,6 @@ class SliceTimer(NEW_FSLCommand):
         outfile = self.inputs.outfile
         if not isdefined(outfile):
             outfile = self._gen_fname(self.inputs.infile,
-                                      newpath=os.getcwd(),
                                       suffix='_st')
         outputs['outfile'] = outfile
         return outputs
