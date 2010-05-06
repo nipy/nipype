@@ -768,11 +768,11 @@ class ContrastMgrOutputSpec(TraitedSpec):
     varcope_files = OutputMultiPath(File(exists=True),
                                  desc='Variance estimates for each contrast')
     zstat_files = OutputMultiPath(File(exists=True),
-                                 desc='z-stat file for each contrast') :
+                                 desc='z-stat file for each contrast')
     tstat_files = OutputMultiPath(File(exists=True),
-                                 desc='t-stat file for each contrast') : 
+                                 desc='t-stat file for each contrast') 
     fstat_files = OutputMultiPath(File(exists=True),
-                                 desc='f-stat file for each contrast') : 
+                                 desc='f-stat file for each contrast') 
     neff_files =  OutputMultiPath(File(exists=True),
                                  desc='neff file ?? for each contrast')
 
