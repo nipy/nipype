@@ -208,7 +208,7 @@ class ImageMathsInputSpec(FSLTraitedSpec):
     outfile = File(argstr="%s", position=3, genfile=True)
     optstring = traits.Str(argstr="%s", mandatory=True, position=1,
                            desc="string defining the operation, i. e. -add")
-    suffix = traits.Str(argstr="%s", desc="outfile suffix")
+    suffix = traits.Str(desc="outfile suffix")
     outdatatype = traits.Enum('char', 'short', 'int', 'float', 'double',
                               'input', argstr="-odt %s", position=4,
                               desc="output datatype, one of (char, short, int, float, double, input)")
@@ -236,6 +236,9 @@ class ImageMaths(NEW_FSLCommand):
         if name == 'outfile':
             return self._list_outputs()[name]
         return None
+    
+    def _parse_inputs(self, skip=None):
+        return super(ImageMaths, self)._parse_inputs(skip=['suffix'])
 
     def _list_outputs(self):
         suffix = '_maths'  # ohinds: build suffix
