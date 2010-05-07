@@ -94,7 +94,6 @@ computeFA.connect([ (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,dtifit,[('bvals','bvals')]),
                     (datasource,dtifit,[('bvecs','bvecs')]),
 
-                    (infosource, bedpostx,[['subject_id','bpxdirectory']]),
                     (eddycorrect,bedpostx,[('outfile','dwi')]), 
                     (bet,bedpostx,[('maskfile','mask')]),
                     (datasource,bedpostx,[('bvals','bvals')]),
