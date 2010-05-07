@@ -1,80 +1,34 @@
 """Provide interface to AFNI commands."""
 __docformat__ = 'restructuredtext'
 
-
+''' Old imports
 from nipype.interfaces.base import Bunch, CommandLine
 from nipype.utils.docparse import get_doc
 from nipype.utils.misc import container_to_string
 
 import warnings
 warn = warnings.warn
+'''
 
-class AFNICommand(CommandLine):
-    @property
-    def cmdline(self):
-        """Generate the command line string from the list of arguments."""
-        allargs = self._parseinputs()
-        allargs.insert(0, self.cmd)
-        return ' '.join(allargs)
 
-    def _parseinputs(self, skip=()):
-        """Parse all inputs and format options using the opt_map format string.
+import os
+from glob import glob
+import warnings
 
-        Any inputs that are assigned (that are not None) are formatted
-        to be added to the command line.
+from nipype.interfaces.afni.base import Info, AFNITraitedSpec, AFNICommand
+from nipype.interfaces.base import Bunch, TraitedSpec, File, InputMultiPath
+from nipype.utils.filemanip import fname_presuffix, list_to_filename, split_filename
+from nipype.utils.docparse import get_doc
+from nipype.utils.misc import container_to_string, is_container, isdefined
 
-        Parameters
-        ----------
-        skip : tuple or list
-            Inputs to skip in the parsing.  This is for inputs that
-            require special handling, for example input files that
-            often must be at the end of the command line.  Inputs that
-            require special handling like this should be handled in a
-            _parse_inputs method in the subclass.
-        
-        Returns
-        -------
-        allargs : list
-            A list of all inputs formatted for the command line.
+import enthought.traits.api as traits
 
-        """
-        allargs = []
-        inputs = [(k, v) for k, v in self.inputs.items() if v is not None ]
-        for opt, value in inputs:
-            if opt in skip:
-                continue
-            if opt == 'args':
-                # XXX Where is this used?  Is self.inputs.args still
-                # used?  Or is it leftover from the original design of
-                # base.CommandLine?
-                allargs.extend(value)
-                continue
-            try:
-                argstr = self.opt_map[opt]
-                if argstr.find('%') == -1:
-                    # Boolean options have no format string.  Just
-                    # append options if True.
-                    if value is True:
-                        allargs.append(argstr)
-                    elif value is not False:
-                        raise TypeError('Boolean option %s set to %s' % 
-                                         (opt, str(value)) )
-                elif type(value) == list:
-                    allargs.append(argstr % tuple(value))
-                else:
-                    # Append options using format string.
-                    allargs.append(argstr % value)
-            except TypeError, err:
-                msg = 'Error when parsing option %s in class %s.\n%s' % \
-                    (opt, self.__class__.__name__, err.message)
-                warn(msg)
-            except KeyError:                   
-                msg = '%s: unsupported option: %s' % (
-                    self.__class__.__name__, opt)
-                raise AttributeError(msg)
-        
-        return allargs
+warn = warnings.warn
+warnings.filterwarnings('always', category=UserWarning)
 
+class To3dInputSpec(AFNITraitedSpec)
+
+class To3dOutputSpec(TraitedSpec)
 
 class To3d(AFNICommand):
     """Create a 3D dataset from 2D image files using AFNI to3d command.
@@ -286,6 +240,47 @@ class To3d(AFNICommand):
         return results
 
 
+class ThreedrefitInputSpec(AFNITraitedSpec)
+        infile = File(exists=True,
+                      desc = 'input file to 3drefit',
+                      argstr='%s', position=0, mandatory=True)
+        outfile = File(desc = 'name of output skull stripped image',
+                       argstr='%s', position=-1, genfile=True)
+        deoblique = traits.Bool(desc = 'replace current transformation matrix with cardinal matrix',
+                       argstr='-deoblique')
+        xorigin = traits.Str(desc = 'x distance for edge voxel offset',
+                           argstr='-xorigin %s')
+        yorigin = traits.Str(desc = 'y distance for edge voxel offset',
+                           argstr='-yorigin %s')
+        zorigin = traits.Str(desc = 'y distance for edge voxel offset',
+                           argstr='-yorigin %s')
+
+class ThreedrefitOutputSpec(TraitedSpec)
+
+
+class Threedrefit(AFNICommand):
+    """ Use 3drefit for altering header info.
+    """
+
+    _cmd = '3drefit'
+    input_spec = ThreedrefitInputSpec
+    output_spec = ThreedrefitOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        orignames = self.inputs.infiles
+        if isdefined(self.inputs.out_basename):
+            basepth, basename = os.path.split(self.inputs.out_basename)
+        
+        for item in self.inputs.infiles:
+            print item
+        outputs['refit_header'] = 'FIX'
+        if not isdefined(outputs['outfile']) and isdefined(self.inputs.infile):
+            outputs['outfile'] = self._gen_fname(self.inputs.infile,
+                                              suffix = '-Refit')
+        return outputs 
+
+
 class Threedrefit(AFNICommand):
     """Fix errors in AFNI header resulting from using to3d command.
 
@@ -370,7 +365,7 @@ class Threedrefit(AFNICommand):
         results = self._runner()
         # XXX implement aggregate_outputs
         return results
-        
+
 
 class Threedresample(AFNICommand):
     """Resample or reorient an image using AFNI 3dresample command.
@@ -463,7 +458,7 @@ class Threedresample(AFNICommand):
         # XXX implement aggregate_outputs
         return results
 
-        
+
 class ThreedTstat(AFNICommand):
     """Compute voxel-wise statistices using AFNI 3dTstat command.
 
@@ -612,7 +607,6 @@ class ThreedAutomask(AFNICommand):
         results = self._runner()
         # XXX implement aggregate_outputs
         return results
-
 
 
 class Threedvolreg(AFNICommand):
@@ -800,7 +794,6 @@ class Threedmerge(AFNICommand):
         results = self._runner()
         # XXX implement aggregate_outputs
         return results
-
 
 
 class ThreedZcutup(AFNICommand):
