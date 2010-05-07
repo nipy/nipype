@@ -289,6 +289,7 @@ class Info(object):
     def outputtype(cls):
         """AFNI has no environment variables,
         Output filetypes get set in command line calls
+        Nipype uses NIFTI_GZ as default
         
 
         Returns
@@ -296,7 +297,8 @@ class Info(object):
         None
         """
         print 'AFNI has no environment variable that sets filetype'
-        return None
+        print 'Nipype uses NIFTI_GZ as default'
+        return 'NIFTI_GZ'
             
 
     @staticmethod
@@ -314,13 +316,14 @@ class Info(object):
 
 
 class AFNITraitedSpec(CommandLineInputSpec):
-    outputtype =  traits.Enum('NIFTI', Info.ftypes.keys())
+    outputtype =  traits.Enum('NIFTI_GZ', Info.ftypes.keys(),
+                              desc = 'AFNI output filetype')
 
 
 class AFNICommand(NEW_CommandLine):
-    '''General support for AFNI commands. Every AFNI command accepts 'outputtype' input. For example:
+    """General support for AFNI commands. Every AFNI command accepts 'outputtype' input. For example:
     afni.Threedsetup(outputtype='NIFTI_GZ')
-    '''
+    """
 
     input_spec = AFNITraitedSpec
     _outputtype = None
@@ -338,8 +341,12 @@ class AFNICommand(NEW_CommandLine):
             self._output_update()
 
     def _output_update(self):
+        """ i think? updates class private attribute based on instance input
+         in fsl also updates ENVIRON variable....not valid in afni
+         as it uses no environment variables
+        """
         self._outputtype = self.inputs.outputtype
-        self.inputs.environ.update({'AFNIOUTPUTTYPE': self.inputs.outputtype})
+        
     
     @classmethod
     def set_default_outputtype(cls, outputtype):
