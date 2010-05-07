@@ -4,7 +4,7 @@ Created on 24 Feb 2010
 @author: filo
 '''
 from nipype.interfaces.base import Bunch, InterfaceResult,\
-    NEW_BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec,\
+    NEW_BaseInterface, traits, TraitedSpec,\
     File
 from nipype.utils.misc import isdefined
 import nipype.externals.pynifti as nifti
@@ -15,7 +15,7 @@ from copy import deepcopy
 import os
 from nipype.utils.filemanip import fname_presuffix
 
-class PickAtlasInputSpec(BaseInterfaceInputSpec):
+class PickAtlasInputSpec(TraitedSpec):
     atlas = File(exists=True, desc="Location of the atlas that will be used.", compulsory=True)
     labels = traits.Either(traits.Int, traits.List(traits.Int), 
                            desc="Labels of regions that will be included in the mask. Must be \

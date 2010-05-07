@@ -18,7 +18,7 @@ from nipype.interfaces.fsl.base import (FSLCommand, FSLInfo, FSLTraitedSpec,
                                         NEW_FSLCommand)
 from nipype.interfaces.base import (Bunch, Interface, load_template,
                                     InterfaceResult, File, Directory, traits,
-                                    BaseInterfaceInputSpec, TraitedSpec,
+                                    TraitedSpec,
                                     NEW_BaseInterface,
                                     InputMultiPath, OutputMultiPath)
 from nipype.utils.filemanip import (list_to_filename, filename_to_list,
@@ -31,7 +31,7 @@ from nipype.interfaces.traits import Directory
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
-class Level1DesignInputSpec(BaseInterfaceInputSpec):
+class Level1DesignInputSpec(TraitedSpec):
     interscan_interval = traits.Float(mandatory=True,
                 desc='Interscan  interval (in secs)')
     session_info = File(exists=True, mandatory=True,
@@ -250,7 +250,7 @@ class Level1Design(NEW_BaseInterface):
                 reg_image = self.inputs.reg_image
                 if not isdefined(reg_image):
                     reg_image = \
-                        Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
+                        FSLInfo.standard_image('MNI152_T1_2mm_brain.nii.gz')
                 reg_dof = self.inputs.reg_dof
         
         for i, info in enumerate(session_info):
@@ -574,7 +574,7 @@ class FixedEffectsModel(Interface):
         return outputs
 '''
 
-class FeatRegisterInputSpec(BaseInterfaceInputSpec):
+class FeatRegisterInputSpec(TraitedSpec):
     feat_dirs = InputMultiPath(Directory(), exist=True, desc="Lower level feat dirs",
                                mandatory=True)
     reg_image = File(exist=True, desc="image to register to (will be treated as standard)",
@@ -836,7 +836,7 @@ class ContrastMgr(NEW_FSLCommand):
         
         return outputs
 
-class L2ModelInputSpec(BaseInterfaceInputSpec):
+class L2ModelInputSpec(TraitedSpec):
     num_copes = traits.Int(min=1, mandatory=True,
                              desc='number of copes to be combined')
 

@@ -18,7 +18,7 @@ from enthought.traits.trait_errors import TraitError
 from nipype.interfaces.base import (Interface, CommandLine, Bunch,
                                     InterfaceResult, NEW_Interface,
                                     TraitedSpec, traits, File, Directory,
-                                    BaseInterfaceInputSpec, NEW_BaseInterface,
+                                    NEW_BaseInterface,
                                     OutputMultiPath, DynamicTraitedSpec,
                                     BaseTraitedSpec, Undefined)
 from nipype.utils.misc import isdefined
@@ -57,7 +57,7 @@ class IOBase(NEW_BaseInterface):
     def _add_output_traits(self, base):
         return base
     
-class DataSinkInputSpec(BaseInterfaceInputSpec):
+class DataSinkInputSpec(DynamicTraitedSpec):
     base_directory = Directory( 
         desc='Path to the base directory consisting of subject data.')
     container = traits.Str(desc = 'Folder within basedirectory in which to store output')
@@ -301,7 +301,7 @@ class DataGrabber(IOBase):
         return outputs
 
 
-class FSSourceInputSpec(BaseInterfaceInputSpec):
+class FSSourceInputSpec(TraitedSpec):
     subjects_dir = Directory(desc='Freesurfer subjects directory. The ' \
                                  'program will try to retrieve it from the ' \
                                  'environment if available.')

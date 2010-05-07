@@ -889,9 +889,6 @@ class NEW_Interface(object):
         """
         raise NotImplementedError
 
-class BaseInterfaceInputSpec(TraitedSpec):
-    environ = traits.DictStrStr(desc='Environment variables', usedefault=True)
-
 class NEW_BaseInterface(NEW_Interface):
     """Implements common interface functionality.
 
@@ -910,7 +907,6 @@ class NEW_BaseInterface(NEW_Interface):
     This class cannot be instantiated.
     
     """
-    input_spec = BaseInterfaceInputSpec
 
     def __init__(self, **inputs):
         if not self.input_spec:
@@ -1112,10 +1108,11 @@ class NEW_BaseInterface(NEW_Interface):
                     else:
                         raise error
         return outputs
+    
 
-
-class CommandLineInputSpec(BaseInterfaceInputSpec):
+class CommandLineInputSpec(TraitedSpec):
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
+    environ = traits.DictStrStr(desc='Environment variables', usedefault=True)
 
 class NEW_CommandLine(NEW_BaseInterface):
     """Implements functionality to interact with command line programs

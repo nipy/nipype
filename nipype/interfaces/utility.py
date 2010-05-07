@@ -4,7 +4,7 @@ import numpy as np
 
 from nipype.utils.filemanip import (filename_to_list, list_to_filename)
 from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec,
-                                    BaseInterfaceInputSpec, Undefined)
+                                    Undefined)
 from nipype.interfaces.io import IOBase, add_traits
 
     

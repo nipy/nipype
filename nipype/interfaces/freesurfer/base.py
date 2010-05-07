@@ -20,7 +20,7 @@ import numpy as np
 
 from nipype.utils.filemanip import FileNotFoundError, fname_presuffix
 from nipype.interfaces.base import NEW_CommandLine, traits, TraitedSpec,\
-    BaseInterfaceInputSpec, Directory
+    Directory, CommandLineInputSpec
 from nipype.utils.misc import isdefined
 
 class Info(object):
@@ -79,7 +79,7 @@ class Info(object):
         return None
 
 
-class FSTraitedSpec(BaseInterfaceInputSpec):
+class FSTraitedSpec(CommandLineInputSpec):
     subjectsdir =  Directory(exists=True, desc='subjects directory')
     
 class NEW_FSCommand(NEW_CommandLine):

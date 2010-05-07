@@ -20,9 +20,8 @@ from scipy import signal
 import scipy.io as sio
 
 from nipype.interfaces.base import Bunch, InterfaceResult, Interface,\
-    NEW_BaseInterface, BaseInterfaceInputSpec, traits, InputMultiPath,\
-    OutputMultiPath, TraitedSpec,\
-    File
+    NEW_BaseInterface, traits, InputMultiPath, OutputMultiPath,\
+    TraitedSpec, File
 from nipype.externals.pynifti import load, funcs
 from nipype.utils.filemanip import filename_to_list, list_to_filename
 from nipype.utils.misc import find_indices
@@ -30,7 +29,7 @@ from nipype.utils.misc import find_indices
 #import matplotlib.pyplot as plt
 #import traceback
 
-class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
+class ArtifactDetectInputSpec(TraitedSpec):
     realigned_files = InputMultiPath(File(exists=True), desc="Names of realigned functional data files", mandatory=True)
     realignment_parameters = InputMultiPath(File(exists=True), desc="Names of realignment parameters corresponding to the" \
             "functional data files")
