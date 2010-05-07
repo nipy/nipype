@@ -241,7 +241,7 @@ class AFNICommand(OptMapCommand):
 class Info(object):
     """Handle afni output type and version information.
     """
-
+    __outputtype = 'NIFTI_GZ'
     ftypes = {'NIFTI': '.nii',
               'AFNI': '.BRIK',
               'NIFTI_GZ': '.nii.gz'}
@@ -287,20 +287,17 @@ class Info(object):
 
     @classmethod
     def outputtype(cls):
-        """Get the global AFNI output file type AFNIOUTPUTTYPE.
-
-        This returns the value of the environment variable
-        AFNIOUTPUTTYPE.  An exception is raised if it is not defined.
+        """AFNI has no environment variables,
+        Output filetypes get set in command line calls
+        
 
         Returns
         -------
-        afni_ftype : string
-            Represents the current environment setting of AFNIOUTPUTTYPE
+        None
         """
-        try:
-            return os.environ['AFNIOUTPUTTYPE']
-        except KeyError:
-            raise Exception('AFNI environment variables not set')
+        print 'AFNI has no environment variable that sets filetype'
+        return None
+            
 
     @staticmethod
     def standard_image(img_name):
@@ -329,7 +326,7 @@ class AFNICommand(NEW_CommandLine):
     _outputtype = None
 
     def __init__(self, **inputs):
-        super(NEW_AFNICommand, self).__init__(**inputs)
+        super(AFNICommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, 'outputtype')
 
         if self._outputtype is None:
