@@ -15,7 +15,7 @@ import warnings
 from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
 from nipype.interfaces.fsl.base import NEW_FSLCommand, FSLTraitedSpec
 from nipype.interfaces.base import Bunch, TraitedSpec, File,\
-    InputMultiPath
+    InputMultiPath, OutputMultiPath
 from nipype.utils.filemanip import fname_presuffix, list_to_filename,\
     split_filename
 from nipype.utils.docparse import get_doc
@@ -27,7 +27,7 @@ warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 class BetInputSpec(FSLTraitedSpec):
-    '''Note: Currently we don't support -R, -S, -Z,-A or -A2'''
+    """Note: Currently we don't support -R, -S, -Z,-A or -A2"""
     # We use position args here as list indices - so a negative number
     # will put something on the end
     infile = File(exists=True,
@@ -157,14 +157,14 @@ class FastInputSpec(FSLTraitedSpec):
                               'to be segmented',
                           argstr='%s', position=-1, mandatory=True)
     out_basename = File(desc = 'base name of output files',
-                        argstr='-o %s', genfile=True) # maybe not genfile
+                        argstr='-o %s') #uses infile name as basename if none given
     number_classes = traits.Range(low=1, high=10, argstr = '-n %d',
                                   desc = 'number of tissue-type classes')
     output_biasfield = traits.Bool(desc = 'output estimated bias field',
-                                   argstr = '-b', genfile=True)
+                                   argstr = '-b')
     output_biascorrected = traits.Bool(desc = 'output restored image ' \
                                            '(bias-corrected image)',
-                                       argstr = '-B', genfile = True)
+                                       argstr = '-B')
     img_type = traits.Enum((1,2,3), desc = 'int specifying type of image: ' \
                                '(1 = T1, 2 = T2, 3 = PD)',
                            argstr = '-t %d')
@@ -182,7 +182,7 @@ class FastInputSpec(FSLTraitedSpec):
                                    argstr = '-f %.3f')
     segments = traits.Bool(desc = 'outputs a separate binary image for each ' \
                                'tissue type',
-                           argstr = '-g', genfile=True)
+                           argstr = '-g')
     init_transform = File(exists=True, desc = '<standard2input.mat> initialise'\
                               ' using priors',
                           argstr = '-a %s')
@@ -218,28 +218,28 @@ class FastInputSpec(FSLTraitedSpec):
     manualseg = File(exists=True, desc = 'Filename containing intensities',
                      argstr = '-s %s')
     probability_maps = traits.Bool(desc = 'outputs individual probability maps',
-                                   argstr = '-p', genfile = True)
+                                   argstr = '-p')
     
 
 class FastOutputSpec(TraitedSpec):
     """Specify possible outputs from Fast"""
     tissue_class_map = File(exists=True,
                             desc = 'path/name of binary segmented volume file' \
-                                ' one val for each class  _seg')
-    tissue_class_files = File(desc = 'path/name of binary segmented volumes ' \
-                                  'one file for each class  _seg_x')
-    restored_image = File(desc = 'restored images (one for each input image) ' \
-                              'named according to the input images _restore')
+                            ' one val for each class  _seg')
+    tissue_class_files =OutputMultiPath( File(desc = 'path/name of binary segmented volumes ' \
+                                  'one file for each class  _seg_x'))
+    restored_image = OutputMultiPath(File(desc = 'restored images (one for each input image) ' \
+                              'named according to the input images _restore'))
 
     mixeltype  = File(desc = "path/name of mixeltype volume file _mixeltype")
 
     partial_volume_map = File(desc = "path/name of partial volume file _pveseg")
-    partial_volume_files  = File(desc = 'path/name of partial volumes files ' \
-                                     'one for each class, _pve_x')
+    partial_volume_files  = OutputMultiPath(File(desc = 'path/name of partial volumes files ' \
+                                     'one for each class, _pve_x'))
     
-    bias_field = File(desc = 'Estimated bias field _bias')
-    probability_maps = File(desc= 'filenames, one for each class, for each ' \
-                                'input, prob_x')
+    bias_field = OutputMultiPath(File(desc = 'Estimated bias field _bias'))
+    probability_maps = OutputMultiPath(File(desc= 'filenames, one for each class, for each ' \
+                                'input, prob_x'))
 
 
 class Fast(NEW_FSLCommand):
@@ -254,247 +254,42 @@ class Fast(NEW_FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        orignames = self.inputs.infiles
+        if not isdefined(self.inputs.number_classes):
+            nclasses = 3
+        else:
+            nclasses = self.inputs.number_classes
+        # when using multichannel, results basename is based on last
+        # input filename
         if isdefined(self.inputs.out_basename):
-            basepth, basename = os.path.split(self.inputs.out_basename)
-        
-        for item in self.inputs.infiles:
-            print item
-        outputs['tissue_class_map'] = 'FIX'
-        if not isdefined(outputs['outfile']) and isdefined(self.inputs.infile):
-            outputs['outfile'] = self._gen_fname(self.inputs.infile,
-                                              suffix = '_brain')
-        if isdefined(self.inputs.mesh) and self.inputs.mesh:
-            outputs['meshfile'] = self._gen_fname(outputs['outfile'],
-                                               suffix = '_mesh.vtk',
-                                               change_ext = False)
-        if (isdefined(self.inputs.mask) and self.inputs.mask) or \
-                (isdefined(self.inputs.reduce_bias) and self.inputs.reduce_bias):
-            outputs['maskfile'] = self._gen_fname(outputs['outfile'],
-                                               suffix = '_mask')
+            basefile = self.inputs.out_basename
+        else:
+            basefile = self.inputs.infiles[-1]
+
+        outputs['tissue_class_map'] = self._gen_fname(basefile,
+                                                      suffix = '_seg')
+        for  i in range(nclasses):
+            outputs['tissue_class_files'].append(self._gen_fname(basefile,
+                                                                 suffix = '_seg_%d'%(i)))
+        if isdefined(self.inputs.output_biascorrected):
+            for val,f in enumerate(self.inputs.infiles):
+                outputs['restored_image'].append(self._gen_fname(f,
+                                                                 suffix = '_restore_%d'%(val)))
+        outputs['mixeltype'] = self._gen_fname(basefile, suffix = '_mixeltype')
+        if not self.inputs.nopve:
+            outputs['partial_volume_map'] = self._gen_fname(basefile, suffix = '_pveseg')
+            for i in range(nclasses):
+                outputs['partial_volume_files'].append(self._gen_fname(basefile,
+                                                                       suffix='_pve_%d'%(i)))
+        if self.inputs.output_biasfield:
+            for val,f in enumerate(self.inputs.infiles):
+                outputs['bias_field'].append(self._gen_fname(basefile, suffix='_bias_%d'%val))
+        #if self.inputs.probability_maps:
+            
         return outputs 
 
 
    
-'''
-class Fast(FSLCommand):
-    """Use FSL FAST for segmenting and bias correction.
-
-    For complete details, see the `FAST Documentation.
-    <http://www.fmrib.ox.ac.uk/fsl/fast4/index.html>`_
-
-    To print out the command line help, use:
-        fsl.Fast().inputs_help()
-
-    Examples
-    --------
-    >>> from nipype.interfaces import fsl
-    >>> faster = fsl.Fast(out_basename = 'myfasted')
-    >>> fasted = faster.run(['file1', 'file2'])
-
-    >>> faster = fsl.Fast(infiles=['filea', 'fileb'], out_basename='myfasted')
-    >>> fasted = faster.run()
-
-    """
-
-    @property
-    def cmd(self):
-        """sets base command, not editable"""
-        return 'fast'
-
-    opt_map = {'number_classes':       '-n %d',
-            'bias_iters':           '-I %d',
-            'bias_lowpass':         '-l %d',  # in mm
-            'img_type':             '-t %d',
-            'init_seg_smooth':      '-f %.3f',
-            'segments':             '-g',
-            'init_transform':       '-a %s',
-            # This option is not really documented on the Fast web page:
-            # http://www.fmrib.ox.ac.uk/fsl/fast4/index.html#fastcomm
-            # I'm not sure if there are supposed to be exactly 3 args or what
-            'other_priors':         '-A %s %s %s',
-            'nopve':                '--nopve',
-            'output_biasfield':     '-b',
-            'output_biascorrected': '-B',
-            'nobias':               '-N',
-            'n_inputimages':        '-S %d',
-            'out_basename':         '-o %s',
-            'use_priors':           '-P',  # must also set -a!
-            'segment_iters':        '-W %d',
-            'mixel_smooth':         '-R %.2f',
-            'iters_afterbias':      '-O %d',
-            'hyper':                '-H %.2f',
-            'verbose':              '-v',
-            'manualseg':            '-s %s',
-            'probability_maps':     '-p',
-            'infiles':               None,
-            }
-
-    def inputs_help(self):
-        """Print command line documentation for FAST."""
-        print get_doc(self.cmd, self.opt_map, trap_error=False)
-
-    def run(self, infiles=None, **inputs):
-        """Execute the FSL fast command.
-
-        Parameters
-        ----------
-        infiles : string or list of strings
-            File(s) to be segmented or bias corrected
-        inputs : dict, optional
-            Additional ``inputs`` assignments can be passed in.
-
-        Returns
-        -------
-        results : InterfaceResult
-            An :class:`nipype.interfaces.base.InterfaceResult` object
-            with a copy of self in `interface`
-
-        """
-
-        if infiles:
-            self.inputs.infiles = infiles
-        if not self.inputs.infiles:
-            raise AttributeError('Fast requires input file(s)')
-        self.inputs.update(**inputs)
-        return super(Fast, self).run()
-
-    def _parse_inputs(self):
-        """Call our super-method, then add our input files"""
-        # Could do other checking above and beyond regular _parse_inputs here
-        allargs = super(Fast, self)._parse_inputs(skip=('infiles'))
-        if self.inputs.infiles:
-            allargs.append(container_to_string(self.inputs.infiles))
-        return allargs
-
-    def outputs(self):
-        """Returns a :class:`nipype.interfaces.base.Bunch` with outputs
-
-        Parameters
-        ----------
-        Each attribute in ``outputs`` is a list.  There will be
-        one set of ``outputs`` for each file specified in
-        ``infiles``.  ``outputs`` will contain the following
-        files:
-
-        mixeltype : list
-            filename(s)
-        partial_volume_map : list
-            filenames, one for each input
-        partial_volume_files : list
-            filenames, one for each class, for each input
-        tissue_class_map : list
-            filename(s), each tissue has unique int value
-        tissue_class_files : list
-            filenames, one for each class, for each input
-        restored_image : list
-            filename(s) bias corrected image(s)
-        bias_field : list
-            filename(s)
-        probability_maps : list
-            filenames, one for each class, for each input
-
-        """
-
-        outputs = Bunch(mixeltype=[],
-                seg=[],
-                partial_volume_map=[],
-                partial_volume_files=[],
-                tissue_class_map=[],
-                tissue_class_files=[],
-                bias_corrected=[],
-                bias_field=[],
-                prob_maps=[])
-        return outputs
-
-    def aggregate_outputs(self):
-        """Create a Bunch which contains all possible files generated
-        by running the interface.  Some files are always generated, others
-        depending on which ``inputs`` options are set.
-
-        Returns
-        -------
-        outputs : Bunch object
-
-        Notes
-        -----
-        For each item in Bunch:
-        If [] empty list, optional file was not generated
-        Else, list contains path,filename of generated outputfile(s)
-
-        Raises
-        ------
-        IOError
-            If any expected output file is not found.
-
-        """
-        _, envext = FSLInfo.outputtype()
-        outputs = self.outputs()
-
-        if not is_container(self.inputs.infiles):
-            infiles = [self.inputs.infiles]
-        else:
-            infiles = self.inputs.infiles
-        for item in infiles:
-            # get basename (correct fsloutpputytpe extension)
-            if self.inputs.out_basename:
-                pth, nme = os.path.split(item)
-                _, _ = os.path.splitext(nme)
-                item = pth + self.inputs.out_basename + envext
-            else:
-                nme, _ = os.path.splitext(item)
-                item = nme + envext
-            # get number of tissue classes
-            if not self.inputs.number_classes:
-                nclasses = 3
-            else:
-                nclasses = self.inputs.number_classes
-
-            # always seg, (plus mutiple?)
-            outputs.seg.append(fname_presuffix(item, suffix='_seg'))
-            if self.inputs.segments:
-                for i in range(nclasses):
-                    outputs.seg.append(fname_presuffix(item,
-                        suffix='_seg_%d' % (i)))
-                    # always pve,mixeltype unless nopve = True
-            if not self.inputs.nopve:
-                fname = fname_presuffix(item, suffix='_pveseg')
-                outputs.partial_volume_map.append(fname)
-                fname = fname_presuffix(item, suffix='_mixeltype')
-                outputs.mixeltype.append(fname)
-
-                for i in range(nclasses):
-                    fname = fname_presuffix(item, suffix='_pve_%d' % (i))
-                    outputs.partial_volume_files.append(fname)
-
-            # biasfield ?
-            if self.inputs.output_biasfield:
-                outputs.bias_field.append(fname_presuffix(item, suffix='_bias'))
-
-            # restored image (bias corrected)?
-            if self.inputs.output_biascorrected:
-                fname = fname_presuffix(item, suffix='_restore')
-                outputs.biascorrected.append(fname)
-
-            # probability maps ?
-            if self.inputs.probability_maps:
-                for i in range(nclasses):
-                    fname = fname_presuffix(item, suffix='_prob_%d' % (i))
-                    outputs.prob_maps.append(fname)
-
-        # For each output file-type (key), check that any expected
-        # files in the output list exist.
-        for outtype, outlist in outputs.items():
-            if len(outlist) > 0:
-                for outfile in outlist:
-                    if not len(glob(outfile)) == 1:
-                        msg = "Output file '%s' of type '%s' was not generated"\
-                                % (outfile, outtype)
-                        raise IOError(msg)
-
-        return outputs
-'''
-        
+       
 class FlirtInputSpec(FSLTraitedSpec):
     infile = File(exists = True, argstr = '-in %s', mandatory = True,
                   position = 0, desc = 'input file')
@@ -634,7 +429,7 @@ class Flirt(NEW_FSLCommand):
         else:
             return None
 
-
+    
 class ApplyXfm(Flirt):
     pass
 
