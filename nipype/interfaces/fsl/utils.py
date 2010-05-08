@@ -15,7 +15,7 @@ import warnings
 import numpy as np
 
 from nipype.interfaces.fsl.base import FSLCommand,\
-    FSLTraitedSpec, Info
+    FSLCommandInputSpec, Info
 from nipype.interfaces.base import traits, TraitedSpec,\
     OutputMultiPath, File
 from nipype.utils.misc import isdefined
@@ -23,7 +23,7 @@ from nipype.utils.misc import isdefined
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
-class SmoothInputSpec(FSLTraitedSpec):
+class SmoothInputSpec(FSLCommandInputSpec):
     infile = File(exists=True, argstr="%s", position=0, mandatory=True)
     fwhm = traits.Float(argstr="-kernel gauss %f -fmean", position=1,
                             mandatory=True)
@@ -65,7 +65,7 @@ class Smooth(FSLCommand):
         else:
             return super(Smooth, self)._format_arg(name, trait_spec, value)
 
-class MergeInputSpec(FSLTraitedSpec):
+class MergeInputSpec(FSLCommandInputSpec):
     infiles = traits.List(File(exists=True), argstr="%s", position=2, mandatory=True)
     dimension = traits.Enum('t', 'x', 'y', 'z', argstr="-%s", position=0,
                             desc="dimension along which the file will be merged",
@@ -97,7 +97,7 @@ class Merge(FSLCommand):
         return None
 
 
-class ExtractRoiInputSpec(FSLTraitedSpec):
+class ExtractRoiInputSpec(FSLCommandInputSpec):
     infile = File(exists=True, argstr="%s", position=0, desc="input file", mandatory=True)
     outfile = File(argstr="%s", position=1, desc="output file", genfile=True)
     xmin = traits.Float(argstr="%f", position=2)
@@ -162,7 +162,7 @@ class ExtractRoi(FSLCommand):
             return self._list_outputs()[name]
         return None
 
-class SplitInputSpec(FSLTraitedSpec):
+class SplitInputSpec(FSLCommandInputSpec):
     infile = File(exists=True, argstr="%s", position = 0, desc="input filename")
     outbasename = traits.Str(argstr="%s", position=1, desc="outputs prefix")
     dimension = traits.Enum('t','x','y','z', argstr="-%s", position=2, desc="dimension along which the file will be split")
@@ -202,7 +202,7 @@ class Split(FSLCommand):
                                                     outbase + ext)))
         return outputs
     
-class ImageMathsInputSpec(FSLTraitedSpec):
+class ImageMathsInputSpec(FSLCommandInputSpec):
     infile = File(exists=True, argstr="%s", mandatory=True, position=0)
     infile2 = File(exists=True, argstr="%s", position=2)
     outfile = File(argstr="%s", position=3, genfile=True)

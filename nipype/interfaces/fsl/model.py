@@ -14,7 +14,7 @@ from glob import glob
 import warnings
 from shutil import rmtree
 
-from nipype.interfaces.fsl.base import (FSLCommand, Info, FSLTraitedSpec)
+from nipype.interfaces.fsl.base import (FSLCommand, Info, FSLCommandInputSpec)
 from nipype.interfaces.base import (Bunch, load_template,
                                     InterfaceResult, File, traits,
                                     TraitedSpec,
@@ -297,7 +297,7 @@ class Level1Design(NEW_BaseInterface):
         return outputs
 
 
-class FeatInputSpec(FSLTraitedSpec):
+class FeatInputSpec(FSLCommandInputSpec):
     fsf_file = File(exist=True, mandatory=True,argstr="%s", position=0, 
                     desc="File specifying the feat design spec file")
     
@@ -316,7 +316,7 @@ class Feat(FSLCommand):
         outputs['featdir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
         return outputs
 
-class FeatModelInputSpec(FSLTraitedSpec):
+class FeatModelInputSpec(FSLCommandInputSpec):
     fsf_file = File(exist=True, mandatory=True, argstr="%s", position=0,
                     desc="File specifying the feat design spec file",
                     copyfile=False)
@@ -361,7 +361,7 @@ class FeatModel(FSLCommand):
 
 # interface to fsl command line model fit routines
 # ohinds: 2009-12-28
-class FilmGLSInputSpec(FSLTraitedSpec):
+class FilmGLSInputSpec(FSLCommandInputSpec):
     infile = File(exists=True, mandatory=True, position=-3,
                   argstr='%s',
                   desc='input data file')
@@ -625,7 +625,7 @@ class FeatRegister(NEW_BaseInterface):
         outputs['fsf_file'] = os.path.abspath(os.path.join(os.getcwd(), 'register.fsf'))
         return outputs
 
-class FlameoInputSpec(FSLTraitedSpec):
+class FlameoInputSpec(FSLCommandInputSpec):
     copefile = File(exists=True, argstr='--copefile=%s', madatory=True)
     varcopefile = File(exists=True, argstr='--varcopefile=%s')
     dofvarcopefile = File(exists=True, argstr='--dofvarcopefile=%s')
@@ -745,7 +745,7 @@ class Flameo(FSLCommand):
 
         return outputs
 
-class ContrastMgrInputSpec(FSLTraitedSpec):
+class ContrastMgrInputSpec(FSLCommandInputSpec):
     tcon_file = File(exists=True, mandatory=True,
                      argstr='%s', position=-1,
                      desc='contrast file containing T-contrasts')
@@ -907,7 +907,7 @@ class L2Model(NEW_BaseInterface):
                                                  field.replace('_','.')))
         return outputs
 
-class SMMInputSpec(FSLTraitedSpec):
+class SMMInputSpec(FSLCommandInputSpec):
     spatialdatafile = File(exists=True, position=0, argstr='--sdf="%s"', mandatory=True,
                            desc="statistics spatial map", copyfile=False)
     mask = File(exist=True, position=1, argstr='--mask="%s"', mandatory=True,

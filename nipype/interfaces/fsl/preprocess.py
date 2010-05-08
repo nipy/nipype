@@ -11,7 +11,7 @@ See the docstrings of the individual classes for examples.
 import os
 import warnings
 
-from nipype.interfaces.fsl.base import FSLCommand, FSLTraitedSpec
+from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
 from nipype.interfaces.base import TraitedSpec, File,\
     InputMultiPath, OutputMultiPath
 from nipype.utils.filemanip import split_filename
@@ -22,7 +22,7 @@ import enthought.traits.api as traits
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
-class BetInputSpec(FSLTraitedSpec):
+class BetInputSpec(FSLCommandInputSpec):
     """Note: Currently we don't support -R, -S, -Z,-A or -A2"""
     # We use position args here as list indices - so a negative number
     # will put something on the end
@@ -146,7 +146,7 @@ class Bet(FSLCommand):
         return None
 
 
-class FastInputSpec(FSLTraitedSpec):
+class FastInputSpec(FSLCommandInputSpec):
     """ Defines inputs (trait classes) for Fast """
     infiles = InputMultiPath(File(exists=True),
                           desc = 'image, or multi-channel set of images, ' \
@@ -286,7 +286,7 @@ class Fast(FSLCommand):
 
    
        
-class FlirtInputSpec(FSLTraitedSpec):
+class FlirtInputSpec(FSLCommandInputSpec):
     infile = File(exists = True, argstr = '-in %s', mandatory = True,
                   position = 0, desc = 'input file')
     # XXX Not clear if position is required for mandatory flirt inputs
@@ -430,7 +430,7 @@ class ApplyXfm(Flirt):
     pass
 
 
-class McFlirtInputSpec(FSLTraitedSpec):
+class McFlirtInputSpec(FSLCommandInputSpec):
     infile = File(exists=True, position= 0, argstr="-in %s", mandatory=True)
     outfile = File(exists=True, argstr='-out %s', genfile=True)
     cost = traits.Enum('mutualinfo','woods','corratio','normcorr','normmi','leastsquares', argstr='-cost %s')
@@ -509,7 +509,7 @@ class McFlirt(FSLCommand):
             return self._list_outputs()[name]
         return None
 
-class FnirtInputSpec(FSLTraitedSpec):
+class FnirtInputSpec(FSLCommandInputSpec):
     ref_file = File(exists=True, argstr='--ref=%s', mandatory=True,
                     desc='name of reference image')
     infile = File(exists=True, argstr='--in=%s', mandatory=True,
@@ -714,7 +714,7 @@ class Fnirt(FSLCommand):
             fid.write('%s\n' % (item))
         fid.close()
 
-class ApplyWarpInputSpec(FSLTraitedSpec):
+class ApplyWarpInputSpec(FSLCommandInputSpec):
     infile = File(exists=True, argstr='--in=%s',
                   mandatory=True,
                   desc='image to be warped')
@@ -779,7 +779,7 @@ class ApplyWarp(FSLCommand):
             return self._list_outputs()[name]
         return None
 
-class SliceTimerInputSpec(FSLTraitedSpec):
+class SliceTimerInputSpec(FSLCommandInputSpec):
     infile = File(exists=True, argstr='--in=%s',
                   mandatory=True, position=0,
                   desc='filename of input timeseries')

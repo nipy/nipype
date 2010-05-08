@@ -114,7 +114,7 @@ class Info(object):
         return os.path.join(fsldir, 'data/standard', img_name)
 
 
-class FSLTraitedSpec(CommandLineInputSpec):
+class FSLCommandInputSpec(CommandLineInputSpec):
     outputtype =  traits.Enum('NIFTI', Info.ftypes.keys(),
                               desc='FSL output type')
     
@@ -123,7 +123,7 @@ class FSLCommand(NEW_CommandLine):
     input. For example:
     fsl.ExtractRoi(tmin=42, tsize=1, outputtype='NIFTI')"""
     
-    input_spec = FSLTraitedSpec
+    input_spec = FSLCommandInputSpec
     _outputtype = None
 
     def __init__(self, **inputs):
