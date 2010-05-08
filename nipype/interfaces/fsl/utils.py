@@ -14,7 +14,7 @@ import warnings
 
 import numpy as np
 
-from nipype.interfaces.fsl.base import NEW_FSLCommand,\
+from nipype.interfaces.fsl.base import FSLCommand,\
     FSLTraitedSpec, Info
 from nipype.interfaces.base import traits, TraitedSpec,\
     OutputMultiPath, File
@@ -32,7 +32,7 @@ class SmoothInputSpec(FSLTraitedSpec):
 class SmoothOutputSpec(TraitedSpec):
     smoothedimage = File(exists=True)
 
-class Smooth(NEW_FSLCommand):
+class Smooth(FSLCommand):
     '''Use fslmaths to smooth the image
 
     This is dumb, of course - we should use nipy for such things! But it is a
@@ -75,7 +75,7 @@ class MergeInputSpec(FSLTraitedSpec):
 class MergeOutputSpec(TraitedSpec):
     outfile = File(exists=True)
 
-class Merge(NEW_FSLCommand):
+class Merge(FSLCommand):
     """Use fslmerge to concatenate images
     """
 
@@ -112,7 +112,7 @@ class ExtractRoiInputSpec(FSLTraitedSpec):
 class ExtractRoiOutputSpec(TraitedSpec):
     outfile = File(exists=True)
 
-class ExtractRoi(NEW_FSLCommand):
+class ExtractRoi(FSLCommand):
     """Uses FSL Fslroi command to extract region of interest (ROI)
     from an image.
 
@@ -170,7 +170,7 @@ class SplitInputSpec(FSLTraitedSpec):
 class SplitOutputSpec(TraitedSpec):
     outfiles = OutputMultiPath(File(exists=True))
 
-class Split(NEW_FSLCommand):
+class Split(FSLCommand):
     """Uses FSL Fslsplit command to separate a volume into images in
     time, x, y or z dimension.
     """
@@ -216,7 +216,7 @@ class ImageMathsInputSpec(FSLTraitedSpec):
 class ImageMathsOutputSpec(TraitedSpec):
     outfile = File(exists=True)
 
-class ImageMaths(NEW_FSLCommand):
+class ImageMaths(FSLCommand):
     """Use FSL fslmaths command to allow mathematical manipulation of images
     Example:
     >>> from nipype.interfaces import fsl

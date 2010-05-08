@@ -9,17 +9,13 @@ See the docstrings of the individual classes for examples.
 """
 
 import os
-from glob import glob
 import warnings
 
-from nipype.interfaces.fsl.base import FSLCommand, FSLInfo
-from nipype.interfaces.fsl.base import NEW_FSLCommand, FSLTraitedSpec
-from nipype.interfaces.base import Bunch, TraitedSpec, File,\
+from nipype.interfaces.fsl.base import FSLCommand, FSLTraitedSpec
+from nipype.interfaces.base import TraitedSpec, File,\
     InputMultiPath, OutputMultiPath
-from nipype.utils.filemanip import fname_presuffix, list_to_filename,\
-    split_filename
-from nipype.utils.docparse import get_doc
-from nipype.utils.misc import container_to_string, is_container, isdefined
+from nipype.utils.filemanip import split_filename
+from nipype.utils.misc import isdefined
 
 import enthought.traits.api as traits
 
@@ -74,7 +70,7 @@ class BetOutputSpec(TraitedSpec):
     meshfile = File(
         desc="path/name of vtk mesh file (if generated)")
 
-class Bet(NEW_FSLCommand):
+class Bet(FSLCommand):
     """Use FSL BET command for skull stripping.
 
     For complete details, see the `BET Documentation.
@@ -242,7 +238,7 @@ class FastOutputSpec(TraitedSpec):
                                 'input, prob_x'))
 
 
-class Fast(NEW_FSLCommand):
+class Fast(FSLCommand):
     """ Use FSL FAST for segmenting and bias correction.
 
     For complete details, see the `FAST Documentation.
@@ -383,7 +379,7 @@ class FlirtOutputSpec(TraitedSpec):
                      desc = 'path/name of calculated affine transform ' \
                          '(if generated)')
 
-class Flirt(NEW_FSLCommand):
+class Flirt(FSLCommand):
     """Use FSL FLIRT for coregistration.
 
     For complete details, see the `FLIRT Documentation.
@@ -462,7 +458,7 @@ class McFlirtOutputSpec(TraitedSpec):
     parfile = File(exists=True)
     outmatfile = File(exists=True)
 
-class McFlirt(NEW_FSLCommand):
+class McFlirt(FSLCommand):
     """Use FSL MCFLIRT to do within-modality motion correction.
 
     For complete details, see the `MCFLIRT Documentation.
@@ -619,7 +615,7 @@ class FnirtOutputSpec(TraitedSpec):
                         desc='file containing info pertaining to intensity mapping')
     log_file = File(exists=True, desc='Name of log-file')
 
-class Fnirt(NEW_FSLCommand):
+class Fnirt(FSLCommand):
     """Use FSL FNIRT for non-linear registration.
 
     Examples
@@ -657,8 +653,9 @@ class Fnirt(NEW_FSLCommand):
                    modulatedref_file='_modulated',
                    out_intensitymap_file='_intmap',
                    log_file='.log')
+    
     def _format_arg(self, name, spec, value):
-        if name in out_map.keys():
+        if name in self.out_map.keys():
             if isinstance(value, bool):
                 fname = self._list_outputs()[name]
             else:
@@ -682,7 +679,7 @@ class Fnirt(NEW_FSLCommand):
         if not isdefined(self.inputs.fieldcoeff_file):
             outputs['fieldcoeff_file'] = self._gen_fname(self.inputs.file,
                                                          suffix='_warpcoef')
-        for name, suffix in out_map.items():
+        for name, suffix in self.out_map.items():
             src = self.inputs.infile
             if name == 'modulatedref_file':
                 src = self.inputs.ref_file
@@ -695,7 +692,7 @@ class Fnirt(NEW_FSLCommand):
         return outputs
     
     def _gen_filename(self, name):
-        if name in out_map.keys():
+        if name in self.out_map.keys():
             return self._list_outputs()[name]
         return None
 
@@ -753,7 +750,7 @@ class ApplyWarpInputSpec(FSLTraitedSpec):
 class ApplyWarpOutputSpec(TraitedSpec):
     outfile = File(exists=True, desc='Warped output file')
 
-class ApplyWarp(NEW_FSLCommand):
+class ApplyWarp(FSLCommand):
     """Use FSL's applywarp to apply the results of a Fnirt registration
 
     Examples
@@ -806,7 +803,7 @@ class SliceTimerInputSpec(FSLTraitedSpec):
 class SliceTimerOutputSpec(TraitedSpec):
     outfile = File(exists=True, desc='slice time corrected file')
 
-class SliceTimer(NEW_FSLCommand):
+class SliceTimer(FSLCommand):
     """ use FSL slicetimer to perform slice timing correction.
 
     Examples

@@ -38,8 +38,8 @@ package_check('IPython', '0.10', 'tutorial1')
 """
 
 # Tell fsl to generate all output in compressed nifti format
-print fsl.FSLInfo.version()
-fsl.NEW_FSLCommand.set_default_outputtype('NIFTI_GZ')
+print fsl.Info.version()
+fsl.FSLCommand.set_default_outputtype('NIFTI_GZ')
 
 
 """The nipype tutorial contains data for two subjects.  Subject data
@@ -207,7 +207,7 @@ level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
 level1design.inputs.bases = {'hrf':{'derivs': True}}
 level1design.inputs.contrasts = contrasts
 level1design.inputs.register = True
-level1design.inputs.reg_image = fsl.FSLInfo.standard_image('MNI152_T1_2mm_brain.nii.gz')
+level1design.inputs.reg_image = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
 level1design.inputs.reg_dof = 12 
 
 """

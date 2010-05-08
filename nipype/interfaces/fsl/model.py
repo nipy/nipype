@@ -14,16 +14,14 @@ from glob import glob
 import warnings
 from shutil import rmtree
 
-from nipype.interfaces.fsl.base import (FSLCommand, FSLInfo, FSLTraitedSpec,
-                                        NEW_FSLCommand)
-from nipype.interfaces.base import (Bunch, Interface, load_template,
-                                    InterfaceResult, File, Directory, traits,
+from nipype.interfaces.fsl.base import (FSLCommand, Info, FSLTraitedSpec)
+from nipype.interfaces.base import (Bunch, load_template,
+                                    InterfaceResult, File, traits,
                                     TraitedSpec,
                                     NEW_BaseInterface,
                                     InputMultiPath, OutputMultiPath)
 from nipype.utils.filemanip import (list_to_filename, filename_to_list,
                                     loadflat)
-from nipype.utils.docparse import get_doc
 from nipype.externals.pynifti import load
 from nipype.utils.misc import isdefined
 from nipype.interfaces.traits import Directory
@@ -250,7 +248,7 @@ class Level1Design(NEW_BaseInterface):
                 reg_image = self.inputs.reg_image
                 if not isdefined(reg_image):
                     reg_image = \
-                        FSLInfo.standard_image('MNI152_T1_2mm_brain.nii.gz')
+                        Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
                 reg_dof = self.inputs.reg_dof
         
         for i, info in enumerate(session_info):
@@ -306,7 +304,7 @@ class FeatInputSpec(FSLTraitedSpec):
 class FeatOutputSpec(TraitedSpec):
     featdir = Directory(exists=True)
 
-class Feat(NEW_FSLCommand):
+class Feat(FSLCommand):
     """Uses FSL feat to calculate first level stats
     """
     _cmd = 'feat'
@@ -330,7 +328,7 @@ class FeatModelOutpuSpec(TraitedSpec):
                 
 # interface to fsl command line model generation routine
 # satra: 2010-01-03
-class FeatModel(NEW_FSLCommand):
+class FeatModel(FSLCommand):
     """Uses FSL feat_model to generate design.mat files
     """
     _cmd = 'feat_model'
@@ -411,7 +409,7 @@ class FilmGLSOutputSpec(TraitedSpec):
     results_dir = Directory(exists=True,
                          desc='directory storing model estimation output')
 
-class FilmGLS(NEW_FSLCommand):
+class FilmGLS(FSLCommand):
     """Use FSL film_gls command to fit a design matrix to voxel timeseries
 
     Examples
@@ -664,7 +662,7 @@ class FlameoOutputSpec(TraitedSpec):
 
 # interface to fsl command line higher level model fit
 # satra: 2010-01-09
-class Flameo(NEW_FSLCommand):
+class Flameo(FSLCommand):
     """Use FSL flameo command to perform higher level model fits
 
     To print out the command line help, use:
@@ -776,7 +774,7 @@ class ContrastMgrOutputSpec(TraitedSpec):
     neff_files =  OutputMultiPath(File(exists=True),
                                  desc='neff file ?? for each contrast')
 
-class ContrastMgr(NEW_FSLCommand):
+class ContrastMgr(FSLCommand):
     """Use FSL contrast_mgr command to evaluate contrasts
 
     Examples
@@ -922,7 +920,7 @@ class SMMOutputSpec(TraitedSpec):
     activation_p_map = File(exists=True)
     deactivation_p_map = File(exists=True)
 
-class SMM(NEW_FSLCommand):
+class SMM(FSLCommand):
     '''
     Spatial Mixture Modelling. For more detail on the spatial mixture modelling see 
     Mixture Models with Adaptive Spatial Regularisation for Segmentation with an Application to FMRI Data; 

@@ -57,7 +57,7 @@ def test_bedpostx():
 
 # test eddy_correct
 def test_eddy_correct():
-    eddy = fsl.EddyCorrect()
+    eddy = fsl.Eddycorrect()
 
     # make sure command gets called
     yield assert_equal, eddy.cmd, 'eddy_correct'
@@ -72,10 +72,10 @@ def test_eddy_correct():
     yield assert_equal, eddy.cmdline, 'eddy_correct foo.nii foo_eddc.nii 100'
 
     # .run based parameter setting
-    eddy2 = fsl.EddyCorrect(infile='foo', outfile='foo_eddc', reference_vol=20)
+    eddy2 = fsl.Eddycorrect(infile='foo', outfile='foo_eddc', reference_vol=20)
     yield assert_equal, eddy2.cmdline, 'eddy_correct foo foo_eddc 20'
 
-    eddy3 = fsl.EddyCorrect()
+    eddy3 = fsl.Eddycorrect()
     results = eddy3.run(infile='foo', outfile='foo_eddc', reference_vol=10)
     yield assert_equal, results.interface.inputs.infile, 'foo'
     yield assert_equal, results.interface.inputs.outfile, 'foo_eddc'
@@ -456,7 +456,7 @@ def test_Probtrackx():
 
 # test proj_thresh
 def test_Proj_thresh():
-    proj = fsl.ProjThresh()
+    proj = fsl.Projthresh()
 
     # make sure command gets called
     yield assert_equal, proj.cmd, 'proj_thresh'
@@ -469,11 +469,11 @@ def test_Proj_thresh():
     proj.inputs.threshold = 3
     yield assert_equal, proj.cmdline, 'proj_thresh vol1 vol2 vol3 3'
 
-    proj2 = fsl.ProjThresh(threshold=10, volumes=['vola', 'volb'])
+    proj2 = fsl.Projthresh(threshold=10, volumes=['vola', 'volb'])
     yield assert_equal, proj2.cmdline, 'proj_thresh vola volb 10'
 
     # .run based parameters setting
-    proj3 = fsl.ProjThresh()
+    proj3 = fsl.Projthresh()
     results = proj3.run(volumes=['inp1', 'inp3', 'inp2'], threshold=2)
     yield assert_equal, results.runtime.cmdline, 'proj_thresh inp1 inp3 inp2 2'
     yield assert_not_equal, results.runtime.returncode, 0
@@ -547,7 +547,7 @@ def test_Vec_reg():
 
 # test find_the_biggest
 def test_Find_the_biggest():
-    fbg = fsl.FindTheBiggest()
+    fbg = fsl.Findthebiggest()
 
     # make sure command gets called
     yield assert_equal, fbg.cmd, 'find_the_biggest'
@@ -560,11 +560,11 @@ def test_Find_the_biggest():
     fbg.inputs.outfile = 'fbgfile'
     yield assert_equal, fbg.cmdline, 'find_the_biggest seed* fbgfile'
 
-    fbg2 = fsl.FindTheBiggest(infiles='seed2*', outfile='fbgfile2')
+    fbg2 = fsl.Findthebiggest(infiles='seed2*', outfile='fbgfile2')
     yield assert_equal, fbg2.cmdline, 'find_the_biggest seed2* fbgfile2'
 
     # .run based parameters setting
-    fbg3 = fsl.FindTheBiggest()
+    fbg3 = fsl.Findthebiggest()
     results = fbg3.run(infiles='seed3', outfile='out3')
     yield assert_equal, results.runtime.cmdline, 'find_the_biggest seed3 out3'
 
