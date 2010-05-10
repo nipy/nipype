@@ -15,7 +15,7 @@ import numpy as np
 import scipy.io as sio
 
 # Local imports
-from nipype.interfaces.spm.base import NEW_SPMCommand
+from nipype.interfaces.spm.base import NEW_SPMCommand, SPMCommandInputSpec
 from nipype.interfaces.base import Bunch, traits,\
     TraitedSpec, File, Directory, OutputMultiPath, InputMultiPath
 from nipype.utils.misc import isdefined
@@ -24,7 +24,7 @@ from nipype.utils.filemanip import (filename_to_list, list_to_filename,
 
 logger = logging.getLogger('spmlogger')
 
-class Level1DesignInputSpec(TraitedSpec):
+class Level1DesignInputSpec(SPMCommandInputSpec):
     spmmat_dir = Directory(exists=True, field='dir', desc='directory to store SPM.mat file (opt)')
     timing_units = traits.Enum('secs', 'scans', field='timing.units', desc='units for specification of onsets')
     interscan_interval = traits.Float(field='timing.RT', desc='Interscan interval in secs')
@@ -175,7 +175,7 @@ class Level1Design(NEW_SPMCommand):
         return outputs
 
 
-class EstimateModelInputSpec(TraitedSpec):
+class EstimateModelInputSpec(SPMCommandInputSpec):
     spm_design_file = File(exists=True, field='spmmat', desc='absolute path to SPM.mat', copyfile=True)
     estimation_method = traits.Dict(traits.Enum('Classical', 'Bayesian2', 'Bayesian'), field='method',
                                      desc='Classical, Bayesian2, Bayesian (dict)')
@@ -236,7 +236,7 @@ class EstimateModel(NEW_SPMCommand):
         outputs['spm_mat_file'] = spm
         return outputs
 
-class EstimateContrastInputSpec(TraitedSpec):
+class EstimateContrastInputSpec(SPMCommandInputSpec):
     spm_mat_file = File(exists=True, field='spmmat', desc='Absolute path to SPM.mat', copyfile=True)
     contrasts = traits.List(
         traits.Either(traits.Tuple(traits.Str,
@@ -377,7 +377,7 @@ class EstimateContrast(NEW_SPMCommand):
         outputs['spm_mat_file'] = self.inputs.spm_mat_file
         return outputs
 
-class OneSampleTTestInputSpec(TraitedSpec):
+class OneSampleTTestInputSpec(SPMCommandInputSpec):
     con_images = InputMultiPath(File(exist=True, desc = 'List of contrast images'), mandatory=True)
     
 class OneSampleTTestOutputSpec(TraitedSpec):
@@ -429,7 +429,7 @@ class OneSampleTTest(NEW_SPMCommand):
             outputs['spmT_images'] = sorted(spmt)
         return outputs
 
-class TwoSampleTTestInputSpec(TraitedSpec):
+class TwoSampleTTestInputSpec(SPMCommandInputSpec):
     images_group1 = traits.List(File(exists=True), desc='con images from group 1', mandatory=True)
     images_group2 = traits.List(File(exists=True), desc='con images from group 2', mandatory=True)
     dependent = traits.Bool(desc='Are the measurements independent between levels')
@@ -502,7 +502,7 @@ class TwoSampleTTest(NEW_SPMCommand):
         outputs['spmT_images'] = [os.path.join(pth, 'spmT%04d.img' % i) for i in range(1, 5)]
         return outputs
 
-class MultipleRegressionInputSpec(TraitedSpec):
+class MultipleRegressionInputSpec(SPMCommandInputSpec):
     images = traits.List(File(exists=True), desc='con images from group 1',
                          mandatory=True)
     covariates = traits.Dict(key_trait=traits.Enum('vectors', 'names', 'centering'),
@@ -642,7 +642,7 @@ class MultipleRegression(NEW_SPMCommand):
         outputs['spm_mat_file'] = self.inputs.spm_mat_file
         return outputs
 
-class ThresholdInputSpec(TraitedSpec):
+class ThresholdInputSpec(SPMCommandInputSpec):
     spm_mat_file = File(exists=True, desc='absolute path to SPM.mat', copyfile=True, mandatory=True)
     spmT_images = InputMultiPath(File(exists=True), desc='stat images from a t-contrast', copyfile=False, mandatory=True)
     contrast_index = traits.Int(mandatory=True, desc='which contrast (T map) to use')

@@ -25,14 +25,14 @@ import numpy as np
 
 # Local imports
 from nipype.interfaces.spm.base import (NEW_SPMCommand, scans_for_fname,
-                                   scans_for_fnames)
+                                   scans_for_fnames, SPMCommandInputSpec)
 from nipype.interfaces.base import OutputMultiPath,\
     TraitedSpec, traits, InputMultiPath, File
 from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list, 
                                     list_to_filename)
 
-class SliceTimingInputSpec(TraitedSpec):
+class SliceTimingInputSpec(SPMCommandInputSpec):
     infile = InputMultiPath(File(exists=True), field='scans',
                           desc='list of filenames to apply slice timing',
                           mandatory=True, copyfile=False)
@@ -96,7 +96,7 @@ class SliceTiming(NEW_SPMCommand):
 #   Realign
 #
 ####################################
-class RealignInputSpec(TraitedSpec):
+class RealignInputSpec(SPMCommandInputSpec):
     infile = InputMultiPath(File(exists=True), field='data', mandatory=True,
                          desc='list of filenames to realign', copyfile=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
@@ -192,7 +192,7 @@ class Realign(NEW_SPMCommand):
 #   Coregister
 #
 ####################################
-class CoregisterInputSpec(TraitedSpec):
+class CoregisterInputSpec(SPMCommandInputSpec):
     target = File(exists=True, field='ref', mandatory=True,
                          desc='reference file to register to', copyfile=False)
     source = InputMultiPath(File(exists=True), field='source',
@@ -284,7 +284,7 @@ class Coregister(NEW_SPMCommand):
                 
         return outputs
 
-class NormalizeInputSpec(TraitedSpec):
+class NormalizeInputSpec(SPMCommandInputSpec):
     template = File(exists=True, field='eoptions.template', desc='template file to normalize to', copyfile=False)
     source = InputMultiPath(File(exists=True), field='subj.source', desc='file to normalize to template', mandatory = True, copyfile=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
@@ -398,7 +398,7 @@ class Normalize(NEW_SPMCommand):
                 
         return outputs
     
-class SegmentInputSpec(TraitedSpec):
+class SegmentInputSpec(SPMCommandInputSpec):
     data = InputMultiPath(File(exists=True), field='data', desc='one scan per subject', 
                           copyfile=False, mandatory=True)
     gm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.GM', 
@@ -520,7 +520,7 @@ class Segment(NEW_SPMCommand):
         outputs['inverse_transformation_mat'] = invt_mat
         return outputs
 
-class SmoothInputSpec(TraitedSpec):
+class SmoothInputSpec(SPMCommandInputSpec):
     infile = InputMultiPath(File(exists=True), field='data', desc='list of files to smooth', madatrory=True, copyfile=False)
     fwhm = traits.Either(traits.List(traits.Float(), minlen = 3, maxlen = 3),traits.Float(), field= 'fwhm', desc = '3-list of fwhm for each dimension (opt)')
     data_type =  traits.Int(field = 'dtype', desc = 'Data type of the output images (opt)')

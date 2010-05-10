@@ -163,6 +163,9 @@ class NEW_MatlabCommand(NEW_CommandLine):
     """
 
     _cmd = 'matlab'
+    _default_matlab_cmd = None
+    _default_mfile = None
+    _default_paths = None
     input_spec = MatlabInputSpec
     
     def __init__(self, matlab_cmd = None, **inputs):
@@ -170,8 +173,49 @@ class NEW_MatlabCommand(NEW_CommandLine):
         (default 'matlab -nodesktop -nosplash'
         """
         super(NEW_MatlabCommand,self).__init__(**inputs)
-        if matlab_cmd is not None:
+        if matlab_cmd and isdefined(matlab_cmd):
             self._cmd = matlab_cmd
+        elif self._default_matlab_cmd:
+            self._cmd = self._default_matlab_cmd
+            
+        if self._default_mfile and not isdefined(self.inputs.mfile):
+            self.inputs.mfile = self._default_mfile
+            
+        if self._default_paths and not isdefined(self.inputs.paths):
+            self.inputs.paths = self._default_paths
+            
+    @classmethod
+    def set_default_matlab_cmd(cls, matlab_cmd):
+        """Set the default MATLAB command line for MATLAB classes.
+
+        This method is used to set values for all MATLAB
+        subclasses.  However, setting this will not update the output
+        type for any existing instances.  For these, assign the
+        <instance>.inputs.matlab_cmd.
+        """
+        cls._default_matlab_cmd = matlab_cmd
+        
+    @classmethod
+    def set_default_mfile(cls, mfile):
+        """Set the default MATLAB script file format for MATLAB classes.
+
+        This method is used to set values for all MATLAB
+        subclasses.  However, setting this will not update the output
+        type for any existing instances.  For these, assign the
+        <instance>.inputs.mfile.
+        """
+        cls._default_mfile = mfile
+        
+    @classmethod
+    def set_default_paths(cls, paths):
+        """Set the default MATLAB paths for MATLAB classes.
+
+        This method is used to set values for all MATLAB
+        subclasses.  However, setting this will not update the output
+        type for any existing instances.  For these, assign the
+        <instance>.inputs.paths.
+        """
+        cls._default_paths = paths
 
     def _run_interface(self,runtime):
         runtime = super(NEW_MatlabCommand, self)._run_interface(runtime)

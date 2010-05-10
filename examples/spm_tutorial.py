@@ -47,11 +47,11 @@ because SPM does not handle compressed NIFTI.
 """
 
 # Tell fsl to generate all output in uncompressed nifti format
-print fsl.Info.version()
-fsl.NEW_FSLCommand.set_default_outputtype('NIFTI')
+#print fsl.Info.version()
+fsl.FSLCommand.set_default_outputtype('NIFTI')
 
 # Set the way matlab should be called
-mlab.MatlabCommandLine.matlab_cmd = "matlab -nodesktop -nosplash"
+mlab.NEW_MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
 
 """The nipype tutorial contains data for two subjects.  Subject data
 is in two subdirectories, ``s1`` and ``s2``.  Each subject directory

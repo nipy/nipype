@@ -2,6 +2,7 @@
 and spm to access spm tools.
 
 """
+from nipype.interfaces.traits import Directory
 __docformat__ = 'restructuredtext'
 
 # Standard library imports
@@ -14,7 +15,8 @@ import numpy as np
 from scipy.io import savemat
 
 # Local imports
-from nipype.interfaces.base import Bunch, NEW_BaseInterface, traits, TraitedSpec
+from nipype.interfaces.base import Bunch, NEW_BaseInterface, traits, TraitedSpec,\
+    InputMultiPath
 from nipype.utils.misc import isdefined
 from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import MatlabCommandLine
@@ -421,35 +423,38 @@ class NEW_Info(object):
                 return None
             
         return cls.__path
+    
+class SPMCommandInputSpec(TraitedSpec):
+    matlab_cmd = traits.Str()
+    paths = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
+    mfile = traits.Bool(True, desc='Run m-code using m-file',
+                          usedefault=True)
 
 class NEW_SPMCommand(NEW_BaseInterface):
     """ Extends `NEW_BaseInterface` class to implement SPM specific interfaces.
     """
-
-    _paths = None
-    _matlab_cmd = None
-
-    def __init__(self, matlab_cmd=None, paths=None,
-                 mfile = True, **inputs): 
+    
+    def __init__(self, **inputs):
         super(NEW_SPMCommand, self).__init__(**inputs)
-        if matlab_cmd:
-            self._matlab_cmd = matlab_cmd
-        self.mlab = NEW_MatlabCommand(matlab_cmd=self._matlab_cmd)
-        self.mlab.inputs.mfile = mfile
-        if paths:
-            self._paths = paths
-        if self._paths:
-            self.mlab.inputs.paths = self._paths
+        self.inputs.on_trait_change(self._matlab_cmd_update, 'matlab_cmd')
+        self._matlab_cmd_update()
+        
+    def _matlab_cmd_update(self):
+        # MatlabCommand has to be created here, because matlab_cmb is not a proper input
+        # and can be set only during init
+        self.mlab = NEW_MatlabCommand(matlab_cmd=self.inputs.matlab_cmd,
+                                      mfile=self.inputs.mfile,
+                                      paths=self.inputs.paths)
         self.mlab.inputs.script_file = 'pyscript_%s.m' % \
-            self.__class__.__name__.split('.')[-1].lower()
+        self.__class__.__name__.split('.')[-1].lower()
+        
+    @property
+    def jobtype(self):
+        return self._jobtype
 
     @property
-    def jobtype(cls):
-        return cls._jobtype
-
-    @property
-    def jobname(cls):
-        return cls._jobname
+    def jobname(self):
+        return self._jobname
 
     def use_mfile(self, use_mfile):
         """boolean,
@@ -461,6 +466,8 @@ class NEW_SPMCommand(NEW_BaseInterface):
     def _run_interface(self, runtime):
         """Executes the SPM function using MATLAB
         """
+        self.mlab.inputs.mfile = self.inputs.mfile
+        self.mlab.inputs.paths = self.inputs.paths
         self.mlab.inputs.script = self._make_matlab_command(deepcopy(self._parse_inputs()))
         results = self.mlab.run()
         runtime.returncode = results.runtime.returncode
