@@ -48,7 +48,7 @@ because SPM does not handle compressed NIFTI.
 
 # Tell fsl to generate all output in uncompressed nifti format
 print fsl.Info.version()
-fsl.NEW_FSLCommand.set_default_outputtype('NIFTI')
+fsl.FSLCommand.set_default_outputtype('NIFTI')
 
 # Set the way matlab should be called
 mlab.NEW_MatlabCommand.matlab_cmd = "matlab -nodesktop -nosplash"
