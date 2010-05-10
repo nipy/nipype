@@ -1,7 +1,6 @@
 """Top-level namespace for spm."""
 
-from nipype.interfaces.spm.base import (SpmInfo, SpmMatlabCommandLine,
-                                        NEW_Info, NEW_SPMCommand, logger,
+from nipype.interfaces.spm.base import (Info, SPMCommand, logger,
                                         scans_for_fname, scans_for_fnames)
 from nipype.interfaces.spm.preprocess import (SliceTiming, Realign, Coregister,
                                               Normalize, Segment, Smooth)

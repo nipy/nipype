@@ -15,7 +15,7 @@ import numpy as np
 import scipy.io as sio
 
 # Local imports
-from nipype.interfaces.spm.base import NEW_SPMCommand, SPMCommandInputSpec
+from nipype.interfaces.spm.base import SPMCommand, SPMCommandInputSpec
 from nipype.interfaces.base import Bunch, traits,\
     TraitedSpec, File, Directory, OutputMultiPath, InputMultiPath
 from nipype.utils.misc import isdefined
@@ -67,7 +67,7 @@ class Level1DesignOutputSpec(TraitedSpec):
     spm_mat_file = File(exists=True, desc='SPM mat file')
 
 
-class Level1Design(NEW_SPMCommand):
+class Level1Design(SPMCommand):
     """Generate an SPM design matrix
 
     Parameters
@@ -188,7 +188,7 @@ class EstimateModelOutputSpec(TraitedSpec):
     RPVimage = File(exists=True, desc = 'Resels per voxel image')
     spm_mat_file = File(exist=True, desc = 'Updated SPM mat file')
                
-class EstimateModel(NEW_SPMCommand):
+class EstimateModel(SPMCommand):
     """Use spm_spm to estimate the parameters of a model
 
     """
@@ -275,7 +275,7 @@ class EstimateContrastOutputSpec(TraitedSpec):
     spmF_images = OutputMultiPath(File(exists=True), desc='stat images from an F-contrast')
     spm_mat_file = File(exist=True, desc = 'Updated SPM mat file')
 
-class EstimateContrast(NEW_SPMCommand):
+class EstimateContrast(SPMCommand):
     """use spm_contrasts to estimate contrasts of interest
 
 
@@ -384,7 +384,7 @@ class OneSampleTTestOutputSpec(TraitedSpec):
     con_images = OutputMultiPath(File(exist=True, desc = 'contrast images from a t-contrast'))
     spmT_images = OutputMultiPath(File(exist=True, desc = 'stat images from a t-contrast'))
 
-class OneSampleTTest(NEW_SPMCommand):
+class OneSampleTTest(SPMCommand):
     """use spm to perform a one-sample ttest on a set of images
 
     Examples
@@ -439,7 +439,7 @@ class TwoSampleTTestOutputSpec(TraitedSpec):
     con_images = traits.List(File(exist=True), desc='contrast images from a t-contrast')
     spmT_images = traits.List(File(exist=True), desc='stat images from a t-contrast')
 
-class TwoSampleTTest(NEW_SPMCommand):
+class TwoSampleTTest(SPMCommand):
     """Perform a two-sample ttest using two groups of images
 
     4 contrasts are automatically created corresponding to:
@@ -542,7 +542,7 @@ class MultipleRegressionOutputSpec(TraitedSpec):
     ess_images = OutputMultiPath(File(exists=True), desc='contrast images from an F-contrast')
     spmF_images = OutputMultiPath(File(exists=True), desc='stat images from an F-contrast')
 
-class MultipleRegression(NEW_SPMCommand):
+class MultipleRegression(SPMCommand):
     """Perform a two-sample ttest using two groups of images
 
     Examples
@@ -655,7 +655,7 @@ class ThresholdOutputSpec(TraitedSpec):
     thresholded_map = File(exists=True)
 
 
-class Threshold(NEW_SPMCommand):
+class Threshold(SPMCommand):
     '''
     Topological FDR thresholding based on cluster extent/size. Smoothness is
     estimated from GLM residuals but is assumed to be the same for all of the

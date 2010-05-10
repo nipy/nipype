@@ -51,7 +51,7 @@ because SPM does not handle compressed NIFTI.
 fsl.FSLCommand.set_default_outputtype('NIFTI')
 
 # Set the way matlab should be called
-mlab.NEW_MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
+mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
 
 """The nipype tutorial contains data for two subjects.  Subject data
 is in two subdirectories, ``s1`` and ``s2``.  Each subject directory

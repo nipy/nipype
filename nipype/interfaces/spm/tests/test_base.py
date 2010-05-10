@@ -19,7 +19,7 @@ mlab.MatlabCommandLine.matlab_cmd = matlab_cmd
 def cannot_find_spm():
     # See if we can find spm or not.
     try:
-        spm.SpmInfo.spm_path()
+        spm.Info.spm_path()
         return False
     except IOError:
         return True
@@ -33,7 +33,7 @@ def test_scan_for_fnames():
 save_time = True
 if not save_time:
     def test_spm_path():
-        spm_path = spm.spm_info.spm_path
+        spm_path = spm.Info.spm_path
         if spm_path is not None:
             yield assert_equal, type(spm_path), type('')
             yield assert_true, 'spm' in spm_path

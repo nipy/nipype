@@ -24,7 +24,7 @@ from copy import deepcopy
 import numpy as np
 
 # Local imports
-from nipype.interfaces.spm.base import (NEW_SPMCommand, scans_for_fname,
+from nipype.interfaces.spm.base import (SPMCommand, scans_for_fname,
                                    scans_for_fnames, SPMCommandInputSpec)
 from nipype.interfaces.base import OutputMultiPath,\
     TraitedSpec, traits, InputMultiPath, File
@@ -52,7 +52,7 @@ class SliceTimingInputSpec(SPMCommandInputSpec):
 class SliceTimingOutputSpec(TraitedSpec):
     timecorrected_files = OutputMultiPath(File(exist=True, desc='slice time corrected files'))
 
-class SliceTiming(NEW_SPMCommand):
+class SliceTiming(SPMCommand):
     """Use spm to perform slice timing correction.
 
     See SliceTiming().spm_doc() for more information.
@@ -134,7 +134,7 @@ class RealignOutputSpec(TraitedSpec):
     realignment_parameters = OutputMultiPath(File(exists=True),
                     desc='Estimated translation and rotation parameters')
 
-class Realign(NEW_SPMCommand):
+class Realign(SPMCommand):
     """Use spm_realign for estimating within modality rigid body alignment
 
     Examples
@@ -229,7 +229,7 @@ class CoregisterOutputSpec(TraitedSpec):
     coregistered_files = OutputMultiPath(File(exists=True), desc = 'Coregistered other files')
     
 
-class Coregister(NEW_SPMCommand):
+class Coregister(SPMCommand):
     """Use spm_coreg for estimating cross-modality rigid body alignment
 
     Examples
@@ -324,7 +324,7 @@ class NormalizeOutputSpec(TraitedSpec):
     normalized_source = OutputMultiPath(File(exists=True), desc='Normalized source files')
     normalized_files = OutputMultiPath(File(exists=True), desc = 'Normalized other files')
 
-class Normalize(NEW_SPMCommand):
+class Normalize(SPMCommand):
     """use spm_normalise for warping an image to a template
 
     Examples
@@ -456,7 +456,7 @@ class SegmentOutputSpec(TraitedSpec):
     transformation_mat = File(exists=True, desc='Normalization transformation')
     inverse_transformation_mat = File(exists=True, desc='Inverse normalization info')
 
-class Segment(NEW_SPMCommand):
+class Segment(SPMCommand):
     """use spm_segment to separate structural images into different
     tissue classes.
 
@@ -528,7 +528,7 @@ class SmoothInputSpec(SPMCommandInputSpec):
 class SmoothOutputSpec(TraitedSpec):
     smoothed_files = OutputMultiPath(File(exists=True), desc ='smoothed files')
 
-class Smooth(NEW_SPMCommand):
+class Smooth(SPMCommand):
     """use spm_smooth for 3D Gaussian smoothing of image volumes.
 
     Examples
