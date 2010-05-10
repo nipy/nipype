@@ -15,6 +15,7 @@ filemanip_level = INFO
 [execution]
 stop_on_first_crash = false
 hash_method = content
+single_thread_matlab = true
 """)
 
 config = ConfigParser.ConfigParser()

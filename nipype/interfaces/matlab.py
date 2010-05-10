@@ -6,6 +6,7 @@ import os
 from nipype.interfaces.base import CommandLineInputSpec, InputMultiPath
 from nipype.utils.misc import isdefined
 from nipype.interfaces.base import (NEW_CommandLine, traits, File, Directory)
+from nipype.utils.config import config
 
 class MatlabInputSpec(CommandLineInputSpec):
     script  = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
@@ -16,6 +17,7 @@ class MatlabInputSpec(CommandLineInputSpec):
                            descr='Switch of splash screen')
     logfile = File(argstr='-logfile %s',
                           desc='Save matlab output to log')
+    singleCompThread = traits.Bool(argstr="-singleCompThread", desc="force single threaded operation")
     # non-commandline options
     mfile   = traits.Bool(False, desc='Run m-code using m-file',
                           usedefault=True)
@@ -40,7 +42,7 @@ class MatlabCommand(NEW_CommandLine):
     
     def __init__(self, matlab_cmd = None, **inputs):
         """initializes interface to matlab
-        (default 'matlab -nodesktop -nosplash'
+        (default 'matlab -nodesktop -nosplash')
         """
         super(MatlabCommand,self).__init__(**inputs)
         if matlab_cmd and isdefined(matlab_cmd):
@@ -53,6 +55,9 @@ class MatlabCommand(NEW_CommandLine):
             
         if self._default_paths and not isdefined(self.inputs.paths):
             self.inputs.paths = self._default_paths
+            
+        if not isdefined(self.inputs.singleCompThread):
+            self.inputs.singleCompThread = config.getboolean('execution','single_thread_matlab')
             
     @classmethod
     def set_default_matlab_cmd(cls, matlab_cmd):
