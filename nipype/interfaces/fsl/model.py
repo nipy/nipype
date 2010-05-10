@@ -37,7 +37,7 @@ class Level1DesignInputSpec(TraitedSpec):
     bases = traits.Either(traits.Dict('dgamma', traits.Dict('derivs', traits.Bool)),
                           traits.Dict('gamma', traits.Dict('derivs', traits.Bool)),
                           mandatory=True,
-                          desc='name of basis function and options')
+                          desc="name of basis function and options e.g., {'dgamma': {'derivs': True}}")
     model_serial_correlations = traits.Enum('AR(1)', 'none',
         desc="""Option to model serial correlations using an
             autoregressive estimator. Setting this option is only
@@ -285,6 +285,10 @@ class Level1Design(NEW_BaseInterface):
         cwd = os.getcwd()
         outputs['fsf_files'] = []
         outputs['ev_files'] = []
+        usetd = 0
+        basis_key = self.inputs.bases.keys()[0]
+        if basis_key in ['dgamma', 'gamma']:
+            usetd = int(self.inputs.bases[basis_key]['derivs'])
         for runno, runinfo in enumerate(self._get_session_info(self.inputs.session_info)):
             outputs['fsf_files'].append(os.path.join(cwd, 'run%d.fsf' % runno))
             evname = []
@@ -295,6 +299,9 @@ class Level1Design(NEW_BaseInterface):
                     evfname = os.path.join(cwd, 'ev_%s_%d_%d.txt' % (name, runno,
                                                                      len(evname)))
                     outputs['ev_files'].append(evfname)
+                    if field == 'cond':
+                        if usetd:
+                            evname.append(name + 'TD')
         return outputs
 
 
@@ -443,18 +450,17 @@ class FilmGLS(FSLCommand):
     input_spec = FilmGLSInputSpec
     output_spec = FilmGLSOutputSpec
 
-    def _get_pe_files(self):
+    def _get_pe_files(self, cwd):
         files = None
-        if isdefined(self.inputs.designfile):
-            fp = open(self.inputs.designfile, 'rt')
+        if isdefined(self.inputs.design_file):
+            fp = open(self.inputs.design_file, 'rt')
             for line in fp.readlines():
                 if line.startswith('/NumWaves'):
                     numpes = int(line.split()[-1])
                     files = []
-                    cwd = os.getcwd()
                     for i in range(numpes):
-                        files.append(self._gen_fname(os.path.join(cwd,
-                                                                  'pe%d.nii'%(i+1))))
+                        files.append(self._gen_fname('pe%d.nii'%(i+1),
+                                                     cwd=cwd))
                     break
             fp.close()
         return files
@@ -462,14 +468,15 @@ class FilmGLS(FSLCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         cwd = os.getcwd()
-        outputs['results_dir'] = os.path.join(cwd,
-                                              self.inputs.results_dir)
-        pe_files = self._get_pe_files()
+        results_dir = os.path.join(cwd, self.inputs.results_dir)
+        outputs['results_dir'] = results_dir
+        pe_files = self._get_pe_files(results_dir)
         if pe_files:
-            outputs['parameter_estimates'] = pe_files
-        outputs['residual4d'] = self._gen_fname(os.path.join(cwd,'res4d.nii'))
-        outputs['dof_file'] = os.path.join(cwd,'dof')
-        outputs['sigmasquareds'] = self._gen_fname(os.path.join(cwd,'sigmasquareds.nii'))
+            outputs['param_estimates'] = pe_files
+        outputs['residual4d'] = self._gen_fname('res4d.nii', cwd=results_dir)
+        outputs['dof_file'] = os.path.join(results_dir,'dof')
+        outputs['sigmasquareds'] = self._gen_fname('sigmasquareds.nii',
+                                                   cwd=results_dir)
         return outputs
 
 
@@ -627,25 +634,39 @@ class FeatRegister(NEW_BaseInterface):
         return outputs
 
 class FlameoInputSpec(FSLCommandInputSpec):
-    copefile = File(exists=True, argstr='--copefile=%s', madatory=True)
-    varcopefile = File(exists=True, argstr='--varcopefile=%s')
-    dofvarcopefile = File(exists=True, argstr='--dofvarcopefile=%s')
-    maskfile = File(exists=True, argstr='--maskfile=%s', madatory=True)
-    designfile = File(exists=True, argstr='--designfile=%s', madatory=True)
-    tconfile = File(exists=True, argstr='--tcontrastsfile=%s', madatory=True)
-    fconfile = File(exists=True, argstr='--fcontrastsfile=%s')
-    covsplitfile = File(exists=True, argstr='--covsplitfile=%s', madatory=True)
-    runmode = traits.Enum('fe', 'ols', 'flame1', 'flame12', argstr='--runmode=%s', madatory=True)
-    njumps = traits.Int(argstr='--njumps=%d')
-    burnin = traits.Int(argstr='--burnin=%d')
-    sampleevery = traits.Int(argstr='--sampleevery=%d')
-    fixmean = traits.Bool(argstr='--fixmean')
-    inferoutliers = traits.Bool(argstr='--inferoutliers')
-    nopeoutput = traits.Bool(argstr='--nopeoutput')
-    sigma_dofs = traits.Int(argstr='--sigma_dofs=%d')
-    outlier_iter = traits.Int(argstr='--ioni=%d')
-    statsdir = Directory("stats", argstr='--ld=%s', usedefaults=True) # ohinds
-    flags = traits.Str(argstr='%s')
+    copefile = File(exists=True, argstr='--copefile=%s', mandatory=True,
+                    desc='cope regressor data file')
+    varcopefile = File(exists=True, argstr='--varcopefile=%s',
+                       desc='varcope weightings data file')
+    dofvarcopefile = File(exists=True, argstr='--dofvarcopefile=%s',
+                          desc='dof data file for varcope data')
+    maskfile = File(exists=True, argstr='--maskfile=%s', mandatory=True,
+                    desc='mask file')
+    designfile = File(exists=True, argstr='--designfile=%s', mandatory=True,
+                      desc='design matrix file')
+    tconfile = File(exists=True, argstr='--tcontrastsfile=%s', mandatory=True,
+                    desc='ascii matrix specifying t-contrasts')
+    fconfile = File(exists=True, argstr='--fcontrastsfile=%s',
+                    desc='ascii matrix specifying f-contrasts')
+    covsplitfile = File(exists=True, argstr='--covsplitfile=%s', mandatory=True,
+                        desc='ascii matrix specifying the groups the covariance is split into')
+    runmode = traits.Enum('fe', 'ols', 'flame1', 'flame12', argstr='--runmode=%s',
+                          mandatory=True, desc='inference to perform')
+    njumps = traits.Int(argstr='--njumps=%d', desc='number of jumps made by mcmc')
+    burnin = traits.Int(argstr='--burnin=%d',
+                        desc='number of jumps at start of mcmc to be discarded')
+    sampleevery = traits.Int(argstr='--sampleevery=%d',
+                             desc='number of jumps for each sample')
+    fixmean = traits.Bool(argstr='--fixmean', desc='fix mean for tfit')
+    inferoutliers = traits.Bool(argstr='--inferoutliers',
+                                desc='infer outliers - not for fe')
+    nopeoutput = traits.Bool(argstr='--nopeoutput',
+                             desc='do not output pe files')
+    sigma_dofs = traits.Int(argstr='--sigma_dofs=%d',
+                            desc='sigma (in mm) to use for Gaussian smoothing the DOFs in FLAME 2. Default is 1mm, -1 indicates no smoothing')
+    outlier_iter = traits.Int(argstr='--ioni=%d',
+                              desc='Number of max iterations to use when inferring outliers. Default is 12.')
+    logdir = Directory("stats", argstr='--ld=%s', usedefault=True) # ohinds
     # no support for ven, vef
 
 
@@ -658,6 +679,9 @@ class FlameoOutputSpec(TraitedSpec):
     varcopes = OutputMultiPath(exists=True, desc="Variance estimates for each contrast")
     zstats = OutputMultiPath(exists=True, desc="z-stat file for each contrast")
     tstats = OutputMultiPath(exists=True, desc="t-stat file for each contrast")
+    mrefvars = OutputMultiPath(exists=True, desc="mean random effect variances for each contrast")
+    tdof = OutputMultiPath(exists=True, desc="temporal dof file for each contrast")
+    weights = OutputMultiPath(exists=True, desc="weights file for each contrast")
     statsdir = Directory(exists=True, desc="directory storing model estimation output")
 
 
@@ -693,10 +717,10 @@ class Flameo(FSLCommand):
 
     # ohinds: 2010-04-06
     def _run_interface(self, runtime):
-        statsdir = self.inputs.statsdir
+        logdir = self.inputs.logdir
         cwd = os.getcwd()
-        if os.access(os.path.join(cwd, statsdir), os.F_OK):
-            rmtree(os.path.join(cwd, statsdir))
+        if os.access(os.path.join(cwd, logdir), os.F_OK):
+            rmtree(os.path.join(cwd, logdir))
 
         return super(Flameo, self)._run_interface(runtime)
 
@@ -704,7 +728,7 @@ class Flameo(FSLCommand):
     # made these compatible with flameo
     def _list_outputs(self):
         outputs = self._outputs().get()
-        pth = os.path.join(os.getcwd(), self.inputs.statsdir)
+        pth = os.path.join(os.getcwd(), self.inputs.logdir)
 
         pes = glob(os.path.join(pth, 'pe[0-9]*.*'))
         assert len(pes) >= 1, 'No pe volumes generated by FSL Estimate'
@@ -732,7 +756,7 @@ class Flameo(FSLCommand):
 
         mrefs = glob(os.path.join(pth, 'mean_random_effects_var[0-9]*.*'))
         assert len(mrefs) >= 1, 'No mean random effects volumes generated by Flameo'
-        outputs['mrefs'] = mrefs
+        outputs['mrefvars'] = mrefs
 
         tdof = glob(os.path.join(pth, 'tdof_t[0-9]*.*'))
         assert len(tdof) >= 1, 'No T dof volumes generated by Flameo'
@@ -754,7 +778,6 @@ class ContrastMgrInputSpec(FSLCommandInputSpec):
                      desc='contrast file containing T-contrasts')
     stats_dir = Directory(exists=True, mandatory=True,
                           argstr='%s', position=-2,
-                          copyfile=False,
                           desc='directory containing first level analysis')
     contrast_num = traits.Int(min=1, argstr='-cope',
                 desc='contrast number to start labeling copes from')
@@ -786,53 +809,60 @@ class ContrastMgr(FSLCommand):
     input_spec = ContrastMgrInputSpec
     output_spec = ContrastMgrOutputSpec
 
-    def _get_files(self):
-        files = None
+    def _get_numcons(self):
+        numtcons = 0
+        numfcons = 0
         if isdefined(self.inputs.tcon_file):
             fp = open(self.inputs.tcon_file, 'rt')
             for line in fp.readlines():
-                if line.startswith('/NumWaves'):
-                    numpes = int(line.split()[-1])
-                    files = []
-                    cwd = os.getcwd()
-                    for i in range(numpes):
-                        files.append(self._gen_fname(os.path.join(cwd,
-                                                                  'pe%d.nii'%(i+1))))
+                if line.startswith('/NumContrasts'):
+                    numtcons = int(line.split()[-1])
                     break
             fp.close()
-        return files
+        if isdefined(self.inputs.fcon_file):
+            fp = open(self.inputs.fcon_file, 'rt')
+            for line in fp.readlines():
+                if line.startswith('/NumContrasts'):
+                    numfcons = int(line.split()[-1])
+                    break
+            fp.close()
+        return numtcons, numfcons
     
     def _list_outputs(self):
         outputs = self._outputs().get()
         pth = self.inputs.stats_dir
-        
-        #TODO: figure out file names and get rid off the globs
-        # use something like _get_files above
-
-        copes = glob(os.path.join(pth, 'cope[0-9]*.*'))
-        assert len(copes) >= 1, 'No cope volumes generated by FSL CEstimate'
-        outputs['cope_files'] = copes
-
-        varcopes = glob(os.path.join(pth, 'varcope[0-9]*.*'))
-        assert len(varcopes) >= 1, 'No varcope volumes generated by FSL CEstimate'
-        outputs['varcope_files'] = varcopes
-
-        zstats = glob(os.path.join(pth, 'zstat[0-9]*.*'))
-        assert len(zstats) >= 1, 'No zstat volumes generated by FSL CEstimate'
-        outputs['zstats_files'] = zstats
-
-        tstats = glob(os.path.join(pth, 'tstat[0-9]*.*'))
-        assert len(tstats) >= 1, 'No tstat volumes generated by FSL CEstimate'
-        outputs['tstats_files'] = tstats
-
-        fstats = glob(os.path.join(pth, 'fstat[0-9]*.*'))
+        numtcons, numfcons = self._get_numcons()
+        base_contrast = 1
+        if isdefined(self.inputs.contrast_num):
+            base_contrast = self.inputs.contrast_num
+        copes = []
+        varcopes = []
+        zstats = []
+        tstats = []
+        neffs = []
+        for i in range(numtcons):
+            copes.append(self._gen_fname('cope%d.nii'%(base_contrast+i),
+                                       cwd=pth))
+            varcopes.append(self._gen_fname('varcope%d.nii'%(base_contrast+i),
+                                          cwd=pth))
+            zstats.append(self._gen_fname('zstat%d.nii'%(base_contrast+i),
+                                        cwd=pth))
+            tstats.append(self._gen_fname('tstat%d.nii'%(base_contrast+i),
+                                        cwd=pth))
+            neffs.append(self._gen_fname('neff%d.nii'%(base_contrast+i),
+                                       cwd=pth))
+        if copes:
+            outputs['cope_files'] = copes
+            outputs['varcope_files'] = varcopes
+            outputs['zstat_files'] = zstats
+            outputs['tstat_files'] = tstats
+            outputs['neff_files'] = neffs
+        fstats = []
+        for i in range(numfcons):
+            fstats.append(self._gen_fname('fstat%d.nii'%(base_contrast+i),
+                                        cwd=pth))
         if fstats:
-            outputs['fstats_files'] = fstats
-
-        neffs = glob(os.path.join(pth, 'neff[0-9]*.*'))
-        assert len(neffs) >= 1, 'No neff volumes generated by FSL CEstimate'
-        outputs['neff_files'] = neffs
-        
+            outputs['fstat_files'] = fstats
         return outputs
 
 class L2ModelInputSpec(TraitedSpec):
@@ -904,8 +934,8 @@ class L2Model(NEW_BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         for field in outputs.keys():
-            setattr(outputs, field, os.path.join(os.getcwd(),
-                                                 field.replace('_','.')))
+            outputs[field] = os.path.join(os.getcwd(),
+                                          field.replace('_','.'))
         return outputs
 
 class SMMInputSpec(FSLCommandInputSpec):
