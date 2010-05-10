@@ -298,7 +298,7 @@ class Workflow(WorkflowBase):
 
     def get_exec_node(self, name):
         if self._execgraph:
-            return [node  for node in self._execgraph.nodes() if name == str(node)]
+            return [node  for node in self._execgraph.nodes() if name == str(node)].pop()
         return None
 
     def write_graph(self, dotfilename='graph.dot', graph2use='orig'):
@@ -306,12 +306,13 @@ class Workflow(WorkflowBase):
         graph2use = 'orig', 'flat', 'exec'
         """
         graph = self._graph
-        if graph2use == 'flat' and self._flatgraph is None:
+        if graph2use in ['flat', 'exec'] and self._flatgraph is None:
             self._create_flat_graph()
             graph = self._flatgraph
         if graph2use == 'exec':
-            if self._execgraph is None:
-                graph = _generate_expanded_graph(graph)
+            graph = self._execgraph
+            if graph is None:
+                graph = _generate_expanded_graph(deepcopy(self._flatgraph))
         export_graph(graph, self.base_dir, dotfilename=dotfilename)
 
     def run(self):
@@ -397,7 +398,7 @@ class Workflow(WorkflowBase):
             if callable(sourceinfo[1]):
                 val = sourceinfo[1](source.get_output(sourceinfo[0]),
                                     *sourceinfo[2:])
-        logger.debug('setting input: %s->%s', param, str(val))
+        logger.debug('setting node input: %s->%s', param, str(val))
         node.set_input(param, deepcopy(val))
 
     def _create_flat_graph(self):
@@ -428,8 +429,9 @@ class Workflow(WorkflowBase):
                             parameter = cd[0]
                         srcnode = node._get_parameter_node(parameter, subtype='out')
                         if isinstance(cd[0], tuple):
-                            srcout = cd[0]
+                            srcout = list(cd[0])
                             srcout[0] = parameter.split('.')[-1]
+                            srcout = tuple(srcout)
                         else:
                             srcout = parameter.split('.')[-1]
                         dstin = cd[1]
@@ -553,6 +555,9 @@ class Workflow(WorkflowBase):
         """Executes a pre-defined pipeline is distributed approaches
         based on IPython's parallel processing interface
         """
+        if config.getboolean('execution', 'run_in_series'):
+            self._execute_in_series()
+            return
         # retrieve clients again
         if not self.taskclient:
             try:
@@ -713,6 +718,7 @@ class Node(WorkflowBase):
 
         Priority goes to interface.
         """
+        logger.debug('setting nodelevel input %s = %s' % (parameter, str(val)))
         setattr(self.inputs, parameter, deepcopy(val))
 
     def get_output(self, parameter):
@@ -721,6 +727,9 @@ class Node(WorkflowBase):
             val = getattr(self._result.outputs, parameter)
         return val
 
+    def _get_hashval(self):
+        return self.inputs._get_hashval()
+    
     def _save_hashfile(self, hashfile, hashed_inputs):
         try:
             save_json(hashfile, hashed_inputs)
@@ -750,7 +759,7 @@ class Node(WorkflowBase):
         logger.info("in dir: %s"%outdir)
         # Get a dictionary with hashed filenames and a hashvalue
         # of the dictionary itself.
-        hashed_inputs, hashvalue = self.inputs._get_hashval()
+        hashed_inputs, hashvalue = self._get_hashval()
         hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
         if updatehash:
             logger.info("Updating hash: %s"%hashvalue)
@@ -880,6 +889,7 @@ class MapNode(Node):
         self._inputs = self._create_dynamic_traits(self._interface.inputs,
                                                    fields=self.iterfield,
                                                    input=True)
+        self._inputs.on_trait_change(self._set_mapnode_input)
 
     def _create_dynamic_traits(self, basetraits, fields=None, input=False):
         """Convert specific fields of a trait to accept multiple inputs
@@ -895,24 +905,38 @@ class MapNode(Node):
             if name in fields:
                 trait_type = spec.trait_type
                 if isinstance(trait_type, (File, Directory)):
-                    #self._inputs.remove_trait(name) # XX NOT SURE IF NECESSARY
                     output.add_trait(name, container(trait_type))
                 else:
-                    #self._inputs.remove_trait(name)
                     output.add_trait(name, traits.List(trait_type))
             else:
                 output.add_trait(name, traits.Trait(spec))
             setattr(output, name, Undefined)
-        if input:
-            output.on_trait_change(self._set_mapnode_input)
+            value = getattr(output, name)
         return output
 
+    def set_input(self, parameter, val):
+        """ Set interface input value or nodewrapper attribute
+
+        Priority goes to interface.
+        """
+        logger.debug('setting nodelevel input %s = %s' % (parameter, str(val)))
+        self._set_mapnode_input(self.inputs, parameter, deepcopy(val))
+        #setattr(self.inputs, parameter, deepcopy(val))
+        
     def _set_mapnode_input(self, object, name, newvalue):
-        print name, newvalue
+        logger.debug('setting mapnode input: %s -> %s' %(name, str(newvalue)))
         if name in self.iterfield:
             setattr(self._inputs, name, newvalue)
         else:
             setattr(self._interface.inputs, name, newvalue)
+
+    def _get_hashval(self):
+        inputs = deepcopy(self._interface.inputs)
+        for name in self.iterfield:
+            inputs.remove_trait(name)
+            inputs.add_trait(name, traits.List(self._interface.inputs.traits()[name].trait_type))
+            setattr(inputs, name, getattr(self._inputs, name))
+        return inputs._get_hashval()
 
     @property
     def inputs(self):
@@ -920,12 +944,12 @@ class MapNode(Node):
 
     @property
     def outputs(self):
-        return self._outputs()
+        return Bunch(self._interface._outputs().get())
     
     def _outputs(self):
         return self._create_dynamic_traits(self._interface._outputs(),
                                            input=False)
-
+    
     def _run_interface(self, execute=True, cwd=None):
         old_cwd = os.getcwd()
         if not cwd:
@@ -935,32 +959,38 @@ class MapNode(Node):
         workflowname = 'workflow'
         iterflow = Workflow(name=workflowname)
         iterflow.base_dir = cwd
-        for i, _ in enumerate(getattr(self.inputs, self.iterfield[0])):
+        print self.inputs
+        print self._interface.inputs
+        nitems = len(getattr(self.inputs, self.iterfield[0]))
+        for i in range(nitems):
             newnode = Node(deepcopy(self._interface), name=self.name+str(i))
+            newnode._interface.inputs = deepcopy(self._interface.inputs)
+            print newnode._interface.inputs
             for field in self.iterfield:
                 setattr(newnode.inputs, field,
                         getattr(self.inputs, field)[i])
             iterflow.add_nodes([newnode])
         iterflow.run()
         self._result = InterfaceResult(interface=[], runtime=[],
-                                       outputs=Bunch())
-        for i, node in enumerate(iterflow._execgraph.nodes()):
-            self._result.runtime.insert(i, node.result.runtime)
-            if node.result.runtime.returncode == 0:
+                                       outputs=self._outputs())
+        for i in range(nitems):
+            node = iterflow.get_exec_node(self.name+str(i))
+            if node.result and hasattr(node.result, 'runtime'):
+                self._result.runtime.insert(i, node.result.runtime)
+                if node.result.runtime.returncode != 0:
+                    raise Exception('iternode %s:%d did not run'%(node._id, i))
                 self._result.interface.insert(i, node.result.interface)
-                for key, val in node.result.outputs.get().items():
-                    try:
-                        # This has funny default behavior if the length
-                        # of the
-                        # list is < i - 1. I'd like to simply use
-                        # append... feel
-                        # free to second my vote here!
-                        self._result.outputs.get(key).append(val)
-                    except AttributeError:
-                        # .insert(i, val) is equivalent to the following if
-                        # outputs.key == None, so this is far less likely to
-                        # produce subtle errors down the road!
-                        setattr(self._result.outputs, key, [val])
             else:
-                raise Exception('iternode %d did not run')
+                # by default set runtime to None if not provided
+                self._result.runtime.insert(i, None)
+        for key, _ in self.outputs.items():
+            values = []
+            for i in range(nitems):
+                node = iterflow.get_exec_node(self.name+str(i))
+                values.insert(i, getattr(node.result.outputs, key))
+            if any([val != Undefined for val in values]):
+                #logger.info('setting key %s with values %s' %(key, str(values)))
+                setattr(self._result.outputs, key, values)
+            #else:
+            #    logger.info('no values for key %s' %key)
         os.chdir(old_cwd)
