@@ -742,13 +742,16 @@ class BaseTraitedSpec(traits.HasTraits):
             stuff = [stuff]
         file_list = []
         for afile in stuff:
-            if config.get('execution', 'hash_method').lower() == 'timestamp':
-                hash = hash_timestamp(afile)
-            elif config.get('execution', 'hash_method').lower() == 'content':
-                hash = hash_infile(afile)
+            if is_container(afile):
+                hashlist = self._hash_infile({'infiles':afile}, 'infiles')
+                hash = [val[1] for val in hashlist]
             else:
-                raise Exception("Unknown hash method: %s"%config.get('execution', 'hash_method'))
-            
+                if config.get('execution', 'hash_method').lower() == 'timestamp':
+                    hash = hash_timestamp(afile)
+                elif config.get('execution', 'hash_method').lower() == 'content':
+                    hash = hash_infile(afile)
+                else:
+                    raise Exception("Unknown hash method: %s"%config.get('execution', 'hash_method'))
             file_list.append((afile, hash ))
         return file_list
 
@@ -1101,7 +1104,7 @@ class NEW_BaseInterface(NEW_Interface):
                     setattr(outputs, key, val)
                     value = getattr(outputs, key)
                 except TraitError, error:
-                    if error.info == "a file name":
+                    if hasattr(error, 'info') and error.info == "a file name":
                         msg = "File '%s' not found for %s output '%s'." \
                             % (val, self.__class__.__name__, key)
                         raise FileNotFoundError(msg)
