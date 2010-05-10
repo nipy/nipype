@@ -87,7 +87,7 @@ class Merge(FSLCommand):
         outputs = self._outputs().get()
         outputs['outfile'] = self.inputs.outfile
         if not isdefined(outputs['outfile']):
-            outputs['outfile'] = self._gen_fname(self.inputs.infile,
+            outputs['outfile'] = self._gen_fname(self.inputs.infiles[0],
                                               suffix = '_merged')
         return outputs
     
