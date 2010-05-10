@@ -42,6 +42,197 @@ print fsl.Info.version()
 fsl.FSLCommand.set_default_outputtype('NIFTI_GZ')
 
 
+"""
+Setting up workflows
+--------------------
+
+In this tutorial we will be setting up a hierarchical workflow for spm
+analysis. This will demonstrate how pre-defined workflows can be setup
+and shared across users, projects and labs.
+
+
+Setup preprocessing workflow
+----------------------------
+
+This is a generic fsl preprocessing workflow that can be used by different analyses
+
+"""
+
+preproc = pe.Workflow(name='preproc')
+
+extract_ref = pe.Node(interface=fsl.ExtractRoi(tmin=42,
+                                               tsize=1),
+                      name = 'extractref')
+
+# run FSL's bet
+# bet my_structural my_betted_structural
+skullstrip = pe.Node(interface=fsl.Bet(mask = True,
+                                       frac = 0.34),
+                     name = 'stripstruct')
+
+refskullstrip = pe.Node(interface=fsl.Bet(mask = True,
+                                       frac = 0.34),
+                     name = 'stripref')
+
+coregister = pe.Node(interface=fsl.Flirt(dof=6),
+                     name = 'coregister')
+
+# Preprocess functionals
+motion_correct = pe.MapNode(interface=fsl.McFlirt(saveplots = True),
+                            name='realign',
+                            iterfield = ['infile'])
+
+func_skullstrip = pe.MapNode(interface=fsl.Bet(functional = True),
+                             name='stripfunc',
+                             iterfield = ['infile'])
+
+
+# Finally do some smoothing!
+
+smoothing = pe.MapNode(interface=fsl.Smooth(),
+                       name="smooth",
+                       iterfield = ['infile'])
+
+inorm = pe.MapNode(interface = fsl.ImageMaths(optstring = '-inm 10000',
+                                              suffix = '_inm',
+                                              outdatatype = 'float'),
+                       name = 'inorm',
+                       iterfield = ['infile'])
+
+hpfilter = pe.MapNode(interface=fsl.ImageMaths(),
+                      name='highpass',
+                      iterfield = ['infile'])
+
+preproc.add_nodes([extract_ref, skullstrip])
+preproc.connect([(extract_ref, motion_correct,[('outfile', 'reffile')]),
+                 (extract_ref, refskullstrip,[('outfile', 'infile')]),
+                 (skullstrip, coregister,[('maskfile','infile')]),
+                 (refskullstrip, coregister,[('outfile','reference')]),
+                 (motion_correct, func_skullstrip, [('outfile', 'infile')]),
+                 (func_skullstrip, smoothing, [('outfile', 'infile')]),
+                 (smoothing,inorm,[('smoothedimage','infile')]),
+                 (inorm,hpfilter,[('outfile','infile')]),
+                 ])
+
+
+"""
+Set up model fitting workflow
+-----------------------------
+
+"""
+
+modelfit = pe.Workflow(name='modelfit')
+
+"""
+   c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
+   SPM-specific design information. 
+"""
+modelspec = pe.Node(interface=model.SpecifyModel(),  name="modelspec")
+modelspec.inputs.concatenate_runs = False
+
+"""
+   d. Use :class:`nipype.interfaces.fsl.Level1Design` to generate a
+   run specific fsf file for analysis
+"""
+level1design = pe.Node(interface=fsl.Level1Design(), name="level1design")
+
+"""
+   e. Use :class:`nipype.interfaces.fsl.FeatModel` to generate a
+   run specific mat file for use by FilmGLS
+"""
+modelgen = pe.MapNode(interface=fsl.FeatModel(), name='modelgen',
+                      iterfield = ['fsf_file'])
+
+"""
+   f. Use :class:`nipype.interfaces.fsl.FilmGLS` to estimate a model
+   specified by a mat file and a functional run
+"""
+modelestimate = pe.MapNode(interface=fsl.FilmGLS(), name='modelestimate',
+                           iterfield = ['design_file','infile'])
+
+"""
+   f. Use :class:`nipype.interfaces.fsl.ContrastMgr` to generate contrast
+   estimates 
+"""
+conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
+                         iterfield = ['tcon_file','stats_dir'])
+
+modelfit.connect([
+   (modelspec,level1design,[('session_info','session_info')]),
+   (level1design,modelgen,[('fsf_files','fsf_file')]),
+   (modelgen,modelestimate,[('designfile','design_file')]),
+   (modelgen,conestimate,[('confile','tcon_file')]),
+   (modelestimate,conestimate,[('results_dir','stats_dir')]),
+   ])
+
+"""
+Set up fixed-effects workflow
+-----------------------------
+
+"""
+
+fixed_fx = pe.Workflow(name='fixedfx')
+
+# Use :class:`nipype.interfaces.fsl.Merge` to merge the copes and
+# varcopes for each condition
+copemerge    = pe.MapNode(interface=fsl.Merge(dimension='t'),
+                       iterfield=['infiles'],
+                       name="copemerge")
+
+varcopemerge = pe.MapNode(interface=fsl.Merge(dimension='t'),
+                       iterfield=['infiles'],
+                       name="varcopemerge")
+
+
+# Use :class:`nipype.interfaces.fsl.L2Model` to generate subject and
+# condition specific level 2 model design files
+level2model = pe.Node(interface=fsl.L2Model(),
+                      name='l2model')
+
+"""
+Use :class:`nipype.interfaces.fsl.Flameo` to estimate a second level
+model
+"""
+flameo = pe.MapNode(interface=fsl.Flameo(runmode='fe'), name="flameo",
+                    iterfield=['copefile','varcopefile'])
+
+fixed_fx.connect([(copemerge,flameo,[('outfile','copefile')]),
+                  (varcopemerge,flameo,[('outfile','varcopefile')]),
+                  (level2model,flameo, [('design_mat','designfile'),
+                                        ('design_con','tconfile'),
+                                        ('design_grp','covsplitfile')]),
+                  ])
+
+
+"""
+Set up first-level workflow
+---------------------------
+
+"""
+
+def sort_copes(files):
+    numelements = len(files[0])
+    outfiles = []
+    for i in range(numelements):
+        outfiles.insert(i,[])
+        for j, elements in enumerate(files):
+            outfiles[i].append(elements[i])
+    return outfiles
+
+def num_copes(files):
+    return len(files)
+
+firstlevel = pe.Workflow(name='firstlevel')
+#firstlevel.add_nodes([preproc])
+firstlevel.connect([(preproc, modelfit, [('highpass.outfile', 'modelspec.functional_runs')]),
+                    (preproc, fixed_fx, [('coregister.outfile', 'flameo.maskfile')]),
+                    (modelfit, fixed_fx,[(('conestimate.cope_files', sort_copes),'copemerge.infiles'),
+                                         (('conestimate.varcope_files', sort_copes),'varcopemerge.infiles'),
+                                         (('conestimate.cope_files', num_copes),'l2model.num_copes'),
+                                         ])
+                    ])
+
+
 """The nipype tutorial contains data for two subjects.  Subject data
 is in two subdirectories, ``s1`` and ``s2``.  Each subject directory
 contains four functional volumes: f3.nii, f5.nii, f7.nii, f10.nii. And
@@ -98,52 +289,12 @@ datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
 
-## from the FLIRT web doc
 
-extract_ref = pe.Node(interface=fsl.ExtractRoi(tmin=42,
-                                               tsize=1),
-                      name = 'middlevol.fsl')
-
-# run FSL's bet
-# bet my_structural my_betted_structural
-skullstrip = pe.Node(interface=fsl.Bet(mask = True,
-                                       frac = 0.34),
-                     name = 'struct_bet.fsl')
-
-# Preprocess functionals
-motion_correct = pe.MapNode(interface=fsl.McFlirt(saveplots = True),
-                            name='mcflirt.fsl',
-                            iterfield = ['infile'])
-
-func_skullstrip = pe.MapNode(interface=fsl.Bet(functional = True),
-                             name='func_bet.fsl',
-                             iterfield = ['infile'])
-
-
-# Finally do some smoothing!
-
-smoothing = pe.MapNode(interface=fsl.Smooth(),
-                       name="smooth.fsl",
-                       iterfield = ['infile'])
-smoothing.inputs.fwhm = 5
-
-inorm = pe.MapNode(interface = fsl.ImageMaths(optstring = '-inm 10000',
-                                              suffix = '_inm',
-                                              outdatatype = 'float'),
-                       name = 'inorm.fsl',
-                       iterfield = ['infile'])
-
-hpfilter = pe.MapNode(interface=fsl.ImageMaths(),
-                      name='highpass.fsl',
-                      iterfield = ['infile'])
+firstlevel.inputs.preproc.smooth.fwhm = 5
 hpcutoff = 120
 TR = 3.
-hpfilter.inputs.suffix = '_hpf'
-hpfilter.inputs.optstring = '-bptf %d -1'%(hpcutoff/TR)
-
-#######################################################################
-# setup analysis components
-#######################################################################
+firstlevel.inputs.preproc.highpass.suffix = '_hpf'
+firstlevel.inputs.preproc.highpass.optstring = '-bptf %d -1'%(hpcutoff/TR)
 
 
 """
@@ -186,36 +337,43 @@ cont2 = ['Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1]]
 cont3 = ['Task','F', [cont1, cont2]]
 contrasts = [cont1,cont2]
 
-"""
-   c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
-   SPM-specific design information. 
-"""
-modelspec = pe.Node(interface=model.SpecifyModel(),  name="modelspec.fsl")
-modelspec.inputs.concatenate_runs        = False
-modelspec.inputs.input_units             = 'secs'
-modelspec.inputs.output_units            = 'secs'
-modelspec.inputs.time_repetition         = TR
-modelspec.inputs.high_pass_filter_cutoff = hpcutoff
+firstlevel.inputs.modelfit.modelspec.input_units = 'secs'
+firstlevel.inputs.modelfit.modelspec.output_units = 'secs'
+firstlevel.inputs.modelfit.modelspec.time_repetition = TR
+firstlevel.inputs.modelfit.modelspec.high_pass_filter_cutoff = hpcutoff
 
 
-"""
-   d. Use :class:`nipype.interfaces.fsl.Level1Design` to generate a
-   run specific fsf file for analysis
-"""
-level1design = pe.Node(interface=fsl.Level1Design(), name="level1design.fsl")
-level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
-level1design.inputs.bases = {'hrf':{'derivs': True}}
-level1design.inputs.contrasts = contrasts
-level1design.inputs.register = True
-level1design.inputs.reg_image = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
-level1design.inputs.reg_dof = 12 
+firstlevel.inputs.modelfit.level1design.interscan_interval = TR 
+firstlevel.inputs.modelfit.level1design.bases = {'dgamma':{'derivs': True}}
+firstlevel.inputs.modelfit.level1design.contrasts = contrasts
+firstlevel.inputs.modelfit.level1design.register = True
+firstlevel.inputs.modelfit.level1design.reg_image = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
+firstlevel.inputs.modelfit.level1design.reg_dof = 12 
 
 """
-   e. Use :class:`nipype.interfaces.fsl.FeatModel` to generate a
-   run specific mat file for use by FilmGLS
+Set up complete workflow
+========================
 """
-featmodel = pe.MapNode(interface=fsl.FeatModel(), name="featmodel.fsl",
-                       iterfield = ['fsf_file'])
+
+l1pipeline = pe.Workflow(name= "level1")
+l1pipeline.base_dir = os.path.abspath('./fsl/workingdir')
+
+
+def pickfirst(files):
+    return files[0]
+
+l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
+                    (infosource, firstlevel, [(('subject_id', subjectinfo), 'modelfit.modelspec.subject_info')]),
+                    (datasource, firstlevel, [('struct','preproc.stripstruct.infile'),
+                                              ('func', 'preproc.realign.infile'),
+                                              (('func', pickfirst), 'preproc.extractref.infile'),
+                                              ('func', 'modelfit.modelestimate.infile')
+                                              ]),
+                    ])
+
+'''
+
+
 
 
 
@@ -290,3 +448,4 @@ l1pipeline.connect([(infosource,datasink,[('subject_id','subject_id')]),
 if __name__ == '__main__':
     l1pipeline.run()
 #    l2pipeline.run()
+'''
