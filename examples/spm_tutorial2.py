@@ -55,6 +55,14 @@ mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
 
 
 """
+Setting up workflows
+--------------------
+
+In this tutorial we will be setting up a hierarchical workflow for spm
+analysis. This will demonstrate how pre-defined workflows can be setup
+and shared across users, projects and labs.
+
+
 Setup preprocessing workflow
 ----------------------------
 
