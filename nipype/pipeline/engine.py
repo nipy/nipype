@@ -959,13 +959,10 @@ class MapNode(Node):
         workflowname = 'workflow'
         iterflow = Workflow(name=workflowname)
         iterflow.base_dir = cwd
-        print self.inputs
-        print self._interface.inputs
         nitems = len(getattr(self.inputs, self.iterfield[0]))
         for i in range(nitems):
             newnode = Node(deepcopy(self._interface), name=self.name+str(i))
             newnode._interface.inputs = deepcopy(self._interface.inputs)
-            print newnode._interface.inputs
             for field in self.iterfield:
                 setattr(newnode.inputs, field,
                         getattr(self.inputs, field)[i])
