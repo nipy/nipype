@@ -69,11 +69,12 @@ class Level1DesignInputSpec(TraitedSpec):
     session list is None or not provided, all sessions are used. For F
     contrasts, the condition list should contain previously defined
     T-contrasts.""")
-    register = traits.Bool(requires=['reg_dof'],
+    register = traits.Bool(False, requires=['reg_dof'], usedefault=True,
         desc='Run registration at the end of session specific analysis.')
-    reg_image = File(exists=True, desc='image volume to register to')
+    reg_image = File(exists=True,
+                     desc='image volume to register to')
     # MNI152_T1_2mm_brain.nii.gz
-    reg_dof = traits.Enum(3,6,9,12,
+    reg_dof = traits.Enum(3,6,9,12, requires=['reg_image'],
                           desc='registration degrees of freedom')
 
 class Level1DesignOutputSpec(TraitedSpec):
