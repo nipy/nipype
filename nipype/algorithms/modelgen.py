@@ -514,16 +514,12 @@ class SpecifyModel(NEW_BaseInterface):
         
         np.savez(self._get_outfilename(),session_info=sessinfo)
 
-    def run(self, **inputs):
+    def _run_interface(self, runtime):
         """
         """
-        self.inputs.set(**inputs)
-        runtime = Bunch(returncode=0,
-                        stdout=None,
-                        stderr=None)
         self._generate_design()
-        outputs=self.aggregate_outputs()
-        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+        runtime.returncode = 0
+        return runtime
     
     def _get_outfilename(self):
         return os.path.join(os.getcwd(),'%s_modelspec.npz'%self.inputs.subject_id)
