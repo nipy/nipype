@@ -24,6 +24,7 @@ from nipype.utils.misc import is_container
 from enthought.traits.trait_errors import TraitError
 from nipype.utils.config import config
 from nipype.utils.misc import isdefined
+from ConfigParser import NoOptionError
 
 __docformat__ = 'restructuredtext'
 
@@ -1160,6 +1161,11 @@ class NEW_CommandLine(NEW_BaseInterface):
             raise Exception("Missing command")
         if command:
             self._cmd = command
+        try:    
+            display_var = config.get('execution', 'display_variable')
+            self.inputs.environ['DISPLAY'] = display_var
+        except NoOptionError:
+            pass
 
     @property
     def cmd(self):
