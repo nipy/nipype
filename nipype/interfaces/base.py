@@ -848,6 +848,7 @@ class NEW_Interface(object):
 
     input_spec = None # A traited input specification
     output_spec = None # A traited output specification
+    can_resume = False # defines if the interface can reuse partial results after interruption
 
     def __init__(self, **inputs):
         """Initialize command with given args and inputs."""

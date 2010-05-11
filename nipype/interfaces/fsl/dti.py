@@ -167,19 +167,21 @@ class Bedpostx(FSLCommand):
     _cmd = 'bedpostx'
     input_spec = BedpostxInputSpec
     output_spec = BedpostxOutputSpec
+    can_resume = True
 
     def _run_interface(self, runtime):
         
         #create the subject specific bpxdirectory           
         bpxdirectory = os.path.join(os.getcwd(),self.inputs.bpxdirectory)
-        os.makedirs(bpxdirectory)
         self.inputs.bpxdirectory = bpxdirectory
-
-        # copy the dwi,bvals,bvecs, and mask files to that directory
-        shutil.copyfile(self.inputs.mask,self._gen_fname('nodif_brain_mask',suffix='',cwd=self.inputs.bpxdirectory))
-        shutil.copyfile(self.inputs.dwi,self._gen_fname('data',suffix='',cwd=self.inputs.bpxdirectory))
-        shutil.copyfile(self.inputs.bvals,os.path.join(self.inputs.bpxdirectory,'bvals'))
-        shutil.copyfile(self.inputs.bvecs,os.path.join(self.inputs.bpxdirectory,'bvecs'))
+        if not os.path.exists(bpxdirectory):
+            os.makedirs(bpxdirectory)
+    
+            # copy the dwi,bvals,bvecs, and mask files to that directory
+            shutil.copyfile(self.inputs.mask,self._gen_fname('nodif_brain_mask',suffix='',cwd=self.inputs.bpxdirectory))
+            shutil.copyfile(self.inputs.dwi,self._gen_fname('data',suffix='',cwd=self.inputs.bpxdirectory))
+            shutil.copyfile(self.inputs.bvals,os.path.join(self.inputs.bpxdirectory,'bvals'))
+            shutil.copyfile(self.inputs.bvecs,os.path.join(self.inputs.bpxdirectory,'bvecs'))
 
         return super(Bedpostx, self)._run_interface(runtime)
 

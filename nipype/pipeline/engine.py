@@ -18,6 +18,7 @@ from warnings import warn
 import numpy as np
 
 from nipype.utils.misc import package_check
+import shutil
 package_check('networkx', '1.0')
 import networkx as nx
 try:
@@ -766,10 +767,14 @@ class Node(WorkflowBase):
             self._save_hashfile(hashfile,hashed_inputs)
         if force_execute or (not updatehash and (self.overwrite or not os.path.exists(hashfile))):
             logger.info("Node hash: %s"%hashvalue)
-            if os.path.exists(outdir):
+            hashfile_unfinished = os.path.join(outdir, '_0x%s_unfinished.json' % hashvalue)
+            if os.path.exists(outdir) and not (os.path.exists(hashfile_unfinished) and self._interface.can_resume):
                 logger.debug("Removing old %s and its contents"%outdir)
                 rmtree(outdir)
                 outdir = make_output_dir(outdir)
+            else:
+                logger.debug("%s found and can_resume is True - resuming execution"%hashfile_unfinished)
+            self._save_hashfile(hashfile_unfinished,hashed_inputs)
             self._run_interface(execute=True, cwd=outdir)
             if isinstance(self._result.runtime, list):
                 # XXX In what situation is runtime ever a list?
@@ -780,11 +785,12 @@ class Node(WorkflowBase):
             else:
                 returncode = self._result.runtime.returncode
             if returncode == 0:
-                self._save_hashfile(hashfile,hashed_inputs)
+                shutil.move(hashfile_unfinished, hashfile)
             else:
                 msg = "Could not run %s" % self.name
                 msg += "\nwith inputs:\n%s" % self.inputs
                 msg += "\n\tstderr: %s" % self._result.runtime.stderr
+                os.remove(hashfile_unfinished)
                 raise RuntimeError(msg)
         else:
             logger.debug("Hashfile exists. Skipping execution\n")
