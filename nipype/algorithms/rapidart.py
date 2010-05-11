@@ -328,18 +328,15 @@ class ArtifactDetect(NEW_BaseInterface):
         file.write( ''.join(('std: ',str(np.std(gz,axis=0)),'\n')))
         file.close()
 
-    def run(self, **inputs):
+    def _run_interface(self, runtime):
         """Execute this module.
         """
         funcfilelist = filename_to_list(self.inputs.realigned_files)
         motparamlist = filename_to_list(self.inputs.realignment_parameters)
         for i,imgf in enumerate(funcfilelist):
             self._detect_outliers_core(imgf ,motparamlist[i], i, os.getcwd())
-        runtime = Bunch(returncode=0,
-                        messages=None,
-                        errmessages=None)
-        outputs=self.aggregate_outputs()
-        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+        runtime.returncode = 0
+        return runtime
 
 class StimulusCorrelation(Interface):
     """Determines if stimuli are correlated with motion or intensity

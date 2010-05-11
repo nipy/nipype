@@ -3,9 +3,8 @@ Created on 24 Feb 2010
 
 @author: filo
 '''
-from nipype.interfaces.base import Bunch, InterfaceResult,\
-    NEW_BaseInterface, traits, TraitedSpec,\
-    File
+from nipype.interfaces.base import NEW_BaseInterface,\
+    traits, TraitedSpec, File
 from nipype.utils.misc import isdefined
 import nipype.externals.pynifti as nifti
 import numpy as np
@@ -35,15 +34,12 @@ class PickAtlas(NEW_BaseInterface):
     input_spec = PickAtlasInputSpec
     output_spec = PickAtlasOutputSpec
 
-    def run(self, cwd=None):
+    def _run_interface(self, runtime):
         nim = self._get_brodmann_area()
         nifti.save(nim, self._gen_output_filename())
 
-        runtime = Bunch(returncode=0,
-                        messages=None,
-                        errmessages=None)
-        outputs = self.aggregate_outputs()
-        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+        runtime.returncode = 0
+        return runtime
 
     def _gen_output_filename(self):
         if not isdefined(self.inputs.output_file):
