@@ -907,6 +907,8 @@ class MapNode(Node):
         self.iterfield  = iterfield
         if self.iterfield is None:
             raise Exception("Iterfield must be provided")
+        elif isinstance(self.iterfield, str):
+            self.iterfield = [self.iterfield]
         self._inputs = self._create_dynamic_traits(self._interface.inputs,
                                                    fields=self.iterfield)
         self._inputs.on_trait_change(self._set_mapnode_input)
