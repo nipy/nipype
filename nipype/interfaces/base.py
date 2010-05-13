@@ -16,6 +16,7 @@ from warnings import warn
 
 
 import enthought.traits.api as traits
+from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
 from nipype.interfaces.traits import Undefined
 
 from nipype.utils.filemanip import md5, hash_infile, FileNotFoundError,\
@@ -756,6 +757,20 @@ class BaseTraitedSpec(traits.HasTraits):
             file_list.append((afile, hash ))
         return file_list
 
+    def get(self, **kwargs):
+        """ Returns traited class as a dict
+
+        Augments the trait get function to return a dictionary without
+        notification handles
+        """
+        out = super(BaseTraitedSpec, self).get(**kwargs)
+        for key, val in out.items():
+            if isinstance(val, TraitDictObject):
+                out[key] = dict(val)
+            if isinstance(val, TraitListObject):
+                out[key] = val[:]
+        return out
+                
     #@traits.cached_property
     @property
     def hashval(self):
