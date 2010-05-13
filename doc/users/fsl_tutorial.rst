@@ -1,8 +1,8 @@
 .. _tutorial_fsl:
 
-======================
-Using FSL for analysis
-======================
+===========================
+Using FSL for fMRI analysis
+===========================
 
 This tutorial illustrates how to perform a first level analysis with
 FSL_.
