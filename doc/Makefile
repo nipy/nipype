@@ -48,8 +48,9 @@ examples2rst:
 			--project Nipype \
 			--outdir $(CURDIR)/examples \
 			../examples/freesurfer_tutorial.py \
-			../examples/fsl_tutorial.py \
-			../examples/spm_tutorial.py
+			../examples/fsl_tutorial2.py \
+			../examples/spm_tutorial.py \
+			../examples/spm_tutorial2.py 
 	@echo "examples2rst finished."
 
 latex: api

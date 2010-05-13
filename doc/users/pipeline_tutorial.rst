@@ -18,6 +18,7 @@ Tutorials
    tutorial_102
    tutorial_103
    spm_tutorial
+   spm_tutorial2
    freesurfer_tutorial
    fsl_tutorial
 
