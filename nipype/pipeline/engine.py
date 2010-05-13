@@ -933,7 +933,6 @@ class MapNode(Node):
         """
         logger.debug('setting nodelevel input %s = %s' % (parameter, str(val)))
         self._set_mapnode_input(self.inputs, parameter, deepcopy(val))
-        #setattr(self.inputs, parameter, deepcopy(val))
         
     def _set_mapnode_input(self, object, name, newvalue):
         logger.debug('setting mapnode input: %s -> %s' %(name, str(newvalue)))
@@ -943,6 +942,8 @@ class MapNode(Node):
             setattr(self._interface.inputs, name, newvalue)
 
     def _get_hashval(self):
+        """ Compute hash including iterfield lists
+        """
         inputs = deepcopy(self._interface.inputs)
         for name in self.iterfield:
             inputs.remove_trait(name)
@@ -956,15 +957,6 @@ class MapNode(Node):
 
     @property
     def outputs(self):
-        return Bunch(self._interface._outputs().get())
-    
-    def _outputs(self):
-        if isdefined(getattr(self.inputs, self.iterfield[0])):
-            nitems = len(getattr(self.inputs, self.iterfield[0]))
-        else:
-            nitems = None
-        #return Bunch(self._create_dynamic_traits(self._interface._outputs(),
-        #                                   nitems=nitems).trait_get())
         return Bunch(self._interface._outputs().get())
     
     def _run_interface(self, execute=True, cwd=None):
@@ -981,38 +973,13 @@ class MapNode(Node):
             for field in self.iterfield:
                 setattr(newnodes[i].inputs, field,
                         getattr(self.inputs, field)[i])
-            #newnodes[i].base_dir = cwd
-            #newnodes[i].run()
-        self._result = InterfaceResult(interface=[], runtime=[],
-                                       outputs=self._outputs())
-        """
-        for i, node in enumerate(newnodes):
-            if node.result and hasattr(node.result, 'runtime'):
-                self._result.runtime.insert(i, node.result.runtime)
-                if node.result.runtime.returncode != 0:
-                    raise Exception('iternode %s:%d did not run'%(node._id, i))
-                self._result.interface.insert(i, node.result.interface)
-            else:
-                # by default set runtime to None if not provided
-                self._result.runtime.insert(i, None)
-        for key, _ in self.outputs.items():
-            values = []
-            for i, node in enumerate(newnodes):
-                val = node.result.outputs.get()[key]
-                values.insert(i, val)
-            if any([val != Undefined for val in values]):
-                #logger.info('setting key %s with values %s' %(key, str(values)))
-                setattr(self._result.outputs, key, values)
-            #else:
-            #    logger.info('no values for key %s' %key)
-        """
         workflowname = 'workflow'
         iterflow = Workflow(name=workflowname)
         iterflow.base_dir = cwd
         iterflow.add_nodes(newnodes)
         iterflow.run(inseries=True)
         self._result = InterfaceResult(interface=[], runtime=[],
-                                       outputs=self._outputs())
+                                       outputs=self.outputs)
         for i in range(nitems):
             node = iterflow.get_exec_node(self.name+str(i))
             if node.result and hasattr(node.result, 'runtime'):
