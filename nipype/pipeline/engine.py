@@ -15,6 +15,7 @@ from time import sleep, strftime
 from traceback import format_exception
 from warnings import warn
 
+from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
 import numpy as np
 
 from nipype.utils.misc import package_check
@@ -316,10 +317,13 @@ class Workflow(WorkflowBase):
                 graph = _generate_expanded_graph(deepcopy(self._flatgraph))
         export_graph(graph, self.base_dir, dotfilename=dotfilename)
 
-    def run(self):
+    def run(self, inseries=False):
         self._create_flat_graph()
         self._execgraph = _generate_expanded_graph(deepcopy(self._flatgraph))
-        self._execute_with_manager()
+        if inseries:
+            self._execute_in_series()
+        else:
+            self._execute_with_manager()
 
     # PRIVATE API AND FUNCTIONS
     
@@ -389,7 +393,7 @@ class Workflow(WorkflowBase):
         return outputdict
         
     def _set_input(self, object, name, newvalue):
-        setattr(object.traits()[name].node.inputs, name, newvalue)
+        object.traits()[name].node.set_input(name, newvalue)
 
     def _set_node_input(self, node, param, source, sourceinfo):
         """Set inputs of a node given the edge connection"""
@@ -399,8 +403,13 @@ class Workflow(WorkflowBase):
             if callable(sourceinfo[1]):
                 val = sourceinfo[1](source.get_output(sourceinfo[0]),
                                     *sourceinfo[2:])
-        logger.debug('setting node input: %s->%s', param, str(val))
-        node.set_input(param, deepcopy(val))
+        newval = val
+        if isinstance(val, TraitDictObject):
+            newval = dict(val)
+        if isinstance(val, TraitListObject):
+            newval = val[:]
+        logger.debug('setting node input: %s->%s', param, str(newval))
+        node.set_input(param, deepcopy(newval))
 
     def _create_flat_graph(self):
         workflowcopy = deepcopy(self)
@@ -568,7 +577,7 @@ class Workflow(WorkflowBase):
                 self._execute_in_series()
                 return
         logger.info("Running in parallel.")
-        self.taskclient.clear()
+        # self.taskclient.clear()
         # in the absence of a dirty bit on the object, generate the
         # parameterization each time before running
         # Generate appropriate structures for worker-manager model
@@ -583,26 +592,31 @@ class Workflow(WorkflowBase):
             # trigger callbacks for any pending results
             while self.pending_tasks:
                 taskid, jobid = self.pending_tasks.pop()
-                res = self.taskclient.get_task_result(taskid, block=False)
-                if res:
-                    if res.failure:
-                        try:
-                            res.raise_exception()
-                        except:
-                            crashfile = self.procs[jobid]._report_crash(execgraph=self._execgraph)
-                            # remove dependencies from queue
-                            notrun.append(self._remove_node_deps(jobid, crashfile))
+                try:
+                    res = self.taskclient.get_task_result(taskid, block=False)
+                    if res:
+                        if res.failure:
+                            try:
+                                res.raise_exception()
+                            except:
+                                crashfile = self.procs[jobid]._report_crash(execgraph=self._execgraph)
+                                # remove dependencies from queue
+                                notrun.append(self._remove_node_deps(jobid, crashfile))
+                        else:
+                            self._task_finished_cb(res['result'], jobid)
                     else:
-                        self._task_finished_cb(res['result'], jobid)
-                else:
-                    toappend.insert(0, (taskid, jobid))
+                        toappend.insert(0, (taskid, jobid))
+                except:
+                    crashfile = self.procs[jobid]._report_crash(execgraph=self._execgraph)
+                    # remove dependencies from queue
+                    notrun.append(self._remove_node_deps(jobid, crashfile))
             if toappend:
                 self.pending_tasks.extend(toappend)
-            else:
-                self.taskclient.clear()
+            #else:
+            #    self.taskclient.clear()
             self._send_procs_to_workers()
             sleep(2)
-        self.taskclient.clear()
+        #self.taskclient.clear()
         _report_nodes_not_run(notrun)
                 
     def _send_procs_to_workers(self):
@@ -629,6 +643,7 @@ class Workflow(WorkflowBase):
                                                      push = dict(task=self.procs[jobid]),
                                                      pull = 'result')
                     tid = self.taskclient.run(task, block = False)
+                    #logger.info('Task id: %d' % tid)
                     self.pending_tasks.insert(0, (tid, jobid))
             else:
                 break
@@ -893,27 +908,18 @@ class MapNode(Node):
         if self.iterfield is None:
             raise Exception("Iterfield must be provided")
         self._inputs = self._create_dynamic_traits(self._interface.inputs,
-                                                   fields=self.iterfield,
-                                                   input=True)
+                                                   fields=self.iterfield)
         self._inputs.on_trait_change(self._set_mapnode_input)
 
-    def _create_dynamic_traits(self, basetraits, fields=None, input=False):
+    def _create_dynamic_traits(self, basetraits, fields=None, nitems=None):
         """Convert specific fields of a trait to accept multiple inputs
         """
         output = DynamicTraitedSpec()
-        if input:
-            container = InputMultiPath
-        else:
-            container = OutputMultiPath
         if fields is None:
             fields = basetraits.copyable_trait_names()
         for name, spec in basetraits.items():
-            if name in fields:
-                trait_type = spec.trait_type
-                if isinstance(trait_type, (File, Directory)):
-                    output.add_trait(name, container(trait_type))
-                else:
-                    output.add_trait(name, traits.List(trait_type))
+            if name in fields and ((nitems is None) or (nitems > 1)):
+                output.add_trait(name, InputMultiPath(spec.trait_type))
             else:
                 output.add_trait(name, traits.Trait(spec))
             setattr(output, name, Undefined)
@@ -953,8 +959,13 @@ class MapNode(Node):
         return Bunch(self._interface._outputs().get())
     
     def _outputs(self):
-        return self._create_dynamic_traits(self._interface._outputs(),
-                                           input=False)
+        if isdefined(getattr(self.inputs, self.iterfield[0])):
+            nitems = len(getattr(self.inputs, self.iterfield[0]))
+        else:
+            nitems = None
+        #return Bunch(self._create_dynamic_traits(self._interface._outputs(),
+        #                                   nitems=nitems).trait_get())
+        return Bunch(self._interface._outputs().get())
     
     def _run_interface(self, execute=True, cwd=None):
         old_cwd = os.getcwd()
@@ -962,18 +973,44 @@ class MapNode(Node):
             cwd = self._output_directory()
         os.chdir(cwd)
 
+        nitems = len(getattr(self.inputs, self.iterfield[0]))
+        newnodes = []
+        for i in range(nitems):
+            newnodes.insert(i, Node(deepcopy(self._interface), name=self.name+str(i)))
+            newnodes[i]._interface.inputs.set(**deepcopy(self._interface.inputs.get()))
+            for field in self.iterfield:
+                setattr(newnodes[i].inputs, field,
+                        getattr(self.inputs, field)[i])
+            #newnodes[i].base_dir = cwd
+            #newnodes[i].run()
+        self._result = InterfaceResult(interface=[], runtime=[],
+                                       outputs=self._outputs())
+        """
+        for i, node in enumerate(newnodes):
+            if node.result and hasattr(node.result, 'runtime'):
+                self._result.runtime.insert(i, node.result.runtime)
+                if node.result.runtime.returncode != 0:
+                    raise Exception('iternode %s:%d did not run'%(node._id, i))
+                self._result.interface.insert(i, node.result.interface)
+            else:
+                # by default set runtime to None if not provided
+                self._result.runtime.insert(i, None)
+        for key, _ in self.outputs.items():
+            values = []
+            for i, node in enumerate(newnodes):
+                val = node.result.outputs.get()[key]
+                values.insert(i, val)
+            if any([val != Undefined for val in values]):
+                #logger.info('setting key %s with values %s' %(key, str(values)))
+                setattr(self._result.outputs, key, values)
+            #else:
+            #    logger.info('no values for key %s' %key)
+        """
         workflowname = 'workflow'
         iterflow = Workflow(name=workflowname)
         iterflow.base_dir = cwd
-        nitems = len(getattr(self.inputs, self.iterfield[0]))
-        for i in range(nitems):
-            newnode = Node(deepcopy(self._interface), name=self.name+str(i))
-            newnode._interface.inputs = deepcopy(self._interface.inputs)
-            for field in self.iterfield:
-                setattr(newnode.inputs, field,
-                        getattr(self.inputs, field)[i])
-            iterflow.add_nodes([newnode])
-        iterflow.run()
+        iterflow.add_nodes(newnodes)
+        iterflow.run(inseries=True)
         self._result = InterfaceResult(interface=[], runtime=[],
                                        outputs=self._outputs())
         for i in range(nitems):
@@ -990,7 +1027,7 @@ class MapNode(Node):
             values = []
             for i in range(nitems):
                 node = iterflow.get_exec_node(self.name+str(i))
-                values.insert(i, getattr(node.result.outputs, key))
+                values.insert(i, node.result.outputs.get()[key])
             if any([val != Undefined for val in values]):
                 #logger.info('setting key %s with values %s' %(key, str(values)))
                 setattr(self._result.outputs, key, values)
