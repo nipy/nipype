@@ -21,6 +21,7 @@ Tutorials
    spm_tutorial2
    freesurfer_tutorial
    fsl_tutorial
+   fsl_dti_tutorial
 
 Requirements
 ============
