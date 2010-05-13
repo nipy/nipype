@@ -50,6 +50,7 @@ examples2rst:
 			../examples/freesurfer_tutorial.py \
 			../examples/fsl_tutorial2.py \
 			../examples/spm_tutorial.py \
+			../examples/dti_tutorial.py \
 			../examples/spm_tutorial2.py 
 	@echo "examples2rst finished."
 
