@@ -19,6 +19,7 @@ __docformat__ = 'restructuredtext'
 # Standard library imports
 from glob import glob
 from copy import deepcopy
+import os
 
 # Third-party imports
 import numpy as np
@@ -30,7 +31,7 @@ from nipype.interfaces.base import OutputMultiPath,\
     TraitedSpec, traits, InputMultiPath, File
 from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list, 
-                                    list_to_filename)
+                                    list_to_filename, split_filename)
 
 class SliceTimingInputSpec(SPMCommandInputSpec):
     infile = InputMultiPath(File(exists=True), field='scans',
@@ -518,6 +519,80 @@ class Segment(SPMCommand):
         outputs['transformation_mat'] = t_mat
         invt_mat = glob(fname_presuffix(f,suffix='_seg_inv_sn.mat',use_ext=False))
         outputs['inverse_transformation_mat'] = invt_mat
+        return outputs
+
+class NewSegmentInputSpec(SPMCommandInputSpec):
+    channels = traits.List(traits.Tuple(InputMultiPath(File(exists=True)),traits.Float(),traits.Float(), traits.Tuple(traits.Bool, traits.Bool)),
+                           desc="""A list of tuples (one per channel/modality) with the following fields:
+- list of volumes to be segmented
+- bias reguralisation (0-10)
+- FWHM of Gaussian smoothness of bias
+- which maps to save (Corrected, Field) - a tuple of two boolean values""", field = 'channel', copyfile=False, mandatory=True)
+    tissues = traits.List(traits.Tuple(InputMultiPath(File(exists=True)), traits.Int(), traits.Tuple(traits.Bool, traits.Bool), traits.Tuple(traits.Bool, traits.Bool)),
+                         desc="""A list of tuples (one per tissue) with the following fields:
+- tissue probability map
+- number of gaussians
+- which maps to save [Native, DARTEL] - a tuple of two boolean values
+- which maps to save [Modulated, Unmodualted] - a tuple of two boolean values""", field='tissue', copyfile=False)
+    affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', field='warp.affreg',
+                      desc='mni, eastern, subj, none ')
+    warping_regularization = traits.Float(field='warp.reg',
+                      desc='Aproximate distance between sampling points.')
+    sampling_distance = traits.Float(field='warp.samp',
+                      desc='Sampling distance on data for parameter estimation')
+    write_deformation_fields = traits.List(traits.Bool(), minlen=2, maxlen=2, field='warp.write',
+                                           desc="Which deformation fields to write:[Inverse, Forward]")
+    
+class NewSegmentOutputSpec(TraitedSpec):
+    native_class_images = OutputMultiPath(File(exists=True), desc='native space grey probability map')
+    transformation_mat = OutputMultiPath(File(exists=True), desc='Normalization transformation')
+    
+class NewSegment(SPMCommand):
+    input_spec = NewSegmentInputSpec
+    output_spec = NewSegmentOutputSpec
+    _jobtype = 'tools'
+    _jobname = 'preproc8'
+    
+    def _format_arg(self, opt, val):
+        """Convert input to appropriate format for spm
+        """
+        
+        if opt == 'channels':
+            # structure have to be recreated, because of some weird traits error
+            new_channels = []
+            for channel in val:
+                new_channel = {}
+                
+                new_channel['vols'] = scans_for_fnames(channel[0])
+                new_channel['biasreg'] = channel[1]
+                new_channel['biasfwhm'] = channel[2]
+                new_channel['write'] = [int(channel[3][0]), int(channel[3][1])]
+
+                new_channels.append(new_channel)
+            return new_channels
+        elif opt == 'tissues':
+            new_tissues = []
+            for tissue in val:
+                new_tissue = {}
+                
+                new_tissue['tpm'] = scans_for_fnames(tissue[0])
+                new_tissue['ngauss'] = tissue[1]
+                new_tissue['native'] = [int(tissue[2][0]), int(tissue[2][1])]
+                new_tissue['warped'] = [int(tissue[3][0]), int(tissue[3][1])]
+
+                new_tissues.append(new_tissue)
+            return new_tissues
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['native_class_images'] = []
+        outputs['transformation_mat'] = []
+        
+        for filename in filename_to_list(self.inputs.channels[0][0]):
+            pth, base, ext = split_filename(filename)
+            for i in range(len(self.inputs.tissues)):
+                outputs['native_class_images'].append(os.path.join("c%d%s%s"(i,base,ext)))
+            outputs['transformation_mat'] = os.path.join(pth, "%s_seg8.mat"%base)
         return outputs
 
 class SmoothInputSpec(SPMCommandInputSpec):
