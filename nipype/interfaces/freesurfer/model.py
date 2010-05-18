@@ -585,11 +585,11 @@ class Label2VolInputSpec(FSTraitedSpec):
                        desc='hemisphere to use lh or rh')
     surface = traits.Str(argstr='--surf %s',
                          desc='use surface instead of white')
-    outfile = traits.File(argstr='--o %s', genfile=True,
+    outfile = File(argstr='--o %s', genfile=True,
                           desc='output volume')
-    hitvolid = traits.File(argstr='--hits %s',
+    hitvolid = File(argstr='--hits %s',
                            desc='each frame is nhits for a label')
-    labelstat = traits.File(argstr='--label-stat %s',
+    labelstat = File(argstr='--label-stat %s',
                     desc='map the label stats field into the vol')
     nativevox2ras = traits.Bool(argstr='--native-vox2ras',
                desc='use native vox2ras xform instead of  tkregister-style')
