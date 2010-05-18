@@ -66,7 +66,13 @@ info = dict(dwi=[['subject_id', 'data.nii.gz']],
             bvecs=[['subject_id','bvecs']],
             bvals=[['subject_id','bvals']],
             seedfile = [['subject_id','MASK_average_thal_right.nii.gz']],
-            targetmasks = [['subject_id','targets.txt']],
+            targetmasks = [['subject_id',['MASK_average_M1_right.nii.gz',
+                                          'MASK_average_S1_right.nii.gz',
+                                          'MASK_average_occipital_right.nii.gz',
+                                          'MASK_average_pfc_right.nii.gz',
+                                          'MASK_average_pmc_right.nii.gz',
+                                          'MASK_average_ppc_right.nii.gz',
+                                          'MASK_average_temporal_right.nii.gz']]],
             xfm=[['subject_id','standard2diff.mat']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
@@ -89,8 +95,7 @@ and provides additional housekeeping and pipeline specific
 functionality.
 """
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                               outfields=['dwi','bvecs','bvals',
-                                                          'seedfile','targetmasks','xfm']),
+                                               outfields=info.keys()),
                      name = 'datasource')
 datasource.inputs.base_directory = os.path.abspath('data')
 datasource.inputs.template = '%s/%s'
@@ -227,8 +232,9 @@ dwiproc.connect([
                     (tractography,datasink,[('projthresh.outfiles','projthresh.@seeds_to_targets')]),
                     (tractography,datasink,[('findthebiggest.outfile','fbiggest.@biggestsegmentation')])
                 ])
-dwiproc.write_graph()
+
 dwiproc.run()
+dwiproc.write_graph()
           
 
 """
@@ -290,8 +296,9 @@ tbss_workflow.connect([ (tbss_source,tbss1,[('outfiles','imglist')]),
                         (tbss4,randomise,[('all_FA_skeletonised','infile')]),
                         (tbss4,randomise,[('mean_FA_skeleton_mask','mask')])            
                     ])
-tbss_workflow.write_graph()
+
 tbss_workflow.run()
+tbss_workflow.write_graph()
 
 
 

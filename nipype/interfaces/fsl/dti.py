@@ -12,7 +12,8 @@ import os,shutil
 import warnings
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
-from nipype.interfaces.base import Bunch, TraitedSpec, isdefined, File,Directory
+from nipype.interfaces.base import Bunch, TraitedSpec, isdefined, File,Directory,\
+    InputMultiPath
 import enthought.traits.api as traits
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -449,8 +450,8 @@ class ProbtrackxInputSpec(FSLCommandInputSpec):
                      'volumes, or freesurfer label file',argstr='-x %s', mandatory=True)	
     mode	= traits.Str(desc='options: simple (single seed voxel), seedmask (mask of seed voxels),'+
                      'twomask_symm (two bet binary masks) ', argstr='--mode=%s')                             
-    targetmasks	= File(exits=True,desc='file containing a list of target masks - '+
-                       'required for seeds_to_targets classification', argstr='--targetmasks=%s')    
+    targetmasks	= InputMultiPath(File(exits=True),desc='list of target masks - '+
+                       'required for seeds_to_targets classification', argstr='--targetmasks=targets.txt')    
     mask2	=File(exists=True,desc='second bet binary mask (in diffusion space) in twomask_symm mode',
                 argstr='--mask2=%s')
     waypoints	= File(exists=True, desc='waypoint mask or ascii list of waypoint masks - '+
@@ -535,6 +536,13 @@ class Probtrackx(FSLCommand):
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.samplesbasename):
             self.inputs.samplesbasename = os.path.join(self.inputs.bpxdirectory,'merged')
+            
+        if isdefined(self.inputs.targetmasks):
+            f = open("targets.txt","w")
+            for target in self.inputs.targetmasks:
+                f.write("%s\n"%target)
+            f.close()
+            
         return super(Probtrackx, self)._run_interface(runtime)
     
     def _list_outputs(self):        
