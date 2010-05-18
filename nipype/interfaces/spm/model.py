@@ -15,9 +15,9 @@ import numpy as np
 import scipy.io as sio
 
 # Local imports
-from nipype.interfaces.spm.base import SPMCommand, SPMCommandInputSpec
-from nipype.interfaces.base import Bunch, traits,\
+from nipype.interfaces.base import Bunch, traits, \
     TraitedSpec, File, Directory, OutputMultiPath, InputMultiPath
+from nipype.interfaces.spm.base import SPMCommand, SPMCommandInputSpec
 from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (filename_to_list, list_to_filename,
                                     loadflat)
@@ -119,34 +119,39 @@ class Level1Design(SPMCommand):
 
     Examples
     --------
-    
+    >>> level1design = spm.Level1Design()
+    >>> level1design.inputs.timing_units = 'secs'
+    >>> level1design.inputs.interscan_interval = '2.5'
+    >>> level1design.inputs.bases = {'hrf':{'derivs': [0,0]}}
+    >>> level1design.inputs.session_info = 'session_info.npz'
+    >>> level1design.run()
     """
-    
+
     input_spec = Level1DesignInputSpec
     output_spec = Level1DesignOutputSpec
-    
+
     _jobtype = 'stats'
     _jobname = 'fmri_spec'
-        
+
     def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
         """
         if opt in ['spmmat_dir', 'mask_image']:
-            return np.array([str(val)],dtype=object)
+            return np.array([str(val)], dtype=object)
         if opt in ['session_info', 'factor_info']:
-            data = loadflat(val,opt)
-            if isinstance(data[opt],dict):
+            data = loadflat(val, opt)
+            if isinstance(data[opt], dict):
                 return [data[opt]]
             else:
                 return data[opt]
         return val
-    
+
     def _parse_inputs(self):
         """validate spm realign options if set to None ignore
         """
         einputs = super(Level1Design, self)._parse_inputs(skip=('mask_threshold'))
         if not isdefined(self.inputs.spmmat_dir):
-            einputs[0]['dir'] = np.array([str(os.getcwd())],dtype=object)
+            einputs[0]['dir'] = np.array([str(os.getcwd())], dtype=object)
         return einputs
 
     def _make_matlab_command(self, content):
@@ -158,19 +163,19 @@ class Level1Design(SPMCommand):
             # SPM doesn't handle explicit masking properly, especially
             # when you want to use the entire mask image
             postscript = "load SPM;\n"
-            postscript += "SPM.xM.VM = spm_vol('%s');\n"%list_to_filename(self.inputs.mask_image)
+            postscript += "SPM.xM.VM = spm_vol('%s');\n" % list_to_filename(self.inputs.mask_image)
             postscript += "SPM.xM.I = 0;\n"
             postscript += "SPM.xM.T = [];\n"
-            postscript += "SPM.xM.TH = ones(size(SPM.xM.TH))*(%s);\n"%self.inputs.mask_threshold
+            postscript += "SPM.xM.TH = ones(size(SPM.xM.TH))*(%s);\n" % self.inputs.mask_threshold
             postscript += "SPM.xM.xs = struct('Masking', 'explicit masking only');\n"
             postscript += "save SPM SPM;\n"
         else:
             postscript = None
         return super(Level1Design, self)._make_matlab_command(content, postscript=postscript)
-        
+
     def _list_outputs(self):
         outputs = self._outputs().get()
-        spm = os.path.join(os.getcwd(),'SPM.mat')
+        spm = os.path.join(os.getcwd(), 'SPM.mat')
         outputs['spm_mat_file'] = spm
         return outputs
 
@@ -179,36 +184,41 @@ class EstimateModelInputSpec(SPMCommandInputSpec):
     spm_design_file = File(exists=True, field='spmmat', desc='absolute path to SPM.mat', copyfile=True)
     estimation_method = traits.Dict(traits.Enum('Classical', 'Bayesian2', 'Bayesian'), field='method',
                                      desc='Classical, Bayesian2, Bayesian (dict)')
-    flags = traits.Str(desc = 'optional arguments (opt)')
+    flags = traits.Str(desc='optional arguments (opt)')
 
 class EstimateModelOutputSpec(TraitedSpec):
     mask_image = File(exists=True, desc='binary mask to constrain estimation')
-    beta_images = OutputMultiPath(File(exists=True), desc ='design parameter estimates')
-    residual_image = File(exists=True, desc = 'Mean-squared image of the residuals')
-    RPVimage = File(exists=True, desc = 'Resels per voxel image')
-    spm_mat_file = File(exist=True, desc = 'Updated SPM mat file')
-               
+    beta_images = OutputMultiPath(File(exists=True), desc='design parameter estimates')
+    residual_image = File(exists=True, desc='Mean-squared image of the residuals')
+    RPVimage = File(exists=True, desc='Resels per voxel image')
+    spm_mat_file = File(exist=True, desc='Updated SPM mat file')
+
 class EstimateModel(SPMCommand):
     """Use spm_spm to estimate the parameters of a model
-
+    
+    Examples
+    --------
+    >>> est = spm.EstimateModel()
+    >>> est.inputs.spm_design_file = 'SPM.mat'
+    >>> est.run()
     """
     input_spec = EstimateModelInputSpec
     output_spec = EstimateModelOutputSpec
     _jobtype = 'stats'
     _jobname = 'fmri_est'
-    
+
     def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
         """
         if opt == 'spm_design_file':
-            return np.array([str(val)],dtype=object)
+            return np.array([str(val)], dtype=object)
         if opt == 'estimation_method':
             if isinstance(val, str):
-                return {'%s'%val:1}
+                return {'%s' % val:1}
             else:
                 return val
         return val
-    
+
     def _parse_inputs(self):
         """validate spm realign options if set to None ignore
         """
@@ -220,19 +230,19 @@ class EstimateModel(SPMCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         pth, _ = os.path.split(self.inputs.spm_design_file)
-        mask = os.path.join(pth,'mask.img')
+        mask = os.path.join(pth, 'mask.img')
         outputs['mask_image'] = mask
         spm = sio.loadmat(self.inputs.spm_design_file)
         betas = []
-        for vbeta in spm['SPM'][0,0].Vbeta[0]:
-            betas.append(str(os.path.join(pth,vbeta.fname[0])))
+        for vbeta in spm['SPM'][0, 0].Vbeta[0]:
+            betas.append(str(os.path.join(pth, vbeta.fname[0])))
         if betas:
             outputs['beta_images'] = betas
-        resms = os.path.join(pth,'ResMS.img')
+        resms = os.path.join(pth, 'ResMS.img')
         outputs['residual_image'] = resms
-        rpv = os.path.join(pth,'RPV.img')
+        rpv = os.path.join(pth, 'RPV.img')
         outputs['RPVimage'] = rpv
-        spm = os.path.join(pth,'SPM.mat')
+        spm = os.path.join(pth, 'SPM.mat')
         outputs['spm_mat_file'] = spm
         return outputs
 
@@ -259,12 +269,12 @@ class EstimateContrastInputSpec(SPMCommandInputSpec):
                                                                           traits.List(traits.Str),
                                                                           traits.List(traits.Float),
                                                                           traits.List(traits.Float)))))),
-        desc="""List of contrasts with each contrast being a list of the form -
-    [('name', 'stat', [condition list], [weight list], [session list])]. if
-    session list is None or not provided, all sessions are used. For F
-    contrasts, the condition list should contain previously defined
-    T-contrasts.""")
-    beta_images = InputMultiPath(File(exists=True), desc = 'Parameter estimates of the design matrix', copyfile=False)
+        desc="""List of contrasts with each contrast being a list of the form:
+            [('name', 'stat', [condition list], [weight list], [session list])]. if
+            session list is None or not provided, all sessions are used. For F
+            contrasts, the condition list should contain previously defined
+            T-contrasts.""")
+    beta_images = InputMultiPath(File(exists=True), desc='Parameter estimates of the design matrix', copyfile=False)
     residual_image = File(exists=True, desc='Mean-squared image of the residuals', copyfile=False)
     ignore_derivs = traits.Bool(True, desc='ignore derivatives for estimation', usedefault=True)
 
@@ -273,7 +283,7 @@ class EstimateContrastOutputSpec(TraitedSpec):
     spmT_images = OutputMultiPath(File(exists=True), desc='stat images from a t-contrast')
     ess_images = OutputMultiPath(File(exists=True), desc='contrast images from an F-contrast')
     spmF_images = OutputMultiPath(File(exists=True), desc='stat images from an F-contrast')
-    spm_mat_file = File(exist=True, desc = 'Updated SPM mat file')
+    spm_mat_file = File(exist=True, desc='Updated SPM mat file')
 
 class EstimateContrast(SPMCommand):
     """use spm_contrasts to estimate contrasts of interest
@@ -289,31 +299,39 @@ class EstimateContrast(SPMCommand):
 
     Examples
     --------
+    >>> import nipype.interfaces.spm as spm
+    >>> est = spm.EstimateContrast()
+    >>> est.inputs.spm_design_file = 'SPM.mat'
+    >>> cont1 = ('Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5])
+    >>> cont2 = ('Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1])
+    >>> contrasts = [cont1,cont2]
+    >>> est.inputs.contrasts = contrasts
+    >>> est.run()
     
     """
-    
+
     input_spec = EstimateContrastInputSpec
     output_spec = EstimateContrastOutputSpec
     _jobtype = 'stats'
     _jobname = 'con'
-    
+
     def _make_matlab_command(self, _):
         """validates spm options and generates job structure
         """
         contrasts = []
         cname = []
-        for i,cont in enumerate(self.inputs.contrasts):
-            cname.insert(i,cont[0])
-            contrasts.insert(i,Bunch(name=cont[0],
+        for i, cont in enumerate(self.inputs.contrasts):
+            cname.insert(i, cont[0])
+            contrasts.insert(i, Bunch(name=cont[0],
                                      stat=cont[1],
                                      conditions=cont[2],
                                      weights=None,
                                      sessions=None))
-            if len(cont)>=4:
+            if len(cont) >= 4:
                 contrasts[i].weights = cont[3]
-            if len(cont)>=5:
+            if len(cont) >= 5:
                 contrasts[i].sessions = cont[4]
-        script  = "% generated by nipype.interfaces.spm\n"
+        script = "% generated by nipype.interfaces.spm\n"
         script += "spm_defaults;\n"
         script += "jobs{1}.stats{1}.con.spmmat  = {'%s'};\n" % self.inputs.spm_mat_file
         script += "load(jobs{1}.stats{1}.con.spmmat{:});\n"
@@ -331,65 +349,68 @@ class EstimateContrast(SPMCommand):
         script += "t1 = regexp(names,pat1,'tokens');\n"
         script += "for i0=1:numel(t),condnames{i0}='';condsess(i0)=0;if ~isempty(t{i0}{1}),condnames{i0} = t{i0}{1}{1};condsess(i0)=str2num(t1{i0}{1}{1});end;end;\n"
         # BUILD CONTRAST SESSION STRUCTURE
-        for i,contrast in enumerate(contrasts):
+        for i, contrast in enumerate(contrasts):
             if contrast.stat == 'T':
-                script += "consess{%d}.tcon.name   = '%s';\n" % (i+1,contrast.name)
-                script += "consess{%d}.tcon.convec = zeros(1,numel(names));\n" % (i+1)
-                for c0,cond in enumerate(contrast.conditions):
+                script += "consess{%d}.tcon.name   = '%s';\n" % (i + 1, contrast.name)
+                script += "consess{%d}.tcon.convec = zeros(1,numel(names));\n" % (i + 1)
+                for c0, cond in enumerate(contrast.conditions):
                     script += "idx = strmatch('%s',condnames,'exact');\n" % (cond)
                     if contrast.sessions:
-                        for sno,sw in enumerate(contrast.sessions):
-                            script += "sidx = find(condsess(idx)==%d);\n" % (sno+1)
-                            script += "consess{%d}.tcon.convec(idx(sidx)) = %f;\n" % (i+1,sw*contrast.weights[c0])
+                        for sno, sw in enumerate(contrast.sessions):
+                            script += "sidx = find(condsess(idx)==%d);\n" % (sno + 1)
+                            script += "consess{%d}.tcon.convec(idx(sidx)) = %f;\n" % (i + 1, sw * contrast.weights[c0])
                     else:
-                        script += "consess{%d}.tcon.convec(idx) = %f;\n" % (i+1,contrast.weights[c0])
+                        script += "consess{%d}.tcon.convec(idx) = %f;\n" % (i + 1, contrast.weights[c0])
             elif contrast.stat == 'F':
-                script += "consess{%d}.fcon.name   =  '%s';\n" % (i+1,contrast.name)
-                for cl0,fcont in enumerate(contrast.conditions):
+                script += "consess{%d}.fcon.name   =  '%s';\n" % (i + 1, contrast.name)
+                for cl0, fcont in enumerate(contrast.conditions):
                     tidx = cname.index(fcont[0])
-                    script += "consess{%d}.fcon.convec{%d} = consess{%d}.tcon.convec;\n" % (i+1,cl0+1,tidx+1)
+                    script += "consess{%d}.fcon.convec{%d} = consess{%d}.tcon.convec;\n" % (i + 1, cl0 + 1, tidx + 1)
             else:
                 raise Exception("Contrast Estimate: Unknown stat %s for " \
                                     "contrast %d" % (contrast.stat, i))
         script += "jobs{1}.stats{1}.con.consess = consess;\n"
-        script += "if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');jobs=spm_jobman('spm5tospm8',{jobs});end\n" 
+        script += "if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');jobs=spm_jobman('spm5tospm8',{jobs});end\n"
         script += "spm_jobman('run',jobs);"
         return script
-        
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         pth, _ = os.path.split(self.inputs.spm_mat_file)
         spm = sio.loadmat(self.inputs.spm_mat_file)
         con_images = []
         spmT_images = []
-        for con in spm['SPM'][0,0].xCon[0]:
-            con_images.append(str(os.path.join(pth,con.Vcon[0,0].fname[0])))
-            spmT_images.append(str(os.path.join(pth,con.Vspm[0,0].fname[0])))
+        for con in spm['SPM'][0, 0].xCon[0]:
+            con_images.append(str(os.path.join(pth, con.Vcon[0, 0].fname[0])))
+            spmT_images.append(str(os.path.join(pth, con.Vspm[0, 0].fname[0])))
         if con_images:
             outputs['con_images'] = con_images
             outputs['spmT_images'] = spmT_images
-        ess = glob(os.path.join(pth,'ess*.img'))
-        if len(ess)>0:
+        ess = glob(os.path.join(pth, 'ess*.img'))
+        if len(ess) > 0:
             outputs['ess_images'] = sorted(ess)
-        spmf = glob(os.path.join(pth,'spmF*.img'))
-        if len(spmf)>0:
+        spmf = glob(os.path.join(pth, 'spmF*.img'))
+        if len(spmf) > 0:
             outputs['spmF_images'] = sorted(spmf)
         outputs['spm_mat_file'] = self.inputs.spm_mat_file
         return outputs
 
 class OneSampleTTestInputSpec(SPMCommandInputSpec):
-    con_images = InputMultiPath(File(exist=True, desc = 'List of contrast images'), mandatory=True)
-    
+    con_images = InputMultiPath(File(exist=True, desc='List of contrast images'), mandatory=True)
+
 class OneSampleTTestOutputSpec(TraitedSpec):
-    con_images = OutputMultiPath(File(exist=True, desc = 'contrast images from a t-contrast'))
-    spmT_images = OutputMultiPath(File(exist=True, desc = 'stat images from a t-contrast'))
+    con_images = OutputMultiPath(File(exist=True, desc='contrast images from a t-contrast'))
+    spmT_images = OutputMultiPath(File(exist=True, desc='stat images from a t-contrast'))
 
 class OneSampleTTest(SPMCommand):
     """use spm to perform a one-sample ttest on a set of images
 
     Examples
     --------
-    
+    >>> import nipype.interfaces.spm as spm
+    >>> ttest = spm.OneSampleTTest()
+    >>> ttest.inputs.con_images = ['cont1.nii', 'cont2.nii']
+    >>> ttest.run()
     """
     input_spec = OneSampleTTestInputSpec
     output_spec = OneSampleTTestOutputSpec
@@ -399,33 +420,33 @@ class OneSampleTTest(SPMCommand):
         """validates spm options and generates job structure
         """
         cwd = os.getcwd()
-        script  = "% generated by nipype.interfaces.spm\n"
+        script = "% generated by nipype.interfaces.spm\n"
         script += "spm_defaults;\n\n"
         script += "% Setup Design;\n"
         script += "jobs{1}.stats{1}.factorial_design.dir  = {'%s'};\n" % cwd
         script += "jobs{1}.stats{1}.factorial_design.des.t1.scans = {};\n"
         for f in filename_to_list(self.inputs.con_images):
             script += "jobs{1}.stats{1}.factorial_design.des.t1.scans{end+1} = '%s';\n" % f
-        (_,fname) = os.path.split(f)
-        (conname,_) = os.path.splitext(fname)
+        (_, fname) = os.path.split(f)
+        (conname, _) = os.path.splitext(fname)
         script += "\n% Estimate Model;\n"
-        script += "jobs{2}.stats{1}.fmri_est(1).spmmat = {'%s'};\n\n" % os.path.join(cwd,'SPM.mat')
+        script += "jobs{2}.stats{1}.fmri_est(1).spmmat = {'%s'};\n\n" % os.path.join(cwd, 'SPM.mat')
         script += "% Estimate Contrast;\n"
-        script += "jobs{3}.stats{1}.con.spmmat = {'%s'};\n"  % os.path.join(cwd,'SPM.mat')
+        script += "jobs{3}.stats{1}.con.spmmat = {'%s'};\n" % os.path.join(cwd, 'SPM.mat')
         script += "jobs{3}.stats{1}.con.consess{1}.tcon.name = '%s';\n" % conname
         script += "jobs{3}.stats{1}.con.consess{1}.tcon.convec = [1];\n"
-        script += "if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');jobs=spm_jobman('spm5tospm8',{jobs});end\n" 
+        script += "if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');jobs=spm_jobman('spm5tospm8',{jobs});end\n"
         script += "spm_jobman('run',jobs);\n"
         return script
-        
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         pth = os.getcwd()
-        con = glob(os.path.join(pth,'con*.img'))
-        if len(con)>0:
+        con = glob(os.path.join(pth, 'con*.img'))
+        if len(con) > 0:
             outputs['con_images'] = sorted(con)
-        spmt = glob(os.path.join(pth,'spmT*.img'))
-        if len(spmt)>0:
+        spmt = glob(os.path.join(pth, 'spmT*.img'))
+        if len(spmt) > 0:
             outputs['spmT_images'] = sorted(spmt)
         return outputs
 
@@ -451,7 +472,13 @@ class TwoSampleTTest(SPMCommand):
     
     Examples
     --------
-    
+    >>> import nipype.interfaces.spm as spm
+    >>> ttest = spm.TwoSampleTTest()
+    >>> ttest.inputs.images_group1 = ['cont1.nii', 'cont2.nii']
+    >>> ttest.inputs.images_group2 = ['cont1a.nii', 'cont2a.nii']
+    >>> ttest.dependent = False
+    >>> ttest.unequal_variance = True
+    >>> ttest.run()
     """
 
     _jobtype = 'stats'
@@ -529,11 +556,11 @@ class MultipleRegressionInputSpec(SPMCommandInputSpec):
                                                                           traits.List(traits.Str),
                                                                           traits.List(traits.Float),
                                                                           traits.List(traits.Float)))))),
-                            desc="""List of contrasts with each contrast being a list of the form -
-[('name', 'stat', [condition list], [weight list], [session list])]. if
-session list is None or not provided, all sessions are used. For F
-contrasts, the condition list should contain previously defined
-T-contrasts.""", mandatory=True)
+                            desc="""List of contrasts with each contrast being a list of the form:
+            [('name', 'stat', [condition list], [weight list], [session list])]. if
+            session list is None or not provided, all sessions are used. For F
+            contrasts, the condition list should contain previously defined
+            T-contrasts.""", mandatory=True)
     include_intercept = traits.Bool(True, desc='Include intercept in model', usedefault=True)
 
 class MultipleRegressionOutputSpec(TraitedSpec):
@@ -555,7 +582,7 @@ class MultipleRegression(SPMCommand):
     >>> mreg.inputs.covariates = covariates
     >>> mreg.inputs.images = ['subj1con1.img', 'subj2con1.img']
     >>> mreg.inputs.contrasts = [['reg2 > reg1', 'T', ['reg1','reg2'], [-1,1]]]
-   
+    >>> mreg.run()
     """
 
     _jobtype = 'stats'
@@ -656,10 +683,20 @@ class ThresholdOutputSpec(TraitedSpec):
 
 
 class Threshold(SPMCommand):
-    '''
-    Topological FDR thresholding based on cluster extent/size. Smoothness is
+    '''Topological FDR thresholding based on cluster extent/size. Smoothness is
     estimated from GLM residuals but is assumed to be the same for all of the
     voxels.
+    
+    Examples
+    --------
+
+    >>> from nipype.interfaces.spm import Threshold
+    >>> thresh = Threshold()
+    >>> thresh.inputs.spm_mat_file = 'SPM.mat'
+    >>> thresh.inputs.spmT_images = 'spmT_0001.img'
+    >>> thresh.inputs.contrast_index = 1
+    >>> thresh.inputs.extent_fdr_p_threshold = 0.05
+    >>> thresh.inputs.run()
     '''
     input_spec = ThresholdInputSpec
     output_spec = ThresholdOutputSpec
