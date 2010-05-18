@@ -76,6 +76,9 @@ class SliceTiming(SPMCommand):
     
     """
 
+    input_spec = SliceTimingInputSpec
+    output_spec = SliceTimingOutputSpec
+    
     _jobtype = 'temporal'
     _jobname = 'st'
 
