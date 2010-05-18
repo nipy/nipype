@@ -16,7 +16,7 @@ from glob import glob
 import warnings
 
 from nipype.utils.filemanip import fname_presuffix, list_to_filename, FileNotFoundError
-from nipype.interfaces.base import NEW_CommandLine, traits, TraitedSpec, CommandLineInputSpec, OptMapCommand
+from nipype.interfaces.base import CommandLine, traits, TraitedSpec, CommandLineInputSpec, OptMapCommand
 from nipype.utils.misc import isdefined
 
 from copy import deepcopy
@@ -260,7 +260,7 @@ class Info(object):
            Version number as string or None if AFNI not found
 
         """
-        clout = NEW_CommandLine(command='afni_vcheck').run()
+        clout = CommandLine(command='afni_vcheck').run()
         out = clout.runtime.stdout
         return out.split('\n')[1]
 
@@ -320,7 +320,7 @@ class AFNITraitedSpec(CommandLineInputSpec):
                               desc = 'AFNI output filetype')
 
 
-class AFNICommand(NEW_CommandLine):
+class AFNICommand(CommandLine):
     """General support for AFNI commands. Every AFNI command accepts 'outputtype' input. For example:
     afni.Threedsetup(outputtype='NIFTI_GZ')
     """

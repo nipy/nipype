@@ -22,7 +22,7 @@ import os
 import warnings
 
 from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.base import NEW_CommandLine, traits, CommandLineInputSpec
+from nipype.interfaces.base import CommandLine, traits, CommandLineInputSpec
 from nipype.utils.misc import isdefined
 
 warn = warnings.warn
@@ -53,14 +53,14 @@ class Info(object):
         """
         # find which fsl being used....and get version from
         # /path/to/fsl/etc/fslversion
-        clout = NEW_CommandLine(command='which', args='fsl').run()
+        clout = CommandLine(command='which', args='fsl').run()
 
         if clout.runtime.returncode is not 0:
             return None
 
         out = clout.runtime.stdout
         basedir = os.path.split(os.path.split(out)[0])[0]
-        clout = NEW_CommandLine(command='cat', args='%s/etc/fslversion' % (basedir)).run()
+        clout = CommandLine(command='cat', args='%s/etc/fslversion' % (basedir)).run()
         out = clout.runtime.stdout
         return out.strip('\n')
 
@@ -118,7 +118,7 @@ class FSLCommandInputSpec(CommandLineInputSpec):
     outputtype =  traits.Enum('NIFTI', Info.ftypes.keys(),
                               desc='FSL output type')
     
-class FSLCommand(NEW_CommandLine):
+class FSLCommand(CommandLine):
     """General support for FSL commands. Every FSL command accepts 'outputtype'
     input. For example:
     fsl.ExtractRoi(tmin=42, tsize=1, outputtype='NIFTI')"""

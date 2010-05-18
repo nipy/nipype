@@ -19,7 +19,7 @@ import enthought.traits.api as traits
 from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
 from nipype.interfaces.traits import Undefined
 
-from nipype.utils.filemanip import md5, hash_infile, FileNotFoundError,\
+from nipype.utils.filemanip import md5, hash_infile, FileNotFoundError, \
     hash_timestamp
 from nipype.utils.misc import is_container
 from enthought.traits.trait_errors import TraitError
@@ -130,7 +130,7 @@ class Bunch(object):
         outstr.append(')')
         return ''.join(outstr)
 
-    def _hash_infile(self,adict, key):
+    def _hash_infile(self, adict, key):
         # Inject file hashes into adict[key]
         stuff = adict[key]
         if not is_container(stuff):
@@ -149,7 +149,7 @@ class Bunch(object):
                 md5hex = md5obj.hexdigest()
             else:
                 md5hex = None
-            file_list.append((afile,md5hex ))
+            file_list.append((afile, md5hex))
         return file_list
 
     def _get_bunch_hash(self):
@@ -178,12 +178,12 @@ class Bunch(object):
             if is_container(val):
                 # XXX - SG this probably doesn't catch numpy arrays
                 # containing embedded file names either. 
-                if isinstance(val,dict):
+                if isinstance(val, dict):
                     # XXX - SG should traverse dicts, but ignoring for now
                     item = None
                 else:
                     if len(val) == 0:
-                        raise AttributeError('%s attribute is empty'%key)
+                        raise AttributeError('%s attribute is empty' % key)
                     item = val[0]
             else:
                 item = val
@@ -206,7 +206,7 @@ class Bunch(object):
 
     def _get_hashval(self):
         return self._get_bunch_hash()
-            
+
     def __pretty__(self, p, cycle):
         '''Support for the pretty module
         
@@ -224,7 +224,7 @@ class Bunch(object):
                 p.pretty(v)
                 first = False
             p.end_group(6, ')')
-    
+
 
 class InterfaceResult(object):
     """Object that contains the results of running a particular Interface.
@@ -257,393 +257,6 @@ class InterfaceResult(object):
         self.runtime = runtime
         self.outputs = outputs
 
-#
-# Original base classes
-#
-class Interface(object):
-    """This is the template for Interface objects.
-
-    It provides no functionality.  It defines the necessary attributes
-    and methods all Interface objects should have.
-
-    Everything in inputs should also be a possible (explicit?) argument to
-    .__init__()
-    """
-
-    def __init__(self, *args, **inputs):
-        """Initialize command with given args and inputs."""
-        raise NotImplementedError
-
-    def run(self, cwd=None):
-        """Execute the command."""
-        raise NotImplementedError
-
-    def _runner(self):
-        """Performs the call to execute the command."""
-        raise NotImplementedError
-
-    def _populate_inputs(self):
-        """Initialize the inputs Bunch attributes."""
-        raise NotImplementedError
-
-    def aggregate_outputs(self):
-        """Called to populate outputs
-        
-        Currently, search for discussion of this on private e-mails between Dav
-        and Satra (ugh!).  This needs to get in here!"""
-        raise NotImplementedError
-
-
-class CommandLine(Interface):
-    """Encapsulate a command-line function along with the arguments and options.
-
-    Provides a convenient mechanism to build a command line with it's
-    arguments and options incrementally.  A `CommandLine` object can
-    be reused, and it's arguments and options updated.  The
-    `CommandLine` class is the base class for all nipype.interfaces
-    classes.
-
-    Parameters
-    ----------
-    args : string
-        A string representing the command and it's arguments.
-    inputs : mapping
-        key value pairs that populate a Bunch()
-
-
-    Attributes
-    ----------
-    args : list
-        The command, it's arguments and options store in a list of strings.
-        ['ls', '-al']
-        These are added to command line string first
-    inputs : Bunch of key,value inputs
-        The only valid key for CommandLine is args
-        Other keys are not recognized in CommandLine, and
-        require parsing in subclasses
-        if there are args=['ls','-al'] 
-        These are added to command line string before simple positional args
-    Returns
-    -------
-    
-    cmd : CommandLine
-        A `CommandLine` object that can be run and/or updated.
-
-    Examples
-    --------
-    >>> from nipype.interfaces.base import CommandLine
-    >>> cmd = CommandLine('echo')
-    >>> cmd.cmdline
-    'echo'
-    >>> res = cmd.run(None, 'foo')
-    >>> print res.runtime.stdout
-    foo
-    <BLANKLINE>
-
-    You could pass arguments in the following ways and all result in
-    the same command.
-    >>> lscmd = CommandLine('ls', '-l', '-t')
-    >>> lscmd.cmdline
-    'ls -l -t'
-    >>> lscmd = CommandLine('ls -l -t') 
-    >>> lscmd.cmdline
-    'ls -l -t'
-    >>> lscmd = CommandLine(args=['ls', '-l', '-t'])
-    >>> lscmd.cmdline
-    'ls -l -t'
-
-    Notes
-    -----
-    
-    When subclassing CommandLine, you will generally override at least:
-        _compile_command, and run
-
-    Also quite possibly __init__ but generally not  _runner
-
-    """
-
-    def __init__(self, *args, **inputs):
-        self._populate_inputs()
-        self._update(*args, **inputs)
-        self._environ = {}
-
-    def _update(self, *args, **inputs):
-        """Update the `self.inputs` Bunch.
-
-        Updates the Bunch dictionary `self.inputs` with values from
-        `args` and `inputs`.  Positional arguments in `args` will be
-        appended to self.inputs.args if it exists.  Keyword arguments
-        in `inputs` will be added to the `self.inputs` dictionary.  As
-        with any dictionary, if the key already exists in
-        `self.inputs` the new value will overwrite the previous
-        values.  For example, if inputs['args'] is passed it, it will
-        overwrite the previous value of `self.inputs.args`.
-
-        Parameters
-        ----------
-        args : list
-            List of parameters to be assigned to self.inputs.args
-        inputs : dict
-            Dictionary whose items are used to update the self.inputs
-            dictionary.
-
-        Examples
-        --------
-        >>> from nipype.interfaces.base import CommandLine
-        >>> cmd = CommandLine('echo')
-        >>> cmd._update('foo', 'bar', new_input_var='whatever')
-        >>> cmd.inputs
-        Bunch(args=['echo', 'foo', 'bar'], new_input_var='whatever')
-
-        """
-
-        try:
-            # if inputs['args'] exists and is splittable (thus, not a
-            # list), split it.
-            # So if inputs['args'] == 'foo bar
-            # then after this block:
-            # inputs['args'] == ['foo', 'bar']
-            if hasattr(inputs['args'], 'split'):
-                inputs['args']  = inputs['args'].split()
-        except KeyError:
-            pass
-
-        self.inputs.update(inputs)
-
-        if args:
-            # Note: .get() returns None if key doesn't exist
-            if self.inputs.get('args') is not None:
-                self.inputs.args.extend(list(args))
-            else:
-                self.inputs.args = list(args)
-
-    def run(self, cwd=None, *args, **inputs):
-        """Execute the command.
-        
-        Parameters
-        ----------
-        cwd : path
-            Where do we effectively execute this command? (default: os.getcwd())
-        args : list
-            additional arguments that will be appended to inputs.args
-        inputs : mapping
-            additional key,value pairs will update inputs
-            it will overwrite existing key, value pairs
-           
-        Returns
-        -------
-        results : InterfaceResult Object
-            A `Bunch` object with a copy of self in `interface`
-        
-        """
-        self._update(*args, **inputs) 
-            
-        return self._runner(cwd=cwd)
-
-    def _populate_inputs(self):
-        self.inputs = Bunch(args=None)
-
-    @property
-    def cmdline(self):
-        # This handles args like ['bet', '-f 0.2'] without crashing
-        return ' '.join(self.inputs.args)
-
-    def _runner(self, cwd=None):
-        """Run the command using subprocess.Popen.
-
-        Currently, shell is set to True, i.e., a shell parses the command line
-        
-        Arguments
-        ---------
-        cwd : str
-            default os.getcwd()
-        """
-        if cwd is None:
-            cwd = os.getcwd()
-        runtime = Bunch(cmdline=self.cmdline, cwd=cwd,
-                        stdout = None, stderr = None,
-                        returncode = None, duration = None,
-                        environ=deepcopy(os.environ.data),
-                        hostname = gethostname())
-        
-        t = time()
-        if hasattr(self, '_environ') and self._environ != None:
-            env = deepcopy(os.environ.data)
-            env.update(self._environ)
-            runtime.environ = env
-            proc  = subprocess.Popen(runtime.cmdline,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     shell=True,
-                                     cwd=cwd,
-                                     env=env)
-        else:
-            proc  = subprocess.Popen(runtime.cmdline,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     shell=True,
-                                     cwd=cwd)
-
-        runtime.stdout, runtime.stderr = proc.communicate()
-        runtime.duration = time()-t
-        runtime.returncode = proc.returncode
-
-        return InterfaceResult(deepcopy(self), runtime)
-
-    def get_input_info(self):
-        """ Provides information about file inputs to copy or link to cwd.
-        
-        Notes
-        -----
-        see `spm.Realign.get_input_info`
-            
-        """
-        return []
-    
-    
-class OptMapCommand(CommandLine):
-    '''Common FreeSurfer and FSL commands support'''
-    opt_map = {}
-
-    @property
-    def cmdline(self):
-        """validates fsl options and generates command line argument"""
-        allargs = self._parse_inputs()
-        allargs.insert(0, self.cmd)
-        return ' '.join(allargs)
-
-    def run(self):
-        """Execute the command.
-
-        Returns
-        -------
-        results : InterfaceResult
-            An :class:`nipype.interfaces.base.InterfaceResult` object
-            with a copy of self in `interface`
-
-        """
-        results = self._runner(cwd=os.getcwd())
-        if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
-
-        return results
-
-    def _parse_inputs(self, skip=()):
-        """Parse all inputs and format options using the opt_map format string.
-
-        Any inputs that are assigned (that are not None) are formatted
-        to be added to the command line.
-
-        Parameters
-        ----------
-        skip : tuple or list
-            Inputs to skip in the parsing.  This is for inputs that
-            require special handling, for example input files that
-            often must be at the end of the command line.  Inputs that
-            require special handling like this should be handled in a
-            _parse_inputs method in the subclass.
-
-        Returns
-        -------
-        allargs : list
-            A list of all inputs formatted for the command line.
-
-        """
-        allargs = []
-        inputs = sorted((k, v) for k, v in self.inputs.items()
-                            if v is not None and k not in skip)
-        for opt, value in inputs:
-            if opt == 'args':
-                # XXX Where is this used?  Is self.inputs.args still
-                # used?  Or is it leftover from the original design of
-                # base.CommandLine?
-                allargs.extend(value)
-                continue
-            try:
-                argstr = self.opt_map[opt]
-                if is_container(argstr):
-                    # The value in opt_map may be a tuple whose first
-                    # element is the format string and second element
-                    # a one-line docstring.  This docstring will
-                    # become the desc field in the traited version of
-                    # the code.
-                    argstr = argstr[0]
-                if argstr.find('%') == -1:
-                    # Boolean options have no format string.  Just
-                    # append options if True.
-                    if value is True:
-                        allargs.append(argstr)
-                    elif value is not False:
-                        raise TypeError('Boolean option %s set to %s' %
-                                         (opt, str(value)) )
-                elif isinstance(value, list) and self.__class__.__name__ == 'Fnirt':
-                    # XXX Hack to deal with special case where some
-                    # parameters to Fnirt can have a variable number
-                    # of arguments.  Splitting the argument string,
-                    # like '--infwhm=%d', then add as many format
-                    # strings as there are values to the right-hand
-                    # side.
-                    argparts = argstr.split('=')
-                    allargs.append(argparts[0] + '=' +
-                                   ','.join([argparts[1] % y for y in value]))
-                elif isinstance(value, list):
-                    allargs.append(argstr % tuple(value))
-                else:
-                    # Append options using format string.
-                    allargs.append(argstr % value)
-            except TypeError, err:
-                msg = 'Error when parsing option %s in class %s.\n%s' % \
-                    (opt, self.__class__.__name__, err.message)
-                warn(msg)
-            except KeyError:
-                warn("Option '%s' is not supported!" % (opt))
-                raise
-
-        return allargs
-
-    def _populate_inputs(self):
-        self.inputs = Bunch((k,None) for k in self.opt_map.keys())
-
-    def inputs_help(self):
-        """Print command line documentation for the command."""
-        from nipype.utils.docparse import get_doc
-        print get_doc(self.cmd, self.opt_map, '-h')
-
-    def outputs_help(self):
-        """Print the help for outputs."""
-        # XXX This function does the same for FSL and SPM, consider
-        # moving to a top-level class.
-        print self.outputs.__doc__
-
-    def aggregate_outputs(self):
-        """Create a Bunch which contains all possible files generated
-        by running the interface.  Some files are always generated, others
-        depending on which ``inputs`` options are set.
-
-        Returns
-        -------
-        outputs : Bunch object
-            Bunch object containing all possible files generated by
-            interface object.
-
-            If None, file was not generated
-            Else, contains path, filename of generated outputfile
-
-        """
-        raise NotImplementedError(
-                'Subclasses of OptMapCommand must implement aggregate_outputs')
-
-    def outputs(self):
-        """Virtual function"""
-        raise NotImplementedError(
-                'Subclasses of OptMapCommand must implement outputs')
-
-#####################################################################
-#
-# New base classes
-#
-#####################################################################
-
 class BaseTraitedSpec(traits.HasTraits):
     """Provide a few methods necessary to support nipype interface api
 
@@ -663,7 +276,7 @@ class BaseTraitedSpec(traits.HasTraits):
     XXX Reconsider this in the long run, but it seems like the best
     solution to move forward on the refactoring.
     """
-    
+
     def __init__(self, **kwargs):
         """ Initialize handlers and inputs"""
         # NOTE: In python 2.6, object.__init__ no longer accepts input
@@ -696,11 +309,11 @@ class BaseTraitedSpec(traits.HasTraits):
     def _generate_handlers(self):
         # Find all traits with the 'xor' metadata and attach an event
         # handler to them.
-        has_xor = dict(xor = lambda t : t is not None)
+        has_xor = dict(xor=lambda t : t is not None)
         xors = self.trait_names(**has_xor)
         for elem in xors:
             self.on_trait_change(self._xor_warn, elem)
-        has_requires = dict(requires = lambda t : t is not None)
+        has_requires = dict(requires=lambda t : t is not None)
         requires = self.trait_names(**has_requires)
         for elem in requires:
             self.on_trait_change(self._requires_warn, elem)
@@ -753,8 +366,8 @@ class BaseTraitedSpec(traits.HasTraits):
                 elif config.get('execution', 'hash_method').lower() == 'content':
                     hash = hash_infile(afile)
                 else:
-                    raise Exception("Unknown hash method: %s"%config.get('execution', 'hash_method'))
-            file_list.append((afile, hash ))
+                    raise Exception("Unknown hash method: %s" % config.get('execution', 'hash_method'))
+            file_list.append((afile, hash))
         return file_list
 
     def get(self, **kwargs):
@@ -770,7 +383,7 @@ class BaseTraitedSpec(traits.HasTraits):
             if isinstance(val, TraitListObject):
                 out[key] = val[:]
         return out
-                
+
     #@traits.cached_property
     @property
     def hashval(self):
@@ -814,7 +427,7 @@ class BaseTraitedSpec(traits.HasTraits):
         # dictionary.
         sorted_dict = str(sorted(dict_nofilename.items()))
         return (dict_withhash, md5(sorted_dict).hexdigest())
-    
+
     def _get_hashval(self):
         return self.hashval
 
@@ -846,7 +459,7 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         dup = self.clone_traits(memo=memo)
         dup.set(**dup_dict)
         return dup
-    
+
 class TraitedSpec(BaseTraitedSpec):
     """ Create a subclass with strict traits.
 
@@ -854,7 +467,7 @@ class TraitedSpec(BaseTraitedSpec):
     """
     _ = traits.Disallow
 
-class NEW_Interface(object):
+class Interface(object):
     """This is an abstract defintion for Interface objects.
 
     It provides no functionality.  It defines the necessary attributes
@@ -874,12 +487,12 @@ class NEW_Interface(object):
     def help(cls):
         """ Prints class help"""
         raise NotImplementedError
-        
+
     @classmethod
     def _inputs_help(cls):
         """ Prints inputs help"""
         raise NotImplementedError
-    
+
     @classmethod
     def _outputs_help(cls):
         """ Prints outputs help"""
@@ -889,7 +502,7 @@ class NEW_Interface(object):
     def _outputs(cls):
         """ Initializes outputs"""
         raise NotImplementedError
-    
+
     def run(self):
         """Execute the command."""
         raise NotImplementedError
@@ -902,14 +515,14 @@ class NEW_Interface(object):
     def _list_outputs(self):
         """ List expected outputs"""
         raise NotImplementedError
-        
+
     def _get_filecopy_info(self):
         """ Provides information about file inputs to copy or link to cwd.
             Necessary for pipeline operation
         """
         raise NotImplementedError
 
-class NEW_BaseInterface(NEW_Interface):
+class BaseInterface(Interface):
     """Implements common interface functionality.
 
     Implements
@@ -946,7 +559,7 @@ class NEW_BaseInterface(NEW_Interface):
     def _inputs_help(cls):
         """ Prints description for input parameters
         """
-        helpstr = ['Inputs','------']
+        helpstr = ['Inputs', '------']
         opthelpstr = None
         manhelpstr = None
         if cls.input_spec is None:
@@ -959,7 +572,7 @@ class NEW_BaseInterface(NEW_Interface):
             xor = spec.xor
             requires = spec.requires
             if not manhelpstr:
-                manhelpstr = ['','Mandatory:']
+                manhelpstr = ['', 'Mandatory:']
             manhelpstr += [' %s: %s' % (name, desc)]
             if xor: # and name not in xor_done:
                 xor_done.extend(xor)
@@ -973,7 +586,7 @@ class NEW_BaseInterface(NEW_Interface):
             xor = spec.xor
             requires = spec.requires
             if not opthelpstr:
-                opthelpstr = ['','Optional:']
+                opthelpstr = ['', 'Optional:']
             opthelpstr += [' %s: %s' % (name, desc)]
             if spec.usedefault:
                 opthelpstr[-1] += ' (default=%s)' % spec.default
@@ -993,7 +606,7 @@ class NEW_BaseInterface(NEW_Interface):
     def _outputs_help(cls):
         """ Prints description for output parameters
         """
-        helpstr = ['Outputs','-------']
+        helpstr = ['Outputs', '-------']
         if cls.output_spec:
             for name, spec in sorted(cls.output_spec().traits(transient=None).items()):
                 helpstr += ['%s: %s' % (name, spec.desc)]
@@ -1017,7 +630,7 @@ class NEW_BaseInterface(NEW_Interface):
         info = []
         if cls.input_spec is None:
             return info
-        metadata = dict(copyfile = lambda t : t is not None)
+        metadata = dict(copyfile=lambda t : t is not None)
         for name, spec in sorted(cls.input_spec().traits(**metadata).items()):
             info.append(dict(key=name,
                              copy=spec.copyfile))
@@ -1034,7 +647,7 @@ class NEW_BaseInterface(NEW_Interface):
                     (self.__class__.__name__, name,
                      ', '.join(spec.requires), self.__class__.__name__)
                 raise ValueError(msg)
-            
+
     def _check_xor(self, spec, name, value):
         """ check if mutually exclusive inputs are satisfied
         """
@@ -1046,7 +659,7 @@ class NEW_BaseInterface(NEW_Interface):
                     (self.__class__.__name__, ', '.join(spec.xor),
                      self.__class__.__name__)
                 raise ValueError(msg)
-    
+
     def _check_mandatory_inputs(self):
         """ Raises an exception if a mandatory input is Undefined
         """
@@ -1067,7 +680,7 @@ class NEW_BaseInterface(NEW_Interface):
         """ Core function that executes interface
         """
         raise NotImplementedError
-    
+
     def run(self, **inputs):
         """Execute this interface.
 
@@ -1088,20 +701,20 @@ class NEW_BaseInterface(NEW_Interface):
         # initialize provenance tracking
         env = deepcopy(os.environ.data)
         runtime = Bunch(cwd=os.getcwd(),
-                        returncode = None,
-                        duration = None,
+                        returncode=None,
+                        duration=None,
                         environ=env,
-                        hostname = gethostname())
+                        hostname=gethostname())
         t = time()
         runtime = self._run_interface(runtime)
-        runtime.duration = time()-t
+        runtime.duration = time() - t
         results = InterfaceResult(deepcopy(self), runtime)
         if results.runtime.returncode is None:
             raise Exception('Returncode from an interface cannot be None')
         if results.runtime.returncode == 0:
             results.outputs = self.aggregate_outputs()
         return results
-    
+
     def _list_outputs(self):
         """ List the expected outputs
         """
@@ -1109,7 +722,7 @@ class NEW_BaseInterface(NEW_Interface):
             raise NotImplementedError
         else:
             return None
-    
+
     def aggregate_outputs(self):
         """ Collate expected outputs and check for existence
         """
@@ -1128,13 +741,13 @@ class NEW_BaseInterface(NEW_Interface):
                     else:
                         raise error
         return outputs
-    
+
 
 class CommandLineInputSpec(TraitedSpec):
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
     environ = traits.DictStrStr(desc='Environment variables', usedefault=True)
 
-class NEW_CommandLine(NEW_BaseInterface):
+class CommandLine(BaseInterface):
     """Implements functionality to interact with command line programs
     class must be instantiated with a command argument
 
@@ -1151,8 +764,8 @@ class NEW_CommandLine(NEW_BaseInterface):
     Examples
     --------
         
-    >>> from nipype.interfaces.base import NEW_CommandLine
-    >>> cli = NEW_CommandLine(command='ls')
+    >>> from nipype.interfaces.base import CommandLine
+    >>> cli = CommandLine(command='ls')
     >>> cli.inputs.args = '-al'
     >>> cli.cmdline
     'ls -al'
@@ -1166,9 +779,9 @@ class NEW_CommandLine(NEW_BaseInterface):
     """
 
     input_spec = CommandLineInputSpec
-        
+
     def __init__(self, command=None, **inputs):
-        super(NEW_CommandLine, self).__init__(**inputs)
+        super(CommandLine, self).__init__(**inputs)
         self._environ = None
         if not hasattr(self, '_cmd'):
             self._cmd = None
@@ -1176,7 +789,7 @@ class NEW_CommandLine(NEW_BaseInterface):
             raise Exception("Missing command")
         if command:
             self._cmd = command
-        try:    
+        try:
             display_var = config.get('execution', 'display_variable')
             self.inputs.environ['DISPLAY'] = display_var
         except NoOptionError:
@@ -1196,7 +809,7 @@ class NEW_CommandLine(NEW_BaseInterface):
         allargs.insert(0, self.cmd)
         return ' '.join(allargs)
 
-        
+
     def _run_interface(self, runtime):
         """Execute command via subprocess
 
@@ -1213,7 +826,7 @@ class NEW_CommandLine(NEW_BaseInterface):
         setattr(runtime, 'stderr', None)
         setattr(runtime, 'cmdline', self.cmdline)
         runtime.environ.update(self.inputs.environ)
-        proc  = subprocess.Popen(runtime.cmdline,
+        proc = subprocess.Popen(runtime.cmdline,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
                                  shell=True,
@@ -1229,7 +842,7 @@ class NEW_CommandLine(NEW_BaseInterface):
         Called when trait.genfile = True and trait is Undefined
         """
         raise NotImplementedError
-    
+
     def _format_arg(self, name, trait_spec, value):
         """A helper function for _parse_inputs
 
@@ -1264,14 +877,14 @@ class NEW_CommandLine(NEW_BaseInterface):
                 # repeatable option
                 # --id %d... will expand to
                 # --id 1 --id 2 --id 3 etc.,.
-                argstr = argstr.replace('...','')
+                argstr = argstr.replace('...', '')
                 return ' '.join([argstr % elt for elt in value])
             else:
                 return argstr % ' '.join(str(elt) for elt in value)
         else:
             # Append options using format string.
             return argstr % value
-            
+
     def _parse_inputs(self, skip=None):
         """Parse all inputs using the ``argstr`` format string in the Trait.
 
@@ -1287,7 +900,7 @@ class NEW_CommandLine(NEW_BaseInterface):
         all_args = []
         initial_args = {}
         final_args = {}
-        metadata=dict(argstr=lambda t : t is not None)
+        metadata = dict(argstr=lambda t : t is not None)
         for name, spec in sorted(self.inputs.traits(**metadata).items()):
             if skip and name in skip:
                 continue
@@ -1314,19 +927,19 @@ class NEW_CommandLine(NEW_BaseInterface):
 class MultiPath(traits.List):
     """ Abstract class - shared functionality of input and output MultiPath
     """
-    
+
     def validate(self, object, name, value):
-        if not isdefined(value) or (isinstance(value, list) and len(value)==0):
+        if not isdefined(value) or (isinstance(value, list) and len(value) == 0):
             return Undefined
         newvalue = value
         if not isinstance(value, list):
             newvalue = [value]
         value = super(MultiPath, self).validate(object, name, newvalue)
-        
+
         if len(value) > 0:
             return value
 
-        self.error( object, name, value )
+        self.error(object, name, value)
 
 class OutputMultiPath(MultiPath):
     """ Implements a user friendly traits that accepts one or more
@@ -1365,14 +978,14 @@ class OutputMultiPath(MultiPath):
         value = self.get_value(object, name)
         if len(value) == 0:
             return Undefined
-        elif len(value)==1:
+        elif len(value) == 1:
             return value[0]
         else:
             return value
 
     def set(self, object, name, value):
         self.set_value(object, name, value)
-        
+
 class InputMultiPath(MultiPath):
     """ Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the input version which 
@@ -1405,3 +1018,4 @@ class InputMultiPath(MultiPath):
     
     """
     pass
+

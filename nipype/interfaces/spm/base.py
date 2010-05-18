@@ -15,7 +15,7 @@ import numpy as np
 from scipy.io import savemat
 
 # Local imports
-from nipype.interfaces.base import NEW_BaseInterface, traits, TraitedSpec,\
+from nipype.interfaces.base import BaseInterface, traits, TraitedSpec,\
     InputMultiPath
 from nipype.utils.misc import isdefined
 from nipype.externals.pynifti import load
@@ -115,8 +115,8 @@ class SPMCommandInputSpec(TraitedSpec):
     mfile = traits.Bool(True, desc='Run m-code using m-file',
                           usedefault=True)
 
-class SPMCommand(NEW_BaseInterface):
-    """ Extends `NEW_BaseInterface` class to implement SPM specific interfaces.
+class SPMCommand(BaseInterface):
+    """ Extends `BaseInterface` class to implement SPM specific interfaces.
     """
     
     def __init__(self, **inputs):

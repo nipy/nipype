@@ -11,7 +11,7 @@ from nipype.utils.misc import package_check
 package_check('networkx', '1.0')
 import networkx as nx
 
-from nipype.interfaces.base import NEW_CommandLine
+from nipype.interfaces.base import CommandLine
 from nipype.utils.filemanip import fname_presuffix
 
 logger = logging.getLogger('workflow')
@@ -270,7 +270,7 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
     logger.info('Creating detailed dot file: %s'%outfname)
     _write_detailed_dot(graph, outfname)
     cmd = 'dot -Tpng -O %s' % outfname
-    res = NEW_CommandLine(cmd).run()
+    res = CommandLine(cmd).run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
     pklgraph = _create_pickleable_graph(graph, show_connectinfo)
@@ -281,7 +281,7 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
     nx.write_dot(pklgraph, outfname)
     logger.info('Creating dot file: %s' % outfname)
     cmd = 'dot -Tpng -O %s' % outfname
-    res = NEW_CommandLine(cmd).run()
+    res = CommandLine(cmd).run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
     if show:

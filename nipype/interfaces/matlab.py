@@ -5,7 +5,7 @@ import os
 
 from nipype.interfaces.base import CommandLineInputSpec, InputMultiPath
 from nipype.utils.misc import isdefined
-from nipype.interfaces.base import (NEW_CommandLine, traits, File, Directory)
+from nipype.interfaces.base import (CommandLine, traits, File, Directory)
 from nipype.utils.config import config
 
 class MatlabInputSpec(CommandLineInputSpec):
@@ -25,7 +25,7 @@ class MatlabInputSpec(CommandLineInputSpec):
                               desc='Name of file to write m-code to')
     paths   = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
 
-class MatlabCommand(NEW_CommandLine):
+class MatlabCommand(CommandLine):
     """Interface that runs matlab code
 
     >>> import nipype.interfaces.matlab as matlab

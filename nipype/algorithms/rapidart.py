@@ -19,7 +19,7 @@ import numpy as np
 from scipy import signal
 import scipy.io as sio
 
-from nipype.interfaces.base import (Bunch, InterfaceResult, NEW_BaseInterface,
+from nipype.interfaces.base import (Bunch, InterfaceResult, BaseInterface,
                                     traits, InputMultiPath, OutputMultiPath,
                                     TraitedSpec, File)
 from nipype.externals.pynifti import load, funcs
@@ -71,7 +71,7 @@ class ArtifactDetectOutputSpec(TraitedSpec):
     #mask_file = File(exists=True,
     #                 desc='generated or provided mask file')
 
-class ArtifactDetect(NEW_BaseInterface):
+class ArtifactDetect(BaseInterface):
     """Detects outliers in a functional imaging series depending on the
     intensity and motion parameters.  It also generates other statistics.
     """
@@ -354,7 +354,7 @@ class StimCorrOutputSpec(TraitedSpec):
     stimcorr_files = OutputMultiPath(File(exists=True),
                      desc='List of files containing correlation values')
 
-class StimulusCorrelation(NEW_BaseInterface):
+class StimulusCorrelation(BaseInterface):
     """Determines if stimuli are correlated with motion or intensity
     parameters.
 

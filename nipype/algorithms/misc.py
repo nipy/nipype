@@ -3,7 +3,7 @@ Created on 24 Feb 2010
 
 @author: filo
 '''
-from nipype.interfaces.base import NEW_BaseInterface,\
+from nipype.interfaces.base import BaseInterface,\
     traits, TraitedSpec, File
 from nipype.utils.misc import isdefined
 import nipype.externals.pynifti as nifti
@@ -26,7 +26,7 @@ class PickAtlasInputSpec(TraitedSpec):
 class PickAtlasOutputSpec(TraitedSpec):
     mask_file = File(exists=True, desc="output mask file")
 
-class PickAtlas(NEW_BaseInterface):
+class PickAtlas(BaseInterface):
     '''
     Returns ROI masks given an atlas and a list of labels. Supports dilation
     and left right masking (assuming the atlas is properly aligned).

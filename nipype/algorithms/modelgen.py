@@ -19,7 +19,7 @@ from scipy.special import gammaln
 
 from nipype.externals.pynifti import load
 from nipype.interfaces.base import Bunch, InterfaceResult,\
-    NEW_BaseInterface, TraitedSpec, InputMultiPath, traits,\
+    BaseInterface, TraitedSpec, InputMultiPath, traits,\
     File
 from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix,
@@ -121,7 +121,7 @@ class SpecifyModelOutputSpec(TraitedSpec):
           desc="session info saved in a numpy file for level1designs")
     #design_file = File(desc="design file")
 
-class SpecifyModel(NEW_BaseInterface):
+class SpecifyModel(BaseInterface):
     """Makes a model specification
 
     Parameters

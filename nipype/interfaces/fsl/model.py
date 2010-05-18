@@ -18,7 +18,7 @@ from nipype.interfaces.fsl.base import (FSLCommand, Info, FSLCommandInputSpec)
 from nipype.interfaces.base import (Bunch, load_template,
                                     InterfaceResult, File, traits,
                                     TraitedSpec,
-                                    NEW_BaseInterface,
+                                    BaseInterface,
                                     InputMultiPath, OutputMultiPath)
 from nipype.utils.filemanip import (list_to_filename, filename_to_list,
                                     loadflat)
@@ -83,7 +83,7 @@ class Level1DesignOutputSpec(TraitedSpec):
     ev_files = OutputMultiPath(File(exists=True),
                      desc='condition information files')
 
-class Level1Design(NEW_BaseInterface):
+class Level1Design(BaseInterface):
     """Generate Feat specific files
 
     Examples
@@ -591,7 +591,7 @@ class FeatRegisterOutputSpec(TraitedSpec):
     fsf_file = File(exists=True,
                                 desc="FSL feat specification file")
     
-class FeatRegister(NEW_BaseInterface):
+class FeatRegister(BaseInterface):
     """Register feat directories to a specific standard
 
     See FixedEffectsModel().inputs_help() for more information.
@@ -874,7 +874,7 @@ class L2ModelOutputSpec(TraitedSpec):
     design_con = File(exists=True, desc='design contrast file')
     design_grp = File(exists=True, desc='design group file')
 
-class L2Model(NEW_BaseInterface):
+class L2Model(BaseInterface):
     """Generate subject specific second level model
 
     Examples

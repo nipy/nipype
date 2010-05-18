@@ -16,9 +16,9 @@ import shutil
 from enthought.traits.trait_errors import TraitError
 
 from nipype.interfaces.base import (Interface, CommandLine, Bunch,
-                                    InterfaceResult, NEW_Interface,
+                                    InterfaceResult, Interface,
                                     TraitedSpec, traits, File, Directory,
-                                    NEW_BaseInterface,
+                                    BaseInterface,
                                     OutputMultiPath, DynamicTraitedSpec,
                                     BaseTraitedSpec, Undefined)
 from nipype.utils.misc import isdefined
@@ -42,7 +42,7 @@ def add_traits(base, names, trait_type=None):
         value = getattr(base, key)
     return base
 
-class IOBase(NEW_BaseInterface):
+class IOBase(BaseInterface):
 
     def _run_interface(self, runtime):
         runtime.returncode = 0

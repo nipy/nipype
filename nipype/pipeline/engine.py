@@ -28,7 +28,7 @@ except:
     pass
 
 from nipype.interfaces.base import (traits, File, Directory, InputMultiPath,
-                                    NEW_CommandLine, Undefined,
+                                    CommandLine, Undefined,
                                     OutputMultiPath, TraitedSpec,
                                     DynamicTraitedSpec,
                                     Bunch, InterfaceResult)
@@ -827,7 +827,7 @@ class Node(WorkflowBase):
             self._copyfiles_to_wd(cwd,execute)
         resultsfile = os.path.join(cwd, 'result_%s.npz' % self._id)
         if execute:
-            if issubclass(self._interface.__class__, NEW_CommandLine):
+            if issubclass(self._interface.__class__, CommandLine):
                 cmd = self._interface.cmdline
                 logger.info('cmd: %s'%cmd)
                 cmdfile = os.path.join(cwd,'command.txt')
