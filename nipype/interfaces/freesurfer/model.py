@@ -16,7 +16,7 @@ import os
 from glob import glob
 
 from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.freesurfer.base import NEW_FSCommand, FSTraitedSpec
+from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (Bunch, TraitedSpec, File,
                                     traits, InputMultiPath)
 from nipype.utils.misc import isdefined
@@ -73,7 +73,7 @@ class MrisPreprocInputSpec(FSTraitedSpec):
 class MrisPreprocOutputSpec(TraitedSpec):
     outfile = File(exists=True, desc='concatenated output file')
     
-class MrisPreproc(NEW_FSCommand):
+class MrisPreproc(FSCommand):
     """Use FreeSurfer mris_preproc to prepare a group of contrasts for
     a second level analysis
     
@@ -220,7 +220,7 @@ class GlmFitInputSpec(FSTraitedSpec):
     simdonefile = File(argstr='--sim-done %s',
                    desc='create file when simulation finished')
     
-class GlmFit(NEW_FSCommand):
+class GlmFit(FSCommand):
     """Use FreeSurfer mri_glmfit to prepare a group of contrasts for
     a second level analysis
     
@@ -294,7 +294,7 @@ class BinarizeOutputSpec(TraitedSpec):
     outfile = File(exists=True, desc='binarized output volume')
     countfile = File(desc='ascii file containing number of hits')
     
-class Binarize(NEW_FSCommand):
+class Binarize(FSCommand):
     """Use FreeSurfer mri_binarize to threshold an input volume
 
     Examples
@@ -385,7 +385,7 @@ class ConcatenateOutputSpec(TraitedSpec):
     outvol = File(exists=True,
                   desc='Path/name of the output volume')
 
-class Concatenate(NEW_FSCommand):
+class Concatenate(FSCommand):
     """Use Freesurfer mri_concat to combine several input volumes
     into one output volume.  Can concatenate by frames, or compute
     a variety of statistics on the input volumes.
@@ -479,7 +479,7 @@ class SegStatsOutputSpec(TraitedSpec):
     sfavg = File(desc='Text file with func statistics averaged over segs and framss')
 
 
-class SegStats(NEW_FSCommand):
+class SegStats(FSCommand):
     """Use FreeSurfer mri_segstats for ROI analysis
 
     Examples
@@ -597,7 +597,7 @@ class Label2VolInputSpec(FSTraitedSpec):
 class Label2VolOutputSpec(TraitedSpec):
     outfile = File(exists=True, desc='output volume')
 
-class Label2Vol(NEW_FSCommand):
+class Label2Vol(FSCommand):
     """Make a binary volume from a Freesurfer label
 
     Examples

@@ -21,7 +21,7 @@ from nipype.utils.docparse import get_doc
 from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
 from nipype.interfaces.io import FreeSurferSource
 
-from nipype.interfaces.freesurfer.base import NEW_FSCommand, FSTraitedSpec
+from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (Bunch, TraitedSpec, File, traits,
                                     Directory, InputMultiPath)
 from nipype.utils.misc import isdefined
@@ -40,7 +40,7 @@ class ParseDicomDirOutputSpec(TraitedSpec):
     outfile = File(exists=True,
                    desc='text file containing dicom information')
 
-class ParseDicomDir(NEW_FSCommand):
+class ParseDicomDir(FSCommand):
     """uses mri_parse_sdcmdir to get information from dicom directories
     
     Examples
@@ -99,7 +99,7 @@ class UnpackSDcmdirInputSpec(FSTraitedSpec):
     nounpackerr = traits.Bool(argstr='-no-unpackerr',
                               desc='do not try to unpack runs with errors')
 
-class UnpackSDcmdir(NEW_FSCommand):
+class UnpackSDcmdir(FSCommand):
     """use fs unpacksdcmdir to convert dicom files
 
     Examples
@@ -302,7 +302,7 @@ class MriConvertInputSpec(FSTraitedSpec):
 class MriConvertOutputSpec(TraitedSpec):
     outfile = File(exists=True, desc='converted output file')
 
-class MriConvert(NEW_FSCommand):
+class MriConvert(FSCommand):
     """use fs mri_convert to manipulate files
 
     adds niigz as an output type option
@@ -394,7 +394,7 @@ class DicomConvertInputSpec(FSTraitedSpec):
     ignore_single_slice = traits.Bool(requires=['dicominfo'],
                desc='ignore volumes containing a single slice')
 
-class DicomConvert(NEW_FSCommand):
+class DicomConvert(FSCommand):
     """use fs mri_convert to convert dicom files
 
     Examples
@@ -502,7 +502,7 @@ class ResampleOutputSpec(TraitedSpec):
     outfile = File(exists=True,
                    desc='output filename')
     
-class Resample(NEW_FSCommand):
+class Resample(FSCommand):
     """Use FreeSurfer mri_convert to up or down-sample image files
 
     Examples
@@ -553,7 +553,7 @@ class ReconAllInputSpec(FSTraitedSpec):
                              desc='path to subjects directory')
     flags = traits.Str(argstr='%s', desc='additional parameters')
 
-class ReconAll(NEW_FSCommand):
+class ReconAll(FSCommand):
     """Use FreeSurfer recon-all to generate surfaces and parcellations of
     structural data from an anatomical image of a subject.
 
@@ -603,7 +603,7 @@ class BBRegisterOutputSpec(TraitedSpec):
     outregfile = File(exists=True, desc='Output registration file')
     outfile = File(desc='Registered and resampled source file')
 
-class BBRegister(NEW_FSCommand):
+class BBRegister(FSCommand):
     """Use FreeSurfer bbregister to register a volume two a surface mesh
 
     This program performs within-subject, cross-modal registration using a
@@ -693,7 +693,7 @@ class ApplyVolTransformInputSpec(FSTraitedSpec):
 class ApplyVolTransformOutputSpec(TraitedSpec):
     outfile = File(exists=True, desc = 'Path to output file if used normally')
 
-class ApplyVolTransform(NEW_FSCommand):
+class ApplyVolTransform(FSCommand):
     """Use FreeSurfer mri_vol2vol to apply a transform.
 
     Examples
@@ -757,7 +757,7 @@ class SmoothInputSpec(FSTraitedSpec):
 class SmoothOutputSpec(FSTraitedSpec):
     outfile= File(exist=True,desc='smoothed input volume')	
          
-class Smooth(NEW_FSCommand):
+class Smooth(FSCommand):
     """Use FreeSurfer mris_volsmooth to smooth a volume
 
     This function smoothes cortical regions on a surface and

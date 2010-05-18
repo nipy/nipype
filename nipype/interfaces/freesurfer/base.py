@@ -82,7 +82,7 @@ class Info(object):
 class FSTraitedSpec(CommandLineInputSpec):
     subjectsdir =  Directory(exists=True, desc='subjects directory')
     
-class NEW_FSCommand(NEW_CommandLine):
+class FSCommand(NEW_CommandLine):
     '''General support for FS commands. Every FS command accepts
     'subjectsdir' input. For example:
     '''
@@ -92,7 +92,7 @@ class NEW_FSCommand(NEW_CommandLine):
     _subjectsdir = None
 
     def __init__(self, **inputs):
-        super(NEW_FSCommand, self).__init__(**inputs)
+        super(FSCommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._subjectsdir_update, 'subjectsdir')
         if not self._subjectsdir:
             self._subjectsdir = Info.subjectsdir()

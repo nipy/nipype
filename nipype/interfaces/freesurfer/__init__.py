@@ -1,6 +1,6 @@
 """Top-level namespace for freesurfer."""
 
-from nipype.interfaces.freesurfer.base import (Info, NEW_FSCommand)
+from nipype.interfaces.freesurfer.base import (Info, FSCommand)
 from nipype.interfaces.freesurfer.preprocess import (ParseDicomDir,
                                                      UnpackSDcmdir, MriConvert,
                                                      Resample, ReconAll,
