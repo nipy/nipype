@@ -501,6 +501,8 @@ class Segment(SPMCommand):
                 return scans_for_fnames(val)
             else:
                 return scans_for_fname(val)
+        if 'output_type' in opt:
+            return [int(v) for v in val]
         if opt == 'save_bias_corrected':
             return int(val)
         if opt == 'mask_image':
