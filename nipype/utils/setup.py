@@ -1,4 +1,5 @@
 from os.path import join
+from os import getcwd
 
 def configuration(parent_package='',top_path=None):
     from numpy.distutils.misc_util import Configuration
@@ -13,7 +14,7 @@ def configuration(parent_package='',top_path=None):
         # completer will be enabled by default.
         from IPython.genutils import get_ipython_dir
         pth = get_ipython_dir()
-        config.data_files = [(pth, ['ipy_profile_nipype.py'])]
+        config.data_files = [(pth, [join('nipype','utils','ipy_profile_nipype.py')])]
     except ImportError:
         # Don't do anything if they haven't installed IPython
         pass
