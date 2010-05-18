@@ -202,10 +202,10 @@ class CoregisterInputSpec(SPMCommandInputSpec):
                                  copyfile=True)
     cost_function = traits.Enum('mi', 'nmi', 'ecc', 'ncc',
                                 field='eoptions.cost_fun',
-                 desc="cost function, one of: 'mi' - Mutual Information, " +
-                        "'nmi' - Normalised Mutual Information, " +
-                        "'ecc' - Entropy Correlation Coefficient, " +
-                        "'ncc' - Normalised Cross Correlation")
+                 desc="""cost function, one of: 'mi' - Mutual Information,
+                'nmi' - Normalised Mutual Information,
+                'ecc' - Entropy Correlation Coefficient,
+                'ncc' - Normalised Cross Correlation""")
     fwhm = traits.Float(field='eoptions.fwhm',
                         desc='gaussian smoothing kernel width (mm)')
     separation = traits.List(traits.Float(), field='eoptions.sep',
@@ -403,23 +403,35 @@ class SegmentInputSpec(SPMCommandInputSpec):
     data = InputMultiPath(File(exists=True), field='data', desc='one scan per subject',
                           copyfile=False, mandatory=True)
     gm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.GM',
-                                 desc="""Options to produce grey matter images: c1*.img, wc1*.img and
-mwc1*.img. None: [0,0,0], Native Space: [0,0,1], Unmodulated Normalised:
-[0,1,0], Modulated Normalised: [1,0,0], Native + Unmodulated Normalised:
-[0,1,1], Native + Modulated Normalised: [1,0,1], Native + Modulated +
-Unmodulated: [1,1,1], Modulated + Unmodulated Normalised: [1,1,0]""")
+                                 desc="""Options to produce grey matter images: c1*.img, wc1*.img and mwc1*.img. 
+            None: [0,0,0], 
+            Native Space: [0,0,1], 
+            Unmodulated Normalised: [0,1,0], 
+            Modulated Normalised: [1,0,0], 
+            Native + Unmodulated Normalised: [0,1,1], 
+            Native + Modulated Normalised: [1,0,1], 
+            Native + Modulated + Unmodulated: [1,1,1], 
+            Modulated + Unmodulated Normalised: [1,1,0]""")
     wm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.WM',
-                                 desc="""Options to produce white matter images: c2*.img, wc2*.img and
-mwc2*.img. None: [0,0,0], Native Space: [0,0,1], Unmodulated Normalised:
-[0,1,0], Modulated Normalised: [1,0,0], Native + Unmodulated Normalised:
-[0,1,1], Native + Modulated Normalised: [1,0,1], Native + Modulated +
-Unmodulated: [1,1,1], Modulated + Unmodulated Normalised: [1,1,0]""")
+                                 desc="""Options to produce white matter images: c2*.img, wc2*.img and mwc2*.img.             
+            None: [0,0,0], 
+            Native Space: [0,0,1], 
+            Unmodulated Normalised: [0,1,0], 
+            Modulated Normalised: [1,0,0], 
+            Native + Unmodulated Normalised: [0,1,1], 
+            Native + Modulated Normalised: [1,0,1], 
+            Native + Modulated + Unmodulated: [1,1,1], 
+            Modulated + Unmodulated Normalised: [1,1,0]""")
     csf_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.CSF',
-                                  desc="""Options to produce CSF images: c3*.img, wc3*.img and
-mwc3*.img. None: [0,0,0], Native Space: [0,0,1], Unmodulated Normalised:
-[0,1,0], Modulated Normalised: [1,0,0], Native + Unmodulated Normalised:
-[0,1,1], Native + Modulated Normalised: [1,0,1], Native + Modulated +
-Unmodulated: [1,1,1], Modulated + Unmodulated Normalised: [1,1,0]""")
+                                  desc="""Options to produce CSF images: c3*.img, wc3*.img and mwc3*.img.             
+            None: [0,0,0], 
+            Native Space: [0,0,1], 
+            Unmodulated Normalised: [0,1,0], 
+            Modulated Normalised: [1,0,0], 
+            Native + Unmodulated Normalised: [0,1,1], 
+            Native + Modulated Normalised: [1,0,1], 
+            Native + Modulated + Unmodulated: [1,1,1], 
+            Modulated + Unmodulated Normalised: [1,1,0]""")
     save_bias_corrected = traits.Bool(field='output.biascor',
                      desc='True/False produce a bias corrected image')
     clean_masks = traits.Enum('no', 'light', 'thorough', field='output.cleanup',
@@ -526,18 +538,21 @@ class Segment(SPMCommand):
         return outputs
 
 class NewSegmentInputSpec(SPMCommandInputSpec):
-    channels = traits.List(traits.Tuple(InputMultiPath(File(exists=True)), traits.Float(), traits.Float(), traits.Tuple(traits.Bool, traits.Bool)),
+    channels = traits.List(traits.Tuple(InputMultiPath(File(exists=True)), traits.Float(), 
+                                        traits.Float(), traits.Tuple(traits.Bool, traits.Bool)),
                            desc="""A list of tuples (one per channel/modality) with the following fields:
-- list of volumes to be segmented
-- bias reguralisation (0-10)
-- FWHM of Gaussian smoothness of bias
-- which maps to save (Corrected, Field) - a tuple of two boolean values""", field='channel', copyfile=False, mandatory=True)
-    tissues = traits.List(traits.Tuple(InputMultiPath(File(exists=True)), traits.Int(), traits.Tuple(traits.Bool, traits.Bool), traits.Tuple(traits.Bool, traits.Bool)),
+            - list of volumes to be segmented
+            - bias reguralisation (0-10)
+            - FWHM of Gaussian smoothness of bias
+            - which maps to save (Corrected, Field) - a tuple of two boolean values""", 
+            field='channel', copyfile=False, mandatory=True)
+    tissues = traits.List(traits.Tuple(InputMultiPath(File(exists=True)), traits.Int(), 
+                                       traits.Tuple(traits.Bool, traits.Bool), traits.Tuple(traits.Bool, traits.Bool)),
                          desc="""A list of tuples (one per tissue) with the following fields:
-- tissue probability map
-- number of gaussians
-- which maps to save [Native, DARTEL] - a tuple of two boolean values
-- which maps to save [Modulated, Unmodualted] - a tuple of two boolean values""", field='tissue', copyfile=False)
+            - tissue probability map
+            - number of gaussians
+            - which maps to save [Native, DARTEL] - a tuple of two boolean values
+            - which maps to save [Modulated, Unmodualted] - a tuple of two boolean values""", field='tissue', copyfile=False)
     affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', field='warp.affreg',
                       desc='mni, eastern, subj, none ')
     warping_regularization = traits.Float(field='warp.reg',
