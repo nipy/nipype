@@ -57,7 +57,7 @@ def test_bedpostx():
 
 # test eddy_correct
 def test_eddy_correct():
-    eddy = fsl.Eddycorrect()
+    eddy = fsl.EddyCorrect()
 
     # make sure command gets called
     yield assert_equal, eddy.cmd, 'eddy_correct'
@@ -72,10 +72,10 @@ def test_eddy_correct():
     yield assert_equal, eddy.cmdline, 'eddy_correct foo.nii foo_eddc.nii 100'
 
     # .run based parameter setting
-    eddy2 = fsl.Eddycorrect(infile='foo', outfile='foo_eddc', reference_vol=20)
+    eddy2 = fsl.EddyCorrect(infile='foo', outfile='foo_eddc', reference_vol=20)
     yield assert_equal, eddy2.cmdline, 'eddy_correct foo foo_eddc 20'
 
-    eddy3 = fsl.Eddycorrect()
+    eddy3 = fsl.EddyCorrect()
     results = eddy3.run(infile='foo', outfile='foo_eddc', reference_vol=10)
     yield assert_equal, results.interface.inputs.infile, 'foo'
     yield assert_equal, results.interface.inputs.outfile, 'foo_eddc'

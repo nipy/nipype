@@ -14,7 +14,7 @@ from nipype.interfaces.fsl.model import (Level1Design, Feat, FeatModel,
                                          L2Model, SMM)
 from nipype.interfaces.fsl.utils import (Smooth, Merge, ExtractRoi, Split,
                                          ImageMaths)
-from nipype.interfaces.fsl.dti import (Eddycorrect, Bedpostx, DtiFit, Tbss2reg,
+from nipype.interfaces.fsl.dti import (EddyCorrect, Bedpostx, DtiFit, Tbss2reg,
                                        Tbss1preproc, Tbss3postreg,
                                        Tbss4prestats, Randomise,
                                        Probtrackx, Vecreg, Projthresh, FindTheBiggest)

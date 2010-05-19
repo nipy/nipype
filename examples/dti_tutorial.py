@@ -127,7 +127,7 @@ bet.inputs.frac=0.34
 """
 correct the diffusion weighted images for eddy_currents
 """
-eddycorrect = pe.Node(interface=fsl.Eddycorrect(),name='eddycorrect')
+eddycorrect = pe.Node(interface=fsl.EddyCorrect(),name='eddycorrect')
 eddycorrect.inputs.refnum=0
 
 """

@@ -80,30 +80,30 @@ class DtiFit(FSLCommand):
                 outputs[k] = self._gen_fname(self.inputs.basename,suffix = '_'+k)
         return outputs
     
-class EddycorrectInputSpec(FSLCommandInputSpec):
+class EddyCorrectInputSpec(FSLCommandInputSpec):
     infile = File(exists=True,desc = '4D input file',argstr='%s', position=0, mandatory=True)
     outfile = File(desc = '4D output file',argstr='%s', position=1, genfile=True)
     refnum = traits.Int(argstr='%d', position=2, desc='reference number',mandatory=True)
 
-class EddycorrectOutputSpec(TraitedSpec):
+class EddyCorrectOutputSpec(TraitedSpec):
     outfile = File(exists=True, desc='path/name of 4D eddy corrected output file')
 
-class Eddycorrect(FSLCommand):
+class EddyCorrect(FSLCommand):
     """ Use FSL eddy_correct command for correction of eddy current distortion
         Example:
         >>> from nipype.interfaces import fsl
-        >>> eddyc = fsl.Eddycorrect(infile='/data.nii.gz',refnum=0)
+        >>> eddyc = fsl.EddyCorrect(infile='/data.nii.gz',refnum=0)
         >>> print dti.cmdline
         'eddy_correct data.nii.gz data_edc.nii.gz 0'
     """
     _cmd = 'eddy_correct'
-    input_spec = EddycorrectInputSpec
-    output_spec = EddycorrectOutputSpec
+    input_spec = EddyCorrectInputSpec
+    output_spec = EddyCorrectOutputSpec
 
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.outfile):
             self.inputs.outfile = self._gen_fname(self.inputs.infile,suffix = '_edc')
-        runtime = super(Eddycorrect, self)._run_interface(runtime)
+        runtime = super(EddyCorrect, self)._run_interface(runtime)
         if runtime.stderr:
             runtime.returncode = 1
         return runtime
