@@ -316,20 +316,10 @@ class InterfaceHelpWriter(object):
             if helpstr:
                 helpstr += '\n\n'
                 
-            if isinstance(classinst, Interface):
-                opt_map = True
-                if hasattr(classinst, 'out_map') and len(classinst.out_map):
-                    # If the class has an opt_map, use that so we can
-                    # grab
-                    # any docstrings from it. Otherwise use the inputs.
-                    iterator = classinst.out_map.items
-                else:
-                    iterator = classinst.outputs().items
+            if classinst._outputs():
+                iterator = classinst._outputs().items
             else:
-                if classinst._outputs():
-                    iterator = classinst._outputs().items
-                else:
-                    iterator = {}.items
+                iterator = {}.items
             outstr = []
             for i,v in sorted(iterator()):
                 fieldstr =  i
