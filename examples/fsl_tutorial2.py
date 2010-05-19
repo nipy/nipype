@@ -78,7 +78,7 @@ coregister = pe.Node(interface=fsl.FLIRT(dof=6),
                      name = 'coregister')
 
 # Preprocess functionals
-motion_correct = pe.MapNode(interface=fsl.MCFLIRT(saveplots = True),
+motion_correct = pe.MapNode(interface=fsl.MCFLIRT(save_plots = True),
                             name='realign',
                             iterfield = ['in_file'])
 
@@ -194,7 +194,7 @@ Use :class:`nipype.interfaces.fsl.FLAMEO` to estimate a second level
 model
 """
 flameo = pe.MapNode(interface=fsl.FLAMEO(run_mode='fe'), name="flameo",
-                    iterfield=['cope_file','varcope_file'])
+                    iterfield=['cope_file','var_cope_file'])
 
 fixed_fx.connect([(copemerge,flameo,[('out_file','cope_file')]),
                   (varcopemerge,flameo,[('out_file','var_cope_file')]),

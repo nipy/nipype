@@ -37,7 +37,7 @@ class BETInputSpec(FSLCommandInputSpec):
                        argstr='-m')
     skull = traits.Bool(desc = 'create skull image',
                         argstr='-s')
-    nooutput = traits.Bool(argstr='-n',
+    no_output = traits.Bool(argstr='-n',
                            desc="Don't generate segmented output")
     frac = traits.Float(desc = 'fractional intensity threshold',
                         argstr='-f %.2f')
@@ -65,7 +65,7 @@ class BETOutputSpec(TraitedSpec):
                    desc="path/name of skullstripped file")
     mask_file = File(
         desc="path/name of binary brain mask (if generated)")
-    outlinefile = File(
+    outline_file = File(
         desc="path/name of outline file (if generated)")
     meshfile = File(
         desc="path/name of vtk mesh file (if generated)")
@@ -184,9 +184,9 @@ class FASTInputSpec(FSLCommandInputSpec):
                           argstr = '-a %s')
     other_priors = InputMultiPath(File(exist=True), desc = 'alternative prior images',
                                argstr = '-A %s', minlen=3, maxlen=3)
-    nopve = traits.Bool(desc = 'turn off PVE (partial volume estimation)',
+    no_pve = traits.Bool(desc = 'turn off PVE (partial volume estimation)',
                         argstr = '--nopve')
-    nobias = traits.Bool(desc = 'do not remove bias field',
+    no_bias = traits.Bool(desc = 'do not remove bias field',
                          argstr = '-N')
     use_priors = traits.Bool(desc = 'use priors throughout',
                              argstr = '-P')   # must also set -a!,
@@ -211,7 +211,7 @@ class FASTInputSpec(FSLCommandInputSpec):
                          argstr = '-H %.2f')
     verbose = traits.Bool(desc = 'switch on diagnostic messages',
                           argstr = '-v')
-    manualseg = File(exists=True, desc = 'Filename containing intensities',
+    manual_seg = File(exists=True, desc = 'Filename containing intensities',
                      argstr = '-s %s')
     probability_maps = traits.Bool(desc = 'outputs individual probability maps',
                                    argstr = '-p')
@@ -271,7 +271,7 @@ class FAST(FSLCommand):
                 outputs['restored_image'].append(self._gen_fname(f,
                                                                  suffix = '_restore_%d'%(val)))
         outputs['mixeltype'] = self._gen_fname(basefile, suffix = '_mixeltype')
-        if not self.inputs.nopve:
+        if not self.inputs.no_pve:
             outputs['partial_volume_map'] = self._gen_fname(basefile, suffix = '_pveseg')
             for i in range(nclasses):
                 outputs['partial_volume_files'].append(self._gen_fname(basefile,
@@ -297,10 +297,10 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                      position = 1, desc = 'reference file')
     out_file = File(argstr = '-out %s', desc = 'registered output file',
                    genfile = True, position = 2)
-    outmatrix = File(argstr = '-omat %s',
+    out_matrix = File(argstr = '-omat %s',
                      desc = 'output affine matrix in 4x4 asciii format',
                      genfile = True, position = 3)
-    inmatrix = File(argstr = '-init %s', desc = 'input 4x4 affine matrix')
+    in_matrix = File(argstr = '-init %s', desc = 'input 4x4 affine matrix')
 
     datatype = traits.Enum('char', 'short', 'int', 'float', 'double',
                            argstr = '-datatype %s',
@@ -311,61 +311,61 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                        desc = 'cost function')
     # XXX What is the difference between 'cost' and 'searchcost'?  Are
     # these both necessary or do they map to the same variable.
-    searchcost = traits.Enum('mutualinfo', 'corratio', 'normcorr', 'normmi',
+    cost_func = traits.Enum('mutualinfo', 'corratio', 'normcorr', 'normmi',
                              'leastsq', 'labeldiff',
                              argstr = '-searchcost %s',
                              desc = 'cost function')
-    usesqform = traits.Bool(argstr = '-usesqform',
+    uses_qform = traits.Bool(argstr = '-usesqform',
                             desc = 'initialize using sform or qform')
-    displayinit = traits.Bool(argstr = '-displayinit',
+    display_init = traits.Bool(argstr = '-displayinit',
                               desc = 'display initial matrix')
-    anglerep = traits.Enum('quaternion', 'euler',
+    angle_rep = traits.Enum('quaternion', 'euler',
                            argstr = '-anglerep %s',
                            desc = 'representation of rotation angles')
     interp = traits.Enum('trilinear', 'nearestneighbour', 'sinc',
                          argstr = '-interp %s',
                          desc = 'final interpolation method used in reslicing')
-    sincwidth = traits.Int(argstr = '-sincwidth %d', units = 'voxels',
+    sinc_width = traits.Int(argstr = '-sincwidth %d', units = 'voxels',
                            desc = 'full-width in voxels')
-    sincwindow = traits.Enum('rectangular', 'hanning', 'blackman',
+    sinc_window = traits.Enum('rectangular', 'hanning', 'blackman',
                              argstr = '-sincwindow %s',
                              desc = 'sinc window') # XXX better doc
     bins = traits.Int(argstr = '-bins %d', desc = 'number of histogram bins')
     dof = traits.Int(argstr = '-dof %d',
                      desc = 'number of transform degrees of freedom')
-    noresample = traits.Bool(argstr = '-noresample',
+    no_resample = traits.Bool(argstr = '-noresample',
                              desc = 'do not change input sampling')
-    forcescaling = traits.Bool(argstr = '-forcescaling',
+    force_scaling = traits.Bool(argstr = '-forcescaling',
                                desc = 'force rescaling even for low-res images')
-    minsampling = traits.Float(argstr = '-minsampling %f', units = 'mm',
+    min_sampling = traits.Float(argstr = '-minsampling %f', units = 'mm',
                                desc ='set minimum voxel dimension for sampling')
-    paddingsize = traits.Int(argstr = '-paddingsize %d', units = 'voxels',
+    padding_size = traits.Int(argstr = '-paddingsize %d', units = 'voxels',
                              desc = 'for applyxfm: interpolates outside image '\
                                  'by size')
-    searchrx = traits.List(traits.Int, minlen = 2, maxlen = 2, units ='degrees',
+    searchr_x = traits.List(traits.Int, minlen = 2, maxlen = 2, units ='degrees',
                            argstr = '-searchrx %s',
                            desc = 'search angles along x-axis, in degrees')
-    searchry = traits.List(traits.Int, minlen = 2, maxlen = 2, units ='degrees',
+    searchr_y = traits.List(traits.Int, minlen = 2, maxlen = 2, units ='degrees',
                            argstr = '-searchry %s',
                            desc = 'search angles along y-axis, in degrees')
-    searchrz = traits.List(traits.Int, minlen = 2, maxlen = 2, units ='degrees',
+    searchr_z = traits.List(traits.Int, minlen = 2, maxlen = 2, units ='degrees',
                            argstr = '-searchrz %s',
                            desc = 'search angles along z-axis, in degrees')
-    nosearch = traits.Bool(argstr = '-nosearch',
+    no_search = traits.Bool(argstr = '-nosearch',
                            desc = 'set all angular searches to ranges 0 to 0')
-    coarsesearch = traits.Int(argstr = '-coarsesearch %d', units = 'degrees',
+    coarse_search = traits.Int(argstr = '-coarsesearch %d', units = 'degrees',
                               desc = 'coarse search delta angle')
-    finesearch = traits.Int(argstr = '-finesearch %d', units = 'degrees',
+    fine_search = traits.Int(argstr = '-finesearch %d', units = 'degrees',
                             desc = 'fine search delta angle')
     schedule = File(exists = True, argstr = '-schedule %s',
                     desc = 'replaces default schedule')
-    refweight = File(exists = True, argstr = '-refweight %s',
+    ref_weight = File(exists = True, argstr = '-refweight %s',
                      desc = 'File for reference weighting volume')
-    inweight = File(exists = True, argstr = '-inweight %s',
+    in_weight = File(exists = True, argstr = '-inweight %s',
                     desc = 'File for input weighting volume')
-    noclamp = traits.Bool(argstr = '-noclamp',
+    no_clamp = traits.Bool(argstr = '-noclamp',
                           desc = 'do not use intensity clamping')
-    noresampblur = traits.Bool(argstr = '-noresampblur',
+    no_resample_blur = traits.Bool(argstr = '-noresampblur',
                                desc = 'do not use blurring on downsampling')
     rigid2D = traits.Bool(argstr = '-2D',
                           desc = 'use 2D rigid body mode - ignores dof')
@@ -375,7 +375,7 @@ class FLIRTInputSpec(FSLCommandInputSpec):
 class FLIRTOutputSpec(TraitedSpec):
     out_file = File(exists = True,
                    desc = 'path/name of registered file (if generated)')
-    outmatrix = File(exists = True,
+    out_matrix = File(exists = True,
                      desc = 'path/name of calculated affine transform ' \
                          '(if generated)')
 
@@ -391,11 +391,11 @@ class FLIRT(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> flt = fsl.FLIRT(bins=640, searchcost='mutualinfo')
+    >>> flt = fsl.FLIRT(bins=640, cost_func='mutualinfo')
     >>> flt.inputs.in_file = 'subject.nii'
     >>> flt.inputs.reference = 'template.nii'
     >>> flt.inputs.out_file = 'moved_subject.nii'
-    >>> flt.inputs.outmatrix = 'subject_to_template.mat'
+    >>> flt.inputs.out_matrix = 'subject_to_template.mat'
     >>> res = flt.run()
 
     """
@@ -410,17 +410,17 @@ class FLIRT(FSLCommand):
         if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                  suffix = '_flirt')
-        outputs['outmatrix'] = self.inputs.outmatrix
-        # Generate an outmatrix file if one is not provided
-        if not isdefined(outputs['outmatrix']) and \
+        outputs['out_matrix'] = self.inputs.out_matrix
+        # Generate an out_matrix file if one is not provided
+        if not isdefined(outputs['out_matrix']) and \
                 isdefined(self.inputs.in_file):
-            outputs['outmatrix'] = self._gen_fname(self.inputs.in_file,
+            outputs['out_matrix'] = self._gen_fname(self.inputs.in_file,
                                                    suffix = '_flirt.mat',
                                                    change_ext = False)
         return outputs
 
     def _gen_filename(self, name):
-        if name in ('out_file', 'outmatrix'):
+        if name in ('out_file', 'out_matrix'):
             return self._list_outputs()[name]
         else:
             return None
@@ -436,27 +436,27 @@ class MCFLIRTInputSpec(FSLCommandInputSpec):
     cost = traits.Enum('mutualinfo','woods','corratio','normcorr','normmi','leastsquares', argstr='-cost %s')
     bins = traits.Int(argstr='-bins %d')
     dof = traits.Int(argstr='-dof %d')
-    refvol = traits.Int(argstr='-refvol %d')
+    ref_vol = traits.Int(argstr='-refvol %d')
     scaling = traits.Float(argstr='-scaling %.2f')
     smooth = traits.Float(argstr='-smooth %.2f')
     rotation = traits.Int(argstr='-rotation %d')
     stages = traits.Int(argstr='-stages %d')
     init = File(exists=True, argstr='-init %s')
-    usegradient = traits.Bool(argstr='-gdt')
-    usecontour = traits.Bool(argstr='-edge')
-    meanvol = traits.Bool(argstr='-meanvol')
-    statsimgs = traits.Bool(argstr='-stats')
-    savemats = traits.Bool(argstr='-mats')
-    saveplots = traits.Bool(argstr='-plots')
+    use_gradient = traits.Bool(argstr='-gdt')
+    use_contour = traits.Bool(argstr='-edge')
+    mean_vol = traits.Bool(argstr='-meanvol')
+    stats_imgs = traits.Bool(argstr='-stats')
+    save_mats = traits.Bool(argstr='-mats')
+    save_plots = traits.Bool(argstr='-plots')
     ref_file = File(exists=True, argstr='-reffile %s')
     
 class MCFLIRTOutputSpec(TraitedSpec):
     out_file = File(exists=True)
-    varianceimg = File(exists=True)
-    stdimg = File(exists=True)
-    meanimg = File(exists=True)
-    parfile = File(exists=True)
-    outmatfile = File(exists=True)
+    variance_img = File(exists=True)
+    std_img = File(exists=True)
+    mean_img = File(exists=True)
+    par_file = File(exists=True)
+    mat_file = File(exists=True)
 
 class MCFLIRT(FSLCommand):
     """Use FSL MCFLIRT to do within-modality motion correction.
@@ -490,18 +490,18 @@ class MCFLIRT(FSLCommand):
         # XXX Need to change 'item' below to something that exists
         # out_file? in_file?
         # These could be handled similarly to default values for inputs
-        if isdefined(self.inputs.statsimgs):
-            outputs['varianceimg'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_variance')
-            outputs['stdimg'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_sigma')
-            outputs['meanimg'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_meanvol')
-        if isdefined(self.inputs.savemats):
+        if isdefined(self.inputs.stats_imgs):
+            outputs['variance_img'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_variance')
+            outputs['std_img'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_sigma')
+            outputs['mean_img'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_meanvol')
+        if isdefined(self.inputs.save_mats):
             pth, basename, _ = split_filename(self.inputs.in_file)
             matname = os.path.join(pth, basename + '.mat')
-            outputs['outmatfile'] = matname
-        if isdefined(self.inputs.saveplots):
+            outputs['mat_file'] = matname
+        if isdefined(self.inputs.save_plots):
             # Note - if e.g. out_file has .nii.gz, you get .nii.gz.par, which is
             # what mcflirt does!
-            outputs['parfile'] = outputs['out_file'] + '.par'
+            outputs['par_file'] = outputs['out_file'] + '.par'
         return outputs
     
     def _gen_filename(self, name):
@@ -546,15 +546,15 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                         desc='name of file with mask in reference space')
     inmask_file = File(exists=True, argstr='--inmask=%s',
                        desc='name of file with mask in input image space')
-    skiprefmask = traits.Bool(argstr='--applyrefmask 0',
+    skip_ref_mask = traits.Bool(argstr='--applyrefmask 0',
                               requires=['refmask_file'],
                               desc='Skip specified refmask if set, default false')
-    skipinmask = traits.Bool(argstr='--applyinmask 0',
+    skip_inmask = traits.Bool(argstr='--applyinmask 0',
                              requires=['inmask_file'],
                              desc='skip specified inmask if set, default false')
-    skipimplicitrefmasking = traits.Bool(argstr='--imprefm 0',
+    skip_implicit_ref_masking = traits.Bool(argstr='--imprefm 0',
                                       desc='skip implicit masking  based on value in --ref image. Default = 0')
-    skipimplicitinmasking = traits.Bool(argstr='--impinm 0',
+    skip_implicit_in_masking = traits.Bool(argstr='--impinm 0',
                                       desc='skip implicit masking  based on value in --in image. Default = 0')
     refmask_val = traits.Float(argstr='--imprefval=%f',
                               desc='Value to mask out in --ref image. Default =0.0')
@@ -607,7 +607,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
 
 class FNIRTOutputSpec(TraitedSpec):
     fieldcoeff_file = File(exists=True, desc='file with field coefficients')
-    out_file = File(exists=True, desc='warped image')
+    warped_file = File(exists=True, desc='warped image')
     field_file = File(exists=True, desc='file with warp field')
     jacobian_file = File(exists=True, desc='file containing Jacobian of the field')
     modulatedref_file = File(exists=True, desc='file containing intensity modulated --ref')
@@ -648,7 +648,7 @@ class FNIRT(FSLCommand):
     input_spec = FNIRTInputSpec
     output_spec = FNIRTOutputSpec
 
-    out_map = dict(out_file='_warp', field_file='_field',
+    out_map = dict(warped_file='_warp', field_file='_field',
                    jacobian_file='_field_jacobian',
                    modulatedref_file='_modulated',
                    out_intensitymap_file='_intmap',
@@ -723,7 +723,7 @@ class ApplyWarpInputSpec(FSLCommandInputSpec):
     ref_file = File(exists=True, argstr='--ref=%s',
                      mandatory=True,
                      desc='reference image')
-    fieldfile = File(exists=True, argstr='--warp=%s',
+    field_file = File(exists=True, argstr='--warp=%s',
                      mandatory=True,
                      desc='file containing warp field')
     abswarp = traits.Bool(argstr='--abs', xor=['relwarp'],
@@ -742,7 +742,7 @@ class ApplyWarpInputSpec(FSLCommandInputSpec):
                   desc='filename for pre-transform (affine matrix)')
     postmat = File(exists=True, argstr='--postmat=%s',
                   desc='filename for post-transform (affine matrix)')
-    maskfile = File(exists=True, argstr='--mask=%s',
+    mask_file = File(exists=True, argstr='--mask=%s',
                     desc='filename for mask image (in reference space)')
     interp = traits.Enum('nn', 'trilinear', 'sinc', argstr='--interp=%s',
                          desc='interpolation method {nn,trilinear,sinc}')
@@ -801,7 +801,7 @@ class SliceTimerInputSpec(FSLCommandInputSpec):
                         desc='filename of single-column custom interleave order file (first slice is referred to as 1 not 0)')
 
 class SliceTimerOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='slice time corrected file')
+    slice_time_corrected_file = File(exists=True, desc='slice time corrected file')
 
 class SliceTimer(FSLCommand):
     """ use FSL slicetimer to perform slice timing correction.
@@ -821,10 +821,10 @@ class SliceTimer(FSLCommand):
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                       suffix='_st')
-        outputs['out_file'] = out_file
+        outputs['slice_time_corrected_file'] = out_file
         return outputs
     
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()[name]
+            return self._list_outputs()['slice_time_corrected_file']
         return None
