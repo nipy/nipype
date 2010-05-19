@@ -133,7 +133,7 @@ eddycorrect.inputs.refnum=0
 """
 compute the diffusion tensor in each voxel
 """
-dtifit = pe.Node(interface=fsl.Dtifit(),name='dtifit')
+dtifit = pe.Node(interface=fsl.DtiFit(),name='dtifit')
 
 """
 connect all the nodes for this workflow

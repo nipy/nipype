@@ -18,7 +18,7 @@ import enthought.traits.api as traits
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
-class DtifitInputSpec(FSLCommandInputSpec):
+class DtiFitInputSpec(FSLCommandInputSpec):
     
     dwi = File(exists=True, desc = 'diffusion weighted image data file',
                   argstr='-k %s', position=0, mandatory=True)
@@ -43,7 +43,7 @@ class DtifitInputSpec(FSLCommandInputSpec):
     littlebit =  traits.Bool(desc = 'only process small area of brain',
                              argstr='--littlebit')
 
-class DtifitOutputSpec(TraitedSpec):
+class DtiFitOutputSpec(TraitedSpec):
     
     V1 = File(exists = True, desc = 'path/name of file with the 1st eigenvector')
     V2 = File(exists = True, desc = 'path/name of file with the 2nd eigenvector')
@@ -56,11 +56,11 @@ class DtifitOutputSpec(TraitedSpec):
     S0 = File(exists = True, desc = 'path/name of file with the raw T2 signal with no '+
               'diffusion weighting')    
 
-class Dtifit(FSLCommand):
+class DtiFit(FSLCommand):
     """ Use FSL  dtifit command for fitting a diffusion tensor model at each voxel
         Example:
         >>> from nipype.interfaces import fsl
-        >>> dti = fsl.Dtifit()
+        >>> dti = fsl.DtiFit()
         >>> dti.inputs.dwi = data.nii.gz
         >>> dti.inputs.bvec = bvecs
         >>> dti.inputs.bval = bvals
@@ -70,8 +70,8 @@ class Dtifit(FSLCommand):
         'dtifit -k data.nii.gz -o TP -m nodif_brain_mask.nii.gz -r bvecs -b bvals'
     """
     _cmd = 'dtifit'
-    input_spec = DtifitInputSpec
-    output_spec = DtifitOutputSpec
+    input_spec = DtiFitInputSpec
+    output_spec = DtiFitOutputSpec
         
     def _list_outputs(self):        
         outputs = self.output_spec().get()      

@@ -87,7 +87,7 @@ def test_eddy_correct():
 
 # test dtifit  
 def test_dtifit():
-    dti = fsl.Dtifit()
+    dti = fsl.DtiFit()
 
     # make sure command gets called
     yield assert_equal, dti.cmd, 'dtifit'
@@ -108,10 +108,10 @@ def test_dtifit():
     yield assert_equal, actualCmdline, desiredCmdline
 
     # .run based parameter setting
-    dti2 = fsl.Dtifit(data='foo2.nii')
+    dti2 = fsl.DtiFit(data='foo2.nii')
     yield assert_equal, dti2.cmdline, 'dtifit -k foo2.nii'
 
-    dti3 = fsl.Dtifit()
+    dti3 = fsl.DtiFit()
     results = dti3.run(data='foo3.nii', noseTest=True)
     yield assert_not_equal, results.runtime.returncode, 0
     yield assert_equal, results.interface.inputs.data, 'foo3.nii'
@@ -137,7 +137,7 @@ def test_dtifit():
                 'small_brain_area':         ('--littlebit', True)}
 
     for name, settings in opt_map.items():
-        dti4 = fsl.Dtifit(**{name: settings[1]})
+        dti4 = fsl.DtiFit(**{name: settings[1]})
         yield assert_equal, dti4.cmdline, dti4.cmd + ' ' + settings[0]
 
 
