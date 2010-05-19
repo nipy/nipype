@@ -159,7 +159,7 @@ def teardown_tbss():
 
 @with_setup(setup_tbss, teardown_tbss)
 def test_tbss_1_preproc():
-    tbss1 = fsl.Tbss1preproc()
+    tbss1 = fsl.Tbss1Preproc()
 
     # make sure command gets called
     yield assert_equal, tbss1.cmd, 'tbss_1_preproc'
@@ -172,7 +172,7 @@ def test_tbss_1_preproc():
     yield assert_equal, tbss1.cmdline, \
         'tbss_1_preproc foo.nii  f002.nii  f003.nii'
 
-    tbss = fsl.Tbss1preproc()
+    tbss = fsl.Tbss1Preproc()
     results = tbss.run(infiles='*.nii.gz', noseTest=True)
     yield assert_equal, results.interface.inputs.infiles, '*.nii.gz'
     yield assert_equal, results.runtime.cmdline, 'tbss_1_preproc *.nii.gz'
@@ -182,7 +182,7 @@ def test_tbss_1_preproc():
 
 @with_setup(setup_tbss, teardown_tbss)
 def test_tbss_2_reg():
-    tbss2 = fsl.Tbss2reg()
+    tbss2 = fsl.Tbss2Reg()
 
     # make sure command gets called
     yield assert_equal, tbss2.cmd, 'tbss_2_reg'
@@ -195,13 +195,13 @@ def test_tbss_2_reg():
     yield assert_equal, tbss2.cmdline, 'tbss_2_reg -T'
 
     # .run based parameter setting
-    tbss22 = fsl.Tbss2reg(targetImage='targetImg')
+    tbss22 = fsl.Tbss2Reg(targetImage='targetImg')
     yield assert_equal, tbss22.cmdline, 'tbss_2_reg -t targetImg'
 
-    tbss222 = fsl.Tbss2reg(findTarget=True)
+    tbss222 = fsl.Tbss2Reg(findTarget=True)
     yield assert_equal, tbss222.cmdline, 'tbss_2_reg -n'
 
-    tbss21 = fsl.Tbss2reg()
+    tbss21 = fsl.Tbss2Reg()
     results = tbss21.run(FMRIB58_FA_1mm=True, noseTest=True)
     yield assert_equal, results.runtime.cmdline, 'tbss_2_reg -T'
 
@@ -211,12 +211,12 @@ def test_tbss_2_reg():
                'findTarget':        ('-n', True)}
 
     for name, settings in opt_map.items():
-        tbss = fsl.Tbss2reg(**{name: settings[1]})
+        tbss = fsl.Tbss2Reg(**{name: settings[1]})
         yield assert_equal, tbss.cmdline, tbss.cmd + ' ' + settings[0]
 
 @with_setup(setup_tbss, teardown_tbss)
 def test_tbss_3_postreg():
-    tbss = fsl.Tbss3postreg()
+    tbss = fsl.Tbss3Postreg()
 
     # make sure command gets called
     yield assert_equal, tbss.cmd, 'tbss_3_postreg'
@@ -229,10 +229,10 @@ def test_tbss_3_postreg():
     yield assert_equal, tbss.cmdline, 'tbss_3_postreg -T'
 
     # .run based parameter setting
-    tbss2 = fsl.Tbss3postreg(subject_means=True)
+    tbss2 = fsl.Tbss3Postreg(subject_means=True)
     yield assert_equal, tbss2.cmdline, 'tbss_3_postreg -S'
 
-    tbss3 = fsl.Tbss3postreg()
+    tbss3 = fsl.Tbss3Postreg()
     results = tbss3.run(FMRIB58_FA=True, noseTest=True)
     yield assert_equal, results.runtime.cmdline, 'tbss_3_postreg -T'
 
@@ -241,12 +241,12 @@ def test_tbss_3_postreg():
                'FMRIB58_FA':        ('-T', True)}
 
     for name, settings in opt_map.items():
-        tbss3 = fsl.Tbss3postreg(**{name: settings[1]})
+        tbss3 = fsl.Tbss3Postreg(**{name: settings[1]})
         yield assert_equal, tbss3.cmdline, tbss3.cmd + ' ' + settings[0]
 
 @with_setup(setup_tbss, teardown_tbss)
 def test_tbss_4_prestats():
-    tbss = fsl.Tbss4prestats()
+    tbss = fsl.Tbss4Prestats()
 
     # make sure command gets called
     yield assert_equal, tbss.cmd, 'tbss_4_prestats'
@@ -258,15 +258,15 @@ def test_tbss_4_prestats():
     tbss.inputs.threshold = 0.3
     yield assert_equal, tbss.cmdline, 'tbss_4_prestats 0.3'
 
-    tbss2 = fsl.Tbss4prestats(threshold=0.4)
+    tbss2 = fsl.Tbss4Prestats(threshold=0.4)
     yield assert_equal, tbss2.cmdline, 'tbss_4_prestats 0.4'
 
-    tbss3 = fsl.Tbss4prestats()
+    tbss3 = fsl.Tbss4Prestats()
     results = tbss3.run(threshold=0.2, noseTest=True)
     yield assert_equal, results.runtime.cmdline, 'tbss_4_prestats 0.2'
 
     # test arguments for opt_map
-    # Tbss4prestats doesn't have an opt_map{}
+    # Tbss4Prestats doesn't have an opt_map{}
 
 def test_randomise():
 
@@ -456,7 +456,7 @@ def test_Probtrackx():
 
 # test proj_thresh
 def test_Proj_thresh():
-    proj = fsl.Projthresh()
+    proj = fsl.ProjThresh()
 
     # make sure command gets called
     yield assert_equal, proj.cmd, 'proj_thresh'
@@ -469,11 +469,11 @@ def test_Proj_thresh():
     proj.inputs.threshold = 3
     yield assert_equal, proj.cmdline, 'proj_thresh vol1 vol2 vol3 3'
 
-    proj2 = fsl.Projthresh(threshold=10, volumes=['vola', 'volb'])
+    proj2 = fsl.ProjThresh(threshold=10, volumes=['vola', 'volb'])
     yield assert_equal, proj2.cmdline, 'proj_thresh vola volb 10'
 
     # .run based parameters setting
-    proj3 = fsl.Projthresh()
+    proj3 = fsl.ProjThresh()
     results = proj3.run(volumes=['inp1', 'inp3', 'inp2'], threshold=2)
     yield assert_equal, results.runtime.cmdline, 'proj_thresh inp1 inp3 inp2 2'
     yield assert_not_equal, results.runtime.returncode, 0
@@ -487,7 +487,7 @@ def test_Proj_thresh():
 # test vec_reg
 def test_Vec_reg():
 
-    vrg = fsl.Vecreg()
+    vrg = fsl.VecReg()
 
     # make sure command gets called
     yield assert_equal, vrg.cmd, 'vecreg'
@@ -504,7 +504,7 @@ def test_Vec_reg():
         'vecreg -i infile -o outfile -r MNI152 -t tmat.mat'
 
     # .run based parameter setting
-    vrg2 = fsl.Vecreg(infile='infile2',
+    vrg2 = fsl.VecReg(infile='infile2',
                        outfile='outfile2',
                        refVolName='MNI152',
                        affineTmat='tmat2.mat',
@@ -515,7 +515,7 @@ def test_Vec_reg():
     desiredCmdline = sorted(cmd.split())
     yield assert_equal, actualCmdline, desiredCmdline
 
-    vrg3 = fsl.Vecreg()
+    vrg3 = fsl.VecReg()
     results = vrg3.run(infile='infile3',
                      outfile='outfile3',
                      refVolName='MNI152',
@@ -539,7 +539,7 @@ def test_Vec_reg():
                'brainMask':         ('-m mask', 'mask')}
 
     for name, settings in opt_map.items():
-        vrg4 = fsl.Vecreg(infile='infile', outfile='outfile', 
+        vrg4 = fsl.VecReg(infile='infile', outfile='outfile', 
                           refVolName='MNI152', **{name: settings[1]})
         yield assert_equal, vrg4.cmdline, vrg4.cmd + \
             ' -i infile -o outfile -r MNI152 ' + settings[0]

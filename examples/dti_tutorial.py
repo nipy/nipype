@@ -177,7 +177,7 @@ probtrackx.inputs.mode='seedmask'
 """
 threshold the output of probtrackx 
 """
-projthresh = pe.Node(interface=fsl.Projthresh(),name='projthresh')
+projthresh = pe.Node(interface=fsl.ProjThresh(),name='projthresh')
 projthresh.inputs.threshold = 1
 
 
@@ -254,25 +254,25 @@ tbss_source.inputs.template = os.path.abspath('data/workingdir/_subject_id_*/dti
 """
 prepare your FA data in your TBSS working directory in the right format
 """
-tbss1 = pe.Node(fsl.Tbss1preproc(),name='tbss1')
+tbss1 = pe.Node(fsl.Tbss1Preproc(),name='tbss1')
 
 
 """
 apply nonlinear registration of all FA images into standard space
 """
-tbss2 = pe.Node(fsl.Tbss2reg(),name='tbss2')
+tbss2 = pe.Node(fsl.Tbss2Reg(),name='tbss2')
 tbss2.inputs.FMRIB58FA=True
 
 """
 create the mean FA image and skeletonise it
 """
-tbss3 = pe.Node(fsl.Tbss3postreg(),name='tbss3')
+tbss3 = pe.Node(fsl.Tbss3Postreg(),name='tbss3')
 tbss3.inputs.FMRIB58FA=True
 
 """
 project all subjects' FA data onto the mean FA skeleton
 """
-tbss4 = pe.Node(fsl.Tbss4prestats(),name='tbss4')
+tbss4 = pe.Node(fsl.Tbss4Prestats(),name='tbss4')
 tbss4.inputs.threshold=0.3
 
 """
