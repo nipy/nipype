@@ -663,13 +663,13 @@ class Projthresh(FSLCommand):
                                                        repr(self.inputs.threshold)))            
         return outputs
 
-class FindthebiggestInputSpec(FSLCommandInputSpec):
+class FindTheBiggestInputSpec(FSLCommandInputSpec):
     infiles = traits.List(File,exists=True,argstr='%s',desc='a list of input volumes or a singleMatrixFile',
                           position=0,mandatory=True)
     labelfile = File(exists=True,argstr='%s',desc='label file')
     outfile = File(argstr='%s',desc='file with the resulting segmentation',position=-1,genfile=True)   
     
-class FindthebiggestOutputSpec(TraitedSpec):
+class FindTheBiggestOutputSpec(TraitedSpec):
     outfile = File(exists=True,argstr='%s',desc='output file indexed in order of input files')
     
 class FindTheBiggest(FSLCommand):
@@ -686,8 +686,8 @@ class FindTheBiggest(FSLCommand):
 
     """    
     _cmd='find_the_biggest'
-    input_spec = FindthebiggestInputSpec
-    output_spec = FindthebiggestOutputSpec
+    input_spec = FindTheBiggestInputSpec
+    output_spec = FindTheBiggestOutputSpec
     
     def _run_interface(self, runtime):        
         if not isdefined(self.inputs.outfile):
