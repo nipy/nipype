@@ -21,56 +21,56 @@ from nipype.interfaces.base import (TraitedSpec, File,
 from nipype.utils.misc import isdefined
 
 class MRISPreprocInputSpec(FSTraitedSpec):
-    outfile = File(argstr='--out %s', genfile=True,
+    out_file = File(argstr='--out %s', genfile=True,
                    desc='output filename')
     target = traits.Str(argstr='--target %s', mandatory=True,
                          desc='target subject name')
     hemi = traits.Enum('lh', 'rh', argstr='--hemi %s',
                        mandatory=True,
                        desc='hemisphere for source and target')
-    surfmeasure = traits.Str(argstr='--meas %s',
-                             xor = ('surfmeasure', 'surfmeasfile', 'surfarea'),
-                desc='Use subject/surf/hemi.surfmeasure as input')
-    surfarea = traits.Str(argstr='--area %s',
-                          xor = ('surfmeasure', 'surfmeasfile', 'surfarea'),
+    surf_measure = traits.Str(argstr='--meas %s',
+                             xor = ('surf_measure', 'surf_measure_file', 'surf_area'),
+                desc='Use subject/surf/hemi.surf_measure as input')
+    surf_area = traits.Str(argstr='--area %s',
+                          xor = ('surf_measure', 'surf_measure_file', 'surf_area'),
        desc='Extract vertex area from subject/surf/hemi.surfname to use as input.')
     subjects = traits.List(argstr='--s %s...',
-                           xor = ('subjects', 'fsgdfile', 'subjectfile'),
+                           xor = ('subjects', 'fsgd_file', 'subject_file'),
                    desc='subjects from who measures are calculated')
-    fsgdfile = File(exists=True, argstr='--fsgd %s',
-                    xor = ('subjects', 'fsgdfile', 'subjectfile'),
+    fsgd_file = File(exists=True, argstr='--fsgd %s',
+                    xor = ('subjects', 'fsgd_file', 'subject_file'),
                     desc='specify subjects using fsgd file')
-    subjectfile = File(exists=True, argstr='--f %s',
-                    xor = ('subjects', 'fsgdfile', 'subjectfile'),
+    subject_file = File(exists=True, argstr='--f %s',
+                    xor = ('subjects', 'fsgd_file', 'subject_file'),
                     desc='file specifying subjects separated by white space')
-    surfmeasfile = InputMultiPath(File(exists=True), argstr='--is %s...',
-                           xor = ('surfmeasure', 'surfmeasfile', 'surfarea'),
+    surf_measure_file = InputMultiPath(File(exists=True), argstr='--is %s...',
+                           xor = ('surf_measure', 'surf_measure_file', 'surf_area'),
           desc='file alternative to surfmeas, still requires list of subjects')
-    srcfmt = traits.Str(argstr='--srcfmt %s', desc='source format')
-    surfdir = traits.Str(argstr='--surfdir %s',
+    source_format = traits.Str(argstr='--srcfmt %s', desc='source format')
+    surf_dir = traits.Str(argstr='--surfdir %s',
                          desc='alternative directory (instead of surf)')
-    volmeasfile = InputMultiPath(traits.Tuple(File(exists=True),File(exists=True)),
-                                 argstr='--iv %s %s...',
-                         desc = 'list of volume measure and reg file tuples')
-    projfrac = traits.Float(argstr='--projfrac %s',
+    vol_measure_file = InputMultiPath(traits.Tuple(File(exists=True),File(exists=True)),
+                                      argstr='--iv %s %s...',
+                                 desc = 'list of volume measure and reg file tuples')
+    proj_frac = traits.Float(argstr='--projfrac %s',
                             desc='projection fraction for vol2surf')
     fwhm = traits.Float(argstr='--fwhm %f',
-                        xor = ('fwhm', 'niters'),
+                        xor=['num_iters'],
                         desc='smooth by fwhm mm on the target surface') 
-    fwhmsrc = traits.Float(argstr='--fwhm-src %f',
-                        xor = ('fwhmsrc', 'niterssrc'),
-                        desc='smooth by fwhm mm on the source surface')
-    niters = traits.Int(argstr='--niters %d',
-                        xor = ('fwhm', 'niters'),
+    num_iters = traits.Int(argstr='--niters %d',
+                        xor=['fwhm'],
                         desc='niters : smooth by niters on the target surface')
-    niterssrc = traits.Int(argstr='--niterssrc %d',
-                        xor = ('fwhmsrc', 'niterssrc'),
+    fwhm_source = traits.Float(argstr='--fwhm-src %f',
+                        xor=['num_iters_source'],
+                        desc='smooth by fwhm mm on the source surface')
+    num_iters_source = traits.Int(argstr='--niterssrc %d',
+                        xor=['fwhm_source'],
                         desc='niters : smooth by niters on the source surface')
-    smoothcortexonly = traits.Bool(argstr='--smooth-cortex-only',
+    smooth_cortex_only = traits.Bool(argstr='--smooth-cortex-only',
                        desc='only smooth cortex (ie, exclude medial wall)')
 
 class MRISPreprocOutputSpec(TraitedSpec):
-    outfile = File(exists=True, desc='concatenated output file')
+    out_file = File(exists=True, desc='preprocessed output file')
     
 class MRISPreproc(FSCommand):
     """Use FreeSurfer mris_preproc to prepare a group of contrasts for
@@ -78,6 +78,9 @@ class MRISPreproc(FSCommand):
     
     Examples
     --------
+    >>> from nipype.interfaces.freesurfer import MRISPreproc
+    >>> preproc = MRISPreproc()
+    
     """
 
     _cmd = 'mris_preproc'
@@ -86,31 +89,32 @@ class MRISPreproc(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outfile = self.inputs.outfile
+        outfile = self.inputs.out_file
         if not isdefined(outfile):
-            outputs['outfile'] = fname_presuffix(self.inputs.infile,
+            outputs['out_file'] = fname_presuffix(self.inputs.infile,
                                                  newpath=os.getcwd(),
-                                                 suffix='_concat.mgz',
+                                                 suffix='_preproc.mgz',
                                                  use_ext=False)
         return outputs
     
     def _gen_filename(self, name):
-        if name == 'outfile':
+        if name == 'out_file':
             return self._list_outputs()[name]
         return None    
 
 class SurfConcat(MRISPreproc):
+    """Alias for MRISPreproc
+    """
     pass
 
 class GLMFitInputSpec(FSTraitedSpec):
     hemi = traits.Str(desc='im not sure what hemi does ',
-        argstr='%s')
-    surf=traits.Str(desc='subject hemi',argstr='--surf %s')
-
-    glmdir = traits.Str(argstr='--glmdir %s', desc='save outputs to dir')
-    infile = File(desc='input file', argstr='--y %s', mandatory=True,
+                      argstr='%s')
+    surf = traits.Str(desc='subject hemi',argstr='--surf %s')
+    glm_dir = traits.Str(argstr='--glmdir %s', desc='save outputs to dir')
+    in_file = File(desc='input 4D file', argstr='--y %s', mandatory=True,
                   copyfile=False)
-    _design_xor = ('fsgd', 'design', 'onesample')
+    _design_xor = ('fsgd', 'design', 'one_sample')
     fsgd = traits.Tuple(File(exists=True),traits.Enum('doss', 'dods'),
                         argstr='--fsgd %s %s', xor= _design_xor,
                         desc='freesurfer descriptor file')
@@ -119,65 +123,65 @@ class GLMFitInputSpec(FSTraitedSpec):
     contrast = InputMultiPath(File(exists=True), argstr='--C %s...',
                               desc='contrast file')
     
-    onesample = traits.Bool(argstr='--osgm',
-                            xor=('onesample', 'fsgd', 'design', 'contrast'),
+    one_sample = traits.Bool(argstr='--osgm',
+                            xor=('one_sample', 'fsgd', 'design', 'contrast'),
                             desc='construct X and C as a one-sample group mean')
-    nocontrastsok = traits.Bool(argstr='--no-contrasts-ok',
+    no_contrast_sok = traits.Bool(argstr='--no-contrasts-ok',
                                 desc='do not fail if no contrasts specified')
-    pervoxelreg = InputMultiPath(File(exists=True), argstr='--pvr %s...',
+    per_voxel_reg = InputMultiPath(File(exists=True), argstr='--pvr %s...',
                                  desc='per-voxel regressors')
-    selfreg = traits.Tuple(traits.Int, traits.Int, traits.Int,
+    self_reg = traits.Tuple(traits.Int, traits.Int, traits.Int,
                            argstr='--selfreg %d %d %d',
                            desc='self-regressor from index col row slice')
-    weightedls = File(exists=True, argstr='--wls %s',
-                      xor = ('weightfile', 'weightinv', 'weightsqrt'), 
+    weighted_ls = File(exists=True, argstr='--wls %s',
+                      xor = ('weight_file', 'weight_inv', 'weight_sqrt'), 
                       desc='weighted least squares')
-    fixedfxvar = File(exists=True, argstr='--yffxvar %s',
+    fixed_fx_var = File(exists=True, argstr='--yffxvar %s',
                       desc='for fixed effects analysis')
-    fixedfxdof = traits.Int(argstr='--ffxdof %d',
-                            xor=('fixedfxdof','fixedfxdoffile'),
+    fixed_fx_dof = traits.Int(argstr='--ffxdof %d',
+                            xor=['fixed_fx_dof_file'],
                             desc='dof for fixed effects analysis')
-    fixedfxdoffile = File(argstr='--ffxdofdat %d',
-                          xor=('fixedfxdof','fixedfxdoffile'),
+    fixed_fx_dof_file = File(argstr='--ffxdofdat %d',
+                          xor=['fixed_fx_dof'],
                           desc='text file with dof for fixed effects analysis')
-    weightfile = File(exists=True, xor = ('weightedls', 'weightfile'),
-                      desc='weight for each input at each voxel')
-    weightinv = traits.Bool(argstr='--w-inv', desc='invert weights',
-                            xor = ('weightedls', 'weightinv'))
-    weightsqrt = traits.Bool(argstr='--w-sqrt', desc='sqrt of weights',
-                            xor = ('weightedls', 'weightsqrt'))
+    weight_file = File(exists=True, xor = ['weighted_ls'],
+                       desc='weight for each input at each voxel')
+    weight_inv = traits.Bool(argstr='--w-inv', desc='invert weights',
+                            xor = ['weighted_ls'])
+    weight_sqrt = traits.Bool(argstr='--w-sqrt', desc='sqrt of weights',
+                            xor = ['weighted_ls'])
     fwhm = traits.Float(min=0, argstr='--fwhm %f',
                         desc='smooth input by fwhm')
-    varfwhm = traits.Float(min=0, argstr='--var-fwhm %f',
-                        desc='smooth variance by fwhm')
-    nomasksmooth = traits.Bool(argstr='--no-mask-smooth',
-                               desc='do not mask when smoothing')
-    noestfwhm = traits.Bool(argstr='--no-est-fwhm',
-                            desc='turn off FWHM output estimation')
-    maskfile = File(exists=True, argstr='--mask %s', desc='binary mask')
-    labelfile = File(exists=True, argstr='--label %s',
-                     xor=('labelfile','cortex'),
+    var_fwhm = traits.Float(min=0, argstr='--var-fwhm %f',
+                            desc='smooth variance by fwhm')
+    no_mask_smooth = traits.Bool(argstr='--no-mask-smooth',
+                                 desc='do not mask when smoothing')
+    no_est_fwhm = traits.Bool(argstr='--no-est-fwhm',
+                              desc='turn off FWHM output estimation')
+    mask_file = File(exists=True, argstr='--mask %s', desc='binary mask')
+    label_file = File(exists=True, argstr='--label %s',
+                     xor=['cortex'],
                      desc='use label as mask, surfaces only')
     cortex = traits.Bool(argstr='--cortex',
-                         xor=('labelfile','cortex'),
+                         xor=['label_file'],
                          desc='use subjects ?h.cortex.label as label')
-    invertmask = traits.Bool(argstr='--mask-inv',
+    invert_mask = traits.Bool(argstr='--mask-inv',
                              desc='invert mask')
     prune = traits.Bool(argstr='--prune',
        desc='remove voxels that do not have a non-zero value at each frame (def)')
-    noprune = traits.Bool(argstr='--no-prune',
-                          xor = ('noprune', 'prunethresh'),
+    no_prune = traits.Bool(argstr='--no-prune',
+                          xor = ['prunethresh'],
                           desc='do not prune')
-    prunethresh = traits.Float(argstr='--prune_thr %f',
-                               xor = ('noprune', 'prunethresh'),
+    prune_thresh = traits.Float(argstr='--prune_thr %f',
+                               xor = ['noprune'],
                                desc='prune threshold. Default is FLT_MIN')
-    logy = traits.Bool(argstr='--logy',
+    compute_log_y = traits.Bool(argstr='--logy',
                        desc='compute natural log of y prior to analysis')
-    saveestimate = traits.Bool(argstr='--yhat-save',
+    save_estimate = traits.Bool(argstr='--yhat-save',
                                desc='save signal estimate (yhat)')
-    saveresidual = traits.Bool(argstr='--eres-save',
+    save_residual = traits.Bool(argstr='--eres-save',
                                desc='save residual error (eres)')
-    saverescorrmtx = traits.Bool(argstr='--eres-scm',
+    save_res_corr_mtx = traits.Bool(argstr='--eres-scm',
        desc='save residual error spatial correlation matrix (eres.scm). Big!')
     surf = traits.Tuple(traits.Str, traits.Enum('lh', 'rh'),
                         traits.Enum('white','pial','smoothwm','inflated'),
@@ -186,37 +190,37 @@ class GLMFitInputSpec(FSTraitedSpec):
                               traits.Int(min=1), traits.Float, traits.Str,
                               argstr='--sim %s %d %f %s',
                               desc='nulltype nsim thresh csdbasename')
-    simsign = traits.Enum('abs', 'pos', 'neg', argstr='--sim-sign %s',
+    sim_sign = traits.Enum('abs', 'pos', 'neg', argstr='--sim-sign %s',
                           desc='abs, pos, or neg')
     uniform = traits.Tuple(traits.Float, traits.Float,
                            argstr='--uniform %f %f',
                       desc='use uniform distribution instead of gaussian')
     pca = traits.Bool(argstr='--pca',
                       desc='perform pca/svd analysis on residual')
-    calcAR1 = traits.Bool(argstr='--tar1',
+    calc_AR1 = traits.Bool(argstr='--tar1',
                           desc='compute and save temporal AR1 of residual')
-    savecond = traits.Bool(argstr='--save-cond',
+    save_cond = traits.Bool(argstr='--save-cond',
             desc='flag to save design matrix condition at each voxel')
-    voxdump = traits.Tuple(traits.Int, traits.Int, traits.Int,
+    vox_dump = traits.Tuple(traits.Int, traits.Int, traits.Int,
                            argstr='--voxdump %d %d %d',
                            desc='dump voxel GLM and exit')
     seed = traits.Int(argstr='--seed %d', desc='used for synthesizing noise')
     synth = traits.Bool(argstr='--synth', desc='replace input with gaussian')
-    resynthtest = traits.Int(argstr='--resynthtest %d', desc='test GLM by resynthsis')
+    resynth_test = traits.Int(argstr='--resynthtest %d', desc='test GLM by resynthsis')
     profile = traits.Int(argstr='--profile %d', desc='niters : test speed')
-    forceperm = traits.Bool(argstr='--perm-force',
+    force_perm = traits.Bool(argstr='--perm-force',
               desc='force perumtation test, even when design matrix is not orthog')
     diag = traits.Int('--diag %d', desc='Gdiag_no : set diagnositc level')
-    diagcluster = traits.Bool(argstr='--diag-cluster',
+    diag_cluster = traits.Bool(argstr='--diag-cluster',
                             desc='save sig volume and exit from first sim loop')
     debug = traits.Bool(argstr='--debug', desc='turn on debugging')
-    checkopts = traits.Bool(argstr='--checkopts',
+    check_opts = traits.Bool(argstr='--checkopts',
                             desc="don't run anything, just check options and exit")
-    allowsubjrep = traits.Bool(argstr='--allowsubjrep',
+    allow_repeated_subjects = traits.Bool(argstr='--allowsubjrep',
       desc='allow subject names to repeat in the fsgd file (must appear before --fsgd')
-    illcond = traits.Bool(argstr='--illcond',
+    allow_ill_cond = traits.Bool(argstr='--illcond',
                  desc='allow ill-conditioned design matrices')
-    simdonefile = File(argstr='--sim-done %s',
+    sim_done_file = File(argstr='--sim-done %s',
                    desc='create file when simulation finished')
     
 class GLMFit(FSCommand):
@@ -234,10 +238,11 @@ class OneSampleTTest(GLMFit):
 
     def __init__(self, **kwargs):
         super(OneSampleTTest, self).__init__(**kwargs)
-        self.inputs.onesample = True
+        self.inputs.one_sample = True
+                              
 
 class BinarizeInputSpec(FSTraitedSpec):
-    infile = File(exists=True, argstr='--i %s', mandatory=True,
+    in_file = File(exists=True, argstr='--i %s', mandatory=True,
                   copyfile=False, desc='input volume')
     min = traits.Float(argstr='--min %f',
                        desc='min thresh')
@@ -253,34 +258,34 @@ class BinarizeInputSpec(FSTraitedSpec):
          desc='set match vals to 2 and 41 (aseg for cerebral WM)')
     ventricles = traits.Bool(argstr='--ventricles',
          desc='set match vals those for aseg ventricles+choroid (not 4th)')
-    wmvcsf = traits.Bool(argstr='--wm+vcsf',
+    wm_ven_csf = traits.Bool(argstr='--wm+vcsf',
           desc='WM and ventricular CSF, including choroid (not 4th)')
-    outfile = File(argstr='--o %s', genfile=True,
-                  desc='output volume')
-    countfile = traits.Either(traits.Bool, File,
+    binary_file = File(argstr='--o %s', genfile=True,
+                  desc='binary output volume')
+    count_file = traits.Either(traits.Bool, File,
                               argstr='--count %s',
                   desc='save number of hits in ascii file (hits,ntotvox,pct)')
-    binval = traits.Int(argstr='--binval %d',
+    bin_val = traits.Int(argstr='--binval %d',
                         desc='set vox within thresh to val (default is 1)')
-    binvalnot = traits.Int(argstr='--binvalnot %d',
+    bin_val_not = traits.Int(argstr='--binvalnot %d',
                         desc='set vox outside range to val (default is 0)')
     invert = traits.Bool(argstr='--inv',
                          desc='set binval=0, binvalnot=1')
-    frameno = traits.Int(argstr='--frame %s',
+    frame_no = traits.Int(argstr='--frame %s',
                          desc='use 0-based frame of input (default is 0)')
-    mergevol = File(exists=True, argstr='--merge %s',
+    merge_file = File(exists=True, argstr='--merge %s',
                     desc='merge with mergevol') 
-    maskvol = File(exists=True, argstr='--mask maskvol',
+    mask_file = File(exists=True, argstr='--mask maskvol',
                    desc='must be within mask')
-    maskthresh = traits.Float(argstr='--mask-thresh %f',
+    mask_thresh = traits.Float(argstr='--mask-thresh %f',
                     desc='set thresh for mask')
     abs = traits.Bool(argstr='--abs',
                       desc='take abs of invol first (ie, make unsigned)')
-    bincol = traits.Bool(argstr='--bincol',
+    bin_col_num = traits.Bool(argstr='--bincol',
                 desc='set binarized voxel value to its column number')
-    zeroedges = traits.Bool(argstr='--zero-edges',
+    zero_edges = traits.Bool(argstr='--zero-edges',
                             desc='zero the edge voxels')
-    zerosliceedge = traits.Bool(argstr='--zero-slice-edges',
+    zero_slice_edge = traits.Bool(argstr='--zero-slice-edges',
                        desc='zero the edge slice voxels')
     dilate = traits.Int(argstr='--dilate %d',
                         desc='niters: dilate binarization in 3D')
@@ -290,8 +295,8 @@ class BinarizeInputSpec(FSTraitedSpec):
                          desc='nerode2d: erode binarization in 2D (after any 3D erosion)')
 
 class BinarizeOutputSpec(TraitedSpec):
-    outfile = File(exists=True, desc='binarized output volume')
-    countfile = File(desc='ascii file containing number of hits')
+    binary_file = File(exists=True, desc='binarized output volume')
+    count_file = File(desc='ascii file containing number of hits')
     
 class Binarize(FSCommand):
     """Use FreeSurfer mri_binarize to threshold an input volume
@@ -299,7 +304,7 @@ class Binarize(FSCommand):
     Examples
     --------
     >>> from nipype.interfaces.freesurfer import Threshold
-    >>> binvol = Threshold(infile='foo.nii', min=10, outfile='foo_out.nii')
+    >>> binvol = Threshold(in_file='foo.nii', min=10, binary_file='foo_out.nii')
     >>> binvol.cmdline
     'mri_binarize --i foo.nii --min 10.000000 --o foo_out.nii'
     
@@ -311,22 +316,26 @@ class Binarize(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outfile = self.inputs.outfile
+        outfile = self.inputs.binary_file
         if not isdefined(outfile):
-            outputs['outfile'] = fname_presuffix(self.inputs.infile,
+            outputs['binary_file'] = fname_presuffix(self.inputs.in_file,
                                             newpath=os.getcwd(),
                                             suffix='_thresh')
-        value = self.inputs.countfile
+        outputs['binary_file'] = outfile
+        value = self.inputs.count_file
         if isdefined(value):
             if isinstance(value, bool):
-                outputs['countfile'] = fname_presuffix(self.inputs.infile,
-                                                       suffix='_count.txt',
-                                                       newpath=os.getcwd(),
-                                                       use_ext=False)
+                if value:
+                    outputs['count_file'] = fname_presuffix(self.inputs.in_file,
+                                                            suffix='_count.txt',
+                                                            newpath=os.getcwd(),
+                                                            use_ext=False)
+            else:
+                outputs['count_file'] = value
         return outputs
 
     def _format_arg(self, name, spec, value):
-        if name == 'countfile':
+        if name == 'count_file':
             if isinstance(value, bool):
                 fname = self._list_outputs()[name]
             else:
@@ -335,53 +344,55 @@ class Binarize(FSCommand):
         return super(Binarize, self)._format_arg(name, spec, value)
     
     def _gen_filename(self, name):
-        if name == 'outfile':
+        if name == 'binary_file':
             return self._list_outputs()[name]
         return None    
 
 class Threshold(Binarize):
+    """Alias for Binarize
+    """
     pass
     
 
 class ConcatenateInputSpec(FSTraitedSpec):
-    invol = InputMultiPath(File(exists=True),
+    in_files = InputMultiPath(File(exists=True),
                  desc = 'Individual volumes to be concatenated',
                  argstr='--i %s...',mandatory=True)
-    outvol = File('concat_output.nii.gz', desc = 'Output volume', argstr='--o %s',
+    concatenated_file = File('concat_output.nii.gz', desc = 'Output volume', argstr='--o %s',
                   usedefault=True)
     sign = traits.Enum('abs','pos','neg', argstr='--%s',
           desc = 'Take only pos or neg voxles from input, or take abs')
     stats = traits.Enum('sum','var','std','max','min', 'mean', argstr='--%s',
           desc = 'Compute the sum, var, std, max, min or mean of the input volumes')
-    pairedstats = traits.Enum('sum','avg','diff', 'diff-norm','diff-norm1',
+    paired_stats = traits.Enum('sum','avg','diff', 'diff-norm','diff-norm1',
                               'diff-norm2', argstr='--paired-%s',
                               desc = 'Compute paired sum, avg, or diff')
     gmean = traits.Int(argstr='--gmean %d',
                        desc = 'create matrix to average Ng groups, Nper=Ntot/Ng')
-    meandivn = traits.Bool(argstr='--mean-div-n',
+    mean_div_n = traits.Bool(argstr='--mean-div-n',
                            desc='compute mean/nframes (good for var)')
-    multiplyby = traits.Float(argstr='--mul %f',
+    multiply_by = traits.Float(argstr='--mul %f',
           desc = 'Multiply input volume by some amount')
-    addval = traits.Float(argstr='--add %f',
+    add_val = traits.Float(argstr='--add %f',
                           desc = 'Add some amount to the input volume')
-    multiplymatrix = File(exists=True, argstr='--mtx %s',
+    multiply_matrix_file = File(exists=True, argstr='--mtx %s',
           desc = 'Multiply input by an ascii matrix in file')
     combine = traits.Bool(argstr='--combine',
           desc = 'Combine non-zero values into single frame volume')
-    keepdtype = traits.Bool(argstr='--keep-datatype',
+    keep_dtype = traits.Bool(argstr='--keep-datatype',
           desc = 'Keep voxelwise precision type (default is float')
-    maxbonfcor = traits.Bool(argstr='--max-bonfcor',
+    max_bonfcor = traits.Bool(argstr='--max-bonfcor',
           desc = 'Compute max and bonferroni correct (assumes -log10(ps))')
-    maxindex = traits.Bool(argstr='--max-index',
+    max_index = traits.Bool(argstr='--max-index',
           desc = 'Compute the index of max voxel in concatenated volumes')
-    mask = File(exists=True, argstr='--mask %s', desc = 'Mask input with a volume')
+    mask_file = File(exists=True, argstr='--mask %s', desc = 'Mask input with a volume')
     vote = traits.Bool(argstr='--vote',
           desc = 'Most frequent value at each voxel and fraction of occurances')
     sort = traits.Bool(argstr='--sort',
           desc = 'Sort each voxel by ascending frame value')
 
 class ConcatenateOutputSpec(TraitedSpec):
-    outvol = File(exists=True,
+    concatenated_file = File(exists=True,
                   desc='Path/name of the output volume')
 
 class Concatenate(FSCommand):
@@ -395,7 +406,7 @@ class Concatenate(FSCommand):
     Combine two input volumes into one volume with two frames
 
     >>> concat = fs.Concatenate()
-    >>> concat.inputs.infile = ['foo.nii,goo.nii']
+    >>> concat.inputs.in_files = ['foo.nii,goo.nii']
     >>> concat.inputs.outfile 'bar.nii'
 
     """
@@ -406,76 +417,77 @@ class Concatenate(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['outvol'] = self.inputs.outvol
+        outputs['concatenated_file'] = self.inputs.concatenated_file
         return outputs
 
 class SegStatsInputSpec(FSTraitedSpec):
-    _xor_inputs = ('segvol', 'annot', 'surflabel')
-    segvol = File(exists=True, argstr='--seg %s', xor=_xor_inputs,
+    _xor_inputs = ('segmentation_file', 'annot', 'surf_label')
+    segmentation_file = File(exists=True, argstr='--seg %s', xor=_xor_inputs,
                   mandatory=True, desc='segmentation volume path')
     annot = traits.Tuple(traits.Str,traits.Enum('lh','rh'),traits.Str,
                          argstr='--annot %s %s %s', xor=_xor_inputs,
                          mandatory=True,
                          desc='subject hemi parc : use surface parcellation')
-    surflabel = traits.Tuple(traits.Str,traits.Enum('lh','rh'),traits.Str,
+    surf_label = traits.Tuple(traits.Str,traits.Enum('lh','rh'),traits.Str,
                              argstr='--slabel %s %s %s', xor=_xor_inputs,
                              mandatory=True,
                              desc='subject hemi label : use surface label')
-    sumfile = File(argstr='--sum %s', genfile=True,
+    summary_file = File(argstr='--sum %s', genfile=True,
                    desc='Segmentation stats summary table file')
-    parvol = File(exists=True, argstr='--pv %f',
+    partial_volume_file = File(exists=True, argstr='--pv %f',
                   desc='Compensate for partial voluming')
-    invol = File(exists=True, argstr='--i %s',
+    in_file = File(exists=True, argstr='--i %s',
                  desc='Use the segmentation to report stats on this volume')
     frame = traits.Int(argstr='--frame %d',
                        desc='Report stats on nth frame of input volume')
     multiply = traits.Float(argstr='--mul %f', desc='multiply input by val')
-    calcsnr = traits.Bool(argstr='--snr', desc='save mean/std as extra column in output table')
-    calcpower = traits.Enum('sqr','sqrt',argstr='--%s',
+    calc_snr = traits.Bool(argstr='--snr', desc='save mean/std as extra column in output table')
+    calc_power = traits.Enum('sqr','sqrt',argstr='--%s',
                           desc='Compute either the sqr or the sqrt of the input')
-    _ctab_inputs = ('ctab', 'ctabdefault', 'ctabgca')
-    ctab = File(exists=True, argstr='--ctab %s', xor=_ctab_inputs,
+    _ctab_inputs = ('color_table_file', 'default_color_table', 'gca_color_table')
+    color_table_file = File(exists=True, argstr='--ctab %s', xor=_ctab_inputs,
                 desc='color table file with seg id names')
-    ctabdefault = traits.Bool(argstr='--ctab-default', xor=_ctab_inputs,
+    default_color_table = traits.Bool(argstr='--ctab-default', xor=_ctab_inputs,
                 desc='use $FREESURFER_HOME/FreeSurferColorLUT.txt')
-    ctabgca = File(exists=True, argstr='--ctab-gca %s', xor=_ctab_inputs,
+    gca_color_table = File(exists=True, argstr='--ctab-gca %s', xor=_ctab_inputs,
                 desc='get color table from GCA (CMA)')
-    segid = traits.List(argstr='--id %d...',desc='Manually specify segmentation ids')
-    excludeid = traits.Int(argstr='--excludeid %d',desc='Exclude seg id from report')
-    excludectxgmwm = traits.Bool(argstr='--excl-ctxgmwm',
+    segment_id = traits.List(argstr='--id %s...',desc='Manually specify segmentation ids')
+    exclude_id = traits.Int(argstr='--excludeid %d',desc='Exclude seg id from report')
+    exclude_ctx_gm_wm = traits.Bool(argstr='--excl-ctxgmwm',
                                  desc='exclude cortical gray and white matter')
-    surfwm = traits.Bool(argstr='--surf-wm-vol',desc='Compute wm volume from surf')
-    surfctx = traits.Bool(argstr='--surf-ctx-vol',desc='Compute cortex volume from surf')
-    nonempty = traits.Bool(argstr='--nonempty',desc='Only report nonempty segmentations')
-    maskvol = File(exists=True, argstr='--mask %s',
+    wm_vol_from_surf = traits.Bool(argstr='--surf-wm-vol',desc='Compute wm volume from surf')
+    cortex_vol_from_surf = traits.Bool(argstr='--surf-ctx-vol',desc='Compute cortex volume from surf')
+    non_empty_only = traits.Bool(argstr='--nonempty',desc='Only report nonempty segmentations')
+    mask_file = File(exists=True, argstr='--mask %s',
                    desc='Mask volume (same size as seg')
-    maskthresh = traits.Float(argstr='--maskthresh %f',
+    mask_thresh = traits.Float(argstr='--maskthresh %f',
                               desc='binarize mask with this threshold <0.5>')
-    masksign = traits.Enum('abs','pos','neg','--masksign %s',
+    mask_sign = traits.Enum('abs','pos','neg','--masksign %s',
                            desc='Sign for mask threshold: pos, neg, or abs')
-    maskframe = traits.Int('--maskframe %d',
-                           desc='Mask with this (0 based) frame of the mask volume')
-    maskinvert = traits.Bool(argstr='--maskinvert', desc='Invert binarized mask volume')
-    maskerode = traits.Int(argstr='--maskerode %d', desc='Erode mask by some amount')
-    brainvol = traits.Enum('brain-vol-from-seg','brainmask','--%s',
+    mask_frame = traits.Int('--maskframe %d',
+                            requires=['mask_file'],
+                            desc='Mask with this (0 based) frame of the mask volume')
+    mask_invert = traits.Bool(argstr='--maskinvert', desc='Invert binarized mask volume')
+    mask_erode = traits.Int(argstr='--maskerode %d', desc='Erode mask by some amount')
+    brain_vol = traits.Enum('brain-vol-from-seg','brainmask','--%s',
          desc='Compute brain volume either with ``brainmask`` or ``brain-vol-from-seg``')
     etiv = traits.Bool(argstr='--etiv',desc='Compute ICV from talairach transform')
-    etivonly = traits.Enum('etiv','old-etiv','--%s-only',
+    etiv_only = traits.Enum('etiv','old-etiv','--%s-only',
                            desc='Compute etiv and exit.  Use ``etiv`` or ``old-etiv``')
-    avgwftxt = traits.Either(traits.Bool, File, argstr='--avgwf %s',
+    avgwf_txt_file = traits.Either(traits.Bool, File, argstr='--avgwf %s',
                              desc='Save average waveform into file (bool or filename)')
-    avgwfvol = traits.Either(traits.Bool, File, argstr='--avgwfvol %s',
+    avgwf_file = traits.Either(traits.Bool, File, argstr='--avgwfvol %s',
                              desc='Save as binary volume (bool or filename)')
-    sfavg = traits.Either(traits.Bool, File, argstr='--sfavg %s',
+    sf_avg_file = traits.Either(traits.Bool, File, argstr='--sfavg %s',
                           desc='Save mean across space and time')
     vox = traits.List(traits.Int, argstr='--vox %s',
                      desc='Replace seg with all 0s except at C R S (three int inputs)')
 
 class SegStatsOutputSpec(TraitedSpec):
-    sumfile = File(exists=True,desc='Segmentation summary statistics table')
-    avgwftxt = File(desc='Text file with functional statistics averaged over segs')
-    avgwfvol = File(desc='Volume with functional statistics averaged over segs')
-    sfavg = File(desc='Text file with func statistics averaged over segs and framss')
+    summary_file = File(exists=True,desc='Segmentation summary statistics table')
+    avgwf_txt_file = File(desc='Text file with functional statistics averaged over segs')
+    avgwf_file = File(desc='Volume with functional statistics averaged over segs')
+    sf_avg_file = File(desc='Text file with func statistics averaged over segs and framss')
 
 
 class SegStats(FSCommand):
@@ -487,7 +499,7 @@ class SegStats(FSCommand):
     >>> ss = fs.SegStats()
     >>> ss.inputs.annot = ('PWS04', 'lh', 'aparc')
     >>> ss.inputs.environ['SUBJECTS_DIR'] = '/somepath/FSDATA'
-    >>> ss.inputs.avgwftxt = True
+    >>> ss.inputs.avgwf_txt_file = True
     >>> ss.cmdline
     'mri_segstats --annot PWS04 lh aparc --avgwf ./PWS04_lh_aparc_avgwf.txt --sum ./summary.stats'
     
@@ -499,17 +511,17 @@ class SegStats(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['sumfile'] = self.inputs.sumfile
-        if not isdefined(outputs['sumfile']):
-            outputs['sumfile'] = os.path.join(os.getcwd(), 'summary.stats')
-        suffices =dict(avgwftxt='_avgwf.txt', avgwfvol='_avgwf.nii.gz',
-                     sfavg='sfavg.txt')
-        if isdefined(self.inputs.segvol):
-            _, src = os.path.split(self.inputs.segvol)
+        outputs['summary_file'] = self.inputs.summary_file
+        if not isdefined(outputs['summary_file']):
+            outputs['summary_file'] = os.path.join(os.getcwd(), 'summary.stats')
+        suffices =dict(avgwf_txt_file='_avgwf.txt', avgwf_file='_avgwf.nii.gz',
+                     sf_avg_file='sfavg.txt')
+        if isdefined(self.inputs.segmentation_file):
+            _, src = os.path.split(self.inputs.segmentation_file)
         if isdefined(self.inputs.annot):
             src = '_'.join(self.inputs.annot)
-        if isdefined(self.inputs.surflabel):
-            src = '_'.join(self.inputs.surflabel)
+        if isdefined(self.inputs.surf_label):
+            src = '_'.join(self.inputs.surf_label)
         for name, suffix in suffices.items():
             value = getattr(self.inputs, name)
             if isdefined(value):
@@ -522,7 +534,7 @@ class SegStats(FSCommand):
         return outputs
 
     def _format_arg(self, name, spec, value):
-        if name in ['avgwftxt', 'avgwfvol', 'sfavg']:
+        if name in ['avgwftxt', 'avgwf_file', 'sf_avg_file']:
             if isinstance(value, bool):
                 fname = self._list_outputs()[name]
             else:
@@ -531,70 +543,71 @@ class SegStats(FSCommand):
         return super(SegStats, self)._format_arg(name, spec, value)
     
     def _gen_filename(self, name):
-        if name == 'sumfile':
+        if name == 'summary_file':
             return self._list_outputs()[name]
         return None    
 
+
 class Label2VolInputSpec(FSTraitedSpec):
-    labelfile = InputMultiPath(File(exists=True), argstr='--label %s...',
-                   xor = ('labelfile', 'annotfile', 'segfile', 'aparcaseg'),
+    label_file = InputMultiPath(File(exists=True), argstr='--label %s...',
+                   xor = ('label_file', 'annot_file', 'seg_file', 'aparc_aseg'),
                                copyfile=False,
                                mandatory=True,
                                desc='list of label files')
-    annotfile = File(exists=True, argstr='--annot %s',
-                     xor = ('labelfile', 'annotfile', 'segfile', 'aparcaseg'),
+    annot_file = File(exists=True, argstr='--annot %s',
+                     xor = ('label_file', 'annot_file', 'seg_file', 'aparc_aseg'),
                      requires = ('subjectid', 'hemi'),
                      mandatory=True,
                      copyfile=False,
                      desc='surface annotation file')
-    segfile = File(exists=True, argstr='--seg %s',
-                   xor = ('labelfile', 'annotfile', 'segfile', 'aparcaseg'),
+    seg_file = File(exists=True, argstr='--seg %s',
+                   xor = ('label_file', 'annot_file', 'seg_file', 'aparc_aseg'),
                    mandatory=True,
                    copyfile=False,
                    desc='segmentation file')
-    aparcaseg = traits.Bool(argstr='--aparc+aseg',
-                            xor = ('labelfile', 'annotfile', 'segfile', 'aparcaseg'),
+    aparc_aseg = traits.Bool(argstr='--aparc+aseg',
+                            xor = ('label_file', 'annot_file', 'seg_file', 'aparc_aseg'),
                             mandatory=True,
                             desc='use aparc+aseg.mgz in subjectdir as seg')
-    template = File(exists=True, argstr='--temp %s', mandatory=True,
+    template_file = File(exists=True, argstr='--temp %s', mandatory=True,
                     desc='output template volume')
-    regmatfile = File(exists=True, argstr='--reg %s',
-                      xor = ('regmatfile', 'regheader', 'identity'),
+    reg_file = File(exists=True, argstr='--reg %s',
+                      xor = ('reg_file', 'reg_header', 'identity'),
                  desc='tkregister style matrix VolXYZ = R*LabelXYZ')
-    regheader = File(exists=True, argstr='--regheader %s',
-                      xor = ('regmatfile', 'regheader', 'identity'),
+    reg_header = File(exists=True, argstr='--regheader %s',
+                      xor = ('reg_file', 'reg_header', 'identity'),
                      desc= 'label template volume')
     identity = traits.Bool(argstr='--identity',
-                           xor = ('regmatfile', 'regheader', 'identity'),
+                           xor = ('reg_file', 'reg_header', 'identity'),
                            desc='set R=I')
-    invertmtx = traits.Bool(argstr='--invertmtx',
+    invert_mtx = traits.Bool(argstr='--invertmtx',
                             desc='Invert the registration matrix')
-    fillthresh = traits.Range(0., 1., argstr='--fillthresh %.f',
+    fill_thresh = traits.Range(0., 1., argstr='--fillthresh %.f',
                               desc='thresh : between 0 and 1')
-    labvoxvol = traits.Float(argstr='--labvoxvol %f',
+    label_voxel_volume = traits.Float(argstr='--labvoxvol %f',
                              desc='volume of each label point (def 1mm3)')
     proj = traits.Tuple(traits.Enum('abs','frac'), traits.Float,
                         traits.Float, traits.Float,
                         argstr='--proj %s %f %f %f',
                         requries = ('subjectid', 'hemi'),
                         desc='project along surface normal')
-    subjectid = traits.Str(argstr='--subject %s',
+    subject_id = traits.Str(argstr='--subject %s',
                            desc='subject id')
     hemi = traits.Enum('lh', 'rh', argstr='--hemi %s',
                        desc='hemisphere to use lh or rh')
     surface = traits.Str(argstr='--surf %s',
                          desc='use surface instead of white')
-    outfile = File(argstr='--o %s', genfile=True,
+    vol_label_file = File(argstr='--o %s', genfile=True,
                           desc='output volume')
-    hitvolid = File(argstr='--hits %s',
-                           desc='each frame is nhits for a label')
-    labelstat = File(argstr='--label-stat %s',
+    label_hit_file = File(argstr='--hits %s',
+                           desc='file with each frame is nhits for a label')
+    map_label_stat = File(argstr='--label-stat %s',
                     desc='map the label stats field into the vol')
-    nativevox2ras = traits.Bool(argstr='--native-vox2ras',
+    native_vox2ras = traits.Bool(argstr='--native-vox2ras',
                desc='use native vox2ras xform instead of  tkregister-style')
 
 class Label2VolOutputSpec(TraitedSpec):
-    outfile = File(exists=True, desc='output volume')
+    vol_label_file = File(exists=True, desc='output volume')
 
 class Label2Vol(FSCommand):
     """Make a binary volume from a Freesurfer label
@@ -602,7 +615,7 @@ class Label2Vol(FSCommand):
     Examples
     --------
     >>> from nipype.interfaces.freesurfer import Label2Vol
-    >>> binvol = Label2Vol(label='foo.label', templatevol='bar.nii', regmat='foo_reg.dat',fillthresh=0.5,outvol='foo_out.nii')
+    >>> binvol = Label2Vol(label_file='foo.label', template_file='bar.nii', regmat='foo_reg.dat',fillthresh=0.5, vol_label_file='foo_out.nii')
     >>> binvol.cmdline
     'mri_label2vol --fillthresh 0.500000 --label foo.label --o foo_out.nii --reg foo_reg.dat --temp bar.nii'
     
@@ -614,20 +627,20 @@ class Label2Vol(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outfile = self.inputs.outfile
+        outfile = self.inputs.vol_label_file
         if not isdefined(outfile):
-            for key in ['labelfile', 'annotfile', 'segfile']:
-                if isdefined(self.inputs.labelfile):
+            for key in ['label_file', 'annot_file', 'seg_file']:
+                if isdefined(self.inputs.label_file):
                     _, src = os.path.split(getattr(self.inputs, key))
             if isdefined(self.inputs.aparcaaseg):
                 src = 'aparc+aseg.mgz'
             outfile = fname_presuffix(src, suffix='_vol.nii.gz',
                                       newpath=os.getcwd(),
                                       use_ext=False)
-        outputs['outfile'] = outfile
+        outputs['vol_label_file'] = outfile
         return outputs
 
     def _gen_filename(self, name):
-        if name == 'outfile':
+        if name == 'vol_label_file':
             return self._list_outputs()[name]
         return None
