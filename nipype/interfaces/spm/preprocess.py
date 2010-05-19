@@ -285,14 +285,22 @@ class Coregister(SPMCommand):
         return outputs
 
 class NormalizeInputSpec(SPMCommandInputSpec):
-    template = File(exists=True, field='eoptions.template', desc='template file to normalize to', copyfile=False)
-    source = InputMultiPath(File(exists=True), field='subj.source', desc='file to normalize to template', mandatory=True, copyfile=True)
+    template = File(exists=True, field='eoptions.template',
+                    desc='template file to normalize to',
+                    mandatory=True, xor=['parameter_file'],
+                    copyfile=False)
+    source = InputMultiPath(File(exists=True), field='subj.source',
+                            desc='file to normalize to template',
+                            xor=['parameter_file'],
+                            mandatory=True, copyfile=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
-                          desc='one of: estimate, write, estwrite (opt, estwrite)', usedefault=True)
+                          desc='one of: estimate, write, estwrite (opt, estwrite)',
+                          usedefault=True)
     apply_to_files = InputMultiPath(File(exists=True), field='subj.resample',
                                desc='files to apply transformation to (opt)', copyfile=True)
-    parameter_file = File(field='subj.matname',
-                                  desc='normalization parameter file*_sn.mat', copyfile=False)
+    parameter_file = File(field='subj.matname', mandatory=True,
+                          xor=['source', 'template'],
+                          desc='normalization parameter file*_sn.mat', copyfile=False)
     source_weight = File(field='subj.wtsrc',
                                  desc='name of weighting image for source (opt)', copyfile=False)
     template_weight = File(field='eoptions.weight',
@@ -362,15 +370,15 @@ class Normalize(SPMCommand):
         """
         einputs = super(Normalize, self)._parse_inputs(skip=('jobtype',
                                                              'apply_to_files'))
-        if self.inputs.apply_to_files:
-            inputfiles = deepcopy(filename_to_list(self.inputs.apply_to_files))
-            if self.inputs.source:
-                inputfiles.append(list_to_filename(self.inputs.source))
+        if isdefined(self.inputs.apply_to_files):
+            inputfiles = deepcopy(self.inputs.apply_to_files)
+            if isdefined(self.inputs.source):
+                inputfiles.extend(self.inputs.source)
             einputs[0]['subj']['resample'] = scans_for_fnames(inputfiles)
         jobtype = self.inputs.jobtype
         if jobtype in ['estwrite', 'write']:
-            if self.inputs.apply_to_files is None:
-                if self.inputs.source:
+            if not isdefined(self.inputs.apply_to_files):
+                if isdefined(self.inputs.source):
                     einputs[0]['subj']['resample'] = scans_for_fname(self.inputs.source)
         return [{'%s' % (jobtype):einputs[0]}]
 
@@ -388,17 +396,16 @@ class Normalize(SPMCommand):
             if isdefined(self.inputs.apply_to_files):
                 outputs['normalized_files'] = self.inputs.apply_to_files
             outputs['normalized_source'] = self.inputs.source
-        elif self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
+        elif 'write' in self.inputs.jobtype:
             outputs['normalized_files'] = []
             if isdefined(self.inputs.apply_to_files):
                 for imgf in filename_to_list(self.inputs.apply_to_files):
                     outputs['normalized_files'].append(fname_presuffix(imgf, prefix='w'))
-                outputs['normalized_files'] = list_to_filename(outputs['normalized_files'])
 
-            outputs['normalized_source'] = []
-            for imgf in filename_to_list(self.inputs.source):
-                outputs['normalized_source'].append(fname_presuffix(imgf, prefix='w'))
-            outputs['normalized_source'] = list_to_filename(outputs['normalized_source'])
+            if isdefined(self.inputs.source):
+                outputs['normalized_source'] = []
+                for imgf in filename_to_list(self.inputs.source):
+                    outputs['normalized_source'].append(fname_presuffix(imgf, prefix='w'))
 
         return outputs
 
@@ -513,32 +520,21 @@ class Segment(SPMCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        f = self.inputs.data
+        f = self.inputs.data[0]
 
-        c_file = fname_presuffix(f, prefix='c1')
-        outputs['native_gm_image'] = c_file
-        wc_file = fname_presuffix(f, prefix='wc1')
-        outputs['normalized_gm_image'] = wc_file
-        mwc_file = fname_presuffix(f, prefix='mwc1')
-        outputs['modulated_gm_image'] = mwc_file
-
-        c_file = fname_presuffix(f, prefix='c2')
-        outputs['native_wm_image'] = c_file
-        wc_file = fname_presuffix(f, prefix='wc2')
-        outputs['normalized_wm_image'] = wc_file
-        mwc_file = fname_presuffix(f, prefix='mwc2')
-        outputs['modulated_wm_image'] = mwc_file
-
-        c_file = fname_presuffix(f, prefix='c3')
-        outputs['native_csf_image'] = c_file
-        wc_file = fname_presuffix(f, prefix='wc3')
-        outputs['normalized_csf_image'] = wc_file
-        mwc_file = fname_presuffix(f, prefix='mwc3')
-        outputs['modulated_csf_image'] = mwc_file
-
-        t_mat = glob(fname_presuffix(f, suffix='_seg_sn.mat', use_ext=False))
+        for tidx,tissue in enumerate(['gm', 'wm', 'csf']):
+            outtype = '%s_output_type'%tissue
+            if isdefined(getattr(self.inputs, outtype)):
+                for idx,(image,prefix) in enumerate([('modulated','mw'),
+                                                     ('normalized','w'),
+                                                     ('native','')]):
+                    if getattr(self.inputs, outtype)[idx]:
+                        outfield = '%s_%s_image'%(image,tissue)
+                        outputs[outfield] = fname_presuffix(f, prefix='%sc%d'%(prefix,tidx+1))
+        outputs['modulated_input_image'] = fname_presuffix(f, prefix='m')
+        t_mat = fname_presuffix(f, suffix='_seg_sn.mat', use_ext=False)
         outputs['transformation_mat'] = t_mat
-        invt_mat = glob(fname_presuffix(f, suffix='_seg_inv_sn.mat', use_ext=False))
+        invt_mat = fname_presuffix(f, suffix='_seg_inv_sn.mat', use_ext=False)
         outputs['inverse_transformation_mat'] = invt_mat
         return outputs
 
