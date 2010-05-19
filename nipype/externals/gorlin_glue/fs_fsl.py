@@ -353,7 +353,7 @@ def mcDatToFeatExtreg(mcdat, outfile, dof=6):
     out.tofile(outfile, header=False, header_order=order)
     
 def preRegToFS(featObj, subject, standard='/usr/share/fsl/data/standard/avg152T1_brain.nii.gz', **kwargs):
-    """During creation, prepares a Feat object to register to a subject's
+    """During creation, prepares a FEAT object to register to a subject's
     FS anatomy
     
     After the feat is run, you must call postRegToFS otherwise the results will
@@ -397,9 +397,9 @@ def regToFS(feat, subject, **kwargs):
     file to register the exf to anatomy, as FLIRT (in my experience) is a 
     terrible coregister, producing files flipped r<->c and cm's off
     
-    Note that this must be called *after* Feat has already run
+    Note that this must be called *after* FEAT has already run
     
-    If you are creating a Feat using the Feat object, see preRegToFS and
+    If you are creating a FEAT using the FEAT object, see preRegToFS and
     postRegToFS.  See them anyway for more details, since this calls them.
     
     :feat:
@@ -417,7 +417,7 @@ def regToFS(feat, subject, **kwargs):
     """
     regdir=p.join(feat, 'reg')
     fslregdir=p.join(freesurfer.SUBJECTS_DIR, subject, 'mri', 'fslreg')
-    myfeat = fsl.Feat()
+    myfeat = fsl.FEAT()
     myfeat.setAnalysis(0)
     myfeat.setFMRI(overwrite_yn=1)
     myfeat.addFiles(feat)
@@ -427,7 +427,7 @@ def regToFS(feat, subject, **kwargs):
     myfeat.execute()
     postRegToFS(feat, subject, **kwargs)
 def postRegToFS(feat, subject, reg=None, **kwargs):
-    """Updates the registration of a created Feat dir to a FS subject
+    """Updates the registration of a created FEAT dir to a FS subject
     
     preRegToFS must have been used in creation of the feat dir, otherwise call
     regToFS
@@ -463,7 +463,7 @@ def postRegToFS(feat, subject, reg=None, **kwargs):
     setReg(feat, subject, reg=reg)
     
     # Update poststats
-    featObj=fsl.Feat()
+    featObj=fsl.FEAT()
     featObj.setAnalysis(4)
     featObj.addFiles(feat)
     featObj.updateModel()

@@ -247,22 +247,22 @@ level1design.inputs.bases              = {'hrf':{'derivs': True}}
 level1design.inputs.contrasts          = contrasts
 
 """
-e. Use :class:`nipype.interfaces.fsl.FeatModel` to generate a run
-specific mat file for use by FilmGLS
+e. Use :class:`nipype.interfaces.fsl.FEATModel` to generate a run
+specific mat file for use by FILMGLS
 """
 
-modelgen = nw.NodeWrapper(interface=fsl.FeatModel(),diskbased=True)
+modelgen = nw.NodeWrapper(interface=fsl.FEATModel(),diskbased=True)
 modelgen.iterfield = ['fsf_file']
 
-featmodel = nw.NodeWrapper(interface=fsl.Feat(),diskbased=True)
+featmodel = nw.NodeWrapper(interface=fsl.FEAT(),diskbased=True)
 featmodel.iterfield = ['fsf_file']
 
 """
-   f. Use :class:`nipype.interfaces.fsl.FilmGLS` to estimate a model
+   f. Use :class:`nipype.interfaces.fsl.FILMGLS` to estimate a model
    specified by a mat file and a functional run
 """
 
-modelestimate = nw.NodeWrapper(interface=fsl.FilmGLS(),diskbased=True)
+modelestimate = nw.NodeWrapper(interface=fsl.FILMGLS(),diskbased=True)
 modelestimate.inputs.thresh = 10
 modelestimate.inputs.sa = True
 modelestimate.inputs.ms = 5

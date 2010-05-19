@@ -137,17 +137,17 @@ modelspec.inputs.concatenate_runs = False
 level1design = pe.Node(interface=fsl.Level1Design(), name="level1design")
 
 """
-   e. Use :class:`nipype.interfaces.fsl.FeatModel` to generate a
-   run specific mat file for use by FilmGLS
+   e. Use :class:`nipype.interfaces.fsl.FEATModel` to generate a
+   run specific mat file for use by FILMGLS
 """
-modelgen = pe.MapNode(interface=fsl.FeatModel(), name='modelgen',
+modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
                       iterfield = ['fsf_file'])
 
 """
-   f. Use :class:`nipype.interfaces.fsl.FilmGLS` to estimate a model
+   f. Use :class:`nipype.interfaces.fsl.FILMGLS` to estimate a model
    specified by a mat file and a functional run
 """
-modelestimate = pe.MapNode(interface=fsl.FilmGLS(), name='modelestimate',
+modelestimate = pe.MapNode(interface=fsl.FILMGLS(), name='modelestimate',
                            iterfield = ['design_file','infile'])
 
 """
@@ -190,10 +190,10 @@ level2model = pe.Node(interface=fsl.L2Model(),
                       name='l2model')
 
 """
-Use :class:`nipype.interfaces.fsl.Flameo` to estimate a second level
+Use :class:`nipype.interfaces.fsl.FLAMEO` to estimate a second level
 model
 """
-flameo = pe.MapNode(interface=fsl.Flameo(runmode='fe'), name="flameo",
+flameo = pe.MapNode(interface=fsl.FLAMEO(runmode='fe'), name="flameo",
                     iterfield=['copefile','varcopefile'])
 
 fixed_fx.connect([(copemerge,flameo,[('outfile','copefile')]),

@@ -9,8 +9,8 @@ from nipype.interfaces.fsl.base import FSLCommand, Info
 from nipype.interfaces.fsl.preprocess import (Fast, Flirt, ApplyXfm,
                                               Bet, McFlirt, Fnirt, ApplyWarp,
                                               SliceTimer)
-from nipype.interfaces.fsl.model import (Level1Design, Feat, FeatModel,
-                                         FilmGLS, FeatRegister, Flameo, ContrastMgr,
+from nipype.interfaces.fsl.model import (Level1Design, FEAT, FEATModel,
+                                         FILMGLS, FEATRegister, FLAMEO, ContrastMgr,
                                          L2Model, SMM)
 from nipype.interfaces.fsl.utils import (Smooth, Merge, ExtractRoi, Split,
                                          ImageMaths)
