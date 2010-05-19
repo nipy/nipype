@@ -21,7 +21,6 @@ These functions include:
 __docformat__ = 'restructuredtext'
 
 # Standard library imports
-from glob import glob
 from copy import deepcopy
 import os
 
@@ -38,7 +37,7 @@ from nipype.utils.filemanip import (fname_presuffix, filename_to_list,
                                     list_to_filename, split_filename)
 
 class SliceTimingInputSpec(SPMCommandInputSpec):
-    infile = InputMultiPath(File(exists=True), field='scans',
+    in_files = InputMultiPath(File(exists=True), field='scans',
                           desc='list of filenames to apply slice timing',
                           mandatory=True, copyfile=False)
     num_slices = traits.Int(field='nslices',
@@ -67,7 +66,7 @@ class SliceTiming(SPMCommand):
 
     >>> from nipype.interfaces.spm import SliceTiming
     >>> st = SliceTiming()
-    >>> st.inputs.infile = 'func.nii'
+    >>> st.inputs.in_files = 'func.nii'
     >>> st.inputs.num_slices = 32
     >>> st.inputs.time_repetition = 6.0
     >>> st.inputs.time_acquisition = 6. - 6./32.
@@ -85,7 +84,7 @@ class SliceTiming(SPMCommand):
     def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
         """
-        if opt == 'infile':
+        if opt == 'in_files':
             return scans_for_fnames(filename_to_list(val),
                                     separate_sessions=True)
         return val
@@ -93,7 +92,7 @@ class SliceTiming(SPMCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['timecorrected_files'] = []
-        filelist = filename_to_list(self.inputs.infile)
+        filelist = filename_to_list(self.inputs.in_files)
         for f in filelist:
             s_file = fname_presuffix(f, prefix='a')
             outputs['timecorrected_files'].append(s_file)
@@ -101,7 +100,7 @@ class SliceTiming(SPMCommand):
 
 
 class RealignInputSpec(SPMCommandInputSpec):
-    infile = InputMultiPath(File(exists=True), field='data', mandatory=True,
+    in_files = InputMultiPath(File(exists=True), field='data', mandatory=True,
                          desc='list of filenames to realign', copyfile=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
                           desc='one of: estimate, write, estwrite',
@@ -146,7 +145,7 @@ class Realign(SPMCommand):
 
     >>> import nipype.interfaces.spm as spm
     >>> realign = spm.Realign()
-    >>> realign.inputs.infile = 'a.nii'
+    >>> realign.inputs.in_files = 'a.nii'
     >>> realign.inputs.register_to_mean = True
     >>> realign.run() # doctest: +SKIP
 
@@ -161,7 +160,7 @@ class Realign(SPMCommand):
     def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
         """
-        if opt == 'infile':
+        if opt == 'in_files':
             return scans_for_fnames(filename_to_list(val),
                                     keep4d=True,
                                     separate_sessions=True)
@@ -177,17 +176,17 @@ class Realign(SPMCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if isdefined(self.inputs.infile):
+        if isdefined(self.inputs.in_files):
             outputs['realignment_parameters'] = []
-        for imgf in filename_to_list(self.inputs.infile):
+        for imgf in filename_to_list(self.inputs.in_files):
             outputs['realignment_parameters'].append(fname_presuffix(imgf,
                                                                      prefix='rp_',
                                                                      suffix='.txt',
                                                                      use_ext=False))
         if self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
-            outputs['mean_image'] = fname_presuffix(filename_to_list(self.inputs.infile)[0], prefix='mean')
+            outputs['mean_image'] = fname_presuffix(filename_to_list(self.inputs.in_files)[0], prefix='mean')
             outputs['realigned_files'] = []
-            for imgf in filename_to_list(self.inputs.infile):
+            for imgf in filename_to_list(self.inputs.in_files):
                 outputs['realigned_files'].append(fname_presuffix(imgf, prefix='r'))
         return outputs
 
@@ -628,7 +627,7 @@ class NewSegment(SPMCommand):
         return outputs
 
 class SmoothInputSpec(SPMCommandInputSpec):
-    infile = InputMultiPath(File(exists=True), field='data', desc='list of files to smooth', mandatory=True, copyfile=False)
+    in_files = InputMultiPath(File(exists=True), field='data', desc='list of files to smooth', mandatory=True, copyfile=False)
     fwhm = traits.Either(traits.List(traits.Float(), minlen=3, maxlen=3), traits.Float(), field='fwhm', desc='3-list of fwhm for each dimension (opt)')
     data_type = traits.Int(field='dtype', desc='Data type of the output images (opt)')
 
@@ -642,7 +641,7 @@ class Smooth(SPMCommand):
     --------
     >>> import nipype.interfaces.spm as spm
     >>> smooth = spm.Smooth()
-    >>> smooth.inputs.infile = 'a.nii'
+    >>> smooth.inputs.in_files = 'a.nii'
     >>> smooth.inputs.fwhm = [4, 4, 4]
     >>> smooth.run() # doctest: +SKIP
     """
@@ -653,7 +652,7 @@ class Smooth(SPMCommand):
     _jobname = 'smooth'
 
     def _format_arg(self, opt, val):
-        if opt in ['infile']:
+        if opt in ['in_files']:
             return scans_for_fnames(filename_to_list(val))
         if opt == 'fwhm':
             if not isinstance(val, list):
@@ -669,7 +668,7 @@ class Smooth(SPMCommand):
         outputs = self._outputs().get()
         outputs['smoothed_files'] = []
 
-        for imgf in filename_to_list(self.inputs.infile):
+        for imgf in filename_to_list(self.inputs.in_files):
             outputs['smoothed_files'].append(fname_presuffix(imgf, prefix='s'))
         return outputs
 

@@ -126,8 +126,8 @@ smooth.iterables = ('fwhm',fwhmlist)
 preproc.connect([(realign,coregister,[('mean_image', 'source'),
                                       ('realigned_files','apply_to_files')]),
                  (coregister, normalize, [('coregistered_files','apply_to_files')]),
-                 (normalize, smooth, [('normalized_files', 'infile')]),
-                 (normalize,skullstrip,[('normalized_source','infile')]),
+                 (normalize, smooth, [('normalized_files', 'in_files')]),
+                 (normalize,skullstrip,[('normalized_source','in_file')]),
                  (realign,art,[('realignment_parameters','realignment_parameters')]),
                  (normalize,art,[('normalized_files','realigned_files')]),
                  (skullstrip,art,[('maskfile','mask_file')])
@@ -170,7 +170,7 @@ first level contrasts specified in a few steps above.
 contrastestimate = pe.Node(interface = spm.EstimateContrast(), name="contrastestimate")
 
 l1analysis.connect([(modelspec,level1design,[('session_info','session_info')]),
-                  (level1design,level1estimate,[('spm_mat_file','spm_design_file')]),
+                  (level1design,level1estimate,[('spm_mat_file','spm_mat_file')]),
                   (level1estimate,contrastestimate,[('spm_mat_file','spm_mat_file'),
                                                   ('beta_images','beta_images'),
                                                   ('residual_image','residual_image')]),
@@ -335,7 +335,7 @@ level1 = pe.Workflow(name="level1")
 level1.base_dir = os.path.abspath('spm/workingdir')
 
 level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                (datasource,l1pipeline,[('func','preproc.realign.infile'),
+                (datasource,l1pipeline,[('func','preproc.realign.in_files'),
                                         ('struct', 'preproc.coregister.target'),
                                         ('struct', 'preproc.normalize.source')]),
                 (infosource,l1pipeline,[('subject_id','analysis.modelspec.subject_id'),

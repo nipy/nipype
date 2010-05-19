@@ -25,7 +25,7 @@ from nipype.utils.filemanip import (filename_to_list, list_to_filename,
 logger = logging.getLogger('spmlogger')
 
 class Level1DesignInputSpec(SPMCommandInputSpec):
-    spmmat_dir = Directory(exists=True, field='dir', desc='directory to store SPM.mat file (opt)')
+    spm_mat_dir = Directory(exists=True, field='dir', desc='directory to store SPM.mat file (opt)')
     timing_units = traits.Enum('secs', 'scans', field='timing.units', desc='units for specification of onsets')
     interscan_interval = traits.Float(field='timing.RT', desc='Interscan interval in secs')
     microtime_resolution = traits.Int(field='timing.fmri_t',
@@ -136,7 +136,7 @@ class Level1Design(SPMCommand):
     def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
         """
-        if opt in ['spmmat_dir', 'mask_image']:
+        if opt in ['spm_mat_dir', 'mask_image']:
             return np.array([str(val)], dtype=object)
         if opt in ['session_info', 'factor_info']:
             data = loadflat(val, opt)
@@ -150,7 +150,7 @@ class Level1Design(SPMCommand):
         """validate spm realign options if set to None ignore
         """
         einputs = super(Level1Design, self)._parse_inputs(skip=('mask_threshold'))
-        if not isdefined(self.inputs.spmmat_dir):
+        if not isdefined(self.inputs.spm_mat_dir):
             einputs[0]['dir'] = np.array([str(os.getcwd())], dtype=object)
         return einputs
 
@@ -181,7 +181,7 @@ class Level1Design(SPMCommand):
 
 
 class EstimateModelInputSpec(SPMCommandInputSpec):
-    spm_design_file = File(exists=True, field='spmmat', desc='absolute path to SPM.mat', copyfile=True)
+    spm_mat_file = File(exists=True, field='spmmat', desc='absolute path to SPM.mat', copyfile=True)
     estimation_method = traits.Dict(traits.Enum('Classical', 'Bayesian2', 'Bayesian'), field='method',
                                      desc='Classical, Bayesian2, Bayesian (dict)')
     flags = traits.Str(desc='optional arguments (opt)')
@@ -199,7 +199,7 @@ class EstimateModel(SPMCommand):
     Examples
     --------
     >>> est = spm.EstimateModel()
-    >>> est.inputs.spm_design_file = 'SPM.mat'
+    >>> est.inputs.spm_mat_file = 'SPM.mat'
     >>> est.run()
     """
     input_spec = EstimateModelInputSpec
@@ -210,7 +210,7 @@ class EstimateModel(SPMCommand):
     def _format_arg(self, opt, val):
         """Convert input to appropriate format for spm
         """
-        if opt == 'spm_design_file':
+        if opt == 'spm_mat_file':
             return np.array([str(val)], dtype=object)
         if opt == 'estimation_method':
             if isinstance(val, str):
@@ -229,10 +229,10 @@ class EstimateModel(SPMCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        pth, _ = os.path.split(self.inputs.spm_design_file)
+        pth, _ = os.path.split(self.inputs.spm_mat_file)
         mask = os.path.join(pth, 'mask.img')
         outputs['mask_image'] = mask
-        spm = sio.loadmat(self.inputs.spm_design_file)
+        spm = sio.loadmat(self.inputs.spm_mat_file)
         betas = []
         for vbeta in spm['SPM'][0, 0].Vbeta[0]:
             betas.append(str(os.path.join(pth, vbeta.fname[0])))

@@ -26,7 +26,7 @@ class BETInputSpec(FSLCommandInputSpec):
     """Note: Currently we don't support -R, -S, -Z,-A or -A2"""
     # We use position args here as list indices - so a negative number
     # will put something on the end
-    infile = File(exists=True,
+    in_file = File(exists=True,
                   desc = 'input file to skull strip',
                   argstr='%s', position=0, mandatory=True)
     outfile = File(desc = 'name of output skull stripped image',
@@ -85,25 +85,25 @@ class BET(FSLCommand):
 
     >>> from nipype.interfaces import fsl
     >>> btr = fsl.BET()
-    >>> res = btr.run('infile', 'outfile', frac=0.5) # doctest: +SKIP
+    >>> res = btr.run('in_file', 'outfile', frac=0.5) # doctest: +SKIP
 
     Assign options through the ``inputs`` attribute:
 
     >>> btr = fsl.BET()
-    >>> btr.inputs.infile = 'foo.nii'
+    >>> btr.inputs.in_file = 'foo.nii'
     >>> btr.inputs.outfile = 'bar.nii'
     >>> btr.inputs.frac = 0.7
     >>> res = btr.run() # doctest: +SKIP
 
     Specify options when creating a BET instance:
 
-    >>> btr = fsl.BET(infile='infile', outfile='outfile', frac=0.5)
+    >>> btr = fsl.BET(in_file='in_file', outfile='outfile', frac=0.5)
     >>> res = btr.run() # doctest: +SKIP
 
     Loop over many inputs (Note: the snippet below would overwrite the
     outfile each time):
 
-    >>> btr = fsl.BET(infile='infile', outfile='outfile')
+    >>> btr = fsl.BET(in_file='in_file', outfile='outfile')
     >>> fracvals = [0.3, 0.4, 0.5]
     >>> for val in fracvals:
     ...     res = btr.run(frac=val) # doctest: +SKIP
@@ -126,8 +126,8 @@ class BET(FSLCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['outfile'] = self.inputs.outfile
-        if not isdefined(outputs['outfile']) and isdefined(self.inputs.infile):
-            outputs['outfile'] = self._gen_fname(self.inputs.infile,
+        if not isdefined(outputs['outfile']) and isdefined(self.inputs.in_file):
+            outputs['outfile'] = self._gen_fname(self.inputs.in_file,
                                               suffix = '_brain')
         if isdefined(self.inputs.mesh) and self.inputs.mesh:
             outputs['meshfile'] = self._gen_fname(outputs['outfile'],
