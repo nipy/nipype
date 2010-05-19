@@ -57,8 +57,6 @@ formatter = logging.Formatter(fmt='%(asctime)s,%(msecs)d %(name)-2s '\
 hdlr.setFormatter(formatter)
 logger.addHandler(hdlr)
 logger.setLevel(logging.getLevelName(config.get('logging','workflow_level')))
-nwlogger.addHandler(hdlr)
-nwlogger.setLevel(logging.getLevelName(config.get('logging','node_level')))
 fmlogger.addHandler(hdlr)
 fmlogger.setLevel(logging.getLevelName(config.get('logging','filemanip_level')))
 

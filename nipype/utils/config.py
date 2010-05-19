@@ -12,7 +12,6 @@ from StringIO import StringIO
 default_cfg = StringIO("""
 [logging]
 workflow_level = INFO
-node_level = INFO
 filemanip_level = INFO
 
 [execution]
