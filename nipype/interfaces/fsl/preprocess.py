@@ -29,7 +29,7 @@ class BETInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True,
                   desc = 'input file to skull strip',
                   argstr='%s', position=0, mandatory=True)
-    outfile = File(desc = 'name of output skull stripped image',
+    out_file = File(desc = 'name of output skull stripped image',
                    argstr='%s', position=1, genfile=True)
     outline = traits.Bool(desc = 'create surface outline image',
                           argstr='-o')
@@ -61,9 +61,9 @@ class BETInputSpec(FSLCommandInputSpec):
                               desc="bias field and neck cleanup")
 
 class BETOutputSpec(TraitedSpec):
-    outfile = File(exists=True,
+    out_file = File(exists=True,
                    desc="path/name of skullstripped file")
-    maskfile = File(
+    mask_file = File(
         desc="path/name of binary brain mask (if generated)")
     outlinefile = File(
         desc="path/name of outline file (if generated)")
@@ -85,25 +85,25 @@ class BET(FSLCommand):
 
     >>> from nipype.interfaces import fsl
     >>> btr = fsl.BET()
-    >>> res = btr.run('in_file', 'outfile', frac=0.5) # doctest: +SKIP
+    >>> res = btr.run('in_file', 'out_file', frac=0.5) # doctest: +SKIP
 
     Assign options through the ``inputs`` attribute:
 
     >>> btr = fsl.BET()
     >>> btr.inputs.in_file = 'foo.nii'
-    >>> btr.inputs.outfile = 'bar.nii'
+    >>> btr.inputs.out_file = 'bar.nii'
     >>> btr.inputs.frac = 0.7
     >>> res = btr.run() # doctest: +SKIP
 
     Specify options when creating a BET instance:
 
-    >>> btr = fsl.BET(in_file='in_file', outfile='outfile', frac=0.5)
+    >>> btr = fsl.BET(in_file='in_file', out_file='out_file', frac=0.5)
     >>> res = btr.run() # doctest: +SKIP
 
     Loop over many inputs (Note: the snippet below would overwrite the
-    outfile each time):
+    out_file each time):
 
-    >>> btr = fsl.BET(in_file='in_file', outfile='outfile')
+    >>> btr = fsl.BET(in_file='in_file', out_file='out_file')
     >>> fracvals = [0.3, 0.4, 0.5]
     >>> for val in fracvals:
     ...     res = btr.run(frac=val) # doctest: +SKIP
@@ -125,35 +125,35 @@ class BET(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['outfile'] = self.inputs.outfile
-        if not isdefined(outputs['outfile']) and isdefined(self.inputs.in_file):
-            outputs['outfile'] = self._gen_fname(self.inputs.in_file,
+        outputs['out_file'] = self.inputs.out_file
+        if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                               suffix = '_brain')
         if isdefined(self.inputs.mesh) and self.inputs.mesh:
-            outputs['meshfile'] = self._gen_fname(outputs['outfile'],
+            outputs['meshfile'] = self._gen_fname(outputs['out_file'],
                                                suffix = '_mesh.vtk',
                                                change_ext = False)
         if (isdefined(self.inputs.mask) and self.inputs.mask) or \
                 (isdefined(self.inputs.reduce_bias) and \
                      self.inputs.reduce_bias):
-            outputs['maskfile'] = self._gen_fname(outputs['outfile'],
+            outputs['mask_file'] = self._gen_fname(outputs['out_file'],
                                                suffix = '_mask')
         return outputs
 
     def _gen_filename(self, name):
-        if name == 'outfile':
+        if name == 'out_file':
             return self._list_outputs()[name]
         return None
 
 
 class FASTInputSpec(FSLCommandInputSpec):
     """ Defines inputs (trait classes) for FAST """
-    infiles = InputMultiPath(File(exists=True),
+    in_files = InputMultiPath(File(exists=True),
                           desc = 'image, or multi-channel set of images, ' \
                               'to be segmented',
                           argstr='%s', position=-1, mandatory=True)
     out_basename = File(desc = 'base name of output files',
-                        argstr='-o %s') #uses infile name as basename if none given
+                        argstr='-o %s') #uses in_file name as basename if none given
     number_classes = traits.Range(low=1, high=10, argstr = '-n %d',
                                   desc = 'number of tissue-type classes')
     output_biasfield = traits.Bool(desc = 'output estimated bias field',
@@ -259,7 +259,7 @@ class FAST(FSLCommand):
         if isdefined(self.inputs.out_basename):
             basefile = self.inputs.out_basename
         else:
-            basefile = self.inputs.infiles[-1]
+            basefile = self.inputs.in_files[-1]
 
         outputs['tissue_class_map'] = self._gen_fname(basefile,
                                                       suffix = '_seg')
@@ -267,7 +267,7 @@ class FAST(FSLCommand):
             outputs['tissue_class_files'].append(self._gen_fname(basefile,
                                                                  suffix = '_seg_%d'%(i)))
         if isdefined(self.inputs.output_biascorrected):
-            for val,f in enumerate(self.inputs.infiles):
+            for val,f in enumerate(self.inputs.in_files):
                 outputs['restored_image'].append(self._gen_fname(f,
                                                                  suffix = '_restore_%d'%(val)))
         outputs['mixeltype'] = self._gen_fname(basefile, suffix = '_mixeltype')
@@ -277,7 +277,7 @@ class FAST(FSLCommand):
                 outputs['partial_volume_files'].append(self._gen_fname(basefile,
                                                                        suffix='_pve_%d'%(i)))
         if self.inputs.output_biasfield:
-            for val,f in enumerate(self.inputs.infiles):
+            for val,f in enumerate(self.inputs.in_files):
                 outputs['bias_field'].append(self._gen_fname(basefile, suffix='_bias_%d'%val))
         #if self.inputs.probability_maps:
             
@@ -287,7 +287,7 @@ class FAST(FSLCommand):
    
        
 class FLIRTInputSpec(FSLCommandInputSpec):
-    infile = File(exists = True, argstr = '-in %s', mandatory = True,
+    in_file = File(exists = True, argstr = '-in %s', mandatory = True,
                   position = 0, desc = 'input file')
     # XXX Not clear if position is required for mandatory flirt inputs
     # since they are prefixed with argstrs.  But doing it to follow
@@ -295,7 +295,7 @@ class FLIRTInputSpec(FSLCommandInputSpec):
     # line.
     reference = File(exists = True, argstr = '-ref %s', mandatory = True,
                      position = 1, desc = 'reference file')
-    outfile = File(argstr = '-out %s', desc = 'registered output file',
+    out_file = File(argstr = '-out %s', desc = 'registered output file',
                    genfile = True, position = 2)
     outmatrix = File(argstr = '-omat %s',
                      desc = 'output affine matrix in 4x4 asciii format',
@@ -373,7 +373,7 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                          desc = 'verbose mode, 0 is least')
 
 class FLIRTOutputSpec(TraitedSpec):
-    outfile = File(exists = True,
+    out_file = File(exists = True,
                    desc = 'path/name of registered file (if generated)')
     outmatrix = File(exists = True,
                      desc = 'path/name of calculated affine transform ' \
@@ -392,9 +392,9 @@ class FLIRT(FSLCommand):
     --------
     >>> from nipype.interfaces import fsl
     >>> flt = fsl.FLIRT(bins=640, searchcost='mutualinfo')
-    >>> flt.inputs.infile = 'subject.nii'
+    >>> flt.inputs.in_file = 'subject.nii'
     >>> flt.inputs.reference = 'template.nii'
-    >>> flt.inputs.outfile = 'moved_subject.nii'
+    >>> flt.inputs.out_file = 'moved_subject.nii'
     >>> flt.inputs.outmatrix = 'subject_to_template.mat'
     >>> res = flt.run()
 
@@ -405,22 +405,22 @@ class FLIRT(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['outfile'] = self.inputs.outfile
-        # Generate an outfile if one is not provided
-        if not isdefined(outputs['outfile']) and isdefined(self.inputs.infile):
-            outputs['outfile'] = self._gen_fname(self.inputs.infile,
+        outputs['out_file'] = self.inputs.out_file
+        # Generate an out_file if one is not provided
+        if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                  suffix = '_flirt')
         outputs['outmatrix'] = self.inputs.outmatrix
         # Generate an outmatrix file if one is not provided
         if not isdefined(outputs['outmatrix']) and \
-                isdefined(self.inputs.infile):
-            outputs['outmatrix'] = self._gen_fname(self.inputs.infile,
+                isdefined(self.inputs.in_file):
+            outputs['outmatrix'] = self._gen_fname(self.inputs.in_file,
                                                    suffix = '_flirt.mat',
                                                    change_ext = False)
         return outputs
 
     def _gen_filename(self, name):
-        if name in ('outfile', 'outmatrix'):
+        if name in ('out_file', 'outmatrix'):
             return self._list_outputs()[name]
         else:
             return None
@@ -431,8 +431,8 @@ class ApplyXfm(FLIRT):
 
 
 class MCFLIRTInputSpec(FSLCommandInputSpec):
-    infile = File(exists=True, position= 0, argstr="-in %s", mandatory=True)
-    outfile = File(exists=True, argstr='-out %s', genfile=True)
+    in_file = File(exists=True, position= 0, argstr="-in %s", mandatory=True)
+    out_file = File(exists=True, argstr='-out %s', genfile=True)
     cost = traits.Enum('mutualinfo','woods','corratio','normcorr','normmi','leastsquares', argstr='-cost %s')
     bins = traits.Int(argstr='-bins %d')
     dof = traits.Int(argstr='-dof %d')
@@ -448,10 +448,10 @@ class MCFLIRTInputSpec(FSLCommandInputSpec):
     statsimgs = traits.Bool(argstr='-stats')
     savemats = traits.Bool(argstr='-mats')
     saveplots = traits.Bool(argstr='-plots')
-    reffile = File(exists=True, argstr='-reffile %s')
+    ref_file = File(exists=True, argstr='-reffile %s')
     
 class MCFLIRTOutputSpec(TraitedSpec):
-    outfile = File(exists=True)
+    out_file = File(exists=True)
     varianceimg = File(exists=True)
     stdimg = File(exists=True)
     meanimg = File(exists=True)
@@ -470,7 +470,7 @@ class MCFLIRT(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> mcflt = fsl.MCFLIRT(infile='timeseries.nii', cost='mututalinfo')
+    >>> mcflt = fsl.MCFLIRT(in_file='timeseries.nii', cost='mututalinfo')
     >>> res = mcflt.run()
 
     """
@@ -482,37 +482,37 @@ class MCFLIRT(FSLCommand):
         cwd = os.getcwd()
         outputs = self._outputs().get()
         
-        outputs['outfile'] = self.inputs.outfile
-        if not isdefined(outputs['outfile']):
-            outputs['outfile'] = self._gen_fname(self.inputs.infile,
+        outputs['out_file'] = self.inputs.out_file
+        if not isdefined(outputs['out_file']):
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                               suffix = '_mcf')
         
         # XXX Need to change 'item' below to something that exists
-        # outfile? infile?
+        # out_file? in_file?
         # These could be handled similarly to default values for inputs
         if isdefined(self.inputs.statsimgs):
-            outputs['varianceimg'] = self._gen_fname(self.inputs.infile, cwd=cwd, suffix='_variance')
-            outputs['stdimg'] = self._gen_fname(self.inputs.infile, cwd=cwd, suffix='_sigma')
-            outputs['meanimg'] = self._gen_fname(self.inputs.infile, cwd=cwd, suffix='_meanvol')
+            outputs['varianceimg'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_variance')
+            outputs['stdimg'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_sigma')
+            outputs['meanimg'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_meanvol')
         if isdefined(self.inputs.savemats):
-            pth, basename, _ = split_filename(self.inputs.infile)
+            pth, basename, _ = split_filename(self.inputs.in_file)
             matname = os.path.join(pth, basename + '.mat')
             outputs['outmatfile'] = matname
         if isdefined(self.inputs.saveplots):
-            # Note - if e.g. outfile has .nii.gz, you get .nii.gz.par, which is
+            # Note - if e.g. out_file has .nii.gz, you get .nii.gz.par, which is
             # what mcflirt does!
-            outputs['parfile'] = outputs['outfile'] + '.par'
+            outputs['parfile'] = outputs['out_file'] + '.par'
         return outputs
     
     def _gen_filename(self, name):
-        if name == 'outfile':
+        if name == 'out_file':
             return self._list_outputs()[name]
         return None
 
 class FNIRTInputSpec(FSLCommandInputSpec):
     ref_file = File(exists=True, argstr='--ref=%s', mandatory=True,
                     desc='name of reference image')
-    infile = File(exists=True, argstr='--in=%s', mandatory=True,
+    in_file = File(exists=True, argstr='--in=%s', mandatory=True,
                   desc='name of input image')
     affine_file = File(exists=True, argstr='--aff=%s',
                        desc='name of file containing affine transform')
@@ -522,7 +522,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                              desc='name of file/files containing initial intensity maping')
     fieldcoeff_file = File(genfile=True, argstr='--cout=%s',
                            desc='name of output file with field coefficients or true')
-    outfile = traits.Either(traits.Bool, File, genfile=True,
+    out_file = traits.Either(traits.Bool, File, genfile=True,
                             argstr='--iout=%s',
                             desc='name of output image or true')
     field_file = traits.Either(traits.Bool, File, genfile=True,
@@ -607,7 +607,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
 
 class FNIRTOutputSpec(TraitedSpec):
     fieldcoeff_file = File(exists=True, desc='file with field coefficients')
-    outfile = File(exists=True, desc='warped image')
+    out_file = File(exists=True, desc='warped image')
     field_file = File(exists=True, desc='file with warp field')
     jacobian_file = File(exists=True, desc='file containing Jacobian of the field')
     modulatedref_file = File(exists=True, desc='file containing intensity modulated --ref')
@@ -622,7 +622,7 @@ class FNIRT(FSLCommand):
     --------
     >>> from nipype.interfaces import fsl
     >>> fnt = fsl.FNIRT(affine='affine.mat')
-    >>> res = fnt.run(reference='ref.nii', infile='anat.nii') # doctests: +SKIP
+    >>> res = fnt.run(reference='ref.nii', in_file='anat.nii') # doctests: +SKIP
 
     T1 -> Mni153
     
@@ -635,7 +635,7 @@ class FNIRT(FSLCommand):
     ``fnirt_mprage.inputs``:
     
     >>> fnirt_mprage.inputs.flags = '--warpres 6, 6, 6'
-    >>> res = fnirt_mprage.run(infile='subj.nii', reference='mni.nii')
+    >>> res = fnirt_mprage.run(in_file='subj.nii', reference='mni.nii')
     
     We can check the command line and confirm that it's what we expect.
     
@@ -648,7 +648,7 @@ class FNIRT(FSLCommand):
     input_spec = FNIRTInputSpec
     output_spec = FNIRTOutputSpec
 
-    out_map = dict(outfile='_warp', field_file='_field',
+    out_map = dict(out_file='_warp', field_file='_field',
                    jacobian_file='_field_jacobian',
                    modulatedref_file='_modulated',
                    out_intensitymap_file='_intmap',
@@ -680,7 +680,7 @@ class FNIRT(FSLCommand):
             outputs['fieldcoeff_file'] = self._gen_fname(self.inputs.file,
                                                          suffix='_warpcoef')
         for name, suffix in self.out_map.items():
-            src = self.inputs.infile
+            src = self.inputs.in_file
             if name == 'modulatedref_file':
                 src = self.inputs.ref_file
             if name == 'log_file':
@@ -715,10 +715,10 @@ class FNIRT(FSLCommand):
         fid.close()
 
 class ApplyWarpInputSpec(FSLCommandInputSpec):
-    infile = File(exists=True, argstr='--in=%s',
+    in_file = File(exists=True, argstr='--in=%s',
                   mandatory=True,
                   desc='image to be warped')
-    outfile = File(argstr='--out=%s', genfile=True,
+    out_file = File(argstr='--out=%s', genfile=True,
                    desc='output filename')
     ref_file = File(exists=True, argstr='--ref=%s',
                      mandatory=True,
@@ -748,7 +748,7 @@ class ApplyWarpInputSpec(FSLCommandInputSpec):
                          desc='interpolation method {nn,trilinear,sinc}')
 
 class ApplyWarpOutputSpec(TraitedSpec):
-    outfile = File(exists=True, desc='Warped output file')
+    out_file = File(exists=True, desc='Warped output file')
 
 class ApplyWarp(FSLCommand):
     """Use FSL's applywarp to apply the results of a FNIRT registration
@@ -770,20 +770,20 @@ class ApplyWarp(FSLCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
                              
-        outputs['outfile'] = self._gen_fname(self.inputs.infile,
+        outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                              suffix='_warp')
         return outputs
     
     def _gen_filename(self, name):
-        if name == 'outfile':
+        if name == 'out_file':
             return self._list_outputs()[name]
         return None
 
 class SliceTimerInputSpec(FSLCommandInputSpec):
-    infile = File(exists=True, argstr='--in=%s',
+    in_file = File(exists=True, argstr='--in=%s',
                   mandatory=True, position=0,
                   desc='filename of input timeseries')
-    outfile = File(argstr='--out=%s', genfile=True,
+    out_file = File(argstr='--out=%s', genfile=True,
                    desc='filename of output timeseries')
     index_dir = traits.Bool(argstr='--down',
               desc='slice indexing from top to bottom')
@@ -801,7 +801,7 @@ class SliceTimerInputSpec(FSLCommandInputSpec):
                         desc='filename of single-column custom interleave order file (first slice is referred to as 1 not 0)')
 
 class SliceTimerOutputSpec(TraitedSpec):
-    outfile = File(exists=True, desc='slice time corrected file')
+    out_file = File(exists=True, desc='slice time corrected file')
 
 class SliceTimer(FSLCommand):
     """ use FSL slicetimer to perform slice timing correction.
@@ -817,14 +817,14 @@ class SliceTimer(FSLCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outfile = self.inputs.outfile
-        if not isdefined(outfile):
-            outfile = self._gen_fname(self.inputs.infile,
+        out_file = self.inputs.out_file
+        if not isdefined(out_file):
+            out_file = self._gen_fname(self.inputs.in_file,
                                       suffix='_st')
-        outputs['outfile'] = outfile
+        outputs['out_file'] = out_file
         return outputs
     
     def _gen_filename(self, name):
-        if name == 'outfile':
+        if name == 'out_file':
             return self._list_outputs()[name]
         return None

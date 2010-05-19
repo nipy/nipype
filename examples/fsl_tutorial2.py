@@ -39,7 +39,7 @@ package_check('IPython', '0.10', 'tutorial1')
 
 # Tell fsl to generate all output in compressed nifti format
 print fsl.Info.version()
-fsl.FSLCommand.set_default_outputtype('NIFTI_GZ')
+fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
 
 
 """
@@ -80,38 +80,38 @@ coregister = pe.Node(interface=fsl.FLIRT(dof=6),
 # Preprocess functionals
 motion_correct = pe.MapNode(interface=fsl.MCFLIRT(saveplots = True),
                             name='realign',
-                            iterfield = ['infile'])
+                            iterfield = ['in_file'])
 
 func_skullstrip = pe.MapNode(interface=fsl.BET(functional = True),
                              name='stripfunc',
-                             iterfield = ['infile'])
+                             iterfield = ['in_file'])
 
 
 # Finally do some smoothing!
 
 smoothing = pe.MapNode(interface=fsl.Smooth(),
                        name="smooth",
-                       iterfield = ['infile'])
+                       iterfield = ['in_file'])
 
 inorm = pe.MapNode(interface = fsl.ImageMaths(optstring = '-inm 10000',
                                               suffix = '_inm',
                                               outdatatype = 'float'),
                        name = 'inorm',
-                       iterfield = ['infile'])
+                       iterfield = ['in_file'])
 
 hpfilter = pe.MapNode(interface=fsl.ImageMaths(),
                       name='highpass',
-                      iterfield = ['infile'])
+                      iterfield = ['in_file'])
 
 preproc.add_nodes([extract_ref, skullstrip])
-preproc.connect([(extract_ref, motion_correct,[('outfile', 'reffile')]),
-                 (extract_ref, refskullstrip,[('outfile', 'infile')]),
-                 (skullstrip, coregister,[('maskfile','infile')]),
-                 (refskullstrip, coregister,[('outfile','reference')]),
-                 (motion_correct, func_skullstrip, [('outfile', 'infile')]),
-                 (func_skullstrip, smoothing, [('outfile', 'infile')]),
-                 (smoothing,inorm,[('smoothedimage','infile')]),
-                 (inorm,hpfilter,[('outfile','infile')]),
+preproc.connect([(extract_ref, motion_correct,[('out_file', 'ref_file')]),
+                 (extract_ref, refskullstrip,[('out_file', 'in_file')]),
+                 (skullstrip, coregister,[('mask_file','in_file')]),
+                 (refskullstrip, coregister,[('out_file','reference')]),
+                 (motion_correct, func_skullstrip, [('out_file', 'in_file')]),
+                 (func_skullstrip, smoothing, [('out_file', 'in_file')]),
+                 (smoothing,inorm,[('smoothedimage','in_file')]),
+                 (inorm,hpfilter,[('out_file','in_file')]),
                  ])
 
 
@@ -148,7 +148,7 @@ modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
    specified by a mat file and a functional run
 """
 modelestimate = pe.MapNode(interface=fsl.FILMGLS(), name='modelestimate',
-                           iterfield = ['design_file','infile'])
+                           iterfield = ['design_file','in_file'])
 
 """
    f. Use :class:`nipype.interfaces.fsl.ContrastMgr` to generate contrast
@@ -160,8 +160,8 @@ conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
 modelfit.connect([
    (modelspec,level1design,[('session_info','session_info')]),
    (level1design,modelgen,[('fsf_files','fsf_file')]),
-   (modelgen,modelestimate,[('designfile','design_file')]),
-   (modelgen,conestimate,[('confile','tcon_file')]),
+   (modelgen,modelestimate,[('design_file','design_file')]),
+   (modelgen,conestimate,[('con_file','tcon_file')]),
    (modelestimate,conestimate,[('results_dir','stats_dir')]),
    ])
 
@@ -176,11 +176,11 @@ fixed_fx = pe.Workflow(name='fixedfx')
 # Use :class:`nipype.interfaces.fsl.Merge` to merge the copes and
 # varcopes for each condition
 copemerge    = pe.MapNode(interface=fsl.Merge(dimension='t'),
-                       iterfield=['infiles'],
+                       iterfield=['in_files'],
                        name="copemerge")
 
 varcopemerge = pe.MapNode(interface=fsl.Merge(dimension='t'),
-                       iterfield=['infiles'],
+                       iterfield=['in_files'],
                        name="varcopemerge")
 
 
@@ -193,14 +193,14 @@ level2model = pe.Node(interface=fsl.L2Model(),
 Use :class:`nipype.interfaces.fsl.FLAMEO` to estimate a second level
 model
 """
-flameo = pe.MapNode(interface=fsl.FLAMEO(runmode='fe'), name="flameo",
-                    iterfield=['copefile','varcopefile'])
+flameo = pe.MapNode(interface=fsl.FLAMEO(run_mode='fe'), name="flameo",
+                    iterfield=['cope_file','varcope_file'])
 
-fixed_fx.connect([(copemerge,flameo,[('outfile','copefile')]),
-                  (varcopemerge,flameo,[('outfile','varcopefile')]),
-                  (level2model,flameo, [('design_mat','designfile'),
-                                        ('design_con','tconfile'),
-                                        ('design_grp','covsplitfile')]),
+fixed_fx.connect([(copemerge,flameo,[('out_file','cope_file')]),
+                  (varcopemerge,flameo,[('out_file','var_cope_file')]),
+                  (level2model,flameo, [('design_mat','design_file'),
+                                        ('design_con','t_con_file'),
+                                        ('design_grp','cov_split_file')]),
                   ])
 
 
@@ -224,11 +224,11 @@ def num_copes(files):
 
 firstlevel = pe.Workflow(name='firstlevel')
 #firstlevel.add_nodes([preproc])
-firstlevel.connect([(preproc, modelfit, [('highpass.outfile', 'modelspec.functional_runs')]),
-                    (preproc, fixed_fx, [('coregister.outfile', 'flameo.maskfile')]),
-                    (modelfit, fixed_fx,[(('conestimate.cope_files', sort_copes),'copemerge.infiles'),
-                                         (('conestimate.varcope_files', sort_copes),'varcopemerge.infiles'),
-                                         (('conestimate.cope_files', num_copes),'l2model.num_copes'),
+firstlevel.connect([(preproc, modelfit, [('highpass.out_file', 'modelspec.functional_runs')]),
+                    (preproc, fixed_fx, [('coregister.out_file', 'flameo.mask_file')]),
+                    (modelfit, fixed_fx,[(('conestimate.copes', sort_copes),'copemerge.in_files'),
+                                         (('conestimate.varcopes', sort_copes),'varcopemerge.in_files'),
+                                         (('conestimate.copes', num_copes),'l2model.num_copes'),
                                          ])
                     ])
 
@@ -364,10 +364,10 @@ def pickfirst(files):
 
 l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                     (infosource, firstlevel, [(('subject_id', subjectinfo), 'modelfit.modelspec.subject_info')]),
-                    (datasource, firstlevel, [('struct','preproc.stripstruct.infile'),
-                                              ('func', 'preproc.realign.infile'),
-                                              (('func', pickfirst), 'preproc.extractref.infile'),
-                                              ('func', 'modelfit.modelestimate.infile')
+                    (datasource, firstlevel, [('struct','preproc.stripstruct.in_file'),
+                                              ('func', 'preproc.realign.in_file'),
+                                              (('func', pickfirst), 'preproc.extractref.in_file'),
+                                              ('func', 'modelfit.modelestimate.in_file')
                                               ]),
                     ])
 
@@ -398,18 +398,18 @@ def pickfirst(files):
 
 l1pipeline.connect([# preprocessing in native space
                     (infosource, datasource, [('subject_id', 'subject_id')]),
-                 (datasource, skullstrip, [('struct','infile')]),
-                 (datasource, motion_correct, [('func', 'infile')]),
-                 (datasource, extract_ref, [(('func', pickfirst), 'infile')]),
-                 (extract_ref, motion_correct,[('outfile', 'reffile')]),
-                 (motion_correct, func_skullstrip, [('outfile', 'infile')]),
+                 (datasource, skullstrip, [('struct','in_file')]),
+                 (datasource, motion_correct, [('func', 'in_file')]),
+                 (datasource, extract_ref, [(('func', pickfirst), 'in_file')]),
+                 (extract_ref, motion_correct,[('out_file', 'reffile')]),
+                 (motion_correct, func_skullstrip, [('out_file', 'in_file')]),
                  # Smooth :\
-                 (func_skullstrip, smoothing, [('outfile', 'infile')]),
-                 #(smoothing,inorm,[('smoothedimage','infile')]),
-                 #(inorm,hpfilter,[('outfile','infile')]),
-                 (smoothing,hpfilter,[('smoothedimage','infile')]),
+                 (func_skullstrip, smoothing, [('out_file', 'in_file')]),
+                 #(smoothing,inorm,[('smoothedimage','in_file')]),
+                 #(inorm,hpfilter,[('out_file','in_file')]),
+                 (smoothing,hpfilter,[('smoothedimage','in_file')]),
                  # Model design
-                 (hpfilter,modelspec,[('outfile','functional_runs')]),
+                 (hpfilter,modelspec,[('out_file','functional_runs')]),
                  (infosource,modelspec,[('subject_id','subject_id'),
                                         (('subject_id',subjectinfo),'subject_info')]),
                  (motion_correct,modelspec,[('parfile','realignment_parameters')]),
@@ -420,20 +420,20 @@ l1pipeline.connect([# preprocessing in native space
 # store relevant outputs from various stages of preprocessing
 l1pipeline.connect([(infosource,datasink,[('subject_id','subject_id')]),
                     (skullstrip, datasink, 
-                        [('outfile', 'skullstrip.@outfile')]),
+                        [('out_file', 'skullstrip.@out_file')]),
                     (func_skullstrip, datasink,
-                        [('outfile', 'skullstrip.@outfile')]),
+                        [('out_file', 'skullstrip.@out_file')]),
                     (motion_correct, datasink,
                         [('parfile', 'skullstrip.@parfile')]),
                     (smoothing, datasink, 
-                        [('smoothedimage', 'registration.@outfile')]),
+                        [('smoothedimage', 'registration.@out_file')]),
                     ])
 """
                     (featfemodel, datasink, 
                         [('featdir', 'modelestimate.@fixedeffects')]),
 """
 
-
+'''
 ##########################################################################
 # Execute the pipeline
 ##########################################################################
@@ -448,4 +448,4 @@ l1pipeline.connect([(infosource,datasink,[('subject_id','subject_id')]),
 if __name__ == '__main__':
     l1pipeline.run()
 #    l2pipeline.run()
-'''
+
