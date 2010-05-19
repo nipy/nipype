@@ -27,10 +27,10 @@ class SmoothInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", position=0, mandatory=True)
     fwhm = traits.Float(argstr="-kernel gauss %f -fmean", position=1,
                             mandatory=True)
-    out_file = File(argstr="%s", position=2, genfile=True)
+    smoothed_file = File(argstr="%s", position=2, genfile=True)
 
 class SmoothOutputSpec(TraitedSpec):
-    smoothedimage = File(exists=True)
+    smoothed_file = File(exists=True)
 
 class Smooth(FSLCommand):
     '''Use fslmaths to smooth the image
@@ -46,15 +46,15 @@ class Smooth(FSLCommand):
     _cmd = 'fslmaths'
 
     def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()['smoothedimage']
+        if name == 'smoothed_file':
+            return self._list_outputs()['smoothed_file']
         return None
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['smoothedimage'] = self.inputs.out_file
-        if not isdefined(outputs['smoothedimage']):
-            outputs['smoothedimage'] = self._gen_fname(self.inputs.in_file,
+        outputs['smoothed_file'] = self.inputs.smoothed_file
+        if not isdefined(outputs['smoothed_file']):
+            outputs['smoothed_file'] = self._gen_fname(self.inputs.in_file,
                                               suffix = '_smooth')
         return outputs
     
@@ -70,10 +70,10 @@ class MergeInputSpec(FSLCommandInputSpec):
     dimension = traits.Enum('t', 'x', 'y', 'z', argstr="-%s", position=0,
                             desc="dimension along which the file will be merged",
                             mandatory=True)
-    out_file = File(argstr="%s", position=1, genfile=True)
+    merged_file = File(argstr="%s", position=1, genfile=True)
 
 class MergeOutputSpec(TraitedSpec):
-    out_file = File(exists=True)
+    merged_file = File(exists=True)
 
 class Merge(FSLCommand):
     """Use fslmerge to concatenate images
@@ -85,32 +85,32 @@ class Merge(FSLCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_files[0],
+        outputs['merged_file'] = self.inputs.merged_file
+        if not isdefined(outputs['merged_file']):
+            outputs['merged_file'] = self._gen_fname(self.inputs.in_files[0],
                                               suffix = '_merged')
         return outputs
     
     def _gen_filename(self, name):
-        if name == 'out_file':
+        if name == 'merged_file':
             return self._list_outputs()[name]
         return None
 
 
 class ExtractROIInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", position=0, desc="input file", mandatory=True)
-    out_file = File(argstr="%s", position=1, desc="output file", genfile=True)
-    xmin = traits.Float(argstr="%f", position=2)
-    xsize = traits.Float(argstr="%f", position=3)
-    ymin = traits.Float(argstr="%f", position=4)
-    ysize = traits.Float(argstr="%f", position=5)
-    zmin = traits.Float(argstr="%f", position=6)
-    zsize = traits.Float(argstr="%f", position=7)
-    tmin = traits.Int(argstr="%d", position=8)
-    tsize = traits.Int(argstr="%d", position=9)
+    roi_file = File(argstr="%s", position=1, desc="output file", genfile=True)
+    x_min = traits.Float(argstr="%f", position=2)
+    x_size = traits.Float(argstr="%f", position=3)
+    y_min = traits.Float(argstr="%f", position=4)
+    y_size = traits.Float(argstr="%f", position=5)
+    z_min = traits.Float(argstr="%f", position=6)
+    z_size = traits.Float(argstr="%f", position=7)
+    t_min = traits.Int(argstr="%d", position=8)
+    t_size = traits.Int(argstr="%d", position=9)
     
 class ExtractROIOutputSpec(TraitedSpec):
-    out_file = File(exists=True)
+    roi_file = File(exists=True)
 
 class ExtractROI(FSLCommand):
     """Uses FSL Fslroi command to extract region of interest (ROI)
@@ -125,7 +125,7 @@ class ExtractROI(FSLCommand):
     10 and 12).
     
     >>> from nipype.interfaces import fsl
-    >>> fslroi = fsl.ExtractROI(in_file='foo.nii', out_file='bar.nii', \
+    >>> fslroi = fsl.ExtractROI(in_file='foo.nii', roi_file='bar.nii', \
                                 tmin=0, tsize=1)
     >>> fslroi.cmdline
     'fslroi foo.nii bar.nii 0 1'
@@ -151,20 +151,20 @@ class ExtractROI(FSLCommand):
 
         """
         outputs = self._outputs().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+        outputs['roi_file'] = self.inputs.roi_file
+        if not isdefined(outputs['roi_file']):
+            outputs['roi_file'] = self._gen_fname(self.inputs.in_file,
                                               suffix = '_roi')
         return outputs
     
     def _gen_filename(self, name):
-        if name == 'out_file':
+        if name == 'roi_file':
             return self._list_outputs()[name]
         return None
 
 class SplitInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", position = 0, desc="input filename")
-    outbasename = traits.Str(argstr="%s", position=1, desc="outputs prefix")
+    out_base_name = traits.Str(argstr="%s", position=1, desc="outputs prefix")
     dimension = traits.Enum('t','x','y','z', argstr="-%s", position=2, desc="dimension along which the file will be split")
     
 class SplitOutputSpec(TraitedSpec):
@@ -196,8 +196,8 @@ class Split(FSLCommand):
         outputs = self._outputs().get()
         ext =  Info.output_type_to_ext(self.inputs.outputtype)
         outbase = 'vol*'
-        if isdefined(self.inputs.outbasename):
-            outbase = '%s*' % self.inputs.outbasename
+        if isdefined(self.inputs.out_base_name):
+            outbase = '%s*' % self.inputs.out_base_name
         outputs['out_files'] = sorted(glob(os.path.join(os.getcwd(),
                                                     outbase + ext)))
         return outputs
@@ -206,12 +206,12 @@ class ImageMathsInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", mandatory=True, position=0)
     in_file2 = File(exists=True, argstr="%s", position=2)
     out_file = File(argstr="%s", position=3, genfile=True)
-    optstring = traits.Str(argstr="%s", mandatory=True, position=1,
+    op_string = traits.Str(argstr="%s", mandatory=True, position=1,
                            desc="string defining the operation, i. e. -add")
     suffix = traits.Str(desc="out_file suffix")
-    outdatatype = traits.Enum('char', 'short', 'int', 'float', 'double',
-                              'input', argstr="-odt %s", position=4,
-                              desc="output datatype, one of (char, short, int, float, double, input)")
+    out_data_type = traits.Enum('char', 'short', 'int', 'float', 'double',
+                                'input', argstr="-odt %s", position=4,
+                                desc="output datatype, one of (char, short, int, float, double, input)")
 
 class ImageMathsOutputSpec(TraitedSpec):
     out_file = File(exists=True)
@@ -221,7 +221,7 @@ class ImageMaths(FSLCommand):
     Example:
     >>> from nipype.interfaces import fsl
     >>> import os
-    >>> maths = fsl.ImageMaths(in_file='foo.nii', optstring= '-add 5', \
+    >>> maths = fsl.ImageMaths(in_file='foo.nii', op_string= '-add 5', \
                                out_file='foo_maths.nii')
     >>> maths.cmdline
     'fslmaths foo.nii -add 5 foo_maths.nii'
