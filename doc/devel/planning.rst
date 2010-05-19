@@ -168,3 +168,10 @@ Somewhere in the future
 
 * split input/output spec into separate files 
 
+Packages yet to be wrapped
+--------------------------
+
+* AFNI
+
+* Camino
+
