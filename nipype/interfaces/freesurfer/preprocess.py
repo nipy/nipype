@@ -781,10 +781,11 @@ class Smooth(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['smoothed_file'] = self.inputs.smoothed_file
-        if not isdefined(outputs['smoothed_file']) and isdefined(self.inputs.in_file):
-            outputs['smoothed_file'] = self._gen_fname(self.inputs.in_file,
-                                              suffix = '_smooth')
+        outfile= self.inputs.smoothed_file
+        if not isdefined(outfile):
+            outfile = self._gen_fname(self.inputs.in_file,
+                                      suffix = '_smooth')
+        outputs['smoothed_file'] = outfile
         return outputs
 
     def _gen_filename(self, name):
