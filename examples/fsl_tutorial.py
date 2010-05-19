@@ -106,22 +106,22 @@ datasource.iterables = dict(subject_id=lambda:subject_list)
 
 """Skull strip."""
 
-skullstrip = nw.NodeWrapper(interface=fsl.Bet(mask = True,
+skullstrip = nw.NodeWrapper(interface=fsl.BET(mask = True,
                                               frac = 0.34),
                             diskbased=True)
 
 """Preprocess functionals"""
 
-motion_correct = nw.NodeWrapper(interface=fsl.McFlirt(saveplots = True),
+motion_correct = nw.NodeWrapper(interface=fsl.MCFLIRT(saveplots = True),
                                 diskbased=True)
 motion_correct.iterfield = ['infile']
 
-func_skullstrip = nw.NodeWrapper(interface=fsl.Bet(functional = True),
+func_skullstrip = nw.NodeWrapper(interface=fsl.BET(functional = True),
                                  diskbased=True,
                                  name='func_Bet.fsl')
 func_skullstrip.iterfield = ['infile']
 
-ref_skullstrip = nw.NodeWrapper(interface=fsl.Bet(), diskbased=True,
+ref_skullstrip = nw.NodeWrapper(interface=fsl.BET(), diskbased=True,
                                 name='ref_Bet.fsl')
 ref_skullstrip.inputs.update(functional = True)
 
@@ -133,7 +133,7 @@ target_image = fsl.fsl_info.standard_image('MNI152_T1_2mm')
 # For structurals
 # flirt -ref ${FSLDIR}/data/standard/MNI152_T1_2mm_brain -in my_betted_structural -omat my_affine_transf.mat
 
-t1reg2std = nw.NodeWrapper(interface=fsl.Flirt(), diskbased=True)
+t1reg2std = nw.NodeWrapper(interface=fsl.FLIRT(), diskbased=True)
 t1reg2std.inputs.update(reference = target_image,
                         outmatrix = 't1reg2std.xfm')
 
@@ -147,7 +147,7 @@ applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=my_structural --warp=
 =my_warped_structural
 """
 
-t1warp2std = nw.NodeWrapper(interface=fsl.Fnirt(), diskbased=True)
+t1warp2std = nw.NodeWrapper(interface=fsl.FNIRT(), diskbased=True)
 t1warp2std.inputs.update(configfile = 'T1_2_MNI152_2mm',
                          fieldcoeff_file = 't1warp2std',
                          logfile = 't1warp2std.log')
@@ -159,7 +159,7 @@ t1applywarp.inputs.update(reference = target_image,
 # For functionals - refers to some files above
 # flirt -ref my_betted_structural -in my_functional -dof 7 -omat func2struct.mat
 
-ref2t1 = nw.NodeWrapper(interface=fsl.Flirt(), diskbased=True, 
+ref2t1 = nw.NodeWrapper(interface=fsl.FLIRT(), diskbased=True, 
                          name='ref_Flirt.fsl')
 ref2t1.inputs.update(outmatrix = 'ref2t1.xfm',
                      dof = 6)

@@ -66,23 +66,23 @@ extract_ref = pe.Node(interface=fsl.ExtractRoi(tmin=42,
 
 # run FSL's bet
 # bet my_structural my_betted_structural
-skullstrip = pe.Node(interface=fsl.Bet(mask = True,
+skullstrip = pe.Node(interface=fsl.BET(mask = True,
                                        frac = 0.34),
                      name = 'stripstruct')
 
-refskullstrip = pe.Node(interface=fsl.Bet(mask = True,
+refskullstrip = pe.Node(interface=fsl.BET(mask = True,
                                        frac = 0.34),
                      name = 'stripref')
 
-coregister = pe.Node(interface=fsl.Flirt(dof=6),
+coregister = pe.Node(interface=fsl.FLIRT(dof=6),
                      name = 'coregister')
 
 # Preprocess functionals
-motion_correct = pe.MapNode(interface=fsl.McFlirt(saveplots = True),
+motion_correct = pe.MapNode(interface=fsl.MCFLIRT(saveplots = True),
                             name='realign',
                             iterfield = ['infile'])
 
-func_skullstrip = pe.MapNode(interface=fsl.Bet(functional = True),
+func_skullstrip = pe.MapNode(interface=fsl.BET(functional = True),
                              name='stripfunc',
                              iterfield = ['infile'])
 

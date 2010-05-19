@@ -121,10 +121,10 @@ art.inputs.mask_type            = 'file'
 
 
 """
-Use :class:`nipype.interfaces.fsl.Bet` for skull strip structural images. 
+Use :class:`nipype.interfaces.fsl.BET` for skull strip structural images. 
 """
 
-skullstrip = nw.NodeWrapper(interface=fsl.Bet())
+skullstrip = nw.NodeWrapper(interface=fsl.BET())
 skullstrip.inputs.mask = True
 
 

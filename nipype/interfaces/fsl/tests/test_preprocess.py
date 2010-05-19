@@ -28,10 +28,10 @@ def setup_infile():
 def teardown_infile():
     shutil.rmtree(tmp_dir)
 
-# test Bet
+# test BET
 @with_setup(setup_infile, teardown_infile)
 def test_bet():
-    better = fsl.Bet()
+    better = fsl.BET()
     yield assert_equal, better.cmd, 'bet'
 
     # Test raising error with mandatory args absent
@@ -55,7 +55,7 @@ def test_bet():
     yield assert_raises, TraitError, func
 
     # .run() based parameter setting
-    better = fsl.Bet()
+    better = fsl.BET()
     better.inputs.frac = 0.40
     outfile = fsl_name(better, 'outfile')
     betted = better.run(infile=tmp_infile, outfile=outfile)
@@ -83,11 +83,11 @@ def test_bet():
     # Currently we don't test -R, -S, -B, -Z, -F, -A or -A2
 
     # test each of our arguments
-    better = fsl.Bet()
+    better = fsl.BET()
     outfile = fsl_name(better, 'foo_brain')
     outpath = os.path.join(os.getcwd(), outfile)
     for name, settings in opt_map.items():
-        better = fsl.Bet(**{name: settings[1]})
+        better = fsl.BET(**{name: settings[1]})
         # Add mandatory input
         better.inputs.infile = tmp_infile
         realcmd =  ' '.join([better.cmd, tmp_infile, outpath, settings[0]])
@@ -96,7 +96,7 @@ def test_bet():
 
 # test fast
 def test_fast():
-    faster = fsl.Fast()
+    faster = fsl.FAST()
     faster.inputs.verbose = True
     fasted = faster.run(infiles='infile')
     fasted2 = faster.run(infiles=['infile', 'otherfile'])
@@ -108,7 +108,7 @@ def test_fast():
     yield assert_equal, fasted.runtime.cmdline, 'fast -v infile'
     yield assert_equal, fasted2.runtime.cmdline, 'fast -v infile otherfile'
 
-    faster = fsl.Fast()
+    faster = fsl.FAST()
     faster.inputs.infiles = 'foo.nii'
     yield assert_equal, faster.cmdline, 'fast foo.nii'
     faster.inputs.infiles = ['foo.nii', 'bar.nii']
@@ -144,7 +144,7 @@ def test_fast():
 
     # test each of our arguments
     for name, settings in opt_map.items():
-        faster = fsl.Fast(**{name: settings[1]})
+        faster = fsl.FAST(**{name: settings[1]})
         yield assert_equal, faster.cmdline, ' '.join([faster.cmd, settings[0]])
 
 def setup_flirt():
@@ -162,7 +162,7 @@ def test_flirt():
     # setup
     tmpdir, infile, reffile = setup_flirt()
 
-    flirter = fsl.Flirt()
+    flirter = fsl.FLIRT()
     yield assert_equal(flirter.cmd, 'flirt')
 
     flirter.inputs.bins = 256
@@ -181,7 +181,7 @@ def test_flirt():
         '-bins 256 -cost mutualinfo' % (infile, reffile)
     yield assert_equal(flirted.runtime.cmdline, realcmd)
 
-    flirter = fsl.Flirt()
+    flirter = fsl.FLIRT()
     # infile not specified
     yield assert_raises(ValueError, flirter.run)
     flirter.inputs.infile = infile
@@ -202,7 +202,7 @@ def test_flirt():
     _, tmpfile = tempfile.mkstemp(suffix = '.nii', dir = tmpdir)
     # Loop over all inputs, set a reasonable value and make sure the
     # cmdline is updated correctly.
-    for key, trait_spec in sorted(fsl.Flirt.input_spec().traits().items()):
+    for key, trait_spec in sorted(fsl.FLIRT.input_spec().traits().items()):
         # Skip mandatory inputs and the trait methods
         if key in ('trait_added', 'trait_modified', 'infile', 'reference',
                    'environ', 'outputtype', 'outfile', 'outmatrix'):
@@ -236,12 +236,12 @@ def test_flirt():
         outmatrix = ' '.join(['-omat', outmatrix])
         # Build command line
         cmdline = ' '.join([cmdline, outfile, outmatrix, param])
-        flirter = fsl.Flirt(infile = infile, reference = reffile)
+        flirter = fsl.FLIRT(infile = infile, reference = reffile)
         setattr(flirter.inputs, key, value)
         yield assert_equal(flirter.cmdline, cmdline)
 
     # Test OutputSpec
-    flirter = fsl.Flirt(infile = infile, reference = reffile)
+    flirter = fsl.FLIRT(infile = infile, reference = reffile)
     pth, fname, ext = split_filename(infile)
     flirter.inputs.outfile = ''.join(['foo', ext])
     flirter.inputs.outmatrix = ''.join(['bar', ext])
@@ -252,7 +252,7 @@ def test_flirt():
     teardown_flirt(tmpdir)
 
 def test_applyxfm():
-    # ApplyXFM subclasses Flirt.
+    # ApplyXFM subclasses FLIRT.
     flt = fsl.ApplyXfm(infile='subj.nii', inmatrix='xfm.mat',
                        outfile='xfm_subj.nii', reference='mni152.nii')
     flt.run()
@@ -282,7 +282,7 @@ def test_applyxfm():
 
 # Mcflirt
 def test_mcflirt():
-    frt = fsl.McFlirt()
+    frt = fsl.MCFLIRT()
     yield assert_equal, frt.cmd, 'mcflirt'
     # Test generated outfile name
     infile = '/data/foo.nii'
@@ -318,14 +318,14 @@ def test_mcflirt():
         }
 
     for name, settings in opt_map.items():
-        fnt = fsl.McFlirt(**{name : settings[1]})
+        fnt = fsl.MCFLIRT(**{name : settings[1]})
         yield assert_equal, fnt.cmdline, ' '.join([fnt.cmd, settings[0]])
 
     # Test error is raised when missing required args
-    fnt = fsl.McFlirt()
+    fnt = fsl.MCFLIRT()
     yield assert_raises, AttributeError, fnt.run
     # Test run result
-    fnt = fsl.McFlirt()
+    fnt = fsl.MCFLIRT()
     fnt.inputs.infile = 'foo.nii'
     res = fnt.run()
     yield assert_equal, type(res), InterfaceResult
@@ -335,7 +335,7 @@ def test_mcflirt():
 
 #test fnirt
 def test_fnirt():
-    fnirt = fsl.Fnirt()
+    fnirt = fsl.FNIRT()
     yield assert_equal, fnirt.cmd, 'fnirt'
 
     # Test inputs with variable number of values
@@ -345,7 +345,7 @@ def test_fnirt():
     realcmd = 'fnirt --in=infile --ref=reference --subsamp=8,6,4'
     yield assert_equal, fnirtd.runtime.cmdline, realcmd
 
-    fnirt2 = fsl.Fnirt(sub_sampling=[8, 2])
+    fnirt2 = fsl.FNIRT(sub_sampling=[8, 2])
     fnirtd2 = fnirt2.run(infile='infile', reference='reference')
     realcmd = 'fnirt --in=infile --ref=reference --subsamp=8,2'
     yield assert_equal, fnirtd2.runtime.cmdline, realcmd
@@ -365,18 +365,18 @@ def test_fnirt():
         if item in ('sub_sampling', 'max_iter',
                     'referencefwhm', 'imgfwhm',
                     'lambdas', 'estintensity'):
-            fnirt = fsl.Fnirt(**{item : 5})
+            fnirt = fsl.FNIRT(**{item : 5})
             cmd = 'fnirt %s=%d' % (flag, 5)
         else:
-            fnirt = fsl.Fnirt(**{item : 5})
+            fnirt = fsl.FNIRT(**{item : 5})
             cmd = 'fnirt %s=%f' % (flag, 5)
         yield assert_equal, fnirt.cmdline, cmd
 
     # Test error is raised when missing required args
-    fnirt = fsl.Fnirt()
+    fnirt = fsl.FNIRT()
     yield assert_raises, AttributeError, fnirt.run
     fnirt.inputs.infile = 'foo.nii'
-    # I don't think this is correct. See Fnirt documentation -DJC
+    # I don't think this is correct. See FNIRT documentation -DJC
     # yield assert_raises, AttributeError, fnirt.run
     fnirt.inputs.reference = 'mni152.nii'
     res = fnirt.run()
@@ -400,7 +400,7 @@ def test_fnirt():
         'flags':            ('--fake-flag', '--fake-flag')}
 
     for name, settings in opt_map.items():
-        fnirt = fsl.Fnirt(**{name : settings[1]})
+        fnirt = fsl.FNIRT(**{name : settings[1]})
         yield assert_equal, fnirt.cmdline, ' '.join([fnirt.cmd, settings[0]])
 
 def test_applywarp():

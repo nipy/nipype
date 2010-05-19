@@ -92,10 +92,10 @@ art.inputs.zintensity_threshold = 3
 art.inputs.mask_type            = 'file'
 
 """Skull strip structural images using
-:class:`nipype.interfaces.fsl.Bet`.
+:class:`nipype.interfaces.fsl.BET`.
 """
 
-skullstrip = pe.Node(interface=fsl.Bet(), name="skullstrip")
+skullstrip = pe.Node(interface=fsl.BET(), name="skullstrip")
 skullstrip.inputs.mask = True
 
 """Use :class:`nipype.interfaces.spm.Coregister` to perform a rigid

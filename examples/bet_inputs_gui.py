@@ -23,7 +23,7 @@ from nipype.interfaces import fsl
 # Make fake input file
 _, fname = tempfile.mkstemp()
 
-bet = fsl.Bet()
+bet = fsl.BET()
 bet.inputs.infile = fname
 
 # WX blows up when trying to handle boolean "CheckBox" widgets with

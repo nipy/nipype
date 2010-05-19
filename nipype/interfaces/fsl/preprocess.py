@@ -22,7 +22,7 @@ import enthought.traits.api as traits
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
-class BetInputSpec(FSLCommandInputSpec):
+class BETInputSpec(FSLCommandInputSpec):
     """Note: Currently we don't support -R, -S, -Z,-A or -A2"""
     # We use position args here as list indices - so a negative number
     # will put something on the end
@@ -60,7 +60,7 @@ class BetInputSpec(FSLCommandInputSpec):
     reduce_bias = traits.Bool(argstr='-B', xor=_xor_inputs,
                               desc="bias field and neck cleanup")
 
-class BetOutputSpec(TraitedSpec):
+class BETOutputSpec(TraitedSpec):
     outfile = File(exists=True,
                    desc="path/name of skullstripped file")
     maskfile = File(
@@ -70,40 +70,40 @@ class BetOutputSpec(TraitedSpec):
     meshfile = File(
         desc="path/name of vtk mesh file (if generated)")
 
-class Bet(FSLCommand):
+class BET(FSLCommand):
     """Use FSL BET command for skull stripping.
 
     For complete details, see the `BET Documentation.
     <http://www.fmrib.ox.ac.uk/fsl/bet2/index.html>`_
 
     To print out the command line help, use:
-        fsl.Bet().inputs_help()
+        fsl.BET().inputs_help()
 
     Examples
     --------
-    Initialize Bet with no options, assigning them when calling run:
+    Initialize BET with no options, assigning them when calling run:
 
     >>> from nipype.interfaces import fsl
-    >>> btr = fsl.Bet()
+    >>> btr = fsl.BET()
     >>> res = btr.run('infile', 'outfile', frac=0.5) # doctest: +SKIP
 
     Assign options through the ``inputs`` attribute:
 
-    >>> btr = fsl.Bet()
+    >>> btr = fsl.BET()
     >>> btr.inputs.infile = 'foo.nii'
     >>> btr.inputs.outfile = 'bar.nii'
     >>> btr.inputs.frac = 0.7
     >>> res = btr.run() # doctest: +SKIP
 
-    Specify options when creating a Bet instance:
+    Specify options when creating a BET instance:
 
-    >>> btr = fsl.Bet(infile='infile', outfile='outfile', frac=0.5)
+    >>> btr = fsl.BET(infile='infile', outfile='outfile', frac=0.5)
     >>> res = btr.run() # doctest: +SKIP
 
     Loop over many inputs (Note: the snippet below would overwrite the
     outfile each time):
 
-    >>> btr = fsl.Bet(infile='infile', outfile='outfile')
+    >>> btr = fsl.BET(infile='infile', outfile='outfile')
     >>> fracvals = [0.3, 0.4, 0.5]
     >>> for val in fracvals:
     ...     res = btr.run(frac=val) # doctest: +SKIP
@@ -111,14 +111,14 @@ class Bet(FSLCommand):
     """
 
     _cmd = 'bet'
-    input_spec = BetInputSpec
-    output_spec = BetOutputSpec
+    input_spec = BETInputSpec
+    output_spec = BETOutputSpec
 
     def _run_interface(self, runtime):
-        # The returncode is meaningless in Bet.  So check the output
+        # The returncode is meaningless in BET.  So check the output
         # in stderr and if it's set, then update the returncode
         # accordingly.
-        runtime = super(Bet, self)._run_interface(runtime)
+        runtime = super(BET, self)._run_interface(runtime)
         if runtime.stderr:
             runtime.returncode = 1
         return runtime
@@ -146,8 +146,8 @@ class Bet(FSLCommand):
         return None
 
 
-class FastInputSpec(FSLCommandInputSpec):
-    """ Defines inputs (trait classes) for Fast """
+class FASTInputSpec(FSLCommandInputSpec):
+    """ Defines inputs (trait classes) for FAST """
     infiles = InputMultiPath(File(exists=True),
                           desc = 'image, or multi-channel set of images, ' \
                               'to be segmented',
@@ -217,8 +217,8 @@ class FastInputSpec(FSLCommandInputSpec):
                                    argstr = '-p')
     
 
-class FastOutputSpec(TraitedSpec):
-    """Specify possible outputs from Fast"""
+class FASTOutputSpec(TraitedSpec):
+    """Specify possible outputs from FAST"""
     tissue_class_map = File(exists=True,
                             desc = 'path/name of binary segmented volume file' \
                             ' one val for each class  _seg')
@@ -238,15 +238,15 @@ class FastOutputSpec(TraitedSpec):
                                 'input, prob_x'))
 
 
-class Fast(FSLCommand):
+class FAST(FSLCommand):
     """ Use FSL FAST for segmenting and bias correction.
 
     For complete details, see the `FAST Documentation.
     <http://www.fmrib.ox.ac.uk/fsl/fast4/index.html>`_
     """
     _cmd = 'fast'
-    input_spec = FastInputSpec
-    output_spec = FastOutputSpec
+    input_spec = FASTInputSpec
+    output_spec = FASTOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -286,7 +286,7 @@ class Fast(FSLCommand):
 
    
        
-class FlirtInputSpec(FSLCommandInputSpec):
+class FLIRTInputSpec(FSLCommandInputSpec):
     infile = File(exists = True, argstr = '-in %s', mandatory = True,
                   position = 0, desc = 'input file')
     # XXX Not clear if position is required for mandatory flirt inputs
@@ -372,26 +372,26 @@ class FlirtInputSpec(FSLCommandInputSpec):
     verbose = traits.Int(argstr = '-verbose %d',
                          desc = 'verbose mode, 0 is least')
 
-class FlirtOutputSpec(TraitedSpec):
+class FLIRTOutputSpec(TraitedSpec):
     outfile = File(exists = True,
                    desc = 'path/name of registered file (if generated)')
     outmatrix = File(exists = True,
                      desc = 'path/name of calculated affine transform ' \
                          '(if generated)')
 
-class Flirt(FSLCommand):
+class FLIRT(FSLCommand):
     """Use FSL FLIRT for coregistration.
 
     For complete details, see the `FLIRT Documentation.
     <http://www.fmrib.ox.ac.uk/fsl/flirt/index.html>`_
 
     To print out the command line help, use:
-        fsl.Flirt().inputs_help()
+        fsl.FLIRT().inputs_help()
 
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> flt = fsl.Flirt(bins=640, searchcost='mutualinfo')
+    >>> flt = fsl.FLIRT(bins=640, searchcost='mutualinfo')
     >>> flt.inputs.infile = 'subject.nii'
     >>> flt.inputs.reference = 'template.nii'
     >>> flt.inputs.outfile = 'moved_subject.nii'
@@ -400,8 +400,8 @@ class Flirt(FSLCommand):
 
     """
     _cmd = 'flirt'
-    input_spec = FlirtInputSpec
-    output_spec = FlirtOutputSpec
+    input_spec = FLIRTInputSpec
+    output_spec = FLIRTOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -426,11 +426,11 @@ class Flirt(FSLCommand):
             return None
 
     
-class ApplyXfm(Flirt):
+class ApplyXfm(FLIRT):
     pass
 
 
-class McFlirtInputSpec(FSLCommandInputSpec):
+class MCFLIRTInputSpec(FSLCommandInputSpec):
     infile = File(exists=True, position= 0, argstr="-in %s", mandatory=True)
     outfile = File(exists=True, argstr='-out %s', genfile=True)
     cost = traits.Enum('mutualinfo','woods','corratio','normcorr','normmi','leastsquares', argstr='-cost %s')
@@ -450,7 +450,7 @@ class McFlirtInputSpec(FSLCommandInputSpec):
     saveplots = traits.Bool(argstr='-plots')
     reffile = File(exists=True, argstr='-reffile %s')
     
-class McFlirtOutputSpec(TraitedSpec):
+class MCFLIRTOutputSpec(TraitedSpec):
     outfile = File(exists=True)
     varianceimg = File(exists=True)
     stdimg = File(exists=True)
@@ -458,25 +458,25 @@ class McFlirtOutputSpec(TraitedSpec):
     parfile = File(exists=True)
     outmatfile = File(exists=True)
 
-class McFlirt(FSLCommand):
+class MCFLIRT(FSLCommand):
     """Use FSL MCFLIRT to do within-modality motion correction.
 
     For complete details, see the `MCFLIRT Documentation.
     <http://www.fmrib.ox.ac.uk/fsl/mcflirt/index.html>`_
 
     To print out the command line help, use:
-        McFlirt().inputs_help()
+        MCFLIRT().inputs_help()
 
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> mcflt = fsl.McFlirt(infile='timeseries.nii', cost='mututalinfo')
+    >>> mcflt = fsl.MCFLIRT(infile='timeseries.nii', cost='mututalinfo')
     >>> res = mcflt.run()
 
     """
     _cmd = 'mcflirt'
-    input_spec = McFlirtInputSpec
-    output_spec = McFlirtOutputSpec
+    input_spec = MCFLIRTInputSpec
+    output_spec = MCFLIRTOutputSpec
 
     def _list_outputs(self):
         cwd = os.getcwd()
@@ -509,7 +509,7 @@ class McFlirt(FSLCommand):
             return self._list_outputs()[name]
         return None
 
-class FnirtInputSpec(FSLCommandInputSpec):
+class FNIRTInputSpec(FSLCommandInputSpec):
     ref_file = File(exists=True, argstr='--ref=%s', mandatory=True,
                     desc='name of reference image')
     infile = File(exists=True, argstr='--in=%s', mandatory=True,
@@ -605,7 +605,7 @@ class FnirtInputSpec(FSLCommandInputSpec):
     hessian_precision = traits.Enum('double', 'float', argstr='--numprec=%s',
                                     desc='Precision for representing Hessian, double or float. Default double')
 
-class FnirtOutputSpec(TraitedSpec):
+class FNIRTOutputSpec(TraitedSpec):
     fieldcoeff_file = File(exists=True, desc='file with field coefficients')
     outfile = File(exists=True, desc='warped image')
     field_file = File(exists=True, desc='file with warp field')
@@ -615,19 +615,19 @@ class FnirtOutputSpec(TraitedSpec):
                         desc='file containing info pertaining to intensity mapping')
     log_file = File(exists=True, desc='Name of log-file')
 
-class Fnirt(FSLCommand):
+class FNIRT(FSLCommand):
     """Use FSL FNIRT for non-linear registration.
 
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> fnt = fsl.Fnirt(affine='affine.mat')
+    >>> fnt = fsl.FNIRT(affine='affine.mat')
     >>> res = fnt.run(reference='ref.nii', infile='anat.nii') # doctests: +SKIP
 
     T1 -> Mni153
     
     >>> from nipype.interfaces import fsl
-    >>> fnirt_mprage = fsl.Fnirt()
+    >>> fnirt_mprage = fsl.FNIRT()
     >>> fnirt_mprage.inputs.imgfwhm = [8, 4, 2]
     >>> fnirt_mprage.inputs.sub_sampling = [4, 2, 1]
 
@@ -645,8 +645,8 @@ class Fnirt(FSLCommand):
     """
     
     _cmd = 'fnirt'
-    input_spec = FnirtInputSpec
-    output_spec = FnirtOutputSpec
+    input_spec = FNIRTInputSpec
+    output_spec = FNIRTOutputSpec
 
     out_map = dict(outfile='_warp', field_file='_field',
                    jacobian_file='_field_jacobian',
@@ -661,7 +661,7 @@ class Fnirt(FSLCommand):
             else:
                 fname = value
             return spec.argstr % fname
-        return super(Fnirt, self)._format_arg(name, spec, value)
+        return super(FNIRT, self)._format_arg(name, spec, value)
 
     def _set_output(self, field, src, suffix, change_ext=True):
         val = getattr(self.inputs, field)
@@ -751,7 +751,7 @@ class ApplyWarpOutputSpec(TraitedSpec):
     outfile = File(exists=True, desc='Warped output file')
 
 class ApplyWarp(FSLCommand):
-    """Use FSL's applywarp to apply the results of a Fnirt registration
+    """Use FSL's applywarp to apply the results of a FNIRT registration
 
     Examples
     --------

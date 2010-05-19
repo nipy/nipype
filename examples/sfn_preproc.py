@@ -25,7 +25,7 @@ info = {}
 # The current data structure for info is not very nice for incremental
 # construction
 
-# Would be nice to put centers for Bet in here. Right now, I've hacked around
+# Would be nice to put centers for BET in here. Right now, I've hacked around
 # when necessary. Certainly for the tutorial!
 for s in subject_list:
     subj_dir = os.path.join(data_dir, s)
@@ -70,22 +70,22 @@ datasource.iterables = {'subject_id': lambda:subject_list}
 
 # run FSL's bet
 # bet my_structural my_betted_structural
-skullstrip = nw.NodeWrapper(interface=fsl.Bet(),diskbased=True)
+skullstrip = nw.NodeWrapper(interface=fsl.BET(),diskbased=True)
 skullstrip.inputs.update(mask = True,
                          frac = 0.34)
 
 # Preprocess functionals
-motion_correct = nw.NodeWrapper(interface=fsl.McFlirt(), diskbased=True)
+motion_correct = nw.NodeWrapper(interface=fsl.MCFLIRT(), diskbased=True)
 motion_correct.inputs.update(saveplots = True)
 # Note- only one iterfield is currently supported
 motion_correct.iterfield = ['infile']
 
-func_skullstrip = nw.NodeWrapper(interface=fsl.Bet(), diskbased=True,
+func_skullstrip = nw.NodeWrapper(interface=fsl.BET(), diskbased=True,
                                  name='func_Bet.fsl')
 func_skullstrip.inputs.update(functional = True)
 func_skullstrip.iterfield = ['infile']
 
-ref_skullstrip = nw.NodeWrapper(interface=fsl.Bet(), diskbased=True,
+ref_skullstrip = nw.NodeWrapper(interface=fsl.BET(), diskbased=True,
                                 name='ref_Bet.fsl')
 ref_skullstrip.inputs.update(functional = True)
 
@@ -97,7 +97,7 @@ target_image = fsl.fsl_info.standard_image('MNI152_T1_2mm')
 # For structurals
 # flirt -ref ${FSLDIR}/data/standard/MNI152_T1_2mm_brain -in my_betted_structural -omat my_affine_transf.mat
 
-t1reg2std = nw.NodeWrapper(interface=fsl.Flirt(), diskbased=True)
+t1reg2std = nw.NodeWrapper(interface=fsl.FLIRT(), diskbased=True)
 t1reg2std.inputs.update(reference = target_image,
                         outmatrix = 't1reg2std.xfm')
 
@@ -108,7 +108,7 @@ t1reg2std.inputs.update(reference = target_image,
 # fnirt --in=my_structural --aff=my_affine_transf.mat --cout=my_nonlinear_transf --config=T1_2_MNI152_2mm
 # applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=my_structural --warp=my_nonlinear_transf --out=my_warped_structural
 
-t1warp2std = nw.NodeWrapper(interface=fsl.Fnirt(), diskbased=True)
+t1warp2std = nw.NodeWrapper(interface=fsl.FNIRT(), diskbased=True)
 t1warp2std.inputs.update(configfile = 'T1_2_MNI152_2mm',
                          fieldcoeff_file = 't1warp2std',
                          logfile = 't1warp2std.log')
@@ -120,7 +120,7 @@ t1applywarp.inputs.update(reference = target_image,
 # For functionals - refers to some files above
 # flirt -ref my_betted_structural -in my_functional -dof 7 -omat func2struct.mat
 
-ref2t1 = nw.NodeWrapper(interface=fsl.Flirt(), diskbased=True, 
+ref2t1 = nw.NodeWrapper(interface=fsl.FLIRT(), diskbased=True, 
                          name='ref_Flirt.fsl')
 ref2t1.inputs.update(outmatrix = 'ref2t1.xfm',
                      dof = 6)

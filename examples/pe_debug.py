@@ -7,7 +7,7 @@ reload(pe)
 realign = pe.Node(spm.Realign(), name = 'spmrealign')
 coreg = pe.Node(spm.Coregister(), name = 'coreg')
 realign2 = pe.Node(spm.Realign(), name = 'spmrealign2')
-bet = pe.MapNode(fsl.Bet(), iterfield=['infile'], name='bet')
+bet = pe.MapNode(fsl.BET(), iterfield=['infile'], name='bet')
 
 w1 = pe.Workflow(name='spm')
 w1.connect([(realign, coreg, [('realigned_files', 'source')])])

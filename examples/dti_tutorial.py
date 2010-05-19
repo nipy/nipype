@@ -120,7 +120,7 @@ fslroi.inputs.tsize=1
 """
 create a brain mask from the nodif_brain
 """
-bet = pe.Node(interface=fsl.Bet(),name='bet')
+bet = pe.Node(interface=fsl.BET(),name='bet')
 bet.inputs.mask=True
 bet.inputs.frac=0.34
 
