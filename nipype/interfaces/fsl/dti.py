@@ -18,7 +18,7 @@ import enthought.traits.api as traits
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
-class DtiFitInputSpec(FSLCommandInputSpec):
+class DTIFitInputSpec(FSLCommandInputSpec):
     
     dwi = File(exists=True, desc = 'diffusion weighted image data file',
                   argstr='-k %s', position=0, mandatory=True)
@@ -43,7 +43,7 @@ class DtiFitInputSpec(FSLCommandInputSpec):
     littlebit =  traits.Bool(desc = 'only process small area of brain',
                              argstr='--littlebit')
 
-class DtiFitOutputSpec(TraitedSpec):
+class DTIFitOutputSpec(TraitedSpec):
     
     V1 = File(exists = True, desc = 'path/name of file with the 1st eigenvector')
     V2 = File(exists = True, desc = 'path/name of file with the 2nd eigenvector')
@@ -56,11 +56,11 @@ class DtiFitOutputSpec(TraitedSpec):
     S0 = File(exists = True, desc = 'path/name of file with the raw T2 signal with no '+
               'diffusion weighting')    
 
-class DtiFit(FSLCommand):
+class DTIFit(FSLCommand):
     """ Use FSL  dtifit command for fitting a diffusion tensor model at each voxel
         Example:
         >>> from nipype.interfaces import fsl
-        >>> dti = fsl.DtiFit()
+        >>> dti = fsl.DTIFit()
         >>> dti.inputs.dwi = data.nii.gz
         >>> dti.inputs.bvec = bvecs
         >>> dti.inputs.bval = bvals
@@ -70,8 +70,8 @@ class DtiFit(FSLCommand):
         'dtifit -k data.nii.gz -o TP -m nodif_brain_mask.nii.gz -r bvecs -b bvals'
     """
     _cmd = 'dtifit'
-    input_spec = DtiFitInputSpec
-    output_spec = DtiFitOutputSpec
+    input_spec = DTIFitInputSpec
+    output_spec = DTIFitOutputSpec
         
     def _list_outputs(self):        
         outputs = self.output_spec().get()      
@@ -121,7 +121,7 @@ class EddyCorrect(FSLCommand):
         else:
             return None
 
-class BedpostxInputSpec(FSLCommandInputSpec):    
+class BEDPOSTXInputSpec(FSLCommandInputSpec):    
     dwi = File(exists=True, desc = 'diffusion weighted image data file',mandatory=True)
     mask = File(exists=True, desc = 'bet binary mask file',mandatory=True)    
     bvecs = File(exists=True, desc = 'b vectors file',mandatory=True)
@@ -136,7 +136,7 @@ class BedpostxInputSpec(FSLCommandInputSpec):
     jumps = traits.Int(1250,argstr='-j %d', desc='number of jumps',usedefault=True)
     sampling = traits.Int(25,argstr='-s %d', desc='sample every',usedefault=True)
     
-class BedpostxOutputSpec(TraitedSpec):
+class BEDPOSTXOutputSpec(TraitedSpec):
     bpxoutdirectory = Directory(exists=True, field='dir', desc = 'path/name of directory with all '+
                              'bedpostx output files for this subject')
     xfmsdirectory = Directory(exists=True, field='dir', desc = 'path/name of directory with the '+
@@ -157,17 +157,17 @@ class BedpostxOutputSpec(TraitedSpec):
     dyads = traits.List(File, exists=True,  desc='a list of path/name of mean of PDD distribution in vector form')
 
     
-class Bedpostx(FSLCommand):
+class BEDPOSTX(FSLCommand):
     """ Use FSL  bedpostx command for local modelling of diffusion parameters
         Example:
         >>> from nipype.interfaces import fsl
-        >>> bedp = fsl.Bedpostx(bpxdirectory='subjdir', fibres=1)
+        >>> bedp = fsl.BEDPOSTX(bpxdirectory='subjdir', fibres=1)
         >>> bedp.cmdline
         'bedpostx subjdir -n 1'
     """
     _cmd = 'bedpostx'
-    input_spec = BedpostxInputSpec
-    output_spec = BedpostxOutputSpec
+    input_spec = BEDPOSTXInputSpec
+    output_spec = BEDPOSTXOutputSpec
     can_resume = True
 
     def _run_interface(self, runtime):
@@ -184,7 +184,7 @@ class Bedpostx(FSLCommand):
             shutil.copyfile(self.inputs.bvals,os.path.join(self.inputs.bpxdirectory,'bvals'))
             shutil.copyfile(self.inputs.bvecs,os.path.join(self.inputs.bpxdirectory,'bvecs'))
 
-        return super(Bedpostx, self)._run_interface(runtime)
+        return super(BEDPOSTX, self)._run_interface(runtime)
 
     def _list_outputs(self):        
         outputs = self.output_spec().get()
@@ -206,35 +206,35 @@ class Bedpostx(FSLCommand):
         return outputs
 
 
-class Tbss1PreprocInputSpec(FSLCommandInputSpec):
+class TBSS1PreprocInputSpec(FSLCommandInputSpec):
     imglist = traits.List(File, exists=True, mandatory=True,
                           desc = 'list with filenames of the FA images')
     inexp = traits.Str('*.nii.gz',desc='the file pattern to be given to this command '+
                        '(note: the extension of the files need to be changed if different from .nii.gz)',
                        argstr='%s',usedefault=True)
     
-class Tbss1PreprocOutputSpec(TraitedSpec):
+class TBSS1PreprocOutputSpec(TraitedSpec):
     tbssdir = Directory(exists=True, field='dir',
                         desc='path/name of directory with FA images')
 
-class Tbss1Preproc(FSLCommand):
+class TBSS1Preproc(FSLCommand):
     """
-        Use FSL Tbss1Preproc for preparing your FA data in your TBSS working
+        Use FSL TBSS1Preproc for preparing your FA data in your TBSS working
         directory in the right format
         Example:
         >>> from nipype.interfaces import fsl
-        >>> tbss1 = fsl.Tbss1Preproc(imglist=[f1,f2,f3],tbssdir='/home')
+        >>> tbss1 = fsl.TBSS1Preproc(imglist=[f1,f2,f3],tbssdir='/home')
         >>> tbss1.cmdline
         'tbss_1_preproc f1 f2 f3'
     """
     _cmd = 'tbss_1_preproc'
-    input_spec = Tbss1PreprocInputSpec
-    output_spec = Tbss1PreprocOutputSpec
+    input_spec = TBSS1PreprocInputSpec
+    output_spec = TBSS1PreprocOutputSpec
 
     def _run_interface(self, runtime):        
         for n in self.inputs.imglist:
             shutil.copyfile(n,self._gen_fname(n,suffix=''))            
-        runtime = super(Tbss1Preproc, self)._run_interface(runtime)
+        runtime = super(TBSS1Preproc, self)._run_interface(runtime)
         if runtime.stderr:
             runtime.returncode = 1             
         return runtime
@@ -244,7 +244,7 @@ class Tbss1Preproc(FSLCommand):
         outputs['tbssdir'] = os.getcwd()            
         return outputs
         
-class Tbss2RegInputSpec(FSLCommandInputSpec):
+class TBSS2RegInputSpec(FSLCommandInputSpec):
     tbssdir = Directory(exists=True, field='dir',
                         desc = 'path/name of directory containing the FA and origdata folders '+
                         'generated by tbss_1_preproc',
@@ -257,34 +257,34 @@ class Tbss2RegInputSpec(FSLCommandInputSpec):
     findTarget = traits.Bool(desc='find best target from all images in FA',
                              argstr='-n', xor=_xor_inputs)
     
-class Tbss2RegOutputSpec(TraitedSpec):
+class TBSS2RegOutputSpec(TraitedSpec):
     tbssdir = Directory(exists=True, field='dir',
                         desc='path/name of directory containing the FA and origdata folders '+
                         'generated by tbss_1_preproc')
    
-class Tbss2Reg(FSLCommand):
+class TBSS2Reg(FSLCommand):
     """
-        Use FSL Tbss2Reg for applying nonlinear registration of all FA images into standard space
+        Use FSL TBSS2Reg for applying nonlinear registration of all FA images into standard space
         Example:
         >>> from nipype.interfaces import fsl
-        >>> tbss2 = fsl.Tbss2Reg(tbssdir=os.getcwd(),FMRIB58FA=True)
+        >>> tbss2 = fsl.TBSS2Reg(tbssdir=os.getcwd(),FMRIB58FA=True)
         >>> tbss2.cmdline
         'tbss_2_reg -T'
     """
     _cmd = 'tbss_2_reg'
-    input_spec = Tbss2RegInputSpec
-    output_spec = Tbss2RegOutputSpec
+    input_spec = TBSS2RegInputSpec
+    output_spec = TBSS2RegOutputSpec
 
     def _run_interface(self, runtime):        
         runtime.cwd = self.inputs.tbssdir
-        return super(Tbss2Reg, self)._run_interface(runtime)
+        return super(TBSS2Reg, self)._run_interface(runtime)
 
     def _list_outputs(self):        
         outputs = self.output_spec().get()
         outputs['tbssdir'] = self.inputs.tbssdir             
         return outputs
 
-class Tbss3PostregInputSpec(FSLCommandInputSpec):
+class TBSS3PostregInputSpec(FSLCommandInputSpec):
     tbssdir = Directory(exists=True, field='dir',
                         desc = 'path/name of directory containing the FA and origdata '+
                         'folders generated by tbss_1_preproc',
@@ -295,7 +295,7 @@ class Tbss3PostregInputSpec(FSLCommandInputSpec):
     FMRIB58FA = traits.Bool(desc='use FMRIB58_FA and its skeleton instead of study-derived mean and skeleton',
                             argstr='-T', xor=_xor_inputs)
    
-class Tbss3PostregOutputSpec(TraitedSpec):
+class TBSS3PostregOutputSpec(TraitedSpec):
     tbssdir = Directory(exists=True, field='dir',
                         desc='path/name of directory containing the FA, origdata, and '+
                         'stats folders generated by tbss_1_preproc and this command')
@@ -303,22 +303,22 @@ class Tbss3PostregOutputSpec(TraitedSpec):
     mean_FA_skeleton = File(exists=True, desc='path/name of 3D volume with mean FA skeleton')     
     mean_FA = File(exists=True, desc='path/name of 3D volume with mean FA image')    
   
-class Tbss3Postreg(FSLCommand):
+class TBSS3Postreg(FSLCommand):
     """
-        Use FSL Tbss3Postreg for creating the mean FA image and skeletonise it
+        Use FSL TBSS3Postreg for creating the mean FA image and skeletonise it
         Example:
         >>> from nipype.interfaces import fsl
-        >>> tbss3 = fsl.Tbss3Postreg(subjectmean=True)
+        >>> tbss3 = fsl.TBSS3Postreg(subjectmean=True)
         >>> tbss3.cmdline
         'tbss_3_postreg -S'
     """
     _cmd = 'tbss_3_postreg'
-    input_spec = Tbss3PostregInputSpec
-    output_spec = Tbss3PostregOutputSpec
+    input_spec = TBSS3PostregInputSpec
+    output_spec = TBSS3PostregOutputSpec
 
     def _run_interface(self, runtime):        
         runtime.cwd = self.inputs.tbssdir
-        return super(Tbss3Postreg, self)._run_interface(runtime)
+        return super(TBSS3Postreg, self)._run_interface(runtime)
     
     def _list_outputs(self):        
         outputs = self.output_spec().get()
@@ -332,36 +332,36 @@ class Tbss3Postreg(FSLCommand):
                                              cwd=os.path.abspath(stats),suffix='' )        
         return outputs
 
-class Tbss4PrestatsInputSpec(FSLCommandInputSpec):
+class TBSS4PrestatsInputSpec(FSLCommandInputSpec):
     tbssdir = Directory(exists=True, field='dir',
                         desc = 'path/name of directory containing the FA, origdata, and '+
                         'stats folders generated by tbss_1_preproc and tbss_3_postreg',
                         mandatory=True)
     threshold = traits.Float(argstr='%.3f', desc='threshold value',mandatory=True)
 
-class Tbss4PrestatsOutputSpec(TraitedSpec):
+class TBSS4PrestatsOutputSpec(TraitedSpec):
     all_FA_skeletonised = File(exists=True, desc='path/name of 4D volume with all FA images skeletonized')
     mean_FA_skeleton_mask = File(exists=True, desc='path/name of mean FA skeleton mask') 
     tbssdir = Directory(exists=True, field='dir',
                         desc = 'path/name of directory containing the FA, origdata, and stats '+
                         'folders generated by tbss_1_preproc and tbss_3_postreg')
 
-class Tbss4Prestats(FSLCommand):
+class TBSS4Prestats(FSLCommand):
     """
-        Use FSL Tbss4Prestats thresholds the mean FA skeleton image at the chosen threshold
+        Use FSL TBSS4Prestats thresholds the mean FA skeleton image at the chosen threshold
         Example:
         >>> from nipype.interfaces import fsl
-        >>> tbss4 = fsl.Tbss4Prestats(threshold=0.3)
+        >>> tbss4 = fsl.TBSS4Prestats(threshold=0.3)
         >>> tbss4.cmdline
         'tbss_4_prestats 0.3'
     """
     _cmd = 'tbss_4_prestats'
-    input_spec = Tbss4PrestatsInputSpec
-    output_spec = Tbss4PrestatsOutputSpec
+    input_spec = TBSS4PrestatsInputSpec
+    output_spec = TBSS4PrestatsOutputSpec
 
     def _run_interface(self, runtime):        
         runtime.cwd = self.inputs.tbssdir
-        return super(Tbss4Prestats, self)._run_interface(runtime)
+        return super(TBSS4Prestats, self)._run_interface(runtime)
    
     def _list_outputs(self):        
         outputs = self.output_spec().get()
@@ -440,7 +440,7 @@ class Randomise(FSLCommand):
         outputs['tstat1file'] = self._gen_fname(self.inputs.basename,suffix='_tstat1')
         return outputs
 
-class ProbtrackxInputSpec(FSLCommandInputSpec):
+class ProbTrackXInputSpec(FSLCommandInputSpec):
     samplesbasename = traits.Str(desc = 'the rootname/basename for samples files',argstr='-s %s')
     bpxdirectory = Directory(exists=True, field='dir', desc = 'path/name of directory with all '+
                              'bedpostx output files',mandatory=True)
@@ -504,7 +504,7 @@ class ProbtrackxInputSpec(FSLCommandInputSpec):
     s2tastext = traits.Bool(argstr='--s2tastext',desc='output seed-to-target counts as a'+
                             ' text file (useful when seeding from a mesh)')
 
-class ProbtrackxOutputSpec(TraitedSpec):
+class ProbTrackXOutputSpec(TraitedSpec):
     probtrackx = File(exists=True, desc='path/name of a text record of the command that was run')
     fdt_paths = File(exists=True, desc='path/name of a 3D image file containing the output '+
                      'connectivity distribution to the seed mask')
@@ -513,12 +513,12 @@ class ProbtrackxOutputSpec(TraitedSpec):
                     'have not been rejected by inclusion/exclusion mask criteria')
     targets = traits.List(File,exists=True,desc='a list with all generated seeds_to_target files')
     
-class Probtrackx(FSLCommand):
+class ProbTrackX(FSLCommand):
 
     """ Use FSL  probtrackx for tractography on bedpostx results
         Example:
         >>> from nipype.interfaces import fsl
-        >>> pbx = fsl.Probtrackx(samplesbasename='merged', mask='nodif_brain_mask.nii.gz',
+        >>> pbx = fsl.ProbTrackX(samplesbasename='merged', mask='nodif_brain_mask.nii.gz',
                      seedfile='MASK_average_thal_right.nii.gz', mode='seedmask',
                      xfm='standard2diff.mat', nsamples=3, nsteps=10, forcedir=True, opd=True, os2t=True,
                      outdir='dtiout', targetmasks = ['THAL2CTX_right/targets_MASK1.nii','THAL2CTX_right/targets_MASK2.nii'],
@@ -530,14 +530,14 @@ class Probtrackx(FSLCommand):
         --targetmasks=/THAL2CTX_right/targets.txt --xfm=standard2diff.mat'
     """
     _cmd = 'probtrackx'
-    input_spec = ProbtrackxInputSpec
-    output_spec = ProbtrackxOutputSpec
+    input_spec = ProbTrackXInputSpec
+    output_spec = ProbTrackXOutputSpec
 
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.samplesbasename):
             self.inputs.samplesbasename = os.path.join(self.inputs.bpxdirectory,'merged')
             
-        return super(Probtrackx, self)._run_interface(runtime)
+        return super(ProbTrackX, self)._run_interface(runtime)
     
     def _format_arg(self, name, spec, value):
         if name == 'targetmasks':
@@ -546,9 +546,9 @@ class Probtrackx(FSLCommand):
             for target in value:
                 f.write("%s\n"%target)
             f.close()
-            return super(Probtrackx, self)._format_arg(name, spec, [fname])
+            return super(ProbTrackX, self)._format_arg(name, spec, [fname])
         else:
-            return super(Probtrackx, self)._format_arg(name, spec, value)
+            return super(ProbTrackX, self)._format_arg(name, spec, value)
     
     def _list_outputs(self):        
         outputs = self.output_spec().get()        

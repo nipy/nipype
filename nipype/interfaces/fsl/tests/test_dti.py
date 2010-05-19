@@ -10,7 +10,7 @@ import nipype.interfaces.fsl.dti as fsl
 
 # test bedpostx
 def test_bedpostx():
-    bpx = fsl.Bedpostx()
+    bpx = fsl.BEDPOSTX()
 
     # make sure command gets called
     yield assert_equal, bpx.cmd, 'bedpostx'
@@ -19,7 +19,7 @@ def test_bedpostx():
     yield assert_raises, AttributeError, bpx.run
 
     # .inputs based parameters setting
-    bpx2 = fsl.Bedpostx()
+    bpx2 = fsl.BEDPOSTX()
     bpx2.inputs.directory = 'inputDir'
     bpx2.inputs.fibres = 2
     bpx2.inputs.weight = 0.3
@@ -33,7 +33,7 @@ def test_bedpostx():
 
 
     # .run based parameter setting
-    bpx3 = fsl.Bedpostx(fibres=1, directory='inputDir')
+    bpx3 = fsl.BEDPOSTX(fibres=1, directory='inputDir')
     yield assert_equal, bpx3.cmdline, 'bedpostx inputDir -n 1'
 
     results = bpx3.run(fibres=1, directory='inputDir', noseTest=True)
@@ -51,7 +51,7 @@ def test_bedpostx():
                 'sampling':             ('-s 25', 25)}
 
     for name, settings in opt_map.items():
-        bpx4 = fsl.Bedpostx(directory='inputDir', **{name: settings[1]})
+        bpx4 = fsl.BEDPOSTX(directory='inputDir', **{name: settings[1]})
         yield assert_equal, bpx4.cmdline, bpx4.cmd + ' inputDir ' + settings[0]
 
 
@@ -87,7 +87,7 @@ def test_eddy_correct():
 
 # test dtifit  
 def test_dtifit():
-    dti = fsl.DtiFit()
+    dti = fsl.DTIFit()
 
     # make sure command gets called
     yield assert_equal, dti.cmd, 'dtifit'
@@ -108,10 +108,10 @@ def test_dtifit():
     yield assert_equal, actualCmdline, desiredCmdline
 
     # .run based parameter setting
-    dti2 = fsl.DtiFit(data='foo2.nii')
+    dti2 = fsl.DTIFit(data='foo2.nii')
     yield assert_equal, dti2.cmdline, 'dtifit -k foo2.nii'
 
-    dti3 = fsl.DtiFit()
+    dti3 = fsl.DTIFit()
     results = dti3.run(data='foo3.nii', noseTest=True)
     yield assert_not_equal, results.runtime.returncode, 0
     yield assert_equal, results.interface.inputs.data, 'foo3.nii'
@@ -137,7 +137,7 @@ def test_dtifit():
                 'small_brain_area':         ('--littlebit', True)}
 
     for name, settings in opt_map.items():
-        dti4 = fsl.DtiFit(**{name: settings[1]})
+        dti4 = fsl.DTIFit(**{name: settings[1]})
         yield assert_equal, dti4.cmdline, dti4.cmd + ' ' + settings[0]
 
 
@@ -159,7 +159,7 @@ def teardown_tbss():
 
 @with_setup(setup_tbss, teardown_tbss)
 def test_tbss_1_preproc():
-    tbss1 = fsl.Tbss1Preproc()
+    tbss1 = fsl.TBSS1Preproc()
 
     # make sure command gets called
     yield assert_equal, tbss1.cmd, 'tbss_1_preproc'
@@ -172,7 +172,7 @@ def test_tbss_1_preproc():
     yield assert_equal, tbss1.cmdline, \
         'tbss_1_preproc foo.nii  f002.nii  f003.nii'
 
-    tbss = fsl.Tbss1Preproc()
+    tbss = fsl.TBSS1Preproc()
     results = tbss.run(infiles='*.nii.gz', noseTest=True)
     yield assert_equal, results.interface.inputs.infiles, '*.nii.gz'
     yield assert_equal, results.runtime.cmdline, 'tbss_1_preproc *.nii.gz'
@@ -182,7 +182,7 @@ def test_tbss_1_preproc():
 
 @with_setup(setup_tbss, teardown_tbss)
 def test_tbss_2_reg():
-    tbss2 = fsl.Tbss2Reg()
+    tbss2 = fsl.TBSS2Reg()
 
     # make sure command gets called
     yield assert_equal, tbss2.cmd, 'tbss_2_reg'
@@ -195,13 +195,13 @@ def test_tbss_2_reg():
     yield assert_equal, tbss2.cmdline, 'tbss_2_reg -T'
 
     # .run based parameter setting
-    tbss22 = fsl.Tbss2Reg(targetImage='targetImg')
+    tbss22 = fsl.TBSS2Reg(targetImage='targetImg')
     yield assert_equal, tbss22.cmdline, 'tbss_2_reg -t targetImg'
 
-    tbss222 = fsl.Tbss2Reg(findTarget=True)
+    tbss222 = fsl.TBSS2Reg(findTarget=True)
     yield assert_equal, tbss222.cmdline, 'tbss_2_reg -n'
 
-    tbss21 = fsl.Tbss2Reg()
+    tbss21 = fsl.TBSS2Reg()
     results = tbss21.run(FMRIB58_FA_1mm=True, noseTest=True)
     yield assert_equal, results.runtime.cmdline, 'tbss_2_reg -T'
 
@@ -211,12 +211,12 @@ def test_tbss_2_reg():
                'findTarget':        ('-n', True)}
 
     for name, settings in opt_map.items():
-        tbss = fsl.Tbss2Reg(**{name: settings[1]})
+        tbss = fsl.TBSS2Reg(**{name: settings[1]})
         yield assert_equal, tbss.cmdline, tbss.cmd + ' ' + settings[0]
 
 @with_setup(setup_tbss, teardown_tbss)
 def test_tbss_3_postreg():
-    tbss = fsl.Tbss3Postreg()
+    tbss = fsl.TBSS3Postreg()
 
     # make sure command gets called
     yield assert_equal, tbss.cmd, 'tbss_3_postreg'
@@ -229,10 +229,10 @@ def test_tbss_3_postreg():
     yield assert_equal, tbss.cmdline, 'tbss_3_postreg -T'
 
     # .run based parameter setting
-    tbss2 = fsl.Tbss3Postreg(subject_means=True)
+    tbss2 = fsl.TBSS3Postreg(subject_means=True)
     yield assert_equal, tbss2.cmdline, 'tbss_3_postreg -S'
 
-    tbss3 = fsl.Tbss3Postreg()
+    tbss3 = fsl.TBSS3Postreg()
     results = tbss3.run(FMRIB58_FA=True, noseTest=True)
     yield assert_equal, results.runtime.cmdline, 'tbss_3_postreg -T'
 
@@ -241,12 +241,12 @@ def test_tbss_3_postreg():
                'FMRIB58_FA':        ('-T', True)}
 
     for name, settings in opt_map.items():
-        tbss3 = fsl.Tbss3Postreg(**{name: settings[1]})
+        tbss3 = fsl.TBSS3Postreg(**{name: settings[1]})
         yield assert_equal, tbss3.cmdline, tbss3.cmd + ' ' + settings[0]
 
 @with_setup(setup_tbss, teardown_tbss)
 def test_tbss_4_prestats():
-    tbss = fsl.Tbss4Prestats()
+    tbss = fsl.TBSS4Prestats()
 
     # make sure command gets called
     yield assert_equal, tbss.cmd, 'tbss_4_prestats'
@@ -258,15 +258,15 @@ def test_tbss_4_prestats():
     tbss.inputs.threshold = 0.3
     yield assert_equal, tbss.cmdline, 'tbss_4_prestats 0.3'
 
-    tbss2 = fsl.Tbss4Prestats(threshold=0.4)
+    tbss2 = fsl.TBSS4Prestats(threshold=0.4)
     yield assert_equal, tbss2.cmdline, 'tbss_4_prestats 0.4'
 
-    tbss3 = fsl.Tbss4Prestats()
+    tbss3 = fsl.TBSS4Prestats()
     results = tbss3.run(threshold=0.2, noseTest=True)
     yield assert_equal, results.runtime.cmdline, 'tbss_4_prestats 0.2'
 
     # test arguments for opt_map
-    # Tbss4Prestats doesn't have an opt_map{}
+    # TBSS4Prestats doesn't have an opt_map{}
 
 def test_randomise():
 

@@ -133,7 +133,7 @@ eddycorrect.inputs.refnum=0
 """
 compute the diffusion tensor in each voxel
 """
-dtifit = pe.Node(interface=fsl.DtiFit(),name='dtifit')
+dtifit = pe.Node(interface=fsl.DTIFit(),name='dtifit')
 
 """
 connect all the nodes for this workflow
@@ -159,13 +159,13 @@ tractography = pe.Workflow(name='tractography')
 """
 estimate the diffusion parameters: phi, theta, and so on 
 """
-bedpostx = pe.Node(interface=fsl.Bedpostx(),name='bedpostx')
+bedpostx = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx')
 
 
 """
 perform probabilistic tracktography
 """
-probtrackx = pe.Node(interface=fsl.Probtrackx(),name='probtrackx')
+probtrackx = pe.Node(interface=fsl.ProbTrackX(),name='probtrackx')
 probtrackx.inputs.nsamples=3
 probtrackx.inputs.nsteps=10
 probtrackx.inputs.forcedir=True
@@ -254,25 +254,25 @@ tbss_source.inputs.template = os.path.abspath('data/workingdir/_subject_id_*/dti
 """
 prepare your FA data in your TBSS working directory in the right format
 """
-tbss1 = pe.Node(fsl.Tbss1Preproc(),name='tbss1')
+tbss1 = pe.Node(fsl.TBSS1Preproc(),name='tbss1')
 
 
 """
 apply nonlinear registration of all FA images into standard space
 """
-tbss2 = pe.Node(fsl.Tbss2Reg(),name='tbss2')
+tbss2 = pe.Node(fsl.TBSS2Reg(),name='tbss2')
 tbss2.inputs.FMRIB58FA=True
 
 """
 create the mean FA image and skeletonise it
 """
-tbss3 = pe.Node(fsl.Tbss3Postreg(),name='tbss3')
+tbss3 = pe.Node(fsl.TBSS3Postreg(),name='tbss3')
 tbss3.inputs.FMRIB58FA=True
 
 """
 project all subjects' FA data onto the mean FA skeleton
 """
-tbss4 = pe.Node(fsl.Tbss4Prestats(),name='tbss4')
+tbss4 = pe.Node(fsl.TBSS4Prestats(),name='tbss4')
 tbss4.inputs.threshold=0.3
 
 """
