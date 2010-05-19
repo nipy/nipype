@@ -114,8 +114,8 @@ computeTensor = pe.Workflow(name='computeTensor')
 extract the volume with b=0 (nodif_brain)
 """
 fslroi = pe.Node(interface=fsl.ExtractROI(),name='fslroi')
-fslroi.inputs.tmin=0
-fslroi.inputs.tsize=1
+fslroi.inputs.t_min=0
+fslroi.inputs.t_size=1
 
 """
 create a brain mask from the nodif_brain
@@ -139,10 +139,10 @@ dtifit = pe.Node(interface=fsl.DTIFit(),name='dtifit')
 connect all the nodes for this workflow
 """
 computeTensor.connect([
-                        (fslroi,bet,[('outfile','in_file')]),  
+                        (fslroi,bet,[('roi_file','in_file')]),  
                         (eddycorrect,dtifit,[('eddy_corrected','dwi')]),                                   
                         (infosource, dtifit,[['subject_id','base_name']]),
-                        (bet,dtifit,[('maskfile','mask')])                       
+                        (bet,dtifit,[('mask_file','mask')])                       
                       ])
 
 
@@ -216,7 +216,7 @@ dwiproc = pe.Workflow(name="dwiproc")
 dwiproc.base_dir = os.path.abspath('data/workingdir')
 dwiproc.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),                   
-                    (datasource,computeTensor,[('dwi','fslroi.infile'),
+                    (datasource,computeTensor,[('dwi','fslroi.in_file'),
                                                ('bvals','dtifit.bvals'),
                                                ('bvecs','dtifit.bvecs'),
                                                ('dwi','eddycorrect.in_file')]),
@@ -225,8 +225,8 @@ dwiproc.connect([
                                               ('seed_file','probtrackx.seed_file'),
                                               ('target_masks','probtrackx.target_masks')]),
                     (computeTensor,tractography,[('eddycorrect.eddy_corrected','bedpostx.dwi'),
-                                                 ('bet.maskfile','bedpostx.mask'),
-                                                 ('bet.maskfile','probtrackx.mask')]),
+                                                 ('bet.mask_file','bedpostx.mask'),
+                                                 ('bet.mask_file','probtrackx.mask')]),
                     (infosource, datasink,[('subject_id','container'),
                                            (('subject_id', getstripdir),'strip_dir')]),
                     (tractography,datasink,[('projthresh.out_files','projthresh.@seeds_to_targets')]),
@@ -293,7 +293,7 @@ tbss_workflow.connect([ (tbss_source,tbss1,[('outfiles','imglist')]),
                         (tbss1,tbss2,[('tbssdir','tbssdir')]),
                         (tbss2,tbss3,[('tbssdir','tbssdir')]),
                         (tbss3,tbss4,[('tbssdir','tbssdir')]),                        
-                        (tbss4,randomise,[('all_FA_skeletonised','infile')]),
+                        (tbss4,randomise,[('all_FA_skeletonised','in_file')]),
                         (tbss4,randomise,[('mean_FA_skeleton_mask','mask')])            
                     ])
 
