@@ -191,6 +191,13 @@ class ArtifactDetect(BaseInterface):
             newpos = np.abs(signal.detrend(newpos,axis=0,type='constant'))
             normdata = np.sqrt(np.mean(np.power(newpos,2),axis=1))
         return normdata
+
+    def _nanmean(self, a, axis=None):
+        if axis:
+            return np.nansum(a, axis)/np.sum(1-np.isnan(a),axis)
+        else:
+            return np.nansum(a)/np.sum(1-np.isnan(a))
+        
     
     def _detect_outliers_core(self, imgfile, motionfile, runidx, cwd=None):
         """
@@ -250,32 +257,32 @@ class ArtifactDetect(BaseInterface):
                 mask = np.ones((x,y,z),dtype=bool)
                 for t0 in range(timepoints):
                     vol   = data[:,:,:,t0]
-                    mask  = mask*(vol>(np.mean(vol)/8))
+                    mask  = mask*(vol>(self._nanmean(vol)/8))
                 for t0 in range(timepoints):
                     vol   = data[:,:,:,t0]                    
-                    g[t0] = np.mean(vol[mask])
+                    g[t0] = self._nanmean(vol[mask])
                 if len(find_indices(mask))<(np.prod((x,y,z))/10):
                     intersect_mask = False
                     g = np.zeros((timepoints,1))
             if not intersect_mask:
                 for t0 in range(timepoints):
                     vol   = data[:,:,:,t0]
-                    mask  = vol>(np.mean(vol)/8)
-                    g[t0] = np.mean(vol[mask])
+                    mask  = vol>(self._nanmean(vol)/8)
+                    g[t0] = self._nanmean(vol[mask])
         elif masktype == 'file': # uses a mask image to determine intensity
             mask = load(self.inputs.mask_file).get_data()
             mask = mask>0.5
             for t0 in range(timepoints):
                 vol = data[:,:,:,t0]
-                g[t0] = np.mean(vol[mask])
+                g[t0] = self._nanmean(vol[mask])
         elif masktype == 'thresh': # uses a fixed signal threshold
             for t0 in range(timepoints):
                 vol   = data[:,:,:,t0]
                 mask  = vol>self.inputs.mask_threshold
-                g[t0] = np.mean(vol[mask])
+                g[t0] = self._nanmean(vol[mask])
         else:
             mask = np.ones((x,y,z))
-            g = np.mean(data[mask>0,:],1)
+            g = self._nanmean(data[mask>0,:],1)
 
         # compute normalized intensity values
         gz = signal.detrend(g,axis=0)       # detrend the signal
