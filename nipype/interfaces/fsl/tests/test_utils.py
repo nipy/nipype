@@ -3,7 +3,7 @@ from nipype.testing import assert_equal, assert_not_equal, assert_raises
 import nipype.interfaces.fsl.utils as fsl
 
 def test_fslroi():
-    roi = fsl.ExtractRoi()
+    roi = fsl.ExtractROI()
 
     # make sure command gets called
     yield assert_equal, roi.cmd, 'fslroi'
@@ -19,7 +19,7 @@ def test_fslroi():
     yield assert_equal, roi.cmdline, 'fslroi foo.nii foo_roi.nii 10 20'
 
     # .run based parameter setting
-    roi2 = fsl.ExtractRoi(infile='foo2',
+    roi2 = fsl.ExtractROI(infile='foo2',
                       outfile='foo2_roi',
                       tmin=20, tsize=40,
                       xmin=3, xsize=30,
@@ -28,7 +28,7 @@ def test_fslroi():
     yield assert_equal, roi2.cmdline, \
           'fslroi foo2 foo2_roi 3 30 40 10 5 20 20 40'
 
-    roi3 = fsl.ExtractRoi()
+    roi3 = fsl.ExtractROI()
     results = roi3.run(infile='foo3',
                      outfile='foo3_roi',
                      xmin=3, xsize=30,

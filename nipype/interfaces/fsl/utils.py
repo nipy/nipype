@@ -97,7 +97,7 @@ class Merge(FSLCommand):
         return None
 
 
-class ExtractRoiInputSpec(FSLCommandInputSpec):
+class ExtractROIInputSpec(FSLCommandInputSpec):
     infile = File(exists=True, argstr="%s", position=0, desc="input file", mandatory=True)
     outfile = File(argstr="%s", position=1, desc="output file", genfile=True)
     xmin = traits.Float(argstr="%f", position=2)
@@ -109,10 +109,10 @@ class ExtractRoiInputSpec(FSLCommandInputSpec):
     tmin = traits.Int(argstr="%d", position=8)
     tsize = traits.Int(argstr="%d", position=9)
     
-class ExtractRoiOutputSpec(TraitedSpec):
+class ExtractROIOutputSpec(TraitedSpec):
     outfile = File(exists=True)
 
-class ExtractRoi(FSLCommand):
+class ExtractROI(FSLCommand):
     """Uses FSL Fslroi command to extract region of interest (ROI)
     from an image.
 
@@ -125,15 +125,15 @@ class ExtractRoi(FSLCommand):
     10 and 12).
     
     >>> from nipype.interfaces import fsl
-    >>> fslroi = fsl.ExtractRoi(infile='foo.nii', outfile='bar.nii', \
+    >>> fslroi = fsl.ExtractROI(infile='foo.nii', outfile='bar.nii', \
                                 tmin=0, tsize=1)
     >>> fslroi.cmdline
     'fslroi foo.nii bar.nii 0 1'
     """
     
     _cmd = 'fslroi'
-    input_spec = ExtractRoiInputSpec
-    output_spec = ExtractRoiOutputSpec
+    input_spec = ExtractROIInputSpec
+    output_spec = ExtractROIOutputSpec
 
     def _list_outputs(self):
         """Create a Bunch which contains all possible files generated

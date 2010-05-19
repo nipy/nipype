@@ -113,7 +113,7 @@ computeTensor = pe.Workflow(name='computeTensor')
 """
 extract the volume with b=0 (nodif_brain)
 """
-fslroi = pe.Node(interface=fsl.ExtractRoi(),name='fslroi')
+fslroi = pe.Node(interface=fsl.ExtractROI(),name='fslroi')
 fslroi.inputs.tmin=0
 fslroi.inputs.tsize=1
 

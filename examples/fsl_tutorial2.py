@@ -60,7 +60,7 @@ This is a generic fsl preprocessing workflow that can be used by different analy
 
 preproc = pe.Workflow(name='preproc')
 
-extract_ref = pe.Node(interface=fsl.ExtractRoi(tmin=42,
+extract_ref = pe.Node(interface=fsl.ExtractROI(tmin=42,
                                                tsize=1),
                       name = 'extractref')
 

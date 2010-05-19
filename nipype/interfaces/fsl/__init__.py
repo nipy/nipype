@@ -12,7 +12,7 @@ from nipype.interfaces.fsl.preprocess import (FAST, FLIRT, ApplyXfm,
 from nipype.interfaces.fsl.model import (Level1Design, FEAT, FEATModel,
                                          FILMGLS, FEATRegister, FLAMEO, ContrastMgr,
                                          L2Model, SMM)
-from nipype.interfaces.fsl.utils import (Smooth, Merge, ExtractRoi, Split,
+from nipype.interfaces.fsl.utils import (Smooth, Merge, ExtractROI, Split,
                                          ImageMaths)
 from nipype.interfaces.fsl.dti import (EddyCorrect, BEDPOSTX, DTIFit, TBSS2Reg,
                                        TBSS1Preproc, TBSS3Postreg,
