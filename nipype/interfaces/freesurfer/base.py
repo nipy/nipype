@@ -80,34 +80,34 @@ class Info(object):
 
 
 class FSTraitedSpec(CommandLineInputSpec):
-    subjectsdir =  Directory(exists=True, desc='subjects directory')
+    subjects_dir =  Directory(exists=True, desc='subjects directory')
     
 class FSCommand(CommandLine):
     '''General support for FS commands. Every FS command accepts
-    'subjectsdir' input. For example:
+    'subjects_dir' input. For example:
     '''
     
     input_spec = FSTraitedSpec
     
-    _subjectsdir = None
+    _subjects_dir = None
 
     def __init__(self, **inputs):
         super(FSCommand, self).__init__(**inputs)
-        self.inputs.on_trait_change(self._subjectsdir_update, 'subjectsdir')
-        if not self._subjectsdir:
-            self._subjectsdir = Info.subjectsdir()
-        if not isdefined(self.inputs.subjectsdir) and self._subjectsdir:
-            self.inputs.subjectsdir = self._subjectsdir
-        self._subjectsdir_update()
+        self.inputs.on_trait_change(self._subjects_dir_update, 'subjects_dir')
+        if not self._subjects_dir:
+            self._subjects_dir = Info.subjectsdir()
+        if not isdefined(self.inputs.subjects_dir) and self._subjects_dir:
+            self.inputs.subjects_dir = self._subjects_dir
+        self._subjects_dir_update()
 
-    def _subjectsdir_update(self):
-        if self.inputs.subjectsdir:
+    def _subjects_dir_update(self):
+        if self.inputs.subjects_dir:
             self.inputs.environ.update({'SUBJECTS_DIR':
-                                            self.inputs.subjectsdir})
+                                            self.inputs.subjects_dir})
     
     @classmethod
-    def set_default_subjectsdir(cls, subjectsdir):
-        cls._subjectsdir = subjectsdir
+    def set_default_subjects_dir(cls, subjects_dir):
+        cls._subjects_dir = subjects_dir
 
     def _gen_fname(self, basename, fname=None, cwd=None, suffix='_fs', use_ext=True):
         '''Define a generic mapping for a single outfile
