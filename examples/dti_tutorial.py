@@ -128,7 +128,7 @@ bet.inputs.frac=0.34
 correct the diffusion weighted images for eddy_currents
 """
 eddycorrect = pe.Node(interface=fsl.EddyCorrect(),name='eddycorrect')
-eddycorrect.inputs.refnum=0
+eddycorrect.inputs.ref_num=0
 
 """
 compute the diffusion tensor in each voxel
@@ -139,9 +139,9 @@ dtifit = pe.Node(interface=fsl.DTIFit(),name='dtifit')
 connect all the nodes for this workflow
 """
 computeTensor.connect([
-                        (fslroi,bet,[('outfile','infile')]),  
-                        (eddycorrect,dtifit,[('outfile','dwi')]),                                   
-                        (infosource, dtifit,[['subject_id','basename']]),
+                        (fslroi,bet,[('outfile','in_file')]),  
+                        (eddycorrect,dtifit,[('eddy_corrected','dwi')]),                                   
+                        (infosource, dtifit,[['subject_id','base_name']]),
                         (bet,dtifit,[('maskfile','mask')])                       
                       ])
 
@@ -166,9 +166,9 @@ bedpostx = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx')
 perform probabilistic tracktography
 """
 probtrackx = pe.Node(interface=fsl.ProbTrackX(),name='probtrackx')
-probtrackx.inputs.nsamples=3
-probtrackx.inputs.nsteps=10
-probtrackx.inputs.forcedir=True
+probtrackx.inputs.n_samples=3
+probtrackx.inputs.n_steps=10
+probtrackx.inputs.force_dir=True
 probtrackx.inputs.opd=True
 probtrackx.inputs.os2t=True
 probtrackx.inputs.mode='seedmask'
@@ -191,10 +191,10 @@ findthebiggest = pe.Node(interface=fsl.FindTheBiggest(),name='findthebiggest')
 connect all the nodes for this workflow
 """
 tractography.connect([
-                        (bedpostx,probtrackx,[('bpxoutdirectory','bpxdirectory')]),
-                        (bedpostx,probtrackx,[('bpxoutdirectory','outdir')]),
-                        (probtrackx,projthresh,[('targets','infiles')]),
-                        (projthresh,findthebiggest,[('outfiles','infiles')])                    
+                        (bedpostx,probtrackx,[('bpx_out_directory','bpx_directory')]),
+                        (bedpostx,probtrackx,[('bpx_out_directory','out_dir')]),
+                        (probtrackx,projthresh,[('targets','in_files')]),
+                        (projthresh,findthebiggest,[('out_files','in_files')])                    
                     ])
 
 
@@ -219,18 +219,18 @@ dwiproc.connect([
                     (datasource,computeTensor,[('dwi','fslroi.infile'),
                                                ('bvals','dtifit.bvals'),
                                                ('bvecs','dtifit.bvecs'),
-                                               ('dwi','eddycorrect.infile')]),
+                                               ('dwi','eddycorrect.in_file')]),
                     (datasource,tractography,[('bvals','bedpostx.bvals'),
                                               ('bvecs','bedpostx.bvecs'),
-                                              ('seedfile','probtrackx.seedfile'),
-                                              ('targetmasks','probtrackx.targetmasks')]),
-                    (computeTensor,tractography,[('eddycorrect.outfile','bedpostx.dwi'),
+                                              ('seed_file','probtrackx.seed_file'),
+                                              ('target_masks','probtrackx.target_masks')]),
+                    (computeTensor,tractography,[('eddycorrect.eddy_corrected','bedpostx.dwi'),
                                                  ('bet.maskfile','bedpostx.mask'),
                                                  ('bet.maskfile','probtrackx.mask')]),
                     (infosource, datasink,[('subject_id','container'),
                                            (('subject_id', getstripdir),'strip_dir')]),
-                    (tractography,datasink,[('projthresh.outfiles','projthresh.@seeds_to_targets')]),
-                    (tractography,datasink,[('findthebiggest.outfile','fbiggest.@biggestsegmentation')])
+                    (tractography,datasink,[('projthresh.out_files','projthresh.@seeds_to_targets')]),
+                    (tractography,datasink,[('findthebiggest.out_file','fbiggest.@biggestsegmentation')])
                 ])
 
 dwiproc.run()
