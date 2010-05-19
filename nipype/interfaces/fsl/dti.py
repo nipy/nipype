@@ -451,7 +451,7 @@ class ProbtrackxInputSpec(FSLCommandInputSpec):
     mode	= traits.Str(desc='options: simple (single seed voxel), seedmask (mask of seed voxels),'+
                      'twomask_symm (two bet binary masks) ', argstr='--mode=%s')                             
     targetmasks	= InputMultiPath(File(exits=True),desc='list of target masks - '+
-                       'required for seeds_to_targets classification', argstr='--targetmasks=targets.txt')    
+                       'required for seeds_to_targets classification', argstr='--targetmasks=%s')    
     mask2	=File(exists=True,desc='second bet binary mask (in diffusion space) in twomask_symm mode',
                 argstr='--mask2=%s')
     waypoints	= File(exists=True, desc='waypoint mask or ascii list of waypoint masks - '+
@@ -521,7 +521,7 @@ class Probtrackx(FSLCommand):
         >>> pbx = fsl.Probtrackx(samplesbasename='merged', mask='nodif_brain_mask.nii.gz',
                      seedfile='MASK_average_thal_right.nii.gz', mode='seedmask',
                      xfm='standard2diff.mat', nsamples=3, nsteps=10, forcedir=True, opd=True, os2t=True,
-                     outdir='dtiout', targetmasks = 'THAL2CTX_right/targets.txt',
+                     outdir='dtiout', targetmasks = ['THAL2CTX_right/targets_MASK1.nii','THAL2CTX_right/targets_MASK2.nii'],
                      pathsfile='nipype_fdtpaths')
         >>> pbx.cmdline
         'probtrackx --forcedir -m nodif_brain_mask.nii.gz --mode=seedmask
@@ -537,13 +537,18 @@ class Probtrackx(FSLCommand):
         if not isdefined(self.inputs.samplesbasename):
             self.inputs.samplesbasename = os.path.join(self.inputs.bpxdirectory,'merged')
             
-        if isdefined(self.inputs.targetmasks):
-            f = open("targets.txt","w")
-            for target in self.inputs.targetmasks:
+        return super(Probtrackx, self)._run_interface(runtime)
+    
+    def _format_arg(self, name, spec, value):
+        if name == 'targetmasks':
+            fname = "targets.txt"
+            f = open(fname,"w")
+            for target in value:
                 f.write("%s\n"%target)
             f.close()
-            
-        return super(Probtrackx, self)._run_interface(runtime)
+            return super(Probtrackx, self)._format_arg(name, spec, [fname])
+        else:
+            return super(Probtrackx, self)._format_arg(name, spec, value)
     
     def _list_outputs(self):        
         outputs = self.output_spec().get()        
@@ -556,10 +561,9 @@ class Probtrackx(FSLCommand):
       
         # handle seeds-to-target output files 
         if isdefined(self.inputs.targetmasks):
-            f=open(self.inputs.targetmasks,'r')
             outputs['targets']=[]
-            for line in f:
-                outputs['targets'].append(self._gen_fname('seeds_to_'+os.path.split(line)[1],
+            for target in self.inputs.targetmasks:
+                outputs['targets'].append(self._gen_fname('seeds_to_'+os.path.split(target)[1],
                                                           cwd=self.inputs.outdir,suffix=''))        
         return outputs
 
