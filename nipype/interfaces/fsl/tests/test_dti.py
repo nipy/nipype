@@ -547,7 +547,7 @@ def test_Vec_reg():
 
 # test find_the_biggest
 def test_Find_the_biggest():
-    fbg = fsl.Findthebiggest()
+    fbg = fsl.FindTheBiggest()
 
     # make sure command gets called
     yield assert_equal, fbg.cmd, 'find_the_biggest'
@@ -560,11 +560,11 @@ def test_Find_the_biggest():
     fbg.inputs.outfile = 'fbgfile'
     yield assert_equal, fbg.cmdline, 'find_the_biggest seed* fbgfile'
 
-    fbg2 = fsl.Findthebiggest(infiles='seed2*', outfile='fbgfile2')
+    fbg2 = fsl.FindTheBiggest(infiles='seed2*', outfile='fbgfile2')
     yield assert_equal, fbg2.cmdline, 'find_the_biggest seed2* fbgfile2'
 
     # .run based parameters setting
-    fbg3 = fsl.Findthebiggest()
+    fbg3 = fsl.FindTheBiggest()
     results = fbg3.run(infiles='seed3', outfile='out3')
     yield assert_equal, results.runtime.cmdline, 'find_the_biggest seed3 out3'
 

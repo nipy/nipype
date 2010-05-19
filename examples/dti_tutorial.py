@@ -184,7 +184,7 @@ projthresh.inputs.threshold = 1
 """
 perform hard segmentation on the output of probtrackx
 """
-findthebiggest = pe.Node(interface=fsl.Findthebiggest(),name='findthebiggest')
+findthebiggest = pe.Node(interface=fsl.FindTheBiggest(),name='findthebiggest')
 
 
 """

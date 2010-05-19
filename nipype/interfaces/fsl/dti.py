@@ -672,7 +672,7 @@ class FindthebiggestInputSpec(FSLCommandInputSpec):
 class FindthebiggestOutputSpec(TraitedSpec):
     outfile = File(exists=True,argstr='%s',desc='output file indexed in order of input files')
     
-class Findthebiggest(FSLCommand):
+class FindTheBiggest(FSLCommand):
     """Use FSL find_the_biggest for performing hard segmentation on
        the outputs of connectivity-based thresholding in probtrack.
        For complete details, see the `FDT
@@ -692,7 +692,7 @@ class Findthebiggest(FSLCommand):
     def _run_interface(self, runtime):        
         if not isdefined(self.inputs.outfile):
             self.inputs.outfile = self._gen_fname('biggestSegmentation',suffix='')
-        return super(Findthebiggest, self)._run_interface(runtime)
+        return super(FindTheBiggest, self)._run_interface(runtime)
     
     def _list_outputs(self):        
         outputs = self.output_spec().get()
