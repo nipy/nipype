@@ -14,20 +14,19 @@ __docformat__ = 'restructuredtext'
 
 import os
 from glob import glob
+import numpy as np
 
 from nipype.externals.pynifti import load
-from nipype.interfaces.base import Bunch
-from nipype.utils.docparse import get_doc
-from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
+from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.io import FreeSurferSource
 
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.interfaces.base import (Bunch, TraitedSpec, File, traits,
+from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath)
 from nipype.utils.misc import isdefined
 
 
-class ParseDicomDirInputSpec(FSTraitedSpec):
+class ParseDICOMDirInputSpec(FSTraitedSpec):
     dicomdir = Directory(exists=True, argstr='--d %s', mandatory=True,
                          desc='path to siemens dicom directory')
     outfile = File('dicominfo.txt', argstr='--o %s', usedefault=True,
@@ -36,19 +35,19 @@ class ParseDicomDirInputSpec(FSTraitedSpec):
     summarize = traits.Bool(argstr='--summarize',
                             desc='only print out info for run leaders')
 
-class ParseDicomDirOutputSpec(TraitedSpec):
+class ParseDICOMDirOutputSpec(TraitedSpec):
     outfile = File(exists=True,
                    desc='text file containing dicom information')
 
-class ParseDicomDir(FSCommand):
+class ParseDICOMDir(FSCommand):
     """uses mri_parse_sdcmdir to get information from dicom directories
     
     Examples
     --------
 
-    >>> from nipype.interfaces.freesurfer import ParseDicomDir
+    >>> from nipype.interfaces.freesurfer import ParseDICOMDir
     >>> import os
-    >>> dcminfo = ParseDicomDir()
+    >>> dcminfo = ParseDICOMDir()
     >>> dcminfo.inputs.dicomdir = '.'
     >>> dcminfo.inputs.sortbyrun = True
     >>> dcminfo.inputs.summarize = True
@@ -58,8 +57,8 @@ class ParseDicomDir(FSCommand):
    """
 
     _cmd = 'mri_parse_sdcmdir'
-    input_spec = ParseDicomDirInputSpec
-    output_spec = ParseDicomDirOutputSpec
+    input_spec = ParseDICOMDirInputSpec
+    output_spec = ParseDICOMDirOutputSpec
     
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -67,7 +66,7 @@ class ParseDicomDir(FSCommand):
             outputs['outfile'] = self.inputs.outfile
         return outputs
 
-class UnpackSDcmdirInputSpec(FSTraitedSpec):
+class UnpackSDICOMDirInputSpec(FSTraitedSpec):
     srcdir = Directory(exists=True, argstr='-src %s',
                        mandatory=True,
                        desc='directory with the DICOM files')
@@ -99,17 +98,17 @@ class UnpackSDcmdirInputSpec(FSTraitedSpec):
     nounpackerr = traits.Bool(argstr='-no-unpackerr',
                               desc='do not try to unpack runs with errors')
 
-class UnpackSDcmdir(FSCommand):
+class UnpackSDICOMDir(FSCommand):
     """use fs unpacksdcmdir to convert dicom files
 
     Examples
     --------
     """
     _cmd = 'unpacksdcmdir'
-    input_spec = UnpackSDcmdirInputSpec
+    input_spec = UnpackSDICOMDirInputSpec
 
 
-class MriConvertInputSpec(FSTraitedSpec):
+class MRIConvertInputSpec(FSTraitedSpec):
     readonly = traits.Bool(argstr='--read_only',
                             desc='read the input volume')
     nowrite = traits.Bool(argstr='--no_write',
@@ -299,10 +298,10 @@ class MriConvertInputSpec(FSTraitedSpec):
     zerogezoffset = traits.Bool(argstr='--zero_ge_z_offset',
                                desc='zero ge z offset ???')
 
-class MriConvertOutputSpec(TraitedSpec):
+class MRIConvertOutputSpec(TraitedSpec):
     outfile = File(exists=True, desc='converted output file')
 
-class MriConvert(FSCommand):
+class MRIConvert(FSCommand):
     """use fs mri_convert to manipulate files
 
     adds niigz as an output type option
@@ -310,8 +309,8 @@ class MriConvert(FSCommand):
     Examples
     --------
 
-    >>> from nipype.interfaces.freesurfer import MriConvert
-    >>> mc = MriConvert()
+    >>> from nipype.interfaces.freesurfer import MRIConvert
+    >>> mc = MRIConvert()
     >>> mc.inputs.infile = 'anatomical.nii'
     >>> mc.inputs.outtype = 'mgz'
     >>> mc.cmdline
@@ -319,8 +318,8 @@ class MriConvert(FSCommand):
     
     """
     _cmd = 'mri_convert'
-    input_spec = MriConvertInputSpec
-    output_spec = MriConvertOutputSpec
+    input_spec = MRIConvertInputSpec
+    output_spec = MRIConvertOutputSpec
 
     filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
                    afni='brik', brik='brik', bshort='bshort',
@@ -332,7 +331,7 @@ class MriConvert(FSCommand):
         if name in ['intype', 'outtype', 'templatetype']:
             if value == 'niigz':
                 return spec.argstr % 'nii'
-        return super(MriConvert, self)._format_arg(name, spec, value)
+        return super(MRIConvert, self)._format_arg(name, spec, value)
     
     def _get_outfilename(self):
         outfile = self.inputs.outfile
@@ -359,7 +358,7 @@ class MriConvert(FSCommand):
                 else:
                     tp = size[-1]
                 # have to take care of all the frame manipulations
-                warn('Not taking frame manipulations into account')
+                raise Exception('Not taking frame manipulations into account- please warn the developers')
                 outfiles = []
                 for i in range(tp):
                     outfiles.append(fname_presuffix(outfile,
@@ -373,7 +372,7 @@ class MriConvert(FSCommand):
             return self._get_outfilename()
         return None    
 
-class DicomConvertInputSpec(FSTraitedSpec):
+class DICOMConvertInputSpec(FSTraitedSpec):
     dicomdir = Directory(exists=True, mandatory=True,
                          desc='dicom directory from which to convert dicom files')
     base_output_dir = Directory(mandatory=True,
@@ -383,7 +382,7 @@ class DicomConvertInputSpec(FSTraitedSpec):
     subject_id = traits.Any(desc = 'subject identifier to insert into template')
     file_mapping = traits.List(traits.Tuple(traits.Str, traits.Str),
                desc='defines the output fields of interface')
-    out_type = traits.Enum('niigz', MriConvertInputSpec._filetypes,
+    out_type = traits.Enum('niigz', MRIConvertInputSpec._filetypes,
                            usedefault=True,
                desc='defines the type of output file produced')
     dicominfo = File(exists=True,
@@ -394,19 +393,19 @@ class DicomConvertInputSpec(FSTraitedSpec):
     ignore_single_slice = traits.Bool(requires=['dicominfo'],
                desc='ignore volumes containing a single slice')
 
-class DicomConvert(FSCommand):
+class DICOMConvert(FSCommand):
     """use fs mri_convert to convert dicom files
 
     Examples
     --------
-    >>> from nipype.interfaces.freesurfer import DicomConvert
-    >>> cvt = DicomConvert()
+    >>> from nipype.interfaces.freesurfer import DICOMConvert
+    >>> cvt = DICOMConvert()
     >>> cvt.inputs.dicomdir = '/incoming/TrioTim-35115-2009-1900-123456/'
     >>> cvt.inputs.file_mapping = [('nifti','*.nii'),('info','dicom*.txt'),('dti','*dti.bv*')]
 
     """
     _cmd = 'mri_convert'
-    input_spec = DicomConvertInputSpec
+    input_spec = DICOMConvertInputSpec
 
     def _get_dicomfiles(self):
         """validate fsl bet options
@@ -457,7 +456,7 @@ class DicomConvert(FSCommand):
             fname,ext = os.path.splitext(fname)
             fileparts = fname.split('-')
             runno = int(fileparts[1])
-            out_type = MriConvert.filemap[self.inputs.out_type]
+            out_type = MRIConvert.filemap[self.inputs.out_type]
             outfile = os.path.join(outdir,'.'.join(('%s-%02d'% (fileparts[0],
                                                                 runno),
                                                     out_type)))

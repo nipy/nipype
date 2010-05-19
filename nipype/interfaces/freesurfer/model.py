@@ -13,15 +13,14 @@ See the docstrings for the individual classes for 'working' examples.
 __docformat__ = 'restructuredtext'
 
 import os
-from glob import glob
 
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.interfaces.base import (Bunch, TraitedSpec, File,
+from nipype.interfaces.base import (TraitedSpec, File,
                                     traits, InputMultiPath)
 from nipype.utils.misc import isdefined
 
-class MrisPreprocInputSpec(FSTraitedSpec):
+class MRISPreprocInputSpec(FSTraitedSpec):
     outfile = File(argstr='--out %s', genfile=True,
                    desc='output filename')
     target = traits.Str(argstr='--target %s', mandatory=True,
@@ -70,10 +69,10 @@ class MrisPreprocInputSpec(FSTraitedSpec):
     smoothcortexonly = traits.Bool(argstr='--smooth-cortex-only',
                        desc='only smooth cortex (ie, exclude medial wall)')
 
-class MrisPreprocOutputSpec(TraitedSpec):
+class MRISPreprocOutputSpec(TraitedSpec):
     outfile = File(exists=True, desc='concatenated output file')
     
-class MrisPreproc(FSCommand):
+class MRISPreproc(FSCommand):
     """Use FreeSurfer mris_preproc to prepare a group of contrasts for
     a second level analysis
     
@@ -82,8 +81,8 @@ class MrisPreproc(FSCommand):
     """
 
     _cmd = 'mris_preproc'
-    input_spec = MrisPreprocInputSpec
-    output_spec = MrisPreprocOutputSpec
+    input_spec = MRISPreprocInputSpec
+    output_spec = MRISPreprocOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -100,10 +99,10 @@ class MrisPreproc(FSCommand):
             return self._list_outputs()[name]
         return None    
 
-class SurfConcat(MrisPreproc):
+class SurfConcat(MRISPreproc):
     pass
 
-class GlmFitInputSpec(FSTraitedSpec):
+class GLMFitInputSpec(FSTraitedSpec):
     hemi = traits.Str(desc='im not sure what hemi does ',
         argstr='%s')
     surf=traits.Str(desc='subject hemi',argstr='--surf %s')
@@ -220,7 +219,7 @@ class GlmFitInputSpec(FSTraitedSpec):
     simdonefile = File(argstr='--sim-done %s',
                    desc='create file when simulation finished')
     
-class GlmFit(FSCommand):
+class GLMFit(FSCommand):
     """Use FreeSurfer mri_glmfit to prepare a group of contrasts for
     a second level analysis
     
@@ -229,9 +228,9 @@ class GlmFit(FSCommand):
     """
 
     _cmd = 'mri_glmfit'
-    input_spec = GlmFitInputSpec
+    input_spec = GLMFitInputSpec
         
-class OneSampleTTest(GlmFit):
+class OneSampleTTest(GLMFit):
 
     def __init__(self, **kwargs):
         super(OneSampleTTest, self).__init__(**kwargs)
