@@ -24,6 +24,33 @@ import sys
 
 from nipype.utils.misc import is_container
 from nipype.interfaces.base import Interface
+from enthought.traits.trait_errors import TraitError
+
+def trim(docstring):
+    if not docstring:
+        return ''
+    # Convert tabs to spaces (following the normal Python rules)
+    # and split into a list of lines:
+    lines = docstring.expandtabs().splitlines()
+    # Determine minimum indentation (first line doesn't count):
+    indent = sys.maxint
+    for line in lines[1:]:
+        stripped = line.lstrip()
+        if stripped:
+            indent = min(indent, len(line) - len(stripped))
+    # Remove indentation (first line is special):
+    trimmed = [lines[0].strip()]
+    if indent < sys.maxint:
+        for line in lines[1:]:
+            trimmed.append(line[indent:].rstrip())
+    # Strip off trailing and leading blank lines:
+    while trimmed and not trimmed[-1]:
+        trimmed.pop()
+    while trimmed and not trimmed[0]:
+        trimmed.pop(0)
+    # Return a single string:
+    return '\n'.join(trimmed)
+
 
 # Functions and classes
 class InterfaceHelpWriter(object):
@@ -255,58 +282,40 @@ class InterfaceHelpWriter(object):
                 classinst = sys.modules[uri].__dict__[c]()
             except:
                 continue
-            helpstr = ''
+            helpstr = trim(classinst.__doc__) + "\n\n"
             print 'Generating inputs/outputs doc for:', uri, \
                 classinst.__class__.__name__
-            opt_map = False
-            if isinstance(classinst, Interface):
-                opt_map = True
-                if hasattr(classinst, 'opt_map') and len(classinst.opt_map):
-                    iterator = classinst.opt_map.items
-                else:
-                    iterator = classinst.inputs.items
+            if hasattr(classinst, 'inputs'):
+                iterator = classinst.inputs.items
             else:
-                if hasattr(classinst, 'inputs'):
-                    iterator = classinst.inputs.items
-                else:
-                    continue
+                continue
             mandhelpstr = None # mandatory inputs
             opthelpstr = None  # optional inputs
+            if not helpstr:
+                helpstr = 'Inputs:: \n\n\t'
+            else:
+                helpstr += 'Inputs:: \n\n\t'
             for i,v in sorted(iterator()):
-                if not helpstr:
-                    if opt_map:
-                        helpstr = 'Inputs (Untraited):: \n\n\t'
-                    else:
-                        helpstr = 'Inputs:: \n\n\t'
+
                 fieldstr =  i
-                if opt_map:
-                    if isinstance(v,tuple) and isinstance(v[1], str):
-                    # Handle cases where we've added a docstring to
-                    # the opt_map.  The value is then a tuple where
-                    # the first element is the format string and the
-                    # second element is the docstring.
-                        fieldstr += ' : ' + v[1]
-                    if '(opt' in fieldstr:
-                        if not opthelpstr:
-                            opthelpstr = ['[Optional]']
-                        opthelpstr += [fieldstr]
-                    else:
-                        if not mandhelpstr:
-                            mandhelpstr = ['[Mandatory]']
-                        mandhelpstr += [fieldstr]
+
+                try:
+                    setattr(classinst.inputs,i, None)
+                except TraitError, excp:
+                    fieldstr += " (%s) "%excp.info
+                    
+                try:
+                    fieldstr += ' : ' + getattr(v, 'desc')
+                except:
+                    fieldstr += ' : Unknown'
+                if getattr(v, 'mandatory'):
+                    if not mandhelpstr:
+                        mandhelpstr = ['[Mandatory]']
+                    mandhelpstr += [fieldstr]
                 else:
-                    try:
-                        fieldstr += ' : ' + getattr(v, 'desc')
-                    except:
-                        fieldstr += ' : Unknown'
-                    if getattr(v, 'mandatory'):
-                        if not mandhelpstr:
-                            mandhelpstr = ['[Mandatory]']
-                        mandhelpstr += [fieldstr]
-                    else:
-                        if not opthelpstr:
-                            opthelpstr = ['[Optional]']
-                        opthelpstr += [fieldstr]
+                    if not opthelpstr:
+                        opthelpstr = ['[Optional]']
+                    opthelpstr += [fieldstr]
                         
             if mandhelpstr:
                 helpstr += '\n\t'.join(mandhelpstr)
@@ -323,14 +332,16 @@ class InterfaceHelpWriter(object):
             outstr = []
             for i,v in sorted(iterator()):
                 fieldstr =  i
-                if opt_map:
-                    if isinstance(v,tuple) and isinstance(v[0], str):
-                        fieldstr += ' : ' + v[0]
-                else:
-                    try:
-                        fieldstr += ' : ' + getattr(v, 'desc')
-                    except:
-                        fieldstr += ' : Unknown'
+                
+                try:
+                    setattr(classinst._outputs(),i, None)
+                except TraitError, excp:
+                    fieldstr += " (%s) "%excp.info
+                    
+                try:
+                    fieldstr += ' : ' + getattr(v, 'desc')
+                except:
+                    fieldstr += ' : Unknown'
                 outstr += [fieldstr]
             if outstr:
                 if not helpstr:
