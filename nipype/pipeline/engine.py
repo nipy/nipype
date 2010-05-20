@@ -79,19 +79,19 @@ class WorkflowBase(object):
             exists. If directory exists and hash matches it
             assumes that process has been executed (default : False)
         name : string (mandatory)
-            Name of this node. By default node is named
-            modulename.classname. But when the same class is being used several
-            times, a different name ensures that output directory is not
-            overwritten each time the same functionality is run. 
+            Name of this node. Name must be alphanumeric and not contain any
+            special characters (e.g., '.', '@'). 
         """
         self.base_dir = base_dir
         self.overwrite = overwrite
         if name is None:
             raise Exception("init requires a name for this %s" % self.__class__.__name__)
+        if '.' in name:
+            raise Exception('the name keyword-arg must not contain a period "."')
         self.name = name
-        
         # for compatibility with node expansion using iterables
         self._id = self.name
+        self._hierarchy = None
 
     @property
     def inputs(self):
@@ -230,6 +230,17 @@ class Workflow(WorkflowBase):
         else:
             raise Exception('unknown set of parameters to connect function')
         not_found = []
+        newnodes = []
+        for srcnode, destnode, _ in connection_list:
+            if (srcnode not in newnodes) and (srcnode not in self._graph.nodes()):
+                newnodes.append(srcnode)
+            if (destnode not in newnodes) and (destnode not in self._graph.nodes()):
+                newnodes.append(destnode)
+        if newnodes:
+            self._check_nodes(newnodes)
+            for node in newnodes:
+                if node._hierarchy is None:
+                    node._hierarchy = self.name
         for srcnode, destnode, connects in connection_list:
             for source, dest in connects:
                 # Currently datasource/sink/grabber.io modules
@@ -283,10 +294,18 @@ class Workflow(WorkflowBase):
         nodes : list
             A list of WorkflowBase-based objects
         """
-        for node in nodes:
+        newnodes = [node for node in nodes if node not in self._graph.nodes()]
+        if not newnodes:
+            logger.info('no new nodes to add')
+            return
+        for node in newnodes:
             if not issubclass(node.__class__, WorkflowBase):
                 raise Exception('Node %s must be a subclass of WorkflowBase' % str(node))
-            self._graph.add_nodes_from([node])
+        self._check_nodes(newnodes)
+        for node in newnodes:
+            if node._hierarchy is None:
+                node._hierarchy = self.name
+        self._graph.add_nodes_from(newnodes)
 
     @property
     def inputs(self):
@@ -300,6 +319,15 @@ class Workflow(WorkflowBase):
         if self._execgraph:
             return [node  for node in self._execgraph.nodes() if name == str(node)].pop()
         return None
+
+    def get_node(self, name):
+        nodenames = name.split('.')
+        nodename = nodenames[0]
+        outnode = [node for node in self._graph.nodes() if nodename == str(node)]
+        if outnode:
+            if issubclass(outnode[0].__class__, Workflow) and nodenames[1:]:
+                outnode = outnode[0].get_node('.'.join(nodenames[1:]))
+        return outnode
 
     def write_graph(self, dotfilename='graph.dot', graph2use='orig'):
         """
@@ -324,6 +352,15 @@ class Workflow(WorkflowBase):
             self._execute_with_manager()
 
     # PRIVATE API AND FUNCTIONS
+
+    def _check_nodes(self, nodes):
+        "docstring for _check_nodes"
+        node_names = [node.name for node in self._graph.nodes()]
+        for node in nodes:
+            if node.name in node_names:
+                raise Exception('Duplicate node name %s found.'%node.name)
+            else:
+                node_names.append(node.name)
     
     def _has_attr(self, parameter, subtype='in'):
         if subtype == 'in':
@@ -446,6 +483,8 @@ class Workflow(WorkflowBase):
                         self.connect(srcnode, srcout, dstnode, dstin)
                 # expand the workflow node
                 node._generate_execgraph()
+                for innernode in node._graph.nodes():
+                    innernode._hierarchy = '.'.join((self.name,innernode._hierarchy))
                 self._graph.add_nodes_from(node._graph.nodes())
                 self._graph.add_edges_from(node._graph.edges(data=True))
         if nodes2remove:
@@ -517,8 +556,10 @@ class Workflow(WorkflowBase):
         """
         # update parameterization of output directory
         outputdir = self.base_dir
+        if node._hierarchy:
+            outputdir = os.path.join(outputdir, *node._hierarchy.split('.'))
         if node.parameterization:
-            outputdir = os.path.join(outputdir, node.parameterization)
+            outputdir = os.path.join(outputdir, *node.parameterization)
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
         node.base_dir = os.path.abspath(outputdir)
