@@ -60,8 +60,8 @@ This is a generic fsl preprocessing workflow that can be used by different analy
 
 preproc = pe.Workflow(name='preproc')
 
-extract_ref = pe.Node(interface=fsl.ExtractROI(tmin=42,
-                                               tsize=1),
+extract_ref = pe.Node(interface=fsl.ExtractROI(t_min=42,
+                                               t_size=1),
                       name = 'extractref')
 
 # run FSL's bet
@@ -93,9 +93,9 @@ smoothing = pe.MapNode(interface=fsl.Smooth(),
                        name="smooth",
                        iterfield = ['in_file'])
 
-inorm = pe.MapNode(interface = fsl.ImageMaths(optstring = '-inm 10000',
+inorm = pe.MapNode(interface = fsl.ImageMaths(op_string = '-inm 10000',
                                               suffix = '_inm',
-                                              outdatatype = 'float'),
+                                              out_data_type = 'float'),
                        name = 'inorm',
                        iterfield = ['in_file'])
 
@@ -104,13 +104,13 @@ hpfilter = pe.MapNode(interface=fsl.ImageMaths(),
                       iterfield = ['in_file'])
 
 preproc.add_nodes([extract_ref, skullstrip])
-preproc.connect([(extract_ref, motion_correct,[('out_file', 'ref_file')]),
-                 (extract_ref, refskullstrip,[('out_file', 'in_file')]),
+preproc.connect([(extract_ref, motion_correct,[('roi_file', 'ref_file')]),
+                 (extract_ref, refskullstrip,[('roi_file', 'in_file')]),
                  (skullstrip, coregister,[('mask_file','in_file')]),
                  (refskullstrip, coregister,[('out_file','reference')]),
                  (motion_correct, func_skullstrip, [('out_file', 'in_file')]),
                  (func_skullstrip, smoothing, [('out_file', 'in_file')]),
-                 (smoothing,inorm,[('smoothedimage','in_file')]),
+                 (smoothing,inorm,[('smoothed_file','in_file')]),
                  (inorm,hpfilter,[('out_file','in_file')]),
                  ])
 
@@ -196,8 +196,8 @@ model
 flameo = pe.MapNode(interface=fsl.FLAMEO(run_mode='fe'), name="flameo",
                     iterfield=['cope_file','var_cope_file'])
 
-fixed_fx.connect([(copemerge,flameo,[('out_file','cope_file')]),
-                  (varcopemerge,flameo,[('out_file','var_cope_file')]),
+fixed_fx.connect([(copemerge,flameo,[('merged_file','cope_file')]),
+                  (varcopemerge,flameo,[('merged_file','var_cope_file')]),
                   (level2model,flameo, [('design_mat','design_file'),
                                         ('design_con','t_con_file'),
                                         ('design_grp','cov_split_file')]),
@@ -289,12 +289,18 @@ datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
 
+"""
+Use the get_node function to retrieve an internal node by name.
+"""
+smoothnode = firstlevel.get_node('preproc.smooth')
+assert(str(smoothnode)=='smooth')
+smoothnode.iterables = ('fwhm', [5,10])
 
 firstlevel.inputs.preproc.smooth.fwhm = 5
 hpcutoff = 120
 TR = 3.
 firstlevel.inputs.preproc.highpass.suffix = '_hpf'
-firstlevel.inputs.preproc.highpass.optstring = '-bptf %d -1'%(hpcutoff/TR)
+firstlevel.inputs.preproc.highpass.op_string = '-bptf %d -1'%(hpcutoff/TR)
 
 
 """
@@ -445,7 +451,7 @@ l1pipeline.connect([(infosource,datasink,[('subject_id','subject_id')]),
    analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
    function needs to be called. 
 """
-if __name__ == '__main__':
-    l1pipeline.run()
+#if __name__ == '__main__':
+#    l1pipeline.run()
 #    l2pipeline.run()
 
