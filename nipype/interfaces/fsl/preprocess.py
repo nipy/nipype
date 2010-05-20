@@ -302,7 +302,7 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                      desc = 'output affine matrix in 4x4 asciii format',
                      genfile = True, position = 3)
     in_matrix_file = File(argstr = '-init %s', desc = 'input 4x4 affine matrix')
-    apply_xfm = Bool(argstr = '-applyxfm', requires=['in_matrix'],
+    apply_xfm = traits.Bool(argstr = '-applyxfm', requires=['in_matrix'],
                      desc='apply transformation supplied by in_matrix')
     datatype = traits.Enum('char', 'short', 'int', 'float', 'double',
                            argstr = '-datatype %s',
