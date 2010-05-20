@@ -20,28 +20,28 @@ import os
 class BaseFile ( traits.BaseStr ):
     """ Defines a trait whose value must be the name of a file.
     """
-	
+
     # A description of the type of value this trait accepts:
     info_text = 'a file name'
-	
+
     def __init__ ( self, value = '', filter = None, auto_set = False,
-                   entries = 0, exists = False, **metadata ):
+                         entries = 0, exists = False, **metadata ):
         """ Creates a File trait.
-	
+
         Parameters
         ----------
         value : string
-        The default value for the trait
+            The default value for the trait
         filter : string
-        A wildcard string to filter filenames in the file dialog box used by
-        the attribute trait editor.
+            A wildcard string to filter filenames in the file dialog box used by
+            the attribute trait editor.
         auto_set : boolean
-        Indicates whether the file editor updates the trait value after
-        every key stroke.
+            Indicates whether the file editor updates the trait value after
+            every key stroke.
         exists : boolean
-        Indicates whether the trait value must be an existing file or
-        not.
-	
+            Indicates whether the trait value must be an existing file or
+            not.
+
         Default Value
         -------------
         *value* or ''
@@ -53,49 +53,46 @@ class BaseFile ( traits.BaseStr ):
         
         if exists:
             self.info_text = 'an existing file name'
-	
+
         super( BaseFile, self ).__init__( value, **metadata )
-	
+
     def validate ( self, object, name, value ):
         """ Validates that a specified value is valid for this trait.
-        
-        Note: The 'fast validator' version performs this check in C.
-        """
-        
-        retval = super( BaseFile, self ).validate( object, name, value )
-        if not self.exists:
-            return retval
-        
-        if os.path.isfile( value ):
-            return value
-        
-        self.error( object, name, value )
- 
 
-    
+            Note: The 'fast validator' version performs this check in C.
+        """
+        validated_value = super( BaseFile, self ).validate( object, name, value )
+        if not self.exists:
+            return validated_value
+        elif os.path.isfile( value ):
+            return validated_value
+
+        self.error( object, name, value )
+
+
 class File ( BaseFile ):
     """ Defines a trait whose value must be the name of a file using a C-level
-    fast validator.
+        fast validator.
     """
-    
+
     def __init__ ( self, value = '', filter = None, auto_set = False,
-                   entries = 0, exists = False, **metadata ):
+                         entries = 0, exists = False, **metadata ):
         """ Creates a File trait.
-	
+
         Parameters
         ----------
         value : string
-        The default value for the trait
+            The default value for the trait
         filter : string
-        A wildcard string to filter filenames in the file dialog box used by
-        the attribute trait editor.
+            A wildcard string to filter filenames in the file dialog box used by
+            the attribute trait editor.
         auto_set : boolean
-        Indicates whether the file editor updates the trait value after
-        every key stroke.
+            Indicates whether the file editor updates the trait value after
+            every key stroke.
         exists : boolean
-        Indicates whether the trait value must be an existing file or
-        not.
-	
+            Indicates whether the trait value must be an existing file or
+            not.
+
         Default Value
         -------------
         *value* or ''
@@ -103,22 +100,25 @@ class File ( BaseFile ):
         if not exists:
             # Define the C-level fast validator to use:
             fast_validate = ( 11, basestring )
-	
+
         super( File, self ).__init__( value, filter, auto_set, entries, exists,
                                       **metadata )
-	
+
+#-------------------------------------------------------------------------------
+#  'BaseDirectory' and 'Directory' traits:
+#-------------------------------------------------------------------------------
 
 class BaseDirectory ( traits.BaseStr ):
     """ Defines a trait whose value must be the name of a directory.
     """
-    
+
     # A description of the type of value this trait accepts:
     info_text = 'a directory name'
-    
+
     def __init__ ( self, value = '', auto_set = False, entries = 0,
-                   exists = False, **metadata ):
+                         exists = False, **metadata ):
         """ Creates a BaseDirectory trait.
-	
+
         Parameters
         ----------
         value : string
@@ -139,7 +139,7 @@ class BaseDirectory ( traits.BaseStr ):
         self.exists = exists
         
         if exists:
-            self.info_text = 'an existing file name'
+            self.info_text = 'an existing directory name'
 
         super( BaseDirectory, self ).__init__( value, **metadata )
 
@@ -148,24 +148,14 @@ class BaseDirectory ( traits.BaseStr ):
 
             Note: The 'fast validator' version performs this check in C.
         """
-        
-        retval = super( BaseDirectory, self ).validate( object, name, value )
-        
+        validated_value = super( BaseDirectory, self ).validate( object, name, value )
         if not self.exists:
-            return retval
+            return validated_value
 
         if os.path.isdir( value ):
-            return value
+            return validated_value
 
         self.error( object, name, value )
-
-    def create_editor(self):
-        from .ui.editors.directory_editor import DirectoryEditor
-        editor = DirectoryEditor(
-            auto_set = self.auto_set,
-            entries = self.entries,
-        )
-        return editor
 
 
 class Directory ( BaseDirectory ):
@@ -199,6 +189,7 @@ class Directory ( BaseDirectory ):
 
         super( Directory, self ).__init__( value, auto_set, entries, exists,
                                            **metadata )
+
 
 """
 The functions that pop-up the Traits GUIs, edit_traits and
