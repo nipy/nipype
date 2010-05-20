@@ -182,11 +182,11 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
             with iterable 'b' will be placed in a directory
             _a_aval/_b_bval/.
             """
+            paramlist = [paramstr]
             if n.parameterization:
-                n.parameterization = os.path.join(paramstr,
-                                                  n.parameterization)
+                n.parameterization = paramlist + n.parameterization
             else:
-                n.parameterization = paramstr
+                n.parameterization = paramlist
         supergraph.add_nodes_from(Gc.nodes())
         supergraph.add_edges_from(Gc.edges(data=True))
         for node in Gc.nodes():
