@@ -26,9 +26,11 @@ import enthought.traits.api as traits
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
-class To3dInputSpec(AFNITraitedSpec)
+class To3dInputSpec(AFNITraitedSpec):
+    pass
 
-class To3dOutputSpec(TraitedSpec)
+class To3dOutputSpec(TraitedSpec):
+    pass
 
 class To3d(AFNICommand):
     """Create a 3D dataset from 2D image files using AFNI to3d command.
@@ -240,7 +242,7 @@ class To3d(AFNICommand):
         return results
 
 
-class ThreedrefitInputSpec(AFNITraitedSpec)
+class ThreedrefitInputSpec(AFNITraitedSpec):
         infile = File(exists=True,
                       desc = 'input file to 3drefit',
                       argstr='%s', position=0, mandatory=True)
@@ -255,7 +257,8 @@ class ThreedrefitInputSpec(AFNITraitedSpec)
         zorigin = traits.Str(desc = 'y distance for edge voxel offset',
                            argstr='-yorigin %s')
 
-class ThreedrefitOutputSpec(TraitedSpec)
+class ThreedrefitOutputSpec(TraitedSpec):
+    pass
 
 
 class Threedrefit(AFNICommand):
