@@ -50,6 +50,9 @@ class BaseFile ( traits.BaseStr ):
         self.auto_set = auto_set
         self.entries = entries
         self.exists = exists
+        
+        if exists:
+            self.info_text = 'an existing file name'
 	
         super( BaseFile, self ).__init__( value, **metadata )
 	
@@ -58,8 +61,10 @@ class BaseFile ( traits.BaseStr ):
         
         Note: The 'fast validator' version performs this check in C.
         """
+        
+        retval = super( BaseFile, self ).validate( object, name, value )
         if not self.exists:
-            return super( BaseFile, self ).validate( object, name, value )
+            return retval
         
         if os.path.isfile( value ):
             return value
@@ -132,6 +137,9 @@ class BaseDirectory ( traits.BaseStr ):
         self.entries = entries
         self.auto_set = auto_set
         self.exists = exists
+        
+        if exists:
+            self.info_text = 'an existing file name'
 
         super( BaseDirectory, self ).__init__( value, **metadata )
 
@@ -140,8 +148,11 @@ class BaseDirectory ( traits.BaseStr ):
 
             Note: The 'fast validator' version performs this check in C.
         """
+        
+        retval = super( BaseDirectory, self ).validate( object, name, value )
+        
         if not self.exists:
-            return super( BaseDirectory, self ).validate( object, name, value )
+            return retval
 
         if os.path.isdir( value ):
             return value

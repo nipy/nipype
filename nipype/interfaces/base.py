@@ -29,14 +29,16 @@ from ConfigParser import NoOptionError
 
 __docformat__ = 'restructuredtext'
 
-try:
-    class dummy(traits.HasTraits):
-        foo = traits.File
-    dummy().foo = 'bar'
-    from enthought.traits.api import File, Directory
-except:
-    warn('traitsUI unavailable')
-    from nipype.interfaces.traits import File, Directory
+# We'll use our versions of File and Directory until error reporting 
+# will be fixed upstream
+#try:
+#    class dummy(traits.HasTraits):
+#        foo = traits.File
+#    dummy().foo = 'bar'
+#    from enthought.traits.api import File, Directory
+#except:
+#    warn('traitsUI unavailable')
+from nipype.interfaces.traits import File, Directory
 
 def load_template(name):
     """Load a template from the script_templates directory
@@ -734,8 +736,8 @@ class BaseInterface(Interface):
                     setattr(outputs, key, val)
                     value = getattr(outputs, key)
                 except TraitError, error:
-                    if hasattr(error, 'info') and error.info == "a file name":
-                        msg = "File '%s' not found for %s output '%s'." \
+                    if hasattr(error, 'info') and error.info.starts_with("an existing"):
+                        msg = "File/Directory '%s' not found for %s output '%s'." \
                             % (val, self.__class__.__name__, key)
                         raise FileNotFoundError(msg)
                     else:
