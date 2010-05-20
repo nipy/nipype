@@ -65,8 +65,8 @@ Map field names to individual subject runs
 info = dict(dwi=[['subject_id', 'data.nii.gz']],
             bvecs=[['subject_id','bvecs']],
             bvals=[['subject_id','bvals']],
-            seedfile = [['subject_id','MASK_average_thal_right.nii.gz']],
-            targetmasks = [['subject_id',['MASK_average_M1_right.nii.gz',
+            seed_file = [['subject_id','MASK_average_thal_right.nii.gz']],
+            target_masks = [['subject_id',['MASK_average_M1_right.nii.gz',
                                           'MASK_average_S1_right.nii.gz',
                                           'MASK_average_occipital_right.nii.gz',
                                           'MASK_average_pfc_right.nii.gz',
@@ -280,9 +280,9 @@ feed the 4D projected FA data into GLM modelling and thresholding
 in order to find voxels which correlate with your model
 """
 randomise = pe.Node(fsl.Randomise(),name='randomise')
-randomise.inputs.designmat=os.path.abspath('data/tbss/design.mat')
-randomise.inputs.tcon=os.path.abspath('data/tbss/design.con')
-randomise.inputs.numperm=10
+randomise.inputs.design_mat=os.path.abspath('data/tbss/design.mat')
+randomise.inputs.t_con=os.path.abspath('data/tbss/design.con')
+randomise.inputs.num_perm=10
                     
 
 """

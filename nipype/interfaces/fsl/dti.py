@@ -451,7 +451,7 @@ class ProbTrackXInputSpec(FSLCommandInputSpec):
     mode	= traits.Str(desc='options: simple (single seed voxel), seedmask (mask of seed voxels),'+
                      'twomask_symm (two bet binary masks) ', argstr='--mode=%s')                             
     target_masks	= InputMultiPath(File(exits=True),desc='list of target masks - '+
-                       'required for seeds_to_targets classification', argstr='--target_masks=%s')    
+                       'required for seeds_to_targets classification', argstr='--targetmasks=%s')    
     mask2	=File(exists=True,desc='second bet binary mask (in diffusion space) in twomask_symm mode',
                 argstr='--mask2=%s')
     waypoints	= File(exists=True, desc='waypoint mask or ascii list of waypoint masks - '+
@@ -554,7 +554,7 @@ class ProbTrackX(FSLCommand):
         outputs = self.output_spec().get()        
         outputs['log'] = self._gen_fname('probtrackx',cwd=self.inputs.out_dir,
                                                 suffix='.log',change_ext=False)            
-        outputs['way_total'] = self._gen_fname('way_total',cwd=self.inputs.out_dir,
+        outputs['way_total'] = self._gen_fname('waytotal',cwd=self.inputs.out_dir,
                                               suffix='',change_ext=False)                        
         outputs['fdt_paths'] = self._gen_fname(self.inputs.paths_file,
                                                cwd=self.inputs.out_dir,suffix='')
