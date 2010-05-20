@@ -22,6 +22,7 @@ import enthought.traits.api as traits
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+
 class BETInputSpec(FSLCommandInputSpec):
     """Note: Currently we don't support -R, -S, -Z,-A or -A2"""
     # We use position args here as list indices - so a negative number
@@ -145,7 +146,47 @@ class BET(FSLCommand):
             return self._list_outputs()[name]
         return None
 
+class ImageMeantsInputSpec(FSLCommandInputSpec):
+    infile = File(exists=True, desc = 'input file for computing the average timeseries',
+                  argstr='-i %s', position=0, mandatory=True)
+    outfile = File(desc = 'name of output text matrix',argstr='-o %s', genfile=True)
+    mask = File(exists=True, desc='input 3D mask',argstr='-m %s')
+    spatialcoord = traits.List(traits.Int, desc='<x y z>	requested spatial coordinate (instead of mask)',
+                               argstr='-c %s')
+    usemm = traits.Bool(desc='use mm instead of voxel coordinates (for -c option)',
+                        argstr='--usemm')
+    showall = traits.Bool(desc='show all voxel time series (within mask) instead of averaging',
+                          argstr='--showall')
+    eig = traits.Bool(desc='calculate Eigenvariate(s) instead of mean (output will have 0 mean)',
+                      argstr='--eig')
+    order = traits.Int(1,desc='select number of Eigenvariates',argstr='--order %d',usedefault=True)
+    nobin = traits.Bool(desc='do not binarise the mask for calculation of Eigenvariates',
+                        argstr='--no_bin')
+    transpose = traits.Bool(desc='output results in transpose format (one row per voxel/mean)',
+                            argstr='--transpose')
 
+class ImageMeantsOutputSpec(TraitedSpec):
+    outfile = File(exists=True, desc="path/name of output text matrix")
+
+class ImageMeants(FSLCommand):
+    _cmd = 'fslmeants'
+    input_spec = ImageMeantsInputSpec
+    output_spec = ImageMeantsOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['outfile'] = self.inputs.outfile
+        if not isdefined(outputs['outfile']):
+            outputs['outfile'] = self._gen_fname(self.inputs.infile,
+                                              suffix = '_ts')
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'outfile':
+            return self._list_outputs()[name]
+        return None
+
+    
 class FASTInputSpec(FSLCommandInputSpec):
     """ Defines inputs (trait classes) for FAST """
     in_files = InputMultiPath(File(exists=True),
