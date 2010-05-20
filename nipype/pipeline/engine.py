@@ -321,12 +321,17 @@ class Workflow(WorkflowBase):
         return None
 
     def get_node(self, name):
+        """Return an internal node by name
+        """
         nodenames = name.split('.')
         nodename = nodenames[0]
         outnode = [node for node in self._graph.nodes() if nodename == str(node)]
         if outnode:
-            if issubclass(outnode[0].__class__, Workflow) and nodenames[1:]:
-                outnode = outnode[0].get_node('.'.join(nodenames[1:]))
+            outnode = outnode[0]
+            if nodenames[1:] and issubclass(outnode.__class__, Workflow):
+                outnode = outnode.get_node('.'.join(nodenames[1:]))
+        else:
+            outnode = None
         return outnode
 
     def write_graph(self, dotfilename='graph.dot', graph2use='orig'):
