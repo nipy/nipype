@@ -11,7 +11,6 @@ import nipype.interfaces.spm as spm          # spm
 import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.freesurfer as fs    # freesurfer
-import nipype.pipeline.node_wrapper as nw    # nodes for pypelines
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
 import nipype.algorithms.modelgen as model   # model specification
@@ -31,18 +30,26 @@ package_check('scipy', '0.7', 'tutorial1')
 package_check('networkx', '1.0', 'tutorial1')
 package_check('IPython', '0.10', 'tutorial1')
 
-"""
-Package specific configuration
-------------------------------
+"""Set any package specific configuration. The output file format
+for FSL routines is being set to uncompressed NIFTI and a specific
+version of matlab is being used. The uncompressed format is required
+because SPM does not handle compressed NIFTI.
 
-The output file format for FSL routines is being set to uncompressed NIFTI and
-a specific version of matlab is being used. The uncompressed format is required
-because SPM does not handle compressed NIFTI. 
+These are currently being set at the class level, so every node will inherit
+these settings. However, these can also be changed or set for an individual
+node. 
 """
 
-fsl.FSLInfo.outputtype('NIFTI')
-fs.FSInfo.subjectsdir(os.path.abspath('fsdata'))
-mlab.MatlabCommandLine.matlab_cmd = "matlab -nodesktop -nosplash"
+# Tell fsl to generate all output in uncompressed nifti format
+print fsl.Info.version()
+fsl.FSLCommand.set_default_outputtype('NIFTI')
+
+# Tell freesurfer what subjects directory to use
+fs.FSCommand.set_subjects_dir(os.path.abspath('fsdata'))
+
+# Set the way matlab should be called
+mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
+
 
 """
 The following lines of code sets up the necessary information required by the
