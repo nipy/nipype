@@ -23,6 +23,54 @@ from nipype.utils.misc import isdefined
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+class ImageMeantsInputSpec(FSLCommandInputSpec):
+    in_file = File(exists=True, desc = 'input file for computing the average timeseries',
+                  argstr='-i %s', position=0, mandatory=True)
+    out_file = File(desc = 'name of output text matrix',argstr='-o %s', genfile=True)
+    mask = File(exists=True, desc='input 3D mask',argstr='-m %s')
+    spatial_coord = traits.List(traits.Int, desc='<x y z>	requested spatial coordinate (instead of mask)',
+                               argstr='-c %s')
+    use_mm = traits.Bool(desc='use mm instead of voxel coordinates (for -c option)',
+                        argstr='--usemm')
+    show_all = traits.Bool(desc='show all voxel time series (within mask) instead of averaging',
+                          argstr='--showall')
+    eig = traits.Bool(desc='calculate Eigenvariate(s) instead of mean (output will have 0 mean)',
+                      argstr='--eig')
+    order = traits.Int(1,desc='select number of Eigenvariates',argstr='--order %d',usedefault=True)
+    nobin = traits.Bool(desc='do not binarise the mask for calculation of Eigenvariates',
+                        argstr='--no_bin')
+    transpose = traits.Bool(desc='output results in transpose format (one row per voxel/mean)',
+                            argstr='--transpose')
+
+class ImageMeantsOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="path/name of output text matrix")
+
+class ImageMeants(FSLCommand):
+    """ Use fslmeants for printing the average timeseries (intensities) to
+        the screen (or saves to a file). The average is taken over all voxels in the
+        mask (or all voxels in the image if no mask is specified)
+
+        Example:
+        --------
+        
+    """
+    _cmd = 'fslmeants'
+    input_spec = ImageMeantsInputSpec
+    output_spec = ImageMeantsOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.out_file
+        if not isdefined(outputs['out_file']):
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                                              suffix = '_ts')
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+
 class SmoothInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", position=0, mandatory=True)
     fwhm = traits.Float(argstr="-kernel gauss %f -fmean", position=1,
