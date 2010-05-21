@@ -70,7 +70,8 @@ class SpecifyModelInputSpec(TraitedSpec):
                 kernel : list of convolution kernel
 
     """
-    realignment_parameters = InputMultiPath(File(exists=True),
+    realignment_parameters = traits.Either(traits.List(traits.List(File(exists=True))),
+                                    InputMultiPath(File(exists=True)),       
        desc = "Realignment parameters returned by motion correction algorithm",
                                          filecopy=False)
     outlier_files = InputMultiPath(File(exists=True),
@@ -470,13 +471,28 @@ class SpecifyModel(BaseInterface):
         realignment_parameters = []
         if isdefined(self.inputs.realignment_parameters):
             rpfiles = filename_to_list(self.inputs.realignment_parameters)
-            realignment_parameters.insert(0,np.loadtxt(rpfiles[0]))
-            for rpf in rpfiles[1:]:
-                mc = np.loadtxt(rpf)
-                if self.inputs.concatenate_runs:
-                    realignment_parameters[0] = np.concatenate((realignment_parameters[0],mc))
+            for rpf in rpfiles:
+                if isinstance(rpf, list):
+                    con_single_rpf = None
+                    for single_rpf in rpf:
+                        if con_single_rpf == None:
+                            con_single_rpf = np.loadtxt(single_rpf).reshape(1,-1)
+                        else:
+                            con_single_rpf = np.concatenate((con_single_rpf, np.loadtxt(single_rpf).reshape(1,-1)))
+                    mc = con_single_rpf
                 else:
-                    realignment_parameters.insert(len(realignment_parameters),mc)
+                    mc = np.loadtxt(rpf)
+                    
+                if self.inputs.concatenate_runs:
+                    if not realignment_parameters:
+                        realignment_parameters.append(mc)
+                    else:
+                        realignment_parameters[0] = np.concatenate((realignment_parameters[0],mc))
+                else:
+                    realignment_parameters.append(mc)
+                             
+                    
+                    
         outliers = []
         if isdefined(self.inputs.outlier_files):
             outfiles = filename_to_list(self.inputs.outlier_files)
