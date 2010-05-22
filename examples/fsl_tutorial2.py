@@ -439,7 +439,6 @@ l1pipeline.connect([(infosource,datasink,[('subject_id','subject_id')]),
                         [('featdir', 'modelestimate.@fixedeffects')]),
 """
 
-'''
 ##########################################################################
 # Execute the pipeline
 ##########################################################################
@@ -454,4 +453,5 @@ l1pipeline.connect([(infosource,datasink,[('subject_id','subject_id')]),
 #if __name__ == '__main__':
 #    l1pipeline.run()
 #    l2pipeline.run()
+'''
 
