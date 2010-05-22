@@ -24,6 +24,26 @@ from nipype.interfaces.matlab import MatlabCommand
 import logging
 logger = logging.getLogger('spmlogger')
 
+def func_is_3d(in_files):
+    """ check if input functional files are 3d
+    """
+    if isinstance(in_files[0], list):
+        return func_is_3d(in_files[0])
+    else:
+        img = load(in_files[0])
+        shape = img.get_shape() 
+        if len(shape) == 3 or (len(shape)==4 and shape[3]==1):
+            return True
+        else:
+            return False
+        
+def get_first_3dfile(in_files):
+    if not func_is_3d(in_files):
+        return None
+    if isinstance(in_files[0], list):
+        return in_files[0]
+    return in_files    
+
 def scans_for_fname(fname):
     """Reads a nifti file and converts it to a numpy array storing
     individual nifti volumes
@@ -57,12 +77,18 @@ def scans_for_fnames(fnames,keep4d=False,separate_sessions=False):
         ensures a cell array per session is created in the structure.
     """
     flist = None
+    if not isinstance(fnames[0], list):
+        if func_is_3d(fnames[0]):
+            fnames = [fnames]
     if separate_sessions or keep4d:
         flist = np.zeros((len(fnames),),dtype=object)
     for i,f in enumerate(fnames):
         if separate_sessions:
             if keep4d:
-                flist[i] = np.array([f],dtype=object)
+                if isinstance(f,list):
+                    flist[i] = np.array(f, dtype=object)
+                else:
+                    flist[i] = np.array([f],dtype=object)
             else:
                 flist[i] = scans_for_fname(f)
         else:

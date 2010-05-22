@@ -30,7 +30,8 @@ import numpy as np
 # Local imports
 from nipype.interfaces.base import (OutputMultiPath, TraitedSpec,
                                     traits, InputMultiPath, File)
-from nipype.interfaces.spm.base import (SPMCommand, scans_for_fname,
+from nipype.interfaces.spm.base import (SPMCommand, scans_for_fname, 
+                                        func_is_3d, get_first_3dfile,
                                         scans_for_fnames, SPMCommandInputSpec)
 from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list,
@@ -100,7 +101,7 @@ class SliceTiming(SPMCommand):
 
 
 class RealignInputSpec(SPMCommandInputSpec):
-    in_files = InputMultiPath(File(exists=True), field='data', mandatory=True,
+    in_files = InputMultiPath(traits.Either(traits.List(File(exists=True)),File(exists=True)), field='data', mandatory=True,
                          desc='list of filenames to realign', copyfile=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
                           desc='one of: estimate, write, estwrite',
@@ -161,7 +162,7 @@ class Realign(SPMCommand):
         """Convert input to appropriate format for spm
         """
         if opt == 'in_files':
-            return scans_for_fnames(filename_to_list(val),
+            return scans_for_fnames(val,
                                     keep4d=True,
                                     separate_sessions=True)
         if opt == 'register_to_mean': # XX check if this is necessary
@@ -178,7 +179,7 @@ class Realign(SPMCommand):
         outputs = self._outputs().get()
         if isdefined(self.inputs.in_files):
             outputs['realignment_parameters'] = []
-        for imgf in filename_to_list(self.inputs.in_files):
+        for imgf in self.inputs.in_files:
             outputs['realignment_parameters'].append(fname_presuffix(imgf,
                                                                      prefix='rp_',
                                                                      suffix='.txt',

@@ -228,12 +228,15 @@ def copyfiles(filelist, dest, copy=False):
     outfiles = filename_to_list(dest)
     newfiles = []
     for i,f in enumerate(filename_to_list(filelist)):
-        if len(outfiles) > 1:
-            destfile = outfiles[i]
+        if isinstance(f, list):
+            newfiles.insert(i, copyfiles(f, dest, copy=copy))
         else:
-            destfile = fname_presuffix(f, newpath=outfiles[0])
-        copyfile(f,destfile,copy)
-        newfiles.insert(i,destfile)
+            if len(outfiles) > 1:
+                destfile = outfiles[i]
+            else:
+                destfile = fname_presuffix(f, newpath=outfiles[0])
+            copyfile(f,destfile,copy)
+            newfiles.insert(i,destfile)
     return newfiles
 
 def filename_to_list(filename):
