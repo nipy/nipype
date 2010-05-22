@@ -261,7 +261,7 @@ the processing nodes.
 """
 
 l1pipeline = pe.Workflow(name="level1")
-l1pipeline.base_dir = os.path.abspath('spm/workingdir')
+l1pipeline.base_dir = os.path.abspath('spm_tutorial/workingdir')
 
 l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                   (datasource,realign,[('func','in_files')]),
@@ -311,10 +311,10 @@ the mean image would be copied to that directory.
 """
 
 datasink = pe.Node(interface=nio.DataSink(), name="datasink")
-datasink.inputs.base_directory = os.path.abspath('spm/l1output')
+datasink.inputs.base_directory = os.path.abspath('spm_tutorial/l1output')
 
 def getstripdir(subject_id):
-    return os.path.join(os.path.abspath('spm/workingdir'),'_subject_id_%s' % subject_id)
+    return os.path.join(os.path.abspath('spm_tutorial/workingdir'),'_subject_id_%s' % subject_id)
 
 # store relevant outputs from various stages of the 1st level analysis
 l1pipeline.connect([(infosource,datasink,[('subject_id','container'),
@@ -347,7 +347,7 @@ contrasts.
 # collect all the con images for each contrast.
 contrast_ids = range(1,len(contrasts)+1)
 l2source = pe.Node(nio.DataGrabber(infields=['fwhm', 'con']), name="l2source")
-l2source.inputs.template=os.path.abspath('spm/l1output/*/con*/_fwhm_%d/con_%04d.img')
+l2source.inputs.template=os.path.abspath('spm_tutorial/l1output/*/con*/*/_fwhm_%d/con_%04d.img')
 # iterate over all contrast images
 l2source.iterables = [('fwhm',fwhmlist),
                       ('con',contrast_ids)]
@@ -367,7 +367,7 @@ onesamplettest = pe.Node(interface=spm.OneSampleTTest(), name="onesamplettest")
 """
 
 l2pipeline = pe.Workflow(name="level2")
-l2pipeline.base_dir = os.path.abspath('spm/l2output')
+l2pipeline.base_dir = os.path.abspath('spm_tutorial/l2output')
 l2pipeline.connect([(l2source,onesamplettest,[('outfiles','con_images')])])
 
 """
@@ -383,5 +383,6 @@ function needs to be called.
 
 if __name__ == '__main__':
     l1pipeline.run()
-    l2pipeline.run()
-    l1pipeline.write_graph()
+#    l2pipeline.run()
+#    l1pipeline.write_graph()
+
