@@ -242,7 +242,7 @@ class Split(FSLCommand):
 
         """
         outputs = self._outputs().get()
-        ext =  Info.output_type_to_ext(self.inputs.outputtype)
+        ext =  Info.output_type_to_ext(self.inputs.output_type)
         outbase = 'vol*'
         if isdefined(self.inputs.out_base_name):
             outbase = '%s*' % self.inputs.out_base_name
