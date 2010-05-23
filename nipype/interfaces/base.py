@@ -736,7 +736,7 @@ class BaseInterface(Interface):
                     setattr(outputs, key, val)
                     value = getattr(outputs, key)
                 except TraitError, error:
-                    if hasattr(error, 'info') and error.info.starts_with("an existing"):
+                    if hasattr(error, 'info') and error.info.startswith("an existing"):
                         msg = "File/Directory '%s' not found for %s output '%s'." \
                             % (val, self.__class__.__name__, key)
                         raise FileNotFoundError(msg)
