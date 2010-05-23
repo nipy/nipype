@@ -38,7 +38,7 @@ from nipype.utils.filemanip import (fname_presuffix, filename_to_list,
                                     list_to_filename, split_filename)
 
 class SliceTimingInputSpec(SPMCommandInputSpec):
-    in_files = InputMultiPath(File(exists=True), field='scans',
+    in_files = InputMultiPath(traits.Either(traits.List(File(exists=True)),File(exists=True)), field='scans',
                           desc='list of filenames to apply slice timing',
                           mandatory=True, copyfile=False)
     num_slices = traits.Int(field='nslices',
@@ -87,16 +87,24 @@ class SliceTiming(SPMCommand):
         """
         if opt == 'in_files':
             return scans_for_fnames(filename_to_list(val),
+                                    keep4d=True,
                                     separate_sessions=True)
         return val
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['timecorrected_files'] = []
+
+
         filelist = filename_to_list(self.inputs.in_files)
         for f in filelist:
-            s_file = fname_presuffix(f, prefix='a')
-            outputs['timecorrected_files'].append(s_file)
+            run = []
+            if isinstance(f,list):
+                for inner_f in filename_to_list(f):
+                    run.append(fname_presuffix(inner_f, prefix='a'))
+            else:
+                realigned_run = fname_presuffix(f, prefix='a')
+            outputs['timecorrected_files'].append(realigned_run)
         return outputs
 
 
