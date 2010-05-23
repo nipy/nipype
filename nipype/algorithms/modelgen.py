@@ -65,8 +65,7 @@ class SpecifyModelInputSpec(TraitedSpec):
                 kernel : list of convolution kernel
 
     """
-    realignment_parameters = traits.Either(traits.List(traits.List(File(exists=True))),
-                                    InputMultiPath(File(exists=True)),       
+    realignment_parameters = InputMultiPath(File(exists=True),       
        desc = "Realignment parameters returned by motion correction algorithm",
                                          filecopy=False)
     outlier_files = InputMultiPath(File(exists=True),
