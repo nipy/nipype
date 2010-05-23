@@ -8,23 +8,18 @@ These functions include:
 """
 
 import os
-from glob import glob
 from copy import deepcopy
 
 import numpy as np
-from scipy import signal
 from scipy.signal import convolve
 from scipy.special import gammaln
 #from scipy.stats.distributions import gamma
 
 from nipype.externals.pynifti import load
-from nipype.interfaces.base import Bunch, InterfaceResult,\
-    BaseInterface, TraitedSpec, InputMultiPath, traits,\
-    File
+from nipype.interfaces.base import BaseInterface, TraitedSpec,\
+ InputMultiPath, traits, File
 from nipype.utils.misc import isdefined
-from nipype.utils.filemanip import (fname_presuffix, fnames_presuffix,
-                                    filename_to_list, list_to_filename,
-                                    FileNotFoundError)
+from nipype.utils.filemanip import filename_to_list
 from nipype.interfaces.spm import scans_for_fnames
 
 class SpecifyModelInputSpec(TraitedSpec):
@@ -471,28 +466,13 @@ class SpecifyModel(BaseInterface):
         realignment_parameters = []
         if isdefined(self.inputs.realignment_parameters):
             rpfiles = filename_to_list(self.inputs.realignment_parameters)
-            for rpf in rpfiles:
-                if isinstance(rpf, list):
-                    con_single_rpf = None
-                    for single_rpf in rpf:
-                        if con_single_rpf == None:
-                            con_single_rpf = np.loadtxt(single_rpf).reshape(1,-1)
-                        else:
-                            con_single_rpf = np.concatenate((con_single_rpf, np.loadtxt(single_rpf).reshape(1,-1)))
-                    mc = con_single_rpf
-                else:
-                    mc = np.loadtxt(rpf)
-                    
+            realignment_parameters.insert(0,np.loadtxt(rpfiles[0]))
+            for rpf in rpfiles[1:]:
+                mc = np.loadtxt(rpf)
                 if self.inputs.concatenate_runs:
-                    if not realignment_parameters:
-                        realignment_parameters.append(mc)
-                    else:
-                        realignment_parameters[0] = np.concatenate((realignment_parameters[0],mc))
+                    realignment_parameters[0] = np.concatenate((realignment_parameters[0],mc))
                 else:
-                    realignment_parameters.append(mc)
-                             
-                    
-                    
+                    realignment_parameters.insert(len(realignment_parameters),mc)
         outliers = []
         if isdefined(self.inputs.outlier_files):
             outfiles = filename_to_list(self.inputs.outlier_files)
