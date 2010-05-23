@@ -174,7 +174,7 @@ def makelist(item):
     return [item]
 
 l1pipeline = pe.Workflow(name='firstlevel')
-l1pipeline.connect([(preproc, l1analysis, [(('realign.realignment_parameters',makelist),
+l1pipeline.connect([(preproc, l1analysis, [('realign.realignment_parameters',
                                             'modelspec.realignment_parameters'),
                                            (('smooth.smoothed_files', makelist),
                                             'modelspec.functional_runs')])
@@ -203,7 +203,7 @@ nifti filename through a template '%s.nii'. So 'f3' would become
 """
 
 # Specify the location of the data downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/auditory/
-data_dir = os.path.abspath('data')
+data_dir = os.path.abspath('spm_auditory_data')
 # Specify the subject directories
 subject_list = ['M00223']
 # Map field names to individual subject runs.
