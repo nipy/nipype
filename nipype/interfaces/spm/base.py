@@ -24,13 +24,13 @@ from nipype.interfaces.matlab import MatlabCommand
 import logging
 logger = logging.getLogger('spmlogger')
 
-def func_is_3d(in_files):
+def func_is_3d(in_file):
     """ check if input functional files are 3d
     """
-    if isinstance(in_files[0], list):
-        return func_is_3d(in_files[0])
+    if isinstance(in_file, list):
+        return func_is_3d(in_file[0])
     else:
-        img = load(in_files[0])
+        img = load(in_file)
         shape = img.get_shape() 
         if len(shape) == 3 or (len(shape)==4 and shape[3]==1):
             return True

@@ -134,7 +134,7 @@ class RealignInputSpec(SPMCommandInputSpec):
 
 class RealignOutputSpec(TraitedSpec):
     mean_image = File(exists=True, desc='Mean image file from the realignment')
-    realigned_files = OutputMultiPath(File(exists=True), desc='Realigned files')
+    realigned_files = OutputMultiPath(traits.Either(traits.List(File(exists=True)),File(exists=True)), desc='Realigned files')
     realignment_parameters = OutputMultiPath(File(exists=True),
                     desc='Estimated translation and rotation parameters')
 
@@ -180,15 +180,32 @@ class Realign(SPMCommand):
         if isdefined(self.inputs.in_files):
             outputs['realignment_parameters'] = []
         for imgf in self.inputs.in_files:
-            outputs['realignment_parameters'].append(fname_presuffix(imgf,
+            if isinstance(imgf,list):
+                tmp_imgf = imgf[0]
+            else:
+                tmp_imgf = imgf
+            outputs['realignment_parameters'].append(fname_presuffix(tmp_imgf,
                                                                      prefix='rp_',
                                                                      suffix='.txt',
                                                                      use_ext=False))
+            if not isinstance(imgf,list) and func_is_3d(imgf):
+                break;
         if self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
-            outputs['mean_image'] = fname_presuffix(filename_to_list(self.inputs.in_files)[0], prefix='mean')
+            if isinstance(self.inputs.in_files[0], list):
+                first_image = self.inputs.in_files[0][0]
+            else:
+                first_image = self.inputs.in_files[0]
+                
+            outputs['mean_image'] = fname_presuffix(first_image, prefix='mean')
             outputs['realigned_files'] = []
             for imgf in filename_to_list(self.inputs.in_files):
-                outputs['realigned_files'].append(fname_presuffix(imgf, prefix='r'))
+                realigned_run = []
+                if isinstance(imgf,list):
+                    for inner_imgf in filename_to_list(imgf):
+                        realigned_run.append(fname_presuffix(inner_imgf, prefix='r'))
+                else:
+                    realigned_run = fname_presuffix(imgf, prefix='r')
+                outputs['realigned_files'].append(realigned_run)
         return outputs
 
 
