@@ -177,8 +177,10 @@ class SPMCommand(BaseInterface):
     def _run_interface(self, runtime):
         """Executes the SPM function using MATLAB
         """
-        self.mlab.inputs.mfile = self.inputs.mfile
-        self.mlab.inputs.paths = self.inputs.paths
+        if isdefined(self.inputs.mfile):
+            self.mlab.inputs.mfile = self.inputs.mfile
+        if isdefined(self.inputs.paths):
+            self.mlab.inputs.paths = self.inputs.paths
         self.mlab.inputs.script = self._make_matlab_command(deepcopy(self._parse_inputs()))
         results = self.mlab.run()
         runtime.returncode = results.runtime.returncode
