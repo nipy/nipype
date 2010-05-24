@@ -107,6 +107,7 @@ class WorkflowBase(object):
         clone = deepcopy(self)
         clone.name = name
         clone._id = name
+        clone._reset_hierarchy()
         return clone
 
     def _check_outputs(self, parameter):
@@ -361,9 +362,12 @@ class Workflow(WorkflowBase):
     def _check_nodes(self, nodes):
         "docstring for _check_nodes"
         node_names = [node.name for node in self._graph.nodes()]
+        node_lineage = [node._hierarchy for node in self._graph.nodes()]
         for node in nodes:
             if node.name in node_names:
-                raise Exception('Duplicate node name %s found.'%node.name)
+                idx = node_names.index(node.name)
+                if node._hierarchy == node_lineage[idx]:
+                    raise Exception('Duplicate node name %s found.'%node.name)
             else:
                 node_names.append(node.name)
     
@@ -455,6 +459,15 @@ class Workflow(WorkflowBase):
         workflowcopy = deepcopy(self)
         workflowcopy._generate_execgraph()
         self._flatgraph = workflowcopy._graph
+        
+    def _reset_hierarchy(self):
+        for node in self._graph.nodes():
+            if isinstance(node, Workflow):
+                node._reset_hierarchy()
+                for innernode in node._graph.nodes():
+                    innernode._hierarchy = '.'.join((self.name,innernode._hierarchy))
+            else:
+                node._hierarchy = self.name
         
     def _generate_execgraph(self):
         nodes2remove = []
