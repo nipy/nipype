@@ -286,13 +286,13 @@ subjectinfo_param = [Bunch(conditions=['N1', 'N2', 'F1', 'F2'],
                             amplitudes=None,
                             tmod=None,
                             pmod=[None,
-                                  Bunch(name='Lag',
-                                        param=itemlag[1],
-                                        poly=2),
+                                  Bunch(name=['Lag'],
+                                        param=itemlag[1].tolist(),
+                                        poly=[2]),
                                   None,
-                                  Bunch(name='Lag',
-                                        param=itemlag[3],
-                                        poly=2)],
+                                  Bunch(name=['Lag'],
+                                        param=itemlag[3].tolist(),
+                                        poly=[2])],
                             regressor_names=None,
                             regressors=None)]
 
@@ -303,26 +303,25 @@ those conditions]. The condition names must match the `names` listed
 in the `subjectinfo` function described above.
 """
 
-cont1 = ('positive effect of condition_1','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[1,1,1,1])
-cont2 = ('positive effect of condition_2','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,1,1,1])
-cont3 = ('positive effect of condition_3','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,1,1,1])
-fam1 = ('positive effect of Fame_1','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[-1,-1,1,1])
-fam2 = ('positive effect of Fame_2','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[-1,-1,1,1])
-fam3 = ('positive effect of Fame_3','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[-1,-1,1,1])
-rep1 = ('positive effect of Rep_1','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[-1,1,-1,1])
-rep2 = ('positive effect of Rep_2','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[-1,1,-1,1])
-rep3 = ('positive effect of Rep_3','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[-1,1,-1,1])
-int1 = ('positive interaction of Fame x Rep_1','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[-1,-1,-1,1])
-int2 = ('positive interaction of Fame x Rep_2','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[-1,-1,-1,1])
-int3 = ('positive interaction of Fame x Rep_3','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[-1,-1,-1,1])
+cont1 = ('positive effect of condition_1','T', ['N1','N2','F1','F2'], [1,1,1,1])
+cont2 = ('positive effect of Fame_1','T', ['N1','N2','F1','F2'],[1,1,-1,-1])
+cont3 = ('positive effect of Rep_1','T', ['N1','N2','F1','F2'],[1,-1,1,-1])
+cont4 = ('positive interaction: Fame xRep_1','T', ['N1','N2','F1','F2'],[1,-1,-1,1])
 
-contf1 = ['average effect condition','F', [cont1, cont2, cont3]]
-contf2 = ['main effect Fam', 'F', [fam1, fam2, fam3]]
-contf3 = ['main effect Rep', 'F', [rep1, rep2, rep3]]
-contf4 = ['interaction: Fam x Rep', 'F', [int1, int2, int3]]
-contrasts = [cont1, cont2, cont3, fam1, fam2, fam3, rep1, rep2, rep3, int1, int2, int3,contf1, contf2,contf3,contf4]
-# TODO figure out why it breaks for:
-# contrasts = [contf1, contf2,contf3,contf4, cont1, cont2, cont3, fam1, fam2, fam3, rep1, rep2, rep3, int1, int2, int3]
+fcont1 = ('Average effect of condition', 'F', [cont1])
+fcont2 = ('Main effect of Fame', 'F', [cont2])
+fcont3 = ('Main effect of Rep', 'F', [cont3])
+fcont4 = ('Interaction: Fame x Rep', 'F', [cont4])
+
+contrasts = [cont1, cont2, cont3, cont4, fcont1, fcont2, fcont3, fcont4]
+
+"""
+parametric f-contrast
+"""
+cont1 = ('Famous_lag1','T', ['F2xLag^1'],[1])
+cont2 = ('Famous_lag2','T', ['F2xLag^2'],[1])
+fcont1 = ('Famous Lag', 'F', [cont1, cont2])
+paramcontrasts = [cont1, cont2, fcont1]
 
 num_slices = 24
 TR = 2.
@@ -349,11 +348,25 @@ l1designref.microtime_resolution = slice_timingref.num_slices
 l1designref.microtime_onset = slice_timingref.ref_slice
 l1designref.bases = {'hrf':{'derivs': [1,1]}}
 
+#l1designref.factor_info = [dict(name='Fame', levels = 2),
+#                           dict(name = 'Rep', levels = 2)]
+
 l1pipeline.inputs.analysis.modelspec.subject_info = subjectinfo
 l1pipeline.inputs.analysis.contrastestimate.contrasts = contrasts
-l1pipeline.inputs.analysis.contrastestimate.ignore_derivs = False
 l1pipeline.inputs.analysis.threshold.contrast_index = 1
 
+paramanalysis = l1analysis.clone(name='paramanalysis')
+l1pipeline.connect([(preproc, paramanalysis, [('realign.realignment_parameters',
+                                               'modelspec.realignment_parameters'),
+                                              (('smooth.smoothed_files', makelist),
+                                               'modelspec.functional_runs')])
+                  ])
+
+paramanalysis.inputs.level1design.bases = {'hrf':{'derivs': [0,0]}}
+paramanalysis.inputs.modelspec.subject_info = subjectinfo_param
+paramanalysis.inputs.contrastestimate.contrasts = paramcontrasts
+
+                 
 """
 Setup the pipeline
 ------------------
@@ -418,7 +431,9 @@ def getstripdir(subject_id):
 level1.connect([(infosource, datasink,[('subject_id','container'),
                                        (('subject_id', getstripdir),'strip_dir')]),
                 (l1pipeline, datasink,[('analysis.contrastestimate.con_images','contrasts.@con'),
-                                       ('analysis.contrastestimate.spmT_images','contrasts.@T')]),
+                                       ('analysis.contrastestimate.spmT_images','contrasts.@T'),
+                                       ('paramanalysis.contrastestimate.con_images','paramcontrasts.@con'),
+                                       ('paramanalysis.contrastestimate.spmT_images','paramcontrasts.@T')]),
                 ])
 
 
