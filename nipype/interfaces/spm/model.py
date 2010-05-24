@@ -33,7 +33,8 @@ class Level1DesignInputSpec(SPMCommandInputSpec):
     microtime_onset = traits.Float(field='timing.fmri_t0',
                         desc='The onset/time-bin in seconds for alignment (opt)')
     session_info = File(exists=True, field='sess', desc='Session specific information file')
-    factor_info = File(exists=True, field='fact', desc='Factor specific information file (opt)')
+    factor_info = traits.List(traits.Dict(traits.Enum('name','levels')),
+                              field='fact', desc='Factor specific information file (opt)')
     bases = traits.Dict(traits.Enum('hrf', 'fourier', 'fourier_han',
                 'gamma', 'fir'), field='bases', desc="""
             dict {'name':{'basesparam1':val,...}}
@@ -138,7 +139,7 @@ class Level1Design(SPMCommand):
         """
         if opt in ['spm_mat_dir', 'mask_image']:
             return np.array([str(val)], dtype=object)
-        if opt in ['session_info', 'factor_info']:
+        if opt in ['session_info']: #, 'factor_info']:
             data = loadflat(val, opt)
             if isinstance(data[opt], dict):
                 return [data[opt]]
