@@ -117,7 +117,10 @@ class WorkflowBase(object):
         return hasattr(self.inputs, parameter)
     
     def __repr__(self):
-        return self._id
+        if self._hierarchy:
+            return '.'.join((self._hierarchy, self._id))
+        else:
+            return self._id
 
     def _output_directory(self):
         if self.base_dir is None:
