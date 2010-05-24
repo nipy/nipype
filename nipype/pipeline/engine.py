@@ -695,7 +695,7 @@ class Workflow(WorkflowBase):
                     self.proc_pending[jobid] = True
                     self._set_output_directory_base(self.procs[jobid])
                     # Send job to task manager and add to pending tasks
-                    _, hashvalue = self.procs[jobid].inputs._get_hashval()
+                    _, hashvalue = self.procs[jobid]._get_hashval()
                     logger.info('Executing: %s ID: %d H:%s' % \
                                     (self.procs[jobid]._id, jobid, hashvalue))
                     cmdstr = "result = task.run()"
@@ -804,7 +804,7 @@ class Node(WorkflowBase):
         return val
 
     def _get_hashval(self):
-        return self.inputs._get_hashval()
+        return self.inputs.hashval
     
     def _save_hashfile(self, hashfile, hashed_inputs):
         try:
@@ -1011,7 +1011,7 @@ class MapNode(Node):
             inputs.remove_trait(name)
             inputs.add_trait(name, traits.List(self._interface.inputs.traits()[name].trait_type))
             setattr(inputs, name, getattr(self._inputs, name))
-        return inputs._get_hashval()
+        return inputs.hashval
 
     @property
     def inputs(self):
