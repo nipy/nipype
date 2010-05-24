@@ -406,28 +406,6 @@ class BaseTraitedSpec(traits.HasTraits):
                 out = undefinedval
         return out
 
-    def _is_file_inside(self, spec):
-        """Determines if there is a File trait embedded in a trait container
-        """
-        if getattr(spec, 'is_trait_type'):
-            if spec.is_trait_type(traits.Tuple):
-                inner_traits = spec.handler.types
-            elif spec.is_trait_type(traits.TraitCompound):
-                inner_traits = spec.handler.handlers
-            else:
-                inner_traits = None
-        else:
-            if callable(spec.inner_traits):
-                inner_traits = spec.inner_traits()
-            else:
-                inner_traits = spec.inner_traits
-        if inner_traits:
-            return any([self._is_file_inside(inner) for inner in inner_traits])
-        elif getattr(spec, 'is_trait_type') and spec.is_trait_type(File):
-            if getattr(spec, 'exists'):
-                return True
-        return False
-
     #@traits.cached_property
     @property
     def hashval(self):
