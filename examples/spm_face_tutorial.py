@@ -51,6 +51,7 @@ fsl.FSLCommand.set_default_output_type('NIFTI')
 
 # Set the way matlab should be called
 mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
+#mlab.MatlabCommand.set_default_paths('/software/spm8')
 
 
 """
@@ -303,20 +304,30 @@ those conditions]. The condition names must match the `names` listed
 in the `subjectinfo` function described above.
 """
 
-cont1 = ('positive effect of condition_1','T', ['N1','N2','F1','F2'], [1,1,1,1])
-cont2 = ('positive effect of Fame_1','T', ['N1','N2','F1','F2'],[1,1,-1,-1])
-cont3 = ('positive effect of Rep_1','T', ['N1','N2','F1','F2'],[1,-1,1,-1])
-cont4 = ('positive interaction: Fame xRep_1','T', ['N1','N2','F1','F2'],[1,-1,-1,1])
+cond1 = ('positive effect of condition','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[1,1,1,1])
+cond2 = ('positive effect of condition_ddisp','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,1,1,1])
+cond3 = ('positive effect of condition_dtemp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,1,1,1])
+# non-famous > famous
+fam1 = ('positive effect of Fame','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[1,1,-1,-1])
+fam2 = ('positive effect of Fame_ddisp','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,1,-1,-1])
+fam3 = ('positive effect of Fame_dtemp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,1,-1,-1])
+# rep1 > rep2
+rep1 = ('positive effect of Rep','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[1,-1,1,-1])
+rep2 = ('positive effect of Rep_ddisp','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,-1,1,-1])
+rep3 = ('positive effect of Rep_dtemp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,-1,1,-1])
+int1 = ('positive interaction of Fame x Rep','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[-1,-1,-1,1])
+int2 = ('positive interaction of Fame x Rep_ddisp','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,-1,-1,1])
+int3 = ('positive interaction of Fame x Rep_dtemp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,-1,-1,1])
 
-fcont1 = ('Average effect of condition', 'F', [cont1])
-fcont2 = ('Main effect of Fame', 'F', [cont2])
-fcont3 = ('Main effect of Rep', 'F', [cont3])
-fcont4 = ('Interaction: Fame x Rep', 'F', [cont4])
+contf1 = ['average effect condition','F', [cond1, cond2, cond3]]
+contf2 = ['main effect Fam', 'F', [fam1, fam2, fam3]]
+contf3 = ['main effect Rep', 'F', [rep1, rep2, rep3]]
+contf4 = ['interaction: Fam x Rep', 'F', [int1, int2, int3]]
+contrasts = [cond1, cond2, cond3, fam1, fam2, fam3, rep1, rep2, rep3, int1, int2, int3, contf1, contf2,contf3,contf4]
 
-contrasts = [cont1, cont2, cont3, cont4, fcont1, fcont2, fcont3, fcont4]
 
 """
-parametric f-contrast
+contrasts for parametric model
 """
 cont1 = ('Famous_lag1','T', ['F2xLag^1'],[1])
 cont2 = ('Famous_lag2','T', ['F2xLag^2'],[1])
@@ -348,7 +359,11 @@ l1designref.microtime_resolution = slice_timingref.num_slices
 l1designref.microtime_onset = slice_timingref.ref_slice
 l1designref.bases = {'hrf':{'derivs': [1,1]}}
 
-#l1designref.factor_info = [dict(name='Fame', levels = 2),
+"""
+The following lines automatically inform SPM to create a default set of
+contrats. 
+"""
+#l1designref.factor_info = [dict(name = 'Fame', levels = 2),
 #                           dict(name = 'Rep', levels = 2)]
 
 l1pipeline.inputs.analysis.modelspec.subject_info = subjectinfo
@@ -366,6 +381,10 @@ paramanalysis.inputs.level1design.bases = {'hrf':{'derivs': [0,0]}}
 paramanalysis.inputs.modelspec.subject_info = subjectinfo_param
 paramanalysis.inputs.contrastestimate.contrasts = paramcontrasts
 
+"""
+Use derivative estimates in the non-parametric model
+"""
+l1pipeline.inputs.analysis.contrastestimate.ignore_derivs = False
                  
 """
 Setup the pipeline
