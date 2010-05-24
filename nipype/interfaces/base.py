@@ -206,9 +206,6 @@ class Bunch(object):
         sorted_dict = str(sorted(dict_nofilename.items()))
         return (dict_withhash, md5(sorted_dict).hexdigest())
 
-    def _get_hashval(self):
-        return self._get_bunch_hash()
-
     def __pretty__(self, p, cycle):
         '''Support for the pretty module
         
@@ -379,12 +376,57 @@ class BaseTraitedSpec(traits.HasTraits):
         notification handles
         """
         out = super(BaseTraitedSpec, self).get(**kwargs)
-        for key, val in out.items():
-            if isinstance(val, TraitDictObject):
-                out[key] = dict(val)
-            if isinstance(val, TraitListObject):
-                out[key] = val[:]
+        out = self._clean_container(out, Undefined)
         return out
+    
+    def _clean_container(self, object, undefinedval=None):
+        """Convert a traited obejct into a pure python representation.
+        """
+        if isinstance(object, TraitDictObject) or isinstance(object, dict):
+            out = {}
+            for key, val in object.items():
+                if isdefined(val):
+                    out[key] = self._clean_container(val, undefinedval)
+                else:
+                    out[key] = undefinedval
+        elif isinstance(object, TraitListObject) or isinstance(object, list) or \
+                isinstance(object, tuple):
+            out = []
+            for val in object:
+                if isdefined(val):
+                    out.append(self._clean_container(val, undefinedval))
+                else:
+                    out.append(undefinedval)
+            if isinstance(object, tuple):
+                out = tuple(out)
+        else:
+            if isdefined(object):
+                out = object
+            else:
+                out = undefinedval
+        return out
+
+    def _is_file_inside(self, spec):
+        """Determines if there is a File trait embedded in a trait container
+        """
+        if getattr(spec, 'is_trait_type'):
+            if spec.is_trait_type(traits.Tuple):
+                inner_traits = spec.handler.types
+            elif spec.is_trait_type(traits.TraitCompound):
+                inner_traits = spec.handler.handlers
+            else:
+                inner_traits = None
+        else:
+            if callable(spec.inner_traits):
+                inner_traits = spec.inner_traits()
+            else:
+                inner_traits = spec.inner_traits
+        if inner_traits:
+            return any([self._is_file_inside(inner) for inner in inner_traits])
+        elif getattr(spec, 'is_trait_type') and spec.is_trait_type(File):
+            if getattr(spec, 'exists'):
+                return True
+        return False
 
     #@traits.cached_property
     @property
@@ -408,30 +450,39 @@ class BaseTraitedSpec(traits.HasTraits):
             The md5 hash value of the traited spec
 
         """
-        dict_withhash = self.get()
-        dict_nofilename = self.get()
-        for key, spec in self.items():
-            #do not hash values which are not set
-            if not isdefined(dict_withhash[key]):
-                del dict_withhash[key]
-                del dict_nofilename[key]
-                continue
-            innertype = []
-            if spec.inner_traits:
-                innertype = [1 for inner in spec.inner_traits \
-                                 if inner.is_trait_type(File)]
-            if spec.is_trait_type(File) or innertype:
-                if dict_withhash[key]:
-                    dict_withhash[key] = self._hash_infile(dict_withhash, key)
-                    dict_nofilename[key] = [val[1] for val in dict_withhash[key]]
-        # Sort the items of the dictionary, before hashing the string
-        # representation so we get a predictable order of the
-        # dictionary.
-        sorted_dict = str(sorted(dict_nofilename.items()))
-        return (dict_withhash, md5(sorted_dict).hexdigest())
+        dict_withhash = self._get_sorteddict(self.get(),True)
+        dict_nofilename = self._get_sorteddict(self.get())
+        return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
 
-    def _get_hashval(self):
-        return self.hashval
+    def _get_sorteddict(self, object, dictwithhash=False):
+        if isinstance(object, dict):
+            out = {}
+            for key, val in sorted(object.items()):
+                if isdefined(val):
+                    out[key] = self._get_sorteddict(val, dictwithhash)
+        elif isinstance(object, (list,tuple)):
+            out = []
+            for val in object:
+                if isdefined(val):
+                    out.append(self._get_sorteddict(val, dictwithhash))
+            if isinstance(object, tuple):
+                out = tuple(out)
+        else:
+            if isdefined(object):
+                if isinstance(object, str) and os.path.isfile(object):
+                    if config.get('execution', 'hash_method').lower() == 'timestamp':
+                        hash = hash_timestamp(object)
+                    elif config.get('execution', 'hash_method').lower() == 'content':
+                        hash = hash_infile(object)
+                    else:
+                        raise Exception("Unknown hash method: %s" % config.get('execution', 'hash_method'))
+                    if dictwithhash:
+                        out = (object, hash)
+                    else:
+                        out = hash
+                else:
+                    out = object
+        return out
 
 class DynamicTraitedSpec(BaseTraitedSpec):
     """ A subclass to handle dynamic traits
