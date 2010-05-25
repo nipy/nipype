@@ -19,8 +19,8 @@ class PickAtlasInputSpec(TraitedSpec):
     labels = traits.Either(traits.Int, traits.List(traits.Int), 
                            desc="Labels of regions that will be included in the mask. Must be \
                                 compatible with the atlas used.", compulsory=True)
-    hemi = traits.Enum('both','left','right', desc="Restrict the mask to only one hemisphere: left or right", use_default=True)
-    dilation_size = traits.Float(desc="Defines how much the mask will be dilated (expanded in 3D).", use_default = True)
+    hemi = traits.Enum('both','left','right', desc="Restrict the mask to only one hemisphere: left or right", usedefault=True)
+    dilation_size = traits.Float(desc="Defines how much the mask will be dilated (expanded in 3D).", usedefault = True)
     output_file = File(desc="Where to store the output mask.")
 
 class PickAtlasOutputSpec(TraitedSpec):
