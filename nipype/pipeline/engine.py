@@ -243,7 +243,7 @@ class Workflow(WorkflowBase):
         if newnodes:
             self._check_nodes(newnodes)
             for node in newnodes:
-                if node._hierarchy is None:
+                if not hasattr(node, "_hierarchy") or node._hierarchy is None:
                     node._hierarchy = self.name
         for srcnode, destnode, connects in connection_list:
             for source, dest in connects:
@@ -251,7 +251,7 @@ class Workflow(WorkflowBase):
                 # determine their inputs/outputs depending on
                 # connection settings.  Skip these modules in the check
                 if not (hasattr(destnode, '_interface') and '.io' in str(destnode._interface.__class__)):
-                    if not destnode._check_inputs(dest):
+                    if not destnode.check_inputs(dest):
                         not_found.append(['in', destnode.name, dest])
                 if not (hasattr(srcnode, '_interface') and '.io' in str(srcnode._interface.__class__)):
                     if isinstance(source, tuple):
@@ -264,7 +264,7 @@ class Workflow(WorkflowBase):
                         raise Exception('Unknown source specification in' \
                                          'connection from output of %s'%
                                         srcnode.name)
-                    if sourcename and not srcnode._check_outputs(sourcename):
+                    if sourcename and not srcnode.check_outputs(sourcename):
                         not_found.append(['out', srcnode.name, sourcename])
         for info in not_found: 
             warn("Module %s has no %sput called %s\n"%(info[1], info[0],
@@ -307,7 +307,7 @@ class Workflow(WorkflowBase):
                 raise Exception('Node %s must be a subclass of WorkflowBase' % str(node))
         self._check_nodes(newnodes)
         for node in newnodes:
-            if node._hierarchy is None:
+            if not hasattr(node, "_hierarchy") or node._hierarchy is None:
                 node._hierarchy = self.name
         self._graph.add_nodes_from(newnodes)
 

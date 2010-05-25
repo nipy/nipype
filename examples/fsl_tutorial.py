@@ -42,8 +42,8 @@ package_check('IPython', '0.10', 'tutorial1')
 """
 
 # Tell fsl to generate all output in uncompressed nifti format
-print fsl.FSLInfo.version()
-fsl.FSLInfo.outputtype('NIFTI_GZ')
+print fsl.Info.version()
+fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
 
 
 """
@@ -60,7 +60,7 @@ fsl.FSLInfo.outputtype('NIFTI_GZ')
 # The following lines create some information about location of your
 # data. 
 data_dir = os.path.abspath('data')
-subject_list = ['s1'] #, 's3']
+subject_list = ['s1', 's3']
 # The following info structure helps the DataSource module organize
 # nifti files into fields/attributes of a data object. With DataSource
 # this object is of type Bunch.
@@ -85,7 +85,7 @@ and provides additional housekeeping and pipeline specific
 functionality.
 """
 
-datasource = nw.NodeWrapper(interface=nio.DataSource())
+datasource = nw.NodeWrapper(interface=nio.DataGrabber())
 datasource.inputs.base_directory   = data_dir
 datasource.inputs.subject_template = '%s'
 datasource.inputs.file_template    = '%s.nii'
@@ -112,7 +112,7 @@ skullstrip = nw.NodeWrapper(interface=fsl.BET(mask = True,
 
 """Preprocess functionals"""
 
-motion_correct = nw.NodeWrapper(interface=fsl.MCFLIRT(saveplots = True),
+motion_correct = nw.NodeWrapper(interface=fsl.MCFLIRT(save_plots = True),
                                 diskbased=True)
 motion_correct.iterfield = ['infile']
 
@@ -121,21 +121,22 @@ func_skullstrip = nw.NodeWrapper(interface=fsl.BET(functional = True),
                                  name='func_Bet.fsl')
 func_skullstrip.iterfield = ['infile']
 
-ref_skullstrip = nw.NodeWrapper(interface=fsl.BET(), diskbased=True,
+ref_skullstrip = nw.NodeWrapper(interface=fsl.BET(functional = True), diskbased=True,
                                 name='ref_Bet.fsl')
-ref_skullstrip.inputs.update(functional = True)
+
 
 
 """Registration"""
 
-target_image = fsl.fsl_info.standard_image('MNI152_T1_2mm')
+target_image = fsl.Info.standard_image('MNI152_T1_2mm.nii.gz')
 
 # For structurals
 # flirt -ref ${FSLDIR}/data/standard/MNI152_T1_2mm_brain -in my_betted_structural -omat my_affine_transf.mat
 
 t1reg2std = nw.NodeWrapper(interface=fsl.FLIRT(), diskbased=True)
-t1reg2std.inputs.update(reference = target_image,
-                        outmatrix = 't1reg2std.xfm')
+t1reg2std.inputs.reference = target_image
+t1reg2std.inputs.out_matrix_file = 't1reg2std.xfm'
+
 
 """
 It may seem that these should be able to be run in one step. But, then you get
@@ -148,28 +149,29 @@ applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=my_structural --warp=
 """
 
 t1warp2std = nw.NodeWrapper(interface=fsl.FNIRT(), diskbased=True)
-t1warp2std.inputs.update(configfile = 'T1_2_MNI152_2mm',
-                         fieldcoeff_file = 't1warp2std',
-                         logfile = 't1warp2std.log')
+t1warp2std.inputs.config_file = '/usr/local/fsl/etc/flirtsch/T1_2_MNI152_2mm.cnf'
+t1warp2std.inputs.fieldcoeff_file = 't1warp2std'
+t1warp2std.inputs.log_file = 't1warp2std.log'
+
 
 t1applywarp = nw.NodeWrapper(interface=fsl.ApplyWarp(), diskbased=True)
-t1applywarp.inputs.update(reference = target_image,
-                          outfile = 't1_warped')
+t1applywarp.inputs.ref_file = target_image
+t1applywarp.inputs.out_file = 't1_warped'
 
 # For functionals - refers to some files above
 # flirt -ref my_betted_structural -in my_functional -dof 7 -omat func2struct.mat
 
 ref2t1 = nw.NodeWrapper(interface=fsl.FLIRT(), diskbased=True, 
                          name='ref_Flirt.fsl')
-ref2t1.inputs.update(outmatrix = 'ref2t1.xfm',
-                     dof = 6)
+ref2t1.inputs.out_matrix_file = 'ref2t1.xfm'
+ref2t1.inputs.dof = 6
 
 # applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=my_functional --warp=my_nonlinear_transf --premat=func2struct.mat --out=my_warped_functional
 
 funcapplywarp = nw.NodeWrapper(interface=fsl.ApplyWarp(), diskbased=True,
                                name='func_ApplyWarp.fsl')
 funcapplywarp.iterfield = ['infile']
-funcapplywarp.inputs.update(reference = target_image)
+funcapplywarp.inputs.ref_file = target_image
 
 # Finally do some smoothing!
 
@@ -247,8 +249,8 @@ level1design.inputs.bases              = {'hrf':{'derivs': True}}
 level1design.inputs.contrasts          = contrasts
 
 """
-e. Use :class:`nipype.interfaces.fsl.FEATModel` to generate a run
-specific mat file for use by FILMGLS
+e. Use :class:`nipype.interfaces.fsl.FeatModel` to generate a run
+specific mat file for use by FilmGLS
 """
 
 modelgen = nw.NodeWrapper(interface=fsl.FEATModel(),diskbased=True)
@@ -258,14 +260,14 @@ featmodel = nw.NodeWrapper(interface=fsl.FEAT(),diskbased=True)
 featmodel.iterfield = ['fsf_file']
 
 """
-   f. Use :class:`nipype.interfaces.fsl.FILMGLS` to estimate a model
+   f. Use :class:`nipype.interfaces.fsl.FilmGLS` to estimate a model
    specified by a mat file and a functional run
 """
 
 modelestimate = nw.NodeWrapper(interface=fsl.FILMGLS(),diskbased=True)
-modelestimate.inputs.thresh = 10
-modelestimate.inputs.sa = True
-modelestimate.inputs.ms = 5
+modelestimate.inputs.threshold = 10
+modelestimate.inputs.smooth_autocorr = True
+modelestimate.inputs.mask_size = 5
 modelestimate.iterfield = ['designfile','infile']
 
 """
@@ -285,9 +287,9 @@ datasink.inputs.base_directory = os.path.abspath('./fsl/l1output')
 
 """Set up l1pipeline pype"""
 
-l1pipeline = pe.Pipeline()
-l1pipeline.config['workdir'] = os.path.abspath('./fsl/workingdir')
-l1pipeline.config['use_parameterized_dirs'] = True
+l1pipeline = pe.Workflow(name = "level1")
+l1pipeline.base_dir = os.path.abspath('./fsl/workingdir')
+#l1pipeline.config['use_parameterized_dirs'] = True
 
 l1pipeline.connect([# preprocessing in native space
                  (datasource, skullstrip,[('struct','infile')]),
@@ -320,7 +322,7 @@ l1pipeline.connect([# preprocessing in native space
                  (motion_correct,modelspec,[('parfile','realignment_parameters')]),
                  (smoothing,modelspec,[('smoothedimage','functional_runs')]),
                  (modelspec,level1design,[('session_info','session_info')]),
-                 (level1design,featmodel,[('fsf_files','fsf_file')]),
+                 (level1design,featmodel,[('fsf_file','fsf_file')]),
                  #(level1design,modelestimate,[('func_files','infile')]),
                  #(modelgen,modelestimate,[('designfile','designfile')]),
                  #(modelgen,conestimate,[('confile','tconfile')]),
