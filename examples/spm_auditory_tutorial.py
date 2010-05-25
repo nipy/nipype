@@ -138,6 +138,7 @@ if merge_to_4d:
     preproc.connect([(merge, realign,[('merged_file', 'in_files')])])
                      
 preproc.connect([(realign,coregister,[('mean_image', 'target')]),
+                 (coregister, segment,[('coregistered_source','data')]),
                  (segment, normalize_func, [('transformation_mat','parameter_file')]),
                  (segment, normalize_struc, [('transformation_mat','parameter_file'),
                                              ('modulated_input_image', 'apply_to_files'),
@@ -345,8 +346,7 @@ level1 = pe.Workflow(name="level1")
 level1.base_dir = os.path.abspath('spm_auditory_tutorial/workingdir')
 
 level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                (datasource,l1pipeline,[('struct', 'preproc.coregister.source'),
-                                        ('struct', 'preproc.segment.data')]),
+                (datasource,l1pipeline,[('struct', 'preproc.coregister.source')]),
                 (infosource,l1pipeline,[('subject_id','analysis.modelspec.subject_id')]),
                 ])
 if merge_to_4d:
