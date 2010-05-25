@@ -87,7 +87,7 @@ class SliceTiming(SPMCommand):
         """
         if opt == 'in_files':
             return scans_for_fnames(filename_to_list(val),
-                                    keep4d=True,
+                                    keep4d=False,
                                     separate_sessions=True)
         return val
 
