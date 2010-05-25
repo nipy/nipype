@@ -1,13 +1,4 @@
-"""The freesurfer module provides basic functions for interfacing with freesurfer tools.
-
-Currently these tools are supported:
-
-     * Dicom2Nifti: using mri_convert
-     * Resample: using mri_convert
-     
-Examples
---------
-See the docstrings for the individual classes for 'working' examples.
+"""Provides python interfaces to various commands provided by freeusrfer
 
 """
 __docformat__ = 'restructuredtext'
@@ -40,13 +31,12 @@ class ParseDICOMDirOutputSpec(TraitedSpec):
                            desc='text file containing dicom information')
 
 class ParseDICOMDir(FSCommand):
-    """uses mri_parse_sdcmdir to get information from dicom directories
+    """Uses mri_parse_sdcmdir to get information from dicom directories
     
     Examples
     --------
 
     >>> from nipype.interfaces.freesurfer import ParseDICOMDir
-    >>> import os
     >>> dcminfo = ParseDICOMDir()
     >>> dcminfo.inputs.dicom_dir = '.'
     >>> dcminfo.inputs.sortbyrun = True
@@ -99,10 +89,22 @@ class UnpackSDICOMDirInputSpec(FSTraitedSpec):
                               desc='do not try to unpack runs with errors')
 
 class UnpackSDICOMDir(FSCommand):
-    """use fs unpacksdcmdir to convert dicom files
+    """Use unpacksdcmdir to convert dicom files
+
+    Call unpacksdcmdir -help from the command line to see more information on
+    using this command.
 
     Examples
     --------
+
+    >>> from nipype.interfaces.freesurfer import UnpackSDICOMDir
+    >>> unpack = UnpackSDICOMDir()
+    >>> unpack.inputs.source_dir = '.'
+    >>> unpack.inputs.output_dir = '.'
+    >>> unpack.inputs.run_info = (5, 'mprage', 'nii', 'struct')
+    >>> unpack.inputs.dir_structure = 'generic'
+    >>> unpack.cmdline
+    'unpacksdcmdir -generic -targ . -run 5 mprage nii struct -src .'
     """
     _cmd = 'unpacksdcmdir'
     input_spec = UnpackSDICOMDirInputSpec
