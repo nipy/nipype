@@ -19,6 +19,8 @@ Tutorials
    tutorial_103
    spm_tutorial
    spm_tutorial2
+   spm_auditory_tutorial
+   spm_face_tutorial
    freesurfer_tutorial
    fsl_tutorial
    fsl_dti_tutorial
