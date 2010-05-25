@@ -1,11 +1,11 @@
 """
-Using SPM for analysis
-=======================
+Introduction
+============
 
 The spm_auditory_tutorial.py recreates the classical workflow described in the SPM8 manual (http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf)
 using auditory dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/auditory/:
 
-    python spm_tutorial.py
+    python spm_auditory_tutorial.py
 
 """
 
@@ -14,6 +14,7 @@ using auditory dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/
 
 import nipype.interfaces.io as nio           # Data i/o 
 import nipype.interfaces.spm as spm          # spm
+import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.matlab as mlab      # how to run matlabimport nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility 
 import nipype.pipeline.engine as pe          # pypeline engine
@@ -41,7 +42,6 @@ package_check('IPython', '0.10', 'tutorial1')
 # Set the way matlab should be called
 mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
 
-
 """
 Setting up workflows
 --------------------
@@ -60,6 +60,21 @@ This is a generic preprocessing workflow that can be used by different analyses
 
 preproc = pe.Workflow(name='preproc')
 
+"""We strongly encourage to use 4D files insteead of series of 3D for fMRI analyses 
+for many reasons (cleanness and saving and filesystem inodes are among them). However, 
+the the workflow presented in the SPM8 manual which this tutorial is based on 
+uses 3D files. Therefore we leave converting to 4D as an option. We are using `merge_to_4d` 
+variable, because switching between 3d and 4d requires some additional steps (explauned later on).
+Use :class:`nipype.interfaces.fsl.Merge` to merge a series of 3D files along the time 
+dimension creating a 4d file.
+"""
+
+merge_to_4d = True
+
+if merge_to_4d:
+    merge = pe.Node(interface=fsl.Merge(), name="merge")
+    merge.inputs.dimension="t"
+
 """Use :class:`nipype.interfaces.spm.Realign` for motion correction
 and register all images to the mean image.
 """
@@ -77,7 +92,10 @@ coregister.inputs.jobtype = 'estimate'
 
 
 segment = pe.Node(interface=spm.Segment(), name="segment")
-# Uncomment the following line for faster execution
+
+"""Uncomment the following line for faster execution
+"""
+
 #segment.inputs.gaussians_per_class = [1, 1, 1, 4]
 
 """Warp functional and structural data to SPM's T1 template using
@@ -98,6 +116,10 @@ normalize_struc.inputs.jobtype = "write"
 
 smooth = pe.Node(interface=spm.Smooth(), name = "smooth")
 
+"""`write_voxel_sizes` is the input of the normalize interface that is recommended to be set to
+the voxel sizes of the target volume. There is no need to set it manually since we van infer it from data
+using the following function:
+"""
 
 def get_vox_dims(volume):
     if isinstance(volume, list):
@@ -107,6 +129,14 @@ def get_vox_dims(volume):
     voxdims = hdr.get_zooms()
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
 
+"""Here we are connecting all the nodes together. Notice that we add the merge node only if you choose
+to use 4D. Also `get_vox_dims` function is passed along the input volume of normalise to set the optimal
+voxel sizes.
+"""
+
+if merge_to_4d:
+    preproc.connect([(merge, realign,[('merged_file', 'in_files')])])
+                     
 preproc.connect([(realign,coregister,[('mean_image', 'target')]),
                  (segment, normalize_func, [('transformation_mat','parameter_file')]),
                  (segment, normalize_struc, [('transformation_mat','parameter_file'),
@@ -170,36 +200,39 @@ Preproc + Analysis pipeline
 
 """
 
-def makelist(item):
-    return [item]
+
 
 l1pipeline = pe.Workflow(name='firstlevel')
 l1pipeline.connect([(preproc, l1analysis, [('realign.realignment_parameters',
-                                            'modelspec.realignment_parameters'),
-                                           (('smooth.smoothed_files', makelist),
-                                            'modelspec.functional_runs')])
-                  ])
+                                            'modelspec.realignment_parameters')])])
+
+"""Pluging in `functional_runs` is a bit more complicated, because model spec expects a list of `runs`.
+Every run can be a 4D file or a list of 3D files. Therefore for 3D analysis we need a list of lists and 
+to make one we need a helper function.
+"""
+
+if merge_to_4d:
+    l1pipeline.connect([(preproc, l1analysis, [('smooth.smoothed_files',
+                                                'modelspec.functional_runs')])])
+else:
+    def makelist(item):
+        return [item]
+    l1pipeline.connect([(preproc, l1analysis, [(('smooth.smoothed_files',makelist),
+                                                'modelspec.functional_runs')])])
+                  
 
 
 """
 Data specific components
 ------------------------
 
-The nipype tutorial contains data for two subjects.  Subject data
-is in two subdirectories, ``s1`` and ``s2``.  Each subject directory
-contains four functional volumes: f3.nii, f5.nii, f7.nii, f10.nii. And
-one anatomical volume named struct.nii.
+In this tutorial there is only one subject `M00223`.
 
 Below we set some variables to inform the ``datasource`` about the
 layout of our data.  We specify the location of the data, the subject
 sub-directories and a dictionary that maps each run to a mnemonic (or
 field) for the run type (``struct`` or ``func``).  These fields become
 the output fields of the ``datasource`` node in the pipeline.
-
-In the example below, run 'f3' is of type 'func' and gets mapped to a
-nifti filename through a template '%s.nii'. So 'f3' would become
-'f3.nii'.
-
 """
 
 # Specify the location of the data downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/auditory/
@@ -312,11 +345,14 @@ level1 = pe.Workflow(name="level1")
 level1.base_dir = os.path.abspath('spm_auditory_tutorial/workingdir')
 
 level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                (datasource,l1pipeline,[('func','preproc.realign.in_files'),
-                                        ('struct', 'preproc.coregister.source'),
+                (datasource,l1pipeline,[('struct', 'preproc.coregister.source'),
                                         ('struct', 'preproc.segment.data')]),
                 (infosource,l1pipeline,[('subject_id','analysis.modelspec.subject_id')]),
                 ])
+if merge_to_4d:
+    level1.connect([(datasource,l1pipeline,[('func','preproc.merge.in_files')])])
+else:
+    level1.connect([(datasource,l1pipeline,[('func','preproc.realign.in_files')])])
 
 
 """

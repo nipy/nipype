@@ -1,15 +1,13 @@
 """
-Using SPM for analysis
+Introduction
 =======================
 
-The spm_auditory_tutorial.py recreates the classical workflow described in the SPM8 manual (http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf)
+The spm_face_tutorial.py recreates the classical workflow described in the SPM8 manual (http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf)
 using auditory dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/face_rep_SPM5.html:
 
     python spm_tutorial.py
 
 """
-from copy import deepcopy
-
 
 """Import necessary modules from nipype."""
 
@@ -51,7 +49,8 @@ fsl.FSLCommand.set_default_output_type('NIFTI')
 
 # Set the way matlab should be called
 mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
-#mlab.MatlabCommand.set_default_paths('/software/spm8')
+# If SPM is not in your MATLAB path you should add it here
+# mlab.MatlabCommand.set_default_paths('/path/to/your/spm8')
 
 
 """
@@ -59,8 +58,7 @@ Setting up workflows
 --------------------
 
 In this tutorial we will be setting up a hierarchical workflow for spm
-analysis. This will demonstrate how pre-defined workflows can be setup
-and shared across users, projects and labs.
+analysis. It one is slightly different then the one used in spm_tutorial2.
 
 
 Setup preprocessing workflow
@@ -71,6 +69,21 @@ This is a generic preprocessing workflow that can be used by different analyses
 """
 
 preproc = pe.Workflow(name='preproc')
+
+"""We strongly encourage to use 4D files insteead of series of 3D for fMRI analyses 
+for many reasons (cleanness and saving and filesystem inodes are among them). However, 
+the the workflow presented in the SPM8 manual which this tutorial is based on 
+uses 3D files. Therefore we leave converting to 4D as an option. We are using `merge_to_4d` 
+variable, because switching between 3d and 4d requires some additional steps (explauned later on).
+Use :class:`nipype.interfaces.fsl.Merge` to merge a series of 3D files along the time 
+dimension creating a 4d file.
+"""
+
+merge_to_4d = False
+
+if merge_to_4d:
+    merge = pe.Node(interface=fsl.Merge(), name="merge")
+    merge.inputs.dimension="t"
 
 """Use :class:`nipype.interfaces.spm.Realign` for motion correction
 and register all images to the mean image.
@@ -91,7 +104,10 @@ coregister.inputs.jobtype = 'estimate'
 
 
 segment = pe.Node(interface=spm.Segment(), name="segment")
-# Uncomment the following line for faster execution
+
+"""Uncomment the following line for faster execution
+"""
+
 #segment.inputs.gaussians_per_class = [1, 1, 1, 4]
 
 """Warp functional and structural data to SPM's T1 template using
@@ -112,6 +128,10 @@ normalize_struc.inputs.jobtype = "write"
 
 smooth = pe.Node(interface=spm.Smooth(), name = "smooth")
 
+"""`write_voxel_sizes` is the input of the normalize interface that is recommended to be set to
+the voxel sizes of the target volume. There is no need to set it manually since we van infer it from data
+using the following function:
+"""
 
 def get_vox_dims(volume):
     if isinstance(volume, list):
@@ -120,6 +140,14 @@ def get_vox_dims(volume):
     hdr = nii.get_header()
     voxdims = hdr.get_zooms()
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
+
+"""Here we are connecting all the nodes together. Notice that we add the merge node only if you choose
+to use 4D. Also `get_vox_dims` function is passed along the input volume of normalise to set the optimal
+voxel sizes.
+"""
+
+if merge_to_4d:
+    preproc.connect([(merge, realign,[('merged_file', 'in_files')])])
 
 preproc.connect([(realign,coregister,[('mean_image', 'target')]),
                  (segment, normalize_func, [('transformation_mat','parameter_file')]),
@@ -184,36 +212,36 @@ Preproc + Analysis pipeline
 
 """
 
-def makelist(item):
-    return [item]
-
 l1pipeline = pe.Workflow(name='firstlevel')
 l1pipeline.connect([(preproc, l1analysis, [('realign.realignment_parameters',
-                                            'modelspec.realignment_parameters'),
-                                           (('smooth.smoothed_files', makelist),
-                                            'modelspec.functional_runs')])
-                  ])
+                                            'modelspec.realignment_parameters')])])
+
+"""Pluging in `functional_runs` is a bit more complicated, because model spec expects a list of `runs`.
+Every run can be a 4D file or a list of 3D files. Therefore for 3D analysis we need a list of lists and 
+to make one we need a helper function.
+"""
+  
+if merge_to_4d:
+    l1pipeline.connect([(preproc, l1analysis, [('smooth.smoothed_files',
+                                                'modelspec.functional_runs')])])
+else:
+    def makelist(item):
+        return [item]
+    l1pipeline.connect([(preproc, l1analysis, [(('smooth.smoothed_files',makelist),
+                                                'modelspec.functional_runs')])])
 
 
 """
 Data specific components
 ------------------------
 
-The nipype tutorial contains data for two subjects.  Subject data
-is in two subdirectories, ``s1`` and ``s2``.  Each subject directory
-contains four functional volumes: f3.nii, f5.nii, f7.nii, f10.nii. And
-one anatomical volume named struct.nii.
+In this tutorial there is only one subject `M03953`.
 
 Below we set some variables to inform the ``datasource`` about the
 layout of our data.  We specify the location of the data, the subject
 sub-directories and a dictionary that maps each run to a mnemonic (or
 field) for the run type (``struct`` or ``func``).  These fields become
 the output fields of the ``datasource`` node in the pipeline.
-
-In the example below, run 'f3' is of type 'func' and gets mapped to a
-nifti filename through a template '%s.nii'. So 'f3' would become
-'f3.nii'.
-
 """
 
 # Specify the location of the data downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/face_rep_SPM5.html
@@ -265,8 +293,12 @@ necessary to generate an SPM design matrix.
 """
 
 from nipype.interfaces.base import Bunch
-from scipy.io.matlab import loadmat
 
+"""We're importing the onset times from a mat file (found on
+http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/face_rep_SPM5.html
+"""
+
+from scipy.io.matlab import loadmat
 mat = loadmat(os.path.join(data_dir, "sots.mat"))
 sot = mat['sot'][0]
 itemlag = mat['itemlag'][0]
@@ -277,23 +309,6 @@ subjectinfo = [Bunch(conditions=['N1', 'N2', 'F1', 'F2'],
                             amplitudes=None,
                             tmod=None,
                             pmod=None,
-                            regressor_names=None,
-                            regressors=None)]
-
-#TODO fix the parametric one
-subjectinfo_param = [Bunch(conditions=['N1', 'N2', 'F1', 'F2'],
-                            onsets=[sot[0], sot[1], sot[2], sot[3]],
-                            durations=[[0], [0], [0], [0]],
-                            amplitudes=None,
-                            tmod=None,
-                            pmod=[None,
-                                  Bunch(name=['Lag'],
-                                        param=itemlag[1].tolist(),
-                                        poly=[2]),
-                                  None,
-                                  Bunch(name=['Lag'],
-                                        param=itemlag[3].tolist(),
-                                        poly=[2])],
                             regressor_names=None,
                             regressors=None)]
 
@@ -325,14 +340,8 @@ contf3 = ['main effect Rep', 'F', [rep1, rep2, rep3]]
 contf4 = ['interaction: Fam x Rep', 'F', [int1, int2, int3]]
 contrasts = [cond1, cond2, cond3, fam1, fam2, fam3, rep1, rep2, rep3, int1, int2, int3, contf1, contf2,contf3,contf4]
 
-
+"""Setting up nodes inputs
 """
-contrasts for parametric model
-"""
-cont1 = ('Famous_lag1','T', ['F2xLag^1'],[1])
-cont2 = ('Famous_lag2','T', ['F2xLag^2'],[1])
-fcont1 = ('Famous Lag', 'F', [cont1, cont2])
-paramcontrasts = [cont1, cont2, fcont1]
 
 num_slices = 24
 TR = 2.
@@ -361,8 +370,9 @@ l1designref.bases = {'hrf':{'derivs': [1,1]}}
 
 """
 The following lines automatically inform SPM to create a default set of
-contrats. 
+contrats for a factorial design. 
 """
+
 #l1designref.factor_info = [dict(name = 'Fame', levels = 2),
 #                           dict(name = 'Rep', levels = 2)]
 
@@ -370,21 +380,51 @@ l1pipeline.inputs.analysis.modelspec.subject_info = subjectinfo
 l1pipeline.inputs.analysis.contrastestimate.contrasts = contrasts
 l1pipeline.inputs.analysis.threshold.contrast_index = 1
 
+"""
+Use derivative estimates in the non-parametric model
+"""
+
+l1pipeline.inputs.analysis.contrastestimate.ignore_derivs = False
+
+"""
+Setting up parametricvariation of the model
+"""
+
+subjectinfo_param = [Bunch(conditions=['N1', 'N2', 'F1', 'F2'],
+                            onsets=[sot[0], sot[1], sot[2], sot[3]],
+                            durations=[[0], [0], [0], [0]],
+                            amplitudes=None,
+                            tmod=None,
+                            pmod=[None,
+                                  Bunch(name=['Lag'],
+                                        param=itemlag[1].tolist(),
+                                        poly=[2]),
+                                  None,
+                                  Bunch(name=['Lag'],
+                                        param=itemlag[3].tolist(),
+                                        poly=[2])],
+                            regressor_names=None,
+                            regressors=None)]
+
+cont1 = ('Famous_lag1','T', ['F2xLag^1'],[1])
+cont2 = ('Famous_lag2','T', ['F2xLag^2'],[1])
+fcont1 = ('Famous Lag', 'F', [cont1, cont2])
+paramcontrasts = [cont1, cont2, fcont1]
+
 paramanalysis = l1analysis.clone(name='paramanalysis')
-l1pipeline.connect([(preproc, paramanalysis, [('realign.realignment_parameters',
-                                               'modelspec.realignment_parameters'),
-                                              (('smooth.smoothed_files', makelist),
-                                               'modelspec.functional_runs')])
-                  ])
 
 paramanalysis.inputs.level1design.bases = {'hrf':{'derivs': [0,0]}}
 paramanalysis.inputs.modelspec.subject_info = subjectinfo_param
 paramanalysis.inputs.contrastestimate.contrasts = paramcontrasts
 
-"""
-Use derivative estimates in the non-parametric model
-"""
-l1pipeline.inputs.analysis.contrastestimate.ignore_derivs = False
+l1pipeline.connect([(preproc, paramanalysis, [('realign.realignment_parameters',
+                                            'modelspec.realignment_parameters')])])
+if merge_to_4d:
+    l1pipeline.connect([(preproc, paramanalysis, [('smooth.smoothed_files',
+                                                'modelspec.functional_runs')])])
+else:
+    l1pipeline.connect([(preproc, paramanalysis, [(('smooth.smoothed_files',makelist),
+                                                'modelspec.functional_runs')])])
                  
 """
 Setup the pipeline
@@ -413,11 +453,14 @@ level1 = pe.Workflow(name="level1")
 level1.base_dir = os.path.abspath('spm_face_tutorial/workingdir')
 
 level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                (datasource,l1pipeline,[('func','preproc.realign.in_files'),
-                                        ('struct', 'preproc.coregister.source'),
+                (datasource,l1pipeline,[('struct', 'preproc.coregister.source'),
                                         ('struct', 'preproc.segment.data')]),
                 (infosource,l1pipeline,[('subject_id','analysis.modelspec.subject_id')]),
                 ])
+if merge_to_4d:
+    level1.connect([(datasource,l1pipeline,[('func','preproc.merge.in_files')])])
+else:
+    level1.connect([(datasource,l1pipeline,[('func','preproc.realign.in_files')])])
 
 
 """
