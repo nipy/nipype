@@ -26,7 +26,7 @@ from nipype.utils.misc import is_container
 from nipype.interfaces.base import Interface
 from enthought.traits.trait_errors import TraitError
 
-def trim(docstring):
+def trim(docstring, marker):
     if not docstring:
         return ''
     # Convert tabs to spaces (following the normal Python rules)
@@ -42,6 +42,10 @@ def trim(docstring):
     trimmed = [lines[0].strip()]
     if indent < sys.maxint:
         for line in lines[1:]:
+            # replace existing REST marker with doc level marker
+            stripped = line.lstrip().strip().rstrip()
+            if stripped and all([s==stripped[0] for s in stripped]):
+                line = line.replace(stripped[0], marker)
             trimmed.append(line[indent:].rstrip())
     # Strip off trailing and leading blank lines:
     while trimmed and not trimmed[-1]:
@@ -282,7 +286,7 @@ class InterfaceHelpWriter(object):
                 classinst = sys.modules[uri].__dict__[c]()
             except:
                 continue
-            helpstr = trim(classinst.__doc__) + "\n\n"
+            helpstr = trim(classinst.__doc__, self.rst_section_levels[3]) + "\n\n"
             print 'Generating inputs/outputs doc for:', uri, \
                 classinst.__class__.__name__
             if hasattr(classinst, 'inputs'):
@@ -302,12 +306,16 @@ class InterfaceHelpWriter(object):
                 try:
                     setattr(classinst.inputs,i, None)
                 except TraitError, excp:
-                    fieldstr += " (%s) "%excp.info
+                    fieldstr += " : (%s)\n\t"%excp.info
                     
                 try:
-                    fieldstr += ' : ' + getattr(v, 'desc')
+                    fieldstr += '\t' + getattr(v, 'desc')
                 except:
-                    fieldstr += ' : Unknown'
+                    fieldstr += '\tUnknown'
+                if getattr(v,'xor'):
+                    fieldstr += '\n\t\texclusive: %s'%','.join(getattr(v,'xor'))
+                if getattr(v,'requires'):
+                    fieldstr += '\n\t\trequires: %s'%','.join(getattr(v,'requires'))
                 if getattr(v, 'mandatory'):
                     if not mandhelpstr:
                         mandhelpstr = ['[Mandatory]']
@@ -336,12 +344,12 @@ class InterfaceHelpWriter(object):
                 try:
                     setattr(classinst._outputs(),i, None)
                 except TraitError, excp:
-                    fieldstr += " (%s) "%excp.info
+                    fieldstr += " : (%s)\n\t"%excp.info
                     
                 try:
-                    fieldstr += ' : ' + getattr(v, 'desc')
+                    fieldstr += '\t' + getattr(v, 'desc')
                 except:
-                    fieldstr += ' : Unknown'
+                    fieldstr += '\tUnknown'
                 outstr += [fieldstr]
             if outstr:
                 if not helpstr:
