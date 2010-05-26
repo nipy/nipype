@@ -343,8 +343,9 @@ class Workflow(WorkflowBase):
         graph2use = 'orig', 'flat', 'exec'
         """
         graph = self._graph
-        if graph2use in ['flat', 'exec'] and self._flatgraph is None:
-            self._create_flat_graph()
+        if graph2use in ['flat', 'exec']:
+            if self._flatgraph is None:
+                self._create_flat_graph()
             graph = self._flatgraph
         if graph2use == 'exec':
             graph = self._execgraph
