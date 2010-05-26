@@ -149,7 +149,7 @@ class BET(FSLCommand):
     
 class FASTInputSpec(FSLCommandInputSpec):
     """ Defines inputs (trait classes) for FAST """
-    in_files = InputMultiPath(File(exists=True),
+    in_files = InputMultiPath(File(exists=True), copyfile=False,
                           desc = 'image, or multi-channel set of images, ' \
                               'to be segmented',
                           argstr='%s', position=-1, mandatory=True)
@@ -264,28 +264,28 @@ class FAST(FSLCommand):
 
         outputs['tissue_class_map'] = self._gen_fname(basefile,
                                                       suffix = '_seg')
+        outputs['tissue_class_files'] = []
         for  i in range(nclasses):
             outputs['tissue_class_files'].append(self._gen_fname(basefile,
                                                                  suffix = '_seg_%d'%(i)))
         if isdefined(self.inputs.output_biascorrected):
+            outputs['restored_image'] = []
             for val,f in enumerate(self.inputs.in_files):
                 outputs['restored_image'].append(self._gen_fname(f,
                                                                  suffix = '_restore_%d'%(val)))
         outputs['mixeltype'] = self._gen_fname(basefile, suffix = '_mixeltype')
         if not self.inputs.no_pve:
             outputs['partial_volume_map'] = self._gen_fname(basefile, suffix = '_pveseg')
+            outputs['partial_volume_files'] = []
             for i in range(nclasses):
                 outputs['partial_volume_files'].append(self._gen_fname(basefile,
                                                                        suffix='_pve_%d'%(i)))
         if self.inputs.output_biasfield:
+            outputs['bias_field'] = []
             for val,f in enumerate(self.inputs.in_files):
                 outputs['bias_field'].append(self._gen_fname(basefile, suffix='_bias_%d'%val))
         #if self.inputs.probability_maps:
-            
         return outputs 
-
-
-   
        
 class FLIRTInputSpec(FSLCommandInputSpec):
     in_file = File(exists = True, argstr = '-in %s', mandatory = True,
@@ -302,8 +302,8 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                      desc = 'output affine matrix in 4x4 asciii format',
                      genfile = True, position = 3)
     in_matrix_file = File(argstr = '-init %s', desc = 'input 4x4 affine matrix')
-    apply_xfm = traits.Bool(argstr = '-applyxfm', requires=['in_matrix'],
-                     desc='apply transformation supplied by in_matrix')
+    apply_xfm = traits.Bool(argstr = '-applyxfm', requires=['in_matrix_file'],
+                     desc='apply transformation supplied by in_matrix_file')
     datatype = traits.Enum('char', 'short', 'int', 'float', 'double',
                            argstr = '-datatype %s',
                            desc = 'force output data type')
@@ -377,8 +377,8 @@ class FLIRTInputSpec(FSLCommandInputSpec):
 class FLIRTOutputSpec(TraitedSpec):
     out_file = File(exists = True,
                    desc = 'path/name of registered file (if generated)')
-    out_matrix = File(exists = True,
-                     desc = 'path/name of calculated affine transform ' \
+    out_matrix_file = File(exists = True,
+                           desc = 'path/name of calculated affine transform ' \
                          '(if generated)')
 
 class FLIRT(FSLCommand):
@@ -412,17 +412,17 @@ class FLIRT(FSLCommand):
         if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                  suffix = '_flirt')
-        outputs['out_matrix'] = self.inputs.out_matrix
+        outputs['out_matrix_file'] = self.inputs.out_matrix_file
         # Generate an out_matrix file if one is not provided
-        if not isdefined(outputs['out_matrix']) and \
+        if not isdefined(outputs['out_matrix_file']) and \
                 isdefined(self.inputs.in_file):
-            outputs['out_matrix'] = self._gen_fname(self.inputs.in_file,
+            outputs['out_matrix_file'] = self._gen_fname(self.inputs.in_file,
                                                    suffix = '_flirt.mat',
                                                    change_ext = False)
         return outputs
 
     def _gen_filename(self, name):
-        if name in ('out_file', 'out_matrix'):
+        if name in ('out_file', 'out_matrix_file'):
             return self._list_outputs()[name]
         else:
             return None
