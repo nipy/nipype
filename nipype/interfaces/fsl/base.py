@@ -157,7 +157,7 @@ class FSLCommand(CommandLine):
         else:
             raise AttributeError('Invalid FSL output_type: %s' % output_type)
 
-    def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True):
+    def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True, ext=None):
         """Generate a filename based on the given parameters.
 
         The filename will take the form: cwd/basename<suffix><ext>.
@@ -189,7 +189,8 @@ class FSLCommand(CommandLine):
             raise ValueError(msg)
         if cwd is None:
             cwd = os.getcwd()
-        ext = Info.output_type_to_ext(self.inputs.output_type)
+        if ext is None:
+            ext = Info.output_type_to_ext(self.inputs.output_type)
         if change_ext:
             if suffix:
                 suffix = ''.join((suffix, ext))
