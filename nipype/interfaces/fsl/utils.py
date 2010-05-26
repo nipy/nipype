@@ -36,7 +36,7 @@ class ImageMeantsInputSpec(FSLCommandInputSpec):
                           argstr='--showall')
     eig = traits.Bool(desc='calculate Eigenvariate(s) instead of mean (output will have 0 mean)',
                       argstr='--eig')
-    order = traits.Int(1,desc='select number of Eigenvariates',argstr='--order %d',usedefault=True)
+    order = traits.Int(1,desc='select number of Eigenvariates',argstr='--order=%d',usedefault=True)
     nobin = traits.Bool(desc='do not binarise the mask for calculation of Eigenvariates',
                         argstr='--no_bin')
     transpose = traits.Bool(desc='output results in transpose format (one row per voxel/mean)',
@@ -63,7 +63,9 @@ class ImageMeants(FSLCommand):
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                              suffix = '_ts')
+                                                  suffix = '_ts',
+                                                  ext='.txt',
+                                                  change_ext=True)
         return outputs
 
     def _gen_filename(self, name):
