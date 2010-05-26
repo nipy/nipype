@@ -765,3 +765,47 @@ end
         outputs['thresholded_map'] = os.path.abspath('thresholded_map.img')
         return outputs
 
+
+class FactorialDesignInputSpec(SPMCommandInputSpec):
+    spm_mat_dir = Directory(exists=True, field='dir', desc='directory to store SPM.mat file (opt)')
+    covariates = traits.List(traits.Dict(key_trait=traits.Enum('vectors', 'names',
+                                                               'interactions', 'centering')),
+                             field='cov',
+                             desc='dict of covariates {vectors, names, interactions, centering}')
+    threshold_mask_none = traits.Bool(field='masking.tm.tm_none',
+                                      xor=['threshold_mask_absolute', 'threshold_mask_relative'],
+                                      desc='do not use threshold masking')
+    threshold_mask_absolute = traits.Float(field='masking.tm.tma.athresh',
+                                      xor=['threshold_mask_none', 'threshold_mask_relative'],
+                                      desc='use an absolute threshold')
+    threshold_mask_absolute = traits.Float(field='masking.tm.tmr.rthresh',
+                                      xor=['threshold_mask_absolute', 'threshold_mask_none'],
+                                      desc='threshold using a proportion of the global value')
+    use_implicit_threshold = traits.Bool(field='masking.im',
+                                         desc='use implicit mask NaNs or zeros to threshold')
+    explicit_mask_file = File(field='masking.em', #requires cell
+                              desc='use an implicit mask file to threshold')
+    global_calc_omit = traits.Bool(field='globalc.g_omit',
+                                   xor =['global_calc_mean', 'global_calc_values'],
+                                   desc='omit global calculation')
+    global_calc_mean = traits.Bool(field='globalc.g_mean',
+                                   xor =['global_calc_omit', 'global_calc_values'],
+                                   desc='use mean for global calculation')
+    global_calc_values = traits.List(traits.Float, field='globalc.g_user.global_uval',
+                              xor =['global_calc_mean', 'global_calc_omit'],
+                              desc='omit global calculation')
+    no_grand_mean_scaling = traits.Bool(field='globalm.gmsca.gmsca_no',
+                                    desc='do not perform grand mean scaling')
+    global_normalization = traits.Enum(1,2,3,field='globalm.glonorm',
+                                    desc='global normalization None-1, Proportional-2, ANCOVA-3')
+
+class FactorialDesignOutputSpec(TraitedSpec):
+    spm_mat_file = File(exists=True, desc='SPM mat file')
+    con_images = OutputMultiPath(File(exists=True), desc='contrast images from a t-contrast')
+    spmT_images = OutputMultiPath(File(exists=True), desc='stat images from a t-contrast')
+    ess_images = OutputMultiPath(File(exists=True), desc='contrast images from an F-contrast')
+    spmF_images = OutputMultiPath(File(exists=True), desc='stat images from an F-contrast')
+
+class OneSampleTTestDesignInputSpec(FactorialDesignInputSpec):
+    in_files = InputMultiPath(File(exists=True), field='des.t1',
+                              desc='input files')
