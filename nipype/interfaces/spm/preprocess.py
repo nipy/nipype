@@ -171,7 +171,7 @@ class Realign(SPMCommand):
         """
         if opt == 'in_files':
             return scans_for_fnames(val,
-                                    keep4d=True,
+                                    keep4d=False,
                                     separate_sessions=True)
         if opt == 'register_to_mean': # XX check if this is necessary
             return int(val)
