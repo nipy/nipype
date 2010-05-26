@@ -284,7 +284,7 @@ l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                     (modelfit, bandPassFilterData, [('modelestimate.residual4d', 'in_file')]),
                     ])
 
-l1pipe1line.run()
+l1pipeline.run()
 l1pipeline.write_graph(graph2use='flat')
 
 """
