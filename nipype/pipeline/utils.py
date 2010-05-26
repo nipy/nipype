@@ -263,6 +263,8 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
         logger.debug('using input graph')
     if base_dir is None:
         base_dir = os.getcwd()
+    if not os.path.exists(base_dir):
+        os.makedirs(base_dir)
     outfname = fname_presuffix(dotfilename,
                                suffix='_detailed.dot',
                                use_ext=False,
