@@ -330,7 +330,7 @@ class SPMCommand(BaseInterface):
         end
         fprintf('SPM version: %s\\n',spm('ver'));
         fprintf('SPM path: %s\\n',which('spm'));
-        spm_defaults;
+        spm('Defaults','fMRI');
                   
         if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');end\n
         """
