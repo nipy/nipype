@@ -70,20 +70,6 @@ This is a generic preprocessing workflow that can be used by different analyses
 
 preproc = pe.Workflow(name='preproc')
 
-"""We strongly encourage to use 4D files insteead of series of 3D for fMRI analyses 
-for many reasons (cleanness and saving and filesystem inodes are among them). However, 
-the the workflow presented in the SPM8 manual which this tutorial is based on 
-uses 3D files. Therefore we leave converting to 4D as an option. We are using `merge_to_4d` 
-variable, because switching between 3d and 4d requires some additional steps (explauned later on).
-Use :class:`nipype.interfaces.fsl.Merge` to merge a series of 3D files along the time 
-dimension creating a 4d file.
-"""
-
-merge_to_4d = False
-
-if merge_to_4d:
-    merge = pe.Node(interface=fsl.Merge(), name="merge")
-    merge.inputs.dimension="t"
 
 """Use :class:`nipype.interfaces.spm.Realign` for motion correction
 and register all images to the mean image.
@@ -145,9 +131,6 @@ def get_vox_dims(volume):
 to use 4D. Also `get_vox_dims` function is passed along the input volume of normalise to set the optimal
 voxel sizes.
 """
-
-if merge_to_4d:
-    preproc.connect([(merge, realign,[('merged_file', 'in_files')])])
 
 preproc.connect([(realign,coregister,[('mean_image', 'target')]),
                  (coregister, segment,[('coregistered_source','data')]),
@@ -222,14 +205,10 @@ Every run can be a 4D file or a list of 3D files. Therefore for 3D analysis we n
 to make one we need a helper function.
 """
   
-if merge_to_4d:
-    l1pipeline.connect([(preproc, l1analysis, [('smooth.smoothed_files',
-                                                'modelspec.functional_runs')])])
-else:
-    def makelist(item):
-        return [item]
-    l1pipeline.connect([(preproc, l1analysis, [(('smooth.smoothed_files',makelist),
-                                                'modelspec.functional_runs')])])
+def makelist(item):
+    return [item]
+l1pipeline.connect([(preproc, l1analysis, [(('smooth.smoothed_files',makelist),
+                                            'modelspec.functional_runs')])])
 
 
 """
@@ -420,12 +399,8 @@ paramanalysis.inputs.contrastestimate.contrasts = paramcontrasts
 paramanalysis.inputs.contrastestimate.ignore_derivs = True
 
 l1pipeline.connect([(preproc, paramanalysis, [('realign.realignment_parameters',
-                                            'modelspec.realignment_parameters')])])
-if merge_to_4d:
-    l1pipeline.connect([(preproc, paramanalysis, [('smooth.smoothed_files',
-                                                'modelspec.functional_runs')])])
-else:
-    l1pipeline.connect([(preproc, paramanalysis, [(('smooth.smoothed_files',makelist),
+                                            'modelspec.realignment_parameters'),
+                                            (('smooth.smoothed_files',makelist),
                                                 'modelspec.functional_runs')])])
                  
 """
@@ -455,14 +430,11 @@ level1 = pe.Workflow(name="level1")
 level1.base_dir = os.path.abspath('spm_face_tutorial/workingdir')
 
 level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                (datasource,l1pipeline,[('struct', 'preproc.coregister.source')]),
+                (datasource,l1pipeline,[('struct', 'preproc.coregister.source'),
+                                        ('func','preproc.realign.in_files')]),
                 (infosource,l1pipeline,[('subject_id','analysis.modelspec.subject_id'),
                                         ('subject_id','paramanalysis.modelspec.subject_id')]),
                 ])
-if merge_to_4d:
-    level1.connect([(datasource,l1pipeline,[('func','preproc.merge.in_files')])])
-else:
-    level1.connect([(datasource,l1pipeline,[('func','preproc.realign.in_files')])])
 
 
 """
