@@ -321,19 +321,19 @@ in the `subjectinfo` function described above.
 """
 
 cond1 = ('positive effect of condition','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[1,1,1,1])
-cond2 = ('positive effect of condition_ddisp','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,1,1,1])
-cond3 = ('positive effect of condition_dtemp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,1,1,1])
+cond2 = ('positive effect of condition_dtemo','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,1,1,1])
+cond3 = ('positive effect of condition_ddisp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,1,1,1])
 # non-famous > famous
 fam1 = ('positive effect of Fame','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[1,1,-1,-1])
-fam2 = ('positive effect of Fame_ddisp','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,1,-1,-1])
-fam3 = ('positive effect of Fame_dtemp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,1,-1,-1])
+fam2 = ('positive effect of Fame_dtemp','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,1,-1,-1])
+fam3 = ('positive effect of Fame_ddisp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,1,-1,-1])
 # rep1 > rep2
 rep1 = ('positive effect of Rep','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[1,-1,1,-1])
-rep2 = ('positive effect of Rep_ddisp','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,-1,1,-1])
-rep3 = ('positive effect of Rep_dtemp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,-1,1,-1])
+rep2 = ('positive effect of Rep_dtemp','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,-1,1,-1])
+rep3 = ('positive effect of Rep_ddisp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,-1,1,-1])
 int1 = ('positive interaction of Fame x Rep','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[-1,-1,-1,1])
-int2 = ('positive interaction of Fame x Rep_ddisp','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,-1,-1,1])
-int3 = ('positive interaction of Fame x Rep_dtemp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,-1,-1,1])
+int2 = ('positive interaction of Fame x Rep_dtemp','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,-1,-1,1])
+int3 = ('positive interaction of Fame x Rep_ddisp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,-1,-1,1])
 
 contf1 = ['average effect condition','F', [cond1, cond2, cond3]]
 contf2 = ['main effect Fam', 'F', [fam1, fam2, fam3]]
@@ -417,6 +417,7 @@ paramanalysis = l1analysis.clone(name='paramanalysis')
 paramanalysis.inputs.level1design.bases = {'hrf':{'derivs': [0,0]}}
 paramanalysis.inputs.modelspec.subject_info = subjectinfo_param
 paramanalysis.inputs.contrastestimate.contrasts = paramcontrasts
+paramanalysis.inputs.contrastestimate.ignore_derivs = True
 
 l1pipeline.connect([(preproc, paramanalysis, [('realign.realignment_parameters',
                                             'modelspec.realignment_parameters')])])
@@ -455,7 +456,8 @@ level1.base_dir = os.path.abspath('spm_face_tutorial/workingdir')
 
 level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                 (datasource,l1pipeline,[('struct', 'preproc.coregister.source')]),
-                (infosource,l1pipeline,[('subject_id','analysis.modelspec.subject_id')]),
+                (infosource,l1pipeline,[('subject_id','analysis.modelspec.subject_id'),
+                                        ('subject_id','paramanalysis.modelspec.subject_id')]),
                 ])
 if merge_to_4d:
     level1.connect([(datasource,l1pipeline,[('func','preproc.merge.in_files')])])
