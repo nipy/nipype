@@ -23,7 +23,7 @@ from nipype.utils.filemanip import filename_to_list
 from nipype.interfaces.spm import scans_for_fnames
 
 class SpecifyModelInputSpec(TraitedSpec):
-    subject_id = traits.Either(traits.Str(),traits.Int(),
+    subject_id = traits.Either(traits.Str(),traits.Int(),mandatory=True,
         desc ="Subject identifier used as a parameter to the subject_info_func.")
     subject_info = traits.List(mandatory=True,
                           desc= "List subject specific condition information")
@@ -156,10 +156,10 @@ class SpecifyModel(BaseInterface):
         if (input_units == 'secs') and (output_units == 'scans'):
             self._scalefactor = 1./self.inputs.time_repetition
 
-        if self._scalefactor > 1:
-            timelist = [self._scalefactor*t for t in timelist]
-        else:
-            timelist = [round(self._scalefactor*t) for t in timelist]
+        #if self._scalefactor > 1:
+        timelist = [np.max([0.,self._scalefactor*t]) for t in timelist]
+        #else:
+        #    timelist = [round(self._scalefactor*t) for t in timelist]
             
         return timelist
     
