@@ -245,9 +245,7 @@ class To3d(AFNICommand):
 class ThreedrefitInputSpec(AFNITraitedSpec):
         infile = File(exists=True,
                       desc = 'input file to 3drefit',
-                      argstr='%s', position=0, mandatory=True)
-        outfile = File(desc = 'name of output skull stripped image',
-                       argstr='%s', position=-1, genfile=True)
+                      argstr='%s', position=-1, mandatory=True)
         deoblique = traits.Bool(desc = 'replace current transformation matrix with cardinal matrix',
                        argstr='-deoblique')
         xorigin = traits.Str(desc = 'x distance for edge voxel offset',
@@ -258,11 +256,17 @@ class ThreedrefitInputSpec(AFNITraitedSpec):
                            argstr='-yorigin %s')
 
 class ThreedrefitOutputSpec(TraitedSpec):
-    pass
+    out_file = File(exists = True,
+                    desc = 'Same file as original infile' \
+                    'with modified matrix' )
 
 
 class Threedrefit(AFNICommand):
     """ Use 3drefit for altering header info.
+        
+        NOTES
+        -----
+        The original file is returned but it is CHANGED
     """
 
     _cmd = '3drefit'
@@ -271,103 +275,107 @@ class Threedrefit(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        orignames = self.inputs.infiles
-        if isdefined(self.inputs.out_basename):
-            basepth, basename = os.path.split(self.inputs.out_basename)
+        outputs['out_file'] = self.inputs.infile
+        return outputs
+
+#class Threedrefit(AFNICommand):
+    #"""Fix errors in AFNI header resulting from using to3d command.
+
+    #For complete details, see the `3drefit Documentation. 
+    #<http://afni.nimh.nih.gov/pub/dist/doc/program_help/3drefit.html>`_
+    #"""
+
+    #_cmd = '3drefit'
+    #input_spec = ThreedrefitInputSpec
+    #output_spec = ThreedrefitOutputSpec
+
+    #def _run_interface(self, runtime):
+
+    #def _list_outputs(self):
+
+    #def _gen_filename(self,name):
+
+
+
+
+
+    #@property
+    #def cmd(self):
+        #"""Base command for Threedrefit"""
+        #return '3drefit'
+
+    #def inputs_help(self):
+        #doc = """
+        #"""
+        #print doc
+
+    #def _populate_inputs(self):
+        #"""Initialize the inputs attribute."""
+        #self.inputs = Bunch(deoblique=None,
+                            #xorigin=None,
+                            #yorigin=None,
+                            #zorigin=None,
+                            #infile=None)
+
+    #def _parseinputs(self):
+        #"""Parse valid input options for Threedrefit command.
+
+        #Ignore options set to None.
+
+        #"""
+
+        #out_inputs = []
+        #inputs = {}
+        #[inputs.update({k:v}) for k, v in self.inputs.items() \
+             #if v is not None]
+
+        #if inputs.has_key('deoblique'):
+            #val = inputs.pop('deoblique')
+            #out_inputs.append('-deoblique')
+        #if inputs.has_key('xorigin'):
+            #val = inputs.pop('xorigin')
+            #out_inputs.append('-xorigin %s' % val)
+        #if inputs.has_key('yorigin'):
+            #val = inputs.pop('yorigin')
+            #out_inputs.append('-yorigin %s' % val)
+        #if inputs.has_key('zorigin'):
+            #val = inputs.pop('zorigin')
+            #out_inputs.append('-zorigin %s' % val)
+        #if inputs.has_key('infile'):
+            #val = inputs.pop('infile')
+            #out_inputs.append('%s' % val)
+
+        #if len(inputs) > 0:
+            #msg = '%s: unsupported options: %s' % (
+                #self.__class__.__name__, inputs.keys())
+            #raise AttributeError(msg)
+
+        #return out_inputs
+
+    #def run(self, infile=None, **inputs):
+        #"""Execute the command.
+
+        #Parameters
+        #----------
+        #infile : filename
+            #File whose header file will be updated by 3drefit
+        #inputs : dict
+            #Dictionary of any additional flags to send to 3drefit
         
-        for item in self.inputs.infiles:
-            print item
-        outputs['refit_header'] = 'FIX'
-        if not isdefined(outputs['outfile']) and isdefined(self.inputs.infile):
-            outputs['outfile'] = self._gen_fname(self.inputs.infile,
-                                              suffix = '-Refit')
-        return outputs 
+        #Returns
+        #-------
+        #results : InterfaceResult
+            #A `InterfaceResult` object with a copy of self in `interface`
 
-
-class Threedrefit(AFNICommand):
-    """Fix errors in AFNI header resulting from using to3d command.
-
-    For complete details, see the `3drefit Documentation. 
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3drefit.html>`_
-    """
-
-    @property
-    def cmd(self):
-        """Base command for Threedrefit"""
-        return '3drefit'
-
-    def inputs_help(self):
-        doc = """
-        """
-        print doc
-
-    def _populate_inputs(self):
-        """Initialize the inputs attribute."""
-        self.inputs = Bunch(deoblique=None,
-                            xorigin=None,
-                            yorigin=None,
-                            zorigin=None,
-                            infile=None)
-
-    def _parseinputs(self):
-        """Parse valid input options for Threedrefit command.
-
-        Ignore options set to None.
-
-        """
-
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.items() \
-             if v is not None]
-
-        if inputs.has_key('deoblique'):
-            val = inputs.pop('deoblique')
-            out_inputs.append('-deoblique')
-        if inputs.has_key('xorigin'):
-            val = inputs.pop('xorigin')
-            out_inputs.append('-xorigin %s' % val)
-        if inputs.has_key('yorigin'):
-            val = inputs.pop('yorigin')
-            out_inputs.append('-yorigin %s' % val)
-        if inputs.has_key('zorigin'):
-            val = inputs.pop('zorigin')
-            out_inputs.append('-zorigin %s' % val)
-        if inputs.has_key('infile'):
-            val = inputs.pop('infile')
-            out_inputs.append('%s' % val)
-
-        if len(inputs) > 0:
-            msg = '%s: unsupported options: %s' % (
-                self.__class__.__name__, inputs.keys())
-            raise AttributeError(msg)
-
-        return out_inputs
-
-    def run(self, infile=None, **inputs):
-        """Execute the command.
-
-        Parameters
-        ----------
-        infile : filename
-            File whose header file will be updated by 3drefit
-        inputs : dict
-            Dictionary of any additional flags to send to 3drefit
-        
-        Returns
-        -------
-        results : InterfaceResult
-            A `InterfaceResult` object with a copy of self in `interface`
-
-        """
-        if infile:
-            self.inputs.infile = infile
-        if not self.inputs.infile:
-            raise AttributeError('Threedrefit requires an infile.')
-        self.inputs.update(**inputs)
-        results = self._runner()
-        # XXX implement aggregate_outputs
-        return results
+        #"""
+        #if infile:
+            #self.inputs.infile = infile
+        #if not self.inputs.infile:
+            #raise AttributeError('Threedrefit requires an infile.')
+        #self.inputs.update(**inputs)
+        #results = self._runner()
+        ## XXX implement aggregate_outputs
+        #return results
 
 
 class Threedresample(AFNICommand):

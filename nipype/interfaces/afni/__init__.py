@@ -5,8 +5,13 @@ was written to work with AFNI version 4.1.4.
 Top-level namespace for afni.  Perhaps should just make afni a package!
 """
 
+"""XXX: This is an temporary warning for the 0.3 release to let users know that the afni interface is under construction and unstable."""
+import warnings
+warnings.warn('AFNI interface unstable.  Use at own risk.')
+
+
 from nipype.interfaces.afni.base import Info, AFNICommand, AFNITraitedSpec
-#from nipype.interfaces.afni.preprocess import (Fast, Flirt, ApplyXfm,
+from nipype.interfaces.afni.preprocess import (Threedrefit)
                                               #Bet, McFlirt, Fnirt, ApplyWarp)
 #from nipype.interfaces.afni.model import (Level1Design, Feat, FeatModel,
                                          #FilmGLS, FixedEffectsModel,
