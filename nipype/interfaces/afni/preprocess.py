@@ -255,7 +255,7 @@ class ThreedrefitInputSpec(AFNITraitedSpec):
         zorigin = traits.Str(desc = 'y distance for edge voxel offset',
                            argstr='-yorigin %s')
 
-class ThreedrefitOutputSpec(TraitedSpec):
+class ThreedrefitOutputSpec(AFNITraitedSpec):
     out_file = File(exists = True,
                     desc = 'Same file as original infile' \
                     'with modified matrix' )
@@ -378,6 +378,24 @@ class Threedrefit(AFNICommand):
         #return results
 
 
+class ThreedresampleInputSpec(AFNITraitedSpec):
+        infile = File(exists = True,
+                      desc = 'input file to 3dresample',
+                      argstr = '-inset %s',
+                      position = -1,
+                      mandatory = True)
+        outfile = File(desc = 'output file from 3dresample',
+                       argstr = '-prefix %s',
+                       position = -2,
+                       mandatory = True)
+        orientation = traits.Str(desc = 'new orientation code',
+                                 argstr = '-orient %s')
+
+
+class ThreedresampleOutputSpec(AFNITraitedSpec):
+        out_file = File(exists = True,
+                        desc = 'reoriented or resampled file')
+
 class Threedresample(AFNICommand):
     """Resample or reorient an image using AFNI 3dresample command.
 
@@ -385,89 +403,100 @@ class Threedresample(AFNICommand):
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dresample.html>`_
     """
 
-    @property
-    def cmd(self):
-        """Base command for Threedresample"""
-        return '3dresample'
+    _cmd = '3dresample'
+    input_spec = ThreedresampleInputSpec
+    output_spec = ThreedresampleOutputSpec
 
-    def inputs_help(self):
-        doc = """
-        """
-        print doc
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.outfile
+        return outputs
 
-    def _populate_inputs(self):
-        """Initialize the inputs attribute."""
 
-        self.inputs = Bunch(rsmode=None,
-                            orient=None,
-                            gridfile=None,
-                            outfile=None,
-                            infile=None)
 
-    def _parseinputs(self):
-        """Parse valid input options for Threedresample command.
+    #@property
+    #def cmd(self):
+        #"""Base command for Threedresample"""
+        #return '3dresample'
 
-        Ignore options set to None.
+    #def inputs_help(self):
+        #doc = """
+        #"""
+        #print doc
 
-        """
+    #def _populate_inputs(self):
+        #"""Initialize the inputs attribute."""
 
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.items() \
-             if v is not None]
+        #self.inputs = Bunch(rsmode=None,
+                            #orient=None,
+                            #gridfile=None,
+                            #outfile=None,
+                            #infile=None)
 
-        if inputs.has_key('rsmode'):
-            val = inputs.pop('rsmode')
-            out_inputs.append('-rmode %s' % val)
-        if inputs.has_key('orient'):
-            val = inputs.pop('orient')
-            out_inputs.append('-orient %s' % val)
-        if inputs.has_key('gridfile'):
-            val = inputs.pop('gridfile')
-            out_inputs.append('-master %s' % val)
-        if inputs.has_key('outfile'):
-            val = inputs.pop('outfile')
-            out_inputs.append('-prefix %s' % val)
-        if inputs.has_key('infile'):
-            val = inputs.pop('infile')
-            out_inputs.append('-inset %s' % val)
+    #def _parseinputs(self):
+        #"""Parse valid input options for Threedresample command.
 
-        if len(inputs) > 0:
-            msg = '%s: unsupported options: %s' % (
-                self.__class__.__name__, inputs.keys())
-            raise AttributeError(msg)
+        #Ignore options set to None.
 
-        return out_inputs
+        #"""
 
-    def run(self, infile=None, outfile=None, **inputs):
-        """Execute 3dresample.
+        #out_inputs = []
+        #inputs = {}
+        #[inputs.update({k:v}) for k, v in self.inputs.items() \
+             #if v is not None]
 
-        Parameters
-        ----------
-        infile : filename
-            File that we be resampled
-        outfile : filename
-            Output file name or prefix for output file name.
-        inputs : dict
-            Dictionary of any additional flags to send to 3dresample
+        #if inputs.has_key('rsmode'):
+            #val = inputs.pop('rsmode')
+            #out_inputs.append('-rmode %s' % val)
+        #if inputs.has_key('orient'):
+            #val = inputs.pop('orient')
+            #out_inputs.append('-orient %s' % val)
+        #if inputs.has_key('gridfile'):
+            #val = inputs.pop('gridfile')
+            #out_inputs.append('-master %s' % val)
+        #if inputs.has_key('outfile'):
+            #val = inputs.pop('outfile')
+            #out_inputs.append('-prefix %s' % val)
+        #if inputs.has_key('infile'):
+            #val = inputs.pop('infile')
+            #out_inputs.append('-inset %s' % val)
 
-        Returns
-        -------
-        results : InterfaceResult
-            A `InterfaceResult` object with a copy of self in `interface`
+        #if len(inputs) > 0:
+            #msg = '%s: unsupported options: %s' % (
+                #self.__class__.__name__, inputs.keys())
+            #raise AttributeError(msg)
 
-        """
-        if infile:
-            self.inputs.infile = infile
-        if outfile:
-            self.inputs.outfile = outfile
-        if not self.inputs.infile or not self.inputs.outfile:
-            msg = 'Threedresample requires an infile and an outfile.'
-            raise AttributeError(msg)
-        self.inputs.update(**inputs)
-        results = self._runner()
-        # XXX implement aggregate_outputs
-        return results
+        #return out_inputs
+
+    #def run(self, infile=None, outfile=None, **inputs):
+        #"""Execute 3dresample.
+
+        #Parameters
+        #----------
+        #infile : filename
+            #File that we be resampled
+        #outfile : filename
+            #Output file name or prefix for output file name.
+        #inputs : dict
+            #Dictionary of any additional flags to send to 3dresample
+
+        #Returns
+        #-------
+        #results : InterfaceResult
+            #A `InterfaceResult` object with a copy of self in `interface`
+
+        #"""
+        #if infile:
+            #self.inputs.infile = infile
+        #if outfile:
+            #self.inputs.outfile = outfile
+        #if not self.inputs.infile or not self.inputs.outfile:
+            #msg = 'Threedresample requires an infile and an outfile.'
+            #raise AttributeError(msg)
+        #self.inputs.update(**inputs)
+        #results = self._runner()
+        ## XXX implement aggregate_outputs
+        #return results
 
 
 class ThreedTstat(AFNICommand):
