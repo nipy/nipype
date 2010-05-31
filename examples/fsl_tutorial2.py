@@ -1,12 +1,11 @@
 """
-   A pipeline example that uses intergrates several interfaces to
-   perform a first and second level analysis on a two-subject data
-   set. 
-"""
+A workflow that uses fsl to perform a first level analysis on the nipype
+tutorial data set::
+
+python fsl_tutorial2.py
 
 
-"""
-1. Tell python where to find the appropriate functions.
+First tell python where to find the appropriate functions.
 """
 
 import nipype.interfaces.io as nio           # Data i/o 
@@ -16,13 +15,15 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model generation
 import os                                    # system functions
 
-#####################################################################
-# Preliminaries
 
 """
-1b. Confirm package dependencies are installed.  (This is only for the
-tutorial, rarely would you put this in your own code.)
+Preliminaries
+-------------
+
+Confirm package dependencies are installed.  (This is only for the tutorial,
+rarely would you put this in your own code.) 
 """
+
 from nipype.utils.misc import package_check
 
 package_check('numpy', '1.3', 'tutorial1')
@@ -31,22 +32,17 @@ package_check('networkx', '1.0', 'tutorial1')
 package_check('IPython', '0.10', 'tutorial1')
 
 """
-2. Setup any package specific configuration. The output file format
-   for FSL routines is being set to uncompressed NIFTI and a specific
-   version of matlab is being used. The uncompressed format is
-   required because SPM does not handle compressed NIFTI.
+Setup any package specific configuration. The output file format for FSL
+routines is being set to compressed NIFTI.
 """
 
-# Tell fsl to generate all output in compressed nifti format
-print fsl.Info.version()
 fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
-
 
 """
 Setting up workflows
 --------------------
 
-In this tutorial we will be setting up a hierarchical workflow for spm
+In this tutorial we will be setting up a hierarchical workflow for fsl
 analysis. This will demonstrate how pre-defined workflows can be setup
 and shared across users, projects and labs.
 
@@ -54,7 +50,8 @@ and shared across users, projects and labs.
 Setup preprocessing workflow
 ----------------------------
 
-This is a generic fsl preprocessing workflow that can be used by different analyses
+This is a generic fsl preprocessing workflow encompassing skull stripping,
+motion correction and smoothing operations.
 
 """
 
@@ -127,6 +124,7 @@ modelfit = pe.Workflow(name='modelfit')
    c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
    SPM-specific design information. 
 """
+
 modelspec = pe.Node(interface=model.SpecifyModel(),  name="modelspec")
 modelspec.inputs.concatenate_runs = False
 
@@ -134,12 +132,14 @@ modelspec.inputs.concatenate_runs = False
    d. Use :class:`nipype.interfaces.fsl.Level1Design` to generate a
    run specific fsf file for analysis
 """
+
 level1design = pe.Node(interface=fsl.Level1Design(), name="level1design")
 
 """
    e. Use :class:`nipype.interfaces.fsl.FEATModel` to generate a
    run specific mat file for use by FILMGLS
 """
+
 modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
                       iterfield = ['fsf_file'])
 
@@ -147,6 +147,7 @@ modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
    f. Use :class:`nipype.interfaces.fsl.FILMGLS` to estimate a model
    specified by a mat file and a functional run
 """
+
 modelestimate = pe.MapNode(interface=fsl.FILMGLS(), name='modelestimate',
                            iterfield = ['design_file','in_file'])
 
@@ -154,6 +155,7 @@ modelestimate = pe.MapNode(interface=fsl.FILMGLS(), name='modelestimate',
    f. Use :class:`nipype.interfaces.fsl.ContrastMgr` to generate contrast
    estimates 
 """
+
 conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
                          iterfield = ['tcon_file','stats_dir'])
 
@@ -193,6 +195,7 @@ level2model = pe.Node(interface=fsl.L2Model(),
 Use :class:`nipype.interfaces.fsl.FLAMEO` to estimate a second level
 model
 """
+
 flameo = pe.MapNode(interface=fsl.FLAMEO(run_mode='fe'), name="flameo",
                     iterfield=['cope_file','var_cope_file'])
 
@@ -292,6 +295,7 @@ datasource.inputs.template_args = info
 """
 Use the get_node function to retrieve an internal node by name.
 """
+
 smoothnode = firstlevel.get_node('preproc.smooth')
 assert(str(smoothnode)=='smooth')
 smoothnode.iterables = ('fwhm', [5,10])
@@ -312,6 +316,7 @@ firstlevel.inputs.preproc.highpass.op_string = '-bptf %d -1'%(hpcutoff/TR)
    examples of this function are available in the `doc/examples`
    folder. Note: Python knowledge required here.
 """
+
 from nipype.interfaces.base import Bunch
 from copy import deepcopy
 def subjectinfo(subject_id):
@@ -338,6 +343,7 @@ def subjectinfo(subject_id):
    those conditions]. The condition names must match the `names`
    listed in the `subjectinfo` function described above. 
 """
+
 cont1 = ['Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5]]
 cont2 = ['Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1]]
 cont3 = ['Task','F', [cont1, cont2]]
@@ -377,68 +383,6 @@ l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                                               ]),
                     ])
 
-'''
-
-
-
-
-
-##########################
-# Setup storage of results
-##########################
-
-datasink = pe.Node(interface=nio.DataSink(), name="datasink")
-# I'd like this one to actually be preproc, but for now, I don't want to change
-# the pipeline around because of data already being on S3
-datasink.inputs.base_directory = os.path.abspath('./fsl/l1output')
-
-#####################
-# Set up l1pipeline pype
-#####################
-
-l1pipeline = pe.Workflow(name= "level1")
-l1pipeline.base_dir = os.path.abspath('./fsl/workingdir')
-
-def pickfirst(files):
-    return files[0]
-
-l1pipeline.connect([# preprocessing in native space
-                    (infosource, datasource, [('subject_id', 'subject_id')]),
-                 (datasource, skullstrip, [('struct','in_file')]),
-                 (datasource, motion_correct, [('func', 'in_file')]),
-                 (datasource, extract_ref, [(('func', pickfirst), 'in_file')]),
-                 (extract_ref, motion_correct,[('out_file', 'reffile')]),
-                 (motion_correct, func_skullstrip, [('out_file', 'in_file')]),
-                 # Smooth :\
-                 (func_skullstrip, smoothing, [('out_file', 'in_file')]),
-                 #(smoothing,inorm,[('smoothedimage','in_file')]),
-                 #(inorm,hpfilter,[('out_file','in_file')]),
-                 (smoothing,hpfilter,[('smoothedimage','in_file')]),
-                 # Model design
-                 (hpfilter,modelspec,[('out_file','functional_runs')]),
-                 (infosource,modelspec,[('subject_id','subject_id'),
-                                        (('subject_id',subjectinfo),'subject_info')]),
-                 (motion_correct,modelspec,[('parfile','realignment_parameters')]),
-                 (modelspec,level1design,[('session_info','session_info')]),
-                 (level1design,featmodel,[('fsf_files','fsf_file')]),
-                ])
-
-# store relevant outputs from various stages of preprocessing
-l1pipeline.connect([(infosource,datasink,[('subject_id','subject_id')]),
-                    (skullstrip, datasink, 
-                        [('out_file', 'skullstrip.@out_file')]),
-                    (func_skullstrip, datasink,
-                        [('out_file', 'skullstrip.@out_file')]),
-                    (motion_correct, datasink,
-                        [('parfile', 'skullstrip.@parfile')]),
-                    (smoothing, datasink, 
-                        [('smoothedimage', 'registration.@out_file')]),
-                    ])
-"""
-                    (featfemodel, datasink, 
-                        [('featdir', 'modelestimate.@fixedeffects')]),
-"""
-
 ##########################################################################
 # Execute the pipeline
 ##########################################################################
@@ -450,8 +394,9 @@ l1pipeline.connect([(infosource,datasink,[('subject_id','subject_id')]),
    analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
    function needs to be called. 
 """
-#if __name__ == '__main__':
-#    l1pipeline.run()
-#    l2pipeline.run()
-'''
+
+if __name__ == '__main__':
+    l1pipeline.run()
+    l1pipeline.write_graph(graph2use='flat')
+
 
