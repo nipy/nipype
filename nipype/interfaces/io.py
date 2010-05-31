@@ -302,9 +302,8 @@ class DataGrabber(IOBase):
 
 
 class FSSourceInputSpec(TraitedSpec):
-    subjects_dir = Directory(desc='Freesurfer subjects directory. The ' \
-                                 'program will try to retrieve it from the ' \
-                                 'environment if available.')
+    subjects_dir = Directory(mandatory=True,
+                             desc='Freesurfer subjects directory.')
     subject_id = traits.Str(mandatory=True,
                             desc='Subject name for whom to retrieve data')
     hemi = traits.Enum('both', 'lh', 'rh', usedefault=True,
@@ -383,16 +382,10 @@ class FreeSurferSource(IOBase):
         if altkey:
             key = altkey
         globpattern = os.path.join(keydir,''.join((globprefix,key,globsuffix)))
-        print globpattern
         return glob.glob(globpattern)
     
     def _list_outputs(self):
         subjects_dir = self.inputs.subjects_dir
-        if not subjects_dir:
-            subjects_dir = os.getenv('SUBJECTS_DIR')
-        if not subjects_dir:
-            raise Exception('SUBJECTS_DIR variable must be set or '\
-                                'provided as input to FreeSurferSource.')
         subject_path = os.path.join(subjects_dir, self.inputs.subject_id)
         output_traits = self._outputs()
         outputs = output_traits.get()
