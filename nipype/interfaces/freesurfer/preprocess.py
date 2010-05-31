@@ -718,7 +718,7 @@ class ApplyVolTransform(FSCommand):
                 if self.inputs.fs_target == True:
                     src = 'orig.mgz'
                 else:
-                    src = self.inputs.target
+                    src = self.inputs.target_file
             else:
                 src = self.inputs.source_file
             outfile = fname_presuffix(src,
