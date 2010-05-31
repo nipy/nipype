@@ -1044,7 +1044,8 @@ class MapNode(Node):
         self._result = InterfaceResult(interface=[], runtime=[],
                                        outputs=self.outputs)
         for i in range(nitems):
-            node = iterflow.get_exec_node(self.name+str(i))
+            node = iterflow.get_exec_node('.'.join((workflowname,
+                                                    self.name+str(i))))
             if node.result and hasattr(node.result, 'runtime'):
                 self._result.runtime.insert(i, node.result.runtime)
                 if node.result.runtime.returncode != 0:
@@ -1056,7 +1057,8 @@ class MapNode(Node):
         for key, _ in self.outputs.items():
             values = []
             for i in range(nitems):
-                node = iterflow.get_exec_node(self.name+str(i))
+                node = iterflow.get_exec_node('.'.join((workflowname,
+                                                    self.name+str(i))))
                 values.insert(i, node.result.outputs.get()[key])
             if any([val != Undefined for val in values]):
                 #logger.info('setting key %s with values %s' %(key, str(values)))
