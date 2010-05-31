@@ -55,6 +55,33 @@ def _create_pickleable_graph(graph, show_connectinfo=False):
             pklgraph.add_edge(edge[0], edge[1])
     return pklgraph
 
+def _create_dot_graph(graph, show_connectinfo=False):
+    """Create a graph that can be pickled.
+
+    Ensures that edge info is pickleable.
+    """
+    logger.debug('creating pickleable graph')
+    pklgraph = nx.DiGraph()
+    for edge in graph.edges():
+        data = graph.get_edge_data(*edge)
+        if hasattr(edge[0], '_interface'):
+            srcclass = edge[0]._interface.__class__.__module__.split('.')[2]
+        else:
+            srcclass = ''
+        srcname = '.'.join(str(edge[0]).split('.')[1:])
+        srcname = '.'.join((srcname, srcclass))
+        if hasattr(edge[1], '_interface'):
+            destclass = edge[1]._interface.__class__.__module__.split('.')[2]
+        else:
+            destclass = ''
+        destname = '.'.join(str(edge[1]).split('.')[1:])
+        destname = '.'.join((destname, destclass))
+        if show_connectinfo:
+            pklgraph.add_edge(srcname, destname, l=str(data['connect']))
+        else:
+            pklgraph.add_edge(srcname, destname)
+    return pklgraph
+
 def _write_detailed_dot(graph, dotfilename):
     """Create a dot file with connection info
 
@@ -83,9 +110,9 @@ def _write_detailed_dot(graph, dotfilename):
                 else:
                     outport = cd[0][0]
                 inport = cd[1]
-                ipstrip = replacefunk(inport)
-                opstrip = replacefunk(outport)
-                edges.append('%s:%s -> %s:%s;' % (str(u).replace('.', ''),
+                ipstrip = 'in'+replacefunk(inport)
+                opstrip = 'out'+replacefunk(outport)
+                edges.append('%s:%s:e -> %s:%s:w;' % (str(u).replace('.', ''),
                                                   opstrip,
                                                   str(v).replace('.', ''),
                                                   ipstrip))
@@ -93,7 +120,7 @@ def _write_detailed_dot(graph, dotfilename):
                     inports.append(inport)
         inputstr = '{IN'
         for ip in inports:
-            inputstr += '|<%s> %s' % (replacefunk(ip), ip)
+            inputstr += '|<in%s> %s' % (replacefunk(ip), ip)
         inputstr += '}'
         outports = []
         for u, v, d in graph.out_edges_iter(nbunch=n, data=True):
@@ -106,10 +133,16 @@ def _write_detailed_dot(graph, dotfilename):
                     outports.append(outport)
         outputstr = '{OUT'
         for op in outports:
-            outputstr += '|<%s> %s' % (replacefunk(op), op)
+            outputstr += '|<out%s> %s' % (replacefunk(op), op)
         outputstr += '}'
+        if hasattr(n, '_interface'):
+            srcpackage = n._interface.__class__.__module__.split('.')[2]
+        else:
+            srcpackage = ''
+        srchierarchy = '.'.join(nodename.split('.')[1:-1])
+        nodenamestr = '{ %s | %s | %s }'% (nodename.split('.')[-1], srcpackage, srchierarchy)
         text += ['%s [label="%s|%s|%s"];' % (nodename.replace('.', ''),
-                                             inputstr, nodename,
+                                             inputstr, nodenamestr,
                                              outputstr)]
     # write edges
     for edge in edges:
@@ -275,7 +308,7 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
     res = CommandLine(cmd).run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
-    pklgraph = _create_pickleable_graph(graph, show_connectinfo)
+    pklgraph = _create_dot_graph(graph, show_connectinfo)
     outfname = fname_presuffix(dotfilename,
                                suffix='.dot',
                                use_ext=False,
