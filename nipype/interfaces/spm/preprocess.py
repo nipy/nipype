@@ -564,14 +564,17 @@ class Segment(SPMCommand):
         return outputs
 
 class NewSegmentInputSpec(SPMCommandInputSpec):
-    channels = traits.List(traits.Tuple(InputMultiPath(File(exists=True)), traits.Float(), 
-                                        traits.Float(), traits.Tuple(traits.Bool, traits.Bool)),
-                           desc="""A list of tuples (one per channel/modality) with the following fields:
-            - list of volumes to be segmented
+    channel_files = InputMultiPath(File(exists=True),
+                              desc="A list of files to be segmented",
+                              field='channel', copyfile=False, mandatory=True)
+    channel_info = traits.List(traits.Tuple(traits.Float(), traits.Float(),
+                                            traits.Tuple(traits.Bool, traits.Bool)),
+                           desc="""A list of tuples (one per channel/modality)
+    with the following fields:
             - bias reguralisation (0-10)
             - FWHM of Gaussian smoothness of bias
             - which maps to save (Corrected, Field) - a tuple of two boolean values""", 
-            field='channel', copyfile=False, mandatory=True)
+            field='channel')
     tissues = traits.List(traits.Tuple(InputMultiPath(File(exists=True)), traits.Int(), 
                                        traits.Tuple(traits.Bool, traits.Bool), traits.Tuple(traits.Bool, traits.Bool)),
                          desc="""A list of tuples (one per tissue) with the following fields:
@@ -600,7 +603,7 @@ class NewSegment(SPMCommand):
     --------
     >>> import nipype.interfaces.spm as spm
     >>> seg = spm.NewSegment()
-    >>> seg.inputs.channels = [('a.nii', 0.0001, 60, (False, False))]
+    >>> seg.inputs.channel_files = 'a.nii'
     >>> seg.run() # doctest: +SKIP
     
     """
@@ -614,16 +617,23 @@ class NewSegment(SPMCommand):
         """Convert input to appropriate format for spm
         """
 
-        if opt == 'channels':
+        if opt == 'channel_files':
+            # structure have to be recreated, because of some weird traits error
+            new_channels = []
+            for channel in val:
+                new_channel = {}
+                new_channel['vols'] = scans_for_fname(filename_to_list(channel))
+                new_channels.append(new_channel)
+            return new_channels
+        elif opt == 'channel_info':
             # structure have to be recreated, because of some weird traits error
             new_channels = []
             for channel in val:
                 new_channel = {}
 
-                new_channel['vols'] = scans_for_fnames(channel[0])
-                new_channel['biasreg'] = channel[1]
-                new_channel['biasfwhm'] = channel[2]
-                new_channel['write'] = [int(channel[3][0]), int(channel[3][1])]
+                new_channel['biasreg'] = channel[0]
+                new_channel['biasfwhm'] = channel[1]
+                new_channel['write'] = [int(channel[2][0]), int(channel[2][1])]
 
                 new_channels.append(new_channel)
             return new_channels
@@ -645,7 +655,7 @@ class NewSegment(SPMCommand):
         outputs['native_class_images'] = []
         outputs['transformation_mat'] = []
 
-        for filename in filename_to_list(self.inputs.channels[0][0]):
+        for filename in filename_to_list(self.inputs.channel_files[0]):
             pth, base, ext = split_filename(filename)
             for i in range(len(self.inputs.tissues)):
                 outputs['native_class_images'].append(os.path.join("c%d%s%s"(i, base, ext)))
