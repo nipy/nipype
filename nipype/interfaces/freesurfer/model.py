@@ -262,6 +262,8 @@ class BinarizeInputSpec(FSTraitedSpec):
           desc='WM and ventricular CSF, including choroid (not 4th)')
     binary_file = File(argstr='--o %s', genfile=True,
                   desc='binary output volume')
+    out_type = traits.Enum('nii','nii.gz','mgz', argstr='',
+                           desc='output file type')
     count_file = traits.Either(traits.Bool, File,
                               argstr='--count %s',
                   desc='save number of hits in ascii file (hits,ntotvox,pct)')
@@ -318,9 +320,16 @@ class Binarize(FSCommand):
         outputs = self.output_spec().get()
         outfile = self.inputs.binary_file
         if not isdefined(outfile):
-            outputs['binary_file'] = fname_presuffix(self.inputs.in_file,
-                                            newpath=os.getcwd(),
-                                            suffix='_thresh')
+            if isdefined(self.inputs.out_type):
+                outfile = fname_presuffix(self.inputs.in_file,
+                                          newpath=os.getcwd(),
+                                          suffix='.'.join(('_thresh',
+                                                          self.inputs.out_type)),
+                                          use_ext=False)
+            else:
+                outfile = fname_presuffix(self.inputs.in_file,
+                                          newpath=os.getcwd(),
+                                          suffix='_thresh')
         outputs['binary_file'] = outfile
         value = self.inputs.count_file
         if isdefined(value):
@@ -341,6 +350,8 @@ class Binarize(FSCommand):
             else:
                 fname = value
             return spec.argstr % fname
+        if name == 'out_type':
+            return ''
         return super(Binarize, self)._format_arg(name, spec, value)
     
     def _gen_filename(self, name):
