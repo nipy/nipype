@@ -697,12 +697,13 @@ class BaseInterface(Interface):
         for name, spec in self.inputs.traits(mandatory=True).items():
             value = getattr(self.inputs, name)
             self._check_xor(spec, name, value)
-            self._check_requires(spec, name, value)
             if not isdefined(value) and spec.xor is None:
                 msg = "%s requires a value for input '%s'. " \
                     "For a list of required inputs, see %s.help()" % \
                     (self.__class__.__name__, name, self.__class__.__name__)
                 raise ValueError(msg)
+            if isdefined(value):
+                self._check_requires(spec, name, value)
         for name, spec in self.inputs.traits(mandatory=None,
                                              transient=None).items():
             self._check_requires(spec, name, getattr(self.inputs, name))
