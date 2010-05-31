@@ -497,7 +497,7 @@ class ResampleInputSpec(FSTraitedSpec):
                   desc='file to resample')
     resampled_file = File(argstr='-o %s', desc='output filename', genfile=True)
     voxel_size = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                       argstr='-vs %s', desc='triplet of output voxel sizes',
+                       argstr='-vs %.2f %.2f %.2f', desc='triplet of output voxel sizes',
                               mandatory=True)
         
 class ResampleOutputSpec(TraitedSpec):
@@ -746,7 +746,7 @@ class SmoothInputSpec(FSTraitedSpec):
     proj_frac_avg=traits.Tuple(traits.Float,traits.Float,traits.Float,
                                xor=['proj_frac'],
                               desc='average a long normal min max delta',
-                              argstr='--projfrac-avg %s')
+                              argstr='--projfrac-avg %.2f %.2f %.2f')
     proj_frac = traits.Float(desc='project frac of thickness a long surface normal',
                              xor=['proj_frac_avg'],
                              argstr='--projfrac %s')
