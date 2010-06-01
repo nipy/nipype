@@ -300,3 +300,40 @@ class ImageMaths(FSLCommand):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                               suffix=suffix)
         return outputs
+
+
+class REGFILTInputSpec(FSLCommandInputSpec):    
+    in_file = File(exists=True,argst="-i %s",desc="input file name (4D image)",mandatory=True)
+    out_file = File(argst="-o %s",desc="output file name for the filtered data",genfile=True)
+    design_file = File(exists=True,argst="-d %s",desc="design	file name of the matrix with "\
+                       "time courses (e.g. GLM design or MELODIC mixing matrix)",mandatory=True)
+    filter_out = traits.List(traits.Int,argst="-f %s",desc="filter out part of the "\
+                             "regression model, e.g. -f '1,2,3'",mandatory=True)
+    mask = File(exists=True,argst="-m %s",desc="mask image file name")
+    var_norm = traits.Bool(argst="--vn",desc="perfrom variance-normalisation on data")
+    out_file = traits.Bool(argst="--out_data",desc="output data")
+    Out_vnscales = traits.Bool(argst="--out_vnscales",desc="output scaling factors for variance normalisation")
+
+class REGFILTOutputSpec(TraitedSpec):
+    out_file = File(exists=True,desc="output file name for the filtered data")
+
+class REGFILT(FSLCommand):
+    """
+        Data de-noising by regressing out part of a design matrix
+        using simple OLS regression on 4D images
+    """
+    input_spec = REGFILTInputSpec
+    output_spec = REGFILTOutputSpec
+    _cmd = 'fsl_regfilt'
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.out_file
+        if not isdefined(outputs['out_file']):
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,suffix='_regfilt')  
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
