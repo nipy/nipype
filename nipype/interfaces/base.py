@@ -250,7 +250,7 @@ class InterfaceResult(object):
 
     """
 
-    # We could actually call aggregate_outputs in here...
+   
     def __init__(self, interface, runtime, outputs=None):
         self.interface = interface
         self.runtime = runtime
@@ -306,8 +306,9 @@ class BaseTraitedSpec(traits.HasTraits):
         return '\n' + '\n'.join(outstr) + '\n'
 
     def _generate_handlers(self):
-        # Find all traits with the 'xor' metadata and attach an event
-        # handler to them.
+        """Find all traits with the 'xor' metadata and attach an event
+        handler to them.
+        """
         has_xor = dict(xor=lambda t : t is not None)
         xors = self.trait_names(**has_xor)
         for elem in xors:
@@ -318,6 +319,8 @@ class BaseTraitedSpec(traits.HasTraits):
             self.on_trait_change(self._requires_warn, elem)
 
     def _xor_warn(self, obj, name, old, new):
+        """ Generates warnings for xor traits
+        """
         if isdefined(new):
             trait_spec = self.traits()[name]
             msg = None
@@ -338,6 +341,8 @@ class BaseTraitedSpec(traits.HasTraits):
             self.trait_set(trait_change_notify=False, **undefined_traits)
 
     def _requires_warn(self, obj, name, old, new):
+        """Part of the xor behavior
+        """
         if new:
             trait_spec = self.traits()[name]
             msg = None
@@ -350,7 +355,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 warn(msg)
 
     def _hash_infile(self, adict, key):
-        # Inject file hashes into adict[key]
+        """ Inject file hashes into adict[key]"""
         stuff = adict[key]
         if not is_container(stuff):
             stuff = [stuff]
@@ -804,6 +809,19 @@ class CommandLine(BaseInterface):
     
     >>> cli.inputs.trait_get()
     {'args': '-al', 'environ': {}}
+
+    >>>cli.help()
+    Inputs
+    ------
+
+    Optional:
+     args: Additional parameters to the command
+     environ: Environment variables (default={})
+
+    Outputs
+    -------
+    None
+   
 
     >>> cli.inputs.hashval
     ({'args': '-al', 'environ': {}}, 'c005b3eb45d97fd5733997ae75689457')

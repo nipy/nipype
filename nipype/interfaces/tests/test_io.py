@@ -1,20 +1,28 @@
 import os
 import shutil
 from tempfile import mkdtemp
-from nipype.testing import assert_equal
+from nipype.testing import assert_equal, assert_true
 import nipype.interfaces.io as nio
+from nipype.interfaces.base import Undefined 
 
-def test_aggregate_outputs():
-    basedir = mkdtemp()
-    os.makedirs(os.path.join(basedir,'s1'))
-    filename = os.path.join(basedir,'s1','s1.nii')
-    fp = open(filename,'w')
-    fp.close()
-    ds = nio.SubjectSource()
-    ds.inputs.base_directory = basedir
-    ds.inputs.file_layout = 's%s.nii'
-    ds.inputs.subject_info = dict(func=['1'])
-    ds.inputs.subject_id = 's1'
-    res = ds.run()
-    yield assert_equal, res.outputs.func, filename
-    shutil.rmtree(basedir)
+def test_datagrabber():
+    dg = nio.DataGrabber()
+    yield assert_equal, dg.inputs.template, Undefined
+    yield assert_equal, dg.inputs.base_directory, Undefined
+    yield assert_equal, dg.inputs.template_args,{'outfiles': []} 
+
+def test_datasink():
+    ds = nio.DataSink()
+    yield assert_true, ds.inputs.parameterization
+    yield assert_equal, ds.inputs.base_directory, Undefined
+    yield assert_equal, ds.inputs.strip_dir, Undefined
+    yield assert_equal, ds.inputs._outputs, {}
+    ds = nio.DataSink(base_directory = 'foo')
+    yield assert_equal, ds.inputs.base_directory, 'foo'
+
+
+def test_freesurfersource():
+    fss = nio.FreeSurferSource()
+    yield assert_equal, fss.inputs.hemi, 'both'
+    yield assert_equal, fss.inputs.subject_id, Undefined
+    yield assert_equal, fss.inputs.subjects_dir, Undefined
