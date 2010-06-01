@@ -96,4 +96,4 @@ def test_set_matlabcmd():
     mi.set_default_matlab_cmd('foo')
     yield assert_equal, mi._default_matlab_cmd, 'foo'
     mi.set_default_matlab_cmd(matlab_command)
-    mi.inputs.
+    
