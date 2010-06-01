@@ -5,14 +5,14 @@ from shutil import rmtree
 from nipype.testing import (assert_equal, assert_true, assert_false, 
                             assert_raises, skipif)
 import nipype.interfaces.matlab as mlab
-from nipype.interfaces.base import NEW_CommandLine, Bunch
+from nipype.interfaces.base import CommandLine, Bunch
 
 try:
     matlab_cmd = os.environ['MATLABCMD']
 except:
     matlab_cmd = 'matlab'
 
-res = NEW_CommandLine(command='which', args=matlab_cmd).run()
+res = CommandLine(command='which', args=matlab_cmd).run()
 matlab_path = res.runtime.stdout.strip()
 
 matlab_command = ''
@@ -30,33 +30,27 @@ if matlab_path != '':
 #     pass
 
 def test_init():
-    mi = mlab.MatlabCommandLine()
+    mi = mlab.MatlabCommand()
     yield assert_equal, mi._cmdline, None
     yield assert_equal, mi._cmdline_inputs, None
-    mi = mlab.MatlabCommandLine(matlab_cmd='foo')
+    mi = mlab.MatlabCommand(matlab_cmd='foo')
     yield assert_equal, mi.matlab_cmd, 'foo'
 
 def test_cmdline():
     basedir = mkdtemp()
 
-    mi = mlab.MatlabCommandLine(script_lines='whos',
-                                script_name='testscript',
-                                cwd=basedir)
+    mi = mlab.MatlabCommand(script='whos',
+                            script_file='testscript')
+                                
     yield assert_equal, mi.cmdline, \
-        'matlab -nodesktop -nosplash -r "testscript;exit" '
-    yield assert_equal, mi._cmdline, \
-        'matlab -nodesktop -nosplash -r "testscript;exit" '
-    inputs = str(Bunch(cwd=basedir, mfile=True, script_lines='whos', 
-                       script_name='testscript', ))
-    yield assert_equal, inputs, str(mi._cmdline_inputs)
+        'matlab -nodesktop -nosplash -singleCompThread -r "fprintf(1,\'Executing code at %s:\\n\',datestr(now));ver,try,whos,catch ME,ME,ME.stack,fprintf(\'%s\\n\',ME.message);fprintf(2,\'<MatlabScriptException>\');fprintf(2,\'%s\\n\',ME.message);fprintf(2,\'File:%s\\nName:%s\\nLine:%d\\n\',ME.stack.file,ME.stack.name,ME.stack.line);fprintf(2,\'</MatlabScriptException>\');end;;exit"'
+ 
+    yield assert_equal, mi.inputs.script, 'whos'
+    yield assert_equal, mi.inputs.script_file, 'testscript'
+    yield assert_equal, mi.inputs.environ, {}
     path_exists = os.path.exists(os.path.join(basedir,'testscript.m'))
-    yield assert_true, path_exists
+    yield assert_false, path_exists
     rmtree(basedir)
-
-def test_set_matlabcmd():
-    mi = mlab.MatlabCommandLine()
-    mi.set_matlabcmd('foo')
-    yield assert_equal, mi.matlab_cmd, 'foo'
 
 
 if matlab_path != '':
@@ -73,27 +67,33 @@ def test_mlab_inputspec():
     yield assert_false, spec.mfile
     yield assert_equal, spec.script_file, 'pyscript.m'
 
-def test_NEW_init():
-    yield assert_equal, mlab.NEW_MatlabCommand._cmd, 'matlab'
-    yield assert_equal, mlab.NEW_MatlabCommand.input_spec, mlab.MatlabInputSpec
+def test_init():
+    yield assert_equal, mlab.MatlabCommand._cmd, 'matlab'
+    yield assert_equal, mlab.MatlabCommand.input_spec, mlab.MatlabInputSpec
 
-    yield assert_equal, mlab.NEW_MatlabCommand().cmd, mlab.NEW_MatlabCommand._cmd
-    mc = mlab.NEW_MatlabCommand(matlab_cmd='foo_m')
+    yield assert_equal, mlab.MatlabCommand().cmd, mlab.MatlabCommand._cmd
+    mc = mlab.MatlabCommand(matlab_cmd='foo_m')
     yield assert_equal, mc.cmd, 'foo_m'
     
 @skipif(no_matlab)
-def test_NEW_run_interface():
-    mc = mlab.NEW_MatlabCommand(matlab_cmd='foo_m')
+def test_run_interface():
+    mc = mlab.MatlabCommand(matlab_cmd='foo_m')
     yield assert_raises, ValueError, mc.run # script is mandatory
     mc.inputs.script = 'a=1;'
     yield assert_raises, IOError, mc.run # foo_m is not an executable
     cwd = os.getcwd()
     basedir = mkdtemp()
     os.chdir(basedir)
-    res = mlab.NEW_MatlabCommand(script='foo', paths=[basedir], mfile=True).run() # bypasses ubuntu dash issue
+    res = mlab.MatlabCommand(script='foo', paths=[basedir], mfile=True).run() # bypasses ubuntu dash issue
     yield assert_equal, res.runtime.returncode, 1
-    res = mlab.NEW_MatlabCommand(script='a=1;', paths=[basedir], mfile=True).run() # bypasses ubuntu dash issue
+    res = mlab.MatlabCommand(script='a=1;', paths=[basedir], mfile=True).run() # bypasses ubuntu dash issue
     yield assert_equal, res.runtime.returncode, 0
     os.chdir(cwd)
     rmtree(basedir)
     
+def test_set_matlabcmd():
+    mi = mlab.MatlabCommand()
+    mi.set_default_matlab_cmd('foo')
+    yield assert_equal, mi._default_matlab_cmd, 'foo'
+    mi.set_default_matlab_cmd(matlab_command)
+    mi.inputs.
