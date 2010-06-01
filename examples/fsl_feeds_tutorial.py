@@ -232,6 +232,7 @@ firstlevel.inputs.modelfit.modelspec.input_units = 'secs'
 firstlevel.inputs.modelfit.modelspec.output_units = 'secs'
 firstlevel.inputs.modelfit.modelspec.time_repetition = TR
 firstlevel.inputs.modelfit.modelspec.high_pass_filter_cutoff = hpcutoff
+firstlevel.inputs.modelfit.modelspec.subject_id = 'whatever'
 
 
 firstlevel.inputs.modelfit.level1design.interscan_interval = TR 
