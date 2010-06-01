@@ -1,6 +1,4 @@
 """ General matlab interface code """
-
-# Stdlib imports
 import os
 
 from nipype.interfaces.base import CommandLineInputSpec, InputMultiPath
@@ -9,15 +7,19 @@ from nipype.interfaces.base import (CommandLine, traits, File, Directory)
 from nipype.utils.config import config
 
 class MatlabInputSpec(CommandLineInputSpec):
+    """ Basic expected inputs to Matlab interface """
+    
     script  = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
                          mandatory=True, position=-1)
-    nodesktop = traits.Bool(True, argstr='-nodesktop', usedefault=True,
+    nodesktop = traits.Bool(True, argstr='-nodesktop',
+                            usedefault=True,
                             desc='Switch off desktop mode on unix platforms')
     nosplash = traits.Bool(True, argstr='-nosplash', usedefault=True,
                            descr='Switch of splash screen')
     logfile = File(argstr='-logfile %s',
                           desc='Save matlab output to log')
-    singleCompThread = traits.Bool(argstr="-singleCompThread", desc="force single threaded operation")
+    singleCompThread = traits.Bool(argstr="-singleCompThread",
+                                   desc="force single threaded operation")
     # non-commandline options
     mfile   = traits.Bool(False, desc='Run m-code using m-file',
                           usedefault=True)
