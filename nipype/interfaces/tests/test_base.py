@@ -57,15 +57,17 @@ def test_bunch_hash():
 
 
 # create a temp file
-tmp_infile = None
-tmp_dir = None
+#global tmp_infile, tmp_dir
+#tmp_infile = None
+#tmp_dir = None
 def setup_file():
-    global tmp_infile, tmp_dir
+    #global tmp_infile, tmp_dir
     tmp_dir = tempfile.mkdtemp()
     tmp_infile = os.path.join(tmp_dir, 'foo.txt')
     open(tmp_infile, 'w').writelines('123456789')
+    return tmp_infile
 
-def teardown_file():
+def teardown_file(tmp_dir):
     shutil.rmtree(tmp_dir)
 
 
@@ -92,22 +94,22 @@ def test_TraitedSpec():
 def checknose():
     """check version of nose for known incompatability"""
     mod = __import__('nose')
-    if mod.__version__ < .11:
+    if mod.__versioninfo__[1] <= 11:
         return 0
     else:
         return 1
 
 @skipif(checknose)
-@with_setup(setup_file, teardown_file)
 def test_TraitedSpec_withFile():
-    global tmp_infile
-    yield assert_true, os.path.exists(str(tmp_infile))
+    tmp_infile = setup_file()
+    tmpd, nme = os.path.split(tmp_infile)
+    yield assert_true, os.path.exists(tmp_infile)
     class spec2(nib.TraitedSpec):
         moo = nib.File(exists=True)
         doo = nib.traits.List(nib.File(exists=True))
     infields = spec2(moo=tmp_infile,doo=[tmp_infile])
     yield assert_equal, infields.hashval[1], '8c227fb727c32e00cd816c31d8fea9b9'
-
+    teardown_file(tmpd)
     
 def test_Interface():
     yield assert_equal, nib.Interface.input_spec, None
