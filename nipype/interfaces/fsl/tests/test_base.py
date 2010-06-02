@@ -60,7 +60,9 @@ def test_FSLCommand2():
             #  Setting class outputtype should not effect existing instances
             yield assert_not_equal, cmdinst.inputs.output_type, out_type
 
+
 @parametric
+@skipif(check_fsl)#skip if fsl not installed)
 def test_gen_fname():
     # Test _gen_fname method of FSLCommand
     cmd = fsl.FSLCommand(command = 'junk',output_type = 'NIFTI_GZ')
