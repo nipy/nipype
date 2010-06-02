@@ -35,7 +35,7 @@ def test_outputtype_to_ext():
 
     yield assert_raises, KeyError, fsl.Info.output_type_to_ext, 'JUNK'
     
-
+@skipif(check_fsl)#skip if fsl not installed)
 def test_FSLCommand():
     # Most methods in FSLCommand are tested in the subclasses.  Only
     # testing the one item that is not.
