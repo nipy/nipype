@@ -193,7 +193,7 @@ class FSLCommand(CommandLine):
         cwd : str
             Path to prefix to the new filename. (default is os.getcwd())
         suffix : str
-            Suffix to add to the `basename`.  (default is '_fsl')
+            Suffix to add to the `basename`.  (defaults is '' )
         change_ext : bool
             Flag to change the filename extension to the FSL output type.
             (default True)
