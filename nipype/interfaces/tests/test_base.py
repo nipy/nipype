@@ -4,7 +4,7 @@ import os
 import tempfile
 import shutil
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
-                            assert_true, assert_false, with_setup)
+                            assert_true, assert_false, with_setup, package_check, skipif)
 import nipype.interfaces.base as nib
 from nipype.interfaces.base import Undefined
 from nipype.interfaces.base import InterfaceResult
@@ -68,7 +68,7 @@ def setup_file():
 def teardown_file():
     shutil.rmtree(tmp_dir)
 
-@with_setup(setup_file, teardown_file)
+
 def test_TraitedSpec():
     yield assert_true, nib.TraitedSpec().hashval
     yield assert_equal, nib.TraitedSpec().__repr__(), '\n\n'
@@ -89,8 +89,19 @@ def test_TraitedSpec():
     yield assert_equal, infields.__repr__(), '\nfoo = 1\ngoo = 0.0\n'
 
 
+def checknose():
+    """check version of nose for known incompatability"""
+    mod = __import__('nose')
+    if mod.__version__ < .11:
+        return 0
+    else:
+        return 1
+
+@skipif(checknose)
+@with_setup(setup_file, teardown_file)
+def test_TraitedSpec_withFile():
     global tmp_infile
-    yield assert_true, os.path.exists(tmp_infile)
+    yield assert_true, os.path.exists(str(tmp_infile))
     class spec2(nib.TraitedSpec):
         moo = nib.File(exists=True)
         doo = nib.traits.List(nib.File(exists=True))
