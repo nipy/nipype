@@ -2,6 +2,11 @@
 <http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.  This
 was written to work with FSL version 4.1.4.
 
+These are the base tools for working with FSL.
+Preprocessing tools are found in fsl/preprocess.py
+Model tools are found in fsl/model.py
+DTI tools are found in fsl/dti.py
+
 XXX Make this doc current!
 
 Currently these tools are supported:
@@ -30,6 +35,12 @@ warnings.filterwarnings('always', category=UserWarning)
 
 class Info(object):
     """Handle fsl output type and version information.
+
+    version refers to the version of fsl on the system
+
+    output type refers to the type of file fsl defaults to writing
+    eg, NIFTI, NIFTI_GZ
+
     """
 
     ftypes = {'NIFTI': '.nii',
@@ -88,15 +99,15 @@ class Info(object):
 
     @classmethod
     def output_type(cls):
-        """Get the global FSL output file type FSLoutput_type.
+        """Get the global FSL output file type FSLOUTPUTTYPE.
 
         This returns the value of the environment variable
-        FSLoutput_type.  An exception is raised if it is not defined.
+        FSLOUTPUTTYPE.  An exception is raised if it is not defined.
 
         Returns
         -------
         fsl_ftype : string
-            Represents the current environment setting of FSLoutput_type
+            Represents the current environment setting of FSLOUTPUTTYPE
         """
         try:
             return os.environ['FSLOUTPUTTYPE']
@@ -116,13 +127,23 @@ class Info(object):
 
 
 class FSLCommandInputSpec(CommandLineInputSpec):
+    """
+    Base Input Specification for all FSL Commands
+
+    All command support specifying FSLOUTPUTTYPE dynamically
+    via output_type.
+    
+    Example
+    -------
+    fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
+    """
     output_type =  traits.Enum('NIFTI', Info.ftypes.keys(),
                               desc='FSL output type')
     
 class FSLCommand(CommandLine):
-    """General support for FSL commands. Every FSL command accepts 'output_type'
-    input. For example:
-    fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')"""
+    """Base support for FSL commands.
+    
+    """
     
     input_spec = FSLCommandInputSpec
     _output_type = None
