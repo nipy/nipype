@@ -60,7 +60,8 @@ class Info(object):
 
         out = clout.runtime.stdout
         basedir = os.path.split(os.path.split(out)[0])[0]
-        clout = CommandLine(command='cat', args='%s/etc/fslversion' % (basedir)).run()
+        clout = CommandLine(command='cat',
+                            args='%s/etc/fslversion' % (basedir)).run()
         out = clout.runtime.stdout
         return out.strip('\n')
 

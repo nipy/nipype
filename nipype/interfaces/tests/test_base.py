@@ -77,8 +77,7 @@ def test_TraitedSpec():
         foo = nib.traits.Int
         goo = nib.traits.Float(usedefault=True)
 
-    # This should fail currently and is consistent with traits, but
-    # inconsistent with nipype interface api
+
     yield assert_equal, spec().foo, Undefined
     yield assert_equal, spec().goo, 0.0
     specfunc = lambda x : spec(hoo=x)
@@ -89,7 +88,9 @@ def test_TraitedSpec():
     yield assert_equal, infields.hashval[1], hashval[1]
     yield assert_equal, infields.__repr__(), '\nfoo = 1\ngoo = 0.0\n'
 
+
     global tmp_infile
+    yield assert_true, os.path.exists(tmp_infile)
     class spec2(nib.TraitedSpec):
         moo = nib.File(exists=True)
         doo = nib.traits.List(nib.File(exists=True))
