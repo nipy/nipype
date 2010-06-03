@@ -366,50 +366,46 @@ def test_mcflirt():
 
 #test fnirt
 def test_fnirt():
+    tmpdir, infile, reffile = setup_flirt()
     fnirt = fsl.FNIRT()
     yield assert_equal, fnirt.cmd, 'fnirt'
 
-    # Test inputs with variable number of values
-    fnirt.inputs.sub_sampling = [8, 6, 4]
-    yield assert_equal, fnirt.inputs.sub_sampling, [8, 6, 4]
-    fnirtd = fnirt.run(in_file='infile', reference='reference')
-    realcmd = 'fnirt --in=infile --ref=reference --subsamp=8,6,4'
-    yield assert_equal, fnirtd.runtime.cmdline, realcmd
-
-    fnirt2 = fsl.FNIRT(sub_sampling=[8, 2])
-    fnirtd2 = fnirt2.run(in_file='infile', reference='reference')
-    realcmd = 'fnirt --in=infile --ref=reference --subsamp=8,2'
-    yield assert_equal, fnirtd2.runtime.cmdline, realcmd
-
-    # Test case where input that can be a list is just a single value
-    params = [('sub_sampling', '--subsamp'),
-              ('max_iter', '--miter'),
-              ('referencefwhm', '--reffwhm'),
-              ('imgfwhm', '--infwhm'),
-              ('lambdas', '--lambda'),
-              ('estintensity', '--estint'),
-              ('applyrefmask', '--applyrefmask'),
-              ('applyimgmask', '--applyinmask')]
-    for item, flag in params:
-
-
-        if item in ('sub_sampling', 'max_iter',
-                    'referencefwhm', 'imgfwhm',
-                    'lambdas', 'estintensity'):
-            fnirt = fsl.FNIRT(**{item : 5})
-            cmd = 'fnirt %s=%d' % (flag, 5)
+    # Test tuple parameters
+    params = [('subsampling_scheme', '--subsamp', (4,2,2,1),'4,2,2,1'),
+              ('max_nonlin_iter', '--miter', (4,4,4,2),'4,4,4,2'),
+              ('ref_fwhm', '--reffwhm', (4,2,2,0),'4,2,2,0'),
+              ('in_fwhm', '--infwhm', (4,2,2,0),'4,2,2,0'),
+              ('regularization_lambda', '--lambda', 0.5, '0.500000')]
+    for item, flag, val, strval in params:
+        fnirt = fsl.FNIRT(in_file = infile,
+                          ref_file = reffile,
+                          **{item : val})
+        if item in ('max_nonlin_iter'):
+            cmd = 'fnirt --fout=<undefined> --cout=None '\
+                  '--in=%s --jout=<undefined> --logout=<undefined> '\
+                  '%s=%s --refout=<undefined> --intout=<undefined> '\
+                  '--ref=%s --iout=<undefined>' % (infile, flag,
+                                                   strval,reffile)
+        elif item in ('in_fwhm'):
+            cmd = 'fnirt --fout=<undefined> --cout=None '\
+                  '--in=%s %s=%s --jout=<undefined> --logout=<undefined> '\
+                  '--refout=<undefined> --intout=<undefined> '\
+                  '--ref=%s --iout=<undefined>' % (infile, flag,
+                                                   strval,reffile)
         else:
-            fnirt = fsl.FNIRT(**{item : 5})
-            cmd = 'fnirt %s=%f' % (flag, 5)
+            cmd = 'fnirt --fout=<undefined> --cout=None '\
+                  '--in=%s --jout=<undefined> --logout=<undefined> '\
+                  '--refout=<undefined> --intout=<undefined> '\
+                  '--ref=%s %s=%s --iout=<undefined>' % (infile,
+                                                         reffile,
+                                                         flag, strval)
         yield assert_equal, fnirt.cmdline, cmd
 
-    # Test error is raised when missing required args
+    # Test ValueError is raised when missing mandatory args
     fnirt = fsl.FNIRT()
-    yield assert_raises, AttributeError, fnirt.run
-    fnirt.inputs.in_file = 'foo.nii'
-    # I don't think this is correct. See FNIRT documentation -DJC
-    # yield assert_raises, AttributeError, fnirt.run
-    fnirt.inputs.reference = 'mni152.nii'
+    yield assert_raises, ValueError, fnirt.run
+    fnirt.inputs.in_file = infile
+    fnirt.inputs.ref_file = reffile
     res = fnirt.run()
     yield assert_equal, type(res), InterfaceResult
 
@@ -433,7 +429,8 @@ def test_fnirt():
     for name, settings in opt_map.items():
         fnirt = fsl.FNIRT(**{name : settings[1]})
         yield assert_equal, fnirt.cmdline, ' '.join([fnirt.cmd, settings[0]])
-
+    teardown_flirt(tmpdir)
+    
 def test_applywarp():
     opt_map = {
         'in_file':            ('--in=foo.nii', 'foo.nii'),

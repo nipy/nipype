@@ -543,7 +543,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                              desc='name of file/files containing initial intensity maping')
     fieldcoeff_file = File(genfile=True, argstr='--cout=%s',
                            desc='name of output file with field coefficients or true')
-    out_file = traits.Either(traits.Bool, File, genfile=True,
+    warped_file = traits.Either(traits.Bool, File, genfile=True,
                             argstr='--iout=%s',
                             desc='name of output image or true')
     field_file = traits.Either(traits.Bool, File, genfile=True,
@@ -551,13 +551,16 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                                desc='name of output file with field or true')
     jacobian_file = traits.Either(traits.Bool, File, genfile=True,
                                   argstr='--jout=%s',
-                                  desc='name of file for writing out the Jacobian of the field (for diagnostic or VBM purposes)')
+                                  desc='name of file for writing out the Jacobian'\
+                                  'of the field (for diagnostic or VBM purposes)')
     modulatedref_file = traits.Either(traits.Bool, File, genfile=True,
                                       argstr='--refout=%s',
-                                      desc='name of file for writing out intensity modulated --ref (for diagnostic purposes)')
+                                      desc='name of file for writing out intensity modulated'\
+                                      '--ref (for diagnostic purposes)')
     out_intensitymap_file = traits.Either(traits.Bool, File, genfile=True,
                                       argstr='--intout=%s',
-                                      desc='name of files for writing information pertaining to intensity mapping')
+                                      desc='name of files for writing information pertaining '\
+                                          'to intensity mapping')
     log_file = traits.Either(traits.Bool, File, genfile=True,
                              argstr='--logout=%s',
                              desc='Name of log-file')
@@ -574,22 +577,25 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                              requires=['inmask_file'],
                              desc='skip specified inmask if set, default false')
     skip_implicit_ref_masking = traits.Bool(argstr='--imprefm 0',
-                                      desc='skip implicit masking  based on value in --ref image. Default = 0')
+                                      desc='skip implicit masking  based on value'\
+                                            'in --ref image. Default = 0')
     skip_implicit_in_masking = traits.Bool(argstr='--impinm 0',
-                                      desc='skip implicit masking  based on value in --in image. Default = 0')
+                                      desc='skip implicit masking  based on value'\
+                                           'in --in image. Default = 0')
     refmask_val = traits.Float(argstr='--imprefval=%f',
                               desc='Value to mask out in --ref image. Default =0.0')
     inmask_val = traits.Float(argstr='--impinval=%f',
                               desc='Value to mask out in --in image. Default =0.0')
     max_nonlin_iter = traits.Tuple(traits.Int,traits.Int,traits.Int,traits.Int,
                                    argstr='--miter=%d,%d,%d,%d',
-                                   desc='Max # of non-linear iterations, default 5,5,5,5')
-    subsampling_scheme = traits.Tuple(traits.Int,traits.Int,traits.Int,traits.Int,
+                                   desc='Max # of non-linear iterations tuple, default (5,5,5,5)')
+    subsampling_scheme = traits.Tuple((traits.Int,traits.Int,traits.Int,traits.Int),
                                    argstr='--subsamp=%d,%d,%d,%d',
-                                   desc='sub-sampling scheme, default 4,2,1,1')
+                                   desc='sub-sampling scheme, tuple, default (4,2,1,1)')
     warp_resolution = traits.Tuple(traits.Int, traits.Int, traits.Int,
                                    argstr='--warpres=%d,%d,%d',
-                                   desc='(approximate) resolution (in mm) of warp basis in x-, y- and z-direction, default 10,10,10')
+                                   desc='(approximate) resolution (in mm) of warp basis '\
+                                   'in x-, y- and z-direction, default 10,10,10')
     spline_order = traits.Int(argstr='--splineorder=%d',
                               desc='Order of spline, 2->Qadratic spline, 3->Cubic spline. Default=3')
     in_fwhm = traits.Tuple(traits.Int,traits.Int,traits.Int,traits.Int,
@@ -602,7 +608,8 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                                        argstr='--regmod=%s',
         desc='Model for regularisation of warp-field [membrane_energy bending_energy], default bending_energy')
     regularization_lambda = traits.Float(argstr='--lambda=%f',
-        desc='Weight of regularisation, default depending on --ssqlambda and --regmod switches. See user documetation.')
+        desc='Weight of regularisation, default depending on --ssqlambda and --regmod '\
+                                         'switches. See user documetation.')
     skip_lambda_ssq = traits.Bool(argstr='--ssqlambda 0',
                                   desc='If true, lambda is not weighted by current ssq, default false')
     jacobian_range = traits.Tuple(traits.Float, traits.Float,
@@ -618,7 +625,8 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                                          desc='Order of poynomial for mapping intensities, default 5')
     biasfield_resolution = traits.Tuple(traits.Int, traits.Int, traits.Int,
                                         argstr='--biasres=%d,%d,%d',
-                                        desc='Resolution (in mm) of bias-field modelling local intensities, default 50,50,50')
+                                        desc='Resolution (in mm) of bias-field modelling '\
+                                        'local intensities, default 50,50,50')
     bias_regularization_lambda = traits.Float(argstr='--biaslambda=%f',
                                               desc='Weight of regularisation for bias-field, default 10000')
     skip_intensity_mapping = traits.Bool(argstr='--estint 0',
@@ -698,7 +706,7 @@ class FNIRT(FSLCommand):
         outputs = self._outputs().get()
         outputs['fieldcoeff_file']=self.inputs.fieldcoeff_file
         if not isdefined(self.inputs.fieldcoeff_file):
-            outputs['fieldcoeff_file'] = self._gen_fname(self.inputs.file,
+            outputs['fieldcoeff_file'] = self._gen_fname(self.inputs.in_file,
                                                          suffix='_warpcoef')
         for name, suffix in self.out_map.items():
             src = self.inputs.in_file
