@@ -429,6 +429,25 @@ class FLIRT(FSLCommand):
 
     
 class ApplyXfm(FLIRT):
+    """Currently just a light wrapper around FLIRT,
+    with no modifications
+
+    ApplyXfm is used to apply an existing tranform to an image
+
+
+    Examples
+    -------
+
+    >>> import nipype.interfaces.fsl as fsl
+    >>> applyxfm = fsl.ApplyXfm()
+    >>> applyxfm.inputs.in_file = 'moving.nii'
+    >>> applyxfm.inputs.in_matrix_file = 'transform.mat'
+    >>> applyxfm.inputs.out_file = 'newfile.nii'
+    >>> applyxfm.inputs.reference = 'template.nii'
+    >>> applyxfm.inputs.apply_xfm = True
+    >>> result = applyxfm.run() # doctest: +SKIP
+    
+    """
     pass
 
 
