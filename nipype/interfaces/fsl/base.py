@@ -221,3 +221,10 @@ class FSLCommand(CommandLine):
         fname = fname_presuffix(basename, suffix = suffix,
                                 use_ext = False, newpath = cwd)
         return fname
+
+def check_fsl():
+    ver = Info.version()
+    if ver:
+        return 0
+    else:
+        return 1

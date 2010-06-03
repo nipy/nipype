@@ -4,14 +4,8 @@ from nipype.testing import (assert_equal, assert_true, assert_raises,
                             assert_not_equal, parametric, skipif)
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces.base import InterfaceResult
+from nipype.interfaces.fsl import check_fsl
 
-
-def check_fsl():
-    ver = fsl.Info.version()
-    if ver:
-        return 0
-    else:
-        return 1
     
 @skipif(check_fsl)#skip if fsl not installed)
 def test_fslversion():
