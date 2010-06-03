@@ -313,13 +313,12 @@ def test_mcflirt():
     realcmd = 'mcflirt -in ' + infile + ' -out ' + outfile
     yield assert_equal, frt.cmdline, realcmd
     # Test specified outfile name
-    outfile = '/newdata/bar.nii'
-    frt.inputs.out_file = outfile
-    realcmd = 'mcflirt -in ' + infile + ' -out ' + outfile
+    outfile2 = '/newdata/bar.nii'
+    frt.inputs.out_file = outfile2
+    realcmd = 'mcflirt -in ' + infile + ' -out ' + outfile2
     yield assert_equal, frt.cmdline, realcmd
 
     opt_map = {
-        'out_file':     ('-out bar.nii', 'bar.nii'),
         'cost':        ('-cost mutualinfo', 'mutualinfo'),
         'bins':        ('-bins 256', 256),
         'dof':         ('-dof 6', 6),
@@ -327,31 +326,41 @@ def test_mcflirt():
         'scaling':     ('-scaling 6.00', 6.00),
         'smooth':      ('-smooth 1.00', 1.00),
         'rotation':    ('-rotation 2', 2),
-        'verbose':     ('-verbose', True),
         'stages':      ('-stages 3', 3),
-        'init':        ('-init matrix.mat', 'matrix.mat'),
+        'init':        ('-init %s'%(infile), infile),
         'use_gradient': ('-gdt', True),
         'use_contour':  ('-edge', True),
         'mean_vol':     ('-meanvol', True),
         'stats_imgs':   ('-stats', True),
         'save_mats':    ('-mats', True),
         'save_plots':   ('-plots', True),
-        'report':      ('-report', True),
         }
 
     for name, settings in opt_map.items():
-        fnt = fsl.MCFLIRT(**{name : settings[1]})
-        yield assert_equal, fnt.cmdline, ' '.join([fnt.cmd, settings[0]])
+        fnt = fsl.MCFLIRT(in_file = infile, **{name : settings[1]})
+        instr = '-in %s'%(infile) 
+        outstr = '-out %s'%(outfile)
+        if name in ('init', 'cost', 'dof','mean_vol','bins'):
+            yield assert_equal, fnt.cmdline, ' '.join([fnt.cmd,
+                                                       instr,
+                                                       settings[0],
+                                                       outstr])
+        else:
+            yield assert_equal, fnt.cmdline, ' '.join([fnt.cmd,
+                                                       instr,
+                                                       outstr,
+                                                       settings[0]])
+                                                   
 
     # Test error is raised when missing required args
     fnt = fsl.MCFLIRT()
-    yield assert_raises, AttributeError, fnt.run
+    yield assert_raises, ValueError, fnt.run
     # Test run result
     fnt = fsl.MCFLIRT()
-    fnt.inputs.in_file = 'foo.nii'
+    fnt.inputs.in_file = infile
     res = fnt.run()
     yield assert_equal, type(res), InterfaceResult
-    res = fnt.run(in_file='bar.nii')
+    res = fnt.run(in_file= infile)
     yield assert_equal, type(res), InterfaceResult
     teardown_flirt(tmpdir)
 
