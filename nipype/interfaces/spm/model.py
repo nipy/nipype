@@ -768,10 +768,11 @@ end
 
 class FactorialDesignInputSpec(SPMCommandInputSpec):
     spm_mat_dir = Directory(exists=True, field='dir', desc='directory to store SPM.mat file (opt)')
-    covariates = traits.List(traits.Dict(key_trait=traits.Enum('vectors', 'names',
-                                                               'interactions', 'centering')),
-                             field='cov',
-                             desc='dict of covariates {vectors, names, interactions, centering}')
+    # really need to make an alias of InputMultiPath because the inputs below are not Path
+    covariates = InputMultiPath(traits.Dict(key_trait=traits.Enum('vector', 'name',
+                                                                  'interaction', 'centering')),
+                                field='cov',
+                                desc='covariate dictionary {vector, name, interaction, centering}')
     threshold_mask_none = traits.Bool(field='masking.tm.tm_none',
                                       xor=['threshold_mask_absolute', 'threshold_mask_relative'],
                                       desc='do not use threshold masking')
@@ -801,11 +802,90 @@ class FactorialDesignInputSpec(SPMCommandInputSpec):
 
 class FactorialDesignOutputSpec(TraitedSpec):
     spm_mat_file = File(exists=True, desc='SPM mat file')
-    con_images = OutputMultiPath(File(exists=True), desc='contrast images from a t-contrast')
-    spmT_images = OutputMultiPath(File(exists=True), desc='stat images from a t-contrast')
-    ess_images = OutputMultiPath(File(exists=True), desc='contrast images from an F-contrast')
-    spmF_images = OutputMultiPath(File(exists=True), desc='stat images from an F-contrast')
 
+class FactorialDesign(SPMCommand):
+    """Base class for factorial designs
+    """
+
+    input_spec = FactorialDesignInputSpec
+    output_spec = FactorialDesignOutputSpec        
+    _jobtype = 'stats'
+    _jobname = 'factorial_design'
+
+    def _format_arg(self, opt, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt in ['spm_mat_dir']:
+            return np.array([str(val)], dtype=object)
+        if opt in ['covariates']:
+            outlist = []
+            mapping = {'name':'cname','vector':'c',
+                       'interactions':'iCFI',
+                       'centering':'iCC'}
+            for dictitem in val:
+                outdict = {}
+                for key,keyval in dictitem.items():
+                    outdict[mapping[key]] = keyval
+                outlist.append(outdict)
+            print outlist
+            return outlist
+        return val
+
+    def _parse_inputs(self):
+        """validate spm realign options if set to None ignore
+        """
+        einputs = super(FactorialDesign, self)._parse_inputs()
+        if not isdefined(self.inputs.spm_mat_dir):
+            einputs[0]['dir'] = np.array([str(os.getcwd())], dtype=object)
+        return einputs
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        spm = os.path.join(os.getcwd(), 'SPM.mat')
+        outputs['spm_mat_file'] = spm
+        return outputs
+    
 class OneSampleTTestDesignInputSpec(FactorialDesignInputSpec):
-    in_files = InputMultiPath(File(exists=True), field='des.t1',
-                              desc='input files')
+    in_files = traits.List(File(exists=True), field='des.t1.scans',
+                           mandatory=True, minlen=2,
+                           desc='input files')
+
+class OneSampleTTestDesign(FactorialDesign):
+    """Create SPM design for one sample t-test
+    """
+    
+    input_spec = OneSampleTTestDesignInputSpec
+    
+    def _format_arg(self, opt, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt in ['in_files']:
+            return np.array(val, dtype=object)
+        return super(OneSampleTTestDesign, self)._format_arg(opt, val)
+
+class TwoSampleTTestDesignInputSpec(FactorialDesignInputSpec):
+    # very unlikely that you will have a single image in one group, so setting
+    # parameters to require at least two files in each group [SG]
+    group1_files = traits.List(File(exists=True), field='des.t2.scans1',
+                               mandatory=True, minlen=2,
+                               desc='Group 1 input files')
+    group2_files = traits.List(File(exists=True), field='des.t2.scans2',
+                               mandatory=True, minlen=2,
+                               desc='Group 2 input files')
+    dependent = traits.Bool(field='des.t2.dept',
+                            desc='Are the measurements dependent between levels')
+    unequal_variance = traits.Bool(field='des.t2.variance',
+                                   desc='Are the variances equal or unequal between groups')
+
+class TwoSampleTTestDesign(FactorialDesign):
+    """Create SPM design for two sample t-test
+    """
+    
+    input_spec = TwoSampleTTestDesignInputSpec
+
+    def _format_arg(self, opt, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt in ['group1_files', 'group2_files']:
+            return np.array(val, dtype=object)
+        return super(OneSampleTTestDesign, self)._format_arg(opt, val)
