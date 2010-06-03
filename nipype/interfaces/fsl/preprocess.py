@@ -453,7 +453,7 @@ class ApplyXfm(FLIRT):
 
 class MCFLIRTInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, position= 0, argstr="-in %s", mandatory=True)
-    out_file = File(exists=True, argstr='-out %s', genfile=True)
+    out_file = File(argstr='-out %s', genfile=True)
     cost = traits.Enum('mutualinfo','woods','corratio','normcorr','normmi','leastsquares', argstr='-cost %s')
     bins = traits.Int(argstr='-bins %d')
     dof = traits.Int(argstr='-dof %d')

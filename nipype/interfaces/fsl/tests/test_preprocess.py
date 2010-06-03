@@ -294,8 +294,7 @@ def test_applyxfm():
     # reference not specified
     yield assert_raises, ValueError, flt.run
     flt.inputs.reference = reffile
-    # in_matrix not specified
-    yield assert_raises, ValueError, flt.run
+
 
     
 
@@ -308,7 +307,9 @@ def test_mcflirt():
     # Test generated outfile name
 
     frt.inputs.in_file = infile
-    outfile = os.path.join(os.getcwd(), 'foo_mcf.nii')
+    _, nme = os.path.split(infile)
+    outfile = os.path.join(os.getcwd(), nme)
+    outfile = frt._gen_fname(outfile, suffix = '_mcf')
     realcmd = 'mcflirt -in ' + infile + ' -out ' + outfile
     yield assert_equal, frt.cmdline, realcmd
     # Test specified outfile name
@@ -322,19 +323,19 @@ def test_mcflirt():
         'cost':        ('-cost mutualinfo', 'mutualinfo'),
         'bins':        ('-bins 256', 256),
         'dof':         ('-dof 6', 6),
-        'refvol':      ('-refvol 2', 2),
+        'ref_vol':      ('-refvol 2', 2),
         'scaling':     ('-scaling 6.00', 6.00),
         'smooth':      ('-smooth 1.00', 1.00),
         'rotation':    ('-rotation 2', 2),
         'verbose':     ('-verbose', True),
         'stages':      ('-stages 3', 3),
         'init':        ('-init matrix.mat', 'matrix.mat'),
-        'usegradient': ('-gdt', True),
-        'usecontour':  ('-edge', True),
-        'meanvol':     ('-meanvol', True),
-        'statsimgs':   ('-stats', True),
-        'savemats':    ('-mats', True),
-        'saveplots':   ('-plots', True),
+        'use_gradient': ('-gdt', True),
+        'use_contour':  ('-edge', True),
+        'mean_vol':     ('-meanvol', True),
+        'stats_imgs':   ('-stats', True),
+        'save_mats':    ('-mats', True),
+        'save_plots':   ('-plots', True),
         'report':      ('-report', True),
         }
 
