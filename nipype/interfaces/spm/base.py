@@ -210,9 +210,12 @@ class SPMCommand(BaseInterface):
             field = spec.field
             if '.' in field:
                 fields = field.split('.')
-                if fields[0] not in spmdict.keys():
-                    spmdict[fields[0]] = {}
-                spmdict[fields[0]][fields[1]] = self._format_arg(name, value)
+                dictref = spmdict
+                for f in fields[:-1]:
+                    if f not in dictref.keys():
+                        dictref[f] = {}
+                    dictref = dictref[f]
+                dictref[fields[-1]] = self._format_arg(name, value)
             else:
                 spmdict[field] = self._format_arg(name, value)
         return [spmdict]
@@ -335,7 +338,8 @@ class SPMCommand(BaseInterface):
         if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');end\n
         """
         if self.mlab.inputs.mfile:
-            if self.jobname in ['st','smooth','preproc','preproc8','fmri_spec','fmri_est'] :
+            if self.jobname in ['st','smooth','preproc','preproc8','fmri_spec','fmri_est',
+                                'factorial_design'] :
                 # parentheses
                 mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' %
                                               (self.jobtype,self.jobname), contents[0])
