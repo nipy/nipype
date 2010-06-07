@@ -72,7 +72,10 @@ Debugging
 
 When a crash happens while running a pipeline, a crashdump is stored in
 the pipeline's working directory unless the config option 'crashdumpdir'
-has been set. The crashdump is a `dict` containing three fields:
+has been set (see :ref:config_options). 
+
+The crashdump is a compressed numpy file that stores a dictionary
+containing three fields:
 
   1. node - the node that failed
   2. execgraph - the graph that the node came from
