@@ -4,74 +4,54 @@
 Pipeline 102
 ============
 
-Now that you know how to construct a pipeline and execute it, we will
-go into more advanced concepts. This tutorial focuses on NodeWrapper
-options. 
+Now that you know how to construct a workflow and execute it, we will go
+into more advanced concepts. This tutorial focuses on
+:class:`nipype.pipeline.engine.Workflow`
+:class:`nipype.pipeline.engine.Node` and
+:class:`nipype.pipeline.engine.MapNode`.
 
-NodeWrapper options
-===================
+A workflow is a **directed acyclic graph (DAG)** consisting of nodes
+which can be of type `Workflow`, `Node` or `MapNode`. Workflows can
+be re-used and hierarchical workflows can be easily constructed.
 
-NodeWrapper provides the glue that enables interfaces to be used
-within the nipype pipeline. The following options allow you to
-manipulate various aspects of the pipeline, such as, where the node is
-executed and outputs stored, how to repeat some part or the entire
-pipeline over some parameters and how to run an interface over
-multiple inputs when it only accepts a single one.
+'name' : the mandatory keyword arg
+==================================
 
-name
-----
+When instantiating a Workflow, Node or MapNode, a `name` has to be
+provided. For any given level of a workflow, no two nodes can have the
+same name. The engine will let you know if this is the case when you add
+nodes to a workflow either directly using `add_nodes` or using the
+`connect` function.
 
-By default, pipeline nodes are named based on the interface
-used. These names are then used to create directory names for storing
-node/interface output. So a :class:`nipype.interfaces.spm.Realign`
-interface will be stored in a directory called *Realign.spm*. However,
-this name could be set by the user
+Names have many internal uses. They determine the name of the directory
+in which the workflow/node is run and the outputs are stored.
 
 .. testcode::
 
-   realigner = nw.NodeWrapper(interface=spm.Realign(),
-                              name='StructRealign.spm')
+   realigner = pe.Node(interface=spm.Realign(),
+                       name='StructRealign.spm')
 
 Now this output will be stored in a directory called
-*StructRealign.spm*. Naming your nodes can be advantageous from the
-perspective that it provides a semantic descriptor aligned with your
-thought process. Also, if we change the name of an interface, you do
-not have to recompute the output unless the functionality of the node
-has changed.
-
-diskbased
----------
-
-This is enabled by default and results in each node being executed in
-its own directory and depending on the nature of the underlying
-interface, its outputs are generated inside this directory. The
-pipeline engine computes a hash of the input state of any node and if
-executed with ``diskbased=True`` option (default) it stores this hash
-in the output directory for the node (derived from the node name, see
-above). This hash is then checked each time the node is
-executed. Unless the inputs to the node have changed, this hash will
-remain unique for a unique set of inputs. Details of the hash
-calculation can be found further below.
-
-This behavior can be turned off for memory-based interfaces, i.e. those
-interfaces that do not write any files to disk **AND** compute their
-outputs always (developer note: via aggregate_outputs).
-
+*StructRealign.spm*. Proper naming of your nodes can be advantageous
+from the perspective that it provides a semantic descriptor aligned with
+your thought process.
 
 iterables
 ---------
 
-This is syntactic sugar for running parts or all of your pipeline in
-a ``for`` loop. For example, consider an fMRI preprocessing pipeline that
-you would like to run for all your subjects. You can define a workflow
-and then execute it for every single subject inside a ``for``
-loop. Consider the simplistic example below.
+This can only be set for Node and MapNode. This is syntactic sugar for
+running a subgraph with the Node/MapNode at its root in a ``for``
+loop. For example, consider an fMRI preprocessing pipeline that you
+would like to run for all your subjects. You can define a workflow and
+then execute it for every single subject inside a ``for`` loop. Consider
+the simplistic example below, where startnode is a node belonging to
+workflow 'mywork.'
 
 .. testcode::
    
    for s in subjects:
        startnode.inputs.subject_id = s
-       workflow.run()
+       mywork.run()
 
 The pipeline engine provides a convenience function that simplifies
 this:
@@ -79,7 +59,7 @@ this:
 .. testcode::
    
    startnode.iterables = ('subject_id', subjects)
-   workflow.run()
+   mywork.run()
 
 This will achieve the same exact behavior as the for loop above. The
 workflow graph is:
@@ -110,7 +90,7 @@ another set of iterables for the smoothnode.
    
    startnode.iterables = ('subject_id', subjects)
    smoothnode.iterables = ('fwhm', [0, 6])
-   workflow.run()
+   mywork.run()
 
 This will run the preprocessing workflow for two different smoothing
 kernels over all subjects.
@@ -126,21 +106,21 @@ executed for each combination of subject and smoothing.
 iterfield
 ---------
 
-This is another convenience option to run your underlying interface
-over a set of inputs when the interface can only operate on a single
-input. For example, the :class:`nipype.interfaces.fsl.Bet` will
-operate on only one (3d or 4d) NIfTI file. But a node wrapping Bet can
-execute it over a list of files:
+This is a mandatory keyword arg for MapNode. This enables running the
+underlying interface over a set of inputs and is particularly useful
+when the interface can only operate on a single input. For example, the
+:class:`nipype.interfaces.fsl.BET` will operate on only one (3d or 4d)
+NIfTI file. But wrapping BET in a MapNode can execute it over a list of files:
 
 .. testcode::
 
-   better = nw.NodeWrapper(interface=fsl.Bet())
-   better.inputs.infile = ['file1.nii','file2.nii']
-   better.iterfield = ['infile']
+   better = pe.MapNode(interface=fsl.Bet(), name='stripper',
+                       iterfield=['in_file'])
+   better.inputs.in_file = ['file1.nii','file2.nii']
    better.run()
 
-This will create a directory called ``Bet.fsl`` and inside it two
-subdirectories called ``infile_0`` and ``infile_1``. The output of running bet
+This will create a directory called ``stripper`` and inside it two
+subdirectories called ``in_file_0`` and ``in_file_1``. The output of running bet
 separately on each of those files will be stored in those two
 subdirectories.
 
@@ -148,15 +128,30 @@ This can be extended to run it on pairwise inputs. For example,
 
 .. testcode::
 
-   transform = nw.NodeWrapper(interface=fs.ApplyVolTransform())
-   transform.inputs.sourcefile = ['file1.nii','file2.nii']
-   transform.inputs.fslreg = ['file1.reg','file2.reg']
-   transform.iterfield = ['sourcefile','fslreg']
+   transform = pe.MapNode(interface=fs.ApplyVolTransform(),
+                          name='warpvol',
+                          iterfield=['source_file', 'reg_file'])
+   transform.inputs.source_file = ['file1.nii','file2.nii']
+   transform.inputs.reg_file = ['file1.reg','file2.reg']
    transform.run()
 
 The above will be equivalent to running transform by taking corresponding items from
 each of the two fields in iterfield. The subdirectories get always
 named with respect to the first iterfield.
+
+
+overwrite
+---------
+
+The overwrite keyword arg forces a node to be rerun.
+
+The `clone` function
+--------------------
+
+The `clone` function can be used to create a copy of a workflow. No
+references to the original workflow are retained. As such the clone
+function requires a name keyword arg that specifies a new name for the
+duplicate workflow.
 
 
 .. include:: ../links_names.txt
