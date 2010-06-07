@@ -380,25 +380,26 @@ def test_fnirt():
         fnirt = fsl.FNIRT(in_file = infile,
                           ref_file = reffile,
                           **{item : val})
+        cout = fnirt._gen_fname(infile, suffix='_fieldwarp')
+        iout = fnirt._gen_fname(infile, suffix='_warped')
         if item in ('max_nonlin_iter'):
-            cmd = 'fnirt --fout=<undefined> --cout=None '\
-                  '--in=%s --jout=<undefined> --logout=<undefined> '\
-                  '%s=%s --refout=<undefined> --intout=<undefined> '\
-                  '--ref=%s --iout=<undefined>' % (infile, flag,
-                                                   strval,reffile)
+            cmd = 'fnirt --cout=%s '\
+                  '--in=%s '\
+                  '%s=%s --ref=%s'\
+                  ' --iout=%s' % (cout, infile, 
+                                  flag, strval, reffile, iout)
         elif item in ('in_fwhm'):
-            cmd = 'fnirt --fout=<undefined> --cout=None '\
-                  '--in=%s %s=%s --jout=<undefined> --logout=<undefined> '\
-                  '--refout=<undefined> --intout=<undefined> '\
-                  '--ref=%s --iout=<undefined>' % (infile, flag,
-                                                   strval,reffile)
+            cmd = 'fnirt --cout=%s '\
+                  '--in=%s %s=%s '\
+                  '--ref=%s --iout=%s' % (cout, infile, flag,
+                                          strval,reffile, iout)
         else:
-            cmd = 'fnirt --fout=<undefined> --cout=None '\
-                  '--in=%s --jout=<undefined> --logout=<undefined> '\
-                  '--refout=<undefined> --intout=<undefined> '\
-                  '--ref=%s %s=%s --iout=<undefined>' % (infile,
-                                                         reffile,
-                                                         flag, strval)
+            cmd = 'fnirt --cout=%s '\
+                  '--in=%s '\
+                  '--ref=%s %s=%s --iout=%s' % (cout, infile,
+                                                reffile,
+                                                flag, strval,
+                                                iout)
         yield assert_equal, fnirt.cmdline, cmd
 
     # Test ValueError is raised when missing mandatory args
@@ -409,26 +410,46 @@ def test_fnirt():
     res = fnirt.run()
     yield assert_equal, type(res), InterfaceResult
 
+    # test files
     opt_map = {
-        'affine':           ('--aff=affine.mat', 'affine.mat'),
-        'initwarp':         ('--inwarp=warp.mat', 'warp.mat'),
-        'initintensity':    ('--intin=inten.mat', 'inten.mat'),
-        'configfile':       ('--config=conf.txt', 'conf.txt'),
-        'referencemask':    ('--refmask=ref.mat', 'ref.mat'),
-        'imagemask':        ('--inmask=mask.nii', 'mask.nii'),
-        'fieldcoeff_file':  ('--cout=coef.txt', 'coef.txt'),
-        'outimage':         ('--iout=out.nii', 'out.nii'),
-        'fieldfile':        ('--fout=fld.txt', 'fld.txt'),
-        'jacobianfile':     ('--jout=jaco.txt', 'jaco.txt'),
-        'reffile':          ('--refout=refout.nii', 'refout.nii'),
-        'intensityfile':    ('--intout=intout.txt', 'intout.txt'),
-        'logfile':          ('--logout=log.txt', 'log.txt'),
-        'verbose':          ('--verbose', True),
-        'flags':            ('--fake-flag', '--fake-flag')}
+        'affine_file':          ('--aff='),
+        'inwarp_file':          ('--inwarp='),
+        'in_intensitymap_file': ('--intin='),
+        'config_file':          ('--config='),
+        'refmask_file':         ('--refmask='),
+        'inmask_file':          ('--inmask='),
+        'field_file':           ('--fout='),
+        'jacobian_file':        ('--jout='),
+        'modulatedref_file':    ('--refout='),
+        'out_intensitymap_file':('--intout='),
+        'log_file':             ('--logout=')}
 
     for name, settings in opt_map.items():
-        fnirt = fsl.FNIRT(**{name : settings[1]})
-        yield assert_equal, fnirt.cmdline, ' '.join([fnirt.cmd, settings[0]])
+        fnirt = fsl.FNIRT(in_file = infile,
+                          ref_file = reffile,
+                          **{name : infile})
+        
+        if name in ('config_file', 'affine_file','field_file'):
+            cmd = 'fnirt --cout=%s '\
+                  '--in=%s %s%s '\
+                  '--ref=%s --iout=%s' % (cout, infile,
+                                      reffile, settings,
+                                      infile, iout)
+        elif name in ('refmask_file'):
+            cmd = 'fnirt %s%s --cout=%s '\
+                  '--in=%s --ref=%s '\
+                  '%s%s --iout=%s' % (settings,infile,
+                                          cout, infile,
+                                          reffile,iout)
+            
+        else:
+            cmd = 'fnirt --cout=%s '\
+                  '--in=%s %s%s '\
+                  '--ref=%s --iout=%s' % (cout, infile,
+                                          settings, infile,
+                                          reffile,iout)
+                                       
+        yield assert_equal, fnirt.cmdline, cmd
     teardown_flirt(tmpdir)
     
 def test_applywarp():

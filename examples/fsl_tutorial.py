@@ -58,7 +58,7 @@ fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
 """
 
 # The following lines create some information about location of your
-# data. 
+# data.
 data_dir = os.path.abspath('data')
 subject_list = ['s1', 's3']
 # The following info structure helps the DataSource module organize
