@@ -11,7 +11,8 @@ Two nodes can be connected as shown below.
 
 .. testcode::
    
-   workflow.connect(realigner, 'realigned_files', smoother, 'infile')
+workflow.connect(realigner, 'realigned_files', smoother, 'infile')
+==================================================================
 
 The connection mechanism allows for a function to be evaluated on the
 output field ('realigned files') of the source node (realigner) and
@@ -69,10 +70,9 @@ Some details of setting up your cluster can be found in
 Debugging
 =========
 
-When a crash happens while running a pipeline, a crashdump is stored
-in the pipeline's working directory unless
-``pipeline.config['crashdumpdir']`` has been set. The crashdump is a `dict`
-containing three fields:
+When a crash happens while running a pipeline, a crashdump is stored in
+the pipeline's working directory unless the config option 'crashdumpdir'
+has been set. The crashdump is a `dict` containing three fields:
 
   1. node - the node that failed
   2. execgraph - the graph that the node came from
