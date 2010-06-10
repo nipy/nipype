@@ -427,6 +427,40 @@ class ThreedAutomask(AFNICommand):
         return out_inputs'''
 
 
+class ThreedvolregInputSpec(AFNITraitedSpec):
+    infile = File(desc = 'input file to 3dvolreg',
+                  argstr = '%s',
+                  position = -1,
+                  mandatory = True,
+                  exists = True)
+    outfile = File(desc = 'output file from 3dvolreg',
+                   argstr = '-prefix %s',
+                   position = -2,
+                   mandatory = True)
+    basefile = File(desc = 'base file for registration',
+                    argstr = '-base %s',
+                    position = -5)
+    md1dfile = File(desc = 'max displacement output file',
+                    argstr = '-maxdisp1D %s',
+                    position = -4)
+    onedfile = File(desc = '1D movement parameters output file',
+                    argstr = '-1Dfile %s',
+                    position = -3)
+    verbose = traits.Bool(desc = 'more detailed description of the process',
+                          argstr = '-verbose')
+    timeshift = traits.Bool(desc = 'time shift to mean slice time offset',
+                            argstr = '-tshift 0')
+    copyorigin = traits.Bool(desc = 'copy base file origin coords to output',
+                            argstr = '-twodup')
+    other = traits.Str(desc = 'other options',
+                         argstr = '%s')
+
+class ThreedvolregOutputSpec(AFNITraitedSpec):
+    out_file = File(desc = 'registered file',
+                    exists = True)
+    md1d_file = File(desc = 'max displacement info file')
+    oned_file = File(desc = 'movement parameters info file')
+
 class Threedvolreg(AFNICommand):
     """Register input volumes to a base volume using AFNI 3dvolreg command.
 
@@ -434,97 +468,14 @@ class Threedvolreg(AFNICommand):
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dvolreg.html>`_
     """
 
-    @property
-    def cmd(self):
-        """Base command for Threedvolreg"""
-        return '3dvolreg'
+    _cmd = '3dvolreg'
+    input_spec = ThreedvolregInputSpec
+    output_spec = ThreedvolregOutputSpec
 
-    def inputs_help(self):
-        doc = """
-        """
-        print doc
-
-    def _populate_inputs(self):
-        """Initialize the inputs attribute."""
-
-        self.inputs = Bunch(
-            verbose=None,
-            copy_origin=None,
-            time_shift=None,
-            basefile=None,
-            md1dfile=None,
-            onedfile=None,
-            outfile=None,
-            infile=None)
-
-    def _parseinputs(self):
-        """Parse valid input options for Threedvolreg command.
-
-        Ignore options set to None.
-
-        """
-
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.items() \
-             if v is not None]
-
-        if inputs.has_key('verbose'):
-            val = inputs.pop('verbose')
-            out_inputs.append('-verbose')
-        if inputs.has_key('copy_origin'):
-            val = inputs.pop('copy_origin')
-            out_inputs.append('-twodup')
-        if inputs.has_key('time_shift'):
-            val = inputs.pop('time_shift')
-            out_inputs.append('-tshift %s' % str(val))
-        if inputs.has_key('basefile'):
-            val = inputs.pop('basefile')
-            out_inputs.append('-base %s' % val)
-        if inputs.has_key('md1dfile'):
-            val = inputs.pop('md1dfile')
-            out_inputs.append('-maxdisp1D %s' % val)
-        if inputs.has_key('onedfile'):
-            val = inputs.pop('onedfile')
-            out_inputs.append('-1Dfile %s' % val)
-        if inputs.has_key('outfile'):
-            val = inputs.pop('outfile')
-            out_inputs.append('-prefix %s' % val)
-        if inputs.has_key('infile'):
-            val = inputs.pop('infile')
-            out_inputs.append('%s' % val)
-
-        if len(inputs) > 0:
-            msg = '%s: unsupported options: %s' % (
-                self.__class__.__name__, inputs.keys())
-            raise AttributeError(msg)
-
-        return out_inputs
-
-    def run(self, infile=None, **inputs):
-        """Execute 3dvolreg
-
-        Parameters
-        ----------
-        infile : string
-            File to register
-        inputs : dict
-            Dictionary of any additional flags to send to 3dvolreg
-
-        Returns
-        -------
-        results : InterfaceResult
-            A `InterfaceResult` object with a copy of self in `interface`
-
-        """
-        if infile:
-            self.inputs.infile = infile
-        if not self.inputs.infile:
-            raise AttributeError('Threedvolreg requires an infile.')
-        self.inputs.update(**inputs)
-        results = self._runner()
-        # XXX implement aggregate_outputs
-        return results
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.outfile
+        return outputs
 
 
 class Threedmerge(AFNICommand):
