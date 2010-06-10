@@ -366,6 +366,23 @@ class ThreedTstat(AFNICommand):
     '''
 
 
+class ThreedAutomaskInputSpec(AFNITraitedSpec):
+    infile = File(desc = 'input file to 3dAutomask',
+                  argstr = '%s',
+                  position = -1,
+                  mandatory = True,
+                  exists = True)
+    outfile = File(desc = 'output file from 3dAutomask',
+                   argstr = '-prefix %s',
+                   position = -2,
+                   mandatory = True)
+    options = traits.Str(desc = 'automask settings',
+                         argstr = '%s')
+
+class ThreedAutomaskOutputSpec(AFNITraitedSpec):
+    out_file = File(desc = 'mask file',
+                    exists = True)
+
 class ThreedAutomask(AFNICommand):
     """Create a brain-only mask of the image using AFNI 3dAutomask command.
 
@@ -373,23 +390,17 @@ class ThreedAutomask(AFNICommand):
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutomask.html>`_
     """
 
-    @property
-    def cmd(self):
-        """Base command for ThreedAutomask"""
-        return '3dAutomask'
+    _cmd = '3dAutomask'
+    input_spec = ThreedAutomaskInputSpec
+    output_spec = ThreedAutomaskOutputSpec
 
-    def inputs_help(self):
-        doc = """
-        """
-        print doc
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.outfile
+        return outputs
 
-    def _populate_inputs(self):
-        """Initialize the inputs attribute."""
 
-        self.inputs = Bunch(outfile=None,
-                            infile=None)
-
-    def _parseinputs(self):
+    '''def _parseinputs(self):
         """Parse valid input options for ThreedAutomask command.
 
         Ignore options set to None.
@@ -413,32 +424,7 @@ class ThreedAutomask(AFNICommand):
                 self.__class__.__name__, inputs.keys())
             raise AttributeError(msg)
 
-        return out_inputs
-
-    def run(self, infile=None, **inputs):
-        """Execute 3DAutomask
-
-        Parameters
-        ----------
-        infile : string
-            File to generate mask from.
-        inputs : dict
-            Dictionary of any additional flags to send to 3dTstat
-
-        Returns
-        -------
-        results : InterfaceResult
-            A `InterfaceResult` object with a copy of self in `interface`
-
-        """
-        if infile:
-            self.inputs.infile = infile
-        if not self.inputs.infile:
-            raise AttributeError('ThreedAutomask requires an infile.')
-        self.inputs.update(**inputs)
-        results = self._runner()
-        # XXX implement aggregate_outputs
-        return results
+        return out_inputs'''
 
 
 class Threedvolreg(AFNICommand):
