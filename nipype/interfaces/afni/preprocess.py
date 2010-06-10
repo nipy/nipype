@@ -1,15 +1,6 @@
 """Provide interface to AFNI commands."""
 __docformat__ = 'restructuredtext'
 
-''' Old imports
-from nipype.interfaces.base import Bunch, CommandLine
-from nipype.utils.docparse import get_doc
-from nipype.utils.misc import container_to_string
-
-import warnings
-warn = warnings.warn
-'''
-
 
 import os
 from glob import glob
@@ -243,27 +234,27 @@ class To3d(AFNICommand):
 
 
 class ThreedrefitInputSpec(AFNITraitedSpec):
-        infile = File(exists=True,
-                      desc = 'input file to 3drefit',
-                      argstr='%s', position=-1, mandatory=True)
-        deoblique = traits.Bool(desc = 'replace current transformation matrix with cardinal matrix',
-                       argstr='-deoblique')
-        xorigin = traits.Str(desc = 'x distance for edge voxel offset',
-                           argstr='-xorigin %s')
-        yorigin = traits.Str(desc = 'y distance for edge voxel offset',
-                           argstr='-yorigin %s')
-        zorigin = traits.Str(desc = 'y distance for edge voxel offset',
-                           argstr='-yorigin %s')
+    infile = File(desc = 'input file to 3drefit',
+                  argstr = '%s',
+                  position = -1,
+                  mandatory = True,
+                  exists = True)
+    deoblique = traits.Bool(desc = 'replace current transformation matrix with cardinal matrix',
+                            argstr = '-deoblique')
+    xorigin = traits.Str(desc = 'x distance for edge voxel offset',
+                         argstr = '-xorigin %s')
+    yorigin = traits.Str(desc = 'y distance for edge voxel offset',
+                         argstr = '-yorigin %s')
+    zorigin = traits.Str(desc = 'y distance for edge voxel offset',
+                         argstr = '-yorigin %s')
 
 class ThreedrefitOutputSpec(AFNITraitedSpec):
-    out_file = File(exists = True,
-                    desc = 'Same file as original infile' \
-                    'with modified matrix' )
-
+    out_file = File(desc = 'Same file as original infile with modified matrix',
+                    exists = True)
 
 class Threedrefit(AFNICommand):
     """ Use 3drefit for altering header info.
-        
+
         NOTES
         -----
         The original file is returned but it is CHANGED
@@ -278,123 +269,23 @@ class Threedrefit(AFNICommand):
         outputs['out_file'] = self.inputs.infile
         return outputs
 
-#class Threedrefit(AFNICommand):
-    #"""Fix errors in AFNI header resulting from using to3d command.
-
-    #For complete details, see the `3drefit Documentation. 
-    #<http://afni.nimh.nih.gov/pub/dist/doc/program_help/3drefit.html>`_
-    #"""
-
-    #_cmd = '3drefit'
-    #input_spec = ThreedrefitInputSpec
-    #output_spec = ThreedrefitOutputSpec
-
-    #def _run_interface(self, runtime):
-
-    #def _list_outputs(self):
-
-    #def _gen_filename(self,name):
-
-
-
-
-
-    #@property
-    #def cmd(self):
-        #"""Base command for Threedrefit"""
-        #return '3drefit'
-
-    #def inputs_help(self):
-        #doc = """
-        #"""
-        #print doc
-
-    #def _populate_inputs(self):
-        #"""Initialize the inputs attribute."""
-        #self.inputs = Bunch(deoblique=None,
-                            #xorigin=None,
-                            #yorigin=None,
-                            #zorigin=None,
-                            #infile=None)
-
-    #def _parseinputs(self):
-        #"""Parse valid input options for Threedrefit command.
-
-        #Ignore options set to None.
-
-        #"""
-
-        #out_inputs = []
-        #inputs = {}
-        #[inputs.update({k:v}) for k, v in self.inputs.items() \
-             #if v is not None]
-
-        #if inputs.has_key('deoblique'):
-            #val = inputs.pop('deoblique')
-            #out_inputs.append('-deoblique')
-        #if inputs.has_key('xorigin'):
-            #val = inputs.pop('xorigin')
-            #out_inputs.append('-xorigin %s' % val)
-        #if inputs.has_key('yorigin'):
-            #val = inputs.pop('yorigin')
-            #out_inputs.append('-yorigin %s' % val)
-        #if inputs.has_key('zorigin'):
-            #val = inputs.pop('zorigin')
-            #out_inputs.append('-zorigin %s' % val)
-        #if inputs.has_key('infile'):
-            #val = inputs.pop('infile')
-            #out_inputs.append('%s' % val)
-
-        #if len(inputs) > 0:
-            #msg = '%s: unsupported options: %s' % (
-                #self.__class__.__name__, inputs.keys())
-            #raise AttributeError(msg)
-
-        #return out_inputs
-
-    #def run(self, infile=None, **inputs):
-        #"""Execute the command.
-
-        #Parameters
-        #----------
-        #infile : filename
-            #File whose header file will be updated by 3drefit
-        #inputs : dict
-            #Dictionary of any additional flags to send to 3drefit
-        
-        #Returns
-        #-------
-        #results : InterfaceResult
-            #A `InterfaceResult` object with a copy of self in `interface`
-
-        #"""
-        #if infile:
-            #self.inputs.infile = infile
-        #if not self.inputs.infile:
-            #raise AttributeError('Threedrefit requires an infile.')
-        #self.inputs.update(**inputs)
-        #results = self._runner()
-        ## XXX implement aggregate_outputs
-        #return results
-
 
 class ThreedresampleInputSpec(AFNITraitedSpec):
-        infile = File(exists = True,
-                      desc = 'input file to 3dresample',
-                      argstr = '-inset %s',
-                      position = -1,
-                      mandatory = True)
-        outfile = File(desc = 'output file from 3dresample',
-                       argstr = '-prefix %s',
-                       position = -2,
-                       mandatory = True)
-        orientation = traits.Str(desc = 'new orientation code',
-                                 argstr = '-orient %s')
-
+    infile = File(desc = 'input file to 3dresample',
+                  argstr = '-inset %s',
+                  position = -1,
+                  mandatory = True,
+                  exists = True)
+    outfile = File(desc = 'output file from 3dresample',
+                   argstr = '-prefix %s',
+                   position = -2,
+                   mandatory = True)
+    orientation = traits.Str(desc = 'new orientation code',
+                             argstr = '-orient %s')
 
 class ThreedresampleOutputSpec(AFNITraitedSpec):
-        out_file = File(exists = True,
-                        desc = 'reoriented or resampled file')
+    out_file = File(desc = 'reoriented or resampled file',
+                    exists = True)
 
 class Threedresample(AFNICommand):
     """Resample or reorient an image using AFNI 3dresample command.
@@ -413,116 +304,41 @@ class Threedresample(AFNICommand):
         return outputs
 
 
+class ThreedTstatInputSpec(AFNITraitedSpec):
+    infile = File(desc = 'input file to 3dTstat',
+                  argstr = '%s',
+                  position = -1,
+                  mandatory = True,
+                  exists = True)
+    outfile = File(desc = 'output file from 3dTstat',
+                   argstr = '-prefix %s',
+                   position = -2,
+                   mandatory = True)
+    options = traits.Str(desc = 'selected statistical output',
+                         argstr = '%s')
 
-    #@property
-    #def cmd(self):
-        #"""Base command for Threedresample"""
-        #return '3dresample'
-
-    #def inputs_help(self):
-        #doc = """
-        #"""
-        #print doc
-
-    #def _populate_inputs(self):
-        #"""Initialize the inputs attribute."""
-
-        #self.inputs = Bunch(rsmode=None,
-                            #orient=None,
-                            #gridfile=None,
-                            #outfile=None,
-                            #infile=None)
-
-    #def _parseinputs(self):
-        #"""Parse valid input options for Threedresample command.
-
-        #Ignore options set to None.
-
-        #"""
-
-        #out_inputs = []
-        #inputs = {}
-        #[inputs.update({k:v}) for k, v in self.inputs.items() \
-             #if v is not None]
-
-        #if inputs.has_key('rsmode'):
-            #val = inputs.pop('rsmode')
-            #out_inputs.append('-rmode %s' % val)
-        #if inputs.has_key('orient'):
-            #val = inputs.pop('orient')
-            #out_inputs.append('-orient %s' % val)
-        #if inputs.has_key('gridfile'):
-            #val = inputs.pop('gridfile')
-            #out_inputs.append('-master %s' % val)
-        #if inputs.has_key('outfile'):
-            #val = inputs.pop('outfile')
-            #out_inputs.append('-prefix %s' % val)
-        #if inputs.has_key('infile'):
-            #val = inputs.pop('infile')
-            #out_inputs.append('-inset %s' % val)
-
-        #if len(inputs) > 0:
-            #msg = '%s: unsupported options: %s' % (
-                #self.__class__.__name__, inputs.keys())
-            #raise AttributeError(msg)
-
-        #return out_inputs
-
-    #def run(self, infile=None, outfile=None, **inputs):
-        #"""Execute 3dresample.
-
-        #Parameters
-        #----------
-        #infile : filename
-            #File that we be resampled
-        #outfile : filename
-            #Output file name or prefix for output file name.
-        #inputs : dict
-            #Dictionary of any additional flags to send to 3dresample
-
-        #Returns
-        #-------
-        #results : InterfaceResult
-            #A `InterfaceResult` object with a copy of self in `interface`
-
-        #"""
-        #if infile:
-            #self.inputs.infile = infile
-        #if outfile:
-            #self.inputs.outfile = outfile
-        #if not self.inputs.infile or not self.inputs.outfile:
-            #msg = 'Threedresample requires an infile and an outfile.'
-            #raise AttributeError(msg)
-        #self.inputs.update(**inputs)
-        #results = self._runner()
-        ## XXX implement aggregate_outputs
-        #return results
-
+class ThreedTstatOutputSpec(AFNITraitedSpec):
+    out_file = File(desc = 'statistical file',
+                    exists = True)
 
 class ThreedTstat(AFNICommand):
-    """Compute voxel-wise statistices using AFNI 3dTstat command.
+    """Compute voxel-wise statistics using AFNI 3dTstat command.
 
     For complete details, see the `3dTstat Documentation. 
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html>`_
     """
 
-    @property
-    def cmd(self):
-        """Base command for ThreedTstat"""
-        return '3dTstat'
+    _cmd = '3dTstat'
+    input_spec = ThreedTstatInputSpec
+    output_spec = ThreedTstatOutputSpec
 
-    def inputs_help(self):
-        doc = """
-        """
-        print doc
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.outfile
+        return outputs
 
-    def _populate_inputs(self):
-        """Initialize the inputs attribute."""
 
-        self.inputs = Bunch(outfile=None,
-                            infile=None)
-
-    def _parseinputs(self):
+    '''    def _parseinputs(self):
         """Parse valid input options for ThreedTstat command.
 
         Ignore options set to None.
@@ -547,31 +363,7 @@ class ThreedTstat(AFNICommand):
             raise AttributeError(msg)
 
         return out_inputs
-
-    def run(self, infile=None, **inputs):
-        """Execute 3dTstat
-
-        Parameters
-        ----------
-        infile : string
-            File to compute statistics on.
-        inputs : dict
-            Dictionary of any additional flags to send to 3dTstat
-
-        Returns
-        -------
-        results : InterfaceResult
-            A `InterfaceResult` object with a copy of self in `interface`
-
-        """
-        if infile:
-            self.inputs.infile = infile
-        if not self.inputs.infile:
-            raise AttributeError('ThreedTstat requires an infile.')
-        self.inputs.update(**inputs)
-        results = self._runner()
-        # XXX implement aggregate_outputs
-        return results
+    '''
 
 
 class ThreedAutomask(AFNICommand):
