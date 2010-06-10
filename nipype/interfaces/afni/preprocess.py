@@ -478,6 +478,28 @@ class Threedvolreg(AFNICommand):
         return outputs
 
 
+class ThreedmergeInputSpec(AFNITraitedSpec):
+    infile = File(desc = 'input file to 3dvolreg',
+                  argstr = '%s',
+                  position = -1,
+                  mandatory = True,
+                  exists = True)
+    outfile = File(desc = 'output file from 3dvolreg',
+                   argstr = '-prefix %s',
+                   position = -2,
+                   mandatory = True)
+    doall = traits.Bool(desc = 'apply options to all sub-bricks in dataset',
+                        argstr = '-doall')
+    blurfwhm = traits.Int(desc = 'FWHM blur value (mm)',
+                          argstr = '-1blur_fwhm %d',
+                          units = 'mm')
+    other = traits.Str(desc = 'other options',
+                         argstr = '%s')
+
+class ThreedmergeOutputSpec(AFNITraitedSpec):
+    out_file = File(desc = 'smoothed file',
+                    exists = True)
+
 class Threedmerge(AFNICommand):
     """Merge or edit volumes using AFNI 3dmerge command.
 
@@ -485,84 +507,14 @@ class Threedmerge(AFNICommand):
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html>`_
     """
 
-    @property
-    def cmd(self):
-        """Base command for Threedmerge"""
-        return '3dmerge'
+    _cmd = '3dmerge'
+    input_spec = ThreedmergeInputSpec
+    output_spec = ThreedmergeOutputSpec
 
-    def inputs_help(self):
-        doc = """
-        """
-        print doc
-
-    def _populate_inputs(self):
-        """Initialize the inputs attribute."""
-
-        self.inputs = Bunch(
-            doall=None,
-            gblur_fwhm=None,
-            outfile=None,
-            infiles=None)
-
-    def _parseinputs(self):
-        """Parse valid input options for Threedmerge command.
-
-        Ignore options set to None.
-
-        """
-
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.items() \
-             if v is not None]
-
-        if inputs.has_key('doall'):
-            val = inputs.pop('doall')
-            out_inputs.append('-doall')
-        if inputs.has_key('gblur_fwhm'):
-            val = inputs.pop('gblur_fwhm')
-            out_inputs.append('-1blur_fwhm %s' % str(val))
-        if inputs.has_key('outfile'):
-            val = inputs.pop('outfile')
-            out_inputs.append('-prefix %s' % val)
-        if inputs.has_key('infiles'):
-            val = inputs.pop('infiles')
-            if type(val) == list:
-                out_inputs.append('%s' % ' '.join(val))
-            else:
-                out_inputs.append('%s' % val)
-
-        if len(inputs) > 0:
-            msg = '%s: unsupported options: %s' % (
-                self.__class__.__name__, inputs.keys())
-            raise AttributeError(msg)
-
-        return out_inputs
-
-    def run(self, infiles=None, **inputs):
-        """Execute 3dmerge
-
-        Parameters
-        ----------
-        infiles : string or list of strings
-            Files to edit or merge
-        inputs : dict
-            Dictionary of any additional flags to send to 3dmerge
-
-        Returns
-        -------
-        results : InterfaceResult
-            A `InterfaceResult` object with a copy of self in `interface`
-
-        """
-        if infiles:
-            self.inputs.infiles = infiles
-        if not self.inputs.infiles:
-            raise AttributeError('Threedmerge requires an infile.')
-        self.inputs.update(**inputs)
-        results = self._runner()
-        # XXX implement aggregate_outputs
-        return results
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.outfile
+        return outputs
 
 
 class ThreedZcutup(AFNICommand):

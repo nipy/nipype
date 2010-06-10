@@ -11,15 +11,4 @@ warnings.warn('AFNI interface unstable.  Use at own risk.')
 
 
 from nipype.interfaces.afni.base import Info, AFNICommand, AFNITraitedSpec
-from nipype.interfaces.afni.preprocess import (Threedrefit, Threedresample, ThreedTstat, ThreedAutomask, Threedvolreg)
-                                              #Bet, McFlirt, Fnirt, ApplyWarp)
-#from nipype.interfaces.afni.model import (Level1Design, Feat, FeatModel,
-                                         #FilmGLS, FixedEffectsModel,
-                                         #FeatRegister, Flameo, ContrastMgr,
-                                         #L2Model)
-#from nipype.interfaces.afni.utils import (Smooth, Merge, ExtractRoi, Split,
-                                         #ImageMaths)
-#from nipype.interfaces.afni.dti import (Eddycorrect, Bedpostx, Dtifit, Tbss2reg,
-                                       #Tbss1preproc, Tbss3postreg,
-                                       #Tbss4prestats, Randomise,
-                                       #Probtrackx,Vecreg, ProjThresh, FindTheBiggest)
+from nipype.interfaces.afni.preprocess import (Threedrefit, Threedresample, ThreedTstat, ThreedAutomask, Threedvolreg, Threedmerge)
