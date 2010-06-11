@@ -11,4 +11,4 @@ warnings.warn('AFNI interface unstable.  Use at own risk.')
 
 
 from nipype.interfaces.afni.base import Info, AFNICommand, AFNITraitedSpec
-from nipype.interfaces.afni.preprocess import (Threedrefit, Threedresample, ThreedTstat, ThreedAutomask, Threedvolreg, Threedmerge, ThreedZcutup)
+from nipype.interfaces.afni.preprocess import (To3d, Threedrefit, Threedresample, ThreedTstat, ThreedAutomask, Threedvolreg, Threedmerge, ThreedZcutup)

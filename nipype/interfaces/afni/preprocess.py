@@ -18,10 +18,30 @@ warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 class To3dInputSpec(AFNITraitedSpec):
-    pass
+    infolder = traits.Directory(desc = 'folder with DICOM images to convert',
+                                argstr = '%s/*.dcm',
+                                position = -1,
+                                mandatory = True,
+                                exists = True)
+    outfile = File(desc = 'converted image file',
+                   argstr = '-prefix %s',
+                   position = -2,
+                   mandatory = True)
+    filetype = traits.Str(desc = 'type of datafile being converted',
+                          argstr = '-%s')
+    '''use xor'''
+    skipoutliers = traits.Bool(desc = 'skip the outliers check',
+                               argstr = '-skip_outliers')
+    assumemosaic = traits.Bool(desc = 'assume that Siemens image is mosaic',
+                               argstr = '-assume_dicom_mosaic')
+    datatype = traits.Str(desc = 'set output file datatype',
+                          argstr = '-datum %s')
+    funcparams = traits.Str(desc = 'parameters for functional data',
+                            argstr = '-time:zt %s alt+z2')
 
 class To3dOutputSpec(TraitedSpec):
-    pass
+    out_file = File(desc = 'converted file',
+                    exists = True)
 
 class To3d(AFNICommand):
     """Create a 3D dataset from 2D image files using AFNI to3d command.
@@ -41,37 +61,16 @@ class To3d(AFNICommand):
 
     """
 
-    @property
-    def cmd(self):
-        """Base command for To3d"""
-        return 'to3d'
+    _cmd = 'to3d'
+    input_spec = To3dInputSpec
+    output_spec = To3dOutputSpec
 
-    def inputs_help(self):
-        """Print command line documentation for to3d."""
-        #print get_doc(self.cmd, self.opt_map)
-        raise NotImplementedError
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.outfile
+        return outputs
 
-    def _populate_inputs(self):
-        """Initialize the inputs attribute."""
-        self.inputs = Bunch(datatype=None,
-                            skip_outliers=None,
-                            assume_dicom_mosaic=None,
-                            datum=None,
-                            time_dependencies=None,
-                            session=None,
-                            prefix=None,
-                            infiles=None)
-
-    opt_map = {'datatype' : '-%s',
-               'skip_outliers' : '-skip_outliers',
-               'assume_dicom_mosaic' : '-assume_dicom_mosaic',
-               'datum' : '-datum %s',
-               'time_dependencies' : '-time:%s %d %d %.2f %s',
-               'session' : '-session %s',
-               'prefix' : '-prefix %s',
-               }
-
-    def _parseinputs_old(self):
+    '''def _parseinputs_old(self):
         """Parse valid input options for To3d command.
 
         Ignore options set to None.
@@ -205,32 +204,7 @@ class To3d(AFNICommand):
         if self.inputs.infiles:
             allargs.append(container_to_string(self.inputs.infiles))
         return allargs
-
-
-    def run(self, infiles=None, **inputs):
-        """Execute the command.
-
-        Parameters
-        ----------
-        infiles : string or list of strings
-            File or list of files to combine into 3d file.
-        inputs : dict
-            Dictionary of any additional flags to send to to3d
-        
-        Returns
-        -------
-        results : InterfaceResult
-            A `InterfaceResult` object with a copy of self in `interface`
-
-        """
-        if infiles:
-            self.inputs.infiles = infiles
-        if not self.inputs.infiles:
-            raise AttributeError('To3d requires infiles.')
-        self.inputs.update(**inputs)
-        results = self._runner()
-        # XXX implement aggregate_outputs
-        return results
+    '''
 
 
 class ThreedrefitInputSpec(AFNITraitedSpec):
@@ -424,7 +398,8 @@ class ThreedAutomask(AFNICommand):
                 self.__class__.__name__, inputs.keys())
             raise AttributeError(msg)
 
-        return out_inputs'''
+        return out_inputs
+    '''
 
 
 class ThreedvolregInputSpec(AFNITraitedSpec):
