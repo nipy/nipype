@@ -517,6 +517,25 @@ class Threedmerge(AFNICommand):
         return outputs
 
 
+class ThreedZcutupInputSpec(AFNITraitedSpec):
+    infile = File(desc = 'input file to 3dZcutup',
+                  argstr = '%s',
+                  position = -1,
+                  mandatory = True,
+                  exists = True)
+    outfile = File(desc = 'output file from 3dZcutup',
+                   argstr = '-prefix %s',
+                   position = -2,
+                   mandatory = True)
+    keep = traits.Str(desc = 'slice range to keep in output',
+                      argstr = '-keep %s')
+    other = traits.Str(desc = 'other options',
+                         argstr = '%s')
+
+class ThreedZcutupOutputSpec(AFNITraitedSpec):
+    out_file = File(desc = 'cut file',
+                    exists = True)
+
 class ThreedZcutup(AFNICommand):
     """Cut z-slices from a volume using AFNI 3dZcutup command.
 
@@ -524,25 +543,18 @@ class ThreedZcutup(AFNICommand):
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcutup.html>`_
     """
 
-    @property
-    def cmd(self):
-        """Base command for ThreedZcutup"""
-        return '3dZcutup'
+    _cmd = '3dZcutup'
+    input_spec = ThreedZcutupInputSpec
+    output_spec = ThreedZcutupOutputSpec
 
-    def inputs_help(self):
-        doc = """
-        """
-        print doc
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.outfile
+        return outputs
 
-    def _populate_inputs(self):
-        """Initialize the inputs attribute."""
 
-        self.inputs = Bunch(
-            keep=None,
-            outfile=None,
-            infile=None)
 
-    def _parseinputs(self):
+    '''def _parseinputs(self):
         """Parse valid input options for ThreedZcutup command.
 
         Ignore options set to None.
@@ -585,6 +597,7 @@ class ThreedZcutup(AFNICommand):
             raise AttributeError(msg)
 
         return out_inputs
+    '''
 
 
 class ThreedSkullStrip(AFNICommand):
