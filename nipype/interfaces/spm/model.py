@@ -673,6 +673,10 @@ class MultipleRegression(SPMCommand):
 class ThresholdInputSpec(SPMCommandInputSpec):
     spm_mat_file = File(exists=True, desc='absolute path to SPM.mat', copyfile=True, mandatory=True)
     spmT_images = InputMultiPath(File(exists=True), desc='stat images from a t-contrast', copyfile=False, mandatory=True)
+    mask_image = File(exists=True, desc='binary mask to constrain estimation', copyfile=False, mandatory=True)
+    beta_images = InputMultiPath(File(exists=True), desc='design parameter estimates', copyfile=False, mandatory=True)
+    residual_image = File(exists=True, desc='Mean-squared image of the residuals', copyfile=False, mandatory=True)
+    RPVimage = File(exists=True, desc='Resels per voxel image', copyfile=False, mandatory=True)
     contrast_index = traits.Int(mandatory=True, desc='which contrast (T map) to use')
     use_fwe_correction = traits.Bool(True, usedefault=True, desc="whether to use FWE (Bonferroni) correction for initial threshold")
     height_threshold = traits.Float(0.05, usedefault=True, desc="p-value for initial thresholding (defining clusters)")
