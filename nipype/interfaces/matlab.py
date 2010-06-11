@@ -59,7 +59,8 @@ class MatlabCommand(CommandLine):
             self.inputs.paths = self._default_paths
             
         if not isdefined(self.inputs.singleCompThread):
-            self.inputs.singleCompThread = config.getboolean('execution','single_thread_matlab')
+            if config.getboolean('execution','single_thread_matlab'):
+                self.inputs.singleCompThread = True
             
     @classmethod
     def set_default_matlab_cmd(cls, matlab_cmd):
