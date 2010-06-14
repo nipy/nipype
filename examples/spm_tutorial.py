@@ -14,11 +14,11 @@ nipype tutorial directory:
 
 """Import necessary modules from nipype."""
 
-import nipype.interfaces.io as nio           # Data i/o 
+import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
 import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility 
+import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
 import nipype.algorithms.modelgen as model   # model specification
@@ -78,7 +78,8 @@ subject_list = ['s1', 's3']
 info = dict(func=[['subject_id', ['f3','f5','f7','f10']]],
             struct=[['subject_id','struct']])
 
-infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
+infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
+                     name="infosource")
 
 """Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
@@ -103,8 +104,8 @@ functionality.
 """
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                                      outfields=['func', 'struct']),
-                            name = 'datasource')
+                                               outfields=['func', 'struct']),
+                     name = 'datasource')
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info

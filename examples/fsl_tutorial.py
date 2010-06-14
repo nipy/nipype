@@ -9,7 +9,7 @@ perform a first and second level analysis on a two-subject data set.
 1. Tell python where to find the appropriate functions.
 """
 
-import nipype.interfaces.io as nio           # Data i/o 
+import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.spm as spm          # spm
 import nipype.pipeline.node_wrapper as nw    # nodes for pypelines
@@ -73,7 +73,7 @@ info['s3'] = ((['f3','f5','f7','f10'],'func'),(['struct'],'struct'),(['ref'],'fu
 Setup preprocessing pipeline nodes
 ----------------------------------
 
-4. Setup various nodes for preprocessing the data. 
+4. Setup various nodes for preprocessing the data.
 
 a. Setting up an instance of the interface
 :class:`nipype.interfaces.io.DataSource`. This node looks into the
@@ -161,7 +161,7 @@ t1applywarp.inputs.out_file = 't1_warped'
 # For functionals - refers to some files above
 # flirt -ref my_betted_structural -in my_functional -dof 7 -omat func2struct.mat
 
-ref2t1 = nw.NodeWrapper(interface=fsl.FLIRT(), diskbased=True, 
+ref2t1 = nw.NodeWrapper(interface=fsl.FLIRT(), diskbased=True,
                          name='ref_Flirt.fsl')
 ref2t1.inputs.out_matrix_file = 'ref2t1.xfm'
 ref2t1.inputs.dof = 6
@@ -293,7 +293,7 @@ l1pipeline.base_dir = os.path.abspath('./fsl/workingdir')
 
 l1pipeline.connect([# preprocessing in native space
                  (datasource, skullstrip,[('struct','infile')]),
-                 (datasource, motion_correct, 
+                 (datasource, motion_correct,
                      [('func', 'infile'), ('func_ref', 'reffile')]),
                  (motion_correct, func_skullstrip,
                      [('outfile', 'infile')]),
@@ -302,7 +302,7 @@ l1pipeline.connect([# preprocessing in native space
                  (skullstrip, t1reg2std,[('outfile', 'infile')]),
                  (datasource, t1warp2std,[('struct', 'infile')]),
                  (t1reg2std, t1warp2std, [('outmatrix', 'affine')]),
-                 (t1warp2std, t1applywarp, 
+                 (t1warp2std, t1applywarp,
                      [('fieldcoeff_file', 'fieldfile')]),
                  # It would seem a little more parsimonious to get this from
                  # t1warp2std, but it's only an input there...
@@ -331,22 +331,22 @@ l1pipeline.connect([# preprocessing in native space
 
 # store relevant outputs from various stages of preprocessing
 l1pipeline.connect([(datasource,datasink,[('subject_id','subject_id')]),
-                    (skullstrip, datasink, 
+                    (skullstrip, datasink,
                         [('outfile', 'skullstrip.@outfile')]),
                     (func_skullstrip, datasink,
                         [('outfile', 'skullstrip.@outfile')]),
                     (motion_correct, datasink,
                         [('parfile', 'skullstrip.@parfile')]),
                     # We aren't really going to look at these, are we?
-                    # (t1reg2std, datasink, 
+                    # (t1reg2std, datasink,
                     #     [('outmatrix', 'registration.@outmatrix')]),
-                    # (t1warp2std, datasink, 
+                    # (t1warp2std, datasink,
                     #     [('fieldcoeff_file', 'registration.@fieldcoeff_file')]),
                     (t1applywarp, datasink,
                         [('outfile', 'registration.@outfile')]),
                     (funcapplywarp, datasink,
                         [('outfile', 'registration.@outfile')]),
-                    (smoothing, datasink, 
+                    (smoothing, datasink,
                         [('smoothedimage', 'registration.@outfile')]),
                     #(conestimate,datasink,[('statsdir','stats')]),
                     ])

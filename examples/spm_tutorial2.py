@@ -14,11 +14,11 @@ nipype tutorial directory:
 
 """Import necessary modules from nipype."""
 
-import nipype.interfaces.io as nio           # Data i/o 
+import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
 import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility 
+import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
 import nipype.algorithms.modelgen as model   # model specification
@@ -122,7 +122,7 @@ normalize.inputs.template = os.path.abspath('data/T1.nii')
 smooth = pe.Node(interface=spm.Smooth(), name = "smooth")
 fwhmlist = [4]
 smooth.iterables = ('fwhm',fwhmlist)
-                 
+
 preproc.connect([(realign,coregister,[('mean_image', 'source'),
                                       ('realigned_files','apply_to_files')]),
                  (coregister, normalize, [('coregistered_files','apply_to_files')]),

@@ -13,9 +13,9 @@
 1. Tell python where to find the appropriate functions.
 """
 
-import nipype.interfaces.io as nio           # Data i/o 
+import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility 
+import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import os                                    # system functions
 
@@ -75,7 +75,8 @@ info = dict(dwi=[['subject_id', 'data.nii.gz']],
                                           'MASK_average_temporal_right.nii.gz']]],
             xfm=[['subject_id','standard2diff.mat']])
 
-infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
+infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
+                     name="infosource")
 
 """Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
@@ -139,10 +140,10 @@ dtifit = pe.Node(interface=fsl.DTIFit(),name='dtifit')
 connect all the nodes for this workflow
 """
 computeTensor.connect([
-                        (fslroi,bet,[('roi_file','in_file')]),  
-                        (eddycorrect,dtifit,[('eddy_corrected','dwi')]),                                   
+                        (fslroi,bet,[('roi_file','in_file')]),
+                        (eddycorrect,dtifit,[('eddy_corrected','dwi')]),
                         (infosource, dtifit,[['subject_id','base_name']]),
-                        (bet,dtifit,[('mask_file','mask')])                       
+                        (bet,dtifit,[('mask_file','mask')])
                       ])
 
 
@@ -157,7 +158,7 @@ and hard segmentation of the seed region
 tractography = pe.Workflow(name='tractography')
 
 """
-estimate the diffusion parameters: phi, theta, and so on 
+estimate the diffusion parameters: phi, theta, and so on
 """
 bedpostx = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx')
 
@@ -175,7 +176,7 @@ probtrackx.inputs.mode='seedmask'
 
 
 """
-threshold the output of probtrackx 
+threshold the output of probtrackx
 """
 projthresh = pe.Node(interface=fsl.ProjThresh(),name='projthresh')
 projthresh.inputs.threshold = 1
@@ -194,7 +195,7 @@ tractography.connect([
                         (bedpostx,probtrackx,[('bpx_out_directory','bpx_directory')]),
                         (bedpostx,probtrackx,[('bpx_out_directory','out_dir')]),
                         (probtrackx,projthresh,[('targets','in_files')]),
-                        (projthresh,findthebiggest,[('out_files','in_files')])                    
+                        (projthresh,findthebiggest,[('out_files','in_files')])
                     ])
 
 
@@ -215,7 +216,7 @@ Setup the pipeline that combines the two workflows: tractography and computeTens
 dwiproc = pe.Workflow(name="dwiproc")
 dwiproc.base_dir = os.path.abspath('data/workingdir')
 dwiproc.connect([
-                    (infosource,datasource,[('subject_id', 'subject_id')]),                   
+                    (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,computeTensor,[('dwi','fslroi.in_file'),
                                                ('bvals','dtifit.bvals'),
                                                ('bvecs','dtifit.bvecs'),
@@ -235,7 +236,7 @@ dwiproc.connect([
 
 dwiproc.run()
 dwiproc.write_graph()
-          
+
 
 """
 Setup for Tract-Based Spatial Statistics (TBSS) Computation
@@ -283,7 +284,7 @@ randomise = pe.Node(fsl.Randomise(),name='randomise')
 randomise.inputs.design_mat=os.path.abspath('data/tbss/design.mat')
 randomise.inputs.t_con=os.path.abspath('data/tbss/design.con')
 randomise.inputs.num_perm=10
-                    
+
 
 """
 Setup the pipeline that runs tbss
@@ -292,35 +293,11 @@ Setup the pipeline that runs tbss
 tbss_workflow.connect([ (tbss_source,tbss1,[('outfiles','imglist')]),
                         (tbss1,tbss2,[('tbssdir','tbssdir')]),
                         (tbss2,tbss3,[('tbssdir','tbssdir')]),
-                        (tbss3,tbss4,[('tbssdir','tbssdir')]),                        
+                        (tbss3,tbss4,[('tbssdir','tbssdir')]),
                         (tbss4,randomise,[('all_FA_skeletonised','in_file')]),
-                        (tbss4,randomise,[('mean_FA_skeleton_mask','mask')])            
+                        (tbss4,randomise,[('mean_FA_skeleton_mask','mask')])
                     ])
 
 tbss_workflow.run()
 tbss_workflow.write_graph()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

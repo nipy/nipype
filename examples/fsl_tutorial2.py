@@ -8,9 +8,9 @@ python fsl_tutorial2.py
 First tell python where to find the appropriate functions.
 """
 
-import nipype.interfaces.io as nio           # Data i/o 
+import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility 
+import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model generation
 import os                                    # system functions
@@ -21,7 +21,7 @@ Preliminaries
 -------------
 
 Confirm package dependencies are installed.  (This is only for the tutorial,
-rarely would you put this in your own code.) 
+rarely would you put this in your own code.)
 """
 
 from nipype.utils.misc import package_check
@@ -122,7 +122,7 @@ modelfit = pe.Workflow(name='modelfit')
 
 """
    c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
-   SPM-specific design information. 
+   SPM-specific design information.
 """
 
 modelspec = pe.Node(interface=model.SpecifyModel(),  name="modelspec")
@@ -153,7 +153,7 @@ modelestimate = pe.MapNode(interface=fsl.FILMGLS(), name='modelestimate',
 
 """
    f. Use :class:`nipype.interfaces.fsl.ContrastMgr` to generate contrast
-   estimates 
+   estimates
 """
 
 conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
@@ -261,7 +261,8 @@ subject_list = ['s1', 's3']
 info = dict(func=[['subject_id', ['f3','f5','f7','f10']]],
             struct=[['subject_id','struct']])
 
-infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
+infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
+                     name="infosource")
 
 """Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
@@ -341,7 +342,7 @@ def subjectinfo(subject_id):
    a list of lists. The inner list specifies the contrasts and has the
    following format - [Name,Stat,[list of condition names],[weights on
    those conditions]. The condition names must match the `names`
-   listed in the `subjectinfo` function described above. 
+   listed in the `subjectinfo` function described above.
 """
 
 cont1 = ['Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5]]
@@ -355,12 +356,12 @@ firstlevel.inputs.modelfit.modelspec.time_repetition = TR
 firstlevel.inputs.modelfit.modelspec.high_pass_filter_cutoff = hpcutoff
 
 
-firstlevel.inputs.modelfit.level1design.interscan_interval = TR 
+firstlevel.inputs.modelfit.level1design.interscan_interval = TR
 firstlevel.inputs.modelfit.level1design.bases = {'dgamma':{'derivs': True}}
 firstlevel.inputs.modelfit.level1design.contrasts = contrasts
 firstlevel.inputs.modelfit.level1design.register = True
 firstlevel.inputs.modelfit.level1design.reg_image = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
-firstlevel.inputs.modelfit.level1design.reg_dof = 12 
+firstlevel.inputs.modelfit.level1design.reg_dof = 12
 
 """
 Set up complete workflow
@@ -392,7 +393,7 @@ l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
    with appropriate parameters and the connectivity between the
    processes, but does not generate any output. To actually run the
    analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
-   function needs to be called. 
+   function needs to be called.
 """
 
 if __name__ == '__main__':

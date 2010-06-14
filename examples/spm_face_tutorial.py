@@ -11,11 +11,11 @@ using auditory dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/
 
 """Import necessary modules from nipype."""
 
-import nipype.interfaces.io as nio           # Data i/o 
+import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
 import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility 
+import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model specification
 import nipype.externals.pynifti as ni
@@ -201,10 +201,10 @@ l1pipeline.connect([(preproc, l1analysis, [('realign.realignment_parameters',
                                             'modelspec.realignment_parameters')])])
 
 """Pluging in `functional_runs` is a bit more complicated, because model spec expects a list of `runs`.
-Every run can be a 4D file or a list of 3D files. Therefore for 3D analysis we need a list of lists and 
+Every run can be a 4D file or a list of 3D files. Therefore for 3D analysis we need a list of lists and
 to make one we need a helper function.
 """
-  
+
 def makelist(item):
     return [item]
 l1pipeline.connect([(preproc, l1analysis, [(('smooth.smoothed_files',makelist),
@@ -232,7 +232,8 @@ subject_list = ['M03953']
 info = dict(func=[['RawEPI', 'subject_id', 5, ["_%04d"%i for i in range(6,357)]]],
             struct=[['Structural', 'subject_id', 7, '']])
 
-infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
+infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
+                     name="infosource")
 
 """Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
@@ -350,7 +351,7 @@ l1designref.bases = {'hrf':{'derivs': [1,1]}}
 
 """
 The following lines automatically inform SPM to create a default set of
-contrats for a factorial design. 
+contrats for a factorial design.
 """
 
 #l1designref.factor_info = [dict(name = 'Fame', levels = 2),
@@ -402,7 +403,7 @@ l1pipeline.connect([(preproc, paramanalysis, [('realign.realignment_parameters',
                                             'modelspec.realignment_parameters'),
                                             (('smooth.smoothed_files',makelist),
                                                 'modelspec.functional_runs')])])
-                 
+
 """
 Setup the pipeline
 ------------------

@@ -7,7 +7,7 @@
 1. Tell python where to find the appropriate functions.
 """
 
-import nipype.interfaces.io as nio           # Data i/o 
+import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model generation
@@ -116,7 +116,7 @@ modelfit = pe.Workflow(name='modelfit')
 
 """
    c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
-   SPM-specific design information. 
+   SPM-specific design information.
 """
 modelspec = pe.Node(interface=model.SpecifyModel(),  name="modelspec")
 
@@ -140,7 +140,7 @@ modelestimate = pe.Node(interface=fsl.FILMGLS(), name='modelestimate')
 
 """
    f. Use :class:`nipype.interfaces.fsl.ContrastMgr` to generate contrast
-   estimates 
+   estimates
 """
 conestimate = pe.Node(interface=fsl.ContrastMgr(), name='conestimate')
 
@@ -185,7 +185,7 @@ functionality.
 
 datasource = pe.Node(interface=nio.DataGrabber(outfields=['func', 'struct']),
                      name = 'datasource')
-datasource.inputs.base_directory = feeds_data_dir 
+datasource.inputs.base_directory = feeds_data_dir
 datasource.inputs.template = '%s.nii.gz'
 datasource.inputs.template_args = info
 
@@ -221,7 +221,7 @@ firstlevel.inputs.modelfit.modelspec.subject_info = [Bunch(conditions=['Visual',
    a list of lists. The inner list specifies the contrasts and has the
    following format - [Name,Stat,[list of condition names],[weights on
    those conditions]. The condition names must match the `names`
-   listed in the `subjectinfo` function described above. 
+   listed in the `subjectinfo` function described above.
 """
 cont1 = ['Visual>Baseline','T', ['Visual','Auditory'],[1,0]]
 cont2 = ['Auditory>Baseline','T', ['Visual','Auditory'],[0,1]]
@@ -235,12 +235,12 @@ firstlevel.inputs.modelfit.modelspec.high_pass_filter_cutoff = hpcutoff
 firstlevel.inputs.modelfit.modelspec.subject_id = 'whatever'
 
 
-firstlevel.inputs.modelfit.level1design.interscan_interval = TR 
+firstlevel.inputs.modelfit.level1design.interscan_interval = TR
 firstlevel.inputs.modelfit.level1design.bases = {'dgamma':{'derivs': True}}
 firstlevel.inputs.modelfit.level1design.contrasts = contrasts
 firstlevel.inputs.modelfit.level1design.register = True
 firstlevel.inputs.modelfit.level1design.reg_image = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
-firstlevel.inputs.modelfit.level1design.reg_dof = 12 
+firstlevel.inputs.modelfit.level1design.reg_dof = 12
 
 """
 Set up complete workflow
@@ -268,7 +268,7 @@ l1pipeline.connect([(datasource, firstlevel, [('struct','preproc.stripstruct.in_
    with appropriate parameters and the connectivity between the
    processes, but does not generate any output. To actually run the
    analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
-   function needs to be called. 
+   function needs to be called.
 """
 if __name__ == '__main__':
     l1pipeline.run()

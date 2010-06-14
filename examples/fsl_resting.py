@@ -1,7 +1,7 @@
 """
    A pipeline example that uses intergrates several interfaces to
    perform a first and second level analysis on a two-subject data
-   set. 
+   set.
 """
 
 
@@ -9,9 +9,9 @@
 1. Tell python where to find the appropriate functions.
 """
 
-import nipype.interfaces.io as nio           # Data i/o 
+import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility 
+import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model generation
 import os                                    # system functions
@@ -127,7 +127,7 @@ modelfit = pe.Workflow(name='modelfit')
 
 """
    c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
-   SPM-specific design information. 
+   SPM-specific design information.
 """
 modelspec = pe.Node(interface=model.SpecifyModel(),  name="modelspec")
 
@@ -180,7 +180,8 @@ subject_list = ['s1']
 info = dict(func=[['subject_id', ['f3',]]], #'f5','f7','f10']]],
             struct=[['subject_id','struct']])
 
-infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
+infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
+                     name="infosource")
 
 """Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
@@ -248,12 +249,12 @@ modelfit.inputs.modelspec.time_repetition = TR
 modelfit.inputs.modelspec.high_pass_filter_cutoff = hpcutoff
 
 
-modelfit.inputs.fsfdesign.interscan_interval = TR 
+modelfit.inputs.fsfdesign.interscan_interval = TR
 modelfit.inputs.fsfdesign.bases = {'dgamma':{'derivs': True}}
 modelfit.inputs.fsfdesign.contrasts = contrasts
 modelfit.inputs.fsfdesign.register = True
 modelfit.inputs.fsfdesign.reg_image = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
-modelfit.inputs.fsfdesign.reg_dof = 12 
+modelfit.inputs.fsfdesign.reg_dof = 12
 
 
 """

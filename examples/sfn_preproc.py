@@ -1,7 +1,7 @@
 import os
 from glob import glob
 
-import nipype.interfaces.io as nio           # Data i/o 
+import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.pipeline.node_wrapper as nw    # nodes for pypelines
 import nipype.algorithms.rapidart as ra      # artifact detection
@@ -13,7 +13,7 @@ print fsl.FSLInfo.version()
 # fsl.fsloutputtype('NIFTI')
 
 # The following lines create some information about location of your
-# data. 
+# data.
 data_dir = os.path.abspath('./nifti')
 subject_list = ['sfn0%d' % i for i in range(1,8)]
 
@@ -43,7 +43,7 @@ for s in subject_list:
 
 # This node looks into the directory containing Nifti files and
 # returns pointers to the files in a structured format as determined
-# by the runtype names provided in the info structure above 
+# by the runtype names provided in the info structure above
 datasource = nw.NodeWrapper(interface=nio.DataSource())
 datasource.inputs.update(base_directory = data_dir,
                          # subject_id = 's1',
@@ -54,7 +54,7 @@ datasource.inputs.update(base_directory = data_dir,
 # iterables provides a mechanism to execute part of the processing
 # over multiple instances of the parameter. In the following example
 # iterables allows DataSource node and its descendants to be executed
-# for multiple subjects.  
+# for multiple subjects.
 datasource.iterables = {'subject_id': lambda:subject_list}
 
 # Not using this for now, but would like to include in final tutorial pipeline
@@ -120,7 +120,7 @@ t1applywarp.inputs.update(reference = target_image,
 # For functionals - refers to some files above
 # flirt -ref my_betted_structural -in my_functional -dof 7 -omat func2struct.mat
 
-ref2t1 = nw.NodeWrapper(interface=fsl.FLIRT(), diskbased=True, 
+ref2t1 = nw.NodeWrapper(interface=fsl.FLIRT(), diskbased=True,
                          name='ref_Flirt.fsl')
 ref2t1.inputs.update(outmatrix = 'ref2t1.xfm',
                      dof = 6)
@@ -143,18 +143,18 @@ smoothing.inputs.fwhm = 5
 # run SPM's coregistration
 # coregister = nw.NodeWrapper(interface=spm.Coregister(),diskbased=True)
 # coregister.inputs.write = False
-# 
+#
 # # run SPM's normalization
 # normalize = nw.NodeWrapper(interface=spm.Normalize(),diskbased=True)
 # normalize.inputs.template = '/software/spm5_1782/templates/T1.nii'
-# 
+#
 # # run SPM's smoothing
 # smooth = nw.NodeWrapper(interface=spm.Smooth(),diskbased=True)
 # smooth.inputs.fwhm = [6,6,8]
-# 
+#
 # #######################################################################
 # # setup analysis components
-# 
+#
 # #define a function that reads a matlab file and returns subject
 # #specific condition information
 # from nipype.interfaces.base import Bunch
@@ -175,12 +175,12 @@ smoothing.inputs.fwhm = 5
 #                             regressor_names=None,
 #                             regressors=None))
 #     return output
-# 
+#
 # # Set up all the contrasts that should be evaluated
 # cont1 = ['Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5]]
 # cont2 = ['Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1]]
 # contrasts = [cont1,cont2]
-# 
+#
 # # Setup model and spm estimation options
 # modelspec = nw.NodeWrapper(interface=spm.SpecifyModel())
 # modelspec.inputs.subject_info_func = subjectinfo
@@ -189,17 +189,17 @@ smoothing.inputs.fwhm = 5
 # modelspec.inputs.output_units = 'secs'
 # modelspec.inputs.time_repetition = 3.
 # modelspec.inputs.high_pass_filter_cutoff = 120
-# 
+#
 # # create the SPM model
 # level1design = nw.NodeWrapper(interface=spm.Level1Design(),diskbased=True)
 # level1design.inputs.timing_units = modelspec.inputs.output_units
 # level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
 # level1design.inputs.bases = {'hrf':{'derivs': [0,0]}}
-# 
+#
 # # setup the estimator for the model
 # level1estimate = nw.NodeWrapper(interface=spm.EstimateModel(),diskbased=True)
 # level1estimate.inputs.estimation_method = {'Classical' : 1}
-# 
+#
 # # setup the contrast estimator
 # contrastestimate = nw.NodeWrapper(interface=spm.EstimateContrast(),diskbased=True)
 # contrastestimate.inputs.contrasts = contrasts

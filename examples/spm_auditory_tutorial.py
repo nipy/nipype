@@ -12,11 +12,11 @@ using auditory dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/
 
 """Import necessary modules from nipype."""
 
-import nipype.interfaces.io as nio           # Data i/o 
+import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.matlab as mlab      # how to run matlabimport nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility 
+import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model specification
 import nipype.externals.pynifti as ni
@@ -60,12 +60,12 @@ This is a generic preprocessing workflow that can be used by different analyses
 
 preproc = pe.Workflow(name='preproc')
 
-"""We strongly encourage to use 4D files insteead of series of 3D for fMRI analyses 
-for many reasons (cleanness and saving and filesystem inodes are among them). However, 
-the the workflow presented in the SPM8 manual which this tutorial is based on 
-uses 3D files. Therefore we leave converting to 4D as an option. We are using `merge_to_4d` 
+"""We strongly encourage to use 4D files insteead of series of 3D for fMRI analyses
+for many reasons (cleanness and saving and filesystem inodes are among them). However,
+the the workflow presented in the SPM8 manual which this tutorial is based on
+uses 3D files. Therefore we leave converting to 4D as an option. We are using `merge_to_4d`
 variable, because switching between 3d and 4d requires some additional steps (explauned later on).
-Use :class:`nipype.interfaces.fsl.Merge` to merge a series of 3D files along the time 
+Use :class:`nipype.interfaces.fsl.Merge` to merge a series of 3D files along the time
 dimension creating a 4d file.
 """
 
@@ -136,7 +136,7 @@ voxel sizes.
 
 if merge_to_4d:
     preproc.connect([(merge, realign,[('merged_file', 'in_files')])])
-                     
+
 preproc.connect([(realign,coregister,[('mean_image', 'target')]),
                  (coregister, segment,[('coregistered_source','data')]),
                  (segment, normalize_func, [('transformation_mat','parameter_file')]),
@@ -208,7 +208,7 @@ l1pipeline.connect([(preproc, l1analysis, [('realign.realignment_parameters',
                                             'modelspec.realignment_parameters')])])
 
 """Pluging in `functional_runs` is a bit more complicated, because model spec expects a list of `runs`.
-Every run can be a 4D file or a list of 3D files. Therefore for 3D analysis we need a list of lists and 
+Every run can be a 4D file or a list of 3D files. Therefore for 3D analysis we need a list of lists and
 to make one we need a helper function.
 """
 
@@ -220,7 +220,7 @@ else:
         return [item]
     l1pipeline.connect([(preproc, l1analysis, [(('smooth.smoothed_files',makelist),
                                                 'modelspec.functional_runs')])])
-                  
+
 
 
 """

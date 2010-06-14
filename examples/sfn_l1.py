@@ -26,17 +26,16 @@ l1_datasource.inputs.update(base_directory = data_dir,
                             subject_info = info)
 l1_datasource.iterables = {'subject_id': lambda:subject_list}
 
-cond_names = ['vibe-all-left',          
-              'vibe-all-right',  
-              'vibe-seq-left',   
-              'vibe-seq-right',  
-              'visual-all-left', 
+cond_names = ['vibe-all-left',
+              'vibe-all-right',
+              'vibe-seq-left',
+              'vibe-seq-right',
+              'visual-all-left',
               'visual-all-right',
-              'visual-seq-left', 
-              'visual-seq-right'] 
+              'visual-seq-left',
+              'visual-seq-right']
 l1_feat = nw.NodeWrapper(fsl.L1FSFmaker(), diskbased=True)
 l1_feat.inputs.update(num_scans=4,
                       cond_names=cond_names,
                       num_vols=198)
-    
 

@@ -30,8 +30,8 @@ coregister.inputs.target = os.path.abspath('data/struct.nii')
 
 pipeline = pe.Pipeline()
 pipeline.config['workdir'] = os.path.abspath('test3')
-pipeline.connect([(realign3, coregister, 
-                   [('mean_image', 'source'), 
+pipeline.connect([(realign3, coregister,
+                   [('mean_image', 'source'),
                     ('realigned_files', 'apply_to_files')]
                    )])
 #pipeline.run()

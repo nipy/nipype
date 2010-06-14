@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 
 # This script should be run from directly above the nifti directory where all
 # brain imaging files are being kept.
@@ -27,7 +27,7 @@ preproc.config['use_parameterized_dirs'] = True
 
 preproc.connect([# preprocessing in native space
                  (datasource, skullstrip,[('struct','infile')]),
-                 (datasource, motion_correct, 
+                 (datasource, motion_correct,
                      [('func', 'infile'), ('func_ref', 'reffile')]),
                  (motion_correct, func_skullstrip,
                      [('outfile', 'infile')]),
@@ -36,7 +36,7 @@ preproc.connect([# preprocessing in native space
                  (skullstrip, t1reg2std,[('outfile', 'infile')]),
                  (datasource, t1warp2std,[('struct', 'infile')]),
                  (t1reg2std, t1warp2std, [('outmatrix', 'affine')]),
-                 (t1warp2std, t1applywarp, 
+                 (t1warp2std, t1applywarp,
                      [('fieldcoeff_file', 'fieldfile')]),
                  # It would seem a little more parsimonious to get this from
                  # t1warp2std, but it's only an input there...
@@ -55,22 +55,22 @@ preproc.connect([# preprocessing in native space
 
 # store relevant outputs from various stages of preprocessing
 preproc.connect([(datasource,datasink,[('subject_id','subject_id')]),
-                    (skullstrip, datasink, 
+                    (skullstrip, datasink,
                         [('outfile', 'skullstrip.@outfile')]),
                     (func_skullstrip, datasink,
                         [('outfile', 'skullstrip.@outfile')]),
                     (motion_correct, datasink,
                         [('parfile', 'skullstrip.@parfile')]),
                     # We aren't really going to look at these, are we?
-                    # (t1reg2std, datasink, 
+                    # (t1reg2std, datasink,
                     #     [('outmatrix', 'registration.@outmatrix')]),
-                    # (t1warp2std, datasink, 
+                    # (t1warp2std, datasink,
                     #     [('fieldcoeff_file', 'registration.@fieldcoeff_file')]),
                     (t1applywarp, datasink,
                         [('outfile', 'registration.@outfile')]),
                     (funcapplywarp, datasink,
                         [('outfile', 'registration.@outfile')]),
-                    (smoothing, datasink, 
+                    (smoothing, datasink,
                         [('outfile', 'registration.@outfile')]),
                     ])
 
@@ -90,19 +90,19 @@ l1.connect([(l1_datasource, l1_feat,[('struct','struct_file'),
 l1.connect([(l1_feat, datasink, [])])
 # #########################################################################
 # # setup level 2 pipeline
-# 
+#
 # # collect all the con images for each contrast.
 # contrast_ids = range(1,len(contrasts)+1)
 # l2source = nw.NodeWrapper(nio.DataGrabber())
 # l2source.inputs.file_template=os.path.abspath('l1output/*/con*/con_%04d.img')
 # l2source.inputs.template_argnames=['con']
-# 
+#
 # # iterate over all contrast images
 # l2source.iterables = dict(con=lambda:contrast_ids)
-# 
+#
 # # setup a 1-sample t-test node
 # onesamplettest = nw.NodeWrapper(interface=spm.OneSampleTTest(),diskbased=True)
-# 
+#
 # # setup the pipeline
 # l2pipeline = pe.Pipeline()
 # l2pipeline.config['workdir'] = os.path.abspath('l2output')
