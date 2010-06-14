@@ -640,7 +640,7 @@ class Workflow(WorkflowBase):
                     warn("Ipython kernel not installed")
                 self._execute_in_series()
                 return
-        logger.info("Running in parallel.")        logger.info("Running in parallel.")
+        logger.info("Running in parallel.")
         # self.taskclient.clear()
         # in the absence of a dirty bit on the object, generate the
         # parameterization each time before running
