@@ -459,10 +459,10 @@ def test_fnirt():
 def test_applywarp():
     tmpdir, infile, reffile = setup_flirt()
     opt_map = {
-        'out_file':           ('--out=bar.nii', 'bar.nii'),
+        'out_file':          ('--out=bar.nii', 'bar.nii'),
         'premat':            ('--premat=%s'%(reffile), reffile),
-        'postmat':           ('--postmat=%s'%(reffile), reffile)
-        }
+        'postmat':           ('--postmat=%s'%(reffile), reffile),
+         }
 
     # in_file, ref_file, field_file mandatory
     for name, settings in opt_map.items():
@@ -483,5 +483,13 @@ def test_applywarp():
                                      outfile, settings[0],
                                      reffile)
         yield assert_equal, awarp.cmdline, realcmd
-        
+
+    awarp = fsl.ApplyWarp(in_file = infile,
+                          ref_file = reffile,
+                          field_file = reffile)
+    # test xor
+    awarp.inputs.abswarp = True
+    awarp.inputs.relwarp = True
+    yield assert_equal, awarp.inputs.abswarp, Undefined
+    
     teardown_flirt(tmpdir)
