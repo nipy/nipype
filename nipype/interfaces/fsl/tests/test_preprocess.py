@@ -477,11 +477,11 @@ def test_applywarp():
                                   settings[1],reffile)
         else:
             outfile = awarp._gen_fname(infile, suffix='_warp')
-            realcmd = 'applywarp %s --warp=%s '\
+            realcmd = 'applywarp --warp=%s '\
                       '--in=%s --out=%s '\
-                      '--ref=%s'%(settings[0],
-                                  reffile, infile,
-                                  outfile, reffile)
+                      '%s --ref=%s'%(reffile, infile,
+                                     outfile, settings[0],
+                                     reffile)
         yield assert_equal, awarp.cmdline, realcmd
         
     teardown_flirt(tmpdir)
