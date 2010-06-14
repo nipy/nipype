@@ -1,3 +1,5 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """Monkeypatch nose to accept any callable as a method.
 
 By default, nose's ismethod() fails for static methods.

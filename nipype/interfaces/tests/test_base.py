@@ -1,3 +1,5 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 import nipype.interfaces.base as nii
 from nipype.testing import assert_equal, assert_not_equal, assert_raises, assert_true
 import os
