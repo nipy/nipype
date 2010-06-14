@@ -432,17 +432,19 @@ def test_fnirt():
                           **{name : infile})
         
         if name in ('config_file', 'affine_file','field_file'):
-            cmd = 'fnirt --cout=%s '\
-                  '--in=%s %s%s '\
-                  '--ref=%s --iout=%s' % (cout, infile,
-                                      reffile, settings,
-                                      infile, iout)
-        elif name in ('refmask_file'):
             cmd = 'fnirt %s%s --cout=%s '\
-                  '--in=%s --ref=%s '\
-                  '%s%s --iout=%s' % (settings,infile,
+                  '--in=%s '\
+                  '--ref=%s --iout=%s' % (settings,infile,
                                           cout, infile,
-                                          reffile,iout)
+                                          reffile, iout)
+        elif name in ('refmask_file'):
+            cmd = 'fnirt --cout=%s '\
+                  '--in=%s --ref=%s '\
+                  '%s%s '\
+                  '--iout=%s' % (cout, infile,
+                                 reffile,
+                                 settings,infile,
+                                 iout)
             
         else:
             cmd = 'fnirt --cout=%s '\
@@ -455,21 +457,31 @@ def test_fnirt():
     teardown_flirt(tmpdir)
     
 def test_applywarp():
+    tmpdir, infile, reffile = setup_flirt()
     opt_map = {
-        'in_file':            ('--in=foo.nii', 'foo.nii'),
         'out_file':           ('--out=bar.nii', 'bar.nii'),
-        'reference':         ('--ref=refT1.nii', 'refT1.nii'),
-        'fieldfile':         ('--warp=warp_field.nii', 'warp_field.nii'),
-        'premat':            ('--premat=prexform.mat', 'prexform.mat'),
-        'postmat':           ('--postmat=postxform.mat', 'postxform.mat')
+        'premat':            ('--premat=%s'%(reffile), reffile),
+        'postmat':           ('--postmat=%s'%(reffile), reffile)
         }
 
+    # in_file, ref_file, field_file mandatory
     for name, settings in opt_map.items():
-        awarp = fsl.ApplyWarp(**{name : settings[1]})
-        if name == 'in_file':
-            outfile = os.path.join(os.getcwd(), 'foo_warp.nii')
-            realcmd = 'applywarp --in=foo.nii --out=%s' % outfile
-            yield assert_equal, awarp.cmdline, realcmd
+        awarp = fsl.ApplyWarp(in_file = infile,
+                              ref_file = reffile,
+                              field_file = reffile,
+                              **{name : settings[1]})
+        if name == 'out_file':
+            realcmd = 'applywarp --warp=%s '\
+                      '--in=%s --out=%s '\
+                      '--ref=%s'%(reffile, infile,
+                                  settings[1],reffile)
         else:
-            yield assert_equal, awarp.cmdline, \
-                ' '.join([awarp.cmd, settings[0]])
+            outfile = awarp._gen_fname(infile, suffix='_warp')
+            realcmd = 'applywarp %s --warp=%s '\
+                      '--in=%s --out=%s '\
+                      '--ref=%s'%(settings[0],
+                                  reffile, infile,
+                                  outfile, reffile)
+        yield assert_equal, awarp.cmdline, realcmd
+        
+    teardown_flirt(tmpdir)
