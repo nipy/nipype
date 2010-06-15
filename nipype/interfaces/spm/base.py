@@ -146,6 +146,10 @@ class SPMCommandInputSpec(TraitedSpec):
 class SPMCommand(BaseInterface):
     """ Extends `BaseInterface` class to implement SPM specific interfaces.
     """
+    input_spec = SPMCommandInputSpec
+
+    _jobtype = 'basetype'
+    _jobname = 'basename'
     
     def __init__(self, **inputs):
         super(SPMCommand, self).__init__(**inputs)

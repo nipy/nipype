@@ -16,7 +16,7 @@ try:
 except:
     matlab_cmd = 'matlab -nodesktop -nosplash'
 
-mlab.MatlabCommandLine.matlab_cmd = matlab_cmd
+mlab.MatlabCommand.matlab_cmd = matlab_cmd
 
 def cannot_find_spm():
     # See if we can find spm or not.
@@ -41,7 +41,7 @@ if not save_time:
             yield assert_true, 'spm' in spm_path
 
 def test_use_mfile():
-    mlab = spm.SpmMatlabCommandLine()
+    mlab = spm.SPMCommand()
     yield assert_true, mlab.mfile
     mlab._use_mfile(False)
     yield assert_false, mlab.mfile
@@ -51,7 +51,7 @@ def test_run():
     #mlab = spm.SpmMatlabCommandLine()
     #yield assert_raises, NotImplementedError, mlab.run
 
-    class mlabsub(spm.SpmMatlabCommandLine):
+    class mlabsub(spm.SPMCommand):
         def _compile_command(self):
             return self._gen_matlab_command('',mfile=self.mfile) 
     mlab = mlabsub()
@@ -66,12 +66,12 @@ def test_run():
     yield assert_equal, results.runtime.returncode, 0
     
 def test_reformat_dict_for_savemat():
-    mlab = spm.SpmMatlabCommandLine()
+    mlab = spm.SPMCommand()
     out = mlab._reformat_dict_for_savemat({'a':{'b':{'c':[]}}})
     yield assert_equal, out, [{'a': [{'b': [{'c': []}]}]}]
     
 def test_generate_job():
-    mlab = spm.SpmMatlabCommandLine()
+    mlab = spm.SPMCommand()
     out = mlab._generate_job()
     yield assert_equal, out, ''
     # struct array
@@ -95,7 +95,7 @@ def test_generate_job():
     yield assert_equal, out, 'test.onsets = {...\n[1, 2, 3, 4];...\n};\n'
     
 def test_make_matlab_command():
-    mlab = spm.SpmMatlabCommandLine()
+    mlab = spm.SPMCommand()
     outdir = mkdtemp()
     old_wd = os.getcwd()
     os.chdir(outdir)
