@@ -190,6 +190,35 @@ def test_segment():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(seg.inputs.traits()[key], metakey), value
 
+def test_newsegment():
+    yield assert_equal, spm.NewSegment._jobtype, 'tools'
+    yield assert_equal, spm.NewSegment._jobname, 'preproc8'
+    input_map = dict(affine_regularization = dict(field='warp.affreg',),
+                     channel_files = dict(copyfile=False,mandatory=True,field='channel',),
+                     channel_info = dict(field='channel',),
+                     sampling_distance = dict(field='warp.samp',),
+                     tissues = dict(copyfile=False,field='tissue',),
+                     warping_regularization = dict(field='warp.reg',),
+                     write_deformation_fields = dict(field='warp.write',),
+                     )
+    instance = spm.NewSegment()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+
+def test_smooth():
+    yield assert_equal, spm.Smooth._jobtype, 'spatial'
+    yield assert_equal, spm.Smooth._jobname, 'smooth'
+    input_map = dict(data_type = dict(field='dtype',),
+                     fwhm = dict(field='fwhm',),
+                     in_files = dict(copyfile=False,mandatory=True,field='data',),
+                     )
+    instance = spm.Smooth()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+    
 #@skipif(cannot_find_spm, "SPM not found")
 #def test_spm_realign_inputs():
 #    pass
