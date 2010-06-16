@@ -178,7 +178,7 @@ class SPMCommand(BaseInterface):
         if true generates a matlab <filename>.m file
         if false generates a binary .mat file
         """
-        self.mlab.inputs.mfile = use_mfile
+        self.inputs.mfile = use_mfile
 
     def _run_interface(self, runtime):
         """Executes the SPM function using MATLAB
