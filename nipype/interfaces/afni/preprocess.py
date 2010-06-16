@@ -9,22 +9,23 @@ from glob import glob
 import warnings
 
 from nipype.interfaces.afni.base import Info, AFNITraitedSpec, AFNICommand
-from nipype.interfaces.base import Bunch, TraitedSpec, File, InputMultiPath
+from nipype.interfaces.base import Bunch, TraitedSpec, File, Directory, InputMultiPath
 from nipype.utils.filemanip import fname_presuffix, list_to_filename, split_filename
 from nipype.utils.docparse import get_doc
 from nipype.utils.misc import container_to_string, is_container, isdefined
 
 import enthought.traits.api as traits
 
+
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 class To3dInputSpec(AFNITraitedSpec):
-    infolder = traits.Directory(desc = 'folder with DICOM images to convert',
-                                argstr = '%s/*.dcm',
-                                position = -1,
-                                mandatory = True,
-                                exists = True)
+    infolder = Directory(desc = 'folder with DICOM images to convert',
+                         argstr = '%s/*.dcm',
+                         position = -1,
+                         mandatory = True,
+                         exists = True)
     outfile = File(desc = 'converted image file',
                    argstr = '-prefix %s',
                    position = -2,
