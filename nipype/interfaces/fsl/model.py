@@ -95,7 +95,7 @@ class Level1Design(BaseInterface):
 
     input_spec = Level1DesignInputSpec
     output_spec = Level1DesignOutputSpec
-    
+
     def _create_ev_file(self, evfname, evinfo):
         f = open(evfname, 'wt')
         for i in evinfo:
@@ -201,7 +201,7 @@ class Level1Design(BaseInterface):
                                                               c2=k + 1)
         ev_txt += contrastmask_footer.substitute()
         return num_evs, ev_txt
-    
+
     def _get_session_info(self, session_info_file):
         key = 'session_info'
         data = loadflat(session_info_file)
@@ -253,7 +253,7 @@ class Level1Design(BaseInterface):
                     reg_image = \
                         Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
                 reg_dof = self.inputs.reg_dof
-        
+
         for i, info in enumerate(session_info):
             num_evs, cond_txt = self._create_ev_files(cwd, info, i, usetd,
                                                       self.inputs.contrasts)
@@ -308,9 +308,9 @@ class Level1Design(BaseInterface):
 
 
 class FEATInputSpec(FSLCommandInputSpec):
-    fsf_file = File(exist=True, mandatory=True,argstr="%s", position=0, 
+    fsf_file = File(exist=True, mandatory=True,argstr="%s", position=0,
                     desc="File specifying the feat design spec file")
-    
+
 class FEATOutputSpec(TraitedSpec):
     feat_dir = Directory(exists=True)
 
@@ -335,7 +335,7 @@ class FEATModelOutpuSpec(TraitedSpec):
     design_file = File(exists=True, desc='Mat file containing ascii matrix for design')
     con_file = File(exists=True, desc='Contrast file containing contrast vectors')
 
-                
+
 # interface to fsl command line model generation routine
 # satra: 2010-01-03
 class FEATModel(FSLCommand):
@@ -344,7 +344,7 @@ class FEATModel(FSLCommand):
     _cmd = 'feat_model'
     input_spec = FEATModelInputSpec
     output_spec = FEATModelOutpuSpec
-    
+
     def _format_arg(self, name, trait_spec, value):
         if name == 'fsf_file':
             # ohinds: convert fwhm to stddev
@@ -380,7 +380,7 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
                        desc='design matrix file')
     threshold = traits.Float(1000, min=0, argstr='%f',
                              position=-1,
-                             desc='threshold')      
+                             desc='threshold')
     smooth_autocorr = traits.Bool(argstr='-sa',
                                   desc='Smooth auto corr estimates')
     mask_size = traits.Int(argstr='-ms %d',
@@ -395,7 +395,7 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
                                     xor=['autocorr_noestimate'],
                    desc='perform autocorrelation estimatation only')
     fit_armodel = traits.Bool(argstr='-ar',
-        desc='fits autoregressive model - default is to use tukey with M=sqrt(numvols)')                      
+        desc='fits autoregressive model - default is to use tukey with M=sqrt(numvols)')
     tukey_window = traits.Int(argstr='-tukey %d',
         desc='tukey window size to estimate autocorr')
     multitaper_product = traits.Int(argstr='-mt %d',
@@ -466,7 +466,7 @@ class FILMGLS(FSLCommand):
                     break
             fp.close()
         return files
-        
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         cwd = os.getcwd()
@@ -483,7 +483,7 @@ class FILMGLS(FSLCommand):
 
 
 # satra: 2010-01-23
-''' 
+'''
 class FixedEffectsModel(Interface):
     """Generate FEAT specific files
 
@@ -588,11 +588,11 @@ class FEATRegisterInputSpec(TraitedSpec):
     reg_image = File(exist=True, desc="image to register to (will be treated as standard)",
                      mandatory=True)
     reg_dof = traits.Int(12, desc="registration degrees of freedom", usedefault=True)
-    
+
 class FEATRegisterOutputSpec(TraitedSpec):
     fsf_file = File(exists=True,
                                 desc="FSL feat specification file")
-    
+
 class FEATRegister(BaseInterface):
     """Register feat directories to a specific standard
 
@@ -610,7 +610,7 @@ class FEATRegister(BaseInterface):
         runtime = Bunch(returncode=0,
                         stdout=None,
                         stderr=None)
-        
+
         fsf_header = load_template('featreg_header.tcl')
         fsf_footer = load_template('feat_nongui.tcl')
         fsf_dirs = load_template('feat_fe_featdirs.tcl')
@@ -626,7 +626,7 @@ class FEATRegister(BaseInterface):
         f = open(os.path.join(os.getcwd(), 'register.fsf'), 'wt')
         f.write(fsf_txt)
         f.close()
-    
+
         outputs=self.aggregate_outputs()
         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
 
@@ -793,9 +793,9 @@ class ContrastMgrOutputSpec(TraitedSpec):
     zstats = OutputMultiPath(File(exists=True),
                                  desc='z-stat file for each contrast')
     tstats = OutputMultiPath(File(exists=True),
-                                 desc='t-stat file for each contrast') 
+                                 desc='t-stat file for each contrast')
     fstats = OutputMultiPath(File(exists=True),
-                                 desc='f-stat file for each contrast') 
+                                 desc='f-stat file for each contrast')
     neffs =  OutputMultiPath(File(exists=True),
                                  desc='neff file ?? for each contrast')
 
@@ -828,7 +828,7 @@ class ContrastMgr(FSLCommand):
                     break
             fp.close()
         return numtcons, numfcons
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         pth = self.inputs.stats_dir
@@ -899,7 +899,7 @@ class L2Model(BaseInterface):
         for i in range(self.inputs.num_copes):
             mat_txt += ['%e' % 1]
         mat_txt = '\n'.join(mat_txt)
-        
+
         con_txt = ['/ContrastName1   group mean',
                    '/NumWaves       1',
                    '/NumContrasts   1',
@@ -918,7 +918,7 @@ class L2Model(BaseInterface):
         for i in range(self.inputs.num_copes):
             grp_txt += ['1']
         grp_txt = '\n'.join(grp_txt)
-        
+
         txt = {'design.mat' : mat_txt,
                'design.con' : con_txt,
                'design.grp' : grp_txt}
@@ -954,9 +954,9 @@ class SMMOutputSpec(TraitedSpec):
 
 class SMM(FSLCommand):
     '''
-    Spatial Mixture Modelling. For more detail on the spatial mixture modelling see 
-    Mixture Models with Adaptive Spatial Regularisation for Segmentation with an Application to FMRI Data; 
-    Woolrich, M., Behrens, T., Beckmann, C., and Smith, S.; IEEE Trans. Medical Imaging, 24(1):1-11, 2005. 
+    Spatial Mixture Modelling. For more detail on the spatial mixture modelling see
+    Mixture Models with Adaptive Spatial Regularisation for Segmentation with an Application to FMRI Data;
+    Woolrich, M., Behrens, T., Beckmann, C., and Smith, S.; IEEE Trans. Medical Imaging, 24(1):1-11, 2005.
     '''
     _cmd = 'mm --ld=logdir'
     input_spec = SMMInputSpec
@@ -986,12 +986,12 @@ class MELODICInputSpec(FSLCommandInputSpec):
     dim_est = traits.Str(argst="--dimest %s",desc="use specific dim. estimation technique:"\
                          " lap, bic, mdl, aic, mean (default: lap)")
     sep_whiten = traits.Bool(argst="--sep_whiten",desc="switch on separate whitening")
-    sep_vn = traits.Bool(argst="--sep_vn",desc="switch off joined variance nomalisation")
-    num_ICs = traits.Int(argst="-n %d",desc="numer of IC's to extract (for deflation approach)")
+    sep_vn = traits.Bool(argst="--sep_vn",desc="switch off joined variance normalization")
+    num_ICs = traits.Int(argst="-n %d",desc="number of IC's to extract (for deflation approach)")
     approach = traits.Str(argst="-a %s",desc="approach for decomposition, 2D: defl, symm (default),"\
                           " 3D: tica (default), concat")
     non_linearity = traits.Str(argst="--nl %s",desc="nonlinearity: gauss, tanh, pow3, pow4")
-    var_norm = traits.Bool(argst="--vn",desc="switch off variance normalisation")
+    var_norm = traits.Bool(argst="--vn",desc="switch off variance normalization")
     pbsc = traits.Bool(argst="--pbsc",desc="switch off conversion to percent BOLD signal change")
     cov_weight = traits.Float(argst="--covarweight %f",desc="voxel-wise weights for the covariance "\
                               "matrix (e.g. segmentation information)")
@@ -1022,7 +1022,7 @@ class MELODICInputSpec(FSLCommandInputSpec):
     out_orig = traits.Bool(argst="--Oorig",desc="output the original ICs")
     out_mean = traits.Bool(argst="--Omean",desc="output mean volume")
     report_maps = traits.Str(argst="--report_maps %s",desc="control string for spatial map images (see slicer)")
-    remove_deriv = traits.Bool(argst="--remove_deriv",desc="removes every second entry in paradigrm"\
+    remove_deriv = traits.Bool(argst="--remove_deriv",desc="removes every second entry in paradigm"\
                                " file (EV derivatives)")
 
 class MELODICOutputSpec(TraitedSpec):
@@ -1035,12 +1035,12 @@ class MELODIC(FSLCommand):
     input_spec = MELODICInputSpec
     output_spec = MELODICOutputSpec
     _cmd = 'melodic'
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_dir'] = self.inputs.out_dir
         if not isdefined(outputs['out_dir']):
-            outputs['out_dir'] = os.makedirs(os.path.join(os.getcwd(),'melodic_out'))   
+            outputs['out_dir'] = os.makedirs(os.path.join(os.getcwd(),'melodic_out'))
         return outputs
 
 

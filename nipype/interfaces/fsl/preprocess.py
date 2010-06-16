@@ -148,7 +148,7 @@ class BET(FSLCommand):
             return self._list_outputs()[name]
         return None
 
-    
+
 class FASTInputSpec(FSLCommandInputSpec):
     """ Defines inputs (trait classes) for FAST """
     in_files = InputMultiPath(File(exists=True), copyfile=False,
@@ -170,11 +170,11 @@ class FASTInputSpec(FSLCommandInputSpec):
     bias_iters = traits.Range(low = 1, high = 10, argstr = '-I %d',
                               desc = 'number of main-loop iterations during ' \
                                   'bias-field removal')
-    bias_lowpass = traits.Range(low = 4, high = 40, 
+    bias_lowpass = traits.Range(low = 4, high = 40,
                                 desc = 'bias field smoothing extent (FWHM) ' \
                                     'in mm',
                                 argstr = '-l %d', units = 'mm')
-    init_seg_smooth = traits.Range(low=0.0001, high = 0.1, 
+    init_seg_smooth = traits.Range(low=0.0001, high = 0.1,
                                    desc = 'initial segmentation spatial ' \
                                        'smoothness (during bias field ' \
                                        'estimation)',
@@ -198,18 +198,18 @@ class FASTInputSpec(FSLCommandInputSpec):
                                               # mandatory... need to
                                               # figure out how to
                                               # handle with traits.
-    segment_iters = traits.Range(low=1, high=50, 
+    segment_iters = traits.Range(low=1, high=50,
                                  desc = 'number of segmentation-initialisation'\
                                      ' iterations',
                                  argstr = '-W %d')
-    mixel_smooth = traits.Range(low = 0.0, high=1.0, 
+    mixel_smooth = traits.Range(low = 0.0, high=1.0,
                                 desc = 'spatial smoothness for mixeltype',
                                 argstr = '-R %.2f')
     iters_afterbias = traits.Range(low = 1, hight = 20,
                                    desc = 'number of main-loop iterations ' \
                                        'after bias-field removal',
                                    argstr = '-O %d')
-    hyper = traits.Range(low = 0.0, high = 1.0, 
+    hyper = traits.Range(low = 0.0, high = 1.0,
                          desc = 'segmentation spatial smoothness',
                          argstr = '-H %.2f')
     verbose = traits.Bool(desc = 'switch on diagnostic messages',
@@ -218,14 +218,14 @@ class FASTInputSpec(FSLCommandInputSpec):
                      argstr = '-s %s')
     probability_maps = traits.Bool(desc = 'outputs individual probability maps',
                                    argstr = '-p')
-    
+
 
 class FASTOutputSpec(TraitedSpec):
     """Specify possible outputs from FAST"""
     tissue_class_map = File(exists=True,
                             desc = 'path/name of binary segmented volume file' \
                             ' one val for each class  _seg')
-    tissue_class_files =OutputMultiPath( File(desc = 'path/name of binary segmented volumes ' \
+    tissue_class_files = OutputMultiPath(File(desc = 'path/name of binary segmented volumes ' \
                                   'one file for each class  _seg_x'))
     restored_image = OutputMultiPath(File(desc = 'restored images (one for each input image) ' \
                               'named according to the input images _restore'))
@@ -235,7 +235,7 @@ class FASTOutputSpec(TraitedSpec):
     partial_volume_map = File(desc = "path/name of partial volume file _pveseg")
     partial_volume_files  = OutputMultiPath(File(desc = 'path/name of partial volumes files ' \
                                      'one for each class, _pve_x'))
-    
+
     bias_field = OutputMultiPath(File(desc = 'Estimated bias field _bias'))
     probability_maps = OutputMultiPath(File(desc= 'filenames, one for each class, for each ' \
                                 'input, prob_x'))
@@ -287,8 +287,8 @@ class FAST(FSLCommand):
             for val,f in enumerate(self.inputs.in_files):
                 outputs['bias_field'].append(self._gen_fname(basefile, suffix='_bias_%d'%val))
         #if self.inputs.probability_maps:
-        return outputs 
-       
+        return outputs
+
 class FLIRTInputSpec(FSLCommandInputSpec):
     in_file = File(exists = True, argstr = '-in %s', mandatory = True,
                   position = 0, desc = 'input file')
@@ -429,7 +429,7 @@ class FLIRT(FSLCommand):
         else:
             return None
 
-    
+
 class ApplyXfm(FLIRT):
     """Currently just a light wrapper around FLIRT,
     with no modifications
@@ -448,7 +448,7 @@ class ApplyXfm(FLIRT):
     >>> applyxfm.inputs.reference = 'template.nii'
     >>> applyxfm.inputs.apply_xfm = True
     >>> result = applyxfm.run() # doctest: +SKIP
-    
+
     """
     pass
 
@@ -472,7 +472,7 @@ class MCFLIRTInputSpec(FSLCommandInputSpec):
     save_mats = traits.Bool(argstr='-mats')
     save_plots = traits.Bool(argstr='-plots')
     ref_file = File(exists=True, argstr='-reffile %s')
-    
+
 class MCFLIRTOutputSpec(TraitedSpec):
     out_file = File(exists=True)
     variance_img = File(exists=True)
@@ -504,12 +504,12 @@ class MCFLIRT(FSLCommand):
     def _list_outputs(self):
         cwd = os.getcwd()
         outputs = self._outputs().get()
-        
+
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                               suffix = '_mcf')
-        
+
         # XXX Need to change 'item' below to something that exists
         # out_file? in_file?
         # These could be handled similarly to default values for inputs
@@ -526,7 +526,7 @@ class MCFLIRT(FSLCommand):
             # what mcflirt does!
             outputs['par_file'] = outputs['out_file'] + '.par'
         return outputs
-    
+
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._list_outputs()[name]
@@ -655,7 +655,7 @@ class FNIRT(FSLCommand):
     >>> res = fnt.run(reference='ref.nii', in_file='anat.nii') # doctests: +SKIP
 
     T1 -> Mni153
-    
+
     >>> from nipype.interfaces import fsl
     >>> fnirt_mprage = fsl.FNIRT()
     >>> fnirt_mprage.inputs.imgfwhm = [8, 4, 2]
@@ -663,17 +663,17 @@ class FNIRT(FSLCommand):
 
     Specify the resolution of the warps, currently not part of the
     ``fnirt_mprage.inputs``:
-    
+
     >>> fnirt_mprage.inputs.flags = '--warpres 6, 6, 6'
     >>> res = fnirt_mprage.run(in_file='subj.nii', ref_file='mni.nii')
-    
+
     We can check the command line and confirm that it's what we expect.
-    
+
     >>> fnirt_mprage.cmdline  #doctest: +NORMALIZE_WHITESPACE
     'fnirt --warpres 6, 6, 6 --infwhm=8,4,2 --in=subj.nii --ref=mni.nii --subsamp=4,2,1'
 
     """
-    
+
     _cmd = 'fnirt'
     input_spec = FNIRTInputSpec
     output_spec = FNIRTOutputSpec
@@ -685,7 +685,7 @@ class FNIRT(FSLCommand):
                    out_intensitymap_file='_intmap',
                    log_file='_log',
                    fieldcoeff_file = '_fieldwarp')
-    
+
     def _format_arg(self, name, spec, value):
         if name in self.out_map.keys():
             if isinstance(value, bool):
@@ -716,7 +716,7 @@ class FNIRT(FSLCommand):
         final_args = {}
         metadata = dict(argstr=lambda t : t is not None)
         for name, spec in sorted(self.inputs.traits(**metadata).items()):
-            
+
             value = getattr(self.inputs, name)
             if not isdefined(value):
                 if spec.default_value() == (0, None):
@@ -737,8 +737,8 @@ class FNIRT(FSLCommand):
         first_args = [arg for pos, arg in sorted(initial_args.items())]
         last_args = [arg for pos, arg in sorted(final_args.items())]
         return first_args + all_args + last_args
-        
-    
+
+
     def _set_output(self, field, src, suffix, change_ext=True):
         val = getattr(self.inputs, field)
         if isdefined(val):
@@ -748,7 +748,7 @@ class FNIRT(FSLCommand):
         else:
             val = None
         return val
-        
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         """
@@ -757,11 +757,11 @@ class FNIRT(FSLCommand):
             outputs['fieldcoeff_file'] = self._gen_fname(self.inputs.in_file,
                                                          suffix='_warpcoef')
         """
-        
+
         if not isdefined(self.inputs.warped_file):
             outputs['warped_file'] = self._gen_fname(self.inputs.in_file,
                                                      suffix = '_warped')
-        
+
         for name, suffix in self.out_map.items():
             if name == 'modulatedref_file':
                 src = self.inputs.ref_file
@@ -774,11 +774,11 @@ class FNIRT(FSLCommand):
                                       change_ext=True, ext='.log')
             else:
                 val = self._gen_fname(src, suffix=suffix)
-            
+
             outputs[name] = val
-        
+
         return outputs
-    
+
     def _gen_filename(self, name):
         if name in self.out_map.keys():
             return self._list_outputs()[name]
@@ -843,9 +843,9 @@ class ApplyWarp(FSLCommand):
 
     Examples
     --------
-    
+
     """
-    
+
     _cmd = 'applywarp'
     input_spec = ApplyWarpInputSpec
     output_spec = ApplyWarpOutputSpec
@@ -854,14 +854,14 @@ class ApplyWarp(FSLCommand):
         if name == 'superlevel':
             return spec.argstr%str(value)
         return super(ApplyWarp, self)._format_arg(name, spec, value)
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
-                             
+
         outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                              suffix='_warp')
         return outputs
-    
+
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._list_outputs()[name]
@@ -896,7 +896,7 @@ class SliceTimer(FSLCommand):
 
     Examples
     --------
-    
+
     """
 
     _cmd = 'slicetimer'
@@ -911,7 +911,7 @@ class SliceTimer(FSLCommand):
                                       suffix='_st')
         outputs['slice_time_corrected_file'] = out_file
         return outputs
-    
+
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._list_outputs()['slice_time_corrected_file']

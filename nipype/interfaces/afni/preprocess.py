@@ -48,7 +48,7 @@ class To3dOutputSpec(TraitedSpec):
 class To3d(AFNICommand):
     """Create a 3D dataset from 2D image files using AFNI to3d command.
 
-    For complete details, see the `to3d Documentation. 
+    For complete details, see the `to3d Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
 
     To print out the command line help, use:
@@ -169,7 +169,7 @@ class To3d(AFNICommand):
         return out_inputs
 
     def _parseinputs(self):
-        allargs = super(To3d, self)._parseinputs(skip=('infiles', 
+        allargs = super(To3d, self)._parseinputs(skip=('infiles',
                                                        'time_dependencies'))
         if self.inputs.time_dependencies:
             # Accept time_dependencies as input from a dictionary or
@@ -202,7 +202,7 @@ class To3d(AFNICommand):
                 # Assume it's just a container (list or tuple) and
                 # just use the format string.
                 allargs.append(self.opt_map['time_dependencies'] % tin)
-                
+
         if self.inputs.infiles:
             allargs.append(container_to_string(self.inputs.infiles))
         return allargs
@@ -266,7 +266,7 @@ class ThreedresampleOutputSpec(AFNITraitedSpec):
 class Threedresample(AFNICommand):
     """Resample or reorient an image using AFNI 3dresample command.
 
-    For complete details, see the `3dresample Documentation. 
+    For complete details, see the `3dresample Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dresample.html>`_
     """
 
@@ -300,7 +300,7 @@ class ThreedTstatOutputSpec(AFNITraitedSpec):
 class ThreedTstat(AFNICommand):
     """Compute voxel-wise statistics using AFNI 3dTstat command.
 
-    For complete details, see the `3dTstat Documentation. 
+    For complete details, see the `3dTstat Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html>`_
     """
 
@@ -362,7 +362,7 @@ class ThreedAutomaskOutputSpec(AFNITraitedSpec):
 class ThreedAutomask(AFNICommand):
     """Create a brain-only mask of the image using AFNI 3dAutomask command.
 
-    For complete details, see the `3dAutomask Documentation. 
+    For complete details, see the `3dAutomask Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutomask.html>`_
     """
 
@@ -441,7 +441,7 @@ class ThreedvolregOutputSpec(AFNITraitedSpec):
 class Threedvolreg(AFNICommand):
     """Register input volumes to a base volume using AFNI 3dvolreg command.
 
-    For complete details, see the `3dvolreg Documentation. 
+    For complete details, see the `3dvolreg Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dvolreg.html>`_
     """
 
@@ -480,7 +480,7 @@ class ThreedmergeOutputSpec(AFNITraitedSpec):
 class Threedmerge(AFNICommand):
     """Merge or edit volumes using AFNI 3dmerge command.
 
-    For complete details, see the `3dmerge Documentation. 
+    For complete details, see the `3dmerge Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html>`_
     """
 
@@ -516,7 +516,7 @@ class ThreedZcutupOutputSpec(AFNITraitedSpec):
 class ThreedZcutup(AFNICommand):
     """Cut z-slices from a volume using AFNI 3dZcutup command.
 
-    For complete details, see the `3dZcutup Documentation. 
+    For complete details, see the `3dZcutup Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcutup.html>`_
     """
 
@@ -579,7 +579,7 @@ class ThreedZcutup(AFNICommand):
 
 class ThreedSkullStrip(AFNICommand):
     """
-    For complete details, see the `3dSkullStrip Documentation. 
+    For complete details, see the `3dSkullStrip Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSkullStrip.html>`_
     """
 
@@ -627,7 +627,7 @@ class ThreedSkullStrip(AFNICommand):
 
 class ThreedBrickStat(AFNICommand):
     """
-    For complete details, see the `3dBrickStat Documentation. 
+    For complete details, see the `3dBrickStat Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBrickStat.html>`_
     """
 
@@ -701,7 +701,7 @@ class ThreedBrickStat(AFNICommand):
 
 class Threedcalc(AFNICommand):
     """
-    For complete details, see the `3dcalc Documentation. 
+    For complete details, see the `3dcalc Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcalc.html>`_
     """
 
@@ -763,7 +763,7 @@ class Threedcalc(AFNICommand):
 
 class ThreedAllineate(AFNICommand):
     """
-    For complete details, see the `3dAllineate Documentation. 
+    For complete details, see the `3dAllineate Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html>`_
     """
 

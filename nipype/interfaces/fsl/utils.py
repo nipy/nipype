@@ -54,7 +54,7 @@ class ImageMeants(FSLCommand):
 
         Example:
         --------
-        
+
     """
     _cmd = 'fslmeants'
     input_spec = ImageMeantsInputSpec
@@ -90,9 +90,9 @@ class Smooth(FSLCommand):
     This is dumb, of course - we should use nipy for such things! But it is a
     step along the way to get the "standard" FSL pipeline in place.
 
-    This is meant to be a throwaway class, so it's not currently very robust.
+    This is meant to be a throwaway class, so it is not currently very robust.
     Effort would be better spent integrating basic numpy into nipype'''
-    
+
     input_spec = SmoothInputSpec
     output_spec = SmoothOutputSpec
     _cmd = 'fslmaths'
@@ -109,7 +109,7 @@ class Smooth(FSLCommand):
             outputs['smoothed_file'] = self._gen_fname(self.inputs.in_file,
                                               suffix = '_smooth')
         return outputs
-    
+
     def _format_arg(self, name, trait_spec, value):
         if name == 'fwhm':
             # ohinds: convert fwhm to stddev
@@ -142,7 +142,7 @@ class Merge(FSLCommand):
             outputs['merged_file'] = self._gen_fname(self.inputs.in_files[0],
                                               suffix = '_merged')
         return outputs
-    
+
     def _gen_filename(self, name):
         if name == 'merged_file':
             return self._list_outputs()[name]
@@ -160,7 +160,7 @@ class ExtractROIInputSpec(FSLCommandInputSpec):
     z_size = traits.Float(argstr="%f", position=7)
     t_min = traits.Int(argstr="%d", position=8)
     t_size = traits.Int(argstr="%d", position=9)
-    
+
 class ExtractROIOutputSpec(TraitedSpec):
     roi_file = File(exists=True)
 
@@ -175,14 +175,14 @@ class ExtractROI(FSLCommand):
     arguments are minimum index and size (not maximum index).  So to
     extract voxels 10 to 12 inclusive you would specify 10 and 3 (not
     10 and 12).
-    
+
     >>> from nipype.interfaces import fsl
     >>> fslroi = fsl.ExtractROI(in_file='foo.nii', roi_file='bar.nii', \
                                 tmin=0, tsize=1)
     >>> fslroi.cmdline
     'fslroi foo.nii bar.nii 0 1'
     """
-    
+
     _cmd = 'fslroi'
     input_spec = ExtractROIInputSpec
     output_spec = ExtractROIOutputSpec
@@ -208,7 +208,7 @@ class ExtractROI(FSLCommand):
             outputs['roi_file'] = self._gen_fname(self.inputs.in_file,
                                               suffix = '_roi')
         return outputs
-    
+
     def _gen_filename(self, name):
         if name == 'roi_file':
             return self._list_outputs()[name]
@@ -218,7 +218,7 @@ class SplitInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", position = 0, desc="input filename")
     out_base_name = traits.Str(argstr="%s", position=1, desc="outputs prefix")
     dimension = traits.Enum('t','x','y','z', argstr="-%s", position=2, desc="dimension along which the file will be split")
-    
+
 class SplitOutputSpec(TraitedSpec):
     out_files = OutputMultiPath(File(exists=True))
 
@@ -253,7 +253,7 @@ class Split(FSLCommand):
         outputs['out_files'] = sorted(glob(os.path.join(os.getcwd(),
                                                     outbase + ext)))
         return outputs
-    
+
 class ImageMathsInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", mandatory=True, position=0)
     in_file2 = File(exists=True, argstr="%s", position=2)
@@ -288,7 +288,7 @@ class ImageMaths(FSLCommand):
         if name == 'out_file':
             return self._list_outputs()[name]
         return None
-    
+
     def _parse_inputs(self, skip=None):
         return super(ImageMaths, self)._parse_inputs(skip=['suffix'])
 
@@ -304,7 +304,7 @@ class ImageMaths(FSLCommand):
         return outputs
 
 
-class REGFILTInputSpec(FSLCommandInputSpec):    
+class REGFILTInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True,argst="-i %s",desc="input file name (4D image)",mandatory=True)
     out_file = File(argst="-o %s",desc="output file name for the filtered data",genfile=True)
     design_file = File(exists=True,argst="-d %s",desc="design	file name of the matrix with "\
@@ -312,9 +312,9 @@ class REGFILTInputSpec(FSLCommandInputSpec):
     filter_out = traits.List(traits.Int,argst="-f %s",desc="filter out part of the "\
                              "regression model, e.g. -f '1,2,3'",mandatory=True)
     mask = File(exists=True,argst="-m %s",desc="mask image file name")
-    var_norm = traits.Bool(argst="--vn",desc="perfrom variance-normalisation on data")
+    var_norm = traits.Bool(argst="--vn",desc="perform variance-normalization on data")
     out_file = traits.Bool(argst="--out_data",desc="output data")
-    Out_vnscales = traits.Bool(argst="--out_vnscales",desc="output scaling factors for variance normalisation")
+    Out_vnscales = traits.Bool(argst="--out_vnscales",desc="output scaling factors for variance normalization")
 
 class REGFILTOutputSpec(TraitedSpec):
     out_file = File(exists=True,desc="output file name for the filtered data")
@@ -327,12 +327,12 @@ class REGFILT(FSLCommand):
     input_spec = REGFILTInputSpec
     output_spec = REGFILTOutputSpec
     _cmd = 'fsl_regfilt'
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,suffix='_regfilt')  
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,suffix='_regfilt')
         return outputs
 
     def _gen_filename(self, name):
