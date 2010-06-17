@@ -14,7 +14,6 @@ perform a first and second level analysis on a two-subject data set.
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.spm as spm          # spm
-import nipype.pipeline.node_wrapper as nw    # nodes for pypelines
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
 import nipype.algorithms.modelgen as model   # model generation
@@ -87,7 +86,9 @@ and provides additional housekeeping and pipeline specific
 functionality.
 """
 
-datasource = nw.NodeWrapper(interface=nio.DataGrabber())
+datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
+                                               outfields=['func', 'struct']),
+                                               name='datasource')
 datasource.inputs.base_directory   = data_dir
 datasource.inputs.subject_template = '%s'
 datasource.inputs.file_template    = '%s.nii'
@@ -108,23 +109,23 @@ datasource.iterables = dict(subject_id=lambda:subject_list)
 
 """Skull strip."""
 
-skullstrip = nw.NodeWrapper(interface=fsl.BET(mask = True,
+skullstrip = pe.Node(interface=fsl.BET(mask = True,
                                               frac = 0.34),
-                            diskbased=True)
+                            diskbased=True, name='skullstrip')
 
 """Preprocess functionals"""
 
-motion_correct = nw.NodeWrapper(interface=fsl.MCFLIRT(save_plots = True),
-                                diskbased=True)
+motion_correct = pe.Node(interface=fsl.MCFLIRT(save_plots = True),
+                                diskbased=True, name='motion_correct')
 motion_correct.iterfield = ['infile']
 
-func_skullstrip = nw.NodeWrapper(interface=fsl.BET(functional = True),
+func_skullstrip = pe.Node(interface=fsl.BET(functional = True),
                                  diskbased=True,
-                                 name='func_Bet.fsl')
+                                 name='func_Bet_fsl')
 func_skullstrip.iterfield = ['infile']
 
-ref_skullstrip = nw.NodeWrapper(interface=fsl.BET(functional = True), diskbased=True,
-                                name='ref_Bet.fsl')
+ref_skullstrip = pe.Node(interface=fsl.BET(functional = True), diskbased=True,
+                                name='ref_Bet_fsl')
 
 
 
@@ -135,7 +136,7 @@ target_image = fsl.Info.standard_image('MNI152_T1_2mm.nii.gz')
 # For structurals
 # flirt -ref ${FSLDIR}/data/standard/MNI152_T1_2mm_brain -in my_betted_structural -omat my_affine_transf.mat
 
-t1reg2std = nw.NodeWrapper(interface=fsl.FLIRT(), diskbased=True)
+t1reg2std = pe.Node(interface=fsl.FLIRT(), diskbased=True, name='t1reg2std')
 t1reg2std.inputs.reference = target_image
 t1reg2std.inputs.out_matrix_file = 't1reg2std.xfm'
 
@@ -150,34 +151,34 @@ applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=my_structural --warp=
 =my_warped_structural
 """
 
-t1warp2std = nw.NodeWrapper(interface=fsl.FNIRT(), diskbased=True)
+t1warp2std = pe.Node(interface=fsl.FNIRT(), diskbased=True, name='t1warp2std')
 t1warp2std.inputs.config_file = '/usr/local/fsl/etc/flirtsch/T1_2_MNI152_2mm.cnf'
 t1warp2std.inputs.fieldcoeff_file = 't1warp2std'
 t1warp2std.inputs.log_file = 't1warp2std.log'
 
 
-t1applywarp = nw.NodeWrapper(interface=fsl.ApplyWarp(), diskbased=True)
+t1applywarp = pe.Node(interface=fsl.ApplyWarp(), diskbased=True, name='t1applywarp')
 t1applywarp.inputs.ref_file = target_image
 t1applywarp.inputs.out_file = 't1_warped'
 
 # For functionals - refers to some files above
 # flirt -ref my_betted_structural -in my_functional -dof 7 -omat func2struct.mat
 
-ref2t1 = nw.NodeWrapper(interface=fsl.FLIRT(), diskbased=True,
-                         name='ref_Flirt.fsl')
+ref2t1 = pe.Node(interface=fsl.FLIRT(), diskbased=True,
+                         name='ref_Flirt_fsl')
 ref2t1.inputs.out_matrix_file = 'ref2t1.xfm'
 ref2t1.inputs.dof = 6
 
 # applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=my_functional --warp=my_nonlinear_transf --premat=func2struct.mat --out=my_warped_functional
 
-funcapplywarp = nw.NodeWrapper(interface=fsl.ApplyWarp(), diskbased=True,
-                               name='func_ApplyWarp.fsl')
+funcapplywarp = pe.Node(interface=fsl.ApplyWarp(), diskbased=True,
+                               name='func_ApplyWarp_fsl')
 funcapplywarp.iterfield = ['infile']
 funcapplywarp.inputs.ref_file = target_image
 
 # Finally do some smoothing!
 
-smoothing = nw.NodeWrapper(interface=fsl.Smooth(), diskbased=True)
+smoothing = pe.Node(interface=fsl.Smooth(), diskbased=True, name='smoothing')
 smoothing.iterfield = ['infile']
 smoothing.inputs.fwhm = 5
 
@@ -232,7 +233,7 @@ c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
 SPM-specific design information.
 """
 
-modelspec = nw.NodeWrapper(interface=model.SpecifyModel(), diskbased=True)
+modelspec = pe.Node(interface=model.SpecifyModel(), diskbased=True, name='modelspec')
 modelspec.inputs.concatenate_runs        = False
 modelspec.inputs.input_units             = 'secs'
 modelspec.inputs.output_units            = 'secs'
@@ -245,7 +246,7 @@ d. Use :class:`nipype.interfaces.fsl.Level1Design` to generate a run
 specific fsf file for analysis
 """
 
-level1design = nw.NodeWrapper(interface=fsl.Level1Design(),diskbased=True)
+level1design = pe.Node(interface=fsl.Level1Design(),diskbased=True, name='level1design')
 level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
 level1design.inputs.bases              = {'hrf':{'derivs': True}}
 level1design.inputs.contrasts          = contrasts
@@ -255,10 +256,10 @@ e. Use :class:`nipype.interfaces.fsl.FeatModel` to generate a run
 specific mat file for use by FilmGLS
 """
 
-modelgen = nw.NodeWrapper(interface=fsl.FEATModel(),diskbased=True)
+modelgen = pe.Node(interface=fsl.FEATModel(),diskbased=True, name='modelgen')
 modelgen.iterfield = ['fsf_file']
 
-featmodel = nw.NodeWrapper(interface=fsl.FEAT(),diskbased=True)
+featmodel = pe.Node(interface=fsl.FEAT(),diskbased=True, name='featmodel')
 featmodel.iterfield = ['fsf_file']
 
 """
@@ -266,7 +267,7 @@ featmodel.iterfield = ['fsf_file']
    specified by a mat file and a functional run
 """
 
-modelestimate = nw.NodeWrapper(interface=fsl.FILMGLS(),diskbased=True)
+modelestimate = pe.Node(interface=fsl.FILMGLS(),diskbased=True, name='modelestimate')
 modelestimate.inputs.threshold = 10
 modelestimate.inputs.smooth_autocorr = True
 modelestimate.inputs.mask_size = 5
@@ -277,12 +278,12 @@ f. Use :class:`nipype.interfaces.fsl.ContrastMgr` to estimate
 contrasts
 """
 
-conestimate = nw.NodeWrapper(interface=fsl.ContrastMgr(),diskbased=True)
+conestimate = pe.Node(interface=fsl.ContrastMgr(),diskbased=True, name='conestimate')
 conestimate.iterfield = ['tconfile','statsdir']
 
 """Setup storage of results"""
 
-datasink = nw.NodeWrapper(interface=nio.DataSink())
+datasink = pe.Node(interface=nio.DataSink(), name='datasink')
 # I'd like this one to actually be preproc, but for now, I don't want to change
 # the pipeline around because of data already being on S3
 datasink.inputs.base_directory = os.path.abspath('./fsl/l1output')
