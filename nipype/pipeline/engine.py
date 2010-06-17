@@ -331,7 +331,7 @@ class Workflow(WorkflowBase):
         """
         nodenames = name.split('.')
         nodename = nodenames[0]
-        outnode = [node for node in self._graph.nodes() if nodename == str(node)]
+        outnode = [node for node in self._graph.nodes() if str(node).endswith(nodename)]
         if outnode:
             outnode = outnode[0]
             if nodenames[1:] and issubclass(outnode.__class__, Workflow):
