@@ -207,7 +207,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
         for key, val in sorted(params.items()):
             paramstr = '_'.join((paramstr, key,
                                  str(val).replace(os.sep, '_')))
-            setattr(Gc.nodes()[nodeidx].inputs, key, val)
+            Gc.nodes()[nodeidx].set_input(key, val)
         for n in Gc.nodes():
             """
             update parameterization of the node to reflect the location of
