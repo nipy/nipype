@@ -299,11 +299,10 @@ datasource.inputs.template_args = info
 Use the get_node function to retrieve an internal node by name.
 """
 
-"""smoothnode = firstlevel.get_node('preproc.smooth')
-assert(str(smoothnode)=='smooth')
-smoothnode.iterables = ('fwhm', [5,10])"""
+smoothnode = firstlevel.get_node('preproc.smooth')
+assert(str(smoothnode)=='preproc.smooth')
+smoothnode.iterables = ('fwhm', [5,10])
 
-firstlevel.inputs.preproc.smooth.fwhm = 5
 hpcutoff = 120
 TR = 3.
 firstlevel.inputs.preproc.highpass.suffix = '_hpf'
