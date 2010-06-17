@@ -377,7 +377,8 @@ def pickfirst(files):
     return files[0]
 
 l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                    (infosource, firstlevel, [(('subject_id', subjectinfo), 'modelfit.modelspec.subject_info')]),
+                    (infosource, firstlevel, [(('subject_id', subjectinfo), 'modelfit.modelspec.subject_info'),
+                                              ('subject_id', 'modelfit.modelspec.subject_id')]),
                     (datasource, firstlevel, [('struct','preproc.stripstruct.in_file'),
                                               ('func', 'preproc.realign.in_file'),
                                               (('func', pickfirst), 'preproc.extractref.in_file'),
