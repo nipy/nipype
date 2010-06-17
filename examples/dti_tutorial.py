@@ -56,7 +56,7 @@ the output fields of the ``datasource`` node in the pipeline.
 """
 Specify the subject directories
 """
-subject_list = ['dwis1']
+subject_list = ['dwis1','dwis3']
 
 
 """
@@ -165,6 +165,8 @@ bedpostx = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx')
 
 """
 perform probabilistic tracktography
+note: the values given to these parameters are toy examples and
+should be changed to more meaningful values
 """
 probtrackx = pe.Node(interface=fsl.ProbTrackX(),name='probtrackx')
 probtrackx.inputs.n_samples=3
@@ -203,15 +205,15 @@ tractography.connect([
 Setup data storage area
 """
 datasink = pe.Node(interface=nio.DataSink(),name='datasink')
-datasink.inputs.base_directory = os.path.abspath('data/dtiresults')
+datasink.inputs.base_directory = os.path.abspath('data/workingdir/dtiresults')
 
 def getstripdir(subject_id):
-    return os.path.join(os.path.abspath('data/workingdir'),'_subject_id_%s' % subject_id)
+    return os.path.join(os.path.abspath('data/workingdir/dwiproc'),'_subject_id_%s' % subject_id)
 
 
 """
 Setup the pipeline that combines the two workflows: tractography and computeTensor
-------------------
+----------------------------------------------------------------------------------
 """
 dwiproc = pe.Workflow(name="dwiproc")
 dwiproc.base_dir = os.path.abspath('data/workingdir')
@@ -243,14 +245,14 @@ Setup for Tract-Based Spatial Statistics (TBSS) Computation
 -----------------------------------------------------------
 Here we will create a generic workflow for TBSS computation
 """
-tbss_workflow = pe.Workflow(name='tbss_workflow')
-tbss_workflow.base_dir=os.path.abspath('data/tbss')
+tbss_workflow = pe.Workflow(name='tbss')
+tbss_workflow.base_dir=os.path.abspath('data/workingdir')
 
 """
 collect all the FA images for each subject using the DataGrabber class
 """
 tbss_source = pe.Node(nio.DataGrabber(),name="tbss_source")
-tbss_source.inputs.template = os.path.abspath('data/workingdir/_subject_id_*/dtifit/*_FA.nii.gz')
+tbss_source.inputs.template = os.path.abspath('data/workingdir/dwiproc/computeTensor/_subject_id_*/dtifit/*_FA.nii.gz')
 
 """
 prepare your FA data in your TBSS working directory in the right format
@@ -281,8 +283,8 @@ feed the 4D projected FA data into GLM modelling and thresholding
 in order to find voxels which correlate with your model
 """
 randomise = pe.Node(fsl.Randomise(),name='randomise')
-randomise.inputs.design_mat=os.path.abspath('data/tbss/design.mat')
-randomise.inputs.t_con=os.path.abspath('data/tbss/design.con')
+randomise.inputs.design_mat=os.path.abspath('data/design.mat')
+randomise.inputs.t_con=os.path.abspath('data/design.con')
 randomise.inputs.num_perm=10
 
 
