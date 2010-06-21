@@ -317,10 +317,13 @@ class TBSS3Postreg(FSLCommand):
     _cmd = 'tbss_3_postreg'
     input_spec = TBSS3PostregInputSpec
     output_spec = TBSS3PostregOutputSpec
-
+    
     def _run_interface(self, runtime):        
         runtime.cwd = self.inputs.tbss_dir
-        return super(TBSS3Postreg, self)._run_interface(runtime)
+        runtime = super(TBSS3Postreg, self)._run_interface(runtime)
+        if runtime.stderr:
+            runtime.returncode = 1
+        return runtime
     
     def _list_outputs(self):        
         outputs = self.output_spec().get()
