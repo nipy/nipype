@@ -155,6 +155,13 @@ def _write_detailed_dot(graph, dotfilename):
     filep.close()
     return text
 
+def _get_valid_pathstr(pathstr):
+    for symbol in [' ','[',']']:
+        pathstr = pathstr.replace(symbol, '')
+    pathstr = pathstr.replace(os.sep, '_')
+    pathstr = pathstr.replace(',', '.')
+    return pathstr
+
 def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
     """Merges two graphs that share a subset of nodes.
 
@@ -206,7 +213,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
         paramstr = ''
         for key, val in sorted(params.items()):
             paramstr = '_'.join((paramstr, key,
-                                 str(val).replace(os.sep, '_')))
+                                 _get_valid_pathstr(str(val)))) #.replace(os.sep, '_')))
             Gc.nodes()[nodeidx].set_input(key, val)
         for n in Gc.nodes():
             """
