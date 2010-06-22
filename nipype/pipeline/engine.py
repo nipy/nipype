@@ -1035,13 +1035,15 @@ class MapNode(Node):
 
         nitems = len(getattr(self.inputs, self.iterfield[0]))
         newnodes = []
+        nodenames = []
         for i in range(nitems):
-            newnodes.insert(i, Node(deepcopy(self._interface), name=self.name+str(i)))
+            nodenames.insert(i, '_' + self.name+str(i))
+            newnodes.insert(i, Node(deepcopy(self._interface), name=nodenames[i]))
             newnodes[i]._interface.inputs.set(**deepcopy(self._interface.inputs.get()))
             for field in self.iterfield:
                 setattr(newnodes[i].inputs, field,
                         getattr(self.inputs, field)[i])
-        workflowname = 'workflow'
+        workflowname = 'mapflow'
         iterflow = Workflow(name=workflowname)
         iterflow.base_dir = cwd
         iterflow.add_nodes(newnodes)
@@ -1050,7 +1052,7 @@ class MapNode(Node):
                                        outputs=self.outputs)
         for i in range(nitems):
             node = iterflow.get_exec_node('.'.join((workflowname,
-                                                    self.name+str(i))))
+                                                    nodenames[i])))
             if node.result and hasattr(node.result, 'runtime'):
                 self._result.runtime.insert(i, node.result.runtime)
                 if node.result.runtime.returncode != 0:
@@ -1063,7 +1065,7 @@ class MapNode(Node):
             values = []
             for i in range(nitems):
                 node = iterflow.get_exec_node('.'.join((workflowname,
-                                                    self.name+str(i))))
+                                                        nodenames[i])))
                 values.insert(i, node.result.outputs.get()[key])
             if any([val != Undefined for val in values]):
                 #logger.info('setting key %s with values %s' %(key, str(values)))
