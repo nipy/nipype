@@ -9,6 +9,8 @@ import xml.dom.minidom
 import enthought.traits.api as traits
 import os
 from nipype.interfaces.traits import File
+from nipype.utils.misc import isdefined
+from enthought.traits.trait_base import Undefined
 
 
 path = "/home/filo/tmp/slicer/Slicer3-build/lib/Slicer3/Plugins"
@@ -36,8 +38,9 @@ class SlicerCommandLine(CommandLine):
         dom = self._grab_xml()
         self._outputs_filenames = {}
         
-        inputs = []
-        outputs = []
+        self._outputs_nodes = []
+        
+        undefined_traits = {}
         
         for paramGroup in dom.getElementsByTagName("parameters"):
             for param in paramGroup.childNodes:
@@ -47,7 +50,10 @@ class SlicerCommandLine(CommandLine):
                 
                 longFlagNode = param.getElementsByTagName('longflag')
                 if longFlagNode:
-                    traitsParams["argstr"] = "--" + longFlagNode[0].firstChild.nodeValue + " " + {'integer': "%d", 'double': "%f", 'image': "%s", 'transform': "%s"}[param.nodeName]
+                    traitsParams["argstr"] = "--" + longFlagNode[0].firstChild.nodeValue + " " 
+                else:
+                    traitsParams["argstr"] = ""
+                traitsParams["argstr"] += {'integer': "%d", 'double': "%f", 'image': "%s", 'transform': "%s"}[param.nodeName]
                 
                 index = param.getElementsByTagName('index')
                 if index:
@@ -56,15 +62,31 @@ class SlicerCommandLine(CommandLine):
                 desc = param.getElementsByTagName('description')
                 if index:
                     traitsParams["desc"] = desc[0].firstChild.nodeValue
-                    
-                type = {'integer': traits.Int, 'double': traits.Float, 'image': File, 'transform': File}[param.nodeName](**traitsParams)
+                
+                                    
+                
                 if param.nodeName in ['file', 'directory', 'image', 'transform'] and param.getElementsByTagName('channel')[0].firstChild.nodeValue == 'output':
                     traitsParams["genfile"] = True
+                    self.inputs.add_trait(param.getElementsByTagName('name')[0].firstChild.nodeValue, type)
+                    undefined_traits[param.getElementsByTagName('name')[0].firstChild.nodeValue] = Undefined
+                    if param.nodeName in ['image', 'transform', 'file']:
+                        traitsParams["exist"] = True
+                    type = {'integer': traits.Int, 'double': traits.Float, 'image': File, 'transform': File}[param.nodeName](**traitsParams)
                     self._outputs_filenames[param.getElementsByTagName('name')[0].firstChild.nodeValue] = self._gen_filename_from_param(param)
-                    outputs.append(param)
+                    self._outputs().add_trait(param.getElementsByTagName('name')[0].firstChild.nodeValue, type)
+                    self._outputs_nodes.append(param)
+                else:
+                    if param.nodeName in ['image', 'transform', 'file']:
+                        traitsParams["exist"] = True
+                    type = {'integer': traits.Int, 'double': traits.Float, 'image': File, 'transform': File}[param.nodeName](**traitsParams)
+                    self.inputs.add_trait(param.getElementsByTagName('name')[0].firstChild.nodeValue, type)
+                    undefined_traits[param.getElementsByTagName('name')[0].firstChild.nodeValue] = Undefined
+                    
+                
 
-                self.inputs.add_trait(param.getElementsByTagName('name')[0].firstChild.nodeValue, type)
-        print outputs
+                
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+        print self._outputs_nodes
         
     def _gen_filename(self, name):
         if name in self._outputs_filenames:
@@ -77,10 +99,23 @@ class SlicerCommandLine(CommandLine):
         if fileExtensions:
             ext = fileExtensions
         else:
-            ext = {'image': '.nii', 'transform': '.txt'}[param.nodeName]
+            ext = {'image': '.nii', 'transform': '.txt', 'file': ''}[param.nodeName]
         return os.path.abspath(base + ext)
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        for output_node in self._outputs_nodes:
+            name = output_node.getElementsByTagName('name')[0].firstChild.nodeValue
+            outputs[name] = getattr(self.inputs, name)
+            if not isdefined(outputs[name]):
+                outputs[name] = self._gen_filename(name)
+        return outputs
         
 if __name__ == "__main__":
     test = SlicerCommandLine(name="AffineRegistration")
-    test.inputs.Iterations = 2
+    test.inputs.FixedImageFileName = "/home/filo/workspace/fmri_tumour/data/pilot1/10_co_COR_3D_IR_PREP.nii"
+    test.inputs.MovingImageFileName = "/home/filo/workspace/fmri_tumour/data/pilot1/2_line_bisection.nii"
     print test.cmdline
+    ret = test.run()
+    print ret.runtime.stderr
+    print ret.runtime.returncode
