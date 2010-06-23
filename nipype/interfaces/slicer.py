@@ -15,17 +15,12 @@ from enthought.traits.trait_base import Undefined
 
 path = "/home/filo/tmp/slicer/Slicer3-build/lib/Slicer3/Plugins"
 
-class SlicerCommandLineInputSpec(DynamicTraitedSpec):
+class SlicerCommandLineInputSpec(DynamicTraitedSpec, CommandLineInputSpec):
     name = traits.Str()
-    args = traits.Str(argstr='%s', desc='Additional parameters to the command')
-    environ = traits.DictStrStr(desc='Environment variables', usedefault=True)
-    
-class SlicerCommandLineOutputSpec(DynamicTraitedSpec):
-    pass
 
 class SlicerCommandLine(CommandLine):
     input_spec = SlicerCommandLineInputSpec
-    output_spec = SlicerCommandLineOutputSpec
+    output_spec = DynamicTraitedSpec
         
     
     def _grab_xml(self):
@@ -44,16 +39,26 @@ class SlicerCommandLine(CommandLine):
         
         for paramGroup in dom.getElementsByTagName("parameters"):
             for param in paramGroup.childNodes:
-                if param.nodeName in ['label', 'description', '#text']:
+                if param.nodeName in ['label', 'description', '#text', '#comment']:
                     continue
+                print param.nodeName
                 traitsParams = {}
+                
+                name = param.getElementsByTagName('name')[0].firstChild.nodeValue
                 
                 longFlagNode = param.getElementsByTagName('longflag')
                 if longFlagNode:
                     traitsParams["argstr"] = "--" + longFlagNode[0].firstChild.nodeValue + " " 
                 else:
-                    traitsParams["argstr"] = ""
-                traitsParams["argstr"] += {'integer': "%d", 'double': "%f", 'image': "%s", 'transform': "%s"}[param.nodeName]
+                    traitsParams["argstr"] = "--" + name + " "
+                    
+                    
+                argsDict = {'file': '%s', 'integer': "%d", 'double': "%f", 'image': "%s", 'transform': "%s", 'boolean': '', 'string-enumeration': '%s', 'string': "%s"}
+                    
+                if param.nodeName.endswith('-vector'):
+                    traitsParams["argstr"] += argsDict[param.nodeName[:-7]]
+                else:
+                    traitsParams["argstr"] += argsDict[param.nodeName]
                 
                 index = param.getElementsByTagName('index')
                 if index:
@@ -63,30 +68,39 @@ class SlicerCommandLine(CommandLine):
                 if index:
                     traitsParams["desc"] = desc[0].firstChild.nodeValue
                 
-                                    
+                name = param.getElementsByTagName('name')[0].firstChild.nodeValue
+                
+                typesDict = {'integer': traits.Int, 'double': traits.Float, 'image': File, 'transform': File, 'boolean': traits.Bool, 'string': traits.Str, 'file':File}
+                            
+                if param.nodeName == 'string-enumeration':
+                    type = traits.Enum
+                    values = [el.firstChild.nodeValue for el in param.getElementsByTagName('element')]
+                elif param.nodeName.endswith('-vector'):
+                    type = traits.List
+                    values = [typesDict[param.nodeName[:-7]]]
+                    traitsParams["sep"] = ','
+                else:
+                    values = []
+                    type = typesDict[param.nodeName]
                 
                 if param.nodeName in ['file', 'directory', 'image', 'transform'] and param.getElementsByTagName('channel')[0].firstChild.nodeValue == 'output':
                     traitsParams["genfile"] = True
-                    self.inputs.add_trait(param.getElementsByTagName('name')[0].firstChild.nodeValue, type)
-                    undefined_traits[param.getElementsByTagName('name')[0].firstChild.nodeValue] = Undefined
+                    self.inputs.add_trait(name, type(*values, **traitsParams))
+                    undefined_traits[name] = Undefined
+                    
                     if param.nodeName in ['image', 'transform', 'file']:
-                        traitsParams["exist"] = True
-                    type = {'integer': traits.Int, 'double': traits.Float, 'image': File, 'transform': File}[param.nodeName](**traitsParams)
-                    self._outputs_filenames[param.getElementsByTagName('name')[0].firstChild.nodeValue] = self._gen_filename_from_param(param)
-                    self._outputs().add_trait(param.getElementsByTagName('name')[0].firstChild.nodeValue, type)
+                        traitsParams["exists"] = True
+                    
+                    self._outputs_filenames[name] = self._gen_filename_from_param(param)
+                    self._outputs().add_trait(name, type(*values, **traitsParams))
                     self._outputs_nodes.append(param)
                 else:
                     if param.nodeName in ['image', 'transform', 'file']:
-                        traitsParams["exist"] = True
-                    type = {'integer': traits.Int, 'double': traits.Float, 'image': File, 'transform': File}[param.nodeName](**traitsParams)
-                    self.inputs.add_trait(param.getElementsByTagName('name')[0].firstChild.nodeValue, type)
-                    undefined_traits[param.getElementsByTagName('name')[0].firstChild.nodeValue] = Undefined
-                    
-                
-
+                        traitsParams["exists"] = True
+                    self.inputs.add_trait(name, type(*values, **traitsParams))
+                    undefined_traits[name] = Undefined
                 
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
-        print self._outputs_nodes
         
     def _gen_filename(self, name):
         if name in self._outputs_filenames:
@@ -112,9 +126,10 @@ class SlicerCommandLine(CommandLine):
         return outputs
         
 if __name__ == "__main__":
-    test = SlicerCommandLine(name="AffineRegistration")
-    test.inputs.FixedImageFileName = "/home/filo/workspace/fmri_tumour/data/pilot1/10_co_COR_3D_IR_PREP.nii"
-    test.inputs.MovingImageFileName = "/home/filo/workspace/fmri_tumour/data/pilot1/2_line_bisection.nii"
+    test = SlicerCommandLine(name="BRAINSFit")
+    test.inputs.fixedVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/10_co_COR_3D_IR_PREP.nii"
+    test.inputs.movingVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/2_line_bisection.nii"
+    test.inputs.transformType = ["Affine"]
     print test.cmdline
     ret = test.run()
     print ret.runtime.stderr
