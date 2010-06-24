@@ -48,8 +48,8 @@ from nipype.utils.config import config
 LOG_FILENAME = 'pypeline.log'
 logging.basicConfig()
 logger = logging.getLogger('workflow')
-nwlogger = logging.getLogger('node')
 fmlogger = logging.getLogger('filemanip')
+iflogger = logging.getLogger('interface')
 hdlr = logging.handlers.RotatingFileHandler(LOG_FILENAME,
                                             maxBytes=256000,
                                             backupCount=4)
@@ -61,6 +61,8 @@ logger.addHandler(hdlr)
 logger.setLevel(logging.getLevelName(config.get('logging','workflow_level')))
 fmlogger.addHandler(hdlr)
 fmlogger.setLevel(logging.getLevelName(config.get('logging','filemanip_level')))
+iflogger.addHandler(hdlr)
+iflogger.setLevel(logging.getLevelName(config.get('logging','interface_level')))
 
 class WorkflowBase(object):
     """ Define common attributes and functions for workflows and nodes
