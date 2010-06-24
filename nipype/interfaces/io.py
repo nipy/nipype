@@ -27,6 +27,9 @@ from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (copyfile, list_to_filename,
                                     filename_to_list, FileNotFoundError)
 
+import logging
+iflogger = logging.getLogger('interface')
+
 def add_traits(base, names, trait_type=None):
     """ Add traits to a traited class.
 
@@ -139,11 +142,10 @@ class DataSink(IOBase):
                 elif os.path.isdir(src):
                     dst = self._get_dst(os.path.join(src,''))
                     dst = os.path.join(tempoutdir, dst)
-                    path,_ = os.path.split(dst)
-                    if os.path.exists(path):
-                        #print "removing: ", path
-                        shutil.rmtree(path)
-                    print "copydir", src, dst
+                    if os.path.exists(dst):
+                        iflogger.debug("removing: %s"%dst)
+                        shutil.rmtree(dst)
+                    iflogger.debug("copydir: %s %s"%(src, dst))
                     shutil.copytree(src, dst)
         return None
 
