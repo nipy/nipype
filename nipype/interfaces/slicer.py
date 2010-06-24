@@ -16,7 +16,7 @@ from enthought.traits.trait_base import Undefined
 path = "/home/filo/tmp/slicer/Slicer3-build/lib/Slicer3/Plugins"
 
 class SlicerCommandLineInputSpec(DynamicTraitedSpec, CommandLineInputSpec):
-    name = traits.Str()
+    module = traits.Str()
 
 class SlicerCommandLine(CommandLine):
     input_spec = SlicerCommandLineInputSpec
@@ -28,8 +28,8 @@ class SlicerCommandLine(CommandLine):
         ret = cmd.run()
         return xml.dom.minidom.parseString(ret.runtime.stdout)
     
-    def __init__(self, name, **inputs):
-        super(SlicerCommandLine, self).__init__(command= os.path.join(path, name), name= name, **inputs)
+    def __init__(self, module, **inputs):
+        super(SlicerCommandLine, self).__init__(command= os.path.join(path, module), name= module, **inputs)
         dom = self._grab_xml()
         self._outputs_filenames = {}
         
@@ -52,7 +52,7 @@ class SlicerCommandLine(CommandLine):
                     traitsParams["argstr"] = "--" + name + " "
                     
                     
-                argsDict = {'file': '%s', 'integer': "%d", 'double': "%f", 'image': "%s", 'transform': "%s", 'boolean': '', 'string-enumeration': '%s', 'string': "%s"}
+                argsDict = {'file': '%s', 'integer': "%d", 'double': "%f", 'float': "%f", 'image': "%s", 'transform': "%s", 'boolean': '', 'string-enumeration': '%s', 'string': "%s"}
                     
                 if param.nodeName.endswith('-vector'):
                     traitsParams["argstr"] += argsDict[param.nodeName[:-7]]
@@ -69,7 +69,7 @@ class SlicerCommandLine(CommandLine):
                 
                 name = param.getElementsByTagName('name')[0].firstChild.nodeValue
                 
-                typesDict = {'integer': traits.Int, 'double': traits.Float, 'image': File, 'transform': File, 'boolean': traits.Bool, 'string': traits.Str, 'file':File}
+                typesDict = {'integer': traits.Int, 'double': traits.Float, 'float': traits.Float, 'image': File, 'transform': File, 'boolean': traits.Bool, 'string': traits.Str, 'file':File}
                             
                 if param.nodeName == 'string-enumeration':
                     type = traits.Enum
@@ -117,8 +117,11 @@ class SlicerCommandLine(CommandLine):
         for output_node in self._outputs_nodes:
             name = output_node.getElementsByTagName('name')[0].firstChild.nodeValue
             outputs[name] = getattr(self.inputs, name)
-            if not isdefined(outputs[name]):
-                outputs[name] = self._gen_filename(name)
+            if isdefined(outputs[name]) and isinstance(outputs[name], bool):
+                if outputs[name]:
+                    outputs[name] = self._gen_filename(name)
+                else:
+                    outputs[name] = Undefined
         return outputs
     
     def _format_arg(self, name, spec, value):
@@ -131,12 +134,22 @@ class SlicerCommandLine(CommandLine):
         return super(SlicerCommandLine, self)._format_arg(name, spec, value)
         
 if __name__ == "__main__":
-    test = SlicerCommandLine(name="BRAINSFit")
+    test = SlicerCommandLine(module="BRAINSFit")
     test.inputs.fixedVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/10_co_COR_3D_IR_PREP.nii"
     test.inputs.movingVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/2_line_bisection.nii"
-    test.inputs.outputVolume = True
+    test.inputs.outputTransform = True
     test.inputs.transformType = ["Affine"]
     print test.cmdline
-    ret = test.run()
-    print ret.runtime.stderr
-    print ret.runtime.returncode
+    #print test.inputs
+    print test._outputs()
+    #ret = test.run()
+    
+#    test = SlicerCommandLine(name="BRAINSResample")
+#    test.inputs.referenceVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/10_co_COR_3D_IR_PREP.nii"
+#    test.inputs.inputVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/2_line_bisection.nii"
+#    test.inputs.outputVolume = True
+#    test.inputs.warpTransform = "/home/filo/workspace/nipype/nipype/interfaces/outputTransform.mat"
+#    print test.cmdline
+#    ret = test.run()
+#    print ret.runtime.stderr
+#    print ret.runtime.returncode
