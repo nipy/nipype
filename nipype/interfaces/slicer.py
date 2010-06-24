@@ -41,7 +41,6 @@ class SlicerCommandLine(CommandLine):
             for param in paramGroup.childNodes:
                 if param.nodeName in ['label', 'description', '#text', '#comment']:
                     continue
-                print param.nodeName
                 traitsParams = {}
                 
                 name = param.getElementsByTagName('name')[0].firstChild.nodeValue
@@ -84,18 +83,15 @@ class SlicerCommandLine(CommandLine):
                     type = typesDict[param.nodeName]
                 
                 if param.nodeName in ['file', 'directory', 'image', 'transform'] and param.getElementsByTagName('channel')[0].firstChild.nodeValue == 'output':
-                    traitsParams["genfile"] = True
-                    self.inputs.add_trait(name, type(*values, **traitsParams))
+                    self.inputs.add_trait(name, traits.Either(traits.Bool, File, **traitsParams))
                     undefined_traits[name] = Undefined
                     
-                    if param.nodeName in ['image', 'transform', 'file']:
-                        traitsParams["exists"] = True
-                    
+                    traitsParams["exists"] = True
                     self._outputs_filenames[name] = self._gen_filename_from_param(param)
-                    self._outputs().add_trait(name, type(*values, **traitsParams))
+                    self._outputs().add_trait(name, File(*values, **traitsParams))
                     self._outputs_nodes.append(param)
                 else:
-                    if param.nodeName in ['image', 'transform', 'file']:
+                    if param.nodeName in ['file', 'directory', 'image', 'transform']:
                         traitsParams["exists"] = True
                     self.inputs.add_trait(name, type(*values, **traitsParams))
                     undefined_traits[name] = Undefined
@@ -124,11 +120,21 @@ class SlicerCommandLine(CommandLine):
             if not isdefined(outputs[name]):
                 outputs[name] = self._gen_filename(name)
         return outputs
+    
+    def _format_arg(self, name, spec, value):
+        if name in [output_node.getElementsByTagName('name')[0].firstChild.nodeValue for output_node in self._outputs_nodes]:
+            if isinstance(value, bool):
+                fname = self._gen_filename(name)
+            else:
+                fname = value
+            return spec.argstr % fname
+        return super(SlicerCommandLine, self)._format_arg(name, spec, value)
         
 if __name__ == "__main__":
     test = SlicerCommandLine(name="BRAINSFit")
     test.inputs.fixedVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/10_co_COR_3D_IR_PREP.nii"
     test.inputs.movingVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/2_line_bisection.nii"
+    test.inputs.outputVolume = True
     test.inputs.transformType = ["Affine"]
     print test.cmdline
     ret = test.run()
