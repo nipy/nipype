@@ -55,7 +55,7 @@ class ParseDICOMDir(FSCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.dicom_info_file):
-            outputs['dicom_info_file'] = self.inputs.dicom_info_file
+            outputs['dicom_info_file'] = os.path.join(os.getcwd(),self.inputs.dicom_info_file)
         return outputs
 
 class UnpackSDICOMDirInputSpec(FSTraitedSpec):

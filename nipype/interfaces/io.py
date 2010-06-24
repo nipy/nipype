@@ -117,6 +117,7 @@ class DataSink(IOBase):
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         for key,files in self.inputs._outputs.items():
+            iflogger.debug("key: %s files: %s"%(key, str(files)))
             files = filename_to_list(files)
             outfiles = []
             tempoutdir = outdir
@@ -137,7 +138,7 @@ class DataSink(IOBase):
                     if not os.path.exists(path):
                         #print 'path',path
                         os.makedirs(path)
-                    #print 'copyfile',src, dst
+                    iflogger.debug("copyfile: %s %s"%(src, dst))
                     copyfile(src, dst, copy=True)
                 elif os.path.isdir(src):
                     dst = self._get_dst(os.path.join(src,''))
