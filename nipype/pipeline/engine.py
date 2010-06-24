@@ -323,6 +323,11 @@ class Workflow(WorkflowBase):
     def outputs(self):
         return self._get_outputs()
 
+    def execnodes(self):
+        if self._execgraph:
+            return self._execgraph.nodes()
+        return None
+        
     def get_exec_node(self, name):
         if self._execgraph:
             return [node  for node in self._execgraph.nodes() if name == str(node)].pop()
