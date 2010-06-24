@@ -15,6 +15,7 @@ default_cfg = StringIO("""
 [logging]
 workflow_level = INFO
 filemanip_level = INFO
+interface_level = INFO
 
 [execution]
 stop_on_first_crash = false
