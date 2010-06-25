@@ -484,6 +484,8 @@ class Workflow(WorkflowBase):
 
     def _generate_execgraph(self):
         nodes2remove = []
+        if not nx.is_directed_acyclic_graph(self._graph):
+            raise Exception('Workflow: %s is not a directed acyclic graph (DAG)'%self.name)
         for node in self._graph.nodes():
             if isinstance(node, Workflow):
                 nodes2remove.append(node)
