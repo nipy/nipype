@@ -174,17 +174,21 @@ class DataGrabber(IOBase):
 
         Examples
         --------
+        
         >>> from nipype.interfaces.io import DataGrabber
 
         Pick all files from current directory
+        
         >>> dg = DataGrabber()
         >>> dg.inputs.template = '*'
 
         Pick file foo/foo.nii from current directory
+        
         >>> dg.inputs.template = '%s/%s.nii'
         >>> dg.inputs.template_args['outfiles']=[['foo','foo']]
 
         Same thing but with dynamically created fields
+        
         >>> dg = DataGrabber(infields=['arg1','arg2'])
         >>> dg.inputs.template = '%s/%s.nii'
         >>> dg.inputs.arg1 = 'foo'
@@ -194,6 +198,7 @@ class DataGrabber(IOBase):
         pipeline.
 
         Dynamically created, user-defined input and output fields
+        
         >>> dg = DataGrabber(infields=['sid'], outfields=['func','struct','ref'])
         >>> dg.inputs.base_directory = 'nipype-tutorial/data/'
         >>> dg.inputs.template = '%s/%s.nii'
@@ -204,6 +209,7 @@ class DataGrabber(IOBase):
 
         Change the template only for output field struct. The rest use the
         general template
+        
         >>> dg.inputs.field_template = dict(struct='%s/struct.nii')
         >>> dg.inputs.template_args['struct'] = [['sid']]
 
@@ -426,17 +432,21 @@ class XNATSource(IOBase):
 
         Examples
         --------
+        
         >>> from nipype.interfaces.io import XNATSource
 
         Pick all files from current directory
+        
         >>> dg = XNATSource()
         >>> dg.inputs.template = '*'
 
         Pick file foo/foo.nii from current directory
+        
         >>> dg.inputs.template = '%s/%s.nii'
         >>> dg.inputs.template_args['outfiles']=[['foo','foo']]
 
         Same thing but with dynamically created fields
+        
         >>> dg = XNATSource(infields=['project','subject','experiment','assessor','inout'])
         >>> dg.inputs.query_template = '/projects/%s/subjects/%s/experiments/%s' \
                    '/assessors/%s/%s_resources/files'
