@@ -994,6 +994,7 @@ class MapNode(Node):
             fields = basetraits.copyable_trait_names()
         for name, spec in basetraits.items():
             if name in fields and ((nitems is None) or (nitems > 1)):
+                logger.debug('adding multipath trait: %s'%name)
                 output.add_trait(name, InputMultiPath(spec.trait_type))
             else:
                 output.add_trait(name, traits.Trait(spec))
@@ -1019,12 +1020,13 @@ class MapNode(Node):
     def _get_hashval(self):
         """ Compute hash including iterfield lists
         """
-        inputs = deepcopy(self._interface.inputs)
+        hashinputs = deepcopy(self._interface.inputs)
         for name in self.iterfield:
-            inputs.remove_trait(name)
-            inputs.add_trait(name, traits.List(self._interface.inputs.traits()[name].trait_type))
-            setattr(inputs, name, getattr(self._inputs, name))
-        return inputs.hashval
+            hashinputs.remove_trait(name)
+            hashinputs.add_trait(name, InputMultiPath(self._interface.inputs.traits()[name].trait_type))
+            logger.debug('setting hashinput %s-> %s'%(name,getattr(self._inputs, name)))
+            setattr(hashinputs, name, getattr(self._inputs, name))
+        return hashinputs.hashval
 
     @property
     def inputs(self):
@@ -1040,7 +1042,7 @@ class MapNode(Node):
             cwd = self._output_directory()
         os.chdir(cwd)
 
-        nitems = len(getattr(self.inputs, self.iterfield[0]))
+        nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
         newnodes = []
         nodenames = []
         for i in range(nitems):
@@ -1048,8 +1050,11 @@ class MapNode(Node):
             newnodes.insert(i, Node(deepcopy(self._interface), name=nodenames[i]))
             newnodes[i]._interface.inputs.set(**deepcopy(self._interface.inputs.get()))
             for field in self.iterfield:
+                fieldvals = filename_to_list(getattr(self.inputs, field))
+                logger.debug('setting input %d %s %s'%(i, field,
+                                                      fieldvals[i])) 
                 setattr(newnodes[i].inputs, field,
-                        getattr(self.inputs, field)[i])
+                        fieldvals[i])
         workflowname = 'mapflow'
         iterflow = Workflow(name=workflowname)
         iterflow.base_dir = cwd

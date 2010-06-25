@@ -469,7 +469,7 @@ class StimulusCorrelation(BaseInterface):
     
     def _list_outputs(self):
         outputs = self._outputs().get()
-        files = None
+        files = []
         for i,f in enumerate(self.inputs.realignment_parameters):
             files.insert(i, self._get_output_filenames(f, os.getcwd()))
         if files:
