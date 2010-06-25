@@ -409,7 +409,7 @@ class FreeSurferSource(IOBase):
 
 class XNATSourceInputSpec(DynamicTraitedSpec): #InterfaceInputSpec):
     config_file = File(exists=True, mandatory=True,
-                        desc='config file containing xnat access info')
+                        desc='a json config file containing xnat access info: url, username and password')
     query_template = traits.Str(mandatory=True,
              desc='Layout used to get files. relative to base directory if defined')
     query_template_args = traits.Dict(traits.Str,
@@ -420,8 +420,6 @@ class XNATSourceInputSpec(DynamicTraitedSpec): #InterfaceInputSpec):
 class XNATSource(IOBase):
     """ Generic XNATSource module that wraps around glob in an
         intelligent way for neuroimaging tasks to grab files
-
-        Doesn't support directories currently
 
         Examples
         --------
