@@ -5,9 +5,10 @@
 
     DataSource: Generic nifti to named Nifti interface
     DataSink: Generic named output from interfaces to data store
-
+    XNATSource: preliminary interface to XNAT
+    
     To come :
-    XNATSource, XNATSink
+    XNATSink
 
 """
 from copy import deepcopy
@@ -16,6 +17,7 @@ import os
 import shutil
 
 from enthought.traits.trait_errors import TraitError
+from xnatlib import Interface as XNATInterface
 
 from nipype.interfaces.base import (Interface, CommandLine, Bunch,
                                     InterfaceResult, Interface,
@@ -404,3 +406,163 @@ class FreeSurferSource(IOBase):
         
         
         
+
+class XNATSourceInputSpec(DynamicTraitedSpec): #InterfaceInputSpec):
+    config_file = File(exists=True, mandatory=True,
+                        desc='config file containing xnat access info')
+    query_template = traits.Str(mandatory=True,
+             desc='Layout used to get files. relative to base directory if defined')
+    query_template_args = traits.Dict(traits.Str,
+                                traits.List(traits.List),
+                                value=dict(outfiles=[]), usedefault=True,
+                                desc='Information to plug into template')
+
+class XNATSource(IOBase):
+    """ Generic XNATSource module that wraps around glob in an
+        intelligent way for neuroimaging tasks to grab files
+
+        Doesn't support directories currently
+
+        Examples
+        --------
+        >>> from nipype.interfaces.io import XNATSource
+
+        Pick all files from current directory
+        >>> dg = XNATSource()
+        >>> dg.inputs.template = '*'
+
+        Pick file foo/foo.nii from current directory
+        >>> dg.inputs.template = '%s/%s.nii'
+        >>> dg.inputs.template_args['outfiles']=[['foo','foo']]
+
+        Same thing but with dynamically created fields
+        >>> dg = XNATSource(infields=['project','subject','experiment','assessor','inout'])
+        >>> dg.inputs.query_template = '/projects/%s/subjects/%s/experiments/%s' \
+                   '/assessors/%s/%s_resources/files'
+        >>> dg.inputs.project = 'IMAGEN'
+        >>> dg.inputs.subject = 'IMAGEN_000000001274'
+        >>> dg.inputs.experiment = '*SessionA*'
+        >>> dg.inputs.assessor = '*ADNI_MPRAGE_nii'
+        >>> dg.inputs.inout = 'out'
+
+        
+        >>> dg = XNATSource(infields=['sid'],outfields=['struct','func'])
+        >>> dg.inputs.query_template = '/projects/IMAGEN/subjects/%s/experiments/*SessionA*' \
+                   '/assessors/*%s_nii/out_resources/files'
+        >>> dg.inputs.query_template_args['struct'] = [['sid','ADNI_MPRAGE']]
+        >>> dg.inputs.query_template_args['func'] = [['sid','EPI_faces']]
+        >>> dg.inputs.sid = 'IMAGEN_000000001274'
+
+
+    """
+    input_spec = XNATSourceInputSpec
+    output_spec = DynamicTraitedSpec
+
+    def __init__(self, infields=None, outfields=None, **kwargs):
+        """
+        Parameters
+        ----------
+        infields : list of str
+            Indicates the input fields to be dynamically created
+
+        outfields: list of str
+            Indicates output fields to be dynamically created
+
+        See class examples for usage
+        
+        """
+        super(XNATSource, self).__init__(**kwargs)
+        undefined_traits = {}
+        # used for mandatory inputs check
+        self._infields = infields
+        if infields:
+            for key in infields:
+                self.inputs.add_trait(key, traits.Any)
+                undefined_traits[key] = Undefined
+            self.inputs.query_template_args['outfiles'] = [infields]
+        if outfields:
+            # add ability to insert field specific templates
+            self.inputs.add_trait('field_template',
+                                  traits.Dict(traits.Enum(outfields),
+                                    desc="arguments that fit into query_template"))
+            undefined_traits['field_template'] = Undefined
+            #self.inputs.remove_trait('query_template_args')
+            outdict = {}
+            for key in outfields:
+                outdict[key] = []
+            self.inputs.query_template_args =  outdict
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+
+    def _add_output_traits(self, base):
+        """
+
+        Using traits.Any instead out OutputMultiPath till add_trait bug
+        is fixed.
+        """
+        return add_traits(base, self.inputs.query_template_args.keys())
+
+    def _list_outputs(self):
+        # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
+        # hence manual check
+        config_info = load_json(self.inputs.config_file)
+        cwd = os.getcwd()
+        xnat = XNATInterface(config_info['url'], config_info['username'], config_info['password'], cachedir=cwd)
+        if self._infields:
+            for key in self._infields:
+                value = getattr(self.inputs,key)
+                if not isdefined(value):
+                    msg = "%s requires a value for input '%s' because it was listed in 'infields'" % \
+                    (self.__class__.__name__, key)
+                    raise ValueError(msg)
+                
+        outputs = {}
+        for key, args in self.inputs.query_template_args.items():
+            outputs[key] = []
+            template = self.inputs.query_template
+            if hasattr(self.inputs, 'field_template') and \
+                    isdefined(self.inputs.field_template) and \
+                    self.inputs.field_template.has_key(key):
+                template = self.inputs.field_template[key]
+            if not args:
+                file_objects = xnat.select(template).request_objects()
+                if file_objects == []:
+                    raise IOError('Template %s returned no files'%template)
+                outputs[key] = list_to_filename([str(file_object.get()) for file_object in file_objects])
+            for argnum, arglist in enumerate(args):
+                maxlen = 1
+                for arg in arglist:
+                    if isinstance(arg, str) and hasattr(self.inputs, arg):
+                        arg = getattr(self.inputs, arg)
+                    if isinstance(arg, list):
+                        if (maxlen > 1) and (len(arg) != maxlen):
+                            raise ValueError('incompatible number of arguments for %s' % key)
+                        if len(arg)>maxlen:
+                            maxlen = len(arg)
+                outfiles = []
+                for i in range(maxlen):
+                    argtuple = []
+                    for arg in arglist:
+                        if isinstance(arg, str) and hasattr(self.inputs, arg):
+                            arg = getattr(self.inputs, arg)
+                        if isinstance(arg, list):
+                            argtuple.append(arg[i])
+                        else:
+                            argtuple.append(arg)
+                    if argtuple:
+                        file_objects = xnat.select(template%tuple(argtuple)).request_objects()
+                        if file_objects == []:
+                            raise IOError('Template %s returned no files'%(template%tuple(argtuple)))
+                        outfiles = list_to_filename([str(file_object.get()) for file_object in file_objects])
+                    else:
+                        file_objects = xnat.select(template).request_objects()
+                        if file_objects == []:
+                            raise IOError('Template %s returned no files'%template)
+                        outfiles = list_to_filename([str(file_object.get()) for file_object in file_objects])
+                    outputs[key].insert(i,outfiles)
+            if len(outputs[key]) == 0:
+                outputs[key] = None
+            elif len(outputs[key]) == 1:
+                outputs[key] = outputs[key][0]
+        return outputs
+
+
