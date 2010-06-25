@@ -28,6 +28,16 @@ class SlicerCommandLine(CommandLine):
         ret = cmd.run()
         return xml.dom.minidom.parseString(ret.runtime.stdout)
     
+    def _outputs(self):
+        base = super(SlicerCommandLine, self)._outputs()
+        undefined_output_traits = {}
+        for key in [node.getElementsByTagName('name')[0].firstChild.nodeValue for node in self._outputs_nodes]:
+            base.add_trait(key, File(exists = True))
+            undefined_output_traits[key] = Undefined
+            
+        base.trait_set(trait_change_notify=False, **undefined_output_traits)
+        return base
+    
     def __init__(self, module, **inputs):
         super(SlicerCommandLine, self).__init__(command= os.path.join(path, module), name= module, **inputs)
         dom = self._grab_xml()
@@ -86,9 +96,10 @@ class SlicerCommandLine(CommandLine):
                     self.inputs.add_trait(name, traits.Either(traits.Bool, File, **traitsParams))
                     undefined_traits[name] = Undefined
                     
-                    traitsParams["exists"] = True
+                    #traitsParams["exists"] = True
                     self._outputs_filenames[name] = self._gen_filename_from_param(param)
-                    self._outputs().add_trait(name, File(*values, **traitsParams))
+                    #undefined_output_traits[name] = Undefined
+                    #self._outputs().add_trait(name, File(*values, **traitsParams))
                     self._outputs_nodes.append(param)
                 else:
                     if param.nodeName in ['file', 'directory', 'image', 'transform']:
@@ -97,6 +108,9 @@ class SlicerCommandLine(CommandLine):
                     undefined_traits[name] = Undefined
                 
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+        for name in undefined_traits.keys():
+            value = getattr(self.inputs, name)
+        #self._outputs().trait_set(trait_change_notify=False, **undefined_output_traits)
         
     def _gen_filename(self, name):
         if name in self._outputs_filenames:
@@ -140,9 +154,9 @@ if __name__ == "__main__":
     test.inputs.outputTransform = True
     test.inputs.transformType = ["Affine"]
     print test.cmdline
-    #print test.inputs
+    print test.inputs
     print test._outputs()
-    #ret = test.run()
+    ret = test.run()
     
 #    test = SlicerCommandLine(name="BRAINSResample")
 #    test.inputs.referenceVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/10_co_COR_3D_IR_PREP.nii"
