@@ -93,4 +93,8 @@ sf_cburns:
 
 sf_satra_nightly: html
 	@echo "Copying html files to sourceforge..."
-	scp -r _build/html/* satra,nipy@web.sourceforge.net:htdocs/nipype-nightly
+	scp -r _build/html/* satra,nipy@web.sourceforge.net:htdocs/nipype-nightly/
+
+sf_satra: html
+	@echo "Copying html files to sourceforge..."
+	rsync -auv _build/html/. satra,nipy@web.sourceforge.net:htdocs/nipype/.
