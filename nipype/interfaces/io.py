@@ -17,7 +17,10 @@ import os
 import shutil
 
 from enthought.traits.trait_errors import TraitError
-from xnatlib import Interface as XNATInterface
+try:
+    from xnatlib import Interface as XNATInterface
+except:
+    pass
 
 from nipype.interfaces.base import (Interface, CommandLine, Bunch,
                                     InterfaceResult, Interface,
