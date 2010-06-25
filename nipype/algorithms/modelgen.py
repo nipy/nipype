@@ -151,7 +151,7 @@ class SpecifyModel(BaseInterface):
         if input_units==output_units:
             self._scalefactor = 1.
         if (input_units == 'scans') and (output_units == 'secs'):
-            if self.inputs.volumes_in_cluster > 1:
+            if isdefined(self.inputs.volumes_in_cluster) and (self.inputs.volumes_in_cluster > 1):
                 raise NotImplementedError("cannot scale timings if times are scans and acquisition is clustered")
             else:
                 self._scalefactor = self.inputs.time_repetition
