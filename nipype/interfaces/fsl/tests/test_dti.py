@@ -3,26 +3,297 @@
 import os
 import tempfile
 import shutil
+
+from tempfile import mkdtemp
+from shutil import rmtree
+
+import numpy as np
+
+import nipype.externals.pynifti as nif
+
 from nose import with_setup
 
-from nipype.testing import assert_equal, assert_not_equal, assert_raises
+from nipype.testing import assert_equal, assert_not_equal, assert_raises, skipif
 import nipype.interfaces.fsl.dti as fsl
 
 # nosetests --with-doctest path_to/test_fsl.py
 
-# test bedpostx
 def test_bedpostx():
+    input_map = dict(args = dict(argstr='%s',),
+                     bpx_directory = dict(argstr='%s',),
+                     burn_period = dict(argstr='-b %d',),
+                     bvals = dict(mandatory=True,),
+                     bvecs = dict(mandatory=True,),
+                     dwi = dict(mandatory=True,),
+                     environ = dict(),
+                     fibres = dict(argstr='-n %d',),
+                     jumps = dict(argstr='-j %d',),
+                     mask = dict(mandatory=True,),
+                     output_type = dict(),
+                     sampling = dict(argstr='-s %d',),
+                     weight = dict(argstr='-w %.2f',),
+                     )
+    instance = fsl.BEDPOSTX()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+def test_dtifit():
+    input_map = dict(args = dict(argstr='%s',),
+                     base_name = dict(argstr='-o %s',),
+                     bvals = dict(argstr='-b %s',mandatory=True,),
+                     bvecs = dict(argstr='-r %s',mandatory=True,),
+                     cni = dict(argstr='-cni %s',),
+                     dwi = dict(argstr='-k %s',mandatory=True,),
+                     environ = dict(),
+                     little_bit = dict(argstr='--littlebit',),
+                     mask = dict(argstr='-m %s',mandatory=True,),
+                     max_x = dict(argstr='-X %d',),
+                     max_y = dict(argstr='-Y %d',),
+                     max_z = dict(argstr='-Z %d',),
+                     min_x = dict(argstr='-x %d',),
+                     min_y = dict(argstr='-y %d',),
+                     min_z = dict(argstr='-z %d',),
+                     output_type = dict(),
+                     save = dict(argstr='--save_tensor',),
+                     sse = dict(argstr='--sse',),
+                     )
+    instance = fsl.DTIFit()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+def test_eddycorrect():
+    input_map = dict(args = dict(argstr='%s',),
+                     environ = dict(),
+                     in_file = dict(argstr='%s',mandatory=True,),
+                     out_file = dict(argstr='%s',),
+                     output_type = dict(),
+                     ref_num = dict(mandatory=True,argstr='%d',),
+                     )
+    instance = fsl.EddyCorrect()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+def test_findthebiggest():
+    input_map = dict(args = dict(argstr='%s',),
+                     environ = dict(),
+                     in_files = dict(argstr='%s',mandatory=True,),
+                     label_file = dict(argstr='%s',),
+                     out_file = dict(argstr='%s',),
+                     output_type = dict(),
+                     )
+    instance = fsl.FindTheBiggest()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+def test_probtrackx():
+    input_map = dict(args = dict(argstr='%s',),
+                     avoid_mp = dict(argstr='--avoid=%s',),
+                     bpx_directory = dict(mandatory=True,),
+                     c_thresh = dict(argstr='--cthr=%.3f',),
+                     correct_path_distribution = dict(argstr='--pd',),
+                     dist_thresh = dict(argstr='--distthresh=%.3f',),
+                     environ = dict(),
+                     fibst = dict(argstr='--fibst=%d',),
+                     force_dir = dict(argstr='--forcedir',),
+                     inv_xfm = dict(argstr='--invxfm=%s',),
+                     loop_check = dict(argstr='--loopcheck',),
+                     mask = dict(argstr='-m %s',mandatory=True,),
+                     mask2 = dict(argstr='--mask2=%s',),
+                     mesh = dict(argstr='--mesh=%s',),
+                     mod_euler = dict(argstr='--modeuler',),
+                     mode = dict(argstr='--mode=%s',),
+                     n_samples = dict(argstr='--nsamples=%d',),
+                     n_steps = dict(argstr='--nsteps=%d',),
+                     network = dict(argstr='--network',),
+                     opd = dict(argstr='--opd',),
+                     os2t = dict(argstr='--os2t',),
+                     out_dir = dict(argstr='--dir=%s',),
+                     output_type = dict(),
+                     paths_file = dict(argstr='--out=%s',),
+                     rand_fib = dict(argstr='--randfib %d',),
+                     random_seed = dict(argstr='--rseed',),
+                     s2tastext = dict(argstr='--s2tastext',),
+                     sample_random_points = dict(argstr='--sampvox',),
+                     samplesbase_name = dict(argstr='-s %s',),
+                     seed_file = dict(argstr='-x %s',mandatory=True,),
+                     seed_ref = dict(argstr='--seedref=%s',),
+                     step_length = dict(argstr='--steplength=%.3f',),
+                     stop_mask = dict(argstr='--stop=%s',),
+                     target_masks = dict(argstr='--targetmasks=%s',),
+                     use_anisotropy = dict(argstr='--usef',),
+                     waypoints = dict(argstr='--waypoints=%s',),
+                     xfm = dict(argstr='--xfm=%s',),
+                     )
+    instance = fsl.ProbTrackX()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+def test_projthresh():
+    input_map = dict(args = dict(argstr='%s',),
+                     environ = dict(),
+                     in_files = dict(argstr='%s',mandatory=True,),
+                     output_type = dict(),
+                     threshold = dict(mandatory=True,argstr='%d',),
+                     )
+    instance = fsl.ProjThresh()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+def test_randomise():
+    input_map = dict(args = dict(argstr='%s',),
+                     base_name = dict(argstr='-o %s',),
+                     c_thresh = dict(argstr='-c %.2f',),
+                     cm_thresh = dict(argstr='-C %.2f',),
+                     demean = dict(argstr='-D',),
+                     design_mat = dict(argstr='-d %s',mandatory=True,),
+                     environ = dict(),
+                     f_c_thresh = dict(argstr='-F %.2f',),
+                     f_cm_thresh = dict(argstr='-S %.2f',),
+                     f_only = dict(argstr='--f_only',),
+                     fcon = dict(argstr='-f %s',),
+                     in_file = dict(argstr='-i %s',mandatory=True,),
+                     mask = dict(argstr='-m %s',),
+                     num_perm = dict(argstr='-n %d',),
+                     one_sample_group_mean = dict(argstr='-l',),
+                     output_type = dict(),
+                     p_vec_n_dist_files = dict(argstr='-P',),
+                     raw_stats_imgs = dict(argstr='-R',),
+                     seed = dict(argstr='--seed %d',),
+                     show_info_parallel_mode = dict(argstr='-Q',),
+                     show_total_perms = dict(argstr='-q',),
+                     tcon = dict(argstr='-t %s',mandatory=True,),
+                     tfce = dict(argstr='-T',),
+                     tfce2D = dict(argstr='--T2',),
+                     tfce_C = dict(argstr='--tfce_C %.2f',),
+                     tfce_E = dict(argstr='--tfce_E %.2f',),
+                     tfce_H = dict(argstr='--tfce_H %.2f',),
+                     var_smooth = dict(argstr='-v %d',),
+                     vox_p_values = dict(argstr='-x',),
+                     vxf = dict(argstr='--vxf %d',),
+                     vxl = dict(argstr='--vxl %d',),
+                     x_block_labels = dict(argstr='-e %s',),
+                     )
+    instance = fsl.Randomise()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+def test_tbss1preproc():
+    input_map = dict(args = dict(argstr='%s',),
+                     environ = dict(),
+                     img_list = dict(mandatory=True,),
+                     in_exp = dict(argstr='%s',),
+                     output_type = dict(),
+                     )
+    instance = fsl.TBSS1Preproc()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+def test_tbss2reg():
+    input_map = dict(FMRIB58FA = dict(argstr='-T',xor=('FMRIB58FA', 'target_img', 'find_target'),),
+                     args = dict(argstr='%s',),
+                     environ = dict(),
+                     find_target = dict(argstr='-n',xor=('FMRIB58FA', 'target_img', 'find_target'),),
+                     output_type = dict(),
+                     target_img = dict(argstr='-t %s',xor=('FMRIB58FA', 'target_img', 'find_target'),),
+                     tbss_dir = dict(mandatory=True,),
+                     )
+    instance = fsl.TBSS2Reg()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+def test_tbss3postreg():
+    input_map = dict(FMRIB58FA = dict(argstr='-T',xor=('subject_mean', 'FMRIB58FA'),),
+                     args = dict(argstr='%s',),
+                     environ = dict(),
+                     output_type = dict(),
+                     subject_mean = dict(argstr='-S',xor=('subject_mean', 'FMRIB58FA'),),
+                     tbss_dir = dict(mandatory=True,),
+                     )
+    instance = fsl.TBSS3Postreg()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+def test_tbss4prestats():
+    input_map = dict(args = dict(argstr='%s',),
+                     environ = dict(),
+                     output_type = dict(),
+                     tbss_dir = dict(mandatory=True,),
+                     threshold = dict(mandatory=True,argstr='%.3f',),
+                     )
+    instance = fsl.TBSS4Prestats()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+def test_vecreg():
+    input_map = dict(affine_mat = dict(argstr='-t %s',),
+                     args = dict(argstr='%s',),
+                     environ = dict(),
+                     in_file = dict(mandatory=True,argstr='-i %s',),
+                     interpolation = dict(argstr='--interp=%s',),
+                     mask = dict(argstr='-m %s',),
+                     out_file = dict(argstr='-o %s',),
+                     output_type = dict(),
+                     ref_mask = dict(argstr='--refmask=%s',),
+                     ref_vol = dict(mandatory=True,argstr='-r %s',),
+                     rotation_mat = dict(argstr='--rotmat=%s',),
+                     rotation_warp = dict(argstr='--rotwarp=%s',),
+                     warp_field = dict(argstr='-w %s',),
+                     )
+    instance = fsl.VecReg()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+
+def skip_dti_tests():
+    return True
+
+def create_files_in_directory():
+    outdir = mkdtemp()
+    cwd = os.getcwd()
+    os.chdir(outdir)
+    filelist = ['a.nii','b.nii']
+    for f in filelist:
+        hdr = nif.Nifti1Header()
+        shape = (3,3,3,4)
+        hdr.set_data_shape(shape)
+        img = np.random.random(shape)
+        nif.save(nif.Nifti1Image(img,np.eye(4),hdr),
+                 os.path.join(outdir,f))
+    return filelist, outdir, cwd
+    
+def clean_directory(outdir, old_wd):
+    if os.path.exists(outdir):
+        rmtree(outdir)
+    os.chdir(old_wd)
+
+
+# test bedpostx
+@skipif(skip_dti_tests)
+def test_bedpostx():
+    filelist, outdir, cwd = create_files_in_directory()
     bpx = fsl.BEDPOSTX()
 
     # make sure command gets called
     yield assert_equal, bpx.cmd, 'bedpostx'
 
     # test raising error with mandatory args absent
-    yield assert_raises, AttributeError, bpx.run
+    yield assert_raises, ValueError, bpx.run
 
     # .inputs based parameters setting
     bpx2 = fsl.BEDPOSTX()
-    bpx2.inputs.directory = 'inputDir'
+    bpx2.inputs.bpx_directory = 'inputDir'
     bpx2.inputs.fibres = 2
     bpx2.inputs.weight = 0.3
     bpx2.inputs.burn_period = 200
@@ -35,14 +306,8 @@ def test_bedpostx():
 
 
     # .run based parameter setting
-    bpx3 = fsl.BEDPOSTX(fibres=1, directory='inputDir')
+    bpx3 = fsl.BEDPOSTX(fibres=1, bpx_directory='inputDir')
     yield assert_equal, bpx3.cmdline, 'bedpostx inputDir -n 1'
-
-    results = bpx3.run(fibres=1, directory='inputDir', noseTest=True)
-    yield assert_not_equal, results.runtime.returncode, 0
-    yield assert_equal, results.interface.inputs.fibres, 1
-    yield assert_equal, results.interface.inputs.directory, 'inputDir'
-    yield assert_equal, results.runtime.cmdline, 'bedpostx inputDir -n 1'
 
     # test arguments for opt_map
     opt_map = {
@@ -53,94 +318,64 @@ def test_bedpostx():
                 'sampling':             ('-s 25', 25)}
 
     for name, settings in opt_map.items():
-        bpx4 = fsl.BEDPOSTX(directory='inputDir', **{name: settings[1]})
+        bpx4 = fsl.BEDPOSTX(bpx_directory='inputDir', **{name: settings[1]})
         yield assert_equal, bpx4.cmdline, bpx4.cmd + ' inputDir ' + settings[0]
+    clean_directory(outdir, cwd)
 
 
 # test eddy_correct
 def test_eddy_correct():
+    filelist, outdir, cwd = create_files_in_directory()
     eddy = fsl.EddyCorrect()
 
     # make sure command gets called
     yield assert_equal, eddy.cmd, 'eddy_correct'
 
     # test raising error with mandatory args absent
-    yield assert_raises, AttributeError, eddy.run
+    yield assert_raises, ValueError, eddy.run
 
     # .inputs based parameters setting
-    eddy.inputs.infile = 'foo.nii'
-    eddy.inputs.outfile = 'foo_eddc.nii'
-    eddy.inputs.reference_vol = 100
-    yield assert_equal, eddy.cmdline, 'eddy_correct foo.nii foo_eddc.nii 100'
+    eddy.inputs.in_file = filelist[0]
+    eddy.inputs.out_file = 'foo_eddc.nii'
+    eddy.inputs.ref_num = 100
+    yield assert_equal, eddy.cmdline, 'eddy_correct %s foo_eddc.nii 100'%filelist[0]
 
     # .run based parameter setting
-    eddy2 = fsl.EddyCorrect(infile='foo', outfile='foo_eddc', reference_vol=20)
-    yield assert_equal, eddy2.cmdline, 'eddy_correct foo foo_eddc 20'
-
-    eddy3 = fsl.EddyCorrect()
-    results = eddy3.run(infile='foo', outfile='foo_eddc', reference_vol=10)
-    yield assert_equal, results.interface.inputs.infile, 'foo'
-    yield assert_equal, results.interface.inputs.outfile, 'foo_eddc'
-    yield assert_equal, results.runtime.cmdline, 'eddy_correct foo foo_eddc 10'
+    eddy2 = fsl.EddyCorrect(in_file=filelist[0], out_file='foo_ec.nii', ref_num=20)
+    yield assert_equal, eddy2.cmdline, 'eddy_correct %s foo_ec.nii 20'%filelist[0]
 
     # test arguments for opt_map
     # eddy_correct class doesn't have opt_map{}
+    clean_directory(outdir, cwd)
 
 
 # test dtifit  
 def test_dtifit():
+    filelist, outdir, cwd = create_files_in_directory()
     dti = fsl.DTIFit()
 
     # make sure command gets called
     yield assert_equal, dti.cmd, 'dtifit'
 
     # test raising error with mandatory args absent
-    yield assert_raises, AttributeError, dti.run
+    yield assert_raises, ValueError, dti.run
 
     # .inputs based parameters setting
-    dti.inputs.data = 'foo.nii'
-    dti.inputs.basename = 'foo.dti.nii'
-    dti.inputs.bet_binary_mask = 'nodif_brain_mask'
+    dti.inputs.dwi = filelist[0]
+    dti.inputs.base_name = 'foo.dti.nii'
+    dti.inputs.mask = filelist[1]
+    dti.inputs.bvecs = filelist[0]
+    dti.inputs.bvals = filelist[1]
     dti.inputs.min_z = 10
     dti.inputs.max_z = 50
 
-    actualCmdline = sorted(dti.cmdline.split())
-    cmd = 'dtifit -k foo.nii -o foo.dti.nii -m nodif_brain_mask -z 10 -Z 50'
-    desiredCmdline = sorted(cmd.split())
-    yield assert_equal, actualCmdline, desiredCmdline
+    yield assert_equal, dti.cmdline, \
+        'dtifit -k %s -o foo.dti.nii -m %s -r %s -b %s -Z 50 -z 10'%(filelist[0],
+                                                                     filelist[1],
+                                                                     filelist[0],
+                                                                     filelist[1])
 
-    # .run based parameter setting
-    dti2 = fsl.DTIFit(data='foo2.nii')
-    yield assert_equal, dti2.cmdline, 'dtifit -k foo2.nii'
-
-    dti3 = fsl.DTIFit()
-    results = dti3.run(data='foo3.nii', noseTest=True)
-    yield assert_not_equal, results.runtime.returncode, 0
-    yield assert_equal, results.interface.inputs.data, 'foo3.nii'
-    yield assert_equal, results.runtime.cmdline, 'dtifit -k foo3.nii'
-
-    # test arguments for opt_map
-    opt_map = {
-                'data':                     ('-k subj1', 'subj1'),
-                'basename':                 ('-o subj1', 'subj1'),
-                'bet_binary_mask':          ('-m nodif_brain_mask', 'nodif_brain_mask'),
-                'b_vector_file':            ('-r bvecs', 'bvecs'),
-                'b_value_file':             ('-b bvals', 'bvals'),
-                'min_z':                    ('-z 10', 10),
-                'max_z':                    ('-Z 20', 20),
-                'min_y':                    ('-y 10', 10),
-                'max_y':                    ('-Y 30', 30),
-                'min_x':                    ('-x 5', 5),
-                'max_x':                    ('-X 50', 50),
-                'verbose':                  ('-V', True),
-                'save_tensor':              ('--save_tensor', True),
-                'sum_squared_errors':       ('--sse', True),
-                'inp_confound_reg':         ('--cni', True),
-                'small_brain_area':         ('--littlebit', True)}
-
-    for name, settings in opt_map.items():
-        dti4 = fsl.DTIFit(**{name: settings[1]})
-        yield assert_equal, dti4.cmdline, dti4.cmd + ' ' + settings[0]
+    clean_directory(outdir, cwd)
 
 
 # Globals to store paths for tbss tests
@@ -149,16 +384,22 @@ test_dir = None
 def setup_tbss():
     # Setup function is called before each test.  Setup is called only
     # once for each generator function.
-    global tbss_dir, test_dir
+    global tbss_dir, tbss_files, test_dir
     test_dir = os.getcwd()
     tbss_dir = tempfile.mkdtemp()
     os.chdir(tbss_dir)
+    tbss_files = ['a.nii','b.nii']
+    for f in tbss_files:
+        fp = open(f,'wt')
+        fp.write('dummy')
+        fp.close()
 
 def teardown_tbss():
     # Teardown is called after each test to perform cleanup
     os.chdir(test_dir)
     shutil.rmtree(tbss_dir)
 
+@skipif(skip_dti_tests)
 @with_setup(setup_tbss, teardown_tbss)
 def test_tbss_1_preproc():
     tbss1 = fsl.TBSS1Preproc()
@@ -167,21 +408,17 @@ def test_tbss_1_preproc():
     yield assert_equal, tbss1.cmd, 'tbss_1_preproc'
 
     # test raising error with mandatory args absent
-    yield assert_raises, AttributeError, tbss1.run
+    yield assert_raises, ValueError, tbss1.run
 
     # .inputs based parameters setting
-    tbss1.inputs.infiles = 'foo.nii  f002.nii  f003.nii'
+    tbss1.inputs.img_list = tbss_files
     yield assert_equal, tbss1.cmdline, \
-        'tbss_1_preproc foo.nii  f002.nii  f003.nii'
-
-    tbss = fsl.TBSS1Preproc()
-    results = tbss.run(infiles='*.nii.gz', noseTest=True)
-    yield assert_equal, results.interface.inputs.infiles, '*.nii.gz'
-    yield assert_equal, results.runtime.cmdline, 'tbss_1_preproc *.nii.gz'
+        'tbss_1_preproc %s %s'%(tbss_files[0],tbss_files[1])
 
     # test arguments for opt_map
     # Tbss_1_preproc class doesn't have opt_map{}
 
+@skipif(skip_dti_tests)
 @with_setup(setup_tbss, teardown_tbss)
 def test_tbss_2_reg():
     tbss2 = fsl.TBSS2Reg()
@@ -190,7 +427,7 @@ def test_tbss_2_reg():
     yield assert_equal, tbss2.cmd, 'tbss_2_reg'
 
     # test raising error with mandatory args absent
-    yield assert_raises, AttributeError, tbss2.run
+    yield assert_raises, ValueError, tbss2.run
 
     # .inputs based parameters setting
     tbss2.inputs.FMRIB58_FA_1mm = True
@@ -216,6 +453,7 @@ def test_tbss_2_reg():
         tbss = fsl.TBSS2Reg(**{name: settings[1]})
         yield assert_equal, tbss.cmdline, tbss.cmd + ' ' + settings[0]
 
+@skipif(skip_dti_tests)
 @with_setup(setup_tbss, teardown_tbss)
 def test_tbss_3_postreg():
     tbss = fsl.TBSS3Postreg()
@@ -224,7 +462,7 @@ def test_tbss_3_postreg():
     yield assert_equal, tbss.cmd, 'tbss_3_postreg'
 
     # test raising error with mandatory args absent
-    yield assert_raises, AttributeError, tbss.run
+    yield assert_raises, ValueError, tbss.run
 
     # .inputs based parameters setting
     tbss.inputs.FMRIB58_FA = True
@@ -246,6 +484,7 @@ def test_tbss_3_postreg():
         tbss3 = fsl.TBSS3Postreg(**{name: settings[1]})
         yield assert_equal, tbss3.cmdline, tbss3.cmd + ' ' + settings[0]
 
+@skipif(skip_dti_tests)
 @with_setup(setup_tbss, teardown_tbss)
 def test_tbss_4_prestats():
     tbss = fsl.TBSS4Prestats()
@@ -254,7 +493,7 @@ def test_tbss_4_prestats():
     yield assert_equal, tbss.cmd, 'tbss_4_prestats'
 
     # test raising error with mandatory args absent
-    yield assert_raises, AttributeError, tbss.run
+    yield assert_raises, ValueError, tbss.run
 
     # .inputs based parameters setting
     tbss.inputs.threshold = 0.3
@@ -270,6 +509,7 @@ def test_tbss_4_prestats():
     # test arguments for opt_map
     # TBSS4Prestats doesn't have an opt_map{}
 
+@skipif(skip_dti_tests)
 def test_randomise():
 
     rand = fsl.Randomise()
@@ -278,7 +518,7 @@ def test_randomise():
     yield assert_equal, rand.cmd, 'randomise'
 
     # test raising error with mandatory args absent
-    yield assert_raises, AttributeError, rand.run
+    yield assert_raises, ValueError, rand.run
 
     # .inputs based parameters setting
     rand.inputs.input_4D = 'infile.nii'
@@ -351,6 +591,7 @@ def test_randomise():
         yield assert_equal, rand4.cmdline, rand4.cmd + ' -i infile -o root ' \
             + settings[0]
 
+@skipif(skip_dti_tests)
 def test_Randomise_parallel():
     rand = fsl.Randomise_parallel()
 
@@ -358,7 +599,7 @@ def test_Randomise_parallel():
     yield assert_equal, rand.cmd, 'randomise_parallel'
 
     # test raising error with mandatory args absent
-    yield assert_raises, AttributeError, rand.run
+    yield assert_raises, ValueError, rand.run
 
     # .inputs based parameters setting
     rand.inputs.input_4D = 'infile.nii'
@@ -435,6 +676,7 @@ def test_Randomise_parallel():
             + settings[0]
 
 
+@skipif(skip_dti_tests)
 def test_Probtrackx():
     pass
     # make sure command gets called
@@ -457,6 +699,7 @@ def test_Probtrackx():
 
 
 # test proj_thresh
+@skipif(skip_dti_tests)
 def test_Proj_thresh():
     proj = fsl.ProjThresh()
 
@@ -464,7 +707,7 @@ def test_Proj_thresh():
     yield assert_equal, proj.cmd, 'proj_thresh'
 
     # test raising error with mandatory args absent
-    yield assert_raises, AttributeError, proj.run
+    yield assert_raises, ValueError, proj.run
 
     # .inputs based parameters setting
     proj.inputs.volumes = ['vol1', 'vol2', 'vol3']
@@ -487,6 +730,7 @@ def test_Proj_thresh():
 
 
 # test vec_reg
+@skipif(skip_dti_tests)
 def test_Vec_reg():
 
     vrg = fsl.VecReg()
@@ -495,7 +739,7 @@ def test_Vec_reg():
     yield assert_equal, vrg.cmd, 'vecreg'
 
     # test raising error with mandatory args absent
-    yield assert_raises, AttributeError, vrg.run
+    yield assert_raises, ValueError, vrg.run
 
     # .inputs based parameters setting
     vrg.inputs.infile = 'infile'
@@ -548,6 +792,7 @@ def test_Vec_reg():
 
 
 # test find_the_biggest
+@skipif(skip_dti_tests)
 def test_Find_the_biggest():
     fbg = fsl.FindTheBiggest()
 
@@ -555,7 +800,7 @@ def test_Find_the_biggest():
     yield assert_equal, fbg.cmd, 'find_the_biggest'
 
     # test raising error with mandatory args absent
-    yield assert_raises, AttributeError, fbg.run
+    yield assert_raises, ValueError, fbg.run
 
     # .inputs based parameters setting
     fbg.inputs.infiles = 'seed*'
