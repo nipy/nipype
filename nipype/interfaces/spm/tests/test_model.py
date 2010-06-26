@@ -15,7 +15,7 @@ import nipype.interfaces.matlab as mlab
 try:
     matlab_cmd = os.environ['MATLABCMD']
 except:
-    matlab_cmd = 'matlab -nodesktop -nosplash'
+    matlab_cmd = 'matlab'
 
 mlab.MatlabCommand.set_default_matlab_cmd(matlab_cmd)
 
