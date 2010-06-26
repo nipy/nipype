@@ -15,7 +15,7 @@ from nipype.interfaces.fsl.model import (Level1Design, FEAT, FEATModel,
                                          FILMGLS, FEATRegister, FLAMEO, ContrastMgr,
                                          L2Model, SMM, MELODIC)
 from nipype.interfaces.fsl.utils import (Smooth, Merge, ExtractROI, Split,
-                                         ImageMaths, ImageMeants, REGFILT)
+                                         ImageMaths, ImageMeants, FilterRegressor)
 from nipype.interfaces.fsl.dti import (EddyCorrect, BEDPOSTX, DTIFit, TBSS2Reg,
                                        TBSS1Preproc, TBSS3Postreg,
                                        TBSS4Prestats, Randomise,
