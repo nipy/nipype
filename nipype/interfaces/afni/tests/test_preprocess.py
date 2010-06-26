@@ -5,6 +5,7 @@ from nipype.testing import *
 from nipype.interfaces import afni
 from nipype.interfaces.base import InterfaceResult
 
+@skipif(True)
 def test_To3d():
     cmd = afni.To3d()
     yield assert_equal, cmd.cmdline, 'to3d'
@@ -101,6 +102,7 @@ def test_To3d():
     yield assert_raises, AttributeError, cmd.run
 
 
+@skipif(True)
 def test_Threedrefit():
     cmd = afni.Threedrefit()
     yield assert_equal, cmd.cmdline, '3drefit'
@@ -139,6 +141,7 @@ def test_Threedrefit():
     yield assert_true, isinstance(res, InterfaceResult)
 
 
+@skipif(True)
 def test_Threedresample():
     cmd = afni.Threedresample()
     yield assert_equal, cmd.cmdline, '3dresample'
@@ -181,6 +184,7 @@ def test_Threedresample():
     yield assert_true, isinstance(res, InterfaceResult)
 
 
+@skipif(True)
 def test_ThreedTstat():
     cmd = afni.ThreedTstat()
     yield assert_equal, cmd.cmdline, '3dTstat'
@@ -208,6 +212,7 @@ def test_ThreedTstat():
     yield assert_true, isinstance(res, InterfaceResult)
 
 
+@skipif(True)
 def test_ThreedAutomask():
     cmd = afni.ThreedAutomask()
     yield assert_equal, cmd.cmdline, '3dAutomask'
@@ -233,6 +238,7 @@ def test_ThreedAutomask():
     yield assert_true, isinstance(res, InterfaceResult)
 
 
+@skipif(True)
 def test_Threedvolreg():
     cmd = afni.Threedvolreg()
     yield assert_equal, cmd.cmdline, '3dvolreg'
@@ -282,6 +288,7 @@ def test_Threedvolreg():
     yield assert_true, isinstance(res, InterfaceResult)
 
 
+@skipif(True)
 def test_Threedmerge():
     cmd = afni.Threedmerge()
     yield assert_equal, cmd.cmdline, '3dmerge'
