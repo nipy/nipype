@@ -152,12 +152,12 @@ class Merge(FSLCommand):
 class ExtractROIInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", position=0, desc="input file", mandatory=True)
     roi_file = File(argstr="%s", position=1, desc="output file", genfile=True)
-    x_min = traits.Float(argstr="%f", position=2)
-    x_size = traits.Float(argstr="%f", position=3)
-    y_min = traits.Float(argstr="%f", position=4)
-    y_size = traits.Float(argstr="%f", position=5)
-    z_min = traits.Float(argstr="%f", position=6)
-    z_size = traits.Float(argstr="%f", position=7)
+    x_min = traits.Int(argstr="%d", position=2)
+    x_size = traits.Int(argstr="%d", position=3)
+    y_min = traits.Int(argstr="%d", position=4)
+    y_size = traits.Int(argstr="%d", position=5)
+    z_min = traits.Int(argstr="%d", position=6)
+    z_size = traits.Int(argstr="%d", position=7)
     t_min = traits.Int(argstr="%d", position=8)
     t_size = traits.Int(argstr="%d", position=9)
 
@@ -304,7 +304,7 @@ class ImageMaths(FSLCommand):
         return outputs
 
 
-class REGFILTInputSpec(FSLCommandInputSpec):
+class FilterRegressorInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True,argst="-i %s",desc="input file name (4D image)",mandatory=True)
     out_file = File(argst="-o %s",desc="output file name for the filtered data",genfile=True)
     design_file = File(exists=True,argst="-d %s",desc="design	file name of the matrix with "\
@@ -316,16 +316,16 @@ class REGFILTInputSpec(FSLCommandInputSpec):
     out_file = traits.Bool(argst="--out_data",desc="output data")
     Out_vnscales = traits.Bool(argst="--out_vnscales",desc="output scaling factors for variance normalization")
 
-class REGFILTOutputSpec(TraitedSpec):
+class FilterRegressorOutputSpec(TraitedSpec):
     out_file = File(exists=True,desc="output file name for the filtered data")
 
-class REGFILT(FSLCommand):
+class FilterRegressor(FSLCommand):
     """
         Data de-noising by regressing out part of a design matrix
         using simple OLS regression on 4D images
     """
-    input_spec = REGFILTInputSpec
-    output_spec = REGFILTOutputSpec
+    input_spec = FilterRegressorInputSpec
+    output_spec = FilterRegressorOutputSpec
     _cmd = 'fsl_regfilt'
 
     def _list_outputs(self):
