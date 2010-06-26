@@ -209,7 +209,7 @@ class BEDPOSTX(FSLCommand):
 
 
 class TBSS1PreprocInputSpec(FSLCommandInputSpec):
-    img_list = traits.List(File(), exists=True, mandatory=True,
+    img_list = traits.List(File(exists=True), mandatory=True,
                           desc = 'list with filenames of the FA images')
     in_exp = traits.Str('*.nii.gz',desc='the file pattern to be given to this command '+
                        '(note: the extension of the files need to be changed if different from .nii.gz)',
