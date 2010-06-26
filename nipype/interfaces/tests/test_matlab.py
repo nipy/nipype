@@ -5,7 +5,7 @@ from tempfile import mkdtemp
 from shutil import rmtree
 
 from nipype.testing import (assert_equal, assert_true, assert_false, 
-                            assert_raises, skipif)
+                            assert_raises, skipif, parametric)
 import nipype.interfaces.matlab as mlab
 from nipype.interfaces.base import CommandLine, Bunch
 
@@ -20,7 +20,7 @@ matlab_path = res.runtime.stdout.strip()
 matlab_command = ''
 no_matlab = True
 if matlab_path != '':
-    matlab_command = '%s -nodesktop -nosplash' % \
+    matlab_command = '%s' % \
         matlab_path.split(os.path.sep)[-1]
     no_matlab = False
     
@@ -30,13 +30,6 @@ if matlab_path != '':
 #@skipif(no_matlab)
 # def test_func():
 #     pass
-
-def test_init():
-    mi = mlab.MatlabCommand()
-    yield assert_equal, mi._cmdline, None
-    yield assert_equal, mi._cmdline_inputs, None
-    mi = mlab.MatlabCommand(matlab_cmd='foo')
-    yield assert_equal, mi.matlab_cmd, 'foo'
 
 def test_cmdline():
     basedir = mkdtemp()
@@ -54,11 +47,6 @@ def test_cmdline():
     yield assert_false, path_exists
     rmtree(basedir)
 
-
-if matlab_path != '':
-    matlab_command = matlab_path.split(os.path.sep)[-1]
-    no_matlab = False
-
 def test_mlab_inputspec():
     spec = mlab.MatlabInputSpec()
     for k in ['paths', 'script', 'nosplash', 'mfile', 'logfile', 'script_file',
@@ -69,13 +57,14 @@ def test_mlab_inputspec():
     yield assert_false, spec.mfile
     yield assert_equal, spec.script_file, 'pyscript.m'
 
-def test_init():
-    yield assert_equal, mlab.MatlabCommand._cmd, 'matlab'
-    yield assert_equal, mlab.MatlabCommand.input_spec, mlab.MatlabInputSpec
+@parametric
+def test_mlab_init():
+    yield assert_equal(mlab.MatlabCommand._cmd, 'matlab')
+    yield assert_equal(mlab.MatlabCommand.input_spec, mlab.MatlabInputSpec)
 
-    yield assert_equal, mlab.MatlabCommand().cmd, mlab.MatlabCommand._cmd
+    yield assert_equal(mlab.MatlabCommand().cmd, mlab.MatlabCommand._cmd)
     mc = mlab.MatlabCommand(matlab_cmd='foo_m')
-    yield assert_equal, mc.cmd, 'foo_m'
+    yield assert_equal(mc.cmd, 'foo_m')
     
 @skipif(no_matlab)
 def test_run_interface():
