@@ -205,8 +205,8 @@ def test_flirt():
     res = flirter.run()
     # Generate outfile and outmatrix
     pth, fname, ext = split_filename(infile)
-    outfile = '%s_flirt%s' % (fname, ext)
-    outfile = os.path.join(os.getcwd(), outfile)
+    outfile = os.path.join(os.getcwd(),
+                           fsl_name(flirter, '%s_flirt' %fname))
     outmat = '%s_flirt.mat' % fname
     outmat = os.path.join(os.getcwd(), outmat)
     realcmd = 'flirt -in %s -ref %s -out %s -omat %s' % (infile, reffile,
@@ -242,8 +242,8 @@ def test_flirt():
         cmdline = 'flirt -in %s -ref %s' % (infile, reffile)
         # Handle autogeneration of outfile
         pth, fname, ext = split_filename(infile)
-        outfile = '%s_flirt%s' % (fname, ext)
-        outfile = os.path.join(os.getcwd(), outfile)
+        outfile = os.path.join(os.getcwd(),
+                               fsl_name(fsl.FLIRT(),'%s_flirt' % fname))
         outfile = ' '.join(['-out', outfile])
         # Handle autogeneration of outmatrix
         outmatrix = '%s_flirt.mat' % fname
@@ -266,39 +266,6 @@ def test_flirt():
 
     teardown_flirt(tmpdir)
 
-def test_applyxfm():
-    # ApplyXFM subclasses FLIRT, but doesnt change anything.
-    # setup
-    tmpdir, infile, reffile = setup_flirt()
-
-    outname = 'xfm_subj.nii'
-    
-    flt = fsl.ApplyXfm(in_file = infile,
-                       in_matrix_file = infile,
-                       out_file = outname,
-                       reference = reffile,
-                       apply_xfm = True)
-    _, nme = os.path.split(infile)
-    tmpoutfile = os.path.join(os.getcwd(),nme)
-    outfile = flt._gen_fname(tmpoutfile, suffix='_flirt')
-    outfile = outfile.replace(Info.output_type_to_ext(Info.output_type()),
-                              '.mat')
-    yield assert_equal, flt.cmdline, \
-        'flirt -in %s -ref %s -out %s ' \
-        '-omat %s -applyxfm '\
-        '-init %s'%(infile, reffile,
-                     outname, outfile,
-                     infile)
-    flt = fsl.ApplyXfm(apply_xfm=True)
-    yield assert_raises, ValueError, flt.run
-    flt.inputs.in_file = infile
-    flt.inputs.out_file = 'xfm_subj.nii'
-    # reference not specified
-    yield assert_raises, ValueError, flt.run
-    flt.inputs.reference = reffile
-
-
-    
 
 # Mcflirt
 def test_mcflirt():
