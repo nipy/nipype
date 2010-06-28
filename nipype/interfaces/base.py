@@ -925,14 +925,18 @@ class CommandLine(BaseInterface):
             # Depending on whether we stick with traitlets, and whether or
             # not we beef up traitlets.List, we may want to put some
             # type-checking code here as well
+            sep = trait_spec.sep
+            if sep == None:
+                sep = ' '
             if argstr.endswith('...'):
+                
                 # repeatable option
                 # --id %d... will expand to
                 # --id 1 --id 2 --id 3 etc.,.
                 argstr = argstr.replace('...', '')
-                return ' '.join([argstr % elt for elt in value])
+                return sep.join([argstr % elt for elt in value])
             else:
-                return argstr % ' '.join(str(elt) for elt in value)
+                return argstr % sep.join(str(elt) for elt in value)
         else:
             # Append options using format string.
             return argstr % value
