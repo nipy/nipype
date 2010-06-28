@@ -252,7 +252,7 @@ tbss_workflow.base_dir=os.path.abspath('data/workingdir')
 collect all the FA images for each subject using the DataGrabber class
 """
 tbss_source = pe.Node(nio.DataGrabber(),name="tbss_source")
-tbss_source.inputs.template = os.path.abspath('data/workingdir/dwiproc/computeTensor/_subject_id_*/dtifit/*_FA.nii.gz')
+tbss_source.inputs.template = os.path.abspath('data/workingdir/dwiproc/computeTensor/_subject_id_*/dtifit/*_FA.nii')
 
 """
 prepare your FA data in your TBSS working directory in the right format
@@ -284,7 +284,7 @@ in order to find voxels which correlate with your model
 """
 randomise = pe.Node(fsl.Randomise(),name='randomise')
 randomise.inputs.design_mat=os.path.abspath('data/design.mat')
-randomise.inputs.t_con=os.path.abspath('data/design.con')
+randomise.inputs.tcon=os.path.abspath('data/design.con')
 randomise.inputs.num_perm=10
 
 
@@ -292,10 +292,10 @@ randomise.inputs.num_perm=10
 Setup the pipeline that runs tbss
 ------------------
 """
-tbss_workflow.connect([ (tbss_source,tbss1,[('outfiles','imglist')]),
-                        (tbss1,tbss2,[('tbssdir','tbssdir')]),
-                        (tbss2,tbss3,[('tbssdir','tbssdir')]),
-                        (tbss3,tbss4,[('tbssdir','tbssdir')]),
+tbss_workflow.connect([ (tbss_source,tbss1,[('outfiles','img_list')]),
+                        (tbss1,tbss2,[('tbss_dir','tbss_dir')]),
+                        (tbss2,tbss3,[('tbss_dir','tbss_dir')]),
+                        (tbss3,tbss4,[('tbss_dir','tbss_dir')]),
                         (tbss4,randomise,[('all_FA_skeletonised','in_file')]),
                         (tbss4,randomise,[('mean_FA_skeleton_mask','mask')])
                     ])
