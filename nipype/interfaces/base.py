@@ -483,18 +483,9 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         if id_self in memo:
             return memo[id_self]
         dup_dict = deepcopy(self.get(), memo)
-        # access all keys
+        dup = self.__new__( self.__class__ )
         for key in self.copyable_trait_names():
-            value = getattr(self, key)
-        # clone once
-        dup = self.clone_traits(memo=memo)
-        for key in self.copyable_trait_names():
-            try:
-                value = getattr(dup, key)
-            except:
-                pass
-        # clone twice
-        dup = self.clone_traits(memo=memo)
+            dup.add_trait(key, self.trait(key))
         dup.set(**dup_dict)
         return dup
 
