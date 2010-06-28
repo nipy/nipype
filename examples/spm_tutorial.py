@@ -131,6 +131,7 @@ art.inputs.use_norm             = True
 art.inputs.norm_threshold       = 0.5
 art.inputs.zintensity_threshold = 3
 art.inputs.mask_type            = 'file'
+art.inputs.parameter_source     = 'SPM'
 
 """Skull strip structural images using
 :class:`nipype.interfaces.fsl.BET`.
