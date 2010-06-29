@@ -24,7 +24,7 @@ from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import MatlabCommand
                                     
 import logging
-logger = logging.getLogger('spmlogger')
+logger = logging.getLogger('iflogger')
 
 def func_is_3d(in_file):
     """ check if input functional files are 3d
@@ -132,7 +132,7 @@ class Info(object):
                     path = path.groups()[0]
                 cls.__path = path
             else:
-                logger(out.runtime.stderr)
+                logger.info(out.runtime.stderr)
                 return None
             
         return cls.__path
