@@ -1,3 +1,4 @@
+.. _interface_devel:
 =====================
 Developing interfaces
 =====================
@@ -50,7 +51,7 @@ This allows to introduce easy type checking. Inputs and outputs are grouped into
 	ExampleOutputSpec(TraitedSpec):
 		output_volume = File(desc = "Output volume", exists = True)
 		
-For the Traits (and NiPyPe) to work correctly outout and input spec has to be inherited from TraitedSpec 
+For the Traits (and NiPyPe) to work correctly output and input spec has to be inherited from TraitedSpec 
 (however, this does not have to be direct inheritance). 
 
 Traits (File, Int etc.) have different parameters (called metadata). In the above example we have used the desc metadata 
@@ -73,7 +74,7 @@ command line, MATLAB, python, SPM, FSL, Freesurfer, and AFNI. They all differ to
 Command line executable
 =======================
 As with all interfaces command line wrappers need to have inputs defined. Command line input spec has to inherit from 
-CommandLineInputSpec which adds two extra inputs: environ (a dictionarry of environmental variables), and args (a string defining extra flags).
+CommandLineInputSpec which adds two extra inputs: environ (a dictionary of environmental variables), and args (a string defining extra flags).
  In addition input spec can define the relation between the inputs and the generated command line. To achieve this we have adde two metadata: argstr 
  (string defining how the argument should be formated) and position (number defining the order of the arguments). For example
  
@@ -105,3 +106,24 @@ output spec:
 		outputs = self.output_spec().get()
 		outputs['output_volume'] = os.path.abspath('name_of_the_file_this_cmd_made.nii')
 		return outputs
+		
+Sometimes the inputs need extra parsing before turning into command line parameters. For example imagine a parameter selecting between three methods: 
+"old", "standard" and "new". Imagine also that the command line accept this as a parameter "--method=" accepting 0, 1 or 2. Since we
+are aiming to make nipype scripts as informative as possible it's better to define the inputs as following:
+
+.. testcode::
+
+	ExampleInputSpec(CommandLineSpec):
+		method = traits.Enum("old", "standard", "new", desc = "method", argstr="--method=%d")
+
+Here we've used the Enum trait which restricts input a few fixed options. If we would leave it as it is it would not work since the argstr is expecting
+numbers. We need to do additional parsing by overloading the following method in the main interface class:
+
+.. testcode::
+	
+	def _format_arg(self, name, spec, value):
+		if name == 'method':
+		    return spec.argstr%{"old":0, "standard":1, "new":2}[value]
+		return super(Example, self)._format_arg(name, spec, value)
+		
+.. include:: ../links_names.txt
