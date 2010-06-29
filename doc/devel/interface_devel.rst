@@ -125,5 +125,17 @@ numbers. We need to do additional parsing by overloading the following method in
 		if name == 'method':
 		    return spec.argstr%{"old":0, "standard":1, "new":2}[value]
 		return super(Example, self)._format_arg(name, spec, value)
-		
+
+Matlab script
+=============
+If you have a piece of MATLAB code that you would like to incorporate into nipype pipeline there a few things you need to know. At the moment the only 
+data type that nipype is able to pass between two nodes are filenames (but fixed inputs can be of any type). Therefore your script have to either read or 
+write files. There are many many Matlab routines available on the Internet (also included in the SPM package). 
+
+To implement a Matlab script wrapper you need to inherit from MatlabCommand and the input spec has to inherit from MatlabCommandInputSpec. As in the example 
+above you'll need to implement the _list_outputs methods to populate the output after execution. The MatlabCommandInputSpec adds extra fields for specifying 
+Matlab executable and it's flags as well as the path to matlab routines.
+
+Finally you need to overload the _gen_matlab_command method adding your matlab code and parametrising it using the provided inputs.
+
 .. include:: ../links_names.txt
