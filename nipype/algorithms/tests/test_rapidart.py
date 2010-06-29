@@ -9,27 +9,41 @@ import os
 from shutil import rmtree
 import numpy as np
 
+def test_artifactdetect():
+    input_map = dict(intersect_mask = dict(),
+                     mask_file = dict(),
+                     mask_threshold = dict(),
+                     mask_type = dict(),
+                     norm_threshold = dict(),
+                     parameter_source = dict(mandatory=True,),
+                     realigned_files = dict(mandatory=True,),
+                     realignment_parameters = dict(),
+                     rotation_threshold = dict(),
+                     translation_threshold = dict(),
+                     use_differences = dict(usedefault=True,),
+                     use_norm = dict(usedefault=True,),
+                     zintensity_threshold = dict(),
+                     )
+    instance = ra.ArtifactDetect()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+def test_stimuluscorrelation():
+    input_map = dict(concatenated_design = dict(mandatory=True,),
+                     intensity_values = dict(mandatory=True,),
+                     realignment_parameters = dict(mandatory=True,),
+                     spm_mat_file = dict(mandatory=True,),
+                     )
+    instance = ra.StimulusCorrelation()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
 def test_ad_init():
     ad = ra.ArtifactDetect(use_differences=[True,False])
     yield assert_true, ad.inputs.use_differences[0]
     yield assert_false, ad.inputs.use_differences[1]
-
-def test_ad_populate_inputs():
-    ad = ra.ArtifactDetect()
-    inputs = Bunch(realigned_files=None,
-                   realignment_parameters=None,
-                   parameter_source=None,
-                   use_differences=[True,True],
-                   use_norm=True,
-                   norm_threshold=None,
-                   rotation_threshold=None,
-                   translation_threshold=None,
-                   zintensity_threshold=None,
-                   mask_type=None,
-                   mask_file=None,
-                   mask_threshold=None,
-                   intersect_mask=True)
-    yield assert_equal, ad.inputs.__dict__.keys(), inputs.__dict__.keys()
 
 def test_ad_output_filenames():
     ad = ra.ArtifactDetect()
@@ -40,16 +54,6 @@ def test_ad_output_filenames():
     yield assert_equal, intensityfile, '/tmp/global_intensity.motion.txt'
     yield assert_equal, statsfile, '/tmp/stats.motion.txt'
     yield assert_equal, normfile, '/tmp/norm.motion.txt'
-
-def test_ad_outputs():
-    ad = ra.ArtifactDetect()
-    outputs = Bunch(outlier_files=None,
-                    intensity_files=None,
-                    statistic_files=None)
-    yield assert_equal, ad.outputs().__dict__.keys(), outputs.__dict__.keys()
-
-def test_ad_get_input_info():
-    yield assert_equal, ra.ArtifactDetect().get_input_info(), []
 
 def test_ad_get_affine_matrix():
     ad = ra.ArtifactDetect()
@@ -104,10 +108,3 @@ def test_sc_output_filenames():
     corrfile = sc._get_output_filenames(f,outputdir)
     yield assert_equal, corrfile, '/tmp/qa.motion_stimcorr.txt'
     
-def test_sc_outputs():
-    sc = ra.StimulusCorrelation()
-    outputs = Bunch(stimcorr_files=None)
-    yield assert_equal, sc.outputs().__dict__.keys(), outputs.__dict__.keys()
-
-def test_sc_get_input_info():
-    yield assert_equal, ra.StimulusCorrelation().get_input_info(), []
