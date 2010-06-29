@@ -710,7 +710,6 @@ class FNIRT(FSLCommand):
             A list of all inputs formatted for the command line.
 
         """
-        print 'parse'
         all_args = []
         initial_args = {}
         final_args = {}
