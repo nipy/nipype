@@ -99,6 +99,7 @@ datasource.inputs.template_args = info
 
 coregister = pe.Node(interface=SlicerCommandLine(module="BRAINSFit"), name="coregister")
 coregister.inputs.outputTransform = True
+coregister.inputs.outputVolume = True
 coregister.inputs.transformType = ["Affine"]
 
 reslice = pe.Node(interface=SlicerCommandLine(module="BRAINSResample"), name="reslice")
