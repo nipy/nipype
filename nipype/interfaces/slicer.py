@@ -13,8 +13,6 @@ from nipype.utils.misc import isdefined
 from enthought.traits.trait_base import Undefined
 
 
-path = "/home/filo/tmp/slicer/Slicer3-build/lib/Slicer3/Plugins"
-
 class SlicerCommandLineInputSpec(DynamicTraitedSpec, CommandLineInputSpec):
     module = traits.Str()
 
@@ -23,10 +21,13 @@ class SlicerCommandLine(CommandLine):
     output_spec = DynamicTraitedSpec
         
     
-    def _grab_xml(self):
-        cmd = CommandLine(command = self.cmd, args="--xml")
+    def _grab_xml(self, module):
+        cmd = CommandLine(command = "Slicer3", args="--launch %s --xml"%module)
         ret = cmd.run()
-        return xml.dom.minidom.parseString(ret.runtime.stdout)
+        if ret.runtime.returncode == 0:
+            return xml.dom.minidom.parseString(ret.runtime.stdout)
+        else:
+            raise Exception(cmd.cmdline + " failed:\n%s"%ret.runtime.stderr)
     
     def _outputs(self):
         base = super(SlicerCommandLine, self)._outputs()
@@ -39,8 +40,8 @@ class SlicerCommandLine(CommandLine):
         return base
     
     def __init__(self, module, **inputs):
-        super(SlicerCommandLine, self).__init__(command= os.path.join(path, module), name= module, **inputs)
-        dom = self._grab_xml()
+        super(SlicerCommandLine, self).__init__(command= "Slicer3 --launch %s "%module, name= module, **inputs)
+        dom = self._grab_xml(module)
         self._outputs_filenames = {}
         
         self._outputs_nodes = []
@@ -111,10 +112,11 @@ class SlicerCommandLine(CommandLine):
         for name in undefined_traits.keys():
             value = getattr(self.inputs, name)
         #self._outputs().trait_set(trait_change_notify=False, **undefined_output_traits)
+
         
     def _gen_filename(self, name):
         if name in self._outputs_filenames:
-            return self._outputs_filenames[name]
+            return os.path.join(os.getcwd(), self._outputs_filenames[name])
         return None
     
     def _gen_filename_from_param(self,param):
@@ -124,7 +126,7 @@ class SlicerCommandLine(CommandLine):
             ext = fileExtensions
         else:
             ext = {'image': '.nii', 'transform': '.txt', 'file': ''}[param.nodeName]
-        return os.path.abspath(base + ext)
+        return base + ext
     
     def _list_outputs(self):
         outputs = self.output_spec().get()
