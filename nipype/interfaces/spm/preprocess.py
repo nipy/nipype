@@ -84,7 +84,7 @@ class SliceTiming(SPMCommand):
     _jobtype = 'temporal'
     _jobname = 'st'
 
-    def _format_arg(self, opt, val):
+    def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
         if opt == 'in_files':
@@ -168,7 +168,7 @@ class Realign(SPMCommand):
     _jobtype = 'spatial'
     _jobname = 'realign'
 
-    def _format_arg(self, opt, val):
+    def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
         if opt == 'in_files':
@@ -275,7 +275,7 @@ class Coregister(SPMCommand):
     _jobtype = 'spatial'
     _jobname = 'coreg'
 
-    def _format_arg(self, opt, val):
+    def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
         if opt == 'target' or opt == 'source':
@@ -376,7 +376,7 @@ class Normalize(SPMCommand):
     _jobtype = 'spatial'
     _jobname = 'normalise'
 
-    def _format_arg(self, opt, val):
+    def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
         if opt == 'template':
@@ -525,7 +525,7 @@ class Segment(SPMCommand):
     input_spec = SegmentInputSpec
     output_spec = SegmentOutputSpec
 
-    def _format_arg(self, opt, val):
+    def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
         clean_masks_dict = {'no':0, 'light':1, 'thorough':2}
@@ -615,7 +615,7 @@ class NewSegment(SPMCommand):
     _jobtype = 'tools'
     _jobname = 'preproc8'
 
-    def _format_arg(self, opt, val):
+    def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
 
@@ -689,7 +689,7 @@ class Smooth(SPMCommand):
     _jobtype = 'spatial'
     _jobname = 'smooth'
 
-    def _format_arg(self, opt, val):
+    def _format_arg(self, opt, spec, val):
         if opt in ['in_files']:
             return scans_for_fnames(filename_to_list(val))
         if opt == 'fwhm':
