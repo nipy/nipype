@@ -1,25 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The spm module provides basic functions for interfacing with matlab
-and spm to access spm tools.
+"""SPM wrappers for preprocessing data"""
 
-These functions include:
-
-* SliceTiming: slice timing correction
-    
-* Realign: within-modality registration
-
-* Coregister: between modality registration
-    
-* Normalize: non-linear warping to standard space
-
-* Segment: bias correction, segmentation
-
-* NewSegment: new version of segment supporting multimodal and multiclass segmentation
-
-* Smooth: smooth with Gaussian kernel
-
-"""
 __docformat__ = 'restructuredtext'
 
 # Standard library imports
@@ -61,15 +43,15 @@ class SliceTimingOutputSpec(TraitedSpec):
 
 class SliceTiming(SPMCommand):
     """Use spm to perform slice timing correction.
-
-    See SliceTiming().spm_doc() for more information.
+    
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=19
 
     Examples
     --------
 
     >>> from nipype.interfaces.spm import SliceTiming
     >>> st = SliceTiming()
-    >>> st.inputs.in_files = 'func.nii'
+    >>> st.inputs.in_files = '../../emptydata/functional.nii'
     >>> st.inputs.num_slices = 32
     >>> st.inputs.time_repetition = 6.0
     >>> st.inputs.time_acquisition = 6. - 6./32.
@@ -150,13 +132,15 @@ class RealignOutputSpec(TraitedSpec):
 
 class Realign(SPMCommand):
     """Use spm_realign for estimating within modality rigid body alignment
+    
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=25
 
     Examples
     --------
 
     >>> import nipype.interfaces.spm as spm
     >>> realign = spm.Realign()
-    >>> realign.inputs.in_files = 'a.nii'
+    >>> realign.inputs.in_files = '../../emptydata/functional.nii'
     >>> realign.inputs.register_to_mean = True
     >>> realign.run() # doctest: +SKIP
 
@@ -258,14 +242,16 @@ class CoregisterOutputSpec(TraitedSpec):
 
 class Coregister(SPMCommand):
     """Use spm_coreg for estimating cross-modality rigid body alignment
+    
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=39
 
     Examples
     --------
     
     >>> import nipype.interfaces.spm as spm
     >>> coreg = spm.Coregister()
-    >>> coreg.inputs.target = 'a.nii'
-    >>> coreg.inputs.source = 'b.nii'
+    >>> coreg.inputs.target = '../../emptydata/functional.nii'
+    >>> coreg.inputs.source = '../../emptydata/structural.nii'
     >>> coreg.run() # doctest: +SKIP
     
     """
@@ -361,12 +347,14 @@ class NormalizeOutputSpec(TraitedSpec):
 
 class Normalize(SPMCommand):
     """use spm_normalise for warping an image to a template
+    
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=51
 
     Examples
     --------
     >>> import nipype.interfaces.spm as spm
     >>> norm = spm.Normalize()
-    >>> norm.inputs.source = 'a.nii'
+    >>> norm.inputs.source = '../../emptydata/functional.nii'
     >>> norm.run() # doctest: +SKIP
     
     """
@@ -509,12 +497,14 @@ class SegmentOutputSpec(TraitedSpec):
 class Segment(SPMCommand):
     """use spm_segment to separate structural images into different
     tissue classes.
+    
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=43
 
     Examples
     --------
     >>> import nipype.interfaces.spm as spm
     >>> seg = spm.Segment()
-    >>> seg.inputs.data = 'a.nii'
+    >>> seg.inputs.data = '../../emptydata/structural.nii'
     >>> seg.run() # doctest: +SKIP
     
     """
@@ -598,14 +588,16 @@ class NewSegmentOutputSpec(TraitedSpec):
     transformation_mat = OutputMultiPath(File(exists=True), desc='Normalization transformation')
 
 class NewSegment(SPMCommand):
-    """use spm_preproc8 (New Segment) to separate structural images into different
+    """Use spm_preproc8 (New Segment) to separate structural images into different
     tissue classes. Supports multiple modalities.
+    
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=185
 
     Examples
     --------
     >>> import nipype.interfaces.spm as spm
     >>> seg = spm.NewSegment()
-    >>> seg.inputs.channel_files = 'a.nii'
+    >>> seg.inputs.channel_files = '../../emptydata/structural.nii'
     >>> seg.run() # doctest: +SKIP
     
     """
@@ -673,13 +665,15 @@ class SmoothOutputSpec(TraitedSpec):
     smoothed_files = OutputMultiPath(File(exists=True), desc='smoothed files')
 
 class Smooth(SPMCommand):
-    """use spm_smooth for 3D Gaussian smoothing of image volumes.
+    """Use spm_smooth for 3D Gaussian smoothing of image volumes.
+    
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=57
 
     Examples
     --------
     >>> import nipype.interfaces.spm as spm
     >>> smooth = spm.Smooth()
-    >>> smooth.inputs.in_files = 'a.nii'
+    >>> smooth.inputs.in_files = '../../emptydata/functional.nii'
     >>> smooth.inputs.fwhm = [4, 4, 4]
     >>> smooth.run() # doctest: +SKIP
     """
