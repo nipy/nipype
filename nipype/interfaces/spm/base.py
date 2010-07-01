@@ -199,7 +199,7 @@ class SPMCommand(BaseInterface):
         raise NotImplementedError
     
         
-    def _format_arg(self, opt, val):
+    def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
         return val
@@ -221,9 +221,9 @@ class SPMCommand(BaseInterface):
                     if f not in dictref.keys():
                         dictref[f] = {}
                     dictref = dictref[f]
-                dictref[fields[-1]] = self._format_arg(name, value)
+                dictref[fields[-1]] = self._format_arg(name, spec, value)
             else:
-                spmdict[field] = self._format_arg(name, value)
+                spmdict[field] = self._format_arg(name, spec, value)
         return [spmdict]
     
     def _reformat_dict_for_savemat(self, contents):
