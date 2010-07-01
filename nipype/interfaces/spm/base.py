@@ -1,9 +1,8 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The spm module provides basic functions for interfacing with matlab
-and spm to access spm tools.
+"""The spm module provides basic functions for interfacing with SPM  tools."""
 
-"""
+
 from nipype.interfaces.traits import Directory
 __docformat__ = 'restructuredtext'
 
@@ -27,8 +26,8 @@ import logging
 logger = logging.getLogger('iflogger')
 
 def func_is_3d(in_file):
-    """ check if input functional files are 3d
-    """
+    """Checks if input functional files are 3d."""
+    
     if isinstance(in_file, list):
         return func_is_3d(in_file[0])
     else:
@@ -48,9 +47,10 @@ def get_first_3dfile(in_files):
 
 def scans_for_fname(fname):
     """Reads a nifti file and converts it to a numpy array storing
-    individual nifti volumes
+    individual nifti volumes.
     
-    Opens images so will fail if they are not found
+    Opens images so will fail if they are not found.
+    
     """
     if isinstance(fname,list):
         scans = np.zeros((len(fname),),dtype=object)
@@ -77,6 +77,7 @@ def scans_for_fnames(fnames,keep4d=False,separate_sessions=False):
     separate_sessions: boolean
         if 4d nifti files are being used, then separate_sessions
         ensures a cell array per session is created in the structure.
+        
     """
     flist = None
     if not isinstance(fnames[0], list):
@@ -104,16 +105,10 @@ def scans_for_fnames(fnames,keep4d=False,separate_sessions=False):
                     flist = np.concatenate((flist,scans))
     return flist
 
-######################
-# 
-# NEW classes
-#
-######################
-
 class Info(object):
-    """ Return the path to the spm directory in the matlab path
-        If path not found, prints error asn returns None
-    """
+    """Returns the path to the SPM directory in the Matlab path
+        If path not found, prints error and returns None."""
+        
     __path = None
     @classmethod
     def spm_path(cls):
@@ -144,7 +139,8 @@ class SPMCommandInputSpec(TraitedSpec):
                           usedefault=True)
 
 class SPMCommand(BaseInterface):
-    """ Extends `BaseInterface` class to implement SPM specific interfaces.
+    """Extends `BaseInterface` class to implement SPM specific interfaces.
+    
     WARNING: Pseudo prototype class, meant to be subclassed
     """
     input_spec = SPMCommandInputSpec
@@ -159,7 +155,7 @@ class SPMCommand(BaseInterface):
         
     def _matlab_cmd_update(self):
         # MatlabCommand has to be created here,
-        #because matlab_cmb is not a proper input
+        # because matlab_cmb is not a proper input
         # and can be set only during init
         self.mlab = MatlabCommand(matlab_cmd=self.inputs.matlab_cmd,
                                       mfile=self.inputs.mfile,
@@ -183,8 +179,8 @@ class SPMCommand(BaseInterface):
         self.inputs.mfile = use_mfile
 
     def _run_interface(self, runtime):
-        """Executes the SPM function using MATLAB
-        """
+        """Executes the SPM function using MATLAB."""
+        
         if isdefined(self.inputs.mfile):
             self.mlab.inputs.mfile = self.inputs.mfile
         if isdefined(self.inputs.paths):
@@ -197,13 +193,14 @@ class SPMCommand(BaseInterface):
         return runtime
     
     def _list_outputs(self):
-        """ Determine the expected outputs based on inputs """
+        """Determine the expected outputs based on inputs."""
+        
         raise NotImplementedError
     
         
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for SPM."""
+        
         return val
     
     def _parse_inputs(self, skip=()):
@@ -237,7 +234,7 @@ class SPMCommand(BaseInterface):
 
         Examples
         --------
-        >>> a = SpmMatlabCommandLine()._reformat_dict_for_savemat(dict(a=1,b=dict(c=2,d=3)))
+        >>> a = SPMCommand()._reformat_dict_for_savemat(dict(a=1,b=dict(c=2,d=3)))
         >>> print a
         [{'a': 1, 'b': [{'c': 2, 'd': 3}]}]
         
@@ -257,7 +254,7 @@ class SPMCommand(BaseInterface):
             print 'Requires dict input'
 
     def _generate_job(self, prefix='', contents=None):
-        """ Recursive function to generate spm job specification as a string
+        """Recursive function to generate spm job specification as a string
 
         Parameters
         ----------
@@ -267,6 +264,7 @@ class SPMCommand(BaseInterface):
             A non-tuple Python structure containing spm job
             information gets converted to an appropriate sequence of
             matlab commands.
+            
         """
         jobstring = ''
         if contents is None:
@@ -313,7 +311,7 @@ class SPMCommand(BaseInterface):
         return jobstring
     
     def _make_matlab_command(self, contents, postscript=None):
-        """ generates a mfile to build job structure
+        """Generates a mfile to build job structure
         Parameters
         ----------
 
@@ -326,12 +324,9 @@ class SPMCommand(BaseInterface):
 
         Returns
         -------
-        cmdline : string
-            string representing command passed to shell
-            as generated by matlab.MatlabCommandLine()._gen_matlab_command
-
         mscript : string
             contents of a script called by matlab
+            
         """
         cwd = os.getcwd()
         mscript  = """
