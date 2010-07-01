@@ -5,6 +5,38 @@ from nipype.testing import *
 from nipype.interfaces import afni
 from nipype.interfaces.base import InterfaceResult
 
+def afni_not_installed():
+    ''' XXX: This test assumes that AFNI.Info.version will not crash on a system without AFNI installed'''
+    if afni.Info.version is None:
+        return True
+    else:
+        return False
+
+def test_To3dInputSpec():
+    inputs_map = dict(infolder = dict(argstr= '%s/*.dcm',
+                                  position = -1,
+                                  mandatory = True),
+                      outfile = dict(desc = 'converted image file',
+                                 argstr = '-prefix %s',
+                                 position = -2,
+                                 mandatory = True),
+                      filetype = dict(desc = 'type of datafile being converted',
+                                  argstr = '-%s'),
+                      skipoutliers = dict(desc = 'skip the outliers check',
+                                      argstr = '-skip_outliers'),
+                      assumemosaic = dict(desc = 'assume that Siemens image is mosaic',
+                                      argstr = '-assume_dicom_mosaic'),
+                      datatype = dict(desc = 'set output file datatype',
+                                  argstr = '-datum %s'),
+                      funcparams = dict(desc = 'parameters for functional data',
+                                    argstr = '-time:zt %s alt+z2'))
+    instance = afni.To3d()
+    for key, metadata in inputs_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+
+#@skipif(afni_not_installed)
 @skipif(True)
 def test_To3d():
     cmd = afni.To3d()
