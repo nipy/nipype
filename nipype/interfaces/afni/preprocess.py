@@ -578,6 +578,87 @@ class ThreedZcutup(AFNICommand):
     '''
 
 
+class ThreedAllineateInputSpec(AFNITraitedSpec):
+    infile = File(desc = 'input file to 3dAllineate',
+                  argstr = '-source %s',
+                  position = -1,
+                  mandatory = True,
+                  exists = True)
+    outfile = File(desc = 'output file from 3dAllineate',
+                   argstr = '-prefix %s',
+                   position = -2,
+                   mandatory = True)
+    matrix = File(desc = 'matrix to align input file',
+                  argstr = '-1dmatrix_apply %s',
+                  position = -3)
+
+class ThreedAllineateOutputSpec(AFNITraitedSpec):
+    out_file = File(desc = 'cut file',
+                    exists = True)
+
+class ThreedAllineate(AFNICommand):
+    """
+    For complete details, see the `3dAllineate Documentation. 
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html>`_
+    """
+
+    _cmd = '3dAllineate'
+    input_spec = ThreedAllineateInputSpec
+    output_spec = ThreedAllineateOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.outfile
+        return outputs
+
+
+
+    '''def _parseinputs(self):
+        """Parse valid input options for ThreedZcutup command.
+
+        Ignore options set to None.
+
+        """
+
+        out_inputs = []
+        inputs = {}
+        [inputs.update({k:v}) for k, v in self.inputs.items() \
+             if v is not None]
+
+        if inputs.has_key('keep'):
+            val = inputs.pop('keep')
+            inputssub = {}
+            [inputssub.update({k:v}) for k, v in val.items() \
+                if v is not None]
+
+            if inputssub.has_key('from'):
+                valsub = inputssub.pop('from')
+                out_inputs.append('-keep %s' % str(valsub))
+            else:
+                valsub=None
+                print('Warning: value \'from\' required for keep')
+            if inputssub.has_key('to'):
+                valsub = inputssub.pop('to')
+                out_inputs.append('%s' % str(valsub))
+            else:
+                valsub=None
+                print('Warning: value \'to\' required for keep')
+        if inputs.has_key('outfile'):
+            val = inputs.pop('outfile')
+            out_inputs.append('-prefix %s' % val)
+        if inputs.has_key('infile'):
+            val = inputs.pop('infile')
+            out_inputs.append('%s' % val)
+
+        if len(inputs) > 0:
+            msg = '%s: unsupported options: %s' % (
+                self.__class__.__name__, inputs.keys())
+            raise AttributeError(msg)
+
+        return out_inputs
+    '''
+
+
 class ThreedSkullStrip(AFNICommand):
     """
     For complete details, see the `3dSkullStrip Documentation.
