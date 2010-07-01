@@ -15,6 +15,7 @@ from copy import deepcopy
 import glob
 import os
 import shutil
+from warning import warn
 
 from enthought.traits.trait_errors import TraitError
 try:
@@ -170,7 +171,9 @@ class DataGrabber(IOBase):
     """ Generic datagrabber module that wraps around glob in an
         intelligent way for neuroimaging tasks to grab files
 
-        Doesn't support directories currently
+
+        .. note::
+           Doesn't support directories currently
 
         Examples
         --------
@@ -284,7 +287,10 @@ class DataGrabber(IOBase):
             else:
                 template = os.path.abspath(template)
             if not args:
-                outputs[key] = list_to_filename(glob.glob(template))
+                filelist = glob.glob(template)
+                outputs[key] = list_to_filename(filelist)
+                if len(filelist) == 0:
+                    warn('Output key: %s Template: %s returned no files'%(key, template))
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
@@ -305,11 +311,13 @@ class DataGrabber(IOBase):
                             argtuple.append(arg[i])
                         else:
                             argtuple.append(arg)
+                    filledtemplate = template
                     if argtuple:
-                        outfiles = list_to_filename(glob.glob(template%tuple(argtuple)))
-                    else:
-                        outfiles = list_to_filename(glob.glob(template))
-                    outputs[key].insert(i,outfiles)
+                        filledtemplate = template%tuple(argtuple)
+                    outfiles = glob.glob(filledtemplate)
+                    outputs[key].insert(i,list_to_filename(outfiles))
+                    if len(outfiles) == 0:
+                        warn('Output key: %s Template: %s returned no files'%(key, filledtemplate))
             if len(outputs[key]) == 0:
                 outputs[key] = None
             elif len(outputs[key]) == 1:
