@@ -136,7 +136,7 @@ class Level1Design(SPMCommand):
     _jobtype = 'stats'
     _jobname = 'fmri_spec'
 
-    def _format_arg(self, opt, val):
+    def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
         if opt in ['spm_mat_dir', 'mask_image']:
@@ -210,7 +210,7 @@ class EstimateModel(SPMCommand):
     _jobtype = 'stats'
     _jobname = 'fmri_est'
 
-    def _format_arg(self, opt, val):
+    def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
         if opt == 'spm_mat_file':
@@ -298,7 +298,7 @@ class EstimateContrast(SPMCommand):
     contrasts : List of contrasts with each contrast being a list of the form -
     ['name', 'stat', [condition list], [weight list], [session list]]. if
     session list is None or not provided, all sessions are used. For F
-    contrasts, the condition list should contain previously defined T-contrasts. 
+    contrasts, the condition list should contain *previously* defined T-contrasts. 
 
     Examples
     --------
@@ -364,14 +364,17 @@ class EstimateContrast(SPMCommand):
                             script += "consess{%d}.tcon.convec(idx(sidx)) = %f;\n" % (i + 1, sw * contrast.weights[c0])
                     else:
                         script += "consess{%d}.tcon.convec(idx) = %f;\n" % (i + 1, contrast.weights[c0])
-            elif contrast.stat == 'F':
+        for i, contrast in enumerate(contrasts):
+            if contrast.stat == 'F':
                 script += "consess{%d}.fcon.name   =  '%s';\n" % (i + 1, contrast.name)
                 for cl0, fcont in enumerate(contrast.conditions):
-                    tidx = cname.index(fcont[0])
+                    try:
+                        tidx = cname.index(fcont[0])
+                    except:
+                        Exception("Contrast Estimate: could not get index of" \
+                                  " T contrast. probably not defined prior " \
+                                      "to the F contrasts")
                     script += "consess{%d}.fcon.convec{%d} = consess{%d}.tcon.convec;\n" % (i + 1, cl0 + 1, tidx + 1)
-            else:
-                raise Exception("Contrast Estimate: Unknown stat %s for " \
-                                    "contrast %d" % (contrast.stat, i))
         script += "jobs{1}.stats{1}.con.consess = consess;\n"
         script += "if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');jobs=spm_jobman('spm5tospm8',{jobs});end\n"
         script += "spm_jobman('run',jobs);"
@@ -818,7 +821,7 @@ class FactorialDesign(SPMCommand):
     _jobtype = 'stats'
     _jobname = 'factorial_design'
 
-    def _format_arg(self, opt, val):
+    def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
         if opt in ['spm_mat_dir']:
@@ -862,12 +865,12 @@ class OneSampleTTestDesign(FactorialDesign):
     
     input_spec = OneSampleTTestDesignInputSpec
     
-    def _format_arg(self, opt, val):
+    def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
         if opt in ['in_files']:
             return np.array(val, dtype=object)
-        return super(OneSampleTTestDesign, self)._format_arg(opt, val)
+        return super(OneSampleTTestDesign, self)._format_arg(opt, spec, val)
 
 class TwoSampleTTestDesignInputSpec(FactorialDesignInputSpec):
     # very unlikely that you will have a single image in one group, so setting
@@ -889,9 +892,9 @@ class TwoSampleTTestDesign(FactorialDesign):
     
     input_spec = TwoSampleTTestDesignInputSpec
 
-    def _format_arg(self, opt, val):
+    def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
         if opt in ['group1_files', 'group2_files']:
             return np.array(val, dtype=object)
-        return super(OneSampleTTestDesign, self)._format_arg(opt, val)
+        return super(TwoSampleTTestDesign, self)._format_arg(opt, spec, val)
