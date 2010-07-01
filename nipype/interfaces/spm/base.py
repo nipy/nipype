@@ -145,6 +145,7 @@ class SPMCommandInputSpec(TraitedSpec):
 
 class SPMCommand(BaseInterface):
     """ Extends `BaseInterface` class to implement SPM specific interfaces.
+    WARNING: Pseudo prototype class, meant to be subclassed
     """
     input_spec = SPMCommandInputSpec
 
@@ -157,7 +158,8 @@ class SPMCommand(BaseInterface):
         self._matlab_cmd_update()
         
     def _matlab_cmd_update(self):
-        # MatlabCommand has to be created here, because matlab_cmb is not a proper input
+        # MatlabCommand has to be created here,
+        #because matlab_cmb is not a proper input
         # and can be set only during init
         self.mlab = MatlabCommand(matlab_cmd=self.inputs.matlab_cmd,
                                       mfile=self.inputs.mfile,

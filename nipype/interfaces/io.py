@@ -15,7 +15,7 @@ from copy import deepcopy
 import glob
 import os
 import shutil
-from warning import warn
+from warnings import warn
 
 from enthought.traits.trait_errors import TraitError
 try:
