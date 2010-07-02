@@ -10,12 +10,13 @@ Top-level namespace for fsl.  Perhaps should just make fsl a package!
 from nipype.interfaces.fsl.base import FSLCommand, Info, check_fsl
 from nipype.interfaces.fsl.preprocess import (FAST, FLIRT, ApplyXfm,
                                               BET, MCFLIRT, FNIRT, ApplyWarp,
-                                              SliceTimer)
+                                              SliceTimer, SUSAN)
 from nipype.interfaces.fsl.model import (Level1Design, FEAT, FEATModel,
                                          FILMGLS, FEATRegister, FLAMEO, ContrastMgr,
                                          L2Model, SMM, MELODIC)
 from nipype.interfaces.fsl.utils import (Smooth, Merge, ExtractROI, Split,
-                                         ImageMaths, ImageMeants, FilterRegressor)
+                                         ImageMaths, ImageMeants, ImageStats,
+                                         FilterRegressor)
 from nipype.interfaces.fsl.dti import (EddyCorrect, BEDPOSTX, DTIFit, TBSS2Reg,
                                        TBSS1Preproc, TBSS3Postreg,
                                        TBSS4Prestats, Randomise,
