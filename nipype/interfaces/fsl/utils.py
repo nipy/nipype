@@ -346,9 +346,9 @@ class FilterRegressor(FSLCommand):
         return None
 
 class ImageStatsInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, argstr="%s", mandatory=True, position=2)
     split_4d = traits.Bool(argstr='-t', position=1,
                            desc='give a separate output line for each 3D volume of a 4D timeseries')
+    in_file = File(exists=True, argstr="%s", mandatory=True, position=2)
     op_string = traits.Str(argstr="%s", mandatory=True, position=3,
                            desc="string defining the operation, options are applied in order, e.g. -M -l 10 -M will report the non-zero mean, apply a threshold and then report the new nonzero mean")
 
@@ -374,7 +374,7 @@ class ImageStats(FSLCommand):
 
     _cmd = 'fslstats'
 
-    def aggregate_outputs(self, runtime):
+    def aggregate_outputs(self, runtime=None):
         outputs = self._outputs()
         outfile = os.path.join(os.getcwd(), 'stat_result.json')
         if runtime is None:
@@ -391,7 +391,6 @@ class ImageStats(FSLCommand):
                         out_stat.extend([float(val) for val in values])
             if len(out_stat)==1:
                 out_stat = out_stat[0]
-            print out_stat
             save_json(outfile, dict(stat=out_stat))
         outputs.out_stat = out_stat
         return outputs
