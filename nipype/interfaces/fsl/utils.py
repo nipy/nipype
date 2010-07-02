@@ -177,11 +177,14 @@ class ExtractROI(FSLCommand):
     extract voxels 10 to 12 inclusive you would specify 10 and 3 (not
     10 and 12).
 
-    >>> from nipype.interfaces import fsl
-    >>> fslroi = fsl.ExtractROI(in_file='foo.nii', roi_file='bar.nii', \
-                                tmin=0, tsize=1)
-    >>> fslroi.cmdline
-    'fslroi foo.nii bar.nii 0 1'
+    Examples
+    --------
+
+    >>> from nipype.interfaces.fsl import ExtractROI
+    >>> from nipype.testing import anatfile
+    >>> fslroi = ExtractROI(in_file=anatfile, roi_file='bar.nii', t_min=0, t_size=1)
+    >>> fslroi.cmdline == 'fslroi %s bar.nii 0 1'%anatfile
+    True
     """
 
     _cmd = 'fslroi'
@@ -278,10 +281,11 @@ class ImageMaths(FSLCommand):
     --------
     
     >>> from nipype.interfaces import fsl
-    >>> maths = fsl.ImageMaths(in_file='foo.nii', op_string= '-add 5', \
+    >>> from nipype.testing import anatfile
+    >>> maths = fsl.ImageMaths(in_file=anatfile, op_string= '-add 5', \
                                out_file='foo_maths.nii')
-    >>> maths.cmdline
-    'fslmaths foo.nii -add 5 foo_maths.nii'
+    >>> maths.cmdline == 'fslmaths %s -add 5 foo_maths.nii'%anatfile
+    True
 
     """
     input_spec = ImageMathsInputSpec
@@ -319,15 +323,15 @@ class FilterRegressorInputSpec(FSLCommandInputSpec):
     mask = File(exists=True,argst="-m %s",desc="mask image file name")
     var_norm = traits.Bool(argst="--vn",desc="perform variance-normalization on data")
     out_file = traits.Bool(argst="--out_data",desc="output data")
-    Out_vnscales = traits.Bool(argst="--out_vnscales",desc="output scaling factors for variance normalization")
+    out_vnscales = traits.Bool(argst="--out_vnscales",desc="output scaling factors for variance normalization")
 
 class FilterRegressorOutputSpec(TraitedSpec):
     out_file = File(exists=True,desc="output file name for the filtered data")
 
 class FilterRegressor(FSLCommand):
-    """
-        Data de-noising by regressing out part of a design matrix
-        using simple OLS regression on 4D images
+    """Data de-noising by regressing out part of a design matrix
+    
+    Uses simple OLS regression on 4D images
     """
     input_spec = FilterRegressorInputSpec
     output_spec = FilterRegressorOutputSpec
@@ -363,10 +367,11 @@ class ImageStats(FSLCommand):
     Examples
     --------
     
-    >>> from nipype.interfaces import fsl
-    >>> stats = fsl.ImageStats(in_file='foo.nii', op_string= '-M')
-    >>> stats.cmdline
-    'fslstats foo.nii -M'
+    >>> from nipype.interfaces.fsl import ImageStats
+    >>> from nipype.testing import funcfile
+    >>> stats = ImageStats(in_file=funcfile, op_string= '-M')
+    >>> stats.cmdline == 'fslstats %s -M'%funcfile
+    True
 
     """
     input_spec = ImageStatsInputSpec
