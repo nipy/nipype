@@ -742,7 +742,7 @@ class BaseInterface(Interface):
         if results.runtime.returncode is None:
             raise Exception('Returncode from an interface cannot be None')
         if results.runtime.returncode == 0:
-            results.outputs = self.aggregate_outputs()
+            results.outputs = self.aggregate_outputs(results.runtime)
         return results
 
     def _list_outputs(self):
@@ -753,7 +753,7 @@ class BaseInterface(Interface):
         else:
             return None
 
-    def aggregate_outputs(self):
+    def aggregate_outputs(self, runtime=None):
         """ Collate expected outputs and check for existence
         """
         predicted_outputs = self._list_outputs()
