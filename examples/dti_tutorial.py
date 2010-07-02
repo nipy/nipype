@@ -97,10 +97,10 @@ functionality.
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=info.keys()),
                      name = 'datasource')
+
+datasource.inputs.template = "%s/%s"
 datasource.inputs.base_directory = os.path.abspath('/media/sdb2/fsl_course/fsl_course_data/fdt/')
 datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz',
-                                        bvecs="%s/%s",
-                                        bvals="%s/%s",
                                         seed_file="%s.bedpostX/%s.nii.gz",
                                         target_masks="%s.bedpostX/%s.nii.gz")
 datasource.inputs.template_args = info
