@@ -73,142 +73,6 @@ class To3d(AFNICommand):
         outputs['out_file'] = self.inputs.outfile
         return outputs
 
-    '''def _parseinputs_old(self):
-        """Parse valid input options for To3d command.
-
-        Ignore options set to None.
-
-        """
-
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.items() \
-            if v is not None]
-
-        if inputs.has_key('datatype'):
-            val = inputs.pop('datatype')
-            out_inputs.append('-%s' % val)
-        if inputs.has_key('skip_outliers'):
-            val = inputs.pop('skip_outliers')
-            out_inputs.append('-skip_outliers')
-        if inputs.has_key('assume_dicom_mosaic'):
-            val = inputs.pop('assume_dicom_mosaic')
-            out_inputs.append('-assume_dicom_mosaic')
-        if inputs.has_key('datum'):
-            val = inputs.pop('datum')
-            out_inputs.append('-datum %s' % val)
-        if inputs.has_key('time_dependencies'):
-            val = inputs.pop('time_dependencies')
-            inputssub = {}
-            [inputssub.update({k:v}) for k, v in val.items() \
-                if v is not None]
-
-            # The following are example input orders
-            # -time:zt nz nt TR tpattern
-            # -time:tz nt nz TR tpattern
-            # time : list
-            #    zt nz nt TR tpattern
-            #    tz nt nz TR tpattern
-
-            # dict(slice_order='zt', nz=12, nt=150, TR=2000, tpattern='alt+z')
-
-            try:
-                slice_order = inputssub.pop('slice_order')
-                out_inputs.append('-time:%s' % slice_order)
-            except KeyError:
-                raise KeyError('slice_order is required for time_dependencies')
-            try:
-                nz = inputssub.pop('nz')
-            except KeyError:
-                raise KeyError('nz required for time_dependencies')
-            try:
-                nt = inputssub.pop('nt')
-            except KeyError:
-                raise KeyError('nt required for time_dependencies')
-
-            if slice_order == 'tz':
-                out_inputs.append('%s' % str(nt))
-                out_inputs.append('%s' % str(nz))
-            else:
-                out_inputs.append('%s' % str(nz))
-                out_inputs.append('%s' % str(nt))
-
-            try:
-                valsub = inputssub.pop('TR')
-                out_inputs.append('%s' % str(valsub))
-            except KeyError:
-                raise KeyError('TR required for time_dependencies')
-            try:
-                valsub = inputssub.pop('tpattern')
-                out_inputs.append('%s' % valsub)
-            except KeyError:
-                raise KeyError('tpattern required for time_dependencies')
-
-            if len(inputssub) > 0:
-                msg = '%s: unsupported time_dependencies options: %s' % (
-                    self.__class__.__name__, inputssub.keys())
-                raise AttributeError(msg)
-
-        if inputs.has_key('session'):
-            val = inputs.pop('session')
-            out_inputs.append('-session %s' % val)
-        if inputs.has_key('prefix'):
-            val = inputs.pop('prefix')
-            out_inputs.append('-prefix %s' % val)
-        if inputs.has_key('infiles'):
-            val = inputs.pop('infiles')
-            if type(val) == list:
-                out_inputs.append('%s' % ' '.join(val))
-            else:
-                out_inputs.append('%s' % val)
-
-        if len(inputs) > 0:
-            msg = '%s: unsupported options: %s' % (
-                self.__class__.__name__, inputs.keys())
-            raise AttributeError(msg)
-
-        return out_inputs
-
-    def _parseinputs(self):
-        allargs = super(To3d, self)._parseinputs(skip=('infiles',
-                                                       'time_dependencies'))
-        if self.inputs.time_dependencies:
-            # Accept time_dependencies as input from a dictionary or
-            # any container.
-            tin = self.inputs.time_dependencies
-            if hasattr(tin, 'keys'):
-                # XXX Not checking if any invalid keys have been passed in.
-                try:
-                    slice_order = tin['slice_order']
-                    nz = tin['nz']
-                    nt = tin['nt']
-                    TR = tin['TR']
-                    tpattern = tin['tpattern']
-                    tflag = ['-time:%s' % slice_order]
-                    if slice_order == 'zt':
-                        tflag.append(str(nz))
-                        tflag.append(str(nt))
-                    else:
-                        tflag.append(str(nt))
-                        tflag.append(str(nz))
-                    tflag.append(str(TR))
-                    tflag.append(str(tpattern))
-                    allargs.append(' '.join(tflag))
-                except KeyError:
-                    msg = 'time_dependencies is missing a required key!\n'
-                    msg += 'It should have: slice_order, nz, nt, TR, tpattern\n'
-                    msg += 'But is currently set to:\n%s' % tin
-                    raise KeyError(msg)
-            else:
-                # Assume it's just a container (list or tuple) and
-                # just use the format string.
-                allargs.append(self.opt_map['time_dependencies'] % tin)
-
-        if self.inputs.infiles:
-            allargs.append(container_to_string(self.inputs.infiles))
-        return allargs
-    '''
-
 
 class ThreedrefitInputSpec(AFNITraitedSpec):
     infile = File(desc = 'input file to 3drefit',
@@ -315,34 +179,6 @@ class ThreedTstat(AFNICommand):
         return outputs
 
 
-    '''    def _parseinputs(self):
-        """Parse valid input options for ThreedTstat command.
-
-        Ignore options set to None.
-
-        """
-
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.items() \
-             if v is not None]
-
-        if inputs.has_key('outfile'):
-            val = inputs.pop('outfile')
-            out_inputs.append('-prefix %s' % val)
-        if inputs.has_key('infile'):
-            val = inputs.pop('infile')
-            out_inputs.append('%s' % val)
-
-        if len(inputs) > 0:
-            msg = '%s: unsupported options: %s' % (
-                self.__class__.__name__, inputs.keys())
-            raise AttributeError(msg)
-
-        return out_inputs
-    '''
-
-
 class ThreedAutomaskInputSpec(AFNITraitedSpec):
     infile = File(desc = 'input file to 3dAutomask',
                   argstr = '%s',
@@ -375,34 +211,6 @@ class ThreedAutomask(AFNICommand):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.outfile
         return outputs
-
-
-    '''def _parseinputs(self):
-        """Parse valid input options for ThreedAutomask command.
-
-        Ignore options set to None.
-
-        """
-
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.items() \
-             if v is not None]
-
-        if inputs.has_key('outfile'):
-            val = inputs.pop('outfile')
-            out_inputs.append('-prefix %s' % val)
-        if inputs.has_key('infile'):
-            val = inputs.pop('infile')
-            out_inputs.append('%s' % val)
-
-        if len(inputs) > 0:
-            msg = '%s: unsupported options: %s' % (
-                self.__class__.__name__, inputs.keys())
-            raise AttributeError(msg)
-
-        return out_inputs
-    '''
 
 
 class ThreedvolregInputSpec(AFNITraitedSpec):
@@ -531,53 +339,6 @@ class ThreedZcutup(AFNICommand):
         return outputs
 
 
-
-    '''def _parseinputs(self):
-        """Parse valid input options for ThreedZcutup command.
-
-        Ignore options set to None.
-
-        """
-
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.items() \
-             if v is not None]
-
-        if inputs.has_key('keep'):
-            val = inputs.pop('keep')
-            inputssub = {}
-            [inputssub.update({k:v}) for k, v in val.items() \
-                if v is not None]
-
-            if inputssub.has_key('from'):
-                valsub = inputssub.pop('from')
-                out_inputs.append('-keep %s' % str(valsub))
-            else:
-                valsub=None
-                print('Warning: value \'from\' required for keep')
-            if inputssub.has_key('to'):
-                valsub = inputssub.pop('to')
-                out_inputs.append('%s' % str(valsub))
-            else:
-                valsub=None
-                print('Warning: value \'to\' required for keep')
-        if inputs.has_key('outfile'):
-            val = inputs.pop('outfile')
-            out_inputs.append('-prefix %s' % val)
-        if inputs.has_key('infile'):
-            val = inputs.pop('infile')
-            out_inputs.append('%s' % val)
-
-        if len(inputs) > 0:
-            msg = '%s: unsupported options: %s' % (
-                self.__class__.__name__, inputs.keys())
-            raise AttributeError(msg)
-
-        return out_inputs
-    '''
-
-
 class ThreedAllineateInputSpec(AFNITraitedSpec):
     infile = File(desc = 'input file to 3dAllineate',
                   argstr = '-source %s',
@@ -610,53 +371,6 @@ class ThreedAllineate(AFNICommand):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.outfile
         return outputs
-
-
-
-    '''def _parseinputs(self):
-        """Parse valid input options for ThreedZcutup command.
-
-        Ignore options set to None.
-
-        """
-
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.items() \
-             if v is not None]
-
-        if inputs.has_key('keep'):
-            val = inputs.pop('keep')
-            inputssub = {}
-            [inputssub.update({k:v}) for k, v in val.items() \
-                if v is not None]
-
-            if inputssub.has_key('from'):
-                valsub = inputssub.pop('from')
-                out_inputs.append('-keep %s' % str(valsub))
-            else:
-                valsub=None
-                print('Warning: value \'from\' required for keep')
-            if inputssub.has_key('to'):
-                valsub = inputssub.pop('to')
-                out_inputs.append('%s' % str(valsub))
-            else:
-                valsub=None
-                print('Warning: value \'to\' required for keep')
-        if inputs.has_key('outfile'):
-            val = inputs.pop('outfile')
-            out_inputs.append('-prefix %s' % val)
-        if inputs.has_key('infile'):
-            val = inputs.pop('infile')
-            out_inputs.append('%s' % val)
-
-        if len(inputs) > 0:
-            msg = '%s: unsupported options: %s' % (
-                self.__class__.__name__, inputs.keys())
-            raise AttributeError(msg)
-
-        return out_inputs
-    '''
 
 
 class ThreedSkullStrip(AFNICommand):
@@ -835,95 +549,6 @@ class Threedcalc(AFNICommand):
         if inputs.has_key('outfile'):
             val = inputs.pop('outfile')
             out_inputs.append('-prefix %s' % val)
-
-        if len(inputs) > 0:
-            print '%s: unsupported options: %s' % (
-                self.__class__.__name__, inputs.keys())
-
-        return out_inputs
-
-
-class ThreedAllineate(AFNICommand):
-    """
-    For complete details, see the `3dAllineate Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html>`_
-    """
-
-    @property
-    def cmd(self):
-        """Base command for ThreedAllineate"""
-        return '3dAllineate'
-
-    def inputs_help(self):
-        doc = """
-        """
-        print doc
-
-    def _populate_inputs(self):
-        """Initialize the inputs attribute."""
-
-        self.inputs = Bunch(
-            lpc=None,
-            weight_frac=None,
-            verbose=None,
-            warp=None,
-            maxrot=None,
-            maxshf=None,
-            source_automask=None,
-            transform_matrix=None,
-            base=None,
-            weight=None,
-            outfile=None,
-            infile=None)
-
-    def _parseinputs(self):
-        """Parse valid input options for ThreedSkullStrip command.
-
-        Ignore options set to None.
-
-        """
-
-        out_inputs = []
-        inputs = {}
-        [inputs.update({k:v}) for k, v in self.inputs.items() \
-             if v is not None]
-
-        if inputs.has_key('lpc'):
-            val = inputs.pop('lpc')
-            out_inputs.append('-lpc')
-        if inputs.has_key('weight_frac'):
-            val = inputs.pop('weight_frac')
-            out_inputs.append('-weight_frac %s' % str(val))
-        if inputs.has_key('verbose'):
-            val = inputs.pop('verbose')
-            out_inputs.append('-VERB')
-        if inputs.has_key('warp'):
-            val = inputs.pop('warp')
-            out_inputs.append('-warp %s' % val)
-        if inputs.has_key('maxrot'):
-            val = inputs.pop('maxrot')
-            out_inputs.append('-maxrot %s' % str(val))
-        if inputs.has_key('maxshf'):
-            val = inputs.pop('maxshf')
-            out_inputs.append('-maxshf %s' % str(val))
-        if inputs.has_key('source_automask'):
-            val = inputs.pop('source_automask')
-            out_inputs.append('-source_automask+%s' % str(val))
-        if inputs.has_key('transform_matrix'):
-            val = inputs.pop('transform_matrix')
-            out_inputs.append('-1Dmatrix_save %s' % val)
-        if inputs.has_key('base'):
-            val = inputs.pop('base')
-            out_inputs.append('-base %s' % val)
-        if inputs.has_key('weight'):
-            val = inputs.pop('weight')
-            out_inputs.append('-weight %s' % val)
-        if inputs.has_key('outfile'):
-            val = inputs.pop('outfile')
-            out_inputs.append('-prefix %s' % val)
-        if inputs.has_key('infile'):
-            val = inputs.pop('infile')
-            out_inputs.append('-source %s' % val)
 
         if len(inputs) > 0:
             print '%s: unsupported options: %s' % (
