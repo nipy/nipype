@@ -962,7 +962,7 @@ class SUSAN(FSLCommand):
                 return '0'
             arglist = [len(value)]
             for filename, thresh in value:
-                arglist.extend([filename, thresh])
+                arglist.extend([filename, '%.3f'%thresh)])
             return ' '.join(arglist)
         return super(SUSAN, self)._format_arg(name, spec, value)
     
