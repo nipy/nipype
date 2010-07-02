@@ -21,6 +21,7 @@ from nipype.interfaces.fsl.base import FSLCommand,\
 from nipype.interfaces.base import traits, TraitedSpec,\
     OutputMultiPath, File
 from nipype.utils.misc import isdefined
+from nipype.utils.filemanip import load_json, save_json
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -270,9 +271,13 @@ class ImageMathsOutputSpec(TraitedSpec):
 
 class ImageMaths(FSLCommand):
     """Use FSL fslmaths command to allow mathematical manipulation of images
-    Example:
+
+    `FSL info <http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/intro/index.htm#fslutils>`_
+    
+    Examples
+    --------
+    
     >>> from nipype.interfaces import fsl
-    >>> import os
     >>> maths = fsl.ImageMaths(in_file='foo.nii', op_string= '-add 5', \
                                out_file='foo_maths.nii')
     >>> maths.cmdline
@@ -339,3 +344,54 @@ class FilterRegressor(FSLCommand):
         if name == 'out_file':
             return self._list_outputs()[name]
         return None
+
+class ImageStatsInputSpec(FSLCommandInputSpec):
+    in_file = File(exists=True, argstr="%s", mandatory=True, position=2)
+    split_4d = traits.Bool(argstr='-t', position=1,
+                           desc='give a separate output line for each 3D volume of a 4D timeseries')
+    op_string = traits.Str(argstr="%s", mandatory=True, position=3,
+                           desc="string defining the operation, options are applied in order, e.g. -M -l 10 -M will report the non-zero mean, apply a threshold and then report the new nonzero mean")
+
+class ImageStatsOutputSpec(TraitedSpec):
+    out_stat = traits.Any(desc='stats output')
+
+class ImageStats(FSLCommand):
+    """Use FSL fslstats command to calculate stats from images
+
+    `FSL info <http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/intro/index.htm#fslutils>`_
+    
+    Examples
+    --------
+    
+    >>> from nipype.interfaces import fsl
+    >>> stats = fsl.ImageStats(in_file='foo.nii', op_string= '-M')
+    >>> stats.cmdline
+    'fslstats foo.nii -M'
+
+    """
+    input_spec = ImageStatsInputSpec
+    output_spec = ImageStatsOutputSpec
+
+    _cmd = 'fslstats'
+
+    def aggregate_outputs(self, runtime):
+        outputs = self._outputs()
+        outfile = os.path.join(os.getcwd(), 'stat_result.json')
+        if runtime is None:
+            out_stat = load_json(outfile)['stat']
+        else:
+            out_stat = []
+            print runtime
+            for line in runtime.stdout.split('\n'):
+                if line:
+                    values = line.split()
+                    if len(values)>1:
+                        out_stat.append([float(val) for val in values])
+                    else:
+                        out_stat.extend([float(val) for val in values])
+            if len(out_stat)==1:
+                out_stat = out_stat[0]
+            print out_stat
+            save_json(outfile, dict(stat=out_stat))
+        outputs.out_stat = out_stat
+        return outputs
