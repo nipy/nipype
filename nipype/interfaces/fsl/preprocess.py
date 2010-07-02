@@ -915,3 +915,67 @@ class SliceTimer(FSLCommand):
         if name == 'out_file':
             return self._list_outputs()['slice_time_corrected_file']
         return None
+
+class SUSANInputSpec(FSLCommandInputSpec):
+    in_file = File(exists=True, argstr='%s',
+                   mandatory=True, position=1,
+                   desc='filename of input timeseries')
+    brightness_threshold = traits.Float(argstr='%.3f',
+                                        postition=2, mandatory=True,
+                   desc='brightness threshold and should be greater than' \
+                        'noise level and less than contrast of edges to' \
+                        'be preserved.')
+    spatial_size = traits.Float(argstr='%.3f',
+                                postition=3, mandatory=True,
+                                desc='spatial size (sigma, i.e., half-width) of smoothing, in mm')
+    dimension = traits.Enum(3,2, argstr='%d', position=4, usedefault=True,
+                            desc='within-plane (2) or fully 3D (3)')
+    use_median = traits.Enum(1,0, argstr='%d', position=5, usedefault=True,
+                        desc='whether to use a local median filter in the cases where single-point noise is detected')
+    usans = traits.List(traits.Tuple(File(exists=True),Float), maxlen=2,
+                        argstr='', position=6,
+             desc='determines whether the smoothing area (USAN) is to be' \
+                  'found from secondary images (0, 1 or 2). A negative' \
+                  'value for any brightness threshold will auto-set the' \
+                  'threshold at 10% of the robust range')
+    out_file = File(argstr='%s', position=-1, genfile=True,
+                    desc='output file name')
+    
+class SUSANOutputSpec(TraitedSpec):
+    smoothed_file = File(exists=True, desc='smoothed output file')
+
+class SUSAN(FSLCommand):
+    """ use FSL SUSAN to perform smoothing
+
+    Examples
+    --------
+
+    """
+
+    _cmd = 'susan'
+    input_spec = SUSANInputSpec
+    output_spec = SUSANOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'usans':
+            if not isdefined(value):
+                return '0'
+            arglist = [len(value)]
+            for filename, thresh in value:
+                arglist.extend([filename, thresh])
+            return ' '.join(arglist)
+        return super(SUSAN, self)._format_arg(name, spec, value)
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_file = self.inputs.out_file
+        if not isdefined(out_file):
+            out_file = self._gen_fname(self.inputs.in_file,
+                                      suffix='_smooth')
+        outputs['smoothed_file'] = out_file
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()['smoothed_file']
+        return None
