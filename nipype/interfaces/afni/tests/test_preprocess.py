@@ -35,6 +35,179 @@ def test_To3dInputSpec():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+'''XXX: This test is broken.  output_spec does not appear to have the out_file attribute the same way that inputs does
+def test_To3dOutputSpec():
+    outputs_map = dict(out_file = dict(desc = 'converted file'))
+    instance = afni.To3d()
+    for key, metadata in outputs_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.output_spec.traits()[key], metakey), value
+'''
+
+
+def test_ThreedrefitInputSpec():
+    inputs_map = dict(infile = dict(desc = 'input file to 3drefit',
+                                    argstr = '%s',
+                                    position = -1,
+                                    mandatory = True),
+                      deoblique = dict(desc = 'replace current transformation matrix with cardinal matrix',
+                                       argstr = '-deoblique'),
+                      xorigin = dict(desc = 'x distance for edge voxel offset',
+                                     argstr = '-xorigin %s'),
+                      yorigin = dict(desc = 'y distance for edge voxel offset',
+                                     argstr = '-yorigin %s'),
+                      zorigin = dict(desc = 'y distance for edge voxel offset',
+                                     argstr = '-yorigin %s'))
+    instance = afni.Threedrefit()
+    for key, metadata in inputs_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+
+def test_ThreedresampleInputSpec():
+    inputs_map = dict(infile = dict(desc = 'input file to 3dresample',
+                                    argstr = '-inset %s',
+                                    position = -1,
+                                    mandatory = True),
+                      outfile = dict(desc = 'output file from 3dresample',
+                                     argstr = '-prefix %s',
+                                     position = -2,
+                                     mandatory = True),
+                      orientation = dict(desc = 'new orientation code',
+                                         argstr = '-orient %s'))
+    instance = afni.Threedresample()
+    for key, metadata in inputs_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+
+def test_ThreedTstatInputSpec():
+    inputs_map = dict(infile = dict(desc = 'input file to 3dTstat',
+                                    argstr = '%s',
+                                    position = -1,
+                                    mandatory = True),
+                      outfile = dict(desc = 'output file from 3dTstat',
+                                     argstr = '-prefix %s',
+                                     position = -2,
+                                     mandatory = True),
+                      options = dict(desc = 'selected statistical output',
+                                     argstr = '%s'))
+    instance = afni.ThreedTstat()
+    for key, metadata in inputs_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+
+def test_ThreedAutomaskInputSpec():
+    inputs_map = dict(infile = dict(desc = 'input file to 3dAutomask',
+                                    argstr = '%s',
+                                    position = -1,
+                                    mandatory = True),
+                      outfile = dict(desc = 'output file from 3dAutomask',
+                                     argstr = '-prefix %s',
+                                     position = -2,
+                                     mandatory = True),
+                      options = dict(desc = 'automask settings',
+                                     argstr = '%s'))
+    instance = afni.ThreedAutomask()
+    for key, metadata in inputs_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+
+def test_ThreedvolregInputSpec():
+    inputs_map = dict(infile = dict(desc = 'input file to 3dvolreg',
+                                    argstr = '%s',
+                                    position = -1,
+                                    mandatory = True),
+                      outfile = dict(desc = 'output file from 3dvolreg',
+                                     argstr = '-prefix %s',
+                                     position = -2,
+                                     mandatory = True),
+                      basefile = dict(desc = 'base file for registration',
+                                      argstr = '-base %s',
+                                      position = -5),
+                      md1dfile = dict(desc = 'max displacement output file',
+                                      argstr = '-maxdisp1D %s',
+                                      position = -4),
+                      onedfile = dict(desc = '1D movement parameters output file',
+                                      argstr = '-1Dfile %s',
+                                      position = -3),
+                      verbose = dict(desc = 'more detailed description of the process',
+                                     argstr = '-verbose'),
+                      timeshift = dict(desc = 'time shift to mean slice time offset',
+                                       argstr = '-tshift 0'),
+                      copyorigin = dict(desc = 'copy base file origin coords to output',
+                                        argstr = '-twodup'),
+                      other = dict(desc = 'other options',
+                                   argstr = '%s'))
+    instance = afni.Threedvolreg()
+    for key, metadata in inputs_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+
+def test_ThreedmergeInputSpec():
+    inputs_map = dict(infile = dict(desc = 'input file to 3dvolreg',
+                                    argstr = '%s',
+                                    position = -1,
+                                    mandatory = True),
+                      outfile = dict(desc = 'output file from 3dvolreg',
+                                     argstr = '-prefix %s',
+                                     position = -2,
+                                     mandatory = True),
+                      doall = dict(desc = 'apply options to all sub-bricks in dataset',
+                                   argstr = '-doall'),
+                      blurfwhm = dict(desc = 'FWHM blur value (mm)',
+                                      argstr = '-1blur_fwhm %d',
+                                      units = 'mm'),
+                      other = dict(desc = 'other options',
+                                   argstr = '%s'))
+    instance = afni.Threedmerge()
+    for key, metadata in inputs_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+
+def test_ThreedZcutupInputSpec():
+    inputs_map = dict(infile = dict(desc = 'input file to 3dZcutup',
+                                    argstr = '%s',
+                                    position = -1,
+                                    mandatory = True),
+                      outfile = dict(desc = 'output file from 3dZcutup',
+                                     argstr = '-prefix %s',
+                                     position = -2,
+                                     mandatory = True),
+                      keep = dict(desc = 'slice range to keep in output',
+                                  argstr = '-keep %s'),
+                      other = dict(desc = 'other options',
+                                   argstr = '%s'))
+    instance = afni.ThreedZcutup()
+    for key, metadata in inputs_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+
+def ThreedAllineateInputSpec():
+    inputs_map = dict(infile = dict(desc = 'input file to 3dAllineate',
+                                    argstr = '-source %s',
+                                    position = -1,
+                                    mandatory = True),
+                      outfile = dict(desc = 'output file from 3dAllineate',
+                                     argstr = '-prefix %s',
+                                     position = -2,
+                                     mandatory = True),
+                      matrix = dict(desc = 'matrix to align input file',
+                                    argstr = '-1dmatrix_apply %s',
+                                    position = -3))
+    instance = afni.ThreedAllineate()
+    for key, metadata in inputs_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+
+
+
 
 #@skipif(afni_not_installed)
 @skipif(True)
