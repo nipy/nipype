@@ -131,12 +131,12 @@ class BEDPOSTXInputSpec(FSLCommandInputSpec):
     bpx_directory = Directory('bedpostx',argstr='%s',usedefault=True,
                              desc='the name for this subject''s bedpostx folder')
   
-    fibres = traits.Int(1,argstr='-n %d', desc='number of fibres per voxel',usedefault=True)
+    fibres = traits.Int(1,argstr='-n %d', desc='number of fibres per voxel')
     weight = traits.Float(1.00,argstr='-w %.2f', desc='ARD weight, more weight means less'+
-                          ' secondary fibres per voxel',usedefault=True)
-    burn_period = traits.Int(1000,argstr='-b %d', desc='burnin period',usedefault=True)
-    jumps = traits.Int(1250,argstr='-j %d', desc='number of jumps',usedefault=True)
-    sampling = traits.Int(25,argstr='-s %d', desc='sample every',usedefault=True)
+                          ' secondary fibres per voxel')
+    burn_period = traits.Int(1000,argstr='-b %d', desc='burnin period')
+    jumps = traits.Int(1250,argstr='-j %d', desc='number of jumps')
+    sampling = traits.Int(25,argstr='-s %d', desc='sample every')
     
 class BEDPOSTXOutputSpec(TraitedSpec):
     bpx_out_directory = Directory(exists=True, field='dir', desc = 'path/name of directory with all '+
@@ -210,10 +210,7 @@ class BEDPOSTX(FSLCommand):
 
 class TBSS1PreprocInputSpec(FSLCommandInputSpec):
     img_list = traits.List(File(exists=True), mandatory=True,
-                          desc = 'list with filenames of the FA images')
-    in_exp = traits.Str('*.nii.gz',desc='the file pattern to be given to this command '+
-                       '(note: the extension of the files need to be changed if different from .nii.gz)',
-                       argstr='%s',usedefault=True)
+                          desc = 'list with filenames of the FA images', sep = " ", argstr="%s")
     
 class TBSS1PreprocOutputSpec(TraitedSpec):
     tbss_dir = Directory(exists=True, field='dir',
@@ -235,7 +232,7 @@ class TBSS1Preproc(FSLCommand):
 
     def _run_interface(self, runtime):        
         for n in self.inputs.img_list:
-            shutil.copyfile(n,self._gen_fname(n,suffix=''))            
+            shutil.copyfile(n,os.path.basename(n))            
         runtime = super(TBSS1Preproc, self)._run_interface(runtime)
         if runtime.stderr:
             runtime.returncode = 1             
@@ -245,6 +242,12 @@ class TBSS1Preproc(FSLCommand):
         outputs = self.output_spec().get()
         outputs['tbss_dir'] = os.getcwd()            
         return outputs
+    
+    def _format_arg(self, name, spec, value):
+        if name == "img_list":
+            new_list = [os.path.basename(fname) for fname in self.inputs.img_list]
+            return super(TBSS1Preproc, self)._format_arg("img_list", spec, new_list)
+        return super(TBSS1Preproc, self)._format_arg(name, spec, value)
         
 class TBSS2RegInputSpec(FSLCommandInputSpec):
     tbss_dir = Directory(exists=True, field='dir',
@@ -671,8 +674,7 @@ class ProjThresh(FSLCommand):
 class FindTheBiggestInputSpec(FSLCommandInputSpec):
     in_files = traits.List(File,exists=True,argstr='%s',desc='a list of input volumes or a singleMatrixFile',
                           position=0,mandatory=True)
-    label_file = File(exists=True,argstr='%s',desc='label file')
-    out_file = File(argstr='%s',desc='file with the resulting segmentation',position=-1,genfile=True)   
+    out_file = File(argstr='%s',desc='file with the resulting segmentation',position=2,genfile=True)   
     
 class FindTheBiggestOutputSpec(TraitedSpec):
     out_file = File(exists=True,argstr='%s',desc='output file indexed in order of input files')
