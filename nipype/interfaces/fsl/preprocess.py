@@ -932,7 +932,7 @@ class SUSANInputSpec(FSLCommandInputSpec):
                             desc='within-plane (2) or fully 3D (3)')
     use_median = traits.Enum(1,0, argstr='%d', position=5, usedefault=True,
                         desc='whether to use a local median filter in the cases where single-point noise is detected')
-    usans = traits.List(traits.Tuple(File(exists=True),Float), maxlen=2,
+    usans = traits.List(traits.Tuple(File(exists=True),traits.Float), maxlen=2,
                         argstr='', position=6,
              desc='determines whether the smoothing area (USAN) is to be' \
                   'found from secondary images (0, 1 or 2). A negative' \
@@ -962,7 +962,7 @@ class SUSAN(FSLCommand):
                 return '0'
             arglist = [len(value)]
             for filename, thresh in value:
-                arglist.extend([filename, '%.3f'%thresh)])
+                arglist.extend([filename, '%.3f'%thresh])
             return ' '.join(arglist)
         return super(SUSAN, self)._format_arg(name, spec, value)
     
