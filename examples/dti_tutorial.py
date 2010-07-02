@@ -56,24 +56,23 @@ the output fields of the ``datasource`` node in the pipeline.
 """
 Specify the subject directories
 """
-subject_list = ['dwis1','dwis3']
+subject_list = ['subj1']
 
 
 """
 Map field names to individual subject runs
 """
-info = dict(dwi=[['subject_id', 'data.nii.gz']],
+info = dict(dwi=[['subject_id', 'data']],
             bvecs=[['subject_id','bvecs']],
             bvals=[['subject_id','bvals']],
-            seed_file = [['subject_id','MASK_average_thal_right.nii.gz']],
-            target_masks = [['subject_id',['MASK_average_M1_right.nii.gz',
-                                          'MASK_average_S1_right.nii.gz',
-                                          'MASK_average_occipital_right.nii.gz',
-                                          'MASK_average_pfc_right.nii.gz',
-                                          'MASK_average_pmc_right.nii.gz',
-                                          'MASK_average_ppc_right.nii.gz',
-                                          'MASK_average_temporal_right.nii.gz']]],
-            xfm=[['subject_id','standard2diff.mat']])
+            seed_file = [['subject_id','MASK_average_thal_right']],
+            target_masks = [['subject_id',['MASK_average_M1_right',
+                                           'MASK_average_S1_right',
+                                           'MASK_average_occipital_right',
+                                           'MASK_average_pfc_right',
+                                           'MASK_average_pmc_right',
+                                           'MASK_average_ppc_right',
+                                           'MASK_average_temporal_right']]])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
@@ -98,8 +97,12 @@ functionality.
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=info.keys()),
                      name = 'datasource')
-datasource.inputs.base_directory = os.path.abspath('data')
-datasource.inputs.template = '%s/%s'
+datasource.inputs.base_directory = os.path.abspath('/media/sdb2/fsl_course/fsl_course_data/fdt/')
+datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz',
+                                        bvecs="%s/%s",
+                                        bvals="%s/%s",
+                                        seed_file="%s.bedpostX/%s.nii.gz",
+                                        target_masks="%s.bedpostX/%s.nii.gz")
 datasource.inputs.template_args = info
 
 
@@ -156,12 +159,21 @@ and hard segmentation of the seed region
 """
 
 tractography = pe.Workflow(name='tractography')
+tractography.base_dir = os.path.abspath('dti_tutorial')
 
 """
 estimate the diffusion parameters: phi, theta, and so on
 """
 bedpostx = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx')
+bedpostx.inputs.fibres = 1
 
+bedpostx_2f = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx_2f')
+bedpostx_2f.inputs.fibres = 2
+
+
+flirt = pe.Node(interface=fsl.FLIRT(), name='flirt')
+flirt.inputs.reference = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
+flirt.inputs.dof = 12
 
 """
 perform probabilistic tracktography
@@ -169,19 +181,15 @@ note: the values given to these parameters are toy examples and
 should be changed to more meaningful values
 """
 probtrackx = pe.Node(interface=fsl.ProbTrackX(),name='probtrackx')
-probtrackx.inputs.n_samples=3
-probtrackx.inputs.n_steps=10
+probtrackx.inputs.mode='seedmask'
+probtrackx.inputs.loop_check=True
+probtrackx.inputs.c_thresh = 0.2
+probtrackx.inputs.n_steps=2000
+probtrackx.inputs.step_length=0.5
+probtrackx.inputs.n_samples=5000
 probtrackx.inputs.force_dir=True
 probtrackx.inputs.opd=True
 probtrackx.inputs.os2t=True
-probtrackx.inputs.mode='seedmask'
-
-
-"""
-threshold the output of probtrackx
-"""
-projthresh = pe.Node(interface=fsl.ProjThresh(),name='projthresh')
-projthresh.inputs.threshold = 1
 
 
 """
@@ -196,8 +204,8 @@ connect all the nodes for this workflow
 tractography.connect([
                         (bedpostx,probtrackx,[('bpx_out_directory','bpx_directory')]),
                         (bedpostx,probtrackx,[('bpx_out_directory','out_dir')]),
-                        (probtrackx,projthresh,[('targets','in_files')]),
-                        (projthresh,findthebiggest,[('out_files','in_files')])
+                        (probtrackx,findthebiggest,[('targets','in_files')]),
+                        (flirt, probtrackx, [('out_matrix_file','xfm')])
                     ])
 
 
@@ -205,7 +213,7 @@ tractography.connect([
 Setup data storage area
 """
 datasink = pe.Node(interface=nio.DataSink(),name='datasink')
-datasink.inputs.base_directory = os.path.abspath('data/workingdir/dtiresults')
+datasink.inputs.base_directory = os.path.abspath('dtiresults')
 
 def getstripdir(subject_id):
     return os.path.join(os.path.abspath('data/workingdir/dwiproc'),'_subject_id_%s' % subject_id)
@@ -216,7 +224,7 @@ Setup the pipeline that combines the two workflows: tractography and computeTens
 ----------------------------------------------------------------------------------
 """
 dwiproc = pe.Workflow(name="dwiproc")
-dwiproc.base_dir = os.path.abspath('data/workingdir')
+dwiproc.base_dir = os.path.abspath('dti_tutorial')
 dwiproc.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,computeTensor,[('dwi','fslroi.in_file'),
@@ -229,77 +237,14 @@ dwiproc.connect([
                                               ('target_masks','probtrackx.target_masks')]),
                     (computeTensor,tractography,[('eddycorrect.eddy_corrected','bedpostx.dwi'),
                                                  ('bet.mask_file','bedpostx.mask'),
-                                                 ('bet.mask_file','probtrackx.mask')]),
+                                                 ('bet.mask_file','probtrackx.mask'),
+                                                 ('fslroi.roi_file','flirt.in_file')]),
                     (infosource, datasink,[('subject_id','container'),
                                            (('subject_id', getstripdir),'strip_dir')]),
-                    (tractography,datasink,[('projthresh.out_files','projthresh.@seeds_to_targets')]),
                     (tractography,datasink,[('findthebiggest.out_file','fbiggest.@biggestsegmentation')])
                 ])
 
 dwiproc.run()
 dwiproc.write_graph()
 
-
-"""
-Setup for Tract-Based Spatial Statistics (TBSS) Computation
------------------------------------------------------------
-Here we will create a generic workflow for TBSS computation
-"""
-tbss_workflow = pe.Workflow(name='tbss')
-tbss_workflow.base_dir=os.path.abspath('data/workingdir')
-
-"""
-collect all the FA images for each subject using the DataGrabber class
-"""
-tbss_source = pe.Node(nio.DataGrabber(),name="tbss_source")
-tbss_source.inputs.template = os.path.abspath('data/workingdir/dwiproc/computeTensor/_subject_id_*/dtifit/*_FA.nii')
-
-"""
-prepare your FA data in your TBSS working directory in the right format
-"""
-tbss1 = pe.Node(fsl.TBSS1Preproc(),name='tbss1')
-
-
-"""
-apply nonlinear registration of all FA images into standard space
-"""
-tbss2 = pe.Node(fsl.TBSS2Reg(),name='tbss2')
-tbss2.inputs.FMRIB58FA=True
-
-"""
-create the mean FA image and skeletonise it
-"""
-tbss3 = pe.Node(fsl.TBSS3Postreg(),name='tbss3')
-tbss3.inputs.FMRIB58FA=True
-
-"""
-project all subjects' FA data onto the mean FA skeleton
-"""
-tbss4 = pe.Node(fsl.TBSS4Prestats(),name='tbss4')
-tbss4.inputs.threshold=0.3
-
-"""
-feed the 4D projected FA data into GLM modelling and thresholding
-in order to find voxels which correlate with your model
-"""
-randomise = pe.Node(fsl.Randomise(),name='randomise')
-randomise.inputs.design_mat=os.path.abspath('data/design.mat')
-randomise.inputs.tcon=os.path.abspath('data/design.con')
-randomise.inputs.num_perm=10
-
-
-"""
-Setup the pipeline that runs tbss
-------------------
-"""
-tbss_workflow.connect([ (tbss_source,tbss1,[('outfiles','img_list')]),
-                        (tbss1,tbss2,[('tbss_dir','tbss_dir')]),
-                        (tbss2,tbss3,[('tbss_dir','tbss_dir')]),
-                        (tbss3,tbss4,[('tbss_dir','tbss_dir')]),
-                        (tbss4,randomise,[('all_FA_skeletonised','in_file')]),
-                        (tbss4,randomise,[('mean_FA_skeleton_mask','mask')])
-                    ])
-
-tbss_workflow.run()
-tbss_workflow.write_graph()
 
