@@ -73,61 +73,14 @@ class Level1DesignOutputSpec(TraitedSpec):
 class Level1Design(SPMCommand):
     """Generate an SPM design matrix
 
-    Parameters
-    ----------
-        session_info : list of dicts
-            Stores session specific information
-
-            Session parameters
-
-            nscan : int
-                Number of scans in a session
-            scans : list of filenames
-                A single 4D nifti file or a list of 3D nifti files
-            hpf : float
-                High pass filter cutoff
-                SPM default = 128 secs
-            condition_info : mat filename or list of dicts
-                The output of `SpecifyModel` generates this
-                information.
-            regressor_info : mat/txt filename or list of dicts 
-                Stores regressor specific information
-                The output of Specify>odel generates this
-                information.
-        factor_info : list of dicts
-            Stores factor specific information
-
-            Factor parameters
-
-            name : string
-                Name of factor (use condition name)
-            levels: int
-                Number of levels for the factor
-
-        bases : dict {'name':{'basesparam1':val,...}}
-            name : string
-                Name of basis function (hrf, fourier, fourier_han,
-                gamma, fir)
-                
-                hrf :
-                    derivs : 2-element list
-                        Model  HRF  Derivatives. No derivatives: [0,0],
-                        Time derivatives : [1,0], Time and Dispersion
-                        derivatives: [1,1]
-                fourier, fourier_han, gamma, fir:
-                    length : int
-                        Post-stimulus window length (in seconds)
-                    order : int
-                        Number of basis functions
-
     Examples
     --------
-    >>> level1design = spm.Level1Design()
+    >>> level1design = Level1Design()
     >>> level1design.inputs.timing_units = 'secs'
-    >>> level1design.inputs.interscan_interval = '2.5'
+    >>> level1design.inputs.interscan_interval = 2.5
     >>> level1design.inputs.bases = {'hrf':{'derivs': [0,0]}}
-    >>> level1design.inputs.session_info = 'session_info.npz'
-    >>> level1design.run()
+    >>> level1design.inputs.session_info = '../../emptydata/session_info.npz'
+    >>> level1design.run() # doctest: +SKIP
     """
 
     input_spec = Level1DesignInputSpec
@@ -201,9 +154,9 @@ class EstimateModel(SPMCommand):
     
     Examples
     --------
-    >>> est = spm.EstimateModel()
-    >>> est.inputs.spm_mat_file = 'SPM.mat'
-    >>> est.run()
+    >>> est = EstimateModel()
+    >>> est.inputs.spm_mat_file = '../../emptydata/SPM.mat'
+    >>> est.run() # doctest: +SKIP
     """
     input_spec = EstimateModelInputSpec
     output_spec = EstimateModelOutputSpec
@@ -291,25 +244,16 @@ class EstimateContrastOutputSpec(TraitedSpec):
 class EstimateContrast(SPMCommand):
     """use spm_contrasts to estimate contrasts of interest
 
-
-    Parameters
-    ----------
-    
-    contrasts : List of contrasts with each contrast being a list of the form -
-    ['name', 'stat', [condition list], [weight list], [session list]]. if
-    session list is None or not provided, all sessions are used. For F
-    contrasts, the condition list should contain *previously* defined T-contrasts. 
-
     Examples
     --------
     >>> import nipype.interfaces.spm as spm
     >>> est = spm.EstimateContrast()
-    >>> est.inputs.spm_design_file = 'SPM.mat'
+    >>> est.inputs.spm_mat_file = '../../emptydata/SPM.mat'
     >>> cont1 = ('Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5])
     >>> cont2 = ('Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1])
     >>> contrasts = [cont1,cont2]
     >>> est.inputs.contrasts = contrasts
-    >>> est.run()
+    >>> est.run() # doctest: +SKIP
     
     """
 
@@ -415,8 +359,8 @@ class OneSampleTTest(SPMCommand):
     --------
     >>> import nipype.interfaces.spm as spm
     >>> ttest = spm.OneSampleTTest()
-    >>> ttest.inputs.con_images = ['cont1.nii', 'cont2.nii']
-    >>> ttest.run()
+    >>> ttest.inputs.con_images = ['../../emptydata/cont1.nii', '../../emptydata/cont2.nii']
+    >>> ttest.run() # doctest: +SKIP
     """
     input_spec = OneSampleTTestInputSpec
     output_spec = OneSampleTTestOutputSpec
@@ -480,11 +424,11 @@ class TwoSampleTTest(SPMCommand):
     --------
     >>> import nipype.interfaces.spm as spm
     >>> ttest = spm.TwoSampleTTest()
-    >>> ttest.inputs.images_group1 = ['cont1.nii', 'cont2.nii']
-    >>> ttest.inputs.images_group2 = ['cont1a.nii', 'cont2a.nii']
+    >>> ttest.inputs.images_group1 = ['../../emptydata/cont1.nii', '../../emptydata/cont2.nii']
+    >>> ttest.inputs.images_group2 = ['../../emptydata/cont1a.nii', '../../emptydata/cont2a.nii']
     >>> ttest.dependent = False
     >>> ttest.unequal_variance = True
-    >>> ttest.run()
+    >>> ttest.run() # doctest: +SKIP
     """
 
     _jobtype = 'stats'
@@ -586,9 +530,9 @@ class MultipleRegression(SPMCommand):
     >>> covariates = dict(names=['reg1', 'reg2'], centering=[1,1])
     >>> covariates['vectors'] = [[12,24],[0.6 -0.9]]
     >>> mreg.inputs.covariates = covariates
-    >>> mreg.inputs.images = ['subj1con1.img', 'subj2con1.img']
+    >>> mreg.inputs.images = ['../../emptydata/cont1.nii', '../../emptydata/cont1.nii']
     >>> mreg.inputs.contrasts = [['reg2 > reg1', 'T', ['reg1','reg2'], [-1,1]]]
-    >>> mreg.run()
+    >>> mreg.run() # doctest: +SKIP
     """
 
     _jobtype = 'stats'
@@ -700,13 +644,12 @@ class Threshold(SPMCommand):
     Examples
     --------
 
-    >>> from nipype.interfaces.spm import Threshold
     >>> thresh = Threshold()
-    >>> thresh.inputs.spm_mat_file = 'SPM.mat'
-    >>> thresh.inputs.spmT_images = 'spmT_0001.img'
+    >>> thresh.inputs.spm_mat_file = '../../emptydata/SPM.mat'
+    >>> thresh.inputs.spmT_images = '../../emptydata/spmT_0001.img'
     >>> thresh.inputs.contrast_index = 1
     >>> thresh.inputs.extent_fdr_p_threshold = 0.05
-    >>> thresh.inputs.run()
+    >>> thresh.run() # doctest: +SKIP
     '''
     input_spec = ThresholdInputSpec
     output_spec = ThresholdOutputSpec
@@ -861,6 +804,10 @@ class OneSampleTTestDesignInputSpec(FactorialDesignInputSpec):
 
 class OneSampleTTestDesign(FactorialDesign):
     """Create SPM design for one sample t-test
+    
+    >>> ttest = OneSampleTTestDesign()
+    >>> ttest.inputs.in_files = ['../../emptydata/cont1.nii', '../../emptydata/cont2.nii']
+    >>> ttest.run() # doctest: +SKIP
     """
     
     input_spec = OneSampleTTestDesignInputSpec
@@ -888,6 +835,11 @@ class TwoSampleTTestDesignInputSpec(FactorialDesignInputSpec):
 
 class TwoSampleTTestDesign(FactorialDesign):
     """Create SPM design for two sample t-test
+    
+    >>> ttest = TwoSampleTTestDesign()
+    >>> ttest.inputs.group1_files = ['../../emptydata/cont1.nii', '../../emptydata/cont2.nii']
+    >>> ttest.inputs.group2_files = ['../../emptydata/cont1a.nii', '../../emptydata/cont2a.nii']
+    >>> ttest.run() # doctest: +SKIP
     """
     
     input_spec = TwoSampleTTestDesignInputSpec
