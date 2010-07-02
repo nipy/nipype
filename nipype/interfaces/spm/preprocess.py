@@ -56,7 +56,8 @@ class SliceTiming(SPMCommand):
     >>> st.inputs.time_repetition = 6.0
     >>> st.inputs.time_acquisition = 6. - 6./32.
     >>> st.inputs.slice_order = range(32,0,-1)
-    >>> st.inputs.ref_slice = 1 # doctest: +SKIP
+    >>> st.inputs.ref_slice = 1
+    >>> st.run() # doctest: +SKIP
     
     """
 
