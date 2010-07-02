@@ -12,10 +12,8 @@ import nipype.externals.pynifti as nifti
 import numpy as np
 from math import floor, ceil
 from scipy.ndimage.morphology import grey_dilation
-from copy import deepcopy
 import os
 from nipype.utils.filemanip import fname_presuffix, split_filename
-from IPython.core.completer import Bunch
 
 class PickAtlasInputSpec(TraitedSpec):
     atlas = File(exists=True, desc="Location of the atlas that will be used.", compulsory=True)
