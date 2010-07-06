@@ -20,7 +20,7 @@ class MatlabInputSpec(CommandLineInputSpec):
                            descr='Switch of splash screen')
     logfile = File(argstr='-logfile %s',
                           desc='Save matlab output to log')
-    singleCompThread = traits.Bool(argstr="-singleCompThread",
+    single_comp_thread = traits.Bool(argstr="-single_comp_thread",
                                    desc="force single threaded operation")
     # non-commandline options
     mfile   = traits.Bool(False, desc='Run m-code using m-file',
@@ -60,9 +60,9 @@ class MatlabCommand(CommandLine):
         if self._default_paths and not isdefined(self.inputs.paths):
             self.inputs.paths = self._default_paths
             
-        if not isdefined(self.inputs.singleCompThread):
+        if not isdefined(self.inputs.single_comp_thread):
             if config.getboolean('execution','single_thread_matlab'):
-                self.inputs.singleCompThread = True
+                self.inputs.single_comp_thread = True
             
     @classmethod
     def set_default_matlab_cmd(cls, matlab_cmd):
