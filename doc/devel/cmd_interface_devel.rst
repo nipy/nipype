@@ -1,7 +1,7 @@
 .. _interface_devel:
-=====================
-Developing interfaces
-=====================
+===============================
+How to wrap a command line tool
+===============================
 
 The aim of this section is to describe how external programs and scripts can be
 wrapped for use in Nipype either as interactive interfaces or within the
@@ -11,44 +11,19 @@ interfaces. The key to defining interfaces is to provide a formal specification
 of inputs and outputs and determining what outputs are generated given a set of
 inputs.
 
-Base and helper classes
-=======================
-
-* InterfaceBase
-* CommandLine
-* MatlabCommand
-* FSLCommand
-* FSCommand
-* SPMCommand
-* IOBase
-
-Spec Base classes
-=================
-
-* TraitedSpec
-* DynamicTraitedSpec
-* CommandLineInputSpec
-
-Three components of an interface
-================================
-
-* InputSpec
-* OutputSpec
-* Interface
-
 Defining inputs and outputs
 ===========================
-In NiPyPe we have decided to use Ethought Traits to define inputs and outputs of the interfaces. 
+In NiPyPe we have decided to use Enthought Traits to define inputs and outputs of the interfaces. 
 This allows to introduce easy type checking. Inputs and outputs are grouped into separete classes 
 (usually suffixed with InputSpec and OutputSpec). For example:
 
 .. testcode::
 	
-	ExampleInputSpec(TraitedSpec):
+	class ExampleInputSpec(TraitedSpec):
 		input_volume = File(desc = "Input volume", exists = True, mandatory = True)
 		parameter = traits.Int(desc = "some parameter")
 		
-	ExampleOutputSpec(TraitedSpec):
+	class ExampleOutputSpec(TraitedSpec):
 		output_volume = File(desc = "Output volume", exists = True)
 		
 For the Traits (and NiPyPe) to work correctly output and input spec has to be inherited from TraitedSpec 
@@ -62,14 +37,13 @@ The input and output specifications have to be connected to the our example inte
 
 .. testcode::
 
-	Example(Interface):
+	class Example(Interface):
 		input_spec = ExampleInputSpec
 		output_spec = ExampleOutputSpec
 		
 Where the names of the classes grouping inputs and outputs were arbitrary the names of the fields within 
 the interface they are assigned are not (it always has to be input_spec and output_spec). Of course this interface does not do much 
-because we have not specified how to process the inputs and create the outputs. This can be done in many ways. Currently we support: 
-command line, MATLAB, python, SPM, FSL, Freesurfer, and AFNI. They all differ to some extend so we'll cover them separately.
+because we have not specified how to process the inputs and create the outputs. This can be done in many ways.
  
 Command line executable
 =======================
@@ -80,7 +54,7 @@ CommandLineInputSpec which adds two extra inputs: environ (a dictionary of envir
  
 .. testcode::
 
-	ExampleInputSpec(CommandLineSpec):
+	class ExampleInputSpec(CommandLineSpec):
 		input_volume = File(desc = "Input volume", exists = True, mandatory = True, position = 0)
 		parameter = traits.Int(desc = "some parameter", argstr = "--param %d")
 		
@@ -90,7 +64,7 @@ class needs to inherit from CommandLine:
 
 .. testcode::
 
-	Example(CommandLine):
+	class Example(CommandLine):
 		_cmd = 'my_command'
 		input_spec = ExampleInputSpec
 		output_spec = ExampleOutputSpec
@@ -102,7 +76,7 @@ output spec:
 
 .. testcode::
 
-	_list_outputs(self):
+	def _list_outputs(self):
 		outputs = self.output_spec().get()
 		outputs['output_volume'] = os.path.abspath('name_of_the_file_this_cmd_made.nii')
 		return outputs
@@ -113,7 +87,7 @@ are aiming to make nipype scripts as informative as possible it's better to defi
 
 .. testcode::
 
-	ExampleInputSpec(CommandLineSpec):
+	class ExampleInputSpec(CommandLineSpec):
 		method = traits.Enum("old", "standard", "new", desc = "method", argstr="--method=%d")
 
 Here we've used the Enum trait which restricts input a few fixed options. If we would leave it as it is it would not work since the argstr is expecting
@@ -125,17 +99,3 @@ numbers. We need to do additional parsing by overloading the following method in
 		if name == 'method':
 		    return spec.argstr%{"old":0, "standard":1, "new":2}[value]
 		return super(Example, self)._format_arg(name, spec, value)
-
-Matlab script
-=============
-If you have a piece of MATLAB code that you would like to incorporate into nipype pipeline there a few things you need to know. At the moment the only 
-data type that nipype is able to pass between two nodes are filenames (but fixed inputs can be of any type). Therefore your script have to either read or 
-write files. There are many many Matlab routines available on the Internet (also included in the SPM package). 
-
-To implement a Matlab script wrapper you need to inherit from MatlabCommand and the input spec has to inherit from MatlabCommandInputSpec. As in the example 
-above you'll need to implement the _list_outputs methods to populate the output after execution. The MatlabCommandInputSpec adds extra fields for specifying 
-Matlab executable and it's flags as well as the path to matlab routines.
-
-Finally you need to overload the _gen_matlab_command method adding your matlab code and parametrising it using the provided inputs.
-
-.. include:: ../links_names.txt

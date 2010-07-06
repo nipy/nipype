@@ -1,6 +1,11 @@
-================================
- Trait Interface Specifications
-================================
+========================
+Interface Specifications
+========================
+
+Before you start
+----------------
+NiPyPe is a young project maintained by an enthusiastic group of developers. Even though the documentation might be sparse or cryptic at times we strongly encourage you to contact us on the official nipype developers mailing list in case of any troubles: nipy-devel@neuroimaging.scipy.org (we are sharing a mailing list with the nipy community therefore please add ``[nipype]`` to the messsage title).
+
 
 Overview
 --------
@@ -63,8 +68,8 @@ Each interface class defines two specifications: 1) an InputSpec and
 2) an OutputSpec.  Each of these are prefixed with the class name of
 the interfaces.  For example, Bet has these specs:
 
-  - BetInputSpec
-  - BetOutputSpec
+  - BETInputSpec
+  - BETOutputSpec
 
 Each of these Specs are classes, derived from a base TraitedSpec class
 (more on these below).  The InputSpec consists of attributes which
@@ -78,9 +83,9 @@ an interfaces class is instantiated, the InputSpec is bound to the
 ``inputs`` appear to a user for Bet::
 
   >>> from nipype.interfaces import fsl
-  >>> bet = fsl.Bet()
+  >>> bet = fsl.BET()
   >>> type(bet.inputs)
-  <class 'nipype.interfaces.fsl.preprocess.BetInputSpec'>
+  <class 'nipype.interfaces.fsl.preprocess.BETInputSpec'>
   >>> bet.inputs.<TAB>
   bet.inputs.__class__           bet.inputs.center
   bet.inputs.__delattr__         bet.inputs.environ
@@ -108,29 +113,32 @@ InputSpecs inherit from interfaces.fsl.base.FSLTraitedSpec.
 FSLTraitedSpec defines an ``outputtype`` attribute, which stores the
 file type (NIFTI, NIFTI_PAIR, etc...) for all generated output files.
 
-BetInputSpec class hierarchy
+InputSpec class hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Below is the current class hierarchy for FSL InputSpec classes (from
+Below is the current class hierarchy for InputSpec classes (from
 base class down to subclasses).:
 
   ``TraitedSpec``: Nipype's primary base class for all Specs.
   Provides initialization, some nipype-specific methods and any trait
   handlers we define. Inherits from traits.HasTraits.
 
-    ``BaseInterfaceInputSpec``: Defines inputs common to all
-    interfaces (``environ``)
-
       ``CommandLineInputSpec``: Defines inputs common to all
-      command-line classes (``args``)
+      command-line classes (``args`` and ``environ``)
 
         ``FSLTraitedSpec``: Defines inputs common to all FSL classes
         (``outputtype``)
+	  		
+        ``SPMCommandInputSpec``: Defines inputs common to all SPM classes (``matlab_cmd``, ``path``, and ``mfile``)
+        
+        ``FSTraitedSpec``: Defines inputs common to all FreeSurfer classes
+        (``sbjects_dir``)
+        
+        ``MatlabInputSpec``: Defines inputs common to all Matlab classes (``script``, ``nodesktop``, ``nosplash``, ``logfile``, ``single_comp_thread``, ``mfile``, ``script_file``, and ``paths``)
+        
+        ``SlicerCommandLineInputSpec``: Defines inputs common to all Slicer classes (``module``)
 
-	  ``BetInputSpec``: Defines inputs specific to Bet
-
-Most developers will only need to code at the package-level
-(``FSLTraitedSpec``) or the interface-level (``BetInputSpec``).
+Most developers will only need to code at the the interface-level (i.e. implementing custom class inheriting from one of the above classes).
 
 Output Specs
 ^^^^^^^^^^^^
@@ -149,7 +157,7 @@ with additional behavior like type checking.  (*See the documentation
 on traits for more information on these trait types.*) To handle
 unique behaviors of our attributes we us traits metadata.  These are
 keyword arguments supplied in the initialization of the attributes.
-The base classes ``NEW_BaseInterface`` and ``NEW_CommandLine``
+The base classes ``BaseInterface`` and ``CommandLine``
 (defined in ``nipype.interfaces.base``) check for the existence/or
 value of these metadata and handle the inputs/outputs accordingly.
 For example, all mandatory parameters will have the ``mandatory =
@@ -161,165 +169,162 @@ True`` metadata::
                   argstr='%s', position=0, mandatory=True)
 
 
-File
-^^^^
-
-For files, use ``nipype.interfaces.base.File`` as the trait type.  If
-the file must exist for the tool to execute, specify ``exists = True``
-in the initialization of File (as shown in BetInputSpec above). This
-will trigger the underlying traits code to confirm the file assigned
-to that *input* actually exists.  If it does not exist, the user will
-be presented with an error message::
-
-    >>> bet.inputs.infile = 'does_not_exist.nii'
-    ------------------------------------------------------------
-    Traceback (most recent call last):
-      File "<ipython console>", line 1, in <module>
-      File "/Users/cburns/local/lib/python2.5/site-packages/nipype/interfaces/base.py", line 76, in validate
-        self.error( object, name, value )
-      File "/Users/cburns/local/lib/python2.5/site-packages/enthought/traits/trait_handlers.py", line 175, in error
-        value )
-    TraitError: The 'infile' trait of a BetInputSpec instance must be a file 
-    name, but a value of 'does_not_exist.nii' <type 'str'> was specified.
-
-
-argstr
+Common
 ^^^^^^
 
-``argstr`` is the metadata keyword for specifying the format strings
-for the parameters. This was the *value* string in the opt_map
-dictionaries of Nipype 0.2 code.  If we look at the
-``FlirtInputSpec``, the ``argstr`` for the reference file corresponds
-to the argument string I would need to provide with the command-line
-version of ``flirt``::
+``exists``
+	For files, use ``nipype.interfaces.base.File`` as the trait type.  If
+	the file must exist for the tool to execute, specify ``exists = True``
+	in the initialization of File (as shown in BetInputSpec above). This
+	will trigger the underlying traits code to confirm the file assigned
+	to that *input* actually exists.  If it does not exist, the user will
+	be presented with an error message::
+	
+	    >>> bet.inputs.infile = 'does_not_exist.nii'
+	    ------------------------------------------------------------
+	    Traceback (most recent call last):
+	      File "<ipython console>", line 1, in <module>
+	      File "/Users/cburns/local/lib/python2.5/site-packages/nipype/interfaces/base.py", line 76, in validate
+	        self.error( object, name, value )
+	      File "/Users/cburns/local/lib/python2.5/site-packages/enthought/traits/trait_handlers.py", line 175, in error
+	        value )
+	    TraitError: The 'infile' trait of a BetInputSpec instance must be a file 
+	    name, but a value of 'does_not_exist.nii' <type 'str'> was specified.
+	    
+``desc``
+	All trait objects have a set of default metadata attributes.  ``desc``
+	is one of those and is used as a simple, one-line docstring.  The
+	``desc`` is printed when users use the ``help()`` methods.
+	
+	**Required:** This metadata is required by all nipype interface
+	  classes.
+	  
+``usedefault``
+	Set this metadata to True when the *default value* for the trait type
+	of this attribute is an acceptable value.  All trait objects have a
+	default value, ``traits.Int`` has a default of ``0``, ``traits.Float``
+	has a default of ``0.0``, etc...  You can also define a default value
+	when you define the class.  For example, in the code below all objects
+	of ``Foo`` will have a default value of 12 for ``x``::
+	
+	    >>> import enthought.traits.api as traits
+	    >>> class Foo(traits.HasTraits):
+	    ...     x = traits.Int(12)
+	    ...     y = traits.Int
+	    ...
+	    >>> foo = Foo()
+	    >>> foo.x
+	    12
+	    >>> foo.y
+	    0
+	
+	Nipype only passes ``inputs`` on to the underlying package if they
+	have been defined (more on this later).  So if you specify
+	``usedefault = True``, you are telling the parser to pass the default
+	value on to the underlying package.  Let's look at the InputSpec for
+	SPM Realign::
+	
+	    class RealignInputSpec(BaseInterfaceInputSpec):
+	        jobtype = traits.Enum('estwrite', 'estimate', 'write',
+	                              desc='one of: estimate, write, estwrite',
+	                              usedefault=True)
+	
+	Here we've defined ``jobtype`` to be an enumerated trait type,
+	``Enum``, which can be set to one of the following: ``estwrite``,
+	``estimate``, or ``write``.  In a container, the default is always the
+	first element.  So in this case, the default will be ``estwrite``::
+	
+	    >>> from nipype.interfaces import spm
+	    >>> rlgn = spm.Realign()
+	    >>> rlgn.inputs.infile
+	    <undefined>
+	    >>> rlgn.inputs.jobtype
+	    'estwrite'
+	    
+``xor`` and ``requires``
+	Both of these accept a list of trait names. The ``xor`` metadata reflects
+	mutually exclusive traits, while the requires metadata reflects traits
+	that have to be set together. When a xor-ed trait is set, all other
+	traits belonging to the list are set to Undefined. The function
+	check_mandatory_inputs ensures that all requirements (both mandatory and
+	via the requires metadata are satisfied). These are also reflected in
+	the help function.
+	
+CommandLine
+^^^^^^^^^^^
 
-    class FlirtInputSpec(FSLTraitedSpec):
-        reference = File(exists = True, argstr = '-ref %s', mandatory = True,
-                         position = 1, desc = 'reference file')
+``argstr``
+	The metadata keyword for specifying the format strings
+	for the parameters. This was the *value* string in the opt_map
+	dictionaries of Nipype 0.2 code.  If we look at the
+	``FlirtInputSpec``, the ``argstr`` for the reference file corresponds
+	to the argument string I would need to provide with the command-line
+	version of ``flirt``::
+	
+	    class FlirtInputSpec(FSLTraitedSpec):
+	        reference = File(exists = True, argstr = '-ref %s', mandatory = True,
+	                         position = 1, desc = 'reference file')
+	
+	**Required:** This metadata is required by all command-line interface classes.
 
-**Required:** This metadata is required by all command-line interface
-  classes.
+``position``
+	This metadata is used to specify the position of arguments.  Both
+	positive and negative values are accepted.  ``position = 0`` will
+	position this argument as the first parameter after the command
+	name. ``position = -1`` will position this argument as the last
+	parameter, after all other parameters.
+	
+``genfile``
+	If True, the ``genfile`` metadata specifies that a filename should be
+	generated for this parameter *if-and-only-if* the user did not provide
+	one.  The nipype convention is to automatically generate output
+	filenames when not specified by the user both as a convenience for the
+	user and so the pipeline can easily gather the outputs. Requires ``_gen_filename()`` method to be implemented.
+	
+``sep``
+	For List traits the string with witch elements of the list will be joined.
+	
+SPM
+^^^
 
-desc
-^^^^
+``field``
+	XXX: Get description from Satra.  Clearly this maps to some field
+	structure in spm.
+	
+	**Required:** This metadata is required by all SPM-mediated
+	  interface classes.
 
-All trait objects have a set of default metadata attributes.  ``desc``
-is one of those and is used as a simple, one-line docstring.  The
-``desc`` is printed when users use the ``help()`` methods.
-
-**Required:** This metadata is required by all nipype interface
-  classes.
-
-field
-^^^^^
-
-XXX: Get description from Satra.  Clearly this maps to some field
-structure in spm.
-
-**Required:** This metadata is required by all matlab-mediated
-  interface classes.
-
-position
-^^^^^^^^
-
-This metadata is used to specify the position of arguments.  Both
-positive and negative values are accepted.  ``position = 0`` will
-position this argument as the first parameter after the command
-name. ``position = -1`` will position this argument as the last
-parameter, after all other parameters.
-
-genfile
-^^^^^^^
-
-If True, the ``genfile`` metadata specifies that a filename should be
-generated for this parameter *if-and-only-if* the user did not provide
-one.  The nipype convention is to automatically generate output
-filenames when not specified by the user both as a convenience for the
-user and so the pipeline can easily gather the outputs.
-
-usedefault
-^^^^^^^^^^
-
-Set this metadata to True when the *default value* for the trait type
-of this attribute is an acceptable value.  All trait objects have a
-default value, ``traits.Int`` has a default of ``0``, ``traits.Float``
-has a default of ``0.0``, etc...  You can also define a default value
-when you define the class.  For example, in the code below all objects
-of ``Foo`` will have a default value of 12 for ``x``::
-
-    >>> import enthought.traits.api as traits
-    >>> class Foo(traits.HasTraits):
-    ...     x = traits.Int(12)
-    ...     y = traits.Int
-    ...
-    >>> foo = Foo()
-    >>> foo.x
-    12
-    >>> foo.y
-    0
-
-Nipype only passes ``inputs`` on to the underlying package if they
-have been defined (more on this later).  So if you specify
-``usedefault = True``, you are telling the parser to pass the default
-value on to the underlying package.  Let's look at the InputSpec for
-SPM Realign::
-
-    class RealignInputSpec(BaseInterfaceInputSpec):
-        jobtype = traits.Enum('estwrite', 'estimate', 'write',
-                              desc='one of: estimate, write, estwrite',
-                              usedefault=True)
-
-Here we've defined ``jobtype`` to be an enumerated trait type,
-``Enum``, which can be set to one of the following: ``estwrite``,
-``estimate``, or ``write``.  In a container, the default is always the
-first element.  So in this case, the default will be ``estwrite``::
-
-    >>> from nipype.interfaces import spm
-    >>> rlgn = spm.Realign()
-    >>> rlgn.inputs.infile
-    <undefined>
-    >>> rlgn.inputs.jobtype
-    'estwrite'
-
-xor and requires
-^^^^^^^^^^^^^^^^
-
-Both of these accept a list of trait names. The xor metadata reflects
-mutually exclusive traits, while the requires metadata reflects traits
-that have to be set together. When a xor-ed trait is set, all other
-traits belonging to the list are set to Undefined. The function
-check_mandatory_inputs ensures that all requirements (both mandatory and
-via the requires metadata are satisfied). These are also reflected in
-the help function. 
-
-units
-^^^^^
-
-XXX value of units.  Not sure how are these used in traits?
 
 Defining an interface class
 ---------------------------
+
+Common
+^^^^^^
 
 When you define an interface class, you will define these attributes
 and methods:
 
 * ``input_spec``: the InputSpec
 * ``output_spec``: the OutputSpec
-* ``_list_outputs()``: Returns a dictionary will all outputs and
-  associated paths.
-* ``_get_filename()``: Returns a string that is the generated filename
-  for the requested output.
+* ``_list_outputs()``: Returns a dictionary containing names of generated files that are expected after package completes execution.  This is used by ``BaseInterface.aggregate_outputs`` to gather all output files for the pipeline.
+
+  
+CommandLine
+^^^^^^^^^^^
 
 For command-line interfaces:
 
 * ``_cmd``: the command-line command
 
-For matlab-mediated interfaces:
+If you used genfile:
 
-* ``_jobtype``: XXX
-* ``_jobname``: XXX
+* ``_gen_filename(name)``:  Generate filename, used for filenames that nipype generates as a convenience for users.  This is for parameters that are required by the wrapped package, but we're generating from some other parameter. For example, ``BET.inputs.outfile`` is required by BET but we can generate the name from ``BET.inputs.infile``.  Override this method in subclass to handle.
 
-This is the class definition for Flirt, minus the docstring::
+And optionally:
+
+* ``_format_arg(name, spec, value)``: For extra formatting of the input values before passing them to generic ``_parse_inputs()`` method.
+
+For example this is the class definition for Flirt, minus the docstring::
 
     class Flirt(NEW_FSLCommand):
         _cmd = 'flirt'
@@ -351,36 +356,38 @@ This is the class definition for Flirt, minus the docstring::
 There are two possible output files ``outfile`` and ``outmatrix``,
 both of which can be generated if not specified by the user.
 
-NEW_CommandLine._gen_filename
------------------------------
+Also notice the use of ``self._gen_fname()`` - a FSLCommand helper method for generating filenames (with extensions conforming with FSLOUTPUTTYPE).
 
-Generate filename, used for filenames that nipype generates as a
-convenience for users.  This is for parameters that are required by
-the wrapped package, but we're generating from some other parameter.
-For example, ``Bet.inputs.outfile`` is required by bet but we can
-generate the name from ``Bet.inputs.infile``.  Override this method in
-subclass to handle.
 
-NEW_FSLCommand._gen_fname
--------------------------
+SPM
+^^^
 
-Generates filenames for FSL commands making sure to use the
-appropriate file extension.  Used by subclasses but should **not** be
-overridden.
+For SPM-mediated interfaces:
 
-NEW_Interface._list_outputs
----------------------------
+* ``_jobtype`` and ``_jobname``: special names used used by the SPM job manager. You can find them by saving your batch job as an .m file and looking up the code.
 
-Returns a dictionary containing names of generated files that are
-expected after package completes execution.  This is used by
-``NEW_BaseInterface.aggregate_outputs`` to gather all output files for
-the pipeline.
+And optionally:
+
+* ``_format_arg(name, spec, value)``: For extra formatting of the input values before passing them to generic ``_parse_inputs()`` method.
+
+Matlab
+^^^^^^
+
+If you have a piece of MATLAB code that you would like to incorporate into nipype pipeline there a few things you need to know. At the moment the only 
+data type that nipype is able to pass between two nodes are filenames (but fixed inputs can be of any type). Therefore your script have to either read or 
+write files. There are many many Matlab routines available on the Internet (also included in the SPM package). 
+
+To implement a Matlab script wrapper you need to inherit from MatlabCommand and the input spec has to inherit from MatlabCommandInputSpec. As in the example 
+above you'll need to implement the _list_outputs methods to populate the output after execution. The MatlabCommandInputSpec adds extra fields for specifying 
+Matlab executable and it's flags as well as the path to matlab routines.
+
+Finally you need to overload the ``_gen_matlab_command()`` method adding your matlab code and parametrising it using the provided inputs.
 
 
 Undefined inputs
 ----------------
 
-XXX Explain <undefined> and the isdefined function.
+All the inputs and outputs that were not explicitly set (And do not have a usedefault flag - see above) will have Undefined value. To check if something is defined you have to explicitly call ``isdefiend`` function (comparing to None will not work).
 
 Example of inputs
 -----------------
@@ -390,7 +397,7 @@ inputs are mandatory and which are optional, along with the one-line
 description provided by the ``desc`` metadata::
 
     >>> from nipype.interfaces import fsl
-    >>> fsl.Bet.help()
+    >>> fsl.BET.help()
     Inputs
     ------
 
@@ -426,7 +433,7 @@ description provided by the ``desc`` metadata::
 Here we create a bet object and specify the required input. We then
 check our inputs to see which are defined and which are not::
 
-    >>> bet = fsl.Bet(infile = 'f3.nii')
+    >>> bet = fsl.BET(infile = 'f3.nii')
     >>> bet.inputs
     args = <undefined>
     center = <undefined>
