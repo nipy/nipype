@@ -80,7 +80,7 @@ class PickAtlas(BaseInterface):
     
 class SimpleThresholdInputSpec(TraitedSpec):
     volumes = InputMultiPath(File(exists=True), desc='volumes to be thresholded', mandatory=True)
-    threshold = traits.Float(mandatory=True, desc='volumes to be thresholdedeverything below this value will be set to zero', mandatory=True)
+    threshold = traits.Float(desc='volumes to be thresholdedeverything below this value will be set to zero', mandatory=True)
     
     
 class SimpleThresholdOutputSpec(TraitedSpec):
