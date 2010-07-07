@@ -20,7 +20,7 @@ class MatlabInputSpec(CommandLineInputSpec):
                            descr='Switch of splash screen')
     logfile = File(argstr='-logfile %s',
                           desc='Save matlab output to log')
-    single_comp_thread = traits.Bool(argstr="-single_comp_thread",
+    single_comp_thread = traits.Bool(argstr="-singleCompThread",
                                    desc="force single threaded operation")
     # non-commandline options
     mfile   = traits.Bool(False, desc='Run m-code using m-file',
