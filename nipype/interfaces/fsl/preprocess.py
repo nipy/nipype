@@ -15,9 +15,11 @@ import warnings
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
 from nipype.interfaces.base import TraitedSpec, File,\
-    InputMultiPath, OutputMultiPath
+    InputMultiPath, OutputMultiPath, Undefined
 from nipype.utils.filemanip import split_filename
 from nipype.utils.misc import isdefined
+
+from nipype.externals.pynifti import load
 
 import enthought.traits.api as traits
 
@@ -64,8 +66,7 @@ class BETInputSpec(FSLCommandInputSpec):
                               desc="bias field and neck cleanup")
 
 class BETOutputSpec(TraitedSpec):
-    out_file = File(exists=True,
-                   desc="path/name of skullstripped file")
+    out_file = File(desc="path/name of skullstripped file")
     mask_file = File(
         desc="path/name of binary brain mask (if generated)")
     outline_file = File(
@@ -126,12 +127,16 @@ class BET(FSLCommand):
             runtime.returncode = 1
         return runtime
 
+    def _gen_outfilename(self):
+        out_file = self.inputs.out_file
+        if not isdefined(out_file) and isdefined(self.inputs.in_file):
+            out_file = self._gen_fname(self.inputs.in_file,
+                                       suffix = '_brain')
+        return out_file
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                              suffix = '_brain')
+        outputs['out_file'] = self._gen_outfilename()
         if isdefined(self.inputs.mesh) and self.inputs.mesh:
             outputs['meshfile'] = self._gen_fname(outputs['out_file'],
                                                suffix = '_mesh.vtk',
@@ -141,11 +146,13 @@ class BET(FSLCommand):
                      self.inputs.reduce_bias):
             outputs['mask_file'] = self._gen_fname(outputs['out_file'],
                                                suffix = '_mask')
+        if isdefined(self.inputs.no_output) and self.inputs.no_output:
+            outputs['out_file'] = Undefined
         return outputs
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()[name]
+            return self._gen_outfilename()
         return None
 
 
@@ -479,7 +486,7 @@ class MCFLIRTOutputSpec(TraitedSpec):
     std_img = File(exists=True)
     mean_img = File(exists=True)
     par_file = File(exists=True)
-    mat_file = File(exists=True)
+    mat_file = OutputMultiPath(File(exists=True))
 
 class MCFLIRT(FSLCommand):
     """Use FSL MCFLIRT to do within-modality motion correction.
@@ -513,15 +520,18 @@ class MCFLIRT(FSLCommand):
         # XXX Need to change 'item' below to something that exists
         # out_file? in_file?
         # These could be handled similarly to default values for inputs
-        if isdefined(self.inputs.stats_imgs):
+        if isdefined(self.inputs.stats_imgs) and self.inputs.stats_imgs:
             outputs['variance_img'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_variance')
             outputs['std_img'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_sigma')
             outputs['mean_img'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_meanvol')
-        if isdefined(self.inputs.save_mats):
-            pth, basename, _ = split_filename(self.inputs.in_file)
-            matname = os.path.join(pth, basename + '.mat')
-            outputs['mat_file'] = matname
-        if isdefined(self.inputs.save_plots):
+        if isdefined(self.inputs.save_mats) and self.inputs.save_mats:
+            _, filename = os.path.split(outputs['out_file'])
+            matpathname = os.path.join(cwd, filename + '.mat')
+            _,_,_,timepoints = load(self.inputs.in_file).get_shape()
+            outputs['mat_file'] = []
+            for t in range(timepoints):
+                outputs['mat_file'].append(os.path.join(matpathname, 'MAT_%04d'%t))
+        if isdefined(self.inputs.save_plots) and self.inputs.save_plots:
             # Note - if e.g. out_file has .nii.gz, you get .nii.gz.par, which is
             # what mcflirt does!
             outputs['par_file'] = outputs['out_file'] + '.par'
@@ -921,12 +931,12 @@ class SUSANInputSpec(FSLCommandInputSpec):
                    mandatory=True, position=1,
                    desc='filename of input timeseries')
     brightness_threshold = traits.Float(argstr='%.3f',
-                                        postition=2, mandatory=True,
+                                        position=2, mandatory=True,
                    desc='brightness threshold and should be greater than' \
                         'noise level and less than contrast of edges to' \
                         'be preserved.')
     spatial_size = traits.Float(argstr='%.3f',
-                                postition=3, mandatory=True,
+                                position=3, mandatory=True,
                                 desc='spatial size (sigma, i.e., half-width) of smoothing, in mm')
     dimension = traits.Enum(3,2, argstr='%d', position=4, usedefault=True,
                             desc='within-plane (2) or fully 3D (3)')
@@ -960,7 +970,7 @@ class SUSAN(FSLCommand):
         if name == 'usans':
             if not isdefined(value):
                 return '0'
-            arglist = [len(value)]
+            arglist = [str(len(value))]
             for filename, thresh in value:
                 arglist.extend([filename, '%.3f'%thresh])
             return ' '.join(arglist)
