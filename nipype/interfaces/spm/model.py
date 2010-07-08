@@ -150,6 +150,7 @@ class EstimateModelOutputSpec(TraitedSpec):
     residual_image = File(exists=True, desc='Mean-squared image of the residuals')
     RPVimage = File(exists=True, desc='Resels per voxel image')
     spm_mat_file = File(exist=True, desc='Updated SPM mat file')
+    residuals = OutputMultiPath(File(exists=True), desc='residual images')
 
 class EstimateModel(SPMCommand):
     """Use spm_spm to estimate the parameters of a model
@@ -204,6 +205,7 @@ class EstimateModel(SPMCommand):
         outputs['RPVimage'] = rpv
         spm = os.path.join(pth, 'SPM.mat')
         outputs['spm_mat_file'] = spm
+        outputs['residuals'] = glob("ResI_*.img")
         return outputs
 
 class EstimateContrastInputSpec(SPMCommandInputSpec):
@@ -886,9 +888,9 @@ class PairedTTestDesign(FactorialDesign):
     --------
     
     >>> pttest = PairedTTestDesign()
-    >>> pttest.inputs.paired_files = [['../../emptydata/cont1.nii',
-                                       '../../emptydata/cont1a.nii'],
-                                       ['../../emptydata/cont2.nii',
+    >>> pttest.inputs.paired_files = [['../../emptydata/cont1.nii', \
+                                       '../../emptydata/cont1a.nii'], \
+                                       ['../../emptydata/cont2.nii', \
                                        '../../emptydata/cont2a.nii']]
     >>> pttest.run() # doctest: +SKIP
     """
@@ -923,7 +925,7 @@ class MultipleRegressionDesign(FactorialDesign):
     --------
     
     >>> mreg = MultipleRegressionDesign()
-    >>> mreg.inputs.in_files = ['../../emptydata/cont1.nii',
+    >>> mreg.inputs.in_files = ['../../emptydata/cont1.nii', \
                                 '../../emptydata/cont2.nii']
     >>> mreg.run() # doctest: +SKIP
     """
