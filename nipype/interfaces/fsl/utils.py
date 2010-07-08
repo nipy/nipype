@@ -259,14 +259,14 @@ class Split(FSLCommand):
         return outputs
 
 class ImageMathsInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, argstr="%s", mandatory=True, position=0)
-    in_file2 = File(exists=True, argstr="%s", position=2)
-    out_file = File(argstr="%s", position=3, genfile=True)
-    op_string = traits.Str(argstr="%s", mandatory=True, position=1,
+    in_file = File(exists=True, argstr="%s", mandatory=True, position=1)
+    in_file2 = File(exists=True, argstr="%s", position=3)
+    out_file = File(argstr="%s", position=4, genfile=True)
+    op_string = traits.Str(argstr="%s", position=2,
                            desc="string defining the operation, i. e. -add")
     suffix = traits.Str(desc="out_file suffix")
     out_data_type = traits.Enum('char', 'short', 'int', 'float', 'double',
-                                'input', argstr="-odt %s", position=4,
+                                'input', argstr="-odt %s", position=5,
                                 desc="output datatype, one of (char, short, int, float, double, input)")
 
 class ImageMathsOutputSpec(TraitedSpec):
