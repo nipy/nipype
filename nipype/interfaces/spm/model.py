@@ -236,7 +236,10 @@ class EstimateContrastInputSpec(SPMCommandInputSpec):
             T-contrasts.""")
     beta_images = InputMultiPath(File(exists=True), desc='Parameter estimates of the design matrix', copyfile=False)
     residual_image = File(exists=True, desc='Mean-squared image of the residuals', copyfile=False)
-    ignore_derivs = traits.Bool(True, desc='ignore derivatives for estimation', usedefault=True)
+    ignore_derivs = traits.Bool(True, desc='ignore derivatives for estimation',
+                                usedefault=True, xor=['group_contrast'])
+    group_contrast = traits.Bool(False, desc='higher level contrast', usedefault=True,
+                                 xor=['ignore_derivs'])
 
 class EstimateContrastOutputSpec(TraitedSpec):
     con_images = OutputMultiPath(File(exists=True), desc='contrast images from a t-contrast')
@@ -290,15 +293,18 @@ class EstimateContrast(SPMCommand):
         script += "save(jobs{1}.stats{1}.con.spmmat{:},'SPM');\n"
         script += "names = SPM.xX.name;\n"
         # get names for columns
-        if self.inputs.ignore_derivs:
-            script += "pat = 'Sn\([0-9*]\) (.*)\*bf\(1\)|Sn\([0-9*]\) .*\*bf\([2-9]\)|Sn\([0-9*]\) (.*)';\n"
+        if self.inputs.group_contrast:
+            script += "condnames=names;\n"
         else:
-            script += "pat = 'Sn\([0-9*]\) (.*)';\n"
-        script += "t = regexp(names,pat,'tokens');\n"
-        # get sessidx for columns
-        script += "pat1 = 'Sn\(([0-9].*)\)\s.*';\n"
-        script += "t1 = regexp(names,pat1,'tokens');\n"
-        script += "for i0=1:numel(t),condnames{i0}='';condsess(i0)=0;if ~isempty(t{i0}{1}),condnames{i0} = t{i0}{1}{1};condsess(i0)=str2num(t1{i0}{1}{1});end;end;\n"
+            if self.inputs.ignore_derivs:
+                script += "pat = 'Sn\([0-9*]\) (.*)\*bf\(1\)|Sn\([0-9*]\) .*\*bf\([2-9]\)|Sn\([0-9*]\) (.*)';\n"
+            else:
+                script += "pat = 'Sn\([0-9*]\) (.*)';\n"
+            script += "t = regexp(names,pat,'tokens');\n"
+            # get sessidx for columns
+            script += "pat1 = 'Sn\(([0-9].*)\)\s.*';\n"
+            script += "t1 = regexp(names,pat1,'tokens');\n"
+            script += "for i0=1:numel(t),condnames{i0}='';condsess(i0)=0;if ~isempty(t{i0}{1}),condnames{i0} = t{i0}{1}{1};condsess(i0)=str2num(t1{i0}{1}{1});end;end;\n"
         # BUILD CONTRAST SESSION STRUCTURE
         for i, contrast in enumerate(contrasts):
             if contrast.stat == 'T':
@@ -786,7 +792,6 @@ class FactorialDesign(SPMCommand):
                 for key,keyval in dictitem.items():
                     outdict[mapping[key]] = keyval
                 outlist.append(outdict)
-            print outlist
             return outlist
         return val
 
@@ -811,6 +816,9 @@ class OneSampleTTestDesignInputSpec(FactorialDesignInputSpec):
 
 class OneSampleTTestDesign(FactorialDesign):
     """Create SPM design for one sample t-test
+
+    Examples
+    --------
     
     >>> ttest = OneSampleTTestDesign()
     >>> ttest.inputs.in_files = ['../../emptydata/cont1.nii', '../../emptydata/cont2.nii']
@@ -843,6 +851,9 @@ class TwoSampleTTestDesignInputSpec(FactorialDesignInputSpec):
 class TwoSampleTTestDesign(FactorialDesign):
     """Create SPM design for two sample t-test
     
+    Examples
+    --------
+    
     >>> ttest = TwoSampleTTestDesign()
     >>> ttest.inputs.group1_files = ['../../emptydata/cont1.nii', '../../emptydata/cont2.nii']
     >>> ttest.inputs.group2_files = ['../../emptydata/cont1a.nii', '../../emptydata/cont2a.nii']
@@ -857,3 +868,82 @@ class TwoSampleTTestDesign(FactorialDesign):
         if opt in ['group1_files', 'group2_files']:
             return np.array(val, dtype=object)
         return super(TwoSampleTTestDesign, self)._format_arg(opt, spec, val)
+
+class PairedTTestDesignInputSpec(FactorialDesignInputSpec):
+    paired_files = traits.List(traits.List(File(exists=True), minlen=2, maxlen=2),
+                               field='des.pt.pair',
+                               mandatory=True, minlen=2,
+                               desc='List of paired files')
+    grand_mean_scaling = traits.Bool(field='des.pt.gmsca',
+                            desc='Perform grand mean scaling')
+    ancova = traits.Bool(field='des.pt.ancova',
+                            desc='Specify ancova-by-factor regressors')
+
+class PairedTTestDesign(FactorialDesign):
+    """Create SPM design for paired t-test
+    
+    Examples
+    --------
+    
+    >>> pttest = PairedTTestDesign()
+    >>> pttest.inputs.paired_files = [['../../emptydata/cont1.nii',
+                                       '../../emptydata/cont1a.nii'],
+                                       ['../../emptydata/cont2.nii',
+                                       '../../emptydata/cont2a.nii']]
+    >>> pttest.run() # doctest: +SKIP
+    """
+    
+    input_spec = PairedTTestDesignInputSpec
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt in ['paired_files']:
+            return [dict(scans=np.array(files, dtype=object)) for files in val] 
+        return super(PairedTTestDesign, self)._format_arg(opt, spec, val)
+
+class MultipleRegressionDesignInputSpec(FactorialDesignInputSpec):
+    in_files = traits.List(File(exists=True),
+                           field='des.mreg.scans',
+                           mandatory=True, minlen=2,
+                           desc='List of files')
+    include_intercept = traits.Bool(True, field='des.mreg.incint',
+                                    usedefault=True,
+                                    desc='Include intercept in design')
+    user_covariates = InputMultiPath(traits.Dict(key_trait=traits.Enum('vector',
+                                                                       'name',
+                                                                       'centering')),
+                                field='des.mreg.mcov',
+                                desc='covariate dictionary {vector, name, centering}')
+
+class MultipleRegressionDesign(FactorialDesign):
+    """Create SPM design for multiple regression
+    
+    Examples
+    --------
+    
+    >>> mreg = MultipleRegressionDesign()
+    >>> mreg.inputs.in_files = ['../../emptydata/cont1.nii',
+                                '../../emptydata/cont2.nii']
+    >>> mreg.run() # doctest: +SKIP
+    """
+    
+    input_spec = MultipleRegressionDesignInputSpec
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt in ['in_files']:
+            return np.array(val, dtype=object)
+        if opt in ['user_covariates']:
+            outlist = []
+            mapping = {'name':'cname','vector':'c',
+                       'centering':'iCC'}
+            for dictitem in val:
+                outdict = {}
+                for key,keyval in dictitem.items():
+                    outdict[mapping[key]] = keyval
+                outlist.append(outdict)
+            return outlist
+        return super(MultipleRegressionDesign, self)._format_arg(opt, spec, val)
+
