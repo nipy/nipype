@@ -406,7 +406,13 @@ subjects (n=2 in this example).
 """
 
 # setup a 1-sample t-test node
-onesamplettest = pe.Node(interface=spm.OneSampleTTest(), name="onesamplettest")
+onesamplettestdes = pe.Node(interface=spm.OneSampleTTestDesign(), name="onesampttestdes")
+l2estimate = pe.Node(interface=spm.EstimateModel(), name="level2estimate")
+l2estimate.inputs.estimation_method = {'Classical' : 1}
+l2conestimate = pe.Node(interface = spm.EstimateContrast(), name="level2conestimate")
+cont1 = ('Group','T', ['mean'],[1])
+l2conestimate.inputs.contrasts = [cont1]
+l2conestimate.inputs.group_contrast = True
 
 
 """As before, we setup a pipeline to connect these two nodes (l2source
@@ -415,7 +421,12 @@ onesamplettest = pe.Node(interface=spm.OneSampleTTest(), name="onesamplettest")
 
 l2pipeline = pe.Workflow(name="level2")
 l2pipeline.base_dir = os.path.abspath('spm_tutorial2/l2output')
-l2pipeline.connect([(l2source,onesamplettest,[('outfiles','con_images')])])
+l2pipeline.connect([(l2source,onesamplettestdes,[('outfiles','in_files')]),
+                  (onesamplettestdes,l2estimate,[('spm_mat_file','spm_mat_file')]),
+                  (l2estimate,l2conestimate,[('spm_mat_file','spm_mat_file'),
+                                             ('beta_images','beta_images'),
+                                             ('residual_image','residual_image')]),
+                    ])
 
 """
 Execute the pipeline
