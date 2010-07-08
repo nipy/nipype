@@ -168,7 +168,7 @@ firstlevel.connect([(preproc, modelfit, [('highpass.out_file', 'modelspec.functi
 """
 
 # Specify the location of the FEEDS data. You can find it at http://www.fmrib.ox.ac.uk/fsl/feeds/doc/index.html
-feeds_data_dir = '/home/filo/data/feeds/data'
+feeds_data_dir = os.path.abspath('feeds_data')
 # Specify the subject directories
 # Map field names to individual subject runs.
 info = dict(func=[['fmri']],
