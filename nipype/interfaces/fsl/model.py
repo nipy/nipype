@@ -7,7 +7,7 @@ was written to work with FSL version 4.1.4.
     Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../emptydata'))
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../emptydata'))
     >>> os.chdir(datadir)
 """
 
