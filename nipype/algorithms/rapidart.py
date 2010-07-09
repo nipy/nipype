@@ -11,6 +11,11 @@ These functions include:
   * StimulusCorrelation: determines correlation between stimuli
     schedule and movement/intensity parameters
 
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../emptydata'))
+   >>> os.chdir(datadir)
 """
 
 import os
@@ -45,11 +50,14 @@ class ArtifactDetectInputSpec(TraitedSpec):
             "outliers.  Requires ``norm_threshold`` to be set.  (default is" \
             "True) ", usedefault=True)
     norm_threshold = traits.Float(desc="Threshold to use to detect motion-related outliers when" \
-            "composite motion is being used (see ``use_norm``)")
-    rotation_threshold = traits.Float(desc="Threshold (in radians) to use to detect rotation-related outliers")
-    translation_threshold = traits.Float(desc="Threshold (in mm) to use to detect translation-related outliers")
+            "composite motion is being used (see ``use_norm``)", mandatory=True,
+                                  xor=['rotation_threshold','translation_threshold'])
+    rotation_threshold = traits.Float(desc="Threshold (in radians) to use to detect rotation-related outliers",
+                                      mandatory=True, xor=['norm_threshold'])
+    translation_threshold = traits.Float(desc="Threshold (in mm) to use to detect translation-related outliers",
+                                      mandatory=True, xor=['norm_threshold'])
     zintensity_threshold = traits.Float(desc="Intensity Z-threshold use to detection images that deviate from the" \
-            "mean") 
+            "mean", mandatory=True) 
     mask_type = traits.Enum('spm_global', 'file', 'thresh', desc="Type of mask that should be used to mask the functional data." \
             "*spm_global* uses an spm_global like calculation to determine the" \
             "brain mask.  *file* specifies a brain mask file (should be an image" \
@@ -74,8 +82,24 @@ class ArtifactDetectOutputSpec(TraitedSpec):
     #                 desc='generated or provided mask file')
 
 class ArtifactDetect(BaseInterface):
-    """Detects outliers in a functional imaging series depending on the
-    intensity and motion parameters.  It also generates other statistics.
+    """Detects outliers in a functional imaging series
+
+    Uses intensity and motion parameters to infer outliers. If `use_norm` is
+    True, it computes the movement of the center of each face a cuboid centered
+    around the head and returns the maximal movement across the centers.
+
+    
+    Examples
+    --------
+
+    >>> ad = ArtifactDetect()
+    >>> ad.inputs.realigned_files = 'functional.nii'
+    >>> ad.inputs.realignment_parameters = 'functional.par'
+    >>> ad.inputs.parameter_source = 'FSL'
+    >>> ad.inputs.norm_threshold = 1
+    >>> ad.inputs.use_differences = [True, False]
+    >>> ad.inputs.zintensity_threshold = 3
+    >>> ad.run() # doctest: +SKIP
     """
     
     input_spec = ArtifactDetectInputSpec
@@ -204,11 +228,6 @@ class ArtifactDetect(BaseInterface):
     def _detect_outliers_core(self, imgfile, motionfile, runidx, cwd=None):
         """
         Core routine for detecting outliers
-        
-        Parameters
-        ----------
-        imgfile :
-        motionfile :
         """
         if not cwd:
             cwd = os.getcwd()
@@ -376,9 +395,13 @@ class StimulusCorrelation(BaseInterface):
     Examples
     --------
 
-    >>> from nipype.algorithms.rapidart import StimulusCorrelation
     >>> sc = StimulusCorrelation()
-    >>> sc.inputs
+    >>> sc.inputs.realignment_parameters = 'functional.par'
+    >>> sc.inputs.intensity_values = 'functional.rms'
+    >>> sc.inputs.spm_mat_file = 'SPM.mat'
+    >>> sc.inputs.concatenated_design = False
+    >>> sc.run() # doctest: +SKIP
+    
     """
 
     input_spec = StimCorrInputSpec
