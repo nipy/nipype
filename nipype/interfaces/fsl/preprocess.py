@@ -89,28 +89,28 @@ class BET(FSLCommand):
 
     >>> from nipype.interfaces import fsl
     >>> btr = fsl.BET()
-    >>> res = btr.run('in_file', 'out_file', frac=0.5) # doctest: +SKIP
+    >>> res = btr.run('in_file', 'out_file', frac=0.5) #doctest: +SKIP
 
     Assign options through the ``inputs`` attribute:
 
     >>> btr = fsl.BET()
-    >>> btr.inputs.in_file = 'foo.nii'
-    >>> btr.inputs.out_file = 'bar.nii'
+    >>> btr.inputs.in_file = 'structural.nii'
+    >>> btr.inputs.out_file = 'structural_brain.nii'
     >>> btr.inputs.frac = 0.7
     >>> res = btr.run() # doctest: +SKIP
 
     Specify options when creating a BET instance:
 
-    >>> btr = fsl.BET(in_file='in_file', out_file='out_file', frac=0.5)
+    >>> btr = fsl.BET(in_file='structural.nii', out_file='structural_brain.nii', frac=0.5)
     >>> res = btr.run() # doctest: +SKIP
 
     Loop over many inputs (Note: the snippet below would overwrite the
     out_file each time):
 
-    >>> btr = fsl.BET(in_file='in_file', out_file='out_file')
+    >>> btr = fsl.BET(in_file='structural.nii', out_file='structural_brain.nii')
     >>> fracvals = [0.3, 0.4, 0.5]
-    >>> for val in fracvals:
-    ...     res = btr.run(frac=val) # doctest: +SKIP
+    >>> for val in fracvals: #doctest: +SKIP
+    ...     res = btr.run(frac=val) #doctest: +SKIP
 
     """
 
@@ -403,11 +403,11 @@ class FLIRT(FSLCommand):
     --------
     >>> from nipype.interfaces import fsl
     >>> flt = fsl.FLIRT(bins=640, cost_func='mutualinfo')
-    >>> flt.inputs.in_file = 'subject.nii'
-    >>> flt.inputs.reference = 'template.nii'
+    >>> flt.inputs.in_file = 'structural.nii'
+    >>> flt.inputs.reference = 'mni.nii'
     >>> flt.inputs.out_file = 'moved_subject.nii'
-    >>> flt.inputs.out_matrix = 'subject_to_template.mat'
-    >>> res = flt.run()
+    >>> flt.inputs.out_matrix_file = 'subject_to_template.mat'
+    >>> res = flt.run() #doctest: +SKIP
 
     """
     _cmd = 'flirt'
@@ -449,10 +449,10 @@ class ApplyXfm(FLIRT):
 
     >>> import nipype.interfaces.fsl as fsl
     >>> applyxfm = fsl.ApplyXfm()
-    >>> applyxfm.inputs.in_file = 'moving.nii'
-    >>> applyxfm.inputs.in_matrix_file = 'transform.mat'
+    >>> applyxfm.inputs.in_file = 'structural.nii'
+    >>> applyxfm.inputs.in_matrix_file = 'trans.mat'
     >>> applyxfm.inputs.out_file = 'newfile.nii'
-    >>> applyxfm.inputs.reference = 'template.nii'
+    >>> applyxfm.inputs.reference = 'mni.nii'
     >>> applyxfm.inputs.apply_xfm = True
     >>> result = applyxfm.run() # doctest: +SKIP
 
