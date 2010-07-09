@@ -294,6 +294,8 @@ class InterfaceHelpWriter(object):
             if hasattr(classinst, 'inputs'):
                 iterator = classinst.inputs.items
             else:
+                if helpstr:
+                    ad += '\n' + helpstr + '\n'
                 continue
             mandhelpstr = None # mandatory inputs
             opthelpstr = None  # optional inputs
