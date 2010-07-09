@@ -10,6 +10,12 @@
     To come :
     XNATSink
 
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../emptydata'))
+    >>> os.chdir(datadir)
+
 """
 from copy import deepcopy
 import glob
@@ -84,9 +90,31 @@ class DataSinkInputSpec(DynamicTraitedSpec):
             super(DataSinkInputSpec, self).__setattr__(key, value)
     
 class DataSink(IOBase):
-    """ Generic datasink module that takes a directory containing a
-        list of nifti files and provides a set of structured output
-        fields.
+    """ Generic datasink module to store structured outputs
+
+        Primarily for use within a workflow. This interface all arbitrary
+        creation of input attributes. The names of these attributes define the
+        directory structure to create for storage of the files or directories.
+
+        The attributes take the following form:
+        string[[@|.]string[[@|.]string]] ...
+
+        An attribute such as contrasts@con will create a contrasts directory to
+        store the results linked to the attribute. If the @ is replaced with a
+        '.', such as 'contrasts.con' a subdirectory 'con' will be created under
+        contrasts.  
+
+        Examples
+        --------
+
+        >>> ds = DataSink()
+        >>> ds.inputs.base_directory = 'results_dir'
+        >>> ds.inputs.container = 'subject'
+        >>> ds.inputs.structural = 'structural.nii'
+        >>> setattr(ds.inputs, 'contrasts@con', ['cont1.nii', 'cont2.nii'])
+        >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
+        >>> ds.run() # doctest: +SKIP
+        
     """
     input_spec = DataSinkInputSpec
 
@@ -187,8 +215,8 @@ class DataGrabber(IOBase):
 
         Pick file foo/foo.nii from current directory
         
-        >>> dg.inputs.template = '%s/%s.nii'
-        >>> dg.inputs.template_args['outfiles']=[['foo','foo']]
+        >>> dg.inputs.template = '%s/%s.dcm'
+        >>> dg.inputs.template_args['outfiles']=[['dicomdir','123456-1-1.dcm']]
 
         Same thing but with dynamically created fields
         
@@ -203,7 +231,7 @@ class DataGrabber(IOBase):
         Dynamically created, user-defined input and output fields
         
         >>> dg = DataGrabber(infields=['sid'], outfields=['func','struct','ref'])
-        >>> dg.inputs.base_directory = 'nipype-tutorial/data/'
+        >>> dg.inputs.base_directory = '.'
         >>> dg.inputs.template = '%s/%s.nii'
         >>> dg.inputs.template_args['func'] = [['sid',['f3','f5']]]
         >>> dg.inputs.template_args['struct'] = [['sid',['struct']]]
@@ -381,12 +409,12 @@ class FreeSurferSource(IOBase):
 
     >>> from nipype.interfaces.io import FreeSurferSource
     >>> fs = FreeSurferSource()
-    >>> #fs.inputs.subjects_dir = '/software/data/STUT/FSDATA/'
+    >>> #fs.inputs.subjects_dir = '.'
     >>> fs.inputs.subject_id = 'PWS04'
-    >>> res = fs.run()
+    >>> res = fs.run() # doctest: +SKIP
 
     >>> fs.inputs.hemi = 'lh'
-    >>> res = fs.run()
+    >>> res = fs.run() # doctest: +SKIP
 
     """
     input_spec = FSSourceInputSpec
@@ -447,13 +475,6 @@ class XNATSource(IOBase):
         
         >>> dg = XNATSource()
         >>> dg.inputs.template = '*'
-
-        Pick file foo/foo.nii from current directory
-        
-        >>> dg.inputs.template = '%s/%s.nii'
-        >>> dg.inputs.template_args['outfiles']=[['foo','foo']]
-
-        Same thing but with dynamically created fields
         
         >>> dg = XNATSource(infields=['project','subject','experiment','assessor','inout'])
         >>> dg.inputs.query_template = '/projects/%s/subjects/%s/experiments/%s' \
@@ -463,7 +484,6 @@ class XNATSource(IOBase):
         >>> dg.inputs.experiment = '*SessionA*'
         >>> dg.inputs.assessor = '*ADNI_MPRAGE_nii'
         >>> dg.inputs.inout = 'out'
-
         
         >>> dg = XNATSource(infields=['sid'],outfields=['struct','func'])
         >>> dg.inputs.query_template = '/projects/IMAGEN/subjects/%s/experiments/*SessionA*' \
