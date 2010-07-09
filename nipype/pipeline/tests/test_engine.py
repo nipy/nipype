@@ -11,7 +11,7 @@ from nose import with_setup
 import networkx as nx
 
 from nipype.testing import (assert_raises, assert_equal, assert_true,
-                            assert_false, skipif)
+                            assert_false, skipif, parametric)
 import nipype.interfaces.base as nib
 from nipype.utils.filemanip import cleandir
 import nipype.pipeline.engine as pe
@@ -26,9 +26,11 @@ class OutputSpec(nib.TraitedSpec):
 class TestInterface(nib.BaseInterface):
     input_spec = InputSpec
     output_spec = OutputSpec
+
     def _run_interface(self, runtime):
         runtime.returncode = 0
         return runtime
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['output1'] = [1, self.inputs.input1]
@@ -44,31 +46,35 @@ def teardown_pipe():
     os.chdir(working_dir)
     rmtree(temp_dir)
 
+@parametric
 def test_init():
-    yield assert_raises, Exception, pe.Workflow
+    yield assert_raises(Exception, pe.Workflow)
     pipe = pe.Workflow(name='pipe')
-    yield assert_equal, type(pipe._graph), nx.DiGraph
-    yield assert_equal, pipe._execgraph, None
+    yield assert_equal(type(pipe._graph), nx.DiGraph)
+    yield assert_equal(pipe._execgraph, None)
 
+@parametric
 def test_connect():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
     mod2 = pe.Node(interface=TestInterface(),name='mod2')
     pipe.connect([(mod1,mod2,[('output1','input1')])])
 
-    yield assert_true, mod1 in pipe._graph.nodes()
-    yield assert_true, mod2 in pipe._graph.nodes()
-    yield assert_equal, pipe._graph.get_edge_data(mod1,mod2), {'connect':[('output1','input1')]} 
+    yield assert_true(mod1 in pipe._graph.nodes())
+    yield assert_true(mod2 in pipe._graph.nodes())
+    yield assert_equal(pipe._graph.get_edge_data(mod1,mod2), {'connect':[('output1','input1')]})
 
+@parametric
 def test_add_nodes():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
     mod2 = pe.Node(interface=TestInterface(),name='mod2')
     pipe.add_nodes([mod1,mod2])
 
-    yield assert_true, mod1 in pipe._graph.nodes()
-    yield assert_true, mod2 in pipe._graph.nodes()
+    yield assert_true(mod1 in pipe._graph.nodes())
+    yield assert_true(mod2 in pipe._graph.nodes())
 
+@parametric
 def test_generate_dependency_list():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
@@ -77,12 +83,13 @@ def test_generate_dependency_list():
     pipe._create_flat_graph()
     pipe._execgraph = pe._generate_expanded_graph(deepcopy(pipe._flatgraph))
     pipe._generate_dependency_list()
-    yield assert_false, pipe._execgraph == None
-    yield assert_equal, len(pipe.procs), 2
-    yield assert_false, pipe.proc_done[1]
-    yield assert_false, pipe.proc_pending[1]
-    yield assert_equal, pipe.depidx[0,1], 1
+    yield assert_false(pipe._execgraph == None)
+    yield assert_equal(len(pipe.procs), 2)
+    yield assert_false(pipe.proc_done[1])
+    yield assert_false(pipe.proc_pending[1])
+    yield assert_equal(pipe.depidx[0,1], 1)
 
+@parametric
 @with_setup(setup_pipe, teardown_pipe)
 def test_run_in_series():
     pipe = pe.Workflow(name='pipe')
@@ -104,15 +111,17 @@ def test_run_in_series():
 # XXX - SG I'll create a graphical version of these tests and actually
 # ensure that all connections are tested later
 
+@parametric
 def test1():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
     pipe.add_nodes([mod1])
     pipe._create_flat_graph()
     pipe._execgraph = pe._generate_expanded_graph(deepcopy(pipe._flatgraph))
-    yield assert_equal, len(pipe._execgraph.nodes()), 1
-    yield assert_equal, len(pipe._execgraph.edges()), 0
+    yield assert_equal(len(pipe._execgraph.nodes()), 1)
+    yield assert_equal(len(pipe._execgraph.edges()), 0)
 
+@parametric
 def test2():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
@@ -120,9 +129,10 @@ def test2():
     pipe.add_nodes([mod1])
     pipe._create_flat_graph()
     pipe._execgraph = pe._generate_expanded_graph(deepcopy(pipe._flatgraph))
-    yield assert_equal, len(pipe._execgraph.nodes()), 4
-    yield assert_equal, len(pipe._execgraph.edges()), 0
+    yield assert_equal(len(pipe._execgraph.nodes()), 4)
+    yield assert_equal(len(pipe._execgraph.edges()), 0)
     
+@parametric
 def test3():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
@@ -132,9 +142,10 @@ def test3():
     pipe.connect([(mod1,mod2,[('output1','input2')])])
     pipe._create_flat_graph()
     pipe._execgraph = pe._generate_expanded_graph(deepcopy(pipe._flatgraph))
-    yield assert_equal, len(pipe._execgraph.nodes()), 3
-    yield assert_equal, len(pipe._execgraph.edges()), 2
+    yield assert_equal(len(pipe._execgraph.nodes()), 3)
+    yield assert_equal(len(pipe._execgraph.edges()), 2)
     
+@parametric
 def test4():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
@@ -145,9 +156,10 @@ def test4():
     pipe.connect([(mod1,mod2,[('output1','input2')])])
     pipe._create_flat_graph()
     pipe._execgraph = pe._generate_expanded_graph(deepcopy(pipe._flatgraph))
-    yield assert_equal, len(pipe._execgraph.nodes()), 4
-    yield assert_equal, len(pipe._execgraph.edges()), 2
+    yield assert_equal(len(pipe._execgraph.nodes()), 4)
+    yield assert_equal(len(pipe._execgraph.edges()), 2)
 
+@parametric
 def test5():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
@@ -157,9 +169,10 @@ def test5():
     pipe.connect([(mod1,mod2,[('output1','input2')])])
     pipe._create_flat_graph()
     pipe._execgraph = pe._generate_expanded_graph(deepcopy(pipe._flatgraph))
-    yield assert_equal, len(pipe._execgraph.nodes()), 6
-    yield assert_equal, len(pipe._execgraph.edges()), 4
+    yield assert_equal(len(pipe._execgraph.nodes()), 6)
+    yield assert_equal(len(pipe._execgraph.edges()), 4)
 
+@parametric
 def test6():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
@@ -172,9 +185,10 @@ def test6():
                   (mod2,mod3,[('output1','input2')])])
     pipe._create_flat_graph()
     pipe._execgraph = pe._generate_expanded_graph(deepcopy(pipe._flatgraph))
-    yield assert_equal, len(pipe._execgraph.nodes()), 5
-    yield assert_equal, len(pipe._execgraph.edges()), 4
+    yield assert_equal(len(pipe._execgraph.nodes()), 5)
+    yield assert_equal(len(pipe._execgraph.edges()), 4)
 
+@parametric
 def test7():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
@@ -187,9 +201,10 @@ def test7():
                   (mod2,mod3,[('output1','input2')])])
     pipe._create_flat_graph()
     pipe._execgraph = pe._generate_expanded_graph(deepcopy(pipe._flatgraph))
-    yield assert_equal, len(pipe._execgraph.nodes()), 5
-    yield assert_equal, len(pipe._execgraph.edges()), 4
+    yield assert_equal(len(pipe._execgraph.nodes()), 5)
+    yield assert_equal(len(pipe._execgraph.edges()), 4)
 
+@parametric
 def test8():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
@@ -202,11 +217,9 @@ def test8():
                   (mod2,mod3,[('output1','input2')])])
     pipe._create_flat_graph()
     pipe._execgraph = pe._generate_expanded_graph(deepcopy(pipe._flatgraph))
-    yield assert_equal, len(pipe._execgraph.nodes()), 8
-    yield assert_equal, len(pipe._execgraph.edges()), 8
+    yield assert_equal(len(pipe._execgraph.nodes()), 8)
+    yield assert_equal(len(pipe._execgraph.edges()), 8)
     edgenum = sorted([(len(pipe._execgraph.in_edges(node)) + \
                            len(pipe._execgraph.out_edges(node))) \
                           for node in pipe._execgraph.nodes()])
-    yield assert_true, edgenum[0]>0
-    
-    
+    yield assert_true(edgenum[0]>0)
