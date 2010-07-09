@@ -42,7 +42,6 @@ def test_cmdline():
  
     yield assert_equal, mi.inputs.script, 'whos'
     yield assert_equal, mi.inputs.script_file, 'testscript'
-    yield assert_equal, mi.inputs.environ, {}
     path_exists = os.path.exists(os.path.join(basedir,'testscript.m'))
     yield assert_false, path_exists
     rmtree(basedir)
@@ -71,7 +70,8 @@ def test_run_interface():
     mc = mlab.MatlabCommand(matlab_cmd='foo_m')
     yield assert_raises, ValueError, mc.run # script is mandatory
     mc.inputs.script = 'a=1;'
-    yield assert_raises, IOError, mc.run # foo_m is not an executable
+    res = mc.run
+    yield assert_true, res.runtime.returncode != 0 # foo_m is not an executable
     cwd = os.getcwd()
     basedir = mkdtemp()
     os.chdir(basedir)
