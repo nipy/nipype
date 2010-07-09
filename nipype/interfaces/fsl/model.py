@@ -4,10 +4,11 @@
 <http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.  This
 was written to work with FSL version 4.1.4.
 
-Examples
---------
-See the docstrings of the individual classes for examples.
-
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../emptydata'))
+    >>> os.chdir(datadir)
 """
 
 import os
@@ -71,13 +72,6 @@ class Level1DesignInputSpec(TraitedSpec):
     session list is None or not provided, all sessions are used. For F
     contrasts, the condition list should contain previously defined
     T-contrasts.""")
-    register = traits.Bool(False, requires=['reg_dof'], usedefault=True,
-        desc='Run registration at the end of session specific analysis.')
-    reg_image = File(exists=True,
-                     desc='image volume to register to')
-    # MNI152_T1_2mm_brain.nii.gz
-    reg_dof = traits.Enum(3,6,9,12, requires=['reg_image'],
-                          desc='registration degrees of freedom')
 
 class Level1DesignOutputSpec(TraitedSpec):
     fsf_files = OutputMultiPath(File(exists=True),
@@ -243,17 +237,6 @@ class Level1Design(BaseInterface):
             else:
                 print "unknown contrast type: %s" % str(c)
 
-        if isdefined(self.inputs.register):
-            register = int(self.inputs.register)
-            reg_image = ''
-            reg_dof = 0
-            if register:
-                reg_image = self.inputs.reg_image
-                if not isdefined(reg_image):
-                    reg_image = \
-                        Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
-                reg_dof = self.inputs.reg_dof
-
         for i, info in enumerate(session_info):
             num_evs, cond_txt = self._create_ev_files(cwd, info, i, usetd,
                                                       self.inputs.contrasts)
@@ -268,10 +251,7 @@ class Level1Design(BaseInterface):
                                             num_tcon=n_tcon,
                                             num_fcon=n_fcon,
                                             high_pass_filter_cutoff=info['hpf'],
-                                            func_file=func_files[i],
-                                            register=register,
-                                            reg_image=reg_image,
-                                            reg_dof=reg_dof)
+                                            func_file=func_files[i])
             fsf_txt += cond_txt
             fsf_txt += fsf_postscript.substitute(overwrite=1)
 
