@@ -115,8 +115,7 @@ class Smooth(FSLCommand):
         if name == 'fwhm':
             # ohinds: convert fwhm to stddev
             return super(Smooth, self)._format_arg(name, trait_spec, float(value) / np.sqrt(8 * np.log(2)))
-        else:
-            return super(Smooth, self)._format_arg(name, trait_spec, value)
+        return super(Smooth, self)._format_arg(name, trait_spec, value)
 
 class MergeInputSpec(FSLCommandInputSpec):
     in_files = traits.List(File(exists=True), argstr="%s", position=2, mandatory=True)
@@ -354,7 +353,10 @@ class ImageStatsInputSpec(FSLCommandInputSpec):
                            desc='give a separate output line for each 3D volume of a 4D timeseries')
     in_file = File(exists=True, argstr="%s", mandatory=True, position=2)
     op_string = traits.Str(argstr="%s", mandatory=True, position=3,
-                           desc="string defining the operation, options are applied in order, e.g. -M -l 10 -M will report the non-zero mean, apply a threshold and then report the new nonzero mean")
+                           desc="string defining the operation, options are" \
+    "applied in order, e.g. -M -l 10 -M will report the non-zero mean, apply a" \
+    "threshold and then report the new nonzero mean")
+    mask_file = File(exists=True, argstr="")
 
 class ImageStatsOutputSpec(TraitedSpec):
     out_stat = traits.Any(desc='stats output')
@@ -379,6 +381,17 @@ class ImageStats(FSLCommand):
 
     _cmd = 'fslstats'
 
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'mask_file':
+            return ''
+        if name == 'op_string':
+            if '-k %s' in self.inputs.op_string:
+                if isdefined(self.inputs.mask_file):
+                    return self.inputs.op_string%self.inputs.mask_file
+                else:
+                    raise ValueError('-k %s option in op_string requires mask_file')
+        return super(ImageStats, self)._format_arg(name, trait_spec, value)
+    
     def aggregate_outputs(self, runtime=None):
         outputs = self._outputs()
         outfile = os.path.join(os.getcwd(), 'stat_result.json')
