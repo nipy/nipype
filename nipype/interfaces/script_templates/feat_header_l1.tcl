@@ -241,10 +241,10 @@ set fmri(reghighres_search) 90
 set fmri(reghighres_dof) 6
 
 # Registration to standard image?
-set fmri(regstandard_yn) $register
+set fmri(regstandard_yn) 0
 
 # Standard image
-set fmri(regstandard) "${reg_image}"
+set fmri(regstandard) "MNI152"
 
 # Search space for registration to standard space
 # 0   : No search
@@ -253,7 +253,7 @@ set fmri(regstandard) "${reg_image}"
 set fmri(regstandard_search) 90
 
 # Degrees of Freedom for registration to standard space
-set fmri(regstandard_dof) ${reg_dof}
+set fmri(regstandard_dof) 0
 
 # Do nonlinear registration from structural to standard space?
 set fmri(regstandard_nonlinear_yn) 0
