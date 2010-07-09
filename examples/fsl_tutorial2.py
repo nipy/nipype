@@ -371,6 +371,14 @@ modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
                       iterfield = ['fsf_file'])
 
 """
+Set the model generation to run everytime. Since the fsf file, which is the
+input to modelgen only references the ev files, modelgen will not run if the ev
+file contents are changed but the fsf file is untouched.
+"""
+
+modelgen.overwrite = True
+
+"""
 Use :class:`nipype.interfaces.fsl.FILMGLS` to estimate a model specified by a
 mat file and a functional run
 """
