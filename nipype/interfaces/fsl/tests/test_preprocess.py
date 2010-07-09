@@ -36,40 +36,41 @@ def teardown_infile(tmp_dir):
 # test BET
 #@with_setup(setup_infile, teardown_infile)
 #broken in nose with generators
+@parametric
 def test_bet():
     tmp_infile, tp_dir = setup_infile()
     better = fsl.BET()
-    yield assert_equal, better.cmd, 'bet'
+    yield assert_equal(better.cmd, 'bet')
 
     # Test raising error with mandatory args absent
-    yield assert_raises, ValueError, better.run
+    yield assert_raises(ValueError, better.run)
 
     # Test generated outfile name
     better.inputs.in_file = tmp_infile
     outfile = fsl_name(better, 'foo_brain')
     outpath = os.path.join(os.getcwd(), outfile)
     realcmd = 'bet %s %s' % (tmp_infile, outpath)
-    yield assert_equal, better.cmdline, realcmd
+    yield assert_equal(better.cmdline, realcmd)
     # Test specified outfile name
     outfile = fsl_name(better, '/newdata/bar')
     better.inputs.out_file = outfile
     realcmd = 'bet %s %s' % (tmp_infile, outfile)
-    yield assert_equal, better.cmdline, realcmd
+    yield assert_equal(better.cmdline, realcmd)
 
     # infile foo.nii doesn't exist
     def func():
-        better.run(in_file='foo.nii', out_file='bar.nii')
-    yield assert_raises, TraitError, func
+        better.run(in_file='foo2.nii', out_file='bar.nii')
+    yield assert_raises(TraitError, func)
 
     # .run() based parameter setting
     better = fsl.BET()
     better.inputs.frac = 0.40
     outfile = fsl_name(better, 'outfile')
     betted = better.run(in_file=tmp_infile, out_file=outfile)
-    yield assert_equal, betted.interface.inputs.in_file, tmp_infile
-    yield assert_equal, betted.interface.inputs.out_file, outfile
+    yield assert_equal(betted.interface.inputs.in_file, tmp_infile)
+    yield assert_equal(betted.interface.inputs.out_file, outfile)
     realcmd = 'bet %s %s -f 0.40' % (tmp_infile, outfile)
-    yield assert_equal, betted.runtime.cmdline, realcmd
+    yield assert_equal(betted.runtime.cmdline, realcmd)
 
     # Our options and some test values for them
     # Should parallel the opt_map structure in the class for clarity
@@ -98,7 +99,7 @@ def test_bet():
         # Add mandatory input
         better.inputs.in_file = tmp_infile
         realcmd =  ' '.join([better.cmd, tmp_infile, outpath, settings[0]])
-        yield assert_equal, better.cmdline, realcmd
+        yield assert_equal(better.cmdline, realcmd)
     teardown_infile(tmp_dir)
     
 # test fast
