@@ -64,21 +64,21 @@ def test_mlab_init():
     yield assert_equal(mlab.MatlabCommand().cmd, mlab.MatlabCommand._cmd)
     mc = mlab.MatlabCommand(matlab_cmd='foo_m')
     yield assert_equal(mc.cmd, 'foo_m')
-    
+
+@parametric
 @skipif(no_matlab)
 def test_run_interface():
     mc = mlab.MatlabCommand(matlab_cmd='foo_m')
-    yield assert_raises, ValueError, mc.run # script is mandatory
+    yield assert_raises(ValueError, mc.run) # script is mandatory
     mc.inputs.script = 'a=1;'
-    res = mc.run
-    yield assert_true, res.runtime.returncode != 0 # foo_m is not an executable
+    yield assert_raises(IOError, mc.run) # foo_m is not an executable
     cwd = os.getcwd()
     basedir = mkdtemp()
     os.chdir(basedir)
     res = mlab.MatlabCommand(script='foo', paths=[basedir], mfile=True).run() # bypasses ubuntu dash issue
-    yield assert_equal, res.runtime.returncode, 1
+    yield assert_equal(res.runtime.returncode, 1)
     res = mlab.MatlabCommand(script='a=1;', paths=[basedir], mfile=True).run() # bypasses ubuntu dash issue
-    yield assert_equal, res.runtime.returncode, 0
+    yield assert_equal(res.runtime.returncode, 0)
     os.chdir(cwd)
     rmtree(basedir)
     
