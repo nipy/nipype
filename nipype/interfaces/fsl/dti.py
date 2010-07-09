@@ -359,7 +359,7 @@ class TBSS4Prestats(FSLCommand):
         Use FSL TBSS4Prestats thresholds the mean FA skeleton image at the chosen threshold
         Example:
         >>> from nipype.interfaces import fsl
-        >>> tbss4 = fsl.TBSS4Prestats(threshold=0.3)
+        >>> tbss4 = fsl.TBSS4Prestats(threshold=0.3, tbss_dir="tbss_dir")
         >>> tbss4.cmdline
         'tbss_4_prestats 0.3'
     """
@@ -603,12 +603,12 @@ class VecReg(FSLCommand):
     <http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_vecreg.html>`_
     Example:
     >>> from nipype.interfaces import fsl
-    >>> vreg = fsl.VecReg(in_file='dyads1.nii.gz',
-                 affine_mat='diff2standard.mat',
-                 ref_vol='/usr/share/fsl/data/standard/MNI152_T1_2mm.nii.gz')
-    >>> print vreg.cmdline
-    'vecreg -t diff2standard.mat -i dyads1.nii.gz -o dyads1_vreg.nii.gz
-    -r /usr/share/fsl/data/standard/MNI152_T1_2mm.nii.gz'
+    >>> vreg = fsl.VecReg(in_file='diffusion.nii', \
+                 affine_mat='trans.mat', \
+                 ref_vol='mni.nii', \
+                 out_file='diffusion_vreg.nii')
+    >>> vreg.cmdline
+    'vecreg -t trans.mat -i diffusion.nii -o diffusion_vreg.nii -r mni.nii'
     """
     _cmd = 'vecreg'
     input_spec = VecRegInputSpec
