@@ -1,6 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Provides python interfaces to various commands provided by freeusrfer
+"""Provides interfaces to various commands provided by freeusrfer
 
 """
 __docformat__ = 'restructuredtext'
@@ -308,17 +308,19 @@ class MRIConvertOutputSpec(TraitedSpec):
 class MRIConvert(FSCommand):
     """use fs mri_convert to manipulate files
 
-    adds niigz as an output type option
+    .. note::
+       Adds niigz as an output type option
 
     Examples
     --------
 
-    >>> from nipype.interfaces.freesurfer import MRIConvert
+    >>> os.chdir( os.path.dirname( os.path.realpath( __file__ ) ) )
     >>> mc = MRIConvert()
-    >>> mc.inputs.in_file = 'anatomical.nii'
+    >>> mc.inputs.in_file = '../../emptydata/structural.nii'
+    >>> mc.inputs.out_file = 'outfile.mgz'
     >>> mc.inputs.out_type = 'mgz'
     >>> mc.cmdline
-    'mri_convert --out_type mgz --input_volume struct.nii --output_volume struct_out.mgz'
+    'mri_convert --out_type mgz --input_volume ../../emptydata/structural.nii --output_volume outfile.mgz'
     
     """
     _cmd = 'mri_convert'
@@ -402,9 +404,11 @@ class DICOMConvert(FSCommand):
 
     Examples
     --------
+
+    >>> os.chdir( os.path.dirname( os.path.realpath( __file__ ) ) )
     >>> from nipype.interfaces.freesurfer import DICOMConvert
     >>> cvt = DICOMConvert()
-    >>> cvt.inputs.dicom_dir = '/incoming/TrioTim-35115-2009-1900-123456/'
+    >>> cvt.inputs.dicom_dir = '../../emptydata/dicomdir'
     >>> cvt.inputs.file_mapping = [('nifti','*.nii'),('info','dicom*.txt'),('dti','*dti.bv*')]
 
     """
@@ -496,8 +500,9 @@ class DICOMConvert(FSCommand):
 
 class ResampleInputSpec(FSTraitedSpec):
     in_file = File(exists=True, argstr='-i %s', mandatory=True,
-                  desc='file to resample')
-    resampled_file = File(argstr='-o %s', desc='output filename', genfile=True)
+                  desc='file to resample', position=-2)
+    resampled_file = File(argstr='-o %s', desc='output filename', genfile=True,
+                          position=-1)
     voxel_size = traits.Tuple(traits.Float, traits.Float, traits.Float,
                        argstr='-vs %.2f %.2f %.2f', desc='triplet of output voxel sizes',
                               mandatory=True)
@@ -511,14 +516,17 @@ class Resample(FSCommand):
 
     Examples
     --------
+    
+    >>> os.chdir( os.path.dirname( os.path.realpath( __file__ ) ) )
     >>> from nipype.interfaces import freesurfer
     >>> resampler = freesurfer.Resample()
-    >>> resampler.inputs.in_file = 'infile.nii'
+    >>> resampler.inputs.in_file = '../../emptydata/structural.nii'
+    >>> resampler.inputs.resampled_file = 'resampled.nii'
     >>> resampler.inputs.voxel_size = (2.1, 2.1, 2.1)
     >>> resampler.cmdline
-    'mri_convert -i infile.nii -vs 2.10 2.10 2.10 -o infile_resample.nii'
+    'mri_convert -vs 2.10 2.10 2.10 -i ../../emptydata/structural.nii -o resampled.nii'
     
-   """
+    """
 
     _cmd = 'mri_convert'
     input_spec = ResampleInputSpec
@@ -552,27 +560,30 @@ class ReconAllInputSpec(FSTraitedSpec):
                             'autorecon3', argstr='-%s', desc='process directive',
                             mandatory=True)
     hemi = traits.Enum('lh', 'rh', desc='hemisphere to process')
-    T1_files = InputMultiPath(argstr='--i %s...', desc='name of T1 file to process')
+    T1_files = InputMultiPath(File(exists=True), argstr='-i %s...',
+                              desc='name of T1 file to process')
     subjects_dir = Directory(exists=True, argstr='-sd %s',
                              desc='path to subjects directory')
     flags = traits.Str(argstr='%s', desc='additional parameters')
 
 class ReconAll(FSCommand):
-    """Use FreeSurfer recon-all to generate surfaces and parcellations of
-    structural data from an anatomical image of a subject.
+    """Uses recon-all to generate surfaces and parcellations of structural data
+    from anatomical images of a subject. 
 
     Examples
     --------
-    >>> from nipype.interfaces import freesurfer
-    >>> reconall = freesurfer.ReconAll()
+    
+    >>> os.chdir( os.path.dirname( os.path.realpath( __file__ ) ) )
+    >>> from nipype.interfaces.freesurfer import ReconAll
+    >>> reconall = ReconAll()
     >>> reconall.inputs.subject_id = 'foo'
     >>> reconall.inputs.directive = 'all'
     >>> reconall.inputs.subjects_dir = '.'
-    >>> reconall.inputs.T1_files = 'structfile.nii'
+    >>> reconall.inputs.T1_files = '../../emptydata/structural.nii'
     >>> reconall.cmdline
-    'recon-all --i structfile.nii --all -subjid foo -sd .'
+    'recon-all -i ../../emptydata/structural.nii -all -subjid foo -sd .'
     
-   """
+    """
 
     _cmd = 'recon-all'
     input_spec = ReconAllInputSpec
@@ -613,16 +624,18 @@ class BBRegister(FSCommand):
     This program performs within-subject, cross-modal registration using a
     boundary-based cost function. The registration is constrained to be 6
     DOF (rigid). It is required that you have an anatomical scan of the
-    subject that has been analyzed in freesurfer.
+    subject that has already been recon-all-ed using freesurfer.
 
     Examples
     --------
+    
+    >>> os.chdir( os.path.dirname( os.path.realpath( __file__ ) ) )
     >>> from nipype.interfaces.freesurfer import BBRegister
-    >>> bbreg = BBRegister(subject_id='me', source_file='foo.nii', init_header=True, t2_contrast=True)
+    >>> bbreg = BBRegister(subject_id='me', source_file='../../emptydata/structural.nii', init='header', contrast_type='t2')
     >>> bbreg.cmdline
-    'bbregister --init-header --mov foo.nii --s me --t2 --reg foo_bbreg_me.dat'
+    'bbregister --t2 --init-header --reg ../../emptydata/structural_bbreg_me.dat --mov ../../emptydata/structural.nii --s me'
 
-   """
+    """
 
     _cmd = 'bbregister'
     input_spec = BBRegisterInputSpec
@@ -699,13 +712,16 @@ class ApplyVolTransform(FSCommand):
 
     Examples
     --------
+    
+    >>> os.chdir( os.path.dirname( os.path.realpath( __file__ ) ) )
     >>> from nipype.interfaces.freesurfer import ApplyVolTransform
     >>> applyreg = ApplyVolTransform()
-    >>> applyreg.inputs.source_file = 'struct.nii'
-    >>> applyreg.inputs.reg_file = 'register.dat'
+    >>> applyreg.inputs.source_file = '../../emptydata/structural.nii'
+    >>> applyreg.inputs.reg_file = '../../emptydata/register.dat'
+    >>> applyreg.inputs.transformed_file = 'struct_warped.nii'
     >>> applyreg.inputs.fs_target = True
     >>> applyreg.cmdline
-    'mri_vol2vol --fstarg --o struct_warped.nii --reg register.dat --mov struct.nii'
+    'mri_vol2vol --fstarg --reg ../../emptydata/register.dat --mov ../../emptydata/structural.nii --o struct_warped.nii'
 
     """
 
@@ -767,15 +783,23 @@ class SmoothOutputSpec(FSTraitedSpec):
 class Smooth(FSCommand):
     """Use FreeSurfer mris_volsmooth to smooth a volume
 
-    This function smoothes cortical regions on a surface and
-    non-cortical regions in volume.
+    This function smoothes cortical regions on a surface and non-cortical
+    regions in volume.
+
+    .. note::
+       Cortical voxels are mapped to the surface (3D->2D) and then the
+       smoothed values from the surface are put back into the volume to fill
+       the cortical ribbon. If data is smoothed with this algorithm, one has to
+       be careful about how further processing is interpreted.
 
     Examples
     --------
+
+    >>> os.chdir( os.path.dirname( os.path.realpath( __file__ ) ) )
     >>> from nipype.interfaces.freesurfer import Smooth
-    >>> smoothvol = Smooth(in_file='foo.nii', smoothed_file = 'foo_out.nii', reg_file='reg.dat', surface_fwhm=10, vol_fwhm=6)
+    >>> smoothvol = Smooth(in_file='../../emptydata/functional.nii', smoothed_file = 'foo_out.nii', reg_file='../../emptydata/register.dat', surface_fwhm=10, vol_fwhm=6)
     >>> smoothvol.cmdline
-    'mris_volsmooth --o foo_out.nii --reg reg.dat --i foo.nii --fwhm 10 --vol-fwhm 6'
+    'mris_volsmooth --i ../../emptydata/functional.nii --reg ../../emptydata/register.dat --o foo_out.nii --fwhm 10 --vol-fwhm 6'
     
     """
 
@@ -796,4 +820,15 @@ class Smooth(FSCommand):
         if name == 'smoothed_file':
             return self._list_outputs()[name]
         return None
+
+
+"""
+interfaces to do:
+
+mri_vol2surf
+mri_surf2vol
+mri_surf2surf
+mri_robust_register
+mri_ms_fitparams
+"""
 
