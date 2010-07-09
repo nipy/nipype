@@ -95,6 +95,7 @@ class WorkflowBase(object):
         """
         self.base_dir = base_dir
         self.overwrite = overwrite
+        self.config = {}
         if name is None:
             raise Exception("init requires a name for this %s" % self.__class__.__name__)
         if '.' in name:
@@ -115,6 +116,10 @@ class WorkflowBase(object):
     def clone(self, name):
         if name is None:
             raise Exception('Cloning requires a new name')
+        if hasattr(self, '_flatgraph'):
+            self._flatgraph = None
+        if hasattr(self, '_execgraph'):
+            self._execgraph = None
         clone = deepcopy(self)
         clone.name = name
         clone._id = name
@@ -150,7 +155,8 @@ class WorkflowBase(object):
     def _report_crash(self, traceback=None, execgraph=None):
         """Writes crash related information to a file
         """
-        message = ['Node %s failed to run.' % self._id]
+        name = self._id
+        message = ['Node %s failed to run.' % name]
         logger.error(message)
         if not traceback:
             exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -161,8 +167,10 @@ class WorkflowBase(object):
         login_name = pwd.getpwuid(os.geteuid())[0]
         crashfile = 'crash-%s-%s-%s.npz' % (timeofcrash,
                                             login_name,
-                                            self._id)
+                                            name)
         if hasattr(self, 'config') and self.config['crashdump_dir']:
+            if not os.path.exists(self.config['crashdump_dir']):
+                os.makedirs(self.config['crashdump_dir'])
             crashfile = os.path.join(self.config['crashdump_dir'],
                                      crashfile)
         else:
@@ -370,13 +378,23 @@ class Workflow(WorkflowBase):
         export_graph(graph, self.base_dir, dotfilename=dotfilename)
 
     def run(self, inseries=False):
+        """ Execute the workflow
+
+        Parameters
+        ----------
+        
+        inseries: Boolean
+            Execute workflow in series
+        """
         self._create_flat_graph()
         self._execgraph = _generate_expanded_graph(deepcopy(self._flatgraph))
-        if inseries:
+        for node in self._execgraph.nodes():
+            node.config = self.config
+        if inseries == True:
             self._execute_in_series()
         else:
             self._execute_with_manager()
-
+        
     # PRIVATE API AND FUNCTIONS
 
     def _check_nodes(self, nodes):
@@ -476,6 +494,8 @@ class Workflow(WorkflowBase):
         node.set_input(param, deepcopy(newval))
 
     def _create_flat_graph(self):
+        self._flatgraph = None
+        self._execgraph = None
         workflowcopy = deepcopy(self)
         workflowcopy._generate_execgraph()
         self._flatgraph = workflowcopy._graph
@@ -863,6 +883,8 @@ class Node(WorkflowBase):
         hashed_inputs, hashvalue = self._get_hashval()
         hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
         if updatehash:
+            #if isinstance(self, MapNode):
+            #    self._run_interface(updatehash=True)
             logger.info("Updating hash: %s" % hashvalue)
             self._save_hashfile(hashfile, hashed_inputs)
         if force_execute or (not updatehash and (self.overwrite or not os.path.exists(hashfile))):
@@ -1081,6 +1103,7 @@ class MapNode(Node):
         workflowname = 'mapflow'
         iterflow = Workflow(name=workflowname)
         iterflow.base_dir = cwd
+        iterflow.config = self.config
         iterflow.add_nodes(newnodes)
         iterflow.run(inseries=True)
         self._result = InterfaceResult(interface=[], runtime=[],
