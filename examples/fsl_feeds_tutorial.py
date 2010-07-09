@@ -369,6 +369,14 @@ modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
                       iterfield = ['fsf_file'])
 
 """
+Set the model generation to run everytime. Since the fsf file, which is the
+input to modelgen only references the ev files, modelgen will not run if the ev
+file contents are changed but the fsf file is untouched.
+"""
+
+modelgen.overwrite = True
+
+"""
 Use :class:`nipype.interfaces.fsl.FILMGLS` to estimate a model specified by a
 mat file and a functional run
 """
@@ -384,13 +392,14 @@ Use :class:`nipype.interfaces.fsl.ContrastMgr` to generate contrast estimates
 """
 
 conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
-                         iterfield = ['tcon_file','stats_dir'])
+                         iterfield = ['tcon_file','fcon_file','stats_dir'])
 
 modelfit.connect([
    (modelspec,level1design,[('session_info','session_info')]),
    (level1design,modelgen,[('fsf_files','fsf_file')]),
    (modelgen,modelestimate,[('design_file','design_file')]),
    (modelgen,conestimate,[('con_file','tcon_file')]),
+   (modelgen,conestimate,[('fcon_file','fcon_file')]),
    (modelestimate,conestimate,[('results_dir','stats_dir')]),
    ])
 
@@ -480,7 +489,7 @@ feeds_data_dir = os.path.abspath('feeds_data')
 # Specify the subject directories
 # Map field names to individual subject runs.
 info = dict(func=[['fmri']],
-            struct=[['structural_brain']])
+            struct=[['structural']])
 
 """
 Now we create a :class:`nipype.interfaces.io.DataSource` object and fill in the
@@ -515,7 +524,7 @@ for every participant. Other examples of this function are available in the
 from nipype.interfaces.base import Bunch
 
 firstlevel.inputs.modelfit.modelspec.subject_info = [Bunch(conditions=['Visual','Auditory'],
-                        onsets=[range(0,180*3,60),range(45,180*TR,90)],
+                        onsets=[range(0,180*TR,60),range(0,180*TR,90)],
                         durations=[[30], [45]],
                         amplitudes=None,
                         tmod=None,
@@ -533,7 +542,7 @@ described above.
 cont1 = ['Visual>Baseline','T', ['Visual','Auditory'],[1,0]]
 cont2 = ['Auditory>Baseline','T', ['Visual','Auditory'],[0,1]]
 cont3 = ['Task','F', [cont1, cont2]]
-contrasts = [cont1,cont2]
+contrasts = [cont1,cont2,cont3]
 
 firstlevel.inputs.modelfit.modelspec.input_units = 'secs'
 firstlevel.inputs.modelfit.modelspec.output_units = 'secs'
@@ -543,7 +552,7 @@ firstlevel.inputs.modelfit.modelspec.subject_id = 'whatever'
 
 
 firstlevel.inputs.modelfit.level1design.interscan_interval = TR
-firstlevel.inputs.modelfit.level1design.bases = {'dgamma':{'derivs': False}}
+firstlevel.inputs.modelfit.level1design.bases = {'dgamma':{'derivs': True}}
 firstlevel.inputs.modelfit.level1design.contrasts = contrasts
 
 """
