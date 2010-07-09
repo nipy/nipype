@@ -3,6 +3,12 @@
 """The spm module provides basic functions for interfacing with matlab
 and spm to access spm tools.
 
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../../emptydata'))
+   >>> os.chdir(datadir)
+
 """
 
 __docformat__ = 'restructuredtext'
@@ -81,7 +87,7 @@ class Level1Design(SPMCommand):
     >>> level1design.inputs.timing_units = 'secs'
     >>> level1design.inputs.interscan_interval = 2.5
     >>> level1design.inputs.bases = {'hrf':{'derivs': [0,0]}}
-    >>> level1design.inputs.session_info = '../../emptydata/session_info.npz'
+    >>> level1design.inputs.session_info = 'session_info.npz'
     >>> level1design.run() # doctest: +SKIP
     """
 
@@ -160,7 +166,7 @@ class EstimateModel(SPMCommand):
     Examples
     --------
     >>> est = EstimateModel()
-    >>> est.inputs.spm_mat_file = '../../emptydata/SPM.mat'
+    >>> est.inputs.spm_mat_file = 'SPM.mat'
     >>> est.run() # doctest: +SKIP
     """
     input_spec = EstimateModelInputSpec
@@ -257,7 +263,7 @@ class EstimateContrast(SPMCommand):
     --------
     >>> import nipype.interfaces.spm as spm
     >>> est = spm.EstimateContrast()
-    >>> est.inputs.spm_mat_file = '../../emptydata/SPM.mat'
+    >>> est.inputs.spm_mat_file = 'SPM.mat'
     >>> cont1 = ('Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5])
     >>> cont2 = ('Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1])
     >>> contrasts = [cont1,cont2]
@@ -371,7 +377,7 @@ class OneSampleTTest(SPMCommand):
     --------
     >>> import nipype.interfaces.spm as spm
     >>> ttest = spm.OneSampleTTest()
-    >>> ttest.inputs.con_images = ['../../emptydata/cont1.nii', '../../emptydata/cont2.nii']
+    >>> ttest.inputs.con_images = ['cont1.nii', 'cont2.nii']
     >>> ttest.run() # doctest: +SKIP
     """
     input_spec = OneSampleTTestInputSpec
@@ -436,8 +442,8 @@ class TwoSampleTTest(SPMCommand):
     --------
     >>> import nipype.interfaces.spm as spm
     >>> ttest = spm.TwoSampleTTest()
-    >>> ttest.inputs.images_group1 = ['../../emptydata/cont1.nii', '../../emptydata/cont2.nii']
-    >>> ttest.inputs.images_group2 = ['../../emptydata/cont1a.nii', '../../emptydata/cont2a.nii']
+    >>> ttest.inputs.images_group1 = ['cont1.nii', 'cont2.nii']
+    >>> ttest.inputs.images_group2 = ['cont1a.nii', 'cont2a.nii']
     >>> ttest.dependent = False
     >>> ttest.unequal_variance = True
     >>> ttest.run() # doctest: +SKIP
@@ -542,7 +548,7 @@ class MultipleRegression(SPMCommand):
     >>> covariates = dict(names=['reg1', 'reg2'], centering=[1,1])
     >>> covariates['vectors'] = [[12,24],[0.6 -0.9]]
     >>> mreg.inputs.covariates = covariates
-    >>> mreg.inputs.images = ['../../emptydata/cont1.nii', '../../emptydata/cont1.nii']
+    >>> mreg.inputs.images = ['cont1.nii', 'cont1.nii']
     >>> mreg.inputs.contrasts = [['reg2 > reg1', 'T', ['reg1','reg2'], [-1,1]]]
     >>> mreg.run() # doctest: +SKIP
     """
@@ -657,8 +663,8 @@ class Threshold(SPMCommand):
     --------
 
     >>> thresh = Threshold()
-    >>> thresh.inputs.spm_mat_file = '../../emptydata/SPM.mat'
-    >>> thresh.inputs.spmT_images = '../../emptydata/spmT_0001.img'
+    >>> thresh.inputs.spm_mat_file = 'SPM.mat'
+    >>> thresh.inputs.spmT_images = 'spmT_0001.img'
     >>> thresh.inputs.contrast_index = 1
     >>> thresh.inputs.extent_fdr_p_threshold = 0.05
     >>> thresh.run() # doctest: +SKIP
@@ -823,7 +829,7 @@ class OneSampleTTestDesign(FactorialDesign):
     --------
     
     >>> ttest = OneSampleTTestDesign()
-    >>> ttest.inputs.in_files = ['../../emptydata/cont1.nii', '../../emptydata/cont2.nii']
+    >>> ttest.inputs.in_files = ['cont1.nii', 'cont2.nii']
     >>> ttest.run() # doctest: +SKIP
     """
     
@@ -857,8 +863,8 @@ class TwoSampleTTestDesign(FactorialDesign):
     --------
     
     >>> ttest = TwoSampleTTestDesign()
-    >>> ttest.inputs.group1_files = ['../../emptydata/cont1.nii', '../../emptydata/cont2.nii']
-    >>> ttest.inputs.group2_files = ['../../emptydata/cont1a.nii', '../../emptydata/cont2a.nii']
+    >>> ttest.inputs.group1_files = ['cont1.nii', 'cont2.nii']
+    >>> ttest.inputs.group2_files = ['cont1a.nii', 'cont2a.nii']
     >>> ttest.run() # doctest: +SKIP
     """
     
@@ -888,10 +894,7 @@ class PairedTTestDesign(FactorialDesign):
     --------
     
     >>> pttest = PairedTTestDesign()
-    >>> pttest.inputs.paired_files = [['../../emptydata/cont1.nii', \
-                                       '../../emptydata/cont1a.nii'], \
-                                       ['../../emptydata/cont2.nii', \
-                                       '../../emptydata/cont2a.nii']]
+    >>> pttest.inputs.paired_files = [['cont1.nii','cont1a.nii'],['cont2.nii','cont2a.nii']]
     >>> pttest.run() # doctest: +SKIP
     """
     
@@ -925,8 +928,7 @@ class MultipleRegressionDesign(FactorialDesign):
     --------
     
     >>> mreg = MultipleRegressionDesign()
-    >>> mreg.inputs.in_files = ['../../emptydata/cont1.nii', \
-                                '../../emptydata/cont2.nii']
+    >>> mreg.inputs.in_files = ['cont1.nii','cont2.nii']
     >>> mreg.run() # doctest: +SKIP
     """
     
