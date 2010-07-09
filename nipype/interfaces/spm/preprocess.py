@@ -1,6 +1,13 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""SPM wrappers for preprocessing data"""
+"""SPM wrappers for preprocessing data
+
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../../emptydata'))
+   >>> os.chdir(datadir)
+"""
 
 __docformat__ = 'restructuredtext'
 
@@ -51,7 +58,7 @@ class SliceTiming(SPMCommand):
 
     >>> from nipype.interfaces.spm import SliceTiming
     >>> st = SliceTiming()
-    >>> st.inputs.in_files = '../../emptydata/functional.nii'
+    >>> st.inputs.in_files = 'functional.nii'
     >>> st.inputs.num_slices = 32
     >>> st.inputs.time_repetition = 6.0
     >>> st.inputs.time_acquisition = 6. - 6./32.
@@ -141,7 +148,7 @@ class Realign(SPMCommand):
 
     >>> import nipype.interfaces.spm as spm
     >>> realign = spm.Realign()
-    >>> realign.inputs.in_files = '../../emptydata/functional.nii'
+    >>> realign.inputs.in_files = 'functional.nii'
     >>> realign.inputs.register_to_mean = True
     >>> realign.run() # doctest: +SKIP
 
@@ -251,8 +258,8 @@ class Coregister(SPMCommand):
     
     >>> import nipype.interfaces.spm as spm
     >>> coreg = spm.Coregister()
-    >>> coreg.inputs.target = '../../emptydata/functional.nii'
-    >>> coreg.inputs.source = '../../emptydata/structural.nii'
+    >>> coreg.inputs.target = 'functional.nii'
+    >>> coreg.inputs.source = 'structural.nii'
     >>> coreg.run() # doctest: +SKIP
     
     """
@@ -355,7 +362,7 @@ class Normalize(SPMCommand):
     --------
     >>> import nipype.interfaces.spm as spm
     >>> norm = spm.Normalize()
-    >>> norm.inputs.source = '../../emptydata/functional.nii'
+    >>> norm.inputs.source = 'functional.nii'
     >>> norm.run() # doctest: +SKIP
     
     """
@@ -505,7 +512,7 @@ class Segment(SPMCommand):
     --------
     >>> import nipype.interfaces.spm as spm
     >>> seg = spm.Segment()
-    >>> seg.inputs.data = '../../emptydata/structural.nii'
+    >>> seg.inputs.data = 'structural.nii'
     >>> seg.run() # doctest: +SKIP
     
     """
@@ -598,7 +605,7 @@ class NewSegment(SPMCommand):
     --------
     >>> import nipype.interfaces.spm as spm
     >>> seg = spm.NewSegment()
-    >>> seg.inputs.channel_files = '../../emptydata/structural.nii'
+    >>> seg.inputs.channel_files = 'structural.nii'
     >>> seg.run() # doctest: +SKIP
     
     """
@@ -674,7 +681,7 @@ class Smooth(SPMCommand):
     --------
     >>> import nipype.interfaces.spm as spm
     >>> smooth = spm.Smooth()
-    >>> smooth.inputs.in_files = '../../emptydata/functional.nii'
+    >>> smooth.inputs.in_files = 'functional.nii'
     >>> smooth.inputs.fwhm = [4, 4, 4]
     >>> smooth.run() # doctest: +SKIP
     """
