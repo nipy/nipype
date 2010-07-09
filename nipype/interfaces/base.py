@@ -795,29 +795,29 @@ class CommandLine(BaseInterface):
     --------
 
     >>> from nipype.interfaces.base import CommandLine
-    >>> cli = CommandLine(command='ls')
+    >>> cli = CommandLine(command='ls', environ={'DISPLAY': ':1'})
     >>> cli.inputs.args = '-al'
     >>> cli.cmdline
     'ls -al'
 
     >>> cli.inputs.trait_get()
-    {'args': '-al', 'environ': {}}
+    {'args': '-al', 'environ': {'DISPLAY': ':1'}}
 
     >>> cli.help()
     Inputs
     ------
-
+    <BLANKLINE>
     Optional:
      args: Additional parameters to the command
      environ: Environment variables (default={})
-
+    <BLANKLINE>
     Outputs
     -------
     None
 
 
     >>> cli.inputs.hashval
-    ({'args': '-al', 'environ': {}}, 'c005b3eb45d97fd5733997ae75689457')
+    ({'args': '-al', 'environ': {'DISPLAY': ':1'}}, '998f3bdb3d4ed9b5177e34387117cb0d')
 
     """
 
