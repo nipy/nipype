@@ -699,18 +699,16 @@ class FLAMEO(FSLCommand):
     Initialize FLAMEO with no options, assigning them when calling run:
 
     >>> from nipype.interfaces import fsl
-    >>> flame = fsl.FLAMEO()
-    >>> res = flame.run()
-
-    >>> from nipype.interfaces import fsl
     >>> import os
     >>> flameo = fsl.FLAMEO(cope_file='cope.nii.gz', \
                             var_cope_file='varcope.nii.gz', \
+                            cov_split_file='cov_split.mat', \
                             design_file='design.mat', \
                             t_con_file='design.con', \
+                            mask_file='mask.nii', \
                             run_mode='fe')
     >>> flameo.cmdline
-    'flameo --copefile=cope.nii.gz --designfile=design.mat --runmode=fe --tcontrastsfile=design.con --varcopefile=varcope.nii.gz'
+    'flameo --copefile=cope.nii.gz --covsplitfile=cov_split.mat --designfile=design.mat --ld=stats --maskfile=mask.nii --runmode=fe --tcontrastsfile=design.con --varcopefile=varcope.nii.gz'
     """
     _cmd = 'flameo'
     input_spec = FLAMEOInputSpec
