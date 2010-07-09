@@ -2,14 +2,11 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The freesurfer module provides basic functions for interfacing with freesurfer tools.
 
-Currently these tools are supported:
-
-     * Dicom2Nifti: using mri_convert
-     * Resample: using mri_convert
-     
-Examples
---------
-See the docstrings for the individual classes for 'working' examples.
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../../emptydata'))
+   >>> os.chdir(datadir)
 
 """
 __docformat__ = 'restructuredtext'
@@ -80,9 +77,16 @@ class MRISPreproc(FSCommand):
     
     Examples
     --------
-    >>> from nipype.interfaces.freesurfer import MRISPreproc
-    >>> preproc = MRISPreproc()
     
+    >>> preproc = MRISPreproc()
+    >>> preproc.inputs.target = 'fsaverage'
+    >>> preproc.inputs.hemi = 'lh'
+    >>> preproc.inputs.vol_measure_file = [('cont1.nii', 'register.dat'), \
+                                           ('cont1a.nii', 'register.dat')]
+    >>> preproc.inputs.out_file = 'concatenated_file.mgz'
+    >>> preproc.cmdline
+    'mris_preproc --hemi lh --out concatenated_file.mgz --target fsaverage --iv cont1.nii register.dat --iv cont1a.nii register.dat'
+
     """
 
     _cmd = 'mris_preproc'
@@ -103,11 +107,6 @@ class MRISPreproc(FSCommand):
         if name == 'out_file':
             return self._list_outputs()[name]
         return None    
-
-class SurfConcat(MRISPreproc):
-    """Alias for MRISPreproc
-    """
-    pass
 
 class GLMFitInputSpec(FSTraitedSpec):
     hemi = traits.Str(desc='im not sure what hemi does ',
@@ -231,6 +230,13 @@ class GLMFit(FSCommand):
     
     Examples
     --------
+
+    >>> glmfit = GLMFit()
+    >>> glmfit.inputs.in_file = 'functional.nii'
+    >>> glmfit.inputs.one_sample = True
+    >>> glmfit.cmdline
+    'mri_glmfit --y functional.nii --osgm'
+    
     """
 
     _cmd = 'mri_glmfit'
@@ -307,10 +313,10 @@ class Binarize(FSCommand):
 
     Examples
     --------
-    >>> from nipype.interfaces.freesurfer import Threshold
-    >>> binvol = Threshold(in_file='foo.nii', min=10, binary_file='foo_out.nii')
+    
+    >>> binvol = Binarize(in_file='structural.nii', min=10, binary_file='foo_out.nii')
     >>> binvol.cmdline
-    'mri_binarize --i foo.nii --min 10.000000 --o foo_out.nii'
+    'mri_binarize --o foo_out.nii --i structural.nii --min 10.000000'
     
    """
 
@@ -361,11 +367,6 @@ class Binarize(FSCommand):
             return self._list_outputs()[name]
         return None    
 
-class Threshold(Binarize):
-    """Alias for Binarize
-    """
-    pass
-    
 
 class ConcatenateInputSpec(FSTraitedSpec):
     in_files = InputMultiPath(File(exists=True),
@@ -418,9 +419,11 @@ class Concatenate(FSCommand):
 
     Combine two input volumes into one volume with two frames
 
-    >>> concat = fs.Concatenate()
-    >>> concat.inputs.in_files = ['foo.nii,goo.nii']
-    >>> concat.inputs.outfile 'bar.nii'
+    >>> concat = Concatenate()
+    >>> concat.inputs.in_files = ['cont1.nii','cont2.nii']
+    >>> concat.inputs.concatenated_file = 'bar.nii'
+    >>> concat.cmdline
+    'mri_concat --o bar.nii --i cont1.nii --i cont2.nii'
 
     """
 
@@ -508,13 +511,15 @@ class SegStats(FSCommand):
 
     Examples
     --------
+    
     >>> import nipype.interfaces.freesurfer as fs
     >>> ss = fs.SegStats()
     >>> ss.inputs.annot = ('PWS04', 'lh', 'aparc')
     >>> ss.inputs.environ['SUBJECTS_DIR'] = '/somepath/FSDATA'
-    >>> ss.inputs.avgwf_txt_file = True
+    >>> ss.inputs.avgwf_txt_file = './avgwf.txt'
+    >>> ss.inputs.summary_file = './summary.stats'
     >>> ss.cmdline
-    'mri_segstats --annot PWS04 lh aparc --avgwf ./PWS04_lh_aparc_avgwf.txt --sum ./summary.stats'
+    'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --sum ./summary.stats'
     
     """
 
@@ -547,7 +552,7 @@ class SegStats(FSCommand):
         return outputs
 
     def _format_arg(self, name, spec, value):
-        if name in ['avgwftxt', 'avgwf_file', 'sf_avg_file']:
+        if name in ['avgwf_txt_file', 'avgwf_file', 'sf_avg_file']:
             if isinstance(value, bool):
                 fname = self._list_outputs()[name]
             else:
@@ -627,10 +632,10 @@ class Label2Vol(FSCommand):
 
     Examples
     --------
-    >>> from nipype.interfaces.freesurfer import Label2Vol
-    >>> binvol = Label2Vol(label_file='foo.label', template_file='bar.nii', regmat='foo_reg.dat',fillthresh=0.5, vol_label_file='foo_out.nii')
+    
+    >>> binvol = Label2Vol(label_file='cortex.label', template_file='structural.nii', reg_file='register.dat', fill_thresh=0.5, vol_label_file='foo_out.nii')
     >>> binvol.cmdline
-    'mri_label2vol --fillthresh 0.500000 --label foo.label --o foo_out.nii --reg foo_reg.dat --temp bar.nii'
+    'mri_label2vol --fillthresh 0 --label cortex.label --reg register.dat --temp structural.nii --o foo_out.nii'
     
    """
 
