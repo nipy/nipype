@@ -80,7 +80,6 @@ def test_findthebiggest():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
                      in_files = dict(argstr='%s',mandatory=True,),
-                     label_file = dict(argstr='%s',),
                      out_file = dict(argstr='%s',),
                      output_type = dict(),
                      )
@@ -188,7 +187,6 @@ def test_tbss1preproc():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
                      img_list = dict(mandatory=True,),
-                     in_exp = dict(argstr='%s',),
                      output_type = dict(),
                      )
     instance = fsl.TBSS1Preproc()
