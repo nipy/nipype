@@ -589,7 +589,7 @@ firstlevel.inputs.modelfit.modelspec.time_repetition = TR
 firstlevel.inputs.modelfit.modelspec.high_pass_filter_cutoff = hpcutoff
 
 firstlevel.inputs.modelfit.level1design.interscan_interval = TR
-firstlevel.inputs.modelfit.level1design.bases = {'dgamma':{'derivs': True}}
+firstlevel.inputs.modelfit.level1design.bases = {'dgamma':{'derivs': False}}
 firstlevel.inputs.modelfit.level1design.contrasts = contrasts
 
 """
@@ -600,9 +600,6 @@ Set up complete workflow
 l1pipeline = pe.Workflow(name= "level1")
 l1pipeline.base_dir = os.path.abspath('./fsl/workingdir')
 l1pipeline.config = dict(crashdump_dir=os.path.abspath('./fsl/crashdumps'))
-
-def pickfirst(files):
-    return files[0]
 
 l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                     (infosource, firstlevel, [(('subject_id', subjectinfo), 'modelfit.modelspec.subject_info'),
