@@ -3,6 +3,13 @@
 """Defines functionality for pipelined execution of interfaces
 
 The `Pipeline` class provides core functionality for batch processing.
+
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../emptydata'))
+   >>> os.chdir(datadir)
+
 """
 
 from copy import deepcopy
@@ -753,6 +760,7 @@ class Node(WorkflowBase):
 
     Parameters
     ----------
+    
     interface : interface object
         node specific interface  (fsl.Bet(), spm.Coregister())
     iterables : generator
@@ -765,15 +773,17 @@ class Node(WorkflowBase):
 
     Notes
     -----
+    
     creates output directory
     copies/discovers files to work with
     saves a hash.json file to indicate that a process has been completed
 
     Examples
     --------
+    
     >>> import nipype.interfaces.spm as spm
-    >>> realign = Node(interface=spm.Realign(), base_directory='test2')
-    >>> realign.inputs.infile = os.path.abspath('data/funcrun.nii')
+    >>> realign = Node(interface=spm.Realign(), name='realign')
+    >>> realign.inputs.in_files = 'functional.nii'
     >>> realign.inputs.register_to_mean = True
     >>> realign.run() # doctest: +SKIP
 
@@ -964,6 +974,17 @@ class Node(WorkflowBase):
 
 
 class MapNode(Node):
+    """Wraps interface objects that need to be iterated on a list of inputs.
+
+    Examples
+    --------
+
+    >>> import nipype.interfaces.fsl as fsl
+    >>> realign = MapNode(interface=fsl.MCFLIRT(), name='realign', iterfield=['in_file'])
+    >>> realign.inputs.in_file = ['functional.nii', 'functional2.nii', 'functional3.nii'] 
+    >>> realign.run() # doctest: +SKIP
+    
+    """
 
     def __init__(self, interface, iterfield=None, **kwargs):
         """
