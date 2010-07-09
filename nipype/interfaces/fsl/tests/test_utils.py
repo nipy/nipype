@@ -55,7 +55,7 @@ def test_imagemaths():
                      environ = dict(),
                      in_file = dict(argstr='%s',mandatory=True,),
                      in_file2 = dict(argstr='%s',),
-                     op_string = dict(mandatory=True,argstr='%s',),
+                     op_string = dict(argstr='%s',),
                      out_data_type = dict(argstr='-odt %s',),
                      out_file = dict(argstr='%s',),
                      output_type = dict(),
