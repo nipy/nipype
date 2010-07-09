@@ -19,10 +19,12 @@ class IdentityInterface(IOBase):
     >>> from nipype.interfaces.utility import IdentityInterface
     >>> ii = IdentityInterface(fields=['a','b'])
     >>> ii.inputs.a
+    <undefined>
 
     >>> ii.inputs.a = 'foo'
-    >>> out = ii.outputs()
+    >>> out = ii._outputs()
     >>> out.a
+    <undefined>
 
     >>> out = ii.run()
     >>> out.outputs.a
@@ -89,7 +91,8 @@ class Merge(IOBase):
         outputs = self._outputs().get()
         out = []
         if self.inputs.axis == 'vstack':
-            for value in self.inputs.get().values():
+            for idx in range(self.numinputs):
+                value = getattr(self.inputs, 'in%d'%(idx+1))
                 if isdefined(value):
                     if isinstance(value, list):
                         out.extend(value)
@@ -118,7 +121,7 @@ class Split(IOBase):
     
     >>> from nipype.interfaces.utility import Split
     >>> sp = Split()
-    >>> sp.inputs.set(inlist=[1,2,3],splits=[2,1])
+    >>> _ = sp.inputs.set(inlist=[1,2,3],splits=[2,1])
     >>> out = sp.run()
     >>> out.outputs.out1
     [1, 2]
@@ -167,11 +170,12 @@ class Select(IOBase):
     
     >>> from nipype.interfaces.utility import Select
     >>> sl = Select()
-    >>> sl.inputs.set(inlist=[1,2,3,4,5],index=[3])
+    >>> _ = sl.inputs.set(inlist=[1,2,3,4,5],index=[3])
     >>> out = sl.run()
     >>> out.outputs.out
     4
-    >>> sl.inputs.set(inlist=[1,2,3,4,5],index=[3,4])
+    
+    >>> _ = sl.inputs.set(inlist=[1,2,3,4,5],index=[3,4])
     >>> out = sl.run()
     >>> out.outputs.out
     [4, 5]
