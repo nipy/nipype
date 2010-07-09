@@ -10,6 +10,7 @@ from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
 import nipype.interfaces.base as nib
 from nipype.interfaces.base import Undefined
 from nipype.interfaces.base import InterfaceResult
+from nipype.utils.config import config
 
 #test Bunch
 def test_bunch():
@@ -110,7 +111,8 @@ def test_TraitedSpec_withFile():
         moo = nib.File(exists=True)
         doo = nib.traits.List(nib.File(exists=True))
     infields = spec2(moo=tmp_infile,doo=[tmp_infile])
-    yield assert_equal, infields.hashval[1], '8c227fb727c32e00cd816c31d8fea9b9'
+    if config.get('execution', 'hash_method').lower() == 'content':
+        yield assert_equal, infields.hashval[1], '8c227fb727c32e00cd816c31d8fea9b9'
     teardown_file(tmpd)
     
 def test_Interface():
@@ -204,7 +206,7 @@ def test_Commandline():
     yield assert_equal, res.runtime.environ['MYENV'], 'foo'
     yield assert_equal, res.outputs, None
 
-    class CommandLineInputSpec1(nib.TraitedSpec):
+    class CommandLineInputSpec1(nib.CommandLineInputSpec):
         foo = nib.traits.Str(argstr='%s', desc='a str')
         goo = nib.traits.Bool(argstr='-g', desc='a bool', position=0)
         hoo = nib.traits.List(argstr='-l %s', desc='a list')
@@ -225,7 +227,7 @@ def test_Commandline():
     yield assert_equal, cmd[-1], '-i 1 -i 2 -i 3'
     yield assert_true, 'hello' not in ' '.join(cmd)
     
-    class CommandLineInputSpec2(nib.TraitedSpec):
+    class CommandLineInputSpec2(nib.CommandLineInputSpec):
         foo = nib.File(argstr='%s', desc='a str', genfile=True)
     nib.CommandLine.input_spec = CommandLineInputSpec2
     ci5 = nib.CommandLine(command='cmd')
