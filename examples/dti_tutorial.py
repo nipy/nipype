@@ -2,10 +2,11 @@
 """
    A pipeline example that uses several interfaces to
    perform analysis on diffusion weighted images using
-   FSL fdt and tbss tools.
+   FSL FDT tools.
 
-   The data for this analysis is available at
-   http://www.mit.edu/~satra/nipype-nightly/users/pipeline_tutorial.html
+   This tutorial is based on the 2010 FSL course and uses
+   data freely available at the FSL website at:
+   http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 """
 
 
@@ -99,7 +100,9 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                      name = 'datasource')
 
 datasource.inputs.template = "%s/%s"
-datasource.inputs.base_directory = os.path.abspath('/media/sdb2/fsl_course/fsl_course_data/fdt/')
+# This needs to point to the fdt folder you can find after extracting 
+# http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
+datasource.inputs.base_directory = os.path.abspath('fsl_course_data/fdt/')
 datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz',
                                         seed_file="%s.bedpostX/%s.nii.gz",
                                         target_masks="%s.bedpostX/%s.nii.gz")
