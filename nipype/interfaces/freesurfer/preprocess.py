@@ -2,6 +2,12 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by freeusrfer
 
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../../emptydata'))
+   >>> os.chdir(datadir)
+
 """
 __docformat__ = 'restructuredtext'
 
@@ -314,13 +320,12 @@ class MRIConvert(FSCommand):
     Examples
     --------
 
-    >>> os.chdir( os.path.dirname( os.path.realpath( __file__ ) ) )
     >>> mc = MRIConvert()
-    >>> mc.inputs.in_file = '../../emptydata/structural.nii'
+    >>> mc.inputs.in_file = 'structural.nii'
     >>> mc.inputs.out_file = 'outfile.mgz'
     >>> mc.inputs.out_type = 'mgz'
     >>> mc.cmdline
-    'mri_convert --out_type mgz --input_volume ../../emptydata/structural.nii --output_volume outfile.mgz'
+    'mri_convert --out_type mgz --input_volume structural.nii --output_volume outfile.mgz'
     
     """
     _cmd = 'mri_convert'
@@ -405,10 +410,9 @@ class DICOMConvert(FSCommand):
     Examples
     --------
 
-    >>> os.chdir( os.path.dirname( os.path.realpath( __file__ ) ) )
     >>> from nipype.interfaces.freesurfer import DICOMConvert
     >>> cvt = DICOMConvert()
-    >>> cvt.inputs.dicom_dir = '../../emptydata/dicomdir'
+    >>> cvt.inputs.dicom_dir = 'dicomdir'
     >>> cvt.inputs.file_mapping = [('nifti','*.nii'),('info','dicom*.txt'),('dti','*dti.bv*')]
 
     """
@@ -517,14 +521,13 @@ class Resample(FSCommand):
     Examples
     --------
     
-    >>> os.chdir( os.path.dirname( os.path.realpath( __file__ ) ) )
     >>> from nipype.interfaces import freesurfer
     >>> resampler = freesurfer.Resample()
-    >>> resampler.inputs.in_file = '../../emptydata/structural.nii'
+    >>> resampler.inputs.in_file = 'structural.nii'
     >>> resampler.inputs.resampled_file = 'resampled.nii'
     >>> resampler.inputs.voxel_size = (2.1, 2.1, 2.1)
     >>> resampler.cmdline
-    'mri_convert -vs 2.10 2.10 2.10 -i ../../emptydata/structural.nii -o resampled.nii'
+    'mri_convert -vs 2.10 2.10 2.10 -i structural.nii -o resampled.nii'
     
     """
 
@@ -573,15 +576,14 @@ class ReconAll(FSCommand):
     Examples
     --------
     
-    >>> os.chdir( os.path.dirname( os.path.realpath( __file__ ) ) )
     >>> from nipype.interfaces.freesurfer import ReconAll
     >>> reconall = ReconAll()
     >>> reconall.inputs.subject_id = 'foo'
     >>> reconall.inputs.directive = 'all'
     >>> reconall.inputs.subjects_dir = '.'
-    >>> reconall.inputs.T1_files = '../../emptydata/structural.nii'
+    >>> reconall.inputs.T1_files = 'structural.nii'
     >>> reconall.cmdline
-    'recon-all -i ../../emptydata/structural.nii -all -subjid foo -sd .'
+    'recon-all -i structural.nii -all -subjid foo -sd .'
     
     """
 
@@ -629,11 +631,10 @@ class BBRegister(FSCommand):
     Examples
     --------
     
-    >>> os.chdir( os.path.dirname( os.path.realpath( __file__ ) ) )
     >>> from nipype.interfaces.freesurfer import BBRegister
-    >>> bbreg = BBRegister(subject_id='me', source_file='../../emptydata/structural.nii', init='header', contrast_type='t2')
+    >>> bbreg = BBRegister(subject_id='me', source_file='structural.nii', init='header', contrast_type='t2')
     >>> bbreg.cmdline
-    'bbregister --t2 --init-header --reg ../../emptydata/structural_bbreg_me.dat --mov ../../emptydata/structural.nii --s me'
+    'bbregister --t2 --init-header --reg structural_bbreg_me.dat --mov structural.nii --s me'
 
     """
 
@@ -713,15 +714,14 @@ class ApplyVolTransform(FSCommand):
     Examples
     --------
     
-    >>> os.chdir( os.path.dirname( os.path.realpath( __file__ ) ) )
     >>> from nipype.interfaces.freesurfer import ApplyVolTransform
     >>> applyreg = ApplyVolTransform()
-    >>> applyreg.inputs.source_file = '../../emptydata/structural.nii'
-    >>> applyreg.inputs.reg_file = '../../emptydata/register.dat'
+    >>> applyreg.inputs.source_file = 'structural.nii'
+    >>> applyreg.inputs.reg_file = 'register.dat'
     >>> applyreg.inputs.transformed_file = 'struct_warped.nii'
     >>> applyreg.inputs.fs_target = True
     >>> applyreg.cmdline
-    'mri_vol2vol --fstarg --reg ../../emptydata/register.dat --mov ../../emptydata/structural.nii --o struct_warped.nii'
+    'mri_vol2vol --fstarg --reg register.dat --mov structural.nii --o struct_warped.nii'
 
     """
 
@@ -795,11 +795,10 @@ class Smooth(FSCommand):
     Examples
     --------
 
-    >>> os.chdir( os.path.dirname( os.path.realpath( __file__ ) ) )
     >>> from nipype.interfaces.freesurfer import Smooth
-    >>> smoothvol = Smooth(in_file='../../emptydata/functional.nii', smoothed_file = 'foo_out.nii', reg_file='../../emptydata/register.dat', surface_fwhm=10, vol_fwhm=6)
+    >>> smoothvol = Smooth(in_file='functional.nii', smoothed_file = 'foo_out.nii', reg_file='register.dat', surface_fwhm=10, vol_fwhm=6)
     >>> smoothvol.cmdline
-    'mris_volsmooth --i ../../emptydata/functional.nii --reg ../../emptydata/register.dat --o foo_out.nii --fwhm 10 --vol-fwhm 6'
+    'mris_volsmooth --i functional.nii --reg register.dat --o foo_out.nii --fwhm 10 --vol-fwhm 6'
     
     """
 
