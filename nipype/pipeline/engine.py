@@ -168,7 +168,7 @@ class WorkflowBase(object):
         crashfile = 'crash-%s-%s-%s.npz' % (timeofcrash,
                                             login_name,
                                             name)
-        if hasattr(self, 'config') and self.config['crashdump_dir']:
+        if hasattr(self, 'config') and ('crashdump_dir' in self.config.keys()):
             if not os.path.exists(self.config['crashdump_dir']):
                 os.makedirs(self.config['crashdump_dir'])
             crashfile = os.path.join(self.config['crashdump_dir'],
