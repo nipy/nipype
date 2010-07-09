@@ -500,7 +500,7 @@ class MCFLIRT(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> mcflt = fsl.MCFLIRT(in_file='timeseries.nii', cost='mututalinfo')
+    >>> mcflt = fsl.MCFLIRT(in_file='functional.nii', cost='mutualinfo')
     >>> res = mcflt.run()
 
     """
@@ -665,26 +665,25 @@ class FNIRT(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> fnt = fsl.FNIRT(affine='affine.mat')
-    >>> res = fnt.run(reference='ref.nii', in_file='anat.nii') # doctests: +SKIP
+    >>> fnt = fsl.FNIRT(affine_file='trans.mat')
+    >>> res = fnt.run(ref_file='ref.nii', in_file='anat.nii') #doctest: +SKIP
 
     T1 -> Mni153
 
     >>> from nipype.interfaces import fsl
     >>> fnirt_mprage = fsl.FNIRT()
-    >>> fnirt_mprage.inputs.imgfwhm = [8, 4, 2]
-    >>> fnirt_mprage.inputs.sub_sampling = [4, 2, 1]
+    >>> fnirt_mprage.inputs.in_fwhm = (8, 4, 2, 2)
+    >>> fnirt_mprage.inputs.subsampling_scheme = (4, 2, 1, 1)
 
-    Specify the resolution of the warps, currently not part of the
-    ``fnirt_mprage.inputs``:
+    Specify the resolution of the warps
 
-    >>> fnirt_mprage.inputs.flags = '--warpres 6, 6, 6'
-    >>> res = fnirt_mprage.run(in_file='subj.nii', ref_file='mni.nii')
+    >>> fnirt_mprage.inputs.warp_resolution = (6, 6, 6)
+    >>> res = fnirt_mprage.run(in_file='structural.nii', ref_file='mni.nii', warped_file='warped.nii', fieldcoeff_file='fieldcoeff.nii')
 
     We can check the command line and confirm that it's what we expect.
 
     >>> fnirt_mprage.cmdline  #doctest: +NORMALIZE_WHITESPACE
-    'fnirt --warpres 6, 6, 6 --infwhm=8,4,2 --in=subj.nii --ref=mni.nii --subsamp=4,2,1'
+    'fnirt --cout=fieldcoeff.nii --in=structural.nii --infwhm=8,4,2,2 --ref=mni.nii --subsamp=4,2,1,1 --warpres=6,6,6 --iout=warped.nii'
 
     """
 
