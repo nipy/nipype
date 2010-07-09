@@ -512,10 +512,7 @@ class MCFLIRT(FSLCommand):
         cwd = os.getcwd()
         outputs = self._outputs().get()
 
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                              suffix = '_mcf')
+        outputs['out_file'] = self._gen_outfilename()
 
         # XXX Need to change 'item' below to something that exists
         # out_file? in_file?
@@ -539,8 +536,15 @@ class MCFLIRT(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()[name]
+            return self._gen_outfilename()
         return None
+    
+    def _gen_outfilename(self):
+        out_file = self.inputs.out_file
+        if not isdefined(out_file) and isdefined(self.inputs.in_file):
+            out_file = self._gen_fname(self.inputs.in_file,
+                                       suffix = '_mcf')
+        return out_file
 
 class FNIRTInputSpec(FSLCommandInputSpec):
     ref_file = File(exists=True, argstr='--ref=%s', mandatory=True,
