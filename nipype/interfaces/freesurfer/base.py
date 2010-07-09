@@ -26,17 +26,23 @@ from nipype.interfaces.base import CommandLine, traits, TraitedSpec,\
 from nipype.utils.misc import isdefined
 
 class Info(object):
-    """Handle freesurfer subject directory and version information.
+    """ Freesurfer subject directory and version information.
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.freesurfer import Info
+    >>> Info.version()  # doctest: +SKIP
+    >>> Info.subjectsdir()  # doctest: +SKIP
+    
     """
     
     @staticmethod
     def version():
         """Check for freesurfer version on system
     
-        Parameters
-        ----------
-        
-        None
+        Find which freesurfer is being used....and get version from
+        /path/to/freesurfer/build-stamp.txt
     
         Returns
         -------
@@ -46,22 +52,20 @@ class Info(object):
            or None if freesurfer version not found
     
         """
-        # find which freesurfer is being used....and get version from
-        # /path/to/freesurfer/
         fs_home = os.getenv('FREESURFER_HOME')
         if fs_home is None:
-            return fs_home
+            Exception('FREESURFER_HOME is not defined')
         versionfile = os.path.join(fs_home,'build-stamp.txt')
         if not os.path.exists(versionfile):
             return None
         fid = open(versionfile,'rt')
         version = fid.readline()
         fid.close()
-        return version #.split('-v')[1].strip('\n')
+        return version
     
     @classmethod
     def subjectsdir(cls):
-        """Check and or set the global SUBJECTS_DIR
+        """Check the global SUBJECTS_DIR
         
         Parameters
         ----------
@@ -85,9 +89,10 @@ class FSTraitedSpec(CommandLineInputSpec):
     subjects_dir =  Directory(exists=True, desc='subjects directory')
     
 class FSCommand(CommandLine):
-    '''General support for FS commands. Every FS command accepts
-    'subjects_dir' input. For example:
-    '''
+    """General support for FreeSurfer commands.
+
+       Every FS command accepts 'subjects_dir' input.
+    """
     
     input_spec = FSTraitedSpec
     
