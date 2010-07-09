@@ -933,7 +933,7 @@ class SUSANInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='%s',
                    mandatory=True, position=1,
                    desc='filename of input timeseries')
-    brightness_threshold = traits.Float(argstr='%.3f',
+    brightness_threshold = traits.Float(argstr='%.10f',
                                         position=2, mandatory=True,
                    desc='brightness threshold and should be greater than' \
                         'noise level and less than contrast of edges to' \
@@ -975,7 +975,7 @@ class SUSAN(FSLCommand):
                 return '0'
             arglist = [str(len(value))]
             for filename, thresh in value:
-                arglist.extend([filename, '%.3f'%thresh])
+                arglist.extend([filename, '%.10f'%thresh])
             return ' '.join(arglist)
         return super(SUSAN, self)._format_arg(name, spec, value)
     
