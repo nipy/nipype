@@ -168,7 +168,7 @@ def test_parsedicomdir():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
             
 def test_reconall():
-    input_map = dict(T1_files = dict(argstr='--i %s...',),
+    input_map = dict(T1_files = dict(argstr='-i %s...',),
                      args = dict(argstr='%s',),
                      directive = dict(argstr='-%s',mandatory=True,),
                      environ = dict(),
