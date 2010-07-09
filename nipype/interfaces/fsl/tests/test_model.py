@@ -123,9 +123,6 @@ def test_level1design():
                      contrasts = dict(),
                      interscan_interval = dict(mandatory=True,),
                      model_serial_correlations = dict(),
-                     reg_dof = dict(requires=['reg_image'],),
-                     reg_image = dict(),
-                     register = dict(requires=['reg_dof'],),
                      session_info = dict(mandatory=True,),
                      )
     instance = fsl.Level1Design()
