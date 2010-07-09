@@ -222,9 +222,9 @@ class TBSS1Preproc(FSLCommand):
         directory in the right format
         Example:
         >>> from nipype.interfaces import fsl
-        >>> tbss1 = fsl.TBSS1Preproc(img_list=[f1,f2,f3],tbss_dir='/home')
+        >>> tbss1 = fsl.TBSS1Preproc(img_list=['functional.nii','functional2.nii','functional3.nii'])
         >>> tbss1.cmdline
-        'tbss_1_preproc f1 f2 f3'
+        'tbss_1_preproc functional.nii functional2.nii functional3.nii'
     """
     _cmd = 'tbss_1_preproc'
     input_spec = TBSS1PreprocInputSpec
@@ -313,7 +313,7 @@ class TBSS3Postreg(FSLCommand):
         Use FSL TBSS3Postreg for creating the mean FA image and skeletonise it
         Example:
         >>> from nipype.interfaces import fsl
-        >>> tbss3 = fsl.TBSS3Postreg(subject_mean=True)
+        >>> tbss3 = fsl.TBSS3Postreg(subject_mean=True, tbss_dir='tbss_dir')
         >>> tbss3.cmdline
         'tbss_3_postreg -S'
     """
@@ -361,7 +361,7 @@ class TBSS4Prestats(FSLCommand):
         >>> from nipype.interfaces import fsl
         >>> tbss4 = fsl.TBSS4Prestats(threshold=0.3, tbss_dir="tbss_dir")
         >>> tbss4.cmdline
-        'tbss_4_prestats 0.3'
+        'tbss_4_prestats 0.300'
     """
     _cmd = 'tbss_4_prestats'
     input_spec = TBSS4PrestatsInputSpec
@@ -432,7 +432,7 @@ class Randomise(FSLCommand):
         in order to find voxels which correlate with your model
         Example:
         >>> from nipype.interfaces import fsl
-        >>> rand = fsl.Randomise(in_file='allFA',
+        >>> rand = fsl.Randomise(in_file='allFA', \
                                  mask = 'all_FA_skeleton_mask'
                                  tcon='design.con',
                                  design_mat='design.mat')
