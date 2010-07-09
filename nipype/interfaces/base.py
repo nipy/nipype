@@ -803,7 +803,7 @@ class CommandLine(BaseInterface):
     >>> cli.inputs.trait_get()
     {'args': '-al', 'environ': {}}
 
-    >>>cli.help()
+    >>> cli.help()
     Inputs
     ------
 
