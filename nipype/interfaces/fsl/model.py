@@ -440,23 +440,23 @@ class FILMGLS(FSLCommand):
 
     >>> from nipype.interfaces import fsl
     >>> fgls = fsl.FILMGLS()
-    >>> res = fgls.run('in_file', 'design_file', 'thresh', rn='stats')
+    >>> res = fgls.run('in_file', 'design_file', 'thresh', rn='stats') #doctest: +SKIP
 
     Assign options through the ``inputs`` attribute:
 
     >>> fgls = fsl.FILMGLS()
-    >>> fgls.inputs.in_file = 'filtered_func_data'
+    >>> fgls.inputs.in_file = 'functional.nii'
     >>> fgls.inputs.design_file = 'design.mat'
-    >>> fgls.inputs.thresh = 10
-    >>> fgls.inputs.rn = 'stats'
-    >>> res = fgls.run()
+    >>> fgls.inputs.threshold = 10
+    >>> fgls.inputs.results_dir = 'stats'
+    >>> res = fgls.run() #doctest: +SKIP
 
     Specify options when creating an instance:
 
-    >>> fgls = fsl.FILMGLS(in_file='filtered_func_data', \
+    >>> fgls = fsl.FILMGLS(in_file='functional.nii', \
                            design_file='design.mat', \
-                           thresh=10, rn='stats')
-    >>> res = fgls.run()
+                           threshold=10, results_dir='stats')
+    >>> res = fgls.run() #doctest: +SKIP
 
     """
 
