@@ -12,8 +12,6 @@ First tell python where to find the appropriate functions.
 
 import os                                    # system functions
 
-import numpy as np
-
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
@@ -80,7 +78,7 @@ one functional run we use a MapNode to convert each run.
 
 img2float = pe.MapNode(interface=fsl.ImageMaths(out_data_type='float',
                                              op_string = '',
-                                             suffix='_prefilt'),
+                                             suffix='_dtype'),
                        iterfield=['in_file'],
                        name='img2float')
 preproc.connect(inputnode, 'func', img2float, 'in_file')
@@ -241,7 +239,7 @@ Smooth each run using SUSAN with the brightness threshold set to 75% of the
 median value for each run and a mask consituting the mean functional
 """
 
-smooth = pe.MapNode(interface=fsl.SUSAN(spatial_size=5./np.sqrt(8 * np.log(2))),
+smooth = pe.MapNode(interface=fsl.SUSAN(),
                     iterfield=['in_file', 'brightness_threshold','usans'],
                     name='smooth')
 
@@ -468,6 +466,7 @@ def num_copes(files):
 
 firstlevel = pe.Workflow(name='firstlevel')
 firstlevel.connect([(preproc, modelfit, [('highpass.out_file', 'modelspec.functional_runs'),
+                                         ('art.outlier_files', 'modelspec.outlier_files'),
                                          ('highpass.out_file','modelestimate.in_file')]),
                     (preproc, fixed_fx, [('coregister.out_file', 'flameo.mask_file')]),
                     (modelfit, fixed_fx,[(('conestimate.copes', sort_copes),'copemerge.in_files'),
@@ -542,7 +541,7 @@ iterables on this node to perform two different extents of smoothing.
 
 smoothnode = firstlevel.get_node('preproc.smooth')
 assert(str(smoothnode)=='preproc.smooth')
-smoothnode.iterables = ('spatial_size', [val/np.sqrt(8 * np.log(2)) for val in [5.,10.]])
+smoothnode.iterables = ('fwhm', [5.,10.])
 
 hpcutoff = 120
 TR = 3.
