@@ -10,14 +10,11 @@ You can find it at http://www.fmrib.ox.ac.uk/fsl/feeds/doc/index.html
 
 import os                                    # system functions
 
-import numpy as np
-
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model generation
-import nipype.algorithms.rapidart as ra      # artifact detection
 
 from nipype.externals.pynifti import load
 
@@ -78,7 +75,7 @@ one functional run we use a MapNode to convert each run.
 
 img2float = pe.MapNode(interface=fsl.ImageMaths(out_data_type='float',
                                              op_string = '',
-                                             suffix='_prefilt'),
+                                             suffix='_dtype'),
                        iterfield=['in_file'],
                        name='img2float')
 preproc.connect(inputnode, 'func', img2float, 'in_file')
@@ -239,7 +236,7 @@ Smooth each run using SUSAN with the brightness threshold set to 75% of the
 median value for each run and a mask consituting the mean functional
 """
 
-smooth = pe.MapNode(interface=fsl.SUSAN(spatial_size=5./np.sqrt(8 * np.log(2))),
+smooth = pe.MapNode(interface=fsl.SUSAN(),
                     iterfield=['in_file', 'brightness_threshold','usans'],
                     name='smooth')
 
@@ -314,28 +311,10 @@ skullstrip = pe.Node(interface=fsl.BET(mask = True),
 coregister = pe.Node(interface=fsl.FLIRT(dof=6),
                      name = 'coregister')
 
-"""
-Use :class:`nipype.algorithms.rapidart` to determine which of the
-images in the functional series are outliers based on deviations in
-intensity and/or movement.
-"""
-
-art = pe.Node(interface=ra.ArtifactDetect(use_differences = [False,True],
-                                          use_norm = True,
-                                          norm_threshold = 0.5,
-                                          zintensity_threshold = 3,
-                                          parameter_source = 'FSL',
-                                          mask_type = 'file'),
-              name="art")
-
-
 preproc.connect([(inputnode, nosestrip,[('struct','in_file')]),
                  (nosestrip, skullstrip, [('out_file','in_file')]),
                  (skullstrip, coregister,[('out_file','in_file')]),
                  (meanfunc2, coregister,[(('out_file',pickfirst),'reference')]),
-                 (motion_correct, art, [('par_file','realignment_parameters')]),
-                 (maskfunc2, art, [('out_file','realigned_files')]),
-                 (dilatemask, art, [('out_file', 'mask_file')]),
                  ])
 
 """
@@ -504,7 +483,7 @@ datasource.inputs.base_directory = feeds_data_dir
 datasource.inputs.template = '%s.nii.gz'
 datasource.inputs.template_args = info
 
-firstlevel.inputs.preproc.smooth.spatial_size = 5./np.sqrt(8 * np.log(2))
+firstlevel.inputs.preproc.smooth.fwhm = 5
 
 hpcutoff = 100
 TR = 3.
