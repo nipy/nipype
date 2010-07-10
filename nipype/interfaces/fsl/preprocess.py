@@ -13,15 +13,16 @@ See the docstrings of the individual classes for examples.
 import os
 import warnings
 
+import numpy as np
+
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
-from nipype.interfaces.base import TraitedSpec, File,\
-    InputMultiPath, OutputMultiPath, Undefined
+from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
+                                    OutputMultiPath, Undefined, traits)
 from nipype.utils.filemanip import split_filename
 from nipype.utils.misc import isdefined
 
 from nipype.externals.pynifti import load
 
-import enthought.traits.api as traits
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -938,9 +939,9 @@ class SUSANInputSpec(FSLCommandInputSpec):
                    desc='brightness threshold and should be greater than' \
                         'noise level and less than contrast of edges to' \
                         'be preserved.')
-    spatial_size = traits.Float(argstr='%.3f',
-                                position=3, mandatory=True,
-                                desc='spatial size (sigma, i.e., half-width) of smoothing, in mm')
+    fwhm = traits.Float(argstr='%.10f',
+                        position=3, mandatory=True,
+                        desc='fwhm of smoothing, in mm, gets converted using sqrt(8*log(2))')
     dimension = traits.Enum(3,2, argstr='%d', position=4, usedefault=True,
                             desc='within-plane (2) or fully 3D (3)')
     use_median = traits.Enum(1,0, argstr='%d', position=5, usedefault=True,
@@ -970,6 +971,8 @@ class SUSAN(FSLCommand):
     output_spec = SUSANOutputSpec
 
     def _format_arg(self, name, spec, value):
+        if name == 'fwhm':
+            return spec.argstr%(float(value)/np.sqrt(8 * np.log(2)))
         if name == 'usans':
             if not isdefined(value):
                 return '0'
