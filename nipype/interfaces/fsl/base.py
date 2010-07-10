@@ -25,6 +25,7 @@ See the docstrings of the individual classes for examples.
 
 """
 
+from glob import glob
 import os
 import warnings
 
@@ -117,15 +118,20 @@ class Info(object):
             raise Exception('FSL environment variables not set')
 
     @staticmethod
-    def standard_image(img_name):
+    def standard_image(img_name=None):
         '''Grab an image from the standard location.
+
+        Returns a list of standard images if called without arguments.
 
         Could be made more fancy to allow for more relocatability'''
         try:
             fsldir = os.environ['FSLDIR']
         except KeyError:
             raise Exception('FSL environment variables not set')
-        return os.path.join(fsldir, 'data/standard', img_name)
+        stdpath = os.path.join(fsldir, 'data','standard')
+        if img_name is None:
+            return [filename.replace(stdpath+'/','') for filename in glob(os.path.join(stdpath,'*nii*'))]
+        return os.path.join(stdpath, img_name)
 
 
 class FSLCommandInputSpec(CommandLineInputSpec):
