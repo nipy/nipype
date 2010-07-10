@@ -23,6 +23,7 @@ Tutorials
    spm_face_tutorial
    freesurfer_tutorial
    fsl_tutorial
+   fsl_feeds
    fsl_dti_tutorial
 
 Requirements
