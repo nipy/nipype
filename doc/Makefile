@@ -50,6 +50,7 @@ examples2rst:
 			--outdir $(CURDIR)/examples \
 			../examples/freesurfer_tutorial.py \
 			../examples/fsl_tutorial2.py \
+			../examples/fsl_feeds_tutorial.py \
 			../examples/spm_tutorial.py \
 			../examples/spm_face_tutorial.py \
 			../examples/spm_auditory_tutorial.py \
