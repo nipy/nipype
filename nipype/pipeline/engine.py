@@ -615,6 +615,8 @@ class Workflow(WorkflowBase):
         """Determine output directory and create it
         """
         # update parameterization of output directory
+        if self.base_dir is None:
+            self.base_dir = mkdtemp()
         outputdir = self.base_dir
         if node._hierarchy:
             outputdir = os.path.join(outputdir, *node._hierarchy.split('.'))
