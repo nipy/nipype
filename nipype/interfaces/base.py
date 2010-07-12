@@ -1000,8 +1000,8 @@ class OutputMultiPath(MultiPath):
 
     XXX This needs to be vetted by somebody who understands traits
 
-    >>> from nipype.interfaces.base import MultiPath
-    >>> class A(traits.HasTraits):
+    >>> from nipype.interfaces.base import OutputMultiPath
+    >>> class A(TraitedSpec):
     ...     foo = OutputMultiPath(File(exists=False))
     >>> a = A()
     >>> a.foo
@@ -1044,8 +1044,8 @@ class InputMultiPath(MultiPath):
 
     XXX This needs to be vetted by somebody who understands traits
 
-    >>> from nipype.interfaces.base import MultiPath
-    >>> class A(traits.HasTraits):
+    >>> from nipype.interfaces.base import InputMultiPath
+    >>> class A(TraitedSpec):
     ...     foo = InputMultiPath(File(exists=False))
     >>> a = A()
     >>> a.foo
@@ -1064,13 +1064,5 @@ class InputMultiPath(MultiPath):
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
 
     """
-    def get(self, object, name):
-        value = self.get_value(object, name)
-        if len(value) == 0:
-            return Undefined
-        else:
-            return value
-        
-    def set(self, object, name, value):
-        self.set_value(object, name, value)
+    pass
 
