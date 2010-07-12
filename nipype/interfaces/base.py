@@ -1002,7 +1002,7 @@ class OutputMultiPath(MultiPath):
 
     >>> from nipype.interfaces.base import MultiPath
     >>> class A(traits.HasTraits):
-    ...     foo = MultiPath(File(exists=False))
+    ...     foo = OutputMultiPath(File(exists=False))
     >>> a = A()
     >>> a.foo
     <undefined>
@@ -1046,7 +1046,7 @@ class InputMultiPath(MultiPath):
 
     >>> from nipype.interfaces.base import MultiPath
     >>> class A(traits.HasTraits):
-    ...     foo = MultiPath(File(exists=False))
+    ...     foo = InputMultiPath(File(exists=False))
     >>> a = A()
     >>> a.foo
     <undefined>
@@ -1064,5 +1064,13 @@ class InputMultiPath(MultiPath):
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
 
     """
-    pass
+    def get(self, object, name):
+        value = self.get_value(object, name)
+        if len(value) == 0:
+            return Undefined
+        else:
+            return value
+        
+    def set(self, object, name, value):
+        self.set_value(object, name, value)
 
