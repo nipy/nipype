@@ -1,6 +1,14 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Provide interface to AFNI commands."""
+"""Provide interface to AFNI commands.
+
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../emptydata'))
+    >>> os.chdir(datadir)
+
+"""
 __docformat__ = 'restructuredtext'
 
 
@@ -30,14 +38,15 @@ class To3dInputSpec(AFNITraitedSpec):
                    argstr = '-prefix %s',
                    position = -2,
                    mandatory = True)
-    filetype = traits.Str(desc = 'type of datafile being converted',
-                          argstr = '-%s')
+    filetype = traits.Enum('spgr', 'fse', 'epan', 'anat', 'ct', 'spct','pet', 'mra', 'bmap', 'diff',
+                           'omri', 'abuc','fim', 'fith', 'fico', 'fitt', 'fift','fizt', 'fict', 'fibt',
+                           'fibn','figt','fipt','fbuc', argstr = '-%s', desc='type of datafile being converted')
     '''use xor'''
     skipoutliers = traits.Bool(desc = 'skip the outliers check',
                                argstr = '-skip_outliers')
     assumemosaic = traits.Bool(desc = 'assume that Siemens image is mosaic',
                                argstr = '-assume_dicom_mosaic')
-    datatype = traits.Str(desc = 'set output file datatype',
+    datatype = traits.Enum('short', 'float', 'byte', 'complex', desc = 'set output file datatype',
                           argstr = '-datum %s')
     funcparams = traits.Str(desc = 'parameters for functional data',
                             argstr = '-time:zt %s alt+z2')
@@ -58,9 +67,13 @@ class To3d(AFNICommand):
     Examples
     --------
     >>> from nipype.interfaces import afni
-    >>> to3d = afni.To3d(datatype="anat")
-    >>> to3d.inputs.datum = 'float'
-    >>> res = to3d.run(infiles='data/*.dcm')
+    >>> to3d = afni.To3d()
+    AFNI has no environment variable that sets filetype
+    Nipype uses NIFTI_GZ as default
+    >>> to3d.inputs.datatype = 'float'
+    >>> to3d.inputs.infolder='dicomdir'
+    >>> to3d.inputs.filetype="anat"
+    >>> res = to3d.run() #doctest: +SKIP
 
     """
 
