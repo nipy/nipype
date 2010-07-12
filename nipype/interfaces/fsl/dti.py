@@ -4,9 +4,11 @@
 <http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.  This
 was written to work with FSL version 4.1.4.
 
-Examples
---------
-See the docstrings of the individual classes for examples.
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../emptydata'))
+    >>> os.chdir(datadir)
 
 """
 
@@ -63,13 +65,13 @@ class DTIFit(FSLCommand):
         Example:
         >>> from nipype.interfaces import fsl
         >>> dti = fsl.DTIFit()
-        >>> dti.inputs.dwi = data.nii.gz
-        >>> dti.inputs.bvec = bvecs
-        >>> dti.inputs.bval = bvals
-        >>> dti.inputs.base_name = TP
-        >>> dti.inputs.mask = nodif_brain_mask.nii.gz
+        >>> dti.inputs.dwi = 'diffusion.nii'
+        >>> dti.inputs.bvecs = 'bvecs'
+        >>> dti.inputs.bvals = 'bvals'
+        >>> dti.inputs.base_name = 'TP'
+        >>> dti.inputs.mask = 'mask.nii'
         >>> dti.cmdline
-        'dtifit -k data.nii.gz -o TP -m nodif_brain_mask.nii.gz -r bvecs -b bvals'
+        'dtifit -k diffusion.nii -o TP -m mask.nii -r bvecs -b bvals'
     """
     _cmd = 'dtifit'
     input_spec = DTIFitInputSpec
@@ -94,9 +96,9 @@ class EddyCorrect(FSLCommand):
     """ Use FSL eddy_correct command for correction of eddy current distortion
         Example:
         >>> from nipype.interfaces import fsl
-        >>> eddyc = fsl.EddyCorrect(in_file='/data.nii.gz',ref_num=0)
-        >>> print dti.cmdline
-        'eddy_correct data.nii.gz data_edc.nii.gz 0'
+        >>> eddyc = fsl.EddyCorrect(in_file='diffusion.nii',out_file="diffusion_edc.nii", ref_num=0)
+        >>> eddyc.cmdline
+        'eddy_correct diffusion.nii diffusion_edc.nii 0'
     """
     _cmd = 'eddy_correct'
     input_spec = EddyCorrectInputSpec
@@ -163,7 +165,8 @@ class BEDPOSTX(FSLCommand):
     """ Use FSL  bedpostx command for local modelling of diffusion parameters
         Example:
         >>> from nipype.interfaces import fsl
-        >>> bedp = fsl.BEDPOSTX(bpx_directory='subjdir', fibres=1)
+        >>> bedp = fsl.BEDPOSTX(bpx_directory='subjdir', bvecs='bvecs', bvals='bvals', dwi='diffusion.nii', \
+        mask='mask.nii', fibres=1)
         >>> bedp.cmdline
         'bedpostx subjdir -n 1'
     """
@@ -432,12 +435,12 @@ class Randomise(FSLCommand):
         in order to find voxels which correlate with your model
         Example:
         >>> from nipype.interfaces import fsl
-        >>> rand = fsl.Randomise(in_file='allFA', \
-                                 mask = 'all_FA_skeleton_mask'
-                                 tcon='design.con',
+        >>> rand = fsl.Randomise(in_file='allFA.nii', \
+                                 mask = 'mask.nii', \
+                                 tcon='design.con', \
                                  design_mat='design.mat')
         >>> rand.cmdline
-        'randomise -i allFA -o tbss -t design.con -d design.mat -m all_FA_skeleton_mask'
+        'randomise -i allFA.nii -o tbss_ -d design.mat -t design.con -m mask.nii'
     """
     _cmd = 'randomise'
     input_spec = RandomiseInputSpec
@@ -526,16 +529,14 @@ class ProbTrackX(FSLCommand):
     """ Use FSL  probtrackx for tractography on bedpostx results
         Example:
         >>> from nipype.interfaces import fsl
-        >>> pbx = fsl.ProbTrackX(samplesbase_name='merged', mask='nodif_brain_mask.nii.gz',
-                     seed_file='MASK_average_thal_right.nii.gz', mode='seedmask',
-                     xfm='standard2diff.mat', n_samples=3, n_steps=10, force_dir=True, opd=True, os2t=True,
-                     out_dir='dtiout', target_masks = ['THAL2CTX_right/targets_MASK1.nii','THAL2CTX_right/targets_MASK2.nii'],
+        >>> pbx = fsl.ProbTrackX(samplesbase_name='merged', mask='mask.nii', \
+                     seed_file='MASK_average_thal_right.nii', mode='seedmask', \
+                     xfm='trans.mat', n_samples=3, n_steps=10, force_dir=True, opd=True, os2t=True, \
+                     bpx_directory='bedpostxout', target_masks = ['targets_MASK1.nii','targets_MASK2.nii'], \
                      paths_file='nipype_fdtpaths')
         >>> pbx.cmdline
-        'probtrackx --force_dir -m nodif_brain_mask.nii.gz --mode=seedmask
-        --n_samples=3 --n_steps=10 --opd --os2t --dir=dtiout --out=nipype_fdtpaths
-        -s merged -x MASK_average_thal_right.nii.gz
-        --target_masks=/THAL2CTX_right/targets.txt --xfm=standard2diff.mat'
+        'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=/home/filo \
+--out=nipype_fdtpaths -s merged -x MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
     """
     _cmd = 'probtrackx'
     input_spec = ProbTrackXInputSpec
@@ -648,14 +649,16 @@ class ProjThreshOuputSpec(TraitedSpec):
     
 class ProjThresh(FSLCommand):
     """Use FSL proj_thresh for thresholding some outputs of probtrack
-        For complete details, see the `FDT Documentation
-        <http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_thresh.html>`_
-        Example:
-        >>> from nipype.interfaces import fsl
-        >>> ldir = glob('seeds_to_M*')
-        >>> pThresh = fsl.ProjThresh(in_files=ldir,threshold=3)
-        >>> pThresh.cmdline
-        'proj_thresh seeds_to_M1 seeds_to_M2 3000'
+    For complete details, see the `FDT Documentation
+    <http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_thresh.html>`_
+    
+    Example:
+    >>> from nipype.interfaces import fsl
+    >>> from glob import glob
+    >>> ldir = glob('seeds_to_M*')
+    >>> pThresh = fsl.ProjThresh(in_files=ldir,threshold=3)
+    >>> pThresh.cmdline
+    'proj_thresh seeds_to_M1.nii seeds_to_M2.nii 3'
 
     """ 
     _cmd = 'proj_thresh'
@@ -680,16 +683,19 @@ class FindTheBiggestOutputSpec(TraitedSpec):
     out_file = File(exists=True,argstr='%s',desc='output file indexed in order of input files')
     
 class FindTheBiggest(FSLCommand):
-    """Use FSL find_the_biggest for performing hard segmentation on
-       the outputs of connectivity-based thresholding in probtrack.
-       For complete details, see the `FDT
-       Documentation. <http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_biggest.html>`_
-       Example:
-        >>> from nipype.interfaces import fsl
-        >>> ldir = glob('seeds_to_M*')
-        >>> fBig = fsl.FindTheBiggest(in_files=ldir, out_file='biggestSegmentation')
-        >>> fBig.cmdline
-        'find_the_biggest  seeds_to_M1 seeds_to_M2 biggestSegmentation'      
+    """
+    Use FSL find_the_biggest for performing hard segmentation on
+    the outputs of connectivity-based thresholding in probtrack.
+    For complete details, see the `FDT
+    Documentation. <http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_biggest.html>`_
+    
+    Example:
+    >>> from nipype.interfaces import fsl
+    >>> from glob import glob
+    >>> ldir = glob('seeds_to_M*')
+    >>> fBig = fsl.FindTheBiggest(in_files=ldir, out_file='biggestSegmentation')
+    >>> fBig.cmdline
+    'find_the_biggest seeds_to_M1.nii seeds_to_M2.nii biggestSegmentation'
 
     """    
     _cmd='find_the_biggest'
