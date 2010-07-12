@@ -869,6 +869,8 @@ class CommandLine(BaseInterface):
         setattr(runtime, 'stderr', None)
         setattr(runtime, 'cmdline', self.cmdline)
         runtime.environ.update(self.inputs.environ)
+        if not self._exists_in_path(self.cmd.split()[0]):
+            raise IOError("%s could not be found"%self.cmd.split()[0])
         proc = subprocess.Popen(runtime.cmdline,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
@@ -879,6 +881,23 @@ class CommandLine(BaseInterface):
         runtime.returncode = proc.returncode
         return runtime
 
+    def _exists_in_path(self, cmd):
+        '''
+        Based on a code snippet from http://orip.org/2009/08/python-checking-if-executable-exists-in.html
+        '''
+        # can't search the path if a directory is specified
+        if os.path.dirname(cmd):
+            return False
+    
+        extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
+        for directory in os.environ.get("PATH", "").split(os.pathsep):
+            base = os.path.join(directory, cmd)
+            options = [base] + [(base + ext) for ext in extensions]
+            for filename in options:
+                if os.path.exists(filename):
+                    return True
+        return False
+  
     def _gen_filename(self, name):
         """ Generate filename attributes before running.
 
