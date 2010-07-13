@@ -319,7 +319,7 @@ class Workflow(WorkflowBase):
         """
         newnodes = [node for node in nodes if node not in self._graph.nodes()]
         if not newnodes:
-            logger.info('no new nodes to add')
+            logger.debug('no new nodes to add')
             return
         for node in newnodes:
             if not issubclass(node.__class__, WorkflowBase):
@@ -518,7 +518,7 @@ class Workflow(WorkflowBase):
                 nodes2remove.append(node)
                 for u, _, d in self._graph.in_edges_iter(nbunch=node, data=True):
                     for cd in d['connect']:
-                        logger.info("in: %s" % str (cd))
+                        logger.debug("in: %s" % str (cd))
                         dstnode = node._get_parameter_node(cd[1],subtype='in')
                         srcnode = u
                         srcout = cd[0]
@@ -526,7 +526,7 @@ class Workflow(WorkflowBase):
                         self.connect(srcnode, srcout, dstnode, dstin)
                 for _, v, d in self._graph.out_edges_iter(nbunch=node, data=True):
                     for cd in d['connect']:
-                        logger.info("out: %s" % str (cd))
+                        logger.debug("out: %s" % str (cd))
                         dstnode = v
                         if isinstance(cd[0], tuple):
                             parameter = cd[0][0]
@@ -887,10 +887,10 @@ class Node(WorkflowBase):
         if updatehash:
             #if isinstance(self, MapNode):
             #    self._run_interface(updatehash=True)
-            logger.info("Updating hash: %s" % hashvalue)
+            logger.debug("Updating hash: %s" % hashvalue)
             self._save_hashfile(hashfile, hashed_inputs)
         if force_execute or (not updatehash and (self.overwrite or not os.path.exists(hashfile))):
-            logger.info("Node hash: %s"%hashvalue)
+            logger.debug("Node hash: %s"%hashvalue)
             hashfile_unfinished = os.path.join(outdir, '_0x%s_unfinished.json' % hashvalue)
             if os.path.exists(outdir) and not (os.path.exists(hashfile_unfinished) and self._interface.can_resume):
                 logger.debug("Removing old %s and its contents"%outdir)
@@ -935,15 +935,16 @@ class Node(WorkflowBase):
         if copyfiles:
             self._copyfiles_to_wd(cwd,execute)
         resultsfile = os.path.join(cwd, 'result_%s.npz' % self._id)
+        if issubclass(self._interface.__class__, CommandLine):
+            cmd = self._interface.cmdline
+            logger.info('cmd: %s'%cmd)
         if execute:
             if issubclass(self._interface.__class__, CommandLine):
-                cmd = self._interface.cmdline
-                logger.info('cmd: %s'%cmd)
                 cmdfile = os.path.join(cwd,'command.txt')
                 fd = open(cmdfile,'wt')
                 fd.writelines(cmd)
                 fd.close()
-            logger.info('Executing node')
+            logger.debug('Executing node')
             try:
                 result = self._interface.run()
             except:
@@ -964,7 +965,7 @@ class Node(WorkflowBase):
                 np.savez(resultsfile, **outdict)
         else:
             # Likewise, cwd could go in here
-            logger.info("Collecting precomputed outputs:")
+            logger.debug("Collecting precomputed outputs:")
             try:
                 aggouts = self._interface.aggregate_outputs()
                 runtime = Bunch(returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
@@ -972,7 +973,7 @@ class Node(WorkflowBase):
                                          runtime=runtime,
                                          outputs=aggouts)
             except FileNotFoundError:
-                logger.info("Some of the outputs were not found: rerunning node.")
+                logger.debug("Some of the outputs were not found: rerunning node.")
                 result = self._run_command(execute=True, cwd=cwd, copyfiles=False)
         return result
 

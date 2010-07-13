@@ -399,7 +399,6 @@ class ImageStats(FSLCommand):
             out_stat = load_json(outfile)['stat']
         else:
             out_stat = []
-            print runtime
             for line in runtime.stdout.split('\n'):
                 if line:
                     values = line.split()

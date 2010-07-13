@@ -246,7 +246,7 @@ def _generate_expanded_graph(graph_in):
     and b=[3,4] this procedure will generate a graph with sub-graphs
     parameterized as (a=1,b=3), (a=1,b=4), (a=2,b=3) and (a=2,b=4). 
     """
-    logger.info("PE: expanding iterables")
+    logger.debug("PE: expanding iterables")
     moreiterables = True
     # convert list of tuples to dict fields
     for node in graph_in.nodes():
@@ -272,7 +272,7 @@ def _generate_expanded_graph(graph_in):
                                      iterables)
         else:
             moreiterables = False
-    logger.info("PE: expanding iterables ... done")
+    logger.debug("PE: expanding iterables ... done")
     return graph_in
 
 def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
@@ -360,7 +360,7 @@ def make_output_dir(outdir):
         # case where mkdir failed because a missing parent
         # directory, something went wrong up-stream that caused an
         # invalid path to be passed in for `outdir`.
-        logger.info("Creating %s" % outdir)
+        logger.debug("Creating %s" % outdir)
         os.mkdir(outdir)
     return outdir
 
