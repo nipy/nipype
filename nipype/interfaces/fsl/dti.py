@@ -527,16 +527,19 @@ class ProbTrackXOutputSpec(TraitedSpec):
 class ProbTrackX(FSLCommand):
 
     """ Use FSL  probtrackx for tractography on bedpostx results
-        Example:
+    
+        Examples
+        --------
+        
         >>> from nipype.interfaces import fsl
         >>> pbx = fsl.ProbTrackX(samplesbase_name='merged', mask='mask.nii', \
                      seed_file='MASK_average_thal_right.nii', mode='seedmask', \
                      xfm='trans.mat', n_samples=3, n_steps=10, force_dir=True, opd=True, os2t=True, \
                      bpx_directory='bedpostxout', target_masks = ['targets_MASK1.nii','targets_MASK2.nii'], \
-                     paths_file='nipype_fdtpaths')
+                     paths_file='nipype_fdtpaths', out_dir='.')
         >>> pbx.cmdline
-        'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=/home/filo \
---out=nipype_fdtpaths -s merged -x MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
+        'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=. --out=nipype_fdtpaths -s merged -x MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
+
     """
     _cmd = 'probtrackx'
     input_spec = ProbTrackXInputSpec
