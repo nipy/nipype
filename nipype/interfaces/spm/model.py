@@ -156,7 +156,6 @@ class EstimateModelOutputSpec(TraitedSpec):
     residual_image = File(exists=True, desc='Mean-squared image of the residuals')
     RPVimage = File(exists=True, desc='Resels per voxel image')
     spm_mat_file = File(exist=True, desc='Updated SPM mat file')
-    residuals = OutputMultiPath(File(exists=True), desc='residual images')
 
 class EstimateModel(SPMCommand):
     """Use spm_spm to estimate the parameters of a model
@@ -211,7 +210,6 @@ class EstimateModel(SPMCommand):
         outputs['RPVimage'] = rpv
         spm = os.path.join(pth, 'SPM.mat')
         outputs['spm_mat_file'] = spm
-        outputs['residuals'] = glob("ResI_*.img")
         return outputs
 
 class EstimateContrastInputSpec(SPMCommandInputSpec):
