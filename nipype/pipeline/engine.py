@@ -1112,7 +1112,7 @@ class MapNode(Node):
                                                       fieldvals[i])) 
                 setattr(newnodes[i].inputs, field,
                         fieldvals[i])
-        workflowname = 'map'
+        workflowname = 'mapflow'
         iterflow = Workflow(name=workflowname)
         iterflow.base_dir = cwd
         iterflow.config = self.config
