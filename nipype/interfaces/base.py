@@ -879,7 +879,8 @@ class CommandLine(BaseInterface):
         setattr(runtime, 'cmdline', self.cmdline)
         runtime.environ.update(self.inputs.environ)
         if not self._exists_in_path(self.cmd.split()[0]):
-            raise IOError("%s could not be found"%self.cmd.split()[0])
+            raise IOError("%s could not be found on host %s"%(self.cmd.split()[0],
+                                                         runtime.hostname))
         proc = subprocess.Popen(runtime.cmdline,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,

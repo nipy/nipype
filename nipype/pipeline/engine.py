@@ -156,7 +156,14 @@ class WorkflowBase(object):
         """Writes crash related information to a file
         """
         name = self._id
-        message = ['Node %s failed to run.' % name]
+        if self.result and hasattr(self.result, 'runtime') and \
+                self.result.runtime:
+            if isinstance(self.result.runtime, list):
+                host = self.result.runtime[0].hostname
+            else:
+                host = self.result.runtime.hostname
+        message = ['Node %s failed to run on host %s.' % (name,
+                                                          host)]
         logger.error(message)
         if not traceback:
             exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -1103,7 +1110,7 @@ class MapNode(Node):
                                                       fieldvals[i])) 
                 setattr(newnodes[i].inputs, field,
                         fieldvals[i])
-        workflowname = 'mapflow'
+        workflowname = 'map'
         iterflow = Workflow(name=workflowname)
         iterflow.base_dir = cwd
         iterflow.config = self.config
@@ -1114,14 +1121,13 @@ class MapNode(Node):
         for i in range(nitems):
             node = iterflow.get_exec_node('.'.join((workflowname,
                                                     nodenames[i])))
+            runtime = Bunch(returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
+            self._result.runtime.insert(i, runtime)
             if node.result and hasattr(node.result, 'runtime'):
-                self._result.runtime.insert(i, node.result.runtime)
+                self._result.runtime[i] = node.result.runtime
                 if node.result.runtime.returncode != 0:
                     raise Exception('iternode %s:%d did not run'%(node._id, i))
                 self._result.interface.insert(i, node.result.interface)
-            else:
-                # by default set runtime to None if not provided
-                self._result.runtime.insert(i, None)
         for key, _ in self.outputs.items():
             values = []
             for i in range(nitems):
@@ -1129,8 +1135,8 @@ class MapNode(Node):
                                                         nodenames[i])))
                 values.insert(i, node.result.outputs.get()[key])
             if any([val != Undefined for val in values]):
-                #logger.info('setting key %s with values %s' %(key, str(values)))
+                #logger.debug('setting key %s with values %s' %(key, str(values)))
                 setattr(self._result.outputs, key, values)
             #else:
-            #    logger.info('no values for key %s' %key)
+            #    logger.debug('no values for key %s' %key)
         os.chdir(old_cwd)
