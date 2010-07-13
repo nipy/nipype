@@ -86,32 +86,12 @@ class BET(FSLCommand):
 
     Examples
     --------
-    Initialize BET with no options, assigning them when calling run:
-
     >>> from nipype.interfaces import fsl
+    >>> from nipype.testing import funcfile
     >>> btr = fsl.BET()
-    >>> res = btr.run('in_file', 'out_file', frac=0.5) #doctest: +SKIP
-
-    Assign options through the ``inputs`` attribute:
-
-    >>> btr = fsl.BET()
-    >>> btr.inputs.in_file = 'structural.nii'
-    >>> btr.inputs.out_file = 'structural_brain.nii'
+    >>> btr.inputs.in_file = funcfile
     >>> btr.inputs.frac = 0.7
     >>> res = btr.run() # doctest: +SKIP
-
-    Specify options when creating a BET instance:
-
-    >>> btr = fsl.BET(in_file='structural.nii', out_file='structural_brain.nii', frac=0.5)
-    >>> res = btr.run() # doctest: +SKIP
-
-    Loop over many inputs (Note: the snippet below would overwrite the
-    out_file each time):
-
-    >>> btr = fsl.BET(in_file='structural.nii', out_file='structural_brain.nii')
-    >>> fracvals = [0.3, 0.4, 0.5]
-    >>> for val in fracvals: #doctest: +SKIP
-    ...     res = btr.run(frac=val) #doctest: +SKIP
 
     """
 
@@ -254,6 +234,18 @@ class FAST(FSLCommand):
 
     For complete details, see the `FAST Documentation.
     <http://www.fmrib.ox.ac.uk/fsl/fast4/index.html>`_
+
+    Examples
+    --------
+    >>> from nipype.interfaces import fsl
+    >>> from nipype.testing import anatfile
+
+    Assign options through the ``inputs`` attribute:
+
+    >>> fastr = fsl.FAST()
+    >>> fastr.inputs.in_files = anatfile
+    >>> out = fastr.run() #doctest: +SKIP
+    
     """
     _cmd = 'fast'
     input_spec = FASTInputSpec
@@ -403,9 +395,10 @@ class FLIRT(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
+    >>> from nipype.testing import anatfile, template
     >>> flt = fsl.FLIRT(bins=640, cost_func='mutualinfo')
-    >>> flt.inputs.in_file = 'structural.nii'
-    >>> flt.inputs.reference = 'mni.nii'
+    >>> flt.inputs.in_file = anatfile
+    >>> flt.inputs.reference = template
     >>> flt.inputs.out_file = 'moved_subject.nii'
     >>> flt.inputs.out_matrix_file = 'subject_to_template.mat'
     >>> res = flt.run() #doctest: +SKIP
@@ -449,11 +442,12 @@ class ApplyXfm(FLIRT):
     -------
 
     >>> import nipype.interfaces.fsl as fsl
+    >>> from nipype.testing import anatfile, template, transfm 
     >>> applyxfm = fsl.ApplyXfm()
-    >>> applyxfm.inputs.in_file = 'structural.nii'
-    >>> applyxfm.inputs.in_matrix_file = 'trans.mat'
+    >>> applyxfm.inputs.in_file = anatfile
+    >>> applyxfm.inputs.in_matrix_file = transfm
     >>> applyxfm.inputs.out_file = 'newfile.nii'
-    >>> applyxfm.inputs.reference = 'mni.nii'
+    >>> applyxfm.inputs.reference = template
     >>> applyxfm.inputs.apply_xfm = True
     >>> result = applyxfm.run() # doctest: +SKIP
 
@@ -501,8 +495,9 @@ class MCFLIRT(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> mcflt = fsl.MCFLIRT(in_file='functional.nii', cost='mutualinfo')
-    >>> res = mcflt.run()
+    >>> from nipype.testing import funcfile
+    >>> mcflt = fsl.MCFLIRT(in_file=funcfile, cost='mutualinfo')
+    >>> res = mcflt.run() # doctest: +SKIP
 
     """
     _cmd = 'mcflirt'
@@ -519,19 +514,24 @@ class MCFLIRT(FSLCommand):
         # out_file? in_file?
         # These could be handled similarly to default values for inputs
         if isdefined(self.inputs.stats_imgs) and self.inputs.stats_imgs:
-            outputs['variance_img'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_variance')
-            outputs['std_img'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_sigma')
-            outputs['mean_img'] = self._gen_fname(self.inputs.in_file, cwd=cwd, suffix='_meanvol')
+            outputs['variance_img'] = self._gen_fname(self.inputs.in_file,
+                                                      cwd=cwd,
+                                                      suffix='_variance')
+            outputs['std_img'] = self._gen_fname(self.inputs.in_file,
+                                                 cwd=cwd, suffix='_sigma')
+            outputs['mean_img'] = self._gen_fname(self.inputs.in_file,
+                                                  cwd=cwd, suffix='_meanvol')
         if isdefined(self.inputs.save_mats) and self.inputs.save_mats:
             _, filename = os.path.split(outputs['out_file'])
             matpathname = os.path.join(cwd, filename + '.mat')
             _,_,_,timepoints = load(self.inputs.in_file).get_shape()
             outputs['mat_file'] = []
             for t in range(timepoints):
-                outputs['mat_file'].append(os.path.join(matpathname, 'MAT_%04d'%t))
+                outputs['mat_file'].append(os.path.join(matpathname,
+                                                        'MAT_%04d'%t))
         if isdefined(self.inputs.save_plots) and self.inputs.save_plots:
-            # Note - if e.g. out_file has .nii.gz, you get .nii.gz.par, which is
-            # what mcflirt does!
+            # Note - if e.g. out_file has .nii.gz, you get .nii.gz.par, 
+            # which is what mcflirt does!
             outputs['par_file'] = outputs['out_file'] + '.par'
         return outputs
 
@@ -666,8 +666,9 @@ class FNIRT(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> fnt = fsl.FNIRT(affine_file='trans.mat')
-    >>> res = fnt.run(ref_file='ref.nii', in_file='anat.nii') #doctest: +SKIP
+    >>> from nipype.testing import anatfile, template, transfm
+    >>> fnt = fsl.FNIRT(affine_file=transfm)
+    >>> res = fnt.run(ref_file= template, in_file=anatfile) #doctest: +SKIP
 
     T1 -> Mni153
 
@@ -679,11 +680,11 @@ class FNIRT(FSLCommand):
     Specify the resolution of the warps
 
     >>> fnirt_mprage.inputs.warp_resolution = (6, 6, 6)
-    >>> res = fnirt_mprage.run(in_file='structural.nii', ref_file='mni.nii', warped_file='warped.nii', fieldcoeff_file='fieldcoeff.nii')
+    >>> res = fnirt_mprage.run(in_file='structural.nii', ref_file='mni.nii', warped_file='warped.nii', fieldcoeff_file='fieldcoeff.nii')#doctest: +SKIP
 
     We can check the command line and confirm that it's what we expect.
 
-    >>> fnirt_mprage.cmdline  #doctest: +NORMALIZE_WHITESPACE
+    >>> fnirt_mprage.cmdline  #doctest: +SKIP
     'fnirt --cout=fieldcoeff.nii --in=structural.nii --infwhm=8,4,2,2 --ref=mni.nii --subsamp=4,2,1,1 --warpres=6,6,6 --iout=warped.nii'
 
     """
@@ -856,6 +857,14 @@ class ApplyWarp(FSLCommand):
 
     Examples
     --------
+    >>> from nipype.interfaces import fsl
+    >>> from nipype.testing import (anatfile, template, transfm)
+    >>> aw = fsl.ApplyWarp()
+    >>> aw.inputs.in_file = anatfile
+    >>> aw.inputs.ref_file = template
+    >>> aw.inputs.field_file = 'my_coefficients_filed.nii' #doctest: +SKIP
+    >>> res = aw.run() #doctest: +SKIP
+
 
     """
 
@@ -909,6 +918,12 @@ class SliceTimer(FSLCommand):
 
     Examples
     --------
+   >>> from nipype.interfaces import fsl
+   >>> from nipype.testing import funcfile
+   >>> st = fsl.SliceTimer()
+   >>> st.inputs.in_file = funcfile
+   >>> st.inputs.interleaved = True
+   >>> result = st.run() #doctest: +SKIP
 
     """
 
@@ -963,7 +978,15 @@ class SUSAN(FSLCommand):
 
     Examples
     --------
-
+    >>> from nipype.interfaces import fsl
+    >>> from nipype.testing import anatfile
+    >>> print anatfile #doctest: +SKIP
+    anatomical.nii #doctest: +SKIP
+    >>> sus = fsl.SUSAN()
+    >>> sus.inputs.in_file = anatfile
+    >>> sus.inputs.brightness_threshold = 2000.0
+    >>> sus.inputs.fwhm = 8.0
+    >>> result = sus.run() #doctest: +SKIP
     """
 
     _cmd = 'susan'

@@ -30,4 +30,6 @@ filepath = os.path.abspath(__file__)
 basedir = os.path.dirname(filepath)
 
 funcfile = os.path.join(basedir, 'data', 'functional.nii')
-anatfile = os.path.join(basedir, 'data', 'anatomical.nii')
+anatfile = funcfile
+template = funcfile
+transfm = funcfile
