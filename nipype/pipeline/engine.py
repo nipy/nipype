@@ -162,6 +162,8 @@ class WorkflowBase(object):
                 host = self.result.runtime[0].hostname
             else:
                 host = self.result.runtime.hostname
+        else:
+            host = gethostname()
         message = ['Node %s failed to run on host %s.' % (name,
                                                           host)]
         logger.error(message)
