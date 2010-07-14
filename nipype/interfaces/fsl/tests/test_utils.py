@@ -8,8 +8,20 @@ from shutil import rmtree
 import numpy as np
 
 import nipype.externals.pynifti as nif
-from nipype.testing import assert_equal, assert_not_equal, assert_raises, parametric
+from nipype.testing import (assert_equal, assert_not_equal,
+                            assert_raises, parametric, skipif)
 import nipype.interfaces.fsl.utils as fsl
+
+def no_fsl():
+    """Checks if FSL is NOT installed
+    used with skipif to skip tests that will
+    fail if FSL is not installed"""
+    
+    if fsl.Info().version() == None:
+        return True
+    else:
+        return False
+
 
 def create_files_in_directory():
     outdir = mkdtemp()
@@ -30,6 +42,7 @@ def clean_directory(outdir, old_wd):
         rmtree(outdir)
     os.chdir(old_wd)
 
+@skipif(no_fsl)
 def test_extractroi():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -50,6 +63,7 @@ def test_extractroi():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_imagemaths():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -66,6 +80,7 @@ def test_imagemaths():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_merge():
     input_map = dict(args = dict(argstr='%s',),
                      dimension = dict(argstr='-%s',mandatory=True,),
@@ -79,6 +94,7 @@ def test_merge():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_filterregressor():
     input_map = dict(Out_vnscales = dict(),
                      args = dict(argstr='%s',),
@@ -96,6 +112,7 @@ def test_filterregressor():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_smooth():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -109,6 +126,7 @@ def test_smooth():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_split():
     input_map = dict(args = dict(argstr='%s',),
                      dimension = dict(argstr='-%s',),
@@ -156,6 +174,7 @@ def test_fslroi():
 
 
 # test fslmath
+@skipif(no_fsl)
 def test_fslmaths():
     filelist, outdir, cwd = create_files_in_directory()
     math = fsl.ImageMaths()
