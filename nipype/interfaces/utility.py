@@ -99,10 +99,10 @@ class Merge(IOBase):
                     else:
                         out.append(value)
         else:
-            for i in range(len(self.inputs.in1)):
+            for i in range(len(filename_to_list(self.inputs.in1))):
                 out.insert(i,[])
                 for j in range(self.numinputs):
-                    out[i].append(getattr(self.inputs, 'in%d'%(j+1))[i])
+                    out[i].append(filename_to_list(getattr(self.inputs, 'in%d'%(j+1)))[i])
         if out:
             outputs['out'] = out
         return outputs
