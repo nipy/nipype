@@ -549,15 +549,18 @@ class ProbTrackX(FSLCommand):
         if not isdefined(self.inputs.samplesbase_name):
             self.inputs.samplesbase_name = os.path.join(self.inputs.bpx_directory,'merged')
             
+        if isdefined(self.inputs.target_masks):
+            f = open("targets.txt","w")
+            for target in self.inputs.target_masks:
+                f.write("%s\n"%target)
+            f.close()
+            
         return super(ProbTrackX, self)._run_interface(runtime)
     
     def _format_arg(self, name, spec, value):
-        if name == 'target_masks':
+        if name == 'target_masks' and isdefined(value):
             fname = "targets.txt"
-            f = open(fname,"w")
-            for target in value:
-                f.write("%s\n"%target)
-            f.close()
+            
             return super(ProbTrackX, self)._format_arg(name, spec, [fname])
         else:
             return super(ProbTrackX, self)._format_arg(name, spec, value)
