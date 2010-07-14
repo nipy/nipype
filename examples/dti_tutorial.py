@@ -1,17 +1,19 @@
 
 """
-   A pipeline example that uses several interfaces to
-   perform analysis on diffusion weighted images using
-   FSL FDT tools.
+A pipeline example that uses several interfaces to
+perform analysis on diffusion weighted images using
+FSL FDT tools.
 
-   This tutorial is based on the 2010 FSL course and uses
-   data freely available at the FSL website at:
-   http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
+This tutorial is based on the 2010 FSL course and uses
+data freely available at the FSL website at:
+http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
+
+More details can be found at http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/fdt/index.htm
 """
 
 
 """
-1. Tell python where to find the appropriate functions.
+Tell python where to find the appropriate functions.
 """
 
 import nipype.interfaces.io as nio           # Data i/o
@@ -21,9 +23,10 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import os                                    # system functions
 
 """
-1b. Confirm package dependencies are installed.  (This is only for the
+Confirm package dependencies are installed.  (This is only for the
 tutorial, rarely would you put this in your own code.)
 """
+
 from nipype.utils.misc import package_check
 
 package_check('numpy', '1.3', 'tutorial1')
@@ -52,17 +55,16 @@ sub-directories and a dictionary that maps each run to a mnemonic (or
 field) for the run type (``dwi`` or ``bvals``).  These fields become
 the output fields of the ``datasource`` node in the pipeline.
 
-"""
-
-"""
 Specify the subject directories
 """
+
 subject_list = ['subj1']
 
 
 """
 Map field names to individual subject runs
 """
+
 info = dict(dwi=[['subject_id', 'data']],
             bvecs=[['subject_id','bvecs']],
             bvals=[['subject_id','bvals']],
@@ -86,6 +88,7 @@ it should repeat the analysis on each of the items in the
 preprocessing and estimation will be repeated for each subject
 contained in subject_list.
 """
+
 infosource.iterables = ('subject_id', subject_list)
 
 """
@@ -95,14 +98,17 @@ fill in the information from above about the layout of our data.  The
 and provides additional housekeeping and pipeline specific
 functionality.
 """
+
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=info.keys()),
                      name = 'datasource')
 
 datasource.inputs.template = "%s/%s"
+
 # This needs to point to the fdt folder you can find after extracting 
 # http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 datasource.inputs.base_directory = os.path.abspath('fsl_course_data/fdt/')
+
 datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz',
                                         seed_file="%s.bedpostX/%s.nii.gz",
                                         target_masks="%s.bedpostX/%s.nii.gz")
@@ -120,6 +126,7 @@ computeTensor = pe.Workflow(name='computeTensor')
 """
 extract the volume with b=0 (nodif_brain)
 """
+
 fslroi = pe.Node(interface=fsl.ExtractROI(),name='fslroi')
 fslroi.inputs.t_min=0
 fslroi.inputs.t_size=1
@@ -127,6 +134,7 @@ fslroi.inputs.t_size=1
 """
 create a brain mask from the nodif_brain
 """
+
 bet = pe.Node(interface=fsl.BET(),name='bet')
 bet.inputs.mask=True
 bet.inputs.frac=0.34
@@ -134,17 +142,20 @@ bet.inputs.frac=0.34
 """
 correct the diffusion weighted images for eddy_currents
 """
+
 eddycorrect = pe.Node(interface=fsl.EddyCorrect(),name='eddycorrect')
 eddycorrect.inputs.ref_num=0
 
 """
 compute the diffusion tensor in each voxel
 """
+
 dtifit = pe.Node(interface=fsl.DTIFit(),name='dtifit')
 
 """
 connect all the nodes for this workflow
 """
+
 computeTensor.connect([
                         (fslroi,bet,[('roi_file','in_file')]),
                         (eddycorrect,dtifit,[('eddy_corrected','dwi')]),
@@ -167,6 +178,7 @@ tractography.base_dir = os.path.abspath('dti_tutorial')
 """
 estimate the diffusion parameters: phi, theta, and so on
 """
+
 bedpostx = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx')
 bedpostx.inputs.fibres = 1
 
@@ -183,6 +195,7 @@ perform probabilistic tracktography
 note: the values given to these parameters are toy examples and
 should be changed to more meaningful values
 """
+
 probtrackx = pe.Node(interface=fsl.ProbTrackX(),name='probtrackx')
 probtrackx.inputs.mode='seedmask'
 probtrackx.inputs.loop_check=True
@@ -198,12 +211,14 @@ probtrackx.inputs.os2t=True
 """
 perform hard segmentation on the output of probtrackx
 """
+
 findthebiggest = pe.Node(interface=fsl.FindTheBiggest(),name='findthebiggest')
 
 
 """
 connect all the nodes for this workflow
 """
+
 tractography.connect([
                         (bedpostx,probtrackx,[('bpx_out_directory','bpx_directory')]),
                         (bedpostx,probtrackx,[('bpx_out_directory','out_dir')]),
@@ -215,6 +230,7 @@ tractography.connect([
 """
 Setup data storage area
 """
+
 datasink = pe.Node(interface=nio.DataSink(),name='datasink')
 datasink.inputs.base_directory = os.path.abspath('dtiresults')
 
@@ -226,6 +242,7 @@ def getstripdir(subject_id):
 Setup the pipeline that combines the two workflows: tractography and computeTensor
 ----------------------------------------------------------------------------------
 """
+
 dwiproc = pe.Workflow(name="dwiproc")
 dwiproc.base_dir = os.path.abspath('dti_tutorial')
 dwiproc.connect([
