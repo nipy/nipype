@@ -14,6 +14,16 @@ from nipype.interfaces.base import InterfaceResult, File
 from nipype.interfaces.fsl import check_fsl
 from nipype.interfaces.traits import Undefined
 
+def no_fsl():
+    """Checks if FSL is NOT installed
+    used with skipif to skip tests that will
+    fail if FSL is not installed"""
+    
+    if Info.version() == None:
+        return True
+    else:
+        return False
+@skipif(no_fsl)
 def fsl_name(obj, fname):
     """Create valid fsl name, including file extension for output type.
     """
@@ -22,6 +32,8 @@ def fsl_name(obj, fname):
 
 tmp_infile = None
 tmp_dir = None
+
+@skipif(no_fsl)
 def setup_infile():
     global tmp_infile, tmp_dir
     ext = Info.output_type_to_ext(Info.output_type())
@@ -37,6 +49,7 @@ def teardown_infile(tmp_dir):
 #@with_setup(setup_infile, teardown_infile)
 #broken in nose with generators
 @parametric
+@skipif(no_fsl)
 def test_bet():
     tmp_infile, tp_dir = setup_infile()
     better = fsl.BET()
@@ -103,6 +116,7 @@ def test_bet():
     teardown_infile(tmp_dir)
     
 # test fast
+@skipif(no_fsl)
 def test_fast():
     tmp_infile, tp_dir = setup_infile()
     faster = fsl.FAST()
@@ -161,7 +175,7 @@ def test_fast():
                                                       settings[0],
                                                       tmp_infile])
     teardown_infile(tmp_dir)
-    
+@skipif(no_fsl)    
 def setup_flirt():
     ext = Info.output_type_to_ext(Info.output_type())
     tmpdir = tempfile.mkdtemp()
@@ -173,6 +187,7 @@ def teardown_flirt(tmpdir):
     shutil.rmtree(tmpdir)
 
 @parametric
+@skipif(no_fsl)
 def test_flirt():
     # setup
     tmpdir, infile, reffile = setup_flirt()
@@ -269,6 +284,7 @@ def test_flirt():
 
 
 # Mcflirt
+@skipif(no_fsl)
 def test_mcflirt():
     tmpdir, infile, reffile = setup_flirt()
     
@@ -335,7 +351,9 @@ def test_mcflirt():
     teardown_flirt(tmpdir)
 
 #test fnirt
+@skipif(no_fsl)
 def test_fnirt():
+
     tmpdir, infile, reffile = setup_flirt()
     fnirt = fsl.FNIRT()
     yield assert_equal, fnirt.cmd, 'fnirt'
@@ -423,7 +441,8 @@ def test_fnirt():
                                        
         yield assert_equal, fnirt.cmdline, cmd
     teardown_flirt(tmpdir)
-    
+
+@skipif(no_fsl)
 def test_applywarp():
     tmpdir, infile, reffile = setup_flirt()
     opt_map = {
