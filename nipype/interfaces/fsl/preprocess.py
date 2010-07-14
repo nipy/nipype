@@ -87,9 +87,9 @@ class BET(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> from nipype.testing import funcfile
+    >>> from nipype.testing import  example_data
     >>> btr = fsl.BET()
-    >>> btr.inputs.in_file = funcfile
+    >>> btr.inputs.in_file = example_data('structural.nii')
     >>> btr.inputs.frac = 0.7
     >>> res = btr.run() # doctest: +SKIP
 
@@ -238,12 +238,12 @@ class FAST(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> from nipype.testing import anatfile
+    >>> from nipype.testing import example_data
 
     Assign options through the ``inputs`` attribute:
 
     >>> fastr = fsl.FAST()
-    >>> fastr.inputs.in_files = anatfile
+    >>> fastr.inputs.in_files = example_data('structural.nii')
     >>> out = fastr.run() #doctest: +SKIP
 
     """
@@ -395,10 +395,10 @@ class FLIRT(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> from nipype.testing import anatfile, template
+    >>> from nipype.testing import example_data
     >>> flt = fsl.FLIRT(bins=640, cost_func='mutualinfo')
-    >>> flt.inputs.in_file = anatfile
-    >>> flt.inputs.reference = template
+    >>> flt.inputs.in_file = example_data('structural.nii')
+    >>> flt.inputs.reference = example_data('mni.nii')
     >>> flt.inputs.out_file = 'moved_subject.nii'
     >>> flt.inputs.out_matrix_file = 'subject_to_template.mat'
     >>> res = flt.run() #doctest: +SKIP
@@ -442,12 +442,12 @@ class ApplyXfm(FLIRT):
     --------
 
     >>> import nipype.interfaces.fsl as fsl
-    >>> from nipype.testing import anatfile, template, transfm
+    >>> from nipype.testing import example_data
     >>> applyxfm = fsl.ApplyXfm()
-    >>> applyxfm.inputs.in_file = anatfile
-    >>> applyxfm.inputs.in_matrix_file = transfm
+    >>> applyxfm.inputs.in_file = example_data('structural.nii')
+    >>> applyxfm.inputs.in_matrix_file = example_data('trans.mat')
     >>> applyxfm.inputs.out_file = 'newfile.nii'
-    >>> applyxfm.inputs.reference = template
+    >>> applyxfm.inputs.reference = example_data('mni.nii')
     >>> applyxfm.inputs.apply_xfm = True
     >>> result = applyxfm.run() # doctest: +SKIP
 
@@ -495,8 +495,8 @@ class MCFLIRT(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> from nipype.testing import funcfile
-    >>> mcflt = fsl.MCFLIRT(in_file=funcfile, cost='mutualinfo')
+    >>> from nipype.testing import example_data
+    >>> mcflt = fsl.MCFLIRT(in_file=example_data('functional.nii'), cost='mutualinfo')
     >>> res = mcflt.run() # doctest: +SKIP
 
     """
@@ -666,9 +666,9 @@ class FNIRT(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> from nipype.testing import anatfile, template, transfm
-    >>> fnt = fsl.FNIRT(affine_file=transfm)
-    >>> res = fnt.run(ref_file= template, in_file=anatfile) #doctest: +SKIP
+    >>> from nipype.testing import example_data
+    >>> fnt = fsl.FNIRT(affine_file=example_data('trans.mat'))
+    >>> res = fnt.run(ref_file=example_data('mni.nii', in_file=example_data('structural.nii')) #doctest: +SKIP
 
     T1 -> Mni153
 
@@ -858,10 +858,10 @@ class ApplyWarp(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> from nipype.testing import (anatfile, template, transfm)
+    >>> from nipype.testing import example_data
     >>> aw = fsl.ApplyWarp()
-    >>> aw.inputs.in_file = anatfile
-    >>> aw.inputs.ref_file = template
+    >>> aw.inputs.in_file = example_data('structural.nii')
+    >>> aw.inputs.ref_file = example_data('mni.nii')
     >>> aw.inputs.field_file = 'my_coefficients_filed.nii' #doctest: +SKIP
     >>> res = aw.run() #doctest: +SKIP
 
@@ -919,9 +919,9 @@ class SliceTimer(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> from nipype.testing import funcfile
+    >>> from nipype.testing import example_data
     >>> st = fsl.SliceTimer()
-    >>> st.inputs.in_file = funcfile
+    >>> st.inputs.in_file = example_data('functional.nii')
     >>> st.inputs.interleaved = True
     >>> result = st.run() #doctest: +SKIP
 
@@ -979,11 +979,11 @@ class SUSAN(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> from nipype.testing import anatfile
+    >>> from nipype.testing import example_data
     >>> print anatfile #doctest: +SKIP
     anatomical.nii #doctest: +SKIP
     >>> sus = fsl.SUSAN()
-    >>> sus.inputs.in_file = anatfile
+    >>> sus.inputs.in_file = example_data('structural.nii')
     >>> sus.inputs.brightness_threshold = 2000.0
     >>> sus.inputs.fwhm = 8.0
     >>> result = sus.run() #doctest: +SKIP
