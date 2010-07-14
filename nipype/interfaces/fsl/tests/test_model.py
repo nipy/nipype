@@ -147,6 +147,7 @@ def test_level1design():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_melodic():
     input_map = dict(ICs = dict(),
                      approach = dict(),
