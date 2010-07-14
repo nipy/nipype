@@ -32,7 +32,7 @@ except:
 from nipype.interfaces.base import (Interface, CommandLine, Bunch,
                                     InterfaceResult, Interface,
                                     TraitedSpec, traits, File, Directory,
-                                    BaseInterface,
+                                    BaseInterface, InputMultiPath,
                                     OutputMultiPath, DynamicTraitedSpec,
                                     BaseTraitedSpec, Undefined)
 from nipype.utils.misc import isdefined
@@ -76,11 +76,15 @@ class IOBase(BaseInterface):
     
 class DataSinkInputSpec(DynamicTraitedSpec):
     base_directory = Directory( 
-        desc='Path to the base directory consisting of subject data.')
-    container = traits.Str(desc = 'Folder within basedirectory in which to store output')
+        desc='Path to the base directory for storing data.')
+    container = traits.Str(desc = 'Folder within base directory in which to store output')
     parameterization = traits.Bool(True, usedefault=True,
                                    desc='store output in parameterized structure')
     strip_dir = Directory(desc='path to strip out of filename')
+    substitutions = InputMultiPath(traits.Tuple(traits.Str,traits.Str),
+                                   desc=('List of 2-tuples reflecting string'
+                                         'to substitute and string to replace'
+                                         'it with'))
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
     
     def __setattr__(self, key, value):
@@ -119,7 +123,6 @@ class DataSink(IOBase):
     input_spec = DataSinkInputSpec
 
     def _get_dst(self, src):
-        #print 'isrc', src
         path, fname = os.path.split(src)
         if self.inputs.parameterization:
             dst = path
@@ -136,8 +139,15 @@ class DataSink(IOBase):
                 dst = path.split(os.path.sep)[-1]
         if dst[0] == os.path.sep:
             dst = dst[1:]
-        #print 'dst', dst
         return dst
+
+    def _substitute(self, pathstr):
+        if isdefined(self.inputs.substitutions):
+            for key, val in self.inputs.substitutions:
+                iflogger.debug(str((pathstr, key, val)))
+                pathstr = pathstr.replace(key, val)
+                iflogger.debug('new: ' + pathstr)
+        return pathstr
         
     def _list_outputs(self):
         """Execute this module.
@@ -159,24 +169,24 @@ class DataSink(IOBase):
                 if d[0] == '@':
                     continue
                 tempoutdir = os.path.join(tempoutdir,d)
-            if not os.path.exists(tempoutdir):
-                #print 'tmpoutdir', tempoutdir
-                os.makedirs(tempoutdir)
             for src in filename_to_list(files):
-                #print 'src',src
                 src = os.path.abspath(src)
                 if os.path.isfile(src):
                     dst = self._get_dst(src)
                     dst = os.path.join(tempoutdir, dst)
+                    dst = self._substitute(dst)
                     path,_ = os.path.split(dst)
                     if not os.path.exists(path):
-                        #print 'path',path
                         os.makedirs(path)
                     iflogger.debug("copyfile: %s %s"%(src, dst))
                     copyfile(src, dst, copy=True)
                 elif os.path.isdir(src):
                     dst = self._get_dst(os.path.join(src,''))
                     dst = os.path.join(tempoutdir, dst)
+                    dst = self._substitute(dst)
+                    path,_ = os.path.split(dst)
+                    if not os.path.exists(path):
+                        os.makedirs(path)
                     if os.path.exists(dst):
                         iflogger.debug("removing: %s"%dst)
                         shutil.rmtree(dst)
