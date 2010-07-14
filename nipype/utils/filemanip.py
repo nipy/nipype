@@ -324,3 +324,6 @@ def loadflat(infile, *args):
             if len(out[k])==1:
                 out[k] = out[k].pop()
     return out
+
+def loadcrash(infile, *args):
+    return loadflat(infile, *args)
