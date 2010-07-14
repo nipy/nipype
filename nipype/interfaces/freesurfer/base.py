@@ -54,7 +54,7 @@ class Info(object):
         """
         fs_home = os.getenv('FREESURFER_HOME')
         if fs_home is None:
-            Exception('FREESURFER_HOME is not defined')
+            return None
         versionfile = os.path.join(fs_home,'build-stamp.txt')
         if not os.path.exists(versionfile):
             return None

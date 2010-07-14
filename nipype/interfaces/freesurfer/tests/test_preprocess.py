@@ -4,6 +4,14 @@ from nipype.testing import (assert_equal, assert_false, assert_true,
                             assert_raises, skipif)
 import nipype.interfaces.freesurfer as freesurfer
 
+
+def no_freesurfer():
+    if freesurfer.Info().version is None:
+        return True
+    else:
+        return False
+    
+@skipif(no_freesurfer)
 def test_applyvoltransform():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -27,7 +35,7 @@ def test_applyvoltransform():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
+@skipif(no_freesurfer)
 def test_bbregister():
     input_map = dict(args = dict(argstr='%s',),
                      contrast_type = dict(argstr='--%s',mandatory=True,),
@@ -45,6 +53,7 @@ def test_bbregister():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_freesurfer)
 def test_dicomconvert():
     input_map = dict(args = dict(argstr='%s',),
                      base_output_dir = dict(mandatory=True,),
@@ -63,7 +72,9 @@ def test_dicomconvert():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-        
+
+
+@skipif(no_freesurfer)        
 def test_mriconvert():
     input_map = dict(apply_inv_transform = dict(argstr='--apply_inverse_transform %s',),
                      apply_transform = dict(argstr='--apply_transform %s',),
@@ -152,7 +163,7 @@ def test_mriconvert():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-        
+@skipif(no_freesurfer)        
 def test_parsedicomdir():
     input_map = dict(args = dict(argstr='%s',),
                      dicom_dir = dict(mandatory=True,argstr='--d %s',),
@@ -166,7 +177,7 @@ def test_parsedicomdir():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-            
+@skipif(no_freesurfer)            
 def test_reconall():
     input_map = dict(T1_files = dict(argstr='-i %s...',),
                      args = dict(argstr='%s',),
@@ -181,7 +192,7 @@ def test_reconall():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-            
+@skipif(no_freesurfer)            
 def test_resample():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -194,7 +205,7 @@ def test_resample():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-            
+@skipif(no_freesurfer)            
 def test_smooth():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -212,7 +223,7 @@ def test_smooth():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-            
+@skipif(no_freesurfer)            
 def test_unpacksdicomdir():
     input_map = dict(args = dict(argstr='%s',),
                      config = dict(mandatory=True,xor=('run_info', 'config', 'seq_config'),argstr='-cfg %s',),
