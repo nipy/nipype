@@ -21,7 +21,7 @@ Options can be assigned when you first create an interface object:
 .. testcode::
    
    import nipype.interfaces.fsl as fsl
-   mybet = fsl.Bet(infile='foo.nii', outfile='bar.nii')
+   mybet = fsl.BET(infile='foo.nii', outfile='bar.nii')
    result = mybet.run()
 
 Options can be assigned through the ``inputs`` attribute:
@@ -29,7 +29,7 @@ Options can be assigned through the ``inputs`` attribute:
 .. testcode::
 
    import nipype.interfaces.fsl as fsl
-   mybet = fsl.Bet()
+   mybet = fsl.BET()
    mybet.inputs.infile = 'foo.nii'
    mybet.inputs.outfile = 'bar.nii'
    result = mybet.run()
@@ -39,7 +39,7 @@ Options can be assigned when calling the ``run`` method:
 .. testcode::
 
    import nipype.interfaces.fsl as fsl
-   mybet = fsl.Bet()
+   mybet = fsl.BET()
    result = mybet.run(infile='foo.nii', outfile='bar.nii', frac=0.5)   
 
 Getting Help
@@ -50,7 +50,7 @@ documentation and examples.
 
 .. sourcecode:: ipython
 
-   In [5]: fsl.Fast?
+   In [5]: fsl.FAST?
    Type:		type
    Base Class:	<type 'type'>
    String Form:	<class 'nipype.interfaces.fsl.Fast'>
@@ -111,7 +111,7 @@ which provides information on each of the options one can assign.
 
 .. sourcecode:: ipython
 
-   In [7]: fsl.Bet().inputs_help()
+   In [7]: fsl.BET().inputs_help()
    Parameters
    ----------
    outline : 
