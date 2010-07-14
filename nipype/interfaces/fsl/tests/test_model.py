@@ -5,11 +5,22 @@ import tempfile
 import shutil
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_true,
-                            assert_raises)
+                            assert_raises, skipif)
 import nipype.interfaces.fsl as fsl
 
 # XXX Write tests for fsl_model
 
+def no_fsl():
+    """Checks if FSL is NOT installed
+    used with skipif to skip tests that will
+    fail if FSL is not installed"""
+    
+    if fsl.Info().version() == None:
+        return True
+    else:
+        return False
+
+@skipif(no_fsl)
 def test_contrastmgr():
     input_map = dict(args = dict(argstr='%s',),
                      contrast_num = dict(argstr='-cope',),
@@ -25,6 +36,7 @@ def test_contrastmgr():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_feat():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -36,6 +48,7 @@ def test_feat():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_featmodel():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -47,6 +60,7 @@ def test_featmodel():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+
 def test_featregister():
     input_map = dict(feat_dirs = dict(mandatory=True,),
                      reg_dof = dict(),
@@ -57,6 +71,7 @@ def test_featregister():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_filmgls():
     input_map = dict(args = dict(argstr='%s',),
                      autocorr_estimate = dict(xor=['autocorr_noestimate'],argstr='-ac',),
@@ -82,6 +97,7 @@ def test_filmgls():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_flameo():
     input_map = dict(args = dict(argstr='%s',),
                      burnin = dict(argstr='--burnin=%d',),
@@ -110,6 +126,7 @@ def test_flameo():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_l2model():
     input_map = dict(num_copes = dict(mandatory=True,),
                      )
@@ -184,6 +201,7 @@ def test_melodic():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_smm():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
