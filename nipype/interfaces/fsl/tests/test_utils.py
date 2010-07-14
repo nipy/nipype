@@ -139,7 +139,17 @@ def test_split():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+def no_fsl():
+    """Checks if FSL is NOT installed
+    used with skipif to skip tests that will
+    fail if FSL is not installed"""
+    
+    if fsl.Info().version() == None:
+        return True
+    else:
+        return False
 
+@skipif(no_fsl)
 def test_fslroi():
     filelist, outdir, cwd = create_files_in_directory()
     
