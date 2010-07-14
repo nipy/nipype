@@ -8,6 +8,7 @@ results of TAB completion.  Also defines a magic command
 off.
 
 """
+__test__ = False
 
 import IPython.ipapi
 
