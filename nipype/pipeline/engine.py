@@ -708,13 +708,13 @@ class Workflow(WorkflowBase):
                 try:
                     res = self.taskclient.get_task_result(taskid, block=False)
                     if res:
-                        if res.failure:
-                            try:
-                                res.raise_exception()
-                            except:
-                                crashfile = self.procs[jobid]._report_crash(execgraph=self._execgraph)
-                                # remove dependencies from queue
-                                notrun.append(self._remove_node_deps(jobid, crashfile))
+                        if res['traceback']:
+                            self.procs[jobid]._result = res['result']
+                            self.procs[jobid]._traceback = res['traceback']
+                            crashfile = self.procs[jobid]._report_crash(traceback=res['traceback'],
+                                                                        execgraph=self._execgraph)
+                            # remove dependencies from queue
+                            notrun.append(self._remove_node_deps(jobid, crashfile))
                         else:
                             self._task_finished_cb(res['result'], jobid)
                     else:
@@ -751,10 +751,19 @@ class Workflow(WorkflowBase):
                     _, hashvalue = self.procs[jobid]._get_hashval()
                     logger.info('Executing: %s ID: %d H:%s' % \
                                     (self.procs[jobid]._id, jobid, hashvalue))
-                    cmdstr = "result = task.run()"
+                    cmdstr = """import sys
+from traceback import format_exception
+traceback=None
+try:
+    result = task.run()
+except:
+    etype, eval, etr = sys.exc_info()
+    traceback = format_exception(etype,eval,etr)
+    result = task.result
+"""
                     task = self.ipyclient.StringTask(cmdstr,
                                                      push = dict(task=self.procs[jobid]),
-                                                     pull = 'result')
+                                                     pull = ['result','traceback'])
                     tid = self.taskclient.run(task, block = False)
                     #logger.info('Task id: %d' % tid)
                     self.pending_tasks.insert(0, (tid, jobid))
