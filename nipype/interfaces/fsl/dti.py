@@ -657,8 +657,7 @@ class ProjThresh(FSLCommand):
     
     Example:
     >>> from nipype.interfaces import fsl
-    >>> from glob import glob
-    >>> ldir = glob('seeds_to_M*')
+    >>> ldir = ['seeds_to_M1.nii', 'seeds_to_M2.nii']
     >>> pThresh = fsl.ProjThresh(in_files=ldir,threshold=3)
     >>> pThresh.cmdline
     'proj_thresh seeds_to_M1.nii seeds_to_M2.nii 3'
@@ -694,8 +693,7 @@ class FindTheBiggest(FSLCommand):
     
     Example:
     >>> from nipype.interfaces import fsl
-    >>> from glob import glob
-    >>> ldir = glob('seeds_to_M*')
+    >>> ldir = ['seeds_to_M1.nii', 'seeds_to_M2.nii']
     >>> fBig = fsl.FindTheBiggest(in_files=ldir, out_file='biggestSegmentation')
     >>> fBig.cmdline
     'find_the_biggest seeds_to_M1.nii seeds_to_M2.nii biggestSegmentation'
