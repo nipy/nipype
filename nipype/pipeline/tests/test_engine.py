@@ -36,15 +36,7 @@ class TestInterface(nib.BaseInterface):
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
 
-working_dir = os.getcwd()
-temp_dir = None
-def setup_pipe():
-    global temp_dir
-    temp_dir = mkdtemp(prefix='test_engine_')
-    os.chdir(temp_dir)
-def teardown_pipe():
-    os.chdir(working_dir)
-    rmtree(temp_dir)
+
 
 @parametric
 def test_init():
@@ -90,8 +82,11 @@ def test_generate_dependency_list():
     yield assert_equal(pipe.depidx[0,1], 1)
 
 @parametric
-@with_setup(setup_pipe, teardown_pipe)
 def test_run_in_series():
+    cur_dir = os.getcwd()
+    temp_dir = mkdtemp(prefix='test_engine_')
+    os.chdir(temp_dir)
+
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
     mod2 = pe.Node(interface=TestInterface(),name='mod2')
@@ -105,6 +100,9 @@ def test_run_in_series():
     # called at this point in the code, after all of the above is
     # executed!
     assert_equal(result, [1, 1])
+    os.chdir(cur_dir)
+    rmtree(temp_dir)
+    os.remove("pypeline.log")
 
 # Test graph expansion.  The following set tests the building blocks
 # of the graph expansion routine.
