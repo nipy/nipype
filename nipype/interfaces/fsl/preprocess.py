@@ -245,7 +245,7 @@ class FAST(FSLCommand):
     >>> fastr = fsl.FAST()
     >>> fastr.inputs.in_files = anatfile
     >>> out = fastr.run() #doctest: +SKIP
-    
+
     """
     _cmd = 'fast'
     input_spec = FASTInputSpec
@@ -439,10 +439,10 @@ class ApplyXfm(FLIRT):
 
 
     Examples
-    -------
+    --------
 
     >>> import nipype.interfaces.fsl as fsl
-    >>> from nipype.testing import anatfile, template, transfm 
+    >>> from nipype.testing import anatfile, template, transfm
     >>> applyxfm = fsl.ApplyXfm()
     >>> applyxfm.inputs.in_file = anatfile
     >>> applyxfm.inputs.in_matrix_file = transfm
@@ -530,7 +530,7 @@ class MCFLIRT(FSLCommand):
                 outputs['mat_file'].append(os.path.join(matpathname,
                                                         'MAT_%04d'%t))
         if isdefined(self.inputs.save_plots) and self.inputs.save_plots:
-            # Note - if e.g. out_file has .nii.gz, you get .nii.gz.par, 
+            # Note - if e.g. out_file has .nii.gz, you get .nii.gz.par,
             # which is what mcflirt does!
             outputs['par_file'] = outputs['out_file'] + '.par'
         return outputs
@@ -539,7 +539,7 @@ class MCFLIRT(FSLCommand):
         if name == 'out_file':
             return self._gen_outfilename()
         return None
-    
+
     def _gen_outfilename(self):
         out_file = self.inputs.out_file
         if not isdefined(out_file) and isdefined(self.inputs.in_file):
@@ -918,12 +918,12 @@ class SliceTimer(FSLCommand):
 
     Examples
     --------
-   >>> from nipype.interfaces import fsl
-   >>> from nipype.testing import funcfile
-   >>> st = fsl.SliceTimer()
-   >>> st.inputs.in_file = funcfile
-   >>> st.inputs.interleaved = True
-   >>> result = st.run() #doctest: +SKIP
+    >>> from nipype.interfaces import fsl
+    >>> from nipype.testing import funcfile
+    >>> st = fsl.SliceTimer()
+    >>> st.inputs.in_file = funcfile
+    >>> st.inputs.interleaved = True
+    >>> result = st.run() #doctest: +SKIP
 
     """
 
@@ -969,7 +969,7 @@ class SUSANInputSpec(FSLCommandInputSpec):
                   'threshold at 10% of the robust range')
     out_file = File(argstr='%s', position=-1, genfile=True,
                     desc='output file name')
-    
+
 class SUSANOutputSpec(TraitedSpec):
     smoothed_file = File(exists=True, desc='smoothed output file')
 
@@ -1004,7 +1004,7 @@ class SUSAN(FSLCommand):
                 arglist.extend([filename, '%.10f'%thresh])
             return ' '.join(arglist)
         return super(SUSAN, self)._format_arg(name, spec, value)
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         out_file = self.inputs.out_file
