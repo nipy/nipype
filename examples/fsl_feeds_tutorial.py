@@ -548,6 +548,21 @@ l1pipeline.connect([(datasource, firstlevel, [('struct','preproc.inputspec.struc
                                               ]),
                     ])
 
+"""
+Setup the datasink
+"""
+
+datasink = pe.Node(interface=nio.DataSink(parameterization=False), name="datasink")
+datasink.inputs.base_directory = os.path.abspath('./fsl_feeds/l1out')
+datasink.inputs.substitutions = [('dtype_mcf_mask_mean', 'meanfunc'),
+                                 ('brain_brain_flirt','coregistered')]
+# store relevant outputs from various stages of the 1st level analysis
+l1pipeline.connect([(firstlevel, datasink,[('fixedfx.flameo.stats_dir','@stats'),
+                                            ('preproc.coregister.out_file','coregstruct'),
+                                            ('preproc.meanfunc2.out_file','meanfunc'),
+                                            ])
+                    ])
+
 
 """
 Execute the pipeline
