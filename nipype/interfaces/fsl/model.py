@@ -86,7 +86,6 @@ class Level1Design(BaseInterface):
     --------
     
     >>> level1design = Level1Design()
-    >>> level1design.inputs.timing_units = 'secs'
     >>> level1design.inputs.interscan_interval = 2.5
     >>> level1design.inputs.bases = {'dgamma':{'derivs': False}}
     >>> level1design.inputs.session_info = 'session_info.npz'
