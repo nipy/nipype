@@ -53,9 +53,6 @@ class ImageMeants(FSLCommand):
         the screen (or saves to a file). The average is taken over all voxels in the
         mask (or all voxels in the image if no mask is specified)
 
-        Example:
-        --------
-
     """
     _cmd = 'fslmeants'
     input_spec = ImageMeantsInputSpec
@@ -87,12 +84,7 @@ class SmoothOutputSpec(TraitedSpec):
 
 class Smooth(FSLCommand):
     '''Use fslmaths to smooth the image
-
-    This is dumb, of course - we should use nipy for such things! But it is a
-    step along the way to get the "standard" FSL pipeline in place.
-
-    This is meant to be a throwaway class, so it is not currently very robust.
-    Effort would be better spent integrating basic numpy into nipype'''
+    '''
 
     input_spec = SmoothInputSpec
     output_spec = SmoothOutputSpec
@@ -351,12 +343,13 @@ class FilterRegressor(FSLCommand):
 class ImageStatsInputSpec(FSLCommandInputSpec):
     split_4d = traits.Bool(argstr='-t', position=1,
                            desc='give a separate output line for each 3D volume of a 4D timeseries')
-    in_file = File(exists=True, argstr="%s", mandatory=True, position=2)
+    in_file = File(exists=True, argstr="%s", mandatory=True, position=2,
+                   desc='input file to generate stats of')
     op_string = traits.Str(argstr="%s", mandatory=True, position=3,
-                           desc="string defining the operation, options are" \
+                           desc="string defining the operation, options are " \
     "applied in order, e.g. -M -l 10 -M will report the non-zero mean, apply a" \
     "threshold and then report the new nonzero mean")
-    mask_file = File(exists=True, argstr="")
+    mask_file = File(exists=True, argstr="", desc='mask file used for option -k %s')
 
 class ImageStatsOutputSpec(TraitedSpec):
     out_stat = traits.Any(desc='stats output')

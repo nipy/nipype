@@ -84,6 +84,13 @@ class Level1Design(BaseInterface):
 
     Examples
     --------
+    
+    >>> level1design = Level1Design()
+    >>> level1design.inputs.timing_units = 'secs'
+    >>> level1design.inputs.interscan_interval = 2.5
+    >>> level1design.inputs.bases = {'dgamma':{'derivs': False}}
+    >>> level1design.inputs.session_info = 'session_info.npz'
+    >>> level1design.run() # doctest: +SKIP
 
     """
 
@@ -437,6 +444,7 @@ class FILMGLS(FSLCommand):
 
     Examples
     --------
+    
     Initialize with no options, assigning them when calling run:
 
     >>> from nipype.interfaces import fsl
@@ -508,12 +516,6 @@ class FEATRegisterOutputSpec(TraitedSpec):
 
 class FEATRegister(BaseInterface):
     """Register feat directories to a specific standard
-
-    See FixedEffectsModel().inputs_help() for more information.
-
-    Examples
-    --------
-
     """
     input_spec = FEATRegisterInputSpec
     output_spec = FEATRegisterOutputSpec
@@ -604,11 +606,9 @@ class FLAMEOOutputSpec(TraitedSpec):
 class FLAMEO(FSLCommand):
     """Use FSL flameo command to perform higher level model fits
 
-    To print out the command line help, use:
-        fsl.FLAMEO().inputs_help()
-
     Examples
     --------
+    
     Initialize FLAMEO with no options, assigning them when calling run:
 
     >>> from nipype.interfaces import fsl
@@ -622,7 +622,9 @@ class FLAMEO(FSLCommand):
                             run_mode='fe')
     >>> flameo.cmdline
     'flameo --copefile=cope.nii.gz --covsplitfile=cov_split.mat --designfile=design.mat --ld=stats --maskfile=mask.nii --runmode=fe --tcontrastsfile=design.con --varcopefile=varcope.nii.gz'
+
     """
+
     _cmd = 'flameo'
     input_spec = FLAMEOInputSpec
     output_spec = FLAMEOOutputSpec
@@ -712,9 +714,6 @@ class ContrastMgrOutputSpec(TraitedSpec):
 
 class ContrastMgr(FSLCommand):
     """Use FSL contrast_mgr command to evaluate contrasts
-
-    Examples
-    --------
     """
 
     _cmd = 'contrast_mgr'
@@ -940,8 +939,7 @@ class MELODICOutputSpec(TraitedSpec):
     out_dir = Directory(exists=True,argst="-o %s",desc="output directory name")
 
 class MELODIC(FSLCommand):
-    """
-        Multivariate Exploratory Linear Optimised Decomposition into Independent Components
+    """Multivariate Exploratory Linear Optimised Decomposition into Independent Components
     """
     input_spec = MELODICInputSpec
     output_spec = MELODICOutputSpec

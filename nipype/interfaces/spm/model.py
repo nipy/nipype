@@ -83,12 +83,14 @@ class Level1Design(SPMCommand):
 
     Examples
     --------
+    
     >>> level1design = Level1Design()
     >>> level1design.inputs.timing_units = 'secs'
     >>> level1design.inputs.interscan_interval = 2.5
     >>> level1design.inputs.bases = {'hrf':{'derivs': [0,0]}}
     >>> level1design.inputs.session_info = 'session_info.npz'
     >>> level1design.run() # doctest: +SKIP
+    
     """
 
     input_spec = Level1DesignInputSpec

@@ -44,6 +44,7 @@ This is a generic workflow for DTI data analysis using the FSL
 """
 Data specific components
 ------------------------
+
 The nipype tutorial contains data for two subjects.  Subject data
 is in two subdirectories, ``dwis1`` and ``dwis2``.  Each subject directory
 contains each of the following files: bvec, bval, diffusion weighted data, a set of target masks,
@@ -192,8 +193,11 @@ flirt.inputs.dof = 12
 
 """
 perform probabilistic tracktography
-note: the values given to these parameters are toy examples and
-should be changed to more meaningful values
+
+.. note::
+
+  the values given to these parameters are toy examples and
+  should be changed to more meaningful values
 """
 
 probtrackx = pe.Node(interface=fsl.ProbTrackX(),name='probtrackx')

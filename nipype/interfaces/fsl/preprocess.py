@@ -81,9 +81,6 @@ class BET(FSLCommand):
     For complete details, see the `BET Documentation.
     <http://www.fmrib.ox.ac.uk/fsl/bet2/index.html>`_
 
-    To print out the command line help, use:
-        fsl.BET().inputs_help()
-
     Examples
     --------
     >>> from nipype.interfaces import fsl
@@ -488,9 +485,6 @@ class MCFLIRT(FSLCommand):
 
     For complete details, see the `MCFLIRT Documentation.
     <http://www.fmrib.ox.ac.uk/fsl/mcflirt/index.html>`_
-
-    To print out the command line help, use:
-        MCFLIRT().inputs_help()
 
     Examples
     --------
@@ -978,6 +972,7 @@ class SUSAN(FSLCommand):
 
     Examples
     --------
+    
     >>> from nipype.interfaces import fsl
     >>> from nipype.testing import example_data
     >>> print anatfile #doctest: +SKIP
