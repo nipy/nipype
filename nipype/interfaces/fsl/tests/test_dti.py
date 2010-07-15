@@ -18,6 +18,16 @@ import nipype.interfaces.fsl.dti as fsl
 
 # nosetests --with-doctest path_to/test_fsl.py
 
+def no_fsl():
+    """Checks if FSL is NOT installed
+    used with skipif to skip tests that will
+    fail if FSL is not installed"""
+    
+    if Info.version() == None:
+        return True
+    else:
+        return False
+
 def test_bedpostx():
     input_map = dict(args = dict(argstr='%s',),
                      bpx_directory = dict(argstr='%s',),
@@ -63,6 +73,7 @@ def test_dtifit():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_eddycorrect():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -76,6 +87,7 @@ def test_eddycorrect():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_findthebiggest():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -88,6 +100,7 @@ def test_findthebiggest():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_probtrackx():
     input_map = dict(args = dict(argstr='%s',),
                      avoid_mp = dict(argstr='--avoid=%s',),
@@ -132,6 +145,7 @@ def test_probtrackx():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_projthresh():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -183,6 +197,7 @@ def test_randomise():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_tbss1preproc():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -194,6 +209,7 @@ def test_tbss1preproc():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_tbss2reg():
     input_map = dict(FMRIB58FA = dict(argstr='-T',xor=('FMRIB58FA', 'target_img', 'find_target'),),
                      args = dict(argstr='%s',),
@@ -208,6 +224,7 @@ def test_tbss2reg():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_tbss3postreg():
     input_map = dict(FMRIB58FA = dict(argstr='-T',xor=('subject_mean', 'FMRIB58FA'),),
                      args = dict(argstr='%s',),
@@ -221,6 +238,7 @@ def test_tbss3postreg():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_tbss4prestats():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -233,6 +251,7 @@ def test_tbss4prestats():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_vecreg():
     input_map = dict(affine_mat = dict(argstr='-t %s',),
                      args = dict(argstr='%s',),
@@ -322,6 +341,7 @@ def test_bedpostx():
 
 
 # test eddy_correct
+@skipif(no_fsl)
 def test_eddy_correct():
     filelist, outdir, cwd = create_files_in_directory()
     eddy = fsl.EddyCorrect()
@@ -347,7 +367,8 @@ def test_eddy_correct():
     clean_directory(outdir, cwd)
 
 
-# test dtifit  
+# test dtifit
+@skipif(no_fsl)
 def test_dtifit():
     filelist, outdir, cwd = create_files_in_directory()
     dti = fsl.DTIFit()

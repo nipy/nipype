@@ -12,6 +12,8 @@ __test__ = False
 
 import IPython.ipapi
 
+
+
 def get_nipype_mode():
     ip = IPython.ipapi.get()
     try:
@@ -78,6 +80,7 @@ def nipype_mode_off():
 
 def main():
     """When we use the nipype profile we turn nipype_mode on."""
+    
     ip = IPython.ipapi.get()
 
     mode = get_nipype_mode() # initialize nipype_mode in user_ns
