@@ -38,8 +38,9 @@ from nipype.utils.misc import find_indices
 
 class ArtifactDetectInputSpec(TraitedSpec):
     realigned_files = InputMultiPath(File(exists=True), desc="Names of realigned functional data files", mandatory=True)
-    realignment_parameters = InputMultiPath(File(exists=True), desc="Names of realignment parameters corresponding to the" \
-            "functional data files")
+    realignment_parameters = InputMultiPath(File(exists=True), mandatory=True,
+                                            desc=("Names of realignment parameters"
+                                                  "corresponding to the functional data files"))
     parameter_source = traits.Enum("SPM", "FSL", "Siemens", desc="Are the movement parameters from SPM or FSL or from" \
             "Siemens PACE data. Options: SPM, FSL or Siemens", mandatory=True)
     use_differences = traits.ListBool([True, True], minlen = 2, maxlen = 2, usedefault=True,
