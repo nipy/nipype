@@ -55,6 +55,7 @@ def test_scan_for_fnames():
 
 save_time = False
 if not save_time:
+    @skipif(cannot_find_spm)
     def test_spm_path():
         spm_path = spm.Info.spm_path()
         if spm_path is not None:
