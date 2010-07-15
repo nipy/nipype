@@ -25,7 +25,7 @@ import re
 import sys
 
 from nipype.utils.misc import is_container
-from nipype.interfaces.base import Interface
+from nipype.interfaces.base import Interface, CommandLine
 from enthought.traits.trait_errors import TraitError
 
 def trim(docstring, marker):
@@ -288,7 +288,10 @@ class InterfaceHelpWriter(object):
                 classinst = sys.modules[uri].__dict__[c]()
             except:
                 continue
-            helpstr = trim(classinst.__doc__, self.rst_section_levels[3]) + "\n\n"
+            helpstr = ''
+            if isinstance(classinst, CommandLine):
+                helpstr += trim("Wraps command **%s**"%classinst._cmd, self.rst_section_levels[3]) + "\n\n"
+            helpstr += trim(classinst.__doc__, self.rst_section_levels[3]) + "\n\n"
             print 'Generating inputs/outputs doc for:', uri, \
                 classinst.__class__.__name__
             if hasattr(classinst, 'inputs'):
