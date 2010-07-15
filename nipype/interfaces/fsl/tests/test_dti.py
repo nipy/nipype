@@ -15,6 +15,7 @@ from nose import with_setup
 
 from nipype.testing import assert_equal, assert_not_equal, assert_raises, skipif
 import nipype.interfaces.fsl.dti as fsl
+from nipype.interfaces.fsl import Info
 
 # nosetests --with-doctest path_to/test_fsl.py
 
