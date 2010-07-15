@@ -326,9 +326,9 @@ class DataGrabber(IOBase):
                 template = os.path.abspath(template)
             if not args:
                 filelist = glob.glob(template)
-                outputs[key] = list_to_filename(filelist)
                 if len(filelist) == 0:
                     warn('Output key: %s Template: %s returned no files'%(key, template))
+                outputs[key] = list_to_filename(filelist)
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
@@ -353,9 +353,9 @@ class DataGrabber(IOBase):
                     if argtuple:
                         filledtemplate = template%tuple(argtuple)
                     outfiles = glob.glob(filledtemplate)
-                    outputs[key].insert(i,list_to_filename(outfiles))
                     if len(outfiles) == 0:
                         warn('Output key: %s Template: %s returned no files'%(key, filledtemplate))
+                    outputs[key].insert(i,list_to_filename(outfiles))
             if len(outputs[key]) == 0:
                 outputs[key] = None
             elif len(outputs[key]) == 1:
