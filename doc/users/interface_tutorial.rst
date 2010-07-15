@@ -21,7 +21,7 @@ Options can be assigned when you first create an interface object:
 .. testcode::
    
    import nipype.interfaces.fsl as fsl
-   mybet = fsl.BET(infile='foo.nii', outfile='bar.nii')
+   mybet = fsl.BET(in_file='foo.nii', out_file='bar.nii')
    result = mybet.run()
 
 Options can be assigned through the ``inputs`` attribute:
@@ -30,8 +30,8 @@ Options can be assigned through the ``inputs`` attribute:
 
    import nipype.interfaces.fsl as fsl
    mybet = fsl.BET()
-   mybet.inputs.infile = 'foo.nii'
-   mybet.inputs.outfile = 'bar.nii'
+   mybet.inputs.in_file = 'foo.nii'
+   mybet.inputs.out_file = 'bar.nii'
    result = mybet.run()
 
 Options can be assigned when calling the ``run`` method:
@@ -40,7 +40,7 @@ Options can be assigned when calling the ``run`` method:
 
    import nipype.interfaces.fsl as fsl
    mybet = fsl.BET()
-   result = mybet.run(infile='foo.nii', outfile='bar.nii', frac=0.5)   
+   result = mybet.run(in_file='foo.nii', out_file='bar.nii', frac=0.5)   
 
 Getting Help
 ------------
@@ -50,113 +50,131 @@ documentation and examples.
 
 .. sourcecode:: ipython
 
-   In [5]: fsl.FAST?
+    In [2]: fsl.FAST?
+    Type:		type
+    Base Class:	<type 'type'>
+    String Form:	<class 'nipype.interfaces.fsl.preprocess.FAST'>
+    Namespace:	Interactive
+    File:		/Users/satra/sp/nipype/interfaces/fsl/preprocess.py
+    Docstring:
+        Use FSL FAST for segmenting and bias correction.
+    
+        For complete details, see the `FAST Documentation.
+        <http://www.fmrib.ox.ac.uk/fsl/fast4/index.html>`_
+    
+        Examples
+        --------
+        >>> from nipype.interfaces import fsl
+        >>> from nipype.testing import anatfile
+    
+        Assign options through the ``inputs`` attribute:
+    
+        >>> fastr = fsl.FAST()
+        >>> fastr.inputs.in_files = anatfile
+        >>> out = fastr.run() #doctest: +SKIP
+
+    Constructor information:
+    Definition:	fsl.FAST(self, **inputs)
+
+.. sourcecode:: ipython
+
+   In [5]: spm.Realign?
    Type:		type
    Base Class:	<type 'type'>
-   String Form:	<class 'nipype.interfaces.fsl.Fast'>
+   String Form:	<class 'nipype.interfaces.spm.preprocess.Realign'>
    Namespace:	Interactive
-   File:		/home/cburns/local/lib/python2.6/site-packages/nipype/interfaces/fsl.py
+   File:		/Users/satra/sp/nipype/interfaces/spm/preprocess.py
    Docstring:
-       Use FSL FAST for segmenting and bias correction.
+       Use spm_realign for estimating within modality rigid body alignment
 
-       For complete details, see the `FAST Documentation. 
-       <http://www.fmrib.ox.ac.uk/fsl/fast4/index.html>`_
-
-       To print out the command line help, use:
-           fsl.Fast().inputs_help()
+       http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=25
 
        Examples
        --------
-       >>> from nipype.interfaces import fsl
-       >>> faster = fsl.Fast(out_basename='myfasted')
-       >>> fasted = faster.run(['file1','file2'])
 
-       >>> faster = fsl.Fast(infiles=['filea','fileb'], out_basename='myfasted')
-       >>> fasted = faster.run()
+       >>> import nipype.interfaces.spm as spm
+       >>> realign = spm.Realign()
+       >>> realign.inputs.in_files = 'functional.nii'
+       >>> realign.inputs.register_to_mean = True
+       >>> realign.run() # doctest: +SKIP
 
    Constructor information:
-   Definition:	fsl.Fast(self, *args, **inputs)
+   Definition:	spm.Realign(self, **inputs)
 
-.. sourcecode:: ipython
 
-   In [4]: spm.Realign?
-   Base Class:       <type 'type'>
-   String Form:   <class 'nipype.interfaces.spm.Realign'>
-   Namespace:        Interactive
-   File:             /home/jagust/cindeem/src/nipy-sourceforge/nipype/trunk/nipype/interfaces/spm.py
-   Docstring:
-    Use spm_realign for estimating within modality rigid body alignment
-    
-    See Realign().spm_doc() for more information.
-    
-    Parameters
-    ----------
-    inputs : mapping
-    key, value pairs that will update the Realign.inputs attributes
-    see self.inputs_help() for a list of Realign.inputs attributes
-    
-    Attributes
-    ----------
-    inputs : Bunch
-    a (dictionary-like) bunch of options that can be passed to 
-    spm_realign via a job structure
-    cmdline : string
-    string used to call matlab/spm via SpmMatlabCommandLine interface
-
-    <snip>
-
-All of the nipype.interfaces classes have an ``inputs_help`` method
+All of the nipype.interfaces classes have an ``help`` method
 which provides information on each of the options one can assign.
 
+.. sourcecode:: ipython
+
+    In [6]: fsl.BET.help()
+    Inputs
+    ------
+
+    Mandatory:
+     in_file: input file to skull strip
+
+    Optional:
+     args: Additional parameters to the command
+     center: center of gravity in voxels
+     environ: Environment variables (default={})
+     frac: fractional intensity threshold
+     functional: apply to 4D fMRI data
+      mutually exclusive: functional, reduce_bias
+     mask: create binary mask image
+     mesh: generate a vtk mesh brain surface
+     no_output: Don't generate segmented output
+     out_file: name of output skull stripped image
+     outline: create surface outline image
+     output_type: FSL output type
+     radius: head radius
+     reduce_bias: bias field and neck cleanup
+      mutually exclusive: functional, reduce_bias
+     skull: create skull image
+     threshold: apply thresholding to segmented brain image and mask
+     vertical_gradient: vertical gradient in fractional intensity threshold (-1, 1)
+
+    Outputs
+    -------
+    mask_file: path/name of binary brain mask (if generated)
+    meshfile: path/name of vtk mesh file (if generated)
+    out_file: path/name of skullstripped file
+    outline_file: path/name of outline file (if generated)
 
 .. sourcecode:: ipython
 
-   In [7]: fsl.BET().inputs_help()
-   Parameters
-   ----------
-   outline : 
-        generate brain surface outline overlaid onto original image
-   mask : 
-        generate binary brain mask
-   skull : 
-        generate approximate skull image
-   nooutput : 
-        don't generate segmented brain image output
-   frac : 
-        <f> fractional intensity threshold (0->1); default=0.5; smaller values give larger brain outline estimates
-   vertical_gradient : 
-        <g> vertical gradient in fractional intensity threshold (-1->1); default=0; positive values give larger brain outline at bottom, smaller at top
+    In [7]: spm.Realign.help()
+    Inputs
+    ------
 
-   <snip>
+    Mandatory:
+     in_files: list of filenames to realign
 
-.. sourcecode:: ipython
+    Optional:
+     fwhm: gaussian smoothing kernel width
+     interp: degree of b-spline used for interpolation
+     jobtype: one of: estimate, write, estwrite (default=estwrite)
+     matlab_cmd: None
+     mfile: Run m-code using m-file (default=True)
+     paths: Paths to add to matlabpath
+     quality: 0.1 = fast, 1.0 = precise
+     register_to_mean: Indicate whether realignment is done to the mean image
+     separation: sampling separation in mm
+     weight_img: filename of weighting image
+     wrap: Check if interpolation should wrap in [x,y,z]
+     write_interp: degree of b-spline used for interpolation
+     write_mask: True/False mask output image
+     write_which: determines which images to reslice
+     write_wrap: Check if interpolation should wrap in [x,y,z]
 
-   In [6]: spm.Realign().inputs_help()
-           Parameters
-        ----------
-        
-        infile: string, list
-            list of filenames to realign
-        write : bool, optional
-            if True updates headers and generates
-            resliced files prepended with  'r'
-            if False just updates header files
-            (default == True, will reslice)
-        quality : float, optional
-            0.1 = fastest, 1.0 = most precise
-            (spm5 default = 0.9)
-        fwhm : float, optional
-            full width half maximum gaussian kernel 
-            used to smooth images before realigning
-            (spm default = 5.0)
-        separation : float, optional
-            separation in mm used to sample images
-            (spm default = 4.0)
-	   
-    <snip>
+    Outputs
+    -------
+    mean_image: Mean image file from the realignment
+    realigned_files: Realigned files
+    realignment_parameters: Estimated translation and rotation parameters
 
 
-Our :ref:`api-index` documentation provides html versions of our
+Our :ref:`interfaces` documentation provides html versions of our
 docstrings and includes links to the specific package
 documentation. For instance, the :class:`nipype.interfaces.fsl.Bet`
 docstring has a direct link to the online BET Documentation.
@@ -171,7 +189,7 @@ Using FSL_ to realign a time_series:
 
    import nipype.interfaces.fsl as fsl
    realigner = fsl.McFlirt()
-   realigner.infile='timeseries4D.nii'
+   realigner.inputs.in_file='timeseries4D.nii'
    result = realigner.run()
    
 
@@ -187,7 +205,7 @@ Using SPM_ to realign a time-series:
    allepi = glob('epi*.nii') # this will return an unsorted list
    allepi.sort()
    realigner = spm.Realign()
-   realigner.inputs.infile = allepi
+   realigner.inputs.in_files = allepi
    result = realigner.run()
 
 .. include:: ../links_names.txt
