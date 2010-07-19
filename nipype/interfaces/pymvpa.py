@@ -19,10 +19,9 @@ import mvpa
 from mvpa import pymvpa_dataroot
 from mvpa.algorithms.cvtranserror import CrossValidatedTransferError
 from mvpa.base import debug
-from mvpa.clfs.svm import LinearNuSVMC
+from mvpa.clfs.svm import LinearCSVMC
 from mvpa.clfs.transerror import TransferError
-from mvpa.datasets.base import Dataset, dataset
-from mvpa.datasets.miscfx import zscore
+from mvpa.mappers.zscore import zscore
 from mvpa.datasets.mri import fmri_dataset
 from mvpa.datasets.splitters import NFoldSplitter
 from mvpa.mappers.fx import mean_sample
@@ -110,10 +109,10 @@ class PyMVPA(Interface):
             dataset = dataset[dataset.sa.labels != 'rest']
 
         # zscore dataset relative to baseline ('rest') mean
-        zscore(dataset, perchunk=True, targetdtype='float32')
+        zscore(dataset, chunks_attr=True, dtype='float32')
 
         # choose classifier
-        clf = LinearNuSVMC()
+        clf = LinearCSVMC()
 
         # setup measure to be computed by Searchlight
         # cross-validated mean transfer using an N-fold dataset splitter
@@ -191,6 +190,4 @@ if __name__ == '__main__':
     mvpapipe.connect([(hpfnode,mvpanode,[('outfile','samples_file')])])
     mvpapipe.export_graph()
     #mvpapipe.run()
-                      
-
 
