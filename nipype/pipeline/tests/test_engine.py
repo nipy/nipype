@@ -102,7 +102,6 @@ def test_run_in_series():
     assert_equal(result, [1, 1])
     os.chdir(cur_dir)
     rmtree(temp_dir)
-    os.remove("pypeline.log")
 
 # Test graph expansion.  The following set tests the building blocks
 # of the graph expansion routine.
