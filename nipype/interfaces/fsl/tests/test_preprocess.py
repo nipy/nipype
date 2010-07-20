@@ -11,18 +11,10 @@ from nipype.utils.filemanip import split_filename
 import nipype.interfaces.fsl.preprocess as fsl
 from nipype.interfaces.fsl import Info
 from nipype.interfaces.base import InterfaceResult, File
-from nipype.interfaces.fsl import check_fsl
+from nipype.interfaces.fsl import check_fsl, no_fsl
 from nipype.interfaces.traits import Undefined
 
-def no_fsl():
-    """Checks if FSL is NOT installed
-    used with skipif to skip tests that will
-    fail if FSL is not installed"""
-    
-    if Info.version() == None:
-        return True
-    else:
-        return False
+
 @skipif(no_fsl)
 def fsl_name(obj, fname):
     """Create valid fsl name, including file extension for output type.

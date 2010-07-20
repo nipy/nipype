@@ -236,3 +236,13 @@ def check_fsl():
         return 0
     else:
         return 1
+
+def no_fsl():
+    """Checks if FSL is NOT installed
+    used with skipif to skip tests that will
+    fail if FSL is not installed"""
+    
+    if Info.version() == None:
+        return True
+    else:
+        return False
