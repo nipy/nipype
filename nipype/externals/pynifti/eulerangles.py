@@ -351,8 +351,8 @@ def euler2angle_axis(z=0, y=0, x=0):
     Examples
     --------
     >>> theta, vec = euler2angle_axis(0, 1.5, 0)
-    >>> theta
-    1.5
+    >>> theta  #doctest: +SKIP
+    1.5        #doctest: +SKIP
     >>> np.allclose(vec, [0, 1, 0])
     True
     '''

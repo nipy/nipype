@@ -265,6 +265,8 @@ def test_vecreg():
 
 
 def skip_dti_tests():
+    """XXX These tests are skipped until we clean up some of this code
+    """
     return True
 
 def create_files_in_directory():

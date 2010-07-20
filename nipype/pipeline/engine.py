@@ -1023,8 +1023,8 @@ class MapNode(Node):
     --------
 
     >>> import nipype.interfaces.fsl as fsl
-    >>> realign = MapNode(interface=fsl.MCFLIRT(), name='realign', iterfield=['in_file'])
-    >>> realign.inputs.in_file = ['functional.nii', 'functional2.nii', 'functional3.nii'] 
+    >>> realign = MapNode(interface=fsl.MCFLIRT(), name='realign', iterfield=['in_file']) # doctest: +SKIP
+    >>> realign.inputs.in_file = ['functional.nii', 'functional2.nii', 'functional3.nii'] # doctest: +SKIP
     >>> realign.run() # doctest: +SKIP
     
     """

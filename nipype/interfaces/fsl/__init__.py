@@ -22,21 +22,14 @@ from nipype.interfaces.fsl.dti import (EddyCorrect, BEDPOSTX, DTIFit, TBSS2Reg,
                                        TBSS4Prestats, Randomise,
                                        ProbTrackX, VecReg, ProjThresh, FindTheBiggest)
 
+
 import nose
 
-called = []
-def setup_module(module):
-    module.called[:] = []
 
-def setup_test(test):
-    if Info.version() == None:
-        print 'NO FSL: skipping doctest'
-        raise nose.plugins.skip.SkipTest
-    else:
-        called.appedn(test)
-setup_test.__test__ = False
+def setup():
+    print 'test setup'
+    if no_fsl:
+        raise nose.SkipTest
 
-def teardown_test(test):
-    pass
-teardown_test.__test__ = False
-
+def teardown():
+    print 'test teardown'
