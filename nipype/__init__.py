@@ -7,7 +7,7 @@ The aim of NIPY is to produce a platform-independent Python environment for
 the analysis of brain imaging data using an open development model.
 
 The main website for NIPY is here:
-http://nipy.sourceforge.net/
+http://nipy.org/
 
 Nipype is the Neuroimaging in Python Pipelines and Interfaces package.
 It's aim is to create Python Interfaces to other neuroimaging packages
@@ -27,15 +27,15 @@ Interfaces
 
     2. pipeline functionality for batch processing data
 
-        a. wrappers to provide common basic interface independent functionality
-        (SkullStrip, Coregister, Realign, Warp,...)
+        a. tools to construct hierarchically complex workflows for
+        analysis of neuroimaging data
 
-        b. engine(s) to use other packages for controlling pipeline
-        (networkx, ruffus, etc..)
-
+        b. execute workflows in parallel using IPython's parallel
+        computing interface
+        
         c. tools for interfacing databases, repositories
 
-        d. tools for providence tracking, subject specific flags
+        d. tools for provenance tracking
 
 Package Organization
 ====================
@@ -48,15 +48,17 @@ The nipy package contains the following subpackages and modules:
 from version import version as __version__
 
 __status__   = 'alpha'
-__url__     = 'http://nipy.sourceforge.net/'
+__url__     = 'http://nipy.org/'
 
+
+'''
 # We require numpy 1.2 for our test suite.  If Tester fails to import,
 # check the version of numpy the user has and inform them they need to
 # upgrade.
-import numpy as np
+
 from nipype.utils.misc import package_check
 package_check('numpy', version='1.1')
-
+import numpy as np
 from distutils.version import LooseVersion
 if LooseVersion(np.__version__) >= '1.2':
     from numpy.testing import Tester
@@ -82,6 +84,7 @@ class NipypeTester(Tester):
 
 test = NipypeTester().test
 bench = NipypeTester().bench
+'''
 
 def _test_local_install():
     """ Warn the user that running with nipy being

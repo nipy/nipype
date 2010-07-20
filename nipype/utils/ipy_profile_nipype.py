@@ -8,7 +8,7 @@ results of TAB completion.  Also defines a magic command
 off.
 
 """
-__test__ = False
+#__test__ = False
 
 import IPython.ipapi
 
@@ -89,5 +89,6 @@ def main():
     # enable magic function
     ip.expose_magic('nipype_mode', toggle_nipype_mode)
 
-main()
+if __name__ == '__main__':
+    main()
 
