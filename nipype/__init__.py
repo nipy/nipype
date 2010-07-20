@@ -51,7 +51,7 @@ __status__   = 'alpha'
 __url__     = 'http://nipy.org/'
 
 
-'''
+
 # We require numpy 1.2 for our test suite.  If Tester fails to import,
 # check the version of numpy the user has and inform them they need to
 # upgrade.
@@ -80,11 +80,11 @@ class NipypeTester(Tester):
         super(NipypeTester, self).test(label, verbose, extra_argv,
                                        doctests, coverage)
     # Grab the docstring from numpy
-    test.__doc__ = Tester.test.__doc__
+    #test.__doc__ = Tester.test.__doc__
 
 test = NipypeTester().test
 bench = NipypeTester().bench
-'''
+
 
 def _test_local_install():
     """ Warn the user that running with nipy being
