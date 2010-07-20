@@ -11,16 +11,7 @@ import nipype.externals.pynifti as nif
 from nipype.testing import (assert_equal, assert_not_equal,
                             assert_raises, parametric, skipif)
 import nipype.interfaces.fsl.utils as fsl
-
-def no_fsl():
-    """Checks if FSL is NOT installed
-    used with skipif to skip tests that will
-    fail if FSL is not installed"""
-    
-    if fsl.Info().version() == None:
-        return True
-    else:
-        return False
+from nipype.interfaces.fsl import no_fsl
 
 
 def create_files_in_directory():

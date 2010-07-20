@@ -15,19 +15,9 @@ from nose import with_setup
 
 from nipype.testing import assert_equal, assert_not_equal, assert_raises, skipif
 import nipype.interfaces.fsl.dti as fsl
-from nipype.interfaces.fsl import Info
+from nipype.interfaces.fsl import Info, no_fsl
 
 # nosetests --with-doctest path_to/test_fsl.py
-
-def no_fsl():
-    """Checks if FSL is NOT installed
-    used with skipif to skip tests that will
-    fail if FSL is not installed"""
-    
-    if Info.version() == None:
-        return True
-    else:
-        return False
 
 def test_bedpostx():
     input_map = dict(args = dict(argstr='%s',),

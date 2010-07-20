@@ -7,18 +7,9 @@ import shutil
 from nipype.testing import (assert_equal, assert_not_equal, assert_true,
                             assert_raises, skipif)
 import nipype.interfaces.fsl as fsl
-
+from nipype.interfaces.fsl import no_fsl
 # XXX Write tests for fsl_model
 
-def no_fsl():
-    """Checks if FSL is NOT installed
-    used with skipif to skip tests that will
-    fail if FSL is not installed"""
-    
-    if fsl.Info().version() == None:
-        return True
-    else:
-        return False
 
 @skipif(no_fsl)
 def test_contrastmgr():
