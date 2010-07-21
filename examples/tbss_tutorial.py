@@ -1,4 +1,7 @@
 """
+   XXX Currently not WORKING in release 0.3,
+   Check for updates 
+
    A pipeline example that uses several interfaces to
    perform analysis on diffusion weighted images using
    FSL fdt and tbss tools.
@@ -11,7 +14,7 @@
 """
 1. Tell python where to find the appropriate functions.
 """
-
+raise RuntimeWarning, 'tbss_tutorial currently not functional'
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
