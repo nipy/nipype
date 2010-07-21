@@ -13,7 +13,8 @@ import nipype.externals.pynifti as nif
 
 from nose import with_setup
 
-from nipype.testing import assert_equal, assert_not_equal, assert_raises, skipif
+from nipype.testing import ( assert_equal, assert_not_equal,
+                             assert_raises, skipif, example_data)
 import nipype.interfaces.fsl.dti as fsl
 from nipype.interfaces.fsl import Info, no_fsl
 
@@ -290,7 +291,6 @@ def clean_directory(outdir, old_wd):
 
 
 # test bedpostx
-#@skipif(skip_dti_tests)
 def test_bedpostx():
     filelist, outdir, cwd = create_files_in_directory()
     bpx = fsl.BEDPOSTX()
@@ -303,36 +303,22 @@ def test_bedpostx():
 
     # .inputs based parameters setting
     bpx2 = fsl.BEDPOSTX()
-    bpx2.inputs.bpx_directory = 'inputDir'
+    bpx2.inputs.mask = example_data('mask.nii')
+    bpx2.inputs.dwi = example_data('diffusion.nii')
+    bpx2.inputs.bvals = example_data('bvals')
+    bpx2.inputs.bvecs = example_data('bvecs')
     bpx2.inputs.fibres = 2
     bpx2.inputs.weight = 0.3
     bpx2.inputs.burn_period = 200
     bpx2.inputs.jumps = 500
     bpx2.inputs.sampling = 20
     actualCmdline = sorted(bpx2.cmdline.split())
-    cmd = 'bedpostx inputDir -w 0.30 -n 2 -j 500 -b 200 -s 20'
+    cmd = 'bedpostx bedpostx -b 200 -n 2 -j 500 -s 20 -w 0.30'
     desiredCmdline = sorted(cmd.split())
     yield assert_equal, actualCmdline, desiredCmdline
 
 
-    # .run based parameter setting
-    bpx3 = fsl.BEDPOSTX(fibres=1, bpx_directory='inputDir')
-    yield assert_equal, bpx3.cmdline, 'bedpostx inputDir -n 1'
-
-    # test arguments for opt_map
-    opt_map = {
-                'fibres':               ('-n 1', 1),
-                'weight':               ('-w 1.00', 1.0),
-                'burn_period':          ('-b 1000', 1000),
-                'jumps':                ('-j 1250', 1250),
-                'sampling':             ('-s 25', 25)}
-
-    for name, settings in opt_map.items():
-        bpx4 = fsl.BEDPOSTX(bpx_directory='inputDir', **{name: settings[1]})
-        yield assert_equal, bpx4.cmdline, bpx4.cmd + ' inputDir ' + settings[0]
-    clean_directory(outdir, cwd)
-
-
+ 
 # test eddy_correct
 @skipif(no_fsl)
 def test_eddy_correct():
