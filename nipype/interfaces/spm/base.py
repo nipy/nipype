@@ -127,7 +127,7 @@ class Info(object):
                     path = path.groups()[0]
                 cls.__path = path
             else:
-                logger.info(out.runtime.stderr)
+                logger.debug(out.runtime.stderr)
                 return None
             
         return cls.__path
