@@ -26,7 +26,7 @@ from nipype.interfaces import fsl
 _, fname = tempfile.mkstemp()
 
 bet = fsl.BET()
-bet.inputs.infile = fname
+bet.inputs.in_file = fname
 
 # WX blows up when trying to handle boolean "CheckBox" widgets with
 # value of type 'undefined' instead of type 'bool'.  Loop over inputs
