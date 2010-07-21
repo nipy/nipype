@@ -242,7 +242,7 @@ class TBSS1Preproc(FSLCommand):
         
     Example
     -------
-    >>> from nipype.interfaces import fsl
+    >>> import nipype.interfaces.fsl.dti as fsl
     >>> tbss1 = fsl.TBSS1Preproc(img_list=['functional.nii','functional2.nii','functional3.nii'])
     >>> tbss1.cmdline
     'tbss_1_preproc functional.nii functional2.nii functional3.nii'
@@ -299,7 +299,7 @@ class TBSS2Reg(FSLCommand):
     Example
     -------
     
-    >>> from nipype.interfaces import fsl
+    >>> import nipype.interfaces.fsl.dti as fsl
     >>> tbss2 = fsl.TBSS2Reg(tbss_dir=os.getcwd(),FMRIB58FA=True)
     >>> tbss2.cmdline
     'tbss_2_reg -T'
@@ -346,7 +346,7 @@ class TBSS3Postreg(FSLCommand):
     Example
     -------
     
-    >>> from nipype.interfaces import fsl
+    >>> import nipype.interfaces.fsl.dti as  fsl
     >>> tbss3 = fsl.TBSS3Postreg(subject_mean=True, tbss_dir='tbss_dir')
     >>> tbss3.cmdline
     'tbss_3_postreg -S'
@@ -399,7 +399,7 @@ class TBSS4Prestats(FSLCommand):
     Example
     -------
     
-    >>> from nipype.interfaces import fsl
+    >>> import nipype.interfaces.fsl.dti as fsl
     >>> tbss4 = fsl.TBSS4Prestats(threshold=0.3, tbss_dir="tbss_dir")
     >>> tbss4.cmdline
     'tbss_4_prestats 0.300'
@@ -477,7 +477,7 @@ class Randomise(FSLCommand):
         
     Example
     -------
-    >>> from nipype.interfaces import fsl
+    >>> import nipype.interfaces.fsl.dti as fsl
     >>> rand = fsl.Randomise(in_file='allFA.nii', \
     mask = 'mask.nii', \
     tcon='design.con', \
