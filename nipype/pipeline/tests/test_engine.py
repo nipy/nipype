@@ -89,7 +89,9 @@ def test_run_in_series():
 
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
-    mod2 = pe.Node(interface=TestInterface(),name='mod2')
+    mod2 = pe.MapNode(interface=TestInterface(),
+                      iterfield=['input1'],
+                      name='mod2')
     pipe.connect([(mod1,mod2,[('output1','input1')])])
     pipe.base_dir = os.getcwd()
     mod1.inputs.input1 = 1
@@ -99,7 +101,7 @@ def test_run_in_series():
     # NOTE: yield statements in nose cause the setup function to be
     # called at this point in the code, after all of the above is
     # executed!
-    assert_equal(result, [1, 1])
+    yield assert_equal(result, [1, 1])
     os.chdir(cur_dir)
     rmtree(temp_dir)
 
