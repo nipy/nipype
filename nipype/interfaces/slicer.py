@@ -12,6 +12,7 @@ from nipype.interfaces.traits import File
 from nipype.utils.misc import isdefined
 from enthought.traits.trait_base import Undefined
 
+import warnings
 
 class SlicerCommandLineInputSpec(DynamicTraitedSpec, CommandLineInputSpec):
     module = traits.Str()
@@ -19,7 +20,10 @@ class SlicerCommandLineInputSpec(DynamicTraitedSpec, CommandLineInputSpec):
 class SlicerCommandLine(CommandLine):
     input_spec = SlicerCommandLineInputSpec
     output_spec = DynamicTraitedSpec
-        
+    warnings.warn('slicer is Not fully implemented',
+                  RuntimeWarning)
+                       
+                        
     
     def _grab_xml(self, module):
         cmd = CommandLine(command = "Slicer3", args="--launch %s --xml"%module)

@@ -290,7 +290,7 @@ def clean_directory(outdir, old_wd):
 
 
 # test bedpostx
-@skipif(skip_dti_tests)
+#@skipif(skip_dti_tests)
 def test_bedpostx():
     filelist, outdir, cwd = create_files_in_directory()
     bpx = fsl.BEDPOSTX()
