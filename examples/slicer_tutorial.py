@@ -1,17 +1,20 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-Using SPM for analysis
+Using slicer for analysis
 =======================
 
-The spm_tutorial.py integrates several interfaces to perform a first
-and second level analysis on a two-subject data set.  The tutorial can
-be found in the examples folder.  Run the tutorial from inside the
-nipype tutorial directory:
+The slicer_tutorial.py
 
-    python spm_tutorial.py
+This is currently not working and will raise an exception
+in release 0.3
+It will be fixed in a later release
+
+
+    python slicer_tutorial.py
 
 """
+raise RuntimeWarning, 'Slicer not fully implmented'
 from nipype.interfaces.slicer import SlicerCommandLine
 
 
