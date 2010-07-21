@@ -28,7 +28,7 @@ import nose
 
 def setup():
     print 'test setup'
-    if no_fsl:
+    if no_fsl():
         raise nose.SkipTest
 
 def teardown():
