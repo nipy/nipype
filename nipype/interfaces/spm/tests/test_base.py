@@ -10,6 +10,7 @@ from nipype.testing import (assert_equal, assert_false, assert_true,
                             assert_raises, skipif)
 import nipype.externals.pynifti as nif
 import nipype.interfaces.spm.base as spm
+from nipype.interfaces.spm import no_spm
 import nipype.interfaces.matlab as mlab
 
 try:
@@ -19,13 +20,6 @@ except:
 
 mlab.MatlabCommand.set_default_matlab_cmd(matlab_cmd)
 
-def cannot_find_spm():
-    # See if we can find spm or not.
-    try:
-        spm.Info.spm_path()
-        return False
-    except IOError:
-        return True
 
 def create_files_in_directory():
     outdir = mkdtemp()
@@ -55,9 +49,9 @@ def test_scan_for_fnames():
 
 save_time = False
 if not save_time:
-    @skipif(cannot_find_spm)
+    @skipif(no_spm)
     def test_spm_path():
-        spm_path = spm.Info.spm_path()
+        spm_path = spm.Info.version()
         if spm_path is not None:
             yield assert_equal, type(spm_path), type('')
             yield assert_true, 'spm' in spm_path
@@ -70,7 +64,7 @@ def test_use_mfile():
     dc.use_mfile(False)
     yield assert_false, dc.inputs.mfile
 
-@skipif(cannot_find_spm, "SPM not found")
+@skipif(no_spm, "SPM not found")
 def test_cmd_update():
     class TestClass(spm.SPMCommand):
         input_spec = spm.SPMCommandInputSpec

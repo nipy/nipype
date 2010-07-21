@@ -10,6 +10,7 @@ from nipype.testing import (assert_equal, assert_false, assert_true,
                             assert_raises, skipif)
 import nipype.externals.pynifti as nif
 import nipype.interfaces.spm as spm
+from nipype.interfaces.spm import no_spm
 import nipype.interfaces.matlab as mlab
 
 try:
@@ -19,13 +20,6 @@ except:
 
 mlab.MatlabCommand.set_default_matlab_cmd(matlab_cmd)
 
-def cannot_find_spm():
-    # See if we can find spm or not.
-    try:
-        spm.Info.spm_path()
-        return False
-    except IOError:
-        return True
 
 def create_files_in_directory():
     outdir = mkdtemp()
@@ -219,6 +213,6 @@ def test_smooth():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
     
-#@skipif(cannot_find_spm, "SPM not found")
+#@skipif(no_spm, "SPM not found")
 #def test_spm_realign_inputs():
 #    pass

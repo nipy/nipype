@@ -21,6 +21,8 @@ from nipype.interfaces.base import BaseInterface, traits, TraitedSpec,\
 from nipype.utils.misc import isdefined
 from nipype.externals.pynifti import load
 from nipype.interfaces.matlab import MatlabCommand
+
+import nipype.utils.spm_docs as sd
                                     
 import logging
 logger = logging.getLogger('iflogger')
@@ -106,31 +108,60 @@ def scans_for_fnames(fnames,keep4d=False,separate_sessions=False):
     return flist
 
 class Info(object):
-    """Returns the path to the SPM directory in the Matlab path
-        If path not found, prints error and returns None."""
-        
-    __path = None
-    @classmethod
-    def spm_path(cls):
-        if cls.__path == None:
-            mlab = MatlabCommand()
-            mlab.inputs.script_file = 'spminfo'
-            mlab.inputs.script = """
-    if isempty(which('spm')), throw(MException('SPMCheck:NotFound','SPM not in matlab path'));end;
-    spm_path = spm('dir');
-    fprintf(1, '<PATH>%s</PATH>', spm_path);
+    """Handles SPM version information
     """
-            out = mlab.run()
-            if out.runtime.returncode == 0:
-                path = re.match('<PATH>(.*)</PATH>',out.runtime.stdout[out.runtime.stdout.find('<PATH>'):])
-                if path is not None:
-                    path = path.groups()[0]
-                cls.__path = path
-            else:
-                logger.debug(out.runtime.stderr)
-                return None
-            
-        return cls.__path
+    @staticmethod
+    def version( matlab_cmd = None ):
+        """Returns the path to the SPM directory in the Matlab path
+        If path not found, returns None.
+
+        Parameters
+        ----------
+        matlab_cmd : String specifying default matlab command
+        
+            default None, will look for environment variable MATLABCMD
+            and use if found, otherwise falls back on MatlabCommand
+            default of 'matlab -nodesktop -nosplash'
+
+        Returns
+        -------
+        spm_path : string representing path to SPM directory
+
+            returns None of path not found
+        """
+        if matlab_cmd is None:
+            try:
+                matlab_cmd = os.environ['MATLABCMD']
+            except:
+                matlab_cmd = 'matlab -nodesktop -nosplash'
+        mlab = MatlabCommand(matlab_cmd = matlab_cmd)
+        mlab.inputs.script_file = 'spminfo'
+        mlab.inputs.script = """
+        if isempty(which('spm')),
+        throw(MException('SPMCheck:NotFound','SPM not in matlab path'));
+        end;
+        spm_path = spm('dir');
+        fprintf(1, 'NIPYPE  %s', spm_path);
+        """
+        out = mlab.run()
+        if out.runtime.returncode == 0:
+            spm_path = sd._strip_header(out.runtime.stdout)
+        else:
+            logger.debug(out.runtime.stderr)
+            return None
+        return spm_path
+
+
+def no_spm():
+    """ Checks if SPM is NOT installed
+    used with nosetests skipif to skip tests
+    that will fail if spm is not installed"""
+
+    if Info.version() == None:
+        return True
+    else:
+        return False
+
     
 class SPMCommandInputSpec(TraitedSpec):
     matlab_cmd = traits.Str()
