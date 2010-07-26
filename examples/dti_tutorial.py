@@ -193,11 +193,6 @@ flirt.inputs.dof = 12
 
 """
 perform probabilistic tracktography
-
-.. note::
-
-  the values given to these parameters are toy examples and
-  should be changed to more meaningful values
 """
 
 probtrackx = pe.Node(interface=fsl.ProbTrackX(),name='probtrackx')
