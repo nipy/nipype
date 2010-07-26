@@ -17,6 +17,6 @@ Contents:
    users/index
    interfaces/index
    devel/index
-   api/index
+   changes
 
 For bleeding-edge version see `Nightly documentation <http://www.mit.edu/~satra/nipype-nightly/>`_
