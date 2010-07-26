@@ -72,6 +72,11 @@ SPM_
 
 FreeSurfer_
   FreeSurfer version 4 and higher
+  
+AFNI
+  
+Slicer
+  3.6 or later
 
 Download
 --------
