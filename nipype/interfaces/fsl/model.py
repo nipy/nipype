@@ -42,10 +42,10 @@ class Level1DesignInputSpec(TraitedSpec):
                           mandatory=True,
                           desc="name of basis function and options e.g., {'dgamma': {'derivs': True}}")
     model_serial_correlations = traits.Enum('AR(1)', 'none',
-        desc="""Option to model serial correlations using an
-            autoregressive estimator. Setting this option is only
-            useful in the context of the fsf file. You need to repeat
-            this option for FILMGLS""")
+        desc="Option to model serial correlations using an \
+autoregressive estimator. Setting this option is only \
+useful in the context of the fsf file. You need to repeat \
+this option for FILMGLS")
     contrasts = traits.List(
         traits.Either(traits.Tuple(traits.Str,
                                    traits.Enum('T'),
@@ -67,11 +67,11 @@ class Level1DesignInputSpec(TraitedSpec):
                                                                           traits.List(traits.Str),
                                                                           traits.List(traits.Float),
                                                                           traits.List(traits.Float)))))),
-        desc="""List of contrasts with each contrast being a list of the form -
-    [('name', 'stat', [condition list], [weight list], [session list])]. if
-    session list is None or not provided, all sessions are used. For F
-    contrasts, the condition list should contain previously defined
-    T-contrasts.""")
+        desc="List of contrasts with each contrast being a list of the form - \
+[('name', 'stat', [condition list], [weight list], [session list])]. if \
+session list is None or not provided, all sessions are used. For F \
+contrasts, the condition list should contain previously defined \
+T-contrasts.")
 
 class Level1DesignOutputSpec(TraitedSpec):
     fsf_files = OutputMultiPath(File(exists=True),
@@ -462,8 +462,8 @@ class FILMGLS(FSLCommand):
     Specify options when creating an instance:
 
     >>> fgls = fsl.FILMGLS(in_file='functional.nii', \
-                           design_file='design.mat', \
-                           threshold=10, results_dir='stats')
+design_file='design.mat', \
+threshold=10, results_dir='stats')
     >>> res = fgls.run() #doctest: +SKIP
 
     """
