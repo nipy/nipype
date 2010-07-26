@@ -288,8 +288,7 @@ SPM
 ^^^
 
 ``field``
-	XXX: Get description from Satra.  Clearly this maps to some field
-	structure in spm.
+	name of the structure refered by the SPM job manager
 	
 	**Required:** This metadata is required by all SPM-mediated
 	  interface classes.
