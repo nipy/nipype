@@ -1,6 +1,6 @@
-==========
- Planning
-==========
+====================
+ Planning - OUTDATED
+====================
 
 This document will contain the results of different planning
 discussions and design meetings we have.  This document will serve as
