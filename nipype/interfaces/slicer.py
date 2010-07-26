@@ -1,8 +1,5 @@
-'''
-Created on 22 Jun 2010
-
-@author: filo
-'''
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
     DynamicTraitedSpec
 import xml.dom.minidom
@@ -15,9 +12,13 @@ from enthought.traits.trait_base import Undefined
 import warnings
 
 class SlicerCommandLineInputSpec(DynamicTraitedSpec, CommandLineInputSpec):
-    module = traits.Str()
+    module = traits.Str(desc="name of the Slicer command line module you want to use")
 
 class SlicerCommandLine(CommandLine):
+    """Experimental Slicer wrapper. Work in progress.
+    
+    """
+    
     input_spec = SlicerCommandLineInputSpec
     output_spec = DynamicTraitedSpec
     warnings.warn('slicer is Not fully implemented',
