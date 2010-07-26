@@ -17,9 +17,12 @@ Please read the IPython_ documentation to determine how to setup your
 cluster for distributed processing. This typically involves calling
 ipcluster. For example the following command will start an eight client
 cluster locally and log all client messages to the file in
-/tmp/pipeline.::
+/tmp/pipeline::
 
         ipcluster local -n 8 --logdir /tmp/pipeline
+        
+If you use a more complicated environment distributed over ssh try using the following configuration::
+
         ipcluster ssh  --ipclusterfile=clusterfile.py --sshx=loginprofile.sh
 
 clusterfile.py example::
