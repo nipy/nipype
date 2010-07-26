@@ -1,6 +1,6 @@
-=====================
- Proposed Interfaces
-=====================
+===============================
+ Proposed Interfaces - OUTDATED
+===============================
 
 Below is a brief list of interfaces we plan to implement.  This
 document should be temporary and eventually go into the documentation.
