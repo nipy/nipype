@@ -889,40 +889,40 @@ class MELODICInputSpec(FSLCommandInputSpec):
     no_mask = traits.Bool(argst="--nomask",desc="switch off masking")
     update_mask = traits.Bool(argst="--update_mask",desc="switch off mask updating")
     no_bet = traits.Bool(argst="--nobet",desc="switch off BET")
-    bg_threshold = traits.Bool(argst="--bgthreshold",desc="brain/non-brain threshold (only if --nobet selected)")
+    bg_threshold = traits.Float(argst="--bgthreshold=%f",desc="brain/non-brain threshold used to mask non-brain voxels, as a percentage (only if --nobet selected)")
     dim = traits.Int(argst="-d %d",desc="dimensionality reduction into #num dimensions"\
                      "(default: automatic estimation)")
-    dim_est = traits.Str(argst="--dimest %s",desc="use specific dim. estimation technique:"\
+    dim_est = traits.Str(argst="--dimest=%s",desc="use specific dim. estimation technique:"\
                          " lap, bic, mdl, aic, mean (default: lap)")
     sep_whiten = traits.Bool(argst="--sep_whiten",desc="switch on separate whitening")
     sep_vn = traits.Bool(argst="--sep_vn",desc="switch off joined variance normalization")
     num_ICs = traits.Int(argst="-n %d",desc="number of IC's to extract (for deflation approach)")
     approach = traits.Str(argst="-a %s",desc="approach for decomposition, 2D: defl, symm (default),"\
                           " 3D: tica (default), concat")
-    non_linearity = traits.Str(argst="--nl %s",desc="nonlinearity: gauss, tanh, pow3, pow4")
+    non_linearity = traits.Str(argst="--nl=%s",desc="nonlinearity: gauss, tanh, pow3, pow4")
     var_norm = traits.Bool(argst="--vn",desc="switch off variance normalization")
     pbsc = traits.Bool(argst="--pbsc",desc="switch off conversion to percent BOLD signal change")
-    cov_weight = traits.Float(argst="--covarweight %f",desc="voxel-wise weights for the covariance "\
+    cov_weight = traits.Float(argst="--covarweight=%f",desc="voxel-wise weights for the covariance "\
                               "matrix (e.g. segmentation information)")
-    epsilon = traits.Float(argst="--eps %f",desc="minimum error change")
-    epsilonS = traits.Float(argst="--epsS %f",desc="minimum error change for rank-1 approximation in TICA")
-    maxit = traits.Int(argst="--maxit %d",desc="maximum number of iterations before restart")
-    max_restart = traits.Int(argst="--maxrestart %d",desc="maximum number of restarts")
-    mm_thresh = traits.Float(argst="--mmthresh %f",desc="threshold for Mixture Model based inference")
+    epsilon = traits.Float(argst="--eps=%f",desc="minimum error change")
+    epsilonS = traits.Float(argst="--epsS=%f",desc="minimum error change for rank-1 approximation in TICA")
+    maxit = traits.Int(argst="--maxit=%d",desc="maximum number of iterations before restart")
+    max_restart = traits.Int(argst="--maxrestart=%d",desc="maximum number of restarts")
+    mm_thresh = traits.Float(argst="--mmthresh=%f",desc="threshold for Mixture Model based inference")
     no_mm = traits.Bool(argst="--no_mm",desc="switch off mixture modelling on IC maps")
-    ICs = File(exists=True,argst="--ICs %s",desc="filename of the IC components file for mixture modelling")
-    mix = File(exists=True,argst="--mix %s",desc="mixing matrix for mixture modelling / filtering")
-    smode = File(exists=True,argst="--smode %s",desc="matrix of session modes for report generation")
+    ICs = File(exists=True,argst="--ICs=%s",desc="filename of the IC components file for mixture modelling")
+    mix = File(exists=True,argst="--mix=%s",desc="mixing matrix for mixture modelling / filtering")
+    smode = File(exists=True,argst="--smode=%s",desc="matrix of session modes for report generation")
     rem_cmp = traits.List(traits.Int,argst="-f %d",desc="component numbers to remove")
     report = traits.Bool(argst="--report",desc="generate Melodic web report")
-    bg_image = File(exists=True, argst="--bgimage %s",desc="specify background image for report"\
+    bg_image = File(exists=True, argst="--bgimage=%s",desc="specify background image for report"\
                     " (default: mean image)")
-    tr_sec = traits.Bool(argst="--tr",desc="TR in seconds")
+    tr_sec = traits.Float(argst="--tr=%f",desc="TR in seconds")
     log_power = traits.Bool(argst="--logPower",desc="calculate log of power for frequency spectrum")
-    t_des = File(argst="--Tdes %s",desc="design matrix across time-domain")
-    t_con = File(argst="--Tcon %s",desc="t-contrast matrix across time-domain")
-    s_des = File(argst="--Sdes %s",desc="design matrix across subject-domain")
-    s_con = File(argst="--Scon %s",desc="t-contrast matrix across subject-domain")
+    t_des = File(argst="--Tdes=%s",desc="design matrix across time-domain")
+    t_con = File(argst="--Tcon=%s",desc="t-contrast matrix across time-domain")
+    s_des = File(argst="--Sdes=%s",desc="design matrix across subject-domain")
+    s_con = File(argst="--Scon=%s",desc="t-contrast matrix across subject-domain")
     out_all = traits.Bool(argst="--Oall",desc="output everything")
     out_unmix = traits.Bool(argst="--Ounmix",desc="output unmixing matrix")
     out_stats = traits.Bool(argst="--Ostats",desc="output thresholded maps and probability maps")
@@ -930,7 +930,7 @@ class MELODICInputSpec(FSLCommandInputSpec):
     out_white = traits.Bool(argst="--Owhite",desc="output whitening/dewhitening matrices")
     out_orig = traits.Bool(argst="--Oorig",desc="output the original ICs")
     out_mean = traits.Bool(argst="--Omean",desc="output mean volume")
-    report_maps = traits.Str(argst="--report_maps %s",desc="control string for spatial map images (see slicer)")
+    report_maps = traits.Str(argst="--report_maps=%s",desc="control string for spatial map images (see slicer)")
     remove_deriv = traits.Bool(argst="--remove_deriv",desc="removes every second entry in paradigm"\
                                " file (EV derivatives)")
 
@@ -939,6 +939,26 @@ class MELODICOutputSpec(TraitedSpec):
 
 class MELODIC(FSLCommand):
     """Multivariate Exploratory Linear Optimised Decomposition into Independent Components
+
+    Examples
+    --------
+
+    >>> melodic_setup = MELODIC()
+    >>> melodic_setup.inputs.approach = 'tica'
+    >>> melodic_setup.inputs.in_files = 'allSubsFileList'
+    >>> melodic_setup.inputs.no_bet = True
+    >>> melodic_setup.inputs.bg_threshold = 10
+    >>> melodic_setup.inputs.tr_sec = 1.5
+    >>> melodic_setup.inputs.mm_thresh = 0.5
+    >>> melodic_setup.inputs.out_stats = True
+    >>> melodic_setup.inputs.t_des = 'timeDesign.mat'
+    >>> melodic_setup.inputs.t_con = 'timeDesign.con'
+    >>> melodic_setup.inputs.s_des = 'subjectDesign.mat'
+    >>> melodic_setup.inputs.s_con = 'subjectDesign.con'
+    >>> melodic_setup.outputs.out_dir = 'groupICA.out'
+    >>> melodic_setup.run() # doctest: +SKIP
+
+    
     """
     input_spec = MELODICInputSpec
     output_spec = MELODICOutputSpec
