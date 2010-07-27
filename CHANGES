@@ -13,7 +13,7 @@ Features added
 
 * General:
 
-  - Type checking of inputs and outputs thanks to Traits.
+  - Type checking of inputs and outputs using Traits from ETS_.
   - Support for nested workflows.
   - Preliminary Slicer and AFNI support.
   - New flexible DataGrabber node.

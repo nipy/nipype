@@ -8,7 +8,7 @@
    __not_case_sensitive__, so only one target definition is needed for
    nipy, NIPY, Nipy, etc...
 
-.. _nipy: http://neuroimaging.scipy.org
+.. _nipy: http://nipy.org
 .. _`NIPY developer resources`: http://nipy.sourceforge.net/devel
 .. _`Brain Imaging Center`: http://bic.berkeley.edu/
 
@@ -82,6 +82,7 @@
 .. _FSL: http://www.fmrib.ox.ac.uk/fsl
 .. _FreeSurfer: http://surfer.nmr.mgh.harvard.edu
 .. _voxbo: http://www.voxbo.org
+.. _Slicer: http://slicer.org
 
 .. General software
 .. _gcc: http://gcc.gnu.org

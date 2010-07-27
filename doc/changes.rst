@@ -7,3 +7,5 @@ Changes in Nipype
 =================
 
 .. include:: ../CHANGES
+
+.. include:: links_names.txt
