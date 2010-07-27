@@ -1,0 +1,32 @@
+Release 0.3 (Jul 27, 2010)
+==========================
+
+Incompatible changes
+--------------------
+
+* Complete redesign of the Interface class - heavy use of Traits.
+
+* Changes in the engine API - added Workflow and MapNode. Compulsory name argument.
+
+Features added
+--------------
+
+* General:
+
+  - Type checking of inputs and outputs thanks to Traits.
+  - Support for nested workflows.
+  - Preliminary Slicer and AFNI support.
+  - New flexible DataGrabber node.
+  - AtlasPick and Threshold nodes.
+  - Preliminary support for XNAT.
+  - Doubled number of the tutorials.
+
+* FSL:
+
+  - Added DTI processing nodes (note that TBSS nodes are still experimental).
+  - Recreated FEAT workflow.
+
+* SPM:
+
+  - Added New Segment and many other nodes.
+  - Redesigned second level analysis.
