@@ -76,7 +76,7 @@ class APIDocs(TempInstall):
             # We are running the API-building script via an
             # system call, but overriding the import path.
             toolsdir = os.path.abspath(pjoin('..', 'tools'))
-            for docbuilder in ['build_modref_templates.py', 'build_interface_docs.py']:
+            for docbuilder in ['build_interface_docs.py']:
                 build_templates = pjoin(toolsdir, docbuilder)
                 cmd = """%s -c 'import sys; sys.path.append("%s"); sys.path.append("%s"); execfile("%s", dict(__name__="__main__"))'""" \
                     % (sys.executable,
