@@ -74,7 +74,7 @@ FreeSurfer_
   FreeSurfer version 4 and higher
   
 AFNI
-  
+  2009_12_31_1431 or later
 Slicer
   3.6 or later
 
