@@ -68,6 +68,7 @@
 .. _networkx: http://networkx.lanl.gov/
 .. _pythonxy: http://www.pythonxy.com/
 .. _EPD: http://www.enthought.com/products/epd.php
+.. _Traits: http://code.enthought.com/projects/traits/
 
 .. Python imaging projects
 .. _PyMVPA: http://www.pymvpa.org
@@ -95,7 +96,7 @@
 .. _FMRIB: http://www.fmrib.ox.ac.uk
 
 .. Other organizations
-.. _enthought: <http://www.enthought.com>
+.. _enthought: http://www.enthought.com
 .. _kitware: http://www.kitware.com
 
 .. General information links

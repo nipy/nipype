@@ -39,6 +39,8 @@ IPython_ 0.10
   json is included in Python 2.6, but if you are using Python 2.5 you
   will need to install simplejson.
 
+Enthought_ Traits_ 3.2.0 or later
+
 Note
 ~~~~
 Full distributions such as pythonxy_ or EPD_ provide the above
