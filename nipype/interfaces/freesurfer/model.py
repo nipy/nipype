@@ -369,8 +369,8 @@ class ConcatenateInputSpec(FSTraitedSpec):
     in_files = InputMultiPath(File(exists=True),
                  desc = 'Individual volumes to be concatenated',
                  argstr='--i %s...',mandatory=True)
-    concatenated_file = File('concat_output.nii.gz', desc = 'Output volume', argstr='--o %s',
-                  usedefault=True)
+    concatenated_file = File(desc = 'Output volume', argstr='--o %s',
+                             genfile=True)
     sign = traits.Enum('abs','pos','neg', argstr='--%s',
           desc = 'Take only pos or neg voxles from input, or take abs')
     stats = traits.Enum('sum','var','std','max','min', 'mean', argstr='--%s',
@@ -430,8 +430,17 @@ class Concatenate(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['concatenated_file'] = self.inputs.concatenated_file
+        if not isdefined(self.inputs.concatenated_file):
+            outputs['concatenated_file'] = os.path.join(os.getcwd(),
+                                                        'concat_output.nii.gz')
+        else:
+            outputs['concatenated_file'] = self.inputs.concatenated_file
         return outputs
+    
+    def _gen_filename(self, name):
+        if name == 'concatenated_file':
+            return self._list_outputs()[name]
+        return None    
 
 class SegStatsInputSpec(FSTraitedSpec):
     _xor_inputs = ('segmentation_file', 'annot', 'surf_label')
