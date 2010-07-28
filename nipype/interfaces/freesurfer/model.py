@@ -108,9 +108,6 @@ class MRISPreproc(FSCommand):
         return None    
 
 class GLMFitInputSpec(FSTraitedSpec):
-    hemi = traits.Str(desc='im not sure what hemi does ',
-                      argstr='%s')
-    surf = traits.Str(desc='subject hemi',argstr='--surf %s')
     glm_dir = traits.Str(argstr='--glmdir %s', desc='save outputs to dir')
     in_file = File(desc='input 4D file', argstr='--y %s', mandatory=True,
                   copyfile=False)
@@ -185,6 +182,7 @@ class GLMFitInputSpec(FSTraitedSpec):
        desc='save residual error spatial correlation matrix (eres.scm). Big!')
     surf = traits.Tuple(traits.Str, traits.Enum('lh', 'rh'),
                         traits.Enum('white','pial','smoothwm','inflated'),
+                        argstr='--surf %s %s %s',
                         desc='needed for some flags (uses white by default)')
     simulation = traits.Tuple(traits.Enum('perm','mc-full','mc-z'),
                               traits.Int(min=1), traits.Float, traits.Str,
