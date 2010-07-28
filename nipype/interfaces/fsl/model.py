@@ -883,7 +883,7 @@ class SMM(FSLCommand):
 
 class MELODICInputSpec(FSLCommandInputSpec):
     in_files = InputMultiPath(File(exists=True),argst="-i %s",mandatory=True,position=0,
-                              desc="input file names (either single file name or comma-separated list)")
+                              desc="input file names (either single file name or a list)")
     out_dir = Directory(exists=True,argst="-o %s",desc="output directory name")
     mask = File(exists=True, argst="-m %s",desc="file name of mask for thresholding")
     no_mask = traits.Bool(argst="--nomask",desc="switch off masking")
@@ -919,10 +919,10 @@ class MELODICInputSpec(FSLCommandInputSpec):
                     " (default: mean image)")
     tr_sec = traits.Float(argst="--tr=%f",desc="TR in seconds")
     log_power = traits.Bool(argst="--logPower",desc="calculate log of power for frequency spectrum")
-    t_des = File(argst="--Tdes=%s",desc="design matrix across time-domain")
-    t_con = File(argst="--Tcon=%s",desc="t-contrast matrix across time-domain")
-    s_des = File(argst="--Sdes=%s",desc="design matrix across subject-domain")
-    s_con = File(argst="--Scon=%s",desc="t-contrast matrix across subject-domain")
+    t_des = File(exists=True, argst="--Tdes=%s",desc="design matrix across time-domain")
+    t_con = File(exists=True, argst="--Tcon=%s",desc="t-contrast matrix across time-domain")
+    s_des = File(exists=True, argst="--Sdes=%s",desc="design matrix across subject-domain")
+    s_con = File(exists=True, argst="--Scon=%s",desc="t-contrast matrix across subject-domain")
     out_all = traits.Bool(argst="--Oall",desc="output everything")
     out_unmix = traits.Bool(argst="--Ounmix",desc="output unmixing matrix")
     out_stats = traits.Bool(argst="--Ostats",desc="output thresholded maps and probability maps")
@@ -933,9 +933,10 @@ class MELODICInputSpec(FSLCommandInputSpec):
     report_maps = traits.Str(argst="--report_maps=%s",desc="control string for spatial map images (see slicer)")
     remove_deriv = traits.Bool(argst="--remove_deriv",desc="removes every second entry in paradigm"\
                                " file (EV derivatives)")
+    out_dir = Directory(argst="-o %s",desc="output directory name")
 
 class MELODICOutputSpec(TraitedSpec):
-    out_dir = Directory(exists=True,argst="-o %s",desc="output directory name")
+    out_dir = Directory(exists=True)
 
 class MELODIC(FSLCommand):
     """Multivariate Exploratory Linear Optimised Decomposition into Independent Components
@@ -945,7 +946,7 @@ class MELODIC(FSLCommand):
 
     >>> melodic_setup = MELODIC()
     >>> melodic_setup.inputs.approach = 'tica'
-    >>> melodic_setup.inputs.in_files = 'allSubsFileList'
+    >>> melodic_setup.inputs.in_files = ['functional.nii', 'functional2.nii', 'functional3.nii']
     >>> melodic_setup.inputs.no_bet = True
     >>> melodic_setup.inputs.bg_threshold = 10
     >>> melodic_setup.inputs.tr_sec = 1.5
@@ -955,7 +956,7 @@ class MELODIC(FSLCommand):
     >>> melodic_setup.inputs.t_con = 'timeDesign.con'
     >>> melodic_setup.inputs.s_des = 'subjectDesign.mat'
     >>> melodic_setup.inputs.s_con = 'subjectDesign.con'
-    >>> melodic_setup.outputs.out_dir = 'groupICA.out'
+    >>> melodic_setup.inputs.out_dir = 'groupICA.out'
     >>> melodic_setup.run() # doctest: +SKIP
 
     
