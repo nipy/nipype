@@ -97,10 +97,9 @@ class MRISPreproc(FSCommand):
         outputs = self.output_spec().get()
         outfile = self.inputs.out_file
         if not isdefined(outfile):
-            outputs['out_file'] = fname_presuffix(self.inputs.infile,
-                                                 newpath=os.getcwd(),
-                                                 suffix='_preproc.mgz',
-                                                 use_ext=False)
+            outputs['out_file'] = os.path.join(os.getcwd(),
+                                               'concat_%s_%s.mgz'%(self.inputs.hemi,
+                                                                   self.inputs.target))
         return outputs
     
     def _gen_filename(self, name):
