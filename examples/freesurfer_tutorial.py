@@ -54,7 +54,7 @@ fs.FSCommand.set_default_subjects_dir(subjects_dir)
 # Set the way matlab should be called
 mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
 # If SPM is not in your MATLAB path you should add it here
-# mlab.MatlabCommand.set_default_paths('/path/to/your/spm8')
+mlab.MatlabCommand.set_default_paths('/software/spm8')
 
 
 """
@@ -511,6 +511,107 @@ level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                                         'inputnode.session_info')]),
                 ])
 
+
+"""
+Store the output
+----------------
+
+Create a datasink node to store the contrast images and registration info
+"""
+
+datasink = pe.Node(interface=nio.DataSink(), name="datasink")
+datasink.inputs.base_directory = os.path.abspath('volsurf_tutorial/l1out')
+datasink.inputs.substitutes = []
+
+def getsubs(subject_id):
+    subs = [('_subject_id_%s/'%subject_id,'')]
+    return subs
+
+# store relevant outputs from various stages of the 1st level analysis
+level1.connect([(infosource, datasink,[('subject_id','container'),
+                                       (('subject_id', getsubs), 'substitutions')
+                                       ]),
+                (l1pipeline, datasink,[('surfanalysis.contrastestimate.con_images','contrasts'),
+                                       ('preproc.surfregister.out_reg_file','registrations'),
+                                       ])
+                ])
+
+
+"""
+Level2 surface-based pipeline
+-----------------------------
+
+Create a level2 workflow
+"""
+
+l2flow = pe.Workflow(name='l2out')
+l2flow.base_dir = os.path.abspath('volsurf_tutorial')
+
+"""
+Setup a dummy node to iterate over contrasts and hemispheres
+"""
+
+l2inputnode = pe.Node(interface=util.IdentityInterface(fields=['contrasts',
+                                                               'hemi']),
+                      name='inputnode')
+l2inputnode.iterables = [('contrasts', range(1,len(contrasts)+1)),
+                         ('hemi', ['lh','rh'])]
+
+"""
+Use a datagrabber node to collect contrast images and registration files
+"""
+
+l2source = pe.Node(interface=nio.DataGrabber(infields=['con_id'],
+                                             outfields=['con','reg']),
+                   name='l2source')
+l2source.inputs.base_directory = os.path.abspath('volsurf_tutorial/l1out')
+l2source.inputs.template = '*'
+l2source.inputs.field_template = dict(con='*/contrasts/con_%04d.img',
+                                      reg='*/registrations/*.dat')
+l2source.inputs.template_args = dict(con=[['con_id']],reg=[[]])
+
+l2flow.connect(l2inputnode, 'contrasts', l2source, 'con_id')
+
+"""
+Merge contrast images and registration files
+"""
+
+mergenode = pe.Node(interface=util.Merge(2, axis='hstack'),
+                    name='merge')
+
+def ordersubjects(files, subj_list):
+    outlist = []
+    for s in subj_list:
+        for f in files:
+            if '/%s/'%s in f:
+                outlist.append(f)
+                continue
+    print outlist
+    return outlist
+
+l2flow.connect(l2source,('con', ordersubjects, subject_list), mergenode, 'in1')
+l2flow.connect(l2source,('reg', ordersubjects, subject_list), mergenode, 'in2')
+
+"""
+Concatenate contrast images projected to fsaverage
+"""
+
+l2concat = pe.Node(interface=fs.MRISPreproc(), name='concat')
+l2concat.inputs.target = 'fsaverage'
+l2concat.inputs.fwhm = 5
+
+def list2tuple(listoflist):
+    return [tuple(x) for x in listoflist]
+l2flow.connect(l2inputnode, 'hemi', l2concat, 'hemi')
+l2flow.connect(mergenode, ('out', list2tuple), l2concat, 'vol_measure_file')
+
+"""
+Perform a one sample t-test
+"""
+
+l2ttest = pe.Node(interface=fs.OneSampleTTest(), name='onesample')
+l2flow.connect(l2concat, 'out_file', l2ttest, 'in_file')
+
 """
 Run the analysis pipeline and also create a dot+png (if graphviz is available)
 that visually represents the workflow.
@@ -519,4 +620,6 @@ that visually represents the workflow.
 if __name__ == '__main__':
     level1.run()
     level1.write_graph(graph2use='flat')
+    l2flow.run()
+    l2flow.write_graph(graph2use='flat')
 
