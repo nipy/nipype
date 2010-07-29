@@ -1100,7 +1100,10 @@ class MapNode(Node):
 
     @property
     def outputs(self):
-        return Bunch(self._interface._outputs().get())
+        if self._interface._outputs():
+            return Bunch(self._interface._outputs().get())
+        else:
+            return None
 
     def _run_interface(self, execute=True, cwd=None):
         old_cwd = os.getcwd()
@@ -1144,8 +1147,11 @@ class MapNode(Node):
             for i in range(nitems):
                 node = iterflow.get_exec_node('.'.join((workflowname,
                                                         nodenames[i])))
-                values.insert(i, node.result.outputs.get()[key])
-            if any([val != Undefined for val in values]):
+                if node.result.outputs:
+                    values.insert(i, node.result.outputs.get()[key])
+                else:
+                    values.insert(i, None)
+            if any([val != Undefined for val in values]) and self._result.outputs:
                 #logger.debug('setting key %s with values %s' %(key, str(values)))
                 setattr(self._result.outputs, key, values)
             #else:
