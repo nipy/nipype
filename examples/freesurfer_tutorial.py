@@ -538,6 +538,16 @@ level1.connect([(infosource, datasink,[('subject_id','container'),
 
 
 """
+Run the analysis pipeline and also create a dot+png (if graphviz is available)
+that visually represents the workflow.
+"""
+
+if __name__ == '__main__':
+    level1.run()
+    level1.write_graph(graph2use='flat')
+
+
+"""
 Level2 surface-based pipeline
 -----------------------------
 
@@ -618,8 +628,6 @@ that visually represents the workflow.
 """
 
 if __name__ == '__main__':
-    level1.run()
-    level1.write_graph(graph2use='flat')
     l2flow.run()
     l2flow.write_graph(graph2use='flat')
 
