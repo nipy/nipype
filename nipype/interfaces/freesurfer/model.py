@@ -232,8 +232,8 @@ class GLMFit(FSCommand):
     >>> glmfit = GLMFit()
     >>> glmfit.inputs.in_file = 'functional.nii'
     >>> glmfit.inputs.one_sample = True
-    >>> glmfit.cmdline
-    'mri_glmfit --y functional.nii --osgm'
+    >>> glmfit.cmdline == 'mri_glmfit --glmdir %s --y functional.nii --osgm'%os.getcwd()
+    True
     
     """
 
