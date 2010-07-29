@@ -108,7 +108,8 @@ class MRISPreproc(FSCommand):
         return None    
 
 class GLMFitInputSpec(FSTraitedSpec):
-    glm_dir = traits.Str(argstr='--glmdir %s', desc='save outputs to dir')
+    glm_dir = traits.Str(argstr='--glmdir %s', desc='save outputs to dir',
+                         genfile=True)
     in_file = File(desc='input 4D file', argstr='--y %s', mandatory=True,
                   copyfile=False)
     _design_xor = ('fsgd', 'design', 'one_sample')
@@ -238,6 +239,11 @@ class GLMFit(FSCommand):
 
     _cmd = 'mri_glmfit'
     input_spec = GLMFitInputSpec
+    
+    def _gen_filename(self, name):
+        if name == 'glm_dir':
+            return os.getcwd()
+        return None    
         
 class OneSampleTTest(GLMFit):
 
