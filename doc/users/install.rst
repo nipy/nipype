@@ -41,6 +41,8 @@ IPython_ 0.10
 
 Enthought_ Traits_ 3.2.0 or later
 
+nibabel (TODO: add version number when they release)
+
 Note
 ~~~~
 Full distributions such as pythonxy_ or EPD_ provide the above
@@ -77,6 +79,7 @@ FreeSurfer_
   
 AFNI
   2009_12_31_1431 or later
+  
 Slicer
   3.6 or later
 
