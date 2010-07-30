@@ -387,20 +387,15 @@ class ImageStats(FSLCommand):
     
     def aggregate_outputs(self, runtime=None):
         outputs = self._outputs()
-        outfile = os.path.join(os.getcwd(), 'stat_result.json')
-        if runtime is None:
-            out_stat = load_json(outfile)['stat']
-        else:
-            out_stat = []
-            for line in runtime.stdout.split('\n'):
-                if line:
-                    values = line.split()
-                    if len(values)>1:
-                        out_stat.append([float(val) for val in values])
-                    else:
-                        out_stat.extend([float(val) for val in values])
-            if len(out_stat)==1:
-                out_stat = out_stat[0]
-            save_json(outfile, dict(stat=out_stat))
+        out_stat = []
+        for line in runtime.stdout.split('\n'):
+            if line:
+                values = line.split()
+                if len(values)>1:
+                    out_stat.append([float(val) for val in values])
+                else:
+                    out_stat.extend([float(val) for val in values])
+        if len(out_stat)==1:
+            out_stat = out_stat[0]
         outputs.out_stat = out_stat
         return outputs
