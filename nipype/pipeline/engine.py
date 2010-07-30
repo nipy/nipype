@@ -29,6 +29,7 @@ import numpy as np
 
 from nipype.utils.misc import package_check
 import shutil
+import cPickle
 package_check('networkx', '1.0')
 import networkx as nx
 try:
@@ -981,6 +982,13 @@ class Node(WorkflowBase):
                 # to remove problem with thread unsafeness of savez
                 outdict = {'result_%s' % self._id : result}
                 np.savez(resultsfile, **outdict)
+                
+                # for outputs caching
+                resultsfile_pkl = os.path.join(cwd, 'result_%s.pkl' % self._id)
+                output = open(resultsfile_pkl, 'wb')
+                cPickle.dump(result, output)
+                output.close()
+
         else:
             # Likewise, cwd could go in here
             logger.debug("Collecting precomputed outputs:")
