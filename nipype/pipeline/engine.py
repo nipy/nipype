@@ -985,19 +985,18 @@ class Node(WorkflowBase):
                 
                 # for outputs caching
                 resultsfile_pkl = os.path.join(cwd, 'result_%s.pkl' % self._id)
-                output = open(resultsfile_pkl, 'wb')
-                cPickle.dump(result, output)
-                output.close()
+                pkl_file = open(resultsfile_pkl, 'wb')
+                cPickle.dump(result, pkl_file)
+                pkl_file.close()
 
         else:
             # Likewise, cwd could go in here
             logger.debug("Collecting precomputed outputs:")
             try:
-                aggouts = self._interface.aggregate_outputs()
-                runtime = Bunch(returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
-                result = InterfaceResult(interface=None,
-                                         runtime=runtime,
-                                         outputs=aggouts)
+                resultsfile_pkl = os.path.join(cwd, 'result_%s.pkl' % self._id)
+                pkl_file = open(resultsfile_pkl, 'rb')
+                result = cPickle.load(pkl_file)
+                pkl_file.close()
             except FileNotFoundError:
                 logger.debug("Some of the outputs were not found: rerunning node.")
                 result = self._run_command(execute=True, cwd=cwd, copyfiles=False)
