@@ -16,7 +16,7 @@ import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model generation
 
-from nipype.externals.pynifti import load
+from nibabel import load
 
 
 """

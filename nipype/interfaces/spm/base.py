@@ -19,7 +19,7 @@ from scipy.io import savemat
 from nipype.interfaces.base import BaseInterface, traits, TraitedSpec,\
     InputMultiPath
 from nipype.utils.misc import isdefined
-from nipype.externals.pynifti import load
+from nibabel import load
 from nipype.interfaces.matlab import MatlabCommand
 
 import nipype.utils.spm_docs as sd

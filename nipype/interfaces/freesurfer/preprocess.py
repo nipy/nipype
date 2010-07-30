@@ -15,7 +15,7 @@ import os
 from glob import glob
 import numpy as np
 
-from nipype.externals.pynifti import load
+from nibabel import load
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.io import FreeSurferSource
 
