@@ -70,6 +70,7 @@ def svn_version():
 
 if not release:
     version += '.dev'
-    svnver = get_nipype_gitversion()
-    version += svnver
+    vcsver = get_nipype_gitversion()
+    if vcsver:
+        version += vcsver
 
