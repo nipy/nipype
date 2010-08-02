@@ -527,11 +527,12 @@ class SegStats(FSCommand):
     >>> import nipype.interfaces.freesurfer as fs
     >>> ss = fs.SegStats()
     >>> ss.inputs.annot = ('PWS04', 'lh', 'aparc')
-    >>> ss.inputs.environ['SUBJECTS_DIR'] = '/somepath/FSDATA'
+    >>> ss.inputs.in_file = 'functional.nii'
+    >>> ss.inputs.subjects_dir = '.'
     >>> ss.inputs.avgwf_txt_file = './avgwf.txt'
     >>> ss.inputs.summary_file = './summary.stats'
     >>> ss.cmdline
-    'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --sum ./summary.stats'
+    'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --i functional.nii --sum ./summary.stats'
     
     """
 
