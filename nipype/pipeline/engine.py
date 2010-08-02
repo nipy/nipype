@@ -30,6 +30,7 @@ import numpy as np
 from nipype.utils.misc import package_check
 import shutil
 import cPickle
+import gzip
 package_check('networkx', '1.0')
 import networkx as nx
 try:
@@ -984,8 +985,8 @@ class Node(WorkflowBase):
                 np.savez(resultsfile, **outdict)
                 
                 # for outputs caching
-                resultsfile_pkl = os.path.join(cwd, 'result_%s.pkl' % self._id)
-                pkl_file = open(resultsfile_pkl, 'wb')
+                resultsfile_pkl = os.path.join(cwd, 'result_%s.pklz' % self._id)
+                pkl_file = gzip.open(resultsfile_pkl, 'wb')
                 cPickle.dump(result, pkl_file)
                 pkl_file.close()
 
@@ -993,8 +994,8 @@ class Node(WorkflowBase):
             # Likewise, cwd could go in here
             logger.debug("Collecting precomputed outputs:")
             try:
-                resultsfile_pkl = os.path.join(cwd, 'result_%s.pkl' % self._id)
-                pkl_file = open(resultsfile_pkl, 'rb')
+                resultsfile_pkl = os.path.join(cwd, 'result_%s.pklz' % self._id)
+                pkl_file = gzip.open(resultsfile_pkl, 'rb')
                 result = cPickle.load(pkl_file)
                 pkl_file.close()
             except FileNotFoundError:
