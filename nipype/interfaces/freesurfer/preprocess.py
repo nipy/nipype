@@ -618,6 +618,7 @@ class BBRegisterInputSpec(FSTraitedSpec):
 
 class BBRegisterOutputSpec(TraitedSpec):
     out_reg_file = File(exists=True, desc='Output registration file')
+    min_cost_file = File(exists=True, desc='Output registration minimum cost file')
     registered_file = File(desc='Registered and resampled source file')
 
 class BBRegister(FSCommand):
@@ -653,6 +654,7 @@ class BBRegister(FSCommand):
             outputs['registered_file'] = self.inputs.registered_file
             if isinstance(self.inputs.registered_file, bool):
                 outputs['registered_file'] = fname_presuffix(self.inputs.source_file,suffix='_bbreg')
+        outputs['min_cost_file'] = outputs['out_reg_file']+'.mincost'
         return outputs
 
     def _format_arg(self, name, spec, value):
