@@ -954,7 +954,7 @@ class Node(WorkflowBase):
             self._originputs = deepcopy(self._interface.inputs)
         if copyfiles:
             self._copyfiles_to_wd(cwd,execute)
-        resultsfile = os.path.join(cwd, 'result_%s.npz' % self._id)
+        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self._id)
         if issubclass(self._interface.__class__, CommandLine):
             cmd = self._interface.cmdline
             logger.info('cmd: %s'%cmd)
@@ -980,13 +980,7 @@ class Node(WorkflowBase):
                 self._result = result
                 raise RuntimeError(result.runtime.stderr)
             else:
-                # to remove problem with thread unsafeness of savez
-                outdict = {'result_%s' % self._id : result}
-                np.savez(resultsfile, **outdict)
-                
-                # for outputs caching
-                resultsfile_pkl = os.path.join(cwd, 'result_%s.pklz' % self._id)
-                pkl_file = gzip.open(resultsfile_pkl, 'wb')
+                pkl_file = gzip.open(resultsfile, 'wb')
                 cPickle.dump(result, pkl_file)
                 pkl_file.close()
 
@@ -994,8 +988,7 @@ class Node(WorkflowBase):
             # Likewise, cwd could go in here
             logger.debug("Collecting precomputed outputs:")
             try:
-                resultsfile_pkl = os.path.join(cwd, 'result_%s.pklz' % self._id)
-                pkl_file = gzip.open(resultsfile_pkl, 'rb')
+                pkl_file = gzip.open(resultsfile, 'rb')
                 result = cPickle.load(pkl_file)
                 pkl_file.close()
             except FileNotFoundError:
