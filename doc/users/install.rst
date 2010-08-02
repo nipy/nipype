@@ -75,24 +75,21 @@ SPM_
 FreeSurfer_
   FreeSurfer version 4 and higher
   
-AFNI
+AFNI_
   2009_12_31_1431 or later
-Slicer
+
+Slicer_
   3.6 or later
 
 Download
 --------
 
-Download the latest release from `our sourceforge
-page. <http://sourceforge.net/projects/nipy/files/>`_
+Download the latest release from `our github
+page. <http://github.com/nipy/nipype>`_
 
-To check out the svn version::
-
-   svn co https://nipy.svn.sourceforge.net/svnroot/nipy/nipype/trunk nipype
-
-You may also follow our `release schedule
-<http://sourceforge.net/apps/trac/nipy/roadmap>`_ to see when our next
-release is scheduled.
+To check out the latest development version::
+ 
+        git clone git@github.com:nipy/nipype.git
 
 Install
 -------
@@ -129,8 +126,8 @@ have nose_ installed, then do the following in ipython_::
     import nipype
     nipype.test()
 
-All tests should pass (unless you're missing a dependency). If any
-tests fail, please report them on our `bug tracker
-<http://sourceforge.net/apps/trac/nipy/report>`_.
+All tests should pass (unless you're missing a dependency). If any tests
+fail, please report them on our `bug tracker
+<http://github.com/nipy/nipype/issues>`_.
 
 .. include:: ../links_names.txt
