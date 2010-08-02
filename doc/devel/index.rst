@@ -13,7 +13,8 @@ conventions documented in the `NIPY Developers Guide
 
 .. toctree::
    :maxdepth: 2
-   
+
+   gitwash/index   
    development_quickstart
    architecture
    interface_specs
