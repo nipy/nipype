@@ -114,8 +114,7 @@ class SpecifyModelInputSpec(TraitedSpec):
                               usedefault=True)
     
 class SpecifyModelOutputSpec(TraitedSpec):
-    session_info = File(exists=True,
-          desc="session info saved in a numpy file for level1designs")
+    session_info = traits.Any(desc="session info for level1designs")
     #design_file = File(desc="design file")
 
 class SpecifyModel(BaseInterface):
@@ -504,12 +503,10 @@ class SpecifyModel(BaseInterface):
         if self.inputs.is_sparse:
             infolist = self._generate_clustered_design(infolist)
             
-        sessinfo = self._generate_standard_design(infolist,
+        self.sessinfo = self._generate_standard_design(infolist,
                                                   functional_runs=functional_runs,
                                                   realignment_parameters=realignment_parameters,
                                                   outliers=outliers)
-        
-        np.savez(self._get_outfilename(),session_info=sessinfo)
 
     def _run_interface(self, runtime):
         """
@@ -517,11 +514,8 @@ class SpecifyModel(BaseInterface):
         self._generate_design()
         runtime.returncode = 0
         return runtime
-    
-    def _get_outfilename(self):
-        return os.path.join(os.getcwd(),'%s_modelspec.npz'%self.inputs.subject_id)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['session_info'] = self._get_outfilename()
+        outputs['session_info'] = self.sessinfo
         return outputs
