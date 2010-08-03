@@ -1,3 +1,19 @@
+Release 0.3.2 (Aug 03, 2010)
+============================
+
+Enhancements
+------------
+
+  - all outputs from nodes are now pickled as part of workflow processing
+  - added git developer docs
+
+Bugs fixed
+----------
+
+* FreeSurfer
+
+  - Fixed bugs in SegStats doctest
+
 Release 0.3.1 (Jul 29, 2010)
 ============================
 
