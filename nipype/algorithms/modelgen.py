@@ -17,7 +17,7 @@ from scipy.signal import convolve
 from scipy.special import gammaln
 #from scipy.stats.distributions import gamma
 
-from nipype.externals.pynifti import load
+from nibabel import load
 from nipype.interfaces.base import BaseInterface, TraitedSpec,\
  InputMultiPath, traits, File
 from nipype.utils.misc import isdefined

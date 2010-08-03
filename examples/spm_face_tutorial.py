@@ -20,7 +20,7 @@ import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model specification
-import nipype.externals.pynifti as ni
+import nibabel as nb
 import os                                    # system functions
 
 """
@@ -124,7 +124,7 @@ using the following function:
 def get_vox_dims(volume):
     if isinstance(volume, list):
         volume = volume[0]
-    nii = ni.load(volume)
+    nii = nb.load(volume)
     hdr = nii.get_header()
     voxdims = hdr.get_zooms()
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]

@@ -19,7 +19,7 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model generation
 import nipype.algorithms.rapidart as ra      # artifact detection
 
-from nipype.externals.pynifti import load
+from nibabel import load
 
 
 """

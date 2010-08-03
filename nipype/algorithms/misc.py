@@ -8,7 +8,7 @@ Created on 24 Feb 2010
 from nipype.interfaces.base import BaseInterface,\
     traits, TraitedSpec, File, InputMultiPath, OutputMultiPath
 from nipype.utils.misc import isdefined
-import nipype.externals.pynifti as nifti
+import nibabel as nb
 import numpy as np
 from math import floor, ceil
 from scipy.ndimage.morphology import grey_dilation
@@ -37,7 +37,7 @@ class PickAtlas(BaseInterface):
 
     def _run_interface(self, runtime):
         nim = self._get_brodmann_area()
-        nifti.save(nim, self._gen_output_filename())
+        nb.save(nim, self._gen_output_filename())
 
         runtime.returncode = 0
         return runtime
@@ -51,7 +51,7 @@ class PickAtlas(BaseInterface):
         return output
         
     def _get_brodmann_area(self):
-        nii = nifti.load(self.inputs.atlas)
+        nii = nb.load(self.inputs.atlas)
         origdata = nii.get_data()
         newdata = np.zeros(origdata.shape)
         
@@ -71,7 +71,7 @@ class PickAtlas(BaseInterface):
                                                2 * self.inputs.dilation_size + 1,
                                                2 * self.inputs.dilation_size + 1))
 
-        return nifti.Nifti1Image(newdata, nii.get_affine(), nii.get_header())
+        return nb.Nifti1Image(newdata, nii.get_affine(), nii.get_header())
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -93,7 +93,7 @@ class SimpleThreshold(BaseInterface):
     
     def _run_interface(self, runtime):
         for fname in self.inputs.volumes:
-            img = nifti.load(fname)
+            img = nb.load(fname)
             data = np.array(img.get_data())
             
             active_map = data > self.inputs.threshold
@@ -101,9 +101,9 @@ class SimpleThreshold(BaseInterface):
             thresholded_map = np.zeros(data.shape)
             thresholded_map[active_map] = data[active_map]
 
-            new_img = nifti.Nifti1Image(thresholded_map, img.get_affine(), img.get_header())
+            new_img = nb.Nifti1Image(thresholded_map, img.get_affine(), img.get_header())
             _, base, _ = split_filename(fname)
-            nifti.save(new_img, base + '_thresholded.nii') 
+            nb.save(new_img, base + '_thresholded.nii') 
         
         runtime.returncode=0
         return runtime
