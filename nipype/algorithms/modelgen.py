@@ -21,7 +21,7 @@ from nibabel import load
 from nipype.interfaces.base import BaseInterface, TraitedSpec,\
  InputMultiPath, traits, File
 from nipype.utils.misc import isdefined
-from nipype.utils.filemanip import filename_to_list
+from nipype.utils.filemanip import filename_to_list, loadflat
 from nipype.interfaces.spm import scans_for_fnames
 
 class SpecifyModelInputSpec(TraitedSpec):
@@ -517,5 +517,13 @@ class SpecifyModel(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
+        if not hasattr(self, 'sessinfo'): #backwards compatibility
+            data = loadflat(os.path.join(os.getcwd(),'%s_modelspec.npz'%self.inputs.subject_id))
+            if isinstance(data['session_info'], dict):
+                self.sessinfo = [data['session_info']]
+            else:
+                self.sessinfo = data['session_info']
+                
         outputs['session_info'] = self.sessinfo
+        
         return outputs

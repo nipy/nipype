@@ -988,9 +988,20 @@ class Node(WorkflowBase):
             # Likewise, cwd could go in here
             logger.debug("Collecting precomputed outputs:")
             try:
-                pkl_file = gzip.open(resultsfile, 'rb')
-                result = cPickle.load(pkl_file)
-                pkl_file.close()
+                if os.path.exists(resultsfile):
+                    pkl_file = gzip.open(resultsfile, 'rb')
+                    result = cPickle.load(pkl_file)
+                    pkl_file.close()
+                else: # backwards compatibility - does not support var caching
+                    aggouts = self._interface.aggregate_outputs()
+                    runtime = Bunch(returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
+                    result = InterfaceResult(interface=None,
+                                             runtime=runtime,
+                                             outputs=aggouts)
+                    pkl_file = gzip.open(resultsfile, 'wb')
+                    cPickle.dump(result, pkl_file)
+                    pkl_file.close()
+                    
             except FileNotFoundError:
                 logger.debug("Some of the outputs were not found: rerunning node.")
                 result = self._run_command(execute=True, cwd=cwd, copyfiles=False)
