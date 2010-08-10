@@ -169,6 +169,12 @@ class DataSink(IOBase):
                 if d[0] == '@':
                     continue
                 tempoutdir = os.path.join(tempoutdir,d)
+            
+            # flattening list
+            if isinstance(files, list):
+                if isinstance(files[0], list):
+                    files = [item for sublist in files for item in sublist]
+                    
             for src in filename_to_list(files):
                 src = os.path.abspath(src)
                 if os.path.isfile(src):
