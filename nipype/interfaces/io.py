@@ -101,12 +101,14 @@ class DataSink(IOBase):
         directory structure to create for storage of the files or directories.
 
         The attributes take the following form:
-        string[[@|.]string[[@|.]string]] ...
+        
+        string[[.[@]]string[[.[@]]string]] ...
+        
+        where parts between [] are optional.
 
-        An attribute such as contrasts@con will create a contrasts directory to
-        store the results linked to the attribute. If the @ is replaced with a
-        '.', such as 'contrasts.con' a subdirectory 'con' will be created under
-        contrasts.  
+        An attribute such as contrasts.@con will create a 'contrasts' directory to
+        store the results linked to the attribute. If the @ is left out, such as in
+        'contrasts.con' a subdirectory 'con' will be created under 'contrasts'.  
 
         Examples
         --------
@@ -115,7 +117,7 @@ class DataSink(IOBase):
         >>> ds.inputs.base_directory = 'results_dir'
         >>> ds.inputs.container = 'subject'
         >>> ds.inputs.structural = 'structural.nii'
-        >>> setattr(ds.inputs, 'contrasts@con', ['cont1.nii', 'cont2.nii'])
+        >>> setattr(ds.inputs, 'contrasts.@con', ['cont1.nii', 'cont2.nii'])
         >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
         >>> ds.run() # doctest: +SKIP
         
@@ -169,6 +171,12 @@ class DataSink(IOBase):
                 if d[0] == '@':
                     continue
                 tempoutdir = os.path.join(tempoutdir,d)
+            
+            # flattening list
+            if isinstance(files, list):
+                if isinstance(files[0], list):
+                    files = [item for sublist in files for item in sublist]
+                    
             for src in filename_to_list(files):
                 src = os.path.abspath(src)
                 if os.path.isfile(src):
