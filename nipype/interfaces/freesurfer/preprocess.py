@@ -13,6 +13,7 @@ __docformat__ = 'restructuredtext'
 
 import os
 from glob import glob
+import itertools
 import numpy as np
 
 from nipype.externals.pynifti import load
@@ -154,7 +155,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
                            desc='<R direction> <A direction> <S direction>')
     #[''.join([i['x'],i['y'],i['z']]) for i in \
     #    walk(dict(x=lambda:['L','R'],y=lambda:['A','P'],z=lambda:['I','S']).items())]
-    _orientations = [comb for comb initertools.chain(*[[''.join(c) for c in itertools.permutations(s)] for s in [a+b+c for a in 'LR' for b in 'AP' for c in 'IS']])]
+    _orientations = [comb for comb in itertools.chain(*[[''.join(c) for c in itertools.permutations(s)] for s in [a+b+c for a in 'LR' for b in 'AP' for c in 'IS']])]
     in_orientation = traits.Enum(_orientations,
                                 argstr='--in_orientation %s',
                                 desc='specify the input orientation')
