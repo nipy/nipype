@@ -206,6 +206,8 @@ class DataSink(IOBase):
 class DataGrabberInputSpec(DynamicTraitedSpec): #InterfaceInputSpec):
     base_directory = Directory(exists=True,
             desc='Path to the base directory consisting of subject data.')
+    raise_on_empty = traits.Bool(True, usedefault=True,
+                          desc='Generate exception if list is empty for a given field')
     template = traits.Str(mandatory=True,
              desc='Layout used to get files. relative to base directory if defined')
     template_args = traits.Dict(traits.Str,
@@ -335,7 +337,11 @@ class DataGrabber(IOBase):
             if not args:
                 filelist = glob.glob(template)
                 if len(filelist) == 0:
-                    warn('Output key: %s Template: %s returned no files'%(key, template))
+                    msg = 'Output key: %s Template: %s returned no files'%(key, template)
+                    if self.inputs.raise_on_empty:
+                        raise IOError(msg)
+                    else:
+                        warn(msg)
                 else:
                     outputs[key] = list_to_filename(filelist)
             for argnum, arglist in enumerate(args):
@@ -363,7 +369,11 @@ class DataGrabber(IOBase):
                         filledtemplate = template%tuple(argtuple)
                     outfiles = glob.glob(filledtemplate)
                     if len(outfiles) == 0:
-                        warn('Output key: %s Template: %s returned no files'%(key, filledtemplate))
+                        msg = 'Output key: %s Template: %s returned no files'%(key, filledtemplate)
+                        if self.inputs.raise_on_empty:
+                            raise IOError(msg)
+                        else:
+                            warn(msg)
                         outputs[key].insert(i, None)
                     else:
                         outputs[key].insert(i,list_to_filename(outfiles))
