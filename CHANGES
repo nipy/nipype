@@ -6,6 +6,7 @@ Bugs fixed
 
 * IO
   - DataSink properly handles lists of lists now
+  - DataSink has option for raising Exception on getting empty lists
 
 Release 0.3.2 (Aug 03, 2010)
 ============================
