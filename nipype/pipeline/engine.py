@@ -992,9 +992,16 @@ class Node(WorkflowBase):
                     pkl_file = gzip.open(resultsfile, 'rb')
                     result = cPickle.load(pkl_file)
                     pkl_file.close()
+                    if result.runtime.cwd != cwd:
+                        # working directory has changed, so stored output names are different
+                        aggouts = self._interface.aggregate_outputs()
+                        result.outputs = aggouts
+                        pkl_file = gzip.open(resultsfile, 'wb')
+                        cPickle.dump(result, pkl_file)
+                        pkl_file.close()
                 else: # backwards compatibility - does not support var caching
                     aggouts = self._interface.aggregate_outputs()
-                    runtime = Bunch(returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
+                    runtime = Bunch(cwd=cwd,returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
                     result = InterfaceResult(interface=None,
                                              runtime=runtime,
                                              outputs=aggouts)
