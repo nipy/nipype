@@ -475,7 +475,7 @@ class StimulusCorrelation(BaseInterface):
         """
         motparamlist = self.inputs.realignment_parameters
         intensityfiles = self.inputs.intensity_values
-        spmmat = sio.loadmat(self.inputs.spm_mat_file)
+        spmmat = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)
         nrows = []
         for i,imgf in enumerate(motparamlist):
             sessidx = i
