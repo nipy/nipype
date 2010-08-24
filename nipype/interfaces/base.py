@@ -678,8 +678,8 @@ class BaseInterface(Interface):
         """ check if required inputs are satisfied
         """
         if spec.requires:
-            values = [isdefined(getattr(self.inputs, field)) for field in spec.requires]
-            if any(values) and not isdefined(value):
+            values = [not isdefined(getattr(self.inputs, field)) for field in spec.requires]
+            if any(values) and isdefined(value):
                 msg = "%s requires a value for input '%s' because one of %s is set. " \
                     "For a list of required inputs, see %s.help()" % \
                     (self.__class__.__name__, name,
