@@ -40,7 +40,6 @@ def clean_directory(outdir, old_wd):
         rmtree(outdir)
     os.chdir(old_wd)
 
-
 def test_level1design():
     yield assert_equal, spm.Level1Design._jobtype, 'stats'
     yield assert_equal, spm.Level1Design._jobname, 'fmri_spec'
@@ -48,7 +47,7 @@ def test_level1design():
                      factor_info = dict(field='fact',),
                      global_intensity_normalization = dict(field='global',),
                      interscan_interval = dict(field='timing.RT',),
-                     mask_image = dict(copyfile=False,field='mask',),
+                     mask_image = dict(field='mask',),
                      mask_threshold = dict(),
                      microtime_onset = dict(field='timing.fmri_t0',),
                      microtime_resolution = dict(field='timing.fmri_t',),
