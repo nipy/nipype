@@ -21,7 +21,7 @@ from nipype.interfaces.fsl.base import FSLCommand,\
 from nipype.interfaces.base import traits, TraitedSpec,\
     OutputMultiPath, File
 from nipype.utils.misc import isdefined
-from nipype.utils.filemanip import load_json, save_json
+from nipype.utils.filemanip import load_json, save_json, split_filename
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -404,3 +404,172 @@ class ImageStats(FSLCommand):
                 out_stat = out_stat[0]
         outputs.out_stat = out_stat
         return outputs
+
+
+class OverlayInputSpec(FSLCommandInputSpec):
+    transparency = traits.Bool(desc='make overlay colors semi-transparent',
+                               position=1, argstr='%s',usedefault=True, default_value=True)
+    out_type = traits.Enum('float', 'int', position=2, usedefault=True ,argstr='%s',
+                            desc='write output with float or int')
+    use_checkerboard = traits.Bool(desc='use checkerboard mask for overlay',
+                                   argstr='-c', position=3)
+    background_image = File(exists=True, position=4, mandatory=True,argstr='%s',
+                            desc='image to use as background')
+    _xor_inputs = ('auto_thresh_bg', 'full_bg_range', 'bg_thresh')
+    auto_thresh_bg = traits.Bool(desc='automatically threhsold the background image',
+                                 argstr='-a', position=5, xor=_xor_inputs, mandatory=True)
+    full_bg_range = traits.Bool(desc='use full range of background image',
+                                argstr='-A', position=5, xor=_xor_inputs, mandatory=True)
+    bg_thresh = traits.Tuple(traits.Float, traits.Float, argstr='%.3f %.3f', position=5,
+                             desc='min and max values for background intensity',
+                             xor=_xor_inputs, mandatory=True)
+    stat_image = traits.File(exists=True, position=6, mandatory=True,argstr='%s',
+                             desc='statistical image to overlay in color')
+    stat_thresh = traits.Tuple(traits.Float, traits.Float, position=7, mandatory=True,
+                               desc='min and max values for the statistical overlay',
+                               argstr='%.2f %.2f')
+    show_negative_stats = traits.Bool(desc='display negative statistics in overlay',
+                                      xor=['stat_image2'], argstr = '%s', position=8)
+    stat_image2 = traits.File(exists=True, position=9, xor=['show_negative_stats'],argstr='%s',
+                              desc='second statistical image to overlay in color')
+    stat_thresh2 = traits.Tuple(traits.Float, traits.Float, position=10,
+                                desc='min and max values for second statistical overlay',
+                                argstr='%.2f %.2f')
+    out_file = File(desc='combined image volume', position=-1, argstr='%s',genfile=True)
+
+class OverlayOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='combined image volume')
+
+class Overlay(FSLCommand):
+    """ Use FSL's overlay command to combine background and statistical images into one volume
+
+    Examples
+    --------
+    >>> from nipype.interfaces immport fsl
+    >>> from nipype.test import example_data
+    >>> combine = fsl.Overlay()
+    >>> combine.inputs.background_image = example_data('mean_func.nii.gz')
+    >>> combine.inputs.auto_thresh_bg = True
+    >>> combine.inputs.stat_image = example_data('zstat1.nii.gz')
+    >>> combine.inputs.stat_thresh = (3.5, 10)
+    >>> combine.inputs.show_negative_stats = True
+    >>> res = combine.run() #doctest: +SKIP
+
+    """
+    _cmd = 'overlay'
+    input_spec = OverlayInputSpec
+    output_spec = OverlayOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'transparency':
+            if value:
+                return '1'
+            else:
+                return '0'
+        if name == 'out_type':
+            if value == 'float':
+                return '0'
+            else:
+                return '1'
+        if name == 'show_negative_stats':
+            return '%s %.2f %.2f'% (self.inputs.stat_image,
+                                    self.inputs.stat_thresh[0]*-1,
+                                    self.inputs.stat_thresh[1]*-1)
+        return super(Overlay, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_file = self.inputs.out_file
+        if not isdefined(out_file):
+            if isdefined(self.inputs.stat_image2) and (
+                not isdefined(self.inputs.show_negative_stats)
+                or not self.inputs.show_negative_stats):
+                    stem = "%s_and_%s"%(split_filename(self.inputs.stat_image)[1],
+                                        split_filename(self.inputs.stat_image2)[1])
+            else:
+                stem = split_filename(self.inputs.stat_image)[1]
+            out_file = self._gen_fname(stem, suffix='_overlay')
+        outputs['out_file'] = out_file
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()['out_file']
+        return None
+
+
+class SlicerInputSpec(FSLCommandInputSpec):
+    in_file = File(exists=True, position=1, argstr='%s', mandatory=True,
+                   desc='input volume')
+    image_edges = File(exists=True, position=2, argstr='%s',
+        desc='volume to display edge overlay for (useful for checking registration')
+    label_slices = traits.Bool(position=3, argstr='-L', desc='display slice number',
+                               usedefault=True, default_value=True)
+    colour_map = File(exists=True, position=4, argstr='-l %s',
+                      desc='use different colour map from that stored in nifti header')
+    intensity_range = traits.Tuple(traits.Float, traits.Float, position=5, argstr='-i %.3f %.3f',
+                                   desc='min and max intensities to display')
+    threshold_edges = traits.Float(position=6, argstr='-e %.3f', desc='use threshold for edges')
+    dither_edges = traits.Bool(position=7, argstr='-t',
+                               desc='produce semi-transparaent (dithered) edges')
+    nearest_neighbour = traits.Bool(position=8, argstr='-n',
+                                    desc='use nearest neighbour interpolation for output')
+    show_orientation = traits.Bool(position=9, argstr='%s', usedefault=True, default_value=True,
+                                    desc='label left-right orientation')
+    _xor_options = ('single_slice','middle_slices','all_axial','sample_axial')
+    single_slice = traits.Enum('x','y','z', position=10, argstr='-%s',
+                               xor=_xor_options, requires=['slice_number'],
+                               desc='output picture of single slice in the x, y, or z plane')
+    slice_number = traits.Int(position=11, argstr='-%d',desc='slice number to save in picture')
+    middle_slices = traits.Bool(position=10, argstr='-a',xor=_xor_options,
+                                desc='output picture of mid-sagital, axial, and coronal slices')
+    all_axial = traits.Bool(position=10, argstr='-A', xor=_xor_options, requires=['image_width'],
+                            desc='output all axial slices into one picture')
+    sample_axial = traits.Int(position=10,argstr='-S %d',
+                              xor=_xor_options, requires=['image_width'],
+                              desc='output every n axial slices into one picture')
+    image_width = traits.Int(position=-2, argstr='%d',desc='max picture width')
+    out_file = File(position=-1, genfile=True, argstr='%s', desc='picture to write')
+
+class SlicerOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='picture to write')
+
+class Slicer(FSLCommand):
+    """Use FSL's slicer command to output a png image from a volume.
+
+    Examples
+    --------
+    >>> from nipype.interfaces import fsl
+    >>> from nipype.testing import example_data
+    >>> slice = fsl.Slicer()
+    >>> slice.inputs.in_file = example_data('functional.nii')
+    >>> slice.inputs.all_axial = True
+    >>> slice.inputs.image_width = 750
+    >>> res = slice.run() #doctest: +SKIP
+
+    """
+    _cmd = 'slicer'
+    input_spec = SlicerInputSpec
+    output_spec = SlicerOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'show_orientation':
+            if value:
+                return ''
+            else:
+                return '-u'
+        return super(Slicer, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_file = self.inputs.out_file
+        if not isdefined(out_file):
+            out_file = self._gen_fname(self.inputs.in_file, ext='.png')
+        outputs['out_file'] = out_file
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()['out_file']
+        return None
+
