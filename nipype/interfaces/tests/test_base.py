@@ -93,6 +93,33 @@ def test_TraitedSpec():
     yield assert_equal, infields.hashval[1], hashval[1]
     yield assert_equal, infields.__repr__(), '\nfoo = 1\ngoo = 0.0\n'
 
+def test_TraitedSpec_logic():
+    class spec3(nib.TraitedSpec):
+        _xor_inputs = ('foo', 'bar')
+        
+        foo = nib.traits.Int(xor = _xor_inputs,
+                             desc = 'foo or bar, not both')
+        bar = nib.traits.Int(xor = _xor_inputs,
+                             desc = 'bar or foo, not both')
+        kung = nib.traits.Float(requires = ('foo',),
+                                position = 0,
+                                desc = 'kung foo')
+    class out3(nib.TraitedSpec):
+        output = nib.traits.Int
+    class MyInterface(nib.BaseInterface):
+        input_spec = spec3
+        output_spec = out3
+
+    myif = MyInterface()
+    yield assert_raises, TypeError, setattr(myif.inputs, 'kung', 10.0)
+    myif.inputs.foo = 1
+    yield assert_equal,  myif.inputs.foo, 1
+    myif.inputs.bar = 1
+    yield assert_equal, myif.inputs.foo, Undefined
+    myif.inputs.foo = 1
+    myif.inputs.kung = 2
+    yield assert_equal, myif.inputs.kung, 2.0
+   
 
 def checknose():
     """check version of nose for known incompatability"""

@@ -199,7 +199,7 @@ class EstimateModel(SPMCommand):
         pth, _ = os.path.split(self.inputs.spm_mat_file)
         mask = os.path.join(pth, 'mask.img')
         outputs['mask_image'] = mask
-        spm = sio.loadmat(self.inputs.spm_mat_file)
+        spm = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)
         betas = []
         for vbeta in spm['SPM'][0, 0].Vbeta[0]:
             betas.append(str(os.path.join(pth, vbeta.fname[0])))
@@ -344,7 +344,7 @@ class EstimateContrast(SPMCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         pth, _ = os.path.split(self.inputs.spm_mat_file)
-        spm = sio.loadmat(self.inputs.spm_mat_file)
+        spm = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)
         con_images = []
         spmT_images = []
         for con in spm['SPM'][0, 0].xCon[0]:
@@ -618,7 +618,7 @@ class MultipleRegression(SPMCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         pth = os.getcwd()
-        spm = sio.loadmat(os.path.join(pth, 'SPM.mat'))
+        spm = sio.loadmat(os.path.join(pth, 'SPM.mat'), struct_as_record=False)
         con_images = []
         spmT_images = []
         for con in spm['SPM'][0, 0].xCon[0]:

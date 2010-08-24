@@ -286,7 +286,7 @@ http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/face_rep_SPM5.html
 """
 
 from scipy.io.matlab import loadmat
-mat = loadmat(os.path.join(data_dir, "sots.mat"))
+mat = loadmat(os.path.join(data_dir, "sots.mat"), struct_as_record=False)
 sot = mat['sot'][0]
 itemlag = mat['itemlag'][0]
 
