@@ -938,6 +938,8 @@ class MultipleRegressionDesign(FactorialDesign):
         """
         if opt in ['in_files']:
             return np.array(val, dtype=object)
+        if opt in ['include_intercept']:
+            return int(val)
         if opt in ['user_covariates']:
             outlist = []
             mapping = {'name':'cname','vector':'c',
