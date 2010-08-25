@@ -1,6 +1,11 @@
 Release 0.3.3 (FUTURE)
 ======================
 
+Enhancements
+------------
+
+* Added support for Diffusion toolkit
+
 Bugs fixed
 ----------
 
@@ -9,7 +14,7 @@ Bugs fixed
   - DataGrabber has option for raising Exception on getting empty lists
 
 * Base
-  - [Fixed] bug in traits logic for 'requires' metadata
+  - traits logic for 'requires' metadata
 
 Release 0.3.2 (Aug 03, 2010)
 ============================
