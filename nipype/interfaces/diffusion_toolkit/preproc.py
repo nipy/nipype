@@ -10,21 +10,17 @@
 
 """
 import re
+from nipype.utils.filemanip import fname_presuffix
 __docformat__ = 'restructuredtext'
 
-
-"""from nipype.interfaces.dtk.base import (DTKCommandInputSpec, DTKCommand)"""
-"""@TEMP"""
-from base import (DTKCommandInputSpec, DTKCommand)
-"""@TEMP"""
-from nipype.interfaces.base import (TraitedSpec, File, traits)
-from nipype.utils.misc import isdefined
+from nipype.interfaces.base import (TraitedSpec, File, traits, CommandLine,
+    CommandLineInputSpec)
 
 
-class DTIReconInputSpec(DTKCommandInputSpec):
+class DTIReconInputSpec(CommandLineInputSpec):
     dwi = File(desc='Input diffusion volume', argstr='%s',exists=True, mandatory=True,position=1)
     out_prefix = traits.Str("dti", desc='Output file prefix', argstr='%s', usedefault=True,position=2)
-    output_type = traits.Enum('analyze', 'ni1', 'nii', 'nii.gz', argstr='-ot %s', desc='output file type')    
+    output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-ot %s', desc='output file type', usedefault=True)    
     bvecs = File(exists=True, desc = 'b vectors file',
                 argstr='-gm %s', mandatory=True)
     bvals = File(exists=True,desc = 'b values file', mandatory=True)
@@ -45,21 +41,20 @@ automatically. but if it failed, you need to set it manually.""", argstr="-b0_th
     
     
 class DTIReconOutputSpec(TraitedSpec):
-    adc_img = File(exists=True)
-    b0_img = File(exists=True)
-    dwi_img = File(exists=True)
-    e1_img = File(exists=True)
-    e2_img = File(exists=True)
-    e3_img = File(exists=True)
-    exp_img = File(exists=True)
-    fa_img = File(exists=True)
-    fa_color_img = File(exists=True)
-    tensor_img = File(exists=True)
-    v1_img = File(exists=True)
-    v2_img = File(exists=True)
-    v3_img = File(exists=True)
+    ADC = File(exists=True)
+    B0 = File(exists=True)
+    L1 = File(exists=True)
+    L2 = File(exists=True)
+    L3 = File(exists=True)
+    exp = File(exists=True)
+    FA = File(exists=True)
+    FA_color = File(exists=True)
+    tensor = File(exists=True)
+    V1 = File(exists=True)
+    V2 = File(exists=True)
+    V3 = File(exists=True)
 
-class DTIRecon(DTKCommand):
+class DTIRecon(CommandLine):
     """Use dti_recon to generate tensors and other maps
     """
     
@@ -92,22 +87,19 @@ class DTIRecon(DTKCommand):
     def _list_outputs(self):
         out_prefix = self.inputs.out_prefix
         output_type = self.inputs.output_type
-        if not isdefined(output_type):
-            output_type='nii'
 
         outputs = self.output_spec().get()
-        outputs['adc_img'] = self._gen_fname('%s.%s' % (out_prefix, output_type), suffix='_adc')
-        outputs['b0_img'] = self._gen_fname('%s.%s' % (out_prefix, output_type), suffix='_b0')
-        outputs['dwi_img'] = self._gen_fname('%s.%s' % (out_prefix, output_type), suffix='_dwi')
-        outputs['e1_img'] = self._gen_fname('%s.%s' % (out_prefix, output_type), suffix='_e1')
-        outputs['e2_img'] = self._gen_fname('%s.%s' % (out_prefix, output_type), suffix='_e2')
-        outputs['e3_img'] = self._gen_fname('%s.%s' % (out_prefix, output_type), suffix='_e3')
-        outputs['exp_img'] = self._gen_fname('%s.%s' % (out_prefix, output_type), suffix='_exp')
-        outputs['fa_img'] = self._gen_fname('%s.%s' % (out_prefix, output_type), suffix='_fa')
-        outputs['fa_color_img'] = self._gen_fname('%s.%s' % (out_prefix, output_type), suffix='_fa_color')
-        outputs['tensor_img'] = self._gen_fname('%s.%s' % (out_prefix, output_type), suffix='_tensor')
-        outputs['v1_img'] = self._gen_fname('%s.%s' % (out_prefix, output_type), suffix='_v1')
-        outputs['v2_img'] = self._gen_fname('%s.%s' % (out_prefix, output_type), suffix='_v2')
-        outputs['v3_img'] = self._gen_fname('%s.%s' % (out_prefix, output_type), suffix='_v3')
+        outputs['ADC'] = fname_presuffix("",  prefix=out_prefix, suffix='_adc.'+ output_type)
+        outputs['B0'] = fname_presuffix("",  prefix=out_prefix, suffix='_b0.'+ output_type)
+        outputs['L1'] = fname_presuffix("",  prefix=out_prefix, suffix='_e1.'+ output_type)
+        outputs['L2'] = fname_presuffix("",  prefix=out_prefix, suffix='_e2.'+ output_type)
+        outputs['L3'] = fname_presuffix("",  prefix=out_prefix, suffix='_e3.'+ output_type)
+        outputs['exp'] = fname_presuffix("",  prefix=out_prefix, suffix='_exp.'+ output_type)
+        outputs['FA'] = fname_presuffix("",  prefix=out_prefix, suffix='_fa.'+ output_type)
+        outputs['FA_color'] = fname_presuffix("",  prefix=out_prefix, suffix='_fa_color.'+ output_type)
+        outputs['tensor'] = fname_presuffix("",  prefix=out_prefix, suffix='_tensor.'+ output_type)
+        outputs['V1'] = fname_presuffix("",  prefix=out_prefix, suffix='_v1.'+ output_type)
+        outputs['V2'] = fname_presuffix("",  prefix=out_prefix, suffix='_v2.'+ output_type)
+        outputs['V3'] = fname_presuffix("",  prefix=out_prefix, suffix='_v3.'+ output_type)
 
         return outputs
