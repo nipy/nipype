@@ -558,6 +558,11 @@ class Slicer(FSLCommand):
                 return ''
             else:
                 return '-u'
+        elif name == "label_slices":
+            if value:
+                return '-L'
+            else:
+                return ''
         return super(Slicer, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
