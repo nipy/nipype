@@ -234,4 +234,33 @@ def test_overlay():
 
     clean_directory(outdir, cwd)
 
+# test slicer
+@skipif(no_fsl)
+def test_slicer():
+    filelist, outdir, cwd = create_files_in_directory()
+    slicer = fsl.Slicer()
+
+    # make sure command gets called
+    yield assert_equal, slicer.cmd, 'slicer'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, ValueError, slicer.run
+
+    # .inputs based parameters setting
+    slicer.inputs.in_file = filelist[0]
+    slicer.inputs.image_edges = filelist[1]
+    slicer.inputs.intensity_range = (10., 20.)
+    slicer.inputs.all_axial = True
+    slicer.inputs.image_width = 750
+    slicer.inputs.out_file = 'foo_bar.png'
+    yield assert_equal, slicer.cmdline, \
+        'slicer %s %s -L -i 10.000 20.000  -A 750 foo_bar.png'%(filelist[0],filelist[1])
+
+    # .run based parameter setting
+    slicer2 = fsl.Slicer(in_file = filelist[0], middle_slices = True, label_slices=False,
+                         out_file='foo_bar2.png')
+    yield assert_equal, slicer2.cmdline, 'slicer %s   -a foo_bar2.png'%(filelist[0])
+
+    clean_directory(outdir, cwd)
+
 
