@@ -1,1 +1,1 @@
-from nipype.interfaces.diffusion_toolkit.preproc import DTIRecon
+from nipype.interfaces.diffusion_toolkit.preproc import (DTIRecon, HARDIMat, ODFRecon)
