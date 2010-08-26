@@ -11,7 +11,7 @@ Overview
 
 ::
 
-   git clone git@github.com/your-user-name/nipype.git
+   git clone git@github.com:your-user-name/nipype.git
    cd nipype
    git remote add upstream git://github.com/nipy/nipype.git
 
