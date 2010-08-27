@@ -578,3 +578,141 @@ class Slicer(FSLCommand):
             return self._list_outputs()['out_file']
         return None
 
+class PlotTimeSeriesInputSpec(FSLCommandInputSpec):
+
+    in_file = traits.Either(File(exists=True), traits.List(File(exists=True)),
+                           mandatory=True,argstr="%s",position=1,
+                           desc="file or list of files with columns of timecourse information")
+    plot_start = traits.Int(argstr="--start=%d",xor=("plot_range",),
+                            desc="first column from in-file to plot")
+    plot_finish = traits.Int(argstr="--finish=%d",xor=("plot_range",),
+                             desc="final column from in-file to plot")
+    plot_range = traits.Tuple(traits.Int,traits.Int,argstr="%s",xor=("plot_start","plot_finish"),
+                              desc="first and last columns from the in-file to plot")
+    title = traits.Str(argstr="%s",desc="plot title")
+    legend_file = File(exists=True,argstr="--legend=%s",desc="legend file")
+    labels = traits.Either(traits.Str, traits.List(traits.Str),
+                           argstr="%s",desc="label or list of labels")
+    y_min = traits.Float(argstr="--ymin=%.2f",desc="minumum y value",xor=("y_range",))
+    y_max = traits.Float(argstr="--ymax=%.2f",desc="maximum y value",xor=("y_range",))
+    y_range = traits.Tuple(traits.Float,traits.Float,argstr="%s",xor=("y_min","y_max"),
+                           desc="min and max y axis values")
+    x_units = traits.Int(argstr="-u %d",usedefault=True,default_value=1,
+                         desc="scaling units for x-axis (between 1 and length of in file)")
+    plot_size = traits.Tuple(traits.Int,traits.Int,argstr="%s",
+                             desc="plot image height and width")
+    x_precision = traits.Int(argstr="--precision=%d",desc="precision of x-axis labels")
+    sci_notation = traits.Bool(argstr="--sci",desc="switch on scientific notation")
+    out_file = traits.File(argstr="-o %s",genfile=True,desc="image to write")
+
+class PlotTimeSeriesOutputSpec(TraitedSpec):
+    
+    out_file = File(exists=True, desc='image to write')
+
+class PlotTimeSeries(FSLCommand):
+
+    _cmd = "fsl_tsplot"
+    input_spec = PlotTimeSeriesInputSpec
+    output_spec = PlotTimeSeriesOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == "in_file":
+            if isinstance(value, list):
+                args = ", ".join(value)
+                return "-i %s"%args
+            else:
+                return "-i %s"%value
+        elif name == "labels":
+            if isinstance(value, list):
+                args = ", ".join(value)
+                return "-a %s"%args
+            else:
+                return "-a %s"%value
+        elif name == "title":
+            return "-t \'%s\'"%value
+        elif name == "plot_range":
+            return "--start=%d --finish=%d"%value
+        elif name == "y_range":
+            return "--ymin=%d --ymax=%d"%value
+        elif name == "plot_size":
+            return "-h %d -w %d"%value
+        return super(PlotTimeSeries, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_file = self.inputs.out_file
+        if not isdefined(out_file):
+            out_file = self._gen_fname(self.inputs.in_file, ext='.png')
+        outputs['out_file'] = out_file
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()['out_file']
+        return None
+
+
+class PlotMotionParamsInputSpec(FSLCommandInputSpec):
+
+    in_file = traits.Either(File(exists=True), traits.List(File(exists=True)),
+                            mandatory=True,argstr="%s",position=1,
+                            desc="file with motion parameters")
+    in_source = traits.Enum("spm", "fsl", mandatory=True,
+                            desc="which program generated the motion parameter file")
+    plot_type = traits.Enum("rotations","translations", "displacement",argstr="%s",
+                            desc="which motion type to plot", mandatory=True)
+    plot_size = traits.Tuple(traits.Int,traits.Int,argstr="%s",
+                             desc="plot image height and width")
+    out_file = traits.File(argstr="-o %s",genfile=True,desc="image to write")
+
+class PlotMotionParamsOutputSpec(TraitedSpec):
+
+    out_file = File(exists=True, desc='image to write')
+
+class PlotMotionParams(FSLCommand):
+
+    _cmd = 'fsl_tsplot'
+    input_spec = PlotMotionParamsInputSpec
+    output_spec = PlotMotionParamsOutputSpec
+
+    def _format_arg(self, name, spec, value):
+
+        if name == "plot_type":
+            source = self.inputs.in_source
+            
+            # Get the right starting and ending position depending on source program
+            sfdict = dict(fsl_rot=(1,3),fsl_tra=(4,6),spm_rot=(4,6),spm_tra=(1,3))
+            
+            # Format the title properly
+            sfstr = "--start=%d --finish=%d"%sfdict["%s_%s"%(source, value[:3])]
+            titledict = dict(fsl="MCFLIRT",spm="Realign")
+            unitdict = dict(rot="radians",tra="mm")
+            
+            title = "\'%s estimated %s (%s)\'"%(titledict[source],value,unitdict[value[:3]])
+            
+            return "-t %s %s -a x,y,z"%(title, sfstr)
+        elif name == "plot_size":
+            return "-h %d -w %d"%value
+        elif name == "in_file":
+            if isinstance(value, list):
+                args = ", ".join(value)
+                return "-i %s"%args
+            else:
+                return "-i %s"%value
+
+        return super(PlotMotionParams, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_file = self.inputs.out_file
+        if not isdefined(out_file):
+            stem = split_filename(self.inputs.in_file)[1]
+            type = dict(rot="rot",tra="trans")[self.inputs.plot_type[:3]]
+            out_file = self._gen_fname("%s_%s"%(stem,type), ext='.png')
+        outputs['out_file'] = out_file
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()['out_file']
+        return None
