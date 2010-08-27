@@ -203,10 +203,10 @@ class ODFReconOutputSpec(TraitedSpec):
     DWI = File(exists=True)
     MAX = File(exists=True)
     ODF = File(exists=True)
-    OE = File(desc='Output entropy map')
+    ENTROPY = File(desc='Output entropy map')
 
 class ODFRecon(CommandLine):
-    """Use dti_recon to generate tensors and other maps
+    """Use odf_recon to generate tensors and other maps
     """
     
     input_spec=ODFReconInputSpec
@@ -224,6 +224,122 @@ class ODFRecon(CommandLine):
         outputs['MAX'] = fname_presuffix("",  prefix=out_prefix, suffix='_max.'+ output_type)
         outputs['ODF'] = fname_presuffix("",  prefix=out_prefix, suffix='_odf.'+ output_type)
         if isdefined(self.inputs.output_entropy):
-            outputs['OE'] = fname_presuffix("",  prefix=out_prefix, suffix='_oe.'+ output_type)
-        
+            outputs['ENTROPY'] = fname_presuffix("",  prefix=out_prefix, suffix='_entropy.'+ output_type)
+       
         return outputs
+
+class ODFTrackerInputSpec(CommandLineInputSpec):
+    recon_data_prefix = traits.Str(desc='recon data prefix', argstr='%s', mandatory=True, position=1)
+    out_file = File(desc = 'output track file', argstr='%s', genfile=True, position=2)
+    input_output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-it %s', desc='input and output file type', usedefault=True)
+    runge_kutta2 = traits.Bool(argstr='-rk2', desc="""use 2nd order runge-kutta method for tracking.
+default tracking method is non-interpolate streamline""")
+    step_length = traits.Float(argstr='-l %f', desc="""set step length, in the unit of minimum voxel size.
+default value is 0.1.""")
+    angle_threshold = traits.Float(argstr='-at %f',desc="""set angle threshold. default value is 35 degree for
+default tracking method and 25 for rk2""")
+    random_seed = traits.Int(argstr='-rseed %s', desc="""use random location in a voxel instead of the center of the voxel
+to seed. can also define number of seed per voxel. default is 1""")
+    invert_x = traits.Bool(argstr='-ix', desc='invert x component of the vector')
+    invert_y = traits.Bool(argstr='-iy', desc='invert y component of the vector')
+    invert_z = traits.Bool(argstr='-iz', desc='invert z component of the vector')
+    swap_xy = traits.Bool(argstr='-sxy', desc='swap x and y vectors while tracking')
+    swap_yz = traits.Bool(argstr='-syz', desc='swap y and z vectors while tracking')
+    swap_zx = traits.Bool(argstr='-szx', desc='swap x and z vectors while tracking')
+    disc = traits.Bool(argstr='-disc', desc='use disc tracking')
+    mask = traits.List(traits.Str(), minlen=1, maxlen=2, desc="""<mask_image> [<mask_threshold>] threshold for mask image.  The
+first argument is the mask image and the second is the threshold.  If the threshold is not provided, then the program will
+automatically try to find the threshold""", argstr='-m %s')
+    mask2 = traits.List(traits.Str(), minlen=1, maxlen=2, desc="""<mask_image> [<mask_threshold>] threshold for second mask image.  The
+first argument is the mask image and the second is the threshold.  If the threshold is not provided, then the program will
+automatically try to find the threshold""", argstr='-m %s')
+    limit = traits.Int(argstr='-limit %d', desc="""in some special case, such as heart data, some track may go into
+infinite circle and take long time to stop. this option allows
+setting a limit for the longest tracking steps (voxels)""")
+    dsi = traits.Bool(argstr='-dsi', desc=""" specify the input odf data is dsi. because dsi recon uses fixed
+pre-calculated matrix, some special orientation patch needs to
+be applied to keep dti/dsi/q-ball consistent.""")
+    image_orientation_vectors = traits.List(traits.Float(), minlen=6, maxlen=6, desc="""specify image orientation vectors. if just one argument given,
+will treat it as filename and read the orientation vectors from
+the file. if 6 arguments are given, will treat them as 6 float
+numbers and construct the 1st and 2nd vector and calculate the 3rd
+one automatically.
+this information will be used to determine image orientation,
+as well as to adjust gradient vectors with oblique angle when""", argstr="-iop %f")
+    slice_order = traits.Int(argstr='-sorder %d', desc='set the slice order. 1 means normal, -1 means reversed. default value is 1')
+    voxel_order = traits.Enum('RAS', 'RPS', 'RAI', 'RPI', 'LAI', 'LAS', 'LPS', 'LPI', argstr='-vorder %s', desc="""specify the voxel order in RL/AP/IS (human brain) reference. must be
+3 letters with no space in between.
+for example, RAS means the voxel row is from L->R, the column
+is from P->A and the slice order is from I->S.
+by default voxel order is determined by the image orientation
+(but NOT guaranteed to be correct because of various standards).
+for example, siemens axial image is LPS, coronal image is LIP and
+sagittal image is PIL.
+this information also is NOT needed for tracking but will be saved
+in the track file and is essential for track display to map onto
+the right coordinates""") 
+    
+class ODFTrackerOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='output track file')
+
+class ODFTracker(CommandLine):
+    """Use odf_tracker to generate track file
+    """
+    
+    input_spec=ODFTrackerInputSpec
+    output_spec=ODFTrackerOutputSpec
+    
+    _cmd = 'odf_tracker'
+
+    def _get_outfilename(self):
+        outfile = self.inputs.out_file
+        if not isdefined(outfile):         
+            outfile = fname_presuffix("",  prefix=self.inputs.recon_data_prefix, suffix='.trk')               
+        return outfile
+        
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outfile = self._get_outfilename()
+        outputs['out_file'] = outfile
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._get_outfilename()
+        return None        
+
+class SplineFilterInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, desc='Input track file',position=1)
+    step_length = traits.Float(argstr='%f', mandatory=True, desc='Step length', position=2)
+    out_file = File(argstr='%s', genfile=True, desc = 'output track file', position=3)
+
+class SplineFilterOutputSpec(CommandLineInputSpec):
+    out_file = File(exists=True, desc='output track file')
+
+class SplineFilter(CommandLine):
+    """Use spline_filter to clean up original track file
+    """
+    
+    input_spec=SplineFilterInputSpec
+    output_spec=SplineFilterOutputSpec
+    
+    _cmd = 'spline_filter'
+
+    def _get_outfilename(self):
+        outfile = self.inputs.out_file
+        if not isdefined(outfile):         
+            outfile = fname_presuffix("",  prefix=self.inputs.in_file, suffix='_filtered.trk')               
+        return outfile
+        
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outfile = self._get_outfilename()
+        outputs['out_file'] = outfile
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._get_outfilename()
+        return None        
+    
+    
