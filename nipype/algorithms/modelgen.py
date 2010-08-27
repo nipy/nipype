@@ -518,12 +518,14 @@ class SpecifyModel(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         if not hasattr(self, 'sessinfo'): #backwards compatibility
-            data = loadflat(os.path.join(os.getcwd(),'%s_modelspec.npz'%self.inputs.subject_id))
-            if isinstance(data['session_info'], dict):
-                self.sessinfo = [data['session_info']]
-            else:
-                self.sessinfo = data['session_info']
-                
+            try:
+                data = loadflat(os.path.join(os.getcwd(),'%s_modelspec.npz'%self.inputs.subject_id))
+                if isinstance(data['session_info'], dict):
+                    self.sessinfo = [data['session_info']]
+                else:
+                    self.sessinfo = data['session_info']
+            except IOError:
+                self._generate_design()
         outputs['session_info'] = self.sessinfo
         
         return outputs
