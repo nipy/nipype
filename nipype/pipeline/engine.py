@@ -954,7 +954,7 @@ class Node(WorkflowBase):
             self._originputs = deepcopy(self._interface.inputs)
         if copyfiles:
             self._copyfiles_to_wd(cwd,execute)
-        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self._id)
+        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
         if issubclass(self._interface.__class__, CommandLine):
             cmd = self._interface.cmdline
             logger.info('cmd: %s'%cmd)
