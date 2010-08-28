@@ -13,8 +13,8 @@ from nipype.utils.misc import package_check
 package_check('networkx', '1.0')
 import networkx as nx
 
-from nipype.interfaces.base import CommandLine
-from nipype.utils.filemanip import fname_presuffix
+from nipype.interfaces.base import CommandLine, isdefined
+from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
 
 logger = logging.getLogger('workflow')
 
@@ -364,3 +364,34 @@ def make_output_dir(outdir):
         os.mkdir(outdir)
     return outdir
 
+def modify_paths(object, relative=True, basedir=None):
+    """Modify filenames in a data structure to either full paths or relative paths
+    """
+    if not basedir:
+        basedir = os.getcwd()
+    if isinstance(object, dict):
+        out = {}
+        for key, val in sorted(object.items()):
+            if isdefined(val):
+                out[key] = modify_paths(val, relative=relative,
+                                        basedir=basedir)
+    elif isinstance(object, (list,tuple)):
+        out = []
+        for val in object:
+            if isdefined(val):
+                out.append(modify_paths(val, relative=relative,
+                                        basedir=basedir))
+        if isinstance(object, tuple):
+            out = tuple(out)
+    else:
+        if isdefined(object):
+            if isinstance(object, str) and os.path.isfile(object):
+                if relative:
+                    out = os.path.relpath(object,start=basedir)
+                else:
+                    out = os.path.abspath(os.path.join(basedir,object))
+                if not os.path.exists(out):
+                    raise FileNotFoundError('File %s not found'%out)
+            else:
+                out = object
+    return out
