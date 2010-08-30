@@ -610,7 +610,18 @@ class PlotTimeSeriesOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='image to write')
 
 class PlotTimeSeries(FSLCommand):
+    """Use fsl_tsplot to create images of time course plots.
 
+    Examples
+    --------
+    >>> import nipype.interfaces.fsl as fsl
+    >>> plotter = fsl.PlotTimeSeries()
+    >>> plotter.inputs.in_file = 'functional.par'
+    >>> plotter.inputs.title = 'Functional timeseries'
+    >>> plotter.inputs.labels = ['run1', 'run2']
+    >>> plotter.run() #doctest: +SKIP
+
+    """
     _cmd = "fsl_tsplot"
     input_spec = PlotTimeSeriesInputSpec
     output_spec = PlotTimeSeriesOutputSpec
@@ -618,13 +629,13 @@ class PlotTimeSeries(FSLCommand):
     def _format_arg(self, name, spec, value):
         if name == "in_file":
             if isinstance(value, list):
-                args = ", ".join(value)
+                args = ",".join(value)
                 return "-i %s"%args
             else:
                 return "-i %s"%value
         elif name == "labels":
             if isinstance(value, list):
-                args = ", ".join(value)
+                args = ",".join(value)
                 return "-a %s"%args
             else:
                 return "-a %s"%value
@@ -642,7 +653,11 @@ class PlotTimeSeries(FSLCommand):
         outputs = self._outputs().get()
         out_file = self.inputs.out_file
         if not isdefined(out_file):
-            out_file = self._gen_fname(self.inputs.in_file, ext='.png')
+            if isinstance(self.inputs.in_file, list):
+                infile = self.inputs.in_file[0]
+            else:
+                infile = self.inputs.in_file
+            out_file = self._gen_fname(infile, ext='.png')
         outputs['out_file'] = out_file
         return outputs
 
@@ -658,9 +673,9 @@ class PlotMotionParamsInputSpec(FSLCommandInputSpec):
                             mandatory=True,argstr="%s",position=1,
                             desc="file with motion parameters")
     in_source = traits.Enum("spm", "fsl", mandatory=True,
-                            desc="which program generated the motion parameter file")
-    plot_type = traits.Enum("rotations","translations", "displacement",argstr="%s",
-                            desc="which motion type to plot", mandatory=True)
+                            desc="which program generated the motion parameter file - fsl, spm")
+    plot_type = traits.Enum("rotations","translations", "displacement",argstr="%s",mandatory=True,
+                         desc="which motion type to plot - rotations, translations, displacement")
     plot_size = traits.Tuple(traits.Int,traits.Int,argstr="%s",
                              desc="plot image height and width")
     out_file = traits.File(argstr="-o %s",genfile=True,desc="image to write")
@@ -670,7 +685,27 @@ class PlotMotionParamsOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='image to write')
 
 class PlotMotionParams(FSLCommand):
+    """Use fsl_tsplot to plot the estimated motion parameters from a realignment program.
 
+    Examples
+    --------
+    >>> import nipype.interfaces.fsl as fsl
+    >>> plotter = fsl.PlotMotionParams()
+    >>> plotter.inputs.in_file = functional.par
+    >>> plotter.inputs.in_source = 'fsl'
+    >>> plotter.inputs.plot_type = 'rotations'
+    >>> res = plotter.run() #doctest: +SKIP
+
+    Notes
+    -----
+    The 'in_source' attribute determines the order of columns that are expected in the
+    source file.  FSL prints motion parameters in the order rotations, translations,
+    while SPM prints them in the opposite order.  This interface should be able to 
+    plot timecourses of motion parameters generated from other sources as long as
+    they fall under one of these two patterns.  For more flexibilty, see the 
+    :class:`fsl.PlotTimeSeries` interface.
+
+    """
     _cmd = 'fsl_tsplot'
     input_spec = PlotMotionParamsInputSpec
     output_spec = PlotMotionParamsOutputSpec
@@ -680,7 +715,12 @@ class PlotMotionParams(FSLCommand):
         if name == "plot_type":
             source = self.inputs.in_source
             
-            # Get the right starting and ending position depending on source program
+            if self.inputs.plot_type == 'displacement':
+                title='-t \'MCFLIRT estimated mean displacement (mm)\''
+                labels = '-a abs,rel'
+                return '%s %s'%(title, labels)
+
+            # Get the right starting and ending position depending on source package
             sfdict = dict(fsl_rot=(1,3),fsl_tra=(4,6),spm_rot=(4,6),spm_tra=(1,3))
             
             # Format the title properly
@@ -695,7 +735,7 @@ class PlotMotionParams(FSLCommand):
             return "-h %d -w %d"%value
         elif name == "in_file":
             if isinstance(value, list):
-                args = ", ".join(value)
+                args = ",".join(value)
                 return "-i %s"%args
             else:
                 return "-i %s"%value
@@ -706,8 +746,12 @@ class PlotMotionParams(FSLCommand):
         outputs = self._outputs().get()
         out_file = self.inputs.out_file
         if not isdefined(out_file):
-            stem = split_filename(self.inputs.in_file)[1]
-            type = dict(rot="rot",tra="trans")[self.inputs.plot_type[:3]]
+            if isinstance(self.inputs.in_file, list):
+                infile = self.inputs.in_file[0]
+            else:
+                infile = self.inputs.in_file
+            stem = split_filename(infile)[1]
+            type = dict(rot="rot",tra="trans",dis="disp")[self.inputs.plot_type[:3]]
             out_file = self._gen_fname("%s_%s"%(stem,type), ext='.png')
         outputs['out_file'] = out_file
         return outputs
