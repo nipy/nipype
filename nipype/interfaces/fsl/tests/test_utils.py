@@ -263,4 +263,69 @@ def test_slicer():
 
     clean_directory(outdir, cwd)
 
+def create_parfiles():
+    
+    np.savetxt('a.par',np.random.rand(6,3))
+    np.savetxt('b.par',np.random.rand(6,3))
+    return ['a.par', 'b.par']
 
+# test fsl_tsplot
+@skipif(no_fsl)
+def test_plottimeseries():
+    filelist, outdir, cwd = create_files_in_directory()
+    parfiles = create_parfiles()
+    plotter = fsl.PlotTimeSeries()
+
+    # make sure command gets called
+    yield assert_equal, plotter.cmd, 'fsl_tsplot'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, ValueError, plotter.run
+
+    # .inputs based parameters setting
+    plotter.inputs.in_file = parfiles[0]
+    plotter.inputs.labels = ['x','y','z']
+    plotter.inputs.y_range = (0,1)
+    plotter.inputs.title = 'test plot'
+    plotter.inputs.out_file = 'foo.png'
+    yield assert_equal, plotter.cmdline, \
+        ('fsl_tsplot -i %s -a x,y,z -o foo.png -t \'test plot\' -u 1 --ymin=0 --ymax=1'
+         %parfiles[0])
+
+    # .run based parameter setting
+    plotter2 = fsl.PlotTimeSeries(in_file=parfiles, title='test2 plot', plot_range=(2,5),
+                                  out_file='bar.png')
+    yield assert_equal, plotter2.cmdline, \
+        'fsl_tsplot -i %s,%s -o bar.png --start=2 --finish=5 -t \'test2 plot\' -u 1'%tuple(parfiles)
+
+    clean_directory(outdir, cwd)
+
+@skipif(no_fsl)
+def test_plotmotionparams():
+    filelist, outdir, cwd = create_files_in_directory()
+    parfiles = create_parfiles()
+    plotter = fsl.PlotMotionParams()
+
+    # make sure command gets called
+    yield assert_equal, plotter.cmd, 'fsl_tsplot'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, ValueError, plotter.run
+
+    # .inputs based parameters setting
+    plotter.inputs.in_file = parfiles[0]
+    plotter.inputs.in_source = 'fsl'
+    plotter.inputs.plot_type = 'rotations'
+    plotter.inputs.out_file = 'foo.png'
+    yield assert_equal, plotter.cmdline, \
+    ('fsl_tsplot -i %s -o foo.png -t \'MCFLIRT estimated rotations (radians)\' '
+     '--start=1 --finish=3 -a x,y,z'%parfiles[0])
+
+    # .run based parameter setting
+    plotter2 = fsl.PlotMotionParams(in_file=parfiles[1],in_source='spm',plot_type='translations',
+                                    out_file='bar.png')
+    yield assert_equal, plotter2.cmdline, \
+        ('fsl_tsplot -i %s -o bar.png -t \'Realign estimated translations (mm)\' '
+         '--start=1 --finish=3 -a x,y,z'%parfiles[1])
+
+    clean_directory(outdir, cwd)
