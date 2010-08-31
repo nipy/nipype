@@ -390,7 +390,10 @@ class ImageStats(FSLCommand):
         # local caching for backward compatibility
         outfile = os.path.join(os.getcwd(), 'stat_result.json')
         if runtime is None:
-            out_stat = load_json(outfile)['stat']
+            try:
+                out_stat = load_json(outfile)['stat']
+            except IOError:
+                return self.run().outputs
         else:
             out_stat = []
             for line in runtime.stdout.split('\n'):
@@ -402,5 +405,6 @@ class ImageStats(FSLCommand):
                         out_stat.extend([float(val) for val in values])
             if len(out_stat)==1:
                 out_stat = out_stat[0]
+            save_json(outfile, dict(stat=out_stat))
         outputs.out_stat = out_stat
         return outputs
