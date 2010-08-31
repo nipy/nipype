@@ -340,6 +340,12 @@ file for analysis
 level1design = pe.Node(interface=fsl.Level1Design(), name="level1design")
 
 """
+To allow changing working directories one needs to rerun the level1design as
+the fsf files are stored with absolute paths.
+"""
+level1design.overwrite = True
+
+"""
 Use :class:`nipype.interfaces.fsl.FEATModel` to generate a run specific mat
 file for use by FILMGLS
 """
