@@ -60,16 +60,16 @@ the output fields of the ``datasource`` node in the pipeline.
 Specify the subject directories
 """
 
-subject_list = ['subj1']
+subject_list = ['siemens_hardi_test']
 
 
 """
 Map field names to individual subject runs
 """
 
-info = dict(dwi=[['subject_id', 'data']],
-            bvecs=[['subject_id','bvecs']],
-            bvals=[['subject_id','bvals']])
+info = dict(dwi=[['subject_id', 'siemens_hardi_test_data']],
+            bvecs=[['subject_id','siemens_hardi_test_data.bvec']],
+            bvals=[['subject_id','siemens_hardi_test_data.bval']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
@@ -101,9 +101,9 @@ datasource.inputs.template = "%s/%s"
 
 # This needs to point to the fdt folder you can find after extracting 
 # http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
-datasource.inputs.base_directory = os.path.abspath('fsl_course_data/fdt/')
+datasource.inputs.base_directory = os.path.abspath('data')
 
-datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz')
+datasource.inputs.field_template = dict(dwi='%s/%s.nii')
 datasource.inputs.template_args = info
 
 
@@ -183,17 +183,6 @@ tractography.connect([
 
 
 """
-Setup data storage area
-"""
-
-datasink = pe.Node(interface=nio.DataSink(),name='datasink')
-datasink.inputs.base_directory = os.path.abspath('dtiresults')
-
-def getstripdir(subject_id):
-    return os.path.join(os.path.abspath('data/workingdir/dwiproc'),'_subject_id_%s' % subject_id)
-
-
-"""
 Setup the pipeline that combines the two workflows: tractography and computeTensor
 ----------------------------------------------------------------------------------
 """
@@ -213,7 +202,7 @@ dwiproc.connect([
                 ])
 
 dwiproc.inputs.computeTensor.hardi_mat.oblique_correction = True
-dwiproc.inputs.computeTensor.odf_recon.n_directions = 60
+dwiproc.inputs.computeTensor.odf_recon.n_directions = 31
 dwiproc.inputs.computeTensor.odf_recon.n_b0 = 5
 dwiproc.inputs.computeTensor.odf_recon.n_output_directions = 181
 
