@@ -54,6 +54,7 @@ fsl.FSLCommand.set_default_output_type('NIFTI')
 
 # Set the way matlab should be called
 mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
+mlab.MatlabCommand.set_default_paths('/software/spm8')
 
 
 """
@@ -382,6 +383,21 @@ level1.connect([(infosource, datasink,[('subject_id','container'),
 
 
 """
+Execute the pipeline
+--------------------
+
+The code discussed above sets up all the necessary data structures
+with appropriate parameters and the connectivity between the
+processes, but does not generate any output. To actually run the
+analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
+function needs to be called.
+"""
+
+if __name__ == '__main__':
+    level1.run()
+    level1.write_graph()
+
+"""
 Setup level 2 pipeline
 ----------------------
 
@@ -429,17 +445,10 @@ l2pipeline.connect([(l2source,onesamplettestdes,[('outfiles','in_files')]),
                     ])
 
 """
-Execute the pipeline
---------------------
+Execute the second level pipeline
+---------------------------------
 
-The code discussed above sets up all the necessary data structures
-with appropriate parameters and the connectivity between the
-processes, but does not generate any output. To actually run the
-analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
-function needs to be called.
 """
 
 if __name__ == '__main__':
-    level1.run()
     l2pipeline.run()
-    level1.write_graph()

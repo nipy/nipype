@@ -48,7 +48,7 @@ from nipype.utils.filemanip import (save_json, FileNotFoundError,
                                     filename_to_list, list_to_filename,
                                     copyfiles, fnames_presuffix)
 
-from nipype.pipeline.utils import (_generate_expanded_graph,
+from nipype.pipeline.utils import (_generate_expanded_graph, modify_paths,
                                    _create_pickleable_graph, export_graph,
                                    _report_nodes_not_run, make_output_dir)
 from nipype.utils.config import config
@@ -885,8 +885,8 @@ class Node(WorkflowBase):
                 fd = open(hashfile,'wt')
                 fd.writelines(str(hashed_inputs))
                 fd.close()
-                logger.warn('Unable to write a particular type to the json '\
-                                'file')
+                logger.debug('Unable to write a particular type to the json '\
+                                 'file')
             else:
                 logger.critical('Unable to open the file in write mode: %s'% \
                                     hashfile)
@@ -921,10 +921,7 @@ class Node(WorkflowBase):
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             self._run_interface(execute=True, cwd=outdir)
             if isinstance(self._result.runtime, list):
-                # XXX In what situation is runtime ever a list?
-                # Normally it's a Bunch.
-                # Ans[SG]: Runtime is a list when we are iterating
-                # over an input field using iterfield
+                # Handle MapNode
                 returncode = max([r.returncode for r in self._result.runtime])
             else:
                 returncode = self._result.runtime.returncode
@@ -952,13 +949,13 @@ class Node(WorkflowBase):
     def _run_command(self, execute, cwd, copyfiles=True):
         if execute and copyfiles:
             self._originputs = deepcopy(self._interface.inputs)
-        if copyfiles:
-            self._copyfiles_to_wd(cwd,execute)
-        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self._id)
+        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
         if issubclass(self._interface.__class__, CommandLine):
             cmd = self._interface.cmdline
             logger.info('cmd: %s'%cmd)
         if execute:
+            if copyfiles:
+                self._copyfiles_to_wd(cwd, execute)
             if issubclass(self._interface.__class__, CommandLine):
                 cmdfile = os.path.join(cwd,'command.txt')
                 fd = open(cmdfile,'wt')
@@ -981,33 +978,57 @@ class Node(WorkflowBase):
                 raise RuntimeError(result.runtime.stderr)
             else:
                 pkl_file = gzip.open(resultsfile, 'wb')
+                if result.outputs:
+                    outputs = result.outputs.get()
+                    result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
                 cPickle.dump(result, pkl_file)
                 pkl_file.close()
-
+                if result.outputs:
+                    result.outputs.set(**outputs)
         else:
             # Likewise, cwd could go in here
             logger.debug("Collecting precomputed outputs:")
             try:
+                aggregate = True
                 if os.path.exists(resultsfile):
                     pkl_file = gzip.open(resultsfile, 'rb')
-                    result = cPickle.load(pkl_file)
+                    try:
+                        result = cPickle.load(pkl_file)
+                    except traits.TraitError:
+                        logger.debug('some file does not exist. hence trait cannot be set')
+                    else:
+                        if result.outputs:
+                            try:
+                                result.outputs.set(**modify_paths(result.outputs.get(), relative=False, basedir=cwd))
+                            except FileNotFoundError:
+                                logger.debug('conversion to full path does results in non existent file')
+                            else:
+                                aggregate = False
                     pkl_file.close()
-                else: # backwards compatibility - does not support var caching
+                logger.debug('Aggregate: %s', aggregate)
+                # try aggregating first
+                if aggregate:
+                    self._copyfiles_to_wd(cwd, True, linksonly=True)
                     aggouts = self._interface.aggregate_outputs()
-                    runtime = Bunch(returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
+                    runtime = Bunch(cwd=cwd,returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
                     result = InterfaceResult(interface=None,
                                              runtime=runtime,
                                              outputs=aggouts)
                     pkl_file = gzip.open(resultsfile, 'wb')
+                    if result.outputs:
+                        outputs = result.outputs.get()
+                        result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
                     cPickle.dump(result, pkl_file)
                     pkl_file.close()
-                    
+                    if result.outputs:
+                        result.outputs.set(**outputs)
             except FileNotFoundError:
+                # if aggregation does not work, rerun the node
                 logger.debug("Some of the outputs were not found: rerunning node.")
                 result = self._run_command(execute=True, cwd=cwd, copyfiles=False)
         return result
 
-    def _copyfiles_to_wd(self, outdir, execute):
+    def _copyfiles_to_wd(self, outdir, execute, linksonly=False):
         """ copy files over and change the inputs"""
         if hasattr(self._interface,'_get_filecopy_info'):
             for info in self._interface._get_filecopy_info():
@@ -1017,7 +1038,13 @@ class Node(WorkflowBase):
                 if files:
                     infiles = filename_to_list(files)
                     if execute:
-                        newfiles = copyfiles(infiles, [outdir], copy=info['copy'])
+                        if linksonly:
+                            if info['copy'] == False:
+                                newfiles = copyfiles(infiles, [outdir], copy=info['copy'])
+                            else:
+                                newfiles = fnames_presuffix(infiles, newpath=outdir)
+                        else:
+                            newfiles = copyfiles(infiles, [outdir], copy=info['copy'])
                     else:
                         newfiles = fnames_presuffix(infiles, newpath=outdir)
                     if not isinstance(files, list):

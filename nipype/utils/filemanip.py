@@ -3,11 +3,15 @@
 """Miscellaneous file manipulation functions
 
 """
+
+import cPickle
+from glob import glob
+import gzip
+import logging
 import os
 import re
 import shutil
-from glob import glob
-import logging
+
 from nipype.utils.misc import isdefined
 # The md5 module is deprecated in Python 2.6, but hashlib is only
 # available as an external package for versions of python before 2.6.
@@ -327,3 +331,22 @@ def loadflat(infile, *args):
 
 def loadcrash(infile, *args):
     return loadflat(infile, *args)
+
+def loadpkl(infile):
+    """Load a zipped or plain cPickled file
+    """
+    if infile.endswith('pklz'):
+        pkl_file = gzip.open(infile, 'rb')
+    else:
+        pkl_file = open(infile)
+    return cPickle.load(pkl_file)
+
+def savepkl(filename, record):
+    if filename.endswith('pklz'):
+        pkl_file = gzip.open(filename, 'wb')
+    else:
+        pkl_file = open(filename, 'wb')
+    cPickle.dump(result, pkl_file)
+    pkl_file.close()
+    
+

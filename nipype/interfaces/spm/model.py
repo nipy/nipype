@@ -25,7 +25,8 @@ import scipy.io as sio
 # Local imports
 from nipype.interfaces.base import Bunch, traits, \
     TraitedSpec, File, Directory, OutputMultiPath, InputMultiPath
-from nipype.interfaces.spm.base import SPMCommand, SPMCommandInputSpec
+from nipype.interfaces.spm.base import (SPMCommand, SPMCommandInputSpec,
+                                        scans_for_fnames)
 from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (filename_to_list, list_to_filename,
                                     loadflat)
@@ -115,6 +116,8 @@ class Level1Design(SPMCommand):
         """validate spm realign options if set to None ignore
         """
         einputs = super(Level1Design, self)._parse_inputs(skip=('mask_threshold'))
+        for sessinfo in einputs[0]['sess']:
+            sessinfo['scans'] = scans_for_fnames(filename_to_list(sessinfo['scans']), keep4d=False)
         if not isdefined(self.inputs.spm_mat_dir):
             einputs[0]['dir'] = np.array([str(os.getcwd())], dtype=object)
         return einputs
