@@ -235,7 +235,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
                   'analyze4d', 'spm', 'afni', 'brik', 'bshort',
                   'bfloat', 'sdt', 'outline', 'otl', 'gdf',
                   'nifti1', 'nii', 'niigz']
-    _infiletypes = ['ge', 'gelx', 'lx','ximg', 'siemens', 'dicom', 'siemens+dicom']
+    _infiletypes = ['ge', 'gelx', 'lx','ximg', 'siemens', 'dicom', 'siemens_dicom']
     in_type = traits.Enum(_filetypes + _infiletypes, argstr='--in_type %s',
                         desc='input file type')
     out_type = traits.Enum(_filetypes, argstr='--out_type %s',
