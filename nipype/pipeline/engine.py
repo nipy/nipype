@@ -995,13 +995,13 @@ class Node(WorkflowBase):
                     try:
                         result = cPickle.load(pkl_file)
                     except traits.TraitError:
-                        logger.debug('trait cannot be set')
+                        logger.debug('some file does not exist. hence trait cannot be set')
                     else:
                         if result.outputs:
                             try:
                                 result.outputs.set(**modify_paths(result.outputs.get(), relative=False, basedir=cwd))
                             except FileNotFoundError:
-                                logger.debug('file not found')
+                                logger.debug('conversion to full path does results in non existent file')
                             else:
                                 aggregate = False
                     pkl_file.close()

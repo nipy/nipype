@@ -16,6 +16,9 @@ Bugs fixed
 * Base
   - traits logic for 'requires' metadata
 
+* Workflow engine
+  - allows workflows to be relocatable
+
 Release 0.3.2 (Aug 03, 2010)
 ============================
 
