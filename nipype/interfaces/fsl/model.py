@@ -240,7 +240,7 @@ class Level1Design(BaseInterface):
         """
         func_files = []
         for i, info in enumerate(session_info):
-            func_files.insert(i, info['scans'][0].split(',')[0])
+            func_files.insert(i, info['scans'])
         return func_files
 
     def _run_interface(self, runtime):

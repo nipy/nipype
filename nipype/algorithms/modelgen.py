@@ -382,7 +382,7 @@ class SpecifyModel(BaseInterface):
                         sessinfo[i]['regress'][j]['name'] = 'UR%d'%(j+1)
                     sessinfo[i]['regress'][j]['val'] = info.regressors[j]
             if isdefined(functional_runs):
-                sessinfo[i]['scans'] = scans_for_fnames(filename_to_list(functional_runs[i]),keep4d=False)
+                sessinfo[i]['scans'] = functional_runs[i]#scans_for_fnames(filename_to_list(functional_runs[i]),keep4d=False)
             else:
                 raise Exception("No functional data information provided for model")
         if isdefined(realignment_parameters):
@@ -395,8 +395,9 @@ class SpecifyModel(BaseInterface):
                     sessinfo[i]['regress'][colidx]['val']  = mc[:,col].tolist()
         if isdefined(outliers):
             for i,out in enumerate(outliers):
-                numscans = len(sessinfo[i]['scans'])
-                print numscans
+                numscans = 0
+                for f in filename_to_list(sessinfo[i]['scans']):
+                    numscans += load(f).get_shape()[3]
                 for j,scanno in enumerate(out):
                     if True:
                         colidx = len(sessinfo[i]['regress'])
