@@ -17,7 +17,20 @@ __docformat__ = 'restructuredtext'
 
 from nipype.interfaces.base import (TraitedSpec, File, traits, CommandLine,
     CommandLineInputSpec)
-from nipype.utils.misc import isdefined
+
+def _create_gradient_matrix(bvecs_file, bvals_file):
+    _gradient_matrix_file = 'gradient_matrix.txt'
+    bvals = [val for val in  re.split('\s+', open(bvals_file).readline().strip())]
+    bvecs_f = open(bvecs_file)
+    bvecs_x = [val for val in  re.split('\s+', bvecs_f.readline().strip())]
+    bvecs_y = [val for val in  re.split('\s+', bvecs_f.readline().strip())]
+    bvecs_z = [val for val in  re.split('\s+', bvecs_f.readline().strip())]
+    bvecs_f.close()
+    gradient_matrix_f = open(_gradient_matrix_file, 'w')
+    for i in range(len(bvals)):
+        gradient_matrix_f.write("%s, %s, %s, %s\n"%(bvecs_x[i], bvecs_y[i], bvecs_z[i], bvals[i]))
+    gradient_matrix_f.close()
+    return _gradient_matrix_file
 
 class DTIReconInputSpec(CommandLineInputSpec):
     dwi = File(desc='Input diffusion volume', argstr='%s',exists=True, mandatory=True,position=1)
@@ -63,27 +76,13 @@ class DTIRecon(CommandLine):
     input_spec=DTIReconInputSpec
     output_spec=DTIReconOutputSpec
     
-    _gradient_matrix_file = 'gradient_matrix.txt'
     _cmd = 'dti_recon'
     
     def _format_arg(self, name, spec, value):
         if name == "bvecs":
-            new_val = self._create_gradient_matrix(self.inputs.bvecs, self.inputs.bvals)
+            new_val = _create_gradient_matrix(self.inputs.bvecs, self.inputs.bvals)
             return super(DTIRecon, self)._format_arg("bvecs", spec, new_val)
         return super(DTIRecon, self)._format_arg(name, spec, value)
-        
-    def _create_gradient_matrix(self, bvecs_file, bvals_file):
-        bvals = [val for val in  re.split('\s+', open(bvals_file).readline().strip())]
-        bvecs_f = open(bvecs_file)
-        bvecs_x = [val for val in  re.split('\s+', bvecs_f.readline().strip())]
-        bvecs_y = [val for val in  re.split('\s+', bvecs_f.readline().strip())]
-        bvecs_z = [val for val in  re.split('\s+', bvecs_f.readline().strip())]
-        bvecs_f.close()
-        gradient_matrix_f = open(self._gradient_matrix_file, 'w')
-        for i in range(len(bvals)):
-            gradient_matrix_f.write("%s, %s, %s, %s\n"%(bvecs_x[i], bvecs_y[i], bvecs_z[i], bvals[i]))
-        gradient_matrix_f.close()
-        return self._gradient_matrix_file
 
     def _list_outputs(self):
         out_prefix = self.inputs.out_prefix
@@ -186,8 +185,10 @@ class SplineFilter(CommandLine):
         return outputs
 
 class HARDIMatInputSpec(CommandLineInputSpec):
-    bvecs = File(exists=True, desc = 'b vectors file', argstr='%s', mandatory=True, position=1)    
-    out_file = File(desc = 'output matrix file', argstr='%s', genfile=True, position=2)
+    bvecs = File(exists=True, desc = 'b vectors file',
+                argstr='%s', position=1, mandatory=True)
+    bvals = File(exists=True,desc = 'b values file', mandatory=True)   
+    out_file = File("recon_mat.dat", desc = 'output matrix file', argstr='%s', usedefault=True, position=2)
     order = traits.Int(argsstr='-order %s', desc="""maximum order of spherical harmonics. must be even number. default
 is 4""")
     odf_file = File(exists=True, argstr='-odf %s', desc="""filename that contains the reconstruction points on a HEMI-sphere.
@@ -225,39 +226,27 @@ class HARDIMat(CommandLine):
     
     _cmd = 'hardi_mat'
     
-    def _get_outfilename(self):
-        outfile = self.inputs.out_file
-        if not isdefined(outfile):            
-            outfile = fname_presuffix(self.inputs.bvecs,
-                                      newpath=os.getcwd(),
-                                      suffix='_out',
-                                      use_ext=False)
-        return outfile
-        
+    def _format_arg(self, name, spec, value):
+        if name == "bvecs":
+            new_val = _create_gradient_matrix(self.inputs.bvecs, self.inputs.bvals)
+            return super(HARDIMat, self)._format_arg("bvecs", spec, new_val)
+        return super(HARDIMat, self)._format_arg(name, spec, value)
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outfile = self._get_outfilename()
-        outputs['out_file'] = outfile
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._get_outfilename()
-        return None        
-    
-
 class ODFReconInputSpec(CommandLineInputSpec):
-    raw_data = File(desc='Input raw data', argstr='%s',exists=True, mandatory=True,position=1)
+    dwi = File(desc='Input raw data', argstr='%s',exists=True, mandatory=True,position=1)
     n_directions = traits.Int(desc='Number of directions', argstr='%s', mandatory=True, position=2)
     n_output_directions = traits.Int(desc='Number of output directions', argstr='%s', mandatory=True, position=3)
     out_prefix = traits.Str("odf", desc='Output file prefix', argstr='%s', usedefault=True, position=4)
-    matrix = File(argstr='-mat %s', exists=True, desc="""use given file as reconstruction matrix. by default the program
-will pick matrix file automatically by the given number of
-diffusion and output directions""")
+    matrix = File(argstr='-mat %s', exists=True, desc="""use given file as reconstruction matrix.""", mandatory=True)
     n_b0 = traits.Int(argstr='-b0 %s', desc="""number of b0 scans. by default the program gets this information
-from the number of directions and number of volume files in
-the raw data directory. useful when dealing with incomplete raw
-data set or only using part of raw data set to reconstruct""")
+from the number of directions and number of volumes in
+the raw data. useful when dealing with incomplete raw
+data set or only using part of raw data set to reconstruct""", mandatory=True)
     output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-ot %s', desc='output file type', usedefault=True)    
     sharpness = traits.Float(desc="""smooth or sharpen the raw data. factor > 0 is smoothing.
 factor < 0 is sharpening. default value is 0
@@ -299,18 +288,20 @@ class ODFRecon(CommandLine):
         output_type = self.inputs.output_type
 
         outputs = self.output_spec().get()
-        outputs['B0'] = fname_presuffix("",  prefix=out_prefix, suffix='_b0.'+ output_type)
-        outputs['DWI'] = fname_presuffix("",  prefix=out_prefix, suffix='_dwi.'+ output_type)
-        outputs['MAX'] = fname_presuffix("",  prefix=out_prefix, suffix='_max.'+ output_type)
-        outputs['ODF'] = fname_presuffix("",  prefix=out_prefix, suffix='_odf.'+ output_type)
+        outputs['B0'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_b0.'+ output_type))
+        outputs['DWI'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_dwi.'+ output_type))
+        outputs['MAX'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_max.'+ output_type))
+        outputs['ODF'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_odf.'+ output_type))
         if isdefined(self.inputs.output_entropy):
-            outputs['ENTROPY'] = fname_presuffix("",  prefix=out_prefix, suffix='_entropy.'+ output_type)
+            outputs['ENTROPY'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_entropy.'+ output_type))
        
         return outputs
 
 class ODFTrackerInputSpec(CommandLineInputSpec):
-    recon_data_prefix = traits.Str(desc='recon data prefix', argstr='%s', mandatory=True, position=1)
-    out_file = File(desc = 'output track file', argstr='%s', genfile=True, position=2)
+    MAX = File(exists=True, mandatory=True)
+    ODF = File(exists=True, mandatory=True)
+    input_data_prefix = traits.Str("odf", desc='recon data prefix', argstr='%s', usedefault=True, position=0)
+    out_file = File("tracks.trk", desc = 'output track file', argstr='%s', usedefault=True, position=1)
     input_output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-it %s', desc='input and output file type', usedefault=True)
     runge_kutta2 = traits.Bool(argstr='-rk2', desc="""use 2nd order runge-kutta method for tracking.
 default tracking method is non-interpolate streamline""")
@@ -327,12 +318,12 @@ to seed. can also define number of seed per voxel. default is 1""")
     swap_yz = traits.Bool(argstr='-syz', desc='swap y and z vectors while tracking')
     swap_zx = traits.Bool(argstr='-szx', desc='swap x and z vectors while tracking')
     disc = traits.Bool(argstr='-disc', desc='use disc tracking')
-    mask = traits.List(traits.Str(), minlen=1, maxlen=2, desc="""<mask_image> [<mask_threshold>] threshold for mask image.  The
-first argument is the mask image and the second is the threshold.  If the threshold is not provided, then the program will
-automatically try to find the threshold""", argstr='-m %s')
-    mask2 = traits.List(traits.Str(), minlen=1, maxlen=2, desc="""<mask_image> [<mask_threshold>] threshold for second mask image.  The
-first argument is the mask image and the second is the threshold.  If the threshold is not provided, then the program will
-automatically try to find the threshold""", argstr='-m %s')
+    mask1_file = File(desc="first mask image", mandatory=True, argstr="-m %s", position=2)
+    mask1_threshold = traits.Float(desc="threshold value for the first mask image, if not given, the program will \
+try automatically find the threshold", position=3)
+    mask2_file = File(desc="second mask image", argstr="-m2 %s", position=4)
+    mask2_threshold = traits.Float(desc="threshold value for the second mask image, if not given, the program will \
+try automatically find the threshold", position=5)
     limit = traits.Int(argstr='-limit %d', desc="""in some special case, such as heart data, some track may go into
 infinite circle and take long time to stop. this option allows
 setting a limit for the longest tracking steps (voxels)""")
@@ -360,7 +351,7 @@ in the track file and is essential for track display to map onto
 the right coordinates""") 
     
 class ODFTrackerOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='output track file')
+    track_file = File(exists=True, desc='output track file')
 
 class ODFTracker(CommandLine):
     """Use odf_tracker to generate track file
@@ -371,21 +362,18 @@ class ODFTracker(CommandLine):
     
     _cmd = 'odf_tracker'
 
-    def _get_outfilename(self):
-        outfile = self.inputs.out_file
-        if not isdefined(outfile):         
-            outfile = fname_presuffix("",  prefix=self.inputs.recon_data_prefix, suffix='.trk')               
-        return outfile
+    def _run_interface(self, runtime):
+        _, _, ext = split_filename(self.inputs.MAX)
+        copyfile(self.inputs.MAX, os.path.abspath(self.inputs.input_data_prefix + "_max" + ext), copy=False)
+        
+        _, _, ext = split_filename(self.inputs.ODF)
+        copyfile(self.inputs.ODF, os.path.abspath(self.inputs.input_data_prefix + "_odf" + ext), copy=False)
+        
+        return super(ODFTracker, self)._run_interface(runtime)
         
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outfile = self._get_outfilename()
-        outputs['out_file'] = outfile
+        outputs['track_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._get_outfilename()
-        return None
     
     
