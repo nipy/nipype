@@ -163,9 +163,9 @@ and hard segmentation of the seed region
 """
 
 tractography = pe.Workflow(name='tractography')
-tractography.base_dir = os.path.abspath('dtk_dti_tutorial')
 
 dtk_tracker = pe.Node(interface=dtk.DTITracker(), name="dtk_tracker")
+dtk_tracker.inputs.invert_x = True
 
 smooth_trk = pe.Node(interface=dtk.SplineFilter(), name="smooth_trk")
 smooth_trk.inputs.step_length = 0.5
@@ -195,15 +195,15 @@ Setup the pipeline that combines the two workflows: tractography and computeTens
 """
 
 dwiproc = pe.Workflow(name="dwiproc")
-dwiproc.base_dir = os.path.abspath('dtk_tutorial')
+dwiproc.base_dir = os.path.abspath('dtk_dti_tutorial')
 dwiproc.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,computeTensor,[('dwi','fslroi.in_file'),
                                                ('bvals','dtifit.bvals'),
                                                ('bvecs','dtifit.bvecs'),
                                                ('dwi','eddycorrect.in_file')]),
-                    (computeTensor,tractography,[('bet.mask_file','dtk_trackt.mask1_file'),
-                                                 ('dtifit.tensor','dtk_trackt.tensor_file')
+                    (computeTensor,tractography,[('bet.mask_file','dtk_tracker.mask1_file'),
+                                                 ('dtifit.tensor','dtk_tracker.tensor_file')
                                                  ])
                 ])
 
