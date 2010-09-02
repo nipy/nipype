@@ -1,1 +1,3 @@
-from nipype.interfaces.diffusion_toolkit.preproc import (DTIRecon, DTITracker, HARDIMat, ODFRecon, ODFTracker, SplineFilter)
+from nipype.interfaces.diffusion_toolkit.postproc import SplineFilter
+from nipype.interfaces.diffusion_toolkit.dti import (DTIRecon, DTITracker)
+from nipype.interfaces.diffusion_toolkit.odf import (HARDIMat, ODFRecon, ODFTracker) 
