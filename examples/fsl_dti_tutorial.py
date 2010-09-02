@@ -18,7 +18,6 @@ Tell python where to find the appropriate functions.
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.diffusion_toolkit as dtk 
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import os                                    # system functions
@@ -60,16 +59,24 @@ the output fields of the ``datasource`` node in the pipeline.
 Specify the subject directories
 """
 
-subject_list = ['siemens_hardi_test']
+subject_list = ['subj1']
 
 
 """
 Map field names to individual subject runs
 """
 
-info = dict(dwi=[['subject_id', 'siemens_hardi_test_data']],
-            bvecs=[['subject_id','siemens_hardi_test_data.bvec']],
-            bvals=[['subject_id','siemens_hardi_test_data.bval']])
+info = dict(dwi=[['subject_id', 'data']],
+            bvecs=[['subject_id','bvecs']],
+            bvals=[['subject_id','bvals']],
+            seed_file = [['subject_id','MASK_average_thal_right']],
+            target_masks = [['subject_id',['MASK_average_M1_right',
+                                           'MASK_average_S1_right',
+                                           'MASK_average_occipital_right',
+                                           'MASK_average_pfc_right',
+                                           'MASK_average_pmc_right',
+                                           'MASK_average_ppc_right',
+                                           'MASK_average_temporal_right']]])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
@@ -101,9 +108,11 @@ datasource.inputs.template = "%s/%s"
 
 # This needs to point to the fdt folder you can find after extracting 
 # http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
-datasource.inputs.base_directory = os.path.abspath('data')
+datasource.inputs.base_directory = os.path.abspath('fsl_course_data/fdt/')
 
-datasource.inputs.field_template = dict(dwi='%s/%s.nii')
+datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz',
+                                        seed_file="%s.bedpostX/%s.nii.gz",
+                                        target_masks="%s.bedpostX/%s.nii.gz")
 datasource.inputs.template_args = info
 
 
@@ -142,9 +151,7 @@ eddycorrect.inputs.ref_num=0
 compute the diffusion tensor in each voxel
 """
 
-hardi_mat = pe.Node(interface=dtk.HARDIMat(),name='hardi_mat')
-
-odf_recon = pe.Node(interface=dtk.ODFRecon(),name='odf_recon')
+dtifit = pe.Node(interface=fsl.DTIFit(),name='dtifit')
 
 """
 connect all the nodes for this workflow
@@ -152,9 +159,9 @@ connect all the nodes for this workflow
 
 computeTensor.connect([
                         (fslroi,bet,[('roi_file','in_file')]),
-                        (eddycorrect, odf_recon,[('eddy_corrected','dwi')]),
-                        (eddycorrect, hardi_mat,[('eddy_corrected','reference_file')]),
-                        (hardi_mat, odf_recon, [('out_file', 'matrix')])
+                        (eddycorrect,dtifit,[('eddy_corrected','dwi')]),
+                        (infosource, dtifit,[['subject_id','base_name']]),
+                        (bet,dtifit,[('mask_file','mask')])
                       ])
 
 
@@ -167,19 +174,67 @@ and hard segmentation of the seed region
 """
 
 tractography = pe.Workflow(name='tractography')
-tractography.base_dir = os.path.abspath('odf_tutorial')
+tractography.base_dir = os.path.abspath('fsl_dti_tutorial')
 
-odf_trackt = pe.Node(interface=dtk.ODFTracker(), name="odf_trackt")
+"""
+estimate the diffusion parameters: phi, theta, and so on
+"""
 
-smooth_trk = pe.Node(interface=dtk.SplineFilter(), name="smooth_trk")
-smooth_trk.inputs.step_length = 1
+bedpostx = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx')
+bedpostx.inputs.fibres = 1
+
+bedpostx_2f = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx_2f')
+bedpostx_2f.inputs.fibres = 2
+
+
+flirt = pe.Node(interface=fsl.FLIRT(), name='flirt')
+flirt.inputs.reference = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
+flirt.inputs.dof = 12
+
+"""
+perform probabilistic tracktography
+"""
+
+probtrackx = pe.Node(interface=fsl.ProbTrackX(),name='probtrackx')
+probtrackx.inputs.mode='seedmask'
+probtrackx.inputs.loop_check=True
+probtrackx.inputs.c_thresh = 0.2
+probtrackx.inputs.n_steps=2000
+probtrackx.inputs.step_length=0.5
+probtrackx.inputs.n_samples=5000
+probtrackx.inputs.force_dir=True
+probtrackx.inputs.opd=True
+probtrackx.inputs.os2t=True
+
+
+"""
+perform hard segmentation on the output of probtrackx
+"""
+
+findthebiggest = pe.Node(interface=fsl.FindTheBiggest(),name='findthebiggest')
+
+
 """
 connect all the nodes for this workflow
 """
 
 tractography.connect([
-                      (odf_trackt, smooth_trk, [('track_file', 'track_file')])
-                      ])
+                        (bedpostx,probtrackx,[('bpx_out_directory','bpx_directory')]),
+                        (bedpostx,probtrackx,[('bpx_out_directory','out_dir')]),
+                        (probtrackx,findthebiggest,[('targets','in_files')]),
+                        (flirt, probtrackx, [('out_matrix_file','xfm')])
+                    ])
+
+
+"""
+Setup data storage area
+"""
+
+datasink = pe.Node(interface=nio.DataSink(),name='datasink')
+datasink.inputs.base_directory = os.path.abspath('dtiresults')
+
+def getstripdir(subject_id):
+    return os.path.join(os.path.abspath('data/workingdir/dwiproc'),'_subject_id_%s' % subject_id)
 
 
 """
@@ -188,23 +243,25 @@ Setup the pipeline that combines the two workflows: tractography and computeTens
 """
 
 dwiproc = pe.Workflow(name="dwiproc")
-dwiproc.base_dir = os.path.abspath('odf_tutorial')
+dwiproc.base_dir = os.path.abspath('fsl_dti_tutorial')
 dwiproc.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,computeTensor,[('dwi','fslroi.in_file'),
-                                               ('bvals','hardi_mat.bvals'),
-                                               ('bvecs','hardi_mat.bvecs'),
+                                               ('bvals','dtifit.bvals'),
+                                               ('bvecs','dtifit.bvecs'),
                                                ('dwi','eddycorrect.in_file')]),
-                    (computeTensor,tractography,[('bet.mask_file','odf_trackt.mask1_file'),
-                                                 ('odf_recon.ODF','odf_trackt.ODF'),
-                                                 ('odf_recon.MAX','odf_trackt.MAX')
-                                                 ])
+                    (datasource,tractography,[('bvals','bedpostx.bvals'),
+                                              ('bvecs','bedpostx.bvecs'),
+                                              ('seed_file','probtrackx.seed_file'),
+                                              ('target_masks','probtrackx.target_masks')]),
+                    (computeTensor,tractography,[('eddycorrect.eddy_corrected','bedpostx.dwi'),
+                                                 ('bet.mask_file','bedpostx.mask'),
+                                                 ('bet.mask_file','probtrackx.mask'),
+                                                 ('fslroi.roi_file','flirt.in_file')]),
+                    (infosource, datasink,[('subject_id','container'),
+                                           (('subject_id', getstripdir),'strip_dir')]),
+                    (tractography,datasink,[('findthebiggest.out_file','fbiggest.@biggestsegmentation')])
                 ])
-
-dwiproc.inputs.computeTensor.hardi_mat.oblique_correction = True
-dwiproc.inputs.computeTensor.odf_recon.n_directions = 31
-dwiproc.inputs.computeTensor.odf_recon.n_b0 = 5
-dwiproc.inputs.computeTensor.odf_recon.n_output_directions = 181
 
 dwiproc.run()
 dwiproc.write_graph()

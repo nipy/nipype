@@ -150,7 +150,7 @@ connect all the nodes for this workflow
 
 computeTensor.connect([
                         (fslroi,bet,[('roi_file','in_file')]),
-                        (eddycorrect,dtifit,[('eddy_corrected','dwi')])
+                        (eddycorrect,dtifit,[('eddy_corrected','DWI')])
                       ])
 
 
@@ -163,9 +163,9 @@ and hard segmentation of the seed region
 """
 
 tractography = pe.Workflow(name='tractography')
-tractography.base_dir = os.path.abspath('dtk_tutorial')
+tractography.base_dir = os.path.abspath('dtk_dti_tutorial')
 
-dtk_trackt = pe.Node(interface=dtk.DTITracker(), name="dtk_trackt")
+dtk_tracker = pe.Node(interface=dtk.DTITracker(), name="dtk_tracker")
 
 smooth_trk = pe.Node(interface=dtk.SplineFilter(), name="smooth_trk")
 smooth_trk.inputs.step_length = 0.5
@@ -174,7 +174,7 @@ connect all the nodes for this workflow
 """
 
 tractography.connect([
-                      (dtk_trackt, smooth_trk, [('track_file', 'track_file')])
+                      (dtk_tracker, smooth_trk, [('track_file', 'track_file')])
                       ])
 
 
