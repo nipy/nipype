@@ -164,7 +164,6 @@ and hard segmentation of the seed region
 """
 
 tractography = pe.Workflow(name='tractography')
-tractography.base_dir = os.path.abspath('dtk_odf_tutorial')
 
 odf_tracker = pe.Node(interface=dtk.ODFTracker(), name="odf_tracker")
 
@@ -185,23 +184,23 @@ Setup the pipeline that combines the two workflows: tractography and compute_ODF
 """
 
 dwiproc = pe.Workflow(name="dwiproc")
-dwiproc.base_dir = os.path.abspath('odf_tutorial')
+dwiproc.base_dir = os.path.abspath('dtk_odf_tutorial')
 dwiproc.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,compute_ODF,[('dwi','fslroi.in_file'),
                                                ('bvals','hardi_mat.bvals'),
                                                ('bvecs','hardi_mat.bvecs'),
                                                ('dwi','eddycorrect.in_file')]),
-                    (compute_ODF,tractography,[('bet.mask_file','odf_trackt.mask1_file'),
+                    (compute_ODF,tractography,[('bet.mask_file','odf_tracker.mask1_file'),
                                                  ('odf_recon.ODF','odf_tracker.ODF'),
                                                  ('odf_recon.max','odf_tracker.max')
                                                  ])
                 ])
 
-dwiproc.inputs.computeTensor.hardi_mat.oblique_correction = True
-dwiproc.inputs.computeTensor.odf_recon.n_directions = 31
-dwiproc.inputs.computeTensor.odf_recon.n_b0 = 5
-dwiproc.inputs.computeTensor.odf_recon.n_output_directions = 181
+dwiproc.inputs.compute_ODF.hardi_mat.oblique_correction = True
+dwiproc.inputs.compute_ODF.odf_recon.n_directions = 31
+dwiproc.inputs.compute_ODF.odf_recon.n_b0 = 5
+dwiproc.inputs.compute_ODF.odf_recon.n_output_directions = 181
 
 dwiproc.run()
 dwiproc.write_graph()
