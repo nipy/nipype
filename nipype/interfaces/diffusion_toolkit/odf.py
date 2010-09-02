@@ -213,8 +213,8 @@ class ODFTracker(CommandLine):
     _cmd = 'odf_tracker'
 
     def _run_interface(self, runtime):
-        _, _, ext = split_filename(self.inputs.MAX)
-        copyfile(self.inputs.MAX, os.path.abspath(self.inputs.input_data_prefix + "_max" + ext), copy=False)
+        _, _, ext = split_filename(self.inputs.max)
+        copyfile(self.inputs.max, os.path.abspath(self.inputs.input_data_prefix + "_max" + ext), copy=False)
         
         _, _, ext = split_filename(self.inputs.ODF)
         copyfile(self.inputs.ODF, os.path.abspath(self.inputs.input_data_prefix + "_odf" + ext), copy=False)
