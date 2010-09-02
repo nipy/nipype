@@ -129,7 +129,7 @@ on top of the angle_threshold", argstr = "-atw %f")
     invert_z = traits.Bool(desc="invert z component of the vector", argstr = "-iz")
     swap_xy = traits.Bool(desc="swap x & y vectors while tracking", argstr = "-sxy")
     swap_yz = traits.Bool(desc="swap y & z vectors while tracking", argstr = "-syz")
-    swap_xz = traits.Bool(desc="swap x & z vectors while tracking", argstr = "-sxz")
+    swap_zx = traits.Bool(desc="swap x & z vectors while tracking", argstr = "-szx")
     mask1_file = File(desc="first mask image", mandatory=True, argstr="-m %s", position=2)
     mask1_threshold = traits.Float(desc="threshold value for the first mask image, if not given, the program will \
 try automatically find the threshold", position=3)
