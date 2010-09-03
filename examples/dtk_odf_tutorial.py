@@ -2,13 +2,9 @@
 """
 A pipeline example that uses several interfaces to
 perform analysis on diffusion weighted images using
-FSL FDT tools.
+Diffusion Toolkit and FSL.
 
-This tutorial is based on the 2010 FSL course and uses
-data freely available at the FSL website at:
-http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
-
-More details can be found at http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/fdt/index.htm
+This tutorial uses data from out nipype-tutorial package. 
 """
 
 
@@ -108,9 +104,9 @@ datasource.inputs.template_args = info
 
 
 """
-Setup for Diffusion Tensor Computation
+Setup for ODF Computation
 --------------------------------------
-Here we will create a generic workflow for DTI computation
+Here we will create a generic workflow for ODF computation
 """
 
 compute_ODF = pe.Workflow(name='compute_ODF')
@@ -159,8 +155,7 @@ compute_ODF.connect([
 """
 Setup for Tracktography
 -----------------------
-Here we will create a workflow to enable probabilistic tracktography
-and hard segmentation of the seed region
+Here we will create a workflow to enable deterministic tracktography
 """
 
 tractography = pe.Workflow(name='tractography')

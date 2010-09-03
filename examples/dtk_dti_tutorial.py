@@ -2,7 +2,7 @@
 """
 A pipeline example that uses several interfaces to
 perform analysis on diffusion weighted images using
-FSL FDT tools.
+Diffusion Toolkit and FSL.
 
 This tutorial is based on the 2010 FSL course and uses
 data freely available at the FSL website at:
@@ -158,8 +158,7 @@ computeTensor.connect([
 """
 Setup for Tracktography
 -----------------------
-Here we will create a workflow to enable probabilistic tracktography
-and hard segmentation of the seed region
+Here we will create a workflow to enable deterministic tracktography
 """
 
 tractography = pe.Workflow(name='tractography')
