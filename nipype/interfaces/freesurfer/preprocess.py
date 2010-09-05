@@ -823,14 +823,71 @@ class Smooth(FSCommand):
             return self._list_outputs()[name]
         return None
 
+class RobustRegisterInputSpec(FSTraitedSpec):
 
-"""
+    source_file = File(mandatory=True,argstr='--mov %s',
+                       desc='volume to be registered')
+    target_file = File(mandatory=True,argstr='--dst %s',
+                       desc='target volume for the registration')
+    out_reg_file = File(genfile=True,argstr='--lta %s',
+                        desc='registration file to write')
+    registered_file = traits.Either(traits.Bool, File, argstr='--warp %s',
+                      desc='registered image; either True or filename')
+    weights_file = traits.Either(traits.Bool, File, argstr='--weights %s',
+                   desc='weights image to write; either True or filename')
+    est_int_scale = traits.Bool(argstr='--iscale',
+                    desc='estimate intensity scale (recommended for unnormalized images)')
+    trans_only = traits.Bool(argstr='--transonly',
+                             desc='find 3 parameter translation only')
+    in_xfm_file = File(exists=True,argstr='--transform',
+                       desc='use initial transform on source')
+    auto_sens = traits.Bool(argstr='--satit',xor=['outlier_sens'],mandatory=True,
+                            desc='auto-detect good sensitivity')
+    outlier_sens = traits.Float(argstr='--sat %.4f',xor=['auto_sens'],mandatory=True,
+                                desc='set outlier sensitivity explicitly')
+    least_squares = traits.Bool(argstr='--leastsquares',
+                                desc='use least squares instead of robust estimator')
+    no_init = traits.Bool(argstr='--noinit',desc='skip transform init')
+    init_orient = traits.Bool(argstr='--initorient',
+                  desc='use moments for initial orient (recommended for stripped brains)')
+    max_iterations = traits.Int(argstr='--maxit %d', 
+                                desc='maximum # of times on each resolution')
+    high_iterations = traits.Int(argstr='--highit %d',
+                                 desc='max # of times on highest resolution')
+    iteration_thresh = traits.Float(argstr='--epsit %.3f',
+                                    desc='stop iterations when below threshold')
+    subsample_thresh = traits.Int(argstr='--subsample %d',
+                       desc='subsample is dimension is above threshold size')
+    outlier_limit = traits.Float(argstr='--wlimit %.3f',
+                                 desc='set maximal outlier limit in satit')
+    write_vo2vox = traits.Bool(argstr='--vox2vox',
+                               desc='output vox2vox matrix (default is RAS2RAS)')
+    no_multi = traits.Bool(argstr='--nomulti',desc='work on highest resolution')
+    mask_source = File(exists=True,argstr='--maskmov %s',
+                       desc='image to mask source volume with')
+    mask_target = File(exists=True,argstr='--maskdst %s',
+                       desc='image to mask target volume with')
+    force_double = traits.Bool(argstr='--doubleprec', desc='use double-precision intensities')
+    force_float = traits.Bool(argstr='--floattype', desc='use float intensities')
+
+
+class RobustRegisterOutputSpec(TraitedSpec):
+
+    pass
+
+class RobustRegister(FSCommand):
+
+    _cmd = 'mri_robust_register'
+    input_spec = RobustRegisterInputSpec
+    output_spec = RobustRegisterOutputSpec
+
+
+'''
 interfaces to do:
 
 mri_vol2surf
 mri_surf2vol
 mri_surf2surf
-mri_robust_register
 mri_ms_fitparams
-"""
+'''
 
