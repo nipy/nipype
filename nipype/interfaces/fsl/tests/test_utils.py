@@ -202,3 +202,130 @@ def test_fslmaths():
     # Fslmath class doesn't have opt_map{}
     clean_directory(outdir, cwd)
 
+# test overlay
+@skipif(no_fsl)
+def test_overlay():
+    filelist, outdir, cwd = create_files_in_directory()
+    overlay = fsl.Overlay()
+
+    # make sure command gets called
+    yield assert_equal, overlay.cmd, 'overlay'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, ValueError, overlay.run
+
+    # .inputs based parameters setting
+    overlay.inputs.stat_image = filelist[0]
+    overlay.inputs.stat_thresh = (2.5, 10)
+    overlay.inputs.background_image = filelist[1]
+    overlay.inputs.auto_thresh_bg = True
+    overlay.inputs.show_negative_stats = True
+    overlay.inputs.out_file = 'foo_overlay.nii'
+    yield assert_equal, overlay.cmdline, \
+        'overlay 1 0 %s -a %s 2.50 10.00 %s -2.50 -10.00 foo_overlay.nii'%(
+            filelist[1],filelist[0],filelist[0])
+
+    # .run based parameter setting
+    overlay2 = fsl.Overlay(stat_image=filelist[0], stat_thresh=(2.5,10),
+                           background_image=filelist[1], auto_thresh_bg=True,
+                           out_file='foo2_overlay.nii')
+    yield assert_equal, overlay2.cmdline, 'overlay 1 0 %s -a %s 2.50 10.00 foo2_overlay.nii'%(
+                                           filelist[1], filelist[0])
+
+    clean_directory(outdir, cwd)
+
+# test slicer
+@skipif(no_fsl)
+def test_slicer():
+    filelist, outdir, cwd = create_files_in_directory()
+    slicer = fsl.Slicer()
+
+    # make sure command gets called
+    yield assert_equal, slicer.cmd, 'slicer'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, ValueError, slicer.run
+
+    # .inputs based parameters setting
+    slicer.inputs.in_file = filelist[0]
+    slicer.inputs.image_edges = filelist[1]
+    slicer.inputs.intensity_range = (10., 20.)
+    slicer.inputs.all_axial = True
+    slicer.inputs.image_width = 750
+    slicer.inputs.out_file = 'foo_bar.png'
+    yield assert_equal, slicer.cmdline, \
+        'slicer %s %s -L -i 10.000 20.000  -A 750 foo_bar.png'%(filelist[0],filelist[1])
+
+    # .run based parameter setting
+    slicer2 = fsl.Slicer(in_file = filelist[0], middle_slices = True, label_slices=False,
+                         out_file='foo_bar2.png')
+    yield assert_equal, slicer2.cmdline, 'slicer %s   -a foo_bar2.png'%(filelist[0])
+
+    clean_directory(outdir, cwd)
+
+def create_parfiles():
+    
+    np.savetxt('a.par',np.random.rand(6,3))
+    np.savetxt('b.par',np.random.rand(6,3))
+    return ['a.par', 'b.par']
+
+# test fsl_tsplot
+@skipif(no_fsl)
+def test_plottimeseries():
+    filelist, outdir, cwd = create_files_in_directory()
+    parfiles = create_parfiles()
+    plotter = fsl.PlotTimeSeries()
+
+    # make sure command gets called
+    yield assert_equal, plotter.cmd, 'fsl_tsplot'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, ValueError, plotter.run
+
+    # .inputs based parameters setting
+    plotter.inputs.in_file = parfiles[0]
+    plotter.inputs.labels = ['x','y','z']
+    plotter.inputs.y_range = (0,1)
+    plotter.inputs.title = 'test plot'
+    plotter.inputs.out_file = 'foo.png'
+    yield assert_equal, plotter.cmdline, \
+        ('fsl_tsplot -i %s -a x,y,z -o foo.png -t \'test plot\' -u 1 --ymin=0 --ymax=1'
+         %parfiles[0])
+
+    # .run based parameter setting
+    plotter2 = fsl.PlotTimeSeries(in_file=parfiles, title='test2 plot', plot_range=(2,5),
+                                  out_file='bar.png')
+    yield assert_equal, plotter2.cmdline, \
+        'fsl_tsplot -i %s,%s -o bar.png --start=2 --finish=5 -t \'test2 plot\' -u 1'%tuple(parfiles)
+
+    clean_directory(outdir, cwd)
+
+@skipif(no_fsl)
+def test_plotmotionparams():
+    filelist, outdir, cwd = create_files_in_directory()
+    parfiles = create_parfiles()
+    plotter = fsl.PlotMotionParams()
+
+    # make sure command gets called
+    yield assert_equal, plotter.cmd, 'fsl_tsplot'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, ValueError, plotter.run
+
+    # .inputs based parameters setting
+    plotter.inputs.in_file = parfiles[0]
+    plotter.inputs.in_source = 'fsl'
+    plotter.inputs.plot_type = 'rotations'
+    plotter.inputs.out_file = 'foo.png'
+    yield assert_equal, plotter.cmdline, \
+    ('fsl_tsplot -i %s -o foo.png -t \'MCFLIRT estimated rotations (radians)\' '
+     '--start=1 --finish=3 -a x,y,z'%parfiles[0])
+
+    # .run based parameter setting
+    plotter2 = fsl.PlotMotionParams(in_file=parfiles[1],in_source='spm',plot_type='translations',
+                                    out_file='bar.png')
+    yield assert_equal, plotter2.cmdline, \
+        ('fsl_tsplot -i %s -o bar.png -t \'Realign estimated translations (mm)\' '
+         '--start=1 --finish=3 -a x,y,z'%parfiles[1])
+
+    clean_directory(outdir, cwd)

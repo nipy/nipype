@@ -5,6 +5,7 @@ Enhancements
 ------------
 
 * Added support for Diffusion toolkit
+* Added support for FSL slicer and overlay 
 
 Bugs fixed
 ----------

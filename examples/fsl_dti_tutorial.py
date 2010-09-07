@@ -18,7 +18,6 @@ Tell python where to find the appropriate functions.
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.diffusion_toolkit as dtk 
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import os                                    # system functions
@@ -152,7 +151,7 @@ eddycorrect.inputs.ref_num=0
 compute the diffusion tensor in each voxel
 """
 
-dtifit = pe.Node(interface=dtk.DTIRecon(),name='dtifit')
+dtifit = pe.Node(interface=fsl.DTIFit(),name='dtifit')
 
 """
 connect all the nodes for this workflow
@@ -160,7 +159,9 @@ connect all the nodes for this workflow
 
 computeTensor.connect([
                         (fslroi,bet,[('roi_file','in_file')]),
-                        (eddycorrect,dtifit,[('eddy_corrected','dwi')])
+                        (eddycorrect,dtifit,[('eddy_corrected','dwi')]),
+                        (infosource, dtifit,[['subject_id','base_name']]),
+                        (bet,dtifit,[('mask_file','mask')])
                       ])
 
 
@@ -173,7 +174,7 @@ and hard segmentation of the seed region
 """
 
 tractography = pe.Workflow(name='tractography')
-tractography.base_dir = os.path.abspath('diffusion_toolkit_tutorial')
+tractography.base_dir = os.path.abspath('fsl_dti_tutorial')
 
 """
 estimate the diffusion parameters: phi, theta, and so on
@@ -242,7 +243,7 @@ Setup the pipeline that combines the two workflows: tractography and computeTens
 """
 
 dwiproc = pe.Workflow(name="dwiproc")
-dwiproc.base_dir = os.path.abspath('dti_tutorial')
+dwiproc.base_dir = os.path.abspath('fsl_dti_tutorial')
 dwiproc.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,computeTensor,[('dwi','fslroi.in_file'),
