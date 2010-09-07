@@ -841,6 +841,16 @@ class RobustRegisterInputSpec(FSTraitedSpec):
                              desc='find 3 parameter translation only')
     in_xfm_file = File(exists=True,argstr='--transform',
                        desc='use initial transform on source')
+    half_source = traits.Either(traits.Bool, File, argstr='--halfmov %s',
+                                desc="write source volume mapped to halfway space")
+    half_targ = traits.Either(traits.Bool, File, argstr="--halfdst %s",
+                              desc="write target volume mapped to halfway space")
+    half_weights = traits.Either(traits.Bool, File, argstr="--halfweights %s",
+                                 desc="write weights volume mapped to halfway space")
+    half_source_xfm = traits.Either(traits.Bool, File, argstr="--halfmovlta %s",
+                                    desc="write transform from source to halfway space")
+    half_targ_xfm = traits.Either(traits.Bool, File, argstr="--halfdstlta %s",
+                                  desc="write transform from target to halfway space")
     auto_sens = traits.Bool(argstr='--satit',xor=['outlier_sens'],mandatory=True,
                             desc='auto-detect good sensitivity')
     outlier_sens = traits.Float(argstr='--sat %.4f',xor=['auto_sens'],mandatory=True,
@@ -857,7 +867,7 @@ class RobustRegisterInputSpec(FSTraitedSpec):
     iteration_thresh = traits.Float(argstr='--epsit %.3f',
                                     desc='stop iterations when below threshold')
     subsample_thresh = traits.Int(argstr='--subsample %d',
-                       desc='subsample is dimension is above threshold size')
+                       desc='subsample if dimension is above threshold size')
     outlier_limit = traits.Float(argstr='--wlimit %.3f',
                                  desc='set maximal outlier limit in satit')
     write_vo2vox = traits.Bool(argstr='--vox2vox',
@@ -873,15 +883,106 @@ class RobustRegisterInputSpec(FSTraitedSpec):
 
 class RobustRegisterOutputSpec(TraitedSpec):
 
-    pass
+    out_reg_file = File(exists=True, desc="output registration file")
+    registered_file = File(desc="output image with registration applied")
+    weights_file = File(desc="image of weights used")
+    half_source = File(desc="source image mapped to halfway space")
+    half_targ = File(desc="target image mapped to halfway space")
+    half_weights = File(desc="weights image mapped to halfway space")
+    half_source_xfm = File(desc="transform file to map source image to halfway space")
+    half_targ_xfm = File(desc="transform file to map target image to halfway space")
 
 class RobustRegister(FSCommand):
 
     _cmd = 'mri_robust_register'
     input_spec = RobustRegisterInputSpec
     output_spec = RobustRegisterOutputSpec
+    
+    def _format_arg(self, name, spec, value):
+        for option in ["registered_file", "weights_file", "half_source", "half_targ",
+                       "half_weights", "half_source_xfm", "half_targ_xfm"]:
+            if name == option:
+                if isinstance(value, bool):
+                    fname = self._list_outputs()[name]
+                else:
+                    fname = value
+                return spec.argstr % fname
+        return super(RobustRegister, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_reg_file'] = self.inputs.out_reg_file
+        if not isdefined(self.inputs.out_reg_file) and self.inputs.source_file:
+            outputs['out_reg_file'] = fname_presuffix(self.inputs.source_file,
+                                         suffix='_robustreg.lta',use_ext=False)
+        prefices = dict(src=self.inputs.source_file,trg=self.inputs.target_file)
+        suffices = dict(registered_file=("src","_robustreg",True),
+                        weights_file=("src","_robustweights",True),
+                        half_source=("src","_halfway",True),
+                        half_targ=("trg","_halfway",True),
+                        half_weights=("src","_halfweights",True),
+                        half_source_xfm=("src","_robustxfm.lta",False),
+                        half_targ_xfm=("trg","_robustxfm.lta",False))
+        for name, sufftup in suffices.items():
+            value = getattr(self.inputs, name)
+            if isdefined(value):
+                if isinstance(value, bool):
+                    outputs[name] = fname_presuffix(prefices[sufftup[0]],
+                                                    suffix=sufftup[1],
+                                                    newpath=os.getcwd(),
+                                                    use_ext=sufftup[2])
+                else:
+                    outputs[name] = value
+        return outputs
 
 
+    def _gen_filename(self, name):
+        if name == 'out_reg_file':
+            return self._list_outputs()[name]
+        return None    
+
+class FitMSParamsInputSpec(FSTraitedSpec):
+
+    in_files = traits.List(traits.File, exists=True, argstr="%s", position=-2, mandatory=True,
+                           desc="list of FLASH images (must be in mgh format)")
+    tr_list = traits.List(traits.Int, desc="list of TRs of the input files (in msec)")
+    te_list = traits.List(traits.Int, desc="list of TEs of the input files (in msec)")
+    flip_list = traits.List(traits.Int, desc="list of flip angles of the input files")
+    xfm_list = traits.List(traits.File, exists=True, 
+                           desc="list of transform files to apply to each FLASH image")
+    out_dir = Directory(argstr="%s",position=-1, genfile=True,
+                              desc="directory to store output in")
+
+class FitMSParamsOutputSpec(TraitedSpec):
+
+    pass
+
+class FitMSParams(FSCommand):
+
+    _cmd = "mri_ms_fitparms"
+    input_spec = FitMSParamsInputSpec
+    output_spec = FitMSParamsOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == "in_files":
+            cmd = ""
+            for i, file in enumerate(value):
+                if isdefined(self.inputs.tr_list):
+                    cmd = " ".join((cmd, "-tr %d"%self.inputs.tr_list[i]))
+                if isdefined(self.inputs.te_list):
+                    cmd = " ".join((cmd ,"-te %s"%self.inputs.te_list[i]))
+                if isdefined(self.inputs.flip_list):
+                    cmd = " ".join((cmd, "-fa %s"%self.inputs.flip_list[i]))
+                if isdefined(self.inputs.xfm_list):
+                    cmd = " ".join((cmd, "-at %s"%self.inputs.xfm_list[i]))
+                cmd = " ".join((cmd, file))
+            return cmd
+        return super(FitMSParams, self)._format_arg(name, spec, value)
+
+    def _gen_filename(self, name):
+        if name == "out_dir":
+            return os.getcwd()
+        return None
 '''
 interfaces to do:
 
