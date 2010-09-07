@@ -126,6 +126,17 @@ motion_correct = pe.MapNode(interface=fsl.MCFLIRT(save_mats = True,
 preproc.connect(img2float, 'out_file', motion_correct, 'in_file')
 preproc.connect(extract_ref, 'roi_file', motion_correct, 'ref_file')
 
+
+"""
+Plot the estimated motion parameters
+"""
+
+plotmotion = ps.MapNode(interface=fsl.PlotMotionParameters(in_source='fsl'),
+                        name='plotmotion',
+                        iterfield=['in_file'])
+plotmotion.iterables = ('plot_type', ['rotations', 'translations'])
+preproc.connect(motion_correct, 'par_file', plot_motion, 'in_file')
+
 """
 Extract the mean volume of the first functional run
 """

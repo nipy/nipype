@@ -470,6 +470,7 @@ class MCFLIRTInputSpec(FSLCommandInputSpec):
     stats_imgs = traits.Bool(argstr='-stats')
     save_mats = traits.Bool(argstr='-mats')
     save_plots = traits.Bool(argstr='-plots')
+    save_rms = traits.Bool(argstr='-rmsabs -rmsrel')
     ref_file = File(exists=True, argstr='-reffile %s')
 
 class MCFLIRTOutputSpec(TraitedSpec):
@@ -479,6 +480,7 @@ class MCFLIRTOutputSpec(TraitedSpec):
     mean_img = File(exists=True)
     par_file = File(exists=True)
     mat_file = OutputMultiPath(File(exists=True))
+    rms_files = OutputMultiPath(File(exists=True))
 
 class MCFLIRT(FSLCommand):
     """Use FSL MCFLIRT to do within-modality motion correction.
@@ -527,6 +529,9 @@ class MCFLIRT(FSLCommand):
             # Note - if e.g. out_file has .nii.gz, you get .nii.gz.par,
             # which is what mcflirt does!
             outputs['par_file'] = outputs['out_file'] + '.par'
+        if isdefined(self.inputs.save_rms) and self.inputs.save_rms:
+            outfile = outputs['out_file']
+            outputs['rms_files'] = [outfile+ '_abs.rms', outfile + '_rel.rms']
         return outputs
 
     def _gen_filename(self, name):

@@ -21,7 +21,7 @@ from nipype.interfaces.fsl.base import FSLCommand,\
 from nipype.interfaces.base import traits, TraitedSpec,\
     OutputMultiPath, File
 from nipype.utils.misc import isdefined
-from nipype.utils.filemanip import load_json, save_json
+from nipype.utils.filemanip import load_json, save_json, split_filename
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -408,3 +408,359 @@ class ImageStats(FSLCommand):
             save_json(outfile, dict(stat=out_stat))
         outputs.out_stat = out_stat
         return outputs
+
+
+class OverlayInputSpec(FSLCommandInputSpec):
+    transparency = traits.Bool(desc='make overlay colors semi-transparent',
+                               position=1, argstr='%s',usedefault=True, default_value=True)
+    out_type = traits.Enum('float', 'int', position=2, usedefault=True ,argstr='%s',
+                            desc='write output with float or int')
+    use_checkerboard = traits.Bool(desc='use checkerboard mask for overlay',
+                                   argstr='-c', position=3)
+    background_image = File(exists=True, position=4, mandatory=True,argstr='%s',
+                            desc='image to use as background')
+    _xor_inputs = ('auto_thresh_bg', 'full_bg_range', 'bg_thresh')
+    auto_thresh_bg = traits.Bool(desc='automatically threhsold the background image',
+                                 argstr='-a', position=5, xor=_xor_inputs, mandatory=True)
+    full_bg_range = traits.Bool(desc='use full range of background image',
+                                argstr='-A', position=5, xor=_xor_inputs, mandatory=True)
+    bg_thresh = traits.Tuple(traits.Float, traits.Float, argstr='%.3f %.3f', position=5,
+                             desc='min and max values for background intensity',
+                             xor=_xor_inputs, mandatory=True)
+    stat_image = traits.File(exists=True, position=6, mandatory=True,argstr='%s',
+                             desc='statistical image to overlay in color')
+    stat_thresh = traits.Tuple(traits.Float, traits.Float, position=7, mandatory=True,
+                               desc='min and max values for the statistical overlay',
+                               argstr='%.2f %.2f')
+    show_negative_stats = traits.Bool(desc='display negative statistics in overlay',
+                                      xor=['stat_image2'], argstr = '%s', position=8)
+    stat_image2 = traits.File(exists=True, position=9, xor=['show_negative_stats'],argstr='%s',
+                              desc='second statistical image to overlay in color')
+    stat_thresh2 = traits.Tuple(traits.Float, traits.Float, position=10,
+                                desc='min and max values for second statistical overlay',
+                                argstr='%.2f %.2f')
+    out_file = File(desc='combined image volume', position=-1, argstr='%s',genfile=True)
+
+class OverlayOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='combined image volume')
+
+class Overlay(FSLCommand):
+    """ Use FSL's overlay command to combine background and statistical images into one volume
+
+    Examples
+    --------
+    >>> from nipype.interfaces immport fsl
+    >>> from nipype.test import example_data
+    >>> combine = fsl.Overlay()
+    >>> combine.inputs.background_image = example_data('mean_func.nii.gz')
+    >>> combine.inputs.auto_thresh_bg = True
+    >>> combine.inputs.stat_image = example_data('zstat1.nii.gz')
+    >>> combine.inputs.stat_thresh = (3.5, 10)
+    >>> combine.inputs.show_negative_stats = True
+    >>> res = combine.run() #doctest: +SKIP
+
+    """
+    _cmd = 'overlay'
+    input_spec = OverlayInputSpec
+    output_spec = OverlayOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'transparency':
+            if value:
+                return '1'
+            else:
+                return '0'
+        if name == 'out_type':
+            if value == 'float':
+                return '0'
+            else:
+                return '1'
+        if name == 'show_negative_stats':
+            return '%s %.2f %.2f'% (self.inputs.stat_image,
+                                    self.inputs.stat_thresh[0]*-1,
+                                    self.inputs.stat_thresh[1]*-1)
+        return super(Overlay, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_file = self.inputs.out_file
+        if not isdefined(out_file):
+            if isdefined(self.inputs.stat_image2) and (
+                not isdefined(self.inputs.show_negative_stats)
+                or not self.inputs.show_negative_stats):
+                    stem = "%s_and_%s"%(split_filename(self.inputs.stat_image)[1],
+                                        split_filename(self.inputs.stat_image2)[1])
+            else:
+                stem = split_filename(self.inputs.stat_image)[1]
+            out_file = self._gen_fname(stem, suffix='_overlay')
+        outputs['out_file'] = out_file
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()['out_file']
+        return None
+
+
+class SlicerInputSpec(FSLCommandInputSpec):
+    in_file = File(exists=True, position=1, argstr='%s', mandatory=True,
+                   desc='input volume')
+    image_edges = File(exists=True, position=2, argstr='%s',
+        desc='volume to display edge overlay for (useful for checking registration')
+    label_slices = traits.Bool(position=3, argstr='-L', desc='display slice number',
+                               usedefault=True, default_value=True)
+    colour_map = File(exists=True, position=4, argstr='-l %s',
+                      desc='use different colour map from that stored in nifti header')
+    intensity_range = traits.Tuple(traits.Float, traits.Float, position=5, argstr='-i %.3f %.3f',
+                                   desc='min and max intensities to display')
+    threshold_edges = traits.Float(position=6, argstr='-e %.3f', desc='use threshold for edges')
+    dither_edges = traits.Bool(position=7, argstr='-t',
+                               desc='produce semi-transparaent (dithered) edges')
+    nearest_neighbour = traits.Bool(position=8, argstr='-n',
+                                    desc='use nearest neighbour interpolation for output')
+    show_orientation = traits.Bool(position=9, argstr='%s', usedefault=True, default_value=True,
+                                    desc='label left-right orientation')
+    _xor_options = ('single_slice','middle_slices','all_axial','sample_axial')
+    single_slice = traits.Enum('x','y','z', position=10, argstr='-%s',
+                               xor=_xor_options, requires=['slice_number'],
+                               desc='output picture of single slice in the x, y, or z plane')
+    slice_number = traits.Int(position=11, argstr='-%d',desc='slice number to save in picture')
+    middle_slices = traits.Bool(position=10, argstr='-a',xor=_xor_options,
+                                desc='output picture of mid-sagital, axial, and coronal slices')
+    all_axial = traits.Bool(position=10, argstr='-A', xor=_xor_options, requires=['image_width'],
+                            desc='output all axial slices into one picture')
+    sample_axial = traits.Int(position=10,argstr='-S %d',
+                              xor=_xor_options, requires=['image_width'],
+                              desc='output every n axial slices into one picture')
+    image_width = traits.Int(position=-2, argstr='%d',desc='max picture width')
+    out_file = File(position=-1, genfile=True, argstr='%s', desc='picture to write')
+
+class SlicerOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='picture to write')
+
+class Slicer(FSLCommand):
+    """Use FSL's slicer command to output a png image from a volume.
+
+    Examples
+    --------
+    >>> from nipype.interfaces import fsl
+    >>> from nipype.testing import example_data
+    >>> slice = fsl.Slicer()
+    >>> slice.inputs.in_file = example_data('functional.nii')
+    >>> slice.inputs.all_axial = True
+    >>> slice.inputs.image_width = 750
+    >>> res = slice.run() #doctest: +SKIP
+
+    """
+    _cmd = 'slicer'
+    input_spec = SlicerInputSpec
+    output_spec = SlicerOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'show_orientation':
+            if value:
+                return ''
+            else:
+                return '-u'
+        elif name == "label_slices":
+            if value:
+                return '-L'
+            else:
+                return ''
+        return super(Slicer, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_file = self.inputs.out_file
+        if not isdefined(out_file):
+            out_file = self._gen_fname(self.inputs.in_file, ext='.png')
+        outputs['out_file'] = out_file
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()['out_file']
+        return None
+
+class PlotTimeSeriesInputSpec(FSLCommandInputSpec):
+
+    in_file = traits.Either(File(exists=True), traits.List(File(exists=True)),
+                           mandatory=True,argstr="%s",position=1,
+                           desc="file or list of files with columns of timecourse information")
+    plot_start = traits.Int(argstr="--start=%d",xor=("plot_range",),
+                            desc="first column from in-file to plot")
+    plot_finish = traits.Int(argstr="--finish=%d",xor=("plot_range",),
+                             desc="final column from in-file to plot")
+    plot_range = traits.Tuple(traits.Int,traits.Int,argstr="%s",xor=("plot_start","plot_finish"),
+                              desc="first and last columns from the in-file to plot")
+    title = traits.Str(argstr="%s",desc="plot title")
+    legend_file = File(exists=True,argstr="--legend=%s",desc="legend file")
+    labels = traits.Either(traits.Str, traits.List(traits.Str),
+                           argstr="%s",desc="label or list of labels")
+    y_min = traits.Float(argstr="--ymin=%.2f",desc="minumum y value",xor=("y_range",))
+    y_max = traits.Float(argstr="--ymax=%.2f",desc="maximum y value",xor=("y_range",))
+    y_range = traits.Tuple(traits.Float,traits.Float,argstr="%s",xor=("y_min","y_max"),
+                           desc="min and max y axis values")
+    x_units = traits.Int(argstr="-u %d",usedefault=True,default_value=1,
+                         desc="scaling units for x-axis (between 1 and length of in file)")
+    plot_size = traits.Tuple(traits.Int,traits.Int,argstr="%s",
+                             desc="plot image height and width")
+    x_precision = traits.Int(argstr="--precision=%d",desc="precision of x-axis labels")
+    sci_notation = traits.Bool(argstr="--sci",desc="switch on scientific notation")
+    out_file = traits.File(argstr="-o %s",genfile=True,desc="image to write")
+
+class PlotTimeSeriesOutputSpec(TraitedSpec):
+    
+    out_file = File(exists=True, desc='image to write')
+
+class PlotTimeSeries(FSLCommand):
+    """Use fsl_tsplot to create images of time course plots.
+
+    Examples
+    --------
+    >>> import nipype.interfaces.fsl as fsl
+    >>> plotter = fsl.PlotTimeSeries()
+    >>> plotter.inputs.in_file = 'functional.par'
+    >>> plotter.inputs.title = 'Functional timeseries'
+    >>> plotter.inputs.labels = ['run1', 'run2']
+    >>> plotter.run() #doctest: +SKIP
+
+    """
+    _cmd = "fsl_tsplot"
+    input_spec = PlotTimeSeriesInputSpec
+    output_spec = PlotTimeSeriesOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == "in_file":
+            if isinstance(value, list):
+                args = ",".join(value)
+                return "-i %s"%args
+            else:
+                return "-i %s"%value
+        elif name == "labels":
+            if isinstance(value, list):
+                args = ",".join(value)
+                return "-a %s"%args
+            else:
+                return "-a %s"%value
+        elif name == "title":
+            return "-t \'%s\'"%value
+        elif name == "plot_range":
+            return "--start=%d --finish=%d"%value
+        elif name == "y_range":
+            return "--ymin=%d --ymax=%d"%value
+        elif name == "plot_size":
+            return "-h %d -w %d"%value
+        return super(PlotTimeSeries, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_file = self.inputs.out_file
+        if not isdefined(out_file):
+            if isinstance(self.inputs.in_file, list):
+                infile = self.inputs.in_file[0]
+            else:
+                infile = self.inputs.in_file
+            out_file = self._gen_fname(infile, ext='.png')
+        outputs['out_file'] = out_file
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()['out_file']
+        return None
+
+
+class PlotMotionParamsInputSpec(FSLCommandInputSpec):
+
+    in_file = traits.Either(File(exists=True), traits.List(File(exists=True)),
+                            mandatory=True,argstr="%s",position=1,
+                            desc="file with motion parameters")
+    in_source = traits.Enum("spm", "fsl", mandatory=True,
+                            desc="which program generated the motion parameter file - fsl, spm")
+    plot_type = traits.Enum("rotations","translations", "displacement",argstr="%s",mandatory=True,
+                         desc="which motion type to plot - rotations, translations, displacement")
+    plot_size = traits.Tuple(traits.Int,traits.Int,argstr="%s",
+                             desc="plot image height and width")
+    out_file = traits.File(argstr="-o %s",genfile=True,desc="image to write")
+
+class PlotMotionParamsOutputSpec(TraitedSpec):
+
+    out_file = File(exists=True, desc='image to write')
+
+class PlotMotionParams(FSLCommand):
+    """Use fsl_tsplot to plot the estimated motion parameters from a realignment program.
+
+    Examples
+    --------
+    >>> import nipype.interfaces.fsl as fsl
+    >>> plotter = fsl.PlotMotionParams()
+    >>> plotter.inputs.in_file = functional.par
+    >>> plotter.inputs.in_source = 'fsl'
+    >>> plotter.inputs.plot_type = 'rotations'
+    >>> res = plotter.run() #doctest: +SKIP
+
+    Notes
+    -----
+    The 'in_source' attribute determines the order of columns that are expected in the
+    source file.  FSL prints motion parameters in the order rotations, translations,
+    while SPM prints them in the opposite order.  This interface should be able to 
+    plot timecourses of motion parameters generated from other sources as long as
+    they fall under one of these two patterns.  For more flexibilty, see the 
+    :class:`fsl.PlotTimeSeries` interface.
+
+    """
+    _cmd = 'fsl_tsplot'
+    input_spec = PlotMotionParamsInputSpec
+    output_spec = PlotMotionParamsOutputSpec
+
+    def _format_arg(self, name, spec, value):
+
+        if name == "plot_type":
+            source = self.inputs.in_source
+            
+            if self.inputs.plot_type == 'displacement':
+                title='-t \'MCFLIRT estimated mean displacement (mm)\''
+                labels = '-a abs,rel'
+                return '%s %s'%(title, labels)
+
+            # Get the right starting and ending position depending on source package
+            sfdict = dict(fsl_rot=(1,3),fsl_tra=(4,6),spm_rot=(4,6),spm_tra=(1,3))
+            
+            # Format the title properly
+            sfstr = "--start=%d --finish=%d"%sfdict["%s_%s"%(source, value[:3])]
+            titledict = dict(fsl="MCFLIRT",spm="Realign")
+            unitdict = dict(rot="radians",tra="mm")
+            
+            title = "\'%s estimated %s (%s)\'"%(titledict[source],value,unitdict[value[:3]])
+            
+            return "-t %s %s -a x,y,z"%(title, sfstr)
+        elif name == "plot_size":
+            return "-h %d -w %d"%value
+        elif name == "in_file":
+            if isinstance(value, list):
+                args = ",".join(value)
+                return "-i %s"%args
+            else:
+                return "-i %s"%value
+
+        return super(PlotMotionParams, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_file = self.inputs.out_file
+        if not isdefined(out_file):
+            if isinstance(self.inputs.in_file, list):
+                infile = self.inputs.in_file[0]
+            else:
+                infile = self.inputs.in_file
+            stem = split_filename(infile)[1]
+            type = dict(rot="rot",tra="trans",dis="disp")[self.inputs.plot_type[:3]]
+            out_file = self._gen_fname("%s_%s"%(stem,type), ext='.png')
+        outputs['out_file'] = out_file
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()['out_file']
+        return None
