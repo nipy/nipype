@@ -427,14 +427,14 @@ class OverlayInputSpec(FSLCommandInputSpec):
     bg_thresh = traits.Tuple(traits.Float, traits.Float, argstr='%.3f %.3f', position=5,
                              desc='min and max values for background intensity',
                              xor=_xor_inputs, mandatory=True)
-    stat_image = traits.File(exists=True, position=6, mandatory=True,argstr='%s',
+    stat_image = File(exists=True, position=6, mandatory=True,argstr='%s',
                              desc='statistical image to overlay in color')
     stat_thresh = traits.Tuple(traits.Float, traits.Float, position=7, mandatory=True,
                                desc='min and max values for the statistical overlay',
                                argstr='%.2f %.2f')
     show_negative_stats = traits.Bool(desc='display negative statistics in overlay',
                                       xor=['stat_image2'], argstr = '%s', position=8)
-    stat_image2 = traits.File(exists=True, position=9, xor=['show_negative_stats'],argstr='%s',
+    stat_image2 = File(exists=True, position=9, xor=['show_negative_stats'],argstr='%s',
                               desc='second statistical image to overlay in color')
     stat_thresh2 = traits.Tuple(traits.Float, traits.Float, position=10,
                                 desc='min and max values for second statistical overlay',
@@ -607,7 +607,7 @@ class PlotTimeSeriesInputSpec(FSLCommandInputSpec):
                              desc="plot image height and width")
     x_precision = traits.Int(argstr="--precision=%d",desc="precision of x-axis labels")
     sci_notation = traits.Bool(argstr="--sci",desc="switch on scientific notation")
-    out_file = traits.File(argstr="-o %s",genfile=True,desc="image to write")
+    out_file = File(argstr="-o %s",genfile=True,desc="image to write")
 
 class PlotTimeSeriesOutputSpec(TraitedSpec):
     
@@ -682,7 +682,7 @@ class PlotMotionParamsInputSpec(FSLCommandInputSpec):
                          desc="which motion type to plot - rotations, translations, displacement")
     plot_size = traits.Tuple(traits.Int,traits.Int,argstr="%s",
                              desc="plot image height and width")
-    out_file = traits.File(argstr="-o %s",genfile=True,desc="image to write")
+    out_file = File(argstr="-o %s",genfile=True,desc="image to write")
 
 class PlotMotionParamsOutputSpec(TraitedSpec):
 
