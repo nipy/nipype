@@ -352,8 +352,7 @@ level1 = pe.Workflow(name="level1")
 level1.base_dir = os.path.abspath('spm_auditory_tutorial/workingdir')
 
 level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                (datasource,l1pipeline,[('struct', 'preproc.coregister.source')]),
-                (infosource,l1pipeline,[('subject_id','analysis.modelspec.subject_id')]),
+                (datasource,l1pipeline,[('struct', 'preproc.coregister.source')])
                 ])
 if merge_to_4d:
     level1.connect([(datasource,l1pipeline,[('func','preproc.merge.in_files')])])
