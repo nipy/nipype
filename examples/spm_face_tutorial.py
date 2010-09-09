@@ -438,9 +438,7 @@ level1.base_dir = os.path.abspath('spm_face_tutorial/workingdir')
 
 level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                 (datasource,l1pipeline,[('struct', 'preproc.coregister.source'),
-                                        ('func','preproc.realign.in_files')]),
-                (infosource,l1pipeline,[('subject_id','analysis.modelspec.subject_id'),
-                                        ('subject_id','paramanalysis.modelspec.subject_id')]),
+                                        ('func','preproc.realign.in_files')])
                 ])
 
 

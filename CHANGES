@@ -19,6 +19,11 @@ Bugs fixed
 
 * Workflow engine
   - allows workflows to be relocatable
+  
+API changes
+-----------
+
+* subject_id in ModelSpec is now deprecated
 
 Release 0.3.2 (Aug 03, 2010)
 ============================
