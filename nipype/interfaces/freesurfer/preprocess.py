@@ -955,7 +955,8 @@ class FitMSParamsInputSpec(FSTraitedSpec):
 
 class FitMSParamsOutputSpec(TraitedSpec):
 
-    pass
+    t1_image = File(exists=True, desc="estimated best T1 weighted image")
+    pd_image = File(exists=True, desc="estimated best proton density image")
 
 class FitMSParams(FSCommand):
 
@@ -979,6 +980,13 @@ class FitMSParams(FSCommand):
             return cmd
         return super(FitMSParams, self)._format_arg(name, spec, value)
 
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        out_dir = self.inputs.out_dir
+        outputs["t1_image"] = os.path.join(out_dir, "T1.mgz")
+        outputs["pd_image"] = os.path.join(out_dir, "PD.mgz")
+        return outputs
+
     def _gen_filename(self, name):
         if name == "out_dir":
             return os.getcwd()
@@ -989,6 +997,5 @@ interfaces to do:
 mri_vol2surf
 mri_surf2vol
 mri_surf2surf
-mri_ms_fitparams
 '''
 
