@@ -53,7 +53,7 @@ class IdentityInterface(IOBase):
         outputs = self._outputs().get()
         for key in self._fields:
             val = getattr(self.inputs, key)
-            if val:
+            if isdefined(val):
                 outputs[key] = val
         return outputs
 
