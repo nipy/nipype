@@ -650,6 +650,7 @@ class ThresholdInputSpec(SPMCommandInputSpec):
 
 class ThresholdOutputSpec(TraitedSpec):
     thresholded_map = File(exists=True)
+    pre_topo_fdr_map = File(exists=True)
 
 
 class Threshold(SPMCommand):
@@ -709,6 +710,8 @@ XYZ = cat(1, x', y', z');
 XYZth = XYZ(:, Z >= cluster_forming_thr);
 Zth = Z(Z >= cluster_forming_thr);
 
+spm_write_filtered(Zth,XYZth,stat_map_vol.dim',stat_map_vol.mat,'thresholded map', 'pre_topo_map.img');
+
 if isempty(XYZth)
     thresholded_XYZ = [];
     thresholded_Z = [];
@@ -745,6 +748,7 @@ end
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['thresholded_map'] = os.path.abspath('thresholded_map.img')
+        outputs['pre_topo_fdr_map'] = os.path.abspath('pre_topo_map.img')
         return outputs
 
 
