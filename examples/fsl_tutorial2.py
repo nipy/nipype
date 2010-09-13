@@ -131,10 +131,10 @@ preproc.connect(extract_ref, 'roi_file', motion_correct, 'ref_file')
 Plot the estimated motion parameters
 """
 
-plotmotion = ps.MapNode(interface=fsl.PlotMotionParameters(in_source='fsl'),
-                        name='plotmotion',
+plot_motion = pe.MapNode(interface=fsl.PlotMotionParams(in_source='fsl'),
+                        name='plot_motion',
                         iterfield=['in_file'])
-plotmotion.iterables = ('plot_type', ['rotations', 'translations'])
+plot_motion.iterables = ('plot_type', ['rotations', 'translations'])
 preproc.connect(motion_correct, 'par_file', plot_motion, 'in_file')
 
 """
@@ -620,8 +620,7 @@ l1pipeline.base_dir = os.path.abspath('./fsl/workingdir')
 l1pipeline.config = dict(crashdump_dir=os.path.abspath('./fsl/crashdumps'))
 
 l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                    (infosource, firstlevel, [(('subject_id', subjectinfo), 'modelfit.modelspec.subject_info'),
-                                              ('subject_id', 'modelfit.modelspec.subject_id')]),
+                    (infosource, firstlevel, [(('subject_id', subjectinfo), 'modelfit.modelspec.subject_info')]),
                     (datasource, firstlevel, [('struct','preproc.inputspec.struct'),
                                               ('func', 'preproc.inputspec.func'),
                                               ]),

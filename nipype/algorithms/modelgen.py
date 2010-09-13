@@ -22,11 +22,10 @@ from nipype.interfaces.base import BaseInterface, TraitedSpec,\
  InputMultiPath, traits, File
 from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import filename_to_list, loadflat
-from nipype.interfaces.spm import scans_for_fnames
 
 class SpecifyModelInputSpec(TraitedSpec):
-    subject_id = traits.Either(traits.Str(),traits.Int(),mandatory=True,
-        desc ="Subject identifier used as a parameter to the subject_info_func.")
+    subject_id = traits.Either(traits.Str(),traits.Int(),
+        desc ="This input is deprecated and will be removed in the future releases. Update your code.")
     subject_info = traits.List(mandatory=True,
                           desc= "List subject specific condition information")
     """    . If all
