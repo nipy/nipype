@@ -55,7 +55,8 @@ examples2rst:
 			../examples/spm_face_tutorial.py \
 			../examples/spm_auditory_tutorial.py \
 			../examples/fsl_dti_tutorial.py \
-			../examples/spm_tutorial2.py 
+			../examples/spm_tutorial2.py \
+			../examples/dartmouth_workshop_2010.py 
 	@echo "examples2rst finished."
 
 latex: api
