@@ -27,18 +27,18 @@ class DTIReconInputSpec(CommandLineInputSpec):
     bvals = File(exists=True,desc = 'b values file', mandatory=True)
     n_averages = traits.Int(desc='Number of averages', argstr='-nex %s')
     image_orientation_vectors = traits.List(traits.Float(), minlen=6, maxlen=6, desc="""specify image orientation vectors. if just one argument given,
-will treat it as filename and read the orientation vectors from
-the file. if 6 arguments are given, will treat them as 6 float
-numbers and construct the 1st and 2nd vector and calculate the 3rd
-one automatically.
-this information will be used to determine image orientation,
-as well as to adjust gradient vectors with oblique angle when""", argstr="-iop %f")
+        will treat it as filename and read the orientation vectors from
+        the file. if 6 arguments are given, will treat them as 6 float
+        numbers and construct the 1st and 2nd vector and calculate the 3rd
+        one automatically.
+        this information will be used to determine image orientation,
+        as well as to adjust gradient vectors with oblique angle when""", argstr="-iop %f")
     oblique_correction = traits.Bool(desc="""when oblique angle(s) applied, some SIEMENS dti protocols do not
-adjust gradient accordingly, thus it requires adjustment for correct
-diffusion tensor calculation""", argstr="-oc")
+        adjust gradient accordingly, thus it requires adjustment for correct
+        diffusion tensor calculation""", argstr="-oc")
     b0_threshold = traits.Float(desc="""program will use b0 image with the given threshold to mask out high
-background of fa/adc maps. by default it will calculate threshold
-automatically. but if it failed, you need to set it manually.""", argstr="-b0_th")
+        background of fa/adc maps. by default it will calculate threshold
+        automatically. but if it failed, you need to set it manually.""", argstr="-b0_th")
     
     
 class DTIReconOutputSpec(TraitedSpec):
@@ -107,21 +107,21 @@ class DTIRecon(CommandLine):
 class DTITrackerInputSpec(CommandLineInputSpec):
     tensor_file = File(exists=True, desc="reconstructed tensor file")
     input_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', desc="""input and output file type. accepted values are:
-analyze -> analyze format 7.5
-ni1     -> nifti format saved in seperate .hdr and .img file
-nii     -> nifti format with one .nii file
-nii.gz  -> nifti format with compression
-default type is 'nii'""", argstr = "-it %s")
+        analyze -> analyze format 7.5
+        ni1     -> nifti format saved in seperate .hdr and .img file
+        nii     -> nifti format with one .nii file
+        nii.gz  -> nifti format with compression
+        default type is 'nii'""", argstr = "-it %s")
     tracking_method = traits.Enum('fact', 'rk2', 'tl', 'sl', desc="""fact -> use FACT method for tracking. this is the default method.
-rk2  -> use 2nd order runge-kutta method for tracking.
-tl   -> use tensorline method for tracking.
-sl   -> use interpolated streamline method with fixed step-length""", argstr="-%s")
+        rk2  -> use 2nd order runge-kutta method for tracking.
+        tl   -> use tensorline method for tracking.
+        sl   -> use interpolated streamline method with fixed step-length""", argstr="-%s")
     step_length = traits.Float(desc="""set step length, in the unit of minimum voxel size.
-default value is 0.5 for interpolated streamline method
-and 0.1 for other methods""", argstr="-l %f")
+        default value is 0.5 for interpolated streamline method
+        and 0.1 for other methods""", argstr="-l %f")
     angle_threshold = traits.Float(desc="set angle threshold. default value is 35 degree", argstr="-at %f")
     angle_threshold_weight = traits.Float(desc="set angle threshold weighting factor. weighting will be be applied \
-on top of the angle_threshold", argstr = "-atw %f")
+        on top of the angle_threshold", argstr = "-atw %f")
     random_seed = traits.Int(desc = "use random location in a voxel instead of the center of the voxel \
           to seed. can also define number of seed per voxel. default is 1", argstr="-rseed")
     invert_x = traits.Bool(desc="invert x component of the vector", argstr = "-ix")
@@ -132,10 +132,10 @@ on top of the angle_threshold", argstr = "-atw %f")
     swap_zx = traits.Bool(desc="swap x & z vectors while tracking", argstr = "-szx")
     mask1_file = File(desc="first mask image", mandatory=True, argstr="-m %s", position=2)
     mask1_threshold = traits.Float(desc="threshold value for the first mask image, if not given, the program will \
-try automatically find the threshold", position=3)
+        try automatically find the threshold", position=3)
     mask2_file = File(desc="second mask image", argstr="-m2 %s", position=4)
     mask2_threshold = traits.Float(desc="threshold value for the second mask image, if not given, the program will \
-try automatically find the threshold", position=5)
+        try automatically find the threshold", position=5)
     input_data_prefix = traits.Str("dti", desc="for internal naming use only", position=0, argstr="%s", usedefault=True)
     output_file = File("tracks.trk", "file containing tracks", argstr="%s", position=1, usedefault=True)
     output_mask = File(desc="output a binary mask file in analyze format", argstr="-om %s")
