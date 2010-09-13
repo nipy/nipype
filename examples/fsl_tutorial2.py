@@ -131,11 +131,11 @@ preproc.connect(extract_ref, 'roi_file', motion_correct, 'ref_file')
 Plot the estimated motion parameters
 """
 
-plotmotion = ps.MapNode(interface=fsl.PlotMotionParameters(in_source='fsl'),
+plotmotion = pe.MapNode(interface=fsl.PlotMotionParams(in_source='fsl'),
                         name='plotmotion',
                         iterfield=['in_file'])
 plotmotion.iterables = ('plot_type', ['rotations', 'translations'])
-preproc.connect(motion_correct, 'par_file', plot_motion, 'in_file')
+preproc.connect(motion_correct, 'par_file', plotmotion, 'in_file')
 
 """
 Extract the mean volume of the first functional run
