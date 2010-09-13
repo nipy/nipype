@@ -646,7 +646,7 @@ class ThresholdInputSpec(SPMCommandInputSpec):
     use_fwe_correction = traits.Bool(True, usedefault=True, desc="whether to use FWE (Bonferroni) correction for initial threshold")
     height_threshold = traits.Float(0.05, usedefault=True, desc="p-value for initial thresholding (defining clusters)")
     extent_fdr_p_threshold = traits.Float(0.05, usedefault=True, desc='p threshold on FDR corrected cluster size probabilities')
-    extent_threshold = traits.Int(0, usedefault=True, desc="Minimum clusterr size in voxels")
+    extent_threshold = traits.Int(0, usedefault=True, desc="Minimum cluster size in voxels")
 
 class ThresholdOutputSpec(TraitedSpec):
     thresholded_map = File(exists=True)
@@ -741,7 +741,7 @@ if isempty(thresholded_XYZ)
     thresholded_XYZ = [1 1 1]';
 end
 """
-        script += "spm_write_filtered(thresholded_Z,thresholded_XYZ,stat_map_vol.dim',stat_map_vol.mat,'thresholded map', '%s');\n" % os.path.abspath('thresholded_map.hdr')
+        script += "spm_write_filtered(thresholded_Z,thresholded_XYZ,stat_map_vol.dim',stat_map_vol.mat,'thresholded map', 'thresholded_map.hdr');\n"
 
         return script
 
