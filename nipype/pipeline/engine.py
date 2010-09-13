@@ -219,7 +219,10 @@ class Workflow(WorkflowBase):
 
     # PUBLIC API
 
-    def connect(self, *args):
+    def disconnect(self, *args):
+        return self.connect(*args, disconnect=True)
+
+    def connect(self, *args, **kwargs):
         """Connect nodes in the pipeline.
 
         This routine also checks if inputs and outputs are actually provided by
@@ -263,6 +266,10 @@ class Workflow(WorkflowBase):
             connection_list = [(args[0], args[2], [(args[1], args[3])])]
         else:
             raise Exception('unknown set of parameters to connect function')
+        if not kwargs:
+            disconnect = False
+        else:
+            disconnect = kwargs['disconnect']
         not_found = []
         newnodes = []
         for srcnode, destnode, _ in connection_list:
@@ -310,8 +317,11 @@ class Workflow(WorkflowBase):
                 for data in connects:
                     if data not in edge_data['connect']:
                         edge_data['connect'].append(data)
+                    if disconnect:
+                        logger.debug('Removing connection: %s'%str(data))
+                        edge_data['connect'].remove(data)
                 self._graph.add_edges_from([(srcnode, destnode, edge_data)])
-            else:
+            elif not disconnect:
                 logger.debug('(%s, %s): No edge data' % (srcnode, destnode))
                 self._graph.add_edges_from([(srcnode, destnode,
                                              {'connect': connects})])
@@ -505,6 +515,7 @@ class Workflow(WorkflowBase):
         node.set_input(param, deepcopy(newval))
 
     def _create_flat_graph(self):
+        logger.debug('Creating flat graph for workflow: %s', self.name)
         self._flatgraph = None
         self._execgraph = None
         workflowcopy = deepcopy(self)
@@ -521,22 +532,29 @@ class Workflow(WorkflowBase):
                 node._hierarchy = self.name
 
     def _generate_execgraph(self):
+        logger.debug('expanding workflow: %s', self)
         nodes2remove = []
         if not nx.is_directed_acyclic_graph(self._graph):
             raise Exception('Workflow: %s is not a directed acyclic graph (DAG)'%self.name)
-        for node in self._graph.nodes():
+        nodes = nx.topological_sort(self._graph)
+        for node in nodes:
+            logger.debug('processing node: %s'%node)
             if isinstance(node, Workflow):
                 nodes2remove.append(node)
                 for u, _, d in self._graph.in_edges_iter(nbunch=node, data=True):
-                    for cd in d['connect']:
+                    logger.debug('in: connections-> %s'%str(d['connect']))
+                    for cd in deepcopy(d['connect']):
                         logger.debug("in: %s" % str (cd))
                         dstnode = node._get_parameter_node(cd[1],subtype='in')
                         srcnode = u
                         srcout = cd[0]
                         dstin = cd[1].split('.')[-1]
+                        logger.debug('in edges: %s %s %s %s'%(srcnode, srcout, dstnode, dstin))
+                        self.disconnect(u, cd[0], node, cd[1])
                         self.connect(srcnode, srcout, dstnode, dstin)
                 for _, v, d in self._graph.out_edges_iter(nbunch=node, data=True):
-                    for cd in d['connect']:
+                    logger.debug('out: connections-> %s'%str(d['connect']))
+                    for cd in deepcopy(d['connect']):
                         logger.debug("out: %s" % str (cd))
                         dstnode = v
                         if isinstance(cd[0], tuple):
@@ -551,8 +569,11 @@ class Workflow(WorkflowBase):
                         else:
                             srcout = parameter.split('.')[-1]
                         dstin = cd[1]
+                        logger.debug('out edges: %s %s %s %s'%(srcnode, srcout, dstnode, dstin))
+                        self.disconnect(node, cd[0], v, cd[1])
                         self.connect(srcnode, srcout, dstnode, dstin)
                 # expand the workflow node
+                #logger.debug('expanding workflow: %s', node)
                 node._generate_execgraph()
                 for innernode in node._graph.nodes():
                     innernode._hierarchy = '.'.join((self.name,innernode._hierarchy))
@@ -560,6 +581,7 @@ class Workflow(WorkflowBase):
                 self._graph.add_edges_from(node._graph.edges(data=True))
         if nodes2remove:
             self._graph.remove_nodes_from(nodes2remove)
+        logger.debug('finished expanding workflow: %s', self)
 
     def _execute_in_series(self, updatehash=False, force_execute=None):
         """Executes a pre-defined pipeline in a serial order.

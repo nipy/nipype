@@ -222,3 +222,29 @@ def test8():
                            len(pipe._execgraph.out_edges(node))) \
                           for node in pipe._execgraph.nodes()])
     yield assert_true(edgenum[0]>0)
+
+@parametric
+def test_expansion():
+    pipe1 = pe.Workflow(name='pipe1')
+    mod1 = pe.Node(interface=TestInterface(),name='mod1')
+    mod2 = pe.Node(interface=TestInterface(),name='mod2')
+    pipe1.connect([(mod1,mod2,[('output1','input2')])])
+    pipe2 = pe.Workflow(name='pipe2')
+    mod3 = pe.Node(interface=TestInterface(),name='mod3')
+    mod4 = pe.Node(interface=TestInterface(),name='mod4')
+    pipe2.connect([(mod3,mod4,[('output1','input2')])])
+    pipe3 = pe.Workflow(name="pipe3")
+    pipe3.connect([(pipe1, pipe2, [('mod2.output1','mod4.input1')])])
+    pipe4 = pe.Workflow(name="pipe4")
+    mod5 = pe.Node(interface=TestInterface(),name='mod5')
+    pipe4.add_nodes([mod5])
+    pipe5 = pe.Workflow(name="pipe5")
+    pipe5.add_nodes([pipe4])
+    pipe6 = pe.Workflow(name="pipe6")
+    pipe6.connect([(pipe5, pipe3, [('pipe4.mod5.output1','pipe2.mod3.input1')])])
+    error_raised = False
+    try:
+        pipe6._create_flat_graph()
+    except:
+        error_raised = True
+    yield assert_false(error_raised)

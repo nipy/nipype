@@ -5,7 +5,8 @@ Enhancements
 ------------
 
 * Added support for Diffusion toolkit
-* Added support for FSL slicer and overlay 
+* Added support for FSL slicer and overlay
+* Added support for dcm2nii
 
 Bugs fixed
 ----------
@@ -19,6 +20,7 @@ Bugs fixed
 
 * Workflow engine
   - allows workflows to be relocatable
+  - nested workflows with connections don't raise connection not found error
   
 API changes
 -----------
