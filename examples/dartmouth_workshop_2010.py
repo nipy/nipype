@@ -1,4 +1,7 @@
 """
+Using interfaces
+----------------
+
 Having interfaces allows us to use third party software (like FSL BET) as function. Look how simple it is.
 """
 
@@ -17,6 +20,9 @@ result1 = fsl.MCFLIRT(in_file='data/s1/f3.nii').run()
 result2 = fsl.Smooth(in_file='f3_mcf.nii.gz', fwhm=6).run()
 
 """
+Simple workflow
+---------------
+
 In the previous example we knew that fsl.MCFLIRT will produce a file called f3_mcf.nii.gz and we have hard coded
 this as an input to fsl.Smooth. This is quite limited, but luckily nipype supports joining interfaces in pipelines.
 This way output of one interface will be used as an input of another without having to hard code anything. Before
@@ -27,7 +33,8 @@ process data in a separate folder.
 import nipype.pipeline.engine as pe
 import os
 
-motion_correct = pe.Node(interface=fsl.MCFLIRT(in_file='data/s1/f3.nii'), name="motion_correct")
+motion_correct = pe.Node(interface=fsl.MCFLIRT(in_file=os.path.abspath('data/s1/f3.nii')),
+                         name="motion_correct")
 smooth = pe.Node(interface=fsl.Smooth(fwhm=6), name="smooth")
 
 motion_correct_and_smooth = pe.Workflow(name="motion_correct_and_smooth")
@@ -39,6 +46,9 @@ motion_correct_and_smooth.connect([
 motion_correct_and_smooth.run()
 
 """
+Another workflow
+----------------
+
 Another example of a simple workflow (calculate the mean of fMRI signal and subtract it). 
 This time we'll be assigning inputs after defining the workflow.
 """
@@ -59,6 +69,9 @@ demean.inputs.subtract.in_file = os.path.abspath('data/s1/f3.nii')
 demean.run()
 
 """
+Reusing workflows
+-----------------
+
 The beauty of the workflows is that they are reusable. We can just import a workflow made by someone
 else and feed it with our data.
 """
@@ -68,8 +81,37 @@ preproc.base_dir = os.path.abspath('.')
 preproc.inputs.inputspec.func = os.path.abspath('data/s1/f3.nii')
 preproc.inputs.inputspec.struct = os.path.abspath('data/s1/struct.nii')
 preproc.run()
-    
+
+
 """
+... and we can run it again and it won't actually rerun anything because none of
+the parameters have changed.
+"""
+
+preproc.run()
+
+
+"""
+... and we can change a parameter and run it again. Only the dependent nodes
+are rerun and that too only if the input state has changed.
+"""
+
+preproc.inputs.meanfuncmask.frac = 0.5
+preproc.run()
+
+"""
+Visualizing workflows 1
+-----------------------
+
+So what did we run in this precanned workflow
+"""
+
+preproc.write_graph()
+
+"""
+Datasink
+--------
+
 Datasink is a special interface for copying and arranging results.
 """
  
@@ -87,6 +129,9 @@ preprocess.connect([
 preprocess.run()
     
 """
+Datagrabber
+-----------
+
 Datagrabber is (surprise, surprise) an interface for collecting files from hard drive. It is very flexible and
 supports almost any file organisation of your data you can imagine. 
 """
@@ -115,6 +160,9 @@ results = datasource4.run()
 print results.outputs    
 
 """
+Iterables
+---------
+
 Iterables is a special field of the Node class that enables to iterate all workfloes/nodes connected to it over 
 some parameters. Here we'll use it to iterate over two subjects.
 """
@@ -136,3 +184,21 @@ my_workflow.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                      (datasource, preproc, [('func', 'inputspec.func'),
                                           ('struct', 'inputspec.struct')])])
 my_workflow.run()
+
+
+"""
+and we can change a node attribute and run it again
+
+"""
+
+smoothnode = my_workflow.get_node('preproc.smooth')
+assert(str(smoothnode)=='preproc.smooth')
+smoothnode.iterables = ('fwhm', [5.,10.])
+my_workflow.run()
+
+"""
+Visualizing workflows 2
+-----------------------
+
+In the case of nested workflows, we might want to look at expanded forms of the workflow.
+"""

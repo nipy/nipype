@@ -449,12 +449,11 @@ class Overlay(FSLCommand):
 
     Examples
     --------
-    >>> from nipype.interfaces immport fsl
-    >>> from nipype.test import example_data
+    >>> from nipype.interfaces import fsl
     >>> combine = fsl.Overlay()
-    >>> combine.inputs.background_image = example_data('mean_func.nii.gz')
+    >>> combine.inputs.background_image = 'mean_func.nii.gz'
     >>> combine.inputs.auto_thresh_bg = True
-    >>> combine.inputs.stat_image = example_data('zstat1.nii.gz')
+    >>> combine.inputs.stat_image = 'zstat1.nii.gz'
     >>> combine.inputs.stat_thresh = (3.5, 10)
     >>> combine.inputs.show_negative_stats = True
     >>> res = combine.run() #doctest: +SKIP
@@ -695,7 +694,7 @@ class PlotMotionParams(FSLCommand):
     --------
     >>> import nipype.interfaces.fsl as fsl
     >>> plotter = fsl.PlotMotionParams()
-    >>> plotter.inputs.in_file = functional.par
+    >>> plotter.inputs.in_file = 'functional.par'
     >>> plotter.inputs.in_source = 'fsl'
     >>> plotter.inputs.plot_type = 'rotations'
     >>> res = plotter.run() #doctest: +SKIP
