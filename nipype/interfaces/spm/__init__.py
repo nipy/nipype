@@ -14,4 +14,5 @@ from nipype.interfaces.spm.model import (Level1Design, EstimateModel,
                                          OneSampleTTestDesign, TwoSampleTTestDesign,
                                          PairedTTestDesign, MultipleRegressionDesign
                                          )
+from nipype.interfaces.spm.utils import Analyze2nii
 
