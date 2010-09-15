@@ -946,7 +946,7 @@ class FitMSParamsInputSpec(FSTraitedSpec):
     in_files = traits.List(traits.File, exists=True, argstr="%s", position=-2, mandatory=True,
                            desc="list of FLASH images (must be in mgh format)")
     tr_list = traits.List(traits.Int, desc="list of TRs of the input files (in msec)")
-    te_list = traits.List(traits.Int, desc="list of TEs of the input files (in msec)")
+    te_list = traits.List(traits.Float, desc="list of TEs of the input files (in msec)")
     flip_list = traits.List(traits.Int, desc="list of flip angles of the input files")
     xfm_list = traits.List(traits.File, exists=True, 
                            desc="list of transform files to apply to each FLASH image")
@@ -955,8 +955,8 @@ class FitMSParamsInputSpec(FSTraitedSpec):
 
 class FitMSParamsOutputSpec(TraitedSpec):
 
-    t1_image = File(exists=True, desc="estimated best T1 weighted image")
-    pd_image = File(exists=True, desc="estimated best proton density image")
+    t1_image = File(exists=True, desc="image of T1 relaxation values")
+    pd_image = File(exists=True, desc="image of proton density values")
 
 class FitMSParams(FSCommand):
 
@@ -971,7 +971,7 @@ class FitMSParams(FSCommand):
                 if isdefined(self.inputs.tr_list):
                     cmd = " ".join((cmd, "-tr %d"%self.inputs.tr_list[i]))
                 if isdefined(self.inputs.te_list):
-                    cmd = " ".join((cmd ,"-te %s"%self.inputs.te_list[i]))
+                    cmd = " ".join((cmd ,"-te %.3f"%self.inputs.te_list[i]))
                 if isdefined(self.inputs.flip_list):
                     cmd = " ".join((cmd, "-fa %s"%self.inputs.flip_list[i]))
                 if isdefined(self.inputs.xfm_list):
@@ -991,6 +991,47 @@ class FitMSParams(FSCommand):
         if name == "out_dir":
             return os.getcwd()
         return None
+
+class SynthesizeFLASHInputSpec(FSTraitedSpec):
+
+    fixed_weighting = traits.Bool(position=1,argstr="-w",
+        desc="use a fixed weighting to generate optimal gray/white contrast")
+    tr = traits.Float(mandatory=True,position=2,argstr="%.2f",
+                      desc="repetition time (in msec)")
+    flip_angle = traits.Float(mandatory=True,position=3,argstr="%.2f",
+                              desc="flip angle (in degrees)")
+    te = traits.Float(mandatory=True,position=4,argstr="%.3f",
+                      desc="echo time (in msec)")
+    t1_image = File(exists=True,mandatory=True,position=5,argstr="%s",
+                    desc="image of T1 values")
+    pd_image = File(exists=True,mandatory=True,position=6,argstr="%s",
+                    desc="image of proton density values")
+    out_file = File(genfile=True,argstr="%s",desc="image to write")
+
+class SynthesizeFLASHOutputSpec(TraitedSpec):
+
+    out_file = File(exists=True, desc="synthesized FLASH acquisition")
+
+class SynthesizeFLASH(FSCommand):
+
+    _cmd = "mri_synthesize"
+    input_spec = SynthesizeFLASHInputSpec
+    output_spec = SynthesizeFLASHOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            outputs["out_file"] = self.inputs.out_file
+        else:
+            outputs["out_file"] = self._gen_fname("flash_%d.mgz"%self.inputs.flip_angle,
+                                                   suffix = "")
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == "out_file":
+            return self._list_outputs()["out_file"]
+        return None
+
 '''
 interfaces to do:
 
