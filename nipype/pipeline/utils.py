@@ -193,22 +193,22 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
     # Retrieve edge information connecting nodes of the subgraph to other
     # nodes of the supergraph.
     supernodes = supergraph.nodes()
-    ids = [n._id for n in supernodes]
+    ids = [n._hierarchy+n._id for n in supernodes]
     edgeinfo = {}
     for n in subgraph.nodes():
-        nidx = ids.index(n._id)
+        nidx = ids.index(n._hierarchy+n._id)
         for edge in supergraph.in_edges_iter(supernodes[nidx]):
                 #make sure edge is not part of subgraph
             if edge[0] not in subgraph.nodes():
-                if n._id not in edgeinfo.keys():
-                    edgeinfo[n._id] = []
-                edgeinfo[n._id].append((edge[0],
+                if n._hierarchy+n._id not in edgeinfo.keys():
+                    edgeinfo[n._hierarchy+n._id] = []
+                edgeinfo[n._hierarchy+n._id].append((edge[0],
                                        supergraph.get_edge_data(*edge)))
     supergraph.remove_nodes_from(nodes)
     # Add copies of the subgraph depending on the number of iterables
     for i, params in enumerate(walk(iterables.items())):
         Gc = deepcopy(subgraph)
-        ids = [n._id for n in Gc.nodes()]
+        ids = [n._hierarchy+n._id for n in Gc.nodes()]
         nodeidx = ids.index(nodeid)
         paramstr = ''
         for key, val in sorted(params.items()):
@@ -232,8 +232,8 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
         supergraph.add_nodes_from(Gc.nodes())
         supergraph.add_edges_from(Gc.edges(data=True))
         for node in Gc.nodes():
-            if node._id in edgeinfo.keys():
-                for info in edgeinfo[node._id]:
+            if node._hierarchy+node._id in edgeinfo.keys():
+                for info in edgeinfo[node._hierarchy+node._id]:
                     supergraph.add_edges_from([(info[0], node, info[1])])
             node._id += str(i)
     return supergraph
@@ -268,7 +268,7 @@ def _generate_expanded_graph(graph_in):
             subnodes = nx.dfs_preorder(graph_in, node)
             subgraph = graph_in.subgraph(subnodes)
             graph_in = _merge_graphs(graph_in, subnodes,
-                                     subgraph, node._id,
+                                     subgraph, node._hierarchy+node._id,
                                      iterables)
         else:
             moreiterables = False
@@ -338,7 +338,7 @@ def _report_nodes_not_run(notrun):
     if notrun:
         logger.info("***********************************")
         for info in notrun:
-            logger.error("could not run node: %s" % info['node']._id)
+            logger.error("could not run node: %s" % info['node']._hierarchy+info['node']._id)
             logger.info("crashfile: %s" % info['crashfile'])
             logger.debug("The following dependent nodes were not run")
             for subnode in info['dependents']:

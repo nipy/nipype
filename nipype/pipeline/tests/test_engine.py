@@ -248,3 +248,18 @@ def test_expansion():
     except:
         error_raised = True
     yield assert_false(error_raised)
+
+@parametric
+def test_iterable_expansion():
+    import nipype.pipeline.engine as pe
+    from nipype.interfaces.utility import IdentityInterface
+    wf1 = pe.Workflow(name='test')
+    node1 = pe.Node(IdentityInterface(fields=['in1']),name='node1')
+    node2 = pe.Node(IdentityInterface(fields=['in2']),name='node2')
+    node1.iterables = ('in1',[1,2])
+    wf1.connect(node1,'in1', node2, 'in2')
+    wf3 = pe.Workflow(name='group')
+    for i in [0,1,2]:
+        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+    wf3._create_flat_graph()
+    yield assert_equal(len(pe._generate_expanded_graph(wf3._flatgraph).nodes()),12)
