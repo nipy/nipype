@@ -356,6 +356,24 @@ class MRIConvert(FSCommand):
                                       newpath=os.getcwd(),
                                       suffix=suffix,
                                       use_ext=False)
+        if isdefined(self.inputs.split) and self.inputs.split:
+            size = load(self.inputs.in_file).get_shape()
+            if len(size)==3:
+                tp = 1
+            else:
+                tp = size[-1]
+            if outfile.endswith('.mgz'):
+                stem = outfile.split('.mgz')[0]
+                ext = '.mgz'
+            elif outfile.endswith('.nii.gz'):
+                stem = outfile.split('.nii.gz')[0]
+                ext = '.nii.gz'
+            else:
+                stem = '.'.join(outfile.split('.')[:-1])
+                ext = '.'+outfile.split('.')[-1]
+            outfile = []
+            for idx in range(0,tp):
+                outfile.append(stem+'%04d'%idx+ext)
         return outfile
         
     def _list_outputs(self):
