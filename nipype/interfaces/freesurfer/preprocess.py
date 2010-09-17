@@ -22,7 +22,8 @@ from nipype.interfaces.io import FreeSurferSource
 
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits,
-                                    Directory, InputMultiPath)
+                                    Directory, InputMultiPath,
+                                    OutputMultiPath)
 from nipype.utils.misc import isdefined
 
 
@@ -310,7 +311,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
                                desc='zero ge z offset ???')
 
 class MRIConvertOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='converted output file')
+    out_file = OutputMultiPath(File(exists=True), desc='converted output file')
 
 class MRIConvert(FSCommand):
     """use fs mri_convert to manipulate files
@@ -356,6 +357,11 @@ class MRIConvert(FSCommand):
                                       newpath=os.getcwd(),
                                       suffix=suffix,
                                       use_ext=False)
+        return outfile
+        
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outfile = self._get_outfilename()
         if isdefined(self.inputs.split) and self.inputs.split:
             size = load(self.inputs.in_file).get_shape()
             if len(size)==3:
@@ -374,11 +380,6 @@ class MRIConvert(FSCommand):
             outfile = []
             for idx in range(0,tp):
                 outfile.append(stem+'%04d'%idx+ext)
-        return outfile
-        
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outfile = self._get_outfilename()
         if isdefined(self.inputs.out_type):
             if self.inputs.out_type in ['spm', 'analyze']:
                 # generate all outputs
@@ -390,6 +391,7 @@ class MRIConvert(FSCommand):
                     # have to take care of all the frame manipulations
                     raise Exception('Not taking frame manipulations into account- please warn the developers')
                 outfiles = []
+                outfile = self._get_outfilename()
                 for i in range(tp):
                     outfiles.append(fname_presuffix(outfile,
                                                     suffix='%03d'%(i+1)))
