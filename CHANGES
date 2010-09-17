@@ -1,36 +1,28 @@
-Release 0.3.3 (FUTURE)
+Release 0.3.4 (FUTURE)
 ======================
 
-Enhancements
-------------
+No changes yet
 
-* Added support for Diffusion toolkit
-* Added support for FSL slicer and overlay
-* Added support for dcm2nii
+Release 0.3.3 (Sep 16, 2010)
+============================
 
-Bugs fixed
-----------
-
-* IO
-  - DataSink properly handles lists of lists now
-  - DataGrabber has option for raising Exception on getting empty lists
-
-* Base
-  - traits logic for 'requires' metadata
-
-* Workflow engine
-  - allows workflows to be relocatable
-  - nested workflows with connections don't raise connection not found error
-  
-API changes
------------
-
-* subject_id in ModelSpec is now deprecated
-* spm.Threshold 
+* API: subject_id in ModelSpec is now deprecated
+* API: spm.Threshold 
   - does not need mask, beta, RPV anymore
   - takes only one image (stat_image - mind the name change)
   - works with SPM2 SPM.mat
   - returns additional map - pre topological FDR
+
+* ENH: Added support for Diffusion toolkit
+* ENH: Added support for FSL slicer and overlay
+* ENH: Added support for dcm2nii
+
+* BF: DataSink properly handles lists of lists now
+* BF: DataGrabber has option for raising Exception on getting empty lists
+* BF: Traits logic for 'requires' metadata
+* BF: allows workflows to be relocatable
+* BF: nested workflows with connections don't raise connection not found error
+* BF: multiple workflows with identical nodenames and iterables do not create nestsed workflows  
 
 Release 0.3.2 (Aug 03, 2010)
 ============================
