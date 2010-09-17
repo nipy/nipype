@@ -663,7 +663,7 @@ class Threshold(SPMCommand):
 
     >>> thresh = Threshold()
     >>> thresh.inputs.spm_mat_file = 'SPM.mat'
-    >>> thresh.inputs.spmT_images = 'spmT_0001.img'
+    >>> thresh.inputs.stat_image = 'spmT_0001.img'
     >>> thresh.inputs.contrast_index = 1
     >>> thresh.inputs.extent_fdr_p_threshold = 0.05
     >>> thresh.run() # doctest: +SKIP

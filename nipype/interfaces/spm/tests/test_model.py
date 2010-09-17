@@ -120,13 +120,13 @@ def test_multipleregression():
 def test_threshold():
     yield assert_equal, spm.Threshold._jobtype, 'basetype'
     yield assert_equal, spm.Threshold._jobname, 'basename'
-    input_map = dict(RPVimage = dict(copyfile=False,mandatory=True,),
-                     beta_images = dict(copyfile=False,mandatory=True,),
-                     contrast_index = dict(mandatory=True,),
-                     mask_image = dict(copyfile=False,mandatory=True,),
-                     residual_image = dict(copyfile=False,mandatory=True,),
-                     spmT_images = dict(copyfile=False,mandatory=True,),
+    input_map = dict(contrast_index = dict(mandatory=True,),
+                     stat_image = dict(copyfile=False,mandatory=True,),
                      spm_mat_file = dict(copyfile=True,mandatory=True,),
+                     use_fwe_correction = dict(usedefault=True),
+                     height_threshold = dict(usedefault=True),
+                     extent_fdr_p_threshold = dict(usedefault=True),
+                     extent_threshold = dict(usedefault=True),
                      )
     instance = spm.Threshold()
     for key, metadata in input_map.items():
