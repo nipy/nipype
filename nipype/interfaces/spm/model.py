@@ -641,19 +641,16 @@ class MultipleRegression(SPMCommand):
 
 class ThresholdInputSpec(SPMCommandInputSpec):
     spm_mat_file = File(exists=True, desc='absolute path to SPM.mat', copyfile=True, mandatory=True)
-    spmT_images = InputMultiPath(File(exists=True), desc='stat images from a t-contrast', copyfile=False, mandatory=True)
-    mask_image = File(exists=True, desc='binary mask to constrain estimation', copyfile=False, mandatory=True)
-    beta_images = InputMultiPath(File(exists=True), desc='design parameter estimates', copyfile=False, mandatory=True)
-    residual_image = File(exists=True, desc='Mean-squared image of the residuals', copyfile=False, mandatory=True)
-    RPVimage = File(exists=True, desc='Resels per voxel image', copyfile=False, mandatory=True)
-    contrast_index = traits.Int(mandatory=True, desc='which contrast (T map) to use')
+    stat_image = File(exists=True, desc='stat image', copyfile=False, mandatory=True)
+    contrast_index = traits.Int(mandatory=True, desc='which contrast in the SPM.mat to use')
     use_fwe_correction = traits.Bool(True, usedefault=True, desc="whether to use FWE (Bonferroni) correction for initial threshold")
     height_threshold = traits.Float(0.05, usedefault=True, desc="p-value for initial thresholding (defining clusters)")
-    extent_threshold = traits.Int(0, usedefault=True, desc='minimum cluster size')
     extent_fdr_p_threshold = traits.Float(0.05, usedefault=True, desc='p threshold on FDR corrected cluster size probabilities')
+    extent_threshold = traits.Int(0, usedefault=True, desc="Minimum cluster size in voxels")
 
 class ThresholdOutputSpec(TraitedSpec):
     thresholded_map = File(exists=True)
+    pre_topo_fdr_map = File(exists=True)
 
 
 class Threshold(SPMCommand):
@@ -666,7 +663,7 @@ class Threshold(SPMCommand):
 
     >>> thresh = Threshold()
     >>> thresh.inputs.spm_mat_file = 'SPM.mat'
-    >>> thresh.inputs.spmT_images = 'spmT_0001.img'
+    >>> thresh.inputs.stat_image = 'spmT_0001.img'
     >>> thresh.inputs.contrast_index = 1
     >>> thresh.inputs.extent_fdr_p_threshold = 0.05
     >>> thresh.run() # doctest: +SKIP
@@ -675,50 +672,67 @@ class Threshold(SPMCommand):
     output_spec = ThresholdOutputSpec
 
     def _make_matlab_command(self, _):
-        script = "xSPM.swd = '%s';\n" % os.getcwd()
-        script += "xSPM.Ic = %d;\n" % self.inputs.contrast_index
-        script += "xSPM.u = %f;\n" % self.inputs.height_threshold
-        script += "xSPM.Im = [];\n"
-
+        script = "con_index = %d;\n"%self.inputs.contrast_index
+        script += "cluster_forming_thr = %f;\n"%self.inputs.height_threshold
         if self.inputs.use_fwe_correction:
-            script += "xSPM.thresDesc  = 'FWE';\n"
+            script += "thresDesc  = 'FWE';\n"
         else:
-            script += "xSPM.thresDesc  = 'none';\n"
+            script += "thresDesc  = 'none';\n"
+        script += "cluster_extent_p_fdr_thr = %f;\n"% self.inputs.extent_fdr_p_threshold
+        script += "stat_filename = '%s';\n"% self.inputs.stat_image
+        script += "extent_threshold = %d;\n" % self.inputs.extent_threshold
+        script +="""
+load SPM.mat
+FWHM  = SPM.xVol.FWHM;
+df = [SPM.xCon(con_index).eidf SPM.xX.erdf];
+STAT = SPM.xCon(con_index).STAT;
+R = SPM.xVol.R;
+S = SPM.xVol.S;
+n = 1;
 
-        script += "xSPM.k = %d;\n" % self.inputs.extent_threshold
-        script += "xSPM.title = 'foo';\n"
-        script += "p_thresh = %f;\n" % self.inputs.extent_fdr_p_threshold
+switch thresDesc
+    case 'FWE'
+        cluster_forming_thr = spm_uc(cluster_forming_thr,df,STAT,R,n,S);
 
-        script += """[SPM,xSPM] = spm_getSPM(xSPM);
-% checking if anything survived initial thresholding
-if isempty(xSPM.XYZ)
+    case 'none'
+        if cluster_forming_thr <= 1
+            cluster_forming_thr = spm_u(cluster_forming_thr^(1/n),df,STAT);
+        end
+end
+
+stat_map_vol = spm_vol(stat_filename);
+[stat_map_data, stat_map_XYZmm] = spm_read_vols(stat_map_vol);
+
+Z = stat_map_data(:)';
+[x,y,z] = ind2sub(size(stat_map_data),(1:numel(stat_map_data))');
+XYZ = cat(1, x', y', z');
+
+XYZth = XYZ(:, Z >= cluster_forming_thr);
+Zth = Z(Z >= cluster_forming_thr);
+
+spm_write_filtered(Zth,XYZth,stat_map_vol.dim',stat_map_vol.mat,'thresholded map', 'pre_topo_map.img');
+
+if isempty(XYZth)
     thresholded_XYZ = [];
     thresholded_Z = [];
 else
-    FWHM  = xSPM.FWHM;
-    if FWHM(3) == Inf
-        V2R   = 1/prod(FWHM(1:2));
-    else
-        V2R   = 1/prod(FWHM);
-    end;
-    
-    QPc = xSPM.Pc;
-    QPc = sort(QPc(:));
-    
-    voxel_labels = spm_clusters(xSPM.XYZ);
+
+    V2R        = 1/prod(FWHM(stat_map_vol.dim > 1));
+    [uc,Pc,ue] = spm_uc_clusterFDR(cluster_extent_p_fdr_thr,df,STAT,R,n,Z,XYZ,V2R,cluster_forming_thr);
+
+    voxel_labels = spm_clusters(XYZth);
     nclusters = max(voxel_labels);
-    
+
     thresholded_XYZ = [];
     thresholded_Z = [];
-    
+
     for i = 1:nclusters
-       cluster_size = sum(voxel_labels==i);
-       cluster_size_resels = cluster_size*V2R;
-       p = spm_P_clusterFDR(cluster_size_resels,xSPM.df,xSPM.STAT,xSPM.R,xSPM.n,xSPM.u,QPc);
-       if p < p_thresh
-           thresholded_XYZ = cat(2, thresholded_XYZ, xSPM.XYZ(:,voxel_labels == i));
-           thresholded_Z = cat(2, thresholded_Z, xSPM.Z(voxel_labels == i));
-       end
+        cluster_size = sum(voxel_labels==i);
+        cluster_size_resels = cluster_size*V2R;
+        if cluster_size > extent_threshold && cluster_size >= uc
+            thresholded_XYZ = cat(2, thresholded_XYZ, XYZth(:,voxel_labels == i));
+            thresholded_Z = cat(2, thresholded_Z, Zth(voxel_labels == i));
+        end
     end
 end
 % workaround to write an empty volume
@@ -727,14 +741,14 @@ if isempty(thresholded_XYZ)
     thresholded_XYZ = [1 1 1]';
 end
 """
-
-        script += "spm_write_filtered(thresholded_Z,thresholded_XYZ,xSPM.DIM,xSPM.M,'foo', '%s');\n" % os.path.abspath('thresholded_map.hdr')
+        script += "spm_write_filtered(thresholded_Z,thresholded_XYZ,stat_map_vol.dim',stat_map_vol.mat,'thresholded map', 'thresholded_map.hdr');\n"
 
         return script
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['thresholded_map'] = os.path.abspath('thresholded_map.img')
+        outputs['pre_topo_fdr_map'] = os.path.abspath('pre_topo_map.img')
         return outputs
 
 

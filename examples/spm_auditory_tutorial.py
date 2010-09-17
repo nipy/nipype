@@ -194,11 +194,7 @@ l1analysis.connect([(modelspec,level1design,[('session_info','session_info')]),
                                                   ('beta_images','beta_images'),
                                                   ('residual_image','residual_image')]),
                   (contrastestimate, threshold,[('spm_mat_file','spm_mat_file'),
-                                                    ('spmT_images', 'spmT_images')]),
-                  (level1estimate,threshold,[('beta_images','beta_images'),
-                                                  ('residual_image','residual_image'),
-                                                  ('mask_image','mask_image'),
-                                                  ('RPVimage','RPVimage')]),
+                                                    ('spmT_images', 'stat_image')]),
                   ])
 
 """

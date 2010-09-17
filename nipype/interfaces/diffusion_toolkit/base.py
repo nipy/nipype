@@ -22,7 +22,7 @@ class Info(object):
     Examples
     --------
 
-    >>> from nipype.interfaces.dtk import Info
+    >>> from nipype.interfaces.diffusion_toolkit import Info
     >>> Info.version()  # doctest: +SKIP
     >>> Info.subjectsdir()  # doctest: +SKIP
     

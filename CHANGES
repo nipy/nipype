@@ -26,6 +26,11 @@ API changes
 -----------
 
 * subject_id in ModelSpec is now deprecated
+* spm.Threshold 
+  - does not need mask, beta, RPV anymore
+  - takes only one image (stat_image - mind the name change)
+  - works with SPM2 SPM.mat
+  - returns additional map - pre topological FDR
 
 Release 0.3.2 (Aug 03, 2010)
 ============================
