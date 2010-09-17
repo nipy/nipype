@@ -6,7 +6,7 @@ from tempfile import mkstemp
 
 import nipype
 
-version = '0.3.2'
+version = '0.3.3'
 release = True
 
 # Return the svn version as a string, raise a ValueError otherwise
@@ -21,7 +21,7 @@ def get_nipype_gitversion():
     Returns
     -------
     None or str
-      Version of PyMVPA according to git.
+      Version of NiPype according to git.
     """
     gitpath = os.path.realpath(os.path.join(os.path.dirname(nipype.__file__), os.path.pardir))
     gitpathgit = os.path.join(gitpath, '.git')
