@@ -220,7 +220,8 @@ class Workflow(WorkflowBase):
     # PUBLIC API
 
     def disconnect(self, *args):
-        return self.connect(*args, disconnect=True)
+        # yoh: explicit **dict was introduced for compatibility with Python 2.5
+        return self.connect(*args, **dict(disconnect=True))
 
     def connect(self, *args, **kwargs):
         """Connect nodes in the pipeline.
