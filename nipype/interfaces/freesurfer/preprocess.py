@@ -893,6 +893,25 @@ class RobustRegisterOutputSpec(TraitedSpec):
     half_targ_xfm = File(desc="transform file to map target image to halfway space")
 
 class RobustRegister(FSCommand):
+    """Perform intramodal linear registration (translation and rotation) using robust statistics.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import RobustRegister
+    >>> reg = RobustRegister()
+    >>> reg.inputs.source_file = structural.nii
+    >>> reg.inputs.target_file = T1.nii
+    >>> reg.inputs.auto_sens = True
+    >>> reg.inputs.init_orient = True
+    >>> reg.cmdline
+    'mri_robust_register --satit --initorient --lta structural_robustreg.lta --mov structural.nii --dst T1.nii'
+
+    References
+    ----------
+    Reuter, M, Rosas, HD, and Fischl, B, (2010). Highly Accurate Inverse Consistent Registration:
+    A Robust Approach.  Neuroimage 53(4) 1181-96.
+
+    """
 
     _cmd = 'mri_robust_register'
     input_spec = RobustRegisterInputSpec
@@ -955,11 +974,23 @@ class FitMSParamsInputSpec(FSTraitedSpec):
 
 class FitMSParamsOutputSpec(TraitedSpec):
 
-    t1_image = File(exists=True, desc="image of T1 relaxation values")
-    pd_image = File(exists=True, desc="image of proton density values")
+    t1_image = File(exists=True, desc="image of estimated T1 relaxation values")
+    pd_image = File(exists=True, desc="image of estimated proton density values")
+    t2star_image = File(exists=True, desc="image of estimated T2* values")
 
 class FitMSParams(FSCommand):
+    """Estimate tissue NMR paramaters from a set of FLASH images.
 
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import FitMSParams
+    >>> msfit = FitMSParams()
+    >>> msfit.inputs.in_files = ['flash_05.mgz', 'flash_30.mgz']
+    >>> msfit.inputs.out_dir = 'flash_parameters'
+    >>> msfit.cmdline
+    'mri_ms_fitparms  flash_05.mgz flash_30.mgz flash_parameters'
+
+    """
     _cmd = "mri_ms_fitparms"
     input_spec = FitMSParamsInputSpec
     output_spec = FitMSParamsOutputSpec
@@ -985,6 +1016,7 @@ class FitMSParams(FSCommand):
         out_dir = self.inputs.out_dir
         outputs["t1_image"] = os.path.join(out_dir, "T1.mgz")
         outputs["pd_image"] = os.path.join(out_dir, "PD.mgz")
+        outputs["t2star_image"] = os.path.join(out_dir, "T2star.mgz")
         return outputs
 
     def _gen_filename(self, name):
@@ -1013,7 +1045,19 @@ class SynthesizeFLASHOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="synthesized FLASH acquisition")
 
 class SynthesizeFLASH(FSCommand):
+    """Synthesize a FLASH acquisition from T1 and proton density maps.
 
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import SynthesizeFLASH
+    >>> syn = SynthesizeFLASH(tr=20, te=3, flip_angle=30)
+    >>> syn.inputs.t1_image = 'T1.mgz'
+    >>> syn.inputs.pd_image = 'PD.mgz'
+    >>> syn.inputs.out_file = 'flash_30syn.mgz'
+    >>> syn.cmdline
+    'mri_synthesize 20.00 30.00 3.000 T1.mgz PD.mgz flash_30syn.mgz'
+
+    """
     _cmd = "mri_synthesize"
     input_spec = SynthesizeFLASHInputSpec
     output_spec = SynthesizeFLASHOutputSpec
