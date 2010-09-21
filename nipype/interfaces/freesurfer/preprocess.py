@@ -979,7 +979,7 @@ class FitMSParamsOutputSpec(TraitedSpec):
     t2star_image = File(exists=True, desc="image of estimated T2* values")
 
 class FitMSParams(FSCommand):
-    """Estimate tissue NMR paramaters from a set of FLASH images.
+    """Estimate tissue paramaters from a set of FLASH images.
 
     Examples
     --------
@@ -1055,7 +1055,7 @@ class SynthesizeFLASH(FSCommand):
     >>> syn.inputs.pd_image = 'PD.mgz'
     >>> syn.inputs.out_file = 'flash_30syn.mgz'
     >>> syn.cmdline
-    'mri_synthesize 20.00 30.00 3.000 T1.mgz PD.mgz flash_30syn.mgz'
+    'mri_synthesize 20.00 30.00 3.000 T1.mgz PD.mgz synth-flash_30.mgz'
 
     """
     _cmd = "mri_synthesize"
