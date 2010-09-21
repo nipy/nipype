@@ -1000,11 +1000,11 @@ class FitMSParams(FSCommand):
             cmd = ""
             for i, file in enumerate(value):
                 if isdefined(self.inputs.tr_list):
-                    cmd = " ".join((cmd, "-tr %d"%self.inputs.tr_list[i]))
+                    cmd = " ".join((cmd, "-tr %.1f"%self.inputs.tr_list[i]))
                 if isdefined(self.inputs.te_list):
                     cmd = " ".join((cmd ,"-te %.3f"%self.inputs.te_list[i]))
                 if isdefined(self.inputs.flip_list):
-                    cmd = " ".join((cmd, "-fa %s"%self.inputs.flip_list[i]))
+                    cmd = " ".join((cmd, "-fa %.1f"%self.inputs.flip_list[i]))
                 if isdefined(self.inputs.xfm_list):
                     cmd = " ".join((cmd, "-at %s"%self.inputs.xfm_list[i]))
                 cmd = " ".join((cmd, file))
@@ -1067,7 +1067,7 @@ class SynthesizeFLASH(FSCommand):
         if isdefined(self.inputs.out_file):
             outputs["out_file"] = self.inputs.out_file
         else:
-            outputs["out_file"] = self._gen_fname("flash_%d.mgz"%self.inputs.flip_angle,
+            outputs["out_file"] = self._gen_fname("synth-flash_%02d.mgz"%self.inputs.flip_angle,
                                                    suffix = "")
         return outputs
 

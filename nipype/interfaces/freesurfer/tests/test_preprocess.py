@@ -294,3 +294,55 @@ def test_robustregister():
     yield assert_equal, reg2.cmdline, ('mri_robust_register --halfdst %s_halfway.nii --lta foo.lta '
         '--sat 3.0000 --mov %s --dst %s'%(os.path.join(outdir,filelist[1][:-4]),filelist[0],filelist[1]))
     clean_directory(outdir, cwd)
+
+@skipif(no_freesurfer)
+def test_fitmsparams():
+    filelist, outdir, cwd = create_files_in_directory()
+
+    fit = freesurfer.FitMSParams()
+
+    # make sure command gets called
+    yield assert_equal, fit.cmd, 'mri_ms_fitparms'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, ValueError, fit.run
+
+    # .inputs based parameters setting
+    fit.inputs.in_files = filelist
+    fit.inputs.out_dir = outdir
+    yield assert_equal, fit.cmdline, 'mri_ms_fitparms  %s %s %s'%(filelist[0],filelist[1],outdir)
+
+    # constructor based parameter setting
+    fit2 = freesurfer.FitMSParams(in_files=filelist,te_list=[1.5,3.5],flip_list=[20,30],out_dir=outdir)
+    yield assert_equal, fit2.cmdline, ('mri_ms_fitparms  -te %.3f -fa %.1f %s -te %.3f -fa %.1f %s %s'
+                                       %(1.500,20.0,filelist[0],3.500,30.0,filelist[1],outdir))
+
+    clean_directory(outdir, cwd)
+
+@skipif(no_freesurfer)
+def test_synthesizeflash():
+    filelist, outdir, cwd = create_files_in_directory()
+
+    syn = freesurfer.SynthesizeFLASH()
+
+    # make sure command gets called
+    yield assert_equal, syn.cmd, 'mri_synthesize'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, ValueError, syn.run
+
+    # .inputs based parameters setting
+    syn.inputs.t1_image = filelist[0]
+    syn.inputs.pd_image = filelist[1]
+    syn.inputs.flip_angle = 30
+    syn.inputs.te = 4.5
+    syn.inputs.tr = 20
+
+    yield assert_equal, syn.cmdline, ('mri_synthesize 20.00 30.00 4.500 %s %s %s'
+                                      %(filelist[0],filelist[1],os.path.join(outdir,'synth-flash_30.mgz')))
+
+    # constructor based parameters setting
+    syn2 = freesurfer.SynthesizeFLASH(t1_image=filelist[0],pd_image=filelist[1],flip_angle=20,te=5,tr=25)
+    yield assert_equal, syn2.cmdline, ('mri_synthesize 25.00 20.00 5.000 %s %s %s'
+                                       %(filelist[0],filelist[1],os.path.join(outdir,'synth-flash_20.mgz')))
+
