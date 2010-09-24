@@ -1013,7 +1013,10 @@ class FitMSParams(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        out_dir = self.inputs.out_dir
+        if not isdefined(self.inputs.out_dir):
+            out_dir = self._gen_filename("out_dir")
+        else:
+            out_dir = self.inputs.out_dir
         outputs["t1_image"] = os.path.join(out_dir, "T1.mgz")
         outputs["pd_image"] = os.path.join(out_dir, "PD.mgz")
         outputs["t2star_image"] = os.path.join(out_dir, "T2star.mgz")
