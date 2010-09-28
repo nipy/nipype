@@ -8,10 +8,8 @@ from nipype.interfaces.freesurfer.preprocess import (ParseDICOMDir,
                                                      Resample, ReconAll,
                                                      BBRegister,
                                                      ApplyVolTransform,
-                                                     Smooth, DICOMConvert,
-                                                     RobustRegister, FitMSParams,
-                                                     SynthesizeFLASH)
+                                                     Smooth, DICOMConvert)
 from nipype.interfaces.freesurfer.model import (MRISPreproc, GLMFit,
                                                 OneSampleTTest, Binarize,
                                                 Concatenate, SegStats, Label2Vol)
-from nipype.interfaces.freesurfer.utils import (SurfaceScreenshots)
+
