@@ -251,7 +251,7 @@ def test_unpacksdicomdir():
 
 
 def create_files_in_directory():
-    outdir = mkdtemp()
+    outdir = os.path.realpath(mkdtemp())
     cwd = os.getcwd()
     os.chdir(outdir)
     filelist = ['a.nii','b.nii']
@@ -292,7 +292,8 @@ def test_robustregister():
     reg2 = freesurfer.RobustRegister(source_file=filelist[0],target_file=filelist[1],outlier_sens=3.0,
                                      out_reg_file='foo.lta', half_targ=True)
     yield assert_equal, reg2.cmdline, ('mri_robust_register --halfdst %s_halfway.nii --lta foo.lta '
-        '--sat 3.0000 --mov %s --dst %s'%(os.path.join(outdir,filelist[1][:-4]),filelist[0],filelist[1]))
+                                       '--sat 3.0000 --mov %s --dst %s'
+                                       %(os.path.join(outdir,filelist[1][:-4]),filelist[0],filelist[1]))
     clean_directory(outdir, cwd)
 
 @skipif(no_freesurfer)

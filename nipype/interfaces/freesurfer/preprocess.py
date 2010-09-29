@@ -919,8 +919,8 @@ class RobustRegister(FSCommand):
     --------
     >>> from nipype.interfaces.freesurfer import RobustRegister
     >>> reg = RobustRegister()
-    >>> reg.inputs.source_file = structural.nii
-    >>> reg.inputs.target_file = T1.nii
+    >>> reg.inputs.source_file = 'structural.nii'
+    >>> reg.inputs.target_file = 'T1.nii'
     >>> reg.inputs.auto_sens = True
     >>> reg.inputs.init_orient = True
     >>> reg.cmdline
@@ -1078,7 +1078,7 @@ class SynthesizeFLASH(FSCommand):
     >>> syn.inputs.pd_image = 'PD.mgz'
     >>> syn.inputs.out_file = 'flash_30syn.mgz'
     >>> syn.cmdline
-    'mri_synthesize 20.00 30.00 3.000 T1.mgz PD.mgz synth-flash_30.mgz'
+    'mri_synthesize 20.00 30.00 3.000 T1.mgz PD.mgz flash_30syn.mgz'
 
     """
     _cmd = "mri_synthesize"
