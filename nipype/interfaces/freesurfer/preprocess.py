@@ -843,14 +843,267 @@ class Smooth(FSCommand):
             return self._list_outputs()[name]
         return None
 
+class RobustRegisterInputSpec(FSTraitedSpec):
 
-"""
+    source_file = File(mandatory=True,argstr='--mov %s',
+                       desc='volume to be registered')
+    target_file = File(mandatory=True,argstr='--dst %s',
+                       desc='target volume for the registration')
+    out_reg_file = File(genfile=True,argstr='--lta %s',
+                        desc='registration file to write')
+    registered_file = traits.Either(traits.Bool, File, argstr='--warp %s',
+                      desc='registered image; either True or filename')
+    weights_file = traits.Either(traits.Bool, File, argstr='--weights %s',
+                   desc='weights image to write; either True or filename')
+    est_int_scale = traits.Bool(argstr='--iscale',
+                    desc='estimate intensity scale (recommended for unnormalized images)')
+    trans_only = traits.Bool(argstr='--transonly',
+                             desc='find 3 parameter translation only')
+    in_xfm_file = File(exists=True,argstr='--transform',
+                       desc='use initial transform on source')
+    half_source = traits.Either(traits.Bool, File, argstr='--halfmov %s',
+                                desc="write source volume mapped to halfway space")
+    half_targ = traits.Either(traits.Bool, File, argstr="--halfdst %s",
+                              desc="write target volume mapped to halfway space")
+    half_weights = traits.Either(traits.Bool, File, argstr="--halfweights %s",
+                                 desc="write weights volume mapped to halfway space")
+    half_source_xfm = traits.Either(traits.Bool, File, argstr="--halfmovlta %s",
+                                    desc="write transform from source to halfway space")
+    half_targ_xfm = traits.Either(traits.Bool, File, argstr="--halfdstlta %s",
+                                  desc="write transform from target to halfway space")
+    auto_sens = traits.Bool(argstr='--satit',xor=['outlier_sens'],mandatory=True,
+                            desc='auto-detect good sensitivity')
+    outlier_sens = traits.Float(argstr='--sat %.4f',xor=['auto_sens'],mandatory=True,
+                                desc='set outlier sensitivity explicitly')
+    least_squares = traits.Bool(argstr='--leastsquares',
+                                desc='use least squares instead of robust estimator')
+    no_init = traits.Bool(argstr='--noinit',desc='skip transform init')
+    init_orient = traits.Bool(argstr='--initorient',
+                  desc='use moments for initial orient (recommended for stripped brains)')
+    max_iterations = traits.Int(argstr='--maxit %d', 
+                                desc='maximum # of times on each resolution')
+    high_iterations = traits.Int(argstr='--highit %d',
+                                 desc='max # of times on highest resolution')
+    iteration_thresh = traits.Float(argstr='--epsit %.3f',
+                                    desc='stop iterations when below threshold')
+    subsample_thresh = traits.Int(argstr='--subsample %d',
+                       desc='subsample if dimension is above threshold size')
+    outlier_limit = traits.Float(argstr='--wlimit %.3f',
+                                 desc='set maximal outlier limit in satit')
+    write_vo2vox = traits.Bool(argstr='--vox2vox',
+                               desc='output vox2vox matrix (default is RAS2RAS)')
+    no_multi = traits.Bool(argstr='--nomulti',desc='work on highest resolution')
+    mask_source = File(exists=True,argstr='--maskmov %s',
+                       desc='image to mask source volume with')
+    mask_target = File(exists=True,argstr='--maskdst %s',
+                       desc='image to mask target volume with')
+    force_double = traits.Bool(argstr='--doubleprec', desc='use double-precision intensities')
+    force_float = traits.Bool(argstr='--floattype', desc='use float intensities')
+
+
+class RobustRegisterOutputSpec(TraitedSpec):
+
+    out_reg_file = File(exists=True, desc="output registration file")
+    registered_file = File(desc="output image with registration applied")
+    weights_file = File(desc="image of weights used")
+    half_source = File(desc="source image mapped to halfway space")
+    half_targ = File(desc="target image mapped to halfway space")
+    half_weights = File(desc="weights image mapped to halfway space")
+    half_source_xfm = File(desc="transform file to map source image to halfway space")
+    half_targ_xfm = File(desc="transform file to map target image to halfway space")
+
+class RobustRegister(FSCommand):
+    """Perform intramodal linear registration (translation and rotation) using robust statistics.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import RobustRegister
+    >>> reg = RobustRegister()
+    >>> reg.inputs.source_file = structural.nii
+    >>> reg.inputs.target_file = T1.nii
+    >>> reg.inputs.auto_sens = True
+    >>> reg.inputs.init_orient = True
+    >>> reg.cmdline
+    'mri_robust_register --satit --initorient --lta structural_robustreg.lta --mov structural.nii --dst T1.nii'
+
+    References
+    ----------
+    Reuter, M, Rosas, HD, and Fischl, B, (2010). Highly Accurate Inverse Consistent Registration:
+    A Robust Approach.  Neuroimage 53(4) 1181-96.
+
+    """
+
+    _cmd = 'mri_robust_register'
+    input_spec = RobustRegisterInputSpec
+    output_spec = RobustRegisterOutputSpec
+    
+    def _format_arg(self, name, spec, value):
+        for option in ["registered_file", "weights_file", "half_source", "half_targ",
+                       "half_weights", "half_source_xfm", "half_targ_xfm"]:
+            if name == option:
+                if isinstance(value, bool):
+                    fname = self._list_outputs()[name]
+                else:
+                    fname = value
+                return spec.argstr % fname
+        return super(RobustRegister, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_reg_file'] = self.inputs.out_reg_file
+        if not isdefined(self.inputs.out_reg_file) and self.inputs.source_file:
+            outputs['out_reg_file'] = fname_presuffix(self.inputs.source_file,
+                                         suffix='_robustreg.lta',use_ext=False)
+        prefices = dict(src=self.inputs.source_file,trg=self.inputs.target_file)
+        suffices = dict(registered_file=("src","_robustreg",True),
+                        weights_file=("src","_robustweights",True),
+                        half_source=("src","_halfway",True),
+                        half_targ=("trg","_halfway",True),
+                        half_weights=("src","_halfweights",True),
+                        half_source_xfm=("src","_robustxfm.lta",False),
+                        half_targ_xfm=("trg","_robustxfm.lta",False))
+        for name, sufftup in suffices.items():
+            value = getattr(self.inputs, name)
+            if isdefined(value):
+                if isinstance(value, bool):
+                    outputs[name] = fname_presuffix(prefices[sufftup[0]],
+                                                    suffix=sufftup[1],
+                                                    newpath=os.getcwd(),
+                                                    use_ext=sufftup[2])
+                else:
+                    outputs[name] = value
+        return outputs
+
+
+    def _gen_filename(self, name):
+        if name == 'out_reg_file':
+            return self._list_outputs()[name]
+        return None    
+
+class FitMSParamsInputSpec(FSTraitedSpec):
+
+    in_files = traits.List(traits.File, exists=True, argstr="%s", position=-2, mandatory=True,
+                           desc="list of FLASH images (must be in mgh format)")
+    tr_list = traits.List(traits.Int, desc="list of TRs of the input files (in msec)")
+    te_list = traits.List(traits.Float, desc="list of TEs of the input files (in msec)")
+    flip_list = traits.List(traits.Int, desc="list of flip angles of the input files")
+    xfm_list = traits.List(traits.File, exists=True, 
+                           desc="list of transform files to apply to each FLASH image")
+    out_dir = Directory(argstr="%s",position=-1, genfile=True,
+                              desc="directory to store output in")
+
+class FitMSParamsOutputSpec(TraitedSpec):
+
+    t1_image = File(exists=True, desc="image of estimated T1 relaxation values")
+    pd_image = File(exists=True, desc="image of estimated proton density values")
+    t2star_image = File(exists=True, desc="image of estimated T2* values")
+
+class FitMSParams(FSCommand):
+    """Estimate tissue paramaters from a set of FLASH images.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import FitMSParams
+    >>> msfit = FitMSParams()
+    >>> msfit.inputs.in_files = ['flash_05.mgz', 'flash_30.mgz']
+    >>> msfit.inputs.out_dir = 'flash_parameters'
+    >>> msfit.cmdline
+    'mri_ms_fitparms  flash_05.mgz flash_30.mgz flash_parameters'
+
+    """
+    _cmd = "mri_ms_fitparms"
+    input_spec = FitMSParamsInputSpec
+    output_spec = FitMSParamsOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == "in_files":
+            cmd = ""
+            for i, file in enumerate(value):
+                if isdefined(self.inputs.tr_list):
+                    cmd = " ".join((cmd, "-tr %.1f"%self.inputs.tr_list[i]))
+                if isdefined(self.inputs.te_list):
+                    cmd = " ".join((cmd ,"-te %.3f"%self.inputs.te_list[i]))
+                if isdefined(self.inputs.flip_list):
+                    cmd = " ".join((cmd, "-fa %.1f"%self.inputs.flip_list[i]))
+                if isdefined(self.inputs.xfm_list):
+                    cmd = " ".join((cmd, "-at %s"%self.inputs.xfm_list[i]))
+                cmd = " ".join((cmd, file))
+            return cmd
+        return super(FitMSParams, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if not isdefined(self.inputs.out_dir):
+            out_dir = self._gen_filename("out_dir")
+        else:
+            out_dir = self.inputs.out_dir
+        outputs["t1_image"] = os.path.join(out_dir, "T1.mgz")
+        outputs["pd_image"] = os.path.join(out_dir, "PD.mgz")
+        outputs["t2star_image"] = os.path.join(out_dir, "T2star.mgz")
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == "out_dir":
+            return os.getcwd()
+        return None
+
+class SynthesizeFLASHInputSpec(FSTraitedSpec):
+
+    fixed_weighting = traits.Bool(position=1,argstr="-w",
+        desc="use a fixed weighting to generate optimal gray/white contrast")
+    tr = traits.Float(mandatory=True,position=2,argstr="%.2f",
+                      desc="repetition time (in msec)")
+    flip_angle = traits.Float(mandatory=True,position=3,argstr="%.2f",
+                              desc="flip angle (in degrees)")
+    te = traits.Float(mandatory=True,position=4,argstr="%.3f",
+                      desc="echo time (in msec)")
+    t1_image = File(exists=True,mandatory=True,position=5,argstr="%s",
+                    desc="image of T1 values")
+    pd_image = File(exists=True,mandatory=True,position=6,argstr="%s",
+                    desc="image of proton density values")
+    out_file = File(genfile=True,argstr="%s",desc="image to write")
+
+class SynthesizeFLASHOutputSpec(TraitedSpec):
+
+    out_file = File(exists=True, desc="synthesized FLASH acquisition")
+
+class SynthesizeFLASH(FSCommand):
+    """Synthesize a FLASH acquisition from T1 and proton density maps.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import SynthesizeFLASH
+    >>> syn = SynthesizeFLASH(tr=20, te=3, flip_angle=30)
+    >>> syn.inputs.t1_image = 'T1.mgz'
+    >>> syn.inputs.pd_image = 'PD.mgz'
+    >>> syn.inputs.out_file = 'flash_30syn.mgz'
+    >>> syn.cmdline
+    'mri_synthesize 20.00 30.00 3.000 T1.mgz PD.mgz synth-flash_30.mgz'
+
+    """
+    _cmd = "mri_synthesize"
+    input_spec = SynthesizeFLASHInputSpec
+    output_spec = SynthesizeFLASHOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            outputs["out_file"] = self.inputs.out_file
+        else:
+            outputs["out_file"] = self._gen_fname("synth-flash_%02d.mgz"%self.inputs.flip_angle,
+                                                   suffix = "")
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == "out_file":
+            return self._list_outputs()["out_file"]
+        return None
+
+'''
 interfaces to do:
 
 mri_vol2surf
 mri_surf2vol
 mri_surf2surf
-mri_robust_register
-mri_ms_fitparams
-"""
+'''
 
