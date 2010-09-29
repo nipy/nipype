@@ -1,7 +1,9 @@
 Release 0.3.4 (FUTURE)
 ======================
 
-No changes yet
+* ENH: Added support for flash processing using FreeSurfer
+
+* BF: Diffusion toolkit gets installed 
 
 Release 0.3.3 (Sep 16, 2010)
 ============================
