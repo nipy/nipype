@@ -84,6 +84,7 @@ class CoherenceAnalyzer(BaseInterface):
     output_spec = CoherenceAnalyzerOutputSpec
 
     def _read_csv(self):
+        """ Read from csv in_file and return a rec array """
         #Check that input conforms to expectations:
         first_row = open(self.inputs.in_file).readline()
         if not first_row[1].isalpha():
@@ -91,16 +92,50 @@ class CoherenceAnalyzer(BaseInterface):
 
         rec_array=csv2rec(self.inputs.in_file)
         return rec_array
+
+    def _csv2ts(self):
+        """ Read data from the in_file and generate a nitime TimeSeries object"""
+        rec_array = self._read_csv()
+        roi_names= data_rec.dtype.names
+        n_samples = data_rec.shape[0]
+        for n_idx in range(len(roi_names)):
+            data[n_idx] = data_rec[roi_names[n_idx]]
+
+        TS = TimeSeries(data=data,sampling_interval=TR,time_unit='s')
+
+        return TimeSeries(data=data
+                          
+        
         
     #Rewrite _run_interface, but not run
     def _run_interface(self,runtime):
         lb, ub = self.inputs.frequency_range
-        
-    
+
+        if self.inputs.in_TS is Undefined:
+            # get TS form csv and inputs.TR
+            # calls _csv2ts
+            
+        else:
+            # get TS from inputs.in_TS
+            
+            
+        #Get the coherence matrix from the analyzer
+        self.coherence = A.coherence
+
+        if isdefined(self.inputs.output_csv_file):
+            #write to a csv file and assign a value to self.coherence_file (a
+            #file name + path)
+            
     #Rewrite _list_outputs (look at BET)
-    
     def _list_outputs(self):
         outputs = self.output_spec().get()
+
+        #Always defined:
+        outputs['coherence']=self.coherence #The array 
+        #Conditional
+        if isdefined(self.inputs.output_csv_file):
+            outputs['coherence_csv']=self.coherence_file
+
         return outputs
     
 class GetTimeSeriesInputSpec():
@@ -108,11 +143,6 @@ class GetTimeSeriesInputSpec():
 class GetTimeSeriesOutputSpec():
     pass
 class GetTimeSeries():
-    pass
-class CoherenceVizInputSpec():
-    pass
-class CoherenceVizOutputSpec():
-    pass
-class CoherenceViz():
+    # getting time series data from nifti files and ROIs
     pass
 
