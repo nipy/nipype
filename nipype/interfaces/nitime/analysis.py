@@ -10,27 +10,29 @@ Interfaces to functionality from nitime for time-series analysis of fmri data
 
 """
 
+
 from nipype.utils.misc import package_check
+package_check('nitime')
+package_check('matplotlib')
+
 
 from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
                                     OutputMultiPath, Undefined, traits,
                                     BaseInterface)
-
 from nitime.analysis import CoherenceAnalyzer
 from nitime.timeseries import TimeSeries
 
-package_check('nitime')
-package_check('matplotlib')
-
+from matplotlib.mlab import csv2rec
+    
 class CoherenceAnalyzerInputSpec(TraitedSpec):
 
     #Input either csv file, or time-series object and use _xor_inputs to
     #discriminate
-    _xor_inputs('in_file','in_TS')
+    _xor_inputs=('in_file','in_TS')
     in_file = File(desc=('csv file with ROIs on the columns and ',
                    'time-points on the rows. ROI names at the top row'),
                    exists=True,
-                   requires=('sampling_rate'))
+                   requires=('TR',))
     
     #If you gave just a file name, you need to specify the sampling_rate:
     TR = traits.Float(desc=('The TR used to collect the data',
@@ -79,16 +81,21 @@ class CoherenceAnalyzerOutputSpec(TraitedSpec):
 class CoherenceAnalyzer(BaseInterface):
 
     input_spec = CoherenceAnalyzerInputSpec
-    output_spec = CoherenceAnayzerOutputSpec
+    output_spec = CoherenceAnalyzerOutputSpec
 
     def _read_csv(self):
+        #Check that input conforms to expectations:
+        first_row = open(self.inputs.in_file).readline()
+        if not first_row[1].isalpha():
+            raise ValueError("First row of in_file should contain ROI names as strings of characters")
 
-        return roi_labels,TS
+        rec_array=csv2rec(self.inputs.in_file)
+        return rec_array
         
     #Rewrite _run_interface, but not run
     def _run_interface(self,runtime):
         lb, ub = self.inputs.frequency_range
-        if
+        
     
     #Rewrite _list_outputs (look at BET)
     
@@ -97,10 +104,15 @@ class CoherenceAnalyzer(BaseInterface):
         return outputs
     
 class GetTimeSeriesInputSpec():
+    pass
 class GetTimeSeriesOutputSpec():
+    pass
 class GetTimeSeries():
-
+    pass
 class CoherenceVizInputSpec():
+    pass
 class CoherenceVizOutputSpec():
+    pass
 class CoherenceViz():
+    pass
 
