@@ -200,15 +200,9 @@ class Workflow(WorkflowBase):
     def __init__(self, **kwargs):
         super(Workflow, self).__init__(**kwargs)
         self._graph = nx.DiGraph()
-        self.ipyclient = None
-        self.taskclient = None
-        try:
-            name = 'IPython.kernel.client'
-            __import__(name)
-            self.ipyclient = sys.modules[name]
-        except ImportError:
-            warn("Ipython kernel not found.  Parallel execution will be" \
-                     "unavailable", ImportWarning)
+        self._init_runtime_fields()
+
+    def _init_runtime_fields(self):
         # attributes for running with manager
         self.procs = None
         self.depidx = None
@@ -216,8 +210,13 @@ class Workflow(WorkflowBase):
         self.proc_pending = None
         self._flatgraph = None
         self._execgraph = None
+        self.ipyclient = None
+        self.taskclient = None
 
     # PUBLIC API
+    def clone(self, name):
+        self._init_runtime_fields()
+        return super(Workflow, self).clone(name)
 
     def disconnect(self, *args):
         # yoh: explicit **dict was introduced for compatibility with Python 2.5
@@ -408,6 +407,7 @@ class Workflow(WorkflowBase):
         inseries: Boolean
             Execute workflow in series
         """
+        self._init_runtime_fields()
         self._create_flat_graph()
         self._execgraph = _generate_expanded_graph(deepcopy(self._flatgraph))
         for node in self._execgraph.nodes():
@@ -517,8 +517,7 @@ class Workflow(WorkflowBase):
 
     def _create_flat_graph(self):
         logger.debug('Creating flat graph for workflow: %s', self.name)
-        self._flatgraph = None
-        self._execgraph = None
+        self._init_runtime_fields()
         workflowcopy = deepcopy(self)
         workflowcopy._generate_execgraph()
         self._flatgraph = workflowcopy._graph
@@ -704,6 +703,13 @@ class Workflow(WorkflowBase):
             self._execute_in_series()
             return
         # retrieve clients again
+        try:
+            name = 'IPython.kernel.client'
+            __import__(name)
+            self.ipyclient = sys.modules[name]
+        except ImportError:
+            warn("Ipython kernel not found.  Parallel execution will be" \
+                     "unavailable", ImportWarning)
         if not self.taskclient:
             try:
                 self.taskclient = self.ipyclient.TaskClient()
