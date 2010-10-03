@@ -202,6 +202,8 @@ class SurfaceScreenshotsInputSpec(FSTraitedSpec):
    
     six_images = traits.Bool(desc="also take anterior and posterior screenshots")
     screenshot_stem = traits.String(desc="stem to use for screenshot file names")
+    stem_template_args = traits.List(traits.String,requires=["screenshot_stem"],
+                    desc="input names to use as arguments for a string-formated stem template")
     tcl_script = File(exists=True, argstr="%s",genfile=True, 
                              desc="override default screenshot script")
 
@@ -255,6 +257,10 @@ class SurfaceScreenshots(FSCommand):
                     self.inputs.subject, self.inputs.hemi, self.inputs.surface)
         else:
             stem = self.inputs.screenshot_stem
+            stem_args = self.inputs.stem_template_args
+            if isdefined(stem_args):
+                args = tuple([getattr(self.inputs, arg) for arg in stem_args])
+                stem = stem%args
         runtime.environ["_SCREENSHOT_STEM"] = stem
         self._write_tcl_script()
         runtime = super(SurfaceScreenshots, self)._run_interface(runtime)
@@ -298,6 +304,10 @@ class SurfaceScreenshots(FSCommand):
             stem = "%s_%s_%s"%(self.inputs.subject, self.inputs.hemi, self.inputs.surface)
         else:
             stem = self.inputs.screenshot_stem
+            stem_args = self.inputs.stem_template_args
+            if isdefined(stem_args):
+                args = tuple([getattr(self.inputs, arg) for arg in stem_args])
+                stem = stem%args
         screenshots = ["%s-lat.tif","%s-med.tif","%s-dor.tif","%s-ven.tif"]
         if self.inputs.six_images:
             screenshots.extend(["%s-pos.tif","%s-ant.tif"])
