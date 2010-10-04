@@ -795,6 +795,7 @@ class ConvertXFM(FSLCommand):
     >>> invt = fsl.ConvertXFM()
     >>> invt.inputs.in_file = "flirt.mat"
     >>> invt.inputs.invert_xfm = True
+    >>> invt.inputs.out_file = 'flirt_inv.mat'
     >>> invt.cmdline
     'convert_xfm -omat flirt_inv.mat -inverse flirt.mat'
     """

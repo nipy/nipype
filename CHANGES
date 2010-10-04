@@ -2,6 +2,8 @@ Release 0.3.4 (FUTURE)
 ======================
 
 * ENH: Added support for flash processing using FreeSurfer
+* ENH: Added support for flirt matrix in BBRegister
+* ENH: Added support for FSL convert_xfm
 
 * BF: Diffusion toolkit gets installed 
 
