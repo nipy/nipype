@@ -329,3 +329,29 @@ def test_plotmotionparams():
          '--start=1 --finish=3 -a x,y,z'%parfiles[1])
 
     clean_directory(outdir, cwd)
+
+
+@skipif(no_fsl)
+def test_convertxfm():
+    filelist, outdir, cwd = create_files_in_directory()
+    cvt = fsl.ConvertXFM()
+
+    # make sure command gets called
+    yield assert_equal, cvt.cmd, "convert_xfm"
+
+    # test raising error with mandatory args absent
+    yield assert_raises, ValueError, cvt.run
+
+    # .inputs based parameters setting
+    cvt.inputs.in_file = filelist[0]
+    cvt.inputs.invert_xfm = True
+    cvt.inputs.out_file = "foo.mat"
+    yield assert_equal, cvt.cmdline, 'convert_xfm -omat foo.mat -inverse %s'%filelist[0]
+
+    # constructor based parameter setting
+    cvt2 = fsl.ConvertXFM(in_file=filelist[0], in_file2=filelist[1], concat_xfm=True,
+                          out_file="bar.mat")
+    yield assert_equal, cvt2.cmdline, \
+        "convert_xfm -omat bar.mat -concat %s %s"%(filelist[1], filelist[0])
+
+    clean_directory(outdir, cwd)
