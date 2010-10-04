@@ -624,7 +624,7 @@ class BBRegisterInputSpec(FSTraitedSpec):
                             mandatory=True)
     source_file = File(argstr='--mov %s', desc='source file to be registered',
                       mandatory=True, copyfile=False)
-    init = traits.Enum('spm', 'fsl', 'header', argstr='--init-%s',
+    init = traits.Enum('spm', 'fsl', 'header', argstr='--init-%s',mandatory=True,
                        xor=['init_reg_file'],
                        desc='initialize registration spm, fsl, header')
     init_reg_file = File(exists=True, desc='existing registration file',
@@ -634,16 +634,22 @@ class BBRegisterInputSpec(FSTraitedSpec):
                                 desc='contrast type of image', mandatory=True)
     out_reg_file = File(argstr='--reg %s', desc='output registration file',
                       genfile=True)
+    spm_nifti = traits.Bool(argstr="--spm-nii",
+                            desc="force use of nifti rather than analyze with SPM")
+    epi_mask = traits.Bool(argstr="--epi-mask",desc="mask out B0 regions in stages 1 and 2")  
+    out_fsl_file = traits.Either(traits.Bool, File, argstr="--fslmat %s",
+                                 desc="write the transformation matrix in FSL FLIRT format")
     registered_file = traits.Either(traits.Bool, File, argstr='--o %s',
                             desc='output warped sourcefile either True or filename')
 
 class BBRegisterOutputSpec(TraitedSpec):
     out_reg_file = File(exists=True, desc='Output registration file')
+    out_fsl_file = File(exists=True, desc='Output FLIRT-style registration file')
     min_cost_file = File(exists=True, desc='Output registration minimum cost file')
     registered_file = File(desc='Registered and resampled source file')
 
 class BBRegister(FSCommand):
-    """Use FreeSurfer bbregister to register a volume two a surface mesh
+    """Use FreeSurfer bbregister to register a volume to the Freesurfer anatomical.
 
     This program performs within-subject, cross-modal registration using a
     boundary-based cost function. The registration is constrained to be 6
@@ -675,6 +681,12 @@ class BBRegister(FSCommand):
             outputs['registered_file'] = self.inputs.registered_file
             if isinstance(self.inputs.registered_file, bool):
                 outputs['registered_file'] = fname_presuffix(self.inputs.source_file,suffix='_bbreg')
+        if isdefined(self.inputs.out_fsl_file):
+            outputs['out_fsl_file'] = self.inputs.out_fsl_file
+            if isinstance(self.inputs.registered_file, bool):
+                outputs['out_fsl_file'] = fname_presuffix(self.inputs.source_file,
+                                                suffix='_bbreg_%s.mat'%self.inputs.subject_id,
+                                                use_ext=False)
         outputs['min_cost_file'] = outputs['out_reg_file']+'.mincost'
         return outputs
 
