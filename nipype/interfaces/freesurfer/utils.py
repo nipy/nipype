@@ -18,7 +18,7 @@ import itertools
 import numpy as np
 
 from nipype.externals.pynifti import load
-from nipype.utils.filemanip import fname_presuffix
+from nipype.utils.filemanip import fname_presuffix, load_json, save_json
 from nipype.interfaces.io import FreeSurferSource
 
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
@@ -72,8 +72,10 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
     
     interp_method = traits.Enum("nearest","trilinear",desc="interpolation method")
 
-    cortex_mask = traits.Bool(argstr="--cortex",
+    cortex_mask = traits.Bool(argstr="--cortex",xor=["mask_label"],
                               desc="mask the target surface with hemi.cortex.label")
+    mask_label = File(exists=True,argstr="--mask %s",xor=["cortex_mask"],
+                      desc="label file to mask output with")
 
     float2int_method = traits.Enum("round","tkregister",argstr="--float2int %s",
                         desc="method to convert reg matrix values (default is round)")
@@ -82,26 +84,59 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
     subject_id = traits.String(desc="subject id")
     target_subject = traits.String(argstr="--trgsubject %s",
                      desc="sample to surface of different subject than source")
+    surf_reg = traits.Bool(argstr="--surfreg",requires=["target_subject"],
+                           desc="use surface registration to target subject")
+    ico_order = traits.Int(argstr="--icoorder %d",requires=["target_subject"],
+                           desc="icosahedron order when target_subject is 'ico'")
+
+    reshape = traits.Bool(argstr="--reshape",xor=["no_reshape"],
+                          desc="reshape surface vector to fit in non-mgh format")
+    no_reshape = traits.Bool(argstr="--noreshape",xor=["reshape"],
+                             desc="do not reshape surface vector (default)")
+    reshape_slices = traits.Int(argstr="--rf %d",desc="number of 'slices' for reshaping")
+    scale_input = traits.Float(argstr="--scale %.3f",
+                               desc="multiple all intensities by scale factor")
+    frame = traits.Int(argstr="--frame %d",desc="save only one frame (0-based)")
+
 
     out_file = File(argstr="--o %s",genfile=True,desc="surface file to write")
-    
+    _filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
+                  'analyze4d', 'spm', 'afni', 'brik', 'bshort',
+                  'bfloat', 'sdt', 'outline', 'otl', 'gdf',
+                  'nifti1', 'nii', 'niigz']
+    out_type = traits.Enum(_filetypes,argstr="--out_type %s", desc="output file type")
+    hits_file = traits.Either(traits.Bool, File(exists=True),argstr="--srchit %s",
+                              desc="save image with number of hits at each voxel")
+    hits_type = traits.Enum(_filetypes,argstr="--srchit_type", desc="hits file type")
+    vox_file = traits.Either(traits.Bool,File,argstr="--nvox %s",
+                           desc="text file with the number of voxels intersecting the surface")
+
 
 class SampleToSurfaceOutputSpec(TraitedSpec):
 
     out_file = File(exists=True, desc="surface file")
+    hits_file = File(exists=True, desc="image with number of hits at each voxel")
+    vox_file = File(exists=True,
+                    desc="text file with the number of voxels intersecting the surface")
 
 class SampleToSurface(FSCommand):
     """Sample a volume to the cortical surface using Freesurfer's mri_vol2surf.
     
     This process needs to be repeated for each hemisphere.
     
+    XXX Need examples 
     """
     _cmd = "mri_vol2surf"
     input_spec = SampleToSurfaceInputSpec
     output_spec = SampleToSurfaceOutputSpec
 
+    filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
+                   afni='brik', brik='brik', bshort='bshort',
+                   spm='img', analyze='img', analyze4d='img',
+                   bfloat='bfloat', nifti1='img', nii='nii',
+                   niigz='nii.gz')
+
     def _format_arg(self, name, spec, value):
-        
         if name == "sampling_method":
             range = self.inputs.sampling_range
             units = self.inputs.sampling_units
@@ -120,15 +155,42 @@ class SampleToSurface(FSCommand):
             return spec.argstr%self.inputs.subject_id
         return super(SampleToSurface, self)._format_arg(name, spec, value)
 
+    def _get_outfilename(self,opt="out_file"):
+        outfile = getattr(self.inputs, opt)
+        if not isdefined(outfile):
+            if isdefined(self.inputs.out_type):
+                if opt == "hits_file":
+                    suffix = '_hits.' + self.filemap[self.inputs.out_type]
+                else:
+                    suffix = '.' + self.filemap[self.inputs.out_type]
+            elif opt == "hits_file":
+                suffix = "_hits.mgz"
+            else:
+                suffix = '.mgz'
+            outfile = fname_presuffix(self.inputs.source_file,
+                                      newpath=os.getcwd(),
+                                      prefix=self.inputs.hemi + ".",
+                                      suffix=suffix,
+                                      use_ext=False)
+        return outfile
+
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outfile = self.inputs.out_file
-        if not isdefined(outfile):
-            srcpath, srcname = os.path.split(self.inputs.source_file)
-            outfile = fname_presuffix(
-                "%s%s%s.%s"%(srcpath, os.path.sep, self.inputs.hemi, srcname),
-                             newpath=os.getcwd(), suffix="")
-        outputs["out_file"] = outfile
+        outputs["out_file"] = self._get_outfilename()
+        hitsfile = self.inputs.hits_file
+        if isdefined(hitsfile):
+            if isinstance(hitsfile, bool):
+                hitsfile = self._gen_outfilename("hits_file")
+            outputs["hits_file"] = hitsfile
+        voxfile = self.inputs.vox_file
+        if isdefined(voxfile):
+            if isinstance(voxfile, bool):
+                voxfile = fname_presuffix(self.inputs.source_file,
+                                          newpath=os.cwd(),
+                                          prefix=self.inputs.hemi + ".",
+                                          suffix="_vox.txt",
+                                          use_ext=False)
+            outputs["vox_file"] = voxfile
         return outputs
 
     def _gen_filename(self, name):
@@ -147,8 +209,6 @@ class SurfaceScreenshotsInputSpec(FSTraitedSpec):
     
     show_curv = traits.Bool(argstr="-curv",desc="show curvature",xor=["show_gray_curv"])
     show_gray_curv = traits.Bool(argstr="-gray",desc="show curvature in gray",xor=["show_curv"])
-    
-    window_title = traits.String(argstr="-title %s", desc="title to use (default is subject name")
     
     overlay = File(exists=True,argstr="-overlay %s",desc="load an overlay volume/surface",
                    requires=["overlay_range"])
@@ -219,6 +279,10 @@ class SurfaceScreenshots(FSCommand):
     and dorsal surfaces.  See the ``six_images`` option to add the
     anterior and posterior surfaces.
 
+    Note
+    ----
+    This interface will crash if you do not have graphics enabled on your system.
+
     Examples
     --------
     XXX FINISH THIS 
@@ -264,8 +328,16 @@ class SurfaceScreenshots(FSCommand):
         runtime.environ["_SCREENSHOT_STEM"] = stem
         self._write_tcl_script()
         runtime = super(SurfaceScreenshots, self)._run_interface(runtime)
+        # If a display window can't be opened, this will crash on 
+        # aggregate_outputs.  Let's try to parse stderr and raise a
+        # better exception here if that happened.
+        errors = ["surfer: failed, no suitable display found",
+                  "Fatal Error in tksurfer.bin: could not open display"]
+        for err in errors:
+            if err in runtime.stderr:
+                raise Exception("Could not open display")
         # Tksurfer always (or at least always when you run a tcl script)
-        # exits with a nonzero returncode.  We have to force it to 0 here
+        # exits with a nonzero returncode.  We have to force it to 0 here.
         runtime.returncode = 0
         return runtime
 
@@ -322,11 +394,11 @@ class SurfaceScreenshots(FSCommand):
 
 class ImageInfoInputSpec(FSTraitedSpec):
 
-    pass
+    in_file = File(exists=True,position=1,argstr="%s",desc="image to query")
 
 class ImageInfoOutputSpec(TraitedSpec):
 
-    pass
+    info = traits.Any(desc="output of mri_info")
 
 class ImageInfo(FSCommand):
 
@@ -334,4 +406,16 @@ class ImageInfo(FSCommand):
     input_spec = ImageInfoInputSpec
     output_spec = ImageInfoOutputSpec
 
-        
+    def aggregate_outputs(self, runtime=None):
+        outputs = self._outputs()
+        outfile = os.path.join(os.getcwd(), "info_result.json")
+        if runtime is None:
+            try:
+                out_info = load_json(outfile)["info"]
+            except IOError:
+                return self.run().outputs
+        else:
+            out_info = runtime.stdout
+            save_json(outfile, dict(info=out_info))
+        outputs.info = out_info
+        return outputs
