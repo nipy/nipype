@@ -683,7 +683,7 @@ class BBRegister(FSCommand):
                 outputs['registered_file'] = fname_presuffix(self.inputs.source_file,suffix='_bbreg')
         if isdefined(self.inputs.out_fsl_file):
             outputs['out_fsl_file'] = self.inputs.out_fsl_file
-            if isinstance(self.inputs.registered_file, bool):
+            if isinstance(self.inputs.out_fsl_file, bool):
                 outputs['out_fsl_file'] = fname_presuffix(self.inputs.source_file,
                                                 suffix='_bbreg_%s.mat'%self.inputs.subject_id,
                                                 use_ext=False)
@@ -691,7 +691,7 @@ class BBRegister(FSCommand):
         return outputs
 
     def _format_arg(self, name, spec, value):
-        if name == 'registered_file':
+        if name in ['registered_file', 'out_fsl_file']:
             if isinstance(value, bool):
                 fname = self._list_outputs()[name]
             else:
