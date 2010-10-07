@@ -644,7 +644,7 @@ class BBRegisterInputSpec(FSTraitedSpec):
 
 class BBRegisterOutputSpec(TraitedSpec):
     out_reg_file = File(exists=True, desc='Output registration file')
-    out_fsl_file = File(exists=True, desc='Output FLIRT-style registration file')
+    out_fsl_file = File(desc='Output FLIRT-style registration file')
     min_cost_file = File(exists=True, desc='Output registration minimum cost file')
     registered_file = File(desc='Registered and resampled source file')
 
