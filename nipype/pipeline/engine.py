@@ -398,7 +398,7 @@ class Workflow(WorkflowBase):
                 graph = _generate_expanded_graph(deepcopy(self._flatgraph))
         export_graph(graph, self.base_dir, dotfilename=dotfilename)
 
-    def run(self, inseries=False):
+    def run(self, inseries=False, updatehash=False):
         """ Execute the workflow
 
         Parameters
@@ -412,8 +412,8 @@ class Workflow(WorkflowBase):
         self._execgraph = _generate_expanded_graph(deepcopy(self._flatgraph))
         for node in self._execgraph.nodes():
             node.config = self.config
-        if inseries == True:
-            self._execute_in_series()
+        if inseries or updatehash:
+            self._execute_in_series(updatehash=updatehash)
         else:
             self._execute_with_manager()
         
@@ -964,10 +964,10 @@ class Node(WorkflowBase):
                 raise RuntimeError(msg)
         else:
             logger.debug("Hashfile exists. Skipping execution\n")
-            self._run_interface(execute=False, cwd=outdir)
+            self._run_interface(execute=False, updatehash=updatehash, cwd=outdir)
         return self._result
 
-    def _run_interface(self, execute=True, cwd=None):
+    def _run_interface(self, execute=True, updatehash=False, cwd=None):
         old_cwd = os.getcwd()
         if not cwd:
             cwd = self._output_directory()
@@ -1173,7 +1173,7 @@ class MapNode(Node):
         else:
             return None
 
-    def _run_interface(self, execute=True, cwd=None):
+    def _run_interface(self, execute=True, updatehash=False, cwd=None):
         old_cwd = os.getcwd()
         if not cwd:
             cwd = self._output_directory()
@@ -1197,7 +1197,7 @@ class MapNode(Node):
         iterflow.base_dir = cwd
         iterflow.config = self.config
         iterflow.add_nodes(newnodes)
-        iterflow.run(inseries=True)
+        iterflow.run(inseries=True, updatehash=updatehash)
         self._result = InterfaceResult(interface=[], runtime=[],
                                        outputs=self.outputs)
         for i in range(nitems):
