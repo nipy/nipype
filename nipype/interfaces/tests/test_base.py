@@ -88,7 +88,7 @@ def test_TraitedSpec():
     specfunc = lambda x : spec(hoo=x)
     yield assert_raises, nib.traits.TraitError, specfunc, 1
     infields = spec(foo=1)
-    hashval = ({'foo': 1, 'goo': 0.0}, '278d33656cb1a3e4f49b0e27dfed1b7d')
+    hashval = ({'foo': 1, 'goo': '0.0000000000'}, 'cb03be1c3182ff941eecea6440c910f0')
     yield assert_equal, infields.hashval[0], hashval[0]
     yield assert_equal, infields.hashval[1], hashval[1]
     yield assert_equal, infields.__repr__(), '\nfoo = 1\ngoo = 0.0\n'
