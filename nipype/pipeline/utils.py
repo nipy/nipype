@@ -338,7 +338,7 @@ def _report_nodes_not_run(notrun):
     if notrun:
         logger.info("***********************************")
         for info in notrun:
-            logger.error("could not run node: %s" % info['node']._hierarchy+info['node']._id)
+            logger.error("could not run node: %s" % '.'.join((info['node']._hierarchy,info['node']._id)))
             logger.info("crashfile: %s" % info['crashfile'])
             logger.debug("The following dependent nodes were not run")
             for subnode in info['dependents']:

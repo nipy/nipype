@@ -465,6 +465,8 @@ class BaseTraitedSpec(traits.HasTraits):
                         out = (object, hash)
                     else:
                         out = hash
+                elif isinstance(object, float):
+                    out = '%.10f'%object
                 else:
                     out = object
         return out
