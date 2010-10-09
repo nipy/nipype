@@ -1,9 +1,12 @@
 Release 0.3.4 (FUTURE)
 ======================
 
+* API: hash values for float use a string conversion upto the 10th decimal place.
+
 * ENH: Added support for flash processing using FreeSurfer
 * ENH: Added support for flirt matrix in BBRegister
 * ENH: Added support for FSL convert_xfm
+* ENH: hashes can be updated again without rerunning all nodes.
 
 * BF: Diffusion toolkit gets installed 
 
