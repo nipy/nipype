@@ -17,6 +17,8 @@ from glob import glob
 import warnings
 from shutil import rmtree
 
+import numpy as np
+
 from nipype.interfaces.fsl.base import (FSLCommand, Info, FSLCommandInputSpec)
 from nipype.interfaces.base import (Bunch, load_template,
                                     InterfaceResult, File, traits,
@@ -849,6 +851,160 @@ class L2Model(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         for field in outputs.keys():
+            outputs[field] = os.path.join(os.getcwd(),
+                                          field.replace('_','.'))
+        return outputs
+
+class MultipleRegressDesignInputSpec(TraitedSpec):
+    contrasts = traits.List(
+        traits.Either(traits.Tuple(traits.Str,
+                                   traits.Enum('T'),
+                                   traits.List(traits.Str),
+                                   traits.List(traits.Float)),
+                      traits.Tuple(traits.Str,
+                                   traits.Enum('F'),
+                                   traits.List(traits.Tuple(traits.Str,
+                                                            traits.Enum('T'),
+                                                            traits.List(traits.Str),
+                                                            traits.List(traits.Float)),
+                                               ))),
+        mandatory=True,
+        desc="List of contrasts with each contrast being a list of the form - \
+[('name', 'stat', [condition list], [weight list])]. if \
+session list is None or not provided, all sessions are used. For F \
+contrasts, the condition list should contain previously defined \
+T-contrasts without any weight list.")
+    regressors = traits.Dict(traits.Str,traits.List(traits.Float),
+                             mandatory=True,
+                             desc='dictionary containing named lists of regressors')
+    groups = traits.List(traits.Int,
+                  desc='list of group identifiers (defaults to single group)')
+
+class MultipleRegressDesignOutputSpec(TraitedSpec):
+    design_mat = File(exists=True, desc='design matrix file')
+    design_con = File(exists=True, desc='design t-contrast file')
+    design_fts = File(exists=True, desc='design f-contrast file')
+    design_grp = File(exists=True, desc='design group file')
+
+class MultipleRegressDesign(BaseInterface):
+    """Generate multiple regression design
+
+    .. note::
+      FSL does not demean columns for higher level analysis.
+
+    Please see `FSL documentation <http://www.fmrib.ox.ac.uk/fsl/feat5/detail.html#higher>`_
+    for more details on model specification for higher level analysis. 
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.fsl import L2Model
+    >>> model = MultipleRegressDesign()
+    >>> model.inputs.contrasts = [['group mean','T',['reg1'],[1]]]
+    >>> model.inputs.regressors = dict(reg1=[1,1,1],reg2=[2.,-4,3])
+    >>> model.run() # doctest: +SKIP
+    
+    """
+
+    input_spec = MultipleRegressDesignInputSpec
+    output_spec = MultipleRegressDesignOutputSpec
+
+    def _run_interface(self, runtime):
+        cwd = os.getcwd()
+        regs = sorted(self.inputs.regressors.keys())
+        nwaves = len(regs)
+        npoints = len(self.inputs.regressors[regs[0]])
+        ntcons = sum([1 for con in self.inputs.contrasts if con[1]=='T'])
+        nfcons = sum([1 for con in self.inputs.contrasts if con[1]=='F'])
+        # write mat file
+        mat_txt = ['/NumWaves       %d'%nwaves,
+                   '/NumPoints      %d'%npoints,
+                   ]
+        ppheights = []
+        for reg in regs:
+            maxreg=np.max(self.inputs.regressors[reg])
+            minreg=np.min(self.inputs.regressors[reg])
+            if np.sign(maxreg) == np.sign(minreg):
+                regheight = max([abs(minreg), abs(maxreg)])
+            else:
+                regheight = abs(maxreg-minreg)
+            ppheights.append('%e'%regheight)
+        mat_txt += ['/PPheights      '+' '.join(ppheights)]
+        mat_txt += ['',
+                    '/Matrix']
+        for cidx in range(npoints):
+            mat_txt.append(' '.join(['%e'%self.inputs.regressors[key][cidx] for key in regs]))
+        mat_txt = '\n'.join(mat_txt)
+        # write t-con file
+        con_txt = []
+        counter = 0
+        tconmap = {}
+        for conidx, con in enumerate(self.inputs.contrasts):
+            if con[1] == 'T':
+                tconmap[conidx] = counter
+                counter += 1
+                con_txt += ['/ContrastName%d   %s'%(counter, con[0])]
+        con_txt +=['/NumWaves       %d'%nwaves,
+                   '/NumContrasts   %d'%ntcons,
+                   '/PPheights          %s' % ' '.join(['%e'%1 for i in range(counter)]),
+                   '/RequiredEffect     %s' % ' '.join(['%.3f'%100 for i in range(counter)]),
+                   '',
+                   '/Matrix']
+        for idx in sorted(tconmap.keys()):
+            convals = np.zeros((nwaves,1))
+            for regidx, reg in enumerate(self.inputs.contrasts[idx][2]):
+                convals[regs.index(reg)] = self.inputs.contrasts[idx][3][regidx] 
+            con_txt.append(' '.join(['%e'%val for val in convals]))
+        con_txt = '\n'.join(con_txt)
+        # write f-con file
+        fcon_txt = ''
+        if nfcons:
+            fcon_txt =['/NumWaves       %d'%ntcons,
+                       '/NumContrasts   %d'%nfcons,
+                       '',
+                       '/Matrix']
+            for conidx, con in enumerate(self.inputs.contrasts):
+                if con[1] == 'F':
+                    convals = np.zeros((ntcons,1))
+                    for tcon in con[2]:
+                        convals[tconmap[self.inputs.contrasts.index(tcon)]] = 1
+                    fcon_txt.append(' '.join(['%d'%val for val in convals]))
+                    fcon_txt = '\n'.join(fcon_txt)
+        # write group file
+        grp_txt = ['/NumWaves       1',
+                   '/NumPoints      %d' % npoints,
+                   '',
+                   '/Matrix']
+        for i in range(npoints):
+            if isdefined(self.inputs.groups):
+                grp_txt += ['%d'%self.inputs.groups[i]]
+            else:
+                grp_txt += ['1']
+        grp_txt = '\n'.join(grp_txt)
+
+        txt = {'design.mat' : mat_txt,
+               'design.con' : con_txt,
+               'design.fts' : fcon_txt,
+               'design.grp' : grp_txt}
+
+        # write design files
+        for key,val in txt.items():
+            if ('fts' in key) and (nfcons == 0):
+                continue
+            filename = key.replace('_','.')
+            f = open(os.path.join(cwd, filename), 'wt')
+            f.write(val)
+            f.close()
+
+        runtime.returncode=0
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        nfcons = sum([1 for con in self.inputs.contrasts if con[1]=='F'])
+        for field in outputs.keys():
+            if ('fts' in field) and (nfcons==0):
+                continue
             outputs[field] = os.path.join(os.getcwd(),
                                           field.replace('_','.'))
         return outputs
