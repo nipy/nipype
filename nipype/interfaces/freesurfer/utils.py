@@ -395,10 +395,23 @@ class SurfaceScreenshots(FSCommand):
 class ImageInfoInputSpec(FSTraitedSpec):
 
     in_file = File(exists=True,position=1,argstr="%s",desc="image to query")
+    out_file = traits.Either(traits.Bool, File(genfile=True),
+                             desc="write info to file (true or filename)")
 
 class ImageInfoOutputSpec(TraitedSpec):
 
     info = traits.Any(desc="output of mri_info")
+    out_file = File(exists=True,desc="text file with image information")
+    data_type = traits.String(desc="image data type")
+    file_format = traits.String(desc="file format")
+    TE = traits.String(desc="echo time (msec)")
+    TR = traits.String(desc="repetition time(msec)")
+    TI = traits.String(desc="inversion time (msec)")
+    dimensions = traits.Tuple(desc="image dimensions (voxels)")
+    vox_sizes = traits.Tuple(desc="voxel sizes (mm)")
+    orientation = traits.String(desc="image orientation")
+    ph_enc_dir = traits.String(desc="phase encode direction")
+   
 
 class ImageInfo(FSCommand):
 
@@ -406,16 +419,39 @@ class ImageInfo(FSCommand):
     input_spec = ImageInfoInputSpec
     output_spec = ImageInfoOutputSpec
 
+    def info_regexp(self, info, field, delim="\n"):
+        m = re.search("%s\s*:\s+(.+?)%s"%(field,delim), info) 
+        if m:
+            return m.group(1)
+        else:
+            return None
+
     def aggregate_outputs(self, runtime=None):
         outputs = self._outputs()
-        outfile = os.path.join(os.getcwd(), "info_result.json")
-        if runtime is None:
-            try:
-                out_info = load_json(outfile)["info"]
-            except IOError:
-                return self.run().outputs
-        else:
-            out_info = runtime.stdout
-            save_json(outfile, dict(info=out_info))
-        outputs.info = out_info
+        info = runtime.stdout
+        outputs.info = info
+        
+        # Pulse sequence parameters
+        for field in ["TE", "TR", "TI"]:
+            fieldval = self.info_regexp(info, field, ",")
+            if fieldval.endswith(" msec"):
+                fieldval = fieldval[:-5]
+            setattr(outputs, field, fieldval)
+        
+        # Voxel info
+        vox = self.info_regexp(info, "voxel sizes")
+        vox = tuple(vox.split(", "))
+        outputs.vox_sizes = vox
+        dim = self.info_regexp(info, "dimensions")
+        dim = tuple([int(d) for d in dim.split(" x ")])
+        outputs.dimensions = dim
+
+        outputs.orientation = self.info_regexp(info, "Orientation")
+        outputs.ph_enc_dir = self.info_regexp(info, "PhEncDir")
+
+        # File format and datatype are both keyed by "type"
+        ftype, dtype = re.findall("%s\s*:\s+(.+?)\n"%"type", info)
+        outputs.file_format = ftype
+        outputs.data_type = dtype
+
         return outputs
