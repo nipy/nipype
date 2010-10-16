@@ -1033,3 +1033,171 @@ class SUSAN(FSLCommand):
         if name == 'out_file':
             return self._list_outputs()['smoothed_file']
         return None
+
+class FUGUEInputSpec(TraitedSpec):
+    in_file = File(exists=True, argstr='--in=%s',
+                   desc='filename of input volume')
+    unwarped_file = File(argstr='--unwarp=%s', genfile=True,
+                         desc='apply unwarping and save as filename')
+    phasemap_file = File(exists=True, argstr='--phasemap=%s',
+                         desc='filename for input phase image')
+    dwell_to_asym_ratio = traits.Float(argstr='--dwelltoasym=%.10f',
+                                       desc='set the dwell to asym time ratio')
+    dwell_time = traits.Float(argstr='--dwell=%.10f',
+                              desc='set the EPI dwell time per phase-encode line - same as echo spacing - (sec)')
+    asym_se_time = traits.Float(argstr='--asym=%.10f',
+                                desc='set the fieldmap asymmetric spin echo time (sec)')
+    fmap_out_file = File(argstr='--savefmap=%s',
+                     desc='filename for saving fieldmap (rad/s)')
+    fmap_in_file = File(exists=True, argstr='--loadfmap=%s',
+                        desc='filename for loading fieldmap (rad/s)')
+    shift_out_file = File(argstr='--saveshift=%s',
+                          desc='filename for saving pixel shift volume')
+    shift_in_file = File(exists=True, argstr='--loadshift=%s',
+                         desc='filename for reading pixel shift volume')
+    median_2dfilter = traits.Bool(argstr='--median',
+                                desc='apply 2D median filtering')
+    despike_2dfilter = traits.Bool(argstr='--despike',
+                                   desc='apply a 2D de-spiking filter')
+    no_gap_fill = traits.Bool(argstr='--nofill',
+                              desc='do not apply gap-filling measure to the fieldmap')
+    no_extend = traits.Bool(argstr='--noextend',
+                            desc='do not apply rigid-body extrapolation to the fieldmap')
+    smooth2d = traits.Float(argstr='--smooth2=%.2f',
+                            desc='apply 2D Gaussian smoothing of sigma N (in mm)')
+    smooth3d = traits.Float(argstr='--smooth3=%.2f',
+                            desc='apply 3D Gaussian smoothing of sigma N (in mm)')
+    poly_order = traits.Int(argstr='--poly=%d',
+                            desc='apply polynomial fitting of order N')
+    fourier_order = traits.Int(argstr='--fourier=%d',
+                               desc='apply Fourier (sinusoidal) fitting of order N')
+    pava = traits.Bool(argstr='--pava',
+                       desc='apply monotonic enforcement via PAVA')
+    despike_theshold = traits.Float(argstr='--despikethreshold=%s',
+                                    desc='specify the threshold for de-spiking (default=3.0)')
+    unwarp_direction = traits.Enum('x','y','z','x-','y-','z-',
+                                   argstr='--unwarpdir=%s',
+                                   desc='specifies direction of warping (default y)')
+    phase_conjugate = traits.Bool(argstr='--phaseconj',
+                                  desc='apply phase conjugate method of unwarping')
+    icorr = traits.Bool(argstr='--icorr', requires=['shift_in_file'],
+                        desc='apply intensity correction to unwarping (pixel shift method only)')
+    icorr_only = traits.Bool(argstr='--icorronly', requires=['unwarped_file'],
+                             desc='apply intensity correction only')
+    mask_file = File(exists=True, argstr='--mask=%s',
+                     desc='filename for loading valid mask')
+    save_unmasked_fmap = traits.Either(traits.Bool,
+                                       traits.File,
+                                       argstr='--unmaskfmap=%s',
+                                       requires=['fmap_out_file'],
+                                       desc='saves the unmasked fieldmap when using --savefmap')
+    save_unmasked_shift = traits.Either(traits.Bool,
+                                       traits.File,
+                                       argstr='--unmaskshift=%s',
+                                       requires=['shift_out_file'],
+                                       desc='saves the unmasked shiftmap when using --saveshift')
+    nokspace = traits.Bool(argstr='--nokspace', desc='do not use k-space forward warping')
+
+class FUGUEOutputSpec(TraitedSpec):
+    unwarped_file = File(exists=True, desc='unwarped file')
+
+class FUGUE(FSLCommand):
+    """Use FSL FUGUE to unwarp epi's with fieldmaps
+
+    Examples
+    --------
+
+    >>>
+    
+    """
+    
+    _cmd = 'fugue'
+    input_spec = FUGUEInputSpec
+    output_spec = FUGUEOutputSpec
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_file = self.inputs.unwarped_file
+        if not isdefined(out_file):
+            out_file = self._gen_fname(self.inputs.in_file,
+                                      suffix='_unwarped')
+        outputs['unwarped_file'] = out_file
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'unwarped_file':
+            return self._list_outputs()['unwarped_file']
+        return None
+
+class PRELUDEInputSpec(FSLCommandInputSpec):
+    complex_phase_file = File(exists=True, argstr='--complex=%s',
+                              mandatory=True, xor=['magnitude_file','phase_file'],
+                              desc='complex phase input volume')
+    magnitude_file = File(exists=True, argstr='--abs=%s',
+                          mandatory=True,
+                          xor=['complex_phase_file'],
+                          desc='file containing magnitude image')
+    phase_file = File(exists=True, argstr='--phase=%s',
+                      mandatory=True,
+                      xor=['complex_phase_file'],
+                      desc='raw phase file')
+    unwrapped_phase_file = File(genfile=True,
+                                argstr='--unwrap=%s',
+                                desc='file containing unwrapepd phase')
+    num_partitions = traits.Int(argstr='--numphasesplit=%d',
+                                desc='number of phase partitions to use')
+    labelprocess2d = traits.Bool(argstr='--labelslices',
+                                 desc='does label processing in 2D (slice at a time)')
+    process2d = traits.Bool(argstr='--slices',
+                            xor = ['labelprocess2d'],
+                            desc='does all processing in 2D (slice at a time)')
+    process3d = traits.Bool(argstr='--force3D',
+                            xor=['labelprocess2d','process2d'],
+                            desc='forces all processing to be full 3D')
+    threshold = traits.Float(argstr='--thresh=%.10f',
+                             desc='intensity threshold for masking')
+    mask_file = File(exists=True, argstr='--mask=%s',
+                     desc='filename of mask input volume')
+    start = traits.Int(argstr='--start=%d',
+                       desc='first image number to process (default 0)')
+    end = traits.Int(argstr='--end=%d',
+                     desc='final image number to process (default Inf)')
+    savemask_file = File(argstr='--savemask=%s',
+                         desc='saving the mask volume')
+    rawphase_file = File(argstr='--rawphase=%s',
+                         desc='saving the raw phase output')
+    label_file = File(argstr='--labels=%s',
+                      desc='saving the area labels output')
+    removeramps = traits.Bool(argstr='--removeramps',
+                              desc='remove phase ramps during unwrapping')
+
+class PRELUDEOutputSpec(TraitedSpec):
+    unwrapped_phase_file = File(desc='unwrapped phase file')
+
+class PRELUDE(FSLCommand):
+    """Use FSL prelude to do phase unwrapping
+
+    Examples
+    --------
+    
+    >>>
+    
+    """
+    input_spec = PRELUDEInputSpec
+    output_spec = PRELUDEOutputSpec
+    _cmd = 'prelude'
+
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_file = self.inputs.unwrapped_phase_file
+        if not isdefined(out_file):
+            out_file = self._gen_fname(self.inputs.in_file,
+                                      suffix='_unwrapped')
+        outputs['unwrapped_phase_file'] = out_file
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'unwraped_phase_file':
+            return self._list_outputs()['unwrapped_phase_file']
+        return None

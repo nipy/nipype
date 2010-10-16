@@ -1133,11 +1133,167 @@ class MELODIC(FSLCommand):
             outputs['out_dir'] = os.makedirs(os.path.join(os.getcwd(),'melodic_out'))
         return outputs
 
+class SmoothEstimateInputSpec(FSLCommandInputSpec):
+    dof = traits.Int(argstr='--dof=%d', mandatory=True,
+                     xor=['zstat_file'],
+                     desc='number of degrees of freedom')
+    mask_file = File(argstr='--mask=%s',
+                     exists=True, mandatory=True,
+                     desc='brain mask volume')
+    residual_fit_file = File(argstr='--res=%s',
+                             exists=True, requires=['dof'],
+                             desc='residual-fit image file')
+    zstat_file = File(argstr='--zstat=%s',
+                      exists=True, xor=['dof'],
+                      desc='zstat image file')
 
+class SmoothEstimateOutputSpec(TraitedSpec):
+    dlh = traits.Float(desc='smoothness estimate sqrt(det(Lambda))')
+    volume = traits.Int(desc='number of voxels in mask')
+    resels = traits.Float(desc='number of resels')
 
+class SmoothEstimate(FSLCommand):
+    """ Estimates the smoothness of an image
 
+    Examples
+    --------
+    
+    >>> est = SmoothEstimate()
+    >>> est.inputs.zstat_file = 'zstat1.nii.gz'
+    >>> est.inputs.mask_file = 'mask.nii'
+    >>> est.cmdline
+    'smoothest --mask=mask.nii --zstat=zstat1.nii.gz'
+    
+    """
 
+    input_spec = SmoothEstimateInputSpec
+    output_spec = SmoothEstimateOutputSpec
+    _cmd = 'smoothest'
 
+    def aggregate_outputs(self, runtime=None):
+        outputs = self._outputs()
+        stdout = runtime.stdout.split('\n')
+        outputs.dlh = float(stdout[0].split()[1])
+        outputs.volume = int(stdout[1].split()[1])
+        outputs.resels = float(stdout[2].split()[1])
+        return outputs
 
+class ClusterInputSpec(FSLCommandInputSpec):
+    in_file = File(argstr='--in=%s', mandatory=True,
+                   exists=True, desc='input volume')
+    threshold = traits.Float(argstr='--thresh=%.10f',
+                             mandatory=True,
+                             desc='threshold for input volume')
+    out_index_file = traits.Either(traits.Bool, File,
+                                   argstr='--oindex=%s',
+                                   desc='output of cluster index (in size order)')
+    out_threshold_file = traits.Either(traits.Bool, File,
+                                       argstr='--othresh=%s',
+                                       desc='thresholded image')
+    out_localmax_txt_file = traits.Either(traits.Bool, File,
+                                          argstr='--olmax=%s',
+                                          desc='local maxima text file')
+    out_localmax_vol_file = traits.Either(traits.Bool, File,
+                                          argstr='--olmaxim=%s',
+                                          desc='output of local maxima volume')
+    out_size_file = traits.Either(traits.Bool, File,
+                                  argstr='--osize=%s',
+                                  desc='filename for output of size image')
+    out_max_file = traits.Either(traits.Bool, File,
+                                 argstr='--omax=%s',
+                                 desc='filename for output of max image')
+    out_mean_file = traits.Either(traits.Bool, File,
+                                  argstr='--omean=%s',
+                                  desc='filename for output of mean image')
+    out_pval_file = traits.Either(traits.Bool, File,
+                                  argstr='--opvals=%s',
+                                  desc='filename for image output of log pvals')
+    pthreshold = traits.Float(argstr='--pthresh=%.10f',
+                              requires=['dlh','volume'],
+                              desc='p-threshold for clusters')
+    peak_distance = traits.Float(argstr='--peakdist=%.10f',
+                                 desc='minimum distance between local maxima/minima, in mm (default 0)')
+    cope_file = traits.File(argstr='--cope=%s',
+                            desc='cope volume')
+    volume = traits.Int(argstr='--volume=%d',
+                        desc='number of voxels in the mask')
+    dlh = traits.Float(argstr='--dlh=%.10f',
+                       desc='smoothness estimate = sqrt(det(Lambda))')
+    fractional = traits.Bool('--fractional',
+                             desc='interprets the threshold as a fraction of the robust range')
+    connectivity = traits.Int(argstr='--connectivity=%d',
+                              desc='the connectivity of voxels (default 26)')
+    use_mm = traits.Bool('--mm', desc='use mm, not voxel, coordinates')
+    find_min = traits.Bool('--min', desc='find minima instead of maxima')
+    no_table = traits.Bool('--no_table', desc='suppresses printing of the table info')
+    minclustersize = traits.Bool(argstr='--minclustersize',
+                                 desc='prints out minimum significant cluster size')
+    xfm_file = File(argstr='--xfm=%s',
+                    desc='filename for Linear: input->standard-space transform. Non-linear: input->highres transform')
+    std_space_file = File(argstr='--stdvol=%s',
+                          desc='filename for standard-space volume')
+    num_maxima = traits.Int(argstr='--num=%d',
+                            desc='no of local maxima to report')
+    warpfield_file = File(argstr='--warpvol=%s',
+                          desc='file contining warpfield')
 
+class ClusterOutputSpec(TraitedSpec):
+    index_file = File(desc='output of cluster index (in size order)')
+    threshold_file = File(desc='thresholded image')
+    localmax_txt_file = File(desc='local maxima text file')
+    localmax_vol_file = File(desc='output of local maxima volume')
+    size_file = File(desc='filename for output of size image')
+    max_file = File(desc='filename for output of max image')
+    mean_file = File(desc='filename for output of mean image')
+    pval_file = File(desc='filename for image output of log pvals')
+    
+class Cluster(FSLCommand):
+    """ Uses FSL cluster to perform clustering on statistical output
 
+    Examples
+    --------
+    
+    >>> cl = Cluster()
+    >>> cl.inputs.threshold = 2.3
+    >>> cl.inputs.in_file = 'zstat1.nii.gz'
+    >>> cl.inputs.out_localmax_txt_file = 'stats.txt'
+    >>> cl.cmdline
+    'cluster --in=zstat1.nii.gz --olmax=stats.txt --thresh=2.3000000000'
+    
+    """
+    input_spec = ClusterInputSpec
+    output_spec = ClusterOutputSpec
+    _cmd = 'cluster'
+    
+    filemap = {'out_index_file':'index', 'out_threshold_file':'threshold',
+               'out_localmax_txt_file': 'localmax.txt',
+               'out_localmax_vol_file': 'localmax',
+               'out_size_file': 'size', 'out_max_file': 'max',
+               'out_mean_file': 'mean', 'out_pval_file': 'pval'}
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        for key, suffix in self.filemap.items():
+            outkey = key[4:]
+            inval = getattr(self.inputs, key)
+            if isdefined(inval):
+                if isinstance(inval, bool):
+                    if inval:
+                        change_ext = True
+                        if suffix.endswith('.txt'):
+                            change_ext=False
+                        outputs[outkey] = self._gen_fname(self.inputs.in_file,
+                                                          suffix='_'+suffix,
+                                                          change_ext=change_ext)
+                else:
+                    outputs[outkey] = inval
+        return outputs
+
+    def _format_arg(self, name, spec, value):
+        if name in self.filemap.keys():
+            if isinstance(value, bool):
+                fname = self._list_outputs()[name[4:]]
+            else:
+                fname = value
+            return spec.argstr % fname
+        return super(Cluster, self)._format_arg(name, spec, value)
