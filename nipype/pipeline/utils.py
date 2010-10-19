@@ -156,9 +156,9 @@ def _write_detailed_dot(graph, dotfilename):
     return text
 
 def _get_valid_pathstr(pathstr):
-    for symbol in [' ','[',']']:
+    for symbol in [' ','[',']','(',')','_','{','}','?',':','<','>','#','!','|','"',';']:
         pathstr = pathstr.replace(symbol, '')
-    pathstr = pathstr.replace(os.sep, '_')
+    pathstr = pathstr.replace(os.sep, '..')
     pathstr = pathstr.replace(',', '.')
     return pathstr
 
@@ -212,7 +212,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
         nodeidx = ids.index(nodeid)
         paramstr = ''
         for key, val in sorted(params.items()):
-            paramstr = '_'.join((paramstr, key,
+            paramstr = '_'.join((paramstr, _get_valid_pathstr(key),
                                  _get_valid_pathstr(str(val)))) #.replace(os.sep, '_')))
             Gc.nodes()[nodeidx].set_input(key, val)
         for n in Gc.nodes():
