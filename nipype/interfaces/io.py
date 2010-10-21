@@ -21,6 +21,7 @@ from copy import deepcopy
 import glob
 import os
 import shutil
+import hashlib
 from warnings import warn
 
 from enthought.traits.trait_errors import TraitError
@@ -493,9 +494,11 @@ class XNATSourceInputSpec(DynamicTraitedSpec): #InterfaceInputSpec):
                                 value=dict(outfiles=[]), usedefault=True,
                                 desc='Information to plug into template')
 
-    xnat_server = traits.Str(mandatory=True, desc='XNAT server URL')
-    xnat_user = traits.Str(mandatory=True, desc='XNAT user')
-    xnat_pwd = traits.Password(mandatory=True, desc='XNAT password')
+    xnat_server = traits.Str(mandatory=True, requires=['xnat_user', 'xnat_pwd'], xor=['xnat_config'])
+    xnat_user = traits.Str()
+    xnat_pwd = traits.Password()
+    xnat_config = File(mandatory=True, xor=['xnat_server'])
+
     cache_dir = Directory(desc='Cache directory')
     cache_size = traits.Str(desc='Optional cache max size')
 
@@ -582,7 +585,13 @@ class XNATSource(IOBase):
         # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
         # hence manual check
 
-        xnat = pyxnat.Interface(self.inputs.xnat_server,self.inputs.xnat_user, self.inputs.xnat_pwd)
+        cache_dir = self.cache_dir or tempfile.gettempdir()
+
+        if self.inputs.xnat_server:
+            xnat = pyxnat.Interface(self.inputs.xnat_server,self.inputs.xnat_user, self.inputs.xnat_pwd, cache_dir)
+        else:
+            xnat = pyxnat.Interface(self.inputs.xnat_config)
+
 #        xnat.set_offline_mode()
 
         if self._infields:
@@ -646,17 +655,12 @@ class XNATSource(IOBase):
 
 class XNATSinkInputSpec(DynamicTraitedSpec):
     
-#    base_directory = Directory( 
-#        desc='Path to the base directory consisting of subject data.')
-#    container = traits.Str(desc = 'Folder within basedirectory in which to store output')
-#    parameterization = traits.Bool(True, usedefault=True,
-#                                   desc='store output in parameterized structure')
-#    strip_dir = Directory(desc='path to strip out of filename')
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
 
-    xnat_server = traits.Str(mandatory=True)
-    xnat_user = traits.Str(mandatory=True)
-    xnat_pwd = traits.Password(mandatory=True)
+    xnat_server = traits.Str(mandatory=True, requires=['xnat_user', 'xnat_pwd'], xor=['xnat_config'])
+    xnat_user = traits.Str()
+    xnat_pwd = traits.Password()
+    xnat_config = File(mandatory=True, xor=['xnat_server'])
     cache_dir = Directory(desc='')
     cache_size = traits.Str()
 
@@ -669,6 +673,7 @@ class XNATSinkInputSpec(DynamicTraitedSpec):
             self._outputs[key] = value
         else:
             super(XNATSinkInputSpec, self).__setattr__(key, value)
+
     
 class XNATSink(IOBase):
     """ Generic datasink module that takes a directory containing a
@@ -681,12 +686,19 @@ class XNATSink(IOBase):
         """Execute this module.
         """
 
-        xnat = pyxnat.Interface(self.inputs.xnat_server,self.inputs.xnat_user, self.inputs.xnat_pwd)
+        cache_dir = self.cache_dir or tempfile.gettempdir()
+
+        if self.inputs.xnat_server:
+            xnat = pyxnat.Interface(self.inputs.xnat_server,self.inputs.xnat_user, self.inputs.xnat_pwd, cache_dir)
+        else:
+            xnat = pyxnat.Interface(self.inputs.xnat_config)
 
         uri_template_args = {'project_id':self.inputs.project_id,
                              'subject_id':self.inputs.subject_id,
-                             'experiment_id':str(hash(self.inputs.subject_id)) + \
-                                             '_' + self.inputs.experiment_id,
+                             'experiment_id': '%s_%s' % \
+                                (hashlib.md5(self.inputs.subject_id).hexdigest(),
+                                 self.inputs.experiment_id
+                                 )
                              }
 
         for key,files in self.inputs._outputs.items():
@@ -714,17 +726,18 @@ def write_file_to_XNAT(xnat, name, key, uri_template_args):
         if str(self.inputs.subject_id) not in val:
             recon_label.extend([key, val])
 
-    if recon_label:
-        uri_template_args['recon_label'] = str(hash(uri_template_args['experiment_id'])) + \
-                                           '_' + '_'.join(recon_label)
-    else:
-        uri_template_args['recon_label'] = str(hash(uri_template_args['experiment_id']))
+    uri_template_args['recon_label'] = \
+        hashlib.md5(uri_template_args['experiment_id']).hexdigest()
 
-    uri_template_args['resource_label'] = str(hash(uri_template_args['recon_label'])) + \
-                                          '_' + key.split('.')[0]
+    if recon_label:
+        uri_template_args['recon_label'] += '_'.join(recon_label)
+
+    uri_template_args['resource_label'] = '%s_%s' % \
+                (hashlib.md5(uri_template_args['recon_label']).hexdigest(),
+                 key.split('.')[0]
+                 )
 
     uri_template_args['file_name'] = os.path.split(os.path.abspath(name))[1]
-
 
     uri_template = ('/project/%(project_id)s/subject/%(subject_id)s'
                     '/experiment/%(experiment_id)s/reconstruction/%(recon_label)s'
