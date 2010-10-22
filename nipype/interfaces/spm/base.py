@@ -192,6 +192,12 @@ class SPMCommand(BaseInterface):
                                                               'use_mcr'])
         self._check_mlab_inputs()
         self._matlab_cmd_update()
+
+    @classmethod
+    def set_mlab_paths(cls, matlab_cmd=None, paths = None, use_mcr=None):
+        cls._matlab_cmd = matlab_cmd
+        cls._paths = paths
+        cls._use_mcr = use_mcr
         
     def _matlab_cmd_update(self):
         # MatlabCommand has to be created here,
