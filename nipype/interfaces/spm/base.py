@@ -213,6 +213,9 @@ class SPMCommand(BaseInterface):
         self.mlab.inputs.script = self._make_matlab_command(deepcopy(self._parse_inputs()))
         results = self.mlab.run()
         runtime.returncode = results.runtime.returncode
+        if self.mlab.inputs.uses_mcr:
+            if 'Skipped' in '-'.join(results.runtime.stdout):
+                runtime.returncode = 1
         runtime.stdout = results.runtime.stdout
         runtime.stderr = results.runtime.stderr
         return runtime
