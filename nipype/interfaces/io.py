@@ -22,6 +22,7 @@ import glob
 import os
 import shutil
 import hashlib
+import tempfile
 from warnings import warn
 
 from enthought.traits.trait_errors import TraitError
@@ -585,7 +586,7 @@ class XNATSource(IOBase):
         # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
         # hence manual check
 
-        cache_dir = self.cache_dir or tempfile.gettempdir()
+        cache_dir = self.inputs.cache_dir or tempfile.gettempdir()
 
         if self.inputs.xnat_server:
             xnat = pyxnat.Interface(self.inputs.xnat_server,self.inputs.xnat_user, self.inputs.xnat_pwd, cache_dir)
@@ -686,7 +687,7 @@ class XNATSink(IOBase):
         """Execute this module.
         """
 
-        cache_dir = self.cache_dir or tempfile.gettempdir()
+        cache_dir = self.inputs.cache_dir or tempfile.gettempdir()
 
         if self.inputs.xnat_server:
             xnat = pyxnat.Interface(self.inputs.xnat_server,self.inputs.xnat_user, self.inputs.xnat_pwd, cache_dir)
@@ -694,11 +695,12 @@ class XNATSink(IOBase):
             xnat = pyxnat.Interface(self.inputs.xnat_config)
 
         uri_template_args = {'project_id':self.inputs.project_id,
-                             'subject_id':self.inputs.subject_id,
+                             'subject_id':'%s_%s' % \
+                                (self.inputs.project_id, 
+                                 self.inputs.subject_id),
                              'experiment_id': '%s_%s' % \
                                 (hashlib.md5(self.inputs.subject_id).hexdigest(),
-                                 self.inputs.experiment_id
-                                 )
+                                 self.inputs.experiment_id)
                              }
 
         for key,files in self.inputs._outputs.items():
