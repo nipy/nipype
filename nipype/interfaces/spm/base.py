@@ -179,6 +179,10 @@ class SPMCommand(BaseInterface):
 
     _jobtype = 'basetype'
     _jobname = 'basename'
+
+    _matlab_cmd = None
+    _paths = None
+    _use_mcr = None
     
     def __init__(self, **inputs):
         super(SPMCommand, self).__init__(**inputs)
@@ -186,6 +190,7 @@ class SPMCommand(BaseInterface):
                                                               'mfile',
                                                               'paths',
                                                               'use_mcr'])
+        self._check_mlab_inputs()
         self._matlab_cmd_update()
         
     def _matlab_cmd_update(self):
@@ -206,10 +211,17 @@ class SPMCommand(BaseInterface):
     @property
     def jobname(self):
         return self._jobname
+
+    def _check_mlab_inputs(self):
+        if not isdefined(self.inputs.matlab_cmd) and self._matlab_cmd:
+            self.inputs.matlab_cmd = self._matlab_cmd
+        if not isdefined(self.inputs.paths) and self._paths:
+            self.inputs.paths = self._paths
+        if not isdefined(self.inputs.use_mcr) and self._use_mcr:
+            self.inputs.use_mcr = self._use_mcr
         
     def _run_interface(self, runtime):
         """Executes the SPM function using MATLAB."""
-        
         self.mlab.inputs.script = self._make_matlab_command(deepcopy(self._parse_inputs()))
         results = self.mlab.run()
         runtime.returncode = results.runtime.returncode
