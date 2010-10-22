@@ -994,12 +994,12 @@ class RobustRegister(FSCommand):
 
 class FitMSParamsInputSpec(FSTraitedSpec):
 
-    in_files = traits.List(traits.File, exists=True, argstr="%s", position=-2, mandatory=True,
+    in_files = traits.List(File, exists=True, argstr="%s", position=-2, mandatory=True,
                            desc="list of FLASH images (must be in mgh format)")
     tr_list = traits.List(traits.Int, desc="list of TRs of the input files (in msec)")
     te_list = traits.List(traits.Float, desc="list of TEs of the input files (in msec)")
     flip_list = traits.List(traits.Int, desc="list of flip angles of the input files")
-    xfm_list = traits.List(traits.File, exists=True, 
+    xfm_list = traits.List(File, exists=True, 
                            desc="list of transform files to apply to each FLASH image")
     out_dir = Directory(argstr="%s",position=-1, genfile=True,
                               desc="directory to store output in")
