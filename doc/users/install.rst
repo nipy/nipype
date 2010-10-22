@@ -41,7 +41,7 @@ IPython_ 0.10
 
 Enthought_ Traits_ 3.2.0 or later
 
-nibabel (TODO: add version number when they release)
+nibabel 1.0.0 or later
 
 Note
 ~~~~
