@@ -164,10 +164,11 @@ def no_spm():
 
     
 class SPMCommandInputSpec(TraitedSpec):
-    matlab_cmd = traits.Str()
+    matlab_cmd = traits.Str(desc='matlab command to use')
     paths = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
     mfile = traits.Bool(True, desc='Run m-code using m-file',
                           usedefault=True)
+    use_mcr = traits.Bool(desc='Run m-code using SPM MCR')
 
 class SPMCommand(BaseInterface):
     """Extends `BaseInterface` class to implement SPM specific interfaces.
@@ -181,7 +182,10 @@ class SPMCommand(BaseInterface):
     
     def __init__(self, **inputs):
         super(SPMCommand, self).__init__(**inputs)
-        self.inputs.on_trait_change(self._matlab_cmd_update, 'matlab_cmd')
+        self.inputs.on_trait_change(self._matlab_cmd_update, ['matlab_cmd',
+                                                              'mfile',
+                                                              'paths',
+                                                              'use_mcr'])
         self._matlab_cmd_update()
         
     def _matlab_cmd_update(self):
@@ -189,8 +193,9 @@ class SPMCommand(BaseInterface):
         # because matlab_cmb is not a proper input
         # and can be set only during init
         self.mlab = MatlabCommand(matlab_cmd=self.inputs.matlab_cmd,
-                                      mfile=self.inputs.mfile,
-                                      paths=self.inputs.paths)
+                                  mfile=self.inputs.mfile,
+                                  paths=self.inputs.paths,
+                                  uses_mcr=self.inputs.use_mcr)
         self.mlab.inputs.script_file = 'pyscript_%s.m' % \
         self.__class__.__name__.split('.')[-1].lower()
         
@@ -201,21 +206,10 @@ class SPMCommand(BaseInterface):
     @property
     def jobname(self):
         return self._jobname
-
-    def use_mfile(self, use_mfile):
-        """boolean,
-        if true generates a matlab <filename>.m file
-        if false generates a binary .mat file
-        """
-        self.inputs.mfile = use_mfile
-
+        
     def _run_interface(self, runtime):
         """Executes the SPM function using MATLAB."""
         
-        if isdefined(self.inputs.mfile):
-            self.mlab.inputs.mfile = self.inputs.mfile
-        if isdefined(self.inputs.paths):
-            self.mlab.inputs.paths = self.inputs.paths
         self.mlab.inputs.script = self._make_matlab_command(deepcopy(self._parse_inputs()))
         results = self.mlab.run()
         runtime.returncode = results.runtime.returncode
