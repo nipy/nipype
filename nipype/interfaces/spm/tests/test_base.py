@@ -61,8 +61,6 @@ def test_use_mfile():
         input_spec = spm.SPMCommandInputSpec
     dc = TestClass() # dc = derived_class
     yield assert_true, dc.inputs.mfile
-    dc.use_mfile(False)
-    yield assert_false, dc.inputs.mfile
 
 @skipif(no_spm, "SPM not found")
 def test_cmd_update():

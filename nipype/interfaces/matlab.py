@@ -13,6 +13,9 @@ class MatlabInputSpec(CommandLineInputSpec):
     
     script  = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
                          mandatory=True, position=-1)
+    uses_mcr = traits.Bool(desc='use MCR interface',
+                           xor=['nodesktop', 'nosplash',
+                                'single_comp_thread'])
     nodesktop = traits.Bool(True, argstr='-nodesktop',
                             usedefault=True,
                             desc='Switch off desktop mode on unix platforms')
@@ -28,6 +31,20 @@ class MatlabInputSpec(CommandLineInputSpec):
     script_file = File('pyscript.m', usedefault=True,
                               desc='Name of file to write m-code to')
     paths   = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
+    prescript = traits.List(["ver,","try,"], usedefault=True,
+                            desc='prescript to be added before code')
+    postscript = traits.List(
+        ["\n,catch ME,",
+         "ME,",
+         "ME.stack,",
+         "fprintf('%s\\n',ME.message);",
+         "fprintf(2,'<MatlabScriptException>');",
+         "fprintf(2,'%s\\n',ME.message);",
+         "fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);",
+         "fprintf(2,'</MatlabScriptException>');",
+         "end;"],
+        usedefault=True,
+        desc='script added after code')
 
 class MatlabCommand(CommandLine):
     """Interface that runs matlab code
@@ -60,7 +77,8 @@ class MatlabCommand(CommandLine):
         if self._default_paths and not isdefined(self.inputs.paths):
             self.inputs.paths = self._default_paths
             
-        if not isdefined(self.inputs.single_comp_thread):
+        if not isdefined(self.inputs.single_comp_thread) and \
+                not isdefined(self.inputs.uses_mcr):
             if config.getboolean('execution','single_thread_matlab'):
                 self.inputs.single_comp_thread = True
             
@@ -110,42 +128,36 @@ class MatlabCommand(CommandLine):
 
     def _format_arg(self, name, trait_spec, value):
         if name in ['script']:
-            return self._gen_matlab_command(trait_spec.argstr, value)
+            argstr = trait_spec.argstr
+            if self.inputs.uses_mcr:
+                argstr='%s'
+            return self._gen_matlab_command(argstr, value)
         return super(MatlabCommand, self)._format_arg(name, trait_spec, value)
 
     def _gen_matlab_command(self, argstr, script_lines):
         cwd = os.getcwd()
-        mfile = self.inputs.mfile
+        mfile = self.inputs.mfile or self.inputs.uses_mcr
         paths = []
         if isdefined(self.inputs.paths):
             paths = self.inputs.paths
         # prescript
-        prescript  = ''
+        prescript = self.inputs.prescript
         if mfile:
-            prescript += "fprintf(1,'Executing %s at %s:\\n',mfilename,datestr(now));\n"
+            prescript.insert(0,"fprintf(1,'Executing %s at %s:\\n',mfilename,datestr(now));")
         else:
-            prescript += "fprintf(1,'Executing code at %s:\\n',datestr(now));\n" 
-        prescript += "ver,\n"
-        prescript += "try,\n"
+            prescript.insert(0,"fprintf(1,'Executing code at %s:\\n',datestr(now));") 
         for path in paths:
-            prescript += "addpath('%s');\n" % path
-        # postscript
-        postscript  = ''
-        postscript += "\n,catch ME,\n"
-        postscript += "ME,\n"
-        postscript += "ME.stack,\n"
-        postscript += "fprintf('%s\\n',ME.message);\n"
-        postscript += "fprintf(2,'<MatlabScriptException>');\n"
-        postscript += "fprintf(2,'%s\\n',ME.message);\n"
-        postscript += "fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);\n"
-        postscript += "fprintf(2,'</MatlabScriptException>');\n"
-        postscript += "end;\n"
-        script_lines = prescript+script_lines+postscript
+            prescript.append("addpath('%s');\n" % path)
+        postscript = self.inputs.postscript
+        script_lines = '\n'.join(prescript)+script_lines+'\n'.join(postscript)
         if mfile:
             mfile = file(os.path.join(cwd,self.inputs.script_file), 'wt')
             mfile.write(script_lines)
             mfile.close()
-            script = "addpath('%s');%s" % (cwd, self.inputs.script_file.split('.')[0])
+            if self.inputs.uses_mcr:
+                script = '%s' % (os.path.join(cwd,self.inputs.script_file))
+            else:
+                script = "addpath('%s');%s" % (cwd, self.inputs.script_file.split('.')[0])
         else:
             script = ''.join(script_lines.split('\n'))
         return argstr % script
