@@ -214,7 +214,7 @@ class SPMCommand(BaseInterface):
         results = self.mlab.run()
         runtime.returncode = results.runtime.returncode
         if self.mlab.inputs.uses_mcr:
-            if 'Skipped' in '-'.join(results.runtime.stdout):
+            if 'Skipped' in results.runtime.stdout:
                 runtime.returncode = 1
         runtime.stdout = results.runtime.stdout
         runtime.stderr = results.runtime.stderr
