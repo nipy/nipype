@@ -206,6 +206,7 @@ class Workflow(WorkflowBase):
         # attributes for running with manager
         self.procs = None
         self.depidx = None
+        self.refidx = None
         self.proc_done = None
         self.proc_pending = None
         self._flatgraph = None
@@ -682,6 +683,8 @@ class Workflow(WorkflowBase):
             raise Exception('Execution graph has not been generated')
         self.procs = self._execgraph.nodes()
         self.depidx = nx.adj_matrix(self._execgraph).__array__()
+        self.refidx = deepcopy(self.depidx>0)
+        self.refidx.dtype = np.int8
         self.proc_done    = np.zeros(len(self.procs), dtype=bool)
         self.proc_pending = np.zeros(len(self.procs), dtype=bool)
 
@@ -694,6 +697,19 @@ class Workflow(WorkflowBase):
         return dict(node = self.procs[jobid],
                     dependents = subnodes,
                     crashfile = crashfile)
+
+    def _remove_node_dirs(self):
+        if config.getboolean('execution', 'remove_node_directories'):
+            for idx in np.nonzero(np.all(self.refidx==0,axis=1))[0]:
+                if self.proc_done[idx] and (not self.proc_pending[idx]):
+                    self.refidx[idx,idx] = -1
+                    outdir = self.procs[idx]._output_directory()
+                    logger.info(('[node dependencies finished] '
+                                 'removing node: %s from directory %s') % \
+                                    (self.procs[idx]._id,
+                                     outdir))
+                    shutil.rmtree(outdir)
+        
 
     def _execute_with_manager(self):
         """Executes a pre-defined pipeline is distributed approaches
@@ -748,6 +764,8 @@ class Workflow(WorkflowBase):
                             notrun.append(self._remove_node_deps(jobid, crashfile))
                         else:
                             self._task_finished_cb(res['result'], jobid)
+                            self._remove_node_dirs()
+                            self.taskclient.clear(taskid)
                     else:
                         toappend.insert(0, (taskid, jobid))
                 except:
@@ -756,11 +774,9 @@ class Workflow(WorkflowBase):
                     notrun.append(self._remove_node_deps(jobid, crashfile))
             if toappend:
                 self.pending_tasks.extend(toappend)
-            #else:
-            #    self.taskclient.clear()
             self._send_procs_to_workers()
             sleep(2)
-        #self.taskclient.clear()
+        self._remove_node_dirs()
         _report_nodes_not_run(notrun)
 
     def _send_procs_to_workers(self):
@@ -822,8 +838,7 @@ except:
                                      self.procs[jobid], sourceinfo)
         # update the job dependency structure
         self.depidx[jobid, :] = 0.
-
-
+        self.refidx[np.nonzero(self.refidx[:,jobid]>0)[0],jobid] = 0
 
 class Node(WorkflowBase):
     """Wraps interface objects for use in pipeline

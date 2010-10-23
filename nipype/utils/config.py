@@ -22,6 +22,7 @@ stop_on_first_crash = false
 hash_method = content
 single_thread_matlab = true
 run_in_series = false
+remove_node_directories = false
 """)
 
 config = ConfigParser.ConfigParser()
