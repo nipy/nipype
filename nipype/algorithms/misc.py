@@ -161,8 +161,8 @@ class DistanceInputSpec(TraitedSpec):
 
 class DistanceOutputSpec(TraitedSpec):
     distance = traits.Float()
-    point1 = traits.Array(shape=(1,3))
-    point2 = traits.Array(shape=(1,3))
+    point1 = traits.Array(shape=(3,))
+    point2 = traits.Array(shape=(3,))
     
 class Distance(BaseInterface):
     '''
