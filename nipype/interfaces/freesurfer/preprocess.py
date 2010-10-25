@@ -26,6 +26,25 @@ from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     OutputMultiPath)
 from nipype.utils.misc import isdefined
 
+try:
+    from itertools import permutations
+except ImportError:
+    def product(*args, **kwds):
+        pools = map(tuple, args) * kwds.get('repeat', 1)
+        result = [[]]
+        for pool in pools:
+            result = [x+[y] for x in result for y in pool]
+        for prod in result:
+            yield tuple(prod)
+
+    def permutations(iterable, r=None):
+        pool = tuple(iterable)
+        n = len(pool)
+        r = n if r is None else r
+        for indices in product(range(n), repeat=r):
+            if len(set(indices)) == r:
+                yield tuple(pool[i] for i in indices)
+
 
 class ParseDICOMDirInputSpec(FSTraitedSpec):
     dicom_dir = Directory(exists=True, argstr='--d %s', mandatory=True,
@@ -156,7 +175,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
                            desc='<R direction> <A direction> <S direction>')
     #[''.join([i['x'],i['y'],i['z']]) for i in \
     #    walk(dict(x=lambda:['L','R'],y=lambda:['A','P'],z=lambda:['I','S']).items())]
-    _orientations = [comb for comb in itertools.chain(*[[''.join(c) for c in itertools.permutations(s)] for s in [a+b+c for a in 'LR' for b in 'AP' for c in 'IS']])]
+    _orientations = [comb for comb in itertools.chain(*[[''.join(c) for c in permutations(s)] for s in [a+b+c for a in 'LR' for b in 'AP' for c in 'IS']])]
     in_orientation = traits.Enum(_orientations,
                                 argstr='--in_orientation %s',
                                 desc='specify the input orientation')
