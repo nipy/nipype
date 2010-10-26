@@ -1,0 +1,2300 @@
+100914-09:15:08,846 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:15:08,846 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:15:08,846 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:15:08,847 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:15:08,847 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:15:08,847 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:15:08,848 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:15:08,848 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:15:08,848 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:15:08,848 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:15:08,849 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:15:08,849 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:15:08,849 workflow DEBUG:
+	 setting nodelevel input input2 = 1
+100914-09:15:08,850 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:15:08,850 workflow DEBUG:
+	 setting nodelevel input input2 = 1
+100914-09:15:08,851 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:15:08,851 workflow DEBUG:
+	 setting nodelevel input input2 = 2
+100914-09:15:08,851 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:15:08,851 workflow DEBUG:
+	 setting nodelevel input input2 = 2
+100914-09:15:08,851 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:15:08,852 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:15:08,852 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:15:08,852 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:15:08,853 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:15:08,853 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:15:08,853 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:15:08,853 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:15:08,854 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:15:08,854 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:15:08,855 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:15:08,855 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:15:08,856 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:15:08,856 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:15:08,856 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): Edge data exists: {'connect': [('output1', 'input2')]}
+100914-09:15:08,856 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:15:08,856 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:15:08,857 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:15:08,857 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:15:08,857 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:15:08,857 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:15:08,857 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:15:08,858 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:15:08,859 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:15:08,859 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:15:08,860 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:15:08,860 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:15:08,860 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:15:08,860 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:15:08,860 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:15:08,861 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:15:08,861 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:15:08,861 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:15:08,862 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:15:08,862 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:15:08,863 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:15:08,863 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:15:08,863 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:15:08,864 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:15:08,864 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:15:08,865 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:15:08,865 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:15:08,865 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:15:08,866 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:15:08,866 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:15:08,866 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:15:08,866 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:15:08,866 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:15:08,867 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:15:08,867 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:15:08,868 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:15:08,868 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:15:08,869 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): No edge data
+100914-09:15:08,869 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:15:08,869 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:15:08,869 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:15:08,869 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:15:08,870 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:15:08,870 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:15:08,870 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:15:08,870 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:15:08,871 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:15:08,871 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:15:08,872 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:15:08,872 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:15:08,872 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:15:08,873 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): No edge data
+100914-09:15:08,873 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:15:08,873 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:15:08,874 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:15:08,874 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:15:08,874 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:15:08,874 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:15:08,875 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:15:08,875 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:15:08,875 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:15:08,875 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:15:08,876 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:15:08,876 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:15:08,877 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:15:08,878 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:15:08,878 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:15:08,879 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:15:08,880 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:15:08,881 workflow DEBUG:
+	 (pipe1.mod1, pipe1.mod2): No edge data
+100914-09:15:08,881 workflow DEBUG:
+	 (pipe1.mod1, pipe1.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:15:08,881 workflow DEBUG:
+	 (pipe2.mod3, pipe2.mod4): No edge data
+100914-09:15:08,881 workflow DEBUG:
+	 (pipe2.mod3, pipe2.mod4): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:15:08,882 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): No edge data
+100914-09:15:08,882 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): new edge data: {'connect': [('mod2.output1', 'mod4.input1')]}
+100914-09:15:08,884 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): No edge data
+100914-09:15:08,884 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): new edge data: {'connect': [('pipe4.mod5.output1', 'pipe2.mod3.input1')]}
+100914-09:15:08,884 workflow DEBUG:
+	 Creating flat graph for workflow: pipe6
+100914-09:15:08,886 workflow DEBUG:
+	 expanding workflow: pipe6
+100914-09:15:08,886 workflow DEBUG:
+	 processing node: pipe6.pipe5
+100914-09:15:08,886 workflow DEBUG:
+	 out: connections-> [('pipe4.mod5.output1', 'pipe2.mod3.input1')]
+100914-09:15:08,886 workflow DEBUG:
+	 out: ('pipe4.mod5.output1', 'pipe2.mod3.input1')
+100914-09:15:08,887 workflow DEBUG:
+	 out edges: pipe4.mod5 output1 pipe6.pipe3 pipe2.mod3.input1
+100914-09:15:08,888 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): Edge data exists: {'connect': [('pipe4.mod5.output1', 'pipe2.mod3.input1')]}
+100914-09:15:08,888 workflow DEBUG:
+	 Removing connection: ('pipe4.mod5.output1', 'pipe2.mod3.input1')
+100914-09:15:08,889 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): new edge data: {'connect': []}
+100914-09:15:08,890 workflow DEBUG:
+	 (pipe4.mod5, pipe6.pipe3): No edge data
+100914-09:15:08,890 workflow DEBUG:
+	 (pipe4.mod5, pipe6.pipe3): new edge data: {'connect': [('output1', 'pipe2.mod3.input1')]}
+100914-09:15:08,890 workflow DEBUG:
+	 expanding workflow: pipe6.pipe5
+100914-09:15:08,890 workflow DEBUG:
+	 processing node: pipe5.pipe4
+100914-09:15:08,890 workflow DEBUG:
+	 expanding workflow: pipe5.pipe4
+100914-09:15:08,890 workflow DEBUG:
+	 processing node: pipe4.mod5
+100914-09:15:08,890 workflow DEBUG:
+	 finished expanding workflow: pipe5.pipe4
+100914-09:15:08,891 workflow DEBUG:
+	 finished expanding workflow: pipe6.pipe5
+100914-09:15:08,891 workflow DEBUG:
+	 processing node: pipe6.pipe3
+100914-09:15:08,891 workflow DEBUG:
+	 in: connections-> []
+100914-09:15:08,891 workflow DEBUG:
+	 in: connections-> [('output1', 'pipe2.mod3.input1')]
+100914-09:15:08,891 workflow DEBUG:
+	 in: ('output1', 'pipe2.mod3.input1')
+100914-09:15:08,892 workflow DEBUG:
+	 in edges: pipe6.pipe5.pipe4.mod5 output1 pipe2.mod3 input1
+100914-09:15:08,893 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe6.pipe3): Edge data exists: {'connect': [('output1', 'pipe2.mod3.input1')]}
+100914-09:15:08,894 workflow DEBUG:
+	 Removing connection: ('output1', 'pipe2.mod3.input1')
+100914-09:15:08,894 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe6.pipe3): new edge data: {'connect': []}
+100914-09:15:08,894 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe2.mod3): No edge data
+100914-09:15:08,894 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe2.mod3): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:15:08,894 workflow DEBUG:
+	 expanding workflow: pipe6.pipe3
+100914-09:15:08,894 workflow DEBUG:
+	 processing node: pipe3.pipe1
+100914-09:15:08,894 workflow DEBUG:
+	 out: connections-> [('mod2.output1', 'mod4.input1')]
+100914-09:15:08,894 workflow DEBUG:
+	 out: ('mod2.output1', 'mod4.input1')
+100914-09:15:08,895 workflow DEBUG:
+	 out edges: pipe1.mod2 output1 pipe3.pipe2 mod4.input1
+100914-09:15:08,896 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): Edge data exists: {'connect': [('mod2.output1', 'mod4.input1')]}
+100914-09:15:08,896 workflow DEBUG:
+	 Removing connection: ('mod2.output1', 'mod4.input1')
+100914-09:15:08,896 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): new edge data: {'connect': []}
+100914-09:15:08,897 workflow DEBUG:
+	 (pipe1.mod2, pipe3.pipe2): No edge data
+100914-09:15:08,897 workflow DEBUG:
+	 (pipe1.mod2, pipe3.pipe2): new edge data: {'connect': [('output1', 'mod4.input1')]}
+100914-09:15:08,897 workflow DEBUG:
+	 expanding workflow: pipe3.pipe1
+100914-09:15:08,897 workflow DEBUG:
+	 processing node: pipe1.mod1
+100914-09:15:08,897 workflow DEBUG:
+	 processing node: pipe1.mod2
+100914-09:15:08,897 workflow DEBUG:
+	 finished expanding workflow: pipe3.pipe1
+100914-09:15:08,898 workflow DEBUG:
+	 processing node: pipe3.pipe2
+100914-09:15:08,898 workflow DEBUG:
+	 in: connections-> []
+100914-09:15:08,898 workflow DEBUG:
+	 in: connections-> [('output1', 'mod4.input1')]
+100914-09:15:08,898 workflow DEBUG:
+	 in: ('output1', 'mod4.input1')
+100914-09:15:08,899 workflow DEBUG:
+	 in edges: pipe3.pipe1.mod2 output1 pipe2.mod4 input1
+100914-09:15:08,899 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe3.pipe2): Edge data exists: {'connect': [('output1', 'mod4.input1')]}
+100914-09:15:08,899 workflow DEBUG:
+	 Removing connection: ('output1', 'mod4.input1')
+100914-09:15:08,899 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe3.pipe2): new edge data: {'connect': []}
+100914-09:15:08,900 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe2.mod4): No edge data
+100914-09:15:08,900 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe2.mod4): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:15:08,900 workflow DEBUG:
+	 expanding workflow: pipe3.pipe2
+100914-09:15:08,900 workflow DEBUG:
+	 processing node: pipe2.mod3
+100914-09:15:08,900 workflow DEBUG:
+	 processing node: pipe2.mod4
+100914-09:15:08,900 workflow DEBUG:
+	 finished expanding workflow: pipe3.pipe2
+100914-09:15:08,900 workflow DEBUG:
+	 finished expanding workflow: pipe6.pipe3
+100914-09:15:08,901 workflow DEBUG:
+	 finished expanding workflow: pipe6
+100914-09:15:08,901 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:15:08,901 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:15:08,901 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:15:08,902 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:15:08,902 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:15:08,902 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:15:08,902 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:15:08,903 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:15:08,903 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:15:08,904 workflow DEBUG:
+	 adding multipath trait: input1
+100914-09:15:08,905 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:15:08,905 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:15:08,905 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:15:08,906 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:15:08,906 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:15:08,906 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:15:08,906 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:15:08,907 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:15:08,907 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:15:08,907 workflow INFO:
+	 Running serially.
+100914-09:15:08,907 workflow INFO:
+	 Node: mod1
+100914-09:15:08,907 workflow DEBUG:
+	 Creating /tmp/test_engine_vKacpk/pipe/mod1
+100914-09:15:08,907 workflow INFO:
+	 in dir: /tmp/test_engine_vKacpk/pipe/mod1
+100914-09:15:08,908 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:15:08,908 workflow DEBUG:
+	 Removing old /tmp/test_engine_vKacpk/pipe/mod1 and its contents
+100914-09:15:08,908 workflow DEBUG:
+	 Creating /tmp/test_engine_vKacpk/pipe/mod1
+100914-09:15:08,908 workflow DEBUG:
+	 Executing node
+100914-09:15:08,911 workflow DEBUG:
+	 setting input: pipe.mod1->pipe.mod2 {'connect': [('output1', 'input1')]}
+100914-09:15:08,911 workflow DEBUG:
+	 setting node input: input1->[1, 1]
+100914-09:15:08,911 workflow DEBUG:
+	 setting nodelevel input input1 = [1, 1]
+100914-09:15:08,912 workflow DEBUG:
+	 setting mapnode input: input1 -> [1, 1]
+100914-09:15:08,912 workflow INFO:
+	 Node: mod2
+100914-09:15:08,912 workflow DEBUG:
+	 Creating /tmp/test_engine_vKacpk/pipe/mod2
+100914-09:15:08,912 workflow INFO:
+	 in dir: /tmp/test_engine_vKacpk/pipe/mod2
+100914-09:15:08,912 workflow DEBUG:
+	 setting hashinput input1-> [1, 1]
+100914-09:15:08,913 workflow DEBUG:
+	 Node hash: 783e9404dfdcb5b41536a23b737246c4
+100914-09:15:08,913 workflow DEBUG:
+	 Removing old /tmp/test_engine_vKacpk/pipe/mod2 and its contents
+100914-09:15:08,913 workflow DEBUG:
+	 Creating /tmp/test_engine_vKacpk/pipe/mod2
+100914-09:15:08,913 workflow DEBUG:
+	 setting input 0 input1 1
+100914-09:15:08,914 workflow DEBUG:
+	 setting input 1 input1 1
+100914-09:15:08,914 workflow DEBUG:
+	 Creating flat graph for workflow: mapflow
+100914-09:15:08,914 workflow DEBUG:
+	 expanding workflow: mapflow
+100914-09:15:08,914 workflow DEBUG:
+	 processing node: mapflow._mod21
+100914-09:15:08,915 workflow DEBUG:
+	 processing node: mapflow._mod20
+100914-09:15:08,915 workflow DEBUG:
+	 finished expanding workflow: mapflow
+100914-09:15:08,915 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:15:08,915 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:15:08,915 workflow INFO:
+	 Running serially.
+100914-09:15:08,916 workflow INFO:
+	 Node: _mod21
+100914-09:15:08,916 workflow DEBUG:
+	 Creating /tmp/test_engine_vKacpk/pipe/mod2/mapflow/_mod21
+100914-09:15:08,916 workflow INFO:
+	 in dir: /tmp/test_engine_vKacpk/pipe/mod2/mapflow/_mod21
+100914-09:15:08,916 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:15:08,916 workflow DEBUG:
+	 Removing old /tmp/test_engine_vKacpk/pipe/mod2/mapflow/_mod21 and its contents
+100914-09:15:08,916 workflow DEBUG:
+	 Creating /tmp/test_engine_vKacpk/pipe/mod2/mapflow/_mod21
+100914-09:15:08,917 workflow DEBUG:
+	 Executing node
+100914-09:15:08,918 workflow INFO:
+	 Node: _mod20
+100914-09:15:08,919 workflow DEBUG:
+	 Creating /tmp/test_engine_vKacpk/pipe/mod2/mapflow/_mod20
+100914-09:15:08,919 workflow INFO:
+	 in dir: /tmp/test_engine_vKacpk/pipe/mod2/mapflow/_mod20
+100914-09:15:08,919 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:15:08,919 workflow DEBUG:
+	 Removing old /tmp/test_engine_vKacpk/pipe/mod2/mapflow/_mod20 and its contents
+100914-09:15:08,919 workflow DEBUG:
+	 Creating /tmp/test_engine_vKacpk/pipe/mod2/mapflow/_mod20
+100914-09:15:08,920 workflow DEBUG:
+	 Executing node
+100914-09:22:35,457 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:22:35,471 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:22:35,472 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:22:35,472 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:22:35,472 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:22:35,473 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:22:35,474 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:22:35,475 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:22:35,476 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:22:35,476 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:22:35,477 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:22:35,477 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:22:35,478 workflow DEBUG:
+	 setting nodelevel input input2 = 1
+100914-09:22:35,479 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:22:35,479 workflow DEBUG:
+	 setting nodelevel input input2 = 1
+100914-09:22:35,480 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:22:35,480 workflow DEBUG:
+	 setting nodelevel input input2 = 2
+100914-09:22:35,481 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:22:35,481 workflow DEBUG:
+	 setting nodelevel input input2 = 2
+100914-09:22:35,481 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:22:35,482 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:22:35,482 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:22:35,482 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:22:35,482 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:22:35,483 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:22:35,483 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:22:35,483 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:22:35,483 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:22:35,484 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:22:35,484 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:22:35,484 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:22:35,485 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:22:35,485 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:22:35,485 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): Edge data exists: {'connect': [('output1', 'input2')]}
+100914-09:22:35,485 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:22:35,486 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:22:35,486 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:22:35,486 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:22:35,486 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:22:35,486 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:22:35,487 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:22:35,487 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:22:35,488 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:22:35,488 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:22:35,489 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:22:35,489 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:22:35,489 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:22:35,490 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:22:35,490 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:22:35,490 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:22:35,490 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:22:35,491 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:22:35,491 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:22:35,492 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:22:35,492 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:22:35,493 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:22:35,493 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:22:35,494 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:22:35,494 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:22:35,494 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:22:35,494 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:22:35,494 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:22:35,495 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:22:35,495 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:22:35,495 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:22:35,495 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:22:35,496 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:22:35,496 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:22:35,497 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:22:35,497 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:22:35,497 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:22:35,498 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): No edge data
+100914-09:22:35,498 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:22:35,498 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:22:35,499 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:22:35,499 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:22:35,499 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:22:35,499 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:22:35,499 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:22:35,500 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:22:35,500 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:22:35,500 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:22:35,501 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:22:35,501 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:22:35,502 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:22:35,502 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): No edge data
+100914-09:22:35,502 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:22:35,503 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:22:35,503 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:22:35,503 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:22:35,504 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:22:35,504 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:22:35,504 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:22:35,504 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:22:35,504 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:22:35,505 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:22:35,505 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:22:35,506 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:22:35,507 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:22:35,507 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:22:35,507 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:22:35,509 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:22:35,509 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:22:35,510 workflow DEBUG:
+	 (pipe1.mod1, pipe1.mod2): No edge data
+100914-09:22:35,510 workflow DEBUG:
+	 (pipe1.mod1, pipe1.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:22:35,510 workflow DEBUG:
+	 (pipe2.mod3, pipe2.mod4): No edge data
+100914-09:22:35,510 workflow DEBUG:
+	 (pipe2.mod3, pipe2.mod4): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:22:35,511 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): No edge data
+100914-09:22:35,511 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): new edge data: {'connect': [('mod2.output1', 'mod4.input1')]}
+100914-09:22:35,513 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): No edge data
+100914-09:22:35,513 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): new edge data: {'connect': [('pipe4.mod5.output1', 'pipe2.mod3.input1')]}
+100914-09:22:35,513 workflow DEBUG:
+	 Creating flat graph for workflow: pipe6
+100914-09:22:35,515 workflow DEBUG:
+	 expanding workflow: pipe6
+100914-09:22:35,515 workflow DEBUG:
+	 processing node: pipe6.pipe5
+100914-09:22:35,515 workflow DEBUG:
+	 out: connections-> [('pipe4.mod5.output1', 'pipe2.mod3.input1')]
+100914-09:22:35,515 workflow DEBUG:
+	 out: ('pipe4.mod5.output1', 'pipe2.mod3.input1')
+100914-09:22:35,516 workflow DEBUG:
+	 out edges: pipe4.mod5 output1 pipe6.pipe3 pipe2.mod3.input1
+100914-09:22:35,517 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): Edge data exists: {'connect': [('pipe4.mod5.output1', 'pipe2.mod3.input1')]}
+100914-09:22:35,517 workflow DEBUG:
+	 Removing connection: ('pipe4.mod5.output1', 'pipe2.mod3.input1')
+100914-09:22:35,517 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): new edge data: {'connect': []}
+100914-09:22:35,518 workflow DEBUG:
+	 (pipe4.mod5, pipe6.pipe3): No edge data
+100914-09:22:35,518 workflow DEBUG:
+	 (pipe4.mod5, pipe6.pipe3): new edge data: {'connect': [('output1', 'pipe2.mod3.input1')]}
+100914-09:22:35,519 workflow DEBUG:
+	 expanding workflow: pipe6.pipe5
+100914-09:22:35,519 workflow DEBUG:
+	 processing node: pipe5.pipe4
+100914-09:22:35,519 workflow DEBUG:
+	 expanding workflow: pipe5.pipe4
+100914-09:22:35,519 workflow DEBUG:
+	 processing node: pipe4.mod5
+100914-09:22:35,519 workflow DEBUG:
+	 finished expanding workflow: pipe5.pipe4
+100914-09:22:35,519 workflow DEBUG:
+	 finished expanding workflow: pipe6.pipe5
+100914-09:22:35,519 workflow DEBUG:
+	 processing node: pipe6.pipe3
+100914-09:22:35,519 workflow DEBUG:
+	 in: connections-> []
+100914-09:22:35,519 workflow DEBUG:
+	 in: connections-> [('output1', 'pipe2.mod3.input1')]
+100914-09:22:35,520 workflow DEBUG:
+	 in: ('output1', 'pipe2.mod3.input1')
+100914-09:22:35,521 workflow DEBUG:
+	 in edges: pipe6.pipe5.pipe4.mod5 output1 pipe2.mod3 input1
+100914-09:22:35,522 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe6.pipe3): Edge data exists: {'connect': [('output1', 'pipe2.mod3.input1')]}
+100914-09:22:35,522 workflow DEBUG:
+	 Removing connection: ('output1', 'pipe2.mod3.input1')
+100914-09:22:35,522 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe6.pipe3): new edge data: {'connect': []}
+100914-09:22:35,522 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe2.mod3): No edge data
+100914-09:22:35,522 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe2.mod3): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:22:35,522 workflow DEBUG:
+	 expanding workflow: pipe6.pipe3
+100914-09:22:35,523 workflow DEBUG:
+	 processing node: pipe3.pipe1
+100914-09:22:35,523 workflow DEBUG:
+	 out: connections-> [('mod2.output1', 'mod4.input1')]
+100914-09:22:35,523 workflow DEBUG:
+	 out: ('mod2.output1', 'mod4.input1')
+100914-09:22:35,523 workflow DEBUG:
+	 out edges: pipe1.mod2 output1 pipe3.pipe2 mod4.input1
+100914-09:22:35,524 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): Edge data exists: {'connect': [('mod2.output1', 'mod4.input1')]}
+100914-09:22:35,524 workflow DEBUG:
+	 Removing connection: ('mod2.output1', 'mod4.input1')
+100914-09:22:35,524 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): new edge data: {'connect': []}
+100914-09:22:35,525 workflow DEBUG:
+	 (pipe1.mod2, pipe3.pipe2): No edge data
+100914-09:22:35,525 workflow DEBUG:
+	 (pipe1.mod2, pipe3.pipe2): new edge data: {'connect': [('output1', 'mod4.input1')]}
+100914-09:22:35,525 workflow DEBUG:
+	 expanding workflow: pipe3.pipe1
+100914-09:22:35,525 workflow DEBUG:
+	 processing node: pipe1.mod1
+100914-09:22:35,525 workflow DEBUG:
+	 processing node: pipe1.mod2
+100914-09:22:35,526 workflow DEBUG:
+	 finished expanding workflow: pipe3.pipe1
+100914-09:22:35,526 workflow DEBUG:
+	 processing node: pipe3.pipe2
+100914-09:22:35,526 workflow DEBUG:
+	 in: connections-> []
+100914-09:22:35,526 workflow DEBUG:
+	 in: connections-> [('output1', 'mod4.input1')]
+100914-09:22:35,526 workflow DEBUG:
+	 in: ('output1', 'mod4.input1')
+100914-09:22:35,527 workflow DEBUG:
+	 in edges: pipe3.pipe1.mod2 output1 pipe2.mod4 input1
+100914-09:22:35,527 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe3.pipe2): Edge data exists: {'connect': [('output1', 'mod4.input1')]}
+100914-09:22:35,527 workflow DEBUG:
+	 Removing connection: ('output1', 'mod4.input1')
+100914-09:22:35,527 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe3.pipe2): new edge data: {'connect': []}
+100914-09:22:35,527 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe2.mod4): No edge data
+100914-09:22:35,528 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe2.mod4): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:22:35,528 workflow DEBUG:
+	 expanding workflow: pipe3.pipe2
+100914-09:22:35,528 workflow DEBUG:
+	 processing node: pipe2.mod3
+100914-09:22:35,528 workflow DEBUG:
+	 processing node: pipe2.mod4
+100914-09:22:35,528 workflow DEBUG:
+	 finished expanding workflow: pipe3.pipe2
+100914-09:22:35,528 workflow DEBUG:
+	 finished expanding workflow: pipe6.pipe3
+100914-09:22:35,528 workflow DEBUG:
+	 finished expanding workflow: pipe6
+100914-09:22:35,529 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:22:35,529 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:22:35,529 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:22:35,530 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:22:35,530 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:22:35,530 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:22:35,530 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:22:35,530 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:22:35,531 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:22:35,532 workflow DEBUG:
+	 adding multipath trait: input1
+100914-09:22:35,532 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:22:35,532 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:22:35,533 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:22:35,533 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:22:35,533 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:22:35,534 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:22:35,534 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:22:35,534 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:22:35,534 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:22:35,534 workflow INFO:
+	 Running serially.
+100914-09:22:35,535 workflow INFO:
+	 Node: mod1
+100914-09:22:35,535 workflow DEBUG:
+	 Creating /tmp/test_engine_EsoW21/pipe/mod1
+100914-09:22:35,535 workflow INFO:
+	 in dir: /tmp/test_engine_EsoW21/pipe/mod1
+100914-09:22:35,535 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:22:35,535 workflow DEBUG:
+	 Removing old /tmp/test_engine_EsoW21/pipe/mod1 and its contents
+100914-09:22:35,536 workflow DEBUG:
+	 Creating /tmp/test_engine_EsoW21/pipe/mod1
+100914-09:22:35,536 workflow DEBUG:
+	 Executing node
+100914-09:22:35,538 workflow DEBUG:
+	 setting input: pipe.mod1->pipe.mod2 {'connect': [('output1', 'input1')]}
+100914-09:22:35,538 workflow DEBUG:
+	 setting node input: input1->[1, 1]
+100914-09:22:35,538 workflow DEBUG:
+	 setting nodelevel input input1 = [1, 1]
+100914-09:22:35,538 workflow DEBUG:
+	 setting mapnode input: input1 -> [1, 1]
+100914-09:22:35,538 workflow INFO:
+	 Node: mod2
+100914-09:22:35,538 workflow DEBUG:
+	 Creating /tmp/test_engine_EsoW21/pipe/mod2
+100914-09:22:35,538 workflow INFO:
+	 in dir: /tmp/test_engine_EsoW21/pipe/mod2
+100914-09:22:35,539 workflow DEBUG:
+	 setting hashinput input1-> [1, 1]
+100914-09:22:35,539 workflow DEBUG:
+	 Node hash: 783e9404dfdcb5b41536a23b737246c4
+100914-09:22:35,539 workflow DEBUG:
+	 Removing old /tmp/test_engine_EsoW21/pipe/mod2 and its contents
+100914-09:22:35,539 workflow DEBUG:
+	 Creating /tmp/test_engine_EsoW21/pipe/mod2
+100914-09:22:35,539 workflow DEBUG:
+	 setting input 0 input1 1
+100914-09:22:35,540 workflow DEBUG:
+	 setting input 1 input1 1
+100914-09:22:35,540 workflow DEBUG:
+	 Creating flat graph for workflow: mapflow
+100914-09:22:35,540 workflow DEBUG:
+	 expanding workflow: mapflow
+100914-09:22:35,540 workflow DEBUG:
+	 processing node: mapflow._mod21
+100914-09:22:35,541 workflow DEBUG:
+	 processing node: mapflow._mod20
+100914-09:22:35,541 workflow DEBUG:
+	 finished expanding workflow: mapflow
+100914-09:22:35,541 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:22:35,541 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:22:35,541 workflow INFO:
+	 Running serially.
+100914-09:22:35,541 workflow INFO:
+	 Node: _mod21
+100914-09:22:35,542 workflow DEBUG:
+	 Creating /tmp/test_engine_EsoW21/pipe/mod2/mapflow/_mod21
+100914-09:22:35,542 workflow INFO:
+	 in dir: /tmp/test_engine_EsoW21/pipe/mod2/mapflow/_mod21
+100914-09:22:35,542 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:22:35,542 workflow DEBUG:
+	 Removing old /tmp/test_engine_EsoW21/pipe/mod2/mapflow/_mod21 and its contents
+100914-09:22:35,542 workflow DEBUG:
+	 Creating /tmp/test_engine_EsoW21/pipe/mod2/mapflow/_mod21
+100914-09:22:35,542 workflow DEBUG:
+	 Executing node
+100914-09:22:35,544 workflow INFO:
+	 Node: _mod20
+100914-09:22:35,544 workflow DEBUG:
+	 Creating /tmp/test_engine_EsoW21/pipe/mod2/mapflow/_mod20
+100914-09:22:35,544 workflow INFO:
+	 in dir: /tmp/test_engine_EsoW21/pipe/mod2/mapflow/_mod20
+100914-09:22:35,545 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:22:35,545 workflow DEBUG:
+	 Removing old /tmp/test_engine_EsoW21/pipe/mod2/mapflow/_mod20 and its contents
+100914-09:22:35,545 workflow DEBUG:
+	 Creating /tmp/test_engine_EsoW21/pipe/mod2/mapflow/_mod20
+100914-09:22:35,545 workflow DEBUG:
+	 Executing node
+100914-09:23:29,336 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:23:29,337 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:23:29,337 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:23:29,337 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:23:29,337 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:23:29,338 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:23:29,338 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:23:29,339 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:23:29,339 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:23:29,339 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:23:29,339 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:23:29,340 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:23:29,340 workflow DEBUG:
+	 setting nodelevel input input2 = 1
+100914-09:23:29,340 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:23:29,340 workflow DEBUG:
+	 setting nodelevel input input2 = 1
+100914-09:23:29,341 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:23:29,341 workflow DEBUG:
+	 setting nodelevel input input2 = 2
+100914-09:23:29,341 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:23:29,342 workflow DEBUG:
+	 setting nodelevel input input2 = 2
+100914-09:23:29,342 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:23:29,342 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:23:29,343 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:23:29,343 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:23:29,343 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:23:29,343 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:23:29,343 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:23:29,344 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:23:29,344 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:23:29,344 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:23:29,345 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:23:29,345 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:23:29,346 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:23:29,346 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:23:29,346 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): Edge data exists: {'connect': [('output1', 'input2')]}
+100914-09:23:29,346 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:23:29,346 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:23:29,347 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:23:29,347 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:23:29,347 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:23:29,347 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:23:29,347 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:23:29,348 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:23:29,348 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:23:29,349 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:23:29,349 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:23:29,349 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:23:29,349 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:23:29,350 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:23:29,350 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:23:29,350 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:23:29,350 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:23:29,351 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:23:29,351 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:23:29,352 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:23:29,352 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:23:29,353 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:23:29,353 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:23:29,354 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:23:29,354 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:23:29,354 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:23:29,354 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:23:29,354 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:23:29,355 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:23:29,355 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:23:29,355 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:23:29,355 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:23:29,355 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:23:29,356 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:23:29,356 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:23:29,357 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:23:29,357 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:23:29,358 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): No edge data
+100914-09:23:29,358 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:23:29,358 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:23:29,358 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:23:29,358 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:23:29,359 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:23:29,359 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:23:29,359 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:23:29,359 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:23:29,359 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:23:29,360 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:23:29,360 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:23:29,361 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:23:29,361 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:23:29,362 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): No edge data
+100914-09:23:29,362 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:23:29,362 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:23:29,362 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:23:29,362 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:23:29,363 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:23:29,363 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:23:29,363 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:23:29,363 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:23:29,363 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:23:29,364 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:23:29,365 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:23:29,365 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:23:29,366 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:23:29,367 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:23:29,367 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:23:29,368 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:23:29,368 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:23:29,369 workflow DEBUG:
+	 (pipe1.mod1, pipe1.mod2): No edge data
+100914-09:23:29,369 workflow DEBUG:
+	 (pipe1.mod1, pipe1.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:23:29,369 workflow DEBUG:
+	 (pipe2.mod3, pipe2.mod4): No edge data
+100914-09:23:29,369 workflow DEBUG:
+	 (pipe2.mod3, pipe2.mod4): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:23:29,370 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): No edge data
+100914-09:23:29,371 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): new edge data: {'connect': [('mod2.output1', 'mod4.input1')]}
+100914-09:23:29,372 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): No edge data
+100914-09:23:29,372 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): new edge data: {'connect': [('pipe4.mod5.output1', 'pipe2.mod3.input1')]}
+100914-09:23:29,372 workflow DEBUG:
+	 Creating flat graph for workflow: pipe6
+100914-09:23:29,374 workflow DEBUG:
+	 expanding workflow: pipe6
+100914-09:23:29,374 workflow DEBUG:
+	 processing node: pipe6.pipe5
+100914-09:23:29,374 workflow DEBUG:
+	 out: connections-> [('pipe4.mod5.output1', 'pipe2.mod3.input1')]
+100914-09:23:29,374 workflow DEBUG:
+	 out: ('pipe4.mod5.output1', 'pipe2.mod3.input1')
+100914-09:23:29,374 workflow DEBUG:
+	 out edges: pipe4.mod5 output1 pipe6.pipe3 pipe2.mod3.input1
+100914-09:23:29,376 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): Edge data exists: {'connect': [('pipe4.mod5.output1', 'pipe2.mod3.input1')]}
+100914-09:23:29,376 workflow DEBUG:
+	 Removing connection: ('pipe4.mod5.output1', 'pipe2.mod3.input1')
+100914-09:23:29,377 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): new edge data: {'connect': []}
+100914-09:23:29,378 workflow DEBUG:
+	 (pipe4.mod5, pipe6.pipe3): No edge data
+100914-09:23:29,378 workflow DEBUG:
+	 (pipe4.mod5, pipe6.pipe3): new edge data: {'connect': [('output1', 'pipe2.mod3.input1')]}
+100914-09:23:29,378 workflow DEBUG:
+	 expanding workflow: pipe6.pipe5
+100914-09:23:29,378 workflow DEBUG:
+	 processing node: pipe5.pipe4
+100914-09:23:29,378 workflow DEBUG:
+	 expanding workflow: pipe5.pipe4
+100914-09:23:29,379 workflow DEBUG:
+	 processing node: pipe4.mod5
+100914-09:23:29,379 workflow DEBUG:
+	 finished expanding workflow: pipe5.pipe4
+100914-09:23:29,379 workflow DEBUG:
+	 finished expanding workflow: pipe6.pipe5
+100914-09:23:29,379 workflow DEBUG:
+	 processing node: pipe6.pipe3
+100914-09:23:29,379 workflow DEBUG:
+	 in: connections-> []
+100914-09:23:29,379 workflow DEBUG:
+	 in: connections-> [('output1', 'pipe2.mod3.input1')]
+100914-09:23:29,379 workflow DEBUG:
+	 in: ('output1', 'pipe2.mod3.input1')
+100914-09:23:29,380 workflow DEBUG:
+	 in edges: pipe6.pipe5.pipe4.mod5 output1 pipe2.mod3 input1
+100914-09:23:29,381 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe6.pipe3): Edge data exists: {'connect': [('output1', 'pipe2.mod3.input1')]}
+100914-09:23:29,382 workflow DEBUG:
+	 Removing connection: ('output1', 'pipe2.mod3.input1')
+100914-09:23:29,382 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe6.pipe3): new edge data: {'connect': []}
+100914-09:23:29,382 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe2.mod3): No edge data
+100914-09:23:29,382 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe2.mod3): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:23:29,382 workflow DEBUG:
+	 expanding workflow: pipe6.pipe3
+100914-09:23:29,382 workflow DEBUG:
+	 processing node: pipe3.pipe1
+100914-09:23:29,382 workflow DEBUG:
+	 out: connections-> [('mod2.output1', 'mod4.input1')]
+100914-09:23:29,382 workflow DEBUG:
+	 out: ('mod2.output1', 'mod4.input1')
+100914-09:23:29,383 workflow DEBUG:
+	 out edges: pipe1.mod2 output1 pipe3.pipe2 mod4.input1
+100914-09:23:29,384 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): Edge data exists: {'connect': [('mod2.output1', 'mod4.input1')]}
+100914-09:23:29,384 workflow DEBUG:
+	 Removing connection: ('mod2.output1', 'mod4.input1')
+100914-09:23:29,384 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): new edge data: {'connect': []}
+100914-09:23:29,385 workflow DEBUG:
+	 (pipe1.mod2, pipe3.pipe2): No edge data
+100914-09:23:29,385 workflow DEBUG:
+	 (pipe1.mod2, pipe3.pipe2): new edge data: {'connect': [('output1', 'mod4.input1')]}
+100914-09:23:29,385 workflow DEBUG:
+	 expanding workflow: pipe3.pipe1
+100914-09:23:29,385 workflow DEBUG:
+	 processing node: pipe1.mod1
+100914-09:23:29,385 workflow DEBUG:
+	 processing node: pipe1.mod2
+100914-09:23:29,385 workflow DEBUG:
+	 finished expanding workflow: pipe3.pipe1
+100914-09:23:29,386 workflow DEBUG:
+	 processing node: pipe3.pipe2
+100914-09:23:29,386 workflow DEBUG:
+	 in: connections-> []
+100914-09:23:29,386 workflow DEBUG:
+	 in: connections-> [('output1', 'mod4.input1')]
+100914-09:23:29,386 workflow DEBUG:
+	 in: ('output1', 'mod4.input1')
+100914-09:23:29,386 workflow DEBUG:
+	 in edges: pipe3.pipe1.mod2 output1 pipe2.mod4 input1
+100914-09:23:29,387 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe3.pipe2): Edge data exists: {'connect': [('output1', 'mod4.input1')]}
+100914-09:23:29,387 workflow DEBUG:
+	 Removing connection: ('output1', 'mod4.input1')
+100914-09:23:29,387 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe3.pipe2): new edge data: {'connect': []}
+100914-09:23:29,387 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe2.mod4): No edge data
+100914-09:23:29,387 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe2.mod4): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:23:29,388 workflow DEBUG:
+	 expanding workflow: pipe3.pipe2
+100914-09:23:29,388 workflow DEBUG:
+	 processing node: pipe2.mod3
+100914-09:23:29,388 workflow DEBUG:
+	 processing node: pipe2.mod4
+100914-09:23:29,388 workflow DEBUG:
+	 finished expanding workflow: pipe3.pipe2
+100914-09:23:29,388 workflow DEBUG:
+	 finished expanding workflow: pipe6.pipe3
+100914-09:23:29,388 workflow DEBUG:
+	 finished expanding workflow: pipe6
+100914-09:23:29,389 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:23:29,389 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:23:29,389 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:23:29,390 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:23:29,390 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:23:29,390 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:23:29,390 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:23:29,390 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:23:29,391 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:23:29,392 workflow DEBUG:
+	 adding multipath trait: input1
+100914-09:23:29,392 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:23:29,392 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:23:29,392 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:23:29,393 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:23:29,393 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:23:29,393 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:23:29,394 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:23:29,394 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:23:29,394 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:23:29,394 workflow INFO:
+	 Running serially.
+100914-09:23:29,395 workflow INFO:
+	 Node: mod1
+100914-09:23:29,395 workflow DEBUG:
+	 Creating /tmp/test_engine_mBs2Jc/pipe/mod1
+100914-09:23:29,395 workflow INFO:
+	 in dir: /tmp/test_engine_mBs2Jc/pipe/mod1
+100914-09:23:29,395 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:23:29,395 workflow DEBUG:
+	 Removing old /tmp/test_engine_mBs2Jc/pipe/mod1 and its contents
+100914-09:23:29,395 workflow DEBUG:
+	 Creating /tmp/test_engine_mBs2Jc/pipe/mod1
+100914-09:23:29,396 workflow DEBUG:
+	 Executing node
+100914-09:23:29,398 workflow DEBUG:
+	 setting input: pipe.mod1->pipe.mod2 {'connect': [('output1', 'input1')]}
+100914-09:23:29,398 workflow DEBUG:
+	 setting node input: input1->[1, 1]
+100914-09:23:29,398 workflow DEBUG:
+	 setting nodelevel input input1 = [1, 1]
+100914-09:23:29,398 workflow DEBUG:
+	 setting mapnode input: input1 -> [1, 1]
+100914-09:23:29,398 workflow INFO:
+	 Node: mod2
+100914-09:23:29,398 workflow DEBUG:
+	 Creating /tmp/test_engine_mBs2Jc/pipe/mod2
+100914-09:23:29,398 workflow INFO:
+	 in dir: /tmp/test_engine_mBs2Jc/pipe/mod2
+100914-09:23:29,399 workflow DEBUG:
+	 setting hashinput input1-> [1, 1]
+100914-09:23:29,399 workflow DEBUG:
+	 Node hash: 783e9404dfdcb5b41536a23b737246c4
+100914-09:23:29,399 workflow DEBUG:
+	 Removing old /tmp/test_engine_mBs2Jc/pipe/mod2 and its contents
+100914-09:23:29,399 workflow DEBUG:
+	 Creating /tmp/test_engine_mBs2Jc/pipe/mod2
+100914-09:23:29,399 workflow DEBUG:
+	 setting input 0 input1 1
+100914-09:23:29,400 workflow DEBUG:
+	 setting input 1 input1 1
+100914-09:23:29,400 workflow DEBUG:
+	 Creating flat graph for workflow: mapflow
+100914-09:23:29,400 workflow DEBUG:
+	 expanding workflow: mapflow
+100914-09:23:29,400 workflow DEBUG:
+	 processing node: mapflow._mod21
+100914-09:23:29,400 workflow DEBUG:
+	 processing node: mapflow._mod20
+100914-09:23:29,401 workflow DEBUG:
+	 finished expanding workflow: mapflow
+100914-09:23:29,401 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:23:29,401 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:23:29,401 workflow INFO:
+	 Running serially.
+100914-09:23:29,402 workflow INFO:
+	 Node: _mod21
+100914-09:23:29,402 workflow DEBUG:
+	 Creating /tmp/test_engine_mBs2Jc/pipe/mod2/mapflow/_mod21
+100914-09:23:29,402 workflow INFO:
+	 in dir: /tmp/test_engine_mBs2Jc/pipe/mod2/mapflow/_mod21
+100914-09:23:29,402 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:23:29,402 workflow DEBUG:
+	 Removing old /tmp/test_engine_mBs2Jc/pipe/mod2/mapflow/_mod21 and its contents
+100914-09:23:29,402 workflow DEBUG:
+	 Creating /tmp/test_engine_mBs2Jc/pipe/mod2/mapflow/_mod21
+100914-09:23:29,403 workflow DEBUG:
+	 Executing node
+100914-09:23:29,404 workflow INFO:
+	 Node: _mod20
+100914-09:23:29,404 workflow DEBUG:
+	 Creating /tmp/test_engine_mBs2Jc/pipe/mod2/mapflow/_mod20
+100914-09:23:29,404 workflow INFO:
+	 in dir: /tmp/test_engine_mBs2Jc/pipe/mod2/mapflow/_mod20
+100914-09:23:29,405 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:23:29,405 workflow DEBUG:
+	 Removing old /tmp/test_engine_mBs2Jc/pipe/mod2/mapflow/_mod20 and its contents
+100914-09:23:29,405 workflow DEBUG:
+	 Creating /tmp/test_engine_mBs2Jc/pipe/mod2/mapflow/_mod20
+100914-09:23:29,405 workflow DEBUG:
+	 Executing node
+100914-09:26:21,849 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:26:21,850 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:26:21,850 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:26:21,850 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:26:21,850 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:26:21,851 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:26:21,851 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:26:21,852 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:26:21,852 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:26:21,852 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:26:21,852 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:26:21,853 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:26:21,853 workflow DEBUG:
+	 setting nodelevel input input2 = 1
+100914-09:26:21,853 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:26:21,853 workflow DEBUG:
+	 setting nodelevel input input2 = 1
+100914-09:26:21,854 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:26:21,854 workflow DEBUG:
+	 setting nodelevel input input2 = 2
+100914-09:26:21,854 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:26:21,854 workflow DEBUG:
+	 setting nodelevel input input2 = 2
+100914-09:26:21,854 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:26:21,855 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:26:21,855 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:26:21,855 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:26:21,856 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:26:21,856 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:26:21,856 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:26:21,857 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:26:21,857 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:26:21,858 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:26:21,858 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:26:21,858 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:26:21,859 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:26:21,859 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:26:21,859 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): Edge data exists: {'connect': [('output1', 'input2')]}
+100914-09:26:21,859 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:26:21,859 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:26:21,860 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:26:21,860 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:26:21,860 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:26:21,860 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:26:21,861 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:26:21,861 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:26:21,862 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:26:21,862 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:26:21,863 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:26:21,863 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:26:21,863 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:26:21,863 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:26:21,863 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:26:21,864 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:26:21,864 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:26:21,864 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:26:21,864 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:26:21,865 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:26:21,865 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:26:21,866 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:26:21,866 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:26:21,867 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:26:21,867 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:26:21,867 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:26:21,867 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:26:21,868 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:26:21,868 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:26:21,868 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:26:21,868 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:26:21,869 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:26:21,869 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:26:21,869 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:26:21,870 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:26:21,870 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:26:21,870 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:26:21,871 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): No edge data
+100914-09:26:21,871 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:26:21,871 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:26:21,872 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:26:21,872 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:26:21,872 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:26:21,872 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:26:21,873 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:26:21,873 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:26:21,873 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:26:21,873 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:26:21,874 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:26:21,874 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:26:21,875 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:26:21,875 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): No edge data
+100914-09:26:21,876 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:26:21,876 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:26:21,876 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:26:21,876 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:26:21,876 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:26:21,877 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:26:21,877 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:26:21,877 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:26:21,877 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:26:21,877 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:26:21,878 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:26:21,878 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:26:21,879 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:26:21,880 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:26:21,880 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:26:21,881 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:26:21,882 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:26:21,882 workflow DEBUG:
+	 (pipe1.mod1, pipe1.mod2): No edge data
+100914-09:26:21,883 workflow DEBUG:
+	 (pipe1.mod1, pipe1.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:26:21,883 workflow DEBUG:
+	 (pipe2.mod3, pipe2.mod4): No edge data
+100914-09:26:21,883 workflow DEBUG:
+	 (pipe2.mod3, pipe2.mod4): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:26:21,884 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): No edge data
+100914-09:26:21,884 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): new edge data: {'connect': [('mod2.output1', 'mod4.input1')]}
+100914-09:26:21,886 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): No edge data
+100914-09:26:21,886 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): new edge data: {'connect': [('pipe4.mod5.output1', 'pipe2.mod3.input1')]}
+100914-09:26:21,886 workflow DEBUG:
+	 Creating flat graph for workflow: pipe6
+100914-09:26:21,887 workflow DEBUG:
+	 expanding workflow: pipe6
+100914-09:26:21,888 workflow DEBUG:
+	 processing node: pipe6.pipe5
+100914-09:26:21,888 workflow DEBUG:
+	 out: connections-> [('pipe4.mod5.output1', 'pipe2.mod3.input1')]
+100914-09:26:21,888 workflow DEBUG:
+	 out: ('pipe4.mod5.output1', 'pipe2.mod3.input1')
+100914-09:26:21,888 workflow DEBUG:
+	 out edges: pipe4.mod5 output1 pipe6.pipe3 pipe2.mod3.input1
+100914-09:26:21,890 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): Edge data exists: {'connect': [('pipe4.mod5.output1', 'pipe2.mod3.input1')]}
+100914-09:26:21,890 workflow DEBUG:
+	 Removing connection: ('pipe4.mod5.output1', 'pipe2.mod3.input1')
+100914-09:26:21,890 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): new edge data: {'connect': []}
+100914-09:26:21,891 workflow DEBUG:
+	 (pipe4.mod5, pipe6.pipe3): No edge data
+100914-09:26:21,891 workflow DEBUG:
+	 (pipe4.mod5, pipe6.pipe3): new edge data: {'connect': [('output1', 'pipe2.mod3.input1')]}
+100914-09:26:21,891 workflow DEBUG:
+	 expanding workflow: pipe6.pipe5
+100914-09:26:21,891 workflow DEBUG:
+	 processing node: pipe5.pipe4
+100914-09:26:21,891 workflow DEBUG:
+	 expanding workflow: pipe5.pipe4
+100914-09:26:21,892 workflow DEBUG:
+	 processing node: pipe4.mod5
+100914-09:26:21,892 workflow DEBUG:
+	 finished expanding workflow: pipe5.pipe4
+100914-09:26:21,892 workflow DEBUG:
+	 finished expanding workflow: pipe6.pipe5
+100914-09:26:21,892 workflow DEBUG:
+	 processing node: pipe6.pipe3
+100914-09:26:21,892 workflow DEBUG:
+	 in: connections-> []
+100914-09:26:21,892 workflow DEBUG:
+	 in: connections-> [('output1', 'pipe2.mod3.input1')]
+100914-09:26:21,892 workflow DEBUG:
+	 in: ('output1', 'pipe2.mod3.input1')
+100914-09:26:21,893 workflow DEBUG:
+	 in edges: pipe6.pipe5.pipe4.mod5 output1 pipe2.mod3 input1
+100914-09:26:21,895 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe6.pipe3): Edge data exists: {'connect': [('output1', 'pipe2.mod3.input1')]}
+100914-09:26:21,895 workflow DEBUG:
+	 Removing connection: ('output1', 'pipe2.mod3.input1')
+100914-09:26:21,895 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe6.pipe3): new edge data: {'connect': []}
+100914-09:26:21,895 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe2.mod3): No edge data
+100914-09:26:21,895 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe2.mod3): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:26:21,895 workflow DEBUG:
+	 expanding workflow: pipe6.pipe3
+100914-09:26:21,895 workflow DEBUG:
+	 processing node: pipe3.pipe1
+100914-09:26:21,895 workflow DEBUG:
+	 out: connections-> [('mod2.output1', 'mod4.input1')]
+100914-09:26:21,896 workflow DEBUG:
+	 out: ('mod2.output1', 'mod4.input1')
+100914-09:26:21,896 workflow DEBUG:
+	 out edges: pipe1.mod2 output1 pipe3.pipe2 mod4.input1
+100914-09:26:21,897 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): Edge data exists: {'connect': [('mod2.output1', 'mod4.input1')]}
+100914-09:26:21,897 workflow DEBUG:
+	 Removing connection: ('mod2.output1', 'mod4.input1')
+100914-09:26:21,897 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): new edge data: {'connect': []}
+100914-09:26:21,898 workflow DEBUG:
+	 (pipe1.mod2, pipe3.pipe2): No edge data
+100914-09:26:21,898 workflow DEBUG:
+	 (pipe1.mod2, pipe3.pipe2): new edge data: {'connect': [('output1', 'mod4.input1')]}
+100914-09:26:21,898 workflow DEBUG:
+	 expanding workflow: pipe3.pipe1
+100914-09:26:21,898 workflow DEBUG:
+	 processing node: pipe1.mod1
+100914-09:26:21,898 workflow DEBUG:
+	 processing node: pipe1.mod2
+100914-09:26:21,898 workflow DEBUG:
+	 finished expanding workflow: pipe3.pipe1
+100914-09:26:21,899 workflow DEBUG:
+	 processing node: pipe3.pipe2
+100914-09:26:21,899 workflow DEBUG:
+	 in: connections-> []
+100914-09:26:21,899 workflow DEBUG:
+	 in: connections-> [('output1', 'mod4.input1')]
+100914-09:26:21,899 workflow DEBUG:
+	 in: ('output1', 'mod4.input1')
+100914-09:26:21,899 workflow DEBUG:
+	 in edges: pipe3.pipe1.mod2 output1 pipe2.mod4 input1
+100914-09:26:21,900 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe3.pipe2): Edge data exists: {'connect': [('output1', 'mod4.input1')]}
+100914-09:26:21,900 workflow DEBUG:
+	 Removing connection: ('output1', 'mod4.input1')
+100914-09:26:21,900 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe3.pipe2): new edge data: {'connect': []}
+100914-09:26:21,900 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe2.mod4): No edge data
+100914-09:26:21,900 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe2.mod4): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:26:21,901 workflow DEBUG:
+	 expanding workflow: pipe3.pipe2
+100914-09:26:21,901 workflow DEBUG:
+	 processing node: pipe2.mod3
+100914-09:26:21,901 workflow DEBUG:
+	 processing node: pipe2.mod4
+100914-09:26:21,901 workflow DEBUG:
+	 finished expanding workflow: pipe3.pipe2
+100914-09:26:21,901 workflow DEBUG:
+	 finished expanding workflow: pipe6.pipe3
+100914-09:26:21,901 workflow DEBUG:
+	 finished expanding workflow: pipe6
+100914-09:26:21,902 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:26:21,902 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:26:21,902 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:26:21,902 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:26:21,903 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:26:21,903 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:26:21,903 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:26:21,903 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:26:21,903 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:26:21,905 workflow DEBUG:
+	 adding multipath trait: input1
+100914-09:26:21,905 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:26:21,905 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:26:21,905 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:26:21,906 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:26:21,906 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:26:21,906 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:26:21,906 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:26:21,907 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:26:21,907 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:26:21,907 workflow INFO:
+	 Running serially.
+100914-09:26:21,907 workflow INFO:
+	 Node: mod1
+100914-09:26:21,908 workflow DEBUG:
+	 Creating /tmp/test_engine_wGbhNG/pipe/mod1
+100914-09:26:21,908 workflow INFO:
+	 in dir: /tmp/test_engine_wGbhNG/pipe/mod1
+100914-09:26:21,908 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:26:21,908 workflow DEBUG:
+	 Removing old /tmp/test_engine_wGbhNG/pipe/mod1 and its contents
+100914-09:26:21,908 workflow DEBUG:
+	 Creating /tmp/test_engine_wGbhNG/pipe/mod1
+100914-09:26:21,909 workflow DEBUG:
+	 Executing node
+100914-09:26:21,910 workflow DEBUG:
+	 setting input: pipe.mod1->pipe.mod2 {'connect': [('output1', 'input1')]}
+100914-09:26:21,911 workflow DEBUG:
+	 setting node input: input1->[1, 1]
+100914-09:26:21,911 workflow DEBUG:
+	 setting nodelevel input input1 = [1, 1]
+100914-09:26:21,911 workflow DEBUG:
+	 setting mapnode input: input1 -> [1, 1]
+100914-09:26:21,911 workflow INFO:
+	 Node: mod2
+100914-09:26:21,911 workflow DEBUG:
+	 Creating /tmp/test_engine_wGbhNG/pipe/mod2
+100914-09:26:21,911 workflow INFO:
+	 in dir: /tmp/test_engine_wGbhNG/pipe/mod2
+100914-09:26:21,911 workflow DEBUG:
+	 setting hashinput input1-> [1, 1]
+100914-09:26:21,912 workflow DEBUG:
+	 Node hash: 783e9404dfdcb5b41536a23b737246c4
+100914-09:26:21,912 workflow DEBUG:
+	 Removing old /tmp/test_engine_wGbhNG/pipe/mod2 and its contents
+100914-09:26:21,912 workflow DEBUG:
+	 Creating /tmp/test_engine_wGbhNG/pipe/mod2
+100914-09:26:21,912 workflow DEBUG:
+	 setting input 0 input1 1
+100914-09:26:21,912 workflow DEBUG:
+	 setting input 1 input1 1
+100914-09:26:21,913 workflow DEBUG:
+	 Creating flat graph for workflow: mapflow
+100914-09:26:21,913 workflow DEBUG:
+	 expanding workflow: mapflow
+100914-09:26:21,913 workflow DEBUG:
+	 processing node: mapflow._mod21
+100914-09:26:21,913 workflow DEBUG:
+	 processing node: mapflow._mod20
+100914-09:26:21,914 workflow DEBUG:
+	 finished expanding workflow: mapflow
+100914-09:26:21,914 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:26:21,914 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:26:21,914 workflow INFO:
+	 Running serially.
+100914-09:26:21,915 workflow INFO:
+	 Node: _mod21
+100914-09:26:21,915 workflow DEBUG:
+	 Creating /tmp/test_engine_wGbhNG/pipe/mod2/mapflow/_mod21
+100914-09:26:21,915 workflow INFO:
+	 in dir: /tmp/test_engine_wGbhNG/pipe/mod2/mapflow/_mod21
+100914-09:26:21,915 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:26:21,915 workflow DEBUG:
+	 Removing old /tmp/test_engine_wGbhNG/pipe/mod2/mapflow/_mod21 and its contents
+100914-09:26:21,915 workflow DEBUG:
+	 Creating /tmp/test_engine_wGbhNG/pipe/mod2/mapflow/_mod21
+100914-09:26:21,916 workflow DEBUG:
+	 Executing node
+100914-09:26:21,917 workflow INFO:
+	 Node: _mod20
+100914-09:26:21,917 workflow DEBUG:
+	 Creating /tmp/test_engine_wGbhNG/pipe/mod2/mapflow/_mod20
+100914-09:26:21,917 workflow INFO:
+	 in dir: /tmp/test_engine_wGbhNG/pipe/mod2/mapflow/_mod20
+100914-09:26:21,918 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:26:21,918 workflow DEBUG:
+	 Removing old /tmp/test_engine_wGbhNG/pipe/mod2/mapflow/_mod20 and its contents
+100914-09:26:21,918 workflow DEBUG:
+	 Creating /tmp/test_engine_wGbhNG/pipe/mod2/mapflow/_mod20
+100914-09:26:21,918 workflow DEBUG:
+	 Executing node
+100914-09:27:54,680 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:27:54,680 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:27:54,680 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:27:54,681 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:27:54,681 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:27:54,681 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:27:54,682 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:27:54,682 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:27:54,682 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:27:54,682 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:27:54,683 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:27:54,683 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:27:54,683 workflow DEBUG:
+	 setting nodelevel input input2 = 1
+100914-09:27:54,684 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:27:54,684 workflow DEBUG:
+	 setting nodelevel input input2 = 1
+100914-09:27:54,684 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:27:54,684 workflow DEBUG:
+	 setting nodelevel input input2 = 2
+100914-09:27:54,684 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:27:54,685 workflow DEBUG:
+	 setting nodelevel input input2 = 2
+100914-09:27:54,685 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:27:54,686 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:27:54,686 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:27:54,686 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:27:54,686 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:27:54,686 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:27:54,687 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:27:54,687 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:27:54,687 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:27:54,687 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:27:54,688 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:27:54,688 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:27:54,689 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:27:54,689 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:27:54,689 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): Edge data exists: {'connect': [('output1', 'input2')]}
+100914-09:27:54,689 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:27:54,689 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:27:54,690 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:27:54,690 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:27:54,690 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:27:54,690 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:27:54,690 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:27:54,691 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:27:54,691 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:27:54,691 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:27:54,692 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:27:54,692 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:27:54,692 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:27:54,693 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:27:54,693 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:27:54,693 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:27:54,693 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:27:54,694 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:27:54,694 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:27:54,694 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:27:54,695 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:27:54,696 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:27:54,696 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:27:54,697 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:27:54,697 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:27:54,697 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:27:54,697 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:27:54,697 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:27:54,698 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:27:54,698 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:27:54,698 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:27:54,698 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:27:54,698 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:27:54,699 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:27:54,699 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:27:54,700 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:27:54,700 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:27:54,701 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): No edge data
+100914-09:27:54,701 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:27:54,701 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:27:54,701 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:27:54,701 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:27:54,702 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:27:54,702 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:27:54,702 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:27:54,702 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:27:54,702 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:27:54,703 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:27:54,703 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:27:54,704 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:27:54,704 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:27:54,705 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): No edge data
+100914-09:27:54,705 workflow DEBUG:
+	 (pipe.mod1, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:27:54,705 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): No edge data
+100914-09:27:54,705 workflow DEBUG:
+	 (pipe.mod2, pipe.mod3): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:27:54,705 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:27:54,706 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:27:54,706 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:27:54,706 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:27:54,706 workflow DEBUG:
+	 processing node: pipe.mod3
+100914-09:27:54,706 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:27:54,707 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:27:54,707 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:27:54,708 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:27:54,708 workflow DEBUG:
+	 setting nodelevel input input1 = 1
+100914-09:27:54,709 workflow DEBUG:
+	 setting nodelevel input input1 = 2
+100914-09:27:54,709 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:27:54,711 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:27:54,711 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:27:54,712 workflow DEBUG:
+	 (pipe1.mod1, pipe1.mod2): No edge data
+100914-09:27:54,712 workflow DEBUG:
+	 (pipe1.mod1, pipe1.mod2): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:27:54,712 workflow DEBUG:
+	 (pipe2.mod3, pipe2.mod4): No edge data
+100914-09:27:54,712 workflow DEBUG:
+	 (pipe2.mod3, pipe2.mod4): new edge data: {'connect': [('output1', 'input2')]}
+100914-09:27:54,713 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): No edge data
+100914-09:27:54,713 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): new edge data: {'connect': [('mod2.output1', 'mod4.input1')]}
+100914-09:27:54,715 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): No edge data
+100914-09:27:54,715 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): new edge data: {'connect': [('pipe4.mod5.output1', 'pipe2.mod3.input1')]}
+100914-09:27:54,715 workflow DEBUG:
+	 Creating flat graph for workflow: pipe6
+100914-09:27:54,716 workflow DEBUG:
+	 expanding workflow: pipe6
+100914-09:27:54,717 workflow DEBUG:
+	 processing node: pipe6.pipe5
+100914-09:27:54,717 workflow DEBUG:
+	 out: connections-> [('pipe4.mod5.output1', 'pipe2.mod3.input1')]
+100914-09:27:54,717 workflow DEBUG:
+	 out: ('pipe4.mod5.output1', 'pipe2.mod3.input1')
+100914-09:27:54,717 workflow DEBUG:
+	 out edges: pipe4.mod5 output1 pipe6.pipe3 pipe2.mod3.input1
+100914-09:27:54,719 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): Edge data exists: {'connect': [('pipe4.mod5.output1', 'pipe2.mod3.input1')]}
+100914-09:27:54,719 workflow DEBUG:
+	 Removing connection: ('pipe4.mod5.output1', 'pipe2.mod3.input1')
+100914-09:27:54,719 workflow DEBUG:
+	 (pipe6.pipe5, pipe6.pipe3): new edge data: {'connect': []}
+100914-09:27:54,720 workflow DEBUG:
+	 (pipe4.mod5, pipe6.pipe3): No edge data
+100914-09:27:54,720 workflow DEBUG:
+	 (pipe4.mod5, pipe6.pipe3): new edge data: {'connect': [('output1', 'pipe2.mod3.input1')]}
+100914-09:27:54,720 workflow DEBUG:
+	 expanding workflow: pipe6.pipe5
+100914-09:27:54,720 workflow DEBUG:
+	 processing node: pipe5.pipe4
+100914-09:27:54,720 workflow DEBUG:
+	 expanding workflow: pipe5.pipe4
+100914-09:27:54,720 workflow DEBUG:
+	 processing node: pipe4.mod5
+100914-09:27:54,720 workflow DEBUG:
+	 finished expanding workflow: pipe5.pipe4
+100914-09:27:54,721 workflow DEBUG:
+	 finished expanding workflow: pipe6.pipe5
+100914-09:27:54,721 workflow DEBUG:
+	 processing node: pipe6.pipe3
+100914-09:27:54,721 workflow DEBUG:
+	 in: connections-> []
+100914-09:27:54,721 workflow DEBUG:
+	 in: connections-> [('output1', 'pipe2.mod3.input1')]
+100914-09:27:54,721 workflow DEBUG:
+	 in: ('output1', 'pipe2.mod3.input1')
+100914-09:27:54,722 workflow DEBUG:
+	 in edges: pipe6.pipe5.pipe4.mod5 output1 pipe2.mod3 input1
+100914-09:27:54,723 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe6.pipe3): Edge data exists: {'connect': [('output1', 'pipe2.mod3.input1')]}
+100914-09:27:54,723 workflow DEBUG:
+	 Removing connection: ('output1', 'pipe2.mod3.input1')
+100914-09:27:54,724 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe6.pipe3): new edge data: {'connect': []}
+100914-09:27:54,724 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe2.mod3): No edge data
+100914-09:27:54,724 workflow DEBUG:
+	 (pipe6.pipe5.pipe4.mod5, pipe2.mod3): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:27:54,724 workflow DEBUG:
+	 expanding workflow: pipe6.pipe3
+100914-09:27:54,724 workflow DEBUG:
+	 processing node: pipe3.pipe1
+100914-09:27:54,724 workflow DEBUG:
+	 out: connections-> [('mod2.output1', 'mod4.input1')]
+100914-09:27:54,724 workflow DEBUG:
+	 out: ('mod2.output1', 'mod4.input1')
+100914-09:27:54,725 workflow DEBUG:
+	 out edges: pipe1.mod2 output1 pipe3.pipe2 mod4.input1
+100914-09:27:54,727 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): Edge data exists: {'connect': [('mod2.output1', 'mod4.input1')]}
+100914-09:27:54,727 workflow DEBUG:
+	 Removing connection: ('mod2.output1', 'mod4.input1')
+100914-09:27:54,727 workflow DEBUG:
+	 (pipe3.pipe1, pipe3.pipe2): new edge data: {'connect': []}
+100914-09:27:54,727 workflow DEBUG:
+	 (pipe1.mod2, pipe3.pipe2): No edge data
+100914-09:27:54,727 workflow DEBUG:
+	 (pipe1.mod2, pipe3.pipe2): new edge data: {'connect': [('output1', 'mod4.input1')]}
+100914-09:27:54,728 workflow DEBUG:
+	 expanding workflow: pipe3.pipe1
+100914-09:27:54,728 workflow DEBUG:
+	 processing node: pipe1.mod1
+100914-09:27:54,728 workflow DEBUG:
+	 processing node: pipe1.mod2
+100914-09:27:54,728 workflow DEBUG:
+	 finished expanding workflow: pipe3.pipe1
+100914-09:27:54,728 workflow DEBUG:
+	 processing node: pipe3.pipe2
+100914-09:27:54,728 workflow DEBUG:
+	 in: connections-> []
+100914-09:27:54,728 workflow DEBUG:
+	 in: connections-> [('output1', 'mod4.input1')]
+100914-09:27:54,728 workflow DEBUG:
+	 in: ('output1', 'mod4.input1')
+100914-09:27:54,729 workflow DEBUG:
+	 in edges: pipe3.pipe1.mod2 output1 pipe2.mod4 input1
+100914-09:27:54,729 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe3.pipe2): Edge data exists: {'connect': [('output1', 'mod4.input1')]}
+100914-09:27:54,730 workflow DEBUG:
+	 Removing connection: ('output1', 'mod4.input1')
+100914-09:27:54,730 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe3.pipe2): new edge data: {'connect': []}
+100914-09:27:54,730 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe2.mod4): No edge data
+100914-09:27:54,730 workflow DEBUG:
+	 (pipe3.pipe1.mod2, pipe2.mod4): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:27:54,730 workflow DEBUG:
+	 expanding workflow: pipe3.pipe2
+100914-09:27:54,730 workflow DEBUG:
+	 processing node: pipe2.mod3
+100914-09:27:54,730 workflow DEBUG:
+	 processing node: pipe2.mod4
+100914-09:27:54,730 workflow DEBUG:
+	 finished expanding workflow: pipe3.pipe2
+100914-09:27:54,731 workflow DEBUG:
+	 finished expanding workflow: pipe6.pipe3
+100914-09:27:54,731 workflow DEBUG:
+	 finished expanding workflow: pipe6
+100914-09:27:54,731 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:27:54,731 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:27:54,732 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:27:54,732 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:27:54,732 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:27:54,732 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:27:54,732 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:27:54,733 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:27:54,733 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:27:54,734 workflow DEBUG:
+	 adding multipath trait: input1
+100914-09:27:54,735 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): No edge data
+100914-09:27:54,735 workflow DEBUG:
+	 (pipe.mod1, pipe.mod2): new edge data: {'connect': [('output1', 'input1')]}
+100914-09:27:54,735 workflow DEBUG:
+	 Creating flat graph for workflow: pipe
+100914-09:27:54,736 workflow DEBUG:
+	 expanding workflow: pipe
+100914-09:27:54,736 workflow DEBUG:
+	 processing node: pipe.mod1
+100914-09:27:54,736 workflow DEBUG:
+	 processing node: pipe.mod2
+100914-09:27:54,736 workflow DEBUG:
+	 finished expanding workflow: pipe
+100914-09:27:54,736 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:27:54,737 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:27:54,737 workflow INFO:
+	 Running serially.
+100914-09:27:54,737 workflow INFO:
+	 Node: mod1
+100914-09:27:54,737 workflow DEBUG:
+	 Creating /tmp/test_engine_y0WhKE/pipe/mod1
+100914-09:27:54,737 workflow INFO:
+	 in dir: /tmp/test_engine_y0WhKE/pipe/mod1
+100914-09:27:54,737 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:27:54,737 workflow DEBUG:
+	 Removing old /tmp/test_engine_y0WhKE/pipe/mod1 and its contents
+100914-09:27:54,738 workflow DEBUG:
+	 Creating /tmp/test_engine_y0WhKE/pipe/mod1
+100914-09:27:54,738 workflow DEBUG:
+	 Executing node
+100914-09:27:54,740 workflow DEBUG:
+	 setting input: pipe.mod1->pipe.mod2 {'connect': [('output1', 'input1')]}
+100914-09:27:54,740 workflow DEBUG:
+	 setting node input: input1->[1, 1]
+100914-09:27:54,740 workflow DEBUG:
+	 setting nodelevel input input1 = [1, 1]
+100914-09:27:54,740 workflow DEBUG:
+	 setting mapnode input: input1 -> [1, 1]
+100914-09:27:54,740 workflow INFO:
+	 Node: mod2
+100914-09:27:54,740 workflow DEBUG:
+	 Creating /tmp/test_engine_y0WhKE/pipe/mod2
+100914-09:27:54,740 workflow INFO:
+	 in dir: /tmp/test_engine_y0WhKE/pipe/mod2
+100914-09:27:54,741 workflow DEBUG:
+	 setting hashinput input1-> [1, 1]
+100914-09:27:54,741 workflow DEBUG:
+	 Node hash: 783e9404dfdcb5b41536a23b737246c4
+100914-09:27:54,741 workflow DEBUG:
+	 Removing old /tmp/test_engine_y0WhKE/pipe/mod2 and its contents
+100914-09:27:54,741 workflow DEBUG:
+	 Creating /tmp/test_engine_y0WhKE/pipe/mod2
+100914-09:27:54,741 workflow DEBUG:
+	 setting input 0 input1 1
+100914-09:27:54,742 workflow DEBUG:
+	 setting input 1 input1 1
+100914-09:27:54,742 workflow DEBUG:
+	 Creating flat graph for workflow: mapflow
+100914-09:27:54,742 workflow DEBUG:
+	 expanding workflow: mapflow
+100914-09:27:54,742 workflow DEBUG:
+	 processing node: mapflow._mod21
+100914-09:27:54,742 workflow DEBUG:
+	 processing node: mapflow._mod20
+100914-09:27:54,743 workflow DEBUG:
+	 finished expanding workflow: mapflow
+100914-09:27:54,743 workflow DEBUG:
+	 PE: expanding iterables
+100914-09:27:54,743 workflow DEBUG:
+	 PE: expanding iterables ... done
+100914-09:27:54,743 workflow INFO:
+	 Running serially.
+100914-09:27:54,743 workflow INFO:
+	 Node: _mod21
+100914-09:27:54,744 workflow DEBUG:
+	 Creating /tmp/test_engine_y0WhKE/pipe/mod2/mapflow/_mod21
+100914-09:27:54,744 workflow INFO:
+	 in dir: /tmp/test_engine_y0WhKE/pipe/mod2/mapflow/_mod21
+100914-09:27:54,744 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:27:54,744 workflow DEBUG:
+	 Removing old /tmp/test_engine_y0WhKE/pipe/mod2/mapflow/_mod21 and its contents
+100914-09:27:54,744 workflow DEBUG:
+	 Creating /tmp/test_engine_y0WhKE/pipe/mod2/mapflow/_mod21
+100914-09:27:54,744 workflow DEBUG:
+	 Executing node
+100914-09:27:54,746 workflow INFO:
+	 Node: _mod20
+100914-09:27:54,746 workflow DEBUG:
+	 Creating /tmp/test_engine_y0WhKE/pipe/mod2/mapflow/_mod20
+100914-09:27:54,746 workflow INFO:
+	 in dir: /tmp/test_engine_y0WhKE/pipe/mod2/mapflow/_mod20
+100914-09:27:54,746 workflow DEBUG:
+	 Node hash: cd00b4d853ed1322c5929b85ee214ed8
+100914-09:27:54,747 workflow DEBUG:
+	 Removing old /tmp/test_engine_y0WhKE/pipe/mod2/mapflow/_mod20 and its contents
+100914-09:27:54,747 workflow DEBUG:
+	 Creating /tmp/test_engine_y0WhKE/pipe/mod2/mapflow/_mod20
+100914-09:27:54,747 workflow DEBUG:
+	 Executing node

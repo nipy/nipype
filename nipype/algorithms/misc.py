@@ -198,9 +198,7 @@ class Distance(BaseInterface):
         
         dist_matrix = cdist(set1_coordinates.T, set2_coordinates.T)
         (point1, point2) = np.unravel_index(np.argmin(dist_matrix), dist_matrix.shape)
-        point1_coo = set1_coordinates.T[point1,:]
-        point2_coo = set2_coordinates.T[point2,:]
-        return (euclidean(set1_coordinates.T[point1_coo,:], set2_coordinates.T[point2_coo,:]), point1_coo, point2_coo)
+        return (euclidean(set1_coordinates.T[point1,:], set2_coordinates.T[point2,:]), set1_coordinates.T[point1,:], set2_coordinates.T[point2,:])
     
     def _run_interface(self, runtime):
         nii1 = nifti.load(self.inputs.volume1)
