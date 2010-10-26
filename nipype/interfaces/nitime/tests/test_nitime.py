@@ -21,6 +21,6 @@ def test_read_csv():
     yield assert_raises,ValueError,CA._read_csv 
 
     CA.inputs.in_file = example_data('fmri_timeseries.csv')
-    rec_array = CA._read_csv()
-    yield assert_equal, rec_array['wm'][0],10125.9
-
+    data,roi_names = CA._read_csv()
+    yield assert_equal, data[0][0],10125.9
+    yield assert_equal, roi_names[0],'WM' 

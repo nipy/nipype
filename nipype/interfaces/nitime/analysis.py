@@ -10,7 +10,7 @@ Interfaces to functionality from nitime for time-series analysis of fmri data
 
 """
 
-
+import numpy as np
 from nipype.utils.misc import package_check
 package_check('nitime')
 package_check('matplotlib')
@@ -85,27 +85,33 @@ class CoherenceAnalyzer(BaseInterface):
 
     def _read_csv(self):
         """ Read from csv in_file and return a rec array """
+
+        
+
         #Check that input conforms to expectations:
         first_row = open(self.inputs.in_file).readline()
         if not first_row[1].isalpha():
             raise ValueError("First row of in_file should contain ROI names as strings of characters")
 
-        rec_array=csv2rec(self.inputs.in_file)
-        return rec_array
 
+        roi_names = open(self.inputs.in_file).readline().replace('\"','').strip('\n').split(',')
+        data = np.loadtxt(self.inputs.in_file,skiprows=1,delimiter=',')
+        
+        #rec_array=csv2rec(self.inputs.in_file)
+        return data,roi_names
+    
     def _csv2ts(self):
         """ Read data from the in_file and generate a nitime TimeSeries object"""
-        rec_array = self._read_csv()
-        roi_names= data_rec.dtype.names
-        n_samples = data_rec.shape[0]
-        for n_idx in range(len(roi_names)):
-            data[n_idx] = data_rec[roi_names[n_idx]]
-
-        TS = TimeSeries(data=data,sampling_interval=TR,time_unit='s')
-
-        return TimeSeries(data=data
-                          
+        data,roi_names = self._read_csv()
         
+        TS = TimeSeries(data=data,
+                        sampling_interval=self.inputs.TR,
+                        time_unit='s')
+        
+        TS.metadata = dict(ROIs=roi_names)
+
+        return TS
+                          
         
     #Rewrite _run_interface, but not run
     def _run_interface(self,runtime):
@@ -113,25 +119,44 @@ class CoherenceAnalyzer(BaseInterface):
 
         if self.inputs.in_TS is Undefined:
             # get TS form csv and inputs.TR
-            # calls _csv2ts
+            TS = self._csv2ts()
             
         else:
             # get TS from inputs.in_TS
-            
-            
-        #Get the coherence matrix from the analyzer
-        self.coherence = A.coherence
+            TS = self.inputs.in_TS
+            # deal with creating or storing ROI names
+            if not TS.metadata.haskey('ROIs'):
+                TS.metadata['ROIs']=['roi_%d' % x for x,_ in enumerate(TS.data)]
 
-        if isdefined(self.inputs.output_csv_file):
-            #write to a csv file and assign a value to self.coherence_file (a
-            #file name + path)
-            
+        A = CoherenceAnalyzer(TS,
+                              method=dict(this_method='welch',
+                                          NFFT=self.inputs.NFFT,
+                                          n_overlap=self.inputs.n_overlap))
+
+        freq_idx = np.where((A.frequencies>self.inputs.frequency_range) *
+                            (A.frequencies<self.inputs.frequency_range))[0]
+        
+        #Get the coherence matrix from the analyzer, averaging on the last
+        #(frequency) dimension: (roi X roi array)
+        self.coherence = np.mean(A.coherence[:,:,freq_idx],-1)
+        # Get the time delay from analyzer, (roi X roi array)
+        self.delay = np.mean(A.delay[:,:,freq_idx],-1)
+        runtime.returncode = 0
+        return runtime
+                    
     #Rewrite _list_outputs (look at BET)
     def _list_outputs(self):
         outputs = self.output_spec().get()
 
-        #Always defined:
-        outputs['coherence']=self.coherence #The array 
+        #if isdefined(self.inputs.output_csv_file):
+            
+            #write to a csv file and assign a value to self.coherence_file (a
+            #file name + path)
+
+        #Always defined (the arrays):
+        outputs['coherence']=self.coherence
+        outputs['delay']=self.delay
+        
         #Conditional
         if isdefined(self.inputs.output_csv_file):
             outputs['coherence_csv']=self.coherence_file
