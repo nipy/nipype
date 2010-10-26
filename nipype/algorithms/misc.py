@@ -15,7 +15,7 @@ from scipy.ndimage.morphology import grey_dilation
 import os
 from nipype.utils.filemanip import fname_presuffix, split_filename
 from scipy.ndimage.morphology import binary_erosion
-from scipy.spatial.distance import cdist, euclidean
+from scipy.spatial.distance import cdist, euclidean, dice, jaccard
 
 class PickAtlasInputSpec(TraitedSpec):
     atlas = File(exists=True, desc="Location of the atlas that will be used.", compulsory=True)
@@ -158,6 +158,7 @@ class ModifyAffine(BaseInterface):
 class DistanceInputSpec(TraitedSpec):
     volume1 = File(exists=True, mandatory=True)
     volume2 = File(exists=True, mandatory=True)
+    method = traits.Enum("eucl_min", desc='""eucl_min": Euclidean distance between two closest points', usedefault = True)
 
 class DistanceOutputSpec(TraitedSpec):
     distance = traits.Float()
@@ -171,12 +172,12 @@ class Distance(BaseInterface):
     input_spec = DistanceInputSpec
     output_spec = DistanceOutputSpec
     
-    def _findBorder(self,data):
+    def _find_border(self,data):
         eroded = binary_erosion(data)
         border = np.logical_and(data, np.logical_not(eroded))
         return border
     
-    def _getCoordinates(self, data, affine):
+    def _get_coordinates(self, data, affine):
         if len(data.shape) == 4:
             data = data[:,:,:,0]
         indices = np.vstack(np.nonzero(data))
@@ -184,24 +185,33 @@ class Distance(BaseInterface):
         coordinates = np.dot(affine,indices)
         return coordinates[:3,:]
     
-    def _run_interface(self, runtime):
-        nii1 = nifti.load(self.inputs.volume1)
+    def _eucl_min(self, nii1, nii2):
         origdata1 = nii1.get_data().astype(np.bool)
-        border1 = self._findBorder(origdata1)
+        border1 = self._find_border(origdata1)
               
-        nii2 = nifti.load(self.inputs.volume2)
         origdata2 = nii2.get_data().astype(np.bool)
-        border2 = self._findBorder(origdata2)
+        border2 = self._find_border(origdata2)
         
-        set1_coordinates = self._getCoordinates(border1, nii1.get_affine())
+        set1_coordinates = self._get_coordinates(border1, nii1.get_affine())
         
-        set2_coordinates = self._getCoordinates(border2, nii2.get_affine())
+        set2_coordinates = self._get_coordinates(border2, nii2.get_affine())
         
         dist_matrix = cdist(set1_coordinates.T, set2_coordinates.T)
         (point1, point2) = np.unravel_index(np.argmin(dist_matrix), dist_matrix.shape)
-        self._point1 = set1_coordinates.T[point1,:]
-        self._point2 = set2_coordinates.T[point2,:]
-        self._distance = euclidean(set1_coordinates.T[point1,:], set2_coordinates.T[point2,:])
+        point1_coo = set1_coordinates.T[point1,:]
+        point2_coo = set2_coordinates.T[point2,:]
+        return (euclidean(set1_coordinates.T[point1_coo,:], set2_coordinates.T[point2_coo,:]), point1_coo, point2_coo)
+    
+    def _run_interface(self, runtime):
+        nii1 = nifti.load(self.inputs.volume1)
+        nii2 = nifti.load(self.inputs.volume2)
+        
+        if self.inputs.method == "eucl_min":
+            self._distance, self._point1, self._point2 = self._eucl_min(nii1, nii2)
+        elif self.inputs.method in ("dice", "jaccard"):
+            origdata1 = nii1.get_data().astype(np.bool)
+            origdata2 = nii2.get_data().astype(np.bool)
+            self._distance = self._bool_vec_distance(origdata1, origdata2, method = self.inputs.method)
         
         runtime.returncode=0
         return runtime
@@ -211,4 +221,42 @@ class Distance(BaseInterface):
         outputs['distance'] = self._distance
         outputs['point1'] = self._point1
         outputs['point2'] = self._point2
+        return outputs
+    
+class SimilarityInputSpec(TraitedSpec):
+    volume1 = File(exists=True, mandatory=True)
+    volume2 = File(exists=True, mandatory=True)
+    method = traits.Enum("dice", "jaccard", desc='"dice": Dice\'s dissimilarity,\
+    "jaccard": Jaccards\'s dissimilarity', usedefault = True
+    )
+    
+class SimilarityOutputSpec(TraitedSpec):
+    distance = traits.Float()
+    
+class Similarity(TraitedSpec):
+    """
+    Calculates similarity between two maps.
+    """
+    input_spec = SimilarityInputSpec
+    output_spec = SimilarityOutputSpec
+    
+    def _bool_vec_distance(self, booldata1, booldata2, method):
+        methods = {"dice": dice, "jaccard": jaccard}       
+        return methods[method](booldata1.flat, booldata2.flat)
+    
+    def _run_interface(self, runtime):
+        nii1 = nifti.load(self.inputs.volume1)
+        nii2 = nifti.load(self.inputs.volume2)
+        
+        if self.inputs.method in ("dice", "jaccard"):
+            origdata1 = nii1.get_data().astype(np.bool)
+            origdata2 = nii2.get_data().astype(np.bool)
+            self._distance = self._bool_vec_distance(origdata1, origdata2, method = self.inputs.method)
+        
+        runtime.returncode=0
+        return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['distance'] = self._distance
         return outputs
