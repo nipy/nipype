@@ -231,7 +231,7 @@ class SimilarityInputSpec(TraitedSpec):
 class SimilarityOutputSpec(TraitedSpec):
     distance = traits.Float()
     
-class Similarity(TraitedSpec):
+class Similarity(BaseInterface):
     """
     Calculates similarity between two maps.
     """
