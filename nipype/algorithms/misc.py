@@ -16,6 +16,7 @@ import os
 from nipype.utils.filemanip import fname_presuffix, split_filename
 from scipy.ndimage.morphology import binary_erosion
 from scipy.spatial.distance import cdist, euclidean, dice, jaccard
+from scipy.ndimage.measurements import center_of_mass, label
 
 class PickAtlasInputSpec(TraitedSpec):
     atlas = File(exists=True, desc="Location of the atlas that will be used.", compulsory=True)
@@ -158,7 +159,8 @@ class ModifyAffine(BaseInterface):
 class DistanceInputSpec(TraitedSpec):
     volume1 = File(exists=True, mandatory=True)
     volume2 = File(exists=True, mandatory=True)
-    method = traits.Enum("eucl_min", desc='""eucl_min": Euclidean distance between two closest points', usedefault = True)
+    method = traits.Enum("eucl_min", "eucl_cog", desc='""eucl_min": Euclidean distance between two closest points\
+    "eucl_cog": mean Euclidian distance between the Center of Gravity of volume1 and CoGs of volume2', usedefault = True)
 
 class DistanceOutputSpec(TraitedSpec):
     distance = traits.Float()
@@ -200,16 +202,34 @@ class Distance(BaseInterface):
         (point1, point2) = np.unravel_index(np.argmin(dist_matrix), dist_matrix.shape)
         return (euclidean(set1_coordinates.T[point1,:], set2_coordinates.T[point2,:]), set1_coordinates.T[point1,:], set2_coordinates.T[point2,:])
     
+    def _eucl_cog(self, nii1, nii2):
+        origdata1 = nii1.get_data().astype(np.bool)  
+        cog_t = np.array(center_of_mass(origdata1)).reshape(-1,1)
+        cog_t = np.vstack((cog_t, np.array([1])))
+        cog_t_coor = np.dot(nii1.get_affine(),cog_t)[:3,:]
+        
+        origdata2 = nii2.get_data().astype(np.bool)
+        (labeled_data, n_labels) = label(origdata2)
+        
+        cogs = np.ones((4,n_labels))
+        
+        for i in range(n_labels):
+            cogs[:3,i] = np.array(center_of_mass(origdata2, labeled_data, i+1))
+            
+        cogs_coor = np.dot(nii2.get_affine(),cogs)[:3,:]
+        
+        dist_matrix = cdist(cog_t_coor.T, cogs_coor.T)
+        
+        return np.mean(dist_matrix)
+    
     def _run_interface(self, runtime):
         nii1 = nifti.load(self.inputs.volume1)
         nii2 = nifti.load(self.inputs.volume2)
         
         if self.inputs.method == "eucl_min":
             self._distance, self._point1, self._point2 = self._eucl_min(nii1, nii2)
-        elif self.inputs.method in ("dice", "jaccard"):
-            origdata1 = nii1.get_data().astype(np.bool)
-            origdata2 = nii2.get_data().astype(np.bool)
-            self._distance = self._bool_vec_distance(origdata1, origdata2, method = self.inputs.method)
+        elif self.inputs.method == "eucl_cog":
+            self._distance = self._eucl_cog(nii1, nii2)
         
         runtime.returncode=0
         return runtime
@@ -217,8 +237,9 @@ class Distance(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['distance'] = self._distance
-        outputs['point1'] = self._point1
-        outputs['point2'] = self._point2
+        if self.inputs.method == "eucl_min":
+            outputs['point1'] = self._point1
+            outputs['point2'] = self._point2
         return outputs
     
 class SimilarityInputSpec(TraitedSpec):
