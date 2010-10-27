@@ -241,7 +241,7 @@ class Distance(BaseInterface):
         
         dist_matrix = cdist(set1_coordinates.T, set2_coordinates.T)
         min_dist_matrix = np.amin(dist_matrix, axis = 0)
-        
+        plt.figure()
         plt.hist(min_dist_matrix, 50, normed=1, facecolor='green')
         plt.savefig(self._hist_filename)
         
