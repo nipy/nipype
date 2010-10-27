@@ -258,12 +258,16 @@ class Distance(BaseInterface):
         
         if self.inputs.method == "eucl_min":
             self._distance, self._point1, self._point2 = self._eucl_min(nii1, nii2)
+            
         elif self.inputs.method == "eucl_cog":
             self._distance = self._eucl_cog(nii1, nii2)
+            
         elif self.inputs.method == "eucl_mean":
-            self._distance = self._eucl_mean(nii1, nii2)
+            self._distance = self._eucl_mean(nii1, nii2)            
+            
         elif self.inputs.method == "eucl_wmean":
             self._distance = self._eucl_mean(nii1, nii2, weighted=True)
+
 
         runtime.returncode=0
         return runtime
