@@ -17,6 +17,9 @@ from nipype.utils.filemanip import fname_presuffix, split_filename
 from scipy.ndimage.morphology import binary_erosion
 from scipy.spatial.distance import cdist, euclidean, dice, jaccard
 from scipy.ndimage.measurements import center_of_mass, label
+import matplotlib
+matplotlib.use('Cairo')
+import matplotlib.pyplot as plt
 
 class PickAtlasInputSpec(TraitedSpec):
     atlas = File(exists=True, desc="Location of the atlas that will be used.", compulsory=True)
@@ -159,13 +162,15 @@ class ModifyAffine(BaseInterface):
 class DistanceInputSpec(TraitedSpec):
     volume1 = File(exists=True, mandatory=True)
     volume2 = File(exists=True, mandatory=True)
-    method = traits.Enum("eucl_min", "eucl_cog", desc='""eucl_min": Euclidean distance between two closest points\
-    "eucl_cog": mean Euclidian distance between the Center of Gravity of volume1 and CoGs of volume2', usedefault = True)
+    method = traits.Enum("eucl_min", "eucl_cog", "eucl_mean", desc='""eucl_min": Euclidean distance between two closest points\
+    "eucl_cog": mean Euclidian distance between the Center of Gravity of volume1 and CoGs of volume2\
+    "eucl_mean', usedefault = True)
 
 class DistanceOutputSpec(TraitedSpec):
     distance = traits.Float()
     point1 = traits.Array(shape=(3,))
     point2 = traits.Array(shape=(3,))
+    histogram = File()
     
 class Distance(BaseInterface):
     '''
@@ -173,6 +178,8 @@ class Distance(BaseInterface):
     '''
     input_spec = DistanceInputSpec
     output_spec = DistanceOutputSpec
+    
+    _hist_filename = "hist.pdf"
     
     def _find_border(self,data):
         eroded = binary_erosion(data)
@@ -222,6 +229,25 @@ class Distance(BaseInterface):
         
         return np.mean(dist_matrix)
     
+    def _eucl_mean(self, nii1, nii2):
+        origdata1 = nii1.get_data().astype(np.bool)
+        border1 = self._find_border(origdata1)
+              
+        origdata2 = nii2.get_data().astype(np.bool)
+       
+        set1_coordinates = self._get_coordinates(border1, nii1.get_affine()) 
+        set2_coordinates = self._get_coordinates(origdata2, nii2.get_affine())
+        
+        dist_matrix = cdist(set1_coordinates.T, set2_coordinates.T)
+        min_dist_matrix = np.amin(dist_matrix, axis = 0)
+        
+        plt.hist(min_dist_matrix, 50, normed=1, facecolor='green')
+        plt.savefig(self._hist_filename)
+        
+        return np.mean(min_dist_matrix)
+        
+
+    
     def _run_interface(self, runtime):
         nii1 = nifti.load(self.inputs.volume1)
         nii2 = nifti.load(self.inputs.volume2)
@@ -230,6 +256,8 @@ class Distance(BaseInterface):
             self._distance, self._point1, self._point2 = self._eucl_min(nii1, nii2)
         elif self.inputs.method == "eucl_cog":
             self._distance = self._eucl_cog(nii1, nii2)
+        elif self.inputs.method == "eucl_mean":
+            self._distance = self._eucl_mean(nii1, nii2)
         
         runtime.returncode=0
         return runtime
@@ -240,6 +268,8 @@ class Distance(BaseInterface):
         if self.inputs.method == "eucl_min":
             outputs['point1'] = self._point1
             outputs['point2'] = self._point2
+        elif self.inputs.method == "eucl_mean":
+            outputs['histogram'] = os.path.abspath(self._hist_filename)
         return outputs
     
 class SimilarityInputSpec(TraitedSpec):
