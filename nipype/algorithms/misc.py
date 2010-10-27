@@ -162,9 +162,10 @@ class ModifyAffine(BaseInterface):
 class DistanceInputSpec(TraitedSpec):
     volume1 = File(exists=True, mandatory=True)
     volume2 = File(exists=True, mandatory=True)
-    method = traits.Enum("eucl_min", "eucl_cog", "eucl_mean", desc='""eucl_min": Euclidean distance between two closest points\
+    method = traits.Enum("eucl_min", "eucl_cog", "eucl_mean", "eucl_wmean", desc='""eucl_min": Euclidean distance between two closest points\
     "eucl_cog": mean Euclidian distance between the Center of Gravity of volume1 and CoGs of volume2\
-    "eucl_mean', usedefault = True)
+    "eucl_mean": mean Euclidian minimum distance of all volume2 voxels to volume1\
+    "eucl_wmean": mean Euclidian minimum distance of all volume2 voxels to volume1 weighted by their values', usedefault = True)
 
 class DistanceOutputSpec(TraitedSpec):
     distance = traits.Float()
@@ -229,7 +230,7 @@ class Distance(BaseInterface):
         
         return np.mean(dist_matrix)
     
-    def _eucl_mean(self, nii1, nii2):
+    def _eucl_mean(self, nii1, nii2, weighted=False):
         origdata1 = nii1.get_data().astype(np.bool)
         border1 = self._find_border(origdata1)
               
@@ -244,7 +245,10 @@ class Distance(BaseInterface):
         plt.hist(min_dist_matrix, 50, normed=1, facecolor='green')
         plt.savefig(self._hist_filename)
         
-        return np.mean(min_dist_matrix)
+        if weighted:
+            return np.average(min_dist_matrix, weights=nii2.get_data()[origdata2].flat)
+        else:
+            return np.mean(min_dist_matrix)
         
 
     
@@ -258,10 +262,11 @@ class Distance(BaseInterface):
             self._distance = self._eucl_cog(nii1, nii2)
         elif self.inputs.method == "eucl_mean":
             self._distance = self._eucl_mean(nii1, nii2)
-        
+        elif self.inputs.method == "eucl_wmean":
+            self._distance = self._eucl_mean(nii1, nii2, weighted=True)
+
         runtime.returncode=0
         return runtime
-    
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['distance'] = self._distance
@@ -309,3 +314,41 @@ class Similarity(BaseInterface):
         outputs = self._outputs().get()
         outputs['distance'] = self._distance
         return outputs
+        
+class ModifyAffineInputSpec(TraitedSpec):
+    volumes = InputMultiPath(File(exists=True), desc='volumes which affine matrices will be modified', mandatory=True)
+    transformation_matrix = traits.Array(value=np.eye(4), shape=(4,4), desc="transformation matrix that will be left multiplied by the affine matrix", usedefault=True)
+    
+class ModifyAffineOutputSpec(TraitedSpec):
+    transformed_volumes = OutputMultiPath(File(exist=True))
+    
+class ModifyAffine(BaseInterface):
+    '''
+    Left multiplies the affine matrix with a specified values. Saves the volume as a nifti file.
+    '''
+    input_spec = ModifyAffineInputSpec
+    output_spec = ModifyAffineOutputSpec
+    
+    def _gen_output_filename(self, name):
+        _, base, _ = split_filename(name)
+        return os.path.abspath(base + "_transformed.nii")
+    
+    def _run_interface(self, runtime):
+        for fname in self.inputs.volumes:
+            img = nifti.load(fname)
+            
+            affine = img.get_affine()
+            affine = np.dot(self.inputs.transformation_matrix,affine)
+
+            nifti.save(nifti.Nifti1Image(img.get_data(), affine, img.get_header()), self._gen_output_filename(fname))
+            
+        runtime.returncode=0
+        return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['transformed_volumes'] = []
+        for fname in self.inputs.volumes:
+            outputs['transformed_volumes'].append(self._gen_output_filename(fname))
+        return outputs
+
