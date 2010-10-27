@@ -273,7 +273,7 @@ class Distance(BaseInterface):
         if self.inputs.method == "eucl_min":
             outputs['point1'] = self._point1
             outputs['point2'] = self._point2
-        elif self.inputs.method == "eucl_mean":
+        elif self.inputs.method in ["eucl_mean", "eucl_wmean"]:
             outputs['histogram'] = os.path.abspath(self._hist_filename)
         return outputs
     
