@@ -10,19 +10,25 @@ hash_method : content, timestamp
 '''
 import ConfigParser, os
 from StringIO import StringIO
+import os
 
+homedir = os.environ['HOME']
 default_cfg = StringIO("""
 [logging]
 workflow_level = INFO
 filemanip_level = INFO
 interface_level = INFO
+log_directory = %s
+log_size = 254000
+log_rotate = 4
 
 [execution]
 stop_on_first_crash = false
 hash_method = content
 single_thread_matlab = true
 run_in_series = false
-""")
+remove_node_directories = false
+"""%(homedir))
 
 config = ConfigParser.ConfigParser()
 config.readfp(default_cfg)

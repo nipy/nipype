@@ -21,11 +21,13 @@ from copy import deepcopy
 import glob
 import os
 import shutil
+import hashlib
+import tempfile
 from warnings import warn
 
 from enthought.traits.trait_errors import TraitError
 try:
-    from xnatlib import Interface as XNATInterface
+    import pyxnat
 except:
     pass
 
@@ -492,14 +494,21 @@ class FreeSurferSource(IOBase):
         
 
 class XNATSourceInputSpec(DynamicTraitedSpec): #InterfaceInputSpec):
-    config_file = File(exists=True, mandatory=True,
-                        desc='a json config file containing xnat access info: url, username and password')
     query_template = traits.Str(mandatory=True,
              desc='Layout used to get files. relative to base directory if defined')
     query_template_args = traits.Dict(traits.Str,
                                 traits.List(traits.List),
                                 value=dict(outfiles=[]), usedefault=True,
                                 desc='Information to plug into template')
+
+    xnat_server = traits.Str(mandatory=True, requires=['xnat_user', 'xnat_pwd'], xor=['xnat_config'])
+    xnat_user = traits.Str()
+    xnat_pwd = traits.Password()
+    xnat_config = File(mandatory=True, xor=['xnat_server'])
+
+    cache_dir = Directory(desc='Cache directory')
+    cache_size = traits.Str(desc='Optional cache max size')
+
 
 class XNATSource(IOBase):
     """ Generic XNATSource module that wraps around glob in an
@@ -582,9 +591,16 @@ class XNATSource(IOBase):
     def _list_outputs(self):
         # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
         # hence manual check
-        config_info = load_json(self.inputs.config_file)
-        cwd = os.getcwd()
-        xnat = XNATInterface(config_info['url'], config_info['username'], config_info['password'], cachedir=cwd)
+
+        cache_dir = self.inputs.cache_dir or tempfile.gettempdir()
+
+        if self.inputs.xnat_server:
+            xnat = pyxnat.Interface(self.inputs.xnat_server,self.inputs.xnat_user, self.inputs.xnat_pwd, cache_dir)
+        else:
+            xnat = pyxnat.Interface(self.inputs.xnat_config)
+
+#        xnat.set_offline_mode()
+
         if self._infields:
             for key in self._infields:
                 value = getattr(self.inputs,key)
@@ -602,7 +618,7 @@ class XNATSource(IOBase):
                     self.inputs.field_template.has_key(key):
                 template = self.inputs.field_template[key]
             if not args:
-                file_objects = xnat.select(template).request_objects()
+                file_objects = xnat.select(template).get('obj')
                 if file_objects == []:
                     raise IOError('Template %s returned no files'%template)
                 outputs[key] = list_to_filename([str(file_object.get()) for file_object in file_objects])
@@ -627,12 +643,12 @@ class XNATSource(IOBase):
                         else:
                             argtuple.append(arg)
                     if argtuple:
-                        file_objects = xnat.select(template%tuple(argtuple)).request_objects()
+                        file_objects = xnat.select(template%tuple(argtuple)).get('obj')
                         if file_objects == []:
                             raise IOError('Template %s returned no files'%(template%tuple(argtuple)))
                         outfiles = list_to_filename([str(file_object.get()) for file_object in file_objects])
                     else:
-                        file_objects = xnat.select(template).request_objects()
+                        file_objects = xnat.select(template).get('obj')
                         if file_objects == []:
                             raise IOError('Template %s returned no files'%template)
                         outfiles = list_to_filename([str(file_object.get()) for file_object in file_objects])
@@ -643,4 +659,100 @@ class XNATSource(IOBase):
                 outputs[key] = outputs[key][0]
         return outputs
 
+
+class XNATSinkInputSpec(DynamicTraitedSpec):
+    
+    _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
+
+    xnat_server = traits.Str(mandatory=True, requires=['xnat_user', 'xnat_pwd'], xor=['xnat_config'])
+    xnat_user = traits.Str()
+    xnat_pwd = traits.Password()
+    xnat_config = File(mandatory=True, xor=['xnat_server'])
+    cache_dir = Directory(desc='')
+    cache_size = traits.Str()
+
+    project_id =  traits.Str(desc='Project in which to store the outputs', mandatory=True)
+    subject_id =  traits.Str(desc='Set to subject id', mandatory=True)
+    experiment_id =  traits.Str(desc='Set to workflow name', mandatory=True)
+
+    def __setattr__(self, key, value):
+        if key not in self.copyable_trait_names():
+            self._outputs[key] = value
+        else:
+            super(XNATSinkInputSpec, self).__setattr__(key, value)
+
+    
+class XNATSink(IOBase):
+    """ Generic datasink module that takes a directory containing a
+        list of nifti files and provides a set of structured output
+        fields.
+    """
+    input_spec = XNATSinkInputSpec
+
+    def _list_outputs(self):
+        """Execute this module.
+        """
+
+        cache_dir = self.inputs.cache_dir or tempfile.gettempdir()
+
+        if self.inputs.xnat_server:
+            xnat = pyxnat.Interface(self.inputs.xnat_server,self.inputs.xnat_user, self.inputs.xnat_pwd, cache_dir)
+        else:
+            xnat = pyxnat.Interface(self.inputs.xnat_config)
+
+        uri_template_args = {'project_id':self.inputs.project_id,
+                             'subject_id':'%s_%s' % \
+                                (self.inputs.project_id, 
+                                 self.inputs.subject_id),
+                             'experiment_id': '%s_%s' % \
+                                (hashlib.md5(self.inputs.subject_id).hexdigest(),
+                                 self.inputs.experiment_id)
+                             }
+
+        for key,files in self.inputs._outputs.items():
+            for name in filename_to_list(files):
+
+                if isinstance(name, list):
+                    for i, file_name in enumerate(name):
+                        write_file_to_XNAT(xnat, file_name, '%s_'%i+key, uri_template_args)
+
+                else:
+                    write_file_to_XNAT(xnat, name, key, uri_template_args)
+
+
+def write_file_to_XNAT(xnat, name, key, uri_template_args):
+
+    val_list = [val
+         for part in os.path.split(name)[0].split(os.sep) 
+         for val in part.split('_')[1:] 
+         if part.startswith('_') and len(part.split('_'))%2]
+
+    keymap = dict(zip(val_list[1::2],val_list[2::2]))
+
+    recon_label = []
+    for key, val in sorted(keymap.items()):
+        if str(self.inputs.subject_id) not in val:
+            recon_label.extend([key, val])
+
+    uri_template_args['recon_label'] = \
+        hashlib.md5(uri_template_args['experiment_id']).hexdigest()
+
+    if recon_label:
+        uri_template_args['recon_label'] += '_'.join(recon_label)
+
+    uri_template_args['resource_label'] = '%s_%s' % \
+                (hashlib.md5(uri_template_args['recon_label']).hexdigest(),
+                 key.split('.')[0]
+                 )
+
+    uri_template_args['file_name'] = os.path.split(os.path.abspath(name))[1]
+
+    uri_template = ('/project/%(project_id)s/subject/%(subject_id)s'
+                    '/experiment/%(experiment_id)s/reconstruction/%(recon_label)s'
+                    '/out/resource/%(resource_label)s/file/%(file_name)s')
+
+    print uri_template%uri_template_args
+
+    file_resource = xnat.select(uri_template%uri_template_args)
+    file_resource.put(name, experiments='xnat:imageSessionData')
 

@@ -164,10 +164,11 @@ def no_spm():
 
     
 class SPMCommandInputSpec(TraitedSpec):
-    matlab_cmd = traits.Str()
+    matlab_cmd = traits.Str(desc='matlab command to use')
     paths = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
     mfile = traits.Bool(True, desc='Run m-code using m-file',
                           usedefault=True)
+    use_mcr = traits.Bool(desc='Run m-code using SPM MCR')
 
 class SPMCommand(BaseInterface):
     """Extends `BaseInterface` class to implement SPM specific interfaces.
@@ -178,19 +179,34 @@ class SPMCommand(BaseInterface):
 
     _jobtype = 'basetype'
     _jobname = 'basename'
+
+    _matlab_cmd = None
+    _paths = None
+    _use_mcr = None
     
     def __init__(self, **inputs):
         super(SPMCommand, self).__init__(**inputs)
-        self.inputs.on_trait_change(self._matlab_cmd_update, 'matlab_cmd')
+        self.inputs.on_trait_change(self._matlab_cmd_update, ['matlab_cmd',
+                                                              'mfile',
+                                                              'paths',
+                                                              'use_mcr'])
+        self._check_mlab_inputs()
         self._matlab_cmd_update()
+
+    @classmethod
+    def set_mlab_paths(cls, matlab_cmd=None, paths = None, use_mcr=None):
+        cls._matlab_cmd = matlab_cmd
+        cls._paths = paths
+        cls._use_mcr = use_mcr
         
     def _matlab_cmd_update(self):
         # MatlabCommand has to be created here,
         # because matlab_cmb is not a proper input
         # and can be set only during init
         self.mlab = MatlabCommand(matlab_cmd=self.inputs.matlab_cmd,
-                                      mfile=self.inputs.mfile,
-                                      paths=self.inputs.paths)
+                                  mfile=self.inputs.mfile,
+                                  paths=self.inputs.paths,
+                                  uses_mcr=self.inputs.use_mcr)
         self.mlab.inputs.script_file = 'pyscript_%s.m' % \
         self.__class__.__name__.split('.')[-1].lower()
         
@@ -202,23 +218,22 @@ class SPMCommand(BaseInterface):
     def jobname(self):
         return self._jobname
 
-    def use_mfile(self, use_mfile):
-        """boolean,
-        if true generates a matlab <filename>.m file
-        if false generates a binary .mat file
-        """
-        self.inputs.mfile = use_mfile
-
+    def _check_mlab_inputs(self):
+        if not isdefined(self.inputs.matlab_cmd) and self._matlab_cmd:
+            self.inputs.matlab_cmd = self._matlab_cmd
+        if not isdefined(self.inputs.paths) and self._paths:
+            self.inputs.paths = self._paths
+        if not isdefined(self.inputs.use_mcr) and self._use_mcr:
+            self.inputs.use_mcr = self._use_mcr
+        
     def _run_interface(self, runtime):
         """Executes the SPM function using MATLAB."""
-        
-        if isdefined(self.inputs.mfile):
-            self.mlab.inputs.mfile = self.inputs.mfile
-        if isdefined(self.inputs.paths):
-            self.mlab.inputs.paths = self.inputs.paths
         self.mlab.inputs.script = self._make_matlab_command(deepcopy(self._parse_inputs()))
         results = self.mlab.run()
         runtime.returncode = results.runtime.returncode
+        if self.mlab.inputs.uses_mcr:
+            if 'Skipped' in results.runtime.stdout:
+                runtime.returncode = 1
         runtime.stdout = results.runtime.stdout
         runtime.stderr = results.runtime.stderr
         return runtime
