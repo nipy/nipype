@@ -113,7 +113,7 @@ class SimpleThreshold(BaseInterface):
         outputs["thresholded_volumes"] = []
         for fname in self.inputs.volumes:
             _, base, _ = split_filename(fname)
-            outputs["thresholded_volumes"].append(base + '_thresholded.nii')
+            outputs["thresholded_volumes"].append(os.path.abspath(base + '_thresholded.nii'))
         return outputs
 
 class ModifyAffineInputSpec(TraitedSpec):
