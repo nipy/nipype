@@ -13,7 +13,7 @@ __docformat__ = 'restructuredtext'
 
 import os
 from glob import glob
-import itertools
+#import itertools
 import numpy as np
 
 from nibabel import load
@@ -154,9 +154,8 @@ class MRIConvertInputSpec(FSTraitedSpec):
     in_k_dir = traits.Tuple(traits.Float, traits.Float,traits.Float,
                            argstr='--in_k_direction %f %f %f',
                            desc='<R direction> <A direction> <S direction>')
-    #[''.join([i['x'],i['y'],i['z']]) for i in \
-    #    walk(dict(x=lambda:['L','R'],y=lambda:['A','P'],z=lambda:['I','S']).items())]
-    _orientations = [comb for comb in itertools.chain(*[[''.join(c) for c in itertools.permutations(s)] for s in [a+b+c for a in 'LR' for b in 'AP' for c in 'IS']])]
+    _orientations = ['LAI', 'LIA', 'ALI', 'AIL', 'ILA', 'IAL', 'LAS', 'LSA', 'ALS', 'ASL', 'SLA', 'SAL', 'LPI', 'LIP', 'PLI', 'PIL', 'ILP', 'IPL', 'LPS', 'LSP', 'PLS', 'PSL', 'SLP', 'SPL', 'RAI', 'RIA', 'ARI', 'AIR', 'IRA', 'IAR', 'RAS', 'RSA', 'ARS', 'ASR', 'SRA', 'SAR', 'RPI', 'RIP', 'PRI', 'PIR', 'IRP', 'IPR', 'RPS', 'RSP', 'PRS', 'PSR', 'SRP', 'SPR']
+    #_orientations = [comb for comb in itertools.chain(*[[''.join(c) for c in itertools.permutations(s)] for s in [a+b+c for a in 'LR' for b in 'AP' for c in 'IS']])]
     in_orientation = traits.Enum(_orientations,
                                 argstr='--in_orientation %s',
                                 desc='specify the input orientation')

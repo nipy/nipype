@@ -8,6 +8,7 @@ Release 0.3.4 (FUTURE)
 * ENH: Added support for FSL convert_xfm
 * ENH: hashes can be updated again without rerunning all nodes.
 * ENH: Added multipleregression design for FSL
+* ENH: Added SPM based Analyze to Nifti converter
 
 * BF: Diffusion toolkit gets installed 
 

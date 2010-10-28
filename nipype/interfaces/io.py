@@ -208,6 +208,8 @@ class DataGrabberInputSpec(DynamicTraitedSpec): #InterfaceInputSpec):
             desc='Path to the base directory consisting of subject data.')
     raise_on_empty = traits.Bool(True, usedefault=True,
                           desc='Generate exception if list is empty for a given field')
+    sort_filelist = traits.Bool(False, usedefault=True,
+                        desc='Sort the filelist that matches the template')
     template = traits.Str(mandatory=True,
              desc='Layout used to get files. relative to base directory if defined')
     template_args = traits.Dict(traits.Str,
@@ -343,6 +345,8 @@ class DataGrabber(IOBase):
                     else:
                         warn(msg)
                 else:
+                    if self.inputs.sort_filelist:
+                        filelist.sort()
                     outputs[key] = list_to_filename(filelist)
             for argnum, arglist in enumerate(args):
                 maxlen = 1
@@ -376,6 +380,8 @@ class DataGrabber(IOBase):
                             warn(msg)
                         outputs[key].insert(i, None)
                     else:
+                        if self.inputs.sort_filelist:
+                            outfiles.sort()
                         outputs[key].insert(i,list_to_filename(outfiles))
             if any([val==None for val in outputs[key]]):
                 outputs[key] = []
