@@ -281,24 +281,24 @@ class Distance(BaseInterface):
             outputs['histogram'] = os.path.abspath(self._hist_filename)
         return outputs
     
-class SimilarityInputSpec(TraitedSpec):
+class DisimilarityInputSpec(TraitedSpec):
     volume1 = File(exists=True, mandatory=True)
     volume2 = File(exists=True, mandatory=True)
     method = traits.Enum("dice", "jaccard", desc='"dice": Dice\'s dissimilarity,\
     "jaccard": Jaccards\'s dissimilarity', usedefault = True
     )
     
-class SimilarityOutputSpec(TraitedSpec):
-    distance = traits.Float()
+class DisimilarityOutputSpec(TraitedSpec):
+    dissimilarity = traits.Float()
     
-class Similarity(BaseInterface):
+class Disimilarity(BaseInterface):
     """
     Calculates similarity between two maps.
     """
-    input_spec = SimilarityInputSpec
-    output_spec = SimilarityOutputSpec
+    input_spec = DisimilarityInputSpec
+    output_spec = DisimilarityOutputSpec
     
-    def _bool_vec_distance(self, booldata1, booldata2, method):
+    def _bool_vec_dissimilarity(self, booldata1, booldata2, method):
         methods = {"dice": dice, "jaccard": jaccard}       
         return methods[method](booldata1.flat, booldata2.flat)
     
@@ -309,14 +309,14 @@ class Similarity(BaseInterface):
         if self.inputs.method in ("dice", "jaccard"):
             origdata1 = nii1.get_data().astype(np.bool)
             origdata2 = nii2.get_data().astype(np.bool)
-            self._distance = self._bool_vec_distance(origdata1, origdata2, method = self.inputs.method)
+            self._dissimilarity = self._bool_vec_dissimilarity(origdata1, origdata2, method = self.inputs.method)
         
         runtime.returncode=0
         return runtime
     
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['distance'] = self._distance
+        outputs['dissimilarity'] = self._dissimilarity
         return outputs
         
 class ModifyAffineInputSpec(TraitedSpec):
