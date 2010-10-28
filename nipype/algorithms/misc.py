@@ -281,22 +281,22 @@ class Distance(BaseInterface):
             outputs['histogram'] = os.path.abspath(self._hist_filename)
         return outputs
     
-class DisimilarityInputSpec(TraitedSpec):
+class DissimilarityInputSpec(TraitedSpec):
     volume1 = File(exists=True, mandatory=True)
     volume2 = File(exists=True, mandatory=True)
     method = traits.Enum("dice", "jaccard", desc='"dice": Dice\'s dissimilarity,\
     "jaccard": Jaccards\'s dissimilarity', usedefault = True
     )
     
-class DisimilarityOutputSpec(TraitedSpec):
+class DissimilarityOutputSpec(TraitedSpec):
     dissimilarity = traits.Float()
     
-class Disimilarity(BaseInterface):
+class Dissimilarity(BaseInterface):
     """
     Calculates similarity between two maps.
     """
-    input_spec = DisimilarityInputSpec
-    output_spec = DisimilarityOutputSpec
+    input_spec = DissimilarityInputSpec
+    output_spec = DissimilarityOutputSpec
     
     def _bool_vec_dissimilarity(self, booldata1, booldata2, method):
         methods = {"dice": dice, "jaccard": jaccard}       
