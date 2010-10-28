@@ -33,6 +33,7 @@ import cPickle
 import gzip
 package_check('networkx', '1.0')
 import networkx as nx
+from IPython.Release import version as IPyversion
 try:
     from IPython.kernel.contexts import ConnectionRefusedError
 except:
@@ -766,6 +767,8 @@ class Workflow(WorkflowBase):
                         else:
                             self._task_finished_cb(res['result'], jobid)
                             self._remove_node_dirs()
+                        if IPyversion >= '0.10.1':
+                            logger.debug("Clearing id: %d"%taskid)
                             self.taskclient.clear(taskid)
                     else:
                         toappend.insert(0, (taskid, jobid))
