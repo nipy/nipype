@@ -18,8 +18,8 @@ package_check('matplotlib')
 
 from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
                                     OutputMultiPath, Undefined, traits,
-                                    BaseInterface)
-from nitime.analysis import CoherenceAnalyzer
+                                    BaseInterface, isdefined)
+import nitime.analysis as nta
 from nitime.timeseries import TimeSeries
 
 from matplotlib.mlab import csv2rec
@@ -40,24 +40,24 @@ class CoherenceAnalyzerInputSpec(TraitedSpec):
 
     in_TS = traits.Any(desc='a nitime TimeSeries object')
 
-    NFFT = traits.Range(low=32,value=64,
+    NFFT = traits.Range(low=32,value=64, usedefault=True,
                         desc=('This is the size of the window used for ',
                         'the spectral estimation. Use values between ',
                         '32 and the number of samples in your time-series.',
                         '(Defaults to 64.)'))
-    n_overlap = traits.Range(low=0,value=0,
+    n_overlap = traits.Range(low=0,value=0,usedefault=True,
                              desc=('The number of samples which overlap',
                              'between subsequent windows.(Defaults to 0)'))
     
-    frequency_range = traits.ListFloat(value=[0.02, 0.15],
-                                       minlen=2,
-                                       maxlen=2,
-                                       desc=('The range of frequencies over',
-                                             'which the analysis will average.',
-                                             '[low,high] (Default [0.02,0.15]'))
+    frequency_range = traits.List(value=[0.02, 0.15],usedefault=True,
+                                  minlen=2,
+                                  maxlen=2,
+                                  desc=('The range of frequencies over',
+                                        'which the analysis will average.',
+                                        '[low,high] (Default [0.02,0.15]'))
 
-    output_csv_file = traits.File(desc='File to write output')
-    output_figure_file = traits.File(desc='File to write output figures')
+    output_csv_file = File(desc='File to write output')
+    output_figure_file = File(desc='File to write output figures')
     figure_type = traits.Enum('matrix','network',
                               desc=("The type of plot to generate, where ",
                                     "'matrix' denotes a matrix image and",
@@ -69,13 +69,13 @@ class CoherenceAnalyzerOutputSpec(TraitedSpec):
     timedelay_array = traits.Array(desc=('The pairwise time delays between the',
                                          'ROIs (in seconds)'))
 
-    coherence_csv = traits.File(desc = ('A csv file containing the pairwise ',
+    coherence_csv = File(desc = ('A csv file containing the pairwise ',
                                         'coherence values'))
-    timedelay_csv = traits.File(desc = ('A csv file containing the pairwise ',
+    timedelay_csv = File(desc = ('A csv file containing the pairwise ',
                                         'time delay values'))
 
-    coherence_fig = traits.File(desc = ('Figure representing coherence values'))
-    timedelay_fig = traits.File(desc = ('Figure representing coherence values'))
+    coherence_fig = File(desc = ('Figure representing coherence values'))
+    timedelay_fig = File(desc = ('Figure representing coherence values'))
 
     
 class CoherenceAnalyzer(BaseInterface):
@@ -114,7 +114,7 @@ class CoherenceAnalyzer(BaseInterface):
                           
         
     #Rewrite _run_interface, but not run
-    def _run_interface(self,runtime):
+    def _run_interface(self, runtime):
         lb, ub = self.inputs.frequency_range
 
         if self.inputs.in_TS is Undefined:
@@ -128,13 +128,13 @@ class CoherenceAnalyzer(BaseInterface):
             if not TS.metadata.haskey('ROIs'):
                 TS.metadata['ROIs']=['roi_%d' % x for x,_ in enumerate(TS.data)]
 
-        A = CoherenceAnalyzer(TS,
-                              method=dict(this_method='welch',
-                                          NFFT=self.inputs.NFFT,
-                                          n_overlap=self.inputs.n_overlap))
+        A = nta.CoherenceAnalyzer(TS,
+                                  method=dict(this_method='welch',
+                                              NFFT=self.inputs.NFFT,
+                                              n_overlap=self.inputs.n_overlap))
 
-        freq_idx = np.where((A.frequencies>self.inputs.frequency_range) *
-                            (A.frequencies<self.inputs.frequency_range))[0]
+        freq_idx = np.where((A.frequencies>self.inputs.frequency_range[0]) *
+                            (A.frequencies<self.inputs.frequency_range[1]))[0]
         
         #Get the coherence matrix from the analyzer, averaging on the last
         #(frequency) dimension: (roi X roi array)
@@ -154,12 +154,20 @@ class CoherenceAnalyzer(BaseInterface):
             #file name + path)
 
         #Always defined (the arrays):
-        outputs['coherence']=self.coherence
-        outputs['delay']=self.delay
+        outputs['coherence_array']=self.coherence
+        outputs['timedelay_array']=self.delay
         
         #Conditional
         if isdefined(self.inputs.output_csv_file):
-            outputs['coherence_csv']=self.coherence_file
+            # we need to make a function that we call here that writes the coherence
+            # values to this file "coherence_csv" and makes the time_delay csv file??
+            outputs['coherence_csv'] = self.inputs.coherence_file
+            outputs['timedelay_csv'] = timedelay_file
+        if isdefined(self.inputs.output_figure_file):
+            # we need to make a function that we call here that generates the
+            # figure files for coherence and time delay (subplots, one fig??)
+            # check self.inputs.figure_type but has a default??
+            outputs['coherence_fig'] = self.inputs.output_figure_file
 
         return outputs
     
