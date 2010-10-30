@@ -156,9 +156,9 @@ def _write_detailed_dot(graph, dotfilename):
     return text
 
 def _get_valid_pathstr(pathstr):
-    for symbol in [' ','[',']','(',')','_','{','}','?',':','<','>','#','!','|','"',';']:
-        pathstr = pathstr.replace(symbol, '')
     pathstr = pathstr.replace(os.sep, '..')
+    for symbol in [' ','[',']','(',')','{','}','?',':','<','>','#','!','|','"',';']:
+        pathstr = pathstr.replace(symbol, '')
     pathstr = pathstr.replace(',', '.')
     return pathstr
 
