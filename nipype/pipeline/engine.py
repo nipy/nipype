@@ -118,16 +118,19 @@ class WorkflowBase(object):
         raise NotImplementedError
 
     def clone(self, name):
-        if name is None:
+        """Clone a workflowbase object
+
+        Parameters
+        ----------
+
+        name : string (mandatory)
+            A clone of node or workflow must have a new name
+        """
+        if (name is None) or (name == self.name):
             raise Exception('Cloning requires a new name')
-        if hasattr(self, '_flatgraph'):
-            self._flatgraph = None
-        if hasattr(self, '_execgraph'):
-            self._execgraph = None
         clone = deepcopy(self)
         clone.name = name
         clone._id = name
-        clone._reset_hierarchy()
         return clone
 
     def _check_outputs(self, parameter):
@@ -154,7 +157,7 @@ class WorkflowBase(object):
         np.savez(filename, object=self)
 
     def load(self, filename):
-        np.load(filename)
+        return np.load(filename)
 
     def _report_crash(self, traceback=None, execgraph=None):
         """Writes crash related information to a file
@@ -205,7 +208,8 @@ class Workflow(WorkflowBase):
         self._init_runtime_fields()
 
     def _init_runtime_fields(self):
-        # attributes for running with manager
+        """Reset runtime attributes to none
+        """
         self.procs = None
         self.depidx = None
         self.refidx = None
@@ -218,10 +222,30 @@ class Workflow(WorkflowBase):
 
     # PUBLIC API
     def clone(self, name):
+        """Clone a workflow
+
+        .. note::
+
+        Will reset attributes used for executing workflow. See
+        _init_runtime_fields. 
+
+        Parameters
+        ----------
+
+        name: string (mandatory )
+            every clone requires a new name
+            
+        """
         self._init_runtime_fields()
-        return super(Workflow, self).clone(name)
+        clone = super(Workflow, self).clone(name)
+        clone._reset_hierarchy()
+        return clone
 
     def disconnect(self, *args):
+        """Disconnect two nodes
+
+        See the docstring for connect for format.
+        """
         # yoh: explicit **dict was introduced for compatibility with Python 2.5
         return self.connect(*args, **dict(disconnect=True))
 
@@ -237,6 +261,7 @@ class Workflow(WorkflowBase):
 
         Parameters
         ----------
+        
         args : list or a set of four positional arguments
 
             Four positional arguments of the form::
@@ -286,10 +311,21 @@ class Workflow(WorkflowBase):
                 if node._hierarchy is None:
                     node._hierarchy = self.name
         for srcnode, destnode, connects in connection_list:
+            connected_ports = []
+            # check to see which ports of destnode are already
+            # connected. 
+            if not disconnect and (destnode in self._graph.nodes()):
+                for edge in self._graph.in_edges_iter(destnode):
+                    data = self._graph.get_edge_data(*edge)
+                    for sourceinfo, destname in data['connect']:
+                        connected_ports += [destname]
             for source, dest in connects:
                 # Currently datasource/sink/grabber.io modules
                 # determine their inputs/outputs depending on
                 # connection settings.  Skip these modules in the check
+                if dest in connected_ports:
+                    raise Exception('Input %s of node %s is already ' \
+                                        'connected'%(dest,destnode))
                 if not (hasattr(destnode, '_interface') and '.io' in str(destnode._interface.__class__)):
                     if not destnode._check_inputs(dest):
                         not_found.append(['in', destnode.name, dest])
@@ -323,7 +359,12 @@ class Workflow(WorkflowBase):
                     if disconnect:
                         logger.debug('Removing connection: %s'%str(data))
                         edge_data['connect'].remove(data)
-                self._graph.add_edges_from([(srcnode, destnode, edge_data)])
+                if edge_data['connect']:
+                    self._graph.add_edges_from([(srcnode, destnode, edge_data)])
+                else:
+                    #pass
+                    logger.debug('Removing connection: %s->%s'%(srcnode,destnode))
+                    self._graph.remove_edges_from([(srcnode, destnode)])
             elif not disconnect:
                 logger.debug('(%s, %s): No edge data' % (srcnode, destnode))
                 self._graph.add_edges_from([(srcnode, destnode,
@@ -333,8 +374,7 @@ class Workflow(WorkflowBase):
                                                          str(edge_data)))
 
     def add_nodes(self, nodes):
-        """ Wraps the networkx functionality in a more semantically
-        relevant function name
+        """ Add nodes to a workflow
 
         Parameters
         ----------
@@ -354,6 +394,16 @@ class Workflow(WorkflowBase):
                 node._hierarchy = self.name
         self._graph.add_nodes_from(newnodes)
 
+    def remove_nodes(self, nodes):
+        """ Remove nodes from a workflow
+
+        Parameters
+        ----------
+        nodes : list
+            A list of WorkflowBase-based objects
+        """
+        self._graph.remove_nodes_from(nodes)
+        
     @property
     def inputs(self):
         return self._get_inputs()
@@ -386,9 +436,18 @@ class Workflow(WorkflowBase):
             outnode = None
         return outnode
 
-    def write_graph(self, dotfilename='graph.dot', graph2use='orig'):
-        """
-        graph2use = 'orig', 'flat', 'exec'
+    def write_graph(self, dotfilename='graph.dot', graph2use='flat'):
+        """Generates a graphviz dot file and a png file
+
+        Parameters
+        ----------
+        
+        graph2use: 'orig', 'flat' (default), 'exec'
+            orig - creates a top level graph without expanding internal
+                   workflow nodes
+            flat - expands workflow nodes recursively
+            exec - expands workflows to depict iterables
+            
         """
         graph = self._graph
         if graph2use in ['flat', 'exec']:
@@ -423,7 +482,9 @@ class Workflow(WorkflowBase):
     # PRIVATE API AND FUNCTIONS
 
     def _check_nodes(self, nodes):
-        "docstring for _check_nodes"
+        """Checks if any of the nodes are already in the graph
+        
+        """
         node_names = [node.name for node in self._graph.nodes()]
         node_lineage = [node._hierarchy for node in self._graph.nodes()]
         for node in nodes:
@@ -435,6 +496,8 @@ class Workflow(WorkflowBase):
                 node_names.append(node.name)
 
     def _has_attr(self, parameter, subtype='in'):
+        """Checks if a parameter is available as an input or output
+        """
         if subtype == 'in':
             subobject = self.inputs
         else:
@@ -448,6 +511,9 @@ class Workflow(WorkflowBase):
         return True
 
     def _get_parameter_node(self, parameter, subtype='in'):
+        """Returns the underlying node corresponding to an input or
+        output parameter
+        """
         if subtype == 'in':
             subobject = self.inputs
         else:
@@ -465,6 +531,10 @@ class Workflow(WorkflowBase):
         return self._has_attr(parameter, subtype='in')
 
     def _get_inputs(self):
+        """Returns the inputs of a workflow
+
+        This function does not return any input ports that are already connected
+        """
         inputdict = TraitedSpec()
         for node in self._graph.nodes():
             inputdict.add_trait(node.name, traits.Instance(TraitedSpec))
@@ -486,6 +556,8 @@ class Workflow(WorkflowBase):
         return inputdict
 
     def _get_outputs(self):
+        """Returns all possible output ports that are not already connected
+        """
         outputdict = TraitedSpec()
         for node in self._graph.nodes():
             outputdict.add_trait(node.name, traits.Instance(TraitedSpec))
@@ -500,6 +572,8 @@ class Workflow(WorkflowBase):
         return outputdict
 
     def _set_input(self, object, name, newvalue):
+        """Trait callback function to update a node input
+        """
         object.traits()[name].node.set_input(name, newvalue)
 
     def _set_node_input(self, node, param, source, sourceinfo):
@@ -519,13 +593,17 @@ class Workflow(WorkflowBase):
         node.set_input(param, deepcopy(newval))
 
     def _create_flat_graph(self):
+        """Turn a hierarchical DAG into a simple DAG where no node is a workflow
+        """
         logger.debug('Creating flat graph for workflow: %s', self.name)
         self._init_runtime_fields()
         workflowcopy = deepcopy(self)
-        workflowcopy._generate_execgraph()
+        workflowcopy._generate_flatgraph()
         self._flatgraph = workflowcopy._graph
 
     def _reset_hierarchy(self):
+        """Reset the hierarchy on a graph
+        """
         for node in self._graph.nodes():
             if isinstance(node, Workflow):
                 node._reset_hierarchy()
@@ -534,7 +612,9 @@ class Workflow(WorkflowBase):
             else:
                 node._hierarchy = self.name
 
-    def _generate_execgraph(self):
+    def _generate_flatgraph(self):
+        """Generate a graph containing only Nodes or MapNodes
+        """
         logger.debug('expanding workflow: %s', self)
         nodes2remove = []
         if not nx.is_directed_acyclic_graph(self._graph):
@@ -544,7 +624,10 @@ class Workflow(WorkflowBase):
             logger.debug('processing node: %s'%node)
             if isinstance(node, Workflow):
                 nodes2remove.append(node)
-                for u, _, d in self._graph.in_edges_iter(nbunch=node, data=True):
+                # use in_edges instead of in_edges_iter to allow
+                # disconnections to take place properly. otherwise, the
+                # edge dict is modified.
+                for u, _, d in self._graph.in_edges(nbunch=node, data=True):
                     logger.debug('in: connections-> %s'%str(d['connect']))
                     for cd in deepcopy(d['connect']):
                         logger.debug("in: %s" % str (cd))
@@ -555,7 +638,8 @@ class Workflow(WorkflowBase):
                         logger.debug('in edges: %s %s %s %s'%(srcnode, srcout, dstnode, dstin))
                         self.disconnect(u, cd[0], node, cd[1])
                         self.connect(srcnode, srcout, dstnode, dstin)
-                for _, v, d in self._graph.out_edges_iter(nbunch=node, data=True):
+                # do not use out_edges_iter for reasons stated in in_edges
+                for _, v, d in self._graph.out_edges(nbunch=node, data=True):
                     logger.debug('out: connections-> %s'%str(d['connect']))
                     for cd in deepcopy(d['connect']):
                         logger.debug("out: %s" % str (cd))
@@ -577,7 +661,7 @@ class Workflow(WorkflowBase):
                         self.connect(srcnode, srcout, dstnode, dstin)
                 # expand the workflow node
                 #logger.debug('expanding workflow: %s', node)
-                node._generate_execgraph()
+                node._generate_flatgraph()
                 for innernode in node._graph.nodes():
                     innernode._hierarchy = '.'.join((self.name,innernode._hierarchy))
                 self._graph.add_nodes_from(node._graph.nodes())
@@ -701,6 +785,8 @@ class Workflow(WorkflowBase):
                     crashfile = crashfile)
 
     def _remove_node_dirs(self):
+        """Removes directories whos outputs have already been used up
+        """
         if config.getboolean('execution', 'remove_node_directories'):
             for idx in np.nonzero(np.all(self.refidx==0,axis=1))[0]:
                 if self.proc_done[idx] and (not self.proc_pending[idx]):
@@ -739,7 +825,6 @@ class Workflow(WorkflowBase):
                 self._execute_in_series()
                 return
         logger.info("Running in parallel.")
-        # self.taskclient.clear()
         # in the absence of a dirty bit on the object, generate the
         # parameterization each time before running
         # Generate appropriate structures for worker-manager model
@@ -944,10 +1029,9 @@ class Node(WorkflowBase):
         """Executes an interface within a directory.
         """
         # check to see if output directory and hash exist
-        logger.info("Node: %s"%self._id)
         outdir = self._output_directory()
         outdir = make_output_dir(outdir)
-        logger.info("in dir: %s"%outdir)
+        logger.info("Executing node %s in dir: %s"%(self._id,outdir))
         # Get a dictionary with hashed filenames and a hashvalue
         # of the dictionary itself.
         hashed_inputs, hashvalue = self._get_hashval()
@@ -959,6 +1043,7 @@ class Node(WorkflowBase):
             self._save_hashfile(hashfile, hashed_inputs)
         if force_execute or (not updatehash and (self.overwrite or not os.path.exists(hashfile))):
             logger.debug("Node hash: %s"%hashvalue)
+            
             hashfile_unfinished = os.path.join(outdir, '_0x%s_unfinished.json' % hashvalue)
             if os.path.exists(outdir) and not (os.path.exists(hashfile_unfinished) and self._interface.can_resume):
                 logger.debug("Removing old %s and its contents"%outdir)
