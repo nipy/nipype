@@ -644,7 +644,7 @@ class ThresholdInputSpec(SPMCommandInputSpec):
     stat_image = File(exists=True, desc='stat image', copyfile=False, mandatory=True)
     contrast_index = traits.Int(mandatory=True, desc='which contrast in the SPM.mat to use')
     use_fwe_correction = traits.Bool(True, usedefault=True, desc="whether to use FWE (Bonferroni) correction for initial threshold")
-    use_topo_fdr = traits.Bool(True, usedefault=True, desc="whether to use FDR over cludter extent probabilities")
+    use_topo_fdr = traits.Bool(True, usedefault=True, desc="whether to use FDR over cluster extent probabilities")
     height_threshold = traits.Float(0.05, usedefault=True, desc="p-value for initial thresholding (defining clusters)")
     extent_fdr_p_threshold = traits.Float(0.05, usedefault=True, desc='p threshold on FDR corrected cluster size probabilities')
     extent_threshold = traits.Int(0, usedefault=True, desc="Minimum cluster size in voxels")
