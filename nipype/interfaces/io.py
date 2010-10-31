@@ -44,6 +44,60 @@ from nipype.utils.filemanip import (copyfile, list_to_filename,
 import logging
 iflogger = logging.getLogger('interface')
 
+
+def copytree(src, dst):
+    """Recursively copy a directory tree using copyfile().
+
+    The destination directory must not already exist.
+    If exception(s) occur, an Error is raised with a list of reasons.
+
+    If the optional symlinks flag is true, symbolic links in the
+    source tree result in symbolic links in the destination tree; if
+    it is false, the contents of the files pointed to by symbolic
+    links are copied.
+
+    The optional ignore argument is a callable. If given, it
+    is called with the `src` parameter, which is the directory
+    being visited by copytree(), and `names` which is the list of
+    `src` contents, as returned by os.listdir():
+
+        callable(src, names) -> ignored_names
+
+    Since copytree() is called recursively, the callable will be
+    called once for each directory that is copied. It returns a
+    list of names relative to the `src` directory that should
+    not be copied.
+
+    XXX Consider this example code rather than the ultimate tool.
+
+    """
+    names = os.listdir(src)
+    try:
+        os.makedirs(dst)
+    except OSError, why:
+        if 'File exists' in why:
+            pass
+        else:
+            raise why
+    errors = []
+    for name in names:
+        srcname = os.path.join(src, name)
+        dstname = os.path.join(dst, name)
+        try:
+            if os.path.isdir(srcname):
+                copytree(srcname, dstname)
+            else:
+                copyfile(srcname, dstname)
+            # XXX What about devices, sockets etc.?
+        except (IOError, os.error), why:
+            errors.append((srcname, dstname, str(why)))
+        # catch the Error from the recursive copytree so that we can
+        # continue with other files
+        except Error, err:
+            errors.extend(err.args[0])
+    if errors:
+        raise Error, errors
+
 def add_traits(base, names, trait_type=None):
     """ Add traits to a traited class.
 
@@ -88,6 +142,8 @@ class DataSinkInputSpec(DynamicTraitedSpec):
                                          'to substitute and string to replace'
                                          'it with'))
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
+    remove_dest_dir = traits.Bool(False, usedefault=True,
+                                  desc='remove dest directory when copying dirs')
     
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
@@ -163,7 +219,13 @@ class DataSink(IOBase):
         if isdefined(self.inputs.container):
             outdir = os.path.join(outdir, self.inputs.container)
         if not os.path.exists(outdir):
-            os.makedirs(outdir)
+            try:
+                os.makedirs(outdir)
+            except OSError as inst:
+                if 'File exists' in inst:
+                    pass
+                else:
+                    raise(inst)
         for key,files in self.inputs._outputs.items():
             iflogger.debug("key: %s files: %s"%(key, str(files)))
             files = filename_to_list(files)
@@ -196,12 +258,18 @@ class DataSink(IOBase):
                     dst = self._substitute(dst)
                     path,_ = os.path.split(dst)
                     if not os.path.exists(path):
-                        os.makedirs(path)
-                    if os.path.exists(dst):
+                        try:
+                            os.makedirs(path)
+                        except OSError as inst:
+                            if 'File exists' in inst:
+                                pass
+                            else:
+                                raise(inst)
+                    if os.path.exists(dst) and self.inputs.remove_dest_directory:
                         iflogger.debug("removing: %s"%dst)
                         shutil.rmtree(dst)
                     iflogger.debug("copydir: %s %s"%(src, dst))
-                    shutil.copytree(src, dst)
+                    copytree(src, dst)
         return None
 
 
