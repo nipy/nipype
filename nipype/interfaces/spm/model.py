@@ -735,8 +735,7 @@ else
 
     for i = 1:nclusters
         cluster_size = sum(voxel_labels==i);
-        cluster_size_resels = cluster_size*V2R;
-        if cluster_size > extent_threshold && (~use_topo_fdr || cluster_size >= uc) 
+         if cluster_size > extent_threshold && (~use_topo_fdr || cluster_size >= uc) 
             thresholded_XYZ = cat(2, thresholded_XYZ, XYZth(:,voxel_labels == i));
             thresholded_Z = cat(2, thresholded_Z, Zth(voxel_labels == i));
         end
