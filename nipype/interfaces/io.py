@@ -46,30 +46,12 @@ iflogger = logging.getLogger('interface')
 
 
 def copytree(src, dst):
-    """Recursively copy a directory tree using copyfile().
+    """Recursively copy a directory tree using
+    nipype.utils.filemanip.copyfile()
 
-    The destination directory must not already exist.
-    If exception(s) occur, an Error is raised with a list of reasons.
-
-    If the optional symlinks flag is true, symbolic links in the
-    source tree result in symbolic links in the destination tree; if
-    it is false, the contents of the files pointed to by symbolic
-    links are copied.
-
-    The optional ignore argument is a callable. If given, it
-    is called with the `src` parameter, which is the directory
-    being visited by copytree(), and `names` which is the list of
-    `src` contents, as returned by os.listdir():
-
-        callable(src, names) -> ignored_names
-
-    Since copytree() is called recursively, the callable will be
-    called once for each directory that is copied. It returns a
-    list of names relative to the `src` directory that should
-    not be copied.
-
-    XXX Consider this example code rather than the ultimate tool.
-
+    This is not a thread-safe routine. However, in the case of creating new
+    directories, it checks to see if a particular directory has already been
+    created by another process.
     """
     names = os.listdir(src)
     try:
@@ -88,7 +70,6 @@ def copytree(src, dst):
                 copytree(srcname, dstname)
             else:
                 copyfile(srcname, dstname)
-            # XXX What about devices, sockets etc.?
         except (IOError, os.error), why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
@@ -166,7 +147,13 @@ class DataSink(IOBase):
 
         An attribute such as contrasts.@con will create a 'contrasts' directory to
         store the results linked to the attribute. If the @ is left out, such as in
-        'contrasts.con' a subdirectory 'con' will be created under 'contrasts'.  
+        'contrasts.con' a subdirectory 'con' will be created under 'contrasts'.
+
+        .. note::
+
+        Unlike most nipype-nodes this is not a thread-safe node because it can
+        write to a common shared location. It will not complain when it
+        overwrites a file.
 
         Examples
         --------
