@@ -16,6 +16,7 @@ import re
 from glob import glob
 import itertools
 import numpy as np
+import warnings
 
 from nipype.externals.pynifti import load
 from nipype.utils.filemanip import fname_presuffix, load_json, save_json
@@ -25,6 +26,8 @@ from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath, OutputMultiPath)
 from nipype.utils.misc import isdefined
+
+warnings.warn("Freesurfer utility interfaces are not fully tested")
 
 class SampleToSurfaceInputSpec(FSTraitedSpec):
 
