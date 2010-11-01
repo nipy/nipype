@@ -74,10 +74,10 @@ def copytree(src, dst):
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
-        except Error, err:
+        except Exception, err:
             errors.extend(err.args[0])
     if errors:
-        raise Error, errors
+        raise Exception, errors
 
 def add_traits(base, names, trait_type=None):
     """ Add traits to a traited class.
@@ -252,7 +252,7 @@ class DataSink(IOBase):
                                 pass
                             else:
                                 raise(inst)
-                    if os.path.exists(dst) and self.inputs.remove_dest_directory:
+                    if os.path.exists(dst) and self.inputs.remove_dest_dir:
                         iflogger.debug("removing: %s"%dst)
                         shutil.rmtree(dst)
                     iflogger.debug("copydir: %s %s"%(src, dst))
