@@ -644,6 +644,7 @@ class ThresholdInputSpec(SPMCommandInputSpec):
     stat_image = File(exists=True, desc='stat image', copyfile=False, mandatory=True)
     contrast_index = traits.Int(mandatory=True, desc='which contrast in the SPM.mat to use')
     use_fwe_correction = traits.Bool(True, usedefault=True, desc="whether to use FWE (Bonferroni) correction for initial threshold")
+    use_topo_fdr = traits.Bool(True, usedefault=True, desc="whether to use FDR over cluster extent probabilities")
     height_threshold = traits.Float(0.05, usedefault=True, desc="p-value for initial thresholding (defining clusters)")
     extent_fdr_p_threshold = traits.Float(0.05, usedefault=True, desc='p threshold on FDR corrected cluster size probabilities')
     extent_threshold = traits.Int(0, usedefault=True, desc="Minimum cluster size in voxels")
@@ -678,6 +679,11 @@ class Threshold(SPMCommand):
             script += "thresDesc  = 'FWE';\n"
         else:
             script += "thresDesc  = 'none';\n"
+            
+        if self.inputs.use_topo_fdr:
+            script += "use_topo_fdr  = 1;\n"
+        else:
+            script += "use_topo_fdr  = 0;\n"
         script += "cluster_extent_p_fdr_thr = %f;\n"% self.inputs.extent_fdr_p_threshold
         script += "stat_filename = '%s';\n"% self.inputs.stat_image
         script += "extent_threshold = %d;\n" % self.inputs.extent_threshold
@@ -716,9 +722,10 @@ if isempty(XYZth)
     thresholded_XYZ = [];
     thresholded_Z = [];
 else
-
-    V2R        = 1/prod(FWHM(stat_map_vol.dim > 1));
-    [uc,Pc,ue] = spm_uc_clusterFDR(cluster_extent_p_fdr_thr,df,STAT,R,n,Z,XYZ,V2R,cluster_forming_thr);
+    if use_topo_fdr
+        V2R        = 1/prod(FWHM(stat_map_vol.dim > 1));
+        [uc,Pc,ue] = spm_uc_clusterFDR(cluster_extent_p_fdr_thr,df,STAT,R,n,Z,XYZ,V2R,cluster_forming_thr);
+    end
 
     voxel_labels = spm_clusters(XYZth);
     nclusters = max(voxel_labels);
@@ -728,8 +735,7 @@ else
 
     for i = 1:nclusters
         cluster_size = sum(voxel_labels==i);
-        cluster_size_resels = cluster_size*V2R;
-        if cluster_size > extent_threshold && cluster_size >= uc
+         if cluster_size > extent_threshold && (~use_topo_fdr || cluster_size >= uc) 
             thresholded_XYZ = cat(2, thresholded_XYZ, XYZth(:,voxel_labels == i));
             thresholded_Z = cat(2, thresholded_Z, Zth(voxel_labels == i));
         end
