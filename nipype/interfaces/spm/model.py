@@ -810,7 +810,7 @@ class FactorialDesign(SPMCommand):
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
-        if opt in ['spm_mat_dir']:
+        if opt in ['spm_mat_dir','explicit_mask_file']:
             return np.array([str(val)], dtype=object)
         if opt in ['covariates']:
             outlist = []
