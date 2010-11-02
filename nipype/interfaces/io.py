@@ -44,6 +44,41 @@ from nipype.utils.filemanip import (copyfile, list_to_filename,
 import logging
 iflogger = logging.getLogger('interface')
 
+
+def copytree(src, dst):
+    """Recursively copy a directory tree using
+    nipype.utils.filemanip.copyfile()
+
+    This is not a thread-safe routine. However, in the case of creating new
+    directories, it checks to see if a particular directory has already been
+    created by another process.
+    """
+    names = os.listdir(src)
+    try:
+        os.makedirs(dst)
+    except OSError, why:
+        if 'File exists' in why:
+            pass
+        else:
+            raise why
+    errors = []
+    for name in names:
+        srcname = os.path.join(src, name)
+        dstname = os.path.join(dst, name)
+        try:
+            if os.path.isdir(srcname):
+                copytree(srcname, dstname)
+            else:
+                copyfile(srcname, dstname)
+        except (IOError, os.error), why:
+            errors.append((srcname, dstname, str(why)))
+        # catch the Error from the recursive copytree so that we can
+        # continue with other files
+        except Exception, err:
+            errors.extend(err.args[0])
+    if errors:
+        raise Exception, errors
+
 def add_traits(base, names, trait_type=None):
     """ Add traits to a traited class.
 
@@ -88,6 +123,8 @@ class DataSinkInputSpec(DynamicTraitedSpec):
                                          'to substitute and string to replace'
                                          'it with'))
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
+    remove_dest_dir = traits.Bool(False, usedefault=True,
+                                  desc='remove dest directory when copying dirs')
     
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
@@ -110,7 +147,13 @@ class DataSink(IOBase):
 
         An attribute such as contrasts.@con will create a 'contrasts' directory to
         store the results linked to the attribute. If the @ is left out, such as in
-        'contrasts.con' a subdirectory 'con' will be created under 'contrasts'.  
+        'contrasts.con' a subdirectory 'con' will be created under 'contrasts'.
+
+        .. note::
+
+        Unlike most nipype-nodes this is not a thread-safe node because it can
+        write to a common shared location. It will not complain when it
+        overwrites a file.
 
         Examples
         --------
@@ -163,7 +206,13 @@ class DataSink(IOBase):
         if isdefined(self.inputs.container):
             outdir = os.path.join(outdir, self.inputs.container)
         if not os.path.exists(outdir):
-            os.makedirs(outdir)
+            try:
+                os.makedirs(outdir)
+            except OSError as inst:
+                if 'File exists' in inst:
+                    pass
+                else:
+                    raise(inst)
         for key,files in self.inputs._outputs.items():
             iflogger.debug("key: %s files: %s"%(key, str(files)))
             files = filename_to_list(files)
@@ -187,7 +236,13 @@ class DataSink(IOBase):
                     dst = self._substitute(dst)
                     path,_ = os.path.split(dst)
                     if not os.path.exists(path):
-                        os.makedirs(path)
+                        try:
+                            os.makedirs(path)
+                        except OSError as inst:
+                            if 'File exists' in inst:
+                                pass
+                            else:
+                                raise(inst)
                     iflogger.debug("copyfile: %s %s"%(src, dst))
                     copyfile(src, dst, copy=True)
                 elif os.path.isdir(src):
@@ -196,12 +251,18 @@ class DataSink(IOBase):
                     dst = self._substitute(dst)
                     path,_ = os.path.split(dst)
                     if not os.path.exists(path):
-                        os.makedirs(path)
-                    if os.path.exists(dst):
+                        try:
+                            os.makedirs(path)
+                        except OSError as inst:
+                            if 'File exists' in inst:
+                                pass
+                            else:
+                                raise(inst)
+                    if os.path.exists(dst) and self.inputs.remove_dest_dir:
                         iflogger.debug("removing: %s"%dst)
                         shutil.rmtree(dst)
                     iflogger.debug("copydir: %s %s"%(src, dst))
-                    shutil.copytree(src, dst)
+                    copytree(src, dst)
         return None
 
 
