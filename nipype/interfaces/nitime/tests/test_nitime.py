@@ -39,6 +39,11 @@ def test_coherence_analysis():
     CA = nitime.CoherenceAnalyzer()
     CA.inputs.TR = 1.89
     CA.inputs.in_file = example_data('fmri_timeseries.csv')
+    tmp_png = tempfile.mkstemp(suffix='.png')[1] 
+    CA.inputs.output_figure_file = tmp_png
+    tmp_csv = tempfile.mkstemp(suffix='.csv')[1] 
+    CA.inputs.output_csv_file = tmp_csv
+
     o = CA.run()
     yield assert_equal,o.outputs.coherence_array.shape,(31,31)
 
