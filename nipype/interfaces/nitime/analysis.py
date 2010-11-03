@@ -11,6 +11,7 @@ Interfaces to functionality from nitime for time-series analysis of fmri data
 """
 
 import numpy as np
+import tempfile
 from nipype.utils.misc import package_check
 package_check('nitime')
 package_check('matplotlib')
@@ -19,10 +20,12 @@ package_check('matplotlib')
 from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
                                     OutputMultiPath, Undefined, traits,
                                     BaseInterface, isdefined)
+
+from nipype.utils.filemanip import fname_presuffix
+
 import nitime.analysis as nta
 from nitime.timeseries import TimeSeries
-
-from matplotlib.mlab import csv2rec
+import nitime.viz as viz
     
 class CoherenceAnalyzerInputSpec(TraitedSpec):
 
@@ -56,21 +59,26 @@ class CoherenceAnalyzerInputSpec(TraitedSpec):
                                         'which the analysis will average.',
                                         '[low,high] (Default [0.02,0.15]'))
 
-    output_csv_file = File(desc='File to write output')
-    output_figure_file = File(desc='File to write output figures')
-    figure_type = traits.Enum('matrix','network',
+    output_csv_file = File(desc='File to write outputs (coherence,time-delay) with file-names: file_name_ {coherence,timedelay}')
+    
+    output_figure_file = File(desc='File to write output figures (coherence,time-delay) with file-names: file_name_{coherence,timedelay}. Possible formats: .png,.svg,.pdf,.jpg,...')
+
+    figure_type = traits.Enum('matrix','network',usedefault=True,
                               desc=("The type of plot to generate, where ",
                                     "'matrix' denotes a matrix image and",
-                                    "'network' denotes a graph representation"))
+                                    "'network' denotes a graph representation.",
+                                    " Default: 'matrix'"))
     
 class CoherenceAnalyzerOutputSpec(TraitedSpec):
-    coherence_array = traits.Array(desc=('The pairwise coherence values between',
-                                   'the ROIs'))
+    coherence_array = traits.Array(desc=('The pairwise coherence values',
+                                         'between the ROIs'))
+    
     timedelay_array = traits.Array(desc=('The pairwise time delays between the',
                                          'ROIs (in seconds)'))
 
     coherence_csv = File(desc = ('A csv file containing the pairwise ',
                                         'coherence values'))
+
     timedelay_csv = File(desc = ('A csv file containing the pairwise ',
                                         'time delay values'))
 
@@ -84,20 +92,25 @@ class CoherenceAnalyzer(BaseInterface):
     output_spec = CoherenceAnalyzerOutputSpec
 
     def _read_csv(self):
-        """ Read from csv in_file and return a rec array """
+        """
+        Read from csv in_file and return an array and ROI names
 
+        The input file should have a first row containing the names of the
+        ROIs (strings)
+
+        the rest of the data will be read in and transposed so that the rows
+        (TRs) will becomes the second (and last) dimension of the array
         
-
+        """
         #Check that input conforms to expectations:
         first_row = open(self.inputs.in_file).readline()
         if not first_row[1].isalpha():
             raise ValueError("First row of in_file should contain ROI names as strings of characters")
 
-
         roi_names = open(self.inputs.in_file).readline().replace('\"','').strip('\n').split(',')
-        data = np.loadtxt(self.inputs.in_file,skiprows=1,delimiter=',')
+        #Transpose, so that the time is the last dimension:
+        data = np.loadtxt(self.inputs.in_file,skiprows=1,delimiter=',').T
         
-        #rec_array=csv2rec(self.inputs.in_file)
         return data,roi_names
     
     def _csv2ts(self):
@@ -124,10 +137,13 @@ class CoherenceAnalyzer(BaseInterface):
         else:
             # get TS from inputs.in_TS
             TS = self.inputs.in_TS
-            # deal with creating or storing ROI names
-            if not TS.metadata.haskey('ROIs'):
-                TS.metadata['ROIs']=['roi_%d' % x for x,_ in enumerate(TS.data)]
 
+        # deal with creating or storing ROI names:
+        if not TS.metadata.has_key('ROIs'):
+            self.ROIs=['roi_%d' % x for x,_ in enumerate(TS.data)]
+        else:
+            self.ROIs=TS.metadata['ROIs']
+            
         A = nta.CoherenceAnalyzer(TS,
                                   method=dict(this_method='welch',
                                               NFFT=self.inputs.NFFT,
@@ -158,19 +174,74 @@ class CoherenceAnalyzer(BaseInterface):
         outputs['timedelay_array']=self.delay
         
         #Conditional
-        if isdefined(self.inputs.output_csv_file):
-            # we need to make a function that we call here that writes the coherence
-            # values to this file "coherence_csv" and makes the time_delay csv file??
-            outputs['coherence_csv'] = self.inputs.coherence_file
-            outputs['timedelay_csv'] = timedelay_file
-        if isdefined(self.inputs.output_figure_file):
-            # we need to make a function that we call here that generates the
-            # figure files for coherence and time delay (subplots, one fig??)
-            # check self.inputs.figure_type but has a default??
-            outputs['coherence_fig'] = self.inputs.output_figure_file
-
+        if isdefined(self.inputs.output_csv_file) and hasattr(self,'coherence'):
+            # we need to make a function that we call here that writes the
+            # coherence values to this file "coherence_csv" and makes the
+            # time_delay csv file??
+            self._make_output_files()
+            outputs['coherence_csv']=fname_presuffix(self.inputs.output_csv_file,suffix='_coherence')
+        
+            outputs['timedelay_csv']=fname_presuffix(self.inputs.output_csv_file,suffix='_delay')
+            
+        if isdefined(self.inputs.output_figure_file) and hasattr(self,
+                                                                 'coherence'):
+            self._make_output_figures()
+            outputs['coherence_fig'] = fname_presuffix(self.inputs.output_figure_file,suffix='_coherence')
+            outputs['timedelay_fig'] = fname_presuffix(self.inputs.output_figure_file,suffix='_delay')
+      
         return outputs
-    
+    def _make_output_files(self):
+        """
+        Generate the output csv files.
+        """
+        for this in zip([self.coherence,self.delay],['coherence','delay']):
+            tmp_f = tempfile.mkstemp()[1]
+            np.savetxt(tmp_f,this[0],delimiter=',')
+
+            fid = open(fname_presuffix(self.inputs.output_csv_file,
+                                       suffix='_%s'%this[1]),'w+')
+            # this writes ROIs as header line
+            fid.write(','+','.join(self.ROIs)+'\n')
+            # this writes ROI and data to a line
+            for r, line in zip(self.ROIs, open(tmp_f)):
+                fid.write('%s,%s'%(r,line))
+            fid.close()
+        
+
+    def _make_output_figures(self):
+        """
+        Generate the desired figure and save the files according to
+        self.inputs.output_figure_file
+
+        """
+        
+        if self.inputs.figure_type == 'matrix':
+            fig_coh = viz.drawmatrix_channels(self.coherence,
+                                channel_names=self.ROIs,
+                                color_anchor=0)
+        
+            fig_coh.savefig(fname_presuffix(self.inputs.output_figure_file,
+                                    suffix='_coherence'))
+
+            fig_dt = viz.drawmatrix_channels(self.delay,
+                                channel_names=self.ROIs,
+                                color_anchor=0)
+        
+            fig_dt.savefig(fname_presuffix(self.inputs.output_figure_file,
+                                    suffix='_delay'))
+        else:
+            fig_coh = viz.drawgraph_channels(self.coherence,
+                                channel_names=self.ROIs)
+        
+            fig_coh.savefig(fname_presuffix(self.inputs.output_figure_file,
+                                    suffix='_coherence'))
+
+            fig_dt = viz.drawgraph_channels(self.delay,
+                                channel_names=self.ROIs)
+        
+            fig_dt.savefig(fname_presuffix(self.inputs.output_figure_file,
+                                    suffix='_delay'))
+
 class GetTimeSeriesInputSpec():
     pass
 class GetTimeSeriesOutputSpec():
