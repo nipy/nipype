@@ -681,7 +681,7 @@ class XNATSource(IOBase):
         if self.inputs.xnat_server:
             xnat = pyxnat.Interface(self.inputs.xnat_server,self.inputs.xnat_user, self.inputs.xnat_pwd, cache_dir)
         else:
-            xnat = pyxnat.Interface(self.inputs.xnat_config)
+            xnat = pyxnat.Interface.load(self.inputs.xnat_config)
 
 #        xnat.set_offline_mode()
 
@@ -782,7 +782,7 @@ class XNATSink(IOBase):
         if self.inputs.xnat_server:
             xnat = pyxnat.Interface(self.inputs.xnat_server,self.inputs.xnat_user, self.inputs.xnat_pwd, cache_dir)
         else:
-            xnat = pyxnat.Interface(self.inputs.xnat_config)
+            xnat = pyxnat.Interface.load(self.inputs.xnat_config)
 
         uri_template_args = {'project_id':self.inputs.project_id,
                              'subject_id':'%s_%s' % \
