@@ -236,7 +236,13 @@ class DataSink(IOBase):
                     dst = self._substitute(dst)
                     path,_ = os.path.split(dst)
                     if not os.path.exists(path):
-                        os.makedirs(path)
+                        try:
+                            os.makedirs(path)
+                        except OSError as inst:
+                            if 'File exists' in inst:
+                                pass
+                            else:
+                                raise(inst)
                     iflogger.debug("copyfile: %s %s"%(src, dst))
                     copyfile(src, dst, copy=True)
                 elif os.path.isdir(src):
