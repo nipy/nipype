@@ -6,7 +6,8 @@ import numpy as np
 
 from nipype.utils.filemanip import (filename_to_list, list_to_filename)
 from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec,
-                                    Undefined, isdefined, OutputMultiPath)
+                                    Undefined, isdefined, OutputMultiPath,
+    InputMultiPath)
 from nipype.interfaces.io import IOBase, add_traits
 
     
@@ -153,9 +154,9 @@ class Split(IOBase):
         return outputs
 
 class SelectInputSpec(TraitedSpec):
-    inlist = traits.List(traits.Any, mandatory=True,
+    inlist = InputMultiPath(traits.Any, mandatory=True,
                   desc='list of values to choose from')
-    index = traits.List(traits.Int, mandatory=True,
+    index = InputMultiPath(traits.Int, mandatory=True,
                   desc='0-based indices of values to choose')
     
 class SelectOutputSpec(TraitedSpec):
