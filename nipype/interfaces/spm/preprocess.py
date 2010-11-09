@@ -272,10 +272,10 @@ class Coregister(SPMCommand):
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
-        if opt == 'target' or opt == 'source':
+        if opt == 'target' or (opt == 'source' and self.inputs.jobtype != "write"):
             return scans_for_fnames(filename_to_list(val),
                                     keep4d=True)
-        if opt == 'apply_to_files':
+        if opt == 'apply_to_files' or (opt == 'source' and self.inputs.jobtype == "write"):
             return scans_for_fnames(filename_to_list(val))
         return val
 
