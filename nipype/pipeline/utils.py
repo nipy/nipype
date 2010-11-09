@@ -8,6 +8,7 @@ The `Pipeline` class provides core functionality for batch processing.
 from copy import deepcopy
 import logging
 import os
+import re
 
 from nipype.utils.misc import package_check
 package_check('networkx', '1.0')
@@ -17,6 +18,40 @@ from nipype.interfaces.base import CommandLine, isdefined
 from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
 
 logger = logging.getLogger('workflow')
+
+try:
+   from os.path import relpath
+except ImportError:
+   import os
+   import os.path as op
+   def relpath(path, start=None):
+       """Return a relative version of a path"""
+       if start is None:
+           start = os.curdir
+       if not path:
+           raise ValueError("no path specified")
+       start_list = op.abspath(start).split(op.sep)
+       path_list = op.abspath(path).split(op.sep)
+       if start_list[0].lower() != path_list[0].lower():
+           unc_path, rest = op.splitunc(path)
+           unc_start, rest = op.splitunc(start)
+           if bool(unc_path) ^ bool(unc_start):
+               raise ValueError("Cannot mix UNC and non-UNC paths (%s and%s)" %
+                                                                   (path, start))
+           else:
+               raise ValueError("path is on drive %s, start on drive %s"
+                                            % (path_list[0], start_list[0]))
+       # Work out how much of the filepath is shared by start and path.
+       for i in range(min(len(start_list), len(path_list))):
+           if start_list[i].lower() != path_list[i].lower():
+               break
+       else:
+           i += 1
+
+       rel_list = [op.pardir] * (len(start_list)-i) + path_list[i:]
+       if not rel_list:
+           return os.curdir
+       return op.join(*rel_list)
 
 def walk(children, level=0, path=None, usename=True):
     """Generate all the full paths in a tree, as a dict.
@@ -157,8 +192,7 @@ def _write_detailed_dot(graph, dotfilename):
 
 def _get_valid_pathstr(pathstr):
     pathstr = pathstr.replace(os.sep, '..')
-    for symbol in [' ','[',']','(',')','{','}','?',':','<','>','#','!','|','"',';']:
-        pathstr = pathstr.replace(symbol, '')
+    pathstr = re.sub(r'''[] (){}?:<>#!|"';]''', '', pathstr)
     pathstr = pathstr.replace(',', '.')
     return pathstr
 
@@ -387,7 +421,7 @@ def modify_paths(object, relative=True, basedir=None):
         if isdefined(object):
             if isinstance(object, str) and os.path.isfile(object):
                 if relative:
-                    out = os.path.relpath(object,start=basedir)
+                    out = relpath(object,start=basedir)
                 else:
                     out = os.path.abspath(os.path.join(basedir,object))
                 if not os.path.exists(out):
