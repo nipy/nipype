@@ -172,7 +172,7 @@ def hash_timestamp(afile):
         md5hex = md5obj.hexdigest()
     return md5hex
 
-def copyfile(originalfile, newfile, copy=False):
+def copyfile(originalfile, newfile, copy=False, create_new=False):
     """Copy or symlink ``originalfile`` to ``newfile``.
 
     Parameters
@@ -194,12 +194,18 @@ def copyfile(originalfile, newfile, copy=False):
     orighash = None
     fmlogger.debug(newfile)
     if os.path.exists(newfile):
-        if config.get('execution', 'hash_method').lower() == 'timestamp':
-            newhash = hash_timestamp(newfile)
-        elif config.get('execution', 'hash_method').lower() == 'content':
-            newhash = hash_infile(newfile)
-        fmlogger.debug("File: %s already exists,%s, copy:%d" \
-                           % (newfile, newhash, copy))
+        if create_new:
+            while os.path.exists(newfile):
+                base, fname, ext = split_filename(newfile) 
+                fname += "c"
+                newfile = base + os.sep + fname + ext
+        else:
+            if config.get('execution', 'hash_method').lower() == 'timestamp':
+                newhash = hash_timestamp(newfile)
+            elif config.get('execution', 'hash_method').lower() == 'content':
+                newhash = hash_infile(newfile)
+            fmlogger.debug("File: %s already exists,%s, copy:%d" \
+                               % (newfile, newhash, copy))
     #the following seems unnecessary
     #if os.name is 'posix' and copy:
     #    if os.path.lexists(newfile) and os.path.islink(newfile):
@@ -240,8 +246,10 @@ def copyfile(originalfile, newfile, copy=False):
             matnfile = newfile[:-4] + ".mat"
             copyfile(matofile, matnfile, copy)
         copyfile(hdrofile, hdrnfile, copy)
+        
+    return newfile
 
-def copyfiles(filelist, dest, copy=False):
+def copyfiles(filelist, dest, copy=False, create_new=False):
     """Copy or symlink files in ``filelist`` to ``dest`` directory.
 
     Parameters
@@ -271,7 +279,7 @@ def copyfiles(filelist, dest, copy=False):
                 destfile = outfiles[i]
             else:
                 destfile = fname_presuffix(f, newpath=outfiles[0])
-            copyfile(f,destfile,copy)
+            destfile = copyfile(f,destfile,copy,create_new=create_new)
             newfiles.insert(i,destfile)
     return newfiles
 
