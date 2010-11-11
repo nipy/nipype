@@ -71,15 +71,22 @@ def split_filename(fname):
     '.nii.gz'
 
     """
+    
+    special_extensions = [".nii.gz"]
 
     pth, fname = os.path.split(fname)
-    tmp = '.none'
-    ext = []
-    while tmp:
-        fname, tmp = os.path.splitext(fname)
-        ext.append(tmp)
-    ext.reverse()
-    return pth, fname, ''.join(ext)
+    
+    ext = None
+    for special_ext in special_extensions:
+        ext_len = len(special_ext)
+        if len(fname) > ext_len and fname[-ext_len:].lower() == special_ext.lower():
+            ext = fname[-ext_len:]
+            fname = fname[:-ext_len]
+            break
+    if not ext:
+        fname, ext = os.path.splitext(fname)
+
+    return pth, fname, ext
 
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     """Manipulates path and name of input filename
