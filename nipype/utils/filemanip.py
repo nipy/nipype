@@ -195,10 +195,13 @@ def copyfile(originalfile, newfile, copy=False, create_new=False):
     fmlogger.debug(newfile)
     if os.path.exists(newfile):
         if create_new:
-            while os.path.exists(newfile):
-                base, fname, ext = split_filename(newfile) 
-                fname += "c"
-                newfile = base + os.sep + fname + ext
+            base, fname, ext = split_filename(newfile)
+            s = re.search('_c[0-9]{4,4}',fname)
+            i = 0
+            if s:
+                i = int(s.group()[2:])+1
+            fname += "_c%04d"%i
+            newfile = base + os.sep + fname + ext
         else:
             if config.get('execution', 'hash_method').lower() == 'timestamp':
                 newhash = hash_timestamp(newfile)
