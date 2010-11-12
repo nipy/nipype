@@ -203,11 +203,13 @@ def copyfile(originalfile, newfile, copy=False, create_new=False):
     if create_new:
         while os.path.exists(newfile):
             base, fname, ext = split_filename(newfile)
-            s = re.search('_c[0-9]{4,4}',fname)
+            s = re.search('_c[0-9]{4,4}$',fname)
             i = 0
             if s:
                 i = int(s.group()[2:])+1
-            fname += "_c%04d"%i
+                fname = fname[:-6] + "_c%04d"%i
+            else:
+                fname += "_c%04d"%i
             newfile = base + os.sep + fname + ext
     elif os.path.exists(newfile):
         if config.get('execution', 'hash_method').lower() == 'timestamp':
