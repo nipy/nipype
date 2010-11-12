@@ -12,6 +12,7 @@ Release 0.3.4 (FUTURE)
 * ENH: Added SPM based Analyze to Nifti converter
 * ENH: Added increased support for PyXNAT
 * ENH: Added support for MCR-based binary version of SPM
+* ENH: Added SPM node for calculationg various threshold statistics
 
 * BF: Diffusion toolkit gets installed 
 
