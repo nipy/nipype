@@ -200,8 +200,8 @@ def copyfile(originalfile, newfile, copy=False, create_new=False):
     newhash = None
     orighash = None
     fmlogger.debug(newfile)
-    if os.path.exists(newfile):
-        if create_new:
+    if create_new:
+        while os.path.exists(newfile):
             base, fname, ext = split_filename(newfile)
             s = re.search('_c[0-9]{4,4}',fname)
             i = 0
@@ -209,13 +209,13 @@ def copyfile(originalfile, newfile, copy=False, create_new=False):
                 i = int(s.group()[2:])+1
             fname += "_c%04d"%i
             newfile = base + os.sep + fname + ext
-        else:
-            if config.get('execution', 'hash_method').lower() == 'timestamp':
-                newhash = hash_timestamp(newfile)
-            elif config.get('execution', 'hash_method').lower() == 'content':
-                newhash = hash_infile(newfile)
-            fmlogger.debug("File: %s already exists,%s, copy:%d" \
-                               % (newfile, newhash, copy))
+    elif os.path.exists(newfile):
+        if config.get('execution', 'hash_method').lower() == 'timestamp':
+            newhash = hash_timestamp(newfile)
+        elif config.get('execution', 'hash_method').lower() == 'content':
+            newhash = hash_infile(newfile)
+        fmlogger.debug("File: %s already exists,%s, copy:%d" \
+                           % (newfile, newhash, copy))
     #the following seems unnecessary
     #if os.name is 'posix' and copy:
     #    if os.path.lexists(newfile) and os.path.islink(newfile):
