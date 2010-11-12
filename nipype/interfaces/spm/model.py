@@ -775,7 +775,7 @@ class ThresholdStatisticsOutputSpec(TraitedSpec):
 
 
 class ThresholdStatistics(SPMCommand):
-    '''Given heigh and cluster size threshold calculate theoretical probabilities concernig false positives
+    '''Given height and cluster size threshold calculate theoretical probabilities concernig false positives
     
     Examples
     --------
