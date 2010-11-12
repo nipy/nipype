@@ -200,6 +200,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False):
     newhash = None
     orighash = None
     fmlogger.debug(newfile)
+    
     if create_new:
         while os.path.exists(newfile):
             base, fname, ext = split_filename(newfile)
