@@ -160,8 +160,8 @@ class ModifyAffine(BaseInterface):
         return outputs
 
 class DistanceInputSpec(TraitedSpec):
-    volume1 = File(exists=True, mandatory=True)
-    volume2 = File(exists=True, mandatory=True)
+    volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
+    volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
     method = traits.Enum("eucl_min", "eucl_cog", "eucl_mean", "eucl_wmean", desc='""eucl_min": Euclidean distance between two closest points\
     "eucl_cog": mean Euclidian distance between the Center of Gravity of volume1 and CoGs of volume2\
     "eucl_mean": mean Euclidian minimum distance of all volume2 voxels to volume1\
@@ -175,7 +175,7 @@ class DistanceOutputSpec(TraitedSpec):
     
 class Distance(BaseInterface):
     '''
-    Calculates minimum distance between two volumes.
+    Calculates distance between two volumes.
     '''
     input_spec = DistanceInputSpec
     output_spec = DistanceOutputSpec
@@ -284,8 +284,8 @@ class Distance(BaseInterface):
         return outputs
     
 class DissimilarityInputSpec(TraitedSpec):
-    volume1 = File(exists=True, mandatory=True)
-    volume2 = File(exists=True, mandatory=True)
+    volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
+    volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
     method = traits.Enum("dice", "jaccard", desc='"dice": Dice\'s dissimilarity,\
     "jaccard": Jaccards\'s dissimilarity', usedefault = True
     )
@@ -295,7 +295,7 @@ class DissimilarityOutputSpec(TraitedSpec):
     
 class Dissimilarity(BaseInterface):
     """
-    Calculates disimilarity between two maps.
+    Calculates dissimilarity between two maps.
     """
     input_spec = DissimilarityInputSpec
     output_spec = DissimilarityOutputSpec
