@@ -1173,11 +1173,11 @@ class Node(WorkflowBase):
                     if execute:
                         if linksonly:
                             if info['copy'] == False:
-                                newfiles = copyfiles(infiles, [outdir], copy=info['copy'])
+                                newfiles = copyfiles(infiles, [outdir], copy=info['copy'], create_new=True)
                             else:
                                 newfiles = fnames_presuffix(infiles, newpath=outdir)
                         else:
-                            newfiles = copyfiles(infiles, [outdir], copy=info['copy'])
+                            newfiles = copyfiles(infiles, [outdir], copy=info['copy'], create_new=True)
                     else:
                         newfiles = fnames_presuffix(infiles, newpath=outdir)
                     if not isinstance(files, list):
