@@ -131,7 +131,7 @@ class ModifyAffineOutputSpec(TraitedSpec):
     
 class ModifyAffine(BaseInterface):
     '''
-    LEft multiplies the affine matrix with a specified values. Saves the volume as a nifti file.
+    Left multiplies the affine matrix with a specified values. Saves the volume as a nifti file.
     '''
     input_spec = ModifyAffineInputSpec
     output_spec = ModifyAffineOutputSpec
@@ -293,7 +293,7 @@ class DissimilarityOutputSpec(TraitedSpec):
     
 class Dissimilarity(BaseInterface):
     """
-    Calculates similarity between two maps.
+    Calculates disimilarity between two maps.
     """
     input_spec = DissimilarityInputSpec
     output_spec = DissimilarityOutputSpec
