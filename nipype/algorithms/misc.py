@@ -14,6 +14,12 @@ from math import floor, ceil
 from scipy.ndimage.morphology import grey_dilation
 import os
 from nipype.utils.filemanip import fname_presuffix, split_filename
+from scipy.ndimage.morphology import binary_erosion
+from scipy.spatial.distance import cdist, euclidean, dice, jaccard
+from scipy.ndimage.measurements import center_of_mass, label
+import matplotlib
+#matplotlib.use('Cairo')
+import matplotlib.pyplot as plt
 
 class PickAtlasInputSpec(TraitedSpec):
     atlas = File(exists=True, desc="Location of the atlas that will be used.", compulsory=True)
@@ -125,7 +131,7 @@ class ModifyAffineOutputSpec(TraitedSpec):
     
 class ModifyAffine(BaseInterface):
     '''
-    LEft multiplies the affine matrix with a specified values. Saves the volume as a nifti file.
+    Left multiplies the affine matrix with a specified values. Saves the volume as a nifti file.
     '''
     input_spec = ModifyAffineInputSpec
     output_spec = ModifyAffineOutputSpec
@@ -151,4 +157,166 @@ class ModifyAffine(BaseInterface):
         outputs['transformed_volumes'] = []
         for fname in self.inputs.volumes:
             outputs['transformed_volumes'].append(self._gen_output_filename(fname))
+        return outputs
+
+class DistanceInputSpec(TraitedSpec):
+    volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
+    volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
+    method = traits.Enum("eucl_min", "eucl_cog", "eucl_mean", "eucl_wmean", desc='""eucl_min": Euclidean distance between two closest points\
+    "eucl_cog": mean Euclidian distance between the Center of Gravity of volume1 and CoGs of volume2\
+    "eucl_mean": mean Euclidian minimum distance of all volume2 voxels to volume1\
+    "eucl_wmean": mean Euclidian minimum distance of all volume2 voxels to volume1 weighted by their values', usedefault = True)
+
+class DistanceOutputSpec(TraitedSpec):
+    distance = traits.Float()
+    point1 = traits.Array(shape=(3,))
+    point2 = traits.Array(shape=(3,))
+    histogram = File()
+    
+class Distance(BaseInterface):
+    '''
+    Calculates distance between two volumes.
+    '''
+    input_spec = DistanceInputSpec
+    output_spec = DistanceOutputSpec
+    
+    _hist_filename = "hist.pdf"
+    
+    def _find_border(self,data):
+        eroded = binary_erosion(data)
+        border = np.logical_and(data, np.logical_not(eroded))
+        return border
+    
+    def _get_coordinates(self, data, affine):
+        if len(data.shape) == 4:
+            data = data[:,:,:,0]
+        indices = np.vstack(np.nonzero(data))
+        indices = np.vstack((indices, np.ones(indices.shape[1])))
+        coordinates = np.dot(affine,indices)
+        return coordinates[:3,:]
+    
+    def _eucl_min(self, nii1, nii2):
+        origdata1 = nii1.get_data().astype(np.bool)
+        border1 = self._find_border(origdata1)
+              
+        origdata2 = nii2.get_data().astype(np.bool)
+        border2 = self._find_border(origdata2)
+        
+        set1_coordinates = self._get_coordinates(border1, nii1.get_affine())
+        
+        set2_coordinates = self._get_coordinates(border2, nii2.get_affine())
+        
+        dist_matrix = cdist(set1_coordinates.T, set2_coordinates.T)
+        (point1, point2) = np.unravel_index(np.argmin(dist_matrix), dist_matrix.shape)
+        return (euclidean(set1_coordinates.T[point1,:], set2_coordinates.T[point2,:]), set1_coordinates.T[point1,:], set2_coordinates.T[point2,:])
+    
+    def _eucl_cog(self, nii1, nii2):
+        origdata1 = nii1.get_data().astype(np.bool)  
+        cog_t = np.array(center_of_mass(origdata1)).reshape(-1,1)
+        cog_t = np.vstack((cog_t, np.array([1])))
+        cog_t_coor = np.dot(nii1.get_affine(),cog_t)[:3,:]
+        
+        origdata2 = nii2.get_data().astype(np.bool)
+        (labeled_data, n_labels) = label(origdata2)
+        
+        cogs = np.ones((4,n_labels))
+        
+        for i in range(n_labels):
+            cogs[:3,i] = np.array(center_of_mass(origdata2, labeled_data, i+1))
+            
+        cogs_coor = np.dot(nii2.get_affine(),cogs)[:3,:]
+        
+        dist_matrix = cdist(cog_t_coor.T, cogs_coor.T)
+        
+        return np.mean(dist_matrix)
+    
+    def _eucl_mean(self, nii1, nii2, weighted=False):
+        origdata1 = nii1.get_data().astype(np.bool)
+        border1 = self._find_border(origdata1)
+              
+        origdata2 = nii2.get_data().astype(np.bool)
+       
+        set1_coordinates = self._get_coordinates(border1, nii1.get_affine()) 
+        set2_coordinates = self._get_coordinates(origdata2, nii2.get_affine())
+        
+        dist_matrix = cdist(set1_coordinates.T, set2_coordinates.T)
+        min_dist_matrix = np.amin(dist_matrix, axis = 0)
+        plt.figure()
+        plt.hist(min_dist_matrix, 50, normed=1, facecolor='green')
+        plt.savefig(self._hist_filename)
+        plt.clf()
+        plt.close()
+        
+        if weighted:
+            return np.average(min_dist_matrix, weights=nii2.get_data()[origdata2].flat)
+        else:
+            return np.mean(min_dist_matrix)
+        
+
+    
+    def _run_interface(self, runtime):
+        nii1 = nifti.load(self.inputs.volume1)
+        nii2 = nifti.load(self.inputs.volume2)
+        
+        if self.inputs.method == "eucl_min":
+            self._distance, self._point1, self._point2 = self._eucl_min(nii1, nii2)
+            
+        elif self.inputs.method == "eucl_cog":
+            self._distance = self._eucl_cog(nii1, nii2)
+            
+        elif self.inputs.method == "eucl_mean":
+            self._distance = self._eucl_mean(nii1, nii2)            
+            
+        elif self.inputs.method == "eucl_wmean":
+            self._distance = self._eucl_mean(nii1, nii2, weighted=True)
+
+
+        runtime.returncode=0
+        return runtime
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['distance'] = self._distance
+        if self.inputs.method == "eucl_min":
+            outputs['point1'] = self._point1
+            outputs['point2'] = self._point2
+        elif self.inputs.method in ["eucl_mean", "eucl_wmean"]:
+            outputs['histogram'] = os.path.abspath(self._hist_filename)
+        return outputs
+    
+class DissimilarityInputSpec(TraitedSpec):
+    volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
+    volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
+    method = traits.Enum("dice", "jaccard", desc='"dice": Dice\'s dissimilarity,\
+    "jaccard": Jaccards\'s dissimilarity', usedefault = True
+    )
+    
+class DissimilarityOutputSpec(TraitedSpec):
+    dissimilarity = traits.Float()
+    
+class Dissimilarity(BaseInterface):
+    """
+    Calculates dissimilarity between two maps.
+    """
+    input_spec = DissimilarityInputSpec
+    output_spec = DissimilarityOutputSpec
+    
+    def _bool_vec_dissimilarity(self, booldata1, booldata2, method):
+        methods = {"dice": dice, "jaccard": jaccard}       
+        return methods[method](booldata1.flat, booldata2.flat)
+    
+    def _run_interface(self, runtime):
+        nii1 = nifti.load(self.inputs.volume1)
+        nii2 = nifti.load(self.inputs.volume2)
+        
+        if self.inputs.method in ("dice", "jaccard"):
+            origdata1 = nii1.get_data().astype(np.bool)
+            origdata2 = nii2.get_data().astype(np.bool)
+            self._dissimilarity = self._bool_vec_dissimilarity(origdata1, origdata2, method = self.inputs.method)
+        
+        runtime.returncode=0
+        return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['dissimilarity'] = self._dissimilarity
         return outputs

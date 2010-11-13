@@ -278,7 +278,10 @@ class Coregister(SPMCommand):
         if opt == 'apply_to_files':
             return scans_for_fnames(filename_to_list(val))
         if opt == 'source' and self.inputs.jobtype == "write":
-            return scans_for_fnames(val+self.inputs.apply_to_files)
+            if isdefined(self.inputs.apply_to_files):
+                return scans_for_fnames(val+self.inputs.apply_to_files)
+            else:
+                return scans_for_fnames(val)
         return val
 
     def _parse_inputs(self):
