@@ -13,6 +13,7 @@ Release 0.3.4 (FUTURE)
 * ENH: Added increased support for PyXNAT
 * ENH: Added support for MCR-based binary version of SPM
 * ENH: Added SPM node for calculationg various threshold statistics
+* ENH: Added distance and dissimilarity measurements
 
 * BF: Diffusion toolkit gets installed 
 
