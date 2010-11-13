@@ -244,6 +244,8 @@ class Distance(BaseInterface):
         plt.figure()
         plt.hist(min_dist_matrix, 50, normed=1, facecolor='green')
         plt.savefig(self._hist_filename)
+        plt.clf()
+        plt.close()
         
         if weighted:
             return np.average(min_dist_matrix, weights=nii2.get_data()[origdata2].flat)
