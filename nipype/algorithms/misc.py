@@ -18,7 +18,7 @@ from scipy.ndimage.morphology import binary_erosion
 from scipy.spatial.distance import cdist, euclidean, dice, jaccard
 from scipy.ndimage.measurements import center_of_mass, label
 import matplotlib
-matplotlib.use('Cairo')
+#matplotlib.use('Cairo')
 import matplotlib.pyplot as plt
 
 class PickAtlasInputSpec(TraitedSpec):
