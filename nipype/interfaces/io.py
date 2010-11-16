@@ -208,7 +208,7 @@ class DataSink(IOBase):
         if not os.path.exists(outdir):
             try:
                 os.makedirs(outdir)
-            except OSError as inst:
+            except OSError, inst:
                 if 'File exists' in inst:
                     pass
                 else:
@@ -238,7 +238,7 @@ class DataSink(IOBase):
                     if not os.path.exists(path):
                         try:
                             os.makedirs(path)
-                        except OSError as inst:
+                        except OSError, inst:
                             if 'File exists' in inst:
                                 pass
                             else:
@@ -253,7 +253,7 @@ class DataSink(IOBase):
                     if not os.path.exists(path):
                         try:
                             os.makedirs(path)
-                        except OSError as inst:
+                        except OSError, inst:
                             if 'File exists' in inst:
                                 pass
                             else:
