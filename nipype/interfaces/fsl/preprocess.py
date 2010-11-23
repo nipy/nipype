@@ -21,7 +21,7 @@ from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
 from nipype.utils.filemanip import split_filename
 from nipype.utils.misc import isdefined
 
-from nipype.externals.pynifti import load
+from nibabel import load
 
 
 warn = warnings.warn

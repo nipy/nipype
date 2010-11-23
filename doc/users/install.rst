@@ -41,6 +41,8 @@ IPython_ 0.10
 
 Enthought_ Traits_ 3.2.0 or later
 
+nibabel 1.0.0 or later
+
 Note
 ~~~~
 Full distributions such as pythonxy_ or EPD_ provide the above
@@ -79,7 +81,7 @@ AFNI_
   2009_12_31_1431 or later
 
 Slicer_
-  3.6 or later
+ 3.6 or later
 
 Download
 --------

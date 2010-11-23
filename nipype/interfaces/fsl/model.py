@@ -27,7 +27,7 @@ from nipype.interfaces.base import (Bunch, load_template,
                                     InputMultiPath, OutputMultiPath)
 from nipype.utils.filemanip import (list_to_filename, filename_to_list,
                                     loadflat)
-from nipype.externals.pynifti import load
+from nibabel import load
 from nipype.utils.misc import isdefined
 from nipype.interfaces.traits import Directory
 

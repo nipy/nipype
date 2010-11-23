@@ -29,7 +29,7 @@ import scipy.io as sio
 from nipype.interfaces.base import (Bunch, InterfaceResult, BaseInterface,
                                     traits, InputMultiPath, OutputMultiPath,
                                     TraitedSpec, File)
-from nipype.externals.pynifti import load, funcs
+from nibabel import load, funcs
 from nipype.utils.filemanip import filename_to_list, list_to_filename
 from nipype.utils.misc import find_indices
 #import matplotlib as mpl
