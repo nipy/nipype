@@ -27,8 +27,6 @@ from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath, OutputMultiPath)
 from nipype.utils.misc import isdefined
 
-warnings.warn("Freesurfer utility interfaces are not fully tested")
-
 class SampleToSurfaceInputSpec(FSTraitedSpec):
 
     source_file = File(exists=True,mandatory=True,argstr="--mov %s",
@@ -156,11 +154,13 @@ class SampleToSurface(FSCommand):
             return spec.argstr%self.inputs.subject_id
         if name == "override_reg_subj":
             return spec.argstr%self.inputs.subject_id
+        if name in ["hits_file", "vox_file"]:
+            return spec.argstr%self._get_outfilename(name)
         return super(SampleToSurface, self)._format_arg(name, spec, value)
 
     def _get_outfilename(self,opt="out_file"):
         outfile = getattr(self.inputs, opt)
-        if not isdefined(outfile):
+        if not isdefined(outfile) or isinstance(outfile, bool):
             if isdefined(self.inputs.out_type):
                 if opt == "hits_file":
                     suffix = '_hits.' + self.filemap[self.inputs.out_type]
@@ -182,14 +182,14 @@ class SampleToSurface(FSCommand):
         outputs["out_file"] = self._get_outfilename()
         hitsfile = self.inputs.hits_file
         if isdefined(hitsfile):
-            if isinstance(hitsfile, bool):
-                hitsfile = self._gen_outfilename("hits_file")
             outputs["hits_file"] = hitsfile
+            if isinstance(hitsfile, bool):
+                hitsfile = self._get_outfilename("hits_file")
         voxfile = self.inputs.vox_file
         if isdefined(voxfile):
             if isinstance(voxfile, bool):
                 voxfile = fname_presuffix(self.inputs.source_file,
-                                          newpath=os.cwd(),
+                                          newpath=os.getcwd(),
                                           prefix=self.inputs.hemi + ".",
                                           suffix="_vox.txt",
                                           use_ext=False)
@@ -284,7 +284,7 @@ class SurfaceScreenshots(FSCommand):
 
     Note
     ----
-    This interface will crash if you do not have graphics enabled on your system.
+    This interface will not run if you do not have graphics enabled on your system.
 
     Examples
     --------
@@ -328,6 +328,9 @@ class SurfaceScreenshots(FSCommand):
             if isdefined(stem_args):
                 args = tuple([getattr(self.inputs, arg) for arg in stem_args])
                 stem = stem%args
+        # Check if the DISPLAY variable is set -- should avoid crashes (might not?)
+        if not "DISPLAY" in os.environ:
+            raise RuntimeError("Graphics are not enabled -- cannot run tksurfer")
         runtime.environ["_SCREENSHOT_STEM"] = stem
         self._write_tcl_script()
         runtime = super(SurfaceScreenshots, self)._run_interface(runtime)
@@ -338,7 +341,7 @@ class SurfaceScreenshots(FSCommand):
                   "Fatal Error in tksurfer.bin: could not open display"]
         for err in errors:
             if err in runtime.stderr:
-                raise Exception("Could not open display")
+                raise RuntimeError("Could not open display")
         # Tksurfer always (or at least always when you run a tcl script)
         # exits with a nonzero returncode.  We have to force it to 0 here.
         runtime.returncode = 0
@@ -398,8 +401,6 @@ class SurfaceScreenshots(FSCommand):
 class ImageInfoInputSpec(FSTraitedSpec):
 
     in_file = File(exists=True,position=1,argstr="%s",desc="image to query")
-    out_file = traits.Either(traits.Bool, File(genfile=True),
-                             desc="write info to file (true or filename)")
 
 class ImageInfoOutputSpec(TraitedSpec):
 
