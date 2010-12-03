@@ -192,7 +192,7 @@ def _write_detailed_dot(graph, dotfilename):
 
 def _get_valid_pathstr(pathstr):
     pathstr = pathstr.replace(os.sep, '..')
-    pathstr = re.sub(r'''[] (){}?:<>#!|"';]''', '', pathstr)
+    pathstr = re.sub(r'''[][ (){}?:<>#!|"';]''', '', pathstr)
     pathstr = pathstr.replace(',', '.')
     return pathstr
 
