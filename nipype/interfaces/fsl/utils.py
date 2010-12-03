@@ -753,9 +753,8 @@ class PlotMotionParams(FSLCommand):
                 infile = self.inputs.in_file[0]
             else:
                 infile = self.inputs.in_file
-            stem = split_filename(infile)[1]
-            type = dict(rot="rot",tra="trans",dis="disp")[self.inputs.plot_type[:3]]
-            out_file = self._gen_fname("%s_%s"%(stem,type), ext='.png')
+            plttype = dict(rot="rot",tra="trans",dis="disp")[self.inputs.plot_type[:3]]
+            out_file = fname_presuffix(infile, suffix="_%s.png"%plttype, use_ext=False)
         outputs['out_file'] = out_file
         return outputs
 
