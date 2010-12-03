@@ -142,12 +142,12 @@ class ModifyAffine(BaseInterface):
     
     def _run_interface(self, runtime):
         for fname in self.inputs.volumes:
-            img = nifti.load(fname)
+            img = nb.load(fname)
             
             affine = img.get_affine()
             affine = np.dot(self.inputs.transformation_matrix,affine)
 
-            nifti.save(nifti.Nifti1Image(img.get_data(), affine, img.get_header()), self._gen_output_filename(fname))
+            nb.save(nb.Nifti1Image(img.get_data(), affine, img.get_header()), self._gen_output_filename(fname))
             
         runtime.returncode=0
         return runtime
@@ -255,8 +255,8 @@ class Distance(BaseInterface):
 
     
     def _run_interface(self, runtime):
-        nii1 = nifti.load(self.inputs.volume1)
-        nii2 = nifti.load(self.inputs.volume2)
+        nii1 = nb.load(self.inputs.volume1)
+        nii2 = nb.load(self.inputs.volume2)
         
         if self.inputs.method == "eucl_min":
             self._distance, self._point1, self._point2 = self._eucl_min(nii1, nii2)
@@ -305,8 +305,8 @@ class Dissimilarity(BaseInterface):
         return methods[method](booldata1.flat, booldata2.flat)
     
     def _run_interface(self, runtime):
-        nii1 = nifti.load(self.inputs.volume1)
-        nii2 = nifti.load(self.inputs.volume2)
+        nii1 = nb.load(self.inputs.volume1)
+        nii2 = nb.load(self.inputs.volume2)
         
         if self.inputs.method in ("dice", "jaccard"):
             origdata1 = nii1.get_data().astype(np.bool)
