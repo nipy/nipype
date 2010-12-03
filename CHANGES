@@ -1,6 +1,8 @@
 Release 0.3.4 (FUTURE)
 ======================
 
+* ENH: Added support for sampling a volume onto a FreeSurfer surface
+* ENH: Added support for saving pictures of FreeSurfer surfaces using tksurfer
 * ENH: Added support for flash processing using FreeSurfer
 
 * BF: Diffusion toolkit gets installed 
