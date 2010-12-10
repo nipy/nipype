@@ -4,6 +4,8 @@ Release 0.3.4 (FUTURE)
 * API: hash values for float use a string conversion upto the 10th decimal place.
 * API: Iterables in output path will always be generated as _var1_val1_var2_val2 pairs
 
+* ENH: Added support for sampling a volume onto a FreeSurfer surface
+* ENH: Added support for saving pictures of FreeSurfer surfaces using tksurfer
 * ENH: Added support for flash processing using FreeSurfer
 * ENH: Added support for flirt matrix in BBRegister
 * ENH: Added support for FSL convert_xfm
