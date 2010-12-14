@@ -6,12 +6,13 @@ import os
 from copy import deepcopy
 
 class Dcm2niiInputSpec(CommandLineInputSpec):
-    source_names = InputMultiPath(File(exists=True), argstr="%s", position=5, mandatory=True)
+    source_names = InputMultiPath(File(exists=True), argstr="%s", position=6, mandatory=True)
     gzip_output = traits.Bool(False, argstr='-g', position=0, usedefault=True)
     nii_output = traits.Bool(True, argstr='-n', position=1, usedefault=True)
     anonymize = traits.Bool(argstr='-a', position=2)
-    output_dir = Directory(exists=True, argstr='-o %s', genfile=True, position=3)
-    config_file = File(exists=True, argstr="-b %s", genfile=True, position=4)
+    id_in_filename = traits.Bool(False, argstr='-i', usedefault=True, position=3)
+    output_dir = Directory(exists=True, argstr='-o %s', genfile=True, position=4)
+    config_file = File(exists=True, argstr="-b %s", genfile=True, position=5)
     
 class Dcm2niiOutputSpec(TraitedSpec):
     converted_files = OutputMultiPath(File(exists=True))
@@ -23,7 +24,7 @@ class Dcm2nii(CommandLine):
     _cmd = 'dcm2nii'
     
     def _format_arg(self, opt, spec, val):
-        if opt in ['gzip_output', 'nii_output', 'anonymize']:
+        if opt in ['gzip_output', 'nii_output', 'anonymize', 'id_in_filename']:
             spec = deepcopy(spec)
             if val:
                 spec.argstr += ' y'
@@ -48,7 +49,7 @@ class Dcm2nii(CommandLine):
     def _parse_stdout(self, stdout):
         files = []
         for line in stdout.split("\n"):
-            if line.endswith(".nii"):
+            if line.endswith(".nii") and not (line.find("->") != -1 or line.startswith("Cropping") or line.startswith("Reorienting")):
                 file = line.split(" ")[-1]
                 if self.inputs.gzip_output:
                     file +=".gz"
@@ -58,6 +59,7 @@ class Dcm2nii(CommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['converted_files'] = self.output_files
+        print self.output_files
         return outputs
     
     def _gen_filename(self, name):
