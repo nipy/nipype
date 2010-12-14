@@ -201,6 +201,58 @@ class SampleToSurface(FSCommand):
             return self._list_outputs()[name]
         return None
 
+
+class SurfaceSmoothInputSpec(FSTraitedSpec):
+
+    in_file = File(mandatory=True,argstr="--sval %s",desc="source surface file")
+    subject = traits.String(mandatory=True,argstr="--s %s",desc="subject id of surface file")
+    hemi = traits.Enum("lh","rh",argstr="--hemi %s",mandatory=True,desc="hemisphere to operate on")
+    fwhm = traits.Float(argstr="--fwhm %.4f",xor=["smooth_iters"],
+                        desc="effective FWHM of the smoothing process")
+    smooth_iters = traits.Int(argstr="--smooth %d",xor=["fwhm"],
+                              desc="iterations of smoothing process")
+    subjects_dir = traits.String(argstr="--sd %s",desc="override environment subjects directory")
+    cortex = traits.Bool(True,argstr="--cortex",usedefault=True,desc="only smooth within cortex.label")
+    out_file = File(argstr="--tval %s",genfile=True,desc="surface file to write")
+
+class SurfaceSmoothOutputSpec(TraitedSpec):
+
+    out_file = File(exists=True, desc="smoothed surface file")
+
+class SurfaceSmooth(FSCommand):
+
+    _cmd = "mri_surf2surf"
+    input_spec = SurfaceSmoothInputSpec
+    output_spec = SurfaceSmoothOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = self.inputs.out_file
+        if not isdefined(outputs["out_file"]):
+            in_file = self.inputs.in_file
+            for ftype in filemap.values():
+                # This is sort of a hack, but fname_presuffix does not
+                # seem to play nicely with surface files, which almost
+                # always start with ?h.
+                # Nevermind, still doesn't work
+                print ftype
+                if in_file.endswith(ftype):
+                    in_stem = in_file[:-len(ftype)]
+                    print in_stem
+                    ext = ftype
+            outputs["out_file"] = fname_presuffix(in_stem,
+                                                  newpath=os.getcwd(),
+                                                  suffix="_smooth."+ext,
+                                                  use_ext=False)
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == "out_file":
+            return self._list_outputs()[name]
+        return None
+
+
+
 class SurfaceScreenshotsInputSpec(FSTraitedSpec):
 
     subject = traits.String(position=1,argstr="%s",mandatory=True,

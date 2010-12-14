@@ -33,7 +33,20 @@ def create_files_in_directory():
         nif.save(nif.Nifti1Image(img,np.eye(4),hdr),
                  os.path.join(outdir,f))
     return filelist, outdir, cwd
-    
+
+def create_surf_file():
+    outdir = mkdtemp()
+    cwd = os.getcwd()
+    os.chdir(outdir)
+    surf = 'lh.a.nii'
+    hdr = nif.Nifti1Header()
+    shape = (1,100,1)
+    hdr.set_data_shape(shape)
+    img = np.random.random(shape)
+    nif.save(nif.Nifti1Image(surf,np.eye(4),hdr),
+             os.path.join(outdir,f))
+    return surf, outdir, cwd
+
 def clean_directory(outdir, old_wd):
     if os.path.exists(outdir):
         rmtree(outdir)
@@ -80,6 +93,42 @@ def test_sample2surf():
 
     # Clean up our mess
     clean_directory(cwd, oldwd)
+
+@skipif(no_freesurfer)
+def test_surfsmooth():
+    
+    smooth = fs.SurfaceSmooth()
+
+    # Test underlying command
+    yield assert_equal, smooth.cmd, "mri_surf2surf"
+
+    # Test mandatory args exception
+    yield assert_raises, ValueError, smooth.run
+
+    # Create testing files
+    surf, cwd, oldwd = create_surf_file()
+
+    # Test input settings
+    smooth.inputs.in_file = surf
+    smooth.inputs.subject = "fsaverage"
+    smooth.inputs.fwhm = 5
+    smooth.inputs.out_file = "lh.a_smooth.nii"
+    smooth.inputs.hemi = "lh"
+
+    # Test the command line
+    yield assert_equal, smooth.cmdline, \
+    "mri_surf2surf --sval %s --subject fsaverage --hemi lh --fwhm 5.0000 --tval lh.a_smooth.nii"%surf
+
+    # Test identity
+    shmooth = fs.SurfaceSmooth(
+        subject="fsaverage", fwhm=6, in_file=surf, hemi="lh", out_file="lh.a_smooth.nii")
+    yield assert_not_equal, smooth, shmooth
+
+    # Clean up
+    clean_directory(cwd, oldwd)
+
+
+
 
 @skipif(no_freesurfer)
 def test_surfshots():
