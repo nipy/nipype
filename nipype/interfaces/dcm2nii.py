@@ -59,7 +59,6 @@ class Dcm2nii(CommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['converted_files'] = self.output_files
-        print self.output_files
         return outputs
     
     def _gen_filename(self, name):
