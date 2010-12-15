@@ -140,6 +140,7 @@ class SampleToSurface(FSCommand):
     import nipype.interfaces.freesurfer as fs
     sampler = fs.SampleToSurface(hemi="lh")
     sampler.inputs.in_file = "cope1.nii.gz"
+    sampler.inputs.reg_file = "register.dat"
     sampler.inputs.sampling_method = "average"
     sampler.inputs.sampling_rage = 1
     sampler.inputs.sampling_units = "frac"
@@ -224,7 +225,7 @@ class SampleToSurface(FSCommand):
 class SurfaceSmoothInputSpec(FSTraitedSpec):
 
     in_file = File(mandatory=True,argstr="--sval %s",desc="source surface file")
-    subject = traits.String(mandatory=True,argstr="--s %s",desc="subject id of surface file")
+    subject_id = traits.String(mandatory=True,argstr="--s %s",desc="subject id of surface file")
     hemi = traits.Enum("lh","rh",argstr="--hemi %s",mandatory=True,desc="hemisphere to operate on")
     fwhm = traits.Float(argstr="--fwhm %.4f",xor=["smooth_iters"],
                         desc="effective FWHM of the smoothing process")
@@ -251,7 +252,7 @@ class SurfaceSmooth(FSCommand):
     import nipype.interfaces.freesurfer as fs
     smoother = fs.SurfaceSmooth()
     smoother.inputs.in_file = "lh.cope1.mgz"
-    smoother.inputs.subject = "subj_1"
+    smoother.inputs.subject_id = "subj_1"
     smoother.inputs.hemi = "lh"
     smoother.inputs.fwhm = 5
     smoother.run() # doctest: +SKIP
@@ -266,15 +267,9 @@ class SurfaceSmooth(FSCommand):
         outputs["out_file"] = self.inputs.out_file
         if not isdefined(outputs["out_file"]):
             in_file = self.inputs.in_file
-            for ftype in filemap.values():
-                # This is sort of a hack, but fname_presuffix does not
-                # seem to play nicely with surface files, which almost
-                # always start with ?h.
-                in_basename = os.path.split(in_file)[1]
-                if in_basename.endswith(ftype):
-                    in_stem = in_basename[:-len(ftype)-1]
-                    ext = ftype
-            outputs["out_file"] = os.path.join(os.getcwd(), in_stem + "_smooth." +ext)
+            outputs["out_file"] = fname_presuffix(in_file,
+                                                  suffix="_smooth",
+                                                  newpath=os.getcwd())
         return outputs
 
     def _gen_filename(self, name):

@@ -110,7 +110,7 @@ def test_surfsmooth():
 
     # Test input settings
     smooth.inputs.in_file = surf
-    smooth.inputs.subject = "fsaverage"
+    smooth.inputs.subject_id = "fsaverage"
     smooth.inputs.fwhm = 5
     smooth.inputs.hemi = "lh"
 
