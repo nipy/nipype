@@ -121,7 +121,7 @@ def test_surfsmooth():
 
     # Test identity
     shmooth = fs.SurfaceSmooth(
-        subject="fsaverage", fwhm=6, in_file=surf, hemi="lh", out_file="lh.a_smooth.nii")
+        subject_id="fsaverage", fwhm=6, in_file=surf, hemi="lh", out_file="lh.a_smooth.nii")
     yield assert_not_equal, smooth, shmooth
 
     # Clean up
