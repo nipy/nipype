@@ -43,8 +43,8 @@ def create_surf_file():
     shape = (1,100,1)
     hdr.set_data_shape(shape)
     img = np.random.random(shape)
-    nif.save(nif.Nifti1Image(surf,np.eye(4),hdr),
-             os.path.join(outdir,f))
+    nif.save(nif.Nifti1Image(img,np.eye(4),hdr),
+             os.path.join(outdir,surf))
     return surf, outdir, cwd
 
 def clean_directory(outdir, old_wd):
@@ -112,12 +112,12 @@ def test_surfsmooth():
     smooth.inputs.in_file = surf
     smooth.inputs.subject = "fsaverage"
     smooth.inputs.fwhm = 5
-    smooth.inputs.out_file = "lh.a_smooth.nii"
     smooth.inputs.hemi = "lh"
 
     # Test the command line
     yield assert_equal, smooth.cmdline, \
-    "mri_surf2surf --sval %s --subject fsaverage --hemi lh --fwhm 5.0000 --tval lh.a_smooth.nii"%surf
+    ("mri_surf2surf --cortex --fwhm 5.0000 --hemi lh --sval %s --tval %s/lh.a_smooth.nii --s fsaverage"%
+    (surf, cwd))
 
     # Test identity
     shmooth = fs.SurfaceSmooth(

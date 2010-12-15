@@ -13,19 +13,23 @@ __docformat__ = 'restructuredtext'
 
 import os
 import re
-from glob import glob
-import itertools
-import numpy as np
-import warnings
-
-from nipype.externals.pynifti import load
-from nipype.utils.filemanip import fname_presuffix, load_json, save_json
-from nipype.interfaces.io import FreeSurferSource
+from nipype.utils.filemanip import fname_presuffix
 
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.interfaces.base import (TraitedSpec, File, traits,
-                                    Directory, InputMultiPath, OutputMultiPath)
+from nipype.interfaces.base import TraitedSpec, File, traits, OutputMultiPath
 from nipype.utils.misc import isdefined
+
+filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
+               afni='brik', brik='brik', bshort='bshort',
+               spm='img', analyze='img', analyze4d='img',
+               bfloat='bfloat', nifti1='img', nii='nii',
+               niigz='nii.gz')
+
+filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
+             'analyze4d', 'spm', 'afni', 'brik', 'bshort',
+             'bfloat', 'sdt', 'outline', 'otl', 'gdf',
+             'nifti1', 'nii', 'niigz']
+
 
 class SampleToSurfaceInputSpec(FSTraitedSpec):
 
@@ -101,14 +105,10 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
 
 
     out_file = File(argstr="--o %s",genfile=True,desc="surface file to write")
-    _filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
-                  'analyze4d', 'spm', 'afni', 'brik', 'bshort',
-                  'bfloat', 'sdt', 'outline', 'otl', 'gdf',
-                  'nifti1', 'nii', 'niigz']
-    out_type = traits.Enum(_filetypes,argstr="--out_type %s", desc="output file type")
+    out_type = traits.Enum(filetypes,argstr="--out_type %s", desc="output file type")
     hits_file = traits.Either(traits.Bool, File(exists=True),argstr="--srchit %s",
                               desc="save image with number of hits at each voxel")
-    hits_type = traits.Enum(_filetypes,argstr="--srchit_type", desc="hits file type")
+    hits_type = traits.Enum(filetypes,argstr="--srchit_type", desc="hits file type")
     vox_file = traits.Either(traits.Bool,File,argstr="--nvox %s",
                            desc="text file with the number of voxels intersecting the surface")
 
@@ -122,10 +122,29 @@ class SampleToSurfaceOutputSpec(TraitedSpec):
 
 class SampleToSurface(FSCommand):
     """Sample a volume to the cortical surface using Freesurfer's mri_vol2surf.
-    
-    This process needs to be repeated for each hemisphere.
-    
-    XXX Need examples 
+  
+    You must supply a sampling method, range, and units.  You can project 
+    either a given distance (in mm) or a given fraction of the cortical 
+    thickness at that vertex along the surface normal from the target surface,
+    and then set the value of that vertex to be either the value at that point
+    or the average or maximum value found along the projection vector.
+
+    By default, the surface will be saved as a vector with a length equal to the
+    number of vertices on the target surface.  This is not a problem for Freesurfer
+    programs, but if you intend to use the file with interfaces to another package,
+    you must set the ``reshape`` input to True, which will factor the surface vector
+    into a matrix with dimensions compatible with proper Nifti files.
+
+    Examples
+    --------
+    import nipype.interfaces.freesurfer as fs
+    sampler = fs.SampleToSurface(hemi="lh")
+    sampler.inputs.in_file = "cope1.nii.gz"
+    sampler.inputs.sampling_method = "average"
+    sampler.inputs.sampling_rage = 1
+    sampler.inputs.sampling_units = "frac"
+    res = sampler.run() # doctest: +SKIP
+   
     """
     _cmd = "mri_vol2surf"
     input_spec = SampleToSurfaceInputSpec
@@ -210,9 +229,8 @@ class SurfaceSmoothInputSpec(FSTraitedSpec):
     fwhm = traits.Float(argstr="--fwhm %.4f",xor=["smooth_iters"],
                         desc="effective FWHM of the smoothing process")
     smooth_iters = traits.Int(argstr="--smooth %d",xor=["fwhm"],
-                              desc="iterations of smoothing process")
-    subjects_dir = traits.String(argstr="--sd %s",desc="override environment subjects directory")
-    cortex = traits.Bool(True,argstr="--cortex",usedefault=True,desc="only smooth within cortex.label")
+                              desc="iterations of the smoothing process")
+    cortex = traits.Bool(True,argstr="--cortex",usedefault=True,desc="only smooth within $hemi.cortex.label")
     out_file = File(argstr="--tval %s",genfile=True,desc="surface file to write")
 
 class SurfaceSmoothOutputSpec(TraitedSpec):
@@ -220,7 +238,25 @@ class SurfaceSmoothOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="smoothed surface file")
 
 class SurfaceSmooth(FSCommand):
+    """Smooth a surface image with mri_surf2surf.
 
+    The surface is smoothed by an interative process of averaging the
+    value at each vertex with those of its adjacent neighbors. You may supply
+    either the number of iterations to run or a desired effective FWHM of the
+    smoothing process.  If the latter, the underlying program will calculate 
+    the correct number of iterations internally.
+
+    Examples
+    --------
+    import nipype.interfaces.freesurfer as fs
+    smoother = fs.SurfaceSmooth()
+    smoother.inputs.in_file = "lh.cope1.mgz"
+    smoother.inputs.subject = "subj_1"
+    smoother.inputs.hemi = "lh"
+    smoother.inputs.fwhm = 5
+    smoother.run() # doctest: +SKIP
+
+    """
     _cmd = "mri_surf2surf"
     input_spec = SurfaceSmoothInputSpec
     output_spec = SurfaceSmoothOutputSpec
@@ -234,16 +270,11 @@ class SurfaceSmooth(FSCommand):
                 # This is sort of a hack, but fname_presuffix does not
                 # seem to play nicely with surface files, which almost
                 # always start with ?h.
-                # Nevermind, still doesn't work
-                print ftype
-                if in_file.endswith(ftype):
-                    in_stem = in_file[:-len(ftype)]
-                    print in_stem
+                in_basename = os.path.split(in_file)[1]
+                if in_basename.endswith(ftype):
+                    in_stem = in_basename[:-len(ftype)-1]
                     ext = ftype
-            outputs["out_file"] = fname_presuffix(in_stem,
-                                                  newpath=os.getcwd(),
-                                                  suffix="_smooth."+ext,
-                                                  use_ext=False)
+            outputs["out_file"] = os.path.join(os.getcwd(), in_stem + "_smooth." +ext)
         return outputs
 
     def _gen_filename(self, name):
@@ -332,15 +363,25 @@ class SurfaceScreenshots(FSCommand):
 
     By default, this takes screenshots of the lateral, medial, ventral,
     and dorsal surfaces.  See the ``six_images`` option to add the
-    anterior and posterior surfaces.
+    anterior and posterior surfaces.  
+    
+    You may also supply your own tcl script (see the Freesurfer wiki for
+    information on scripting tksurfer). The screenshot stem is set as the
+    environment variable "_SCREENSHOT_STEM", which you can use in your
+    own scripts.
 
-    Note
-    ----
-    This interface will not run if you do not have graphics enabled on your system.
+    Node that this interface will not run if you do not have graphics 
+    enabled on your system.
 
     Examples
     --------
-    XXX FINISH THIS 
+    import nipype.interfaces.freesurfer as fs
+    shots = fs.SurfaceScreenshots(subject="fsaverage", hemi="lh", surface="pial")
+    shots.inputs.overlay = "zstat1.nii.gz"
+    shots.inputs.overlay_range = (2.3, 6)
+    shots.inputs.overlay_reg = "register.dat"
+    res = shots.run() # doctest: +SKIP
+    
     """
     _cmd = "tksurfer"
     input_spec = SurfaceScreenshotsInputSpec
