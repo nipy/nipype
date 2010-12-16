@@ -232,6 +232,8 @@ class SurfaceSmoothInputSpec(FSTraitedSpec):
     smooth_iters = traits.Int(argstr="--smooth %d",xor=["fwhm"],
                               desc="iterations of the smoothing process")
     cortex = traits.Bool(True,argstr="--cortex",usedefault=True,desc="only smooth within $hemi.cortex.label")
+    reshape = traits.Bool(argstr="--reshape",
+                          desc="reshape surface vector to fit in non-mgh format")
     out_file = File(argstr="--tval %s",genfile=True,desc="surface file to write")
 
 class SurfaceSmoothOutputSpec(TraitedSpec):
