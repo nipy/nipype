@@ -41,7 +41,7 @@ start with defining a realign node using the interface
 .. testcode::
    
    realigner = pe.Node(interface=spm.Realign(), name='realign')
-   realigner.inputs.infile = 'somefuncrun.nii'
+   realigner.inputs.in_files = 'somefuncrun.nii'
    realigner.inputs.register_to_mean = True
 
 This would be equivalent to:
