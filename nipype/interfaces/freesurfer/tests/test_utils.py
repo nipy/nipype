@@ -127,13 +127,43 @@ def test_surfsmooth():
     # Clean up
     clean_directory(cwd, oldwd)
 
+@skipif(no_freesurfer)
+def test_surfxfm():
 
+    xfm = fs.SurfaceTransform()
 
+    # Test underlying command
+    yield assert_equal, xfm.cmd, "mri_surf2surf"
+
+    # Test mandatory args exception
+    yield assert_raises, ValueError, xfm.run
+
+    # Create testing files
+    surf, cwd, oldwd = create_surf_file()
+
+    # Test input settings
+    xfm.inputs.source_file = surf
+    xfm.inputs.source_subject = "my_subject"
+    xfm.inputs.target_subject = "fsaverage"
+    xfm.inputs.hemi = "lh"
+
+    # Test the command line
+    yield assert_equal, xfm.cmdline, \
+    ("mri_surf2surf --hemi lh --tval %s/lh.a.fsaverage.nii --sval %s --srcsubject my_subject --trgsubject fsaverage"%
+    (cwd, surf))
+
+    # Test identity
+    xfmish = fs.SurfaceTransform(
+        source_subject="fsaverage", target_subject="my_subject", source_file=surf, hemi="lh")
+    yield assert_not_equal, xfm, xfmish
+
+    # Clean up
+    clean_directory(cwd, oldwd)
 
 @skipif(no_freesurfer)
 def test_surfshots():
 
-    fotos = fs.SurfaceScreenshots()
+    fotos = fs.SurfaceSnapshots()
 
     # Test underlying command
     yield assert_equal, fotos.cmd, "tksurfer"
@@ -145,7 +175,7 @@ def test_surfshots():
     files, cwd, oldwd = create_files_in_directory()
 
     # Test input settins
-    fotos.inputs.subject = "fsaverage"
+    fotos.inputs.subject_id = "fsaverage"
     fotos.inputs.hemi = "lh"
     fotos.inputs.surface = "pial"
 
@@ -153,7 +183,7 @@ def test_surfshots():
     yield assert_equal, fotos.cmdline, "tksurfer fsaverage lh pial -tcl screenshots.tcl"
 
     # Test identity
-    schmotos = fs.SurfaceScreenshots(subject="mysubject",hemi="rh",surface="white")
+    schmotos = fs.SurfaceSnapshots(subject_id="mysubject",hemi="rh",surface="white")
     yield assert_not_equal, fotos, schmotos
 
     # Test that the tcl script gets written

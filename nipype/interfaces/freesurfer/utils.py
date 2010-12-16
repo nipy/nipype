@@ -278,11 +278,68 @@ class SurfaceSmooth(FSCommand):
         return None
 
 
+class SurfaceTransformInputSpec(FSTraitedSpec):
 
-class SurfaceScreenshotsInputSpec(FSTraitedSpec):
+    source_file = File(exists=True,mandatory=True,argstr="--sval %s",
+                       help="surface file with source values")
+    source_subject = traits.String(mandatory=True,argstr="--srcsubject %s",
+                                   help="subject id for source surface")
+    hemi = traits.Enum("lh","rh",argstr="--hemi %s",mandatory=True,
+                       desc="hemisphere to transform")
+    target_subject = traits.String(mandatory=True,argstr="--trgsubject %s",
+                                   help="subject id of target surface")
+    target_ico_order = traits.Enum(1,2,3,4,5,6,7, argstr="--trgicoorder %d",
+                                   help="order of the icosahedron if target_subject is 'ico'")
+    reshape = traits.Bool(argstr="--reshape",help="reshape output surface to conform with Nifti")
+    reshape_factor = traits.Int(argstr="--reshape-factor",help="number of slices in reshaped image")
+    out_file = File(argstr="--tval %s",genfile=True,desc="surface file to write")
 
-    subject = traits.String(position=1,argstr="%s",mandatory=True,
-                            desc="subject to visualize")
+class SurfaceTransformOutputSpec(TraitedSpec):
+
+    out_file = File(exists=True, desc="transformed surface file")
+
+class SurfaceTransform(FSCommand):
+    """Transform a surface file from one subject to another via a spherical registration.
+
+    Both the source and target subject must reside in your Subjects Directory,
+    and they must have been processed with recon-all, unless you are transforming
+    to one of the icosahedron meshes.
+
+    Examples
+    --------
+    from nipype.interfaces.freesurfer import SurfaceTransform
+    sxfm = SurfaceTransfrom()
+    sxfm.inputs.source_file = "lh.cope1.nii.gz"
+    sxfm.inputs.source_subject = "my_subject"
+    sxfm.inputs.target_subject = "fsaverage"
+    sxfm.inputs.hemi = "lh"
+    sxfm.run() # doctest: +SKIP
+
+    """
+    _cmd = "mri_surf2surf"
+    input_spec = SurfaceTransformInputSpec
+    output_spec = SurfaceTransformOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = self.inputs.out_file
+        if not isdefined(outputs["out_file"]):
+            source = self.inputs.source_file
+            outputs["out_file"] = fname_presuffix(source,
+                                                  suffix=".%s"%self.inputs.target_subject,
+                                                  newpath=os.getcwd())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == "out_file":
+            return self._list_outputs()[name]
+        return None
+
+
+class SurfaceSnapshotsInputSpec(FSTraitedSpec):
+
+    subject_id = traits.String(position=1,argstr="%s",mandatory=True,
+                               desc="subject to visualize")
     hemi = traits.Enum("lh","rh",position=2,argstr="%s",mandatory=True,
                        desc="hemisphere to visualize")
     surface = traits.String(position=3,argstr="%s",mandatory=True,
@@ -348,13 +405,13 @@ class SurfaceScreenshotsInputSpec(FSTraitedSpec):
     tcl_script = File(exists=True, argstr="%s",genfile=True, 
                              desc="override default screenshot script")
 
-class SurfaceScreenshotsOutputSpec(TraitedSpec):
+class SurfaceSnapshotsOutputSpec(TraitedSpec):
     
     screenshots = OutputMultiPath(File(exists=True),
                     desc="tiff images of the surface from different perspectives")
 
-class SurfaceScreenshots(FSCommand):
-    """Use Tksurfer to take screenshots of the cortical surface.
+class SurfaceSnapshots(FSCommand):
+    """Use Tksurfer to save pictures of the cortical surface.
 
     By default, this takes screenshots of the lateral, medial, ventral,
     and dorsal surfaces.  See the ``six_images`` option to add the
@@ -362,7 +419,7 @@ class SurfaceScreenshots(FSCommand):
     
     You may also supply your own tcl script (see the Freesurfer wiki for
     information on scripting tksurfer). The screenshot stem is set as the
-    environment variable "_SCREENSHOT_STEM", which you can use in your
+    environment variable "_SNAPSHOT_STEM", which you can use in your
     own scripts.
 
     Node that this interface will not run if you do not have graphics 
@@ -371,7 +428,7 @@ class SurfaceScreenshots(FSCommand):
     Examples
     --------
     import nipype.interfaces.freesurfer as fs
-    shots = fs.SurfaceScreenshots(subject="fsaverage", hemi="lh", surface="pial")
+    shots = fs.SurfaceSnapshots(subject_id="fsaverage", hemi="lh", surface="pial")
     shots.inputs.overlay = "zstat1.nii.gz"
     shots.inputs.overlay_range = (2.3, 6)
     shots.inputs.overlay_reg = "register.dat"
@@ -379,8 +436,8 @@ class SurfaceScreenshots(FSCommand):
     
     """
     _cmd = "tksurfer"
-    input_spec = SurfaceScreenshotsInputSpec
-    output_spec = SurfaceScreenshotsOutputSpec
+    input_spec = SurfaceSnapshotsInputSpec
+    output_spec = SurfaceSnapshotsOutputSpec
 
     def _format_arg(self, name, spec, value):
         if name == "tcl_script":
@@ -404,12 +461,12 @@ class SurfaceScreenshots(FSCommand):
             if re.match("%s[\.\-_]"%self.inputs.hemi, value[:3]):
                 value = value[3:]
             return "-annotation %s"%value
-        return super(SurfaceScreenshots, self)._format_arg(name, spec, value)
+        return super(SurfaceSnapshots, self)._format_arg(name, spec, value)
     
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.screenshot_stem):
             stem = "%s_%s_%s"%(
-                    self.inputs.subject, self.inputs.hemi, self.inputs.surface)
+                    self.inputs.subject_id, self.inputs.hemi, self.inputs.surface)
         else:
             stem = self.inputs.screenshot_stem
             stem_args = self.inputs.stem_template_args
@@ -419,9 +476,9 @@ class SurfaceScreenshots(FSCommand):
         # Check if the DISPLAY variable is set -- should avoid crashes (might not?)
         if not "DISPLAY" in os.environ:
             raise RuntimeError("Graphics are not enabled -- cannot run tksurfer")
-        runtime.environ["_SCREENSHOT_STEM"] = stem
+        runtime.environ["_SNAPSHOT_STEM"] = stem
         self._write_tcl_script()
-        runtime = super(SurfaceScreenshots, self)._run_interface(runtime)
+        runtime = super(SurfaceSnapshots, self)._run_interface(runtime)
         # If a display window can't be opened, this will crash on 
         # aggregate_outputs.  Let's try to parse stderr and raise a
         # better exception here if that happened.
@@ -437,28 +494,28 @@ class SurfaceScreenshots(FSCommand):
 
     def _write_tcl_script(self):
         fid = open("screenshots.tcl","w")
-        script = ["save_tiff $env(_SCREENSHOT_STEM)-lat.tif",
+        script = ["save_tiff $env(_SNAPSHOT_STEM)-lat.tif",
                   "make_lateral_view",
                   "rotate_brain_y 180",
                   "redraw",
-                  "save_tiff $env(_SCREENSHOT_STEM)-med.tif",
+                  "save_tiff $env(_SNAPSHOT_STEM)-med.tif",
                   "make_lateral_view",
                   "rotate_brain_x 90",
                   "redraw",
-                  "save_tiff $env(_SCREENSHOT_STEM)-ven.tif",
+                  "save_tiff $env(_SNAPSHOT_STEM)-ven.tif",
                   "make_lateral_view",
                   "rotate_brain_x -90",
                   "redraw",
-                  "save_tiff $env(_SCREENSHOT_STEM)-dor.tif"]
+                  "save_tiff $env(_SNAPSHOT_STEM)-dor.tif"]
         if isdefined(self.inputs.six_images) and self.inputs.six_images:
             script.extend(["make_lateral_view",
                            "rotate_brain_y 90",
                            "redraw",
-                           "save_tiff $env(_SCREENSHOT_STEM)-pos.tif",
+                           "save_tiff $env(_SNAPSHOT_STEM)-pos.tif",
                            "make_lateral_view",
                            "rotate_brain_y -90",
                            "redraw",
-                           "save_tiff $env(_SCREENSHOT_STEM)-ant.tif"])
+                           "save_tiff $env(_SNAPSHOT_STEM)-ant.tif"])
             
         script.append("exit")
         fid.write("\n".join(script))
@@ -467,7 +524,7 @@ class SurfaceScreenshots(FSCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         if not isdefined(self.inputs.screenshot_stem):
-            stem = "%s_%s_%s"%(self.inputs.subject, self.inputs.hemi, self.inputs.surface)
+            stem = "%s_%s_%s"%(self.inputs.subject_id, self.inputs.hemi, self.inputs.surface)
         else:
             stem = self.inputs.screenshot_stem
             stem_args = self.inputs.stem_template_args
