@@ -180,7 +180,7 @@ def test_surfshots():
     fotos.inputs.surface = "pial"
 
     # Test a basic command line
-    yield assert_equal, fotos.cmdline, "tksurfer fsaverage lh pial -tcl screenshots.tcl"
+    yield assert_equal, fotos.cmdline, "tksurfer fsaverage lh pial -tcl snapshots.tcl"
 
     # Test identity
     schmotos = fs.SurfaceSnapshots(subject_id="mysubject",hemi="rh",surface="white")
@@ -188,7 +188,7 @@ def test_surfshots():
 
     # Test that the tcl script gets written
     fotos._write_tcl_script()
-    yield assert_equal, True, os.path.exists("screenshots.tcl") 
+    yield assert_equal, True, os.path.exists("snapshots.tcl") 
 
     # Test that we can use a different tcl script
     foo = open("other.tcl", "w").close()

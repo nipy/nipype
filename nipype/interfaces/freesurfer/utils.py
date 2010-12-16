@@ -398,7 +398,7 @@ class SurfaceSnapshotsInputSpec(FSTraitedSpec):
     show_color_text = traits.Bool(argstr="-colscaletext 1",
                                   desc="display text in the color scale bar")
    
-    six_images = traits.Bool(desc="also take anterior and posterior screenshots")
+    six_images = traits.Bool(desc="also take anterior and posterior snapshots")
     screenshot_stem = traits.String(desc="stem to use for screenshot file names")
     stem_template_args = traits.List(traits.String,requires=["screenshot_stem"],
                     desc="input names to use as arguments for a string-formated stem template")
@@ -407,13 +407,13 @@ class SurfaceSnapshotsInputSpec(FSTraitedSpec):
 
 class SurfaceSnapshotsOutputSpec(TraitedSpec):
     
-    screenshots = OutputMultiPath(File(exists=True),
+    snapshots = OutputMultiPath(File(exists=True),
                     desc="tiff images of the surface from different perspectives")
 
 class SurfaceSnapshots(FSCommand):
     """Use Tksurfer to save pictures of the cortical surface.
 
-    By default, this takes screenshots of the lateral, medial, ventral,
+    By default, this takes snapshots of the lateral, medial, ventral,
     and dorsal surfaces.  See the ``six_images`` option to add the
     anterior and posterior surfaces.  
     
@@ -442,7 +442,7 @@ class SurfaceSnapshots(FSCommand):
     def _format_arg(self, name, spec, value):
         if name == "tcl_script":
             if not isdefined(value):
-                return "-tcl screenshots.tcl"
+                return "-tcl snapshots.tcl"
             else:
                 return "-tcl %s"%value
         elif name == "overlay_range":
@@ -493,7 +493,7 @@ class SurfaceSnapshots(FSCommand):
         return runtime
 
     def _write_tcl_script(self):
-        fid = open("screenshots.tcl","w")
+        fid = open("snapshots.tcl","w")
         script = ["save_tiff $env(_SNAPSHOT_STEM)-lat.tif",
                   "make_lateral_view",
                   "rotate_brain_y 180",
@@ -531,16 +531,16 @@ class SurfaceSnapshots(FSCommand):
             if isdefined(stem_args):
                 args = tuple([getattr(self.inputs, arg) for arg in stem_args])
                 stem = stem%args
-        screenshots = ["%s-lat.tif","%s-med.tif","%s-dor.tif","%s-ven.tif"]
+        snapshots = ["%s-lat.tif","%s-med.tif","%s-dor.tif","%s-ven.tif"]
         if self.inputs.six_images:
-            screenshots.extend(["%s-pos.tif","%s-ant.tif"])
-        screenshots = [self._gen_fname(f%stem,suffix="") for f in screenshots]
-        outputs["screenshots"] = screenshots
+            snapshots.extend(["%s-pos.tif","%s-ant.tif"])
+        snapshots = [self._gen_fname(f%stem,suffix="") for f in snapshots]
+        outputs["snapshots"] = snapshots
         return outputs
 
     def _gen_filename(self, name):
         if name == "tcl_script":
-            return "screenshots.tcl"
+            return "snapshots.tcl"
         return None
 
 class ImageInfoInputSpec(FSTraitedSpec):
