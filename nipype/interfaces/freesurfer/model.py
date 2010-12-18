@@ -283,7 +283,12 @@ class GLMFit(FSCommand):
 
         # Get the contrast directory name(s)
         if isdefined(self.inputs.contrast):
-            contrasts = [split_filename(c)[1] for c in self.inputs.contrast]
+            contrasts = []
+            for c in self.inputs.contrast:
+                if split_filename(c)[2] in [".mat",".dat",".mtx",".con"]:
+                    contrasts.append(split_filename(c)[1])
+                else:
+                    contrasts.append(os.path.split(c)[1])
         elif isdefined(self.inputs.one_sample) and self.inputs.one_sample:
             contrasts = ["osgm"]
 
