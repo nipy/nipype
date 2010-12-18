@@ -33,7 +33,20 @@ def create_files_in_directory():
         nif.save(nif.Nifti1Image(img,np.eye(4),hdr),
                  os.path.join(outdir,f))
     return filelist, outdir, cwd
-    
+
+def create_surf_file():
+    outdir = mkdtemp()
+    cwd = os.getcwd()
+    os.chdir(outdir)
+    surf = 'lh.a.nii'
+    hdr = nif.Nifti1Header()
+    shape = (1,100,1)
+    hdr.set_data_shape(shape)
+    img = np.random.random(shape)
+    nif.save(nif.Nifti1Image(img,np.eye(4),hdr),
+             os.path.join(outdir,surf))
+    return surf, outdir, cwd
+
 def clean_directory(outdir, old_wd):
     if os.path.exists(outdir):
         rmtree(outdir)
@@ -82,9 +95,75 @@ def test_sample2surf():
     clean_directory(cwd, oldwd)
 
 @skipif(no_freesurfer)
+def test_surfsmooth():
+    
+    smooth = fs.SurfaceSmooth()
+
+    # Test underlying command
+    yield assert_equal, smooth.cmd, "mri_surf2surf"
+
+    # Test mandatory args exception
+    yield assert_raises, ValueError, smooth.run
+
+    # Create testing files
+    surf, cwd, oldwd = create_surf_file()
+
+    # Test input settings
+    smooth.inputs.in_file = surf
+    smooth.inputs.subject_id = "fsaverage"
+    smooth.inputs.fwhm = 5
+    smooth.inputs.hemi = "lh"
+
+    # Test the command line
+    yield assert_equal, smooth.cmdline, \
+    ("mri_surf2surf --cortex --fwhm 5.0000 --hemi lh --sval %s --tval %s/lh.a_smooth.nii --s fsaverage"%
+    (surf, cwd))
+
+    # Test identity
+    shmooth = fs.SurfaceSmooth(
+        subject_id="fsaverage", fwhm=6, in_file=surf, hemi="lh", out_file="lh.a_smooth.nii")
+    yield assert_not_equal, smooth, shmooth
+
+    # Clean up
+    clean_directory(cwd, oldwd)
+
+@skipif(no_freesurfer)
+def test_surfxfm():
+
+    xfm = fs.SurfaceTransform()
+
+    # Test underlying command
+    yield assert_equal, xfm.cmd, "mri_surf2surf"
+
+    # Test mandatory args exception
+    yield assert_raises, ValueError, xfm.run
+
+    # Create testing files
+    surf, cwd, oldwd = create_surf_file()
+
+    # Test input settings
+    xfm.inputs.source_file = surf
+    xfm.inputs.source_subject = "my_subject"
+    xfm.inputs.target_subject = "fsaverage"
+    xfm.inputs.hemi = "lh"
+
+    # Test the command line
+    yield assert_equal, xfm.cmdline, \
+    ("mri_surf2surf --hemi lh --tval %s/lh.a.fsaverage.nii --sval %s --srcsubject my_subject --trgsubject fsaverage"%
+    (cwd, surf))
+
+    # Test identity
+    xfmish = fs.SurfaceTransform(
+        source_subject="fsaverage", target_subject="my_subject", source_file=surf, hemi="lh")
+    yield assert_not_equal, xfm, xfmish
+
+    # Clean up
+    clean_directory(cwd, oldwd)
+
+@skipif(no_freesurfer)
 def test_surfshots():
 
-    fotos = fs.SurfaceScreenshots()
+    fotos = fs.SurfaceSnapshots()
 
     # Test underlying command
     yield assert_equal, fotos.cmd, "tksurfer"
@@ -96,20 +175,20 @@ def test_surfshots():
     files, cwd, oldwd = create_files_in_directory()
 
     # Test input settins
-    fotos.inputs.subject = "fsaverage"
+    fotos.inputs.subject_id = "fsaverage"
     fotos.inputs.hemi = "lh"
     fotos.inputs.surface = "pial"
 
     # Test a basic command line
-    yield assert_equal, fotos.cmdline, "tksurfer fsaverage lh pial -tcl screenshots.tcl"
+    yield assert_equal, fotos.cmdline, "tksurfer fsaverage lh pial -tcl snapshots.tcl"
 
     # Test identity
-    schmotos = fs.SurfaceScreenshots(subject="mysubject",hemi="rh",surface="white")
+    schmotos = fs.SurfaceSnapshots(subject_id="mysubject",hemi="rh",surface="white")
     yield assert_not_equal, fotos, schmotos
 
     # Test that the tcl script gets written
     fotos._write_tcl_script()
-    yield assert_equal, True, os.path.exists("screenshots.tcl") 
+    yield assert_equal, True, os.path.exists("snapshots.tcl") 
 
     # Test that we can use a different tcl script
     foo = open("other.tcl", "w").close()

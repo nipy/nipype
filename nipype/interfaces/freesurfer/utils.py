@@ -13,19 +13,23 @@ __docformat__ = 'restructuredtext'
 
 import os
 import re
-from glob import glob
-import itertools
-import numpy as np
-import warnings
-
-from nipype.externals.pynifti import load
-from nipype.utils.filemanip import fname_presuffix, load_json, save_json
-from nipype.interfaces.io import FreeSurferSource
+from nipype.utils.filemanip import fname_presuffix
 
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.interfaces.base import (TraitedSpec, File, traits,
-                                    Directory, InputMultiPath, OutputMultiPath)
+from nipype.interfaces.base import TraitedSpec, File, traits, OutputMultiPath
 from nipype.utils.misc import isdefined
+
+filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
+               afni='brik', brik='brik', bshort='bshort',
+               spm='img', analyze='img', analyze4d='img',
+               bfloat='bfloat', nifti1='img', nii='nii',
+               niigz='nii.gz')
+
+filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
+             'analyze4d', 'spm', 'afni', 'brik', 'bshort',
+             'bfloat', 'sdt', 'outline', 'otl', 'gdf',
+             'nifti1', 'nii', 'niigz']
+
 
 class SampleToSurfaceInputSpec(FSTraitedSpec):
 
@@ -101,14 +105,10 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
 
 
     out_file = File(argstr="--o %s",genfile=True,desc="surface file to write")
-    _filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
-                  'analyze4d', 'spm', 'afni', 'brik', 'bshort',
-                  'bfloat', 'sdt', 'outline', 'otl', 'gdf',
-                  'nifti1', 'nii', 'niigz']
-    out_type = traits.Enum(_filetypes,argstr="--out_type %s", desc="output file type")
+    out_type = traits.Enum(filetypes,argstr="--out_type %s", desc="output file type")
     hits_file = traits.Either(traits.Bool, File(exists=True),argstr="--srchit %s",
                               desc="save image with number of hits at each voxel")
-    hits_type = traits.Enum(_filetypes,argstr="--srchit_type", desc="hits file type")
+    hits_type = traits.Enum(filetypes,argstr="--srchit_type", desc="hits file type")
     vox_file = traits.Either(traits.Bool,File,argstr="--nvox %s",
                            desc="text file with the number of voxels intersecting the surface")
 
@@ -122,10 +122,30 @@ class SampleToSurfaceOutputSpec(TraitedSpec):
 
 class SampleToSurface(FSCommand):
     """Sample a volume to the cortical surface using Freesurfer's mri_vol2surf.
-    
-    This process needs to be repeated for each hemisphere.
-    
-    XXX Need examples 
+  
+    You must supply a sampling method, range, and units.  You can project 
+    either a given distance (in mm) or a given fraction of the cortical 
+    thickness at that vertex along the surface normal from the target surface,
+    and then set the value of that vertex to be either the value at that point
+    or the average or maximum value found along the projection vector.
+
+    By default, the surface will be saved as a vector with a length equal to the
+    number of vertices on the target surface.  This is not a problem for Freesurfer
+    programs, but if you intend to use the file with interfaces to another package,
+    you must set the ``reshape`` input to True, which will factor the surface vector
+    into a matrix with dimensions compatible with proper Nifti files.
+
+    Examples
+    --------
+    import nipype.interfaces.freesurfer as fs
+    sampler = fs.SampleToSurface(hemi="lh")
+    sampler.inputs.in_file = "cope1.nii.gz"
+    sampler.inputs.reg_file = "register.dat"
+    sampler.inputs.sampling_method = "average"
+    sampler.inputs.sampling_rage = 1
+    sampler.inputs.sampling_units = "frac"
+    res = sampler.run() # doctest: +SKIP
+   
     """
     _cmd = "mri_vol2surf"
     input_spec = SampleToSurfaceInputSpec
@@ -201,10 +221,127 @@ class SampleToSurface(FSCommand):
             return self._list_outputs()[name]
         return None
 
-class SurfaceScreenshotsInputSpec(FSTraitedSpec):
 
-    subject = traits.String(position=1,argstr="%s",mandatory=True,
-                            desc="subject to visualize")
+class SurfaceSmoothInputSpec(FSTraitedSpec):
+
+    in_file = File(mandatory=True,argstr="--sval %s",desc="source surface file")
+    subject_id = traits.String(mandatory=True,argstr="--s %s",desc="subject id of surface file")
+    hemi = traits.Enum("lh","rh",argstr="--hemi %s",mandatory=True,desc="hemisphere to operate on")
+    fwhm = traits.Float(argstr="--fwhm %.4f",xor=["smooth_iters"],
+                        desc="effective FWHM of the smoothing process")
+    smooth_iters = traits.Int(argstr="--smooth %d",xor=["fwhm"],
+                              desc="iterations of the smoothing process")
+    cortex = traits.Bool(True,argstr="--cortex",usedefault=True,desc="only smooth within $hemi.cortex.label")
+    reshape = traits.Bool(argstr="--reshape",
+                          desc="reshape surface vector to fit in non-mgh format")
+    out_file = File(argstr="--tval %s",genfile=True,desc="surface file to write")
+
+class SurfaceSmoothOutputSpec(TraitedSpec):
+
+    out_file = File(exists=True, desc="smoothed surface file")
+
+class SurfaceSmooth(FSCommand):
+    """Smooth a surface image with mri_surf2surf.
+
+    The surface is smoothed by an interative process of averaging the
+    value at each vertex with those of its adjacent neighbors. You may supply
+    either the number of iterations to run or a desired effective FWHM of the
+    smoothing process.  If the latter, the underlying program will calculate 
+    the correct number of iterations internally.
+
+    Examples
+    --------
+    import nipype.interfaces.freesurfer as fs
+    smoother = fs.SurfaceSmooth()
+    smoother.inputs.in_file = "lh.cope1.mgz"
+    smoother.inputs.subject_id = "subj_1"
+    smoother.inputs.hemi = "lh"
+    smoother.inputs.fwhm = 5
+    smoother.run() # doctest: +SKIP
+
+    """
+    _cmd = "mri_surf2surf"
+    input_spec = SurfaceSmoothInputSpec
+    output_spec = SurfaceSmoothOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = self.inputs.out_file
+        if not isdefined(outputs["out_file"]):
+            in_file = self.inputs.in_file
+            outputs["out_file"] = fname_presuffix(in_file,
+                                                  suffix="_smooth",
+                                                  newpath=os.getcwd())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == "out_file":
+            return self._list_outputs()[name]
+        return None
+
+
+class SurfaceTransformInputSpec(FSTraitedSpec):
+
+    source_file = File(exists=True,mandatory=True,argstr="--sval %s",
+                       help="surface file with source values")
+    source_subject = traits.String(mandatory=True,argstr="--srcsubject %s",
+                                   help="subject id for source surface")
+    hemi = traits.Enum("lh","rh",argstr="--hemi %s",mandatory=True,
+                       desc="hemisphere to transform")
+    target_subject = traits.String(mandatory=True,argstr="--trgsubject %s",
+                                   help="subject id of target surface")
+    target_ico_order = traits.Enum(1,2,3,4,5,6,7, argstr="--trgicoorder %d",
+                                   help="order of the icosahedron if target_subject is 'ico'")
+    reshape = traits.Bool(argstr="--reshape",help="reshape output surface to conform with Nifti")
+    reshape_factor = traits.Int(argstr="--reshape-factor",help="number of slices in reshaped image")
+    out_file = File(argstr="--tval %s",genfile=True,desc="surface file to write")
+
+class SurfaceTransformOutputSpec(TraitedSpec):
+
+    out_file = File(exists=True, desc="transformed surface file")
+
+class SurfaceTransform(FSCommand):
+    """Transform a surface file from one subject to another via a spherical registration.
+
+    Both the source and target subject must reside in your Subjects Directory,
+    and they must have been processed with recon-all, unless you are transforming
+    to one of the icosahedron meshes.
+
+    Examples
+    --------
+    from nipype.interfaces.freesurfer import SurfaceTransform
+    sxfm = SurfaceTransfrom()
+    sxfm.inputs.source_file = "lh.cope1.nii.gz"
+    sxfm.inputs.source_subject = "my_subject"
+    sxfm.inputs.target_subject = "fsaverage"
+    sxfm.inputs.hemi = "lh"
+    sxfm.run() # doctest: +SKIP
+
+    """
+    _cmd = "mri_surf2surf"
+    input_spec = SurfaceTransformInputSpec
+    output_spec = SurfaceTransformOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = self.inputs.out_file
+        if not isdefined(outputs["out_file"]):
+            source = self.inputs.source_file
+            outputs["out_file"] = fname_presuffix(source,
+                                                  suffix=".%s"%self.inputs.target_subject,
+                                                  newpath=os.getcwd())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == "out_file":
+            return self._list_outputs()[name]
+        return None
+
+
+class SurfaceSnapshotsInputSpec(FSTraitedSpec):
+
+    subject_id = traits.String(position=1,argstr="%s",mandatory=True,
+                               desc="subject to visualize")
     hemi = traits.Enum("lh","rh",position=2,argstr="%s",mandatory=True,
                        desc="hemisphere to visualize")
     surface = traits.String(position=3,argstr="%s",mandatory=True,
@@ -263,41 +400,51 @@ class SurfaceScreenshotsInputSpec(FSTraitedSpec):
     show_color_text = traits.Bool(argstr="-colscaletext 1",
                                   desc="display text in the color scale bar")
    
-    six_images = traits.Bool(desc="also take anterior and posterior screenshots")
+    six_images = traits.Bool(desc="also take anterior and posterior snapshots")
     screenshot_stem = traits.String(desc="stem to use for screenshot file names")
     stem_template_args = traits.List(traits.String,requires=["screenshot_stem"],
                     desc="input names to use as arguments for a string-formated stem template")
     tcl_script = File(exists=True, argstr="%s",genfile=True, 
                              desc="override default screenshot script")
 
-class SurfaceScreenshotsOutputSpec(TraitedSpec):
+class SurfaceSnapshotsOutputSpec(TraitedSpec):
     
-    screenshots = OutputMultiPath(File(exists=True),
+    snapshots = OutputMultiPath(File(exists=True),
                     desc="tiff images of the surface from different perspectives")
 
-class SurfaceScreenshots(FSCommand):
-    """Use Tksurfer to take screenshots of the cortical surface.
+class SurfaceSnapshots(FSCommand):
+    """Use Tksurfer to save pictures of the cortical surface.
 
-    By default, this takes screenshots of the lateral, medial, ventral,
+    By default, this takes snapshots of the lateral, medial, ventral,
     and dorsal surfaces.  See the ``six_images`` option to add the
-    anterior and posterior surfaces.
+    anterior and posterior surfaces.  
+    
+    You may also supply your own tcl script (see the Freesurfer wiki for
+    information on scripting tksurfer). The screenshot stem is set as the
+    environment variable "_SNAPSHOT_STEM", which you can use in your
+    own scripts.
 
-    Note
-    ----
-    This interface will not run if you do not have graphics enabled on your system.
+    Node that this interface will not run if you do not have graphics 
+    enabled on your system.
 
     Examples
     --------
-    XXX FINISH THIS 
+    import nipype.interfaces.freesurfer as fs
+    shots = fs.SurfaceSnapshots(subject_id="fsaverage", hemi="lh", surface="pial")
+    shots.inputs.overlay = "zstat1.nii.gz"
+    shots.inputs.overlay_range = (2.3, 6)
+    shots.inputs.overlay_reg = "register.dat"
+    res = shots.run() # doctest: +SKIP
+    
     """
     _cmd = "tksurfer"
-    input_spec = SurfaceScreenshotsInputSpec
-    output_spec = SurfaceScreenshotsOutputSpec
+    input_spec = SurfaceSnapshotsInputSpec
+    output_spec = SurfaceSnapshotsOutputSpec
 
     def _format_arg(self, name, spec, value):
         if name == "tcl_script":
             if not isdefined(value):
-                return "-tcl screenshots.tcl"
+                return "-tcl snapshots.tcl"
             else:
                 return "-tcl %s"%value
         elif name == "overlay_range":
@@ -316,12 +463,12 @@ class SurfaceScreenshots(FSCommand):
             if re.match("%s[\.\-_]"%self.inputs.hemi, value[:3]):
                 value = value[3:]
             return "-annotation %s"%value
-        return super(SurfaceScreenshots, self)._format_arg(name, spec, value)
+        return super(SurfaceSnapshots, self)._format_arg(name, spec, value)
     
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.screenshot_stem):
             stem = "%s_%s_%s"%(
-                    self.inputs.subject, self.inputs.hemi, self.inputs.surface)
+                    self.inputs.subject_id, self.inputs.hemi, self.inputs.surface)
         else:
             stem = self.inputs.screenshot_stem
             stem_args = self.inputs.stem_template_args
@@ -331,9 +478,9 @@ class SurfaceScreenshots(FSCommand):
         # Check if the DISPLAY variable is set -- should avoid crashes (might not?)
         if not "DISPLAY" in os.environ:
             raise RuntimeError("Graphics are not enabled -- cannot run tksurfer")
-        runtime.environ["_SCREENSHOT_STEM"] = stem
+        runtime.environ["_SNAPSHOT_STEM"] = stem
         self._write_tcl_script()
-        runtime = super(SurfaceScreenshots, self)._run_interface(runtime)
+        runtime = super(SurfaceSnapshots, self)._run_interface(runtime)
         # If a display window can't be opened, this will crash on 
         # aggregate_outputs.  Let's try to parse stderr and raise a
         # better exception here if that happened.
@@ -348,29 +495,29 @@ class SurfaceScreenshots(FSCommand):
         return runtime
 
     def _write_tcl_script(self):
-        fid = open("screenshots.tcl","w")
-        script = ["save_tiff $env(_SCREENSHOT_STEM)-lat.tif",
+        fid = open("snapshots.tcl","w")
+        script = ["save_tiff $env(_SNAPSHOT_STEM)-lat.tif",
                   "make_lateral_view",
                   "rotate_brain_y 180",
                   "redraw",
-                  "save_tiff $env(_SCREENSHOT_STEM)-med.tif",
+                  "save_tiff $env(_SNAPSHOT_STEM)-med.tif",
                   "make_lateral_view",
                   "rotate_brain_x 90",
                   "redraw",
-                  "save_tiff $env(_SCREENSHOT_STEM)-ven.tif",
+                  "save_tiff $env(_SNAPSHOT_STEM)-ven.tif",
                   "make_lateral_view",
                   "rotate_brain_x -90",
                   "redraw",
-                  "save_tiff $env(_SCREENSHOT_STEM)-dor.tif"]
+                  "save_tiff $env(_SNAPSHOT_STEM)-dor.tif"]
         if isdefined(self.inputs.six_images) and self.inputs.six_images:
             script.extend(["make_lateral_view",
                            "rotate_brain_y 90",
                            "redraw",
-                           "save_tiff $env(_SCREENSHOT_STEM)-pos.tif",
+                           "save_tiff $env(_SNAPSHOT_STEM)-pos.tif",
                            "make_lateral_view",
                            "rotate_brain_y -90",
                            "redraw",
-                           "save_tiff $env(_SCREENSHOT_STEM)-ant.tif"])
+                           "save_tiff $env(_SNAPSHOT_STEM)-ant.tif"])
             
         script.append("exit")
         fid.write("\n".join(script))
@@ -379,23 +526,23 @@ class SurfaceScreenshots(FSCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         if not isdefined(self.inputs.screenshot_stem):
-            stem = "%s_%s_%s"%(self.inputs.subject, self.inputs.hemi, self.inputs.surface)
+            stem = "%s_%s_%s"%(self.inputs.subject_id, self.inputs.hemi, self.inputs.surface)
         else:
             stem = self.inputs.screenshot_stem
             stem_args = self.inputs.stem_template_args
             if isdefined(stem_args):
                 args = tuple([getattr(self.inputs, arg) for arg in stem_args])
                 stem = stem%args
-        screenshots = ["%s-lat.tif","%s-med.tif","%s-dor.tif","%s-ven.tif"]
+        snapshots = ["%s-lat.tif","%s-med.tif","%s-dor.tif","%s-ven.tif"]
         if self.inputs.six_images:
-            screenshots.extend(["%s-pos.tif","%s-ant.tif"])
-        screenshots = [self._gen_fname(f%stem,suffix="") for f in screenshots]
-        outputs["screenshots"] = screenshots
+            snapshots.extend(["%s-pos.tif","%s-ant.tif"])
+        snapshots = [self._gen_fname(f%stem,suffix="") for f in snapshots]
+        outputs["snapshots"] = snapshots
         return outputs
 
     def _gen_filename(self, name):
         if name == "tcl_script":
-            return "screenshots.tcl"
+            return "snapshots.tcl"
         return None
 
 class ImageInfoInputSpec(FSTraitedSpec):
