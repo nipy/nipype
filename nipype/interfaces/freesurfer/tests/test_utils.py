@@ -7,7 +7,7 @@ from shutil import rmtree
 
 import numpy as np
 
-import nipype.externals.pynifti as nif
+import nibabel as nif
 from nipype.testing import (assert_equal, assert_not_equal,
                             assert_raises, parametric, skipif)
 from nipype.interfaces.base import TraitError

@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
 from shutil import rmtree
-import nipype.externals.pynifti as nif
+import nibabel as nif
 import numpy as np
 from tempfile import mkdtemp
 from nipype.testing import (assert_equal, assert_false, assert_true, 
