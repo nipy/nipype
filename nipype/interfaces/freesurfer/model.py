@@ -13,10 +13,10 @@ __docformat__ = 'restructuredtext'
 
 import os
 
-from nipype.utils.filemanip import fname_presuffix
+from nipype.utils.filemanip import fname_presuffix, split_filename
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File,
-                                    traits, InputMultiPath)
+                                    traits, InputMultiPath, OutputMultiPath, Directory)
 from nipype.utils.misc import isdefined
 
 class MRISPreprocInputSpec(FSTraitedSpec):
@@ -221,11 +221,30 @@ class GLMFitInputSpec(FSTraitedSpec):
                  desc='allow ill-conditioned design matrices')
     sim_done_file = File(argstr='--sim-done %s',
                    desc='create file when simulation finished')
+
+class GLMFitOutputSpec(TraitedSpec):
+
+    glm_dir = Directory(exists=True, desc="output directory")
+    beta_file = File(exists=True, desc="map of regression coefficients")
+    error_file = File(desc="map of residual error")
+    error_var_file = File(desc="map of residual error variance")
+    error_stddev_file = File(desc="map of residual error standard deviation")
+    estimate_file = File(desc="map of the estimated Y values")
+    mask_file = File(desc="map of the mask used in the analysis")
+    fwhm_file = File(desc="text file with estimated smoothness")
+    dof_file = File(desc="text file with effective degrees-of-freedom for the analysis")
+    gamma_file = OutputMultiPath(desc="map of contrast of regression coefficients")
+    gamma_var_file = OutputMultiPath(desc="map of regression contrast variance")
+    sig_file = OutputMultiPath(desc="map of F-test significance (in -log10p)")
+    ftest_file = OutputMultiPath(desc="map of test statistic values")
+    spatial_eigenvectors = File(desc="map of spatial eigenvectors from residual PCA")
+    frame_eigenvectors = File(desc="matrix of frame eigenvectors from residual PCA")
+    singular_values = File(desc="matrix singular values from residual PCA")
+    svd_stats_file = File(desc="text file summarizing the residual PCA")
     
 class GLMFit(FSCommand):
-    """Use FreeSurfer mri_glmfit to prepare a group of contrasts for
-    a second level analysis
-    
+    """Use FreeSurfer's mri_glmfit to specify and estimate a general linear model.
+
     Examples
     --------
 
@@ -239,7 +258,57 @@ class GLMFit(FSCommand):
 
     _cmd = 'mri_glmfit'
     input_spec = GLMFitInputSpec
+    output_spec = GLMFitOutputSpec
     
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        # Get the top-level output directory
+        glmdir = self.inputs.glm_dir
+        if not isdefined(glmdir):
+            glmdir = os.getcwd()
+        outputs["glm_dir"] = glmdir
+
+        # Assign the output files that always get created
+        outputs["beta_file"] = os.path.join(glmdir, "beta.mgh")
+        outputs["error_var_file"] = os.path.join(glmdir, "rvar.mgh")
+        outputs["error_stddev_file"] = os.path.join(glmdir, "rstd.mgh")
+        outputs["mask_file"] = os.path.join(glmdir, "mask.mgh")
+        outputs["fwhm_file"] = os.path.join(glmdir, "fwhm.dat")
+        outputs["dof_file"] = os.path.join(glmdir, "dof.dat")
+        # Assign the conditional outputs
+        if isdefined(self.inputs.save_residual) and self.inputs.save_residual:
+            outputs["error_file"] = os.path.join(glmdir, "eres.mgh")
+        if isdefined(self.inputs.save_estimate) and self.inputs.save_estimate:
+            outputs["estimate_file"] = os.path.join(glmdir, "yhat.mgh")
+
+        # Get the contrast directory name(s)
+        if isdefined(self.inputs.contrast):
+            contrasts = []
+            for c in self.inputs.contrast:
+                if split_filename(c)[2] in [".mat",".dat",".mtx",".con"]:
+                    contrasts.append(split_filename(c)[1])
+                else:
+                    contrasts.append(os.path.split(c)[1])
+        elif isdefined(self.inputs.one_sample) and self.inputs.one_sample:
+            contrasts = ["osgm"]
+
+        # Add in the contrast images
+        outputs["sig_file"] = [os.path.join(glmdir,c,"sig.mgh") for c in contrasts]
+        outputs["ftest_file"] = [os.path.join(glmdir,c,"F.mgh") for c in contrasts]
+        outputs["gamma_file"] = [os.path.join(glmdir,c,"gamma.mgh") for c in contrasts]
+        outputs["gamma_var_file"] = [os.path.join(glmdir,c,"gammavar.mgh") for c in contrasts]
+
+        # Add in the PCA results, if relevant
+        if isdefined(self.inputs.pca) and self.inputs.pca:
+            pcadir = os.path.join(glmdir, "pca-eres")
+            outputs["spatial_eigenvectors"] = os.path.join(pcadir, "v.mgh")
+            outputs["frame_eigenvectors"] = os.path.join(pcadir, "u.mtx")
+            outputs["singluar_values"] = os.path.join(pcadir, "sdiag.mat")
+            outputs["svd_stats_file"] = os.path.join(pcadir, "stats.dat")
+
+        return outputs
+
+
     def _gen_filename(self, name):
         if name == 'glm_dir':
             return os.getcwd()
