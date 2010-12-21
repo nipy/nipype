@@ -53,8 +53,12 @@ class FitGLM(BaseInterface):
             
         nscans = timeseries.shape[1]
         
-        
-        hpf = session_info[0]['hpf']
+        if 'hpf' in session_info[0].keys():
+            hpf = session_info[0]['hpf']
+            drift_model=self.inputs.drift_model
+        else:
+            hpf=0
+            drift_model = "Blank"
         
         reg_names = []
         for reg in session_info[0]['regress']:
@@ -79,11 +83,13 @@ class FitGLM(BaseInterface):
                 
         
         paradigm =  dm.BlockParadigm(con_id=conditions, onset=onsets, duration=duration)
-        design_matrix, self._reg_names = dm.dmtx_light(frametimes, paradigm, drift_model=self.inputs.drift_model, hfcut=hpf,
+        design_matrix, self._reg_names = dm.dmtx_light(frametimes, paradigm, drift_model=drift_model, hfcut=hpf,
                hrf_model=self.inputs.hrf_model, 
                add_regs=reg_vals,
                add_reg_names=reg_names
                )
+        pylab.pcolor(design_matrix)
+        pylab.savefig("design_matrix.pdf")
         
         glm = GLM.glm()
         glm.fit(timeseries.T, design_matrix, method=self.inputs.method, model=self.inputs.model)
@@ -150,7 +156,7 @@ class EstimateContrastInputSpec(TraitedSpec):
             [('name', 'stat', [condition list], [weight list], [session list])]. if
             session list is None or not provided, all sessions are used. For F
             contrasts, the condition list should contain previously defined
-            T-contrasts.""")
+            T-contrasts.""", mandatory=True)
     beta = File(exists=True)
     nvbeta = traits.Any()
     s2 = File(exists=True)
