@@ -353,7 +353,7 @@ class SpecifyModel(BaseInterface):
         #                sessinfo[i]['pmod'] = np.zeros((len(info.pmod),), dtype=dt)
         for i,info in enumerate(infolist):
             sessinfo.insert(i,dict(cond=[]))
-            if self.inputs.high_pass_filter_cutoff:
+            if isdefined(self.inputs.high_pass_filter_cutoff):
                 sessinfo[i]['hpf'] = np.float(self.inputs.high_pass_filter_cutoff)
             if info.conditions:
                 for cid,cond in enumerate(info.conditions):
