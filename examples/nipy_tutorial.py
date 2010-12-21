@@ -13,6 +13,7 @@ nipype tutorial directory:
 
 """
 from nipype.interfaces.nipy.model import FitGLM, EstimateContrast
+from nipype.interfaces.nipy.preprocess import ComputeMask
 
 
 """Import necessary modules from nipype."""
@@ -121,6 +122,8 @@ and register all images to the mean image.
 realign = pe.Node(interface=spm.Realign(), name="realign")
 realign.inputs.register_to_mean = True
 
+compute_mask = pe.Node(interface=ComputeMask(), name="compute_mask")
+
 """Use :class:`nipype.algorithms.rapidart` to determine which of the
 images in the functional series are outliers based on deviations in
 intensity or movement.
@@ -134,12 +137,6 @@ art.inputs.zintensity_threshold = 3
 art.inputs.mask_type            = 'file'
 art.inputs.parameter_source     = 'SPM'
 
-"""Skull strip structural images using
-:class:`nipype.interfaces.fsl.BET`.
-"""
-
-skullstrip = pe.Node(interface=fsl.BET(), name="skullstrip")
-skullstrip.inputs.mask = True
 
 """Use :class:`nipype.interfaces.spm.Coregister` to perform a rigid
 body registration of the functional data to the structural data.
@@ -149,22 +146,12 @@ coregister = pe.Node(interface=spm.Coregister(), name="coregister")
 coregister.inputs.jobtype = 'estimate'
 
 
-"""Warp functional and structural data to SPM's T1 template using
-:class:`nipype.interfaces.spm.Normalize`.  The tutorial data set
-includes the template image, T1.nii.
-"""
-
-normalize = pe.Node(interface=spm.Normalize(), name = "normalize")
-normalize.inputs.template = os.path.abspath('data/T1.nii')
-
-
 """Smooth the functional data using
 :class:`nipype.interfaces.spm.Smooth`.
 """
 
 smooth = pe.Node(interface=spm.Smooth(), name = "smooth")
-fwhmlist = [4]
-smooth.iterables = ('fwhm',fwhmlist)
+smooth.inputs.fwhm = 4
 
 """
 Set up analysis components
@@ -221,7 +208,7 @@ modelspec.inputs.high_pass_filter_cutoff = 120
 model_estimate = pe.Node(interface=FitGLM(), name="model_estimate")
 model_estimate.inputs.TR = 3.
 model_estimate.inputs.model = "spherical"
-model_estimate.inputs.method = "ols"
+model_estimate.inputs.method = "kalman"
 
 contrast_estimate = pe.Node(interface=EstimateContrast(), name="contrast_estimate")
 cont1 = ('Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5])
@@ -256,22 +243,20 @@ l1pipeline.base_dir = os.path.abspath('spm_tutorial/workingdir')
 
 l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                   (datasource,realign,[('func','in_files')]),
-                  (realign,coregister,[('mean_image', 'source'),
-                                       ('realigned_files','apply_to_files')]),
-		  (datasource,coregister,[('struct', 'target')]),
-		  (datasource,normalize,[('struct', 'source')]),
-		  (coregister, normalize, [('coregistered_files','apply_to_files')]),
-		  (normalize, smooth, [('normalized_files', 'in_files')]),
-                  (realign,modelspec,[('realignment_parameters','realignment_parameters')]),
-                  (smooth,modelspec,[('smoothed_files','functional_runs')]),
-                  (normalize,skullstrip,[('normalized_source','in_file')]),
-                  (realign,art,[('realignment_parameters','realignment_parameters')]),
-                  (normalize,art,[('normalized_files','realigned_files')]),
-                  (skullstrip,art,[('mask_file','mask_file')]),
-                  (art,modelspec,[('outlier_files','outlier_files')]),
+                  (realign, compute_mask, [('mean_image','mean_volume')]),
+                  (realign, coregister,[('mean_image', 'source'),
+                                        ('realigned_files','apply_to_files')]),
+		          (datasource, coregister,[('struct', 'target')]),
+		          (coregister, smooth, [('coregistered_files', 'in_files')]),
+                  (realign, modelspec,[('realignment_parameters','realignment_parameters')]),
+                  (smooth, modelspec,[('smoothed_files','functional_runs')]),
+                  (realign, art,[('realignment_parameters','realignment_parameters')]),
+                  (coregister, art,[('coregistered_files','realigned_files')]),
+                  (compute_mask,art,[('brain_mask','mask_file')]),
+                  (art, modelspec,[('outlier_files','outlier_files')]),
                   (infosource, modelspec, [(("subject_id", subjectinfo), "subject_info")]),
-                  (skullstrip, model_estimate,[('mask_file','mask')]),
                   (modelspec, model_estimate,[('session_info','session_info')]),
+                  (compute_mask, model_estimate, [('brain_mask','mask')]),
                   (smooth, model_estimate, [("smoothed_files", "functional_runs")]),
                   (model_estimate, contrast_estimate, [("beta","beta"),
                                                         ("nvbeta","nvbeta"),
