@@ -14,15 +14,13 @@ It will be fixed in a later release
     python slicer_tutorial.py
 
 """
-raise RuntimeWarning, 'Slicer not fully implmented'
-from nipype.interfaces.slicer import SlicerCommandLine
+#raise RuntimeWarning, 'Slicer not fully implmented'
+from nipype.interfaces.slicer import BRAINSFit, BRAINSResample
 
 
 """Import necessary modules from nipype."""
 
 import nipype.interfaces.io as nio           # Data i/o
-import nipype.interfaces.matlab as mlab      # how to run matlab
-import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import os                                    # system functions
@@ -100,12 +98,12 @@ datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
 
-coregister = pe.Node(interface=SlicerCommandLine(module="BRAINSFit"), name="coregister")
+coregister = pe.Node(interface=BRAINSFit(), name="coregister")
 coregister.inputs.outputTransform = True
 coregister.inputs.outputVolume = True
 coregister.inputs.transformType = ["Affine"]
 
-reslice = pe.Node(interface=SlicerCommandLine(module="BRAINSResample"), name="reslice")
+reslice = pe.Node(interface=BRAINSResample(), name="reslice")
 reslice.inputs.outputVolume = True
 
 pipeline = pe.Workflow(name="pipeline")
