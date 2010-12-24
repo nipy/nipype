@@ -453,34 +453,41 @@ class ApplyXfm(FLIRT):
 
 
 class MCFLIRTInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, position= 0, argstr="-in %s", mandatory=True)
-    out_file = File(argstr='-out %s', genfile=True)
-    cost = traits.Enum('mutualinfo','woods','corratio','normcorr','normmi','leastsquares', argstr='-cost %s')
-    bins = traits.Int(argstr='-bins %d')
-    dof = traits.Int(argstr='-dof %d')
-    ref_vol = traits.Int(argstr='-refvol %d')
-    scaling = traits.Float(argstr='-scaling %.2f')
-    smooth = traits.Float(argstr='-smooth %.2f')
-    rotation = traits.Int(argstr='-rotation %d')
-    stages = traits.Int(argstr='-stages %d')
-    init = File(exists=True, argstr='-init %s')
-    use_gradient = traits.Bool(argstr='-gdt')
-    use_contour = traits.Bool(argstr='-edge')
-    mean_vol = traits.Bool(argstr='-meanvol')
-    stats_imgs = traits.Bool(argstr='-stats')
-    save_mats = traits.Bool(argstr='-mats')
-    save_plots = traits.Bool(argstr='-plots')
-    save_rms = traits.Bool(argstr='-rmsabs -rmsrel')
-    ref_file = File(exists=True, argstr='-reffile %s')
+    in_file = File(exists=True, position= 0, argstr="-in %s", mandatory=True,
+                   desc="timeseries to motion-correct")
+    out_file = File(argstr='-out %s', genfile=True,
+                    desc="file to write")
+    cost = traits.Enum('mutualinfo','woods','corratio','normcorr','normmi','leastsquares',
+                       argstr='-cost %s', desc="cost function to optimize")
+    bins = traits.Int(argstr='-bins %d',desc="number of histogram bins")
+    dof = traits.Int(argstr='-dof %d',desc="degrees of freedom for the transformation")
+    ref_vol = traits.Int(argstr='-refvol %d',desc="volume to align frames to")
+    scaling = traits.Float(argstr='-scaling %.2f',desc="scaling factor to use")
+    smooth = traits.Float(argstr='-smooth %.2f',desc="smoothing factor for the cost function")
+    rotation = traits.Int(argstr='-rotation %d',desc="scaling factor for rotation tolerances")
+    stages = traits.Int(argstr='-stages %d',
+                        desc="stages (if 4, perform final search with sinc interpolation")
+    init = File(exists=True, argstr='-init %s',desc="inital transformation matrix")
+    interpolation = traits.Enum("trilinear","nn","sinc",argstr="-%s_final",
+                                desc="interpolation method for transformation")
+    use_gradient = traits.Bool(argstr='-gdt',desc="run search on gradient images")
+    use_contour = traits.Bool(argstr='-edge',desc="run search on contour images")
+    mean_vol = traits.Bool(argstr='-meanvol',desc="register to mean volume")
+    stats_imgs = traits.Bool(argstr='-stats',desc="produce variance and std. dev. images")
+    save_mats = traits.Bool(argstr='-mats',desc="save transformation matrices")
+    save_plots = traits.Bool(argstr='-plots',desc="save transformation parameters")
+    save_rms = traits.Bool(argstr='-rmsabs -rmsrel',desc="save rms displacement parameters")
+    ref_file = File(exists=True, argstr='-reffile %s',desc="target image for motion correction")
 
 class MCFLIRTOutputSpec(TraitedSpec):
-    out_file = File(exists=True)
-    variance_img = File(exists=True)
-    std_img = File(exists=True)
-    mean_img = File(exists=True)
-    par_file = File(exists=True)
-    mat_file = OutputMultiPath(File(exists=True))
-    rms_files = OutputMultiPath(File(exists=True))
+    out_file = File(exists=True,desc="motion-corrected timeseries")
+    variance_img = File(exists=True,desc="variance image")
+    std_img = File(exists=True,desc="standard deviation image")
+    mean_img = File(exists=True,desc="mean timeseries image")
+    par_file = File(exists=True,desc="text-file with motion parameters")
+    mat_file = OutputMultiPath(File(exists=True),desc="transformation matrices")
+    rms_files = OutputMultiPath(File(exists=True),
+                                desc="absolute and relative displacement parameters")
 
 class MCFLIRT(FSLCommand):
     """Use FSL MCFLIRT to do within-modality motion correction.
@@ -499,6 +506,14 @@ class MCFLIRT(FSLCommand):
     _cmd = 'mcflirt'
     input_spec = MCFLIRTInputSpec
     output_spec = MCFLIRTOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == "interpolation":
+            if value == "trilinear":
+                return ""
+            else:
+                return spec.argstr%value
+        return super(MCFLIRT, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         cwd = os.getcwd()
