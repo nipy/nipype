@@ -21,6 +21,8 @@ Release 0.3.4 (FUTURE)
 * ENH: Added distance and dissimilarity measurements
 
 * BF: Diffusion toolkit gets installed 
+* BF: Changed FNIRT interface to accept flexible lists (rather than 4-tuples)
+      on all options specific to different subsampling levels
 
 Release 0.3.3 (Sep 16, 2010)
 ============================

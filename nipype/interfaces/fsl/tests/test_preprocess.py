@@ -350,12 +350,14 @@ def test_fnirt():
     fnirt = fsl.FNIRT()
     yield assert_equal, fnirt.cmd, 'fnirt'
 
-    # Test tuple parameters
-    params = [('subsampling_scheme', '--subsamp', (4,2,2,1),'4,2,2,1'),
-              ('max_nonlin_iter', '--miter', (4,4,4,2),'4,4,4,2'),
-              ('ref_fwhm', '--reffwhm', (4,2,2,0),'4,2,2,0'),
-              ('in_fwhm', '--infwhm', (4,2,2,0),'4,2,2,0'),
-              ('regularization_lambda', '--lambda', 0.5, '0.500000')]
+    # Test list parameters
+    params = [('subsampling_scheme', '--subsamp', [4,2,2,1],'4,2,2,1'),
+              ('max_nonlin_iter', '--miter', [4,4,4,2],'4,4,4,2'),
+              ('ref_fwhm', '--reffwhm', [4,2,2,0],'4,2,2,0'),
+              ('in_fwhm', '--infwhm', [4,2,2,0],'4,2,2,0'),
+              ('apply_refmask', '--applyrefmask', [0,0,1,1],'0,0,1,1'),
+              ('apply_inmask', '--applyinmask', [0,0,0,1],'0,0,0,1'),
+              ('regularization_lambda', '--lambda', [0.5,0.75],'0.5,0.75')]
     for item, flag, val, strval in params:
         fnirt = fsl.FNIRT(in_file = infile,
                           ref_file = reffile,
@@ -373,6 +375,15 @@ def test_fnirt():
                   '--in=%s %s=%s '\
                   '--ref=%s --iout=%s' % (cout, infile, flag,
                                           strval,reffile, iout)
+        elif item.startswith('apply'):
+            cmd = 'fnirt %s=%s '\
+                  '--cout=%s '\
+                  '--in=%s '\
+                  '--ref=%s --iout=%s' % (flag,strval,
+                                                cout, infile,
+                                                reffile,
+                                                iout)
+
         else:
             cmd = 'fnirt --cout=%s '\
                   '--in=%s '\

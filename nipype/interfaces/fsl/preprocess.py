@@ -602,10 +602,14 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                         desc='name of file with mask in reference space')
     inmask_file = File(exists=True, argstr='--inmask=%s',
                        desc='name of file with mask in input image space')
-    skip_ref_mask = traits.Bool(argstr='--applyrefmask 0',
+    skip_refmask = traits.Bool(argstr='--applyrefmask=0',xor=['apply_refmask'],
                               desc='Skip specified refmask if set, default false')
-    skip_inmask = traits.Bool(argstr='--applyinmask 0',
+    skip_inmask = traits.Bool(argstr='--applyinmask=0',xor=['apply_inmask'],
                              desc='skip specified inmask if set, default false')
+    apply_refmask = traits.List(traits.Enum(0,1),argstr='--applyrefmask=%s',xor=['skip_refmask'],
+              desc='list of iterations to use reference mask on (1 to use, 0 to skip)')
+    apply_inmask = traits.List(traits.Enum(0,1),argstr='--applyinmask=%s',xor=['skip_inmask'],
+              desc='list of iterations to use input mask on (1 to use, 0 to skip)')
     skip_implicit_ref_masking = traits.Bool(argstr='--imprefm 0',
                                       desc='skip implicit masking  based on value'\
                                             'in --ref image. Default = 0')
@@ -616,29 +620,27 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                               desc='Value to mask out in --ref image. Default =0.0')
     inmask_val = traits.Float(argstr='--impinval=%f',
                               desc='Value to mask out in --in image. Default =0.0')
-    max_nonlin_iter = traits.Tuple(traits.Int,traits.Int,traits.Int,traits.Int,
-                                   argstr='--miter=%d,%d,%d,%d',
-                                   desc='Max # of non-linear iterations tuple, default (5,5,5,5)')
-    subsampling_scheme = traits.Tuple((traits.Int,traits.Int,traits.Int,traits.Int),
-                                   argstr='--subsamp=%d,%d,%d,%d',
-                                   desc='sub-sampling scheme, tuple, default (4,2,1,1)')
+    max_nonlin_iter = traits.List(traits.Int,
+                                   argstr='--miter=%s',
+                                   desc='Max # of non-linear iterations list, default [5,5,5,5]')
+    subsampling_scheme = traits.List(traits.Int,
+                                   argstr='--subsamp=%s',
+                                   desc='sub-sampling scheme, list, default [4,2,1,1]')
     warp_resolution = traits.Tuple(traits.Int, traits.Int, traits.Int,
                                    argstr='--warpres=%d,%d,%d',
                                    desc='(approximate) resolution (in mm) of warp basis '\
                                    'in x-, y- and z-direction, default 10,10,10')
     spline_order = traits.Int(argstr='--splineorder=%d',
                               desc='Order of spline, 2->Qadratic spline, 3->Cubic spline. Default=3')
-    in_fwhm = traits.Tuple(traits.Int,traits.Int,traits.Int,traits.Int,
-                           argstr='--infwhm=%d,%d,%d,%d',
-                           desc='FWHM (in mm) of gaussian smoothing kernel for input volume, default 6,4,2,2')
-    ref_fwhm = traits.Tuple(traits.Int,traits.Int,traits.Int,traits.Int,
-                           argstr='--reffwhm=%d,%d,%d,%d',
-                           desc='FWHM (in mm) of gaussian smoothing kernel for ref volume, default 4,2,0,0')
+    in_fwhm = traits.List(traits.Int, argstr='--infwhm=%s',
+                           desc='FWHM (in mm) of gaussian smoothing kernel for input volume, default [6,4,2,2]')
+    ref_fwhm = traits.List(traits.Int, argstr='--reffwhm=%s',
+                           desc='FWHM (in mm) of gaussian smoothing kernel for ref volume, default [4,2,0,0]')
     regularization_model = traits.Enum('membrane_energy', 'bending_energy',
                                        argstr='--regmod=%s',
         desc='Model for regularisation of warp-field [membrane_energy bending_energy], default bending_energy')
-    regularization_lambda = traits.Float(argstr='--lambda=%f',
-        desc='Weight of regularisation, default depending on --ssqlambda and --regmod '\
+    regularization_lambda = traits.List(traits.Float, argstr='--lambda=%s',
+                desc='Weight of regularisation, default depending on --ssqlambda and --regmod '\
                                          'switches. See user documetation.')
     skip_lambda_ssq = traits.Bool(argstr='--ssqlambda 0',
                                   desc='If true, lambda is not weighted by current ssq, default false')
@@ -659,8 +661,10 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                                         'local intensities, default 50,50,50')
     bias_regularization_lambda = traits.Float(argstr='--biaslambda=%f',
                                               desc='Weight of regularisation for bias-field, default 10000')
-    skip_intensity_mapping = traits.Bool(argstr='--estint 0',
+    skip_intensity_mapping = traits.Bool(argstr='--estint=0',xor=['apply_intensity_mapping'],
                                          desc='Skip estimate intensity-mapping default false')
+    apply_intensity_mapping = traits.List(traits.Enum(0, 1), argstr='--estint=%s',xor=['skip_intensity_mapping'],
+                                        desc='List of subsampling levels to apply intensity mapping for (0 to skip, 1 to apply)')
     hessian_precision = traits.Enum('double', 'float', argstr='--numprec=%s',
                                     desc='Precision for representing Hessian, double or float. Default double')
 
@@ -715,6 +719,10 @@ class FNIRT(FSLCommand):
                    log_file='_log',
                    fieldcoeff_file = '_fieldwarp')
 
+    _subsampling_options = ['subsampling_scheme', 'apply_refmask', 'apply_inmask', 'max_nonlin_iter',
+                           'ref_fwhm','in_fwhm','regularization_lambda','apply_intensity_mapping']
+                           
+
     def _format_arg(self, name, spec, value):
         if name in self.out_map.keys():
             if isinstance(value, bool):
@@ -725,6 +733,8 @@ class FNIRT(FSLCommand):
             else:
                 fname = value
             return spec.argstr % fname
+        if name in self._subsampling_options:
+            return spec.argstr%",".join(str(i) for i in value)
         return super(FNIRT, self)._format_arg(name, spec, value)
 
     def _parse_inputs(self, skip=None):
