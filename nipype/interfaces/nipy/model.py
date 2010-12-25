@@ -18,6 +18,7 @@ class FitGLMInputSpec(TraitedSpec):
     model = traits.Enum("ar1", "spherical", usedefault=True)
     method = traits.Enum("kalman", "ols", usedefault=True)
     mask = traits.File(exists=True)
+    normalize_design_matrix = traits.Bool(False, usedefault=True)
     
 class FitGLMOutputSpec(TraitedSpec):
     beta = File(exists=True)
@@ -88,6 +89,11 @@ class FitGLM(BaseInterface):
                add_regs=reg_vals,
                add_reg_names=reg_names
                )
+        print design_matrix.shape
+        print len(self._reg_names)
+        if self.inputs.normalize_design_matrix:
+            for i in range(len(self._reg_names)-1):
+                design_matrix[:,i] = (design_matrix[:,i]-design_matrix[:,i].mean())/design_matrix[:,i].std()
         pylab.pcolor(design_matrix)
         pylab.savefig("design_matrix.pdf")
         
