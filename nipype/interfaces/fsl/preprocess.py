@@ -1034,7 +1034,7 @@ class SUSAN(FSLCommand):
             return self._list_outputs()['smoothed_file']
         return None
 
-class FUGUEInputSpec(TraitedSpec):
+class FUGUEInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='--in=%s',
                    desc='filename of input volume')
     unwarped_file = File(argstr='--unwarp=%s', genfile=True,
@@ -1107,13 +1107,17 @@ class FUGUE(FSLCommand):
     Examples
     --------
 
-    >>>
+    Please insert examples for use of this command
     
     """
     
     _cmd = 'fugue'
     input_spec = FUGUEInputSpec
     output_spec = FUGUEOutputSpec
+    
+    def __init__(self, **kwargs):
+        super(FUGUE, self).__init__(**kwargs)
+        warn('This interface has not been fully tested. Please report any failures.')
     
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -1180,13 +1184,16 @@ class PRELUDE(FSLCommand):
     Examples
     --------
     
-    >>>
+    Please insert examples for use of this command
     
     """
     input_spec = PRELUDEInputSpec
     output_spec = PRELUDEOutputSpec
     _cmd = 'prelude'
-
+    
+    def __init__(self, **kwargs):
+        super(PRELUDE, self).__init__(**kwargs)
+        warn('This has not been fully tested. Please report any failures.')
     
     def _list_outputs(self):
         outputs = self._outputs().get()
