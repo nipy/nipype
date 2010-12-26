@@ -240,3 +240,54 @@ def test_MultipleRegressDesign():
     yield assert_equal, res.outputs.design_con, os.path.join(os.getcwd(),'design.con')
     yield assert_equal, res.outputs.design_fts, os.path.join(os.getcwd(),'design.fts')
     yield assert_equal, res.outputs.design_grp, os.path.join(os.getcwd(),'design.grp')
+
+@skipif(no_fsl)
+def test_smoothestimate():
+    input_map = dict(args = dict(argstr='%s',),
+                     dof = dict(mandatory=True,xor=['zstat_file'],argstr='--dof=%d',),
+                     environ = dict(usedefault=True,),
+                     mask_file = dict(mandatory=True,argstr='--mask=%s',),
+                     output_type = dict(),
+                     residual_fit_file = dict(requires=['dof'],argstr='--res=%s',),
+                     zstat_file = dict(xor=['dof'],argstr='--zstat=%s',),
+                     )
+    instance = fsl.SmoothEstimate()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+@skipif(no_fsl)
+def test_cluster():
+    input_map = dict(args = dict(argstr='%s',),
+                     connectivity = dict(argstr='--connectivity=%d',),
+                     cope_file = dict(argstr='--cope=%s',),
+                     dlh = dict(argstr='--dlh=%.10f',),
+                     environ = dict(usedefault=True,),
+                     find_min = dict(),
+                     fractional = dict(),
+                     in_file = dict(mandatory=True,argstr='--in=%s',),
+                     minclustersize = dict(argstr='--minclustersize',),
+                     no_table = dict(),
+                     num_maxima = dict(argstr='--num=%d',),
+                     out_index_file = dict(argstr='--oindex=%s',),
+                     out_localmax_txt_file = dict(argstr='--olmax=%s',),
+                     out_localmax_vol_file = dict(argstr='--olmaxim=%s',),
+                     out_max_file = dict(argstr='--omax=%s',),
+                     out_mean_file = dict(argstr='--omean=%s',),
+                     out_pval_file = dict(argstr='--opvals=%s',),
+                     out_size_file = dict(argstr='--osize=%s',),
+                     out_threshold_file = dict(argstr='--othresh=%s',),
+                     output_type = dict(),
+                     peak_distance = dict(argstr='--peakdist=%.10f',),
+                     pthreshold = dict(requires=['dlh', 'volume'],argstr='--pthresh=%.10f',),
+                     std_space_file = dict(argstr='--stdvol=%s',),
+                     threshold = dict(mandatory=True,argstr='--thresh=%.10f',),
+                     use_mm = dict(),
+                     volume = dict(argstr='--volume=%d',),
+                     warpfield_file = dict(argstr='--warpvol=%s',),
+                     xfm_file = dict(argstr='--xfm=%s',),
+                     )
+    instance = fsl.Cluster()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
