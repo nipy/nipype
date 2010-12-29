@@ -6,7 +6,6 @@ import nipy.neurospin.utils.design_matrix as dm
 import nipy.neurospin.glm as GLM
 import pylab
 import os
-from nipy.neurospin.mask import compute_mask
 from nipype.utils.misc import isdefined
 
 class FitGLMInputSpec(TraitedSpec):
@@ -19,6 +18,8 @@ class FitGLMInputSpec(TraitedSpec):
     method = traits.Enum("kalman", "ols", usedefault=True)
     mask = traits.File(exists=True)
     normalize_design_matrix = traits.Bool(False, usedefault=True)
+    save_residuals = traits.Bool(False, usedefault=True)
+    plot_design_matrix = traits.Bool(False, usedefault=True)
     
 class FitGLMOutputSpec(TraitedSpec):
     beta = File(exists=True)
@@ -28,7 +29,8 @@ class FitGLMOutputSpec(TraitedSpec):
     constants = traits.Any()
     axis = traits.Any()
     reg_names = traits.List()
-    residuals = traits.File(exists=True)
+    residuals = traits.File()
+    a = File(exists=True)
     
 class FitGLM(BaseInterface):
     input_spec = FitGLMInputSpec
@@ -39,18 +41,24 @@ class FitGLM(BaseInterface):
         session_info = self.inputs.session_info
         
         nii = nb.load(self.inputs.functional_runs[0])              
-        timeseries = nii.get_data()
+        data = nii.get_data()
+
         
         if isdefined(self.inputs.mask):
             mask = nb.load(self.inputs.mask).get_data() > 0
         else:
-            mask = np.ones(timeseries.shape[:3]) == 1
+            mask = np.ones(nii.shape[:3]) == 1
             
-        timeseries = timeseries[mask,:]
+        timeseries = data.copy()[mask,:]
+        del data
         
         for functional_run in self.inputs.functional_runs[1:]:
-            nii = nb.load(functional_run)              
-            timeseries = np.concatenate((timeseries,nii.get_data()[mask,:]), axis=1)
+            nii = nb.load(functional_run)
+            data = nii.get_data()
+            npdata = data.copy()
+            del data          
+            timeseries = np.concatenate((timeseries,npdata[mask,:]), axis=1)
+            del npdata
             
         nscans = timeseries.shape[1]
         
@@ -89,38 +97,55 @@ class FitGLM(BaseInterface):
                add_regs=reg_vals,
                add_reg_names=reg_names
                )
-        print design_matrix.shape
-        print len(self._reg_names)
         if self.inputs.normalize_design_matrix:
             for i in range(len(self._reg_names)-1):
                 design_matrix[:,i] = (design_matrix[:,i]-design_matrix[:,i].mean())/design_matrix[:,i].std()
-        pylab.pcolor(design_matrix)
-        pylab.savefig("design_matrix.pdf")
+                
+        if self.inputs.plot_design_matrix:
+            pylab.pcolor(design_matrix)
+            pylab.savefig("design_matrix.pdf")
+            pylab.close()
+            pylab.clf()
         
         glm = GLM.glm()
         glm.fit(timeseries.T, design_matrix, method=self.inputs.method, model=self.inputs.model)
+        
         
         self._beta_file = os.path.abspath("beta.nii")
         beta = np.zeros(mask.shape + (glm.beta.shape[0],))
         beta[mask,:] = glm.beta.T
         nb.save(nb.Nifti1Image(beta, nii.get_affine()), self._beta_file)
+        #del beta
         
         self._s2_file = os.path.abspath("s2.nii")
         s2 = np.zeros(mask.shape)
         s2[mask] = glm.s2
         nb.save(nb.Nifti1Image(s2, nii.get_affine()), self._s2_file)
+        #del s2
         
-        explained = np.dot(design_matrix,glm.beta)
-        residuals = np.zeros(mask.shape + (nscans,))
-        residuals[mask,:] = timeseries - explained.T
-        self._residuals_file = os.path.abspath("residuals.nii")
-        nb.save(nb.Nifti1Image(residuals, nii.get_affine()), self._residuals_file)
+        if self.inputs.save_residuals:
+            explained = np.dot(design_matrix,glm.beta)
+            residuals = np.zeros(mask.shape + (nscans,))
+            residuals[mask,:] = timeseries - explained.T
+            self._residuals_file = os.path.abspath("residuals.nii")
+            nb.save(nb.Nifti1Image(residuals, nii.get_affine()), self._residuals_file)
+            #del residuals
+        #del timeseries
         
         self._nvbeta = glm.nvbeta
         self._dof = glm.dof
         self._constants = glm._constants
         self._axis = glm._axis
-
+        if self.inputs.model == "ar1":
+            self._a_file = os.path.abspath("a.nii")
+            a = np.zeros(mask.shape)
+            a[mask] = glm.a.squeeze()
+            nb.save(nb.Nifti1Image(a, nii.get_affine()), self._a_file)
+        self._model = glm.model
+        self._method = glm.method
+        
+        #del glm
+        
         runtime.returncode = 0
         return runtime
     
@@ -133,7 +158,10 @@ class FitGLM(BaseInterface):
         outputs["constants"] = self._constants
         outputs["axis"] = self._axis
         outputs["reg_names"] = self._reg_names
-        outputs["residuals"] = self._residuals_file
+        if self.inputs.model == "ar1":
+            outputs["a"] = self._a_file
+        if self.inputs.save_residuals:
+            outputs["residuals"] = self._residuals_file
         return outputs
     
 class EstimateContrastInputSpec(TraitedSpec):
@@ -170,6 +198,7 @@ class EstimateContrastInputSpec(TraitedSpec):
     constants = traits.Any()
     axis = traits.Any()
     reg_names = traits.List()
+    mask = traits.File(exists=True)
     
 class EstimateContrastOutputSpec(TraitedSpec):
     stat_maps = OutputMultiPath(File(exists=True))
@@ -181,11 +210,19 @@ class EstimateContrast(BaseInterface):
     output_spec = EstimateContrastOutputSpec
     
     def _run_interface(self, runtime):
+                
+        beta_nii = nb.load(self.inputs.beta)
+        if isdefined(self.inputs.mask):
+            mask = nb.load(self.inputs.mask).get_data() > 0
+        else:
+            mask = np.ones(beta_nii.shape[:3]) == 1
+        
+        
         glm = GLM.glm()
         nii = nb.load(self.inputs.beta)
-        glm.beta = nii.get_data().T
+        glm.beta = beta_nii.get_data().copy()[mask,:].T
         glm.nvbeta = self.inputs.nvbeta
-        glm.s2 = nb.load(self.inputs.s2).get_data().T
+        glm.s2 = nb.load(self.inputs.s2).get_data().copy()[mask]
         glm.dof = self.inputs.dof
         glm._axis = self.inputs.axis
         glm._constants = self.inputs.constants
@@ -207,17 +244,20 @@ class EstimateContrast(BaseInterface):
             
             est_contrast = glm.contrast(contrast)
             
-            stat_map = est_contrast.stat().T
+            stat_map = np.zeros(mask.shape)
+            stat_map[mask] = est_contrast.stat().T
             stat_map_file = os.path.abspath(name + "_stat_map.nii")
             nb.save(nb.Nifti1Image(stat_map, nii.get_affine()), stat_map_file)
             self._stat_maps.append(stat_map_file)
             
-            p_map = est_contrast.pvalue().T
+            p_map = np.zeros(mask.shape)
+            p_map[mask] = est_contrast.pvalue().T
             p_map_file = os.path.abspath(name + "_p_map.nii")
             nb.save(nb.Nifti1Image(p_map, nii.get_affine()), p_map_file)
             self._p_maps.append(p_map_file)
             
-            z_map = est_contrast.zscore().T
+            z_map = np.zeros(mask.shape)
+            z_map[mask] = est_contrast.zscore().T
             z_map_file = os.path.abspath(name + "_z_map.nii")
             nb.save(nb.Nifti1Image(z_map, nii.get_affine()), z_map_file)
             self._z_maps.append(z_map_file)
