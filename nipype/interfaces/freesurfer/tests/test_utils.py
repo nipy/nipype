@@ -21,7 +21,7 @@ def no_freesurfer():
         return False
 
 def create_files_in_directory():
-    outdir = mkdtemp()
+    outdir = os.path.realpath(mkdtemp())
     cwd = os.getcwd()
     os.chdir(outdir)
     filelist = ['a.nii','b.nii']
@@ -35,7 +35,7 @@ def create_files_in_directory():
     return filelist, outdir, cwd
 
 def create_surf_file():
-    outdir = mkdtemp()
+    outdir = os.path.realpath(mkdtemp())
     cwd = os.getcwd()
     os.chdir(outdir)
     surf = 'lh.a.nii'
