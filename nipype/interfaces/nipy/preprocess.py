@@ -7,11 +7,12 @@ from nipype.utils.misc import isdefined
 import os
 
 class ComputeMaskInputSpec(TraitedSpec):
-    mean_volume = File(exists=True, mandatory=True)
-    reference_volume = File(exists=True)
-    m = traits.Float()
-    M = traits.Float()
-    cc = traits.Float() 
+    mean_volume = File(exists=True, mandatory=True, desc="mean EPI image, used to compute the threshold for the mask")
+    reference_volume = File(exists=True, desc="reference volume used to compute the mask. If none is give, the \
+        mean volume is used.")
+    m = traits.Float(desc="lower fraction of the histogram to be discarded")
+    M = traits.Float(desc="upper fraction of the histogram to be discarded")
+    cc = traits.Bool(desc="if True, only the largest connect component is kept") 
     
 class ComputeMaskOutputSpec(TraitedSpec):
     brain_mask = File(exists=True)
@@ -21,16 +22,13 @@ class ComputeMask(BaseInterface):
     output_spec = ComputeMaskOutputSpec
     
     def _run_interface(self, runtime):
-        mean_volume_nii = nb.load(self.inputs.mean_volume)
         
         args = {}
-        affine = None
         for key,_ in self.inputs.items():
             value = getattr(self.inputs, key)
             if isdefined(value):
                 if key in ['mean_volume', 'reference_volume']:
                     nii = nb.load(value)
-                    affine = nii.get_affine()
                     value = nii.get_data()
                 args[key] = value
         

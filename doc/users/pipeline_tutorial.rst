@@ -25,6 +25,7 @@ Tutorials
    fsl_tutorial
    fsl_feeds
    fsl_dti_tutorial
+   nipy_tutorial
    dartmouth_workshop_2010
 
 Requirements
