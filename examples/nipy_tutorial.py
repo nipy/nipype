@@ -1,15 +1,17 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-Using SPM for analysis
+Using nipy and SPM for analysis
 =======================
 
-The spm_tutorial.py integrates several interfaces to perform a first
-and second level analysis on a two-subject data set.  The tutorial can
-be found in the examples folder.  Run the tutorial from inside the
+The nipy_tutorial.py integrates several interfaces to perform a first level 
+analysis on a two-subject data set. It is very similar to the spm_tutorial with
+the difference of using nipy for fitting GLM model and estimating contrasts.
+The tutorial can
+be found in the examples folder. Run the tutorial from inside the
 nipype tutorial directory:
 
-    python spm_tutorial.py
+    python nipy_tutorial.py
 
 """
 from nipype.interfaces.nipy.model import FitGLM, EstimateContrast
@@ -194,8 +196,9 @@ cont1 = ('Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5])
 cont2 = ('Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1])
 contrasts = [cont1,cont2]
 
-"""Generate SPM-specific design information using
-:class:`nipype.interfaces.spm.SpecifyModel`.
+"""Generate design information using
+:class:`nipype.interfaces.spm.SpecifyModel`. nipy accepts only design specified 
+in seconds so "output_units" has always have to be set to "secs".
 """
 
 modelspec = pe.Node(interface=model.SpecifyModel(), name= "modelspec")
@@ -205,10 +208,17 @@ modelspec.inputs.output_units            = 'secs'
 modelspec.inputs.time_repetition         = 3.
 modelspec.inputs.high_pass_filter_cutoff = 120
 
+"""Fit the GLM model using nipy and ordinary least square method
+"""
+
 model_estimate = pe.Node(interface=FitGLM(), name="model_estimate")
 model_estimate.inputs.TR = 3.
 model_estimate.inputs.model = "spherical"
-model_estimate.inputs.method = "kalman"
+model_estimate.inputs.method = "ols"
+
+"""Estimate the contrasts. The format of the contrasts definition is the same as
+for FSL and SPM
+"""
 
 contrast_estimate = pe.Node(interface=EstimateContrast(), name="contrast_estimate")
 cont1 = ('Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5])
