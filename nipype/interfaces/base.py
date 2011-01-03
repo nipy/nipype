@@ -739,6 +739,7 @@ class BaseInterface(Interface):
         """
         self.inputs.set(**inputs)
         self._check_mandatory_inputs()
+        interface = deepcopy(self)
         # initialize provenance tracking
         env = deepcopy(os.environ.data)
         runtime = Bunch(cwd=os.getcwd(),
@@ -749,7 +750,7 @@ class BaseInterface(Interface):
         t = time()
         runtime = self._run_interface(runtime)
         runtime.duration = time() - t
-        results = InterfaceResult(deepcopy(self), runtime)
+        results = InterfaceResult(interface, runtime)
         if results.runtime.returncode is None:
             raise Exception('Returncode from an interface cannot be None')
         if results.runtime.returncode == 0:
