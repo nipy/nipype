@@ -362,32 +362,31 @@ def test_fnirt():
         fnirt = fsl.FNIRT(in_file = infile,
                           ref_file = reffile,
                           **{item : val})
-        cout = fnirt._gen_fname(infile, suffix='_fieldwarp')
+        log = fnirt._gen_fname(infile, suffix='_log.txt', change_ext=False)
         iout = fnirt._gen_fname(infile, suffix='_warped')
         if item in ('max_nonlin_iter'):
-            cmd = 'fnirt --cout=%s '\
-                  '--in=%s '\
-                  '%s=%s --ref=%s'\
-                  ' --iout=%s' % (cout, infile, 
+            cmd = 'fnirt --in=%s '\
+                  '--logout=%s'\
+                  ' %s=%s --ref=%s'\
+                  ' --iout=%s' % (infile, log, 
                                   flag, strval, reffile, iout)
         elif item in ('in_fwhm'):
-            cmd = 'fnirt --cout=%s '\
-                  '--in=%s %s=%s '\
-                  '--ref=%s --iout=%s' % (cout, infile, flag,
-                                          strval,reffile, iout)
+            cmd = 'fnirt --in=%s %s=%s --logout=%s '\
+                  '--ref=%s --iout=%s' % (infile, flag,
+                                          strval, log,  reffile, iout)
         elif item.startswith('apply'):
             cmd = 'fnirt %s=%s '\
-                  '--cout=%s '\
                   '--in=%s '\
+                  '--logout=%s '\
                   '--ref=%s --iout=%s' % (flag,strval,
-                                                cout, infile,
+                                                infile, log, 
                                                 reffile,
                                                 iout)
 
         else:
-            cmd = 'fnirt --cout=%s '\
-                  '--in=%s '\
-                  '--ref=%s %s=%s --iout=%s' % (cout, infile,
+            cmd = 'fnirt '\
+                  '--in=%s --logout=%s '\
+                  '--ref=%s %s=%s --iout=%s' % (infile, log, 
                                                 reffile,
                                                 flag, strval,
                                                 iout)
@@ -421,24 +420,38 @@ def test_fnirt():
                           **{name : infile})
         
         if name in ('config_file', 'affine_file','field_file'):
-            cmd = 'fnirt %s%s --cout=%s '\
-                  '--in=%s '\
-                  '--ref=%s --iout=%s' % (settings,infile,
-                                          cout, infile,
+            cmd = 'fnirt %s%s --in=%s '\
+                  '--logout=%s '\
+                  '--ref=%s --iout=%s' % (settings, infile, infile, log, 
                                           reffile, iout)
         elif name in ('refmask_file'):
-            cmd = 'fnirt --cout=%s '\
-                  '--in=%s --ref=%s '\
+            cmd = 'fnirt --in=%s '\
+                  '--logout=%s --ref=%s '\
                   '%s%s '\
-                  '--iout=%s' % (cout, infile,
-                                 reffile,
+                  '--iout=%s' % (infile, log, 
+                                 reffile, 
                                  settings,infile,
                                  iout)
-            
+        elif name in ('in_intensitymap_file', 'inwarp_file', 'inmask_file', 'jacobian_file'):
+            cmd = 'fnirt --in=%s '\
+                  '%s%s '\
+                  '--logout=%s --ref=%s '\
+                  '--iout=%s' % (infile, 
+                                 settings,infile,
+                                 log, 
+                                 reffile, 
+                                 iout)
+        elif name in ('log_file'):
+            cmd = 'fnirt --in=%s '\
+                  '%s%s --ref=%s '\
+                  '--iout=%s' % (infile, 
+                                 settings,infile, 
+                                 reffile, 
+                                 iout)
         else:
-            cmd = 'fnirt --cout=%s '\
-                  '--in=%s %s%s '\
-                  '--ref=%s --iout=%s' % (cout, infile,
+            cmd = 'fnirt --in=%s '\
+                  '--logout=%s %s%s '\
+                  '--ref=%s --iout=%s' % (infile,log, 
                                           settings, infile,
                                           reffile,iout)
                                        

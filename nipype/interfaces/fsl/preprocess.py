@@ -691,8 +691,8 @@ class FNIRT(FSLCommand):
 
     >>> from nipype.interfaces import fsl
     >>> fnirt_mprage = fsl.FNIRT()
-    >>> fnirt_mprage.inputs.in_fwhm = (8, 4, 2, 2)
-    >>> fnirt_mprage.inputs.subsampling_scheme = (4, 2, 1, 1)
+    >>> fnirt_mprage.inputs.in_fwhm = [8, 4, 2, 2]
+    >>> fnirt_mprage.inputs.subsampling_scheme = [4, 2, 1, 1]
 
     Specify the resolution of the warps
 
