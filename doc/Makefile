@@ -100,3 +100,7 @@ sf_satra_nightly: html
 sf_satra: html
 	@echo "Copying html files to sourceforge..."
 	rsync -auv _build/html/. satra,nipy@web.sourceforge.net:htdocs/nipype/.
+	
+sf_filo: html
+	@echo "Copying html files to sourceforge..."
+	rsync -auv _build/html/. gorgolewski,nipy@web.sourceforge.net:htdocs/nipype/.
