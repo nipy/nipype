@@ -4,6 +4,7 @@ Release 0.3.4 (FUTURE)
 * API: hash values for float use a string conversion upto the 10th decimal place.
 * API: Iterables in output path will always be generated as _var1_val1_var2_val2 pairs
 
+* ENH: Added support to nipy: GLM fit, contrast estimation and calculating mask from EPI
 * ENH: Added support for maniupulating surface files in Freesurfer:
     - projecting volume images onto the surface
     - smoothing along the surface
