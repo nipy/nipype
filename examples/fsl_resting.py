@@ -254,9 +254,6 @@ modelfit.inputs.modelspec.high_pass_filter_cutoff = hpcutoff
 modelfit.inputs.fsfdesign.interscan_interval = TR
 modelfit.inputs.fsfdesign.bases = {'dgamma':{'derivs': True}}
 modelfit.inputs.fsfdesign.contrasts = contrasts
-modelfit.inputs.fsfdesign.register = True
-modelfit.inputs.fsfdesign.reg_image = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
-modelfit.inputs.fsfdesign.reg_dof = 12
 
 
 """
