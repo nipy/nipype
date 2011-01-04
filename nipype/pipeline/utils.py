@@ -102,13 +102,21 @@ def _create_dot_graph(graph, show_connectinfo=False):
     for edge in graph.edges():
         data = graph.get_edge_data(*edge)
         if hasattr(edge[0], '_interface'):
-            srcclass = edge[0]._interface.__class__.__module__.split('.')[2]
+            pkglist = edge[0]._interface.__class__.__module__.split('.')
+            if len(pkglist) > 1:
+                srcclass = pkglist[-2]
+            else:
+                srcclass = ''
         else:
             srcclass = ''
         srcname = '.'.join(str(edge[0]).split('.')[1:])
         srcname = '.'.join((srcname, srcclass))
         if hasattr(edge[1], '_interface'):
-            destclass = edge[1]._interface.__class__.__module__.split('.')[2]
+            pkglist = edge[1]._interface.__class__.__module__.split('.')
+            if len(pkglist) > 1:
+                destclass = pkglist[-2]
+            else:
+                destclass = ''
         else:
             destclass = ''
         destname = '.'.join(str(edge[1]).split('.')[1:])
@@ -173,7 +181,11 @@ def _write_detailed_dot(graph, dotfilename):
             outputstr += '|<out%s> %s' % (replacefunk(op), op)
         outputstr += '}'
         if hasattr(n, '_interface'):
-            srcpackage = n._interface.__class__.__module__.split('.')[2]
+            pkglist = n._interface.__class__.__module__.split('.')
+            if len(pkglist) > 1:
+                srcpackage = pkglist[-2]
+            else:
+                srcpackage = ""
         else:
             srcpackage = ''
         srchierarchy = '.'.join(nodename.split('.')[1:-1])
