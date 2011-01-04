@@ -898,9 +898,6 @@ class CommandLine(BaseInterface):
         '''
         Based on a code snippet from http://orip.org/2009/08/python-checking-if-executable-exists-in.html
         '''
-        # can't search the path if a directory is specified
-        if os.path.isdir(cmd):
-            return False
     
         extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
         for directory in os.environ.get("PATH", "").split(os.pathsep):
