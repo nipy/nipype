@@ -16,6 +16,7 @@ import networkx as nx
 
 from nipype.interfaces.base import CommandLine, isdefined
 from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
+from nipype.utils.config import config
 
 logger = logging.getLogger('workflow')
 
