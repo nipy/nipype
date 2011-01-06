@@ -460,7 +460,7 @@ class Workflow(WorkflowBase):
                 graph = _generate_expanded_graph(deepcopy(self._flatgraph))
         export_graph(graph, self.base_dir, dotfilename=dotfilename)
 
-    def run(self, inseries=False, createdirsonly=False):
+    def run(self, inseries=False, updatehash=False, createdirsonly=False):
         """ Execute the workflow
 
         Parameters
