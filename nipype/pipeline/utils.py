@@ -433,7 +433,10 @@ def modify_paths(object, relative=True, basedir=None):
         if isdefined(object):
             if isinstance(object, str) and os.path.isfile(object):
                 if relative:
-                    out = relpath(object,start=basedir)
+                    if config.get('execution','use_relative_paths'):
+                        out = relpath(object,start=basedir)
+                    else:
+                        out = object.copy()
                 else:
                     out = os.path.abspath(os.path.join(basedir,object))
                 if not os.path.exists(out):
