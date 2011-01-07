@@ -13,7 +13,7 @@ __docformat__ = 'restructuredtext'
 
 import os
 import re
-from nipype.utils.filemanip import fname_presuffix
+from nipype.utils.filemanip import fname_presuffix, split_filename
 
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import TraitedSpec, File, traits, OutputMultiPath
@@ -270,7 +270,7 @@ class SurfaceSmooth(FSCommand):
         if not isdefined(outputs["out_file"]):
             in_file = self.inputs.in_file
             outputs["out_file"] = fname_presuffix(in_file,
-                                                  suffix="_smooth",
+                                                  suffix="_smooth%d"%self.inputs.fwhm,
                                                   newpath=os.getcwd())
         return outputs
 
@@ -292,6 +292,7 @@ class SurfaceTransformInputSpec(FSTraitedSpec):
                                    help="subject id of target surface")
     target_ico_order = traits.Enum(1,2,3,4,5,6,7, argstr="--trgicoorder %d",
                                    help="order of the icosahedron if target_subject is 'ico'")
+    target_type = traits.Enum(filetypes, help="output format")
     reshape = traits.Bool(argstr="--reshape",help="reshape output surface to conform with Nifti")
     reshape_factor = traits.Int(argstr="--reshape-factor",help="number of slices in reshaped image")
     out_file = File(argstr="--tval %s",genfile=True,desc="surface file to write")
@@ -327,9 +328,22 @@ class SurfaceTransform(FSCommand):
         outputs["out_file"] = self.inputs.out_file
         if not isdefined(outputs["out_file"]):
             source = self.inputs.source_file
+            # Some recon-all files don't have a proper extension (e.g. "lh.thickness")
+            # so we have to account for that here
+            bad_extensions = [".%s"%e for e in ["area", "mid", "pial", "avg_curv", "curv", "inflated",
+                                                "jacobian_white", "orig", "nofix", "smoothwm", "crv",
+                                                "sphere", "sulc", "thickness", "volume", "white"]]
+            use_ext = True
+            if split_filename(source)[2] in bad_extensions:
+                use_ext = False
+            ext = ""
+            if isdefined(self.inputs.target_type):
+                ext = "." + filemap[self.inputs.target_type]
+                use_ext = False
             outputs["out_file"] = fname_presuffix(source,
-                                                  suffix=".%s"%self.inputs.target_subject,
-                                                  newpath=os.getcwd())
+                                                  suffix=".%s%s"%(self.inputs.target_subject,ext),
+                                                  newpath=os.getcwd(),
+                                                  use_ext=use_ext)
         return outputs
 
     def _gen_filename(self, name):

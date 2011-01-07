@@ -111,13 +111,14 @@ def test_surfsmooth():
     # Test input settings
     smooth.inputs.in_file = surf
     smooth.inputs.subject_id = "fsaverage"
-    smooth.inputs.fwhm = 5
+    fwhm = 5
+    smooth.inputs.fwhm = fwhm
     smooth.inputs.hemi = "lh"
 
     # Test the command line
     yield assert_equal, smooth.cmdline, \
-    ("mri_surf2surf --cortex --fwhm 5.0000 --hemi lh --sval %s --tval %s/lh.a_smooth.nii --s fsaverage"%
-    (surf, cwd))
+    ("mri_surf2surf --cortex --fwhm 5.0000 --hemi lh --sval %s --tval %s/lh.a_smooth%d.nii --s fsaverage"%
+    (surf, cwd, fwhm))
 
     # Test identity
     shmooth = fs.SurfaceSmooth(
