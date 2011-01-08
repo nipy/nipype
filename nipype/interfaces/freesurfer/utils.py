@@ -335,6 +335,7 @@ class SurfaceTransform(FSCommand):
                                                 "sphere", "sulc", "thickness", "volume", "white"]]
             use_ext = True
             if split_filename(source)[2] in bad_extensions:
+                source = source + ".stripme"
                 use_ext = False
             ext = ""
             if isdefined(self.inputs.target_type):
