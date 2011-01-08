@@ -1,10 +1,15 @@
-from nipype.interfaces.base import TraitedSpec, BaseInterface, traits
-from nipype.interfaces.traits import File
+import os
+
 import nibabel as nb
 import numpy as np
+
+from nipype.utils.misc import package_check
+package_check('nipy')
 from nipy.neurospin.mask import compute_mask
+
+from nipype.interfaces.base import TraitedSpec, BaseInterface, traits
+from nipype.interfaces.traits import File
 from nipype.utils.misc import isdefined
-import os
 
 class ComputeMaskInputSpec(TraitedSpec):
     mean_volume = File(exists=True, mandatory=True, desc="mean EPI image, used to compute the threshold for the mask")
@@ -44,3 +49,5 @@ class ComputeMask(BaseInterface):
         outputs = self._outputs().get()
         outputs["brain_mask"] = self._brain_mask_path
         return outputs
+
+

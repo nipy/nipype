@@ -460,7 +460,7 @@ class Workflow(WorkflowBase):
                 graph = _generate_expanded_graph(deepcopy(self._flatgraph))
         export_graph(graph, self.base_dir, dotfilename=dotfilename)
 
-    def run(self, inseries=False, updatehash=False):
+    def run(self, inseries=False, updatehash=False, createdirsonly=False):
         """ Execute the workflow
 
         Parameters
@@ -474,8 +474,8 @@ class Workflow(WorkflowBase):
         self._execgraph = _generate_expanded_graph(deepcopy(self._flatgraph))
         for node in self._execgraph.nodes():
             node.config = self.config
-        if inseries or updatehash:
-            self._execute_in_series(updatehash=updatehash)
+        if inseries or createdirsonly:
+            self._execute_in_series(createdirsonly=createdirsonly)
         else:
             self._execute_with_manager()
         
@@ -670,7 +670,7 @@ class Workflow(WorkflowBase):
             self._graph.remove_nodes_from(nodes2remove)
         logger.debug('finished expanding workflow: %s', self)
 
-    def _execute_in_series(self, updatehash=False, force_execute=None):
+    def _execute_in_series(self, updatehash=False, createdirsonly=False, force_execute=None):
         """Executes a pre-defined pipeline in a serial order.
 
         Parameters
@@ -687,6 +687,8 @@ class Workflow(WorkflowBase):
         # In the absence of a dirty bit on the object, generate the
         # parameterization each time before running
         logger.info("Running serially.")
+        if createdirsonly:
+            logger.info("Creating directories only.")
         old_wd = os.getcwd()
         notrun = []
         donotrun = []
@@ -697,13 +699,14 @@ class Workflow(WorkflowBase):
             try:
                 if node in donotrun:
                     continue
-                for edge in self._execgraph.in_edges_iter(node):
-                    data = self._execgraph.get_edge_data(*edge)
-                    logger.debug('setting input: %s->%s %s',
-                                 edge[0], edge[1], str(data))
-                    for sourceinfo, destname in data['connect']:
-                        self._set_node_input(node, destname,
-                                             edge[0], sourceinfo)
+                if not createdirsonly:
+                    for edge in self._execgraph.in_edges_iter(node):
+                        data = self._execgraph.get_edge_data(*edge)
+                        logger.debug('setting input: %s->%s %s',
+                                     edge[0], edge[1], str(data))
+                        for sourceinfo, destname in data['connect']:
+                            self._set_node_input(node, destname,
+                                                 edge[0], sourceinfo)
                 self._set_output_directory_base(node)
                 redo = None
                 if force_execute:
@@ -714,7 +717,12 @@ class Workflow(WorkflowBase):
                 if updatehash and not redo:
                     node.run(updatehash=updatehash)
                 else:
-                    node.run(force_execute=redo)
+                    if createdirsonly:
+                        outdir = node._output_directory()
+                        outdir = make_output_dir(outdir)
+                        logger.info('node: %s dir: %s'%(node, outdir))
+                    else:
+                        node.run(force_execute=redo)
             except:
                 os.chdir(old_wd)
                 if config.getboolean('execution', 'stop_on_first_crash'):
