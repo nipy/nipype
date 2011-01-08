@@ -269,8 +269,12 @@ class SurfaceSmooth(FSCommand):
         outputs["out_file"] = self.inputs.out_file
         if not isdefined(outputs["out_file"]):
             in_file = self.inputs.in_file
+            if isdefined(self.inputs.fwhm):
+                kernel = self.inputs.fwhm
+            else:
+                kernel = self.inputs.smooth_iters
             outputs["out_file"] = fname_presuffix(in_file,
-                                                  suffix="_smooth%d"%self.inputs.fwhm,
+                                                  suffix="_smooth%d"%kernel,
                                                   newpath=os.getcwd())
         return outputs
 
