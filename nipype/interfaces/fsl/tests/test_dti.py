@@ -815,3 +815,85 @@ def test_Find_the_biggest():
 
     # test arguments for opt_map
     # Find_the_biggest doesn't have an opt_map{}
+
+
+@skipif(no_fsl)
+def test_tbss_skeleton():
+    skeletor = fsl.TBSSSkeleton()
+
+    files, newdir, olddir = create_files_in_directory()
+    
+    # Test the underlying command
+    yield assert_equal, skeletor.cmd, "tbss_skeleton"
+
+    # It shouldn't run yet
+    yield assert_raises, ValueError, skeletor.run
+
+    # Test the most basic way to use it
+    skeletor.inputs.in_file = files[0]
+
+    # First by implicit argument
+    skeletor.inputs.skeleton_file = True
+    yield assert_equal, skeletor.cmdline, \
+    "tbss_skeleton -i a.nii -o %s"%os.path.join(newdir, "a_skeleton.nii")
+
+    # Now with a specific name
+    skeletor.inputs.skeleton_file = "old_boney.nii"
+    yield assert_equal, skeletor.cmdline, "tbss_skeleton -i a.nii -o old_boney.nii"
+
+    # Now test the more complicated usage
+    bones = fsl.TBSSSkeleton(in_file="a.nii", project_data=True)
+    
+    # This should error
+    yield assert_raises, ValueError, bones.run
+
+    # But we can set what we need
+    bones.inputs.threshold = 0.2
+    bones.inputs.distance_map = "b.nii"
+    bones.inputs.data_file = "b.nii" # Even though that's silly
+    
+    # Now we get a command line
+    yield assert_equal, bones.cmdline, \
+    "tbss_skeleton -i a.nii -p 0.200 b.nii %s b.nii %s"%(Info.standard_image("LowerCingulum_1mm.nii.gz"),
+                                                         os.path.join(newdir, "b_skeletonised.nii"))
+
+    # Can we specify a mask?
+    bones.inputs.search_mask_file = "a.nii"
+    yield assert_equal, bones.cmdline, \
+    "tbss_skeleton -i a.nii -p 0.200 b.nii a.nii b.nii %s"%os.path.join(newdir, "b_skeletonised.nii")
+
+    # Looks good; clean up
+    clean_directory(newdir, olddir)
+
+@skipif(no_fsl)
+def test_distancemap():
+    mapper = fsl.DistanceMap()
+
+    files, newdir, olddir = create_files_in_directory()
+
+    # Test the underlying command
+    yield assert_equal, mapper.cmd, "distancemap"
+
+    # It shouldn't run yet
+    yield assert_raises, ValueError, mapper.run
+
+    # But if we do this...
+    mapper.inputs.in_file = "a.nii"
+
+    # It should
+    yield assert_equal, mapper.cmdline, "distancemap --out=%s --in=a.nii"%os.path.join(newdir, "a_dstmap.nii")
+
+    # And we should be able to write out a maxima map
+    mapper.inputs.local_max_file = True
+    yield assert_equal, mapper.cmdline, \
+        "distancemap --out=%s --in=a.nii --localmax=%s"%(os.path.join(newdir, "a_dstmap.nii"),
+                                                         os.path.join(newdir, "a_lclmax.nii"))
+
+    # And call it whatever we want
+    mapper.inputs.local_max_file = "max.nii"
+    yield assert_equal, mapper.cmdline, \
+        "distancemap --out=%s --in=a.nii --localmax=max.nii"%os.path.join(newdir, "a_dstmap.nii")
+
+    # Not much else to do here
+    clean_directory(newdir, olddir)
+

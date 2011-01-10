@@ -20,6 +20,7 @@ Release 0.3.4 (Jan 12, 2011)
 * ENH: Added support for flash processing using FreeSurfer
 * ENH: Added support for flirt matrix in BBRegister
 * ENH: Added support for FSL convert_xfm
+* ENH: Added support for the component parts of FSL's TBSS workflow (TBSSSkeleton and DistanceMap)
 * ENH: hashes can be updated again without rerunning all nodes.
 * ENH: Added multiple regression design for FSL
 * ENH: Added SPM based Analyze to Nifti converter

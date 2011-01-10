@@ -15,9 +15,9 @@ was written to work with FSL version 4.1.4.
 import os,shutil
 import warnings
 
-from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
-from nipype.interfaces.base import Bunch, TraitedSpec, isdefined, File,Directory,\
-    InputMultiPath
+from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
+from nipype.interfaces.base import TraitedSpec, isdefined, File,Directory, InputMultiPath
+from nipype.utils.filemanip import fname_presuffix
 import enthought.traits.api as traits
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -779,3 +779,156 @@ class FindTheBiggest(FSLCommand):
             return self._list_outputs()[name]
         else:
             return None
+
+class TBSSSkeletonInputSpec(FSLCommandInputSpec):
+
+    in_file = File(exists=True, mandatory=True, argstr="-i %s",
+                   desc="input image (typcially mean FA volume)")
+    _proj_inputs = ["threshold", "distance_map", "data_file"]  
+    project_data = traits.Bool(argstr="-p %.3f %s %s %s %s",requires=_proj_inputs,
+                               desc="project data onto skeleton")
+    threshold = traits.Float(desc="skeleton threshold value")
+    distance_map = File(exists=True,desc="distance map image")
+    search_mask_file = File(exists=True,xor=["use_cingulum_mask"],
+                            desc="mask in which to use alternate search rule")
+    use_cingulum_mask = traits.Bool(True,usedefault=True,
+                                    xor=["search_mask_file"],
+                                    desc="perform alternate search using built-in cingulum mask")
+    data_file = File(exists=True, desc="4D data to project onto skeleton")
+    projected_data = File(desc="input data projected onto skeleton")
+    skeleton_file = traits.Either(traits.Bool, File, argstr="-o %s", desc="write out skeleton image")
+
+class TBSSSkeletonOutputSpec(TraitedSpec):
+
+    projected_data = File(desc="input data projected onto skeleton")
+    skeleton_file = File(desc="tract skeleton image")
+
+class TBSSSkeleton(FSLCommand):
+    """Use FSL's tbss_skeleton to skeletonise an FA image or project arbitrary values onto a skeleton.
+    
+    There are two ways to use this interface.  To create a skeleton from an FA image, just
+    supply the ``in_file`` and set ``skeleton_file`` to True (or specify a skeleton filename.
+    To project values onto a skeleton, you must set ``project_data`` to True, and then also
+    supply values for ``threshold``, ``distance_map``, and ``data_file``. The ``search_mask_file``
+    and ``use_cingulum_mask`` inputs are also used in data projection, but ``use_cingulum_mask``
+    is set to True by default.  This mask controls where the projection algorithm searches 
+    within a circular space around a tract, rather than in a single perpindicular direction.
+
+    Examples
+    --------
+    import nipype.interfaces.fsl as fsl
+    skeletor = fsl.TBSSSkeleton()
+    skeletor.inputs.in_file = "all_FA.nii.gz"
+    skeletor.inputs.skeleton_file = True
+    skeletor.run() # doctest: +SKIP
+
+    """
+
+    _cmd = "tbss_skeleton"
+    input_spec = TBSSSkeletonInputSpec
+    output_spec = TBSSSkeletonOutputSpec
+
+
+    def _format_arg(self, name, spec, value):
+        if name == "project_data":
+            if isdefined(value) and value:
+                _si = self.inputs
+                if isdefined(_si.use_cingulum_mask) and _si.use_cingulum_mask:
+                    mask_file = Info.standard_image("LowerCingulum_1mm.nii.gz")
+                else:
+                    mask_file = _si.search_mask_file
+                if not isdefined(_si.projected_data):
+                    proj_file = self._list_outputs()["projected_data"]
+                else:
+                    proj_file = _si.projected_data
+                return spec.argstr%(_si.threshold, _si.distance_map, mask_file, _si.data_file, proj_file)
+        elif name == "skeleton_file":
+            if isinstance(value, bool):
+                return spec.argstr%self._list_outputs()["skeleton_file"]
+            else:
+                return spec.argstr%value       
+        return super(TBSSSkeleton, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        _si = self.inputs
+        if isdefined(_si.project_data) and _si.project_data:
+            proj_data = _si.projected_data
+            outputs["projected_data"] = proj_data
+            if not isdefined(proj_data):
+                outputs["projected_data"] = fname_presuffix(_si.data_file,
+                                                            suffix="_skeletonised",
+                                                            newpath=os.getcwd(),
+                                                            use_ext=True)
+        if isdefined(_si.skeleton_file) and _si.skeleton_file:
+            outputs["skeleton_file"] = _si.skeleton_file
+            if isinstance(_si.skeleton_file, bool):
+                outputs["skeleton_file"] = fname_presuffix(_si.in_file,
+                                                           suffix="_skeleton",
+                                                           newpath=os.getcwd(),
+                                                           use_ext=True)
+        return outputs
+            
+
+class DistanceMapInputSpec(FSLCommandInputSpec):
+
+    in_file = File(exists=True, mandatory=True,argstr="--in=%s",
+                   desc="image to calculate distance values for")
+    mask_file = File(exists=True,argstr="--mask=%s",
+                     desc="binary mask to contrain calculations")
+    invert_input = traits.Bool(argstr="--invert", desc="invert input image") 
+    local_max_file = traits.Either(traits.Bool, File, argstr="--localmax=%s",
+                                   desc="write an image of the local maxima")
+    distance_map = File(genfile=True,argstr="--out=%s",desc="distance map to write")
+
+
+class DistanceMapOutputSpec(TraitedSpec):
+
+    distance_map = File(exists=True,desc="value is distance to nearest nonzero voxels")
+    local_max_file = File(desc="image of local maxima")
+
+class DistanceMap(FSLCommand):
+    """Use FSL's distancemap to generate a map of the distance to the nearest nonzero voxel.
+
+    Examples
+    --------
+    import nipype.interfaces.fsl as fsl
+    mapper = fsl.DistanceMap()
+    mapper.inputs.in_file = "skeleton_mask.nii.gz"
+    mapper.run() # doctest: +SKIP
+
+    """
+
+    _cmd = "distancemap"
+    input_spec = DistanceMapInputSpec
+    output_spec = DistanceMapOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == "local_max_file":
+            if isinstance(value, bool):
+                return spec.argstr%self._list_outputs()["local_max_file"]
+        return super(DistanceMap, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        _si = self.inputs
+        outputs["distance_map"] = _si.distance_map
+        if not isdefined(_si.distance_map):
+            outputs["distance_map"] = fname_presuffix(_si.in_file,
+                                                      suffix="_dstmap",
+                                                      use_ext=True,
+                                                      newpath=os.getcwd())
+        if isdefined(_si.local_max_file):
+            outputs["local_max_file"] = _si.local_max_file
+            if isinstance(_si.local_max_file, bool):
+                outputs["local_max_file"] = fname_presuffix(_si.in_file,
+                                                           suffix="_lclmax",
+                                                           use_ext=True,
+                                                           newpath=os.getcwd())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == "distance_map":
+            return self._list_outputs()["distance_map"]
+        return None
+
