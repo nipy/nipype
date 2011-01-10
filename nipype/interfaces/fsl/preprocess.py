@@ -29,7 +29,7 @@ warnings.filterwarnings('always', category=UserWarning)
 
 
 class BETInputSpec(FSLCommandInputSpec):
-    """Note: Currently we don't support -R, -S, -Z,-A or -A2"""
+    """"""
     # We use position args here as list indices - so a negative number
     # will put something on the end
     in_file = File(exists=True,
@@ -59,6 +59,22 @@ class BETInputSpec(FSLCommandInputSpec):
                    desc="apply thresholding to segmented brain image and mask")
     mesh = traits.Bool(argstr='-e',
                        desc="generate a vtk mesh brain surface")
+    robust = traits.Bool(desc='robust brain centre estimation ' \
+                              '(iterates BET several times)',
+                       argstr='-R')
+    padding = traits.Bool(desc='improve BET if FOV is very small in Z ' \
+                               '(by temporarily padding end slices)',
+                       argstr='-Z')
+    remove_eyes = traits.Bool(desc='eye & optic nerve cleanup (can be ' \
+                                   'useful in SIENA)',
+                       argstr='-S')
+    surfaces = traits.Bool(desc='run bet2 and then betsurf to get additional ' \
+                                'skull and scalp surfaces (includes ' \
+                                'registrations)',
+                           argstr='-A')
+    t2_guided = File(desc='as with creating surfaces, when also feeding in ' \
+                          'non-brain-extracted T2 (includes registrations)',
+                     argstr='-A2 %s')
     # XXX how do we know these two are mutually exclusive?
     _xor_inputs = ('functional', 'reduce_bias')
     functional = traits.Bool(argstr='-F', xor=_xor_inputs,
