@@ -59,24 +59,29 @@ class BETInputSpec(FSLCommandInputSpec):
                    desc="apply thresholding to segmented brain image and mask")
     mesh = traits.Bool(argstr='-e',
                        desc="generate a vtk mesh brain surface")
+    # the remaining 'options' are more like modes (mutually exclusive) that
+    # FSL actually implements in a shell script wrapper around the bet binary.
+    # for some combinations of them in specific order a call would not fail,
+    # but in general using more than one of the following is clearly not
+    # supported
+    _xor_inputs = ('functional', 'reduce_bias', 'robust', 'padding',
+                   'remove_eyes', 'surfaces', 't2_guided')
     robust = traits.Bool(desc='robust brain centre estimation ' \
                               '(iterates BET several times)',
-                       argstr='-R')
+                       argstr='-R', xor=_xor_inputs)
     padding = traits.Bool(desc='improve BET if FOV is very small in Z ' \
                                '(by temporarily padding end slices)',
-                       argstr='-Z')
+                       argstr='-Z', xor=_xor_inputs)
     remove_eyes = traits.Bool(desc='eye & optic nerve cleanup (can be ' \
                                    'useful in SIENA)',
-                       argstr='-S')
+                       argstr='-S', xor=_xor_inputs)
     surfaces = traits.Bool(desc='run bet2 and then betsurf to get additional ' \
                                 'skull and scalp surfaces (includes ' \
                                 'registrations)',
-                           argstr='-A')
+                           argstr='-A', xor=_xor_inputs)
     t2_guided = File(desc='as with creating surfaces, when also feeding in ' \
                           'non-brain-extracted T2 (includes registrations)',
-                     argstr='-A2 %s')
-    # XXX how do we know these two are mutually exclusive?
-    _xor_inputs = ('functional', 'reduce_bias')
+                     argstr='-A2 %s', xor=_xor_inputs)
     functional = traits.Bool(argstr='-F', xor=_xor_inputs,
                              desc="apply to 4D fMRI data")
     reduce_bias = traits.Bool(argstr='-B', xor=_xor_inputs,
