@@ -283,4 +283,35 @@ def test_doubleconnect():
     x = lambda: flow1.connect(a,'b',b,'a')
     yield assert_raises, Exception, x
 
-    
+
+'''
+Test for order of iterables
+
+import nipype.pipeline.engine as pe
+import nipype.interfaces.utility as niu
+
+wf1 = pe.Workflow(name='wf1')
+node1 = pe.Node(interface=niu.IdentityInterface(fields=['a1','b1']), name='node1')
+node1.iterables = ('a1', [1,2])
+wf1.add_nodes([node1])
+
+wf2 = pe.Workflow(name='wf2')
+node2 = pe.Node(interface=niu.IdentityInterface(fields=['a2','b2']), name='node2')
+wf2.add_nodes([node2])
+wf1.connect(node1, 'a1', wf2, 'node2.a2')
+
+node4 = pe.Node(interface=niu.IdentityInterface(fields=['a4','b4']), name='node4')
+#node4.iterables = ('a4', [5,6])
+wf2.connect(node2, 'b2', node4, 'b4')
+
+wf3 = pe.Workflow(name='wf3')
+node3 = pe.Node(interface=niu.IdentityInterface(fields=['a3','b3']), name='node3')
+node3.iterables = ('b3', [3,4])
+wf3.add_nodes([node3])
+wf1.connect(wf3, 'node3.b3', wf2, 'node2.b2')
+
+wf1.base_dir = os.path.join(os.getcwd(),'testit')
+wf1.run(inseries=True, createdirsonly=True)
+
+wf1.write_graph(graph2use='exec')
+'''

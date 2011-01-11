@@ -1,10 +1,15 @@
-from nipype.interfaces.base import BaseInterface, TraitedSpec, traits, File, OutputMultiPath
-import numpy as np
+import os
+
 import nibabel as nb
+import numpy as np
+import pylab
+
+from nipype.utils.misc import package_check
+package_check('nipy')
 import nipy.neurospin.utils.design_matrix as dm
 import nipy.neurospin.glm as GLM
-import pylab
-import os
+
+from nipype.interfaces.base import BaseInterface, TraitedSpec, traits, File, OutputMultiPath
 from nipype.utils.misc import isdefined
 
 class FitGLMInputSpec(TraitedSpec):
@@ -277,3 +282,4 @@ class EstimateContrast(BaseInterface):
         outputs["p_maps"] = self._p_maps
         outputs["z_maps"] = self._z_maps
         return outputs
+

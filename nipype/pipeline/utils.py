@@ -16,42 +16,43 @@ import networkx as nx
 
 from nipype.interfaces.base import CommandLine, isdefined
 from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
+from nipype.utils.config import config
 
 logger = logging.getLogger('workflow')
 
 try:
-   from os.path import relpath
+    from os.path import relpath
 except ImportError:
-   import os
-   import os.path as op
-   def relpath(path, start=None):
-       """Return a relative version of a path"""
-       if start is None:
-           start = os.curdir
-       if not path:
-           raise ValueError("no path specified")
-       start_list = op.abspath(start).split(op.sep)
-       path_list = op.abspath(path).split(op.sep)
-       if start_list[0].lower() != path_list[0].lower():
-           unc_path, rest = op.splitunc(path)
-           unc_start, rest = op.splitunc(start)
-           if bool(unc_path) ^ bool(unc_start):
-               raise ValueError("Cannot mix UNC and non-UNC paths (%s and%s)" %
-                                                                   (path, start))
-           else:
-               raise ValueError("path is on drive %s, start on drive %s"
-                                            % (path_list[0], start_list[0]))
-       # Work out how much of the filepath is shared by start and path.
-       for i in range(min(len(start_list), len(path_list))):
-           if start_list[i].lower() != path_list[i].lower():
-               break
-       else:
-           i += 1
+    import os
+    import os.path as op
+    def relpath(path, start=None):
+        """Return a relative version of a path"""
+        if start is None:
+            start = os.curdir
+        if not path:
+            raise ValueError("no path specified")
+        start_list = op.abspath(start).split(op.sep)
+        path_list = op.abspath(path).split(op.sep)
+        if start_list[0].lower() != path_list[0].lower():
+            unc_path, rest = op.splitunc(path)
+            unc_start, rest = op.splitunc(start)
+            if bool(unc_path) ^ bool(unc_start):
+                raise ValueError("Cannot mix UNC and non-UNC paths (%s and%s)" %
+                                                                    (path, start))
+            else:
+                raise ValueError("path is on drive %s, start on drive %s"
+                                             % (path_list[0], start_list[0]))
+        # Work out how much of the filepath is shared by start and path.
+        for i in range(min(len(start_list), len(path_list))):
+            if start_list[i].lower() != path_list[i].lower():
+                break
+        else:
+            i += 1
 
-       rel_list = [op.pardir] * (len(start_list)-i) + path_list[i:]
-       if not rel_list:
-           return os.curdir
-       return op.join(*rel_list)
+        rel_list = [op.pardir] * (len(start_list)-i) + path_list[i:]
+        if not rel_list:
+            return os.curdir
+        return op.join(*rel_list)
 
 def walk(children, level=0, path=None, usename=True):
     """Generate all the full paths in a tree, as a dict.
@@ -208,6 +209,29 @@ def _get_valid_pathstr(pathstr):
     pathstr = pathstr.replace(',', '.')
     return pathstr
 
+def find_all_paths(graph, start, end, path=[]):
+    """Find all paths between two nodes
+    
+        http://www.python.org/doc/essays/graphs.html
+    """
+    path = path + [start]
+    if start == end:
+        return [path]
+    if start not in graph.nodes():
+        return []
+    paths = []
+    for node in graph.successors(start):
+        if node not in path:
+            newpaths = find_all_paths(graph, node, end, path)
+            for newpath in newpaths:
+                paths.append(newpath)
+    return paths
+
+def max_path_length(G, startnode, endnode):
+    """Determine the max path length between two nodes in a DAG
+    """
+    return max([len(p) for p in find_all_paths(G, startnode, endnode)])
+
 def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
     """Merges two graphs that share a subset of nodes.
 
@@ -256,11 +280,12 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
         Gc = deepcopy(subgraph)
         ids = [n._hierarchy+n._id for n in Gc.nodes()]
         nodeidx = ids.index(nodeid)
+        rootnode = Gc.nodes()[nodeidx]
         paramstr = ''
         for key, val in sorted(params.items()):
             paramstr = '_'.join((paramstr, _get_valid_pathstr(key),
                                  _get_valid_pathstr(str(val)))) #.replace(os.sep, '_')))
-            Gc.nodes()[nodeidx].set_input(key, val)
+            rootnode.set_input(key, val)
         for n in Gc.nodes():
             """
             update parameterization of the node to reflect the location of
@@ -270,7 +295,10 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
             with iterable 'b' will be placed in a directory
             _a_aval/_b_bval/.
             """
-            paramlist = [paramstr]
+            path_length = max_path_length(Gc, rootnode, n)
+            # enter as negative numbers so that earlier iterables with longer
+            # path lengths get precedence in a sort
+            paramlist = [(-path_length, paramstr)]
             if n.parameterization:
                 n.parameterization = paramlist + n.parameterization
             else:
@@ -318,6 +346,9 @@ def _generate_expanded_graph(graph_in):
                                      iterables)
         else:
             moreiterables = False
+    for node in graph_in.nodes():
+        if node.parameterization:
+           node.parameterization = [param for _, param in sorted(node.parameterization)]
     logger.debug("PE: expanding iterables ... done")
     return graph_in
 
@@ -433,7 +464,10 @@ def modify_paths(object, relative=True, basedir=None):
         if isdefined(object):
             if isinstance(object, str) and os.path.isfile(object):
                 if relative:
-                    out = relpath(object,start=basedir)
+                    if config.get('execution','use_relative_paths'):
+                        out = relpath(object,start=basedir)
+                    else:
+                        out = object.copy()
                 else:
                     out = os.path.abspath(os.path.join(basedir,object))
                 if not os.path.exists(out):

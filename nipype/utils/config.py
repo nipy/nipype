@@ -28,6 +28,7 @@ hash_method = content
 single_thread_matlab = true
 run_in_series = false
 remove_node_directories = false
+use_relative_paths = false
 """%(homedir))
 
 config = ConfigParser.ConfigParser()
