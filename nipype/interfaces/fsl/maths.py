@@ -11,7 +11,7 @@
     >>> os.chdir(datadir)
 """
 
-from nipype.interfaces.fsl.base import (FSLCommand, FSLCommandInputSpec)
+from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
 from nipype.interfaces.base import TraitedSpec, File, traits
 from nipype.utils.filemanip import fname_presuffix
 from nipype.utils.misc import isdefined
@@ -36,6 +36,7 @@ class MathsCommand(FSLCommand):
 
     _cmd = "fslmaths"
     output_spec = MathsOutput
+    _suffix = "_maths"
 
     def _gen_filename(self, name):
         if name == "out_file":
@@ -45,10 +46,30 @@ class MathsCommand(FSLCommand):
 class ChangeDataType(MathsCommand):
 
     input_spec = MathsInput
+    _suffix = "_chdt"
+
+class ThresholdInputSpec(MathsInput):
+
+    thresh = traits.Float(desc="threshold value")
+    direction = traits.Enum("below", "above", use_default=True, default_value="below",
+                            desc="zero-out either below or above thresh value")
+    use_robust_range = traits.Bool(desc="inteperet thresh as percentage (0-100) of robust range")
+    use_nonzero_voxels = traits.Bool(desc="use nonzero voxels to caluclate robust range")
+
+class Threshold(MathsCommand):
+
+    input_spec = ThresholdInputSpec
+    _suffix = "_thresh"
+
+class MeanImageInput(MathsInput):
+
+    dimension = traits.Enum("T","X","Y","Z", use_default=True, default_value="T",
+                            desc="dimension to mean across")
 
 class MeanImage(MathsCommand):
 
-    input_spec = MathsInput
+    input_spec = MeanImageInput
+    _suffix = "_mean"
 
 class ApplyMaskInput(MathsInput):
 
@@ -58,6 +79,7 @@ class ApplyMaskInput(MathsInput):
 class ApplyMask(MathsCommand):
 
     input_spec = ApplyMaskInput
+    _suffix = "_mask"
 
 class IsotropicSmooth(MathsCommand):
 
@@ -65,7 +87,7 @@ class IsotropicSmooth(MathsCommand):
 
 class TemporalFilter(MathsCommand):
 
-    pass
+    _suffix = "_filt"
 
 class TensorDecomposition(MathsCommand):
 
