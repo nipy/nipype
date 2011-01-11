@@ -780,7 +780,7 @@ class FindTheBiggest(FSLCommand):
         else:
             return None
 
-class TBSSSkeletonInputSpec(FSLCommandInputSpec):
+class TractSkeletonInputSpec(FSLCommandInputSpec):
 
     in_file = File(exists=True, mandatory=True, argstr="-i %s",
                    desc="input image (typcially mean FA volume)")
@@ -798,12 +798,12 @@ class TBSSSkeletonInputSpec(FSLCommandInputSpec):
     projected_data = File(desc="input data projected onto skeleton")
     skeleton_file = traits.Either(traits.Bool, File, argstr="-o %s", desc="write out skeleton image")
 
-class TBSSSkeletonOutputSpec(TraitedSpec):
+class TractSkeletonOutputSpec(TraitedSpec):
 
     projected_data = File(desc="input data projected onto skeleton")
     skeleton_file = File(desc="tract skeleton image")
 
-class TBSSSkeleton(FSLCommand):
+class TractSkeleton(FSLCommand):
     """Use FSL's tbss_skeleton to skeletonise an FA image or project arbitrary values onto a skeleton.
     
     There are two ways to use this interface.  To create a skeleton from an FA image, just
@@ -817,7 +817,7 @@ class TBSSSkeleton(FSLCommand):
     Examples
     --------
     import nipype.interfaces.fsl as fsl
-    skeletor = fsl.TBSSSkeleton()
+    skeletor = fsl.TractSkeleton()
     skeletor.inputs.in_file = "all_FA.nii.gz"
     skeletor.inputs.skeleton_file = True
     skeletor.run() # doctest: +SKIP
@@ -825,8 +825,8 @@ class TBSSSkeleton(FSLCommand):
     """
 
     _cmd = "tbss_skeleton"
-    input_spec = TBSSSkeletonInputSpec
-    output_spec = TBSSSkeletonOutputSpec
+    input_spec = TractSkeletonInputSpec
+    output_spec = TractSkeletonOutputSpec
 
 
     def _format_arg(self, name, spec, value):
@@ -847,7 +847,7 @@ class TBSSSkeleton(FSLCommand):
                 return spec.argstr%self._list_outputs()["skeleton_file"]
             else:
                 return spec.argstr%value       
-        return super(TBSSSkeleton, self)._format_arg(name, spec, value)
+        return super(TractSkeleton, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

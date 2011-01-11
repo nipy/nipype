@@ -25,7 +25,8 @@ from nipype.interfaces.fsl.utils import (Smooth, Merge, ExtractROI, Split,
                                          ConvertXFM, SwapDimensions)
 from nipype.interfaces.fsl.dti import (EddyCorrect, BEDPOSTX, DTIFit, 
                                        ProbTrackX, VecReg, ProjThresh,
-                                       FindTheBiggest)
+                                       FindTheBiggest, DistanceMap,
+                                       TractSkeleton)
 
 
 import nose

@@ -819,7 +819,7 @@ def test_Find_the_biggest():
 
 @skipif(no_fsl)
 def test_tbss_skeleton():
-    skeletor = fsl.TBSSSkeleton()
+    skeletor = fsl.TractSkeleton()
 
     files, newdir, olddir = create_files_in_directory()
     
@@ -842,7 +842,7 @@ def test_tbss_skeleton():
     yield assert_equal, skeletor.cmdline, "tbss_skeleton -i a.nii -o old_boney.nii"
 
     # Now test the more complicated usage
-    bones = fsl.TBSSSkeleton(in_file="a.nii", project_data=True)
+    bones = fsl.TractSkeleton(in_file="a.nii", project_data=True)
     
     # This should error
     yield assert_raises, ValueError, bones.run
