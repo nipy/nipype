@@ -46,7 +46,10 @@ class FitGLM(BaseInterface):
         
         session_info = self.inputs.session_info
         
-        nii = nb.load(self.inputs.session_info[0]['scans'][0])              
+        functional_runs = self.inputs.session_info[0]['scans']
+        if isinstance(functional_runs, str):
+            functional_runs = [functional_runs]
+        nii = nb.load(functional_runs[0])              
         data = nii.get_data()
 
         
@@ -58,7 +61,7 @@ class FitGLM(BaseInterface):
         timeseries = data.copy()[mask,:]
         del data
         
-        for functional_run in self.inputs.session_info[0]['scans'][1:]:
+        for functional_run in functional_runs[1:]:
             nii = nb.load(functional_run)
             data = nii.get_data()
             npdata = data.copy()
