@@ -860,7 +860,7 @@ class TractSkeleton(FSLCommand):
             if not isdefined(proj_data):
                 stem = _si.data_file
                 if isdefined(_si.alt_data_file):
-                    stem = _si.atl_data_file
+                    stem = _si.alt_data_file
                 outputs["projected_data"] = fname_presuffix(stem,
                                                             suffix="_skeletonised",
                                                             newpath=os.getcwd(),
