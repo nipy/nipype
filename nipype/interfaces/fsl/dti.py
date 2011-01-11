@@ -794,7 +794,9 @@ class TractSkeletonInputSpec(FSLCommandInputSpec):
     use_cingulum_mask = traits.Bool(True,usedefault=True,
                                     xor=["search_mask_file"],
                                     desc="perform alternate search using built-in cingulum mask")
-    data_file = File(exists=True, desc="4D data to project onto skeleton")
+    data_file = File(exists=True, desc="4D data to project onto skeleton (usually FA)")
+    alt_data_file = File(exists=True, argstr="-a %s", desc="4D non-FA data to project onto skeleton")
+    alt_skeleton = File(exists=True, argstr="-s %s", desc="alternate skeleton to use") 
     projected_data = File(desc="input data projected onto skeleton")
     skeleton_file = traits.Either(traits.Bool, File, argstr="-o %s", desc="write out skeleton image")
 
@@ -856,7 +858,10 @@ class TractSkeleton(FSLCommand):
             proj_data = _si.projected_data
             outputs["projected_data"] = proj_data
             if not isdefined(proj_data):
-                outputs["projected_data"] = fname_presuffix(_si.data_file,
+                stem = _si.data_file
+                if isdefined(_si.alt_data_file):
+                    stem = _si.atl_data_file
+                outputs["projected_data"] = fname_presuffix(stem,
                                                             suffix="_skeletonised",
                                                             newpath=os.getcwd(),
                                                             use_ext=True)
