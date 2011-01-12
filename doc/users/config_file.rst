@@ -38,7 +38,7 @@ Execution
 *display_variable*
 	What ``DISPLAY`` variable should all command line interfaces be run with. This is useful if you are using `xnest <http://www.x.org/archive/X11R7.5/doc/man/man1/Xnest.1.html>`_ or `Xvfb <http://www.x.org/archive/X11R6.8.1/doc/Xvfb.1.html>`_ and you would like to redirect all spawned windows to it. (possible values: any X server address; default value: not set)
 *use_relative_paths*
-	Should the paths stored in results (and used to look for inputs) be relative or absolute. Relative paths allow moving the whole working directory around but may cause problems with simlinks. (possible values: ``true`` and ``false``; default value: ``false``)
+	Should the paths stored in results (and used to look for inputs) be relative or absolute. Relative paths allow moving the whole working directory around but may cause problems with symlinks. (possible values: ``true`` and ``false``; default value: ``false``)
 *remove_node_directories*
 	Removes directories whose outputs have already been used up. Doesn't work with IdentiInterface or any node that patches data through (without copying) (possible values: ``true`` and ``false``; default value: ``false``)
 
