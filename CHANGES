@@ -1,11 +1,11 @@
-Release 0.3.4 (FUTURE)
+Release 0.3.4 (Jan 12, 2010)
 ======================
 
-* API: hash values for float use a string conversion upto the 10th decimal place.
+* API: hash values for float use a string conversion up to the 10th decimal place.
 * API: Iterables in output path will always be generated as _var1_val1_var2_val2 pairs
 
 * ENH: Added support to nipy: GLM fit, contrast estimation and calculating mask from EPI
-* ENH: Added support for maniupulating surface files in Freesurfer:
+* ENH: Added support for manipulating surface files in Freesurfer:
     - projecting volume images onto the surface
     - smoothing along the surface
     - transforming a surface image from one subject to another
@@ -14,11 +14,11 @@ Release 0.3.4 (FUTURE)
 * ENH: Added support for flirt matrix in BBRegister
 * ENH: Added support for FSL convert_xfm
 * ENH: hashes can be updated again without rerunning all nodes.
-* ENH: Added multipleregression design for FSL
+* ENH: Added multiple regression design for FSL
 * ENH: Added SPM based Analyze to Nifti converter
 * ENH: Added increased support for PyXNAT
 * ENH: Added support for MCR-based binary version of SPM
-* ENH: Added SPM node for calculationg various threshold statistics
+* ENH: Added SPM node for calculating various threshold statistics
 * ENH: Added distance and dissimilarity measurements
 
 * BF: Diffusion toolkit gets installed 
