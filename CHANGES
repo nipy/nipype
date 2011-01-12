@@ -1,4 +1,8 @@
-Release 0.3.4 (Jan 12, 2010)
+Release 0.4 (FUTURE)
+======================
+
+
+Release 0.3.4 (Jan 12, 2011)
 ======================
 
 * API: hash values for float use a string conversion up to the 10th decimal place.
