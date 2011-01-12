@@ -793,7 +793,7 @@ class Workflow(WorkflowBase):
                     crashfile = crashfile)
 
     def _remove_node_dirs(self):
-        """Removes directories whos outputs have already been used up
+        """Removes directories whose outputs have already been used up
         """
         if config.getboolean('execution', 'remove_node_directories'):
             for idx in np.nonzero(np.all(self.refidx==0,axis=1))[0]:
