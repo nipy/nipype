@@ -143,7 +143,13 @@ class Info(object):
         spm_path = spm('dir');
         fprintf(1, 'NIPYPE  %s', spm_path);
         """
-        out = mlab.run()
+        try:
+            out = mlab.run()
+        except IOError, e:
+            # if no Matlab at all -- exception could be raised
+            # No Matlab -- no spm
+            logger.debug(str(e))
+            return None
         if out.runtime.returncode == 0:
             spm_path = sd._strip_header(out.runtime.stdout)
         else:
