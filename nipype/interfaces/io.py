@@ -275,9 +275,8 @@ class DataGrabberInputSpec(DynamicTraitedSpec): #InterfaceInputSpec):
                         desc='Sort the filelist that matches the template')
     template = traits.Str(mandatory=True,
              desc='Layout used to get files. relative to base directory if defined')
-    template_args = traits.Dict(traits.Str,
-                                traits.List(traits.List),
-                                value=dict(outfiles=[]), usedefault=True,
+    template_args = traits.Dict(key_trait=traits.Str,
+                                value_trait= traits.List(traits.List),
                                 desc='Information to plug into template')
 
 class DataGrabber(IOBase):
@@ -354,7 +353,6 @@ class DataGrabber(IOBase):
             for key in infields:
                 self.inputs.add_trait(key, traits.Any)
                 undefined_traits[key] = Undefined
-            self.inputs.template_args['outfiles'] = [infields]
         if outfields:
             # add ability to insert field specific templates
             self.inputs.add_trait('field_template',
@@ -363,9 +361,12 @@ class DataGrabber(IOBase):
             undefined_traits['field_template'] = Undefined
             #self.inputs.remove_trait('template_args')
             outdict = {}
+            if not isdefined(self.inputs.template_args):
+                self.inputs.template_args = {}
             for key in outfields:
-                outdict[key] = []
-            self.inputs.template_args =  outdict
+                if not key in self.inputs.template_args:
+                    self.inputs.template_args[key] = [infields]
+                
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
     def _add_output_traits(self, base):
