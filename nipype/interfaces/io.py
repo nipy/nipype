@@ -359,8 +359,6 @@ class DataGrabber(IOBase):
                                   traits.Dict(traits.Enum(outfields),
                                     desc="arguments that fit into template"))
             undefined_traits['field_template'] = Undefined
-            #self.inputs.remove_trait('template_args')
-            outdict = {}
             if not isdefined(self.inputs.template_args):
                 self.inputs.template_args = {}
             for key in outfields:
