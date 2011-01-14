@@ -353,17 +353,19 @@ class DataGrabber(IOBase):
             for key in infields:
                 self.inputs.add_trait(key, traits.Any)
                 undefined_traits[key] = Undefined
-        if outfields:
-            # add ability to insert field specific templates
-            self.inputs.add_trait('field_template',
-                                  traits.Dict(traits.Enum(outfields),
-                                    desc="arguments that fit into template"))
-            undefined_traits['field_template'] = Undefined
-            if not isdefined(self.inputs.template_args):
-                self.inputs.template_args = {}
-            for key in outfields:
-                if not key in self.inputs.template_args:
-                    self.inputs.template_args[key] = [infields]
+        if not outfields:
+            outfields = ['outfiles']
+            
+        # add ability to insert field specific templates
+        self.inputs.add_trait('field_template',
+                              traits.Dict(traits.Enum(outfields),
+                                desc="arguments that fit into template"))
+        undefined_traits['field_template'] = Undefined
+        if not isdefined(self.inputs.template_args):
+            self.inputs.template_args = {}
+        for key in outfields:
+            if not key in self.inputs.template_args:
+                self.inputs.template_args[key] = [infields]
                 
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
