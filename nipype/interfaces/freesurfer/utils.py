@@ -357,6 +357,53 @@ class SurfaceTransform(FSCommand):
         return None
 
 
+class ApplyMaskInputSpec(FSTraitedSpec):
+
+    in_file = File(exists=True,mandatory=True,position=-3,argstr="%s",
+                   desc="input image (will be masked)")
+    mask_file = File(exists=True,mandatory=True,position=-2,argstr="%s",
+                     desc="image defining mask space")
+    out_file = File(genfile=True,position=-1,argstr="%s",
+                    desc="final image to write")
+    xfm_file = File(exists=True,argstr="-xform %s", 
+                    desc="LTA-format transformation matrix to align mask with input")
+    invert_xfm = traits.Bool(argstr="-invert",desc="invert transformation")
+    xfm_source = File(exists=True,argstr="-lta_src %s",desc="image defining transform source space")
+    xfm_target = File(exists=True,argstr="-lta_dst %s",desc="image defining transform target space")
+    use_abs = traits.Bool(argstr="-abs",desc="take absolute value of mask before applying")
+    mask_thresh = traits.Float(argstr="-T %.4f",desc="threshold mask before applying")
+
+class ApplyMaskOutputSpec(TraitedSpec):
+
+    out_file = File(exists=True,desc="masked image")
+
+class ApplyMask(FSCommand):
+    """Use Freesurfer's mri_mask to apply a mask to an image.
+
+    The mask file need not be binarized; it can be thresholded above a given
+    value before application. It can also optionally be transformed into input
+    space with an LTA matrix.
+    
+    """
+    _cmd = "mri_mask"
+    input_spec = ApplyMaskInputSpec
+    output_spec = ApplyMaskOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = self.inputs.out_file
+        if not isdefined(outputs["out_file"]):
+            outputs["out_file"] = fname_presuffix(self.inputs.in_file,
+                                                  suffix="_masked",
+                                                  newpath=os.getcwd(),
+                                                  use_ext=True)
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == "out_file":
+            return self._list_outputs()[name]
+        return None
+
 class SurfaceSnapshotsInputSpec(FSTraitedSpec):
 
     subject_id = traits.String(position=1,argstr="%s",mandatory=True,
