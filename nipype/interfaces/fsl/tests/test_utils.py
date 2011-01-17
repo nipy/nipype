@@ -355,3 +355,29 @@ def test_convertxfm():
         "convert_xfm -omat bar.mat -concat %s %s"%(filelist[1], filelist[0])
 
     clean_directory(outdir, cwd)
+
+@skipif(no_fsl)
+def test_swapdims():
+    files, testdir, origdir = create_files_in_directory()
+    swap = fsl.SwapDimensions()
+
+    # Test the underlying command
+    yield assert_equal, swap.cmd, "fslswapdim"
+
+    # Test mandatory args
+    args = [dict(in_file=files[0]), dict(new_dims=("x","y","z"))]
+    for arg in args:
+        wontrun = fsl.SwapDimensions(**arg)
+        yield assert_raises, ValueError, wontrun.run
+
+    # Now test a basic command line
+    swap.inputs.in_file = files[0]
+    swap.inputs.new_dims = ("x", "y", "z")
+    yield assert_equal, swap.cmdline, "fslswapdim a.nii x y z %s"%os.path.join(testdir, "a_newdims.nii")
+
+    # Test that we can set an output name
+    swap.inputs.out_file = "b.nii"
+    yield assert_equal, swap.cmdline, "fslswapdim a.nii x y z b.nii"
+
+    # Clean up
+    clean_directory(testdir, origdir)
