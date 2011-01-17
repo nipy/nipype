@@ -1,6 +1,7 @@
 Release 0.4 (FUTURE)
 ======================
 
+* ENH: New interface: freesurfer.ApplyMask (mri_mask)
 
 Release 0.3.4 (Jan 12, 2011)
 ======================
