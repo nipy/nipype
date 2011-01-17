@@ -827,8 +827,8 @@ class ApplyWarpInputSpec(FSLCommandInputSpec):
                   desc='filename for post-transform (affine matrix)')
     mask_file = File(exists=True, argstr='--mask=%s',
                     desc='filename for mask image (in reference space)')
-    interp = traits.Enum('nn', 'trilinear', 'sinc', argstr='--interp=%s',
-                         desc='interpolation method {nn,trilinear,sinc}')
+    interp = traits.Enum('nn', 'trilinear', 'sinc', 'spline', argstr='--interp=%s',
+                         desc='interpolation method')
 
 class ApplyWarpOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Warped output file')
