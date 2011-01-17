@@ -145,6 +145,9 @@ class BET(FSLCommand):
                      self.inputs.reduce_bias):
             outputs['mask_file'] = self._gen_fname(outputs['out_file'],
                                                suffix = '_mask')
+        if isdefined(self.inputs.outline) and self.inputs.outline:
+            outputs['outline_file'] = self._gen_fname(outputs['out_file'],
+                                               suffix = '_overlay')
         if isdefined(self.inputs.no_output) and self.inputs.no_output:
             outputs['out_file'] = Undefined
         return outputs
