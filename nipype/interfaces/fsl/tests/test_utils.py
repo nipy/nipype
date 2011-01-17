@@ -373,7 +373,7 @@ def test_swapdims():
     # Now test a basic command line
     swap.inputs.in_file = files[0]
     swap.inputs.new_dims = ("x", "y", "z")
-    yield assert_equal, swap.cmdline, "fslswapdim a.nii x y z %s"%os.path.join(testdir, "a_newdims.nii")
+    yield assert_equal, swap.cmdline, "fslswapdim a.nii x y z %s"%os.path.realpath(os.path.join(testdir, "a_newdims.nii"))
 
     # Test that we can set an output name
     swap.inputs.out_file = "b.nii"
