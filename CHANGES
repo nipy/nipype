@@ -1,6 +1,7 @@
 Release 0.4 (FUTURE)
 ======================
 
+* ENH: New FSL interface -- SwapDimensions (fslswapdim)
 
 Release 0.3.4 (Jan 12, 2011)
 ======================
