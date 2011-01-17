@@ -345,6 +345,8 @@ class DataGrabber(IOBase):
         See class examples for usage
         
         """
+        if not outfields:
+            outfields = ['outfiles']
         super(DataGrabber, self).__init__(**kwargs)
         undefined_traits = {}
         # used for mandatory inputs check
@@ -353,9 +355,6 @@ class DataGrabber(IOBase):
             for key in infields:
                 self.inputs.add_trait(key, traits.Any)
                 undefined_traits[key] = Undefined
-        if not outfields:
-            outfields = ['outfiles']
-            
         # add ability to insert field specific templates
         self.inputs.add_trait('field_template',
                               traits.Dict(traits.Enum(outfields),
@@ -365,7 +364,10 @@ class DataGrabber(IOBase):
             self.inputs.template_args = {}
         for key in outfields:
             if not key in self.inputs.template_args:
-                self.inputs.template_args[key] = [infields]
+                if infields:
+                    self.inputs.template_args[key] = [infields]
+                else:
+                    self.inputs.template_args[key] = []
                 
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
