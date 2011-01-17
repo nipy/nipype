@@ -6,7 +6,7 @@ from tempfile import mkstemp
 
 import nipype
 
-version = '0.3.4'
+version = '0.4'
 release = False
 
 # Return the svn version as a string, raise a ValueError otherwise
