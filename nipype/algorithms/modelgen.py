@@ -7,13 +7,21 @@ interest analysis.
 These functions include:
 
   * SpecifyModel: allows specification of sparse and non-sparse models
+
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+   >>> os.chdir(datadir)
+  
 """
 
 import os
 from copy import deepcopy
 
+import logging
+
 import numpy as np
-from scipy.signal import convolve
 from scipy.special import gammaln
 #from scipy.stats.distributions import gamma
 
@@ -22,6 +30,8 @@ from nipype.interfaces.base import BaseInterface, TraitedSpec,\
  InputMultiPath, traits, File
 from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import filename_to_list, loadflat
+
+iflogger = logging.getLogger('interface')
 
 class SpecifyModelInputSpec(TraitedSpec):
     subject_id = traits.Either(traits.Str(),traits.Int(),
@@ -97,19 +107,23 @@ class SpecifyModelInputSpec(TraitedSpec):
     #generate_design = traits.Bool(False, usedefault=True,
     #      desc="Generate a design matrix")
 
-        #Sparse and clustered-sparse specific options
-    is_sparse = traits.Bool(False, usedefault = True,
+    #Sparse and clustered-sparse specific options
+    is_sparse = traits.Bool(requires=['time_acquisition', 'volumes_in_cluster'],
                             desc="indicates whether paradigm is sparse")
     time_acquisition = traits.Float(0,
-                  desc = "Time in seconds to acquire a single image volume")
+                  desc = "Time in seconds to acquire a single image volume (sparse only)")
     volumes_in_cluster = traits.Range(low=0,
-            desc="Number of scan volumes in a cluster")
-    model_hrf = traits.Bool(desc="model sparse events with hrf")
+            desc="Number of scan volumes in a cluster  (sparse only)")
+    model_hrf = traits.Bool(desc="model sparse events with hrf  (sparse only)")
     stimuli_as_impulses = traits.Bool(True,
-              desc = "Treat each stimulus to be impulse like.",
+              desc = "Treat each stimulus to be impulse like.  (sparse only)",
                                       usedefault=True)
+    use_temporal_deriv = traits.Bool(requires=['model_hrf'],
+           desc = "Create a temporal derivative in addition to regular regressor  (sparse only)")
+    scale_regressors = traits.Bool(True, desc="Scale regressors by the peak  (sparse only)",
+                                   usedefault=True)
     scan_onset = traits.Float(0.0,
-              desc="Start of scanning relative to onset of run in secs",
+              desc="Start of scanning relative to onset of run in secs  (sparse only)",
                               usedefault=True)
     
 class SpecifyModelOutputSpec(TraitedSpec):
@@ -117,25 +131,22 @@ class SpecifyModelOutputSpec(TraitedSpec):
     #design_file = File(desc="design file")
 
 class SpecifyModel(BaseInterface):
-    """Makes a model specification
+    """Makes a model specification compatible with spm/fsl designers
 
-    Parameters
-    ----------
-    inputs : dict
-        key, value pairs that will update the SpecifyModel.inputs
-        attributes. See self.inputs_help() for a list attributes.
-    
-    Attributes
-    ----------
-    inputs : :class:`nipype.interfaces.base.Bunch`
-        Options that can be passed to spm_spm via a job structure
-    cmdline : str
-        String used to call matlab/spm via SpmMatlabCommandLine
-        interface
-        
-    Other Parameters
-    ----------------
-    To see optional arguments SpecifyModel().inputs_help()
+    Examples
+    --------
+
+    >>> from nipype.interfaces.base import Bunch
+    >>> s = SpecifyModel()
+    >>> s.inputs.input_units = 'secs'
+    >>> s.inputs.output_units = 'scans'
+    >>> s.inputs.functional_runs = ['functional2.nii', 'functional3.nii']
+    >>> s.inputs.time_repetition = 6
+    >>> info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 180]], durations=[[1]], amplitudes=None, \
+                  pmod=None, regressors = None, regressor_names = None, tmod=None), \
+            Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], durations=[[1]], amplitudes=None, \
+                  pmod=None, regressors = None, regressor_names = None, tmod=None)]
+    >>> s.inputs.subject_info = info
 
     """
     input_spec = SpecifyModelInputSpec
@@ -215,7 +226,7 @@ class SpecifyModel(BaseInterface):
         hrf   = hrf/np.sum(hrf)
         return hrf
         
-    def _gen_regress(self,i_onsets,i_durations,i_amplitudes,nscans,bplot=False):
+    def _gen_regress(self,i_onsets,i_durations,i_amplitudes,nscans,bplot=True):
         """Generates a regressor for a sparse/clustered-sparse acquisition
 
            see Ghosh et al. (2009) OHBM 2009
@@ -242,12 +253,25 @@ class SpecifyModel(BaseInterface):
                 dt = self._gcd(dttemp,dt)
         if dt < 1:
             raise Exception("Time multiple less than 1 ms")
-        print "Setting dt = %d ms\n" % dt
+        iflogger.info("Setting dt = %d ms\n" % dt)
         npts = int(total_time/dt)
         times = np.arange(0,total_time,dt)*1e-3
         timeline = np.zeros((npts))
         timeline2 = np.zeros((npts))
-        hrf = self._spm_hrf(dt*1e-3)
+        if isdefined(self.inputs.model_hrf) and self.inputs.model_hrf:
+            hrf = self._spm_hrf(dt*1e-3)
+        reg_scale = 1.0
+        if self.inputs.scale_regressors:
+            boxcar = np.zeros((50.*1e3/dt))
+            if self.inputs.stimuli_as_impulses:
+                boxcar[1.*1e3/dt] = 1.0
+            else:
+                boxcar[1.*1e3/dt:2.*1e3/dt] = 1.0
+            response = boxcar
+            if isdefined(self.inputs.model_hrf) and self.inputs.model_hrf:
+                response = np.convolve(boxcar, hrf)
+            reg_scale = 1./response.max()
+            iflogger.debug('sum: %.4f max: %.4f reg_scale: %.4f'%(response.sum(), response.max(), reg_scale))
         for i,t in enumerate(onsets):
             idx = int(t/dt)
             if i_amplitudes:
@@ -264,47 +288,68 @@ class SpecifyModel(BaseInterface):
                 if durations[i] == 0:
                     durations[i] = TA*nvol
                 stimdur = np.ones((int(durations[i]/dt)))
-                timeline2 = convolve(timeline2,stimdur)[0:len(timeline2)]
+                timeline2 = np.convolve(timeline2, stimdur)[0:len(timeline2)]
             timeline += timeline2
             timeline2[:] = 0
         if bplot:
             plt.subplot(4,1,2)
             plt.plot(times,timeline)
-        if self.inputs.model_hrf:
-            timeline = convolve(timeline,hrf)[0:len(timeline)]
+        if isdefined(self.inputs.model_hrf) and self.inputs.model_hrf:
+            timeline = np.convolve(timeline, hrf)[0:len(timeline)]
+            if isdefined(self.inputs.use_temporal_deriv) and self.inputs.use_temporal_deriv:
+                #create temporal deriv
+                timederiv = np.concatenate(([0],np.diff(timeline)))
         if bplot:
             plt.subplot(4,1,3)
-            plt.plot(times,timeline)
+            plt.plot(times,timeline) 
+            if isdefined(self.inputs.use_temporal_deriv) and self.inputs.use_temporal_deriv:
+                plt.plot(times,timederiv)
         # sample timeline
         timeline2 = np.zeros((npts))
         reg = []
+        regderiv = []
         for i,trial in enumerate(np.arange(nscans)/nvol):
             scanstart = int((SCANONSET + trial*TR + (i%nvol)*TA)/dt)
             #print total_time/dt, SCANONSET, TR, TA, scanstart, trial, i%2, int(TA/dt)
             scanidx = scanstart+np.arange(int(TA/dt))
             timeline2[scanidx] = np.max(timeline)
-            reg.insert(i,np.mean(timeline[scanidx]))
+            reg.insert(i,np.mean(timeline[scanidx])*reg_scale)
+            if isdefined(self.inputs.use_temporal_deriv) and self.inputs.use_temporal_deriv:
+                regderiv.insert(i,np.mean(timederiv[scanidx])*reg_scale)
+        if isdefined(self.inputs.use_temporal_deriv) and self.inputs.use_temporal_deriv:
+            #enter orthogonal deriv
+            pass
         if bplot:
             plt.subplot(4,1,3)
             plt.plot(times,timeline2)
             plt.subplot(4,1,4)
             plt.bar(np.arange(len(reg)),reg,width=0.5)
-        return reg
+        if regderiv:
+            return [reg, regderiv]
+        else:
+            return reg
 
     def _cond_to_regress(self,info,nscans):
         """Converts condition information to full regressors
         """
         reg = []
-        regnames = info.conditions
-        for i,c in enumerate(info.conditions):
+        regnames = []
+        for i,cond in enumerate(info.conditions):
             if info.amplitudes:
                 amplitudes = info.amplitudes[i]
             else:
                 amplitudes = None
-            reg.insert(i,self._gen_regress(self._scaletimings(info.onsets[i],output_units='secs'),
+            regnames.insert(len(regnames), cond)
+            regressor = self._gen_regress(self._scaletimings(info.onsets[i],output_units='secs'),
                                            self._scaletimings(info.durations[i],output_units='secs'),
                                            amplitudes,
-                                           nscans))
+                                           nscans)
+            if isdefined(self.inputs.use_temporal_deriv) and self.inputs.use_temporal_deriv:
+                reg.insert(len(reg), regressor[0])
+                regnames.insert(len(regnames), cond+'_D')
+                reg.insert(len(reg), regressor[1])
+            else:
+                reg.insert(len(reg), regressor)
             # need to deal with temporal and parametric modulators
         # for sparse-clustered acquisitions enter T1-effect regressors
         nvol = self.inputs.volumes_in_cluster
@@ -313,7 +358,8 @@ class SpecifyModel(BaseInterface):
                 treg = np.zeros((nscans/nvol,nvol))
                 treg[:,i] = 1
                 reg.insert(len(reg),treg.ravel().tolist())
-        return reg,regnames
+                regnames.insert(len(regnames), 'T1effect_%d'%i)
+        return reg, regnames
     
     def _generate_clustered_design(self,infolist):
         """Generates condition information for sparse-clustered
@@ -500,7 +546,7 @@ class SpecifyModel(BaseInterface):
                         outliers.insert(len(outliers),[out.tolist()])
                     else:
                         outliers.insert(len(outliers),out.tolist())
-        if self.inputs.is_sparse:
+        if isdefined(self.inputs.is_sparse) and self.inputs.is_sparse:
             infolist = self._generate_clustered_design(infolist)
             
         self.sessinfo = self._generate_standard_design(infolist,
