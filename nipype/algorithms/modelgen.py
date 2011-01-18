@@ -265,13 +265,14 @@ class SpecifyModel(BaseInterface):
             boxcar = np.zeros((50.*1e3/dt))
             if self.inputs.stimuli_as_impulses:
                 boxcar[1.*1e3/dt] = 1.0
+                reg_scale = float(TA/dt)
             else:
                 boxcar[1.*1e3/dt:2.*1e3/dt] = 1.0
-            response = boxcar
             if isdefined(self.inputs.model_hrf) and self.inputs.model_hrf:
                 response = np.convolve(boxcar, hrf)
-            reg_scale = 1./response.max()
-            iflogger.debug('sum: %.4f max: %.4f reg_scale: %.4f'%(response.sum(), response.max(), reg_scale))
+                reg_scale = 1./response.max()
+                iflogger.info('response sum: %.4f max: %.4f'%(response.sum(), response.max()))
+            iflogger.info('reg_scale: %.4f'%reg_scale)
         for i,t in enumerate(onsets):
             idx = int(t/dt)
             if i_amplitudes:
