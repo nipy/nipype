@@ -69,5 +69,5 @@ def test_modelgen_sparse():
     res = s.run()
     yield assert_equal, len(res.outputs.session_info[0]['regress']), 2
     yield assert_almost_equal, res.outputs.session_info[0]['regress'][0]['val'][0], 0.016675298129743384
-    yield assert_almost_equal, res.outputs.session_info[1]['regress'][1]['val'][5], 0.0073585552208706015
+    yield assert_almost_equal, res.outputs.session_info[1]['regress'][1]['val'][5], 0.007671459162258378
     rmtree(tempdir)

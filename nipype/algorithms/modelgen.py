@@ -225,6 +225,23 @@ class SpecifyModel(BaseInterface):
         hrf   = hrf[idx]
         hrf   = hrf/np.sum(hrf)
         return hrf
+
+    def orth(self, x_in, y_in):
+        """Orthoganlize y with respect to x
+
+        >>> s = SpecifyModel()
+        >>> s.orth([1,2,3],[4,5,6])
+        [1.7142857142857144, 0.42857142857142883, -0.85714285714285676]
+        
+        """
+        x = np.array(x_in)[:,None]
+        y = np.array(y_in)[:,None]
+        y = y - np.dot(x,np.dot(np.linalg.inv(np.dot(x.T,x)),np.dot(x.T,y)));
+        if np.linalg.norm(y,1) > np.exp(-32):
+            y = y[:,0].tolist()
+        else:
+            y = y_in
+        return y
         
     def _gen_regress(self,i_onsets,i_durations,i_amplitudes,nscans,bplot=True):
         """Generates a regressor for a sparse/clustered-sparse acquisition
@@ -318,8 +335,8 @@ class SpecifyModel(BaseInterface):
             if isdefined(self.inputs.use_temporal_deriv) and self.inputs.use_temporal_deriv:
                 regderiv.insert(i,np.mean(timederiv[scanidx])*reg_scale)
         if isdefined(self.inputs.use_temporal_deriv) and self.inputs.use_temporal_deriv:
-            #enter orthogonal deriv
-            pass
+            iflogger.info('orthoganlizing derivative w.r.t. main regressor')
+            regderiv = self.orth(reg, regderiv)
         if bplot:
             plt.subplot(4,1,3)
             plt.plot(times,timeline2)
