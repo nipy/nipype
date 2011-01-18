@@ -227,10 +227,13 @@ def test_surfshots():
     yield assert_equal, fotos.cmdline, "tksurfer fsaverage lh pial -tcl other.tcl"
 
     # Test that the interface crashes politely if graphics aren't enabled
-    hold_display = os.environ["DISPLAY"]
-    del os.environ["DISPLAY"]
-    yield assert_raises, RuntimeError, fotos.run
-    os.environ["DISPLAY"] = hold_display
-
+    try:
+        hold_display = os.environ["DISPLAY"]
+        del os.environ["DISPLAY"]
+        yield assert_raises, RuntimeError, fotos.run
+        os.environ["DISPLAY"] = hold_display
+    except KeyError:
+        pass
+    
     # Clean up our mess
     clean_directory(cwd, oldwd)
