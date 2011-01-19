@@ -272,6 +272,15 @@ class FAST(FSLCommand):
     input_spec = FASTInputSpec
     output_spec = FASTOutputSpec
 
+    def _format_arg(self, name, spec, value):
+        # first do what should be done in general
+        formated = super(FAST, self)._format_arg(name, spec, value)
+        if name == 'in_files':
+            # FAST needs the -S parameter value to correspond to the number
+            # of input images, otherwise it will ignore all but the first
+            formated = "-S %d %s" % (len(value), formated)
+        return formated
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.number_classes):
