@@ -243,7 +243,7 @@ class SpecifyModel(BaseInterface):
             y = y_in
         return y
         
-    def _gen_regress(self,i_onsets,i_durations,i_amplitudes,nscans,bplot=True):
+    def _gen_regress(self,i_onsets,i_durations,i_amplitudes,nscans,bplot=False):
         """Generates a regressor for a sparse/clustered-sparse acquisition
 
            see Ghosh et al. (2009) OHBM 2009
