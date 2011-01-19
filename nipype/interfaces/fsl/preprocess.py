@@ -296,15 +296,25 @@ class FAST(FSLCommand):
 
         outputs['tissue_class_map'] = self._gen_fname(basefile,
                                                       suffix = '_seg')
-        outputs['tissue_class_files'] = []
-        for  i in range(nclasses):
-            outputs['tissue_class_files'].append(self._gen_fname(basefile,
-                                                                 suffix = '_seg_%d'%(i)))
+        if self.inputs.segments:
+            outputs['tissue_class_files'] = []
+            for  i in range(nclasses):
+                outputs['tissue_class_files'].append(
+                        self._gen_fname(basefile, suffix = '_seg_%d'%(i)))
         if isdefined(self.inputs.output_biascorrected):
             outputs['restored_image'] = []
-            for val,f in enumerate(self.inputs.in_files):
-                outputs['restored_image'].append(self._gen_fname(f,
-                                                                 suffix = '_restore_%d'%(val)))
+            if len(self.inputs.in_files) > 1:
+                # for multi-image segmentation there is one corrected image
+                # per input
+                for val,f in enumerate(self.inputs.in_files):
+                    # image numbering is 1-based
+                    outputs['restored_image'].append(
+                            self._gen_fname(basefile, suffix = '_restore_%d'%(val+1)))
+            else:
+                # single image segmentation has unnumbered output image
+                outputs['restored_image'].append(
+                        self._gen_fname(basefile, suffix = '_restore'))
+
         outputs['mixeltype'] = self._gen_fname(basefile, suffix = '_mixeltype')
         if not self.inputs.no_pve:
             outputs['partial_volume_map'] = self._gen_fname(basefile, suffix = '_pveseg')
@@ -314,8 +324,18 @@ class FAST(FSLCommand):
                                                                        suffix='_pve_%d'%(i)))
         if self.inputs.output_biasfield:
             outputs['bias_field'] = []
-            for val,f in enumerate(self.inputs.in_files):
-                outputs['bias_field'].append(self._gen_fname(basefile, suffix='_bias_%d'%val))
+            if len(self.inputs.in_files) > 1:
+                # for multi-image segmentation there is one bias field image
+                # per input
+                for val,f in enumerate(self.inputs.in_files):
+                    # image numbering is 1-based
+                    outputs['bias_field'].append(
+                            self._gen_fname(basefile, suffix='_bias_%d'%(val+1)))
+            else:
+                # single image segmentation has unnumbered output image
+                outputs['bias_field'].append(
+                        self._gen_fname(basefile, suffix='_bias'))
+
         #if self.inputs.probability_maps:
         return outputs
 
