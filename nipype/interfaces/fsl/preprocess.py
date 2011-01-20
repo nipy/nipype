@@ -336,7 +336,11 @@ class FAST(FSLCommand):
                 outputs['bias_field'].append(
                         self._gen_fname(basefile, suffix='_bias'))
 
-        #if self.inputs.probability_maps:
+        if self.inputs.probability_maps:
+            outputs['probability_maps'] = []
+            for i in range(nclasses):
+                outputs['probability_maps'].append(
+                        self._gen_fname(basefile, suffix='_prob_%d'%(i)))
         return outputs
 
 class FLIRTInputSpec(FSLCommandInputSpec):
