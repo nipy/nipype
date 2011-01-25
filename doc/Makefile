@@ -89,6 +89,8 @@ doctest:
 
 gitwash-update:
 	python ../tools/gitwash_dumper.py devel nipype \
+            --repo-name=nipype \
+            --github-user=nipy \
             --project-url=http://nipy.org/nipype \
             --project-ml-url=http://mail.scipy.org/mailman/listinfo/nipy-devel
 	@echo "gitwash updated"

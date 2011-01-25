@@ -13,7 +13,7 @@ Overview
 
    git clone git@github.com:your-user-name/nipype.git
    cd nipype
-   git remote add upstream git://github.com/nipype/nipype.git
+   git remote add upstream git://github.com/nipy/nipype.git
 
 In detail
 =========
@@ -46,7 +46,7 @@ Linking your repository to the upstream repo
 ::
 
    cd nipype
-   git remote add upstream git://github.com/nipype/nipype.git
+   git remote add upstream git://github.com/nipy/nipype.git
 
 ``upstream`` here is just the arbitrary name we're using to refer to the
 main nipype_ repository at `nipype github`_.
@@ -59,8 +59,8 @@ use it to merge into our own code.
 Just for your own satisfaction, show yourself that you now have a new
 'remote', with ``git remote -v show``, giving you something like::
 
-   upstream	git://github.com/nipype/nipype.git (fetch)
-   upstream	git://github.com/nipype/nipype.git (push)
+   upstream	git://github.com/nipy/nipype.git (fetch)
+   upstream	git://github.com/nipy/nipype.git (push)
    origin	git@github.com:your-user-name/nipype.git (fetch)
    origin	git@github.com:your-user-name/nipype.git (push)
 
