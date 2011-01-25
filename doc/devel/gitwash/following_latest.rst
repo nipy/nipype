@@ -5,7 +5,7 @@
 =============================
 
 These are the instructions if you just want to follow the latest
-*Nipype* source, but you don't need to do any development for now.
+*nipype* source, but you don't need to do any development for now.
 
 The steps are:
 
@@ -33,4 +33,4 @@ From time to time you may want to pull down the latest code.  Do this with::
 The tree in ``nipype`` will now have the latest changes from the initial
 repository.
 
-.. include:: git_links.inc
+.. include:: links.inc

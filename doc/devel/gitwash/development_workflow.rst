@@ -4,7 +4,7 @@
 Development workflow
 ====================
 
-You already have your own forked copy of the Nipype_ repository, by
+You already have your own forked copy of the nipype_ repository, by
 following :ref:`forking`, :ref:`set-up-fork`, and you have configured
 git_ by following :ref:`configure-git`.
 
@@ -12,8 +12,8 @@ Workflow summary
 ================
 
 * Keep your ``master`` branch clean of edits that have not been merged
-  to the main Nipype_ development repo.  Your ``master`` then will follow
-  the main Nipype_ repository.
+  to the main nipype_ development repo.  Your ``master`` then will follow
+  the main nipype_ repository.
 * Start a new *feature branch* for each set of edits that you do.
 * If you can avoid it, try not to merge other branches into your feature
   branch while you are working.
@@ -22,7 +22,7 @@ Workflow summary
 This way of working really helps to keep work well organized, and in
 keeping history as clear as possible.
 
-See - for example - `linux git workflow`_. 
+See |emdash| for example |emdash| `linux git workflow`_. 
 
 Making a new feature branch
 ===========================
@@ -33,7 +33,7 @@ Making a new feature branch
    git checkout my-new-feature
 
 Generally, you will want to keep this also on your public github_ fork
-of Nipype_.  To do this, you `git push`_ this new branch up to your github_
+of nipype_.  To do this, you `git push`_ this new branch up to your github_
 repo.  Generally (if you followed the instructions in these pages, and
 by default), git will have a link to your github_ repo, called
 ``origin``.  You push up to your own repo on github_ with::
@@ -87,21 +87,22 @@ In more detail
 #. To commit all modified files into the local copy of your repo,, do
    ``git commit -am 'A commit message'``.  Note the ``-am`` options to
    ``commit``. The ``m`` flag just signals that you're going to type a
-   message on the command line.  The ``a`` flag - you can just take on
-   faith - or see `why the -a flag?`_. See also the `git commit`_ manual
-   page.
+   message on the command line.  The ``a`` flag |emdash| you can just take on
+   faith |emdash| or see `why the -a flag?`_ |emdash| and the helpful use-case
+   description in the `tangled working copy problem`_. The `git commit`_ manual
+   page might also be useful.
 #. To push the changes up to your forked repo on github_, do a ``git
    push`` (see `git push`). 
 
 Asking for code review
 ======================
 
-#. Go to your repo URL - e.g. ``http://github.com/your-user-name/nipype``.
+#. Go to your repo URL |emdash| e.g. ``http://github.com/your-user-name/nipype``.
 #. Click on the *Branch list* button:
 
    .. image:: branch_list.png
 
-#. Click on the *Compare* button for your feature branch - here ``my-new-feature``:
+#. Click on the *Compare* button for your feature branch |emdash| here ``my-new-feature``:
 
    .. image:: branch_list_compare.png
 
@@ -109,7 +110,7 @@ Asking for code review
    compare.  Usually these will be ``master`` and ``my-new-feature``
    (where that is your feature branch name).
 #. At this point you should get a nice summary of the changes.  Copy the
-   URL for this, and post it to the `Nipype mailing list`_, asking for
+   URL for this, and post it to the `nipype mailing list`_, asking for
    review.  The URL will look something like:
    ``http://github.com/your-user-name/nipype/compare/master...my-new-feature``.
    There's an example at
@@ -135,14 +136,14 @@ When you are ready to ask for the merge of your code:
 
    .. image:: pull_button.png
 
-   Enter a message; we suggest you select only ``Nipype`` as the
-   recipient.  The message will go to the `Nipype mailing list`_.  Please
+   Enter a message; we suggest you select only ``nipype`` as the
+   recipient.  The message will go to the `nipype mailing list`_.  Please
    feel free to add others from the list as you like.
 
 Merging from trunk
 ==================
 
-This updates your code from the upstream `Nipype github`_  repo. 
+This updates your code from the upstream `nipype github`_  repo. 
 
 Overview
 --------
@@ -197,7 +198,7 @@ If you want to work on some stuff with other people, where you are all
 committing into the same repository, or even the same branch, then just
 share it via github_.
 
-First fork Nipype into your account, as from :ref:`forking`.
+First fork nipype into your account, as from :ref:`forking`.
 
 Then, go to your forked repository github page, say
 ``http://github.com/your-user-name/nipype``
@@ -235,4 +236,4 @@ To see a linear list of commits for this branch::
 You can also look at the `network graph visualizer`_ for your github_
 repo.
 
-.. include:: git_links.inc
+.. include:: links.inc

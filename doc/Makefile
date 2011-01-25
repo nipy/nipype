@@ -87,6 +87,14 @@ doctest:
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in _build/doctest/output.txt."
 
+gitwash-update:
+	python ../tools/gitwash_dumper.py devel nipype \
+            --repo-name=nipype \
+            --github-user=nipy \
+            --project-url=http://nipy.org/nipype \
+            --project-ml-url=http://mail.scipy.org/mailman/listinfo/nipy-devel
+	@echo "gitwash updated"
+
 # Sourceforge doesn't appear to have a way of copying the files
 # without specifying a username.  So we'll probably have one target
 # for each project admin
@@ -101,7 +109,7 @@ sf_satra_nightly: html
 sf_satra: html
 	@echo "Copying html files to sourceforge..."
 	rsync -auv _build/html/. satra,nipy@web.sourceforge.net:htdocs/nipype/.
-	
+
 sf_filo: html
 	@echo "Copying html files to sourceforge..."
 	rsync -auv _build/html/. gorgolewski,nipy@web.sourceforge.net:htdocs/nipype/.

@@ -113,11 +113,11 @@ Merging
 To enforce summaries when doing merges (``~/.gitconfig`` file again)::
 
    [merge]
-      summary = true
+      log = true
 
 Or from the command line::
 
-  git config --global merge.summary true
+  git config --global merge.log true
 
 
-.. include:: git_links.inc
+.. include:: links.inc
