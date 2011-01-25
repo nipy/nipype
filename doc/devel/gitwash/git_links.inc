@@ -8,31 +8,6 @@
    __not_case_sensitive__, so only one target definition is needed for
    nipy, NIPY, Nipy, etc...
 
-.. PROJECTNAME placeholders
-.. _PROJECTNAME: http://neuroimaging.scipy.org
-.. _`PROJECTNAME github`: http://github.com/nipy
-.. _`PROJECTNAME mailing list`: http://projects.scipy.org/mailman/listinfo/nipy-devel
-
-.. nipy
-.. _nipy: http://nipy.org/nipy
-.. _`nipy github`: http://github.com/nipy/nipy
-.. _`nipy mailing list`: http://mail.scipy.org/mailman/listinfo/nipy-devel
-
-.. ipython
-.. _ipython: http://ipython.scipy.org
-.. _`ipython github`: http://github.com/ipython/ipython
-.. _`ipython mailing list`: http://mail.scipy.org/mailman/listinfo/IPython-dev
-
-.. dipy
-.. _dipy: http://nipy.org/dipy
-.. _`dipy github`: http://github.com/Garyfallidis/dipy
-.. _`dipy mailing list`: http://mail.scipy.org/mailman/listinfo/nipy-devel
-
-.. nipype
-.. _nipype: http://nipy.org/nipype
-.. _`nipype github`: http://github.com/nipy/nipype
-.. _`nipype mailing list`: http://mail.scipy.org/mailman/listinfo/nipy-devel
-
 .. git stuff
 .. _git: http://git-scm.com/
 .. _github: http://github.com
@@ -67,6 +42,13 @@
 .. _git config: http://www.kernel.org/pub/software/scm/git/docs/git-config.html
 .. _why the -a flag?: http://www.gitready.com/beginner/2009/01/18/the-staging-area.html
 .. _git staging area: http://www.gitready.com/beginner/2009/01/18/the-staging-area.html
+.. _tangled working copy problem: http://tomayko.com/writings/the-thing-about-git 
 .. _git management: http://kerneltrap.org/Linux/Git_Management
 .. _linux git workflow: http://www.mail-archive.com/dri-devel@lists.sourceforge.net/msg39091.html
 .. _git parable: http://tom.preston-werner.com/2009/05/19/the-git-parable.html
+.. _git foundation: http://matthew-brett.github.com/pydagogue/foundation.html
+
+.. other stuff
+.. _python: http://www.python.org
+
+.. |emdash| unicode:: U+02014

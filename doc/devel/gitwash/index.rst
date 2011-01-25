@@ -1,6 +1,6 @@
 .. _using-git:
 
-Working with *Nipype* source code
+Working with *nipype* source code
 ======================================
 
 Contents:

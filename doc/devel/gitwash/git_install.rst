@@ -23,4 +23,4 @@ Have a look at the github_ install help pages available from `github help`_
 
 There are good instructions here: http://book.git-scm.com/2_installing_git.html
 
-.. include:: git_links.inc
+.. include:: links.inc

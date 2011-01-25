@@ -5,7 +5,7 @@
 =============================
 
 These are the instructions if you just want to follow the latest
-*Nipype* source, but you don't need to do any development for now.
+*nipype* source, but you don't need to do any development for now.
 
 The steps are:
 
@@ -18,7 +18,7 @@ Get the local copy of the code
 
 From the command line::
 
-   git clone git://github.com/nipy/nipype.git
+   git clone git://github.com/nipype/nipype.git
 
 You now have a copy of the code tree in the new ``nipype`` directory.
 
@@ -33,4 +33,4 @@ From time to time you may want to pull down the latest code.  Do this with::
 The tree in ``nipype`` will now have the latest changes from the initial
 repository.
 
-.. include:: git_links.inc
+.. include:: links.inc
