@@ -41,12 +41,12 @@ IPython_ 0.10
 
 Enthought_ Traits_ 3.2.0 or later
 
-nibabel 1.0.0 or later
+.. note::
 
-Note
-~~~~
-Full distributions such as pythonxy_ or EPD_ provide the above
+    Full distributions such as pythonxy_ or EPD_ provide the above
 packages. 
+
+Nibabel_ (required)
 
 Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -83,6 +83,12 @@ AFNI_
 Slicer_
  3.6 or later
 
+Nipy_ 
+(optional; required for doc building)
+
+Nitime_ 
+(optional; required for doc building)
+
 Download
 --------
 
@@ -109,15 +115,6 @@ like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
     python setup.py install
 
 **Note:** Depending on permissions you may need to use ``sudo``.
-
-From egg
-~~~~~~~~
-
-If you downloaded an egg, named something like
-``nipype-x.y-py2.5.egg``, then install nipype using::
-
-    easy_install nipype-x.y-py2.5.egg
-
 
 Testing the install
 -------------------
