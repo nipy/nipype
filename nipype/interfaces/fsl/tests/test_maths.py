@@ -8,11 +8,8 @@ from shutil import rmtree
 import numpy as np
 
 import nibabel as nb
-from nipype.testing import (assert_equal, assert_not_equal,
-                            assert_raises, parametric, skipif)
-from nipype.interfaces.fsl.base import Info
+from nipype.testing import (assert_equal, assert_raises, skipif)
 import nipype.interfaces.fsl.maths as fsl
-from nipype.interfaces.base import TraitError
 from nipype.interfaces.fsl import no_fsl
 
 
@@ -221,6 +218,219 @@ def test_mask():
     masker = fsl.ApplyMask(in_file="a.nii",mask_file="b.nii")
     yield assert_equal, masker.cmdline, "fslmaths a.nii -mas b.nii "+os.path.join(testdir, "a_mask.nii")
 
+    # Clean up our mess
+    clean_directory(testdir, origdir, ftype)
+
+
+@skipif(no_fsl)
+def test_dilation():
+    files, testdir, origdir, ftype = create_files_in_directory()
+
+    # Get the command
+    diller = fsl.DilateImage(in_file="a.nii",out_file="b.nii")
+
+    # Test the underlying command
+    yield assert_equal, diller.cmd, "fslmaths"
+
+    # Test that the dilation operation is mandatory
+    yield assert_raises, ValueError, diller.run
+
+    # Test the different dilation operations
+    for op in ["mean", "modal", "max"]:
+        cv = dict(mean="M", modal="D", max="F")
+        diller.inputs.operation = op
+        yield assert_equal, diller.cmdline, "fslmaths a.nii -dil%s b.nii"%cv[op]
+
+    # Now test the different kernel options
+    for k in ["3D", "2D", "box", "boxv", "gauss", "sphere"]:
+        for size in [1, 1.5, 5]:
+            diller.inputs.kernel_shape = k
+            diller.inputs.kernel_size = size
+            yield assert_equal, diller.cmdline, "fslmaths a.nii -kernel %s %.4f -dilF b.nii"%(k, size)
+
+    # Test that we can use a file kernel
+    f = open("kernel.txt","w").close()
+    del f # Shut pyflakes up
+    diller.inputs.kernel_shape = "file"
+    diller.inputs.kernel_file = "kernel.txt"
+    yield assert_equal, diller.cmdline, "fslmaths a.nii -kernel file kernel.txt -dilF b.nii"
+    
+    # Test that we don't need to request an out name
+    dil = fsl.DilateImage(in_file="a.nii", operation="max")
+    yield assert_equal, dil.cmdline, "fslmaths a.nii -dilF %s"%os.path.join(testdir, "a_dil.nii")
+
+    # Clean up our mess
+    clean_directory(testdir, origdir, ftype)
+    
+@skipif(no_fsl)
+def test_erosion():
+    files, testdir, origdir, ftype = create_files_in_directory()
+
+    # Get the command
+    erode = fsl.ErodeImage(in_file="a.nii",out_file="b.nii")
+
+    # Test the underlying command
+    yield assert_equal, erode.cmd, "fslmaths"
+
+    # Test the basic command line
+    yield assert_equal, erode.cmdline, "fslmaths a.nii -ero b.nii"
+
+    # Test that something else happens when you minimum filter
+    erode.inputs.minimum_filter = True
+    yield assert_equal, erode.cmdline, "fslmaths a.nii -eroF b.nii"
+
+    # Test that we don't need to request an out name
+    erode = fsl.ErodeImage(in_file="a.nii")
+    yield assert_equal, erode.cmdline, "fslmaths a.nii -ero %s"%os.path.join(testdir, "a_ero.nii")
+
+    # Clean up our mess
+    clean_directory(testdir, origdir, ftype)
+
+@skipif(no_fsl)
+def test_spatial_filter():
+    files, testdir, origdir, ftype = create_files_in_directory()
+
+    # Get the command
+    filter = fsl.SpatialFilter(in_file="a.nii",out_file="b.nii")
+
+    # Test the underlying command
+    yield assert_equal, filter.cmd, "fslmaths"
+
+    # Test that it fails without an operation
+    yield assert_raises, ValueError, filter.run
+
+    # Test the different operations
+    for op in ["mean", "meanu", "median"]:
+        filter.inputs.operation = op
+        yield assert_equal, filter.cmdline, "fslmaths a.nii -f%s b.nii"%op
+
+    # Test that we don't need to ask for an out name
+    filter = fsl.SpatialFilter(in_file="a.nii", operation="mean")
+    yield assert_equal, filter.cmdline, "fslmaths a.nii -fmean %s"%os.path.join(testdir, "a_filt.nii")
+
+    # Clean up our mess
+    clean_directory(testdir, origdir, ftype)
+
+
+@skipif(no_fsl)
+def test_unarymaths():
+    files, testdir, origdir, ftype = create_files_in_directory()
+
+    # Get the command
+    maths = fsl.UnaryMaths(in_file="a.nii",out_file="b.nii")
+
+    # Test the underlying command
+    yield assert_equal, maths.cmd, "fslmaths"
+
+    # Test that it fails without an operation
+    yield assert_raises, ValueError, maths.run
+
+    # Test the different operations
+    ops = ["exp", "log", "sin", "cos", "sqr", "sqrt", "recip", "abs", "bin", "index"]
+    for op in ops:
+        maths.inputs.operation = op
+        yield assert_equal, maths.cmdline, "fslmaths a.nii -%s b.nii"%op
+
+    # Test that we don't need to ask for an out file
+    for op in ops:
+        maths = fsl.UnaryMaths(in_file="a.nii", operation=op)
+        yield assert_equal, maths.cmdline, "fslmaths a.nii -%s %s"%(op, os.path.join(testdir, "a_%s.nii"%op))
+    
+    # Clean up our mess
+    clean_directory(testdir, origdir, ftype)
+
+
+@skipif(no_fsl)
+def test_binarymaths():
+    files, testdir, origdir, ftype = create_files_in_directory()
+
+    # Get the command
+    maths = fsl.BinaryMaths(in_file="a.nii",out_file="c.nii")
+
+    # Test the underlying command
+    yield assert_equal, maths.cmd, "fslmaths"
+
+    # Test that it fails without an operation an
+    yield assert_raises, ValueError, maths.run
+
+    # Test the different operations
+    ops = ["add", "sub", "mul", "div", "rem", "min", "max"]
+    operands = ["b.nii", -2, -0.5, 0, .123456, np.pi, 500]
+    for op in ops:
+        for ent in operands:
+            maths = fsl.BinaryMaths(in_file="a.nii", out_file="c.nii", operation = op)
+            if ent == "b.nii":
+                maths.inputs.operand_file = ent
+                yield assert_equal, maths.cmdline, "fslmaths a.nii -%s b.nii c.nii"%op
+            else:
+                maths.inputs.operand_value = ent
+                yield assert_equal, maths.cmdline, "fslmaths a.nii -%s %.8f c.nii"%(op, ent)
+
+    # Test that we don't need to ask for an out file
+    for op in ops:
+        maths = fsl.BinaryMaths(in_file="a.nii", operation=op, operand_file="b.nii")
+        yield assert_equal, maths.cmdline, "fslmaths a.nii -%s b.nii %s"%(op,os.path.join(testdir,"a_maths.nii"))
+    
+    # Clean up our mess
+    clean_directory(testdir, origdir, ftype)
+
+
+@skipif(no_fsl)
+def test_multimaths():
+    files, testdir, origdir, ftype = create_files_in_directory()
+
+    # Get the command
+    maths = fsl.MultiImageMaths(in_file="a.nii",out_file="c.nii")
+
+    # Test the underlying command
+    yield assert_equal, maths.cmd, "fslmaths"
+
+    # Test that it fails without an operation an
+    yield assert_raises, ValueError, maths.run
+
+    # Test a few operations
+    maths.inputs.operand_files = ["a.nii", "b.nii"]
+    opstrings = ["-add %s -div %s",
+                 "-max 1 -sub %s -min %s",
+                 "-mas %s -add %s"]
+    for ostr in opstrings:
+        maths.inputs.op_string = ostr
+        yield assert_equal, maths.cmdline, "fslmaths a.nii %s c.nii"%ostr%("a.nii", "b.nii")
+
+    # Test that we don't need to ask for an out file
+    maths = fsl.MultiImageMaths(in_file="a.nii", op_string="-add %s -mul 5", operand_files=["b.nii"])
+    yield assert_equal, maths.cmdline, \
+    "fslmaths a.nii -add b.nii -mul 5 %s"%os.path.join(testdir,"a_maths.nii")
+    
+    # Clean up our mess
+    clean_directory(testdir, origdir, ftype)
+
+
+@skipif(no_fsl)
+def test_tempfilt():
+    files, testdir, origdir, ftype = create_files_in_directory()
+
+    # Get the command
+    filt = fsl.TemporalFilter(in_file="a.nii",out_file="b.nii")
+
+    # Test the underlying command
+    yield assert_equal, filt.cmd, "fslmaths"
+
+    # Test that both filters are initialized off
+    yield assert_equal, filt.cmdline, "fslmaths a.nii -bptf -1.000000 -1.000000 b.nii"
+
+    # Test some filters
+    windows = [(-1, -1), (0.1, 0.1), (-1, 20), (20, -1), (128, 248)]
+    for win in windows:
+        filt.inputs.lowpass_sigma = win[0]
+        filt.inputs.highpass_sigma = win[1]
+        yield assert_equal, filt.cmdline, "fslmaths a.nii -bptf %.6f %.6f b.nii"%win
+
+    # Test that we don't need to ask for an out file
+    filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma = 64) 
+    yield assert_equal, filt.cmdline, \
+    "fslmaths a.nii -bptf -1.000000 64.000000 %s"%os.path.join(testdir,"a_filt.nii")
+    
     # Clean up our mess
     clean_directory(testdir, origdir, ftype)
 

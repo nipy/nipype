@@ -3,12 +3,6 @@
 """
     The maths module provides higher-level interfaces to some of the operations
     that can be performed with the fslmaths command-line program.
-
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    >>> os.chdir(datadir)
 """
 
 import numpy as np
@@ -62,7 +56,9 @@ class ChangeDataTypeInput(MathsInput):
                                   desc="output data type")
 
 class ChangeDataType(MathsCommand):
-
+    """Use fslmaths to change the datatype of an image.
+    
+    """
     input_spec = ChangeDataTypeInput
     _suffix = "_chdt"
 
@@ -77,7 +73,9 @@ class ThresholdInputSpec(MathsInput):
                                      requires=["use_robust_range"])
 
 class Threshold(MathsCommand):
-
+    """Use fslmaths to apply a threshold to an image in a variety of ways.
+   
+    """
     input_spec = ThresholdInputSpec
     _suffix = "_thresh"
 
@@ -103,7 +101,9 @@ class MeanImageInput(MathsInput):
                             desc="dimension to mean across")
 
 class MeanImage(MathsCommand):
+    """Use fslmaths to generate a mean image across a given dimension.
 
+    """
     input_spec = MeanImageInput
     _suffix = "_mean"
 
@@ -115,7 +115,9 @@ class IsotropicSmoothInput(MathsInput):
                          desc="sigma of smoothing kernel")
 
 class IsotropicSmooth(MathsCommand):
+    """Use fslmaths to spatially smooth an image with a gaussian kernel.
 
+    """
     input_spec = IsotropicSmoothInput
     _suffix = "_smooth"
 
@@ -131,22 +133,129 @@ class ApplyMaskInput(MathsInput):
                       desc="binary image defining mask space")
 
 class ApplyMask(MathsCommand):
+    """Use fslmaths to apply a binary mask to another image.
 
+    """
     input_spec = ApplyMaskInput
     _suffix = "_mask"
 
-class MultiImageMaths(MathsCommand):
+class KernelInput(MathsInput):
 
-    pass
+    kernel_shape = traits.Enum("3D", "2D", "box", "boxv", "gauss", "sphere", "file",
+                               argstr="-kernel %s", position=3, desc="kernel shape to use")
+    kernel_size = traits.Float(argstr="%.4f", position=4, xor=["kernel_file"],
+                             desc="kernel size - voxels for box/boxv, mm for sphere, mm sigma for gauss")
+    kernel_file = File(exists=True, argstr="%s", position=4, xor=["kernel_size"],
+                       desc="use external file for kernel")
+
+class DilateInput(KernelInput):
+
+    operation = traits.Enum("mean", "modal", "max", argstr="-dil%s", position=5, mandatory=True,
+                            desc="filtering operation to perfoem in dilation")
 
 class DilateImage(MathsCommand):
+    """Use fslmaths to perform a spatial dilation of an image.
 
-    pass
+    """
+    input_spec = DilateInput
+    _suffix = "_dil"
 
-class TemporalFilter(MathsCommand):
+    def _format_arg(self, name, spec, value):
+        if name == "operation":
+            return spec.argstr%dict(mean="M",modal="D",max="F")[value]
+        return super(DilateImage, self)._format_arg(name, spec, value)
 
+class ErodeInput(KernelInput):
+    
+    minimum_filter = traits.Bool(argstr="%s", position=5, usedefault=True, default_value=False,
+                                 desc="if true, minimum filter rather than erosion by zeroing-out")
+
+class ErodeImage(MathsCommand):
+    """Use fslmaths to perform a spatial erosion of an image.
+
+    """
+    input_spec = ErodeInput
+    _suffix = "_ero"
+
+    def _format_arg(self, name, spec, value):
+        if name == "minimum_filter":
+            if value:
+                return "-eroF"
+            return "-ero"
+        return super(ErodeImage, self)._format_arg(name, spec, value)
+
+class SpatialFilterInput(KernelInput):
+
+    operation = traits.Enum("mean", "median", "meanu", argstr="-f%s", position=5, mandatory=True,
+                            desc="operation to filter with")
+
+class SpatialFilter(MathsCommand):
+    """Use fslmaths to spatially filter an image.
+    
+    """
+    input_spec = SpatialFilterInput
     _suffix = "_filt"
 
-class TensorDecomposition(MathsCommand):
+class UnaryMathsInput(MathsInput):
+    
+    operation = traits.Enum("exp", "log", "sin", "cos", "sqr", "sqrt", "recip", "abs", "bin", "index",
+                            argstr="-%s", position=3, mandatory=True,
+                            desc="operation to perform")
 
-    pass
+class UnaryMaths(MathsCommand):
+    """Use fslmaths to perorm a variety of mathematical operations on an image.
+
+    """
+    input_spec = UnaryMathsInput
+
+    def _list_outputs(self):
+        self._suffix = "_" + self.inputs.operation
+        return super(UnaryMaths, self)._list_outputs()
+
+class BinaryMathsInput(MathsInput):
+
+    operation = traits.Enum("add", "sub", "mul", "div", "rem", "max" ,"min",
+                            mandatory=True, argstr="-%s", position=3,
+                            desc="operation to perform")
+    operand_file = File(exists=True, argstr="%s", mandatory=True, position=4, xor=["operand_value"],
+                        desc="second image to perform operation with")
+    operand_value = traits.Float(argstr="%.8f", mandatory=True, position=4, xor=["operand_file"],
+                                 desc="value to perform operation with")
+
+class BinaryMaths(MathsCommand):
+    """Use fslmaths to perform mathematical operations using a second image or a numeric value.
+
+    """
+    input_spec = BinaryMathsInput
+
+class MultiImageMathsInput(MathsInput):
+
+    op_string = traits.String(position=3, argstr="%s", mandatory=True,
+                              desc="python string-formatting string")
+    operand_files = traits.List(File(exists=True), mandatory=True,
+                                 desc="list of file names to plug into op string")
+
+class MultiImageMaths(MathsCommand):
+    """Use fslmaths to perform a sequence of mathematical operations.
+
+    """
+    input_spec = MultiImageMathsInput
+
+    def _format_arg(self, name, spec, value):
+        if name == "op_string":
+            return value%tuple(self.inputs.operand_files)
+        return super(MultiImageMaths, self)._format_arg(name, spec, value)
+
+class TemporalFilterInput(MathsInput):
+    
+    lowpass_sigma = traits.Float(-1, argstr="-bptf %.6f", position=3, usedefault=True,
+                                 desc="lowpass filter sigma (in volumes)")
+    highpass_sigma = traits.Float(-1, argstr="%.6f", position =4, usedefault=True,
+                                  desc="highpass filter sigma (in volumes)")
+
+class TemporalFilter(MathsCommand):
+    """Use fslmaths to apply a low, high, or bandpass temporal filter to a timeseries.
+
+    """
+    input_spec = TemporalFilterInput
+    _suffix = "_filt"
