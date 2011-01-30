@@ -209,28 +209,20 @@ def _get_valid_pathstr(pathstr):
     pathstr = pathstr.replace(',', '.')
     return pathstr
 
-def find_all_paths(graph, start, end, path=[]):
-    """Find all paths between two nodes
-    
-        http://www.python.org/doc/essays/graphs.html
-    """
-    path = path + [start]
-    if start == end:
-        return [path]
-    if start not in graph.nodes():
-        return []
-    paths = []
-    for node in graph.successors(start):
-        if node not in path:
-            newpaths = find_all_paths(graph, node, end, path)
-            for newpath in newpaths:
-                paths.append(newpath)
-    return paths
-
 def max_path_length(G, startnode, endnode):
     """Determine the max path length between two nodes in a DAG
+
+    reformulate as a shortest path problem on a weighted graph with
+    negative weights
     """
-    return max([len(p) for p in find_all_paths(G, startnode, endnode)])
+    if startnode == endnode:
+        return 0
+    if len(G.nodes()) == 2:
+        return 1
+    for u,v,data in G.edges(data=True):
+        data.update(weight=-1)
+    _, dist = nx.algorithms.bellman_ford(G, startnode)
+    return abs(dist[endnode])
 
 def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
     """Merges two graphs that share a subset of nodes.
@@ -337,6 +329,8 @@ def _generate_expanded_graph(graph_in):
         if inodes:
             node = inodes[0]
             iterables = node.iterables.copy()
+            logger.debug('node: %s iterables: %s'%(node, iterables))
+            #nx.write_dot(graph_in, '%s_pre.dot'%node)
             node.iterables = {}
             node._id += 'I'
             subnodes = nx.dfs_preorder(graph_in, node)
@@ -344,6 +338,7 @@ def _generate_expanded_graph(graph_in):
             graph_in = _merge_graphs(graph_in, subnodes,
                                      subgraph, node._hierarchy+node._id,
                                      iterables)
+            #nx.write_dot(graph_in, '%s_post.dot'%node)
         else:
             moreiterables = False
     for node in graph_in.nodes():
