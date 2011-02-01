@@ -191,11 +191,9 @@ class WorkflowBase(object):
                                      crashfile)
         else:
             crashfile = os.path.join(os.getcwd(), crashfile)
-        pklgraph = _create_pickleable_graph(execgraph,
-                                            show_connectinfo=True)
         logger.info('Saving crash info to %s' % crashfile)
         logger.info(''.join(traceback))
-        np.savez(crashfile, node=self, execgraph=pklgraph, traceback=traceback)
+        np.savez(crashfile, node=self, traceback=traceback)
         return crashfile
 
 class Workflow(WorkflowBase):
@@ -933,6 +931,8 @@ except:
                 logger.debug('%s %s %s %s',edge[1], destname, self.procs[jobid], sourceinfo)
                 self._set_node_input(edge[1], destname,
                                      self.procs[jobid], sourceinfo)
+        if len(graph.out_edges(self.procs[jobid])):
+            self.procs[jobid]._result = None
         # update the job dependency structure
         self.depidx[jobid, :] = 0.
         self.refidx[np.nonzero(self.refidx[:,jobid]>0)[0],jobid] = 0
