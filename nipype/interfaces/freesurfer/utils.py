@@ -137,6 +137,7 @@ class SampleToSurface(FSCommand):
 
     Examples
     --------
+
     import nipype.interfaces.freesurfer as fs
     sampler = fs.SampleToSurface(hemi="lh")
     sampler.inputs.in_file = "cope1.nii.gz"
@@ -251,6 +252,7 @@ class SurfaceSmooth(FSCommand):
 
     Examples
     --------
+
     import nipype.interfaces.freesurfer as fs
     smoother = fs.SurfaceSmooth()
     smoother.inputs.in_file = "lh.cope1.mgz"
@@ -314,6 +316,7 @@ class SurfaceTransform(FSCommand):
 
     Examples
     --------
+
     from nipype.interfaces.freesurfer import SurfaceTransform
     sxfm = SurfaceTransfrom()
     sxfm.inputs.source_file = "lh.cope1.nii.gz"
@@ -495,6 +498,7 @@ class SurfaceSnapshots(FSCommand):
 
     Examples
     --------
+
     import nipype.interfaces.freesurfer as fs
     shots = fs.SurfaceSnapshots(subject_id="fsaverage", hemi="lh", surface="pial")
     shots.inputs.overlay = "zstat1.nii.gz"
