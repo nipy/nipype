@@ -16,7 +16,8 @@ import os,shutil
 import warnings
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
-from nipype.interfaces.base import TraitedSpec, isdefined, File,Directory, InputMultiPath
+from nipype.interfaces.base import TraitedSpec, isdefined, File,Directory, \
+InputMultiPath, OutputMultiPath
 from nipype.utils.filemanip import fname_presuffix
 import enthought.traits.api as traits
 warn = warnings.warn
@@ -937,3 +938,67 @@ class DistanceMap(FSLCommand):
             return self._list_outputs()["distance_map"]
         return None
 
+class XFibresInputSpec(FSLCommandInputSpec):
+    dwi = File(exists = True, argstr="--data=%s", mandatory=True)
+    mask = File(exists = True, argstr="--mask=%s", mandatory=True)
+    bvecs = File(exists = True, argstr="--bvecs=%s", mandatory=True)
+    bvals = File(exists = True, argstr="--bvals=%s", mandatory=True)
+    logdir = Directory("logdir", argstr="--logdir=%s", usedefault=True)
+    #--forcedir    Use the actual directory name given - i.e. don't add + to make a new directory
+    n_fibres = traits.Range(low=1, argstr="--nfibres=%d",
+                            desc="Maximum nukmber of fibres to fit in each voxel")
+    fudge = traits.Int(argstr="--fudge=%d",
+                         desc="ARD fudge factor")
+    n_jumps = traits.Range(low=1, argstr="--njumps=%d",
+                           desc="Num of jumps to be made by MCMC")
+    burn_in = traits.Range(low=0, argstr="--burnin=%d",
+                           desc="Total num of jumps at start of MCMC to be discarded")
+    burn_in_no_ard = traits.Range(low=0, argstr="--burninnoard=%d",
+                           desc="num of burnin jumps before the ard is imposed")
+    sample_every = traits.Range(low=0, argstr="--sampleevery=%d",
+                           desc="Num of jumps for each sample (MCMC)")
+    update_proposal_every = traits.Range(low=1, argstr="--updateproposalevery=%d",
+                           desc="Num of jumps for each update to the proposal density std (MCMC)")
+    seed = traits.Int(argstr="--seed=%d", desc="seed for pseudo random number generator")
+    model = traits.Int(argstr="--model=%d", desc="")
+    
+    _xor_inputs1 = ('no_ard', 'all_ard')
+    no_ard = traits.Bool(argstr="--noard", desc="Turn ARD off on all fibres", xor=_xor_inputs1)
+    all_ard = traits.Bool(argstr="--allard", desc="Turn ARD on on all fibres", xor=_xor_inputs1)
+    
+    _xor_inputs2 = ('no_spat', 'non_linear')
+    no_spat = traits.Bool(argstr="--nospat", desc="Initialise with tensor, not spatially", xor=_xor_inputs2)
+    non_linear = traits.Bool(argstr="--nonlinear", desc="Initialise with nonlinear fitting", xor=_xor_inputs2)
+
+class XFibresOutputSpec(TraitedSpec):
+    dyads = OutputMultiPath(File(exists=True), desc="Mean of PDD distribution in vector form.")  
+    fsamples = OutputMultiPath(File(exists=True), desc="Samples from the distribution on anisotropic volume fraction")
+    mean_dsamples = File(exists=True, desc="Mean of distribution on diffusivity d")
+    mean_fsamples = OutputMultiPath(File(exists=True), desc="Mean of distribution on f anisotropy")
+    mean_S0samples = File(exists=True, desc="Samples from S0 distribution")
+    phsamples = OutputMultiPath(File(exists=True), desc="Samples from the distribution on phi")
+    thsamples = OutputMultiPath(File(exists=True), desc="Samples from the distribution on theta")
+
+class XFibres(FSLCommand):
+    _cmd = "xfibres"
+    input_spec = XFibresInputSpec
+    output_spec = XFibresOutputSpec
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["mean_dsamples"] = self._gen_fname("mean_dsamples", cwd=self.inputs.logdir)
+        outputs["mean_S0samples"] = self._gen_fname("mean_S0samples", cwd=self.inputs.logdir)
+        outputs["dyads"] = []
+        outputs["fsamples"] = []
+        outputs["mean_fsamples"] = []
+        outputs["phsamples"] = []
+        outputs["thsamples"] = []
+        for i in range(1, self.inputs.n_fibres+1):
+            outputs["dyads"].append(self._gen_fname("dyads%d"%i, cwd=self.inputs.logdir))
+            outputs["fsamples"].append(self._gen_fname("f%dsamples"%i, cwd=self.inputs.logdir))
+            outputs["mean_fsamples"].append(self._gen_fname("mean_f%dsamples"%i, cwd=self.inputs.logdir))
+            outputs["phsamples"].append(self._gen_fname("ph%dsamples"%i, cwd=self.inputs.logdir))
+            outputs["thsamples"].append(self._gen_fname("th%dsamples"%i, cwd=self.inputs.logdir))
+            
+        return outputs
+    
