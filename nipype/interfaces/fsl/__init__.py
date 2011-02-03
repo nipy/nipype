@@ -26,7 +26,7 @@ from nipype.interfaces.fsl.utils import (Smooth, Merge, ExtractROI, Split,
 from nipype.interfaces.fsl.dti import (EddyCorrect, BEDPOSTX, DTIFit, 
                                        ProbTrackX, VecReg, ProjThresh,
                                        FindTheBiggest, DistanceMap,
-                                       TractSkeleton)
+                                       TractSkeleton, XFibres)
 
 
 import nose
