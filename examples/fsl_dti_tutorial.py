@@ -21,6 +21,7 @@ import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import os                                    # system functions
+from bedpostx import create_bedpostx_pipeline
 
 """
 Confirm package dependencies are installed.  (This is only for the
@@ -180,11 +181,8 @@ tractography.base_dir = os.path.abspath('fsl_dti_tutorial')
 estimate the diffusion parameters: phi, theta, and so on
 """
 
-bedpostx = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx')
-bedpostx.inputs.fibres = 1
-
-bedpostx_2f = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx_2f')
-bedpostx_2f.inputs.fibres = 2
+bedpostx = create_bedpostx_pipeline()
+bedpostx.inputs.xfibres.n_fibres = 1
 
 
 flirt = pe.Node(interface=fsl.FLIRT(), name='flirt')
@@ -197,6 +195,7 @@ perform probabilistic tracktography
 
 probtrackx = pe.Node(interface=fsl.ProbTrackX(),name='probtrackx')
 probtrackx.inputs.mode='seedmask'
+probtrackx.inputs.network=True
 probtrackx.inputs.loop_check=True
 probtrackx.inputs.c_thresh = 0.2
 probtrackx.inputs.n_steps=2000
@@ -204,7 +203,6 @@ probtrackx.inputs.step_length=0.5
 probtrackx.inputs.n_samples=5000
 probtrackx.inputs.force_dir=True
 probtrackx.inputs.opd=True
-probtrackx.inputs.os2t=True
 
 
 """
@@ -217,13 +215,14 @@ findthebiggest = pe.Node(interface=fsl.FindTheBiggest(),name='findthebiggest')
 """
 connect all the nodes for this workflow
 """
-
-tractography.connect([
-                        (bedpostx,probtrackx,[('bpx_out_directory','bpx_directory')]),
-                        (bedpostx,probtrackx,[('bpx_out_directory','out_dir')]),
-                        (probtrackx,findthebiggest,[('targets','in_files')]),
-                        (flirt, probtrackx, [('out_matrix_file','xfm')])
-                    ])
+tractography.add_nodes([bedpostx, flirt])
+tractography.connect([(bedpostx,probtrackx,[('postproc.merge_thsamples.merged_file','thsamples'),
+                                            ('postproc.merge_phsamples.merged_file','phsamples'),
+                                            ('postproc.merge_fsamples.merged_file','fsamples')
+                                            ]),
+                      (probtrackx,findthebiggest,[('targets','in_files')]),
+                      (flirt, probtrackx, [('out_matrix_file','xfm')])
+                     ])
 
 
 """
@@ -250,12 +249,12 @@ dwiproc.connect([
                                                ('bvals','dtifit.bvals'),
                                                ('bvecs','dtifit.bvecs'),
                                                ('dwi','eddycorrect.in_file')]),
-                    (datasource,tractography,[('bvals','bedpostx.bvals'),
-                                              ('bvecs','bedpostx.bvecs'),
-                                              ('seed_file','probtrackx.seed_file'),
-                                              ('target_masks','probtrackx.target_masks')]),
-                    (computeTensor,tractography,[('eddycorrect.eddy_corrected','bedpostx.dwi'),
-                                                 ('bet.mask_file','bedpostx.mask'),
+                    (datasource,tractography,[('bvals','bedpostx.inputnode.bvals'),
+                                              ('bvecs','bedpostx.inputnode.bvecs'),
+                                              ('target_masks','probtrackx.seed')
+                                              ]),
+                    (computeTensor,tractography,[('eddycorrect.eddy_corrected','bedpostx.inputnode.dwi'),
+                                                 ('bet.mask_file','bedpostx.inputnode.mask'),
                                                  ('bet.mask_file','probtrackx.mask'),
                                                  ('fslroi.roi_file','flirt.in_file')]),
                     (infosource, datasink,[('subject_id','container'),
