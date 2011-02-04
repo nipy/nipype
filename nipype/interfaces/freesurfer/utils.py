@@ -138,14 +138,14 @@ class SampleToSurface(FSCommand):
     Examples
     --------
 
-    import nipype.interfaces.freesurfer as fs
-    sampler = fs.SampleToSurface(hemi="lh")
-    sampler.inputs.in_file = "cope1.nii.gz"
-    sampler.inputs.reg_file = "register.dat"
-    sampler.inputs.sampling_method = "average"
-    sampler.inputs.sampling_rage = 1
-    sampler.inputs.sampling_units = "frac"
-    res = sampler.run() # doctest: +SKIP
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> sampler = fs.SampleToSurface(hemi="lh")
+    >>> sampler.inputs.in_file = "cope1.nii.gz"
+    >>> sampler.inputs.reg_file = "register.dat"
+    >>> sampler.inputs.sampling_method = "average"
+    >>> sampler.inputs.sampling_rage = 1
+    >>> sampler.inputs.sampling_units = "frac"
+    >>> res = sampler.run() # doctest: +SKIP
    
     """
     _cmd = "mri_vol2surf"
@@ -253,13 +253,13 @@ class SurfaceSmooth(FSCommand):
     Examples
     --------
 
-    import nipype.interfaces.freesurfer as fs
-    smoother = fs.SurfaceSmooth()
-    smoother.inputs.in_file = "lh.cope1.mgz"
-    smoother.inputs.subject_id = "subj_1"
-    smoother.inputs.hemi = "lh"
-    smoother.inputs.fwhm = 5
-    smoother.run() # doctest: +SKIP
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> smoother = fs.SurfaceSmooth()
+    >>> smoother.inputs.in_file = "lh.cope1.mgz"
+    >>> smoother.inputs.subject_id = "subj_1"
+    >>> smoother.inputs.hemi = "lh"
+    >>> smoother.inputs.fwhm = 5
+    >>> smoother.run() # doctest: +SKIP
 
     """
     _cmd = "mri_surf2surf"
@@ -317,13 +317,13 @@ class SurfaceTransform(FSCommand):
     Examples
     --------
 
-    from nipype.interfaces.freesurfer import SurfaceTransform
-    sxfm = SurfaceTransfrom()
-    sxfm.inputs.source_file = "lh.cope1.nii.gz"
-    sxfm.inputs.source_subject = "my_subject"
-    sxfm.inputs.target_subject = "fsaverage"
-    sxfm.inputs.hemi = "lh"
-    sxfm.run() # doctest: +SKIP
+    >>> from nipype.interfaces.freesurfer import SurfaceTransform
+    >>> sxfm = SurfaceTransfrom()
+    >>> sxfm.inputs.source_file = "lh.cope1.nii.gz"
+    >>> sxfm.inputs.source_subject = "my_subject"
+    >>> sxfm.inputs.target_subject = "fsaverage"
+    >>> sxfm.inputs.hemi = "lh"
+    >>> sxfm.run() # doctest: +SKIP
 
     """
     _cmd = "mri_surf2surf"
@@ -499,12 +499,12 @@ class SurfaceSnapshots(FSCommand):
     Examples
     --------
 
-    import nipype.interfaces.freesurfer as fs
-    shots = fs.SurfaceSnapshots(subject_id="fsaverage", hemi="lh", surface="pial")
-    shots.inputs.overlay = "zstat1.nii.gz"
-    shots.inputs.overlay_range = (2.3, 6)
-    shots.inputs.overlay_reg = "register.dat"
-    res = shots.run() # doctest: +SKIP
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> shots = fs.SurfaceSnapshots(subject_id="fsaverage", hemi="lh", surface="pial")
+    >>> shots.inputs.overlay = "zstat1.nii.gz"
+    >>> shots.inputs.overlay_range = (2.3, 6)
+    >>> shots.inputs.overlay_reg = "register.dat"
+    >>> res = shots.run() # doctest: +SKIP
     
     """
     _cmd = "tksurfer"
