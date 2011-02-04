@@ -18,7 +18,7 @@ import warnings
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
 from nipype.interfaces.base import TraitedSpec, isdefined, File,Directory, \
 InputMultiPath, OutputMultiPath
-from nipype.utils.filemanip import fname_presuffix
+from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
 import enthought.traits.api as traits
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -498,14 +498,15 @@ class Randomise(FSLCommand):
         return outputs
 
 class ProbTrackXInputSpec(FSLCommandInputSpec):
-    samplesbase_name = traits.Str(desc = 'the rootname/base_name for samples files',argstr='-s %s')
-    bpx_directory = Directory(exists=True, field='dir', desc = 'path/name of directory with all '+
-                             'bedpostx output files',mandatory=True)
+    thsamples = InputMultiPath(File(exists=True), mandatory=True)
+    phsamples = InputMultiPath(File(exists=True), mandatory=True)
+    fsamples = InputMultiPath(File(exists=True), mandatory=True)
+    samples_base_name = traits.Str("merged", desc = 'the rootname/base_name for samples files',argstr='--samples=%s', usedefault=True)
     mask	 = File(exists=True, desc='bet binary mask file in diffusion space',
                  argstr='-m %s', mandatory=True)
-    seed_file = 	File(exists=True, desc='seed volume, or voxel, or ascii file with multiple'+
-                     'volumes, or freesurfer label file',argstr='-x %s', mandatory=True)	
-    mode	= traits.Str(desc='options: simple (single seed voxel), seedmask (mask of seed voxels),'+
+    seed = 	traits.Either(File(exists=True), traits.List(File(exists=True)), desc='seed volumes, or voxel'+
+                     'volumes, or freesurfer label file',argstr='--seed=%s', mandatory=True)	
+    mode	= traits.Enum("simple", "two_mask_symm", "seedmask", desc='options: simple (single seed voxel), seedmask (mask of seed voxels),'+
                      'twomask_symm (two bet binary masks) ', argstr='--mode=%s')                             
     target_masks	= InputMultiPath(File(exits=True),desc='list of target masks - '+
                        'required for seeds_to_targets classification', argstr='--targetmasks=%s')    
@@ -521,16 +522,16 @@ class ProbTrackXInputSpec(FSLCommandInputSpec):
     seed_ref	= File(exists=True, desc='reference vol to define seed space in '+
                    'simple mode - diffusion space assumed if absent',
                    argstr='--seedref=%s')
-    out_dir	= Directory(os.getcwd(),exists=True,argstr='--dir=%s',usedefault=True,
-                       desc='directory to put the final volumes in')
+    out_dir	= Directory(exists=True,argstr='--dir=%s',
+                       desc='directory to put the final volumes in', genfile=True)
     force_dir	= traits.Bool(desc='use the actual directory name given - i.e. '+
                           'do not add + to make a new directory',argstr='--forcedir')
     opd = traits.Bool(desc='outputs path distributions',argstr='--opd')
     correct_path_distribution	= traits.Bool(desc='correct path distribution for the length of the pathways',
                             argstr='--pd')
     os2t	= traits.Bool(desc='Outputs seeds to targets',argstr='--os2t')
-    paths_file = File('nipype_fdtpaths',usedefault=True,argstr='--out=%s',
-                     desc='produces an output file (default is fdt_paths)')
+    #paths_file = File('nipype_fdtpaths',usedefault=True,argstr='--out=%s',
+    #                 desc='produces an output file (default is fdt_paths)')
     avoid_mp = File(exists=True, desc='reject pathways passing through locations given by this mask',
                    argstr='--avoid=%s')
     stop_mask = File(exists=True,argstr='--stop=%s',
@@ -592,22 +593,37 @@ class ProbTrackX(FSLCommand):
     output_spec = ProbTrackXOutputSpec
 
     def _run_interface(self, runtime):
-        if not isdefined(self.inputs.samplesbase_name):
-            self.inputs.samplesbase_name = os.path.join(self.inputs.bpx_directory,'merged')
+        for i in range(1, len(self.inputs.thsamples)+1):
+            _, _, ext = split_filename(self.inputs.thsamples[i-1])
+            copyfile(self.inputs.thsamples[i-1], self.inputs.samples_base_name + "_th%dsamples"%i + ext, copy=False)
+            _, _, ext = split_filename(self.inputs.thsamples[i-1])
+            copyfile(self.inputs.fsamples[i-1], self.inputs.samples_base_name + "_ph%dsamples"%i + ext, copy=False)
+            _, _, ext = split_filename(self.inputs.thsamples[i-1])
+            copyfile(self.inputs.phsamples[i-1], self.inputs.samples_base_name + "_f%dsamples"%i + ext, copy=False)
             
         if isdefined(self.inputs.target_masks):
             f = open("targets.txt","w")
             for target in self.inputs.target_masks:
                 f.write("%s\n"%target)
             f.close()
+        if isinstance(self.inputs.seed, list):
+            f = open("seeds.txt","w")
+            for seed in self.inputs.seed:
+                f.write("%s\n"%seed)
+            f.close()
             
-        return super(ProbTrackX, self)._run_interface(runtime)
+        runtime = super(ProbTrackX, self)._run_interface(runtime)
+        if runtime.stderr:
+            runtime.returncode = 1
+        return runtime
     
     def _format_arg(self, name, spec, value):
         if name == 'target_masks' and isdefined(value):
-            fname = "targets.txt"
-            
+            fname = "targets.txt"     
             return super(ProbTrackX, self)._format_arg(name, spec, [fname])
+        elif name == 'seed' and isinstance(value, list):
+            fname = "seeds.txt"
+            return super(ProbTrackX, self)._format_arg(name, spec, fname)
         else:
             return super(ProbTrackX, self)._format_arg(name, spec, value)
     
@@ -617,7 +633,7 @@ class ProbTrackX(FSLCommand):
                                                 suffix='.log',change_ext=False)            
         outputs['way_total'] = self._gen_fname('waytotal',cwd=self.inputs.out_dir,
                                               suffix='',change_ext=False)                        
-        outputs['fdt_paths'] = self._gen_fname(self.inputs.paths_file,
+        outputs['fdt_paths'] = self._gen_fname("fdt_paths",
                                                cwd=self.inputs.out_dir,suffix='')
       
         # handle seeds-to-target output files 
@@ -627,6 +643,9 @@ class ProbTrackX(FSLCommand):
                 outputs['targets'].append(self._gen_fname('seeds_to_'+os.path.split(target)[1],
                                                           cwd=self.inputs.out_dir,suffix=''))        
         return outputs
+    def _gen_filename(self, name):
+        if name == "out_dir":
+            return os.getcwd()
 
 class VecRegInputSpec(FSLCommandInputSpec):    
     in_file = File(exists=True,argstr='-i %s',desc='filename for input vector or tensor field',
@@ -944,7 +963,6 @@ class XFibresInputSpec(FSLCommandInputSpec):
     bvecs = File(exists = True, argstr="--bvecs=%s", mandatory=True)
     bvals = File(exists = True, argstr="--bvals=%s", mandatory=True)
     logdir = Directory("logdir", argstr="--logdir=%s", usedefault=True)
-    #--forcedir    Use the actual directory name given - i.e. don't add + to make a new directory
     n_fibres = traits.Range(low=1, argstr="--nfibres=%d",
                             desc="Maximum nukmber of fibres to fit in each voxel")
     fudge = traits.Int(argstr="--fudge=%d",
@@ -960,7 +978,9 @@ class XFibresInputSpec(FSLCommandInputSpec):
     update_proposal_every = traits.Range(low=1, argstr="--updateproposalevery=%d",
                            desc="Num of jumps for each update to the proposal density std (MCMC)")
     seed = traits.Int(argstr="--seed=%d", desc="seed for pseudo random number generator")
-    model = traits.Int(argstr="--model=%d", desc="")
+    model = traits.Int(argstr="--model=%d", desc="Which model to use. \
+1=mono-exponential (default and required for single shell). 2=continous \
+exponential (for multi-shell experiments)")
     
     _xor_inputs1 = ('no_ard', 'all_ard')
     no_ard = traits.Bool(argstr="--noard", desc="Turn ARD off on all fibres", xor=_xor_inputs1)
@@ -984,6 +1004,12 @@ class XFibres(FSLCommand):
     input_spec = XFibresInputSpec
     output_spec = XFibresOutputSpec
     
+    def _run_interface(self,runtime):
+        runtime = super(XFibres, self)._run_interface(runtime)
+        if runtime.stderr:
+            runtime.returncode = 1
+        return runtime
+    
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["mean_dsamples"] = self._gen_fname("mean_dsamples", cwd=self.inputs.logdir)
@@ -1001,4 +1027,33 @@ class XFibres(FSLCommand):
             outputs["thsamples"].append(self._gen_fname("th%dsamples"%i, cwd=self.inputs.logdir))
             
         return outputs
+    
+class MakeDyadicVectorsInputSpec(FSLCommandInputSpec):
+    theta_vol = File(exists=True, mandatory=True, position=0)
+    phi_vol = File(exists=True, mandatory=True, position=1)
+    mask = File(exists=True, position=2)
+    output = File("dyads", exists=True, position=3, usedefault=True)
+    perc = traits.Float(desc="the {perc}% angle of the output cone of uncertainty (output will be in degrees)", position=4)
+    
+class MakeDyadicVectorsOutputSpec(TraitedSpec):
+    dyads = File(exists=True)
+    dispersion = File(exists=True)
+    
+class MakeDyadicVectors(FSLCommand):
+    _cmd = "make_dyadic_vectors"
+    input_spec = MakeDyadicVectorsInputSpec
+    output_spec = MakeDyadicVectorsOutputSpec
+    
+    def _gen_filename(self, name):
+        if name == "output":
+            return "dyads"
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["dyads"] = self._gen_fname(self.inputs.output)
+        outputs["dispersion"] = self._gen_fname(self.inputs.output, suffix="dispersion")
+            
+        return outputs  
+    
+
     
