@@ -209,20 +209,14 @@ def _get_valid_pathstr(pathstr):
     pathstr = pathstr.replace(',', '.')
     return pathstr
 
-def max_path_length(G, startnode, endnode):
-    """Determine the max path length between two nodes in a DAG
+def get_levels(G):
+    levels = {}
+    for n in nx.topological_sort(G):
+        levels[n] = 0
+        for pred in G.predecessors_iter(n):
+            levels[n] = max(levels[n], levels[pred]+1)
+    return levels
 
-    reformulate as a shortest path problem on a weighted graph with
-    negative weights
-    """
-    if startnode == endnode:
-        return 0
-    if len(G.nodes()) == 2:
-        return 1
-    for u,v,data in G.edges(data=True):
-        data.update(weight=-1)
-    _, dist = nx.algorithms.bellman_ford(G, startnode)
-    return abs(dist[endnode])
 
 def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
     """Merges two graphs that share a subset of nodes.
@@ -278,6 +272,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
             paramstr = '_'.join((paramstr, _get_valid_pathstr(key),
                                  _get_valid_pathstr(str(val)))) #.replace(os.sep, '_')))
             rootnode.set_input(key, val)
+        levels = get_levels(Gc)
         for n in Gc.nodes():
             """
             update parameterization of the node to reflect the location of
@@ -287,7 +282,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
             with iterable 'b' will be placed in a directory
             _a_aval/_b_bval/.
             """
-            path_length = max_path_length(Gc, rootnode, n)
+            path_length = levels[n]
             # enter as negative numbers so that earlier iterables with longer
             # path lengths get precedence in a sort
             paramlist = [(-path_length, paramstr)]
