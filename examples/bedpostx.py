@@ -59,7 +59,7 @@ def create_bedpostx_pipeline(name="bedpostx"):
     mean_fsamples = pe.MapNode(fsl.ImageMaths(op_string="-Tmean"), 
                                name="mean_fsamples", iterfield=['in_file'])
     make_dyads = pe.MapNode(fsl.MakeDyadicVectors(), name="make_dyads", 
-                            iterfield=['thsamples', 'phsamples'])
+                            iterfield=['theta_vol', 'phi_vol'])
 
     postproc = pe.Workflow(name="postproc")
     
@@ -77,8 +77,8 @@ def create_bedpostx_pipeline(name="bedpostx"):
                       (merge_thsamples, mean_thsamples, [('merged_file', 'in_file')]),
                       (merge_phsamples, mean_phsamples, [('merged_file', 'in_file')]),
                       (merge_fsamples, mean_fsamples, [('merged_file', 'in_file')]),
-                      (merge_thsamples, make_dyads, [('merged_file', 'thsamples')]),
-                      (merge_phsamples, make_dyads, [('merged_file', 'phsamples')]),
+                      (merge_thsamples, make_dyads, [('merged_file', 'theta_vol')]),
+                      (merge_phsamples, make_dyads, [('merged_file', 'phi_vol')]),
                       (inputnode, make_dyads, [('mask', 'mask')]),
                       ])
     
@@ -97,7 +97,7 @@ def create_bedpostx_pipeline(name="bedpostx"):
                       (inputnode, xfibres, [('bvals', 'bvals')]),
                       (inputnode, xfibres, [('bvecs', 'bvecs')]),
                       
-                      (preproc, postproc, [('slice_mask.out_files', 'mask')]),
+                      (inputnode, postproc, [('mask', 'inputnode.mask')]),
                       (xfibres, postproc, [('thsamples','inputnode.thsamples'),
                                            ('phsamples', 'inputnode.phsamples'),
                                            ('fsamples', 'inputnode.fsamples'),
