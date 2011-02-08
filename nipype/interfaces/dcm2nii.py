@@ -4,6 +4,7 @@ from nipype.interfaces.traits import File, Directory
 from nipype.utils.misc import isdefined
 import os
 from copy import deepcopy
+from nipype.utils.filemanip import split_filename
 
 class Dcm2niiInputSpec(CommandLineInputSpec):
     source_names = InputMultiPath(File(exists=True), argstr="%s", position=8, mandatory=True)
@@ -20,6 +21,8 @@ class Dcm2niiOutputSpec(TraitedSpec):
     converted_files = OutputMultiPath(File(exists=True))
     reoriented_files = OutputMultiPath(File(exists=True))
     reoriented_and_cropped_files = OutputMultiPath(File(exists=True))
+    bvecs = OutputMultiPath(File(exists=True))
+    bvals = OutputMultiPath(File(exists=True))
 
 class Dcm2nii(CommandLine):
     input_spec=Dcm2niiInputSpec
@@ -40,14 +43,20 @@ class Dcm2nii(CommandLine):
     def _run_interface(self, runtime):
           
         new_runtime = super(Dcm2nii, self)._run_interface(runtime)
-        self.output_files, self.reoriented_files, self.reoriented_and_cropped_files = self._parse_stdout(new_runtime.stdout)
+        (self.output_files, 
+         self.reoriented_files, 
+         self.reoriented_and_cropped_files, 
+         self.bvecs, self.bvals) = self._parse_stdout(new_runtime.stdout)
         return new_runtime
     
     def _parse_stdout(self, stdout):
         files = []
         reoriented_files = []
         reoriented_and_cropped_files = []
+        bvecs = []
+        bvals = []
         skip = False
+        last_added_file = None
         for line in stdout.split("\n"):
             if not skip:
                 file = None
@@ -61,7 +70,18 @@ class Dcm2nii(CommandLine):
                         output_dir = self._gen_filename('output_dir')
                     file = os.path.abspath(os.path.join(output_dir, 
                                                         line[len("GZip..."):]))
-                elif line.startswith("Reorienting as "):
+                elif line.startswith("Number of diffusion directions "):
+                    if last_added_file:
+                        base, filename, ext = split_filename(last_added_file)
+                        bvecs.append(os.path.join(base,filename + ".bvec"))
+                        bvals.append(os.path.join(base,filename + ".bval"))
+                    
+                if file:
+                    files.append(file)
+                    last_added_file = file
+                    continue
+                
+                if line.startswith("Reorienting as "):
                     reoriented_files.append(line[len("Reorienting as "):])
                     skip = True
                     continue
@@ -72,17 +92,18 @@ class Dcm2nii(CommandLine):
                     skip = True
                     continue            
                                            
-                if file:
-                    files.append(file)
+                
                     
             skip = False
-        return files, reoriented_files, reoriented_and_cropped_files
+        return files, reoriented_files, reoriented_and_cropped_files, bvecs, bvals
     
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['converted_files'] = self.output_files
         outputs['reoriented_files'] = self.reoriented_files
         outputs['reoriented_and_cropped_files'] = self.reoriented_and_cropped_files
+        outputs['bvecs'] = self.bvecs
+        outputs['bvals'] = self.bvals
         return outputs
     
     def _gen_filename(self, name):
