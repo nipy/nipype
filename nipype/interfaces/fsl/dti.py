@@ -524,8 +524,8 @@ class ProbTrackXInputSpec(FSLCommandInputSpec):
                    argstr='--seedref=%s')
     out_dir	= Directory(exists=True,argstr='--dir=%s',
                        desc='directory to put the final volumes in', genfile=True)
-    force_dir	= traits.Bool(desc='use the actual directory name given - i.e. '+
-                          'do not add + to make a new directory',argstr='--forcedir')
+    force_dir	= traits.Bool(True, desc='use the actual directory name given - i.e. '+
+                          'do not add + to make a new directory',argstr='--forcedir', usedefault=True)
     opd = traits.Bool(desc='outputs path distributions',argstr='--opd')
     correct_path_distribution	= traits.Bool(desc='correct path distribution for the length of the pathways',
                             argstr='--pd')
@@ -629,19 +629,20 @@ class ProbTrackX(FSLCommand):
     
     def _list_outputs(self):        
         outputs = self.output_spec().get()        
-        outputs['log'] = self._gen_fname('probtrackx',cwd=self.inputs.out_dir,
-                                                suffix='.log',change_ext=False)            
-        outputs['way_total'] = self._gen_fname('waytotal',cwd=self.inputs.out_dir,
-                                              suffix='',change_ext=False)                        
-        outputs['fdt_paths'] = self._gen_fname("fdt_paths",
-                                               cwd=self.inputs.out_dir,suffix='')
+        outputs['log'] = os.path.abspath(self._gen_fname('probtrackx',cwd=self.inputs.out_dir,
+                                                suffix='.log',change_ext=False))            
+        outputs['way_total'] = os.path.abspath(self._gen_fname('waytotal',cwd=self.inputs.out_dir,
+                                              suffix='',change_ext=False))                        
+        outputs['fdt_paths'] = os.path.abspath(self._gen_fname("fdt_paths",
+                                               cwd=self.inputs.out_dir,suffix=''))
       
         # handle seeds-to-target output files 
         if isdefined(self.inputs.target_masks):
             outputs['targets']=[]
             for target in self.inputs.target_masks:
-                outputs['targets'].append(self._gen_fname('seeds_to_'+os.path.split(target)[1],
-                                                          cwd=self.inputs.out_dir,suffix=''))        
+                outputs['targets'].append(os.path.abspath(self._gen_fname('seeds_to_'+os.path.split(target)[1],
+                                                          cwd=self.inputs.out_dir,
+                                                          suffix='')))
         return outputs
     def _gen_filename(self, name):
         if name == "out_dir":
@@ -989,6 +990,8 @@ exponential (for multi-shell experiments)")
     _xor_inputs2 = ('no_spat', 'non_linear')
     no_spat = traits.Bool(argstr="--nospat", desc="Initialise with tensor, not spatially", xor=_xor_inputs2)
     non_linear = traits.Bool(argstr="--nonlinear", desc="Initialise with nonlinear fitting", xor=_xor_inputs2)
+    force_dir    = traits.Bool(True, desc='use the actual directory name given - i.e. '+
+                          'do not add + to make a new directory',argstr='--forcedir', usedefault=True)
 
 class XFibresOutputSpec(TraitedSpec):
     dyads = OutputMultiPath(File(exists=True), desc="Mean of PDD distribution in vector form.")  
@@ -1029,11 +1032,12 @@ class XFibres(FSLCommand):
         return outputs
     
 class MakeDyadicVectorsInputSpec(FSLCommandInputSpec):
-    theta_vol = File(exists=True, mandatory=True, position=0)
-    phi_vol = File(exists=True, mandatory=True, position=1)
-    mask = File(exists=True, position=2)
-    output = File("dyads", exists=True, position=3, usedefault=True)
-    perc = traits.Float(desc="the {perc}% angle of the output cone of uncertainty (output will be in degrees)", position=4)
+    theta_vol = File(exists=True, mandatory=True, position=0, argstr="%s")
+    phi_vol = File(exists=True, mandatory=True, position=1, argstr="%s")
+    mask = File(exists=True, position=2, argstr="%s")
+    output = File("dyads", position=3, usedefault=True, argstr="%s")
+    perc = traits.Float(desc="the {perc}% angle of the output cone of \
+uncertainty (output will be in degrees)", position=4, argstr="%f")
     
 class MakeDyadicVectorsOutputSpec(TraitedSpec):
     dyads = File(exists=True)
@@ -1043,15 +1047,11 @@ class MakeDyadicVectors(FSLCommand):
     _cmd = "make_dyadic_vectors"
     input_spec = MakeDyadicVectorsInputSpec
     output_spec = MakeDyadicVectorsOutputSpec
-    
-    def _gen_filename(self, name):
-        if name == "output":
-            return "dyads"
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["dyads"] = self._gen_fname(self.inputs.output)
-        outputs["dispersion"] = self._gen_fname(self.inputs.output, suffix="dispersion")
+        outputs["dispersion"] = self._gen_fname(self.inputs.output, suffix="_dispersion")
             
         return outputs  
     
