@@ -18,6 +18,8 @@ class Dcm2niiInputSpec(CommandLineInputSpec):
     
 class Dcm2niiOutputSpec(TraitedSpec):
     converted_files = OutputMultiPath(File(exists=True))
+    reoriented_files = OutputMultiPath(File(exists=True))
+    reoriented_and_cropped_files = OutputMultiPath(File(exists=True))
 
 class Dcm2nii(CommandLine):
     input_spec=Dcm2niiInputSpec
@@ -38,30 +40,49 @@ class Dcm2nii(CommandLine):
     def _run_interface(self, runtime):
           
         new_runtime = super(Dcm2nii, self)._run_interface(runtime)
-        self.output_files = self._parse_stdout(new_runtime.stdout)
+        self.output_files, self.reoriented_files, self.reoriented_and_cropped_files = self._parse_stdout(new_runtime.stdout)
         return new_runtime
     
     def _parse_stdout(self, stdout):
         files = []
+        reoriented_files = []
+        reoriented_and_cropped_files = []
+        skip = False
         for line in stdout.split("\n"):
-            file = None
-            if line.startswith("Saving "):
-                file = line[len("Saving "):]
-            elif line.startswith("GZip..."):
-                #for gzipped outpus files are not absolute
-                if isdefined(self.inputs.output_dir):
-                    output_dir = self.inputs.output_dir
-                else:
-                    output_dir = self._gen_filename('output_dir')
-                file = os.path.abspath(os.path.join(output_dir, line[len("GZip..."):]))
-                                       
-            if file:
-                files.append(file)
-        return files
+            if not skip:
+                file = None
+                if line.startswith("Saving "):
+                    file = line[len("Saving "):]
+                elif line.startswith("GZip..."):
+                    #for gzipped outpus files are not absolute
+                    if isdefined(self.inputs.output_dir):
+                        output_dir = self.inputs.output_dir
+                    else:
+                        output_dir = self._gen_filename('output_dir')
+                    file = os.path.abspath(os.path.join(output_dir, 
+                                                        line[len("GZip..."):]))
+                elif line.startswith("Reorienting as "):
+                    reoriented_files.append(line[len("Reorienting as "):])
+                    skip = True
+                    continue
+                elif line.startswith("Cropping NIfTI/Analyze image "):
+                    base, filename = os.path.split(line[len("Cropping NIfTI/Analyze image "):])
+                    filename = "c" + filename
+                    reoriented_and_cropped_files.append(os.path.join(base, filename))
+                    skip = True
+                    continue            
+                                           
+                if file:
+                    files.append(file)
+                    
+            skip = False
+        return files, reoriented_files, reoriented_and_cropped_files
     
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['converted_files'] = self.output_files
+        outputs['reoriented_files'] = self.reoriented_files
+        outputs['reoriented_and_cropped_files'] = self.reoriented_and_cropped_files
         return outputs
     
     def _gen_filename(self, name):
