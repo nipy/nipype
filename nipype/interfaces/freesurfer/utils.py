@@ -140,10 +140,10 @@ class SampleToSurface(FSCommand):
 
     >>> import nipype.interfaces.freesurfer as fs
     >>> sampler = fs.SampleToSurface(hemi="lh")
-    >>> sampler.inputs.in_file = "cope1.nii.gz"
+    >>> sampler.inputs.source_file = "cope1.nii.gz"
     >>> sampler.inputs.reg_file = "register.dat"
     >>> sampler.inputs.sampling_method = "average"
-    >>> sampler.inputs.sampling_rage = 1
+    >>> sampler.inputs.sampling_range = 1
     >>> sampler.inputs.sampling_units = "frac"
     >>> res = sampler.run() # doctest: +SKIP
    
@@ -318,7 +318,7 @@ class SurfaceTransform(FSCommand):
     --------
 
     >>> from nipype.interfaces.freesurfer import SurfaceTransform
-    >>> sxfm = SurfaceTransfrom()
+    >>> sxfm = SurfaceTransform()
     >>> sxfm.inputs.source_file = "lh.cope1.nii.gz"
     >>> sxfm.inputs.source_subject = "my_subject"
     >>> sxfm.inputs.target_subject = "fsaverage"
@@ -421,7 +421,7 @@ class SurfaceSnapshotsInputSpec(FSTraitedSpec):
     
     overlay = File(exists=True,argstr="-overlay %s",desc="load an overlay volume/surface",
                    requires=["overlay_range"])
-    reg_xors = ["overlay_reg","identity_reg","find_reg","mni152_reg"]
+    reg_xors = ["overlay_reg", "identity_reg", "mni152_reg"]
     overlay_reg = traits.File(exists=True,argstr="-overlay-reg %s",xor=reg_xors,
                               desc="registration matrix file to register overlay to surface")
     identity_reg = traits.Bool(argstr="-overlay-reg-identity",xor=reg_xors,
