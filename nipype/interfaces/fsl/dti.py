@@ -541,7 +541,7 @@ class ProbTrackXInputSpec(FSLCommandInputSpec):
                 '(either FLIRT matrix or FNIRT warp_field) - default is identity')    
     inv_xfm = File( argstr='--invxfm=%s',desc='transformation matrix taking DTI space to seed'+
                     ' space (compulsory when using a warp_field for seeds_to_dti)')
-    n_samples = traits.Int(argstr='--nsamples=%d',desc='number of samples - default=5000')
+    n_samples = traits.Int(5000, argstr='--nsamples=%d',desc='number of samples - default=5000', usedefault=True)
     n_steps = traits.Int(argstr='--nsteps=%d',desc='number of steps per sample - default=2000')
     dist_thresh = traits.Float(argstr='--distthresh=%.3f',desc='discards samples shorter than '+
                               'this threshold (in mm - default=0)')    
@@ -561,6 +561,7 @@ class ProbTrackXInputSpec(FSLCommandInputSpec):
     random_seed = traits.Bool(argstr='--rseed',desc='random seed')
     s2tastext = traits.Bool(argstr='--s2tastext',desc='output seed-to-target counts as a'+
                             ' text file (useful when seeding from a mesh)')
+    verbose = traits.Enum(0,1,2, desc = "Verbose level, [0-2]", argstr="--verbose=%d")
 
 class ProbTrackXOutputSpec(TraitedSpec):
     log = File(exists=True, desc='path/name of a text record of the command that was run')
@@ -570,6 +571,7 @@ class ProbTrackXOutputSpec(TraitedSpec):
                     'corresponding to the total number of generated tracts that '+
                     'have not been rejected by inclusion/exclusion mask criteria')
     targets = traits.List(File,exists=True,desc='a list with all generated seeds_to_target files')
+    particle_files = traits.List(File,exists=True)
     
 class ProbTrackX(FSLCommand):
     """ Use FSL  probtrackx for tractography on bedpostx results
@@ -629,20 +631,25 @@ class ProbTrackX(FSLCommand):
     
     def _list_outputs(self):        
         outputs = self.output_spec().get()        
-        outputs['log'] = os.path.abspath(self._gen_fname('probtrackx',cwd=self.inputs.out_dir,
-                                                suffix='.log',change_ext=False))            
-        outputs['way_total'] = os.path.abspath(self._gen_fname('waytotal',cwd=self.inputs.out_dir,
-                                              suffix='',change_ext=False))                        
+        if not isdefined(self.inputs.out_dir):
+            out_dir = self._gen_filename("out_dir")
+        else:
+            out_dir = self.inputs.out_dir
+            
+        outputs['log'] = os.path.abspath(os.path.join(out_dir,'probtrackx.log'))            
+        outputs['way_total'] = os.path.abspath(os.path.join(out_dir,'waytotal'))                        
         outputs['fdt_paths'] = os.path.abspath(self._gen_fname("fdt_paths",
-                                               cwd=self.inputs.out_dir,suffix=''))
+                                               cwd=out_dir,suffix=''))
       
         # handle seeds-to-target output files 
         if isdefined(self.inputs.target_masks):
             outputs['targets']=[]
             for target in self.inputs.target_masks:
                 outputs['targets'].append(os.path.abspath(self._gen_fname('seeds_to_'+os.path.split(target)[1],
-                                                          cwd=self.inputs.out_dir,
+                                                          cwd=out_dir,
                                                           suffix='')))
+        if isdefined(self.inputs.verbose) and self.inputs.verbose == 2:
+            outputs['particle_files'] = [os.path.abspath(os.path.join(out_dir, 'particle%d'%i)) for i in range(self.inputs.n_samples) ]
         return outputs
     def _gen_filename(self, name):
         if name == "out_dir":
