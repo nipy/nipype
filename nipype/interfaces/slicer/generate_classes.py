@@ -59,11 +59,21 @@ def generate_class(module):
                         
             if param.nodeName.endswith('-enumeration'):
                 type = "traits.Enum"
-                values = [el.firstChild.nodeValue for el in param.getElementsByTagName('element')]
+                values = ['"%s"'%el.firstChild.nodeValue for el in param.getElementsByTagName('element')]
             elif param.nodeName.endswith('-vector'):
                 type = "traits.List"
-                values = [typesDict[param.nodeName[:-7]]]
+                if param.nodeName in ['file', 'directory', 'image', 'transform']:
+                    values = ["File(exists=True)"]
+                else:
+                    values = [typesDict[param.nodeName[:-7]]]
                 traitsParams["sep"] = ','
+            elif param.getAttribute('multiple') == "true":
+                type = "traits.List"
+                if param.nodeName in ['file', 'directory', 'image', 'transform']:
+                    values = ["File(exists=True)"]
+                else:
+                    values = [typesDict[param.nodeName]]
+                traitsParams["argstr"] += "..."
             else:
                 values = []
                 type = typesDict[param.nodeName]
@@ -74,8 +84,9 @@ def generate_class(module):
                 
                 outputs_filenames[name] = gen_filename_from_param(param)
             else:
-                if param.nodeName in ['file', 'directory', 'image', 'transform']:
+                if param.nodeName in ['file', 'directory', 'image', 'transform'] and type not in ["InputMultiPath", "traits.List"]:
                     traitsParams["exists"] = True
+                    
                 inputTraits.append("%s = %s(%s %s)"%(name, type, parse_values(values), parse_params(traitsParams)))
                 
     input_spec_code = "class " + module + "InputSpec(CommandLineInputSpec):\n"
