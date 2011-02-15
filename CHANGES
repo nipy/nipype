@@ -5,6 +5,9 @@ Release 0.4 (FUTURE)
 * ENH: New FSL interface -- SwapDimensions (fslswapdim)
 * ENH: Sparse models allow regressor scaling and temporal derivatives
 * ENH: Added support for the component parts of FSL's TBSS workflow (TBSSSkeleton and DistanceMap)
+* ENH: dcm2nii interface exposes bvals, bvecs, reoriented and cropped images
+
+* BF: dcm2nii interface handles gzipped files correctly
 
 Release 0.3.4 (Jan 12, 2011)
 ======================
