@@ -6,6 +6,9 @@ Release 0.4 (FUTURE)
 * ENH: Sparse models allow regressor scaling and temporal derivatives
 * ENH: Added support for the component parts of FSL's TBSS workflow (TBSSSkeleton and DistanceMap)
 * ENH: dcm2nii interface exposes bvals, bvecs, reoriented and cropped images
+* ENH: Added several higher-level interfaces to the fslmaths command:
+    - ChangeDataType, Threshold, MeanImage, IsotropicSmooth, ApplyMask, TemporalFilter
+      DilateImage, ErodeImage, SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths
 
 * BF: dcm2nii interface handles gzipped files correctly
 
