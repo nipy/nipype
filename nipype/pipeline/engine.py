@@ -31,8 +31,9 @@ from nipype.utils.misc import package_check
 import shutil
 import cPickle
 import gzip
-package_check('networkx', '1.0')
+package_check('networkx', '1.3')
 import networkx as nx
+
 from IPython.Release import version as IPyversion
 try:
     from IPython.kernel.contexts import ConnectionRefusedError
@@ -74,6 +75,14 @@ fmlogger.addHandler(hdlr)
 fmlogger.setLevel(logging.getLevelName(config.get('logging','filemanip_level')))
 iflogger.addHandler(hdlr)
 iflogger.setLevel(logging.getLevelName(config.get('logging','interface_level')))
+
+if nx.__version__ < '1.4':
+    dfs_preorder = nx.dfs_preorder
+    logger.info('networkx < 1.4 detected')
+else:
+    dfs_preorder = nx.dfs_preorder_nodes
+    logger.info('networkx >= 1.4 detected')
+
 
 class WorkflowBase(object):
     """ Define common attributes and functions for workflows and nodes
@@ -729,7 +738,7 @@ class Workflow(WorkflowBase):
                 # node might fail
                 crashfile = node._report_crash(execgraph=self._execgraph)
                 # remove dependencies from queue
-                subnodes = nx.dfs_preorder(self._execgraph, node)
+                subnodes = [s for s in dfs_preorder(self._execgraph, node)]
                 notrun.append(dict(node = node,
                                    dependents = subnodes,
                                    crashfile = crashfile))
@@ -781,7 +790,7 @@ class Workflow(WorkflowBase):
         self.proc_pending = np.zeros(len(self.procs), dtype=bool)
 
     def _remove_node_deps(self, jobid, crashfile):
-        subnodes = nx.dfs_preorder(self._execgraph, self.procs[jobid])
+        subnodes = [s for s in dfs_preorder(self._execgraph, self.procs[jobid])]
         for node in subnodes:
             idx = self.procs.index(node)
             self.proc_done[idx] = True
