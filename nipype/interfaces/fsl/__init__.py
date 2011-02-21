@@ -28,7 +28,10 @@ from nipype.interfaces.fsl.dti import (EddyCorrect, BEDPOSTX, DTIFit,
                                        FindTheBiggest, DistanceMap,
                                        TractSkeleton, XFibres, 
                                        MakeDyadicVectors)
-
+from nipype.interfaces.fsl.maths import (ChangeDataType, Threshold, MeanImage, 
+                                         ApplyMask, IsotropicSmooth, TemporalFilter,
+                                         DilateImage, ErodeImage, SpatialFilter,
+                                         UnaryMaths, BinaryMaths, MultiImageMaths)
 
 import nose
 

@@ -11,7 +11,7 @@ import os
 import re
 
 from nipype.utils.misc import package_check
-package_check('networkx', '1.0')
+package_check('networkx', '1.3')
 import networkx as nx
 
 from nipype.interfaces.base import CommandLine, isdefined
@@ -19,6 +19,13 @@ from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
 from nipype.utils.config import config
 
 logger = logging.getLogger('workflow')
+
+if nx.__version__ < '1.4':
+    dfs_preorder = nx.dfs_preorder
+    logger.info('networkx < 1.4 detected')
+else:
+    dfs_preorder = nx.dfs_preorder_nodes
+    logger.info('networkx >= 1.4 detected')
 
 try:
     from os.path import relpath
@@ -328,7 +335,8 @@ def _generate_expanded_graph(graph_in):
             #nx.write_dot(graph_in, '%s_pre.dot'%node)
             node.iterables = {}
             node._id += 'I'
-            subnodes = nx.dfs_preorder(graph_in, node)
+            subnodes = [s for s in dfs_preorder(graph_in, node)]
+            logger.debug(('subnodes:' , subnodes))
             subgraph = graph_in.subgraph(subnodes)
             graph_in = _merge_graphs(graph_in, subnodes,
                                      subgraph, node._hierarchy+node._id,
