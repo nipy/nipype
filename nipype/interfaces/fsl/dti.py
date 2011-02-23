@@ -20,6 +20,12 @@ from nipype.interfaces.base import TraitedSpec, isdefined, File,Directory, \
 InputMultiPath, OutputMultiPath
 from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
 import enthought.traits.api as traits
+from nipype.interfaces.fsl.utils import ImageMaths, Split, Merge, ExtractROI
+from nipype.interfaces.utility import IdentityInterface, Select
+from nipype.pipeline.engine import Workflow, Node, MapNode
+import numpy as np
+from nipype.interfaces.fsl.preprocess import FLIRT
+
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
@@ -1078,5 +1084,132 @@ class MakeDyadicVectors(FSLCommand):
             
         return outputs  
     
+def create_bedpostx_pipeline(name="bedpostx"):
+    inputnode = Node(interface = IdentityInterface(fields=["dwi", "mask"]), 
+                        name="inputnode")
+    
+    mask_dwi = Node(interface = ImageMaths(op_string = "-mas"), 
+                       name="mask_dwi")
+    slice_dwi = Node(interface = Split(dimension="z"), name="slice_dwi")
+    slice_mask = Node(interface = Split(dimension="z"), 
+                         name="slice_mask")
+    
+    preproc = Workflow(name="preproc")
+    
+    preproc.connect([(inputnode, mask_dwi, [('dwi', 'in_file')]),
+                     (inputnode, mask_dwi, [('mask', 'in_file2')]),
+                     (mask_dwi, slice_dwi, [('out_file', 'in_file')]),
+                     (inputnode, slice_mask, [('mask', 'in_file')])
+                     ])
+    
+    xfibres = MapNode(interface=XFibres(), name="xfibres", 
+                         iterfield=['dwi', 'mask'])
+    
+   
+    # Normal set of parameters
+    xfibres.inputs.n_fibres = 2 
+    xfibres.inputs.fudge = 1 
+    xfibres.inputs.burn_in = 1000 
+    xfibres.inputs.n_jumps = 1250 
+    xfibres.inputs.sample_every = 25
+    xfibres.inputs.model = 1
+    xfibres.inputs.non_linear = True
+    xfibres.inputs.update_proposals_every = 24
+    
+    inputnode = Node(interface = IdentityInterface(fields=["thsamples", 
+                                                                   "phsamples", 
+                                                                   "fsamples", 
+                                                                   "dyads", 
+                                                                   "mean_dsamples",
+                                                                   "mask"]), 
+                        name="inputnode")
+    
+    merge_thsamples = MapNode(Merge(dimension="z"), 
+                                 name="merge_thsamples", iterfield=['in_files'])
+    merge_phsamples = MapNode(Merge(dimension="z"), 
+                                 name="merge_phsamples", iterfield=['in_files'])
+    merge_fsamples = MapNode(Merge(dimension="z"), 
+                                name="merge_fsamples", iterfield=['in_files'])
+    
+    
+    merge_mean_dsamples = Node(Merge(dimension="z"), 
+                                  name="merge_mean_dsamples")
+    
+    mean_thsamples = MapNode(ImageMaths(op_string="-Tmean"), 
+                                name="mean_thsamples", iterfield=['in_file'])
+    mean_phsamples = MapNode(ImageMaths(op_string="-Tmean"), 
+                                name="mean_phsamples", iterfield=['in_file'])
+    mean_fsamples = MapNode(ImageMaths(op_string="-Tmean"), 
+                               name="mean_fsamples", iterfield=['in_file'])
+    make_dyads = MapNode(MakeDyadicVectors(), name="make_dyads", 
+                            iterfield=['theta_vol', 'phi_vol'])
 
+    postproc = Workflow(name="postproc")
+    
+    def transpose(samples_over_fibres):
+        a = np.array(samples_over_fibres)
+        if len(a.shape)==1:
+            a = a.reshape(-1,1)
+        return a.T.tolist()
+    
+    postproc.connect([(inputnode, merge_thsamples, [(('thsamples',transpose), 'in_files')]),
+                      (inputnode, merge_phsamples, [(('phsamples',transpose), 'in_files')]),
+                      (inputnode, merge_fsamples, [(('fsamples',transpose), 'in_files')]),
+                      (inputnode, merge_mean_dsamples, [('mean_dsamples', 'in_files')]),
+                      
+                      (merge_thsamples, mean_thsamples, [('merged_file', 'in_file')]),
+                      (merge_phsamples, mean_phsamples, [('merged_file', 'in_file')]),
+                      (merge_fsamples, mean_fsamples, [('merged_file', 'in_file')]),
+                      (merge_thsamples, make_dyads, [('merged_file', 'theta_vol')]),
+                      (merge_phsamples, make_dyads, [('merged_file', 'phi_vol')]),
+                      (inputnode, make_dyads, [('mask', 'mask')]),
+                      ])
+    
+    inputnode = Node(interface = IdentityInterface(fields=["dwi", 
+                                                                   "mask", 
+                                                                   "bvecs", 
+                                                                   "bvals"]), 
+                                                           name="inputnode")
+    
+    bedpostx = Workflow(name=name)
+    bedpostx.connect([(inputnode, preproc, [('mask', 'inputnode.mask')]),
+                      (inputnode, preproc, [('dwi', 'inputnode.dwi')]),
+                      
+                      (preproc, xfibres, [('slice_dwi.out_files', 'dwi'),
+                                          ('slice_mask.out_files', 'mask')]),
+                      (inputnode, xfibres, [('bvals', 'bvals')]),
+                      (inputnode, xfibres, [('bvecs', 'bvecs')]),
+                      
+                      (inputnode, postproc, [('mask', 'inputnode.mask')]),
+                      (xfibres, postproc, [('thsamples','inputnode.thsamples'),
+                                           ('phsamples', 'inputnode.phsamples'),
+                                           ('fsamples', 'inputnode.fsamples'),
+                                           ('dyads', 'inputnode.dyads'),
+                                           ('mean_dsamples', 'inputnode.mean_dsamples')]),
+                      ])
+    return bedpostx
+
+def create_eddycorrect_pipeline(name="eddy_correct"):
+    inputnode = Node(interface = IdentityInterface(fields=["in_file", "ref_num"]), 
+                        name="inputnode")
+    
+    pipeline = Workflow(name)
+    
+    split = Node(Split(), name="split")
+    pipeline.connect([(inputnode, split, [("in_file", "in_file")])])
+    
+    pick_ref = Node(Select(), name="pick_ref")
+    pipeline.connect([(split, pick_ref[("out_files", "inlist")]),
+                      (inputnode, pick_ref[("ref_num", "index")])])
+    
+    coregistration = MapNode(FLIRT(nosearch=True, padding_size=1), name = "coregistration", iterfield=["in_file"])
+    pipeline.connect([(split, coregistration, [("out_files", "in_file")]),
+                      (pick_ref, coregistration, [("out", "reference")])])
+    
+    merge = Node(Merge(dimension="t"), name="merge")
+    pipeline.connect([(coregistration, merge, [("out_file", "in_files")])
+                      ])
+    return pipeline
+    
+    
     
