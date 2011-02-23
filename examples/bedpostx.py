@@ -32,6 +32,8 @@ def create_bedpostx_pipeline(name="bedpostx"):
     xfibres.inputs.n_jumps = 1250 
     xfibres.inputs.sample_every = 25
     xfibres.inputs.model = 1
+    xfibres.inputs.non_linear = True
+    xfibres.inputs.update_proposals_every = 24
     
     inputnode = pe.Node(interface = util.IdentityInterface(fields=["thsamples", 
                                                                    "phsamples", 
