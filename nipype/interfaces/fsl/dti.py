@@ -504,10 +504,10 @@ class ProbTrackXInputSpec(FSLCommandInputSpec):
     samples_base_name = traits.Str("merged", desc = 'the rootname/base_name for samples files',argstr='--samples=%s', usedefault=True)
     mask	 = File(exists=True, desc='bet binary mask file in diffusion space',
                  argstr='-m %s', mandatory=True)
-    seed = 	traits.Either(File(exists=True), traits.List(File(exists=True)), desc='seed volumes, or voxel'+
-                     'volumes, or freesurfer label file',argstr='--seed=%s', mandatory=True)	
+    seed = 	traits.Either(File(exists=True), traits.List(File(exists=True)), traits.List(traits.List(traits.Int(), minlen=3, maxlen=3)), desc='seed volume(s), or voxel(s)'+
+                     'or freesurfer label file',argstr='--seed=%s', mandatory=True)	
     mode	= traits.Enum("simple", "two_mask_symm", "seedmask", desc='options: simple (single seed voxel), seedmask (mask of seed voxels),'+
-                     'twomask_symm (two bet binary masks) ', argstr='--mode=%s')                             
+                     'twomask_symm (two bet binary masks) ', argstr='--mode=%s', genfile=True)                             
     target_masks	= InputMultiPath(File(exits=True),desc='list of target masks - '+
                        'required for seeds_to_targets classification', argstr='--targetmasks=%s')    
     mask2	=File(exists=True,desc='second bet binary mask (in diffusion space) in twomask_symm mode',
@@ -526,7 +526,7 @@ class ProbTrackXInputSpec(FSLCommandInputSpec):
                        desc='directory to put the final volumes in', genfile=True)
     force_dir	= traits.Bool(True, desc='use the actual directory name given - i.e. '+
                           'do not add + to make a new directory',argstr='--forcedir', usedefault=True)
-    opd = traits.Bool(desc='outputs path distributions',argstr='--opd')
+    opd = traits.Bool(True, desc='outputs path distributions',argstr='--opd', usedefault=True)
     correct_path_distribution	= traits.Bool(desc='correct path distribution for the length of the pathways',
                             argstr='--pd')
     os2t	= traits.Bool(desc='Outputs seeds to targets',argstr='--os2t')
@@ -565,7 +565,7 @@ class ProbTrackXInputSpec(FSLCommandInputSpec):
 
 class ProbTrackXOutputSpec(TraitedSpec):
     log = File(exists=True, desc='path/name of a text record of the command that was run')
-    fdt_paths = File(exists=True, desc='path/name of a 3D image file containing the output '+
+    fdt_paths = OutputMultiPath(File(exists=True), desc='path/name of a 3D image file containing the output '+
                      'connectivity distribution to the seed mask')
     way_total = File(exists=True, desc='path/name of a text file containing a single number '+
                     'corresponding to the total number of generated tracts that '+
@@ -611,7 +611,10 @@ class ProbTrackX(FSLCommand):
         if isinstance(self.inputs.seed, list):
             f = open("seeds.txt","w")
             for seed in self.inputs.seed:
-                f.write("%s\n"%seed)
+                if isinstance(seed, list):
+                    f.write("%s\n"%(" ".join([str(s) for s in seed])))
+                else:
+                    f.write("%s\n"%seed)
             f.close()
             
         runtime = super(ProbTrackX, self)._run_interface(runtime)
@@ -637,8 +640,15 @@ class ProbTrackX(FSLCommand):
             out_dir = self.inputs.out_dir
             
         outputs['log'] = os.path.abspath(os.path.join(out_dir,'probtrackx.log'))            
-        outputs['way_total'] = os.path.abspath(os.path.join(out_dir,'waytotal'))                        
-        outputs['fdt_paths'] = os.path.abspath(self._gen_fname("fdt_paths",
+        #utputs['way_total'] = os.path.abspath(os.path.join(out_dir,'waytotal'))
+        if isdefined(self.inputs.opd == True):
+            if isinstance(self.inputs.seed, list) and isinstance(self.inputs.seed[0], list):
+                outputs['fdt_paths'] = []
+                for seed in self.inputs.seed:
+                    outputs['fdt_paths'].append(os.path.abspath(self._gen_fname("fdt_paths_%s"%("_".join([str(s) for s in seed])), 
+                                                                                cwd=out_dir,suffix='')))
+            else:             
+                outputs['fdt_paths'] = os.path.abspath(self._gen_fname("fdt_paths",
                                                cwd=out_dir,suffix=''))
       
         # handle seeds-to-target output files 
@@ -651,9 +661,15 @@ class ProbTrackX(FSLCommand):
         if isdefined(self.inputs.verbose) and self.inputs.verbose == 2:
             outputs['particle_files'] = [os.path.abspath(os.path.join(out_dir, 'particle%d'%i)) for i in range(self.inputs.n_samples) ]
         return outputs
+    
     def _gen_filename(self, name):
         if name == "out_dir":
             return os.getcwd()
+        elif name == "mode":
+            if isinstance(self.inputs.seed, list) and isinstance(self.inputs.seed[0], list):
+                return "simple"
+            else:
+                return "seedmask"
 
 class VecRegInputSpec(FSLCommandInputSpec):    
     in_file = File(exists=True,argstr='-i %s',desc='filename for input vector or tensor field',
