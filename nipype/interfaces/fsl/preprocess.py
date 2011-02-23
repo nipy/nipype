@@ -736,47 +736,45 @@ class FNIRT(FSLCommand):
     
     
     filemap = {'warped_file':'warped',
-                'field_file':'field',
-                   'jacobian_file':'field_jacobian',
-                   'modulatedref_file':'modulated',
-                   'out_intensitymap_file':'intmap',
-                   'log_file':'log.txt',
-                   'fieldcoeff_file':'fieldwarp'}
+               'field_file':'field',
+               'jacobian_file':'field_jacobian',
+               'modulatedref_file':'modulated',
+               'out_intensitymap_file':'intmap',
+               'log_file':'log.txt',
+               'fieldcoeff_file':'fieldwarp'}
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         for key, suffix in self.filemap.items():
-            outkey = key
             inval = getattr(self.inputs, key)
-            if isdefined(inval):
+            change_ext = True
+            if key in ['warped_file', 'log_file']:
+                if suffix.endswith('.txt'):
+                    change_ext=False
+                if isdefined(inval):
+                    outputs[key] = inval
+                else:
+                    outputs[key] = self._gen_fname(self.inputs.in_file,
+                                                   suffix='_'+suffix,
+                                                   change_ext=change_ext)
+            elif isdefined(inval):
                 if isinstance(inval, bool):
                     if inval:
-                        change_ext = True
-                        if suffix.endswith('.txt'):
-                            change_ext=False
-                        outputs[outkey] = self._gen_fname(self.inputs.in_file,
-                                                          suffix='_'+suffix,
-                                                          change_ext=change_ext)
+                        outputs[key] = self._gen_fname(self.inputs.in_file,
+                                                       suffix='_'+suffix,
+                                                       change_ext=change_ext)
                 else:
-                    outputs[outkey] = inval
+                    outputs[key] = inval
         return outputs
 
     def _format_arg(self, name, spec, value):
         if name in self.filemap.keys():
-            if isinstance(value, bool) and value:
-                fname = self._list_outputs()[name]
-            else:
-                fname = value
-            return spec.argstr % fname
+            return spec.argstr % self._list_outputs()[name]
         return super(FNIRT, self)._format_arg(name, spec, value)
     
     def _gen_filename(self, name):
-        if name in self.filemap.keys():
-            suffix = self.filemap[name]
-            change_ext = True
-            if suffix.endswith('.txt'):
-                change_ext=False
-            return self._gen_fname(self.inputs.in_file, suffix='_'+suffix, change_ext=change_ext)
+        if name in ['warped_file', 'log_file']:
+            return self._list_outputs()[name]
         return None
 
     def write_config(self, configfile):
