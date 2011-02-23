@@ -9,8 +9,10 @@ Release 0.4 (FUTURE)
 * ENH: Added several higher-level interfaces to the fslmaths command:
     - ChangeDataType, Threshold, MeanImage, IsotropicSmooth, ApplyMask, TemporalFilter
       DilateImage, ErodeImage, SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths
+* ENH: added support for networx 1.4 and improved iterable expansion
 
 * BF: dcm2nii interface handles gzipped files correctly
+* BF: FNIRT generates proper outputs
 
 Release 0.3.4 (Jan 12, 2011)
 ======================
