@@ -216,7 +216,7 @@ def test_mask():
 
     # Test auto name generation
     masker = fsl.ApplyMask(in_file="a.nii",mask_file="b.nii")
-    yield assert_equal, masker.cmdline, "fslmaths a.nii -mas b.nii "+os.path.join(testdir, "a_mask.nii")
+    yield assert_equal, masker.cmdline, "fslmaths a.nii -mas b.nii "+os.path.join(testdir, "a_masked.nii")
 
     # Clean up our mess
     clean_directory(testdir, origdir, ftype)

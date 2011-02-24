@@ -137,7 +137,7 @@ class ApplyMask(MathsCommand):
 
     """
     input_spec = ApplyMaskInput
-    _suffix = "_mask"
+    _suffix = "_masked"
 
 class KernelInput(MathsInput):
 
