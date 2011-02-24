@@ -1114,7 +1114,7 @@ def create_bedpostx_pipeline(name="bedpostx"):
     xfibres.inputs.sample_every = 25
     xfibres.inputs.model = 1
     xfibres.inputs.non_linear = True
-    xfibres.inputs.update_proposals_every = 24
+    xfibres.inputs.update_proposal_every = 24
     
     inputnode = Node(interface = IdentityInterface(fields=["thsamples", 
                                                                    "phsamples", 
@@ -1193,16 +1193,16 @@ def create_eddycorrect_pipeline(name="eddy_correct"):
     inputnode = Node(interface = IdentityInterface(fields=["in_file", "ref_num"]), 
                         name="inputnode")
     
-    pipeline = Workflow(name)
+    pipeline = Workflow(name=name)
     
     split = Node(Split(), name="split")
     pipeline.connect([(inputnode, split, [("in_file", "in_file")])])
     
     pick_ref = Node(Select(), name="pick_ref")
-    pipeline.connect([(split, pick_ref[("out_files", "inlist")]),
-                      (inputnode, pick_ref[("ref_num", "index")])])
+    pipeline.connect([(split, pick_ref, [("out_files", "inlist")]),
+                      (inputnode, pick_ref, [("ref_num", "index")])])
     
-    coregistration = MapNode(FLIRT(nosearch=True, padding_size=1), name = "coregistration", iterfield=["in_file"])
+    coregistration = MapNode(FLIRT(no_search=True, padding_size=1), name = "coregistration", iterfield=["in_file"])
     pipeline.connect([(split, coregistration, [("out_files", "in_file")]),
                       (pick_ref, coregistration, [("out", "reference")])])
     
