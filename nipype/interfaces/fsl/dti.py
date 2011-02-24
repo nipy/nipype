@@ -21,7 +21,7 @@ InputMultiPath, OutputMultiPath
 from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
 import enthought.traits.api as traits
 from nipype.interfaces.fsl.utils import ImageMaths, Split, Merge, ExtractROI
-from nipype.interfaces.utility import IdentityInterface, Select
+import nipype.interfaces.utility as util
 from nipype.pipeline.engine import Workflow, Node, MapNode
 import numpy as np
 from nipype.interfaces.fsl.preprocess import FLIRT
@@ -1085,7 +1085,7 @@ class MakeDyadicVectors(FSLCommand):
         return outputs  
     
 def create_bedpostx_pipeline(name="bedpostx"):
-    inputnode = Node(interface = IdentityInterface(fields=["dwi", "mask"]), 
+    inputnode = Node(interface = util.IdentityInterface(fields=["dwi", "mask"]), 
                         name="inputnode")
     
     mask_dwi = Node(interface = ImageMaths(op_string = "-mas"), 
@@ -1116,7 +1116,7 @@ def create_bedpostx_pipeline(name="bedpostx"):
     xfibres.inputs.non_linear = True
     xfibres.inputs.update_proposal_every = 24
     
-    inputnode = Node(interface = IdentityInterface(fields=["thsamples", 
+    inputnode = Node(interface = util.IdentityInterface(fields=["thsamples", 
                                                                    "phsamples", 
                                                                    "fsamples", 
                                                                    "dyads", 
@@ -1165,7 +1165,7 @@ def create_bedpostx_pipeline(name="bedpostx"):
                       (inputnode, make_dyads, [('mask', 'mask')]),
                       ])
     
-    inputnode = Node(interface = IdentityInterface(fields=["dwi", 
+    inputnode = Node(interface = util.IdentityInterface(fields=["dwi", 
                                                                    "mask", 
                                                                    "bvecs", 
                                                                    "bvals"]), 
@@ -1190,7 +1190,7 @@ def create_bedpostx_pipeline(name="bedpostx"):
     return bedpostx
 
 def create_eddycorrect_pipeline(name="eddy_correct"):
-    inputnode = Node(interface = IdentityInterface(fields=["in_file", "ref_num"]), 
+    inputnode = Node(interface = util.IdentityInterface(fields=["in_file", "ref_num"]), 
                         name="inputnode")
     
     pipeline = Workflow(name=name)
@@ -1198,7 +1198,7 @@ def create_eddycorrect_pipeline(name="eddy_correct"):
     split = Node(Split(), name="split")
     pipeline.connect([(inputnode, split, [("in_file", "in_file")])])
     
-    pick_ref = Node(Select(), name="pick_ref")
+    pick_ref = Node(util.Select(), name="pick_ref")
     pipeline.connect([(split, pick_ref, [("out_files", "inlist")]),
                       (inputnode, pick_ref, [("ref_num", "index")])])
     

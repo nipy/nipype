@@ -16,7 +16,12 @@ from nose import with_setup
 from nipype.testing import ( assert_equal, assert_not_equal,
                              assert_raises, skipif, example_data)
 import nipype.interfaces.fsl.dti as fsl
-from nipype.interfaces.fsl import Info, no_fsl
+from nipype.interfaces.fsl import Info, no_fsl, no_fsl_course_data
+
+import nipype.pipeline.engine as pe
+from nipype.interfaces.fsl.maths import BinaryMaths
+from nipype.interfaces.fsl.utils import ImageStats
+from nipype.interfaces.utility import IdentityInterface
 
 # nosetests --with-doctest path_to/test_fsl.py
 
@@ -79,6 +84,57 @@ def test_eddycorrect():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+def setup_test_dir():
+    # Setup function is called before each test.  Setup is called only
+    # once for each generator function.
+    global test_dir, cur_dir
+    test_dir = tempfile.mkdtemp()
+    cur_dir = os.getcwd()
+    os.chdir(test_dir)
+
+def remove_test_dir():
+    # Teardown is called after each test to perform cleanup
+    os.chdir(cur_dir)
+    shutil.rmtree(test_dir)
+
+
+@skipif(no_fsl)
+@skipif(no_fsl_course_data)
+@with_setup(setup_test_dir, remove_test_dir)
+def test_create_eddy_correct_pipeline():
+    fsl_course_dir = os.environ["FSL_COURSE_DATA"]
+    
+    dwi_file = os.path.join(fsl_course_dir, "fsl_course_data/fdt/subj1/data.nii.gz")
+    
+    
+    nipype_eddycorrect = fsl.create_eddycorrect_pipeline("nipype_eddycorrect")
+    nipype_eddycorrect.inputs.inputnode.in_file = dwi_file
+    nipype_eddycorrect.inputs.inputnode.ref_num = 0
+    
+    original_eddycorrect = pe.Node(interface = fsl.EddyCorrect(), name="original_eddycorrect")
+    original_eddycorrect.inputs.in_file = dwi_file
+    original_eddycorrect.inputs.ref_num = 0
+    
+    difference = pe.Node(interface=BinaryMaths(operation="sub"), name="difference")
+    
+    mean = pe.Node(interface=ImageStats(op_string="-m"), name="mean")
+    
+    test = pe.Node(interface=IdentityInterface(fields=["mean"]), name="test")
+    
+    def assert_zero(val):
+        assert_equal, val, 0
+    
+    pipeline = pe.Workflow(name="test_eddycorrect")
+    pipeline.base_dir = test_dir
+    
+    pipeline.connect([(nipype_eddycorrect, difference, [("merge.merged_file", "in_file")]),
+                      (original_eddycorrect, difference, [("eddy_corrected", "operand_file")]),
+                      (difference, mean, [("out_file", "in_file")]),
+                      (mean, test, [(("out_stat", assert_zero), "mean")])
+                      ])
+    
+    pipeline.run(inseries=True)
+
 @skipif(no_fsl)
 def test_findthebiggest():
     input_map = dict(args = dict(argstr='%s',),
@@ -96,7 +152,9 @@ def test_findthebiggest():
 def test_probtrackx():
     input_map = dict(args = dict(argstr='%s',),
                      avoid_mp = dict(argstr='--avoid=%s',),
-                     bpx_directory = dict(mandatory=True,),
+                     thsamples = dict(mandatory=True),
+                     phsamples = dict(mandatory=True),
+                     fsamples = dict(mandatory=True),
                      c_thresh = dict(argstr='--cthr=%.3f',),
                      correct_path_distribution = dict(argstr='--pd',),
                      dist_thresh = dict(argstr='--distthresh=%.3f',),
@@ -117,13 +175,12 @@ def test_probtrackx():
                      os2t = dict(argstr='--os2t',),
                      out_dir = dict(argstr='--dir=%s',),
                      output_type = dict(),
-                     paths_file = dict(argstr='--out=%s',),
                      rand_fib = dict(argstr='--randfib %d',),
                      random_seed = dict(argstr='--rseed',),
                      s2tastext = dict(argstr='--s2tastext',),
                      sample_random_points = dict(argstr='--sampvox',),
-                     samplesbase_name = dict(argstr='-s %s',),
-                     seed_file = dict(argstr='-x %s',mandatory=True,),
+                     samples_base_name = dict(argstr='--samples=%s',),
+                     seed = dict(argstr='--seed=%s',mandatory=True,),
                      seed_ref = dict(argstr='--seedref=%s',),
                      step_length = dict(argstr='--steplength=%.3f',),
                      stop_mask = dict(argstr='--stop=%s',),
