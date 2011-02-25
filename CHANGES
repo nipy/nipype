@@ -10,6 +10,7 @@ Release 0.4 (FUTURE)
     - ChangeDataType, Threshold, MeanImage, IsotropicSmooth, ApplyMask, TemporalFilter
       DilateImage, ErodeImage, SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths
 * ENH: added support for networx 1.4 and improved iterable expansion
+* ENH: Replaced BEDPOSTX and EddyCurrent with nipype pipelines 
 
 * BF: dcm2nii interface handles gzipped files correctly
 * BF: FNIRT generates proper outputs
