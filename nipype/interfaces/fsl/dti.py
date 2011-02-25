@@ -106,7 +106,7 @@ class EddyCorrectOutputSpec(TraitedSpec):
     eddy_corrected = File(exists=True, desc='path/name of 4D eddy corrected output file')
 
 class EddyCorrect(FSLCommand):
-    """ Use FSL eddy_correct command for correction of eddy current distortion
+    """  Deprecated! Please use create_eddy_correct_pipeline instead
     
     Example
     -------
@@ -179,7 +179,7 @@ class BEDPOSTXOutputSpec(TraitedSpec):
 
     
 class BEDPOSTX(FSLCommand):
-    """ Use FSL  bedpostx command for local modelling of diffusion parameters
+    """ Deprecated! Please use create_bedpostx_pipeline instead
     
     Example
     -------
@@ -196,6 +196,10 @@ class BEDPOSTX(FSLCommand):
     input_spec = BEDPOSTXInputSpec
     output_spec = BEDPOSTXOutputSpec
     can_resume = True
+    
+    def __init__(self, **inputs):
+        warnings.warn("Deprecated: Please use create_bedpostx_pipeline instead", DeprecationWarning)
+        return super(BEDPOSTX, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
         
@@ -603,6 +607,10 @@ class ProbTrackX(FSLCommand):
     _cmd = 'probtrackx'
     input_spec = ProbTrackXInputSpec
     output_spec = ProbTrackXOutputSpec
+    
+    def __init__(self, **inputs):
+        warnings.warn("Deprecated: Please use create_bedpostx_pipeline instead", DeprecationWarning)
+        return super(ProbTrackX, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
         for i in range(1, len(self.inputs.thsamples)+1):
@@ -1036,6 +1044,8 @@ class XFibresOutputSpec(TraitedSpec):
     thsamples = OutputMultiPath(File(exists=True), desc="Samples from the distribution on theta")
 
 class XFibres(FSLCommand):
+    """Perform model parameters estimation for local (voxelwise) diffusion parameters
+    """
     _cmd = "xfibres"
     input_spec = XFibresInputSpec
     output_spec = XFibresOutputSpec
@@ -1077,6 +1087,9 @@ class MakeDyadicVectorsOutputSpec(TraitedSpec):
     dispersion = File(exists=True)
     
 class MakeDyadicVectors(FSLCommand):
+    """Create vector volume representing mean principal diffusion direction
+    and its uncertainty (dispersion)"""
+    
     _cmd = "make_dyadic_vectors"
     input_spec = MakeDyadicVectorsInputSpec
     output_spec = MakeDyadicVectorsOutputSpec
@@ -1089,6 +1102,39 @@ class MakeDyadicVectors(FSLCommand):
         return outputs  
     
 def create_bedpostx_pipeline(name="bedpostx"):
+    """Creates a pipeline that does the same as bedpostx script from FSL -
+    calculates diffusion model parameters (distributions not MLE) voxelwise for
+    the whole volume (by splitting it slicewise).
+        . 
+    Inputs: 
+    "inputnode.dwi"
+    "inputnode.mask"
+    
+    Outputs:
+    "merge_thsamples.merged_file"
+    "merge_phsamples.merged_file"
+    "merge_fsamples.merged_file"
+    "mean_thsamples.out_file"
+    "mean_phsamples.out_file"
+    "mean_fsamples.out_file"
+    "make_dyads.dyads"
+    "make_dyads.dispersion"
+    
+    >>> from nipype.interfaces import fsl
+    >>> nipype_bedpostx = fsl.create_bedpostx_pipeline("nipype_bedpostx")
+    >>> nipype_bedpostx.inputs.inputnode.dwi = 'diffusion.nii'
+    >>> nipype_bedpostx.inputs.inputnode.mask = 'mask.nii'
+    >>> nipype_bedpostx.inputs.inputnode.bvecs = 'bvecs'
+    >>> nipype_bedpostx.inputs.inputnode.bvals = 'bvals'
+    >>> nipype_bedpostx.inputs.xfibres.n_fibres = 2
+    >>> nipype_bedpostx.inputs.xfibres.fudge = 1
+    >>> nipype_bedpostx.inputs.xfibres.burn_in = 1000
+    >>> nipype_bedpostx.inputs.xfibres.n_jumps = 1250
+    >>> nipype_bedpostx.inputs.xfibres.sample_every = 25
+    
+    """
+    
+    
     inputnode = Node(interface = util.IdentityInterface(fields=["dwi", "mask"]), 
                         name="inputnode")
     
@@ -1193,7 +1239,24 @@ def create_bedpostx_pipeline(name="bedpostx"):
                       ])
     return bedpostx
 
-def create_eddycorrect_pipeline(name="eddy_correct"):
+def create_eddy_correct_pipeline(name="eddy_correct"):
+    """Creates a pipeline that replaces eddy_correct script in FSL. It takes a
+    series of diffusion weighted images and linearly corregisters them to one
+    reference image.
+    
+    Inputs:
+    inputnode.in_file
+    inputnode.ref_num
+    
+    Outputs:
+    merge.merged_file
+    
+    >>> from nipype.interfaces import fsl
+    >>> nipype_eddycorrect = fsl.create_eddy_correct_pipeline("nipype_eddycorrect")
+    >>> nipype_eddycorrect.inputs.inputnode.in_file = 'diffusion.nii'
+    >>> nipype_eddycorrect.inputs.inputnode.ref_num = 0
+    """
+    
     inputnode = Node(interface = util.IdentityInterface(fields=["in_file", "ref_num"]), 
                         name="inputnode")
     
