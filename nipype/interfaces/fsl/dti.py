@@ -205,13 +205,17 @@ class BEDPOSTX(FSLCommand):
         if not os.path.exists(bpx_directory):
             os.makedirs(bpx_directory)
     
-            # copy the dwi,bvals,bvecs, and mask files to that directory
-            shutil.copyfile(self.inputs.mask,self._gen_fname('nodif_brain_mask',suffix='',cwd=self.inputs.bpx_directory))
-            shutil.copyfile(self.inputs.dwi,self._gen_fname('data',suffix='',cwd=self.inputs.bpx_directory))
+            _,_,ext = split_filename(self.inputs.mask)
+            shutil.copyfile(self.inputs.mask, os.path.join(self.inputs.bpx_directory,'nodif_brain_mask'+ext))
+            _,_,ext = split_filename(self.inputs.dwi)
+            shutil.copyfile(self.inputs.dwi, os.path.join(self.inputs.bpx_directory,'data'+ext))
             shutil.copyfile(self.inputs.bvals,os.path.join(self.inputs.bpx_directory,'bvals'))
             shutil.copyfile(self.inputs.bvecs,os.path.join(self.inputs.bpx_directory,'bvecs'))
 
-        return super(BEDPOSTX, self)._run_interface(runtime)
+        runtime = super(BEDPOSTX, self)._run_interface(runtime)
+        if runtime.stderr:
+            runtime.returncode = 1
+        return runtime
 
     def _list_outputs(self):        
         outputs = self.output_spec().get()
