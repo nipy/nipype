@@ -20,11 +20,6 @@ from nipype.interfaces.base import TraitedSpec, isdefined, File,Directory, \
 InputMultiPath, OutputMultiPath
 from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
 import enthought.traits.api as traits
-from nipype.interfaces.fsl.utils import ImageMaths, Split, Merge, ExtractROI
-import nipype.interfaces.utility as util
-from nipype.pipeline.engine import Workflow, Node, MapNode
-import numpy as np
-from nipype.interfaces.fsl.preprocess import FLIRT
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)

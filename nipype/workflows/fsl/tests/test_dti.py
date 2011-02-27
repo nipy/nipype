@@ -5,10 +5,11 @@ from nose import with_setup
 from nipype.testing import (skipif)
 import nipype.workflows.fsl as fsl_wf
 import nipype.interfaces.fsl as fsl
+import nipype.interfaces.utility as util
 from nipype.interfaces.fsl import no_fsl, no_fsl_course_data
 
 import nipype.pipeline.engine as pe
-from nipype.testing.utils import create_compare_pipeline, setup_test_dir,\
+from nipype.testing.utils import setup_test_dir,\
     remove_test_dir
 import warnings
 
@@ -32,7 +33,7 @@ def test_create_eddy_correct_pipeline():
     original_eddycorrect.inputs.in_file = dwi_file
     original_eddycorrect.inputs.ref_num = 0
     
-    test = create_compare_pipeline("eddy_corrected_dwi_test")
+    test = pe.Node(util.AssertEqual(), name="eddy_corrected_dwi_test")
     
     pipeline = pe.Workflow(name="test_eddycorrect")
     pipeline.base_dir = test_dir
@@ -79,12 +80,12 @@ def test_create_bedpostx_pipeline():
     original_bedpostx.inputs.jumps = 1250
     original_bedpostx.inputs.sampling = 25
     
-    test_f1 = create_compare_pipeline("mean_f1_test")
-    test_f2 = create_compare_pipeline("mean_f2_test")
-    test_th1 = create_compare_pipeline("mean_th1_test")
-    test_th2 = create_compare_pipeline("mean_th2_test")
-    test_ph1 = create_compare_pipeline("mean_ph1_test")
-    test_ph2 = create_compare_pipeline("mean_ph2_test")
+    test_f1 = pe.Node(util.AssertEqual(), name="mean_f1_test")
+    test_f2 = pe.Node(util.AssertEqual(), name="mean_f2_test")
+    test_th1 = pe.Node(util.AssertEqual(), name="mean_th1_test")
+    test_th2 = pe.Node(util.AssertEqual(), name="mean_th2_test")
+    test_ph1 = pe.Node(util.AssertEqual(), name="mean_ph1_test")
+    test_ph2 = pe.Node(util.AssertEqual(), name="mean_ph2_test")
     
     pipeline = pe.Workflow(name="test_bedpostx")
     pipeline.base_dir = test_dir
