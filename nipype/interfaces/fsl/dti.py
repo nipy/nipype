@@ -1111,14 +1111,14 @@ def create_bedpostx_pipeline(name="bedpostx"):
     "inputnode.mask"
     
     Outputs:
-    "merge_thsamples.merged_file"
-    "merge_phsamples.merged_file"
-    "merge_fsamples.merged_file"
-    "mean_thsamples.out_file"
-    "mean_phsamples.out_file"
-    "mean_fsamples.out_file"
-    "make_dyads.dyads"
-    "make_dyads.dispersion"
+    "postproc.merge_thsamples.merged_file"
+    "postproc.merge_phsamples.merged_file"
+    "postproc.merge_fsamples.merged_file"
+    "postproc.mean_thsamples.out_file"
+    "postproc.mean_phsamples.out_file"
+    "postproc.mean_fsamples.out_file"
+    "postproc.make_dyads.dyads"
+    "postproc.make_dyads.dispersion"
     
     >>> from nipype.interfaces import fsl
     >>> nipype_bedpostx = fsl.create_bedpostx_pipeline("nipype_bedpostx")
