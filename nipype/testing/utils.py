@@ -37,7 +37,7 @@ def create_compare_pipeline(name="compare_and_test"):
     test = Node(interface=IdentityInterface(fields=["mean"]), name="test")
     
     def assert_zero(val):
-        assert_equal, val, 0, "failed in " + name
+        assert val==0, "failed in " + name
     
     pipeline = Workflow(name=name)
     
