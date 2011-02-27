@@ -20,7 +20,8 @@ from nipype.interfaces.fsl import Info, no_fsl, no_fsl_course_data
 
 import nipype.pipeline.engine as pe
 from nipype.interfaces.fsl.dti import create_bedpostx_pipeline
-from nipype.testing.utils import create_compare_pipeline
+from nipype.testing.utils import create_compare_pipeline, setup_test_dir,\
+    remove_test_dir
 import warnings
 
 # nosetests --with-doctest path_to/test_fsl.py
@@ -83,19 +84,6 @@ def test_eddycorrect():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-def setup_test_dir():
-    # Setup function is called before each test.  Setup is called only
-    # once for each generator function.
-    global test_dir, cur_dir
-    test_dir = tempfile.mkdtemp()
-    cur_dir = os.getcwd()
-    os.chdir(test_dir)
-
-def remove_test_dir():
-    # Teardown is called after each test to perform cleanup
-    os.chdir(cur_dir)
-    shutil.rmtree(test_dir)
 
 @skipif(no_fsl)
 @skipif(no_fsl_course_data)

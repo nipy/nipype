@@ -2,6 +2,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Additional handy utilities for testing
 """
+import tempfile
+import os
+import shutil
 __docformat__ = 'restructuredtext'
 
 from nipype.utils.misc import package_check
@@ -47,3 +50,16 @@ def create_compare_pipeline(name="compare_and_test"):
                       (mean, test, [(("out_stat", assert_zero), "mean")])
                       ])
     return pipeline
+
+def setup_test_dir():
+    # Setup function is called before each test.  Setup is called only
+    # once for each generator function.
+    global test_dir, cur_dir
+    test_dir = tempfile.mkdtemp()
+    cur_dir = os.getcwd()
+    os.chdir(test_dir)
+
+def remove_test_dir():
+    # Teardown is called after each test to perform cleanup
+    os.chdir(cur_dir)
+    shutil.rmtree(test_dir)
