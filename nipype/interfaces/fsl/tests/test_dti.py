@@ -26,7 +26,7 @@ import warnings
 
 # nosetests --with-doctest path_to/test_fsl.py
 
-def test_bedpostx():
+def test_bedpostx1():
     input_map = dict(args = dict(argstr='%s',),
                      bpx_directory = dict(argstr='%s',),
                      burn_period = dict(argstr='-b %d',),
@@ -46,7 +46,7 @@ def test_bedpostx():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
-def test_dtifit():
+def test_dtifit1():
     input_map = dict(args = dict(argstr='%s',),
                      base_name = dict(argstr='-o %s',),
                      bvals = dict(argstr='-b %s',mandatory=True,),
@@ -72,7 +72,7 @@ def test_dtifit():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
 @skipif(no_fsl)
-def test_eddycorrect():
+def test_eddy_correct1():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
                      in_file = dict(argstr='%s',mandatory=True,),
@@ -256,7 +256,7 @@ def test_projthresh():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
-def test_randomise():
+def test_randomise1():
     input_map = dict(args = dict(argstr='%s',),
                      base_name = dict(argstr='-o %s',),
                      c_thresh = dict(argstr='-c %.2f',),
@@ -397,7 +397,7 @@ def clean_directory(outdir, old_wd):
 
 
 # test bedpostx
-def test_bedpostx():
+def test_bedpostx2():
     filelist, outdir, cwd = create_files_in_directory()
     bpx = fsl.BEDPOSTX()
 
@@ -427,7 +427,7 @@ def test_bedpostx():
  
 # test eddy_correct
 @skipif(no_fsl)
-def test_eddy_correct():
+def test_eddy_correct2():
     filelist, outdir, cwd = create_files_in_directory()
     eddy = fsl.EddyCorrect()
 
@@ -454,7 +454,7 @@ def test_eddy_correct():
 
 # test dtifit
 @skipif(no_fsl)
-def test_dtifit():
+def test_dtifit2():
     filelist, outdir, cwd = create_files_in_directory()
     dti = fsl.DTIFit()
 
@@ -614,7 +614,7 @@ def test_tbss_4_prestats():
     # TBSS4Prestats doesn't have an opt_map{}
 
 @skipif(skip_dti_tests)
-def test_randomise():
+def test_randomise2():
 
     rand = fsl.Randomise()
 
