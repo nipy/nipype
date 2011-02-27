@@ -28,9 +28,7 @@ from nipype.interfaces.fsl.dti import (EddyCorrect, BEDPOSTX, DTIFit,
                                        ProbTrackX, VecReg, ProjThresh,
                                        FindTheBiggest, DistanceMap,
                                        TractSkeleton, XFibres, 
-                                       MakeDyadicVectors, 
-                                       create_bedpostx_pipeline,
-                                       create_eddy_correct_pipeline)
+                                       MakeDyadicVectors)
 from nipype.interfaces.fsl.maths import (ChangeDataType, Threshold, MeanImage, 
                                          ApplyMask, IsotropicSmooth, TemporalFilter,
                                          DilateImage, ErodeImage, SpatialFilter,

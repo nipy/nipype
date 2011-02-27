@@ -18,6 +18,7 @@ Tell python where to find the appropriate functions.
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
+import nipype.workflows.fsl as fsl_wf          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import os                                    # system functions
@@ -180,7 +181,7 @@ tractography.base_dir = os.path.abspath('fsl_dti_tutorial')
 estimate the diffusion parameters: phi, theta, and so on
 """
 
-bedpostx = fsl.create_bedpostx_pipeline()
+bedpostx = fsl_wf.create_bedpostx_pipeline()
 bedpostx.get_node("xfibres").iterables = ("n_fibres",[1,2])
 
 
