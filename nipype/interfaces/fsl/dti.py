@@ -115,6 +115,10 @@ class EddyCorrect(FSLCommand):
     _cmd = 'eddy_correct'
     input_spec = EddyCorrectInputSpec
     output_spec = EddyCorrectOutputSpec
+    
+    def __init__(self, **inputs):
+        warnings.warn("Deprecated: Please use create_eddy_correct_pipeline instead", DeprecationWarning)
+        return super(EddyCorrect, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.out_file):
