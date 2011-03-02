@@ -215,9 +215,9 @@ findthebiggest = pe.Node(interface=fsl.FindTheBiggest(),name='findthebiggest')
 connect all the nodes for this workflow
 """
 tractography.add_nodes([bedpostx, flirt])
-tractography.connect([(bedpostx,probtrackx,[('postproc.merge_thsamples.merged_file','thsamples'),
-                                            ('postproc.merge_phsamples.merged_file','phsamples'),
-                                            ('postproc.merge_fsamples.merged_file','fsamples')
+tractography.connect([(bedpostx,probtrackx,[('outputnode.thsamples','thsamples'),
+                                            ('outputnode.phsamples','phsamples'),
+                                            ('outputnode.fsamples','fsamples')
                                             ]),
                       (probtrackx,findthebiggest,[('targets','in_files')]),
                       (flirt, probtrackx, [('out_matrix_file','xfm')])

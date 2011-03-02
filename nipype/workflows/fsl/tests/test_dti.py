@@ -96,12 +96,12 @@ def test_create_bedpostx_pipeline():
     def pickSecond(l):
         return l[1]
     
-    pipeline.connect([(nipype_bedpostx, test_f1, [(("mean_fsamples.out_file", pickFirst), "inputnode.volume1")]),
-                      (nipype_bedpostx, test_f2, [(("mean_fsamples.out_file", pickSecond), "inputnode.volume1")]),
-                      (nipype_bedpostx, test_th1, [(("mean_thsamples.out_file", pickFirst), "inputnode.volume1")]),
-                      (nipype_bedpostx, test_th2, [(("mean_thsamples.out_file", pickSecond), "inputnode.volume1")]),
-                      (nipype_bedpostx, test_ph1, [(("mean_phsamples.out_file", pickFirst), "inputnode.volume1")]),
-                      (nipype_bedpostx, test_ph2, [(("mean_phsamples.out_file", pickSecond), "inputnode.volume1")]),
+    pipeline.connect([(nipype_bedpostx, test_f1, [(("outputnode.mean_fsamples", pickFirst), "inputnode.volume1")]),
+                      (nipype_bedpostx, test_f2, [(("outputnode.mean_fsamples", pickSecond), "inputnode.volume1")]),
+                      (nipype_bedpostx, test_th1, [(("outputnode.mean_thsamples", pickFirst), "inputnode.volume1")]),
+                      (nipype_bedpostx, test_th2, [(("outputnode.mean_thsamples", pickSecond), "inputnode.volume1")]),
+                      (nipype_bedpostx, test_ph1, [(("outputnode.mean_phsamples", pickFirst), "inputnode.volume1")]),
+                      (nipype_bedpostx, test_ph2, [(("outputnode.mean_phsamples", pickSecond), "inputnode.volume1")]),
                       
                       (original_bedpostx, test_f1, [(("mean_fsamples", pickFirst), "inputnode.volume2")]),
                       (original_bedpostx, test_f2, [(("mean_fsamples", pickSecond), "inputnode.volume2")]),

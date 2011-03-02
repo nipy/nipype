@@ -13,14 +13,14 @@ def create_bedpostx_pipeline(name="bedpostx"):
     "inputnode.mask"
     
     Outputs:
-    "postproc.merge_thsamples.merged_file"
-    "postproc.merge_phsamples.merged_file"
-    "postproc.merge_fsamples.merged_file"
-    "postproc.mean_thsamples.out_file"
-    "postproc.mean_phsamples.out_file"
-    "postproc.mean_fsamples.out_file"
-    "postproc.make_dyads.dyads"
-    "postproc.make_dyads.dispersion"
+    "outputnode.thsamples"
+    "outputnode.phsamples"
+    "outputnode.fsamples"
+    "outputnode.mean_thsamples"
+    "outputnode.mean_phsamples"
+    "outputnode.mean_fsamples"
+    "outputnode.dyads"
+    "outputnode.dyads_dispersion"
     
     >>> from nipype.interfaces import fsl
     >>> nipype_bedpostx = fsl.create_bedpostx_pipeline("nipype_bedpostx")
@@ -138,6 +138,25 @@ def create_bedpostx_pipeline(name="bedpostx"):
                                            ('fsamples', 'inputnode.fsamples'),
                                            ('dyads', 'inputnode.dyads'),
                                            ('mean_dsamples', 'inputnode.mean_dsamples')]),
+                      ])
+    
+    outputnode = pe.Node(interface = util.IdentityInterface(fields=["thsamples",
+                                                                    "phsamples",
+                                                                    "fsamples",
+                                                                    "mean_thsamples",
+                                                                    "mean_phsamples",
+                                                                    "mean_fsamples",
+                                                                    "dyads",
+                                                                    "dyads_dispersion"]), 
+                        name="outputnode")
+    bedpostx.connect([(postproc, outputnode, [("merge_thsamples.merged_file", "thsamples"),
+                                              ("merge_phsamples.merged_file", "phsamples"),
+                                              ("merge_fsamples.merged_file", "fsamples"),
+                                              ("mean_thsamples.out_file", "mean_thsamples"),
+                                              ("mean_phsamples.out_file", "mean_phsamples"),
+                                              ("mean_fsamples.out_file", "mean_fsamples"),
+                                              ("make_dyads.dyads", "dyads"),
+                                              ("make_dyads.dispersion", "dyads_dispersion")])
                       ])
     return bedpostx
 
