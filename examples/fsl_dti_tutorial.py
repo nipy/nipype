@@ -145,8 +145,8 @@ bet.inputs.frac=0.34
 correct the diffusion weighted images for eddy_currents
 """
 
-eddycorrect = pe.Node(interface=fsl.EddyCorrect(),name='eddycorrect')
-eddycorrect.inputs.ref_num=0
+eddycorrect = fsl_wf.create_eddy_correct_pipeline('eddycorrect')
+eddycorrect.inputs.inputnode.ref_num=0
 
 """
 compute the diffusion tensor in each voxel
@@ -160,7 +160,7 @@ connect all the nodes for this workflow
 
 computeTensor.connect([
                         (fslroi,bet,[('roi_file','in_file')]),
-                        (eddycorrect,dtifit,[('eddy_corrected','dwi')]),
+                        (eddycorrect, dtifit,[('outputnode.eddy_corrected','dwi')]),
                         (infosource, dtifit,[['subject_id','base_name']]),
                         (bet,dtifit,[('mask_file','mask')])
                       ])
@@ -247,13 +247,13 @@ dwiproc.connect([
                     (datasource,computeTensor,[('dwi','fslroi.in_file'),
                                                ('bvals','dtifit.bvals'),
                                                ('bvecs','dtifit.bvecs'),
-                                               ('dwi','eddycorrect.in_file')]),
+                                               ('dwi','eddycorrect.inputnode.in_file')]),
                     (datasource,tractography,[('bvals','bedpostx.inputnode.bvals'),
                                               ('bvecs','bedpostx.inputnode.bvecs'),
                                               ('seed_file','probtrackx.seed'),
                                               ('target_masks','probtrackx.target_masks')
                                               ]),
-                    (computeTensor,tractography,[('eddycorrect.eddy_corrected','bedpostx.inputnode.dwi'),
+                    (computeTensor,tractography,[('eddycorrect.outputnode.eddy_corrected','bedpostx.inputnode.dwi'),
                                                  ('bet.mask_file','bedpostx.inputnode.mask'),
                                                  ('bet.mask_file','probtrackx.mask'),
                                                  ('fslroi.roi_file','flirt.reference')]),
