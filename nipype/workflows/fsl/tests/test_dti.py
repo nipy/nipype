@@ -38,7 +38,7 @@ def test_create_eddy_correct_pipeline():
     pipeline = pe.Workflow(name="test_eddycorrect")
     pipeline.base_dir = test_dir
     
-    pipeline.connect([(nipype_eddycorrect, test, [("merge.merged_file", "inputnode.volume1")]),
+    pipeline.connect([(nipype_eddycorrect, test, [("outputnode.eddy_corrected", "inputnode.volume1")]),
                       (original_eddycorrect, test, [("eddy_corrected", "inputnode.volume2")]),
                       ])
     

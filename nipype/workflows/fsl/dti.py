@@ -170,7 +170,7 @@ def create_eddy_correct_pipeline(name="eddy_correct"):
     inputnode.ref_num
     
     Outputs:
-    fsl.Merge.merged_file
+    outputnode.eddy_corrected
     
     >>> from nipype.interfaces import fsl
     >>> nipype_eddycorrect = fsl.create_eddy_correct_pipeline("nipype_eddycorrect")
@@ -194,7 +194,13 @@ def create_eddy_correct_pipeline(name="eddy_correct"):
     pipeline.connect([(fsl.Split, coregistration, [("out_files", "in_file")]),
                       (pick_ref, coregistration, [("out", "reference")])])
     
-    fsl.Merge = pe.Node(fsl.Merge(dimension="t"), name="fsl.Merge")
-    pipeline.connect([(coregistration, fsl.Merge, [("out_file", "in_files")])
+    merge = pe.Node(fsl.Merge(dimension="t"), name="merge")
+    pipeline.connect([(coregistration, merge, [("out_file", "in_files")])
                       ])
+    
+    outputnode = pe.Node(interface = util.IdentityInterface(fields=["eddy_corrected"]), 
+                        name="outputnode")
+    
+    pipeline.connect([(merge, outputnode, [("merged_file", "eddy_corrected")])])
+    
     return pipeline
