@@ -1,11 +1,12 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+import os
 from copy import deepcopy
 
 import numpy as np
 
 from nipype.utils.filemanip import (filename_to_list, list_to_filename)
-from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec,
+from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec, File,
                                     Undefined, isdefined, OutputMultiPath,
     InputMultiPath)
 from nipype.interfaces.io import IOBase, add_traits
@@ -106,6 +107,44 @@ class Merge(IOBase):
                     out[i].append(filename_to_list(getattr(self.inputs, 'in%d'%(j+1)))[i])
         if out:
             outputs['out'] = out
+        return outputs
+
+class RenameInputSpec(DynamicTraitedSpec):
+
+    in_file = File(exists=True, desc="file to rename")
+    format_string = traits.String(desc="python string formatting style string to rename a file")
+
+class RenameOutputSpec(TraitedSpec):
+
+    out_file = traits.File(exists=True,desc="softlink to original file with new name")
+
+class Rename(IOBase):
+
+    input_spec = RenameInputSpec
+    output_spec = RenameOutputSpec
+
+    def __init__(self, numinputs=0, **inputs):
+        super(Rename, self).__init__(**inputs)
+        self.numinputs = numinputs
+        add_traits(self.inputs, ['in%d'%(i+1) for i in range(numinputs)])
+
+    def _rename(self):
+        fmt_list = []
+        for idx in range(self.numinputs):
+            value = getattr(self.inputs, 'in%d'%(idx+1))
+            if isdefined(value):
+                fmt_list.append(value) 
+        new_name = self.inputs.format_string%tuple(fmt_list)
+        return new_name
+
+    def _run_interface(self, runtime):
+        runtime.returncode = 0
+        os.symlink(self.inputs.in_file, os.path.join(os.getcwd(), self._rename()))
+        return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.join(os.getcwd(), self._rename())
         return outputs
 
 class SplitInputSpec(TraitedSpec):
