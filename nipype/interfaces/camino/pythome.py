@@ -24,69 +24,6 @@ from nipype.interfaces.base import (TraitedSpec, File, traits, CommandLine,
     CommandLineInputSpec)
 
 		
-class dtfitInputSpec(CaminoCommandInputSpec):
-	"""
-	* Reads diffusion MRI data, acquired using the acquisition scheme detailed in the scheme file, from the data file. 
-	* For help with scheme files, please see the section "scheme files" in camino(1).  OPTIONS
-
-	dtfit <data file> <scheme file> [-nonlinear] [options] --nonlinear
-	
-	    Use non-linear fitting instead of the default linear regression to the log measurements. 
-	The data file stores the diffusion MRI data in voxel order with the measurements stored in big-endian format and ordered as in the scheme file.
-	The default input data type is four-byte float. The default output data type is eight-byte double.
-	See modelfit and camino for the format of the data file and scheme file.
-	The program fits the diffusion tensor to each voxel and outputs the results, 
-	in voxel order and as big-endian eight-byte doubles, to the standard output. 
-	The program outputs eight values in each voxel: [exit code, ln(S(0)), D_xx, D_xy, D_xz, D_yy, D_yz, D_zz]. 
-	An exit code of zero indicates no problems. For a list of other exit codes, see modelfit(1). The entry S(0) is an estimate of the signal at q=0. 
-	"""
-	
-	in_file = File(exists=True, argstr='%s',
-					mandatory=True, position=1,
-					desc='voxel-order data filename')
-	
-	scheme_file = File(exists=False, argstr='%s',
-					mandatory=False, position=2,
-					desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
-	
-	nonlinear = traits.Bool(argstr='-nonlinear', position=3, desc="Use non-linear fitting instead of the default linear regression to the log measurements. ")
-	
-	out_file = File(exists=False, argstr='> %s',
-				mandatory=False, position=4,
-				desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"')				
-			
-class dtfitOutputSpec(TraitedSpec):
-	"""Use dtfit to fit tensors to each voxel
-	"""
-	out_file = File(exists=True, desc='path/name of 4D volume in voxel order') 
-
-class dtfit(CaminoCommand):
-	"""Use dtfit to fit tensors to each voxel
-	"""
-	_cmd = 'dtfit'
-	input_spec=dtfitInputSpec
-	output_spec=dtfitOutputSpec
-	
-	def _list_outputs(self):
-		out_prefix = self.inputs.out_prefix
-		output_type = self.inputs.output_type
-	
-		outputs = self.output_spec().get()
-		return outputs
-	def _run_interface(self, runtime):
-		if not isdefined(self.inputs.out_file):
-		    self.inputs.out_file = self._gen_fname(self.inputs.in_file,suffix = '_fit')
-		runtime = super(dtfit, self)._run_interface(runtime)
-		if runtime.stderr:
-		    runtime.returncode = 1
-		return runtime
-
-	def _gen_filename(self, name):
-		if name is 'out_file':
-		    return self._list_outputs()['tensor_fitted']
-		else:
-		    return None
-		
 class trackInputSpec(CaminoCommandInputSpec):
 	"""
 	* track - Performs streamline tractography.

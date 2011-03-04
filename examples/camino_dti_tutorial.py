@@ -143,7 +143,7 @@ fsl2scheme = pe.Node(interface=camino.FSL2Scheme(), name="fsl2scheme")
 compute the diffusion tensor in each voxel
 """
 
-dtifit = pe.Node(interface=camino.dtfit(),name='dtifit')
+dtifit = pe.Node(interface=camino.DTIFit(),name='dtifit')
 
 """
 connect all the nodes for this workflow
