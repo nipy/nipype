@@ -1,7 +1,7 @@
 from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec
 import enthought.traits.api as traits
 import os
-from nipype.interfaces.traits import File
+from nipype.interfaces.traits import File, Directory
 from nipype.utils.misc import isdefined
 
 class BRAINSROIAutoInputSpec(CommandLineInputSpec):
