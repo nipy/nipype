@@ -422,14 +422,14 @@ def test_tempfilt():
     # Test some filters
     windows = [(-1, -1), (0.1, 0.1), (-1, 20), (20, -1), (128, 248)]
     for win in windows:
-        filt.inputs.lowpass_sigma = win[0]
-        filt.inputs.highpass_sigma = win[1]
+        filt.inputs.highpass_sigma = win[0]
+        filt.inputs.lowpass_sigma = win[1]
         yield assert_equal, filt.cmdline, "fslmaths a.nii -bptf %.6f %.6f b.nii"%win
 
     # Test that we don't need to ask for an out file
     filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma = 64) 
     yield assert_equal, filt.cmdline, \
-    "fslmaths a.nii -bptf -1.000000 64.000000 %s"%os.path.join(testdir,"a_filt.nii")
+    "fslmaths a.nii -bptf 64.000000 -1.000000 %s"%os.path.join(testdir,"a_filt.nii")
     
     # Clean up our mess
     clean_directory(testdir, origdir, ftype)
