@@ -1,7 +1,7 @@
 from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec
 import enthought.traits.api as traits
 import os
-from nipype.interfaces.traits import File
+from nipype.interfaces.traits import File, Directory
 from nipype.utils.misc import isdefined
 
 class BRAINSDemonWarpInputSpec(CommandLineInputSpec):
@@ -15,13 +15,13 @@ class BRAINSDemonWarpInputSpec(CommandLineInputSpec):
 	registrationFilterType = traits.Enum("Demons","FastSymmetricForces","Diffeomorphic","LogDemons","SymmetricLogDemons", argstr = "--registrationFilterType %s")
 	smoothDeformationFieldSigma = traits.Float( argstr = "--smoothDeformationFieldSigma %f")
 	numberOfPyramidLevels = traits.Int( argstr = "--numberOfPyramidLevels %d")
-	minimumFixedPyramid = traits.List("traits.Int", sep = ",",argstr = "--minimumFixedPyramid %d")
-	minimumMovingPyramid = traits.List("traits.Int", sep = ",",argstr = "--minimumMovingPyramid %d")
-	arrayOfPyramidLevelIterations = traits.List("traits.Int", sep = ",",argstr = "--arrayOfPyramidLevelIterations %d")
+	minimumFixedPyramid = traits.List(traits.Int, sep = ",",argstr = "--minimumFixedPyramid %d")
+	minimumMovingPyramid = traits.List(traits.Int, sep = ",",argstr = "--minimumMovingPyramid %d")
+	arrayOfPyramidLevelIterations = traits.List(traits.Int, sep = ",",argstr = "--arrayOfPyramidLevelIterations %d")
 	histogramMatch = traits.Bool( argstr = "--histogramMatch ")
 	numberOfHistogramBins = traits.Int( argstr = "--numberOfHistogramBins %d")
 	numberOfMatchPoints = traits.Int( argstr = "--numberOfMatchPoints %d")
-	medianFilterSize = traits.List("traits.Int", sep = ",",argstr = "--medianFilterSize %d")
+	medianFilterSize = traits.List(traits.Int, sep = ",",argstr = "--medianFilterSize %d")
 	initializeWithDeformationField = File( exists = "True",argstr = "--initializeWithDeformationField %s")
 	initializeWithTransform = File( exists = "True",argstr = "--initializeWithTransform %s")
 	maskProcessingMode = traits.Enum("NOMASK","ROIAUTO","ROI","BOBF", argstr = "--maskProcessingMode %s")
@@ -30,11 +30,11 @@ class BRAINSDemonWarpInputSpec(CommandLineInputSpec):
 	lowerThresholdForBOBF = traits.Int( argstr = "--lowerThresholdForBOBF %d")
 	upperThresholdForBOBF = traits.Int( argstr = "--upperThresholdForBOBF %d")
 	backgroundFillValue = traits.Int( argstr = "--backgroundFillValue %d")
-	seedForBOBF = traits.List("traits.Int", sep = ",",argstr = "--seedForBOBF %d")
-	neighborhoodForBOBF = traits.List("traits.Int", sep = ",",argstr = "--neighborhoodForBOBF %d")
+	seedForBOBF = traits.List(traits.Int, sep = ",",argstr = "--seedForBOBF %d")
+	neighborhoodForBOBF = traits.List(traits.Int, sep = ",",argstr = "--neighborhoodForBOBF %d")
 	outputDisplacementFieldPrefix = traits.Str( argstr = "--outputDisplacementFieldPrefix %s")
 	outputCheckerboardVolume = traits.Either(traits.Bool, File, argstr = "--outputCheckerboardVolume %s")
-	checkerboardPatternSubdivisions = traits.List("traits.Int", sep = ",",argstr = "--checkerboardPatternSubdivisions %d")
+	checkerboardPatternSubdivisions = traits.List(traits.Int, sep = ",",argstr = "--checkerboardPatternSubdivisions %d")
 	outputNormalized = traits.Bool( argstr = "--outputNormalized ")
 	outputDebug = traits.Bool( argstr = "--outputDebug ")
 	gradientType = traits.Enum("0","1","2", argstr = "--gradient_type %s")
