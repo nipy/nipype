@@ -68,10 +68,12 @@ class fsl2schemeInputSpec(CaminoCommandInputSpec):
 	bvec_file = File(exists=True, argstr='-bvecfile %s',
 					mandatory=True, position=1,
 					desc='b vector file')
-										 
+					
 	bval_file = File(exists=True, argstr='-bvalfile %s',
 					mandatory=True, position=2,
 					desc='b value file')
+					
+	out_file = File(exists=False, argstr='-outputfile %s', genfile=True, desc='Name of output scheme file', position=3) 
 					
 	numscans = traits.Int(argstr='-numscans %d', units='NA',
 				desc="Output all measurements numerous (n) times, used when combining multiple scans from the same imaging session.")
@@ -88,30 +90,29 @@ class fsl2schemeInputSpec(CaminoCommandInputSpec):
 	flipy = traits.Bool(argstr='-flipy', desc="Negate the y component of all the vectors.")
 	flipz = traits.Bool(argstr='-flipz', desc="Negate the z component of all the vectors.")
 	usegradmod = traits.Bool(argstr='-usegradmod', desc="Use the gradient magnitude to scale b. This option has no effect if your gradient directions have unit magnitude.")
-	out_file = File(exists=False, argstr='> %s',
-					mandatory=True, desc='Scheme file', position=3) 
-
 	
 class fsl2schemeOutputSpec(TraitedSpec):
-	out_file = File(exists=True, desc='Scheme file') 
+	scheme = File(exists=True, desc='Scheme file') 
 
 class fsl2scheme(CaminoCommand):
 	_cmd = 'fsl2scheme'	
 	input_spec=fsl2schemeInputSpec
 	output_spec=fsl2schemeOutputSpec
 
-	def _list_outputs(self):
-		out_prefix = self.inputs.out_prefix
-		output_type = self.inputs.output_type
-	
+	def _list_outputs(self):	
 		outputs = self.output_spec().get()
+		outputs['scheme'] = self.inputs.out_file
+		if not isdefined(outputs['scheme']):
+			outputs['scheme'] = self._gen_fname('scheme')
 		return outputs
-	def _run_interface(self, runtime):
+	
+	def _run_interface(self, runtime):		
 		if not isdefined(self.inputs.out_file):
-		    self.inputs.out_file = self._gen_fname(self.inputs.in_file,suffix = '_scheme')
+		    self.inputs.out_file = self._gen_fname('scheme')
 		runtime = super(fsl2scheme, self)._run_interface(runtime)
-		if runtime.stderr:
-		    runtime.returncode = 1
+		# FSL_ToScheme seems to log warnings to stderr even on success
+		#if runtime.stderr:
+		#    runtime.returncode = 1
 		return runtime
 	
 	def _gen_filename(self, name):
@@ -160,18 +161,17 @@ class image2voxelInputSpec(CaminoCommandInputSpec):
 					desc='Name of a file containing a list of 3D images')
 	
 	imageprefix = File(exists=False, argstr='-imageprefix %s',
-					mandatory=False, position=3,
-					desc='Path to prepend onto filenames in the imagelist.')				
+					mandatory=False, position=2,
+					desc='Path to prepend onto filenames in the imagelist.')
 	
-	out_file = File(exists=False, argstr='-outputdatatype %s',
-					mandatory=False, position=4,
-					genfile=True,
-					desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"')	
-	
+	out_file = File(exists=False, argstr='> %s', mandatory=False, genfile=True, desc='"Name of output file"')
+
+	output_type = traits.Str("float", desc=' Specifies the data type of the output data, e.g. "char", "short", "int", "long",  "float"  or  "double". The default is float.', argstr='-outputdatatype %s', usedefault=True) 
+
 class image2voxelOutputSpec(TraitedSpec):
 	"""Use image2voxel to convert NIFTI images to voxel order
 	"""
-	out_file = File(exists=True, desc='path/name of 4D volume in voxel order') 
+	voxel_order = File(exists=True, desc='output path/name of 4D volume in voxel order') 
     
 class image2voxel(CaminoCommand):
 	"""Use image2voxel to convert NIFTI images to voxel order
@@ -181,14 +181,15 @@ class image2voxel(CaminoCommand):
 	output_spec=image2voxelOutputSpec
 
 	def _list_outputs(self):
-		out_prefix = self.inputs.out_prefix
-		output_type = self.inputs.output_type
-	
 		outputs = self.output_spec().get()
+		outputs['voxel_order'] = self.inputs.out_file
+		if not isdefined(outputs['voxel_order']):
+			outputs['voxel_order'] = self._gen_fname(self.inputs.in_file,suffix = '_vox.',ext = self.inputs.output_type)
 		return outputs
+	
 	def _run_interface(self, runtime):
 		if not isdefined(self.inputs.out_file):
-		    self.inputs.out_file = self._gen_fname(self.inputs.in_file,suffix = '_vox')
+		    self.inputs.out_file = self._gen_fname(self.inputs.in_file,suffix = '_vox.',ext = self.inputs.output_type)
 		runtime = super(image2voxel, self)._run_interface(runtime)
 		if runtime.stderr:
 		    runtime.returncode = 1
@@ -229,12 +230,12 @@ class dtfitInputSpec(CaminoCommandInputSpec):
 	
 	out_file = File(exists=False, argstr='> %s',
 				mandatory=False, position=4,
-				desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"')				
+				desc='name of tensor fitted output file')				
 			
 class dtfitOutputSpec(TraitedSpec):
 	"""Use dtfit to fit tensors to each voxel
 	"""
-	out_file = File(exists=True, desc='path/name of 4D volume in voxel order') 
+	tensor_fitted = File(exists=True, desc='tensor fitted output file') 
 
 class dtfit(CaminoCommand):
 	"""Use dtfit to fit tensors to each voxel
@@ -244,14 +245,12 @@ class dtfit(CaminoCommand):
 	output_spec=dtfitOutputSpec
 	
 	def _list_outputs(self):
-		out_prefix = self.inputs.out_prefix
-		output_type = self.inputs.output_type
-	
 		outputs = self.output_spec().get()
 		return outputs
+	
 	def _run_interface(self, runtime):
 		if not isdefined(self.inputs.out_file):
-		    self.inputs.out_file = self._gen_fname(self.inputs.in_file,suffix = '_fit')
+		    self.inputs.out_file = self._gen_fname(self.inputs.in_file,suffix = '_dt.double')
 		runtime = super(dtfit, self)._run_interface(runtime)
 		if runtime.stderr:
 		    runtime.returncode = 1
