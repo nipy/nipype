@@ -34,7 +34,7 @@ class DTIFitInputSpec(CommandLineInputSpec):
 class DTIFitOutputSpec(TraitedSpec):
     """Use dtfit to fit tensors to each voxel
     """
-    out_file = File(exists=True, desc='path/name of 4D volume in voxel order') 
+    tensor_fitted = File(exists=True, desc='path/name of 4D volume in voxel order') 
 
 class DTIFit(CommandLine):
     """Use dtfit to fit tensors to each voxel
@@ -45,7 +45,7 @@ class DTIFit(CommandLine):
     
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = os.path.abspath(self._gen_outfilename())
+        outputs["tensor_fitted"] = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):

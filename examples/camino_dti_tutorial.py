@@ -137,7 +137,7 @@ convert bvecs and bvals to camino scheme format
 """
 
 fsl2scheme = pe.Node(interface=camino.FSL2Scheme(), name="fsl2scheme")
-
+fsl2scheme.inputs.usegradmod = True
 
 """
 compute the diffusion tensor in each voxel
@@ -153,8 +153,8 @@ computeTensor.connect([(inputnode, image2voxel, [("dwi", "in_file")]),
                        (inputnode, fsl2scheme, [("bvecs", "bvec_file"),
                                                 ("bvals", "bval_file")]),
                        
-                       (image2voxel, dtifit,[['out_file','in_file']]),
-                       (fsl2scheme, dtifit,[['out_file','scheme_file']])
+                       (image2voxel, dtifit,[['voxel_order','in_file']]),
+                       (fsl2scheme, dtifit,[['scheme','scheme_file']])
                       ])
 
 

@@ -50,7 +50,7 @@ class Image2VoxelInputSpec(CommandLineInputSpec):
 class Image2VoxelOutputSpec(TraitedSpec):
     """Use image2voxel to convert NIFTI images to voxel order
     """
-    out_file = File(exists=True, desc='path/name of 4D volume in voxel order') 
+    voxel_order = File(exists=True, desc='path/name of 4D volume in voxel order') 
     
 class Image2Voxel(CommandLine):
     """Use image2voxel to convert NIFTI images to voxel order
@@ -61,7 +61,7 @@ class Image2Voxel(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = os.path.abspath(self._gen_outfilename())
+        outputs["voxel_order"] = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -142,7 +142,7 @@ class FSL2SchemeInputSpec(CommandLineInputSpec):
 
     
 class FSL2SchemeOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='Scheme file') 
+    scheme = File(exists=True, desc='Scheme file') 
 
 class FSL2Scheme(CommandLine):
     _cmd = 'fsl2scheme'    
@@ -151,7 +151,7 @@ class FSL2Scheme(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = os.path.abspath(self._gen_outfilename())
+        outputs["scheme"] = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
