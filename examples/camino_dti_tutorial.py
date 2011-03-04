@@ -130,7 +130,7 @@ inputnode = pe.Node(interface=util.IdentityInterface(fields=["dwi", "bvecs", "bv
 convert nifti DWI to camino raw format
 """
 
-image2voxel = pe.Node(interface=camino.image2voxel(out_prefix="dwi"), name="image2voxel")
+image2voxel = pe.Node(interface=camino.Image2Voxel(), name="image2voxel")
 
 """
 convert bvecs and bvals to camino scheme format
@@ -164,7 +164,7 @@ Setup the pipeline that combines the two workflows: tractography and computeTens
 """
 
 dwiproc = pe.Workflow(name="dwiproc")
-dwiproc.base_dir = os.path.abspath('fsl_dti_tutorial')
+dwiproc.base_dir = os.path.abspath('camino_dti_tutorial')
 dwiproc.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,computeTensor,[('dwi','inputnode.dwi'),
