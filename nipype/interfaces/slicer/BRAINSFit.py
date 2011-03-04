@@ -1,7 +1,7 @@
 from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec
 import enthought.traits.api as traits
 import os
-from nipype.interfaces.traits import File
+from nipype.interfaces.traits import File, Directory
 from nipype.utils.misc import isdefined
 
 class BRAINSFitInputSpec(CommandLineInputSpec):
@@ -21,14 +21,14 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
 	outputTransform = traits.Either(traits.Bool, File, argstr = "--outputTransform %s")
 	outputVolume = traits.Either(traits.Bool, File, argstr = "--outputVolume %s")
 	outputVolumePixelType = traits.Enum("float","short","ushort","int","uint","uchar", argstr = "--outputVolumePixelType %s")
-	transformType = traits.List("traits.Str", sep = ",",argstr = "--transformType %s")
-	numberOfIterations = traits.List("traits.Int", sep = ",",argstr = "--numberOfIterations %d")
+	transformType = traits.List(traits.Str, sep = ",",argstr = "--transformType %s")
+	numberOfIterations = traits.List(traits.Int, sep = ",",argstr = "--numberOfIterations %d")
 	numberOfSamples = traits.Int( argstr = "--numberOfSamples %d")
-	minimumStepSize = traits.List("traits.Float", sep = ",",argstr = "--minimumStepSize %f")
+	minimumStepSize = traits.List(traits.Float, sep = ",",argstr = "--minimumStepSize %f")
 	translationScale = traits.Float( argstr = "--translationScale %f")
 	reproportionScale = traits.Float( argstr = "--reproportionScale %f")
 	skewScale = traits.Float( argstr = "--skewScale %f")
-	splineGridSize = traits.List("traits.Int", sep = ",",argstr = "--splineGridSize %d")
+	splineGridSize = traits.List(traits.Int, sep = ",",argstr = "--splineGridSize %d")
 	maxBSplineDisplacement = traits.Float( argstr = "--maxBSplineDisplacement %f")
 	strippedOutputTransform = traits.Either(traits.Bool, File, argstr = "--strippedOutputTransform %s")
 	backgroundFillValue = traits.Float( argstr = "--backgroundFillValue %f")
@@ -42,7 +42,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
 	movingBinaryVolume = File( exists = "True",argstr = "--movingBinaryVolume %s")
 	fixedVolumeTimeIndex = traits.Int( argstr = "--fixedVolumeTimeIndex %d")
 	movingVolumeTimeIndex = traits.Int( argstr = "--movingVolumeTimeIndex %d")
-	medianFilterSize = traits.List("traits.Int", sep = ",",argstr = "--medianFilterSize %d")
+	medianFilterSize = traits.List(traits.Int, sep = ",",argstr = "--medianFilterSize %d")
 	histogramMatch = traits.Bool( argstr = "--histogramMatch ")
 	numberOfHistogramBins = traits.Int( argstr = "--numberOfHistogramBins %d")
 	numberOfMatchPoints = traits.Int( argstr = "--numberOfMatchPoints %d")
@@ -59,7 +59,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
 	projectedGradientTolerance = traits.Float( argstr = "--projectedGradientTolerance %f")
 	UseDebugImageViewer = traits.Bool( argstr = "--gui ")
 	PromptAfterImageSend = traits.Bool( argstr = "--promptUser ")
-	permitParameterVariation = traits.List("traits.Int", sep = ",",argstr = "--permitParameterVariation %d")
+	permitParameterVariation = traits.List(traits.Int, sep = ",",argstr = "--permitParameterVariation %d")
 
 
 class BRAINSFitOutputSpec(TraitedSpec):

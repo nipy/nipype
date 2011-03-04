@@ -55,7 +55,11 @@ def generate_class(module):
             
             name = param.getElementsByTagName('name')[0].firstChild.nodeValue
             
-            typesDict = {'integer': "traits.Int", 'double': "traits.Float", 'float': "traits.Float", 'image': "File", 'transform': "File", 'boolean': "traits.Bool", 'string': "traits.Str", 'file':"File"}
+            typesDict = {'integer': "traits.Int", 'double': "traits.Float", 
+                         'float': "traits.Float", 'image': "File", 
+                         'transform': "File", 'boolean': "traits.Bool", 
+                         'string': "traits.Str", 'file':"File",
+                         'directory': "Directory"}
                         
             if param.nodeName.endswith('-enumeration'):
                 type = "traits.Enum"
@@ -63,14 +67,14 @@ def generate_class(module):
             elif param.nodeName.endswith('-vector'):
                 type = "traits.List"
                 if param.nodeName in ['file', 'directory', 'image', 'transform']:
-                    values = ["File(exists=True)"]
+                    values = ["%s(exists=True)"%typesDict[param.nodeName[:-7]]]
                 else:
                     values = [typesDict[param.nodeName[:-7]]]
                 traitsParams["sep"] = ','
             elif param.getAttribute('multiple') == "true":
                 type = "traits.List"
                 if param.nodeName in ['file', 'directory', 'image', 'transform']:
-                    values = ["File(exists=True)"]
+                    values = ["%s(exists=True)"%typesDict[param.nodeName[:-7]]]
                 else:
                     values = [typesDict[param.nodeName]]
                 traitsParams["argstr"] += "..."
@@ -79,8 +83,8 @@ def generate_class(module):
                 type = typesDict[param.nodeName]
             
             if param.nodeName in ['file', 'directory', 'image', 'transform'] and param.getElementsByTagName('channel')[0].firstChild.nodeValue == 'output':
-                inputTraits.append("%s = traits.Either(traits.Bool, File, %s)"%(name, parse_params(traitsParams)))
-                outputTraits.append("%s = File(exists=True, %s)"%(name, parse_params(traitsParams)))
+                inputTraits.append("%s = traits.Either(traits.Bool, %s, %s)"%(name, type, parse_params(traitsParams)))
+                outputTraits.append("%s = %s(exists=True, %s)"%(name, type, parse_params(traitsParams)))
                 
                 outputs_filenames[name] = gen_filename_from_param(param)
             else:
@@ -108,7 +112,7 @@ def generate_class(module):
     imports = """from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec
 import enthought.traits.api as traits
 import os
-from nipype.interfaces.traits import File
+from nipype.interfaces.traits import File, Directory
 from nipype.utils.misc import isdefined\n\n"""
     
     template = """class %name%(CommandLine):

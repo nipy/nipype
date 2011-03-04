@@ -1,7 +1,7 @@
 from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec
 import enthought.traits.api as traits
 import os
-from nipype.interfaces.traits import File
+from nipype.interfaces.traits import File, Directory
 from nipype.utils.misc import isdefined
 
 class BRAINSResampleInputSpec(CommandLineInputSpec):
@@ -13,7 +13,7 @@ class BRAINSResampleInputSpec(CommandLineInputSpec):
 	warpTransform = File( exists = "True",argstr = "--warpTransform %s")
 	interpolationMode = traits.Enum("NearestNeighbor","Linear","BSpline","WindowedSinc", argstr = "--interpolationMode %s")
 	defaultValue = traits.Float( argstr = "--defaultValue %f")
-	gridSpacing = traits.List("traits.Int", sep = ",",argstr = "--gridSpacing %d")
+	gridSpacing = traits.List(traits.Int, sep = ",",argstr = "--gridSpacing %d")
 
 
 class BRAINSResampleOutputSpec(TraitedSpec):
