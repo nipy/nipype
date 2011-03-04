@@ -136,7 +136,7 @@ image2voxel = pe.Node(interface=camino.Image2Voxel(), name="image2voxel")
 convert bvecs and bvals to camino scheme format
 """
 
-fsl2scheme = pe.Node(interface=camino.fsl2scheme(), name="fsl2scheme")
+fsl2scheme = pe.Node(interface=camino.FSL2Scheme(), name="fsl2scheme")
 
 
 """
