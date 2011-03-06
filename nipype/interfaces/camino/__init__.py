@@ -4,9 +4,9 @@
 """
 
 from nipype.interfaces.camino.base import CaminoCommand, CaminoCommandInputSpec
-from nipype.interfaces.camino.pythome import track, procstreamlines, vtkstreamlines, conmap
-from nipype.interfaces.camino.convert import Image2Voxel, FSL2Scheme
-from nipype.interfaces.camino.dti import DTIFit
+from nipype.interfaces.camino.pythome import Conmap
+from nipype.interfaces.camino.convert import Image2Voxel, FSL2Scheme, VtkStreamlines, ProcStreamlines
+from nipype.interfaces.camino.dti import DTIFit, DTLUTGen, PicoPDFs, Track
 import nose
 
 
