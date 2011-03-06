@@ -42,13 +42,7 @@ class ConmapInputSpec(CommandLineInputSpec):
 				desc="threshold indicates the minimum number of fiber connections that has to be drawn in the graph.")
 		
 class ConmapOutputSpec(TraitedSpec):
-	output_txt = File(exists=False, argstr='%s',
-			mandatory=False, position=1,
-			desc='connectivity matrix in text file')
-
-	output_png = File(exists=False, argstr='%s',
-			mandatory=False, position=1,
-			desc='2D connectivity matrix in PNG image')
+	output_txt = File(exists=True, desc='connectivity matrix in text file') 
 
 class Conmap(CommandLine):
     _cmd = 'conmap'
@@ -58,7 +52,6 @@ class Conmap(CommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["output_txt"] = os.path.abspath(self._gen_outfilename())
-        outputs["output_png"] = os.path.abspath(self._gen_outfilename())
         return outputs
         
     def _gen_filename(self, name):

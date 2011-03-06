@@ -50,7 +50,7 @@ class Image2VoxelInputSpec(CommandLineInputSpec):
 class Image2VoxelOutputSpec(TraitedSpec):
     """Use image2voxel to convert NIFTI images to voxel order
     """
-    voxel_order = File(exists=False, desc='path/name of 4D volume in voxel order') 
+    voxel_order = File(exists=True, desc='path/name of 4D volume in voxel order') 
     
 class Image2Voxel(CommandLine):
     """Use image2voxel to convert NIFTI images to voxel order
@@ -142,7 +142,7 @@ class FSL2SchemeInputSpec(CommandLineInputSpec):
 
     
 class FSL2SchemeOutputSpec(TraitedSpec):
-    scheme = File(exists=False, desc='Scheme file') 
+    scheme = File(exists=True, desc='Scheme file') 
 
 class FSL2Scheme(CommandLine):
     _cmd = 'fsl2scheme'    
@@ -221,7 +221,7 @@ class VtkStreamlinesInputSpec(CommandLineInputSpec):
 
 	
 class VtkStreamlinesOutputSpec(TraitedSpec):
-	vtk = File(exists=False, desc='Streamlines in VTK format') 
+	vtk = File(exists=True, desc='Streamlines in VTK format') 
 
 class VtkStreamlines(CommandLine):
     _cmd = 'vtkstreamlines'    
@@ -432,9 +432,7 @@ class ProcStreamlinesInputSpec(CommandLineInputSpec):
 	outputcbs = traits.Bool(argstr='-outputcbs', desc="outputs connectivity-based segmentation maps; requires target outputfile")
 
 class ProcStreamlinesOutputSpec(TraitedSpec):
-	proc = File(argstr='-outputfile %s',
-					mandatory=True, position=-1,
-					desc='output data file')
+	proc = File(exists=True, desc='Processed Streamlines') 
 
 class ProcStreamlines(CommandLine):
     _cmd = 'procstreamlines'    

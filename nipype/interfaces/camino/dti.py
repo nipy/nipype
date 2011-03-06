@@ -39,7 +39,7 @@ class DTIFitOutputSpec(TraitedSpec):
 class DTIFit(CommandLine):
     """Use dtfit to fit tensors to each voxel
     """
-    _cmd = 'dtifit'
+    _cmd = 'dtfit'
     input_spec=DTIFitInputSpec
     output_spec=DTIFitOutputSpec
     
@@ -169,7 +169,7 @@ class PicoPDFsInputSpec(CommandLineInputSpec):
     out_file = File(argstr="> %s", position=-1, genfile=True)              
             
 class PicoPDFsOutputSpec(TraitedSpec):
-    pdfs = File(exists=False, desc='path/name of 4D volume in voxel order') 
+    pdfs = File(exists=True, desc='path/name of 4D volume in voxel order') 
 
 class PicoPDFs(CommandLine):
     _cmd = 'picopdfs'
@@ -230,7 +230,7 @@ class TrackInputSpec(CommandLineInputSpec):
         desc='root directory for output')
     
 class TrackOutputSpec(TraitedSpec):
-	tracked = File(exists=False, desc='path/name of 4D volume') 
+	tracked = File(exists=True, desc='path/name of 4D volume') 
 
 class Track(CommandLine):
     _cmd = 'track'

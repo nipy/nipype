@@ -84,7 +84,7 @@ class Camino2TrackvisInputSpec(CommandLineInputSpec):
     mandatory=False, position=7, desc='Read coordinate system from a NIfTI file.')
     
 class Camino2TrackvisOutputSpec(TraitedSpec):
-    trackvis = File(exists=False, desc='The filename to which to write the .trk (trackvis) file.') 
+    trackvis = File(exists=True, desc='The filename to which to write the .trk (trackvis) file.') 
 
 class Camino2Trackvis(CommandLine):
     _cmd = 'camino_to_trackvis'    
