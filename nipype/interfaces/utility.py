@@ -1,7 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from copy import deepcopy
 
+from inspect import getsource
 import numpy as np
 
 from nipype.utils.filemanip import (filename_to_list, list_to_filename)
@@ -190,6 +190,83 @@ class Select(IOBase):
         outputs = self._outputs().get()
         out = np.array(self.inputs.inlist)[np.array(self.inputs.index)].tolist()
         outputs['out'] = out
+        return outputs
+
+class FunctionInputSpec(DynamicTraitedSpec):
+    function_str = traits.Str(mandatory=True, desc='code for function')
+
+class Function(IOBase):
+    """Runs arbitrary function as an interface
+
+    Examples
+    --------
+
+    >>> func = 'def func(arg1, arg2):\n    return arg1 +arg2\n'
+    >>> fi = Function(numinputs=2)
+    >>> fi.inputs.function_str = func
+    >>> fi.inputs.in1 = 1
+    >>> fi.inputs.in2 = 2
+    >>> res = fi.run()
+    >>> res.outputs.out1
+    3
+
+    """
+    
+    input_spec = FunctionInputSpec
+    output_spec = DynamicTraitedSpec
+
+    def __init__(self, numinputs=0, numoutputs=1, function_handle=None, **inputs):
+        super(Function, self).__init__(**inputs)
+        if function_handle:
+            self.inputs.function_str = getsource(function_handle)
+        self._numinputs = numinputs
+        self._numoutputs = numoutputs
+        if self._numinputs>0:
+            add_traits(self.inputs, ['in%d'%(i+1) for i in range(numinputs)])
+
+    def _add_output_traits(self, base):
+        undefined_traits = {}
+        for i in range(self._numoutputs):
+            key = 'out%d'%(i+1)
+            base.add_trait(key, traits.Any)
+            undefined_traits[key] = Undefined
+        base.trait_set(trait_change_notify=False, **undefined_traits)
+        return base
+
+    def _run_interface(self, runtime):
+        self._out = {}
+        for i in range(self._numoutputs):
+            key = 'out%d'%(i+1)
+            self._out[key] = None
+        try:
+            ns = {}
+            exec self.inputs.function_str in ns
+            args = {}
+            for i in range(self._numinputs):
+                args['arg%d'%(i+1)] = getattr(self.inputs, 'in%d'%(i+1))
+            function_name = [name for name in ns.keys() if not name == '__builtins__'][0]
+            if self._numinputs > 0:
+                out = ns[function_name](**args)
+            else:
+                out = ns[function_name]()
+            if self._numoutputs == 1:
+                self._out['out1'] = out
+            else:
+                if len(out) != self._numoutputs:
+                    raise Exception('Mismatch in number of outputs')
+                for i in range(self._numoutputs):
+                    self._out['out%d'%(i+1)] = out[i]
+        except:
+            runtime.returncode = 1
+        finally:
+            runtime.returncode = 0
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        for i in range(self._numoutputs):
+            key = 'out%d'%(i+1)
+            outputs[key] = self._out[key]
         return outputs
 
 '''
