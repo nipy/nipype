@@ -14,7 +14,7 @@ from nipype.interfaces.fsl import no_fsl
 
 
 def create_files_in_directory():
-    testdir = mkdtemp()
+    testdir = os.path.realpath(mkdtemp())
     origdir = os.getcwd()
     os.chdir(testdir)
 
