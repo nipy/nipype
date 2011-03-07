@@ -215,10 +215,15 @@ class Function(IOBase):
     input_spec = FunctionInputSpec
     output_spec = DynamicTraitedSpec
 
-    def __init__(self, numinputs=0, numoutputs=1, function_handle=None, **inputs):
+    def __init__(self, numinputs=0, numoutputs=1, function=None, **inputs):
         super(Function, self).__init__(**inputs)
-        if function_handle:
-            self.inputs.function_str = getsource(function_handle)
+        if function:
+            if hasattr(function, '__call__'):
+                self.inputs.function_str = getsource(function)
+            elif isinstance(function, str):
+                self.inputs.function_str = function
+            else:
+                raise Exception('Unknown type of function')
         self._numinputs = numinputs
         self._numoutputs = numoutputs
         if self._numinputs>0:
