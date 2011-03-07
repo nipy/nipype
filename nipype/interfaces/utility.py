@@ -198,6 +198,8 @@ class FunctionInputSpec(DynamicTraitedSpec):
 class Function(IOBase):
     """Runs arbitrary function as an interface
 
+    The function has to accept arguments named arg1, arg2, ...
+
     Examples
     --------
 
