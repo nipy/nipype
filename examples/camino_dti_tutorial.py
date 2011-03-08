@@ -78,7 +78,7 @@ camino2trackvis = pe.Node(interface=cam2trk.Camino2Trackvis(), name="camino2trk"
 camino2trackvis.inputs.min_length = 30
 #camino2trackvis.inputs.data_dims = [96,96,60]
 #camino2trackvis.inputs.voxel_dims = [1,1,1]
-camino2trackvis.inputs.data_dims = '96,96,60'
+camino2trackvis.inputs.data_dims = '128,104,64'
 camino2trackvis.inputs.voxel_dims = '1,1,1'
 camino2trackvis.inputs.voxel_order = 'LAS'
 
@@ -114,6 +114,22 @@ fsl2scheme.inputs.usegradmod = True
 
 dtifit = pe.Node(interface=camino.DTIFit(),name='dtifit')
 
+#analyzeheader = pe.MapNode(interface=camino.AnalyzeHeader(),name='analyzeheader',iterfield = ['in_file'])
+analyzeheader = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader')
+analyzeheader.inputs.data_dims = [128,104,64]
+analyzeheader.inputs.voxel_dims = [1,1,1]
+analyzeheader.inputs.datatype = 'double'
+
+analyzeheader2 = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader2')
+analyzeheader2.inputs.data_dims = [128,104,64]
+analyzeheader2.inputs.voxel_dims = [1,1,1]
+analyzeheader2.inputs.datatype = 'double'
+
+fa = pe.Node(interface=camino.FA(),name='fa')
+md = pe.Node(interface=camino.MD(),name='md')
+trd = pe.Node(interface=camino.TrD(),name='trd')
+
+
 track = pe.Node(interface=camino.Track(), name="track")
 track.inputs.inputmodel = 'pico'
 track.inputs.iterations = 1
@@ -135,6 +151,17 @@ convertTest.connect([(inputnode, image2voxel, [("dwi", "in_file")]),
 convertTest.connect([(fsl2scheme, dtlutgen,[("scheme","scheme_file")])])
 convertTest.connect([(dtlutgen, picopdfs,[("dtLUT","luts")])])
 convertTest.connect([(dtifit, picopdfs,[("tensor_fitted","in_file")])])
+
+convertTest.connect([(dtifit, fa,[("tensor_fitted","in_file")])])
+convertTest.connect([(fa, analyzeheader,[("fa","in_file")])])
+
+convertTest.connect([(dtifit, trd,[("tensor_fitted","in_file")])])
+convertTest.connect([(trd, analyzeheader2,[("trace","in_file")])])
+
+#These lines are commented out the Camino mean diffusivity function appears to be broken.
+#convertTest.connect([(dtifit, md,[("tensor_fitted","in_file")])])
+#convertTest.connect([(md, analyzeheader2,[("md","in_file")])])
+
 convertTest.connect([(picopdfs, track,[("pdfs","in_file")])])
 
 #This line is commented out because the ProcStreamlines node keeps throwing nemory errors
@@ -146,7 +173,7 @@ convertTest.connect([(track, camino2trackvis, [('tracked','in_file')]),
                       ])
 
 dwiproc = pe.Workflow(name="dwiproc")
-dwiproc.base_dir = os.path.abspath('camino_streamline_tutorial')
+dwiproc.base_dir = os.path.abspath('camino_dti_tutorial')
 dwiproc.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,convertTest,[('dwi','inputnode.dwi'),

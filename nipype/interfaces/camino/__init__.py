@@ -6,7 +6,7 @@
 from nipype.interfaces.camino.base import CaminoCommand, CaminoCommandInputSpec
 from nipype.interfaces.camino.pythome import Conmap
 from nipype.interfaces.camino.convert import Image2Voxel, FSL2Scheme, VtkStreamlines, ProcStreamlines
-from nipype.interfaces.camino.dti import DTIFit, DTLUTGen, PicoPDFs, Track
+from nipype.interfaces.camino.dti import DTIFit, DTLUTGen, PicoPDFs, Track, FA, MD, TrD, AnalyzeHeader
 import nose
 
 

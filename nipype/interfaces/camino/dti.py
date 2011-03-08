@@ -29,7 +29,7 @@ class DTIFitInputSpec(CommandLineInputSpec):
     
     non_linear = traits.Bool(argstr='-nonlinear', position=3, desc="Use non-linear fitting instead of the default linear regression to the log measurements. ")
     
-    out_file = File(argstr="> %s", position=4, genfile=True)              
+    out_file = File(argstr="> %s", position=4, genfile=True) #Change to -1?
             
 class DTIFitOutputSpec(TraitedSpec):
     """Use dtfit to fit tensors to each voxel
@@ -215,7 +215,7 @@ class TrackInputSpec(CommandLineInputSpec):
         argstr='-datadims %s', minlen=3, maxlen=3,
         units='voxels')
 
-    voxel_dims = traits.List(traits.Int, desc = 'voxel dimensions in mm',
+    voxel_dims = traits.List(traits.Float, desc = 'voxel dimensions in mm',
         argstr='-voxeldims %s', minlen=3, maxlen=3,
         units='mm')				 
 
@@ -250,3 +250,268 @@ class Track(CommandLine):
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + "_tracked"
+
+class MDInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='< %s',
+                    mandatory=True, position=1,
+                    desc='Tensor-fitted data filename')
+    
+    scheme_file = File(exists=True, argstr='%s',
+                    mandatory=False, position=2,
+                    desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
+       
+    out_file = File(argstr="> %s", position=-1, genfile=True)              
+
+    inputmodel = traits.Enum('dt', 'twotensor', 'threetensor', 
+    argstr='-inputmodel %s', 
+    desc='Specifies the model that the input tensor data contains parameters for.' \
+    'Possible model types are: "dt" (diffusion-tensor data), "twotensor" (two-tensor data), '\
+    '"threetensor" (three-tensor data). By default, the program assumes that the input data '\
+    'contains a single diffusion tensor in each voxel.')
+
+    inputdatatype = traits.Enum('char', 'short', 'int', 'long', 'float', 'double',
+    argstr='-inputdatatype %s', 
+    desc='Specifies the data type of the input file. The data type can be any of the' \
+    'following strings: "char", "short", "int", "long", "float" or "double".')
+
+    outputdatatype = traits.Enum('char', 'short', 'int', 'long', 'float', 'double',
+    argstr='-outputdatatype %s', 
+    desc='Specifies the data type of the output data. The data type can be any of the' \
+    'following strings: "char", "short", "int", "long", "float" or "double".')
+
+class MDOutputSpec(TraitedSpec):
+    md = File(exists=True, desc='Mean Diffusivity Map') 
+
+class MD(CommandLine):
+    _cmd = 'md'
+    input_spec=MDInputSpec
+    output_spec=MDOutputSpec
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["md"] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_file':
+            return self._gen_outfilename()
+        else:
+            return None
+    def _gen_outfilename(self):
+        _, name , _ = split_filename(self.inputs.in_file)
+        return name + "_MD.img" #Need to change to self.inputs.outputdatatype
+        
+class FAInputSpec(CommandLineInputSpec): 
+    in_file = File(exists=True, argstr='< %s',
+                    mandatory=True, position=1,
+                    desc='Tensor-fitted data filename')
+    
+    scheme_file = File(exists=True, argstr='%s',
+                    mandatory=False, position=2,
+                    desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
+        
+    out_file = File(argstr="> %s", position=-1, genfile=True)              
+
+    inputmodel = traits.Enum('dt', 'twotensor', 'threetensor', 'multitensor',
+    argstr='-inputmodel %s', 
+    desc='Specifies the model that the input tensor data contains parameters for.' \
+    'Possible model types are: "dt" (diffusion-tensor data), "twotensor" (two-tensor data), '\
+    '"threetensor" (three-tensor data). By default, the program assumes that the input data '\
+    'contains a single diffusion tensor in each voxel.')
+
+    inputdatatype = traits.Enum('char', 'short', 'int', 'long', 'float', 'double',
+    argstr='-inputdatatype %s', 
+    desc='Specifies the data type of the input file. The data type can be any of the' \
+    'following strings: "char", "short", "int", "long", "float" or "double".')
+
+    outputdatatype = traits.Enum('char', 'short', 'int', 'long', 'float', 'double',
+    argstr='-outputdatatype %s', 
+    desc='Specifies the data type of the output data. The data type can be any of the' \
+    'following strings: "char", "short", "int", "long", "float" or "double".')
+    
+class FAOutputSpec(TraitedSpec):
+    fa = File(exists=True, desc='Fractional Anisotropy Map') 
+
+class FA(CommandLine):
+    _cmd = 'fa'
+    input_spec=FAInputSpec
+    output_spec=FAOutputSpec
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["fa"] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_file':
+            return self._gen_outfilename()
+        else:
+            return None
+    def _gen_outfilename(self):
+        _, name , _ = split_filename(self.inputs.in_file)
+        return name + "_FA.img"     #Need to change to self.inputs.outputdatatype
+
+class TrDInputSpec(CommandLineInputSpec): 
+    in_file = File(exists=True, argstr='< %s',
+                    mandatory=True, position=1,
+                    desc='Tensor-fitted data filename')
+    
+    scheme_file = File(exists=True, argstr='%s',
+                    mandatory=False, position=2,
+                    desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
+        
+    out_file = File(argstr="> %s", position=-1, genfile=True)              
+
+    inputmodel = traits.Enum('dt', 'twotensor', 'threetensor', 'multitensor',
+    argstr='-inputmodel %s', 
+    desc='Specifies the model that the input tensor data contains parameters for.' \
+    'Possible model types are: "dt" (diffusion-tensor data), "twotensor" (two-tensor data), '\
+    '"threetensor" (three-tensor data). By default, the program assumes that the input data '\
+    'contains a single diffusion tensor in each voxel.')
+
+    inputdatatype = traits.Enum('char', 'short', 'int', 'long', 'float', 'double',
+    argstr='-inputdatatype %s', 
+    desc='Specifies the data type of the input file. The data type can be any of the' \
+    'following strings: "char", "short", "int", "long", "float" or "double".')
+
+    outputdatatype = traits.Enum('char', 'short', 'int', 'long', 'float', 'double',
+    argstr='-outputdatatype %s', 
+    desc='Specifies the data type of the output data. The data type can be any of the' \
+    'following strings: "char", "short", "int", "long", "float" or "double".')
+    
+class TrDOutputSpec(TraitedSpec):
+    trace = File(exists=True, desc='Trace of the diffusion tensor') 
+
+class TrD(CommandLine):
+    _cmd = 'trd'
+    input_spec=TrDInputSpec
+    output_spec=TrDOutputSpec
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["trace"] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_file':
+            return self._gen_outfilename()
+        else:
+            return None
+    def _gen_outfilename(self):
+        _, name , _ = split_filename(self.inputs.in_file)
+        return name + "_TrD.img"     #Need to change to self.inputs.outputdatatype
+
+class AnalyzeHeaderInputSpec(CommandLineInputSpec): 
+    in_file = File(exists=True, argstr='< %s', 
+                    mandatory=True, position=1,
+                    desc='Tensor-fitted data filename') # Took out < %s from argstr
+    
+    scheme_file = File(exists=True, argstr='%s',
+                    mandatory=False, position=2,
+                    desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
+        
+    out_file = File(argstr="> %s", position=-1, genfile=True)              
+    
+    readheader = File(exists=True, argstr='-readheader %s',
+    mandatory=False, position=3,
+    desc='Reads header information from file and prints to stdout. If this option is not' \
+    'specified, then the program writes a header based on the other arguments.') 
+
+    printimagedims = File(exists=True, argstr='-printimagedims %s',
+    mandatory=False, position=3,
+    desc='Prints image data and voxel dimensions as Camino arguments and exits.')
+
+    # How do we implement both file and enum (for the program) in one argument? Is this option useful anyway?
+    #-printprogargs <file> <prog>
+    #Prints data dimension (and type, if relevant) arguments for a specific Camino program, where prog is one of shredder, scanner2voxel, vcthreshselect, pdview, track.
+    printprogargs = File(exists=True, argstr='-printprogargs %s',
+    mandatory=False, position=3,
+    desc='Prints data dimension (and type, if relevant) arguments for a specific Camino' \
+    'program, where prog is one of shredder, scanner2voxel, vcthreshselect, pdview, track.')
+
+    printintelbyteorder = File(exists=True, argstr='-printintelbyteorder %s',
+    mandatory=False, position=3,
+    desc='Prints 1 if the header is little-endian, 0 otherwise.')
+
+    printbigendian = File(exists=True, argstr='-printbigendian %s',
+    mandatory=False, position=3,
+    desc='Prints 1 if the header is big-endian, 0 otherwise.')
+
+    initfromheader = File(exists=True, argstr='-initfromheader %s',
+    mandatory=False, position=3,
+    desc='Reads header information from file and intializes a new header with the values' \
+    'read from the file. You may replace any combination of fields in the new header by specifying'\
+    'subsequent options.')
+
+    data_dims = traits.List(traits.Int, desc = 'data dimensions in voxels',
+        argstr='-datadims %s', minlen=3, maxlen=3,
+        units='voxels')
+
+    voxel_dims = traits.List(traits.Float, desc = 'voxel dimensions in mm',
+        argstr='-voxeldims %s', minlen=3, maxlen=3,
+        units='mm')	
+
+    centre = traits.List(traits.Int, 
+    desc = 'Voxel specifying origin of Talairach coordinate system for SPM, default [0 0 0].',
+        argstr='-centre %s', minlen=3, maxlen=3,
+        units='mm')	
+
+    picoseed = traits.List(traits.Int, 
+    desc = 'Voxel specifying the seed (for PICo maps), default [0 0 0].',
+        argstr='-picoseed %s', minlen=3, maxlen=3,
+        units='mm')	
+
+    nimages = traits.Int(argstr='-nimages %d', units='NA',
+        desc="Number of images in the img file. Default 1.")
+
+    datatype = traits.Enum('byte', 'char', '[u]short', '[u]int', 'float', 'complex', 'double',
+    argstr='-datatype %s', 
+    desc='The char datatype is 8 bit (not the 16 bit char of Java), as specified by the Analyze 7.5 standard. \
+     The byte, ushort and uint types are not part of the Analyze specification but are supported by SPM.')
+
+    offset = traits.Int(argstr='-offset %d', units='NA',
+        desc='According to the Analyze 7.5 standard, this is the byte offset in the .img file' \
+        'at which voxels start. This value can be negative to specify that the absolute value is' \
+        'applied for every image in the file.')
+
+    gl = traits.List(traits.Int, 
+    desc = 'Minimum and maximum greylevels. Stored as shorts in the header.',
+        argstr='-gl %s', minlen=2, maxlen=2,
+        units='NA')	
+
+    scaleslope = traits.Float(argstr='-scaleslope %d', units='NA',
+        desc='Intensities in the image are scaled by this factor by SPM and MRICro. Default is 1.0.')
+
+    scaleinter = traits.Float(argstr='-scaleinter %d', units='NA',
+        desc='Constant to add to the image intensities. Used by SPM and MRIcro.')
+
+    description = traits.String(argstr='-description %s',
+        desc='Short description - No spaces, max length 79 bytes. Will be null terminated automatically.')
+
+    intelbyteorder = traits.Bool(argstr='-intelbyteorder', 
+    desc="Write header in intel byte order (little-endian).")
+    
+    networkbyteorder = traits.Bool(argstr='-networkbyteorder', 
+    desc="Write header in network byte order (big-endian). This is the default for new headers.")
+        
+class AnalyzeHeaderOutputSpec(TraitedSpec):
+    header = File(exists=True, desc='Analyze header') 
+
+class AnalyzeHeader(CommandLine):
+    _cmd = 'analyzeheader'
+    input_spec=AnalyzeHeaderInputSpec
+    output_spec=AnalyzeHeaderOutputSpec
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["header"] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_file':
+            return self._gen_outfilename()
+        else:
+            return None
+    def _gen_outfilename(self):
+        _, name , _ = split_filename(self.inputs.in_file)
+        return name + ".hdr"
