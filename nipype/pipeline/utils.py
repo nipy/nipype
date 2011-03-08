@@ -20,12 +20,11 @@ from nipype.utils.config import config
 
 logger = logging.getLogger('workflow')
 
-if nx.__version__ < '1.4':
+try:
     dfs_preorder = nx.dfs_preorder
-    logger.info('networkx < 1.4 detected')
-else:
+except AttributeError:
     dfs_preorder = nx.dfs_preorder_nodes
-    logger.info('networkx >= 1.4 detected')
+    logger.info('networkx  1.4 dev detected')
 
 try:
     from os.path import relpath
