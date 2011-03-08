@@ -198,26 +198,33 @@ class FunctionInputSpec(DynamicTraitedSpec):
 class Function(IOBase):
     """Runs arbitrary function as an interface
 
-    The function has to accept arguments named arg1, arg2, ...
-
     Examples
     --------
 
-    >>> func = 'def func(arg1, arg2):\n    return arg1 +arg2\n'
-    >>> fi = Function(numinputs=2)
+    >>> func = 'def func(arg1, arg2=5):\n    return arg1 +arg2\n'
+    >>> fi = Function(input_names=['arg1', 'arg2'], output_names=['out'])
     >>> fi.inputs.function_str = func
-    >>> fi.inputs.in1 = 1
-    >>> fi.inputs.in2 = 2
-    >>> res = fi.run()
-    >>> res.outputs.out1
-    3
+    >>> res = fi.run(arg1=1)
+    >>> res.outputs.out
+    6
 
     """
     
     input_spec = FunctionInputSpec
     output_spec = DynamicTraitedSpec
 
-    def __init__(self, numinputs=0, numoutputs=1, function=None, **inputs):
+    def __init__(self, input_names, output_names, function=None, **inputs):
+        """
+
+        Parameters
+        ----------
+
+        input_names: single str or list
+            names corresponding to function inputs
+        output_names: single str or list
+            names corresponding to function outputs. has to match the number of outputs
+        """
+        
         super(Function, self).__init__(**inputs)
         if function:
             if hasattr(function, '__call__'):
@@ -225,49 +232,48 @@ class Function(IOBase):
                     self.inputs.function_str = getsource(function)
                 except IOError:
                     raise Exception('Interface Function does not accept ' \
-                                        'function objects defined interactively in a python ssession')
+                                        'function objects defined interactively in a python session')
             elif isinstance(function, str):
                 self.inputs.function_str = function
             else:
                 raise Exception('Unknown type of function')
-        self._numinputs = numinputs
-        self._numoutputs = numoutputs
-        if self._numinputs>0:
-            add_traits(self.inputs, ['in%d'%(i+1) for i in range(numinputs)])
+        self._input_names = filename_to_list(input_names)
+        self._output_names = filename_to_list(output_names)
+        add_traits(self.inputs, [name for name in self._input_names])
+        self._out = {}
+        for name in self._output_names:
+            self._out[name] = None
 
     def _add_output_traits(self, base):
         undefined_traits = {}
-        for i in range(self._numoutputs):
-            key = 'out%d'%(i+1)
+        for key in self._output_names:
             base.add_trait(key, traits.Any)
             undefined_traits[key] = Undefined
         base.trait_set(trait_change_notify=False, **undefined_traits)
         return base
 
     def _run_interface(self, runtime):
-        self._out = {}
-        for i in range(self._numoutputs):
-            key = 'out%d'%(i+1)
-            self._out[key] = None
         try:
             ns = {}
             exec self.inputs.function_str in ns
             args = {}
-            for i in range(self._numinputs):
-                args['arg%d'%(i+1)] = getattr(self.inputs, 'in%d'%(i+1))
+            for name in self._input_names:
+                value = getattr(self.inputs, name)
+                if isdefined(value):
+                    args[name] = value
             function_name = [name for name in ns.keys() if not name == '__builtins__'][0]
-            if self._numinputs > 0:
-                out = ns[function_name](**args)
+            out = ns[function_name](**args)
+            print args #dbg
+            print out #dbg
+            if len(self._output_names) == 1:
+                self._out[self._output_names[0]] = out
             else:
-                out = ns[function_name]()
-            if self._numoutputs == 1:
-                self._out['out1'] = out
-            else:
-                if len(out) != self._numoutputs:
+                if isinstance(out, tuple) and (len(out) != len(self._output_names)):
                     raise Exception('Mismatch in number of outputs')
-                for i in range(self._numoutputs):
-                    self._out['out%d'%(i+1)] = out[i]
-        except:
+                for idx, name in enumerate(self._output_names):
+                    self._out[name] = out[idx]
+        except TypeError, msg :
+            print 'Error: %s'%msg
             runtime.returncode = 1
         finally:
             runtime.returncode = 0
@@ -275,8 +281,7 @@ class Function(IOBase):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        for i in range(self._numoutputs):
-            key = 'out%d'%(i+1)
+        for key in self._output_names:
             outputs[key] = self._out[key]
         return outputs
 
