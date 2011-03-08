@@ -221,7 +221,11 @@ class Function(IOBase):
         super(Function, self).__init__(**inputs)
         if function:
             if hasattr(function, '__call__'):
-                self.inputs.function_str = getsource(function)
+                try:
+                    self.inputs.function_str = getsource(function)
+                except IOError:
+                    raise Exception('Interface Function does not accept ' \
+                                        'function objects defined interactively in a python ssession')
             elif isinstance(function, str):
                 self.inputs.function_str = function
             else:
