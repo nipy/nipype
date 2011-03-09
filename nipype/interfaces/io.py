@@ -577,26 +577,38 @@ class FreeSurferSource(IOBase):
 
 
 
-class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec): #InterfaceInputSpec):
-    query_template = traits.Str(mandatory=True,
-             desc='Layout used to get files. relative to base directory if defined')
-    query_template_args = traits.Dict(traits.Str,
-                                traits.List(traits.List),
-                                value=dict(outfiles=[]), usedefault=True,
-                                desc='Information to plug into template')
+class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
-    xnat_server = traits.Str(mandatory=True, requires=['xnat_user', 'xnat_pwd'], xor=['xnat_config'])
+    query_template = traits.Str(
+        mandatory=True,
+        desc=('Layout used to get files. Relative to base '
+              'directory if defined')
+        )
+
+    query_template_args = traits.Dict(
+        traits.Str,
+        traits.List(traits.List),
+        value=dict(outfiles=[]), usedefault=True,
+        desc='Information to plug into template'
+        )
+
+    xnat_server = traits.Str(
+        mandatory=True,
+        requires=['xnat_user', 'xnat_pwd'],
+        xor=['xnat_config']
+        )
+
     xnat_user = traits.Str()
     xnat_pwd = traits.Password()
     xnat_config = File(mandatory=True, xor=['xnat_server'])
 
     cache_dir = Directory(desc='Cache directory')
-    cache_size = traits.Str(desc='Optional cache max size')
 
 
 class XNATSource(IOBase):
-    """ Generic XNATSource module that wraps around glob in an
-        intelligent way for neuroimaging tasks to grab files
+    """ Generic XNATSource module that wraps around the pyxnat module in
+        an intelligent way for neuroimaging tasks to grab files and data
+        from an XNAT server.
 
         Examples
         --------
@@ -653,9 +665,11 @@ class XNATSource(IOBase):
             self.inputs.query_template_args['outfiles'] = [infields]
         if outfields:
             # add ability to insert field specific templates
-            self.inputs.add_trait('field_template',
-                                  traits.Dict(traits.Enum(outfields),
-                                    desc="arguments that fit into query_template"))
+            self.inputs.add_trait(
+                'field_template',
+                traits.Dict(traits.Enum(outfields),
+                            desc="arguments that fit into query_template")
+                )
             undefined_traits['field_template'] = Undefined
             #self.inputs.remove_trait('query_template_args')
             outdict = {}
@@ -673,24 +687,28 @@ class XNATSource(IOBase):
         return add_traits(base, self.inputs.query_template_args.keys())
 
     def _list_outputs(self):
-        # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
-        # hence manual check
+        # infields are mandatory, however I could not figure out
+        # how to set 'mandatory' flag dynamically, hence manual check
 
         cache_dir = self.inputs.cache_dir or tempfile.gettempdir()
 
-        if self.inputs.xnat_server:
-            xnat = pyxnat.Interface(self.inputs.xnat_server,self.inputs.xnat_user, self.inputs.xnat_pwd, cache_dir)
+        if self.inputs.xnat_config:
+            xnat = pyxnat.Interface(config=self.inputs.xnat_config)
         else:
-            xnat = pyxnat.Interface.load(self.inputs.xnat_config)
-
-#        xnat.set_offline_mode()
+            xnat = pyxnat.Interface(self.inputs.xnat_server,
+                                    self.inputs.xnat_user,
+                                    self.inputs.xnat_pwd,
+                                    cache_dir
+                                    )
 
         if self._infields:
             for key in self._infields:
                 value = getattr(self.inputs,key)
                 if not isdefined(value):
-                    msg = "%s requires a value for input '%s' because it was listed in 'infields'" % \
-                    (self.__class__.__name__, key)
+                    msg = ("%s requires a value for input '%s' "
+                           "because it was listed in 'infields'" % \
+                               (self.__class__.__name__, key)
+                           )
                     raise ValueError(msg)
 
         outputs = {}
@@ -705,7 +723,11 @@ class XNATSource(IOBase):
                 file_objects = xnat.select(template).get('obj')
                 if file_objects == []:
                     raise IOError('Template %s returned no files'%template)
-                outputs[key] = list_to_filename([str(file_object.get()) for file_object in file_objects])
+                outputs[key] = list_to_filename(
+                                        [str(file_object.get())
+                                         for file_object in file_objects
+                                         if file_object.exists()
+                                        ])
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
@@ -713,29 +735,52 @@ class XNATSource(IOBase):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
-                            raise ValueError('incompatible number of arguments for %s' % key)
+                            raise ValueError('incompatible number '
+                                             'of arguments for %s' % key
+                                             )
                         if len(arg)>maxlen:
                             maxlen = len(arg)
                 outfiles = []
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, str) and hasattr(self.inputs, arg):
+                        if isinstance(arg, str) and \
+                                hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
                         else:
                             argtuple.append(arg)
                     if argtuple:
-                        file_objects = xnat.select(template%tuple(argtuple)).get('obj')
+                        target = template % tuple(argtuple)
+                        file_objects = xnat.select(target).get('obj')
+
                         if file_objects == []:
-                            raise IOError('Template %s returned no files'%(template%tuple(argtuple)))
-                        outfiles = list_to_filename([str(file_object.get()) for file_object in file_objects])
+                            raise IOError('Template %s '
+                                          'returned no files' % target
+                                          )
+
+                        outfiles = list_to_filename(
+                            [str(file_object.get())
+                             for file_object in file_objects
+                             if file_object.exists()
+                             ]
+                            )
                     else:
                         file_objects = xnat.select(template).get('obj')
+
                         if file_objects == []:
-                            raise IOError('Template %s returned no files'%template)
-                        outfiles = list_to_filename([str(file_object.get()) for file_object in file_objects])
+                            raise IOError('Template %s '
+                                          'returned no files' % template
+                                          )
+
+                        outfiles = list_to_filename(
+                            [str(file_object.get())
+                             for file_object in file_objects
+                             if file_object.exists()
+                             ]
+                            )
+
                     outputs[key].insert(i,outfiles)
             if len(outputs[key]) == 0:
                 outputs[key] = None
@@ -748,16 +793,45 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
 
-    xnat_server = traits.Str(mandatory=True, requires=['xnat_user', 'xnat_pwd'], xor=['xnat_config'])
+    xnat_server = traits.Str(mandatory=True,
+                             requires=['xnat_user', 'xnat_pwd'],
+                             xor=['xnat_config']
+                             )
+
     xnat_user = traits.Str()
     xnat_pwd = traits.Password()
     xnat_config = File(mandatory=True, xor=['xnat_server'])
     cache_dir = Directory(desc='')
-    cache_size = traits.Str()
 
-    project_id =  traits.Str(desc='Project in which to store the outputs', mandatory=True)
-    subject_id =  traits.Str(desc='Set to subject id', mandatory=True)
-    experiment_id =  traits.Str(desc='Set to workflow name', mandatory=True)
+    project_id = traits.Str(
+        desc='Project in which to store the outputs', mandatory=True)
+
+    subject_id = traits.Str(
+        desc='Set to subject id', mandatory=True)
+
+    experiment_id = traits.Str(
+        desc='Set to workflow name', mandatory=True)
+
+    assessor_id = traits.Str(
+        desc=('Option to customize ouputs representation in XNAT - '
+              'assessor level will be used with specified id'),
+        mandatory=False,
+        xor=['reconstruction_id', 'scan_id']
+        )
+
+    reconstruction_id = traits.Str(
+        desc=('Option to customize ouputs representation in XNAT - '
+              'reconstruction level will be used with specified id'),
+        mandatory=False,
+        xor=['assessor_id', 'scan_id']
+        )
+
+    scan_id = traits.Str(
+        desc=('Option to customize ouputs representation in XNAT - '
+              'scan level will be used with specified id'),
+        mandatory=False,
+        xor=['reconstruction_id', 'assessor_id']
+        )
 
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
@@ -779,27 +853,35 @@ class XNATSink(IOBase):
 
         cache_dir = self.inputs.cache_dir or tempfile.gettempdir()
 
-        if self.inputs.xnat_server:
-            xnat = pyxnat.Interface(self.inputs.xnat_server,self.inputs.xnat_user, self.inputs.xnat_pwd, cache_dir)
+        if self.inputs.xnat_config:
+            xnat = pyxnat.Interface(config=self.inputs.xnat_config)
         else:
-            xnat = pyxnat.Interface.load(self.inputs.xnat_config)
+            xnat = pyxnat.Interface(self.inputs.xnat_server,
+                                    self.inputs.xnat_user,
+                                    self.inputs.xnat_pwd,
+                                    cache_dir
+                                    )
 
-        uri_template_args = {'project_id':self.inputs.project_id,
-                             'subject_id':'%s_%s' % \
-                                (self.inputs.project_id,
-                                 self.inputs.subject_id),
-                             'experiment_id': '%s_%s' % \
-                                (hashlib.md5(self.inputs.subject_id).hexdigest(),
-                                 self.inputs.experiment_id)
-                             }
+        uri_template_args = {
+            'project_id':self.inputs.project_id,
+            'subject_id':'%s_%s' % (self.inputs.project_id,
+                                    self.inputs.subject_id
+                                    ),
+            'experiment_id': '%s_%s' % (hashlib.md5(self.inputs.subject_id
+                                                    ).hexdigest(),
+                                        self.inputs.experiment_id
+                                        )
+            }
 
         for key,files in self.inputs._outputs.items():
             for name in filename_to_list(files):
 
                 if isinstance(name, list):
                     for i, file_name in enumerate(name):
-                        write_file_to_XNAT(xnat, file_name, '%s_'%i+key, uri_template_args)
-
+                        write_file_to_XNAT(xnat, file_name,
+                                           '%s_' % i + key,
+                                           uri_template_args
+                                           )
                 else:
                     write_file_to_XNAT(xnat, name, key, uri_template_args)
 
@@ -807,9 +889,10 @@ class XNATSink(IOBase):
 def write_file_to_XNAT(xnat, name, key, uri_template_args):
 
     val_list = [val
-         for part in os.path.split(name)[0].split(os.sep)
-         for val in part.split('_')[1:]
-         if part.startswith('_') and len(part.split('_'))%2]
+                for part in os.path.split(name)[0].split(os.sep)
+                for val in part.split('_')[1:]
+                if part.startswith('_') and len(part.split('_')) % 2
+                ]
 
     keymap = dict(zip(val_list[1::2],val_list[2::2]))
 
@@ -818,24 +901,27 @@ def write_file_to_XNAT(xnat, name, key, uri_template_args):
         if str(self.inputs.subject_id) not in val:
             recon_label.extend([key, val])
 
-    uri_template_args['recon_label'] = \
-        hashlib.md5(uri_template_args['experiment_id']).hexdigest()
+    uri_template_args['recon_label'] = hashlib.md5(
+        uri_template_args['experiment_id']).hexdigest()
 
     if recon_label:
         uri_template_args['recon_label'] += '_'.join(recon_label)
 
-    uri_template_args['resource_label'] = '%s_%s' % \
-                (hashlib.md5(uri_template_args['recon_label']).hexdigest(),
-                 key.split('.')[0]
-                 )
+    uri_template_args['resource_label'] = (
+        '%s_%s' % (hashlib.md5(uri_template_args['recon_label']).hexdigest(),
+                   key.split('.')[0]
+                   )
+        )
 
     uri_template_args['file_name'] = os.path.split(os.path.abspath(name))[1]
 
-    uri_template = ('/project/%(project_id)s/subject/%(subject_id)s'
-                    '/experiment/%(experiment_id)s/reconstruction/%(recon_label)s'
-                    '/out/resource/%(resource_label)s/file/%(file_name)s')
+    uri_template = (
+        '/project/%(project_id)s/subject/%(subject_id)s'
+        '/experiment/%(experiment_id)s/reconstruction/%(recon_label)s'
+        '/out/resource/%(resource_label)s/file/%(file_name)s'
+        )
 
-    print uri_template%uri_template_args
+    print uri_template % uri_template_args
 
     file_resource = xnat.select(uri_template%uri_template_args)
     file_resource.put(name, experiments='xnat:imageSessionData')
