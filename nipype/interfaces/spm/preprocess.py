@@ -667,8 +667,11 @@ class NewSegment(SPMCommand):
 
         for filename in filename_to_list(self.inputs.channel_files[0]):
             pth, base, ext = split_filename(filename)
-            for i in range(len(self.inputs.tissues)):
-                outputs['native_class_images'].append(os.path.join("c%d%s%s"(i, base, ext)))
+            n_classes = 4
+            if isdefined(self.inputs.tissues):
+                n_classes = len(self.inputs.tissues)
+            for i in range(1,n_classes+1):   
+                outputs['native_class_images'].append(os.path.join(pth,"c%d%s%s"%(i, base, ext)))
             outputs['transformation_mat'] = os.path.join(pth, "%s_seg8.mat" % base)
         return outputs
 
