@@ -201,7 +201,7 @@ class Function(IOBase):
     Examples
     --------
 
-    >>> func = 'def func(arg1, arg2=5):\n    return arg1 +arg2\n'
+    >>> func = 'def func(arg1, arg2=5): return arg1 + arg2'
     >>> fi = Function(input_names=['arg1', 'arg2'], output_names=['out'])
     >>> fi.inputs.function_str = func
     >>> res = fi.run(arg1=1)
@@ -263,8 +263,6 @@ class Function(IOBase):
                     args[name] = value
             function_name = [name for name in ns.keys() if not name == '__builtins__'][0]
             out = ns[function_name](**args)
-            print args #dbg
-            print out #dbg
             if len(self._output_names) == 1:
                 self._out[self._output_names[0]] = out
             else:
