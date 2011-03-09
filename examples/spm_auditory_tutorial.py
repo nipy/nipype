@@ -1,6 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
+========================================
+Using SPM for analysis: Auditory dataset
+========================================
+
 Introduction
 ============
 
@@ -9,10 +13,7 @@ using auditory dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/
 
     python spm_auditory_tutorial.py
 
-"""
-
-
-"""Import necessary modules from nipype."""
+Import necessary modules from nipype."""
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
@@ -404,3 +405,4 @@ function needs to be called.
 if __name__ == '__main__':
     level1.run()
     level1.write_graph()
+

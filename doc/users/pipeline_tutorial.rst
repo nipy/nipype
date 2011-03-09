@@ -1,7 +1,7 @@
 .. _pipeline_tutorial:
 
 =====================
- Tutorial : Pipeline
+ Tutorial : Workflows
 =====================
 
 This section presents several tutorials on how to setup and use pipelines. Make
@@ -13,20 +13,12 @@ Tutorials
 
 .. toctree::
    :maxdepth: 1
+   :glob:
 
    tutorial_101
    tutorial_102
    tutorial_103
-   spm_tutorial
-   spm_tutorial2
-   spm_auditory_tutorial
-   spm_face_tutorial
-   freesurfer_tutorial
-   fsl_tutorial
-   fsl_feeds
-   fsl_dti_tutorial
-   nipy_tutorial
-   dartmouth_workshop_2010
+   examples/*
 
 Requirements
 ============

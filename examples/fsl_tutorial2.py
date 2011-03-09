@@ -1,10 +1,14 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
+===========================
+Using FSL for fMRI analysis
+===========================
+
 A workflow that uses fsl to perform a first level analysis on the nipype
 tutorial data set::
 
-python fsl_tutorial2.py
+    python fsl_tutorial2.py
 
 
 First tell python where to find the appropriate functions.

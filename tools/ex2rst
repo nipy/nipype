@@ -179,6 +179,9 @@ def exfile2rstfile(filename, opts):
 
     # write converted ReST
     dfile.write(exfile2rst(filename))
+    
+    # add links
+    dfile.write('.. include:: ../../links_names.txt\n\n')
 
     if opts.sourceref:
         # write post example see also box

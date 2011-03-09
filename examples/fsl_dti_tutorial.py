@@ -1,5 +1,8 @@
-
 """
+==========================
+Using FSL for DTI analysis
+==========================
+
 A pipeline example that uses several interfaces to
 perform analysis on diffusion weighted images using
 FSL FDT tools.
@@ -9,10 +12,11 @@ data freely available at the FSL website at:
 http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 
 More details can be found at http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/fdt/index.htm
-"""
 
+In order to run this tutorial you need to have fsl tools installed and
+accessible from matlab/command line. Check by calling fslinfo from the
+command line. 
 
-"""
 Tell python where to find the appropriate functions.
 """
 
@@ -39,9 +43,7 @@ package_check('IPython', '0.10', 'tutorial1')
 Setting up workflows
 --------------------
 This is a generic workflow for DTI data analysis using the FSL
-"""
 
-"""
 Data specific components
 ------------------------
 

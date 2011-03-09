@@ -1,13 +1,40 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-A pipeline example that intergrates spm, fsl freesurfer modules to perform a
-comparative volume and surface based first level analysis.
+==============================
+Using FreeSurfer for smoothing
+==============================
 
-This tutorial uses the nipype-tutorial data and hence should be run from the
-directory containing tutorial data
+This tutorial illustrates how to perform surface-based smoothing of
+cortical data using FreeSurfer_ and then perform firstlevel model and
+contrast estimation using SPM_. A surface-based second level glm
+illustrates the use of spherical registration and freesurfer's glm
+functions. 
 
-    python freesurfer_tutorial.py
+Preparing environment
+=====================
+
+Step 0
+------
+
+In order to run this tutorial you need to have SPM_ and FreeSurfer_
+tools installed and accessible from matlab/command line. Check by
+calling mri_info from the command line.
+
+Step 1
+------
+Link the *fsaverage* directory for your freesurfer distribution. To do
+this type: 
+
+::
+
+  cd nipype-tutorial/fsdata
+  ln -s $FREESURFER_HOME/subjects/fsaverage
+  cd ..
+  
+  
+Defining the workflow
+=====================
 
 """
 
