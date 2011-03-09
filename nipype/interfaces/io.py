@@ -592,15 +592,15 @@ class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         desc='Information to plug into template'
         )
 
-    xnat_server = traits.Str(
+    server = traits.Str(
         mandatory=True,
-        requires=['xnat_user', 'xnat_pwd'],
-        xor=['xnat_config']
+        requires=['user', 'pwd'],
+        xor=['config']
         )
 
-    xnat_user = traits.Str()
-    xnat_pwd = traits.Password()
-    xnat_config = File(mandatory=True, xor=['xnat_server'])
+    user = traits.Str()
+    pwd = traits.Password()
+    config = File(mandatory=True, xor=['server'])
 
     cache_dir = Directory(desc='Cache directory')
 
@@ -692,12 +692,12 @@ class XNATSource(IOBase):
 
         cache_dir = self.inputs.cache_dir or tempfile.gettempdir()
 
-        if self.inputs.xnat_config:
-            xnat = pyxnat.Interface(config=self.inputs.xnat_config)
+        if self.inputs.config:
+            xnat = pyxnat.Interface(config=self.inputs.config)
         else:
-            xnat = pyxnat.Interface(self.inputs.xnat_server,
-                                    self.inputs.xnat_user,
-                                    self.inputs.xnat_pwd,
+            xnat = pyxnat.Interface(self.inputs.server,
+                                    self.inputs.user,
+                                    self.inputs.pwd,
                                     cache_dir
                                     )
 
@@ -793,14 +793,14 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
 
-    xnat_server = traits.Str(mandatory=True,
-                             requires=['xnat_user', 'xnat_pwd'],
-                             xor=['xnat_config']
-                             )
+    server = traits.Str(mandatory=True,
+                        requires=['user', 'pwd'],
+                        xor=['config']
+                        )
 
-    xnat_user = traits.Str()
-    xnat_pwd = traits.Password()
-    xnat_config = File(mandatory=True, xor=['xnat_server'])
+    user = traits.Str()
+    pwd = traits.Password()
+    config = File(mandatory=True, xor=['server'])
     cache_dir = Directory(desc='')
 
     project_id = traits.Str(
@@ -853,42 +853,79 @@ class XNATSink(IOBase):
 
         cache_dir = self.inputs.cache_dir or tempfile.gettempdir()
 
-        if self.inputs.xnat_config:
-            xnat = pyxnat.Interface(config=self.inputs.xnat_config)
+        if self.inputs.config:
+            xnat = pyxnat.Interface(config=self.inputs.config)
         else:
-            xnat = pyxnat.Interface(self.inputs.xnat_server,
-                                    self.inputs.xnat_user,
-                                    self.inputs.xnat_pwd,
+            xnat = pyxnat.Interface(self.inputs.server,
+                                    self.inputs.user,
+                                    self.inputs.pwd,
                                     cache_dir
                                     )
 
         uri_template_args = {
-            'project_id':self.inputs.project_id,
-            'subject_id':'%s_%s' % (self.inputs.project_id,
-                                    self.inputs.subject_id
+            'project_id':quote_id(self.inputs.project_id),
+            'subject_id':'%s_%s' % (quote_id(self.inputs.project_id),
+                                    quote_id(self.inputs.subject_id)
                                     ),
-            'experiment_id': '%s_%s' % (hashlib.md5(self.inputs.subject_id
-                                                    ).hexdigest(),
-                                        self.inputs.experiment_id
+            'experiment_id': '%s_%s' % (quote_id(self.inputs.subject_id),
+                                        quote_id(self.inputs.experiment_id)
                                         )
             }
 
-        for key,files in self.inputs._outputs.items():
+        if self.inputs.assessor_id is not None:
+            uri_template_args['assessor_id'] = (
+                '%s_%s' % (quote_id(self.inputs.experiment_id),
+                           quote_id(self.inputs.assessor_id)
+                           )
+                )
+
+        elif self.inputs.reconstruction_id is not None:
+            uri_template_args['reconstruction_id'] = (
+                '%s_%s' % (quote_id(self.inputs.experiment_id),
+                           quote_id(self.inputs.reconstruction_id)
+                           )
+                )
+
+        elif self.inputs.scan_id is not None:
+            uri_template_args['scan_id'] = (
+                '%s_%s' % (quote_id(self.inputs.experiment_id),
+                           quote_id(self.inputs.scan_id)
+                           )
+                )
+
+        # uri_template_args = {
+        #     'project_id':self.inputs.project_id,
+        #     'subject_id':'%s_%s' % (self.inputs.project_id,
+        #                             self.inputs.subject_id
+        #                             ),
+        #     'experiment_id': '%s_%s' % (hashlib.md5(self.inputs.subject_id
+        #                                             ).hexdigest(),
+        #                                 self.inputs.experiment_id
+        #                                 )
+        #     }
+
+        for key, files in self.inputs._outputs.items():
             for name in filename_to_list(files):
 
                 if isinstance(name, list):
                     for i, file_name in enumerate(name):
-                        write_file_to_XNAT(xnat, file_name,
-                                           '%s_' % i + key,
-                                           uri_template_args
-                                           )
+                        push_file(xnat, file_name,
+                                  '%s_' % i + key,
+                                  uri_template_args
+                                  )
                 else:
-                    write_file_to_XNAT(xnat, name, key, uri_template_args)
+                    push_file(xnat, name, key, uri_template_args)
 
 
-def write_file_to_XNAT(xnat, name, key, uri_template_args):
+def quote_id(string):
+    return string.replace('_', '---')
 
-    val_list = [val
+def unquote_id(string):
+    return string.replace('---', '_')
+
+def push_file(xnat, name, key, uri_template_args):
+
+    val_list = [unquote_id(val)
                 for part in os.path.split(name)[0].split(os.sep)
                 for val in part.split('_')[1:]
                 if part.startswith('_') and len(part.split('_')) % 2
@@ -923,6 +960,7 @@ def write_file_to_XNAT(xnat, name, key, uri_template_args):
 
     print uri_template % uri_template_args
 
-    file_resource = xnat.select(uri_template%uri_template_args)
-    file_resource.put(name, experiments='xnat:imageSessionData')
-
+    remote_file = xnat.select(uri_template % uri_template_args)
+    remote_file.insert(name,
+                       experiments='xnat:imageSessionData',
+                       use_label=True)
