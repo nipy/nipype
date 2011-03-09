@@ -105,6 +105,11 @@ Install
 The installation process is similar to other Python packages so it
 will be familiar if you have Python experience.
 
+Debian and Ubuntu
+~~~~~~~~~~~~~~~~~
+Add the `NeuroDebian <http://neuro.debian.org>`_ repository and install 
+the ``python-nipype`` package using ``apt-get`` or your favourite package manager.
+
 From source
 ~~~~~~~~~~~
 
