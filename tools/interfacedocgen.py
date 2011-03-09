@@ -27,6 +27,7 @@ import sys
 from nipype.utils.misc import is_container
 from nipype.interfaces.base import Interface, CommandLine
 from enthought.traits.trait_errors import TraitError
+import warnings
 
 def trim(docstring, marker):
     if not docstring:
@@ -285,7 +286,9 @@ class InterfaceHelpWriter(object):
             __import__(uri)
             print c
             try:
-                classinst = sys.modules[uri].__dict__[c]()
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    classinst = sys.modules[uri].__dict__[c]()
             except:
                 continue
             helpstr = ''
