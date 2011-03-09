@@ -30,20 +30,25 @@ from nipype.utils.filemanip import (fname_presuffix, filename_to_list,
 
 class SliceTimingInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(traits.Either(traits.List(File(exists=True)),File(exists=True)), field='scans',
-                          desc='list of filenames to apply slice timing',
-                          mandatory=True, copyfile=False)
+                              desc='list of filenames to apply slice timing',
+                              mandatory=True, copyfile=False)
     num_slices = traits.Int(field='nslices',
-                              desc='number of slices in a volume')
+                            desc='number of slices in a volume',
+                            mandatory=True)
     time_repetition = traits.Float(field='tr',
                                    desc='time between volume acquisitions ' \
-                                       '(start to start time)')
+                                       '(start to start time)',
+                                   mandatory=True)
     time_acquisition = traits.Float(field='ta',
                                     desc='time of volume acquisition. usually ' \
-                                        'calculated as TR-(TR/num_slices)')
+                                        'calculated as TR-(TR/num_slices)',
+                                    mandatory=True)
     slice_order = traits.List(traits.Int(), field='so',
-                               desc='1-based order in which slices are acquired')
+                              desc='1-based order in which slices are acquired',
+                              mandatory=True)
     ref_slice = traits.Int(field='refslice',
-                             desc='1-based Number of the reference slice')
+                           desc='1-based Number of the reference slice',
+                           mandatory=True)
 
 class SliceTimingOutputSpec(TraitedSpec):
     timecorrected_files = OutputMultiPath(File(exist=True, desc='slice time corrected files'))
@@ -215,7 +220,8 @@ class CoregisterInputSpec(SPMCommandInputSpec):
     target = File(exists=True, field='ref', mandatory=True,
                          desc='reference file to register to', copyfile=False)
     source = InputMultiPath(File(exists=True), field='source',
-                         desc='file to register to target', copyfile=True)
+                         desc='file to register to target', copyfile=True,
+                         mandatory=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
                           desc='one of: estimate, write, estwrite',
                           usedefault=True)
@@ -445,34 +451,34 @@ class SegmentInputSpec(SPMCommandInputSpec):
                           copyfile=False, mandatory=True)
     gm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.GM',
                                  desc="""Options to produce grey matter images: c1*.img, wc1*.img and mwc1*.img. 
-            None: [0,0,0], 
-            Native Space: [0,0,1], 
-            Unmodulated Normalised: [0,1,0], 
-            Modulated Normalised: [1,0,0], 
-            Native + Unmodulated Normalised: [0,1,1], 
-            Native + Modulated Normalised: [1,0,1], 
-            Native + Modulated + Unmodulated: [1,1,1], 
-            Modulated + Unmodulated Normalised: [1,1,0]""")
+            None: [False,False,False], 
+            Native Space: [False,False,True], 
+            Unmodulated Normalised: [False,True,False], 
+            Modulated Normalised: [True,False,False], 
+            Native + Unmodulated Normalised: [False,True,True], 
+            Native + Modulated Normalised: [True,False,True], 
+            Native + Modulated + Unmodulated: [True,True,True], 
+            Modulated + Unmodulated Normalised: [True,True,False]""")
     wm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.WM',
                                  desc="""Options to produce white matter images: c2*.img, wc2*.img and mwc2*.img.             
-            None: [0,0,0], 
-            Native Space: [0,0,1], 
-            Unmodulated Normalised: [0,1,0], 
-            Modulated Normalised: [1,0,0], 
-            Native + Unmodulated Normalised: [0,1,1], 
-            Native + Modulated Normalised: [1,0,1], 
-            Native + Modulated + Unmodulated: [1,1,1], 
-            Modulated + Unmodulated Normalised: [1,1,0]""")
+            None: [False,False,False], 
+            Native Space: [False,False,True], 
+            Unmodulated Normalised: [False,True,False], 
+            Modulated Normalised: [True,False,False], 
+            Native + Unmodulated Normalised: [False,True,True], 
+            Native + Modulated Normalised: [True,False,True], 
+            Native + Modulated + Unmodulated: [True,True,True], 
+            Modulated + Unmodulated Normalised: [True,True,False]""")
     csf_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.CSF',
                                   desc="""Options to produce CSF images: c3*.img, wc3*.img and mwc3*.img.             
-            None: [0,0,0], 
-            Native Space: [0,0,1], 
-            Unmodulated Normalised: [0,1,0], 
-            Modulated Normalised: [1,0,0], 
-            Native + Unmodulated Normalised: [0,1,1], 
-            Native + Modulated Normalised: [1,0,1], 
-            Native + Modulated + Unmodulated: [1,1,1], 
-            Modulated + Unmodulated Normalised: [1,1,0]""")
+            None: [False,False,False], 
+            Native Space: [False,False,True], 
+            Unmodulated Normalised: [False,True,False], 
+            Modulated Normalised: [True,False,False], 
+            Native + Unmodulated Normalised: [False,True,True], 
+            Native + Modulated Normalised: [True,False,True], 
+            Native + Modulated + Unmodulated: [True,True,True], 
+            Modulated + Unmodulated Normalised: [True,True,False]""")
     save_bias_corrected = traits.Bool(field='output.biascor',
                      desc='True/False produce a bias corrected image')
     clean_masks = traits.Enum('no', 'light', 'thorough', field='output.cleanup',
@@ -589,7 +595,9 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
             - tissue probability map
             - number of gaussians
             - which maps to save [Native, DARTEL] - a tuple of two boolean values
-            - which maps to save [Modulated, Unmodualted] - a tuple of two boolean values""", field='tissue', copyfile=False)
+            - which maps to save [Modulated, Unmodualted] - a tuple of two boolean values""", 
+            field='tissue', 
+            copyfile=False)
     affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', field='warp.affreg',
                       desc='mni, eastern, subj, none ')
     warping_regularization = traits.Float(field='warp.reg',
@@ -600,7 +608,7 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
                                            desc="Which deformation fields to write:[Inverse, Forward]")
 
 class NewSegmentOutputSpec(TraitedSpec):
-    native_class_images = OutputMultiPath(File(exists=True), desc='native space grey probability map')
+    native_class_images = OutputMultiPath(File(exists=True), desc='native space probability maps')
     transformation_mat = OutputMultiPath(File(exists=True), desc='Normalization transformation')
 
 class NewSegment(SPMCommand):
