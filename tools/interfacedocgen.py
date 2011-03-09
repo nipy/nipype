@@ -288,8 +288,14 @@ class InterfaceHelpWriter(object):
             try:
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
-                    classinst = sys.modules[uri].__dict__[c]()
-            except:
+                    if c == "Function":
+                        classinst = sys.modules[uri].__dict__[c](input_names=['arg1', 'arg2'], output_names=['out'])
+                    elif c == "IdentityInterface":
+                        classinst = sys.modules[uri].__dict__[c](fields=['a','b'])
+                    else:
+                        classinst = sys.modules[uri].__dict__[c]()
+            except Exception as inst:
+                print inst
                 continue
             helpstr = ''
             if isinstance(classinst, CommandLine):
