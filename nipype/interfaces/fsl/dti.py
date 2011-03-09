@@ -651,8 +651,8 @@ class VecRegOutputSpec(TraitedSpec):
     
 class VecReg(FSLCommand):
     """Use FSL vecreg for registering vector data
-    For complete details, see the `FDT Documentation
-    <http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_vecreg.html>`_
+    For complete details, see the FDT Documentation
+    <http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_vecreg.html>
     
     Example
     -------
@@ -705,8 +705,8 @@ class ProjThreshOuputSpec(TraitedSpec):
     
 class ProjThresh(FSLCommand):
     """Use FSL proj_thresh for thresholding some outputs of probtrack
-    For complete details, see the `FDT Documentation
-    <http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_thresh.html>`_
+    For complete details, see the FDT Documentation
+    <http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_thresh.html>
     
     Example
     -------
