@@ -247,7 +247,7 @@ preproc.connect(medianval,'out_stat', mergenode, 'in2')
                        
 """
 Smooth each run using SUSAN with the brightness threshold set to 75% of the
-median value for each run and a mask consituting the mean functional
+median value for each run and a mask constituting the mean functional
 """
 
 smooth = pe.MapNode(interface=fsl.SUSAN(),
@@ -380,7 +380,7 @@ modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
                       iterfield = ['fsf_file'])
 
 """
-Set the model generation to run everytime. Since the fsf file, which is the
+Set the model generation to run every time. Since the fsf file, which is the
 input to modelgen only references the ev files, modelgen will not run if the ev
 file contents are changed but the fsf file is untouched.
 """
