@@ -18,6 +18,7 @@ Tutorials
    tutorial_101
    tutorial_102
    tutorial_103
+   mapnode_and_iterables
    examples/*
 
 Requirements
