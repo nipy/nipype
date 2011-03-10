@@ -119,15 +119,15 @@ def test_fast():
     yield assert_equal, faster.inputs.verbose, True
     yield assert_equal, faster.inputs.manual_seg , Undefined
     yield assert_not_equal, faster, fasted
-    yield assert_equal, fasted.runtime.cmdline, 'fast -v %s'%(tmp_infile)
-    yield assert_equal, fasted2.runtime.cmdline, 'fast -v %s %s'%(tmp_infile,
+    yield assert_equal, fasted.runtime.cmdline, 'fast -v -S 1 %s'%(tmp_infile)
+    yield assert_equal, fasted2.runtime.cmdline, 'fast -v -S 2 %s %s'%(tmp_infile,
                                                                   tmp_infile)
 
     faster = fsl.FAST()
     faster.inputs.in_files = tmp_infile
-    yield assert_equal, faster.cmdline, 'fast %s'%(tmp_infile)
+    yield assert_equal, faster.cmdline, 'fast -S 1 %s'%(tmp_infile)
     faster.inputs.in_files = [tmp_infile, tmp_infile]
-    yield assert_equal, faster.cmdline, 'fast %s %s'%(tmp_infile, tmp_infile)
+    yield assert_equal, faster.cmdline, 'fast -S 2 %s %s'%(tmp_infile, tmp_infile)
 
     # Our options and some test values for them
     # Should parallel the opt_map structure in the class for clarity
@@ -164,7 +164,7 @@ def test_fast():
         faster = fsl.FAST(in_files=tmp_infile, **{name: settings[1]})
         yield assert_equal, faster.cmdline, ' '.join([faster.cmd,
                                                       settings[0],
-                                                      tmp_infile])
+                                                      "-S 1 %s"%tmp_infile])
     teardown_infile(tmp_dir)
 @skipif(no_fsl)    
 def setup_flirt():
