@@ -349,10 +349,10 @@ class Workflow(WorkflowBase):
                     if sourcename and not srcnode._check_outputs(sourcename):
                         not_found.append(['out', srcnode.name, sourcename])
         for info in not_found:
-            warn("Module %s has no %sput called %s\n"%(info[1], info[0],
-                                                       info[2]))
+            warn("Module %s has no %sput called %s"%(info[1], info[0], info[2]))
         if not_found:
-            raise Exception('Some connections were not found')
+            raise Exception('%d connections were not found (see warnings for details)'
+                            % len(not_found))
         # add connections
         for srcnode, destnode, connects in connection_list:
             edge_data = self._graph.get_edge_data(srcnode, destnode, None)
