@@ -184,7 +184,7 @@ Threshold the first run of the functional data at 10% of the 98th percentile
 
 threshold = pe.Node(interface=fsl.ImageMaths(out_data_type='char',
                                              suffix='_thresh'),
-                       name='threshold')
+                    name='threshold')
 preproc.connect(maskfunc, ('out_file', pickfirst), threshold, 'in_file')
 
 """
@@ -211,7 +211,7 @@ Dilate the mask
 
 dilatemask = pe.Node(interface=fsl.ImageMaths(suffix='_dil',
                                               op_string='-dilF'),
-                       name='dilatemask')
+                     name='dilatemask')
 preproc.connect(threshold, 'out_file', dilatemask, 'in_file')
 
 """
@@ -220,8 +220,8 @@ Mask the motion corrected functional runs with the dilated mask
 
 maskfunc2 = pe.MapNode(interface=fsl.ImageMaths(suffix='_mask',
                                                 op_string='-mas'),
-                      iterfield=['in_file'],
-                      name='maskfunc2')
+                       iterfield=['in_file'],
+                       name='maskfunc2')
 preproc.connect(motion_correct, 'out_file', maskfunc2, 'in_file')
 preproc.connect(dilatemask, 'out_file', maskfunc2, 'in_file2')
 
@@ -244,7 +244,7 @@ mergenode = pe.Node(interface=util.Merge(2, axis='hstack'),
 preproc.connect(meanfunc2,'out_file', mergenode, 'in1')
 preproc.connect(medianval,'out_stat', mergenode, 'in2')
 
-                       
+
 """
 Smooth each run using SUSAN with the brightness threshold set to 75% of the
 median value for each run and a mask constituting the mean functional
@@ -271,8 +271,8 @@ Mask the smoothed data with the dilated mask
 
 maskfunc3 = pe.MapNode(interface=fsl.ImageMaths(suffix='_mask',
                                                 op_string='-mas'),
-                      iterfield=['in_file'],
-                      name='maskfunc3')
+                       iterfield=['in_file'],
+                       name='maskfunc3')
 preproc.connect(smooth, 'smoothed_file', maskfunc3, 'in_file')
 preproc.connect(dilatemask, 'out_file', maskfunc3, 'in_file2')
 
@@ -281,8 +281,8 @@ Scale each volume of the run so that the median value of the run is set to 10000
 """
 
 intnorm = pe.MapNode(interface=fsl.ImageMaths(suffix='_intnorm'),
-                      iterfield=['in_file','op_string'],
-                      name='intnorm')
+                     iterfield=['in_file','op_string'],
+                     name='intnorm')
 preproc.connect(maskfunc3, 'out_file', intnorm, 'in_file')
 
 """
@@ -309,11 +309,11 @@ Generate a mean functional image from the first run
 meanfunc3 = pe.MapNode(interface=fsl.ImageMaths(op_string='-Tmean',
                                                 suffix='_mean'),
                        iterfield=['in_file'],
-                      name='meanfunc3')
+                       name='meanfunc3')
 preproc.connect(highpass, ('out_file', pickfirst), meanfunc3, 'in_file')
 
 """
-Strip the structural image a coregister the mean functional image to the
+Strip the structural image and coregister the mean functional image to the
 structural image
 """
 
@@ -427,8 +427,8 @@ varcopes for each condition
 """
 
 copemerge    = pe.MapNode(interface=fsl.Merge(dimension='t'),
-                       iterfield=['in_files'],
-                       name="copemerge")
+                          iterfield=['in_files'],
+                          name="copemerge")
 
 varcopemerge = pe.MapNode(interface=fsl.Merge(dimension='t'),
                        iterfield=['in_files'],
