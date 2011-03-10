@@ -1101,8 +1101,8 @@ class Node(WorkflowBase):
         resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
         if issubclass(self._interface.__class__, CommandLine):
             cmd = self._interface.cmdline
-            logger.info('cmd: %s'%cmd)
         if execute:
+            logger.info('Running: %s' % cmd)
             if copyfiles:
                 self._copyfiles_to_wd(cwd, execute)
             if issubclass(self._interface.__class__, CommandLine):
@@ -1136,7 +1136,7 @@ class Node(WorkflowBase):
                     result.outputs.set(**outputs)
         else:
             # Likewise, cwd could go in here
-            logger.debug("Collecting precomputed outputs:")
+            logger.info("Collecting precomputed outputs:")
             try:
                 aggregate = True
                 if os.path.exists(resultsfile):
@@ -1173,7 +1173,7 @@ class Node(WorkflowBase):
                         result.outputs.set(**outputs)
             except FileNotFoundError:
                 # if aggregation does not work, rerun the node
-                logger.debug("Some of the outputs were not found: rerunning node.")
+                logger.info("Some of the outputs were not found: rerunning node.")
                 result = self._run_command(execute=True, cwd=cwd, copyfiles=False)
         return result
 
