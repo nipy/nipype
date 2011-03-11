@@ -1102,7 +1102,7 @@ class Node(WorkflowBase):
         if issubclass(self._interface.__class__, CommandLine):
             cmd = self._interface.cmdline
         if execute:
-            logger.info('Running: %s' % cmd)
+            logger.debug('Executing node')
             if copyfiles:
                 self._copyfiles_to_wd(cwd, execute)
             if issubclass(self._interface.__class__, CommandLine):
@@ -1110,7 +1110,7 @@ class Node(WorkflowBase):
                 fd = open(cmdfile,'wt')
                 fd.writelines(cmd)
                 fd.close()
-            logger.debug('Executing node')
+                logger.info('Running: %s' % cmd)
             try:
                 result = self._interface.run()
             except:
@@ -1136,7 +1136,7 @@ class Node(WorkflowBase):
                     result.outputs.set(**outputs)
         else:
             # Likewise, cwd could go in here
-            logger.info("Collecting precomputed outputs:")
+            logger.info("Collecting precomputed outputs")
             try:
                 aggregate = True
                 if os.path.exists(resultsfile):
