@@ -1,8 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Defines functionality for pipelined execution of interfaces
-
-The `Pipeline` class provides core functionality for batch processing. 
+"""Utility routines for workflow graphs
 """
 
 from copy import deepcopy
@@ -24,7 +22,7 @@ try:
     dfs_preorder = nx.dfs_preorder
 except AttributeError:
     dfs_preorder = nx.dfs_preorder_nodes
-    logger.info('networkx  1.4 dev detected')
+    logger.info('networkx 1.4 dev or higher detected')
 
 try:
     from os.path import relpath
@@ -209,6 +207,7 @@ def _write_detailed_dot(graph, dotfilename):
     filep.close()
     return text
 
+# Graph manipulations for iterable expansion
 def _get_valid_pathstr(pathstr):
     pathstr = pathstr.replace(os.sep, '..')
     pathstr = re.sub(r'''[][ (){}?:<>#!|"';]''', '', pathstr)
@@ -305,7 +304,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
             node._id += str(i)
     return supergraph
 
-def _generate_expanded_graph(graph_in):
+def generate_expanded_graph(graph_in):
     """Generates an expanded graph based on node parameterization
     
     Parameterization is controlled using the `iterables` field of the
@@ -408,17 +407,6 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
         if show_connectinfo:
             nx.draw_networkx_edge_labels(pklgraph, pos)
 
-def _report_nodes_not_run(notrun):
-    if notrun:
-        logger.info("***********************************")
-        for info in notrun:
-            logger.error("could not run node: %s" % '.'.join((info['node']._hierarchy,info['node']._id)))
-            logger.info("crashfile: %s" % info['crashfile'])
-            logger.debug("The following dependent nodes were not run")
-            for subnode in info['dependents']:
-                logger.debug(subnode._id)
-        logger.info("***********************************")
-
 
 def make_output_dir(outdir):
     """Make the output_dir if it doesn't exist.
@@ -429,13 +417,8 @@ def make_output_dir(outdir):
     
     """
     if not os.path.exists(os.path.abspath(outdir)):
-        # XXX Should this use os.makedirs which will make any
-        # necessary parent directories?  I didn't because the one
-        # case where mkdir failed because a missing parent
-        # directory, something went wrong up-stream that caused an
-        # invalid path to be passed in for `outdir`.
         logger.debug("Creating %s" % outdir)
-        os.mkdir(outdir)
+        os.makedirs(outdir)
     return outdir
 
 def modify_paths(object, relative=True, basedir=None):
@@ -461,10 +444,10 @@ def modify_paths(object, relative=True, basedir=None):
         if isdefined(object):
             if isinstance(object, str) and os.path.isfile(object):
                 if relative:
-                    if config.get('execution','use_relative_paths'):
+                    if config.getboolean('execution','use_relative_paths'):
                         out = relpath(object,start=basedir)
                     else:
-                        out = object.copy()
+                        out = object
                 else:
                     out = os.path.abspath(os.path.join(basedir,object))
                 if not os.path.exists(out):

@@ -28,6 +28,7 @@ hash_method = content
 single_thread_matlab = true
 run_in_series = false
 remove_node_directories = false
+remove_unnecessary_outputs = true
 use_relative_paths = false
 """%(homedir))
 
@@ -35,3 +36,10 @@ config = ConfigParser.ConfigParser()
 config.readfp(default_cfg)
 config.read([os.path.expanduser('~/.nipype.cfg'), 'nipype.cfg'])
 
+"""
+additional config options
+
+local_file_cache_dir = ''
+clean_notneeded_outputs = true
+
+"""

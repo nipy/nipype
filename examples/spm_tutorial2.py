@@ -248,9 +248,9 @@ nifti filename through a template '%s.nii'. So 'f3' would become
 # Specify the location of the data.
 data_dir = os.path.abspath('data')
 # Specify the subject directories
-subject_list = ['s1', 's3']
+subject_list = ['s1'] #, 's3']
 # Map field names to individual subject runs.
-info = dict(func=[['subject_id', ['f3','f5','f7','f10']]],
+info = dict(func=[['subject_id', ['f3']]], #,'f5','f7','f10']]],
             struct=[['subject_id','struct']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
@@ -294,9 +294,9 @@ necessary to generate an SPM design matrix. In this tutorial, the same
 paradigm was used for every participant.
 """
 
-from nipype.interfaces.base import Bunch
-from copy import deepcopy
 def subjectinfo(subject_id):
+    from nipype.interfaces.base import Bunch
+    from copy import deepcopy
     print "Subject ID: %s\n"%str(subject_id)
     output = []
     names = ['Task-Odd','Task-Even']
@@ -404,6 +404,7 @@ report.inputs.base_directory = os.path.abspath('spm_tutorial2/report')
 report.inputs.parameterization = False
 
 def getstripdir(subject_id):
+    import os
     return os.path.join(os.path.abspath('spm_tutorial2/workingdir'),'_subject_id_%s' % subject_id)
 
 # store relevant outputs from various stages of the 1st level analysis
