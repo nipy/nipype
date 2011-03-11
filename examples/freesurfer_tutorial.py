@@ -521,7 +521,7 @@ Create a datasink node to store the contrast images and registration info
 
 datasink = pe.Node(interface=nio.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.abspath('volsurf_tutorial/l1out')
-datasink.inputs.substitutes = []
+datasink.inputs.substitutions = []
 
 def getsubs(subject_id):
     subs = [('_subject_id_%s/'%subject_id,'')]
