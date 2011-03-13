@@ -1,5 +1,5 @@
 Release 0.4 (FUTURE)
-======================
+====================
 
 * ENH: New interface: freesurfer.ApplyMask (mri_mask)
 * ENH: New FSL interface -- SwapDimensions (fslswapdim)
@@ -15,7 +15,7 @@ Release 0.4 (FUTURE)
 * BF: FNIRT generates proper outputs
 
 Release 0.3.4 (Jan 12, 2011)
-======================
+============================
 
 * API: hash values for float use a string conversion up to the 10th decimal place.
 * API: Iterables in output path will always be generated as _var1_val1_var2_val2 pairs
