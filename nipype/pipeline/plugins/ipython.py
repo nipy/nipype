@@ -68,7 +68,7 @@ except:
             node._result = result['result']
             node._traceback = result['traceback']
             return report_crash(node,
-                                traceback=res['traceback'])
+                                traceback=result['traceback'])
         else:
             return report_crash(node)
 
