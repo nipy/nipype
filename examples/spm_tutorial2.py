@@ -1,8 +1,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-Using SPM for analysis
-=======================
+====================================
+Using SPM for analysis: Hierarchical
+====================================
 
 The spm_tutorial.py integrates several interfaces to perform a first
 and second level analysis on a two-subject data set.  The tutorial can
@@ -11,10 +12,7 @@ nipype tutorial directory:
 
     python spm_tutorial.py
 
-"""
-
-
-"""Import necessary modules from nipype."""
+Import necessary modules from nipype."""
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
@@ -489,3 +487,4 @@ Execute the second level pipeline
 
 if __name__ == '__main__':
     l2pipeline.run()
+

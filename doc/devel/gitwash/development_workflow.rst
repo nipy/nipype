@@ -121,9 +121,31 @@ Asking for code review
 The generated comparison, is between your feature branch
 ``my-new-feature``, and the place in ``master`` from which you branched
 ``my-new-feature``.  In other words, you can keep updating ``master``
-without interfering with the output from the comparison.  More detail?
-Note the three dots in the URL above (``master...my-new-feature``) and
-see :ref:`dot2-dot3`.
+without interfering with the output from the comparison.  More detail? 
+Note the three dots in the URL above (``master...my-new-feature``).
+
+.. admonition:: Two vs three dots
+
+  Imagine a series of commits A, B, C, D...  Imagine that there are two
+  branches, *topic* and *master*.  You branched *topic* off *master* when
+  *master* was at commit 'E'.  The graph of the commits looks like this::
+
+
+	  A---B---C topic
+	  /
+    D---E---F---G master
+
+  Then::
+
+    git diff master..topic
+
+  will output the difference from G to C (i.e. with effects of F and G),
+  while::
+
+    git diff master...topic
+
+  would output just differences in the topic branch (i.e. only A, B, and
+  C). [#thank_yarik]_
 
 Asking for your changes to be merged with the main repo
 =======================================================
@@ -237,3 +259,7 @@ You can also look at the `network graph visualizer`_ for your github_
 repo.
 
 .. include:: links.inc
+
+.. rubric:: Footnotes
+
+.. [#thank_yarik] Thanks to Yarik Halchenko for this explanation.

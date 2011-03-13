@@ -152,9 +152,9 @@ class DataSink(IOBase):
         Notes
         -----
 
-        Unlike most nipype-nodes this is not a thread-safe node because it can
-        write to a common shared location. It will not complain when it
-        overwrites a file.
+            Unlike most nipype-nodes this is not a thread-safe node because it can
+            write to a common shared location. It will not complain when it
+            overwrites a file.
 
         Examples
         --------

@@ -11,12 +11,8 @@ import re
 
 # Third party
 from pygments.lexer import Lexer, do_insertions
-from pygments.lexers.agile import (PythonConsoleLexer, PythonLexer, 
-                                   PythonTracebackLexer)
+from pygments.lexers.agile import (PythonLexer)
 from pygments.token import Comment, Generic
-
-from sphinx import highlighting
-
 
 #-----------------------------------------------------------------------------
 # Global constants
@@ -58,7 +54,6 @@ class IPythonConsoleLexer(Lexer):
 
     def get_tokens_unprocessed(self, text):
         pylexer = PythonLexer(**self.options)
-        tblexer = PythonTracebackLexer(**self.options)
 
         curcode = ''
         insertions = []
@@ -94,7 +89,5 @@ class IPythonConsoleLexer(Lexer):
             for item in do_insertions(insertions,
                                       pylexer.get_tokens_unprocessed(curcode)):
                 yield item
-
-#-----------------------------------------------------------------------------
-# Register the extension as a valid pygments lexer
-highlighting.lexers['ipython'] = IPythonConsoleLexer()
+def setup(app):
+    app.add_lexer('ipython', IPythonConsoleLexer())
