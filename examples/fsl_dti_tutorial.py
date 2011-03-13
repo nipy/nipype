@@ -22,6 +22,7 @@ Tell python where to find the appropriate functions.
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
+import nipype.workflows.fsl as fsl_wf          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import os                                    # system functions
@@ -146,8 +147,8 @@ bet.inputs.frac=0.34
 correct the diffusion weighted images for eddy_currents
 """
 
-eddycorrect = pe.Node(interface=fsl.EddyCorrect(),name='eddycorrect')
-eddycorrect.inputs.ref_num=0
+eddycorrect = fsl_wf.create_eddy_correct_pipeline('eddycorrect')
+eddycorrect.inputs.inputnode.ref_num=0
 
 """
 compute the diffusion tensor in each voxel
@@ -161,7 +162,7 @@ connect all the nodes for this workflow
 
 computeTensor.connect([
                         (fslroi,bet,[('roi_file','in_file')]),
-                        (eddycorrect,dtifit,[('eddy_corrected','dwi')]),
+                        (eddycorrect, dtifit,[('outputnode.eddy_corrected','dwi')]),
                         (infosource, dtifit,[['subject_id','base_name']]),
                         (bet,dtifit,[('mask_file','mask')])
                       ])
@@ -182,15 +183,12 @@ tractography.base_dir = os.path.abspath('fsl_dti_tutorial')
 estimate the diffusion parameters: phi, theta, and so on
 """
 
-bedpostx = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx')
-bedpostx.inputs.fibres = 1
-
-bedpostx_2f = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx_2f')
-bedpostx_2f.inputs.fibres = 2
+bedpostx = fsl_wf.create_bedpostx_pipeline()
+bedpostx.get_node("xfibres").iterables = ("n_fibres",[1,2])
 
 
 flirt = pe.Node(interface=fsl.FLIRT(), name='flirt')
-flirt.inputs.reference = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
+flirt.inputs.in_file = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
 flirt.inputs.dof = 12
 
 """
@@ -199,14 +197,13 @@ perform probabilistic tracktography
 
 probtrackx = pe.Node(interface=fsl.ProbTrackX(),name='probtrackx')
 probtrackx.inputs.mode='seedmask'
-probtrackx.inputs.loop_check=True
 probtrackx.inputs.c_thresh = 0.2
 probtrackx.inputs.n_steps=2000
 probtrackx.inputs.step_length=0.5
 probtrackx.inputs.n_samples=5000
-probtrackx.inputs.force_dir=True
 probtrackx.inputs.opd=True
 probtrackx.inputs.os2t=True
+probtrackx.inputs.loop_check=True
 
 
 """
@@ -219,13 +216,14 @@ findthebiggest = pe.Node(interface=fsl.FindTheBiggest(),name='findthebiggest')
 """
 connect all the nodes for this workflow
 """
-
-tractography.connect([
-                        (bedpostx,probtrackx,[('bpx_out_directory','bpx_directory')]),
-                        (bedpostx,probtrackx,[('bpx_out_directory','out_dir')]),
-                        (probtrackx,findthebiggest,[('targets','in_files')]),
-                        (flirt, probtrackx, [('out_matrix_file','xfm')])
-                    ])
+tractography.add_nodes([bedpostx, flirt])
+tractography.connect([(bedpostx,probtrackx,[('outputnode.thsamples','thsamples'),
+                                            ('outputnode.phsamples','phsamples'),
+                                            ('outputnode.fsamples','fsamples')
+                                            ]),
+                      (probtrackx,findthebiggest,[('targets','in_files')]),
+                      (flirt, probtrackx, [('out_matrix_file','xfm')])
+                     ])
 
 
 """
@@ -251,15 +249,16 @@ dwiproc.connect([
                     (datasource,computeTensor,[('dwi','fslroi.in_file'),
                                                ('bvals','dtifit.bvals'),
                                                ('bvecs','dtifit.bvecs'),
-                                               ('dwi','eddycorrect.in_file')]),
-                    (datasource,tractography,[('bvals','bedpostx.bvals'),
-                                              ('bvecs','bedpostx.bvecs'),
-                                              ('seed_file','probtrackx.seed_file'),
-                                              ('target_masks','probtrackx.target_masks')]),
-                    (computeTensor,tractography,[('eddycorrect.eddy_corrected','bedpostx.dwi'),
-                                                 ('bet.mask_file','bedpostx.mask'),
+                                               ('dwi','eddycorrect.inputnode.in_file')]),
+                    (datasource,tractography,[('bvals','bedpostx.inputnode.bvals'),
+                                              ('bvecs','bedpostx.inputnode.bvecs'),
+                                              ('seed_file','probtrackx.seed'),
+                                              ('target_masks','probtrackx.target_masks')
+                                              ]),
+                    (computeTensor,tractography,[('eddycorrect.outputnode.eddy_corrected','bedpostx.inputnode.dwi'),
+                                                 ('bet.mask_file','bedpostx.inputnode.mask'),
                                                  ('bet.mask_file','probtrackx.mask'),
-                                                 ('fslroi.roi_file','flirt.in_file')]),
+                                                 ('fslroi.roi_file','flirt.reference')]),
                     (infosource, datasink,[('subject_id','container'),
                                            (('subject_id', getstripdir),'strip_dir')]),
                     (tractography,datasink,[('findthebiggest.out_file','fbiggest.@biggestsegmentation')])

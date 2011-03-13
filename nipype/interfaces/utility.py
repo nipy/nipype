@@ -4,11 +4,13 @@
 from inspect import getsource
 import numpy as np
 
-from nipype.utils.filemanip import (filename_to_list, list_to_filename)
+from nipype.utils.filemanip import (filename_to_list)
 from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec,
                                     Undefined, isdefined, OutputMultiPath,
-    InputMultiPath)
+    InputMultiPath, BaseInterface, File)
 from nipype.interfaces.io import IOBase, add_traits
+import nibabel as nb
+from nipype.testing import assert_equal
 
     
 class IdentityInterface(IOBase):
@@ -323,3 +325,20 @@ class SubstringMatch(BasicInterface):
             outputs.out = list_to_filename(outputs.out)
         return outputs
 '''
+
+class AssertEqualInputSpec(TraitedSpec):
+    volume1 = File(exists=True, mandatory=True)
+    volume2 = File(exists=True, mandatory=True)
+    
+class AssertEqual(BaseInterface):
+    input_spec = AssertEqualInputSpec
+    
+    def _run_interface(self, runtime):
+        
+        data1 = nb.load(self.inputs.volume1).get_data()
+        data2 = nb.load(self.inputs.volume2).get_data()
+        
+        assert_equal(data1, data2)
+        
+        runtime.returncode = 0
+        return runtime

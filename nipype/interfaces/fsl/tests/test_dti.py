@@ -20,7 +20,7 @@ from nipype.interfaces.fsl import Info, no_fsl
 
 # nosetests --with-doctest path_to/test_fsl.py
 
-def test_bedpostx():
+def test_bedpostx1():
     input_map = dict(args = dict(argstr='%s',),
                      bpx_directory = dict(argstr='%s',),
                      burn_period = dict(argstr='-b %d',),
@@ -40,7 +40,7 @@ def test_bedpostx():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
-def test_dtifit():
+def test_dtifit1():
     input_map = dict(args = dict(argstr='%s',),
                      base_name = dict(argstr='-o %s',),
                      bvals = dict(argstr='-b %s',mandatory=True,),
@@ -66,7 +66,7 @@ def test_dtifit():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
 @skipif(no_fsl)
-def test_eddycorrect():
+def test_eddy_correct1():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
                      in_file = dict(argstr='%s',mandatory=True,),
@@ -78,6 +78,8 @@ def test_eddycorrect():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+
 
 @skipif(no_fsl)
 def test_findthebiggest():
@@ -96,7 +98,9 @@ def test_findthebiggest():
 def test_probtrackx():
     input_map = dict(args = dict(argstr='%s',),
                      avoid_mp = dict(argstr='--avoid=%s',),
-                     bpx_directory = dict(mandatory=True,),
+                     thsamples = dict(mandatory=True),
+                     phsamples = dict(mandatory=True),
+                     fsamples = dict(mandatory=True),
                      c_thresh = dict(argstr='--cthr=%.3f',),
                      correct_path_distribution = dict(argstr='--pd',),
                      dist_thresh = dict(argstr='--distthresh=%.3f',),
@@ -117,13 +121,12 @@ def test_probtrackx():
                      os2t = dict(argstr='--os2t',),
                      out_dir = dict(argstr='--dir=%s',),
                      output_type = dict(),
-                     paths_file = dict(argstr='--out=%s',),
                      rand_fib = dict(argstr='--randfib %d',),
                      random_seed = dict(argstr='--rseed',),
                      s2tastext = dict(argstr='--s2tastext',),
                      sample_random_points = dict(argstr='--sampvox',),
-                     samplesbase_name = dict(argstr='-s %s',),
-                     seed_file = dict(argstr='-x %s',mandatory=True,),
+                     samples_base_name = dict(argstr='--samples=%s',),
+                     seed = dict(argstr='--seed=%s',mandatory=True,),
                      seed_ref = dict(argstr='--seedref=%s',),
                      step_length = dict(argstr='--steplength=%.3f',),
                      stop_mask = dict(argstr='--stop=%s',),
@@ -150,7 +153,7 @@ def test_projthresh():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
-def test_randomise():
+def test_randomise1():
     input_map = dict(args = dict(argstr='%s',),
                      base_name = dict(argstr='-o %s',),
                      c_thresh = dict(argstr='-c %.2f',),
@@ -291,7 +294,7 @@ def clean_directory(outdir, old_wd):
 
 
 # test bedpostx
-def test_bedpostx():
+def test_bedpostx2():
     filelist, outdir, cwd = create_files_in_directory()
     bpx = fsl.BEDPOSTX()
 
@@ -321,7 +324,7 @@ def test_bedpostx():
  
 # test eddy_correct
 @skipif(no_fsl)
-def test_eddy_correct():
+def test_eddy_correct2():
     filelist, outdir, cwd = create_files_in_directory()
     eddy = fsl.EddyCorrect()
 
@@ -348,7 +351,7 @@ def test_eddy_correct():
 
 # test dtifit
 @skipif(no_fsl)
-def test_dtifit():
+def test_dtifit2():
     filelist, outdir, cwd = create_files_in_directory()
     dti = fsl.DTIFit()
 
@@ -508,7 +511,7 @@ def test_tbss_4_prestats():
     # TBSS4Prestats doesn't have an opt_map{}
 
 @skipif(skip_dti_tests)
-def test_randomise():
+def test_randomise2():
 
     rand = fsl.Randomise()
 
