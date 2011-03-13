@@ -414,7 +414,8 @@ conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
 
 modelfit.connect([
    (modelspec,level1design,[('session_info','session_info')]),
-   (level1design,modelgen,[('fsf_files','fsf_file')]),
+   (level1design,modelgen,[('fsf_files', 'fsf_file'),
+                           ('ev_files', 'ev_files')]),
    (modelgen,modelestimate,[('design_file','design_file')]),
    (modelgen,conestimate,[('con_file','tcon_file')]),
    (modelestimate,conestimate,[('results_dir','stats_dir')]),
