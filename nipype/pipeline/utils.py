@@ -517,11 +517,16 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
         needed_dirs.extend(filename_to_list(dirs2keep))
     for extra in ['_nipype', '_report']:
         needed_dirs.extend(glob(os.path.join(cwd, extra)))
+    logger.debug('Needed files: %s'%(';'.join(needed_files)))
+    logger.debug('Needed dirs: %s'%(';'.join(needed_dirs)))
     files2remove = []
     for f in walk_files(cwd):
         if f not in needed_files:
-            if not len([1 for dirname in needed_dirs if f.startswith(dirname)])==0:
+            if len(needed_dirs) == 0:
                 files2remove.append(f)
+            elif not len([1 for dirname in needed_dirs if f.startswith(dirname)])==0:
+                files2remove.append(f)
+    logger.debug('Removing files: %s'%(';'.join(files2remove)))
     for f in files2remove:
         os.remove(f)
     for key in outputs.copyable_trait_names():
