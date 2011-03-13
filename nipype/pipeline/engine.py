@@ -754,7 +754,6 @@ class Node(WorkflowBase):
             logger.debug('results file: %s'%results_file)
             results = loadpkl(results_file)
             output_value = Undefined
-            print self.name, info, key
             if isinstance(info[1], tuple):
                 output_name = info[1][0]
                 func = create_function_from_source(info[1][1])
