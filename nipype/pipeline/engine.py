@@ -364,7 +364,7 @@ class Workflow(WorkflowBase):
             graph = generate_expanded_graph(deepcopy(graph))
         export_graph(graph, self.base_dir, dotfilename=dotfilename)
 
-    def run(self, plugin=None):
+    def run(self, plugin=None, updatehash=False):
         """ Execute the workflow
 
         Parameters
@@ -398,7 +398,7 @@ class Workflow(WorkflowBase):
             if isinstance(node, MapNode):
                 node.use_plugin = plugin
         self._configure_exec_nodes(execgraph)
-        runner.run(execgraph)
+        runner.run(execgraph, updatehash=updatehash)
         return execgraph
 
     # PRIVATE API AND FUNCTIONS

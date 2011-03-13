@@ -11,7 +11,7 @@ class linear_runner(PluginBase):
     """Execute workflow in series
     """
 
-    def run(self, graph, callback=None, callback_args=None):
+    def run(self, graph, updatehash=False):
         """Executes a pre-defined pipeline in a serial order.
 
         Parameters
@@ -31,9 +31,7 @@ class linear_runner(PluginBase):
             try:
                 if node in donotrun:
                     continue
-                node.run()
-                if callback:
-                    callback('finished', node, **callback_args)
+                node.run(updatehash=updatehash)
             except RuntimeError:
                 os.chdir(old_wd)
                 if config.getboolean('execution', 'stop_on_first_crash'):

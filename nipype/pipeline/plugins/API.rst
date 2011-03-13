@@ -1,6 +1,8 @@
 Execution plugin API
 ====================
 
-accept dag/workflow
-provenance info
-crash reporting
+Current status:
+
+class plugin_runner(PluginBase):
+
+    def run(graph, updatehash)

@@ -42,16 +42,14 @@ class ipython_runner(PluginBase):
         self.procs = None
         self.depidx = None
         self.refidx = None
-        self.mapids = None
+        self.mapnodes = None
+        self.mapnodesubids = None
         self.proc_done = None
         self.proc_pending = None
         self.ipyclient = None
         self.taskclient = None
 
-    def run(self, graph):
-        self._execute_with_manager(graph)
-
-    def _execute_with_manager(self, graph):
+    def run(self, graph, updatehash=False):
         """Executes a pre-defined pipeline is distributed approaches
         based on IPython's parallel processing interface
         """
@@ -113,7 +111,7 @@ class ipython_runner(PluginBase):
                     notrun.append(self._remove_node_deps(jobid, crashfile))
             if toappend:
                 self.pending_tasks.extend(toappend)
-            self._send_procs_to_workers()
+            self._send_procs_to_workers(updatehash=updatehash)
             sleep(2)
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
@@ -135,7 +133,7 @@ class ipython_runner(PluginBase):
         return False
 
         
-    def _send_procs_to_workers(self):
+    def _send_procs_to_workers(self, updatehash=False):
         """ Sends jobs to workers using ipython's taskclient interface
         """
         while np.any(self.proc_done == False):
@@ -161,14 +159,15 @@ class ipython_runner(PluginBase):
 from traceback import format_exception
 traceback=None
 try:
-    result = task.run()
+    result = task.run(updatehash=updatehash)
 except:
     etype, eval, etr = sys.exc_info()
     traceback = format_exception(etype,eval,etr)
     result = task.result
 """
                     task = self.ipyclient.StringTask(cmdstr,
-                                                     push = dict(task=self.procs[jobid]),
+                                                     push = dict(task=self.procs[jobid],
+                                                                 updatehash=updatehash),
                                                      pull = ['result','traceback'])
                     tid = self.taskclient.run(task, block = False)
                     #logger.info('Task id: %d' % tid)
