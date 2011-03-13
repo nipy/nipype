@@ -349,10 +349,10 @@ class Workflow(WorkflowBase):
                     if sourcename and not srcnode._check_outputs(sourcename):
                         not_found.append(['out', srcnode.name, sourcename])
         for info in not_found:
-            warn("Module %s has no %sput called %s\n"%(info[1], info[0],
-                                                       info[2]))
+            warn("Module %s has no %sput called %s"%(info[1], info[0], info[2]))
         if not_found:
-            raise Exception('Some connections were not found')
+            raise Exception('%d connections were not found (see warnings for details)'
+                            % len(not_found))
         # add connections
         for srcnode, destnode, connects in connection_list:
             edge_data = self._graph.get_edge_data(srcnode, destnode, None)
@@ -1101,8 +1101,8 @@ class Node(WorkflowBase):
         resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
         if issubclass(self._interface.__class__, CommandLine):
             cmd = self._interface.cmdline
-            logger.info('cmd: %s'%cmd)
         if execute:
+            logger.debug('Executing node')
             if copyfiles:
                 self._copyfiles_to_wd(cwd, execute)
             if issubclass(self._interface.__class__, CommandLine):
@@ -1110,7 +1110,7 @@ class Node(WorkflowBase):
                 fd = open(cmdfile,'wt')
                 fd.writelines(cmd)
                 fd.close()
-            logger.debug('Executing node')
+                logger.info('Running: %s' % cmd)
             try:
                 result = self._interface.run()
             except:
@@ -1136,7 +1136,7 @@ class Node(WorkflowBase):
                     result.outputs.set(**outputs)
         else:
             # Likewise, cwd could go in here
-            logger.debug("Collecting precomputed outputs:")
+            logger.info("Collecting precomputed outputs")
             try:
                 aggregate = True
                 if os.path.exists(resultsfile):
@@ -1173,7 +1173,7 @@ class Node(WorkflowBase):
                         result.outputs.set(**outputs)
             except FileNotFoundError:
                 # if aggregation does not work, rerun the node
-                logger.debug("Some of the outputs were not found: rerunning node.")
+                logger.info("Some of the outputs were not found: rerunning node.")
                 result = self._run_command(execute=True, cwd=cwd, copyfiles=False)
         return result
 
