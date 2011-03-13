@@ -36,10 +36,3 @@ config = ConfigParser.ConfigParser()
 config.readfp(default_cfg)
 config.read([os.path.expanduser('~/.nipype.cfg'), 'nipype.cfg'])
 
-"""
-additional config options
-
-local_file_cache_dir = ''
-clean_notneeded_outputs = true
-
-"""

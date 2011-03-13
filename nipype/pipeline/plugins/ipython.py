@@ -3,16 +3,20 @@
 """Parallel workflow execution via IPython controller
 """
 
+from copy import deepcopy
 import shutil
-import sleep
+import sys
+from time import sleep
 
+import numpy as np
 from IPython.Release import version as IPyversion
 try:
     from IPython.kernel.contexts import ConnectionRefusedError
 except:
     pass
 
-from .base import PluginBase
+from .base import (PluginBase, logger, report_crash, report_nodes_not_run)
+from ..utils import (nx, dfs_preorder, config)
 
 class ipython_runner(PluginBase):
     """Execute workflow with ipython
@@ -23,20 +27,27 @@ class ipython_runner(PluginBase):
 
     def _init_runtime_fields(self):
         """Reset runtime attributes to none
+
+        procs: list (N) of underlying interface elements to be processed
+        proc_done: a boolean vector (N) signifying whether a process has been
+            executed
+        proc_pending: a boolean vector (N) signifying whether a
+            process is currently running. Note: A process is finished only when
+            both proc_done==True and
+        proc_pending==False
+        depidx: a boolean matrix (NxN) storing the dependency structure accross
+            processes. Process dependencies are derived from each column.
         """
         self.procs = None
         self.depidx = None
         self.refidx = None
         self.proc_done = None
         self.proc_pending = None
-        self._flatgraph = None
-        self._execgraph = None
         self.ipyclient = None
         self.taskclient = None
 
     def run(self, graph):
         self._execute_with_manager(graph)
-        pass
 
     def _execute_with_manager(self, graph):
         """Executes a pre-defined pipeline is distributed approaches
@@ -48,27 +59,22 @@ class ipython_runner(PluginBase):
             __import__(name)
             self.ipyclient = sys.modules[name]
         except ImportError:
-            warn("Ipython kernel not found.  Parallel execution will be" \
-                     "unavailable", ImportWarning)
-        if not self.taskclient:
-            try:
-                self.taskclient = self.ipyclient.TaskClient()
-            except Exception, e:
-                if isinstance(e, ConnectionRefusedError):
-                    warn("No clients found, running serially for now.")
-                if isinstance(e, ValueError):
-                    warn("Ipython kernel not installed")
-                self._execute_in_series()
-                return
+            raise ImportError("Ipython kernel not found. Parallel execution will be" \
+                     "unavailable")
+        try:
+            self.taskclient = self.ipyclient.TaskClient()
+        except Exception, e:
+            if isinstance(e, ConnectionRefusedError):
+                raise Exception("No IPython clients found.")
+            if isinstance(e, ValueError):
+                raise Exception("Ipython kernel not installed")
         logger.info("Running in parallel.")
-        # in the absence of a dirty bit on the object, generate the
-        # parameterization each time before running
         # Generate appropriate structures for worker-manager model
-        self._generate_dependency_list()
+        self._generate_dependency_list(graph)
         # get number of ipython clients available
         self.pending_tasks = []
         self.readytorun = []
-        # setup polling
+        # setup polling - TODO: change to threaded model
         notrun = []
         while np.any(self.proc_done==False) | np.any(self.proc_pending==True):
             toappend = []
@@ -81,10 +87,10 @@ class ipython_runner(PluginBase):
                         if res['traceback']:
                             self.procs[jobid]._result = res['result']
                             self.procs[jobid]._traceback = res['traceback']
-                            crashfile = self.procs[jobid]._report_crash(traceback=res['traceback'],
-                                                                        execgraph=self._execgraph)
+                            crashfile = report_crash(self.procs[jobid],
+                                                     traceback=res['traceback'])
                             # remove dependencies from queue
-                            notrun.append(self._remove_node_deps(jobid, crashfile))
+                            notrun.append(self._remove_node_deps(jobid, crashfile, graph))
                         else:
                             self._task_finished_cb(res['result'], jobid)
                             self._remove_node_dirs()
@@ -94,7 +100,7 @@ class ipython_runner(PluginBase):
                     else:
                         toappend.insert(0, (taskid, jobid))
                 except:
-                    crashfile = self.procs[jobid]._report_crash(execgraph=self._execgraph)
+                    crashfile = report_crash(self.procs[jobid])
                     # remove dependencies from queue
                     notrun.append(self._remove_node_deps(jobid, crashfile))
             if toappend:
@@ -102,7 +108,7 @@ class ipython_runner(PluginBase):
             self._send_procs_to_workers()
             sleep(2)
         self._remove_node_dirs()
-        _report_nodes_not_run(notrun)
+        report_nodes_not_run(notrun)
 
     def _send_procs_to_workers(self):
         """ Sends jobs to workers using ipython's taskclient interface
@@ -118,7 +124,6 @@ class ipython_runner(PluginBase):
                     # change job status in appropriate queues
                     self.proc_done[jobid] = True
                     self.proc_pending[jobid] = True
-                    self._set_output_directory_base(self.procs[jobid])
                     # Send job to task manager and add to pending tasks
                     _, hashvalue = self.procs[jobid]._get_hashval()
                     logger.info('Executing: %s ID: %d H:%s' % \
@@ -153,50 +158,22 @@ except:
         self.proc_pending[jobid] = False
         if self.procs[jobid]._result != result:
             self.procs[jobid]._result = result
-        # Update the inputs of all tasks that depend on this job's outputs
-        graph = self._execgraph
-        for edge in graph.out_edges_iter(self.procs[jobid]):
-            data = graph.get_edge_data(*edge)
-            for sourceinfo, destname in data['connect']:
-                logger.debug('%s %s %s %s',edge[1], destname, self.procs[jobid], sourceinfo)
-                self._set_node_input(edge[1], destname,
-                                     self.procs[jobid], sourceinfo)
-        if len(graph.out_edges(self.procs[jobid])):
-            self.procs[jobid]._result = None
         # update the job dependency structure
         self.depidx[jobid, :] = 0.
         self.refidx[np.nonzero(self.refidx[:,jobid]>0)[0],jobid] = 0
 
-    def _generate_dependency_list(self):
-        """ Generates a dependency list for a list of graphs. Adds the
-        following attributes to the pipeline:
-
-        New attributes:
-        ---------------
-
-        procs: list (N) of underlying interface elements to be
-        processed
-        proc_done: a boolean vector (N) signifying whether a process
-        has been executed
-        proc_pending: a boolean vector (N) signifying whether a
-        process is currently running.
-        Note: A process is finished only when both proc_done==True and
-        proc_pending==False
-        depidx: a boolean matrix (NxN) storing the dependency
-        structure accross processes. Process dependencies are derived
-        from each column.
+    def _generate_dependency_list(self, graph):
+        """ Generates a dependency list for a list of graphs.
         """
-        if not self._execgraph:
-            raise Exception('Execution graph has not been generated')
-        self.procs = self._execgraph.nodes()
-        self.depidx = nx.adj_matrix(self._execgraph).__array__()
+        self.procs = graph.nodes()
+        self.depidx = nx.adj_matrix(graph).__array__()
         self.refidx = deepcopy(self.depidx>0)
         self.refidx.dtype = np.int8
         self.proc_done    = np.zeros(len(self.procs), dtype=bool)
         self.proc_pending = np.zeros(len(self.procs), dtype=bool)
 
-    def _remove_node_deps(self, jobid, crashfile):
-        subnodes = [s for s in dfs_preorder(self._execgraph, self.procs[jobid])]
+    def _remove_node_deps(self, jobid, crashfile, graph):
+        subnodes = [s for s in dfs_preorder(graph, self.procs[jobid])]
         for node in subnodes:
             idx = self.procs.index(node)
             self.proc_done[idx] = True
