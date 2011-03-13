@@ -364,7 +364,7 @@ class Workflow(WorkflowBase):
             graph = generate_expanded_graph(deepcopy(graph))
         export_graph(graph, self.base_dir, dotfilename=dotfilename)
 
-    def run(self, plugin='linear'):
+    def run(self, plugin=None):
         """ Execute the workflow
 
         Parameters
@@ -374,6 +374,8 @@ class Workflow(WorkflowBase):
             Plugin to use for execution. You can create your own plugins for
             execution. 
         """
+        if plugin is None:
+            plugin = config.get('execution','plugin')
         if type(plugin) is not str:
             runner = plugin
         else:
@@ -1077,7 +1079,9 @@ class MapNode(Node):
         else:
             return None
 
-    def _make_nodes(self, cwd):
+    def _make_nodes(self, cwd=None):
+        if cwd is None:
+            cwd = self.output_dir()
         nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
         for i in range(nitems):
             nodename = '_' + self.name+str(i)
@@ -1127,13 +1131,10 @@ class MapNode(Node):
                 if any([val != Undefined for val in values]) and self._result.outputs:
                     setattr(self._result.outputs, key, values)
 
-    def _make_workflow(self, cwd):
-        wf = Workflow(name='mapflow')
-        wf.base_dir = cwd
-        wf.add_nodes([node for node in self._make_nodes(cwd)])
-        wf.config = self.config
-        return wf
-
+    def get_subnodes(self):
+        self._get_inputs()
+        return [node for node in self._make_nodes()]
+    
     def _run_interface(self, execute=True, updatehash=False):
         """Run the mapnode interface
 
@@ -1150,14 +1151,6 @@ class MapNode(Node):
             # map-reduce formulation
             self._collate_results(self._node_runner(self._make_nodes(cwd),
                                                     updatehash=updatehash))
-            # use workflow instead
-            #execgraph = self._make_workflow(cwd).run(plugin=self.use_plugin)
-            #execnames = [node.name for node in execgraph.nodes()]
-            #orderednodes = []
-            #for name in nodenames:
-            #    orderednodes.append(execgraph.nodes()[execnames.index(name)])
-            #self._collate_results(orderednodes)
-
             self._save_results(self._result, cwd)
             # remove any node directories no longer required
             dirs2remove = []

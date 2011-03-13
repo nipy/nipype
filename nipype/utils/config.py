@@ -23,6 +23,7 @@ log_size = 254000
 log_rotate = 4
 
 [execution]
+plugin = linear
 stop_on_first_crash = false
 hash_method = content
 single_thread_matlab = true

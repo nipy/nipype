@@ -17,6 +17,7 @@ except:
 
 from .base import (PluginBase, logger, report_crash, report_nodes_not_run)
 from ..utils import (nx, dfs_preorder, config)
+from ..engine import MapNode
 
 class ipython_runner(PluginBase):
     """Execute workflow with ipython
@@ -41,6 +42,7 @@ class ipython_runner(PluginBase):
         self.procs = None
         self.depidx = None
         self.refidx = None
+        self.mapids = None
         self.proc_done = None
         self.proc_pending = None
         self.ipyclient = None
@@ -74,6 +76,8 @@ class ipython_runner(PluginBase):
         # get number of ipython clients available
         self.pending_tasks = []
         self.readytorun = []
+        self.mapnodes = []
+        self.mapnodesubids = {}
         # setup polling - TODO: change to threaded model
         notrun = []
         while np.any(self.proc_done==False) | np.any(self.proc_pending==True):
@@ -89,6 +93,8 @@ class ipython_runner(PluginBase):
                             self.procs[jobid]._traceback = res['traceback']
                             crashfile = report_crash(self.procs[jobid],
                                                      traceback=res['traceback'])
+                            if jobid in self.mapnodesubids:
+                                jobid = self.mapnodesubids[jobid]
                             # remove dependencies from queue
                             notrun.append(self._remove_node_deps(jobid, crashfile, graph))
                         else:
@@ -102,6 +108,8 @@ class ipython_runner(PluginBase):
                 except:
                     crashfile = report_crash(self.procs[jobid])
                     # remove dependencies from queue
+                    if jobid in self.mapnodesubids:
+                        jobid = self.mapnodesubids[jobid]
                     notrun.append(self._remove_node_deps(jobid, crashfile))
             if toappend:
                 self.pending_tasks.extend(toappend)
@@ -110,6 +118,23 @@ class ipython_runner(PluginBase):
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
 
+    def _submit_mapnode(self, jobid):
+        if jobid in self.mapnodes:
+            return True
+        self.mapnodes.append(jobid)
+        mapnodesubids = self.procs[jobid].get_subnodes()
+        numnodes = len(mapnodesubids)
+        for i in range(numnodes):
+            self.mapnodesubids[self.depidx.shape[0]+i] = jobid
+        self.procs.extend(mapnodesubids)
+        self.depidx = np.vstack((self.depidx,np.zeros((numnodes,self.depidx.shape[1]))))
+        self.depidx = np.hstack((self.depidx,np.zeros((self.depidx.shape[0],numnodes))))
+        self.depidx[-numnodes:,jobid] = 1
+        self.proc_done = np.concatenate((self.proc_done, np.zeros(numnodes, dtype=bool)))
+        self.proc_pending = np.concatenate((self.proc_pending, np.zeros(numnodes, dtype=bool)))
+        return False
+
+        
     def _send_procs_to_workers(self):
         """ Sends jobs to workers using ipython's taskclient interface
         """
@@ -121,6 +146,10 @@ class ipython_runner(PluginBase):
                 # send all available jobs
                 logger.info('Submitting %d jobs' % len(jobids))
                 for jobid in jobids:
+                    if isinstance(self.procs[jobid], MapNode):
+                        submit = self._submit_mapnode(jobid)
+                        if not submit:
+                            continue
                     # change job status in appropriate queues
                     self.proc_done[jobid] = True
                     self.proc_pending[jobid] = True
@@ -156,11 +185,10 @@ except:
                         (self.procs[jobid]._id, jobid))
         # Update job and worker queues
         self.proc_pending[jobid] = False
-        if self.procs[jobid]._result != result:
-            self.procs[jobid]._result = result
         # update the job dependency structure
         self.depidx[jobid, :] = 0.
-        self.refidx[np.nonzero(self.refidx[:,jobid]>0)[0],jobid] = 0
+        if jobid not in self.mapnodesubids:
+            self.refidx[np.nonzero(self.refidx[:,jobid]>0)[0],jobid] = 0
 
     def _generate_dependency_list(self, graph):
         """ Generates a dependency list for a list of graphs.
@@ -187,6 +215,8 @@ except:
         """
         if config.getboolean('execution', 'remove_node_directories'):
             for idx in np.nonzero(np.all(self.refidx==0,axis=1))[0]:
+                if idx in self.mapnodesubids:
+                    continue
                 if self.proc_done[idx] and (not self.proc_pending[idx]):
                     self.refidx[idx,idx] = -1
                     outdir = self.procs[idx]._output_directory()
