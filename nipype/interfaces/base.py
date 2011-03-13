@@ -112,6 +112,11 @@ class Bunch(object):
         '''
         return self.__dict__.get(*args)
 
+    def set(self, **kwargs):
+        '''Support dictionary get() functionality
+        '''
+        return self.__dict__.update(**kwargs)
+
     def dictcopy(self):
         """returns a deep copy of existing Bunch as a dictionary"""
         return deepcopy(self.__dict__)

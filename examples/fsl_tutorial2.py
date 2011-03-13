@@ -23,7 +23,6 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model generation
 import nipype.algorithms.rapidart as ra      # artifact detection
 
-from nibabel import load
 
 
 """
@@ -111,6 +110,7 @@ Define a function to return the 1 based index of the middle volume
 """
 
 def getmiddlevolume(func):
+    from nibabel import load
     funcfile = func
     if isinstance(func, list):
         funcfile = func[0]
@@ -265,9 +265,12 @@ Define a function to get the brightness threshold for SUSAN
 def getbtthresh(medianvals):
     return [0.75*val for val in medianvals]
 
+def getusans(x):
+    return [[tuple([val[0],0.75*val[1]])] for val in x]
+
 preproc.connect(maskfunc2, 'out_file', smooth, 'in_file')
 preproc.connect(medianval, ('out_stat', getbtthresh), smooth, 'brightness_threshold')
-preproc.connect(mergenode, ('out', lambda x: [[tuple([val[0],0.75*val[1]])] for val in x]), smooth, 'usans')
+preproc.connect(mergenode, ('out', getusans), smooth, 'usans')
 
 """
 Mask the smoothed data with the dilated mask
@@ -573,9 +576,9 @@ for every participant. Other examples of this function are available in the
 `doc/examples` folder. Note: Python knowledge required here.
 """
 
-from nipype.interfaces.base import Bunch
-from copy import deepcopy
 def subjectinfo(subject_id):
+    from nipype.interfaces.base import Bunch
+    from copy import deepcopy
     print "Subject ID: %s\n"%str(subject_id)
     output = []
     names = ['Task-Odd','Task-Even']

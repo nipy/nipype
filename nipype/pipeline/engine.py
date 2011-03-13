@@ -12,10 +12,10 @@ The `Pipeline` class provides core functionality for batch processing.
 
 """
 
+from glob import glob
 import gzip
 from copy import deepcopy
 import cPickle
-import inspect
 import os
 import shutil
 from shutil import rmtree
@@ -32,14 +32,16 @@ import networkx as nx
 
 from nipype.interfaces.base import (traits, InputMultiPath, CommandLine,
                                     Undefined, TraitedSpec, DynamicTraitedSpec,
-                                    Bunch, InterfaceResult)
-from nipype.utils.misc import isdefined
+                                    Bunch, InterfaceResult, md5,
+                                    OutputMultiPath)
+from nipype.utils.misc import isdefined, getsource, create_function_from_source
 from nipype.utils.filemanip import (save_json, FileNotFoundError,
                                     filename_to_list, list_to_filename,
                                     copyfiles, fnames_presuffix, loadpkl)
 
 from nipype.pipeline.utils import (generate_expanded_graph, modify_paths,
-                                   export_graph, make_output_dir)
+                                   export_graph, make_output_dir,
+                                   clean_working_directory)
 from nipype.utils.logger import (logger, config)
 
 class WorkflowBase(object):
@@ -188,6 +190,10 @@ class Workflow(WorkflowBase):
              ...]
              sourceoutput1 will always be the first argument to func
              and func will be evaluated and the results sent ot targetinput
+
+             currently func needs to define all its needed imports within the
+             function as we use the inspect module to get at the source code
+             and execute it remotely
         """
         if len(args)==1:
             connection_list = args[0]
@@ -353,13 +359,9 @@ class Workflow(WorkflowBase):
         """
         graph = self._graph
         if graph2use in ['flat', 'exec']:
-            if self._flatgraph is None:
-                self._create_flat_graph()
-            graph = self._flatgraph
+            graph = self._create_flat_graph()
         if graph2use == 'exec':
-            graph = self._execgraph
-            if graph is None:
-                graph = _generate_expanded_graph(deepcopy(self._flatgraph))
+            graph = generate_expanded_graph(deepcopy(graph))
         export_graph(graph, self.base_dir, dotfilename=dotfilename)
 
     def run(self, plugin='linear'):
@@ -381,7 +383,7 @@ class Workflow(WorkflowBase):
             except ImportError:
                 msg = 'Could not import plugin module: %s'%name
                 logger.error(msg)
-                raise RuntimeError(msg)
+                raise ImportError(msg)
             else:
                 runner = getattr(sys.modules[name], '%s_runner'%plugin)()
         flatgraph = self._create_flat_graph()
@@ -391,6 +393,8 @@ class Workflow(WorkflowBase):
             node.config = self.config
             node.base_dir = self.base_dir
             node.index = index
+            if isinstance(node, MapNode):
+                node.use_plugin = plugin
         self._configure_exec_nodes(execgraph)
         runner.run(execgraph)
         return execgraph
@@ -408,9 +412,11 @@ class Workflow(WorkflowBase):
                 data = graph.get_edge_data(*edge)
                 for sourceinfo, _ in sorted(data['connect']):
                     if isinstance(sourceinfo, tuple):
-                        node.needed_outputs += [sourceinfo[0]]
+                        input_name =  sourceinfo[0]
                     else:
-                        node.needed_outputs += [sourceinfo]
+                        input_name = sourceinfo
+                    if input_name not in node.needed_outputs:
+                        node.needed_outputs += [input_name]
                         
     def _configure_exec_nodes(self, graph):
         """Ensure that each node knows where to get inputs from
@@ -423,7 +429,7 @@ class Workflow(WorkflowBase):
                     if isinstance(sourceinfo, tuple):
                         node.input_source[field] = (os.path.join(edge[0].output_dir(),
                                                              'result_%s.pklz'%edge[0].name),
-                                                (sourceinfo[0], inspect.getsource(sourceinfo[1]), sourceinfo[2:]))
+                                                (sourceinfo[0], getsource(sourceinfo[1]), sourceinfo[2:]))
                     else:
                         node.input_source[field] = (os.path.join(edge[0].output_dir(),
                                                              'result_%s.pklz'%edge[0].name),
@@ -652,7 +658,7 @@ class Node(WorkflowBase):
     >>> realign.run() # doctest: +SKIP
 
     """
-    def __init__(self, interface, iterables={}, **kwargs):
+    def __init__(self, interface, iterables=None, **kwargs):
         # interface can only be set at initialization
         super(Node, self).__init__(**kwargs)
         if interface is None:
@@ -661,6 +667,8 @@ class Node(WorkflowBase):
         self._result     = None
         self.iterables  = iterables
         self.parameterization = None
+        self.input_source = {}
+        self.needed_outputs = []
 
     @property
     def interface(self):
@@ -704,7 +712,16 @@ class Node(WorkflowBase):
         return val
 
     def _get_hashval(self):
-        return self.inputs.hashval
+        hashed_inputs, hashvalue =  self.inputs.hashval
+        if config.getboolean('execution', 'remove_unnecessary_outputs') and \
+        self.needed_outputs:
+            hashobject = md5()
+            hashobject.update(hashvalue)
+            sorted_outputs = sorted(self.needed_outputs)
+            hashobject.update(str(sorted_outputs))
+            hashvalue = hashobject.hexdigest()
+            hashed_inputs['needed_outputs'] = sorted_outputs
+        return hashed_inputs, hashvalue
 
     def _save_hashfile(self, hashfile, hashed_inputs):
         try:
@@ -737,19 +754,20 @@ class Node(WorkflowBase):
             logger.debug('results file: %s'%results_file)
             results = loadpkl(results_file)
             output_value = Undefined
+            print self.name, info, key
             if isinstance(info[1], tuple):
                 output_name = info[1][0]
-                ns = {}
-                exec info[1][1] in ns
-                funcname = [name for name in ns.keys() if name != '__builtins__'][0]
-                func = ns[funcname]
-                value = results.outputs.get()[output_name]
+                func = create_function_from_source(info[1][1])
+                value = getattr(results.outputs, output_name)
                 if isdefined(value):
                     output_value = func(value,
                                         *list(info[1][2]))
             else:
                 output_name = info[1]
-                output_value = results.outputs.get()[output_name]
+                try:
+                    output_value = results.outputs.get()[output_name]
+                except TypeError:
+                    output_value = results.outputs.dictcopy()[output_name]
             logger.debug('output: %s'%output_name)
             try:
                 self.set_input(key, deepcopy(output_value))
@@ -823,6 +841,66 @@ class Node(WorkflowBase):
         self._result = self._run_command(execute)
         os.chdir(old_cwd)
 
+    def _save_results(self, result, cwd):
+        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        if result.outputs:
+            try:
+                outputs = result.outputs.get()
+            except TypeError:
+                outputs = result.outputs.dictcopy() # outputs was a bunch
+            result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
+        pkl_file = gzip.open(resultsfile, 'wb')
+        cPickle.dump(result, pkl_file)
+        pkl_file.close()
+        if result.outputs:
+            result.outputs.set(**outputs)
+
+    def _load_results(self, cwd):
+        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        aggregate = True
+        result = None
+        if os.path.exists(resultsfile):
+            pkl_file = gzip.open(resultsfile, 'rb')
+            try:
+                result = cPickle.load(pkl_file)
+            except traits.TraitError:
+                logger.debug('some file does not exist. hence trait cannot be set')
+            else:
+                if result.outputs:
+                    try:
+                        outputs = result.outputs.get()
+                    except TypeError:
+                        outputs = result.outputs.dictcopy() # outputs was a bunch
+                    try:
+                        result.outputs.set(**modify_paths(outputs, relative=False, basedir=cwd))
+                    except FileNotFoundError:
+                        logger.debug('conversion to full path results in non existent file')
+                    else:
+                        aggregate = False
+            pkl_file.close()
+        logger.debug('Aggregate: %s', aggregate)
+        # try aggregating first
+        if aggregate:
+            if not isinstance(self, MapNode):
+                self._copyfiles_to_wd(cwd, True, linksonly=True)
+                aggouts = self._interface.aggregate_outputs()
+                runtime = Bunch(cwd=cwd,returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
+                result = InterfaceResult(interface=None,
+                                         runtime=runtime,
+                                         outputs=aggouts)
+                pkl_file = gzip.open(resultsfile, 'wb')
+                if result.outputs:
+                    try:
+                        outputs = result.outputs.get()
+                    except TypeError:
+                        outputs = result.outputs.dictcopy() # outputs was a bunch
+                    result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
+                cPickle.dump(result, pkl_file)
+                pkl_file.close()
+                if result.outputs:
+                    result.outputs.set(**outputs)
+        return result
+
     def _run_command(self, execute, copyfiles=True):
         cwd = os.getcwd()
         if execute and copyfiles:
@@ -849,58 +927,26 @@ class Node(WorkflowBase):
                                          outputs=None)
                 self._result = result
                 raise
+            else:
+                if config.getboolean('execution', 'remove_unnecessary_outputs'):
+                    dirs2keep = None
+                    if isinstance(self, MapNode):
+                        dirs2keep = [os.path.join(cwd, 'mapflow')]
+                    result.outputs = clean_working_directory(result.outputs, cwd,
+                                                             self._interface.inputs,
+                                                             self.needed_outputs,
+                                                             dirs2keep=dirs2keep)
             if result.runtime.returncode:
                 logger.error('STDERR:' + result.runtime.stderr)
                 logger.error('STDOUT:' + result.runtime.stdout)
                 self._result = result
                 raise RuntimeError(result.runtime.stderr)
             else:
-                pkl_file = gzip.open(resultsfile, 'wb')
-                if result.outputs:
-                    outputs = result.outputs.get()
-                    result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
-                result.interface.inputs = result.interface.inputs.get()
-                cPickle.dump(result, pkl_file)
-                pkl_file.close()
-                if result.outputs:
-                    result.outputs.set(**outputs)
+                self._save_results(result, cwd)
         else:
-            # Likewise, cwd could go in here
             logger.info("Collecting precomputed outputs")
             try:
-                aggregate = True
-                if os.path.exists(resultsfile):
-                    pkl_file = gzip.open(resultsfile, 'rb')
-                    try:
-                        result = cPickle.load(pkl_file)
-                    except traits.TraitError:
-                        logger.debug('some file does not exist. hence trait cannot be set')
-                    else:
-                        if result.outputs:
-                            try:
-                                result.outputs.set(**modify_paths(result.outputs.get(), relative=False, basedir=cwd))
-                            except FileNotFoundError:
-                                logger.debug('conversion to full path results in non existent file')
-                            else:
-                                aggregate = False
-                    pkl_file.close()
-                logger.debug('Aggregate: %s', aggregate)
-                # try aggregating first
-                if aggregate:
-                    self._copyfiles_to_wd(cwd, True, linksonly=True)
-                    aggouts = self._interface.aggregate_outputs()
-                    runtime = Bunch(cwd=cwd,returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
-                    result = InterfaceResult(interface=None,
-                                             runtime=runtime,
-                                             outputs=aggouts)
-                    pkl_file = gzip.open(resultsfile, 'wb')
-                    if result.outputs:
-                        outputs = result.outputs.get()
-                        result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
-                    cPickle.dump(result, pkl_file)
-                    pkl_file.close()
-                    if result.outputs:
-                        result.outputs.set(**outputs)
+                result = self._load_results(cwd)
             except FileNotFoundError:
                 # if aggregation does not work, rerun the node
                 logger.info("Some of the outputs were not found: rerunning node.")
@@ -1010,7 +1056,16 @@ class MapNode(Node):
             hashinputs.add_trait(name, InputMultiPath(self._interface.inputs.traits()[name].trait_type))
             logger.debug('setting hashinput %s-> %s'%(name,getattr(self._inputs, name)))
             setattr(hashinputs, name, getattr(self._inputs, name))
-        return hashinputs.hashval
+        hashed_inputs, hashvalue = hashinputs.hashval
+        if config.getboolean('execution', 'remove_unnecessary_outputs') and \
+        self.needed_outputs:
+            hashobject = md5()
+            hashobject.update(hashvalue)
+            sorted_outputs = sorted(self.needed_outputs)
+            hashobject.update(str(sorted_outputs))
+            hashvalue = hashobject.hexdigest()
+            hashed_inputs['needed_outputs'] = sorted_outputs
+        return hashed_inputs, hashvalue
 
     @property
     def inputs(self):
@@ -1023,55 +1078,80 @@ class MapNode(Node):
         else:
             return None
 
-    def _run_interface(self, execute=True, updatehash=False, cwd=None):
-        old_cwd = os.getcwd()
-        if not cwd:
-            cwd = self._output_directory()
-        os.chdir(cwd)
-
+    def _make_nodes(self, cwd):
         nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
-        newnodes = []
-        nodenames = []
         for i in range(nitems):
-            nodenames.insert(i, '_' + self.name+str(i))
-            newnodes.insert(i, Node(deepcopy(self._interface), name=nodenames[i]))
-            newnodes[i]._interface.inputs.set(**deepcopy(self._interface.inputs.get()))
+            nodename = '_' + self.name+str(i)
+            node = Node(deepcopy(self._interface), name=nodename)
+            node._interface.inputs.set(**deepcopy(self._interface.inputs.get()))
             for field in self.iterfield:
                 fieldvals = filename_to_list(getattr(self.inputs, field))
                 logger.debug('setting input %d %s %s'%(i, field,
-                                                      fieldvals[i])) 
-                setattr(newnodes[i].inputs, field,
+                                                      fieldvals[i]))
+                setattr(node.inputs, field,
                         fieldvals[i])
-        workflowname = 'mapflow'
-        iterflow = Workflow(name=workflowname)
-        iterflow.base_dir = cwd
-        iterflow.config = self.config
-        iterflow.add_nodes(newnodes)
-        iterflow.run(inseries=True, updatehash=updatehash)
+            node.config = self.config
+            node.base_dir = os.path.join(cwd, 'mapflow') # for backwards compatibility
+            yield node
+
+    def _node_runner(self, nodes, updatehash=False):
+        for node in nodes:
+            try:
+                node.run(updatehash=updatehash)
+            except RuntimeError, msg:
+                node.error_msg = msg
+            yield node
+
+    def _collate_results(self, nodes):
         self._result = InterfaceResult(interface=[], runtime=[],
                                        outputs=self.outputs)
-        for i in range(nitems):
-            node = iterflow.get_exec_node('.'.join((workflowname,
-                                                    nodenames[i])))
+        for i, node in enumerate(nodes):
             runtime = Bunch(returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
             self._result.runtime.insert(i, runtime)
             if node.result and hasattr(node.result, 'runtime'):
                 self._result.runtime[i] = node.result.runtime
-                if node.result.runtime.returncode != 0:
+                if node.result.runtime.returncode:
                     raise Exception('iternode %s:%d did not run'%(node._id, i))
                 self._result.interface.insert(i, node.result.interface)
-        for key, _ in self.outputs.items():
-            values = []
-            for i in range(nitems):
-                node = iterflow.get_exec_node('.'.join((workflowname,
-                                                        nodenames[i])))
+            for key, _ in self.outputs.items():
+                if config.getboolean('execution', 'remove_unnecessary_outputs') and \
+                self.needed_outputs:
+                    if key not in self.needed_outputs:
+                        continue
+                values = getattr(self._result.outputs, key)
+                if not isdefined(values):
+                    values = []
                 if node.result.outputs:
                     values.insert(i, node.result.outputs.get()[key])
                 else:
                     values.insert(i, None)
-            if any([val != Undefined for val in values]) and self._result.outputs:
-                #logger.debug('setting key %s with values %s' %(key, str(values)))
-                setattr(self._result.outputs, key, values)
-            #else:
-            #    logger.debug('no values for key %s' %key)
+                if any([val != Undefined for val in values]) and self._result.outputs:
+                    setattr(self._result.outputs, key, values)
+
+    def _run_interface(self, execute=True, updatehash=False):
+        """Run the mapnode interface
+
+        This is primarily intended for serial execution of mapnode. A parallel
+        execution requires creation of new nodes that can be spawned
+        """
+        old_cwd = os.getcwd()
+        cwd = self.output_dir()
+        os.chdir(cwd)
+
+        if execute:
+            self._collate_results(self._node_runner(self._make_nodes(cwd),
+                                                    updatehash=updatehash))
+            self._save_results(self._result, cwd)
+            nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
+            nodenames = ['_' + self.name+str(i) for i in range(nitems)]
+            # remove any node directories no longer required
+            dirs2remove = []
+            for path in glob(os.path.join(cwd,'mapflow','*')):
+                if os.path.isdir(path):
+                    if path.split(os.path.sep)[-1] not in nodenames:
+                        dirs2remove.append(path)
+            for path in dirs2remove:
+                shutil.rmtree(path)
+        else:
+            self._result = self._load_results(cwd)
         os.chdir(old_cwd)

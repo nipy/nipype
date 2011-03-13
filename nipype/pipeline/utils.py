@@ -4,6 +4,7 @@
 """
 
 from copy import deepcopy
+from glob import glob
 import logging
 import os
 import re
@@ -12,7 +13,7 @@ from nipype.utils.misc import package_check
 package_check('networkx', '1.3')
 import networkx as nx
 
-from nipype.interfaces.base import CommandLine, isdefined
+from nipype.interfaces.base import CommandLine, isdefined, Undefined
 from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
 from nipype.utils.config import config
 
@@ -58,29 +59,41 @@ except ImportError:
             return os.curdir
         return op.join(*rel_list)
 
-def walk(children, level=0, path=None, usename=True):
-    """Generate all the full paths in a tree, as a dict.
+def modify_paths(object, relative=True, basedir=None):
+    """Modify filenames in a data structure to either full paths or relative paths
     """
-    # Entry point
-    if level == 0:
-        path = {}
-    # Exit condition
-    if not children:
-        yield path.copy()
-        return
-    # Tree recursion
-    head, tail = children[0], children[1:]
-    name, func = head
-    for child in func():
-        # We can use the arg name or the tree level as a key
-        if usename:
-            path[name] = child
-        else:
-            path[level] = child
-        # Recurse into the next level
-        for child_paths in walk(tail, level+1, path, usename):
-            yield child_paths
-        
+    if not basedir:
+        basedir = os.getcwd()
+    if isinstance(object, dict):
+        out = {}
+        for key, val in sorted(object.items()):
+            if isdefined(val):
+                out[key] = modify_paths(val, relative=relative,
+                                        basedir=basedir)
+    elif isinstance(object, (list,tuple)):
+        out = []
+        for val in object:
+            if isdefined(val):
+                out.append(modify_paths(val, relative=relative,
+                                        basedir=basedir))
+        if isinstance(object, tuple):
+            out = tuple(out)
+    else:
+        if isdefined(object):
+            if isinstance(object, str) and os.path.isfile(object):
+                if relative:
+                    if config.getboolean('execution','use_relative_paths'):
+                        out = relpath(object,start=basedir)
+                    else:
+                        out = object
+                else:
+                    out = os.path.abspath(os.path.join(basedir,object))
+                if not os.path.exists(out):
+                    raise FileNotFoundError('File %s not found'%out)
+            else:
+                out = object
+    return out
+
 def _create_pickleable_graph(graph, show_connectinfo=False):
     """Create a graph that can be pickled.
 
@@ -214,6 +227,29 @@ def _get_valid_pathstr(pathstr):
     pathstr = pathstr.replace(',', '.')
     return pathstr
 
+def walk(children, level=0, path=None, usename=True):
+    """Generate all the full paths in a tree, as a dict.
+    """
+    # Entry point
+    if level == 0:
+        path = {}
+    # Exit condition
+    if not children:
+        yield path.copy()
+        return
+    # Tree recursion
+    head, tail = children[0], children[1:]
+    name, func = head
+    for child in func():
+        # We can use the arg name or the tree level as a key
+        if usename:
+            path[name] = child
+        else:
+            path[level] = child
+        # Recurse into the next level
+        for child_paths in walk(tail, level+1, path, usename):
+            yield child_paths
+
 def get_levels(G):
     levels = {}
     for n in nx.topological_sort(G):
@@ -325,13 +361,13 @@ def generate_expanded_graph(graph_in):
     while moreiterables:
         nodes = nx.topological_sort(graph_in)
         nodes.reverse()
-        inodes = [node for node in nodes if len(node.iterables.keys())>0]
+        inodes = [node for node in nodes if node.iterables is not None]
         if inodes:
             node = inodes[0]
             iterables = node.iterables.copy()
             logger.debug('node: %s iterables: %s'%(node, iterables))
             #nx.write_dot(graph_in, '%s_pre.dot'%node)
-            node.iterables = {}
+            node.iterables = None
             node._id += 'I'
             subnodes = [s for s in dfs_preorder(graph_in, node)]
             logger.debug(('subnodes:' , subnodes))
@@ -421,37 +457,74 @@ def make_output_dir(outdir):
         os.makedirs(outdir)
     return outdir
 
-def modify_paths(object, relative=True, basedir=None):
-    """Modify filenames in a data structure to either full paths or relative paths
+def get_all_files(infile):
+    files = [infile]
+    if infile.endswith(".img"):
+        files.append(infile[:-4] + ".hdr")
+        files.append(infile[:-4] + ".mat")
+    if infile.endswith(".img.gz"):
+        files.append(infile[:-7] + ".hdr.gz")
+    return files
+
+def walk_outputs(object):
+    """Extract every file and directory from a python structure
     """
-    if not basedir:
-        basedir = os.getcwd()
+    out = []
     if isinstance(object, dict):
-        out = {}
         for key, val in sorted(object.items()):
             if isdefined(val):
-                out[key] = modify_paths(val, relative=relative,
-                                        basedir=basedir)
+                out.extend(walk_outputs(val))
     elif isinstance(object, (list,tuple)):
-        out = []
         for val in object:
             if isdefined(val):
-                out.append(modify_paths(val, relative=relative,
-                                        basedir=basedir))
-        if isinstance(object, tuple):
-            out = tuple(out)
+                out.extend(walk_outputs(val))
     else:
-        if isdefined(object):
-            if isinstance(object, str) and os.path.isfile(object):
-                if relative:
-                    if config.getboolean('execution','use_relative_paths'):
-                        out = relpath(object,start=basedir)
-                    else:
-                        out = object
-                else:
-                    out = os.path.abspath(os.path.join(basedir,object))
-                if not os.path.exists(out):
-                    raise FileNotFoundError('File %s not found'%out)
-            else:
-                out = object
+        if isdefined(object) and isinstance(object, str):
+            if os.path.islink(object) or os.path.isfile(object):
+                out = [(filename,'f') for filename in get_all_files(object)]
+            elif os.path.isdir(object):
+                out = [(object,'d')]
     return out
+
+def walk_files(cwd):
+    for path, _, files in os.walk(cwd):
+        for f in files:
+            yield os.path.join(path, f)
+
+def clean_working_directory(outputs, cwd, inputs, needed_outputs,
+                            files2keep=None, dirs2keep=None):
+    """Removes all files not needed for further analysis from the directory
+    """
+    if not needed_outputs:
+        return outputs
+    # build a list of needed files
+    output_files = []
+    outputdict = outputs.get()
+    for output in needed_outputs:
+        output_files.extend(walk_outputs(outputdict[output]))
+    needed_files = [path for path, type in output_files if type == 'f']
+    input_files = []
+    inputdict = inputs.get()
+    input_files.extend(walk_outputs(inputdict))
+    needed_files += [path for path, type in input_files if type == 'f']
+    for extra in ['_0x*.json', 'provenance.xml', 'pyscript*.m',
+                  'command.txt', 'result*.pklz']:
+        needed_files.extend(glob(os.path.join(cwd, extra)))
+    if files2keep:
+        needed_files.extend(filename_to_list(files2keep))
+    needed_dirs = [path for path, type in output_files if type == 'd']
+    if dirs2keep:
+        needed_dirs.extend(filename_to_list(dirs2keep))
+    for extra in ['_nipype', '_report']:
+        needed_dirs.extend(glob(os.path.join(cwd, extra)))
+    files2remove = []
+    for f in walk_files(cwd):
+        if f not in needed_files:
+            if not len([1 for dirname in needed_dirs if f.startswith(dirname)])==0:
+                files2remove.append(f)
+    for f in files2remove:
+        os.remove(f)
+    for key in outputs.copyable_trait_names():
+        if key not in needed_outputs:
+            setattr(outputs, key, Undefined)
+    return outputs

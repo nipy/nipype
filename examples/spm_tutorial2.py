@@ -248,9 +248,9 @@ nifti filename through a template '%s.nii'. So 'f3' would become
 # Specify the location of the data.
 data_dir = os.path.abspath('data')
 # Specify the subject directories
-subject_list = ['s1'] #, 's3']
+subject_list = ['s1', 's3']
 # Map field names to individual subject runs.
-info = dict(func=[['subject_id', ['f3']]], #,'f5','f7','f10']]],
+info = dict(func=[['subject_id', ['f3','f5','f7','f10']]],
             struct=[['subject_id','struct']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
