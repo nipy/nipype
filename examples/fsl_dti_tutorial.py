@@ -3,19 +3,18 @@
 Using FSL for DTI analysis
 ==========================
 
-A pipeline example that uses several interfaces to
-perform analysis on diffusion weighted images using
-FSL FDT tools.
+A pipeline example that uses several interfaces to perform analysis on
+diffusion weighted images using FSL FDT tools.
 
-This tutorial is based on the 2010 FSL course and uses
-data freely available at the FSL website at:
-http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
+This tutorial is based on the 2010 FSL course and uses data freely available at
+the FSL website at: http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 
-More details can be found at http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/fdt/index.htm
+More details can be found at
+http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/fdt/index.htm
 
 In order to run this tutorial you need to have fsl tools installed and
-accessible from matlab/command line. Check by calling fslinfo from the
-command line. 
+accessible from matlab/command line. Check by calling fslinfo from the command
+line.
 
 Tell python where to find the appropriate functions.
 """
@@ -43,15 +42,16 @@ package_check('IPython', '0.10', 'tutorial1')
 """
 Setting up workflows
 --------------------
+
 This is a generic workflow for DTI data analysis using the FSL
 
 Data specific components
 ------------------------
 
-The nipype tutorial contains data for two subjects.  Subject data
-is in two subdirectories, ``dwis1`` and ``dwis2``.  Each subject directory
-contains each of the following files: bvec, bval, diffusion weighted data, a set of target masks,
-a seed file, and a transformation matrix.
+The nipype tutorial contains data for two subjects.  Subject data is in two
+subdirectories, ``dwis1`` and ``dwis2``.  Each subject directory contains each
+of the following files: bvec, bval, diffusion weighted data, a set of target
+masks, a seed file, and a transformation matrix.
 
 Below we set some variables to inform the ``datasource`` about the
 layout of our data.  We specify the location of the data, the subject
@@ -84,7 +84,8 @@ info = dict(dwi=[['subject_id', 'data']],
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
 
-"""Here we set up iteration over all the subjects. The following line
+"""
+Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
 ``datasource`` attribute ``iterables`` tells the pipeline engine that
 it should repeat the analysis on each of the items in the
@@ -122,6 +123,7 @@ datasource.inputs.template_args = info
 """
 Setup for Diffusion Tensor Computation
 --------------------------------------
+
 Here we will create a generic workflow for DTI computation
 """
 
@@ -172,6 +174,7 @@ computeTensor.connect([
 """
 Setup for Tracktography
 -----------------------
+
 Here we will create a workflow to enable probabilistic tracktography
 and hard segmentation of the seed region
 """
@@ -216,6 +219,7 @@ findthebiggest = pe.Node(interface=fsl.FindTheBiggest(),name='findthebiggest')
 """
 connect all the nodes for this workflow
 """
+
 tractography.add_nodes([bedpostx, flirt])
 tractography.connect([(bedpostx,probtrackx,[('outputnode.thsamples','thsamples'),
                                             ('outputnode.phsamples','phsamples'),
