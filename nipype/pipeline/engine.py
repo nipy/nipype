@@ -1127,6 +1127,13 @@ class MapNode(Node):
                 if any([val != Undefined for val in values]) and self._result.outputs:
                     setattr(self._result.outputs, key, values)
 
+    def _make_workflow(self, cwd):
+        wf = Workflow(name='mapflow')
+        wf.base_dir = cwd
+        wf.add_nodes([node for node in self._make_nodes(cwd)])
+        wf.config = self.config
+        return wf
+
     def _run_interface(self, execute=True, updatehash=False):
         """Run the mapnode interface
 
@@ -1138,11 +1145,20 @@ class MapNode(Node):
         os.chdir(cwd)
 
         if execute:
-            self._collate_results(self._node_runner(self._make_nodes(cwd),
-                                                    updatehash=updatehash))
-            self._save_results(self._result, cwd)
             nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
             nodenames = ['_' + self.name+str(i) for i in range(nitems)]
+            # map-reduce formulation
+            self._collate_results(self._node_runner(self._make_nodes(cwd),
+                                                    updatehash=updatehash))
+            # use workflow instead
+            #execgraph = self._make_workflow(cwd).run(plugin=self.use_plugin)
+            #execnames = [node.name for node in execgraph.nodes()]
+            #orderednodes = []
+            #for name in nodenames:
+            #    orderednodes.append(execgraph.nodes()[execnames.index(name)])
+            #self._collate_results(orderednodes)
+
+            self._save_results(self._result, cwd)
             # remove any node directories no longer required
             dirs2remove = []
             for path in glob(os.path.join(cwd,'mapflow','*')):
