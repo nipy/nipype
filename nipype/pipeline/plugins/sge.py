@@ -1,48 +1,103 @@
 """Parallel workflow execution via SGE
 """
+from glob import glob
+
 import os
-from .base import (DistributedPluginBase, logger, report_crash)
-from nipype.utils.filemanip import savepkl
+
+from .base import (DistributedPluginBase, logger, report_crash, strftime)
+from nipype.utils.filemanip import savepkl, loadpkl
+from nipype.interfaces.base import CommandLine
 
 class sge_runner(DistributedPluginBase):
-    """Execute workflow with ipython
+    """Execute workflow with SGE/OGE
+
+    A workflow config option sgeargs can be used to control parameters
+    sent to qsub.
     """
 
+    def __init__(self):
+        self._pending = {}
+        
     def _get_result(self, taskid):
-        #get results from sge taskid
-        pass
+        if taskid not in self._pending:
+            raise Exception('SGE task %d not found'%taskid)
+        cmd = CommandLine('qstat')
+        cmd.inputs.args = '-j %d'%(taskid)
+        # retrieve sge taskid
+        result = cmd.run()
+        if result.runtime.stdout.startswith('='):
+            return None
+        node_dir = self._pending[taskid]
+        results_file = glob(os.path.join(node_dir,'result_*.pklz'))[0]
+        result_data = loadpkl(results_file)
+        result_out = dict(result=None, traceback=None)
+        if isinstance(result_data, dict):
+            result_out['result'] = result_data['result']
+            result_out['traceback'] = result_data['traceback']
+            os.remove(results_file)
+        else:
+            result_out['result'] = result_data
+        return result_out
 
     def _submit_job(self, node, updatehash=False):
         # use qsub to submit job and return sgeid
         # pickle node
-        node_dir = node.output_dir()
-        if not os.path.exists(node_dir):
-            os.makedirs(node_dir)
-        pkl_file = ''
+        timestamp = strftime('%Y%m%d_%H%M%S')
+        suffix = '%s_%s'%(timestamp, node._id)
+        sge_dir = os.path.join(node.base_dir, 'sge')
+        if not os.path.exists(sge_dir):
+            os.makedirs(sge_dir)
+        pkl_file = os.path.join(sge_dir,'node_%s.pklz'%suffix)
+        savepkl(pkl_file, dict(node=node, updatehash=updatehash))
         # create python script to load and trap exception
-        cmdstr = """import sys
+        cmdstr = """import os
+import sys
 from traceback import format_exception
-from nipype.utils.filemanip import loadpkl
+from nipype.utils.filemanip import loadpkl, savepkl
 traceback=None
+print os.getcwd()
 try:
-task = loadpkl('%s')
-result = task.run(updatehash=updatehash)
+    info = loadpkl('%s')
+    result = info['node'].run(updatehash=info['updatehash'])
 except:
-etype, eval, etr = sys.exc_info()
-traceback = format_exception(etype,eval,etr)
-result = task.result
+    etype, eval, etr = sys.exc_info()
+    traceback = format_exception(etype,eval,etr)
+    result = info['node'].result
+    resultsfile = os.path.join(node.output_dir(), 'result_%%s.pklz'%%info['node'].name)
+    savepkl(resultsfile,dict(result=result, traceback=traceback))
 """%pkl_file
+        pyscript = os.path.join(sge_dir, 'pyscript_%s.py'%suffix)
+        fp = open(pyscript, 'wt')
+        fp.writelines(cmdstr)
+        fp.close()
+        sgescript = """#!/usr/bin/env bash
+python %s
+"""%(pyscript)
+        sgescriptfile = os.path.join(sge_dir, 'sgescript_%s.sh'%suffix)
+        fp = open(sgescriptfile, 'wt')
+        fp.writelines(sgescript)
+        fp.close()
+        cmd = CommandLine('qsub', environ=os.environ.data)
+        qsubargs = ''
+        if node.config.has_key('sgeargs'):
+            qsubargs = node.config['sgeargs']
+        cmd.inputs.args = '%s %s'%(qsubargs, sgescriptfile)
+        result = cmd.run()
         # retrieve sge taskid
-        pass
+        if not result.runtime.returncode:
+            taskid = int(result.runtime.stdout.split(' ')[2])
+            self._pending[taskid] = node.output_dir()
+            logger.debug('submitted sge task: %d for node %s'%(taskid, node._id))
+        return taskid
 
     def _report_crash(self, node, result=None):
-        if result and result['traceback']
+        if result and result['traceback']:
             node._result = result['result']
             node._traceback = result['traceback']
             return report_crash(node,
-                                traceback=res['traceback'])
+                                traceback=result['traceback'])
         else:
             return report_crash(node)
 
     def _clear_task(self, taskid):
-        # clear sge script
+        del self._pending[taskid]
