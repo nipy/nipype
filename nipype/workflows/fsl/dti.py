@@ -1,7 +1,14 @@
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 import nipype.interfaces.fsl as fsl
-import numpy as np
+
+
+def transpose(samples_over_fibres):
+    import numpy as np
+    a = np.array(samples_over_fibres)
+    if len(a.shape)==1:
+        a = a.reshape(-1,1)
+    return a.T.tolist()
 
 def create_bedpostx_pipeline(name="bedpostx"):
     """Creates a pipeline that does the same as bedpostx script from FSL -
@@ -97,12 +104,6 @@ def create_bedpostx_pipeline(name="bedpostx"):
                             iterfield=['theta_vol', 'phi_vol'])
 
     postproc = pe.Workflow(name="postproc")
-    
-    def transpose(samples_over_fibres):
-        a = np.array(samples_over_fibres)
-        if len(a.shape)==1:
-            a = a.reshape(-1,1)
-        return a.T.tolist()
     
     postproc.connect([(inputnode, merge_thsamples, [(('thsamples',transpose), 'in_files')]),
                       (inputnode, merge_phsamples, [(('phsamples',transpose), 'in_files')]),
