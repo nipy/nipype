@@ -379,7 +379,7 @@ class Workflow(WorkflowBase):
         if type(plugin) is not str:
             runner = plugin
         else:
-            name = 'nipype.pipeline.plugins.%s'%plugin
+            name = 'nipype.pipeline.plugins'
             try:
                 __import__(name)
             except ImportError:
@@ -387,7 +387,7 @@ class Workflow(WorkflowBase):
                 logger.error(msg)
                 raise ImportError(msg)
             else:
-                runner = getattr(sys.modules[name], '%s_runner'%plugin)()
+                runner = getattr(sys.modules[name], '%sPlugin'%plugin)()
         flatgraph = self._create_flat_graph()
         self._set_needed_outputs(flatgraph)
         execgraph = generate_expanded_graph(deepcopy(flatgraph))

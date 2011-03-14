@@ -8,7 +8,7 @@ from .base import (DistributedPluginBase, logger, report_crash, strftime)
 from nipype.utils.filemanip import savepkl, loadpkl
 from nipype.interfaces.base import CommandLine
 
-class sge_runner(DistributedPluginBase):
+class SGEPlugin(DistributedPluginBase):
     """Execute workflow with SGE/OGE
 
     A workflow config option sgeargs can be used to control parameters

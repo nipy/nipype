@@ -13,12 +13,12 @@ except:
 
 from .base import (DistributedPluginBase, logger, report_crash)
 
-class ipython_runner(DistributedPluginBase):
+class IPythonPlugin(DistributedPluginBase):
     """Execute workflow with ipython
     """
 
     def __init__(self):
-        super(ipython_runner, self).__init__()
+        super(IPythonPlugin, self).__init__()
         self.ipyclient = None
         self.taskclient = None
 
@@ -41,7 +41,7 @@ class ipython_runner(DistributedPluginBase):
                 raise Exception("No IPython clients found.")
             if isinstance(e, ValueError):
                 raise Exception("Ipython kernel not installed")
-        return super(ipython_runner, self).run(graph, updatehash=updatehash)
+        return super(IPythonPlugin, self).run(graph, updatehash=updatehash)
 
     def _get_result(self, taskid):
         return self.taskclient.get_task_result(taskid, block=False)

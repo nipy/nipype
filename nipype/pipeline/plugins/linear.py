@@ -7,7 +7,7 @@ import os
 from .base import (PluginBase, logger, report_crash, report_nodes_not_run)
 from ..utils import (nx, dfs_preorder, config)
 
-class linear_runner(PluginBase):
+class LinearPlugin(PluginBase):
     """Execute workflow in series
     """
 
