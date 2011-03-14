@@ -384,7 +384,7 @@ file for use by FILMGLS
 """
 
 modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
-                      iterfield = ['fsf_file'])
+                      iterfield = ['fsf_file', 'ev_files'])
 
 """
 Set the model generation to run every time. Since the fsf file, which is the
