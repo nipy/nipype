@@ -139,7 +139,7 @@ class DistributedPluginBase(PluginBase):
                         else:
                             self._task_finished_cb(jobid)
                             self._remove_node_dirs()
-                            self._clear_task(taskid)
+                        self._clear_task(taskid)
                     else:
                         toappend.insert(0, (taskid, jobid))
                 except:
