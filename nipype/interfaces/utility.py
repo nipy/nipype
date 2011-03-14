@@ -111,7 +111,8 @@ class Merge(IOBase):
 class RenameInputSpec(DynamicTraitedSpec):
 
     in_file = File(exists=True, mandatory=True, desc="file to rename")
-    format_string = traits.String(desc="Python formatting string for output template")
+    format_string = traits.String(mandatory=True, 
+                                  desc="Python formatting string for output template")
 
 class RenameOutputSpec(TraitedSpec):
 
@@ -120,30 +121,40 @@ class RenameOutputSpec(TraitedSpec):
 class Rename(IOBase):
     """Change the name of a file based on a mapped format string.
 
-    The class constructor must be called with the format template, and the
-    fields identified will become inputs to the interface.
+    To use additional inputs that will be defined at run-time, the class 
+    constructor must be called with the format template, and the fields 
+    identified will become inputs to the interface.
 
     Examples
     --------
     >>> from nipype.interfaces.utility import Rename
-    >>> rename = Rename(format_string="%(subject_id)s_func_run%(run)02d.nii")
+    >>> rename1 = Rename()
+    >>> rename1.inputs.in_file = "zstat1.nii.gz"
+    >>> rename1.inputs.format_string = "Faces-Scenes.nii.gz"
+    >>> res = rename1.run()          # doctest: +SKIP
+    >>> print res.outputs.out_file   # doctest: +SKIP
+    'Faces-Scenes.nii.gz"
 
-    >>> rename.inputs.in_file "func.nii"
-    >>> rename.inputs.subject_id = "subj_201"
-    >>> rename.inputs.run = 2
-    >>> res = rename.run()          # doctest: +SKIP
-    >>> print res.outputs.out_file  # doctest: +SKIP
-    'subj_201_func_run02.nii'       # doctest: +SKIP
+    >>> rename2 = Rename(format_string="%(subject_id)s_func_run%(run)02d.nii")
+    >>> rename2.inputs.in_file "func.nii"
+    >>> rename2.inputs.subject_id = "subj_201"
+    >>> rename2.inputs.run = 2
+    >>> res = rename2.run()          # doctest: +SKIP
+    >>> print res.outputs.out_file   # doctest: +SKIP
+    'subj_201_func_run02.nii'        # doctest: +SKIP
 
     """
     input_spec = RenameInputSpec
     output_spec = RenameOutputSpec
 
-    def __init__(self, format_string, **inputs):
+    def __init__(self, format_string=None, **inputs):
         super(Rename, self).__init__(**inputs)
-        self.inputs.format_string = format_string
-        self.fmt_fields = re.findall(r"%\((.+?)\)", format_string)
-        add_traits(self.inputs, self.fmt_fields)
+        if format_string is not None:
+            self.inputs.format_string = format_string
+            self.fmt_fields = re.findall(r"%\((.+?)\)", format_string)
+            add_traits(self.inputs, self.fmt_fields)
+        else: 
+            self.fmt_fields = []
 
     def _rename(self):
         fmt_dict = dict()
