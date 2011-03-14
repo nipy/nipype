@@ -1,17 +1,16 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-from inspect import getsource
+import nibabel as nb
 import numpy as np
 
-from nipype.utils.filemanip import (filename_to_list)
 from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec,
                                     Undefined, isdefined, OutputMultiPath,
     InputMultiPath, BaseInterface, File)
 from nipype.interfaces.io import IOBase, add_traits
-import nibabel as nb
 from nipype.testing import assert_equal
-
+from nipype.utils.filemanip import (filename_to_list)
+from nipype.utils.misc import getsource, create_function_from_source
     
 class IdentityInterface(IOBase):
     """Basic interface class generates identity mappings
@@ -255,28 +254,33 @@ class Function(IOBase):
         return base
 
     def _run_interface(self, runtime):
+        runtime.returncode = 0
         try:
-            ns = {}
-            exec self.inputs.function_str in ns
+            function_handle = create_function_from_source(self.inputs.function_str)
+        except RuntimeError, msg:
+            runtime.returncode=1
+            runtime.stderr = msg
+        else:
             args = {}
             for name in self._input_names:
                 value = getattr(self.inputs, name)
                 if isdefined(value):
                     args[name] = value
-            function_name = [name for name in ns.keys() if not name == '__builtins__'][0]
-            out = ns[function_name](**args)
-            if len(self._output_names) == 1:
-                self._out[self._output_names[0]] = out
+            try:
+                out = function_handle(**args)
+            except Exception, msg:
+                runtime.returncode = 1
+                runtime.stderr = msg
             else:
-                if isinstance(out, tuple) and (len(out) != len(self._output_names)):
-                    raise Exception('Mismatch in number of outputs')
-                for idx, name in enumerate(self._output_names):
-                    self._out[name] = out[idx]
-        except TypeError, msg :
-            print 'Error: %s'%msg
-            runtime.returncode = 1
-        finally:
-            runtime.returncode = 0
+                if len(self._output_names) == 1:
+                    self._out[self._output_names[0]] = out
+                else:
+                    if isinstance(out, tuple) and (len(out) != len(self._output_names)):
+                        runtime.returncode = 1
+                        runtime.stderr = 'Mismatch in number of expected outputs'
+                    else:
+                        for idx, name in enumerate(self._output_names):
+                            self._out[name] = out[idx]
         return runtime
 
     def _list_outputs(self):
