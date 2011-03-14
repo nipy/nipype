@@ -18,6 +18,7 @@ Tell python where to find the appropriate functions.
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
+import nipype.workflows.fsl as fsl_wf          # fsl
 import nipype.interfaces.diffusion_toolkit as dtk 
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
@@ -135,8 +136,8 @@ bet.inputs.frac=0.34
 correct the diffusion weighted images for eddy_currents
 """
 
-eddycorrect = pe.Node(interface=fsl.EddyCorrect(),name='eddycorrect')
-eddycorrect.inputs.ref_num=0
+eddycorrect = fsl_wf.create_eddy_correct_pipeline('eddycorrect')
+eddycorrect.inputs.inputnode.ref_num=0
 
 """
 compute the diffusion tensor in each voxel
@@ -150,7 +151,7 @@ connect all the nodes for this workflow
 
 computeTensor.connect([
                         (fslroi,bet,[('roi_file','in_file')]),
-                        (eddycorrect,dtifit,[('eddy_corrected','DWI')])
+                        (eddycorrect,dtifit,[('outputnode.eddy_corrected','DWI')])
                       ])
 
 
@@ -200,7 +201,7 @@ dwiproc.connect([
                     (datasource,computeTensor,[('dwi','fslroi.in_file'),
                                                ('bvals','dtifit.bvals'),
                                                ('bvecs','dtifit.bvecs'),
-                                               ('dwi','eddycorrect.in_file')]),
+                                               ('dwi','eddycorrect.inputnode.in_file')]),
                     (computeTensor,tractography,[('bet.mask_file','dtk_tracker.mask1_file'),
                                                  ('dtifit.tensor','dtk_tracker.tensor_file')
                                                  ])
