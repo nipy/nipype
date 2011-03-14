@@ -119,8 +119,8 @@ class DataSinkInputSpec(DynamicTraitedSpec):
                                    desc='store output in parametrized structure')
     strip_dir = Directory(desc='path to strip out of filename')
     substitutions = InputMultiPath(traits.Tuple(traits.Str,traits.Str),
-                                   desc=('List of 2-tuples reflecting string'
-                                         'to substitute and string to replace'
+                                   desc=('List of 2-tuples reflecting string '
+                                         'to substitute and string to replace '
                                          'it with'))
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
     remove_dest_dir = traits.Bool(False, usedefault=True,
