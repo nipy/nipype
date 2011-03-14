@@ -1,11 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
-from copy import deepcopy
-
+import re
 import numpy as np
 
-from nipype.utils.filemanip import (filename_to_list, list_to_filename)
+from nipype.utils.filemanip import (filename_to_list, list_to_filename, copyfile)
 from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec, File,
                                     Undefined, isdefined, OutputMultiPath,
     InputMultiPath)
@@ -111,35 +110,50 @@ class Merge(IOBase):
 
 class RenameInputSpec(DynamicTraitedSpec):
 
-    in_file = File(exists=True, desc="file to rename")
-    format_string = traits.String(desc="python string formatting style string to rename a file")
+    in_file = File(exists=True, mandatory=True, desc="file to rename")
+    format_string = traits.String(desc="Python formatting string for output template")
 
 class RenameOutputSpec(TraitedSpec):
 
     out_file = traits.File(exists=True,desc="softlink to original file with new name")
 
 class Rename(IOBase):
+    """Change the name of a file based on a mapped format string.
 
+    The class constructor must be called with the format template, and the
+    fields identified will become inputs to the interface.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.utility import Rename
+    >>> rename = Rename(format_string="%(subject_id)s_func_run%(run)02d.nii")
+
+    >>> rename.inputs.in_file "func.nii"
+    >>> rename.inputs.subject_id = "subj_201"
+    >>> rename.inputs.run = 2
+    >>> res = rename.run()          # doctest: +SKIP
+    >>> print res.outputs.out_file  # doctest: +SKIP
+    'subj_201_func_run02.nii'       # doctest: +SKIP
+
+    """
     input_spec = RenameInputSpec
     output_spec = RenameOutputSpec
 
-    def __init__(self, numinputs=0, **inputs):
+    def __init__(self, format_string, **inputs):
         super(Rename, self).__init__(**inputs)
-        self.numinputs = numinputs
-        add_traits(self.inputs, ['in%d'%(i+1) for i in range(numinputs)])
+        self.inputs.format_string = format_string
+        self.fmt_fields = re.findall(r"%\((.+?)\)", format_string)
+        add_traits(self.inputs, self.fmt_fields)
 
     def _rename(self):
-        fmt_list = []
-        for idx in range(self.numinputs):
-            value = getattr(self.inputs, 'in%d'%(idx+1))
-            if isdefined(value):
-                fmt_list.append(value) 
-        new_name = self.inputs.format_string%tuple(fmt_list)
-        return new_name
+        fmt_dict = dict()
+        for field in self.fmt_fields:
+            fmt_dict[field] = getattr(self.inputs, field)
+        return self.inputs.format_string%fmt_dict
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
-        os.symlink(self.inputs.in_file, os.path.join(os.getcwd(), self._rename()))
+        _ = copyfile(self.inputs.in_file, os.path.join(os.getcwd(), self._rename()))
         return runtime
     
     def _list_outputs(self):
