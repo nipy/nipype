@@ -78,15 +78,15 @@ is almost the same as running
 
 ::
 
-	b1 = pe.MapNode(interface=B(), name="b1")
+	b1 = pe.Node(interface=B(), name="b1")
 	b1.inputs.in_file = 'file'
 	b1.inputs.n = 1
 	
-	b2 = pe.MapNode(interface=B(), name="b2")
+	b2 = pe.Node(interface=B(), name="b2")
 	b2.inputs.in_file = 'another_file'
 	b2.inputs.n = 2
 	
-	b3 = pe.MapNode(interface=B(), name="b3")
+	b3 = pe.Node(interface=B(), name="b3")
 	b3.inputs.in_file = 'different_file'
 	b3.inputs.n = 3
 	
@@ -130,5 +130,9 @@ scenario! Its called iterables and and you use it this way:
 	my_workflow.connect([(a,b,[('out_file','in_file')]),
                              (b,c,[('out_file','in_file')])
                              ])
+
+Assuming that you want to try out values 1, 2, and 3 of input "n" of the node "B". This
+will also create three different versions of node "C" - each with inputs from instances of node
+"C" with diffrent values of "n".
 
 .. include:: ../links_names.txt
