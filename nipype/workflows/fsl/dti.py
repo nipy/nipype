@@ -183,15 +183,15 @@ def create_eddy_correct_pipeline(name="eddy_correct"):
     
     pipeline = pe.Workflow(name=name)
     
-    fsl.Split = pe.Node(fsl.Split(), name="fsl.Split")
-    pipeline.connect([(inputnode, fsl.Split, [("in_file", "in_file")])])
+    split = pe.Node(fsl.Split(), name="split")
+    pipeline.connect([(inputnode, split, [("in_file", "in_file")])])
     
     pick_ref = pe.Node(util.Select(), name="pick_ref")
-    pipeline.connect([(fsl.Split, pick_ref, [("out_files", "inlist")]),
+    pipeline.connect([(split, pick_ref, [("out_files", "inlist")]),
                       (inputnode, pick_ref, [("ref_num", "index")])])
     
     coregistration = pe.MapNode(fsl.FLIRT(no_search=True, padding_size=1), name = "coregistration", iterfield=["in_file"])
-    pipeline.connect([(fsl.Split, coregistration, [("out_files", "in_file")]),
+    pipeline.connect([(split, coregistration, [("out_files", "in_file")]),
                       (pick_ref, coregistration, [("out", "reference")])])
     
     merge = pe.Node(fsl.Merge(dimension="t"), name="merge")
