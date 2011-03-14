@@ -37,7 +37,7 @@ class TestInterface(nib.BaseInterface):
         return outputs
 
 
-
+# Workflow
 def test_init():
     yield assert_raises, Exception, pe.Workflow
     pipe = pe.Workflow(name='pipe')
@@ -302,3 +302,53 @@ wf1.run(inseries=True, createdirsonly=True)
 
 wf1.write_graph(graph2use='exec')
 '''
+
+'''
+import nipype.pipeline.engine as pe
+import nipype.interfaces.spm as spm
+import os
+from nipype.utils.config import config
+from StringIO import StringIO
+
+config.readfp(StringIO("""
+[execution]
+remove_unnecessary_outputs = true
+"""))
+
+
+segment = pe.Node(interface=spm.Segment(), name="segment")
+segment.inputs.data = os.path.abspath("data/T1.nii")
+segment.inputs.gm_output_type = [True, True, True]
+segment.inputs.wm_output_type = [True, True, True]
+
+
+smooth_gm = pe.Node(interface=spm.Smooth(), name="smooth_gm")
+
+workflow = pe.Workflow(name="workflow_cleanup_test")
+workflow.base_dir = os.path.abspath('./workflow_cleanup_test')
+
+workflow.connect([(segment, smooth_gm, [('native_gm_image','in_files')])])
+
+workflow.run()
+
+#adding new node that uses one of the previously deleted outputs of segment; this should force segment to rerun
+smooth_wm = pe.Node(interface=spm.Smooth(), name="smooth_wm")
+
+workflow.connect([(segment, smooth_wm, [('native_wm_image','in_files')])])
+
+workflow.run()
+
+workflow.run()
+'''
+
+# Node
+def test_node_init():
+    yield assert_raises, Exception, pe.Node
+    try:
+        node = pe.Node(TestInterface, name='test')
+    except IOError:
+        exception = True
+    else:
+        exception = False
+    yield assert_true, exception
+

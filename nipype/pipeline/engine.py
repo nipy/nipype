@@ -32,8 +32,7 @@ import networkx as nx
 
 from nipype.interfaces.base import (traits, InputMultiPath, CommandLine,
                                     Undefined, TraitedSpec, DynamicTraitedSpec,
-                                    Bunch, InterfaceResult, md5,
-                                    OutputMultiPath)
+                                    Bunch, InterfaceResult, md5, Interface)
 from nipype.utils.misc import isdefined, getsource, create_function_from_source
 from nipype.utils.filemanip import (save_json, FileNotFoundError,
                                     filename_to_list, list_to_filename,
@@ -664,7 +663,9 @@ class Node(WorkflowBase):
         # interface can only be set at initialization
         super(Node, self).__init__(**kwargs)
         if interface is None:
-            raise Exception('Interface must be provided')
+            raise IOError('Interface must be provided')
+        if not isinstance(interface, Interface):
+            raise IOError('interface must be an instance of an Interface')
         self._interface  = interface
         self._result     = None
         self.iterables  = iterables
@@ -824,7 +825,7 @@ class Node(WorkflowBase):
             except RuntimeError:
                 msg = "Could not run %s" % self.name
                 msg += "\nwith inputs:\n%s" % self.inputs
-                msg += "\n\tstderr: %s" % self._result.runtime.stderr
+                msg += "\nError:\n %s" % self._result.runtime.stderr
                 os.remove(hashfile_unfinished)
                 raise RuntimeError(msg)
             else:
@@ -907,13 +908,23 @@ class Node(WorkflowBase):
         if execute and copyfiles:
             self._originputs = deepcopy(self._interface.inputs)
         resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
-        if issubclass(self._interface.__class__, CommandLine):
-            cmd = self._interface.cmdline
         if execute:
+            runtime = Bunch(returncode = 1,
+                            environ = deepcopy(os.environ.data),
+                            hostname = gethostname())
+            result = InterfaceResult(interface=self._interface,
+                                     runtime=runtime,
+                                     outputs=None)
             logger.debug('Executing node')
             if copyfiles:
                 self._copyfiles_to_wd(cwd, execute)
             if issubclass(self._interface.__class__, CommandLine):
+                try:
+                    cmd = self._interface.cmdline
+                except Exception, msg:
+                    runtime.update(stderr=msg)
+                    self._result = result
+                    raise RuntimeError(msg)
                 cmdfile = os.path.join(cwd,'command.txt')
                 fd = open(cmdfile,'wt')
                 fd.writelines(cmd)
@@ -921,13 +932,14 @@ class Node(WorkflowBase):
                 logger.info('Running: %s' % cmd)
             try:
                 result = self._interface.run()
-            except:
-                runtime = Bunch(returncode = 1, environ = deepcopy(os.environ.data), hostname = gethostname())
-                result = InterfaceResult(interface=None,
+            except Exception, msg:
+                runtime.update(returncode = 1,
+                               stderr = msg)
+                result = InterfaceResult(interface=self._interface,
                                          runtime=runtime,
                                          outputs=None)
                 self._result = result
-                raise
+                raise RuntimeError(msg)
             else:
                 if config.getboolean('execution', 'remove_unnecessary_outputs'):
                     dirs2keep = None
