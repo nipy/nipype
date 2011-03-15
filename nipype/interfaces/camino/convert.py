@@ -430,6 +430,7 @@ class ProcStreamlinesInputSpec(CommandLineInputSpec):
 	outputsc = traits.Bool(argstr='-outputsc', desc="output the connection probability map (raw streamlines, int)")
 	outputacm = traits.Bool(argstr='-outputacm', desc="output all tracts in a single connection probability map (Analyze image)")
 	outputcbs = traits.Bool(argstr='-outputcbs', desc="outputs connectivity-based segmentation maps; requires target outputfile")
+	out_file = File(argstr="> %s", position=-1, genfile=True)
 
 class ProcStreamlinesOutputSpec(TraitedSpec):
 	proc = File(exists=True, desc='Processed Streamlines') 
@@ -451,4 +452,26 @@ class ProcStreamlines(CommandLine):
             return None
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
-        return name + ".proc"
+        return name + "_proc"
+        
+        class TractShredderOutputSpec(TraitedSpec):
+    shredded = File(exists=True, desc='Shredded tract file') 
+
+class TractShredder(CommandLine):
+    _cmd = 'tractshredder'
+    input_spec=TractShredderInputSpec
+    output_spec=TractShredderOutputSpec
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["shredded"] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_file':
+            return self._gen_outfilename()
+        else:
+            return None
+    def _gen_outfilename(self):
+        _, name , _ = split_filename(self.inputs.in_file)
+        return name + "_shredded"
