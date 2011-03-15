@@ -113,6 +113,7 @@ class RenameInputSpec(DynamicTraitedSpec):
     in_file = File(exists=True, mandatory=True, desc="file to rename")
     format_string = traits.String(mandatory=True, 
                                   desc="Python formatting string for output template")
+    parse_string = traits.String(desc="Python regexp parse string to define replacement inputs.")
 
 class RenameOutputSpec(TraitedSpec):
 
@@ -160,6 +161,11 @@ class Rename(IOBase):
         fmt_dict = dict()
         for field in self.fmt_fields:
             fmt_dict[field] = getattr(self.inputs, field)
+        if isdefined(self.inputs.parse_string):
+            m = re.search(self.inputs.parse_string, self.inputs.in_file)
+            if m:
+                for field in m.groupdict():
+                    fmt_dict[field] = m.group(field)
         return self.inputs.format_string%fmt_dict
 
     def _run_interface(self, runtime):
