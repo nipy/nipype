@@ -887,8 +887,7 @@ class FactorialDesignInputSpec(SPMCommandInputSpec):
     covariates = InputMultiPath(traits.Dict(key_trait=traits.Enum('vector', 'name',
                                                                   'interaction', 'centering')),
                                 field='cov',
-                                desc='covariate dictionary {vector, name, interaction, centering}',
-                                mandatory=True)
+                                desc='covariate dictionary {vector, name, interaction, centering}')
     threshold_mask_none = traits.Bool(field='masking.tm.tm_none',
                                       xor=['threshold_mask_absolute', 'threshold_mask_relative'],
                                       desc='do not use threshold masking')
