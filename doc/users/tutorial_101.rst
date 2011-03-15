@@ -132,8 +132,8 @@ This creates two files graph.dot and graph_detailed.dot and if
 graphviz_ is installed on your system it automatically converts it
 to png files. If graphviz is not installed you can take the dot files
 and load them in a graphviz visualizer elsewhere. You can specify how detailed
-the graph is going to by using "graph2use" option which takes the following 
-options
+the graph is going to be, by using "graph2use" argument which takes the following 
+options:
 
 * orig - creates a top level graph without expanding internal workflow nodes
 * flat - expands workflow nodes recursively
