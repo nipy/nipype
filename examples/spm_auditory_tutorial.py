@@ -22,7 +22,6 @@ import nipype.interfaces.matlab as mlab      # how to run matlabimport nipype.in
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model specification
-import nibabel as nb
 import os                                    # system functions
 
 """
@@ -125,6 +124,7 @@ using the following function:
 """
 
 def get_vox_dims(volume):
+    import nibabel as nb
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume)
@@ -381,6 +381,7 @@ datasink = pe.Node(interface=nio.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.abspath('spm_auditory_tutorial/l1output')
 
 def getstripdir(subject_id):
+    import os
     return os.path.join(os.path.abspath('spm_auditory_tutorial/workingdir'),'_subject_id_%s' % subject_id)
 
 # store relevant outputs from various stages of the 1st level analysis
