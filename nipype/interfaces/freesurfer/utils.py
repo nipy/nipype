@@ -676,3 +676,64 @@ class ImageInfo(FSCommand):
         outputs.data_type = dtype
 
         return outputs
+
+class MRIsConvertInputSpec(FSTraitedSpec):
+    annot_file = File(exists=True,mandatory=False,argstr="--annot %s",
+    desc="input is annotation or gifti label data")
+    
+    parcstats_file = File(exists=True,mandatory=False,argstr="--parcstats %s",
+    desc="infile is name of text file containing label/val pairs")
+    
+    label_file = File(exists=True,mandatory=False,argstr="--label %s",
+    desc="infile is .label file, label is name of this label")
+    
+    scalarcurv_file = File(exists=True,mandatory=False,argstr="-c %s",
+    desc="input is scalar curv overlay file (must still specify surface)")
+    
+    functional_file = File(exists=True,mandatory=False,argstr="-f %s",
+    desc="input is functional time-series or other multi-frame data (must specify surface)")
+    
+    labelstats_outfile = File(exists=False,mandatory=False,argstr="--labelstats %s",
+    desc="outfile is name of gifti file to which label stats will be written")
+    
+    patch = traits.Bool(argstr="-p",desc="input is a patch, not a full surface")
+    rescale = traits.Bool(argstr="-r",desc="rescale vertex xyz so total area is same as group average")
+    normal = traits.Bool(argstr="-n",desc="output is an ascii file where vertex data")
+    xyz_ascii = traits.Bool(argstr="-a",desc="Print only surface xyz to ascii file")
+    vertex = traits.Bool(argstr="-v",desc="Writes out neighbors of a vertex in each row")
+    
+    scale = traits.Float(argstr="-s %.3f",desc="scale vertex xyz by scale")
+    dataarray_num = traits.Int(argstr="--da_num %d",desc="if input is gifti, 'num' specifies which data array to use")
+    
+    talairachxfm_subjid = traits.String(argstr="-t %s", desc="apply talairach xfm of subject to vertex xyz")
+    origname = traits.String(argstr="-o %s", desc="read orig positions")
+    
+    in_file = File(exists=True, mandatory=True, position=-2, argstr='%s', desc='File to read/convert')
+    out_file = File(argstr='./%s', position=-1, genfile=True, desc='output filename or True to generate one') 
+    #Not really sure why the ./ is necessary but the module fails without it
+    
+    out_datatype = traits.Enum("ico","tri","stl","vtk","gii","mgh","mgz", mandatory=True,
+    desc="These file formats are supported:  ASCII:       .asc" \
+    "ICO: .ico, .tri GEO: .geo STL: .stl VTK: .vtk GIFTI: .gii MGH surface-encoded 'volume': .mgh, .mgz")
+    
+class MRIsConvertOutputSpec(TraitedSpec):
+    converted = File(exists=True, desc='converted output surface') 
+
+class MRIsConvert(FSCommand):
+    _cmd = 'mris_convert'
+    input_spec=MRIsConvertInputSpec
+    output_spec=MRIsConvertOutputSpec
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["converted"] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_file':
+            return self._gen_outfilename()
+        else:
+            return None
+    def _gen_outfilename(self):
+        _ , name , ext = split_filename(self.inputs.in_file)
+        return name + ext + "_converted." + self.inputs.out_datatype
