@@ -174,9 +174,10 @@ necessary to generate an SPM design matrix. In this tutorial, the same
 paradigm was used for every participant.
 """
 
-from nipype.interfaces.base import Bunch
-from copy import deepcopy
+
 def subjectinfo(subject_id):
+    from nipype.interfaces.base import Bunch
+    from copy import deepcopy
     print "Subject ID: %s\n"%str(subject_id)
     output = []
     names = ['Task-Odd','Task-Even']
@@ -315,6 +316,7 @@ datasink = pe.Node(interface=nio.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.abspath('spm_tutorial/l1output')
 
 def getstripdir(subject_id):
+    import os
     return os.path.join(os.path.abspath('spm_tutorial/workingdir'),'_subject_id_%s' % subject_id)
 
 # store relevant outputs from various stages of the 1st level analysis
