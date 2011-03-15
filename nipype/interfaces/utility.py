@@ -113,7 +113,7 @@ class RenameInputSpec(DynamicTraitedSpec):
     in_file = File(exists=True, mandatory=True, desc="file to rename")
     format_string = traits.String(mandatory=True, 
                                   desc="Python formatting string for output template")
-    parse_string = traits.String(desc="Python regexp parse string to define replacement inputs.")
+    parse_string = traits.String(desc="Python regexp parse string to define replacement inputs")
 
 class RenameOutputSpec(TraitedSpec):
 
@@ -124,7 +124,11 @@ class Rename(IOBase):
 
     To use additional inputs that will be defined at run-time, the class 
     constructor must be called with the format template, and the fields 
-    identified will become inputs to the interface.
+    identified will become inputs to the interface. 
+    
+    Additionally, you may set the parse_string input, which will be run
+    over the input filename with a regular expressions search, and will
+    fill in additional input fields from matched groups.
 
     Examples
     --------
@@ -134,7 +138,7 @@ class Rename(IOBase):
     >>> rename1.inputs.format_string = "Faces-Scenes.nii.gz"
     >>> res = rename1.run()          # doctest: +SKIP
     >>> print res.outputs.out_file   # doctest: +SKIP
-    'Faces-Scenes.nii.gz"
+    'Faces-Scenes.nii.gz"            # doctest: +SKIP
 
     >>> rename2 = Rename(format_string="%(subject_id)s_func_run%(run)02d.nii")
     >>> rename2.inputs.in_file "func.nii"
@@ -143,6 +147,15 @@ class Rename(IOBase):
     >>> res = rename2.run()          # doctest: +SKIP
     >>> print res.outputs.out_file   # doctest: +SKIP
     'subj_201_func_run02.nii'        # doctest: +SKIP
+
+    >>> rename3 = Rename(format_string="%(subject_id)s_%(seq)s_run%(run)02d.nii")
+    >>> rename3.inputs.in_file "func_epi_1_1.nii"
+    >>> rename3.inputs.parse_string = "func_(?P<seq>\w*)_.*")
+    >>> rename3.inputs.subject_id = "subj_201"
+    >>> rename3.inputs.run = 2
+    >>> res = rename3.run()          # doctest: +SKIP
+    >>> print res.outputs.out_file   # doctest: +SKIP
+    'subj_201_epi_run02.nii'         # doctest: +SKIP
 
     """
     input_spec = RenameInputSpec
@@ -162,10 +175,9 @@ class Rename(IOBase):
         for field in self.fmt_fields:
             fmt_dict[field] = getattr(self.inputs, field)
         if isdefined(self.inputs.parse_string):
-            m = re.search(self.inputs.parse_string, self.inputs.in_file)
+            m = re.search(self.inputs.parse_string, os.path.split(self.inputs.in_file)[1])
             if m:
-                for field in m.groupdict():
-                    fmt_dict[field] = m.group(field)
+                fmt_dict.update(m.groupdict())
         return self.inputs.format_string%fmt_dict
 
     def _run_interface(self, runtime):
