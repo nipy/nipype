@@ -246,3 +246,8 @@ def no_fsl():
         return True
     else:
         return False
+    
+def no_fsl_course_data():
+    """check if FSL_COURSE_DATA is defined and point to a valid directory"""
+       
+    return not ("FSL_COURSE_DATA" in os.environ and os.path.isdir(os.environ["FSL_COURSE_DATA"]))

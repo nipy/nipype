@@ -6,7 +6,7 @@
     DataSource: Generic nifti to named Nifti interface
     DataSink: Generic named output from interfaces to data store
     XNATSource: preliminary interface to XNAT
-    
+
     To come :
     XNATSink
 
@@ -107,53 +107,54 @@ class IOBase(BaseInterface):
 
     def _outputs(self):
         return self._add_output_traits(super(IOBase, self)._outputs())
-    
+
     def _add_output_traits(self, base):
         return base
-    
+
 class DataSinkInputSpec(DynamicTraitedSpec):
-    base_directory = Directory( 
+    base_directory = Directory(
         desc='Path to the base directory for storing data.')
     container = traits.Str(desc = 'Folder within base directory in which to store output')
     parameterization = traits.Bool(True, usedefault=True,
-                                   desc='store output in parameterized structure')
+                                   desc='store output in parametrized structure')
     strip_dir = Directory(desc='path to strip out of filename')
     substitutions = InputMultiPath(traits.Tuple(traits.Str,traits.Str),
-                                   desc=('List of 2-tuples reflecting string'
-                                         'to substitute and string to replace'
+                                   desc=('List of 2-tuples reflecting string '
+                                         'to substitute and string to replace '
                                          'it with'))
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
     remove_dest_dir = traits.Bool(False, usedefault=True,
                                   desc='remove dest directory when copying dirs')
-    
+
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
             self._outputs[key] = value
         else:
             super(DataSinkInputSpec, self).__setattr__(key, value)
-    
+
 class DataSink(IOBase):
     """ Generic datasink module to store structured outputs
 
-        Primarily for use within a workflow. This interface all arbitrary
+        Primarily for use within a workflow. This interface allows arbitrary
         creation of input attributes. The names of these attributes define the
         directory structure to create for storage of the files or directories.
 
         The attributes take the following form:
-        
+
         string[[.[@]]string[[.[@]]string]] ...
-        
+
         where parts between [] are optional.
 
         An attribute such as contrasts.@con will create a 'contrasts' directory to
         store the results linked to the attribute. If the @ is left out, such as in
-        'contrasts.con' a subdirectory 'con' will be created under 'contrasts'.
+        'contrasts.con', a subdirectory 'con' will be created under 'contrasts'.
 
-        .. note::
+        Notes
+        -----
 
-        Unlike most nipype-nodes this is not a thread-safe node because it can
-        write to a common shared location. It will not complain when it
-        overwrites a file.
+            Unlike most nipype-nodes this is not a thread-safe node because it can
+            write to a common shared location. It will not complain when it
+            overwrites a file.
 
         Examples
         --------
@@ -165,7 +166,7 @@ class DataSink(IOBase):
         >>> setattr(ds.inputs, 'contrasts.@con', ['cont1.nii', 'cont2.nii'])
         >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
         >>> ds.run() # doctest: +SKIP
-        
+
     """
     input_spec = DataSinkInputSpec
 
@@ -195,7 +196,7 @@ class DataSink(IOBase):
                 pathstr = pathstr.replace(key, val)
                 iflogger.debug('new: ' + pathstr)
         return pathstr
-        
+
     def _list_outputs(self):
         """Execute this module.
         """
@@ -222,12 +223,12 @@ class DataSink(IOBase):
                 if d[0] == '@':
                     continue
                 tempoutdir = os.path.join(tempoutdir,d)
-            
+
             # flattening list
             if isinstance(files, list):
                 if isinstance(files[0], list):
                     files = [item for sublist in files for item in sublist]
-                    
+
             for src in filename_to_list(files):
                 src = os.path.abspath(src)
                 if os.path.isfile(src):
@@ -289,21 +290,21 @@ class DataGrabber(IOBase):
 
         Examples
         --------
-        
+
         >>> from nipype.interfaces.io import DataGrabber
 
         Pick all files from current directory
-        
+
         >>> dg = DataGrabber()
         >>> dg.inputs.template = '*'
 
         Pick file foo/foo.nii from current directory
-        
+
         >>> dg.inputs.template = '%s/%s.dcm'
         >>> dg.inputs.template_args['outfiles']=[['dicomdir','123456-1-1.dcm']]
 
         Same thing but with dynamically created fields
-        
+
         >>> dg = DataGrabber(infields=['arg1','arg2'])
         >>> dg.inputs.template = '%s/%s.nii'
         >>> dg.inputs.arg1 = 'foo'
@@ -313,7 +314,7 @@ class DataGrabber(IOBase):
         pipeline.
 
         Dynamically created, user-defined input and output fields
-        
+
         >>> dg = DataGrabber(infields=['sid'], outfields=['func','struct','ref'])
         >>> dg.inputs.base_directory = '.'
         >>> dg.inputs.template = '%s/%s.nii'
@@ -324,7 +325,7 @@ class DataGrabber(IOBase):
 
         Change the template only for output field struct. The rest use the
         general template
-        
+
         >>> dg.inputs.field_template = dict(struct='%s/struct.nii')
         >>> dg.inputs.template_args['struct'] = [['sid']]
 
@@ -343,7 +344,7 @@ class DataGrabber(IOBase):
             Indicates output fields to be dynamically created
 
         See class examples for usage
-        
+
         """
         if not outfields:
             outfields = ['outfiles']
@@ -368,7 +369,7 @@ class DataGrabber(IOBase):
                     self.inputs.template_args[key] = [infields]
                 else:
                     self.inputs.template_args[key] = []
-                
+
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
     def _add_output_traits(self, base):
@@ -389,7 +390,7 @@ class DataGrabber(IOBase):
                     msg = "%s requires a value for input '%s' because it was listed in 'infields'" % \
                     (self.__class__.__name__, key)
                     raise ValueError(msg)
-                
+
         outputs = {}
         for key, args in self.inputs.template_args.items():
             outputs[key] = []
@@ -540,7 +541,7 @@ class FreeSurferSource(IOBase):
             key = altkey
         globpattern = os.path.join(keydir,''.join((globprefix,key,globsuffix)))
         return glob.glob(globpattern)
-    
+
     def _list_outputs(self):
         subjects_dir = self.inputs.subjects_dir
         subject_path = os.path.join(subjects_dir, self.inputs.subject_id)
@@ -553,9 +554,9 @@ class FreeSurferSource(IOBase):
             if val:
                 outputs[k] = list_to_filename(val)
         return outputs
-        
-        
-        
+
+
+
 
 class XNATSourceInputSpec(DynamicTraitedSpec): #InterfaceInputSpec):
     query_template = traits.Str(mandatory=True,
@@ -580,14 +581,14 @@ class XNATSource(IOBase):
 
         Examples
         --------
-        
+
         >>> from nipype.interfaces.io import XNATSource
 
         Pick all files from current directory
-        
+
         >>> dg = XNATSource()
         >>> dg.inputs.template = '*'
-        
+
         >>> dg = XNATSource(infields=['project','subject','experiment','assessor','inout'])
         >>> dg.inputs.query_template = '/projects/%s/subjects/%s/experiments/%s' \
                    '/assessors/%s/%s_resources/files'
@@ -596,7 +597,7 @@ class XNATSource(IOBase):
         >>> dg.inputs.experiment = '*SessionA*'
         >>> dg.inputs.assessor = '*ADNI_MPRAGE_nii'
         >>> dg.inputs.inout = 'out'
-        
+
         >>> dg = XNATSource(infields=['sid'],outfields=['struct','func'])
         >>> dg.inputs.query_template = '/projects/IMAGEN/subjects/%s/experiments/*SessionA*' \
                    '/assessors/*%s_nii/out_resources/files'
@@ -620,7 +621,7 @@ class XNATSource(IOBase):
             Indicates output fields to be dynamically created
 
         See class examples for usage
-        
+
         """
         super(XNATSource, self).__init__(**kwargs)
         undefined_traits = {}
@@ -672,7 +673,7 @@ class XNATSource(IOBase):
                     msg = "%s requires a value for input '%s' because it was listed in 'infields'" % \
                     (self.__class__.__name__, key)
                     raise ValueError(msg)
-                
+
         outputs = {}
         for key, args in self.inputs.query_template_args.items():
             outputs[key] = []
@@ -725,7 +726,7 @@ class XNATSource(IOBase):
 
 
 class XNATSinkInputSpec(DynamicTraitedSpec):
-    
+
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
 
     xnat_server = traits.Str(mandatory=True, requires=['xnat_user', 'xnat_pwd'], xor=['xnat_config'])
@@ -745,7 +746,7 @@ class XNATSinkInputSpec(DynamicTraitedSpec):
         else:
             super(XNATSinkInputSpec, self).__setattr__(key, value)
 
-    
+
 class XNATSink(IOBase):
     """ Generic datasink module that takes a directory containing a
         list of nifti files and provides a set of structured output
@@ -766,7 +767,7 @@ class XNATSink(IOBase):
 
         uri_template_args = {'project_id':self.inputs.project_id,
                              'subject_id':'%s_%s' % \
-                                (self.inputs.project_id, 
+                                (self.inputs.project_id,
                                  self.inputs.subject_id),
                              'experiment_id': '%s_%s' % \
                                 (hashlib.md5(self.inputs.subject_id).hexdigest(),
@@ -787,8 +788,8 @@ class XNATSink(IOBase):
 def write_file_to_XNAT(xnat, name, key, uri_template_args):
 
     val_list = [val
-         for part in os.path.split(name)[0].split(os.sep) 
-         for val in part.split('_')[1:] 
+         for part in os.path.split(name)[0].split(os.sep)
+         for val in part.split('_')[1:]
          if part.startswith('_') and len(part.split('_'))%2]
 
     keymap = dict(zip(val_list[1::2],val_list[2::2]))

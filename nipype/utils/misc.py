@@ -2,10 +2,35 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
-import numpy as np
-import os
+import inspect
+
 from distutils.version import LooseVersion
+import numpy as np
+
 from nipype.interfaces.traits import _Undefined
+
+def getsource(function):
+    """Returns the source code of a function"""
+    src = inspect.getsource(function)
+    return src
+
+def create_function_from_source(function_source):
+    """Return a function object from a function source
+    """
+    ns = {}
+    try:
+        exec function_source in ns
+    except Exception, msg:
+        msg = str(msg) + '\nError executing function:\n %s\n'%function_source
+        msg += '\n'.join( ["Functions in connection strings have to be standalone.",
+                           "They cannot be declared either interactively or inside",
+                           "another function or inline in the connect string. Any",
+                           "imports should be done inside the function"
+                           ])
+        raise RuntimeError(msg)
+    funcname = [name for name in ns.keys() if name != '__builtins__'][0]
+    func = ns[funcname]
+    return func
 
 def isdefined(object):
     return not isinstance(object, _Undefined)

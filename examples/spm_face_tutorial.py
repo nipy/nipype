@@ -1,17 +1,19 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
+==================================================
+Using SPM for analysis: Famous vs non-famous faces
+==================================================
+
 Introduction
-=======================
+============
 
 The spm_face_tutorial.py recreates the classical workflow described in the SPM8 manual (http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf)
 using auditory dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/face_rep_SPM5.html:
 
     python spm_tutorial.py
 
-"""
-
-"""Import necessary modules from nipype."""
+Import necessary modules from nipype."""
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
@@ -20,7 +22,6 @@ import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model specification
-import nibabel as nb
 import os                                    # system functions
 
 """
@@ -122,6 +123,7 @@ using the following function:
 """
 
 def get_vox_dims(volume):
+    import nibabel as nb
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume)
@@ -465,6 +467,7 @@ datasink = pe.Node(interface=nio.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.abspath('spm_auditory_tutorial/l1output')
 
 def getstripdir(subject_id):
+    import os
     return os.path.join(os.path.abspath('spm_auditory_tutorial/workingdir'),'_subject_id_%s' % subject_id)
 
 # store relevant outputs from various stages of the 1st level analysis
@@ -491,3 +494,4 @@ function needs to be called.
 if __name__ == '__main__':
     level1.run()
     level1.write_graph()
+

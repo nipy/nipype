@@ -5,7 +5,7 @@ import tempfile
 import shutil
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
-                            with_setup, TraitError, parametric, skipif)
+                            with_setup, TraitError, skipif)
 
 from nipype.utils.filemanip import split_filename
 import nipype.interfaces.fsl.preprocess as fsl
@@ -40,42 +40,41 @@ def teardown_infile(tmp_dir):
 # test BET
 #@with_setup(setup_infile, teardown_infile)
 #broken in nose with generators
-@parametric
 @skipif(no_fsl)
 def test_bet():
     tmp_infile, tp_dir = setup_infile()
     better = fsl.BET()
-    yield assert_equal(better.cmd, 'bet')
+    yield assert_equal, better.cmd, 'bet'
 
     # Test raising error with mandatory args absent
-    yield assert_raises(ValueError, better.run)
+    yield assert_raises, ValueError, better.run
 
     # Test generated outfile name
     better.inputs.in_file = tmp_infile
     outfile = fsl_name(better, 'foo_brain')
     outpath = os.path.join(os.getcwd(), outfile)
     realcmd = 'bet %s %s' % (tmp_infile, outpath)
-    yield assert_equal(better.cmdline, realcmd)
+    yield assert_equal, better.cmdline, realcmd
     # Test specified outfile name
     outfile = fsl_name(better, '/newdata/bar')
     better.inputs.out_file = outfile
     realcmd = 'bet %s %s' % (tmp_infile, outfile)
-    yield assert_equal(better.cmdline, realcmd)
+    yield assert_equal, better.cmdline, realcmd
 
     # infile foo.nii doesn't exist
     def func():
         better.run(in_file='foo2.nii', out_file='bar.nii')
-    yield assert_raises(TraitError, func)
+    yield assert_raises, TraitError, func
 
     # .run() based parameter setting
     better = fsl.BET()
     better.inputs.frac = 0.40
     outfile = fsl_name(better, 'outfile')
     betted = better.run(in_file=tmp_infile, out_file=outfile)
-    yield assert_equal(betted.interface.inputs.in_file, tmp_infile)
-    yield assert_equal(betted.interface.inputs.out_file, outfile)
+    yield assert_equal, betted.interface.inputs.in_file, tmp_infile
+    yield assert_equal, betted.interface.inputs.out_file, outfile
     realcmd = 'bet %s %s -f 0.40' % (tmp_infile, outfile)
-    yield assert_equal(betted.runtime.cmdline, realcmd)
+    yield assert_equal, betted.runtime.cmdline, realcmd
 
     # Our options and some test values for them
     # Should parallel the opt_map structure in the class for clarity
@@ -104,7 +103,7 @@ def test_bet():
         # Add mandatory input
         better.inputs.in_file = tmp_infile
         realcmd =  ' '.join([better.cmd, tmp_infile, outpath, settings[0]])
-        yield assert_equal(better.cmdline, realcmd)
+        yield assert_equal, better.cmdline, realcmd
     teardown_infile(tmp_dir)
     
 # test fast
@@ -120,15 +119,15 @@ def test_fast():
     yield assert_equal, faster.inputs.verbose, True
     yield assert_equal, faster.inputs.manual_seg , Undefined
     yield assert_not_equal, faster, fasted
-    yield assert_equal, fasted.runtime.cmdline, 'fast -v %s'%(tmp_infile)
-    yield assert_equal, fasted2.runtime.cmdline, 'fast -v %s %s'%(tmp_infile,
+    yield assert_equal, fasted.runtime.cmdline, 'fast -v -S 1 %s'%(tmp_infile)
+    yield assert_equal, fasted2.runtime.cmdline, 'fast -v -S 2 %s %s'%(tmp_infile,
                                                                   tmp_infile)
 
     faster = fsl.FAST()
     faster.inputs.in_files = tmp_infile
-    yield assert_equal, faster.cmdline, 'fast %s'%(tmp_infile)
+    yield assert_equal, faster.cmdline, 'fast -S 1 %s'%(tmp_infile)
     faster.inputs.in_files = [tmp_infile, tmp_infile]
-    yield assert_equal, faster.cmdline, 'fast %s %s'%(tmp_infile, tmp_infile)
+    yield assert_equal, faster.cmdline, 'fast -S 2 %s %s'%(tmp_infile, tmp_infile)
 
     # Our options and some test values for them
     # Should parallel the opt_map structure in the class for clarity
@@ -165,7 +164,7 @@ def test_fast():
         faster = fsl.FAST(in_files=tmp_infile, **{name: settings[1]})
         yield assert_equal, faster.cmdline, ' '.join([faster.cmd,
                                                       settings[0],
-                                                      tmp_infile])
+                                                      "-S 1 %s"%tmp_infile])
     teardown_infile(tmp_dir)
 @skipif(no_fsl)    
 def setup_flirt():
@@ -178,14 +177,13 @@ def setup_flirt():
 def teardown_flirt(tmpdir):
     shutil.rmtree(tmpdir)
 
-@parametric
 @skipif(no_fsl)
 def test_flirt():
     # setup
     tmpdir, infile, reffile = setup_flirt()
     
     flirter = fsl.FLIRT()
-    yield assert_equal(flirter.cmd, 'flirt')
+    yield assert_equal, flirter.cmd, 'flirt'
 
     flirter.inputs.bins = 256
     flirter.inputs.cost = 'mutualinfo'
@@ -194,21 +192,21 @@ def test_flirt():
                           out_file='outfile', out_matrix_file='outmat.mat')
     flirt_est = flirter.run(in_file=infile, reference=reffile,
                             out_matrix_file='outmat.mat')
-    yield assert_not_equal(flirter, flirted)
-    yield assert_not_equal(flirted, flirt_est)
+    yield assert_not_equal, flirter, flirted
+    yield assert_not_equal, flirted, flirt_est
 
-    yield assert_equal(flirter.inputs.bins, flirted.interface.inputs.bins)
-    yield assert_equal(flirter.inputs.cost, flirt_est.interface.inputs.cost)
+    yield assert_equal, flirter.inputs.bins, flirted.interface.inputs.bins
+    yield assert_equal, flirter.inputs.cost, flirt_est.interface.inputs.cost
     realcmd = 'flirt -in %s -ref %s -out outfile -omat outmat.mat ' \
         '-bins 256 -cost mutualinfo' % (infile, reffile)
-    yield assert_equal(flirted.runtime.cmdline, realcmd)
+    yield assert_equal, flirted.runtime.cmdline, realcmd
 
     flirter = fsl.FLIRT()
     # infile not specified
-    yield assert_raises(ValueError, flirter.run)
+    yield assert_raises, ValueError, flirter.run
     flirter.inputs.in_file = infile
     # reference not specified
-    yield assert_raises(ValueError, flirter.run)
+    yield assert_raises, ValueError, flirter.run
     flirter.inputs.reference = reffile
     res = flirter.run()
     # Generate outfile and outmatrix
@@ -219,7 +217,7 @@ def test_flirt():
     outmat = os.path.join(os.getcwd(), outmat)
     realcmd = 'flirt -in %s -ref %s -out %s -omat %s' % (infile, reffile,
                                                          outfile, outmat)
-    yield assert_equal(res.interface.cmdline, realcmd)
+    yield assert_equal, res.interface.cmdline, realcmd
 
     _, tmpfile = tempfile.mkstemp(suffix = '.nii', dir = tmpdir)
     # Loop over all inputs, set a reasonable value and make sure the
@@ -261,7 +259,7 @@ def test_flirt():
         cmdline = ' '.join([cmdline, outfile, outmatrix, param])
         flirter = fsl.FLIRT(in_file = infile, reference = reffile)
         setattr(flirter.inputs, key, value)
-        yield assert_equal(flirter.cmdline, cmdline)
+        yield assert_equal, flirter.cmdline, cmdline
 
     # Test OutputSpec
     flirter = fsl.FLIRT(in_file = infile, reference = reffile)
@@ -269,8 +267,8 @@ def test_flirt():
     flirter.inputs.out_file = ''.join(['foo', ext])
     flirter.inputs.out_matrix_file = ''.join(['bar', ext])
     outs = flirter._list_outputs()
-    yield assert_equal(outs['out_file'], flirter.inputs.out_file)
-    yield assert_equal(outs['out_matrix_file'], flirter.inputs.out_matrix_file)
+    yield assert_equal, outs['out_file'], flirter.inputs.out_file
+    yield assert_equal, outs['out_matrix_file'], flirter.inputs.out_matrix_file
 
     teardown_flirt(tmpdir)
 
