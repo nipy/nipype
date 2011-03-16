@@ -628,8 +628,8 @@ class ReconAll(FSCommand):
         else:
             subjects_dir = self._gen_subjects_dir()
             
-        FreeSurferSource(subject_id=self.inputs.subject_id,
-                         subjects_dir=subjects_dir)._outputs().get()
+        return FreeSurferSource(subject_id=self.inputs.subject_id,
+                         subjects_dir=subjects_dir)._outputs()._list_outputs()
 
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s', desc='freesurfer subject id',
