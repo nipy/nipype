@@ -629,8 +629,13 @@ class ReconAll(CommandLine):
         else:
             subjects_dir = self._gen_subjects_dir()
             
+        if isdefined(self.inputs.hemi):
+            hemi = self.inputs.hemi
+        else:
+            hemi = 'both'
+        
         return FreeSurferSource(subject_id=self.inputs.subject_id,
-                         subjects_dir=subjects_dir)._outputs()._list_outputs()
+                         subjects_dir=subjects_dir, hemi=hemi)._outputs()._list_outputs()
 
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s', desc='freesurfer subject id',
