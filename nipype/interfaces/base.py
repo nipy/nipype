@@ -753,8 +753,15 @@ class BaseInterface(Interface):
         results = InterfaceResult(interface, runtime)
         if results.runtime.returncode is None:
             raise Exception('Returncode from an interface cannot be None')
-        if results.runtime.returncode == 0:
+        elif results.runtime.returncode == 0:
             results.outputs = self.aggregate_outputs(results.runtime)
+        else:
+            message = "Interface %s failed to run.\n"%(self.__class__.__name__)
+            message += "Standard output:\n" + results.runtime.stdout + "\n"
+            message += "Standard error:\n" + results.runtime.stderr + "\n"
+            message += "Inputs:\n" + str(self.inputs) + "\n"
+            
+            raise RuntimeError(message)
         return results
 
     def _list_outputs(self):
