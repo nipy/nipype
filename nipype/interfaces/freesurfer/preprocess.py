@@ -23,7 +23,7 @@ from nipype.interfaces.io import FreeSurferSource
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath,
-                                    OutputMultiPath)
+                                    OutputMultiPath, CommandLine)
 from nipype.utils.misc import isdefined
 
 
@@ -575,7 +575,7 @@ class Resample(FSCommand):
             return self._get_outfilename()
         return None
 
-class ReconAllInputSpec(FSTraitedSpec):
+class ReconAllInputSpec(TraitedSpec):
     subject_id = traits.Str("recon_all", argstr='-subjid %s', desc='subject name',
                             usedefault=True)
     directive = traits.Enum('all', 'autorecon1', 'autorecon2', 'autorecon2-cp',
@@ -589,7 +589,7 @@ class ReconAllInputSpec(FSTraitedSpec):
                              desc='path to subjects directory', genfile=True)
     flags = traits.Str(argstr='%s', desc='additional parameters')
 
-class ReconAll(FSCommand):
+class ReconAll(CommandLine):
     """Uses recon-all to generate surfaces and parcellations of structural data
     from anatomical images of a subject. 
 
