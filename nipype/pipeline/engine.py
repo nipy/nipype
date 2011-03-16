@@ -822,14 +822,11 @@ class Node(WorkflowBase):
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             try:
                 self._run_interface(execute=True)
-            except RuntimeError:
-                msg = "Could not run %s" % self.name
-                msg += "\nwith inputs:\n%s" % self.inputs
-                msg += "\nError:\n %s" % self._result.runtime.stderr
+            except:
                 os.remove(hashfile_unfinished)
-                raise RuntimeError(msg)
-            else:
-                shutil.move(hashfile_unfinished, hashfile)
+                raise
+                
+            shutil.move(hashfile_unfinished, hashfile)
         else:
             logger.debug("Hashfile exists. Skipping execution\n")
             self._run_interface(execute=False, updatehash=updatehash)
@@ -939,23 +936,17 @@ class Node(WorkflowBase):
                                          runtime=runtime,
                                          outputs=None)
                 self._result = result
-                raise RuntimeError(msg)
-            else:
-                if config.getboolean('execution', 'remove_unnecessary_outputs'):
-                    dirs2keep = None
-                    if isinstance(self, MapNode):
-                        dirs2keep = [os.path.join(cwd, 'mapflow')]
-                    result.outputs = clean_working_directory(result.outputs, cwd,
-                                                             self._interface.inputs,
-                                                             self.needed_outputs,
-                                                             dirs2keep=dirs2keep)
-            if result.runtime.returncode:
-                logger.error('STDERR:' + result.runtime.stderr)
-                logger.error('STDOUT:' + result.runtime.stdout)
-                self._result = result
-                raise RuntimeError(result.runtime.stderr)
-            else:
-                self._save_results(result, cwd)
+                raise
+            
+            if config.getboolean('execution', 'remove_unnecessary_outputs'):
+                dirs2keep = None
+                if isinstance(self, MapNode):
+                    dirs2keep = [os.path.join(cwd, 'mapflow')]
+                result.outputs = clean_working_directory(result.outputs, cwd,
+                                                         self._interface.inputs,
+                                                         self.needed_outputs,
+                                                         dirs2keep=dirs2keep)
+            self._save_results(result, cwd)
         else:
             logger.info("Collecting precomputed outputs")
             try:
