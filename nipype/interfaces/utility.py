@@ -128,7 +128,8 @@ class Rename(IOBase):
     
     Additionally, you may set the parse_string input, which will be run
     over the input filename with a regular expressions search, and will
-    fill in additional input fields from matched groups.
+    fill in additional input fields from matched groups. Fields set with
+    inputs have precedence over fields filled in with the regexp match.
 
     Examples
     --------
@@ -172,12 +173,12 @@ class Rename(IOBase):
 
     def _rename(self):
         fmt_dict = dict()
-        for field in self.fmt_fields:
-            fmt_dict[field] = getattr(self.inputs, field)
         if isdefined(self.inputs.parse_string):
             m = re.search(self.inputs.parse_string, os.path.split(self.inputs.in_file)[1])
             if m:
                 fmt_dict.update(m.groupdict())
+        for field in self.fmt_fields:
+            fmt_dict[field] = getattr(self.inputs, field)
         return self.inputs.format_string%fmt_dict
 
     def _run_interface(self, runtime):
@@ -189,6 +190,7 @@ class Rename(IOBase):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.join(os.getcwd(), self._rename())
         return outputs
+
 
 class SplitInputSpec(TraitedSpec):
     inlist = traits.List(traits.Any, mandatory=True,
