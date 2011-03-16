@@ -757,7 +757,10 @@ class BaseInterface(Interface):
             message = "Interface %s failed to run.\n"%self.__class__.__name__
             if config.has_option('logging', 'interface_level') and config.get('logging', 'interface_level').lower() == 'debug':
                 message += "Inputs:\n" + str(self.inputs) + "\n"
-            e.args = (e.args[0] + "\n" + message,)
+            if len(e.args) > 0:
+                e.args = (e.args[0] + "\n" + message,)
+            else:
+                e.args = (message,)
             raise
         return results
 
