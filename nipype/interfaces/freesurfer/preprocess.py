@@ -24,7 +24,7 @@ from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath,
                                     OutputMultiPath, CommandLine,
-    CommandLineInputSpec)
+                                    CommandLineInputSpec)
 from nipype.utils.misc import isdefined
 
 
@@ -589,6 +589,10 @@ class ReconAllInputSpec(CommandLineInputSpec):
     subjects_dir = Directory(exists=True, argstr='-sd %s',
                              desc='path to subjects directory', genfile=True)
     flags = traits.Str(argstr='%s', desc='additional parameters')
+    
+class ReconAllIOutputSpec(FreeSurferSource.output_spec):
+    subjects_dir = Directory(exists=True, desc='Freesurfer subjects directory.')
+    subject_id = traits.Str(desc='Subject name for whom to retrieve data')
 
 class ReconAll(CommandLine):
     """Uses recon-all to generate surfaces and parcellations of structural data
@@ -610,7 +614,7 @@ class ReconAll(CommandLine):
 
     _cmd = 'recon-all'
     input_spec = ReconAllInputSpec
-    output_spec = FreeSurferSource.output_spec
+    output_spec = ReconAllIOutputSpec
     
     def _gen_subjects_dir(self):
         return os.getcwd()
@@ -633,9 +637,14 @@ class ReconAll(CommandLine):
             hemi = self.inputs.hemi
         else:
             hemi = 'both'
+            
+        outputs = self._outputs().get()
         
-        return FreeSurferSource(subject_id=self.inputs.subject_id,
-                         subjects_dir=subjects_dir, hemi=hemi)._outputs()._list_outputs()
+        outputs.update(FreeSurferSource(subject_id=self.inputs.subject_id,
+                         subjects_dir=subjects_dir, hemi=hemi)._outputs()._list_outputs())
+        outputs['subject_id'] = self.inputs.subject_id
+        outputs['subjects_dir'] = self.inputs.subjects_dir
+        return outputs
 
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s', desc='freesurfer subject id',
