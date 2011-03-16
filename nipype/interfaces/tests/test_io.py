@@ -40,7 +40,7 @@ def test_datasink_substitutions():
                                 ('[-a]', '!')] )
     setattr(ds.inputs, '@outdir', files)
     ds.run()
-    assert_equal, \
+    yield assert_equal, \
           sorted([os.path.basename(x) for
                   x in glob.glob(os.path.join(outdir, '*'))]), \
           ['!!yz!b.n', 'AB.n'] # so we got re used 2nd and both patterns
