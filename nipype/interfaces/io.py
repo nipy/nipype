@@ -506,6 +506,8 @@ class FSSourceOutputSpec(TraitedSpec):
                            desc='aparc+aseg file')
     sphere_reg = OutputMultiPath(File(exists=True), loc='surf', altkey='sphere.reg',
                            desc='spherical registration file')
+    subjects_dir = Directory(desc='Freesurfer subjects directory.')
+    subject_id = traits.Str(desc='Subject name for whom to retrieve data')
 
 class FreeSurferSource(IOBase):
     """Generates freesurfer subject info from their directories
@@ -553,6 +555,8 @@ class FreeSurferSource(IOBase):
                                   output_traits.traits()[k].altkey)
             if val:
                 outputs[k] = list_to_filename(val)
+        outputs['subject_id'] = self.inputs.subject_id
+        outputs['subjects_dir'] = self.inputs.subjects_dir
         return outputs
 
 
