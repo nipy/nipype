@@ -33,7 +33,10 @@ class MatlabInputSpec(CommandLineInputSpec):
     paths   = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
     prescript = traits.List(["ver,","try,"], usedefault=True,
                             desc='prescript to be added before code')
-    postscript = traits.List(desc='script added after code')
+    postscript = traits.List(["\n,catch ME,",
+                              "fprintf(2,'%s\\n',ME.message);",
+                              "if length(ME.stack) ~= 0, fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);, end;",
+                              "end;"], desc='script added after code', usedefault = True)
 
 class MatlabCommand(CommandLine):
     """Interface that runs matlab code
@@ -131,17 +134,8 @@ class MatlabCommand(CommandLine):
         #postcript takes different default value depending on the mfile argument
         if mfile:
             prescript.insert(0,"fprintf(1,'Executing %s at %s:\\n',mfilename,datestr(now));")
-            if not isdefined(postscript):
-                postscript = ["\n,catch ME,",
-                              "fprintf(2,'%s\\n',ME.message);",
-                              "fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);",
-                              "end;"]
         else:
             prescript.insert(0,"fprintf(1,'Executing code at %s:\\n',datestr(now));")
-            if not isdefined(postscript):
-                postscript = ["\n,catch ME,",
-                              "fprintf(2,'%s\\n',ME.message);",
-                              "end;"]   
         for path in paths:
             prescript.append("addpath('%s');\n" % path)
             
