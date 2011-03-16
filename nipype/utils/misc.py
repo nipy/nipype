@@ -12,21 +12,15 @@ from nipype.interfaces.traits import _Undefined
 
 def getsource(function):
     """Returns the source code of a function"""
-    try:
-        src = dumps(function)
-    except:
-        src = dumps(inspect.getsource(function))
+    src = dumps(inspect.getsource(function))
     return src
 
 def create_function_from_source(function_source):
     """Return a function object from a function source
     """
-    function_source = loads(function_source)
-    if hasattr(function_source, '__call__'):
-        return function_source
     ns = {}
     try:
-        exec function_source in ns
+        exec loads(function_source) in ns
     except Exception, msg:
         msg = str(msg) + '\nError executing function:\n %s\n'%function_source
         msg += '\n'.join( ["Functions in connection strings have to be standalone.",
