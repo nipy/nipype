@@ -23,7 +23,8 @@ from nipype.interfaces.io import FreeSurferSource
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath,
-                                    OutputMultiPath, CommandLine)
+                                    OutputMultiPath, CommandLine,
+    CommandLineInputSpec)
 from nipype.utils.misc import isdefined
 
 
@@ -575,7 +576,7 @@ class Resample(FSCommand):
             return self._get_outfilename()
         return None
 
-class ReconAllInputSpec(TraitedSpec):
+class ReconAllInputSpec(CommandLineInputSpec):
     subject_id = traits.Str("recon_all", argstr='-subjid %s', desc='subject name',
                             usedefault=True)
     directive = traits.Enum('all', 'autorecon1', 'autorecon2', 'autorecon2-cp',
