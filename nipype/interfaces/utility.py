@@ -253,34 +253,27 @@ class Function(IOBase):
         base.trait_set(trait_change_notify=False, **undefined_traits)
         return base
 
-    def _run_interface(self, runtime):
-        runtime.returncode = 0
-        try:
-            function_handle = create_function_from_source(self.inputs.function_str)
-        except RuntimeError, msg:
-            runtime.returncode=1
-            runtime.stderr = msg
+    def _run_interface(self, runtime):       
+        function_handle = create_function_from_source(self.inputs.function_str)
+
+        args = {}
+        for name in self._input_names:
+            value = getattr(self.inputs, name)
+            if isdefined(value):
+                args[name] = value
+
+        out = function_handle(**args)
+        
+        if len(self._output_names) == 1:
+            self._out[self._output_names[0]] = out
         else:
-            args = {}
-            for name in self._input_names:
-                value = getattr(self.inputs, name)
-                if isdefined(value):
-                    args[name] = value
-            try:
-                out = function_handle(**args)
-            except Exception, msg:
+            if isinstance(out, tuple) and (len(out) != len(self._output_names)):
                 runtime.returncode = 1
-                runtime.stderr = msg
+                runtime.stderr = 'Mismatch in number of expected outputs'
             else:
-                if len(self._output_names) == 1:
-                    self._out[self._output_names[0]] = out
-                else:
-                    if isinstance(out, tuple) and (len(out) != len(self._output_names)):
-                        runtime.returncode = 1
-                        runtime.stderr = 'Mismatch in number of expected outputs'
-                    else:
-                        for idx, name in enumerate(self._output_names):
-                            self._out[name] = out[idx]
+                for idx, name in enumerate(self._output_names):
+                    self._out[name] = out[idx]
+        runtime.returncode = 0
         return runtime
 
     def _list_outputs(self):
