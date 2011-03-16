@@ -22,6 +22,7 @@ import glob
 import os
 import shutil
 import hashlib
+import re
 import tempfile
 from warnings import warn
 
@@ -122,6 +123,12 @@ class DataSinkInputSpec(DynamicTraitedSpec):
                                    desc=('List of 2-tuples reflecting string '
                                          'to substitute and string to replace '
                                          'it with'))
+    regexp_substitutions = InputMultiPath(traits.Tuple(traits.Str,traits.Str),
+                                   desc=('List of 2-tuples reflecting a pair '
+                                         'of a Python regexp pattern and a '
+                                         'replacement string. Invoked after '
+                                         'string `substitutions`'))
+
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
     remove_dest_dir = traits.Bool(False, usedefault=True,
                                   desc='remove dest directory when copying dirs')
@@ -194,6 +201,11 @@ class DataSink(IOBase):
             for key, val in self.inputs.substitutions:
                 iflogger.debug(str((pathstr, key, val)))
                 pathstr = pathstr.replace(key, val)
+                iflogger.debug('new: ' + pathstr)
+        if isdefined(self.inputs.regexp_substitutions):
+            for key, val in self.inputs.regexp_substitutions:
+                iflogger.debug(str((pathstr, "regexp:" + key, val)))
+                pathstr, _ = re.subn(key, val, pathstr)
                 iflogger.debug('new: ' + pathstr)
         return pathstr
 
