@@ -748,20 +748,17 @@ class BaseInterface(Interface):
                         environ=env,
                         hostname=gethostname())
         t = time()
-        runtime = self._run_interface(runtime)
-        runtime.duration = time() - t
-        results = InterfaceResult(interface, runtime)
-        if results.runtime.returncode is None:
-            raise Exception('Returncode from an interface cannot be None')
-        elif results.runtime.returncode == 0:
+        try:
+            runtime = self._run_interface(runtime)
+            runtime.duration = time() - t
+            results = InterfaceResult(interface, runtime)
             results.outputs = self.aggregate_outputs(results.runtime)
-        else:
-            message = "Interface %s failed to run.\n"%(self.__class__.__name__)
-            message += "Standard output:\n" + results.runtime.stdout + "\n"
-            message += "Standard error:\n" + results.runtime.stderr + "\n"
-            message += "Inputs:\n" + str(self.inputs) + "\n"
-            
-            raise RuntimeError(message)
+        except Exception, e:
+            message = "Interface %s failed to run.\n"%self.__class__.__name__
+            if config.has_option('logging', 'interface_level') and config.get('logging', 'interface_level').lower() == 'debug':
+                message += "Inputs:\n" + str(self.inputs) + "\n"
+            e.args = (e.args[0] + "\n" + message,)
+            raise
         return results
 
     def _list_outputs(self):
@@ -899,6 +896,13 @@ class CommandLine(BaseInterface):
                                  env=runtime.environ)
         runtime.stdout, runtime.stderr = proc.communicate()
         runtime.returncode = proc.returncode
+        if runtime.returncode is None or runtime.returncode != 0:
+            message = "Command:\n" + runtime.cmdline + "\n"
+            message += "Standard output:\n" + runtime.stdout + "\n"
+            message += "Standard error:\n" + runtime.stderr + "\n"
+            message += "Return code: " + str(runtime.returncode)
+            raise RuntimeError(message)
+        
         return runtime
 
     def _exists_in_path(self, cmd):

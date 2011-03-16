@@ -821,9 +821,10 @@ class Node(WorkflowBase):
                 logger.debug("%s found and can_resume is True - resuming execution" % hashfile_unfinished)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             try:
-                self._run_interface(execute=True)   
-            finally:
+                self._run_interface(execute=True)
+            except:
                 os.remove(hashfile_unfinished)
+                raise
                 
             shutil.move(hashfile_unfinished, hashfile)
         else:
