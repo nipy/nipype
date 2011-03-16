@@ -34,6 +34,7 @@ class MatlabInputSpec(CommandLineInputSpec):
     prescript = traits.List(["ver,","try,"], usedefault=True,
                             desc='prescript to be added before code')
     postscript = traits.List(["\n,catch ME,",
+                              "fprintf(2,'MATLAB code threw an exception:\\n');",
                               "fprintf(2,'%s\\n',ME.message);",
                               "if length(ME.stack) ~= 0, fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);, end;",
                               "end;"], desc='script added after code', usedefault = True)
@@ -109,7 +110,7 @@ class MatlabCommand(CommandLine):
 
     def _run_interface(self,runtime):
         runtime = super(MatlabCommand, self)._run_interface(runtime)
-        if runtime.stderr != '':
+        if 'MATLAB code threw an exception' in runtime.stderr:
             runtime.returncode = 1
         return runtime
 
