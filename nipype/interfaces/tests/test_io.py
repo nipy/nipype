@@ -25,8 +25,8 @@ def test_datasink():
     yield assert_equal, ds.inputs.base_directory, 'foo'
 
 def test_datasink_substitutions():
-    indir = mkdtemp(prefix='nipype_ds_subs_in')
-    outdir = mkdtemp(prefix='nipype_ds_subs_out')
+    indir = mkdtemp(prefix='-Tmp-nipype_ds_subs_in')
+    outdir = mkdtemp(prefix='-Tmp-nipype_ds_subs_out')
     files = []
     for n in ['ababab.n', 'xabababyz.n']:
         f = os.path.join(indir, n)
@@ -36,8 +36,13 @@ def test_datasink_substitutions():
         parametrization=False,
         base_directory = outdir,
         substitutions = [('ababab', 'ABABAB')],
+        # end archoring ($) is used to assure operation on the filename
+        # instead of possible temporary directories names matches
+        # Patterns should be more comprehendable in the real-world usage
+        # cases since paths would be quite more sensible
         regexp_substitutions = [(r'xABABAB(\w*)\.n$', r'a-\1-b.n'),
-                                ('(.*%s)[-a]' % os.path.sep, r'\1!')] )
+                                ('(.*%s)[-a]([^%s]*)$' % ((os.path.sep,)*2),
+                                 r'\1!\2')] )
     setattr(ds.inputs, '@outdir', files)
     ds.run()
     yield assert_equal, \
