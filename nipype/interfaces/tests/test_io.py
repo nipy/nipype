@@ -28,22 +28,22 @@ def test_datasink_substitutions():
     indir = mkdtemp(prefix='nipype_ds_subs_in')
     outdir = mkdtemp(prefix='nipype_ds_subs_out')
     files = []
-    for n in ['ab.n', 'xabyz.n']:
+    for n in ['ababab.n', 'xabababyz.n']:
         f = os.path.join(indir, n)
         files.append(f)
         open(f, 'w')
     ds = nio.DataSink(
         parametrization=False,
         base_directory = outdir,
-        substitutions = [('ab', 'AB')],
-        regexp_substitutions = [(r'/xAB(\w*)\.n', r'/a-\1-b.n'),
-                                ('[-a]', '!')] )
+        substitutions = [('ababab', 'ABABAB')],
+        regexp_substitutions = [(r'xABABAB(\w*)\.n$', r'a-\1-b.n'),
+                                ('(.*%s)[-a]' % os.path.sep, r'\1!')] )
     setattr(ds.inputs, '@outdir', files)
     ds.run()
     yield assert_equal, \
           sorted([os.path.basename(x) for
                   x in glob.glob(os.path.join(outdir, '*'))]), \
-          ['!!yz!b.n', 'AB.n'] # so we got re used 2nd and both patterns
+          ['!-yz-b.n', 'ABABAB.n'] # so we got re used 2nd and both patterns
     shutil.rmtree(indir)
     shutil.rmtree(outdir)
 
