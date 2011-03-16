@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
+from cPickle import dumps, loads
 import inspect
 
 from distutils.version import LooseVersion
@@ -11,12 +12,18 @@ from nipype.interfaces.traits import _Undefined
 
 def getsource(function):
     """Returns the source code of a function"""
-    src = inspect.getsource(function)
+    try:
+        src = dumps(function)
+    except:
+        src = dumps(inspect.getsource(function))
     return src
 
 def create_function_from_source(function_source):
     """Return a function object from a function source
     """
+    function_source = loads(function_source)
+    if hasattr(function_source, '__call__'):
+        return function_source
     ns = {}
     try:
         exec function_source in ns
