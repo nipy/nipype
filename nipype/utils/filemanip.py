@@ -397,7 +397,7 @@ def savepkl(filename, record):
         pkl_file = gzip.open(filename, 'wb')
     else:
         pkl_file = open(filename, 'wb')
-    cPickle.dump(result, pkl_file)
+    cPickle.dump(record, pkl_file)
     pkl_file.close()
     
 

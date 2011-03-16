@@ -23,11 +23,13 @@ log_size = 254000
 log_rotate = 4
 
 [execution]
+plugin = Linear
 stop_on_first_crash = false
 hash_method = content
 single_thread_matlab = true
 run_in_series = false
 remove_node_directories = false
+remove_unnecessary_outputs = true
 use_relative_paths = false
 """%(homedir))
 

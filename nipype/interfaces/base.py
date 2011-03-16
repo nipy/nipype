@@ -112,6 +112,11 @@ class Bunch(object):
         '''
         return self.__dict__.get(*args)
 
+    def set(self, **kwargs):
+        '''Support dictionary get() functionality
+        '''
+        return self.__dict__.update(**kwargs)
+
     def dictcopy(self):
         """returns a deep copy of existing Bunch as a dictionary"""
         return deepcopy(self.__dict__)
@@ -325,7 +330,6 @@ class BaseTraitedSpec(traits.HasTraits):
         """
         if isdefined(new):
             trait_spec = self.traits()[name]
-            msg = None
             # for each xor, set to default_value
             undefined_traits = {}
             for trait_name in trait_spec.xor:
@@ -333,14 +337,10 @@ class BaseTraitedSpec(traits.HasTraits):
                     # skip ourself
                     continue
                 if isdefined(getattr(self, trait_name)):
-                    undefined_traits[trait_name] = Undefined
-                    if not msg:
-                        msg = 'Input %s is mutually exclusive with inputs: %s' \
-                            % (name, ', '.join(trait_spec.xor))
-                    msg += '\nResetting %s to %s' % (trait_name, Undefined)
-            if msg:
-                warn(msg)
-            self.trait_set(trait_change_notify=False, **undefined_traits)
+                    msg = 'Input "%s" is mutually exclusive with input "%s", ' \
+                          'which is already set' \
+                            % (name, trait_name)
+                    raise IOError(msg)
 
     def _requires_warn(self, obj, name, old, new):
         """Part of the xor behavior

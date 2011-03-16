@@ -27,6 +27,7 @@ import sys
 from nipype.utils.misc import is_container
 from nipype.interfaces.base import Interface, CommandLine
 from enthought.traits.trait_errors import TraitError
+import warnings
 
 def trim(docstring, marker):
     if not docstring:
@@ -285,8 +286,16 @@ class InterfaceHelpWriter(object):
             __import__(uri)
             print c
             try:
-                classinst = sys.modules[uri].__dict__[c]()
-            except:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    if c == "Function":
+                        classinst = sys.modules[uri].__dict__[c](input_names=['arg1', 'arg2'], output_names=['out'])
+                    elif c == "IdentityInterface":
+                        classinst = sys.modules[uri].__dict__[c](fields=['a','b'])
+                    else:
+                        classinst = sys.modules[uri].__dict__[c]()
+            except Exception as inst:
+                print inst
                 continue
             helpstr = ''
             if isinstance(classinst, CommandLine):

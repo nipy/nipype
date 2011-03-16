@@ -22,4 +22,8 @@ egg: zipdoc
 	@echo "Building egg..."
 	python setup.py bdist_egg
 	@echo "Done building egg."
+	
+upload_to_pypi: zipdoc
+	@echo "Uploading to PyPi..."
+	python setup.py sdist --formats=zip,gztar upload
 

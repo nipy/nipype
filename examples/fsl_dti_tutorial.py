@@ -1,23 +1,27 @@
-
 """
-A pipeline example that uses several interfaces to
-perform analysis on diffusion weighted images using
-FSL FDT tools.
+==========================
+Using FSL for DTI analysis
+==========================
 
-This tutorial is based on the 2010 FSL course and uses
-data freely available at the FSL website at:
-http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
+A pipeline example that uses several interfaces to perform analysis on
+diffusion weighted images using FSL FDT tools.
 
-More details can be found at http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/fdt/index.htm
-"""
+This tutorial is based on the 2010 FSL course and uses data freely available at
+the FSL website at: http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 
+More details can be found at
+http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/fdt/index.htm
 
-"""
+In order to run this tutorial you need to have fsl tools installed and
+accessible from matlab/command line. Check by calling fslinfo from the command
+line.
+
 Tell python where to find the appropriate functions.
 """
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
+import nipype.workflows.fsl as fsl_wf          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import os                                    # system functions
@@ -38,17 +42,16 @@ package_check('IPython', '0.10', 'tutorial1')
 """
 Setting up workflows
 --------------------
-This is a generic workflow for DTI data analysis using the FSL
-"""
 
-"""
+This is a generic workflow for DTI data analysis using the FSL
+
 Data specific components
 ------------------------
 
-The nipype tutorial contains data for two subjects.  Subject data
-is in two subdirectories, ``dwis1`` and ``dwis2``.  Each subject directory
-contains each of the following files: bvec, bval, diffusion weighted data, a set of target masks,
-a seed file, and a transformation matrix.
+The nipype tutorial contains data for two subjects.  Subject data is in two
+subdirectories, ``dwis1`` and ``dwis2``.  Each subject directory contains each
+of the following files: bvec, bval, diffusion weighted data, a set of target
+masks, a seed file, and a transformation matrix.
 
 Below we set some variables to inform the ``datasource`` about the
 layout of our data.  We specify the location of the data, the subject
@@ -81,7 +84,8 @@ info = dict(dwi=[['subject_id', 'data']],
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
 
-"""Here we set up iteration over all the subjects. The following line
+"""
+Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
 ``datasource`` attribute ``iterables`` tells the pipeline engine that
 it should repeat the analysis on each of the items in the
@@ -119,6 +123,7 @@ datasource.inputs.template_args = info
 """
 Setup for Diffusion Tensor Computation
 --------------------------------------
+
 Here we will create a generic workflow for DTI computation
 """
 
@@ -144,8 +149,8 @@ bet.inputs.frac=0.34
 correct the diffusion weighted images for eddy_currents
 """
 
-eddycorrect = pe.Node(interface=fsl.EddyCorrect(),name='eddycorrect')
-eddycorrect.inputs.ref_num=0
+eddycorrect = fsl_wf.create_eddy_correct_pipeline('eddycorrect')
+eddycorrect.inputs.inputnode.ref_num=0
 
 """
 compute the diffusion tensor in each voxel
@@ -159,7 +164,7 @@ connect all the nodes for this workflow
 
 computeTensor.connect([
                         (fslroi,bet,[('roi_file','in_file')]),
-                        (eddycorrect,dtifit,[('eddy_corrected','dwi')]),
+                        (eddycorrect, dtifit,[('outputnode.eddy_corrected','dwi')]),
                         (infosource, dtifit,[['subject_id','base_name']]),
                         (bet,dtifit,[('mask_file','mask')])
                       ])
@@ -169,6 +174,7 @@ computeTensor.connect([
 """
 Setup for Tracktography
 -----------------------
+
 Here we will create a workflow to enable probabilistic tracktography
 and hard segmentation of the seed region
 """
@@ -180,15 +186,12 @@ tractography.base_dir = os.path.abspath('fsl_dti_tutorial')
 estimate the diffusion parameters: phi, theta, and so on
 """
 
-bedpostx = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx')
-bedpostx.inputs.fibres = 1
-
-bedpostx_2f = pe.Node(interface=fsl.BEDPOSTX(),name='bedpostx_2f')
-bedpostx_2f.inputs.fibres = 2
+bedpostx = fsl_wf.create_bedpostx_pipeline()
+bedpostx.get_node("xfibres").iterables = ("n_fibres",[1,2])
 
 
 flirt = pe.Node(interface=fsl.FLIRT(), name='flirt')
-flirt.inputs.reference = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
+flirt.inputs.in_file = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
 flirt.inputs.dof = 12
 
 """
@@ -197,14 +200,13 @@ perform probabilistic tracktography
 
 probtrackx = pe.Node(interface=fsl.ProbTrackX(),name='probtrackx')
 probtrackx.inputs.mode='seedmask'
-probtrackx.inputs.loop_check=True
 probtrackx.inputs.c_thresh = 0.2
 probtrackx.inputs.n_steps=2000
 probtrackx.inputs.step_length=0.5
 probtrackx.inputs.n_samples=5000
-probtrackx.inputs.force_dir=True
 probtrackx.inputs.opd=True
 probtrackx.inputs.os2t=True
+probtrackx.inputs.loop_check=True
 
 
 """
@@ -218,12 +220,14 @@ findthebiggest = pe.Node(interface=fsl.FindTheBiggest(),name='findthebiggest')
 connect all the nodes for this workflow
 """
 
-tractography.connect([
-                        (bedpostx,probtrackx,[('bpx_out_directory','bpx_directory')]),
-                        (bedpostx,probtrackx,[('bpx_out_directory','out_dir')]),
-                        (probtrackx,findthebiggest,[('targets','in_files')]),
-                        (flirt, probtrackx, [('out_matrix_file','xfm')])
-                    ])
+tractography.add_nodes([bedpostx, flirt])
+tractography.connect([(bedpostx,probtrackx,[('outputnode.thsamples','thsamples'),
+                                            ('outputnode.phsamples','phsamples'),
+                                            ('outputnode.fsamples','fsamples')
+                                            ]),
+                      (probtrackx,findthebiggest,[('targets','in_files')]),
+                      (flirt, probtrackx, [('out_matrix_file','xfm')])
+                     ])
 
 
 """
@@ -234,6 +238,7 @@ datasink = pe.Node(interface=nio.DataSink(),name='datasink')
 datasink.inputs.base_directory = os.path.abspath('dtiresults')
 
 def getstripdir(subject_id):
+    import os
     return os.path.join(os.path.abspath('data/workingdir/dwiproc'),'_subject_id_%s' % subject_id)
 
 
@@ -249,15 +254,16 @@ dwiproc.connect([
                     (datasource,computeTensor,[('dwi','fslroi.in_file'),
                                                ('bvals','dtifit.bvals'),
                                                ('bvecs','dtifit.bvecs'),
-                                               ('dwi','eddycorrect.in_file')]),
-                    (datasource,tractography,[('bvals','bedpostx.bvals'),
-                                              ('bvecs','bedpostx.bvecs'),
-                                              ('seed_file','probtrackx.seed_file'),
-                                              ('target_masks','probtrackx.target_masks')]),
-                    (computeTensor,tractography,[('eddycorrect.eddy_corrected','bedpostx.dwi'),
-                                                 ('bet.mask_file','bedpostx.mask'),
+                                               ('dwi','eddycorrect.inputnode.in_file')]),
+                    (datasource,tractography,[('bvals','bedpostx.inputnode.bvals'),
+                                              ('bvecs','bedpostx.inputnode.bvecs'),
+                                              ('seed_file','probtrackx.seed'),
+                                              ('target_masks','probtrackx.target_masks')
+                                              ]),
+                    (computeTensor,tractography,[('eddycorrect.outputnode.eddy_corrected','bedpostx.inputnode.dwi'),
+                                                 ('bet.mask_file','bedpostx.inputnode.mask'),
                                                  ('bet.mask_file','probtrackx.mask'),
-                                                 ('fslroi.roi_file','flirt.in_file')]),
+                                                 ('fslroi.roi_file','flirt.reference')]),
                     (infosource, datasink,[('subject_id','container'),
                                            (('subject_id', getstripdir),'strip_dir')]),
                     (tractography,datasink,[('findthebiggest.out_file','fbiggest.@biggestsegmentation')])

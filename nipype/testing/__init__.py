@@ -22,9 +22,6 @@ else:
 from utils import *
 from enthought.traits.api import TraitError
 
-# import Fernando's lightunit for parametric tests
-from lightunit import ParametricTestCase, parametric
-
 # import datasets for doctests
 filepath = os.path.abspath(__file__)
 basedir = os.path.dirname(filepath)

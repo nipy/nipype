@@ -1,10 +1,14 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
+===========================
+Using FSL for fMRI analysis
+===========================
+
 A workflow that uses fsl to perform a first level analysis on the nipype
 tutorial data set::
 
-python fsl_tutorial2.py
+    python fsl_tutorial2.py
 
 
 First tell python where to find the appropriate functions.
@@ -19,7 +23,6 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model generation
 import nipype.algorithms.rapidart as ra      # artifact detection
 
-from nibabel import load
 
 
 """
@@ -107,6 +110,7 @@ Define a function to return the 1 based index of the middle volume
 """
 
 def getmiddlevolume(func):
+    from nibabel import load
     funcfile = func
     if isinstance(func, list):
         funcfile = func[0]
@@ -184,7 +188,7 @@ Threshold the first run of the functional data at 10% of the 98th percentile
 
 threshold = pe.Node(interface=fsl.ImageMaths(out_data_type='char',
                                              suffix='_thresh'),
-                       name='threshold')
+                    name='threshold')
 preproc.connect(maskfunc, ('out_file', pickfirst), threshold, 'in_file')
 
 """
@@ -211,7 +215,7 @@ Dilate the mask
 
 dilatemask = pe.Node(interface=fsl.ImageMaths(suffix='_dil',
                                               op_string='-dilF'),
-                       name='dilatemask')
+                     name='dilatemask')
 preproc.connect(threshold, 'out_file', dilatemask, 'in_file')
 
 """
@@ -220,8 +224,8 @@ Mask the motion corrected functional runs with the dilated mask
 
 maskfunc2 = pe.MapNode(interface=fsl.ImageMaths(suffix='_mask',
                                                 op_string='-mas'),
-                      iterfield=['in_file'],
-                      name='maskfunc2')
+                       iterfield=['in_file'],
+                       name='maskfunc2')
 preproc.connect(motion_correct, 'out_file', maskfunc2, 'in_file')
 preproc.connect(dilatemask, 'out_file', maskfunc2, 'in_file2')
 
@@ -244,10 +248,10 @@ mergenode = pe.Node(interface=util.Merge(2, axis='hstack'),
 preproc.connect(meanfunc2,'out_file', mergenode, 'in1')
 preproc.connect(medianval,'out_stat', mergenode, 'in2')
 
-                       
+
 """
 Smooth each run using SUSAN with the brightness threshold set to 75% of the
-median value for each run and a mask consituting the mean functional
+median value for each run and a mask constituting the mean functional
 """
 
 smooth = pe.MapNode(interface=fsl.SUSAN(),
@@ -261,9 +265,12 @@ Define a function to get the brightness threshold for SUSAN
 def getbtthresh(medianvals):
     return [0.75*val for val in medianvals]
 
+def getusans(x):
+    return [[tuple([val[0],0.75*val[1]])] for val in x]
+
 preproc.connect(maskfunc2, 'out_file', smooth, 'in_file')
 preproc.connect(medianval, ('out_stat', getbtthresh), smooth, 'brightness_threshold')
-preproc.connect(mergenode, ('out', lambda x: [[tuple([val[0],0.75*val[1]])] for val in x]), smooth, 'usans')
+preproc.connect(mergenode, ('out', getusans), smooth, 'usans')
 
 """
 Mask the smoothed data with the dilated mask
@@ -271,8 +278,8 @@ Mask the smoothed data with the dilated mask
 
 maskfunc3 = pe.MapNode(interface=fsl.ImageMaths(suffix='_mask',
                                                 op_string='-mas'),
-                      iterfield=['in_file'],
-                      name='maskfunc3')
+                       iterfield=['in_file'],
+                       name='maskfunc3')
 preproc.connect(smooth, 'smoothed_file', maskfunc3, 'in_file')
 preproc.connect(dilatemask, 'out_file', maskfunc3, 'in_file2')
 
@@ -281,8 +288,8 @@ Scale each volume of the run so that the median value of the run is set to 10000
 """
 
 intnorm = pe.MapNode(interface=fsl.ImageMaths(suffix='_intnorm'),
-                      iterfield=['in_file','op_string'],
-                      name='intnorm')
+                     iterfield=['in_file','op_string'],
+                     name='intnorm')
 preproc.connect(maskfunc3, 'out_file', intnorm, 'in_file')
 
 """
@@ -309,11 +316,11 @@ Generate a mean functional image from the first run
 meanfunc3 = pe.MapNode(interface=fsl.ImageMaths(op_string='-Tmean',
                                                 suffix='_mean'),
                        iterfield=['in_file'],
-                      name='meanfunc3')
+                       name='meanfunc3')
 preproc.connect(highpass, ('out_file', pickfirst), meanfunc3, 'in_file')
 
 """
-Strip the structural image a coregister the mean functional image to the
+Strip the structural image and coregister the mean functional image to the
 structural image
 """
 
@@ -377,15 +384,8 @@ file for use by FILMGLS
 """
 
 modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
-                      iterfield = ['fsf_file'])
+                      iterfield = ['fsf_file', 'ev_files'])
 
-"""
-Set the model generation to run everytime. Since the fsf file, which is the
-input to modelgen only references the ev files, modelgen will not run if the ev
-file contents are changed but the fsf file is untouched.
-"""
-
-modelgen.overwrite = True
 
 """
 Use :class:`nipype.interfaces.fsl.FILMGLS` to estimate a model specified by a
@@ -407,7 +407,8 @@ conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
 
 modelfit.connect([
    (modelspec,level1design,[('session_info','session_info')]),
-   (level1design,modelgen,[('fsf_files','fsf_file')]),
+   (level1design,modelgen,[('fsf_files', 'fsf_file'),
+                           ('ev_files', 'ev_files')]),
    (modelgen,modelestimate,[('design_file','design_file')]),
    (modelgen,conestimate,[('con_file','tcon_file')]),
    (modelestimate,conestimate,[('results_dir','stats_dir')]),
@@ -427,8 +428,8 @@ varcopes for each condition
 """
 
 copemerge    = pe.MapNode(interface=fsl.Merge(dimension='t'),
-                       iterfield=['in_files'],
-                       name="copemerge")
+                          iterfield=['in_files'],
+                          name="copemerge")
 
 varcopemerge = pe.MapNode(interface=fsl.Merge(dimension='t'),
                        iterfield=['in_files'],
@@ -569,9 +570,9 @@ for every participant. Other examples of this function are available in the
 `doc/examples` folder. Note: Python knowledge required here.
 """
 
-from nipype.interfaces.base import Bunch
-from copy import deepcopy
 def subjectinfo(subject_id):
+    from nipype.interfaces.base import Bunch
+    from copy import deepcopy
     print "Subject ID: %s\n"%str(subject_id)
     output = []
     names = ['Task-Odd','Task-Even']

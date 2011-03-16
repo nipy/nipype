@@ -95,7 +95,7 @@ numbers. We need to do additional parsing by overloading the following method in
 
 .. testcode::
 	
-	def _format_arg(self, name, value):
+	def _format_arg(self, name, spec, value):
 		if name == 'method':
 		    return spec.argstr%{"old":0, "standard":1, "new":2}[value]
 		return super(Example, self)._format_arg(name, spec, value)

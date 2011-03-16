@@ -5,6 +5,7 @@ def configuration(parent_package='',top_path=None):
 
     config = Configuration('pipeline', parent_package, top_path)
 
+    config.add_subpackage('plugins')
     config.add_data_dir('tests')
 
     return config

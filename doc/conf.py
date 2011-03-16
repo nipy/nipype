@@ -34,6 +34,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.todo',
               'sphinx.ext.pngmath',
               'sphinx.ext.inheritance_diagram',
+              'sphinx.ext.graphviz',
               'numpydoc',
               'ipython_console_highlighting',
               'only_directives',
@@ -229,3 +230,5 @@ latex_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
+
+exclude_patterns = ['interfaces/generated/gen.rst']

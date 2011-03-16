@@ -1,6 +1,11 @@
 Release 0.4 (FUTURE)
-======================
+====================
 
+* API: Workflow run function no longer supports inseries, createdirsonly
+
+* ENH: Supports a plugin interface for external execution
+* ENH: MapNode runs in parallel under IPython
+* ENH: Optionally allows keeping only required outputs
 * ENH: New interface: freesurfer.ApplyMask (mri_mask)
 * ENH: New FSL interface -- SwapDimensions (fslswapdim)
 * ENH: Sparse models allow regressor scaling and temporal derivatives
@@ -10,12 +15,13 @@ Release 0.4 (FUTURE)
     - ChangeDataType, Threshold, MeanImage, IsotropicSmooth, ApplyMask, TemporalFilter
       DilateImage, ErodeImage, SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths
 * ENH: added support for networx 1.4 and improved iterable expansion
+* ENH: Replaced BEDPOSTX and EddyCurrent with nipype pipelines 
 
 * BF: dcm2nii interface handles gzipped files correctly
 * BF: FNIRT generates proper outputs
 
 Release 0.3.4 (Jan 12, 2011)
-======================
+============================
 
 * API: hash values for float use a string conversion up to the 10th decimal place.
 * API: Iterables in output path will always be generated as _var1_val1_var2_val2 pairs
