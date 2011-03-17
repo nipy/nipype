@@ -1096,27 +1096,26 @@ class MapNode(Node):
 
     def _node_runner(self, nodes, updatehash=False):
         for i, node in nodes:
+            err = None
             try:
                 node.run(updatehash=updatehash)
-            except:
+            except Exception, err:
                 if config.getboolean('execution', 'stop_on_first_crash'):
                     self._result = node.result
                     raise
-            yield i, node
+            yield i, node, err
 
     def _collate_results(self, nodes):
         self._result = InterfaceResult(interface=[], runtime=[],
                                        outputs=self.outputs)
         returncode = []
-        for i, node in nodes:
+        for i, node, err in nodes:
             runtime = Bunch(returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
             self._result.runtime.insert(i, runtime)
             if node.result and hasattr(node.result, 'runtime'):
                 self._result.interface.insert(i, node.result.interface)
                 self._result.runtime[i] = node.result.runtime
-                returncode.insert(i, node.result.runtime==1)
-            else:
-                returncode.insert(i, True)
+            returncode.insert(i, err)
             for key, _ in self.outputs.items():
                 if config.getboolean('execution', 'remove_unnecessary_outputs') and \
                 self.needed_outputs:
@@ -1131,7 +1130,7 @@ class MapNode(Node):
                     values.insert(i, None)
                 if any([val != Undefined for val in values]) and self._result.outputs:
                     setattr(self._result.outputs, key, values)
-        if returncode and any(returncode):
+        if returncode and any([code is not None for code in returncode]):
             raise Exception('One of the subnodes of node: %s failed'%self.name)
 
     def get_subnodes(self):
