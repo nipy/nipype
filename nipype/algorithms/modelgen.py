@@ -230,9 +230,10 @@ class SpecifyModel(BaseInterface):
         """Orthoganlize y with respect to x
 
         >>> s = SpecifyModel()
-        >>> s.orth([1,2,3],[4,5,6])
-        [1.7142857142857144, 0.42857142857142883, -0.85714285714285676]
-        
+        >>> err = np.abs(np.array(s.orth([1,2,3],[4,5,6]) - np.array([1.7142857142857144, 0.42857142857142883, -0.85714285714285676])))
+        >>> all(err<np.finfo(float).eps)
+        True
+
         """
         x = np.array(x_in)[:,None]
         y = np.array(y_in)[:,None]
