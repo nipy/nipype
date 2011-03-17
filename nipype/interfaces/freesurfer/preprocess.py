@@ -641,9 +641,9 @@ class ReconAll(CommandLine):
         outputs = self._outputs().get()
         
         outputs.update(FreeSurferSource(subject_id=self.inputs.subject_id,
-                         subjects_dir=subjects_dir, hemi=hemi)._outputs()._list_outputs())
+                         subjects_dir=subjects_dir, hemi=hemi)._list_outputs())
         outputs['subject_id'] = self.inputs.subject_id
-        outputs['subjects_dir'] = self.inputs.subjects_dir
+        outputs['subjects_dir'] = subjects_dir
         return outputs
 
 class BBRegisterInputSpec(FSTraitedSpec):
