@@ -8,26 +8,27 @@ Exaples  FSL, matlab/SPM , afni
 Requires Packages to be installed
 """
 
-import os
-import subprocess
+from ConfigParser import NoOptionError
 from copy import deepcopy
+import os
 from socket import gethostname
 from string import Template
+import subprocess
 from time import time
 from warnings import warn
 
 
 import enthought.traits.api as traits
 from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
-from nipype.interfaces.traits import Undefined
-
-from nipype.utils.filemanip import md5, hash_infile, FileNotFoundError, \
-    hash_timestamp
-from nipype.utils.misc import is_container
 from enthought.traits.trait_errors import TraitError
+
+from nipype.interfaces.traits import Undefined
+from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
+                                    hash_timestamp)
+from nipype.utils.misc import is_container
 from nipype.utils.config import config
 from nipype.utils.misc import isdefined
-from ConfigParser import NoOptionError
+
 
 __docformat__ = 'restructuredtext'
 
@@ -290,6 +291,7 @@ class BaseTraitedSpec(traits.HasTraits):
         # therefore these args were being ignored.
         #super(TraitedSpec, self).__init__(*args, **kwargs)
         super(BaseTraitedSpec, self).__init__(**kwargs)
+        traits.push_exception_handler(reraise_exceptions=True)
         undefined_traits = {}
         for trait in self.copyable_trait_names():
             if not self.traits()[trait].usedefault:
@@ -337,6 +339,7 @@ class BaseTraitedSpec(traits.HasTraits):
                     # skip ourself
                     continue
                 if isdefined(getattr(self, trait_name)):
+                    self.trait_set(trait_change_notify=False, **{'%s'%name:Undefined})
                     msg = 'Input "%s" is mutually exclusive with input "%s", ' \
                           'which is already set' \
                             % (name, trait_name)
