@@ -200,7 +200,7 @@ def test_BaseInterface():
 
     class DerivedInterface3(DerivedInterface2):
         def _run_interface(self, runtime):
-            runtime.returncode = 1
+            self.raise_command_line_exception(runtime)
             return runtime
 
     yield assert_equal, DerivedInterface3(goo=1).run().outputs, None

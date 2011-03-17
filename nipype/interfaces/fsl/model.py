@@ -24,7 +24,8 @@ from nipype.interfaces.base import (Bunch, load_template,
                                     InterfaceResult, File, traits,
                                     TraitedSpec,
                                     BaseInterface,
-                                    InputMultiPath, OutputMultiPath)
+                                    InputMultiPath, OutputMultiPath,
+    BaseInterfaceInputSpec)
 from nipype.utils.filemanip import (list_to_filename, filename_to_list,
                                     loadflat)
 from nibabel import load
@@ -34,7 +35,7 @@ from nipype.interfaces.traits import Directory
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
-class Level1DesignInputSpec(TraitedSpec):
+class Level1DesignInputSpec(BaseInterfaceInputSpec):
     interscan_interval = traits.Float(mandatory=True,
                 desc='Interscan  interval (in secs)')
     session_info = traits.Any(mandatory=True,
@@ -511,7 +512,7 @@ threshold=10, results_dir='stats')
         return outputs
 
 
-class FEATRegisterInputSpec(TraitedSpec):
+class FEATRegisterInputSpec(BaseInterfaceInputSpec):
     feat_dirs = InputMultiPath(Directory(), exist=True, desc="Lower level feat dirs",
                                mandatory=True)
     reg_image = File(exist=True, desc="image to register to (will be treated as standard)",
@@ -784,7 +785,7 @@ class ContrastMgr(FSLCommand):
             outputs['fstats'] = fstats
         return outputs
 
-class L2ModelInputSpec(TraitedSpec):
+class L2ModelInputSpec(BaseInterfaceInputSpec):
     num_copes = traits.Int(min=1, mandatory=True,
                              desc='number of copes to be combined')
 
@@ -857,7 +858,7 @@ class L2Model(BaseInterface):
                                           field.replace('_','.'))
         return outputs
 
-class MultipleRegressDesignInputSpec(TraitedSpec):
+class MultipleRegressDesignInputSpec(BaseInterfaceInputSpec):
     contrasts = traits.List(
         traits.Either(traits.Tuple(traits.Str,
                                    traits.Enum('T'),

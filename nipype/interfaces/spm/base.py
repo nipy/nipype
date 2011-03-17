@@ -17,7 +17,7 @@ from scipy.io import savemat
 
 # Local imports
 from nipype.interfaces.base import BaseInterface, traits, TraitedSpec,\
-    InputMultiPath
+    InputMultiPath, BaseInterfaceInputSpec
 from nipype.utils.misc import isdefined
 from nibabel import load
 from nipype.interfaces.matlab import MatlabCommand
@@ -170,7 +170,7 @@ def no_spm():
         return False
 
     
-class SPMCommandInputSpec(TraitedSpec):
+class SPMCommandInputSpec(BaseInterfaceInputSpec):
     matlab_cmd = traits.Str(desc='matlab command to use')
     paths = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
     mfile = traits.Bool(True, desc='Run m-code using m-file',

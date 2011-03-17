@@ -27,13 +27,13 @@ from scipy.special import gammaln
 
 from nibabel import load
 from nipype.interfaces.base import BaseInterface, TraitedSpec,\
- InputMultiPath, traits, File
+ InputMultiPath, traits, File, BaseInterfaceInputSpec
 from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import filename_to_list, loadflat
 
 iflogger = logging.getLogger('interface')
 
-class SpecifyModelInputSpec(TraitedSpec):
+class SpecifyModelInputSpec(BaseInterfaceInputSpec):
     subject_id = traits.Either(traits.Str(),traits.Int(),
         desc ="This input is deprecated and will be removed in the future releases. Update your code.")
     subject_info = traits.List(mandatory=True,

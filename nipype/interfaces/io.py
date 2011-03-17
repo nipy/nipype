@@ -37,7 +37,8 @@ from nipype.interfaces.base import (Interface, CommandLine, Bunch,
                                     TraitedSpec, traits, File, Directory,
                                     BaseInterface, InputMultiPath,
                                     OutputMultiPath, DynamicTraitedSpec,
-                                    BaseTraitedSpec, Undefined)
+                                    BaseTraitedSpec, Undefined,
+    BaseInterfaceInputSpec)
 from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (copyfile, list_to_filename,
                                     filename_to_list, FileNotFoundError)
@@ -112,7 +113,7 @@ class IOBase(BaseInterface):
     def _add_output_traits(self, base):
         return base
 
-class DataSinkInputSpec(DynamicTraitedSpec):
+class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     base_directory = Directory(
         desc='Path to the base directory for storing data.')
     container = traits.Str(desc = 'Folder within base directory in which to store output')
@@ -279,7 +280,7 @@ class DataSink(IOBase):
         return None
 
 
-class DataGrabberInputSpec(DynamicTraitedSpec): #InterfaceInputSpec):
+class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec): #InterfaceInputSpec):
     base_directory = Directory(exists=True,
             desc='Path to the base directory consisting of subject data.')
     raise_on_empty = traits.Bool(True, usedefault=True,
@@ -471,7 +472,7 @@ class DataGrabber(IOBase):
         return outputs
 
 
-class FSSourceInputSpec(TraitedSpec):
+class FSSourceInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(mandatory=True,
                              desc='Freesurfer subjects directory.')
     subject_id = traits.Str(mandatory=True,
@@ -570,7 +571,7 @@ class FreeSurferSource(IOBase):
 
 
 
-class XNATSourceInputSpec(DynamicTraitedSpec): #InterfaceInputSpec):
+class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec): #InterfaceInputSpec):
     query_template = traits.Str(mandatory=True,
              desc='Layout used to get files. relative to base directory if defined')
     query_template_args = traits.Dict(traits.Str,
@@ -737,7 +738,7 @@ class XNATSource(IOBase):
         return outputs
 
 
-class XNATSinkInputSpec(DynamicTraitedSpec):
+class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
 

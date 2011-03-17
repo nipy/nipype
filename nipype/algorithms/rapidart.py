@@ -28,7 +28,7 @@ import scipy.io as sio
 
 from nipype.interfaces.base import (Bunch, InterfaceResult, BaseInterface,
                                     traits, InputMultiPath, OutputMultiPath,
-                                    TraitedSpec, File)
+                                    TraitedSpec, File, BaseInterfaceInputSpec)
 from nibabel import load, funcs
 from nipype.utils.filemanip import filename_to_list, list_to_filename
 from nipype.utils.misc import find_indices
@@ -36,7 +36,7 @@ from nipype.utils.misc import find_indices
 #import matplotlib.pyplot as plt
 #import traceback
 
-class ArtifactDetectInputSpec(TraitedSpec):
+class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
     realigned_files = InputMultiPath(File(exists=True), desc="Names of realigned functional data files", mandatory=True)
     realignment_parameters = InputMultiPath(File(exists=True), mandatory=True,
                                             desc=("Names of realignment parameters"
@@ -369,7 +369,7 @@ class ArtifactDetect(BaseInterface):
         runtime.returncode = 0
         return runtime
 
-class StimCorrInputSpec(TraitedSpec):
+class StimCorrInputSpec(BaseInterfaceInputSpec):
     realignment_parameters = InputMultiPath(File(exists=True), mandatory=True,
         desc='Names of realignment parameters corresponding to the functional data files')
     intensity_values = InputMultiPath(File(exists=True), mandatory=True,

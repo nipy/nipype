@@ -6,7 +6,8 @@ Created on 24 Feb 2010
 @author: filo
 '''
 from nipype.interfaces.base import BaseInterface,\
-    traits, TraitedSpec, File, InputMultiPath, OutputMultiPath
+    traits, TraitedSpec, File, InputMultiPath, OutputMultiPath,\
+    BaseInterfaceInputSpec
 from nipype.utils.misc import isdefined
 import nibabel as nb
 import numpy as np
@@ -21,7 +22,7 @@ import matplotlib
 #matplotlib.use('Cairo')
 import matplotlib.pyplot as plt
 
-class PickAtlasInputSpec(TraitedSpec):
+class PickAtlasInputSpec(BaseInterfaceInputSpec):
     atlas = File(exists=True, desc="Location of the atlas that will be used.", compulsory=True)
     labels = traits.Either(traits.Int, traits.List(traits.Int), 
                            desc="Labels of regions that will be included in the mask. Must be \
@@ -84,7 +85,7 @@ class PickAtlas(BaseInterface):
         outputs['mask_file'] = self._gen_output_filename()
         return outputs
     
-class SimpleThresholdInputSpec(TraitedSpec):
+class SimpleThresholdInputSpec(BaseInterfaceInputSpec):
     volumes = InputMultiPath(File(exists=True), desc='volumes to be thresholded', mandatory=True)
     threshold = traits.Float(desc='volumes to be thresholdedeverything below this value will be set to zero', mandatory=True)
     
@@ -122,7 +123,7 @@ class SimpleThreshold(BaseInterface):
             outputs["thresholded_volumes"].append(os.path.abspath(base + '_thresholded.nii'))
         return outputs
 
-class ModifyAffineInputSpec(TraitedSpec):
+class ModifyAffineInputSpec(BaseInterfaceInputSpec):
     volumes = InputMultiPath(File(exists=True), desc='volumes which affine matrices will be modified', mandatory=True)
     transformation_matrix = traits.Array(value=np.eye(4), shape=(4,4), desc="transformation matrix that will be left multiplied by the affine matrix", usedefault=True)
     
@@ -159,7 +160,7 @@ class ModifyAffine(BaseInterface):
             outputs['transformed_volumes'].append(self._gen_output_filename(fname))
         return outputs
 
-class DistanceInputSpec(TraitedSpec):
+class DistanceInputSpec(BaseInterfaceInputSpec):
     volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
     volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
     method = traits.Enum("eucl_min", "eucl_cog", "eucl_mean", "eucl_wmean", desc='""eucl_min": Euclidean distance between two closest points\
@@ -283,7 +284,7 @@ class Distance(BaseInterface):
             outputs['histogram'] = os.path.abspath(self._hist_filename)
         return outputs
     
-class DissimilarityInputSpec(TraitedSpec):
+class DissimilarityInputSpec(BaseInterfaceInputSpec):
     volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
     volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
     method = traits.Enum("dice", "jaccard", desc='"dice": Dice\'s dissimilarity,\
