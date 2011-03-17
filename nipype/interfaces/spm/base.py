@@ -240,7 +240,7 @@ class SPMCommand(BaseInterface):
         runtime.returncode = results.runtime.returncode
         if self.mlab.inputs.uses_mcr:
             if 'Skipped' in results.runtime.stdout:
-                self.raise_command_line_exception(runtime)
+                self.raise_exception(runtime)
         runtime.stdout = results.runtime.stdout
         runtime.stderr = results.runtime.stderr
         return runtime

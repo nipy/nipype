@@ -125,7 +125,7 @@ class EddyCorrect(FSLCommand):
             self.inputs.out_file = self._gen_fname(self.inputs.in_file,suffix = '_edc')
         runtime = super(EddyCorrect, self)._run_interface(runtime)
         if runtime.stderr:
-            self.raise_command_line_exception(runtime)
+            self.raise_exception(runtime)
         return runtime
 
     def _list_outputs(self):        
@@ -217,7 +217,7 @@ class BEDPOSTX(FSLCommand):
 
         runtime = super(BEDPOSTX, self)._run_interface(runtime)
         if runtime.stderr:
-            self.raise_command_line_exception(runtime)
+            self.raise_exception(runtime)
         return runtime
 
     def _list_outputs(self):        
@@ -272,7 +272,7 @@ class TBSS1Preproc(FSLCommand):
             shutil.copyfile(n,os.path.basename(n))            
         runtime = super(TBSS1Preproc, self)._run_interface(runtime)
         if runtime.stderr:
-            self.raise_command_line_exception(runtime)            
+            self.raise_exception(runtime)            
         return runtime
 
     def _list_outputs(self):        
@@ -375,7 +375,7 @@ class TBSS3Postreg(FSLCommand):
         runtime.cwd = self.inputs.tbss_dir
         runtime = super(TBSS3Postreg, self)._run_interface(runtime)
         if runtime.stderr:
-            self.raise_command_line_exception(runtime)
+            self.raise_exception(runtime)
         return runtime
     
     def _list_outputs(self):        
@@ -636,7 +636,7 @@ class ProbTrackX(FSLCommand):
             
         runtime = super(ProbTrackX, self)._run_interface(runtime)
         if runtime.stderr:
-            self.raise_command_line_exception(runtime)
+            self.raise_exception(runtime)
         return runtime
     
     def _format_arg(self, name, spec, value):
@@ -1052,7 +1052,7 @@ class XFibres(FSLCommand):
     def _run_interface(self,runtime):
         runtime = super(XFibres, self)._run_interface(runtime)
         if runtime.stderr:
-            self.raise_command_line_exception(runtime)
+            self.raise_exception(runtime)
         return runtime
     
     def _list_outputs(self):

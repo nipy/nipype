@@ -876,7 +876,7 @@ class CommandLine(BaseInterface):
 
 
 
-    def raise_command_line_exception(self, runtime):
+    def raise_exception(self, runtime):
         message = "Command:\n" + runtime.cmdline + "\n"
         message += "Standard output:\n" + runtime.stdout + "\n"
         message += "Standard error:\n" + runtime.stderr + "\n"
@@ -911,7 +911,7 @@ class CommandLine(BaseInterface):
         runtime.stdout, runtime.stderr = proc.communicate()
         runtime.returncode = proc.returncode
         if runtime.returncode is None or runtime.returncode != 0:
-            self.raise_command_line_exception(runtime)
+            self.raise_exception(runtime)
         
         return runtime
 
