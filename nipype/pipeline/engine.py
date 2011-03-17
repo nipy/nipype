@@ -904,7 +904,6 @@ class Node(WorkflowBase):
         cwd = os.getcwd()
         if execute and copyfiles:
             self._originputs = deepcopy(self._interface.inputs)
-        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
         if execute:
             runtime = Bunch(returncode = 1,
                             environ = deepcopy(os.environ.data),
@@ -912,6 +911,7 @@ class Node(WorkflowBase):
             result = InterfaceResult(interface=self._interface,
                                      runtime=runtime,
                                      outputs=None)
+            self._result = result
             logger.debug('Executing node')
             if copyfiles:
                 self._copyfiles_to_wd(cwd, execute)
@@ -919,9 +919,8 @@ class Node(WorkflowBase):
                 try:
                     cmd = self._interface.cmdline
                 except Exception, msg:
-                    runtime.update(stderr=msg)
-                    self._result = result
-                    raise RuntimeError(msg)
+                    self._result.runtime.stderr = msg
+                    raise
                 cmdfile = os.path.join(cwd,'command.txt')
                 fd = open(cmdfile,'wt')
                 fd.writelines(cmd)
@@ -930,12 +929,7 @@ class Node(WorkflowBase):
             try:
                 result = self._interface.run()
             except Exception, msg:
-                runtime.update(returncode = 1,
-                               stderr = msg)
-                result = InterfaceResult(interface=self._interface,
-                                         runtime=runtime,
-                                         outputs=None)
-                self._result = result
+                self._result.runtime.stderr = msg
                 raise
             
             if config.getboolean('execution', 'remove_unnecessary_outputs'):
@@ -1098,28 +1092,31 @@ class MapNode(Node):
                         fieldvals[i])
             node.config = self.config
             node.base_dir = os.path.join(cwd, 'mapflow') # for backwards compatibility
-            yield node
+            yield i, node
 
     def _node_runner(self, nodes, updatehash=False):
-        for node in nodes:
+        for i, node in nodes:
             try:
                 node.run(updatehash=updatehash)
-            except RuntimeError, msg:
-                node.error_msg = msg
-            yield node
+            except:
+                if config.getboolean('execution', 'stop_on_first_crash'):
+                    self._result = node.result
+                    raise
+            yield i, node
 
     def _collate_results(self, nodes):
         self._result = InterfaceResult(interface=[], runtime=[],
                                        outputs=self.outputs)
-        for i, node in enumerate(nodes):
+        returncode = []
+        for i, node in nodes:
             runtime = Bunch(returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
             self._result.runtime.insert(i, runtime)
             if node.result and hasattr(node.result, 'runtime'):
                 self._result.interface.insert(i, node.result.interface)
                 self._result.runtime[i] = node.result.runtime
-                if node.result.runtime.returncode:
-                    raise RuntimeError('iternode %s:%d did not run: %s'%(node._id,  i,
-                                                                         node.error_msg))
+                returncode.insert(i, node.result.runtime==1)
+            else:
+                returncode.insert(i, True)
             for key, _ in self.outputs.items():
                 if config.getboolean('execution', 'remove_unnecessary_outputs') and \
                 self.needed_outputs:
@@ -1134,6 +1131,8 @@ class MapNode(Node):
                     values.insert(i, None)
                 if any([val != Undefined for val in values]) and self._result.outputs:
                     setattr(self._result.outputs, key, values)
+        if returncode and any(returncode):
+            raise Exception('One of the subnodes of node: %s failed'%self.name)
 
     def get_subnodes(self):
         self._get_inputs()
