@@ -565,7 +565,7 @@ class Interface(object):
         """
         raise NotImplementedError
     
-class BaseInterfaceInputSpec(BaseInterfaceInputSpec):
+class BaseInterfaceInputSpec(TraitedSpec):
     ignore_exception = traits.Bool(False, desc = "Print an error message instead \
      of throwing an exception in case the interface fails to run", usedefault = True)
 
