@@ -98,6 +98,9 @@ def add_traits(base, names, trait_type=None):
     return base
 
 class IOBase(BaseInterface):
+    
+    def _run_interface(self,runtime):
+        return runtime
 
     def _list_outputs(self):
         raise NotImplementedError

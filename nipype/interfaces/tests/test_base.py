@@ -114,7 +114,7 @@ def test_TraitedSpec_logic():
     myif.inputs.foo = 1
     yield assert_equal,  myif.inputs.foo, 1
     set_bar = lambda : setattr(myif.inputs, 'bar', 1)
-    yield assert_raises, set_bar
+    yield assert_raises, IOError, set_bar
     yield assert_equal, myif.inputs.foo, 1
     myif.inputs.kung = 2
     yield assert_equal, myif.inputs.kung, 2.0
@@ -195,26 +195,7 @@ def test_BaseInterface():
 
     yield assert_equal, DerivedInterface2.help(), None
     yield assert_equal, DerivedInterface2()._outputs().foo, Undefined
-    yield assert_raises, Exception, DerivedInterface2(goo=1).run
-
-    class DerivedInterface3(DerivedInterface2):
-        def _run_interface(self, runtime):
-            runtime.returncode = 1
-            return runtime
-
-    yield assert_equal, DerivedInterface3(goo=1).run().outputs, None
-    
-    class DerivedInterface4(DerivedInterface):
-        def _run_interface(self, runtime):
-            runtime.returncode = 0
-            return runtime
-    yield assert_equal, DerivedInterface4(goo=1).run().outputs, None
-
-    class DerivedInterface5(DerivedInterface2):
-        def _run_interface(self, runtime):
-            runtime.returncode = 0
-            return runtime
-    yield assert_raises, NotImplementedError, DerivedInterface5(goo=1).run
+    yield assert_raises, NotImplementedError, DerivedInterface2(goo=1).run
 
     nib.BaseInterface.input_spec = None
     yield assert_raises, Exception, nib.BaseInterface

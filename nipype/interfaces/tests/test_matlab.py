@@ -73,8 +73,9 @@ def test_run_interface():
     cwd = os.getcwd()
     basedir = mkdtemp()
     os.chdir(basedir)
-    res = mlab.MatlabCommand(script='foo', paths=[basedir], mfile=True).run() # bypasses ubuntu dash issue
-    yield assert_equal, res.runtime.returncode, 1
+    # bypasses ubuntu dash issue
+    mc = mlab.MatlabCommand(script='foo;', paths=[basedir], mfile=True)
+    yield assert_raises, RuntimeError, mc.run
     res = mlab.MatlabCommand(script='a=1;', paths=[basedir], mfile=True).run() # bypasses ubuntu dash issue
     yield assert_equal, res.runtime.returncode, 0
     os.chdir(cwd)
