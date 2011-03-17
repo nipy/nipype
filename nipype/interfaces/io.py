@@ -27,6 +27,7 @@ import tempfile
 from warnings import warn
 
 from enthought.traits.trait_errors import TraitError
+
 try:
     import pyxnat
 except:
@@ -826,11 +827,14 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         xor=['assessor_id', 'scan_id']
         )
 
-    scan_id = traits.Str(
-        desc=('Option to customize ouputs representation in XNAT - '
-              'scan level will be used with specified id'),
+    share = traits.Bool(
+        desc=('Option to share the subjects from the original project'
+              'instead of creating new ones when possible - the created '
+              'experiments are then shared backk to the original project'
+              ),
+        value=False,
+        usedefault=True,
         mandatory=False,
-        xor=['reconstruction_id', 'assessor_id']
         )
 
     def __setattr__(self, key, value):
@@ -851,6 +855,7 @@ class XNATSink(IOBase):
         """Execute this module.
         """
 
+        # setup XNAT connection
         cache_dir = self.inputs.cache_dir or tempfile.gettempdir()
 
         if self.inputs.config:
@@ -862,105 +867,179 @@ class XNATSink(IOBase):
                                     cache_dir
                                     )
 
+        # if possible share the subject from the original project
+        if self.inputs.share:
+            result = xnat.select(
+                'xnat:subjectData',
+                ['xnat:subjectData/PROJECT',
+                 'xnat:subjectData/SUBJECT_ID']
+                ).where('xnat:subjectData/SUBJECT_ID = %s AND' %
+                        self.inputs.subject_id
+                        )
+
+            subject_id = self.inputs.subject_id
+
+            # subject containing raw data exists on the server
+            if isinstance(result.data[0], dict):
+                result = result.data[0]
+
+                shared = xnat.select('/project/%s/subject/%s' %
+                                     (self.inputs.project_id,
+                                      self.inputs.subject_id
+                                      )
+                                     )
+
+                if not shared.exists(): # subject not in share project
+
+                    share_project = xnat.select(
+                        '/project/%s' % self.inputs.project_id)
+
+                    if not share_project.exists(): # check project exists
+                        share_project.insert()
+
+                    subject = xnat.select('/project/%(project)s'
+                                          '/subject/%(subject_id)s' % result
+                                          )
+
+                    subject.share(str(self.inputs.project_id))
+
+        else:
+            # subject containing raw data does not exist on the server
+            subject_id = '%s_%s' % (
+                quote_id(self.inputs.project_id),
+                quote_id(self.inputs.subject_id)
+                )
+
+        # setup XNAT resource
         uri_template_args = {
             'project_id':quote_id(self.inputs.project_id),
-            'subject_id':'%s_%s' % (quote_id(self.inputs.project_id),
-                                    quote_id(self.inputs.subject_id)
-                                    ),
-            'experiment_id': '%s_%s' % (quote_id(self.inputs.subject_id),
-                                        quote_id(self.inputs.experiment_id)
-                                        )
+            'subject_id':subject_id,
+            'experiment_id': '%s_%s_%s' % (
+                quote_id(self.inputs.project_id),
+                quote_id(self.inputs.subject_id),
+                quote_id(self.inputs.experiment_id)
+                )
             }
 
-        if self.inputs.assessor_id is not None:
+        if self.inputs.share:
+            uri_template_args['original_project'] = result['project']
+
+        if self.inputs.assessor_id:
             uri_template_args['assessor_id'] = (
-                '%s_%s' % (quote_id(self.inputs.experiment_id),
-                           quote_id(self.inputs.assessor_id)
-                           )
+                '%s_%s' % (
+                    uri_template_args['experiment_id'],
+                    quote_id(self.inputs.assessor_id)
+                    )
                 )
 
-        elif self.inputs.reconstruction_id is not None:
+        elif self.inputs.reconstruction_id:
             uri_template_args['reconstruction_id'] = (
-                '%s_%s' % (quote_id(self.inputs.experiment_id),
-                           quote_id(self.inputs.reconstruction_id)
-                           )
+                '%s_%s' % (
+                    uri_template_args['experiment_id'],
+                    quote_id(self.inputs.reconstruction_id)
+                    )
                 )
 
-        elif self.inputs.scan_id is not None:
-            uri_template_args['scan_id'] = (
-                '%s_%s' % (quote_id(self.inputs.experiment_id),
-                           quote_id(self.inputs.scan_id)
-                           )
-                )
-
-        # uri_template_args = {
-        #     'project_id':self.inputs.project_id,
-        #     'subject_id':'%s_%s' % (self.inputs.project_id,
-        #                             self.inputs.subject_id
-        #                             ),
-        #     'experiment_id': '%s_%s' % (hashlib.md5(self.inputs.subject_id
-        #                                             ).hexdigest(),
-        #                                 self.inputs.experiment_id
-        #                                 )
-        #     }
-
+        # gather outputs and upload them
         for key, files in self.inputs._outputs.items():
+
             for name in filename_to_list(files):
 
                 if isinstance(name, list):
                     for i, file_name in enumerate(name):
-                        push_file(xnat, file_name,
+                        push_file(self, xnat, file_name,
                                   '%s_' % i + key,
                                   uri_template_args
                                   )
                 else:
-                    push_file(xnat, name, key, uri_template_args)
+                    push_file(self, xnat, name, key, uri_template_args)
 
 
 def quote_id(string):
-    return string.replace('_', '---')
+    return str(string).replace('_', '---')
 
 def unquote_id(string):
-    return string.replace('---', '_')
+    return str(string).replace('---', '_')
 
-def push_file(xnat, name, key, uri_template_args):
+def push_file(self, xnat, file_name, out_key, uri_template_args):
 
+    # grab info from output file names
     val_list = [unquote_id(val)
-                for part in os.path.split(name)[0].split(os.sep)
+                for part in os.path.split(file_name)[0].split(os.sep)
                 for val in part.split('_')[1:]
                 if part.startswith('_') and len(part.split('_')) % 2
                 ]
 
     keymap = dict(zip(val_list[1::2],val_list[2::2]))
 
-    recon_label = []
+    _label = []
     for key, val in sorted(keymap.items()):
         if str(self.inputs.subject_id) not in val:
-            recon_label.extend([key, val])
+            _label.extend([key, val])
 
-    uri_template_args['recon_label'] = hashlib.md5(
-        uri_template_args['experiment_id']).hexdigest()
+    # select and define container level
+    uri_template_args['container_type'] = None
 
-    if recon_label:
-        uri_template_args['recon_label'] += '_'.join(recon_label)
+    for container in ['assessor_id', 'reconstruction_id']:
+        if getattr(self.inputs, container):
+            uri_template_args['container_type'] = container.split('_id')[0]
+            uri_template_args['container_id'] = uri_template_args[container]
 
+    if uri_template_args['container_type'] is None:
+        uri_template_args['container_type'] = 'reconstruction'
+
+        uri_template_args['container_id'] = unquote_id(
+            uri_template_args['experiment_id']
+            )
+
+        if _label:
+            uri_template_args['container_id'] += (
+                '_results_%s' % '_'.join(_label)
+                )
+        else:
+            uri_template_args['container_id'] += '_results'
+
+    # define resource level
     uri_template_args['resource_label'] = (
-        '%s_%s' % (hashlib.md5(uri_template_args['recon_label']).hexdigest(),
-                   key.split('.')[0]
+        '%s_%s' % (uri_template_args['container_id'],
+                   out_key.split('.')[0]
                    )
         )
 
-    uri_template_args['file_name'] = os.path.split(os.path.abspath(name))[1]
+    # define file level
+    uri_template_args['file_name'] = os.path.split(
+        os.path.abspath(unquote_id(file_name)))[1]
 
     uri_template = (
         '/project/%(project_id)s/subject/%(subject_id)s'
-        '/experiment/%(experiment_id)s/reconstruction/%(recon_label)s'
+        '/experiment/%(experiment_id)s/%(container_type)s/%(container_id)s'
         '/out/resource/%(resource_label)s/file/%(file_name)s'
         )
 
-    print uri_template % uri_template_args
+    # unquote values before uploading
+    for key in uri_template_args.keys():
+        uri_template_args[key] = unquote_id(uri_template_args[key])
 
+    # upload file
     remote_file = xnat.select(uri_template % uri_template_args)
-    remote_file.insert(name,
+    remote_file.insert(file_name,
                        experiments='xnat:imageSessionData',
-                       use_label=True)
+                       use_label=True
+                       )
+
+    # shares the experiment back to the orginal project if relevant
+    if uri_template_args.has_key('original_project'):
+
+        experiment_template = (
+            '/project/%(original_project)s'
+            '/subject/%(subject_id)s/experiment/%(experiment_id)s'
+            )
+
+        xnat.select(experiment_template % uri_template_args
+                    ).share(uri_template_args['original_project'])
+
+def capture_provenance():
+    pass
+
+def push_provenance():
+    pass
