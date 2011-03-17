@@ -135,14 +135,15 @@ class Info(object):
             except:
                 matlab_cmd = 'matlab -nodesktop -nosplash'
         mlab = MatlabCommand(matlab_cmd = matlab_cmd)
-        mlab.inputs.script_file = 'spminfo'
         mlab.inputs.script = """
         if isempty(which('spm')),
         throw(MException('SPMCheck:NotFound','SPM not in matlab path'));
         end;
         spm_path = spm('dir');
         fprintf(1, 'NIPYPE  %s', spm_path);
+        exit;
         """
+        mlab.inputs.mfile = False
         try:
             out = mlab.run()
         except IOError, e:
