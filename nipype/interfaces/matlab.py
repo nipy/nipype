@@ -111,7 +111,7 @@ class MatlabCommand(CommandLine):
     def _run_interface(self,runtime):
         runtime = super(MatlabCommand, self)._run_interface(runtime)
         if 'MATLAB code threw an exception' in runtime.stderr:
-            runtime.returncode = 1
+            self.raise_command_line_exception(runtime)
         return runtime
 
     def _format_arg(self, name, trait_spec, value):

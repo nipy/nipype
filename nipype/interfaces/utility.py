@@ -268,8 +268,8 @@ class Function(IOBase):
             self._out[self._output_names[0]] = out
         else:
             if isinstance(out, tuple) and (len(out) != len(self._output_names)):
-                runtime.returncode = 1
-                runtime.stderr = 'Mismatch in number of expected outputs'
+                raise RuntimeError('Mismatch in number of expected outputs')
+                
             else:
                 for idx, name in enumerate(self._output_names):
                     self._out[name] = out[idx]

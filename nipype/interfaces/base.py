@@ -875,6 +875,14 @@ class CommandLine(BaseInterface):
         return ' '.join(allargs)
 
 
+
+    def raise_command_line_exception(self, runtime):
+        message = "Command:\n" + runtime.cmdline + "\n"
+        message += "Standard output:\n" + runtime.stdout + "\n"
+        message += "Standard error:\n" + runtime.stderr + "\n"
+        message += "Return code: " + str(runtime.returncode)
+        raise RuntimeError(message)
+
     def _run_interface(self, runtime):
         """Execute command via subprocess
 
@@ -903,11 +911,7 @@ class CommandLine(BaseInterface):
         runtime.stdout, runtime.stderr = proc.communicate()
         runtime.returncode = proc.returncode
         if runtime.returncode is None or runtime.returncode != 0:
-            message = "Command:\n" + runtime.cmdline + "\n"
-            message += "Standard output:\n" + runtime.stdout + "\n"
-            message += "Standard error:\n" + runtime.stderr + "\n"
-            message += "Return code: " + str(runtime.returncode)
-            raise RuntimeError(message)
+            self.raise_command_line_exception(runtime)
         
         return runtime
 

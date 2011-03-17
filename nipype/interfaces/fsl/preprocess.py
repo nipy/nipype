@@ -123,7 +123,7 @@ class BET(FSLCommand):
         # accordingly.
         runtime = super(BET, self)._run_interface(runtime)
         if runtime.stderr:
-            runtime.returncode = 1
+            self.raise_command_line_exception(runtime)
         return runtime
 
     def _gen_outfilename(self):
