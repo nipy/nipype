@@ -776,6 +776,7 @@ class BaseInterface(Interface):
                     import traceback, sys
                     print traceback.print_exc(file=sys.stdout)
                     print e.args[0]
+                    return InterfaceResult(interface, runtime)
             else:
                 raise
         return results
