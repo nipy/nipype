@@ -217,7 +217,7 @@ class BEDPOSTX(FSLCommand):
 
         runtime = super(BEDPOSTX, self)._run_interface(runtime)
         if runtime.stderr:
-            runtime.returncode = 1
+            self.raise_command_line_exception(runtime)
         return runtime
 
     def _list_outputs(self):        
