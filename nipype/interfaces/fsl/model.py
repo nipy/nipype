@@ -527,12 +527,7 @@ class FEATRegister(BaseInterface):
     input_spec = FEATRegisterInputSpec
     output_spec = FEATRegisterOutputSpec
 
-    def run(self, **inputs):
-        self.inputs.set(**inputs)
-        runtime = Bunch(returncode=0,
-                        stdout=None,
-                        stderr=None)
-
+    def _run_interface(self, runtime):
         fsf_header = load_template('featreg_header.tcl')
         fsf_footer = load_template('feat_nongui.tcl')
         fsf_dirs = load_template('feat_fe_featdirs.tcl')
@@ -549,8 +544,7 @@ class FEATRegister(BaseInterface):
         f.write(fsf_txt)
         f.close()
 
-        outputs=self.aggregate_outputs()
-        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+        return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
