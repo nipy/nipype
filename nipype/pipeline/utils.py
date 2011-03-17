@@ -524,7 +524,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
         if f not in needed_files:
             if len(needed_dirs) == 0:
                 files2remove.append(f)
-            elif not len([1 for dirname in needed_dirs if f.startswith(dirname)])==0:
+            elif not any([f.startswith(dirname) for dirname in needed_dirs]):
                 files2remove.append(f)
     logger.debug('Removing files: %s'%(';'.join(files2remove)))
     for f in files2remove:

@@ -1115,10 +1115,11 @@ class MapNode(Node):
             runtime = Bunch(returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
             self._result.runtime.insert(i, runtime)
             if node.result and hasattr(node.result, 'runtime'):
+                self._result.interface.insert(i, node.result.interface)
                 self._result.runtime[i] = node.result.runtime
                 if node.result.runtime.returncode:
-                    raise Exception('iternode %s:%d did not run'%(node._id, i))
-                self._result.interface.insert(i, node.result.interface)
+                    raise RuntimeError('iternode %s:%d did not run: %s'%(node._id,  i,
+                                                                         node.error_msg))
             for key, _ in self.outputs.items():
                 if config.getboolean('execution', 'remove_unnecessary_outputs') and \
                 self.needed_outputs:
