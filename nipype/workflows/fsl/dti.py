@@ -29,8 +29,7 @@ def create_bedpostx_pipeline(name="bedpostx"):
     "outputnode.dyads"
     "outputnode.dyads_dispersion"
     
-    >>> from nipype.interfaces import fsl
-    >>> nipype_bedpostx = fsl.create_bedpostx_pipeline("nipype_bedpostx")
+    >>> nipype_bedpostx = create_bedpostx_pipeline("nipype_bedpostx")
     >>> nipype_bedpostx.inputs.inputnode.dwi = 'diffusion.nii'
     >>> nipype_bedpostx.inputs.inputnode.mask = 'mask.nii'
     >>> nipype_bedpostx.inputs.inputnode.bvecs = 'bvecs'
@@ -173,8 +172,7 @@ def create_eddy_correct_pipeline(name="eddy_correct"):
     Outputs:
     outputnode.eddy_corrected
     
-    >>> from nipype.interfaces import fsl
-    >>> nipype_eddycorrect = fsl.create_eddy_correct_pipeline("nipype_eddycorrect")
+    >>> nipype_eddycorrect = create_eddy_correct_pipeline("nipype_eddycorrect")
     >>> nipype_eddycorrect.inputs.inputnode.in_file = 'diffusion.nii'
     >>> nipype_eddycorrect.inputs.inputnode.ref_num = 0
     """

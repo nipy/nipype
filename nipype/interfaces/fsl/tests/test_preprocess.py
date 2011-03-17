@@ -488,11 +488,7 @@ def test_applywarp():
     awarp = fsl.ApplyWarp(in_file = infile,
                           ref_file = reffile,
                           field_file = reffile)
-    # test xor
-    awarp.inputs.abswarp = True
-    awarp.inputs.relwarp = True
-    yield assert_equal, awarp.inputs.abswarp, Undefined
-    
+
     teardown_flirt(tmpdir)
 
 @skipif(no_fsl)
