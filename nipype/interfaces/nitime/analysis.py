@@ -157,7 +157,6 @@ class CoherenceAnalyzer(BaseInterface):
         self.coherence = np.mean(A.coherence[:,:,freq_idx],-1)
         # Get the time delay from analyzer, (roi X roi array)
         self.delay = np.mean(A.delay[:,:,freq_idx],-1)
-        runtime.returncode = 0
         return runtime
                     
     #Rewrite _list_outputs (look at BET)

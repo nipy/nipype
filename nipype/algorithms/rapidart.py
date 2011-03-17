@@ -366,7 +366,6 @@ class ArtifactDetect(BaseInterface):
         motparamlist = filename_to_list(self.inputs.realignment_parameters)
         for i,imgf in enumerate(funcfilelist):
             self._detect_outliers_core(imgf ,motparamlist[i], i, os.getcwd())
-        runtime.returncode = 0
         return runtime
 
 class StimCorrInputSpec(TraitedSpec):
@@ -488,7 +487,6 @@ class StimulusCorrelation(BaseInterface):
             matrix = self._get_spm_submatrix(spmmat,sessidx,rows)
             self._stimcorr_core(motparamlist[i],intensityfiles[i],
                                 matrix, os.getcwd())
-        runtime.returncode=0
         return runtime
     
     def _list_outputs(self):

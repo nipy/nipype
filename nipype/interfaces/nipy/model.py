@@ -154,7 +154,6 @@ class FitGLM(BaseInterface):
         self._model = glm.model
         self._method = glm.method
         
-        runtime.returncode = 0
         return runtime
     
     def _list_outputs(self):
@@ -273,7 +272,6 @@ class EstimateContrast(BaseInterface):
             nb.save(nb.Nifti1Image(z_map, nii.get_affine()), z_map_file)
             self._z_maps.append(z_map_file)
         
-        runtime.returncode = 0
         return runtime
     
     def _list_outputs(self):

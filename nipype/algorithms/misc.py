@@ -44,8 +44,7 @@ class PickAtlas(BaseInterface):
     def _run_interface(self, runtime):
         nim = self._get_brodmann_area()
         nb.save(nim, self._gen_output_filename())
-
-        runtime.returncode = 0
+        
         return runtime
 
     def _gen_output_filename(self):
@@ -111,7 +110,6 @@ class SimpleThreshold(BaseInterface):
             _, base, _ = split_filename(fname)
             nb.save(new_img, base + '_thresholded.nii') 
         
-        runtime.returncode=0
         return runtime
     
     def _list_outputs(self):
@@ -149,7 +147,6 @@ class ModifyAffine(BaseInterface):
 
             nb.save(nb.Nifti1Image(img.get_data(), affine, img.get_header()), self._gen_output_filename(fname))
             
-        runtime.returncode=0
         return runtime
     
     def _list_outputs(self):
@@ -270,8 +267,6 @@ class Distance(BaseInterface):
         elif self.inputs.method == "eucl_wmean":
             self._distance = self._eucl_mean(nii1, nii2, weighted=True)
 
-
-        runtime.returncode=0
         return runtime
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -313,7 +308,6 @@ class Dissimilarity(BaseInterface):
             origdata2 = nii2.get_data().astype(np.bool)
             self._dissimilarity = self._bool_vec_dissimilarity(origdata1, origdata2, method = self.inputs.method)
         
-        runtime.returncode=0
         return runtime
     
     def _list_outputs(self):

@@ -292,7 +292,6 @@ class Level1Design(BaseInterface):
             f.write(fsf_txt)
             f.close()
 
-        runtime.returncode = 0
         return runtime
 
     def _list_outputs(self):
@@ -847,7 +846,6 @@ class L2Model(BaseInterface):
             f.write(txt[name])
             f.close()
 
-        runtime.returncode=0
         return runtime
 
     def _list_outputs(self):
@@ -998,7 +996,6 @@ class MultipleRegressDesign(BaseInterface):
             f.write(val)
             f.close()
 
-        runtime.returncode=0
         return runtime
 
     def _list_outputs(self):

@@ -577,7 +577,6 @@ class SpecifyModel(BaseInterface):
         """
         """
         self._generate_design()
-        runtime.returncode = 0
         return runtime
 
     def _list_outputs(self):

@@ -42,7 +42,6 @@ class ComputeMask(BaseInterface):
         self._brain_mask_path = os.path.abspath("brain_mask.nii")
         nb.save(nb.Nifti1Image(brain_mask.astype(np.uint8), nii.get_affine()), self._brain_mask_path)
         
-        runtime.returncode = 0
         return runtime
     
     def _list_outputs(self):

@@ -273,7 +273,7 @@ class Function(IOBase):
             else:
                 for idx, name in enumerate(self._output_names):
                     self._out[name] = out[idx]
-        runtime.returncode = 0
+
         return runtime
 
     def _list_outputs(self):
@@ -337,5 +337,4 @@ class AssertEqual(BaseInterface):
         
         assert_equal(data1, data2)
         
-        runtime.returncode = 0
         return runtime
