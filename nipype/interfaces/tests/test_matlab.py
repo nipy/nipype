@@ -33,10 +33,10 @@ if matlab_path != '':
 def test_cmdline():
     basedir = mkdtemp()
     mi = mlab.MatlabCommand(script='whos',
-                            script_file='testscript')
+                            script_file='testscript', mfile=False)
                                 
     yield assert_equal, mi.cmdline, \
-        matlab_cmd + ' -nodesktop -nosplash -singleCompThread -r "fprintf(1,\'Executing code at %s:\\n\',datestr(now));ver,try,whos,catch ME,ME,ME.stack,fprintf(\'%s\\n\',ME.message);fprintf(2,\'<MatlabScriptException>\');fprintf(2,\'%s\\n\',ME.message);fprintf(2,\'File:%s\\nName:%s\\nLine:%d\\n\',ME.stack.file,ME.stack.name,ME.stack.line);fprintf(2,\'</MatlabScriptException>\');end;;exit"'
+        matlab_cmd + ' -nodesktop -nosplash -singleCompThread -r "fprintf(1,\'Executing code at %s:\\n\',datestr(now));ver,try,whos,catch ME,fprintf(2,\'MATLAB code threw an exception:\\n\');fprintf(2,\'%s\\n\',ME.message);if length(ME.stack) ~= 0, fprintf(2,\'File:%s\\nName:%s\\nLine:%d\\n\',ME.stack.file,ME.stack.name,ME.stack.line);, end;end;;exit"'
  
     yield assert_equal, mi.inputs.script, 'whos'
     yield assert_equal, mi.inputs.script_file, 'testscript'
@@ -52,7 +52,7 @@ def test_mlab_inputspec():
         yield assert_true, k in spec.copyable_trait_names()
     yield assert_true, spec.nodesktop
     yield assert_true, spec.nosplash
-    yield assert_false, spec.mfile
+    yield assert_true, spec.mfile
     yield assert_equal, spec.script_file, 'pyscript.m'
 
 @skipif(no_matlab)
