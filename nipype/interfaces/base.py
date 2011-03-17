@@ -564,6 +564,10 @@ class Interface(object):
             Necessary for pipeline operation
         """
         raise NotImplementedError
+    
+class BaseInterfaceInputSpec(BaseInterfaceInputSpec):
+    ignore_exception = traits.Bool(False, desc = "Print an error message instead \
+     of throwing an exception in case the interface fails to run", usedefault = True)
 
 class BaseInterface(Interface):
     """Implements common interface functionality.
@@ -764,7 +768,16 @@ class BaseInterface(Interface):
                 e.args = (e.args[0] + "\n" + message,)
             else:
                 e.args = (message,)
-            raise
+            
+            #exception raising inhibition for special cases   
+            if hasattr(self.inputs,'ignore_exception') and \
+            isdefined(self.inputs.ignore_exception) and \
+            self.inputs.ignore_exception:
+                    import traceback, sys
+                    print traceback.print_exc(file=sys.stdout)
+                    print e.args[0]
+            else:
+                raise
         return results
 
     def _list_outputs(self):
@@ -795,7 +808,7 @@ class BaseInterface(Interface):
         return outputs
 
 
-class CommandLineInputSpec(TraitedSpec):
+class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
     environ = traits.DictStrStr(desc='Environment variables', usedefault=True)
 

@@ -6,7 +6,7 @@ import numpy as np
 
 from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec,
                                     Undefined, isdefined, OutputMultiPath,
-    InputMultiPath, BaseInterface, File)
+    InputMultiPath, BaseInterface, File, BaseInterfaceInputSpec)
 from nipype.interfaces.io import IOBase, add_traits
 from nipype.testing import assert_equal
 from nipype.utils.filemanip import (filename_to_list)
@@ -59,7 +59,7 @@ class IdentityInterface(IOBase):
                 outputs[key] = val
         return outputs
 
-class MergeInputSpec(DynamicTraitedSpec):
+class MergeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     axis = traits.Enum('vstack', 'hstack', usedefault=True,
                 desc='direction in which to merge, hstack requires same number of elements in each input')
 class MergeOutputSpec(TraitedSpec):
@@ -109,7 +109,7 @@ class Merge(IOBase):
             outputs['out'] = out
         return outputs
 
-class SplitInputSpec(TraitedSpec):
+class SplitInputSpec(BaseInterfaceInputSpec):
     inlist = traits.List(traits.Any, mandatory=True,
                   desc='list of values to split')
     splits = traits.List(traits.Int, mandatory=True,
@@ -154,7 +154,7 @@ class Split(IOBase):
                 outputs['out%d'%(i+1)] =  np.array(self.inputs.inlist)[splits[i]:splits[i+1]].tolist()
         return outputs
 
-class SelectInputSpec(TraitedSpec):
+class SelectInputSpec(BaseInterfaceInputSpec):
     inlist = InputMultiPath(traits.Any, mandatory=True,
                   desc='list of values to choose from')
     index = InputMultiPath(traits.Int, mandatory=True,
@@ -193,7 +193,7 @@ class Select(IOBase):
         outputs['out'] = out
         return outputs
 
-class FunctionInputSpec(DynamicTraitedSpec):
+class FunctionInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     function_str = traits.Str(mandatory=True, desc='code for function')
 
 class Function(IOBase):
@@ -323,7 +323,7 @@ class SubstringMatch(BasicInterface):
         return outputs
 '''
 
-class AssertEqualInputSpec(TraitedSpec):
+class AssertEqualInputSpec(BaseInterfaceInputSpec):
     volume1 = File(exists=True, mandatory=True)
     volume2 = File(exists=True, mandatory=True)
     

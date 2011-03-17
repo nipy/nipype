@@ -19,7 +19,8 @@ package_check('matplotlib')
 
 from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
                                     OutputMultiPath, Undefined, traits,
-                                    BaseInterface, isdefined)
+                                    BaseInterface, isdefined,
+    BaseInterfaceInputSpec)
 
 from nipype.utils.filemanip import fname_presuffix
 
@@ -27,7 +28,7 @@ import nitime.analysis as nta
 from nitime.timeseries import TimeSeries
 import nitime.viz as viz
     
-class CoherenceAnalyzerInputSpec(TraitedSpec):
+class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
 
     #Input either csv file, or time-series object and use _xor_inputs to
     #discriminate

@@ -7,11 +7,12 @@ from nipype.utils.misc import package_check
 package_check('nipy')
 from nipy.neurospin.mask import compute_mask
 
-from nipype.interfaces.base import TraitedSpec, BaseInterface, traits
+from nipype.interfaces.base import TraitedSpec, BaseInterface, traits,\
+    BaseInterfaceInputSpec
 from nipype.interfaces.traits import File
 from nipype.utils.misc import isdefined
 
-class ComputeMaskInputSpec(TraitedSpec):
+class ComputeMaskInputSpec(BaseInterfaceInputSpec):
     mean_volume = File(exists=True, mandatory=True, desc="mean EPI image, used to compute the threshold for the mask")
     reference_volume = File(exists=True, desc="reference volume used to compute the mask. If none is give, the \
         mean volume is used.")
