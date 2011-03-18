@@ -829,23 +829,28 @@ class Stream(object):
 
     def read(self, drain=0):
         "Read from the file descriptor. If 'drain' set, read until EOF."
-        while self._read() is not None:
+        while self._read(drain) is not None:
             if not drain:
                 break
 
-    def _read(self):
+    def _read(self, drain):
         "Read from the file descriptor"
         fd = self.fileno()
         buf = os.read(fd, 4096)
-        if not buf:
+        if not buf and not self._buf:
             return None
         if '\n' not in buf:
-            self._buf += buf
-            return []
+            if not drain:
+                self._buf += buf
+                return []
 
         # prepend any data previously read, then split into lines and format
         buf = self._buf + buf
-        tmp, rest = buf.rsplit('\n', 1)
+        if '\n' in buf:
+            tmp, rest = buf.rsplit('\n', 1)
+        else:
+            tmp = buf
+            rest = None
         self._buf = rest
         now = datetime.datetime.now().isoformat()
         rows = tmp.split('\n')

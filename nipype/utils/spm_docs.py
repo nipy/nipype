@@ -47,7 +47,7 @@ def _strip_header(doc):
     try:
         index = doc.index(hdr)
         index += len(hdr)
-        index += 2
+        index += 1
         doc = doc[index:]
         try:
             index = doc.index(cruft)
