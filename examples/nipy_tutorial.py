@@ -252,7 +252,7 @@ the processing nodes.
 """
 
 l1pipeline = pe.Workflow(name="level1")
-l1pipeline.base_dir = os.path.abspath('spm_tutorial/workingdir')
+l1pipeline.base_dir = os.path.abspath('nipy_tutorial/workingdir')
 
 l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                   (datasource,realign,[('func','in_files')]),
