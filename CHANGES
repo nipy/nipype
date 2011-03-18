@@ -2,7 +2,10 @@ Release 0.4 (FUTURE)
 ====================
 
 * API: Workflow run function no longer supports inseries, createdirsonly
+       Functions used in connect string must be pickleable
 
+* ENH: All commandline interfaces display stdout and stderr
+* ENH: All interfaces raise exceptions on error with an option to suppress
 * ENH: Supports a plugin interface for external execution
 * ENH: MapNode runs in parallel under IPython
 * ENH: Optionally allows keeping only required outputs
