@@ -10,7 +10,7 @@ from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec,
 from nipype.interfaces.io import IOBase, add_traits
 from nipype.testing import assert_equal
 from nipype.utils.filemanip import (filename_to_list)
-from nipype.utils.misc import getsource, create_function_from_source
+from nipype.utils.misc import getsource, create_function_from_source, dumps
     
 class IdentityInterface(IOBase):
     """Basic interface class generates identity mappings
@@ -238,12 +238,21 @@ class Function(IOBase):
                 self.inputs.function_str = function
             else:
                 raise Exception('Unknown type of function')
+        self.inputs.on_trait_change(self._set_function_string, 'function_str')
         self._input_names = filename_to_list(input_names)
         self._output_names = filename_to_list(output_names)
         add_traits(self.inputs, [name for name in self._input_names])
         self._out = {}
         for name in self._output_names:
             self._out[name] = None
+
+    def _set_function_string(self, obj, name, old, new):
+        if name == 'function_str':
+            if hasattr(new, '__call__'):
+                function_source = getsource(new)
+            elif isinstance(new, str):
+                function_source = dumps(new)
+            self.inputs.trait_set(trait_change_notify=False, **{'%s'%name:function_source})
 
     def _add_output_traits(self, base):
         undefined_traits = {}
@@ -282,46 +291,6 @@ class Function(IOBase):
             outputs[key] = self._out[key]
         return outputs
 
-'''
-class SubstringMatch(BasicInterface):
-    """Basic interface class to match list items containing specific substrings
-
-    Examples
-    --------
-    
-    >>> from nipype.interfaces.utility import SubstringMatch
-    >>> match = SubstringMatch()
-    >>> match.inputs.update(inlist=['foo', 'goo', 'zoo'], substrings='oo')
-    >>> out = match.run()
-    >>> out.outputs.out
-    ['foo', 'goo', 'zoo']
-    >>> match.inputs.update(inlist=['foo', 'goo', 'zoo'], substrings=['foo'])
-    >>> out = match.run()
-    >>> out.outputs.out
-    'foo'
-    
-    """
-    def __init__(self):
-        self.inputs = Bunch(inlist=None,
-                            substrings=None)
-        
-    def outputs(self):
-        outputs = Bunch(out=None)
-        return outputs
-    
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outputs.out = []
-        for val in filename_to_list(self.inputs.inlist):
-            match = [val for pat in filename_to_list(self.inputs.substrings) if val.find(pat) >= 0]
-            if match:
-                outputs.out.append(val)
-        if not outputs.out:
-            outputs.out = None
-        else:
-            outputs.out = list_to_filename(outputs.out)
-        return outputs
-'''
 
 class AssertEqualInputSpec(BaseInterfaceInputSpec):
     volume1 = File(exists=True, mandatory=True)

@@ -837,8 +837,8 @@ class CommandLine(BaseInterface):
     'ls -al'
 
     >>> cli.inputs.trait_get()
-    {'args': '-al', 'environ': {'DISPLAY': ':1'}}
-
+    {'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}
+    
     >>> cli.help()
     Inputs
     ------
@@ -846,6 +846,7 @@ class CommandLine(BaseInterface):
     Optional:
      args: Additional parameters to the command
      environ: Environment variables (default={})
+     ignore_exception: Print an error message instead      of throwing an exception in case the interface fails to run (default=False)
     <BLANKLINE>
     Outputs
     -------
@@ -853,7 +854,7 @@ class CommandLine(BaseInterface):
 
 
     >>> cli.inputs.hashval
-    ({'args': '-al', 'environ': {'DISPLAY': ':1'}}, '998f3bdb3d4ed9b5177e34387117cb0d')
+    ({'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}, 'b1faf85652295456a906f053d48daef6')
 
     """
 
