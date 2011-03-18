@@ -4,6 +4,8 @@
 How to wrap a MATLAB script
 ===========================
 
+This is minimal script for wrapping MATLAB code. You should replace the MATLAB
+code template, and define approriate inputs and outputs.
 
 .. testcode::
 
@@ -24,6 +26,7 @@ How to wrap a MATLAB script
 	    output_spec = SampleMatlabScriptOutputSpec
 	    
 	    def __init__(self, **inputs):
+	    	#this is your MATLAB code template
 	        inputs['script'] = """in_file = '%%in_file%%';
 	out_file = '%%out_file%%';
 	

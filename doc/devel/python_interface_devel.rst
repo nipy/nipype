@@ -4,6 +4,8 @@
 How to wrap a Python script
 ===========================
 
+This is a minimal pure python interface. As you can see all you need to do is to
+do is to define inputs, outputs, _run_interface() (not run()), and _list_outputs. 
 
 .. testcode::
 	
