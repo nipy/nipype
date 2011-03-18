@@ -30,7 +30,7 @@ class ComputeMask(BaseInterface):
     def _run_interface(self, runtime):
         
         args = {}
-        for key in [k for k,_ in self.inputs.items() if k != 'ignore_exception']:
+        for key in [k for k,_ in self.inputs.items() if k not in BaseInterfaceInputSpec().trait_names()]:
             value = getattr(self.inputs, key)
             if isdefined(value):
                 if key in ['mean_volume', 'reference_volume']:
