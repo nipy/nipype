@@ -23,7 +23,7 @@ How to wrap a MATLAB script
 	    input_spec = SampleMatlabScriptInputSpec
 	    output_spec = SampleMatlabScriptOutputSpec
 	    
-	    def __init__(self, matlab_cmd = None, **inputs):
+	    def __init__(self, **inputs):
 	        inputs['script'] = """in_file = '%%in_file%%';
 	out_file = '%%out_file%%';
 	
@@ -35,7 +35,7 @@ How to wrap a MATLAB script
 	save(out_file, 'cmatrix', 'C');
 	return;
 	"""
-	        return super(SampleMatlabScript, self).__init__(matlab_cmd, **inputs)
+	        return super(SampleMatlabScript, self).__init__(**inputs)
 	    
 	    def _run_interface(self, runtime):
 	        #replace the placeholders in the template with inputs
