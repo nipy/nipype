@@ -19,9 +19,5 @@ conventions documented in the `NIPY Developers Guide
    architecture
    interface_specs
    cmd_interface_devel
-   planning
-   proposed_interfaces
-   usecases
-   userfeedback
 
 .. include:: ../links_names.txt
