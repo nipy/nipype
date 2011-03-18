@@ -597,10 +597,11 @@ class ProbTrackX(FSLCommand):
     seed='MASK_average_thal_right.nii', mode='seedmask', \
     xfm='trans.mat', n_samples=3, n_steps=10, force_dir=True, opd=True, os2t=True, \
     target_masks = ['targets_MASK1.nii','targets_MASK2.nii'], \
-    paths_file='nipype_fdtpaths', out_dir='.')
+    thsamples='merged_thsamples.nii', fsamples='merged_fsamples.nii', phsamples='merged_phsamples.nii', \
+    out_dir='.')
     >>> pbx.cmdline
-    'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=. --out=nipype_fdtpaths -s merged -x MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
-
+    'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=. --samples=merged --seed=MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
+    
     """
     
     _cmd = 'probtrackx'
