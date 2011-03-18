@@ -20,5 +20,6 @@ conventions documented in the `NIPY Developers Guide
    interface_specs
    cmd_interface_devel
    matlab_interface_devel
+   python_interface_devel
 
 .. include:: ../links_names.txt
