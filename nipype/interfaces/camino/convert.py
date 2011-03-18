@@ -453,8 +453,40 @@ class ProcStreamlines(CommandLine):
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + "_proc"
-        
-        class TractShredderOutputSpec(TraitedSpec):
+
+class TractShredderInputSpec(CommandLineInputSpec):       
+    """
+    tractshredder <offset> <bunchsize> <space>
+
+    Example:
+        Output every third streamline from the file tracts.Bfloat.
+
+           cat tracts.Bfloat | tractshredder 0 1 2 > shredded.Bfloat
+           tractshredder 0 1 2 < tracts.Bfloat > shredded.Bfloat
+
+        tractshredder works in a similar way to shredder, but processes streamlines instead of scalar data.
+        The input is raw streamlines, in the format produced by track or procstreamlines.
+
+           The  program  first  makes an initial offset of offset tracts.  It then
+           reads and outputs a group of bunchsize tracts, skips space tracts,  and
+           repeats until there is no more input.
+    """
+    offset = traits.Int(argstr='%d', units='NA',
+        desc='initial offset of offset tracts', position=1)
+
+    bunchsize = traits.Int(argstr='%d', units='NA',
+        desc='reads and outputs a group of bunchsize tracts', position=2)
+
+    space = traits.Int(argstr='%d', units='NA',
+        desc='skips space tracts', position=3)
+
+    in_file = File(exists=True, argstr='< %s',
+                    mandatory=True, position=-2,
+                    desc='tract file')
+    
+    out_file = File(argstr="> %s", position=-1, genfile=True)
+            
+class TractShredderOutputSpec(TraitedSpec):
     shredded = File(exists=True, desc='Shredded tract file') 
 
 class TractShredder(CommandLine):

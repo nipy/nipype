@@ -29,7 +29,7 @@ def get_data_dims(volume):
 fsl.FSLCommand.set_default_output_type('NIFTI')
 
 # This needs to point to the freesurfer subjects directory (Recon-all must have been run on subj1 from the FSL course data)
-# The freesurfer subj1 directory can be downloaded here: 
+# This data can be downloaded from: http://dl.dropbox.com/u/315714/subj1.zip
 # If there is already another example dataset with both DWI and a Freesurfer directory, we can switch this tutorial to use
 # that instead...
 
@@ -47,7 +47,7 @@ subject_list = ['subj1']
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
 infosource.iterables = ('subject_id', subject_list)
 
-info = dict(dwi=[['subject_id', 'dwi']],
+info = dict(dwi=[['subject_id', 'data']],
             bvecs=[['subject_id','bvecs']],
             bvals=[['subject_id','bvals']])
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
@@ -56,14 +56,13 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
 
 datasource.inputs.template = "%s/%s"
 datasource.inputs.base_directory = data_dir
-datasource.inputs.field_template = dict(dwi='%s/%s.nii')
+datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz')
 datasource.inputs.template_args = info
 datasource.inputs.base_directory = data_dir
 
 FreeSurferSource = pe.Node(interface=nio.FreeSurferSource(), name='fssource')
 FreeSurferSource.inputs.subjects_dir = subjects_dir
 
-		
 # FSL: Brain Extraction on b0 image
 b0Strip = pe.Node(interface=fsl.BET(mask = True), name = 'bet_b0')
 
@@ -92,8 +91,6 @@ tractshred.inputs.space = 1
 
 conmap = pe.Node(interface=camino.Conmap(), name='conmap')
 conmap.inputs.threshold = 100
-
-conmaptxt2mat = pe.Node(interface=camino.ConmapTxt2Mat(), name='conmaptxt2mat')
 
 FreeSurferSourceLH = pe.Node(interface=nio.FreeSurferSource(), name='fssourceLH')
 FreeSurferSourceLH.inputs.subjects_dir = subjects_dir
@@ -206,7 +203,7 @@ mapping.connect([(inputnode, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel
 
 mapping.connect([(picopdfs, track,[("pdfs","in_file")])])
 
-#Memory errors were fixed by shredding tracts. ProcStreamlines now runs fine, but I am still unable to open the OOGl file in Geomview. Could someone else try this on their machine? (output file is around 1gb!)
+#Memory errors were fixed by shredding tracts. ProcStreamlines now runs fine, but I am still unable to open the OOGl file in Geomview. Could someone else try this on their machine? (output file is around 1 gb!)
 #mapping.connect([(tractshred, procstreamlines,[("shredded","in_file")])])
 
 mapping.connect([(track, camino2trackvis, [('tracked','in_file')]),                    
@@ -216,7 +213,6 @@ mapping.connect([(track, camino2trackvis, [('tracked','in_file')]),
 
 mapping.connect([(track, tractshred,[("tracked","in_file")])])
 mapping.connect([(tractshred, conmap,[("shredded","in_file")])])
-#mapping.connect([(conmap, conmaptxt2mat,[("conmap_txt","in_file")])])
 
 mapping.connect([(inputnode, FreeSurferSource,[("subject_id","subject_id")])])
 mapping.connect([(inputnode, FreeSurferSourceLH,[("subject_id","subject_id")])])
@@ -224,8 +220,8 @@ mapping.connect([(inputnode, FreeSurferSourceRH,[("subject_id","subject_id")])])
 mapping.connect([(FreeSurferSourceLH, mris_convertLH,[("pial","in_file")])])
 mapping.connect([(FreeSurferSourceRH, mris_convertRH,[("pial","in_file")])])
 
-connectivity = pe.Workflow(name="dwiproc")
-connectivity.base_dir = os.path.abspath('connectivity')
+connectivity = pe.Workflow(name="connectivity")
+connectivity.base_dir = os.path.abspath('connectivity_tutorial')
 connectivity.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,mapping,[('dwi','inputnode.dwi'),
