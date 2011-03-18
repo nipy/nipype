@@ -821,6 +821,7 @@ class Stream(object):
         self._impl = impl
         self._buf = ''
         self._rows = []
+        self._lastidx = 0
 
     def fileno(self):
         "Pass-through for file descriptor."
@@ -848,8 +849,10 @@ class Stream(object):
         self._buf = rest
         now = datetime.datetime.now().isoformat()
         rows = tmp.split('\n')
-        self._rows += [(now, '%s %s: %s' % (self._name, now, r), r) for r in rows]
-        iflogger.info(self._rows[-1][1])
+        self._rows += [(now, '%s %s:%s' % (self._name, now, r), r) for r in rows]
+        for idx in range(self._lastidx, len(self._rows)):
+            iflogger.info(self._rows[idx][1])
+        self._lastidx = len(self._rows)
 
 def run_command(runtime, timeout=0.1):
     """
