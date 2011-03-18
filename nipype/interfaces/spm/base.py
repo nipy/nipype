@@ -243,6 +243,7 @@ class SPMCommand(BaseInterface):
                 self.raise_exception(runtime)
         runtime.stdout = results.runtime.stdout
         runtime.stderr = results.runtime.stderr
+        runtime.merged = results.runtime.merged
         return runtime
     
     def _list_outputs(self):
@@ -412,7 +413,7 @@ class SPMCommand(BaseInterface):
         if strcmp(spm('ver'),'SPM8'), 
            jobs=spm_jobman('spm5tospm8',{jobs});
         end 
-        spm_jobman(\'run\',jobs);\n
+        spm_jobman(\'run_nogui\',jobs);\n
         """
         if postscript is not None:
             mscript += postscript
