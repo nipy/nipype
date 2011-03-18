@@ -1140,7 +1140,7 @@ class MapNode(Node):
 
     def get_subnodes(self):
         self._get_inputs()
-        return [node for node in self._make_nodes()]
+        return [node for _, node in self._make_nodes()]
     
     def _run_interface(self, execute=True, updatehash=False):
         """Run the mapnode interface
