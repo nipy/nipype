@@ -14,10 +14,10 @@ conventions documented in the `NIPY Developers Guide
 .. toctree::
    :maxdepth: 2
 
+   writing_custom_interfaces
    gitwash/index   
    development_quickstart
    architecture
-   interface_specs
-   cmd_interface_devel
+
 
 .. include:: ../links_names.txt
