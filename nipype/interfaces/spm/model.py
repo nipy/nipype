@@ -265,10 +265,10 @@ class EstimateContrastInputSpec(SPMCommandInputSpec):
     residual_image = File(exists=True, desc='Mean-squared image of the residuals', 
                           copyfile=False,
                           mandatory=True)
-    ignore_derivs = traits.Bool(True, desc='ignore derivatives for estimation',
-                                usedefault=True, xor=['group_contrast'])
-    group_contrast = traits.Bool(False, desc='higher level contrast', usedefault=True,
-                                 xor=['ignore_derivs'])
+    use_derivs = traits.Bool(desc='use derivatives for estimation',
+                             xor=['group_contrast'])
+    group_contrast = traits.Bool(desc='higher level contrast',
+                                 xor=['use_derivs'])
 
 class EstimateContrastOutputSpec(TraitedSpec):
     con_images = OutputMultiPath(File(exists=True), desc='contrast images from a t-contrast')
@@ -322,13 +322,13 @@ class EstimateContrast(SPMCommand):
         script += "save(jobs{1}.stats{1}.con.spmmat{:},'SPM');\n"
         script += "names = SPM.xX.name;\n"
         # get names for columns
-        if self.inputs.group_contrast:
+        if isdefined(self.inputs.group_contrast) and self.inputs.group_contrast:
             script += "condnames=names;\n"
         else:
-            if self.inputs.ignore_derivs:
-                script += "pat = 'Sn\([0-9*]\) (.*)\*bf\(1\)|Sn\([0-9*]\) .*\*bf\([2-9]\)|Sn\([0-9*]\) (.*)';\n"
-            else:
+            if self.inputs.use_derivs:
                 script += "pat = 'Sn\([0-9*]\) (.*)';\n"
+            else:
+                script += "pat = 'Sn\([0-9*]\) (.*)\*bf\(1\)|Sn\([0-9*]\) .*\*bf\([2-9]\)|Sn\([0-9*]\) (.*)';\n"
             script += "t = regexp(names,pat,'tokens');\n"
             # get sessidx for columns
             script += "pat1 = 'Sn\(([0-9].*)\)\s.*';\n"
