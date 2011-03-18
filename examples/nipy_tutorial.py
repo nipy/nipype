@@ -168,9 +168,10 @@ necessary to generate an SPM design matrix. In this tutorial, the same
 paradigm was used for every participant.
 """
 
-from nipype.interfaces.base import Bunch
-from copy import deepcopy
+
 def subjectinfo(subject_id):
+    from nipype.interfaces.base import Bunch
+    from copy import deepcopy
     print "Subject ID: %s\n"%str(subject_id)
     output = []
     names = ['Task-Odd','Task-Even']
