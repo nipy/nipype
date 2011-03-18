@@ -1110,8 +1110,7 @@ class MapNode(Node):
                                        outputs=self.outputs)
         returncode = []
         for i, node, err in nodes:
-            runtime = Bunch(returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
-            self._result.runtime.insert(i, runtime)
+            self._result.runtime.insert(i, None)
             if node.result and hasattr(node.result, 'runtime'):
                 self._result.interface.insert(i, node.result.interface)
                 self._result.runtime[i] = node.result.runtime
@@ -1131,7 +1130,13 @@ class MapNode(Node):
                 if any([val != Undefined for val in values]) and self._result.outputs:
                     setattr(self._result.outputs, key, values)
         if returncode and any([code is not None for code in returncode]):
-            raise Exception('One of the subnodes of node: %s failed'%self.name)
+            msg = []
+            for i, code in enumerate(returncode):
+                if code is not None:
+                    msg += ['Subnode %d failed'%i]
+                    msg += ['Error:', str(code)]
+            raise Exception('Subnodes of node: %s failed:\n%s'%(self.name,
+                                                                '\n'.join(msg)))
 
     def get_subnodes(self):
         self._get_inputs()

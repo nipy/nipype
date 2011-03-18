@@ -10,13 +10,14 @@ Requires Packages to be installed
 
 from ConfigParser import NoOptionError
 from copy import deepcopy
+import datetime
 import os
 from socket import gethostname
 from string import Template
+import select
 import subprocess
 from time import time
 from warnings import warn
-
 
 import enthought.traits.api as traits
 from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
@@ -27,6 +28,7 @@ from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                     hash_timestamp)
 from nipype.utils.misc import is_container
 from nipype.utils.config import config
+from nipype.utils.logger import iflogger
 from nipype.utils.misc import isdefined
 
 
@@ -550,7 +552,7 @@ class Interface(object):
         """Execute the command."""
         raise NotImplementedError
 
-    def aggregate_outputs(self):
+    def aggregate_outputs(self, runtime=None):
         """Called to populate outputs"""
         raise NotImplementedError
 
@@ -564,7 +566,7 @@ class Interface(object):
             Necessary for pipeline operation
         """
         raise NotImplementedError
-    
+
 class BaseInterfaceInputSpec(TraitedSpec):
     ignore_exception = traits.Bool(False, desc = "Print an error message instead \
      of throwing an exception in case the interface fails to run", usedefault = True)
@@ -768,8 +770,8 @@ class BaseInterface(Interface):
                 e.args = (e.args[0] + "\n" + message,)
             else:
                 e.args = (message,)
-            
-            #exception raising inhibition for special cases   
+
+            #exception raising inhibition for special cases
             if hasattr(self.inputs,'ignore_exception') and \
             isdefined(self.inputs.ignore_exception) and \
             self.inputs.ignore_exception:
@@ -808,6 +810,91 @@ class BaseInterface(Interface):
                         raise error
         return outputs
 
+class Stream(object):
+    """Function to capture stdout and stderr streams with timestamps
+
+    http://stackoverflow.com/questions/4984549/merge-and-sync-stdout-and-stderr/5188359#5188359
+    """
+
+    def __init__(self, name, impl):
+        self._name = name
+        self._impl = impl
+        self._buf = ''
+        self._rows = []
+
+    def fileno(self):
+        "Pass-through for file descriptor."
+        return self._impl.fileno()
+
+    def read(self, drain=0):
+        "Read from the file descriptor. If 'drain' set, read until EOF."
+        while self._read() is not None:
+            if not drain:
+                break
+
+    def _read(self):
+        "Read from the file descriptor"
+        fd = self.fileno()
+        buf = os.read(fd, 4096)
+        if not buf:
+            return None
+        if '\n' not in buf:
+            self._buf += buf
+            return []
+
+        # prepend any data previously read, then split into lines and format
+        buf = self._buf + buf
+        tmp, rest = buf.rsplit('\n', 1)
+        self._buf = rest
+        now = datetime.datetime.now().isoformat()
+        rows = tmp.split('\n')
+        self._rows += [(now, '%s %s: %s' % (self._name, now, r), r) for r in rows]
+        iflogger.info(self._rows[-1][1])
+
+def run_command(runtime, timeout=0.1):
+    """
+    Run a command, read stdout and stderr, prefix with timestamp. The returned
+    runtime contains a merged stdout+stderr log with timestamps
+
+    http://stackoverflow.com/questions/4984549/merge-and-sync-stdout-and-stderr/5188359#5188359
+    """
+    PIPE = subprocess.PIPE
+    proc = subprocess.Popen(runtime.cmdline,
+                             stdout=PIPE,
+                             stderr=PIPE,
+                             shell=True,
+                             cwd=runtime.cwd,
+                             env=runtime.environ)
+    streams = [
+        Stream('stdout', proc.stdout),
+        Stream('stderr', proc.stderr)
+        ]
+
+    def _process(drain=0):
+        res = select.select(streams, [], [], timeout)
+        for stream in res[0]:
+            stream.read(drain)
+
+    while proc.returncode is None:
+        proc.poll()
+        _process()
+    runtime.returncode = proc.returncode
+    _process(drain=1)
+
+    # collect results, merge and return
+    result = {}
+    temp = []
+    for stream in streams:
+        rows = stream._rows
+        temp += rows
+        result[stream._name] = [r[2] for r in rows]
+    temp.sort()
+    result['merged'] = [r[1] for r in temp]
+    runtime.stderr = '\n'.join(result['stderr'])
+    runtime.stdout = '\n'.join(result['stdout'])
+    runtime.merged = result['merged']
+    return runtime
+
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
@@ -838,7 +925,7 @@ class CommandLine(BaseInterface):
 
     >>> cli.inputs.trait_get()
     {'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}
-    
+
     >>> cli.help()
     Inputs
     ------
@@ -917,24 +1004,17 @@ class CommandLine(BaseInterface):
         if not self._exists_in_path(self.cmd.split()[0]):
             raise IOError("%s could not be found on host %s"%(self.cmd.split()[0],
                                                          runtime.hostname))
-        proc = subprocess.Popen(runtime.cmdline,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE,
-                                 shell=True,
-                                 cwd=runtime.cwd,
-                                 env=runtime.environ)
-        runtime.stdout, runtime.stderr = proc.communicate()
-        runtime.returncode = proc.returncode
+        runtime = run_command(runtime)
         if runtime.returncode is None or runtime.returncode != 0:
             self.raise_exception(runtime)
-        
+
         return runtime
 
     def _exists_in_path(self, cmd):
         '''
         Based on a code snippet from http://orip.org/2009/08/python-checking-if-executable-exists-in.html
         '''
-    
+
         extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
         for directory in os.environ.get("PATH", "").split(os.pathsep):
             base = os.path.join(directory, cmd)
@@ -943,7 +1023,7 @@ class CommandLine(BaseInterface):
                 if os.path.exists(filename):
                     return True
         return False
-  
+
     def _gen_filename(self, name):
         """ Generate filename attributes before running.
 
@@ -985,7 +1065,7 @@ class CommandLine(BaseInterface):
             if sep == None:
                 sep = ' '
             if argstr.endswith('...'):
-                
+
                 # repeatable option
                 # --id %d... will expand to
                 # --id 1 --id 2 --id 3 etc.,.
