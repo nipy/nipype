@@ -361,7 +361,12 @@ class Workflow(WorkflowBase):
             graph = self._create_flat_graph()
         if graph2use == 'exec':
             graph = generate_expanded_graph(deepcopy(graph))
-        export_graph(graph, self.base_dir, dotfilename=dotfilename)
+            
+        base_dir, dotfilename = os.path.split(dotfilename)
+        if base_dir == '':
+            base_dir = self.base_dir
+                 
+        export_graph(graph, base_dir, dotfilename=dotfilename)
 
     def run(self, plugin=None, updatehash=False):
         """ Execute the workflow
