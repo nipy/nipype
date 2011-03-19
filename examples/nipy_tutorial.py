@@ -204,7 +204,7 @@ contrasts = [cont1,cont2]
 in seconds so "output_units" has always have to be set to "secs".
 """
 
-modelspec = pe.Node(interface=model.SpecifyModel(), name= "modelspec")
+modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
 modelspec.inputs.concatenate_runs        = True
 modelspec.inputs.input_units             = 'secs'
 modelspec.inputs.output_units            = 'secs'

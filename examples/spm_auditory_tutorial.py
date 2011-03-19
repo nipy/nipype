@@ -164,7 +164,7 @@ l1analysis = pe.Workflow(name='analysis')
 :class:`nipype.interfaces.spm.SpecifyModel`.
 """
 
-modelspec = pe.Node(interface=model.SpecifyModel(), name= "modelspec")
+modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
 
 """Generate a first level SPM.mat file for analysis
 :class:`nipype.interfaces.spm.Level1Design`.
@@ -312,6 +312,7 @@ modelspecref = l1pipeline.inputs.analysis.modelspec
 modelspecref.input_units             = 'scans'
 modelspecref.output_units            = 'scans'
 modelspecref.time_repetition         = 7
+modelspecref.high_pass_filter_cutoff = 120
 
 l1designref = l1pipeline.inputs.analysis.level1design
 l1designref.timing_units       = modelspecref.output_units
