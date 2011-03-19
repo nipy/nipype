@@ -14,20 +14,9 @@ def create_bedpostx_pipeline(name="bedpostx"):
     """Creates a pipeline that does the same as bedpostx script from FSL -
     calculates diffusion model parameters (distributions not MLE) voxelwise for
     the whole volume (by splitting it slicewise).
-        . 
-    Inputs: 
-    "inputnode.dwi"
-    "inputnode.mask"
     
-    Outputs:
-    "outputnode.thsamples"
-    "outputnode.phsamples"
-    "outputnode.fsamples"
-    "outputnode.mean_thsamples"
-    "outputnode.mean_phsamples"
-    "outputnode.mean_fsamples"
-    "outputnode.dyads"
-    "outputnode.dyads_dispersion"
+    Example
+    -------
     
     >>> nipype_bedpostx = create_bedpostx_pipeline("nipype_bedpostx")
     >>> nipype_bedpostx.inputs.inputnode.dwi = 'diffusion.nii'
@@ -39,6 +28,23 @@ def create_bedpostx_pipeline(name="bedpostx"):
     >>> nipype_bedpostx.inputs.xfibres.burn_in = 1000
     >>> nipype_bedpostx.inputs.xfibres.n_jumps = 1250
     >>> nipype_bedpostx.inputs.xfibres.sample_every = 25
+    >>> nipype_bedpostx.run() # doctest: +SKIP
+    
+    Inputs::
+    
+        inputnode.dwi
+        inputnode.mask
+    
+    Outputs::
+    
+        outputnode.thsamples
+        outputnode.phsamples
+        outputnode.fsamples
+        outputnode.mean_thsamples
+        outputnode.mean_phsamples
+        outputnode.mean_fsamples
+        outputnode.dyads
+        outputnode.dyads_dispersion
     
     """
     
@@ -165,16 +171,22 @@ def create_eddy_correct_pipeline(name="eddy_correct"):
     series of diffusion weighted images and linearly corregisters them to one
     reference image.
     
-    Inputs:
-    inputnode.in_file
-    inputnode.ref_num
-    
-    Outputs:
-    outputnode.eddy_corrected
+    Example
+    -------
     
     >>> nipype_eddycorrect = create_eddy_correct_pipeline("nipype_eddycorrect")
     >>> nipype_eddycorrect.inputs.inputnode.in_file = 'diffusion.nii'
     >>> nipype_eddycorrect.inputs.inputnode.ref_num = 0
+    >>> nipype_eddycorrect.run() # doctest: +SKIP
+    
+    Inputs::
+    
+        inputnode.in_file
+        inputnode.ref_num
+    
+    Outputs::
+    
+        outputnode.eddy_corrected
     """
     
     inputnode = pe.Node(interface = util.IdentityInterface(fields=["in_file", "ref_num"]), 
