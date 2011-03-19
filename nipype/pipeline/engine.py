@@ -343,7 +343,7 @@ class Workflow(WorkflowBase):
             outnode = None
         return outnode
 
-    def write_graph(self, dotfilename='graph.dot', graph2use='flat'):
+    def write_graph(self, dotfilename='graph.dot', graph2use='flat', format="png"):
         """Generates a graphviz dot file and a png file
 
         Parameters
@@ -354,6 +354,8 @@ class Workflow(WorkflowBase):
                    workflow nodes
             flat - expands workflow nodes recursively
             exec - expands workflows to depict iterables
+        
+        format: 'png', 'svg'
             
         """
         graph = self._graph
@@ -366,7 +368,7 @@ class Workflow(WorkflowBase):
         if base_dir == '':
             base_dir = self.base_dir
                  
-        export_graph(graph, base_dir, dotfilename=dotfilename)
+        export_graph(graph, base_dir, dotfilename=dotfilename, format=format)
 
     def run(self, plugin=None, updatehash=False):
         """ Execute the workflow

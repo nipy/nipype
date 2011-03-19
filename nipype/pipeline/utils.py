@@ -385,7 +385,7 @@ def generate_expanded_graph(graph_in):
     return graph_in
 
 def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
-                 show_connectinfo=False, dotfilename='graph.dot'):
+                 show_connectinfo=False, dotfilename='graph.dot', format='png'):
     """ Displays the graph layout of the pipeline
     
     This function requires that pygraphviz and matplotlib are available on
@@ -422,7 +422,7 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
                                newpath=base_dir)
     logger.info('Creating detailed dot file: %s'%outfname)
     _write_detailed_dot(graph, outfname)
-    cmd = 'dot -Tpng -O %s' % outfname
+    cmd = 'dot -T%s -O %s' % (format, outfname)
     res = CommandLine(cmd).run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
@@ -433,7 +433,7 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
                                newpath=base_dir)
     nx.write_dot(pklgraph, outfname)
     logger.info('Creating dot file: %s' % outfname)
-    cmd = 'dot -Tpng -O %s' % outfname
+    cmd = 'dot -T%s -O %s' % (format, outfname)
     res = CommandLine(cmd).run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
