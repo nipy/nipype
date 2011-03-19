@@ -150,8 +150,8 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
     input_units = traits.Enum('secs', 'scans', mandatory=True,
              desc = "Units of event onsets and durations (secs or scans)" \
                     "Output units are always in secs")
-    high_pass_filter_cutoff = traits.Float(desc = \
-                                     "High-pass filter cutoff in secs")
+    high_pass_filter_cutoff = traits.Float(mandatory=True,
+                                     desc="High-pass filter cutoff in secs")
     time_repetition = traits.Float(mandatory=True,
         desc = "Time between the start of one volume to the start of " \
                                        "the next image volume.")
