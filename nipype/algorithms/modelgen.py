@@ -19,6 +19,7 @@ These functions include:
 """
 
 from copy import deepcopy
+import os
 
 from nibabel import load
 import numpy as np
@@ -131,10 +132,35 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
     timelist = [np.max([0., _scalefactor*t]) for t in timelist]
     return timelist
 
+def gen_info(run_event_files):
+    """Generate subject_info structure from a list of event files
+    """
+    info = []
+    for i, event_files in enumerate(run_event_files):
+        runinfo = Bunch(cond=[], onsets=[], durations=[], amplitudes=[])
+        for event_file in event_files:
+            _, name = os.path.split(event_file)
+            name, _ = name.split('.run%03d'%(i+1))
+            runinfo.cond.append(name)
+            event_info = np.loadtxt(event_file)
+            runinfo.onsets.append(event_info[:,0].tolist())
+            if event_info.shape[1] > 1:
+                runinfo.durations.append(event_info[:,1].tolist())
+            else:
+                runinfo.durations.append([0])
+            if event_info.shape[1] > 2:
+                runinfo.amplitudes.append(event_info[:,2].tolist())
+            else:
+                delattr(runinfo, 'amplitudes')
+        info.append(runinfo)
+    return info
+
 class SpecifyModelInputSpec(BaseInterfaceInputSpec):
-    subject_info = InputMultiPath(Bunch, mandatory=True,
+    subject_info = InputMultiPath(Bunch, mandatory=True, xor=['event_info'],
                           desc= "Bunch of List(Bunch) subject specific condition information. " \
                           "see :class:`SpecifyModel` or SpecifyModel.__doc__ for details")
+    event_info = InputMultiPath(traits.List(File(exists=True)), mandatory=True, xor=['subject_info'],
+                              desc='list of event description files 1,2 or 3 column format corresponding to onsets, durations and amplitudes')
     realignment_parameters = InputMultiPath(File(exists=True),
        desc = "Realignment parameters returned by motion correction algorithm",
                                          filecopy=False)
@@ -201,6 +227,13 @@ class SpecifyModel(BaseInterface):
       - names : list of names corresponding to each column. Should be None if
         automatically assigned.
       - values : lists of values for each regressors
+
+    Alternatively, you can provide information through event files.
+
+    The event files have to be in 1,2 or 3 column format with the columns
+    corresponding to Onsets, Durations and Amplitudes and they have to have the
+    name event_name.runXXX... e.g.: Words.run001.txt. The event_name part will
+    be used to create the condition names.
 
     Examples
     --------
@@ -311,7 +344,10 @@ class SpecifyModel(BaseInterface):
                     else:
                         outliers.append(outindices.tolist())
         if infolist is None:
-            infolist = self.inputs.subject_info
+            if isdefined(self.inputs.subject_info):
+                infolist = self.inputs.subject_info
+            else:
+                infolist = gen_info(self.inputs.event_files)
         self._sessinfo = self._generate_standard_design(infolist,
                                                   functional_runs=self.inputs.functional_runs,
                                                   realignment_parameters=realignment_parameters,
@@ -415,9 +451,11 @@ class SpecifySPMModel(SpecifyModel):
         if not isdefined(self.inputs.concatenate_runs):
             super(SpecifySPMModel, self)._generate_design()
             return
-        if infolist is None:
+        if isdefined(self.inputs.subject_info):
             infolist = self.inputs.subject_info
-        infolist, nscans = self._concatenate_info(self.inputs.subject_info)
+        else:
+            infolist = gen_info(self.inputs.event_files)
+        infolist, nscans = self._concatenate_info(infolist)
         functional_runs = [filename_to_list(self.inputs.functional_runs)]
         realignment_parameters = []
         if isdefined(self.inputs.realignment_parameters):
@@ -665,7 +703,11 @@ class SpecifySparseModel(SpecifyModel):
         return infoout
 
     def _generate_design(self, infolist=None):
-        infolist = self._generate_clustered_design(self.inputs.subject_info)
+        if isdefined(self.inputs.subject_info):
+            infolist = self.inputs.subject_info
+        else:
+            infolist = gen_info(self.inputs.event_files)
+        infolist = self._generate_clustered_design(infolist)
         super(SpecifySparseModel, self)._generate_design(infolist = infolist)
 
     def _list_outputs(self):
@@ -694,5 +736,9 @@ class SpecifySparseSPMModel(SpecifySparseModel, SpecifySPMModel):
         if not isdefined(self.inputs.concatenate_runs):
             super(SpecifySparseSPMModel, self)._generate_design()
             return
-        infolist = self._generate_clustered_design(self.inputs.subject_info)
+        if isdefined(self.inputs.subject_info):
+            infolist = self.inputs.subject_info
+        else:
+            infolist = gen_info(self.inputs.event_files)
+        infolist = self._generate_clustered_design(infolist)
         super(SpecifySPMModel, self)._generate_design(infolist = infolist)
