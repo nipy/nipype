@@ -243,6 +243,7 @@ class SpecifyModel(BaseInterface):
     >>> s.inputs.input_units = 'secs'
     >>> s.inputs.functional_runs = ['functional2.nii', 'functional3.nii']
     >>> s.inputs.time_repetition = 6
+    >>> s.inputs.high_pass_filter_cutoff = 128.
     >>> info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 180]], durations=[[1]]), \
             Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], durations=[[1]])]
     >>> s.inputs.subject_info = info
@@ -281,7 +282,7 @@ class SpecifyModel(BaseInterface):
                                                                         self.inputs.input_units,
                                                                         'secs',
                                                                         self.inputs.time_repetition)
-                    if hasattr(info, 'amplitudes'):
+                    if hasattr(info, 'amplitudes') and info.amplitudes:
                         sessinfo[i]['cond'][cid]['amplitudes']  = info.amplitudes[cid]
                     if hasattr(info, 'tmod') and info.tmod and len(info.tmod)>cid:
                         sessinfo[i]['cond'][cid]['tmod'] = info.tmod[cid]
@@ -316,7 +317,9 @@ class SpecifyModel(BaseInterface):
                 numscans = 0
                 for f in filename_to_list(sessinfo[i]['scans']):
                     numscans += load(f).get_shape()[3]
+                iflogger.info(('numscans', numscans))
                 for j,scanno in enumerate(out):
+                    iflogger.info(scanno)
                     colidx = len(sessinfo[i]['regress'])
                     sessinfo[i]['regress'].insert(colidx,dict(name='',val=[]))
                     sessinfo[i]['regress'][colidx]['name'] = 'Outlier%d'%(j+1)
@@ -340,7 +343,7 @@ class SpecifyModel(BaseInterface):
                     outliers.append([])
                 else:
                     if outindices.size == 1:
-                        outliers.append([outindices[0]])
+                        outliers.append([outindices.tolist()])
                     else:
                         outliers.append(outindices.tolist())
         if infolist is None:
@@ -362,7 +365,7 @@ class SpecifyModel(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if not hasattr(self, 'sessinfo'):
+        if not hasattr(self, '_sessinfo'):
             self._generate_design()
         outputs['session_info'] = self._sessinfo
         
@@ -389,6 +392,7 @@ class SpecifySPMModel(SpecifyModel):
     >>> s = SpecifyModel()
     >>> s.inputs.input_units = 'secs'
     >>> s.inputs.output_units = 'scans'
+    >>> s.inputs.high_pass_filter_cutoff = 128.
     >>> s.inputs.functional_runs = ['functional2.nii', 'functional3.nii']
     >>> s.inputs.time_repetition = 6
     >>> s.inputs.concatenate_runs = True
@@ -401,6 +405,7 @@ class SpecifySPMModel(SpecifyModel):
     input_spec = SpecifySPMModelInputSpec
 
     def _concatenate_info(self,infolist):
+        iflogger.info('entering concatenate info')
         nscans = []
         for i,f in enumerate(self.inputs.functional_runs):
             if isinstance(f,list):
@@ -414,6 +419,7 @@ class SpecifySPMModel(SpecifyModel):
         # now combine all fields into 1
         # names,onsets,durations,amplitudes,pmod,tmod,regressor_names,regressors
         infoout = infolist[0]
+        iflogger.info(('infolist', len(infolist)))
         for i,info in enumerate(infolist[1:]):
             #info.[conditions,tmod] remain the same
             if info.onsets:
@@ -426,7 +432,7 @@ class SpecifySPMModel(SpecifyModel):
                 for j,val in enumerate(info.durations):
                     if len(val) > 1:
                         infoout.durations[j].extend(info.durations[j])
-                if hasattr(info, 'amplitudes'):
+                if hasattr(info, 'amplitudes') and info.amplitudes:
                     for j,val in enumerate(info.amplitudes):
                         infoout.amplitudes[j].extend(info.amplitudes[j])
                 if hasattr(info, 'pmod') and info.pmod:
@@ -448,36 +454,43 @@ class SpecifySPMModel(SpecifyModel):
         return [infoout], nscans
 
     def _generate_design(self, infolist=None):
+        iflogger.info('entering generate_design')
         if not isdefined(self.inputs.concatenate_runs):
-            super(SpecifySPMModel, self)._generate_design()
+            super(SpecifySPMModel, self)._generate_design(infolist=infolist)
             return
         if isdefined(self.inputs.subject_info):
             infolist = self.inputs.subject_info
         else:
             infolist = gen_info(self.inputs.event_files)
-        infolist, nscans = self._concatenate_info(infolist)
+        concatlist, nscans = self._concatenate_info(infolist)
         functional_runs = [filename_to_list(self.inputs.functional_runs)]
         realignment_parameters = []
         if isdefined(self.inputs.realignment_parameters):
-            realignment_parameters = [[]]
+            realignment_parameters = []
             for parfile in self.inputs.realignment_parameters:
                 mc = np.loadtxt(parfile)
-                realignment_parameters[0] = np.concatenate((realignment_parameters[0],mc))
-                realignment_parameters.append(np.loadtxt(parfile))
+                if not realignment_parameters:
+                    realignment_parameters.insert(0,mc)
+                else:
+                    realignment_parameters[0] = np.concatenate((realignment_parameters[0],mc))
         outliers = []
+        iflogger.info(nscans)
         if isdefined(self.inputs.outlier_files):
             outliers = [[]]
-            for filename in self.inputs.outlier_files:
+            for i, filename in enumerate(self.inputs.outlier_files):
                 try:
                     out = np.loadtxt(filename, dtype=int)
                 except IOError:
                     out = np.array([])
+                iflogger.info(out)
                 if out.size>0:
                     if out.size == 1:
-                        outliers[0].extend([(np.array(out)+sum(nscans[0:(i+1)])).tolist()])
+                        iflogger.info(('size1', [(np.array(out)+sum(nscans[0:i])).tolist()]))
+                        outliers[0].extend([(np.array(out)+sum(nscans[0:i])).tolist()])
                     else:
-                        outliers[0].extend((np.array(out)+sum(nscans[0:(i+1)])).tolist())
-        self._sessinfo = self._generate_standard_design(infolist,
+                        iflogger.info(('sizeother', [(np.array(out)+sum(nscans[0:i])).tolist()]))
+                        outliers[0].extend((np.array(out)+sum(nscans[0:i])).tolist())
+        self._sessinfo = self._generate_standard_design(concatlist,
                                                   functional_runs=functional_runs,
                                                   realignment_parameters=realignment_parameters,
                                                   outliers=outliers)
@@ -485,7 +498,7 @@ class SpecifySPMModel(SpecifyModel):
 class SpecifySparseModelInputSpec(SpecifyModelInputSpec):
     time_acquisition = traits.Float(0, mandatory=True,
                   desc = "Time in seconds to acquire a single image volume")
-    volumes_in_cluster = traits.Range(1,
+    volumes_in_cluster = traits.Range(1, usedefault=True,
             desc="Number of scan volumes in a cluster")
     model_hrf = traits.Bool(desc="model sparse events with hrf")
     stimuli_as_impulses = traits.Bool(True,
@@ -521,11 +534,10 @@ class SpecifySparseModel(SpecifyModel):
     >>> s.inputs.functional_runs = ['functional2.nii', 'functional3.nii']
     >>> s.inputs.time_repetition = 6
     >>> s.inputs.time_acquisition = 2
+    >>> s.inputs.high_pass_filter_cutoff = 128.
     >>> s.inputs.model_hrf = True
-    >>> info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 180]], durations=[[1]], amplitudes=None, \
-                  pmod=None, regressors = None, regressor_names = None, tmod=None), \
-            Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], durations=[[1]], amplitudes=None, \
-                  pmod=None, regressors = None, regressor_names = None, tmod=None)]
+    >>> info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 180]], durations=[[1]]), \
+            Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], durations=[[1]])]
     >>> s.inputs.subject_info = info
 
     """
@@ -644,7 +656,7 @@ class SpecifySparseModel(SpecifyModel):
         reg = []
         regnames = []
         for i,cond in enumerate(info.conditions):
-            if info.amplitudes:
+            if hasattr(info, 'amplitudes') and info.amplitudes:
                 amplitudes = info.amplitudes[i]
             else:
                 amplitudes = None
@@ -689,13 +701,13 @@ class SpecifySparseModel(SpecifyModel):
             if info.conditions:
                 img = load(self.inputs.functional_runs[i])
                 nscans = img.get_shape()[3]
-                reg,regnames = self._cond_to_regress(info,nscans)
-                if not infoout[i].regressors:
-                    infoout[i].regressors = []
-                    infoout[i].regressor_names = []
-                else:
+                reg, regnames = self._cond_to_regress(info,nscans)
+                if hasattr(infoout[i], 'regressors') and infoout[i].regressors:
                     if not infoout[i].regressor_names:
                         infoout[i].regressor_names = ['R%d'%j for j in range(len(infoout[i].regressors))]
+                else:
+                    infoout[i].regressors = []
+                    infoout[i].regressor_names = []
                 for j,r in enumerate(reg):
                     regidx = len(infoout[i].regressors)
                     infoout[i].regressor_names.insert(regidx,regnames[j])
@@ -707,17 +719,22 @@ class SpecifySparseModel(SpecifyModel):
             infolist = self.inputs.subject_info
         else:
             infolist = gen_info(self.inputs.event_files)
-        infolist = self._generate_clustered_design(infolist)
-        super(SpecifySparseModel, self)._generate_design(infolist = infolist)
+        sparselist = self._generate_clustered_design(infolist)
+        super(SpecifySparseModel, self)._generate_design(infolist = sparselist)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if not hasattr(self, 'sessinfo'):
+        if not hasattr(self, '_sessinfo'):
             self._generate_design()
         outputs['session_info'] = self._sessinfo
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
             outputs['sparse_png_file'] = os.path.join(os.getcwd(), 'sparse.png')
             outputs['sparse_svg_file'] = os.path.join(os.getcwd(), 'sparse.svg')
+        return outputs
+
+'''
+
+Need to figure out how this component will work!!! multiple inheritence is causing a big headache
 
 class SpecifySparseSPMModelInputSpec(SpecifySPMModelInputSpec, SpecifySparseModelInputSpec):
     pass
@@ -729,16 +746,17 @@ class SpecifySparseSPMModel(SpecifySparseModel, SpecifySPMModel):
     output_spec = SpecifySparseModelOutputSpec
 
     def _generate_design(self, infolist=None):
-        raise Exception('fix which super method to call')
+        raise Exception('not working yet')
         if (self.inputs.input_units == 'scans') and (self.inputs.output_units == 'secs'):
             if isdefined(self.inputs.volumes_in_cluster) and (self.inputs.volumes_in_cluster > 1):
                 raise NotImplementedError("Cannot scale timings if times are scans and acquisition is clustered")
-        if not isdefined(self.inputs.concatenate_runs):
-            super(SpecifySparseSPMModel, self)._generate_design()
-            return
         if isdefined(self.inputs.subject_info):
             infolist = self.inputs.subject_info
         else:
             infolist = gen_info(self.inputs.event_files)
-        infolist = self._generate_clustered_design(infolist)
-        super(SpecifySPMModel, self)._generate_design(infolist = infolist)
+        clusterlist = self._generate_clustered_design(infolist)
+        if not isdefined(self.inputs.concatenate_runs):
+            super(SpecifySparseSPMModel, self)._generate_design(infolist=clusterlist)
+        else:
+            self._generate_spm_design(infolist=clusterlist)
+'''
