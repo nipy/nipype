@@ -427,8 +427,12 @@ class Workflow(WorkflowBase):
                     srcname = src
                 if '.' in srcname:
                     uname1 += '.' + '.'.join(srcname.split('.')[:-1])
-                if '.' in dest:
-                    vname1 += '.' + '.'.join(dest.split('.')[:-1])
+                if '.' in dest and '@' not in dest:
+                    if not isinstance(v, Workflow):
+                        if 'datasink' not in str(v._interface.__class__).lower():
+                            vname1 += '.' + '.'.join(dest.split('.')[:-1])
+                    else:
+                        vname1 += '.' + '.'.join(dest.split('.')[:-1])
                 if uname1.split('.')[:-1] != vname1.split('.')[:-1]:
                     dotlist.append('%s -> %s;'%(uname1.replace('.','_'),
                                                 vname1.replace('.','_')))
