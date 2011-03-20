@@ -16,7 +16,6 @@ conventions documented in the `NIPY Developers Guide
 
    writing_custom_interfaces
    gitwash/index   
-   development_quickstart
    architecture
 
 
