@@ -96,15 +96,14 @@ def spm_hrf(RT, P=None, fMRI_T=16):
 def orth(x_in, y_in):
     """Orthoganlize y_in with respect to x_in
 
-    >>> s = SpecifyModel()
-    >>> err = np.abs(np.array(s.orth([1,2,3],[4,5,6]) - np.array([1.7142857142857144, 0.42857142857142883, -0.85714285714285676])))
+    >>> err = np.abs(np.array(orth([1,2,3],[4,5,6]) - np.array([1.7142857142857144, 0.42857142857142883, -0.85714285714285676])))
     >>> all(err<np.finfo(float).eps)
     True
 
     """
     x = np.array(x_in)[:,None]
     y = np.array(y_in)[:,None]
-    y = y - np.dot(x,np.dot(np.linalg.inv(np.dot(x.T,x)),np.dot(x.T,y)));
+    y = y - np.dot(x,np.dot(np.linalg.inv(np.dot(x.T,x)),np.dot(x.T,y)))
     if np.linalg.norm(y,1) > np.exp(-32):
         y = y[:,0].tolist()
     else:
@@ -387,7 +386,7 @@ class SpecifySPMModel(SpecifyModel):
     --------
 
     >>> from nipype.interfaces.base import Bunch
-    >>> s = SpecifyModel()
+    >>> s = SpecifySPMModel()
     >>> s.inputs.input_units = 'secs'
     >>> s.inputs.output_units = 'scans'
     >>> s.inputs.high_pass_filter_cutoff = 128.
