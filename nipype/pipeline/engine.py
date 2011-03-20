@@ -402,7 +402,9 @@ class Workflow(WorkflowBase):
                     dotlist.append('%s[label="%s"];'%(nodename, node_class_name))
         for node in self._graph.nodes():
             if isinstance(node, Workflow):
-                dotlist.append('subgraph cluster_%s {'%node.name)
+                fullname = '.'.join(hierarchy + [node.fullname])
+                nodename = fullname.replace('.','_')
+                dotlist.append('subgraph cluster_%s {'%nodename)
                 dotlist.append(node._get_dot(prefix=prefix + prefix,
                                              hierarchy=hierarchy+[self.name]))
                 dotlist.append('}')
