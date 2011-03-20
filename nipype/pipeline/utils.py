@@ -408,7 +408,7 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
     """
     graph = deepcopy(graph_in)
     if use_execgraph:
-        graph = _generate_expanded_graph(graph)
+        graph = generate_expanded_graph(graph)
         logger.debug('using execgraph')
     else:
         logger.debug('using input graph')

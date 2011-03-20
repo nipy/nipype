@@ -85,6 +85,13 @@ class WorkflowBase(object):
     def outputs(self):
         raise NotImplementedError
 
+    @property
+    def fullname(self):
+        fullname = self.name
+        if self._hierarchy:
+            fullname = self._hierarchy + '.' + self.name
+        return fullname            
+
     def clone(self, name):
         """Clone a workflowbase object
 
@@ -369,6 +376,71 @@ class Workflow(WorkflowBase):
             base_dir = self.base_dir
                  
         export_graph(graph, base_dir, dotfilename=dotfilename, format=format)
+
+    def _get_dot(self, prefix=None, hierarchy=None):
+        """Create a dot file with connection info
+        """
+        if prefix is None:
+            prefix='  '
+        if hierarchy is None:
+            hierarchy = []
+        dotlist = ['%slabel="%s";'%(prefix,self.name)]
+        dotlist.append('%scolor=grey;'%(prefix))
+        for node in self._graph.nodes():
+            fullname = '.'.join(hierarchy + [node.fullname])
+            nodename = fullname.replace('.','_')
+            if not isinstance(node, Workflow):
+                pkglist = node._interface.__class__.__module__.split('.')
+                interface = node._interface.__class__.__name__
+                destclass = ''
+                if len(pkglist) > 1:
+                    destclass = pkglist[2]
+                node_class_name = '.'.join([node.name, interface, destclass])
+                if hasattr(node, 'iterables') and node.iterables:
+                    dotlist.append('%s[label="%s", style=filled, color=lightgrey];'%(nodename, node_class_name))
+                else:
+                    dotlist.append('%s[label="%s"];'%(nodename, node_class_name))
+        for node in self._graph.nodes():
+            if isinstance(node, Workflow):
+                dotlist.append('subgraph cluster_%s {'%node.name)
+                dotlist.append(node._get_dot(prefix=prefix + prefix,
+                                             hierarchy=hierarchy+[self.name]))
+                dotlist.append('}')
+            else:
+                for subnode in self._graph.successors_iter(node):
+                    if not isinstance(subnode, Workflow):
+                        nodefullname = '.'.join(hierarchy + [node.fullname])
+                        subnodefullname = '.'.join(hierarchy + [subnode.fullname])
+                        nodename = nodefullname.replace('.','_')
+                        subnodename = subnodefullname.replace('.','_')
+                        dotlist.append('%s -> %s;'%(nodename, subnodename))
+        # add between workflow connections
+        for u,v,d in self._graph.edges_iter(data=True):
+            uname = '.'.join(hierarchy + [u.fullname])
+            vname = '.'.join(hierarchy + [v.fullname])
+            for src, dest in d['connect']:
+                uname1 = uname
+                vname1 = vname
+                if '.' in src:
+                    uname1 += '.' + '.'.join(src.split('.')[:-1])
+                if '.' in dest:
+                    vname1 += '.' + '.'.join(dest.split('.')[:-1])
+                if uname1.split('.')[:-1] != vname1.split('.')[:-1]:
+                    dotlist.append('%s -> %s;'%(uname1.replace('.','_'),
+                                                vname1.replace('.','_')))
+        return ('\n'+prefix).join(dotlist)
+
+    def write_hierarchical_dot(self, dotfilename=None):
+        dotlist = ['digraph %s{'%self.name]
+        dotlist.append(self._get_dot(prefix='  '))
+        dotlist.append('}')
+        dotstr = '\n'.join(dotlist)
+        if dotfilename:
+            fp = open(dotfilename, 'wt')
+            fp.writelines(dotstr)
+            fp.close()
+        else:
+            logger.info(dotstr)
 
     def run(self, plugin=None, updatehash=False):
         """ Execute the workflow
