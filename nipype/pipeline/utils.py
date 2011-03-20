@@ -408,7 +408,7 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
     """
     graph = deepcopy(graph_in)
     if use_execgraph:
-        graph = _generate_expanded_graph(graph)
+        graph = generate_expanded_graph(graph)
         logger.debug('using execgraph')
     else:
         logger.debug('using input graph')
@@ -443,6 +443,10 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
         if show_connectinfo:
             nx.draw_networkx_edge_labels(pklgraph, pos)
 
+def format_dot(dotfilename, format=None):
+    cmd = 'dot -T%s -O %s' % (format, dotfilename)
+    CommandLine(cmd).run()
+    logger.info('Converting dotfile: %s to %s format'%(dotfilename, format))
 
 def make_output_dir(outdir):
     """Make the output_dir if it doesn't exist.

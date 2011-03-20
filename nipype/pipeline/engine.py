@@ -40,7 +40,7 @@ from nipype.utils.filemanip import (save_json, FileNotFoundError,
 
 from nipype.pipeline.utils import (generate_expanded_graph, modify_paths,
                                    export_graph, make_output_dir,
-                                   clean_working_directory)
+                                   clean_working_directory, format_dot)
 from nipype.utils.logger import (logger, config)
 
 class WorkflowBase(object):
@@ -84,6 +84,13 @@ class WorkflowBase(object):
     @property
     def outputs(self):
         raise NotImplementedError
+
+    @property
+    def fullname(self):
+        fullname = self.name
+        if self._hierarchy:
+            fullname = self._hierarchy + '.' + self.name
+        return fullname            
 
     def clone(self, name):
         """Clone a workflowbase object
@@ -343,13 +350,13 @@ class Workflow(WorkflowBase):
             outnode = None
         return outnode
 
-    def write_graph(self, dotfilename='graph.dot', graph2use='flat', format="png"):
+    def write_graph(self, dotfilename='graph.dot', graph2use='hierarchical', format="png"):
         """Generates a graphviz dot file and a png file
 
         Parameters
         ----------
         
-        graph2use: 'orig', 'flat' (default), 'exec'
+        graph2use: 'orig', 'hierarchical', 'flat' (default), 'exec'
             orig - creates a top level graph without expanding internal
                    workflow nodes
             flat - expands workflow nodes recursively
@@ -358,17 +365,39 @@ class Workflow(WorkflowBase):
         format: 'png', 'svg'
             
         """
+        graphtypes = ['orig', 'flat', 'hierarchical', 'exec']
+        if graph2use not in graphtypes:
+            raise ValueError('Unknown graph2use keyword. Must be one of: ' +str(graphtypes))
+        base_dir, dotfilename = os.path.split(dotfilename)
+        if base_dir == '':
+            if self.base_dir:
+                base_dir = self.base_dir
+            else:
+                base_dir = os.getcwd()
+        if graph2use == 'hierarchical':
+            dotfilename = os.path.join(base_dir, dotfilename)
+            self.write_hierarchical_dotfile(dotfilename=dotfilename)
+            format_dot(dotfilename, format=format)
+            return
         graph = self._graph
         if graph2use in ['flat', 'exec']:
             graph = self._create_flat_graph()
         if graph2use == 'exec':
             graph = generate_expanded_graph(deepcopy(graph))
-            
-        base_dir, dotfilename = os.path.split(dotfilename)
-        if base_dir == '':
-            base_dir = self.base_dir
-                 
+
         export_graph(graph, base_dir, dotfilename=dotfilename, format=format)
+
+    def write_hierarchical_dotfile(self, dotfilename=None):
+        dotlist = ['digraph %s{'%self.name]
+        dotlist.append(self._get_dot(prefix='  '))
+        dotlist.append('}')
+        dotstr = '\n'.join(dotlist)
+        if dotfilename:
+            fp = open(dotfilename, 'wt')
+            fp.writelines(dotstr)
+            fp.close()
+        else:
+            logger.info(dotstr)
 
     def run(self, plugin=None, updatehash=False):
         """ Execute the workflow
@@ -631,6 +660,70 @@ class Workflow(WorkflowBase):
         if nodes2remove:
             self._graph.remove_nodes_from(nodes2remove)
         logger.debug('finished expanding workflow: %s', self)
+
+    def _get_dot(self, prefix=None, hierarchy=None):
+        """Create a dot file with connection info
+        """
+        if prefix is None:
+            prefix='  '
+        if hierarchy is None:
+            hierarchy = []
+        dotlist = ['%slabel="%s";'%(prefix,self.name)]
+        dotlist.append('%scolor=grey;'%(prefix))
+        for node in self._graph.nodes():
+            fullname = '.'.join(hierarchy + [node.fullname])
+            nodename = fullname.replace('.','_')
+            if not isinstance(node, Workflow):
+                pkglist = node._interface.__class__.__module__.split('.')
+                interface = node._interface.__class__.__name__
+                destclass = ''
+                if len(pkglist) > 2:
+                    destclass = '.%s'%pkglist[2]
+                node_class_name = '.'.join([node.name, interface]) + destclass
+                if hasattr(node, 'iterables') and node.iterables:
+                    dotlist.append('%s[label="%s", style=filled, color=lightgrey];'%(nodename, node_class_name))
+                else:
+                    dotlist.append('%s[label="%s"];'%(nodename, node_class_name))
+        for node in self._graph.nodes():
+            if isinstance(node, Workflow):
+                fullname = '.'.join(hierarchy + [node.fullname])
+                nodename = fullname.replace('.','_')
+                dotlist.append('subgraph cluster_%s {'%nodename)
+                dotlist.append(node._get_dot(prefix=prefix + prefix,
+                                             hierarchy=hierarchy+[self.name]))
+                dotlist.append('}')
+            else:
+                for subnode in self._graph.successors_iter(node):
+                    if not isinstance(subnode, Workflow):
+                        nodefullname = '.'.join(hierarchy + [node.fullname])
+                        subnodefullname = '.'.join(hierarchy + [subnode.fullname])
+                        nodename = nodefullname.replace('.','_')
+                        subnodename = subnodefullname.replace('.','_')
+                        dotlist.append('%s -> %s;'%(nodename, subnodename))
+        # add between workflow connections
+        for u,v,d in self._graph.edges_iter(data=True):
+            uname = '.'.join(hierarchy + [u.fullname])
+            vname = '.'.join(hierarchy + [v.fullname])
+            for src, dest in d['connect']:
+                uname1 = uname
+                vname1 = vname
+                if isinstance(src, tuple):
+                    srcname = src[0]
+                else:
+                    srcname = src
+                if '.' in srcname:
+                    uname1 += '.' + '.'.join(srcname.split('.')[:-1])
+                if '.' in dest and '@' not in dest:
+                    if not isinstance(v, Workflow):
+                        if 'datasink' not in str(v._interface.__class__).lower():
+                            vname1 += '.' + '.'.join(dest.split('.')[:-1])
+                    else:
+                        vname1 += '.' + '.'.join(dest.split('.')[:-1])
+                if uname1.split('.')[:-1] != vname1.split('.')[:-1]:
+                    dotlist.append('%s -> %s;'%(uname1.replace('.','_'),
+                                                vname1.replace('.','_')))
+        return ('\n'+prefix).join(dotlist)
+
 
 class Node(WorkflowBase):
     """Wraps interface objects for use in pipeline
