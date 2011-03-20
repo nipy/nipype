@@ -393,9 +393,9 @@ class Workflow(WorkflowBase):
                 pkglist = node._interface.__class__.__module__.split('.')
                 interface = node._interface.__class__.__name__
                 destclass = ''
-                if len(pkglist) > 1:
-                    destclass = pkglist[2]
-                node_class_name = '.'.join([node.name, interface, destclass])
+                if len(pkglist) > 2:
+                    destclass = '.'%pkglist[2]
+                node_class_name = '.'.join([node.name, interface]) + destclass
                 if hasattr(node, 'iterables') and node.iterables:
                     dotlist.append('%s[label="%s", style=filled, color=lightgrey];'%(nodename, node_class_name))
                 else:
