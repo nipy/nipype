@@ -298,7 +298,7 @@ class SpecifyModel(BaseInterface):
             if hasattr(info, 'regressors') and info.regressors is not None:
                 for j,r in enumerate(info.regressors):
                     sessinfo[i]['regress'].insert(j,dict(name='',val=[]))
-                    if info.regressor_names is not None:
+                    if hasattr(info, 'regressor_names') and info.regressor_names is not None:
                         sessinfo[i]['regress'][j]['name'] = info.regressor_names[j]
                     else:
                         sessinfo[i]['regress'][j]['name'] = 'UR%d'%(j+1)
@@ -317,9 +317,7 @@ class SpecifyModel(BaseInterface):
                 numscans = 0
                 for f in filename_to_list(sessinfo[i]['scans']):
                     numscans += load(f).get_shape()[3]
-                iflogger.info(('numscans', numscans))
                 for j,scanno in enumerate(out):
-                    iflogger.info(scanno)
                     colidx = len(sessinfo[i]['regress'])
                     sessinfo[i]['regress'].insert(colidx,dict(name='',val=[]))
                     sessinfo[i]['regress'][colidx]['name'] = 'Outlier%d'%(j+1)
@@ -374,7 +372,7 @@ class SpecifyModel(BaseInterface):
 class SpecifySPMModelInputSpec(SpecifyModelInputSpec):
     concatenate_runs = traits.Bool(False, usedefault=True,
             desc="Concatenate all runs to look like a single session.")
-    output_units = traits.Enum('secs', 'scans', usededault=True,
+    output_units = traits.Enum('secs', 'scans', usedefault=True,
              desc = "Units of design event onsets and durations " \
                                    "(secs or scans)")
 
@@ -405,7 +403,6 @@ class SpecifySPMModel(SpecifyModel):
     input_spec = SpecifySPMModelInputSpec
 
     def _concatenate_info(self,infolist):
-        iflogger.info('entering concatenate info')
         nscans = []
         for i,f in enumerate(self.inputs.functional_runs):
             if isinstance(f,list):
@@ -419,7 +416,6 @@ class SpecifySPMModel(SpecifyModel):
         # now combine all fields into 1
         # names,onsets,durations,amplitudes,pmod,tmod,regressor_names,regressors
         infoout = infolist[0]
-        iflogger.info(('infolist', len(infolist)))
         for i,info in enumerate(infolist[1:]):
             #info.[conditions,tmod] remain the same
             if info.onsets:
@@ -446,7 +442,7 @@ class SpecifySPMModel(SpecifyModel):
                 for j,v in enumerate(info.regressors):
                     infoout.regressors[j].extend(info.regressors[j])
             #insert session regressors
-            if not infoout.regressors:
+            if not hasattr(infoout, 'regressors') or not infoout.regressors:
                 infoout.regressors = []
             onelist = np.zeros((1,sum(nscans)))
             onelist[0,sum(nscans[0:(i)]):sum(nscans[0:(i+1)])] = 1
@@ -454,7 +450,6 @@ class SpecifySPMModel(SpecifyModel):
         return [infoout], nscans
 
     def _generate_design(self, infolist=None):
-        iflogger.info('entering generate_design')
         if not isdefined(self.inputs.concatenate_runs):
             super(SpecifySPMModel, self)._generate_design(infolist=infolist)
             return
@@ -474,7 +469,6 @@ class SpecifySPMModel(SpecifyModel):
                 else:
                     realignment_parameters[0] = np.concatenate((realignment_parameters[0],mc))
         outliers = []
-        iflogger.info(nscans)
         if isdefined(self.inputs.outlier_files):
             outliers = [[]]
             for i, filename in enumerate(self.inputs.outlier_files):
@@ -482,13 +476,10 @@ class SpecifySPMModel(SpecifyModel):
                     out = np.loadtxt(filename, dtype=int)
                 except IOError:
                     out = np.array([])
-                iflogger.info(out)
                 if out.size>0:
                     if out.size == 1:
-                        iflogger.info(('size1', [(np.array(out)+sum(nscans[0:i])).tolist()]))
                         outliers[0].extend([(np.array(out)+sum(nscans[0:i])).tolist()])
                     else:
-                        iflogger.info(('sizeother', [(np.array(out)+sum(nscans[0:i])).tolist()]))
                         outliers[0].extend((np.array(out)+sum(nscans[0:i])).tolist())
         self._sessinfo = self._generate_standard_design(concatlist,
                                                   functional_runs=functional_runs,
