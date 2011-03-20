@@ -421,8 +421,12 @@ class Workflow(WorkflowBase):
             for src, dest in d['connect']:
                 uname1 = uname
                 vname1 = vname
-                if '.' in src:
-                    uname1 += '.' + '.'.join(src.split('.')[:-1])
+                if isinstance(src, tuple):
+                    srcname = src[0]
+                else:
+                    srcname = src
+                if '.' in srcname:
+                    uname1 += '.' + '.'.join(srcname.split('.')[:-1])
                 if '.' in dest:
                     vname1 += '.' + '.'.join(dest.split('.')[:-1])
                 if uname1.split('.')[:-1] != vname1.split('.')[:-1]:
