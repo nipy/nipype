@@ -19,7 +19,7 @@ class IdentityInterface(IOBase):
     --------
     
     >>> from nipype.interfaces.utility import IdentityInterface
-    >>> ii = IdentityInterface(fields=['a','b'])
+    >>> ii = IdentityInterface(fields=['a','b'], mandatory_inputs=False)
     >>> ii.inputs.a
     <undefined>
 
@@ -32,15 +32,21 @@ class IdentityInterface(IOBase):
     >>> out.outputs.a
     'foo'
     
+    >>> ii2 = IdentityInterface(fields=['a','b'], mandatory_inputs=True)
+    >>> ii2.inputs.a = 'foo'
+    >>> out = ii2.run() # doctest: +SKIP
+    ValueError: IdentityInterface requires a value for input 'b' because it was listed in 'fields'
+Interface IdentityInterface failed to run.
     """
     input_spec = DynamicTraitedSpec
     output_spec = DynamicTraitedSpec
     
-    def __init__(self, fields=None, **inputs):
+    def __init__(self, fields=None, mandatory_inputs = True, **inputs):
         super(IdentityInterface, self).__init__(**inputs)
         if fields is None or not fields:
             raise Exception('Identity Interface fields must be a non-empty list')
         self._fields = fields
+        self._mandatory_inputs = mandatory_inputs
         add_traits(self.inputs, fields)
 
     def _add_output_traits(self, base):
@@ -52,6 +58,15 @@ class IdentityInterface(IOBase):
         return base
 
     def _list_outputs(self):
+        #manual mandatory inputs check
+        if self._fields and self._mandatory_inputs:
+            for key in self._fields:
+                value = getattr(self.inputs,key)
+                if not isdefined(value):
+                    msg = "%s requires a value for input '%s' because it was listed in 'fields'" % \
+                    (self.__class__.__name__, key)
+                    raise ValueError(msg)
+                
         outputs = self._outputs().get()
         for key in self._fields:
             val = getattr(self.inputs, key)
