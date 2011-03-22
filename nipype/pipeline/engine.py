@@ -918,7 +918,7 @@ class Node(WorkflowBase):
                 rmtree(outdir)
                 outdir = make_output_dir(outdir)
             else:
-                logger.debug("%s found and can_resume is True - resuming execution" % hashfile_unfinished)
+                logger.debug("%s found and can_resume is True or Node is a MapNode - resuming execution" % hashfile_unfinished)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             try:
                 self._run_interface(execute=True)
