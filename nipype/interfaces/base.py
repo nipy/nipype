@@ -597,12 +597,14 @@ class BaseInterface(Interface):
         self.inputs = self.input_spec(**inputs)
 
     @classmethod
-    def help(cls):
+    def help(cls, returnhelp = False):
         """ Prints class help
         """
-        cls._inputs_help()
-        print ''
-        cls._outputs_help()
+        allhelp = '\n'.join(cls._inputs_help() + [''] + cls._outputs_help())
+        if returnhelp:
+            return allhelp
+        else:
+            print allhelp
 
     @classmethod
     def _inputs_help(cls):
@@ -649,7 +651,7 @@ class BaseInterface(Interface):
             helpstr += manhelpstr
         if opthelpstr:
             helpstr += opthelpstr
-        print '\n'.join(helpstr)
+        return helpstr
 
     @classmethod
     def _outputs_help(cls):
@@ -661,7 +663,7 @@ class BaseInterface(Interface):
                 helpstr += ['%s: %s' % (name, spec.desc)]
         else:
             helpstr += ['None']
-        print '\n'.join(helpstr)
+        return helpstr
 
     def _outputs(self):
         """ Returns a bunch containing output fields for the class

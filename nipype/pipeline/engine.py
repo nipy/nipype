@@ -814,6 +814,11 @@ class Node(WorkflowBase):
             val = getattr(self._result.outputs, parameter)
         return val
 
+    def help(self):
+        """ Print interface help
+        """
+        self._interface.help()
+
     def _get_hashval(self):
         hashed_inputs, hashvalue =  self.inputs.hashval
         if config.getboolean('execution', 'remove_unnecessary_outputs') and \
