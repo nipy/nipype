@@ -207,6 +207,11 @@ class SpecifyModel(BaseInterface):
     Optional
     ~~~~~~~~
 
+     - regressors : list of dicts
+      - names : list of names corresponding to each column. Should be None if
+        automatically assigned.
+      - values : lists of values for each regressors
+
      - amplitudes : lists of amplitudes for each event. This will be ignored by
       SPM's Level1Design.
 
@@ -221,11 +226,6 @@ class SpecifyModel(BaseInterface):
       - name : name of parametric modulator
       - param : values of the modulator
       - poly : degree of modulation
-
-     - regressors : list of dicts
-      - names : list of names corresponding to each column. Should be None if
-        automatically assigned.
-      - values : lists of values for each regressors
 
     Alternatively, you can provide information through event files.
 

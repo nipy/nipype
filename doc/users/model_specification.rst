@@ -30,6 +30,11 @@ Required
 Optional
 --------
 
+- regressors : list of dicts specifying additional regressors for each run
+   - names : list of names corresponding to each column. Should be None if
+        automatically assigned.
+   - values : lists of values for each regressors
+
 - amplitudes : lists of amplitudes for each event. This will be ignored by
       SPM's Level1Design.
 
@@ -44,13 +49,10 @@ Level1Design class other than SPM:
    - param : values of the modulator
    - poly : degree of modulation
 
-- regressors : list of dicts
-   - names : list of names corresponding to each column. Should be None if
-        automatically assigned.
-   - values : lists of values for each regressors
 
 An example Bunch definition::
 
+  from nipype.interfaces.base import Bunch
   condnames = ['Tapping', 'Speaking', 'Yawning']
   event_onsets = [[0, 10, 50], [20, 60, 80], [30, 40, 70]]
   durations = [[0],[0],[0],[0],[0]]
@@ -59,12 +61,34 @@ An example Bunch definition::
                                      onsets = event_onsets,
                                      durations = durations)
 
+Alternatively, you can provide condition, onset, duration and amplitude
+information through event files. The event files have to be in 1,2 or 3
+column format with the columns corresponding to Onsets, Durations and
+Amplitudes and they have to have the name event_name.run<anything else>
+e.g.: Words.run001.txt. The event_name part will be used to create the
+condition names. Words.run001.txt may look like::
+
+      # Word Onsets Durations
+       0   10
+       20   10  
+       ...
+
+or with amplitudes::
+
+       # Word Onsets Durations Amplitudes
+       0    10     1
+       20   10    1
+       ...
+
 Together with this information, one needs to specify:
 
 - whether the durations and event onsets are specified in terms of scan volumes or
 secs.
+
 - the high-pass filter cutoff, 
+
 - the repetition time per scan
+
 - functional data files corresponding to each run. 
 
 Optionally you can specify realignment parameters, outlier indices.
@@ -72,8 +96,8 @@ Outlier files should contain a list of numbers, one per row indicating
 which scans should not be included in the analysis. The numbers are
 0-based.
 
-SPM specific specification
-==========================
+SPM specific attributes
+=======================
 
 in addition to the generic specification options, several SPM specific
 options can be provided. In particular, the subject_info function can
@@ -83,7 +107,7 @@ speaking rate for the events specified earlier::
 
  pmod = [None, Bunch(name=['Rate'], param=[[.300, .500, .600]], 
                                       poly=[1]), None]
-  subject_info = Bunch(conditions=condnames,
+ subject_info = Bunch(conditions=condnames,
                                      onsets = event_onsets,
                                      durations = durations,
                                      pmod = pmod)
