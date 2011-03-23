@@ -152,10 +152,18 @@ class Level1Design(BaseInterface):
                 num_evs[1] += 1
                 if field == 'cond':
                     for j, onset in enumerate(cond['onset']):
+                        try:
+                            amplitudes = cond['amplitudes']
+                            if len(amplitudes) > 1:
+                                amp = amplitudes[j]
+                            else:
+                                amp = amplitudes[0]
+                        except KeyError:
+                            amp = 1
                         if len(cond['duration']) > 1:
-                            evinfo.insert(j, [onset, cond['duration'][j], 1])
+                            evinfo.insert(j, [onset, cond['duration'][j], amp])
                         else:
-                            evinfo.insert(j, [onset, cond['duration'][0], 1])
+                            evinfo.insert(j, [onset, cond['duration'][0], amp])
                     ev_txt += ev_hrf.substitute(ev_num=num_evs[0],
                                                 ev_name=name,
                                                 temporalderiv=usetd,
