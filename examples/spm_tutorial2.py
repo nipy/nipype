@@ -1,8 +1,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-Using SPM for analysis
-=======================
+====================================
+Using SPM for analysis: Hierarchical
+====================================
 
 The spm_tutorial.py integrates several interfaces to perform a first
 and second level analysis on a two-subject data set.  The tutorial can
@@ -11,10 +12,7 @@ nipype tutorial directory:
 
     python spm_tutorial.py
 
-"""
-
-
-"""Import necessary modules from nipype."""
+Import necessary modules from nipype."""
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
@@ -150,7 +148,7 @@ l1analysis = pe.Workflow(name='analysis')
 :class:`nipype.interfaces.spm.SpecifyModel`.
 """
 
-modelspec = pe.Node(interface=model.SpecifyModel(), name= "modelspec")
+modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
 modelspec.inputs.concatenate_runs        = True
 
 """Generate a first level SPM.mat file for analysis
@@ -296,9 +294,9 @@ necessary to generate an SPM design matrix. In this tutorial, the same
 paradigm was used for every participant.
 """
 
-from nipype.interfaces.base import Bunch
-from copy import deepcopy
 def subjectinfo(subject_id):
+    from nipype.interfaces.base import Bunch
+    from copy import deepcopy
     print "Subject ID: %s\n"%str(subject_id)
     output = []
     names = ['Task-Odd','Task-Even']
@@ -406,6 +404,7 @@ report.inputs.base_directory = os.path.abspath('spm_tutorial2/report')
 report.inputs.parameterization = False
 
 def getstripdir(subject_id):
+    import os
     return os.path.join(os.path.abspath('spm_tutorial2/workingdir'),'_subject_id_%s' % subject_id)
 
 # store relevant outputs from various stages of the 1st level analysis
@@ -489,3 +488,4 @@ Execute the second level pipeline
 
 if __name__ == '__main__':
     l2pipeline.run()
+

@@ -1,15 +1,16 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from copy import deepcopy
 
+import nibabel as nb
 import numpy as np
 
-from nipype.utils.filemanip import (filename_to_list, list_to_filename)
 from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec,
                                     Undefined, isdefined, OutputMultiPath,
-    InputMultiPath)
+    InputMultiPath, BaseInterface, File, BaseInterfaceInputSpec)
 from nipype.interfaces.io import IOBase, add_traits
-
+from nipype.testing import assert_equal
+from nipype.utils.filemanip import (filename_to_list)
+from nipype.utils.misc import getsource, create_function_from_source, dumps
     
 class IdentityInterface(IOBase):
     """Basic interface class generates identity mappings
@@ -58,7 +59,7 @@ class IdentityInterface(IOBase):
                 outputs[key] = val
         return outputs
 
-class MergeInputSpec(DynamicTraitedSpec):
+class MergeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     axis = traits.Enum('vstack', 'hstack', usedefault=True,
                 desc='direction in which to merge, hstack requires same number of elements in each input')
 class MergeOutputSpec(TraitedSpec):
@@ -108,7 +109,7 @@ class Merge(IOBase):
             outputs['out'] = out
         return outputs
 
-class SplitInputSpec(TraitedSpec):
+class SplitInputSpec(BaseInterfaceInputSpec):
     inlist = traits.List(traits.Any, mandatory=True,
                   desc='list of values to split')
     splits = traits.List(traits.Int, mandatory=True,
@@ -153,7 +154,7 @@ class Split(IOBase):
                 outputs['out%d'%(i+1)] =  np.array(self.inputs.inlist)[splits[i]:splits[i+1]].tolist()
         return outputs
 
-class SelectInputSpec(TraitedSpec):
+class SelectInputSpec(BaseInterfaceInputSpec):
     inlist = InputMultiPath(traits.Any, mandatory=True,
                   desc='list of values to choose from')
     index = InputMultiPath(traits.Int, mandatory=True,
@@ -192,43 +193,117 @@ class Select(IOBase):
         outputs['out'] = out
         return outputs
 
-'''
-class SubstringMatch(BasicInterface):
-    """Basic interface class to match list items containing specific substrings
+class FunctionInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    function_str = traits.Str(mandatory=True, desc='code for function')
+
+class Function(IOBase):
+    """Runs arbitrary function as an interface
 
     Examples
     --------
-    
-    >>> from nipype.interfaces.utility import SubstringMatch
-    >>> match = SubstringMatch()
-    >>> match.inputs.update(inlist=['foo', 'goo', 'zoo'], substrings='oo')
-    >>> out = match.run()
-    >>> out.outputs.out
-    ['foo', 'goo', 'zoo']
-    >>> match.inputs.update(inlist=['foo', 'goo', 'zoo'], substrings=['foo'])
-    >>> out = match.run()
-    >>> out.outputs.out
-    'foo'
-    
+
+    >>> func = 'def func(arg1, arg2=5): return arg1 + arg2'
+    >>> fi = Function(input_names=['arg1', 'arg2'], output_names=['out'])
+    >>> fi.inputs.function_str = func
+    >>> res = fi.run(arg1=1)
+    >>> res.outputs.out
+    6
+
     """
-    def __init__(self):
-        self.inputs = Bunch(inlist=None,
-                            substrings=None)
-        
-    def outputs(self):
-        outputs = Bunch(out=None)
-        return outputs
     
-    def aggregate_outputs(self):
-        outputs = self.outputs()
-        outputs.out = []
-        for val in filename_to_list(self.inputs.inlist):
-            match = [val for pat in filename_to_list(self.inputs.substrings) if val.find(pat) >= 0]
-            if match:
-                outputs.out.append(val)
-        if not outputs.out:
-            outputs.out = None
+    input_spec = FunctionInputSpec
+    output_spec = DynamicTraitedSpec
+
+    def __init__(self, input_names, output_names, function=None, **inputs):
+        """
+
+        Parameters
+        ----------
+
+        input_names: single str or list
+            names corresponding to function inputs
+        output_names: single str or list
+            names corresponding to function outputs. has to match the number of outputs
+        """
+        
+        super(Function, self).__init__(**inputs)
+        if function:
+            if hasattr(function, '__call__'):
+                try:
+                    self.inputs.function_str = getsource(function)
+                except IOError:
+                    raise Exception('Interface Function does not accept ' \
+                                        'function objects defined interactively in a python session')
+            elif isinstance(function, str):
+                self.inputs.function_str = function
+            else:
+                raise Exception('Unknown type of function')
+        self.inputs.on_trait_change(self._set_function_string, 'function_str')
+        self._input_names = filename_to_list(input_names)
+        self._output_names = filename_to_list(output_names)
+        add_traits(self.inputs, [name for name in self._input_names])
+        self._out = {}
+        for name in self._output_names:
+            self._out[name] = None
+
+    def _set_function_string(self, obj, name, old, new):
+        if name == 'function_str':
+            if hasattr(new, '__call__'):
+                function_source = getsource(new)
+            elif isinstance(new, str):
+                function_source = dumps(new)
+            self.inputs.trait_set(trait_change_notify=False, **{'%s'%name:function_source})
+
+    def _add_output_traits(self, base):
+        undefined_traits = {}
+        for key in self._output_names:
+            base.add_trait(key, traits.Any)
+            undefined_traits[key] = Undefined
+        base.trait_set(trait_change_notify=False, **undefined_traits)
+        return base
+
+    def _run_interface(self, runtime):       
+        function_handle = create_function_from_source(self.inputs.function_str)
+
+        args = {}
+        for name in self._input_names:
+            value = getattr(self.inputs, name)
+            if isdefined(value):
+                args[name] = value
+
+        out = function_handle(**args)
+        
+        if len(self._output_names) == 1:
+            self._out[self._output_names[0]] = out
         else:
-            outputs.out = list_to_filename(outputs.out)
+            if isinstance(out, tuple) and (len(out) != len(self._output_names)):
+                raise RuntimeError('Mismatch in number of expected outputs')
+                
+            else:
+                for idx, name in enumerate(self._output_names):
+                    self._out[name] = out[idx]
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        for key in self._output_names:
+            outputs[key] = self._out[key]
         return outputs
-'''
+
+
+class AssertEqualInputSpec(BaseInterfaceInputSpec):
+    volume1 = File(exists=True, mandatory=True)
+    volume2 = File(exists=True, mandatory=True)
+    
+class AssertEqual(BaseInterface):
+    input_spec = AssertEqualInputSpec
+    
+    def _run_interface(self, runtime):
+        
+        data1 = nb.load(self.inputs.volume1).get_data()
+        data2 = nb.load(self.inputs.volume2).get_data()
+        
+        assert_equal(data1, data2)
+        
+        return runtime

@@ -123,7 +123,7 @@ class BET(FSLCommand):
         # accordingly.
         runtime = super(BET, self)._run_interface(runtime)
         if runtime.stderr:
-            runtime.returncode = 1
+            self.raise_exception(runtime)
         return runtime
 
     def _gen_outfilename(self):
@@ -272,6 +272,15 @@ class FAST(FSLCommand):
     input_spec = FASTInputSpec
     output_spec = FASTOutputSpec
 
+    def _format_arg(self, name, spec, value):
+        # first do what should be done in general
+        formated = super(FAST, self)._format_arg(name, spec, value)
+        if name == 'in_files':
+            # FAST needs the -S parameter value to correspond to the number
+            # of input images, otherwise it will ignore all but the first
+            formated = "-S %d %s" % (len(value), formated)
+        return formated
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.number_classes):
@@ -287,15 +296,25 @@ class FAST(FSLCommand):
 
         outputs['tissue_class_map'] = self._gen_fname(basefile,
                                                       suffix = '_seg')
-        outputs['tissue_class_files'] = []
-        for  i in range(nclasses):
-            outputs['tissue_class_files'].append(self._gen_fname(basefile,
-                                                                 suffix = '_seg_%d'%(i)))
+        if self.inputs.segments:
+            outputs['tissue_class_files'] = []
+            for  i in range(nclasses):
+                outputs['tissue_class_files'].append(
+                        self._gen_fname(basefile, suffix = '_seg_%d'%(i)))
         if isdefined(self.inputs.output_biascorrected):
             outputs['restored_image'] = []
-            for val,f in enumerate(self.inputs.in_files):
-                outputs['restored_image'].append(self._gen_fname(f,
-                                                                 suffix = '_restore_%d'%(val)))
+            if len(self.inputs.in_files) > 1:
+                # for multi-image segmentation there is one corrected image
+                # per input
+                for val,f in enumerate(self.inputs.in_files):
+                    # image numbering is 1-based
+                    outputs['restored_image'].append(
+                            self._gen_fname(basefile, suffix = '_restore_%d'%(val+1)))
+            else:
+                # single image segmentation has unnumbered output image
+                outputs['restored_image'].append(
+                        self._gen_fname(basefile, suffix = '_restore'))
+
         outputs['mixeltype'] = self._gen_fname(basefile, suffix = '_mixeltype')
         if not self.inputs.no_pve:
             outputs['partial_volume_map'] = self._gen_fname(basefile, suffix = '_pveseg')
@@ -305,9 +324,23 @@ class FAST(FSLCommand):
                                                                        suffix='_pve_%d'%(i)))
         if self.inputs.output_biasfield:
             outputs['bias_field'] = []
-            for val,f in enumerate(self.inputs.in_files):
-                outputs['bias_field'].append(self._gen_fname(basefile, suffix='_bias_%d'%val))
-        #if self.inputs.probability_maps:
+            if len(self.inputs.in_files) > 1:
+                # for multi-image segmentation there is one bias field image
+                # per input
+                for val,f in enumerate(self.inputs.in_files):
+                    # image numbering is 1-based
+                    outputs['bias_field'].append(
+                            self._gen_fname(basefile, suffix='_bias_%d'%(val+1)))
+            else:
+                # single image segmentation has unnumbered output image
+                outputs['bias_field'].append(
+                        self._gen_fname(basefile, suffix='_bias'))
+
+        if self.inputs.probability_maps:
+            outputs['probability_maps'] = []
+            for i in range(nclasses):
+                outputs['probability_maps'].append(
+                        self._gen_fname(basefile, suffix='_prob_%d'%(i)))
         return outputs
 
 class FLIRTInputSpec(FSLCommandInputSpec):

@@ -558,7 +558,7 @@ class SurfaceSnapshots(FSCommand):
                   "Fatal Error in tksurfer.bin: could not open display"]
         for err in errors:
             if err in runtime.stderr:
-                raise RuntimeError("Could not open display")
+                self.raise_exception(runtime)
         # Tksurfer always (or at least always when you run a tcl script)
         # exits with a nonzero returncode.  We have to force it to 0 here.
         runtime.returncode = 0

@@ -1,11 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Defines functionality for pipelined execution of interfaces
-
-The `Pipeline` class provides core functionality for batch processing. 
+"""Utility routines for workflow graphs
 """
 
 from copy import deepcopy
+from glob import glob
 import logging
 import os
 import re
@@ -14,18 +13,17 @@ from nipype.utils.misc import package_check
 package_check('networkx', '1.3')
 import networkx as nx
 
-from nipype.interfaces.base import CommandLine, isdefined
+from nipype.interfaces.base import CommandLine, isdefined, Undefined
 from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
 from nipype.utils.config import config
 
 logger = logging.getLogger('workflow')
 
-if nx.__version__ < '1.4':
+try:
     dfs_preorder = nx.dfs_preorder
-    logger.info('networkx < 1.4 detected')
-else:
+except AttributeError:
     dfs_preorder = nx.dfs_preorder_nodes
-    logger.info('networkx >= 1.4 detected')
+    logger.info('networkx 1.4 dev or higher detected')
 
 try:
     from os.path import relpath
@@ -61,29 +59,41 @@ except ImportError:
             return os.curdir
         return op.join(*rel_list)
 
-def walk(children, level=0, path=None, usename=True):
-    """Generate all the full paths in a tree, as a dict.
+def modify_paths(object, relative=True, basedir=None):
+    """Modify filenames in a data structure to either full paths or relative paths
     """
-    # Entry point
-    if level == 0:
-        path = {}
-    # Exit condition
-    if not children:
-        yield path.copy()
-        return
-    # Tree recursion
-    head, tail = children[0], children[1:]
-    name, func = head
-    for child in func():
-        # We can use the arg name or the tree level as a key
-        if usename:
-            path[name] = child
-        else:
-            path[level] = child
-        # Recurse into the next level
-        for child_paths in walk(tail, level+1, path, usename):
-            yield child_paths
-        
+    if not basedir:
+        basedir = os.getcwd()
+    if isinstance(object, dict):
+        out = {}
+        for key, val in sorted(object.items()):
+            if isdefined(val):
+                out[key] = modify_paths(val, relative=relative,
+                                        basedir=basedir)
+    elif isinstance(object, (list,tuple)):
+        out = []
+        for val in object:
+            if isdefined(val):
+                out.append(modify_paths(val, relative=relative,
+                                        basedir=basedir))
+        if isinstance(object, tuple):
+            out = tuple(out)
+    else:
+        if isdefined(object):
+            if isinstance(object, str) and os.path.isfile(object):
+                if relative:
+                    if config.getboolean('execution','use_relative_paths'):
+                        out = relpath(object,start=basedir)
+                    else:
+                        out = object
+                else:
+                    out = os.path.abspath(os.path.join(basedir,object))
+                if not os.path.exists(out):
+                    raise FileNotFoundError('File %s not found'%out)
+            else:
+                out = object
+    return out
+
 def _create_pickleable_graph(graph, show_connectinfo=False):
     """Create a graph that can be pickled.
 
@@ -210,11 +220,35 @@ def _write_detailed_dot(graph, dotfilename):
     filep.close()
     return text
 
+# Graph manipulations for iterable expansion
 def _get_valid_pathstr(pathstr):
     pathstr = pathstr.replace(os.sep, '..')
     pathstr = re.sub(r'''[][ (){}?:<>#!|"';]''', '', pathstr)
     pathstr = pathstr.replace(',', '.')
     return pathstr
+
+def walk(children, level=0, path=None, usename=True):
+    """Generate all the full paths in a tree, as a dict.
+    """
+    # Entry point
+    if level == 0:
+        path = {}
+    # Exit condition
+    if not children:
+        yield path.copy()
+        return
+    # Tree recursion
+    head, tail = children[0], children[1:]
+    name, func = head
+    for child in func():
+        # We can use the arg name or the tree level as a key
+        if usename:
+            path[name] = child
+        else:
+            path[level] = child
+        # Recurse into the next level
+        for child_paths in walk(tail, level+1, path, usename):
+            yield child_paths
 
 def get_levels(G):
     levels = {}
@@ -306,7 +340,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
             node._id += str(i)
     return supergraph
 
-def _generate_expanded_graph(graph_in):
+def generate_expanded_graph(graph_in):
     """Generates an expanded graph based on node parameterization
     
     Parameterization is controlled using the `iterables` field of the
@@ -327,13 +361,13 @@ def _generate_expanded_graph(graph_in):
     while moreiterables:
         nodes = nx.topological_sort(graph_in)
         nodes.reverse()
-        inodes = [node for node in nodes if len(node.iterables.keys())>0]
+        inodes = [node for node in nodes if node.iterables is not None]
         if inodes:
             node = inodes[0]
             iterables = node.iterables.copy()
             logger.debug('node: %s iterables: %s'%(node, iterables))
             #nx.write_dot(graph_in, '%s_pre.dot'%node)
-            node.iterables = {}
+            node.iterables = None
             node._id += 'I'
             subnodes = [s for s in dfs_preorder(graph_in, node)]
             logger.debug(('subnodes:' , subnodes))
@@ -351,7 +385,7 @@ def _generate_expanded_graph(graph_in):
     return graph_in
 
 def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
-                 show_connectinfo=False, dotfilename='graph.dot'):
+                 show_connectinfo=False, dotfilename='graph.dot', format='png'):
     """ Displays the graph layout of the pipeline
     
     This function requires that pygraphviz and matplotlib are available on
@@ -374,7 +408,7 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
     """
     graph = deepcopy(graph_in)
     if use_execgraph:
-        graph = _generate_expanded_graph(graph)
+        graph = generate_expanded_graph(graph)
         logger.debug('using execgraph')
     else:
         logger.debug('using input graph')
@@ -388,7 +422,7 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
                                newpath=base_dir)
     logger.info('Creating detailed dot file: %s'%outfname)
     _write_detailed_dot(graph, outfname)
-    cmd = 'dot -Tpng -O %s' % outfname
+    cmd = 'dot -T%s -O %s' % (format, outfname)
     res = CommandLine(cmd).run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
@@ -399,7 +433,7 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
                                newpath=base_dir)
     nx.write_dot(pklgraph, outfname)
     logger.info('Creating dot file: %s' % outfname)
-    cmd = 'dot -Tpng -O %s' % outfname
+    cmd = 'dot -T%s -O %s' % (format, outfname)
     res = CommandLine(cmd).run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
@@ -409,17 +443,10 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
         if show_connectinfo:
             nx.draw_networkx_edge_labels(pklgraph, pos)
 
-def _report_nodes_not_run(notrun):
-    if notrun:
-        logger.info("***********************************")
-        for info in notrun:
-            logger.error("could not run node: %s" % '.'.join((info['node']._hierarchy,info['node']._id)))
-            logger.info("crashfile: %s" % info['crashfile'])
-            logger.debug("The following dependent nodes were not run")
-            for subnode in info['dependents']:
-                logger.debug(subnode._id)
-        logger.info("***********************************")
-
+def format_dot(dotfilename, format=None):
+    cmd = 'dot -T%s -O %s' % (format, dotfilename)
+    CommandLine(cmd).run()
+    logger.info('Converting dotfile: %s to %s format'%(dotfilename, format))
 
 def make_output_dir(outdir):
     """Make the output_dir if it doesn't exist.
@@ -430,46 +457,83 @@ def make_output_dir(outdir):
     
     """
     if not os.path.exists(os.path.abspath(outdir)):
-        # XXX Should this use os.makedirs which will make any
-        # necessary parent directories?  I didn't because the one
-        # case where mkdir failed because a missing parent
-        # directory, something went wrong up-stream that caused an
-        # invalid path to be passed in for `outdir`.
         logger.debug("Creating %s" % outdir)
-        os.mkdir(outdir)
+        os.makedirs(outdir)
     return outdir
 
-def modify_paths(object, relative=True, basedir=None):
-    """Modify filenames in a data structure to either full paths or relative paths
+def get_all_files(infile):
+    files = [infile]
+    if infile.endswith(".img"):
+        files.append(infile[:-4] + ".hdr")
+        files.append(infile[:-4] + ".mat")
+    if infile.endswith(".img.gz"):
+        files.append(infile[:-7] + ".hdr.gz")
+    return files
+
+def walk_outputs(object):
+    """Extract every file and directory from a python structure
     """
-    if not basedir:
-        basedir = os.getcwd()
+    out = []
     if isinstance(object, dict):
-        out = {}
         for key, val in sorted(object.items()):
             if isdefined(val):
-                out[key] = modify_paths(val, relative=relative,
-                                        basedir=basedir)
+                out.extend(walk_outputs(val))
     elif isinstance(object, (list,tuple)):
-        out = []
         for val in object:
             if isdefined(val):
-                out.append(modify_paths(val, relative=relative,
-                                        basedir=basedir))
-        if isinstance(object, tuple):
-            out = tuple(out)
+                out.extend(walk_outputs(val))
     else:
-        if isdefined(object):
-            if isinstance(object, str) and os.path.isfile(object):
-                if relative:
-                    if config.get('execution','use_relative_paths'):
-                        out = relpath(object,start=basedir)
-                    else:
-                        out = object.copy()
-                else:
-                    out = os.path.abspath(os.path.join(basedir,object))
-                if not os.path.exists(out):
-                    raise FileNotFoundError('File %s not found'%out)
-            else:
-                out = object
+        if isdefined(object) and isinstance(object, str):
+            if os.path.islink(object) or os.path.isfile(object):
+                out = [(filename,'f') for filename in get_all_files(object)]
+            elif os.path.isdir(object):
+                out = [(object,'d')]
     return out
+
+def walk_files(cwd):
+    for path, _, files in os.walk(cwd):
+        for f in files:
+            yield os.path.join(path, f)
+
+def clean_working_directory(outputs, cwd, inputs, needed_outputs,
+                            files2keep=None, dirs2keep=None):
+    """Removes all files not needed for further analysis from the directory
+    """
+    if not needed_outputs:
+        return outputs
+    # build a list of needed files
+    output_files = []
+    outputdict = outputs.get()
+    for output in needed_outputs:
+        output_files.extend(walk_outputs(outputdict[output]))
+    needed_files = [path for path, type in output_files if type == 'f']
+    input_files = []
+    inputdict = inputs.get()
+    input_files.extend(walk_outputs(inputdict))
+    needed_files += [path for path, type in input_files if type == 'f']
+    for extra in ['_0x*.json', 'provenance.xml', 'pyscript*.m',
+                  'command.txt', 'result*.pklz']:
+        needed_files.extend(glob(os.path.join(cwd, extra)))
+    if files2keep:
+        needed_files.extend(filename_to_list(files2keep))
+    needed_dirs = [path for path, type in output_files if type == 'd']
+    if dirs2keep:
+        needed_dirs.extend(filename_to_list(dirs2keep))
+    for extra in ['_nipype', '_report']:
+        needed_dirs.extend(glob(os.path.join(cwd, extra)))
+    logger.debug('Needed files: %s'%(';'.join(needed_files)))
+    logger.debug('Needed dirs: %s'%(';'.join(needed_dirs)))
+    files2remove = []
+    for f in walk_files(cwd):
+        if f not in needed_files:
+            if len(needed_dirs) == 0:
+                files2remove.append(f)
+            elif not any([f.startswith(dirname) for dirname in needed_dirs]):
+                files2remove.append(f)
+    logger.debug('Removing files: %s'%(';'.join(files2remove)))
+    for f in files2remove:
+        os.remove(f)
+    for key in outputs.copyable_trait_names():
+        if key not in needed_outputs:
+            setattr(outputs, key, Undefined)
+    return outputs

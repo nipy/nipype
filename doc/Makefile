@@ -47,7 +47,7 @@ html: examples2rst api htmlonly
 examples2rst:
 	python ../tools/ex2rst \
 			--project Nipype \
-			--outdir $(CURDIR)/examples \
+			--outdir $(CURDIR)/users/examples \
 			../examples/freesurfer_tutorial.py \
 			../examples/fsl_tutorial2.py \
 			../examples/fsl_feeds_tutorial.py \

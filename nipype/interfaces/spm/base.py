@@ -17,7 +17,7 @@ from scipy.io import savemat
 
 # Local imports
 from nipype.interfaces.base import BaseInterface, traits, TraitedSpec,\
-    InputMultiPath
+    InputMultiPath, BaseInterfaceInputSpec
 from nipype.utils.misc import isdefined
 from nibabel import load
 from nipype.interfaces.matlab import MatlabCommand
@@ -135,14 +135,15 @@ class Info(object):
             except:
                 matlab_cmd = 'matlab -nodesktop -nosplash'
         mlab = MatlabCommand(matlab_cmd = matlab_cmd)
-        mlab.inputs.script_file = 'spminfo'
         mlab.inputs.script = """
         if isempty(which('spm')),
         throw(MException('SPMCheck:NotFound','SPM not in matlab path'));
         end;
         spm_path = spm('dir');
         fprintf(1, 'NIPYPE  %s', spm_path);
+        exit;
         """
+        mlab.inputs.mfile = False
         try:
             out = mlab.run()
         except IOError, e:
@@ -169,7 +170,7 @@ def no_spm():
         return False
 
     
-class SPMCommandInputSpec(TraitedSpec):
+class SPMCommandInputSpec(BaseInterfaceInputSpec):
     matlab_cmd = traits.Str(desc='matlab command to use')
     paths = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
     mfile = traits.Bool(True, desc='Run m-code using m-file',
@@ -239,9 +240,10 @@ class SPMCommand(BaseInterface):
         runtime.returncode = results.runtime.returncode
         if self.mlab.inputs.uses_mcr:
             if 'Skipped' in results.runtime.stdout:
-                runtime.returncode = 1
+                self.raise_exception(runtime)
         runtime.stdout = results.runtime.stdout
         runtime.stderr = results.runtime.stderr
+        runtime.merged = results.runtime.merged
         return runtime
     
     def _list_outputs(self):
@@ -411,7 +413,7 @@ class SPMCommand(BaseInterface):
         if strcmp(spm('ver'),'SPM8'), 
            jobs=spm_jobman('spm5tospm8',{jobs});
         end 
-        spm_jobman(\'run\',jobs);\n
+        spm_jobman(\'run_nogui\',jobs);\n
         """
         if postscript is not None:
             mscript += postscript

@@ -1,6 +1,9 @@
-==============
- Architecture
-==============
+======================================
+ Architecture (discussions from 2009)
+======================================
+
+This section reflects notes and discussion between developers during the
+start of the nipype project in 2009.
 
 Design Guidelines
 -----------------

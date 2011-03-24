@@ -1,6 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
+===========================================
+Using FSL for fMRI analysis with FEEDS data
+===========================================
+
 A pipeline example that data from the FSL FEEDS set. Single subject, two
 stimuli.
 
@@ -15,8 +19,6 @@ import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model generation
-
-from nibabel import load
 
 
 """
@@ -104,6 +106,7 @@ Define a function to return the 1 based index of the middle volume
 """
 
 def getmiddlevolume(func):
+    from nibabel import load
     funcfile = func
     if isinstance(func, list):
         funcfile = func[0]
@@ -247,9 +250,12 @@ Define a function to get the brightness threshold for SUSAN
 def getbtthresh(medianvals):
     return [0.75*val for val in medianvals]
 
+def convert_th(x):
+    return [[tuple([val[0],0.75*val[1]])] for val in x]
+
 preproc.connect(maskfunc2, 'out_file', smooth, 'in_file')
 preproc.connect(medianval, ('out_stat', getbtthresh), smooth, 'brightness_threshold')
-preproc.connect(mergenode, ('out', lambda x: [[tuple([val[0],0.75*val[1]])] for val in x]), smooth, 'usans')
+preproc.connect(mergenode, ('out', convert_th), smooth, 'usans')
 
 """
 Mask the smoothed data with the dilated mask
@@ -330,7 +336,6 @@ Use :class:`nipype.algorithms.modelgen.SpecifyModel` to generate design informat
 """
 
 modelspec = pe.Node(interface=model.SpecifyModel(),  name="modelspec")
-modelspec.inputs.concatenate_runs = False
 
 """
 Use :class:`nipype.interfaces.fsl.Level1Design` to generate a run specific fsf
@@ -381,7 +386,8 @@ conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
 
 modelfit.connect([
    (modelspec,level1design,[('session_info','session_info')]),
-   (level1design,modelgen,[('fsf_files','fsf_file')]),
+   (level1design,modelgen,[('fsf_files','fsf_file'),
+                           ('ev_files', 'ev_files')]),
    (modelgen,modelestimate,[('design_file','design_file')]),
    (modelgen,conestimate,[('con_file','tcon_file')]),
    (modelgen,conestimate,[('fcon_file','fcon_file')]),
@@ -530,10 +536,8 @@ cont3 = ['Task','F', [cont1, cont2]]
 contrasts = [cont1,cont2,cont3]
 
 firstlevel.inputs.modelfit.modelspec.input_units = 'secs'
-firstlevel.inputs.modelfit.modelspec.output_units = 'secs'
 firstlevel.inputs.modelfit.modelspec.time_repetition = TR
 firstlevel.inputs.modelfit.modelspec.high_pass_filter_cutoff = hpcutoff
-firstlevel.inputs.modelfit.modelspec.subject_id = 'whatever'
 
 
 firstlevel.inputs.modelfit.level1design.interscan_interval = TR

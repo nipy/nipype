@@ -1,0 +1,9 @@
+/build
+/dist
+/nipype.egg-info
+/MANIFEST
+/nipype/build
+/nipype/nipype.egg-info
+/doc/_build
+/doc/users/examples
+*.pyc

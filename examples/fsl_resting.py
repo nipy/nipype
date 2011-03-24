@@ -153,7 +153,8 @@ modelestimate = pe.Node(interface=fsl.FILMGLS(), name='modelestimate')
                            #iterfield = ['design_file','in_file'])
 
 modelfit.connect([(modelspec,level1design,[('session_info','session_info')]),
-                  (level1design,modelgen,[('fsf_files','fsf_file')]),
+                  (level1design,modelgen,[('fsf_files','fsf_file'),
+                                          ('ev_files', 'ev_files')]),
                   (modelgen,modelestimate,[('design_file','design_file')]),
                   ])
 
@@ -224,10 +225,10 @@ datasource.inputs.template_args = info
    examples of this function are available in the `doc/examples`
    folder. Note: Python knowledge required here.
 """
-import numpy as np
-from nipype.interfaces.base import Bunch
-from copy import deepcopy
+
 def subjectinfo(meantsfile):
+    import numpy as np
+    from nipype.interfaces.base import Bunch
     ts = np.loadtxt(meantsfile)
     output = [Bunch(conditions=None,
                     onsets=None,
@@ -246,7 +247,6 @@ cont1 = ['MeanIntensity','T', ['MeanIntensity'],[1]]
 contrasts = [cont1]
 
 modelfit.inputs.modelspec.input_units = 'secs'
-modelfit.inputs.modelspec.output_units = 'secs'
 modelfit.inputs.modelspec.time_repetition = TR
 modelfit.inputs.modelspec.high_pass_filter_cutoff = hpcutoff
 

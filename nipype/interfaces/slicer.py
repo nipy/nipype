@@ -21,8 +21,6 @@ class SlicerCommandLine(CommandLine):
     
     input_spec = SlicerCommandLineInputSpec
     output_spec = DynamicTraitedSpec
-    warnings.warn('slicer is Not fully implemented',
-                  RuntimeWarning)
                        
                         
     
@@ -45,6 +43,8 @@ class SlicerCommandLine(CommandLine):
         return base
     
     def __init__(self, module, **inputs):
+        warnings.warn('slicer is Not fully implemented',
+                  RuntimeWarning)
         super(SlicerCommandLine, self).__init__(command= "Slicer3 --launch %s "%module, name= module, **inputs)
         dom = self._grab_xml(module)
         self._outputs_filenames = {}

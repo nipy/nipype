@@ -7,7 +7,7 @@ import shutil
 import numpy as np
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
-                            with_setup, TraitError, parametric, skipif)
+                            with_setup, TraitError, skipif)
 
 from nipype.testing import example_data
 

@@ -50,22 +50,23 @@ rather than a function.
 Distributed computation
 =======================
 
-The pipeline engine has built-in support for distributed computation
-on clusters via the IPython_ distributed computing interface. As long
-as the user sets up a workflow on a **shared filesystem** and has
-configured the environment for distributed computation using IPython_,
-the pipeline engine's :func:`~nipype.pipeline.engine.Pipeline.run`
-function will automatically take advantage of the cluster. In some
-cases it may be advantageous to run the workflow in series locally
-(e.g., debugging, small-short pipelines, large memory only interfaces,
-relocating working directory/updating hashes).
+The pipeline engine has built-in support for distributed computation on
+clusters. This can be achieved via plugin-modules for the IPython_
+distributed computing interface or SGE, provided the user sets up a
+workflow on a shared filesystem.
+
+For IPython_ the environment needs to be configured for distributed
+operation. Details are available at :ref:`parallel_processing`.
+
+The default behavior is to run in series using the Linear plugin.
 
 .. testcode::
 
-   workflow.run_in_series()
+   workflow.run()
 
-Some details of setting up your cluster can be found in
-:ref:`parallel_processing`.
+In some cases it may be advantageous to run the workflow in series
+locally (e.g., debugging, small-short pipelines, large memory only
+interfaces, relocating working directory/updating hashes).
 
 Debugging
 =========

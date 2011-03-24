@@ -132,26 +132,11 @@ class PyMVPA(Interface):
         orig_sl_map.save(self._get_output_filename())
 
 
-    def run(self, samples_file=None, mask_file=None,
-            attributes_file=None, radius=None, cwd=None, **inputs):
-        """Execute this module.
-        """
-        if samples_file:
-            self.inputs.samples_file = samples_file
-        if attributes_file:
-            self.inputs.attributes_file = attributes_file
-        if mask_file:
-            self.inputs.mask_file = mask_file
-        if radius:
-            self.inputs.radius = radius
+    def _run_interface(self, runtime):
 
         self._run_core()
-        runtime = Bunch(returncode=0,
-                        messages=None,
-                        errmessages=None)
-        outputs=self.aggregate_outputs()
 
-        return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
+        return runtime
 
 
 if __name__ == '__main__':

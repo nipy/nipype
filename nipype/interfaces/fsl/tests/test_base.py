@@ -3,7 +3,7 @@
 import os
 
 from nipype.testing import (assert_equal, assert_true, assert_raises,
-                            assert_not_equal, parametric, skipif)
+                            assert_not_equal, skipif)
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces.base import InterfaceResult
 from nipype.interfaces.fsl import check_fsl, no_fsl
@@ -56,8 +56,6 @@ def test_FSLCommand2():
             #  Setting class outputtype should not effect existing instances
             yield assert_not_equal, cmdinst.inputs.output_type, out_type
 
-
-@parametric
 @skipif(no_fsl)#skip if fsl not installed)
 def test_gen_fname():
     # Test _gen_fname method of FSLCommand
@@ -66,17 +64,17 @@ def test_gen_fname():
     # just the filename
     fname = cmd._gen_fname('foo.nii.gz',suffix='_fsl')
     desired = os.path.join(pth, 'foo_fsl.nii.gz')
-    yield assert_equal(fname, desired)
+    yield assert_equal, fname, desired
     # filename with suffix
     fname = cmd._gen_fname('foo.nii.gz', suffix = '_brain')
     desired = os.path.join(pth, 'foo_brain.nii.gz')
-    yield assert_equal(fname, desired)
+    yield assert_equal, fname, desired
     # filename with suffix and working directory
     fname = cmd._gen_fname('foo.nii.gz', suffix = '_brain', cwd = '/data')
     desired = os.path.join('/data', 'foo_brain.nii.gz')
-    yield assert_equal(fname, desired)
+    yield assert_equal, fname, desired
     # filename with suffix and no file extension change
     fname = cmd._gen_fname('foo.nii.gz', suffix = '_brain.mat',
                            change_ext = False)
     desired = os.path.join(pth, 'foo_brain.mat')
-    yield assert_equal(fname, desired)
+    yield assert_equal, fname, desired

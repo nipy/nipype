@@ -27,6 +27,9 @@ import sys
 from nipype.utils.misc import is_container
 from nipype.interfaces.base import Interface, CommandLine
 from enthought.traits.trait_errors import TraitError
+import warnings
+from nipype.pipeline.engine import Workflow
+import tempfile
 
 def trim(docstring, marker):
     if not docstring:
@@ -238,6 +241,19 @@ class InterfaceHelpWriter(object):
         classes.sort()
         return functions, classes
 
+
+    def _write_graph_section(self, fname, title):
+        ad = '\n%s\n%s\n'%(title,'-'*len(title))
+        ad += '.. graphviz::\n\n'
+        fhandle = open(fname)
+        for line in fhandle:
+            ad += '\t' + line + '\n'
+        
+        fhandle.close()
+        os.remove(fname)
+        os.remove(fname + ".png")
+        return ad
+
     def generate_api_doc(self, uri):
         '''Make autodoc documentation template string for a module
 
@@ -253,7 +269,19 @@ class InterfaceHelpWriter(object):
         '''
         # get the names of all classes and functions
         functions, classes = self._parse_module(uri)
-        if not classes:
+        workflows = []
+        for function in functions:
+            try:
+                __import__(uri)
+                finst = sys.modules[uri].__dict__[function]
+                workflow = finst()
+            except TypeError:
+                continue
+            
+            if isinstance(workflow, Workflow):
+                workflows.append((workflow,function, finst))
+        
+        if not classes and not workflows:
             print 'WARNING: Empty -',uri  # dbg
             return ''
 
@@ -285,8 +313,16 @@ class InterfaceHelpWriter(object):
             __import__(uri)
             print c
             try:
-                classinst = sys.modules[uri].__dict__[c]()
-            except:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    if c == "Function":
+                        classinst = sys.modules[uri].__dict__[c](input_names=['arg1', 'arg2'], output_names=['out'])
+                    elif c == "IdentityInterface":
+                        classinst = sys.modules[uri].__dict__[c](fields=['a','b'])
+                    else:
+                        classinst = sys.modules[uri].__dict__[c]()
+            except Exception as inst:
+                print inst
                 continue
             helpstr = ''
             if isinstance(classinst, CommandLine):
@@ -376,6 +412,21 @@ class InterfaceHelpWriter(object):
                   '\n' \
                   '  .. automethod:: __init__\n'
         """
+        
+        for workflow, name, finst in workflows:
+            ad += '\n:class:`' + name + '()`\n' \
+                  + self.rst_section_levels[2] * \
+                  (len(name)+11) + '\n\n'
+            helpstr = trim(finst.__doc__, self.rst_section_levels[3]) + "\n\n"
+            ad += '\n' + helpstr + '\n'
+            
+            
+            (_,fname) =  tempfile.mkstemp(suffix=".dot")
+            workflow.write_graph(dotfilename=fname, graph2use='flat')
+            
+            ad += self._write_graph_section(fname, 'Graph')
+            ad += self._write_graph_section(fname.replace(".dot",'_detailed.dot'), 'Detailed graph')
+            
         return ad
 
     def _survives_exclude(self, matchstr, match_type):

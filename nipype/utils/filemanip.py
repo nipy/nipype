@@ -55,7 +55,7 @@ def split_filename(fname):
     fname : str
         filename from fname, without extension
     ext : str
-        file extenstion from fname
+        file extension from fname
 
     Examples
     --------
@@ -71,11 +71,11 @@ def split_filename(fname):
     '.nii.gz'
 
     """
-    
+
     special_extensions = [".nii.gz"]
 
     pth, fname = os.path.split(fname)
-    
+
     ext = None
     for special_ext in special_extensions:
         ext_len = len(special_ext)
@@ -94,7 +94,7 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     Parameters
     ----------
     fname : string
-        A filename (may or may not include path
+        A filename (may or may not include path)
     prefix : string
         Characters to prepend to the filename
     suffix : string
@@ -138,7 +138,7 @@ def hash_rename(filename, hash):
     path, name, ext = split_filename(filename)
     newfilename = ''.join((name,'_0x', hash, ext))
     return os.path.join(path, newfilename)
-             
+
 
 def check_forhash(filename):
     """checks if file has a hash in its filename"""
@@ -190,17 +190,17 @@ def copyfile(originalfile, newfile, copy=False, create_new=False):
         full path to new file
     copy : Bool
         specifies whether to copy or symlink files
-        (default=False) but only for posix systems
-         
+        (default=False) but only for POSIX systems
+
     Returns
     -------
     None
-    
+
     """
     newhash = None
     orighash = None
     fmlogger.debug(newfile)
-    
+
     if create_new:
         while os.path.exists(newfile):
             base, fname, ext = split_filename(newfile)
@@ -249,7 +249,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False):
             except shutil.Error, e:
                 fmlogger.warn(e.message)
         else:
-            fmlogger.debug("File: %s already exists, not overwritng, copy:%d" \
+            fmlogger.debug("File: %s already exists, not overwriting, copy:%d" \
                                % (newfile, copy))
     if originalfile.endswith(".img"):
         hdrofile = originalfile[:-4] + ".hdr"
@@ -259,7 +259,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False):
             matnfile = newfile[:-4] + ".mat"
             copyfile(matofile, matnfile, copy)
         copyfile(hdrofile, hdrnfile, copy)
-        
+
     return newfile
 
 def copyfiles(filelist, dest, copy=False, create_new=False):
@@ -272,15 +272,15 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
     dest : path/files
         full path to destination. If it is a list of length greater
         than 1, then it assumes that these are the names of the new
-        files. 
+        files.
     copy : Bool
         specifies whether to copy or symlink files
         (default=False) but only for posix systems
-         
+
     Returns
     -------
     None
-    
+
     """
     outfiles = filename_to_list(dest)
     newfiles = []
@@ -309,7 +309,7 @@ def filename_to_list(filename):
         return None
 
 def list_to_filename(filelist):
-    """Returns a list if filelist is a list of length greater than 1, 
+    """Returns a list if filelist is a list of length greater than 1,
        otherwise returns the first element
     """
     if len(filelist) > 1:
@@ -323,10 +323,10 @@ def cleandir(dir):
     for ftype in filetypes:
         for f in glob(os.path.join(dir,ftype)):
             os.remove(f)
-        
+
 def save_json(filename, data):
     """Save data to a json file
-    
+
     Parameters
     ----------
     filename : str
@@ -356,7 +356,7 @@ def load_json(filename):
     Returns
     -------
     data : dict
-   
+
     """
 
     fp = file(filename, 'r')
@@ -397,7 +397,7 @@ def savepkl(filename, record):
         pkl_file = gzip.open(filename, 'wb')
     else:
         pkl_file = open(filename, 'wb')
-    cPickle.dump(result, pkl_file)
+    cPickle.dump(record, pkl_file)
     pkl_file.close()
-    
+
 

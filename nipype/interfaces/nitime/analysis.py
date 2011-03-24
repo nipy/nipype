@@ -19,7 +19,8 @@ package_check('matplotlib')
 
 from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
                                     OutputMultiPath, Undefined, traits,
-                                    BaseInterface, isdefined)
+                                    BaseInterface, isdefined,
+    BaseInterfaceInputSpec)
 
 from nipype.utils.filemanip import fname_presuffix
 
@@ -27,7 +28,7 @@ import nitime.analysis as nta
 from nitime.timeseries import TimeSeries
 import nitime.viz as viz
     
-class CoherenceAnalyzerInputSpec(TraitedSpec):
+class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
 
     #Input either csv file, or time-series object and use _xor_inputs to
     #discriminate
@@ -157,7 +158,6 @@ class CoherenceAnalyzer(BaseInterface):
         self.coherence = np.mean(A.coherence[:,:,freq_idx],-1)
         # Get the time delay from analyzer, (roi X roi array)
         self.delay = np.mean(A.delay[:,:,freq_idx],-1)
-        runtime.returncode = 0
         return runtime
                     
     #Rewrite _list_outputs (look at BET)

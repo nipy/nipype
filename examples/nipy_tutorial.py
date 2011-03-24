@@ -1,8 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-Using nipy and SPM for analysis
-=======================
+====================================
+Using SPM and nipy for fMRI analysis
+====================================
+
 
 The nipy_tutorial.py integrates several interfaces to perform a first level 
 analysis on a two-subject data set. It is very similar to the spm_tutorial with
@@ -166,9 +168,10 @@ necessary to generate an SPM design matrix. In this tutorial, the same
 paradigm was used for every participant.
 """
 
-from nipype.interfaces.base import Bunch
-from copy import deepcopy
+
 def subjectinfo(subject_id):
+    from nipype.interfaces.base import Bunch
+    from copy import deepcopy
     print "Subject ID: %s\n"%str(subject_id)
     output = []
     names = ['Task-Odd','Task-Even']
@@ -201,7 +204,7 @@ contrasts = [cont1,cont2]
 in seconds so "output_units" has always have to be set to "secs".
 """
 
-modelspec = pe.Node(interface=model.SpecifyModel(), name= "modelspec")
+modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
 modelspec.inputs.concatenate_runs        = True
 modelspec.inputs.input_units             = 'secs'
 modelspec.inputs.output_units            = 'secs'
@@ -249,7 +252,7 @@ the processing nodes.
 """
 
 l1pipeline = pe.Workflow(name="level1")
-l1pipeline.base_dir = os.path.abspath('spm_tutorial/workingdir')
+l1pipeline.base_dir = os.path.abspath('nipy_tutorial/workingdir')
 
 l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                   (datasource,realign,[('func','in_files')]),

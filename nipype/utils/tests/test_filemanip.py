@@ -3,7 +3,7 @@
 import os
 from tempfile import mkstemp, mkdtemp
 
-from nipype.testing import assert_equal, assert_true, assert_false, parametric
+from nipype.testing import assert_equal, assert_true, assert_false
 from nipype.utils.filemanip import (save_json, load_json, loadflat,
                                     fname_presuffix, fnames_presuffix,
                                     hash_rename, check_forhash,
@@ -13,18 +13,17 @@ from nipype.utils.filemanip import (save_json, load_json, loadflat,
 
 import numpy as np
 
-@parametric
 def test_split_filename():
     res = split_filename('foo.nii')
-    yield assert_equal(res, ('', 'foo', '.nii'))
+    yield assert_equal, res, ('', 'foo', '.nii')
     res = split_filename('foo.nii.gz')
-    yield assert_equal(res, ('', 'foo', '.nii.gz'))
+    yield assert_equal, res, ('', 'foo', '.nii.gz')
     res = split_filename('/usr/local/foo.nii.gz')
-    yield assert_equal(res, ('/usr/local', 'foo', '.nii.gz'))
+    yield assert_equal, res, ('/usr/local', 'foo', '.nii.gz')
     res = split_filename('../usr/local/foo.nii')
-    yield assert_equal(res, ('../usr/local', 'foo', '.nii'))
+    yield assert_equal, res, ('../usr/local', 'foo', '.nii')
     res = split_filename('/usr/local/foo.a.b.c.d')
-    yield assert_equal(res, ('/usr/local', 'foo.a.b.c', '.d'))
+    yield assert_equal, res, ('/usr/local', 'foo.a.b.c', '.d')
 
 def test_fname_presuffix():
     fname = 'foo.nii'
@@ -41,12 +40,11 @@ def test_fnames_presuffix():
     pths = fnames_presuffix(fnames, 'pre_', '_post', '/tmp')
     yield assert_equal, pths, ['/tmp/pre_foo_post.nii', '/tmp/pre_bar_post.nii']
 
-@parametric
 def test_hash_rename():
     new_name = hash_rename('foobar.nii', 'abc123')
-    yield assert_equal(new_name, 'foobar_0xabc123.nii')
+    yield assert_equal, new_name, 'foobar_0xabc123.nii'
     new_name = hash_rename('foobar.nii.gz', 'abc123')
-    yield assert_equal(new_name, 'foobar_0xabc123.nii.gz')
+    yield assert_equal, new_name, 'foobar_0xabc123.nii.gz'
 
 def test_check_forhash():
     fname = 'foobar'
