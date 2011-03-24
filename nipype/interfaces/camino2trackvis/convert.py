@@ -48,24 +48,13 @@ class Camino2TrackvisInputSpec(CommandLineInputSpec):
     
     min_length = traits.Float(argstr='-l %d',
     mandatory=False, position=3, units='mm', desc="The minimum length of tracts to output")
-    
-    #Is it possible to have the input List printed with commas in the argstring?
-    
-    #data_dims = traits.List(traits.Float, 
-    #desc = 'Three comma-separated integers giving the number of voxels along each dimension of the source scans.',
-    #argstr='-d %s', minlen=3, maxlen=3,
-    #units='voxels')
 
-    #voxel_dims = traits.List(traits.Float, desc = 'Three comma-separated numbers giving the size of each voxel in mm.',
-    #argstr='-x %s', minlen=3, maxlen=3,
-    #units='mm')
-
-    data_dims = File(argstr='-d %s',
-    mandatory=True, position=4,
+    data_dims = traits.List(traits.Int, argstr='-d %s', sep=",",
+    mandatory=True, position=4, minlen=3, maxlen=3,
     desc='Three comma-separated integers giving the number of voxels along each dimension of the source scans.')
 
-    voxel_dims = File(argstr='-x %s',
-    mandatory=True, position=5,
+    voxel_dims = traits.List(traits.Float, argstr='-x %s', sep=",",
+    mandatory=True, position=5, minlen=3, maxlen=3,
     desc='Three comma-separated numbers giving the size of each voxel in mm.')
     
     #Change to enum with all combinations? i.e. LAS, LPI, RAS, etc..
