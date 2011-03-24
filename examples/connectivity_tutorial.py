@@ -113,9 +113,6 @@ inputnode = pe.Node(interface=util.IdentityInterface(fields=["dwi", "bvecs", "bv
 
 camino2trackvis = pe.Node(interface=cam2trk.Camino2Trackvis(), name="camino2trk")
 camino2trackvis.inputs.min_length = 30
-#Would like to use get_data_dims here, but camino2trackvis requires comma separated values... Ideas?
-camino2trackvis.inputs.data_dims = '128,104,64'
-camino2trackvis.inputs.voxel_dims = '1,1,1'
 camino2trackvis.inputs.voxel_order = 'LAS'
 
                       
@@ -210,6 +207,10 @@ mapping.connect([(track, camino2trackvis, [('tracked','in_file')]),
                        (track, vtkstreamlines,[['tracked','in_file']]),
                        (camino2trackvis, trk2camino,[['trackvis','in_file']])
                       ])
+
+mapping.connect([(inputnode, camino2trackvis,[(('dwi', get_vox_dims), 'voxel_dims'),
+(('dwi', get_data_dims), 'data_dims')])])
+
 
 mapping.connect([(track, tractshred,[("tracked","in_file")])])
 mapping.connect([(tractshred, conmap,[("shredded","in_file")])])
