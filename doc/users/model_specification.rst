@@ -14,8 +14,8 @@ General purpose model specification
 The :class:`SpecifyModel` provides a generic mechanism for model
 specification. A mandatory input called subject_info provides paradigm
 specification for each run corresponding to a subject. This has to be in
-the form of a :class:`Bunch` or a list of Bunch objects. The Bunch
-contains the following attribules.
+the form of a :class:`Bunch` or a list of Bunch objects (one for each
+run). Each Bunch object contains the following attribules.
 
 Required
 --------
@@ -55,7 +55,7 @@ An example Bunch definition::
   from nipype.interfaces.base import Bunch
   condnames = ['Tapping', 'Speaking', 'Yawning']
   event_onsets = [[0, 10, 50], [20, 60, 80], [30, 40, 70]]
-  durations = [[0],[0],[0],[0],[0]]
+  durations = [[0],[0],[0]]
 
   subject_info = Bunch(conditions=condnames,
                                      onsets = event_onsets,
