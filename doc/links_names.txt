@@ -9,7 +9,7 @@
    nipy, NIPY, Nipy, etc...
 
 .. _nipy: http://nipy.org
-.. _`NIPY developer resources`: http://nipy.sourceforge.net/devel
+.. _`NIPY developer resources`: http://nipy.org/devel
 .. _`Brain Imaging Center`: http://bic.berkeley.edu/
 .. _nitime: http://nipy.sourceforge.net/nitime/
 

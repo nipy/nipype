@@ -247,7 +247,6 @@ cont1 = ['MeanIntensity','T', ['MeanIntensity'],[1]]
 contrasts = [cont1]
 
 modelfit.inputs.modelspec.input_units = 'secs'
-modelfit.inputs.modelspec.output_units = 'secs'
 modelfit.inputs.modelspec.time_repetition = TR
 modelfit.inputs.modelspec.high_pass_filter_cutoff = hpcutoff
 

@@ -14,6 +14,7 @@
    config_file
    interface_tutorial
    pipeline_tutorial
+   model_specification
    parallel_processing
 
 

@@ -9,6 +9,7 @@ import nibabel as nb
 import os                                    # system functions
 
 def get_vox_dims(volume):
+    import nibabel as nb
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume)
@@ -17,6 +18,7 @@ def get_vox_dims(volume):
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
 
 def get_data_dims(volume):
+    import nibabel as nb
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume)
@@ -93,9 +95,6 @@ inputnode = pe.Node(interface=util.IdentityInterface(fields=["dwi", "bvecs", "bv
 
 camino2trackvis = pe.Node(interface=cam2trk.Camino2Trackvis(), name="camino2trk")
 camino2trackvis.inputs.min_length = 30
-#Would like to use get_data_dims here, but camino2trackvis requires comma separated values... Ideas?
-camino2trackvis.inputs.data_dims = '128,104,64'
-camino2trackvis.inputs.voxel_dims = '1,1,1'
 camino2trackvis.inputs.voxel_order = 'LAS'
                       
 trk2camino = pe.Node(interface=cam2trk.Trackvis2Camino(), name="trk2camino")
@@ -178,6 +177,9 @@ convertTest.connect([(track, camino2trackvis, [('tracked','in_file')]),
                        (track, vtkstreamlines,[['tracked','in_file']]),
                        (camino2trackvis, trk2camino,[['trackvis','in_file']])
                       ])
+
+convertTest.connect([(inputnode, camino2trackvis,[(('dwi', get_vox_dims), 'voxel_dims'),
+(('dwi', get_data_dims), 'data_dims')])])
 
 dwiproc = pe.Workflow(name="dwiproc")
 dwiproc.base_dir = os.path.abspath('camino_dti_tutorial')

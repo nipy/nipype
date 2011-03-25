@@ -122,21 +122,24 @@ base class down to subclasses).:
   ``TraitedSpec``: Nipype's primary base class for all Specs.
   Provides initialization, some nipype-specific methods and any trait
   handlers we define. Inherits from traits.HasTraits.
+  
+	  ``BaseInterfaceInputSpec``: Defines inputs common to all 
+	  Interfaces (``ignore_exception``). If in doubt inherit from this.
 
-      ``CommandLineInputSpec``: Defines inputs common to all
-      command-line classes (``args`` and ``environ``)
-
-        ``FSLTraitedSpec``: Defines inputs common to all FSL classes
-        (``outputtype``)
-	  		
-        ``SPMCommandInputSpec``: Defines inputs common to all SPM classes (``matlab_cmd``, ``path``, and ``mfile``)
-        
-        ``FSTraitedSpec``: Defines inputs common to all FreeSurfer classes
-        (``sbjects_dir``)
-        
-        ``MatlabInputSpec``: Defines inputs common to all Matlab classes (``script``, ``nodesktop``, ``nosplash``, ``logfile``, ``single_comp_thread``, ``mfile``, ``script_file``, and ``paths``)
-        
-        ``SlicerCommandLineInputSpec``: Defines inputs common to all Slicer classes (``module``)
+	      ``CommandLineInputSpec``: Defines inputs common to all
+	      command-line classes (``args`` and ``environ``)
+	
+	        ``FSLTraitedSpec``: Defines inputs common to all FSL classes
+	        (``outputtype``)
+		  		
+	        ``SPMCommandInputSpec``: Defines inputs common to all SPM classes (``matlab_cmd``, ``path``, and ``mfile``)
+	        
+	        ``FSTraitedSpec``: Defines inputs common to all FreeSurfer classes
+	        (``sbjects_dir``)
+	        
+	        ``MatlabInputSpec``: Defines inputs common to all Matlab classes (``script``, ``nodesktop``, ``nosplash``, ``logfile``, ``single_comp_thread``, ``mfile``, ``script_file``, and ``paths``)
+	        
+	        ``SlicerCommandLineInputSpec``: Defines inputs common to all Slicer classes (``module``)
 
 Most developers will only need to code at the the interface-level (i.e. implementing custom class inheriting from one of the above classes).
 
@@ -279,7 +282,11 @@ CommandLine
 	generated for this parameter *if-and-only-if* the user did not provide
 	one.  The nipype convention is to automatically generate output
 	filenames when not specified by the user both as a convenience for the
-	user and so the pipeline can easily gather the outputs. Requires ``_gen_filename()`` method to be implemented.
+	user and so the pipeline can easily gather the outputs. Requires 
+	``_gen_filename()`` method to be implemented. This way should be used if the
+	desired file name is dependent on some runtime variables (such as file name
+	of one of the inputs, or current working directory). In case when it should 
+	be fixed it's recommended to just use ``usedefault``.
 	
 ``sep``
 	For List traits the string with witch elements of the list will be joined.
@@ -357,6 +364,7 @@ both of which can be generated if not specified by the user.
 
 Also notice the use of ``self._gen_fname()`` - a FSLCommand helper method for generating filenames (with extensions conforming with FSLOUTPUTTYPE).
 
+See also :doc:`cmd_interface_devel`.
 
 SPM
 ^^^
@@ -372,16 +380,12 @@ And optionally:
 Matlab
 ^^^^^^
 
-If you have a piece of MATLAB code that you would like to incorporate into nipype pipeline there a few things you need to know. At the moment the only 
-data type that nipype is able to pass between two nodes are filenames (but fixed inputs can be of any type). Therefore your script have to either read or 
-write files. There are many many Matlab routines available on the Internet (also included in the SPM package). 
+See :doc:`matlab_interface_devel`.
 
-To implement a Matlab script wrapper you need to inherit from MatlabCommand and the input spec has to inherit from MatlabCommandInputSpec. As in the example 
-above you'll need to implement the _list_outputs methods to populate the output after execution. The MatlabCommandInputSpec adds extra fields for specifying 
-Matlab executable and it's flags as well as the path to matlab routines.
+Python
+^^^^^^
 
-Finally you need to overload the ``_gen_matlab_command()`` method adding your matlab code and parametrising it using the provided inputs.
-
+See :doc:`python_interface_devel`.
 
 Undefined inputs
 ----------------

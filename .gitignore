@@ -5,5 +5,5 @@
 /nipype/build
 /nipype/nipype.egg-info
 /doc/_build
-/doc/examples
+/doc/users/examples
 *.pyc

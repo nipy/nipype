@@ -125,7 +125,7 @@ class EddyCorrect(FSLCommand):
             self.inputs.out_file = self._gen_fname(self.inputs.in_file,suffix = '_edc')
         runtime = super(EddyCorrect, self)._run_interface(runtime)
         if runtime.stderr:
-            runtime.returncode = 1
+            self.raise_exception(runtime)
         return runtime
 
     def _list_outputs(self):        
@@ -217,7 +217,7 @@ class BEDPOSTX(FSLCommand):
 
         runtime = super(BEDPOSTX, self)._run_interface(runtime)
         if runtime.stderr:
-            runtime.returncode = 1
+            self.raise_exception(runtime)
         return runtime
 
     def _list_outputs(self):        
@@ -272,7 +272,7 @@ class TBSS1Preproc(FSLCommand):
             shutil.copyfile(n,os.path.basename(n))            
         runtime = super(TBSS1Preproc, self)._run_interface(runtime)
         if runtime.stderr:
-            runtime.returncode = 1             
+            self.raise_exception(runtime)            
         return runtime
 
     def _list_outputs(self):        
@@ -375,7 +375,7 @@ class TBSS3Postreg(FSLCommand):
         runtime.cwd = self.inputs.tbss_dir
         runtime = super(TBSS3Postreg, self)._run_interface(runtime)
         if runtime.stderr:
-            runtime.returncode = 1
+            self.raise_exception(runtime)
         return runtime
     
     def _list_outputs(self):        
@@ -593,14 +593,15 @@ class ProbTrackX(FSLCommand):
     --------
     
     >>> from nipype.interfaces import fsl
-    >>> pbx = fsl.ProbTrackX(samplesbase_name='merged', mask='mask.nii', \
-    seed_file='MASK_average_thal_right.nii', mode='seedmask', \
+    >>> pbx = fsl.ProbTrackX(samples_base_name='merged', mask='mask.nii', \
+    seed='MASK_average_thal_right.nii', mode='seedmask', \
     xfm='trans.mat', n_samples=3, n_steps=10, force_dir=True, opd=True, os2t=True, \
-    bpx_directory='bedpostxout', target_masks = ['targets_MASK1.nii','targets_MASK2.nii'], \
-    paths_file='nipype_fdtpaths', out_dir='.')
+    target_masks = ['targets_MASK1.nii','targets_MASK2.nii'], \
+    thsamples='merged_thsamples.nii', fsamples='merged_fsamples.nii', phsamples='merged_phsamples.nii', \
+    out_dir='.')
     >>> pbx.cmdline
-    'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=. --out=nipype_fdtpaths -s merged -x MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
-
+    'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=. --samples=merged --seed=MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
+    
     """
     
     _cmd = 'probtrackx'
@@ -636,7 +637,7 @@ class ProbTrackX(FSLCommand):
             
         runtime = super(ProbTrackX, self)._run_interface(runtime)
         if runtime.stderr:
-            runtime.returncode = 1
+            self.raise_exception(runtime)
         return runtime
     
     def _format_arg(self, name, spec, value):
@@ -1052,7 +1053,7 @@ class XFibres(FSLCommand):
     def _run_interface(self,runtime):
         runtime = super(XFibres, self)._run_interface(runtime)
         if runtime.stderr:
-            runtime.returncode = 1
+            self.raise_exception(runtime)
         return runtime
     
     def _list_outputs(self):

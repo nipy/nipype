@@ -205,7 +205,7 @@ Generate SPM-specific design information using
 :class:`nipype.interfaces.spm.SpecifyModel`.
 """
 
-modelspec = pe.Node(interface=model.SpecifyModel(), name= "modelspec")
+modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
 modelspec.inputs.concatenate_runs        = True
 
 """
@@ -337,11 +337,9 @@ l1pipeline.connect([(inputnode,preproc,[('func','realign.in_files'),
                                         ('subject_id','surfregister.subject_id'),
                                         ('subject_id','fssource.subject_id'),
                                         ]),
-                    (inputnode, volanalysis,[('subject_id','modelspec.subject_id'),
-                                             ('session_info','modelspec.subject_info'),
+                    (inputnode, volanalysis,[('session_info','modelspec.subject_info'),
                                              ('contrasts','contrastestimate.contrasts')]),
-                    (inputnode, surfanalysis,[('subject_id','modelspec.subject_id'),
-                                              ('session_info','modelspec.subject_info'),
+                    (inputnode, surfanalysis,[('session_info','modelspec.subject_info'),
                                               ('contrasts','contrastestimate.contrasts')]),
                     ])
 
@@ -466,11 +464,7 @@ def subjectinfo(subject_id):
                       Bunch(conditions=names,
                             onsets=deepcopy(onsets),
                             durations=[[15] for s in names],
-                            amplitudes=None,
-                            tmod=None,
-                            pmod=None,
-                            regressor_names=None,
-                            regressors=None))
+                            ))
     return output
 
 """Setup the contrast structure that needs to be evaluated. This is a
@@ -494,13 +488,11 @@ volume-based analysis.
 
 modelspecref = l1pipeline.inputs.volanalysis.modelspec
 modelspecref.input_units             = 'secs'
-modelspecref.output_units            = 'secs'
 modelspecref.time_repetition         = 3.
 modelspecref.high_pass_filter_cutoff = 120
 
 modelspecref = l1pipeline.inputs.surfanalysis.modelspec
 modelspecref.input_units             = 'secs'
-modelspecref.output_units            = 'secs'
 modelspecref.time_repetition         = 3.
 modelspecref.high_pass_filter_cutoff = 120
 

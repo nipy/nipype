@@ -9,6 +9,8 @@ Documentation
    :Release: |version|
    :Date: |today|
 
+Follow this link for: `Developer version documentation <http://www.mit.edu/~satra/nipype-nightly/>`_
+
 Contents:
 
 .. toctree::
@@ -19,6 +21,5 @@ Contents:
    devel/index
    changes
 
-For bleeding-edge version see `Nightly documentation <http://www.mit.edu/~satra/nipype-nightly/>`_
 
 .. include:: links_names.txt

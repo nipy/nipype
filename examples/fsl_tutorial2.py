@@ -369,7 +369,6 @@ Use :class:`nipype.algorithms.modelgen.SpecifyModel` to generate design informat
 """
 
 modelspec = pe.Node(interface=model.SpecifyModel(),  name="modelspec")
-modelspec.inputs.concatenate_runs = False
 
 """
 Use :class:`nipype.interfaces.fsl.Level1Design` to generate a run specific fsf
@@ -603,7 +602,6 @@ cont3 = ['Task','F', [cont1, cont2]]
 contrasts = [cont1,cont2]
 
 firstlevel.inputs.modelfit.modelspec.input_units = 'secs'
-firstlevel.inputs.modelfit.modelspec.output_units = 'secs'
 firstlevel.inputs.modelfit.modelspec.time_repetition = TR
 firstlevel.inputs.modelfit.modelspec.high_pass_filter_cutoff = hpcutoff
 

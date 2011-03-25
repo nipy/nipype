@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
+from cPickle import dumps, loads
 import inspect
 
 from distutils.version import LooseVersion
@@ -11,7 +12,7 @@ from nipype.interfaces.traits import _Undefined
 
 def getsource(function):
     """Returns the source code of a function"""
-    src = inspect.getsource(function)
+    src = dumps(inspect.getsource(function))
     return src
 
 def create_function_from_source(function_source):
@@ -19,7 +20,7 @@ def create_function_from_source(function_source):
     """
     ns = {}
     try:
-        exec function_source in ns
+        exec loads(function_source) in ns
     except Exception, msg:
         msg = str(msg) + '\nError executing function:\n %s\n'%function_source
         msg += '\n'.join( ["Functions in connection strings have to be standalone.",

@@ -161,7 +161,7 @@ l1analysis = pe.Workflow(name='analysis')
 :class:`nipype.interfaces.spm.SpecifyModel`.
 """
 
-modelspec = pe.Node(interface=model.SpecifyModel(), name= "modelspec")
+modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
 
 """Generate a first level SPM.mat file for analysis
 :class:`nipype.interfaces.spm.Level1Design`.
@@ -348,6 +348,7 @@ modelspecref = l1pipeline.inputs.analysis.modelspec
 modelspecref.input_units             = 'scans'
 modelspecref.output_units            = 'scans'
 modelspecref.time_repetition         = TR
+modelspecref.high_pass_filter_cutoff = 120
 
 l1designref = l1pipeline.inputs.analysis.level1design
 l1designref.timing_units       = modelspecref.output_units
@@ -372,7 +373,7 @@ l1pipeline.inputs.analysis.threshold.contrast_index = 1
 Use derivative estimates in the non-parametric model
 """
 
-l1pipeline.inputs.analysis.contrastestimate.ignore_derivs = False
+l1pipeline.inputs.analysis.contrastestimate.use_derivs = True
 
 """
 Setting up parametricvariation of the model
@@ -404,7 +405,7 @@ paramanalysis = l1analysis.clone(name='paramanalysis')
 paramanalysis.inputs.level1design.bases = {'hrf':{'derivs': [0,0]}}
 paramanalysis.inputs.modelspec.subject_info = subjectinfo_param
 paramanalysis.inputs.contrastestimate.contrasts = paramcontrasts
-paramanalysis.inputs.contrastestimate.ignore_derivs = True
+paramanalysis.inputs.contrastestimate.use_derivs = False
 
 l1pipeline.connect([(preproc, paramanalysis, [('realign.realignment_parameters',
                                             'modelspec.realignment_parameters'),
