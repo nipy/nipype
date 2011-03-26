@@ -965,8 +965,8 @@ class SUSANInputSpec(FSLCommandInputSpec):
                    desc='filename of input timeseries')
     brightness_threshold = traits.Float(argstr='%.10f',
                                         position=2, mandatory=True,
-                   desc='brightness threshold and should be greater than' \
-                        'noise level and less than contrast of edges to' \
+                   desc='brightness threshold and should be greater than '
+                        'noise level and less than contrast of edges to '
                         'be preserved.')
     fwhm = traits.Float(argstr='%.10f',
                         position=3, mandatory=True,
@@ -977,9 +977,9 @@ class SUSANInputSpec(FSLCommandInputSpec):
                         desc='whether to use a local median filter in the cases where single-point noise is detected')
     usans = traits.List(traits.Tuple(File(exists=True),traits.Float), maxlen=2,
                         argstr='', position=6,
-             desc='determines whether the smoothing area (USAN) is to be' \
-                  'found from secondary images (0, 1 or 2). A negative' \
-                  'value for any brightness threshold will auto-set the' \
+             desc='determines whether the smoothing area (USAN) is to be '
+                  'found from secondary images (0, 1 or 2). A negative '
+                  'value for any brightness threshold will auto-set the '
                   'threshold at 10% of the robust range')
     out_file = File(argstr='%s', position=-1, genfile=True,
                     desc='output file name')
