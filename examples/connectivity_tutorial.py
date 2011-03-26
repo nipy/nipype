@@ -7,6 +7,7 @@ import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.nipy as nipy      # how to run matlab
+import nipype.interfaces.cmtk.cmtk as cmtk
 import nibabel as nb
 import os                                    # system functions
 
@@ -35,7 +36,7 @@ fsl.FSLCommand.set_default_output_type('NIFTI')
 # If there is already another example dataset with both DWI and a Freesurfer directory, we can switch this tutorial to use
 # that instead...
 
-#subjects_dir = os.path.abspath('/usr/local/freesurfer/subjects/')
+fs_dir = os.path.abspath('/usr/local/freesurfer')
 subjects_dir = os.path.abspath('freesurfer')
 
 # This needs to point to the fdt folder you can find after extracting 
@@ -85,6 +86,9 @@ mri_convert_Brain.inputs.out_type = 'nii'
 
 mri_convert_WMParc = pe.Node(interface=fs.MRIConvert(), name='mri_convert_WMParc')
 mri_convert_WMParc.inputs.out_type = 'nii'
+
+mri_convert_AparcAseg = pe.Node(interface=fs.MRIConvert(), name='mri_convert_AparcAseg')
+mri_convert_AparcAseg.inputs.out_type = 'nii'
 
 tractshred = pe.Node(interface=camino.TractShredder(), name='tractshred')
 tractshred.inputs.offset = 0
@@ -222,6 +226,25 @@ mapping.connect([(inputnode, FreeSurferSourceLH,[("subject_id","subject_id")])])
 mapping.connect([(inputnode, FreeSurferSourceRH,[("subject_id","subject_id")])])
 mapping.connect([(FreeSurferSourceLH, mris_convertLH,[("pial","in_file")])])
 mapping.connect([(FreeSurferSourceRH, mris_convertRH,[("pial","in_file")])])
+
+''' This section adds the new Connectome Mapping Toolkit nodes '''
+roigen = pe.Node(interface=cmtk.ROIGen(), name="ROIGen")
+roigen.inputs.use_freesurfer_LUT = True
+roigen.inputs.freesurfer_dir = fs_dir
+
+selectaparc = pe.Node(interface=util.Select(), name="SelectAparcAseg")
+selectaparc.inputs.index = 0
+
+#creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
+
+mapping.connect([(FreeSurferSourceRH, selectaparc,[("aparc_aseg","inlist")])])
+mapping.connect([(selectaparc, mri_convert_AparcAseg,[("out","in_file")])])
+mapping.connect([(mri_convert_AparcAseg, roigen,[("out_file","aparc_aseg_file")])])
+
+#mapping.connect([(roigen, creatematrix,[("out_roi_file","roi_file")])])
+#mapping.connect([(roigen, creatematrix,[("out_dict_file","dict_file")])])
+#mapping.connect([(camino2trackvis, creatematrix,[("trackvis","tract_file")])])
+
 
 connectivity = pe.Workflow(name="connectivity")
 connectivity.base_dir = os.path.abspath('connectivity_tutorial')
