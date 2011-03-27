@@ -233,11 +233,11 @@ roigen.inputs.use_freesurfer_LUT = True
 roigen.inputs.freesurfer_dir = fs_dir
 
 selectaparc = pe.Node(interface=util.Select(), name="SelectAparcAseg")
-selectaparc.inputs.index = 0
+selectaparc.inputs.index = 0 # Use 0 for aparc+aseg and 1 for aparc.a2009s+aseg
 
 #creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
 
-mapping.connect([(FreeSurferSourceRH, selectaparc,[("aparc_aseg","inlist")])])
+mapping.connect([(FreeSurferSource, selectaparc,[("aparc_aseg","inlist")])])
 mapping.connect([(selectaparc, mri_convert_AparcAseg,[("out","in_file")])])
 mapping.connect([(mri_convert_AparcAseg, roigen,[("out_file","aparc_aseg_file")])])
 
