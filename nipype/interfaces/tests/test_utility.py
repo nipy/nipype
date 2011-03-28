@@ -14,10 +14,9 @@ def test_rename():
    
     # Test very simple rename
     _ = open("file.txt","w").close()
-    yield assert_equal, utility.__file__, "whatever!"
     rn = utility.Rename(in_file="file.txt", format_string="test_file1.txt")
     res = rn.run()
-    outfile = os.realpath(os.path.join(tempdir, "test_file1.txt"))
+    outfile = os.path.join(tempdir, "test_file1.txt")
     yield assert_equal, res.outputs.out_file, outfile
     yield assert_true, os.path.exists(outfile)
 
@@ -30,7 +29,7 @@ def test_rename():
     rn.inputs.field1 = "test"
     rn.inputs.field2 = 2
     res = rn.run()
-    outfile = os.realpath(os.path.join(tempdir, "test_file2.txt"))
+    outfile = os.path.join(tempdir, "test_file2.txt")
     yield assert_equal, res.outputs.out_file, outfile 
     yield assert_true, os.path.exists(outfile)
 
