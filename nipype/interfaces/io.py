@@ -200,18 +200,18 @@ class DataSink(IOBase):
         pathstr_ = pathstr
         if isdefined(self.inputs.substitutions):
             for key, val in self.inputs.substitutions:
-                _ = pathstr
+                oldpathstr = pathstr
                 pathstr = pathstr.replace(key, val)
-                if pathstr != _:
+                if pathstr != oldpathstr:
                     iflogger.debug('sub.str: %s -> %s using %r -> %r'
-                                   % (_, pathstr, key, val))
+                                   % (oldpathstr, pathstr, key, val))
         if isdefined(self.inputs.regexp_substitutions):
             for key, val in self.inputs.regexp_substitutions:
-                _ = pathstr
+                oldpathstr = pathstr
                 pathstr, _ = re.subn(key, val, pathstr)
-                if pathstr != _:
+                if pathstr != oldpathstr:
                     iflogger.debug('sub.regexp: %s -> %s using %r -> %r'
-                                   % (_, pathstr, key, val))
+                                   % (oldpathstr, pathstr, key, val))
         if pathstr_ != pathstr:
             iflogger.info('sub: %s -> %s' % (pathstr_, pathstr))
         return pathstr
