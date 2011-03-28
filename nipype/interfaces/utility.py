@@ -4,7 +4,7 @@ import os
 import re
 import numpy as np
 
-from nipype.utils.filemanip import (filename_to_list, list_to_filename, copyfile)
+from nipype.utils.filemanip import (filename_to_list, copyfile, split_filename)
 from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec, File,
                                     Undefined, isdefined, OutputMultiPath,
     InputMultiPath)
@@ -111,6 +111,7 @@ class Merge(IOBase):
 class RenameInputSpec(DynamicTraitedSpec):
 
     in_file = File(exists=True, mandatory=True, desc="file to rename")
+    keep_ext = traits.Bool(desc="Keep in_file extension, replace non-extension component of name")
     format_string = traits.String(mandatory=True, 
                                   desc="Python formatting string for output template")
     parse_string = traits.String(desc="Python regexp parse string to define replacement inputs")
@@ -141,8 +142,9 @@ class Rename(IOBase):
     >>> print res.outputs.out_file   # doctest: +SKIP
     'Faces-Scenes.nii.gz"            # doctest: +SKIP
 
-    >>> rename2 = Rename(format_string="%(subject_id)s_func_run%(run)02d.nii")
+    >>> rename2 = Rename(format_string="%(subject_id)s_func_run%(run)02d")
     >>> rename2.inputs.in_file "func.nii"
+    >>> rename2.inputs.keep_ext = True
     >>> rename2.inputs.subject_id = "subj_201"
     >>> rename2.inputs.run = 2
     >>> res = rename2.run()          # doctest: +SKIP
@@ -179,7 +181,11 @@ class Rename(IOBase):
                 fmt_dict.update(m.groupdict())
         for field in self.fmt_fields:
             fmt_dict[field] = getattr(self.inputs, field)
-        return self.inputs.format_string%fmt_dict
+        if self.inputs.keep_ext:
+            fmt_string = "".join([self.inputs.format_string, split_filename(self.inputs.in_file)[2]])
+        else:
+            fmt_string = self.inputs.format_string
+        return fmt_string%fmt_dict
 
     def _run_interface(self, runtime):
         runtime.returncode = 0

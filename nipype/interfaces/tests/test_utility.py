@@ -21,7 +21,7 @@ def test_rename():
     yield assert_true, os.path.exists(outfile)
 
     # Now a string-formatting version
-    rn = utility.Rename(in_file="file.txt", format_string="%(field1)s_file%(field2)d.txt")
+    rn = utility.Rename(in_file="file.txt", format_string="%(field1)s_file%(field2)d",keep_ext=True)
     # Test .input field creation
     yield assert_true, hasattr(rn.inputs, "field1")
     yield assert_true, hasattr(rn.inputs, "field2")
