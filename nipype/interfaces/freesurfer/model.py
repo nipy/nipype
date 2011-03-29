@@ -263,9 +263,10 @@ class GLMFit(FSCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         # Get the top-level output directory
-        glmdir = os.path.abspath(self.inputs.glm_dir)
         if not isdefined(self.inputs.glm_dir):
             glmdir = os.getcwd()
+        else:
+            glmdir = os.path.abspath(self.inputs.glm_dir)
         outputs["glm_dir"] = glmdir
 
         # Assign the output files that always get created
