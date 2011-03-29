@@ -42,7 +42,7 @@ class DTIFitInputSpec(FSLCommandInputSpec):
     max_y = traits.Int(argstr='-Y %d', desc='max y')
     min_x = traits.Int(argstr='-x %d', desc='min x')
     max_x = traits.Int(argstr='-X %d', desc='max x')
-    save =  traits.Bool(desc = 'save the elements of the tensor',
+    save_tensor =  traits.Bool(desc = 'save the elements of the tensor',
                         argstr='--save_tensor')
     sse =  traits.Bool(desc = 'output sum of squared errors', argstr='--sse')
     cni = File(exists=True, desc = 'input counfound regressors', argstr='-cni %s')
@@ -60,7 +60,8 @@ class DTIFitOutputSpec(TraitedSpec):
     MD = File(exists = True, desc = 'path/name of file with the mean diffusivity')
     FA = File(exists = True, desc = 'path/name of file with the fractional anisotropy')
     S0 = File(exists = True, desc = 'path/name of file with the raw T2 signal with no '+
-              'diffusion weighting')    
+              'diffusion weighting')
+    tensor = File(exists = True, desc = 'path/name of file with the 4D tensor volume')   
 
 class DTIFit(FSLCommand):
     """ Use FSL  dtifit command for fitting a diffusion tensor model at each
@@ -89,7 +90,9 @@ class DTIFit(FSLCommand):
         outputs = self.output_spec().get()      
         for k in outputs.keys():
             if k not in ('outputtype','environ','args'):
-                outputs[k] = self._gen_fname(self.inputs.base_name,suffix = '_'+k)
+                if k != 'tensor' or (isdefined(self.inputs.save_tensor) 
+                                          and self.inputs.save_tensor):
+                    outputs[k] = self._gen_fname(self.inputs.base_name,suffix = '_'+k)
         return outputs
     
 class EddyCorrectInputSpec(FSLCommandInputSpec):
