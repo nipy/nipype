@@ -5,7 +5,7 @@
 
 from nipype.interfaces.camino.connectivity import Conmap
 from nipype.interfaces.camino.convert import Image2Voxel, FSL2Scheme, VtkStreamlines, ProcStreamlines, TractShredder
-from nipype.interfaces.camino.dti import DTIFit, DTLUTGen, PicoPDFs, Track, FA, MD, TrD, AnalyzeHeader
+from nipype.interfaces.camino.dti import DTIFit, DTLUTGen, PicoPDFs, Track, TrackPICo, TrackBayesDirac, TrackDT, FA, MD, TrD, AnalyzeHeader
 import nose
 
 

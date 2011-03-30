@@ -202,8 +202,7 @@ picopdfs.inputs.inputmodel = 'dt'
 """
 Finally, tractography is performed. In this tutorial, we will use only 1 iteration for time-saving purposes.
 """
-track = pe.Node(interface=camino.Track(), name="track")
-track.inputs.inputmodel = 'pico'
+track = pe.Node(interface=camino.TrackPICo(), name="track")
 track.inputs.iterations = 1
 
 """
