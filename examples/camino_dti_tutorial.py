@@ -1,3 +1,22 @@
+"""
+==================================================
+Using Camino for pipelined diffusion analysis
+==================================================
+
+Introduction
+============
+
+This script, camino_dti_tutorial.py, demonstrates the ability to perform basic diffusion analysis
+in a Nipype pipeline.
+
+    python camino_dti_tutorial.py
+
+We perform this analysis using the FSL course data, which can be acquired from here:
+http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
+
+Import necessary modules from nipype.
+"""
+
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
@@ -7,6 +26,12 @@ import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.camino2trackvis as cam2trk
 import nibabel as nb
 import os                                    # system functions
+
+"""
+We use the following functions to scrape the voxel and data dimensions of the input images. This allows the
+pipeline to be flexible enough to accept and process images of varying size. The SPM Face tutorial
+(spm_face_tutorial.py) also implements this inferral of voxel size from the data.
+"""
 
 def get_vox_dims(volume):
     import nibabel as nb
@@ -36,15 +61,7 @@ Map field names to individual subject runs
 
 info = dict(dwi=[['subject_id', 'data']],
             bvecs=[['subject_id','bvecs']],
-            bvals=[['subject_id','bvals']],
-            seed_file = [['subject_id','MASK_average_thal_right']],
-            target_masks = [['subject_id',['MASK_average_M1_right',
-                                           'MASK_average_S1_right',
-                                           'MASK_average_occipital_right',
-                                           'MASK_average_pfc_right',
-                                           'MASK_average_pmc_right',
-                                           'MASK_average_ppc_right',
-                                           'MASK_average_temporal_right']]])
+            bvals=[['subject_id','bvals']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
@@ -74,83 +91,132 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
 
 datasource.inputs.template = "%s/%s"
 
-# This needs to point to the fdt folder you can find after extracting 
+# This needs to point to the fdt folder you can find after extracting
 # http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 datasource.inputs.base_directory = os.path.abspath('fsl_course_data/fdt/')
 
-datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz',
-                                        seed_file="%s.bedpostX/%s.nii.gz",
-                                        target_masks="%s.bedpostX/%s.nii.gz",
-                                        )
+datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz')
 datasource.inputs.template_args = info
+
+"""
+An inputnode is used to pass the data obtained by the data grabber to the actual processing functions
+"""
+inputnode = pe.Node(interface=util.IdentityInterface(fields=["dwi", "bvecs", "bvals"]), name="inputnode")
 
 """
 Setup for Diffusion Tensor Computation
 --------------------------------------
-Here we will create a generic workflow for DTI computation
+In this section we create the nodes necessary for diffusion analysis.
+First, the diffusion image is converted to voxel order.
 """
+image2voxel = pe.Node(interface=camino.Image2Voxel(), name="image2voxel")
+fsl2scheme = pe.Node(interface=camino.FSL2Scheme(), name="fsl2scheme")
+fsl2scheme.inputs.usegradmod = True
 
-convertTest = pe.Workflow(name='convertTest')
-inputnode = pe.Node(interface=util.IdentityInterface(fields=["dwi", "bvecs", "bvals"]), name="inputnode")
+"""
+Second, diffusion tensors are fit to the voxel-order data.
+"""
+dtifit = pe.Node(interface=camino.DTIFit(),name='dtifit')
 
-camino2trackvis = pe.Node(interface=cam2trk.Camino2Trackvis(), name="camino2trk")
-camino2trackvis.inputs.min_length = 30
-camino2trackvis.inputs.voxel_order = 'LAS'
-                      
-trk2camino = pe.Node(interface=cam2trk.Trackvis2Camino(), name="trk2camino")
-
-vtkstreamlines = pe.Node(interface=camino.VtkStreamlines(), name="vtkstreamlines")
-
-procstreamlines = pe.Node(interface=camino.ProcStreamlines(), name="procstreamlines")
-procstreamlines.inputs.outputtracts = 'oogl'
-
+"""
+Next, a lookup table is generated from the schemefile and the
+signal-to-noise ratio (SNR) of the unweighted (q=0) data.
+"""
 dtlutgen = pe.Node(interface=camino.DTLUTGen(), name="dtlutgen")
 dtlutgen.inputs.snr = 16.0
 dtlutgen.inputs.inversion = 1
 
+"""
+In this tutorial we implement probabilistic tractography using the PICo algorithm.
+PICo tractography requires an estimate of the fibre direction and a model of its uncertainty in each voxel;
+this is produced using the following node.
+"""
 picopdfs = pe.Node(interface=camino.PicoPDFs(), name="picopdfs")
 picopdfs.inputs.inputmodel = 'dt'
 
-image2voxel = pe.Node(interface=camino.Image2Voxel(), name="image2voxel")
+"""
+An FSL BET node creates a brain mask is generated from the diffusion image for seeding the PICo tractography.
+"""
 bet = pe.Node(interface=fsl.BET(), name="bet")
 bet.inputs.mask = True
 
-fsl2scheme = pe.Node(interface=camino.FSL2Scheme(), name="fsl2scheme")
-fsl2scheme.inputs.usegradmod = True
-
-dtifit = pe.Node(interface=camino.DTIFit(),name='dtifit')
-
-analyzeheader_fa = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_fa')
-analyzeheader_fa.inputs.datatype = 'double'
-analyzeheader_trace = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_trace')
-analyzeheader_trace.inputs.datatype = 'double'
-analyzeheader_md = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_md')
-analyzeheader_md.inputs.datatype = 'double'
-
-fa = pe.Node(interface=camino.FA(),name='fa')
-md = pe.Node(interface=camino.MD(),name='md')
-trd = pe.Node(interface=camino.TrD(),name='trd')
-
-
+"""
+Finally, tractography is performed. In this tutorial, we will use only 1 iteration for time-saving purposes.
+"""
 track = pe.Node(interface=camino.Track(), name="track")
 track.inputs.inputmodel = 'pico'
 track.inputs.iterations = 1
 #track.inputs.outputtracts = 'oogl'
-                      
+
+"""
+Currently, the best program for visualizing tracts is TrackVis. For this reason, a node is included to
+convert the raw tract data to .trk format. Solely for testing purposes, another node is added to perform the reverse.
+"""
+camino2trackvis = pe.Node(interface=cam2trk.Camino2Trackvis(), name="camino2trk")
+camino2trackvis.inputs.min_length = 30
+camino2trackvis.inputs.voxel_order = 'LAS'
+trk2camino = pe.Node(interface=cam2trk.Trackvis2Camino(), name="trk2camino")
+
+"""
+Tracts can also be converted to VTK and OOGL formats, for use in programs such as GeomView and Paraview,
+using the following two nodes.
+"""
+vtkstreamlines = pe.Node(interface=camino.VtkStreamlines(), name="vtkstreamlines")
+procstreamlines = pe.Node(interface=camino.ProcStreamlines(), name="procstreamlines")
+procstreamlines.inputs.outputtracts = 'oogl'
+
+
+"""
+We can also produce a variety of scalar values from our fitted tensors. The following nodes generate the
+fractional anisotropy and diffusivity trace maps and their associated headers.
+"""
+fa = pe.Node(interface=camino.FA(),name='fa')
+#md = pe.Node(interface=camino.MD(),name='md')
+trd = pe.Node(interface=camino.TrD(),name='trd')
+analyzeheader_fa = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_fa')
+analyzeheader_fa.inputs.datatype = 'double'
+analyzeheader_trace = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_trace')
+analyzeheader_trace.inputs.datatype = 'double'
+#analyzeheader_md = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_md')
+#analyzeheader_md.inputs.datatype = 'double'
+
+"""
+Since we have now created all our nodes, we can now define our workflow and start making connections.
+"""
+convertTest = pe.Workflow(name='convertTest')
 convertTest.connect([(inputnode, bet,[("dwi","in_file")])])
 convertTest.connect([(bet, track,[("mask_file","seed_file")])])
 
 convertTest.connect([(inputnode, image2voxel, [("dwi", "in_file")]),
                        (inputnode, fsl2scheme, [("bvecs", "bvec_file"),
                                                 ("bvals", "bval_file")]),
-                       
+
                        (image2voxel, dtifit,[['voxel_order','in_file']]),
                        (fsl2scheme, dtifit,[['scheme','scheme_file']])
                       ])
-                      
+
 convertTest.connect([(fsl2scheme, dtlutgen,[("scheme","scheme_file")])])
 convertTest.connect([(dtlutgen, picopdfs,[("dtLUT","luts")])])
 convertTest.connect([(dtifit, picopdfs,[("tensor_fitted","in_file")])])
+convertTest.connect([(picopdfs, track,[("pdfs","in_file")])])
+
+
+# Mean diffusivity still appears broken
+#convertTest.connect([(dtifit, md,[("tensor_fitted","in_file")])])
+#convertTest.connect([(md, analyzeheader_md,[("md","in_file")])])
+#convertTest.connect([(inputnode, analyzeheader_md,[(('dwi', get_vox_dims), 'voxel_dims'),
+#(('dwi', get_data_dims), 'data_dims')])])
+#This line is commented out because the ProcStreamlines node keeps throwing memory errors
+#convertTest.connect([(track, procstreamlines,[("tracked","in_file")])])
+
+"""
+Connecting the Fractional Anisotropy and Trace nodes is simple, as they obtain their input from the
+tensor fitting.
+
+This is also where our voxel- and data-grabbing functions come in. We pass these functions, along with
+the original DWI image from the input node, to the header-generating nodes. This ensures that the files
+will be correct and readable.
+"""
 
 convertTest.connect([(dtifit, fa,[("tensor_fitted","in_file")])])
 convertTest.connect([(fa, analyzeheader_fa,[('fa','in_file')])])
@@ -162,18 +228,7 @@ convertTest.connect([(trd, analyzeheader_trace,[("trace","in_file")])])
 convertTest.connect([(inputnode, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
 (('dwi', get_data_dims), 'data_dims')])])
 
-# Mean diffusivity still appears broken
-#convertTest.connect([(dtifit, md,[("tensor_fitted","in_file")])])
-#convertTest.connect([(md, analyzeheader_md,[("md","in_file")])])
-#convertTest.connect([(inputnode, analyzeheader_md,[(('dwi', get_vox_dims), 'voxel_dims'),
-#(('dwi', get_data_dims), 'data_dims')])])
-
-convertTest.connect([(picopdfs, track,[("pdfs","in_file")])])
-
-#This line is commented out because the ProcStreamlines node keeps throwing memory errors
-#convertTest.connect([(track, procstreamlines,[("tracked","in_file")])])
-
-convertTest.connect([(track, camino2trackvis, [('tracked','in_file')]),                    
+convertTest.connect([(track, camino2trackvis, [('tracked','in_file')]),
                        (track, vtkstreamlines,[['tracked','in_file']]),
                        (camino2trackvis, trk2camino,[['trackvis','in_file']])
                       ])
@@ -181,6 +236,11 @@ convertTest.connect([(track, camino2trackvis, [('tracked','in_file')]),
 convertTest.connect([(inputnode, camino2trackvis,[(('dwi', get_vox_dims), 'voxel_dims'),
 (('dwi', get_data_dims), 'data_dims')])])
 
+"""
+Finally, we create another higher-level workflow to connect our mapping workflow with the info and datagrabbing nodes
+declared at the beginning. Our tutorial can is now extensible to any arbitrary number of subjects by simply adding
+their names to the subject list and their data to the proper folders.
+"""
 dwiproc = pe.Workflow(name="dwiproc")
 dwiproc.base_dir = os.path.abspath('camino_dti_tutorial')
 dwiproc.connect([
@@ -190,6 +250,12 @@ dwiproc.connect([
                                                ('bvecs','inputnode.bvecs')
                                                ])
                 ])
-
+"""
+The following functions run the whole workflow and produce a .dot and .png graph of the processing pipeline.
+"""
 dwiproc.run()
 dwiproc.write_graph()
+"""
+This outputted .dot graph can be converted to a vector image for use in figures via the following command-line function:
+dot -Tps graph.dot > graph.eps
+"""
