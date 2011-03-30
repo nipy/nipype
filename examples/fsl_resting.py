@@ -210,7 +210,7 @@ datasource.inputs.template_args = info
 """
    a. Setup a function that returns subject-specific information about
    the experimental paradigm. This is used by the
-   :class:`nipype.interfaces.spm.SpecifyModel` to create the
+   :class:`nipype.modelgen.SpecifyModel` to create the
    information necessary to generate an SPM design matrix. In this
    tutorial, the same paradigm was used for every participant. Other
    examples of this function are available in the `doc/examples`
@@ -221,13 +221,7 @@ def subjectinfo(meantsfile):
     import numpy as np
     from nipype.interfaces.base import Bunch
     ts = np.loadtxt(meantsfile)
-    output = [Bunch(conditions=None,
-                    onsets=None,
-                    durations=None,
-                    amplitudes=None,
-                    tmod=None,
-                    pmod=None,
-                    regressor_names=['MeanIntensity'],
+    output = [Bunch(regressor_names=['MeanIntensity'],
                     regressors=[ts.tolist()])]
     return output
 

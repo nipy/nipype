@@ -194,8 +194,8 @@ class SpecifyModel(BaseInterface):
     a Bunch of a list of Bunch. The Bunch should contain the following
     information.
 
-    Required
-    ~~~~~~~~
+    Required for most designs
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
 
      - conditions : list of names
      - onsets : lists of onsets corresponding to each condition
@@ -270,7 +270,7 @@ class SpecifyModel(BaseInterface):
             sessinfo.insert(i,dict(cond=[]))
             if isdefined(self.inputs.high_pass_filter_cutoff):
                 sessinfo[i]['hpf'] = np.float(self.inputs.high_pass_filter_cutoff)
-            if info.conditions:
+            if hasattr(info, 'conditions') and info.conditions:
                 for cid,cond in enumerate(info.conditions):
                     sessinfo[i]['cond'].insert(cid,dict())
                     sessinfo[i]['cond'][cid]['name']  = info.conditions[cid]
