@@ -21,7 +21,7 @@ set fmri(shape$ev_num) 2
 set fmri(convolve$ev_num) 0
 
 # Apply temporal filtering
-set fmri(tempfilt_yn$ev_num) 1
+set fmri(tempfilt_yn$ev_num) $tempfilt_yn
 
 # Add temporal derivative
 set fmri(deriv_yn$ev_num) 0
