@@ -58,7 +58,7 @@ def test_dtifit1():
                      min_y = dict(argstr='-y %d',),
                      min_z = dict(argstr='-z %d',),
                      output_type = dict(),
-                     save = dict(argstr='--save_tensor',),
+                     save_tensor = dict(argstr='--save_tensor',),
                      sse = dict(argstr='--sse',),
                      )
     instance = fsl.DTIFit()

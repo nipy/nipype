@@ -185,17 +185,17 @@ def test_parsedicomdir():
 def test_reconall():
     input_map = dict(T1_files = dict(argstr='-i %s...',),
                      args = dict(argstr='%s',),
-                     directive = dict(argstr='-%s',mandatory=True,),
+                     directive = dict(argstr='-%s',),
                      environ = dict(),
                      flags = dict(argstr='%s',),
                      hemi = dict(),
-                     subject_id = dict(mandatory=True,argstr='-subjid %s',),
+                     subject_id = dict(argstr='-subjid %s',),
                      subjects_dir = dict(argstr='-sd %s',),
                      )
     instance = freesurfer.ReconAll()
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value, "key = %s"%key
 @skipif(no_freesurfer)            
 def test_resample():
     input_map = dict(args = dict(argstr='%s',),

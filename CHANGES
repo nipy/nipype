@@ -5,6 +5,7 @@ Release 0.4 (FUTURE)
 * API: SPM EstimateContrast: ignore_derivs replaced by use_derivs
 * API: All interfaces: added new config option ignore_exception
 * API: SpecifModel no longer supports (concatenate_runs, output_specs). high_pass_filter cutoff is mandatory (even if its set to np.inf). Additional interfaces SpecifySPMModel and SpecifySparseModel support other types of data.
+* API: fsl.DTIFit input "save" is now called "save_tensor"
 
 * ENH: All commandline interfaces display stdout and stderr
 * ENH: All interfaces raise exceptions on error with an option to suppress
@@ -25,6 +26,7 @@ Release 0.4 (FUTURE)
 
 * BF: dcm2nii interface handles gzipped files correctly
 * BF: FNIRT generates proper outputs
+* BF: fsl.DTIFit now properly collects tensor volume
 
 Release 0.3.4 (Jan 12, 2011)
 ============================

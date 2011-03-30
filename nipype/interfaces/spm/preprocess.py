@@ -487,8 +487,8 @@ class SegmentInputSpec(SPMCommandInputSpec):
                      desc='list of gray, white & csf prob. (opt,)')
     gaussians_per_class = traits.List(traits.Int(), field='opts.ngaus',
                      desc='num Gaussians capture intensity distribution')
-    affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', field='opts.regtype',
-                      desc='mni, eastern, subj, none ')
+    affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', '', field='opts.regtype',
+                      desc='Possible options: "mni", "eastern", "subj", "none" (no reguralisation), "" (no affine registration)')
     warping_regularization = traits.Float(field='opts.warpreg',
                       desc='Controls balance between parameters and data')
     warp_frequency_cutoff = traits.Float(field='opts.warpco', desc='Cutoff of DCT bases')

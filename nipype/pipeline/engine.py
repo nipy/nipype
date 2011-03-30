@@ -211,18 +211,20 @@ class Workflow(WorkflowBase):
             disconnect = False
         else:
             disconnect = kwargs['disconnect']
-        not_found = []
         newnodes = []
         for srcnode, destnode, _ in connection_list:
-            if (srcnode not in newnodes) and (srcnode not in self._graph.nodes()):
+            if self in [srcnode, destnode]:
+                raise IOError('Workflow connect cannot contain itself as node: src[%s] dest[%s] workflow[%s]'%(srcnode, destnode, self.name))
+            if (srcnode not in newnodes) and not self._has_node(srcnode):
                 newnodes.append(srcnode)
-            if (destnode not in newnodes) and (destnode not in self._graph.nodes()):
+            if (destnode not in newnodes) and not self._has_node(destnode):
                 newnodes.append(destnode)
         if newnodes:
             self._check_nodes(newnodes)
             for node in newnodes:
                 if node._hierarchy is None:
                     node._hierarchy = self.name
+        not_found = []
         for srcnode, destnode, connects in connection_list:
             connected_ports = []
             # check to see which ports of destnode are already
@@ -304,7 +306,16 @@ class Workflow(WorkflowBase):
         nodes : list
             A list of WorkflowBase-based objects
         """
-        newnodes = [node for node in nodes if node not in self._graph.nodes()]
+        newnodes = []
+        all_nodes = self._get_all_nodes()
+        for node in nodes:
+            if self._has_node(node):
+                raise IOError('Node %s already exists in the workflow'%node)
+            if isinstance(node, Workflow):
+                for subnode in node._get_all_nodes():
+                    if subnode in all_nodes:
+                        raise IOError('Subnode %s of node %s already exists in the workflow'%(subnode, node))
+            newnodes.append(node)
         if not newnodes:
             logger.debug('no new nodes to add')
             return
@@ -482,8 +493,8 @@ class Workflow(WorkflowBase):
         for node in nodes:
             if node.name in node_names:
                 idx = node_names.index(node.name)
-                if node._hierarchy == node_lineage[idx]:
-                    raise Exception('Duplicate node name %s found.'%node.name)
+                if node_lineage[idx] in [node._hierarchy, self.name]:
+                    raise IOError('Duplicate node name %s found.'%node.name)
             else:
                 node_names.append(node.name)
 
@@ -583,6 +594,24 @@ class Workflow(WorkflowBase):
             newval = val[:]
         logger.debug('setting node input: %s->%s', param, str(newval))
         node.set_input(param, deepcopy(newval))
+
+    def _get_all_nodes(self):
+        allnodes = []
+        for node in self._graph.nodes():
+            if isinstance(node, Workflow):
+                allnodes.extend(node._get_all_nodes())
+            else:
+                allnodes.append(node)
+        return allnodes
+
+    def _has_node(self, wanted_node):
+        for node in self._graph.nodes():
+            if wanted_node == node:
+                return True
+            if isinstance(node, Workflow):
+                if node._has_node(wanted_node):
+                    return True
+        return False
 
     def _create_flat_graph(self):
         """Turn a hierarchical DAG into a simple DAG where no node is a workflow
@@ -878,13 +907,14 @@ class Node(WorkflowBase):
             logger.debug('output: %s'%output_name)
             try:
                 self.set_input(key, deepcopy(output_value))
-            except traits.TraitError:
+            except traits.TraitError, e:
                 msg = ['Error setting node input:',
                        'Node: %s'%self.name,
                        'input: %s'%key,
                        'results_file: %s'%results_file,
                        'value: %s'%str(output_value)]
-                raise RuntimeError('\n'.join(msg))
+                e.args = (e.args[0] + "\n" + '\n'.join(msg),)
+                raise
 
     def run(self, updatehash=False, force_execute=False):
         """Executes an interface within a directory.

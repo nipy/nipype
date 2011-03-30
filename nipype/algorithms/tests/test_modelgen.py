@@ -12,6 +12,7 @@ from nipype.testing import (assert_equal, assert_false, assert_true,
 from nipype.interfaces.base import Bunch
 from nipype.algorithms.modelgen import (SpecifyModel, SpecifySparseModel,
                                         SpecifySPMModel)
+from enthought.traits.api import TraitError
 
 def test_modelgen1():
     tempdir = mkdtemp()
@@ -22,7 +23,7 @@ def test_modelgen1():
     s = SpecifyModel()
     s.inputs.input_units = 'scans'
     set_output_units = lambda : setattr(s.inputs, 'output_units', 'scans')
-    yield assert_raises, set_output_units
+    yield assert_raises, TraitError, set_output_units
     s.inputs.functional_runs = [filename1, filename2]
     s.inputs.time_repetition = 6
     s.inputs.high_pass_filter_cutoff = 128.
@@ -48,8 +49,8 @@ def test_modelgen_spm_concat():
     s.inputs.input_units = 'secs'
     s.inputs.output_units = 'scans'
     s.inputs.concatenate_runs = True
-    set_output_units = lambda : setattr(s.inputs, 'output_units', 'scans')
-    yield assert_raises, set_output_units
+    setattr(s.inputs, 'output_units', 'scans')
+    yield assert_equal, s.inputs.output_units, 'scans'
     s.inputs.functional_runs = [filename1, filename2]
     s.inputs.time_repetition = 6
     s.inputs.high_pass_filter_cutoff = 128.
