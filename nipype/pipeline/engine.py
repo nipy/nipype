@@ -907,13 +907,14 @@ class Node(WorkflowBase):
             logger.debug('output: %s'%output_name)
             try:
                 self.set_input(key, deepcopy(output_value))
-            except traits.TraitError:
+            except traits.TraitError, e:
                 msg = ['Error setting node input:',
                        'Node: %s'%self.name,
                        'input: %s'%key,
                        'results_file: %s'%results_file,
                        'value: %s'%str(output_value)]
-                raise RuntimeError('\n'.join(msg))
+                e.args = (e.args[0] + "\n" + '\n'.join(msg),)
+                raise
 
     def run(self, updatehash=False, force_execute=False):
         """Executes an interface within a directory.
