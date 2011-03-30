@@ -11,6 +11,8 @@
 1. Tell python where to find the appropriate functions.
 """
 
+import numpy as np
+
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
@@ -20,17 +22,6 @@ import os                                    # system functions
 
 #####################################################################
 # Preliminaries
-
-"""
-1b. Confirm package dependencies are installed.  (This is only for the
-tutorial, rarely would you put this in your own code.)
-"""
-from nipype.utils.misc import package_check
-
-package_check('numpy', '1.3', 'tutorial1')
-package_check('scipy', '0.7', 'tutorial1')
-package_check('networkx', '1.0', 'tutorial1')
-package_check('IPython', '0.10', 'tutorial1')
 
 """
 2. Setup any package specific configuration. The output file format
@@ -240,7 +231,7 @@ def subjectinfo(meantsfile):
                     regressors=[ts.tolist()])]
     return output
 
-hpcutoff = 128
+hpcutoff = np.inf
 TR = 3.
 
 cont1 = ['MeanIntensity','T', ['MeanIntensity'],[1]]
@@ -252,7 +243,7 @@ modelfit.inputs.modelspec.high_pass_filter_cutoff = hpcutoff
 
 
 modelfit.inputs.fsfdesign.interscan_interval = TR
-modelfit.inputs.fsfdesign.bases = {'dgamma':{'derivs': True}}
+modelfit.inputs.fsfdesign.bases = {'none':None} #dgamma':{'derivs': True}}
 modelfit.inputs.fsfdesign.contrasts = contrasts
 
 
@@ -285,7 +276,7 @@ l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                     ])
 
 l1pipeline.run()
-l1pipeline.write_graph(graph2use='flat')
+l1pipeline.write_graph()
 
 """
 Store significant result-files in a special directory

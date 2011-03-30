@@ -184,6 +184,7 @@ class Level1Design(BaseInterface):
                     evinfo = [[j] for j in cond['val']]
                     ev_txt += ev_none.substitute(ev_num=num_evs[0],
                                                  ev_name=name,
+                                                 tempfilt_yn=do_tempfilter,
                                                  cond_file=evfname)
                 ev_txt += "\n"
                 conds[name] = evfname
@@ -280,9 +281,6 @@ class Level1Design(BaseInterface):
             no_bases = True
         session_info = self._format_session_info(self.inputs.session_info)
         func_files = self._get_func_files(session_info)
-        do_tempfilter = 1
-        if info['hpf'] == np.inf:
-            do_tempfilter = 0
         n_tcon = 0
         n_fcon = 0
         for i, c in enumerate(self.inputs.contrasts):
@@ -294,6 +292,9 @@ class Level1Design(BaseInterface):
                 print "unknown contrast type: %s" % str(c)
 
         for i, info in enumerate(session_info):
+            do_tempfilter = 1
+            if info['hpf'] == np.inf:
+                do_tempfilter = 0
             num_evs, cond_txt = self._create_ev_files(cwd, info, i, usetd,
                                                       self.inputs.contrasts,
                                                       no_bases, do_tempfilter)
