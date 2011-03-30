@@ -5,15 +5,25 @@ import os
 import nibabel as nb
 
 class Image2VoxelInputSpec(StdOutCommandLineInputSpec):
-    """    image2voxel -4dimage <file> | -imagelist <file> [options]
+    """
+    Converts Analyze / NIFTI / MHA files to voxel order.
 
-     * Converts Analyze / NIFTI / MHA files to voxel order.
-     * Either takes a 4D file (all measurements in single image)
-     * or a list of 3D images.
+    Converts scanner-order data in a supported image format to voxel-order data.
+    Either takes a 4D file (all measurements in single image)
+    or a list of 3D images.
 
-     http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php?n=Man.Image2voxel
+    Example:
 
-     OPTIONS
+    import nipype.interfaces.camino as cmon
+    img2vox = cmon.Image2Voxel()
+    img2vox.inputs.in_file = '4d_dwi.nii'
+
+    img2vox.run()
+
+    image2voxel -4dimage <file> | -imagelist <file> [options]
+    http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php?n=Man.Image2voxel
+
+    Camino Options List:
     -4dimage <file>
         Path to the input image file or header.
         This should be used when converting 4D / 5D files where each 3D volume is an image from a single diffusion-weighted measurement.
@@ -49,12 +59,14 @@ class Image2VoxelInputSpec(StdOutCommandLineInputSpec):
                            desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"', usedefault=True)
 
 class Image2VoxelOutputSpec(TraitedSpec):
-    """Use image2voxel to convert NIFTI images to voxel order
+    """
+    Use image2voxel to convert NIFTI images to voxel order
     """
     voxel_order = File(exists=True, desc='path/name of 4D volume in voxel order')
 
 class Image2Voxel(StdOutCommandLine):
-    """Use image2voxel to convert NIFTI images to voxel order
+    """
+    Use image2voxel to convert NIFTI images to voxel order
     """
     _cmd = 'image2voxel'
     input_spec = Image2VoxelInputSpec
@@ -70,8 +82,22 @@ class Image2Voxel(StdOutCommandLine):
         return name + ".B" + self.inputs.out_type
 
 class FSL2SchemeInputSpec(StdOutCommandLineInputSpec):
-    """ FSL2Scheme -bvecfile <bvecs> -bvalfile <bvals> -diffusiontime <secs> -bscale <factor> [-flipx] [-flipy] [-flipz] [-usegradmod]
-    * FSL2Scheme - converts b-vectors and b-values from FSL format to a Camino scheme file.
+    """
+    Converts b-vectors and b-values from FSL format to a Camino scheme file.
+
+    Example:
+
+    import nipype.interfaces.camino as cmon
+    makescheme = cmon.FSL2Scheme()
+    makescheme.inputs.bvec_file = 'bvecs'
+    makescheme.inputs.bvec_file = 'bvals'
+
+    makescheme.run()
+
+    Camino Options List:
+
+    FSL2Scheme -bvecfile <bvecs> -bvalfile <bvals> -diffusiontime <secs> -bscale <factor> [-flipx] [-flipy] [-flipz] [-usegradmod]
+
     -bvecfile <bvecs>
         The file containing the b-vectors. This is a text file of format
 
@@ -136,9 +162,15 @@ class FSL2SchemeInputSpec(StdOutCommandLineInputSpec):
     usegradmod = traits.Bool(argstr='-usegradmod', desc="Use the gradient magnitude to scale b. This option has no effect if your gradient directions have unit magnitude.")
 
 class FSL2SchemeOutputSpec(TraitedSpec):
+    """
+    Converts b-vectors and b-values from FSL format to a Camino scheme file.
+    """
     scheme = File(exists=True, desc='Scheme file')
 
 class FSL2Scheme(StdOutCommandLine):
+    """
+    Converts b-vectors and b-values from FSL format to a Camino scheme file.
+    """
     _cmd = 'fsl2scheme'
     input_spec=FSL2SchemeInputSpec
     output_spec=FSL2SchemeOutputSpec
@@ -153,8 +185,19 @@ class FSL2Scheme(StdOutCommandLine):
         return name + ".scheme"
 
 class VtkStreamlinesInputSpec(StdOutCommandLineInputSpec):
-    """ vtkstreamlines  [options]
-    * Use vtkstreamlines to convert raw or voxel format streamlines to VTK polydata
+    """
+    Convert streamlines to VTK
+
+    Example:
+
+    import nipype.interfaces.camino as cmon
+    vtk = cmon.VtkStreamlines()
+    vtk.inputs.in_file = 'tract_data.Bfloat'
+    vtk.inputs.voxeldims = [1,1,1]
+
+    vtk.run()
+
+    Use vtkstreamlines to convert raw or voxel format streamlines to VTK polydata
 
     -colourorient
         Each point on the streamline is coloured by the local orientation. The colour coding scheme is the same as described in pdview(1).
@@ -207,9 +250,15 @@ class VtkStreamlinesInputSpec(StdOutCommandLineInputSpec):
     interpolate = traits.Bool(argstr='-interpolate', desc="the scalar value at each point on the streamline is calculated by trilinear interpolation")
 
 class VtkStreamlinesOutputSpec(TraitedSpec):
+    """
+    Convert streamlines to VTK
+    """
     vtk = File(exists=True, desc='Streamlines in VTK format')
 
 class VtkStreamlines(StdOutCommandLine):
+    """
+    Convert streamlines to VTK
+    """
     _cmd = 'vtkstreamlines'
     input_spec=VtkStreamlinesInputSpec
     output_spec=VtkStreamlinesOutputSpec
@@ -224,11 +273,22 @@ class VtkStreamlines(StdOutCommandLine):
         return name + ".vtk"
 
 class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
-    """ procstreamlines [options]
-     * This program does post-processing of streamline output from track. It can either output streamlines or connection probability maps.
+    """
+    Process streamline data
+
+    This program does post-processing of streamline output from track. It can either output streamlines or connection probability maps.
      * http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php?n=Man.procstreamlines
 
-     OPTIONS
+    Example:
+
+    import nipype.interfaces.camino as cmon
+    proc = cmon.ProcStreamlines()
+    proc.inputs.in_file = 'tract_data.Bfloat'
+    proc.inputs.outputtracts = 'oogl'
+
+    proc.run()
+
+    Options List from Camino Help:
 
     The following list details the options pertaining to the input data, the tractography parameters, the output, and the PICo parameters.
 
@@ -413,9 +473,15 @@ class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
     outputcbs = traits.Bool(argstr='-outputcbs', desc="outputs connectivity-based segmentation maps; requires target outputfile")
 
 class ProcStreamlinesOutputSpec(TraitedSpec):
+    """
+    Process streamline data
+    """
     proc = File(exists=True, desc='Processed Streamlines')
 
 class ProcStreamlines(StdOutCommandLine):
+    """
+    Process streamline data
+    """
     _cmd = 'procstreamlines'
     input_spec=ProcStreamlinesInputSpec
     output_spec=ProcStreamlinesOutputSpec
@@ -431,21 +497,37 @@ class ProcStreamlines(StdOutCommandLine):
 
 class TractShredderInputSpec(StdOutCommandLineInputSpec):
     """
-    tractshredder <offset> <bunchsize> <space>
+    Extracts bunches of streamlines.
 
-    Example:
+    tractshredder works in a similar way to shredder, but processes streamlines instead of scalar data.
+    The input is raw streamlines, in the format produced by track or procstreamlines.
+
+    The program first makes an initial offset of offset tracts.  It then reads and outputs a group of
+    bunchsize tracts, skips space tracts, and repeats until there is no more input.
+
+    Camino Example:
+            tractshredder <offset> <bunchsize> <space>
+
         Output every third streamline from the file tracts.Bfloat.
 
            cat tracts.Bfloat | tractshredder 0 1 2 > shredded.Bfloat
            tractshredder 0 1 2 < tracts.Bfloat > shredded.Bfloat
 
-        tractshredder works in a similar way to shredder, but processes streamlines instead of scalar data.
-        The input is raw streamlines, in the format produced by track or procstreamlines.
+    Nipype Example:
 
-           The  program  first  makes an initial offset of offset tracts.  It then
-           reads and outputs a group of bunchsize tracts, skips space tracts,  and
-           repeats until there is no more input.
+    import nipype.interfaces.camino as cmon
+    shred = cmon.TractShredder()
+    shred.inputs.in_file = 'tract_data.Bfloat'
+    shred.inputs.offset = 0
+    shred.inputs.bunchsize = 1
+    shred.inputs.space = 2
+
+    shred.run()
     """
+    in_file = File(exists=True, argstr='< %s',
+                    mandatory=True, position=-2,
+                    desc='tract file')
+
     offset = traits.Int(argstr='%d', units='NA',
         desc='initial offset of offset tracts', position=1)
 
@@ -455,14 +537,16 @@ class TractShredderInputSpec(StdOutCommandLineInputSpec):
     space = traits.Int(argstr='%d', units='NA',
         desc='skips space tracts', position=3)
 
-    in_file = File(exists=True, argstr='< %s',
-                    mandatory=True, position=-2,
-                    desc='tract file')
-
 class TractShredderOutputSpec(TraitedSpec):
+    """
+    Extracts bunches of streamlines.
+    """
     shredded = File(exists=True, desc='Shredded tract file')
 
 class TractShredder(StdOutCommandLine):
+    """
+    Extracts bunches of streamlines.
+    """
     _cmd = 'tractshredder'
     input_spec=TractShredderInputSpec
     output_spec=TractShredderOutputSpec
