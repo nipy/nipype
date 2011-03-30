@@ -569,7 +569,7 @@ class Interface(object):
 
 class BaseInterfaceInputSpec(TraitedSpec):
     ignore_exception = traits.Bool(False, desc = "Print an error message instead \
-     of throwing an exception in case the interface fails to run", usedefault = True)
+of throwing an exception in case the interface fails to run", usedefault = True)
 
 class BaseInterface(Interface):
     """Implements common interface functionality.
@@ -589,6 +589,7 @@ class BaseInterface(Interface):
     This class cannot be instantiated.
 
     """
+    input_spec = BaseInterfaceInputSpec
 
     def __init__(self, **inputs):
         if not self.input_spec:
@@ -952,7 +953,7 @@ class CommandLine(BaseInterface):
     Optional:
      args: Additional parameters to the command
      environ: Environment variables (default={})
-     ignore_exception: Print an error message instead      of throwing an exception in case the interface fails to run (default=False)
+     ignore_exception: Print an error message instead of throwing an exception in case the interface fails to run (default=False)
     <BLANKLINE>
     Outputs
     -------
