@@ -67,13 +67,10 @@ class Info(object):
         """
         # find which fsl being used....and get version from
         # /path/to/fsl/etc/fslversion
-        clout = CommandLine(command='which', args='fsl').run()
-
-        if clout.runtime.returncode is not 0:
+        try: 
+            basedir = os.environ['FSLDIR']
+        except KeyError:
             return None
-
-        out = clout.runtime.stdout
-        basedir = os.path.split(os.path.split(out)[0])[0]
         clout = CommandLine(command='cat',
                             args='%s/etc/fslversion' % (basedir)).run()
         out = clout.runtime.stdout

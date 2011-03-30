@@ -40,7 +40,7 @@ from nipype.utils.filemanip import (save_json, FileNotFoundError,
 
 from nipype.pipeline.utils import (generate_expanded_graph, modify_paths,
                                    export_graph, make_output_dir,
-                                   clean_working_directory)
+                                   clean_working_directory, format_dot)
 from nipype.utils.logger import (logger, config)
 
 class WorkflowBase(object):
@@ -84,6 +84,13 @@ class WorkflowBase(object):
     @property
     def outputs(self):
         raise NotImplementedError
+
+    @property
+    def fullname(self):
+        fullname = self.name
+        if self._hierarchy:
+            fullname = self._hierarchy + '.' + self.name
+        return fullname            
 
     def clone(self, name):
         """Clone a workflowbase object
@@ -343,25 +350,54 @@ class Workflow(WorkflowBase):
             outnode = None
         return outnode
 
-    def write_graph(self, dotfilename='graph.dot', graph2use='flat'):
+    def write_graph(self, dotfilename='graph.dot', graph2use='hierarchical', format="png"):
         """Generates a graphviz dot file and a png file
 
         Parameters
         ----------
         
-        graph2use: 'orig', 'flat' (default), 'exec'
+        graph2use: 'orig', 'hierarchical', 'flat' (default), 'exec'
             orig - creates a top level graph without expanding internal
                    workflow nodes
             flat - expands workflow nodes recursively
             exec - expands workflows to depict iterables
+        
+        format: 'png', 'svg'
             
         """
+        graphtypes = ['orig', 'flat', 'hierarchical', 'exec']
+        if graph2use not in graphtypes:
+            raise ValueError('Unknown graph2use keyword. Must be one of: ' +str(graphtypes))
+        base_dir, dotfilename = os.path.split(dotfilename)
+        if base_dir == '':
+            if self.base_dir:
+                base_dir = self.base_dir
+            else:
+                base_dir = os.getcwd()
+        if graph2use == 'hierarchical':
+            dotfilename = os.path.join(base_dir, dotfilename)
+            self.write_hierarchical_dotfile(dotfilename=dotfilename)
+            format_dot(dotfilename, format=format)
+            return
         graph = self._graph
         if graph2use in ['flat', 'exec']:
             graph = self._create_flat_graph()
         if graph2use == 'exec':
             graph = generate_expanded_graph(deepcopy(graph))
-        export_graph(graph, self.base_dir, dotfilename=dotfilename)
+
+        export_graph(graph, base_dir, dotfilename=dotfilename, format=format)
+
+    def write_hierarchical_dotfile(self, dotfilename=None):
+        dotlist = ['digraph %s{'%self.name]
+        dotlist.append(self._get_dot(prefix='  '))
+        dotlist.append('}')
+        dotstr = '\n'.join(dotlist)
+        if dotfilename:
+            fp = open(dotfilename, 'wt')
+            fp.writelines(dotstr)
+            fp.close()
+        else:
+            logger.info(dotstr)
 
     def run(self, plugin=None, updatehash=False):
         """ Execute the workflow
@@ -625,6 +661,70 @@ class Workflow(WorkflowBase):
             self._graph.remove_nodes_from(nodes2remove)
         logger.debug('finished expanding workflow: %s', self)
 
+    def _get_dot(self, prefix=None, hierarchy=None):
+        """Create a dot file with connection info
+        """
+        if prefix is None:
+            prefix='  '
+        if hierarchy is None:
+            hierarchy = []
+        dotlist = ['%slabel="%s";'%(prefix,self.name)]
+        dotlist.append('%scolor=grey;'%(prefix))
+        for node in self._graph.nodes():
+            fullname = '.'.join(hierarchy + [node.fullname])
+            nodename = fullname.replace('.','_')
+            if not isinstance(node, Workflow):
+                pkglist = node._interface.__class__.__module__.split('.')
+                interface = node._interface.__class__.__name__
+                destclass = ''
+                if len(pkglist) > 2:
+                    destclass = '.%s'%pkglist[2]
+                node_class_name = '.'.join([node.name, interface]) + destclass
+                if hasattr(node, 'iterables') and node.iterables:
+                    dotlist.append('%s[label="%s", style=filled, color=lightgrey];'%(nodename, node_class_name))
+                else:
+                    dotlist.append('%s[label="%s"];'%(nodename, node_class_name))
+        for node in self._graph.nodes():
+            if isinstance(node, Workflow):
+                fullname = '.'.join(hierarchy + [node.fullname])
+                nodename = fullname.replace('.','_')
+                dotlist.append('subgraph cluster_%s {'%nodename)
+                dotlist.append(node._get_dot(prefix=prefix + prefix,
+                                             hierarchy=hierarchy+[self.name]))
+                dotlist.append('}')
+            else:
+                for subnode in self._graph.successors_iter(node):
+                    if not isinstance(subnode, Workflow):
+                        nodefullname = '.'.join(hierarchy + [node.fullname])
+                        subnodefullname = '.'.join(hierarchy + [subnode.fullname])
+                        nodename = nodefullname.replace('.','_')
+                        subnodename = subnodefullname.replace('.','_')
+                        dotlist.append('%s -> %s;'%(nodename, subnodename))
+        # add between workflow connections
+        for u,v,d in self._graph.edges_iter(data=True):
+            uname = '.'.join(hierarchy + [u.fullname])
+            vname = '.'.join(hierarchy + [v.fullname])
+            for src, dest in d['connect']:
+                uname1 = uname
+                vname1 = vname
+                if isinstance(src, tuple):
+                    srcname = src[0]
+                else:
+                    srcname = src
+                if '.' in srcname:
+                    uname1 += '.' + '.'.join(srcname.split('.')[:-1])
+                if '.' in dest and '@' not in dest:
+                    if not isinstance(v, Workflow):
+                        if 'datasink' not in str(v._interface.__class__).lower():
+                            vname1 += '.' + '.'.join(dest.split('.')[:-1])
+                    else:
+                        vname1 += '.' + '.'.join(dest.split('.')[:-1])
+                if uname1.split('.')[:-1] != vname1.split('.')[:-1]:
+                    dotlist.append('%s -> %s;'%(uname1.replace('.','_'),
+                                                vname1.replace('.','_')))
+        return ('\n'+prefix).join(dotlist)
+
+
 class Node(WorkflowBase):
     """Wraps interface objects for use in pipeline
 
@@ -713,6 +813,11 @@ class Node(WorkflowBase):
         if self._result:
             val = getattr(self._result.outputs, parameter)
         return val
+
+    def help(self):
+        """ Print interface help
+        """
+        self._interface.help()
 
     def _get_hashval(self):
         hashed_inputs, hashvalue =  self.inputs.hashval
@@ -818,18 +923,15 @@ class Node(WorkflowBase):
                 rmtree(outdir)
                 outdir = make_output_dir(outdir)
             else:
-                logger.debug("%s found and can_resume is True - resuming execution" % hashfile_unfinished)
+                logger.debug("%s found and can_resume is True or Node is a MapNode - resuming execution" % hashfile_unfinished)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             try:
                 self._run_interface(execute=True)
-            except RuntimeError:
-                msg = "Could not run %s" % self.name
-                msg += "\nwith inputs:\n%s" % self.inputs
-                msg += "\nError:\n %s" % self._result.runtime.stderr
+            except:
                 os.remove(hashfile_unfinished)
-                raise RuntimeError(msg)
-            else:
-                shutil.move(hashfile_unfinished, hashfile)
+                raise
+                
+            shutil.move(hashfile_unfinished, hashfile)
         else:
             logger.debug("Hashfile exists. Skipping execution\n")
             self._run_interface(execute=False, updatehash=updatehash)
@@ -907,7 +1009,6 @@ class Node(WorkflowBase):
         cwd = os.getcwd()
         if execute and copyfiles:
             self._originputs = deepcopy(self._interface.inputs)
-        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
         if execute:
             runtime = Bunch(returncode = 1,
                             environ = deepcopy(os.environ.data),
@@ -915,6 +1016,7 @@ class Node(WorkflowBase):
             result = InterfaceResult(interface=self._interface,
                                      runtime=runtime,
                                      outputs=None)
+            self._result = result
             logger.debug('Executing node')
             if copyfiles:
                 self._copyfiles_to_wd(cwd, execute)
@@ -922,9 +1024,8 @@ class Node(WorkflowBase):
                 try:
                     cmd = self._interface.cmdline
                 except Exception, msg:
-                    runtime.update(stderr=msg)
-                    self._result = result
-                    raise RuntimeError(msg)
+                    self._result.runtime.stderr = msg
+                    raise
                 cmdfile = os.path.join(cwd,'command.txt')
                 fd = open(cmdfile,'wt')
                 fd.writelines(cmd)
@@ -933,29 +1034,18 @@ class Node(WorkflowBase):
             try:
                 result = self._interface.run()
             except Exception, msg:
-                runtime.update(returncode = 1,
-                               stderr = msg)
-                result = InterfaceResult(interface=self._interface,
-                                         runtime=runtime,
-                                         outputs=None)
-                self._result = result
-                raise RuntimeError(msg)
-            else:
-                if config.getboolean('execution', 'remove_unnecessary_outputs'):
-                    dirs2keep = None
-                    if isinstance(self, MapNode):
-                        dirs2keep = [os.path.join(cwd, 'mapflow')]
-                    result.outputs = clean_working_directory(result.outputs, cwd,
-                                                             self._interface.inputs,
-                                                             self.needed_outputs,
-                                                             dirs2keep=dirs2keep)
-            if result.runtime.returncode:
-                logger.error('STDERR:' + result.runtime.stderr)
-                logger.error('STDOUT:' + result.runtime.stdout)
-                self._result = result
-                raise RuntimeError(result.runtime.stderr)
-            else:
-                self._save_results(result, cwd)
+                self._result.runtime.stderr = msg
+                raise
+            
+            if config.getboolean('execution', 'remove_unnecessary_outputs'):
+                dirs2keep = None
+                if isinstance(self, MapNode):
+                    dirs2keep = [os.path.join(cwd, 'mapflow')]
+                result.outputs = clean_working_directory(result.outputs, cwd,
+                                                         self._interface.inputs,
+                                                         self.needed_outputs,
+                                                         dirs2keep=dirs2keep)
+            self._save_results(result, cwd)
         else:
             logger.info("Collecting precomputed outputs")
             try:
@@ -1107,27 +1197,29 @@ class MapNode(Node):
                         fieldvals[i])
             node.config = self.config
             node.base_dir = os.path.join(cwd, 'mapflow') # for backwards compatibility
-            yield node
+            yield i, node
 
     def _node_runner(self, nodes, updatehash=False):
-        for node in nodes:
+        for i, node in nodes:
+            err = None
             try:
                 node.run(updatehash=updatehash)
-            except RuntimeError, msg:
-                node.error_msg = msg
-            yield node
+            except Exception, err:
+                if config.getboolean('execution', 'stop_on_first_crash'):
+                    self._result = node.result
+                    raise
+            yield i, node, err
 
     def _collate_results(self, nodes):
         self._result = InterfaceResult(interface=[], runtime=[],
                                        outputs=self.outputs)
-        for i, node in enumerate(nodes):
-            runtime = Bunch(returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
-            self._result.runtime.insert(i, runtime)
+        returncode = []
+        for i, node, err in nodes:
+            self._result.runtime.insert(i, None)
             if node.result and hasattr(node.result, 'runtime'):
-                self._result.runtime[i] = node.result.runtime
-                if node.result.runtime.returncode:
-                    raise Exception('iternode %s:%d did not run'%(node._id, i))
                 self._result.interface.insert(i, node.result.interface)
+                self._result.runtime[i] = node.result.runtime
+            returncode.insert(i, err)
             for key, _ in self.outputs.items():
                 if config.getboolean('execution', 'remove_unnecessary_outputs') and \
                 self.needed_outputs:
@@ -1142,10 +1234,18 @@ class MapNode(Node):
                     values.insert(i, None)
                 if any([val != Undefined for val in values]) and self._result.outputs:
                     setattr(self._result.outputs, key, values)
+        if returncode and any([code is not None for code in returncode]):
+            msg = []
+            for i, code in enumerate(returncode):
+                if code is not None:
+                    msg += ['Subnode %d failed'%i]
+                    msg += ['Error:', str(code)]
+            raise Exception('Subnodes of node: %s failed:\n%s'%(self.name,
+                                                                '\n'.join(msg)))
 
     def get_subnodes(self):
         self._get_inputs()
-        return [node for node in self._make_nodes()]
+        return [node for _, node in self._make_nodes()]
     
     def _run_interface(self, execute=True, updatehash=False):
         """Run the mapnode interface

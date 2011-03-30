@@ -1,6 +1,7 @@
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from nipype.utils.filemanip import split_filename
 import os
+import nibabel as nb
 
 class Image2VoxelInputSpec(CommandLineInputSpec):
     """    image2voxel -4dimage <file> | -imagelist <file> [options] 

@@ -533,6 +533,8 @@ class SlicerInputSpec(FSLCommandInputSpec):
                               desc='output every n axial slices into one picture')
     image_width = traits.Int(position=-2, argstr='%d',desc='max picture width')
     out_file = File(position=-1, genfile=True, argstr='%s', desc='picture to write')
+    scaling = traits.Float(position=0, argstr='-s %f',desc='image scale')
+    
 
 class SlicerOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='picture to write')

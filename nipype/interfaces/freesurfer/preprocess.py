@@ -23,7 +23,8 @@ from nipype.interfaces.io import FreeSurferSource
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath,
-                                    OutputMultiPath)
+                                    OutputMultiPath, CommandLine,
+                                    CommandLineInputSpec)
 from nipype.utils.misc import isdefined
 
 
@@ -575,21 +576,25 @@ class Resample(FSCommand):
             return self._get_outfilename()
         return None
 
-class ReconAllInputSpec(FSTraitedSpec):
-    subject_id = traits.Str(argstr='-subjid %s', desc='subject name',
-                            mandatory=True)
+class ReconAllInputSpec(CommandLineInputSpec):
+    subject_id = traits.Str("recon_all", argstr='-subjid %s', desc='subject name',
+                            usedefault=True)
     directive = traits.Enum('all', 'autorecon1', 'autorecon2', 'autorecon2-cp',
                             'autorecon2-wm', 'autorecon2-inflate1', 'autorecon2-perhemi',
                             'autorecon3', argstr='-%s', desc='process directive',
-                            mandatory=True)
-    hemi = traits.Enum('lh', 'rh', desc='hemisphere to process')
+                            usedefault=True)
+    hemi = traits.Enum('lh', 'rh', desc='hemisphere to process', argstr="-hemi %s")
     T1_files = InputMultiPath(File(exists=True), argstr='-i %s...',
                               desc='name of T1 file to process')
     subjects_dir = Directory(exists=True, argstr='-sd %s',
-                             desc='path to subjects directory')
+                             desc='path to subjects directory', genfile=True)
     flags = traits.Str(argstr='%s', desc='additional parameters')
+    
+class ReconAllIOutputSpec(FreeSurferSource.output_spec):
+    subjects_dir = Directory(exists=True, desc='Freesurfer subjects directory.')
+    subject_id = traits.Str(desc='Subject name for whom to retrieve data')
 
-class ReconAll(FSCommand):
+class ReconAll(CommandLine):
     """Uses recon-all to generate surfaces and parcellations of structural data
     from anatomical images of a subject. 
 
@@ -609,14 +614,37 @@ class ReconAll(FSCommand):
 
     _cmd = 'recon-all'
     input_spec = ReconAllInputSpec
-    output_spec = FreeSurferSource.output_spec
+    output_spec = ReconAllIOutputSpec
+    
+    def _gen_subjects_dir(self):
+        return os.getcwd()
+
+    def _gen_filename(self, name):
+        if name == 'subjects_dir':
+            return self._gen_subjects_dir()
+        return None
 
     def _list_outputs(self):
         """
         See io.FreeSurferSource.outputs for the list of outputs returned
         """
-        FreeSurferSource(subject_id=self.inputs.subject_id,
-                         subjects_dir=self.inputs.subjects_dir)._outputs().get()
+        if isdefined(self.inputs.subjects_dir):
+            subjects_dir = self.inputs.subjects_dir
+        else:
+            subjects_dir = self._gen_subjects_dir()
+            
+        if isdefined(self.inputs.hemi):
+            hemi = self.inputs.hemi
+        else:
+            hemi = 'both'
+            
+        outputs = self._outputs().get()
+        
+        outputs.update(FreeSurferSource(subject_id=self.inputs.subject_id,
+                         subjects_dir=subjects_dir, hemi=hemi)._list_outputs())
+        outputs['subject_id'] = self.inputs.subject_id
+        outputs['subjects_dir'] = subjects_dir
+        return outputs
 
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s', desc='freesurfer subject id',

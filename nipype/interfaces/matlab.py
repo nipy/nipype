@@ -26,25 +26,18 @@ class MatlabInputSpec(CommandLineInputSpec):
     single_comp_thread = traits.Bool(argstr="-singleCompThread",
                                    desc="force single threaded operation")
     # non-commandline options
-    mfile   = traits.Bool(False, desc='Run m-code using m-file',
+    mfile   = traits.Bool(True, desc='Run m-code using m-file',
                           usedefault=True)
     script_file = File('pyscript.m', usedefault=True,
                               desc='Name of file to write m-code to')
     paths   = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
     prescript = traits.List(["ver,","try,"], usedefault=True,
                             desc='prescript to be added before code')
-    postscript = traits.List(
-        ["\n,catch ME,",
-         "ME,",
-         "ME.stack,",
-         "fprintf('%s\\n',ME.message);",
-         "fprintf(2,'<MatlabScriptException>');",
-         "fprintf(2,'%s\\n',ME.message);",
-         "fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);",
-         "fprintf(2,'</MatlabScriptException>');",
-         "end;"],
-        usedefault=True,
-        desc='script added after code')
+    postscript = traits.List(["\n,catch ME,",
+                              "fprintf(2,'MATLAB code threw an exception:\\n');",
+                              "fprintf(2,'%s\\n',ME.message);",
+                              "if length(ME.stack) ~= 0, fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);, end;",
+                              "end;"], desc='script added after code', usedefault = True)
 
 class MatlabCommand(CommandLine):
     """Interface that runs matlab code
@@ -117,13 +110,8 @@ class MatlabCommand(CommandLine):
 
     def _run_interface(self,runtime):
         runtime = super(MatlabCommand, self)._run_interface(runtime)
-        if 'command not found' in runtime.stderr:
-            msg = 'Cannot find matlab!\n' + \
-                '\tTried command:  ' + runtime.cmdline + \
-                '\n\tShell reported: ' + runtime.stderr
-            raise IOError(msg)
-        if  'MatlabScriptException' in runtime.stderr:
-            runtime.returncode = 1
+        if 'MATLAB code threw an exception' in runtime.stderr:
+            self.raise_exception(runtime)
         return runtime
 
     def _format_arg(self, name, trait_spec, value):
@@ -142,13 +130,20 @@ class MatlabCommand(CommandLine):
             paths = self.inputs.paths
         # prescript
         prescript = self.inputs.prescript
+        postscript = self.inputs.postscript
+        
+        #postcript takes different default value depending on the mfile argument
         if mfile:
             prescript.insert(0,"fprintf(1,'Executing %s at %s:\\n',mfilename,datestr(now));")
         else:
-            prescript.insert(0,"fprintf(1,'Executing code at %s:\\n',datestr(now));") 
+            prescript.insert(0,"fprintf(1,'Executing code at %s:\\n',datestr(now));")
         for path in paths:
             prescript.append("addpath('%s');\n" % path)
-        postscript = self.inputs.postscript
+            
+        if not mfile:
+            #clean up the code of comments and replace newlines with commas
+            script_lines = ','.join([line for line in script_lines.split("\n") if not line.strip().startswith("%")])
+
         script_lines = '\n'.join(prescript)+script_lines+'\n'.join(postscript)
         if mfile:
             mfile = file(os.path.join(cwd,self.inputs.script_file), 'wt')

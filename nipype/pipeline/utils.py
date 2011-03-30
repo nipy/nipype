@@ -385,7 +385,7 @@ def generate_expanded_graph(graph_in):
     return graph_in
 
 def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
-                 show_connectinfo=False, dotfilename='graph.dot'):
+                 show_connectinfo=False, dotfilename='graph.dot', format='png'):
     """ Displays the graph layout of the pipeline
     
     This function requires that pygraphviz and matplotlib are available on
@@ -408,7 +408,7 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
     """
     graph = deepcopy(graph_in)
     if use_execgraph:
-        graph = _generate_expanded_graph(graph)
+        graph = generate_expanded_graph(graph)
         logger.debug('using execgraph')
     else:
         logger.debug('using input graph')
@@ -422,7 +422,7 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
                                newpath=base_dir)
     logger.info('Creating detailed dot file: %s'%outfname)
     _write_detailed_dot(graph, outfname)
-    cmd = 'dot -Tpng -O %s' % outfname
+    cmd = 'dot -T%s -O %s' % (format, outfname)
     res = CommandLine(cmd).run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
@@ -433,7 +433,7 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
                                newpath=base_dir)
     nx.write_dot(pklgraph, outfname)
     logger.info('Creating dot file: %s' % outfname)
-    cmd = 'dot -Tpng -O %s' % outfname
+    cmd = 'dot -T%s -O %s' % (format, outfname)
     res = CommandLine(cmd).run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
@@ -443,6 +443,10 @@ def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
         if show_connectinfo:
             nx.draw_networkx_edge_labels(pklgraph, pos)
 
+def format_dot(dotfilename, format=None):
+    cmd = 'dot -T%s -O %s' % (format, dotfilename)
+    CommandLine(cmd).run()
+    logger.info('Converting dotfile: %s to %s format'%(dotfilename, format))
 
 def make_output_dir(outdir):
     """Make the output_dir if it doesn't exist.
@@ -524,7 +528,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
         if f not in needed_files:
             if len(needed_dirs) == 0:
                 files2remove.append(f)
-            elif not len([1 for dirname in needed_dirs if f.startswith(dirname)])==0:
+            elif not any([f.startswith(dirname) for dirname in needed_dirs]):
                 files2remove.append(f)
     logger.debug('Removing files: %s'%(';'.join(files2remove)))
     for f in files2remove:

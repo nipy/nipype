@@ -9,6 +9,7 @@ import numpy as np
 
 import nibabel as nb
 from nipype.testing import (assert_equal, assert_raises, skipif)
+from nipype.interfaces.base import Undefined
 import nipype.interfaces.fsl.maths as fsl
 from nipype.interfaces.fsl import no_fsl
 
@@ -252,6 +253,7 @@ def test_dilation():
     f = open("kernel.txt","w").close()
     del f # Shut pyflakes up
     diller.inputs.kernel_shape = "file"
+    diller.inputs.kernel_size = Undefined
     diller.inputs.kernel_file = "kernel.txt"
     yield assert_equal, diller.cmdline, "fslmaths a.nii -kernel file kernel.txt -dilF b.nii"
     

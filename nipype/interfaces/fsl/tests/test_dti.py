@@ -17,6 +17,7 @@ from nipype.testing import ( assert_equal, assert_not_equal,
                              assert_raises, skipif, example_data)
 import nipype.interfaces.fsl.dti as fsl
 from nipype.interfaces.fsl import Info, no_fsl
+from nipype.interfaces.base import Undefined
 
 # nosetests --with-doctest path_to/test_fsl.py
 
@@ -861,6 +862,7 @@ def test_tbss_skeleton():
                                                          os.path.join(newdir, "b_skeletonised.nii"))
 
     # Can we specify a mask?
+    bones.inputs.use_cingulum_mask = Undefined
     bones.inputs.search_mask_file = "a.nii"
     yield assert_equal, bones.cmdline, \
     "tbss_skeleton -i a.nii -p 0.200 b.nii a.nii b.nii %s"%os.path.join(newdir, "b_skeletonised.nii")

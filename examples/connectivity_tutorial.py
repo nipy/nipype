@@ -7,10 +7,13 @@ import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.nipy as nipy      # how to run matlab
+import nipype.interfaces.cmtk.cmtk as cmtk
+import nipype.interfaces.cmtk.mapper as mapper
 import nibabel as nb
 import os                                    # system functions
 
 def get_vox_dims(volume):
+    import nibabel as nb
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume)
@@ -19,6 +22,7 @@ def get_vox_dims(volume):
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
 
 def get_data_dims(volume):
+    import nibabel as nb
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume)
@@ -33,10 +37,10 @@ fsl.FSLCommand.set_default_output_type('NIFTI')
 # If there is already another example dataset with both DWI and a Freesurfer directory, we can switch this tutorial to use
 # that instead...
 
-#subjects_dir = os.path.abspath('/usr/local/freesurfer/subjects/')
+fs_dir = os.path.abspath('/usr/local/freesurfer')
 subjects_dir = os.path.abspath('freesurfer')
 
-# This needs to point to the fdt folder you can find after extracting 
+# This needs to point to the fdt folder you can find after extracting
 # http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 data_dir = os.path.abspath('fsl_course_data/fdt/')
 
@@ -84,6 +88,9 @@ mri_convert_Brain.inputs.out_type = 'nii'
 mri_convert_WMParc = pe.Node(interface=fs.MRIConvert(), name='mri_convert_WMParc')
 mri_convert_WMParc.inputs.out_type = 'nii'
 
+mri_convert_AparcAseg = pe.Node(interface=fs.MRIConvert(), name='mri_convert_AparcAseg')
+mri_convert_AparcAseg.inputs.out_type = 'nii'
+
 tractshred = pe.Node(interface=camino.TractShredder(), name='tractshred')
 tractshred.inputs.offset = 0
 tractshred.inputs.bunchsize = 2
@@ -113,12 +120,9 @@ inputnode = pe.Node(interface=util.IdentityInterface(fields=["dwi", "bvecs", "bv
 
 camino2trackvis = pe.Node(interface=cam2trk.Camino2Trackvis(), name="camino2trk")
 camino2trackvis.inputs.min_length = 30
-#Would like to use get_data_dims here, but camino2trackvis requires comma separated values... Ideas?
-camino2trackvis.inputs.data_dims = '128,104,64'
-camino2trackvis.inputs.voxel_dims = '1,1,1'
 camino2trackvis.inputs.voxel_order = 'LAS'
 
-                      
+
 trk2camino = pe.Node(interface=cam2trk.Trackvis2Camino(), name="trk2camino")
 
 vtkstreamlines = pe.Node(interface=camino.VtkStreamlines(), name="vtkstreamlines")
@@ -170,18 +174,18 @@ mapping.connect([(convertxfm, inverse,[('out_file','in_matrix_file')])])
 mapping.connect([(mri_convert_WMParc, inverse,[('out_file','in_file')])])
 mapping.connect([(inverse, conmap,[('out_file','roi_file')])])
 
-                      
+
 mapping.connect([(inputnode, bet,[("dwi","in_file")])])
 mapping.connect([(bet, track,[("mask_file","seed_file")])])
 
 mapping.connect([(inputnode, image2voxel, [("dwi", "in_file")]),
                        (inputnode, fsl2scheme, [("bvecs", "bvec_file"),
                                                 ("bvals", "bval_file")]),
-                       
+
                        (image2voxel, dtifit,[['voxel_order','in_file']]),
                        (fsl2scheme, dtifit,[['scheme','scheme_file']])
                       ])
-                      
+
 mapping.connect([(fsl2scheme, dtlutgen,[("scheme","scheme_file")])])
 mapping.connect([(dtlutgen, picopdfs,[("dtLUT","luts")])])
 mapping.connect([(dtifit, picopdfs,[("tensor_fitted","in_file")])])
@@ -196,7 +200,7 @@ mapping.connect([(trd, analyzeheader_trace,[("trace","in_file")])])
 mapping.connect([(inputnode, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
 (('dwi', get_data_dims), 'data_dims')])])
 
-                      
+
 #These lines are commented out the Camino mean diffusivity function appears to be broken.
 #mapping.connect([(dtifit, md,[("tensor_fitted","in_file")])])
 #mapping.connect([(md, analyzeheader2,[("md","in_file")])])
@@ -206,10 +210,14 @@ mapping.connect([(picopdfs, track,[("pdfs","in_file")])])
 #Memory errors were fixed by shredding tracts. ProcStreamlines now runs fine, but I am still unable to open the OOGl file in Geomview. Could someone else try this on their machine? (output file is around 1 gb!)
 #mapping.connect([(tractshred, procstreamlines,[("shredded","in_file")])])
 
-mapping.connect([(track, camino2trackvis, [('tracked','in_file')]),                    
+mapping.connect([(track, camino2trackvis, [('tracked','in_file')]),
                        (track, vtkstreamlines,[['tracked','in_file']]),
                        (camino2trackvis, trk2camino,[['trackvis','in_file']])
                       ])
+
+mapping.connect([(inputnode, camino2trackvis,[(('dwi', get_vox_dims), 'voxel_dims'),
+(('dwi', get_data_dims), 'data_dims')])])
+
 
 mapping.connect([(track, tractshred,[("tracked","in_file")])])
 mapping.connect([(tractshred, conmap,[("shredded","in_file")])])
@@ -220,6 +228,27 @@ mapping.connect([(inputnode, FreeSurferSourceRH,[("subject_id","subject_id")])])
 mapping.connect([(FreeSurferSourceLH, mris_convertLH,[("pial","in_file")])])
 mapping.connect([(FreeSurferSourceRH, mris_convertRH,[("pial","in_file")])])
 
+''' This section adds the new Connectome Mapping Toolkit nodes '''
+roigen = pe.Node(interface=cmtk.ROIGen(), name="ROIGen")
+#roigen.inputs.use_freesurfer_LUT = True
+#roigen.inputs.freesurfer_dir = fs_dir
+roigen.inputs.LUT_file = '/home/erik/Dropbox/Code/forked/nipype/examples/FreeSurferColorLUT_adapted.txt'
+
+selectaparc = pe.Node(interface=util.Select(), name="SelectAparcAseg")
+selectaparc.inputs.index = 0 # Use 0 for aparc+aseg and 1 for aparc.a2009s+aseg
+
+creatematrix = pe.Node(interface=mapper.CreateMatrix(), name="CreateMatrix")
+creatematrix.inputs.resolution_network_file = '/home/erik/Dropbox/Code/forked/nipype/examples/resolution83.graphml'
+
+mapping.connect([(FreeSurferSource, selectaparc,[("aparc_aseg","inlist")])])
+mapping.connect([(selectaparc, mri_convert_AparcAseg,[("out","in_file")])])
+mapping.connect([(mri_convert_AparcAseg, roigen,[("out_file","aparc_aseg_file")])])
+
+#mapping.connect([(roigen, creatematrix,[("out_roi_file","roi_file")])])
+#mapping.connect([(roigen, creatematrix,[("out_dict_file","dict_file")])])
+#mapping.connect([(camino2trackvis, creatematrix,[("trackvis","tract_file")])])
+
+
 connectivity = pe.Workflow(name="connectivity")
 connectivity.base_dir = os.path.abspath('connectivity_tutorial')
 connectivity.connect([
@@ -228,7 +257,7 @@ connectivity.connect([
                                                ('bvals','inputnode.bvals'),
                                                ('bvecs','inputnode.bvecs')
                                                ]),
-		(infosource,mapping,[('subject_id','inputnode.subject_id')])
+        (infosource,mapping,[('subject_id','inputnode.subject_id')])
                 ])
 
 connectivity.run()

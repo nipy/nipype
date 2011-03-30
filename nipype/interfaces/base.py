@@ -8,26 +8,29 @@ Exaples  FSL, matlab/SPM , afni
 Requires Packages to be installed
 """
 
-import os
-import subprocess
+from ConfigParser import NoOptionError
 from copy import deepcopy
+import datetime
+import os
 from socket import gethostname
 from string import Template
+import select
+import subprocess
 from time import time
 from warnings import warn
 
-
 import enthought.traits.api as traits
 from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
-from nipype.interfaces.traits import Undefined
-
-from nipype.utils.filemanip import md5, hash_infile, FileNotFoundError, \
-    hash_timestamp
-from nipype.utils.misc import is_container
 from enthought.traits.trait_errors import TraitError
+
+from nipype.interfaces.traits import Undefined
+from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
+                                    hash_timestamp)
+from nipype.utils.misc import is_container
 from nipype.utils.config import config
+from nipype.utils.logger import iflogger
 from nipype.utils.misc import isdefined
-from ConfigParser import NoOptionError
+
 
 __docformat__ = 'restructuredtext'
 
@@ -290,6 +293,7 @@ class BaseTraitedSpec(traits.HasTraits):
         # therefore these args were being ignored.
         #super(TraitedSpec, self).__init__(*args, **kwargs)
         super(BaseTraitedSpec, self).__init__(**kwargs)
+        traits.push_exception_handler(reraise_exceptions=True)
         undefined_traits = {}
         for trait in self.copyable_trait_names():
             if not self.traits()[trait].usedefault:
@@ -337,6 +341,7 @@ class BaseTraitedSpec(traits.HasTraits):
                     # skip ourself
                     continue
                 if isdefined(getattr(self, trait_name)):
+                    self.trait_set(trait_change_notify=False, **{'%s'%name:Undefined})
                     msg = 'Input "%s" is mutually exclusive with input "%s", ' \
                           'which is already set' \
                             % (name, trait_name)
@@ -547,7 +552,7 @@ class Interface(object):
         """Execute the command."""
         raise NotImplementedError
 
-    def aggregate_outputs(self):
+    def aggregate_outputs(self, runtime=None):
         """Called to populate outputs"""
         raise NotImplementedError
 
@@ -561,6 +566,10 @@ class Interface(object):
             Necessary for pipeline operation
         """
         raise NotImplementedError
+
+class BaseInterfaceInputSpec(TraitedSpec):
+    ignore_exception = traits.Bool(False, desc = "Print an error message instead \
+     of throwing an exception in case the interface fails to run", usedefault = True)
 
 class BaseInterface(Interface):
     """Implements common interface functionality.
@@ -588,12 +597,14 @@ class BaseInterface(Interface):
         self.inputs = self.input_spec(**inputs)
 
     @classmethod
-    def help(cls):
+    def help(cls, returnhelp = False):
         """ Prints class help
         """
-        cls._inputs_help()
-        print ''
-        cls._outputs_help()
+        allhelp = '\n'.join(cls._inputs_help() + [''] + cls._outputs_help())
+        if returnhelp:
+            return allhelp
+        else:
+            print allhelp
 
     @classmethod
     def _inputs_help(cls):
@@ -640,7 +651,7 @@ class BaseInterface(Interface):
             helpstr += manhelpstr
         if opthelpstr:
             helpstr += opthelpstr
-        print '\n'.join(helpstr)
+        return helpstr
 
     @classmethod
     def _outputs_help(cls):
@@ -652,7 +663,7 @@ class BaseInterface(Interface):
                 helpstr += ['%s: %s' % (name, spec.desc)]
         else:
             helpstr += ['None']
-        print '\n'.join(helpstr)
+        return helpstr
 
     def _outputs(self):
         """ Returns a bunch containing output fields for the class
@@ -748,13 +759,30 @@ class BaseInterface(Interface):
                         environ=env,
                         hostname=gethostname())
         t = time()
-        runtime = self._run_interface(runtime)
-        runtime.duration = time() - t
-        results = InterfaceResult(interface, runtime)
-        if results.runtime.returncode is None:
-            raise Exception('Returncode from an interface cannot be None')
-        if results.runtime.returncode == 0:
+        try:
+            runtime = self._run_interface(runtime)
+            runtime.duration = time() - t
+            results = InterfaceResult(interface, runtime)
             results.outputs = self.aggregate_outputs(results.runtime)
+        except Exception, e:
+            message = "Interface %s failed to run.\n"%self.__class__.__name__
+            if config.has_option('logging', 'interface_level') and config.get('logging', 'interface_level').lower() == 'debug':
+                message += "Inputs:\n" + str(self.inputs) + "\n"
+            if len(e.args) > 0:
+                e.args = (e.args[0] + "\n" + message,)
+            else:
+                e.args = (message,)
+
+            #exception raising inhibition for special cases
+            if hasattr(self.inputs,'ignore_exception') and \
+            isdefined(self.inputs.ignore_exception) and \
+            self.inputs.ignore_exception:
+                    import traceback, sys
+                    print traceback.print_exc(file=sys.stdout)
+                    print e.args[0]
+                    return InterfaceResult(interface, runtime)
+            else:
+                raise
         return results
 
     def _list_outputs(self):
@@ -784,8 +812,101 @@ class BaseInterface(Interface):
                         raise error
         return outputs
 
+class Stream(object):
+    """Function to capture stdout and stderr streams with timestamps
 
-class CommandLineInputSpec(TraitedSpec):
+    http://stackoverflow.com/questions/4984549/merge-and-sync-stdout-and-stderr/5188359#5188359
+    """
+
+    def __init__(self, name, impl):
+        self._name = name
+        self._impl = impl
+        self._buf = ''
+        self._rows = []
+        self._lastidx = 0
+
+    def fileno(self):
+        "Pass-through for file descriptor."
+        return self._impl.fileno()
+
+    def read(self, drain=0):
+        "Read from the file descriptor. If 'drain' set, read until EOF."
+        while self._read(drain) is not None:
+            if not drain:
+                break
+
+    def _read(self, drain):
+        "Read from the file descriptor"
+        fd = self.fileno()
+        buf = os.read(fd, 4096)
+        if not buf and not self._buf:
+            return None
+        if '\n' not in buf:
+            if not drain:
+                self._buf += buf
+                return []
+
+        # prepend any data previously read, then split into lines and format
+        buf = self._buf + buf
+        if '\n' in buf:
+            tmp, rest = buf.rsplit('\n', 1)
+        else:
+            tmp = buf
+            rest = None
+        self._buf = rest
+        now = datetime.datetime.now().isoformat()
+        rows = tmp.split('\n')
+        self._rows += [(now, '%s %s:%s' % (self._name, now, r), r) for r in rows]
+        for idx in range(self._lastidx, len(self._rows)):
+            iflogger.info(self._rows[idx][1])
+        self._lastidx = len(self._rows)
+
+def run_command(runtime, timeout=0.1):
+    """
+    Run a command, read stdout and stderr, prefix with timestamp. The returned
+    runtime contains a merged stdout+stderr log with timestamps
+
+    http://stackoverflow.com/questions/4984549/merge-and-sync-stdout-and-stderr/5188359#5188359
+    """
+    PIPE = subprocess.PIPE
+    proc = subprocess.Popen(runtime.cmdline,
+                             stdout=PIPE,
+                             stderr=PIPE,
+                             shell=True,
+                             cwd=runtime.cwd,
+                             env=runtime.environ)
+    streams = [
+        Stream('stdout', proc.stdout),
+        Stream('stderr', proc.stderr)
+        ]
+
+    def _process(drain=0):
+        res = select.select(streams, [], [], timeout)
+        for stream in res[0]:
+            stream.read(drain)
+
+    while proc.returncode is None:
+        proc.poll()
+        _process()
+    runtime.returncode = proc.returncode
+    _process(drain=1)
+
+    # collect results, merge and return
+    result = {}
+    temp = []
+    for stream in streams:
+        rows = stream._rows
+        temp += rows
+        result[stream._name] = [r[2] for r in rows]
+    temp.sort()
+    result['merged'] = [r[1] for r in temp]
+    runtime.stderr = '\n'.join(result['stderr'])
+    runtime.stdout = '\n'.join(result['stdout'])
+    runtime.merged = result['merged']
+    return runtime
+
+
+class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
     environ = traits.DictStrStr(desc='Environment variables', usedefault=True)
 
@@ -813,7 +934,7 @@ class CommandLine(BaseInterface):
     'ls -al'
 
     >>> cli.inputs.trait_get()
-    {'args': '-al', 'environ': {'DISPLAY': ':1'}}
+    {'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}
 
     >>> cli.help()
     Inputs
@@ -822,6 +943,7 @@ class CommandLine(BaseInterface):
     Optional:
      args: Additional parameters to the command
      environ: Environment variables (default={})
+     ignore_exception: Print an error message instead      of throwing an exception in case the interface fails to run (default=False)
     <BLANKLINE>
     Outputs
     -------
@@ -829,7 +951,7 @@ class CommandLine(BaseInterface):
 
 
     >>> cli.inputs.hashval
-    ({'args': '-al', 'environ': {'DISPLAY': ':1'}}, '998f3bdb3d4ed9b5177e34387117cb0d')
+    ({'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}, 'b1faf85652295456a906f053d48daef6')
 
     """
 
@@ -865,6 +987,14 @@ class CommandLine(BaseInterface):
         return ' '.join(allargs)
 
 
+
+    def raise_exception(self, runtime):
+        message = "Command:\n" + runtime.cmdline + "\n"
+        message += "Standard output:\n" + runtime.stdout + "\n"
+        message += "Standard error:\n" + runtime.stderr + "\n"
+        message += "Return code: " + str(runtime.returncode)
+        raise RuntimeError(message)
+
     def _run_interface(self, runtime):
         """Execute command via subprocess
 
@@ -884,21 +1014,17 @@ class CommandLine(BaseInterface):
         if not self._exists_in_path(self.cmd.split()[0]):
             raise IOError("%s could not be found on host %s"%(self.cmd.split()[0],
                                                          runtime.hostname))
-        proc = subprocess.Popen(runtime.cmdline,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE,
-                                 shell=True,
-                                 cwd=runtime.cwd,
-                                 env=runtime.environ)
-        runtime.stdout, runtime.stderr = proc.communicate()
-        runtime.returncode = proc.returncode
+        runtime = run_command(runtime)
+        if runtime.returncode is None or runtime.returncode != 0:
+            self.raise_exception(runtime)
+
         return runtime
 
     def _exists_in_path(self, cmd):
         '''
         Based on a code snippet from http://orip.org/2009/08/python-checking-if-executable-exists-in.html
         '''
-    
+
         extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
         for directory in os.environ.get("PATH", "").split(os.pathsep):
             base = os.path.join(directory, cmd)
@@ -907,7 +1033,7 @@ class CommandLine(BaseInterface):
                 if os.path.exists(filename):
                     return True
         return False
-  
+
     def _gen_filename(self, name):
         """ Generate filename attributes before running.
 
@@ -949,7 +1075,7 @@ class CommandLine(BaseInterface):
             if sep == None:
                 sep = ' '
             if argstr.endswith('...'):
-                
+
                 # repeatable option
                 # --id %d... will expand to
                 # --id 1 --id 2 --id 3 etc.,.

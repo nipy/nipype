@@ -32,7 +32,7 @@ class LinearPlugin(PluginBase):
                 if node in donotrun:
                     continue
                 node.run(updatehash=updatehash)
-            except RuntimeError:
+            except:
                 os.chdir(old_wd)
                 if config.getboolean('execution', 'stop_on_first_crash'):
                     raise
