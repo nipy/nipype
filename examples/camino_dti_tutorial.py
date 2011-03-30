@@ -132,8 +132,7 @@ md = pe.Node(interface=camino.MD(),name='md')
 trd = pe.Node(interface=camino.TrD(),name='trd')
 
 
-track = pe.Node(interface=camino.Track(), name="track")
-track.inputs.inputmodel = 'pico'
+track = pe.Node(interface=camino.TrackPICo(), name="track")
 track.inputs.iterations = 1
 #track.inputs.outputtracts = 'oogl'
                       
@@ -169,6 +168,7 @@ convertTest.connect([(inputnode, analyzeheader_trace,[(('dwi', get_vox_dims), 'v
 #(('dwi', get_data_dims), 'data_dims')])])
 
 convertTest.connect([(picopdfs, track,[("pdfs","in_file")])])
+
 
 #This line is commented out because the ProcStreamlines node keeps throwing memory errors
 #convertTest.connect([(track, procstreamlines,[("tracked","in_file")])])
