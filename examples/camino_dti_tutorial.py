@@ -180,10 +180,12 @@ analyzeheader_trace.inputs.datatype = 'double'
 #analyzeheader_md = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_md')
 #analyzeheader_md.inputs.datatype = 'double'
 
+
 """
 Since we have now created all our nodes, we can now define our workflow and start making connections.
 """
 convertTest = pe.Workflow(name='convertTest')
+
 convertTest.connect([(inputnode, bet,[("dwi","in_file")])])
 convertTest.connect([(bet, track,[("mask_file","seed_file")])])
 
@@ -227,6 +229,18 @@ convertTest.connect([(dtifit, trd,[("tensor_fitted","in_file")])])
 convertTest.connect([(trd, analyzeheader_trace,[("trace","in_file")])])
 convertTest.connect([(inputnode, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
 (('dwi', get_data_dims), 'data_dims')])])
+
+# Mean diffusivity still appears broken
+#convertTest.connect([(dtifit, md,[("tensor_fitted","in_file")])])
+#convertTest.connect([(md, analyzeheader_md,[("md","in_file")])])
+#convertTest.connect([(inputnode, analyzeheader_md,[(('dwi', get_vox_dims), 'voxel_dims'),
+#(('dwi', get_data_dims), 'data_dims')])])
+
+convertTest.connect([(picopdfs, track,[("pdfs","in_file")])])
+
+
+#This line is commented out because the ProcStreamlines node keeps throwing memory errors
+#convertTest.connect([(track, procstreamlines,[("tracked","in_file")])])
 
 convertTest.connect([(track, camino2trackvis, [('tracked','in_file')]),
                        (track, vtkstreamlines,[['tracked','in_file']]),
