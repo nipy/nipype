@@ -1124,6 +1124,20 @@ class CommandLine(BaseInterface):
         first_args = [arg for pos, arg in sorted(initial_args.items())]
         last_args = [arg for pos, arg in sorted(final_args.items())]
         return first_args + all_args + last_args
+    
+class StdOutCommandLineInputSpec(CommandLineInputSpec):
+    out_file = File(argstr="> %s", position=-1, genfile=True)
+    
+class StdOutCommandLine(CommandLine):
+    input_spec = StdOutCommandLineInputSpec
+    
+    def _gen_filename(self, name):
+        if name is 'out_file':
+            return self._gen_outfilename()
+        else:
+            return None
+    def _gen_outfilename(self):
+        raise NotImplementedError
 
 
 class MultiPath(traits.List):

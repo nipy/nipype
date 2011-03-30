@@ -1,9 +1,10 @@
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
+from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,\
+    StdOutCommandLine, StdOutCommandLineInputSpec
 from nipype.utils.filemanip import split_filename
 import os
 import nibabel as nb
 
-class Image2VoxelInputSpec(CommandLineInputSpec):
+class Image2VoxelInputSpec(StdOutCommandLineInputSpec):
     """    image2voxel -4dimage <file> | -imagelist <file> [options] 
      
      * Converts Analyze / NIFTI / MHA files to voxel order. 
@@ -46,14 +47,13 @@ class Image2VoxelInputSpec(CommandLineInputSpec):
     
     out_type = traits.Enum("float", "char", "short", "int", "long", "double", argstr='-outputdatatype %s', position=2,
                            desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"', usedefault=True)
-    out_file = File(argstr="> %s", position=3, genfile=True)
     
 class Image2VoxelOutputSpec(TraitedSpec):
     """Use image2voxel to convert NIFTI images to voxel order
     """
     voxel_order = File(exists=True, desc='path/name of 4D volume in voxel order') 
     
-class Image2Voxel(CommandLine):
+class Image2Voxel(StdOutCommandLine):
     """Use image2voxel to convert NIFTI images to voxel order
     """
     _cmd = 'image2voxel'    
@@ -65,11 +65,6 @@ class Image2Voxel(CommandLine):
         outputs["voxel_order"] = os.path.abspath(self._gen_outfilename())
         return outputs
 
-    def _gen_filename(self, name):
-        if name is 'out_file':
-            return self._gen_outfilename()
-        else:
-            return None
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + ".B" + self.inputs.out_type
