@@ -336,3 +336,15 @@ def test_node_init():
         exception = False
     yield assert_true, exception
 
+def test_workflow_add():
+    from nipype.interfaces.utility import IdentityInterface as ii
+    n1 = pe.Node(ii(fields=['a','b']),name='n1')
+    n2 = pe.Node(ii(fields=['c','d']),name='n2')
+    n3 = pe.Node(ii(fields=['c','d']),name='n1')
+    w1 = pe.Workflow(name='test')
+    w1.connect(n1,'a',n2,'c')
+    yield assert_raises, IOError, w1.add_nodes, [n1]
+    yield assert_raises, IOError, w1.add_nodes, [n2]
+    yield assert_raises, IOError, w1.add_nodes, [n3]
+    yield assert_raises, IOError, w1.connect, [(w1,n2,[('n1.a','d')])]
+    
