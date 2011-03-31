@@ -146,7 +146,7 @@ class Rename(IOBase):
     'Faces-Scenes.nii.gz"            # doctest: +SKIP
 
     >>> rename2 = Rename(format_string="%(subject_id)s_func_run%(run)02d")
-    >>> rename2.inputs.in_file "func.nii"
+    >>> rename2.inputs.in_file = "functional.nii"
     >>> rename2.inputs.keep_ext = True
     >>> rename2.inputs.subject_id = "subj_201"
     >>> rename2.inputs.run = 2
@@ -155,8 +155,8 @@ class Rename(IOBase):
     'subj_201_func_run02.nii'        # doctest: +SKIP
 
     >>> rename3 = Rename(format_string="%(subject_id)s_%(seq)s_run%(run)02d.nii")
-    >>> rename3.inputs.in_file "func_epi_1_1.nii"
-    >>> rename3.inputs.parse_string = "func_(?P<seq>\w*)_.*")
+    >>> rename3.inputs.in_file = "func_epi_1_1.nii"
+    >>> rename3.inputs.parse_string = "func_(?P<seq>\w*)_.*"
     >>> rename3.inputs.subject_id = "subj_201"
     >>> rename3.inputs.run = 2
     >>> res = rename3.run()          # doctest: +SKIP
