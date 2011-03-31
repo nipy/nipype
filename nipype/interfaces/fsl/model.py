@@ -49,7 +49,7 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
         desc="Option to model serial correlations using an \
 autoregressive estimator. Setting this option is only \
 useful in the context of the fsf file. You need to repeat \
-this option for FILMGLS")
+this option for FILMGLS", mandatory=True)
     contrasts = traits.List(
         traits.Either(traits.Tuple(traits.Str,
                                    traits.Enum('T'),
@@ -132,13 +132,6 @@ class Level1Design(BaseInterface):
         ev_hrf = load_template('feat_ev_hrf.tcl')
         ev_none = load_template('feat_ev_none.tcl')
         ev_ortho = load_template('feat_ev_ortho.tcl')
-        contrast_header = load_template('feat_contrast_header.tcl')
-        contrast_prolog = load_template('feat_contrast_prolog.tcl')
-        contrast_element = load_template('feat_contrast_element.tcl')
-        contrast_ftest_element = load_template('feat_contrast_ftest_element.tcl')
-        contrastmask_header = load_template('feat_contrastmask_header.tcl')
-        contrastmask_footer = load_template('feat_contrastmask_footer.tcl')
-        contrastmask_element = load_template('feat_contrastmask_element.tcl')
         ev_txt = ''
         # generate sections for conditions and other nuisance
         # regressors
@@ -189,66 +182,75 @@ class Level1Design(BaseInterface):
                 ev_txt += "\n"
                 conds[name] = evfname
                 self._create_ev_file(evfname, evinfo)
-        # add orthogonalization
+        # add ev orthogonalization
         for i in range(1, num_evs[0] + 1):
             for j in range(0, num_evs[0] + 1):
                 ev_txt += ev_ortho.substitute(c0=i, c1=j)
                 ev_txt += "\n"
-        # add t/f contrast info
-        ev_txt += contrast_header.substitute()
-        con_names = []
-        for j, con in enumerate(contrasts):
-            con_names.append(con[0])
-        con_map = {}
-        ftest_idx = []
-        ttest_idx = []
-        for j, con in enumerate(contrasts):
-            if con[1] == 'F':
-                ftest_idx.append(j)
-                for c in con[2]:
-                    if c[0] not in con_map.keys():
-                        con_map[c[0]] = []
-                    con_map[c[0]].append(j)
-            else:
-                ttest_idx.append(j)
-        
-        for ctype in ['real', 'orig']:
+        # add contrast info to fsf file
+        if isdefined(contrasts):
+            contrast_header = load_template('feat_contrast_header.tcl')
+            contrast_prolog = load_template('feat_contrast_prolog.tcl')
+            contrast_element = load_template('feat_contrast_element.tcl')
+            contrast_ftest_element = load_template('feat_contrast_ftest_element.tcl')
+            contrastmask_header = load_template('feat_contrastmask_header.tcl')
+            contrastmask_footer = load_template('feat_contrastmask_footer.tcl')
+            contrastmask_element = load_template('feat_contrastmask_element.tcl')
+            # add t/f contrast info
+            ev_txt += contrast_header.substitute()
+            con_names = []
+            for j, con in enumerate(contrasts):
+                con_names.append(con[0])
+            con_map = {}
+            ftest_idx = []
+            ttest_idx = []
             for j, con in enumerate(contrasts):
                 if con[1] == 'F':
-                    continue
-                tidx = ttest_idx.index(j)+1
-                ev_txt += contrast_prolog.substitute(cnum=tidx,
-                                                     ctype=ctype,
-                                                     cname=con[0])
-                count = 0
-                for c in range(1, len(evname) + 1):
-                    if evname[c - 1].endswith('TD') and ctype == 'orig':
+                    ftest_idx.append(j)
+                    for c in con[2]:
+                        if c[0] not in con_map.keys():
+                            con_map[c[0]] = []
+                        con_map[c[0]].append(j)
+                else:
+                    ttest_idx.append(j)
+
+            for ctype in ['real', 'orig']:
+                for j, con in enumerate(contrasts):
+                    if con[1] == 'F':
                         continue
-                    count = count + 1
-                    if evname[c - 1] in con[2]:
-                        val = con[3][con[2].index(evname[c - 1])]
-                    else:
-                        val = 0.0
-                    ev_txt += contrast_element.substitute(cnum=tidx,
-                                                          element=count,
-                                                          ctype=ctype, val=val)
-                    ev_txt += "\n"
-                if con[0] in con_map.keys():
-                    for fconidx in con_map[con[0]]:
-                        ev_txt += contrast_ftest_element.substitute(cnum=ftest_idx.index(fconidx)+1,
-                                                                    element=tidx,
-                                                                    ctype=ctype,
-                                                                    val=1)
-                    ev_txt += "\n"
-                    
-        # add contrast mask info
-        ev_txt += contrastmask_header.substitute()
-        for j, _ in enumerate(contrasts):
-            for k, _ in enumerate(contrasts):
-                if j != k:
-                    ev_txt += contrastmask_element.substitute(c1=j + 1,
-                                                              c2=k + 1)
-        ev_txt += contrastmask_footer.substitute()
+                    tidx = ttest_idx.index(j)+1
+                    ev_txt += contrast_prolog.substitute(cnum=tidx,
+                                                         ctype=ctype,
+                                                         cname=con[0])
+                    count = 0
+                    for c in range(1, len(evname) + 1):
+                        if evname[c - 1].endswith('TD') and ctype == 'orig':
+                            continue
+                        count = count + 1
+                        if evname[c - 1] in con[2]:
+                            val = con[3][con[2].index(evname[c - 1])]
+                        else:
+                            val = 0.0
+                        ev_txt += contrast_element.substitute(cnum=tidx,
+                                                              element=count,
+                                                              ctype=ctype, val=val)
+                        ev_txt += "\n"
+                    if con[0] in con_map.keys():
+                        for fconidx in con_map[con[0]]:
+                            ev_txt += contrast_ftest_element.substitute(cnum=ftest_idx.index(fconidx)+1,
+                                                                        element=tidx,
+                                                                        ctype=ctype,
+                                                                        val=1)
+                        ev_txt += "\n"
+
+            # add contrast mask info
+            ev_txt += contrastmask_header.substitute()
+            for j, _ in enumerate(contrasts):
+                for k, _ in enumerate(contrasts):
+                    if j != k:
+                        ev_txt += contrastmask_element.substitute(c1=j + 1,
+                                                                  c2=k + 1)
+            ev_txt += contrastmask_footer.substitute()
         return num_evs, ev_txt
 
     def _format_session_info(self, session_info):
@@ -283,13 +285,14 @@ class Level1Design(BaseInterface):
         func_files = self._get_func_files(session_info)
         n_tcon = 0
         n_fcon = 0
-        for i, c in enumerate(self.inputs.contrasts):
-            if c[1] == 'T':
-                n_tcon += 1
-            elif c[1] == 'F':
-                n_fcon += 1
-            else:
-                print "unknown contrast type: %s" % str(c)
+        if isdefined(self.inputs.contrasts):
+            for i, c in enumerate(self.inputs.contrasts):
+                if c[1] == 'T':
+                    n_tcon += 1
+                elif c[1] == 'F':
+                    n_fcon += 1
+                else:
+                    print "unknown contrast type: %s" % str(c)
 
         for i, info in enumerate(session_info):
             do_tempfilter = 1
@@ -445,6 +448,7 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     _estimate_xor = ['autocorr_estimate', 'fit_armodel', 'tukey_window',
                      'multitaper_product', 'use_pava', 'autocorr_noestimate']
     autocorr_estimate = traits.Bool(argstr='-ac',
+                                    mandatory=True,
                                     xor=['autocorr_noestimate'],
                    desc='perform autocorrelation estimatation only')
     fit_armodel = traits.Bool(argstr='-ar',
@@ -455,6 +459,7 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
                desc='multitapering with slepian tapers and num is the time-bandwidth product')
     use_pava = traits.Bool(argstr='-pava', desc='estimates autocorr using PAVA')
     autocorr_noestimate = traits.Bool(argstr='-noest',
+                                      mandatory=True,
                                       xor=['autocorr_estimate'],
                    desc='do not estimate autocorrs')
     output_pwdata = traits.Bool(argstr='-output_pwdata',
