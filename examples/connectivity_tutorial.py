@@ -32,7 +32,6 @@ import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.nipy as nipy      # how to run matlab
 import nipype.interfaces.cmtk.cmtk as cmtk
-import nipype.interfaces.cmtk.mapper as mapper
 import nibabel as nb
 import os                                    # system functions
 
@@ -259,9 +258,9 @@ For this reason, the nodes have not been connected.
 roigen = pe.Node(interface=cmtk.ROIGen(), name="ROIGen")
 #roigen.inputs.use_freesurfer_LUT = True
 #roigen.inputs.freesurfer_dir = fs_dir
-#roigen.inputs.LUT_file = '/home/erik/Dropbox/Code/forked/nipype/examples/FreeSurferColorLUT_adapted.txt'
-creatematrix = pe.Node(interface=mapper.CreateMatrix(), name="CreateMatrix")
-#creatematrix.inputs.resolution_network_file = '/home/erik/Dropbox/Code/forked/nipype/examples/resolution83.graphml'
+roigen.inputs.LUT_file = '/home/erik/Dropbox/Code/forked/nipype/examples/FreeSurferColorLUT_adapted.txt'
+creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
+creatematrix.inputs.resolution_network_file = '/home/erik/Dropbox/Code/forked/nipype/examples/resolution83.graphml'
 
 
 """
@@ -363,10 +362,10 @@ Here the CMTK connectivity mapping nodes are connected.
 """
 mapping.connect([(FreeSurferSource, selectaparc,[("aparc_aseg","inlist")])])
 mapping.connect([(selectaparc, mri_convert_AparcAseg,[("out","in_file")])])
-#mapping.connect([(mri_convert_AparcAseg, roigen,[("out_file","aparc_aseg_file")])])
-#mapping.connect([(roigen, creatematrix,[("out_roi_file","roi_file")])])
-#mapping.connect([(roigen, creatematrix,[("out_dict_file","dict_file")])])
-#mapping.connect([(camino2trackvis, creatematrix,[("trackvis","tract_file")])])
+mapping.connect([(mri_convert_AparcAseg, roigen,[("out_file","aparc_aseg_file")])])
+mapping.connect([(roigen, creatematrix,[("roi_file","roi_file")])])
+mapping.connect([(roigen, creatematrix,[("dict_file","dict_file")])])
+mapping.connect([(camino2trackvis, creatematrix,[("trackvis","tract_file")])])
 
 """
 Finally, we create another higher-level workflow to connect our mapping workflow with the info and datagrabbing nodes
