@@ -1027,7 +1027,7 @@ def push_file(self, xnat, file_name, out_key, uri_template_args):
                        use_label=True
                        )
 
-    # shares the experiment back to the orginal project if relevant
+    # shares the experiment back to the original project if relevant
     if uri_template_args.has_key('original_project'):
 
         experiment_template = (
