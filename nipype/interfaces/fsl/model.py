@@ -448,7 +448,7 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     _estimate_xor = ['autocorr_estimate', 'fit_armodel', 'tukey_window',
                      'multitaper_product', 'use_pava']
     autocorr_estimate = traits.Bool(argstr='-ac',
-                                    mandatory=True,
+                                    xor=['autocorr_noestimate'],
                    desc='perform autocorrelation estimatation only')
     fit_armodel = traits.Bool(argstr='-ar',
         desc='fits autoregressive model - default is to use tukey with M=sqrt(numvols)')
@@ -457,6 +457,9 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     multitaper_product = traits.Int(argstr='-mt %d',
                desc='multitapering with slepian tapers and num is the time-bandwidth product')
     use_pava = traits.Bool(argstr='-pava', desc='estimates autocorr using PAVA')
+    autocorr_noestimate = traits.Bool(argstr='-noest',
+                                      xor=['autocorr_estimate'],
+                   desc='do not estimate autocorrs')
     output_pwdata = traits.Bool(argstr='-output_pwdata',
                    desc='output prewhitened data and average design matrix')
     results_dir = Directory('results', argstr='-rn %s', usedefault=True,
@@ -506,15 +509,6 @@ threshold=10, results_dir='stats')
     input_spec = FILMGLSInputSpec
     output_spec = FILMGLSOutputSpec
     
-    def _format_arg(self, name, trait_spec, value):
-        if name == 'autocorr_estimate':
-            if value:
-                return '-ac'
-            else:
-                return '-noac'
-        else:
-            return super(FILMGLS, self)._format_arg(name, trait_spec, value)
-
     def _get_pe_files(self, cwd):
         files = None
         if isdefined(self.inputs.design_file):
