@@ -1,3 +1,4 @@
+
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ Set of interfaces that allow interaction with data. Currently
@@ -723,7 +724,9 @@ class XNATSource(IOBase):
             if not args:
                 file_objects = xnat.select(template).get('obj')
                 if file_objects == []:
-                    raise IOError('Template %s returned no files'%template)
+                    raise IOError('Template %s returned no files' \
+                                      % template
+                                  )
                 outputs[key] = list_to_filename(
                                         [str(file_object.get())
                                          for file_object in file_objects
@@ -817,14 +820,14 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         desc=('Option to customize ouputs representation in XNAT - '
               'assessor level will be used with specified id'),
         mandatory=False,
-        xor=['reconstruction_id', 'scan_id']
+        xor=['reconstruction_id']
         )
 
     reconstruction_id = traits.Str(
         desc=('Option to customize ouputs representation in XNAT - '
               'reconstruction level will be used with specified id'),
         mandatory=False,
-        xor=['assessor_id', 'scan_id']
+        xor=['assessor_id']
         )
 
     share = traits.Bool(
