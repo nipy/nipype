@@ -12,6 +12,8 @@ Release 0.4 (FUTURE)
 * ENH: Supports a plugin interface for external execution
 * ENH: MapNode runs in parallel under IPython and SGE
 * ENH: Optionally allows keeping only required outputs
+* ENH: New interface: utility.Rename to change the name of files, optionally
+       using python string-formatting with inputs or regular expressions matching
 * ENH: New interface: freesurfer.ApplyMask (mri_mask)
 * ENH: New FSL interface -- SwapDimensions (fslswapdim)
 * ENH: Sparse models allow regressor scaling and temporal derivatives
