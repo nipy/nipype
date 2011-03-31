@@ -383,6 +383,8 @@ class Workflow(WorkflowBase):
         if base_dir == '':
             if self.base_dir:
                 base_dir = self.base_dir
+                if self.name:
+                    base_dir = os.path.join(base_dir, self.name)
             else:
                 base_dir = os.getcwd()
         if graph2use == 'hierarchical':
