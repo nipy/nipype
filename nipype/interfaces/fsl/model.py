@@ -45,9 +45,9 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
                           traits.Dict(traits.Enum('none'), traits.Enum(None)),
                           mandatory=True,
                           desc="name of basis function and options e.g., {'dgamma': {'derivs': True}}")
-    model_serial_correlations = traits.Enum('AR(1)', 'none',
+    model_serial_correlations = traits.Bool(
         desc="Option to model serial correlations using an \
-autoregressive estimator. Setting this option is only \
+autoregressive estimator (order 1). Setting this option is only \
 useful in the context of the fsf file. You need to repeat \
 this option for FILMGLS", mandatory=True)
     contrasts = traits.List(
@@ -273,7 +273,7 @@ class Level1Design(BaseInterface):
 
         prewhiten = 0
         if isdefined(self.inputs.model_serial_correlations):
-            prewhiten = int(self.inputs.model_serial_correlations == 'AR(1)')
+            prewhiten = int(self.inputs.model_serial_correlations)
         usetd = 0
         no_bases = False
         basis_key = self.inputs.bases.keys()[0]
@@ -446,10 +446,9 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     full_data = traits.Bool(argstr='-v', desc='output full data')
     # XX: Are these mutually exclusive? [SG]
     _estimate_xor = ['autocorr_estimate', 'fit_armodel', 'tukey_window',
-                     'multitaper_product', 'use_pava', 'autocorr_noestimate']
+                     'multitaper_product', 'use_pava']
     autocorr_estimate = traits.Bool(argstr='-ac',
                                     mandatory=True,
-                                    xor=['autocorr_noestimate'],
                    desc='perform autocorrelation estimatation only')
     fit_armodel = traits.Bool(argstr='-ar',
         desc='fits autoregressive model - default is to use tukey with M=sqrt(numvols)')
@@ -458,10 +457,6 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     multitaper_product = traits.Int(argstr='-mt %d',
                desc='multitapering with slepian tapers and num is the time-bandwidth product')
     use_pava = traits.Bool(argstr='-pava', desc='estimates autocorr using PAVA')
-    autocorr_noestimate = traits.Bool(argstr='-noest',
-                                      mandatory=True,
-                                      xor=['autocorr_estimate'],
-                   desc='do not estimate autocorrs')
     output_pwdata = traits.Bool(argstr='-output_pwdata',
                    desc='output prewhitened data and average design matrix')
     results_dir = Directory('results', argstr='-rn %s', usedefault=True,
@@ -510,6 +505,15 @@ threshold=10, results_dir='stats')
     _cmd = 'film_gls'
     input_spec = FILMGLSInputSpec
     output_spec = FILMGLSOutputSpec
+    
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'autocorr_estimate':
+            if value:
+                return '-ac'
+            else:
+                return '-noac'
+        else:
+            return super(FILMGLS, self)._format_arg(name, trait_spec, value)
 
     def _get_pe_files(self, cwd):
         files = None
