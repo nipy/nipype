@@ -541,7 +541,6 @@ firstlevel.inputs.modelfit.modelspec.input_units = 'secs'
 firstlevel.inputs.modelfit.modelspec.time_repetition = TR
 firstlevel.inputs.modelfit.modelspec.high_pass_filter_cutoff = hpcutoff
 
-firstlevel.inputs.modelfit.modelestimate.autocorr_estimate = model_serial_correlations
 
 firstlevel.inputs.modelfit.level1design.interscan_interval = TR
 firstlevel.inputs.modelfit.level1design.bases = {'dgamma':{'derivs': True}}

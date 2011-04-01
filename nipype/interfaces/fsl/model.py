@@ -48,8 +48,8 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
     model_serial_correlations = traits.Bool(
         desc="Option to model serial correlations using an \
 autoregressive estimator (order 1). Setting this option is only \
-useful in the context of the fsf file. You need to repeat \
-this option for FILMGLS", mandatory=True)
+useful in the context of the fsf file. If you set this to False, you need to repeat \
+this option for FILMGLS by setting autocorr_noestimate to True", mandatory=True)
     contrasts = traits.List(
         traits.Either(traits.Tuple(traits.Str,
                                    traits.Enum('T'),
@@ -445,9 +445,9 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
         desc='susan brightness threshold, otherwise it is estimated')
     full_data = traits.Bool(argstr='-v', desc='output full data')
     # XX: Are these mutually exclusive? [SG]
-    _estimate_xor = ['autocorr_estimate', 'fit_armodel', 'tukey_window',
-                     'multitaper_product', 'use_pava']
-    autocorr_estimate = traits.Bool(argstr='-ac',
+    #_estimate_xor = ['autocorr_estimate_only', 'fit_armodel', 'tukey_window',
+    #                 'multitaper_product', 'use_pava', 'autocorr_noestimate']
+    autocorr_estimate_only = traits.Bool(argstr='-ac',
                                     xor=['autocorr_noestimate'],
                    desc='perform autocorrelation estimatation only')
     fit_armodel = traits.Bool(argstr='-ar',
@@ -458,7 +458,7 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
                desc='multitapering with slepian tapers and num is the time-bandwidth product')
     use_pava = traits.Bool(argstr='-pava', desc='estimates autocorr using PAVA')
     autocorr_noestimate = traits.Bool(argstr='-noest',
-                                      xor=['autocorr_estimate'],
+                                      xor=['autocorr_estimate_only'],
                    desc='do not estimate autocorrs')
     output_pwdata = traits.Bool(argstr='-output_pwdata',
                    desc='output prewhitened data and average design matrix')

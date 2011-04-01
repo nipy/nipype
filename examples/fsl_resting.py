@@ -235,6 +235,9 @@ modelfit.inputs.modelspec.high_pass_filter_cutoff = hpcutoff
 
 modelfit.inputs.fsfdesign.interscan_interval = TR
 modelfit.inputs.fsfdesign.bases = {'none': None}
+modelfit.inputs.fsfdesign.model_serial_correlations = False
+
+modelfit.inputs.modelestimate.autocorr_noestimate = True
 
 
 """
