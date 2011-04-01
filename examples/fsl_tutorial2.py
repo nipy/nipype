@@ -608,6 +608,7 @@ firstlevel.inputs.modelfit.modelspec.high_pass_filter_cutoff = hpcutoff
 firstlevel.inputs.modelfit.level1design.interscan_interval = TR
 firstlevel.inputs.modelfit.level1design.bases = {'dgamma':{'derivs': False}}
 firstlevel.inputs.modelfit.level1design.contrasts = contrasts
+firstlevel.inputs.modelfit.level1design.model_serial_correlations = True
 
 """
 Set up complete workflow
