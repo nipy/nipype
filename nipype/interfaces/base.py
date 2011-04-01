@@ -569,7 +569,7 @@ class Interface(object):
 
 class BaseInterfaceInputSpec(TraitedSpec):
     ignore_exception = traits.Bool(False, desc = "Print an error message instead \
-     of throwing an exception in case the interface fails to run", usedefault = True)
+of throwing an exception in case the interface fails to run", usedefault = True)
 
 class BaseInterface(Interface):
     """Implements common interface functionality.
@@ -589,6 +589,7 @@ class BaseInterface(Interface):
     This class cannot be instantiated.
 
     """
+    input_spec = BaseInterfaceInputSpec
 
     def __init__(self, **inputs):
         if not self.input_spec:
@@ -765,13 +766,22 @@ class BaseInterface(Interface):
             results = InterfaceResult(interface, runtime)
             results.outputs = self.aggregate_outputs(results.runtime)
         except Exception, e:
-            message = "Interface %s failed to run.\n"%self.__class__.__name__
+            if len(e.args) == 0:
+                e.args = ("")
+                
+            message = "\nInterface %s failed to run."%self.__class__.__name__
+            
             if config.has_option('logging', 'interface_level') and config.get('logging', 'interface_level').lower() == 'debug':
-                message += "Inputs:\n" + str(self.inputs) + "\n"
-            if len(e.args) > 0:
-                e.args = (e.args[0] + "\n" + message,)
+                inputs_str = "Inputs:" + str(self.inputs) + "\n"
             else:
-                e.args = (message,)
+                inputs_str = ''
+            
+            if len(e.args) == 1 and isinstance(e.args[0], str):
+                e.args = (e.args[0] + " ".join([message, inputs_str]),)
+            else:
+                e.args += (message, )
+                if inputs_str != '':
+                    e.args += (inputs_str, )
 
             #exception raising inhibition for special cases
             if hasattr(self.inputs,'ignore_exception') and \
@@ -779,7 +789,7 @@ class BaseInterface(Interface):
             self.inputs.ignore_exception:
                     import traceback, sys
                     print traceback.print_exc(file=sys.stdout)
-                    print e.args[0]
+                    print e.args
                     return InterfaceResult(interface, runtime)
             else:
                 raise
@@ -943,7 +953,7 @@ class CommandLine(BaseInterface):
     Optional:
      args: Additional parameters to the command
      environ: Environment variables (default={})
-     ignore_exception: Print an error message instead      of throwing an exception in case the interface fails to run (default=False)
+     ignore_exception: Print an error message instead of throwing an exception in case the interface fails to run (default=False)
     <BLANKLINE>
     Outputs
     -------

@@ -197,16 +197,23 @@ class DataSink(IOBase):
         return dst
 
     def _substitute(self, pathstr):
+        pathstr_ = pathstr
         if isdefined(self.inputs.substitutions):
             for key, val in self.inputs.substitutions:
-                iflogger.debug(str((pathstr, key, val)))
+                oldpathstr = pathstr
                 pathstr = pathstr.replace(key, val)
-                iflogger.debug('new: ' + pathstr)
+                if pathstr != oldpathstr:
+                    iflogger.debug('sub.str: %s -> %s using %r -> %r'
+                                   % (oldpathstr, pathstr, key, val))
         if isdefined(self.inputs.regexp_substitutions):
             for key, val in self.inputs.regexp_substitutions:
-                iflogger.debug(str((pathstr, "regexp:" + key, val)))
+                oldpathstr = pathstr
                 pathstr, _ = re.subn(key, val, pathstr)
-                iflogger.debug('new: ' + pathstr)
+                if pathstr != oldpathstr:
+                    iflogger.debug('sub.regexp: %s -> %s using %r -> %r'
+                                   % (oldpathstr, pathstr, key, val))
+        if pathstr_ != pathstr:
+            iflogger.info('sub: %s -> %s' % (pathstr_, pathstr))
         return pathstr
 
     def _list_outputs(self):

@@ -212,51 +212,95 @@ class PicoPDFs(StdOutCommandLine):
         return name + "_pdfs.Bdouble"
 
 class TrackInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='-inputfile %s', mandatory=True, position=1, desc='data file')
+    in_file = File(exists=True, argstr='-inputfile %s', mandatory=True, position=1, desc='input data file')
 
     seed_file = File(exists=True, argstr='-seedfile %s', mandatory=False, position=2, desc='seed file')
 
     inputmodel = traits.Enum('dt', 'multitensor', 'pds', 'pico', 'bootstrap', 'ballstick', 'bayesdirac',
-        argstr='-inputmodel %s', position=3, desc='input model type', usedefault=True)
+        argstr='-inputmodel %s', desc='input model type', usedefault=True)
 
     inputdatatype = traits.Enum('float', 'double', argstr='-inputdatatype %s', desc='input file type')
 
     gzip = traits.Bool(argstr='-gzip', desc="save the output image in gzip format")
 
     maxcomponents = traits.Int(argstr='-maxcomponents %d', units='NA',
-        desc="maximum number of components")
+        desc="The maximum number of tensor components in a voxel. This determines the size of the input file and does not say anything about the voxel classification. The default is 2 if the input model is multitensor and 1 if the input model is dt.")
 
-    numpds = traits.Int(argstr='-numpds %d', units='NA',
-        desc="number of principal directions")
-
-    iterations = traits.Int(argstr='-iterations %d', units='NA',
-        desc="number of iterations")
-
-    data_dims = traits.List(traits.Int, desc = 'data dimensions in voxels',
+    data_dims = traits.List(traits.Int, desc='data dimensions in voxels',
         argstr='-datadims %s', minlen=3, maxlen=3,
         units='voxels')
 
-    voxel_dims = traits.List(traits.Float, desc = 'voxel dimensions in mm',
+    voxel_dims = traits.List(traits.Float, desc='voxel dimensions in mm',
         argstr='-voxeldims %s', minlen=3, maxlen=3,
         units='mm')
+
+    ipthresh = traits.Float(argstr='-ipthresh %s', desc='Curvature threshold for tracking, expressed as the minimum dot product between two streamline orientations calculated over the length of a voxel. If the dot product between the previous and current directions is less than this threshold, then the streamline terminates. The default setting will terminate fibres that curve by more than 80 degrees. Set this to -1.0 to disable curvature checking completely.')
+
+    curvethresh = traits.Float(argstr='-curvethresh %s', desc='Curvature threshold for tracking, expressed as the maximum angle (in degrees) between between two streamline orientations calculated over the length of a voxel. If the angle is greater than this, then the streamline terminates.')
+
+    anisthresh = traits.Float(argstr='-anisthresh %s', desc='Terminate fibres that enter a voxel with lower anisotropy than the threshold.')
+
+    anisfile = File(argstr='-anisfile %s', exists=True, desc='File containing the anisotropy map. This is required to apply an anisotropy threshold with non tensor data. If the map issupplied it is always used, even in tensor data.')
 
     outputtracts = traits.Enum('float', 'double', 'oogl', argstr='-outputtracts %s', desc='output tract file type')
 
     out_file = File(argstr='-outputfile %s',
-        position=-1, genfile=True,
+        position= -1, genfile=True,
         desc='output data file')
 
     output_root = File(exists=False, argstr='-outputroot %s',
-        mandatory=False, position=-1,
+        mandatory=False, position= -1,
         desc='root directory for output')
 
+class TrackPICoInputSpec(TrackInputSpec):
+    numpds = traits.Int(argstr='-numpds %d', units='NA', desc="The maximum number of PDs in a voxel. The default is 1 for input model pico. This option determines the size of the voxels in the input file and does not affect tracking.")
+
+    pdf = traits.Enum('bingham', 'watson', 'acg', argstr='-pdf %s', desc='Specifies the model for PICo parameters. The default is "bingham.')
+
+    iterations = traits.Int(argstr='-iterations %d', units='NA', desc="Number of streamlines to generate at each seed point. The default is 5000.")
+
+class TrackBayesDiracInputSpec(TrackInputSpec):
+    scheme_file = File(argstr='-schemefile %s', mandatory=True, exist=True, desc='The scheme file corresponding to the data being processed.')
+
+    iterations = traits.Int(argstr='-iterations %d', units='NA', desc="Number of streamlines to generate at each seed point. The default is 5000.")
+
+    pdf = traits.Enum('bingham', 'watson', 'acg', argstr='-pdf %s', desc='Specifies the model for PICo priors (not the curvature priors). The default is "bingham".')
+
+    pointset = traits.Int(argstr='-pointset %s', desc='Index to the point set to use for Bayesian likelihood calculation. The index specifies a set of evenly distributed points on the unit sphere, where each point x defines two possible step directions (x or -x) for the streamline path. A larger number indexes a larger point set, which gives higher angular resolution at the expense of computation time. The default is index 1, which gives 1922 points, index 0 gives 1082 points, index 2 gives 3002 points.')
+
+    datamodel = traits.Enum('cylsymmdt', 'ballstick', argstr='-datamodel %s', desc='Model of the data for Bayesian tracking. The default model is "cylsymmdt", a diffusion tensor with cylindrical symmetry about e_1, ie L1 >= L_2 = L_3. The other model is "ballstick", the partial volume model (see ballstickfit).')
+
+    curvepriork = traits.Float(argstr='-curvepriork %s', desc='Concentration parameter for the prior distribution on fibre orientations given the fibre orientation at the previous step. Larger values of k make curvature less likely.')
+
+    curvepriorg = traits.Float(argstr='-curvepriorg %s', desc='Concentration parameter for the prior distribution on fibre orientations given the fibre orientation at the previous step. Larger values of g make curvature less likely.')
+
+    extpriorfile = File(exists=True, argstr='-extpriorfile %s', desc='Path to a PICo image produced by picopdfs. The PDF in each voxel is used as a prior for the fibre orientation in Bayesian tracking. The prior image must be in the same space as the diffusion data.')
+
+    extpriordatatype = traits.Enum('float', 'double', argstr='-extpriordatatype %s', desc='Datatype of the prior image. The default is "double".')
+
 class TrackOutputSpec(TraitedSpec):
-    tracked = File(exists=True, desc='path/name of 4D volume')
+    tracked = File(exists=True, desc='output file containing reconstructed tracts')
 
 class Track(CommandLine):
+    """
+    Performs tractography using one of the following models:
+    dt', 'multitensor', 'pds', 'pico', 'bootstrap', 'ballstick', 'bayesdirac'
+
+    Example:
+
+    import nipype.interfaces.camino as cmon
+    track = cmon.Track()
+    track.inputs.inputmodel = 'dt'
+    track.inputs.in_file = 'data.Bfloat'
+    track.inputs.seed_file = 'seed_mask.nii'
+
+    track.run()
+    """
+
     _cmd = 'track'
-    input_spec=TrackInputSpec
-    output_spec=TrackOutputSpec
+
+    input_spec = TrackInputSpec
+    output_spec = TrackOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -272,31 +316,75 @@ class Track(CommandLine):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + "_tracked"
 
-class MDInputSpec(StdOutCommandLineInputSpec):
+class TrackDT(Track):
     """
-    Computes the mean diffusivity (trace/3) from diffusion tensors.
-
-    Reads diffusion tensor (single, two-tensor or three-tensor) data from the standard input,
-    computes the mean diffusivity, ie trace/3, of each tensor and outputs the results to the
-    standard output. For multiple-tensor data the program outputs the mean diffusivity of
-    each tensor, so for three-tensor data, for example, the output contains three values per voxel.
+    Performs streamline tractography using tensor data
 
     Example:
 
     import nipype.interfaces.camino as cmon
-    md = cmon.MD()
-    md.inputs.in_file = 'tensor_fitted_data.Bfloat'
-    md.inputs.scheme_file = 'A.scheme'
+    track = cmon.TrackDT()
+    track.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    track.inputs.seed_file = 'seed_mask.nii'
 
-    md.run()
+    track.run()
     """
+    def __init__(self, command=None, **inputs):
+        inputs["inputmodel"] = "dt"
+        return super(TrackDT, self).__init__(command, **inputs)
+
+class TrackPICo(Track):
+    """
+    Performs streamline tractography using the Probabilistic Index of Connectivity (PICo) algorithm
+
+    Example:
+
+    import nipype.interfaces.camino as cmon
+    track = cmon.TrackDT()
+    track.inputs.in_file = 'pdfs.Bfloat'
+    track.inputs.seed_file = 'seed_mask.nii'
+
+    track.run()
+    """
+
+    input_spec = TrackPICoInputSpec
+
+    def __init__(self, command=None, **inputs):
+        inputs["inputmodel"] = "pico"
+        return super(TrackPICo, self).__init__(command, **inputs)
+
+class TrackBayesDirac(Track):
+    """
+    Performs streamline tractography using a Bayes-Dirac algorithm
+
+    Example:
+
+    import nipype.interfaces.camino as cmon
+    track = cmon.TrackDT()
+    track.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    track.inputs.seed_file = 'seed_mask.nii'
+    track.inputs.scheme_file = 'bvecs.scheme'
+
+    track.run()
+    """
+
+    input_spec = TrackBayesDiracInputSpec
+
+    def __init__(self, command=None, **inputs):
+        inputs["inputmodel"] = "bayesdirac"
+        return super(TrackBayesDirac, self).__init__(command, **inputs)
+
+class MDInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='Tensor-fitted data filename')
 
     scheme_file = File(exists=True, argstr='%s', mandatory=False, position=2,
         desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
 
-    inputmodel = traits.Enum('dt', 'twotensor', 'threetensor', argstr='-inputmodel %s',
+    out_file = File(argstr="> %s", position=-1, genfile=True)
+
+    inputmodel = traits.Enum('dt', 'twotensor', 'threetensor',
+        argstr='-inputmodel %s',
         desc='Specifies the model that the input tensor data contains parameters for.' \
         'Possible model types are: "dt" (diffusion-tensor data), "twotensor" (two-tensor data), '\
         '"threetensor" (three-tensor data). By default, the program assumes that the input data '\

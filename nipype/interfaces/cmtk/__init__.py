@@ -1,2 +1,1 @@
-from nipype.interfaces.cmtk.cmtk import ROIGen
-from nipype.interfaces.cmtk.mapper import CreateMatrix
+from nipype.interfaces.cmtk.cmtk import ROIGen, CreateMatrix
