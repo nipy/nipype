@@ -36,8 +36,7 @@ class IdentityInterface(IOBase):
     >>> ii2 = IdentityInterface(fields=['a','b'], mandatory_inputs=True)
     >>> ii2.inputs.a = 'foo'
     >>> out = ii2.run() # doctest: +SKIP
-    ValueError: IdentityInterface requires a value for input 'b' because it was listed in 'fields'
-Interface IdentityInterface failed to run.
+    ValueError: IdentityInterface requires a value for input 'b' because it was listed in 'fields' Interface IdentityInterface failed to run.
     """
     input_spec = DynamicTraitedSpec
     output_spec = DynamicTraitedSpec
