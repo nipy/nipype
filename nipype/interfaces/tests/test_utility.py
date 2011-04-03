@@ -8,7 +8,7 @@ from nipype.testing import assert_equal, assert_true
 from nipype.interfaces import utility 
 
 def test_rename():
-    tempdir = mkdtemp()
+    tempdir = os.path.realpath(mkdtemp())
     origdir = os.getcwd()
     os.chdir(tempdir)
    
