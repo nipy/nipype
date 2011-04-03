@@ -699,7 +699,7 @@ class Workflow(WorkflowBase):
             hierarchy = []
         dotlist = ['%slabel="%s";'%(prefix,self.name)]
         dotlist.append('%scolor=grey;'%(prefix))
-        for node in self._graph.nodes():
+        for node in nx.topological_sort(self._graph.nodes()):
             fullname = '.'.join(hierarchy + [node.fullname])
             nodename = fullname.replace('.','_')
             if not isinstance(node, Workflow):
@@ -713,7 +713,7 @@ class Workflow(WorkflowBase):
                     dotlist.append('%s[label="%s", style=filled, color=lightgrey];'%(nodename, node_class_name))
                 else:
                     dotlist.append('%s[label="%s"];'%(nodename, node_class_name))
-        for node in self._graph.nodes():
+        for node in nx.topological_sort(self._graph.nodes()):
             if isinstance(node, Workflow):
                 fullname = '.'.join(hierarchy + [node.fullname])
                 nodename = fullname.replace('.','_')

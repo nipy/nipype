@@ -163,7 +163,7 @@ def _write_detailed_dot(graph, dotfilename):
     edges = []
     replacefunk = lambda x: x.replace('_', '').replace('.', ''). \
         replace('@', '').replace('-', '')
-    for n in graph.nodes():
+    for n in nx.topological_sort(graph.nodes()):
         nodename = str(n)
         inports = []
         for u, v, d in graph.in_edges_iter(nbunch=n, data=True):
