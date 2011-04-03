@@ -85,8 +85,8 @@ def test_featregister():
 @skipif(no_fsl)
 def test_filmgls():
     input_map = dict(args = dict(argstr='%s',),
-                     autocorr_estimate = dict(xor=['autocorr_noestimate'],argstr='-ac',),
-                     autocorr_noestimate = dict(xor=['autocorr_estimate'],argstr='-noest',),
+                     autocorr_estimate_only = dict(xor=['autocorr_noestimate'],argstr='-ac',),
+                     autocorr_noestimate = dict(xor=['autocorr_estimate_only'],argstr='-noest',),
                      brightness_threshold = dict(argstr='-epith %d',),
                      design_file = dict(argstr='%s',),
                      environ = dict(),
