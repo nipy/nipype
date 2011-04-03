@@ -163,7 +163,7 @@ def _write_detailed_dot(graph, dotfilename):
     edges = []
     replacefunk = lambda x: x.replace('_', '').replace('.', ''). \
         replace('@', '').replace('-', '')
-    for n in nx.topological_sort(graph.nodes()):
+    for n in nx.topological_sort(graph):
         nodename = str(n)
         inports = []
         for u, v, d in graph.in_edges_iter(nbunch=n, data=True):
@@ -182,7 +182,7 @@ def _write_detailed_dot(graph, dotfilename):
                 if inport not in inports:
                     inports.append(inport)
         inputstr = '{IN'
-        for ip in inports:
+        for ip in sorted(inports):
             inputstr += '|<in%s> %s' % (replacefunk(ip), ip)
         inputstr += '}'
         outports = []
@@ -195,24 +195,22 @@ def _write_detailed_dot(graph, dotfilename):
                 if outport not in outports:
                     outports.append(outport)
         outputstr = '{OUT'
-        for op in outports:
+        for op in sorted(outports):
             outputstr += '|<out%s> %s' % (replacefunk(op), op)
         outputstr += '}'
+        srcpackage = ''
         if hasattr(n, '_interface'):
             pkglist = n._interface.__class__.__module__.split('.')
-            if len(pkglist) > 1:
-                srcpackage = pkglist[-2]
-            else:
-                srcpackage = ""
-        else:
-            srcpackage = ''
+            interface = n._interface.__class__.__name__
+            if len(pkglist) > 2:
+                srcpackage = pkglist[2]
         srchierarchy = '.'.join(nodename.split('.')[1:-1])
         nodenamestr = '{ %s | %s | %s }'% (nodename.split('.')[-1], srcpackage, srchierarchy)
         text += ['%s [label="%s|%s|%s"];' % (nodename.replace('.', ''),
                                              inputstr, nodenamestr,
                                              outputstr)]
     # write edges
-    for edge in edges:
+    for edge in sorted(edges):
         text.append(edge)
     text.append('}')
     filep = open(dotfilename, 'wt')
