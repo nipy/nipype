@@ -383,8 +383,11 @@ class Workflow(WorkflowBase):
         if base_dir == '':
             if self.base_dir:
                 base_dir = self.base_dir
+                if self.name:
+                    base_dir = os.path.join(base_dir, self.name)
             else:
                 base_dir = os.getcwd()
+        base_dir = make_output_dir(base_dir)
         if graph2use == 'hierarchical':
             dotfilename = os.path.join(base_dir, dotfilename)
             self.write_hierarchical_dotfile(dotfilename=dotfilename)
