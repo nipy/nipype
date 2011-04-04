@@ -730,7 +730,7 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
     datatype = traits.Enum('byte', 'char', '[u]short', '[u]int', 'float', 'complex', 'double',
         argstr='-datatype %s',
         desc='The char datatype is 8 bit (not the 16 bit char of Java), as specified by the Analyze 7.5 standard. \
-     The byte, ushort and uint types are not part of the Analyze specification but are supported by SPM.')
+     The byte, ushort and uint types are not part of the Analyze specification but are supported by SPM.', mandatory=True)
 
     offset = traits.Int(argstr='-offset %d', units='NA',
         desc='According to the Analyze 7.5 standard, this is the byte offset in the .img file' \
