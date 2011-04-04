@@ -30,8 +30,8 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.matlab as mlab      # how to run matlab
-import nipype.interfaces.nipy as nipy      # how to run matlab
 import nipype.interfaces.cmtk.cmtk as cmtk
+import nipype.interfaces.cmtk.base as cmtkbase
 import nibabel as nb
 import os                                    # system functions
 
@@ -258,10 +258,14 @@ For this reason, the nodes have not been connected.
 roigen = pe.Node(interface=cmtk.ROIGen(), name="ROIGen")
 #roigen.inputs.use_freesurfer_LUT = True
 #roigen.inputs.freesurfer_dir = fs_dir
+
+""" This line must point to the adapted lookup table given in the example data"""
 roigen.inputs.LUT_file = '/home/erik/Dropbox/Code/forked/nipype/examples/FreeSurferColorLUT_adapted.txt'
 creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
+""" This line must point to the resolution network file given in the example data"""
 creatematrix.inputs.resolution_network_file = '/home/erik/Dropbox/Code/forked/nipype/examples/resolution83.graphml'
 
+CFFConverter = pe.Node(interface=cmtkbase.CFFConverter(), name="CFFConverter")
 
 """
 Here is one example case for using the Nipype Select utility.
@@ -271,6 +275,14 @@ only the 'aparc+aseg.nii' file to a Freesurfer NIFTI conversion node.
 """
 selectaparc = pe.Node(interface=util.Select(), name="SelectAparcAseg")
 selectaparc.inputs.index = 0 # Use 0 for aparc+aseg and 1 for aparc.a2009s+aseg
+
+"""
+Here we define a few nodes using the Nipype Merge utility.
+These are useful for passing lists of the files we want packaged in our CFF file.
+"""
+giftiSurfaces = pe.Node(interface=util.Merge(2), name="GiftiSurfaces")
+niftiVolumes = pe.Node(interface=util.Merge(3), name="NiftiVolumes")
+tractFiles = pe.Node(interface=util.Merge(1), name="TractFiles")
 
 """
 Since we have now created all our nodes, we can now define our workflow and start making connections.
@@ -293,6 +305,8 @@ mapping.connect([(inputnode, image2voxel, [("dwi", "in_file")]),
                       ])
 mapping.connect([(FreeSurferSource, mri_convert_WMParc,[('wmparc','in_file')])])
 mapping.connect([(FreeSurferSource, mri_convert_Brain,[('brain','in_file')])])
+mapping.connect([(FreeSurferSourceLH, mris_convertLH,[('pial','in_file')])])
+mapping.connect([(FreeSurferSourceRH, mris_convertRH,[('pial','in_file')])])
 
 """
 This section coregisters the diffusion-weighted and parcellated white-matter image.
@@ -366,6 +380,23 @@ mapping.connect([(mri_convert_AparcAseg, roigen,[("out_file","aparc_aseg_file")]
 mapping.connect([(roigen, creatematrix,[("roi_file","roi_file")])])
 mapping.connect([(roigen, creatematrix,[("dict_file","dict_file")])])
 mapping.connect([(camino2trackvis, creatematrix,[("trackvis","tract_file")])])
+
+mapping.connect([(mris_convertLH, giftiSurfaces,[("converted","in1")])])
+mapping.connect([(mris_convertRH, giftiSurfaces,[("converted","in2")])])
+
+
+mapping.connect([(roigen, niftiVolumes,[("roi_file","in1")])])
+mapping.connect([(inputnode, niftiVolumes,[("dwi","in2")])])
+mapping.connect([(mri_convert_Brain, niftiVolumes,[("out_file","in3")])])
+
+mapping.connect([(camino2trackvis, tractFiles,[("trackvis","in1")])])
+"""
+This block connects a number of the files to the CFF converter. We pass lists of the surfaces
+and volumes that are to be included, as well as the tracts and the network itself.
+"""
+mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
+#mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
+#mapping.connect([(tractFiles, CFFConverter,[("out","tract_files")])])
 
 """
 Finally, we create another higher-level workflow to connect our mapping workflow with the info and datagrabbing nodes
