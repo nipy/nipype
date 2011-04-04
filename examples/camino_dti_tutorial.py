@@ -24,6 +24,7 @@ import nipype.interfaces.camino as camino
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.camino2trackvis as cam2trk
+import nipype.algorithms.misc as misc
 import nibabel as nb
 import os                                    # system functions
 
@@ -50,6 +51,11 @@ def get_data_dims(volume):
     hdr = nii.get_header()
     datadims = hdr.get_data_shape()
     return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
+
+def get_affine(volume):
+    import nibabel as nb
+    nii = nb.load(volume)
+    return nii.get_affine()
 
 subject_list = ['subj1']
 fsl.FSLCommand.set_default_output_type('NIFTI')
@@ -172,14 +178,14 @@ fractional anisotropy and diffusivity trace maps and their associated headers.
 """
 fa = pe.Node(interface=camino.FA(),name='fa')
 #md = pe.Node(interface=camino.MD(),name='md')
-trd = pe.Node(interface=camino.TrD(),name='trd')
-analyzeheader_fa = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_fa')
-analyzeheader_fa.inputs.datatype = 'double'
-analyzeheader_trace = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_trace')
-analyzeheader_trace.inputs.datatype = 'double'
-#analyzeheader_md = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_md')
-#analyzeheader_md.inputs.datatype = 'double'
+trace = pe.Node(interface=camino.TrD(),name='trace')
 
+analyzeheader_fa = pe.Node(interface= camino.AnalyzeHeader(), name = "analyzeheader_fa")
+analyzeheader_fa.inputs.datatype = "double"
+analyzeheader_trace = analyzeheader_fa.clone('analyzeheader_trace')
+
+fa2nii = pe.Node(interface=misc.CreateNifti(),name='fa2nii')
+trace2nii = fa2nii.clone("trace2nii")
 
 """
 Since we have now created all our nodes, we can now define our workflow and start making connections.
@@ -221,14 +227,22 @@ will be correct and readable.
 """
 
 convertTest.connect([(dtifit, fa,[("tensor_fitted","in_file")])])
-convertTest.connect([(fa, analyzeheader_fa,[('fa','in_file')])])
+convertTest.connect([(fa, analyzeheader_fa,[("fa","in_file")])])
 convertTest.connect([(inputnode, analyzeheader_fa,[(('dwi', get_vox_dims), 'voxel_dims'),
 (('dwi', get_data_dims), 'data_dims')])])
+convertTest.connect([(fa, fa2nii,[('fa','data_file')])])
+convertTest.connect([(inputnode, fa2nii,[(('dwi', get_affine), 'affine')])])
+convertTest.connect([(analyzeheader_fa, fa2nii,[('header', 'header_file')])])
 
-convertTest.connect([(dtifit, trd,[("tensor_fitted","in_file")])])
-convertTest.connect([(trd, analyzeheader_trace,[("trace","in_file")])])
+
+convertTest.connect([(dtifit, trace,[("tensor_fitted","in_file")])])
+convertTest.connect([(trace, analyzeheader_trace,[("trace","in_file")])])
 convertTest.connect([(inputnode, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
 (('dwi', get_data_dims), 'data_dims')])])
+convertTest.connect([(trace, trace2nii,[('trace','data_file')])])
+convertTest.connect([(inputnode, trace2nii,[(('dwi', get_affine), 'affine')])])
+convertTest.connect([(analyzeheader_trace, trace2nii,[('header', 'header_file')])])
+
 
 # Mean diffusivity still appears broken
 #convertTest.connect([(dtifit, md,[("tensor_fitted","in_file")])])

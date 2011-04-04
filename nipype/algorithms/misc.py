@@ -21,6 +21,7 @@ from scipy.ndimage.measurements import center_of_mass, label
 import matplotlib
 #matplotlib.use('Cairo')
 import matplotlib.pyplot as plt
+    
 
 class PickAtlasInputSpec(BaseInterfaceInputSpec):
     atlas = File(exists=True, desc="Location of the atlas that will be used.", compulsory=True)
@@ -315,3 +316,39 @@ class Dissimilarity(BaseInterface):
         outputs = self._outputs().get()
         outputs['dissimilarity'] = self._dissimilarity
         return outputs
+    
+class CreateNiftiInputSpec(BaseInterfaceInputSpec):
+    data_file = File(exists=True, mandatory=True, desc="ANALYZE img file")
+    header_file = File(exists=True, mandatory=True, desc="corresponding ANALYZE hdr file")
+    affine = traits.Array(exists=True, desc="affine transformation array")
+    
+class CreateNiftiOutputSpec(TraitedSpec):
+    nifti_file = File(exists=True)
+
+class CreateNifti(BaseInterface):
+    input_spec = CreateNiftiInputSpec
+    output_spec = CreateNiftiOutputSpec
+    
+    def _gen_output_file_name(self):
+        _, base, _ = split_filename(self.inputs.data_file)
+        return os.path.abspath(base + ".nii")
+    
+    def _run_interface(self, runtime):
+        hdr = nb.AnalyzeHeader.from_fileobj(open(self.inputs.header_file, 'rb'))
+        
+        if isdefined(self.inputs.affine):
+            affine = self.inputs.affine
+        else:
+            affine = None
+            
+        data = hdr.data_from_fileobj(open(self.inputs.data_file, 'rb'))
+        img = nb.Nifti1Image(data, affine, hdr)
+        nb.save(img,  self._gen_output_file_name())
+        
+        return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['nifti_file'] = self._gen_output_file_name()
+        return outputs
+
