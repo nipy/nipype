@@ -678,6 +678,9 @@ class ImageInfo(FSCommand):
         return outputs
 
 class MRIsConvertInputSpec(FSTraitedSpec):
+    """
+	Uses Freesurfer's mris_convert to convert surface files to various formats
+	"""
     annot_file = File(exists=True,mandatory=False,argstr="--annot %s",
     desc="input is annotation or gifti label data")
     
@@ -717,9 +720,23 @@ class MRIsConvertInputSpec(FSTraitedSpec):
     "ICO: .ico, .tri GEO: .geo STL: .stl VTK: .vtk GIFTI: .gii MGH surface-encoded 'volume': .mgh, .mgz")
     
 class MRIsConvertOutputSpec(TraitedSpec):
+    """
+	Uses Freesurfer's mris_convert to convert surface files to various formats
+	"""
     converted = File(exists=True, desc='converted output surface') 
 
 class MRIsConvert(FSCommand):
+    """
+    Uses Freesurfer's mris_convert to convert surface files to various formats
+
+    Example:
+
+    import nipype.interfaces.freesurfer as fs
+    mris = fs.MRIs_Convert()
+    mris.inputs.in_file = 'lh.pial'
+    mris.inputs.out_datatype = 'gii'
+    mris.run()
+    """
     _cmd = 'mris_convert'
     input_spec=MRIsConvertInputSpec
     output_spec=MRIsConvertOutputSpec

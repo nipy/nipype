@@ -299,8 +299,8 @@ class CreateMatrixInputSpec(TraitedSpec):
     dict_file = File(exists=True, mandatory=True, desc='Pickle file containing the label dictionary (see ROIGen)')
     tract_file = File(exists=True, mandatory=True, desc='Trackvis tract file')
     resolution_network_file = File(exists=True, mandatory=True, desc='Parcellation files from Connectome Mapping Toolkit')
-    out_matrix_file = File(genfile = True)
-    out_matrix_mat_file = File(genfile = True)
+    out_matrix_file = File(genfile = True, desc='NetworkX graph describing the connectivity')
+    out_matrix_mat_file = File(genfile = True, desc='Matlab matrix describing the connectivity')
 
 class CreateMatrixOutputSpec(TraitedSpec):
     matrix_file = File(desc='NetworkX graph describing the connectivity')
@@ -341,8 +341,13 @@ class CreateMatrix(BaseInterface):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["matrix_file"]=self._gen_outfilename('gpickle')
-        outputs["matrix_mat_file"]=self._gen_outfilename('mat')
+        outputs['matrix_file']=os.path.abspath(self._gen_outfilename('gpickle'))
+        outputs['matrix_mat_file']=os.path.abspath(self._gen_outfilename('mat'))
+        if isdefined(self.inputs.out_matrix_file):
+            outputs['matrix_file']= os.path.abspath(self.inputs.out_matrix_file)
+
+        if isdefined(self.inputs.out_matrix_mat_file):
+            outputs['matrix_mat_file']= os.path.abspath(self.inputs.out_matrix_mat_file)
         return outputs
 
     def _gen_outfilename(self, ext):
@@ -452,7 +457,7 @@ class ROIGen(BaseInterface):
         LUTlabelDict = {}
         mapDict = {}
 
-        ''' Create dictionary for input LUT table'''
+        """ Create dictionary for input LUT table"""
         for labels in range(0,numLUTLabels):
             #I'm sure there's a better way of writing the right side of this...
             LUTlabelDict[LUTlabelsRGBA[labels][0]] = [LUTlabelsRGBA[labels][1],LUTlabelsRGBA[labels][2], LUTlabelsRGBA[labels][3], LUTlabelsRGBA[labels][4], LUTlabelsRGBA[labels][5]]
