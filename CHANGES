@@ -6,12 +6,16 @@ Release 0.4 (FUTURE)
 * API: All interfaces: added new config option ignore_exception
 * API: SpecifModel no longer supports (concatenate_runs, output_specs). high_pass_filter cutoff is mandatory (even if its set to np.inf). Additional interfaces SpecifySPMModel and SpecifySparseModel support other types of data.
 * API: fsl.DTIFit input "save" is now called "save_tensor"
+* API: All inputs of IdentityInterfaces are mandatory by default. You can turn this off by specifying mandatory_inputs=False to the constructor.
+* API: fsl FILMGLS input "autocorr_estimate" is now called "autocorr_estimate_only"
 
 * ENH: All commandline interfaces display stdout and stderr
 * ENH: All interfaces raise exceptions on error with an option to suppress
 * ENH: Supports a plugin interface for external execution
 * ENH: MapNode runs in parallel under IPython and SGE
 * ENH: Optionally allows keeping only required outputs
+* ENH: New interface: utility.Rename to change the name of files, optionally
+       using python string-formatting with inputs or regular expressions matching
 * ENH: New interface: freesurfer.ApplyMask (mri_mask)
 * ENH: New FSL interface -- SwapDimensions (fslswapdim)
 * ENH: Sparse models allow regressor scaling and temporal derivatives

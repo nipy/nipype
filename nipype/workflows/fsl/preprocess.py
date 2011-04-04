@@ -68,7 +68,7 @@ def create_featpreproc(name='featpreproc'):
     Example
     -------
 
-    >>> from mindflows.gablab.preproc_schemes import create_featpreproc
+    >>> from nipype.workflows.fsl import create_featpreproc
     >>> import os
     >>> preproc = create_featpreproc()
     >>> preproc.inputs.inputspec.func = 'f3.nii'

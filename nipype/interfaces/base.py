@@ -11,6 +11,7 @@ Requires Packages to be installed
 from ConfigParser import NoOptionError
 from copy import deepcopy
 import datetime
+import errno
 import os
 from socket import gethostname
 from string import Template
@@ -871,7 +872,7 @@ class Stream(object):
             iflogger.info(self._rows[idx][1])
         self._lastidx = len(self._rows)
 
-def run_command(runtime, timeout=0.1):
+def run_command(runtime, timeout=0.2):
     """
     Run a command, read stdout and stderr, prefix with timestamp. The returned
     runtime contains a merged stdout+stderr log with timestamps
@@ -891,9 +892,17 @@ def run_command(runtime, timeout=0.1):
         ]
 
     def _process(drain=0):
-        res = select.select(streams, [], [], timeout)
-        for stream in res[0]:
-            stream.read(drain)
+        try:
+            res = select.select(streams, [], [], timeout)
+        except select.error, e:
+            iflogger.info(str(e))
+            if e[0] == errno.EINTR:
+                return
+            else:
+                raise
+        else:
+            for stream in res[0]:
+                stream.read(drain)
 
     while proc.returncode is None:
         proc.poll()

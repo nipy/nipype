@@ -422,10 +422,9 @@ class InterfaceHelpWriter(object):
             
             
             (_,fname) =  tempfile.mkstemp(suffix=".dot")
-            workflow.write_graph(dotfilename=fname, graph2use='flat')
+            workflow.write_graph(dotfilename=fname, graph2use='hierarchical')
             
             ad += self._write_graph_section(fname, 'Graph')
-            ad += self._write_graph_section(fname.replace(".dot",'_detailed.dot'), 'Detailed graph')
             
         return ad
 

@@ -188,44 +188,45 @@ class SpecifyModelOutputSpec(TraitedSpec):
     session_info = traits.Any(desc="session info for level1designs")
 
 class SpecifyModel(BaseInterface):
-    """Makes a model specification compatible with spm/fsl designers
+    """Makes a model specification compatible with spm/fsl designers.
 
     The subject_info field should contain paradigm information in the form of
     a Bunch of a list of Bunch. The Bunch should contain the following
     information.
 
-    Required
-    ~~~~~~~~
+    Required for most designs
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
 
      - conditions : list of names
-
      - onsets : lists of onsets corresponding to each condition
-
-     - durations : lists of durations corresponding to each condition. Should be
-          left to a single 0 if all events are being modelled as impulses.
+     - durations : lists of durations corresponding to each condition. Should be left to a single 0 if all events are being modelled as impulses.
 
     Optional
     ~~~~~~~~
 
      - regressors : list of dicts
-      - names : list of names corresponding to each column. Should be None if
-        automatically assigned.
-      - values : lists of values for each regressors
 
-     - amplitudes : lists of amplitudes for each event. This will be ignored by
-      SPM's Level1Design.
+       - names : list of names corresponding to each column. Should be None if 
+         automatically assigned.
 
-     The following two (tmod, pmod) will be ignored by any
-      Level1Design class other than SPM:
+       - values : lists of values for each regressors
 
-     - tmod : lists of conditions that should be temporally modulated. Should
-        default to None if not being used.
+     - amplitudes : lists of amplitudes for each event. This will be ignored by 
+       SPM's Level1Design.
+
+     The following two (tmod, pmod) will be ignored by any Level1Design class 
+     other than SPM:
+
+     - tmod : lists of conditions that should be temporally modulated. Should 
+       default to None if not being used.
 
      - pmod : list of Bunch corresponding to conditions
 
-      - name : name of parametric modulator
-      - param : values of the modulator
-      - poly : degree of modulation
+       - name : name of parametric modulator
+
+       - param : values of the modulator
+
+       - poly : degree of modulation
 
     Alternatively, you can provide information through event files.
 
@@ -269,7 +270,7 @@ class SpecifyModel(BaseInterface):
             sessinfo.insert(i,dict(cond=[]))
             if isdefined(self.inputs.high_pass_filter_cutoff):
                 sessinfo[i]['hpf'] = np.float(self.inputs.high_pass_filter_cutoff)
-            if info.conditions:
+            if hasattr(info, 'conditions') and info.conditions:
                 for cid,cond in enumerate(info.conditions):
                     sessinfo[i]['cond'].insert(cid,dict())
                     sessinfo[i]['cond'][cid]['name']  = info.conditions[cid]

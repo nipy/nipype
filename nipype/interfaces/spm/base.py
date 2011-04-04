@@ -146,18 +146,13 @@ class Info(object):
         mlab.inputs.mfile = False
         try:
             out = mlab.run()
-        except IOError, e:
+        except (IOError,RuntimeError), e:
             # if no Matlab at all -- exception could be raised
             # No Matlab -- no spm
             logger.debug(str(e))
             return None
-        if out.runtime.returncode == 0:
-            spm_path = sd._strip_header(out.runtime.stdout)
         else:
-            logger.debug(out.runtime.stderr)
-            return None
-        return spm_path
-
+            return sd._strip_header(out.runtime.stdout)
 
 def no_spm():
     """ Checks if SPM is NOT installed

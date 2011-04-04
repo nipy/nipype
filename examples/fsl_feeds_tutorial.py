@@ -535,6 +535,8 @@ cont2 = ['Auditory>Baseline','T', ['Visual','Auditory'],[0,1]]
 cont3 = ['Task','F', [cont1, cont2]]
 contrasts = [cont1,cont2,cont3]
 
+model_serial_correlations = True
+
 firstlevel.inputs.modelfit.modelspec.input_units = 'secs'
 firstlevel.inputs.modelfit.modelspec.time_repetition = TR
 firstlevel.inputs.modelfit.modelspec.high_pass_filter_cutoff = hpcutoff
@@ -543,6 +545,7 @@ firstlevel.inputs.modelfit.modelspec.high_pass_filter_cutoff = hpcutoff
 firstlevel.inputs.modelfit.level1design.interscan_interval = TR
 firstlevel.inputs.modelfit.level1design.bases = {'dgamma':{'derivs': True}}
 firstlevel.inputs.modelfit.level1design.contrasts = contrasts
+firstlevel.inputs.modelfit.level1design.model_serial_correlations = model_serial_correlations
 
 """
 Set up complete workflow

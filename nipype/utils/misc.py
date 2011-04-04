@@ -7,12 +7,13 @@ import inspect
 
 from distutils.version import LooseVersion
 import numpy as np
+from textwrap import dedent
 
 from nipype.interfaces.traits import _Undefined
 
 def getsource(function):
     """Returns the source code of a function"""
-    src = dumps(inspect.getsource(function))
+    src = dumps(dedent(inspect.getsource(function)))
     return src
 
 def create_function_from_source(function_source):

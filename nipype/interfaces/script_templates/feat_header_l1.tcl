@@ -122,7 +122,7 @@ set fmri(norm_yn) 0
 set fmri(perfsub_yn) 0
 
 # Highpass temporal filtering
-set fmri(temphp_yn) 1
+set fmri(temphp_yn) $temphp_yn
 
 # Lowpass temporal filtering
 set fmri(templp_yn) 0

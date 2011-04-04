@@ -17,12 +17,12 @@ specification for each run corresponding to a subject. This has to be in
 the form of a :class:`Bunch` or a list of Bunch objects (one for each
 run). Each Bunch object contains the following attribules.
 
-Required
---------
+Required for most designs
+-------------------------
 
 - conditions : list of names
 
--  onsets : lists of onsets corresponding to each condition
+- onsets : lists of onsets corresponding to each condition
 
 - durations : lists of durations corresponding to each condition. Should be
             left to a single 0 if all events are being modelled as impulses.

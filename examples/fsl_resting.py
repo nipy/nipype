@@ -11,6 +11,8 @@
 1. Tell python where to find the appropriate functions.
 """
 
+import numpy as np
+
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
@@ -20,17 +22,6 @@ import os                                    # system functions
 
 #####################################################################
 # Preliminaries
-
-"""
-1b. Confirm package dependencies are installed.  (This is only for the
-tutorial, rarely would you put this in your own code.)
-"""
-from nipype.utils.misc import package_check
-
-package_check('numpy', '1.3', 'tutorial1')
-package_check('scipy', '0.7', 'tutorial1')
-package_check('networkx', '1.0', 'tutorial1')
-package_check('IPython', '0.10', 'tutorial1')
 
 """
 2. Setup any package specific configuration. The output file format
@@ -219,7 +210,7 @@ datasource.inputs.template_args = info
 """
    a. Setup a function that returns subject-specific information about
    the experimental paradigm. This is used by the
-   :class:`nipype.interfaces.spm.SpecifyModel` to create the
+   :class:`nipype.modelgen.SpecifyModel` to create the
    information necessary to generate an SPM design matrix. In this
    tutorial, the same paradigm was used for every participant. Other
    examples of this function are available in the `doc/examples`
@@ -230,21 +221,12 @@ def subjectinfo(meantsfile):
     import numpy as np
     from nipype.interfaces.base import Bunch
     ts = np.loadtxt(meantsfile)
-    output = [Bunch(conditions=None,
-                    onsets=None,
-                    durations=None,
-                    amplitudes=None,
-                    tmod=None,
-                    pmod=None,
-                    regressor_names=['MeanIntensity'],
+    output = [Bunch(regressor_names=['MeanIntensity'],
                     regressors=[ts.tolist()])]
     return output
 
-hpcutoff = 128
+hpcutoff = np.inf
 TR = 3.
-
-cont1 = ['MeanIntensity','T', ['MeanIntensity'],[1]]
-contrasts = [cont1]
 
 modelfit.inputs.modelspec.input_units = 'secs'
 modelfit.inputs.modelspec.time_repetition = TR
@@ -252,8 +234,10 @@ modelfit.inputs.modelspec.high_pass_filter_cutoff = hpcutoff
 
 
 modelfit.inputs.fsfdesign.interscan_interval = TR
-modelfit.inputs.fsfdesign.bases = {'dgamma':{'derivs': True}}
-modelfit.inputs.fsfdesign.contrasts = contrasts
+modelfit.inputs.fsfdesign.bases = {'none': None}
+modelfit.inputs.fsfdesign.model_serial_correlations = False
+
+modelfit.inputs.modelestimate.autocorr_noestimate = True
 
 
 """
@@ -285,7 +269,7 @@ l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                     ])
 
 l1pipeline.run()
-l1pipeline.write_graph(graph2use='flat')
+l1pipeline.write_graph()
 
 """
 Store significant result-files in a special directory
