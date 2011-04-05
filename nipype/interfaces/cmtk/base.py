@@ -142,6 +142,16 @@ class CFFConverter(BaseInterface):
             for surf in self.inputs.gifti_surfaces:
                 _, surf_name, _ = split_filename(surf)
                 csurf = cf.CSurface.create_from_gifti(surf_name, surf)
+                csurf.fileformat='Gifti'
+                csurf.dtype='Surfaceset'
+                a.add_connectome_surface(csurf)
+
+        if isdefined(self.inputs.gifti_labels):
+            for label in self.inputs.gifti_labels:
+                _, label_name, _ = split_filename(label)
+                csurf = cf.CSurface.create_from_gifti(label_name + '_labels', surf)
+                csurf.fileformat='Gifti'
+                csurf.dtype='Labels'
                 a.add_connectome_surface(csurf)
 
         if isdefined(self.inputs.nifti_volumes):

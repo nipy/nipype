@@ -164,6 +164,10 @@ mris_convertLH = pe.Node(interface=fs.MRIsConvert(), name='mris_convertLH')
 mris_convertLH.inputs.out_datatype = 'gii'
 mris_convertRH = pe.Node(interface=fs.MRIsConvert(), name='mris_convertRH')
 mris_convertRH.inputs.out_datatype = 'gii'
+mris_convertLHlabels = pe.Node(interface=fs.MRIsConvert(), name='mris_convertLHlabels')
+mris_convertLHlabels.inputs.out_datatype = 'gii'
+mris_convertRHlabels = pe.Node(interface=fs.MRIsConvert(), name='mris_convertRHlabels')
+mris_convertRHlabels.inputs.out_datatype = 'gii'
 
 """
 An inputnode is used to pass the data obtained by the data grabber to the actual processing functions
@@ -272,15 +276,24 @@ Here is one example case for using the Nipype Select utility.
 As FreesurferSource outputs a list similar to: ['aparc+aseg.mgz','aparc.a2009s+aseg.mgz']
 when asked for the 'aparc_aseg' output, we use a select node to pass the name of
 only the 'aparc+aseg.nii' file to a Freesurfer NIFTI conversion node.
+
+Similarly, the rh.aparc.annot and lh.aparc.annot files are chosen for the surface labels.
 """
 selectaparc = pe.Node(interface=util.Select(), name="SelectAparcAseg")
 selectaparc.inputs.index = 0 # Use 0 for aparc+aseg and 1 for aparc.a2009s+aseg
+
+selectaparcAnnotLH = pe.Node(interface=util.Select(), name="SelectAparcAnnotLH")
+selectaparcAnnotLH.inputs.index = 2 # Use 0 for .a2009s.annot, 1 for .BA.annot, 2 for .aparc.annot
+
+selectaparcAnnotRH = pe.Node(interface=util.Select(), name="SelectAparcAnnotRH")
+selectaparcAnnotRH.inputs.index = 2 # Use 0 for .a2009s.annot, 1 for .BA.annot, 2 for .aparc.annot
 
 """
 Here we define a few nodes using the Nipype Merge utility.
 These are useful for passing lists of the files we want packaged in our CFF file.
 """
 giftiSurfaces = pe.Node(interface=util.Merge(2), name="GiftiSurfaces")
+giftiLabels = pe.Node(interface=util.Merge(2), name="GiftiLabels")
 niftiVolumes = pe.Node(interface=util.Merge(3), name="NiftiVolumes")
 tractFiles = pe.Node(interface=util.Merge(1), name="TractFiles")
 gpickledNetworks = pe.Node(interface=util.Merge(1), name="NetworkFiles")
@@ -308,6 +321,13 @@ mapping.connect([(FreeSurferSource, mri_convert_WMParc,[('wmparc','in_file')])])
 mapping.connect([(FreeSurferSource, mri_convert_Brain,[('brain','in_file')])])
 mapping.connect([(FreeSurferSourceLH, mris_convertLH,[('pial','in_file')])])
 mapping.connect([(FreeSurferSourceRH, mris_convertRH,[('pial','in_file')])])
+
+mapping.connect([(FreeSurferSourceLH, mris_convertLHlabels,[('pial','in_file')])])
+mapping.connect([(FreeSurferSourceRH, mris_convertRHlabels,[('pial','in_file')])])
+mapping.connect([(FreeSurferSourceLH, selectaparcAnnotLH,[('annot','inlist')])])
+mapping.connect([(FreeSurferSourceRH, selectaparcAnnotRH,[('annot','inlist')])])
+mapping.connect([(selectaparcAnnotLH, mris_convertLHlabels,[('out','annot_file')])])
+mapping.connect([(selectaparcAnnotRH, mris_convertRHlabels,[('out','annot_file')])])
 
 """
 This section coregisters the diffusion-weighted and parcellated white-matter image.
@@ -386,6 +406,8 @@ mapping.connect([(creatematrix, gpickledNetworks,[("matrix_file","in1")])])
 mapping.connect([(mris_convertLH, giftiSurfaces,[("converted","in1")])])
 mapping.connect([(mris_convertRH, giftiSurfaces,[("converted","in2")])])
 
+mapping.connect([(mris_convertLHlabels, giftiLabels,[("converted","in1")])])
+mapping.connect([(mris_convertRHlabels, giftiLabels,[("converted","in2")])])
 
 mapping.connect([(roigen, niftiVolumes,[("roi_file","in1")])])
 mapping.connect([(inputnode, niftiVolumes,[("dwi","in2")])])
@@ -397,6 +419,7 @@ This block connects a number of the files to the CFF converter. We pass lists of
 and volumes that are to be included, as well as the tracts and the network itself.
 """
 mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
+mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
 mapping.connect([(gpickledNetworks, CFFConverter,[("out","gpickled_networks")])])
 #mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
 mapping.connect([(tractFiles, CFFConverter,[("out","tract_files")])])
