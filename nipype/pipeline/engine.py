@@ -36,7 +36,8 @@ from nipype.interfaces.base import (traits, InputMultiPath, CommandLine,
 from nipype.utils.misc import isdefined, getsource, create_function_from_source
 from nipype.utils.filemanip import (save_json, FileNotFoundError,
                                     filename_to_list, list_to_filename,
-                                    copyfiles, fnames_presuffix, loadpkl)
+                                    copyfiles, fnames_presuffix, loadpkl,
+    split_filename, load_json)
 
 from nipype.pipeline.utils import (generate_expanded_graph, modify_paths,
                                    export_graph, make_output_dir,
@@ -441,7 +442,9 @@ class Workflow(WorkflowBase):
         self._set_needed_outputs(flatgraph)
         execgraph = generate_expanded_graph(deepcopy(flatgraph))
         for index, node in enumerate(execgraph.nodes()):
-            node.config = self.config
+            
+            node.config = config._sections.copy()
+            node.config.update(self.config)
             node.base_dir = self.base_dir
             node.index = index
             if isinstance(node, MapNode):
@@ -852,8 +855,8 @@ class Node(WorkflowBase):
         self._interface.help()
 
     def _get_hashval(self):
-        hashed_inputs, hashvalue =  self.inputs.hashval
-        if config.getboolean('execution', 'remove_unnecessary_outputs') and \
+        hashed_inputs, hashvalue =  self.inputs.get_hashval(hash_method=self.config['execution']['hash_method'])
+        if bool(self.config['execution']['remove_unnecessary_outputs']) and \
         self.needed_outputs:
             hashobject = md5()
             hashobject.update(hashvalue)
@@ -933,18 +936,36 @@ class Node(WorkflowBase):
         # check to see if output directory and hash exist
         self._get_inputs()
         outdir = self.output_dir()
-        outdir = make_output_dir(outdir)
         logger.info("Executing node %s in dir: %s"%(self._id,outdir))
         # Get a dictionary with hashed filenames and a hashvalue
         # of the dictionary itself.
         hashed_inputs, hashvalue = self._get_hashval()
         hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
-        if updatehash:
+        if updatehash and os.path.exists(outdir):
             logger.debug("Updating hash: %s" % hashvalue)
             self._save_hashfile(hashfile, hashed_inputs)
         if force_execute or (not updatehash and (self.overwrite or not os.path.exists(hashfile))):
             logger.debug("Node hash: %s"%hashvalue)
-            
+            if os.path.exists(outdir):
+                logger.debug("Rerunning node")
+                logger.debug("force_execute = %s, updatehash = %s, self.overwrite = %s, os.path.exists(%s) = %s, hash_method = %s"%(str(force_execute),
+                                                                                                                  str(updatehash),
+                                                                                                                  str(self.overwrite),
+                                                                                                                  hashfile,
+                                                                                                                  str(os.path.exists(hashfile)),
+                                                                                                                  self.config['execution']['hash_method'].lower()))
+                if bool(self.config['execution']['stop_on_first_rerun']):
+                    if not os.path.exists(hashfile):
+                        exp_hash_file = glob(os.path.join(outdir, '_0x*.json'))
+                        if len(exp_hash_file) == 1:
+                            prev_inputs = load_json(exp_hash_file[0])
+                            _, exp_hash_file, _ = split_filename(exp_hash_file[0])
+                            exp_hash = exp_hash_file[len('_0x'):]
+                            logger.debug("Previous hash = %s"%exp_hash)
+                            logger.debug("Current inputs: " + str(hashed_inputs))
+                            logger.debug("Previous inputs: " + str(prev_inputs))
+                            
+                    raise Exception("Cannot rerun when 'stop_on_first_rerun' is set to True")
             hashfile_unfinished = os.path.join(outdir, '_0x%s_unfinished.json' % hashvalue)
             if os.path.exists(hashfile):
                 os.remove(hashfile)
@@ -954,9 +975,11 @@ class Node(WorkflowBase):
                not isinstance(self, MapNode):
                 logger.debug("Removing old %s and its contents"%outdir)
                 rmtree(outdir)
-                outdir = make_output_dir(outdir)
+                
             else:
                 logger.debug("%s found and can_resume is True or Node is a MapNode - resuming execution" % hashfile_unfinished)
+            
+            outdir = make_output_dir(outdir)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             try:
                 self._run_interface(execute=True)
@@ -1070,7 +1093,7 @@ class Node(WorkflowBase):
                 self._result.runtime.stderr = msg
                 raise
             
-            if config.getboolean('execution', 'remove_unnecessary_outputs'):
+            if bool(self.config['execution']['remove_unnecessary_outputs']):
                 dirs2keep = None
                 if isinstance(self, MapNode):
                     dirs2keep = [os.path.join(cwd, 'mapflow')]
@@ -1192,8 +1215,8 @@ class MapNode(Node):
             hashinputs.add_trait(name, InputMultiPath(self._interface.inputs.traits()[name].trait_type))
             logger.debug('setting hashinput %s-> %s'%(name,getattr(self._inputs, name)))
             setattr(hashinputs, name, getattr(self._inputs, name))
-        hashed_inputs, hashvalue = hashinputs.hashval
-        if config.getboolean('execution', 'remove_unnecessary_outputs') and \
+        hashed_inputs, hashvalue = hashinputs.get_hashval(hash_method=self.config['execution']['hash_method'])
+        if bool(self.config['execution']['remove_unnecessary_outputs']) and \
         self.needed_outputs:
             hashobject = md5()
             hashobject.update(hashvalue)
@@ -1238,7 +1261,7 @@ class MapNode(Node):
             try:
                 node.run(updatehash=updatehash)
             except Exception, err:
-                if config.getboolean('execution', 'stop_on_first_crash'):
+                if bool(self.config['execution']['stop_on_first_crash']):
                     self._result = node.result
                     raise
             yield i, node, err
@@ -1254,7 +1277,7 @@ class MapNode(Node):
                 self._result.runtime[i] = node.result.runtime
             returncode.insert(i, err)
             for key, _ in self.outputs.items():
-                if config.getboolean('execution', 'remove_unnecessary_outputs') and \
+                if bool(self.config['execution']['remove_unnecessary_outputs']) and \
                 self.needed_outputs:
                     if key not in self.needed_outputs:
                         continue
