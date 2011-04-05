@@ -34,6 +34,7 @@ import nipype.interfaces.cmtk.cmtk as cmtk
 import nipype.interfaces.cmtk.base as cmtkbase
 import nibabel as nb
 import os                                    # system functions
+import cmp
 
 """
 We use the following functions to scrape the voxel and data dimensions of the input images. This allows the
@@ -263,11 +264,13 @@ roigen = pe.Node(interface=cmtk.ROIGen(), name="ROIGen")
 #roigen.inputs.use_freesurfer_LUT = True
 #roigen.inputs.freesurfer_dir = fs_dir
 
-""" This line must point to the adapted lookup table given in the example data"""
-roigen.inputs.LUT_file = '/home/erik/Dropbox/Code/forked/nipype/examples/FreeSurferColorLUT_adapted.txt'
+
+cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme = "NativeFreesurfer")
+cmp_config.parcellation_scheme = "NativeFreesurfer"
+
+roigen.inputs.LUT_file = cmp_config.get_freeview_lut("NativeFreesurfer")
 creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
-""" This line must point to the resolution network file given in the example data"""
-creatematrix.inputs.resolution_network_file = '/home/erik/Dropbox/Code/forked/nipype/examples/resolution83.graphml'
+creatematrix.inputs.resolution_network_file = cmp_config.parcellation['freesurferaparc']['node_information_graphml']
 
 CFFConverter = pe.Node(interface=cmtkbase.CFFConverter(), name="CFFConverter")
 
