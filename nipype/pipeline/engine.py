@@ -946,7 +946,10 @@ class Node(WorkflowBase):
             self._save_hashfile(hashfile, hashed_inputs)
         if force_execute or (not updatehash and (self.overwrite or not os.path.exists(hashfile))):
             logger.debug("Node hash: %s"%hashvalue)
-            if os.path.exists(outdir):
+            
+            #by rerunning we mean only nodes that did finish to run previously
+            if os.path.exists(outdir) and not isinstance(self, MapNode) and glob(os.path.join(outdir, '_0x*.json')) != 0 and \
+               glob(os.path.join(outdir, '_0x*_unfinished.json')) == 0:
                 logger.debug("Rerunning node")
                 logger.debug("force_execute = %s, updatehash = %s, self.overwrite = %s, os.path.exists(%s) = %s, hash_method = %s"%(str(force_execute),
                                                                                                                   str(updatehash),
@@ -966,6 +969,7 @@ class Node(WorkflowBase):
                             logger.debug("Previous inputs: " + str(prev_inputs))
                             
                     raise Exception("Cannot rerun when 'stop_on_first_rerun' is set to True")
+                
             hashfile_unfinished = os.path.join(outdir, '_0x%s_unfinished.json' % hashvalue)
             if os.path.exists(hashfile):
                 os.remove(hashfile)
