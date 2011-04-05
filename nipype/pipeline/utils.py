@@ -23,7 +23,7 @@ try:
     dfs_preorder = nx.dfs_preorder
 except AttributeError:
     dfs_preorder = nx.dfs_preorder_nodes
-    logger.info('networkx 1.4 dev or higher detected')
+    logger.debug('networkx 1.4 dev or higher detected')
 
 try:
     from os.path import relpath
