@@ -439,6 +439,7 @@ class BaseTraitedSpec(traits.HasTraits):
             The md5 hash value of the traited spec
 
         """
+        
         dict_withhash = self._get_sorteddict(self.get(),True, hash_method=hash_method)
         dict_nofilename = self._get_sorteddict(self.get(), hash_method=hash_method)
         return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
@@ -448,12 +449,12 @@ class BaseTraitedSpec(traits.HasTraits):
             out = {}
             for key, val in sorted(object.items()):
                 if isdefined(val):
-                    out[key] = self._get_sorteddict(val, dictwithhash)
+                    out[key] = self._get_sorteddict(val, dictwithhash, hash_method=hash_method)
         elif isinstance(object, (list,tuple)):
             out = []
             for val in object:
                 if isdefined(val):
-                    out.append(self._get_sorteddict(val, dictwithhash))
+                    out.append(self._get_sorteddict(val, dictwithhash, hash_method=hash_method))
             if isinstance(object, tuple):
                 out = tuple(out)
         else:
