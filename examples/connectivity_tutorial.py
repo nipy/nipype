@@ -396,7 +396,8 @@ and volumes that are to be included, as well as the tracts and the network itsel
 """
 mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
 #mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
-#mapping.connect([(tractFiles, CFFConverter,[("out","tract_files")])])
+mapping.connect([(tractFiles, CFFConverter,[("out","tract_files")])])
+mapping.connect([(inputnode, CFFConverter,[("subject_id","title")])])
 
 """
 Finally, we create another higher-level workflow to connect our mapping workflow with the info and datagrabbing nodes
