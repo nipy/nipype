@@ -174,9 +174,6 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
     file = open(dict_file, "r")
     labelDict = pickle.load(file)
     file.close()
-    #print labelDict
-    #resolution = gconf.parcellation.keys()
-#    resolution = labelDict.keys()
 
     # create empty fiber label array
     fiberlabels = np.zeros( (n, 2) )
@@ -189,15 +186,14 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
     roiData = roi.get_data()
 
     # Create the matrix
-    nROIs = len(labelDict.keys())
-    print nROIs
     G = nx.Graph()
 
     # add node information from parcellation
-    if isdefined(resolution_network_file):
-        gp = nx.read_graphml(resolution_network_file)
-        for u,d in gp.nodes_iter(data=True):
-            G.add_node(int(u), d)
+    gp = nx.read_graphml(resolution_network_file)
+    nROIs = len(gp.nodes())
+
+    for u,d in gp.nodes_iter(data=True):
+        G.add_node(int(u), d)
 
     dis = 0
 

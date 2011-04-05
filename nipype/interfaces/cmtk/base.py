@@ -108,9 +108,8 @@ class CFFConverter(BaseInterface):
         a.connectome_meta.set_created(datetime.date.today())
 
         cnetwork_fnames = self.inputs.cnetworks
-
+        count = 0
         if isdefined(self.inputs.graphml_networks):
-            count = 0
             for ntwk in self.inputs.graphml_networks:
                 #_, ntwk_name, _ = split_filename(ntwk)
                 # There must be a better way to deal with the unique name problem
@@ -127,9 +126,11 @@ class CFFConverter(BaseInterface):
                 cnet = cf.CNetwork(name = ntwk_name)
                 cnet.set_with_nxgraph(unpickled)
                 a.add_connectome_network(cnet)
+                count += 1
 
+
+        count = 0
         if isdefined(self.inputs.tract_files):
-            count = 0
             for trk in self.inputs.tract_files:
                 #_, trk_name, _ = split_filename(trk)
                 trk_name = 'Tract file {cnt}'.format(cnt=count)

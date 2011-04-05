@@ -283,6 +283,7 @@ These are useful for passing lists of the files we want packaged in our CFF file
 giftiSurfaces = pe.Node(interface=util.Merge(2), name="GiftiSurfaces")
 niftiVolumes = pe.Node(interface=util.Merge(3), name="NiftiVolumes")
 tractFiles = pe.Node(interface=util.Merge(1), name="TractFiles")
+gpickledNetworks = pe.Node(interface=util.Merge(1), name="NetworkFiles")
 
 """
 Since we have now created all our nodes, we can now define our workflow and start making connections.
@@ -380,6 +381,7 @@ mapping.connect([(mri_convert_AparcAseg, roigen,[("out_file","aparc_aseg_file")]
 mapping.connect([(roigen, creatematrix,[("roi_file","roi_file")])])
 mapping.connect([(roigen, creatematrix,[("dict_file","dict_file")])])
 mapping.connect([(camino2trackvis, creatematrix,[("trackvis","tract_file")])])
+mapping.connect([(creatematrix, gpickledNetworks,[("matrix_file","in1")])])
 
 mapping.connect([(mris_convertLH, giftiSurfaces,[("converted","in1")])])
 mapping.connect([(mris_convertRH, giftiSurfaces,[("converted","in2")])])
@@ -395,6 +397,7 @@ This block connects a number of the files to the CFF converter. We pass lists of
 and volumes that are to be included, as well as the tracts and the network itself.
 """
 mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
+mapping.connect([(gpickledNetworks, CFFConverter,[("out","gpickled_networks")])])
 #mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
 mapping.connect([(tractFiles, CFFConverter,[("out","tract_files")])])
 mapping.connect([(inputnode, CFFConverter,[("subject_id","title")])])
