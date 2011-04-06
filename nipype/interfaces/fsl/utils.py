@@ -877,7 +877,7 @@ class SwapDimensions(FSLCommand):
             return self._list_outputs()["out_file"]
         return None
     
-class FslPspecInputSpec(FSLCommandInputSpec):
+class PowerSpectrumInputSpec(FSLCommandInputSpec):
     """"""
     # We use position args here as list indices - so a negative number
     # will put something on the end
@@ -888,25 +888,25 @@ class FslPspecInputSpec(FSLCommandInputSpec):
                    argstr='%s', position=1, genfile=True)
     
 
-class FslPspecOutputSpec(TraitedSpec):
+class PowerSpectrumOutputSpec(TraitedSpec):
     out_file = File(desc="path/name of the output 4D power spectrum file")
 
-class FslPspec(FSLCommand):
-    """Use FSL FslPspec command for power spectrum estimation.
+class PowerSpectrum(FSLCommand):
+    """Use FSL PowerSpectrum command for power spectrum estimation.
 
     Examples
     --------
     >>> from nipype.interfaces import fsl
     >>> from nipype.testing import  example_data
-    >>> pspec = fsl.FslPspec()
+    >>> pspec = fsl.PowerSpectrum()
     >>> pspec.inputs.in_file = example_data('functional.nii')
     >>> res = pspec.run() # doctest: +SKIP
 
     """
 
     _cmd = 'fslpspec'
-    input_spec = FslPspecInputSpec
-    output_spec = FslPspecOutputSpec
+    input_spec = PowerSpectrumInputSpec
+    output_spec = PowerSpectrumOutputSpec
 
     def _gen_outfilename(self):
         out_file = self.inputs.out_file
