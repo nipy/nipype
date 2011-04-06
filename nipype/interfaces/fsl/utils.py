@@ -878,7 +878,6 @@ class SwapDimensions(FSLCommand):
         return None
     
 class PowerSpectrumInputSpec(FSLCommandInputSpec):
-    """"""
     # We use position args here as list indices - so a negative number
     # will put something on the end
     in_file = File(exists=True,
@@ -889,7 +888,7 @@ class PowerSpectrumInputSpec(FSLCommandInputSpec):
     
 
 class PowerSpectrumOutputSpec(TraitedSpec):
-    out_file = File(desc="path/name of the output 4D power spectrum file")
+    out_file = File(exists=True, desc="path/name of the output 4D power spectrum file")
 
 class PowerSpectrum(FSLCommand):
     """Use FSL PowerSpectrum command for power spectrum estimation.
@@ -897,9 +896,8 @@ class PowerSpectrum(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> from nipype.testing import  example_data
     >>> pspec = fsl.PowerSpectrum()
-    >>> pspec.inputs.in_file = example_data('functional.nii')
+    >>> pspec.inputs.in_file = 'functional.nii'
     >>> res = pspec.run() # doctest: +SKIP
 
     """
