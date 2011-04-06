@@ -147,6 +147,9 @@ convertxfm.inputs.invert_xfm = True
 inverse = pe.Node(interface=fsl.FLIRT(), name = 'inverse')
 inverse.inputs.interp = ('nearestneighbour')
 
+inverse_AparcAseg = pe.Node(interface=fsl.FLIRT(), name = 'inverse_AparcAseg')
+inverse_AparcAseg.inputs.interp = ('nearestneighbour')
+
 """
 A number of conversion operations are required to obtain NIFTI files from the FreesurferSource for each subject.
 Nodes are used to convert the following:
@@ -268,7 +271,7 @@ roigen = pe.Node(interface=cmtk.ROIGen(), name="ROIGen")
 cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme = "NativeFreesurfer")
 cmp_config.parcellation_scheme = "NativeFreesurfer"
 
-roigen.inputs.LUT_file = cmp_config.get_freeview_lut("NativeFreesurfer")
+roigen.inputs.LUT_file = cmp_config.get_freeview_lut("NativeFreesurfer")['freesurferaparc']
 creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
 creatematrix.inputs.resolution_network_file = cmp_config.parcellation['freesurferaparc']['node_information_graphml']
 
@@ -283,7 +286,7 @@ only the 'aparc+aseg.nii' file to a Freesurfer NIFTI conversion node.
 Similarly, the rh.aparc.annot and lh.aparc.annot files are chosen for the surface labels.
 """
 selectaparc = pe.Node(interface=util.Select(), name="SelectAparcAseg")
-selectaparc.inputs.index = 0 # Use 0 for aparc+aseg and 1 for aparc.a2009s+aseg
+selectaparc.inputs.index = 1 # Use 0 for aparc+aseg and 1 for aparc.a2009s+aseg
 
 selectaparcAnnotLH = pe.Node(interface=util.Select(), name="SelectAparcAnnotLH")
 selectaparcAnnotLH.inputs.index = 2 # Use 0 for .a2009s.annot, 1 for .BA.annot, 2 for .aparc.annot
@@ -400,7 +403,12 @@ Here the CMTK connectivity mapping nodes are connected.
 """
 mapping.connect([(FreeSurferSource, selectaparc,[("aparc_aseg","inlist")])])
 mapping.connect([(selectaparc, mri_convert_AparcAseg,[("out","in_file")])])
-mapping.connect([(mri_convert_AparcAseg, roigen,[("out_file","aparc_aseg_file")])])
+
+mapping.connect([(b0Strip, inverse_AparcAseg,[('out_file','reference')])])
+mapping.connect([(convertxfm, inverse_AparcAseg,[('out_file','in_matrix_file')])])
+mapping.connect([(mri_convert_AparcAseg, inverse_AparcAseg,[('out_file','in_file')])])
+
+mapping.connect([(inverse_AparcAseg, roigen,[("out_file","aparc_aseg_file")])])
 mapping.connect([(roigen, creatematrix,[("roi_file","roi_file")])])
 mapping.connect([(roigen, creatematrix,[("dict_file","dict_file")])])
 mapping.connect([(camino2trackvis, creatematrix,[("trackvis","tract_file")])])
