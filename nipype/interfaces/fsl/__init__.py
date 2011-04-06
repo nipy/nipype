@@ -34,6 +34,7 @@ from nipype.interfaces.fsl.maths import (ChangeDataType, Threshold, MeanImage,
                                          DilateImage, ErodeImage, SpatialFilter,
                                          UnaryMaths, BinaryMaths, MultiImageMaths)
 
+from nipype.interfaces.fsl.fslpspec import FslPspec
 import nose
 
 
