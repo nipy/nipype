@@ -23,7 +23,7 @@ from nipype.interfaces.fsl.utils import (Smooth, Merge, ExtractROI, Split,
                                          ImageMaths, ImageMeants, ImageStats,
                                          FilterRegressor, Overlay, Slicer,
                                          PlotTimeSeries, PlotMotionParams,
-                                         ConvertXFM, SwapDimensions)
+                                         ConvertXFM, SwapDimensions, FslPspec)
 from nipype.interfaces.fsl.dti import (EddyCorrect, BEDPOSTX, DTIFit, 
                                        ProbTrackX, VecReg, ProjThresh,
                                        FindTheBiggest, DistanceMap,
@@ -34,7 +34,6 @@ from nipype.interfaces.fsl.maths import (ChangeDataType, Threshold, MeanImage,
                                          DilateImage, ErodeImage, SpatialFilter,
                                          UnaryMaths, BinaryMaths, MultiImageMaths)
 
-from nipype.interfaces.fsl.fslpspec import FslPspec
 import nose
 
 
