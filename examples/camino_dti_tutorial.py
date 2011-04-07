@@ -187,6 +187,7 @@ fractional anisotropy and diffusivity trace maps and their associated headers.
 fa = pe.Node(interface=camino.FA(),name='fa')
 #md = pe.Node(interface=camino.MD(),name='md')
 trace = pe.Node(interface=camino.TrD(),name='trace')
+dteig = pe.Node(interface=camino.DTEig(), name='dteig')
 
 analyzeheader_fa = pe.Node(interface= camino.AnalyzeHeader(), name = "analyzeheader_fa")
 analyzeheader_fa.inputs.datatype = "double"
@@ -271,6 +272,8 @@ tractography.connect([(inputnode, analyzeheader_trace,[(('dwi', get_vox_dims), '
 tractography.connect([(trace, trace2nii,[('trace','data_file')])])
 tractography.connect([(inputnode, trace2nii,[(('dwi', get_affine), 'affine')])])
 tractography.connect([(analyzeheader_trace, trace2nii,[('header', 'header_file')])])
+
+tractography.connect([(dtifit, dteig,[("tensor_fitted","in_file")])])
 
 tractography.connect([(trackpico, cam2trk_pico, [('tracked','in_file')])])
 tractography.connect([(trackdt, cam2trk_dt, [('tracked','in_file')])])

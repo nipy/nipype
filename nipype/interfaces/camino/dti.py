@@ -828,3 +828,51 @@ class AnalyzeHeader(StdOutCommandLine):
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + ".hdr"
+
+
+class DTEigInputSpec(StdOutCommandLineInputSpec):
+    in_file = File(exists=True, argstr='< %s', mandatory=True, position=1, desc='Tensor-fitted data filename')
+
+    inputmodel = traits.Enum('dt', 'multitensor', argstr='-inputmodel %s', desc='Specifies the model that the input data contains parameters for. Possible model types are: "dt" (diffusion-tensor data) and "multitensor"')
+
+    maxcomponents = traits.Int(argstr='-maxcomponents %s', desc='The maximum number of tensor components in a voxel of the input data.')
+
+    inputdatatype = traits.Enum("double", "char", "short", "int", "long", "float", argstr='-inputdatatype %s', desc='Specifies the data type of the input file. The data type can be any of the following strings: "char", "short", "int", "long", "float" or "double".')
+
+    outputdatatype = traits.Enum("double", "char", "short", "int", "long", "float", argstr='-outputdatatype %s', desc='Specifies the data type of the output data. The data type can be any of the following strings: "char", "short", "int", "long", "float" or "double".')
+
+class DTEigOutputSpec(TraitedSpec):
+    eigen = File(exists=True, desc='Trace of the diffusion tensor')
+
+class DTEig(StdOutCommandLine):
+    """
+    Computes the eigensystem from tensor fitted data.
+    
+    Reads diffusion tensor (single, two-tensor, three-tensor or multitensor) data from the 
+    standard input, computes the eigenvalues and eigenvectors of each tensor and outputs the 
+    results to the standard output. For multiple-tensor data the program outputs the 
+    eigensystem of each tensor. For each tensor the program outputs: {l_1, e_11, e_12, e_13, 
+    l_2, e_21, e_22, e_33, l_3, e_31, e_32, e_33}, where l_1 >= l_2 >= l_3 and e_i = (e_i1, 
+    e_i2, e_i3) is the eigenvector with eigenvalue l_i. For three-tensor data, for example,
+    the output contains thirty-six values per voxel.
+
+    Example:
+
+    import nipype.interfaces.camino as cmon
+    dteig = cmon.DTEig()
+    dteig.inputs.in_file = 'tensor_fitted_data.Bfloat'
+
+    dteig.run()
+    """
+    _cmd = 'dteig'
+    input_spec=DTEigInputSpec
+    output_spec=DTEigOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["eigen"] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_outfilename(self):
+        _, name , _ = split_filename(self.inputs.in_file)
+        return name + "_Eigen.img"     #Need to change to self.inputs.outputdatatype
