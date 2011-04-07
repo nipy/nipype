@@ -1,6 +1,7 @@
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,\
     StdOutCommandLine, StdOutCommandLineInputSpec
 from nipype.utils.filemanip import split_filename
+from nipype.utils.misc import isdefined
 import os
 import nibabel as nb
 
@@ -559,3 +560,121 @@ class TractShredder(StdOutCommandLine):
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + "_shredded"
+
+class DT2NIfTIInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='-inputfile %s', mandatory=True, position=1,
+        desc='tract file')
+
+    output_root = File(argstr='-outputroot %s', position=2, genfile=True, 
+        desc='filename root prepended onto the names of three output files.')
+
+    header_file = File(exists=True, argstr='-header %s', mandatory=True, position=3, 
+        desc=' A Nifti .nii or .hdr file containing the header information')
+
+class DT2NIfTIOutputSpec(TraitedSpec):
+    dt = File(exists=True, desc='diffusion tensors in NIfTI format')
+    
+    exitcode = File(exists=True, desc='exit codes from Camino reconstruction in NIfTI format')
+    
+    lns0 = File(exists=True, desc='estimated lns0 from Camino reconstruction in NIfTI format')
+    
+
+class DT2NIfTI(CommandLine):
+    """
+    Converts camino tensor data to NIfTI format
+
+    Reads Camino diffusion tensors, and converts them to NIFTI format as three .nii files.
+    """
+    _cmd = 'dt2nii'
+    input_spec=DT2NIfTIInputSpec
+    output_spec=DT2NIfTIOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        output_root = self._gen_outputroot()
+        outputs["dt"] = os.path.abspath(output_root + "dt.nii")
+        outputs["exitcode"] = os.path.abspath(output_root + "exitcode.nii")
+        outputs["lns0"] = os.path.abspath(output_root + "lns0.nii")
+        return outputs
+
+    def _gen_outfilename(self):
+        return self._gen_outputroot()
+
+    def _gen_outputroot(self):
+        output_root = self.inputs.output_root
+        if not isdefined(output_root):
+            output_root = self._gen_filename('output_root')
+        return output_root
+    
+    def _gen_filename(self, name):
+        if name == 'output_root':
+            _, filename , _ = split_filename(self.inputs.in_file)
+            filename = filename + "_"
+        return filename
+
+class NIfTIDT2CaminoInputSpec(StdOutCommandLineInputSpec):
+    in_file = File(exists=True, argstr='-inputfile %s', mandatory=True, position=1,
+        desc='A NIFTI-1 dataset containing diffusion tensors. The tensors are assumed to be '
+        'in lower-triangular order as specified by the NIFTI standard for the storage of '
+        'symmetric matrices. This file should be either a .nii or a .hdr file.')
+    
+    s0_file = File(argstr='-s0 %s', exists=True, 
+        desc='File containing the unweighted signal for each voxel, may be a raw binary '
+        'file (specify type with -inputdatatype) or a supported image file.')
+
+    lns0_file = File(argstr='-lns0 %s', exists=True,
+        desc='File containing the log of the unweighted signal for each voxel, may be a '
+        'raw binary file (specify type with -inputdatatype) or a supported image file.')
+
+    bgmask = File(argstr='-bgmask %s', exists=True,
+        desc='Binary valued brain / background segmentation, may be a raw binary file '
+        '(specify type with -maskdatatype) or a supported image file.')
+
+    scaleslope = traits.Float(argstr='-scaleslope %s',
+        desc='A value v in the diffusion tensor is scaled to v * s + i. This is '
+        'applied after any scaling specified by the input image. Default is 1.0.')
+
+    scaleinter = traits.Float(argstr='-scaleinter %s', 
+        desc='A value v in the diffusion tensor is scaled to v * s + i. This is '
+        'applied after any scaling specified by the input image. Default is 0.0.')
+
+    uppertriangular = traits.Bool(argstr='-uppertriangular %s',
+        desc = 'Specifies input in upper-triangular (VTK style) order.')
+
+class NIfTIDT2CaminoOutputSpec(TraitedSpec):
+    out_file = File(desc='diffusion tensors data in Camino format')
+    
+class NIfTIDT2Camino(CommandLine):
+    """
+    Converts NIFTI-1 diffusion tensors to Camino format. The program reads the
+    NIFTI header but does not apply any spatial transformations to the data. The
+    NIFTI intensity scaling parameters are applied.
+
+    The output is the tensors in Camino voxel ordering: [exit, ln(S0), dxx, dxy,
+    dxz, dyy, dyz, dzz].
+
+    The exit code is set to 0 unless a background mask is supplied, in which case
+    the code is 0 in brain voxels and -1 in background voxels.
+
+    The value of ln(S0) in the output is taken from a file if one is supplied,
+    otherwise it is set to 0.
+
+    NOTE FOR FSL USERS - FSL's dtifit can output NIFTI tensors, but they are not
+    stored in the usual way (which is using NIFTI_INTENT_SYMMATRIX). FSL's
+    tensors follow the ITK / VTK "upper-triangular" convention, so you will need
+    to use the -uppertriangular option to convert these correctly.
+
+    """
+    _cmd = 'niftidt2camino'
+    input_spec=NIfTIDT2CaminoInputSpec
+    output_spec=NIfTIDT2CaminoOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = self._gen_filename('out_file')
+        return outputs
+    
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            _, filename , _ = split_filename(self.inputs.in_file)
+        return filename
