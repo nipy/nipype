@@ -80,13 +80,13 @@ AFNI_
   2009_12_31_1431 or later
 
 Slicer_
- 3.6 or later
+  3.6 or later
 
 Nipy_ 
-(optional; required for doc building)
+  0.1.2+20110404 or later (required for doc building)
 
 Nitime_ 
-(optional; required for doc building)
+  (optional; required for doc building)
 
 Download
 --------
