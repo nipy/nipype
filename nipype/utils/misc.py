@@ -138,3 +138,11 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
     if checker(have_version) < checker(version):
         raise exc_failed_check(msg)
 
+def str2bool(v):
+    lower = v.lower()
+    if lower in ("yes", "true", "t", "1"):
+        return True
+    elif lower in ("no", "false", "n", "0"):
+        return False
+    else:
+        raise ValueError("%s cannot be converted to bool"%v)
