@@ -26,3 +26,35 @@ fmlogger.addHandler(hdlr)
 fmlogger.setLevel(logging.getLevelName(config.get('logging','filemanip_level')))
 iflogger.addHandler(hdlr)
 iflogger.setLevel(logging.getLevelName(config.get('logging','interface_level')))
+
+def logdebug_dict_differences(dold, dnew, prefix):
+    """Helper to log what actually changed from old to new values of
+    dictionaries.
+
+    typical use -- log difference for hashed_inputs
+    """
+    # Compare against hashed_inputs
+    # Keys: should rarely differ
+    new_keys = set(dnew.keys())
+    old_keys = set(dold.keys())
+    if len(new_keys - old_keys):
+        logger.debug("%s not previously seen: %s"
+                     % (new_keys - old_keys))
+    if len(old_keys - new_keys):
+        logger.debug("%s not presently seen: %s"
+                     % (old_keys - new_keys))
+
+    # Values in common keys would differ quite often,
+    # so we need to join the messages together
+    msgs = []
+    for k in new_keys.intersection(old_keys):
+        same = False
+        try:
+            same = dnew[k] == dold[k]
+        except Exception, e:
+            same = False
+        if not same:
+            msgs += ["%s: %r != %r"
+                     % (k, dnew[k], dold[k])]
+    if len(msgs):
+        logger.debug("%s values differ in fields %s" % (", ".join(msgs)))
