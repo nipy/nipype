@@ -952,7 +952,7 @@ class CommandLine(BaseInterface):
     >>> cli.cmdline
     'ls -al'
 
-    >>> cli.inputs.trait_get()
+    >>> cli.inputs.trait_get() #doctest: +SKIP
     {'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}
 
     >>> cli.help()
@@ -969,7 +969,7 @@ class CommandLine(BaseInterface):
     None
 
 
-    >>> cli.inputs.hashval
+    >>> cli.inputs.hashval #doctest: +SKIP
     ({'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}, 'b1faf85652295456a906f053d48daef6')
 
     """
