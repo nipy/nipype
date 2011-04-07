@@ -943,6 +943,8 @@ class Node(WorkflowBase):
         hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
         if updatehash and os.path.exists(outdir):
             logger.debug("Updating hash: %s" % hashvalue)
+            for file in glob(os.path.join(outdir, '_0x*.json')):
+                os.remove(file)
             self._save_hashfile(hashfile, hashed_inputs)
         if force_execute or (not updatehash and (self.overwrite or not os.path.exists(hashfile))):
             logger.debug("Node hash: %s"%hashvalue)
