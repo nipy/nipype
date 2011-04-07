@@ -6,8 +6,8 @@ import pylab
 
 from nipype.utils.misc import package_check
 package_check('nipy')
-import nipy.neurospin.utils.design_matrix as dm
-import nipy.neurospin.glm as GLM
+import nipy.labs.utils.design_matrix as dm
+import nipy.labs.glm as GLM
 
 from nipype.interfaces.base import BaseInterface, TraitedSpec, traits, File, OutputMultiPath,\
     BaseInterfaceInputSpec
