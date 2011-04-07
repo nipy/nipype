@@ -581,8 +581,8 @@ class ReconAllInputSpec(CommandLineInputSpec):
                             usedefault=True)
     directive = traits.Enum('all', 'autorecon1', 'autorecon2', 'autorecon2-cp',
                             'autorecon2-wm', 'autorecon2-inflate1', 'autorecon2-perhemi',
-                            'autorecon3', argstr='-%s', desc='process directive',
-                            usedefault=True)
+                            'autorecon3', 'localGI', 'qcache', argstr='-%s', 
+                            desc='process directive', usedefault=True)
     hemi = traits.Enum('lh', 'rh', desc='hemisphere to process', argstr="-hemi %s")
     T1_files = InputMultiPath(File(exists=True), argstr='-i %s...',
                               desc='name of T1 file to process')
