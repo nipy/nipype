@@ -8,6 +8,7 @@ Release 0.4 (FUTURE)
 * API: fsl.DTIFit input "save" is now called "save_tensor"
 * API: All inputs of IdentityInterfaces are mandatory by default. You can turn this off by specifying mandatory_inputs=False to the constructor.
 * API: fsl FILMGLS input "autocorr_estimate" is now called "autocorr_estimate_only"
+* API: fsl ContrastMgr now requires access to specific files (no longer accepts the result directory)
 
 * ENH: All commandline interfaces display stdout and stderr
 * ENH: All interfaces raise exceptions on error with an option to suppress

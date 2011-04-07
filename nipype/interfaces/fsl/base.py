@@ -223,6 +223,8 @@ class FSLCommand(CommandLine):
                 suffix = ''.join((suffix, ext))
             else:
                 suffix = ext
+        if suffix is None:
+            suffix = ''
         fname = fname_presuffix(basename, suffix = suffix,
                                 use_ext = False, newpath = cwd)
         return fname

@@ -444,21 +444,19 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     brightness_threshold = traits.Int(min=0, argstr='-epith %d',
         desc='susan brightness threshold, otherwise it is estimated')
     full_data = traits.Bool(argstr='-v', desc='output full data')
-    # XX: Are these mutually exclusive? [SG]
-    #_estimate_xor = ['autocorr_estimate_only', 'fit_armodel', 'tukey_window',
-    #                 'multitaper_product', 'use_pava', 'autocorr_noestimate']
+    _estimate_xor = ['autocorr_estimate_only', 'fit_armodel', 'tukey_window',
+                     'multitaper_product', 'use_pava', 'autocorr_noestimate']
     autocorr_estimate_only = traits.Bool(argstr='-ac',
-                                    xor=['autocorr_noestimate'],
+                                    xor=_estimate_xor,
                    desc='perform autocorrelation estimatation only')
-    fit_armodel = traits.Bool(argstr='-ar',
+    fit_armodel = traits.Bool(argstr='-ar',xor=_estimate_xor,
         desc='fits autoregressive model - default is to use tukey with M=sqrt(numvols)')
-    tukey_window = traits.Int(argstr='-tukey %d',
+    tukey_window = traits.Int(argstr='-tukey %d',xor=_estimate_xor,
         desc='tukey window size to estimate autocorr')
-    multitaper_product = traits.Int(argstr='-mt %d',
+    multitaper_product = traits.Int(argstr='-mt %d',xor=_estimate_xor,
                desc='multitapering with slepian tapers and num is the time-bandwidth product')
     use_pava = traits.Bool(argstr='-pava', desc='estimates autocorr using PAVA')
-    autocorr_noestimate = traits.Bool(argstr='-noest',
-                                      xor=['autocorr_estimate_only'],
+    autocorr_noestimate = traits.Bool(argstr='-noest',xor=_estimate_xor,
                    desc='do not estimate autocorrs')
     output_pwdata = traits.Bool(argstr='-output_pwdata',
                    desc='output prewhitened data and average design matrix')
@@ -474,6 +472,10 @@ class FILMGLSOutputSpec(TraitedSpec):
     sigmasquareds = File(exists=True, desc='summary of residuals, See Woolrich, et. al., 2001')
     results_dir = Directory(exists=True,
                          desc='directory storing model estimation output')
+    corrections = File(exists=True,
+                       desc='statistical corrections used within FILM modelling')
+    logfile = File(exists=True,
+                   desc='FILM run logfile')
 
 class FILMGLS(FSLCommand):
     """Use FSL film_gls command to fit a design matrix to voxel timeseries
@@ -536,6 +538,11 @@ threshold=10, results_dir='stats')
         outputs['dof_file'] = os.path.join(results_dir,'dof')
         outputs['sigmasquareds'] = self._gen_fname('sigmasquareds.nii',
                                                    cwd=results_dir)
+        outputs['corrections'] = self._gen_fname('corrections.nii',
+                                                 cwd=results_dir)
+        outputs['logfile'] = self._gen_fname('logfile',
+                                             change_ext=False,
+                                             cwd=results_dir)
         return outputs
 
 
@@ -720,9 +727,17 @@ class ContrastMgrInputSpec(FSLCommandInputSpec):
                      desc='contrast file containing T-contrasts')
     fcon_file = File(exists=True, argstr='-f %s',
                      desc='contrast file containing F-contrasts')
-    stats_dir = Directory(exists=True, mandatory=True,
-                          argstr='%s', position=-2,
-                          desc='directory containing first level analysis')
+    param_estimates = InputMultiPath(File(exists=True),
+                                     argstr='', copyfile=False,
+                                     mandatory=True,
+          desc='Parameter estimates for each column of the design matrix')
+    corrections = File(exists=True, copyfile=False,
+                       desc='statistical corrections used within FILM modelling')
+    dof_file = File(exists=True, argstr='', copyfile=False, mandatory=True,
+                    desc='degrees of freedom')
+    sigmasquareds = File(exists=True, argstr='', position=-2,
+                         copyfile=False, mandatory=True,
+                         desc='summary of residuals, See Woolrich, et. al., 2001')
     contrast_num = traits.Int(min=1, argstr='-cope',
                 desc='contrast number to start labeling copes from')
     suffix = traits.Str(argstr='-suffix %s',
@@ -744,11 +759,27 @@ class ContrastMgrOutputSpec(TraitedSpec):
 
 class ContrastMgr(FSLCommand):
     """Use FSL contrast_mgr command to evaluate contrasts
+
+    In interface mode this file assumes that all the required inputs are in the
+    same location.
     """
 
     _cmd = 'contrast_mgr'
     input_spec = ContrastMgrInputSpec
     output_spec = ContrastMgrOutputSpec
+
+    def _format_arg(self, name, trait_spec, value):
+        if name in ['param_estimates', 'corrections', 'dof_file']:
+            return ''
+        elif name in ['sigmasquareds']:
+            path, _ = os.path.split(value)
+            return path
+        else:
+            return super(ContrastMgr, self)._format_arg(name, trait_spec, value)
+
+    def _get_design_root(self, infile):
+        _, fname = os.path.split(infile)
+        return fname.split('.')[0]
 
     def _get_numcons(self):
         numtcons = 0
@@ -771,7 +802,7 @@ class ContrastMgr(FSLCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        pth = self.inputs.stats_dir
+        pth, _ = os.path.split(self.inputs.sigmasquareds)
         numtcons, numfcons = self._get_numcons()
         base_contrast = 1
         if isdefined(self.inputs.contrast_num):
