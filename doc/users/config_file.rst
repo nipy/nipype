@@ -36,6 +36,12 @@ Execution
 	Should the workflow stop upon first node crashing or try to
 	execute as many nodes as possible? (possible values: ``true``
 	and ``false``; default value: ``false``)
+	
+*stop_on_first_rerun*
+	Should the workflow stop upon first node trying to recompute (by that we mean 
+	rerunning a node that has been run before - this can happen due changed 
+	inputs and/or hash_method since the last run). (possible values: ``true``
+	and ``false``; default value: ``false``)
 
 *hash_method*
 	Should the input files be checked for changes using their
