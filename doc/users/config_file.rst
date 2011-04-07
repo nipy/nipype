@@ -28,9 +28,8 @@ Execution
 ~~~~~~~~~~~
 
 *plugin*
-
-        This defines which execution plugin to use. (possible values:
-        Linear, SGE, IPython; default: Linear)
+	This defines which execution plugin to use. (possible values:
+    ``Linear``, ``SGE``, ``IPython``; default: ``Linear``)
 
 *stop_on_first_crash*
 	Should the workflow stop upon first node crashing or try to
@@ -65,11 +64,11 @@ Execution
 	it. (possible values: any X server address; default value: not
 	set)
 
-*remove_unnecessary_outputs* 
-       This will remove any interface outputs not needed by the
-        workflow. If the required outputs from a node changes, rerunning
-        the workflow will rerun the node. (possible values: ``true`` and
-        ``false``; default value: ``true``)
+*remove_unnecessary_outputs*
+	This will remove any interface outputs not needed by the
+    workflow. If the required outputs from a node changes, rerunning
+    the workflow will rerun the node. (possible values: ``true`` and
+    ``false``; default value: ``true``)
 
 *use_relative_paths*
 	Should the paths stored in results (and used to look for inputs)
