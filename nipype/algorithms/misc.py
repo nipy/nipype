@@ -296,7 +296,10 @@ class DissimilarityInputSpec(BaseInterfaceInputSpec):
     )
     
 class DissimilarityOutputSpec(TraitedSpec):
-    dissimilarity = traits.Float()
+    jaccard = traits.Float()
+    dice = traits.Float()
+    volume = traits.Int()
+    diff_file = File(exists=True)
     
 class Dissimilarity(BaseInterface):
     """
@@ -313,16 +316,28 @@ class Dissimilarity(BaseInterface):
         nii1 = nb.load(self.inputs.volume1)
         nii2 = nb.load(self.inputs.volume2)
         
-        if self.inputs.method in ("dice", "jaccard"):
-            origdata1 = nii1.get_data().astype(np.bool)
-            origdata2 = nii2.get_data().astype(np.bool)
-            self._dissimilarity = self._bool_vec_dissimilarity(origdata1, origdata2, method = self.inputs.method)
+        origdata1 = nii1.get_data().astype(np.bool)
+        origdata2 = nii2.get_data().astype(np.bool)
+        for method in ("dice", "jaccard"):
+
+            setattr(self, '_' + method, self._bool_vec_dissimilarity(origdata1, origdata2, method = method))
+        
+        self._volume = origdata1.sum() - origdata2.sum()
+        
+        both_data = np.zeros(origdata1.shape)
+        both_data[origdata1] = 1
+        both_data[origdata2] += 2
+        
+        nb.save(nb.Nifti1Image(both_data, nii1.get_affine(), nii1.get_header()), "diff.nii")
         
         return runtime
     
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['dissimilarity'] = self._dissimilarity
+        for method in ("dice", "jaccard"):
+            outputs[method] = getattr(self, '_'+method)
+        outputs['volume'] = self._volume
+        outputs['diff_file'] = os.path.abspath("diff.nii")
         return outputs
     
 class CreateNiftiInputSpec(BaseInterfaceInputSpec):
