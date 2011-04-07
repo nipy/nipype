@@ -22,10 +22,8 @@ import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.camino as camino
 import nipype.interfaces.fsl as fsl
-import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.algorithms.misc as misc
-import nibabel as nb
 import os                                    # system functions
 
 """
@@ -147,29 +145,39 @@ bet = pe.Node(interface=fsl.BET(), name="bet")
 bet.inputs.mask = True
 
 """
-Finally, tractography is performed. In this tutorial, we will use only 1 iteration for time-saving purposes.
+Finally, tractography is performed.
+First DT streamline tractography.
 """
-track = pe.Node(interface=camino.TrackPICo(), name="track")
-#track.inputs.inputmodel = 'pico'
-track.inputs.iterations = 1
-#track.inputs.outputtracts = 'oogl'
+trackdt = pe.Node(interface=camino.TrackDT(), name="trackdt")
+
+"""
+Now camino's Probablistic Index of connectivity algorithm.
+In this tutorial, we will use only 1 iteration for time-saving purposes.
+"""
+trackpico = pe.Node(interface=camino.TrackPICo(), name="trackpico")
+trackpico.inputs.iterations = 1
 
 """
 Currently, the best program for visualizing tracts is TrackVis. For this reason, a node is included to
 convert the raw tract data to .trk format. Solely for testing purposes, another node is added to perform the reverse.
 """
-camino2trackvis = pe.Node(interface=cam2trk.Camino2Trackvis(), name="camino2trk")
-camino2trackvis.inputs.min_length = 30
-camino2trackvis.inputs.voxel_order = 'LAS'
+cam2trk_dt = pe.Node(interface=cam2trk.Camino2Trackvis(), name="cam2trk_dt")
+cam2trk_dt.inputs.min_length = 30
+cam2trk_dt.inputs.voxel_order = 'LAS'
+
+cam2trk_pico = pe.Node(interface=cam2trk.Camino2Trackvis(), name="cam2trk_pico")
+cam2trk_pico.inputs.min_length = 30
+cam2trk_pico.inputs.voxel_order = 'LAS'
+
 trk2camino = pe.Node(interface=cam2trk.Trackvis2Camino(), name="trk2camino")
 
 """
 Tracts can also be converted to VTK and OOGL formats, for use in programs such as GeomView and Paraview,
 using the following two nodes.
 """
-vtkstreamlines = pe.Node(interface=camino.VtkStreamlines(), name="vtkstreamlines")
-procstreamlines = pe.Node(interface=camino.ProcStreamlines(), name="procstreamlines")
-procstreamlines.inputs.outputtracts = 'oogl'
+#vtkstreamlines = pe.Node(interface=camino.VtkStreamlines(), name="vtkstreamlines")
+#procstreamlines = pe.Node(interface=camino.ProcStreamlines(), name="procstreamlines")
+#procstreamlines.inputs.outputtracts = 'oogl'
 
 
 """
@@ -184,38 +192,59 @@ analyzeheader_fa = pe.Node(interface= camino.AnalyzeHeader(), name = "analyzehea
 analyzeheader_fa.inputs.datatype = "double"
 analyzeheader_trace = analyzeheader_fa.clone('analyzeheader_trace')
 
+#analyzeheader_md = pe.Node(interface= camino.AnalyzeHeader(), name = "analyzeheader_md")
+#analyzeheader_md.inputs.datatype = "double"
+#analyzeheader_trace = analyzeheader_md.clone('analyzeheader_trace')
+
 fa2nii = pe.Node(interface=misc.CreateNifti(),name='fa2nii')
 trace2nii = fa2nii.clone("trace2nii")
 
 """
 Since we have now created all our nodes, we can now define our workflow and start making connections.
 """
-convertTest = pe.Workflow(name='convertTest')
+tractography = pe.Workflow(name='tractography')
 
-convertTest.connect([(inputnode, bet,[("dwi","in_file")])])
-convertTest.connect([(bet, track,[("mask_file","seed_file")])])
+tractography.connect([(inputnode, bet,[("dwi","in_file")])])
 
-convertTest.connect([(inputnode, image2voxel, [("dwi", "in_file")]),
-                       (inputnode, fsl2scheme, [("bvecs", "bvec_file"),
-                                                ("bvals", "bval_file")]),
-
-                       (image2voxel, dtifit,[['voxel_order','in_file']]),
-                       (fsl2scheme, dtifit,[['scheme','scheme_file']])
+"""
+File format conversion
+"""
+tractography.connect([(inputnode, image2voxel, [("dwi", "in_file")]),
+                      (inputnode, fsl2scheme, [("bvecs", "bvec_file"),
+                                               ("bvals", "bval_file")])
                       ])
 
-convertTest.connect([(fsl2scheme, dtlutgen,[("scheme","scheme_file")])])
-convertTest.connect([(dtlutgen, picopdfs,[("dtLUT","luts")])])
-convertTest.connect([(dtifit, picopdfs,[("tensor_fitted","in_file")])])
-convertTest.connect([(picopdfs, track,[("pdfs","in_file")])])
+"""
+Tensor fitting
+"""
+tractography.connect([(image2voxel, dtifit,[['voxel_order','in_file']]),
+                      (fsl2scheme, dtifit,[['scheme','scheme_file']])
+                     ])
+
+"""
+Workflow for applying DT streamline tractogpahy
+"""
+tractography.connect([(bet, trackdt,[("mask_file","seed_file")])])
+tractography.connect([(dtifit, trackdt,[("tensor_fitted","in_file")])])
+
+"""
+Workflow for applying PICo
+"""
+tractography.connect([(bet, trackpico,[("mask_file","seed_file")])])
+tractography.connect([(fsl2scheme, dtlutgen,[("scheme","scheme_file")])])
+tractography.connect([(dtlutgen, picopdfs,[("dtLUT","luts")])])
+tractography.connect([(dtifit, picopdfs,[("tensor_fitted","in_file")])])
+tractography.connect([(picopdfs, trackpico,[("pdfs","in_file")])])
 
 
 # Mean diffusivity still appears broken
-#convertTest.connect([(dtifit, md,[("tensor_fitted","in_file")])])
-#convertTest.connect([(md, analyzeheader_md,[("md","in_file")])])
-#convertTest.connect([(inputnode, analyzeheader_md,[(('dwi', get_vox_dims), 'voxel_dims'),
+#tractography.connect([(dtifit, md,[("tensor_fitted","in_file")])])
+#tractography.connect([(md, analyzeheader_md,[("md","in_file")])])
+#tractography.connect([(inputnode, analyzeheader_md,[(('dwi', get_vox_dims), 'voxel_dims'),
 #(('dwi', get_data_dims), 'data_dims')])])
 #This line is commented out because the ProcStreamlines node keeps throwing memory errors
-#convertTest.connect([(track, procstreamlines,[("tracked","in_file")])])
+#tractography.connect([(track, procstreamlines,[("tracked","in_file")])])
+
 
 """
 Connecting the Fractional Anisotropy and Trace nodes is simple, as they obtain their input from the
@@ -226,60 +255,50 @@ the original DWI image from the input node, to the header-generating nodes. This
 will be correct and readable.
 """
 
-convertTest.connect([(dtifit, fa,[("tensor_fitted","in_file")])])
-convertTest.connect([(fa, analyzeheader_fa,[("fa","in_file")])])
-convertTest.connect([(inputnode, analyzeheader_fa,[(('dwi', get_vox_dims), 'voxel_dims'),
+tractography.connect([(dtifit, fa,[("tensor_fitted","in_file")])])
+tractography.connect([(fa, analyzeheader_fa,[("fa","in_file")])])
+tractography.connect([(inputnode, analyzeheader_fa,[(('dwi', get_vox_dims), 'voxel_dims'),
 (('dwi', get_data_dims), 'data_dims')])])
-convertTest.connect([(fa, fa2nii,[('fa','data_file')])])
-convertTest.connect([(inputnode, fa2nii,[(('dwi', get_affine), 'affine')])])
-convertTest.connect([(analyzeheader_fa, fa2nii,[('header', 'header_file')])])
+tractography.connect([(fa, fa2nii,[('fa','data_file')])])
+tractography.connect([(inputnode, fa2nii,[(('dwi', get_affine), 'affine')])])
+tractography.connect([(analyzeheader_fa, fa2nii,[('header', 'header_file')])])
 
 
-convertTest.connect([(dtifit, trace,[("tensor_fitted","in_file")])])
-convertTest.connect([(trace, analyzeheader_trace,[("trace","in_file")])])
-convertTest.connect([(inputnode, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
+tractography.connect([(dtifit, trace,[("tensor_fitted","in_file")])])
+tractography.connect([(trace, analyzeheader_trace,[("trace","in_file")])])
+tractography.connect([(inputnode, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
 (('dwi', get_data_dims), 'data_dims')])])
-convertTest.connect([(trace, trace2nii,[('trace','data_file')])])
-convertTest.connect([(inputnode, trace2nii,[(('dwi', get_affine), 'affine')])])
-convertTest.connect([(analyzeheader_trace, trace2nii,[('header', 'header_file')])])
+tractography.connect([(trace, trace2nii,[('trace','data_file')])])
+tractography.connect([(inputnode, trace2nii,[(('dwi', get_affine), 'affine')])])
+tractography.connect([(analyzeheader_trace, trace2nii,[('header', 'header_file')])])
 
+tractography.connect([(trackpico, cam2trk_pico, [('tracked','in_file')])])
+tractography.connect([(trackdt, cam2trk_dt, [('tracked','in_file')])])
+tractography.connect([(inputnode, cam2trk_pico,[(('dwi', get_vox_dims), 'voxel_dims'),
+                                                (('dwi', get_data_dims), 'data_dims')])])
 
-# Mean diffusivity still appears broken
-#convertTest.connect([(dtifit, md,[("tensor_fitted","in_file")])])
-#convertTest.connect([(md, analyzeheader_md,[("md","in_file")])])
-#convertTest.connect([(inputnode, analyzeheader_md,[(('dwi', get_vox_dims), 'voxel_dims'),
-#(('dwi', get_data_dims), 'data_dims')])])
+tractography.connect([(inputnode, cam2trk_dt,[(('dwi', get_vox_dims), 'voxel_dims'),
+                                              (('dwi', get_data_dims), 'data_dims')])])
 
-#This line is commented out because the ProcStreamlines node keeps throwing memory errors
-#convertTest.connect([(track, procstreamlines,[("tracked","in_file")])])
-
-convertTest.connect([(track, camino2trackvis, [('tracked','in_file')]),
-                       (track, vtkstreamlines,[['tracked','in_file']]),
-                       (camino2trackvis, trk2camino,[['trackvis','in_file']])
-                      ])
-
-convertTest.connect([(inputnode, camino2trackvis,[(('dwi', get_vox_dims), 'voxel_dims'),
-(('dwi', get_data_dims), 'data_dims')])])
 
 """
-Finally, we create another higher-level workflow to connect our mapping workflow with the info and datagrabbing nodes
+Finally, we create another higher-level workflow to connect our tractography workflow with the info and datagrabbing nodes
 declared at the beginning. Our tutorial can is now extensible to any arbitrary number of subjects by simply adding
 their names to the subject list and their data to the proper folders.
 """
-dwiproc = pe.Workflow(name="dwiproc")
-dwiproc.base_dir = os.path.abspath('camino_dti_tutorial')
-dwiproc.connect([
-                    (infosource,datasource,[('subject_id', 'subject_id')]),
-                    (datasource,convertTest,[('dwi','inputnode.dwi'),
-                                               ('bvals','inputnode.bvals'),
-                                               ('bvecs','inputnode.bvecs')
-                                               ])
-                ])
+workflow = pe.Workflow(name="workflow")
+workflow.base_dir = os.path.abspath('camino_dti_tutorial')
+workflow.connect([(infosource,datasource,[('subject_id', 'subject_id')]),
+                  (datasource,tractography,[('dwi','inputnode.dwi'),
+                                            ('bvals','inputnode.bvals'),
+                                            ('bvecs','inputnode.bvecs')
+                                           ])
+                 ])
 """
 The following functions run the whole workflow and produce a .dot and .png graph of the processing pipeline.
 """
-dwiproc.run()
-dwiproc.write_graph()
+workflow.run()
+workflow.write_graph()
 """
 This outputted .dot graph can be converted to a vector image for use in figures via the following command-line function:
 dot -Tps graph.dot > graph.eps
