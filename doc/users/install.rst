@@ -103,7 +103,7 @@ Install
 
 The installation process is similar to other Python packages so it
 will be familiar if you have Python experience. Nipype is also hosted on the 
-PyPi rep[ository so you can do::
+PyPi repository so you can do::
 
 	easy_install nipype
 	
