@@ -286,7 +286,7 @@ only the 'aparc+aseg.nii' file to a Freesurfer NIFTI conversion node.
 Similarly, the rh.aparc.annot and lh.aparc.annot files are chosen for the surface labels.
 """
 selectaparc = pe.Node(interface=util.Select(), name="SelectAparcAseg")
-selectaparc.inputs.index = 1 # Use 0 for aparc+aseg and 1 for aparc.a2009s+aseg
+selectaparc.inputs.index = 0 # Use 0 for aparc+aseg and 1 for aparc.a2009s+aseg
 
 selectaparcAnnotLH = pe.Node(interface=util.Select(), name="SelectAparcAnnotLH")
 selectaparcAnnotLH.inputs.index = 2 # Use 0 for .a2009s.annot, 1 for .BA.annot, 2 for .aparc.annot

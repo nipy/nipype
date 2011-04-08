@@ -100,7 +100,6 @@ class CFFConverter(BaseInterface):
 
         a.connectome_meta.set_created(datetime.date.today())
 
-        cnetwork_fnames = self.inputs.cnetworks
         count = 0
         if isdefined(self.inputs.graphml_networks):
             for ntwk in self.inputs.graphml_networks:

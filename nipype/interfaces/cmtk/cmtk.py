@@ -134,10 +134,10 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
 
     print 'Running cmat function'
     # Identify the endpoints of each fiber
-    en_fname = os.path.abspath(op.join(endpoint_name, 'endpoints.npy'))
-    en_fnamemm = os.path.abspath(op.join(endpoint_name, 'endpointsmm.npy'))
-    ep_fname = os.path.abspath(op.join(endpoint_name, 'lengths.npy'))
-    curv_fname = os.path.abspath(op.join(endpoint_name, 'meancurvature.npy'))
+    en_fname = os.path.abspath(endpoint_name + '_endpoints.npy')
+    en_fnamemm = os.path.abspath(endpoint_name + '_endpointsmm.npy')
+    ep_fname = os.path.abspath(endpoint_name + '_lengths.npy')
+    curv_fname = os.path.abspath(endpoint_name + '_meancurvature.npy')
 
     print 'Reading Trackvis file {trk}'.format(trk=track_file)
     fib, hdr = nb.trackvis.read(track_file, False)
@@ -151,7 +151,7 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
     # what it should be
 
     roi = nb.load(roi_file)
-    roiVoxelSize = firstROI.get_header().get_zooms()
+    roiVoxelSize = roi.get_header().get_zooms()
     (endpoints,endpointsmm) = create_endpoints_array(fib, roiVoxelSize)
 
     # Output endpoint arrays
@@ -304,10 +304,10 @@ class CreateMatrix(BaseInterface):
         else:
             matrix_mat_file = self._gen_outfilename('mat')
 
-        if not isdefined(self.inputs.endpoint_name):
+        if not isdefined(self.inputs.out_endpoint_array_name):
             _, endpoint_name , _ = split_filename(self.inputs.tract_file)
         else:
-            endpoint_name = out_endpoint_array_name
+            endpoint_name = self.inputs.out_endpoint_array_name
 
         cmat(self.inputs.tract_file, self.inputs.roi_file, self.inputs.dict_file, self.inputs.resolution_network_file,
         matrix_file, matrix_mat_file, endpoint_name)
@@ -326,16 +326,16 @@ class CreateMatrix(BaseInterface):
             outputs['matrix_mat_file']=os.path.abspath(self._gen_outfilename('mat'))
 
         if isdefined(self.inputs.out_endpoint_array_name):
-            endpoint_file = os.path.abspath(op.join(self.inputs.out_endpoint_array_name, 'endpoints.npy'))
-            endpoint_file_mm = os.path.abspath(op.join(self.inputs.out_endpoint_array_name, 'endpointsmm.npy'))
-            length_file = os.path.abspath(op.join(self.inputs.out_endpoint_array_name, 'lengths.npy'))
-            curvature_file = os.path.abspath(op.join(self.inputs.out_endpoint_array_name, 'meancurvature.npy'))
+            endpoint_file = os.path.abspath(self.inputs.out_endpoint_array_name + '_endpoints.npy')
+            endpoint_file_mm = os.path.abspath(self.inputs.out_endpoint_array_name + '_endpointsmm.npy')
+            length_file = os.path.abspath(self.inputs.out_endpoint_array_name + '_lengths.npy')
+            curvature_file = os.path.abspath(self.inputs.out_endpoint_array_name + '_meancurvature.npy')
         else:
             _, endpoint_name , _ = split_filename(self.inputs.tract_file)
-            endpoint_file = os.path.abspath(op.join(endpoint_name, 'endpoints.npy'))
-            endpoint_file_mm = os.path.abspath(op.join(endpoint_name, 'endpointsmm.npy'))
-            length_file = os.path.abspath(op.join(endpoint_name, 'lengths.npy'))
-            curvature_file = os.path.abspath(op.join(endpoint_name, 'meancurvature.npy'))
+            endpoint_file = os.path.abspath(endpoint_name + '_endpoints.npy')
+            endpoint_file_mm = os.path.abspath(endpoint_name + '_endpointsmm.npy')
+            length_file = os.path.abspath(endpoint_name + '_lengths.npy')
+            curvature_file = os.path.abspath(endpoint_name + '_meancurvature.npy')
 
         return outputs
 
