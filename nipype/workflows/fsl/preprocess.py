@@ -8,24 +8,6 @@ import nipype.pipeline.engine as pe          # pypeline engine
 
 from nibabel import load
 
-
-"""
-Set up FSL preprocessing workflow
---------------------
-
-In this tutorial we will be setting up a hierarchical workflow for fsl
-analysis. This will demonstrate how pre-defined workflows can be setup and
-shared across users, projects and labs.
-
-
-Setup preprocessing workflow
-----------------------------
-
-This is a generic fsl feat preprocessing workflow encompassing skull stripping,
-motion correction and smoothing operations.
-
-"""
-
 def getthreshop(thresh):
     return '-thr %.10f -Tmin -bin'%(0.1*thresh[0][1])
 
@@ -54,16 +36,15 @@ highpass_operand = lambda x:'-bptf %.10f -1'%x
 
 def create_featpreproc(name='featpreproc'):
     """Create a FEAT preprocessing workflow
+    
+    Inputs::
 
-    Parameters
-    ----------
-
-    func : functional runs (filename or list of filenames)
-    fwhm : fwhm for smoothing with SUSAN
-    highpass : HWHM in TRs
-    outdir : where preprocessed data should be stored
-    subjectid : subjectid (used for storing output under subject's name
-    subs : paths substitutions for datasink
+        inputspec.func : functional runs (filename or list of filenames)
+        inputspec.fwhm : fwhm for smoothing with SUSAN
+        inputspec.highpass : HWHM in TRs
+        inputspec.outdir : where preprocessed data should be stored
+        inputspec.subjectid : subjectid (used for storing output under subject's name
+        inputspec.subs : paths substitutions for datasink
 
     Example
     -------
@@ -243,43 +224,16 @@ def create_featpreproc(name='featpreproc'):
     featpreproc.connect(dilatemask, 'out_file', maskfunc2, 'in_file2')
 
     """
-    Determine the mean image from each functional run
-    """
-
-    meanfunc2 = pe.MapNode(interface=fsl.ImageMaths(op_string='-Tmean',
-                                                    suffix='_mean'),
-                           iterfield=['in_file'],
-                           name='meanfunc2')
-    featpreproc.connect(maskfunc2, 'out_file', meanfunc2, 'in_file')
-
-    """
-    Merge the median values with the mean functional images into a coupled list
-    """
-
-    mergenode = pe.Node(interface=util.Merge(2, axis='hstack'),
-                        name='merge')
-    featpreproc.connect(meanfunc2,'out_file', mergenode, 'in1')
-    featpreproc.connect(medianval,'out_stat', mergenode, 'in2')
-
-
-    """
     Smooth each run using SUSAN with the brightness threshold set to 75%
     of the median value for each run and a mask consituting the mean
     functional
     """
 
-    smooth = pe.MapNode(interface=fsl.SUSAN(),
-                        iterfield=['in_file', 'brightness_threshold','usans'],
-                        name='smooth')
+    smooth = create_susan_smooth()
 
-    """
-    Define a function to get the brightness threshold for SUSAN
-    """
-
-    featpreproc.connect(inputnode, 'fwhm', smooth, 'fwhm')
-    featpreproc.connect(maskfunc2, 'out_file', smooth, 'in_file')
-    featpreproc.connect(medianval, ('out_stat', getbtthresh), smooth, 'brightness_threshold')
-    featpreproc.connect(mergenode, ('out', getusans), smooth, 'usans')
+    featpreproc.connect(inputnode, 'fwhm', smooth, 'inputnode.fwhm')
+    featpreproc.connect(maskfunc2, 'out_file', smooth, 'inputnode.in_files')
+    featpreproc.connect(dilatemask, 'out_file', smooth, 'inputnode.mask_file')
 
     """
     Mask the smoothed data with the dilated mask
@@ -289,7 +243,7 @@ def create_featpreproc(name='featpreproc'):
                                                     op_string='-mas'),
                           iterfield=['in_file'],
                           name='maskfunc3')
-    featpreproc.connect(smooth, 'smoothed_file', maskfunc3, 'in_file')
+    featpreproc.connect(smooth, 'outputnode.smoothed_files', maskfunc3, 'in_file')
 
     featpreproc.connect(dilatemask, 'out_file', maskfunc3, 'in_file2')
 
@@ -354,6 +308,32 @@ def create_featpreproc(name='featpreproc'):
     return featpreproc
 
 def create_susan_smooth(name="susan_smooth"):
+    """Create a SUSAN smoothing workflow
+    
+    Inputs::
+
+        inputnode.in_files : functional runs (filename or list of filenames)
+        inputnode.fwhm : fwhm for smoothing with SUSAN
+        inputnode.mask_file : mask used for estimating SUSAN thresholds (but not for smoothing)
+        
+    Outputs::
+
+        outputnode.smoothed_files : functional runs (filename or list of filenames)
+
+    Example
+    -------
+
+    >>> from nipype.workflows.fsl import create_susan_smooth
+    >>> smooth = create_susan_smooth()
+    >>> smooth.inputs.inputnode.in_files = 'f3.nii'
+    >>> smooth.inputs.inputnode.fwhm = 5
+    >>> smooth.inputs.inputnode.mask_file = 'mask.nii'
+    >>> smooth.run() # doctest: +SKIP
+
+    """
+    
+    susan_smooth = pe.Workflow(name=name)    
+    
     """
     Set up a node to define all inputs required for the preprocessing workflow
 
@@ -363,8 +343,6 @@ def create_susan_smooth(name="susan_smooth"):
                                                                  'fwhm',
                                                                  'mask_file']),
                         name='inputnode')
-    
-    susan_smooth = pe.Workflow(name=name)
     
     """
     Smooth each run using SUSAN with the brightness threshold set to 75%
