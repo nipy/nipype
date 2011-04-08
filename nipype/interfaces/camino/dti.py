@@ -5,22 +5,6 @@ import os
 import nibabel as nb
 
 class DTIFitInputSpec(StdOutCommandLineInputSpec):
-    """
-    * Reads diffusion MRI data, acquired using the acquisition scheme detailed in the scheme file, from the data file.
-    * For help with scheme files, please see the section "scheme files" in camino(1).  OPTIONS
-
-    dtfit <data file> <scheme file> [-nonlinear] [options] --nonlinear
-
-        Use non-linear fitting instead of the default linear regression to the log measurements.
-    The data file stores the diffusion MRI data in voxel order with the measurements stored in big-endian format and ordered as in the scheme file.
-    The default input data type is four-byte float. The default output data type is eight-byte double.
-    See modelfit and camino for the format of the data file and scheme file.
-    The program fits the diffusion tensor to each voxel and outputs the results,
-    in voxel order and as big-endian eight-byte doubles, to the standard output.
-    The program outputs eight values in each voxel: [exit code, ln(S(0)), D_xx, D_xy, D_xz, D_yy, D_yz, D_zz].
-    An exit code of zero indicates no problems. For a list of other exit codes, see modelfit(1). The entry S(0) is an estimate of the signal at q=0.
-    """
-
     in_file = File(exists=True, argstr='%s', mandatory=True, position=1,
         desc='voxel-order data filename')
 
@@ -31,12 +15,29 @@ class DTIFitInputSpec(StdOutCommandLineInputSpec):
         desc="Use non-linear fitting instead of the default linear regression to the log measurements. ")
 
 class DTIFitOutputSpec(TraitedSpec):
-    """Use dtfit to fit tensors to each voxel
-    """
     tensor_fitted = File(exists=True, desc='path/name of 4D volume in voxel order')
 
 class DTIFit(StdOutCommandLine):
-    """Use dtfit to fit tensors to each voxel
+    """
+    Reads diffusion MRI data, acquired using the acquisition scheme detailed in the scheme file, from the data file.
+
+        Use non-linear fitting instead of the default linear regression to the log measurements.
+    The data file stores the diffusion MRI data in voxel order with the measurements stored in big-endian format and ordered as in the scheme file.
+    The default input data type is four-byte float. The default output data type is eight-byte double.
+    See modelfit and camino for the format of the data file and scheme file.
+    The program fits the diffusion tensor to each voxel and outputs the results,
+    in voxel order and as big-endian eight-byte doubles, to the standard output.
+    The program outputs eight values in each voxel: [exit code, ln(S(0)), D_xx, D_xy, D_xz, D_yy, D_yz, D_zz].
+    An exit code of zero indicates no problems. For a list of other exit codes, see modelfit(1). The entry S(0) is an estimate of the signal at q=0.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.camino as cmon
+    >>> fit = cmon.DTIFit()
+    >>> fit.inputs.scheme_file = 'A.scheme'
+    >>> fit.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> fit.run()
     """
     _cmd = 'dtfit'
     input_spec=DTIFitInputSpec
@@ -44,34 +45,31 @@ class DTIFit(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["tensor_fitted"] = os.path.abspath(self._gen_outfilename())
+        outputs['tensor_fitted'] = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
-        return name + "_DT.Bdouble"
+        return name + '_DT.Bdouble'
 
 
 class ModelFitInputSpec(StdOutCommandLineInputSpec):
-    """ModelFit inputs
-    """
-    
     def _gen_model_options(): #@NoSelf
         """
         Generate all possible permutations of < multi - tensor > < single - tensor > options
         """
-        
+
         single_tensor = ['dt', 'restore', 'algdt', 'nldt_pos', 'nldt', 'ldt_wtd']
         multi_tensor = ['cylcyl', 'cylcyl_eq', 'pospos', 'pospos_eq', 'poscyl', 'poscyl_eq',
                         'cylcylcyl', 'cylcylcyl_eq', 'pospospos', 'pospospos_eq',
                         'posposcyl', 'posposcyl_eq', 'poscylcyl', 'poscylcyl_eq']
         other = ['adc', 'ball_stick']
-        
+
         model_list = single_tensor
         model_list.extend(other)
         model_list.extend([multi + ' ' + single for multi in multi_tensor for single in single_tensor])
         return model_list
-    
+
     model = traits.Enum(_gen_model_options(), argstr='-model %s', mandatory=True, desc='Specifies the model to be fit to the data.')
 
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True, desc='voxel-order data filename')
@@ -81,7 +79,7 @@ class ModelFitInputSpec(StdOutCommandLineInputSpec):
 
     scheme_file = File(exists=True, argstr='-schemefile %s', mandatory=True,
         desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
-    
+
     outputfile = File(argstr='-outputfile %s', desc='Filename of the output file.')
 
     outlier = File(argstr='-outliermap %s', exists=True, desc='Specifies the name of the file to contain the outlier map generated by the RESTORE algorithm.')
@@ -99,7 +97,7 @@ class ModelFitInputSpec(StdOutCommandLineInputSpec):
     cfthresh = traits.Float(argstr='-csfthresh %s', desc='Sets a threshold on the average q=0 measurement to determine which voxels are CSF. This program does not treat CSF voxels any different to other voxels.')
 
     fixedmodq = traits.List(traits.Float, argstr='-fixedmod %s', minlen=4, maxlen=4, desc='Specifies <M> <N> <Q> <tau> a spherical acquisition scheme with M measurements with q=0 and N measurements with |q|=Q and diffusion time tau. The N measurements with |q|=Q have unique directions. The program reads in the directions from the files in directory PointSets.')
-    
+
     fixedbvalue = traits.List(traits.Float, argstr='-fixedbvalue %s', minlen=3, maxlen=3, desc='As above, but specifies <M> <N> <b>. The resulting scheme is the same whether you specify b directly or indirectly using -fixedmodq.')
 
     tau = traits.Float(argstr='-tau %s', desc='Sets the diffusion time separately. This overrides the diffusion time specified in a scheme file or by a scheme index for both the acquisition scheme and in the data synthesis.')
@@ -107,30 +105,28 @@ class ModelFitInputSpec(StdOutCommandLineInputSpec):
 
 
 class ModelFitOutputSpec(TraitedSpec):
-    """ModelFit outputs
-    """
     fitted_data = File(exists=True, desc='output file of 4D volume in voxel order')
 
 class ModelFit(StdOutCommandLine):
     """
     Fits models of the spin-displacement density to diffusion MRI measurements.
 
-    This is an interface to various model fitting routines for diffusion MRI data that 
-    fit models of the spin-displacement density function. In particular, it will fit the 
-    diffusion tensor to a set of measurements as well as various other models including 
-    two or three-tensor models. The program can read input data from a file or can 
+    This is an interface to various model fitting routines for diffusion MRI data that
+    fit models of the spin-displacement density function. In particular, it will fit the
+    diffusion tensor to a set of measurements as well as various other models including
+    two or three-tensor models. The program can read input data from a file or can
     generate synthetic data using various test functions for testing and simulations.
-    
-    Example:
 
-    import nipype.interfaces.camino as cmon
-    fit = cmon.ModelFit()
-    fit.model = 'dt'
-    fit.inputs.snr = 16
-    fit.inputs.scheme_file = 'A.scheme'
-    fit.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    Example
+    -------
 
-    fit.run()
+    >>> import nipype.interfaces.camino as cmon
+    >>> fit = cmon.ModelFit()
+    >>> fit.model = 'dt'
+    >>> fit.inputs.snr = 16
+    >>> fit.inputs.scheme_file = 'A.scheme'
+    >>> fit.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> fit.run()
     """
     _cmd = 'modelfit'
     input_spec=ModelFitInputSpec
@@ -138,37 +134,14 @@ class ModelFit(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["fitted_data"] = os.path.abspath(self._gen_outfilename())
+        outputs['fitted_data'] = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
-        return name + "_fit.Bdouble"
+        return name + '_fit.Bdouble'
 
 class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
-    """
-    Calibrates the PDFs for PICo probabilistic tractography.
-
-    This program needs to be run once for every acquisition scheme.
-    It outputs a lookup table that is used by the dtpicoparams program to find PICo PDF parameters for an image.
-    The default single tensor LUT contains parameters of the Bingham distribution and is generated by supplying
-    a scheme file and an estimated signal to noise in white matter regions of the (q=0) image.
-    The default inversion is linear (inversion index 1).
-
-    Advanced users can control several options, including the extent and resolution of the LUT,
-    the inversion index, and the type of PDF. See dtlutgen(1) for details.
-
-    Example:
-
-    import nipype.interfaces.camino as cmon
-    dtl = cmon.DTLUTGen()
-    dtl.inputs.snr = 16
-    dtl.inputs.scheme_file = 'A.scheme'
-    dtl.inputs.in_file = 'tensor_fitted_data.Bfloat'
-
-    dtl.run()
-    """
-
     lrange = traits.List(traits.Float, desc = 'Index to one-tensor LUTs. This is the ratio L1/L3 and L2 / L3.' \
         'The LUT is square, with half the values calculated (because L2 / L3 cannot be less than L1 / L3 by definition).' \
         'The minimum must be >= 1. For comparison, a ratio L1 / L3 = 10 with L2 / L3 = 1 corresponds to an FA of 0.891, '\
@@ -213,14 +186,30 @@ class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
         desc='The scheme file of the images to be processed using this LUT.')
 
 class DTLUTGenOutputSpec(TraitedSpec):
-    """
-    Calibrates the PDFs for PICo probabilistic tractography.
-    """
     dtLUT = File(exists=True, desc='Lookup Table')
 
 class DTLUTGen(StdOutCommandLine):
     """
     Calibrates the PDFs for PICo probabilistic tractography.
+
+    This program needs to be run once for every acquisition scheme.
+    It outputs a lookup table that is used by the dtpicoparams program to find PICo PDF parameters for an image.
+    The default single tensor LUT contains parameters of the Bingham distribution and is generated by supplying
+    a scheme file and an estimated signal to noise in white matter regions of the (q=0) image.
+    The default inversion is linear (inversion index 1).
+
+    Advanced users can control several options, including the extent and resolution of the LUT,
+    the inversion index, and the type of PDF. See dtlutgen(1) for details.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.camino as cmon
+    >>> dtl = cmon.DTLUTGen()
+    >>> dtl.inputs.snr = 16
+    >>> dtl.inputs.scheme_file = 'A.scheme'
+    >>> dtl.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> dtl.run()
     """
     _cmd = 'dtlutgen'
     input_spec=DTLUTGenInputSpec
@@ -228,29 +217,14 @@ class DTLUTGen(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["dtLUT"] = os.path.abspath(self._gen_outfilename())
+        outputs['dtLUT'] = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.scheme_file)
-        return name + ".dat"
+        return name + '.dat'
 
 class PicoPDFsInputSpec(StdOutCommandLineInputSpec):
-    """
-    Constructs a spherical PDF in each voxel for probabilistic tractography.
-
-    picopdfs -inputmodel <dt | multitensor | pds> -luts <files>
-
-    Example:
-
-    import nipype.interfaces.camino as cmon
-    pdf = cmon.PicoPDFs()
-    pdf.inputs.inputmodel = 'dt'
-    pdf.inputs.luts = 'lut_file'
-    pdf.inputs.in_file = 'voxel-order_data.Bfloat'
-
-    pdf.run()
-    """
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='voxel-order data filename')
 
@@ -283,14 +257,21 @@ class PicoPDFsInputSpec(StdOutCommandLineInputSpec):
         'but does not mean that any of the voxels are classified as containing three or more PDs.')
 
 class PicoPDFsOutputSpec(TraitedSpec):
-    """
-    Constructs a spherical PDF in each voxel for probabilistic tractography.
-    """
     pdfs = File(exists=True, desc='path/name of 4D volume in voxel order')
 
 class PicoPDFs(StdOutCommandLine):
     """
     Constructs a spherical PDF in each voxel for probabilistic tractography.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.camino as cmon
+    >>> pdf = cmon.PicoPDFs()
+    >>> pdf.inputs.inputmodel = 'dt'
+    >>> pdf.inputs.luts = 'lut_file'
+    >>> pdf.inputs.in_file = 'voxel-order_data.Bfloat'
+    >>> pdf.run()
     """
     _cmd = 'picopdfs'
     input_spec=PicoPDFsInputSpec
@@ -298,12 +279,12 @@ class PicoPDFs(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["pdfs"] = os.path.abspath(self._gen_outfilename())
+        outputs['pdfs'] = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
-        return name + "_pdfs.Bdouble"
+        return name + '_pdfs.Bdouble'
 
 class TrackInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True, position=1, desc='input data file')
@@ -380,15 +361,15 @@ class Track(CommandLine):
     Performs tractography using one of the following models:
     dt', 'multitensor', 'pds', 'pico', 'bootstrap', 'ballstick', 'bayesdirac'
 
-    Example:
+    Example
+    -------
 
-    import nipype.interfaces.camino as cmon
-    track = cmon.Track()
-    track.inputs.inputmodel = 'dt'
-    track.inputs.in_file = 'data.Bfloat'
-    track.inputs.seed_file = 'seed_mask.nii'
-
-    track.run()
+    >>> import nipype.interfaces.camino as cmon
+    >>> track = cmon.Track()
+    >>> track.inputs.inputmodel = 'dt'
+    >>> track.inputs.in_file = 'data.Bfloat'
+    >>> track.inputs.seed_file = 'seed_mask.nii'
+    >>> track.run()
     """
 
     _cmd = 'track'
@@ -398,7 +379,7 @@ class Track(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["tracked"] = os.path.abspath(self._gen_outfilename())
+        outputs['tracked'] = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -408,20 +389,20 @@ class Track(CommandLine):
             return None
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
-        return name + "_tracked"
+        return name + '_tracked'
 
 class TrackDT(Track):
     """
     Performs streamline tractography using tensor data
 
-    Example:
+    Example
+    -------
 
-    import nipype.interfaces.camino as cmon
-    track = cmon.TrackDT()
-    track.inputs.in_file = 'tensor_fitted_data.Bfloat'
-    track.inputs.seed_file = 'seed_mask.nii'
-
-    track.run()
+    >>> import nipype.interfaces.camino as cmon
+    >>> track = cmon.TrackDT()
+    >>> track.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> track.inputs.seed_file = 'seed_mask.nii'
+    >>> track.run()
     """
 
     def __init__(self, command=None, **inputs):
@@ -432,14 +413,14 @@ class TrackPICo(Track):
     """
     Performs streamline tractography using the Probabilistic Index of Connectivity (PICo) algorithm
 
-    Example:
+    Example
+    -------
 
-    import nipype.interfaces.camino as cmon
-    track = cmon.TrackDT()
-    track.inputs.in_file = 'pdfs.Bfloat'
-    track.inputs.seed_file = 'seed_mask.nii'
-
-    track.run()
+    >>> import nipype.interfaces.camino as cmon
+    >>> track = cmon.TrackPICo()
+    >>> track.inputs.in_file = 'pdfs.Bfloat'
+    >>> track.inputs.seed_file = 'seed_mask.nii'
+    >>> track.run()
     """
 
     input_spec = TrackPICoInputSpec
@@ -452,15 +433,15 @@ class TrackBayesDirac(Track):
     """
     Performs streamline tractography using a Bayes-Dirac algorithm
 
-    Example:
+    Example
+    -------
 
-    import nipype.interfaces.camino as cmon
-    track = cmon.TrackDT()
-    track.inputs.in_file = 'tensor_fitted_data.Bfloat'
-    track.inputs.seed_file = 'seed_mask.nii'
-    track.inputs.scheme_file = 'bvecs.scheme'
-
-    track.run()
+    >>> import nipype.interfaces.camino as cmon
+    >>> track = cmon.TrackBayesDirac()
+    >>> track.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> track.inputs.seed_file = 'seed_mask.nii'
+    >>> track.inputs.scheme_file = 'bvecs.scheme'
+    >>> track.run()
     """
 
     input_spec = TrackBayesDiracInputSpec
@@ -496,14 +477,20 @@ class MDInputSpec(CommandLineInputSpec):
         'following strings: "char", "short", "int", "long", "float" or "double".')
 
 class MDOutputSpec(TraitedSpec):
-    """
-    Computes the mean diffusivity (trace/3) from diffusion tensors.
-    """
     md = File(exists=True, desc='Mean Diffusivity Map')
 
 class MD(StdOutCommandLine):
     """
     Computes the mean diffusivity (trace/3) from diffusion tensors.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.camino as cmon
+    >>> md = cmon.MD()
+    >>> md.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> md.inputs.scheme_file = 'A.scheme'
+    >>> md.run()
     """
     _cmd = 'md'
     input_spec=MDInputSpec
@@ -519,25 +506,6 @@ class MD(StdOutCommandLine):
         return name + "_MD.img" #Need to change to self.inputs.outputdatatype
 
 class FAInputSpec(StdOutCommandLineInputSpec):
-    """
-    Computes the fractional anisotropy of tensors.
-
-    Reads diffusion tensor (single, two-tensor or three-tensor) data from the standard input,
-    computes the fractional anisotropy (FA) of each tensor and outputs the results to the
-    standard output. For multiple-tensor data the program outputs the FA of each tensor,
-    so for three-tensor data, for example, the output contains three fractional anisotropy
-    values per voxel.
-
-    Example:
-
-    import nipype.interfaces.camino as cmon
-    fa = cmon.FA()
-    fa.inputs.in_file = 'tensor_fitted_data.Bfloat'
-    fa.inputs.scheme_file = 'A.scheme'
-
-    fa.run()
-    """
-
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='Tensor-fitted data filename')
 
@@ -562,14 +530,26 @@ class FAInputSpec(StdOutCommandLineInputSpec):
         'following strings: "char", "short", "int", "long", "float" or "double".')
 
 class FAOutputSpec(TraitedSpec):
-    """
-    Computes the fractional anisotropy of tensors.
-    """
     fa = File(exists=True, desc='Fractional Anisotropy Map')
 
 class FA(StdOutCommandLine):
     """
     Computes the fractional anisotropy of tensors.
+
+    Reads diffusion tensor (single, two-tensor or three-tensor) data from the standard input,
+    computes the fractional anisotropy (FA) of each tensor and outputs the results to the
+    standard output. For multiple-tensor data the program outputs the FA of each tensor,
+    so for three-tensor data, for example, the output contains three fractional anisotropy
+    values per voxel.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.camino as cmon
+    >>> fa = cmon.FA()
+    >>> fa.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> fa.inputs.scheme_file = 'A.scheme'
+    >>> fa.run()
     """
     _cmd = 'fa'
     input_spec=FAInputSpec
@@ -577,34 +557,14 @@ class FA(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["fa"] = os.path.abspath(self._gen_outfilename())
+        outputs['fa'] = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
-        return name + "_FA.img"     #Need to change to self.inputs.outputdatatype
+        return name + '_FA.img' #Need to change to self.inputs.outputdatatype
 
 class TrDInputSpec(StdOutCommandLineInputSpec):
-    """
-    Computes the trace of tensors.
-
-    Reads diffusion tensor (single, two-tensor or three-tensor) data from the standard input,
-    computes the trace of each tensor, i.e., three times the mean diffusivity, and outputs
-    the results to the standard output. For multiple-tensor data the program outputs the
-    trace of each tensor, so for three-tensor data, for example, the output contains three
-    values per voxel.
-
-    Divide the output by three to get the mean diffusivity.
-
-    Example:
-
-    import nipype.interfaces.camino as cmon
-    trace = cmon.TrD()
-    trace.inputs.in_file = 'tensor_fitted_data.Bfloat'
-    trace.inputs.scheme_file = 'A.scheme'
-
-    trace.run()
-    """
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='Tensor-fitted data filename')
 
@@ -629,14 +589,28 @@ class TrDInputSpec(StdOutCommandLineInputSpec):
         'following strings: "char", "short", "int", "long", "float" or "double".')
 
 class TrDOutputSpec(TraitedSpec):
-    """
-    Computes the trace of tensors.
-    """
     trace = File(exists=True, desc='Trace of the diffusion tensor')
 
 class TrD(StdOutCommandLine):
     """
     Computes the trace of tensors.
+
+    Reads diffusion tensor (single, two-tensor or three-tensor) data from the standard input,
+    computes the trace of each tensor, i.e., three times the mean diffusivity, and outputs
+    the results to the standard output. For multiple-tensor data the program outputs the
+    trace of each tensor, so for three-tensor data, for example, the output contains three
+    values per voxel.
+
+    Divide the output by three to get the mean diffusivity.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.camino as cmon
+    >>> trace = cmon.TrD()
+    >>> trace.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> trace.inputs.scheme_file = 'A.scheme'
+    >>> trace.run()
     """
     _cmd = 'trd'
     input_spec=TrDInputSpec
@@ -644,37 +618,14 @@ class TrD(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["trace"] = os.path.abspath(self._gen_outfilename())
+        outputs['trace'] = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
-        return name + "_TrD.img"     #Need to change to self.inputs.outputdatatype
+        return name + '_TrD.img' #Need to change to self.inputs.outputdatatype
 
 class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
-    """
-    Create or read an Analyze 7.5 header file.
-
-    Analyze image header, provides support for the most common header fields.
-    Some fields, such as patient_id, are not currently supported. The program allows
-    three nonstandard options: the field image_dimension.funused1 is the image scale.
-    The intensity of each pixel in the associated .img file is (image value from file) * scale.
-    Also, the origin of the Talairach coordinates (midline of the anterior commisure) are encoded
-    in the field data_history.originator. These changes are included for compatibility with SPM.
-
-    All headers written with this program are big endian by default.
-
-    Example:
-
-    import nipype.interfaces.camino as cmon
-    hdr = cmon.AnalyzeHeader()
-    hdr.inputs.in_file = 'tensor_fitted_data.Bfloat'
-    hdr.inputs.scheme_file = 'A.scheme'
-    hdr.inputs.data_dims = [256,256,256]
-    hdr.inputs.voxel_dims = [1,1,1]
-
-    hdr.run()
-    """
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='Tensor-fitted data filename') # Took out < %s from argstr
 
@@ -756,14 +707,31 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
         desc="Write header in network byte order (big-endian). This is the default for new headers.")
 
 class AnalyzeHeaderOutputSpec(TraitedSpec):
-    """
-    Create or read an Analyze 7.5 header file.
-    """
     header = File(exists=True, desc='Analyze header')
 
 class AnalyzeHeader(StdOutCommandLine):
     """
     Create or read an Analyze 7.5 header file.
+
+    Analyze image header, provides support for the most common header fields.
+    Some fields, such as patient_id, are not currently supported. The program allows
+    three nonstandard options: the field image_dimension.funused1 is the image scale.
+    The intensity of each pixel in the associated .img file is (image value from file) * scale.
+    Also, the origin of the Talairach coordinates (midline of the anterior commisure) are encoded
+    in the field data_history.originator. These changes are included for compatibility with SPM.
+
+    All headers written with this program are big endian by default.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.camino as cmon
+    >>> hdr = cmon.AnalyzeHeader()
+    >>> hdr.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> hdr.inputs.scheme_file = 'A.scheme'
+    >>> hdr.inputs.data_dims = [256,256,256]
+    >>> hdr.inputs.voxel_dims = [1,1,1]
+    >>> hdr.run()
     """
     _cmd = 'analyzeheader'
     input_spec=AnalyzeHeaderInputSpec
@@ -771,9 +739,9 @@ class AnalyzeHeader(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["header"] = os.path.abspath(self._gen_outfilename())
+        outputs['header'] = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
-        return name + ".hdr"
+        return name + '.hdr'
