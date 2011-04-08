@@ -105,6 +105,7 @@ datasource.inputs.template_args = info
 """
 An inputnode is used to pass the data obtained by the data grabber to the actual processing functions
 """
+
 inputnode = pe.Node(interface=util.IdentityInterface(fields=["dwi", "bvecs", "bvals"]), name="inputnode")
 
 """
@@ -113,6 +114,7 @@ Setup for Diffusion Tensor Computation
 In this section we create the nodes necessary for diffusion analysis.
 First, the diffusion image is converted to voxel order.
 """
+
 image2voxel = pe.Node(interface=camino.Image2Voxel(), name="image2voxel")
 fsl2scheme = pe.Node(interface=camino.FSL2Scheme(), name="fsl2scheme")
 fsl2scheme.inputs.usegradmod = True
@@ -120,27 +122,31 @@ fsl2scheme.inputs.usegradmod = True
 """
 Second, diffusion tensors are fit to the voxel-order data.
 """
+
 dtifit = pe.Node(interface=camino.DTIFit(),name='dtifit')
 
 """
 Next, a lookup table is generated from the schemefile and the
 signal-to-noise ratio (SNR) of the unweighted (q=0) data.
 """
+
 dtlutgen = pe.Node(interface=camino.DTLUTGen(), name="dtlutgen")
 dtlutgen.inputs.snr = 16.0
 dtlutgen.inputs.inversion = 1
 
 """
 In this tutorial we implement probabilistic tractography using the PICo algorithm.
-PICo tractography requires an estimate of the fibre direction and a model of its uncertainty in each voxel;
-this is produced using the following node.
+PICo tractography requires an estimate of the fibre direction and a model of its 
+uncertainty in each voxel; this is produced using the following node.
 """
+
 picopdfs = pe.Node(interface=camino.PicoPDFs(), name="picopdfs")
 picopdfs.inputs.inputmodel = 'dt'
 
 """
 An FSL BET node creates a brain mask is generated from the diffusion image for seeding the PICo tractography.
 """
+
 bet = pe.Node(interface=fsl.BET(), name="bet")
 bet.inputs.mask = True
 
@@ -148,12 +154,14 @@ bet.inputs.mask = True
 Finally, tractography is performed.
 First DT streamline tractography.
 """
+
 trackdt = pe.Node(interface=camino.TrackDT(), name="trackdt")
 
 """
 Now camino's Probablistic Index of connectivity algorithm.
 In this tutorial, we will use only 1 iteration for time-saving purposes.
 """
+
 trackpico = pe.Node(interface=camino.TrackPICo(), name="trackpico")
 trackpico.inputs.iterations = 1
 
@@ -161,6 +169,7 @@ trackpico.inputs.iterations = 1
 Currently, the best program for visualizing tracts is TrackVis. For this reason, a node is included to
 convert the raw tract data to .trk format. Solely for testing purposes, another node is added to perform the reverse.
 """
+
 cam2trk_dt = pe.Node(interface=cam2trk.Camino2Trackvis(), name="cam2trk_dt")
 cam2trk_dt.inputs.min_length = 30
 cam2trk_dt.inputs.voxel_order = 'LAS'
@@ -175,6 +184,7 @@ trk2camino = pe.Node(interface=cam2trk.Trackvis2Camino(), name="trk2camino")
 Tracts can also be converted to VTK and OOGL formats, for use in programs such as GeomView and Paraview,
 using the following two nodes.
 """
+
 #vtkstreamlines = pe.Node(interface=camino.VtkStreamlines(), name="vtkstreamlines")
 #procstreamlines = pe.Node(interface=camino.ProcStreamlines(), name="procstreamlines")
 #procstreamlines.inputs.outputtracts = 'oogl'
@@ -184,6 +194,7 @@ using the following two nodes.
 We can also produce a variety of scalar values from our fitted tensors. The following nodes generate the
 fractional anisotropy and diffusivity trace maps and their associated headers.
 """
+
 fa = pe.Node(interface=camino.FA(),name='fa')
 #md = pe.Node(interface=camino.MD(),name='md')
 trace = pe.Node(interface=camino.TrD(),name='trace')
@@ -203,6 +214,7 @@ trace2nii = fa2nii.clone("trace2nii")
 """
 Since we have now created all our nodes, we can now define our workflow and start making connections.
 """
+
 tractography = pe.Workflow(name='tractography')
 
 tractography.connect([(inputnode, bet,[("dwi","in_file")])])
@@ -210,6 +222,7 @@ tractography.connect([(inputnode, bet,[("dwi","in_file")])])
 """
 File format conversion
 """
+
 tractography.connect([(inputnode, image2voxel, [("dwi", "in_file")]),
                       (inputnode, fsl2scheme, [("bvecs", "bvec_file"),
                                                ("bvals", "bval_file")])
@@ -218,6 +231,7 @@ tractography.connect([(inputnode, image2voxel, [("dwi", "in_file")]),
 """
 Tensor fitting
 """
+
 tractography.connect([(image2voxel, dtifit,[['voxel_order','in_file']]),
                       (fsl2scheme, dtifit,[['scheme','scheme_file']])
                      ])
@@ -225,12 +239,14 @@ tractography.connect([(image2voxel, dtifit,[['voxel_order','in_file']]),
 """
 Workflow for applying DT streamline tractogpahy
 """
+
 tractography.connect([(bet, trackdt,[("mask_file","seed_file")])])
 tractography.connect([(dtifit, trackdt,[("tensor_fitted","in_file")])])
 
 """
 Workflow for applying PICo
 """
+
 tractography.connect([(bet, trackpico,[("mask_file","seed_file")])])
 tractography.connect([(fsl2scheme, dtlutgen,[("scheme","scheme_file")])])
 tractography.connect([(dtlutgen, picopdfs,[("dtLUT","luts")])])
@@ -289,6 +305,7 @@ Finally, we create another higher-level workflow to connect our tractography wor
 declared at the beginning. Our tutorial can is now extensible to any arbitrary number of subjects by simply adding
 their names to the subject list and their data to the proper folders.
 """
+
 workflow = pe.Workflow(name="workflow")
 workflow.base_dir = os.path.abspath('camino_dti_tutorial')
 workflow.connect([(infosource,datasource,[('subject_id', 'subject_id')]),
@@ -300,9 +317,11 @@ workflow.connect([(infosource,datasource,[('subject_id', 'subject_id')]),
 """
 The following functions run the whole workflow and produce a .dot and .png graph of the processing pipeline.
 """
+
 workflow.run()
 workflow.write_graph()
+
 """
-This outputted .dot graph can be converted to a vector image for use in figures via the following command-line function:
-dot -Tps graph.dot > graph.eps
+You can choose the format of the experted graph with the ``format`` option. For example ``workflow.write_graph(format='eps')``
+
 """
