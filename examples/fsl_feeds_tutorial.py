@@ -370,7 +370,7 @@ Use :class:`nipype.interfaces.fsl.ContrastMgr` to generate contrast estimates
 """
 
 conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
-                         iterfield = ['tcon_file','param_estimates',
+                         iterfield = ['fcon_file', 'tcon_file','param_estimates',
                                       'sigmasquareds', 'corrections',
                                       'dof_file'])
 
