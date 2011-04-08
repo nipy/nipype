@@ -767,6 +767,15 @@ class ContrastMgr(FSLCommand):
     _cmd = 'contrast_mgr'
     input_spec = ContrastMgrInputSpec
     output_spec = ContrastMgrOutputSpec
+    
+    def _run_interface(self, runtime):
+        # The returncode is meaningless in ContrastMgr.  So check the output
+        # in stderr and if it's set, then update the returncode
+        # accordingly.
+        runtime = super(ContrastMgr, self)._run_interface(runtime)
+        if runtime.stderr:
+            self.raise_exception(runtime)
+        return runtime
 
     def _format_arg(self, name, trait_spec, value):
         if name in ['param_estimates', 'corrections', 'dof_file']:
