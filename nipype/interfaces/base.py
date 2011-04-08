@@ -971,7 +971,7 @@ class CommandLine(BaseInterface):
     None
 
 
-    >>> cli.inputs.get_hashval
+    >>> cli.inputs.get_hashval()
     ({'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}, 'b1faf85652295456a906f053d48daef6')
 
     """
