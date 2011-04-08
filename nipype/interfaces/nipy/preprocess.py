@@ -5,7 +5,7 @@ import numpy as np
 
 from nipype.utils.misc import package_check
 package_check('nipy')
-from nipy.neurospin.mask import compute_mask
+from nipy.labs.mask import compute_mask
 
 from nipype.interfaces.base import TraitedSpec, BaseInterface, traits,\
     BaseInterfaceInputSpec

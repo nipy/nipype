@@ -28,13 +28,18 @@ Execution
 ~~~~~~~~~~~
 
 *plugin*
-
-        This defines which execution plugin to use. (possible values:
-        Linear, SGE, IPython; default: Linear)
+	This defines which execution plugin to use. (possible values:
+    ``Linear``, ``SGE``, ``IPython``; default: ``Linear``)
 
 *stop_on_first_crash*
 	Should the workflow stop upon first node crashing or try to
 	execute as many nodes as possible? (possible values: ``true``
+	and ``false``; default value: ``false``)
+	
+*stop_on_first_rerun*
+	Should the workflow stop upon first node trying to recompute (by that we mean 
+	rerunning a node that has been run before - this can happen due changed 
+	inputs and/or hash_method since the last run). (possible values: ``true``
 	and ``false``; default value: ``false``)
 
 *hash_method*
@@ -59,11 +64,11 @@ Execution
 	it. (possible values: any X server address; default value: not
 	set)
 
-*remove_unnecessary_outputs* 
-       This will remove any interface outputs not needed by the
-        workflow. If the required outputs from a node changes, rerunning
-        the workflow will rerun the node. (possible values: ``true`` and
-        ``false``; default value: ``true``)
+*remove_unnecessary_outputs*
+	This will remove any interface outputs not needed by the
+    workflow. If the required outputs from a node changes, rerunning
+    the workflow will rerun the node. (possible values: ``true`` and
+    ``false``; default value: ``true``)
 
 *use_relative_paths*
 	Should the paths stored in results (and used to look for inputs)
