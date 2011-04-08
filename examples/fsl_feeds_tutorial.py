@@ -333,26 +333,12 @@ file for analysis
 level1design = pe.Node(interface=fsl.Level1Design(), name="level1design")
 
 """
-To allow changing working directories one needs to rerun the level1design as
-the fsf files are stored with absolute paths.
-"""
-level1design.overwrite = True
-
-"""
 Use :class:`nipype.interfaces.fsl.FEATModel` to generate a run specific mat
 file for use by FILMGLS
 """
 
 modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
                       iterfield = ['fsf_file'])
-
-"""
-Set the model generation to run everytime. Since the fsf file, which is the
-input to modelgen only references the ev files, modelgen will not run if the ev
-file contents are changed but the fsf file is untouched.
-"""
-
-modelgen.overwrite = True
 
 """
 Use :class:`nipype.interfaces.fsl.FILMGLS` to estimate a model specified by a
