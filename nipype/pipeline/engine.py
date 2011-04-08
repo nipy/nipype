@@ -981,8 +981,7 @@ class Node(WorkflowBase):
             if os.path.exists(hashfile):
                 os.remove(hashfile)
             if os.path.exists(outdir) and \
-               not (os.path.exists(hashfile_unfinished) and \
-                    self._interface.can_resume) and \
+               not (os.path.exists(hashfile_unfinished) and self._interface.can_resume) and \
                not isinstance(self, MapNode):
                 logger.debug("Removing old %s and its contents"%outdir)
                 rmtree(outdir)
@@ -1257,6 +1256,7 @@ class MapNode(Node):
         for i in range(nitems):
             nodename = '_' + self.name+str(i)
             node = Node(deepcopy(self._interface), name=nodename)
+            node.overwrite = self.overwrite
             node._interface.inputs.set(**deepcopy(self._interface.inputs.get()))
             for field in self.iterfield:
                 fieldvals = filename_to_list(getattr(self.inputs, field))
@@ -1303,6 +1303,12 @@ class MapNode(Node):
                     values.insert(i, None)
                 if any([val != Undefined for val in values]) and self._result.outputs:
                     setattr(self._result.outputs, key, values)
+                    
+#        for key, _ in self.outputs.items():
+#            values = getattr(self._result.outputs, key)
+#            if isdefined(values) and isinstance(values, list) and len(values) == 1:
+#                setattr(self._result.outputs, key, values[0])
+                
         if returncode and any([code is not None for code in returncode]):
             msg = []
             for i, code in enumerate(returncode):
