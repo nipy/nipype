@@ -2,7 +2,6 @@ from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, Tr
     StdOutCommandLine, StdOutCommandLineInputSpec
 from nipype.utils.filemanip import split_filename
 import os
-import nibabel as nb
 
 class DTIFitInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=1,
@@ -52,7 +51,6 @@ class DTIFit(StdOutCommandLine):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + '_DT.Bdouble'
 
-
 class ModelFitInputSpec(StdOutCommandLineInputSpec):
     def _gen_model_options(): #@NoSelf
         """
@@ -101,8 +99,6 @@ class ModelFitInputSpec(StdOutCommandLineInputSpec):
     fixedbvalue = traits.List(traits.Float, argstr='-fixedbvalue %s', minlen=3, maxlen=3, desc='As above, but specifies <M> <N> <b>. The resulting scheme is the same whether you specify b directly or indirectly using -fixedmodq.')
 
     tau = traits.Float(argstr='-tau %s', desc='Sets the diffusion time separately. This overrides the diffusion time specified in a scheme file or by a scheme index for both the acquisition scheme and in the data synthesis.')
-
-
 
 class ModelFitOutputSpec(TraitedSpec):
     fitted_data = File(exists=True, desc='output file of 4D volume in voxel order')
@@ -327,32 +323,6 @@ class TrackInputSpec(CommandLineInputSpec):
         mandatory=False, position= -1,
         desc='root directory for output')
 
-class TrackPICoInputSpec(TrackInputSpec):
-    numpds = traits.Int(argstr='-numpds %d', units='NA', desc="The maximum number of PDs in a voxel. The default is 1 for input model pico. This option determines the size of the voxels in the input file and does not affect tracking.")
-
-    pdf = traits.Enum('bingham', 'watson', 'acg', argstr='-pdf %s', desc='Specifies the model for PICo parameters. The default is "bingham.')
-
-    iterations = traits.Int(argstr='-iterations %d', units='NA', desc="Number of streamlines to generate at each seed point. The default is 5000.")
-
-class TrackBayesDiracInputSpec(TrackInputSpec):
-    scheme_file = File(argstr='-schemefile %s', mandatory=True, exist=True, desc='The scheme file corresponding to the data being processed.')
-
-    iterations = traits.Int(argstr='-iterations %d', units='NA', desc="Number of streamlines to generate at each seed point. The default is 5000.")
-
-    pdf = traits.Enum('bingham', 'watson', 'acg', argstr='-pdf %s', desc='Specifies the model for PICo priors (not the curvature priors). The default is "bingham".')
-
-    pointset = traits.Int(argstr='-pointset %s', desc='Index to the point set to use for Bayesian likelihood calculation. The index specifies a set of evenly distributed points on the unit sphere, where each point x defines two possible step directions (x or -x) for the streamline path. A larger number indexes a larger point set, which gives higher angular resolution at the expense of computation time. The default is index 1, which gives 1922 points, index 0 gives 1082 points, index 2 gives 3002 points.')
-
-    datamodel = traits.Enum('cylsymmdt', 'ballstick', argstr='-datamodel %s', desc='Model of the data for Bayesian tracking. The default model is "cylsymmdt", a diffusion tensor with cylindrical symmetry about e_1, ie L1 >= L_2 = L_3. The other model is "ballstick", the partial volume model (see ballstickfit).')
-
-    curvepriork = traits.Float(argstr='-curvepriork %s', desc='Concentration parameter for the prior distribution on fibre orientations given the fibre orientation at the previous step. Larger values of k make curvature less likely.')
-
-    curvepriorg = traits.Float(argstr='-curvepriorg %s', desc='Concentration parameter for the prior distribution on fibre orientations given the fibre orientation at the previous step. Larger values of g make curvature less likely.')
-
-    extpriorfile = File(exists=True, argstr='-extpriorfile %s', desc='Path to a PICo image produced by picopdfs. The PDF in each voxel is used as a prior for the fibre orientation in Bayesian tracking. The prior image must be in the same space as the diffusion data.')
-
-    extpriordatatype = traits.Enum('float', 'double', argstr='-extpriordatatype %s', desc='Datatype of the prior image. The default is "double".')
-
 class TrackOutputSpec(TraitedSpec):
     tracked = File(exists=True, desc='output file containing reconstructed tracts')
 
@@ -387,6 +357,7 @@ class Track(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + '_tracked'
@@ -409,6 +380,13 @@ class TrackDT(Track):
         inputs["inputmodel"] = "dt"
         return super(TrackDT, self).__init__(command, **inputs)
 
+class TrackPICoInputSpec(TrackInputSpec):
+    numpds = traits.Int(argstr='-numpds %d', units='NA', desc="The maximum number of PDs in a voxel. The default is 1 for input model pico. This option determines the size of the voxels in the input file and does not affect tracking.")
+
+    pdf = traits.Enum('bingham', 'watson', 'acg', argstr='-pdf %s', desc='Specifies the model for PICo parameters. The default is "bingham.')
+
+    iterations = traits.Int(argstr='-iterations %d', units='NA', desc="Number of streamlines to generate at each seed point. The default is 5000.")
+
 class TrackPICo(Track):
     """
     Performs streamline tractography using the Probabilistic Index of Connectivity (PICo) algorithm
@@ -429,9 +407,28 @@ class TrackPICo(Track):
         inputs["inputmodel"] = "pico"
         return super(TrackPICo, self).__init__(command, **inputs)
 
+class TrackBayesDiracInputSpec(TrackInputSpec):
+    scheme_file = File(argstr='-schemefile %s', mandatory=True, exist=True, desc='The scheme file corresponding to the data being processed.')
+
+    iterations = traits.Int(argstr='-iterations %d', units='NA', desc="Number of streamlines to generate at each seed point. The default is 5000.")
+
+    pdf = traits.Enum('bingham', 'watson', 'acg', argstr='-pdf %s', desc='Specifies the model for PICo priors (not the curvature priors). The default is "bingham".')
+
+    pointset = traits.Int(argstr='-pointset %s', desc='Index to the point set to use for Bayesian likelihood calculation. The index specifies a set of evenly distributed points on the unit sphere, where each point x defines two possible step directions (x or -x) for the streamline path. A larger number indexes a larger point set, which gives higher angular resolution at the expense of computation time. The default is index 1, which gives 1922 points, index 0 gives 1082 points, index 2 gives 3002 points.')
+
+    datamodel = traits.Enum('cylsymmdt', 'ballstick', argstr='-datamodel %s', desc='Model of the data for Bayesian tracking. The default model is "cylsymmdt", a diffusion tensor with cylindrical symmetry about e_1, ie L1 >= L_2 = L_3. The other model is "ballstick", the partial volume model (see ballstickfit).')
+
+    curvepriork = traits.Float(argstr='-curvepriork %s', desc='Concentration parameter for the prior distribution on fibre orientations given the fibre orientation at the previous step. Larger values of k make curvature less likely.')
+
+    curvepriorg = traits.Float(argstr='-curvepriorg %s', desc='Concentration parameter for the prior distribution on fibre orientations given the fibre orientation at the previous step. Larger values of g make curvature less likely.')
+
+    extpriorfile = File(exists=True, argstr='-extpriorfile %s', desc='Path to a PICo image produced by picopdfs. The PDF in each voxel is used as a prior for the fibre orientation in Bayesian tracking. The prior image must be in the same space as the diffusion data.')
+
+    extpriordatatype = traits.Enum('float', 'double', argstr='-extpriordatatype %s', desc='Datatype of the prior image. The default is "double".')
+
 class TrackBayesDirac(Track):
     """
-    Performs streamline tractography using a Bayes-Dirac algorithm
+    Performs streamline tractography using a Bayesian tracking with Dirac priors
 
     Example
     -------
@@ -449,6 +446,60 @@ class TrackBayesDirac(Track):
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "bayesdirac"
         return super(TrackBayesDirac, self).__init__(command, **inputs)
+
+class TrackBallStick(Track):
+    """
+    Performs streamline tractography using ball-stick fitted data
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.camino as cmon
+    >>> track = cmon.TrackBallStick()
+    >>> track.inputs.in_file = 'ballstickfit_data.Bfloat'
+    >>> track.inputs.seed_file = 'seed_mask.nii'
+    >>> track.run()
+    """
+
+    def __init__(self, command=None, **inputs):
+        inputs["inputmodel"] = "ballstick"
+        return super(TrackBallStick, self).__init__(command, **inputs)
+
+class TrackBootstrapInputSpec(TrackInputSpec):
+    scheme_file = File(argstr='-schemefile %s', mandatory=True, exist=True, desc='The scheme file corresponding to the data being processed.')
+
+    iterations = traits.Int(argstr='-iterations %d', units='NA', desc="Number of streamlines to generate at each seed point.")
+
+    inversion = traits.Int(argstr='-inversion %s', desc = 'Tensor reconstruction algorithm for repetition bootstrapping. Default is 1 (linear reconstruction, single tensor).')
+
+    bsdatafiles = traits.List(File, mandatory=True, exists=True, argstr='-bsdatafile %s', desc='Specifies files containing raw data for repetition bootstrapping. Use -inputfile for wild bootstrap data.')
+
+    bsmodel = traits.Enum('dt', 'multitensor', argstr = '-bsmodel %s', desc = 'Model to fit to bootstrap data. This is used for repetition bootstrapping. May be "dt" (default) or "multitensor". This option may be omitted if -inversion is specified.')
+
+    bgmask = File(argstr='-bgmask %s', exists=True, desc = 'Provides the name of a file containing a background mask computed using, for example, FSL\'s bet2 program. The mask file contains zero in background voxels and non-zero in foreground.')
+
+    wildbsmodel = traits.Enum('dt', argstr='-wildbsmodel %s', desc='The model to fit to the data, for wild bootstrapping. The same model is used to generate the the wild bootstrap data. Must be "dt", which is the default.')
+
+class TrackBootstrap(Track):
+    """
+    Performs bootstrap streamline tractography using mulitple scans of the same subject
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.camino as cmon
+    >>> track = cmon.TrackBootstrap()
+    >>> track.inputs.scheme_file = bvecs.scheme
+    >>> track.inputs.bsdatafiles = ['fitted_data1.Bfloat', 'fitted_data2.Bfloat']
+    >>> track.inputs.seedfile = 'seed_mask.nii'
+    >>> track.run()
+    """
+
+    input_spec = TrackBootstrapInputSpec
+
+    def __init__(self, command=None, **inputs):
+        inputs["inputmodel"] = "bootstrap"
+        return super(TrackBootstrap, self).__init__(command, **inputs)
 
 class MDInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
@@ -744,4 +795,52 @@ class AnalyzeHeader(StdOutCommandLine):
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
-        return name + '.hdr'
+        return name + ".hdr"
+
+
+class DTEigInputSpec(StdOutCommandLineInputSpec):
+    in_file = File(exists=True, argstr='< %s', mandatory=True, position=1, desc='Tensor-fitted data filename')
+
+    inputmodel = traits.Enum('dt', 'multitensor', argstr='-inputmodel %s', desc='Specifies the model that the input data contains parameters for. Possible model types are: "dt" (diffusion-tensor data) and "multitensor"')
+
+    maxcomponents = traits.Int(argstr='-maxcomponents %s', desc='The maximum number of tensor components in a voxel of the input data.')
+
+    inputdatatype = traits.Enum("double", "char", "short", "int", "long", "float", argstr='-inputdatatype %s', desc='Specifies the data type of the input file. The data type can be any of the following strings: "char", "short", "int", "long", "float" or "double".')
+
+    outputdatatype = traits.Enum("double", "char", "short", "int", "long", "float", argstr='-outputdatatype %s', desc='Specifies the data type of the output data. The data type can be any of the following strings: "char", "short", "int", "long", "float" or "double".')
+
+class DTEigOutputSpec(TraitedSpec):
+    eigen = File(exists=True, desc='Trace of the diffusion tensor')
+
+class DTEig(StdOutCommandLine):
+    """
+    Computes the eigensystem from tensor fitted data.
+
+    Reads diffusion tensor (single, two-tensor, three-tensor or multitensor) data from the
+    standard input, computes the eigenvalues and eigenvectors of each tensor and outputs the
+    results to the standard output. For multiple-tensor data the program outputs the
+    eigensystem of each tensor. For each tensor the program outputs: {l_1, e_11, e_12, e_13,
+    l_2, e_21, e_22, e_33, l_3, e_31, e_32, e_33}, where l_1 >= l_2 >= l_3 and e_i = (e_i1,
+    e_i2, e_i3) is the eigenvector with eigenvalue l_i. For three-tensor data, for example,
+    the output contains thirty-six values per voxel.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.camino as cmon
+    >>> dteig = cmon.DTEig()
+    >>> dteig.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> dteig.run()
+    """
+    _cmd = 'dteig'
+    input_spec=DTEigInputSpec
+    output_spec=DTEigOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["eigen"] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_outfilename(self):
+        _, name , _ = split_filename(self.inputs.in_file)
+        return name + "_Eigen.img"     #Need to change to self.inputs.outputdatatype
