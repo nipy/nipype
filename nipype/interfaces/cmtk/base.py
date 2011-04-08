@@ -9,6 +9,7 @@ import sys
 from time import time
 from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
 import datetime
+import string
 
 class CFFConverterInputSpec(BaseInterfaceInputSpec):
     graphml_networks = traits.List(File(exists=True), desc='list of graphML networks')
@@ -148,13 +149,25 @@ class CFFConverter(BaseInterface):
             for vol in self.inputs.nifti_volumes:
                 _, vol_name, _ = split_filename(vol)
                 cvol = cf.CVolume.create_from_nifti(vol_name,vol)
-                a.add_connectome_surface(cvol)
+                a.add_connectome_volume(cvol)
 
         if isdefined(self.inputs.script_files):
             for script in self.inputs.script_files:
                 _, script_name, _ = split_filename(script)
                 cscript = cf.CScript.create_from_file(script_name,script)
                 a.add_connectome_script(cscript)
+
+        if isdefined(self.inputs.data_files):
+            for data in self.inputs.data_files:
+                _, data_name, _ = split_filename(data)
+                cda = cf.CData(name=data_name, src=data, fileformat='NumPy')
+                if not string.find(data_name,'lengths') == -1:
+                    cda.dtype = 'FinalFiberLengthArray'
+                if not string.find(data_name,'endpoints') == -1:
+                    cda.dtype = 'FiberEndpoints'
+                if not string.find(data_name,'labels') == -1:
+                    cda.dtype = 'FinalFiberLabels'
+                a.add_connectome_data(cda)
 
         a.print_summary()
         cf.save_to_cff(a,self.inputs.out_file)

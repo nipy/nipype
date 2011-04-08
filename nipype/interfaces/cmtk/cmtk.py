@@ -136,8 +136,6 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
     # Identify the endpoints of each fiber
     en_fname = os.path.abspath(endpoint_name + '_endpoints.npy')
     en_fnamemm = os.path.abspath(endpoint_name + '_endpointsmm.npy')
-    ep_fname = os.path.abspath(endpoint_name + '_lengths.npy')
-    curv_fname = os.path.abspath(endpoint_name + '_meancurvature.npy')
 
     print 'Reading Trackvis file {trk}'.format(trk=track_file)
     fib, hdr = nb.trackvis.read(track_file, False)
@@ -155,7 +153,9 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
     (endpoints,endpointsmm) = create_endpoints_array(fib, roiVoxelSize)
 
     # Output endpoint arrays
+    print 'Saving endpoint array: {array}'.format(array=en_fname)
     np.save(en_fname, endpoints)
+    print 'Saving endpoint array in mm: {array}'.format(array=en_fnamemm)
     np.save(en_fnamemm, endpointsmm)
 
     n = len(fib)
@@ -257,6 +257,14 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
     print 'Writing matlab matrix as {mat}'.format(mat=matrix_mat_name)
     sio.savemat(matrix_mat_name,mlab_dict)
 
+    fiberlengths_fname = os.path.abspath(endpoint_name + '_lengths.npy')
+    print 'Saving fiber length array: {array}'.format(array=fiberlengths_fname)
+    np.save(fiberlengths_fname, final_fiberlength_array)
+
+    fiberlabels_fname = os.path.abspath(endpoint_name + '_labels.npy')
+    print 'Saving fiber label array: {array}'.format(array=fiberlabels_fname)
+    np.save(fiberlabels_fname, np.array(fiberlabels, dtype = np.int32), )
+
 class CreateMatrixInputSpec(TraitedSpec):
     roi_file = File(exists=True, mandatory=True, desc='Freesurfer aparc+aseg file')
     dict_file = File(exists=True, mandatory=True, desc='Pickle file containing the label dictionary (see ROIGen)')
@@ -271,8 +279,8 @@ class CreateMatrixOutputSpec(TraitedSpec):
     matrix_mat_file = File(desc='Matlab matrix describing the connectivity')
     endpoint_file = File(desc='Saved Numpy array with the endpoints of each fiber')
     endpoint_file_mm = File(desc='Saved Numpy array with the endpoints of each fiber (in millimeters)')
-    length_file = File(desc='Saved Numpy array with the lengths of each fiber')
-    curvature_file = File(desc='Saved Numpy array with the curvature of each fiber')
+    fiber_length_file = File(desc='Saved Numpy array with the lengths of each fiber')
+    fiber_label_file = File(desc='Saved Numpy array with the labels for each fiber')
 
 class CreateMatrix(BaseInterface):
     """
@@ -286,9 +294,7 @@ class CreateMatrix(BaseInterface):
     >>> conmap.roi_file = 'fsLUT_aparc+aseg.nii'
     >>> conmap.dict_file = 'fsLUT_aparc+aseg.pck'
     >>> conmap.tract_file = 'fibers.trk'
-    >>>
     >>> conmap.run()
-
     """
 
     input_spec = CreateMatrixInputSpec
@@ -326,16 +332,16 @@ class CreateMatrix(BaseInterface):
             outputs['matrix_mat_file']=os.path.abspath(self._gen_outfilename('mat'))
 
         if isdefined(self.inputs.out_endpoint_array_name):
-            endpoint_file = os.path.abspath(self.inputs.out_endpoint_array_name + '_endpoints.npy')
-            endpoint_file_mm = os.path.abspath(self.inputs.out_endpoint_array_name + '_endpointsmm.npy')
-            length_file = os.path.abspath(self.inputs.out_endpoint_array_name + '_lengths.npy')
-            curvature_file = os.path.abspath(self.inputs.out_endpoint_array_name + '_meancurvature.npy')
+            outputs['endpoint_file'] = os.path.abspath(self.inputs.out_endpoint_array_name + '_endpoints.npy')
+            outputs['endpoint_file_mm'] = os.path.abspath(self.inputs.out_endpoint_array_name + '_endpointsmm.npy')
+            outputs['fiber_length_file'] = os.path.abspath(self.inputs.out_endpoint_array_name + '_lengths.npy')
+            outputs['fiber_label_file'] = os.path.abspath(self.inputs.out_endpoint_array_name + '_labels.npy')
         else:
             _, endpoint_name , _ = split_filename(self.inputs.tract_file)
-            endpoint_file = os.path.abspath(endpoint_name + '_endpoints.npy')
-            endpoint_file_mm = os.path.abspath(endpoint_name + '_endpointsmm.npy')
-            length_file = os.path.abspath(endpoint_name + '_lengths.npy')
-            curvature_file = os.path.abspath(endpoint_name + '_meancurvature.npy')
+            outputs['endpoint_file'] = os.path.abspath(endpoint_name + '_endpoints.npy')
+            outputs['endpoint_file_mm'] = os.path.abspath(endpoint_name + '_endpointsmm.npy')
+            outputs['fiber_length_file'] = os.path.abspath(endpoint_name + '_lengths.npy')
+            outputs['fiber_label_file'] = os.path.abspath(endpoint_name + '_labels.npy')
 
         return outputs
 

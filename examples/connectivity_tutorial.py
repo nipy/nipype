@@ -301,6 +301,7 @@ These are useful for passing lists of the files we want packaged in our CFF file
 giftiSurfaces = pe.Node(interface=util.Merge(2), name="GiftiSurfaces")
 giftiLabels = pe.Node(interface=util.Merge(2), name="GiftiLabels")
 niftiVolumes = pe.Node(interface=util.Merge(3), name="NiftiVolumes")
+fiberDataArrays = pe.Node(interface=util.Merge(4), name="FiberDataArrays")
 tractFiles = pe.Node(interface=util.Merge(1), name="TractFiles")
 gpickledNetworks = pe.Node(interface=util.Merge(1), name="NetworkFiles")
 
@@ -426,6 +427,12 @@ mapping.connect([(inputnode, niftiVolumes,[("dwi","in2")])])
 mapping.connect([(mri_convert_Brain, niftiVolumes,[("out_file","in3")])])
 
 mapping.connect([(camino2trackvis, tractFiles,[("trackvis","in1")])])
+
+mapping.connect([(creatematrix, fiberDataArrays,[("endpoint_file","in1")])])
+mapping.connect([(creatematrix, fiberDataArrays,[("endpoint_file_mm","in2")])])
+mapping.connect([(creatematrix, fiberDataArrays,[("fiber_length_file","in3")])])
+mapping.connect([(creatematrix, fiberDataArrays,[("fiber_label_file","in4")])])
+
 """
 This block connects a number of the files to the CFF converter. We pass lists of the surfaces
 and volumes that are to be included, as well as the tracts and the network itself.
@@ -434,6 +441,7 @@ mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
 mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
 mapping.connect([(gpickledNetworks, CFFConverter,[("out","gpickled_networks")])])
 #mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
+mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
 mapping.connect([(tractFiles, CFFConverter,[("out","tract_files")])])
 mapping.connect([(inputnode, CFFConverter,[("subject_id","title")])])
 
