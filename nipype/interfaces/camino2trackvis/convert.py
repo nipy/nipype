@@ -47,16 +47,15 @@ class Camino2Trackvis(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.camino2trackvis as cam2trk
-    >>> c2t = cam2trk.Camino2Trackvis()
-    >>> c2t.inputs.in_file = 'data.Bfloat'
-    >>> c2t.inputs.out_file = 'streamlines.trk'
-    >>> c2t.inputs.min_length = 30
-    >>> c2t.inputs.data_dims = [128, 104, 64]
-    >>> c2t.inputs.voxel_dims = [2.0, 2.0, 2.0]
-    >>> c2t.inputs.voxel_order = 'LAS'
-    >>> c2t.run()
-
+    >>> import nipype.interfaces.camino2trackvis as cam2trk                  # doctest: +SKIP
+    >>> c2t = cam2trk.Camino2Trackvis()                  # doctest: +SKIP
+    >>> c2t.inputs.in_file = 'data.Bfloat'                  # doctest: +SKIP
+    >>> c2t.inputs.out_file = 'streamlines.trk'                  # doctest: +SKIP
+    >>> c2t.inputs.min_length = 30                  # doctest: +SKIP
+    >>> c2t.inputs.data_dims = [128, 104, 64]                  # doctest: +SKIP
+    >>> c2t.inputs.voxel_dims = [2.0, 2.0, 2.0]                  # doctest: +SKIP
+    >>> c2t.inputs.voxel_order = 'LAS'                  # doctest: +SKIP
+    >>> c2t.run()                  # doctest: +SKIP
     """
 
     _cmd = 'camino_to_trackvis'
@@ -85,12 +84,11 @@ class Trackvis2CaminoInputSpec(CommandLineInputSpec):
     Example
     -------
 
-    >>> import nipype.interfaces.camino2trackvis as cam2trk
-    >>> t2c = cam2trk.Trackvis2Camino()
-    >>> t2c.inputs.in_file = 'streamlines.trk'
-    >>> t2c.inputs.out_file = 'streamlines.Bfloat'
-    >>> t2c.run()
-
+    >>> import nipype.interfaces.camino2trackvis as cam2trk                  # doctest: +SKIP
+    >>> t2c = cam2trk.Trackvis2Camino()                  # doctest: +SKIP
+    >>> t2c.inputs.in_file = 'streamlines.trk'                  # doctest: +SKIP
+    >>> t2c.inputs.out_file = 'streamlines.Bfloat'                  # doctest: +SKIP
+    >>> t2c.run()                  # doctest: +SKIP
     """
 
     in_file = File(exists=True, argstr='-i %s',

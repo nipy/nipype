@@ -289,12 +289,12 @@ class CreateMatrix(BaseInterface):
     Example
     -------
 
-    >>> import nipype.interfaces.cmtk.cmtk as ck
-    >>> conmap = ck.CreateMatrix()
-    >>> conmap.roi_file = 'fsLUT_aparc+aseg.nii'
-    >>> conmap.dict_file = 'fsLUT_aparc+aseg.pck'
-    >>> conmap.tract_file = 'fibers.trk'
-    >>> conmap.run()
+    >>> import nipype.interfaces.cmtk.cmtk as ck                 # doctest: +SKIP
+    >>> conmap = ck.CreateMatrix()               # doctest: +SKIP
+    >>> conmap.roi_file = 'fsLUT_aparc+aseg.nii'                 # doctest: +SKIP
+    >>> conmap.dict_file = 'fsLUT_aparc+aseg.pck'                # doctest: +SKIP
+    >>> conmap.tract_file = 'fibers.trk'                 # doctest: +SKIP
+    >>> conmap.run()                 # doctest: +SKIP
     """
 
     input_spec = CreateMatrixInputSpec
@@ -368,20 +368,19 @@ class ROIGen(BaseInterface):
     Example
     -------
 
-    >>> import nipype.interfaces.cmtk.cmtk as ck
-    >>> rg = ck.ROIGen()
-    >>> rg.inputs.aparc_aseg_file = 'aparc+aseg.nii'
-    >>> rg.inputs.use_freesurfer_LUT = True
-    >>> rg.inputs.freesurfer_dir = '/usr/local/freesurfer'
-    >>>
-    >>> rg.run()
+    >>> import nipype.interfaces.cmtk.cmtk as ck                    # doctest: +SKIP
+    >>> rg = ck.ROIGen()                    # doctest: +SKIP
+    >>> rg.inputs.aparc_aseg_file = 'aparc+aseg.nii'                    # doctest: +SKIP
+    >>> rg.inputs.use_freesurfer_LUT = True                     # doctest: +SKIP
+    >>> rg.inputs.freesurfer_dir = '/usr/local/freesurfer'                  # doctest: +SKIP
+    >>> rg.run()                    # doctest: +SKIP
 
     The label dictionary is written to disk using Pickle. Resulting data can be loaded using:
 
-    >>> file = open("FreeSurferColorLUT_adapted_aparc+aseg_out.pck", "r")
-    >>> file = open("fsLUT_aparc+aseg.pck", "r")
-    >>> labelDict = pickle.load(file)
-    >>> print labelDict
+    >>> file = open("FreeSurferColorLUT_adapted_aparc+aseg_out.pck", "r")                   # doctest: +SKIP
+    >>> file = open("fsLUT_aparc+aseg.pck", "r")                    # doctest: +SKIP
+    >>> labelDict = pickle.load(file)                   # doctest: +SKIP
+    >>> print labelDict                     # doctest: +SKIP
     """
 
     input_spec = ROIGenInputSpec

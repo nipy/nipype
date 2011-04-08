@@ -48,13 +48,12 @@ class CFFConverter(BaseInterface):
     -------
 
     >>> import nipype.interfaces.cmtk.base as ba
-    >>> cvt = ba.CFFConverter()
-    >>> cvt.inputs.title = 'subject 1'
-    >>> cvt.inputs.gifti_surfaces = ['lh.pial_converted.gii', 'rh.pial_converted.gii']
-    >>> cvt.inputs.tract_files = ['streamlines.trk']
-    >>> cvt.inputs.gpickled_networks = ['network0.gpickle']
-    >>> cvt.run()
-
+    >>> cvt = ba.CFFConverter()                 # doctest: +SKIP
+    >>> cvt.inputs.title = 'subject 1'                 # doctest: +SKIP
+    >>> cvt.inputs.gifti_surfaces = ['lh.pial_converted.gii', 'rh.pial_converted.gii']                 # doctest: +SKIP
+    >>> cvt.inputs.tract_files = ['streamlines.trk']                 # doctest: +SKIP
+    >>> cvt.inputs.gpickled_networks = ['network0.gpickle']                 # doctest: +SKIP
+    >>> cvt.run()                 # doctest: +SKIP
     """
 
     input_spec = CFFConverterInputSpec
@@ -192,10 +191,10 @@ class MergeCNetworks(BaseInterface):
     Example
     -------
 
-    >>> import nipype.interfaces.cmtk.base as ba
-    >>> mrg = ba.MergeCNetworks()
-    >>> mrg.inputs.in_files = ['subj1.cff','subj2.cff']
-    >>> mrg.run()
+    >>> import nipype.interfaces.cmtk.base as ba                  # doctest: +SKIP
+    >>> mrg = ba.MergeCNetworks()                  # doctest: +SKIP
+    >>> mrg.inputs.in_files = ['subj1.cff','subj2.cff']                  # doctest: +SKIP
+    >>> mrg.run()                  # doctest: +SKIP
 
     """
 

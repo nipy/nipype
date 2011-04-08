@@ -3,7 +3,6 @@
 """Camino2Trackvis top level namespace
 """
 
-from nipype.interfaces.camino2trackvis.base import Camino2TrackvisCommand, Camino2TrackvisCommandInputSpec
 from nipype.interfaces.camino2trackvis.convert import Camino2Trackvis, Trackvis2Camino
 import nose
 

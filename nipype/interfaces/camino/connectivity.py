@@ -49,14 +49,14 @@ class Conmap(StdOutCommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon
-    >>> mapper = cmon.Conmap()
-    >>> mapper.inputs.in_file = 'brain_track.Bdouble'
-    >>> mapper.inputs.roi_file = 'wm_undersampled.nii'
-    >>> mapper.inputs.index_file = 'indices.txt'
-    >>> mapper.inputs.index_file = 'indices-labels.txt'
-    >>> mapper.inputs.threshold = 100
-    >>> mapper.run()
+    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
+    >>> mapper = cmon.Conmap()                  # doctest: +SKIP
+    >>> mapper.inputs.in_file = 'brain_track.Bdouble'                  # doctest: +SKIP
+    >>> mapper.inputs.roi_file = 'wm_undersampled.nii'                  # doctest: +SKIP
+    >>> mapper.inputs.index_file = 'indices.txt'                  # doctest: +SKIP
+    >>> mapper.inputs.index_file = 'indices-labels.txt'                  # doctest: +SKIP
+    >>> mapper.inputs.threshold = 100                  # doctest: +SKIP
+    >>> mapper.run()                  # doctest: +SKIP
     """
     _cmd = 'conmap'
     input_spec=ConmapInputSpec
