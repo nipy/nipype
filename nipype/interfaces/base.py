@@ -280,7 +280,7 @@ class BaseTraitedSpec(traits.HasTraits):
 
     new attribute:
 
-    * hashval : returns a tuple containing the state of the trait as a dict and
+    * get_hashval : returns a tuple containing the state of the trait as a dict and
       hashvalue corresponding to dict.
 
     XXX Reconsider this in the long run, but it seems like the best
@@ -419,9 +419,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 out = undefinedval
         return out
 
-    #@traits.cached_property
-    @property
-    def hashval(self):
+    def get_hashval(self, hash_method=None):
         """Return a dictionary of our items with hashes for each file.
 
         Searches through dictionary items and if an item is a file, it
@@ -441,32 +439,36 @@ class BaseTraitedSpec(traits.HasTraits):
             The md5 hash value of the traited spec
 
         """
-        dict_withhash = self._get_sorteddict(self.get(),True)
-        dict_nofilename = self._get_sorteddict(self.get())
+        
+        dict_withhash = self._get_sorteddict(self.get(),True, hash_method=hash_method)
+        dict_nofilename = self._get_sorteddict(self.get(), hash_method=hash_method)
         return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
 
-    def _get_sorteddict(self, object, dictwithhash=False):
+    def _get_sorteddict(self, object, dictwithhash=False, hash_method=None):
         if isinstance(object, dict):
             out = {}
             for key, val in sorted(object.items()):
                 if isdefined(val):
-                    out[key] = self._get_sorteddict(val, dictwithhash)
+                    out[key] = self._get_sorteddict(val, dictwithhash, hash_method=hash_method)
         elif isinstance(object, (list,tuple)):
             out = []
             for val in object:
                 if isdefined(val):
-                    out.append(self._get_sorteddict(val, dictwithhash))
+                    out.append(self._get_sorteddict(val, dictwithhash, hash_method=hash_method))
             if isinstance(object, tuple):
                 out = tuple(out)
         else:
             if isdefined(object):
                 if isinstance(object, str) and os.path.isfile(object):
-                    if config.get('execution', 'hash_method').lower() == 'timestamp':
+                    if hash_method == None:
+                        hash_method = config.get('execution', 'hash_method')
+  
+                    if hash_method.lower() == 'timestamp':
                         hash = hash_timestamp(object)
-                    elif config.get('execution', 'hash_method').lower() == 'content':
+                    elif hash_method.lower() == 'content':
                         hash = hash_infile(object)
                     else:
-                        raise Exception("Unknown hash method: %s" % config.get('execution', 'hash_method'))
+                        raise Exception("Unknown hash method: %s" % hash_method)
                     if dictwithhash:
                         out = (object, hash)
                     else:
@@ -952,7 +954,7 @@ class CommandLine(BaseInterface):
     >>> cli.cmdline
     'ls -al'
 
-    >>> cli.inputs.trait_get()
+    >>> cli.inputs.trait_get() #doctest: +SKIP
     {'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}
 
     >>> cli.help()
@@ -969,7 +971,7 @@ class CommandLine(BaseInterface):
     None
 
 
-    >>> cli.inputs.hashval
+    >>> cli.inputs.get_hashval()
     ({'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}, 'b1faf85652295456a906f053d48daef6')
 
     """

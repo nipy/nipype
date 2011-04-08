@@ -20,7 +20,7 @@ class DTIFit(StdOutCommandLine):
     """
     Reads diffusion MRI data, acquired using the acquisition scheme detailed in the scheme file, from the data file.
 
-        Use non-linear fitting instead of the default linear regression to the log measurements.
+    Use non-linear fitting instead of the default linear regression to the log measurements.
     The data file stores the diffusion MRI data in voxel order with the measurements stored in big-endian format and ordered as in the scheme file.
     The default input data type is four-byte float. The default output data type is eight-byte double.
     See modelfit and camino for the format of the data file and scheme file.

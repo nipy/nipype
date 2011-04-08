@@ -26,7 +26,7 @@ from tempfile import mkdtemp
 from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
 import numpy as np
 
-from nipype.utils.misc import package_check
+from nipype.utils.misc import package_check, str2bool
 package_check('networkx', '1.3')
 import networkx as nx
 
@@ -36,12 +36,13 @@ from nipype.interfaces.base import (traits, InputMultiPath, CommandLine,
 from nipype.utils.misc import isdefined, getsource, create_function_from_source
 from nipype.utils.filemanip import (save_json, FileNotFoundError,
                                     filename_to_list, list_to_filename,
-                                    copyfiles, fnames_presuffix, loadpkl)
+                                    copyfiles, fnames_presuffix, loadpkl,
+    split_filename, load_json)
 
 from nipype.pipeline.utils import (generate_expanded_graph, modify_paths,
                                    export_graph, make_output_dir,
                                    clean_working_directory, format_dot)
-from nipype.utils.logger import (logger, config)
+from nipype.utils.logger import (logger, config, logdebug_dict_differences)
 
 class WorkflowBase(object):
     """ Define common attributes and functions for workflows and nodes
@@ -441,7 +442,9 @@ class Workflow(WorkflowBase):
         self._set_needed_outputs(flatgraph)
         execgraph = generate_expanded_graph(deepcopy(flatgraph))
         for index, node in enumerate(execgraph.nodes()):
-            node.config = self.config
+            
+            node.config = deepcopy(config._sections)
+            node.config.update(self.config)
             node.base_dir = self.base_dir
             node.index = index
             if isinstance(node, MapNode):
@@ -852,8 +855,8 @@ class Node(WorkflowBase):
         self._interface.help()
 
     def _get_hashval(self):
-        hashed_inputs, hashvalue =  self.inputs.hashval
-        if config.getboolean('execution', 'remove_unnecessary_outputs') and \
+        hashed_inputs, hashvalue =  self.inputs.get_hashval(hash_method=self.config['execution']['hash_method'])
+        if str2bool(self.config['execution']['remove_unnecessary_outputs']) and \
         self.needed_outputs:
             hashobject = md5()
             hashobject.update(hashvalue)
@@ -933,30 +936,60 @@ class Node(WorkflowBase):
         # check to see if output directory and hash exist
         self._get_inputs()
         outdir = self.output_dir()
-        outdir = make_output_dir(outdir)
         logger.info("Executing node %s in dir: %s"%(self._id,outdir))
         # Get a dictionary with hashed filenames and a hashvalue
         # of the dictionary itself.
         hashed_inputs, hashvalue = self._get_hashval()
         hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
-        if updatehash:
+        if updatehash and os.path.exists(outdir):
             logger.debug("Updating hash: %s" % hashvalue)
+            for file in glob(os.path.join(outdir, '_0x*.json')):
+                os.remove(file)
             self._save_hashfile(hashfile, hashed_inputs)
         if force_execute or (not updatehash and (self.overwrite or not os.path.exists(hashfile))):
             logger.debug("Node hash: %s"%hashvalue)
             
+            #by rerunning we mean only nodes that did finish to run previously
+            if os.path.exists(outdir) \
+            and not isinstance(self, MapNode) \
+            and len(glob(os.path.join(outdir, '_0x*.json'))) != 0 \
+            and len(glob(os.path.join(outdir, '_0x*_unfinished.json'))) == 0:
+                logger.debug("Rerunning node")
+                logger.debug("force_execute = %s, updatehash = %s, self.overwrite = %s, os.path.exists(%s) = %s, hash_method = ,%s,"%(str(force_execute),
+                                                                                                                  str(updatehash),
+                                                                                                                  str(self.overwrite),
+                                                                                                                  hashfile,
+                                                                                                                  str(os.path.exists(hashfile)),
+                                                                                                                  self.config['execution']['hash_method'].lower()))
+                if config.get('logging','workflow_level') == 'DEBUG' and not os.path.exists(hashfile):
+                        exp_hash_paths = glob(os.path.join(outdir, '_0x*.json'))
+                        if len(exp_hash_paths) == 1:
+                            _, exp_hash_file_base, _ = split_filename(exp_hash_paths[0])
+                            exp_hash = exp_hash_file_base[len('_0x'):]
+                            logger.debug("Previous node hash = %s"%exp_hash)
+                            try:
+                                prev_inputs = load_json(exp_hash_paths[0])
+                            except:
+                                pass
+                            else:
+                                logdebug_dict_differences(prev_inputs, hashed_inputs)
+                            
+                if str2bool(self.config['execution']['stop_on_first_rerun']):        
+                    raise Exception("Cannot rerun when 'stop_on_first_rerun' is set to True")
+                
             hashfile_unfinished = os.path.join(outdir, '_0x%s_unfinished.json' % hashvalue)
             if os.path.exists(hashfile):
                 os.remove(hashfile)
             if os.path.exists(outdir) and \
-               not (os.path.exists(hashfile_unfinished) and \
-                    self._interface.can_resume) and \
+               not (os.path.exists(hashfile_unfinished) and self._interface.can_resume) and \
                not isinstance(self, MapNode):
                 logger.debug("Removing old %s and its contents"%outdir)
                 rmtree(outdir)
-                outdir = make_output_dir(outdir)
+                
             else:
                 logger.debug("%s found and can_resume is True or Node is a MapNode - resuming execution" % hashfile_unfinished)
+            
+            outdir = make_output_dir(outdir)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             try:
                 self._run_interface(execute=True)
@@ -966,8 +999,10 @@ class Node(WorkflowBase):
                 
             shutil.move(hashfile_unfinished, hashfile)
         else:
-            logger.debug("Hashfile exists. Skipping execution\n")
+            logger.debug("Hashfile exists. Skipping execution")
             self._run_interface(execute=False, updatehash=updatehash)
+            
+        logger.debug('Finished running %s in dir: %s\n'%(self._id,outdir))
         return self._result
 
     def _run_interface(self, execute=True, updatehash=False):
@@ -1070,7 +1105,7 @@ class Node(WorkflowBase):
                 self._result.runtime.stderr = msg
                 raise
             
-            if config.getboolean('execution', 'remove_unnecessary_outputs'):
+            if str2bool(self.config['execution']['remove_unnecessary_outputs']):
                 dirs2keep = None
                 if isinstance(self, MapNode):
                     dirs2keep = [os.path.join(cwd, 'mapflow')]
@@ -1192,8 +1227,8 @@ class MapNode(Node):
             hashinputs.add_trait(name, InputMultiPath(self._interface.inputs.traits()[name].trait_type))
             logger.debug('setting hashinput %s-> %s'%(name,getattr(self._inputs, name)))
             setattr(hashinputs, name, getattr(self._inputs, name))
-        hashed_inputs, hashvalue = hashinputs.hashval
-        if config.getboolean('execution', 'remove_unnecessary_outputs') and \
+        hashed_inputs, hashvalue = hashinputs.get_hashval(hash_method=self.config['execution']['hash_method'])
+        if str2bool(self.config['execution']['remove_unnecessary_outputs']) and \
         self.needed_outputs:
             hashobject = md5()
             hashobject.update(hashvalue)
@@ -1221,6 +1256,7 @@ class MapNode(Node):
         for i in range(nitems):
             nodename = '_' + self.name+str(i)
             node = Node(deepcopy(self._interface), name=nodename)
+            node.overwrite = self.overwrite
             node._interface.inputs.set(**deepcopy(self._interface.inputs.get()))
             for field in self.iterfield:
                 fieldvals = filename_to_list(getattr(self.inputs, field))
@@ -1238,7 +1274,7 @@ class MapNode(Node):
             try:
                 node.run(updatehash=updatehash)
             except Exception, err:
-                if config.getboolean('execution', 'stop_on_first_crash'):
+                if str2bool(self.config['execution']['stop_on_first_crash']):
                     self._result = node.result
                     raise
             yield i, node, err
@@ -1254,7 +1290,7 @@ class MapNode(Node):
                 self._result.runtime[i] = node.result.runtime
             returncode.insert(i, err)
             for key, _ in self.outputs.items():
-                if config.getboolean('execution', 'remove_unnecessary_outputs') and \
+                if str2bool(self.config['execution']['remove_unnecessary_outputs']) and \
                 self.needed_outputs:
                     if key not in self.needed_outputs:
                         continue
@@ -1267,6 +1303,12 @@ class MapNode(Node):
                     values.insert(i, None)
                 if any([val != Undefined for val in values]) and self._result.outputs:
                     setattr(self._result.outputs, key, values)
+                    
+#        for key, _ in self.outputs.items():
+#            values = getattr(self._result.outputs, key)
+#            if isdefined(values) and isinstance(values, list) and len(values) == 1:
+#                setattr(self._result.outputs, key, values[0])
+                
         if returncode and any([code is not None for code in returncode]):
             msg = []
             for i, code in enumerate(returncode):
