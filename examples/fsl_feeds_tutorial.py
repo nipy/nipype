@@ -515,7 +515,7 @@ for every participant. Other examples of this function are available in the
 from nipype.interfaces.base import Bunch
 
 firstlevel.inputs.modelfit.modelspec.subject_info = [Bunch(conditions=['Visual','Auditory'],
-                        onsets=[range(0,180*TR,60),range(0,180*TR,90)],
+                        onsets=[range(0,int(180*TR),60),range(0,int(180*TR),90)],
                         durations=[[30], [45]],
                         amplitudes=None,
                         tmod=None,
