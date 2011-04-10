@@ -46,6 +46,17 @@ def create_featpreproc(name='featpreproc'):
         inputspec.subjectid : subjectid (used for storing output under subject's name
         inputspec.subs : paths substitutions for datasink
 
+    Outputs::
+    
+        outputspec.reference : volume to which runs are realigned
+        outputspec.motion_parameters : motion correction parameters
+        outputspec.realigned_files : motion corrected files
+        outputspec.motion_plots : plots of motion correction parameters
+        outputspec.mask : mask file used to mask the brain
+        outputspec.smoothed_files : smoothed functional data
+        outputspec.highpassed_files : highpassed functional data
+        outputspec.mean : mean file
+
     Example
     -------
 
@@ -55,9 +66,6 @@ def create_featpreproc(name='featpreproc'):
     >>> preproc.inputs.inputspec.func = 'f3.nii'
     >>> preproc.inputs.inputspec.fwhm = 5
     >>> preproc.inputs.inputspec.highpass = 128./(2*2.5)
-    >>> preproc.inputs.inputspec.outdir = os.path.abspath('l1out')
-    >>> preproc.inputs.inputspec.subjectid = 's1'
-    >>> preproc.inputs.inputspec.subs = []
     >>> preproc.base_dir = '/tmp'
     >>> preproc.run() # doctest: +SKIP
 
@@ -72,22 +80,24 @@ def create_featpreproc(name='featpreproc'):
 
     inputnode = pe.Node(interface=util.IdentityInterface(fields=['func',
                                                                  'fwhm',
-                                                                 'highpass',
-                                                                 'outdir',
-                                                                 'subjectid',
-                                                                 'subs']),
+                                                                 'highpass']),
                         name='inputspec')
 
+
     """
-    Create a datasink
+    Set up a node to define outputs for the preprocessing workflow
+
     """
 
-    datasink = pe.Node(interface=nio.DataSink(),
-                       name='datasink')
-    featpreproc.connect(inputnode, 'outdir', datasink, 'base_directory')
-    featpreproc.connect(inputnode, 'subjectid', datasink, 'container')
-    featpreproc.connect(inputnode, 'subs', datasink, 'substitutions')
-
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=['reference',
+                                                                  'motion_parameters',
+                                                                  'realigned_files',
+                                                                  'motion_plots',
+                                                                  'mask',
+                                                                  'smoothed_files',
+                                                                  'highpassed_files',
+                                                                  'mean']),
+                         name='outputspec')
     """
     Convert functional images to float representation. Since there can
     be more than one functional run we use a MapNode to convert each
@@ -110,7 +120,7 @@ def create_featpreproc(name='featpreproc'):
                           name = 'extractref')
 
     featpreproc.connect(img2float, ('out_file', pickfirst), extract_ref, 'in_file')
-    featpreproc.connect(extract_ref, 'roi_file', datasink, 'reference')
+    featpreproc.connect(extract_ref, 'roi_file', outputnode, 'reference')
 
     """
     Realign the functional runs to the reference (1st volume of first run)
@@ -122,8 +132,8 @@ def create_featpreproc(name='featpreproc'):
                                 iterfield = ['in_file'])
     featpreproc.connect(img2float, 'out_file', motion_correct, 'in_file')
     featpreproc.connect(extract_ref, 'roi_file', motion_correct, 'ref_file')
-    featpreproc.connect(motion_correct, 'par_file', datasink, 'motion.parameters')
-    featpreproc.connect(motion_correct, 'out_file', datasink, 'motion.realigned')
+    featpreproc.connect(motion_correct, 'par_file', outputnode, 'motion_parameters')
+    featpreproc.connect(motion_correct, 'out_file', outputnode, 'realigned_files')
 
     """
     Plot the estimated motion parameters
@@ -134,7 +144,7 @@ def create_featpreproc(name='featpreproc'):
                             iterfield=['in_file'])
     plot_motion.iterables = ('plot_type', ['rotations', 'translations'])
     featpreproc.connect(motion_correct, 'par_file', plot_motion, 'in_file')
-    featpreproc.connect(plot_motion, 'out_file', datasink, 'motion.plots')
+    featpreproc.connect(plot_motion, 'out_file', outputnode, 'motion_plots')
 
     """
     Extract the mean volume of the first functional run
@@ -210,7 +220,7 @@ def create_featpreproc(name='featpreproc'):
                                                   op_string='-dilF'),
                            name='dilatemask')
     featpreproc.connect(threshold, 'out_file', dilatemask, 'in_file')
-    featpreproc.connect(dilatemask, 'out_file', datasink, 'mask')
+    featpreproc.connect(dilatemask, 'out_file', outputnode, 'mask')
 
     """
     Mask the motion corrected functional runs with the dilated mask
@@ -264,7 +274,7 @@ def create_featpreproc(name='featpreproc'):
     featpreproc.connect(concatnode, 'out', selectnode, 'inlist')
 
     featpreproc.connect(inputnode, ('fwhm', chooseindex), selectnode, 'index')
-    featpreproc.connect(selectnode, 'out', datasink, 'smoothed')
+    featpreproc.connect(selectnode, 'out', outputnode, 'smoothed_files')
 
 
     """
@@ -291,7 +301,7 @@ def create_featpreproc(name='featpreproc'):
                           name='highpass')
     featpreproc.connect(inputnode, ('highpass', highpass_operand), highpass, 'op_string')
     featpreproc.connect(meanscale, 'out_file', highpass, 'in_file')
-    featpreproc.connect(highpass, 'out_file', datasink, 'highpassed')
+    featpreproc.connect(highpass, 'out_file', outputnode, 'highpassed_files')
 
     """
     Generate a mean functional image from the first run
@@ -302,7 +312,7 @@ def create_featpreproc(name='featpreproc'):
                            iterfield=['in_file'],
                           name='meanfunc3')
     featpreproc.connect(highpass, ('out_file', pickfirst), meanfunc3, 'in_file')
-    featpreproc.connect(meanfunc3, 'out_file', datasink, 'mean')
+    featpreproc.connect(meanfunc3, 'out_file', outputnode, 'mean')
 
 
     return featpreproc
