@@ -243,7 +243,7 @@ class InterfaceHelpWriter(object):
 
 
     def _write_graph_section(self, fname, title):
-        ad = '\n%s\n%s\n'%(title,'-'*len(title))
+        ad = '\n%s\n%s\n'%(title,'~'*len(title))
         ad += '.. graphviz::\n\n'
         fhandle = open(fname)
         for line in fhandle:
