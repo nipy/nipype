@@ -177,18 +177,21 @@ Nodes are used to convert the following:
 
 mri_convert_Brain = pe.Node(interface=fs.MRIConvert(), name='mri_convert_Brain')
 mri_convert_Brain.inputs.out_type = 'nii'
-mri_convert_WMParc = pe.Node(interface=fs.MRIConvert(), name='mri_convert_WMParc')
-mri_convert_WMParc.inputs.out_type = 'nii'
-mri_convert_AparcAseg = pe.Node(interface=fs.MRIConvert(), name='mri_convert_AparcAseg')
-mri_convert_AparcAseg.inputs.out_type = 'nii'
+
+mri_convert_WMParc = mri_convert_Brain.clone('mri_convert_WMParc')
+mri_convert_AparcAseg = mri_convert_Brain.clone('mri_convert_AparcAseg')
+
 mris_convertLH = pe.Node(interface=fs.MRIsConvert(), name='mris_convertLH')
 mris_convertLH.inputs.out_datatype = 'gii'
-mris_convertRH = pe.Node(interface=fs.MRIsConvert(), name='mris_convertRH')
-mris_convertRH.inputs.out_datatype = 'gii'
-mris_convertLHlabels = pe.Node(interface=fs.MRIsConvert(), name='mris_convertLHlabels')
-mris_convertLHlabels.inputs.out_datatype = 'gii'
-mris_convertRHlabels = pe.Node(interface=fs.MRIsConvert(), name='mris_convertRHlabels')
-mris_convertRHlabels.inputs.out_datatype = 'gii'
+mris_convertRH = mris_convertLH.clone('mris_convertRH')
+mris_convertRHwhite = mris_convertLH.clone('mris_convertRHwhite')
+mris_convertLHwhite = mris_convertLH.clone('mris_convertLHwhite')
+mris_convertRHinflated = mris_convertLH.clone('mris_convertRHinflated')
+mris_convertLHinflated = mris_convertLH.clone('mris_convertLHinflated')
+mris_convertRHsphere = mris_convertLH.clone('mris_convertRHsphere')
+mris_convertLHsphere = mris_convertLH.clone('mris_convertLHsphere')
+mris_convertLHlabels = mris_convertLH.clone('mris_convertLHlabels')
+mris_convertRHlabels = mris_convertLH.clone('mris_convertRHlabels')
 
 """
 An inputnode is used to pass the data obtained by the data grabber to the actual processing functions
@@ -329,7 +332,7 @@ Here we define a few nodes using the Nipype Merge utility.
 These are useful for passing lists of the files we want packaged in our CFF file.
 """
 
-giftiSurfaces = pe.Node(interface=util.Merge(2), name="GiftiSurfaces")
+giftiSurfaces = pe.Node(interface=util.Merge(8), name="GiftiSurfaces")
 giftiLabels = pe.Node(interface=util.Merge(2), name="GiftiLabels")
 niftiVolumes = pe.Node(interface=util.Merge(3), name="NiftiVolumes")
 fiberDataArrays = pe.Node(interface=util.Merge(4), name="FiberDataArrays")
@@ -360,9 +363,16 @@ mapping.connect([(FreeSurferSource, mri_convert_WMParc,[('wmparc','in_file')])])
 mapping.connect([(FreeSurferSource, mri_convert_Brain,[('brain','in_file')])])
 mapping.connect([(FreeSurferSourceLH, mris_convertLH,[('pial','in_file')])])
 mapping.connect([(FreeSurferSourceRH, mris_convertRH,[('pial','in_file')])])
-
 mapping.connect([(FreeSurferSourceLH, mris_convertLHlabels,[('pial','in_file')])])
 mapping.connect([(FreeSurferSourceRH, mris_convertRHlabels,[('pial','in_file')])])
+
+mapping.connect([(FreeSurferSourceLH, mris_convertLHwhite,[('white','in_file')])])
+mapping.connect([(FreeSurferSourceRH, mris_convertRHwhite,[('white','in_file')])])
+mapping.connect([(FreeSurferSourceLH, mris_convertLHinflated,[('inflated','in_file')])])
+mapping.connect([(FreeSurferSourceRH, mris_convertRHinflated,[('inflated','in_file')])])
+mapping.connect([(FreeSurferSourceLH, mris_convertLHsphere,[('sphere','in_file')])])
+mapping.connect([(FreeSurferSourceRH, mris_convertRHsphere,[('sphere','in_file')])])
+
 mapping.connect([(FreeSurferSourceLH, selectaparcAnnotLH,[('annot','inlist')])])
 mapping.connect([(FreeSurferSourceRH, selectaparcAnnotRH,[('annot','inlist')])])
 mapping.connect([(selectaparcAnnotLH, mris_convertLHlabels,[('out','annot_file')])])
@@ -463,6 +473,12 @@ mapping.connect([(creatematrix, gpickledNetworks,[("matrix_file","in1")])])
 
 mapping.connect([(mris_convertLH, giftiSurfaces,[("converted","in1")])])
 mapping.connect([(mris_convertRH, giftiSurfaces,[("converted","in2")])])
+mapping.connect([(mris_convertLHwhite, giftiSurfaces,[("converted","in3")])])
+mapping.connect([(mris_convertRHwhite, giftiSurfaces,[("converted","in4")])])
+mapping.connect([(mris_convertLHinflated, giftiSurfaces,[("converted","in5")])])
+mapping.connect([(mris_convertRHinflated, giftiSurfaces,[("converted","in6")])])
+mapping.connect([(mris_convertLHsphere, giftiSurfaces,[("converted","in7")])])
+mapping.connect([(mris_convertRHsphere, giftiSurfaces,[("converted","in8")])])
 
 mapping.connect([(mris_convertLHlabels, giftiLabels,[("converted","in1")])])
 mapping.connect([(mris_convertRHlabels, giftiLabels,[("converted","in2")])])
