@@ -38,6 +38,7 @@ import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.cmtk.cmtk as cmtk
 import nipype.interfaces.cmtk.base as cmtkbase
 import nipype.algorithms.misc as misc
+import inspect
 
 import nibabel as nb
 import os                                    # system functions
@@ -331,6 +332,8 @@ selectaparcAnnotRH.inputs.index = 2 # Use 0 for .a2009s.annot, 1 for .BA.annot, 
 Here we define a few nodes using the Nipype Merge utility.
 These are useful for passing lists of the files we want packaged in our CFF file.
 """
+scriptFiles = pe.Node(interface=util.Merge(1), name="ScriptFiles")
+scriptFiles.inputs.in1 = os.path.abspath(inspect.getfile(inspect.currentframe()))
 
 giftiSurfaces = pe.Node(interface=util.Merge(8), name="GiftiSurfaces")
 giftiLabels = pe.Node(interface=util.Merge(2), name="GiftiLabels")
@@ -499,6 +502,7 @@ This block connects a number of the files to the CFF converter. We pass lists of
 and volumes that are to be included, as well as the tracts and the network itself.
 """
 
+mapping.connect([(scriptFiles, CFFConverter,[("out","script_files")])])
 mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
 mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
 mapping.connect([(gpickledNetworks, CFFConverter,[("out","gpickled_networks")])])

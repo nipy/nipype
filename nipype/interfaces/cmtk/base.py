@@ -21,8 +21,8 @@ class CFFConverterInputSpec(BaseInterfaceInputSpec):
     tract_files = traits.List(File(exists=True), desc='list of Trackvis fiber files')
 
     timeseries_files = traits.List(File(exists=True), desc='list of HDF5 timeseries files')
-    data_files = traits.List(File(exists=True), desc='list of external data files (i.e.) ')
-    script_files = traits.List(File(exists=True), desc='list of external data files (i.e. Numpy, HD5, XML) ')
+    script_files = traits.List(File(exists=True), desc='list of script files to include')
+    data_files = traits.List(File(exists=True), desc='list of external data files (i.e. Numpy, HD5, XML) ')
 
     title = traits.Str(desc='Connectome Title')
     creator = traits.Str(desc='Creator')
@@ -156,7 +156,7 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.script_files):
             for script in self.inputs.script_files:
                 _, script_name, _ = split_filename(script)
-                cscript = cf.CScript.create_from_file(script_name,script)
+                cscript = cf.CScript.create_from_file(script_name, script)
                 a.add_connectome_script(cscript)
 
         if isdefined(self.inputs.data_files):
