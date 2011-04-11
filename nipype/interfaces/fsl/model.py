@@ -731,7 +731,7 @@ class ContrastMgrInputSpec(FSLCommandInputSpec):
                                      argstr='', copyfile=False,
                                      mandatory=True,
           desc='Parameter estimates for each column of the design matrix')
-    corrections = File(exists=True, copyfile=False,
+    corrections = File(exists=True, copyfile=False, mandatory=True,
                        desc='statistical corrections used within FILM modelling')
     dof_file = File(exists=True, argstr='', copyfile=False, mandatory=True,
                     desc='degrees of freedom')
