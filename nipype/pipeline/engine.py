@@ -1186,6 +1186,7 @@ class MapNode(Node):
         self._inputs = self._create_dynamic_traits(self._interface.inputs,
                                                    fields=self.iterfield)
         self._inputs.on_trait_change(self._set_mapnode_input)
+        self._got_inputs = False
 
     def _create_dynamic_traits(self, basetraits, fields=None, nitems=None):
         """Convert specific fields of a trait to accept multiple inputs
@@ -1319,8 +1320,16 @@ class MapNode(Node):
                                                                 '\n'.join(msg)))
 
     def get_subnodes(self):
-        self._get_inputs()
+        if not self._got_inputs:
+            self._get_inputs()
+            self._got_inputs = True
         return [node for _, node in self._make_nodes()]
+    
+    def num_subnodes(self):
+        if not self._got_inputs:
+            self._get_inputs()
+            self._got_inputs = True
+        return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
     
     def _run_interface(self, execute=True, updatehash=False):
         """Run the mapnode interface
