@@ -21,13 +21,23 @@ def run_node(node, updatehash):
 
 class MultiProcPlugin(DistributedPluginBase):
     """Execute workflow with multiprocessing
+
+    The plugin_args input to run can be used to control the multiprocessing
+    execution. Currently supported options are:
+
+    - n_procs : number of processes to use
+    
     """
 
-    def __init__(self, nprocs=2):
+    def __init__(self, plugin_args=None):
         super(MultiProcPlugin, self).__init__()
         self._taskresult = {}
         self._taskid = 0
-        self.pool = Pool(processes=nprocs)
+        n_procs = 1
+        if plugin_args:
+            if 'n_procs' in plugin_args:
+                n_procs = plugin_args['n_procs']
+        self.pool = Pool(processes=n_procs)
 
     def _get_result(self, taskid):
         if taskid not in self._taskresult:

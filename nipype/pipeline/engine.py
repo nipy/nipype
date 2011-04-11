@@ -414,7 +414,7 @@ class Workflow(WorkflowBase):
         else:
             logger.info(dotstr)
 
-    def run(self, plugin=None, updatehash=False):
+    def run(self, plugin=None, plugin_args=None, updatehash=False):
         """ Execute the workflow
 
         Parameters
@@ -422,7 +422,9 @@ class Workflow(WorkflowBase):
         
         plugin: plugin name or object
             Plugin to use for execution. You can create your own plugins for
-            execution. 
+            execution.
+        plugin_args : dictionary containing arguments to be sent to plugin
+            constructor. see individual plugin doc strings for details.
         """
         if plugin is None:
             plugin = config.get('execution','plugin')
@@ -437,18 +439,17 @@ class Workflow(WorkflowBase):
                 logger.error(msg)
                 raise ImportError(msg)
             else:
-                runner = getattr(sys.modules[name], '%sPlugin'%plugin)()
+                runner = getattr(sys.modules[name], '%sPlugin'%plugin)(plugin_args=plugin_args)
         flatgraph = self._create_flat_graph()
         self._set_needed_outputs(flatgraph)
         execgraph = generate_expanded_graph(deepcopy(flatgraph))
         for index, node in enumerate(execgraph.nodes()):
-            
             node.config = deepcopy(config._sections)
             node.config.update(self.config)
             node.base_dir = self.base_dir
             node.index = index
             if isinstance(node, MapNode):
-                node.use_plugin = plugin
+                node.use_plugin = (plugin, plugin_args)
         self._configure_exec_nodes(execgraph)
         runner.run(execgraph, updatehash=updatehash)
         return execgraph
