@@ -1,26 +1,33 @@
 Release 0.4 (FUTURE)
 ====================
 
-* API: Workflow run function no longer supports (inseries, createdirsonly). Functions used in connect string must be pickleable
+* API: Workflow run function no longer supports (inseries, createdirsonly).
+       Functions used in connect string must be pickleable
 * API: SPM EstimateContrast: ignore_derivs replaced by use_derivs
 * API: All interfaces: added new config option ignore_exception
-* API: SpecifModel no longer supports (concatenate_runs, output_specs). high_pass_filter cutoff is mandatory (even if its set to np.inf). Additional interfaces SpecifySPMModel and SpecifySparseModel support other types of data.
+* API: SpecifModel no longer supports (concatenate_runs, output_specs). high_pass_filter
+       cutoff is mandatory (even if its set to np.inf). Additional interfaces
+       SpecifySPMModel and SpecifySparseModel support other types of data.
 * API: fsl.DTIFit input "save" is now called "save_tensor"
-* API: All inputs of IdentityInterfaces are mandatory by default. You can turn this off by specifying mandatory_inputs=False to the constructor.
+* API: All inputs of IdentityInterfaces are mandatory by default. You can turn
+       this off by specifying mandatory_inputs=False to the constructor.
 * API: fsl FILMGLS input "autocorr_estimate" is now called "autocorr_estimate_only"
-* API: fsl ContrastMgr now requires access to specific files (no longer accepts the result directory)
+* API: fsl ContrastMgr now requires access to specific files (no longer accepts
+       the result directory)
 
 * ENH: All commandline interfaces display stdout and stderr
 * ENH: All interfaces raise exceptions on error with an option to suppress
-* ENH: Supports a plugin interface for external execution
-* ENH: MapNode runs in parallel under IPython and SGE
+* ENH: Supports a plugin interface for execution (current support for multiprocessing,
+       IPython, SGE)
+* ENH: MapNode runs in parallel under IPython, SGE, MultiProc
 * ENH: Optionally allows keeping only required outputs
 * ENH: New interface: utility.Rename to change the name of files, optionally
        using python string-formatting with inputs or regular expressions matching
 * ENH: New interface: freesurfer.ApplyMask (mri_mask)
 * ENH: New FSL interface -- SwapDimensions (fslswapdim)
 * ENH: Sparse models allow regressor scaling and temporal derivatives
-* ENH: Added support for the component parts of FSL's TBSS workflow (TBSSSkeleton and DistanceMap)
+* ENH: Added support for the component parts of FSL's TBSS workflow (TBSSSkeleton
+       and DistanceMap)
 * ENH: dcm2nii interface exposes bvals, bvecs, reoriented and cropped images
 * ENH: Added several higher-level interfaces to the fslmaths command:
     - ChangeDataType, Threshold, MeanImage, IsotropicSmooth, ApplyMask, TemporalFilter
