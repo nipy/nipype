@@ -119,7 +119,6 @@ class CFFConverter(BaseInterface):
                 a.add_connectome_network(cnet)
                 count += 1
 
-
         count = 0
         if isdefined(self.inputs.tract_files):
             for trk in self.inputs.tract_files:
@@ -128,21 +127,25 @@ class CFFConverter(BaseInterface):
                 a.add_connectome_track(ctrack)
                 count += 1
 
+        count = 0
         if isdefined(self.inputs.gifti_surfaces):
             for surf in self.inputs.gifti_surfaces:
                 _, surf_name, _ = split_filename(surf)
-                csurf = cf.CSurface.create_from_gifti(surf_name, surf)
+                csurf = cf.CSurface.create_from_gifti("Surface %s" % count, surf)
                 csurf.fileformat='Gifti'
                 csurf.dtype='Surfaceset'
                 a.add_connectome_surface(csurf)
+                count += 1
 
+        count = 0
         if isdefined(self.inputs.gifti_labels):
             for label in self.inputs.gifti_labels:
                 _, label_name, _ = split_filename(label)
-                csurf = cf.CSurface.create_from_gifti(label_name + '_labels', surf)
+                csurf = cf.CSurface.create_from_gifti("Surface Label %s" % count, label)
                 csurf.fileformat='Gifti'
                 csurf.dtype='Labels'
                 a.add_connectome_surface(csurf)
+                count += 1
 
         if isdefined(self.inputs.nifti_volumes):
             for vol in self.inputs.nifti_volumes:

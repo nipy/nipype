@@ -319,11 +319,11 @@ selectaparc = pe.Node(interface=util.Select(), name="SelectAparcAseg")
 selectaparc.inputs.index = 0 # Use 0 for aparc+aseg and 1 for aparc.a2009s+aseg
 
 selectaparcAnnotLH = pe.Node(interface=util.Select(), name="SelectAparcAnnotLH")
-selectaparcAnnotLH.inputs.index = 2 # Use 0 for .a2009s.annot, 1 for .BA.annot, 2 for .aparc.annot
-
+selectaparcAnnotLH.inputs.index = 1 # Use 0 for .a2009s.annot, 1 for .BA.annot, 2 for .aparc.annot
+# was 2
 selectaparcAnnotRH = pe.Node(interface=util.Select(), name="SelectAparcAnnotRH")
 selectaparcAnnotRH.inputs.index = 2 # Use 0 for .a2009s.annot, 1 for .BA.annot, 2 for .aparc.annot
-
+# was 2
 """
 Here we define a few nodes using the Nipype Merge utility.
 These are useful for passing lists of the files we want packaged in our CFF file.
@@ -486,7 +486,7 @@ and volumes that are to be included, as well as the tracts and the network itsel
 mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
 mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
 mapping.connect([(gpickledNetworks, CFFConverter,[("out","gpickled_networks")])])
-#mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
+mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
 mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
 mapping.connect([(tractFiles, CFFConverter,[("out","tract_files")])])
 mapping.connect([(inputnode, CFFConverter,[("subject_id","title")])])
