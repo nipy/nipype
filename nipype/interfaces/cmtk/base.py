@@ -1,4 +1,4 @@
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, File, TraitedSpec
+from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, File, TraitedSpec, InputMultiPath
 from nipype.utils.misc import isdefined
 import nibabel as nb
 import numpy as np
@@ -12,17 +12,17 @@ import datetime
 import string
 
 class CFFConverterInputSpec(BaseInterfaceInputSpec):
-    graphml_networks = traits.List(File(exists=True), desc='list of graphML networks')
-    gpickled_networks = traits.List(File(exists=True), desc='list of gpickled Networkx graphs')
+    graphml_networks = InputMultiPath(File(exists=True), desc='list of graphML networks')
+    gpickled_networks = InputMultiPath(File(exists=True), desc='list of gpickled Networkx graphs')
 
-    gifti_surfaces = traits.List(File(exists=True), desc='list of GIFTI surfaces')
-    gifti_labels = traits.List(File(exists=True), desc='list of GIFTI surfaces')
-    nifti_volumes = traits.List(File(exists=True), desc='list of NIFTI volumes')
-    tract_files = traits.List(File(exists=True), desc='list of Trackvis fiber files')
+    gifti_surfaces = InputMultiPath(File(exists=True), desc='list of GIFTI surfaces')
+    gifti_labels = InputMultiPath(File(exists=True), desc='list of GIFTI surfaces')
+    nifti_volumes = InputMultiPath(File(exists=True), desc='list of NIFTI volumes')
+    tract_files = InputMultiPath(File(exists=True), desc='list of Trackvis fiber files')
 
-    timeseries_files = traits.List(File(exists=True), desc='list of HDF5 timeseries files')
-    script_files = traits.List(File(exists=True), desc='list of script files to include')
-    data_files = traits.List(File(exists=True), desc='list of external data files (i.e. Numpy, HD5, XML) ')
+    timeseries_files = InputMultiPath(File(exists=True), desc='list of HDF5 timeseries files')
+    script_files = InputMultiPath(File(exists=True), desc='list of script files to include')
+    data_files = InputMultiPath(File(exists=True), desc='list of external data files (i.e. Numpy, HD5, XML) ')
 
     title = traits.Str(desc='Connectome Title')
     creator = traits.Str(desc='Creator')
@@ -182,7 +182,7 @@ class CFFConverter(BaseInterface):
         return outputs
 
 class MergeCNetworksInputSpec(BaseInterfaceInputSpec):
-    in_files = traits.List(File, exists=True, mandatory=True, desc='List of CFF files to extract networks from')
+    in_files = InputMultiPath(File, exists=True, mandatory=True, desc='List of CFF files to extract networks from')
     out_file = File('merged_network_connectome.cff', usedefault = True)
 
 class MergeCNetworksOutputSpec(TraitedSpec):

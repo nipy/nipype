@@ -35,8 +35,7 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.matlab as mlab      # how to run matlab
-import nipype.interfaces.cmtk.cmtk as cmtk
-import nipype.interfaces.cmtk.base as cmtkbase
+import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
 import inspect
 
@@ -74,6 +73,18 @@ def get_affine(volume):
     return nii.get_affine()
 
 fsl.FSLCommand.set_default_output_type('NIFTI')
+
+def select_aparc(list_of_files):
+    for in_file in list_of_files:
+        if 'aparc+aseg.mgz' in in_file:
+            idx = list_of_files.index(in_file)
+    return list_of_files[idx]
+
+def select_aparc_annot(list_of_files):
+    for in_file in list_of_files:
+        if '.aparc.annot' in in_file:
+            idx = list_of_files.index(in_file)
+    return list_of_files[idx]
 
 """
 This needs to point to the freesurfer subjects directory (Recon-all must have been run on subj1 from the FSL course data)
@@ -308,38 +319,17 @@ roigen.inputs.LUT_file = cmp_config.get_freeview_lut("NativeFreesurfer")['freesu
 creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
 creatematrix.inputs.resolution_network_file = cmp_config.parcellation['freesurferaparc']['node_information_graphml']
 
-CFFConverter = pe.Node(interface=cmtkbase.CFFConverter(), name="CFFConverter")
+CFFConverter = pe.Node(interface=cmtk.CFFConverter(), name="CFFConverter")
 
-"""
-Here is one example case for using the Nipype Select utility.
-As FreesurferSource outputs a list similar to: ['aparc+aseg.mgz','aparc.a2009s+aseg.mgz']
-when asked for the 'aparc_aseg' output, we use a select node to pass the name of
-only the 'aparc+aseg.nii' file to a Freesurfer NIFTI conversion node.
-
-Similarly, the rh.aparc.annot and lh.aparc.annot files are chosen for the surface labels.
-"""
-
-selectaparc = pe.Node(interface=util.Select(), name="SelectAparcAseg")
-selectaparc.inputs.index = 0 # Use 0 for aparc+aseg and 1 for aparc.a2009s+aseg
-
-selectaparcAnnotLH = pe.Node(interface=util.Select(), name="SelectAparcAnnotLH")
-selectaparcAnnotLH.inputs.index = 1 # Use 0 for .a2009s.annot, 1 for .BA.annot, 2 for .aparc.annot
-# was 2
-selectaparcAnnotRH = pe.Node(interface=util.Select(), name="SelectAparcAnnotRH")
-selectaparcAnnotRH.inputs.index = 2 # Use 0 for .a2009s.annot, 1 for .BA.annot, 2 for .aparc.annot
-# was 2
 """
 Here we define a few nodes using the Nipype Merge utility.
 These are useful for passing lists of the files we want packaged in our CFF file.
 """
-scriptFiles = pe.Node(interface=util.Merge(1), name="ScriptFiles")
-scriptFiles.inputs.in1 = os.path.abspath(inspect.getfile(inspect.currentframe()))
 
 giftiSurfaces = pe.Node(interface=util.Merge(8), name="GiftiSurfaces")
 giftiLabels = pe.Node(interface=util.Merge(2), name="GiftiLabels")
 niftiVolumes = pe.Node(interface=util.Merge(3), name="NiftiVolumes")
 fiberDataArrays = pe.Node(interface=util.Merge(4), name="FiberDataArrays")
-tractFiles = pe.Node(interface=util.Merge(1), name="TractFiles")
 gpickledNetworks = pe.Node(interface=util.Merge(1), name="NetworkFiles")
 
 """
@@ -376,10 +366,8 @@ mapping.connect([(FreeSurferSourceRH, mris_convertRHinflated,[('inflated','in_fi
 mapping.connect([(FreeSurferSourceLH, mris_convertLHsphere,[('sphere','in_file')])])
 mapping.connect([(FreeSurferSourceRH, mris_convertRHsphere,[('sphere','in_file')])])
 
-mapping.connect([(FreeSurferSourceLH, selectaparcAnnotLH,[('annot','inlist')])])
-mapping.connect([(FreeSurferSourceRH, selectaparcAnnotRH,[('annot','inlist')])])
-mapping.connect([(selectaparcAnnotLH, mris_convertLHlabels,[('out','annot_file')])])
-mapping.connect([(selectaparcAnnotRH, mris_convertRHlabels,[('out','annot_file')])])
+mapping.connect([(FreeSurferSourceLH, mris_convertLHlabels, [(('annot', select_aparc_annot), 'annot_file')])])
+mapping.connect([(FreeSurferSourceRH, mris_convertRHlabels, [(('annot', select_aparc_annot), 'annot_file')])])
 
 """
 This section coregisters the diffusion-weighted and parcellated white-matter / whole brain images.
@@ -460,8 +448,7 @@ mapping.connect([(inputnode, camino2trackvis,[(('dwi', get_vox_dims), 'voxel_dim
 Here the CMTK connectivity mapping nodes are connected.
 """
 
-mapping.connect([(FreeSurferSource, selectaparc,[("aparc_aseg","inlist")])])
-mapping.connect([(selectaparc, mri_convert_AparcAseg,[("out","in_file")])])
+mapping.connect([(FreeSurferSource, mri_convert_AparcAseg, [(('aparc_aseg', select_aparc), 'in_file')])])
 
 mapping.connect([(b0Strip, inverse_AparcAseg,[('out_file','reference')])])
 mapping.connect([(convertxfm, inverse_AparcAseg,[('out_file','in_matrix_file')])])
@@ -490,8 +477,6 @@ mapping.connect([(roigen, niftiVolumes,[("roi_file","in1")])])
 mapping.connect([(inputnode, niftiVolumes,[("dwi","in2")])])
 mapping.connect([(mri_convert_Brain, niftiVolumes,[("out_file","in3")])])
 
-mapping.connect([(camino2trackvis, tractFiles,[("trackvis","in1")])])
-
 mapping.connect([(creatematrix, fiberDataArrays,[("endpoint_file","in1")])])
 mapping.connect([(creatematrix, fiberDataArrays,[("endpoint_file_mm","in2")])])
 mapping.connect([(creatematrix, fiberDataArrays,[("fiber_length_file","in3")])])
@@ -502,13 +487,13 @@ This block connects a number of the files to the CFF converter. We pass lists of
 and volumes that are to be included, as well as the tracts and the network itself.
 """
 
-mapping.connect([(scriptFiles, CFFConverter,[("out","script_files")])])
+CFFConverter.inputs.script_files = os.path.abspath(inspect.getfile(inspect.currentframe()))
 mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
 mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
 mapping.connect([(gpickledNetworks, CFFConverter,[("out","gpickled_networks")])])
 mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
 mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
-mapping.connect([(tractFiles, CFFConverter,[("out","tract_files")])])
+mapping.connect([(camino2trackvis, CFFConverter,[("trackvis","tract_files")])])
 mapping.connect([(inputnode, CFFConverter,[("subject_id","title")])])
 
 """
