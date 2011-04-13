@@ -309,7 +309,9 @@ class Dissimilarity(BaseInterface):
     output_spec = DissimilarityOutputSpec
     
     def _bool_vec_dissimilarity(self, booldata1, booldata2, method):
-        methods = {"dice": dice, "jaccard": jaccard}       
+        methods = {"dice": dice, "jaccard": jaccard}
+        if np.all(booldata1) == False and np.all(booldata2) == False:
+            return 0
         return methods[method](booldata1.flat, booldata2.flat)
     
     def _run_interface(self, runtime):
