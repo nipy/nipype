@@ -5,8 +5,6 @@ import nipype.interfaces.ants as ants
 import nibabel as nb
 import os                                    # system functions
 
-data_dir = os.path.abspath('fsl_course_data/fdt/')
-
 data_dir = os.path.abspath('antsdata/brains')
 subject_list = ['B1', 'B2', 'B3', 'B4' ,'B5']
 
@@ -49,16 +47,24 @@ inputnode = pe.Node(interface=util.IdentityInterface(fields=['subject_id','image
 #  TRANSFORMATION=SyN[1]
 #  REGULARIZATION=Gauss[3,1]
 #  METRICPARAMS=1,4,-0.95]
-createTemplate = pe.Node(interface=ants.ANTS_Probabilistic(), name='createTemplate')
-createTemplate.inputs.weight = 1
-createTemplate.inputs.radius = 4
+createTemplate = pe.MapNode(interface=ants.ANTS_Probabilistic(), name='createTemplate',
+    iterfield = 'moving_images')
+#createTemplate.inputs.image_metric = 'CC'
+createTemplate.inputs.weight = 0
+createTemplate.inputs.radius = 0.5
 
 createTemplate.inputs.transformation_model = 'SyN'
-createTemplate.inputs.transformation_gradient_step_length = 1
+createTemplate.inputs.transformation_gradient_step_length = 2
+#createTemplate.inputs.transformation_delta_time = 2
+#createTemplate.inputs.transformation_number_of_time_steps = 100
+
 createTemplate.inputs.regularization = 'Gauss'
 createTemplate.inputs.regularization_gradient_field_sigma = 3
 createTemplate.inputs.regularization_deformation_field_sigma = 0.5
+#createTemplate.inputs.regularization_truncation = 0
 createTemplate.inputs.iterations = [50, 50, 10]
+createTemplate.inputs.image_dimension = 2
+createTemplate.inputs.fixed_image = data_dir + '/B1.tiff'
 createTemplate.inputs.out_file = 'erikoutputtest.tiff'
 
    # ${ANTSPATH}WarpImageMultiTransform $DIM  $x    ${NAMING}registered.nii ${NAMING}Warp.nii ${NAMING}Affine.txt  -R ${TEMPLATE}
@@ -98,7 +104,7 @@ declared at the beginning. Our tutorial can is now extensible to any arbitrary n
 their names to the subject list and their data to the proper folders.
 """
 normalize = pe.Workflow(name="normalize")
-normalize.connect([(inputnode, createTemplate,[('images','in_files')])])
+normalize.connect([(inputnode, createTemplate,[('images','moving_images')])])
 
 ants = pe.Workflow(name="ants_tutorial")
 ants.base_dir = os.path.abspath('ants_tutorial')

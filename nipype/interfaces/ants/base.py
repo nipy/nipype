@@ -13,11 +13,14 @@ from nipype.utils.misc import isdefined
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+
+
+
 class ANTSInputSpec(CommandLineInputSpec):
-    fixed_image = File(exists=True, argstr='%s,',
+    fixed_image = File(exists=True,
         desc='Fixed image')
-    moving_image = File(exists=True, argstr='%s,',
-        desc='Moving image')
+    moving_images = InputMultiPath(File(exists=True),
+        desc='Moving images')
 
     image_metric = traits.Enum('CC', 'MI', 'SMI', 'PR', 'MSQ', 'PSE', 'JTB', argstr='--image-metric %s',
                                 desc='Intensity-Based Metrics'\
@@ -39,16 +42,12 @@ class ANTSInputSpec(CommandLineInputSpec):
         '[fixedImage,movingImage,fixedPoints,movingPoints,weight,pointSetPercentage,pointSetSigma,boundaryPointsOnly,kNeighborhood,'\
         'alpha,meshResolution,splineOrder,numberOfLevels,useAnisotropicCovariances]')
 
-    in_file = File(exists=True, argstr='-i %s',
-        mandatory=True, position=1,
-        desc='The input file.')
-
     mask_file = File(exists=True, argstr='--mask-image %s',
         desc='this mask -- defined in the fixed image space defines the region of interest'\
               'over which the registration is computed ==> above 0.1 means inside mask ==>'\
               'continuous values in range [0.1,1.0] effect optimization like a probability. ==>'\
               'values > 1 are treated as = 1.0')
-    iterations = traits.List(traits.Int, argstr='--number-of-iterations %d',
+    iterations = traits.List(traits.Int, argstr='--number-of-iterations %s',
         desc='Number of iterations per level -- a vector e.g. : [100,100,20]',
         minlen=3, maxlen=3, sep='x')
 
@@ -60,7 +59,8 @@ class ANTSInputSpec(CommandLineInputSpec):
         'change). Thus, you get a 2.5-Dimensional registration as there is still 3D '\
         'continuity in the mapping.', minlen=3, maxlen=3, sep='x')
 
-    transformation_model = traits.Enum('Diff', 'Elast', 'Exp', 'Greedy Exp', 'SyN', argstr='--transformation-model %s[',
+    transformation_model = traits.Enum('Diff', 'Elast', 'Exp', 'Greedy Exp', 'SyN',
+        argstr='--transformation-model ',
        desc='TRANSFORMATION'\
        '[gradient-step-length,number-of-time-steps,DeltaTime,symmetry-type].'\
        'Choose one of the following TRANSFORMATIONS:'\
@@ -72,28 +72,28 @@ class ANTSInputSpec(CommandLineInputSpec):
        'DeltaTime is the integration time-discretization step - sub-voxel - n-time steps' \
        'currently fixed at 2')
 
-    transformation_gradient_step_length = traits.Float(argstr='%d,',
+    transformation_gradient_step_length = traits.Float( \
         desc='Gradient step length for transformation')
-    transformation_number_of_time_steps = traits.Float(argstr='%d,',
+    transformation_number_of_time_steps = traits.Float( \
         desc='Number of time steps for transformation')
-    transformation_delta_time = traits.Float(argstr='%d,',
+    transformation_delta_time = traits.Float(2,
         desc='DeltaTime is the integration time-discretization step'\
         '- sub-voxel - n-time steps currently fixed at 2')
-    transformation_symmetry_type = traits.Str(argstr='%d]',
-        desc='Transformation symmetry type')
+    #transformation_symmetry_type = traits.Str(argstr=',%d',
+    #    desc='Transformation symmetry type')
 
-    regularization = traits.Enum('Gauss', 'DMFFD', argstr='--regularization %s[',
+    regularization = traits.Enum('Gauss', 'DMFFD', argstr='--regularization ',
         desc='REGULARIZATION' \
         '[gradient-field-sigma,def-field-sigma,truncation].' \
         'Choose one of the following REGULARIZATIONS:' \
         'Gauss = gaussian'\
         'DMFFD = directly manipulated free form deformation '\
         '<VALUES>: Gauss[3,0.5]')
-    regularization_gradient_field_sigma = traits.Float(argstr='%d,',
+    regularization_gradient_field_sigma = traits.Float( \
         desc='Gradient field sigma for regularization')
-    regularization_deformation_field_sigma = traits.Float(argstr='%d,',
+    regularization_deformation_field_sigma = traits.Float( \
         desc='Deformation field sigma for regularization')
-    regularization_truncation = traits.Float(argstr='%d,',
+    regularization_truncation = traits.Float( \
         desc='Truncation parameter for regularization')
 
     initial_affine = File(exists=True, argstr='--initial-affine %s',
@@ -102,8 +102,8 @@ class ANTSInputSpec(CommandLineInputSpec):
     fixed_image_initial_affine  = File(exists=True, argstr='--fixed-image-initial-affine %s',
         desc='Use the input file as the initial affine parameter for the fixed image')
 
-    geodesic = traits.Enum('0', '1', '2', argstr='--geodesic %s',
-        desc='geodesic = 0 / 1 / 2, 0 = not time-dependent, 1 = asymmetric , 2 = symmetric')
+    geodesic = traits.Enum('not time-dependent', 'asymmetric', 'symmetric', argstr='--geodesic %s',
+        desc='Geodesic; can be: not time-dependent, asymmetric, or symmetric')
 
     go_faster = traits.Bool(argstr='--go-faster',
         desc='true / false -- if true, SyN is faster but loses some accuracy wrt '\
@@ -160,6 +160,25 @@ class ANTSInputSpec(CommandLineInputSpec):
     out_file = File(argstr='-o %s', genfile=True,
         desc='The name for the output: prefix or a name+type. e.g. OUT or OUT.nii or OUT.mha')
 
+    image_dimension = traits.Enum(3, 2, argstr='%d', mandatory=True, position=1, usedefault=True,
+        desc='ImageDimension: 2 or 3 (for 2 or 3 Dimensional registration)')
+    """
+    Intensity
+    """
+    weight = traits.Float(desc='Weight')
+    radius = traits.Float(desc='Radius')
+    histogram_bins = traits.Int(desc='Histogram Bins')
+
+    """
+    POINTSET
+    """
+    fixed_points = traits.Int(desc='Fixed points')
+    moving_points = traits.Int(desc='Moving points')
+    pointset_percentage = traits.Float(desc='Point Set Percentage')
+    pointset_sigma = traits.Float(desc='Point Set Sigma')
+    boundary_points_only = traits.Bool(desc='Boundary points only')
+    k_neighbourhood = traits.Float(desc='k Neighbourhood')
+
 class ANTSOutputSpec(TraitedSpec):
     output = File(exists=True, desc='The output file')
 
@@ -182,8 +201,35 @@ class ANTS(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name , _ = split_filename(self.inputs.moving_images[0])
         return name + "_ants"
+
+    def _format_arg(self, name, spec, value):
+        if name == 'geodesic':
+            return spec.argstr%{"not time-dependent":'0', "asymmetric":'1', "symmetric":'2'}[value]
+
+        if name == 'regularization':
+            reglist = self.inputs.regularization + '['
+            if isdefined(self.inputs.regularization_gradient_field_sigma):
+                reglist += str(self.inputs.regularization_gradient_field_sigma)
+            if isdefined(self.inputs.regularization_deformation_field_sigma):
+                reglist += ',' + str(self.inputs.regularization_deformation_field_sigma)
+            if isdefined(self.inputs.regularization_truncation):
+                reglist += ',' + str(self.inputs.regularization_truncation)
+            reglist += ']'
+            return spec.argstr + reglist
+
+        if name == 'transformation_model':
+            translist = self.inputs.transformation_model + '['
+            if isdefined(self.inputs.transformation_gradient_step_length):
+                translist += str(self.inputs.transformation_gradient_step_length)
+            if isdefined(self.inputs.transformation_number_of_time_steps):
+                translist += ',' + str(self.inputs.transformation_number_of_time_steps)
+            if isdefined(self.inputs.transformation_delta_time):
+                translist += ',' + str(self.inputs.transformation_delta_time)
+            translist += ']'
+            return spec.argstr + translist
+        return super(ANTS, self)._format_arg(name, spec, value)
 
 class ANTS_IntensityInputSpec(ANTSInputSpec):
     weight = traits.Float(argstr='%d,',
@@ -192,6 +238,24 @@ class ANTS_IntensityInputSpec(ANTSInputSpec):
         desc='Radius')
     histogram_bins = traits.Int(argstr='%d,',
         desc='Histogram Bins')
+
+class ANTS_Intensity(ANTS):
+    def _format_arg(self, name, spec, value):
+        if name == 'image_metric':
+            metriclist = self.inputs.image_metric + '['
+            if isdefined(self.inputs.fixed_image):
+                metriclist += str(self.inputs.fixed_image)
+            if isdefined(self.inputs.moving_images):
+                metriclist += ',' + ",".join(self.inputs.moving_images)
+            if isdefined(self.inputs.weight):
+                metriclist += ','+ str(self.inputs.weight)
+            if isdefined(self.inputs.radius):
+                metriclist += ',' + str(self.inputs.radius)
+            if isdefined(self.inputs.histogram_bins):
+                metriclist += ',' + str(self.inputs.histogram_bins)
+            metriclist += ']'
+            return super(ANTS_Intensity, self)._format_arg('image_metric', spec, metriclist)
+        return super(ANTS_Intensity, self)._format_arg(name, spec, value)
 
 class ANTS_PointSetInputSpec(ANTSInputSpec):
     fixed_points = traits.Int(argstr='%d,',
@@ -209,7 +273,33 @@ class ANTS_PointSetInputSpec(ANTSInputSpec):
     k_neighbourhood = traits.Float(argstr='%d,',
         desc='k Neighbourhood')
 
-class ANTS_CrossCorrelation(ANTS):
+class ANTS_PointSet(ANTS):
+    def _format_arg(self, name, spec, value):
+        if name == 'image_metric':
+            metriclist = self.inputs.image_metric + '['
+            if isdefined(self.inputs.fixed_image):
+                metriclist += "'" + str(self.inputs.fixed_image) + "'"
+            if isdefined(self.inputs.moving_images):
+                metriclist += ',' + "'" + "','".join(self.inputs.moving_images) + "'"
+            if isdefined(self.inputs.fixed_points):
+                metriclist += ',' + str(self.inputs.fixed_points)
+            if isdefined(self.inputs.moving_points):
+                metriclist += ',' + str(self.inputs.moving_points)
+            if isdefined(self.inputs.weight):
+                metriclist += ',' + str(self.inputs.weight)
+            if isdefined(self.inputs.pointset_percentage):
+                metriclist += ',' + str(self.inputs.pointset_percentage)
+            if isdefined(self.inputs.pointset_sigma):
+                metriclist += ',' + str(self.inputs.pointset_sigma)
+            if isdefined(self.inputs.boundary_points_only):
+                metriclist += ',' + str(self.inputs.boundary_points_only)
+            if isdefined(self.inputs.k_neighbourhood):
+                metriclist += ',' + str(self.inputs.k_neighbourhood)
+            metriclist += ']'
+            return super(ANTS_Intensity, self)._format_arg('image_metric', spec, metriclist)
+        return super(ANTS, self)._format_arg(name, spec, value)
+
+class ANTS_CrossCorrelation(ANTS_Intensity):
     """
     'CC/cross-correlation/CrossCorrelation[fixedImage,movingImage,weight,radius/OrForMI-#histogramBins]'\
     """
@@ -217,9 +307,10 @@ class ANTS_CrossCorrelation(ANTS):
         inputs["image_metric"] = "CC"
         return super(ANTS_CrossCorrelation, self).__init__(command, **inputs)
 
-class ANTS_CrossCorrelationInputSpec(ANTS_IntensityInputSpec)
+class ANTS_CrossCorrelationInputSpec(ANTS_IntensityInputSpec):
+    pass
 
-class ANTS_MutualInformation(ANTS):
+class ANTS_MutualInformation(ANTS_Intensity):
     """
     'MI/mutual-information/MutualInformation
     [fixedImage,movingImage,weight,radius/OrForMI-#histogramBins]'\
@@ -229,8 +320,9 @@ class ANTS_MutualInformation(ANTS):
         return super(ANTS_MutualInformation, self).__init__(command, **inputs)
 
 class ANTS_MutualInformationInputSpec(ANTS_IntensityInputSpec):
+    pass
 
-class ANTS_SpatialMutualInformation(ANTS):
+class ANTS_SpatialMutualInformation(ANTS_Intensity):
     """
     'SMI/spatial-mutual-information/SpatialMutualInformation
     [fixedImage,movingImage,weight,radius/OrForMI-#histogramBins]'\
@@ -240,8 +332,9 @@ class ANTS_SpatialMutualInformation(ANTS):
         return super(ANTS_SpatialMutualInformation, self).__init__(command, **inputs)
 
 class ANTS_SpatialMutualInformationInputSpec(ANTS_IntensityInputSpec):
+    pass
 
-class ANTS_Probabilistic(ANTS):
+class ANTS_Probabilistic(ANTS_Intensity):
     """
     'PR/probabilistic/Probabilistic[fixedImage,movingImage,weight,radius/OrForMI-#histogramBins]'\
     """
@@ -250,8 +343,9 @@ class ANTS_Probabilistic(ANTS):
         return super(ANTS_Probabilistic, self).__init__(command, **inputs)
 
 class ANTS_ProbabilisticInputSpec(ANTS_IntensityInputSpec):
+    pass
 
-class ANTS_MeanSquares(ANTS):
+class ANTS_MeanSquares(ANTS_Intensity):
     """
     'MSQ/mean-squares/MeanSquares -- radius > 0 uses moving image gradient in metric'\
     'deriv.[fixedImage,movingImage,weight,radius/OrForMI-#histogramBins]'\
@@ -261,8 +355,9 @@ class ANTS_MeanSquares(ANTS):
         return super(ANTS_MeanSquares, self).__init__(command, **inputs)
 
 class ANTS_MeanSquaresInputSpec(ANTS_IntensityInputSpec):
+    pass
 
-class ANTS_PointSetExpectation(ANTS):
+class ANTS_PointSetExpectation(ANTS_PointSet):
     """
             'Point-Set-Based Metrics:'\
 
@@ -283,7 +378,7 @@ class ANTS_PointSetExpectationInputSpec(ANTS_PointSetInputSpec):
     partial_matching_iterations = traits.Int(100000, argstr='%d,', usedefault=True,
         desc='Partial matching iterations')
 
-class ANTS_JensenTsallisBSpline(ANTS):
+class ANTS_JensenTsallisBSpline(ANTS_PointSet):
     """
     'Point-Set-Based Metrics:'\
 
@@ -339,7 +434,7 @@ WarpImageMultiTransform 3 reference_image output_image -R moving_image -i  abcdA
  Prefixname "abcd" without any extension will use ".nii.gz" by default
  The abcdWarp and abcdInverseWarp do not exist. They are formed on the basis of abcd(Inverse)Warpxvec/yvec/zvec.nii.gz when calling WarpImageMultiTransform, yet you have to use them as if they exist.
 """
-    image_dimension = traits.Enum('3', '2', argstr='%s', mandatory=True, position=1, usedefault=True
+    image_dimension = traits.Enum(3, 2, argstr='%d', mandatory=True, position=1, usedefault=True,
         desc='ImageDimension: 2 or 3 (for 2 or 3 Dimensional registration)')
 
     moving_image = File(exists=True, argstr='%s', mandatory=True, position=2,
@@ -392,7 +487,7 @@ class WarpImageMultiTransform(CommandLine):
         return name + "_warp"
 
 class MultiplyImagesInputSpec(CommandLineInputSpec):
-    image_dimension = traits.Enum('3', '2', argstr='%s', mandatory=True, position=1, usedefault=True,
+    image_dimension = traits.Enum(3, 2, argstr='%d', mandatory=True, position=1, usedefault=True,
         desc='ImageDimension: 2 or 3 (for 2 or 3 Dimensional registration)')
 
     in_file1 = File(exists=True, argstr='%s', mandatory=True, position=2,
@@ -432,7 +527,7 @@ class MultiplyImages(CommandLine):
         return name + "_multiplied"
 
 class AverageImagesInputSpec(CommandLineInputSpec):
-    image_dimension = traits.Enum('3', '2', argstr='%s', mandatory=True, position=1, usedefault=True,
+    image_dimension = traits.Enum(3, 2, argstr='%d', mandatory=True, position=1, usedefault=True,
         desc='ImageDimension: 2 or 3 (for 2 or 3 Dimensional registration)')
 
     out_file = File(argstr='%s', genfile=True, position=2,

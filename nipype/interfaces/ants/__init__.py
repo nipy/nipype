@@ -6,6 +6,8 @@ from nipype.interfaces.ants.base import (ANTS,
     ANTS_MeanSquaresInputSpec,
     ANTS_PointSetExpectation,
     ANTS_JensenTsallisBSpline,
+    ANTS_Intensity,
+    ANTS_PointSet,
     WarpImageMultiTransform,
     AverageImages,
     MultiplyImages)
