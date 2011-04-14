@@ -390,3 +390,85 @@ class WarpImageMultiTransform(CommandLine):
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + "_warp"
+
+class MultiplyImagesInputSpec(CommandLineInputSpec):
+    image_dimension = traits.Enum('3', '2', argstr='%s', mandatory=True, position=1, usedefault=True,
+        desc='ImageDimension: 2 or 3 (for 2 or 3 Dimensional registration)')
+
+    in_file1 = File(exists=True, argstr='%s', mandatory=True, position=2,
+        desc='the first image to multiply')
+
+    in_file2 = File(exists=True, argstr='%s', mandatory=True, position=3,
+        desc='the second image to multiply')
+
+    out_product = File(argstr='%s', genfile=True, position=4,
+        desc='The name for the output: prefix or a name+type. e.g. OUT or OUT.nii or OUT.mha')
+
+class MultiplyImagesOutputSpec(TraitedSpec):
+    product = File(exists=True, desc='The output image')
+
+class MultiplyImages(CommandLine):
+    """MultiplyImages
+    Usage:
+
+    MultiplyImages ImageDimension img1.nii img2.nii product.nii {smoothing}
+    """
+
+    _cmd = 'MultiplyImages'
+    input_spec=MultiplyImagesInputSpec
+    output_spec=MultiplyImagesOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["product"] = os.path.abspath(self._gen_outfilename())
+        return outputs
+    def _gen_filename(self, name):
+        if name is 'product':
+            return self._gen_outfilename()
+        else:
+            return None
+    def _gen_outfilename(self):
+        _, name , _ = split_filename(self.inputs.in_file1)
+        return name + "_multiplied"
+
+class AverageImagesInputSpec(CommandLineInputSpec):
+    image_dimension = traits.Enum('3', '2', argstr='%s', mandatory=True, position=1, usedefault=True,
+        desc='ImageDimension: 2 or 3 (for 2 or 3 Dimensional registration)')
+
+    out_file = File(argstr='%s', genfile=True, position=2,
+        desc='The name for the output: prefix or a name+type. e.g. OUT or OUT.nii or OUT.mha')
+
+    normalize  = traits.Bool(argstr='%s', position=3,
+        desc='Normalize: 0 (false) or 1 (true); '\
+        'if true, the 2nd image is divided by its mean. This will select the largest image to average into.')
+
+    in_files = File(exists=True, argstr='%s', mandatory=True, position=4,
+        desc='the images to average')
+
+class AverageImagesOutputSpec(TraitedSpec):
+    output = File(exists=True, desc='The output image')
+
+class AverageImages(CommandLine):
+    """AverageImages
+    Usage:
+
+    AverageImages ImageDimension Outputfname.nii.gz Normalize <images>
+
+    """
+
+    _cmd = 'AverageImages'
+    input_spec=AverageImagesInputSpec
+    output_spec=AverageImagesOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["output"] = os.path.abspath(self._gen_outfilename())
+        return outputs
+    def _gen_filename(self, name):
+        if name is 'output':
+            return self._gen_outfilename()
+        else:
+            return None
+    def _gen_outfilename(self):
+        _, name , _ = split_filename(self.inputs.in_files[0])
+        return name + "_averaged"
