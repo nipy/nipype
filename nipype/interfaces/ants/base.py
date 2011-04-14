@@ -3,27 +3,21 @@
 See the docstrings of the individual classes for examples.
 
 """
-
 from glob import glob
 import os
 import warnings
 from nipype.utils.filemanip import fname_presuffix, split_filename
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
+from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File, InputMultiPath
 from nipype.utils.misc import isdefined
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 class ANTSInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='-i %s',
-        mandatory=True, position=1,
-        desc='The input .Bfloat (camino) file.')
-
-    mask_file = File(exists=True, argstr='--mask-image %s',
-        desc='this mask -- defined in the fixed image space defines the region of interest'\
-              'over which the registration is computed ==> above 0.1 means inside mask ==>'\
-              'continuous values in range [0.1,1.0] effect optimization like a probability. ==>'\
-              'values > 1 are treated as = 1.0')
+    fixed_image = File(exists=True, argstr='%s,',
+        desc='Fixed image')
+    moving_image = File(exists=True, argstr='%s,',
+        desc='Moving image')
 
     image_metric = traits.Enum('CC', 'MI', 'SMI', 'PR', 'MSQ', 'PSE', 'JTB', argstr='--image-metric %s',
                                 desc='Intensity-Based Metrics'\
@@ -45,19 +39,28 @@ class ANTSInputSpec(CommandLineInputSpec):
         '[fixedImage,movingImage,fixedPoints,movingPoints,weight,pointSetPercentage,pointSetSigma,boundaryPointsOnly,kNeighborhood,'\
         'alpha,meshResolution,splineOrder,numberOfLevels,useAnisotropicCovariances]')
 
+    in_file = File(exists=True, argstr='-i %s',
+        mandatory=True, position=1,
+        desc='The input file.')
+
+    mask_file = File(exists=True, argstr='--mask-image %s',
+        desc='this mask -- defined in the fixed image space defines the region of interest'\
+              'over which the registration is computed ==> above 0.1 means inside mask ==>'\
+              'continuous values in range [0.1,1.0] effect optimization like a probability. ==>'\
+              'values > 1 are treated as = 1.0')
     iterations = traits.List(traits.Int, argstr='--number-of-iterations %d',
         desc='Number of iterations per level -- a vector e.g. : [100,100,20]',
         minlen=3, maxlen=3, sep='x')
 
-    restrict_deformation = traits.Bool(argstr='--Restrict-Deformation %d',
+    restrict_deformation = traits.List(traits.Float, argstr='--Restrict-Deformation %d',
         desc='restrict the gradient that drives the deformation by scalar factors along'\
         'specified dimensions -- a float vector of length ImageDimension to multiply '\
         'against the similarity metrics gradient values --- e.g. in 3D : 0.1x1x0 --- '\
         'will set the z gradient to zero and scale the x gradient by 0.1 and y by 1 (no '\
         'change). Thus, you get a 2.5-Dimensional registration as there is still 3D '\
-        'continuity in the mapping.')
+        'continuity in the mapping.', minlen=3, maxlen=3, sep='x')
 
-    transformation_model = traits.Enum('Diff', 'Elast', 'Exp', 'Greedy Exp', 'SyN', argstr='--transformation-model %s',
+    transformation_model = traits.Enum('Diff', 'Elast', 'Exp', 'Greedy Exp', 'SyN', argstr='--transformation-model %s[',
        desc='TRANSFORMATION'\
        '[gradient-step-length,number-of-time-steps,DeltaTime,symmetry-type].'\
        'Choose one of the following TRANSFORMATIONS:'\
@@ -69,13 +72,29 @@ class ANTSInputSpec(CommandLineInputSpec):
        'DeltaTime is the integration time-discretization step - sub-voxel - n-time steps' \
        'currently fixed at 2')
 
-    regularization = traits.Enum('Gauss', 'DMFFD', argstr='--regularization %s',
+    transformation_gradient_step_length = traits.Float(argstr='%d,',
+        desc='Gradient step length for transformation')
+    transformation_number_of_time_steps = traits.Float(argstr='%d,',
+        desc='Number of time steps for transformation')
+    transformation_delta_time = traits.Float(argstr='%d,',
+        desc='DeltaTime is the integration time-discretization step'\
+        '- sub-voxel - n-time steps currently fixed at 2')
+    transformation_symmetry_type = traits.Str(argstr='%d]',
+        desc='Transformation symmetry type')
+
+    regularization = traits.Enum('Gauss', 'DMFFD', argstr='--regularization %s[',
         desc='REGULARIZATION' \
         '[gradient-field-sigma,def-field-sigma,truncation].' \
         'Choose one of the following REGULARIZATIONS:' \
         'Gauss = gaussian'\
         'DMFFD = directly manipulated free form deformation '\
         '<VALUES>: Gauss[3,0.5]')
+    regularization_gradient_field_sigma = traits.Float(argstr='%d,',
+        desc='Gradient field sigma for regularization')
+    regularization_deformation_field_sigma = traits.Float(argstr='%d,',
+        desc='Deformation field sigma for regularization')
+    regularization_truncation = traits.Float(argstr='%d,',
+        desc='Truncation parameter for regularization')
 
     initial_affine = File(exists=True, argstr='--initial-affine %s',
         desc='Use the input file as the initial affine parameter ')
@@ -96,8 +115,8 @@ class ANTSInputSpec(CommandLineInputSpec):
               '<VALUES>: true')
 
     number_of_affine_iterations = traits.List(traits.Int, argstr='--number-of-affine-iterations %d',
-        desc="Number of iterations per level -- a vector e.g. : 100x100x20"\
-        "<VALUES>: 10000x10000x10000", minlen=3, maxlen=3, sep="x")
+        desc='Number of iterations per level -- a vector e.g. : 100x100x20'\
+        '<VALUES>: 10000x10000x10000', minlen=3, maxlen=3, sep='x')
 
     use_nearest_neighbor = traits.Bool(argstr='--use-NN',
         desc='Use nearest neighbor interpolation'\
@@ -114,8 +133,8 @@ class ANTSInputSpec(CommandLineInputSpec):
         '<VALUES>: MI')
 
     mutual_info_options = traits.List(traits.Int, argstr='--MI-option %d',
-        desc="option of mutual information: MI_bins x MI_samples (default: 32x32000)"\
-        "<VALUES>: 32x5000", minlen=2, maxlen=2, sep="x")
+        desc='option of mutual information: MI_bins x MI_samples (default: 32x32000)'\
+        '<VALUES>: 32x5000', minlen=2, maxlen=2, sep='x')
 
     rigid_affine  = traits.Bool(argstr='--rigid-affine',
         desc='use rigid transformation : true / false(default)'\
@@ -126,9 +145,9 @@ class ANTSInputSpec(CommandLineInputSpec):
               '<VALUES>: false')
 
     affine_gradient_descent_options = traits.List(traits.Float, argstr='--affine-gradient-descent-option  %d',
-        desc="option of gradient descent in affine transformation: "\
-        "maximum_step_length x relaxation_factor x minimum_step_length x translation_scales"\
-        "<VALUES>: 0.1x0.5x1.e-4x1.e-4", minlen=4, maxlen=4, sep="x")
+        desc='option of gradient descent in affine transformation: '\
+        'maximum_step_length x relaxation_factor x minimum_step_length x translation_scales'\
+        '<VALUES>: 0.1x0.5x1.e-4x1.e-4', minlen=4, maxlen=4, sep='x')
 
     use_rotation_header  = traits.Bool(argstr='--use-rotation-header ',
         desc='Use rotation matrix in image headers: true (default) / false'\
@@ -165,6 +184,129 @@ class ANTS(CommandLine):
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + "_ants"
+
+class ANTS_IntensityInputSpec(ANTSInputSpec):
+    weight = traits.Float(argstr='%d,',
+        desc='Weight')
+    radius = traits.Float(argstr='%d,',
+        desc='Radius')
+    histogram_bins = traits.Int(argstr='%d,',
+        desc='Histogram Bins')
+
+class ANTS_PointSetInputSpec(ANTSInputSpec):
+    fixed_points = traits.Int(argstr='%d,',
+        desc='Fixed points')
+    moving_points = traits.Int(argstr='%d,',
+        desc='Moving points')
+    weight = traits.Float(argstr='%d,',
+        desc='Weight')
+    pointset_percentage = traits.Float(argstr='%d,',
+        desc='Point Set Percentage')
+    pointset_sigma = traits.Float(argstr='%d,',
+        desc='Point Set Sigma')
+    boundary_points_only = traits.Bool(argstr='%d,',
+        desc='Boundary points only')
+    k_neighbourhood = traits.Float(argstr='%d,',
+        desc='k Neighbourhood')
+
+class ANTS_CrossCorrelation(ANTS):
+    """
+    'CC/cross-correlation/CrossCorrelation[fixedImage,movingImage,weight,radius/OrForMI-#histogramBins]'\
+    """
+    def __init__(self, command=None, **inputs):
+        inputs["image_metric"] = "CC"
+        return super(ANTS_CrossCorrelation, self).__init__(command, **inputs)
+
+class ANTS_CrossCorrelationInputSpec(ANTS_IntensityInputSpec)
+
+class ANTS_MutualInformation(ANTS):
+    """
+    'MI/mutual-information/MutualInformation
+    [fixedImage,movingImage,weight,radius/OrForMI-#histogramBins]'\
+    """
+    def __init__(self, command=None, **inputs):
+        inputs["image_metric"] = "MI"
+        return super(ANTS_MutualInformation, self).__init__(command, **inputs)
+
+class ANTS_MutualInformationInputSpec(ANTS_IntensityInputSpec):
+
+class ANTS_SpatialMutualInformation(ANTS):
+    """
+    'SMI/spatial-mutual-information/SpatialMutualInformation
+    [fixedImage,movingImage,weight,radius/OrForMI-#histogramBins]'\
+    """
+    def __init__(self, command=None, **inputs):
+        inputs["image_metric"] = "SMI"
+        return super(ANTS_SpatialMutualInformation, self).__init__(command, **inputs)
+
+class ANTS_SpatialMutualInformationInputSpec(ANTS_IntensityInputSpec):
+
+class ANTS_Probabilistic(ANTS):
+    """
+    'PR/probabilistic/Probabilistic[fixedImage,movingImage,weight,radius/OrForMI-#histogramBins]'\
+    """
+    def __init__(self, command=None, **inputs):
+        inputs["image_metric"] = "PR"
+        return super(ANTS_Probabilistic, self).__init__(command, **inputs)
+
+class ANTS_ProbabilisticInputSpec(ANTS_IntensityInputSpec):
+
+class ANTS_MeanSquares(ANTS):
+    """
+    'MSQ/mean-squares/MeanSquares -- radius > 0 uses moving image gradient in metric'\
+    'deriv.[fixedImage,movingImage,weight,radius/OrForMI-#histogramBins]'\
+    """
+    def __init__(self, command=None, **inputs):
+        inputs["image_metric"] = "MSQ"
+        return super(ANTS_MeanSquares, self).__init__(command, **inputs)
+
+class ANTS_MeanSquaresInputSpec(ANTS_IntensityInputSpec):
+
+class ANTS_PointSetExpectation(ANTS):
+    """
+            'Point-Set-Based Metrics:'\
+
+    'PSE/point-set-expectation/PointSetExpectation'\
+        '[fixedImage,movingImage,fixedPoints,movingPoints,weight,'\
+        'pointSetPercentage,pointSetSigma,boundaryPointsOnly,kNeighborhood,'\
+        'PartialMatchingIterations=100000]'\
+        'the partial matching option assumes the complete labeling is in the
+        first set of label parameters ... more iterations leads to more symmetry
+        in the matching - 0 iterations'\
+        'means full asymmetry'\
+    """
+    def __init__(self, command=None, **inputs):
+        inputs["image_metric"] = "PSE"
+        return super(ANTS_PointSetExpectation, self).__init__(command, **inputs)
+
+class ANTS_PointSetExpectationInputSpec(ANTS_PointSetInputSpec):
+    partial_matching_iterations = traits.Int(100000, argstr='%d,', usedefault=True,
+        desc='Partial matching iterations')
+
+class ANTS_JensenTsallisBSpline(ANTS):
+    """
+    'Point-Set-Based Metrics:'\
+
+    'JTB/jensen-tsallis-bspline/JensenTsallisBSpline'\
+        '[fixedImage,movingImage,fixedPoints,movingPoints,weight,pointSetPercentage,
+        pointSetSigma,boundaryPointsOnly,kNeighborhood,'\
+        'alpha,meshResolution,splineOrder,numberOfLevels,useAnisotropicCovariances]'
+    """
+    def __init__(self, command=None, **inputs):
+        inputs["image_metric"] = "JTB"
+        return super(ANTS_JensenTsallisBSpline, self).__init__(command, **inputs)
+
+class ANTS_JensenTsallisBSplineInputSpec(ANTS_PointSetInputSpec):
+    alpha = traits.Float(argstr='%d,',
+        desc='Alpha')
+    mesh_resolution = traits.Float(argstr='%d,',
+        desc='Mesh resolution')
+    number_of_levels = traits.Int(argstr='%d,',
+        desc='Number of levels')
+    spline_order = traits.Int(argstr='%d,',
+        desc='Spline order')
+    use_anisotropic_covariances = traits.Bool(argstr='%d,',
+        desc='Use anisotropic covariances')
 
 class WarpImageMultiTransformInputSpec(CommandLineInputSpec):
     """WarpImageMultiTransform
