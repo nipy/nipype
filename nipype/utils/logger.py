@@ -50,7 +50,13 @@ def logdebug_dict_differences(dold, dnew, prefix=""):
     for k in new_keys.intersection(old_keys):
         same = False
         try:
-            same = dnew[k] == dold[k]
+            new, old = dnew[k], dold[k]
+            same = new == old
+            if not same:
+                # Since JSON does not discriminate between lists and
+                # tuples, we might need to cast them into the same type
+                # as the last resort.  And lets try to be more generic
+                same = old.__class__(new) == old
         except Exception, e:
             same = False
         if not same:

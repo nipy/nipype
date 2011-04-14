@@ -11,11 +11,28 @@ from nipype.interfaces.base import CommandLine
 class SGEPlugin(DistributedPluginBase):
     """Execute workflow with SGE/OGE
 
-    A workflow config option sgeargs can be used to control parameters
-    sent to qsub.
+    The plugin_args input to run can be used to control the SGE execution.
+    Currently supported options are:
+
+    - template : template to use for SGE job submission
+    - qsub_args : arguments to be prepended to the job execution script in the
+                  qsub call
+
     """
 
-    def __init__(self):
+    def __init__(self, plugin_args=None):
+        self._template="""
+#$$ -V
+#$$ -S /bin/sh
+"""
+        self._qsub_args = None
+        if plugin_args:
+            if 'template' in plugin_args:
+                self._template = plugin_args['template']
+                if os.path.isfile(self._template):
+                    self._template = open(self._template).readlines()
+            if 'qsub_args' in plugin_args:
+                self._qsub_args = plugin_args['qsub_args']
         self._pending = {}
         
     def _get_result(self, taskid):
@@ -70,17 +87,15 @@ except:
         fp = open(pyscript, 'wt')
         fp.writelines(cmdstr)
         fp.close()
-        sgescript = """#!/usr/bin/env bash
-python %s
-"""%(pyscript)
+        sgescript = '\n'.join((self._template, 'python %s'%pyscript))
         sgescriptfile = os.path.join(sge_dir, 'sgescript_%s.sh'%suffix)
         fp = open(sgescriptfile, 'wt')
         fp.writelines(sgescript)
         fp.close()
         cmd = CommandLine('qsub', environ=os.environ.data)
         qsubargs = ''
-        if node.config.has_key('sgeargs'):
-            qsubargs = node.config['sgeargs']
+        if self._qsub_args:
+            qsubargs = self._qsub_args
         cmd.inputs.args = '%s %s'%(qsubargs, sgescriptfile)
         result = cmd.run()
         # retrieve sge taskid
@@ -88,6 +103,9 @@ python %s
             taskid = int(result.runtime.stdout.split(' ')[2])
             self._pending[taskid] = node.output_dir()
             logger.debug('submitted sge task: %d for node %s'%(taskid, node._id))
+        else:
+            raise RuntimeError('\n'.join(('Could not submit sge task for node %s'%node._id,
+                                          result.runtime.stderr)))
         return taskid
 
     def _report_crash(self, node, result=None):

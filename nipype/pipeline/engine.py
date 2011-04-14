@@ -414,7 +414,7 @@ class Workflow(WorkflowBase):
         else:
             logger.info(dotstr)
 
-    def run(self, plugin=None, updatehash=False):
+    def run(self, plugin=None, plugin_args=None, updatehash=False):
         """ Execute the workflow
 
         Parameters
@@ -422,7 +422,9 @@ class Workflow(WorkflowBase):
         
         plugin: plugin name or object
             Plugin to use for execution. You can create your own plugins for
-            execution. 
+            execution.
+        plugin_args : dictionary containing arguments to be sent to plugin
+            constructor. see individual plugin doc strings for details.
         """
         if plugin is None:
             plugin = config.get('execution','plugin')
@@ -437,18 +439,17 @@ class Workflow(WorkflowBase):
                 logger.error(msg)
                 raise ImportError(msg)
             else:
-                runner = getattr(sys.modules[name], '%sPlugin'%plugin)()
+                runner = getattr(sys.modules[name], '%sPlugin'%plugin)(plugin_args=plugin_args)
         flatgraph = self._create_flat_graph()
         self._set_needed_outputs(flatgraph)
         execgraph = generate_expanded_graph(deepcopy(flatgraph))
         for index, node in enumerate(execgraph.nodes()):
-            
             node.config = deepcopy(config._sections)
             node.config.update(self.config)
             node.base_dir = self.base_dir
             node.index = index
             if isinstance(node, MapNode):
-                node.use_plugin = plugin
+                node.use_plugin = (plugin, plugin_args)
         self._configure_exec_nodes(execgraph)
         runner.run(execgraph, updatehash=updatehash)
         return execgraph
@@ -1186,6 +1187,7 @@ class MapNode(Node):
         self._inputs = self._create_dynamic_traits(self._interface.inputs,
                                                    fields=self.iterfield)
         self._inputs.on_trait_change(self._set_mapnode_input)
+        self._got_inputs = False
 
     def _create_dynamic_traits(self, basetraits, fields=None, nitems=None):
         """Convert specific fields of a trait to accept multiple inputs
@@ -1319,8 +1321,16 @@ class MapNode(Node):
                                                                 '\n'.join(msg)))
 
     def get_subnodes(self):
-        self._get_inputs()
+        if not self._got_inputs:
+            self._get_inputs()
+            self._got_inputs = True
         return [node for _, node in self._make_nodes()]
+    
+    def num_subnodes(self):
+        if not self._got_inputs:
+            self._get_inputs()
+            self._got_inputs = True
+        return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
     
     def _run_interface(self, execute=True, updatehash=False):
         """Run the mapnode interface

@@ -35,7 +35,7 @@ def teardown_infile(tmp_dir):
 def test_contrastmgr():
     input_map = dict(args = dict(argstr='%s',),
                     contrast_num = dict(argstr='-cope',),
-                    corrections = dict(copyfile=False,),
+                    corrections = dict(copyfile=False,mandatory=True,),
                     dof_file = dict(copyfile=False,mandatory=True,argstr='',),
                     environ = dict(usedefault=True,),
                     fcon_file = dict(argstr='-f %s',),

@@ -14,6 +14,7 @@ from time import strftime, sleep
 from traceback import format_exception
 
 import numpy as np
+import scipy.sparse as ssp
 
 from ..utils import (nx, dfs_preorder, config)
 from ..engine import MapNode
@@ -78,6 +79,9 @@ def report_nodes_not_run(notrun):
 class PluginBase(object):
     """Base class for plugins"""
 
+    def __init__(self, plugin_args=None):
+        pass
+
     def run(self, graph):
         raise NotImplementedError
 
@@ -86,7 +90,7 @@ class DistributedPluginBase(PluginBase):
     """Execute workflow with a distribution engine
     """
     
-    def __init__(self):
+    def __init__(self, plugin_args=None):
         """Initialize runtime attributes to none
 
         procs: list (N) of underlying interface elements to be processed
@@ -174,13 +178,16 @@ class DistributedPluginBase(PluginBase):
         self.mapnodes.append(jobid)
         mapnodesubids = self.procs[jobid].get_subnodes()
         numnodes = len(mapnodesubids)
+        logger.info('Adding %d jobs for mapnode %s'%(numnodes, self.procs[jobid]._id))
         for i in range(numnodes):
             self.mapnodesubids[self.depidx.shape[0]+i] = jobid
         self.procs.extend(mapnodesubids)
-        self.depidx = np.vstack((self.depidx,
-                                 np.zeros((numnodes, self.depidx.shape[1]))))
-        self.depidx = np.hstack((self.depidx,
-                                 np.zeros((self.depidx.shape[0], numnodes))))
+        self.depidx = ssp.vstack((self.depidx,
+                                  ssp.lil_matrix(np.zeros((numnodes, self.depidx.shape[1])))),
+                                 'lil')
+        self.depidx = ssp.hstack((self.depidx,
+                                  ssp.lil_matrix(np.zeros((self.depidx.shape[0], numnodes)))),
+                                 'lil')
         self.depidx[-numnodes:, jobid] = 1
         self.proc_done = np.concatenate((self.proc_done,
                                          np.zeros(numnodes, dtype=bool)))
@@ -194,12 +201,13 @@ class DistributedPluginBase(PluginBase):
         while np.any(self.proc_done == False):
             # Check to see if a job is available
             jobids = np.flatnonzero((self.proc_done == False) & \
-                                    np.all(self.depidx==0, axis=0))
+                                        (self.depidx.sum(axis=0)==0).__array__())
             if len(jobids)>0:
                 # send all available jobs
                 logger.info('Submitting %d jobs' % len(jobids))
                 for jobid in jobids:
-                    if isinstance(self.procs[jobid], MapNode):
+                    if isinstance(self.procs[jobid], MapNode) and \
+                            self.procs[jobid].num_subnodes()>1:
                         submit = self._submit_mapnode(jobid)
                         if not submit:
                             continue
@@ -228,15 +236,15 @@ class DistributedPluginBase(PluginBase):
         # update the job dependency structure
         self.depidx[jobid, :] = 0.
         if jobid not in self.mapnodesubids:
-            self.refidx[np.nonzero(self.refidx[:,jobid]>0)[0],jobid] = 0
+            self.refidx[self.refidx[:,jobid].nonzero()[0],jobid] = 0
 
     def _generate_dependency_list(self, graph):
         """ Generates a dependency list for a list of graphs.
         """
         self.procs = graph.nodes()
-        self.depidx = nx.adj_matrix(graph).__array__()
-        self.refidx = deepcopy(self.depidx>0)
-        self.refidx.dtype = np.int8
+        self.depidx = ssp.lil_matrix(nx.adj_matrix(graph).__array__())
+        self.refidx = deepcopy(self.depidx)
+        self.refidx.astype = np.int
         self.proc_done    = np.zeros(len(self.procs), dtype=bool)
         self.proc_pending = np.zeros(len(self.procs), dtype=bool)
 
@@ -254,7 +262,7 @@ class DistributedPluginBase(PluginBase):
         """Removes directories whose outputs have already been used up
         """
         if config.getboolean('execution', 'remove_node_directories'):
-            for idx in np.nonzero(np.all(self.refidx==0,axis=1))[0]:
+            for idx in np.nonzero((self.refidx.sum(axis=1)==0).__array__())[0]:
                 if idx in self.mapnodesubids:
                     continue
                 if self.proc_done[idx] and (not self.proc_pending[idx]):

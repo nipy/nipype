@@ -17,7 +17,7 @@ class IPythonPlugin(DistributedPluginBase):
     """Execute workflow with ipython
     """
 
-    def __init__(self):
+    def __init__(self, plugin_args=None):
         super(IPythonPlugin, self).__init__()
         self.ipyclient = None
         self.taskclient = None
