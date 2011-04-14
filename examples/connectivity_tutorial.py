@@ -1,7 +1,7 @@
 """
-==================================================
+==========================================================
 Using Camino and CMTK for structural connectivity analysis
-==================================================
+==========================================================
 
 Introduction
 ============
@@ -13,15 +13,18 @@ and the Connectome Mapping Toolkit (CMTK) for connectivity analysis.
     python connectivity_tutorial.py
 
 We perform this analysis using the FSL course data, which can be acquired from here:
+
     http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 
 This pipeline also requires the Freesurfer directory for 'subj1' from the FSL course data.
 To save time, this data can be downloaded from here:
+
     http://dl.dropbox.com/u/315714/subj1.zip?dl=1
 
 Along with Camino, Camino-Trackvis, FSL and Freesurfer, you must also have the
 Connectome File Format library installed (CFFlib) as well as the Connectome Mapper (cmp).
 These are written by Stephan Gerhard and can be obtained from:
+
     http://www.cmtk.org/
 
 Import necessary modules from nipype.
@@ -181,10 +184,11 @@ inverse_AparcAseg.inputs.interp = ('nearestneighbour')
 """
 A number of conversion operations are required to obtain NIFTI files from the FreesurferSource for each subject.
 Nodes are used to convert the following:
-    - Original structural image to NIFTI
-    - Parcellated white matter image to NIFTI
-    - Parcellated whole-brain image to NIFTI
-    - Left and Right hemisphere surfaces to GIFTI (for visualization in ConnectomeViewer)
+
+    * Original structural image to NIFTI
+    * Parcellated white matter image to NIFTI
+    * Parcellated whole-brain image to NIFTI
+    * Left and Right hemisphere surfaces to GIFTI (for visualization in ConnectomeViewer)
 """
 
 mri_convert_Brain = pe.Node(interface=fs.MRIConvert(), name='mri_convert_Brain')
