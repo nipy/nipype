@@ -79,6 +79,9 @@ def report_nodes_not_run(notrun):
 class PluginBase(object):
     """Base class for plugins"""
 
+    def __init__(self, plugin_args=None):
+        pass
+
     def run(self, graph):
         raise NotImplementedError
 
@@ -87,7 +90,7 @@ class DistributedPluginBase(PluginBase):
     """Execute workflow with a distribution engine
     """
     
-    def __init__(self):
+    def __init__(self, plugin_args=None):
         """Initialize runtime attributes to none
 
         procs: list (N) of underlying interface elements to be processed
