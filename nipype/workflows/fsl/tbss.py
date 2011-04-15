@@ -1,8 +1,5 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Thank Michael for his help and sharing code git://gist.github.com/905015.git
-"""
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
@@ -11,8 +8,8 @@ import nipype.interfaces.io as nio
 import nibabel as nib
 import os
 
-
 def tbss1_op_string(infiles):
+    import nibabel as nib
     op_strings = []
     for infile in infiles:
         img = nib.load(infile)
@@ -114,11 +111,6 @@ def create_tbss_2_reg(name="tbss_2_reg"):
                        iterfield=['in_file','inmask_file','affine_file'],
                     name="fnirt")
     
-    # Apply the warpfield to the masked FA image
-    applywarp = pe.MapNode(interface=fsl.ApplyWarp(),
-                           iterfield=['in_file','field_file'],
-                        name="applywarp")
-    
     # Define the registration workflow
     tbss2 = pe.Workflow(name=name)
     
@@ -131,17 +123,14 @@ def create_tbss_2_reg(name="tbss_2_reg"):
                          ("mask_list","inmask_file"),
                          ("target","ref_file")]),
         (flirt,fnirt,[("out_matrix_file", "affine_file")]),
-        (inputnode,applywarp,[("fa_list", "in_file"),
-                              ("target","ref_file")]),
-        (fnirt,applywarp,[("fieldcoeff_file", "field_file")]),
         ])
 
     # Define the outputnode
-    outputnode = pe.Node(interface = util.IdentityInterface(fields=["wraped_fa_list"]),
+    outputnode = pe.Node(interface = util.IdentityInterface(fields=['field_list']),
                          name="outputnode")
     
     tbss2.connect([
-        (applywarp,outputnode,[("out_file","wraped_fa_list")])
+        (fnirt,outputnode, [('fieldcoeff_file','field_list')])
         ])
     return tbss2
 
@@ -168,12 +157,17 @@ def create_tbss_3_postreg(name='tbss_3_postreg'):
     """
     
     # Create the inputnode
-    inputnode = pe.Node(interface = util.IdentityInterface(fields=['wraped_fa_list']),
+    inputnode = pe.Node(interface = util.IdentityInterface(fields=['field_list','fa_list','target']),
                         name='inputnode')
     
+    # Apply the warpfield to the masked FA image
+    applywarp = pe.MapNode(interface=fsl.ApplyWarp(),
+                           iterfield=['in_file','field_file'],
+                        name="applywarp")
+    
     # Merge the FA files into a 4D file
-    mergefa = pe.Node(fsl.Merge(dimension="t"), name="mergefa")
-
+    mergefa = pe.Node(fsl.Merge(dimension="t", merged_file="all_FA.nii.gz"), name="mergefa")
+    
     # Get a group mask
     groupmask = pe.Node(fsl.ImageMaths(op_string="-max 0 -Tmin -bin",
                                        out_data_type="char",
@@ -181,7 +175,7 @@ def create_tbss_3_postreg(name='tbss_3_postreg'):
                         name="groupmask")
     
     maskgroup = pe.Node(fsl.ImageMaths(op_string="-mas",
-                                       suffix="_mask"),
+                                       suffix="_masked"),
                         name="maskgroup")
     
     # Take the mean over the fourth dimension
@@ -194,7 +188,10 @@ def create_tbss_3_postreg(name='tbss_3_postreg'):
                            name="makeskeleton")
     tbss3 = pe.Workflow(name=name)
     tbss3.connect([
-        (inputnode, mergefa, [("wraped_fa_list", "in_files")]),
+        (inputnode,applywarp,[("fa_list", "in_file"),
+                              ("target","ref_file"),
+                              ("field_list", "field_file")]),
+        (applywarp, mergefa, [("out_file", "in_files")]),
         (mergefa, groupmask, [("merged_file", "in_file")]),
         (mergefa, maskgroup, [("merged_file", "in_file")]),
         (groupmask, maskgroup, [("out_file", "in_file2")]),
@@ -261,9 +258,9 @@ def create_tbss_4_prestats(name='tbss_4_prestats'):
                           name="distancemap")
     
     # Project the FA values onto the skeleton
-    projectfa = pe.Node(fsl.TractSkeleton(#threshold=skeleton_thresh,
-                                          use_cingulum_mask=True,
-                                          project_data=True),
+    projectfa = pe.Node(fsl.TractSkeleton( project_data=True, skeleton_file = True,
+                                          #use_cingulum_mask=True,#by default
+                                          ),
                         name="projectfa")
     
     # Create tbss4 workflow
@@ -286,7 +283,8 @@ def create_tbss_4_prestats(name='tbss_4_prestats'):
     
     tbss4.connect([
         (projectfa, outputnode,[('projected_data','projectedfa_file'),
-                                ('skeleton_file','skeleton_file')]),
+                                ('skeleton_file','skeleton_file')
+                                ]),
         (skeletonmask, outputnode, [('out_file','skeleton_mask')])
         ])
     
@@ -331,11 +329,13 @@ def create_tbss_all(name='tbss_all'):
     tbss_all.connect([
                     (inputnode, tbss1,[('fa_list','inputnode.fa_list')]),
                     (inputnode, tbss2,[('target','inputnode.target')]),
+                    (inputnode, tbss3,[('target','inputnode.target')]),
                     (inputnode, tbss4,[('skeleton_thresh','inputnode.skeleton_thresh')]),
                     
                     (tbss1, tbss2,[('outputnode.fa_list','inputnode.fa_list'),
                                    ('outputnode.mask_list','inputnode.mask_list')]),
-                    (tbss2, tbss3, [('outputnode.wraped_fa_list','inputnode.wraped_fa_list')]),
+                    (tbss1, tbss3,[('outputnode.fa_list','inputnode.fa_list')]),
+                    (tbss2, tbss3, [('outputnode.field_list','inputnode.field_list')]),
                     (tbss3,tbss4,[
                                     ('outputnode.groupmask','inputnode.groupmask'),
                                     ('outputnode.skeleton_file','inputnode.skeleton_file'),
@@ -355,5 +355,3 @@ def create_tbss_all(name='tbss_all'):
                                         ('outputnode.skeleton_mask','skeleton_mask')])
                     ])
     return tbss_all
-
-# tbss_deproject tbss_fill tbss_non_FA tbss_skeleton tbss_sym
