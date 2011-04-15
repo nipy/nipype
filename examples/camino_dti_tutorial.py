@@ -182,12 +182,11 @@ trk2camino = pe.Node(interface=cam2trk.Trackvis2Camino(), name="trk2camino")
 
 """
 Tracts can also be converted to VTK and OOGL formats, for use in programs such as GeomView and Paraview,
-using the following two nodes.
+using the following two nodes. For VTK use VtkStreamlines.
 """
 
-#vtkstreamlines = pe.Node(interface=camino.VtkStreamlines(), name="vtkstreamlines")
-#procstreamlines = pe.Node(interface=camino.ProcStreamlines(), name="procstreamlines")
-#procstreamlines.inputs.outputtracts = 'oogl'
+procstreamlines = pe.Node(interface=camino.ProcStreamlines(), name="procstreamlines")
+procstreamlines.inputs.outputtracts = 'oogl'
 
 
 """
@@ -196,17 +195,12 @@ fractional anisotropy and diffusivity trace maps and their associated headers.
 """
 
 fa = pe.Node(interface=camino.FA(),name='fa')
-#md = pe.Node(interface=camino.MD(),name='md')
 trace = pe.Node(interface=camino.TrD(),name='trace')
 dteig = pe.Node(interface=camino.DTEig(), name='dteig')
 
 analyzeheader_fa = pe.Node(interface= camino.AnalyzeHeader(), name = "analyzeheader_fa")
 analyzeheader_fa.inputs.datatype = "double"
 analyzeheader_trace = analyzeheader_fa.clone('analyzeheader_trace')
-
-#analyzeheader_md = pe.Node(interface= camino.AnalyzeHeader(), name = "analyzeheader_md")
-#analyzeheader_md.inputs.datatype = "double"
-#analyzeheader_trace = analyzeheader_md.clone('analyzeheader_trace')
 
 fa2nii = pe.Node(interface=misc.CreateNifti(),name='fa2nii')
 trace2nii = fa2nii.clone("trace2nii")
@@ -253,14 +247,8 @@ tractography.connect([(dtlutgen, picopdfs,[("dtLUT","luts")])])
 tractography.connect([(dtifit, picopdfs,[("tensor_fitted","in_file")])])
 tractography.connect([(picopdfs, trackpico,[("pdfs","in_file")])])
 
-
-# Mean diffusivity still appears broken
-#tractography.connect([(dtifit, md,[("tensor_fitted","in_file")])])
-#tractography.connect([(md, analyzeheader_md,[("md","in_file")])])
-#tractography.connect([(inputnode, analyzeheader_md,[(('dwi', get_vox_dims), 'voxel_dims'),
-#(('dwi', get_data_dims), 'data_dims')])])
-#This line is commented out because the ProcStreamlines node keeps throwing memory errors
-#tractography.connect([(track, procstreamlines,[("tracked","in_file")])])
+# ProcStreamlines might throw memory errors - comment this line out in such case
+tractography.connect([(trackdt, procstreamlines,[("tracked","in_file")])])
 
 
 """

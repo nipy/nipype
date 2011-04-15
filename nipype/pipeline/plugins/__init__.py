@@ -4,3 +4,4 @@
 from .linear import LinearPlugin
 from .ipython import IPythonPlugin
 from .sge import SGEPlugin
+from .multiproc import MultiProcPlugin
