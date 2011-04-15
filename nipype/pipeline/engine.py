@@ -903,8 +903,14 @@ class Node(WorkflowBase):
                 func = create_function_from_source(info[1][1])
                 value = getattr(results.outputs, output_name)
                 if isdefined(value):
-                    output_value = func(value,
+                    try:
+                        output_value = func(value,
                                         *list(info[1][2]))
+                    except NameError as e:
+                        if e.args[0].startswith("global name") and e.args[0].endswith("is not defined"):
+                            e.args = (e.args[0], "Due to engine constraints all imports have to be done inside each function definition")
+                        raise e
+                        
             else:
                 output_name = info[1]
                 try:
