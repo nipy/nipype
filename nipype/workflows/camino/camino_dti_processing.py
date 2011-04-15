@@ -40,11 +40,11 @@ def create_camino_dti_pipeline(name="dtiproc"):
     -------
 
     >>> import os
-    >>> import nipype.workflows.camino as cmonwk                     # doctest: +SKIP
-    >>> nipype_camino_dti = cmonwk.camino_dti_processing.create_camino_dti_pipeline("nipype_camino_dti")                     # doctest: +SKIP
-    >>> nipype_camino_dti.inputs.inputnode.dwi = os.path.abspath('dwi.nii')                   # doctest: +SKIP
-    >>> nipype_camino_dti.inputs.inputnode.bvecs = os.path.abspath('bvecs')                   # doctest: +SKIP
-    >>> nipype_camino_dti.inputs.inputnode.bvals = os.path.abspath('bvals')                  # doctest: +SKIP
+    >>> import nipype.workflows.camino as cmonwk
+    >>> nipype_camino_dti = cmonwk.camino_dti_processing.create_camino_dti_pipeline("nipype_camino_dti")
+    >>> nipype_camino_dti.inputs.inputnode.dwi = os.path.abspath('dwi.nii')
+    >>> nipype_camino_dti.inputs.inputnode.bvecs = os.path.abspath('bvecs')
+    >>> nipype_camino_dti.inputs.inputnode.bvals = os.path.abspath('bvals')
     >>> nipype_camino_dti.run()                  # doctest: +SKIP
 
     Inputs::

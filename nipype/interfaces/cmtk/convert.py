@@ -56,8 +56,8 @@ class CFFConverter(BaseInterface):
     Example
     -------
 
-    >>> import nipype.interfaces.cmtk.base as ba
-    >>> cvt = ba.CFFConverter()
+    >>> from nipype.interfaces.cmtk.convert import CFFConverter
+    >>> cvt = CFFConverter()
     >>> cvt.inputs.title = 'subject 1'
     >>> cvt.inputs.gifti_surfaces = ['lh.pial_converted.gii', 'rh.pial_converted.gii']
     >>> cvt.inputs.tract_files = ['streamlines.trk']
