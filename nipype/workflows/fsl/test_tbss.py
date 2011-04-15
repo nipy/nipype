@@ -41,7 +41,7 @@ def test_tbss_all_pipeline():
     tbss_all = tbss.create_tbss_all(name='tbss_all')
     tbss_all.inputs.inputnode.target = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
     tbss_all.inputs.inputnode.skeleton_thresh = 0.2
-    tbss_all.inputs.inputnode.fa.list = getFAList(subject_list)
+    tbss_all.inputs.inputnode.fa_list = getFAList(subject_list)
     
     original_tbss_result = pe.Node(interface = util.IdentityInterface(fields=['all_FA_skeletonised','mean_FA_skeleton']),
                                    name='original_tbss_result')
