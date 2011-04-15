@@ -294,6 +294,7 @@ class DissimilarityInputSpec(BaseInterfaceInputSpec):
     method = traits.Enum("dice", "jaccard", desc='"dice": Dice\'s dissimilarity,\
     "jaccard": Jaccards\'s dissimilarity', usedefault = True
     )
+    out_file = File("diff.nii", usedefault=True)
     
 class DissimilarityOutputSpec(TraitedSpec):
     jaccard = traits.Float()
@@ -330,7 +331,7 @@ class Dissimilarity(BaseInterface):
         both_data[origdata1] = 1
         both_data[origdata2] += 2
         
-        nb.save(nb.Nifti1Image(both_data, nii1.get_affine(), nii1.get_header()), "diff.nii")
+        nb.save(nb.Nifti1Image(both_data, nii1.get_affine(), nii1.get_header()), self.inputs.out_file)
         
         return runtime
     
@@ -339,7 +340,7 @@ class Dissimilarity(BaseInterface):
         for method in ("dice", "jaccard"):
             outputs[method] = getattr(self, '_'+method)
         outputs['volume'] = self._volume
-        outputs['diff_file'] = os.path.abspath("diff.nii")
+        outputs['diff_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
     
 class CreateNiftiInputSpec(BaseInterfaceInputSpec):
