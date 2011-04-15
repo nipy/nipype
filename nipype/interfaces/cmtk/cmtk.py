@@ -1,3 +1,12 @@
+""" 
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
+
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, File, TraitedSpec, Directory
 from nipype.utils.filemanip import split_filename
 import re
@@ -289,11 +298,11 @@ class CreateMatrix(BaseInterface):
     Example
     -------
 
-    >>> import nipype.interfaces.cmtk.cmtk as ck                 # doctest: +SKIP
-    >>> conmap = ck.CreateMatrix()               # doctest: +SKIP
-    >>> conmap.roi_file = 'fsLUT_aparc+aseg.nii'                 # doctest: +SKIP
-    >>> conmap.dict_file = 'fsLUT_aparc+aseg.pck'                # doctest: +SKIP
-    >>> conmap.tract_file = 'fibers.trk'                 # doctest: +SKIP
+    >>> import nipype.interfaces.cmtk.cmtk as ck
+    >>> conmap = ck.CreateMatrix()
+    >>> conmap.roi_file = 'fsLUT_aparc+aseg.nii'
+    >>> conmap.dict_file = 'fsLUT_aparc+aseg.pck'
+    >>> conmap.tract_file = 'fibers.trk'
     >>> conmap.run()                 # doctest: +SKIP
     """
 
@@ -368,18 +377,18 @@ class ROIGen(BaseInterface):
     Example
     -------
 
-    >>> import nipype.interfaces.cmtk.cmtk as ck                    # doctest: +SKIP
-    >>> rg = ck.ROIGen()                    # doctest: +SKIP
-    >>> rg.inputs.aparc_aseg_file = 'aparc+aseg.nii'                    # doctest: +SKIP
-    >>> rg.inputs.use_freesurfer_LUT = True                     # doctest: +SKIP
-    >>> rg.inputs.freesurfer_dir = '/usr/local/freesurfer'                  # doctest: +SKIP
-    >>> rg.run()                    # doctest: +SKIP
+    >>> import nipype.interfaces.cmtk.cmtk as ck
+    >>> rg = ck.ROIGen()
+    >>> rg.inputs.aparc_aseg_file = 'aparc+aseg.nii'
+    >>> rg.inputs.use_freesurfer_LUT = True
+    >>> rg.inputs.freesurfer_dir = '/usr/local/freesurfer'
+    >>> rg.run() # doctest: +SKIP
 
     The label dictionary is written to disk using Pickle. Resulting data can be loaded using:
 
-    >>> file = open("FreeSurferColorLUT_adapted_aparc+aseg_out.pck", "r")                   # doctest: +SKIP
-    >>> file = open("fsLUT_aparc+aseg.pck", "r")                    # doctest: +SKIP
-    >>> labelDict = pickle.load(file)                   # doctest: +SKIP
+    >>> file = open("FreeSurferColorLUT_adapted_aparc+aseg_out.pck", "r")
+    >>> file = open("fsLUT_aparc+aseg.pck", "r")
+    >>> labelDict = pickle.load(file) # doctest: +SKIP
     >>> print labelDict                     # doctest: +SKIP
     """
 

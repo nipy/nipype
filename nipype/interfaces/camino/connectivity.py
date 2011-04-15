@@ -1,3 +1,11 @@
+""" 
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,\
     StdOutCommandLine, StdOutCommandLineInputSpec
 from nipype.utils.filemanip import split_filename
@@ -49,13 +57,13 @@ class Conmap(StdOutCommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> mapper = cmon.Conmap()                  # doctest: +SKIP
-    >>> mapper.inputs.in_file = 'brain_track.Bdouble'                  # doctest: +SKIP
-    >>> mapper.inputs.roi_file = 'wm_undersampled.nii'                  # doctest: +SKIP
-    >>> mapper.inputs.index_file = 'indices.txt'                  # doctest: +SKIP
-    >>> mapper.inputs.index_file = 'indices-labels.txt'                  # doctest: +SKIP
-    >>> mapper.inputs.threshold = 100                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> mapper = cmon.Conmap()
+    >>> mapper.inputs.in_file = 'brain_track.Bdouble'
+    >>> mapper.inputs.roi_file = 'wm_undersampled.nii'
+    >>> mapper.inputs.index_file = 'indices.txt'
+    >>> mapper.inputs.index_file = 'indices-labels.txt'
+    >>> mapper.inputs.threshold = 100
     >>> mapper.run()                  # doctest: +SKIP
     """
     _cmd = 'conmap'

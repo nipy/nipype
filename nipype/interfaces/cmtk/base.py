@@ -1,3 +1,12 @@
+""" 
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
+
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, File, TraitedSpec, InputMultiPath
 from nipype.utils.misc import isdefined
 import nibabel as nb
@@ -48,11 +57,11 @@ class CFFConverter(BaseInterface):
     -------
 
     >>> import nipype.interfaces.cmtk.base as ba
-    >>> cvt = ba.CFFConverter()                 # doctest: +SKIP
-    >>> cvt.inputs.title = 'subject 1'                 # doctest: +SKIP
-    >>> cvt.inputs.gifti_surfaces = ['lh.pial_converted.gii', 'rh.pial_converted.gii']                 # doctest: +SKIP
-    >>> cvt.inputs.tract_files = ['streamlines.trk']                 # doctest: +SKIP
-    >>> cvt.inputs.gpickled_networks = ['network0.gpickle']                 # doctest: +SKIP
+    >>> cvt = ba.CFFConverter()
+    >>> cvt.inputs.title = 'subject 1'
+    >>> cvt.inputs.gifti_surfaces = ['lh.pial_converted.gii', 'rh.pial_converted.gii']
+    >>> cvt.inputs.tract_files = ['streamlines.trk']
+    >>> cvt.inputs.gpickled_networks = ['network0.gpickle']
     >>> cvt.run()                 # doctest: +SKIP
     """
 

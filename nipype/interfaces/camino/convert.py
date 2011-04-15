@@ -1,3 +1,11 @@
+""" 
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,\
     StdOutCommandLine, StdOutCommandLineInputSpec
 from nipype.utils.filemanip import split_filename
@@ -34,9 +42,9 @@ class Image2Voxel(StdOutCommandLine):
     Examples
     --------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> img2vox = cmon.Image2Voxel()                  # doctest: +SKIP
-    >>> img2vox.inputs.in_file = '4d_dwi.nii'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> img2vox = cmon.Image2Voxel()
+    >>> img2vox.inputs.in_file = '4d_dwi.nii'
     >>> img2vox.run()                  # doctest: +SKIP
     """
     _cmd = 'image2voxel'
@@ -87,10 +95,10 @@ class FSL2Scheme(StdOutCommandLine):
     Examples
     --------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> makescheme = cmon.FSL2Scheme()                  # doctest: +SKIP
-    >>> makescheme.inputs.bvec_file = 'bvecs'                  # doctest: +SKIP
-    >>> makescheme.inputs.bvec_file = 'bvals'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> makescheme = cmon.FSL2Scheme()
+    >>> makescheme.inputs.bvec_file = 'bvecs'
+    >>> makescheme.inputs.bvec_file = 'bvals'
     >>> makescheme.run()                  # doctest: +SKIP
 
     """
@@ -144,10 +152,10 @@ class VtkStreamlines(StdOutCommandLine):
     Examples
     --------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> vtk = cmon.VtkStreamlines()                  # doctest: +SKIP
-    >>> vtk.inputs.in_file = 'tract_data.Bfloat'                  # doctest: +SKIP
-    >>> vtk.inputs.voxeldims = [1,1,1]                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> vtk = cmon.VtkStreamlines()
+    >>> vtk.inputs.in_file = 'tract_data.Bfloat'
+    >>> vtk.inputs.voxeldims = [1,1,1]
     >>> vtk.run()                  # doctest: +SKIP
     """
     _cmd = 'vtkstreamlines'
@@ -247,10 +255,10 @@ class ProcStreamlines(StdOutCommandLine):
     Examples
     --------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> proc = cmon.ProcStreamlines()                  # doctest: +SKIP
-    >>> proc.inputs.in_file = 'tract_data.Bfloat'                  # doctest: +SKIP
-    >>> proc.inputs.outputtracts = 'oogl'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> proc = cmon.ProcStreamlines()
+    >>> proc.inputs.in_file = 'tract_data.Bfloat'
+    >>> proc.inputs.outputtracts = 'oogl'
     >>> proc.run()                  # doctest: +SKIP
     """
     _cmd = 'procstreamlines'
@@ -294,12 +302,12 @@ class TractShredder(StdOutCommandLine):
     Examples
     --------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> shred = cmon.TractShredder()                  # doctest: +SKIP
-    >>> shred.inputs.in_file = 'tract_data.Bfloat'                  # doctest: +SKIP
-    >>> shred.inputs.offset = 0                  # doctest: +SKIP
-    >>> shred.inputs.bunchsize = 1                  # doctest: +SKIP
-    >>> shred.inputs.space = 2                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> shred = cmon.TractShredder()
+    >>> shred.inputs.in_file = 'tract_data.Bfloat'
+    >>> shred.inputs.offset = 0
+    >>> shred.inputs.bunchsize = 1
+    >>> shred.inputs.space = 2
     >>> shred.run()                  # doctest: +SKIP
     """
     _cmd = 'tractshredder'
