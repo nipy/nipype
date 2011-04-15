@@ -1,6 +1,8 @@
 Release 0.4 (FUTURE)
 ====================
 
+* API: Timestamp hashing does not use ctime anymore. Please update your hashes by
+       running workflows with updatehash=True option
 * API: Workflow run function no longer supports (inseries, createdirsonly).
        Functions used in connect string must be pickleable
 * API: SPM EstimateContrast: ignore_derivs replaced by use_derivs
