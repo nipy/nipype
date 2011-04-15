@@ -29,6 +29,7 @@ library installed as well as the Connectome Mapper.
 These are written by Stephan Gerhard and can be obtained from:
 
     http://www.cmtk.org/
+    
 Or on github at:
 
     CFFlib: https://github.com/LTS5/cfflib
@@ -203,6 +204,7 @@ inverse_AparcAseg.inputs.interp = ('nearestneighbour')
 """
 A number of conversion operations are required to obtain NIFTI files from the FreesurferSource for each subject.
 Nodes are used to convert the following:
+
     * Original structural image to NIFTI
     * Parcellated white matter image to NIFTI
     * Parcellated whole-brain image to NIFTI

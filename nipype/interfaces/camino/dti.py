@@ -126,8 +126,7 @@ class ModelFit(StdOutCommandLine):
 
     >>> import nipype.interfaces.camino as cmon                  
     >>> fit = cmon.ModelFit()                  
-    >>> fit.model = 'dt'                  
-    >>> fit.inputs.snr = 16                 
+    >>> fit.model = 'dt'             
     >>> fit.inputs.scheme_file = 'A.scheme'                  
     >>> fit.inputs.in_file = 'tensor_fitted_data.Bfloat'                  
     >>> fit.run()                  # doctest: +SKIP
@@ -499,7 +498,7 @@ class TrackBootstrap(Track):
     >>> track = cmon.TrackBootstrap()
     >>> track.inputs.scheme_file = 'bvecs.scheme'
     >>> track.inputs.bsdatafiles = ['fitted_data1.Bfloat', 'fitted_data2.Bfloat']
-    >>> track.inputs.seedfile = 'seed_mask.nii'
+    >>> track.inputs.seed_file = 'seed_mask.nii'
     >>> track.run()                  # doctest: +SKIP
     """
 

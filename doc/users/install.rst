@@ -87,6 +87,12 @@ Nipy_
 
 Nitime_ 
   (optional; required for doc building)
+  
+Camino_
+  
+Camino2Trackvis_
+
+ConnectomeViewer_
 
 Download
 --------

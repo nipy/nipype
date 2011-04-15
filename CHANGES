@@ -37,6 +37,9 @@ Release 0.4 (FUTURE)
 * ENH: Ability to create a hierarchical dot file
 * ENH: Improved debugging information for rerunning nodes
 * ENH: Added 'stop_on_first_rerun' option
+* ENH: Added support for Camino
+* ENH: Added support for Camino2Trackvis
+* ENH: Added support for Connectome Viewer
 
 * BF: dcm2nii interface handles gzipped files correctly
 * BF: FNIRT generates proper outputs
