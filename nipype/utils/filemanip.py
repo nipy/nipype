@@ -174,7 +174,6 @@ def hash_timestamp(afile):
         md5obj = md5()
         stat = os.stat(afile)
         md5obj.update(str(stat.st_size))
-        md5obj.update(str(stat.st_ctime))
         md5obj.update(str(stat.st_mtime))
         md5hex = md5obj.hexdigest()
     return md5hex
