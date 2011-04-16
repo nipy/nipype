@@ -29,7 +29,7 @@ from nipype.interfaces.spm.base import (SPMCommand, SPMCommandInputSpec,
                                         scans_for_fnames)
 from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (filename_to_list, list_to_filename,
-                                    loadflat)
+                                    loadflat, split_filename)
 
 logger = logging.getLogger('spmlogger')
 
@@ -691,6 +691,14 @@ class Threshold(SPMCommand):
     input_spec = ThresholdInputSpec
     output_spec = ThresholdOutputSpec
 
+    def _gen_thresholded_map_filename(self):
+        _, fname, ext = split_filename(self.inputs.stat_image)
+        return os.path.abspath(fname + "_thr" + ext)
+    
+    def _gen_pre_topo_map_filename(self):
+        _, fname, ext = split_filename(self.inputs.stat_image)
+        return os.path.abspath(fname + "_pre_topo_thr" + ext)
+    
     def _make_matlab_command(self, _):
         script = "con_index = %d;\n"%self.inputs.contrast_index
         script += "cluster_forming_thr = %f;\n"%self.inputs.height_threshold
@@ -735,8 +743,9 @@ XYZ = cat(1, x', y', z');
 XYZth = XYZ(:, Z >= cluster_forming_thr);
 Zth = Z(Z >= cluster_forming_thr);
 
-spm_write_filtered(Zth,XYZth,stat_map_vol.dim',stat_map_vol.mat,'thresholded map', 'pre_topo_map.img');
-
+"""
+        script += "spm_write_filtered(Zth,XYZth,stat_map_vol.dim',stat_map_vol.mat,'thresholded map', '%s');\n"%self._gen_pre_topo_map_filename()
+        script +="""
 if isempty(XYZth)
     thresholded_XYZ = [];
     thresholded_Z = [];
@@ -766,14 +775,14 @@ if isempty(thresholded_XYZ)
     thresholded_XYZ = [1 1 1]';
 end
 """
-        script += "spm_write_filtered(thresholded_Z,thresholded_XYZ,stat_map_vol.dim',stat_map_vol.mat,'thresholded map', 'thresholded_map.hdr');\n"
+        script += "spm_write_filtered(thresholded_Z,thresholded_XYZ,stat_map_vol.dim',stat_map_vol.mat,'thresholded map', '%s');\n"%self._gen_thresholded_map_filename()
 
         return script
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['thresholded_map'] = os.path.abspath('thresholded_map.img')
-        outputs['pre_topo_fdr_map'] = os.path.abspath('pre_topo_map.img')
+        outputs['thresholded_map'] = self._gen_thresholded_map_filename()
+        outputs['pre_topo_fdr_map'] = self._gen_pre_topo_map_filename()
         return outputs
     
 class ThresholdStatisticsInputSpec(SPMCommandInputSpec):
