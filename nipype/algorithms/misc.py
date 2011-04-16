@@ -311,7 +311,7 @@ class Dissimilarity(BaseInterface):
     
     def _bool_vec_dissimilarity(self, booldata1, booldata2, method):
         methods = {"dice": dice, "jaccard": jaccard}
-        if np.all(booldata1) == False and np.all(booldata2) == False:
+        if not (np.any(booldata1) or np.any(booldata2)):
             return 0
         return methods[method](booldata1.flat, booldata2.flat)
     
@@ -319,8 +319,8 @@ class Dissimilarity(BaseInterface):
         nii1 = nb.load(self.inputs.volume1)
         nii2 = nb.load(self.inputs.volume2)
         
-        origdata1 = nii1.get_data().astype(np.bool)
-        origdata2 = nii2.get_data().astype(np.bool)
+        origdata1 = np.logical_not(np.logical_or(nii1.get_data() == 0, np.isnan(nii1.get_data())))
+        origdata2 = np.logical_not(np.logical_or(nii2.get_data() == 0, np.isnan(nii2.get_data())))
         for method in ("dice", "jaccard"):
 
             setattr(self, '_' + method, self._bool_vec_dissimilarity(origdata1, origdata2, method = method))
