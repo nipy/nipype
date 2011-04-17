@@ -133,6 +133,9 @@ class Merge(FSLCommand):
         if not isdefined(outputs['merged_file']):
             outputs['merged_file'] = self._gen_fname(self.inputs.in_files[0],
                                               suffix = '_merged')
+        else:
+            outputs['merged_file'] = os.path.realpath(self.inputs.merged_file)
+            
         return outputs
 
     def _gen_filename(self, name):
