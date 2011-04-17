@@ -5,11 +5,12 @@ import logging.handlers
 import os
 
 from nipype.utils.config import config
+import sys
 
 #Sets up logging for pipeline and nodewrapper execution
 LOG_FILENAME = os.path.join(config.get('logging','log_directory'),
                             'pypeline.log')
-logging.basicConfig()
+logging.basicConfig(stream=sys.stdout)
 logger = logging.getLogger('workflow')
 fmlogger = logging.getLogger('filemanip')
 iflogger = logging.getLogger('interface')
