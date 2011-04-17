@@ -325,7 +325,7 @@ class Dissimilarity(BaseInterface):
 
             setattr(self, '_' + method, self._bool_vec_dissimilarity(origdata1, origdata2, method = method))
         
-        self._volume = origdata1.sum() - origdata2.sum()
+        self._volume = int(origdata1.sum() - origdata2.sum())
         
         both_data = np.zeros(origdata1.shape)
         both_data[origdata1] = 1
