@@ -1056,6 +1056,20 @@ class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     table_name = traits.Str(mandatory=True)
 
 class SQLiteSink(IOBase):
+    """Very simple frontend for storing values into SQLite database. input_names
+    correspond to input_names. 
+    
+        Examples
+        --------
+
+        >>> sql = SQLiteSink(input_names=['subject_id', 'some_measurement')
+        >>> sql.inputs.database_file = 'my_database.db'
+        >>> sql.inputs.table_name = 'experiment_results'
+        >>> sql.inputs.subject_id = 's1'
+        >>> sql.inputs.some_measurement = 11.4
+        >>> sql.run() # doctest: +SKIP
+        
+    """
     input_spec = SQLiteSinkInputSpec
     
     def __init__(self, input_names, **inputs):
