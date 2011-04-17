@@ -1070,8 +1070,8 @@ class SQLiteSink(IOBase):
         """
         conn = sqlite3.connect(self.inputs.database_file)
         c = conn.cursor()
-        c.execute("INSERT OR REPLACE INTO %s ("%self.inputs.table_name + ",".join(self.inputs._outputs.keys()) + ") VALUES (" + ",".join(["?"]*len(self.inputs._outputs)) + ")", 
-                  self.inputs._outputs.values())
+        c.execute("INSERT OR REPLACE INTO %s ("%self.inputs.table_name + ",".join(self._input_names) + ") VALUES (" + ",".join(["?"]*len(self._input_names)) + ")", 
+                  [getattr(self.inputs,name) for name in self._input_names])
         conn.commit()
         c.close()
         return None
