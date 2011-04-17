@@ -1297,20 +1297,21 @@ class MapNode(Node):
                 self._result.interface.insert(i, node.result.interface)
                 self._result.runtime[i] = node.result.runtime
             returncode.insert(i, err)
-            for key, _ in self.outputs.items():
-                if str2bool(self.config['execution']['remove_unnecessary_outputs']) and \
-                self.needed_outputs:
-                    if key not in self.needed_outputs:
-                        continue
-                values = getattr(self._result.outputs, key)
-                if not isdefined(values):
-                    values = []
-                if node.result.outputs:
-                    values.insert(i, node.result.outputs.get()[key])
-                else:
-                    values.insert(i, None)
-                if any([val != Undefined for val in values]) and self._result.outputs:
-                    setattr(self._result.outputs, key, values)
+            if self.outputs:
+                for key, _ in self.outputs.items():
+                    if str2bool(self.config['execution']['remove_unnecessary_outputs']) and \
+                    self.needed_outputs:
+                        if key not in self.needed_outputs:
+                            continue
+                    values = getattr(self._result.outputs, key)
+                    if not isdefined(values):
+                        values = []
+                    if node.result.outputs:
+                        values.insert(i, node.result.outputs.get()[key])
+                    else:
+                        values.insert(i, None)
+                    if any([val != Undefined for val in values]) and self._result.outputs:
+                        setattr(self._result.outputs, key, values)
                     
 #        for key, _ in self.outputs.items():
 #            values = getattr(self._result.outputs, key)
