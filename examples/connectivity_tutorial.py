@@ -324,9 +324,9 @@ fractional anisotropy and diffusivity trace maps and their associated headers, a
 into a single .nii file.
 """
 
-fa = pe.Node(interface=camino.FA(),name='fa')
-trace = pe.Node(interface=camino.TrD(),name='trace')
-dteig = pe.Node(interface=camino.DTEig(), name='dteig')
+fa = pe.Node(interface=camino.ComputeFractionalAnisotropy(),name='fa')
+trace = pe.Node(interface=camino.ComputeTensorTrace(),name='trace')
+dteig = pe.Node(interface=camino.ComputeEigensystem(), name='dteig')
 
 analyzeheader_fa = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_fa')
 analyzeheader_fa.inputs.datatype = 'double'

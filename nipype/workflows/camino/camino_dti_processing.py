@@ -150,10 +150,10 @@ def create_camino_dti_pipeline(name="dtiproc"):
     We can also produce a variety of scalar values from our fitted tensors. The following nodes generate        the fractional anisotropy and diffusivity trace maps and their associated headers.
     """
 
-    fa = pe.Node(interface=camino.FA(),name='fa')
+    fa = pe.Node(interface=camino.ComputeFractionalAnisotropy(),name='fa')
     #md = pe.Node(interface=camino.MD(),name='md')
-    trace = pe.Node(interface=camino.TrD(),name='trace')
-    dteig = pe.Node(interface=camino.DTEig(), name='dteig')
+    trace = pe.Node(interface=camino.ComputeTensorTrace(),name='trace')
+    dteig = pe.Node(interface=camino.ComputeEigensystem(), name='dteig')
 
     analyzeheader_fa = pe.Node(interface= camino.AnalyzeHeader(), name = "analyzeheader_fa")
     analyzeheader_fa.inputs.datatype = "double"

@@ -508,7 +508,7 @@ class TrackBootstrap(Track):
         inputs["inputmodel"] = "bootstrap"
         return super(TrackBootstrap, self).__init__(command, **inputs)
 
-class MDInputSpec(CommandLineInputSpec):
+class ComputeMeanDiffusivityInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='Tensor-fitted data filename')
 
@@ -534,10 +534,10 @@ class MDInputSpec(CommandLineInputSpec):
         desc='Specifies the data type of the output data. The data type can be any of the' \
         'following strings: "char", "short", "int", "long", "float" or "double".')
 
-class MDOutputSpec(TraitedSpec):
+class ComputeMeanDiffusivityOutputSpec(TraitedSpec):
     md = File(exists=True, desc='Mean Diffusivity Map')
 
-class MD(StdOutCommandLine):
+class ComputeMeanDiffusivity(StdOutCommandLine):
     """
     Computes the mean diffusivity (trace/3) from diffusion tensors.
 
@@ -545,14 +545,14 @@ class MD(StdOutCommandLine):
     -------
 
     >>> import nipype.interfaces.camino as cmon
-    >>> md = cmon.MD()
+    >>> md = cmon.ComputeMeanDiffusivity()
     >>> md.inputs.in_file = 'tensor_fitted_data.Bfloat'
     >>> md.inputs.scheme_file = 'A.scheme'
     >>> md.run()                  # doctest: +SKIP
     """
     _cmd = 'md'
-    input_spec=MDInputSpec
-    output_spec=MDOutputSpec
+    input_spec=ComputeMeanDiffusivityInputSpec
+    output_spec=ComputeMeanDiffusivityOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -563,7 +563,7 @@ class MD(StdOutCommandLine):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + "_MD.img" #Need to change to self.inputs.outputdatatype
 
-class FAInputSpec(StdOutCommandLineInputSpec):
+class ComputeFractionalAnisotropyInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='Tensor-fitted data filename')
 
@@ -587,10 +587,10 @@ class FAInputSpec(StdOutCommandLineInputSpec):
         desc='Specifies the data type of the output data. The data type can be any of the' \
         'following strings: "char", "short", "int", "long", "float" or "double".')
 
-class FAOutputSpec(TraitedSpec):
+class ComputeFractionalAnisotropyOutputSpec(TraitedSpec):
     fa = File(exists=True, desc='Fractional Anisotropy Map')
 
-class FA(StdOutCommandLine):
+class ComputeFractionalAnisotropy(StdOutCommandLine):
     """
     Computes the fractional anisotropy of tensors.
 
@@ -604,14 +604,14 @@ class FA(StdOutCommandLine):
     -------
 
     >>> import nipype.interfaces.camino as cmon
-    >>> fa = cmon.FA()
+    >>> fa = cmon.ComputeFractionalAnisotropy()
     >>> fa.inputs.in_file = 'tensor_fitted_data.Bfloat'
     >>> fa.inputs.scheme_file = 'A.scheme'
     >>> fa.run()                  # doctest: +SKIP
     """
     _cmd = 'fa'
-    input_spec=FAInputSpec
-    output_spec=FAOutputSpec
+    input_spec=ComputeFractionalAnisotropyInputSpec
+    output_spec=ComputeFractionalAnisotropyOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -622,7 +622,7 @@ class FA(StdOutCommandLine):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + '_FA.img' #Need to change to self.inputs.outputdatatype
 
-class TrDInputSpec(StdOutCommandLineInputSpec):
+class ComputeTensorTraceInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='Tensor-fitted data filename')
 
@@ -646,10 +646,10 @@ class TrDInputSpec(StdOutCommandLineInputSpec):
         desc='Specifies the data type of the output data. The data type can be any of the' \
         'following strings: "char", "short", "int", "long", "float" or "double".')
 
-class TrDOutputSpec(TraitedSpec):
+class ComputeTensorTraceOutputSpec(TraitedSpec):
     trace = File(exists=True, desc='Trace of the diffusion tensor')
 
-class TrD(StdOutCommandLine):
+class ComputeTensorTrace(StdOutCommandLine):
     """
     Computes the trace of tensors.
 
@@ -665,14 +665,14 @@ class TrD(StdOutCommandLine):
     -------
 
     >>> import nipype.interfaces.camino as cmon
-    >>> trace = cmon.TrD()
+    >>> trace = cmon.ComputeTensorTrace()
     >>> trace.inputs.in_file = 'tensor_fitted_data.Bfloat'
     >>> trace.inputs.scheme_file = 'A.scheme'
     >>> trace.run()                 # doctest: +SKIP
     """
     _cmd = 'trd'
-    input_spec=TrDInputSpec
-    output_spec=TrDOutputSpec
+    input_spec=ComputeTensorTraceInputSpec
+    output_spec=ComputeTensorTraceOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -684,7 +684,7 @@ class TrD(StdOutCommandLine):
         return name + '_TrD.img' #Need to change to self.inputs.outputdatatype
 
 
-class DTEigInputSpec(StdOutCommandLineInputSpec):
+class ComputeEigensystemInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1, desc='Tensor-fitted data filename')
 
     inputmodel = traits.Enum('dt', 'multitensor', argstr='-inputmodel %s', desc='Specifies the model that the input data contains parameters for. Possible model types are: "dt" (diffusion-tensor data) and "multitensor"')
@@ -695,10 +695,10 @@ class DTEigInputSpec(StdOutCommandLineInputSpec):
 
     outputdatatype = traits.Enum("double", "char", "short", "int", "long", "float", argstr='-outputdatatype %s', desc='Specifies the data type of the output data. The data type can be any of the following strings: "char", "short", "int", "long", "float" or "double".')
 
-class DTEigOutputSpec(TraitedSpec):
+class ComputeEigensystemOutputSpec(TraitedSpec):
     eigen = File(exists=True, desc='Trace of the diffusion tensor')
 
-class DTEig(StdOutCommandLine):
+class ComputeEigensystem(StdOutCommandLine):
     """
     Computes the eigensystem from tensor fitted data.
 
@@ -714,13 +714,13 @@ class DTEig(StdOutCommandLine):
     -------
 
     >>> import nipype.interfaces.camino as cmon
-    >>> dteig = cmon.DTEig()
+    >>> dteig = cmon.ComputeEigensystem()
     >>> dteig.inputs.in_file = 'tensor_fitted_data.Bfloat'
     >>> dteig.run()                  # doctest: +SKIP
     """
     _cmd = 'dteig'
-    input_spec=DTEigInputSpec
-    output_spec=DTEigOutputSpec
+    input_spec=ComputeEigensystemInputSpec
+    output_spec=ComputeEigensystemOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
