@@ -5,7 +5,8 @@ import nipype.interfaces.camino as camino
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.algorithms.misc as misc
-import os                                    # system functions
+import os
+import os.path as op
 
 def get_vox_dims(volume):
     import nibabel as nb
