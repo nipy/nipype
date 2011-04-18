@@ -1,1 +1,1 @@
-from nipype.workflows.camino import camino_dti_processing 
+from nipype.workflows.camino import diffusion
