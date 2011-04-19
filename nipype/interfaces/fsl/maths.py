@@ -8,7 +8,7 @@
 import numpy as np
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
-from nipype.interfaces.base import TraitedSpec, File, traits
+from nipype.interfaces.base import TraitedSpec, File, traits, InputMultiPath
 from nipype.utils.misc import isdefined
 
 
@@ -232,7 +232,7 @@ class MultiImageMathsInput(MathsInput):
 
     op_string = traits.String(position=3, argstr="%s", mandatory=True,
                               desc="python formatted string of operations to perform")
-    operand_files = traits.List(File(exists=True), mandatory=True,
+    operand_files = InputMultiPath(File(exists=True), mandatory=True,
                                  desc="list of file names to plug into op string")
 
 class MultiImageMaths(MathsCommand):
