@@ -326,9 +326,9 @@ images in the functional series are outliers based on deviations in
 intensity and/or movement.
 """
 
-art = pe.Node(interface=ra.ArtifactDetect(use_differences = [False,True],
+art = pe.Node(interface=ra.ArtifactDetect(use_differences = [True, False],
                                           use_norm = True,
-                                          norm_threshold = 0.5,
+                                          norm_threshold = 1,
                                           zintensity_threshold = 3,
                                           parameter_source = 'FSL',
                                           mask_type = 'file'),
