@@ -49,11 +49,12 @@ def test_ad_output_filenames():
     ad = ra.ArtifactDetect()
     outputdir = '/tmp'
     f = 'motion.nii'
-    outlierfile,intensityfile,statsfile,normfile = ad._get_output_filenames(f,outputdir)
+    outlierfile,intensityfile,statsfile,normfile,plotfile = ad._get_output_filenames(f,outputdir)
     yield assert_equal, outlierfile, '/tmp/art.motion_outliers.txt'
     yield assert_equal, intensityfile, '/tmp/global_intensity.motion.txt'
     yield assert_equal, statsfile, '/tmp/stats.motion.txt'
     yield assert_equal, normfile, '/tmp/norm.motion.txt'
+    yield assert_equal, plotfile, '/tmp/plot.motion.png'
 
 def test_ad_get_affine_matrix():
     ad = ra.ArtifactDetect()

@@ -1062,7 +1062,7 @@ class SQLiteSink(IOBase):
         Examples
         --------
 
-        >>> sql = SQLiteSink(input_names=['subject_id', 'some_measurement')
+        >>> sql = SQLiteSink(input_names=['subject_id', 'some_measurement'])
         >>> sql.inputs.database_file = 'my_database.db'
         >>> sql.inputs.table_name = 'experiment_results'
         >>> sql.inputs.subject_id = 's1'

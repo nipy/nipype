@@ -154,45 +154,6 @@ def test_projthresh():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
-def test_randomise1():
-    input_map = dict(args = dict(argstr='%s',),
-                     base_name = dict(argstr='-o %s',),
-                     c_thresh = dict(argstr='-c %.2f',),
-                     cm_thresh = dict(argstr='-C %.2f',),
-                     demean = dict(argstr='-D',),
-                     design_mat = dict(argstr='-d %s',mandatory=True,),
-                     environ = dict(),
-                     f_c_thresh = dict(argstr='-F %.2f',),
-                     f_cm_thresh = dict(argstr='-S %.2f',),
-                     f_only = dict(argstr='--f_only',),
-                     fcon = dict(argstr='-f %s',),
-                     in_file = dict(argstr='-i %s',mandatory=True,),
-                     mask = dict(argstr='-m %s',),
-                     num_perm = dict(argstr='-n %d',),
-                     one_sample_group_mean = dict(argstr='-l',),
-                     output_type = dict(),
-                     p_vec_n_dist_files = dict(argstr='-P',),
-                     raw_stats_imgs = dict(argstr='-R',),
-                     seed = dict(argstr='--seed %d',),
-                     show_info_parallel_mode = dict(argstr='-Q',),
-                     show_total_perms = dict(argstr='-q',),
-                     tcon = dict(argstr='-t %s',mandatory=True,),
-                     tfce = dict(argstr='-T',),
-                     tfce2D = dict(argstr='--T2',),
-                     tfce_C = dict(argstr='--tfce_C %.2f',),
-                     tfce_E = dict(argstr='--tfce_E %.2f',),
-                     tfce_H = dict(argstr='--tfce_H %.2f',),
-                     var_smooth = dict(argstr='-v %d',),
-                     vox_p_values = dict(argstr='-x',),
-                     vxf = dict(argstr='--vxf %d',),
-                     vxl = dict(argstr='--vxl %d',),
-                     x_block_labels = dict(argstr='-e %s',),
-                     )
-    instance = fsl.Randomise()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
 @skipif(no_fsl)
 def test_tbss1preproc():
     input_map = dict(args = dict(argstr='%s',),
