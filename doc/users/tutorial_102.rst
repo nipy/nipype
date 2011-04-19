@@ -29,12 +29,13 @@ in which the workflow/node is run and the outputs are stored.
 .. testcode::
 
    realigner = pe.Node(interface=spm.Realign(),
-                       name='StructRealignSPM')
+                       name='RealignSPM')
 
 Now this output will be stored in a directory called
-*StructRealignSPM*. Proper naming of your nodes can be advantageous
+*RealignSPM*. Proper naming of your nodes can be advantageous
 from the perspective that it provides a semantic descriptor aligned with
-your thought process.
+your thought process. This name parameter is also used to refer to nodes in
+embedded workflows.
 
 iterables
 ---------

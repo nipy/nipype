@@ -26,15 +26,16 @@ Requirements
 
   All tutorials
 
-  - Release 0.3 of nipype and it's dependencies have been installed
+  - Release 0.4 of nipype and it's dependencies have been installed
 
   Analysis tutorials
 
-  - FSL_, FreeSurfer_ and MATLAB_ are available and callable from the command line
+  - FSL_, FreeSurfer_, Camino_, ConnectomeViewer and MATLAB_ are available and
+  callable from the command line
 
   - SPM_ 5/8 is installed and callable in matlab
 
-  - 4(? XX) GB of space
+  - Space: 3-10 GB
 
 Checklist for analysis tutorials
 ================================

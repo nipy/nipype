@@ -16,13 +16,16 @@ Must Have
 
 Python_ 2.5 -2.7
 
+Matplotlib_ 1.0
+  Plotting library
+
+NetworkX_ 1.0 - 1.4
+  Python package for working with complex networks.
+
 NumPy_ 1.3 - 1.5
 
 SciPy_ 0.7 - 0.9
   Numpy and Scipy are high-level, optimized scientific computing libraries.
-
-NetworkX_ 1.0 - 1.4
-  Python package for working with complex networks.
 
 `simplejson <http://pypi.python.org/pypi/simplejson/2.0.9>`_
   json is included in Python 2.6, but if you are using Python 2.5 you
@@ -34,7 +37,7 @@ Enthought_ Traits_ 3.2.0 or 3.6.1
 
     Full distributions such as pythonxy_ or EPD_ provide the above packages. 
 
-Nibabel_ (required)
+Nibabel_
 
 Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -49,9 +52,6 @@ IPython_ 0.10
       * `Twisted <http://twistedmatrix.com/trac/>`_
       * zope.interface: which is also a dependecy of Twisted and was
         installed automatically for me when I installed Twisted.
-
-Matplotlib_
-  Python plotting library.
 
 Sphinx_
   Required for building the documentation

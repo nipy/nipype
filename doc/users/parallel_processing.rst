@@ -31,7 +31,7 @@ The pipeline engine provides a mechanism to distribute processes across
 multiple cores and machines in a cluster employing a consistent login
 system and a shared file system. Currently, the login process needs to
 be ssh-able via public key authentication. This document now reflects use 
-with IPython_ 0.10.1 or higher.
+with IPython_ 0.10.1/2.
 
 Please read the IPython_ documentation to determine how to setup your
 cluster for distributed processing. This typically involves calling
