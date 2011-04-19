@@ -288,32 +288,32 @@ class Distance(BaseInterface):
             outputs['histogram'] = os.path.abspath(self._hist_filename)
         return outputs
     
-class DissimilarityInputSpec(BaseInterfaceInputSpec):
+class OverlapInputSpec(BaseInterfaceInputSpec):
     volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
     volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
-    method = traits.Enum("dice", "jaccard", desc='"dice": Dice\'s dissimilarity,\
-    "jaccard": Jaccards\'s dissimilarity', usedefault = True
+    method = traits.Enum("dice", "jaccard", desc='"dice": Dice\'s overlap,\
+    "jaccard": Jaccards\'s overlap', usedefault = True
     )
     out_file = File("diff.nii", usedefault=True)
     
-class DissimilarityOutputSpec(TraitedSpec):
+class OverlapOutputSpec(TraitedSpec):
     jaccard = traits.Float()
     dice = traits.Float()
     volume = traits.Int()
     diff_file = File(exists=True)
     
-class Dissimilarity(BaseInterface):
+class Overlap(BaseInterface):
     """
     Calculates dissimilarity between two maps.
     """
-    input_spec = DissimilarityInputSpec
-    output_spec = DissimilarityOutputSpec
+    input_spec = OverlapInputSpec
+    output_spec = OverlapOutputSpec
     
     def _bool_vec_dissimilarity(self, booldata1, booldata2, method):
         methods = {"dice": dice, "jaccard": jaccard}
         if not (np.any(booldata1) or np.any(booldata2)):
             return 0
-        return methods[method](booldata1.flat, booldata2.flat)
+        return 1 - methods[method](booldata1.flat, booldata2.flat)
     
     def _run_interface(self, runtime):
         nii1 = nb.load(self.inputs.volume1)
