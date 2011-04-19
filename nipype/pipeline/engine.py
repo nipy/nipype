@@ -730,12 +730,16 @@ class Workflow(WorkflowBase):
                 dotlist.append('}')
             else:
                 for subnode in self._graph.successors_iter(node):
+                    if node._hierarchy != subnode._hierarchy:
+                        continue
                     if not isinstance(subnode, Workflow):
                         nodefullname = '.'.join(hierarchy + [node.fullname])
                         subnodefullname = '.'.join(hierarchy + [subnode.fullname])
                         nodename = nodefullname.replace('.','_')
                         subnodename = subnodefullname.replace('.','_')
-                        dotlist.append('%s -> %s;'%(nodename, subnodename))
+                        for _ in self._graph.get_edge_data(node, subnode)['connect']:
+                            dotlist.append('%s -> %s;'%(nodename, subnodename))
+                        logger.debug('connection: ' + dotlist[-1]) 
         # add between workflow connections
         for u,v,d in self._graph.edges_iter(data=True):
             uname = '.'.join(hierarchy + [u.fullname])
@@ -758,6 +762,7 @@ class Workflow(WorkflowBase):
                 if uname1.split('.')[:-1] != vname1.split('.')[:-1]:
                     dotlist.append('%s -> %s;'%(uname1.replace('.','_'),
                                                 vname1.replace('.','_')))
+                    logger.debug('cross connection: ' + dotlist[-1]) 
         return ('\n'+prefix).join(dotlist)
 
 
