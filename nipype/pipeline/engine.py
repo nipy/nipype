@@ -264,7 +264,14 @@ class Workflow(WorkflowBase):
                                                               info[2])]
         if not_found:
             raise Exception('\n'.join(['Some connections were not found']+infostr))
-        
+
+        # turn functions into strings
+        for srcnode, destnode, connects in connection_list:
+            for idx, (src, dest) in enumerate(connects):
+                if isinstance(src, tuple) and not isinstance(src[1], str):
+                    function_source = getsource(src[1])
+                    connects[idx] = ((src[0], function_source, src[2:]), dest)
+
         # add connections
         for srcnode, destnode, connects in connection_list:
             edge_data = self._graph.get_edge_data(srcnode, destnode, None)
@@ -481,15 +488,9 @@ class Workflow(WorkflowBase):
             for edge in graph.in_edges_iter(node):
                 data = graph.get_edge_data(*edge)
                 for sourceinfo, field in sorted(data['connect']):
-                    if isinstance(sourceinfo, tuple):
-                        node.input_source[field] = (os.path.join(edge[0].output_dir(),
-                                                             'result_%s.pklz'%edge[0].name),
-                                                (sourceinfo[0], getsource(sourceinfo[1]), sourceinfo[2:]))
-                    else:
-                        node.input_source[field] = (os.path.join(edge[0].output_dir(),
+                    node.input_source[field] = (os.path.join(edge[0].output_dir(),
                                                              'result_%s.pklz'%edge[0].name),
                                                 sourceinfo)
-
 
     def _check_nodes(self, nodes):
         """Checks if any of the nodes are already in the graph
