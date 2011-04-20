@@ -9,6 +9,7 @@ import logging
 import os
 import re
 
+import numpy as np
 from nipype.utils.misc import package_check
 package_check('networkx', '1.3')
 import networkx as nx
@@ -289,6 +290,11 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
     # nodes of the supergraph.
     supernodes = supergraph.nodes()
     ids = [n._hierarchy+n._id for n in supernodes]
+    if len(np.unique1d(ids)) != len(ids):
+        # This should trap the problem of miswiring when multiple iterables are
+        # used at the same level. The use of the template below for naming
+        # updates to nodes is the general solution.
+        raise Exception('Execution graph does not have a unique set of node names. Please rerun the workflow')
     edgeinfo = {}
     for n in subgraph.nodes():
         nidx = ids.index(n._hierarchy+n._id)
@@ -301,6 +307,10 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
                                        supergraph.get_edge_data(*edge)))
     supergraph.remove_nodes_from(nodes)
     # Add copies of the subgraph depending on the number of iterables
+    count = 0
+    for i, params in enumerate(walk(iterables.items())):
+        count += 1
+    template = '%%0%dd'%np.ceil(np.log10(count))
     for i, params in enumerate(walk(iterables.items())):
         Gc = deepcopy(subgraph)
         ids = [n._hierarchy+n._id for n in Gc.nodes()]
@@ -335,7 +345,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
             if node._hierarchy+node._id in edgeinfo.keys():
                 for info in edgeinfo[node._hierarchy+node._id]:
                     supergraph.add_edges_from([(info[0], node, info[1])])
-            node._id += str(i)
+            node._id += template%i
     return supergraph
 
 def generate_expanded_graph(graph_in):
