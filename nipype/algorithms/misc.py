@@ -299,7 +299,7 @@ class OverlapInputSpec(BaseInterfaceInputSpec):
 class OverlapOutputSpec(TraitedSpec):
     jaccard = traits.Float()
     dice = traits.Float()
-    volume = traits.Int()
+    volume_difference = traits.Int()
     diff_file = File(exists=True)
     
 class Overlap(BaseInterface):
@@ -339,7 +339,7 @@ class Overlap(BaseInterface):
         outputs = self._outputs().get()
         for method in ("dice", "jaccard"):
             outputs[method] = getattr(self, '_'+method)
-        outputs['volume'] = self._volume
+        outputs['volume_difference'] = self._volume
         outputs['diff_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
     
