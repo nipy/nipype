@@ -89,10 +89,7 @@ def create_tbss_2_reg(name="tbss_2_reg"):
 
     Outputs::
     
-        outputnode.wraped_fa_list
-    #    outputnode.warped_mask
-    #    outputnode.affine_file
-    #    outputnode.field_file
+        outputnode.field_list
     """
    
     # Define the inputnode
@@ -206,7 +203,7 @@ def create_tbss_3_postreg(name='tbss_3_postreg'):
         (groupmask, outputnode,[('out_file','groupmask')]),
         (makeskeleton, outputnode,[('skeleton_file','skeleton_file')]),
         (meanfa, outputnode,[('out_file','meanfa_file')]),
-        (mergefa, outputnode,[('merged_file','mergefa_file')])
+        (maskgroup, outputnode,[('out_file','mergefa_file')])
         ])
     return tbss3
 
@@ -278,13 +275,14 @@ def create_tbss_4_prestats(name='tbss_4_prestats'):
         ])
     
     # Create the outputnode
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=['projectedfa_file','skeleton_file','skeleton_mask']),
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=['projectedfa_file','skeleton_mask','distance_map','skeleton_file']),
                          name='outputnode')
     
     tbss4.connect([
         (projectfa, outputnode,[('projected_data','projectedfa_file'),
                                 ('skeleton_file','skeleton_file')
                                 ]),
+        (distancemap, outputnode,[('distance_map','distance_map')]),
         (skeletonmask, outputnode, [('out_file','skeleton_mask')])
         ])
     
@@ -345,13 +343,44 @@ def create_tbss_all(name='tbss_all'):
                 ])
     
     # Define the outputnode
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=['meanfa_file','projectedfa_file','skeleton_file','skeleton_mask']),
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=['groupmask','skeleton_file3','meanfa_file','mergefa_file','projectedfa_file','skeleton_file4','skeleton_mask','distance_map']),
                          name='outputnode')
+    # Outputnode for test
+    outputall_node = pe.Node(interface=util.IdentityInterface(fields=[
+                                                                    "fa_list1","mask_list1",
+                                                                    'field_list2',
+                                                                    'groupmask3','skeleton_file3','meanfa_file3','mergefa_file3',
+                                                                    'projectedfa_file4','skeleton_mask4','distance_map4'
+                                                                    ]),
+                         name='outputall_node')
 
     tbss_all.connect([
-                    (tbss3, outputnode,[('outputnode.meanfa_file','meanfa_file')]),
+                    (tbss3, outputnode,[('outputnode.meanfa_file','meanfa_file'),
+                                        ('outputnode.mergefa_file','mergefa_file'),
+                                        ('outputnode.groupmask','groupmask'),
+                                        ('outputnode.skeleton_file','skeleton_file3'),
+                                        ]),
                     (tbss4, outputnode,[('outputnode.projectedfa_file','projectedfa_file'),
-                                        ('outputnode.skeleton_file','skeleton_file'),
-                                        ('outputnode.skeleton_mask','skeleton_mask')])
+                                        ('outputnode.skeleton_file','skeleton_file4'),
+                                        ('outputnode.skeleton_mask','skeleton_mask'),
+                                        ('outputnode.distance_map','distance_map'),
+                                        ]),
+                    
+                    (tbss1, outputall_node,[('outputnode.fa_list','fa_list1'),
+                                            ('outputnode.mask_list','mask_list1'),
+                                            ]),
+                    (tbss2, outputall_node,[('outputnode.field_list','field_list2'),
+                                            ]),
+                    (tbss3, outputall_node,[
+                                        ('outputnode.meanfa_file','meanfa_file3'),
+                                        ('outputnode.mergefa_file','mergefa_file3'),
+                                        ('outputnode.groupmask','groupmask3'),
+                                        ('outputnode.skeleton_file','skeleton_file3'),
+                                        ]),
+                    (tbss4, outputall_node,[
+                                        ('outputnode.projectedfa_file','projectedfa_file4'),
+                                        ('outputnode.skeleton_mask','skeleton_mask4'),
+                                        ('outputnode.distance_map','distance_map4'),
+                                        ]),
                     ])
     return tbss_all
