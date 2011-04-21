@@ -1349,11 +1349,12 @@ class MapNode(Node):
         cwd = self.output_dir()
         os.chdir(cwd)
         
+        for iterfield in self.iterfield:
+            if not isdefined(getattr(self.inputs, iterfield)):
+                raise ValueError("Input %s is not defined but listed in iterfields."%iterfield)
         if len(self.iterfield) > 1:
             first_len = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
             for iterfield in self.iterfield[1:]:
-                if not isdefined(getattr(self.inputs, iterfield)):
-                    raise ValueError("Input %s is not defined but listed in iterfields."%iterfield)
                 if first_len != len(filename_to_list(getattr(self.inputs, iterfield))):
                     raise ValueError("All iterfields of a MapNode have to have the same length.")
 
