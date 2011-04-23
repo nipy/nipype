@@ -170,13 +170,19 @@ class CFFConverter(BaseInterface):
                 a.add_connectome_data(cda)
 
         a.print_summary()
-        cf.save_to_cff(a,os.path.abspath(self.inputs.out_file))
+        _, name, ext = split_filename(self.inputs.out_file)
+        if not ext == '.cff':
+            ext = '.cff'
+        cf.save_to_cff(a,op.abspath(name + ext))
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['connectome_file'] = os.path.abspath(self.inputs.out_file)
+        _, name, ext = split_filename(self.inputs.out_file)
+        if not ext == '.cff':
+            ext = '.cff'
+        outputs['connectome_file'] = op.abspath(name + ext)
         return outputs
 
 class MergeCNetworksInputSpec(BaseInterfaceInputSpec):
@@ -223,11 +229,18 @@ class MergeCNetworks(BaseInterface):
         metadata = newcon.get_connectome_meta()
         metadata.set_creator('My Name')
         metadata.set_email('My Email')
-        cf.save_to_cff(newcon, os.path.abspath(self.inputs.out_file))
+
+        _, name, ext = split_filename(self.inputs.out_file)
+        #if not ext == '.cff':
+        ext = '.cff'
+        cf.save_to_cff(newcon, op.abspath(name + ext))
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['connectome_file'] = os.path.abspath(self.inputs.out_file)
+        _, name, ext = split_filename(self.inputs.out_file)
+        #if not ext == '.cff':
+        ext = '.cff'
+        outputs['connectome_file'] = op.abspath(name + ext)
         return outputs
