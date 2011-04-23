@@ -376,7 +376,7 @@ class Workflow(WorkflowBase):
         Parameters
         ----------
         
-        graph2use: 'orig', 'hierarchical', 'flat' (default), 'exec'
+        graph2use: 'orig', 'hierarchical' (default), 'flat', 'exec'
             orig - creates a top level graph without expanding internal
                    workflow nodes
             flat - expands workflow nodes recursively
@@ -401,14 +401,13 @@ class Workflow(WorkflowBase):
             dotfilename = os.path.join(base_dir, dotfilename)
             self.write_hierarchical_dotfile(dotfilename=dotfilename, colored=False)
             format_dot(dotfilename, format=format)
-            return
-        graph = self._graph
-        if graph2use in ['flat', 'exec']:
-            graph = self._create_flat_graph()
-        if graph2use == 'exec':
-            graph = generate_expanded_graph(deepcopy(graph))
-
-        export_graph(graph, base_dir, dotfilename=dotfilename, format=format)
+        else:
+            graph = self._graph
+            if graph2use in ['flat', 'exec']:
+                graph = self._create_flat_graph()
+            if graph2use == 'exec':
+                graph = generate_expanded_graph(deepcopy(graph))
+            export_graph(graph, base_dir, dotfilename=dotfilename, format=format)
 
     def write_hierarchical_dotfile(self, dotfilename=None, colored=True):
         dotlist = ['digraph %s{'%self.name]
