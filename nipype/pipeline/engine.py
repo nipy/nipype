@@ -41,7 +41,8 @@ from nipype.utils.filemanip import (save_json, FileNotFoundError,
 
 from nipype.pipeline.utils import (generate_expanded_graph, modify_paths,
                                    export_graph, make_output_dir,
-                                   clean_working_directory, format_dot)
+                                   clean_working_directory, format_dot,
+                                   get_print_name)
 from nipype.utils.logger import (logger, config, logdebug_dict_differences)
 
 class WorkflowBase(object):
@@ -398,7 +399,7 @@ class Workflow(WorkflowBase):
         base_dir = make_output_dir(base_dir)
         if graph2use == 'hierarchical':
             dotfilename = os.path.join(base_dir, dotfilename)
-            self.write_hierarchical_dotfile(dotfilename=dotfilename)
+            self.write_hierarchical_dotfile(dotfilename=dotfilename, colored=False)
             format_dot(dotfilename, format=format)
             return
         graph = self._graph
@@ -409,9 +410,11 @@ class Workflow(WorkflowBase):
 
         export_graph(graph, base_dir, dotfilename=dotfilename, format=format)
 
-    def write_hierarchical_dotfile(self, dotfilename=None):
+    def write_hierarchical_dotfile(self, dotfilename=None, colored=True):
         dotlist = ['digraph %s{'%self.name]
-        dotlist.append(self._get_dot(prefix='  '))
+        if colored:
+            dotlist.append('  '+'colorscheme=pastel28;')
+        dotlist.append(self._get_dot(prefix='  ', colored=colored))
         dotlist.append('}')
         dotstr = '\n'.join(dotlist)
         if dotfilename:
@@ -698,36 +701,36 @@ class Workflow(WorkflowBase):
             self._graph.remove_nodes_from(nodes2remove)
         logger.debug('finished expanding workflow: %s', self)
 
-    def _get_dot(self, prefix=None, hierarchy=None):
+    def _get_dot(self, prefix=None, hierarchy=None, colored=True):
         """Create a dot file with connection info
         """
         if prefix is None:
             prefix='  '
         if hierarchy is None:
             hierarchy = []
+        level = len(prefix)/2+1
         dotlist = ['%slabel="%s";'%(prefix,self.name)]
-        dotlist.append('%scolor=grey;'%(prefix))
+        if colored:
+            dotlist.append('%scolor=%d;'%(prefix, level))
         for node in nx.topological_sort(self._graph):
             fullname = '.'.join(hierarchy + [node.fullname])
             nodename = fullname.replace('.','_')
             if not isinstance(node, Workflow):
-                pkglist = node._interface.__class__.__module__.split('.')
-                interface = node._interface.__class__.__name__
-                destclass = ''
-                if len(pkglist) > 2:
-                    destclass = '.%s'%pkglist[2]
-                node_class_name = '.'.join([node.name, interface]) + destclass
+                node_class_name = get_print_name(node)
                 if hasattr(node, 'iterables') and node.iterables:
-                    dotlist.append('%s[label="%s", style=filled, color=lightgrey];'%(nodename, node_class_name))
+                    dotlist.append('%s[label="%s", style=filled, colorscheme=greys7 color=2];'%(nodename, node_class_name))
                 else:
                     dotlist.append('%s[label="%s"];'%(nodename, node_class_name))
         for node in nx.topological_sort(self._graph):
             if isinstance(node, Workflow):
                 fullname = '.'.join(hierarchy + [node.fullname])
                 nodename = fullname.replace('.','_')
-                dotlist.append('subgraph cluster_%s {'%nodename)
+                dotlist.append('subgraph cluster_%s {'%(nodename))
+                if colored:
+                    dotlist.append(prefix+prefix+'style=filled;')
                 dotlist.append(node._get_dot(prefix=prefix + prefix,
-                                             hierarchy=hierarchy+[self.name]))
+                                             hierarchy=hierarchy+[self.name],
+                                             colored=colored))
                 dotlist.append('}')
             else:
                 for subnode in self._graph.successors_iter(node):

@@ -95,51 +95,34 @@ def modify_paths(object, relative=True, basedir=None):
                 out = object
     return out
 
-def _create_pickleable_graph(graph, show_connectinfo=False):
-    """Create a graph that can be pickled.
+def get_print_name(node):
+    """Get the name of the node
 
-    Ensures that edge info is pickleable.
+    For example, a node containing an instance of interfaces.fsl.BET
+    would be called nodename.BET.fsl
+    
     """
-    logger.debug('creating pickleable graph')
-    pklgraph = deepcopy(graph)
-    for edge in pklgraph.edges():
-        data = pklgraph.get_edge_data(*edge)
-        pklgraph.remove_edge(*edge)
-        if show_connectinfo:
-            pklgraph.add_edge(edge[0], edge[1], l=str(data['connect']))
-        else:
-            pklgraph.add_edge(edge[0], edge[1])
-    return pklgraph
-
+    name = node.name
+    if hasattr(node, '_interface'):
+        pkglist = node._interface.__class__.__module__.split('.')
+        interface = node._interface.__class__.__name__
+        destclass = ''
+        if len(pkglist) > 2:
+            destclass = '.%s'%pkglist[2]
+        name = '.'.join([node.name, interface]) + destclass
+    return name
+    
 def _create_dot_graph(graph, show_connectinfo=False):
     """Create a graph that can be pickled.
 
     Ensures that edge info is pickleable.
     """
-    logger.debug('creating pickleable graph')
+    logger.debug('creating dot graph')
     pklgraph = nx.DiGraph()
     for edge in graph.edges():
         data = graph.get_edge_data(*edge)
-        if hasattr(edge[0], '_interface'):
-            pkglist = edge[0]._interface.__class__.__module__.split('.')
-            if len(pkglist) > 1:
-                srcclass = pkglist[-2]
-            else:
-                srcclass = ''
-        else:
-            srcclass = ''
-        srcname = '.'.join(str(edge[0]).split('.')[1:])
-        srcname = '.'.join((srcname, srcclass))
-        if hasattr(edge[1], '_interface'):
-            pkglist = edge[1]._interface.__class__.__module__.split('.')
-            if len(pkglist) > 1:
-                destclass = pkglist[-2]
-            else:
-                destclass = ''
-        else:
-            destclass = ''
-        destname = '.'.join(str(edge[1]).split('.')[1:])
-        destname = '.'.join((destname, destclass))
+        srcname = get_print_name(edge[0])
+        destname = get_print_name(edge[1])
         if show_connectinfo:
             pklgraph.add_edge(srcname, destname, l=str(data['connect']))
         else:
