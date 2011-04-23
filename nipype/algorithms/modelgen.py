@@ -30,6 +30,7 @@ from nipype.interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
 from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import filename_to_list
 from nipype.utils.logger import iflogger
+from nipype.utils.config import config
 
 def gcd(a, b):
     """Returns the greatest common divisor of two integers
@@ -541,6 +542,8 @@ class SpecifySparseModel(SpecifyModel):
         bplot = False
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
             bplot=True
+            import matplotlib
+            matplotlib.use(config.get("execution", "matplotlib_backend"))
             import matplotlib.pyplot as plt
         TR = np.round(self.inputs.time_repetition*1000)  # in ms
         if self.inputs.time_acquisition:

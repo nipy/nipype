@@ -18,8 +18,9 @@ from nipype.utils.filemanip import fname_presuffix, split_filename
 from scipy.ndimage.morphology import binary_erosion
 from scipy.spatial.distance import cdist, euclidean, dice, jaccard
 from scipy.ndimage.measurements import center_of_mass, label
+from nipype.utils.config import config
 import matplotlib
-#matplotlib.use('Cairo')
+matplotlib.use(config.get("execution", "matplotlib_backend"))
 import matplotlib.pyplot as plt
     
 
