@@ -1318,12 +1318,6 @@ class MapNode(Node):
                         values.insert(i, None)
                     if any([val != Undefined for val in values]) and self._result.outputs:
                         setattr(self._result.outputs, key, values)
-                    
-#        for key, _ in self.outputs.items():
-#            values = getattr(self._result.outputs, key)
-#            if isdefined(values) and isinstance(values, list) and len(values) == 1:
-#                setattr(self._result.outputs, key, values[0])
-                
         if returncode and any([code is not None for code in returncode]):
             msg = []
             for i, code in enumerate(returncode):
@@ -1345,6 +1339,13 @@ class MapNode(Node):
             self._got_inputs = True
         return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
     
+    def _get_inputs(self):
+        old_inputs = self._inputs.get()
+        self._inputs = self._create_dynamic_traits(self._interface.inputs,
+                                                   fields=self.iterfield)
+        self._inputs.set(**old_inputs)
+        super(MapNode, self)._get_inputs()
+
     def _run_interface(self, execute=True, updatehash=False):
         """Run the mapnode interface
 
@@ -1354,7 +1355,6 @@ class MapNode(Node):
         old_cwd = os.getcwd()
         cwd = self.output_dir()
         os.chdir(cwd)
-        
         for iterfield in self.iterfield:
             if not isdefined(getattr(self.inputs, iterfield)):
                 raise ValueError("Input %s is not defined but listed in iterfields."%iterfield)
