@@ -101,7 +101,7 @@ and another containing the 4D diffusion-weighted image and associated bvecs and 
 """
 
 fs_dir = op.abspath('/usr/local/freesurfer')
-subjects_dir = op.abspath('freesurfer')
+subjects_dir = op.abspath('subjects/')
 data_dir = op.abspath('exdata/')
 fs.FSCommand.set_default_subjects_dir(subjects_dir)
 fsl.FSLCommand.set_default_output_type('NIFTI')
@@ -129,21 +129,17 @@ def getoutdir(group_id):
     return op.join(op.join(output_dir, 'workingdir'),'%s' % group_id)
 
 """
-The title for the final grouped-network connectome file is dependent on the group names. The resulting file for this example
-is 'coma-controls.cff'. The following code implements the format a-b-c-...x.cff for an arbitary number of groups.
-"""
-title = ''
-for idx,key in enumerate(group_list.keys()):
-    title += key
-    if not idx == len(group_list.keys())-1:
-        title += '-'
-
-"""
 Main processing loop.
 """
-
-for group_id in group_list.keys():
-
+title = ''
+for idx, group_id in enumerate(group_list.keys()):
+    """
+    The title for the final grouped-network connectome file is dependent on the group names. The resulting file for this example
+    is 'coma-controls.cff'. The following code implements the format a-b-c-...x.cff for an arbitary number of groups.
+    """
+    title += group_id
+    if not idx == len(group_list.keys())-1:
+        title += '-'
     group_infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id']), name="group_infosource")
     group_infosource.inputs.group_id = group_id
 
@@ -191,6 +187,7 @@ for group_id in group_list.keys():
                                               ("outputnode.fa", "@l1output.fa"),
                                               ("outputnode.tracts", "@l1output.tracts"),
                                               ("outputnode.trace", "@l1output.trace"),
+                                              ("outputnode.cmatrix", "@l1output.cmatrix"),
                                               ])])
     l1pipeline.connect([(group_infosource, datasink,[('group_id','@group_id')])])
 

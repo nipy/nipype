@@ -82,6 +82,7 @@ def create_connectivity_pipeline(name="connectivity"):
     Outputs::
 
         outputnode.connectome
+        outputnode.cmatrix
         outputnode.fa
         outputnode.trace
         outputnode.tracts
@@ -92,7 +93,7 @@ def create_connectivity_pipeline(name="connectivity"):
     inputnode1 = pe.Node(interface=util.IdentityInterface(fields=["subject_id","dwi", "bvecs", "bvals", "subjects_dir"]), name="inputnode1")
 
     fs_dir = os.path.abspath('/usr/local/freesurfer')
-    subjects_dir = os.path.abspath('freesurfer') #Need to find a way to pass this as input!
+    subjects_dir = os.path.abspath('subjects') #Need to find a way to pass this as input!
     fs.FSCommand.set_default_subjects_dir(subjects_dir)
 
     FreeSurferSource = pe.Node(interface=nio.FreeSurferSource(), name='fssource')
@@ -516,6 +517,7 @@ def create_connectivity_pipeline(name="connectivity"):
                                                                 "trace",
                                                                 "tracts",
                                                                 "connectome",
+                                                                "cmatrix",
                                                                 "tensors"]),
                                         name="outputnode")
 
@@ -531,6 +533,7 @@ def create_connectivity_pipeline(name="connectivity"):
 
     connectivity.connect([(mapping, outputnode, [("camino2trackvis.trackvis", "tracts"),
         ("CFFConverter.connectome_file", "connectome"),
+        ("CreateMatrix.matrix_mat_file", "cmatrix"),
         ("fa2nii.nifti_file", "fa"),
         ("trace2nii.nifti_file", "trace"),
         ("dtifit.tensor_fitted", "tensors")])

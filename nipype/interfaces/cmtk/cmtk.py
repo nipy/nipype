@@ -240,18 +240,21 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
     mlab = np.empty([len(G.nodes())+1,len(G.nodes())+1]) #Plus 1 because of zero indexing
     print 'Matlab matrix shape: {shp}'.format(shp=len(G.nodes())+1)
 
+    a = G
+    key = "fiber_length_mean"
     for u,v,d in G.edges_iter(data=True):
         G.remove_edge(u,v)
-        mlab[u][v] = len(d['fiblist'])
         di = { 'number_of_fibers' : len(d['fiblist']), }
         idx = np.where( (final_fiberlabels_array[:,0] == int(u)) & (final_fiberlabels_array[:,1] == int(v)) )[0]
         di['fiber_length_mean'] = np.mean(final_fiberlength_array[idx])
         di['fiber_length_std'] = np.std(final_fiberlength_array[idx])
         G.add_edge(u,v, di)
+        a.edge[u][v]['weight'] = G.edge[u][v][key]
 
     print 'Writing network as {ntwk}'.format(ntwk=matrix_name)
     nx.write_gpickle(G, os.path.abspath(matrix_name))
 
+    mlab=nx.to_numpy_matrix(a)
     mlab_dict = {}
     mlab_dict['cmatrix'] = mlab
     print 'Writing matlab matrix as {mat}'.format(mat=matrix_mat_name)
