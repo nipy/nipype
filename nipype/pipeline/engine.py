@@ -470,18 +470,86 @@ class Workflow(WorkflowBase):
 
     def _write_report_info(self, workingdir, name, graph):
         report_dir = os.path.join(workingdir, name, 'report')
-        if not os.path.exists(report_dir):
-            os.makedirs(report_dir)
+        if os.path.exists(report_dir):
+            shutil.rmtree(report_dir)
+        os.makedirs(report_dir)
         fp = open(os.path.join(report_dir,'index.html'), 'wt')
-        fp.writelines('<html><body><table>\n')
+        fp.writelines('<html>')
+        script="""
+<head>
+<style type="text/css">
+  #page_container{width:1200px;margin:0;}
+  #toc{width:450px;float:left;}
+  #content{width:750px;float:left;}
+</style>
+
+<script type="text/javascript">
+<!--
+function load_doc(url, target) {
+  document.getElementById(target).innerHTML = ' Fetching data...';
+  if (window.XMLHttpRequest) {
+    req = new XMLHttpRequest();
+  } else if (window.ActiveXObject) {
+    req = new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  if (req != undefined) {
+    req.onreadystatechange = function() {load_doc_done(url, target);};
+    req.open("GET", url, true);
+    req.send("");
+  }
+}  
+
+function load_doc_done(url, target) {
+  if (req.readyState == 4) { // only if req is "loaded"
+    if (req.status == 200) { // only if "OK"
+      document.getElementById(target).innerHTML = req.responseText;
+    } else {
+      document.getElementById(target).innerHTML=" AHAH Error: "+ req.status + " " +req.statusText;
+    }
+  }
+}
+
+function readfile(srcfile, outputcontrol) {
+try {
+netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+} catch (e) {
+alert("Permission to read file was denied.");
+}
+var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+file.initWithPath( srcfile );
+if ( file.exists() == false ) {
+   alert("File does not exist");
+}
+var is = Components.classes["@mozilla.org/network/file-input-stream;1"].createInstance( Components.interfaces.nsIFileInputStream );
+is.init( file,0x01, 00004, null);
+var sis = Components.classes["@mozilla.org/scriptableinputstream;1"].createInstance( Components.interfaces.nsIScriptableInputStream );
+sis.init( is );
+var output = sis.read( sis.available() );
+document.getElementById(outputcontrol).innerHTML = '<pre>'+output+'</pre>';
+}
+
+function load(name, div) {
+        readfile(name, div); 
+	return false;
+}
+-->
+</script>
+</head>
+"""
+        fp.writelines(script)
+        fp.writelines('<body><div id="page_container"><div id="toc"><table>\n')
         fp.writelines('<tr><td>Name</td><td>Hierarchy</td><td>Source</td></tr>\n')
         for node in nx.topological_sort(graph):
-            url = '<tr><td><a href="file://%s/_report/report.rst">%s</a></td>'%(os.path.realpath(node.output_dir()),
-                                                                            node._id)
+            report_file = '%s/_report/report.rst'%os.path.realpath(node.output_dir())
+            local_file = '%s.rst'%node._id
+            #os.symlink(report_file, os.path.join(report_dir, local_file))
+            url = '<tr><td><a href="#"	onclick="load(\'%s\',\'content\');return false;">%s</a></td>'%(report_file, node._id)
             url += '<td>%s</td>'%('.'.join(node.fullname.split('.')[:-1]))
-            url += '<td>%s</td></tr>'%('.'.join(get_print_name(node).split('.')[1:]))
+            url += '<td>%s</td></tr>\n'%('.'.join(get_print_name(node).split('.')[1:]))
             fp.writelines(url)
-        fp.writelines('</table></body></html>')
+        fp.writelines('</table></div>')
+        fp.writelines('<div id="content">content</div>')
+        fp.writelines('</div></body></html>')
         fp.close()
         
     def _set_needed_outputs(self, graph):
@@ -1198,7 +1266,7 @@ class Node(WorkflowBase):
             fp = open(report_file, 'at')
             fp.writelines(write_rst_header('Execution Inputs', level=1))
             fp.writelines(write_rst_dict(self.inputs.get()))
-            if not hasattr(self.result, 'outputs'):
+            if not hasattr(self.result, 'outputs') or self.result.outputs is None:
                 return
             fp.writelines(write_rst_header('Execution Outputs', level=1))
             if isinstance(self.result.outputs, Bunch):
