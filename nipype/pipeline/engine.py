@@ -37,7 +37,9 @@ from nipype.utils.misc import isdefined, getsource, create_function_from_source
 from nipype.utils.filemanip import (save_json, FileNotFoundError,
                                     filename_to_list, list_to_filename,
                                     copyfiles, fnames_presuffix, loadpkl,
-    split_filename, load_json)
+                                    split_filename, load_json,
+                                    write_rst_header, write_rst_dict,
+                                    write_rst_list)
 
 from nipype.pipeline.utils import (generate_expanded_graph, modify_paths,
                                    export_graph, make_output_dir,
@@ -460,11 +462,28 @@ class Workflow(WorkflowBase):
             if isinstance(node, MapNode):
                 node.use_plugin = (plugin, plugin_args)
         self._configure_exec_nodes(execgraph)
+        self._write_report_info(self.base_dir, self.name, execgraph)
         runner.run(execgraph, updatehash=updatehash)
         return execgraph
 
     # PRIVATE API AND FUNCTIONS
 
+    def _write_report_info(self, workingdir, name, graph):
+        report_dir = os.path.join(workingdir, name, 'report')
+        if not os.path.exists(report_dir):
+            os.makedirs(report_dir)
+        fp = open(os.path.join(report_dir,'index.html'), 'wt')
+        fp.writelines('<html><body><table>\n')
+        fp.writelines('<tr><td>Name</td><td>Hierarchy</td><td>Source</td></tr>\n')
+        for node in nx.topological_sort(graph):
+            url = '<tr><td><a href="file://%s/_report/report.rst">%s</a></td>'%(os.path.realpath(node.output_dir()),
+                                                                            node._id)
+            url += '<td>%s</td>'%('.'.join(node.fullname.split('.')[:-1]))
+            url += '<td>%s</td></tr>'%('.'.join(get_print_name(node).split('.')[1:]))
+            fp.writelines(url)
+        fp.writelines('</table></body></html>')
+        fp.close()
+        
     def _set_needed_outputs(self, graph):
         """Initialize node with list of which outputs are needed
         """
@@ -988,10 +1007,8 @@ class Node(WorkflowBase):
                                 pass
                             else:
                                 logdebug_dict_differences(prev_inputs, hashed_inputs)
-                            
                 if str2bool(self.config['execution']['stop_on_first_rerun']):        
                     raise Exception("Cannot rerun when 'stop_on_first_rerun' is set to True")
-                
             hashfile_unfinished = os.path.join(outdir, '_0x%s_unfinished.json' % hashvalue)
             if os.path.exists(hashfile):
                 os.remove(hashfile)
@@ -1000,23 +1017,21 @@ class Node(WorkflowBase):
                not isinstance(self, MapNode):
                 logger.debug("Removing old %s and its contents"%outdir)
                 rmtree(outdir)
-                
             else:
                 logger.debug("%s found and can_resume is True or Node is a MapNode - resuming execution" % hashfile_unfinished)
-            
             outdir = make_output_dir(outdir)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
+            self.write_report(report_type='preexec', cwd=outdir)
             try:
                 self._run_interface(execute=True)
             except:
                 os.remove(hashfile_unfinished)
                 raise
-                
             shutil.move(hashfile_unfinished, hashfile)
+            self.write_report(report_type='postexec', cwd=outdir)
         else:
             logger.debug("Hashfile exists. Skipping execution")
             self._run_interface(execute=False, updatehash=updatehash)
-            
         logger.debug('Finished running %s in dir: %s\n'%(self._id,outdir))
         return self._result
 
@@ -1164,6 +1179,45 @@ class Node(WorkflowBase):
 
     def update(self, **opts):
         self.inputs.update(**opts)
+
+    def write_report(self, report_type=None, cwd=None):
+        report_dir = os.path.join(cwd, '_report')
+        report_file = os.path.join(report_dir, 'report.rst')
+        if not os.path.exists(report_dir):
+            os.makedirs(report_dir)
+        if report_type == 'preexec':
+            logger.info('writing pre-exec report to %s'%report_file)
+            fp = open(report_file, 'wt')
+            fp.writelines(write_rst_header('Node: %s'%get_print_name(self), level=0))
+            fp.writelines(write_rst_list(['Hierarchy : %s'%self.fullname,
+                                          'Exec ID : %s'%self._id]))
+            fp.writelines(write_rst_header('Original Inputs', level=1))
+            fp.writelines(write_rst_dict(self.inputs.get()))
+        if report_type == 'postexec':
+            logger.info('writing post-exec report to %s'%report_file)
+            fp = open(report_file, 'at')
+            fp.writelines(write_rst_header('Execution Inputs', level=1))
+            fp.writelines(write_rst_dict(self.inputs.get()))
+            if not hasattr(self.result, 'outputs'):
+                return
+            fp.writelines(write_rst_header('Execution Outputs', level=1))
+            if isinstance(self.result.outputs, Bunch):
+                fp.writelines(write_rst_dict(self.result.outputs.dictcopy()))
+            else:
+                fp.writelines(write_rst_dict(self.result.outputs.get()))
+            if isinstance(self, MapNode):
+                fp.close()
+                return
+            fp.writelines(write_rst_header('Runtime info', level=1))
+            fp.writelines(write_rst_dict({'hostname' : self.result.runtime.hostname,
+                                          'duration' : self.result.runtime.duration}))
+            if hasattr(self.result.runtime, 'merged'):
+                fp.writelines(write_rst_header('Terminal output', level=2))
+                fp.writelines(write_rst_list(self.result.runtime.merged))
+            if hasattr(self.result.runtime, 'environ'):
+                fp.writelines(write_rst_header('Environment', level=2))
+                fp.writelines(write_rst_dict(self.result.runtime.environ))
+        fp.close()
 
 
 class MapNode(Node):
@@ -1329,6 +1383,23 @@ class MapNode(Node):
             raise Exception('Subnodes of node: %s failed:\n%s'%(self.name,
                                                                 '\n'.join(msg)))
 
+    def write_report(self, report_type=None, cwd=None):
+        if report_type == 'preexec':
+            super(MapNode, self).write_report(report_type=report_type, cwd=cwd)
+        if report_type == 'postexec':
+            super(MapNode, self).write_report(report_type=report_type, cwd=cwd)
+            report_dir = os.path.join(cwd, '_report')
+            report_file = os.path.join(report_dir, 'report.rst')
+            fp = open(report_file, 'at')
+            fp.writelines(write_rst_header('Subnode reports', level=1))
+            nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
+            subnode_report_files = []
+            for i in range(nitems):
+                nodename = '_' + self.name+str(i)
+                subnode_report_files.insert(i, 'subnode %d'%i + ' : ' + os.path.join(cwd, 'mapflow', nodename, '_report', 'report.rst'))
+            fp.writelines(write_rst_list(subnode_report_files))
+            fp.close()
+        
     def get_subnodes(self):
         if not self._got_inputs:
             self._get_inputs()
