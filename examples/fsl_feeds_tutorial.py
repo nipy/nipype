@@ -338,7 +338,7 @@ file for use by FILMGLS
 """
 
 modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
-                      iterfield = ['fsf_file'])
+                      iterfield = ['fsf_file', 'ev_files'])
 
 """
 Use :class:`nipype.interfaces.fsl.FILMGLS` to estimate a model specified by a

@@ -399,4 +399,21 @@ def savepkl(filename, record):
     cPickle.dump(record, pkl_file)
     pkl_file.close()
 
+rst_levels = ['=', '-', '~', '+']
+
+def write_rst_header(header, level=0):
+    return '\n'.join((header, ''.join([rst_levels[level] for _ in header])))+'\n\n'
+
+def write_rst_list(items, prefix=''):
+    out = []
+    for item in items:
+        out.append(prefix + ' ' + str(item))
+    return '\n'.join(out)+'\n\n'
+
+def write_rst_dict(info, prefix=''):
+    out = []
+    for key, value in sorted(info.items()):
+        out.append(prefix + '* ' + key + ' : ' + str(value))
+    return '\n'.join(out)+'\n\n'
+        
 
