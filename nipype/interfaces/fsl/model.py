@@ -80,7 +80,7 @@ T-contrasts.")
 class Level1DesignOutputSpec(TraitedSpec):
     fsf_files = OutputMultiPath(File(exists=True),
                      desc='FSL feat specification files')
-    ev_files = OutputMultiPath(traits.List(File(exists=True)),
+    ev_files = traits.List(traits.List(File(exists=True)),
                      desc='condition information files')
 
 class Level1Design(BaseInterface):
