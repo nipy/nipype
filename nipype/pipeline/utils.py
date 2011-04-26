@@ -293,7 +293,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
     count = 0
     for i, params in enumerate(walk(iterables.items())):
         count += 1
-    template = '%%0%dd'%np.ceil(np.log10(count))
+    template = '.%%0%dd'%np.ceil(np.log10(count))
     for i, params in enumerate(walk(iterables.items())):
         Gc = deepcopy(subgraph)
         ids = [n._hierarchy+n._id for n in Gc.nodes()]
