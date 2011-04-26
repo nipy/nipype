@@ -481,63 +481,57 @@ class Workflow(WorkflowBase):
   #page_container{width:1200px;margin:0;}
   #toc{width:450px;float:left;}
   #content{width:750px;float:left;}
+  pre {
+   white-space: pre-wrap;       /* css-3 */
+   white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+   white-space: -pre-wrap;      /* Opera 4-6 */
+   white-space: -o-pre-wrap;    /* Opera 7 */
+   word-wrap: break-word;       /* Internet Explorer 5.5+ */
+  }
 </style>
 
 <script type="text/javascript">
 <!--
-function load_doc(url, target) {
-  document.getElementById(target).innerHTML = ' Fetching data...';
-  if (window.XMLHttpRequest) {
-    req = new XMLHttpRequest();
-  } else if (window.ActiveXObject) {
-    req = new ActiveXObject("Microsoft.XMLHTTP");
-  }
-  if (req != undefined) {
-    req.onreadystatechange = function() {load_doc_done(url, target);};
-    req.open("GET", url, true);
-    req.send("");
-  }
-}  
-
-function load_doc_done(url, target) {
-  if (req.readyState == 4) { // only if req is "loaded"
-    if (req.status == 200) { // only if "OK"
-      document.getElementById(target).innerHTML = req.responseText;
-    } else {
-      document.getElementById(target).innerHTML=" AHAH Error: "+ req.status + " " +req.statusText;
-    }
-  }
-}
-
 function readfile(srcfile, outputcontrol) {
-try {
-netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
-} catch (e) {
-alert("Permission to read file was denied.");
-}
-var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
-file.initWithPath( srcfile );
-if ( file.exists() == false ) {
-   alert("File does not exist");
-}
-var is = Components.classes["@mozilla.org/network/file-input-stream;1"].createInstance( Components.interfaces.nsIFileInputStream );
-is.init( file,0x01, 00004, null);
-var sis = Components.classes["@mozilla.org/scriptableinputstream;1"].createInstance( Components.interfaces.nsIScriptableInputStream );
-sis.init( is );
-var output = sis.read( sis.available() );
-document.getElementById(outputcontrol).innerHTML = '<pre>'+output+'</pre>';
+  try {
+    netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+  } catch (e) {
+    alert("Permission to read file was denied.");
+  }
+  var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+  file.initWithPath( srcfile );
+  if ( file.exists() == false ) {
+    alert("File does not exist");
+  }
+  var is = Components.classes["@mozilla.org/network/file-input-stream;1"].createInstance( Components.interfaces.nsIFileInputStream );
+  is.init( file,0x01, 00004, null);
+  var sis = Components.classes["@mozilla.org/scriptableinputstream;1"].createInstance( Components.interfaces.nsIScriptableInputStream );
+  sis.init( is );
+  var output = sis.read( sis.available() );
+  document.getElementById(outputcontrol).innerHTML = '<pre>'+output+'</pre>';
 }
 
 function load(name, div) {
-        readfile(name, div); 
-	return false;
+  readfile(name, div); 
+  return false;
+}
+function loadimg(name, div) {
+  document.getElementById(div).innerHTML = '<img src="'+name+'"></img>';
+  return false;
 }
 -->
 </script>
 </head>
 """
         fp.writelines(script)
-        fp.writelines('<body><div id="page_container"><div id="toc"><table>\n')
+        fp.writelines('<body><div id="page_container">\n')
+        fp.writelines('<div id="toc">\n')
+        fp.writelines('<pre>Works only with mozilla/firefox browsers</pre><br>\n')
+        script_file = os.path.join(os.path.dirname(sys.argv[0]), sys.argv[0])
+        fp.writelines('<a href="#" onclick="load(\'%s\',\'content\');return false;">Script</a><br>\n'%(script_file))
+        graph_file = 'file://'+os.path.join(self.base_dir, self.name, 'graph.dot.png')
+        fp.writelines('<a href="#" onclick="loadimg(\'%s\',\'content\');return false;">Graph - requires write_graph() in script</a><br>\n'%(graph_file))
+        fp.writelines('<table>\n')
         fp.writelines('<tr><td>Name</td><td>Hierarchy</td><td>Source</td></tr>\n')
         for node in nx.topological_sort(graph):
             report_file = '%s/_report/report.rst'%os.path.realpath(node.output_dir())
