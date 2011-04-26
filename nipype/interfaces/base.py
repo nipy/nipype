@@ -1173,6 +1173,7 @@ class MultiPath(traits.List):
         if not isinstance(value, list) \
         or (self.inner_traits() \
             and isinstance(self.inner_traits()[0].trait_type, traits.List) \
+            and not isinstance(self.inner_traits()[0].trait_type, InputMultiPath) \
             and isinstance(value, list) \
             and value \
             and not isinstance(value[0], list)):
