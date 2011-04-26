@@ -488,6 +488,7 @@ Zth = Z(Z >= cluster_forming_thr);
 max_size = 0;
 max_size_index = 0;
 th_nclusters = 0;
+nclusters = 0;
 if isempty(XYZth)
     thresholded_XYZ = [];
     thresholded_Z = [];
