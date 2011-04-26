@@ -1075,7 +1075,7 @@ class SQLiteSink(IOBase):
     def _list_outputs(self):
         """Execute this module.
         """
-        conn = sqlite3.connect(self.inputs.database_file)
+        conn = sqlite3.connect(self.inputs.database_file, check_same_thread = False)
         c = conn.cursor()
         c.execute("INSERT OR REPLACE INTO %s ("%self.inputs.table_name + ",".join(self._input_names) + ") VALUES (" + ",".join(["?"]*len(self._input_names)) + ")", 
                   [getattr(self.inputs,name) for name in self._input_names])
