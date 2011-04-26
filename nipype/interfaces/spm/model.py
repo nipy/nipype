@@ -395,10 +395,14 @@ class ThresholdInputSpec(SPMCommandInputSpec):
     height_threshold_type = traits.Enum('p-value','stat', usedefault=True, desc="Is the cluster forming threshold a stat value or p-value?")
     extent_fdr_p_threshold = traits.Float(0.05, usedefault=True, desc='p threshold on FDR corrected cluster size probabilities')
     extent_threshold = traits.Int(0, usedefault=True, desc="Minimum cluster size in voxels")
+    force_activation = traits.Bool(False, usedefault=True)
 
 class ThresholdOutputSpec(TraitedSpec):
     thresholded_map = File(exists=True)
+    n_clusters = traits.Int()
     pre_topo_fdr_map = File(exists=True)
+    pre_topo_n_clusters = traits.Int()
+    activation_forced = traits.Bool()
 
 
 class Threshold(SPMCommand):
@@ -439,6 +443,11 @@ class Threshold(SPMCommand):
             script += "use_topo_fdr  = 1;\n"
         else:
             script += "use_topo_fdr  = 0;\n"
+            
+        if self.inputs.force_activation:
+            script += "force_activation  = 1;\n"
+        else:
+            script += "force_activation  = 0;\n"
         script += "cluster_extent_p_fdr_thr = %f;\n"% self.inputs.extent_fdr_p_threshold
         script += "stat_filename = '%s';\n"% self.inputs.stat_image
         script += "height_threshold_type = '%s';\n"% self.inputs.height_threshold_type
@@ -476,6 +485,9 @@ Zth = Z(Z >= cluster_forming_thr);
 """
         script += "spm_write_filtered(Zth,XYZth,stat_map_vol.dim',stat_map_vol.mat,'thresholded map', '%s');\n"%self._gen_pre_topo_map_filename()
         script +="""
+max_size = 0;
+max_size_index = 0;
+th_nclusters = 0;
 if isempty(XYZth)
     thresholded_XYZ = [];
     thresholded_Z = [];
@@ -496,19 +508,54 @@ else
          if cluster_size > extent_threshold && (~use_topo_fdr || (cluster_size - uc) > -1)
             thresholded_XYZ = cat(2, thresholded_XYZ, XYZth(:,voxel_labels == i));
             thresholded_Z = cat(2, thresholded_Z, Zth(voxel_labels == i));
+            th_nclusters = th_nclusters + 1;
+         end
+        if force_activation
+            cluster_sum = sum(Zth(voxel_labels == i));
+            if cluster_sum > max_size
+                max_size = cluster_sum;
+                max_size_index = i;
+            end
         end
     end
 end
-% workaround to write an empty volume
+
+activation_forced = 0;
 if isempty(thresholded_XYZ)
-    thresholded_Z = [0];
-    thresholded_XYZ = [1 1 1]';
+    if force_activation && max_size ~= 0
+        thresholded_XYZ = XYZth(:,voxel_labels == max_size_index);
+        thresholded_Z = Zth(voxel_labels == max_size_index);
+        th_nclusters = 1;
+        activation_forced = 1;
+    else
+        thresholded_Z = [0];
+        thresholded_XYZ = [1 1 1]';
+        th_nclusters = 0;
+    end
 end
+
+fprintf('activation_forced = %d\\n',activation_forced);
+fprintf('pre_topo_n_clusters = %d\\n',nclusters);
+fprintf('n_clusters = %d\\n',th_nclusters);
+fprintf('pre_topo_n_clusters = %d\\n',nclusters);
+fprintf('n_clusters = %d\\n',th_nclusters);
+
 """
         script += "spm_write_filtered(thresholded_Z,thresholded_XYZ,stat_map_vol.dim',stat_map_vol.mat,'thresholded map', '%s');\n"%self._gen_thresholded_map_filename()
 
         return script
-
+    def aggregate_outputs(self, runtime=None):
+        outputs = self._outputs()
+        setattr(outputs,'thresholded_map', self._gen_thresholded_map_filename())
+        setattr(outputs,'pre_topo_fdr_map',self._gen_pre_topo_map_filename())
+        for line in runtime.stdout.split('\n'):
+            if line.startswith("activation_forced = "):
+                setattr(outputs,'activation_forced', line[len("activation_forced = "):].strip() == "1")
+            elif line.startswith("n_clusters = "):
+                setattr(outputs,'n_clusters', int(line[len("n_clusters = "):].strip()))
+            elif line.startswith("pre_topo_n_clusters = "):
+                setattr(outputs,'pre_topo_n_clusters', int(line[len("pre_topo_n_clusters = "):].strip()))
+        return outputs
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['thresholded_map'] = self._gen_thresholded_map_filename()
