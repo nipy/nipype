@@ -1265,7 +1265,7 @@ class Node(WorkflowBase):
             fp.writelines(write_rst_header('Execution Outputs', level=1))
             if isinstance(self.result.outputs, Bunch):
                 fp.writelines(write_rst_dict(self.result.outputs.dictcopy()))
-            else:
+            elif self.result.outputs:
                 fp.writelines(write_rst_dict(self.result.outputs.get()))
             if isinstance(self, MapNode):
                 fp.close()
