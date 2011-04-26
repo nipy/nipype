@@ -21,7 +21,6 @@ These functions include:
 import os
 from copy import deepcopy
 
-import matplotlib.pyplot as plt
 from nibabel import load, funcs
 import numpy as np
 from scipy import signal
@@ -32,6 +31,10 @@ from nipype.interfaces.base import (BaseInterface, traits, InputMultiPath,
                                     BaseInterfaceInputSpec)
 from nipype.utils.filemanip import filename_to_list, save_json
 from nipype.utils.misc import find_indices, isdefined
+from nipype.utils.config import config
+import matplotlib
+matplotlib.use(config.get("execution", "matplotlib_backend"))
+import matplotlib.pyplot as plt
 
 class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
     realigned_files = InputMultiPath(File(exists=True), desc="Names of realigned functional data files", mandatory=True)

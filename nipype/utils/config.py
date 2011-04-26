@@ -31,6 +31,7 @@ single_thread_matlab = true
 remove_node_directories = false
 remove_unnecessary_outputs = true
 use_relative_paths = false
+matplotlib_backend = Agg
 """%(homedir))
 
 config = ConfigParser.ConfigParser()
