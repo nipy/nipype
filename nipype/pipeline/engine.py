@@ -519,11 +519,60 @@ function loadimg(name, div) {
   document.getElementById(div).innerHTML = '<img src="'+name+'"></img>';
   return false;
 }
+
+var report_files = new Array(%d);
+var result_files = new Array(%d);
+%s
+function isnodedone(srcfile){
+  try {
+    netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+  } catch (e) {
+    alert("Permission to read file was denied.");
+  }
+  var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+  file.initWithPath( srcfile );
+  if ( file.exists() == false ) {
+    return false;
+  }
+  return true;
+}
+
+function beginrefresh(){
+  var num_nodes = %d;
+  var nodes_done = -1;
+  for(counter=nodes_done+1;counter<num_nodes;counter++){
+    cell_id = 'td'+counter;
+    if (isnodedone(report_files[counter]) == true){
+      document.getElementById(cell_id).style.backgroundColor = "#afa";
+      if (isnodedone(result_files[counter]) == true){
+        document.getElementById(cell_id).style.backgroundColor = "#fff";
+        nodes_done += 1;
+      }
+    }
+    else{
+      document.getElementById(cell_id).style.backgroundColor = "#aaa";
+    }
+  }
+  if (nodes_done+1 < num_nodes){
+    setTimeout("beginrefresh()", 1000);
+  }
+  else{
+    alert('Workflow finished running');
+  }
+}
+
+window.onload=beginrefresh
 -->
 </script>
 </head>
 """
-        fp.writelines(script)
+        nodes = nx.topological_sort(graph)
+        report_files = []
+        for i, node in enumerate(nodes):
+            report_files.append('result_files[%d] = "%s/result_%s.pklz";'%(i, os.path.realpath(node.output_dir()), node.name))
+            report_files.append('report_files[%d] = "%s/_report/report.rst";'%(i, os.path.realpath(node.output_dir())))
+        report_files = '\n'.join(report_files)
+        fp.writelines(script%(len(nodes), len(nodes), report_files, len(nodes)))
         fp.writelines('<body><div id="page_container">\n')
         fp.writelines('<div id="toc">\n')
         fp.writelines('<pre>Works only with mozilla/firefox browsers</pre><br>\n')
@@ -533,11 +582,11 @@ function loadimg(name, div) {
         fp.writelines('<a href="#" onclick="loadimg(\'%s\',\'content\');return false;">Graph - requires write_graph() in script</a><br>\n'%(graph_file))
         fp.writelines('<table>\n')
         fp.writelines('<tr><td>Name</td><td>Hierarchy</td><td>Source</td></tr>\n')
-        for node in nx.topological_sort(graph):
+        for i, node in enumerate(nodes):
             report_file = '%s/_report/report.rst'%os.path.realpath(node.output_dir())
             local_file = '%s.rst'%node._id
             #os.symlink(report_file, os.path.join(report_dir, local_file))
-            url = '<tr><td><a href="#"	onclick="load(\'%s\',\'content\');return false;">%s</a></td>'%(report_file, node._id)
+            url = '<tr><td id="td%d"><a href="#" onclick="load(\'%s\',\'content\');return false;">%s</a></td>'%(i,report_file, node._id)
             url += '<td>%s</td>'%('.'.join(node.fullname.split('.')[:-1]))
             url += '<td>%s</td></tr>\n'%('.'.join(get_print_name(node).split('.')[1:]))
             fp.writelines(url)
