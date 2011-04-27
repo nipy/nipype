@@ -1515,6 +1515,7 @@ class MapNode(Node):
         if not self._got_inputs:
             self._get_inputs()
             self._got_inputs = True
+        self.write_report(report_type='preexec', cwd = self.output_dir())
         return [node for _, node in self._make_nodes()]
     
     def num_subnodes(self):
