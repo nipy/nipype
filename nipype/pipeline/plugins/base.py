@@ -234,7 +234,8 @@ class DistributedPluginBase(PluginBase):
         # Update job and worker queues
         self.proc_pending[jobid] = False
         # update the job dependency structure
-        self.depidx[jobid, :] = 0.
+        rowview = self.depidx.getrowview(jobid)
+        rowview[rowview.nonzero()] = 0
         if jobid not in self.mapnodesubids:
             self.refidx[self.refidx[:,jobid].nonzero()[0],jobid] = 0
 
