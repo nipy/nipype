@@ -50,6 +50,7 @@ class IPythonPlugin(DistributedPluginBase):
         cmdstr = """import sys
 from traceback import format_exception
 traceback=None
+result=None
 try:
     result = task.run(updatehash=updatehash)
 except:

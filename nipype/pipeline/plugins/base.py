@@ -131,7 +131,10 @@ class DistributedPluginBase(PluginBase):
                 try:
                     result = self._get_result(taskid)
                     if result:
+                        print result #dbg
                         if result['traceback']:
+                            if config.getboolean('execution', 'stop_on_first_crash'):
+                                raise RuntimeError(result)
                             crashfile = self._report_crash(self.procs[jobid],
                                                            result)
                             if jobid in self.mapnodesubids:
@@ -147,6 +150,8 @@ class DistributedPluginBase(PluginBase):
                     else:
                         toappend.insert(0, (taskid, jobid))
                 except:
+                    if config.getboolean('execution', 'stop_on_first_crash'):
+                        raise
                     crashfile = self._report_crash(self.procs[jobid])
                     # remove dependencies from queue
                     if jobid in self.mapnodesubids:
@@ -218,7 +223,7 @@ class DistributedPluginBase(PluginBase):
                     _, hashvalue = self.procs[jobid]._get_hashval()
                     logger.info('Executing: %s ID: %d H:%s' % \
                                     (self.procs[jobid]._id, jobid, hashvalue))
-                    tid = self._submit_job(self.procs[jobid],
+                    tid = self._submit_job(deepcopy(self.procs[jobid]),
                                            updatehash=updatehash)
                     self.pending_tasks.insert(0, (tid, jobid))
             else:
