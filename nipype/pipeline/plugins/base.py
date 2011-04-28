@@ -131,7 +131,6 @@ class DistributedPluginBase(PluginBase):
                 try:
                     result = self._get_result(taskid)
                     if result:
-                        print result #dbg
                         if result['traceback']:
                             if config.getboolean('execution', 'stop_on_first_crash'):
                                 raise RuntimeError(result)
