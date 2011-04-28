@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
     
 
 class PickAtlasInputSpec(BaseInterfaceInputSpec):
-    atlas = File(exists=True, desc="Location of the atlas that will be used.", compulsory=True)
+    atlas = File(exists=True, desc="Location of the atlas that will be used.", mandatory=True)
     labels = traits.Either(traits.Int, traits.List(traits.Int), 
                            desc="Labels of regions that will be included in the mask. Must be \
 compatible with the atlas used.", compulsory=True)
