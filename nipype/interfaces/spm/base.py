@@ -140,7 +140,7 @@ class Info(object):
         throw(MException('SPMCheck:NotFound','SPM not in matlab path'));
         end;
         spm_path = spm('dir');
-        name, ver = spm('ver');
+        [name, ver] = spm('ver');
         fprintf(1, 'NIPYPE  path: %s name: %s release: %s', spm_path, name, ver);
         exit;
         """
@@ -384,7 +384,7 @@ class SPMCommand(BaseInterface):
         if isempty(which('spm')),
              throw(MException('SPMCheck:NotFound','SPM not in matlab path'));
         end
-        name, ver = spm('ver');
+        [name, ver] = spm('ver');
         fprintf('SPM version: %s Release: %s\\n',name, ver);
         fprintf('SPM path: %s\\n',which('spm'));
         spm('Defaults','fMRI');
