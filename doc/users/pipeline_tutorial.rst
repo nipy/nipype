@@ -19,6 +19,7 @@ Tutorials
    tutorial_102
    tutorial_103
    mapnode_and_iterables
+   grabbing_and_sinking
    examples/*
 
 Requirements
