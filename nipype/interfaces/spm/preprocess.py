@@ -618,6 +618,8 @@ class NewSegmentOutputSpec(TraitedSpec):
 class NewSegment(SPMCommand):
     """Use spm_preproc8 (New Segment) to separate structural images into different
     tissue classes. Supports multiple modalities.
+
+    NOTE: This interface currently supports single channel input only
     
     http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=185
 
@@ -655,17 +657,14 @@ class NewSegment(SPMCommand):
 
         if opt in ['channel_files', 'channel_info']:
             # structure have to be recreated, because of some weird traits error
-            new_channels = []
-            for channel in self.inputs.channel_files:
-                new_channel = {}
-                new_channel['vols'] = scans_for_fname(filename_to_list(channel))
-                if isdefined(self.inputs.channel_info):
-                    info = self.inputs.channel_info
-                    new_channel['biasreg'] = info[0]
-                    new_channel['biasfwhm'] = info[1]
-                    new_channel['write'] = [int(info[2][0]), int(info[2][1])]
-                new_channels.append(new_channel)
-            return new_channels
+            new_channel = {}
+            new_channel['vols'] = scans_for_fnames(self.inputs.channel_files)
+            if isdefined(self.inputs.channel_info):
+                info = self.inputs.channel_info
+                new_channel['biasreg'] = info[0]
+                new_channel['biasfwhm'] = info[1]
+                new_channel['write'] = [int(info[2][0]), int(info[2][1])]
+            return [new_channel]
         elif opt == 'tissues':
             new_tissues = []
             for tissue in val:
