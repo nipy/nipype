@@ -695,7 +695,7 @@ class NewSegment(SPMCommand):
             outputs['normalized_class_images'].append([])
             outputs['modulated_class_images'].append([])
 
-        for filename in filename_to_list(self.inputs.channel_files[0]):
+        for filename in self.inputs.channel_files:
             pth, base, ext = split_filename(filename)
             if isdefined(self.inputs.tissues):
                 for i, tissue in enumerate(self.inputs.tissues):
@@ -766,3 +766,192 @@ class Smooth(SPMCommand):
             outputs['smoothed_files'].append(fname_presuffix(imgf, prefix='s'))
         return outputs
 
+
+class DARTELInputSpec(SPMCommandInputSpec):
+    image_files = traits.List(traits.List(File(exists=True)),
+                              desc="A list of files to be segmented",
+                              field='warp.images', copyfile=False, mandatory=True)
+    template_prefix = traits.Str('Template', usedefault=True,
+                                 field='warp.settings.template',
+                                 desc='Prefix for template')
+    regularization_form = traits.Enum('Linear', 'Membrane', 'Bending',
+                                      field = 'warp.settings.rform',
+                                      desc='Form of regularization energy term')
+    iteration_parameters = traits.List(traits.Tuple(traits.Range(1,10), traits.Tuple(traits.Float, traits.Float, traits.Float),
+                                                    traits.Enum(1,2,4,8,16,32,64,128,256,512),
+                                                    traits.Enum(0,0.5,1,2,4,8,16,32)),
+                                       minlen=6,
+                                       maxlen=6,
+                                       field = 'warp.settings.param',
+                                       desc="""List of tuples for each iteration
+                                       - Inner iterations
+                                       - Regularization parameters
+                                       - Time points for deformation model
+                                       - smoothing parameter
+                                       """)
+    optimization_parameters = traits.Tuple(traits.Float, traits.Range(1,8), traits.Range(1,8),
+                                           field = 'warp.settings.optim',
+                                           desc="""Optimization settings a tuple
+                                           - LM regularization
+                                           - cycles of multigrid solver
+                                           - relaxation iterations
+                                           """)
+
+class DARTELOutputSpec(TraitedSpec):
+    final_template_file = File(exists=True, desc='final DARTEL template')
+    template_files = traits.List(File(exists=True), desc='Templates from different stages of iteration')
+    dartel_flow_fields = traits.List(File(exists=True), desc='DARTEL flow fields')
+
+class DARTEL(SPMCommand):
+    """Use spm DARTEL to create a template and flow fields
+
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=197
+
+    Examples
+    --------
+    >>> import nipype.interfaces.spm as spm
+    >>> dartel = spm.DARTEL()
+    >>> dartel.inputs.image_files = [['rc1s1.nii','rc1s2.nii'],['rc2s1.nii', 'rc2s2.nii']]
+    >>> dartel.run() # doctest: +SKIP
+
+    """
+
+    input_spec = DARTELInputSpec
+    output_spec = DARTELOutputSpec
+    _jobtype = 'tools'
+    _jobname = 'dartel'
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+
+        if opt in ['image_files']:
+            return scans_for_fnames(val, keep4d=True, separate_sessions=True)
+        elif opt == 'regularization_form':
+            mapper = {'Linear':0, 'Membrane':1, 'Bending':2}
+            return mapper[val]
+        elif opt == 'iteration_parameters':
+            params = []
+            for param in val:
+                new_param = {}
+                new_param['its'] = param[0]
+                new_param['rparam'] = list(param[1])
+                new_param['K'] = param[2]
+                new_param['slam'] = param[3]
+                params.append(new_param)
+            return params
+        elif opt == 'optimization parameters':
+            new_param = {}
+            new_param['lmreg'] = val[0]
+            new_param['cyc'] = val[1]
+            new_param['its'] = val[2]
+            return [new_param]
+        else:
+            return val
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['template_files'] = []
+        for i in range(6):
+            outputs['template_files'].append(os.path.realpath('%s_%d.nii'%(self.inputs.template_prefix, i+1)))
+        outputs['final_template_file'] = os.path.realpath('%s_6.nii'%self.inputs.template_prefix)
+        outputs['dartel_flow_fields'] = []
+        for filename in self.inputs.image_files[0]:
+            pth, base, ext = split_filename(filename)
+            outputs['dartel_flow_fields'].append(os.path.realpath('u_%s_%s%s'%(base,
+                                                                               self.inputs.template_prefix,
+                                                                               ext)))
+        return outputs
+
+
+class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
+    template_file = File(exists=True,
+                         desc="DARTEL template",
+                         field='mni_norm.template', copyfile=False, mandatory=True)
+    flowfield_files = InputMultiPath(File(exists=True),
+                                     desc="DARTEL flow fields u_rc1*",
+                                     field='mni_norm.data.subjs.flowfields',
+                                     mandatory=True)
+    apply_to_files = InputMultiPath(File(exists=True),
+                                     desc="Files to apply the transform to",
+                                     field='mni_norm.data.subjs.images',
+                                     mandatory=True)
+    voxel_size = traits.Tuple(traits.Float, traits.Float, traits.Float,
+                              desc="Voxel sizes for output file",
+                              field='mni_norm.vox')
+    bounding_box = traits.Tuple(traits.Float, traits.Float, traits.Float,
+                                traits.Float, traits.Float, traits.Float,
+                                desc="Voxel sizes for output file",
+                                field='mni_norm.bb')
+    modulate = traits.Bool(field='mni_norm.preserve',
+                           desc="Modulate out images - no modulation preserves concentrations")
+    fwhm = traits.Either(traits.Tuple(traits.Float(), traits.Float, traits.Float),
+                         traits.Float(), field='mni_norm.fwhm',
+                         desc='3-list of fwhm for each dimension')
+
+class DARTELNorm2MNIOutputSpec(TraitedSpec):
+    normalized_files = OutputMultiPath(File(exists=True), desc='Normalized files in MNI space')
+    normalization_parameter_file = File(exists=True, desc='Transform parameters to MNI space')
+
+class DARTELNorm2MNI(SPMCommand):
+    """Use spm DARTEL to normalize data to MNI space
+
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=200
+
+    Examples
+    --------
+    >>> import nipype.interfaces.spm as spm
+    >>> nm = spm.DARTELNorm2MNI()
+    >>> nm.inputs.template_file = 'Template_6.nii'
+    >>> nm.inputs.flowfield_files = ['u_rc1s1_Template.nii', 'u_rc1s3_Template.nii']
+    >>> nm.inputs.apply_to_files = ['c1s1.nii', 'c1s3.nii']
+    >>> nm.inputs.modulate = True
+    >>> nm.run() # doctest: +SKIP
+
+    """
+
+    input_spec = DARTELNorm2MNIInputSpec
+    output_spec = DARTELNorm2MNIOutputSpec
+    _jobtype = 'tools'
+    _jobname = 'dartel'
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        print opt #dbg
+        if opt in ['template_file']:
+            return np.array([val], dtype=object)
+        elif opt in ['flowfield_files']:
+            return scans_for_fnames(val, keep4d=True)
+        elif opt in ['apply_to_files']:
+            return scans_for_fnames(val, keep4d=True, separate_sessions=True)
+        elif opt == 'voxel_size':
+            return list(val)
+        elif opt == 'bounding_box':
+            return list(val)
+        elif opt == 'fwhm':
+            if not isinstance(val, tuple):
+                return [val, val, val]
+            if isinstance(val, tuple):
+                return val
+        elif opt == 'modulate':
+            return int(val)
+        else:
+            return val
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        pth, base, ext = split_filename(self.inputs.template_file)
+        outputs['normalization_parameter_file'] = os.path.realpath(base+'_2mni.mat')
+        outputs['normalized_files'] = []
+        if isdefined(self.inputs.modulate) and self.inputs.modulate:
+            prefix = 'smw'
+        else:
+            prefix = 'sw'
+        for filename in self.inputs.apply_to_files:
+            pth, base, ext = split_filename(filename)
+            outputs['normalized_files'].append(os.path.realpath('%s%s%s'%(prefix,
+                                                                          base,
+                                                                          ext)))
+
+        return outputs
