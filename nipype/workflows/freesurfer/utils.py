@@ -42,6 +42,7 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
            outputspec.mask_file : binary mask file in reference image space
            outputspec.reg_file : registration file that maps reference image to
                                  freesurfer space
+           outputspec.reg_cost : cost of registration (useful for detecting misalignment)
     """
 
     """
@@ -123,10 +124,12 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
 
     outputnode = pe.Node(niu.IdentityInterface(fields=["mask_file",
                                                         "reg_file",
+                                                        "reg_cost"
                                                         ]),
                          name="outputspec")
     getmask.connect([
             (register, outputnode, [("out_reg_file", "reg_file")]),
+            (register, outputnode, [("min_cost_file", "reg_cost")]),
             (threshold2, outputnode, [("binary_file", "mask_file")]),
             ])
     return getmask

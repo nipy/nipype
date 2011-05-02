@@ -42,11 +42,12 @@ def create_spm_preproc(name='preproc'):
          outputspec.realignment_parameters : realignment parameter files
          outputspec.smoothed_files : smoothed functional files
          outputspec.outlier_files : list of outliers
-         outputspec.outlier_files : statistics of outliers
-         outputspec.outlier_files : images of outliers
+         outputspec.outlier_stats : statistics of outliers
+         outputspec.outlier_plots : images of outliers
          outputspec.mask_file : binary mask file in reference image space
          outputspec.reg_file : registration file that maps reference image to
                                  freesurfer space
+         outputspec.reg_cost : cost of registration (useful for detecting misalignment)
     """
 
     """
@@ -104,6 +105,7 @@ def create_spm_preproc(name='preproc'):
                                                        "smoothed_files",
                                                        "mask_file",
                                                        "reg_file",
+                                                       "reg_cost",
                                                        'outlier_files',
                                                        'outlier_stats',
                                                        'outlier_plots'
@@ -111,6 +113,7 @@ def create_spm_preproc(name='preproc'):
                          name="outputspec")
     workflow.connect([
             (maskflow, outputnode, [("outputspec.reg_file", "reg_file")]),
+            (maskflow, outputnode, [("outputspec.reg_cost", "reg_cost")]),
             (maskflow, outputnode, [("outputspec.mask_file", "mask_file")]),
             (realign, outputnode, [('realignment_parameters', 'realignment_parameters')]),
             (smooth, outputnode, [('smoothed_files', 'smoothed_files')]),
