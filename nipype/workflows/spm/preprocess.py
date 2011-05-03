@@ -185,7 +185,6 @@ def create_vbm_preproc(name='vbmpreproc'):
     """
 
     def get2classes(dartel_files):
-        print dartel_files #dbg
         class1images = []
         class2images = []
         for session in dartel_files:
@@ -201,7 +200,6 @@ def create_vbm_preproc(name='vbmpreproc'):
     workflow.connect(dartel, 'dartel_flow_fields', norm2mni, 'flowfield_files')
 
     def getclass1images(class_images):
-        print class_images
         class1images = []
         for session in class_images:
             class1images.extend(session[0])

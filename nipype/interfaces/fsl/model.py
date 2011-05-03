@@ -291,8 +291,6 @@ class Level1Design(BaseInterface):
                     n_tcon += 1
                 elif c[1] == 'F':
                     n_fcon += 1
-                else:
-                    print "unknown contrast type: %s" % str(c)
 
         for i, info in enumerate(session_info):
             do_tempfilter = 1
