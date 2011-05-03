@@ -595,8 +595,7 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
             - number of gaussians
             - which maps to save [Native, DARTEL] - a tuple of two boolean values
             - which maps to save [Modulated, Unmodualted] - a tuple of two boolean values""", 
-            field='tissue', 
-            copyfile=False)
+            field='tissue')
     affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', field='warp.affreg',
                       desc='mni, eastern, subj, none ')
     warping_regularization = traits.Float(field='warp.reg',
@@ -875,7 +874,7 @@ class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
     apply_to_files = InputMultiPath(File(exists=True),
                                      desc="Files to apply the transform to",
                                      field='mni_norm.data.subjs.images',
-                                     mandatory=True)
+                                     mandatory=True, copyfile=False)
     voxel_size = traits.Tuple(traits.Float, traits.Float, traits.Float,
                               desc="Voxel sizes for output file",
                               field='mni_norm.vox')
@@ -918,7 +917,6 @@ class DARTELNorm2MNI(SPMCommand):
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
-        print opt #dbg
         if opt in ['template_file']:
             return np.array([val], dtype=object)
         elif opt in ['flowfield_files']:
