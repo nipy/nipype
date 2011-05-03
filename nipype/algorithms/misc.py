@@ -353,3 +353,31 @@ class CreateNifti(BaseInterface):
         outputs['nifti_file'] = self._gen_output_file_name()
         return outputs
 
+
+class TSNRInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='realigned 4D file')
+
+class TSNROutputSpec(TraitedSpec):
+    tsnr_file = File(exists=True, desc='tsnr image file')
+
+class TSNR(BaseInterface):
+    input_spec = TSNRInputSpec
+    output_spec = TSNROutputSpec
+
+    def _gen_output_file_name(self):
+        _, base, _ = split_filename(self.inputs.in_file)
+        return os.path.abspath(base + "_tsnr.nii")
+
+    def _run_interface(self, runtime):
+        img = nb.load(self.inputs.in_file)
+        data = img.get_data()
+        tsnr = np.mean(data, axis=3)/np.std(data, axis=3)
+        img = nb.Nifti1Image(tsnr, img.get_affine(), img.get_hdr())
+        nb.save(img,  self._gen_output_file_name())
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['tsnr_file'] = self._gen_output_file_name()
+        return outputs
