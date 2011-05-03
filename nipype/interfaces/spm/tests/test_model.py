@@ -85,38 +85,6 @@ def test_estimatecontrast():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
-def test_onesamplettest():
-    yield assert_equal, spm.OneSampleTTest._jobtype, 'stats'
-    yield assert_equal, spm.OneSampleTTest._jobname, 'basename'
-    input_map = dict(con_images = dict(mandatory=True,))
-    instance = spm.OneSampleTTest()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-def test_twosamplettest():
-    yield assert_equal, spm.TwoSampleTTest._jobtype, 'stats'
-    yield assert_equal, spm.TwoSampleTTest._jobname, 'basename'
-    input_map = dict(images_group1 = dict(mandatory=True,),
-                     images_group2 = dict(mandatory=True,),
-                     )
-    instance = spm.TwoSampleTTest()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-def test_multipleregression():
-    yield assert_equal, spm.MultipleRegression._jobtype, 'stats'
-    yield assert_equal, spm.MultipleRegression._jobname, 'basename'
-    input_map = dict(contrasts = dict(mandatory=True,),
-                     covariates = dict(mandatory=True,),
-                     images = dict(mandatory=True,),
-                     )
-    instance = spm.MultipleRegression()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
 def test_threshold():
     yield assert_equal, spm.Threshold._jobtype, 'basetype'
     yield assert_equal, spm.Threshold._jobname, 'basename'
