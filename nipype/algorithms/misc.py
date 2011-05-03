@@ -362,6 +362,18 @@ class TSNROutputSpec(TraitedSpec):
     tsnr_file = File(exists=True, desc='tsnr image file')
 
 class TSNR(BaseInterface):
+    """Computes the time-course SNR for a time series
+
+    Typically you want to run this on a realigned time-series.
+    
+    Example
+    -------
+
+    >>> tsnr = TSNR()
+    >>> tsnr.inputs.in_file = 'functional.nii'
+    >>> res = tsnr.run() # doctest: +SKIP
+
+    """
     input_spec = TSNRInputSpec
     output_spec = TSNROutputSpec
 
@@ -373,7 +385,7 @@ class TSNR(BaseInterface):
         img = nb.load(self.inputs.in_file)
         data = img.get_data()
         tsnr = np.mean(data, axis=3)/np.std(data, axis=3)
-        img = nb.Nifti1Image(tsnr, img.get_affine(), img.get_hdr())
+        img = nb.Nifti1Image(tsnr, img.get_affine(), img.get_header())
         nb.save(img,  self._gen_output_file_name())
         return runtime
 
