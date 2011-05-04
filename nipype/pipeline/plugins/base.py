@@ -132,16 +132,8 @@ class DistributedPluginBase(PluginBase):
                     result = self._get_result(taskid)
                     if result:
                         if result['traceback']:
-                            if config.getboolean('execution', 'stop_on_first_crash'):
-                                raise RuntimeError(result)
-                            crashfile = self._report_crash(self.procs[jobid],
-                                                           result)
-                            if jobid in self.mapnodesubids:
-                                jobid = self.mapnodesubids[jobid]
-                            # remove dependencies from queue
-                            notrun.append(self._remove_node_deps(jobid,
-                                                                 crashfile,
-                                                                 graph))
+                            notrun.append(self._clean_queue(jobid, graph,
+                                                            result=result))
                         else:
                             self._task_finished_cb(jobid)
                             self._remove_node_dirs()
@@ -149,14 +141,7 @@ class DistributedPluginBase(PluginBase):
                     else:
                         toappend.insert(0, (taskid, jobid))
                 except:
-                    if config.getboolean('execution', 'stop_on_first_crash'):
-                        raise
-                    crashfile = self._report_crash(self.procs[jobid])
-                    # remove dependencies from queue
-                    if jobid in self.mapnodesubids:
-                        jobid = self.mapnodesubids[jobid]
-                    notrun.append(self._remove_node_deps(jobid, crashfile,
-                                                         graph))
+                    notrun.append(self._clean_queue(jobid, graph))
             if toappend:
                 self.pending_tasks.extend(toappend)
             self._send_procs_to_workers(updatehash=updatehash)
@@ -175,6 +160,22 @@ class DistributedPluginBase(PluginBase):
 
     def _clear_task(self, taskid):
         raise NotImplementedError
+
+    def _clean_queue(self, jobid, graph, result=None):
+        if config.getboolean('execution', 'stop_on_first_crash'):
+            raise RuntimeError(result)
+        crashfile = self._report_crash(self.procs[jobid],
+                                       result=result)
+        if jobid in self.mapnodesubids:
+            # remove current jobid
+            self.proc_pending[jobid] = False
+            self.proc_done[jobid] = True
+            # remove parent mapnode
+            jobid = self.mapnodesubids[jobid]
+            self.proc_pending[jobid] = False
+            self.proc_done[jobid] = True
+        # remove dependencies from queue
+        return self._remove_node_deps(jobid, crashfile, graph)
 
     def _submit_mapnode(self, jobid):
         if jobid in self.mapnodes:

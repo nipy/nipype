@@ -51,7 +51,7 @@ save_time = False
 if not save_time:
     @skipif(no_spm)
     def test_spm_path():
-        spm_path = spm.Info.version()
+        spm_path = spm.Info.version()['path']
         if spm_path is not None:
             yield assert_equal, type(spm_path), type('')
             yield assert_true, 'spm' in spm_path

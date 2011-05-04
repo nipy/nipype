@@ -440,7 +440,7 @@ l2source.iterables = [('fwhm',fwhmlist),
                       ('con',contrast_ids)]
 
 
-"""Use :class:`nipype.interfaces.spm.OneSampleTTest` to perform a
+"""Use :class:`nipype.interfaces.spm.OneSampleTTestDesign` to perform a
 simple statistical analysis of the contrasts from the group of
 subjects (n=2 in this example).
 """
