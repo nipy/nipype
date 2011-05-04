@@ -175,9 +175,10 @@ def create_vbm_preproc(name='vbmpreproc'):
     tissue1 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 1), 2, (True,True), (False, False))
     tissue2 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 2), 2, (True,True), (False, False))
     tissue3 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 3), 2, (True,False), (False, False))
-    tissue4 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 4), 2, (False,False), (False, False))
-    tissue5 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 5), 2, (False,False), (False, False))
-    segment.inputs.tissues = [tissue1, tissue2, tissue3, tissue4, tissue5]
+    tissue4 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 4), 3, (False,False), (False, False))
+    tissue5 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 5), 4, (False,False), (False, False))
+    tissue6 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 6), 2, (False,False), (False, False))
+    segment.inputs.tissues = [tissue1, tissue2, tissue3, tissue4, tissue5, tissue6]
 
     dartel = pe.Node(spm.DARTEL(), name='dartel')
 
