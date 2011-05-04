@@ -141,7 +141,7 @@ class Info(object):
         end;
         spm_path = spm('dir');
         [name, ver] = spm('ver');
-        fprintf(1, 'NIPYPE  path: %s name: %s release: %s', spm_path, name, ver);
+        fprintf(1, 'NIPYPE path:%s|name:%s|release:%s', spm_path, name, ver);
         exit;
         """
         mlab.inputs.mfile = False
@@ -153,7 +153,12 @@ class Info(object):
             logger.debug(str(e))
             return None
         else:
-            return sd._strip_header(out.runtime.stdout)
+            out = sd._strip_header(out.runtime.stdout)
+            out_dict = {}
+            for part in out.split('|'):
+                key, val = part.split(':')
+                out_dict[key] = val
+            return out_dict
 
 def no_spm():
     """ Checks if SPM is NOT installed
