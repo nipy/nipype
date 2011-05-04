@@ -19,7 +19,8 @@ def tbss1_op_string(infiles):
     return op_strings
 
 def create_tbss_1_preproc(name='tbss_1_preproc'):
-    """Creates a pipeline that does the same as tbss_1_preproc script in FSL
+    """Preprocess FA data for TBSS: erodes a little and zero end slicers and creates masks(for use in FLIRT & FNIRT from FSL)
+    A pipeline that does the same as tbss_1_preproc script in FSL
     
     Example
     --------
@@ -72,7 +73,8 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
     return tbss1
 
 def create_tbss_2_reg(name="tbss_2_reg"):
-    """Create a pipeline that does the same as tbss_2_reg script in FSL.
+    """TBSS nonlinear registration: 
+    A pipeline that does the same as tbss_2_reg script in FSL.
         
     Example
     ------
@@ -132,8 +134,8 @@ def create_tbss_2_reg(name="tbss_2_reg"):
     return tbss2
 
 def create_tbss_3_postreg(name='tbss_3_postreg'):
-    """
-    Creates a pipeline that does the same as tbss_3_postreg script from FSL
+    """Post-registration processing:derive mean_FA and mean_FA_skeleton from mean of all subjects in study
+    A pipeline that does the same as tbss_3_postreg script from FSL
     
     Example
     --------
@@ -212,8 +214,8 @@ def tbss4_op_string(skeleton_thresh):
     return op_string
     
 def create_tbss_4_prestats(name='tbss_4_prestats'):
-    """
-    Creates a pipeline that does the same as tbss_4_prestats script from FSL
+    """Post-registration processing:Creating skeleton mask using a threshold projecting all FA data onto skeleton
+    A pipeline that does the same as tbss_4_prestats script from FSL
     
     Example
     --------
@@ -345,7 +347,6 @@ def create_tbss_all(name='tbss_all'):
     # Define the outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=['groupmask','skeleton_file3','meanfa_file','mergefa_file','projectedfa_file','skeleton_file4','skeleton_mask','distance_map']),
                          name='outputnode')
-    # Outputnode for test
     outputall_node = pe.Node(interface=util.IdentityInterface(fields=[
                                                                     "fa_list1","mask_list1",
                                                                     'field_list2',
