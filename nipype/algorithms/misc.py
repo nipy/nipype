@@ -55,7 +55,7 @@ class PickAtlas(BaseInterface):
             output = fname_presuffix(fname=self.inputs.atlas, suffix = "_mask",
                                      newpath= os.getcwd(), use_ext = True)
         else:
-            output = self.inputs.output_file
+            output = os.path.realpath(self.inputs.output_file)
         return output
         
     def _get_brodmann_area(self):
