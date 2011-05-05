@@ -19,7 +19,7 @@ def configuration(parent_package='',top_path=None):
     config.set_options(ignore_setup_xxx_py=True,
                        assume_default_configuration=True,
                        delegate_options_to_subpackages=True,
-                       quiet=False)
+                       quiet=True)
     # The quiet=True option will silence all of the name setting warnings:
     # Ignoring attempt to set 'name' (from 'nipy.core' to 
     #    'nipy.core.image')
