@@ -20,9 +20,10 @@ import os
 
 # perform all external trait imports here
 try:
-    import enthought.traits.api as traits
-    if traits.__version__ < '3.6.1':
+    import traits
+    if traits.__version__ < '3.7.0':
         raise ImportError
+    import traits.api as traits
     from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
     from enthought.traits.trait_errors import TraitError
 except ImportError:
