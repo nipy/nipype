@@ -16,8 +16,19 @@ all of these bugs and they've been fixed in enthought svn repository
 
 """
 
-import nipype.external.traits.api as traits
 import os
+
+# perform all external trait imports here
+try:
+    import enthought.traits.api as traits
+    if traits.__version__ < '3.6.1':
+        raise ImportError
+    from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
+    from enthought.traits.trait_errors import TraitError
+except ImportError:
+    import nipype.external.traits.api as traits
+    from nipype.external.traits.trait_handlers import TraitDictObject, TraitListObject
+    from nipype.external.traits.trait_errors import TraitError
 
 class BaseFile ( traits.BaseStr ):
     """ Defines a trait whose value must be the name of a file.
