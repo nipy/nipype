@@ -1142,7 +1142,7 @@ class Node(WorkflowBase):
             shutil.move(hashfile_unfinished, hashfile)
             self.write_report(report_type='postexec', cwd=outdir)
         else:
-            if not exists(os.path.join(outdir, '_inputs.pklz')):
+            if not os.path.exists(os.path.join(outdir, '_inputs.pklz')):
                 savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get())
             logger.debug("Hashfile exists. Skipping execution")
             self._run_interface(execute=False, updatehash=updatehash)
