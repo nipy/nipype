@@ -16,11 +16,9 @@ import warnings
 
 import numpy as np
 
-from nipype.interfaces.fsl.base import FSLCommand,\
-    FSLCommandInputSpec, Info
-from nipype.interfaces.base import traits, TraitedSpec,\
-    OutputMultiPath, File
-from nipype.utils.misc import isdefined
+from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
+from nipype.interfaces.base import (traits, TraitedSpec, OutputMultiPath, File,
+                                    isdefined)
 from nipype.utils.filemanip import load_json, save_json, split_filename, fname_presuffix
 
 warn = warnings.warn

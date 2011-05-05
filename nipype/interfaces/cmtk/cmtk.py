@@ -7,22 +7,15 @@
 
 """
 
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, File, TraitedSpec, Directory
+from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
+                                    File, TraitedSpec, Directory, isdefined)
 from nipype.utils.filemanip import split_filename
-import re
-from glob import glob
-from nibabel import load
-from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
 import pickle
-import scipy as sp
 import scipy.io as sio
-import os, os.path as op
-from time import time
-from glob import glob
+import os
 import numpy as np
 import nibabel as nb
 import networkx as nx
-from nipype.utils.misc import isdefined
 import sys
 
 def length(xyz, along=False):

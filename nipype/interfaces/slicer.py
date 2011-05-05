@@ -6,9 +6,7 @@ import xml.dom.minidom
 
 from nipype.interfaces.base import (CommandLine, CommandLineInputSpec,
                                     DynamicTraitedSpec, traits, Undefined,
-                                    File)
-from nipype.utils.misc import isdefined
-
+                                    File, isdefined)
 
 class SlicerCommandLineInputSpec(DynamicTraitedSpec, CommandLineInputSpec):
     module = traits.Str(desc="name of the Slicer command line module you want to use")

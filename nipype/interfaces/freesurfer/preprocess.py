@@ -24,8 +24,7 @@ from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath,
                                     OutputMultiPath, CommandLine,
-                                    CommandLineInputSpec)
-from nipype.utils.misc import isdefined
+                                    CommandLineInputSpec, isdefined)
 
 
 class ParseDICOMDirInputSpec(FSTraitedSpec):

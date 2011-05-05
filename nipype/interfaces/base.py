@@ -21,18 +21,16 @@ from time import time
 from warnings import warn
 
 from nipype.interfaces.traits_extension import (traits, Undefined, TraitDictObject,
-                                                TraitListObject, TraitError)
+                                                TraitListObject, TraitError,
+                                                isdefined, File, Directory)
 from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                     hash_timestamp)
 from nipype.utils.misc import is_container
 from nipype.utils.config import config
 from nipype.utils.logger import iflogger
-from nipype.utils.misc import isdefined
 
 
 __docformat__ = 'restructuredtext'
-
-from nipype.interfaces.traits import File, Directory
 
 def load_template(name):
     """Load a template from the script_templates directory

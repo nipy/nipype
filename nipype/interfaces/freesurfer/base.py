@@ -21,9 +21,8 @@ from glob import glob
 import numpy as np
 
 from nipype.utils.filemanip import FileNotFoundError, fname_presuffix
-from nipype.interfaces.base import CommandLine, traits, TraitedSpec,\
-    Directory, CommandLineInputSpec
-from nipype.utils.misc import isdefined
+from nipype.interfaces.base import (CommandLine, traits, TraitedSpec,
+                                    Directory, CommandLineInputSpec, isdefined)
 
 class Info(object):
     """ Freesurfer subject directory and version information.

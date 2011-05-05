@@ -23,11 +23,10 @@ import numpy as np
 import scipy.io as sio
 
 # Local imports
-from nipype.interfaces.base import Bunch, traits, \
-    TraitedSpec, File, Directory, OutputMultiPath, InputMultiPath
+from nipype.interfaces.base import (Bunch, traits, TraitedSpec, File, Directory,
+                                    OutputMultiPath, InputMultiPath, isdefined)
 from nipype.interfaces.spm.base import (SPMCommand, SPMCommandInputSpec,
                                         scans_for_fnames)
-from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (filename_to_list, list_to_filename,
                                     loadflat, split_filename)
 

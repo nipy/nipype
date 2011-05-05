@@ -26,8 +26,8 @@ import numpy as np
 from scipy.special import gammaln
 
 from nipype.interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
-                                    traits, File, Bunch, BaseInterfaceInputSpec)
-from nipype.utils.misc import isdefined
+                                    traits, File, Bunch, BaseInterfaceInputSpec,
+                                    isdefined)
 from nipype.utils.filemanip import filename_to_list
 from nipype.utils.logger import iflogger
 from nipype.utils.config import config

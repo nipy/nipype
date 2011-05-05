@@ -10,9 +10,8 @@ from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
 from nipype.utils.filemanip import split_filename
 import nipype.interfaces.fsl.preprocess as fsl
 from nipype.interfaces.fsl import Info
-from nipype.interfaces.base import File, TraitError
+from nipype.interfaces.base import File, TraitError, Undefined
 from nipype.interfaces.fsl import no_fsl
-from nipype.interfaces.traits import Undefined
 
 
 @skipif(no_fsl)

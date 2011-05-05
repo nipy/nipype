@@ -12,7 +12,6 @@ import os
 import re
 import shutil
 
-from nipype.utils.misc import isdefined
 # The md5 module is deprecated in Python 2.6, but hashlib is only
 # available as an external package for versions of python before 2.6.
 # Both md5 algorithms appear to return the same result.
@@ -31,6 +30,7 @@ except ImportError:
 
 import numpy as np
 
+from nipype.interfaces.traits_extension import isdefined
 from nipype.utils.misc import is_container
 from nipype.utils.config import config
 

@@ -2,23 +2,21 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The spm module provides basic functions for interfacing with SPM  tools."""
 
-
-from nipype.interfaces.traits import Directory
 __docformat__ = 'restructuredtext'
 
 # Standard library imports
 import os
 from copy import deepcopy
-import re
 
 # Third-party imports
 import numpy as np
 from scipy.io import savemat
 
 # Local imports
-from nipype.interfaces.base import BaseInterface, traits, TraitedSpec,\
-    InputMultiPath, BaseInterfaceInputSpec
-from nipype.utils.misc import isdefined
+from nipype.interfaces.base import (BaseInterface, traits, isdefined,
+                                    InputMultiPath, BaseInterfaceInputSpec,
+                                    Directory)
+
 from nibabel import load
 from nipype.interfaces.matlab import MatlabCommand
 

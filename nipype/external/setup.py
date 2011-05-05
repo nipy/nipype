@@ -1,3 +1,5 @@
+import os
+
 def configuration(parent_package='',top_path=None):
     from numpy.distutils.misc_util import Configuration
     config = Configuration('external', parent_package, top_path)
@@ -15,7 +17,6 @@ def configuration(parent_package='',top_path=None):
     config.add_subpackage('traits.logger')
     config.add_subpackage('traits.qt')
     config.add_subpackage('traits.util')
-
     return config
 
 if __name__ == '__main__':

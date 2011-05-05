@@ -33,10 +33,9 @@ except:
     pass
 
 from nipype.interfaces.base import (TraitedSpec, traits, File, Directory,
-                                    BaseInterface, InputMultiPath,
+                                    BaseInterface, InputMultiPath, isdefined,
                                     OutputMultiPath, DynamicTraitedSpec,
                                     Undefined, BaseInterfaceInputSpec)
-from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (copyfile, list_to_filename,
                                     filename_to_list)
 

@@ -5,13 +5,9 @@
 
 import os
 from glob import glob
-from copy import deepcopy
 
-
-
-from nipype.interfaces.base import Bunch, InterfaceResult, Interface
-from nipype.utils.filemanip import fname_presuffix, fnames_presuffix, filename_to_list, list_to_filename
-from nipype.utils.misc import find_indices, is_container
+from nipype.interfaces.base import Bunch, Interface
+from nipype.utils.filemanip import fname_presuffix
 
 import mvpa
 from mvpa import pymvpa_dataroot
@@ -27,10 +23,6 @@ from mvpa.measures.searchlight import sphere_searchlight
 from mvpa.misc.io.base import SampleAttributes
 
 import nipype.interfaces.fsl as fsl
-#import matplotlib as mpl
-#import matplotlib.pyplot as plt
-#import traceback
-
 
 class PyMVPA(Interface):
     """Detects outliers in a functional imaging series depending on the

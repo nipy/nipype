@@ -15,9 +15,8 @@ import os
 
 from nipype.utils.filemanip import fname_presuffix, split_filename
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.interfaces.base import (TraitedSpec, File,
-                                    traits, InputMultiPath, OutputMultiPath, Directory)
-from nipype.utils.misc import isdefined
+from nipype.interfaces.base import (TraitedSpec, File, traits, InputMultiPath,
+                                    OutputMultiPath, Directory, isdefined)
 
 class MRISPreprocInputSpec(FSTraitedSpec):
     out_file = File(argstr='--out %s', genfile=True,

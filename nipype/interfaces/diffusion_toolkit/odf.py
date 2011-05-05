@@ -12,11 +12,10 @@
 import re
 from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
 import os
-from nipype.utils.misc import isdefined
 __docformat__ = 'restructuredtext'
 
 from nipype.interfaces.base import (TraitedSpec, File, traits, CommandLine,
-    CommandLineInputSpec)
+                                    CommandLineInputSpec, isdefined)
 
 class HARDIMatInputSpec(CommandLineInputSpec):
     bvecs = File(exists=True, desc = 'b vectors file',

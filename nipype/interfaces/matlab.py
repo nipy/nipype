@@ -3,9 +3,8 @@
 """ General matlab interface code """
 import os
 
-from nipype.interfaces.base import CommandLineInputSpec, InputMultiPath
-from nipype.utils.misc import isdefined
-from nipype.interfaces.base import (CommandLine, traits, File, Directory)
+from nipype.interfaces.base import (CommandLineInputSpec, InputMultiPath, isdefined,
+                                    CommandLine, traits, File, Directory)
 from nipype.utils.config import config
 
 class MatlabInputSpec(CommandLineInputSpec):

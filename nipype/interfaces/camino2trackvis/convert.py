@@ -10,7 +10,6 @@
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from nipype.utils.filemanip import split_filename
 import os
-import nibabel as nb
 
 """Provides interfaces to various commands provided by Camino-Trackvis """
 

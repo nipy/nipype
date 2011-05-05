@@ -16,8 +16,7 @@ import re
 from nipype.utils.filemanip import fname_presuffix, split_filename
 
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.interfaces.base import TraitedSpec, File, traits, OutputMultiPath
-from nipype.utils.misc import isdefined
+from nipype.interfaces.base import TraitedSpec, File, traits, OutputMultiPath, isdefined
 
 filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
                afni='brik', brik='brik', bshort='bshort',

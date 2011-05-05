@@ -32,8 +32,8 @@ import networkx as nx
 from nipype.interfaces.base import (traits, InputMultiPath, CommandLine,
                                     Undefined, TraitedSpec, DynamicTraitedSpec,
                                     Bunch, InterfaceResult, md5, Interface,
-                                    TraitDictObject, TraitListObject)
-from nipype.utils.misc import isdefined, getsource, create_function_from_source
+                                    TraitDictObject, TraitListObject, isdefined)
+from nipype.utils.misc import getsource, create_function_from_source
 from nipype.utils.filemanip import (save_json, FileNotFoundError,
                                     filename_to_list, list_to_filename,
                                     copyfiles, fnames_presuffix, loadpkl,

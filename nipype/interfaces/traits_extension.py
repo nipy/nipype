@@ -232,3 +232,7 @@ _Undefined.__len__ = length
 ##########################################################################
 
 Undefined = _Undefined()
+
+def isdefined(object):
+    return not isinstance(object, _Undefined)
+
