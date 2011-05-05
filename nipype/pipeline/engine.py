@@ -1381,6 +1381,9 @@ class MapNode(Node):
             else:
                 output.add_trait(name, traits.Trait(spec))
             setattr(output, name, Undefined)
+            value = getattr(basetraits, name)
+            if isdefined(value):
+                setattr(output, name, value)
             value = getattr(output, name)
         return output
 
