@@ -140,8 +140,8 @@ class Info(object):
         throw(MException('SPMCheck:NotFound','SPM not in matlab path'));
         end;
         spm_path = spm('dir');
-        [name, ver] = spm('ver');
-        fprintf(1, 'NIPYPE path:%s|name:%s|release:%s', spm_path, name, ver);
+        [name, version] = spm('ver');
+        fprintf(1, 'NIPYPE path:%s|name:%s|release:%s', spm_path, name, version);
         exit;
         """
         mlab.inputs.mfile = False
