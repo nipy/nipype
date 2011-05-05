@@ -285,7 +285,7 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
     newfiles = []
     for i,f in enumerate(filename_to_list(filelist)):
         if isinstance(f, list):
-            newfiles.insert(i, copyfiles(f, dest, copy=copy))
+            newfiles.insert(i, copyfiles(f, dest, copy=copy, create_new=create_new))
         else:
             if len(outfiles) > 1:
                 destfile = outfiles[i]
