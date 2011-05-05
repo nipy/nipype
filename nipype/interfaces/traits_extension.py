@@ -24,12 +24,14 @@ try:
     if traits.__version__ < '3.7.0':
         raise ImportError
     import traits.api as traits
-    from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
-    from enthought.traits.trait_errors import TraitError
+    from traits.trait_handlers import TraitDictObject, TraitListObject
+    from traits.trait_errors import TraitError
+    from traits.trait_base import _Undefined
 except ImportError:
     import nipype.external.traits.api as traits
     from nipype.external.traits.trait_handlers import TraitDictObject, TraitListObject
     from nipype.external.traits.trait_errors import TraitError
+    from nipype.external.traits.trait_base import _Undefined
 
 class BaseFile ( traits.BaseStr ):
     """ Defines a trait whose value must be the name of a file.
@@ -220,8 +222,6 @@ TraitError: The 'vertical_gradient' trait of a BetInputSpec instance must be a f
 So... in order to keep the same type but add the missing method, I
 monkey patched.
 """
-
-from nipype.external.traits.trait_base import _Undefined
 
 def length(self):
     return 0

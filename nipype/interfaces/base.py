@@ -20,8 +20,8 @@ import subprocess
 from time import time
 from warnings import warn
 
-from nipype.interfaces.traits import (traits, Undefined, TraitDictObject,
-                                      TraitListObject, TraitError)
+from nipype.interfaces.traits_extension import (traits, Undefined, TraitDictObject,
+                                                TraitListObject, TraitError)
 from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                     hash_timestamp)
 from nipype.utils.misc import is_container
