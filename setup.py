@@ -19,7 +19,7 @@ def configuration(parent_package='',top_path=None):
     config.set_options(ignore_setup_xxx_py=True,
                        assume_default_configuration=True,
                        delegate_options_to_subpackages=True,
-                       quiet=True)
+                       quiet=False)
     # The quiet=True option will silence all of the name setting warnings:
     # Ignoring attempt to set 'name' (from 'nipy.core' to 
     #    'nipy.core.image')
@@ -27,7 +27,6 @@ def configuration(parent_package='',top_path=None):
     # these messages are probably only used in debugging numpy distutils.
 
     config.get_version('nipype/version.py') # sets config.version
-
     config.add_subpackage('nipype', 'nipype')
     config.add_subpackage('nipype.testing.numpytesting')
 
@@ -94,19 +93,16 @@ def main(**extra_args):
            description = 'Neuroimaging in Python: Pipelines and Interfaces',
            author = 'Various',
            author_email = 'nipy-devel@neuroimaging.scipy.org',
-           url = 'http://nipy.sourceforge.net/nipype',
+           url = 'http://nipy.org/nipype',
            long_description = desc,
            configuration = configuration,
            cmdclass = cmdclass,
            requires=['numpy (>=1.1)',
               'scipy (>=0.7)',
+              'matplotlib (>=1.0.0)',
               'networkx (>=1.0)',
-              'ipython (>=0.10)',
-              'enthought.traits (>=3.2.0)',
               'nibabel (>=1.0.0)',
-              'json',
-              'twisted',
-              'zope.interface'],
+              'json',],
            **extra_args)
 
 

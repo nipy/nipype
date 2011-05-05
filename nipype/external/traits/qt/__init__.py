@@ -11,11 +11,12 @@
 
 import os
 
-from traits.etsconfig.api import ETSConfig
+
+from ..etsconfig import api
 
 qt_api = os.environ.get('QT_API', 'pyqt')
 
-if ETSConfig.toolkit == 'qt4':
+if api.ETSConfig.toolkit == 'qt4':
 
     if qt_api == 'pyqt':
         import sip
