@@ -506,7 +506,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
     input_files.extend(walk_outputs(inputdict))
     needed_files += [path for path, type in input_files if type == 'f']
     for extra in ['_0x*.json', 'provenance.xml', 'pyscript*.m',
-                  'command.txt', 'result*.pklz']:
+                  'command.txt', 'result*.pklz', '_inputs.pklz']:
         needed_files.extend(glob(os.path.join(cwd, extra)))
     if files2keep:
         needed_files.extend(filename_to_list(files2keep))

@@ -37,7 +37,7 @@ from nipype.utils.misc import getsource, create_function_from_source
 from nipype.utils.filemanip import (save_json, FileNotFoundError,
                                     filename_to_list, list_to_filename,
                                     copyfiles, fnames_presuffix, loadpkl,
-                                    split_filename, load_json,
+                                    split_filename, load_json, savepkl,
                                     write_rst_header, write_rst_dict,
                                     write_rst_list)
 
@@ -1133,6 +1133,7 @@ class Node(WorkflowBase):
             outdir = make_output_dir(outdir)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             self.write_report(report_type='preexec', cwd=outdir)
+            savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get())
             try:
                 self._run_interface(execute=True)
             except:
@@ -1141,6 +1142,8 @@ class Node(WorkflowBase):
             shutil.move(hashfile_unfinished, hashfile)
             self.write_report(report_type='postexec', cwd=outdir)
         else:
+            if not exists(os.path.join(outdir, '_inputs.pklz')):
+                savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get())
             logger.debug("Hashfile exists. Skipping execution")
             self._run_interface(execute=False, updatehash=updatehash)
         logger.debug('Finished running %s in dir: %s\n'%(self._id,outdir))
@@ -1172,12 +1175,17 @@ class Node(WorkflowBase):
         resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
         aggregate = True
         result = None
+        attribute_error = False
         if os.path.exists(resultsfile):
             pkl_file = gzip.open(resultsfile, 'rb')
             try:
                 result = cPickle.load(pkl_file)
-            except traits.TraitError:
-                logger.debug('some file does not exist. hence trait cannot be set')
+            except (traits.TraitError, AttributeError), err:
+                if isinstance(err, AttributeError):
+                    attribute_error = True
+                    logger.debug('probably using older trait pickled file')
+                else:
+                    logger.debug('some file does not exist. hence trait cannot be set')
             else:
                 if result.outputs:
                     try:
@@ -1194,6 +1202,9 @@ class Node(WorkflowBase):
         logger.debug('Aggregate: %s', aggregate)
         # try aggregating first
         if aggregate:
+            if attribute_error:
+                old_inputs = loadpkl(os.path.join(cwd, '_inputs.pklz'))
+                self.inputs.set(**old_inputs)
             if not isinstance(self, MapNode):
                 self._copyfiles_to_wd(cwd, True, linksonly=True)
                 aggouts = self._interface.aggregate_outputs()
@@ -1212,6 +1223,10 @@ class Node(WorkflowBase):
                 pkl_file.close()
                 if result.outputs:
                     result.outputs.set(**outputs)
+            else:
+                if attribute_error:
+                    self._run_interface()
+                    result = self._result
         return result
 
     def _run_command(self, execute, copyfiles=True):
