@@ -23,7 +23,6 @@ from socket import gethostname
 import sys
 from tempfile import mkdtemp
 
-from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
 import numpy as np
 
 from nipype.utils.misc import package_check, str2bool
@@ -32,7 +31,8 @@ import networkx as nx
 
 from nipype.interfaces.base import (traits, InputMultiPath, CommandLine,
                                     Undefined, TraitedSpec, DynamicTraitedSpec,
-                                    Bunch, InterfaceResult, md5, Interface)
+                                    Bunch, InterfaceResult, md5, Interface,
+                                    TraitDictObject, TraitListObject)
 from nipype.utils.misc import isdefined, getsource, create_function_from_source
 from nipype.utils.filemanip import (save_json, FileNotFoundError,
                                     filename_to_list, list_to_filename,

@@ -18,16 +18,13 @@
     >>> os.chdir(datadir)
 
 """
-from copy import deepcopy
 import glob
 import os
 import shutil
-import hashlib
 import re
 import tempfile
 from warnings import warn
 
-from enthought.traits.trait_errors import TraitError
 import sqlite3
 
 try:
@@ -35,16 +32,13 @@ try:
 except:
     pass
 
-from nipype.interfaces.base import (Interface, CommandLine, Bunch,
-                                    InterfaceResult, Interface,
-                                    TraitedSpec, traits, File, Directory,
+from nipype.interfaces.base import (TraitedSpec, traits, File, Directory,
                                     BaseInterface, InputMultiPath,
                                     OutputMultiPath, DynamicTraitedSpec,
-                                    BaseTraitedSpec, Undefined,
-    BaseInterfaceInputSpec)
+                                    Undefined, BaseInterfaceInputSpec)
 from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (copyfile, list_to_filename,
-                                    filename_to_list, FileNotFoundError)
+                                    filename_to_list)
 
 import logging
 iflogger = logging.getLogger('interface')

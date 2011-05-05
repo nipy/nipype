@@ -1,15 +1,14 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
-    DynamicTraitedSpec
-import xml.dom.minidom
-import enthought.traits.api as traits
 import os
-from nipype.interfaces.traits import File
-from nipype.utils.misc import isdefined
-from enthought.traits.trait_base import Undefined
-
 import warnings
+import xml.dom.minidom
+
+from nipype.interfaces.base import (CommandLine, CommandLineInputSpec,
+                                    DynamicTraitedSpec, traits, Undefined,
+                                    File)
+from nipype.utils.misc import isdefined
+
 
 class SlicerCommandLineInputSpec(DynamicTraitedSpec, CommandLineInputSpec):
     module = traits.Str(desc="name of the Slicer command line module you want to use")

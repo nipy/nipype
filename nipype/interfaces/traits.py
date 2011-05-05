@@ -16,7 +16,7 @@ all of these bugs and they've been fixed in enthought svn repository
 
 """
 
-import enthought.traits.api as traits
+import nipype.external.traits.api as traits
 import os
 
 class BaseFile ( traits.BaseStr ):
@@ -209,7 +209,7 @@ So... in order to keep the same type but add the missing method, I
 monkey patched.
 """
 
-from enthought.traits.trait_base import _Undefined
+from nipype.external.traits.trait_base import _Undefined
 
 def length(self):
     return 0

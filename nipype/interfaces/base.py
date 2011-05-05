@@ -20,9 +20,9 @@ import subprocess
 from time import time
 from warnings import warn
 
-import enthought.traits.api as traits
-from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
-from enthought.traits.trait_errors import TraitError
+import nipype.external.traits.api as traits
+from nipype.external.traits.trait_handlers import TraitDictObject, TraitListObject
+from nipype.external.traits.trait_errors import TraitError
 
 from nipype.interfaces.traits import Undefined
 from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
@@ -35,15 +35,6 @@ from nipype.utils.misc import isdefined
 
 __docformat__ = 'restructuredtext'
 
-# We'll use our versions of File and Directory until error reporting
-# will be fixed upstream
-#try:
-#    class dummy(traits.HasTraits):
-#        foo = traits.File
-#    dummy().foo = 'bar'
-#    from enthought.traits.api import File, Directory
-#except:
-#    warn('traitsUI unavailable')
 from nipype.interfaces.traits import File, Directory
 
 def load_template(name):
