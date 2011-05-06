@@ -70,7 +70,7 @@ class PyMVPA(Interface):
                                       newpath=os.getcwd())
         return outfile
 
-    def aggregate_outputs(self):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self.outputs()
         outputs.outfile = glob(self._get_output_filename())[0]
         return outputs
