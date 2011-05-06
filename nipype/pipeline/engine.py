@@ -1133,7 +1133,7 @@ class Node(WorkflowBase):
             outdir = make_output_dir(outdir)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             self.write_report(report_type='preexec', cwd=outdir)
-            savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get())
+            savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
             try:
                 self._run_interface(execute=True)
             except:
@@ -1142,8 +1142,8 @@ class Node(WorkflowBase):
             shutil.move(hashfile_unfinished, hashfile)
             self.write_report(report_type='postexec', cwd=outdir)
         else:
-            if not os.path.exists(os.path.join(outdir, '_inputs.pklz')):
-                savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get())
+            #if not os.path.exists(os.path.join(outdir, '_inputs.pklz')):
+            savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
             logger.debug("Hashfile exists. Skipping execution")
             self._run_interface(execute=False, updatehash=updatehash)
         logger.debug('Finished running %s in dir: %s\n'%(self._id,outdir))
@@ -1180,8 +1180,8 @@ class Node(WorkflowBase):
             pkl_file = gzip.open(resultsfile, 'rb')
             try:
                 result = cPickle.load(pkl_file)
-            except (traits.TraitError, AttributeError), err:
-                if isinstance(err, AttributeError):
+            except (traits.TraitError, AttributeError, ImportError), err:
+                if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
                     logger.debug('probably using older trait pickled file')
                 else:
@@ -1207,7 +1207,7 @@ class Node(WorkflowBase):
                 self.inputs.set(**old_inputs)
             if not isinstance(self, MapNode):
                 self._copyfiles_to_wd(cwd, True, linksonly=True)
-                aggouts = self._interface.aggregate_outputs()
+                aggouts = self._interface.aggregate_outputs(needed_outputs=self.needed_outputs)
                 runtime = Bunch(cwd=cwd,returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
                 result = InterfaceResult(interface=None,
                                          runtime=runtime,
@@ -1280,9 +1280,23 @@ class Node(WorkflowBase):
                 result = self._run_command(execute=True, copyfiles=False)
         return result
 
+    def _strip_temp(self, files, wd):
+        out = []
+        for f in files:
+            if isinstance(f, list):
+                out.append(self._strip_temp(f, wd))
+            else:
+                out.append(f.replace(os.path.join(wd,'_tempinput'),wd))
+        return out
+            
+
     def _copyfiles_to_wd(self, outdir, execute, linksonly=False):
         """ copy files over and change the inputs"""
         if hasattr(self._interface,'_get_filecopy_info'):
+            if execute and linksonly:
+                olddir = outdir
+                outdir = os.path.join(outdir, '_tempinput')
+                os.makedirs(outdir)
             for info in self._interface._get_filecopy_info():
                 files = self.inputs.get().get(info['key'])
                 if not isdefined(files):
@@ -1295,6 +1309,8 @@ class Node(WorkflowBase):
                                 newfiles = copyfiles(infiles, [outdir], copy=info['copy'], create_new=True)
                             else:
                                 newfiles = fnames_presuffix(infiles, newpath=outdir)
+                            newfiles = self._strip_temp(newfiles,
+                                                        os.path.abspath(olddir).split(os.path.sep)[-1])
                         else:
                             newfiles = copyfiles(infiles, [outdir], copy=info['copy'], create_new=True)
                     else:
@@ -1302,6 +1318,8 @@ class Node(WorkflowBase):
                     if not isinstance(files, list):
                         newfiles = list_to_filename(newfiles)
                     setattr(self.inputs, info['key'], newfiles)
+            if execute and linksonly:
+                rmtree(outdir)
 
     def update(self, **opts):
         self.inputs.update(**opts)
