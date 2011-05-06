@@ -11,7 +11,7 @@ class MatlabInputSpec(CommandLineInputSpec):
     """ Basic expected inputs to Matlab interface """
     
     script  = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
-                         mandatory=True, position=-1)
+                         mandatory=True, position=-2)
     uses_mcr = traits.Bool(desc='use MCR interface',
                            xor=['nodesktop', 'nosplash',
                                 'single_comp_thread'])
@@ -37,6 +37,7 @@ class MatlabInputSpec(CommandLineInputSpec):
                               "fprintf(2,'%s\\n',ME.message);",
                               "if length(ME.stack) ~= 0, fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);, end;",
                               "end;"], desc='script added after code', usedefault = True)
+    reset_stty = traits.Enum(';stty echo', usedefault=True, argstr='%s', position=-1)
 
 class MatlabCommand(CommandLine):
     """Interface that runs matlab code
