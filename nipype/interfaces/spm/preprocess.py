@@ -131,7 +131,7 @@ class RealignInputSpec(SPMCommandInputSpec):
     write_interp = traits.Range(low=0, high=7, field='roptions.interp',
                          desc='degree of b-spline used for interpolation')
     write_wrap = traits.Tuple(traits.Int, traits.Int, traits.Int,
-                              field='eoptions.wrap',
+                              field='roptions.wrap',
                    desc='Check if interpolation should wrap in [x,y,z]')
     write_mask = traits.Bool(field='roptions.mask',
                              desc='True/False mask output image')
@@ -721,6 +721,7 @@ class SmoothInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(File(exists=True), field='data', desc='list of files to smooth', mandatory=True, copyfile=False)
     fwhm = traits.Either(traits.List(traits.Float(), minlen=3, maxlen=3), traits.Float(), field='fwhm', desc='3-list of fwhm for each dimension (opt)')
     data_type = traits.Int(field='dtype', desc='Data type of the output images (opt)')
+    implicit_masking = traits.Bool(field='im', desc='A mask implied by a particular voxel value')
 
 class SmoothOutputSpec(TraitedSpec):
     smoothed_files = OutputMultiPath(File(exists=True), desc='smoothed files')
@@ -755,6 +756,9 @@ class Smooth(SPMCommand):
                     return [val[0], val[0], val[0]]
                 else:
                     return val
+            if opt == 'implicit_masking':
+                return int(val)
+            
         return val
 
     def _list_outputs(self):
