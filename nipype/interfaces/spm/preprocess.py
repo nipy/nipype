@@ -945,10 +945,11 @@ class DARTELNorm2MNI(SPMCommand):
         pth, base, ext = split_filename(self.inputs.template_file)
         outputs['normalization_parameter_file'] = os.path.realpath(base+'_2mni.mat')
         outputs['normalized_files'] = []
+        prefix = "w"
         if isdefined(self.inputs.modulate) and self.inputs.modulate:
-            prefix = 'smw'
-        else:
-            prefix = 'sw'
+            prefix = 'm' + prefix
+        if isdefined(self.inputs.fwhm) and self.inputs.fwhm > 0:
+            prefix = 's' + prefix
         for filename in self.inputs.apply_to_files:
             pth, base, ext = split_filename(filename)
             outputs['normalized_files'].append(os.path.realpath('%s%s%s'%(prefix,
