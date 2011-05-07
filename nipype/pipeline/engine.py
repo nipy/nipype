@@ -1142,8 +1142,9 @@ class Node(WorkflowBase):
             shutil.move(hashfile_unfinished, hashfile)
             self.write_report(report_type='postexec', cwd=outdir)
         else:
-            #if not os.path.exists(os.path.join(outdir, '_inputs.pklz')):
-            savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
+            if not os.path.exists(os.path.join(outdir, '_inputs.pklz')):
+                logger.debug('%s: creating inputs file'%self.name)
+                savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
             logger.debug("Hashfile exists. Skipping execution")
             self._run_interface(execute=False, updatehash=updatehash)
         logger.debug('Finished running %s in dir: %s\n'%(self._id,outdir))
@@ -1165,9 +1166,8 @@ class Node(WorkflowBase):
             except TypeError:
                 outputs = result.outputs.dictcopy() # outputs was a bunch
             result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
-        pkl_file = gzip.open(resultsfile, 'wb')
-        cPickle.dump(result, pkl_file)
-        pkl_file.close()
+        logger.debug('saving results in %s'%resultsfile)
+        savepkl(resultsfile, result)
         if result.outputs:
             result.outputs.set(**outputs)
 
@@ -1183,7 +1183,7 @@ class Node(WorkflowBase):
             except (traits.TraitError, AttributeError, ImportError), err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
-                    logger.debug('probably using older trait pickled file')
+                    logger.debug('attribute error: %s probably using different trait pickled file'%str(err))
                 else:
                     logger.debug('some file does not exist. hence trait cannot be set')
             else:
@@ -1202,6 +1202,7 @@ class Node(WorkflowBase):
         logger.debug('Aggregate: %s', aggregate)
         # try aggregating first
         if aggregate:
+            logger.debug('aggregating results')
             if attribute_error:
                 old_inputs = loadpkl(os.path.join(cwd, '_inputs.pklz'))
                 self.inputs.set(**old_inputs)
@@ -1212,19 +1213,10 @@ class Node(WorkflowBase):
                 result = InterfaceResult(interface=None,
                                          runtime=runtime,
                                          outputs=aggouts)
-                pkl_file = gzip.open(resultsfile, 'wb')
-                if result.outputs:
-                    try:
-                        outputs = result.outputs.get()
-                    except TypeError:
-                        outputs = result.outputs.dictcopy() # outputs was a bunch
-                    result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
-                cPickle.dump(result, pkl_file)
-                pkl_file.close()
-                if result.outputs:
-                    result.outputs.set(**outputs)
+                self._save_results(result, cwd)
             else:
                 if attribute_error:
+                    logger.debug('aggregating mapnode results due to incorrect attributes')
                     self._run_interface()
                     result = self._result
         return result
@@ -1293,6 +1285,8 @@ class Node(WorkflowBase):
     def _copyfiles_to_wd(self, outdir, execute, linksonly=False):
         """ copy files over and change the inputs"""
         if hasattr(self._interface,'_get_filecopy_info'):
+            logger.debug('copying files to wd [execute=%s, linksonly=%s]'%(str(execute),
+                                                                           str(linksonly)))
             if execute and linksonly:
                 olddir = outdir
                 outdir = os.path.join(outdir, '_tempinput')
