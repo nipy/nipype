@@ -67,7 +67,7 @@ def copytree(src, dst):
             if os.path.isdir(srcname):
                 copytree(srcname, dstname)
             else:
-                copyfile(srcname, dstname, True)
+                copyfile(srcname, dstname, True, hashmethod='content')
         except (IOError, os.error), why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
@@ -260,7 +260,7 @@ class DataSink(IOBase):
                             else:
                                 raise(inst)
                     iflogger.debug("copyfile: %s %s"%(src, dst))
-                    copyfile(src, dst, copy=True)
+                    copyfile(src, dst, copy=True, hashmethod='content')
                 elif os.path.isdir(src):
                     dst = self._get_dst(os.path.join(src,''))
                     dst = os.path.join(tempoutdir, dst)

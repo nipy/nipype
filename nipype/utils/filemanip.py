@@ -178,7 +178,7 @@ def hash_timestamp(afile):
         md5hex = md5obj.hexdigest()
     return md5hex
 
-def copyfile(originalfile, newfile, copy=False, create_new=False):
+def copyfile(originalfile, newfile, copy=False, create_new=False, hashmethod=None):
     """Copy or symlink ``originalfile`` to ``newfile``.
 
     Parameters
@@ -212,9 +212,11 @@ def copyfile(originalfile, newfile, copy=False, create_new=False):
                 fname += "_c%04d"%i
             newfile = base + os.sep + fname + ext
     elif os.path.exists(newfile):
-        if config.get('execution', 'hash_method').lower() == 'timestamp':
+        if hashmethod is None:
+            hashmethod = config.get('execution', 'hash_method').lower()
+        if hashmethod == 'timestamp':
             newhash = hash_timestamp(newfile)
-        elif config.get('execution', 'hash_method').lower() == 'content':
+        elif hashmethod == 'content':
             newhash = hash_infile(newfile)
         fmlogger.debug("File: %s already exists,%s, copy:%d" \
                            % (newfile, newhash, copy))
