@@ -16,11 +16,9 @@ import warnings
 
 import numpy as np
 
-from nipype.interfaces.fsl.base import FSLCommand,\
-    FSLCommandInputSpec, Info
-from nipype.interfaces.base import traits, TraitedSpec,\
-    OutputMultiPath, File
-from nipype.utils.misc import isdefined
+from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
+from nipype.interfaces.base import (traits, TraitedSpec, OutputMultiPath, File,
+                                    isdefined)
 from nipype.utils.filemanip import load_json, save_json, split_filename, fname_presuffix
 
 warn = warnings.warn
@@ -388,7 +386,7 @@ class ImageStats(FSLCommand):
                     raise ValueError('-k %s option in op_string requires mask_file')
         return super(ImageStats, self)._format_arg(name, trait_spec, value)
     
-    def aggregate_outputs(self, runtime=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
         # local caching for backward compatibility
         outfile = os.path.join(os.getcwd(), 'stat_result.json')

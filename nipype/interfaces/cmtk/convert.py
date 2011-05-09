@@ -7,16 +7,12 @@
 
 """
 
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, File, TraitedSpec, InputMultiPath
-from nipype.utils.misc import isdefined
-import nibabel as nb
-import numpy as np
+from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
+                                    File, TraitedSpec, InputMultiPath, isdefined)
 import networkx as nx
 import cfflib as cf
-import os, os.path as op
-import sys
-from time import time
-from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
+import os
+from nipype.utils.filemanip import split_filename
 import datetime
 import string
 

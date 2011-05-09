@@ -149,6 +149,7 @@ def create_vbm_preproc(name='vbmpreproc'):
 
          outputspec.normalized_files : normalized gray matter files
          outputspec.template_file : DARTEL template
+         outputspec.icv : intracranial volume (cc - assuming dimensions in mm)
 
     """
 
@@ -205,21 +206,43 @@ def create_vbm_preproc(name='vbmpreproc'):
         for session in class_images:
             class1images.extend(session[0])
         return class1images
-
+            
     workflow.connect(segment, ('native_class_images', getclass1images), norm2mni, 'apply_to_files')
     workflow.connect(inputnode, 'fwhm', norm2mni, 'fwhm')
 
+    def compute_icv(class_images):
+        from nibabel import load
+        from numpy import prod
+        icv = []
+        for session in class_images:
+            voxel_volume = prod(load(session[0][0]).get_header().get_zooms())
+            img = load(session[0][0]).get_data() + \
+                load(session[1][0]).get_data() + \
+                load(session[2][0]).get_data()
+            img_icv = (img>0.5).astype(int).sum()*voxel_volume*1e-3
+            icv.append(img_icv)
+        return icv
+
+    calc_icv = pe.Node(niu.Function(function=compute_icv,
+                                    input_names=['class_images'],
+                                    output_names=['icv']),
+                       name='calc_icv')
+
+    workflow.connect(segment, 'native_class_images', calc_icv, 'class_images')
+    
     """
     Define the outputs of the workflow and connect the nodes to the outputnode
     """
 
     outputnode = pe.Node(niu.IdentityInterface(fields=["normalized_files",
-                                                       "template_file"
+                                                       "template_file",
+                                                       "icv"
                                                        ]),
                          name="outputspec")
     workflow.connect([
             (dartel, outputnode, [('final_template_file','template_file')]),
             (norm2mni, outputnode, [("normalized_files", "normalized_files")]),
+            (calc_icv, outputnode, [("icv", "icv")]),
             ])
     
     return workflow

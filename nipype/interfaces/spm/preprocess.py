@@ -19,12 +19,11 @@ import os
 import numpy as np
 
 # Local imports
-from nipype.interfaces.base import (OutputMultiPath, TraitedSpec,
+from nipype.interfaces.base import (OutputMultiPath, TraitedSpec, isdefined,
                                     traits, InputMultiPath, File)
 from nipype.interfaces.spm.base import (SPMCommand, scans_for_fname, 
-                                        func_is_3d, get_first_3dfile,
+                                        func_is_3d,
                                         scans_for_fnames, SPMCommandInputSpec)
-from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list,
                                     list_to_filename, split_filename)
 

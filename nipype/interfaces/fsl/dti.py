@@ -16,10 +16,9 @@ import os,shutil
 import warnings
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
-from nipype.interfaces.base import TraitedSpec, isdefined, File,Directory, \
-InputMultiPath, OutputMultiPath
+from nipype.interfaces.base import (TraitedSpec, isdefined, File,Directory,
+                                    InputMultiPath, OutputMultiPath, traits)
 from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
-import enthought.traits.api as traits
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)

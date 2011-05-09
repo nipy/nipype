@@ -6,12 +6,12 @@
     >>> os.chdir(datadir)
 
 """
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,\
-    StdOutCommandLine, StdOutCommandLineInputSpec
-from nipype.utils.filemanip import split_filename
-from nipype.utils.misc import isdefined
 import os
-import nibabel as nb
+
+from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
+                                    TraitedSpec, File, StdOutCommandLine,
+                                    StdOutCommandLineInputSpec, isdefined)
+from nipype.utils.filemanip import split_filename
 
 class Image2VoxelInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-4dimage %s',

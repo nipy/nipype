@@ -24,9 +24,7 @@ import os
 import re
 import sys
 
-from nipype.utils.misc import is_container
-from nipype.interfaces.base import Interface, CommandLine
-from enthought.traits.trait_errors import TraitError
+from nipype.interfaces.base import CommandLine, TraitError
 import warnings
 from nipype.pipeline.engine import Workflow
 import tempfile

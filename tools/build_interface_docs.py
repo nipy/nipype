@@ -17,7 +17,7 @@ if __name__ == '__main__':
     outdir = os.path.join('interfaces','generated')
     docwriter = InterfaceHelpWriter(package)
     # Packages that should not be included in generated API docs.
-    docwriter.package_skip_patterns += ['\.externals$',
+    docwriter.package_skip_patterns += ['\.external$',
                                         '\.utils$',
                                         '\.pipeline',
                                         '\.testing',

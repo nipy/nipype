@@ -5,14 +5,13 @@ import tempfile
 import shutil
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
-                            with_setup, TraitError, skipif)
+                            skipif)
 
 from nipype.utils.filemanip import split_filename
 import nipype.interfaces.fsl.preprocess as fsl
 from nipype.interfaces.fsl import Info
-from nipype.interfaces.base import InterfaceResult, File
-from nipype.interfaces.fsl import check_fsl, no_fsl
-from nipype.interfaces.traits import Undefined
+from nipype.interfaces.base import File, TraitError, Undefined
+from nipype.interfaces.fsl import no_fsl
 
 
 @skipif(no_fsl)

@@ -5,24 +5,26 @@ Created on 24 Feb 2010
 
 @author: filo
 '''
-from nipype.interfaces.base import BaseInterface,\
-    traits, TraitedSpec, File, InputMultiPath, OutputMultiPath,\
-    BaseInterfaceInputSpec
-from nipype.utils.misc import isdefined
+import os
+
 import nibabel as nb
 import numpy as np
 from math import floor, ceil
 from scipy.ndimage.morphology import grey_dilation
-import os
-from nipype.utils.filemanip import fname_presuffix, split_filename
 from scipy.ndimage.morphology import binary_erosion
 from scipy.spatial.distance import cdist, euclidean, dice, jaccard
 from scipy.ndimage.measurements import center_of_mass, label
+
 from nipype.utils.config import config
 import matplotlib
 matplotlib.use(config.get("execution", "matplotlib_backend"))
 import matplotlib.pyplot as plt
-    
+
+from nipype.interfaces.base import (BaseInterface, traits, TraitedSpec, File,
+                                    InputMultiPath, OutputMultiPath,
+                                    BaseInterfaceInputSpec, isdefined)
+from nipype.utils.filemanip import fname_presuffix, split_filename
+
 
 class PickAtlasInputSpec(BaseInterfaceInputSpec):
     atlas = File(exists=True, desc="Location of the atlas that will be used.", mandatory=True)

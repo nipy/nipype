@@ -18,16 +18,13 @@
     >>> os.chdir(datadir)
 
 """
-from copy import deepcopy
 import glob
 import os
 import shutil
-import hashlib
 import re
 import tempfile
 from warnings import warn
 
-from enthought.traits.trait_errors import TraitError
 import sqlite3
 
 try:
@@ -35,16 +32,12 @@ try:
 except:
     pass
 
-from nipype.interfaces.base import (Interface, CommandLine, Bunch,
-                                    InterfaceResult, Interface,
-                                    TraitedSpec, traits, File, Directory,
-                                    BaseInterface, InputMultiPath,
+from nipype.interfaces.base import (TraitedSpec, traits, File, Directory,
+                                    BaseInterface, InputMultiPath, isdefined,
                                     OutputMultiPath, DynamicTraitedSpec,
-                                    BaseTraitedSpec, Undefined,
-    BaseInterfaceInputSpec)
-from nipype.utils.misc import isdefined
+                                    Undefined, BaseInterfaceInputSpec)
 from nipype.utils.filemanip import (copyfile, list_to_filename,
-                                    filename_to_list, FileNotFoundError)
+                                    filename_to_list)
 
 import logging
 iflogger = logging.getLogger('interface')
@@ -74,7 +67,7 @@ def copytree(src, dst):
             if os.path.isdir(srcname):
                 copytree(srcname, dstname)
             else:
-                copyfile(srcname, dstname, True)
+                copyfile(srcname, dstname, True, hashmethod='content')
         except (IOError, os.error), why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
@@ -267,7 +260,7 @@ class DataSink(IOBase):
                             else:
                                 raise(inst)
                     iflogger.debug("copyfile: %s %s"%(src, dst))
-                    copyfile(src, dst, copy=True)
+                    copyfile(src, dst, copy=True, hashmethod='content')
                 elif os.path.isdir(src):
                     dst = self._get_dst(os.path.join(src,''))
                     dst = os.path.join(tempoutdir, dst)

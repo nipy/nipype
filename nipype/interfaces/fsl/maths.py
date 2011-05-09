@@ -8,8 +8,8 @@
 import numpy as np
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
-from nipype.interfaces.base import TraitedSpec, File, traits, InputMultiPath
-from nipype.utils.misc import isdefined
+from nipype.interfaces.base import (TraitedSpec, File, traits, InputMultiPath,
+                                    isdefined)
 
 
 class MathsInput(FSLCommandInputSpec):
