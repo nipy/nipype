@@ -6,8 +6,9 @@
     >>> os.chdir(datadir)
 
 """
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,\
-    StdOutCommandLine, StdOutCommandLineInputSpec
+from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
+                                    TraitedSpec, File, StdOutCommandLine,
+                                    StdOutCommandLineInputSpec)
 from nipype.utils.filemanip import split_filename
 import os
 

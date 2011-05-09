@@ -18,8 +18,8 @@ from glob import glob
 import warnings
 
 from nipype.utils.filemanip import fname_presuffix, list_to_filename, FileNotFoundError
-from nipype.interfaces.base import CommandLine, traits, TraitedSpec, CommandLineInputSpec
-from nipype.utils.misc import isdefined
+from nipype.interfaces.base import (CommandLine, traits, TraitedSpec,
+                                    CommandLineInputSpec, isdefined)
 
 from copy import deepcopy
 

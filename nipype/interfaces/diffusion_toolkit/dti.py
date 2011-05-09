@@ -12,11 +12,10 @@
 import re
 from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
 import os
-from nipype.utils.misc import isdefined
 __docformat__ = 'restructuredtext'
 
 from nipype.interfaces.base import (TraitedSpec, File, traits, CommandLine,
-    CommandLineInputSpec)
+                                    CommandLineInputSpec, isdefined)
 
 class DTIReconInputSpec(CommandLineInputSpec):
     DWI = File(desc='Input diffusion volume', argstr='%s',exists=True, mandatory=True,position=1)

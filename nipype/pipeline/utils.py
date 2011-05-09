@@ -241,7 +241,7 @@ def get_levels(G):
     return levels
 
 
-def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
+def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables, prefix):
     """Merges two graphs that share a subset of nodes.
 
     If the subgraph needs to be replicated for multiple iterables, the
@@ -293,7 +293,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
     count = 0
     for i, params in enumerate(walk(iterables.items())):
         count += 1
-    template = '.%%0%dd'%np.ceil(np.log10(count))
+    template = '.%s%%0%dd'%(prefix, np.ceil(np.log10(count)))
     for i, params in enumerate(walk(iterables.items())):
         Gc = deepcopy(subgraph)
         ids = [n._hierarchy+n._id for n in Gc.nodes()]
@@ -349,6 +349,8 @@ def generate_expanded_graph(graph_in):
         if isinstance(node.iterables, list):
             node.iterables = dict(map(lambda(x):(x[0], lambda:x[1]),
                                       node.iterables))
+    allprefixes = list('0abcdefghijklmnopqrstuvwxyz')
+    iterable_prefix = '0'
     while moreiterables:
         nodes = nx.topological_sort(graph_in)
         nodes.reverse()
@@ -356,16 +358,17 @@ def generate_expanded_graph(graph_in):
         if inodes:
             node = inodes[0]
             iterables = node.iterables.copy()
+            iterable_prefix = allprefixes[allprefixes.index(iterable_prefix)+1]
             logger.debug('node: %s iterables: %s'%(node, iterables))
             #nx.write_dot(graph_in, '%s_pre.dot'%node)
             node.iterables = None
-            node._id += 'I'
+            node._id += ('.' + iterable_prefix + 'I')
             subnodes = [s for s in dfs_preorder(graph_in, node)]
             logger.debug(('subnodes:' , subnodes))
             subgraph = graph_in.subgraph(subnodes)
             graph_in = _merge_graphs(graph_in, subnodes,
                                      subgraph, node._hierarchy+node._id,
-                                     iterables)
+                                     iterables, iterable_prefix)
             #nx.write_dot(graph_in, '%s_post.dot'%node)
         else:
             moreiterables = False
@@ -503,7 +506,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
     input_files.extend(walk_outputs(inputdict))
     needed_files += [path for path, type in input_files if type == 'f']
     for extra in ['_0x*.json', 'provenance.xml', 'pyscript*.m',
-                  'command.txt', 'result*.pklz']:
+                  'command.txt', 'result*.pklz', '_inputs.pklz']:
         needed_files.extend(glob(os.path.join(cwd, extra)))
     if files2keep:
         needed_files.extend(filename_to_list(files2keep))

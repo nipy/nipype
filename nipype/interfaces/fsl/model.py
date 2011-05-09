@@ -12,25 +12,19 @@ was written to work with FSL version 4.1.4.
 """
 
 import os
-from copy import deepcopy
 from glob import glob
 import warnings
 from shutil import rmtree
 
 import numpy as np
 
-from nipype.interfaces.fsl.base import (FSLCommand, Info, FSLCommandInputSpec)
-from nipype.interfaces.base import (Bunch, load_template,
-                                    InterfaceResult, File, traits,
-                                    TraitedSpec,
-                                    BaseInterface,
+from nipype.interfaces.fsl.base import (FSLCommand, FSLCommandInputSpec)
+from nipype.interfaces.base import (load_template, File, traits, isdefined,
+                                    TraitedSpec, BaseInterface, Directory,
                                     InputMultiPath, OutputMultiPath,
-    BaseInterfaceInputSpec)
-from nipype.utils.filemanip import (list_to_filename, filename_to_list,
-                                    loadflat)
+                                    BaseInterfaceInputSpec)
+from nipype.utils.filemanip import (list_to_filename, filename_to_list)
 from nibabel import load
-from nipype.utils.misc import isdefined
-from nipype.interfaces.traits import Directory
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -1231,7 +1225,7 @@ class SmoothEstimate(FSLCommand):
     output_spec = SmoothEstimateOutputSpec
     _cmd = 'smoothest'
 
-    def aggregate_outputs(self, runtime=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
         stdout = runtime.stdout.split('\n')
         outputs.dlh = float(stdout[0].split()[1])

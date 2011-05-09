@@ -1,5 +1,5 @@
 from nipype.interfaces.spm.base import SPMCommandInputSpec, SPMCommand
-from nipype.interfaces.traits import File
+from nipype.interfaces.base import File
 from nipype.utils.filemanip import split_filename
 import os
 

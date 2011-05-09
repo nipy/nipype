@@ -20,31 +20,17 @@ import subprocess
 from time import time
 from warnings import warn
 
-import enthought.traits.api as traits
-from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
-from enthought.traits.trait_errors import TraitError
-
-from nipype.interfaces.traits import Undefined
+from nipype.interfaces.traits_extension import (traits, Undefined, TraitDictObject,
+                                                TraitListObject, TraitError,
+                                                isdefined, File, Directory)
 from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                     hash_timestamp)
 from nipype.utils.misc import is_container
 from nipype.utils.config import config
 from nipype.utils.logger import iflogger
-from nipype.utils.misc import isdefined
 
 
 __docformat__ = 'restructuredtext'
-
-# We'll use our versions of File and Directory until error reporting
-# will be fixed upstream
-#try:
-#    class dummy(traits.HasTraits):
-#        foo = traits.File
-#    dummy().foo = 'bar'
-#    from enthought.traits.api import File, Directory
-#except:
-#    warn('traitsUI unavailable')
-from nipype.interfaces.traits import File, Directory
 
 def load_template(name):
     """Load a template from the script_templates directory
@@ -392,7 +378,18 @@ class BaseTraitedSpec(traits.HasTraits):
         out = self._clean_container(out, Undefined)
         return out
 
-    def _clean_container(self, object, undefinedval=None):
+    def get_traitsfree(self, **kwargs):
+        """ Returns traited class as a dict
+
+        Augments the trait get function to return a dictionary without
+        any traits. The dictionary does not contain any attributes that
+        were Undefined
+        """
+        out = super(BaseTraitedSpec, self).get(**kwargs)
+        out = self._clean_container(out, skipundefined=True)
+        return out
+    
+    def _clean_container(self, object, undefinedval=None, skipundefined=False):
         """Convert a traited obejct into a pure python representation.
         """
         if isinstance(object, TraitDictObject) or isinstance(object, dict):
@@ -401,7 +398,8 @@ class BaseTraitedSpec(traits.HasTraits):
                 if isdefined(val):
                     out[key] = self._clean_container(val, undefinedval)
                 else:
-                    out[key] = undefinedval
+                    if not skipundefined:
+                        out[key] = undefinedval
         elif isinstance(object, TraitListObject) or isinstance(object, list) or \
                 isinstance(object, tuple):
             out = []
@@ -409,14 +407,18 @@ class BaseTraitedSpec(traits.HasTraits):
                 if isdefined(val):
                     out.append(self._clean_container(val, undefinedval))
                 else:
-                    out.append(undefinedval)
+                    if not skipundefined:
+                        out.append(undefinedval)
+                    else:
+                        out.append(None)
             if isinstance(object, tuple):
                 out = tuple(out)
         else:
             if isdefined(object):
                 out = object
             else:
-                out = undefinedval
+                if not skipundefined:
+                    out = undefinedval
         return out
 
     def get_hashval(self, hash_method=None):
@@ -555,7 +557,7 @@ class Interface(object):
         """Execute the command."""
         raise NotImplementedError
 
-    def aggregate_outputs(self, runtime=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
         """Called to populate outputs"""
         raise NotImplementedError
 
@@ -806,13 +808,15 @@ class BaseInterface(Interface):
         else:
             return None
 
-    def aggregate_outputs(self, runtime=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
         """ Collate expected outputs and check for existence
         """
         predicted_outputs = self._list_outputs()
         outputs = self._outputs()
         if predicted_outputs:
             for key, val in predicted_outputs.items():
+                if needed_outputs and key not in needed_outputs:
+                    continue
                 try:
                     setattr(outputs, key, val)
                     value = getattr(outputs, key)

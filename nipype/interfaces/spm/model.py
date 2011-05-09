@@ -23,11 +23,10 @@ import numpy as np
 import scipy.io as sio
 
 # Local imports
-from nipype.interfaces.base import Bunch, traits, \
-    TraitedSpec, File, Directory, OutputMultiPath, InputMultiPath
+from nipype.interfaces.base import (Bunch, traits, TraitedSpec, File, Directory,
+                                    OutputMultiPath, InputMultiPath, isdefined)
 from nipype.interfaces.spm.base import (SPMCommand, SPMCommandInputSpec,
                                         scans_for_fnames)
-from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (filename_to_list, list_to_filename,
                                     loadflat, split_filename)
 
@@ -600,7 +599,7 @@ clusterwise_P_FDR = spm_P_clusterFDR(extent_threshold*V2R,df,STAT,R,n,cluster_fo
 """
         return script
 
-    def aggregate_outputs(self, runtime=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
         cur_output = ""
         for line in runtime.stdout.split('\n'):

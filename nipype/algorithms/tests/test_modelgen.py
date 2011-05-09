@@ -9,10 +9,9 @@ import numpy as np
 
 from nipype.testing import (assert_equal, assert_false, assert_true, 
                             assert_raises, assert_almost_equal)
-from nipype.interfaces.base import Bunch
+from nipype.interfaces.base import Bunch, TraitError
 from nipype.algorithms.modelgen import (SpecifyModel, SpecifySparseModel,
                                         SpecifySPMModel)
-from enthought.traits.api import TraitError
 
 def test_modelgen1():
     tempdir = mkdtemp()

@@ -23,7 +23,6 @@ from socket import gethostname
 import sys
 from tempfile import mkdtemp
 
-from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
 import numpy as np
 
 from nipype.utils.misc import package_check, str2bool
@@ -32,12 +31,13 @@ import networkx as nx
 
 from nipype.interfaces.base import (traits, InputMultiPath, CommandLine,
                                     Undefined, TraitedSpec, DynamicTraitedSpec,
-                                    Bunch, InterfaceResult, md5, Interface)
-from nipype.utils.misc import isdefined, getsource, create_function_from_source
+                                    Bunch, InterfaceResult, md5, Interface,
+                                    TraitDictObject, TraitListObject, isdefined)
+from nipype.utils.misc import getsource, create_function_from_source
 from nipype.utils.filemanip import (save_json, FileNotFoundError,
                                     filename_to_list, list_to_filename,
                                     copyfiles, fnames_presuffix, loadpkl,
-                                    split_filename, load_json,
+                                    split_filename, load_json, savepkl,
                                     write_rst_header, write_rst_dict,
                                     write_rst_list)
 
@@ -1133,6 +1133,7 @@ class Node(WorkflowBase):
             outdir = make_output_dir(outdir)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             self.write_report(report_type='preexec', cwd=outdir)
+            savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
             try:
                 self._run_interface(execute=True)
             except:
@@ -1141,6 +1142,9 @@ class Node(WorkflowBase):
             shutil.move(hashfile_unfinished, hashfile)
             self.write_report(report_type='postexec', cwd=outdir)
         else:
+            if not os.path.exists(os.path.join(outdir, '_inputs.pklz')):
+                logger.debug('%s: creating inputs file'%self.name)
+                savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
             logger.debug("Hashfile exists. Skipping execution")
             self._run_interface(execute=False, updatehash=updatehash)
         logger.debug('Finished running %s in dir: %s\n'%(self._id,outdir))
@@ -1162,9 +1166,8 @@ class Node(WorkflowBase):
             except TypeError:
                 outputs = result.outputs.dictcopy() # outputs was a bunch
             result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
-        pkl_file = gzip.open(resultsfile, 'wb')
-        cPickle.dump(result, pkl_file)
-        pkl_file.close()
+        logger.debug('saving results in %s'%resultsfile)
+        savepkl(resultsfile, result)
         if result.outputs:
             result.outputs.set(**outputs)
 
@@ -1172,12 +1175,17 @@ class Node(WorkflowBase):
         resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
         aggregate = True
         result = None
+        attribute_error = False
         if os.path.exists(resultsfile):
             pkl_file = gzip.open(resultsfile, 'rb')
             try:
                 result = cPickle.load(pkl_file)
-            except traits.TraitError:
-                logger.debug('some file does not exist. hence trait cannot be set')
+            except (traits.TraitError, AttributeError, ImportError), err:
+                if isinstance(err, (AttributeError, ImportError)):
+                    attribute_error = True
+                    logger.debug('attribute error: %s probably using different trait pickled file'%str(err))
+                else:
+                    logger.debug('some file does not exist. hence trait cannot be set')
             else:
                 if result.outputs:
                     try:
@@ -1194,24 +1202,22 @@ class Node(WorkflowBase):
         logger.debug('Aggregate: %s', aggregate)
         # try aggregating first
         if aggregate:
+            logger.debug('aggregating results')
+            if attribute_error:
+                old_inputs = loadpkl(os.path.join(cwd, '_inputs.pklz'))
+                self.inputs.set(**old_inputs)
             if not isinstance(self, MapNode):
                 self._copyfiles_to_wd(cwd, True, linksonly=True)
-                aggouts = self._interface.aggregate_outputs()
+                aggouts = self._interface.aggregate_outputs(needed_outputs=self.needed_outputs)
                 runtime = Bunch(cwd=cwd,returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
                 result = InterfaceResult(interface=None,
                                          runtime=runtime,
                                          outputs=aggouts)
-                pkl_file = gzip.open(resultsfile, 'wb')
-                if result.outputs:
-                    try:
-                        outputs = result.outputs.get()
-                    except TypeError:
-                        outputs = result.outputs.dictcopy() # outputs was a bunch
-                    result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
-                cPickle.dump(result, pkl_file)
-                pkl_file.close()
-                if result.outputs:
-                    result.outputs.set(**outputs)
+                self._save_results(result, cwd)
+            else:
+                logger.debug('aggregating mapnode results')
+                self._run_interface()
+                result = self._result
         return result
 
     def _run_command(self, execute, copyfiles=True):
@@ -1265,9 +1271,25 @@ class Node(WorkflowBase):
                 result = self._run_command(execute=True, copyfiles=False)
         return result
 
+    def _strip_temp(self, files, wd):
+        out = []
+        for f in files:
+            if isinstance(f, list):
+                out.append(self._strip_temp(f, wd))
+            else:
+                out.append(f.replace(os.path.join(wd,'_tempinput'),wd))
+        return out
+            
+
     def _copyfiles_to_wd(self, outdir, execute, linksonly=False):
         """ copy files over and change the inputs"""
         if hasattr(self._interface,'_get_filecopy_info'):
+            logger.debug('copying files to wd [execute=%s, linksonly=%s]'%(str(execute),
+                                                                           str(linksonly)))
+            if execute and linksonly:
+                olddir = outdir
+                outdir = os.path.join(outdir, '_tempinput')
+                os.makedirs(outdir)
             for info in self._interface._get_filecopy_info():
                 files = self.inputs.get().get(info['key'])
                 if not isdefined(files):
@@ -1280,6 +1302,8 @@ class Node(WorkflowBase):
                                 newfiles = copyfiles(infiles, [outdir], copy=info['copy'], create_new=True)
                             else:
                                 newfiles = fnames_presuffix(infiles, newpath=outdir)
+                            newfiles = self._strip_temp(newfiles,
+                                                        os.path.abspath(olddir).split(os.path.sep)[-1])
                         else:
                             newfiles = copyfiles(infiles, [outdir], copy=info['copy'], create_new=True)
                     else:
@@ -1287,6 +1311,8 @@ class Node(WorkflowBase):
                     if not isinstance(files, list):
                         newfiles = list_to_filename(newfiles)
                     setattr(self.inputs, info['key'], newfiles)
+            if execute and linksonly:
+                rmtree(outdir)
 
     def update(self, **opts):
         self.inputs.update(**opts)
@@ -1381,6 +1407,9 @@ class MapNode(Node):
             else:
                 output.add_trait(name, traits.Trait(spec))
             setattr(output, name, Undefined)
+            value = getattr(basetraits, name)
+            if isdefined(value):
+                setattr(output, name, value)
             value = getattr(output, name)
         return output
 

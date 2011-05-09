@@ -20,7 +20,6 @@ else:
     from numpytesting.decorators import *
 
 from utils import *
-from enthought.traits.api import TraitError
 
 # import datasets for doctests
 filepath = os.path.abspath(__file__)
