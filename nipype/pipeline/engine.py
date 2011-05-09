@@ -1215,10 +1215,9 @@ class Node(WorkflowBase):
                                          outputs=aggouts)
                 self._save_results(result, cwd)
             else:
-                if attribute_error:
-                    logger.debug('aggregating mapnode results due to incorrect attributes')
-                    self._run_interface()
-                    result = self._result
+                logger.debug('aggregating mapnode results')
+                self._run_interface()
+                result = self._result
         return result
 
     def _run_command(self, execute, copyfiles=True):
