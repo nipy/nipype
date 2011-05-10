@@ -1,4 +1,4 @@
-"""Parallel workflow execution via SGE
+"""Parallel workflow execution via PBS/Torque
 """
 
 import os
@@ -7,8 +7,8 @@ from .base import (SGELikeBatchManagerBase, logger)
 
 from nipype.interfaces.base import CommandLine
 
-class SGEPlugin(SGELikeBatchManagerBase):
-    """Execute using SGE (OGE not tested)
+class PBSPlugin(SGELikeBatchManagerBase):
+    """Execute using PBS/Torque
 
     The plugin_args input to run can be used to control the SGE execution.
     Currently supported options are:
@@ -21,15 +21,15 @@ class SGEPlugin(SGELikeBatchManagerBase):
 
     def __init__(self, **kwargs):
         template="""
-            #$$ -V
-            #$$ -S /bin/sh
+            #PBS -V
+            #PBS -S /bin/sh
             """
-        super(SGEPlugin, self).__init__(template, **kwargs)
+        super(PBSPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
         cmd = CommandLine('qstat')
         cmd.inputs.args = '-j %d'%taskid
-        # check sge task
+        # check pbs task
         result = cmd.run()
         if result.runtime.stdout.startswith('='):
             return True
@@ -43,12 +43,12 @@ class SGEPlugin(SGELikeBatchManagerBase):
         cmd.inputs.args = '%s %s'%(qsubargs, scriptfile)
         result = cmd.run()
 
-        # retrieve sge taskid
+        # retrieve pbs taskid
         if not result.runtime.returncode:
             taskid = int(result.runtime.stdout.split(' ')[2])
             self._pending[taskid] = node.output_dir()
-            logger.debug('submitted sge task: %d for node %s'%(taskid, node._id))
+            logger.debug('submitted pbs task: %d for node %s'%(taskid, node._id))
         else:
-            raise RuntimeError('\n'.join(('Could not submit sge task for node %s'%node._id,
+            raise RuntimeError('\n'.join(('Could not submit pbs task for node %s'%node._id,
                                           result.runtime.stderr)))
         return taskid

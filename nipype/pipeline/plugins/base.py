@@ -4,6 +4,7 @@
 """
 
 from copy import deepcopy
+from glob import glob
 import logging
 import os
 import pwd
@@ -18,6 +19,8 @@ import scipy.sparse as ssp
 
 from ..utils import (nx, dfs_preorder, config)
 from ..engine import MapNode
+
+from nipype.utils.filemanip import savepkl, loadpkl
 
 logger = logging.getLogger('workflow')
 
@@ -278,3 +281,97 @@ class DistributedPluginBase(PluginBase):
                                  'removing node: %s from directory %s') % \
                                 (self.procs[idx]._id, outdir))
                     shutil.rmtree(outdir)
+
+class SGELikeBatchManagerBase(DistributedPluginBase):
+    """Execute workflow with SGE/OGE/PBS like batch system
+    """
+
+    def __init__(self, template, plugin_args=None):
+        self._template = template
+        self._qsub_args = None
+        if plugin_args:
+            if 'template' in plugin_args:
+                self._template = plugin_args['template']
+                if os.path.isfile(self._template):
+                    self._template = open(self._template).readlines()
+            if 'qsub_args' in plugin_args:
+                self._qsub_args = plugin_args['qsub_args']
+        self._pending = {}
+
+    def _is_pending(self, taskid):
+        """Check if a task is pending in the batch system
+        """
+        raise NotImplementedError
+
+    def _submit_batchtask(self, scriptfile):
+        """Submit a task to the batch system
+        """
+        raise NotImplementedError
+    
+    def _get_result(self, taskid):
+        if taskid not in self._pending:
+            raise Exception('Task %d not found'%taskid)
+        if self._is_pending(taskid):
+            return None
+        node_dir = self._pending[taskid]
+        results_file = glob(os.path.join(node_dir,'result_*.pklz'))[0]
+        result_data = loadpkl(results_file)
+        result_out = dict(result=None, traceback=None)
+        if isinstance(result_data, dict):
+            result_out['result'] = result_data['result']
+            result_out['traceback'] = result_data['traceback']
+            os.remove(results_file)
+        else:
+            result_out['result'] = result_data
+        return result_out
+
+    def _submit_job(self, node, updatehash=False):
+        """submit job and return taskid
+        """
+        # pickle node
+        timestamp = strftime('%Y%m%d_%H%M%S')
+        suffix = '%s_%s'%(timestamp, node._id)
+        batch_dir = os.path.join(node.base_dir, 'batch')
+        if not os.path.exists(batch_dir):
+            os.makedirs(batch_dir)
+        pkl_file = os.path.join(batch_dir,'node_%s.pklz'%suffix)
+        savepkl(pkl_file, dict(node=node, updatehash=updatehash))
+        # create python script to load and trap exception
+        cmdstr = """import os
+import sys
+from traceback import format_exception
+from nipype.utils.filemanip import loadpkl, savepkl
+traceback=None
+print os.getcwd()
+try:
+    info = loadpkl('%s')
+    result = info['node'].run(updatehash=info['updatehash'])
+except:
+    etype, eval, etr = sys.exc_info()
+    traceback = format_exception(etype,eval,etr)
+    result = info['node'].result
+    resultsfile = os.path.join(node.output_dir(), 'result_%%s.pklz'%%info['node'].name)
+    savepkl(resultsfile,dict(result=result, traceback=traceback))
+"""%pkl_file
+        pyscript = os.path.join(batch_dir, 'pyscript_%s.py'%suffix)
+        fp = open(pyscript, 'wt')
+        fp.writelines(cmdstr)
+        fp.close()
+        batchscript = '\n'.join((self._template, 'python %s'%pyscript))
+        batchscriptfile = os.path.join(batch_dir, 'batchscript_%s.sh'%suffix)
+        fp = open(batchscriptfile, 'wt')
+        fp.writelines(batchscript)
+        fp.close()
+        return self._submit_batchtask(batchscriptfile)
+
+    def _report_crash(self, node, result=None):
+        if result and result['traceback']:
+            node._result = result['result']
+            node._traceback = result['traceback']
+            return report_crash(node,
+                                traceback=result['traceback'])
+        else:
+            return report_crash(node)
+
+    def _clear_task(self, taskid):
+        del self._pending[taskid]
