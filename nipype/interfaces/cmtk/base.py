@@ -110,7 +110,8 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.gpickled_networks):
             unpickled = []
             for ntwk in self.inputs.gpickled_networks:
-                ntwk_name = 'Network {cnt}'.format(cnt=count)
+                #ntwk_name = 'Network {cnt}'.format(cnt=count)
+                _, ntwk_name, _ = split_filename(ntwk)
                 unpickled = nx.read_gpickle(ntwk)
                 cnet = cf.CNetwork(name = ntwk_name)
                 cnet.set_with_nxgraph(unpickled)

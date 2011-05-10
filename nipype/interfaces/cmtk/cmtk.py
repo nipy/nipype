@@ -237,28 +237,56 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
     print 'Make final fiber labels as array'
     final_fiberlabels_array = np.array(final_fiberlabels, dtype = np.int32)
 
-    mlab = np.empty([len(G.nodes())+1,len(G.nodes())+1]) #Plus 1 because of zero indexing
+    numfib = np.zeros([len(G.nodes())+1,len(G.nodes())+1]) #Plus 1 because of zero indexing
+    fibmean = np.zeros([len(G.nodes())+1,len(G.nodes())+1])
+    fibdev = np.zeros([len(G.nodes())+1,len(G.nodes())+1])
     print 'Matlab matrix shape: {shp}'.format(shp=len(G.nodes())+1)
 
-    a = G
-    key = "fiber_length_mean"
+    numfib = nx.Graph()
+    numfib.add_nodes_from(G)
+    fibmean = nx.Graph()
+    fibmean.add_nodes_from(G)
+    fibdev = nx.Graph()
+    fibdev.add_nodes_from(G)
+    #key = "fiber_length_mean"
     for u,v,d in G.edges_iter(data=True):
         G.remove_edge(u,v)
         di = { 'number_of_fibers' : len(d['fiblist']), }
         idx = np.where( (final_fiberlabels_array[:,0] == int(u)) & (final_fiberlabels_array[:,1] == int(v)) )[0]
         di['fiber_length_mean'] = np.mean(final_fiberlength_array[idx])
         di['fiber_length_std'] = np.std(final_fiberlength_array[idx])
-        G.add_edge(u,v, di)
-        a.edge[u][v]['weight'] = G.edge[u][v][key]
+        G.add_edge(u, v, di)
+        numfib.add_edge(u, v, weight=di['number_of_fibers'] )
+        fibmean.add_edge(u, v, weight=di['fiber_length_mean'] )
+        fibdev.add_edge(u, v, weight=di['fiber_length_std'] )
+        #numfib.edge[u][v]['number_of_fibers'] = di['number_of_fibers']
+        #fibmean.edge[u][v]['fiber_length_mean'] = di['fiber_length_mean']
+        #fibdev.edge[u][v]['fiber_length_std'] = di['fiber_length_std']
 
     print 'Writing network as {ntwk}'.format(ntwk=matrix_name)
     nx.write_gpickle(G, os.path.abspath(matrix_name))
 
-    mlab=nx.to_numpy_matrix(a)
-    mlab_dict = {}
-    mlab_dict['cmatrix'] = mlab
+    numfib_mlab = nx.to_numpy_matrix(numfib, dtype=np.float64)
+    numfib_dict = {}
+    numfib_dict['cmatrix'] = numfib_mlab
+
+    fibmean_mlab = nx.to_numpy_matrix(fibmean, dtype=np.float64)
+    fibmean_dict = {}
+    fibmean_dict['cmatrix'] = fibmean_mlab
+
+    fibdev_mlab = nx.to_numpy_matrix(fibdev, dtype=np.float64)
+    fibdev_dict = {}
+    fibdev_dict['cmatrix'] = fibdev_mlab
+
     print 'Writing matlab matrix as {mat}'.format(mat=matrix_mat_name)
-    sio.savemat(matrix_mat_name,mlab_dict)
+    sio.savemat(matrix_mat_name, numfib_dict)
+    path, name, ext = split_filename(matrix_mat_name)
+    mean_fiber_length_matrix_name = op.join(path, name + '_mean_fiber_length') + ext
+    fiber_length_std_matrix_name = op.join(path, name + '_fiber_length_std') + ext
+    print 'Writing matlab mean fiber length matrix as {mat}'.format(mat=mean_fiber_length_matrix_name)
+    sio.savemat(mean_fiber_length_matrix_name, fibmean_dict)
+    print 'Writing matlab fiber length deviation matrix as {mat}'.format(mat=fiber_length_std_matrix_name)
+    sio.savemat(fiber_length_std_matrix_name, fibdev_dict)
 
     fiberlengths_fname = os.path.abspath(endpoint_name + '_lengths.npy')
     print 'Saving fiber length array: {array}'.format(array=fiberlengths_fname)
@@ -275,11 +303,15 @@ class CreateMatrixInputSpec(TraitedSpec):
     resolution_network_file = File(exists=True, mandatory=True, desc='Parcellation files from Connectome Mapping Toolkit')
     out_matrix_file = File(genfile = True, desc='NetworkX graph describing the connectivity')
     out_matrix_mat_file = File(genfile = True, desc='Matlab matrix describing the connectivity')
+    out_mean_fiber_length_matrix_mat_file = File(genfile = True, desc='Matlab matrix describing the mean fiber lengths between each node.')
+    out_fiber_length_std_matrix_mat_file = File(genfile = True, desc='Matlab matrix describing the deviation in fiber lengths connecting each node.')
     out_endpoint_array_name = File(genfile = True, desc='Name for the generated endpoint arrays')
 
 class CreateMatrixOutputSpec(TraitedSpec):
     matrix_file = File(desc='NetworkX graph describing the connectivity')
     matrix_mat_file = File(desc='Matlab matrix describing the connectivity')
+    mean_fiber_length_matrix_mat_file = File(desc='Matlab matrix describing the mean fiber lengths between each node.')
+    fiber_length_std_matrix_mat_file = File(desc='Matlab matrix describing the deviation in fiber lengths connecting each node.')
     endpoint_file = File(desc='Saved Numpy array with the endpoints of each fiber')
     endpoint_file_mm = File(desc='Saved Numpy array with the endpoints of each fiber (in millimeters)')
     fiber_length_file = File(desc='Saved Numpy array with the lengths of each fiber')
@@ -305,11 +337,13 @@ class CreateMatrix(BaseInterface):
 
     def _run_interface(self, runtime):
         if isdefined(self.inputs.out_matrix_file):
-            matrix_file = self.inputs.out_matrix_file
+            path, name, _ = split_filename(self.inputs.out_matrix_file)
+            matrix_file = os.path.abspath(name + '.gpickle')
         else:
             matrix_file = self._gen_outfilename('gpickle')
         if isdefined(self.inputs.out_matrix_mat_file):
-            matrix_mat_file = self.inputs.out_matrix_mat_file
+            path, name, _ = split_filename(self.inputs.out_matrix_mat_file)
+            matrix_mat_file = os.path.abspath(name + '.mat')
         else:
             matrix_mat_file = self._gen_outfilename('mat')
 
@@ -326,11 +360,24 @@ class CreateMatrix(BaseInterface):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.out_matrix_file):
-            outputs['matrix_file']= os.path.abspath(self.inputs.out_matrix_file)
+            path, name, _ = split_filename(self.inputs.out_matrix_file)
+            outputs['matrix_file']= os.path.abspath(name + '.gpickle')
         else:
             outputs['matrix_file']=os.path.abspath(self._gen_outfilename('gpickle'))
         if isdefined(self.inputs.out_matrix_mat_file):
-            outputs['matrix_mat_file']= os.path.abspath(self.inputs.out_matrix_mat_file)
+            path, name, _ = split_filename(self.inputs.out_matrix_mat_file)
+            outputs['matrix_mat_file']= os.path.abspath(name + '.mat')
+            outputs['mean_fiber_length_matrix_mat_file']= os.path.abspath(name + '_mean_fiber_length.mat')
+            outputs['fiber_length_std_matrix_mat_file']= os.path.abspath(name + '_fiber_length_std.mat')
+        else:
+            name = os.path.abspath(self._gen_outfilename('mat'))
+            outputs['matrix_mat_file'] = name
+            outputs['mean_fiber_length_matrix_mat_file'] = os.path.abspath(name + '_mean_fiber_length.mat')
+            outputs['fiber_length_std_matrix_mat_file'] = os.path.abspath(name + '_fiber_length_std.mat')
+
+        if isdefined(self.inputs.out_matrix_mat_file):
+            path, name, _ = split_filename(self.inputs.out_matrix_mat_file)
+            outputs['matrix_mat_file']= os.path.abspath(name + '.mat')
         else:
             outputs['matrix_mat_file']=os.path.abspath(self._gen_outfilename('mat'))
 

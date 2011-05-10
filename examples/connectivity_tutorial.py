@@ -110,7 +110,7 @@ Recon-all must have been run on subj1 from the FSL course data.
 """
 
 fs_dir = os.path.abspath('/usr/local/freesurfer')
-subjects_dir = os.path.abspath('freesurfer')
+subjects_dir = os.path.abspath('subjects')
 fsl.FSLCommand.set_default_output_type('NIFTI')
 
 """
@@ -524,13 +524,14 @@ mapping.connect([(roigen, creatematrix,[("roi_file","roi_file")])])
 mapping.connect([(roigen, creatematrix,[("dict_file","dict_file")])])
 mapping.connect([(camino2trackvis, creatematrix,[("trackvis","tract_file")])])
 mapping.connect([(inputnode, creatematrix,[("subject_id","out_matrix_file")])])
+mapping.connect([(inputnode, creatematrix,[("subject_id","out_matrix_mat_file")])])
 
 """
 The merge nodes defined earlier are used here to create lists of the files which are
 destined for the CFFConverter.
 """
 
-mapping.connect([(creatematrix, gpickledNetworks,[("matrix_file","in1")])])
+#mapping.connect([(creatematrix, gpickledNetworks,[("matrix_file","in1")])])
 
 mapping.connect([(mris_convertLH, giftiSurfaces,[("converted","in1")])])
 mapping.connect([(mris_convertRH, giftiSurfaces,[("converted","in2")])])
@@ -564,7 +565,7 @@ product.
 CFFConverter.inputs.script_files = os.path.abspath(inspect.getfile(inspect.currentframe()))
 mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
 mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
-mapping.connect([(gpickledNetworks, CFFConverter,[("out","gpickled_networks")])])
+mapping.connect([(creatematrix, CFFConverter,[("matrix_file","gpickled_networks")])])
 mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
 mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
 mapping.connect([(camino2trackvis, CFFConverter,[("trackvis","tract_files")])])
