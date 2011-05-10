@@ -598,7 +598,7 @@ window.onload=beginrefresh
     def _set_needed_outputs(self, graph):
         """Initialize node with list of which outputs are needed
         """
-        if not config.getboolean('execution', 'remove_unnecessary_outputs'):
+        if not str2bool(self.config['execution']['remove_unnecessary_outputs']):
             return
         for node in graph.nodes():
             node.needed_outputs = []
