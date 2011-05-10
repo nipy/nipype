@@ -71,7 +71,7 @@ class WorkflowBase(object):
         """
         self.base_dir = base_dir
         self.overwrite = overwrite
-        self.config = {}
+        self.config = deepcopy(config._sections)
         if name is None:
             raise Exception("init requires a name for this %s" % self.__class__.__name__)
         if '.' in name:
@@ -452,6 +452,9 @@ class Workflow(WorkflowBase):
             else:
                 runner = getattr(sys.modules[name], '%sPlugin'%plugin)(plugin_args=plugin_args)
         flatgraph = self._create_flat_graph()
+        new_config = deepcopy(config._sections)
+        new_config.update(self.config)
+        self.config = new_config
         self._set_needed_outputs(flatgraph)
         execgraph = generate_expanded_graph(deepcopy(flatgraph))
         for index, node in enumerate(execgraph.nodes()):
