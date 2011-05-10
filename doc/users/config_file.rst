@@ -100,8 +100,19 @@ Example
 	hash_method = timestamp
 	display_variable = :1
 
+Additionally you can set some config options by setting the workflow.config. This, however, currently does not work for options related to logging levels. Those will be always read from .cfg files.
+
+Workflow.config property has a form of a nested dictionary reflecting the structure of the .cfg file.
+
+::
+  
+  myworkflow = pe.Workflow()
+  myworkflow.config['execution'] = {'stop_on_first_rerun': 'True', 
+                                     'hash_method': 'timestamp'}
+
 You can also directly set config options in your workflow script. An
-example is shown below.
+example is shown below. This needs to be called before you import the
+pipeline or the logger. Otherwise logging level will not be reset.
 
 ::
 
@@ -117,5 +128,6 @@ example is shown below.
   """)
   
   config.readfp(cfg)
+
 
 .. include:: ../links_names.txt
