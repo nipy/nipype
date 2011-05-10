@@ -118,4 +118,15 @@ example is shown below.
   
   config.readfp(cfg)
 
+Additionally you can set some config options by setting the workflow.config. This, however, currently does not work for options related to logging levels. Those will be always read from .cfg files.
+
+Workflow.config property has a form of a nested dictionary reflecting the structure of the .cfg file.
+
+::
+  
+  myworkflow = pe.Workflow()
+  myworkflow.config = {'execution': {'stop_on_first_rerun': 'True', 
+                                     'hash_method': 'timestamp'}}
+
+
 .. include:: ../links_names.txt
