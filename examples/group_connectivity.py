@@ -12,11 +12,12 @@ found in connectivity_tutorial.py. This tutorial can be run using:
 
     python group_connectivity.py
 
-We perform this analysis using the FSL course data, as well as a set of two patients diagnosed as
-in a vegetative state. The whole package (roughly 825 mb), including the Freesurfer directories
-for these subjects, can be acquired from here:
+We perform this analysis using two healthy subjects: subj1 (from the FSL course data) and subj2.
+We also use three coma patients who suffer from traumatic brain damage (resulting in diffuse axonal injury),
+anoxic damage, and general atrophy, respectively. The whole package (roughly 1.4 GB zipped, 2.2 unzipped),
+including the Freesurfer directories for these subjects, can be acquired from here:
 
-    make a data package
+    http://dl.dropbox.com/u/315714/groupcondatapackage.zip?dl=1
 
 Along with Camino (http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php?n=Main.HomePage),
 Camino-Trackvis (http://www.nitrc.org/projects/camino-trackvis/), FSL (http://www.fmrib.ox.ac.uk/fsl/),
@@ -309,7 +310,6 @@ l4datasink.inputs.container = group_id
 
 l4pipeline = pe.Workflow(name="l4output")
 l4pipeline.base_dir = op.abspath('groupcon')
-#l4pipeline.connect([(group_infosource, l4infosource,[('group_id','group_id')])])
 
 l4pipeline.connect([
                     (l4infosource,l4source_grp1,[('group_id1', 'group_id')]),
