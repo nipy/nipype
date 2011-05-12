@@ -77,7 +77,7 @@ def test_realign():
                      wrap = dict(field='eoptions.wrap'),
                      write_which = dict(field='roptions.which'),
                      write_interp = dict(field='roptions.interp'),
-                     write_wrap = dict(field='eoptions.wrap'),
+                     write_wrap = dict(field='roptions.wrap'),
                      write_mask = dict(field='roptions.mask'))
     rlgn = spm.Realign()
     for key, metadata in input_map.items():

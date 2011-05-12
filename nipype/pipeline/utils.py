@@ -544,11 +544,10 @@ def merge_dict(d1, d2, merge=lambda x,y:y):
 
     Examples:
 
-    >>> d1
+    >>> d1 = {'a': 1, 'c': 3, 'b': 2}
+    >>> merge_dict(d1, d1)
     {'a': 1, 'c': 3, 'b': 2}
-    >>> merge(d1, d1)
-    {'a': 1, 'c': 3, 'b': 2}
-    >>> merge(d1, d1, lambda x,y: x+y)
+    >>> merge_dict(d1, d1, lambda x,y: x+y)
     {'a': 2, 'c': 6, 'b': 4}
 
     """
@@ -557,7 +556,7 @@ def merge_dict(d1, d2, merge=lambda x,y:y):
     result = dict(d1)
     for k,v in d2.iteritems():
         if k in result:
-            result[k] = merge_dict(result[k], v)
+            result[k] = merge_dict(result[k], v, merge=merge)
         else:
             result[k] = v
     return result
