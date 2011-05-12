@@ -9,6 +9,7 @@ def run_examples(example, pipelines, plugin):
     for pipeline in pipelines:
         wf = getattr(sys.modules[example], pipeline)
         wf.base_dir = os.path.join(os.getcwd(),example, plugin)
+        wf.config = {'execution' :{'hash_method': 'timestamp'}}
         wf.run(plugin=plugin)
 
 if __name__ == '__main__':
