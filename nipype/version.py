@@ -46,7 +46,4 @@ def get_nipype_gitversion():
 
 if not release:
     version += '.dev'
-    vcsver = get_nipype_gitversion()
-    if vcsver:
-        version += vcsver
 
