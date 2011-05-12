@@ -17,8 +17,8 @@ from traceback import format_exception
 import numpy as np
 import scipy.sparse as ssp
 
-from ..utils import (nx, dfs_preorder, config)
-from ..engine import MapNode
+from ..utils import (nx, dfs_preorder)
+from ..engine import (MapNode, str2bool)
 
 from nipype.utils.filemanip import savepkl, loadpkl
 
@@ -85,7 +85,7 @@ class PluginBase(object):
     def __init__(self, plugin_args=None):
         pass
 
-    def run(self, graph):
+    def run(self, graph, config):
         raise NotImplementedError
 
 
@@ -114,10 +114,11 @@ class DistributedPluginBase(PluginBase):
         self.proc_done = None
         self.proc_pending = None
 
-    def run(self, graph, updatehash=False):
+    def run(self, graph, config, updatehash=False):
         """Executes a pre-defined pipeline using distributed approaches
         """
         logger.info("Running in parallel.")
+        self._config = config
         # Generate appropriate structures for worker-manager model
         self._generate_dependency_list(graph)
         self.pending_tasks = []
@@ -143,7 +144,7 @@ class DistributedPluginBase(PluginBase):
                         self._clear_task(taskid)
                     else:
                         toappend.insert(0, (taskid, jobid))
-                except:
+                except Exception, e:
                     notrun.append(self._clean_queue(jobid, graph))
             if toappend:
                 self.pending_tasks.extend(toappend)
@@ -165,7 +166,7 @@ class DistributedPluginBase(PluginBase):
         raise NotImplementedError
 
     def _clean_queue(self, jobid, graph, result=None):
-        if config.getboolean('execution', 'stop_on_first_crash'):
+        if str2bool(self._config['execution']['stop_on_first_crash']):
             raise RuntimeError(result)
         crashfile = self._report_crash(self.procs[jobid],
                                        result=result)
@@ -270,7 +271,7 @@ class DistributedPluginBase(PluginBase):
     def _remove_node_dirs(self):
         """Removes directories whose outputs have already been used up
         """
-        if config.getboolean('execution', 'remove_node_directories'):
+        if str2bool(self._config['execution']['remove_node_directories']):
             for idx in np.nonzero((self.refidx.sum(axis=1)==0).__array__())[0]:
                 if idx in self.mapnodesubids:
                     continue
@@ -314,7 +315,12 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         if self._is_pending(taskid):
             return None
         node_dir = self._pending[taskid]
+        # on the pbs system at mit the parent node directory needs to be
+        # accessed before internal directories become available.
+        os.listdir(os.path.realpath(os.path.join(node_dir,'..')))
+        os.listdir(node_dir)
         results_file = glob(os.path.join(node_dir,'result_*.pklz'))[0]
+        print results_file
         result_data = loadpkl(results_file)
         result_out = dict(result=None, traceback=None)
         if isinstance(result_data, dict):
@@ -362,7 +368,7 @@ except:
         fp = open(batchscriptfile, 'wt')
         fp.writelines(batchscript)
         fp.close()
-        return self._submit_batchtask(batchscriptfile)
+        return self._submit_batchtask(batchscriptfile, node)
 
     def _report_crash(self, node, result=None):
         if result and result['traceback']:

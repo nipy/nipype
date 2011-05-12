@@ -44,7 +44,7 @@ from nipype.utils.filemanip import (save_json, FileNotFoundError,
 from nipype.pipeline.utils import (generate_expanded_graph, modify_paths,
                                    export_graph, make_output_dir,
                                    clean_working_directory, format_dot,
-                                   get_print_name)
+                                   get_print_name, merge_dict)
 from nipype.utils.logger import (logger, config, logdebug_dict_differences)
 
 class WorkflowBase(object):
@@ -452,21 +452,19 @@ class Workflow(WorkflowBase):
             else:
                 runner = getattr(sys.modules[name], '%sPlugin'%plugin)(plugin_args=plugin_args)
         flatgraph = self._create_flat_graph()
-        new_config = deepcopy(config._sections)
-        new_config.update(self.config)
-        self.config = new_config
+        self.config = merge_dict(deepcopy(config._sections), self.config)
+        logger.info(str(sorted(self.config)))
         self._set_needed_outputs(flatgraph)
         execgraph = generate_expanded_graph(deepcopy(flatgraph))
         for index, node in enumerate(execgraph.nodes()):
-            node.config = deepcopy(config._sections)
-            node.config.update(self.config)
+            node.config = self.config
             node.base_dir = self.base_dir
             node.index = index
             if isinstance(node, MapNode):
                 node.use_plugin = (plugin, plugin_args)
         self._configure_exec_nodes(execgraph)
         self._write_report_info(self.base_dir, self.name, execgraph)
-        runner.run(execgraph, updatehash=updatehash)
+        runner.run(execgraph, updatehash=updatehash, config=self.config)
         return execgraph
 
     # PRIVATE API AND FUNCTIONS

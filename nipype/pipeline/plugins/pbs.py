@@ -21,33 +21,31 @@ class PBSPlugin(SGELikeBatchManagerBase):
 
     def __init__(self, **kwargs):
         template="""
-            #PBS -V
-            #PBS -S /bin/sh
-            """
+#PBS -V
+        """
         super(PBSPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
         cmd = CommandLine('qstat')
-        cmd.inputs.args = '-j %d'%taskid
+        cmd.inputs.args = '%s'%taskid
         # check pbs task
-        result = cmd.run()
-        if result.runtime.stdout.startswith('='):
-            return True
-        return False
+        result = cmd.run(ignore_exception=True)
+        if 'Unknown Job Id' in result.runtime.stderr:
+            return False
+        return True
 
-    def _submit_batchtask(self, scriptfile):
+    def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine('qsub', environ=os.environ.data)
         qsubargs = ''
         if self._qsub_args:
             qsubargs = self._qsub_args
         cmd.inputs.args = '%s %s'%(qsubargs, scriptfile)
         result = cmd.run()
-
         # retrieve pbs taskid
         if not result.runtime.returncode:
-            taskid = int(result.runtime.stdout.split(' ')[2])
+            taskid = '.'.join(result.runtime.stdout.split('.')[:2])
             self._pending[taskid] = node.output_dir()
-            logger.debug('submitted pbs task: %d for node %s'%(taskid, node._id))
+            logger.debug('submitted pbs task: %s for node %s'%(taskid, node._id))
         else:
             raise RuntimeError('\n'.join(('Could not submit pbs task for node %s'%node._id,
                                           result.runtime.stderr)))

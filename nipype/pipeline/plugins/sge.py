@@ -30,19 +30,19 @@ class SGEPlugin(SGELikeBatchManagerBase):
         cmd = CommandLine('qstat')
         cmd.inputs.args = '-j %d'%taskid
         # check sge task
-        result = cmd.run()
+        result = cmd.run(ignore_exception=True)
         if result.runtime.stdout.startswith('='):
             return True
         return False
 
-    def _submit_batchtask(self, scriptfile):
+    def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine('qsub', environ=os.environ.data)
         qsubargs = ''
         if self._qsub_args:
             qsubargs = self._qsub_args
         cmd.inputs.args = '%s %s'%(qsubargs, scriptfile)
         result = cmd.run()
-
+        print result.runtime.stdout
         # retrieve sge taskid
         if not result.runtime.returncode:
             taskid = int(result.runtime.stdout.split(' ')[2])
