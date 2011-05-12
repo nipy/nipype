@@ -42,7 +42,6 @@ class SGEPlugin(SGELikeBatchManagerBase):
             qsubargs = self._qsub_args
         cmd.inputs.args = '%s %s'%(qsubargs, scriptfile)
         result = cmd.run()
-        print result.runtime.stdout
         # retrieve sge taskid
         if not result.runtime.returncode:
             taskid = int(result.runtime.stdout.split(' ')[2])

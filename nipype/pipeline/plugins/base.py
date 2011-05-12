@@ -320,7 +320,6 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         os.listdir(os.path.realpath(os.path.join(node_dir,'..')))
         os.listdir(node_dir)
         results_file = glob(os.path.join(node_dir,'result_*.pklz'))[0]
-        print results_file
         result_data = loadpkl(results_file)
         result_out = dict(result=None, traceback=None)
         if isinstance(result_data, dict):
