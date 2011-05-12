@@ -151,10 +151,17 @@ like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
 Testing the install
 -------------------
 
-The best way to test the install is to run the test suite.  If you
-have nose_ installed, then do the following::
+The best way to test the install is to run the test suite.  If you have
+nose_ installed, then do the following::
 
     python -c "import nipype; nipype.test()"
+
+you can also test with nosetests: 
+
+::
+
+        nosetests --with-doctest /software/nipy-repo/masternipype/nipype
+        --exclude=external --exclude=testing
 
 All tests should pass (unless you're missing a dependency). If any tests
 fail, please report them on our `bug tracker
