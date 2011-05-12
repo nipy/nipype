@@ -22,8 +22,8 @@ Release 0.4 (FUTURE)
 * ENH: All commandline interfaces display stdout and stderr
 * ENH: All interfaces raise exceptions on error with an option to suppress
 * ENH: Supports a plugin interface for execution (current support for multiprocessing,
-       IPython, SGE)
-* ENH: MapNode runs in parallel under IPython, SGE, MultiProc
+       IPython, SGE, PBS)
+* ENH: MapNode runs in parallel under IPython, SGE, MultiProc, PBS
 * ENH: Optionally allows keeping only required outputs
 * ENH: New interface: utility.Rename to change the name of files, optionally
        using python string-formatting with inputs or regular expressions matching
