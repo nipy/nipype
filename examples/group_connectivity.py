@@ -304,6 +304,8 @@ stats_fibmean_cff.inputs.out_file = title + '_stats_fibmean'
 stats_fibdev_cff = pe.Node(interface=cmtk.CFFConverter(), name="stats_fibdev_cff")
 stats_fibdev_cff.inputs.out_file = title + '_stats_fibdev'
 
+merge_gexfs = pe.Node(interface=util.Merge(6), name='merge_gexfs')
+
 l4datasink = pe.Node(interface=nio.DataSink(), name="l4datasink")
 l4datasink.inputs.base_directory = output_dir
 l4datasink.inputs.container = group_id
@@ -326,22 +328,30 @@ l4pipeline.connect([(l4inputnode,bctstats,[('CMatrices_grp1','in_group1')])])
 l4pipeline.connect([(l4inputnode,bctstats,[('CMatrices_grp2','in_group2')])])
 l4pipeline.connect([(l4infosource,bctstats,[('group_id1','group_id1')])])
 l4pipeline.connect([(l4infosource,bctstats,[('group_id2','group_id2')])])
-l4pipeline.connect([(bctstats,statscff,[('out_network_files','gpickled_networks')])])
+l4pipeline.connect([(bctstats,statscff,[('out_gpickled_network_files','gpickled_networks')])])
 l4pipeline.connect([(statscff, l4datasink, [('connectome_file', '@l4output')])])
+l4pipeline.connect([(bctstats, merge_gexfs, [('out_gexf_group1avg', 'in1')])])
+l4pipeline.connect([(bctstats, merge_gexfs, [('out_gexf_group2avg', 'in2')])])
 
 l4pipeline.connect([(l4inputnode,fibmean_bctstats,[('fibmean_grp1','in_group1')])])
 l4pipeline.connect([(l4inputnode,fibmean_bctstats,[('fibmean_grp2','in_group2')])])
 l4pipeline.connect([(l4infosource,fibmean_bctstats,[('group_id1','group_id1')])])
 l4pipeline.connect([(l4infosource,fibmean_bctstats,[('group_id2','group_id2')])])
-l4pipeline.connect([(fibmean_bctstats,stats_fibmean_cff,[('out_network_files','gpickled_networks')])])
+l4pipeline.connect([(fibmean_bctstats,stats_fibmean_cff,[('out_gpickled_network_files','gpickled_networks')])])
 l4pipeline.connect([(stats_fibmean_cff, l4datasink, [('connectome_file', '@l4output.mean_fiber_length')])])
+l4pipeline.connect([(fibmean_bctstats, merge_gexfs, [('out_gexf_group1avg', 'in3')])])
+l4pipeline.connect([(fibmean_bctstats, merge_gexfs, [('out_gexf_group2avg', 'in4')])])
 
 l4pipeline.connect([(l4inputnode,fibdev_bctstats,[('fibdev_grp1','in_group1')])])
 l4pipeline.connect([(l4inputnode,fibdev_bctstats,[('fibdev_grp2','in_group2')])])
 l4pipeline.connect([(l4infosource,fibdev_bctstats,[('group_id1','group_id1')])])
 l4pipeline.connect([(l4infosource,fibdev_bctstats,[('group_id2','group_id2')])])
-l4pipeline.connect([(fibdev_bctstats,stats_fibdev_cff,[('out_network_files','gpickled_networks')])])
+l4pipeline.connect([(fibdev_bctstats,stats_fibdev_cff,[('out_gpickled_network_files','gpickled_networks')])])
 l4pipeline.connect([(stats_fibdev_cff, l4datasink, [('connectome_file', '@l4output.fiber_length_std')])])
+l4pipeline.connect([(fibdev_bctstats, merge_gexfs, [('out_gexf_group1avg', 'in5')])])
+l4pipeline.connect([(fibdev_bctstats, merge_gexfs, [('out_gexf_group2avg', 'in6')])])
+l4pipeline.connect([(merge_gexfs, l4datasink, [('out', '@gexf')])])
+
 if __name__ == '__main__':
     l4pipeline.run()
     l4pipeline.write_graph(format='eps',graph2use='flat')

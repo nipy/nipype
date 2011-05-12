@@ -57,6 +57,7 @@ examples2rst:
 			../examples/fsl_dti_tutorial.py \
 			../examples/camino_dti_tutorial.py \
 			../examples/connectivity_tutorial.py \
+			../examples/group_connectivity.py \
 			../examples/dtk_dti_tutorial.py \
 			../examples/dtk_odf_tutorial.py \
 			../examples/spm_tutorial2.py \

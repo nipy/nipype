@@ -32,10 +32,7 @@ def mean_difference(all_values, test_values):
     return mean_difference_from_tested
 
 def permutation_test(subject_values, patient_values,iterations=1000):
-    print np.shape(subject_values)
-    print np.shape(patient_values)
     all_values = np.hstack([subject_values, patient_values])
-    #all_values = subject_values.append(patient_values)
     observed = mean_difference(all_values, patient_values)
     below = 0
     combos = []
@@ -50,8 +47,8 @@ def permutation_test(subject_values, patient_values,iterations=1000):
             below += 1
 
     below = 100. * below / count
-    above = 100. - below
-    print("Iterations: %d Observed: %.4f Below: %.4f%%, Above: %.4f%%" % (count, observed, below, above))
+    above = 100 - below
+    print("Iterations: %d Observed: %.2f Below: %.2f%%, Above: %.2f%%" % (count, observed, below, above))
     print "p(val>obs) < {val}".format(val=above / 100)
     return above / 100
 
@@ -186,7 +183,6 @@ def ttest2_robust(X,Y):
 
 def compute_measures(cmatrix,edgetype='undirected',weighted=True):
     print 'Computing BCT measures'
-    # Force subject / patient dimension as first index
     measures = {}
     if edgetype == 'undirected':
         directed = False
@@ -195,10 +191,10 @@ def compute_measures(cmatrix,edgetype='undirected',weighted=True):
 
     degree = bct.degree(cmatrix,directed)
     community_structure = bct.modularity(cmatrix,edgetype)
-    #module_degree_zscore = bct.module_degree_zscore(cmatrix,community_structure)
+    #module_degree_zscore = bct.module_degree_zscore(cmatrix,community_structure) #broken?
     #participation_coef = bct.participation_coef(cmatrix,community_structure) #binarize cmatrix first?
 
-    #assortativity = bct.assortativity(cmatrix,directed)
+    #assortativity = bct.assortativity(cmatrix,directed) #broken!
     breadthdist = bct.breadthdist(cmatrix)
     reachdist = bct.reachdist(cmatrix)
 
@@ -206,13 +202,13 @@ def compute_measures(cmatrix,edgetype='undirected',weighted=True):
     # Characteristic path functions run on the distance matrix computed above
     charpath = bct.charpath(distance)
     normalized_path_length = bct.normalized_path_length(distance)
-    #normalized_path_length = bct.normalized_path_length(cmatrix)
+    normalized_path_length = bct.normalized_path_length(cmatrix)
     charpath_lambda = bct.charpath(distance)
     clustering_coef = bct.clustering_coef(cmatrix,edgetype,weighted)
     density = bct.density(cmatrix,edgetype)
-    #edge_betweenness = bct.edge_betweenness(cmatrix,weighted)
-    local_efficiency = bct.efficiency(cmatrix,True,edgetype,weighted)
-    global_efficiency = bct.efficiency(cmatrix,False,edgetype,weighted)
+    #edge_betweenness = bct.edge_betweenness(cmatrix,weighted) #broken
+    #local_efficiency = bct.efficiency(cmatrix,True,edgetype,weighted) #broken ?
+    #global_efficiency = bct.efficiency(cmatrix,False,edgetype,weighted) # seg fault
     #edge_range = bct.erange(cmatrix)
     matching_index = bct.matching_ind(cmatrix)
     modularity = bct.modularity(cmatrix,edgetype)
@@ -229,7 +225,7 @@ def compute_measures(cmatrix,edgetype='undirected',weighted=True):
     measures['reachdist'] = reachdist
     measures['distance'] = distance
     measures['charpath'] = charpath
-    #measures['normalized_path_length'] = normalized_path_length
+    measures['normalized_path_length'] = normalized_path_length
     measures['charpath_lambda'] = charpath_lambda
     measures['clustering_coef'] = clustering_coef
     measures['density'] = density
@@ -282,8 +278,6 @@ def average_networks(in_files, ntwk_res_file, group_id):
     allntwks = np.zeros((Nnodes,Nnodes),dtype=float)
     for index, subject in enumerate(in_files):
         tmp = sio.loadmat(subject)
-        print np.shape(allntwks)
-        print np.shape(tmp['cmatrix'])
         allntwks = np.dstack((allntwks, tmp['cmatrix']))
     meanntwk = np.mean(allntwks,2)
     print "Creating average network for group: {grp}".format(grp=group_id)
@@ -296,7 +290,12 @@ def average_networks(in_files, ntwk_res_file, group_id):
                 ntwk.add_edge(u,v)
                 ntwk.edge[u][v]['weight'] = newdata
     ntwk = removenodezero(ntwk)
+    network_name = group_id + '_average.pck'
     nx.write_gpickle(ntwk, op.abspath(network_name))
+    network_name = group_id + '_average.gexf'
+    ntwk = fix_float_for_gexf(ntwk)
+    nx.write_gexf(ntwk, op.abspath(network_name))
+    network_name = group_id + '_average'
     return op.abspath(network_name)
 
 
@@ -312,11 +311,11 @@ def group_bct_stats(in_group1,in_group2,significance,output_prefix, ntwk_res_fil
     patient_measures = {}
     for subject in in_group1:
         tmp = sio.loadmat(subject)
-        print tmp['cmatrix']
+        #print tmp['cmatrix']
         subject_measures[subject] = compute_measures(tmp['cmatrix'])
     for patient in in_group2:
         tmp = sio.loadmat(patient)
-        print tmp['cmatrix']
+        #print tmp['cmatrix']
         patient_measures[patient] = compute_measures(tmp['cmatrix'])
     stats = run_bct_stats(subject_measures, patient_measures,significance)
     return stats
@@ -334,9 +333,21 @@ def removenodezero(network):
         network.remove_node(0)
     return network
 
+def fix_float_for_gexf(network):
+    for u,v,d in network.edges_iter(data=True):
+        for k,v in d.items():
+            if isinstance(d[k], np.float64):
+                d[k] = float( d[k] )
+        network.edge[u][v] = d
+    for u,d in network.nodes_iter(data=True):
+        for k,v in d.items():
+            if isinstance(d[k], np.float64):
+                d[k] = float( d[k] )
+        network.node[u] = d
+    return network
+
 def writenodemeasure(stats, measure, ntwk_res_file):
     print "Node-based measure: {mtrc}".format(mtrc=measure)
-    network_name = measure + '_nodes.pck'
     ntwk = init_ntwk(ntwk_res_file)
     newdata = []
     for u,d in ntwk.nodes_iter(data=True):
@@ -345,12 +356,16 @@ def writenodemeasure(stats, measure, ntwk_res_file):
         ntwk.node[u]=newdata
         del newdata
     ntwk = removenodezero(ntwk)
+    network_name = measure + '_nodes.pck'
     nx.write_gpickle(ntwk, op.abspath(network_name))
+    network_name = measure + '_nodes.gexf'
+    ntwk = fix_float_for_gexf(ntwk)
+    nx.write_gexf(ntwk, op.abspath(network_name))
+    network_name = measure + '_nodes'
     return network_name
 
 def writeedgemeasure(stats, measure, ntwk_res_file, significance):
     print "Edge-based measure: {mtrc}".format(mtrc=measure)
-    network_name = measure + '_edges.pck'
     ntwk = init_ntwk(ntwk_res_file)
     newdata = []
     for u in range(0,np.shape(stats[measure])[0]):
@@ -360,31 +375,40 @@ def writeedgemeasure(stats, measure, ntwk_res_file, significance):
                 ntwk.add_edge(u,v)
                 ntwk.edge[u][v]['p-value'] = newdata
     ntwk = removenodezero(ntwk)
+    network_name = measure + '_edges.pck'
     nx.write_gpickle(ntwk, op.abspath(network_name))
+    network_name = measure + '_edges.gexf'
+    ntwk = fix_float_for_gexf(ntwk)
+    nx.write_gexf(ntwk, op.abspath(network_name))
+    network_name = measure + '_edges'
     return network_name
 
 def makenetworks(stats, ntwk_res_file, significance):
     gp = nx.read_graphml(ntwk_res_file)
     nROIs = len(gp.nodes())
     number_of_measures = len(stats.keys())
-    written = []
+    gexf = []
+    gpickled = []
     ntwk = []
     for index, measure in enumerate(stats.keys()):
         if len(np.shape(stats[measure])) == 1:
             network_name = writenodemeasure(stats, measure, ntwk_res_file)
             print 'Writing metric no. {idx} of {Nmetrics}: {metric} nodes as {ntwk}'.format(idx=index+1,
             Nmetrics=number_of_measures, metric=measure, ntwk=network_name)
-            written.append(op.abspath(network_name))
+            gpickled.append(op.abspath(network_name + '.pck'))
+            gexf.append(op.abspath(network_name + '.gexf'))
         elif len(np.shape(stats[measure])) == 2 and np.shape(stats[measure])[0] == np.shape(stats[measure])[1] and np.shape(stats[measure])[1] == nROIs:
             network_name = writeedgemeasure(stats, measure, ntwk_res_file, significance)
             print 'Writing metric no. {idx} of {Nmetrics}: {metric} network as {ntwk}'.format(idx=index+1,
             Nmetrics=number_of_measures, metric=measure, ntwk=network_name)
-            written.append(op.abspath(network_name))
+            gpickled.append(op.abspath(network_name + '.pck'))
+            gexf.append(op.abspath(network_name + '.gexf'))
         else:
             print 'Writing metric no. {idx} of {Nmetrics}: {metric} value into stats file'.format(idx=index+1,
             Nmetrics=number_of_measures, metric=measure)
-    print '{num} networks written: {wrote}'.format(num=len(written),wrote=written)
-    return written
+    print '{num} gpickled networks written: {wrote}'.format(num=len(gpickled),wrote=gpickled)
+    print '{num} gexf networks written: {wrote}'.format(num=len(gexf),wrote=gexf)
+    return gpickled, gexf
 
 class BCTStatsInputSpec(TraitedSpec):
     in_group1 = InputMultiPath(File(exists=True), mandatory=True, desc='Connectivity matrices for group 1')
@@ -401,10 +425,13 @@ class BCTStatsInputSpec(TraitedSpec):
 
 class BCTStatsOutputSpec(TraitedSpec):
     out_matrix_files = OutputMultiPath(File(desc='Output matrix files'))
-    out_network_files = OutputMultiPath(File(desc='Output network files'))
     stats_file = File(desc='Some simple image statistics for the original and normalized images saved as a Matlab .mat')
-    out_group1avg = File(desc='Average connectome for group 1.')
-    out_group2avg = File(desc='Average connectome for group 2.')
+    out_gpickled_network_files = OutputMultiPath(File(desc='Output gpickled network files'))
+    out_gpickled_group1avg = File(desc='Average connectome for group 1 in gpickled format')
+    out_gpickled_group2avg = File(desc='Average connectome for group 2 in gpickled format')
+    out_gexf_network_files = OutputMultiPath(File(desc='Output gexf network files'))
+    out_gexf_group1avg = File(desc='Average connectome for group 1 in gexf format (for Gephi)')
+    out_gexf_group2avg = File(desc='Average connectome for group 2 in gexf format (for Gephi)')
 
 class BCTStats(BaseInterface):
     """
@@ -438,14 +465,21 @@ class BCTStats(BaseInterface):
         print 'Saving image statistics as {stats}'.format(stats=out_stats_file)
         sio.savemat(out_stats_file, stats)
         print stats
-        global out_network_files
-        out_network_files = makenetworks(stats, ntwk_res_file, self.inputs.significance)
-        global out_group1avg
-        global out_group2avg
-        out_group1avg = average_networks(self.inputs.in_group1, ntwk_res_file, self.inputs.group_id1)
-        out_group2avg = average_networks(self.inputs.in_group2, ntwk_res_file, self.inputs.group_id2)
-        out_network_files.append(out_group1avg)
-        out_network_files.append(out_group2avg)
+        global out_gpickled_network_files, out_gexf_network_files
+        global out_gpickled_group1avg, out_gexf_group1avg
+        global out_gpickled_group2avg, out_gexf_group2avg
+
+        out_gpickled_network_files, out_gexf_network_files = makenetworks(stats, ntwk_res_file, self.inputs.significance)
+        group1avg = average_networks(self.inputs.in_group1, ntwk_res_file, self.inputs.group_id1)
+        group2avg = average_networks(self.inputs.in_group2, ntwk_res_file, self.inputs.group_id2)
+        out_gpickled_group1avg = group1avg + '.pck'
+        out_gpickled_group2avg = group2avg + '.pck'
+        out_gpickled_network_files.append(group1avg + '.pck')
+        out_gpickled_network_files.append(group2avg + '.pck')
+        out_gexf_group1avg = group1avg + '.gexf'
+        out_gexf_group2avg = group2avg + '.gexf'
+        out_gexf_network_files.append(group1avg + '.gexf')
+        out_gexf_network_files.append(group2avg + '.gexf')
         return runtime
 
     def _list_outputs(self):
@@ -461,7 +495,12 @@ class BCTStats(BaseInterface):
 
             out_matrix_list.append(name + '.mat')
         outputs["out_matrix_files"] = list_to_filename(out_matrix_list)
-        outputs["out_network_files"] = out_network_files
+        outputs["out_gpickled_group1avg"] = out_gpickled_group1avg
+        outputs["out_gpickled_group2avg"] = out_gpickled_group2avg
+        outputs["out_gpickled_network_files"] = out_gpickled_network_files
+        outputs["out_gexf_group1avg"] = out_gexf_group1avg
+        outputs["out_gexf_group2avg"] = out_gexf_group2avg
+        outputs["out_gexf_network_files"] = out_gexf_network_files
 
         out_stats_file = op.abspath(self.inputs.out_stats_file)
         outputs["stats_file"] = out_stats_file
