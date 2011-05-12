@@ -1347,8 +1347,13 @@ class Node(WorkflowBase):
                 fp.close()
                 return
             fp.writelines(write_rst_header('Runtime info', level=1))
-            fp.writelines(write_rst_dict({'hostname' : self.result.runtime.hostname,
-                                          'duration' : self.result.runtime.duration}))
+            if hasattr(self.result.runtime, 'cmdline'):
+                fp.writelines(write_rst_dict({'hostname' : self.result.runtime.hostname,
+                                              'duration' : self.result.runtime.duration,
+                                              'command' : self.result.runtime.cmdline}))
+            else: 
+                fp.writelines(write_rst_dict({'hostname' : self.result.runtime.hostname,
+                                              'duration' : self.result.runtime.duration}))
             if hasattr(self.result.runtime, 'merged'):
                 fp.writelines(write_rst_header('Terminal output', level=2))
                 fp.writelines(write_rst_list(self.result.runtime.merged))
