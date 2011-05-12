@@ -134,6 +134,8 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
         raise exc_failed_check(msg)
 
 def str2bool(v):
+    if isinstance(v, bool):
+        return v
     lower = v.lower()
     if lower in ("yes", "true", "t", "1"):
         return True
