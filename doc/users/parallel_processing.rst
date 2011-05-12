@@ -7,8 +7,8 @@
 The workflow engine is designed to support plugin interfaces for
 distributed processing. Current plugins are available for multiprocessing,
 IPython_ (0.10.1/2) distributed processing platforms and for direct
-processing on SGE/OGE. We anticipate future plugins for the Soma_ workflow,
-PBS_, LSF_ and Condor_.
+processing on SGE_/OGE_, PBS_. We anticipate future plugins for the Soma_ workflow,
+LSF_ and Condor_.
 
 Parallel distributed processing relies on the availability of a shared
 filesystem across computational nodes.
@@ -72,16 +72,17 @@ To prevent prevent parallel execution type::
 
     workflow.run(plugin='Linear')
 
-Using the pipeline engine with SGE/OGE
+Using the pipeline engine with SGE/OGE/PBS
 --------------------------------------
 
-In order to use nipype with SGE_/OGE_ (not tested), you simply need to
+In order to use nipype with SGE_/OGE_ (not tested) or PBS_ you simply need to
 call::
 
        workflow.run(plugin='SGE')
+       workflow.run(plugin='PBS)
  
-you can also pass additional arguments to the SGE plugin through the
-keyword argument (plugin_args). Currentyl the SGE engine, supports
+you can also pass additional arguments to the SGE/PBS plugin through the
+keyword argument (plugin_args). Currentyl the SGE/PBS managers, supports
 sending a dictionary containing any of the following keys::
 
  template - custom template file. by
