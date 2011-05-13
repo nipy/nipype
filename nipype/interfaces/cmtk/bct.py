@@ -61,7 +61,7 @@ def perm_test_robust(X,Y):
         length = np.shape(X)[1]
         width = np.shape(X)[2]
         p = np.zeros([length,width])
-       # print 'Input is a matrix of length {L} and width {W}'.format(L=length,W=width)
+        print 'Input is a matrix of length {L} and width {W}'.format(L=length,W=width)
         for i in range(0,length):
             for j in range(0,width):
                 if i >= j:
@@ -78,7 +78,7 @@ def perm_test_robust(X,Y):
                         B = np.append(B,value)
                      #   print 'Y[patient][i][j] = {val}'.format(val=Y[patient][i][j])
                     #print 'Across-patient vector for entry {I},{J} = {vec}'.format(I=i,J=j,vec=B)
-                 #   p[i][j] = permutation_test(A,B)
+                    p[i][j] = permutation_test(A,B)
                  #   print 'p value for entry {I},{J} = {val}'.format(I=i,J=j,val=p[i][j])
             #print 'p value for input matrices: {val}'.format(val=p)
     elif len(np.shape(X)) == 2: #The input is a vector, per subject
@@ -287,8 +287,8 @@ def average_networks(in_files, ntwk_res_file, group_id):
         for v in range(0,np.shape(meanntwk)[1]):
             newdata = meanntwk[u][v]
             if newdata > 0:
-                ntwk.add_edge(u,v)
-                ntwk.edge[u][v]['weight'] = newdata
+                ntwk.add_edge(u+1,v+1)
+                ntwk.edge[u+1][v+1]['weight'] = newdata
     ntwk = removenodezero(ntwk)
     network_name = group_id + '_average.pck'
     nx.write_gpickle(ntwk, op.abspath(network_name))
@@ -311,13 +311,11 @@ def group_bct_stats(in_group1,in_group2,significance,output_prefix, ntwk_res_fil
     patient_measures = {}
     for subject in in_group1:
         tmp = sio.loadmat(subject)
-        #print tmp['cmatrix']
         subject_measures[subject] = compute_measures(tmp['cmatrix'])
     for patient in in_group2:
         tmp = sio.loadmat(patient)
-        #print tmp['cmatrix']
         patient_measures[patient] = compute_measures(tmp['cmatrix'])
-    stats = run_bct_stats(subject_measures, patient_measures,significance)
+    stats = run_bct_stats(subject_measures, patient_measures, significance)
     return stats
 
 def init_ntwk(ntwk_res_file):
@@ -343,6 +341,10 @@ def fix_float_for_gexf(network):
         for k,v in d.items():
             if isinstance(d[k], np.float64):
                 d[k] = float( d[k] )
+            if k == 'dn_correspondence_id':
+                d['id'] = d[k]
+            if k == 'dn_label':
+                d['label'] = d[k]
         network.node[u] = d
     return network
 
@@ -371,9 +373,9 @@ def writeedgemeasure(stats, measure, ntwk_res_file, significance):
     for u in range(0,np.shape(stats[measure])[0]):
         for v in range(0,np.shape(stats[measure])[1]):
             newdata = stats[measure][u][v]
-            if newdata <= significance:
-                ntwk.add_edge(u,v)
-                ntwk.edge[u][v]['p-value'] = newdata
+            if newdata <= significance and newdata > 0:
+                ntwk.add_edge(u+1,v+1)
+                ntwk.edge[u+1][v+1]['p-value'] = newdata
     ntwk = removenodezero(ntwk)
     network_name = measure + '_edges.pck'
     nx.write_gpickle(ntwk, op.abspath(network_name))

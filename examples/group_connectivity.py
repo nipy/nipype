@@ -292,6 +292,7 @@ l4source_grp2 = l4source_grp1.clone(name='l4source_grp2')
 l4inputnode = pe.Node(interface=util.IdentityInterface(fields=['CMatrices_grp1','CMatrices_grp2',
     'fibmean_grp1','fibmean_grp2','fibdev_grp1','fibdev_grp2']), name='l4inputnode')
 bctstats = pe.Node(interface=cmtk.BCTStats(), name="bctstats")
+bctstats.inputs.significance = 0.2
 fibmean_bctstats = bctstats.clone(name="fibmean_bctstats")
 fibdev_bctstats = bctstats.clone(name="fibdev_bctstats")
 
