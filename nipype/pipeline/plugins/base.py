@@ -229,7 +229,11 @@ class DistributedPluginBase(PluginBase):
                                     (self.procs[jobid]._id, jobid, hashvalue))
                     tid = self._submit_job(deepcopy(self.procs[jobid]),
                                            updatehash=updatehash)
-                    self.pending_tasks.insert(0, (tid, jobid))
+                    if tid is None:
+                        self.proc_done[jobid] = False
+                        self.proc_pending[jobid] = False
+                    else:
+                        self.pending_tasks.insert(0, (tid, jobid))
             else:
                 break
 
