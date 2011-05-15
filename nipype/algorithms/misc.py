@@ -291,9 +291,6 @@ class Distance(BaseInterface):
 class OverlapInputSpec(BaseInterfaceInputSpec):
     volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
     volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
-    method = traits.Enum("dice", "jaccard", desc='"dice": Dice\'s overlap,\
-    "jaccard": Jaccards\'s overlap', usedefault = True
-    )
     out_file = File("diff.nii", usedefault=True)
     
 class OverlapOutputSpec(TraitedSpec):
@@ -304,8 +301,17 @@ class OverlapOutputSpec(TraitedSpec):
     
 class Overlap(BaseInterface):
     """
-    Calculates dissimilarity between two maps.
+    Calculates various overlap measures between two maps.
+    
+    Example
+    -------
+
+    >>> overlap = Overlap()
+    >>> overlap.inputs.volume1 = 'cont1.nii'
+    >>> overlap.inputs.volume1 = 'cont2.nii'
+    >>> res = overlap.run() # doctest: +SKIP
     """
+    
     input_spec = OverlapInputSpec
     output_spec = OverlapOutputSpec
     
