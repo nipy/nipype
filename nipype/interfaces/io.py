@@ -1050,7 +1050,15 @@ class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 class SQLiteSink(IOBase):
     """Very simple frontend for storing values into SQLite database. input_names
-    correspond to input_names. 
+    correspond to input_names.
+    
+        Notes
+        -----
+
+            Unlike most nipype-nodes this is not a thread-safe node because it can
+            write to a common shared location. When run in parallel it will 
+            occasionally crash.
+            
     
         Examples
         --------
@@ -1075,7 +1083,7 @@ class SQLiteSink(IOBase):
     def _list_outputs(self):
         """Execute this module.
         """
-        conn = sqlite3.connect(self.inputs.database_file)
+        conn = sqlite3.connect(self.inputs.database_file, check_same_thread = False)
         c = conn.cursor()
         c.execute("INSERT OR REPLACE INTO %s ("%self.inputs.table_name + ",".join(self._input_names) + ") VALUES (" + ",".join(["?"]*len(self._input_names)) + ")", 
                   [getattr(self.inputs,name) for name in self._input_names])
