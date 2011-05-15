@@ -1050,7 +1050,15 @@ class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 class SQLiteSink(IOBase):
     """Very simple frontend for storing values into SQLite database. input_names
-    correspond to input_names. 
+    correspond to input_names.
+    
+        Notes
+        -----
+
+            Unlike most nipype-nodes this is not a thread-safe node because it can
+            write to a common shared location. When run in parallel it will 
+            occasionally crash.
+            
     
         Examples
         --------
