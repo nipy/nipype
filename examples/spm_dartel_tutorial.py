@@ -5,12 +5,12 @@
 Using SPM for analysis: Hierarchical
 ====================================
 
-The spm_tutorial.py integrates several interfaces to perform a first
+The spm_dartel_tutorial.py integrates several interfaces to perform a first
 and second level analysis on a two-subject data set.  The tutorial can
 be found in the examples folder.  Run the tutorial from inside the
 nipype tutorial directory:
 
-    python spm_tutorial.py
+    python spm_dartel_tutorial.py
 
 Import necessary modules from nipype."""
 
@@ -364,7 +364,7 @@ the processing nodes.
 """
 
 level1 = pe.Workflow(name="level1")
-level1.base_dir = os.path.abspath('spm_tutorial2/workingdir')
+level1.base_dir = os.path.abspath('spm_dartel_tutorial/workingdir')
 
 def pickFieldFlow(dartel_flow_fields, subject_id):
     from nipype.utils.filemanip import split_filename
@@ -417,14 +417,14 @@ the mean image would be copied to that directory.
 """
 
 datasink = pe.Node(interface=nio.DataSink(), name="datasink")
-datasink.inputs.base_directory = os.path.abspath('spm_tutorial2/l1output')
+datasink.inputs.base_directory = os.path.abspath('spm__dartel_tutorial/l1output')
 report = pe.Node(interface=nio.DataSink(), name='report')
-report.inputs.base_directory = os.path.abspath('spm_tutorial2/report')
+report.inputs.base_directory = os.path.abspath('spm_dartel_tutorial/report')
 report.inputs.parameterization = False
 
 def getstripdir(subject_id):
     import os
-    return os.path.join(os.path.abspath('spm_tutorial2/workingdir'),'_subject_id_%s' % subject_id)
+    return os.path.join(os.path.abspath('spm_dartel_tutorial/workingdir'),'_subject_id_%s' % subject_id)
 
 # store relevant outputs from various stages of the 1st level analysis
 level1.connect([(infosource, datasink,[('subject_id','container'),
@@ -465,7 +465,7 @@ contrasts.
 # collect all the con images for each contrast.
 contrast_ids = range(1,len(contrasts)+1)
 l2source = pe.Node(nio.DataGrabber(infields=['fwhm', 'con']), name="l2source")
-l2source.inputs.template=os.path.abspath('spm_tutorial2/l1output/*/con*/*/_fwhm_%d/con_%04d.img')
+l2source.inputs.template=os.path.abspath('spm_dartel_tutorial/l1output/*/con*/*/_fwhm_%d/con_%04d.img')
 # iterate over all contrast images
 l2source.iterables = [('fwhm',fwhmlist),
                       ('con',contrast_ids)]
@@ -491,7 +491,7 @@ l2conestimate.inputs.group_contrast = True
 """
 
 l2pipeline = pe.Workflow(name="level2")
-l2pipeline.base_dir = os.path.abspath('spm_tutorial2/l2output')
+l2pipeline.base_dir = os.path.abspath('spm_dartel_tutorial/l2output')
 l2pipeline.connect([(l2source,onesamplettestdes,[('outfiles','in_files')]),
                   (onesamplettestdes,l2estimate,[('spm_mat_file','spm_mat_file')]),
                   (l2estimate,l2conestimate,[('spm_mat_file','spm_mat_file'),
