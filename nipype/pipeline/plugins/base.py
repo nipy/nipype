@@ -145,7 +145,7 @@ class DistributedPluginBase(PluginBase):
                     else:
                         toappend.insert(0, (taskid, jobid))
                 except Exception, e:
-                    notrun.append(self._clean_queue(jobid, graph))
+                    notrun.append(self._clean_queue(jobid, graph, result=e))
             if toappend:
                 self.pending_tasks.extend(toappend)
             self._send_procs_to_workers(updatehash=updatehash)
