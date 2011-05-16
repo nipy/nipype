@@ -1,9 +1,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-====================================
-Using SPM for analysis: Hierarchical
-====================================
+=================================================
+Using SPM for fMRI analysis: DARTEL normalization
+=================================================
 
 The spm_dartel_tutorial.py integrates several interfaces to perform a first
 and second level analysis on a two-subject data set.  The tutorial can
@@ -96,13 +96,15 @@ coregister = pe.Node(interface=spm.Coregister(), name="coregister")
 coregister.inputs.jobtype = 'estimate'
 
 
-"""Smooth the functional data using
-:class:`nipype.interfaces.spm.Smooth`.
+"""Normalize and smooth functional data using DARTEL template
 """
 
 normalize_and_smooth_func = pe.Node(spm.DARTELNorm2MNI(modulate=True), name='normalize_and_smooth_func')
 fwhmlist = [4]
 normalize_and_smooth_func.iterables = ('fwhm',fwhmlist)
+
+"""Normalize structural data using DARTEL template
+"""
 
 normalize_struct = pe.Node(spm.DARTELNorm2MNI(modulate=True), name='normalize_struct')
 normalize_struct.inputs.fwhm = 2
@@ -262,6 +264,9 @@ datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
 
+"""We need to create a separate workflow to make the DARTEL template
+"""
+
 datasource_dartel = pe.MapNode(interface=nio.DataGrabber(infields=['subject_id'],
                                                          outfields=['struct']),
                                name = 'datasource_dartel', 
@@ -272,6 +277,10 @@ datasource_dartel.inputs.template_args = dict(struct=[['subject_id','struct']])
 
 datasource_dartel.inputs.subject_id = subject_list
 
+"""Here we make sure that struct files have names corresponding to the subject ids.
+This way we will be able to pick the right field flows later.
+"""
+
 rename_dartel = pe.MapNode(util.Rename(format_string="subject_id_%(subject_id)s_struct"), 
                            iterfield=['in_file', 'subject_id'],
                            name = 'rename_dartel')
@@ -280,6 +289,21 @@ rename_dartel.inputs.keep_ext = True
 
 dartel_workflow = spm_wf.create_DARTEL_template(name='dartel_workflow')
 dartel_workflow.inputs.inputspec.template_prefix = "template"
+
+"""This function will allow to pick the right field flow for each subject
+"""
+
+def pickFieldFlow(dartel_flow_fields, subject_id):
+    from nipype.utils.filemanip import split_filename
+    for f in dartel_flow_fields:
+        _, name, _ = split_filename(f)
+        if name.find("subject_id_%s"%subject_id):
+            return f
+        
+    raise Exception
+        
+pick_flow = pe.Node(util.Function(input_names=['dartel_flow_fields', 'subject_id'], output_names=['dartel_flow_field'], function = pickFieldFlow),
+                    name = "pick_flow")
 
 """
 Experimental paradigm specific components
@@ -366,22 +390,10 @@ the processing nodes.
 level1 = pe.Workflow(name="level1")
 level1.base_dir = os.path.abspath('spm_dartel_tutorial/workingdir')
 
-def pickFieldFlow(dartel_flow_fields, subject_id):
-    from nipype.utils.filemanip import split_filename
-    for f in dartel_flow_fields:
-        _, name, _ = split_filename(f)
-        if name.find("subject_id_%s"%subject_id):
-            return f
-        
-    raise Exception
-        
-pick_flow = pe.Node(util.Function(input_names=['dartel_flow_fields', 'subject_id'], output_names=['dartel_flow_field'], function = pickFieldFlow),
-                    name = "pick_flow")
-    
-
-level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                (datasource_dartel, rename_dartel, [('struct', 'in_file')]),
+level1.connect([(datasource_dartel, rename_dartel, [('struct', 'in_file')]),
                 (rename_dartel, dartel_workflow, [('out_file','inputspec.structural_files')]),
+                
+                (infosource, datasource, [('subject_id', 'subject_id')]),
                 (datasource,l1pipeline,[('func','preproc.realign.in_files'),
                                         ('struct', 'preproc.coregister.target'),
                                         ('struct', 'preproc.normalize_struct.apply_to_files')]),
@@ -417,7 +429,7 @@ the mean image would be copied to that directory.
 """
 
 datasink = pe.Node(interface=nio.DataSink(), name="datasink")
-datasink.inputs.base_directory = os.path.abspath('spm__dartel_tutorial/l1output')
+datasink.inputs.base_directory = os.path.abspath('spm_dartel_tutorial/l1output')
 report = pe.Node(interface=nio.DataSink(), name='report')
 report.inputs.base_directory = os.path.abspath('spm_dartel_tutorial/report')
 report.inputs.parameterization = False

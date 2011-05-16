@@ -211,10 +211,10 @@ def create_vbm_preproc(name='vbmpreproc'):
                                                        "icv"
                                                        ]),
                          name="outputspec")
-    workflow.connect([
-            (dartel_template, outputnode, [('outputspec.template_file','template_file')]),
-            (norm2mni, outputnode, [("normalized_files", "normalized_files")]),
-            (calc_icv, outputnode, [("icv", "icv")]),
+    workflow.connect([(dartel_template, outputnode, [('outputspec.template_file','template_file')]),
+                      (norm2mni, outputnode, [("normalized_files", "normalized_files")]),
+                      (calc_icv, outputnode, [("icv", "icv")]),
+                      ])
     
     return workflow
 
