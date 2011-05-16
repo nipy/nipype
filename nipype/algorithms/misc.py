@@ -288,41 +288,65 @@ class Distance(BaseInterface):
             outputs['histogram'] = os.path.abspath(self._hist_filename)
         return outputs
     
-class DissimilarityInputSpec(BaseInterfaceInputSpec):
+class OverlapInputSpec(BaseInterfaceInputSpec):
     volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
     volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
-    method = traits.Enum("dice", "jaccard", desc='"dice": Dice\'s dissimilarity,\
-    "jaccard": Jaccards\'s dissimilarity', usedefault = True
-    )
+    out_file = File("diff.nii", usedefault=True)
     
-class DissimilarityOutputSpec(TraitedSpec):
-    dissimilarity = traits.Float()
+class OverlapOutputSpec(TraitedSpec):
+    jaccard = traits.Float()
+    dice = traits.Float()
+    volume_difference = traits.Int()
+    diff_file = File(exists=True)
     
-class Dissimilarity(BaseInterface):
+class Overlap(BaseInterface):
     """
-    Calculates dissimilarity between two maps.
+    Calculates various overlap measures between two maps.
+    
+    Example
+    -------
+
+    >>> overlap = Overlap()
+    >>> overlap.inputs.volume1 = 'cont1.nii'
+    >>> overlap.inputs.volume1 = 'cont2.nii'
+    >>> res = overlap.run() # doctest: +SKIP
     """
-    input_spec = DissimilarityInputSpec
-    output_spec = DissimilarityOutputSpec
+    
+    input_spec = OverlapInputSpec
+    output_spec = OverlapOutputSpec
     
     def _bool_vec_dissimilarity(self, booldata1, booldata2, method):
-        methods = {"dice": dice, "jaccard": jaccard}       
-        return methods[method](booldata1.flat, booldata2.flat)
+        methods = {"dice": dice, "jaccard": jaccard}
+        if not (np.any(booldata1) or np.any(booldata2)):
+            return 0
+        return 1 - methods[method](booldata1.flat, booldata2.flat)
     
     def _run_interface(self, runtime):
         nii1 = nb.load(self.inputs.volume1)
         nii2 = nb.load(self.inputs.volume2)
         
-        if self.inputs.method in ("dice", "jaccard"):
-            origdata1 = nii1.get_data().astype(np.bool)
-            origdata2 = nii2.get_data().astype(np.bool)
-            self._dissimilarity = self._bool_vec_dissimilarity(origdata1, origdata2, method = self.inputs.method)
+        origdata1 = np.logical_not(np.logical_or(nii1.get_data() == 0, np.isnan(nii1.get_data())))
+        origdata2 = np.logical_not(np.logical_or(nii2.get_data() == 0, np.isnan(nii2.get_data())))
+        for method in ("dice", "jaccard"):
+
+            setattr(self, '_' + method, self._bool_vec_dissimilarity(origdata1, origdata2, method = method))
+        
+        self._volume = int(origdata1.sum() - origdata2.sum())
+        
+        both_data = np.zeros(origdata1.shape)
+        both_data[origdata1] = 1
+        both_data[origdata2] += 2
+        
+        nb.save(nb.Nifti1Image(both_data, nii1.get_affine(), nii1.get_header()), self.inputs.out_file)
         
         return runtime
     
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['dissimilarity'] = self._dissimilarity
+        for method in ("dice", "jaccard"):
+            outputs[method] = getattr(self, '_'+method)
+        outputs['volume_difference'] = self._volume
+        outputs['diff_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
     
 class CreateNiftiInputSpec(BaseInterfaceInputSpec):
