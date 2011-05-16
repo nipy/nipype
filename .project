@@ -3,6 +3,8 @@
 	<name>nipype</name>
 	<comment></comment>
 	<projects>
+		<project>nibabel</project>
+		<project>nipy</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
