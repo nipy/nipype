@@ -1266,7 +1266,7 @@ class Node(WorkflowBase):
             logger.info("Collecting precomputed outputs")
             try:
                 result = self._load_results(cwd)
-            except FileNotFoundError:
+            except (FileNotFoundError, AttributeError):
                 # if aggregation does not work, rerun the node
                 logger.info("Some of the outputs were not found: rerunning node.")
                 result = self._run_command(execute=True, copyfiles=False)
