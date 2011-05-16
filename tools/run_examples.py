@@ -21,6 +21,7 @@ if __name__ == '__main__':
     sys.path.insert(0, os.path.realpath(os.path.join(path, '..', 'examples')))
     examples = {'fsl_tutorial2':['l1pipeline'],
                 'spm_tutorial2':['level1','l2pipeline'],
+                'spm_dartel_tutorial':['level1','l2pipeline'],
                 'fsl_feeds_tutorial':['l1pipeline']}
     plugins = ['Linear', 'MultiProc', 'IPython']
     for plugin in plugins:
