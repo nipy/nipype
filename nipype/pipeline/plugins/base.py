@@ -321,15 +321,18 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         node_dir = self._pending[taskid]
         # on the pbs system at mit the parent node directory needs to be
         # accessed before internal directories become available.
-        os.listdir(os.path.realpath(os.path.join(node_dir,'..')))
-        os.listdir(node_dir)
+        logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,'..'))))
+        logger.debug(os.listdir(node_dir))
+        logger.debug(node_dir)
         results_file = glob(os.path.join(node_dir,'result_*.pklz'))[0]
         result_data = loadpkl(results_file)
         result_out = dict(result=None, traceback=None)
         if isinstance(result_data, dict):
             result_out['result'] = result_data['result']
             result_out['traceback'] = result_data['traceback']
-            os.remove(results_file)
+            result_out['hostname'] = result_data['hostname']
+            crash_file = os.path.join(node_dir,'crashstore.pklz')
+            os.rename(results_file, crash_file)
         else:
             result_out['result'] = result_data
         return result_out
@@ -348,6 +351,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         # create python script to load and trap exception
         cmdstr = """import os
 import sys
+from socket import gethostname
 from traceback import format_exception
 from nipype.utils.filemanip import loadpkl, savepkl
 traceback=None
@@ -359,8 +363,8 @@ except:
     etype, eval, etr = sys.exc_info()
     traceback = format_exception(etype,eval,etr)
     result = info['node'].result
-    resultsfile = os.path.join(node.output_dir(), 'result_%%s.pklz'%%info['node'].name)
-    savepkl(resultsfile,dict(result=result, traceback=traceback))
+    resultsfile = os.path.join(info['node'].output_dir(), 'result_%%s.pklz'%%info['node'].name)
+    savepkl(resultsfile,dict(result=result, hostname=gethostname(), traceback=traceback))
 """%pkl_file
         pyscript = os.path.join(batch_dir, 'pyscript_%s.py'%suffix)
         fp = open(pyscript, 'wt')
