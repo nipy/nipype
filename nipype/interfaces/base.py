@@ -792,10 +792,11 @@ class BaseInterface(Interface):
             if hasattr(self.inputs,'ignore_exception') and \
             isdefined(self.inputs.ignore_exception) and \
             self.inputs.ignore_exception:
-                    import traceback, sys
-                    print traceback.print_exc(file=sys.stdout)
-                    print e.args
-                    return InterfaceResult(interface, runtime)
+                import traceback, sys
+                runtime.traceback = traceback.print_exc()
+                runtime.traceback_args = e.args
+                runtime.return_code = 1
+                return InterfaceResult(interface, runtime)
             else:
                 raise
         return results
