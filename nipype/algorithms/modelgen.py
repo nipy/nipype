@@ -205,12 +205,13 @@ class SpecifyModel(BaseInterface):
     Optional
     ~~~~~~~~
 
-     - regressors : list of dicts
-
-       - names : list of names corresponding to each column. Should be None if 
+     - regressor_names : list of str
+         list of names corresponding to each column. Should be None if 
          automatically assigned.
 
-       - values : lists of values for each regressors
+     - regressors : list of lists
+        values for each regressor - must correspond to the number of
+        volumes in the functional run
 
      - amplitudes : lists of amplitudes for each event. This will be ignored by 
        SPM's Level1Design.

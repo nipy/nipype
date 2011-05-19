@@ -30,6 +30,10 @@ Required for most designs
 Optional
 --------
 
+- regressor_names : list of names corresponding to each column. Should be None if  automatically assigned.
+
+- regressors : list of lists. values for each regressor - must correspond to the number of volumes in the functional run
+
 - regressors : list of dicts specifying additional regressors for each run
    - names : list of names corresponding to each column. Should be None if
         automatically assigned.
