@@ -200,7 +200,7 @@ def create_vbm_preproc(name='vbmpreproc'):
                                     output_names=['icv']),
                        name='calc_icv')
 
-    workflow.connect(dartel_template, ('segment.native_class_images', getclass1images), calc_icv, 'class_images')
+    workflow.connect(dartel_template, 'segment.native_class_images', calc_icv, 'class_images')
     
     """
     Define the outputs of the workflow and connect the nodes to the outputnode

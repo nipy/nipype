@@ -39,11 +39,14 @@ class PBSPlugin(SGELikeBatchManagerBase):
         qsubargs = ''
         if self._qsub_args:
             qsubargs = self._qsub_args
-        cmd.inputs.args = '%s %s'%(qsubargs, scriptfile)
+        cmd.inputs.args = '%s -N %s %s'%(qsubargs,
+                                         '.'.join((os.environ.data['LOGNAME'],
+                                                   node._id)),
+                                         scriptfile)
         result = cmd.run()
         # retrieve pbs taskid
         if not result.runtime.returncode:
-            taskid = '.'.join(result.runtime.stdout.split('.')[:2])
+            taskid = result.runtime.stdout.split('.')[0]
             self._pending[taskid] = node.output_dir()
             logger.debug('submitted pbs task: %s for node %s'%(taskid, node._id))
         else:
