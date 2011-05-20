@@ -19,7 +19,7 @@ def pickmiddle(files):
     import numpy as np
     middlevol = []
     for f in files:
-        middlevol.append(np.ceil(load(f).get_shape()[3]/2))
+        middlevol.append(int(np.ceil(load(f).get_shape()[3]/2)))
     return middlevol
 
 def getbtthresh(medianvals):
@@ -40,14 +40,20 @@ def getusans(x):
 tolist = lambda x: [x]
 highpass_operand = lambda x:'-bptf %.10f -1'%x
 
-def create_featpreproc(name='featpreproc'):
+def create_featpreproc(name='featpreproc', highpass=True):
     """Create a FEAT preprocessing workflow
-    
+
+    Parameters
+    ----------
+
+    name : name of workflow (default: featpreproc)
+    highpass : boolean (default: True)
+
     Inputs::
 
         inputspec.func : functional runs (filename or list of filenames)
         inputspec.fwhm : fwhm for smoothing with SUSAN
-        inputspec.highpass : HWHM in TRs
+        inputspec.highpass : HWHM in TRs (if created with highpass=True)
         inputspec.outdir : where preprocessed data should be stored
         inputspec.subjectid : subjectid (used for storing output under subject's name
         inputspec.subs : paths substitutions for datasink
@@ -60,7 +66,7 @@ def create_featpreproc(name='featpreproc'):
         outputspec.motion_plots : plots of motion correction parameters
         outputspec.mask : mask file used to mask the brain
         outputspec.smoothed_files : smoothed functional data
-        outputspec.highpassed_files : highpassed functional data
+        outputspec.highpassed_files : highpassed functional data (if highpass=True)
         outputspec.mean : mean file
 
     Example
@@ -75,6 +81,11 @@ def create_featpreproc(name='featpreproc'):
     >>> preproc.base_dir = '/tmp'
     >>> preproc.run() # doctest: +SKIP
 
+    >>> preproc = create_featpreproc(highpass=False)
+    >>> preproc.inputs.inputspec.func = 'f3.nii'
+    >>> preproc.inputs.inputspec.fwhm = 5
+    >>> preproc.base_dir = '/tmp'
+    >>> preproc.run() # doctest: +SKIP
     """
 
     featpreproc = pe.Workflow(name=name)
@@ -84,18 +95,12 @@ def create_featpreproc(name='featpreproc'):
 
     """
 
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=['func',
-                                                                 'fwhm',
-                                                                 'highpass']),
-                        name='inputspec')
-
-
-    """
-    Set up a node to define outputs for the preprocessing workflow
-
-    """
-
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=['reference',
+    if highpass:
+        inputnode = pe.Node(interface=util.IdentityInterface(fields=['func',
+                                                                     'fwhm',
+                                                                     'highpass']),
+                            name='inputspec')
+        outputnode = pe.Node(interface=util.IdentityInterface(fields=['reference',
                                                                   'motion_parameters',
                                                                   'realigned_files',
                                                                   'motion_plots',
@@ -104,6 +109,24 @@ def create_featpreproc(name='featpreproc'):
                                                                   'highpassed_files',
                                                                   'mean']),
                          name='outputspec')
+    else:
+        inputnode = pe.Node(interface=util.IdentityInterface(fields=['func',
+                                                                     'fwhm']),
+                            name='inputspec')
+        outputnode = pe.Node(interface=util.IdentityInterface(fields=['reference',
+                                                                  'motion_parameters',
+                                                                  'realigned_files',
+                                                                  'motion_plots',
+                                                                  'mask',
+                                                                  'smoothed_files',
+                                                                  'mean']),
+                         name='outputspec')
+
+    """
+    Set up a node to define outputs for the preprocessing workflow
+
+    """
+
     """
     Convert functional images to float representation. Since there can
     be more than one functional run we use a MapNode to convert each
@@ -262,7 +285,7 @@ def create_featpreproc(name='featpreproc'):
 
     maskfunc3 = pe.MapNode(interface=fsl.ImageMaths(suffix='_mask',
                                                     op_string='-mas'),
-                          iterfield=['in_file'],
+                          iterfield=['in_file', 'in_file2'],
                           name='maskfunc3')
     featpreproc.connect(smooth, 'outputnode.smoothed_files', maskfunc3, 'in_file')
 
@@ -307,12 +330,13 @@ def create_featpreproc(name='featpreproc'):
     Perform temporal highpass filtering on the data
     """
 
-    highpass = pe.MapNode(interface=fsl.ImageMaths(suffix='_tempfilt'),
-                          iterfield=['in_file'],
-                          name='highpass')
-    featpreproc.connect(inputnode, ('highpass', highpass_operand), highpass, 'op_string')
-    featpreproc.connect(meanscale, 'out_file', highpass, 'in_file')
-    featpreproc.connect(highpass, 'out_file', outputnode, 'highpassed_files')
+    if highpass:
+        highpass = pe.MapNode(interface=fsl.ImageMaths(suffix='_tempfilt'),
+                              iterfield=['in_file'],
+                              name='highpass')
+        featpreproc.connect(inputnode, ('highpass', highpass_operand), highpass, 'op_string')
+        featpreproc.connect(meanscale, 'out_file', highpass, 'in_file')
+        featpreproc.connect(highpass, 'out_file', outputnode, 'highpassed_files')
 
     """
     Generate a mean functional image from the first run
@@ -322,7 +346,11 @@ def create_featpreproc(name='featpreproc'):
                                                     suffix='_mean'),
                            iterfield=['in_file'],
                           name='meanfunc3')
-    featpreproc.connect(highpass, ('out_file', pickfirst), meanfunc3, 'in_file')
+    if highpass:
+        featpreproc.connect(highpass, ('out_file', pickfirst), meanfunc3, 'in_file')
+    else:
+        featpreproc.connect(meanscale, ('out_file', pickfirst), meanfunc3, 'in_file')
+        
     featpreproc.connect(meanfunc3, 'out_file', outputnode, 'mean')
 
 
