@@ -12,6 +12,8 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
     """Registers a source file to freesurfer space and create a brain mask in
     source space
 
+    Requires fsl tools for initializing registration
+
     Parameters
     ----------
 
@@ -75,8 +77,12 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
                        name = 'fssource')
     threshold = pe.Node(fs.Binarize(min=0.5, out_type='nii'),
                         name='threshold')
-    register = pe.Node(fs.BBRegister(init='fsl'), name='register')
-    voltransform = pe.Node(fs.ApplyVolTransform(inverse=True), name='transform')
+    register = pe.MapNode(fs.BBRegister(init='fsl'),
+                          iterfield=['source_file'],
+                          name='register')
+    voltransform = pe.MapNode(fs.ApplyVolTransform(inverse=True),
+                              iterfield=['source_file', 'reg_file'],
+                              name='transform')
 
     """
     Connect the nodes
@@ -104,11 +110,13 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
     threshold2 : binarize transformed file
     """
     
-    threshold2 = pe.Node(fs.Binarize(min=0.5, out_type='nii'),
+    threshold2 = pe.MapNode(fs.Binarize(min=0.5, out_type='nii'),
+                            iterfield=['in_file'],
                         name='threshold2')
     if dilate_mask:
-        dilate = pe.Node(fsl.maths.DilateImage(operation='max'),
-                         name='dilate')
+        dilate = pe.MapNode(fsl.maths.DilateImage(operation='max'),
+                            iterfield=['in_file'],
+                            name='dilate')
         getmask.connect([
             (voltransform, dilate, [('transformed_file', 'in_file')]),
             (dilate, threshold2, [('out_file', 'in_file')]),
