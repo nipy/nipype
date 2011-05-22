@@ -83,7 +83,9 @@ def create_connectivity_pipeline(name="connectivity"):
 
         outputnode.connectome
         outputnode.cmatrix
+        outputnode.gpickled_network
         outputnode.fa
+        outputnode.struct
         outputnode.trace
         outputnode.tracts
         outputnode.tensors
@@ -516,10 +518,12 @@ def create_connectivity_pipeline(name="connectivity"):
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["subject_id", "dwi", "bvecs", "bvals", "subjects_dir"]), name="inputnode")
 
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["fa",
+                                                                "struct",
                                                                 "trace",
                                                                 "tracts",
                                                                 "connectome",
                                                                 "cmatrix",
+                                                                "gpickled_network",
                                                                 "mean_fiber_length",
                                                                 "fiber_length_std",
                                                                 "tensors"]),
@@ -541,6 +545,8 @@ def create_connectivity_pipeline(name="connectivity"):
         ("CreateMatrix.mean_fiber_length_matrix_mat_file", "mean_fiber_length"),
         ("CreateMatrix.fiber_length_std_matrix_mat_file", "fiber_length_std"),
         ("fa2nii.nifti_file", "fa"),
+        ("CreateMatrix.matrix_file", "gpickled_network"),
+        ("mri_convert_Brain.out_file", "struct"),
         ("trace2nii.nifti_file", "trace"),
         ("dtifit.tensor_fitted", "tensors")])
         ])

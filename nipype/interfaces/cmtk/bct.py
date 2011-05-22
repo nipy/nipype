@@ -15,52 +15,81 @@ import random
 import cmp
 
 def random_combination(iterable, r):
-    "Random selection from itertools.combinations(iterable, r)"
-    pool = tuple(iterable)
-    n = len(pool)
-    indices = sorted(random.sample(xrange(n), r))
-    return tuple(pool[i] for i in indices)
+	"""
+	Random selection from itertools.combinations(iterable, r)
+	Uses the itertools module to pick a random combination of length r 
+	using the given input values (as an iterable)
+    See http://docs.python.org/library/itertools.html
+	"""
+	pool = tuple(iterable)
+	n = len(pool)
+	indices = sorted(random.sample(xrange(n), r))
+	return tuple(pool[i] for i in indices)
 
 def mean_difference(all_values, test_values):
-    """Difference of means; note that the first list must be the concatenation of
-    the two lists (because this is cheaper to work with)."""
-    sum_all_values = sum(all_values)
-    sum_test_values = sum(test_values)
-    mean_test_values = sum_test_values / len(test_values)
-    mean_difference = (sum_all_values - sum_test_values) / (len(all_values) - len(test_values))
-    mean_difference_from_tested = mean_test_values - mean_difference
-    return mean_difference_from_tested
+	"""Difference of means; note that the first list must be the concatenation of
+	the two lists (because this is cheaper to work with).
+    See http://rosettacode.org/wiki/Permutation_test and 
+	"""
+	sum_all_values = sum(all_values)
+	sum_test_values = sum(test_values)
+	mean_test_values = sum_test_values / len(test_values)
+	mean_difference = (sum_all_values - sum_test_values) / (len(all_values) - len(test_values))
+	mean_difference_from_tested = mean_test_values - mean_difference
+	return mean_difference_from_tested
+
+def average_measure(subject_values):
+    average = np.mean(subject_values)
+    min = np.min(subject_values)
+    max = np.max(subject_values)
+    deviation = np.std(subject_values)
+    return average, min, max, deviation
 
 def permutation_test(subject_values, patient_values,iterations=1000):
+    """ Permutation test 
+    See http://rosettacode.org/wiki/Permutation_test and 
+        http://docs.python.org/library/itertools.html
+    """
     all_values = np.hstack([subject_values, patient_values])
     observed = mean_difference(all_values, patient_values)
     below = 0
     combos = []
     combos.append(random_combination(all_values, len(patient_values)))
-    for count, permutation in enumerate(range(0,iterations+1)):
-        #print "Iteration {idx}".format(idx=count)
+    for count in range(1,iterations+1):
         permuted_values = random_combination(all_values, len(patient_values))
         combos.append(permuted_values)
         #Could be randomized better. Right now there is combinatoric replacement...
         meandiff = mean_difference(all_values, permuted_values)
         if meandiff <= observed:
             below += 1
-
-    below = 100. * below / count
-    above = 100 - below
+    below = below * 100. / count
+    above = 100. - below
     print("Iterations: %d Observed: %.2f Below: %.2f%%, Above: %.2f%%" % (count, observed, below, above))
     print "p(val>obs) < {val}".format(val=above / 100)
     return above / 100
 
 def perm_test_robust(X,Y):
-    print 'Running permutation test...'
-    #print 'X = {subject_measure}'.format(subject_measure=X)
-    #print 'Y = {patient_measure}'.format(patient_measure=Y)
+    """ Runs a permutation test across the two input matrices X and Y.
+    This function is used to computer the permutation test for each node / edge in the matrix.
+    This means that X and Y can be vectors or matrices and the permutation will be run across
+    the two groups X and Y at each index of the input. X and Y must be the same shape. 
+    """
+    print 'Running permutation test and averaging...'
     t = 0
+    X = np.array(X)
+    Y = np.array(Y)
+    print np.shape(X)
+    X = np.squeeze(X)
+    Y = np.squeeze(Y)
+    print np.shape(X)
     if len(np.shape(X)) >= 3:
+        n = max(np.shape(X))
+        X = np.reshape(X, (n, n, -1))
+        Y = np.reshape(Y, (n, n, -1))
+        print np.shape(X)
         length = np.shape(X)[1]
         width = np.shape(X)[2]
-        p = np.zeros([length,width])
+        p = avgA = avgB = minA = minB = maxA = maxB = stdA = stdB = np.zeros([length,width])
         print 'Input is a matrix of length {L} and width {W}'.format(L=length,W=width)
         for i in range(0,length):
             for j in range(0,width):
@@ -71,117 +100,37 @@ def perm_test_robust(X,Y):
                     for subject in range(0,np.shape(X)[0]):
                         value = X[subject][i][j]
                         A = np.append(A,value)
-                    #    print 'X[subject][i][j] = {val}'.format(val=X[subject][i][j])
-                    #print 'Across-subject vector for entry {I},{J} = {vec}'.format(I=i,J=j,vec=A)
                     for patient in range(0,np.shape(Y)[0]):
                         value = Y[patient][i][j]
                         B = np.append(B,value)
-                     #   print 'Y[patient][i][j] = {val}'.format(val=Y[patient][i][j])
-                    #print 'Across-patient vector for entry {I},{J} = {vec}'.format(I=i,J=j,vec=B)
                     p[i][j] = permutation_test(A,B)
-                 #   print 'p value for entry {I},{J} = {val}'.format(I=i,J=j,val=p[i][j])
-            #print 'p value for input matrices: {val}'.format(val=p)
+                    avgA[i][j], minA[i][j], maxA[i][j], stdA[i][j] = average_measure(A)
+                    avgB[i][j], minB[i][j], maxB[i][j], stdB[i][j] = average_measure(B)
     elif len(np.shape(X)) == 2: #The input is a vector, per subject
-        #print 'Vector per subject'
         length = np.shape(X)[1]
-        p = np.zeros(length)
+        p = avgA = avgB = minA = minB = maxA = maxB = stdA = stdB = np.zeros(length)
         for i in range(0,length):
             A = []
             B = []
             for subject in range(0,np.shape(X)[0]):
                 value = X[subject][i]
                 A = np.append(A,value)
-          #      print 'X[subject][i] = {val}'.format(val=X[subject][i])
-        #    print 'Across-subject vector for entry {I} = {vec}'.format(I=i,vec=A)
             for patient in range(0,np.shape(Y)[0]):
                 value = Y[patient][i]
                 B = np.append(B,value)
-          #      print 'Y[patient][i] = {val}'.format(val=Y[patient][i])
-        #    print 'Across-patient vector for entry {I} = {vec}'.format(I=i,vec=B)
             p[i] = permutation_test(A,B)
-        #    print 'p value for entry {I} = {val}'.format(I=i, val=p[i])
-        #print 't-value for input matrices: {T}'.format(T=t)
+            avgA[i], minA[i], maxA[i], stdA[i] = average_measure(A)
+            avgB[i], minB[i], maxB[i], stdB[i] = average_measure(B)
     elif len(np.shape(X)) == 1: #The input is a single value, per subject
-        #print 'Single-value per subject'
         p = permutation_test(X,Y)
-        #print 'p value for measure = {val}'.format(val=p)
+        avgA, minA, maxA, stdA = average_measure(X)
+        avgB, minB, maxB, stdB = average_measure(Y)
     else:
         print 'Single-value per group, cannot run permutation test'
         return
-    return p
+    return p, avgA, avgB, minA, minB, maxA, maxB, stdA, stdB
 
-def ttest2_robust(X,Y):
-    """ Compute the two-sided t-statistic of X,Y
-    """
-    print 'Running two-sample t-test...'
-    print 'X = {subject_measure}'.format(subject_measure=X)
-    print 'Y = {patient_measure}'.format(patient_measure=Y)
-    t = 0
-    if len(np.shape(X)) >= 3:
-        length = np.shape(X)[1]
-        width = np.shape(X)[2]
-        t = np.zeros(length)
-        print 'Input is a matrix of length {L} and width {W}'.format(L=length,W=width)
-        for i in range(0,length):
-            for j in range(0,width):
-                A = []
-                B = []
-                for subject in range(0,np.shape(X)[0]):
-                    value = X[subject][i][j]
-                    A = np.append(A,value)
-                    print 'X[subject][i][j] = {val}'.format(val=X[subject][i][j])
-                print 'Across-subject vector for entry {I},{J} = {vec}'.format(I=i,J=j,vec=A)
-                for patient in range(0,np.shape(Y)[0]):
-                    value = Y[patient][i][j]
-                    B = np.append(B,value)
-                    print 'Y[patient][i][j] = {val}'.format(val=Y[patient][i][j])
-                print 'Across-patient vector for entry {I},{J} = {vec}'.format(I=i,J=j,vec=B)
-                t[i][j] = np.mean(A) - np.mean(B)
-                n1 = len(A) * 1.
-                n2 = len(B) * 1.
-                s = np.sqrt( ( (n1-1) * np.var(A,ddof=1) + (n2-1)*np.var(B,ddof=1) ) / (n1+n2-2.) )
-                t[i][j] = t[i][j] / (s*np.sqrt(1/n1+1/n2))
-                print 't-value for entry {I},{J} = {T}'.format(I=i,J=j,T=t[i][j])
-        print 't-value for input matrices: {T}'.format(T=t)
-    elif len(np.shape(X)) == 2: #The input is a vector, per subject
-        print 'Vector per subject'
-        length = np.shape(X)[1]
-        t = np.zeros(length)
-        for i in range(0,length):
-            A = []
-            B = []
-            for subject in range(0,np.shape(X)[0]):
-                value = X[subject][i]
-                A = np.append(A,value)
-                print 'X[subject][i] = {val}'.format(val=X[subject][i])
-            print 'Across-subject vector for entry {I} = {vec}'.format(I=i,vec=A)
-            for patient in range(0,np.shape(Y)[0]):
-                value = Y[patient][i]
-                B = np.append(B,value)
-                print 'Y[patient][i] = {val}'.format(val=Y[patient][i])
-            print 'Across-patient vector for entry {I} = {vec}'.format(I=i,vec=B)
-            t[i] = np.mean(A) - np.mean(B)
-            n1 = len(A) * 1.
-            n2 = len(B) * 1.
-            s = np.sqrt( ( (n1-1) * np.var(A,ddof=1) + (n2-1)*np.var(B,ddof=1) ) / (n1+n2-2.) )
-            t[i] = t[i] / (s*np.sqrt(1/n1+1/n2))
-            print 't-value for entry {I} = {T}'.format(I=i, T=t[i])
-        print 't-value for input matrices: {T}'.format(T=t)
-    elif len(np.shape(X)) == 1: #The input is a single value, per subject
-        print 'Single-value per subject'
-        for length in range(0,len(np.shape(X))):
-            t = np.mean(X) - np.mean(Y)
-            n1 = len(X) * 1.
-            n2 = len(Y) * 1.
-            s = np.sqrt( ( (n1-1) * np.var(X,ddof=1) + (n2-1)*np.var(Y,ddof=1) ) / (n1+n2-2.) )
-            t = t / (s*np.sqrt(1/n1+1/n2))
-        print 't-value for measure = {T}'.format(T=t)
-    else:
-        print 'Single-value per group, cannot run t-test'
-        return
-    return t
-
-def compute_measures(cmatrix,edgetype='undirected',weighted=True):
+def compute_measures(cmatrix, ntwk_res_file, edgetype='undirected', weighted=True):
     print 'Computing BCT measures'
     measures = {}
     if edgetype == 'undirected':
@@ -189,88 +138,67 @@ def compute_measures(cmatrix,edgetype='undirected',weighted=True):
     elif edgetype == 'directed':
         directed = True
 
-    degree = bct.degree(cmatrix,directed)
-    community_structure = bct.modularity(cmatrix,edgetype)
-    #module_degree_zscore = bct.module_degree_zscore(cmatrix,community_structure) #broken?
-    #participation_coef = bct.participation_coef(cmatrix,community_structure) #binarize cmatrix first?
-
-    #assortativity = bct.assortativity(cmatrix,directed) #broken!
-    breadthdist = bct.breadthdist(cmatrix)
-    reachdist = bct.reachdist(cmatrix)
-
-    distance = bct.distance(cmatrix,weighted)
+    measures['degree'] = bct.degree(cmatrix,directed)
+    measures['community_structure'] = community_structure = bct.modularity(cmatrix,edgetype)
+    #measures['breadthdist'] = breadthdist = bct.breadthdist(cmatrix) #all zeros
+    #measures['reachdist'] = reachdist = bct.reachdist(cmatrix) #all zeros
+    #measures['matching_index'] = bct.matching_ind(cmatrix)  #all zeros
+    
     # Characteristic path functions run on the distance matrix computed above
-    charpath = bct.charpath(distance)
-    normalized_path_length = bct.normalized_path_length(distance)
-    normalized_path_length = bct.normalized_path_length(cmatrix)
-    charpath_lambda = bct.charpath(distance)
-    clustering_coef = bct.clustering_coef(cmatrix,edgetype,weighted)
-    density = bct.density(cmatrix,edgetype)
-    #edge_betweenness = bct.edge_betweenness(cmatrix,weighted) #broken
-    #local_efficiency = bct.efficiency(cmatrix,True,edgetype,weighted) #broken ?
-    #global_efficiency = bct.efficiency(cmatrix,False,edgetype,weighted) # seg fault
-    #edge_range = bct.erange(cmatrix)
-    matching_index = bct.matching_ind(cmatrix)
-    modularity = bct.modularity(cmatrix,edgetype)
-    motif3funct = bct.motif3funct(cmatrix,weighted)
-    motif3struct = bct.motif3struct(cmatrix,weighted)
-    number_of_edges = bct.number_of_edges_und(cmatrix)
-    strengths = bct.strengths(cmatrix,edgetype)
+    measures['distance'] = bct.distance(cmatrix,weighted)
+    measures['charpath'] = bct.charpath(measures['distance'])
+    measures['normalized_path_length'] = bct.normalized_path_length(measures['distance'])
+    charpath_lambda = charpath_lambda = bct.charpath(measures['distance'])
 
-    measures['community_structure'] = community_structure
-    #measures['module_degree_zscore'] = module_degree_zscore
-    #measures['participation_coef'] = participation_coef
-    #measures['assortativity'] = assortativity
-    measures['breadthdist'] = breadthdist
-    measures['reachdist'] = reachdist
-    measures['distance'] = distance
-    measures['charpath'] = charpath
-    measures['normalized_path_length'] = normalized_path_length
-    measures['charpath_lambda'] = charpath_lambda
-    measures['clustering_coef'] = clustering_coef
-    measures['density'] = density
-    #measures['edge_betweenness'] = edge_betweenness
-    #measures['local_efficiency'] = local_efficiency
-    #measures['global_efficiency'] = global_efficiency
-    #measures['edge_range'] = edge_range
-    measures['matching_index'] = matching_index
-    measures['modularity'] = modularity
-    measures['motif3funct'] = motif3funct
-    measures['motif3struct'] = motif3struct
-    measures['number_of_edges'] = number_of_edges
-    measures['strengths'] = strengths
-    measures['degree'] = degree
-    measures['community_structure'] = community_structure
+    measures['clustering_coef'] = clustering_coef = bct.clustering_coef(cmatrix,edgetype,weighted)
+    measures['density'] = bct.density(cmatrix,edgetype)
+    measures['modularity'] = bct.modularity(cmatrix,edgetype)
+    #measures['motif3funct'] = bct.motif3funct(cmatrix,weighted) #weird shape
+    #measures['motif3struct'] = bct.motif3struct(cmatrix,weighted) #weird shape
+    measures['number_of_edges'] = bct.number_of_edges_und(cmatrix)
+    measures['strengths'] = bct.strengths(cmatrix,edgetype)
+    measures['edge_weight'] = cmatrix
+
+	#---------------None of these seem to work!---------------#
+    #measures['module_degree_zscore'] = bct.module_degree_zscore(cmatrix,community_structure) #broken?
+    #measures['participation_coef'] = bct.participation_coef(cmatrix,community_structure) #binarize cmatrix first?
+    #measures['assortativity'] = bct.assortativity(cmatrix,directed) #broken!
+    #measures['edge_betweenness'] = bct.edge_betweenness(cmatrix,weighted) #broken
+    #measures['local_efficiency'] = bct.efficiency(cmatrix,True,edgetype,weighted) #broken ?
+    #measures['global_efficiency'] = bct.efficiency(cmatrix,False,edgetype,weighted) # seg fault
+    #measures['edge_range'] = bct.erange(cmatrix)
     return measures
 
-def run_bct_stats(subject_measures, patient_measures, significance):
-    print 'Running subject-level BCT stats...'
-    subject_group_measure = {}
-    patient_group_measure = {}
-    stats = {}
-    number_of_measures = len(subject_measures[subject_measures.keys()[0]].keys())
-    for index, measure in enumerate(subject_measures[subject_measures.keys()[0]].keys()):
+def run_stats(subject_measures, patient_measures, significance, group_id1, group_id2):
+    """
+    This function takes in two dictionaries and a float. The subject and patient dictionaries
+    are are keyed by the subject measure id (i.e. 'degree') and 
+    """
+    print 'Running subject-level stats...'
+    p = subject_average = patient_average = minA = minB = maxA = maxB = stdA = stdB = {}
+    subject_group_measure = patient_group_measure = {}
+    measure_list = subject_measures[subject_measures.keys()[0]].keys()
+    number_of_measures = len(measure_list)
+    subject_list = subject_measures.keys()
+    patient_list = patient_measures.keys()
+    print measure_list
+    for index, measure in enumerate(measure_list):
+        print measure
         tmp = []
-        for subject in subject_measures.keys():
-                tmp.append(subject_measures[subject][measure])
-                subject_group_measure[measure] = tmp
+        for subject in subject_list:
+            tmp.append(subject_measures[subject][measure])
+        subject_group_measure[measure] = tmp
         tmp = []
-        for patient in patient_measures.keys():
-                tmp.append(patient_measures[patient][measure])
-                patient_group_measure[measure] = tmp
-        #stats[measure] = ttest2_robust(subject_group_measure[measure], patient_group_measure[measure])
-        #print "Subject Group Measure: {metric}".format(metric=measure)
-        #print subject_group_measure[measure]
-
-        #print "Patient Group Measure: {metric}".format(metric=measure)
-        #print patient_group_measure[measure]
-
+        for patient in patient_list:
+            tmp.append(patient_measures[patient][measure])
+        patient_group_measure[measure] = tmp
         print "Measure no. {idx} of {N}: {metric}".format(idx=index+1, N=number_of_measures, metric=measure)
-        stats[measure] = perm_test_robust(subject_group_measure[measure], patient_group_measure[measure])
-
+        [p[measure], subject_average[measure], patient_average[measure], minA[measure], minB[measure],
+            maxA[measure], maxB[measure], stdA[measure], stdB[measure]] = perm_test_robust(
+                        subject_group_measure[measure], patient_group_measure[measure])
         print "p-value for Measure: {metric}".format(metric=measure)
-        print stats[measure]
-    return stats
+        print p[measure]
+    return p, subject_average, patient_average
 
 def average_networks(in_files, ntwk_res_file, group_id):
     ntwk = init_ntwk(ntwk_res_file)
@@ -281,7 +209,6 @@ def average_networks(in_files, ntwk_res_file, group_id):
         allntwks = np.dstack((allntwks, tmp['cmatrix']))
     meanntwk = np.mean(allntwks,2)
     print "Creating average network for group: {grp}".format(grp=group_id)
-    network_name = group_id + '_average.pck'
     newdata = []
     for u in range(0,np.shape(meanntwk)[0]):
         for v in range(0,np.shape(meanntwk)[1]):
@@ -292,31 +219,47 @@ def average_networks(in_files, ntwk_res_file, group_id):
     ntwk = removenodezero(ntwk)
     network_name = group_id + '_average.pck'
     nx.write_gpickle(ntwk, op.abspath(network_name))
-    network_name = group_id + '_average.gexf'
+    ntwk = nx.read_gpickle(op.abspath(network_name))
     ntwk = fix_float_for_gexf(ntwk)
+    network_name = group_id + '_average.gexf'
     nx.write_gexf(ntwk, op.abspath(network_name))
     network_name = group_id + '_average'
     return op.abspath(network_name)
 
-
-def group_bct_stats(in_group1,in_group2,significance,output_prefix, ntwk_res_file, subject_ids_group1, subject_ids_group2):
+def group_bct_stats(in_group1,in_group2,significance,output_prefix, ntwk_res_file, group_id1, group_id2, subject_ids_group1, subject_ids_group2):
+    """
+    This function takes in two lists of files; one for each input group. It also allows a prefix for the output files,
+    a network resolution file (i.e. reslution83.graphml) for creating the output matrices, and the subject IDs for each input group.
+        in_group1, ingroup2  -  List of strings (file paths)
+        output_prefix  -  String (i.e. 'bct')
+        significance  -  Float (i.e. 0.05)
+        ntwk_res_file  -  String (path to i.e. resolution83.graphml)
+        subject_ids_group1, subject_ids_group2  -  List of strings
+    It calculates the network measures on each input file for each group. It then computes the statistics across each node/edge/matrix
+    for the two groups and outputs three dictionaries:
+        stats - Dictionary keyed by the network measure names (i.e. 'degree') containing p-values for each node/edge/matrix-based measure
+                calculated between the two groups via permutation test. 
+        subject_measures, patient_measures - Dictionary keyed by patient ID (i.e. 'path/subj1.ext') containing another dictionary of the computed
+                                             network measures keyed by measure name (i.e. 'degree').
+        subject_average, patient_average  - Dictionary keyed by measure name (i.e. 'degree') containing the average for each measure for each group.
+    """
     print 'Running group-level BCT stats...'
     if not ntwk_res_file == 0:
         print 'Network resolution file: {ntwk}'.format(ntwk=ntwk_res_file)
-    if not subject_ids_group1 == 0:
+    if not subject_ids_group1 == 0: #Currently subject_ids do nothing. Should be used as keys instead of paths for the subject and patient dicts
         print 'Subject IDs: {subj_IDs}'.format(subj_IDs=subject_ids_group1)
     if not subject_ids_group2 == 0:
-        print 'Patient IDs: {patient_IDs}'.format(subj_IDs=subject_ids_group1)
+        print 'Patient IDs: {patient_IDs}'.format(subj_IDs=subject_ids_group2)
     subject_measures = {}
     patient_measures = {}
     for subject in in_group1:
         tmp = sio.loadmat(subject)
-        subject_measures[subject] = compute_measures(tmp['cmatrix'])
+        subject_measures[subject] = compute_measures(tmp['cmatrix'], ntwk_res_file)
     for patient in in_group2:
         tmp = sio.loadmat(patient)
-        patient_measures[patient] = compute_measures(tmp['cmatrix'])
-    stats = run_bct_stats(subject_measures, patient_measures, significance)
-    return stats
+        patient_measures[patient] = compute_measures(tmp['cmatrix'], ntwk_res_file)
+    stats, subject_average, patient_average = run_stats(subject_measures, patient_measures, significance, group_id1, group_id2)
+    return stats, subject_measures, patient_measures, subject_average, patient_average
 
 def init_ntwk(ntwk_res_file):
     gp = nx.read_graphml(ntwk_res_file)
@@ -324,6 +267,17 @@ def init_ntwk(ntwk_res_file):
     initial_network = nx.Graph()
     for u,d in gp.nodes_iter(data=True):
         initial_network.add_node(int(u), d)
+    return initial_network
+
+def init_ntwk_with_cmatrix(ntwk_res_file, cmatrix):
+    initial_network = init_ntwk(ntwk_res_file)
+    newdata = []
+    for u in range(0,np.shape(cmatrix)[0]):
+        for v in range(0,np.shape(cmatrix)[1]):
+            newdata = cmatrix[u][v]
+            if newdata > 0:
+                initial_network.add_edge(u+1,v+1)
+                initial_network.edge[u+1][v+1]['weight'] = newdata
     return initial_network
 
 def removenodezero(network):
@@ -336,37 +290,37 @@ def fix_float_for_gexf(network):
         for k,v in d.items():
             if isinstance(d[k], np.float64):
                 d[k] = float( d[k] )
-        network.edge[u][v] = d
     for u,d in network.nodes_iter(data=True):
         for k,v in d.items():
             if isinstance(d[k], np.float64):
                 d[k] = float( d[k] )
             if k == 'dn_correspondence_id':
                 d['id'] = d[k]
-            if k == 'dn_label':
+            if k == 'dn_fsname':
                 d['label'] = d[k]
-        network.node[u] = d
     return network
 
-def writenodemeasure(stats, measure, ntwk_res_file):
+def writenodemeasure(stats, measure, group_id, ntwk_res_file, key='p-value'):
     print "Node-based measure: {mtrc}".format(mtrc=measure)
     ntwk = init_ntwk(ntwk_res_file)
     newdata = []
+    print np.shape(stats[measure])
     for u,d in ntwk.nodes_iter(data=True):
         newdata = d
-        newdata['p-value'] = stats[measure][u-1]
+        newdata[key] = stats[measure][u-1]
         ntwk.node[u]=newdata
         del newdata
     ntwk = removenodezero(ntwk)
-    network_name = measure + '_nodes.pck'
+    network_name = measure + '_' + group_id + '_nodes.pck'
     nx.write_gpickle(ntwk, op.abspath(network_name))
-    network_name = measure + '_nodes.gexf'
+    ntwk = nx.read_gpickle(op.abspath(network_name))
+    network_name = measure + '_' + group_id + '_nodes.gexf'
     ntwk = fix_float_for_gexf(ntwk)
     nx.write_gexf(ntwk, op.abspath(network_name))
-    network_name = measure + '_nodes'
+    network_name = measure + '_' + group_id + '_nodes'
     return network_name
 
-def writeedgemeasure(stats, measure, ntwk_res_file, significance):
+def writeedgemeasure(stats, measure, group_id, ntwk_res_file, significance, key='p-value'):
     print "Edge-based measure: {mtrc}".format(mtrc=measure)
     ntwk = init_ntwk(ntwk_res_file)
     newdata = []
@@ -375,17 +329,18 @@ def writeedgemeasure(stats, measure, ntwk_res_file, significance):
             newdata = stats[measure][u][v]
             if newdata <= significance and newdata > 0:
                 ntwk.add_edge(u+1,v+1)
-                ntwk.edge[u+1][v+1]['p-value'] = newdata
+                ntwk.edge[u+1][v+1][key] = newdata
     ntwk = removenodezero(ntwk)
-    network_name = measure + '_edges.pck'
+    network_name = measure + '_' + group_id + '_edges.pck'
     nx.write_gpickle(ntwk, op.abspath(network_name))
-    network_name = measure + '_edges.gexf'
+    ntwk = nx.read_gpickle(op.abspath(network_name))
+    network_name = measure + '_' + group_id + '_edges.gexf'
     ntwk = fix_float_for_gexf(ntwk)
     nx.write_gexf(ntwk, op.abspath(network_name))
-    network_name = measure + '_edges'
+    network_name = measure + '_' + group_id + '_edges'
     return network_name
 
-def makenetworks(stats, ntwk_res_file, significance):
+def makenetworks(stats, subject_average, patient_average, ntwk_res_file, significance, group_id1, group_id2):
     gp = nx.read_graphml(ntwk_res_file)
     nROIs = len(gp.nodes())
     number_of_measures = len(stats.keys())
@@ -394,24 +349,50 @@ def makenetworks(stats, ntwk_res_file, significance):
     ntwk = []
     for index, measure in enumerate(stats.keys()):
         if len(np.shape(stats[measure])) == 1:
-            network_name = writenodemeasure(stats, measure, ntwk_res_file)
-            print 'Writing metric no. {idx} of {Nmetrics}: {metric} nodes as {ntwk}'.format(idx=index+1,
-            Nmetrics=number_of_measures, metric=measure, ntwk=network_name)
-            gpickled.append(op.abspath(network_name + '.pck'))
-            gexf.append(op.abspath(network_name + '.gexf'))
+            stats_network_name = writenodemeasure(stats, measure, '', ntwk_res_file)
+            print 'Writing stats for metric no. {idx} of {Nmetrics}: {metric} nodes as {ntwk}'.format(idx=index+1,
+            Nmetrics=number_of_measures, metric=measure, ntwk=stats_network_name)
+
+            subject_average_network_name = writenodemeasure(subject_average, measure, group_id1, ntwk_res_file)
+            print 'Writing subject average for metric no. {idx} of {Nmetrics}: {metric} nodes as {ntwk}'.format(idx=index+1,
+            Nmetrics=number_of_measures, metric=measure, ntwk=subject_average_network_name)            
+
+            patient_average_network_name = writenodemeasure(patient_average, measure, group_id2, ntwk_res_file)
+            print 'Writing patient average for metric no. {idx} of {Nmetrics}: {metric} nodes as {ntwk}'.format(idx=index+1,
+            Nmetrics=number_of_measures, metric=measure, ntwk=patient_average_network_name)
+
+            gpickled.append(op.abspath(stats_network_name + '.pck'))
+            gpickled.append(op.abspath(subject_average_network_name + '.pck'))
+            gpickled.append(op.abspath(patient_average_network_name + '.pck'))
+            gexf.append(op.abspath(stats_network_name + '.gexf'))
+            gexf.append(op.abspath(subject_average_network_name + '.gexf'))
+            gexf.append(op.abspath(patient_average_network_name + '.gexf'))
         elif len(np.shape(stats[measure])) == 2 and np.shape(stats[measure])[0] == np.shape(stats[measure])[1] and np.shape(stats[measure])[1] == nROIs:
-            network_name = writeedgemeasure(stats, measure, ntwk_res_file, significance)
-            print 'Writing metric no. {idx} of {Nmetrics}: {metric} network as {ntwk}'.format(idx=index+1,
-            Nmetrics=number_of_measures, metric=measure, ntwk=network_name)
-            gpickled.append(op.abspath(network_name + '.pck'))
-            gexf.append(op.abspath(network_name + '.gexf'))
+            stats_network_name = writeedgemeasure(stats, measure, '', ntwk_res_file, significance)
+            print 'Writing stats for metric no. {idx} of {Nmetrics}: {metric} nodes as {ntwk}'.format(idx=index+1,
+            Nmetrics=number_of_measures, metric=measure, ntwk=stats_network_name)
+
+            subject_average_network_name = writeedgemeasure(subject_average, measure, group_id1, ntwk_res_file, significance)
+            print 'Writing subject average for metric no. {idx} of {Nmetrics}: {metric} nodes as {ntwk}'.format(idx=index+1,
+            Nmetrics=number_of_measures, metric=measure, ntwk=subject_average_network_name)            
+
+            patient_average_network_name = writeedgemeasure(patient_average, measure, group_id2, ntwk_res_file, significance)
+            print 'Writing patient average for metric no. {idx} of {Nmetrics}: {metric} nodes as {ntwk}'.format(idx=index+1,
+            Nmetrics=number_of_measures, metric=measure, ntwk=patient_average_network_name)
+
+            gpickled.append(op.abspath(stats_network_name + '.pck'))
+            gpickled.append(op.abspath(subject_average_network_name + '.pck'))
+            gpickled.append(op.abspath(patient_average_network_name + '.pck'))
+            gexf.append(op.abspath(stats_network_name + '.gexf'))
+            gexf.append(op.abspath(subject_average_network_name + '.gexf'))
+            gexf.append(op.abspath(patient_average_network_name + '.gexf'))
         else:
             print 'Writing metric no. {idx} of {Nmetrics}: {metric} value into stats file'.format(idx=index+1,
             Nmetrics=number_of_measures, metric=measure)
     print '{num} gpickled networks written: {wrote}'.format(num=len(gpickled),wrote=gpickled)
     print '{num} gexf networks written: {wrote}'.format(num=len(gexf),wrote=gexf)
     return gpickled, gexf
-
+    
 class BCTStatsInputSpec(TraitedSpec):
     in_group1 = InputMultiPath(File(exists=True), mandatory=True, desc='Connectivity matrices for group 1')
     in_group2 = InputMultiPath(File(exists=True), mandatory=True, desc='Connectivity matrices for group 2')
@@ -423,7 +404,9 @@ class BCTStatsInputSpec(TraitedSpec):
     output_prefix = traits.Str('bctstats_', usedefault=True, desc='Prefix to append to output files')
     group_id1 = traits.Str('group1', usedefault=True, desc='ID for group 1')
     group_id2 = traits.Str('group2', usedefault=True, desc='ID for group 2')
-    out_stats_file = File('BCTstats.mat', usedefault=True, desc='Some simple image statistics for the original and normalized images saved as a Matlab .mat')
+    out_stats_file = File('BCTstats.mat', usedefault=True, desc='Some simple image statistics saved as a Matlab .mat')
+    out_subject_measures = File('group1_measures.mat', usedefault=True, desc='Some simple image statistics saved as a Matlab .mat')
+    out_patient_measures = File('group2_measures.mat', usedefault=True, desc='Some simple image statistics saved as a Matlab .mat')
 
 class BCTStatsOutputSpec(TraitedSpec):
     out_matrix_files = OutputMultiPath(File(desc='Output matrix files'))
@@ -436,10 +419,6 @@ class BCTStatsOutputSpec(TraitedSpec):
     out_gexf_group2avg = File(desc='Average connectome for group 2 in gexf format (for Gephi)')
 
 class BCTStats(BaseInterface):
-    """
-    Performs intensity normalization on image intensity given marked ROI images.
-    """
-
     input_spec = BCTStatsInputSpec
     output_spec = BCTStatsOutputSpec
 
@@ -459,19 +438,31 @@ class BCTStats(BaseInterface):
             subject_ids_group2 = self.inputs.subject_ids_group2
         else:
             subject_ids_group2 = 0
-
-        stats = group_bct_stats(self.inputs.in_group1,self.inputs.in_group2,self.inputs.significance,self.inputs.output_prefix,
-            ntwk_res_file, subject_ids_group1, subject_ids_group2)
-
+        stats, subject_measures, patient_measures, subject_average, patient_average = group_bct_stats(self.inputs.in_group1, 
+			self.inputs.in_group2, self.inputs.significance, self.inputs.output_prefix, ntwk_res_file, self.inputs.group_id1,
+            self.inputs.group_id2, subject_ids_group1, subject_ids_group2)
         out_stats_file = op.abspath(self.inputs.out_stats_file)
+        global out_subject_measures, out_patient_measures
+        global out_subject_average, out_patient_average
+        out_subject_measures = op.abspath(self.inputs.group_id1 + '_measures.mat')
+        out_patient_measures = op.abspath(self.inputs.group_id2 + '_measures.mat')
+        out_subject_average = op.abspath(self.inputs.group_id1 + '_average.mat')
+        out_patient_average = op.abspath(self.inputs.group_id2 + '_average.mat')
         print 'Saving image statistics as {stats}'.format(stats=out_stats_file)
         sio.savemat(out_stats_file, stats)
-        print stats
+        print 'Saving subject measures as {file}'.format(file=out_subject_measures)
+        sio.savemat(out_subject_measures, subject_measures)
+        print 'Saving patient measures as {file}'.format(file=out_patient_measures)
+        sio.savemat(out_patient_measures, patient_measures)
+        print 'Saving subject average as {file}'.format(file=out_subject_average)
+        sio.savemat(out_subject_average, subject_average)
+        print 'Saving patient average as {file}'.format(file=out_patient_average)
+        sio.savemat(out_patient_average, patient_average)
         global out_gpickled_network_files, out_gexf_network_files
         global out_gpickled_group1avg, out_gexf_group1avg
         global out_gpickled_group2avg, out_gexf_group2avg
-
-        out_gpickled_network_files, out_gexf_network_files = makenetworks(stats, ntwk_res_file, self.inputs.significance)
+        out_gpickled_network_files, out_gexf_network_files = makenetworks(stats, subject_average, 
+            patient_average, ntwk_res_file, self.inputs.significance, self.inputs.group_id1, self.inputs.group_id2)
         group1avg = average_networks(self.inputs.in_group1, ntwk_res_file, self.inputs.group_id1)
         group2avg = average_networks(self.inputs.in_group2, ntwk_res_file, self.inputs.group_id2)
         out_gpickled_group1avg = group1avg + '.pck'

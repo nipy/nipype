@@ -189,6 +189,8 @@ for idx, group_id in enumerate(group_list.keys()):
                                               ("outputnode.tracts", "@l1output.tracts"),
                                               ("outputnode.trace", "@l1output.trace"),
                                               ("outputnode.cmatrix", "@l1output.cmatrix"),
+                                              ("outputnode.struct", "@l1output.struct"),
+                                              ("outputnode.gpickled_network", "@l1output.gpickled_network"),
                                               ("outputnode.mean_fiber_length", "@l1output.mean_fiber_length"),
                                               ("outputnode.fiber_length_std", "@l1output.fiber_length_std"),
                                               ])])
@@ -277,19 +279,19 @@ l4infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id1', 'gr
 l4infosource.inputs.group_id1 = group_list.keys()[0]
 l4infosource.inputs.group_id2 = group_list.keys()[1]
 
-l4info = dict(CMatrices=[['group_id', '']], fibmean=[['group_id', 'mean_fiber_length']],
+l4info = dict(networks=[['group_id', '']], CMatrices=[['group_id', '']], fibmean=[['group_id', 'mean_fiber_length']],
     fibdev=[['group_id', 'fiber_length_std']])
 
 l4source_grp1 = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=l4info.keys()), name='l4source_grp1')
 l4source_grp1.inputs.template = '%s/%s'
-l4source_grp1.inputs.field_template=dict(CMatrices=op.join(output_dir,'%s/cmatrix/*/*%s*.mat'),
+l4source_grp1.inputs.field_template=dict(networks=op.join(output_dir,'%s/gpickled_network/*/*%s*.pck'), CMatrices=op.join(output_dir,'%s/cmatrix/*/*%s*.mat'),
     fibmean=op.join(output_dir,'%s/mean_fiber_length/*/*%s*.mat'), fibdev=op.join(output_dir,'%s/fiber_length_std/*/*%s*.mat'))
 l4source_grp1.inputs.base_directory = output_dir
 l4source_grp1.inputs.template_args = l4info
 
 l4source_grp2 = l4source_grp1.clone(name='l4source_grp2')
 
-l4inputnode = pe.Node(interface=util.IdentityInterface(fields=['CMatrices_grp1','CMatrices_grp2',
+l4inputnode = pe.Node(interface=util.IdentityInterface(fields=['networks_grp1','networks_grp2','CMatrices_grp1','CMatrices_grp2',
     'fibmean_grp1','fibmean_grp2','fibdev_grp1','fibdev_grp2']), name='l4inputnode')
 bctstats = pe.Node(interface=cmtk.BCTStats(), name="bctstats")
 bctstats.inputs.significance = 0.2
@@ -299,6 +301,7 @@ fibdev_bctstats = bctstats.clone(name="fibdev_bctstats")
 statscff = pe.Node(interface=cmtk.CFFConverter(), name="statscff")
 statscff.inputs.out_file = title + '_stats'
 
+
 stats_fibmean_cff = pe.Node(interface=cmtk.CFFConverter(), name="stats_fibmean_cff")
 stats_fibmean_cff.inputs.out_file = title + '_stats_fibmean'
 
@@ -307,18 +310,21 @@ stats_fibdev_cff.inputs.out_file = title + '_stats_fibdev'
 
 merge_gexfs = pe.Node(interface=util.Merge(6), name='merge_gexfs')
 
+nxstats = pe.Node(interface=cmtk.NetworkXStats(), name="nxstats")
+
 l4datasink = pe.Node(interface=nio.DataSink(), name="l4datasink")
 l4datasink.inputs.base_directory = output_dir
-l4datasink.inputs.container = group_id
 
 l4pipeline = pe.Workflow(name="l4output")
-l4pipeline.base_dir = op.abspath('groupcon')
+l4pipeline.base_dir = output_dir
 
 l4pipeline.connect([
                     (l4infosource,l4source_grp1,[('group_id1', 'group_id')]),
                     (l4infosource,l4source_grp2,[('group_id2', 'group_id')]),
                     (l4source_grp1,l4inputnode,[('CMatrices','CMatrices_grp1')]),
                     (l4source_grp2,l4inputnode,[('CMatrices','CMatrices_grp2')]),
+                    (l4source_grp1,l4inputnode,[('networks','networks_grp1')]),
+                    (l4source_grp2,l4inputnode,[('networks','networks_grp2')]),
                     (l4source_grp1,l4inputnode,[('fibmean','fibmean_grp1')]),
                     (l4source_grp2,l4inputnode,[('fibmean','fibmean_grp2')]),
                     (l4source_grp1,l4inputnode,[('fibdev','fibdev_grp1')]),
@@ -352,6 +358,10 @@ l4pipeline.connect([(stats_fibdev_cff, l4datasink, [('connectome_file', '@l4outp
 l4pipeline.connect([(fibdev_bctstats, merge_gexfs, [('out_gexf_group1avg', 'in5')])])
 l4pipeline.connect([(fibdev_bctstats, merge_gexfs, [('out_gexf_group2avg', 'in6')])])
 l4pipeline.connect([(merge_gexfs, l4datasink, [('out', '@gexf')])])
+
+l4pipeline.connect([(l4inputnode,nxstats,[('networks_grp2','in_group1')])])
+l4pipeline.connect([(l4inputnode,nxstats,[('networks_grp1','in_group2')])])
+l4pipeline.connect([(nxstats, l4datasink, [('stats_file', '@nxstats')])])
 
 if __name__ == '__main__':
     l4pipeline.run()

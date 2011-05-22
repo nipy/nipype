@@ -255,13 +255,14 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
         idx = np.where( (final_fiberlabels_array[:,0] == int(u)) & (final_fiberlabels_array[:,1] == int(v)) )[0]
         di['fiber_length_mean'] = np.mean(final_fiberlength_array[idx])
         di['fiber_length_std'] = np.std(final_fiberlength_array[idx])
-        G.add_edge(u, v, di)
-        numfib.add_edge(u, v, weight=di['number_of_fibers'] )
-        fibmean.add_edge(u, v, weight=di['fiber_length_mean'] )
-        fibdev.add_edge(u, v, weight=di['fiber_length_std'] )
-        #numfib.edge[u][v]['number_of_fibers'] = di['number_of_fibers']
-        #fibmean.edge[u][v]['fiber_length_mean'] = di['fiber_length_mean']
-        #fibdev.edge[u][v]['fiber_length_std'] = di['fiber_length_std']
+        if not u==v: #Fix for self loop problem
+            G.add_edge(u, v, di)
+            numfib.add_edge(u, v, weight=di['number_of_fibers'] )
+            fibmean.add_edge(u, v, weight=di['fiber_length_mean'] )
+            fibdev.add_edge(u, v, weight=di['fiber_length_std'] )
+            #numfib.edge[u][v]['number_of_fibers'] = di['number_of_fibers']
+            #fibmean.edge[u][v]['fiber_length_mean'] = di['fiber_length_mean']
+            #fibdev.edge[u][v]['fiber_length_std'] = di['fiber_length_std']
 
     print 'Writing network as {ntwk}'.format(ntwk=matrix_name)
     nx.write_gpickle(G, os.path.abspath(matrix_name))
@@ -338,9 +339,9 @@ class CreateMatrix(BaseInterface):
     def _run_interface(self, runtime):
         if isdefined(self.inputs.out_matrix_file):
             path, name, _ = split_filename(self.inputs.out_matrix_file)
-            matrix_file = os.path.abspath(name + '.gpickle')
+            matrix_file = os.path.abspath(name + '.pck')
         else:
-            matrix_file = self._gen_outfilename('gpickle')
+            matrix_file = self._gen_outfilename('pck')
         if isdefined(self.inputs.out_matrix_mat_file):
             path, name, _ = split_filename(self.inputs.out_matrix_mat_file)
             matrix_mat_file = os.path.abspath(name + '.mat')
@@ -361,9 +362,9 @@ class CreateMatrix(BaseInterface):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.out_matrix_file):
             path, name, _ = split_filename(self.inputs.out_matrix_file)
-            outputs['matrix_file']= os.path.abspath(name + '.gpickle')
+            outputs['matrix_file']= os.path.abspath(name + '.pck')
         else:
-            outputs['matrix_file']=os.path.abspath(self._gen_outfilename('gpickle'))
+            outputs['matrix_file']=os.path.abspath(self._gen_outfilename('pck'))
         if isdefined(self.inputs.out_matrix_mat_file):
             path, name, _ = split_filename(self.inputs.out_matrix_mat_file)
             outputs['matrix_mat_file']= os.path.abspath(name + '.mat')
