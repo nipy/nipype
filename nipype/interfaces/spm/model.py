@@ -340,6 +340,7 @@ class EstimateContrast(SPMCommand):
                 script += "consess{%d}.tcon.convec = zeros(1,numel(names));\n" % (i + 1)
                 for c0, cond in enumerate(contrast.conditions):
                     script += "idx = strmatch('%s',condnames,'exact');\n" % (cond)
+                    script += "if isempty(idx), throw(MException('CondName:Chk', sprintf('Condition %%s not found in design','%s'))); end;\n"%cond
                     if contrast.sessions:
                         for sno, sw in enumerate(contrast.sessions):
                             script += "sidx = find(condsess(idx)==%d);\n" % (sno + 1)
