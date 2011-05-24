@@ -793,9 +793,8 @@ class BaseInterface(Interface):
             isdefined(self.inputs.ignore_exception) and \
             self.inputs.ignore_exception:
                 import traceback, sys
-                runtime.traceback = traceback.print_exc()
+                runtime.traceback = traceback.format_exc()
                 runtime.traceback_args = e.args
-                runtime.return_code = 1
                 return InterfaceResult(interface, runtime)
             else:
                 raise

@@ -43,13 +43,15 @@ class PBSPlugin(SGELikeBatchManagerBase):
                                          '.'.join((os.environ.data['LOGNAME'],
                                                    node._id)),
                                          scriptfile)
-        result = cmd.run()
-        # retrieve pbs taskid
-        if not result.runtime.returncode:
+        try:
+            result = cmd.run()
+        except Exception, e:
+            raise RuntimeError('\n'.join(('Could not submit pbs task for node %s'%node._id,
+                                          str(e))))
+        else:
+            # retrieve pbs taskid
             taskid = result.runtime.stdout.split('.')[0]
             self._pending[taskid] = node.output_dir()
             logger.debug('submitted pbs task: %s for node %s'%(taskid, node._id))
-        else:
-            raise RuntimeError('\n'.join(('Could not submit pbs task for node %s'%node._id,
-                                          result.runtime.stderr)))
+
         return taskid

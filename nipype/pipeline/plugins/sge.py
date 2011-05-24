@@ -41,13 +41,14 @@ class SGEPlugin(SGELikeBatchManagerBase):
         if self._qsub_args:
             qsubargs = self._qsub_args
         cmd.inputs.args = '%s %s'%(qsubargs, scriptfile)
-        result = cmd.run()
-        # retrieve sge taskid
-        if not result.runtime.returncode:
+        try:
+            result = cmd.run()
+        except Exception, e:
+            raise RuntimeError('\n'.join(('Could not submit sge task for node %s'%node._id,
+                                          str(e))))
+        else:
+            # retrieve sge taskid
             taskid = int(result.runtime.stdout.split(' ')[2])
             self._pending[taskid] = node.output_dir()
             logger.debug('submitted sge task: %d for node %s'%(taskid, node._id))
-        else:
-            raise RuntimeError('\n'.join(('Could not submit sge task for node %s'%node._id,
-                                          result.runtime.stderr)))
         return taskid
