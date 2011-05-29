@@ -5,7 +5,7 @@
 
 import sys
 
-from IPython.Release import version as IPyversion
+from IPython import __version__ as IPyversion
 try:
     from IPython.kernel.contexts import ConnectionRefusedError
 except:
