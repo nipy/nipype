@@ -403,6 +403,7 @@ class ThresholdOutputSpec(TraitedSpec):
     pre_topo_fdr_map = File(exists=True)
     pre_topo_n_clusters = traits.Int()
     activation_forced = traits.Bool()
+    cluster_forming_thr = traits.Float()
 
 
 class Threshold(SPMCommand):
@@ -538,8 +539,7 @@ end
 fprintf('activation_forced = %d\\n',activation_forced);
 fprintf('pre_topo_n_clusters = %d\\n',nclusters);
 fprintf('n_clusters = %d\\n',th_nclusters);
-fprintf('pre_topo_n_clusters = %d\\n',nclusters);
-fprintf('n_clusters = %d\\n',th_nclusters);
+fprintf('cluster_forming_thr = %f\\n',cluster_forming_thr);
 
 """
         script += "spm_write_filtered(thresholded_Z,thresholded_XYZ,stat_map_vol.dim',stat_map_vol.mat,'thresholded map', '%s');\n"%self._gen_thresholded_map_filename()
@@ -556,6 +556,8 @@ fprintf('n_clusters = %d\\n',th_nclusters);
                 setattr(outputs,'n_clusters', int(line[len("n_clusters = "):].strip()))
             elif line.startswith("pre_topo_n_clusters = "):
                 setattr(outputs,'pre_topo_n_clusters', int(line[len("pre_topo_n_clusters = "):].strip()))
+            elif line.startswith("cluster_forming_thr = "):
+                setattr(outputs,'cluster_forming_thr', float(line[len("cluster_forming_thr = "):].strip()))
         return outputs
     def _list_outputs(self):
         outputs = self._outputs().get()
