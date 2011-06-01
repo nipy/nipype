@@ -19,7 +19,7 @@ workflow_level = INFO
 filemanip_level = INFO
 interface_level = INFO
 log_directory = %s
-log_size = 254000
+log_size = 16384000
 log_rotate = 4
 
 [execution]
