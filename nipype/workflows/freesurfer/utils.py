@@ -141,3 +141,109 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
             (threshold2, outputnode, [("binary_file", "mask_file")]),
             ])
     return getmask
+
+def create_get_stats_flow(name='getstats', withreg=False):
+    """Retrieves stats from labels
+
+    Parameters
+    ----------
+
+    name : string
+        name of workflow
+    withreg : boolean
+        indicates whether to register source to label
+
+    Example
+    -------
+
+
+    Inputs::
+
+           inputspec.source_file : reference image for mask generation
+           inputspec.label_file : label file from which to get ROIs
+
+           (optionally with registration)
+           inputspec.reg_file : bbreg file (assumes reg from source to label
+           inputspec.inverse : boolean whether to invert the registration
+           inputspec.subjects_dir : freesurfer subjects directory
+
+    Outputs::
+
+           outputspec.stats_file : stats file
+    """
+
+    """
+    Initialize the workflow
+    """
+
+    getstats = pe.Workflow(name=name)
+
+    """
+    Define the inputs to the workflow.
+    """
+
+    if withreg:
+        inputnode = pe.Node(niu.IdentityInterface(fields=['source_file',
+                                                          'label_file',
+                                                          'reg_file',
+                                                          'subjects_dir']),
+                            name='inputspec')
+    else:
+        inputnode = pe.Node(niu.IdentityInterface(fields=['source_file',
+                                                          'label_file']),
+                            name='inputspec')
+
+
+    statnode = pe.MapNode(fs.SegStats(),
+                          iterfield=['segmentation_file','in_file'],
+                          name='segstats')
+
+    """
+    Convert between source and label spaces if registration info is provided
+
+    """
+    if withreg:
+        voltransform = pe.MapNode(fs.ApplyVolTransform(inverse=True),
+                                  iterfield=['source_file', 'reg_file'],
+                                  name='transform')
+        getstats.connect(inputnode, 'reg_file', voltransform, 'reg_file')
+        getstats.connect(inputnode, 'source_file', voltransform, 'source_file')
+        getstats.connect(inputnode, 'label_file', voltransform, 'target_file')
+        getstats.connect(inputnode, 'subjects_dir', voltransform, 'subjects_dir')
+
+        def switch_labels(inverse, transform_output, source_file, label_file):
+            if inverse:
+                return transform_output, source_file
+            else:
+                return label_file, transform_output
+
+        chooser = pe.MapNode(niu.Function(input_names = ['inverse',
+                                                         'transform_output',
+                                                         'source_file',
+                                                         'label_file'],
+                                          output_names = ['label_file',
+                                                          'source_file'],
+                                          function=switch_labels),
+                             iterfield=['transform_output','source_file'],
+                             name='chooser')
+        getstats.connect(inputnode,'source_file', chooser, 'source_file')
+        getstats.connect(inputnode,'label_file', chooser, 'label_file')
+        getstats.connect(inputnode,'inverse', chooser, 'inverse')
+        getstats.connect(voltransform, 'transformed_file', chooser, 'transform_output')
+        getstats.connect(chooser, 'label_file', statnode, 'segmentation_file')
+        getstats.connect(chooser, 'source_file', statnode, 'in_file')
+    else:
+        getstats.connect(inputnode, 'label_file', statnode, 'segmentation_file')
+        getstats.connect(inputnode, 'source_file', statnode, 'in_file')
+
+    """
+    Setup an outputnode that defines relevant inputs of the workflow.
+    """
+
+    outputnode = pe.Node(niu.IdentityInterface(fields=["stats_file"
+                                                        ]),
+                         name="outputspec")
+    getstats.connect([
+            (statnode, outputnode, [("summary_file", "stats_file")]),
+            ])
+    return getstats
