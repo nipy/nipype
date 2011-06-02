@@ -1,6 +1,7 @@
 from nipype.interfaces.base import CommandLine
 import xml.dom.minidom
 import enthought.traits.api as traits
+import subprocess
 
 def generate_all_classes(modules_list = ['BRAINSFit', 'BRAINSResample', 'BRAINSDemonWarp', 'BRAINSROIAuto']):
     init_imports = ""
@@ -109,11 +110,8 @@ def generate_class(module):
     input_spec_code += "\n\n"
     output_spec_code += "\n\n"
     
-    imports = """from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec
-import enthought.traits.api as traits
-import os
-from nipype.interfaces.traits import File, Directory
-from nipype.utils.misc import isdefined\n\n"""
+    imports = """from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined
+import os\n\n"""
     
     template = """class %name%(CommandLine):
     
@@ -150,12 +148,14 @@ from nipype.utils.misc import isdefined\n\n"""
     return imports + input_spec_code + output_spec_code + main_class
 
 def grab_xml(module):
-        cmd = CommandLine(command = "Slicer3", args="--launch %s --xml"%module)
-        ret = cmd.run()
-        if ret.runtime.returncode == 0:
-            return xml.dom.minidom.parseString(ret.runtime.stdout)
-        else:
-            raise Exception(cmd.cmdline + " failed:\n%s"%ret.runtime.stderr)
+#        cmd = CommandLine(command = "Slicer3", args="--launch %s --xml"%module)
+#        ret = cmd.run()
+        stdout = subprocess.Popen(["Slicer3 --launch %s --xml"%module], stdout=subprocess.PIPE, shell=True).communicate()[0]
+        return xml.dom.minidom.parseString(stdout)
+#        if ret.runtime.returncode == 0:
+#            return xml.dom.minidom.parseString(ret.runtime.stdout)
+#        else:
+#            raise Exception(cmd.cmdline + " failed:\n%s"%ret.runtime.stderr)
         
 def parse_params(params):
     list = []
@@ -165,7 +165,7 @@ def parse_params(params):
     return ",".join(list)
 
 def parse_values(values):
-    values = ['"%s"'%value for value in values]
+    values = ['%s'%value for value in values]
     if len(values) > 0:
         retstr = ",".join(values) + ","
     else:

@@ -1,8 +1,5 @@
-from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec
-import enthought.traits.api as traits
+from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined
 import os
-from nipype.interfaces.traits import File, Directory
-from nipype.utils.misc import isdefined
 
 class BRAINSResampleInputSpec(CommandLineInputSpec):
 	inputVolume = File( exists = "True",argstr = "--inputVolume %s")
