@@ -75,7 +75,7 @@ class BRAINSFitOutputSpec(TraitedSpec):
 
 class BRAINSFit(CommandLine):
 
-    input_spec = BRAINSFit
+    input_spec = BRAINSFitInputSpec
     output_spec = BRAINSFitOutputSpec
     _cmd = " BRAINSFit "
     _outputs_filenames = {'outputVolume':'outputVolume.nii','bsplineTransform':'bsplineTransform.mat','outputTransform':'outputTransform.mat','outputFixedVolumeROI':'outputFixedVolumeROI.nii','strippedOutputTransform':'strippedOutputTransform.mat','outputMovingVolumeROI':'outputMovingVolumeROI.nii','linearTransform':'linearTransform.mat'}

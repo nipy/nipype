@@ -125,7 +125,7 @@ import os\n\n"""
 
     template = """class %name%(CommandLine):
 
-    input_spec = %name%
+    input_spec = %name%InputSpec
     output_spec = %name%OutputSpec
     _cmd = "%launcher% %name% "
     %output_filenames_code%
