@@ -51,7 +51,7 @@ class BRAINSDemonWarpOutputSpec(TraitedSpec):
 
 class BRAINSDemonWarp(CommandLine):
 
-    input_spec = BRAINSDemonWarp
+    input_spec = BRAINSDemonWarpInputSpec
     output_spec = BRAINSDemonWarpOutputSpec
     _cmd = " BRAINSDemonWarp "
     _outputs_filenames = {'outputVolume':'outputVolume.nii','outputCheckerboardVolume':'outputCheckerboardVolume.nii','outputDeformationFieldVolume':'outputDeformationFieldVolume.nrrd'}
