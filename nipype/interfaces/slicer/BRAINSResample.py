@@ -19,7 +19,7 @@ class BRAINSResampleOutputSpec(TraitedSpec):
 
 class BRAINSResample(CommandLine):
 
-    input_spec = BRAINSResample
+    input_spec = BRAINSResampleInputSpec
     output_spec = BRAINSResampleOutputSpec
     _cmd = " BRAINSResample "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}

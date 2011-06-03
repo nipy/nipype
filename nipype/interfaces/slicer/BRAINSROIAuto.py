@@ -19,7 +19,7 @@ class BRAINSROIAutoOutputSpec(TraitedSpec):
 
 class BRAINSROIAuto(CommandLine):
 
-    input_spec = BRAINSROIAuto
+    input_spec = BRAINSROIAutoInputSpec
     output_spec = BRAINSROIAutoOutputSpec
     _cmd = " BRAINSROIAuto "
     _outputs_filenames = {'outputROIMaskVolume':'outputROIMaskVolume.nii','outputClippedVolumeROI':'outputClippedVolumeROI.nii'}
