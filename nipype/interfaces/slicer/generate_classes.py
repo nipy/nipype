@@ -52,7 +52,7 @@ def generate_class(module,launcher):
             argsDict = {'directory': '%s', 'file': '%s', 'integer': "%d", 'double': "%f", 'float': "%f", 'image': "%s", 'transform': "%s", 'boolean': '', 'string-enumeration': '%s', 'string': "%s", 'integer-enumeration' : '%s'}
 
             if param.nodeName.endswith('-vector'):
-                traitsParams["argstr"] += argsDict[param.nodeName[:-7]]
+                traitsParams["argstr"] += argsDict[param.nodeName.replace('-vector','')]
             else:
                 traitsParams["argstr"] += argsDict[param.nodeName]
 
@@ -78,14 +78,14 @@ def generate_class(module,launcher):
             elif param.nodeName.endswith('-vector'):
                 type = "traits.List"
                 if param.nodeName in ['file', 'directory', 'image', 'transform']:
-                    values = ["%s(exists=True)"%typesDict[param.nodeName[:-7]]]
+                    values = ["%s(exists=True)"%typesDict[param.nodeName.replace('-vector','')]]
                 else:
-                    values = [typesDict[param.nodeName[:-7]]]
+                    values = [typesDict[param.nodeName.replace('-vector','')]]
                 traitsParams["sep"] = ','
             elif param.getAttribute('multiple') == "true":
                 type = "traits.List"
                 if param.nodeName in ['file', 'directory', 'image', 'transform']:
-                    values = ["%s(exists=True)"%typesDict[param.nodeName[:-7]]]
+                    values = ["%s(exists=True)"%typesDict[param.nodeName]]
                 else:
                     values = [typesDict[param.nodeName]]
                 traitsParams["argstr"] += "..."
