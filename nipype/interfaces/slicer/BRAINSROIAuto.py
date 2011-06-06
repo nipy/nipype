@@ -21,7 +21,7 @@ class BRAINSROIAuto(CommandLine):
 
     input_spec = BRAINSROIAutoInputSpec
     output_spec = BRAINSROIAutoOutputSpec
-    _cmd = " BRAINSROIAuto "
+    _cmd = "Slicer3 --launch BRAINSROIAuto "
     _outputs_filenames = {'outputROIMaskVolume':'outputROIMaskVolume.nii','outputClippedVolumeROI':'outputClippedVolumeROI.nii'}
 
     def _list_outputs(self):
@@ -32,7 +32,7 @@ class BRAINSROIAuto(CommandLine):
                 if isinstance(coresponding_input, bool) and coresponding_input == True:
                     outputs[name] = os.path.abspath(self._outputs_filenames[name])
                 else:
-                    outputs[name] = coresponding_input
+                    outputs[name] = os.path.abspath(coresponding_input)
         return outputs
 
     def _format_arg(self, name, spec, value):
