@@ -8,7 +8,7 @@ class BRAINSResampleInputSpec(CommandLineInputSpec):
     pixelType = traits.Enum("float","short","ushort","int","uint","uchar","binary", argstr = "--pixelType %s")
     deformationVolume = File( exists = "True",argstr = "--deformationVolume %s")
     warpTransform = File( exists = "True",argstr = "--warpTransform %s")
-    interpolationMode = traits.Enum("NearestNeighbor","Linear","ResampleInPlace","BSpline","WindowedSinc", argstr = "--interpolationMode %s")
+    interpolationMode = traits.Enum("NearestNeighbor","Linear","BSpline","WindowedSinc", argstr = "--interpolationMode %s")
     defaultValue = traits.Float( argstr = "--defaultValue %f")
     gridSpacing = traits.List(traits.Int, sep = ",",argstr = "--gridSpacing %d")
 
@@ -21,7 +21,7 @@ class BRAINSResample(CommandLine):
 
     input_spec = BRAINSResampleInputSpec
     output_spec = BRAINSResampleOutputSpec
-    _cmd = " BRAINSResample "
+    _cmd = "Slicer3 --launch BRAINSResample "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
     def _list_outputs(self):
@@ -32,7 +32,7 @@ class BRAINSResample(CommandLine):
                 if isinstance(coresponding_input, bool) and coresponding_input == True:
                     outputs[name] = os.path.abspath(self._outputs_filenames[name])
                 else:
-                    outputs[name] = coresponding_input
+                    outputs[name] = os.path.abspath(coresponding_input)
         return outputs
 
     def _format_arg(self, name, spec, value):
