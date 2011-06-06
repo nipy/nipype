@@ -8,7 +8,7 @@ class BRAINSDemonWarpInputSpec(CommandLineInputSpec):
     outputVolume = traits.Either(traits.Bool, File, argstr = "--outputVolume %s")
     outputDeformationFieldVolume = traits.Either(traits.Bool, File, argstr = "--outputDeformationFieldVolume %s")
     outputPixelType = traits.Enum("float","short","ushort","int","uchar", argstr = "--outputPixelType %s")
-    interpolationMode = traits.Enum("NearestNeighbor","Linear","ResampleInPlace","BSpline","WindowedSinc", argstr = "--interpolationMode %s")
+    interpolationMode = traits.Enum("NearestNeighbor","Linear","BSpline","WindowedSinc", argstr = "--interpolationMode %s")
     registrationFilterType = traits.Enum("Demons","FastSymmetricForces","Diffeomorphic","LogDemons","SymmetricLogDemons", argstr = "--registrationFilterType %s")
     smoothDeformationFieldSigma = traits.Float( argstr = "--smoothDeformationFieldSigma %f")
     numberOfPyramidLevels = traits.Int( argstr = "--numberOfPyramidLevels %d")
@@ -53,7 +53,7 @@ class BRAINSDemonWarp(CommandLine):
 
     input_spec = BRAINSDemonWarpInputSpec
     output_spec = BRAINSDemonWarpOutputSpec
-    _cmd = " BRAINSDemonWarp "
+    _cmd = "Slicer3 --launch BRAINSDemonWarp "
     _outputs_filenames = {'outputVolume':'outputVolume.nii','outputCheckerboardVolume':'outputCheckerboardVolume.nii','outputDeformationFieldVolume':'outputDeformationFieldVolume.nrrd'}
 
     def _list_outputs(self):
@@ -64,7 +64,7 @@ class BRAINSDemonWarp(CommandLine):
                 if isinstance(coresponding_input, bool) and coresponding_input == True:
                     outputs[name] = os.path.abspath(self._outputs_filenames[name])
                 else:
-                    outputs[name] = coresponding_input
+                    outputs[name] = os.path.abspath(coresponding_input)
         return outputs
 
     def _format_arg(self, name, spec, value):

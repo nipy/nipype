@@ -138,7 +138,7 @@ import os\n\n"""
                 if isinstance(coresponding_input, bool) and coresponding_input == True:
                     outputs[name] = os.path.abspath(self._outputs_filenames[name])
                 else:
-                    outputs[name] = coresponding_input
+                    outputs[name] = os.path.abspath(coresponding_input)
         return outputs
 
     def _format_arg(self, name, spec, value):
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     ##        AND calling the module with --xml must be supported and compliant.
     modules_list = ['BRAINSFit', 'BRAINSResample', 'BRAINSDemonWarp', 'BRAINSROIAuto']
     ## SlicerExecutionModel compliant tools that are usually statically built, and don't need the Slicer3 --launcher
-    generate_all_classes(modules_list=modules_list,launcher=[])
+    #generate_all_classes(modules_list=modules_list,launcher=[])
     ## Tools compliant with SlicerExecutionModel called from the Slicer environment (for shared lib compatibility)
-    #launcher=['Slicer3','--launch']
-    #generate_all_classes(modules_list=modules_list, launcher=launcher )
+    launcher=['Slicer3','--launch']
+    generate_all_classes(modules_list=modules_list, launcher=launcher )
