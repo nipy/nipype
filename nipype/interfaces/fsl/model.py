@@ -1152,6 +1152,7 @@ class MELODICInputSpec(FSLCommandInputSpec):
 
 class MELODICOutputSpec(TraitedSpec):
     out_dir = Directory(exists=True)
+    report_dir = Directory(exists=True)
 
 class MELODIC(FSLCommand):
     """Multivariate Exploratory Linear Optimised Decomposition into Independent Components
@@ -1185,11 +1186,14 @@ class MELODIC(FSLCommand):
         outputs['out_dir'] = self.inputs.out_dir
         if not isdefined(outputs['out_dir']):
             outputs['out_dir'] = self._gen_filename("out_dir")
+        if isdefined(self.inputs.report) and self.inputs.report:
+            outputs['report_dir'] = os.path.join(self._gen_filename("out_dir"), "report")
         return outputs
     
     def _gen_filename(self, name):
         if name == "out_dir":
             return os.getcwd()
+        
 
 class SmoothEstimateInputSpec(FSLCommandInputSpec):
     dof = traits.Int(argstr='--dof=%d', mandatory=True,
