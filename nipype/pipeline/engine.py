@@ -470,6 +470,8 @@ class Workflow(WorkflowBase):
     # PRIVATE API AND FUNCTIONS
 
     def _write_report_info(self, workingdir, name, graph):
+        if workingdir is None:
+            workingdir = os.getcwd()
         report_dir = os.path.join(workingdir, name, 'report')
         if os.path.exists(report_dir):
             shutil.rmtree(report_dir)
@@ -579,14 +581,14 @@ window.onload=beginrefresh
         fp.writelines('<pre>Works only with mozilla/firefox browsers</pre><br>\n')
         script_file = os.path.join(os.path.dirname(sys.argv[0]), sys.argv[0])
         fp.writelines('<a href="#" onclick="load(\'%s\',\'content\');return false;">Script</a><br>\n'%(script_file))
-        graph_file = 'file://'+os.path.join(self.base_dir, self.name, 'graph.dot.png')
-        fp.writelines('<a href="#" onclick="loadimg(\'%s\',\'content\');return false;">Graph - requires write_graph() in script</a><br>\n'%(graph_file))
+        if self.base_dir:
+            graph_file = 'file://'+os.path.join(self.base_dir, self.name, 'graph.dot.png')
+            fp.writelines('<a href="#" onclick="loadimg(\'%s\',\'content\');return false;">Graph - requires write_graph() in script</a><br>\n'%(graph_file))
         fp.writelines('<table>\n')
         fp.writelines('<tr><td>Name</td><td>Hierarchy</td><td>Source</td></tr>\n')
         for i, node in enumerate(nodes):
             report_file = '%s/_report/report.rst'%os.path.realpath(node.output_dir())
             local_file = '%s.rst'%node._id
-            #os.symlink(report_file, os.path.join(report_dir, local_file))
             url = '<tr><td id="td%d"><a href="#" onclick="load(\'%s\',\'content\');return false;">%s</a></td>'%(i,report_file, node._id)
             url += '<td>%s</td>'%('.'.join(node.fullname.split('.')[:-1]))
             url += '<td>%s</td></tr>\n'%('.'.join(get_print_name(node).split('.')[1:]))
