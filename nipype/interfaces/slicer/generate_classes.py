@@ -41,13 +41,21 @@ def generate_class(module,launcher):
             traitsParams = {}
 
             name = param.getElementsByTagName('name')[0].firstChild.nodeValue
+            name = name.lstrip().rstrip()
 
             longFlagNode = param.getElementsByTagName('longflag')
             if longFlagNode:
-                traitsParams["argstr"] = "--" + longFlagNode[0].firstChild.nodeValue + " "
+                ## Prefer to use longFlag as name if it is given, rather than the parameter name
+                longFlagName = longFlagNode[0].firstChild.nodeValue
+                ## SEM automatically strips prefixed "--" or "-" from from xml before processing
+                ##     we need to replicate that behavior here The following
+                ##     two nodes in xml have the same behavior in the program
+                ##     <longflag>--test</longflag>
+                ##     <longflag>test</longflag>
+                longFlagName = longFlagName.lstrip(" -").rstrip(" ")
+                traitsParams["argstr"] = "--" + longFlagName + " "
             else:
                 traitsParams["argstr"] = "--" + name + " "
-
 
             argsDict = {'directory': '%s', 'file': '%s', 'integer': "%d", 'double': "%f", 'float': "%f", 'image': "%s", 'transform': "%s", 'boolean': '', 'string-enumeration': '%s', 'string': "%s", 'integer-enumeration' : '%s'}
 
