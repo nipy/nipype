@@ -60,7 +60,7 @@ def generate_class(module,launcher):
             argsDict = {'directory': '%s', 'file': '%s', 'integer': "%d", 'double': "%f", 'float': "%f", 'image': "%s", 'transform': "%s", 'boolean': '', 'string-enumeration': '%s', 'string': "%s", 'integer-enumeration' : '%s'}
 
             if param.nodeName.endswith('-vector'):
-                traitsParams["argstr"] += argsDict[param.nodeName.replace('-vector','')]
+                traitsParams["argstr"] += "%s"
             else:
                 traitsParams["argstr"] += argsDict[param.nodeName]
 
