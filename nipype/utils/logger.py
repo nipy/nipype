@@ -1,6 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
+import logging
 import logging.handlers
 import os
 
@@ -15,8 +16,10 @@ logger = logging.getLogger('workflow')
 fmlogger = logging.getLogger('filemanip')
 iflogger = logging.getLogger('interface')
 hdlr = logging.handlers.RotatingFileHandler(LOG_FILENAME,
-                                            maxBytes=config.get('logging','log_size'),
-                                            backupCount=config.get('logging','log_rotate'))
+                                            maxBytes=int(config.get('logging',
+                                                                    'log_size')),
+                                            backupCount=int(config.get('logging',
+                                                                       'log_rotate')))
 formatter = logging.Formatter(fmt='%(asctime)s,%(msecs)d %(name)-2s '\
                                   '%(levelname)-2s:\n\t %(message)s',
                               datefmt='%y%m%d-%H:%M:%S')
