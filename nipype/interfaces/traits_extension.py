@@ -237,6 +237,9 @@ def isdefined(object):
     return not isinstance(object, _Undefined)
 
 def is_trait_a_file(trait):
+    '''
+    Checks if a given trait could be an exisitng File.
+    '''
     count = 0
     if isinstance(trait.trait_type, File) and hasattr(trait.trait_type, 'exists') and trait.trait_type.exists:
         return True

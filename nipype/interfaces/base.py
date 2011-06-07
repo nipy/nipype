@@ -22,8 +22,7 @@ from warnings import warn
 
 from nipype.interfaces.traits_extension import (traits, Undefined, TraitDictObject,
                                                 TraitListObject, TraitError,
-                                                isdefined, File, Directory,
-    is_trait_a_file)
+                                                isdefined, File, is_trait_a_file)
 from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                     hash_timestamp)
 from nipype.utils.misc import is_container
@@ -467,7 +466,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 out = tuple(out)
         else:
             if isdefined(object):
-                if is_file:
+                if is_file and isinstance(object, str) and os.path.isfile(object):
                     if hash_method == None:
                         hash_method = config.get('execution', 'hash_method')
   
