@@ -188,7 +188,10 @@ def gen_filename_from_param(param):
     base = param.getElementsByTagName('name')[0].firstChild.nodeValue
     fileExtensions = param.getAttribute("fileExtensions")
     if fileExtensions:
-        ext = fileExtensions
+        ## It is possible that multiple file extensions can be specified in a
+        ## comma separated list,  This will extract just the first extension
+        firstFileExtension=fileExtensions.split(',')[0]
+        ext = firstFileExtension
     else:
         ext = {'image': '.nii', 'transform': '.mat', 'file': '', 'directory': ''}[param.nodeName]
     return base + ext
