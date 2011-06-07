@@ -10,7 +10,7 @@ class BRAINSResampleInputSpec(CommandLineInputSpec):
     warpTransform = File( exists = "True",argstr = "--warpTransform %s")
     interpolationMode = traits.Enum("NearestNeighbor","Linear","BSpline","WindowedSinc", argstr = "--interpolationMode %s")
     defaultValue = traits.Float( argstr = "--defaultValue %f")
-    gridSpacing = traits.List(traits.Int, sep = ",",argstr = "--gridSpacing %d")
+    gridSpacing = traits.List(traits.Int, sep = ",",argstr = "--gridSpacing %s")
 
 
 class BRAINSResampleOutputSpec(TraitedSpec):
