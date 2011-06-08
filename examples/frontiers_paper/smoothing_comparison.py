@@ -148,6 +148,8 @@ main_workflow.connect(preprocessing, "realign.realignment_parameters",
                       modelling, "specify_model.realignment_parameters")
 main_workflow.connect(preprocessing, "select_smoothed_files.out", 
                       modelling, "specify_model.functional_runs")
+main_workflow.connect(preprocessing, "compute_mask.brain_mask", 
+                      modelling, "level1design.mask_image")
 
 
 """DataGrabber allows to define flexible search patterns which can be 
