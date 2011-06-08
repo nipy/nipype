@@ -1086,7 +1086,10 @@ class CommandLine(BaseInterface):
                     "string for attr '%s' with value '%s'."  \
                     % (self, trait_spec.name, value)
                 raise ValueError(msg)
-        elif trait_spec.is_trait_type(traits.List):
+        #traits.Either turns into traits.TraitCompound and does not have any inner_traits
+        elif trait_spec.is_trait_type(traits.List) \
+        or (trait_spec.is_trait_type(traits.TraitCompound) \
+        and isinstance(value, list)):
             # This is a bit simple-minded at present, and should be
             # construed as the default. If more sophisticated behavior
             # is needed, it can be accomplished with metadata (e.g.
