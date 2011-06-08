@@ -92,6 +92,12 @@ def chooseindex(roi):
         
 preprocessing.connect(iter_smoothing_method, ("smoothing_method", chooseindex), select_smoothed_files, 'index')
 
+rename = pe.MapNode(util.Rename(format_string="%(orig)s"), name="rename", iterfield=['in_file'])
+rename.inputs.parse_string = "(?P<orig>.*)"
+
+preprocessing.connect(select_smoothed_files, 'out', rename, 'in_file')
+
+
 """Creating a modelling workflow which will define the design, estimate model and 
 contrasts follows the same suite. We will again use SPM implementations. 
 NiPyPe, however, adds extra abstraction layer to model definition which allows 
@@ -170,9 +176,10 @@ regular expression based substitutions. In this example we will store T maps."""
 
 datasink = pe.Node(interface=nio.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.abspath('smoothing_comparison_workflow/output')
+datasink.inputs.regexp_substitutions = [("_rename[0-9]", "")]
 
 main_workflow.connect(modelling, 'contrastestimate.spmT_images', datasink, 'contrasts')
-main_workflow.connect(preprocessing, 'select_smoothed_files.out', datasink, 'smoothed_epi')
+main_workflow.connect(preprocessing, 'rename.out_file', datasink, 'smoothed_epi')
 
 main_workflow.run()
 main_workflow.write_graph()
