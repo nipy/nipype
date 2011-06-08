@@ -1,10 +1,10 @@
-from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined
+from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined, InputMultiPath, OutputMultiPath
 import os
 
 class BRAINSROIAutoInputSpec(CommandLineInputSpec):
-    inputVolume = File( exists = "True",argstr = "--inputVolume %s")
-    outputROIMaskVolume = traits.Either(traits.Bool, File, argstr = "--outputROIMaskVolume %s")
-    outputClippedVolumeROI = traits.Either(traits.Bool, File, argstr = "--outputClippedVolumeROI %s")
+    inputVolume = File( exists = True,argstr = "--inputVolume %s")
+    outputROIMaskVolume = traits.Either(traits.Bool, File(), argstr = "--outputROIMaskVolume %s")
+    outputClippedVolumeROI = traits.Either(traits.Bool, File(), argstr = "--outputClippedVolumeROI %s")
     otsuPercentileThreshold = traits.Float( argstr = "--otsuPercentileThreshold %f")
     thresholdCorrectionFactor = traits.Float( argstr = "--thresholdCorrectionFactor %f")
     closingSize = traits.Float( argstr = "--closingSize %f")
@@ -13,8 +13,8 @@ class BRAINSROIAutoInputSpec(CommandLineInputSpec):
 
 
 class BRAINSROIAutoOutputSpec(TraitedSpec):
-    outputROIMaskVolume = File(exists=True, argstr = "--outputROIMaskVolume %s")
-    outputClippedVolumeROI = File(exists=True, argstr = "--outputClippedVolumeROI %s")
+    outputROIMaskVolume = File( exists = True)
+    outputClippedVolumeROI = File( exists = True)
 
 
 class BRAINSROIAuto(CommandLine):
@@ -32,7 +32,10 @@ class BRAINSROIAuto(CommandLine):
                 if isinstance(coresponding_input, bool) and coresponding_input == True:
                     outputs[name] = os.path.abspath(self._outputs_filenames[name])
                 else:
-                    outputs[name] = os.path.abspath(coresponding_input)
+                    if isinstance(coresponding_input, list):
+                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
+                    else:
+                        outputs[name] = os.path.abspath(coresponding_input)
         return outputs
 
     def _format_arg(self, name, spec, value):

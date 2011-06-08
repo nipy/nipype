@@ -84,14 +84,14 @@ def generate_class(module,launcher):
                 type = "traits.Enum"
                 values = ['"%s"'%el.firstChild.nodeValue for el in param.getElementsByTagName('element')]
             elif param.nodeName.endswith('-vector'):
-                type = "traits.List"
+                type = "InputMultiPath"
                 if param.nodeName in ['file', 'directory', 'image', 'transform']:
                     values = ["%s(exists=True)"%typesDict[param.nodeName.replace('-vector','')]]
                 else:
                     values = [typesDict[param.nodeName.replace('-vector','')]]
                 traitsParams["sep"] = ','
             elif param.getAttribute('multiple') == "true":
-                type = "traits.List"
+                type = "InputMultiPath"
                 if param.nodeName in ['file', 'directory', 'image', 'transform']:
                     values = ["%s(exists=True)"%typesDict[param.nodeName]]
                 else:
@@ -102,8 +102,13 @@ def generate_class(module,launcher):
                 type = typesDict[param.nodeName]
 
             if param.nodeName in ['file', 'directory', 'image', 'transform'] and param.getElementsByTagName('channel')[0].firstChild.nodeValue == 'output':
-                inputTraits.append("%s = traits.Either(traits.Bool, %s, %s)"%(name, type, parse_params(traitsParams)))
-                outputTraits.append("%s = %s(exists=True, %s)"%(name, type, parse_params(traitsParams)))
+                inputTraits.append("%s = traits.Either(traits.Bool, %s(%s), %s)"%(name, 
+                                                                                 type, 
+                                                                                 parse_values(values).replace("exists=True",""), 
+                                                                                 parse_params(traitsParams)))
+                traitsParams["exists"] = True
+                traitsParams.pop("argstr")
+                outputTraits.append("%s = %s(%s %s)"%(name, type.replace("Input", "Output"), parse_values(values), parse_params(traitsParams)))
 
                 outputs_filenames[name] = gen_filename_from_param(param)
             else:
@@ -128,7 +133,7 @@ def generate_class(module,launcher):
     input_spec_code += "\n\n"
     output_spec_code += "\n\n"
 
-    imports = """from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined
+    imports = """from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined, InputMultiPath, OutputMultiPath
 import os\n\n"""
 
     template = """class %name%(CommandLine):
@@ -146,7 +151,10 @@ import os\n\n"""
                 if isinstance(coresponding_input, bool) and coresponding_input == True:
                     outputs[name] = os.path.abspath(self._outputs_filenames[name])
                 else:
-                    outputs[name] = os.path.abspath(coresponding_input)
+                    if isinstance(coresponding_input, list):
+                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
+                    else:
+                        outputs[name] = os.path.abspath(coresponding_input)
         return outputs
 
     def _format_arg(self, name, spec, value):
@@ -178,7 +186,10 @@ def grab_xml(module,launcher):
 def parse_params(params):
     list = []
     for key, value in params.iteritems():
-        list.append('%s = "%s"'%(key, value))
+        if isinstance(value, str) or isinstance(value, unicode):
+            list.append('%s = "%s"'%(key, value))
+        else:
+            list.append('%s = %s'%(key, value))
 
     return ",".join(list)
 
@@ -212,3 +223,4 @@ if __name__ == "__main__":
     ## Tools compliant with SlicerExecutionModel called from the Slicer environment (for shared lib compatibility)
     launcher=['Slicer3','--launch']
     generate_all_classes(modules_list=modules_list, launcher=launcher )
+    #generate_all_classes(modules_list=['BRAINSABC'], launcher=[] )
