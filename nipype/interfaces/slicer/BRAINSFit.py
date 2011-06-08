@@ -1,10 +1,10 @@
-from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined
+from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined, InputMultiPath, OutputMultiPath
 import os
 
 class BRAINSFitInputSpec(CommandLineInputSpec):
-    fixedVolume = File( exists = "True",argstr = "--fixedVolume %s")
-    movingVolume = File( exists = "True",argstr = "--movingVolume %s")
-    initialTransform = File( exists = "True",argstr = "--initialTransform %s")
+    fixedVolume = File( exists = True,argstr = "--fixedVolume %s")
+    movingVolume = File( exists = True,argstr = "--movingVolume %s")
+    initialTransform = File( exists = True,argstr = "--initialTransform %s")
     useMomentsAlign = traits.Bool( argstr = "--useMomentsAlign ")
     useGeometryAlign = traits.Bool( argstr = "--useGeometryAlign ")
     useCenterOfHeadAlign = traits.Bool( argstr = "--useCenterOfHeadAlign ")
@@ -13,33 +13,33 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
     useScaleSkewVersor3D = traits.Bool( argstr = "--useScaleSkewVersor3D ")
     useAffine = traits.Bool( argstr = "--useAffine ")
     useBSpline = traits.Bool( argstr = "--useBSpline ")
-    bsplineTransform = traits.Either(traits.Bool, File, argstr = "--bsplineTransform %s")
-    linearTransform = traits.Either(traits.Bool, File, argstr = "--linearTransform %s")
-    outputTransform = traits.Either(traits.Bool, File, argstr = "--outputTransform %s")
-    outputVolume = traits.Either(traits.Bool, File, argstr = "--outputVolume %s")
+    bsplineTransform = traits.Either(traits.Bool, File(), argstr = "--bsplineTransform %s")
+    linearTransform = traits.Either(traits.Bool, File(), argstr = "--linearTransform %s")
+    outputTransform = traits.Either(traits.Bool, File(), argstr = "--outputTransform %s")
+    outputVolume = traits.Either(traits.Bool, File(), argstr = "--outputVolume %s")
     outputVolumePixelType = traits.Enum("float","short","ushort","int","uint","uchar", argstr = "--outputVolumePixelType %s")
-    transformType = traits.List(traits.Str, sep = ",",argstr = "--transformType %s")
-    numberOfIterations = traits.List(traits.Int, sep = ",",argstr = "--numberOfIterations %s")
+    transformType = InputMultiPath(traits.Str, sep = ",",argstr = "--transformType %s")
+    numberOfIterations = InputMultiPath(traits.Int, sep = ",",argstr = "--numberOfIterations %s")
     numberOfSamples = traits.Int( argstr = "--numberOfSamples %d")
-    minimumStepSize = traits.List(traits.Float, sep = ",",argstr = "--minimumStepSize %s")
+    minimumStepSize = InputMultiPath(traits.Float, sep = ",",argstr = "--minimumStepSize %s")
     translationScale = traits.Float( argstr = "--translationScale %f")
     reproportionScale = traits.Float( argstr = "--reproportionScale %f")
     skewScale = traits.Float( argstr = "--skewScale %f")
-    splineGridSize = traits.List(traits.Int, sep = ",",argstr = "--splineGridSize %s")
+    splineGridSize = InputMultiPath(traits.Int, sep = ",",argstr = "--splineGridSize %s")
     maxBSplineDisplacement = traits.Float( argstr = "--maxBSplineDisplacement %f")
-    strippedOutputTransform = traits.Either(traits.Bool, File, argstr = "--strippedOutputTransform %s")
+    strippedOutputTransform = traits.Either(traits.Bool, File(), argstr = "--strippedOutputTransform %s")
     backgroundFillValue = traits.Float( argstr = "--backgroundFillValue %f")
     maskInferiorCutOffFromCenter = traits.Float( argstr = "--maskInferiorCutOffFromCenter %f")
     scaleOutputValues = traits.Bool( argstr = "--scaleOutputValues ")
     interpolationMode = traits.Enum("NearestNeighbor","Linear","BSpline","WindowedSinc", argstr = "--interpolationMode %s")
     maskProcessingMode = traits.Enum("NOMASK","ROIAUTO","ROI", argstr = "--maskProcessingMode %s")
-    outputFixedVolumeROI = traits.Either(traits.Bool, File, argstr = "--outputFixedVolumeROI %s")
-    outputMovingVolumeROI = traits.Either(traits.Bool, File, argstr = "--outputMovingVolumeROI %s")
-    fixedBinaryVolume = File( exists = "True",argstr = "--fixedBinaryVolume %s")
-    movingBinaryVolume = File( exists = "True",argstr = "--movingBinaryVolume %s")
+    outputFixedVolumeROI = traits.Either(traits.Bool, File(), argstr = "--outputFixedVolumeROI %s")
+    outputMovingVolumeROI = traits.Either(traits.Bool, File(), argstr = "--outputMovingVolumeROI %s")
+    fixedBinaryVolume = File( exists = True,argstr = "--fixedBinaryVolume %s")
+    movingBinaryVolume = File( exists = True,argstr = "--movingBinaryVolume %s")
     fixedVolumeTimeIndex = traits.Int( argstr = "--fixedVolumeTimeIndex %d")
     movingVolumeTimeIndex = traits.Int( argstr = "--movingVolumeTimeIndex %d")
-    medianFilterSize = traits.List(traits.Int, sep = ",",argstr = "--medianFilterSize %s")
+    medianFilterSize = InputMultiPath(traits.Int, sep = ",",argstr = "--medianFilterSize %s")
     histogramMatch = traits.Bool( argstr = "--histogramMatch ")
     numberOfHistogramBins = traits.Int( argstr = "--numberOfHistogramBins %d")
     numberOfMatchPoints = traits.Int( argstr = "--numberOfMatchPoints %d")
@@ -56,17 +56,17 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
     projectedGradientTolerance = traits.Float( argstr = "--projectedGradientTolerance %f")
     UseDebugImageViewer = traits.Bool( argstr = "--gui ")
     PromptAfterImageSend = traits.Bool( argstr = "--promptUser ")
-    permitParameterVariation = traits.List(traits.Int, sep = ",",argstr = "--permitParameterVariation %s")
+    permitParameterVariation = InputMultiPath(traits.Int, sep = ",",argstr = "--permitParameterVariation %s")
 
 
 class BRAINSFitOutputSpec(TraitedSpec):
-    bsplineTransform = File(exists=True, argstr = "--bsplineTransform %s")
-    linearTransform = File(exists=True, argstr = "--linearTransform %s")
-    outputTransform = File(exists=True, argstr = "--outputTransform %s")
-    outputVolume = File(exists=True, argstr = "--outputVolume %s")
-    strippedOutputTransform = File(exists=True, argstr = "--strippedOutputTransform %s")
-    outputFixedVolumeROI = File(exists=True, argstr = "--outputFixedVolumeROI %s")
-    outputMovingVolumeROI = File(exists=True, argstr = "--outputMovingVolumeROI %s")
+    bsplineTransform = File( exists = True)
+    linearTransform = File( exists = True)
+    outputTransform = File( exists = True)
+    outputVolume = File( exists = True)
+    strippedOutputTransform = File( exists = True)
+    outputFixedVolumeROI = File( exists = True)
+    outputMovingVolumeROI = File( exists = True)
 
 
 class BRAINSFit(CommandLine):
@@ -84,7 +84,10 @@ class BRAINSFit(CommandLine):
                 if isinstance(coresponding_input, bool) and coresponding_input == True:
                     outputs[name] = os.path.abspath(self._outputs_filenames[name])
                 else:
-                    outputs[name] = os.path.abspath(coresponding_input)
+                    if isinstance(coresponding_input, list):
+                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
+                    else:
+                        outputs[name] = os.path.abspath(coresponding_input)
         return outputs
 
     def _format_arg(self, name, spec, value):

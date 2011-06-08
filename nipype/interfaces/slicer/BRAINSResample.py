@@ -1,20 +1,20 @@
-from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined
+from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined, InputMultiPath, OutputMultiPath
 import os
 
 class BRAINSResampleInputSpec(CommandLineInputSpec):
-    inputVolume = File( exists = "True",argstr = "--inputVolume %s")
-    referenceVolume = File( exists = "True",argstr = "--referenceVolume %s")
-    outputVolume = traits.Either(traits.Bool, File, argstr = "--outputVolume %s")
+    inputVolume = File( exists = True,argstr = "--inputVolume %s")
+    referenceVolume = File( exists = True,argstr = "--referenceVolume %s")
+    outputVolume = traits.Either(traits.Bool, File(), argstr = "--outputVolume %s")
     pixelType = traits.Enum("float","short","ushort","int","uint","uchar","binary", argstr = "--pixelType %s")
-    deformationVolume = File( exists = "True",argstr = "--deformationVolume %s")
-    warpTransform = File( exists = "True",argstr = "--warpTransform %s")
+    deformationVolume = File( exists = True,argstr = "--deformationVolume %s")
+    warpTransform = File( exists = True,argstr = "--warpTransform %s")
     interpolationMode = traits.Enum("NearestNeighbor","Linear","BSpline","WindowedSinc", argstr = "--interpolationMode %s")
     defaultValue = traits.Float( argstr = "--defaultValue %f")
-    gridSpacing = traits.List(traits.Int, sep = ",",argstr = "--gridSpacing %s")
+    gridSpacing = InputMultiPath(traits.Int, sep = ",",argstr = "--gridSpacing %s")
 
 
 class BRAINSResampleOutputSpec(TraitedSpec):
-    outputVolume = File(exists=True, argstr = "--outputVolume %s")
+    outputVolume = File( exists = True)
 
 
 class BRAINSResample(CommandLine):
@@ -32,7 +32,10 @@ class BRAINSResample(CommandLine):
                 if isinstance(coresponding_input, bool) and coresponding_input == True:
                     outputs[name] = os.path.abspath(self._outputs_filenames[name])
                 else:
-                    outputs[name] = os.path.abspath(coresponding_input)
+                    if isinstance(coresponding_input, list):
+                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
+                    else:
+                        outputs[name] = os.path.abspath(coresponding_input)
         return outputs
 
     def _format_arg(self, name, spec, value):
