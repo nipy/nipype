@@ -21,6 +21,7 @@ from ..utils import (nx, dfs_preorder)
 from ..engine import (MapNode, str2bool)
 
 from nipype.utils.filemanip import savepkl, loadpkl
+import traceback
 
 logger = logging.getLogger('workflow')
 
