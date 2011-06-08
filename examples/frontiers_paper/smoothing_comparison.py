@@ -53,9 +53,11 @@ preprocessing.connect(realign, "mean_image", compute_mask, "mean_volume")
 
 anisotropic_voxel_smooth = fsl_wf.create_susan_smooth(name="anisotropic_voxel_smooth", 
                                                       separate_masks=False)
+anisotropic_voxel_smooth.inputs.smooth.output_type = 'NIFTI'
 preprocessing.connect(realign, "realigned_files", anisotropic_voxel_smooth, "inputnode.in_files")
 preprocessing.connect(iter_fwhm, "fwhm", anisotropic_voxel_smooth, "inputnode.fwhm")
 preprocessing.connect(compute_mask, "brain_mask", anisotropic_voxel_smooth, 'inputnode.mask_file')
+
 
 
 recon_all = pe.Node(interface=fs.ReconAll(), name = "recon_all")
@@ -86,7 +88,7 @@ select_smoothed_files = pe.Node(interface=util.Select(), name="select_smoothed_f
 preprocessing.connect(merge_smoothed_files, 'out', select_smoothed_files, 'inlist')
         
 def chooseindex(roi):
-    return {'isotropic_voxel':0, 'anisotropic_voxel':1, 'isotropic_surface':2}[roi]
+    return {'isotropic_voxel':range(0,4), 'anisotropic_voxel':range(4,8), 'isotropic_surface':range(8,12)}[roi]
         
 preprocessing.connect(iter_smoothing_method, ("smoothing_method", chooseindex), select_smoothed_files, 'index')
 
@@ -167,9 +169,10 @@ specified location. It supports automatic creation of folder stricter and
 regular expression based substitutions. In this example we will store T maps."""
 
 datasink = pe.Node(interface=nio.DataSink(), name="datasink")
-datasink.inputs.base_directory = os.path.abspath('workflow_from_scratch/output')
+datasink.inputs.base_directory = os.path.abspath('smoothing_comparison_workflow/output')
 
-main_workflow.connect(modelling, 'contrastestimate.spmT_images', datasink, 'contrasts.@T')
+main_workflow.connect(modelling, 'contrastestimate.spmT_images', datasink, 'contrasts')
+main_workflow.connect(preprocessing, 'select_smoothed_files.out', datasink, 'smoothed_epi')
 
 main_workflow.run()
 main_workflow.write_graph()
