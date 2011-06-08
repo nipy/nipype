@@ -262,7 +262,7 @@ class Split(IOBase):
 
 class SelectInputSpec(BaseInterfaceInputSpec):
     inlist = InputMultiPath(traits.Any, mandatory=True,
-                  desc='list of values to choose from')
+                  desc='list of values to choose from', exists=True)
     index = InputMultiPath(traits.Int, mandatory=True,
                   desc='0-based indices of values to choose')
     

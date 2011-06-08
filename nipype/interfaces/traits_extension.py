@@ -241,7 +241,7 @@ def is_trait_a_file(trait):
     Checks if a given trait could be an exisitng File.
     '''
     count = 0
-    if isinstance(trait, File) and hasattr(trait, 'exists') and trait.exists:
+    if hasattr(trait, 'exists') and trait.exists:
         return True
     if hasattr(trait, 'inner_traits'):
         for inner_trait in trait.inner_traits():
