@@ -74,6 +74,7 @@ preprocessing.connect(surfregister, 'out_reg_file', isotropic_surface_smooth, 'r
 preprocessing.connect(realign, "realigned_files", isotropic_surface_smooth, "in_file")
 preprocessing.connect(iter_fwhm, "fwhm", isotropic_surface_smooth, "surface_fwhm")
 preprocessing.connect(iter_fwhm, "fwhm", isotropic_surface_smooth, "vol_fwhm")
+preprocessing.connect(recon_all, 'subjects_dir', isotropic_surface_smooth, 'subjects_dir')
 
 merge_smoothed_files = pe.Node(interface=util.Merge(3),
                                name='merge_smoothed_files')
