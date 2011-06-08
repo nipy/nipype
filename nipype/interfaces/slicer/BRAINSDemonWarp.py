@@ -71,11 +71,8 @@ class BRAINSDemonWarp(CommandLine):
         if name in self._outputs_filenames.keys():
             if isinstance(value, bool):
                 if value == True:
-                    fname = os.path.abspath(self._outputs_filenames[name])
+                    value = os.path.abspath(self._outputs_filenames[name])
                 else:
                     return ""
-            else:
-                fname = value
-            return spec.argstr % fname
         return super(BRAINSDemonWarp, self)._format_arg(name, spec, value)
 
