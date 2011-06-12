@@ -236,19 +236,20 @@ Undefined = _Undefined()
 def isdefined(object):
     return not isinstance(object, _Undefined)
 
-def is_trait_a_file(trait):
+def has_metadata(trait, metadata, value, recursive=True):
     '''
-    Checks if a given trait could be an exisitng File.
+    Checks if a given trait has a metadata set to particular value
     '''
     count = 0
-    if hasattr(trait, 'exists') and trait.exists:
-        return True
-    if hasattr(trait, 'inner_traits'):
-        for inner_trait in trait.inner_traits():
-            count += is_trait_a_file(inner_trait.trait_type)
-    if hasattr(trait, 'handlers') and trait.handlers != None:
-        for inner_trait in trait.handlers:
-            count += is_trait_a_file(inner_trait)
+    if hasattr(trait, metadata) and getattr(trait, metadata) == value:
+        count += 1
+    if recursive:
+        if hasattr(trait, 'inner_traits'):
+            for inner_trait in trait.inner_traits():
+                count += has_metadata(inner_trait.trait_type, metadata, recursive)
+        if hasattr(trait, 'handlers') and trait.handlers != None:
+            for inner_trait in trait.handlers:
+                count += has_metadata(inner_trait.trait_type, metadata, recursive)
             
     return count > 0
 

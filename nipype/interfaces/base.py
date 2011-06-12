@@ -22,7 +22,7 @@ from warnings import warn
 
 from nipype.interfaces.traits_extension import (traits, Undefined, TraitDictObject,
                                                 TraitListObject, TraitError,
-                                                isdefined, File, Directory, is_trait_a_file)
+                                                isdefined, File, Directory, has_metadata)
 from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                     hash_timestamp)
 from nipype.utils.misc import is_container
@@ -447,27 +447,27 @@ class BaseTraitedSpec(traits.HasTraits):
         for name, val in sorted(self.get().items()):
             if isdefined(val):
                 trait = self.trait(name)
-                is_file = is_trait_a_file(trait.trait_type)
-                dict_nofilename[name] = self._get_sorteddict(val, hash_method=hash_method, is_file=is_file)
-                dict_withhash[name] = self._get_sorteddict(val,True, hash_method=hash_method, is_file=is_file)
+                hash_files = has_metadata(trait.trait_type, "hash_files", False)
+                dict_nofilename[name] = self._get_sorteddict(val, hash_method=hash_method, hash_files=hash_files)
+                dict_withhash[name] = self._get_sorteddict(val,True, hash_method=hash_method, hash_files=hash_files)
         return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
 
-    def _get_sorteddict(self, object, dictwithhash=False, hash_method=None, is_file=False):
+    def _get_sorteddict(self, object, dictwithhash=False, hash_method=None, hash_files=True):
         if isinstance(object, dict):
             out = {}
             for key, val in sorted(object.items()):
                 if isdefined(val):
-                    out[key] = self._get_sorteddict(val, dictwithhash, hash_method=hash_method, is_file=is_file)
+                    out[key] = self._get_sorteddict(val, dictwithhash, hash_method=hash_method, hash_files=hash_files)
         elif isinstance(object, (list,tuple)):
             out = []
             for val in object:
                 if isdefined(val):
-                    out.append(self._get_sorteddict(val, dictwithhash, hash_method=hash_method, is_file=is_file))
+                    out.append(self._get_sorteddict(val, dictwithhash, hash_method=hash_method, hash_files=hash_files))
             if isinstance(object, tuple):
                 out = tuple(out)
         else:
             if isdefined(object):
-                if is_file and isinstance(object, str) and os.path.isfile(object):
+                if hash_files and isinstance(object, str) and os.path.isfile(object):
                     if hash_method == None:
                         hash_method = config.get('execution', 'hash_method')
   
