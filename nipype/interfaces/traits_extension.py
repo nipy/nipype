@@ -248,8 +248,8 @@ def has_metadata(trait, metadata, value, recursive=True):
             for inner_trait in trait.inner_traits():
                 count += has_metadata(inner_trait.trait_type, metadata, recursive)
         if hasattr(trait, 'handlers') and trait.handlers != None:
-            for inner_trait in trait.handlers:
-                count += has_metadata(inner_trait.trait_type, metadata, recursive)
+            for handler in trait.handlers:
+                count += has_metadata(handler, metadata, recursive)
             
     return count > 0
 
