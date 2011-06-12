@@ -125,7 +125,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                          'replacement string. Invoked after '
                                          'string `substitutions`'))
 
-    _outputs = traits.Dict(traits.Str, value={}, usedefault=True, exists=True)
+    _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
     remove_dest_dir = traits.Bool(False, usedefault=True,
                                   desc='remove dest directory when copying dirs')
 
