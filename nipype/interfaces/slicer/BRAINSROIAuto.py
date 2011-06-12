@@ -3,8 +3,8 @@ import os
 
 class BRAINSROIAutoInputSpec(CommandLineInputSpec):
     inputVolume = File( exists = True,argstr = "--inputVolume %s")
-    outputROIMaskVolume = traits.Either(traits.Bool, File(), argstr = "--outputROIMaskVolume %s")
-    outputClippedVolumeROI = traits.Either(traits.Bool, File(), argstr = "--outputClippedVolumeROI %s")
+    outputROIMaskVolume = traits.Either(traits.Bool, File(), hash_files = False,argstr = "--outputROIMaskVolume %s")
+    outputClippedVolumeROI = traits.Either(traits.Bool, File(), hash_files = False,argstr = "--outputClippedVolumeROI %s")
     otsuPercentileThreshold = traits.Float( argstr = "--otsuPercentileThreshold %f")
     thresholdCorrectionFactor = traits.Float( argstr = "--thresholdCorrectionFactor %f")
     closingSize = traits.Float( argstr = "--closingSize %f")

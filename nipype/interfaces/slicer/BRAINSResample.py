@@ -4,7 +4,7 @@ import os
 class BRAINSResampleInputSpec(CommandLineInputSpec):
     inputVolume = File( exists = True,argstr = "--inputVolume %s")
     referenceVolume = File( exists = True,argstr = "--referenceVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), argstr = "--outputVolume %s")
+    outputVolume = traits.Either(traits.Bool, File(), hash_files = False,argstr = "--outputVolume %s")
     pixelType = traits.Enum("float","short","ushort","int","uint","uchar","binary", argstr = "--pixelType %s")
     deformationVolume = File( exists = True,argstr = "--deformationVolume %s")
     warpTransform = File( exists = True,argstr = "--warpTransform %s")
