@@ -295,6 +295,7 @@ class Distance(BaseInterface):
 class OverlapInputSpec(BaseInterfaceInputSpec):
     volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
     volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
+    mask_volume = File(exists=True, desc="calculate overlap only within this mask.")
     out_file = File("diff.nii", usedefault=True)
 
 class OverlapOutputSpec(TraitedSpec):
@@ -331,6 +332,12 @@ class Overlap(BaseInterface):
 
         origdata1 = np.logical_not(np.logical_or(nii1.get_data() == 0, np.isnan(nii1.get_data())))
         origdata2 = np.logical_not(np.logical_or(nii2.get_data() == 0, np.isnan(nii2.get_data())))
+        
+        if isdefined(self.inputs.mask_volume):
+            maskdata = nb.load(self.inputs.mask_volume).get_data()
+            origdata1 = np.logical_and(maskdata, origdata1)
+            origdata2 = np.logical_and(maskdata, origdata2)
+            
         for method in ("dice", "jaccard"):
 
             setattr(self, '_' + method, self._bool_vec_dissimilarity(origdata1, origdata2, method = method))
