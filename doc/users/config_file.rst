@@ -34,14 +34,14 @@ Execution
 ~~~~~~~~~~~
 
 *plugin*
-	This defines which execution plugin to use. (possible values:
-    ``Linear``, ``MultiProc``, ``SGE``, ``IPython``; default: ``Linear``)
+	This defines which execution plugin to use. (possible values: 
+    ``Linear``, ``MultiProc``, ``SGE``, ``IPython``; default value: ``Linear``)
 
 *stop_on_first_crash*
 	Should the workflow stop upon first node crashing or try to execute as many
 	nodes as possible? (possible values: ``true`` and ``false``; default value:
 	``false``)
-	
+
 *stop_on_first_rerun*
 	Should the workflow stop upon first node trying to recompute (by that we
 	mean rerunning a node that has been run before - this can happen due changed
