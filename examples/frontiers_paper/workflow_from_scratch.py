@@ -1,5 +1,3 @@
-# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
-# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 =====================
 Workflow from scratch
@@ -49,8 +47,8 @@ preprocessing workflow (see Figure TODO)."""
 preprocessing = pe.Workflow(name="preprocessing")
 preprocessing.connect(realign, "realigned_files", smooth, "in_files")
 
-"""Creating a modelling workflow which will define the design, estimate model and 
-contrasts follows the same suite. We will again use SPM implementations. 
+"""Creating a modelling workflow which will define the design, estimate model 
+and contrasts follows the same suite. We will again use SPM implementations. 
 NiPyPe, however, adds extra abstraction layer to model definition which allows 
 using the same definition for many model estimation implemantations (for 
 example one from FSL or nippy). Therefore we will need four nodes: 
@@ -65,7 +63,8 @@ specify_model.inputs.input_units             = 'secs'
 specify_model.inputs.time_repetition         = 3.
 specify_model.inputs.high_pass_filter_cutoff = 120
 specify_model.inputs.subject_info = [Bunch(conditions=['Task-Odd','Task-Even'],
-                                           onsets=[range(15,240,60),range(45,240,60)],
+                                           onsets=[range(15,240,60),
+                                                   range(45,240,60)],
                                            durations=[[15], [15]])]*4
 
 level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")
@@ -76,7 +75,8 @@ level1design.inputs.interscan_interval = specify_model.inputs.time_repetition
 level1estimate = pe.Node(interface=spm.EstimateModel(), name="level1estimate")
 level1estimate.inputs.estimation_method = {'Classical' : 1}
 
-contrastestimate = pe.Node(interface = spm.EstimateContrast(), name="contrastestimate")
+contrastestimate = pe.Node(interface = spm.EstimateContrast(), 
+                           name="contrastestimate")
 cont1 = ('Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5])
 cont2 = ('Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1])
 contrastestimate.inputs.contrasts = [cont1, cont2]
@@ -84,14 +84,16 @@ contrastestimate.inputs.contrasts = [cont1, cont2]
 modelling = pe.Workflow(name="modelling")
 modelling.connect(specify_model, 'session_info', level1design, 'session_info')
 modelling.connect(level1design, 'spm_mat_file', level1estimate, 'spm_mat_file')
-modelling.connect(level1estimate,'spm_mat_file', contrastestimate,'spm_mat_file')
+modelling.connect(level1estimate,'spm_mat_file', 
+                  contrastestimate,'spm_mat_file')
 modelling.connect(level1estimate,'beta_images', contrastestimate,'beta_images')
-modelling.connect(level1estimate,'residual_image', contrastestimate,'residual_image')
+modelling.connect(level1estimate,'residual_image', 
+                  contrastestimate,'residual_image')
 
-"""Having preprocessing and modelling workflows we need to connect them together, 
-add data grabbing facility and save the results. For this we will create a 
-master Workflow which will host preprocessing and model Workflows as well as 
-DataGrabber and DataSink Nodes. NiPyPe allows connecting Nodes between 
+"""Having preprocessing and modelling workflows we need to connect them 
+together, add data grabbing facility and save the results. For this we will 
+create a master Workflow which will host preprocessing and model Workflows as 
+well as DataGrabber and DataSink Nodes. NiPyPe allows connecting Nodes between 
 Workflows. We will use this feature to connect realignment_parameters and 
 smoothed_files to modelling workflow."""
 
@@ -116,7 +118,8 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                      name = 'datasource')
 datasource.inputs.base_directory = os.path.abspath('data')
 datasource.inputs.template = '%s/%s.nii'
-datasource.inputs.template_args = dict(func=[['subject_id', ['f3','f5','f7','f10']]])
+datasource.inputs.template_args = dict(func=[['subject_id', 
+                                              ['f3','f5','f7','f10']]])
 datasource.inputs.subject_id = 's1'
 
 main_workflow.connect(datasource, 'func', preprocessing, 'realign.in_files')
@@ -128,7 +131,8 @@ regular expression based substitutions. In this example we will store T maps."""
 datasink = pe.Node(interface=nio.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.abspath('workflow_from_scratch/output')
 
-main_workflow.connect(modelling, 'contrastestimate.spmT_images', datasink, 'contrasts.@T')
+main_workflow.connect(modelling, 'contrastestimate.spmT_images', 
+                      datasink, 'contrasts.@T')
 
 main_workflow.run()
 main_workflow.write_graph()
