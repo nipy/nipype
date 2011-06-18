@@ -1,3 +1,0 @@
-"""
-lib.traits.logger.agent
-"""
