@@ -31,7 +31,7 @@ SciPy_ 0.7 - 0.9
   json is included in Python 2.6, but if you are using Python 2.5 you
   will need to install simplejson.
 
-Enthought_ Traits_ 3.2.0 or 3.6.1
+Enthought_ Traits_ 4.0.0
 
 .. note::
 
@@ -42,16 +42,9 @@ Nibabel_
 Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
 
-IPython_ 0.10
-  Interactive python environment. This is necessary for the parallel
+IPython_ 0.10.2 or 0.11
+  Interactive python environment. This is necessary for some parallel
   components of the pipeline engine.
-  
-    * The IPython.kernel (parallel computing component) has the
-      following dependencies:
-
-      * `Twisted <http://twistedmatrix.com/trac/>`_
-      * zope.interface: which is also a dependecy of Twisted and was
-        installed automatically for me when I installed Twisted.
 
 Sphinx_
   Required for building the documentation
@@ -112,7 +105,7 @@ will be familiar if you have Python experience. Nipype is also hosted on the
 PyPi repository so you can do::
 
 	easy_install nipype
-	
+
 or::
 	
 	pip install nipype

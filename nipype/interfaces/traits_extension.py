@@ -19,19 +19,13 @@ all of these bugs and they've been fixed in enthought svn repository
 import os
 
 # perform all external trait imports here
-try:
-    import traits
-    if traits.__version__ < '3.7.0':
-        raise ImportError
-    import traits.api as traits
-    from traits.trait_handlers import TraitDictObject, TraitListObject
-    from traits.trait_errors import TraitError
-    from traits.trait_base import _Undefined
-except ImportError:
-    import nipype.external.traits.api as traits
-    from nipype.external.traits.trait_handlers import TraitDictObject, TraitListObject
-    from nipype.external.traits.trait_errors import TraitError
-    from nipype.external.traits.trait_base import _Undefined
+import traits
+if traits.__version__ < '3.7.0':
+    raise ImportError('Traits version 3.7.0 or higher must be installed')
+import traits.api as traits
+from traits.trait_handlers import TraitDictObject, TraitListObject
+from traits.trait_errors import TraitError
+from traits.trait_base import _Undefined
 
 class BaseFile ( traits.BaseStr ):
     """ Defines a trait whose value must be the name of a file.
