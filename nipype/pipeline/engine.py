@@ -1326,7 +1326,7 @@ class Node(WorkflowBase):
         if not os.path.exists(report_dir):
             os.makedirs(report_dir)
         if report_type == 'preexec':
-            logger.info('writing pre-exec report to %s'%report_file)
+            logger.debug('writing pre-exec report to %s'%report_file)
             fp = open(report_file, 'wt')
             fp.writelines(write_rst_header('Node: %s'%get_print_name(self), level=0))
             fp.writelines(write_rst_list(['Hierarchy : %s'%self.fullname,
@@ -1334,7 +1334,7 @@ class Node(WorkflowBase):
             fp.writelines(write_rst_header('Original Inputs', level=1))
             fp.writelines(write_rst_dict(self.inputs.get()))
         if report_type == 'postexec':
-            logger.info('writing post-exec report to %s'%report_file)
+            logger.debug('writing post-exec report to %s'%report_file)
             fp = open(report_file, 'at')
             fp.writelines(write_rst_header('Execution Inputs', level=1))
             fp.writelines(write_rst_dict(self.inputs.get()))
