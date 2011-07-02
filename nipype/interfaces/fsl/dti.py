@@ -613,6 +613,7 @@ class TractSkeleton(FSLCommand):
 
     Examples
     --------
+
     import nipype.interfaces.fsl as fsl
     skeletor = fsl.TractSkeleton()
     skeletor.inputs.in_file = "all_FA.nii.gz"
@@ -692,6 +693,7 @@ class DistanceMap(FSLCommand):
 
     Examples
     --------
+
     import nipype.interfaces.fsl as fsl
     mapper = fsl.DistanceMap()
     mapper.inputs.in_file = "skeleton_mask.nii.gz"
