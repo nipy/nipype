@@ -306,16 +306,17 @@ class ImageMaths(FSLCommand):
 
 
 class FilterRegressorInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True,argst="-i %s",desc="input file name (4D image)",mandatory=True)
-    out_file = File(argst="-o %s",desc="output file name for the filtered data",genfile=True)
-    design_file = File(exists=True,argst="-d %s",desc="design	file name of the matrix with "\
-                       "time courses (e.g. GLM design or MELODIC mixing matrix)",mandatory=True)
-    filter_out = traits.List(traits.Int,argst="-f %s",desc="filter out part of the "\
-                             "regression model, e.g. -f '1,2,3'",mandatory=True)
-    mask = File(exists=True,argst="-m %s",desc="mask image file name")
-    var_norm = traits.Bool(argst="--vn",desc="perform variance-normalization on data")
-    out_file = traits.Bool(argst="--out_data",desc="output data")
-    out_vnscales = traits.Bool(argst="--out_vnscales",desc="output scaling factors for variance normalization")
+    in_file = File(exists=True,argstr="-i %s",desc="input file name (4D image)",mandatory=True,position=1)
+    out_file = File(argstr="-o %s",desc="output file name for the filtered data",genfile=True,position=2)
+    design_file = File(exists=True,argstr="-d %s",position=3,mandatory=True,
+                       desc="name of the matrix with time courses (e.g. GLM design or MELODIC mixing matrix)")
+    filter_columns = traits.List(traits.Int,argstr="-f '%s'", xor=["filter_all"], mandatory=True, position=4,
+                        desc="(1-based) column indices to filter out of the data")
+    filter_all = traits.Bool(mandatory=True, argstr="-f '%s'", xor=["filter_columns"], position=4,
+                             desc="use all columns in the design file in denoising")
+    mask = File(exists=True,argstr="-m %s",desc="mask image file name")
+    var_norm = traits.Bool(argstr="--vn",desc="perform variance-normalization on data")
+    out_vnscales = traits.Bool(argstr="--out_vnscales",desc="output scaling factors for variance normalization")
 
 class FilterRegressorOutputSpec(TraitedSpec):
     out_file = File(exists=True,desc="output file name for the filtered data")
@@ -328,6 +329,18 @@ class FilterRegressor(FSLCommand):
     input_spec = FilterRegressorInputSpec
     output_spec = FilterRegressorOutputSpec
     _cmd = 'fsl_regfilt'
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'filter_columns':
+            return trait_spec.argstr % ",".join(map(str, value))
+        elif name == "filter_all":
+            design = np.loadtxt(self.inputs.design_file)
+            try:
+                n_cols = design.shape[1]
+            except IndexError:
+                n_cols = 1
+            return trait_spec.argstr % ",".join(map(str, range(1, n_cols + 1)))
+        return super(FilterRegressor, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
