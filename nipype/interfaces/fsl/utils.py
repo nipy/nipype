@@ -155,7 +155,7 @@ class ExtractROIInputSpec(FSLCommandInputSpec):
     t_size = traits.Int(argstr="%d", position=9)
     _crop_xor = ['x_min', 'x_size', 'y_min', 'y_size', 'z_min', 'z_size', 't_min', 't_size']
     crop_list = traits.List(traits.Tuple(traits.Int, traits.Int),
-                            argstr="%s", position=2,
+                            argstr="%s", position=2, xor=_crop_xor,
                             help="list of two tuples specifying crop options")
 
 class ExtractROIOutputSpec(TraitedSpec):
