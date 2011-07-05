@@ -82,16 +82,16 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     Example
     -------
 
-    >>> from nipype.workflows.fsl import create_featpreproc
+    >>> from nipype.workflows.fsl import create_parallelfeat_preproc
     >>> import os
-    >>> preproc = create_featpreproc()
+    >>> preproc = create_parallelfeat_preproc()
     >>> preproc.inputs.inputspec.func = ['f3.nii', 'f5.nii']
     >>> preproc.inputs.inputspec.fwhm = 5
     >>> preproc.inputs.inputspec.highpass = 128./(2*2.5)
     >>> preproc.base_dir = '/tmp'
     >>> preproc.run() # doctest: +SKIP
 
-    >>> preproc = create_featpreproc(highpass=False)
+    >>> preproc = create_parallelfeat_preproc(highpass=False)
     >>> preproc.inputs.inputspec.func = 'f3.nii'
     >>> preproc.inputs.inputspec.fwhm = 5
     >>> preproc.base_dir = '/tmp'
@@ -396,7 +396,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     Example
     -------
 
-    >>> from nipype.workflows.fsl import create_featpreproc
+    >>> from nipype.workflows.fsl import create_featreg_preproc
     >>> import os
     >>> preproc = create_featreg_preproc()
     >>> preproc.inputs.inputspec.func = ['f3.nii', 'f5.nii']

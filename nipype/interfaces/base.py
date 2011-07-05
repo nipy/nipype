@@ -447,7 +447,7 @@ class BaseTraitedSpec(traits.HasTraits):
         for name, val in sorted(self.get().items()):
             if isdefined(val):
                 trait = self.trait(name)
-                hash_files = has_metadata(trait.trait_type, "hash_files", False)
+                hash_files = not has_metadata(trait.trait_type, "hash_files", False)
                 dict_nofilename[name] = self._get_sorteddict(val, hash_method=hash_method, hash_files=hash_files)
                 dict_withhash[name] = self._get_sorteddict(val,True, hash_method=hash_method, hash_files=hash_files)
         return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
