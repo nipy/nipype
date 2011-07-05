@@ -577,17 +577,13 @@ class MCFLIRT(FSLCommand):
 
         outputs['out_file'] = self._gen_outfilename()
 
-        # XXX Need to change 'item' below to something that exists
-        # out_file? in_file?
-        # These could be handled similarly to default values for inputs
         if isdefined(self.inputs.stats_imgs) and self.inputs.stats_imgs:
-            outputs['variance_img'] = self._gen_fname(self.inputs.in_file,
-                                                      cwd=cwd,
-                                                      suffix='_variance')
-            outputs['std_img'] = self._gen_fname(self.inputs.in_file,
-                                                 cwd=cwd, suffix='_sigma')
-            outputs['mean_img'] = self._gen_fname(self.inputs.in_file,
-                                                  cwd=cwd, suffix='_meanvol')
+            outputs['variance_img'] = self._gen_fname(outputs['out_file'] + \
+                                                      '_variance.ext', cwd=cwd)
+            outputs['std_img'] = self._gen_fname(outputs['out_file'] + \
+                                                      '_sigma.ext', cwd=cwd)
+            outputs['mean_img'] = self._gen_fname(outputs['out_file'] + \
+                                                      '_meanvol.ext', cwd=cwd)
         if isdefined(self.inputs.save_mats) and self.inputs.save_mats:
             _, filename = os.path.split(outputs['out_file'])
             matpathname = os.path.join(cwd, filename + '.mat')
@@ -612,6 +608,8 @@ class MCFLIRT(FSLCommand):
 
     def _gen_outfilename(self):
         out_file = self.inputs.out_file
+        if isdefined(out_file):
+            out_file = os.path.realpath(out_file)
         if not isdefined(out_file) and isdefined(self.inputs.in_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                        suffix = '_mcf')
@@ -837,7 +835,6 @@ class ApplyWarpInputSpec(FSLCommandInputSpec):
                      mandatory=True,
                      desc='reference image')
     field_file = File(exists=True, argstr='--warp=%s',
-                     mandatory=True,
                      desc='file containing warp field')
     abswarp = traits.Bool(argstr='--abs', xor=['relwarp'],
                           desc="treat warp field as absolute: x' = w(x)")
