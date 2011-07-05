@@ -388,9 +388,13 @@ class CreateNifti(BaseInterface):
 class TSNRInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='realigned 4D file')
+    regress_poly = traits.Int(min=1, desc='Remove polynomials')
 
 class TSNROutputSpec(TraitedSpec):
     tsnr_file = File(exists=True, desc='tsnr image file')
+    mean_file = File(exists=True, desc='mean image file')
+    stddev_file = File(exists=True, desc='std dev image file')
+    detrended_file = File(desc='detrended input file')
 
 class TSNR(BaseInterface):
     """Computes the time-course SNR for a time series
@@ -408,19 +412,47 @@ class TSNR(BaseInterface):
     input_spec = TSNRInputSpec
     output_spec = TSNROutputSpec
 
-    def _gen_output_file_name(self):
+    def _gen_output_file_name(self, out_ext=None):
         _, base, _ = split_filename(self.inputs.in_file)
-        return os.path.abspath(base + "_tsnr.nii")
+        if out_ext in ['mean', 'stddev']:
+            return os.path.abspath(base + "_tsnr_" + out_ext + ".nii.gz")
+        elif out_ext in ['detrended']:
+            return os.path.abspath(base + "_" + out_ext + ".nii.gz")
+        else:
+            return os.path.abspath(base + "_tsnr.nii.gz")
 
     def _run_interface(self, runtime):
         img = nb.load(self.inputs.in_file)
         data = img.get_data()
-        tsnr = np.mean(data, axis=3)/np.std(data, axis=3)
+        if isdefined(self.inputs.regress_poly):
+            timepoints = img.get_shape()[-1]
+            X = np.ones((timepoints,1))
+            for i in range(self.inputs.regress_poly):
+                X = np.hstack((X,
+                               (np.linspace(-1, 1, timepoints)**(i+1))[:,None]))
+            betas = np.dot(np.linalg.pinv(X), np.rollaxis(data, 3, 2))
+            datahat = np.rollaxis(np.dot(X[:,1:],
+                                         np.rollaxis(betas[1:, :, :, :], 0, 3)),
+                                  0, 4)
+            data = data - datahat
+            img = nb.Nifti1Image(data, img.get_affine(), img.get_header())
+            nb.save(img,  self._gen_output_file_name('detrended'))
+        meanimg = np.mean(data, axis=3)
+        stddevimg = np.std(data, axis=3)
+        tsnr = meanimg/stddevimg
         img = nb.Nifti1Image(tsnr, img.get_affine(), img.get_header())
         nb.save(img,  self._gen_output_file_name())
+        img = nb.Nifti1Image(meanimg, img.get_affine(), img.get_header())
+        nb.save(img,  self._gen_output_file_name('mean'))
+        img = nb.Nifti1Image(stddevimg, img.get_affine(), img.get_header())
+        nb.save(img,  self._gen_output_file_name('stddev'))
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['tsnr_file'] = self._gen_output_file_name()
+        outputs['mean_file'] = self._gen_output_file_name('mean')
+        outputs['stddev_file'] = self._gen_output_file_name('stddev')
+        if isdefined(self.inputs.regress_poly):
+            outputs['detrended_file'] = self._gen_output_file_name('detrended')
         return outputs
