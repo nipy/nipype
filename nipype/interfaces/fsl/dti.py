@@ -58,6 +58,7 @@ class DTIFitOutputSpec(TraitedSpec):
     L3 = File(exists = True, desc = 'path/name of file with the 3rd eigenvalue')
     MD = File(exists = True, desc = 'path/name of file with the mean diffusivity')
     FA = File(exists = True, desc = 'path/name of file with the fractional anisotropy')
+    MO = File(exists = True, desc = 'path/name of file with the mode of anisotropy')
     S0 = File(exists = True, desc = 'path/name of file with the raw T2 signal with no '+
               'diffusion weighting')
     tensor = File(exists = True, desc = 'path/name of file with the 4D tensor volume')   
