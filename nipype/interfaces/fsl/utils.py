@@ -153,6 +153,10 @@ class ExtractROIInputSpec(FSLCommandInputSpec):
     z_size = traits.Int(argstr="%d", position=7)
     t_min = traits.Int(argstr="%d", position=8)
     t_size = traits.Int(argstr="%d", position=9)
+    _crop_xor = ['x_min', 'x_size', 'y_min', 'y_size', 'z_min', 'z_size', 't_min', 't_size']
+    crop_list = traits.List(traits.Tuple(traits.Int, traits.Int),
+                            argstr="%s", position=2, xor=_crop_xor,
+                            help="list of two tuples specifying crop options")
 
 class ExtractROIOutputSpec(TraitedSpec):
     roi_file = File(exists=True)
@@ -182,6 +186,12 @@ class ExtractROI(FSLCommand):
     _cmd = 'fslroi'
     input_spec = ExtractROIInputSpec
     output_spec = ExtractROIOutputSpec
+
+    def _format_arg(self, name, spec, value):
+
+        if name == "crop_list":
+            return " ".join(map(str, sum(map(list, value), [])))
+        return super(ExtractROI, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         """Create a Bunch which contains all possible files generated
