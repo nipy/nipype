@@ -19,7 +19,7 @@ from scipy.ndimage.morphology import grey_dilation
 from scipy.ndimage.morphology import binary_erosion
 from scipy.spatial.distance import cdist, euclidean, dice, jaccard
 from scipy.ndimage.measurements import center_of_mass, label
-from scipy.signal import detrend
+from scipy.special import legendre
 
 from nipype.utils.config import config
 import matplotlib
@@ -429,9 +429,7 @@ class TSNR(BaseInterface):
             timepoints = img.get_shape()[-1]
             X = np.ones((timepoints,1))
             for i in range(self.inputs.regress_poly):
-                X = np.hstack((X,
-                               (detrend(np.linspace(-1, 1, timepoints)**(i+1),
-                                        type='constant')[:,None])))
+                X = np.hstack((X,legendre(i+1)(np.linspace(-1, 1, timepoints))[:, None]))
             betas = np.dot(np.linalg.pinv(X), np.rollaxis(data, 3, 2))
             datahat = np.rollaxis(np.dot(X[:,1:],
                                          np.rollaxis(betas[1:, :, :, :], 0, 3)),
