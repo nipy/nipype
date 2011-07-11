@@ -102,7 +102,8 @@ def main(**extra_args):
               'matplotlib (>=1.0.0)',
               'networkx (>=1.0)',
               'nibabel (>=1.0.0)',
-              'json',],
+              'json',
+              'traits (>=4.0.0)',],
            **extra_args)
 
 
