@@ -39,8 +39,8 @@ because SPM does not handle compressed NIFTI.
 fsl.FSLCommand.set_default_output_type('NIFTI')
 
 # Set the way matlab should be called
-mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
-mlab.MatlabCommand.set_default_paths('/software/spm8')
+#mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
+#mlab.MatlabCommand.set_default_paths('/software/spm8')
 
 
 """
