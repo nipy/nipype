@@ -89,6 +89,18 @@ systems.
 def main(**extra_args):
     from numpy.distutils.core import setup
     
+    install_requires=['numpy >=1.1',
+              'scipy >=0.7',
+              'matplotlib >=1.0.0',
+              'networkx >=1.0',
+              'nibabel >=1.0.0',
+              'traits >=4.0.0',]
+    
+    try:
+        import json
+    except ImportError:
+        install_requires.append('simplejson')
+    
     setup( name = 'nipype',
            description = 'Neuroimaging in Python: Pipelines and Interfaces',
            author = 'Various',
@@ -97,13 +109,7 @@ def main(**extra_args):
            long_description = desc,
            configuration = configuration,
            cmdclass = cmdclass,
-           requires=['numpy (>=1.1)',
-              'scipy (>=0.7)',
-              'matplotlib (>=1.0.0)',
-              'networkx (>=1.0)',
-              'nibabel (>=1.0.0)',
-              'json',
-              'traits (>=4.0.0)',],
+           install_requires=install_requires,
            **extra_args)
 
 
