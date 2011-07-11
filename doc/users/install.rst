@@ -156,7 +156,8 @@ you can also test with nosetests:
         nosetests --with-doctest /software/nipy-repo/masternipype/nipype
         --exclude=external --exclude=testing
 
-All tests should pass (unless you're missing a dependency). If any tests
+All tests should pass (unless you're missing a dependency). If SUBJECTS_DIR 
+variable is not set some FreeSurfer related tests will fail. If any tests
 fail, please report them on our `bug tracker
 <http://github.com/nipy/nipype/issues>`_.
 
