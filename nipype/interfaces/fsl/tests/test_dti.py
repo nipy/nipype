@@ -21,6 +21,7 @@ from nipype.interfaces.base import Undefined
 
 # nosetests --with-doctest path_to/test_fsl.py
 
+@skipif(no_fsl)
 def test_bedpostx1():
     input_map = dict(args = dict(argstr='%s',),
                      bpx_directory = dict(argstr='%s',),
@@ -41,6 +42,7 @@ def test_bedpostx1():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+@skipif(no_fsl)
 def test_dtifit1():
     input_map = dict(args = dict(argstr='%s',),
                      base_name = dict(argstr='-o %s',),
@@ -202,6 +204,7 @@ def clean_directory(outdir, old_wd):
 
 
 # test bedpostx
+@skipif(no_fsl)
 def test_bedpostx2():
     filelist, outdir, cwd = create_files_in_directory()
     bpx = fsl.BEDPOSTX()
