@@ -125,9 +125,9 @@ and nipype by executing::
 	easy_install nibabel
 	easy_install nipype
 
-If you are running a 64 bit version of EPD, you will need to compile
+If you are running a 64 bit version of EPD 7.0, you will need to compile
 ETS. Instructions for a 64-bit boot mode are available:  https://gist.github.com/845545
-
+This is no longer needed in EPD 7.1.
  
 
 From source
