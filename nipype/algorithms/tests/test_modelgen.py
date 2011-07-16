@@ -35,7 +35,7 @@ def test_modelgen1():
     yield assert_equal, len(res.outputs.session_info), 2
     yield assert_equal, len(res.outputs.session_info[0]['regress']), 0
     yield assert_equal, len(res.outputs.session_info[0]['cond']), 1
-    yield assert_almost_equal, res.outputs.session_info[0]['cond'][0]['onset'], [12, 300, 600, 1080]
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([12, 300, 600, 1080])
     rmtree(tempdir)
 
 def test_modelgen_spm_concat():
@@ -62,7 +62,7 @@ def test_modelgen_spm_concat():
     yield assert_equal, len(res.outputs.session_info), 1
     yield assert_equal, len(res.outputs.session_info[0]['regress']), 1
     yield assert_equal, len(res.outputs.session_info[0]['cond']), 1
-    yield assert_almost_equal, res.outputs.session_info[0]['cond'][0]['onset'], [2.0, 50.0, 100.0, 180.0, 330.0, 340.0, 400.0, 450.0]
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 180.0, 330.0, 340.0, 400.0, 450.0])
     rmtree(tempdir)
 
 def test_modelgen_sparse():
