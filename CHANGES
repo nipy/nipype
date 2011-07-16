@@ -1,5 +1,10 @@
-Release 0.4 (FUTURE)
-====================
+Release 0.4.1 (Jun 16, 2011)
+============================
+
+* Minor bugfixes
+
+Release 0.4 (Jun 16, 2011)
+==========================
 
 * API: Timestamp hashing does not use ctime anymore. Please update your hashes by
        running workflows with updatehash=True option
