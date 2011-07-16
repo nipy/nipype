@@ -14,7 +14,7 @@ Dependencies
 Must Have
 ~~~~~~~~~
 
-Python_ 2.5 -2.7
+Python_ 2.6 -2.7
 
 Matplotlib_ 1.0
   Plotting library
