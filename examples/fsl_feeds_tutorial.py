@@ -25,18 +25,6 @@ import nipype.algorithms.modelgen as model   # model generation
 Preliminaries
 -------------
 
-Confirm package dependencies are installed.  (This is only for the tutorial,
-rarely would you put this in your own code.)
-"""
-
-from nipype.utils.misc import package_check
-
-package_check('numpy', '1.3', 'tutorial1')
-package_check('scipy', '0.7', 'tutorial1')
-package_check('networkx', '1.0', 'tutorial1')
-package_check('IPython', '0.10', 'tutorial1')
-
-"""
 Setup any package specific configuration. The output file format for FSL
 routines is being set to compressed NIFTI.
 """
@@ -345,26 +333,12 @@ file for analysis
 level1design = pe.Node(interface=fsl.Level1Design(), name="level1design")
 
 """
-To allow changing working directories one needs to rerun the level1design as
-the fsf files are stored with absolute paths.
-"""
-level1design.overwrite = True
-
-"""
 Use :class:`nipype.interfaces.fsl.FEATModel` to generate a run specific mat
 file for use by FILMGLS
 """
 
 modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
-                      iterfield = ['fsf_file'])
-
-"""
-Set the model generation to run everytime. Since the fsf file, which is the
-input to modelgen only references the ev files, modelgen will not run if the ev
-file contents are changed but the fsf file is untouched.
-"""
-
-modelgen.overwrite = True
+                      iterfield = ['fsf_file', 'ev_files'])
 
 """
 Use :class:`nipype.interfaces.fsl.FILMGLS` to estimate a model specified by a
@@ -382,7 +356,9 @@ Use :class:`nipype.interfaces.fsl.ContrastMgr` to generate contrast estimates
 """
 
 conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
-                         iterfield = ['tcon_file','fcon_file','stats_dir'])
+                         iterfield = ['fcon_file', 'tcon_file','param_estimates',
+                                      'sigmasquareds', 'corrections',
+                                      'dof_file'])
 
 modelfit.connect([
    (modelspec,level1design,[('session_info','session_info')]),
@@ -391,7 +367,10 @@ modelfit.connect([
    (modelgen,modelestimate,[('design_file','design_file')]),
    (modelgen,conestimate,[('con_file','tcon_file')]),
    (modelgen,conestimate,[('fcon_file','fcon_file')]),
-   (modelestimate,conestimate,[('results_dir','stats_dir')]),
+   (modelestimate,conestimate,[('param_estimates','param_estimates'),
+                               ('sigmasquareds', 'sigmasquareds'),
+                               ('corrections','corrections'),
+                               ('dof_file','dof_file')]),
    ])
 
 """
@@ -515,7 +494,7 @@ for every participant. Other examples of this function are available in the
 from nipype.interfaces.base import Bunch
 
 firstlevel.inputs.modelfit.modelspec.subject_info = [Bunch(conditions=['Visual','Auditory'],
-                        onsets=[range(0,180*TR,60),range(0,180*TR,90)],
+                        onsets=[range(0,int(180*TR),60),range(0,int(180*TR),90)],
                         durations=[[30], [45]],
                         amplitudes=None,
                         tmod=None,

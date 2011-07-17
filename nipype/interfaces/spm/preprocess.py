@@ -19,12 +19,11 @@ import os
 import numpy as np
 
 # Local imports
-from nipype.interfaces.base import (OutputMultiPath, TraitedSpec,
+from nipype.interfaces.base import (OutputMultiPath, TraitedSpec, isdefined,
                                     traits, InputMultiPath, File)
 from nipype.interfaces.spm.base import (SPMCommand, scans_for_fname, 
-                                        func_is_3d, get_first_3dfile,
+                                        func_is_3d,
                                         scans_for_fnames, SPMCommandInputSpec)
-from nipype.utils.misc import isdefined
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list,
                                     list_to_filename, split_filename)
 
@@ -131,7 +130,7 @@ class RealignInputSpec(SPMCommandInputSpec):
     write_interp = traits.Range(low=0, high=7, field='roptions.interp',
                          desc='degree of b-spline used for interpolation')
     write_wrap = traits.Tuple(traits.Int, traits.Int, traits.Int,
-                              field='eoptions.wrap',
+                              field='roptions.wrap',
                    desc='Check if interpolation should wrap in [x,y,z]')
     write_mask = traits.Bool(field='roptions.mask',
                              desc='True/False mask output image')
@@ -581,23 +580,21 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
     channel_files = InputMultiPath(File(exists=True),
                               desc="A list of files to be segmented",
                               field='channel', copyfile=False, mandatory=True)
-    channel_info = traits.List(traits.Tuple(traits.Float(), traits.Float(),
-                                            traits.Tuple(traits.Bool, traits.Bool)),
-                           desc="""A list of tuples (one per channel/modality)
-    with the following fields:
+    channel_info = traits.Tuple(traits.Float(), traits.Float(),
+                                traits.Tuple(traits.Bool, traits.Bool),
+                                desc="""A tuple with the following fields:
             - bias reguralisation (0-10)
             - FWHM of Gaussian smoothness of bias
             - which maps to save (Corrected, Field) - a tuple of two boolean values""", 
             field='channel')
-    tissues = traits.List(traits.Tuple(InputMultiPath(File(exists=True)), traits.Int(), 
+    tissues = traits.List(traits.Tuple(traits.Tuple(File(exists=True), traits.Int()), traits.Int(),
                                        traits.Tuple(traits.Bool, traits.Bool), traits.Tuple(traits.Bool, traits.Bool)),
                          desc="""A list of tuples (one per tissue) with the following fields:
-            - tissue probability map
+            - tissue probability map (4D), 1-based index to frame
             - number of gaussians
             - which maps to save [Native, DARTEL] - a tuple of two boolean values
             - which maps to save [Modulated, Unmodualted] - a tuple of two boolean values""", 
-            field='tissue', 
-            copyfile=False)
+            field='tissue')
     affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', field='warp.affreg',
                       desc='mni, eastern, subj, none ')
     warping_regularization = traits.Float(field='warp.reg',
@@ -608,12 +605,19 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
                                            desc="Which deformation fields to write:[Inverse, Forward]")
 
 class NewSegmentOutputSpec(TraitedSpec):
-    native_class_images = OutputMultiPath(File(exists=True), desc='native space probability maps')
+    native_class_images = traits.List(traits.List(File(exists=True)), desc='native space probability maps')
+    dartel_input_images = traits.List(traits.List(File(exists=True)), desc='dartel imported class images')
+    normalized_class_images = traits.List(traits.List(File(exists=True)), desc='normalized class images')
+    modulated_class_images = traits.List(traits.List(File(exists=True)), desc='modulated+normalized class images')
     transformation_mat = OutputMultiPath(File(exists=True), desc='Normalization transformation')
+    bias_corrected_images = OutputMultiPath(File(exists=True), desc='bias corrected images')
+    bias_field_images = OutputMultiPath(File(exists=True), desc='bias field images')
 
 class NewSegment(SPMCommand):
     """Use spm_preproc8 (New Segment) to separate structural images into different
     tissue classes. Supports multiple modalities.
+
+    NOTE: This interface currently supports single channel input only
     
     http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=185
 
@@ -622,8 +626,22 @@ class NewSegment(SPMCommand):
     >>> import nipype.interfaces.spm as spm
     >>> seg = spm.NewSegment()
     >>> seg.inputs.channel_files = 'structural.nii'
+    >>> seg.inputs.channel_info = (0.0001, 60, (True, True))
     >>> seg.run() # doctest: +SKIP
-    
+
+    For VBM pre-processing [http://www.fil.ion.ucl.ac.uk/~john/misc/VBMclass10.pdf],
+    TPM.nii should be replaced by /path/to/spm8/toolbox/Seg/TPM.nii
+
+    >>> seg = NewSegment()
+    >>> seg.inputs.channel_files = 'structural.nii'
+    >>> tissue1 = (('TPM.nii', 1), 2, (True,True), (False, False))
+    >>> tissue2 = (('TPM.nii', 2), 2, (True,True), (False, False))
+    >>> tissue3 = (('TPM.nii', 3), 2, (True,False), (False, False))
+    >>> tissue4 = (('TPM.nii', 4), 2, (False,False), (False, False))
+    >>> tissue5 = (('TPM.nii', 5), 2, (False,False), (False, False))
+    >>> seg.inputs.tissues = [tissue1, tissue2, tissue3, tissue4, tissue5]
+    >>> seg.run() # doctest: +SKIP
+
     """
 
     input_spec = NewSegmentInputSpec
@@ -635,58 +653,74 @@ class NewSegment(SPMCommand):
         """Convert input to appropriate format for spm
         """
 
-        if opt == 'channel_files':
+        if opt in ['channel_files', 'channel_info']:
             # structure have to be recreated, because of some weird traits error
-            new_channels = []
-            for channel in val:
-                new_channel = {}
-                new_channel['vols'] = scans_for_fname(filename_to_list(channel))
-                new_channels.append(new_channel)
-            return new_channels
-        elif opt == 'channel_info':
-            # structure have to be recreated, because of some weird traits error
-            new_channels = []
-            for channel in val:
-                new_channel = {}
-
-                new_channel['biasreg'] = channel[0]
-                new_channel['biasfwhm'] = channel[1]
-                new_channel['write'] = [int(channel[2][0]), int(channel[2][1])]
-
-                new_channels.append(new_channel)
-            return new_channels
+            new_channel = {}
+            new_channel['vols'] = scans_for_fnames(self.inputs.channel_files)
+            if isdefined(self.inputs.channel_info):
+                info = self.inputs.channel_info
+                new_channel['biasreg'] = info[0]
+                new_channel['biasfwhm'] = info[1]
+                new_channel['write'] = [int(info[2][0]), int(info[2][1])]
+            return [new_channel]
         elif opt == 'tissues':
             new_tissues = []
             for tissue in val:
                 new_tissue = {}
-
-                new_tissue['tpm'] = scans_for_fnames(tissue[0])
-                new_tissue['ngauss'] = tissue[1]
+                new_tissue['tpm'] = np.array([','.join([tissue[0][0], str(tissue[0][1])])], dtype=object)
+                new_tissue['ngaus'] = tissue[1]
                 new_tissue['native'] = [int(tissue[2][0]), int(tissue[2][1])]
                 new_tissue['warped'] = [int(tissue[3][0]), int(tissue[3][1])]
-
                 new_tissues.append(new_tissue)
             return new_tissues
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['native_class_images'] = []
+        outputs['dartel_input_images'] = []
+        outputs['normalized_class_images'] = []
+        outputs['modulated_class_images'] = []
         outputs['transformation_mat'] = []
+        outputs['bias_corrected_images'] = []
+        outputs['bias_field_images'] = []
 
-        for filename in filename_to_list(self.inputs.channel_files[0]):
+        n_classes = 5
+        if isdefined(self.inputs.tissues):
+            n_classes = len(self.inputs.tissues)
+        for i in range(n_classes):
+            outputs['native_class_images'].append([])
+            outputs['dartel_input_images'].append([])
+            outputs['normalized_class_images'].append([])
+            outputs['modulated_class_images'].append([])
+
+        for filename in self.inputs.channel_files:
             pth, base, ext = split_filename(filename)
-            n_classes = 4
             if isdefined(self.inputs.tissues):
-                n_classes = len(self.inputs.tissues)
-            for i in range(1,n_classes+1):   
-                outputs['native_class_images'].append(os.path.join(pth,"c%d%s%s"%(i, base, ext)))
-            outputs['transformation_mat'] = os.path.join(pth, "%s_seg8.mat" % base)
+                for i, tissue in enumerate(self.inputs.tissues):
+                    if tissue[2][0]:
+                        outputs['native_class_images'][i].append(os.path.join(pth,"c%d%s%s"%(i+1, base, ext)))
+                    if tissue[2][1]:
+                        outputs['dartel_input_images'][i].append(os.path.join(pth,"rc%d%s%s"%(i+1, base, ext)))
+                    if tissue[3][0]:
+                        outputs['normalized_class_images'][i].append(os.path.join(pth,"wc%d%s%s"%(i+1, base, ext)))
+                    if tissue[3][1]:
+                        outputs['modulated_class_images'][i].append(os.path.join(pth,"mwc%d%s%s"%(i+1, base, ext)))
+            else:
+                for i in range(n_classes):
+                    outputs['native_class_images'][i].append(os.path.join(pth,"c%d%s%s"%(i+1, base, ext)))
+            outputs['transformation_mat'].append(os.path.join(pth, "%s_seg8.mat" % base))
+            if isdefined(self.inputs.channel_info):
+                if self.inputs.channel_info[2][0]:
+                    outputs['bias_corrected_images'].append(os.path.join(pth, "m%s%s" % (base, ext)))
+                if self.inputs.channel_info[2][1]:
+                    outputs['bias_field_images'].append(os.path.join(pth, "BiasField_%s%s" % (base, ext)))
         return outputs
 
 class SmoothInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(File(exists=True), field='data', desc='list of files to smooth', mandatory=True, copyfile=False)
     fwhm = traits.Either(traits.List(traits.Float(), minlen=3, maxlen=3), traits.Float(), field='fwhm', desc='3-list of fwhm for each dimension (opt)')
     data_type = traits.Int(field='dtype', desc='Data type of the output images (opt)')
+    implicit_masking = traits.Bool(field='im', desc='A mask implied by a particular voxel value')
 
 class SmoothOutputSpec(TraitedSpec):
     smoothed_files = OutputMultiPath(File(exists=True), desc='smoothed files')
@@ -721,6 +755,9 @@ class Smooth(SPMCommand):
                     return [val[0], val[0], val[0]]
                 else:
                     return val
+            if opt == 'implicit_masking':
+                return int(val)
+            
         return val
 
     def _list_outputs(self):
@@ -731,3 +768,192 @@ class Smooth(SPMCommand):
             outputs['smoothed_files'].append(fname_presuffix(imgf, prefix='s'))
         return outputs
 
+
+class DARTELInputSpec(SPMCommandInputSpec):
+    image_files = traits.List(traits.List(File(exists=True)),
+                              desc="A list of files to be segmented",
+                              field='warp.images', copyfile=False, mandatory=True)
+    template_prefix = traits.Str('Template', usedefault=True,
+                                 field='warp.settings.template',
+                                 desc='Prefix for template')
+    regularization_form = traits.Enum('Linear', 'Membrane', 'Bending',
+                                      field = 'warp.settings.rform',
+                                      desc='Form of regularization energy term')
+    iteration_parameters = traits.List(traits.Tuple(traits.Range(1,10), traits.Tuple(traits.Float, traits.Float, traits.Float),
+                                                    traits.Enum(1,2,4,8,16,32,64,128,256,512),
+                                                    traits.Enum(0,0.5,1,2,4,8,16,32)),
+                                       minlen=6,
+                                       maxlen=6,
+                                       field = 'warp.settings.param',
+                                       desc="""List of tuples for each iteration
+                                       - Inner iterations
+                                       - Regularization parameters
+                                       - Time points for deformation model
+                                       - smoothing parameter
+                                       """)
+    optimization_parameters = traits.Tuple(traits.Float, traits.Range(1,8), traits.Range(1,8),
+                                           field = 'warp.settings.optim',
+                                           desc="""Optimization settings a tuple
+                                           - LM regularization
+                                           - cycles of multigrid solver
+                                           - relaxation iterations
+                                           """)
+
+class DARTELOutputSpec(TraitedSpec):
+    final_template_file = File(exists=True, desc='final DARTEL template')
+    template_files = traits.List(File(exists=True), desc='Templates from different stages of iteration')
+    dartel_flow_fields = traits.List(File(exists=True), desc='DARTEL flow fields')
+
+class DARTEL(SPMCommand):
+    """Use spm DARTEL to create a template and flow fields
+
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=197
+
+    Examples
+    --------
+    >>> import nipype.interfaces.spm as spm
+    >>> dartel = spm.DARTEL()
+    >>> dartel.inputs.image_files = [['rc1s1.nii','rc1s2.nii'],['rc2s1.nii', 'rc2s2.nii']]
+    >>> dartel.run() # doctest: +SKIP
+
+    """
+
+    input_spec = DARTELInputSpec
+    output_spec = DARTELOutputSpec
+    _jobtype = 'tools'
+    _jobname = 'dartel'
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+
+        if opt in ['image_files']:
+            return scans_for_fnames(val, keep4d=True, separate_sessions=True)
+        elif opt == 'regularization_form':
+            mapper = {'Linear':0, 'Membrane':1, 'Bending':2}
+            return mapper[val]
+        elif opt == 'iteration_parameters':
+            params = []
+            for param in val:
+                new_param = {}
+                new_param['its'] = param[0]
+                new_param['rparam'] = list(param[1])
+                new_param['K'] = param[2]
+                new_param['slam'] = param[3]
+                params.append(new_param)
+            return params
+        elif opt == 'optimization parameters':
+            new_param = {}
+            new_param['lmreg'] = val[0]
+            new_param['cyc'] = val[1]
+            new_param['its'] = val[2]
+            return [new_param]
+        else:
+            return val
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['template_files'] = []
+        for i in range(6):
+            outputs['template_files'].append(os.path.realpath('%s_%d.nii'%(self.inputs.template_prefix, i+1)))
+        outputs['final_template_file'] = os.path.realpath('%s_6.nii'%self.inputs.template_prefix)
+        outputs['dartel_flow_fields'] = []
+        for filename in self.inputs.image_files[0]:
+            pth, base, ext = split_filename(filename)
+            outputs['dartel_flow_fields'].append(os.path.realpath('u_%s_%s%s'%(base,
+                                                                               self.inputs.template_prefix,
+                                                                               ext)))
+        return outputs
+
+
+class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
+    template_file = File(exists=True,
+                         desc="DARTEL template",
+                         field='mni_norm.template', copyfile=False, mandatory=True)
+    flowfield_files = InputMultiPath(File(exists=True),
+                                     desc="DARTEL flow fields u_rc1*",
+                                     field='mni_norm.data.subjs.flowfields',
+                                     mandatory=True)
+    apply_to_files = InputMultiPath(File(exists=True),
+                                     desc="Files to apply the transform to",
+                                     field='mni_norm.data.subjs.images',
+                                     mandatory=True, copyfile=False)
+    voxel_size = traits.Tuple(traits.Float, traits.Float, traits.Float,
+                              desc="Voxel sizes for output file",
+                              field='mni_norm.vox')
+    bounding_box = traits.Tuple(traits.Float, traits.Float, traits.Float,
+                                traits.Float, traits.Float, traits.Float,
+                                desc="Voxel sizes for output file",
+                                field='mni_norm.bb')
+    modulate = traits.Bool(field='mni_norm.preserve',
+                           desc="Modulate out images - no modulation preserves concentrations")
+    fwhm = traits.Either(traits.Tuple(traits.Float(), traits.Float, traits.Float),
+                         traits.Float(), field='mni_norm.fwhm',
+                         desc='3-list of fwhm for each dimension')
+
+class DARTELNorm2MNIOutputSpec(TraitedSpec):
+    normalized_files = OutputMultiPath(File(exists=True), desc='Normalized files in MNI space')
+    normalization_parameter_file = File(exists=True, desc='Transform parameters to MNI space')
+
+class DARTELNorm2MNI(SPMCommand):
+    """Use spm DARTEL to normalize data to MNI space
+
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=200
+
+    Examples
+    --------
+    >>> import nipype.interfaces.spm as spm
+    >>> nm = spm.DARTELNorm2MNI()
+    >>> nm.inputs.template_file = 'Template_6.nii'
+    >>> nm.inputs.flowfield_files = ['u_rc1s1_Template.nii', 'u_rc1s3_Template.nii']
+    >>> nm.inputs.apply_to_files = ['c1s1.nii', 'c1s3.nii']
+    >>> nm.inputs.modulate = True
+    >>> nm.run() # doctest: +SKIP
+
+    """
+
+    input_spec = DARTELNorm2MNIInputSpec
+    output_spec = DARTELNorm2MNIOutputSpec
+    _jobtype = 'tools'
+    _jobname = 'dartel'
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt in ['template_file']:
+            return np.array([val], dtype=object)
+        elif opt in ['flowfield_files']:
+            return scans_for_fnames(val, keep4d=True)
+        elif opt in ['apply_to_files']:
+            return scans_for_fnames(val, keep4d=True, separate_sessions=True)
+        elif opt == 'voxel_size':
+            return list(val)
+        elif opt == 'bounding_box':
+            return list(val)
+        elif opt == 'fwhm':
+            if not isinstance(val, tuple):
+                return [val, val, val]
+            if isinstance(val, tuple):
+                return val
+        elif opt == 'modulate':
+            return int(val)
+        else:
+            return val
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        pth, base, ext = split_filename(self.inputs.template_file)
+        outputs['normalization_parameter_file'] = os.path.realpath(base+'_2mni.mat')
+        outputs['normalized_files'] = []
+        prefix = "w"
+        if isdefined(self.inputs.modulate) and self.inputs.modulate:
+            prefix = 'm' + prefix
+        if isdefined(self.inputs.fwhm) and self.inputs.fwhm > 0:
+            prefix = 's' + prefix
+        for filename in self.inputs.apply_to_files:
+            pth, base, ext = split_filename(filename)
+            outputs['normalized_files'].append(os.path.realpath('%s%s%s'%(prefix,
+                                                                          base,
+                                                                          ext)))
+
+        return outputs

@@ -19,17 +19,19 @@ workflow_level = INFO
 filemanip_level = INFO
 interface_level = INFO
 log_directory = %s
-log_size = 254000
+log_size = 16384000
 log_rotate = 4
 
 [execution]
 plugin = Linear
 stop_on_first_crash = false
-hash_method = content
+stop_on_first_rerun = false
+hash_method = timestamp
 single_thread_matlab = true
 remove_node_directories = false
 remove_unnecessary_outputs = true
 use_relative_paths = false
+matplotlib_backend = Agg
 """%(homedir))
 
 config = ConfigParser.ConfigParser()

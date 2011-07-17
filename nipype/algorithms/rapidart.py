@@ -19,22 +19,23 @@ These functions include:
 """
 
 import os
-from glob import glob
 from copy import deepcopy
 
+from nibabel import load, funcs
 import numpy as np
 from scipy import signal
 import scipy.io as sio
 
-from nipype.interfaces.base import (Bunch, InterfaceResult, BaseInterface,
-                                    traits, InputMultiPath, OutputMultiPath,
-                                    TraitedSpec, File, BaseInterfaceInputSpec)
-from nibabel import load, funcs
-from nipype.utils.filemanip import filename_to_list, list_to_filename
+from nipype.utils.config import config
+import matplotlib
+matplotlib.use(config.get("execution", "matplotlib_backend"))
+import matplotlib.pyplot as plt
+
+from nipype.interfaces.base import (BaseInterface, traits, InputMultiPath,
+                                    OutputMultiPath, TraitedSpec, File,
+                                    BaseInterfaceInputSpec, isdefined)
+from nipype.utils.filemanip import filename_to_list, save_json
 from nipype.utils.misc import find_indices
-#import matplotlib as mpl
-#import matplotlib.pyplot as plt
-#import traceback
 
 class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
     realigned_files = InputMultiPath(File(exists=True), desc="Names of realigned functional data files", mandatory=True)
@@ -43,10 +44,10 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
                                                   "corresponding to the functional data files"))
     parameter_source = traits.Enum("SPM", "FSL", "Siemens", desc="Are the movement parameters from SPM or FSL or from" \
             "Siemens PACE data. Options: SPM, FSL or Siemens", mandatory=True)
-    use_differences = traits.ListBool([True, True], minlen = 2, maxlen = 2, usedefault=True,
+    use_differences = traits.ListBool([True, False], minlen = 2, maxlen = 2, usedefault=True,
             desc="Use differences between successive motion (first element)" \
             "and intensity paramter (second element) estimates in order" \
-            "to determine outliers.  (default is [True, True])")
+            "to determine outliers.  (default is [True, False])")
     use_norm = traits.Bool(True, desc = "Uses a composite of the motion parameters in order to determine" \
             "outliers.  Requires ``norm_threshold`` to be set.  (default is" \
             "True) ", usedefault=True)
@@ -68,17 +69,21 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
     mask_file = File(exists=True, desc="Mask file to be used if mask_type is 'file'.")
     mask_threshold = traits.Float(desc="Mask threshold to be used if mask_type is 'thresh'.")
     intersect_mask = traits.Bool(True, desc = "Intersect the masks when computed from spm_global. (default is" \
-            "True)") 
+            "True)")
+    save_plot = traits.Bool(True, desc="save plots containing outliers",
+                            usedefault=True)
     
 class ArtifactDetectOutputSpec(TraitedSpec):
     outlier_files = OutputMultiPath(File(exists=True),desc="One file for each functional run containing a list of 0-based" \
             "indices corresponding to outlier volumes") 
     intensity_files = OutputMultiPath(File(exists=True),desc="One file for each functional run containing the global intensity" \
             "values determined from the brainmask") 
+    norm_files = OutputMultiPath(File, desc="One file for each functional run containing the composite norm")
     statistic_files = OutputMultiPath(File(exists=True),desc="One file for each functional run containing information about the" \
             "different types of artifacts and if design info is provided then" \
             "details of stimulus correlated motion and a listing or artifacts by" \
             "event type.")
+    plot_files = OutputMultiPath(File, desc="One image file for each functional run containing the detected outliers")
     #mask_file = File(exists=True,
     #                 desc='generated or provided mask file')
 
@@ -129,23 +134,36 @@ class ArtifactDetect(BaseInterface):
         intensityfile = os.path.join(output_dir,''.join(('global_intensity.',filename,'.txt')))
         statsfile     = os.path.join(output_dir,''.join(('stats.',filename,'.txt')))
         normfile     = os.path.join(output_dir,''.join(('norm.',filename,'.txt')))
-        return artifactfile,intensityfile,statsfile,normfile
+        plotfile     = os.path.join(output_dir,''.join(('plot.',filename,'.png')))
+        return artifactfile,intensityfile,statsfile,normfile,plotfile
         
     def _list_outputs(self):
         outputs = self._outputs().get()
-        
         outputs['outlier_files'] = []
         outputs['intensity_files'] = []
         outputs['statistic_files'] = []
+        if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
+            outputs['norm_files'] = []
+        if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
+            outputs['plot_files'] = []
         for i,f in enumerate(filename_to_list(self.inputs.realigned_files)):
-            outlierfile,intensityfile,statsfile, _ = self._get_output_filenames(f,os.getcwd())
+            outlierfile,intensityfile,statsfile,normfile,plotfile = self._get_output_filenames(f,os.getcwd())
             outputs['outlier_files'].insert(i,outlierfile)
             outputs['intensity_files'].insert(i,intensityfile)     
             outputs['statistic_files'].insert(i,statsfile)
-
+            if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
+                outputs['norm_files'].insert(i,normfile)
+            if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
+                outputs['plot_files'].insert(i,plotfile)
+        '''
         outputs['outlier_files'] = list_to_filename(outputs['outlier_files'])
         outputs['intensity_files'] = list_to_filename(outputs['intensity_files'])
         outputs['statistic_files'] = list_to_filename(outputs['statistic_files'])
+        if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
+            outputs['norm_files'] = list_to_filename(outputs['norm_files'])
+        if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
+            outputs['plot_files'] = list_to_filename(outputs['plot_files'])
+        '''
         return outputs
 
     def _get_affine_matrix(self,params):
@@ -224,8 +242,18 @@ class ArtifactDetect(BaseInterface):
             return np.nansum(a, axis)/np.sum(1-np.isnan(a),axis)
         else:
             return np.nansum(a)/np.sum(1-np.isnan(a))
-        
-    
+
+    def _plot_outliers_with_wave(self, wave, outliers, name):
+        plt.plot(wave)
+        plt.ylim([wave.min(), wave.max()])
+        plt.xlim([0, len(wave)-1])
+        if len(outliers):
+            plt.plot(np.tile(outliers[:,None], (1, 2)).T,
+                     np.tile([wave.min(),wave.max()], (len(outliers), 1)).T,
+                     'r')
+        plt.xlabel('Scans - 0-based')
+        plt.ylabel(name)
+
     def _detect_outliers_core(self, imgfile, motionfile, runidx, cwd=None):
         """
         Core routine for detecting outliers
@@ -314,7 +342,7 @@ class ArtifactDetect(BaseInterface):
         iidx = find_indices(abs(gz)>self.inputs.zintensity_threshold)
 
         outliers = np.unique(np.union1d(iidx,np.union1d(tidx,ridx)))
-        artifactfile,intensityfile,statsfile,normfile = self._get_output_filenames(imgfile,cwd)
+        artifactfile,intensityfile,statsfile,normfile,plotfile = self._get_output_filenames(imgfile,cwd)
         
         # write output to outputfile
         np.savetxt(artifactfile, outliers, fmt='%d', delimiter=' ')
@@ -322,42 +350,54 @@ class ArtifactDetect(BaseInterface):
         if self.inputs.use_norm:
             np.savetxt(normfile, normval, fmt='%.4f', delimiter=' ')
 
-        file = open(statsfile,'w')
-        file.write("Stats for:\n")
-        file.write("Motion file: %s\n" % motionfile)
-        file.write("Functional file: %s\n" % imgfile)
-        file.write("Motion:\n")
-        file.write("Number of Motion Outliers: %d\n"%len(np.union1d(tidx,ridx)))
-        file.write("Motion (original):\n")
-        file.write( ''.join(('mean: ',str(np.mean(mc_in,axis=0)),'\n')))
-        file.write( ''.join(('min: ',str(np.min(mc_in,axis=0)),'\n')))
-        file.write( ''.join(('max: ',str(np.max(mc_in,axis=0)),'\n')))
-        file.write( ''.join(('std: ',str(np.std(mc_in,axis=0)),'\n')))
-        if self.inputs.use_norm:
-            if self.inputs.use_differences[0]:
-                file.write("Motion (norm-differences):\n")
+        if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
+            fig = plt.figure()
+            if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
+                plt.subplot(211)
             else:
-                file.write("Motion (norm):\n")
-            file.write( ''.join(('mean: ',str(np.mean(normval,axis=0)),'\n')))
-            file.write( ''.join(('min: ',str(np.min(normval,axis=0)),'\n')))
-            file.write( ''.join(('max: ',str(np.max(normval,axis=0)),'\n')))
-            file.write( ''.join(('std: ',str(np.std(normval,axis=0)),'\n')))
-        elif self.inputs.use_differences[0]:
-            file.write("Motion (differences):\n")
-            file.write( ''.join(('mean: ',str(np.mean(mc,axis=0)),'\n')))
-            file.write( ''.join(('min: ',str(np.min(mc,axis=0)),'\n')))
-            file.write( ''.join(('max: ',str(np.max(mc,axis=0)),'\n')))
-            file.write( ''.join(('std: ',str(np.std(mc,axis=0)),'\n')))
-        if self.inputs.use_differences[1]:
-            file.write("Normalized intensity:\n")
-        else:
-            file.write("Intensity:\n")
-        file.write("Number of Intensity Outliers: %d\n"%len(iidx))
-        file.write( ''.join(('min: ',str(np.min(gz,axis=0)),'\n')))
-        file.write( ''.join(('max: ',str(np.max(gz,axis=0)),'\n')))
-        file.write( ''.join(('mean: ',str(np.mean(gz,axis=0)),'\n')))
-        file.write( ''.join(('std: ',str(np.std(gz,axis=0)),'\n')))
-        file.close()
+                plt.subplot(311)
+            self._plot_outliers_with_wave(gz, iidx, 'Intensity')
+            if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
+                plt.subplot(212)
+                self._plot_outliers_with_wave(normval, np.union1d(tidx, ridx), 'Norm (mm)')
+            else:
+                diff=''
+                if self.inputs.use_differences[0]:
+                    diff = 'diff'
+                plt.subplot(312)
+                self._plot_outliers_with_wave(traval, tidx, 'Translation (mm)'+diff)
+                plt.subplot(313)
+                self._plot_outliers_with_wave(rotval, ridx, 'Rotation (rad)'+diff)
+            plt.savefig(plotfile)
+            plt.close(fig)
+
+        motion_outliers = np.union1d(tidx,ridx)
+        stats = [{'motion_file' : motionfile,
+                  'functional_file' : imgfile},
+                 {'common_outliers' : len(np.intersect1d(iidx, motion_outliers)),
+                  'intensity_outliers' : len(np.setdiff1d(iidx, motion_outliers)),
+                  'motion_outliers' : len(np.setdiff1d(motion_outliers, iidx)),
+                  },
+                 {'motion' : [{'using differences' : self.inputs.use_differences[0]},
+                              {'mean' : np.mean(mc_in,axis=0).tolist(),
+                               'min' : np.min(mc_in,axis=0).tolist(),
+                               'max' : np.max(mc_in,axis=0).tolist(),
+                               'std' : np.std(mc_in,axis=0).tolist()},
+                              ]},
+                 {'intensity' : [{'using differences' : self.inputs.use_differences[1]},
+                                 {'mean' : np.mean(gz,axis=0).tolist(),
+                                  'min' : np.min(gz,axis=0).tolist(),
+                                  'max' : np.max(gz,axis=0).tolist(),
+                                  'std' : np.std(gz,axis=0).tolist()},
+                                 ]},
+                 ]
+        if self.inputs.use_norm:
+            stats.insert(3, {'motion_norm' : {'mean' : np.mean(normval, axis=0).tolist(),
+                                              'min' : np.min(normval, axis=0).tolist(),
+                                              'max' : np.max(normval, axis=0).tolist(),
+                                              'std' : np.std(normval, axis=0).tolist(),
+                                    }})
+        save_json(statsfile, stats)
 
     def _run_interface(self, runtime):
         """Execute this module.

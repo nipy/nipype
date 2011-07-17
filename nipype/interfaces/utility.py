@@ -198,7 +198,9 @@ class Rename(IOBase):
             if m:
                 fmt_dict.update(m.groupdict())
         for field in self.fmt_fields:
-            fmt_dict[field] = getattr(self.inputs, field)
+            val = getattr(self.inputs, field)
+            if isdefined(val):
+                fmt_dict[field] = getattr(self.inputs, field)
         if self.inputs.keep_ext:
             fmt_string = "".join([self.inputs.format_string, split_filename(self.inputs.in_file)[2]])
         else:

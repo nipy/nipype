@@ -21,9 +21,8 @@ from glob import glob
 import numpy as np
 
 from nipype.utils.filemanip import FileNotFoundError, fname_presuffix
-from nipype.interfaces.base import CommandLine, traits, TraitedSpec,\
-    Directory, CommandLineInputSpec
-from nipype.utils.misc import isdefined
+from nipype.interfaces.base import (CommandLine, traits, TraitedSpec,
+                                    Directory, CommandLineInputSpec, isdefined)
 
 class Info(object):
     """ Freesurfer subject directory and version information.
@@ -111,10 +110,16 @@ class FSCommand(CommandLine):
         if self.inputs.subjects_dir:
             self.inputs.environ.update({'SUBJECTS_DIR':
                                             self.inputs.subjects_dir})
-    
+
     @classmethod
     def set_default_subjects_dir(cls, subjects_dir):
         cls._subjects_dir = subjects_dir
+
+    def run(self, **inputs):
+        if 'subjects_dir' in inputs:
+            self.inputs.subjects_dir = inputs['subjects_dir']
+        self._subjects_dir_update()
+        return super(FSCommand, self).run(**inputs)
 
     def _gen_fname(self, basename, fname=None, cwd=None, suffix='_fs', use_ext=True):
         '''Define a generic mapping for a single outfile

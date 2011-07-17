@@ -9,8 +9,6 @@ from distutils.version import LooseVersion
 import numpy as np
 from textwrap import dedent
 
-from nipype.interfaces.traits import _Undefined
-
 def getsource(function):
     """Returns the source code of a function"""
     src = dumps(dedent(inspect.getsource(function)))
@@ -33,9 +31,6 @@ def create_function_from_source(function_source):
     funcname = [name for name in ns.keys() if name != '__builtins__'][0]
     func = ns[funcname]
     return func
-
-def isdefined(object):
-    return not isinstance(object, _Undefined)
 
 def find_indices(condition):
    "Return the indices where ravel(condition) is true"
@@ -138,3 +133,13 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
     if checker(have_version) < checker(version):
         raise exc_failed_check(msg)
 
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    lower = v.lower()
+    if lower in ("yes", "true", "t", "1"):
+        return True
+    elif lower in ("no", "false", "n", "0"):
+        return False
+    else:
+        raise ValueError("%s cannot be converted to bool"%v)

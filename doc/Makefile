@@ -34,7 +34,7 @@ htmlonly:
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."
 
-api:    
+api:
 	rm -rf api/generated
 	#python ../tools/build_modref_templates.py
 	rm -rf interfaces/generated
@@ -55,9 +55,14 @@ examples2rst:
 			../examples/spm_face_tutorial.py \
 			../examples/spm_auditory_tutorial.py \
 			../examples/fsl_dti_tutorial.py \
+			../examples/camino_dti_tutorial.py \
+			../examples/connectivity_tutorial.py \
+			../examples/dtk_dti_tutorial.py \
+			../examples/dtk_odf_tutorial.py \
 			../examples/spm_tutorial2.py \
+			../examples/spm_dartel_tutorial.py \
 			../examples/dartmouth_workshop_2010.py \
-			../examples/nipy_tutorial.py 
+			../examples/nipy_tutorial.py
 	@echo "examples2rst finished."
 
 latex: api

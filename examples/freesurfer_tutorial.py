@@ -53,18 +53,7 @@ import nipype.pipeline.engine as pe          # pypeline engine
 Preliminaries
 -------------
 
-Confirm package dependencies are installed.  (This is only for the tutorial,
-rarely would you put this in your own code.) 
-"""
-
-from nipype.utils.misc import package_check
-
-package_check('numpy', '1.3', 'tutorial1')
-package_check('scipy', '0.7', 'tutorial1')
-package_check('networkx', '1.0', 'tutorial1')
-package_check('IPython', '0.10', 'tutorial1')
-
-"""Set any package specific configuration.
+Set any package specific configuration.
 
 Setting the subjects directory and the appropriate matlab command to use. if
 you want to use a different spm version/path, it should also be entered here.
@@ -109,9 +98,9 @@ intensity or movement.
 """
 
 art = pe.Node(interface=ra.ArtifactDetect(), name="art")
-art.inputs.use_differences      = [False,True]
+art.inputs.use_differences      = [True, False]
 art.inputs.use_norm             = True
-art.inputs.norm_threshold       = 0.5
+art.inputs.norm_threshold       = 1
 art.inputs.zintensity_threshold = 3
 art.inputs.mask_type            = 'file'
 art.inputs.parameter_source     = 'SPM'

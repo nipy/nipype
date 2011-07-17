@@ -34,18 +34,23 @@ def teardown_infile(tmp_dir):
 @skipif(no_fsl)
 def test_contrastmgr():
     input_map = dict(args = dict(argstr='%s',),
-                     contrast_num = dict(argstr='-cope',),
-                     environ = dict(),
-                     fcon_file = dict(argstr='-f %s',),
-                     output_type = dict(),
-                     stats_dir = dict(mandatory=True,argstr='%s',),
-                     suffix = dict(argstr='-suffix %s',),
-                     tcon_file = dict(mandatory=True,argstr='%s',),
-                     )
+                    contrast_num = dict(argstr='-cope',),
+                    corrections = dict(copyfile=False,mandatory=True,),
+                    dof_file = dict(copyfile=False,mandatory=True,argstr='',),
+                    environ = dict(usedefault=True,),
+                    fcon_file = dict(argstr='-f %s',),
+                    ignore_exception = dict(usedefault=True,),
+                    output_type = dict(),
+                    param_estimates = dict(copyfile=False,mandatory=True,argstr='',),
+                    sigmasquareds = dict(copyfile=False,mandatory=True,argstr='',),
+                    suffix = dict(argstr='-suffix %s',),
+                    tcon_file = dict(mandatory=True,argstr='%s',),
+                    )
     instance = fsl.ContrastMgr()
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
 
 @skipif(no_fsl)
 def test_feat():
@@ -85,24 +90,25 @@ def test_featregister():
 @skipif(no_fsl)
 def test_filmgls():
     input_map = dict(args = dict(argstr='%s',),
-                     autocorr_estimate_only = dict(xor=['autocorr_noestimate'],argstr='-ac',),
-                     autocorr_noestimate = dict(xor=['autocorr_estimate_only'],argstr='-noest',),
-                     brightness_threshold = dict(argstr='-epith %d',),
-                     design_file = dict(argstr='%s',),
-                     environ = dict(),
-                     fit_armodel = dict(argstr='-ar',),
-                     full_data = dict(argstr='-v',),
-                     in_file = dict(mandatory=True,argstr='%s',),
-                     mask_size = dict(argstr='-ms %d',),
-                     multitaper_product = dict(argstr='-mt %d',),
-                     output_pwdata = dict(argstr='-output_pwdata',),
-                     output_type = dict(),
-                     results_dir = dict(argstr='-rn %s',),
-                     smooth_autocorr = dict(argstr='-sa',),
-                     threshold = dict(argstr='%f',),
-                     tukey_window = dict(argstr='-tukey %d',),
-                     use_pava = dict(argstr='-pava',),
-                     )
+                     autocorr_estimate_only = dict(xor=['autocorr_estimate_only', 'fit_armodel', 'tukey_window', 'multitaper_product', 'use_pava', 'autocorr_noestimate'],argstr='-ac',),
+                    autocorr_noestimate = dict(xor=['autocorr_estimate_only', 'fit_armodel', 'tukey_window', 'multitaper_product', 'use_pava', 'autocorr_noestimate'],argstr='-noest',),
+                    brightness_threshold = dict(argstr='-epith %d',),
+                    design_file = dict(argstr='%s',),
+                    environ = dict(usedefault=True,),
+                    fit_armodel = dict(xor=['autocorr_estimate_only', 'fit_armodel', 'tukey_window', 'multitaper_product', 'use_pava', 'autocorr_noestimate'],argstr='-ar',),
+                    full_data = dict(argstr='-v',),
+                    ignore_exception = dict(usedefault=True,),
+                    in_file = dict(mandatory=True,argstr='%s',),
+                    mask_size = dict(argstr='-ms %d',),
+                    multitaper_product = dict(xor=['autocorr_estimate_only', 'fit_armodel', 'tukey_window', 'multitaper_product', 'use_pava', 'autocorr_noestimate'],argstr='-mt %d',),
+                    output_pwdata = dict(argstr='-output_pwdata',),
+                    output_type = dict(),
+                    results_dir = dict(usedefault=True,argstr='-rn %s',),
+                    smooth_autocorr = dict(argstr='-sa',),
+                    threshold = dict(argstr='%f',),
+                    tukey_window = dict(xor=['autocorr_estimate_only', 'fit_armodel', 'tukey_window', 'multitaper_product', 'use_pava', 'autocorr_noestimate'],argstr='-tukey %d',),
+                    use_pava = dict(argstr='-pava',),
+                    )
     instance = fsl.FILMGLS()
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
@@ -288,6 +294,46 @@ def test_cluster():
                      xfm_file = dict(argstr='--xfm=%s',),
                      )
     instance = fsl.Cluster()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+@skipif(no_fsl)
+def test_randomise1():
+    input_map = dict(args = dict(argstr='%s',),
+                     base_name = dict(argstr='-o %s',),
+                     c_thresh = dict(argstr='-c %.2f',),
+                     cm_thresh = dict(argstr='-C %.2f',),
+                     demean = dict(argstr='-D',),
+                     design_mat = dict(argstr='-d %s',mandatory=True,),
+                     environ = dict(),
+                     f_c_thresh = dict(argstr='-F %.2f',),
+                     f_cm_thresh = dict(argstr='-S %.2f',),
+                     f_only = dict(argstr='--f_only',),
+                     fcon = dict(argstr='-f %s',),
+                     in_file = dict(argstr='-i %s',mandatory=True,),
+                     mask = dict(argstr='-m %s',),
+                     num_perm = dict(argstr='-n %d',),
+                     one_sample_group_mean = dict(argstr='-l',),
+                     output_type = dict(),
+                     p_vec_n_dist_files = dict(argstr='-P',),
+                     raw_stats_imgs = dict(argstr='-R',),
+                     seed = dict(argstr='--seed %d',),
+                     show_info_parallel_mode = dict(argstr='-Q',),
+                     show_total_perms = dict(argstr='-q',),
+                     tcon = dict(argstr='-t %s',mandatory=True,),
+                     tfce = dict(argstr='-T',),
+                     tfce2D = dict(argstr='--T2',),
+                     tfce_C = dict(argstr='--tfce_C %.2f',),
+                     tfce_E = dict(argstr='--tfce_E %.2f',),
+                     tfce_H = dict(argstr='--tfce_H %.2f',),
+                     var_smooth = dict(argstr='-v %d',),
+                     vox_p_values = dict(argstr='-x',),
+                     vxf = dict(argstr='--vxf %d',),
+                     vxl = dict(argstr='--vxl %d',),
+                     x_block_labels = dict(argstr='-e %s',),
+                     )
+    instance = fsl.Randomise()
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value

@@ -2,23 +2,21 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The spm module provides basic functions for interfacing with SPM  tools."""
 
-
-from nipype.interfaces.traits import Directory
 __docformat__ = 'restructuredtext'
 
 # Standard library imports
 import os
 from copy import deepcopy
-import re
 
 # Third-party imports
 import numpy as np
 from scipy.io import savemat
 
 # Local imports
-from nipype.interfaces.base import BaseInterface, traits, TraitedSpec,\
-    InputMultiPath, BaseInterfaceInputSpec
-from nipype.utils.misc import isdefined
+from nipype.interfaces.base import (BaseInterface, traits, isdefined,
+                                    InputMultiPath, BaseInterfaceInputSpec,
+                                    Directory)
+
 from nibabel import load
 from nipype.interfaces.matlab import MatlabCommand
 
@@ -140,7 +138,8 @@ class Info(object):
         throw(MException('SPMCheck:NotFound','SPM not in matlab path'));
         end;
         spm_path = spm('dir');
-        fprintf(1, 'NIPYPE  %s', spm_path);
+        [name, version] = spm('ver');
+        fprintf(1, 'NIPYPE path:%s|name:%s|release:%s', spm_path, name, version);
         exit;
         """
         mlab.inputs.mfile = False
@@ -152,7 +151,12 @@ class Info(object):
             logger.debug(str(e))
             return None
         else:
-            return sd._strip_header(out.runtime.stdout)
+            out = sd._strip_header(out.runtime.stdout)
+            out_dict = {}
+            for part in out.split('|'):
+                key, val = part.split(':')
+                out_dict[key] = val
+            return out_dict
 
 def no_spm():
     """ Checks if SPM is NOT installed
@@ -383,7 +387,8 @@ class SPMCommand(BaseInterface):
         if isempty(which('spm')),
              throw(MException('SPMCheck:NotFound','SPM not in matlab path'));
         end
-        fprintf('SPM version: %s\\n',spm('ver'));
+        [name, ver] = spm('ver');
+        fprintf('SPM version: %s Release: %s\\n',name, ver);
         fprintf('SPM path: %s\\n',which('spm'));
         spm('Defaults','fMRI');
                   

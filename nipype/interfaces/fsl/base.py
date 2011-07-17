@@ -30,8 +30,8 @@ import os
 import warnings
 
 from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.base import CommandLine, traits, CommandLineInputSpec
-from nipype.utils.misc import isdefined
+from nipype.interfaces.base import (CommandLine, traits, CommandLineInputSpec,
+                                    isdefined)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -223,6 +223,8 @@ class FSLCommand(CommandLine):
                 suffix = ''.join((suffix, ext))
             else:
                 suffix = ext
+        if suffix is None:
+            suffix = ''
         fname = fname_presuffix(basename, suffix = suffix,
                                 use_ext = False, newpath = cwd)
         return fname

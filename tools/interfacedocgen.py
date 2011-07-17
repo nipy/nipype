@@ -24,9 +24,7 @@ import os
 import re
 import sys
 
-from nipype.utils.misc import is_container
-from nipype.interfaces.base import Interface, CommandLine
-from enthought.traits.trait_errors import TraitError
+from nipype.interfaces.base import CommandLine, TraitError
 import warnings
 from nipype.pipeline.engine import Workflow
 import tempfile
@@ -243,7 +241,7 @@ class InterfaceHelpWriter(object):
 
 
     def _write_graph_section(self, fname, title):
-        ad = '\n%s\n%s\n'%(title,'-'*len(title))
+        ad = '\n%s\n%s\n'%(title,'~'*len(title))
         ad += '.. graphviz::\n\n'
         fhandle = open(fname)
         for line in fhandle:

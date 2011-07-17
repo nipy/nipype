@@ -11,8 +11,7 @@ Two nodes can be connected as shown below.
 
 .. testcode::
    
-workflow.connect(realigner, 'realigned_files', smoother, 'infile')
-==================================================================
+    workflow.connect(realigner, 'realigned_files', smoother, 'infile')
 
 The connection mechanism allows for a function to be evaluated on the
 output field ('realigned files') of the source node (realigner) and
@@ -51,12 +50,12 @@ Distributed computation
 =======================
 
 The pipeline engine has built-in support for distributed computation on
-clusters. This can be achieved via plugin-modules for the IPython_
-distributed computing interface or SGE, provided the user sets up a
-workflow on a shared filesystem.
-
-For IPython_ the environment needs to be configured for distributed
-operation. Details are available at :ref:`parallel_processing`.
+clusters. This can be achieved via plugin-modules for Python_ multiprocessing or
+the IPython_ distributed computing interface or SGE, provided the user sets up a
+workflow on a shared filesystem. These modules can take arguments that specify
+additional distribution engine parameters. For IPython_ the environment needs to
+be configured for distributed operation. Details are available at
+:ref:`parallel_processing`.
 
 The default behavior is to run in series using the Linear plugin.
 
@@ -109,26 +108,9 @@ all over again. It is possible to do that with the
 
 .. testcode::
 
-   workflow.updatehash()
+   workflow.run(updatehash=True)
 
 This will execute the workflow and update all the hash values that
 were stored without actually running any of the interfaces.
-
-Caveats
--------
-
-Any interface that stores a filename within a generated file will trip
-(e.g., ``spm/fsl.Level1Design``, `SpecifyModel.modelgen`). This is because
-the outputs are not regenerated in this hash update. If your workflow
-contains such an interfaces and none of your parameters or underlying
-packages have changed, then you can relocate and re-execute:
-
-.. testcode::
-
-   workflow.updatehash(force_execute=['spm.level1design',
-                                      'specifymodel.modelgen'])
-
-The names for ``force_execute`` has to correspond to the directories that
-were created.
 
 .. include:: ../links_names.txt

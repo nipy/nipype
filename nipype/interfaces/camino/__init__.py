@@ -4,9 +4,11 @@
 """
 
 from nipype.interfaces.camino.connectivity import Conmap
-from nipype.interfaces.camino.convert import Image2Voxel, FSL2Scheme, VtkStreamlines, ProcStreamlines, TractShredder
-from nipype.interfaces.camino.dti import DTIFit, ModelFit, DTLUTGen, PicoPDFs, Track, TrackPICo, TrackBayesDirac, TrackDT, FA, MD, TrD, AnalyzeHeader
+from nipype.interfaces.camino.convert import Image2Voxel, FSL2Scheme, VtkStreamlines, ProcStreamlines, TractShredder, DT2NIfTI, NIfTIDT2Camino, AnalyzeHeader
+from nipype.interfaces.camino.dti import DTIFit, ModelFit, DTLUTGen, PicoPDFs, Track, TrackPICo, TrackBayesDirac, TrackDT, TrackBallStick, TrackBootstrap, ComputeFractionalAnisotropy, ComputeMeanDiffusivity, ComputeTensorTrace,  ComputeEigensystem
+
 import nose
+
 
 
 def setup():

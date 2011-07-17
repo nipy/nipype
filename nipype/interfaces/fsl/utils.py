@@ -16,11 +16,9 @@ import warnings
 
 import numpy as np
 
-from nipype.interfaces.fsl.base import FSLCommand,\
-    FSLCommandInputSpec, Info
-from nipype.interfaces.base import traits, TraitedSpec,\
-    OutputMultiPath, File
-from nipype.utils.misc import isdefined
+from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
+from nipype.interfaces.base import (traits, TraitedSpec, OutputMultiPath, File,
+                                    isdefined)
 from nipype.utils.filemanip import load_json, save_json, split_filename, fname_presuffix
 
 warn = warnings.warn
@@ -133,6 +131,9 @@ class Merge(FSLCommand):
         if not isdefined(outputs['merged_file']):
             outputs['merged_file'] = self._gen_fname(self.inputs.in_files[0],
                                               suffix = '_merged')
+        else:
+            outputs['merged_file'] = os.path.realpath(self.inputs.merged_file)
+            
         return outputs
 
     def _gen_filename(self, name):
@@ -152,6 +153,10 @@ class ExtractROIInputSpec(FSLCommandInputSpec):
     z_size = traits.Int(argstr="%d", position=7)
     t_min = traits.Int(argstr="%d", position=8)
     t_size = traits.Int(argstr="%d", position=9)
+    _crop_xor = ['x_min', 'x_size', 'y_min', 'y_size', 'z_min', 'z_size', 't_min', 't_size']
+    crop_list = traits.List(traits.Tuple(traits.Int, traits.Int),
+                            argstr="%s", position=2, xor=_crop_xor,
+                            help="list of two tuples specifying crop options")
 
 class ExtractROIOutputSpec(TraitedSpec):
     roi_file = File(exists=True)
@@ -181,6 +186,12 @@ class ExtractROI(FSLCommand):
     _cmd = 'fslroi'
     input_spec = ExtractROIInputSpec
     output_spec = ExtractROIOutputSpec
+
+    def _format_arg(self, name, spec, value):
+
+        if name == "crop_list":
+            return " ".join(map(str, sum(map(list, value), [])))
+        return super(ExtractROI, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         """Create a Bunch which contains all possible files generated
@@ -305,16 +316,17 @@ class ImageMaths(FSLCommand):
 
 
 class FilterRegressorInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True,argst="-i %s",desc="input file name (4D image)",mandatory=True)
-    out_file = File(argst="-o %s",desc="output file name for the filtered data",genfile=True)
-    design_file = File(exists=True,argst="-d %s",desc="design	file name of the matrix with "\
-                       "time courses (e.g. GLM design or MELODIC mixing matrix)",mandatory=True)
-    filter_out = traits.List(traits.Int,argst="-f %s",desc="filter out part of the "\
-                             "regression model, e.g. -f '1,2,3'",mandatory=True)
-    mask = File(exists=True,argst="-m %s",desc="mask image file name")
-    var_norm = traits.Bool(argst="--vn",desc="perform variance-normalization on data")
-    out_file = traits.Bool(argst="--out_data",desc="output data")
-    out_vnscales = traits.Bool(argst="--out_vnscales",desc="output scaling factors for variance normalization")
+    in_file = File(exists=True,argstr="-i %s",desc="input file name (4D image)",mandatory=True,position=1)
+    out_file = File(argstr="-o %s",desc="output file name for the filtered data",genfile=True,position=2)
+    design_file = File(exists=True,argstr="-d %s",position=3,mandatory=True,
+                       desc="name of the matrix with time courses (e.g. GLM design or MELODIC mixing matrix)")
+    filter_columns = traits.List(traits.Int,argstr="-f '%s'", xor=["filter_all"], mandatory=True, position=4,
+                        desc="(1-based) column indices to filter out of the data")
+    filter_all = traits.Bool(mandatory=True, argstr="-f '%s'", xor=["filter_columns"], position=4,
+                             desc="use all columns in the design file in denoising")
+    mask = File(exists=True,argstr="-m %s",desc="mask image file name")
+    var_norm = traits.Bool(argstr="--vn",desc="perform variance-normalization on data")
+    out_vnscales = traits.Bool(argstr="--out_vnscales",desc="output scaling factors for variance normalization")
 
 class FilterRegressorOutputSpec(TraitedSpec):
     out_file = File(exists=True,desc="output file name for the filtered data")
@@ -327,6 +339,18 @@ class FilterRegressor(FSLCommand):
     input_spec = FilterRegressorInputSpec
     output_spec = FilterRegressorOutputSpec
     _cmd = 'fsl_regfilt'
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'filter_columns':
+            return trait_spec.argstr % ",".join(map(str, value))
+        elif name == "filter_all":
+            design = np.loadtxt(self.inputs.design_file)
+            try:
+                n_cols = design.shape[1]
+            except IndexError:
+                n_cols = 1
+            return trait_spec.argstr % ",".join(map(str, range(1, n_cols + 1)))
+        return super(FilterRegressor, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -385,7 +409,7 @@ class ImageStats(FSLCommand):
                     raise ValueError('-k %s option in op_string requires mask_file')
         return super(ImageStats, self)._format_arg(name, trait_spec, value)
     
-    def aggregate_outputs(self, runtime=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
         # local caching for backward compatibility
         outfile = os.path.join(os.getcwd(), 'stat_result.json')
@@ -876,3 +900,50 @@ class SwapDimensions(FSLCommand):
         if name == "out_file":
             return self._list_outputs()["out_file"]
         return None
+    
+class PowerSpectrumInputSpec(FSLCommandInputSpec):
+    # We use position args here as list indices - so a negative number
+    # will put something on the end
+    in_file = File(exists=True,
+                  desc="input 4D file to estimate the power spectrum",
+                  argstr='%s', position=0, mandatory=True)
+    out_file = File(desc = 'name of output 4D file for power spectrum',
+                   argstr='%s', position=1, genfile=True)
+    
+
+class PowerSpectrumOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="path/name of the output 4D power spectrum file")
+
+class PowerSpectrum(FSLCommand):
+    """Use FSL PowerSpectrum command for power spectrum estimation.
+
+    Examples
+    --------
+    >>> from nipype.interfaces import fsl
+    >>> pspec = fsl.PowerSpectrum()
+    >>> pspec.inputs.in_file = 'functional.nii'
+    >>> res = pspec.run() # doctest: +SKIP
+
+    """
+
+    _cmd = 'fslpspec'
+    input_spec = PowerSpectrumInputSpec
+    output_spec = PowerSpectrumOutputSpec
+
+    def _gen_outfilename(self):
+        out_file = self.inputs.out_file
+        if not isdefined(out_file) and isdefined(self.inputs.in_file):
+            out_file = self._gen_fname(self.inputs.in_file,
+                                       suffix = '_ps')
+        return out_file
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self._gen_outfilename()
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._gen_outfilename()
+        return None
+

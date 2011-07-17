@@ -6,8 +6,10 @@ def configuration(parent_package='',top_path=None):
     config = Configuration('workflows', parent_package, top_path)
 
     config.add_subpackage('fsl')
+    config.add_subpackage('freesurfer')
     config.add_subpackage('spm')
-
+    config.add_subpackage('camino')
+    
     return config
 
 if __name__ == '__main__':

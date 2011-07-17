@@ -12,7 +12,6 @@ import os
 import re
 import shutil
 
-from nipype.utils.misc import isdefined
 # The md5 module is deprecated in Python 2.6, but hashlib is only
 # available as an external package for versions of python before 2.6.
 # Both md5 algorithms appear to return the same result.
@@ -31,6 +30,7 @@ except ImportError:
 
 import numpy as np
 
+from nipype.interfaces.traits_extension import isdefined
 from nipype.utils.misc import is_container
 from nipype.utils.config import config
 
@@ -174,12 +174,11 @@ def hash_timestamp(afile):
         md5obj = md5()
         stat = os.stat(afile)
         md5obj.update(str(stat.st_size))
-        md5obj.update(str(stat.st_ctime))
         md5obj.update(str(stat.st_mtime))
         md5hex = md5obj.hexdigest()
     return md5hex
 
-def copyfile(originalfile, newfile, copy=False, create_new=False):
+def copyfile(originalfile, newfile, copy=False, create_new=False, hashmethod=None):
     """Copy or symlink ``originalfile`` to ``newfile``.
 
     Parameters
@@ -213,9 +212,11 @@ def copyfile(originalfile, newfile, copy=False, create_new=False):
                 fname += "_c%04d"%i
             newfile = base + os.sep + fname + ext
     elif os.path.exists(newfile):
-        if config.get('execution', 'hash_method').lower() == 'timestamp':
+        if hashmethod is None:
+            hashmethod = config.get('execution', 'hash_method').lower()
+        if hashmethod == 'timestamp':
             newhash = hash_timestamp(newfile)
-        elif config.get('execution', 'hash_method').lower() == 'content':
+        elif hashmethod == 'content':
             newhash = hash_infile(newfile)
         fmlogger.debug("File: %s already exists,%s, copy:%d" \
                            % (newfile, newhash, copy))
@@ -286,7 +287,7 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
     newfiles = []
     for i,f in enumerate(filename_to_list(filelist)):
         if isinstance(f, list):
-            newfiles.insert(i, copyfiles(f, dest, copy=copy))
+            newfiles.insert(i, copyfiles(f, dest, copy=copy, create_new=create_new))
         else:
             if len(outfiles) > 1:
                 destfile = outfiles[i]
@@ -400,4 +401,21 @@ def savepkl(filename, record):
     cPickle.dump(record, pkl_file)
     pkl_file.close()
 
+rst_levels = ['=', '-', '~', '+']
+
+def write_rst_header(header, level=0):
+    return '\n'.join((header, ''.join([rst_levels[level] for _ in header])))+'\n\n'
+
+def write_rst_list(items, prefix=''):
+    out = []
+    for item in items:
+        out.append(prefix + ' ' + str(item))
+    return '\n'.join(out)+'\n\n'
+
+def write_rst_dict(info, prefix=''):
+    out = []
+    for key, value in sorted(info.items()):
+        out.append(prefix + '* ' + key + ' : ' + str(value))
+    return '\n'.join(out)+'\n\n'
+        
 

@@ -29,17 +29,7 @@ import os                                    # system functions
 Preliminaries
 -------------
 
-Confirm package dependencies are installed.  (This is only for the
-tutorial, rarely would you put this in your own code.)
 """
-
-from nipype.utils.misc import package_check
-
-package_check('numpy', '1.3', 'tutorial1')
-package_check('scipy', '0.7', 'tutorial1')
-package_check('networkx', '1.0', 'tutorial1')
-package_check('IPython', '0.10', 'tutorial1')
-
 
 # Set the way matlab should be called
 mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
@@ -290,12 +280,7 @@ necessary to generate an SPM design matrix.
 from nipype.interfaces.base import Bunch
 subjectinfo = [Bunch(conditions=['Task'],
                             onsets=[range(6,84,12)],
-                            durations=[[6]],
-                            amplitudes=None,
-                            tmod=None,
-                            pmod=None,
-                            regressor_names=None,
-                            regressors=None)]
+                            durations=[[6]])]
 
 """Setup the contrast structure that needs to be evaluated. This is a
 list of lists. The inner list specifies the contrasts and has the

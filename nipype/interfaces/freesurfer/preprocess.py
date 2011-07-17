@@ -24,8 +24,7 @@ from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath,
                                     OutputMultiPath, CommandLine,
-                                    CommandLineInputSpec)
-from nipype.utils.misc import isdefined
+                                    CommandLineInputSpec, isdefined)
 
 
 class ParseDICOMDirInputSpec(FSTraitedSpec):
@@ -581,8 +580,8 @@ class ReconAllInputSpec(CommandLineInputSpec):
                             usedefault=True)
     directive = traits.Enum('all', 'autorecon1', 'autorecon2', 'autorecon2-cp',
                             'autorecon2-wm', 'autorecon2-inflate1', 'autorecon2-perhemi',
-                            'autorecon3', argstr='-%s', desc='process directive',
-                            usedefault=True)
+                            'autorecon3', 'localGI', 'qcache', argstr='-%s', 
+                            desc='process directive', usedefault=True)
     hemi = traits.Enum('lh', 'rh', desc='hemisphere to process', argstr="-hemi %s")
     T1_files = InputMultiPath(File(exists=True), argstr='-i %s...',
                               desc='name of T1 file to process')
@@ -839,7 +838,7 @@ class SmoothInputSpec(FSTraitedSpec):
     vol_fwhm = traits.Float(min=0, argstr= '--vol-fwhm %d',
                             desc='volumesmoothing outside of surface')
 
-class SmoothOutputSpec(FSTraitedSpec):
+class SmoothOutputSpec(TraitedSpec):
     smoothed_file= File(exist=True,desc='smoothed input volume')	
          
 class Smooth(FSCommand):

@@ -29,18 +29,6 @@ import nipype.algorithms.rapidart as ra      # artifact detection
 Preliminaries
 -------------
 
-Confirm package dependencies are installed.  (This is only for the tutorial,
-rarely would you put this in your own code.)
-"""
-
-from nipype.utils.misc import package_check
-
-package_check('numpy', '1.3', 'tutorial1')
-package_check('scipy', '0.7', 'tutorial1')
-package_check('networkx', '1.0', 'tutorial1')
-package_check('IPython', '0.10', 'tutorial1')
-
-"""
 Setup any package specific configuration. The output file format for FSL
 routines is being set to compressed NIFTI.
 """
@@ -338,13 +326,14 @@ images in the functional series are outliers based on deviations in
 intensity and/or movement.
 """
 
-art = pe.Node(interface=ra.ArtifactDetect(use_differences = [False,True],
-                                          use_norm = True,
-                                          norm_threshold = 0.5,
-                                          zintensity_threshold = 3,
-                                          parameter_source = 'FSL',
-                                          mask_type = 'file'),
-              name="art")
+art = pe.MapNode(interface=ra.ArtifactDetect(use_differences = [True, False],
+                                             use_norm = True,
+                                             norm_threshold = 1,
+                                             zintensity_threshold = 3,
+                                             parameter_source = 'FSL',
+                                             mask_type = 'file'),
+                 iterfield=['realigned_files', 'realignment_parameters'],
+                 name="art")
 
 
 preproc.connect([(inputnode, nosestrip,[('struct','in_file')]),
@@ -402,7 +391,9 @@ Use :class:`nipype.interfaces.fsl.ContrastMgr` to generate contrast estimates
 """
 
 conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
-                         iterfield = ['tcon_file','stats_dir'])
+                         iterfield = ['tcon_file','param_estimates',
+                                      'sigmasquareds', 'corrections',
+                                      'dof_file'])
 
 modelfit.connect([
    (modelspec,level1design,[('session_info','session_info')]),
@@ -410,7 +401,10 @@ modelfit.connect([
                            ('ev_files', 'ev_files')]),
    (modelgen,modelestimate,[('design_file','design_file')]),
    (modelgen,conestimate,[('con_file','tcon_file')]),
-   (modelestimate,conestimate,[('results_dir','stats_dir')]),
+   (modelestimate,conestimate,[('param_estimates','param_estimates'),
+                               ('sigmasquareds', 'sigmasquareds'),
+                               ('corrections','corrections'),
+                               ('dof_file','dof_file')]),
    ])
 
 """
@@ -637,7 +631,8 @@ generate any output. To actually run the analysis on the data the
 """
 
 if __name__ == '__main__':
+    l1pipeline.write_graph()
     l1pipeline.run()
-    l1pipeline.write_graph(graph2use='flat')
+    #l1pipeline.run(plugin='MultiProc', plugin_args={'n_procs':2})
 
 

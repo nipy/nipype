@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'nipype'
-copyright = u'2009-10, Neuroimaging in Python team'
+copyright = u'2009-11, Neuroimaging in Python team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
