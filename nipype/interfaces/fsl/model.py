@@ -1100,7 +1100,7 @@ class SMM(FSLCommand):
 class MELODICInputSpec(FSLCommandInputSpec):
     in_files = InputMultiPath(File(exists=True),argstr="-i %s",mandatory=True,position=0,
                               desc="input file names (either single file name or a list)")
-    out_dir = Directory(exists=True,argstr="-o %s",desc="output directory name", genfile=True)
+    out_dir = Directory(argstr="-o %s",desc="output directory name", genfile=True)
     mask = File(exists=True, argstr="-m %s",desc="file name of mask for thresholding")
     no_mask = traits.Bool(argstr="--nomask",desc="switch off masking")
     update_mask = traits.Bool(argstr="--update_mask",desc="switch off mask updating")
@@ -1412,7 +1412,7 @@ class Randomise(FSLCommand):
         
     Example
     -------
-    >>> import nipype.interfaces.fsl.dti as fsl
+    >>> import nipype.interfaces.fsl as fsl
     >>> rand = fsl.Randomise(in_file='allFA.nii', \
     mask = 'mask.nii', \
     tcon='design.con', \
