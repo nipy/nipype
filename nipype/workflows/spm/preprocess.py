@@ -84,12 +84,14 @@ def create_spm_preproc(name='preproc'):
     smooth = pe.Node(spm.Smooth(), name='smooth')
     workflow.connect(inputnode, 'fwhm', smooth, 'fwhm')
     workflow.connect(realign, 'realigned_files', smooth, 'in_files')
-    artdetect = pe.Node(ra.ArtifactDetect(mask_type='file',
+    artdetect = pe.MapNode(ra.ArtifactDetect(mask_type='file',
                                           parameter_source='SPM',
                                           use_differences=[True,False],
                                           use_norm=True,
                                           save_plot=True),
-                        name='artdetect')
+                           iterfield=['mask_file', 'realigned_files',
+                                      'realignment_parameters'],
+                           name='artdetect')
     workflow.connect([(inputnode, artdetect,[('norm_threshold', 'norm_threshold'),
                                              ('zintensity_threshold',
                                               'zintensity_threshold')])])
