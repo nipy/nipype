@@ -378,6 +378,7 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     mapping.connect([(inputnode1, b0Strip,[('dwi','in_file')])])
+    mapping.connect([(inputnode1, b0Strip,[('dwi','t2_guided')])]) # Added to improve damaged brain extraction
     mapping.connect([(b0Strip, coregister,[('out_file','in_file')])])
     mapping.connect([(mri_convert_Brain, coregister,[('out_file','reference')])])
     mapping.connect([(coregister, convertxfm,[('out_matrix_file','in_file')])])
@@ -524,6 +525,7 @@ def create_connectivity_pipeline(name="connectivity"):
                                                                 "connectome",
                                                                 "cmatrix",
                                                                 "gpickled_network",
+                                                                "rois",
                                                                 "mean_fiber_length",
                                                                 "fiber_length_std",
                                                                 "tensors"]),
@@ -546,6 +548,7 @@ def create_connectivity_pipeline(name="connectivity"):
         ("CreateMatrix.fiber_length_std_matrix_mat_file", "fiber_length_std"),
         ("fa2nii.nifti_file", "fa"),
         ("CreateMatrix.matrix_file", "gpickled_network"),
+        ("ROIGen.roi_file", "rois"),
         ("mri_convert_Brain.out_file", "struct"),
         ("trace2nii.nifti_file", "trace"),
         ("dtifit.tensor_fitted", "tensors")])

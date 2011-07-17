@@ -129,7 +129,7 @@ def save_fibers(oldhdr, oldfib, fname, indices):
     nb.trackvis.write(fname, outstreams, hdrnew)
 
 
-def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, matrix_mat_name,endpoint_name):
+def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_name,endpoint_name, dict_file=-1):
     """ Create the connection matrix for each resolution using fibers and ROIs. """
 
     print 'Running cmat function'
@@ -162,9 +162,10 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
     print 'Number of fibers {num}'.format(num=n)
 
     # Load Pickled label dictionary (not currently used)
-    file = open(dict_file, 'r')
-    labelDict = pickle.load(file)
-    file.close()
+    if not dict_file == -1:
+        file = open(dict_file, 'r')
+        labelDict = pickle.load(file)
+        file.close()
 
     # Create empty fiber label array
     fiberlabels = np.zeros( (n, 2) )
@@ -248,7 +249,6 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
     fibmean.add_nodes_from(G)
     fibdev = nx.Graph()
     fibdev.add_nodes_from(G)
-    #key = "fiber_length_mean"
     for u,v,d in G.edges_iter(data=True):
         G.remove_edge(u,v)
         di = { 'number_of_fibers' : len(d['fiblist']), }
@@ -260,9 +260,6 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
             numfib.add_edge(u, v, weight=di['number_of_fibers'] )
             fibmean.add_edge(u, v, weight=di['fiber_length_mean'] )
             fibdev.add_edge(u, v, weight=di['fiber_length_std'] )
-            #numfib.edge[u][v]['number_of_fibers'] = di['number_of_fibers']
-            #fibmean.edge[u][v]['fiber_length_mean'] = di['fiber_length_mean']
-            #fibdev.edge[u][v]['fiber_length_std'] = di['fiber_length_std']
 
     print 'Writing network as {ntwk}'.format(ntwk=matrix_name)
     nx.write_gpickle(G, os.path.abspath(matrix_name))
@@ -299,7 +296,7 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
 
 class CreateMatrixInputSpec(TraitedSpec):
     roi_file = File(exists=True, mandatory=True, desc='Freesurfer aparc+aseg file')
-    dict_file = File(exists=True, mandatory=True, desc='Pickle file containing the label dictionary (see ROIGen)')
+    dict_file = File(exists=True, desc='Pickle file containing the label dictionary (see ROIGen)')
     tract_file = File(exists=True, mandatory=True, desc='Trackvis tract file')
     resolution_network_file = File(exists=True, mandatory=True, desc='Parcellation files from Connectome Mapping Toolkit')
     out_matrix_file = File(genfile = True, desc='NetworkX graph describing the connectivity')
@@ -353,8 +350,12 @@ class CreateMatrix(BaseInterface):
         else:
             endpoint_name = self.inputs.out_endpoint_array_name
 
-        cmat(self.inputs.tract_file, self.inputs.roi_file, self.inputs.dict_file, self.inputs.resolution_network_file,
-        matrix_file, matrix_mat_file, endpoint_name)
+        if isdefined(self.inputs.dict_file):
+            cmat(self.inputs.tract_file, self.inputs.roi_file, self.inputs.resolution_network_file,
+            matrix_file, matrix_mat_file, endpoint_name, self.inputs.dict_file)
+        else:        
+            cmat(self.inputs.tract_file, self.inputs.roi_file, self.inputs.resolution_network_file,
+            matrix_file, matrix_mat_file, endpoint_name)
 
         return runtime
 

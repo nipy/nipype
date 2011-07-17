@@ -38,19 +38,15 @@ def mean_difference(all_values, test_values):
     mean_difference_from_tested = mean_test_values - mean_difference
     return mean_difference_from_tested
 
-def average_measure(subject_values):
-    average = np.mean(subject_values)
-    min = np.min(subject_values)
-    max = np.max(subject_values)
-    deviation = np.std(subject_values)
+def average_measure(values):
     returnavg = {}
-    returnavg['avg'] = average
-    returnavg['min'] = min
-    returnavg['max'] = max
-    returnavg['std'] = deviation
+    returnavg['avg'] = np.mean(values)
+    returnavg['min'] = np.min(values)
+    returnavg['max'] = np.max(values)
+    returnavg['std'] = np.std(values)
     return returnavg
 
-def permutation_test(subject_values, patient_values,iterations=1000):
+def permutation_test(subject_values, patient_values, iterations=1000):
     """ Permutation test
     See http://rosettacode.org/wiki/Permutation_test and
         http://docs.python.org/library/itertools.html
@@ -131,7 +127,17 @@ def perm_test_robust(X,Y):
                     maxB[i][j] = returnavgB['max']
                     stdA[i][j] = returnavgA['std']
                     stdB[i][j] = returnavgB['std']
-    elif len(np.shape(X)) == 2 and not np.shape(X)[1] == 0 or np.shape(X)[0] == 0: #The input is a vector, per subject
+        returnall = {}        
+        nsamples = (length * length) / 2 #Bonferroni correction: Divide by number of tests
+        #nsamples = len(a[np.nonzero(a)])
+        print p[1]
+        print 'Number of samples: {n}'.format(n=nsamples)
+        p = p / n
+        print p[1]
+        returnall['p'] = p
+        returnall['avgA'] = avgA
+        returnall['avgB'] = avgB
+    elif len(np.shape(X)) == 2: # and not np.shape(X)[1] == 0 or np.shape(X)[0] == 0: #The input is a vector, per subject
         n = max(np.shape(X))
         print n
         X = np.reshape(X, (n, -1))
@@ -170,6 +176,16 @@ def perm_test_robust(X,Y):
             maxB[i] = returnavgB['max']
             stdA[i] = returnavgA['std']
             stdB[i] = returnavgB['std']
+        returnall = {}
+        nsamples = length #Bonferroni correction: Divide by number of tests
+        #nsamples = len(a[np.nonzero(a)])
+        print p[1]
+        print 'Number of samples: {n}'.format(n=nsamples)
+        p = p / n
+        print p[1]
+        returnall['p'] = p
+        returnall['avgA'] = avgA
+        returnall['avgB'] = avgB
     elif len(np.shape(X)) == 1: #The input is a single value, per subject
         p = permutation_test(X,Y)
         returnavgA = average_measure(X)
@@ -182,13 +198,14 @@ def perm_test_robust(X,Y):
         maxB = returnavgB['max']
         stdA = returnavgA['std']
         stdB = returnavgB['std']
+        returnall = {}
+        returnall['p'] = p
+        returnall['avgA'] = avgA
+        returnall['avgB'] = avgB
     else:
         print 'Single-value per group, cannot run permutation test'
-        return
-    returnall = {}
-    returnall['p'] = p
-    returnall['avgA'] = avgA
-    returnall['avgB'] = avgB
+        returnall = {}
+        return returnall
     #returnall = {'p':p,'avgA':avgA,'avgB':avgB,'minA':minA,'minB':minB,'maxB':maxB,'stdA':stdA,'stdB':stdB}
     return returnall
 
@@ -246,7 +263,8 @@ def run_stats(subject_measures, patient_measures, significance, group_id1, group
     maxB = {} 
     stdA = {}
     stdB = {}
-    subject_group_measure = patient_group_measure = {}
+    subject_group_measure = {}
+    patient_group_measure = {}
     measure_list = subject_measures[subject_measures.keys()[0]].keys()
     number_of_measures = len(measure_list)
     subject_list = subject_measures.keys()
@@ -264,11 +282,18 @@ def run_stats(subject_measures, patient_measures, significance, group_id1, group
         patient_group_measure[measure] = tmp
         print "Measure no. {idx} of {N}: {metric}".format(idx=index+1, N=number_of_measures, metric=measure)
         returnall = perm_test_robust(subject_group_measure[measure],patient_group_measure[measure])
-        p[measure] = returnall['p']
+        print type(returnall)
+        if returnall.has_key('p'):
+            print 'defined'
+            p[measure] = returnall['p']
+            subject_average[measure] = returnall['avgA']
+            patient_average[measure] = returnall['avgB']
+        else:
+            p[measure] = -1
+            subject_average[measure] = -1
+            patient_average[measure] = -1
         print "p-value for Measure: {metric}".format(metric=measure)
         print p[measure]
-        subject_average[measure] = returnall['avgA']
-        patient_average[measure] = returnall['avgB']
         del returnall
     returnall = {'p':p, 'subject_average':subject_average, 
     'patient_average':patient_average}
@@ -276,14 +301,23 @@ def run_stats(subject_measures, patient_measures, significance, group_id1, group
     return returnall
 
 def average_networks(in_files, ntwk_res_file, group_id):
-    ntwk = init_ntwk(ntwk_res_file)
-    Nnodes = len(ntwk.node)
-    allntwks = np.zeros((Nnodes,Nnodes),dtype=float)
-    for index, subject in enumerate(in_files):
-        tmp = sio.loadmat(subject)
-        allntwks = np.dstack((allntwks, tmp['cmatrix']))
-    meanntwk = np.mean(allntwks,2)
     print "Creating average network for group: {grp}".format(grp=group_id)
+    if len(in_files) == 1:
+        tmp = sio.loadmat(in_files[0])
+        meanntwk = tmp['cmatrix']
+    else:
+        for index, subject in enumerate(in_files):
+            tmp = sio.loadmat(subject)
+            if index == 0:
+                allntwks = tmp['cmatrix']
+            else:    
+                allntwks = np.dstack((allntwks, tmp['cmatrix']))
+        meanntwk = np.mean(allntwks,2)
+        print group_id
+        print in_files
+        print np.shape(allntwks)
+        print np.shape(meanntwk)
+    ntwk = init_ntwk(ntwk_res_file)        
     newdata = []
     for u in range(0,np.shape(meanntwk)[0]):
         for v in range(0,np.shape(meanntwk)[1]):
@@ -294,8 +328,11 @@ def average_networks(in_files, ntwk_res_file, group_id):
     ntwk = removenodezero(ntwk)
     network_name = group_id + '_average.pck'
     nx.write_gpickle(ntwk, op.abspath(network_name))
+    print ntwk.number_of_edges()
     ntwk = nx.read_gpickle(op.abspath(network_name))
+    print ntwk.number_of_edges()
     ntwk = fix_float_for_gexf(ntwk)
+    print ntwk.number_of_edges()
     network_name = group_id + '_average.gexf'
     nx.write_gexf(ntwk, op.abspath(network_name))
     network_name = group_id + '_average'
@@ -388,7 +425,7 @@ def writenodemeasure(stats, measure, group_id, ntwk_res_file, key='p-value'):
     for u,d in ntwk.nodes_iter(data=True):
         newdata = d
         newdata[key] = stats[measure][u-1]
-        ntwk.node[u]=newdata
+        ntwk.node[u] = newdata
         del newdata
     ntwk = removenodezero(ntwk)
     network_name = measure + '_' + group_id + '_nodes.pck'
@@ -427,14 +464,15 @@ def makenetworks(stats, subject_average, patient_average, ntwk_res_file, signifi
     gp = nx.read_graphml(ntwk_res_file)
     nROIs = len(gp.nodes())
     number_of_measures = len(subject_average.keys())
-    global gexf, gpickled
+    global gexf
+    global gpickled
     gexf = []
     gpickled = []
     ntwk = []
     for index, measure in enumerate(subject_average.keys()):
         if len(np.shape(subject_average[measure])) == 1:
             print stats
-            stats_network_name = writenodemeasure(stats, measure, '', ntwk_res_file)
+            stats_network_name = writenodemeasure(stats, measure, 'p-value', ntwk_res_file)
             print 'Writing stats for metric no. {idx} of {Nmetrics}: {metric} nodes as {ntwk}'.format(idx=index+1,
             Nmetrics=number_of_measures, metric=measure, ntwk=stats_network_name)
 
@@ -453,7 +491,7 @@ def makenetworks(stats, subject_average, patient_average, ntwk_res_file, signifi
             gexf.append(op.abspath(subject_average_network_name + '.gexf'))
             gexf.append(op.abspath(patient_average_network_name + '.gexf'))
         elif len(np.shape(subject_average[measure])) == 2 and np.shape(subject_average[measure])[0] == np.shape(subject_average[measure])[1] and np.shape(subject_average[measure])[1] == nROIs:
-            stats_network_name = writeedgemeasure(stats, measure, '', ntwk_res_file, significance)
+            stats_network_name = writeedgemeasure(stats, measure, 'p-value', ntwk_res_file, significance)
             print 'Writing stats for metric no. {idx} of {Nmetrics}: {metric} edges as {ntwk}'.format(idx=index+1,
             Nmetrics=number_of_measures, metric=measure, ntwk=stats_network_name)
 
@@ -529,11 +567,20 @@ class BCTStats(BaseInterface):
         returnall = group_bct_stats(self.inputs.in_group1, self.inputs.in_group2, self.inputs.significance,
         self.inputs.output_prefix, ntwk_res_file, self.inputs.group_id1, self.inputs.group_id2, subject_ids_group1, subject_ids_group2)
 
+        stats = {}
         stats = returnall['stats']
+        subject_measures = {}
+        patient_measures = {}
+        subject_average = {}
+        patient_average = {}
         subject_measures = returnall['subject_measures']
         patient_measures = returnall['patient_measures']
         subject_average = returnall['subject_average']
         patient_average = returnall['patient_average']
+        print 'SUBJECTS'
+        print returnall['subject_average']
+        print 'PATIENTS'
+        print returnall['patient_average']
         global gpickled
         global gexf
         gpickled, gexf = makenetworks(stats, subject_average, patient_average, 

@@ -432,3 +432,50 @@ class NIfTIDT2Camino(CommandLine):
         if name == 'out_file':
             _, filename , _ = split_filename(self.inputs.in_file)
         return filename
+
+class MRTrixSphericalHarmonics2CaminoInputSpec(StdOutCommandLineInputSpec):
+    in_file = File(exists=True, argstr='< %s',
+                    mandatory=True, position=-2, desc='4d image file')
+    source = traits.String('tournier', argstr='-source %s', 
+    desc='The source flag is used to define the origin of the input spherical harmonic coefficients. Currently only Tourniers SD code is supported.', usedefault=True)
+
+    input_type = traits.Enum("float", "char", "short", "int", "long", "double", argstr='-inputdatatype %s', position=2,
+                           desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"', usedefault=True)
+    output_type = traits.Enum("double", "float", "char", "short", "int", "long", argstr='-outputdatatype %s', position=3,
+                           desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"', usedefault=True)
+
+class MRTrixSphericalHarmonics2CaminoOutputSpec(TraitedSpec):
+    caminoSHcoef = File(exists=True, desc='path/name of 4D volume in voxel order')
+
+class MRTrixSphericalHarmonics2Camino(StdOutCommandLine):
+    """
+    Converts spherical harmonics from third party programs into the format used by camino.
+
+    This program reorders spherical harmonic coeffients output from third party programs so that they can be read by Camino.
+    The format Camino expects is:
+
+    [c00, c20, Re(c21), Im(c21), Re(c22), Im(c22), c40, Re(c41), Im(c41), ...]
+
+    Currently, the program can read the output from Tourniers Spherical Deconvolution (SD) code.
+
+    Examples
+    --------
+    To convert the file sdCoeffs.Bfloat from Tournier's SD code, which has been saved as big-endian floats, use the command: 
+
+    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
+    >>> img2vox = cmon.Image2Voxel()                  # doctest: +SKIP
+    >>> img2vox.inputs.in_file = '4d_dwi.nii'                  # doctest: +SKIP
+    >>> img2vox.run()                  # doctest: +SKIP
+    """
+    _cmd = 'shformatconverter'
+    input_spec = MRTrixSphericalHarmonics2CaminoInputSpec
+    output_spec = MRTrixSphericalHarmonics2CaminoOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['caminoSHcoef'] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_outfilename(self):
+        _, name , _ = split_filename(self.inputs.in_file)
+        return name + '.B'+ self.inputs.output_type

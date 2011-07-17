@@ -35,7 +35,6 @@ def group_nx_stats(in_group1,in_group2,significance,output_prefix, group_id1, gr
         tmp = nx.read_gpickle(patient)
         patient_measures[patient] = compute_nx_measures(tmp)
         patient_dict_measures[patient] = compute_nx_dict_measures(tmp)
-    print subject_measures[subject]
     returnall = run_stats(subject_measures, patient_measures, significance, group_id1, group_id2)
     stats = returnall['p']
     subject_average = returnall['subject_average']
@@ -159,12 +158,12 @@ class NetworkXStats(BaseInterface):
         self.inputs.significance, self.inputs.group_id1, self.inputs.group_id2)
 
         out_stats_file = op.abspath(self.inputs.out_stats_file)
-        out_subject_measures = op.abspath(self.inputs.group_id1 + '_measures.mat')
-        out_patient_measures = op.abspath(self.inputs.group_id2 + '_measures.mat')
-        out_subject_average = op.abspath(self.inputs.group_id1 + '_average.mat')
-        out_patient_average = op.abspath(self.inputs.group_id2 + '_average.mat')
-        out_pickled_extra_measures_group1 = op.abspath(self.inputs.group_id1 + '_extra_measures.pck')
-        out_pickled_extra_measures_group2 = op.abspath(self.inputs.group_id2 + '_extra_measures.pck')
+        out_subject_measures = op.abspath(self._gen_outfilename(self.inputs.group_id1 + '_measures', 'mat'))
+        out_patient_measures = op.abspath(self._gen_outfilename(self.inputs.group_id2 + '_measures', 'mat'))
+        out_subject_average = op.abspath(self._gen_outfilename(self.inputs.group_id1 + '_average', 'mat'))
+        out_patient_average = op.abspath(self._gen_outfilename(self.inputs.group_id2 + '_average', 'mat'))
+        out_pickled_extra_measures_group1 = op.abspath(self._gen_outfilename(self.inputs.group_id1 + '_extra_measures', 'pck'))
+        out_pickled_extra_measures_group2 = op.abspath(self._gen_outfilename(self.inputs.group_id2 + '_extra_measures', 'pck'))
         print 'Saving image statistics as {stats}'.format(stats=out_stats_file)
         sio.savemat(out_stats_file, stats)
         print 'Saving subject measures as {file}'.format(file=out_subject_measures)
@@ -176,11 +175,11 @@ class NetworkXStats(BaseInterface):
         print 'Saving patient average as {file}'.format(file=out_patient_average)
         sio.savemat(out_patient_average, patient_average)
         print 'Saving extra measure File for group 1 to {path} in Pickle format'.format(path=os.path.abspath(out_pickled_extra_measures_group1))
-        file = open(os.path.abspath(out_pickled_extra_measures_group1), 'w')
+        file = open(out_pickled_extra_measures_group1, 'w')
         pickle.dump(subject_dict_measures, file)
         file.close()
         print 'Saving extra measure File for group 2 to {path} in Pickle format'.format(path=os.path.abspath(out_pickled_extra_measures_group2))
-        file = open(os.path.abspath(out_pickled_extra_measures_group2), 'w')
+        file = open(out_pickled_extra_measures_group2, 'w')
         pickle.dump(patient_dict_measures, file)
         file.close()
         return runtime
