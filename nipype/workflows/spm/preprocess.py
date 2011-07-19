@@ -74,6 +74,7 @@ def create_spm_preproc(name='preproc'):
     workflow
     """
 
+    poplist = lambda x: x.pop()
     realign = pe.Node(spm.Realign(), name='realign')
     workflow.connect(inputnode, 'functionals', realign, 'in_files')
     maskflow = create_getmask_flow()
@@ -84,21 +85,19 @@ def create_spm_preproc(name='preproc'):
     smooth = pe.Node(spm.Smooth(), name='smooth')
     workflow.connect(inputnode, 'fwhm', smooth, 'fwhm')
     workflow.connect(realign, 'realigned_files', smooth, 'in_files')
-    artdetect = pe.MapNode(ra.ArtifactDetect(mask_type='file',
+    artdetect = pe.Node(ra.ArtifactDetect(mask_type='file',
                                           parameter_source='SPM',
                                           use_differences=[True,False],
                                           use_norm=True,
                                           save_plot=True),
-                           iterfield=['mask_file', 'realigned_files',
-                                      'realignment_parameters'],
-                           name='artdetect')
+                        name='artdetect')
     workflow.connect([(inputnode, artdetect,[('norm_threshold', 'norm_threshold'),
                                              ('zintensity_threshold',
                                               'zintensity_threshold')])])
     workflow.connect([(realign, artdetect, [('realigned_files', 'realigned_files'),
                                             ('realignment_parameters',
                                              'realignment_parameters')])])
-    workflow.connect(maskflow, 'outputspec.mask_file', artdetect, 'mask_file')
+    workflow.connect(maskflow, ('outputspec.mask_file', poplist), artdetect, 'mask_file')
 
     """
     Define the outputs of the workflow and connect the nodes to the outputnode
