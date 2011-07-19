@@ -74,6 +74,7 @@ def create_spm_preproc(name='preproc'):
     workflow
     """
 
+    poplist = lambda x: x.pop()
     realign = pe.Node(spm.Realign(), name='realign')
     workflow.connect(inputnode, 'functionals', realign, 'in_files')
     maskflow = create_getmask_flow()
@@ -96,7 +97,7 @@ def create_spm_preproc(name='preproc'):
     workflow.connect([(realign, artdetect, [('realigned_files', 'realigned_files'),
                                             ('realignment_parameters',
                                              'realignment_parameters')])])
-    workflow.connect(maskflow, 'outputspec.mask_file', artdetect, 'mask_file')
+    workflow.connect(maskflow, ('outputspec.mask_file', poplist), artdetect, 'mask_file')
 
     """
     Define the outputs of the workflow and connect the nodes to the outputnode
