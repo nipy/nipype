@@ -709,7 +709,7 @@ window.onload=beginrefresh
             outputdict.add_trait(node.name, traits.Instance(TraitedSpec))
             if isinstance(node, Workflow):
                 setattr(outputdict, node.name, node.outputs)
-            else:
+            elif node.outputs:
                 outputs = TraitedSpec()
                 for key, _ in node.outputs.items():
                     outputs.add_trait(key, traits.Any(node=node))
