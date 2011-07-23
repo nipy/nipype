@@ -6,7 +6,7 @@ import pylab
 
 from nipype.utils.misc import package_check
 package_check('nipy')
-import nipy.labs.utils.design_matrix as dm
+import nipy.modalities.fmri.design_matrix as dm
 import nipy.labs.glm as GLM
 
 from nipype.interfaces.base import (BaseInterface, TraitedSpec, traits, File,
