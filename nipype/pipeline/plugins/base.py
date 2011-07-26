@@ -373,7 +373,7 @@ except:
         fp = open(pyscript, 'wt')
         fp.writelines(cmdstr)
         fp.close()
-        batchscript = '\n'.join((self._template, 'python %s'%pyscript))
+        batchscript = '\n'.join((self._template, '%s %s'%(sys.executable, pyscript)))
         batchscriptfile = os.path.join(batch_dir, 'batchscript_%s.sh'%suffix)
         fp = open(batchscriptfile, 'wt')
         fp.writelines(batchscript)
