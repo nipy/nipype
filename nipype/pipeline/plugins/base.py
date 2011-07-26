@@ -301,7 +301,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
             if 'template' in plugin_args:
                 self._template = plugin_args['template']
                 if os.path.isfile(self._template):
-                    self._template = open(self._template).readlines()
+                    self._template = open(self._template).read()
             if 'qsub_args' in plugin_args:
                 self._qsub_args = plugin_args['qsub_args']
         self._pending = {}
