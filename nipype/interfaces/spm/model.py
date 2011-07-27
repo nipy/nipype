@@ -630,7 +630,7 @@ class FactorialDesignInputSpec(SPMCommandInputSpec):
     threshold_mask_absolute = traits.Float(field='masking.tm.tma.athresh',
                                       xor=['threshold_mask_none', 'threshold_mask_relative'],
                                       desc='use an absolute threshold')
-    threshold_mask_absolute = traits.Float(field='masking.tm.tmr.rthresh',
+    threshold_mask_relative = traits.Float(field='masking.tm.tmr.rthresh',
                                       xor=['threshold_mask_absolute', 'threshold_mask_none'],
                                       desc='threshold using a proportion of the global value')
     use_implicit_threshold = traits.Bool(field='masking.im',
