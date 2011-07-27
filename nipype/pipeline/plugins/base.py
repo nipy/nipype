@@ -301,7 +301,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
             if 'template' in plugin_args:
                 self._template = plugin_args['template']
                 if os.path.isfile(self._template):
-                    self._template = open(self._template).readlines()
+                    self._template = open(self._template).read()
             if 'qsub_args' in plugin_args:
                 self._qsub_args = plugin_args['qsub_args']
         self._pending = {}
@@ -373,7 +373,7 @@ except:
         fp = open(pyscript, 'wt')
         fp.writelines(cmdstr)
         fp.close()
-        batchscript = '\n'.join((self._template, 'python %s'%pyscript))
+        batchscript = '\n'.join((self._template, '%s %s'%(sys.executable, pyscript)))
         batchscriptfile = os.path.join(batch_dir, 'batchscript_%s.sh'%suffix)
         fp = open(batchscriptfile, 'wt')
         fp.writelines(batchscript)
