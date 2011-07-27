@@ -975,7 +975,7 @@ class SUSANInputSpec(FSLCommandInputSpec):
     use_median = traits.Enum(1,0, argstr='%d', position=5, usedefault=True,
                         desc='whether to use a local median filter in the cases where single-point noise is detected')
     usans = traits.List(traits.Tuple(File(exists=True),traits.Float), maxlen=2,
-                        argstr='', position=6,
+                        argstr='', position=6, default=[], usedefault=True,
              desc='determines whether the smoothing area (USAN) is to be '
                   'found from secondary images (0, 1 or 2). A negative '
                   'value for any brightness threshold will auto-set the '
@@ -1011,7 +1011,7 @@ class SUSAN(FSLCommand):
         if name == 'fwhm':
             return spec.argstr%(float(value)/np.sqrt(8 * np.log(2)))
         if name == 'usans':
-            if not isdefined(value):
+            if not value:
                 return '0'
             arglist = [str(len(value))]
             for filename, thresh in value:
