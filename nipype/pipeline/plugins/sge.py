@@ -20,10 +20,7 @@ class SGEPlugin(SGELikeBatchManagerBase):
     """
 
     def __init__(self, **kwargs):
-        template="""
-            #$$ -V
-            #$$ -S /bin/sh
-            """
+        template="""#$ -V\n#$ -S /bin/sh\n"""
         super(SGEPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
