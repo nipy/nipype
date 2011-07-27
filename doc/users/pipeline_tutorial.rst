@@ -48,9 +48,9 @@ Step 0
 ~~~~~~
 
 Download and extract the `Pipeline tutorial data (429MB). 
-<http://cirl.berkeley.edu/nipy/nipype-tutorial-0.2.tar.gz>`_  
+<http://sourceforge.net/projects/nipy/files/nipype/nipype-0.2/nipype-tutorial.tar.bz2/download>`_  
 
-(checksum: f91b81050e1262f0508d35135c2369f5)
+(checksum: 56ed4b7e0aac5627d1724e9c10cd26a7)
 
 
 Step 1.
