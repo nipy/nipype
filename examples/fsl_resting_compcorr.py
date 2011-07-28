@@ -1,20 +1,21 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-   Performs preprocessing for resting state data based on Behzadi et al. (2007)
+==========================================================
+Using FSL and Python to perform resting data preprocessing
+==========================================================
+
+Performs preprocessing for resting state data based on the tCompCorr method
+described in Behzadi et al. (2007).
+
+Tell python where to find the appropriate functions.
 """
 
-
-"""
-1. Tell python where to find the appropriate functions.
-"""
-
-import numpy as np
+import os                                    # system functions
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.utility as util
-import os                                    # system functions
 
 #####################################################################
 # Preliminaries
@@ -66,13 +67,14 @@ datasource.inputs.template_args = info
 """
 Store significant result-files in a special directory
 """
+
 datasink = pe.Node(interface=nio.DataSink(parameterization=False),
                    name='datasink')
 datasink.inputs.base_directory = os.path.abspath('./fslresting/compcorred')
 
 """
 Set up complete workflow
-========================
+------------------------
 """
 
 def get_substitutions(subject_id):
