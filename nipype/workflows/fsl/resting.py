@@ -46,7 +46,7 @@ def create_realign_flow(name='realign'):
     Example
     -------
 
-    >>> from nipype.workflows.fsl import create_realign_flow
+    >>> from nipype.workflows.fsl.resting import create_realign_flow
     >>> import os
     >>> wf = create_realign_flow()
     >>> wf.inputs.inputspec.func = 'f3.nii'
