@@ -12,13 +12,14 @@ def doPCA(realigned_file, noise_mask_file, num_components):
     import os
     from nibabel import load
     import numpy as np
+    import scipy as sp
     from scipy.signal import detrend
     imgseries = load(realigned_file)
     noise_mask = load(noise_mask_file)
-    idx = np.nonzero(noise_mask.get_data())
-    voxel_timecourses = detrend(imgseries.get_data()[idx[0], idx[1], idx[2], :],
-                                axis=0, type='constant')
-    u,s,v = np.linalg.svd(voxel_timecourses)
+    voxel_timecourses = imgseries.get_data()[np.nonzero(noise_mask.get_data())]
+    for timecourse in voxel_timecourses:
+        timecourse[:] = detrend(timecourse, type='constant')
+    u,s,v = sp.linalg.svd(voxel_timecourses, full_matrices=False)
     components_file = os.path.join(os.getcwd(), 'noise_components.txt')
     np.savetxt(components_file, v[:,:num_components])
     return components_file
