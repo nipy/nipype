@@ -6,7 +6,7 @@ from nipype.algorithms.misc import TSNR
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 
-def doPCA(realigned_file, noise_mask_file, num_components):
+def extract_noise_components(realigned_file, noise_mask_file, num_components):
     """Derive components most reflective of physiological noise
     """
     import os
@@ -24,7 +24,7 @@ def doPCA(realigned_file, noise_mask_file, num_components):
     np.savetxt(components_file, v[:,:num_components])
     return components_file
 
-def pickvol(filename, which):
+def select_volume(filename, which):
     """Return the middle index of a file
     """
     from nibabel import load
@@ -70,7 +70,7 @@ def create_realign_flow(name='realign'):
     joiner = pe.Node(fsl.Merge(dimension='t'), name='joiner')
 
     realignflow.connect(inputnode, 'func', realigner, 'in_file')
-    realignflow.connect(inputnode, ('func', pickvol, 'middle'),
+    realignflow.connect(inputnode, ('func', select_volume, 'middle'),
                         realigner, 'ref_vol')
     realignflow.connect(realigner, 'out_file', splitter, 'in_file')
     realignflow.connect(realigner, 'mat_file', warper, 'premat')
@@ -137,7 +137,7 @@ def create_resting_preproc(name='restpreproc'):
                                                  'noise_mask_file',
                                                  'num_components'],
                                      output_names=['noise_components'],
-                                     function=doPCA),
+                                     function=extract_noise_components),
                        name='compcorr')
     remove_noise = pe.Node(fsl.FilterRegressor(filter_all=True),
                            name='remove_noise')
