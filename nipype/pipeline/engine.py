@@ -33,7 +33,7 @@ from nipype.interfaces.base import (traits, InputMultiPath, CommandLine,
                                     Undefined, TraitedSpec, DynamicTraitedSpec,
                                     Bunch, InterfaceResult, md5, Interface,
                                     TraitDictObject, TraitListObject, isdefined)
-from nipype.utils.misc import getsource, create_function_from_source
+from nipype.utils.misc import getsource
 from nipype.utils.filemanip import (save_json, FileNotFoundError,
                                     filename_to_list, list_to_filename,
                                     copyfiles, fnames_presuffix, loadpkl,
@@ -44,7 +44,8 @@ from nipype.utils.filemanip import (save_json, FileNotFoundError,
 from nipype.pipeline.utils import (generate_expanded_graph, modify_paths,
                                    export_graph, make_output_dir,
                                    clean_working_directory, format_dot,
-                                   get_print_name, merge_dict)
+                                   get_print_name, merge_dict,
+                                   evaluate_connect_function)
 from nipype.utils.logger import (logger, config, logdebug_dict_differences)
 
 class WorkflowBase(object):
@@ -1041,17 +1042,9 @@ class Node(WorkflowBase):
             output_value = Undefined
             if isinstance(info[1], tuple):
                 output_name = info[1][0]
-                func = create_function_from_source(info[1][1])
                 value = getattr(results.outputs, output_name)
                 if isdefined(value):
-                    try:
-                        output_value = func(value,
-                                        *list(info[1][2]))
-                    except NameError as e:
-                        if e.args[0].startswith("global name") and e.args[0].endswith("is not defined"):
-                            e.args = (e.args[0], "Due to engine constraints all imports have to be done inside each function definition")
-                        raise e
-                        
+                    output_value = evaluate_connect_function(info, value)
             else:
                 output_name = info[1]
                 try:
