@@ -6,6 +6,7 @@
 from copy import deepcopy
 from glob import glob
 import os
+import pwd
 import re
 
 import numpy as np
@@ -13,11 +14,11 @@ from nipype.utils.misc import package_check
 package_check('networkx', '1.3')
 import networkx as nx
 
-from nipype.interfaces.base import CommandLine, isdefined, Undefined
-from nipype.utils.filemanip import fname_presuffix, FileNotFoundError,\
-    filename_to_list
-from nipype.utils.misc import create_function_from_source, str2bool
-from nipype.interfaces.utility import IdentityInterface
+from ..utils.filemanip import (fname_presuffix, FileNotFoundError,
+                               filename_to_list)
+from ..utils.misc import create_function_from_source, str2bool
+from ..interfaces.base import CommandLine, isdefined, Undefined, Bunch
+from ..interfaces.utility import IdentityInterface
 
 from .. import logging, config
 logger = logging.getLogger('workflow')
@@ -737,3 +738,71 @@ def merge_dict(d1, d2, merge=lambda x, y: y):
         else:
             result[k] = v
     return result
+
+def write_graphml(graph):
+    pass
+
+def write_opmx(graph, filename=None):
+    """Write Open Provenance Model XML file
+    """
+    if not filename:
+        filename = os.path.join(os.getcwd(), 'graph.opmx')
+    import xml.etree.ElementTree as ET
+    docroot = ET.Element('opmGraph', dict(id='graph_1'))
+    # add accounts
+    accounts = ET.SubElement(docroot, 'accounts')
+    userinfo = pwd.getpwuid(os.geteuid())
+    accountref = '%s'%userinfo.pw_name
+    ET.SubElement(accounts, 'account', dict(id=accountref))
+    # add processes (nodes)
+    procs = ET.SubElement(docroot, 'processes')
+    for idx, node in enumerate(graph.nodes()):
+        process = ET.SubElement(procs, 'process', dict(id=str(node)))
+        ET.SubElement(process, 'account', dict(ref=accountref))
+        ET.SubElement(process, 'label', dict(value=str(node)))
+        ET.SubElement(process, 'interface', dict(value=get_print_name(node)))
+    # add artifacts (files)
+    artifacts = ET.SubElement(docroot, 'artifacts')
+    for idx, node in enumerate(graph.nodes()):
+        if isinstance(node.result.outputs, Bunch):
+            outputs = node.result.outputs.dictcopy()
+        else:
+            outputs = node.result.outputs.get()
+        for outidx, name in enumerate(sorted(outputs)):
+            artifact = ET.SubElement(artifacts, 'artifact', dict(id='a%d_%d'%(idx, outidx)))
+            ET.SubElement(artifact, 'account', dict(ref=accountref))
+            ET.SubElement(artifact, 'label', dict(value=name))
+    # add agents (users)
+    agents = ET.SubElement(docroot, 'agents')
+    agent = ET.SubElement(agents, 'agent', dict(id='%s'%userinfo.pw_name))
+    ET.SubElement(agent, 'account', dict(ref=accountref))
+    ET.SubElement(agent, 'label', dict(value=userinfo.pw_gecos))
+    # add dependencies (edges)
+    dependencies = ET.SubElement(docroot, 'dependencies')
+    # Used: Artifact->Process
+    # used = ET.SubElement(dependencies, 'used')
+    # WGB: Process->Artifact
+    counter=0
+    for idx, node in enumerate(graph.nodes()):
+        if isinstance(node.result.outputs, Bunch):
+            outputs = node.result.outputs.dictcopy()
+        else:
+            outputs = node.result.outputs.get()
+        for outidx, name in enumerate(sorted(outputs)):
+            counter+=1
+            wgb = ET.SubElement(dependencies, 'wasGeneratedBy', dict(id='g_%d'%counter))
+            ET.SubElement(wgb, 'cause', dict(ref=str(node)))
+            ET.SubElement(wgb, 'effect', dict(ref='a%d_%d'%(idx, outidx)))
+            ET.SubElement(wgb, 'account', dict(ref=accountref))
+            ET.SubElement(wgb, 'label', dict(value=name))
+    # WDF: Artifact->Artifact
+    # WCB: Agent->Process
+    # WTB: Process->Process
+    for idx, edgeinfo in enumerate(graph.in_edges_iter()):
+        wtb = ET.SubElement(dependencies, 'wasTriggeredBy', dict(id='d_%d'%idx))
+        ET.SubElement(wtb, 'cause', dict(ref=str(edgeinfo[0])))
+        ET.SubElement(wtb, 'effect', dict(ref=str(edgeinfo[1])))
+        ET.SubElement(wtb, 'account', dict(ref=accountref))
+    ET.dump(docroot)
+    ET.ElementTree(docroot).write(filename)
+    return docroot
