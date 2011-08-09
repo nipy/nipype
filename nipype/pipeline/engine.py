@@ -1044,7 +1044,9 @@ class Node(WorkflowBase):
                 output_name = info[1][0]
                 value = getattr(results.outputs, output_name)
                 if isdefined(value):
-                    output_value = evaluate_connect_function(info, value)
+                    output_value = evaluate_connect_function(info[1][1],
+                                                             info[1][2],
+                                                             value)
             else:
                 output_name = info[1]
                 try:
