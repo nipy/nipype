@@ -6,6 +6,7 @@
 from copy import deepcopy
 from glob import glob
 import os
+import pickle
 import pwd
 import re
 
@@ -761,26 +762,61 @@ def write_opmx(graph, filename=None):
         ET.SubElement(process, 'account', dict(ref=accountref))
         ET.SubElement(process, 'label', dict(value=str(node)))
         ET.SubElement(process, 'interface', dict(value=get_print_name(node)))
+        inputs = ET.SubElement(process, 'inputs')
+        for idx, inputval in enumerate(sorted(node.inputs.get().items())):
+            if isdefined(inputval[1]):
+                inport = inputval[0]
+                used_ports = []
+                for _,_,d in graph.in_edges_iter([node], data=True):
+                    for _, dest in d['connect']:
+                        used_ports.append(dest)
+                if inport not in used_ports:
+                    input = ET.SubElement(inputs, 'param', dict(id=inport))
+                    value = ET.SubElement(input, 'value')
+                    value.text = str(inputval[1])
+    # add dependencies (edges)
+    dependencies = ET.SubElement(docroot, 'dependencies')
     # add artifacts (files)
     artifacts = ET.SubElement(docroot, 'artifacts')
+    counter = 0
     for idx, node in enumerate(graph.nodes()):
         if isinstance(node.result.outputs, Bunch):
             outputs = node.result.outputs.dictcopy()
         else:
             outputs = node.result.outputs.get()
-        for outidx, name in enumerate(sorted(outputs)):
-            artifact = ET.SubElement(artifacts, 'artifact', dict(id='a%d_%d'%(idx, outidx)))
+        used_ports = {}
+        for _,v,d in graph.out_edges_iter([node], data=True):
+            for src, dest in d['connect']:
+                if isinstance(src, tuple):
+                    srcname = src[0]
+                else:
+                    srcname = src
+                if srcname not in used_ports:
+                    used_ports[srcname] = []
+                used_ports[srcname].append((v, dest))
+        for outidx, nameval in enumerate(sorted(outputs.items())):
+            if not isdefined(nameval[1]):
+                continue
+            artifactref = 'a%d_%d'%(idx, outidx)
+            artifact = ET.SubElement(artifacts, 'artifact', dict(id=artifactref))
             ET.SubElement(artifact, 'account', dict(ref=accountref))
-            ET.SubElement(artifact, 'label', dict(value=name))
+            ET.SubElement(artifact, 'label', dict(value=nameval[0]))
+            value = ET.SubElement(artifact, 'value')
+            value.text = str(nameval[1])
+            if nameval[0] in used_ports:
+                for destnode, portname in used_ports[nameval[0]]:
+                    counter += 1
+                    # Used: Artifact->Process
+                    used = ET.SubElement(dependencies, 'used', dict(id='u_%d'%counter))
+                    ET.SubElement(used, 'cause', dict(ref=artifactref))
+                    ET.SubElement(used, 'effect', dict(ref=str(destnode)))
+                    ET.SubElement(used, 'account', dict(ref=accountref))
+                    ET.SubElement(used, 'label', dict(value=portname))
     # add agents (users)
     agents = ET.SubElement(docroot, 'agents')
     agent = ET.SubElement(agents, 'agent', dict(id='%s'%userinfo.pw_name))
     ET.SubElement(agent, 'account', dict(ref=accountref))
     ET.SubElement(agent, 'label', dict(value=userinfo.pw_gecos))
-    # add dependencies (edges)
-    dependencies = ET.SubElement(docroot, 'dependencies')
-    # Used: Artifact->Process
-    # used = ET.SubElement(dependencies, 'used')
     # WGB: Process->Artifact
     counter=0
     for idx, node in enumerate(graph.nodes()):
