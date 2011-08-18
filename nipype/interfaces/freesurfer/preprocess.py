@@ -171,7 +171,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
     out_k_count = traits.Int(argstr='--out_k_count %d',
                              desc='some count ?? in k direction')
     vox_size = traits.Tuple(traits.Float, traits.Float,traits.Float,
-                           argstr='--voxsize %f %f %f',
+                           argstr='-voxsize %f %f %f',
                            desc='<size_x> <size_y> <size_z> specify the size (mm) - useful for upsampling or downsampling')
     out_i_size = traits.Int(argstr='--out_i_size %d',
                             desc='output i size')
