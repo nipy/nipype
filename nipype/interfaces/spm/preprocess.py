@@ -122,14 +122,14 @@ class RealignInputSpec(SPMCommandInputSpec):
                              desc='filename of weighting image')
     interp = traits.Range(low=0, high=7, field='eoptions.interp',
                           desc='degree of b-spline used for interpolation')
-    wrap = traits.Tuple(traits.Int, traits.Int, traits.Int,
+    wrap = traits.List(traits.Int(), minlen=3, maxlen=3,
                         field='eoptions.wrap',
                         desc='Check if interpolation should wrap in [x,y,z]')
     write_which = traits.Tuple(traits.Int, traits.Int, field='roptions.which',
                               desc='determines which images to reslice')
     write_interp = traits.Range(low=0, high=7, field='roptions.interp',
                          desc='degree of b-spline used for interpolation')
-    write_wrap = traits.Tuple(traits.Int, traits.Int, traits.Int,
+    write_wrap = traits.List(traits.Int(), minlen=3, maxlen=3,
                               field='roptions.wrap',
                    desc='Check if interpolation should wrap in [x,y,z]')
     write_mask = traits.Bool(field='roptions.mask',
