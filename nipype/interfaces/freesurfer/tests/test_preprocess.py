@@ -159,7 +159,7 @@ def test_mriconvert():
                      template_info = dict(),
                      template_type = dict(argstr='--template_type %s',),
                      unwarp_gradient = dict(argstr='--unwarp_gradient_nonlinearity',),
-                     vox_size = dict(argstr='--voxsize %f %f %f',),
+                     vox_size = dict(argstr='-voxsize %f %f %f',),
                      zero_ge_z_offset = dict(argstr='--zero_ge_z_offset',),
                      zero_outlines = dict(argstr='--zero_outlines',),
                      )
