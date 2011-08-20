@@ -222,12 +222,11 @@ def test_expansion():
 
 def test_iterable_expansion():
     import nipype.pipeline.engine as pe
-    from nipype.interfaces.utility import IdentityInterface
     wf1 = pe.Workflow(name='test')
-    node1 = pe.Node(IdentityInterface(fields=['in1']),name='node1')
-    node2 = pe.Node(IdentityInterface(fields=['in2']),name='node2')
-    node1.iterables = ('in1',[1,2])
-    wf1.connect(node1,'in1', node2, 'in2')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node2 = pe.Node(TestInterface(),name='node2')
+    node1.iterables = ('input1',[1,2])
+    wf1.connect(node1,'output1', node2, 'input2')
     wf3 = pe.Workflow(name='group')
     for i in [0,1,2]:
         wf3.add_nodes([wf1.clone(name='test%d'%i)])
