@@ -8,8 +8,8 @@ This section presents several tutorials on how to setup and use pipelines. Make
 sure that you have the requirements satisfied and go through the steps required
 for the analysis tutorials.
 
-Tutorials
-=========
+Essential reading
+=================
 
 .. toctree::
    :maxdepth: 1
@@ -20,6 +20,21 @@ Tutorials
    tutorial_103
    mapnode_and_iterables
    grabbing_and_sinking
+
+Beginner's guide
+================
+
+By Michael Notter. `Available here`__
+
+__ http://miykael.github.com/nipype-beginner-s-guide/index.html
+
+Example workflows
+=================
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
    examples/*
 
 Requirements
