@@ -112,7 +112,7 @@ def test_factorialdesign():
                      global_normalization = dict(field='globalm.glonorm',),
                      no_grand_mean_scaling = dict(field='globalm.gmsca.gmsca_no',),
                      spm_mat_dir = dict(field='dir',),
-                     threshold_mask_absolute = dict(field='masking.tm.tmr.rthresh',),
+                     threshold_mask_absolute = dict(field='masking.tm.tma.athresh',),
                      threshold_mask_none = dict(field='masking.tm.tm_none',),
                      use_implicit_threshold = dict(field='masking.im',),
                      )
@@ -133,7 +133,7 @@ def test_onesamplettestdesign():
                      in_files = dict(field='des.t1.scans',mandatory=True,),
                      no_grand_mean_scaling = dict(field='globalm.gmsca.gmsca_no',),
                      spm_mat_dir = dict(field='dir',),
-                     threshold_mask_absolute = dict(field='masking.tm.tmr.rthresh',),
+                     threshold_mask_absolute = dict(field='masking.tm.tma.athresh',),
                      threshold_mask_none = dict(field='masking.tm.tm_none',),
                      use_implicit_threshold = dict(field='masking.im',),
                      )
@@ -156,7 +156,7 @@ def test_twosamplettestdesign():
                      group2_files = dict(field='des.t2.scans2',mandatory=True,),
                      no_grand_mean_scaling = dict(field='globalm.gmsca.gmsca_no',),
                      spm_mat_dir = dict(field='dir',),
-                     threshold_mask_absolute = dict(field='masking.tm.tmr.rthresh',),
+                     threshold_mask_absolute = dict(field='masking.tm.tma.athresh',),
                      threshold_mask_none = dict(field='masking.tm.tm_none',),
                      unequal_variance = dict(field='des.t2.variance',),
                      use_implicit_threshold = dict(field='masking.im',),
