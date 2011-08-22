@@ -241,7 +241,7 @@ class CoregisterInputSpec(SPMCommandInputSpec):
                         desc='acceptable tolerance for each of 12 params')
     write_interp = traits.Range(low=0, hign=7, field='roptions.interp',
                         desc='degree of b-spline used for interpolation')
-    write_wrap = traits.List(traits.Bool(), minlen=3, maxlen=3,
+    write_wrap = traits.List(traits.Int(), minlen=3, maxlen=3,
                              field='roptions.wrap',
                      desc='Check if interpolation should wrap in [x,y,z]')
     write_mask = traits.Bool(field='roptions.mask',
@@ -357,7 +357,7 @@ class NormalizeInputSpec(SPMCommandInputSpec):
     write_voxel_sizes = traits.List(traits.Float(), field='roptions.vox', minlen=3, maxlen=3, desc='3-element list (opt)')
     write_interp = traits.Range(low=0, hign=7, field='roptions.interp',
                         desc='degree of b-spline used for interpolation')
-    write_wrap = traits.List(traits.Bool(), field='roptions.wrap',
+    write_wrap = traits.List(traits.Int(), field='roptions.wrap',
                         desc='Check if interpolation should wrap in [x,y,z] - list of bools (opt)')
 
 
@@ -782,8 +782,8 @@ class DARTELInputSpec(SPMCommandInputSpec):
     iteration_parameters = traits.List(traits.Tuple(traits.Range(1,10), traits.Tuple(traits.Float, traits.Float, traits.Float),
                                                     traits.Enum(1,2,4,8,16,32,64,128,256,512),
                                                     traits.Enum(0,0.5,1,2,4,8,16,32)),
-                                       minlen=6,
-                                       maxlen=6,
+                                       minlen=3,
+                                       maxlen=12,
                                        field = 'warp.settings.param',
                                        desc="""List of tuples for each iteration
                                        - Inner iterations
