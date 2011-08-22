@@ -17,6 +17,8 @@ import networkx as nx
 from nipype.interfaces.base import CommandLine, isdefined, Undefined
 from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
 from nipype.utils.config import config
+from nipype.utils.misc import create_function_from_source
+from nipype.interfaces.utility import IdentityInterface
 
 logger = logging.getLogger('workflow')
 
@@ -232,6 +234,19 @@ def walk(children, level=0, path=None, usename=True):
         for child_paths in walk(tail, level+1, path, usename):
             yield child_paths
 
+def evaluate_connect_function(function_source, args, first_arg):
+    func = create_function_from_source(function_source)
+    try:
+        output_value = func(first_arg,
+                            *list(args))
+    except NameError as e:
+        if e.args[0].startswith("global name") and e.args[0].endswith(
+            "is not defined"):
+            e.args = (e.args[0],
+                      "Due to engine constraints all imports have to be done inside each function definition")
+        raise e
+    return output_value
+
 def get_levels(G):
     levels = {}
     for n in nx.topological_sort(G):
@@ -331,6 +346,73 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables, prefix):
             node._id += template%i
     return supergraph
 
+def _connect_nodes(graph, srcnode, destnode, connection_info):
+    """Add a connection between two nodes
+    """
+    data = graph.get_edge_data(srcnode, destnode, default=None)
+    if not data:
+        data={'connect': connection_info}
+        graph.add_edges_from([(srcnode, destnode, data)])
+    else:
+        data['connect'].extend(connection_info)
+    
+def _remove_identity_nodes(graph):
+    """Remove identity nodes from an execution graph
+    """
+    identity_nodes = []
+    for node in graph.nodes():
+        if isinstance(node._interface,IdentityInterface):
+            identity_nodes.append(node)
+    if identity_nodes:
+        print identity_nodes
+        for node in identity_nodes:
+            portinputs = {}
+            portoutputs = {}
+            for u,_,d in graph.in_edges_iter(node, data=True):
+                for src, dest in d['connect']:
+                    portinputs[dest] = (u, src)
+            for  _,v,d in graph.out_edges_iter(node, data=True):
+                for src, dest in d['connect']:
+                    if isinstance(src, tuple):
+                        srcport = src[0]
+                    else:
+                        srcport = src
+                    if srcport not in portoutputs:
+                        portoutputs[srcport] = []
+                    portoutputs[srcport].append((v, dest, src))
+            if not portoutputs:
+                pass
+            elif not portinputs:
+                for key, connections in portoutputs.items():
+                    for destnode, inport, src in connections:
+                        value = getattr(node.inputs, key)
+                        if isinstance(src, tuple):
+                            value = evaluate_connect_function(src[1], src[2],
+                                                              value)
+                        destnode.set_input(inport, value)
+            else:
+                for key, connections in portoutputs.items():
+                    for destnode, inport, src in connections:
+                        if key not in portinputs:
+                            value = getattr(node.inputs, key)
+                            if isinstance(src, tuple):
+                                value = evaluate_connect_function(src[1], src[2],
+                                                                  value)
+                            destnode.set_input(inport, value)
+                        else:
+                            srcnode, srcport = portinputs[key]
+                            if isinstance(srcport, tuple) and isinstance(src, tuple):
+                                raise ValueError('Does not support two inline functions in series. Please use a Function node')
+                            if isinstance(src, tuple):
+                                connect = {'connect': [((srcport, src[1], src[2]),
+                                                        inport)]}
+                            else:
+                                connect = {'connect': [(srcport, inport)]}
+                            graph.add_edges_from([(srcnode, destnode, connect)])
+            graph.remove_nodes_from([node])
+    return graph
+
+
 def generate_expanded_graph(graph_in):
     """Generates an expanded graph based on node parameterization
     
@@ -376,7 +458,7 @@ def generate_expanded_graph(graph_in):
         if node.parameterization:
            node.parameterization = [param for _, param in sorted(node.parameterization)]
     logger.debug("PE: expanding iterables ... done")
-    return graph_in
+    return _remove_identity_nodes(graph_in)
 
 def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
                  show_connectinfo=False, dotfilename='graph.dot', format='png'):
