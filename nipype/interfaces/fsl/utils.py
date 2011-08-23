@@ -221,9 +221,12 @@ class ExtractROI(FSLCommand):
         return None
 
 class SplitInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, argstr="%s", position = 0, desc="input filename")
+    in_file = File(exists=True, argstr="%s", position = 0, mandatory=True,
+                   desc="input filename")
     out_base_name = traits.Str(argstr="%s", position=1, desc="outputs prefix")
-    dimension = traits.Enum('t','x','y','z', argstr="-%s", position=2, desc="dimension along which the file will be split")
+    dimension = traits.Enum('t','x','y','z', argstr="-%s", position=2,
+                            mandatory=True,
+                            desc="dimension along which the file will be split")
 
 class SplitOutputSpec(TraitedSpec):
     out_files = OutputMultiPath(File(exists=True))
