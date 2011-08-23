@@ -136,6 +136,12 @@ def create_fixed_effects_flow(name='fixedfx'):
     """
 
     fixed_fx = pe.Workflow(name=name)
+    
+    inputspec = pe.Node(util.IdentityInterface(fields=['copes',
+                                                       'varcopes',
+                                                       'dof_files'
+                                                       ]),
+                        name='inputspec')
 
     """
     Use :class:`nipype.interfaces.fsl.Merge` to merge the copes and
@@ -165,10 +171,34 @@ def create_fixed_effects_flow(name='fixedfx'):
     flameo = pe.MapNode(interface=fsl.FLAMEO(run_mode='fe'), name="flameo",
                         iterfield=['cope_file','var_cope_file'])
 
-    fixed_fx.connect([(copemerge,flameo,[('merged_file','cope_file')]),
-                      (varcopemerge,flameo,[('merged_file','var_cope_file')]),
-                      (level2model,flameo, [('design_mat','design_file'),
-                                            ('design_con','t_con_file'),
-                                            ('design_grp','cov_split_file')]),
+    def get_dofvolumes(dof_files, cope_files):
+        import os
+        import nibabel as nb
+        import numpy as np
+        img = nb.load(cope_files[0])
+        out_data = np.zeros(img.get_shape())
+        for i in range(out_data.shape[-1]):
+            dof = np.loadtxt(dof_files[i])
+            out_data[:,:,:,i] = dof
+        filename = os.path.join(os.getcwd(), 'dof_file.nii.gz')
+        newimg = nb.Nifti1Image(out_data, None, img.get_header())
+        newimg.to_filename(filename)
+        return filename
+
+    gendof = pe.Node(util.Function(input_names=['dof_files','cope_files'],
+                                   output_names=['dof_volume'],
+                                   function=get_dofvolumes),
+                     name='gendofvolume')
+
+    fixed_fx.connect([(inputspec, copemerge, [('copes', 'in_files')]),
+                      (inputspec, varcopemerge, [('varcopes', 'in_files')]),
+                      (inputspec, gendof, [('dof_files', 'dof_files')]),
+                      (copemerge, gendof, [('merged_file', 'cope_files')]),
+                      (copemerge, flameo, [('merged_file', 'cope_file')]),
+                      (varcopemerge, flameo, [('merged_file', 'var_cope_file')]),
+                      (level2model, flameo, [('design_mat', 'design_file'),
+                                            ('design_con', 't_con_file'),
+                                            ('design_grp', 'cov_split_file')]),
+                      (gendof, flameo, [('dof_volume', 'dof_var_cope_file')])
                       ])
     return fixed_fx

@@ -24,7 +24,8 @@ import nipype.algorithms.modelgen as model   # model generation
 import nipype.algorithms.rapidart as ra      # artifact detection
 
 from nipype.workflows.fsl import (create_featreg_preproc,
-                                  create_modelfit_workflow)
+                                  create_modelfit_workflow,
+                                  create_fixed_effects_flow)
 
 
 """
@@ -42,6 +43,8 @@ level1_workflow = pe.Workflow(name='level1flow')
 preproc = create_featreg_preproc(whichvol='first')
 
 modelfit = create_modelfit_workflow()
+
+fixed_fx = create_fixed_effects_flow()
 
 """
 Add artifact detection and model specification nodes between the preprocessing
@@ -91,17 +94,22 @@ def sort_copes(files):
 
 def num_copes(files):
     return len(files)
-"""
-firstlevel.connect([(preproc, modelfit, [('highpass.out_file', 'modelspec.functional_runs'),
-                                         ('art.outlier_files', 'modelspec.outlier_files'),
-                                         ('highpass.out_file','modelestimate.in_file')]),
-                    (preproc, fixed_fx, [('coregister.out_file', 'flameo.mask_file')]),
-                    (modelfit, fixed_fx,[(('conestimate.copes', sort_copes),'copemerge.in_files'),
-                                         (('conestimate.varcopes', sort_copes),'varcopemerge.in_files'),
-                                         (('conestimate.copes', num_copes),'l2model.num_copes'),
-                                         ])
-                    ])
-"""
+
+pickfirst = lambda x : x[0]
+
+level1_workflow.connect([(preproc, fixed_fx, [(('outputspec.mask', pickfirst),
+                                               'flameo.mask_file')]),
+                         (modelfit, fixed_fx, [(('outputspec.copes', sort_copes),
+                                                'inputspec.copes'),
+                                                ('outputspec.dof_file',
+                                                 'inputspec.dof_files'),
+                                               (('outputspec.varcopes',
+                                                 sort_copes),
+                                                'inputspec.varcopes'),
+                                               (('outputspec.copes', num_copes),
+                                                'l2model.num_copes'),
+                                               ])
+                         ])
 
 """
 Experiment specific components
