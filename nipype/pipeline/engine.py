@@ -983,7 +983,7 @@ class Node(WorkflowBase):
 
         Priority goes to interface.
         """
-        logger.debug('setting nodelevel input %s = %s' % (parameter, str(val)))
+        logger.debug('setting nodelevel(%s) input %s = %s' % (str(self), parameter, str(val)))
         setattr(self.inputs, parameter, deepcopy(val))
 
     def get_output(self, parameter):
@@ -1421,11 +1421,11 @@ class MapNode(Node):
 
         Priority goes to interface.
         """
-        logger.debug('setting nodelevel input %s = %s' % (parameter, str(val)))
+        logger.debug('setting nodelevel(%s) input %s = %s' % (str(self),parameter, str(val)))
         self._set_mapnode_input(self.inputs, parameter, deepcopy(val))
 
     def _set_mapnode_input(self, object, name, newvalue):
-        logger.debug('setting mapnode input: %s -> %s' %(name, str(newvalue)))
+        logger.debug('setting mapnode(%s) input: %s -> %s' %(str(self),name, str(newvalue)))
         if name in self.iterfield:
             setattr(self._inputs, name, newvalue)
         else:
