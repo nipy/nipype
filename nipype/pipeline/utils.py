@@ -15,7 +15,8 @@ package_check('networkx', '1.3')
 import networkx as nx
 
 from nipype.interfaces.base import CommandLine, isdefined, Undefined
-from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
+from nipype.utils.filemanip import fname_presuffix, FileNotFoundError,\
+    filename_to_list
 from nipype.utils.config import config
 from nipype.utils.misc import create_function_from_source
 from nipype.interfaces.utility import IdentityInterface
@@ -360,11 +361,10 @@ def _remove_identity_nodes(graph):
     """Remove identity nodes from an execution graph
     """
     identity_nodes = []
-    for node in graph.nodes():
+    for node in nx.topological_sort(graph):
         if isinstance(node._interface,IdentityInterface):
             identity_nodes.append(node)
     if identity_nodes:
-        print identity_nodes
         for node in identity_nodes:
             portinputs = {}
             portoutputs = {}
@@ -402,7 +402,8 @@ def _remove_identity_nodes(graph):
                         else:
                             srcnode, srcport = portinputs[key]
                             if isinstance(srcport, tuple) and isinstance(src, tuple):
-                                raise ValueError('Does not support two inline functions in series. Please use a Function node')
+                                raise ValueError('Does not support two inline functions in series (\'%s\' and \'%s\'). Please use a Function node'%(srcport[1].split("\\n")[0][6:-1], 
+                                                                                                                                                    src[1].split("\\n")[0][6:-1]))
                             if isinstance(src, tuple):
                                 connect = {'connect': [((srcport, src[1], src[2]),
                                                         inport)]}
