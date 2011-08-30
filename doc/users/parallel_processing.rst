@@ -73,7 +73,7 @@ To prevent prevent parallel execution type::
     workflow.run(plugin='Linear')
 
 Using the pipeline engine with SGE/OGE/PBS
---------------------------------------
+------------------------------------------
 
 In order to use nipype with SGE_/OGE_ (not tested) or PBS_ you simply need to
 call::
