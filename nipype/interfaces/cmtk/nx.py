@@ -8,7 +8,7 @@ import networkx as nx
 from nipype.utils.misc import isdefined
 import sys
 import scipy.io as sio
-from cviewer.libs.pyconto.bct import measures as bct
+#from cviewer.libs.pyconto.bct import measures as bct
 from itertools import combinations as combo
 import random
 import pickle
