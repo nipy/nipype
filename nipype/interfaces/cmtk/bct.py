@@ -8,7 +8,7 @@ import networkx as nx
 from nipype.utils.misc import isdefined
 import sys
 import scipy.io as sio
-from cviewer.libs.pyconto.bct import measures as bct
+#from cviewer.libs.pyconto.bct import measures as bct
 from itertools import combinations as combo
 import itertools as it
 import random
@@ -317,6 +317,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
         print in_files
         print np.shape(allntwks)
         print np.shape(meanntwk)
+        1/0
     ntwk = init_ntwk(ntwk_res_file)        
     newdata = []
     for u in range(0,np.shape(meanntwk)[0]):

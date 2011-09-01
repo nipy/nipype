@@ -184,9 +184,14 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     gp = nx.read_graphml(resolution_network_file)
     nROIs = len(gp.nodes())
 
+	
+    # add node information from parcellation
     for u,d in gp.nodes_iter(data=True):
-        G.add_node(int(u), d)
-
+		G.add_node(int(u), d)
+		# compute a position for the node based on the mean position of the
+		# ROI in voxel coordinates (segmentation volume )
+		G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
+		
     dis = 0
 
     for i in range(endpoints.shape[0]):

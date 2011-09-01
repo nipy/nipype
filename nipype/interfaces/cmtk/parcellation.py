@@ -1,5 +1,4 @@
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, File, TraitedSpec, Directory
-from nipype.utils.filemanip import split_filename
 import re
 from glob import glob
 from nibabel import load
@@ -9,13 +8,11 @@ import scipy as sp
 import scipy.io as sio
 import os, os.path as op
 from time import time
-from glob import glob
 import numpy as np
 import nibabel as nb
 import networkx as nx
 from nipype.utils.misc import isdefined
 import sys
-import os, os.path as op
 import shutil
 import subprocess
 from cmp.util import mymove, runCmd
@@ -115,15 +112,23 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
     # each node represents a brain region
     # create a big 256^3 volume for storage of all ROIs
     rois = np.zeros( (256, 256, 256), dtype=np.int16 )
+    print pg
+    print pg.number_of_nodes()
+    count = 0
     for brk, brv in pg.nodes_iter(data=True):
+        count = count + 1
+        print brv
+        print brk
         if brv['dn_hemisphere'] == 'left':
             hemi = 'lh'
         elif brv['dn_hemisphere'] == 'right':
             hemi = 'rh'
         if brv['dn_region'] == 'subcortical':
+            print brv
             print "---------------------"
             print "Work on brain region: %s" % (brv['dn_region']) 
             print "Freesurfer Name: %s" %  brv['dn_fsname'] 
+            print "Region %s of %s " % (count, pg.number_of_nodes())
             print "---------------------"
             # if it is subcortical, retrieve roi from aseg
             idx = np.where(asegd == int(brv['dn_fs_aseg_val']))
@@ -134,9 +139,9 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
             print "---------------------"
             print "Work on brain region: %s" % (brv['dn_region']) 
             print "Freesurfer Name: %s" %  brv['dn_fsname'] 
+            print "Region %s of %s " % (count, pg.number_of_nodes())
             print "---------------------"
 
-            #labelpath = op.join(fs_dir, 'label', parval['fs_label_subdir_name'] % hemi)
             labelpath = op.join(output_dir, parval['fs_label_subdir_name'] % hemi)
             # construct .label file name
             
@@ -155,14 +160,22 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
             # find voxel and set them to intensityvalue in rois
             idx = np.where(tmpd == 1)
             rois[idx] = int(brv['dn_correspondence_id'])
-                
+        
+        print count
+        print brk
+        print brv
         # store volume eg in ROI_scale33.nii.gz
         out_roi = op.join(output_dir, 'ROI_%s.nii.gz' % parcellation_name)
         
-        print "Save output image to %s" % out_roi
-        img = nb.Nifti1Image(rois, aseg.get_affine(), aseg.get_header())
+        # update the header
+        hdr = aseg.get_header()
+        hdr2 = hdr.copy()
+        hdr2.set_data_dtype(np.uint16)
+
+        log.info("Save output image to %s" % out_roi)
+        img = nb.Nifti1Image(rois, aseg.get_affine(), hdr2)
         nb.save(img, out_roi)
-    
+        
     print "[ DONE ]"  
     
 
@@ -288,7 +301,7 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     # check if we should subtract the cortical rois from this parcellation
     parval = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]
     print "Loading %s to subtract cortical ROIs from white matter mask" % ('ROI_%s.nii.gz' % parcellation_name) 
-    roi = nb.load(op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % parcellation_name))
+    roi = nb.load(op.join(op.curdir, 'ROI_%s.nii.gz' % parcellation_name))
     roid = roi.get_data()
     assert roid.shape[0] == wmmask.shape[0]
     pg = nx.read_graphml(pgpath)
@@ -321,7 +334,7 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
           (op.join(fs_dir, 'label', 'cc_unknown.nii.gz'), op.join(output_dir, 'cc_unknown.nii.gz') )
           ]
     
-    ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % parcellation_name), op.join(output_dir, parcellation_name, 'ROI_HR_th.nii.gz')) )
+    ds.append( (op.join(op.curdir, 'ROI_%s.nii.gz' % parcellation_name), op.join(op.curdir, 'ROI_HR_th.nii.gz')) )
     orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
     for d in ds:
         print "Processing %s:" % d[0]
@@ -333,10 +346,8 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
         runCmd( mri_cmd,log )
         
 class ParcellateInputSpec(BaseInterfaceInputSpec):
-    aparc_aseg_file = File(exists=True, mandatory=True, desc='Freesurfer aparc+aseg file')
     subject_id = traits.String(mandatory=True, desc='Subject ID')
-    #parcellation_name = traits.Enum('resolution1015', ['resolution83', 'resolution150', 'resolution258', 'resolution500', 'resolution1015'], usedefault=True)
-    parcellation_name = traits.Enum('scale500', ['scale33', 'scale60', 'scale125', 'scale250'], usedefault=True)
+    parcellation_name = traits.Enum('scale500', ['scale33', 'scale60', 'scale125', 'scale250','scale500'], usedefault=True)
     freesurfer_dir = Directory(desc='Freesurfer main directory')
     subjects_dir = Directory(desc='Freesurfer main directory')
     out_roi_file = File(genfile = True, desc='Region of Interest file for connectivity mapping')
@@ -351,22 +362,6 @@ class Parcellate(BaseInterface):
     def _run_interface(self, runtime):
         if self.inputs.subjects_dir:
            os.environ.update({'SUBJECTS_DIR': self.inputs.subjects_dir})
-
-        aparcpath, aparcname, aparcext = split_filename(self.inputs.aparc_aseg_file)
-        print 'Using Aparc+Aseg file: {name}'.format(name=aparcname+aparcext)
-        prefix = 'parcellated'
-        self.roi_file = os.path.abspath(prefix + '_' + aparcname + '.nii')
-        print 'Output names generated'
-        self.aparc_aseg_file = os.path.abspath(self.inputs.aparc_aseg_file)
-        print 'Aparc path: {name}'.format(name=self.aparc_aseg_file)
-        niiAPARCimg = nb.load(self.aparc_aseg_file)
-        niiAPARCdata = niiAPARCimg.get_data()
-        print 'Aparc Data Extracted'
-        niiDataLabels = np.unique(niiAPARCdata)
-        print 'Data labels recorded'
-        print niiDataLabels
-        numDataLabels = np.size(niiDataLabels)
-        print 'Number of labels in image: {n}'.format(n=numDataLabels)
         print "ROI_HR_th.nii.gz / fsmask_1mm.nii.gz CREATION"
         print "============================================="
         create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
@@ -380,9 +375,8 @@ class Parcellate(BaseInterface):
         if isdefined(self.inputs.out_roi_file):
             outputs['roi_file'] = os.path.abspath(self.inputs.out_roi_file)
         else:
-            outputs['roi_file'] = os.path.abspath(self._gen_outfilename('nii', 'parcellated'))
+            outputs['roi_file'] = os.path.abspath(self._gen_outfilename('nii.gz', 'ROI'))
         return outputs
 
-    def _gen_outfilename(self, ext, prefix='parcellated'):
-        _, name , _ = split_filename(self.inputs.aparc_aseg_file)
-        return prefix + '_' + name + '.' + ext
+    def _gen_outfilename(self, ext, prefix='ROI'):
+        return prefix + '_' + self.inputs.parcellation_name + '.' + ext
