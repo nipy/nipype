@@ -6,47 +6,15 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.matlab as mlab      # how to run matlab
+import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
 import inspect
 import nibabel as nb
 import os                                    # system functions
 import cmp                                    # connectome mapper
-
-def get_vox_dims(volume):
-    import nibabel as nb
-    if isinstance(volume, list):
-        volume = volume[0]
-    nii = nb.load(volume)
-    hdr = nii.get_header()
-    voxdims = hdr.get_zooms()
-    return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
-
-def get_data_dims(volume):
-    import nibabel as nb
-    if isinstance(volume, list):
-        volume = volume[0]
-    nii = nb.load(volume)
-    hdr = nii.get_header()
-    datadims = hdr.get_data_shape()
-    return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
-
-def get_affine(volume):
-    import nibabel as nb
-    nii = nb.load(volume)
-    return nii.get_affine()
-
-def select_aparc(list_of_files):
-    for in_file in list_of_files:
-        if 'aparc+aseg.mgz' in in_file:
-            idx = list_of_files.index(in_file)
-    return list_of_files[idx]
-
-def select_aparc_annot(list_of_files):
-    for in_file in list_of_files:
-        if '.aparc.annot' in in_file:
-            idx = list_of_files.index(in_file)
-    return list_of_files[idx]
+from nipype.workflows.camino.connectivity_mapping import (get_vox_dims, get_data_dims,
+ get_affine, select_aparc, select_aparc_annot)
 
 def create_connectivity_pipeline(name="connectivity"):
     """Creates a pipeline that does the same connectivity processing as in the
@@ -57,7 +25,6 @@ def create_connectivity_pipeline(name="connectivity"):
     Example
     -------
 
-    >>> import os
     >>> import os
     >>> import nipype.interfaces.freesurfer as fs
     >>> import nipype.workflows.camino as cmonwk
@@ -94,8 +61,10 @@ def create_connectivity_pipeline(name="connectivity"):
 
     inputnode1 = pe.Node(interface=util.IdentityInterface(fields=["subject_id","dwi", "bvecs", "bvals", "subjects_dir"]), name="inputnode1")
 
-    FreeSurferSource = pe.Node(interface=nio.FreeSurferSource(), name='fssource')
+    #fs_dir = os.path.abspath('/usr/local/freesurfer')
+    #fs.FSCommand.set_default_subjects_dir(subjects_dir)
 
+    FreeSurferSource = pe.Node(interface=nio.FreeSurferSource(), name='fssource')
     FreeSurferSourceLH = pe.Node(interface=nio.FreeSurferSource(), name='fssourceLH')
     FreeSurferSourceLH.inputs.hemi = 'lh'
 
@@ -103,36 +72,30 @@ def create_connectivity_pipeline(name="connectivity"):
     FreeSurferSourceRH.inputs.hemi = 'rh'
 
     """
-    Since the b values and b vectors come from the FSL course, we must convert it to a scheme file
-    for use in Camino.
+    Use FSL's Brain Extraction to create a mask from the b0 image
     """
-
-    fsl2scheme = pe.Node(interface=camino.FSL2Scheme(), name="fsl2scheme")
-    fsl2scheme.inputs.usegradmod = True
+    bet = pe.Node(interface=fsl.BET(mask = True), name = 'bet_b0')
 
     """
-    FSL's Brain Extraction tool is used to create a mask from the b0 image
+    Use FreeSurfer's bbregister function to coregister the b0 mask and the structural image.
+    An FSL convert_xfm node is then used to obtain the inverse matrix.
+    bbregister is used once again to apply the inverse transformation to the parcellated brain image.
     """
 
-    b0Strip = pe.Node(interface=fsl.BET(mask = True), name = 'bet_b0')
+    bbregister = pe.Node(interface=fs.BBRegister(), name = 'bbregister')
+    bbregister.inputs.init = 'fsl'
+    bbregister.inputs.contrast_type = 't2'
+    bbregister.inputs.epi_mask = True
 
-    """
-    FSL's FLIRT function is used to coregister the b0 mask and the structural image.
-    A convert_xfm node is then used to obtain the inverse of the transformation matrix.
-    FLIRT is used once again to apply the inverse transformation to the parcellated brain image.
-    """
-
-    coregister = pe.Node(interface=fsl.FLIRT(dof=6), name = 'coregister')
-    coregister.inputs.cost = ('corratio')
-
-    convertxfm = pe.Node(interface=fsl.ConvertXFM(), name = 'convertxfm')
-    convertxfm.inputs.invert_xfm = True
-
-    inverse = pe.Node(interface=fsl.FLIRT(), name = 'inverse')
-    inverse.inputs.interp = ('nearestneighbour')
-
-    inverse_AparcAseg = pe.Node(interface=fsl.FLIRT(), name = 'inverse_AparcAseg')
-    inverse_AparcAseg.inputs.interp = ('nearestneighbour')
+    ApplyVolTransform_WMParc = pe.Node(interface=fs.ApplyVolTransform(), name='applyreg_WMParc')
+    ApplyVolTransform_WMParc.inputs.interp = 'nearest'
+    ApplyVolTransform_WMParc.inputs.inverse = True
+    ApplyVolTransform_Brain = pe.Node(interface=fs.ApplyVolTransform(), name='applyreg_Brain')
+    ApplyVolTransform_Brain.inputs.interp = 'nearest'
+    ApplyVolTransform_Brain.inputs.inverse = True
+    ApplyVolTransform_AparcAseg = pe.Node(interface=fs.ApplyVolTransform(), name='applyreg_AparcAseg')
+    ApplyVolTransform_AparcAseg.inputs.interp = 'nearest'
+    ApplyVolTransform_AparcAseg.inputs.inverse = True
 
     """
     A number of conversion operations are required to obtain NIFTI files from the FreesurferSource for each subject.
@@ -169,114 +132,60 @@ def create_connectivity_pipeline(name="connectivity"):
     its processing.
     """
 
-    image2voxel = pe.Node(interface=camino.Image2Voxel(), name="image2voxel")
+    dwi2tensor = pe.Node(interface=mrtrix.DWI2Tensor(),name='dwi2tensor')
+    dwi2tensor.inputs.debug = True
+    fsl2mrtrix = pe.Node(interface=mrtrix.FSL2MRTrix(),name='fsl2mrtrix')
+    fsl2mrtrix.inputs.invert_y = True
 
-    """
-    Second, diffusion tensors are fit to the voxel-order data.
-    If desired, these tensors can be converted to a Nifti tensor image using the DT2NIfTI interface.
-    """
+    binarizeWMparc = pe.Node(interface=fsl.UnaryMaths(),name='binarizeWMparc')
+    binarizeWMparc.inputs.operation = 'bin'
 
-    dtifit = pe.Node(interface=camino.DTIFit(),name='dtifit')
+    tensor2vector = pe.Node(interface=mrtrix.Tensor2Vector(),name='tensor2vector')
+    tensor2adc = pe.Node(interface=mrtrix.Tensor2ApparentDiffusion(),name='tensor2adc')
+    tensor2fa = pe.Node(interface=mrtrix.Tensor2FractionalAnisotropy(),name='tensor2fa')
 
-    """
-    Next, a lookup table is generated from the schemefile and the
-    signal-to-noise ratio (SNR) of the unweighted (q=0) data.
-    """
+    erode1 = pe.Node(interface=mrtrix.Erode(),name='erode1')
+    erode2 = pe.Node(interface=mrtrix.Erode(),name='erode2')
+    threshold1 = pe.Node(interface=mrtrix.Threshold(),name='threshold1')
+    threshold2 = pe.Node(interface=mrtrix.Threshold(),name='threshold2')
+    threshold2.inputs.absolute_threshold_value = 0.7
+    threshold3 = pe.Node(interface=mrtrix.Threshold(),name='threshold3')
+    threshold3.inputs.absolute_threshold_value = 0.4
 
-    dtlutgen = pe.Node(interface=camino.DTLUTGen(), name="dtlutgen")
-    dtlutgen.inputs.snr = 16.0
-    dtlutgen.inputs.inversion = 1
+    MRmultiply = pe.Node(interface=mrtrix.MRMultiply(),name='MRmultiply')
+    median3d = pe.Node(interface=mrtrix.MedianFilter3D(),name='median3D')
+    MRconvert = pe.Node(interface=mrtrix.MRConvert(),name='MRconvert')
+    
+    MRview = pe.Node(interface=mrtrix.MRTrixViewer(),name='MRview')
+    MRinfo = pe.Node(interface=mrtrix.MRTrixInfo(),name='MRinfo')
+    csdeconv = pe.Node(interface=mrtrix.ConstrainedSphericalDeconvolution(),name='csdeconv')
+    trackdensity = pe.Node(interface=mrtrix.Tracks2Prob(),name='trackdensity')
+    gen_WM_mask = pe.Node(interface=mrtrix.GenerateWhiteMatterMask(),name='gen_WM_mask')
+    estimateresponse = pe.Node(interface=mrtrix.EstimateResponseForSH(),name='estimateresponse')
+    estimateresponse.inputs.debug = True
+    dwi2SH = pe.Node(interface=mrtrix.DWI2SphericalHarmonicsImage(),name='dwi2SH')
+    probCSDstreamtrack = pe.Node(interface=mrtrix.ProbabilisticSphericallyDeconvolutedStreamlineTrack(),name='probCSDstreamtrack')
+    probCSDstreamtrack.inputs.inputmodel = 'SD_PROB'
+    probCSDstreamtrack.inputs.maximum_number_of_tracks = 15000
+    probSHstreamtrack = probCSDstreamtrack.clone(name="probSHstreamtrack")
+    tracks2prob = pe.Node(interface=mrtrix.Tracks2Prob(),name='tracks2prob')
+    tracks2prob.inputs.colour = True
+    tck2trk = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name='tck2trk')
+    
+    
+    MRconvert_vector = MRconvert.clone(name="MRconvert_vector")
+    MRconvert_ADC = MRconvert.clone(name="MRconvert_ADC")
+    MRconvert_FA = MRconvert.clone(name="MRconvert_FA")
+    MRconvert_TDI = MRconvert.clone(name="MRconvert_TDI")
+    parcellate = pe.Node(interface=cmtk.Parcellate(), name="Parcellate")
+    parcellation_name = 'scale500'
+    #parcellation_name = 'scale250'
+    #parcellation_name = 'scale125'
+    #parcellation_name = 'scale33'
+    parcellate.inputs.parcellation_name = parcellation_name
+    #parcellate.inputs.freesurfer_dir = fs_dir
+    #parcellate.inputs.subjects_dir = subjects_dir
 
-    """
-    In this tutorial we implement probabilistic tractography using the PICo algorithm.
-    PICo tractography requires an estimate of the fibre direction and a model of its uncertainty in each voxel;
-    this probabilitiy distribution map is produced using the following node.
-    """
-
-    picopdfs = pe.Node(interface=camino.PicoPDFs(), name="picopdfs")
-    picopdfs.inputs.inputmodel = 'dt'
-
-    """
-    Finally, tractography is performed. In this tutorial, we will use only one iteration for time-saving purposes.
-    It is important to note that we use the TrackPICo interface here. This interface now expects the files required
-    for PICo tracking (i.e. the output from picopdfs). Similar interfaces exist for alternative types of tracking,
-    such as Bayesian tracking with Dirac priors (TrackBayesDirac).
-    """
-
-    track = pe.Node(interface=camino.TrackPICo(), name="track")
-    track.inputs.iterations = 1
-
-    """
-    This tutorial demonstrates two methods of connectivity mapping. The first uses the conmap function of Camino.
-    The problem with this method is that it can be very memory intensive. To deal with this, we add a "shredding" node
-    which removes roughly half of the tracts in the file.
-    """
-
-    tractshred = pe.Node(interface=camino.TractShredder(), name='tractshred')
-    tractshred.inputs.offset = 0
-    tractshred.inputs.bunchsize = 2
-    tractshred.inputs.space = 1
-
-    """
-    Here we create the Camino-based connectivity mapping node. For visualization, it can be beneficial to set a
-    threshold for the minimum number of fiber connections that are required for an edge to be drawn on the graph.
-    """
-
-    conmap = pe.Node(interface=camino.Conmap(), name='conmap')
-    conmap.inputs.threshold = 100
-
-    """
-    Currently, the best program for visualizing tracts is TrackVis. For this reason, a node is included to
-    convert the raw tract data to .trk format. Solely for testing purposes, another node is added to perform the reverse.
-    """
-
-    camino2trackvis = pe.Node(interface=cam2trk.Camino2Trackvis(), name="camino2trackvis")
-    camino2trackvis.inputs.min_length = 30
-    camino2trackvis.inputs.voxel_order = 'LAS'
-    trk2camino = pe.Node(interface=cam2trk.Trackvis2Camino(), name="trk2camino")
-
-    """
-    Tracts can also be converted to VTK and OOGL formats, for use in programs such as GeomView and Paraview,
-    using the following two nodes.
-    """
-
-    vtkstreamlines = pe.Node(interface=camino.VtkStreamlines(), name="vtkstreamlines")
-    procstreamlines = pe.Node(interface=camino.ProcStreamlines(), name="procstreamlines")
-    procstreamlines.inputs.outputtracts = 'oogl'
-
-    """
-    We can easily produce a variety of scalar values from our fitted tensors. The following nodes generate the
-    fractional anisotropy and diffusivity trace maps and their associated headers, and then merge them back
-    into a single .nii file.
-    """
-
-    fa = pe.Node(interface=camino.FA(),name='fa')
-    trace = pe.Node(interface=camino.TrD(),name='trace')
-    dteig = pe.Node(interface=camino.DTEig(), name='dteig')
-
-    analyzeheader_fa = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_fa')
-    analyzeheader_fa.inputs.datatype = 'double'
-    analyzeheader_trace = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_trace')
-    analyzeheader_trace.inputs.datatype = 'double'
-
-    fa2nii = pe.Node(interface=misc.CreateNifti(),name='fa2nii')
-    trace2nii = fa2nii.clone("trace2nii")
-
-    """
-    This section adds the Connectome Mapping Toolkit (CMTK) nodes.
-    These interfaces are fairly experimental and may not function properly.
-    In order to perform connectivity mapping using CMTK, the parcellated structural data is rewritten
-    using the indices and parcellation scheme from the connectome mapper (CMP). This process has been
-    written into the ROIGen interface, which will output a remapped aparc+aseg image as well as a
-    dictionary of label information (i.e. name, display colours) pertaining to the original and remapped regions.
-    These label values are input from a user-input lookup table, if specified, and otherwise the default
-    Freesurfer LUT (/freesurfer/FreeSurferColorLUT.txt).
-    """
-
-    roigen = pe.Node(interface=cmtk.ROIGen(), name="ROIGen")
-    cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme = "NativeFreesurfer")
-    cmp_config.parcellation_scheme = "NativeFreesurfer"
-    roigen.inputs.LUT_file = cmp_config.get_freeview_lut("NativeFreesurfer")['freesurferaparc']
 
     """
     The CreateMatrix interface takes in the remapped aparc+aseg image as well as the label dictionary and fiber tracts
@@ -288,7 +197,9 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
-    creatematrix.inputs.resolution_network_file = cmp_config.parcellation['freesurferaparc']['node_information_graphml']
+    cmp_config = cmp.configuration.PipelineConfiguration()
+    cmp_config.parcellation_scheme = "Lausanne2008"
+    creatematrix.inputs.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
 
     """
     Here we define the endpoint of this tutorial, which is the CFFConverter node, as well as a few nodes which use
@@ -323,17 +234,9 @@ def create_connectivity_pipeline(name="connectivity"):
 
     mapping.connect([(inputnode1, FreeSurferSourceRH,[("subjects_dir","subjects_dir")])])
     mapping.connect([(inputnode1, FreeSurferSourceRH,[("subject_id","subject_id")])])
-
-    """
-    Required conversions for processing in Camino:
-    """
-
-    mapping.connect([(inputnode1, image2voxel, [("dwi", "in_file")]),
-                           (inputnode1, fsl2scheme, [("bvecs", "bvec_file"),
-                                                    ("bvals", "bval_file")]),
-                           (image2voxel, dtifit,[['voxel_order','in_file']]),
-                           (fsl2scheme, dtifit,[['scheme','scheme_file']])
-                          ])
+    
+    mapping.connect([(inputnode1, bbregister,[("subject_id","subject_id")])])
+    mapping.connect([(inputnode1, parcellate,[("subjects_dir","subjects_dir")])])
 
     """
     Nifti conversions for the parcellated white matter image (used in Camino's conmap),
@@ -367,105 +270,84 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(FreeSurferSourceLH, mris_convertLHlabels, [(('annot', select_aparc_annot), 'annot_file')])])
     mapping.connect([(FreeSurferSourceRH, mris_convertRHlabels, [(('annot', select_aparc_annot), 'annot_file')])])
 
-    """
-    This section coregisters the diffusion-weighted and parcellated white-matter / whole brain images.
-    At present the conmap node connection is left commented, as there have been recent changes in Camino
-    code that have presented some users with errors.
-    """
+    mapping.connect([(inputnode1, fsl2mrtrix, [("bvecs", "bvec_file"),
+                                                    ("bvals", "bval_file")])])
+                                                    
+    mapping.connect([(inputnode1, MRconvert,[("dwi","in_file")])])
+    MRconvert.inputs.extract_at_axis = 3
+    #MRconvert.inputs.extract_at_axis = "TB"
+    MRconvert.inputs.extract_at_coordinate = [0]
+    MRmult_merge = pe.Node(interface=util.Merge(2), name="MRmultiply_merge")
+    
+    mapping.connect([(MRconvert, threshold1,[("converted","in_file")])])
+    mapping.connect([(threshold1, median3d,[("out_file","in_file")])])
+    mapping.connect([(median3d, erode1,[("out_file","in_file")])])
+    mapping.connect([(erode1, erode2,[("out_file","in_file")])])
+    mapping.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
+    mapping.connect([(erode2, MRmult_merge,[("out_file","in2")])])
+    mapping.connect([(MRmult_merge, MRmultiply,[("out","in_files")])])
+    mapping.connect([(MRmultiply, threshold2,[("out_file","in_file")])])
+    mapping.connect([(threshold2, estimateresponse,[("out_file","mask_image")])])
+                                                    
+    mapping.connect([(inputnode1, dwi2tensor,[("dwi","in_file")])])
+    mapping.connect([(fsl2mrtrix, dwi2tensor,[("encoding_file","encoding_file")])])
 
-    mapping.connect([(inputnode1, b0Strip,[('dwi','in_file')])])
-    mapping.connect([(inputnode1, b0Strip,[('dwi','t2_guided')])]) # Added to improve damaged brain extraction
-    mapping.connect([(b0Strip, coregister,[('out_file','in_file')])])
-    mapping.connect([(mri_convert_Brain, coregister,[('out_file','reference')])])
-    mapping.connect([(coregister, convertxfm,[('out_matrix_file','in_file')])])
-    mapping.connect([(b0Strip, inverse,[('out_file','reference')])])
-    mapping.connect([(convertxfm, inverse,[('out_file','in_matrix_file')])])
-    mapping.connect([(mri_convert_WMParc, inverse,[('out_file','in_file')])])
-    #mapping.connect([(inverse, conmap,[('out_file','roi_file')])])
-
-    """
-    The tractography pipeline consists of the following nodes. Further information about the tractography
-    can be found in nipype/examples/camino_dti_tutorial.py.
-    """
-
-    mapping.connect([(b0Strip, track,[("mask_file","seed_file")])])
-    mapping.connect([(fsl2scheme, dtlutgen,[("scheme","scheme_file")])])
-    mapping.connect([(dtlutgen, picopdfs,[("dtLUT","luts")])])
-    mapping.connect([(dtifit, picopdfs,[("tensor_fitted","in_file")])])
-    mapping.connect([(picopdfs, track,[("pdfs","in_file")])])
-
-    """
-    The tractography is passed to the shredder in preparation for connectivity mapping.
-    Again, the required conmap connection is left commented out.
-    """
-
-    mapping.connect([(track, tractshred,[("tracked","in_file")])])
-    #mapping.connect([(tractshred, conmap,[("shredded","in_file")])])
-
-    """
-    Connecting the Fractional Anisotropy and Trace nodes is simple, as they obtain their input from the
-    tensor fitting. This is also where our voxel- and data-grabbing functions come in. We pass these functions,
-    along with the original DWI image from the input node, to the header-generating nodes. This ensures that the
-    files will be correct and readable.
-    """
-
-    mapping.connect([(dtifit, fa,[("tensor_fitted","in_file")])])
-    mapping.connect([(fa, analyzeheader_fa,[("fa","in_file")])])
-    mapping.connect([(inputnode1, analyzeheader_fa,[(('dwi', get_vox_dims), 'voxel_dims'),
-        (('dwi', get_data_dims), 'data_dims')])])
-    mapping.connect([(fa, fa2nii,[('fa','data_file')])])
-    mapping.connect([(inputnode1, fa2nii,[(('dwi', get_affine), 'affine')])])
-    mapping.connect([(analyzeheader_fa, fa2nii,[('header', 'header_file')])])
-
-
-    mapping.connect([(dtifit, trace,[("tensor_fitted","in_file")])])
-    mapping.connect([(trace, analyzeheader_trace,[("trace","in_file")])])
-    mapping.connect([(inputnode1, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
-        (('dwi', get_data_dims), 'data_dims')])])
-    mapping.connect([(trace, trace2nii,[('trace','data_file')])])
-    mapping.connect([(inputnode1, trace2nii,[(('dwi', get_affine), 'affine')])])
-    mapping.connect([(analyzeheader_trace, trace2nii,[('header', 'header_file')])])
-
-    mapping.connect([(dtifit, dteig,[("tensor_fitted","in_file")])])
-
-    """
-    The output tracts are converted to Trackvis format (and back). Here we also use the voxel- and data-grabbing
-    functions defined at the beginning of the pipeline.
-    """
-
-    mapping.connect([(track, camino2trackvis, [('tracked','in_file')]),
-                           (track, vtkstreamlines,[['tracked','in_file']]),
-                           (camino2trackvis, trk2camino,[['trackvis','in_file']])
+    mapping.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
+                           (dwi2tensor, tensor2adc,[['tensor','in_file']]),
+                           (dwi2tensor, tensor2fa,[['tensor','in_file']]),
                           ])
-    mapping.connect([(inputnode1, camino2trackvis,[(('dwi', get_vox_dims), 'voxel_dims'),
-        (('dwi', get_data_dims), 'data_dims')])])
 
-    """
-    Here the CMTK connectivity mapping nodes are connected.
-    The original aparc+aseg image is converted to NIFTI, then registered to
-    the diffusion image and delivered to the ROIGen node. The remapped parcellation,
-    original tracts, and label file are then given to CreateMatrix.
-    """
+    mapping.connect([(inputnode1, bet,[("dwi","in_file")])])
+    mapping.connect([(inputnode1, gen_WM_mask,[("dwi","in_file")])])
+    mapping.connect([(bet, gen_WM_mask,[("mask_file","binary_mask")])])
+    mapping.connect([(fsl2mrtrix, gen_WM_mask,[("encoding_file","encoding_file")])])
+
+    mapping.connect([(inputnode1, estimateresponse,[("dwi","in_file")])])
+    mapping.connect([(fsl2mrtrix, estimateresponse,[("encoding_file","encoding_file")])])
+
+    mapping.connect([(inputnode1, csdeconv,[("dwi","in_file")])])
+    mapping.connect([(gen_WM_mask, csdeconv,[("WMprobabilitymap","mask_image")])])
+    mapping.connect([(estimateresponse, csdeconv,[("response","response_file")])])
+    mapping.connect([(fsl2mrtrix, csdeconv,[("encoding_file","encoding_file")])])
+
+    mapping.connect([(gen_WM_mask, threshold3,[("WMprobabilitymap","in_file")])])
+    mapping.connect([(threshold3, probCSDstreamtrack,[("out_file","seed_file")])])
+
+    mapping.connect([(probCSDstreamtrack, tracks2prob,[("tracked","in_file")])])
+    mapping.connect([(inputnode1, tracks2prob,[("dwi","template_file")])])
+
+    mapping.connect([(inputnode1, tck2trk,[(('dwi', get_vox_dims), 'voxel_dims'),
+    (('dwi', get_data_dims), 'data_dims')])])
+
+    mapping.connect([(inputnode1, bbregister,[('dwi','source_file')])])
+
+    mapping.connect([(mri_convert_Brain, ApplyVolTransform_Brain,[('out_file','target_file')])])
+    mapping.connect([(bbregister, ApplyVolTransform_Brain,[('out_reg_file','reg_file')])])
+    mapping.connect([(inputnode1, ApplyVolTransform_Brain,[('dwi','source_file')])])
+
+    mapping.connect([(mri_convert_WMParc, ApplyVolTransform_WMParc,[('out_file','target_file')])])
+    mapping.connect([(bbregister, ApplyVolTransform_WMParc,[('out_reg_file','reg_file')])])
+    mapping.connect([(inputnode1, ApplyVolTransform_WMParc,[('dwi','source_file')])])
 
     mapping.connect([(FreeSurferSource, mri_convert_AparcAseg, [(('aparc_aseg', select_aparc), 'in_file')])])
+    mapping.connect([(bbregister, ApplyVolTransform_AparcAseg,[('out_reg_file','reg_file')])])
+    mapping.connect([(inputnode1, ApplyVolTransform_AparcAseg,[('dwi','source_file')])])
 
-    mapping.connect([(b0Strip, inverse_AparcAseg,[('out_file','reference')])])
-    mapping.connect([(convertxfm, inverse_AparcAseg,[('out_file','in_matrix_file')])])
-    mapping.connect([(mri_convert_AparcAseg, inverse_AparcAseg,[('out_file','in_file')])])
-
-    mapping.connect([(inverse_AparcAseg, roigen,[("out_file","aparc_aseg_file")])])
-    mapping.connect([(roigen, creatematrix,[("roi_file","roi_file")])])
-    mapping.connect([(roigen, creatematrix,[("dict_file","dict_file")])])
-    mapping.connect([(camino2trackvis, creatematrix,[("trackvis","tract_file")])])
     mapping.connect([(inputnode1, creatematrix,[("subject_id","out_matrix_file")])])
     mapping.connect([(inputnode1, creatematrix,[("subject_id","out_matrix_mat_file")])])
+
+    mapping.connect([(inputnode1, parcellate,[("subject_id","subject_id")])])
+    mapping.connect([(parcellate, ApplyVolTransform_AparcAseg,[("roi_file","target_file")])])
+    mapping.connect([(ApplyVolTransform_AparcAseg, creatematrix,[("transformed_file","roi_file")])])
+
+    mapping.connect([(csdeconv, probCSDstreamtrack,[("spherical_harmonics_image","in_file")])])
+    mapping.connect([(probCSDstreamtrack, tck2trk,[("tracked","in_file")])])
+    mapping.connect([(tck2trk, creatematrix,[("out_file","tract_file")])])
 
     """
     The merge nodes defined earlier are used here to create lists of the files which are
     destined for the CFFConverter.
     """
-
-    #mapping.connect([(creatematrix, gpickledNetworks,[("matrix_file","in1")])])
 
     mapping.connect([(mris_convertLH, giftiSurfaces,[("converted","in1")])])
     mapping.connect([(mris_convertRH, giftiSurfaces,[("converted","in2")])])
@@ -479,7 +361,7 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(mris_convertLHlabels, giftiLabels,[("converted","in1")])])
     mapping.connect([(mris_convertRHlabels, giftiLabels,[("converted","in2")])])
 
-    mapping.connect([(roigen, niftiVolumes,[("roi_file","in1")])])
+    mapping.connect([(ApplyVolTransform_AparcAseg, niftiVolumes,[("transformed_file","in1")])])
     mapping.connect([(inputnode1, niftiVolumes,[("dwi","in2")])])
     mapping.connect([(mri_convert_Brain, niftiVolumes,[("out_file","in3")])])
 
@@ -503,7 +385,6 @@ def create_connectivity_pipeline(name="connectivity"):
 
     mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
     mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
-    mapping.connect([(camino2trackvis, CFFConverter,[("trackvis","tract_files")])])
     mapping.connect([(inputnode1, CFFConverter,[("subject_id","title")])])
 
     """
@@ -516,19 +397,19 @@ def create_connectivity_pipeline(name="connectivity"):
 
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["fa",
                                                                 "struct",
-                                                                "trace",
                                                                 "tracts",
                                                                 "connectome",
                                                                 "cmatrix",
                                                                 "gpickled_network",
                                                                 "rois",
+                                                                "warped",
                                                                 "mean_fiber_length",
-                                                                "fiber_length_std",
-                                                                "tensors"]),
+                                                                "fiber_length_std"]),
                                         name="outputnode")
 
     connectivity = pe.Workflow(name="connectivity")
     connectivity.base_output_dir=name
+    connectivity.base_dir=name
 
     connectivity.connect([(inputnode, mapping, [("dwi", "inputnode1.dwi"),
                                               ("bvals", "inputnode1.bvals"),
@@ -537,17 +418,16 @@ def create_connectivity_pipeline(name="connectivity"):
                                               ("subjects_dir", "inputnode1.subjects_dir")])
                                               ])
 
-    connectivity.connect([(mapping, outputnode, [("camino2trackvis.trackvis", "tracts"),
+    connectivity.connect([(mapping, outputnode, [("tck2trk.out_file", "tracts"),
         ("CFFConverter.connectome_file", "connectome"),
         ("CreateMatrix.matrix_mat_file", "cmatrix"),
         ("CreateMatrix.mean_fiber_length_matrix_mat_file", "mean_fiber_length"),
         ("CreateMatrix.fiber_length_std_matrix_mat_file", "fiber_length_std"),
-        ("fa2nii.nifti_file", "fa"),
         ("CreateMatrix.matrix_file", "gpickled_network"),
-        ("ROIGen.roi_file", "rois"),
-        ("mri_convert_Brain.out_file", "struct"),
-        ("trace2nii.nifti_file", "trace"),
-        ("dtifit.tensor_fitted", "tensors")])
+        ("Parcellate.roi_file", "rois"),
+        ("tensor2fa.FA", "fa"),
+        ("applyreg_AparcAseg.transformed_file", "warped"),
+        ("mri_convert_Brain.out_file", "struct")])
         ])
 
     return connectivity

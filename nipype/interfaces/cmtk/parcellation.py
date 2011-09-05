@@ -26,9 +26,7 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
     paths = []
     cmp_config = cmp.configuration.PipelineConfiguration()
     cmp_config.parcellation_scheme = "Lausanne2008"
-    #cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme = "Lausanne2008")
     for hemi in ['lh', 'rh']:
-        #spath = gconf.parcellation[parcellation_name]['fs_label_subdir_name'] % hemi
         spath = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['fs_label_subdir_name'] % hemi
         paths.append(spath)
     for p in paths:
@@ -112,8 +110,7 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
     # each node represents a brain region
     # create a big 256^3 volume for storage of all ROIs
     rois = np.zeros( (256, 256, 256), dtype=np.int16 )
-    print pg
-    print pg.number_of_nodes()
+
     count = 0
     for brk, brv in pg.nodes_iter(data=True):
         count = count + 1
@@ -161,9 +158,6 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
             idx = np.where(tmpd == 1)
             rois[idx] = int(brv['dn_correspondence_id'])
         
-        print count
-        print brk
-        print brv
         # store volume eg in ROI_scale33.nii.gz
         out_roi = op.join(output_dir, 'ROI_%s.nii.gz' % parcellation_name)
         
@@ -186,7 +180,6 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     cmp_config.parcellation_scheme = "Lausanne2008"
     log = cmp_config.get_logger()
     pgpath = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
-    #reg_path = gconf.get_cmp_tracto_mask()
     # load ribbon as basis for white matter mask
     fsmask = nb.load(op.join(fs_dir, 'mri', 'ribbon.nii.gz'))
     fsmaskd = fsmask.get_data()

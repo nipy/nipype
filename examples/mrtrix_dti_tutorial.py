@@ -16,7 +16,6 @@ http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 
 Import necessary modules from nipype.
 """
-
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
@@ -27,7 +26,7 @@ import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.algorithms.misc as misc
 import nibabel as nb
-import os                                    # system functions
+import os, os.path as op                     # system functions
 
 """
 We import the voxel-, data-, and affine-grabbing functions from the Camino DTI processing workflow
@@ -74,11 +73,22 @@ bet.inputs.mask = True
 dwi2tensor = pe.Node(interface=mrtrix.DWI2Tensor(),name='dwi2tensor')
 dwi2tensor.inputs.debug = True
 fsl2mrtrix = pe.Node(interface=mrtrix.FSL2MRTrix(),name='fsl2mrtrix')
+fsl2mrtrix.inputs.invert_y = True
 tensor2vector = pe.Node(interface=mrtrix.Tensor2Vector(),name='tensor2vector')
 tensor2adc = pe.Node(interface=mrtrix.Tensor2ApparentDiffusion(),name='tensor2adc')
 tensor2fa = pe.Node(interface=mrtrix.Tensor2FractionalAnisotropy(),name='tensor2fa')
+erode1 = pe.Node(interface=mrtrix.Erode(),name='erode1')
+erode2 = pe.Node(interface=mrtrix.Erode(),name='erode2')
+threshold1 = pe.Node(interface=mrtrix.Threshold(),name='threshold1')
+threshold2 = pe.Node(interface=mrtrix.Threshold(),name='threshold2')
+threshold2.inputs.absolute_threshold_value = 0.7
+threshold3 = pe.Node(interface=mrtrix.Threshold(),name='threshold3')
+threshold3.inputs.absolute_threshold_value = 0.4
 
 MRmultiply = pe.Node(interface=mrtrix.MRMultiply(),name='MRmultiply')
+median3d = pe.Node(interface=mrtrix.MedianFilter3D(),name='median3D')
+MRconvert = pe.Node(interface=mrtrix.MRConvert(),name='MRconvert')
+
 MRview = pe.Node(interface=mrtrix.MRTrixViewer(),name='MRview')
 MRinfo = pe.Node(interface=mrtrix.MRTrixInfo(),name='MRinfo')
 csdeconv = pe.Node(interface=mrtrix.ConstrainedSphericalDeconvolution(),name='csdeconv')
@@ -87,6 +97,19 @@ gen_WM_mask = pe.Node(interface=mrtrix.GenerateWhiteMatterMask(),name='gen_WM_ma
 estimateresponse = pe.Node(interface=mrtrix.EstimateResponseForSH(),name='estimateresponse')
 estimateresponse.inputs.debug = True
 dwi2SH = pe.Node(interface=mrtrix.DWI2SphericalHarmonicsImage(),name='dwi2SH')
+probCSDstreamtrack = pe.Node(interface=mrtrix.ProbabilisticSphericallyDeconvolutedStreamlineTrack(),name='probCSDstreamtrack')
+probCSDstreamtrack.inputs.inputmodel = 'SD_PROB'
+probCSDstreamtrack.inputs.maximum_number_of_tracks = 15000
+probSHstreamtrack = probCSDstreamtrack.clone(name="probSHstreamtrack")
+tracks2prob = pe.Node(interface=mrtrix.Tracks2Prob(),name='tracks2prob')
+tracks2prob.inputs.colour = True
+tck2trk = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name='tck2trk')
+
+MRconvert_vector = MRconvert.clone(name="MRconvert_vector")
+MRconvert_ADC = MRconvert.clone(name="MRconvert_ADC")
+MRconvert_FA = MRconvert.clone(name="MRconvert_FA")
+MRconvert_TDI = MRconvert.clone(name="MRconvert_TDI")
+MRmultiply = pe.Node(interface=mrtrix.MRMultiply(),name='MRmultiply')
 
 convertTest = pe.Workflow(name='convertTest')
 
@@ -99,6 +122,22 @@ convertTest.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
                        (dwi2tensor, tensor2adc,[['tensor','in_file']]),
                        (dwi2tensor, tensor2fa,[['tensor','in_file']]),
                       ])
+
+convertTest.connect([(inputnode, MRconvert,[("dwi","in_file")])])
+MRconvert.inputs.extract_at_axis = 3
+#MRconvert.inputs.extract_at_axis = "TB"
+MRconvert.inputs.extract_at_coordinate = [0]
+MRmult_merge = pe.Node(interface=util.Merge(2), name="MRmultiply_merge")
+
+convertTest.connect([(MRconvert, threshold1,[("converted","in_file")])])
+convertTest.connect([(threshold1, median3d,[("out_file","in_file")])])
+convertTest.connect([(median3d, erode1,[("out_file","in_file")])])
+convertTest.connect([(erode1, erode2,[("out_file","in_file")])])
+convertTest.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
+convertTest.connect([(erode2, MRmult_merge,[("out_file","in2")])])
+convertTest.connect([(MRmult_merge, MRmultiply,[("out","in_files")])])
+convertTest.connect([(MRmultiply, threshold2,[("out_file","in_file")])])
+convertTest.connect([(threshold2, estimateresponse,[("out_file","mask_image")])])
 
 #### For Testing Purposes ####
 #convertTest.connect([(tensor2fa, MRview,[("FA","in_files")])])
@@ -113,40 +152,44 @@ convertTest.connect([(fsl2mrtrix, gen_WM_mask,[("encoding_file","encoding_file")
 
 convertTest.connect([(inputnode, estimateresponse,[("dwi","in_file")])])
 convertTest.connect([(fsl2mrtrix, estimateresponse,[("encoding_file","encoding_file")])])
-convertTest.connect([(gen_WM_mask, estimateresponse,[("WMprobabilitymap","mask_image")])])
 
 convertTest.connect([(inputnode, csdeconv,[("dwi","in_file")])])
 convertTest.connect([(gen_WM_mask, csdeconv,[("WMprobabilitymap","mask_image")])])
 convertTest.connect([(estimateresponse, csdeconv,[("response","response_file")])])
 convertTest.connect([(fsl2mrtrix, csdeconv,[("encoding_file","encoding_file")])])
 
-"""
 probCSDstreamtrack = pe.Node(interface=mrtrix.ProbabilisticSphericallyDeconvolutedStreamlineTrack(),name='probCSDstreamtrack')
 probCSDstreamtrack.inputs.inputmodel = 'SD_PROB'
-probCSDstreamtrack.inputs.maximum_number_of_tracks = 150000
+probCSDstreamtrack.inputs.maximum_number_of_tracks = 300000
 convertTest.connect([(csdeconv, probCSDstreamtrack,[("spherical_harmonics_image","in_file")])])
-convertTest.connect([(gen_WM_mask, probCSDstreamtrack,[("WMprobabilitymap","mask_file")])])
+#convertTest.connect([(gen_WM_mask, probCSDstreamtrack,[("WMprobabilitymap","mask_file")])])
 convertTest.connect([(gen_WM_mask, probCSDstreamtrack,[("WMprobabilitymap","seed_file")])])
 
+"""
 probSHstreamtrack = probCSDstreamtrack.clone(name="probSHstreamtrack")
 convertTest.connect([(inputnode, dwi2SH,[("dwi","in_file")])])
 convertTest.connect([(fsl2mrtrix, dwi2SH,[("encoding_file","encoding_file")])])
 convertTest.connect([(dwi2SH, probSHstreamtrack,[("spherical_harmonics_image","in_file")])])
 convertTest.connect([(gen_WM_mask, probSHstreamtrack,[("WMprobabilitymap","mask_file")])])
 convertTest.connect([(gen_WM_mask, probSHstreamtrack,[("WMprobabilitymap","seed_file")])])
-
+"""
 
 tracks2prob = pe.Node(interface=mrtrix.Tracks2Prob(),name='tracks2prob')
 tracks2prob.inputs.colour = True
 convertTest.connect([(probCSDstreamtrack, tracks2prob,[("tracked","in_file")])])
 convertTest.connect([(inputnode, tracks2prob,[("dwi","template_file")])])
-"""
 
-SH2camino = pe.Node(interface=camino.MRTrixSphericalHarmonics2Camino(),name='SH2camino')
-MRconvert = pe.Node(interface=mrtrix.MRConvert(),name='MRconvert')
-MRconvert.inputs.output_datatype = 'float'
-convertTest.connect([(csdeconv, MRconvert,[("spherical_harmonics_image","in_file")])])
-convertTest.connect([(MRconvert, SH2camino,[("converted","in_file")])])
+#SH2camino = pe.Node(interface=camino.MRTrixSphericalHarmonics2Camino(),name='SH2camino')
+#MRconvert = pe.Node(interface=mrtrix.MRConvert(),name='MRconvert')
+#MRconvert.inputs.output_datatype = 'float'
+#convertTest.connect([(csdeconv, MRconvert,[("spherical_harmonics_image","in_file")])])
+#convertTest.connect([(MRconvert, SH2camino,[("converted","in_file")])])
+
+tck2trk = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name='tck2trk')
+convertTest.connect([(inputnode, tck2trk,[(('dwi', get_vox_dims), 'voxel_dims'),
+(('dwi', get_data_dims), 'data_dims')])])
+
+convertTest.connect([(probCSDstreamtrack, tck2trk,[("tracked","in_file")])])
 
 
 """

@@ -15,21 +15,26 @@ class Tracks2ProbInputSpec(CommandLineInputSpec):
                            desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"') #, usedefault=True)
     resample = traits.Float(argstr='-resample %d', position=3,
         units='mm', desc='resample the tracks at regular intervals using Hermite interpolation. If omitted, the program will select an appropriate interpolation factor automatically.')
-    out_filename = File(argstr='%s', position= -1, genfile=True, desc='output data file')
+    out_filename = File(genfile=True, argstr='%s', position= -1, desc='output data file')
 
 class Tracks2ProbOutputSpec(TraitedSpec):
     tract_image = File(exists=True, desc='Output tract count or track density image')
 
 class Tracks2Prob(CommandLine):
     """
-    convert a tract file into a map of the fraction of tracks to enter each voxel.
+    Convert a tract file into a map of the fraction of tracks to enter
+    each voxel - also known as a tract density image (TDI) - in MRtrix's
+    image format (.mif). This can be viewed using MRview or converted to
+    Nifti using MRconvert.
 
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> fit = mrt.Tracks2Prob()                  # doctest: +SKIP
-    >>> fit.run()                  # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
+    >>> tdi = mrt.Tracks2Prob()                         # doctest: +SKIP
+    >>> tdi.inputs.in_file = 'dwi_CSD_tracked.tck'      # doctest: +SKIP
+    >>> tdi.inputs.colour = True                        # doctest: +SKIP
+    >>> tdi.run()                                       # doctest: +SKIP
     """
     _cmd = 'tracks2prob'
     input_spec=Tracks2ProbInputSpec
@@ -106,21 +111,21 @@ class StreamlineTrackOutputSpec(TraitedSpec):
 class StreamlineTrack(CommandLine):
     """
     Performs tractography using one of the following models:
-    'dt_prob', 'dt_stream', 'sd_prob', 'sd_stream'
+    'dt_prob', 'dt_stream', 'sd_prob', 'sd_stream',
+    Where 'dt' stands for diffusion tensor, 'sd' stands for spherical
+    deconvolution, and 'prob' stands from probabilistic. 
 
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> strack = cmon.StreamlineTrack()                  # doctest: +SKIP
-    >>> strack.inputs.inputmodel = 'DT_PROB'                  # doctest: +SKIP
-    >>> strack.inputs.in_file = 'data.Bfloat'                  # doctest: +SKIP
-    >>> strack.inputs.seed_file = 'seed_mask.nii'                  # doctest: +SKIP
-    >>> strack.run()                  # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
+    >>> strack = mrt.StreamlineTrack()                  # doctest: +SKIP
+    >>> strack.inputs.inputmodel = 'DT_PROB'            # doctest: +SKIP
+    >>> strack.inputs.in_file = 'data.Bfloat'           # doctest: +SKIP
+    >>> strack.inputs.seed_file = 'seed_mask.nii'       # doctest: +SKIP
+    >>> strack.run()                                    # doctest: +SKIP
     """
-
     _cmd = 'streamtrack'
-
     input_spec = StreamlineTrackInputSpec
     output_spec = StreamlineTrackOutputSpec
 
@@ -145,17 +150,20 @@ class DiffusionTensorStreamlineTrackInputSpec(StreamlineTrackInputSpec):
 
 class DiffusionTensorStreamlineTrack(StreamlineTrack):
     """
-    Performs streamline tractography using diffusion tensor data
-
+    Specialized interface to StreamlineTrack. This interface is used for
+    streamline tracking from diffusion tensor data, and calls the MRtrix
+    function 'streamtrack' with the option 'DT_STREAM'
+    
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> track = cmon.TrackBallStick()                  # doctest: +SKIP
-    >>> track.inputs.in_file = 'ballstickfit_data.Bfloat'                  # doctest: +SKIP
-    >>> track.inputs.seed_file = 'seed_mask.nii'                  # doctest: +SKIP
-    >>> track.run()                  # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
+    >>> dtstrack = mrt.DiffusionTensorStreamlineTrack() # doctest: +SKIP
+    >>> dtstrack.inputs.in_file = 'data.Bfloat'         # doctest: +SKIP
+    >>> dtstrack.inputs.seed_file = 'seed_mask.nii'     # doctest: +SKIP
+    >>> dtstrack.run()                                  # doctest: +SKIP
     """
+    
     input_spec = DiffusionTensorStreamlineTrackInputSpec
     
     def __init__(self, command=None, **inputs):
@@ -170,14 +178,18 @@ class ProbabilisticSphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
     """
     Performs probabilistic tracking using spherically deconvolved data
 
+    Specialized interface to StreamlineTrack. This interface is used for
+    probabilistic tracking from spherically deconvolved data, and calls
+    the MRtrix function 'streamtrack' with the option 'SD_PROB'
+    
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> track = cmon.ProbabilisticSphericallyDeconvolutedStreamlineTrack()                  # doctest: +SKIP
-    >>> track.inputs.in_file = 'ballstickfit_data.Bfloat'                  # doctest: +SKIP
-    >>> track.inputs.seed_file = 'seed_mask.nii'                  # doctest: +SKIP
-    >>> track.run()                  # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt                                  # doctest: +SKIP
+    >>> sdprobtrack = mrt.ProbabilisticSphericallyDeconvolutedStreamlineTrack() # doctest: +SKIP
+    >>> sdprobtrack.inputs.in_file = 'data.Bfloat'                              # doctest: +SKIP
+    >>> sdprobtrack.inputs.seed_file = 'seed_mask.nii'                          # doctest: +SKIP
+    >>> sdprobtrack.run()                                                       # doctest: +SKIP
     """
     input_spec = ProbabilisticSphericallyDeconvolutedStreamlineTrackInputSpec
     
@@ -187,16 +199,20 @@ class ProbabilisticSphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
 
 class SphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
     """
-    Performs probabilistic tracking using spherically deconvolved data
+    Performs streamline tracking using spherically deconvolved data
 
+    Specialized interface to StreamlineTrack. This interface is used for
+    streamline tracking from spherically deconvolved data, and calls
+    the MRtrix function 'streamtrack' with the option 'SD_STREAM'
+    
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> track = cmon.SphericallyDeconvolutedStreamlineTrack()                  # doctest: +SKIP
-    >>> track.inputs.in_file = 'ballstickfit_data.Bfloat'                  # doctest: +SKIP
-    >>> track.inputs.seed_file = 'seed_mask.nii'                  # doctest: +SKIP
-    >>> track.run()                  # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt                 # doctest: +SKIP
+    >>> sdtrack = mrt.SphericallyDeconvolutedStreamlineTrack() # doctest: +SKIP
+    >>> sdtrack.inputs.in_file = 'data.Bfloat'                 # doctest: +SKIP
+    >>> sdtrack.inputs.seed_file = 'seed_mask.nii'             # doctest: +SKIP
+    >>> sdtrack.run()                                          # doctest: +SKIP
     """
     input_spec = StreamlineTrackInputSpec
     

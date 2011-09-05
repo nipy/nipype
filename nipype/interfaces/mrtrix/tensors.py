@@ -46,6 +46,14 @@ class DWI2SphericalHarmonicsImage(CommandLine):
     [6] Im {Y(4,4)}
     [7] Im {Y(4,3)}
 
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
+    >>> dwi2SH = mrt.DWI2SphericalHarmonicsImage()      # doctest: +SKIP
+    >>> dwi2SH.inputs.in_file = 'dwi.nii'               # doctest: +SKIP
+    >>> dwi2SH.inputs.encoding_file = 'encoding.txt'    # doctest: +SKIP
+    >>> dwi2SH.run()                                    # doctest: +SKIP
     """
     _cmd = 'dwi2SH'
     input_spec=DWI2SphericalHarmonicsImageInputSpec
@@ -71,7 +79,7 @@ class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
     desc='the diffusion-weighted signal response function for a single fibre population (see EstimateResponse)')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filename')
     mask_image = File(exists=True, argstr='-mask %s', position=2, desc='only perform computation within the specified binary brain mask image')
-    encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=1, 
+    encoding_file = File(exists=True, argstr='-grad %s', position=1, 
     desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     filter_file = File(exists=True, argstr='-filter %s', position=-2,
     desc='a text file containing the filtering coefficients for each even harmonic order.' \
@@ -112,15 +120,15 @@ class ConstrainedSphericalDeconvolution(CommandLine):
 	[6] Im {Y(4,4)}
 	[7] Im {Y(4,3)} 
 	
-	Examples
-	--------
+	Example
+	-------
 
     >>> import nipype.interfaces.mrtrix as mrt                  # doctest: +SKIP
-    >>> csdeconv = mrt.ConstrainedSphericalDeconvolution()                  # doctest: +SKIP
-    >>> csdeconv.inputs.in_file = 'tract_data.Bfloat'                  # doctest: +SKIP
-    >>> csdeconv.inputs.gradient_encoding_file = 'encoding.txt'                  # doctest: +SKIP
-    >>> csdeconv.inputs.offset = 0                  # doctest: +SKIP
-    >>> csdeconv.run()                  # doctest: +SKIP
+    >>> csdeconv = mrt.ConstrainedSphericalDeconvolution()      # doctest: +SKIP
+    >>> csdeconv.inputs.in_file = 'dwi.mif'                     # doctest: +SKIP
+    >>> csdeconv.inputs.encoding_file = 'encoding.txt'          # doctest: +SKIP
+    >>> csdeconv.inputs.offset = 0                              # doctest: +SKIP
+    >>> csdeconv.run()                                          # doctest: +SKIP
     """
     _cmd = 'csdeconv'
     input_spec=ConstrainedSphericalDeconvolutionInputSpec
@@ -156,8 +164,17 @@ class EstimateResponseForSHOutputSpec(TraitedSpec):
 
 class EstimateResponseForSH(CommandLine):
     """
-    Estimate the fibre response function for use in spherical deconvolution.
+    Estimates the fibre response function for use in spherical deconvolution.
     
+    Example
+	-------
+
+    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
+    >>> estresp = mrt.EstimateResponseForSH()           # doctest: +SKIP
+    >>> estresp.inputs.in_file = 'dwi.mif'              # doctest: +SKIP
+    >>> estresp.inputs.mask_image = 'dwi_WMProb.mif'    # doctest: +SKIP
+    >>> estresp.inputs.encoding_file = 'encoding.txt'   # doctest: +SKIP
+    >>> estresp.run()                                   # doctest: +SKIP
     """
     _cmd = 'estimate_response'
     input_spec=EstimateResponseForSHInputSpec
@@ -177,8 +194,14 @@ class EstimateResponseForSH(CommandLine):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + '_ER.mif'
 
-def concat_files(bvec_file, bval_file):
+def concat_files(bvec_file, bval_file, invert_x, invert_y, invert_z):
     bvecs = np.loadtxt(bvec_file)
+    if invert_x:
+        bvecs[:,0] = -bvecs[:,0]
+    if invert_y:
+        bvecs[:,1] = -bvecs[:,1]
+    if invert_z:
+        bvecs[:,2] = -bvecs[:,2]
     bvals = np.loadtxt(bval_file)
     encoding = np.transpose(np.vstack((bvecs,bvals)))
     _, bvec , _ = split_filename(bvec_file)
@@ -190,6 +213,9 @@ def concat_files(bvec_file, bval_file):
 class FSL2MRTrixInputSpec(TraitedSpec):
     bvec_file = File(exists=True, mandatory=True, desc='FSL b-vectors file (3xN text file)')
     bval_file = File(exists=True, mandatory=True, desc='FSL b-values file (1xN text file)')
+    invert_x = traits.Bool(False, usedefault=True, desc='Inverts the b-vectors along the x-axis')
+    invert_y = traits.Bool(False, usedefault=True, desc='Inverts the b-vectors along the y-axis')
+    invert_z = traits.Bool(False, usedefault=True, desc='Inverts the b-vectors along the z-axis')
     out_encoding_file = File(genfile=True, desc='Output encoding filename')
 
 class FSL2MRTrixOutputSpec(TraitedSpec):
@@ -198,19 +224,31 @@ class FSL2MRTrixOutputSpec(TraitedSpec):
 
 class FSL2MRTrix(BaseInterface):
     """
-    Converts separate b-values and b-vectors from text files (FSL style) into a 4xN text file in which each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient',
-        'and b gives the b-value in units (1000 s/mm^2).
+    Converts separate b-values and b-vectors from text files (FSL style) into a 
+    4xN text file in which each line is in the format [ X Y Z b ], where [ X Y Z ]
+    describe the direction of the applied gradient, and b gives the 
+    b-value in units (1000 s/mm^2).
+    
+    Example
+	-------
+
+    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
+    >>> fsl2mrtrix = mrt.FSL2MRTrix()                   # doctest: +SKIP
+    >>> fsl2mrtrix.inputs.bvec_file = 'bvecs'           # doctest: +SKIP
+    >>> fsl2mrtrix.inputs.bval_file = 'bvals'           # doctest: +SKIP
+    >>> fsl2mrtrix.inputs.invert_y = True               # doctest: +SKIP
+    >>> fsl2mrtrix.run()                                # doctest: +SKIP
     """
     input_spec = FSL2MRTrixInputSpec
     output_spec = FSL2MRTrixOutputSpec
 
     def _run_interface(self, runtime):
-        encoding = concat_files(self.inputs.bvec_file, self.inputs.bval_file)
+        encoding = concat_files(self.inputs.bvec_file, self.inputs.bval_file, self.inputs.invert_x, self.inputs.invert_y, self.inputs.invert_z)
         return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['encoding_file'] = os.path.abspath(self._gen_filename())
+        outputs['encoding_file'] = os.path.abspath(self._gen_filename('out_encoding_file'))
         return outputs
         
     def _gen_filename(self, name):
