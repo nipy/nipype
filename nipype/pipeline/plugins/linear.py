@@ -12,6 +12,10 @@ class LinearPlugin(PluginBase):
     """Execute workflow in series
     """
 
+    def __init__(self, plugin_args=None):
+        super(LinearPlugin, self).__init__(plugin_args=plugin_args)
+        return
+
     def run(self, graph, config, updatehash=False):
         """Executes a pre-defined pipeline in a serial order.
 
@@ -32,7 +36,11 @@ class LinearPlugin(PluginBase):
             try:
                 if node in donotrun:
                     continue
+                if self._status_callback:
+                    self._status_callback(node, 'start')
                 node.run(updatehash=updatehash)
+                if self._status_callback:
+                    self._status_callback(node, 'end')
             except:
                 os.chdir(old_wd)
                 if str2bool(config['execution']['stop_on_first_crash']):
@@ -46,5 +54,7 @@ class LinearPlugin(PluginBase):
                                    dependents = subnodes,
                                    crashfile = crashfile))
                 donotrun.extend(subnodes)
+                if self._status_callback:
+                    self._status_callback(node, 'exception')
         report_nodes_not_run(notrun)
 
