@@ -11,49 +11,7 @@ import shutil
 import glob
 
 from nipype.interfaces.base import BaseInterface
-from nipype.interfaces.traits_extension import File
 from nipype.pipeline.engine import Node
-from traits.api import List
-
-################################################################################
-# Functions for hashing input arguments
-
-def hash_file(filename, exists=False):
-    "Return the hash of a file from its file name"
-    if exists:
-        if os.path.islink(filename):
-            filename = os.readlink(filename)
-        stat_results = os.stat(filename)
-        return filename, stat_results.st_mtime
-    return filename
-
-
-def _hash(value, trait):
-    """"Return the static representation to hash from the inputs values
-    and specification"""
-    if isinstance(trait.trait_type, File):
-        return hash_file(value, exists=trait.trait_type.exists)
-    elif isinstance(trait.trait_type, List):
-        if isinstance(value, (list, tuple)):
-            return [_hash(v, trait.inner_traits[0]) for v in value]
-        else:
-            return _hash(value, trait.inner_traits[0])
-    else:
-        return value
-
-
-def hash_inputs(inputs, input_spec, func_name):
-    out = dict()
-    traits = input_spec.class_traits()
-    for name in inputs:
-        value = inputs[name]
-        if not name in traits:
-            raise ValueError('Invalid parameter %s for %s' % (name, func_name))
-        trait = traits[name]
-        out[name] = _hash(value, trait)
-    return out 
-
-
 
 ################################################################################
 # PipeFunc object: callable interface to nipype.interface objects
@@ -102,8 +60,7 @@ class PipeFunc(object):
         # Set the inputs early to get some argument checking
         interface.inputs.set(**kwargs)
         # Make a name for our node
-        inputs = hash_inputs(kwargs, interface.input_spec,
-                                interface.__class__)
+        inputs = interface.inputs.get_hashval()
         hasher = hashlib.new('md5')
         hasher.update(pickle.dumps(inputs))
         dir_name = '%s-%s' % (interface.__class__.__module__.replace('.', '-'),
