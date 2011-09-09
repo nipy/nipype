@@ -22,7 +22,7 @@ from warnings import warn
 
 from nipype.interfaces.traits_extension import (traits, Undefined, TraitDictObject,
                                                 TraitListObject, TraitError,
-                                                isdefined, File, Directory, has_metadata)
+                                                isdefined, File, has_metadata)
 from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                     hash_timestamp)
 from nipype.utils.misc import is_container
@@ -31,6 +31,7 @@ from nipype.utils.logger import iflogger
 
 
 __docformat__ = 'restructuredtext'
+
 
 def load_template(name):
     """Load a template from the script_templates directory
@@ -52,6 +53,7 @@ def load_template(name):
     template = Template(template_file.read())
     template_file.close()
     return template
+
 
 class Bunch(object):
     """Dictionary-like class that provides attribute-style access to it's items.
@@ -89,11 +91,11 @@ class Bunch(object):
         self.__dict__.update(*args, **kwargs)
 
     def items(self):
-        """iterates over bunch attributes as key,value pairs"""
+        """iterates over bunch attributes as key, value pairs"""
         return self.__dict__.items()
 
     def iteritems(self):
-        """iterates over bunch attributes as key,value pairs"""
+        """iterates over bunch attributes as key, value pairs"""
         warn('iteritems is deprecated, use items instead')
         return self.items()
 
@@ -247,11 +249,11 @@ class InterfaceResult(object):
 
     """
 
-
     def __init__(self, interface, runtime, outputs=None):
         self.interface = interface
         self.runtime = runtime
         self.outputs = outputs
+
 
 class BaseTraitedSpec(traits.HasTraits):
     """Provide a few methods necessary to support nipype interface api
@@ -289,7 +291,6 @@ class BaseTraitedSpec(traits.HasTraits):
         self._generate_handlers()
         self.set(**kwargs)
 
-
     def items(self):
         """ Name, trait generator for user modifiable traits
         """
@@ -307,11 +308,11 @@ class BaseTraitedSpec(traits.HasTraits):
         """Find all traits with the 'xor' metadata and attach an event
         handler to them.
         """
-        has_xor = dict(xor=lambda t : t is not None)
+        has_xor = dict(xor=lambda t: t is not None)
         xors = self.trait_names(**has_xor)
         for elem in xors:
             self.on_trait_change(self._xor_warn, elem)
-        has_requires = dict(requires=lambda t : t is not None)
+        has_requires = dict(requires=lambda t: t is not None)
         requires = self.trait_names(**has_requires)
         for elem in requires:
             self.on_trait_change(self._requires_warn, elem)
@@ -322,13 +323,12 @@ class BaseTraitedSpec(traits.HasTraits):
         if isdefined(new):
             trait_spec = self.traits()[name]
             # for each xor, set to default_value
-            undefined_traits = {}
             for trait_name in trait_spec.xor:
                 if trait_name == name:
                     # skip ourself
                     continue
                 if isdefined(getattr(self, trait_name)):
-                    self.trait_set(trait_change_notify=False, **{'%s'%name:Undefined})
+                    self.trait_set(trait_change_notify=False, **{'%s' % name: Undefined})
                     msg = 'Input "%s" is mutually exclusive with input "%s", ' \
                           'which is already set' \
                             % (name, trait_name)
@@ -356,7 +356,7 @@ class BaseTraitedSpec(traits.HasTraits):
         file_list = []
         for afile in stuff:
             if is_container(afile):
-                hashlist = self._hash_infile({'infiles':afile}, 'infiles')
+                hashlist = self._hash_infile({'infiles': afile}, 'infiles')
                 hash = [val[1] for val in hashlist]
             else:
                 if config.get('execution', 'hash_method').lower() == 'timestamp':
@@ -449,7 +449,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 trait = self.trait(name)
                 hash_files = not has_metadata(trait.trait_type, "hash_files", False)
                 dict_nofilename[name] = self._get_sorteddict(val, hash_method=hash_method, hash_files=hash_files)
-                dict_withhash[name] = self._get_sorteddict(val,True, hash_method=hash_method, hash_files=hash_files)
+                dict_withhash[name] = self._get_sorteddict(val, True, hash_method=hash_method, hash_files=hash_files)
         return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
 
     def _get_sorteddict(self, object, dictwithhash=False, hash_method=None, hash_files=True):
@@ -458,7 +458,7 @@ class BaseTraitedSpec(traits.HasTraits):
             for key, val in sorted(object.items()):
                 if isdefined(val):
                     out[key] = self._get_sorteddict(val, dictwithhash, hash_method=hash_method, hash_files=hash_files)
-        elif isinstance(object, (list,tuple)):
+        elif isinstance(object, (list, tuple)):
             out = []
             for val in object:
                 if isdefined(val):
@@ -482,10 +482,11 @@ class BaseTraitedSpec(traits.HasTraits):
                     else:
                         out = hash
                 elif isinstance(object, float):
-                    out = '%.10f'%object
+                    out = '%.10f' % object
                 else:
                     out = object
         return out
+
 
 class DynamicTraitedSpec(BaseTraitedSpec):
     """ A subclass to handle dynamic traits
@@ -503,12 +504,12 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         dup_dict = deepcopy(self.get(), memo)
         # access all keys
         for key in self.copyable_trait_names():
-            value = getattr(self, key)
+            _ = getattr(self, key)
         # clone once
         dup = self.clone_traits(memo=memo)
         for key in self.copyable_trait_names():
             try:
-                value = getattr(dup, key)
+                _ = getattr(dup, key)
             except:
                 pass
         # clone twice
@@ -516,12 +517,14 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         dup.set(**dup_dict)
         return dup
 
+
 class TraitedSpec(BaseTraitedSpec):
     """ Create a subclass with strict traits.
 
     This is used in 90% of the cases.
     """
     _ = traits.Disallow
+
 
 class Interface(object):
     """This is an abstract definition for Interface objects.
@@ -531,9 +534,9 @@ class Interface(object):
 
     """
 
-    input_spec = None # A traited input specification
-    output_spec = None # A traited output specification
-    can_resume = False # defines if the interface can reuse partial results after interruption
+    input_spec = None  # A traited input specification
+    output_spec = None  # A traited output specification
+    can_resume = False  # defines if the interface can reuse partial results after interruption
 
     def __init__(self, **inputs):
         """Initialize command with given args and inputs."""
@@ -567,7 +570,6 @@ class Interface(object):
         """Called to populate outputs"""
         raise NotImplementedError
 
-
     def _list_outputs(self):
         """ List expected outputs"""
         raise NotImplementedError
@@ -578,9 +580,11 @@ class Interface(object):
         """
         raise NotImplementedError
 
+
 class BaseInterfaceInputSpec(TraitedSpec):
-    ignore_exception = traits.Bool(False, desc = "Print an error message instead \
-of throwing an exception in case the interface fails to run", usedefault = True)
+    ignore_exception = traits.Bool(False, desc="Print an error message instead \
+of throwing an exception in case the interface fails to run", usedefault=True)
+
 
 class BaseInterface(Interface):
     """Implements common interface functionality.
@@ -609,7 +613,7 @@ class BaseInterface(Interface):
         self.inputs = self.input_spec(**inputs)
 
     @classmethod
-    def help(cls, returnhelp = False):
+    def help(cls, returnhelp=False):
         """ Prints class help
         """
         allhelp = '\n'.join(cls._inputs_help() + [''] + cls._outputs_help())
@@ -637,10 +641,10 @@ class BaseInterface(Interface):
             if not manhelpstr:
                 manhelpstr = ['', 'Mandatory:']
             manhelpstr += [' %s: %s' % (name, desc)]
-            if xor: # and name not in xor_done:
+            if xor:  # and name not in xor_done:
                 xor_done.extend(xor)
                 manhelpstr += ['  mutually exclusive: %s' % ', '.join(xor)]
-            if requires: # and name not in xor_done:
+            if requires:  # and name not in xor_done:
                 others = [field for field in requires if field != name]
                 manhelpstr += ['  requires: %s' % ', '.join(others)]
         for name, spec in sorted(cls.input_spec().traits(mandatory=None,
@@ -653,10 +657,10 @@ class BaseInterface(Interface):
             opthelpstr += [' %s: %s' % (name, desc)]
             if spec.usedefault:
                 opthelpstr[-1] += ' (default=%s)' % spec.default
-            if xor: # and name not in xor_done:
+            if xor:  # and name not in xor_done:
                 xor_done.extend(xor)
                 opthelpstr += ['  mutually exclusive: %s' % ', '.join(xor)]
-            if requires: # and name not in xor_done:
+            if requires:  # and name not in xor_done:
                 others = [field for field in requires if field != name]
                 opthelpstr += ['  requires: %s' % ', '.join(others)]
         if manhelpstr:
@@ -693,7 +697,7 @@ class BaseInterface(Interface):
         info = []
         if cls.input_spec is None:
             return info
-        metadata = dict(copyfile=lambda t : t is not None)
+        metadata = dict(copyfile=lambda t: t is not None)
         for name, spec in sorted(cls.input_spec().traits(**metadata).items()):
             info.append(dict(key=name,
                              copy=spec.copyfile))
@@ -780,7 +784,7 @@ class BaseInterface(Interface):
             if len(e.args) == 0:
                 e.args = ("")
 
-            message = "\nInterface %s failed to run."%self.__class__.__name__
+            message = "\nInterface %s failed to run." % self.__class__.__name__
 
             if config.has_option('logging', 'interface_level') and config.get('logging', 'interface_level').lower() == 'debug':
                 inputs_str = "Inputs:" + str(self.inputs) + "\n"
@@ -795,10 +799,10 @@ class BaseInterface(Interface):
                     e.args += (inputs_str, )
 
             #exception raising inhibition for special cases
-            if hasattr(self.inputs,'ignore_exception') and \
+            if hasattr(self.inputs, 'ignore_exception') and \
             isdefined(self.inputs.ignore_exception) and \
             self.inputs.ignore_exception:
-                import traceback, sys
+                import traceback
                 runtime.traceback = traceback.format_exc()
                 runtime.traceback_args = e.args
                 return InterfaceResult(interface, runtime)
@@ -825,7 +829,7 @@ class BaseInterface(Interface):
                     continue
                 try:
                     setattr(outputs, key, val)
-                    value = getattr(outputs, key)
+                    _ = getattr(outputs, key)
                 except TraitError, error:
                     if hasattr(error, 'info') and error.info.startswith("an existing"):
                         msg = "File/Directory '%s' not found for %s output '%s'." \
@@ -834,6 +838,7 @@ class BaseInterface(Interface):
                     else:
                         raise error
         return outputs
+
 
 class Stream(object):
     """Function to capture stdout and stderr streams with timestamps
@@ -883,6 +888,7 @@ class Stream(object):
         for idx in range(self._lastidx, len(self._rows)):
             iflogger.info(self._rows[idx][1])
         self._lastidx = len(self._rows)
+
 
 def run_command(runtime, timeout=0.2):
     """
@@ -940,6 +946,7 @@ def run_command(runtime, timeout=0.2):
 class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
     environ = traits.DictStrStr(desc='Environment variables', usedefault=True)
+
 
 class CommandLine(BaseInterface):
     """Implements functionality to interact with command line programs
@@ -1017,8 +1024,6 @@ class CommandLine(BaseInterface):
         allargs.insert(0, self.cmd)
         return ' '.join(allargs)
 
-
-
     def raise_exception(self, runtime):
         message = "Command:\n" + runtime.cmdline + "\n"
         message += "Standard output:\n" + runtime.stdout + "\n"
@@ -1043,8 +1048,8 @@ class CommandLine(BaseInterface):
         setattr(runtime, 'cmdline', self.cmdline)
         runtime.environ.update(self.inputs.environ)
         if not self._exists_in_path(self.cmd.split()[0]):
-            raise IOError("%s could not be found on host %s"%(self.cmd.split()[0],
-                                                         runtime.hostname))
+            raise IOError("%s could not be found on host %s" % (self.cmd.split()[0],
+                                                                runtime.hostname))
         runtime = run_command(runtime)
         if runtime.returncode is None or runtime.returncode != 0:
             self.raise_exception(runtime)
@@ -1136,7 +1141,7 @@ class CommandLine(BaseInterface):
         all_args = []
         initial_args = {}
         final_args = {}
-        metadata = dict(argstr=lambda t : t is not None)
+        metadata = dict(argstr=lambda t: t is not None)
         for name, spec in sorted(self.inputs.traits(**metadata).items()):
             if skip and name in skip:
                 continue
@@ -1159,8 +1164,10 @@ class CommandLine(BaseInterface):
         last_args = [arg for pos, arg in sorted(final_args.items())]
         return first_args + all_args + last_args
 
+
 class StdOutCommandLineInputSpec(CommandLineInputSpec):
     out_file = File(argstr="> %s", position=-1, genfile=True)
+
 
 class StdOutCommandLine(CommandLine):
     input_spec = StdOutCommandLineInputSpec
@@ -1170,6 +1177,7 @@ class StdOutCommandLine(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         raise NotImplementedError
 
@@ -1197,6 +1205,7 @@ class MultiPath(traits.List):
             return value
 
         self.error(object, name, value)
+
 
 class OutputMultiPath(MultiPath):
     """ Implements a user friendly traits that accepts one or more
@@ -1243,6 +1252,7 @@ class OutputMultiPath(MultiPath):
     def set(self, object, name, value):
         self.set_value(object, name, value)
 
+
 class InputMultiPath(MultiPath):
     """ Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the input version which
@@ -1275,4 +1285,3 @@ class InputMultiPath(MultiPath):
 
     """
     pass
-
