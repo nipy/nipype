@@ -1,6 +1,6 @@
 """
    XXX Currently not WORKING in release 0.3,
-   Check for updates 
+   Check for updates
 
    A pipeline example that uses several interfaces to
    perform analysis on diffusion weighted images using

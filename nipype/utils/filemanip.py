@@ -417,5 +417,5 @@ def write_rst_dict(info, prefix=''):
     for key, value in sorted(info.items()):
         out.append(prefix + '* ' + key + ' : ' + str(value))
     return '\n'.join(out)+'\n\n'
-        
+
 

@@ -22,7 +22,7 @@ Tell python where to find the appropriate functions.
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.workflows.fsl as fsl_wf          # fsl
-import nipype.interfaces.diffusion_toolkit as dtk 
+import nipype.interfaces.diffusion_toolkit as dtk
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import os                                    # system functions
@@ -102,7 +102,7 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
 
 datasource.inputs.template = "%s/%s"
 
-# This needs to point to the fdt folder you can find after extracting 
+# This needs to point to the fdt folder you can find after extracting
 # http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 datasource.inputs.base_directory = os.path.abspath('data')
 

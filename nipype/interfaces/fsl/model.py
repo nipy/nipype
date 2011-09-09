@@ -82,7 +82,7 @@ class Level1Design(BaseInterface):
 
     Examples
     --------
-    
+
     >>> level1design = Level1Design()
     >>> level1design.inputs.interscan_interval = 2.5
     >>> level1design.inputs.bases = {'dgamma':{'derivs': False}}
@@ -475,7 +475,7 @@ class FILMGLS(FSLCommand):
 
     Examples
     --------
-    
+
     Initialize with no options, assigning them when calling run:
 
     >>> from nipype.interfaces import fsl
@@ -503,7 +503,7 @@ threshold=10, results_dir='stats')
     _cmd = 'film_gls'
     input_spec = FILMGLSInputSpec
     output_spec = FILMGLSOutputSpec
-    
+
     def _get_pe_files(self, cwd):
         files = None
         if isdefined(self.inputs.design_file):
@@ -638,7 +638,7 @@ class FLAMEO(FSLCommand):
 
     Examples
     --------
-    
+
     Initialize FLAMEO with no options, assigning them when calling run:
 
     >>> from nipype.interfaces import fsl
@@ -760,7 +760,7 @@ class ContrastMgr(FSLCommand):
     _cmd = 'contrast_mgr'
     input_spec = ContrastMgrInputSpec
     output_spec = ContrastMgrOutputSpec
-    
+
     def _run_interface(self, runtime):
         # The returncode is meaningless in ContrastMgr.  So check the output
         # in stderr and if it's set, then update the returncode
@@ -949,7 +949,7 @@ class MultipleRegressDesign(BaseInterface):
       FSL does not demean columns for higher level analysis.
 
     Please see `FSL documentation <http://www.fmrib.ox.ac.uk/fsl/feat5/detail.html#higher>`_
-    for more details on model specification for higher level analysis. 
+    for more details on model specification for higher level analysis.
 
     Examples
     --------
@@ -959,7 +959,7 @@ class MultipleRegressDesign(BaseInterface):
     >>> model.inputs.contrasts = [['group mean','T',['reg1'],[1]]]
     >>> model.inputs.regressors = dict(reg1=[1,1,1],reg2=[2.,-4,3])
     >>> model.run() # doctest: +SKIP
-    
+
     """
 
     input_spec = MultipleRegressDesignInputSpec
@@ -1009,7 +1009,7 @@ class MultipleRegressDesign(BaseInterface):
         for idx in sorted(tconmap.keys()):
             convals = np.zeros((nwaves,1))
             for regidx, reg in enumerate(self.inputs.contrasts[idx][2]):
-                convals[regs.index(reg)] = self.inputs.contrasts[idx][3][regidx] 
+                convals[regs.index(reg)] = self.inputs.contrasts[idx][3][regidx]
             con_txt.append(' '.join(['%e'%val for val in convals]))
         con_txt = '\n'.join(con_txt)
         # write f-con file
@@ -1175,7 +1175,7 @@ class MELODIC(FSLCommand):
     >>> melodic_setup.inputs.out_dir = 'groupICA.out'
     >>> melodic_setup.run() # doctest: +SKIP
 
-    
+
     """
     input_spec = MELODICInputSpec
     output_spec = MELODICOutputSpec
@@ -1189,11 +1189,11 @@ class MELODIC(FSLCommand):
         if isdefined(self.inputs.report) and self.inputs.report:
             outputs['report_dir'] = os.path.join(self._gen_filename("out_dir"), "report")
         return outputs
-    
+
     def _gen_filename(self, name):
         if name == "out_dir":
             return os.getcwd()
-        
+
 
 class SmoothEstimateInputSpec(FSLCommandInputSpec):
     dof = traits.Int(argstr='--dof=%d', mandatory=True,
@@ -1219,13 +1219,13 @@ class SmoothEstimate(FSLCommand):
 
     Examples
     --------
-    
+
     >>> est = SmoothEstimate()
     >>> est.inputs.zstat_file = 'zstat1.nii.gz'
     >>> est.inputs.mask_file = 'mask.nii'
     >>> est.cmdline
     'smoothest --mask=mask.nii --zstat=zstat1.nii.gz'
-    
+
     """
 
     input_spec = SmoothEstimateInputSpec
@@ -1308,25 +1308,25 @@ class ClusterOutputSpec(TraitedSpec):
     max_file = File(desc='filename for output of max image')
     mean_file = File(desc='filename for output of mean image')
     pval_file = File(desc='filename for image output of log pvals')
-    
+
 class Cluster(FSLCommand):
     """ Uses FSL cluster to perform clustering on statistical output
 
     Examples
     --------
-    
+
     >>> cl = Cluster()
     >>> cl.inputs.threshold = 2.3
     >>> cl.inputs.in_file = 'zstat1.nii.gz'
     >>> cl.inputs.out_localmax_txt_file = 'stats.txt'
     >>> cl.cmdline
     'cluster --in=zstat1.nii.gz --olmax=stats.txt --thresh=2.3000000000'
-    
+
     """
     input_spec = ClusterInputSpec
     output_spec = ClusterOutputSpec
     _cmd = 'cluster'
-    
+
     filemap = {'out_index_file':'index', 'out_threshold_file':'threshold',
                'out_localmax_txt_file': 'localmax.txt',
                'out_localmax_vol_file': 'localmax',
@@ -1359,8 +1359,8 @@ class Cluster(FSLCommand):
                 fname = value
             return spec.argstr % fname
         return super(Cluster, self)._format_arg(name, spec, value)
-    
-class RandomiseInputSpec(FSLCommandInputSpec):    
+
+class RandomiseInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True,desc = '4D input file',argstr='-i %s', position=0, mandatory=True)
     base_name = traits.Str('tbss_',desc = 'the rootname that all generated files will have',
                           argstr='-o %s', position=1, usedefault=True)
@@ -1368,7 +1368,7 @@ class RandomiseInputSpec(FSLCommandInputSpec):
     tcon = File(exists=True,desc = 't contrasts file',argstr='-t %s', position=3, mandatory=True)
     fcon = File(exists=True,desc = 'f contrasts file',argstr='-f %s')
     mask = File(exists=True,desc = 'mask image',argstr='-m %s')
-    x_block_labels = File(exists=True,desc = 'exchangeability block labels file',argstr='-e %s')   
+    x_block_labels = File(exists=True,desc = 'exchangeability block labels file',argstr='-e %s')
     demean = traits.Bool(desc = 'demean data temporally before model fitting', argstr='-D')
     one_sample_group_mean =  traits.Bool(desc = 'perform 1-sample group-mean test instead of generic permutation test',
                                   argstr='-l')
@@ -1381,27 +1381,27 @@ class RandomiseInputSpec(FSLCommandInputSpec):
     tfce = traits.Bool(desc = 'carry out Threshold-Free Cluster Enhancement', argstr='-T')
     tfce2D = traits.Bool(desc = 'carry out Threshold-Free Cluster Enhancement with 2D optimisation',
                          argstr='--T2')
-    f_only = traits.Bool(desc = 'calculate f-statistics only', argstr='--f_only')    
+    f_only = traits.Bool(desc = 'calculate f-statistics only', argstr='--f_only')
     raw_stats_imgs = traits.Bool(desc = 'output raw ( unpermuted ) statistic images', argstr='-R')
     p_vec_n_dist_files = traits.Bool(desc = 'output permutation vector and null distribution text files',
                                  argstr='-P')
     num_perm = traits.Int(argstr='-n %d', desc='number of permutations (default 5000, set to 0 for exhaustive)')
     seed = traits.Int(argstr='--seed %d', desc='specific integer seed for random number generator')
-    var_smooth = traits.Int(argstr='-v %d', desc='use variance smoothing (std is in mm)')   
+    var_smooth = traits.Int(argstr='-v %d', desc='use variance smoothing (std is in mm)')
     c_thresh = traits.Float(argstr='-c %.2f', desc='carry out cluster-based thresholding')
     cm_thresh = traits.Float(argstr='-C %.2f', desc='carry out cluster-mass-based thresholding')
     f_c_thresh = traits.Float(argstr='-F %.2f', desc='carry out f cluster thresholding')
-    f_cm_thresh = traits.Float(argstr='-S %.2f', desc='carry out f cluster-mass thresholding')    
+    f_cm_thresh = traits.Float(argstr='-S %.2f', desc='carry out f cluster-mass thresholding')
     tfce_H = traits.Float(argstr='--tfce_H %.2f', desc='TFCE height parameter (default=2)')
     tfce_E = traits.Float(argstr='--tfce_E %.2f', desc='TFCE extent parameter (default=0.5)')
-    tfce_C = traits.Float(argstr='--tfce_C %.2f', desc='TFCE connectivity (6 or 26; default=6)')    
+    tfce_C = traits.Float(argstr='--tfce_C %.2f', desc='TFCE connectivity (6 or 26; default=6)')
     vxl = traits.List(traits.Int,argstr='--vxl %d', desc='list of numbers indicating voxelwise EVs'+
                       'position in the design matrix (list order corresponds to files in vxf option)')
     vxf = traits.List(traits.Int,argstr='--vxf %d', desc='list of 4D images containing voxelwise EVs'+
                       '(list order corresponds to numbers in vxl option)')
-             
+
 class RandomiseOutputSpec(TraitedSpec):
-    tstat1_file = File(exists=True,desc = 'path/name of tstat image corresponding to the first t contrast')  
+    tstat1_file = File(exists=True,desc = 'path/name of tstat image corresponding to the first t contrast')
 
 class Randomise(FSLCommand):
     """XXX UNSTABLE DO NOT USE
@@ -1409,7 +1409,7 @@ class Randomise(FSLCommand):
     FSL Randomise: feeds the 4D projected FA data into GLM
     modelling and thresholding
     in order to find voxels which correlate with your model
-        
+
     Example
     -------
     >>> import nipype.interfaces.fsl as fsl
@@ -1419,14 +1419,14 @@ class Randomise(FSLCommand):
     design_mat='design.mat')
     >>> rand.cmdline
     'randomise -i allFA.nii -o tbss_ -d design.mat -t design.con -m mask.nii'
-    
+
     """
-    
+
     _cmd = 'randomise'
     input_spec = RandomiseInputSpec
     output_spec = RandomiseOutputSpec
-   
-    def _list_outputs(self):        
-        outputs = self.output_spec().get()        
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
         outputs['tstat1_file'] = self._gen_fname(self.inputs.base_name,suffix='_tstat1')
         return outputs

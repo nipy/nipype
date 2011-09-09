@@ -364,7 +364,7 @@ class ThreedAllineateOutputSpec(AFNITraitedSpec):
 
 class ThreedAllineate(AFNICommand):
     """
-    For complete details, see the `3dAllineate Documentation. 
+    For complete details, see the `3dAllineate Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html>`_
     """
 

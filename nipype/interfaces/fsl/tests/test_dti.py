@@ -196,7 +196,7 @@ def create_files_in_directory():
         nb.save(nb.Nifti1Image(img,np.eye(4),hdr),
                  os.path.join(outdir,f))
     return filelist, outdir, cwd
-    
+
 def clean_directory(outdir, old_wd):
     if os.path.exists(outdir):
         rmtree(outdir)
@@ -232,7 +232,7 @@ def test_bedpostx2():
     yield assert_equal, actualCmdline, desiredCmdline
 
 
- 
+
 # test eddy_correct
 @skipif(no_fsl)
 def test_eddy_correct2():
@@ -389,7 +389,7 @@ def test_randomise2():
                                                      '6,7,8,9,3')}
 
     for name, settings in opt_map.items():
-        rand4 = fsl.Randomise(input_4D='infile', output_rootname='root', 
+        rand4 = fsl.Randomise(input_4D='infile', output_rootname='root',
                               **{name: settings[1]})
         yield assert_equal, rand4.cmdline, rand4.cmd + ' -i infile -o root ' \
             + settings[0]
@@ -465,15 +465,15 @@ def test_Randomise_parallel():
               'TFCE_extent_param':                  ('--tfce_E 0.50', 0.50),
               'TFCE_connectivity':                  ('--tfce_C 0.30', 0.30),
               'list_num_voxel_EVs_pos':             ('--vxl ' \
-                                                         + repr([1, 2, 3, 4]), 
+                                                         + repr([1, 2, 3, 4]),
                                                      repr([1, 2, 3, 4])),
               'list_img_voxel_EVs':               ('--vxf ' \
-                                                       + repr([6, 7, 8, 9, 3]), 
+                                                       + repr([6, 7, 8, 9, 3]),
                                                      repr([6, 7, 8, 9, 3]))}
 
     for name, settings in opt_map.items():
-        rand4 = fsl.Randomise_parallel(input_4D='infile', 
-                                       output_rootname='root', 
+        rand4 = fsl.Randomise_parallel(input_4D='infile',
+                                       output_rootname='root',
                                        **{name: settings[1]})
         yield assert_equal, rand4.cmdline, rand4.cmd + ' -i infile -o root ' \
             + settings[0]
@@ -529,7 +529,7 @@ def test_Proj_thresh():
     yield assert_equal, results.interface.inputs.threshold, 2
 
     # test arguments for opt_map
-    # Proj_thresh doesn't have an opt_map{}    
+    # Proj_thresh doesn't have an opt_map{}
 
 
 # test vec_reg
@@ -588,7 +588,7 @@ def test_Vec_reg():
                'brainMask':         ('-m mask', 'mask')}
 
     for name, settings in opt_map.items():
-        vrg4 = fsl.VecReg(infile='infile', outfile='outfile', 
+        vrg4 = fsl.VecReg(infile='infile', outfile='outfile',
                           refVolName='MNI152', **{name: settings[1]})
         yield assert_equal, vrg4.cmdline, vrg4.cmd + \
             ' -i infile -o outfile -r MNI152 ' + settings[0]
@@ -627,7 +627,7 @@ def test_tbss_skeleton():
     skeletor = fsl.TractSkeleton()
 
     files, newdir, olddir = create_files_in_directory()
-    
+
     # Test the underlying command
     yield assert_equal, skeletor.cmd, "tbss_skeleton"
 
@@ -648,7 +648,7 @@ def test_tbss_skeleton():
 
     # Now test the more complicated usage
     bones = fsl.TractSkeleton(in_file="a.nii", project_data=True)
-    
+
     # This should error
     yield assert_raises, ValueError, bones.run
 
@@ -656,7 +656,7 @@ def test_tbss_skeleton():
     bones.inputs.threshold = 0.2
     bones.inputs.distance_map = "b.nii"
     bones.inputs.data_file = "b.nii" # Even though that's silly
-    
+
     # Now we get a command line
     yield assert_equal, bones.cmdline, \
     "tbss_skeleton -i a.nii -p 0.200 b.nii %s b.nii %s"%(Info.standard_image("LowerCingulum_1mm.nii.gz"),

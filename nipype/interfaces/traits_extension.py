@@ -60,7 +60,7 @@ class BaseFile ( traits.BaseStr ):
         self.auto_set = auto_set
         self.entries = entries
         self.exists = exists
-        
+
         if exists:
             self.info_text = 'an existing file name'
 
@@ -147,7 +147,7 @@ class BaseDirectory ( traits.BaseStr ):
         self.entries = entries
         self.auto_set = auto_set
         self.exists = exists
-        
+
         if exists:
             self.info_text = 'an existing directory name'
 
@@ -244,8 +244,8 @@ def has_metadata(trait, metadata, value, recursive=True):
         if hasattr(trait, 'handlers') and trait.handlers != None:
             for handler in trait.handlers:
                 count += has_metadata(handler, metadata, recursive)
-            
+
     return count > 0
 
-        
+
 

@@ -24,12 +24,12 @@ from nipype.interfaces.fsl.utils import (Smooth, Merge, ExtractROI, Split,
                                          FilterRegressor, Overlay, Slicer,
                                          PlotTimeSeries, PlotMotionParams,
                                          ConvertXFM, SwapDimensions, PowerSpectrum)
-from nipype.interfaces.fsl.dti import (EddyCorrect, BEDPOSTX, DTIFit, 
+from nipype.interfaces.fsl.dti import (EddyCorrect, BEDPOSTX, DTIFit,
                                        ProbTrackX, VecReg, ProjThresh,
                                        FindTheBiggest, DistanceMap,
-                                       TractSkeleton, XFibres, 
+                                       TractSkeleton, XFibres,
                                        MakeDyadicVectors)
-from nipype.interfaces.fsl.maths import (ChangeDataType, Threshold, MeanImage, 
+from nipype.interfaces.fsl.maths import (ChangeDataType, Threshold, MeanImage,
                                          ApplyMask, IsotropicSmooth, TemporalFilter,
                                          DilateImage, ErodeImage, SpatialFilter,
                                          UnaryMaths, BinaryMaths, MultiImageMaths)

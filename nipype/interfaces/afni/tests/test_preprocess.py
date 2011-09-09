@@ -258,7 +258,7 @@ def test_To3d():
     td = dict(slice_order='tz', nt=150, nz=12, TR=2000, tpattern='alt+z')
     cmd.inputs.time_dependencies = td
     yield assert_equal, cmd.cmdline, 'to3d -time:tz 150 12 2000 alt+z'
-    
+
     # time_dependencies provided as a tuple
     # slice_order, nz, nt, TR, tpattern
     td = ('zt', 12, 130, 2000, 'alt+z')
@@ -290,7 +290,7 @@ def test_To3d():
                                         tpattern='alt+z')
     yield assert_raises, KeyError, getattr, cmd, 'cmdline'
     # provide unknown parameters
-    cmd = afni.To3d(datatype='anat', foo='bar')    
+    cmd = afni.To3d(datatype='anat', foo='bar')
     yield assert_raises, AttributeError, getattr, cmd, 'cmdline'
     # order of params
     cmd = afni.To3d(datatype='anat')
@@ -459,7 +459,7 @@ def test_Threedvolreg():
     cmd = afni.Threedvolreg()
     cmd.inputs.time_shift = 14
     yield assert_equal, cmd.cmdline, '3dvolreg -tshift 14'
-    # basefile 
+    # basefile
     cmd = afni.Threedvolreg()
     cmd.inputs.basefile = 5
     yield assert_equal, cmd.cmdline, '3dvolreg -base 5'

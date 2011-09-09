@@ -3,7 +3,7 @@
 import subprocess
 
 def run_tests(cmd):
-    proc = subprocess.Popen(cmd, 
+    proc = subprocess.Popen(cmd,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             shell=True)

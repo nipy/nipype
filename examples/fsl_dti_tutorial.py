@@ -110,7 +110,7 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
 
 datasource.inputs.template = "%s/%s"
 
-# This needs to point to the fdt folder you can find after extracting 
+# This needs to point to the fdt folder you can find after extracting
 # http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 datasource.inputs.base_directory = os.path.abspath('fsl_course_data/fdt/')
 

@@ -9,7 +9,7 @@ def configuration(parent_package='',top_path=None):
     config.add_subpackage('freesurfer')
     config.add_subpackage('spm')
     config.add_subpackage('camino')
-    
+
     return config
 
 if __name__ == '__main__':

@@ -67,7 +67,7 @@ class Info(object):
         """
         # find which fsl being used....and get version from
         # /path/to/fsl/etc/fslversion
-        try: 
+        try:
             basedir = os.environ['FSLDIR']
         except KeyError:
             return None
@@ -137,19 +137,19 @@ class FSLCommandInputSpec(CommandLineInputSpec):
 
     All command support specifying FSLOUTPUTTYPE dynamically
     via output_type.
-    
+
     Example
     -------
     fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
     """
     output_type =  traits.Enum('NIFTI', Info.ftypes.keys(),
                               desc='FSL output type')
-    
+
 class FSLCommand(CommandLine):
     """Base support for FSL commands.
-    
+
     """
-    
+
     input_spec = FSLCommandInputSpec
     _output_type = None
 
@@ -168,7 +168,7 @@ class FSLCommand(CommandLine):
     def _output_update(self):
         self._output_type = self.inputs.output_type
         self.inputs.environ.update({'FSLOUTPUTTYPE': self.inputs.output_type})
-    
+
     @classmethod
     def set_default_output_type(cls, output_type):
         """Set the default output type for FSL classes.
@@ -240,13 +240,13 @@ def no_fsl():
     """Checks if FSL is NOT installed
     used with skipif to skip tests that will
     fail if FSL is not installed"""
-    
+
     if Info.version() == None:
         return True
     else:
         return False
-    
+
 def no_fsl_course_data():
     """check if FSL_COURSE_DATA is defined and point to a valid directory"""
-       
+
     return not ("FSL_COURSE_DATA" in os.environ and os.path.isdir(os.environ["FSL_COURSE_DATA"]))

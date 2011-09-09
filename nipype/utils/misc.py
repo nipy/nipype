@@ -39,12 +39,12 @@ def find_indices(condition):
 
 def is_container(item):
    """Checks if item is a container (list, tuple, dict, set)
-   
+
    Parameters
    ----------
-   item : object 
+   item : object
        object to check for .__iter__
-      
+
    Returns
    -------
    output : Boolean
@@ -55,10 +55,10 @@ def is_container(item):
       return True
    else:
       return False
-      
+
 def container_to_string(cont):
    """Convert a container to a command line string.
-   
+
    Elements of the container are joined with a space between them,
    suitable for a command line parameter.
 

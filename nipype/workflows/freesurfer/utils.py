@@ -109,7 +109,7 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
     dilate : dilate the transformed file in source space
     threshold2 : binarize transformed file
     """
-    
+
     threshold2 = pe.MapNode(fs.Binarize(min=0.5, out_type='nii'),
                             iterfield=['in_file'],
                         name='threshold2')

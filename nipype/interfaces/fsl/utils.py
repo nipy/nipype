@@ -133,7 +133,7 @@ class Merge(FSLCommand):
                                               suffix = '_merged')
         else:
             outputs['merged_file'] = os.path.realpath(self.inputs.merged_file)
-            
+
         return outputs
 
     def _gen_filename(self, name):
@@ -281,10 +281,10 @@ class ImageMaths(FSLCommand):
     """Use FSL fslmaths command to allow mathematical manipulation of images
 
     `FSL info <http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/intro/index.htm#fslutils>`_
-    
+
     Examples
     --------
-    
+
     >>> from nipype.interfaces import fsl
     >>> from nipype.testing import anatfile
     >>> maths = fsl.ImageMaths(in_file=anatfile, op_string= '-add 5', \
@@ -336,7 +336,7 @@ class FilterRegressorOutputSpec(TraitedSpec):
 
 class FilterRegressor(FSLCommand):
     """Data de-noising by regressing out part of a design matrix
-    
+
     Uses simple OLS regression on 4D images
     """
     input_spec = FilterRegressorInputSpec
@@ -385,10 +385,10 @@ class ImageStats(FSLCommand):
     """Use FSL fslstats command to calculate stats from images
 
     `FSL info <http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/intro/index.htm#fslutils>`_
-    
+
     Examples
     --------
-    
+
     >>> from nipype.interfaces.fsl import ImageStats
     >>> from nipype.testing import funcfile
     >>> stats = ImageStats(in_file=funcfile, op_string= '-M')
@@ -411,7 +411,7 @@ class ImageStats(FSLCommand):
                 else:
                     raise ValueError('-k %s option in op_string requires mask_file')
         return super(ImageStats, self)._format_arg(name, trait_spec, value)
-    
+
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
         # local caching for backward compatibility
@@ -561,7 +561,7 @@ class SlicerInputSpec(FSLCommandInputSpec):
     image_width = traits.Int(position=-2, argstr='%d',desc='max picture width')
     out_file = File(position=-1, genfile=True, argstr='%s', desc='picture to write')
     scaling = traits.Float(position=0, argstr='-s %f',desc='image scale')
-    
+
 
 class SlicerOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='picture to write')
@@ -638,7 +638,7 @@ class PlotTimeSeriesInputSpec(FSLCommandInputSpec):
     out_file = File(argstr="-o %s",genfile=True,desc="image to write")
 
 class PlotTimeSeriesOutputSpec(TraitedSpec):
-    
+
     out_file = File(exists=True, desc='image to write')
 
 class PlotTimeSeries(FSLCommand):
@@ -732,9 +732,9 @@ class PlotMotionParams(FSLCommand):
     -----
     The 'in_source' attribute determines the order of columns that are expected in the
     source file.  FSL prints motion parameters in the order rotations, translations,
-    while SPM prints them in the opposite order.  This interface should be able to 
+    while SPM prints them in the opposite order.  This interface should be able to
     plot timecourses of motion parameters generated from other sources as long as
-    they fall under one of these two patterns.  For more flexibilty, see the 
+    they fall under one of these two patterns.  For more flexibilty, see the
     :class:`fsl.PlotTimeSeries` interface.
 
     """
@@ -746,7 +746,7 @@ class PlotMotionParams(FSLCommand):
 
         if name == "plot_type":
             source = self.inputs.in_source
-            
+
             if self.inputs.plot_type == 'displacement':
                 title='-t \'MCFLIRT estimated mean displacement (mm)\''
                 labels = '-a abs,rel'
@@ -754,14 +754,14 @@ class PlotMotionParams(FSLCommand):
 
             # Get the right starting and ending position depending on source package
             sfdict = dict(fsl_rot=(1,3),fsl_tra=(4,6),spm_rot=(4,6),spm_tra=(1,3))
-            
+
             # Format the title properly
             sfstr = "--start=%d --finish=%d"%sfdict["%s_%s"%(source, value[:3])]
             titledict = dict(fsl="MCFLIRT",spm="Realign")
             unitdict = dict(rot="radians",tra="mm")
-            
+
             title = "\'%s estimated %s (%s)\'"%(titledict[source],value,unitdict[value[:3]])
-            
+
             return "-t %s %s -a x,y,z"%(title, sfstr)
         elif name == "plot_size":
             return "-h %d -w %d"%value
@@ -816,7 +816,7 @@ class ConvertXFMOutputSpec(TraitedSpec):
 
 class ConvertXFM(FSLCommand):
     """Use the FSL utility convert_xfm to modify FLIRT transformation matrices.
-    
+
     Examples
     --------
     >>> import nipype.interfaces.fsl as fsl
@@ -903,7 +903,7 @@ class SwapDimensions(FSLCommand):
         if name == "out_file":
             return self._list_outputs()["out_file"]
         return None
-    
+
 class PowerSpectrumInputSpec(FSLCommandInputSpec):
     # We use position args here as list indices - so a negative number
     # will put something on the end
@@ -912,7 +912,7 @@ class PowerSpectrumInputSpec(FSLCommandInputSpec):
                   argstr='%s', position=0, mandatory=True)
     out_file = File(desc = 'name of output 4D file for power spectrum',
                    argstr='%s', position=1, genfile=True)
-    
+
 
 class PowerSpectrumOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="path/name of the output 4D power spectrum file")
