@@ -21,7 +21,7 @@ def mlab_tempfile(dir=None):
 
     Parameters
     ----------
-    
+
       dir : str
         A path to use as the starting directory.  Note that this directory must
         already exist, it is NOT created if it doesn't (in that case, OSError
@@ -62,5 +62,5 @@ def mlab_tempfile(dir=None):
         f.close()
     else:
         raise ValueError("Could not make temp file after 100 tries")
-        
+
     return f

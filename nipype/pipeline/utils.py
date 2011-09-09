@@ -103,7 +103,7 @@ def get_print_name(node):
 
     For example, a node containing an instance of interfaces.fsl.BET
     would be called nodename.BET.fsl
-    
+
     """
     name = node.name
     if hasattr(node, '_interface'):
@@ -114,7 +114,7 @@ def get_print_name(node):
             destclass = '.%s'%pkglist[2]
         name = '.'.join([node.name, interface]) + destclass
     return name
-    
+
 def _create_dot_graph(graph, show_connectinfo=False):
     """Create a graph that can be pickled.
 
@@ -283,7 +283,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables, prefix):
     -------
     Returns a merged graph containing copies of the subgraph with
     appropriate edge connections to the supergraph.
-    
+
     """
     # Retrieve edge information connecting nodes of the subgraph to other
     # nodes of the supergraph.
@@ -356,7 +356,7 @@ def _connect_nodes(graph, srcnode, destnode, connection_info):
         graph.add_edges_from([(srcnode, destnode, data)])
     else:
         data['connect'].extend(connection_info)
-    
+
 def _remove_identity_nodes(graph):
     """Remove identity nodes from an execution graph
     """
@@ -402,7 +402,7 @@ def _remove_identity_nodes(graph):
                         else:
                             srcnode, srcport = portinputs[key]
                             if isinstance(srcport, tuple) and isinstance(src, tuple):
-                                raise ValueError('Does not support two inline functions in series (\'%s\' and \'%s\'). Please use a Function node'%(srcport[1].split("\\n")[0][6:-1], 
+                                raise ValueError('Does not support two inline functions in series (\'%s\' and \'%s\'). Please use a Function node'%(srcport[1].split("\\n")[0][6:-1],
                                                                                                                                                     src[1].split("\\n")[0][6:-1]))
                             if isinstance(src, tuple):
                                 connect = {'connect': [((srcport, src[1], src[2]),
@@ -416,11 +416,11 @@ def _remove_identity_nodes(graph):
 
 def generate_expanded_graph(graph_in):
     """Generates an expanded graph based on node parameterization
-    
+
     Parameterization is controlled using the `iterables` field of the
     pipeline elements.  Thus if there are two nodes with iterables a=[1,2]
     and b=[3,4] this procedure will generate a graph with sub-graphs
-    parameterized as (a=1,b=3), (a=1,b=4), (a=2,b=3) and (a=2,b=4). 
+    parameterized as (a=1,b=3), (a=1,b=4), (a=2,b=3) and (a=2,b=4).
     """
     logger.debug("PE: expanding iterables")
     moreiterables = True
@@ -464,21 +464,21 @@ def generate_expanded_graph(graph_in):
 def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
                  show_connectinfo=False, dotfilename='graph.dot', format='png'):
     """ Displays the graph layout of the pipeline
-    
+
     This function requires that pygraphviz and matplotlib are available on
     the system.
-    
+
     Parameters
     ----------
-    
+
     show : boolean
     Indicate whether to generate pygraphviz output fromn
     networkx. default [False]
-    
+
     use_execgraph : boolean
     Indicates whether to use the specification graph or the
     execution graph. default [False]
-    
+
     show_connectioninfo : boolean
     Indicates whether to show the edge data on the graph. This
     makes the graph rather cluttered. default [False]
@@ -531,7 +531,7 @@ def make_output_dir(outdir):
     Parameters
     ----------
     outdir : output directory to create
-    
+
     """
     if not os.path.exists(os.path.abspath(outdir)):
         logger.debug("Creating %s" % outdir)
@@ -617,12 +617,12 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
 
 def merge_dict(d1, d2, merge=lambda x,y:y):
     """
-    Merges two dictionaries, non-destructively, combining 
+    Merges two dictionaries, non-destructively, combining
     values on duplicate keys as defined by the optional merge
     function.  The default behavior replaces the values in d1
     with corresponding values in d2.  (There is no other generally
-    applicable merge strategy, but often you'll have homogeneous 
-    types in your dicts, so specifying a merge technique can be 
+    applicable merge strategy, but often you'll have homogeneous
+    types in your dicts, so specifying a merge technique can be
     valuable.)
 
     Examples:

@@ -16,7 +16,7 @@ def listClasses(module=None):
         for k,v in pkg.__dict__.items():
             if 'class' in str(v) and k != '__builtins__':
                 print "\t%s"%k
-                
+
 def add_options(parser=None, module=None, function=None):
     interface = None
     if parser and module and function:
@@ -61,7 +61,7 @@ def get_modfunc(args):
         if len(posargs)==2:
             function = posargs[1]
     return module, function
-        
+
 def parse_args():
     usage = "usage: %prog [options] module function"
     parser = OptionParser(usage=usage,version="%prog 1.0",
@@ -69,7 +69,7 @@ def parse_args():
     parser.add_option("--run", dest="run",
                       action='store_true',help="Execute",
                       default=False)
-    
+
     module, function = get_modfunc(sys.argv[1:])
     parser, interface  = add_options(parser, module, function)
     (options, args) = parser.parse_args()
@@ -81,7 +81,7 @@ def parse_args():
         if module and not function:
             listClasses(module)
         parser.exit()
-    
+
 
 #*****************************************************************************
 if __name__ == '__main__':

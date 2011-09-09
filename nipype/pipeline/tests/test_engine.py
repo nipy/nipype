@@ -26,11 +26,11 @@ class OutputSpec(nib.TraitedSpec):
 class TestInterface(nib.BaseInterface):
     input_spec = InputSpec
     output_spec = OutputSpec
-    
+
     def _run_interface(self, runtime):
         runtime.returncode = 0
         return runtime
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['output1'] = [1, self.inputs.input1]
@@ -109,7 +109,7 @@ def test2():
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 4
     yield assert_equal, len(pipe._execgraph.edges()), 0
-    
+
 def test3():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
@@ -121,7 +121,7 @@ def test3():
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 3
     yield assert_equal, len(pipe._execgraph.edges()), 2
-    
+
 def test4():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
@@ -346,4 +346,3 @@ def test_workflow_add():
     yield assert_raises, IOError, w1.add_nodes, [n2]
     yield assert_raises, IOError, w1.add_nodes, [n3]
     yield assert_raises, IOError, w1.connect, [(w1,n2,[('n1.a','d')])]
-    

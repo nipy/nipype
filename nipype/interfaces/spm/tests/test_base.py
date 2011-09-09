@@ -6,7 +6,7 @@ from shutil import rmtree
 
 import numpy as np
 
-from nipype.testing import (assert_equal, assert_false, assert_true, 
+from nipype.testing import (assert_equal, assert_false, assert_true,
                             assert_raises, skipif)
 import nibabel as nb
 import nipype.interfaces.spm.base as spm
@@ -34,7 +34,7 @@ def create_files_in_directory():
         nb.save(nb.Nifti1Image(img,np.eye(4),hdr),
                  os.path.join(outdir,f))
     return filelist, outdir, cwd
-    
+
 def clean_directory(outdir, old_wd):
     if os.path.exists(outdir):
         rmtree(outdir)
@@ -85,7 +85,7 @@ def test_reformat_dict_for_savemat():
     dc = TestClass() # dc = derived_class
     out = dc._reformat_dict_for_savemat({'a':{'b':{'c':[]}}})
     yield assert_equal, out, [{'a': [{'b': [{'c': []}]}]}]
-    
+
 def test_generate_job():
     class TestClass(spm.SPMCommand):
         input_spec = spm.SPMCommandInputSpec
@@ -112,7 +112,7 @@ def test_generate_job():
     contents['onsets'][0] = [1,2,3,4]
     out = dc._generate_job(prefix='test',contents=contents)
     yield assert_equal, out, 'test.onsets = {...\n[1, 2, 3, 4];...\n};\n'
-    
+
 def test_make_matlab_command():
     class TestClass(spm.SPMCommand):
         _jobtype = 'jobtype'

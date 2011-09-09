@@ -176,4 +176,4 @@ def test_loadflat():
     os.unlink(name)
     yield assert_true, isinstance(aloaded, dict)
     yield assert_equal, sorted(aloaded.items()), sorted(adict.items())
-    
+

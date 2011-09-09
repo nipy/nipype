@@ -269,7 +269,7 @@ datasource.inputs.template_args = info
 
 datasource_dartel = pe.MapNode(interface=nio.DataGrabber(infields=['subject_id'],
                                                          outfields=['struct']),
-                               name = 'datasource_dartel', 
+                               name = 'datasource_dartel',
                                iterfield = ['subject_id'])
 datasource_dartel.inputs.base_directory = data_dir
 datasource_dartel.inputs.template = '%s/%s.nii'
@@ -281,7 +281,7 @@ datasource_dartel.inputs.subject_id = subject_list
 This way we will be able to pick the right field flows later.
 """
 
-rename_dartel = pe.MapNode(util.Rename(format_string="subject_id_%(subject_id)s_struct"), 
+rename_dartel = pe.MapNode(util.Rename(format_string="subject_id_%(subject_id)s_struct"),
                            iterfield=['in_file', 'subject_id'],
                            name = 'rename_dartel')
 rename_dartel.inputs.subject_id = subject_list
@@ -299,9 +299,9 @@ def pickFieldFlow(dartel_flow_fields, subject_id):
         _, name, _ = split_filename(f)
         if name.find("subject_id_%s"%subject_id):
             return f
-        
+
     raise Exception
-        
+
 pick_flow = pe.Node(util.Function(input_names=['dartel_flow_fields', 'subject_id'], output_names=['dartel_flow_field'], function = pickFieldFlow),
                     name = "pick_flow")
 
@@ -392,7 +392,7 @@ level1.base_dir = os.path.abspath('spm_dartel_tutorial/workingdir')
 
 level1.connect([(datasource_dartel, rename_dartel, [('struct', 'in_file')]),
                 (rename_dartel, dartel_workflow, [('out_file','inputspec.structural_files')]),
-                
+
                 (infosource, datasource, [('subject_id', 'subject_id')]),
                 (datasource,l1pipeline,[('func','preproc.realign.in_files'),
                                         ('struct', 'preproc.coregister.target'),
@@ -519,5 +519,5 @@ Execute the second level pipeline
 
 if __name__ == '__main__':
     l2pipeline.run()
-    
-    
+
+

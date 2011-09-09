@@ -763,8 +763,8 @@ class FNIRT(FSLCommand):
     _cmd = 'fnirt'
     input_spec = FNIRTInputSpec
     output_spec = FNIRTOutputSpec
-    
-    
+
+
     filemap = {'warped_file':'warped',
                'field_file':'field',
                'jacobian_file':'field_jacobian',
@@ -801,7 +801,7 @@ class FNIRT(FSLCommand):
         if name in self.filemap.keys():
             return spec.argstr % self._list_outputs()[name]
         return super(FNIRT, self)._format_arg(name, spec, value)
-    
+
     def _gen_filename(self, name):
         if name in ['warped_file', 'log_file']:
             return self._list_outputs()[name]
@@ -988,7 +988,7 @@ class SUSAN(FSLCommand):
 
     Examples
     --------
-    
+
     >>> from nipype.interfaces import fsl
     >>> from nipype.testing import example_data
     >>> print anatfile #doctest: +SKIP
@@ -1104,17 +1104,17 @@ class FUGUE(FSLCommand):
     --------
 
     Please insert examples for use of this command
-    
+
     """
-    
+
     _cmd = 'fugue'
     input_spec = FUGUEInputSpec
     output_spec = FUGUEOutputSpec
-    
+
     def __init__(self, **kwargs):
         super(FUGUE, self).__init__(**kwargs)
         warn('This interface has not been fully tested. Please report any failures.')
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         out_file = self.inputs.unwarped_file
@@ -1179,18 +1179,18 @@ class PRELUDE(FSLCommand):
 
     Examples
     --------
-    
+
     Please insert examples for use of this command
-    
+
     """
     input_spec = PRELUDEInputSpec
     output_spec = PRELUDEOutputSpec
     _cmd = 'prelude'
-    
+
     def __init__(self, **kwargs):
         super(PRELUDE, self).__init__(**kwargs)
         warn('This has not been fully tested. Please report any failures.')
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         out_file = self.inputs.unwrapped_phase_file

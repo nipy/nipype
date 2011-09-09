@@ -21,7 +21,7 @@ import numpy as np
 # Local imports
 from nipype.interfaces.base import (OutputMultiPath, TraitedSpec, isdefined,
                                     traits, InputMultiPath, File)
-from nipype.interfaces.spm.base import (SPMCommand, scans_for_fname, 
+from nipype.interfaces.spm.base import (SPMCommand, scans_for_fname,
                                         func_is_3d,
                                         scans_for_fnames, SPMCommandInputSpec)
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list,
@@ -54,7 +54,7 @@ class SliceTimingOutputSpec(TraitedSpec):
 
 class SliceTiming(SPMCommand):
     """Use spm to perform slice timing correction.
-    
+
     http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=19
 
     Examples
@@ -69,12 +69,12 @@ class SliceTiming(SPMCommand):
     >>> st.inputs.slice_order = range(32,0,-1)
     >>> st.inputs.ref_slice = 1
     >>> st.run() # doctest: +SKIP
-    
+
     """
 
     input_spec = SliceTimingInputSpec
     output_spec = SliceTimingOutputSpec
-    
+
     _jobtype = 'temporal'
     _jobname = 'st'
 
@@ -144,7 +144,7 @@ class RealignOutputSpec(TraitedSpec):
 
 class Realign(SPMCommand):
     """Use spm_realign for estimating within modality rigid body alignment
-    
+
     http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=25
 
     Examples
@@ -201,7 +201,7 @@ class Realign(SPMCommand):
                 first_image = self.inputs.in_files[0][0]
             else:
                 first_image = self.inputs.in_files[0]
-                
+
             outputs['mean_image'] = fname_presuffix(first_image, prefix='mean')
             outputs['realigned_files'] = []
             for imgf in filename_to_list(self.inputs.in_files):
@@ -255,18 +255,18 @@ class CoregisterOutputSpec(TraitedSpec):
 
 class Coregister(SPMCommand):
     """Use spm_coreg for estimating cross-modality rigid body alignment
-    
+
     http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=39
 
     Examples
     --------
-    
+
     >>> import nipype.interfaces.spm as spm
     >>> coreg = spm.Coregister()
     >>> coreg.inputs.target = 'functional.nii'
     >>> coreg.inputs.source = 'structural.nii'
     >>> coreg.run() # doctest: +SKIP
-    
+
     """
 
     input_spec = CoregisterInputSpec
@@ -368,7 +368,7 @@ class NormalizeOutputSpec(TraitedSpec):
 
 class Normalize(SPMCommand):
     """use spm_normalise for warping an image to a template
-    
+
     http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=51
 
     Examples
@@ -377,7 +377,7 @@ class Normalize(SPMCommand):
     >>> norm = spm.Normalize()
     >>> norm.inputs.source = 'functional.nii'
     >>> norm.run() # doctest: +SKIP
-    
+
     """
 
     input_spec = NormalizeInputSpec
@@ -449,34 +449,34 @@ class SegmentInputSpec(SPMCommandInputSpec):
     data = InputMultiPath(File(exists=True), field='data', desc='one scan per subject',
                           copyfile=False, mandatory=True)
     gm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.GM',
-                                 desc="""Options to produce grey matter images: c1*.img, wc1*.img and mwc1*.img. 
-            None: [False,False,False], 
-            Native Space: [False,False,True], 
-            Unmodulated Normalised: [False,True,False], 
-            Modulated Normalised: [True,False,False], 
-            Native + Unmodulated Normalised: [False,True,True], 
-            Native + Modulated Normalised: [True,False,True], 
-            Native + Modulated + Unmodulated: [True,True,True], 
+                                 desc="""Options to produce grey matter images: c1*.img, wc1*.img and mwc1*.img.
+            None: [False,False,False],
+            Native Space: [False,False,True],
+            Unmodulated Normalised: [False,True,False],
+            Modulated Normalised: [True,False,False],
+            Native + Unmodulated Normalised: [False,True,True],
+            Native + Modulated Normalised: [True,False,True],
+            Native + Modulated + Unmodulated: [True,True,True],
             Modulated + Unmodulated Normalised: [True,True,False]""")
     wm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.WM',
-                                 desc="""Options to produce white matter images: c2*.img, wc2*.img and mwc2*.img.             
-            None: [False,False,False], 
-            Native Space: [False,False,True], 
-            Unmodulated Normalised: [False,True,False], 
-            Modulated Normalised: [True,False,False], 
-            Native + Unmodulated Normalised: [False,True,True], 
-            Native + Modulated Normalised: [True,False,True], 
-            Native + Modulated + Unmodulated: [True,True,True], 
+                                 desc="""Options to produce white matter images: c2*.img, wc2*.img and mwc2*.img.
+            None: [False,False,False],
+            Native Space: [False,False,True],
+            Unmodulated Normalised: [False,True,False],
+            Modulated Normalised: [True,False,False],
+            Native + Unmodulated Normalised: [False,True,True],
+            Native + Modulated Normalised: [True,False,True],
+            Native + Modulated + Unmodulated: [True,True,True],
             Modulated + Unmodulated Normalised: [True,True,False]""")
     csf_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.CSF',
-                                  desc="""Options to produce CSF images: c3*.img, wc3*.img and mwc3*.img.             
-            None: [False,False,False], 
-            Native Space: [False,False,True], 
-            Unmodulated Normalised: [False,True,False], 
-            Modulated Normalised: [True,False,False], 
-            Native + Unmodulated Normalised: [False,True,True], 
-            Native + Modulated Normalised: [True,False,True], 
-            Native + Modulated + Unmodulated: [True,True,True], 
+                                  desc="""Options to produce CSF images: c3*.img, wc3*.img and mwc3*.img.
+            None: [False,False,False],
+            Native Space: [False,False,True],
+            Unmodulated Normalised: [False,True,False],
+            Modulated Normalised: [True,False,False],
+            Native + Unmodulated Normalised: [False,True,True],
+            Native + Modulated Normalised: [True,False,True],
+            Native + Modulated + Unmodulated: [True,True,True],
             Modulated + Unmodulated Normalised: [True,True,False]""")
     save_bias_corrected = traits.Bool(field='output.biascor',
                      desc='True/False produce a bias corrected image')
@@ -518,7 +518,7 @@ class SegmentOutputSpec(TraitedSpec):
 class Segment(SPMCommand):
     """use spm_segment to separate structural images into different
     tissue classes.
-    
+
     http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=43
 
     Examples
@@ -527,7 +527,7 @@ class Segment(SPMCommand):
     >>> seg = spm.Segment()
     >>> seg.inputs.data = 'structural.nii'
     >>> seg.run() # doctest: +SKIP
-    
+
     """
 
     _jobtype = 'spatial'
@@ -585,7 +585,7 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
                                 desc="""A tuple with the following fields:
             - bias reguralisation (0-10)
             - FWHM of Gaussian smoothness of bias
-            - which maps to save (Corrected, Field) - a tuple of two boolean values""", 
+            - which maps to save (Corrected, Field) - a tuple of two boolean values""",
             field='channel')
     tissues = traits.List(traits.Tuple(traits.Tuple(File(exists=True), traits.Int()), traits.Int(),
                                        traits.Tuple(traits.Bool, traits.Bool), traits.Tuple(traits.Bool, traits.Bool)),
@@ -593,7 +593,7 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
             - tissue probability map (4D), 1-based index to frame
             - number of gaussians
             - which maps to save [Native, DARTEL] - a tuple of two boolean values
-            - which maps to save [Modulated, Unmodualted] - a tuple of two boolean values""", 
+            - which maps to save [Modulated, Unmodualted] - a tuple of two boolean values""",
             field='tissue')
     affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', field='warp.affreg',
                       desc='mni, eastern, subj, none ')
@@ -618,7 +618,7 @@ class NewSegment(SPMCommand):
     tissue classes. Supports multiple modalities.
 
     NOTE: This interface currently supports single channel input only
-    
+
     http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=185
 
     Examples
@@ -727,7 +727,7 @@ class SmoothOutputSpec(TraitedSpec):
 
 class Smooth(SPMCommand):
     """Use spm_smooth for 3D Gaussian smoothing of image volumes.
-    
+
     http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=57
 
     Examples
@@ -757,7 +757,7 @@ class Smooth(SPMCommand):
                     return val
             if opt == 'implicit_masking':
                 return int(val)
-            
+
         return val
 
     def _list_outputs(self):

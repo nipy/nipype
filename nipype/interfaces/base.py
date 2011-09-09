@@ -388,7 +388,7 @@ class BaseTraitedSpec(traits.HasTraits):
         out = super(BaseTraitedSpec, self).get(**kwargs)
         out = self._clean_container(out, skipundefined=True)
         return out
-    
+
     def _clean_container(self, object, undefinedval=None, skipundefined=False):
         """Convert a traited obejct into a pure python representation.
         """
@@ -441,7 +441,7 @@ class BaseTraitedSpec(traits.HasTraits):
             The md5 hash value of the traited spec
 
         """
-        
+
         dict_withhash = {}
         dict_nofilename = {}
         for name, val in sorted(self.get().items()):
@@ -470,7 +470,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 if hash_files and isinstance(object, str) and os.path.isfile(object):
                     if hash_method == None:
                         hash_method = config.get('execution', 'hash_method')
-  
+
                     if hash_method.lower() == 'timestamp':
                         hash = hash_timestamp(object)
                     elif hash_method.lower() == 'content':
@@ -779,14 +779,14 @@ class BaseInterface(Interface):
         except Exception, e:
             if len(e.args) == 0:
                 e.args = ("")
-                
+
             message = "\nInterface %s failed to run."%self.__class__.__name__
-            
+
             if config.has_option('logging', 'interface_level') and config.get('logging', 'interface_level').lower() == 'debug':
                 inputs_str = "Inputs:" + str(self.inputs) + "\n"
             else:
                 inputs_str = ''
-            
+
             if len(e.args) == 1 and isinstance(e.args[0], str):
                 e.args = (e.args[0] + " ".join([message, inputs_str]),)
             else:
@@ -1158,13 +1158,13 @@ class CommandLine(BaseInterface):
         first_args = [arg for pos, arg in sorted(initial_args.items())]
         last_args = [arg for pos, arg in sorted(final_args.items())]
         return first_args + all_args + last_args
-    
+
 class StdOutCommandLineInputSpec(CommandLineInputSpec):
     out_file = File(argstr="> %s", position=-1, genfile=True)
-    
+
 class StdOutCommandLine(CommandLine):
     input_spec = StdOutCommandLineInputSpec
-    
+
     def _gen_filename(self, name):
         if name is 'out_file':
             return self._gen_outfilename()

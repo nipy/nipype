@@ -7,7 +7,7 @@ Currently these tools are supported:
 
      * Dicom2Nifti: using mri_convert
      * Resample: using mri_convert
-     
+
 Examples
 --------
 See the docstrings for the individual classes for 'working' examples.
@@ -33,23 +33,23 @@ class Info(object):
     >>> from nipype.interfaces.freesurfer import Info
     >>> Info.version()  # doctest: +SKIP
     >>> Info.subjectsdir()  # doctest: +SKIP
-    
+
     """
-    
+
     @staticmethod
     def version():
         """Check for freesurfer version on system
-    
+
         Find which freesurfer is being used....and get version from
         /path/to/freesurfer/build-stamp.txt
-    
+
         Returns
         -------
-        
+
         version : string
-           version number as string 
+           version number as string
            or None if freesurfer version not found
-    
+
         """
         fs_home = os.getenv('FREESURFER_HOME')
         if fs_home is None:
@@ -61,23 +61,23 @@ class Info(object):
         version = fid.readline()
         fid.close()
         return version
-    
+
     @classmethod
     def subjectsdir(cls):
         """Check the global SUBJECTS_DIR
-        
+
         Parameters
         ----------
-        
+
         subjects_dir :  string
             The system defined subjects directory
-    
+
         Returns
         -------
-        
+
         subject_dir : string
             Represents the current environment setting of SUBJECTS_DIR
-    
+
         """
         if cls.version():
             return os.environ['SUBJECTS_DIR']
@@ -86,15 +86,15 @@ class Info(object):
 
 class FSTraitedSpec(CommandLineInputSpec):
     subjects_dir =  Directory(exists=True, desc='subjects directory')
-    
+
 class FSCommand(CommandLine):
     """General support for FreeSurfer commands.
 
        Every FS command accepts 'subjects_dir' input.
     """
-    
+
     input_spec = FSTraitedSpec
-    
+
     _subjects_dir = None
 
     def __init__(self, **inputs):

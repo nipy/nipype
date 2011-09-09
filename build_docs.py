@@ -25,7 +25,7 @@ DOC_BUILD_DIR = os.path.join('doc', '_build', 'html')
 DOC_DOCTREES_DIR = os.path.join('doc', '_build', 'doctrees')
 
 ################################################################################
-# Distutils Command class for installing nipype to a temporary location. 
+# Distutils Command class for installing nipype to a temporary location.
 class TempInstall(Command):
     temp_install_dir = os.path.join('build', 'install')
 
@@ -34,11 +34,11 @@ class TempInstall(Command):
         install = self.distribution.get_command_obj('install')
         install.install_scripts = self.temp_install_dir
         install.install_base    = self.temp_install_dir
-        install.install_platlib = self.temp_install_dir 
-        install.install_purelib = self.temp_install_dir 
-        install.install_data    = self.temp_install_dir 
-        install.install_lib     = self.temp_install_dir 
-        install.install_headers = self.temp_install_dir 
+        install.install_platlib = self.temp_install_dir
+        install.install_purelib = self.temp_install_dir
+        install.install_data    = self.temp_install_dir
+        install.install_lib     = self.temp_install_dir
+        install.install_headers = self.temp_install_dir
         install.run()
 
         # Horrible trick to reload nipype with our temporary instal
@@ -52,13 +52,13 @@ class TempInstall(Command):
 
     def initialize_options(self):
         pass
-    
+
     def finalize_options(self):
         pass
 
 
 ################################################################################
-# Distutils Command class for API generation 
+# Distutils Command class for API generation
 class APIDocs(TempInstall):
     description = \
     """generate API docs """
@@ -99,7 +99,7 @@ def relative_path(filename):
 
 
 ################################################################################
-# Distutils Command class build the docs 
+# Distutils Command class build the docs
 class MyBuildDoc(BuildDoc):
     """ Sub-class the standard sphinx documentation building system, to
         add logics for API generation and matplotlib's plot directive.
@@ -121,7 +121,7 @@ class MyBuildDoc(BuildDoc):
         # in case I'm missing something?
         BuildDoc.run(self)
         self.zip_docs()
-    
+
     def zip_docs(self):
         if not os.path.exists(DOC_BUILD_DIR):
             raise OSError, 'Doc directory does not exist.'
@@ -131,19 +131,19 @@ class MyBuildDoc(BuildDoc):
         # for it. ZIP_STORED produces an uncompressed zip, but does not
         # require zlib.
         try:
-            zf = zipfile.ZipFile(target_file, 'w', 
+            zf = zipfile.ZipFile(target_file, 'w',
                                         compression=zipfile.ZIP_DEFLATED)
         except RuntimeError:
             warnings.warn('zlib not installed, storing the docs '
                             'without compression')
-            zf = zipfile.ZipFile(target_file, 'w', 
-                                        compression=zipfile.ZIP_STORED)    
+            zf = zipfile.ZipFile(target_file, 'w',
+                                        compression=zipfile.ZIP_STORED)
 
         for root, dirs, files in os.walk(DOC_BUILD_DIR):
             relative = relative_path(root)
             if not relative.startswith('.doctrees'):
                 for f in files:
-                    zf.write(os.path.join(root, f), 
+                    zf.write(os.path.join(root, f),
                             os.path.join(relative, 'html_docs', f))
         zf.close()
 
@@ -171,7 +171,7 @@ class Clean(clean):
             print "Removing %s" % interface_path
             shutil.rmtree(interface_path)
         if os.path.exists(DOC_BUILD_DIR):
-            print "Removing %s" % DOC_BUILD_DIR 
+            print "Removing %s" % DOC_BUILD_DIR
             shutil.rmtree(DOC_BUILD_DIR)
         if os.path.exists(DOC_DOCTREES_DIR):
             print "Removing %s" % DOC_DOCTREES_DIR

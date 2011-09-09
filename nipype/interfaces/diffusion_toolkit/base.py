@@ -6,7 +6,7 @@ Diffusion Toolkit tools.
 Currently these tools are supported:
 
     * TODO
-    
+
 Examples
 --------
 See the docstrings for the individual classes for 'working' examples.
@@ -25,9 +25,9 @@ class Info(object):
     >>> from nipype.interfaces.diffusion_toolkit import Info
     >>> Info.version()  # doctest: +SKIP
     >>> Info.subjectsdir()  # doctest: +SKIP
-    
+
     """
-    
+
     @staticmethod
     def version():
         """Check for dtk version on system

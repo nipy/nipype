@@ -15,7 +15,7 @@ These functions include:
    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
-  
+
 """
 
 from copy import deepcopy
@@ -43,7 +43,7 @@ def gcd(a, b):
     4
     >>> gcd(22,55)
     11
-    
+
     """
     while b > 0: a,b = b, a%b
     return a
@@ -78,7 +78,7 @@ def spm_hrf(RT, P=None, fMRI_T=16):
       -3.73060781e-02  -3.08373716e-02  -2.05161334e-02  -1.16441637e-02
       -5.82063147e-03  -2.61854250e-03  -1.07732374e-03  -4.10443522e-04
       -1.46257507e-04]
-    
+
     """
     p     = np.array([6,16,1,1,6,0,32],dtype=float)
     if P is not None:
@@ -121,7 +121,7 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
     input_units: 'secs' or 'scans'
     output_units: Ibid.
     time_repetition: float in seconds
-    
+
     """
     if input_units==output_units:
         _scalefactor = 1.
@@ -206,20 +206,20 @@ class SpecifyModel(BaseInterface):
     ~~~~~~~~
 
      - regressor_names : list of str
-         list of names corresponding to each column. Should be None if 
+         list of names corresponding to each column. Should be None if
          automatically assigned.
 
      - regressors : list of lists
         values for each regressor - must correspond to the number of
         volumes in the functional run
 
-     - amplitudes : lists of amplitudes for each event. This will be ignored by 
+     - amplitudes : lists of amplitudes for each event. This will be ignored by
        SPM's Level1Design.
 
-     The following two (tmod, pmod) will be ignored by any Level1Design class 
+     The following two (tmod, pmod) will be ignored by any Level1Design class
      other than SPM:
 
-     - tmod : lists of conditions that should be temporally modulated. Should 
+     - tmod : lists of conditions that should be temporally modulated. Should
        default to None if not being used.
 
      - pmod : list of Bunch corresponding to conditions
@@ -251,7 +251,7 @@ class SpecifyModel(BaseInterface):
     >>> s.inputs.subject_info = info
 
     Using pmod:
-    
+
     >>> info = [Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 50],[100, 180]], durations=[[0],[0]], pmod=[Bunch(name=['amp'],poly=[2],param=[[1,2]]), None]), \
         Bunch(conditions=['cond1', 'cond2'], onsets=[[20, 120],[80, 160]], durations=[[0],[0]], pmod=[Bunch(name=['amp'],poly=[2],param=[[1,2]]), None])]
     >>> s.inputs.subject_info = info
@@ -368,7 +368,7 @@ class SpecifyModel(BaseInterface):
         if not hasattr(self, '_sessinfo'):
             self._generate_design()
         outputs['session_info'] = self._sessinfo
-        
+
         return outputs
 
 class SpecifySPMModelInputSpec(SpecifyModelInputSpec):
@@ -517,7 +517,7 @@ class SpecifySparseModel(SpecifyModel):
 
     see Ghosh et al. (2009) OHBM 2009
     http://dl.dropbox.com/u/363467/OHBM2009_HRF.pdf
-    
+
     Examples
     --------
 

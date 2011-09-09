@@ -7,7 +7,7 @@ interest analysis.
 These functions include:
 
   * ArtifactDetect: performs artifact detection on functional images
-    
+
   * StimulusCorrelation: determines correlation between stimuli
     schedule and movement/intensity parameters
 
@@ -59,7 +59,7 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
     translation_threshold = traits.Float(desc="Threshold (in mm) to use to detect translation-related outliers",
                                       mandatory=True, xor=['norm_threshold'])
     zintensity_threshold = traits.Float(desc="Intensity Z-threshold use to detection images that deviate from the" \
-            "mean", mandatory=True) 
+            "mean", mandatory=True)
     mask_type = traits.Enum('spm_global', 'file', 'thresh', desc="Type of mask that should be used to mask the functional data." \
             "*spm_global* uses an spm_global like calculation to determine the" \
             "brain mask.  *file* specifies a brain mask file (should be an image" \
@@ -72,12 +72,12 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
             "True)")
     save_plot = traits.Bool(True, desc="save plots containing outliers",
                             usedefault=True)
-    
+
 class ArtifactDetectOutputSpec(TraitedSpec):
     outlier_files = OutputMultiPath(File(exists=True),desc="One file for each functional run containing a list of 0-based" \
-            "indices corresponding to outlier volumes") 
+            "indices corresponding to outlier volumes")
     intensity_files = OutputMultiPath(File(exists=True),desc="One file for each functional run containing the global intensity" \
-            "values determined from the brainmask") 
+            "values determined from the brainmask")
     norm_files = OutputMultiPath(File, desc="One file for each functional run containing the composite norm")
     statistic_files = OutputMultiPath(File(exists=True),desc="One file for each functional run containing information about the" \
             "different types of artifacts and if design info is provided then" \
@@ -94,7 +94,7 @@ class ArtifactDetect(BaseInterface):
     True, it computes the movement of the center of each face a cuboid centered
     around the head and returns the maximal movement across the centers.
 
-    
+
     Examples
     --------
 
@@ -107,10 +107,10 @@ class ArtifactDetect(BaseInterface):
     >>> ad.inputs.zintensity_threshold = 3
     >>> ad.run() # doctest: +SKIP
     """
-    
+
     input_spec = ArtifactDetectInputSpec
     output_spec = ArtifactDetectOutputSpec
-        
+
     def _get_output_filenames(self,motionfile,output_dir):
         """Generate output files based on motion filenames
 
@@ -120,7 +120,7 @@ class ArtifactDetect(BaseInterface):
         motionfile: file/string
             Filename for motion parameter file
         output_dir: string
-            output directory in which the files will be generated 
+            output directory in which the files will be generated
         """
         if isinstance(motionfile,str):
             infile = motionfile
@@ -136,7 +136,7 @@ class ArtifactDetect(BaseInterface):
         normfile     = os.path.join(output_dir,''.join(('norm.',filename,'.txt')))
         plotfile     = os.path.join(output_dir,''.join(('plot.',filename,'.png')))
         return artifactfile,intensityfile,statsfile,normfile,plotfile
-        
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['outlier_files'] = []
@@ -149,7 +149,7 @@ class ArtifactDetect(BaseInterface):
         for i,f in enumerate(filename_to_list(self.inputs.realigned_files)):
             outlierfile,intensityfile,statsfile,normfile,plotfile = self._get_output_filenames(f,os.getcwd())
             outputs['outlier_files'].insert(i,outlierfile)
-            outputs['intensity_files'].insert(i,intensityfile)     
+            outputs['intensity_files'].insert(i,intensityfile)
             outputs['statistic_files'].insert(i,statsfile)
             if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
                 outputs['norm_files'].insert(i,normfile)
@@ -172,7 +172,7 @@ class ArtifactDetect(BaseInterface):
         params : np.array (upto 12 long)
         [translation (3), rotation (3,xyz, radians), scaling (3),
         shear/affine (3)]
-        
+
         """
         rotfunc = lambda x : np.array([[np.cos(x), np.sin(x)],[-np.sin(x),np.cos(x)]])
         q = np.array([0,0,0,0,0,0,1,1,1,0,0,0])
@@ -197,7 +197,7 @@ class ArtifactDetect(BaseInterface):
         Sh[(0,0,1),(1,2,2)] = params[9:12]
 
         return np.dot(T,np.dot(Rx,np.dot(Ry,np.dot(Rz,np.dot(S,Sh)))))
-        
+
 
     def _calc_norm(self,mc,use_differences):
         """Calculates the maximum overall displacement of the midpoints
@@ -213,7 +213,7 @@ class ArtifactDetect(BaseInterface):
         -------
 
         norm : at each time point
-        
+
         """
         respos=np.diag([70,70,75]);resneg=np.diag([-70,-110,-45]);
         # respos=np.diag([50,50,50]);resneg=np.diag([-50,-50,-50]);
@@ -271,7 +271,7 @@ class ArtifactDetect(BaseInterface):
             Exception("Siemens PACE format not implemented yet")
         else:
             Exception("Unknown source for movement parameters")
-            
+
         if self.inputs.use_norm:
             # calculate the norm of the motion parameters
             normval = self._calc_norm(mc,self.inputs.use_differences[0])
@@ -309,7 +309,7 @@ class ArtifactDetect(BaseInterface):
                     vol   = data[:,:,:,t0]
                     mask  = mask*(vol>(self._nanmean(vol)/8))
                 for t0 in range(timepoints):
-                    vol   = data[:,:,:,t0]                    
+                    vol   = data[:,:,:,t0]
                     g[t0] = self._nanmean(vol[mask])
                 if len(find_indices(mask))<(np.prod((x,y,z))/10):
                     intersect_mask = False
@@ -343,7 +343,7 @@ class ArtifactDetect(BaseInterface):
 
         outliers = np.unique(np.union1d(iidx,np.union1d(tidx,ridx)))
         artifactfile,intensityfile,statsfile,normfile,plotfile = self._get_output_filenames(imgfile,cwd)
-        
+
         # write output to outputfile
         np.savetxt(artifactfile, outliers, fmt='%d', delimiter=' ')
         np.savetxt(intensityfile, g, fmt='%.2f', delimiter=' ')
@@ -441,12 +441,12 @@ class StimulusCorrelation(BaseInterface):
     >>> sc.inputs.spm_mat_file = 'SPM.mat'
     >>> sc.inputs.concatenated_design = False
     >>> sc.run() # doctest: +SKIP
-    
+
     """
 
     input_spec = StimCorrInputSpec
     output_spec = StimCorrOutputSpec
-    
+
     def _get_output_filenames(self, motionfile, output_dir):
         """Generate output files based on motion filenames
 
@@ -455,7 +455,7 @@ class StimulusCorrelation(BaseInterface):
         motionfile: file/string
             Filename for motion parameter file
         output_dir: string
-            output directory in which the files will be generated 
+            output directory in which the files will be generated
         """
         (filepath,filename) = os.path.split(motionfile)
         (filename,ext) = os.path.splitext(filename)
@@ -465,7 +465,7 @@ class StimulusCorrelation(BaseInterface):
     def _stimcorr_core(self,motionfile,intensityfile,designmatrix,cwd=None):
         """
         Core routine for determining stimulus correlation
-        
+
         """
         if not cwd:
             cwd = os.getcwd()
@@ -528,7 +528,7 @@ class StimulusCorrelation(BaseInterface):
             self._stimcorr_core(motparamlist[i],intensityfiles[i],
                                 matrix, os.getcwd())
         return runtime
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         files = []

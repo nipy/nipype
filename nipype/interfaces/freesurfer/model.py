@@ -54,7 +54,7 @@ class MRISPreprocInputSpec(FSTraitedSpec):
                             desc='projection fraction for vol2surf')
     fwhm = traits.Float(argstr='--fwhm %f',
                         xor=['num_iters'],
-                        desc='smooth by fwhm mm on the target surface') 
+                        desc='smooth by fwhm mm on the target surface')
     num_iters = traits.Int(argstr='--niters %d',
                         xor=['fwhm'],
                         desc='niters : smooth by niters on the target surface')
@@ -69,14 +69,14 @@ class MRISPreprocInputSpec(FSTraitedSpec):
 
 class MRISPreprocOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='preprocessed output file')
-    
+
 class MRISPreproc(FSCommand):
     """Use FreeSurfer mris_preproc to prepare a group of contrasts for
     a second level analysis
-    
+
     Examples
     --------
-    
+
     >>> preproc = MRISPreproc()
     >>> preproc.inputs.target = 'fsaverage'
     >>> preproc.inputs.hemi = 'lh'
@@ -100,11 +100,11 @@ class MRISPreproc(FSCommand):
                                                'concat_%s_%s.mgz'%(self.inputs.hemi,
                                                                    self.inputs.target))
         return outputs
-    
+
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._list_outputs()[name]
-        return None    
+        return None
 
 class GLMFitInputSpec(FSTraitedSpec):
     glm_dir = traits.Str(argstr='--glmdir %s', desc='save outputs to dir',
@@ -119,7 +119,7 @@ class GLMFitInputSpec(FSTraitedSpec):
                   desc='design matrix file')
     contrast = InputMultiPath(File(exists=True), argstr='--C %s...',
                               desc='contrast file')
-    
+
     one_sample = traits.Bool(argstr='--osgm',
                             xor=('one_sample', 'fsgd', 'design', 'contrast'),
                             desc='construct X and C as a one-sample group mean')
@@ -131,7 +131,7 @@ class GLMFitInputSpec(FSTraitedSpec):
                            argstr='--selfreg %d %d %d',
                            desc='self-regressor from index col row slice')
     weighted_ls = File(exists=True, argstr='--wls %s',
-                      xor = ('weight_file', 'weight_inv', 'weight_sqrt'), 
+                      xor = ('weight_file', 'weight_inv', 'weight_sqrt'),
                       desc='weighted least squares')
     fixed_fx_var = File(exists=True, argstr='--yffxvar %s',
                       desc='for fixed effects analysis')
@@ -242,7 +242,7 @@ class GLMFitOutputSpec(TraitedSpec):
     frame_eigenvectors = File(desc="matrix of frame eigenvectors from residual PCA")
     singular_values = File(desc="matrix singular values from residual PCA")
     svd_stats_file = File(desc="text file summarizing the residual PCA")
-    
+
 class GLMFit(FSCommand):
     """Use FreeSurfer's mri_glmfit to specify and estimate a general linear model.
 
@@ -254,7 +254,7 @@ class GLMFit(FSCommand):
     >>> glmfit.inputs.one_sample = True
     >>> glmfit.cmdline == 'mri_glmfit --glmdir %s --y functional.nii --osgm'%os.getcwd()
     True
-    
+
     """
 
     _cmd = 'mri_glmfit'
@@ -320,14 +320,14 @@ class GLMFit(FSCommand):
     def _gen_filename(self, name):
         if name == 'glm_dir':
             return os.getcwd()
-        return None    
-        
+        return None
+
 class OneSampleTTest(GLMFit):
 
     def __init__(self, **kwargs):
         super(OneSampleTTest, self).__init__(**kwargs)
         self.inputs.one_sample = True
-                              
+
 
 class BinarizeInputSpec(FSTraitedSpec):
     in_file = File(exists=True, argstr='--i %s', mandatory=True,
@@ -364,7 +364,7 @@ class BinarizeInputSpec(FSTraitedSpec):
     frame_no = traits.Int(argstr='--frame %s',
                          desc='use 0-based frame of input (default is 0)')
     merge_file = File(exists=True, argstr='--merge %s',
-                    desc='merge with mergevol') 
+                    desc='merge with mergevol')
     mask_file = File(exists=True, argstr='--mask maskvol',
                    desc='must be within mask')
     mask_thresh = traits.Float(argstr='--mask-thresh %f',
@@ -387,17 +387,17 @@ class BinarizeInputSpec(FSTraitedSpec):
 class BinarizeOutputSpec(TraitedSpec):
     binary_file = File(exists=True, desc='binarized output volume')
     count_file = File(desc='ascii file containing number of hits')
-    
+
 class Binarize(FSCommand):
     """Use FreeSurfer mri_binarize to threshold an input volume
 
     Examples
     --------
-    
+
     >>> binvol = Binarize(in_file='structural.nii', min=10, binary_file='foo_out.nii')
     >>> binvol.cmdline
     'mri_binarize --o foo_out.nii --i structural.nii --min 10.000000'
-    
+
    """
 
     _cmd = 'mri_binarize'
@@ -441,11 +441,11 @@ class Binarize(FSCommand):
         if name == 'out_type':
             return ''
         return super(Binarize, self)._format_arg(name, spec, value)
-    
+
     def _gen_filename(self, name):
         if name == 'binary_file':
             return self._list_outputs()[name]
-        return None    
+        return None
 
 
 class ConcatenateInputSpec(FSTraitedSpec):
@@ -519,11 +519,11 @@ class Concatenate(FSCommand):
         else:
             outputs['concatenated_file'] = self.inputs.concatenated_file
         return outputs
-    
+
     def _gen_filename(self, name):
         if name == 'concatenated_file':
             return self._list_outputs()[name]
-        return None    
+        return None
 
 class SegStatsInputSpec(FSTraitedSpec):
     _xor_inputs = ('segmentation_file', 'annot', 'surf_label')
@@ -600,7 +600,7 @@ class SegStats(FSCommand):
 
     Examples
     --------
-    
+
     >>> import nipype.interfaces.freesurfer as fs
     >>> ss = fs.SegStats()
     >>> ss.inputs.annot = ('PWS04', 'lh', 'aparc')
@@ -610,7 +610,7 @@ class SegStats(FSCommand):
     >>> ss.inputs.summary_file = './summary.stats'
     >>> ss.cmdline
     'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --i functional.nii --sum ./summary.stats'
-    
+
     """
 
     _cmd = 'mri_segstats'
@@ -649,11 +649,11 @@ class SegStats(FSCommand):
                 fname = value
             return spec.argstr % fname
         return super(SegStats, self)._format_arg(name, spec, value)
-    
+
     def _gen_filename(self, name):
         if name == 'summary_file':
             return self._list_outputs()[name]
-        return None    
+        return None
 
 
 class Label2VolInputSpec(FSTraitedSpec):
@@ -722,11 +722,11 @@ class Label2Vol(FSCommand):
 
     Examples
     --------
-    
+
     >>> binvol = Label2Vol(label_file='cortex.label', template_file='structural.nii', reg_file='register.dat', fill_thresh=0.5, vol_label_file='foo_out.nii')
     >>> binvol.cmdline
     'mri_label2vol --fillthresh 0 --label cortex.label --reg register.dat --temp structural.nii --o foo_out.nii'
-    
+
    """
 
     _cmd = 'mri_label2vol'

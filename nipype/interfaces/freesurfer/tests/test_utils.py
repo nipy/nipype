@@ -77,7 +77,7 @@ def test_sample2surf():
     yield assert_equal, s2s.cmdline, ("mri_vol2surf "
     "--hemi lh --o %s --ref %s --projfrac 0.500 --mov %s"
     %(os.path.join(cwd, "lh.a.mgz"),files[1],files[0]))
-    
+
     # Test identity
     s2sish = fs.SampleToSurface(source_file = files[1], reference_file = files[0],hemi="rh")
     yield assert_not_equal, s2s, s2sish
@@ -96,7 +96,7 @@ def test_sample2surf():
 
 @skipif(no_freesurfer)
 def test_surfsmooth():
-    
+
     smooth = fs.SurfaceSmooth()
 
     # Test underlying command
@@ -176,7 +176,7 @@ def test_applymask():
         indict = {input:filelist[0]}
         willbreak = fs.ApplyMask(**indict)
         yield assert_raises, ValueError, willbreak.run
-    
+
     # Now test a basic command line
     masker.inputs.in_file = filelist[0]
     masker.inputs.mask_file = filelist[1]
@@ -219,7 +219,7 @@ def test_surfshots():
 
     # Test that the tcl script gets written
     fotos._write_tcl_script()
-    yield assert_equal, True, os.path.exists("snapshots.tcl") 
+    yield assert_equal, True, os.path.exists("snapshots.tcl")
 
     # Test that we can use a different tcl script
     foo = open("other.tcl", "w").close()
@@ -234,6 +234,6 @@ def test_surfshots():
         os.environ["DISPLAY"] = hold_display
     except KeyError:
         pass
-    
+
     # Clean up our mess
     clean_directory(cwd, oldwd)

@@ -7,7 +7,7 @@ from tempfile import mkdtemp
 from nibabel import Nifti1Image
 import numpy as np
 
-from nipype.testing import (assert_equal, assert_false, assert_true, 
+from nipype.testing import (assert_equal, assert_false, assert_true,
                             assert_raises, assert_almost_equal)
 from nipype.interfaces.base import Bunch, TraitError
 from nipype.algorithms.modelgen import (SpecifyModel, SpecifySparseModel,
