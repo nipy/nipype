@@ -33,14 +33,3 @@ from nipype.interfaces.fsl.maths import (ChangeDataType, Threshold, MeanImage,
                                          ApplyMask, IsotropicSmooth, TemporalFilter,
                                          DilateImage, ErodeImage, SpatialFilter,
                                          UnaryMaths, BinaryMaths, MultiImageMaths)
-
-import nose
-
-
-def setup():
-    print 'test setup'
-    if no_fsl():
-        raise nose.SkipTest
-
-def teardown():
-    print 'test teardown'
