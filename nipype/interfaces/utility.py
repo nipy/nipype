@@ -13,6 +13,7 @@ from nipype.interfaces.io import IOBase, add_traits
 from nipype.testing import assert_equal
 from nipype.utils.misc import getsource, create_function_from_source, dumps
 
+
 class IdentityInterface(IOBase):
     """Basic interface class generates identity mappings
 
@@ -20,7 +21,7 @@ class IdentityInterface(IOBase):
     --------
 
     >>> from nipype.interfaces.utility import IdentityInterface
-    >>> ii = IdentityInterface(fields=['a','b'], mandatory_inputs=False)
+    >>> ii = IdentityInterface(fields=['a', 'b'], mandatory_inputs=False)
     >>> ii.inputs.a
     <undefined>
 
@@ -33,7 +34,7 @@ class IdentityInterface(IOBase):
     >>> out.outputs.a
     'foo'
 
-    >>> ii2 = IdentityInterface(fields=['a','b'], mandatory_inputs=True)
+    >>> ii2 = IdentityInterface(fields=['a', 'b'], mandatory_inputs=True)
     >>> ii2.inputs.a = 'foo'
     >>> out = ii2.run() # doctest: +SKIP
     ValueError: IdentityInterface requires a value for input 'b' because it was listed in 'fields' Interface IdentityInterface failed to run.
@@ -41,7 +42,7 @@ class IdentityInterface(IOBase):
     input_spec = DynamicTraitedSpec
     output_spec = DynamicTraitedSpec
 
-    def __init__(self, fields=None, mandatory_inputs = True, **inputs):
+    def __init__(self, fields=None, mandatory_inputs=True, **inputs):
         super(IdentityInterface, self).__init__(**inputs)
         if fields is None or not fields:
             raise Exception('Identity Interface fields must be a non-empty list')
@@ -61,7 +62,7 @@ class IdentityInterface(IOBase):
         #manual mandatory inputs check
         if self._fields and self._mandatory_inputs:
             for key in self._fields:
-                value = getattr(self.inputs,key)
+                value = getattr(self.inputs, key)
                 if not isdefined(value):
                     msg = "%s requires a value for input '%s' because it was listed in 'fields'. \
                     You can turn off mandatory inputs checking by passing mandatory_inputs = False to the constructor." % \
@@ -75,11 +76,15 @@ class IdentityInterface(IOBase):
                 outputs[key] = val
         return outputs
 
+
 class MergeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     axis = traits.Enum('vstack', 'hstack', usedefault=True,
                 desc='direction in which to merge, hstack requires same number of elements in each input')
+
+
 class MergeOutputSpec(TraitedSpec):
     out = traits.List(desc='Merged output')
+
 
 class Merge(IOBase):
     """Basic interface class to merge inputs into a single list
@@ -90,7 +95,7 @@ class Merge(IOBase):
     >>> from nipype.interfaces.utility import Merge
     >>> mi = Merge(3)
     >>> mi.inputs.in1 = 1
-    >>> mi.inputs.in2 = [2,5]
+    >>> mi.inputs.in2 = [2, 5]
     >>> mi.inputs.in3 = 3
     >>> out = mi.run()
     >>> out.outputs.out
@@ -103,14 +108,14 @@ class Merge(IOBase):
     def __init__(self, numinputs=0, **inputs):
         super(Merge, self).__init__(**inputs)
         self.numinputs = numinputs
-        add_traits(self.inputs, ['in%d'%(i+1) for i in range(numinputs)])
+        add_traits(self.inputs, ['in%d' % (i + 1) for i in range(numinputs)])
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         out = []
         if self.inputs.axis == 'vstack':
             for idx in range(self.numinputs):
-                value = getattr(self.inputs, 'in%d'%(idx+1))
+                value = getattr(self.inputs, 'in%d' % (idx + 1))
                 if isdefined(value):
                     if isinstance(value, list):
                         out.extend(value)
@@ -118,9 +123,9 @@ class Merge(IOBase):
                         out.append(value)
         else:
             for i in range(len(filename_to_list(self.inputs.in1))):
-                out.insert(i,[])
+                out.insert(i, [])
                 for j in range(self.numinputs):
-                    out[i].append(filename_to_list(getattr(self.inputs, 'in%d'%(j+1)))[i])
+                    out[i].append(filename_to_list(getattr(self.inputs, 'in%d' % (j + 1)))[i])
         if out:
             outputs['out'] = out
         return outputs
@@ -134,9 +139,11 @@ class RenameInputSpec(DynamicTraitedSpec):
                                   desc="Python formatting string for output template")
     parse_string = traits.String(desc="Python regexp parse string to define replacement inputs")
 
+
 class RenameOutputSpec(TraitedSpec):
 
-    out_file = traits.File(exists=True,desc="softlink to original file with new name")
+    out_file = traits.File(exists=True, desc="softlink to original file with new name")
+
 
 class Rename(IOBase):
     """Change the name of a file based on a mapped format string.
@@ -205,7 +212,7 @@ class Rename(IOBase):
             fmt_string = "".join([self.inputs.format_string, split_filename(self.inputs.in_file)[2]])
         else:
             fmt_string = self.inputs.format_string
-        return fmt_string%fmt_dict
+        return fmt_string % fmt_dict
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
@@ -217,11 +224,13 @@ class Rename(IOBase):
         outputs["out_file"] = os.path.join(os.getcwd(), self._rename())
         return outputs
 
+
 class SplitInputSpec(BaseInterfaceInputSpec):
     inlist = traits.List(traits.Any, mandatory=True,
                   desc='list of values to split')
     splits = traits.List(traits.Int, mandatory=True,
                   desc='Number of outputs in each split - should add to number of inputs')
+
 
 class Split(IOBase):
     """Basic interface class to split lists into multiple outputs
@@ -231,7 +240,7 @@ class Split(IOBase):
 
     >>> from nipype.interfaces.utility import Split
     >>> sp = Split()
-    >>> _ = sp.inputs.set(inlist=[1,2,3],splits=[2,1])
+    >>> _ = sp.inputs.set(inlist=[1, 2, 3], splits=[2, 1])
     >>> out = sp.run()
     >>> out.outputs.out1
     [1, 2]
@@ -244,7 +253,7 @@ class Split(IOBase):
     def _add_output_traits(self, base):
         undefined_traits = {}
         for i in range(len(self.inputs.splits)):
-            key = 'out%d'%(i+1)
+            key = 'out%d' % (i + 1)
             base.add_trait(key, traits.Any)
             undefined_traits[key] = Undefined
         base.trait_set(trait_change_notify=False, **undefined_traits)
@@ -258,9 +267,10 @@ class Split(IOBase):
             splits = [0]
             splits.extend(self.inputs.splits)
             splits = np.cumsum(splits)
-            for i in range(len(splits)-1):
-                outputs['out%d'%(i+1)] =  np.array(self.inputs.inlist)[splits[i]:splits[i+1]].tolist()
+            for i in range(len(splits) - 1):
+                outputs['out%d' % (i + 1)] = np.array(self.inputs.inlist)[splits[i]:splits[i + 1]].tolist()
         return outputs
+
 
 class SelectInputSpec(BaseInterfaceInputSpec):
     inlist = InputMultiPath(traits.Any, mandatory=True,
@@ -268,9 +278,10 @@ class SelectInputSpec(BaseInterfaceInputSpec):
     index = InputMultiPath(traits.Int, mandatory=True,
                   desc='0-based indices of values to choose')
 
+
 class SelectOutputSpec(TraitedSpec):
-    out = OutputMultiPath(traits.Any,
-                          desc='list of selected values')
+    out = OutputMultiPath(traits.Any, desc='list of selected values')
+
 
 class Select(IOBase):
     """Basic interface class to select specific elements from a list
@@ -280,12 +291,12 @@ class Select(IOBase):
 
     >>> from nipype.interfaces.utility import Select
     >>> sl = Select()
-    >>> _ = sl.inputs.set(inlist=[1,2,3,4,5],index=[3])
+    >>> _ = sl.inputs.set(inlist=[1, 2, 3, 4, 5], index=[3])
     >>> out = sl.run()
     >>> out.outputs.out
     4
 
-    >>> _ = sl.inputs.set(inlist=[1,2,3,4,5],index=[3,4])
+    >>> _ = sl.inputs.set(inlist=[1, 2, 3, 4, 5], index=[3, 4])
     >>> out = sl.run()
     >>> out.outputs.out
     [4, 5]
@@ -301,8 +312,10 @@ class Select(IOBase):
         outputs['out'] = out
         return outputs
 
+
 class FunctionInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     function_str = traits.Str(mandatory=True, desc='code for function')
+
 
 class Function(IOBase):
     """Runs arbitrary function as an interface
@@ -360,7 +373,7 @@ class Function(IOBase):
                 function_source = getsource(new)
             elif isinstance(new, str):
                 function_source = dumps(new)
-            self.inputs.trait_set(trait_change_notify=False, **{'%s'%name:function_source})
+            self.inputs.trait_set(trait_change_notify=False, **{'%s' % name: function_source})
 
     def _add_output_traits(self, base):
         undefined_traits = {}
@@ -403,6 +416,7 @@ class Function(IOBase):
 class AssertEqualInputSpec(BaseInterfaceInputSpec):
     volume1 = File(exists=True, mandatory=True)
     volume2 = File(exists=True, mandatory=True)
+
 
 class AssertEqual(BaseInterface):
     input_spec = AssertEqualInputSpec
