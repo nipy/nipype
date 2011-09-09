@@ -60,7 +60,7 @@ test-doc:
 	--doctest-fixtures=_fixture doc/
 
 test-coverage:
-	$(NOSETESTS) -s --with-coverage --cover-html --cover-html-dir=coverage \
+	$(NOSETESTS) -s --with-doctest --with-coverage --cover-html --cover-html-dir=coverage \
 	--cover-package=nipype nipype
 
 test: test-code
