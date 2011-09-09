@@ -772,7 +772,7 @@ class MRIsConvert(FSCommand):
             _, name, ext = split_filename(self.inputs.parcstats_file)
         elif isdefined(self.inputs.label_file):
             _, name, ext = split_filename(self.inputs.label_file)
-        elif isdefied(self.inputs.scalarcurv_file):
+        elif isdefined(self.inputs.scalarcurv_file):
             _, name, ext = split_filename(self.inputs.scalarcurv_file)
         elif isdefined(self.inputs.functional_file):
             _, name, ext = split_filename(self.inputs.functional_file)

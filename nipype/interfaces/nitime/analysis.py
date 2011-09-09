@@ -16,10 +16,9 @@ import tempfile
 from nipype.utils.misc import package_check
 package_check('matplotlib')
 
-from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
-                                    OutputMultiPath, Undefined, traits,
+from nipype.interfaces.base import (TraitedSpec, File, Undefined, traits,
                                     BaseInterface, isdefined,
-    BaseInterfaceInputSpec)
+                                    BaseInterfaceInputSpec)
 
 from nipype.utils.filemanip import fname_presuffix
 

@@ -75,8 +75,8 @@ class PickAtlas(BaseInterface):
             labels = [self.inputs.labels]
         else:
             labels = self.inputs.labels
-        for label in labels:
-            newdata[origdata == label] = 1
+        for lab in labels:
+            newdata[origdata == lab] = 1
         if self.inputs.hemi == 'right':
             newdata[floor(float(origdata.shape[0]) / 2):, :, :] = 0
         elif self.inputs.hemi == 'left':

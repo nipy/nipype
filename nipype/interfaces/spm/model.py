@@ -28,7 +28,7 @@ from nipype.interfaces.base import (Bunch, traits, TraitedSpec, File, Directory,
 from nipype.interfaces.spm.base import (SPMCommand, SPMCommandInputSpec,
                                         scans_for_fnames)
 from nipype.utils.filemanip import (filename_to_list, list_to_filename,
-                                    loadflat, split_filename)
+                                    split_filename)
 
 logger = logging.getLogger('spmlogger')
 
