@@ -10,12 +10,11 @@ Interfaces to functionality from nitime for time-series analysis of fmri data
 
 """
 
+import warnings
 import numpy as np
 import tempfile
 from nipype.utils.misc import package_check
-package_check('nitime')
 package_check('matplotlib')
-
 
 from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
                                     OutputMultiPath, Undefined, traits,
@@ -24,10 +23,18 @@ from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
 
 from nipype.utils.filemanip import fname_presuffix
 
-import nitime.analysis as nta
-from nitime.timeseries import TimeSeries
-import nitime.viz as viz
-    
+have_nitime = True
+try:
+    package_check('nitime')
+except Exception, e:
+    have_nitime = False
+    warnings.warn('nitime not installed')
+else:
+    import nitime.analysis as nta
+    from nitime.timeseries import TimeSeries
+    import nitime.viz as viz
+
+
 class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
 
     #Input either csv file, or time-series object and use _xor_inputs to

@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import tempfile
-import warnings
 
 import numpy as np
 from matplotlib.mlab import csv2rec
@@ -12,14 +11,9 @@ from nipype.testing import (assert_equal, assert_raises, skipif)
 
 from nipype.testing import example_data
 
-import nipype.interfaces.nitime as nitime 
+import nipype.interfaces.nitime as nitime
 
-no_nitime = True
-try:
-    package_check('nitime')
-    no_nitime = False
-except Exception, e:
-    warnings.warn('nitime not installed. Tests will be skipped')
+no_nitime = not nitime.analysis.have_nitime
 
 
 @skipif(no_nitime)
