@@ -28,7 +28,6 @@ warnings.filterwarnings('always', category=UserWarning)
 
 
 class BETInputSpec(FSLCommandInputSpec):
-    """"""
     # We use position args here as list indices - so a negative number
     # will put something on the end
     in_file = File(exists=True,
@@ -667,7 +666,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
     skip_inmask = traits.Bool(argstr='--applyinmask=0', xor=['apply_inmask'],
                              desc='skip specified inmask if set, default false')
     apply_refmask = traits.List(traits.Enum(0, 1), argstr='--applyrefmask=%s', xor=['skip_refmask'],
-              desc='list of iterations to use reference mask on (1 to use, 0 to skip)', sep=", ")
+              desc='list of iterations to use reference mask on (1 to use, 0 to skip)', sep=",")
     apply_inmask = traits.List(traits.Enum(0, 1), argstr='--applyinmask=%s', xor=['skip_inmask'],
               desc='list of iterations to use input mask on (1 to use, 0 to skip)', sep=",")
     skip_implicit_ref_masking = traits.Bool(argstr='--imprefm 0',
