@@ -40,7 +40,7 @@ subject_list = ['s1']
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
 
-"""Here we set up iteration over all the subjects. 
+"""Here we set up iteration over all the subjects.
 """
 
 infosource.iterables = ('subject_id', subject_list)

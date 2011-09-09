@@ -42,7 +42,7 @@ def grab_doc(cmd, trap_error=True):
     if trap_error and proc.returncode:
         msg = 'Attempting to run %s. Returned Error: %s'%(cmd,stderr)
         raise IOError(msg)
-    
+
     if stderr:
         # A few programs, like fast and fnirt, send their help to
         # stderr instead of stdout.
@@ -58,7 +58,7 @@ def reverse_opt_map(opt_map):
     opt_map : dict
         Dictionary mapping the attribute name to a command line flag.
         Each interface class defines these for the command it wraps.
-        
+
     Returns
     -------
     rev_opt_map : dict
@@ -139,7 +139,7 @@ def insert_doc(doc, new_items):
     >>> from nipype.utils.docparse import insert_doc
     >>> doc = '''Parameters
     ... ----------
-    ... outline : 
+    ... outline :
     ...     something about an outline'''
 
     >>> new_items = ['infile : str', '    The name of the input file']
@@ -152,7 +152,7 @@ def insert_doc(doc, new_items):
         The name of the input file
     outfile : str
         The name of the output file
-    outline : 
+    outline :
         something about an outline
 
     """
@@ -192,7 +192,7 @@ def build_doc(doc, opts):
         formated to match nipy standards (as best we can).
 
     """
-    
+
     # Split doc into line elements.  Generally, each line is an
     # individual flag/option.
     doclist = doc.split('\n')
@@ -229,7 +229,7 @@ def build_doc(doc, opts):
 
 def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
     """Get the docstring from our command and options map.
-    
+
     Parameters
     ----------
     cmd : string
@@ -239,7 +239,7 @@ def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
     help_flag : string
         Provide additional help flag. e.g., -h
     trap_error : boolean
-        Override if underlying command returns a non-zero returncode 
+        Override if underlying command returns a non-zero returncode
 
     Returns
     -------
@@ -271,7 +271,7 @@ def _parse_doc(doc, style=['--']):
     -------
     optmap : dict of input parameters
     """
-    
+
     # Split doc into line elements.  Generally, each line is an
     # individual flag/option.
     doclist = doc.split('\n')
@@ -301,18 +301,18 @@ def _parse_doc(doc, style=['--']):
 
 def get_params_from_doc(cmd, style='--', help_flag=None, trap_error=True):
     """Auto-generate option map from command line help
-    
+
     Parameters
     ----------
     cmd : string
         The command whose documentation we are fetching
     style : string default ['--']
         The help command style (--, -). Multiple styles can be provided in a
-        list e.g. ['--','-']. 
+        list e.g. ['--','-'].
     help_flag : string
         Provide additional help flag. e.g., -h
     trap_error : boolean
-        Override if underlying command returns a non-zero returncode 
+        Override if underlying command returns a non-zero returncode
 
     Returns
     -------
@@ -331,7 +331,7 @@ def get_params_from_doc(cmd, style='--', help_flag=None, trap_error=True):
 
 def replace_opts(rep_doc, opts):
     """Replace flags with parameter names.
-    
+
     This is a simple operation where we replace the command line flags
     with the attribute names.
 
@@ -347,7 +347,7 @@ def replace_opts(rep_doc, opts):
     -------
     rep_doc : string
         New docstring with flags replaces with attribute names.
-    
+
     Examples
     --------
     doc = grab_doc('bet')

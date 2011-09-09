@@ -118,6 +118,6 @@ pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                   (datasource,reslice,[('func','inputVolume')]),
                   (datasource,reslice,[('struct','referenceVolume')])
                   ])
-                    
+
 pipeline.run()
 pipeline.write_graph()

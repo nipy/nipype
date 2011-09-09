@@ -95,7 +95,7 @@ def add_traits(base, names, trait_type=None):
     return base
 
 class IOBase(BaseInterface):
-    
+
     def _run_interface(self,runtime):
         return runtime
 
@@ -1051,15 +1051,15 @@ class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 class SQLiteSink(IOBase):
     """Very simple frontend for storing values into SQLite database. input_names
     correspond to input_names.
-    
+
         Notes
         -----
 
             Unlike most nipype-nodes this is not a thread-safe node because it can
-            write to a common shared location. When run in parallel it will 
+            write to a common shared location. When run in parallel it will
             occasionally crash.
-            
-    
+
+
         Examples
         --------
 
@@ -1069,12 +1069,12 @@ class SQLiteSink(IOBase):
         >>> sql.inputs.subject_id = 's1'
         >>> sql.inputs.some_measurement = 11.4
         >>> sql.run() # doctest: +SKIP
-        
+
     """
     input_spec = SQLiteSinkInputSpec
-    
+
     def __init__(self, input_names, **inputs):
-        
+
         super(SQLiteSink, self).__init__(**inputs)
 
         self._input_names = filename_to_list(input_names)
@@ -1085,7 +1085,7 @@ class SQLiteSink(IOBase):
         """
         conn = sqlite3.connect(self.inputs.database_file, check_same_thread = False)
         c = conn.cursor()
-        c.execute("INSERT OR REPLACE INTO %s ("%self.inputs.table_name + ",".join(self._input_names) + ") VALUES (" + ",".join(["?"]*len(self._input_names)) + ")", 
+        c.execute("INSERT OR REPLACE INTO %s ("%self.inputs.table_name + ",".join(self._input_names) + ") VALUES (" + ",".join(["?"]*len(self._input_names)) + ")",
                   [getattr(self.inputs,name) for name in self._input_names])
         conn.commit()
         c.close()

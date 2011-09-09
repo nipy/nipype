@@ -20,7 +20,7 @@ from nipype.interfaces.base import (TraitedSpec, File, traits, CommandLine,
 class HARDIMatInputSpec(CommandLineInputSpec):
     bvecs = File(exists=True, desc = 'b vectors file',
                 argstr='%s', position=1, mandatory=True)
-    bvals = File(exists=True,desc = 'b values file', mandatory=True)   
+    bvals = File(exists=True,desc = 'b values file', mandatory=True)
     out_file = File("recon_mat.dat", desc = 'output matrix file', argstr='%s', usedefault=True, position=2)
     order = traits.Int(argsstr='-order %s', desc="""maximum order of spherical harmonics. must be even number. default
         is 4""")
@@ -30,7 +30,7 @@ class HARDIMatInputSpec(CommandLineInputSpec):
         figure out the image orientation information. if no such info was
         found in the given image header, the next 5 options -info, etc.,
         will be used if provided. if image orientation info can be found
-        in the given reference, all other 5 image orientation options will 
+        in the given reference, all other 5 image orientation options will
         be IGNORED""")
     image_info = File(exists=True, argstr='-info %s', desc="""specify image information file. the image info file is generated
         from original dicom image by diff_unpack program and contains image
@@ -42,23 +42,23 @@ class HARDIMatInputSpec(CommandLineInputSpec):
         numbers and construct the 1st and 2nd vector and calculate the 3rd
         one automatically.
         this information will be used to determine image orientation,
-        as well as to adjust gradient vectors with oblique angle when""", argstr="-iop %f")    
+        as well as to adjust gradient vectors with oblique angle when""", argstr="-iop %f")
     oblique_correction = traits.Bool(desc="""when oblique angle(s) applied, some SIEMENS dti protocols do not
         adjust gradient accordingly, thus it requires adjustment for correct
         diffusion tensor calculation""", argstr="-oc")
 
 class HARDIMatOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='output matrix file')
-    
+
 
 class HARDIMat(CommandLine):
     """Use hardi_mat to calculate a reconstruction matrix from a gradient table
     """
     input_spec=HARDIMatInputSpec
     output_spec=HARDIMatOutputSpec
-    
+
     _cmd = 'hardi_mat'
-    
+
     def _create_gradient_matrix(self, bvecs_file, bvals_file):
         _gradient_matrix_file = 'gradient_matrix.txt'
         bvals = [val for val in  re.split('\s+', open(bvals_file).readline().strip())]
@@ -74,7 +74,7 @@ class HARDIMat(CommandLine):
             gradient_matrix_f.write("%s %s %s\n"%(bvecs_x[i], bvecs_y[i], bvecs_z[i]))
         gradient_matrix_f.close()
         return _gradient_matrix_file
-    
+
     def _format_arg(self, name, spec, value):
         if name == "bvecs":
             new_val = self._create_gradient_matrix(self.inputs.bvecs, self.inputs.bvals)
@@ -96,7 +96,7 @@ class ODFReconInputSpec(CommandLineInputSpec):
         from the number of directions and number of volumes in
         the raw data. useful when dealing with incomplete raw
         data set or only using part of raw data set to reconstruct""", mandatory=True)
-    output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-ot %s', desc='output file type', usedefault=True)    
+    output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-ot %s', desc='output file type', usedefault=True)
     sharpness = traits.Float(desc="""smooth or sharpen the raw data. factor > 0 is smoothing.
         factor < 0 is sharpening. default value is 0
         NOTE: this option applies to DSI study only""", argstr='-s %f')
@@ -114,8 +114,8 @@ class ODFReconInputSpec(CommandLineInputSpec):
     oblique_correction = traits.Bool(desc="""when oblique angle(s) applied, some SIEMENS dti protocols do not
         adjust gradient accordingly, thus it requires adjustment for correct
         diffusion tensor calculation""", argstr="-oc")
-   
-    
+
+
 class ODFReconOutputSpec(TraitedSpec):
     B0 = File(exists=True)
     DWI = File(exists=True)
@@ -126,12 +126,12 @@ class ODFReconOutputSpec(TraitedSpec):
 class ODFRecon(CommandLine):
     """Use odf_recon to generate tensors and other maps
     """
-    
+
     input_spec=ODFReconInputSpec
     output_spec=ODFReconOutputSpec
-    
+
     _cmd = 'odf_recon'
-        
+
     def _list_outputs(self):
         out_prefix = self.inputs.out_prefix
         output_type = self.inputs.output_type
@@ -143,7 +143,7 @@ class ODFRecon(CommandLine):
         outputs['ODF'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_odf.'+ output_type))
         if isdefined(self.inputs.output_entropy):
             outputs['entropy'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_entropy.'+ output_type))
-       
+
         return outputs
 
 class ODFTrackerInputSpec(CommandLineInputSpec):
@@ -197,31 +197,31 @@ class ODFTrackerInputSpec(CommandLineInputSpec):
         sagittal image is PIL.
         this information also is NOT needed for tracking but will be saved
         in the track file and is essential for track display to map onto
-        the right coordinates""") 
-    
+        the right coordinates""")
+
 class ODFTrackerOutputSpec(TraitedSpec):
     track_file = File(exists=True, desc='output track file')
 
 class ODFTracker(CommandLine):
     """Use odf_tracker to generate track file
     """
-    
+
     input_spec=ODFTrackerInputSpec
     output_spec=ODFTrackerOutputSpec
-    
+
     _cmd = 'odf_tracker'
 
     def _run_interface(self, runtime):
         _, _, ext = split_filename(self.inputs.max)
         copyfile(self.inputs.max, os.path.abspath(self.inputs.input_data_prefix + "_max" + ext), copy=False)
-        
+
         _, _, ext = split_filename(self.inputs.ODF)
         copyfile(self.inputs.ODF, os.path.abspath(self.inputs.input_data_prefix + "_odf" + ext), copy=False)
-        
+
         return super(ODFTracker, self)._run_interface(runtime)
-        
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['track_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
-    
+

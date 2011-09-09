@@ -93,7 +93,7 @@ class PluginBase(object):
 class DistributedPluginBase(PluginBase):
     """Execute workflow with a distribution engine
     """
-    
+
     def __init__(self, plugin_args=None):
         """Initialize runtime attributes to none
 
@@ -315,7 +315,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         """Submit a task to the batch system
         """
         raise NotImplementedError
-    
+
     def _get_result(self, taskid):
         if taskid not in self._pending:
             raise Exception('Task %d not found'%taskid)

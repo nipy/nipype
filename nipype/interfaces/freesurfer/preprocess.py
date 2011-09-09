@@ -42,7 +42,7 @@ class ParseDICOMDirOutputSpec(TraitedSpec):
 
 class ParseDICOMDir(FSCommand):
     """Uses mri_parse_sdcmdir to get information from dicom directories
-    
+
     Examples
     --------
 
@@ -53,13 +53,13 @@ class ParseDICOMDir(FSCommand):
     >>> dcminfo.inputs.summarize = True
     >>> dcminfo.cmdline
     'mri_parse_sdcmdir --d . --o dicominfo.txt --sortbyrun --summarize'
-    
+
    """
 
     _cmd = 'mri_parse_sdcmdir'
     input_spec = ParseDICOMDirInputSpec
     output_spec = ParseDICOMDirOutputSpec
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.dicom_info_file):
@@ -251,7 +251,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
                   position=-2,
                   argstr='--input_volume %s',
                   desc='File to read/convert')
-    out_file = File(argstr='--output_volume %s', 
+    out_file = File(argstr='--output_volume %s',
                    position=-1, genfile=True,
                    desc='output filename or True to generate one')
     conform = traits.Bool(argstr='--conform',
@@ -327,7 +327,7 @@ class MRIConvert(FSCommand):
     >>> mc.inputs.out_type = 'mgz'
     >>> mc.cmdline
     'mri_convert --out_type mgz --input_volume structural.nii --output_volume outfile.mgz'
-    
+
     """
     _cmd = 'mri_convert'
     input_spec = MRIConvertInputSpec
@@ -344,7 +344,7 @@ class MRIConvert(FSCommand):
             if value == 'niigz':
                 return spec.argstr % 'nii'
         return super(MRIConvert, self)._format_arg(name, spec, value)
-    
+
     def _get_outfilename(self):
         outfile = self.inputs.out_file
         if not isdefined(outfile):
@@ -357,7 +357,7 @@ class MRIConvert(FSCommand):
                                       suffix=suffix,
                                       use_ext=False)
         return outfile
-        
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outfile = self._get_outfilename()
@@ -401,7 +401,7 @@ class MRIConvert(FSCommand):
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._get_outfilename()
-        return None    
+        return None
 
 class DICOMConvertInputSpec(FSTraitedSpec):
     dicom_dir = Directory(exists=True, mandatory=True,
@@ -530,17 +530,17 @@ class ResampleInputSpec(FSTraitedSpec):
     voxel_size = traits.Tuple(traits.Float, traits.Float, traits.Float,
                        argstr='-vs %.2f %.2f %.2f', desc='triplet of output voxel sizes',
                               mandatory=True)
-        
+
 class ResampleOutputSpec(TraitedSpec):
     resampled_file = File(exists=True,
                    desc='output filename')
-    
+
 class Resample(FSCommand):
     """Use FreeSurfer mri_convert to up or down-sample image files
 
     Examples
     --------
-    
+
     >>> from nipype.interfaces import freesurfer
     >>> resampler = freesurfer.Resample()
     >>> resampler.inputs.in_file = 'structural.nii'
@@ -548,7 +548,7 @@ class Resample(FSCommand):
     >>> resampler.inputs.voxel_size = (2.1, 2.1, 2.1)
     >>> resampler.cmdline
     'mri_convert -vs 2.10 2.10 2.10 -i structural.nii -o resampled.nii'
-    
+
     """
 
     _cmd = 'mri_convert'
@@ -563,13 +563,13 @@ class Resample(FSCommand):
                                       newpath = os.getcwd(),
                                       suffix='_resample')
         return outfile
-            
-        
+
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['resampled_file'] = self._get_outfilename()
         return outputs
-    
+
     def _gen_filename(self, name):
         if name == 'resampled_file':
             return self._get_outfilename()
@@ -580,7 +580,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
                             usedefault=True)
     directive = traits.Enum('all', 'autorecon1', 'autorecon2', 'autorecon2-cp',
                             'autorecon2-wm', 'autorecon2-inflate1', 'autorecon2-perhemi',
-                            'autorecon3', 'localGI', 'qcache', argstr='-%s', 
+                            'autorecon3', 'localGI', 'qcache', argstr='-%s',
                             desc='process directive', usedefault=True)
     hemi = traits.Enum('lh', 'rh', desc='hemisphere to process', argstr="-hemi %s")
     T1_files = InputMultiPath(File(exists=True), argstr='-i %s...',
@@ -588,18 +588,18 @@ class ReconAllInputSpec(CommandLineInputSpec):
     subjects_dir = Directory(exists=True, argstr='-sd %s',
                              desc='path to subjects directory', genfile=True)
     flags = traits.Str(argstr='%s', desc='additional parameters')
-    
+
 class ReconAllIOutputSpec(FreeSurferSource.output_spec):
     subjects_dir = Directory(exists=True, desc='Freesurfer subjects directory.')
     subject_id = traits.Str(desc='Subject name for whom to retrieve data')
 
 class ReconAll(CommandLine):
     """Uses recon-all to generate surfaces and parcellations of structural data
-    from anatomical images of a subject. 
+    from anatomical images of a subject.
 
     Examples
     --------
-    
+
     >>> from nipype.interfaces.freesurfer import ReconAll
     >>> reconall = ReconAll()
     >>> reconall.inputs.subject_id = 'foo'
@@ -608,13 +608,13 @@ class ReconAll(CommandLine):
     >>> reconall.inputs.T1_files = 'structural.nii'
     >>> reconall.cmdline
     'recon-all -i structural.nii -all -subjid foo -sd .'
-    
+
     """
 
     _cmd = 'recon-all'
     input_spec = ReconAllInputSpec
     output_spec = ReconAllIOutputSpec
-    
+
     def _gen_subjects_dir(self):
         return os.getcwd()
 
@@ -631,14 +631,14 @@ class ReconAll(CommandLine):
             subjects_dir = self.inputs.subjects_dir
         else:
             subjects_dir = self._gen_subjects_dir()
-            
+
         if isdefined(self.inputs.hemi):
             hemi = self.inputs.hemi
         else:
             hemi = 'both'
-            
+
         outputs = self._outputs().get()
-        
+
         outputs.update(FreeSurferSource(subject_id=self.inputs.subject_id,
                          subjects_dir=subjects_dir, hemi=hemi)._list_outputs())
         outputs['subject_id'] = self.inputs.subject_id
@@ -662,7 +662,7 @@ class BBRegisterInputSpec(FSTraitedSpec):
                       genfile=True)
     spm_nifti = traits.Bool(argstr="--spm-nii",
                             desc="force use of nifti rather than analyze with SPM")
-    epi_mask = traits.Bool(argstr="--epi-mask",desc="mask out B0 regions in stages 1 and 2")  
+    epi_mask = traits.Bool(argstr="--epi-mask",desc="mask out B0 regions in stages 1 and 2")
     out_fsl_file = traits.Either(traits.Bool, File, argstr="--fslmat %s",
                                  desc="write the transformation matrix in FSL FLIRT format")
     registered_file = traits.Either(traits.Bool, File, argstr='--o %s',
@@ -684,7 +684,7 @@ class BBRegister(FSCommand):
 
     Examples
     --------
-    
+
     >>> from nipype.interfaces.freesurfer import BBRegister
     >>> bbreg = BBRegister(subject_id='me', source_file='structural.nii', init='header', contrast_type='t2')
     >>> bbreg.cmdline
@@ -695,7 +695,7 @@ class BBRegister(FSCommand):
     _cmd = 'bbregister'
     input_spec = BBRegisterInputSpec
     output_spec =  BBRegisterOutputSpec
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_reg_file'] = self.inputs.out_reg_file
@@ -724,11 +724,11 @@ class BBRegister(FSCommand):
                 fname = value
             return spec.argstr % fname
         return super(BBRegister, self)._format_arg(name, spec, value)
-    
+
     def _gen_filename(self, name):
         if name == 'out_reg_file':
             return self._list_outputs()[name]
-        return None    
+        return None
 
 class ApplyVolTransformInputSpec(FSTraitedSpec):
     source_file = File(exists = True, argstr = '--mov %s',
@@ -774,7 +774,7 @@ class ApplyVolTransform(FSCommand):
 
     Examples
     --------
-    
+
     >>> from nipype.interfaces.freesurfer import ApplyVolTransform
     >>> applyreg = ApplyVolTransform()
     >>> applyreg.inputs.source_file = 'structural.nii'
@@ -809,11 +809,11 @@ class ApplyVolTransform(FSCommand):
         outputs = self.output_spec().get()
         outputs['transformed_file'] = self._get_outfile()
         return outputs
-    
+
     def _gen_filename(self, name):
         if name == 'transformed_file':
             return self._get_outfile()
-        return None    
+        return None
 
 class SmoothInputSpec(FSTraitedSpec):
     in_file= File(exists=True, desc='source volume',
@@ -839,8 +839,8 @@ class SmoothInputSpec(FSTraitedSpec):
                             desc='volumesmoothing outside of surface')
 
 class SmoothOutputSpec(TraitedSpec):
-    smoothed_file= File(exist=True,desc='smoothed input volume')	
-         
+    smoothed_file= File(exist=True,desc='smoothed input volume')
+
 class Smooth(FSCommand):
     """Use FreeSurfer mris_volsmooth to smooth a volume
 
@@ -860,7 +860,7 @@ class Smooth(FSCommand):
     >>> smoothvol = Smooth(in_file='functional.nii', smoothed_file = 'foo_out.nii', reg_file='register.dat', surface_fwhm=10, vol_fwhm=6)
     >>> smoothvol.cmdline
     'mris_volsmooth --i functional.nii --reg register.dat --o foo_out.nii --fwhm 10 --vol-fwhm 6'
-    
+
     """
 
     _cmd = 'mris_volsmooth'
@@ -918,7 +918,7 @@ class RobustRegisterInputSpec(FSTraitedSpec):
     no_init = traits.Bool(argstr='--noinit',desc='skip transform init')
     init_orient = traits.Bool(argstr='--initorient',
                   desc='use moments for initial orient (recommended for stripped brains)')
-    max_iterations = traits.Int(argstr='--maxit %d', 
+    max_iterations = traits.Int(argstr='--maxit %d',
                                 desc='maximum # of times on each resolution')
     high_iterations = traits.Int(argstr='--highit %d',
                                  desc='max # of times on highest resolution')
@@ -974,7 +974,7 @@ class RobustRegister(FSCommand):
     _cmd = 'mri_robust_register'
     input_spec = RobustRegisterInputSpec
     output_spec = RobustRegisterOutputSpec
-    
+
     def _format_arg(self, name, spec, value):
         for option in ["registered_file", "weights_file", "half_source", "half_targ",
                        "half_weights", "half_source_xfm", "half_targ_xfm"]:
@@ -1016,7 +1016,7 @@ class RobustRegister(FSCommand):
     def _gen_filename(self, name):
         if name == 'out_reg_file':
             return self._list_outputs()[name]
-        return None    
+        return None
 
 class FitMSParamsInputSpec(FSTraitedSpec):
 
@@ -1025,7 +1025,7 @@ class FitMSParamsInputSpec(FSTraitedSpec):
     tr_list = traits.List(traits.Int, desc="list of TRs of the input files (in msec)")
     te_list = traits.List(traits.Float, desc="list of TEs of the input files (in msec)")
     flip_list = traits.List(traits.Int, desc="list of flip angles of the input files")
-    xfm_list = traits.List(File, exists=True, 
+    xfm_list = traits.List(File, exists=True,
                            desc="list of transform files to apply to each FLASH image")
     out_dir = Directory(argstr="%s",position=-1, genfile=True,
                               desc="directory to store output in")

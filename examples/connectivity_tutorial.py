@@ -29,7 +29,7 @@ library installed as well as the Connectome Mapper.
 These are written by Stephan Gerhard and can be obtained from:
 
     http://www.cmtk.org/
-    
+
 Or on github at:
 
     CFFlib: https://github.com/LTS5/cfflib

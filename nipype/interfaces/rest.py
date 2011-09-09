@@ -257,7 +257,7 @@ class XnatFile:
         fd.write(self.interface.execute_get("'%s'"%(self.uri)))
         fd.close()
 
-        return local_destination        
+        return local_destination
 
 #    def delete(self):
 #        self.interface.execute_delete(self.uri+'?removeFiles=true')
@@ -271,7 +271,7 @@ if __name__ == '__main__':
 
     #
     # most of the methods exists for all the classes. The main entry point is the XnatInterface class from which you can list and get XnatProjects.
-    # XnatProjects can do the same for XnatSubjects and so on... here are the classes and their structure: 
+    # XnatProjects can do the same for XnatSubjects and so on... here are the classes and their structure:
     #
     # XnatInterface
     #   - XnatProject
@@ -296,12 +296,12 @@ if __name__ == '__main__':
 
     # returns the list of subjects
     interface.project('Volatile').subjects()
-    
+
     # tests if the subject exists
     interface.project('Volatile').subject('060000126321').exists()
 
     # to get an experiment:
-    interface.project('Volatile').subject('060000126321').experiment('SessionB_060000126321') 
+    interface.project('Volatile').subject('060000126321').experiment('SessionB_060000126321')
     # OR
     XnatEperiment('Volatile', '060000126321', 'SessionB_060000126321', interface)
 

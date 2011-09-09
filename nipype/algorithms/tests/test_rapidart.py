@@ -1,6 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from nipype.testing import (assert_equal, assert_false, assert_true, 
+from nipype.testing import (assert_equal, assert_false, assert_true,
                             assert_raises, assert_almost_equal)
 import nipype.algorithms.rapidart as ra
 from nipype.interfaces.base import Bunch
@@ -101,11 +101,11 @@ def test_sc_populate_inputs():
                    spm_mat_file=None,
                    concatenated_design=None)
     yield assert_equal, sc.inputs.__dict__.keys(), inputs.__dict__.keys()
-    
+
 def test_sc_output_filenames():
     sc = ra.StimulusCorrelation()
     outputdir = '/tmp'
     f = 'motion.nii'
     corrfile = sc._get_output_filenames(f,outputdir)
     yield assert_equal, corrfile, '/tmp/qa.motion_stimcorr.txt'
-    
+

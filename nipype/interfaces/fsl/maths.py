@@ -13,7 +13,7 @@ from nipype.interfaces.base import (TraitedSpec, File, traits, InputMultiPath,
 
 
 class MathsInput(FSLCommandInputSpec):
-    
+
     in_file = File(position=2, argstr="%s", exists=True, mandatory=True,
                 desc="image to operate on")
     out_file = File(genfile=True, position=-2, argstr="%s", desc="image to write")
@@ -57,7 +57,7 @@ class ChangeDataTypeInput(MathsInput):
 
 class ChangeDataType(MathsCommand):
     """Use fslmaths to change the datatype of an image.
-    
+
     """
     input_spec = ChangeDataTypeInput
     _suffix = "_chdt"
@@ -74,7 +74,7 @@ class ThresholdInputSpec(MathsInput):
 
 class Threshold(MathsCommand):
     """Use fslmaths to apply a threshold to an image in a variety of ways.
-   
+
     """
     input_spec = ThresholdInputSpec
     _suffix = "_thresh"
@@ -166,7 +166,7 @@ class DilateImage(MathsCommand):
         return super(DilateImage, self)._format_arg(name, spec, value)
 
 class ErodeInput(KernelInput):
-    
+
     minimum_filter = traits.Bool(argstr="%s", position=5, usedefault=True, default_value=False,
                                  desc="if true, minimum filter rather than erosion by zeroing-out")
 
@@ -191,13 +191,13 @@ class SpatialFilterInput(KernelInput):
 
 class SpatialFilter(MathsCommand):
     """Use fslmaths to spatially filter an image.
-    
+
     """
     input_spec = SpatialFilterInput
     _suffix = "_filt"
 
 class UnaryMathsInput(MathsInput):
-    
+
     operation = traits.Enum("exp", "log", "sin", "cos", "sqr", "sqrt", "recip", "abs", "bin", "index",
                             argstr="-%s", position=3, mandatory=True,
                             desc="operation to perform")
@@ -258,7 +258,7 @@ class MultiImageMaths(MathsCommand):
         return super(MultiImageMaths, self)._format_arg(name, spec, value)
 
 class TemporalFilterInput(MathsInput):
-    
+
     lowpass_sigma = traits.Float(-1, argstr="%.6f", position=4, usedefault=True,
                                  desc="lowpass filter sigma (in volumes)")
     highpass_sigma = traits.Float(-1, argstr="-bptf %.6f", position=3, usedefault=True,

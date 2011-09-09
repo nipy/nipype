@@ -53,7 +53,8 @@ inplace:
 	$(PYTHON) setup.py build_ext -i
 
 test-code: in
-	$(NOSETESTS) -s nipype
+	$(NOSETESTS) -s nipype --with-doctest
+
 test-doc:
 	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \
 	--doctest-fixtures=_fixture doc/
@@ -62,5 +63,5 @@ test-coverage:
 	$(NOSETESTS) -s --with-coverage --cover-html --cover-html-dir=coverage \
 	--cover-package=nipype nipype
 
-test: test-code test-doc
+test: test-code
 

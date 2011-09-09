@@ -13,7 +13,7 @@ dirname = '/home/cburns/src/nipy-sf/nipype/trunk/'
 def run_cmd(cmd):
     print cmd
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE, 
+                            stderr=subprocess.PIPE,
                             env=os.environ,
                             shell=True)
     output, error = proc.communicate()
@@ -61,19 +61,19 @@ def setup_paths():
     # this.
     nx_path = os.path.join(pkg_path, 'networkx-0.99-py2.6.egg')
     sys.path.insert(2, nx_path)
-    twisted_path = os.path.join(pkg_path_64, 
+    twisted_path = os.path.join(pkg_path_64,
                                 'Twisted-8.2.0-py2.6-linux-x86_64.egg')
     sys.path.insert(2, twisted_path)
     zope_path = os.path.join(pkg_path_64,
                              'zope.interface-3.5.2-py2.6-linux-x86_64.egg')
     sys.path.insert(2, zope_path)
-    foolscap_path = os.path.join(pkg_path, 
+    foolscap_path = os.path.join(pkg_path,
                                  'foolscap-0.2.9-py2.6.egg')
     sys.path.insert(2, foolscap_path)
 
     # Define our PYTHONPATH variable
     os.environ['PYTHONPATH'] = ':'.join(sys.path)
-    
+
 if __name__ == '__main__':
     setup_paths()
     prev_dir = os.path.abspath(os.curdir)
