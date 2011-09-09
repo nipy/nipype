@@ -54,14 +54,17 @@ inplace:
 
 test-code: in
 	$(NOSETESTS) -s nipype --with-doctest
+	stty sane
 
 test-doc:
 	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \
 	--doctest-fixtures=_fixture doc/
+	stty sane
 
 test-coverage:
 	$(NOSETESTS) -s --with-doctest --with-coverage --cover-html --cover-html-dir=coverage \
 	--cover-package=nipype nipype
+	stty sane
 
 test: test-code
 

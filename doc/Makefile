@@ -23,7 +23,6 @@ help:
 	      		"items (ChangeLog)"
 	@echo "  linkcheck check all external links for integrity"
 	@echo "  doctest   run all doctests embedded in the documentation"
-	@echo "  sf_cburns copy html files to sourceforge (cburns only)"
 	@echo "  sf_satra copy html files to sourceforge (satra only)"
 
 clean:
@@ -43,6 +42,7 @@ api:
 
 html: examples2rst api htmlonly
 	@echo "Build HTML and API finished."
+	stty sane
 
 examples2rst:
 	python ../tools/ex2rst \
@@ -104,10 +104,6 @@ gitwash-update:
 # Sourceforge doesn't appear to have a way of copying the files
 # without specifying a username.  So we'll probably have one target
 # for each project admin
-sf_cburns:
-	@echo "Copying html files to sourceforge..."
-	scp -r _build/html/* cburns,nipy@web.sourceforge.net:htdocs/nipype/
-
 sf_satra_nightly: html
 	@echo "Copying html files to sourceforge..."
 	scp -r _build/html/* satra,nipy@web.sourceforge.net:htdocs/nipype-nightly/
