@@ -1,24 +1,31 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import tempfile
+import warnings
 
 import numpy as np
+from matplotlib.mlab import csv2rec
 
-from nipype.testing import (assert_equal, assert_not_equal, assert_raises)
+from nipype.utils.misc import package_check
+
+from nipype.testing import (assert_equal, assert_raises, skipif)
 
 from nipype.testing import example_data
 
 import nipype.interfaces.nitime as nitime 
 
-import nitime.analysis as nta
-import nitime.timeseries as ts
+no_nitime = True
+try:
+    package_check('nitime')
+    no_nitime = False
+except Exception, e:
+    warnings.warn('nitime not installed. Tests will be skipped')
 
-from matplotlib.mlab import csv2rec
 
+@skipif(no_nitime)
 def test_read_csv():
     """Test that reading the data from csv file gives you back a reasonable
     time-series object """
-
     CA = nitime.CoherenceAnalyzer()
     CA.inputs.TR = 1.89 # bogus value just to pass traits test
     CA.inputs.in_file = example_data('fmri_timeseries_nolabels.csv')
@@ -29,8 +36,12 @@ def test_read_csv():
     yield assert_equal, data[0][0],10125.9
     yield assert_equal, roi_names[0],'WM' 
 
+
+@skipif(no_nitime)
 def test_coherence_analysis():
     """Test that the coherence analyzer works """
+    import nitime.analysis as nta
+    import nitime.timeseries as ts
 
     #This is the nipype interface analysis:
     CA = nitime.CoherenceAnalyzer()
