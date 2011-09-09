@@ -25,8 +25,10 @@ class ComputeMaskInputSpec(BaseInterfaceInputSpec):
     M = traits.Float(desc="upper fraction of the histogram to be discarded")
     cc = traits.Bool(desc="if True, only the largest connect component is kept")
 
+
 class ComputeMaskOutputSpec(TraitedSpec):
     brain_mask = File(exists=True)
+
 
 class ComputeMask(BaseInterface):
     input_spec = ComputeMaskInputSpec
@@ -35,7 +37,7 @@ class ComputeMask(BaseInterface):
     def _run_interface(self, runtime):
 
         args = {}
-        for key in [k for k,_ in self.inputs.items() if k not in BaseInterfaceInputSpec().trait_names()]:
+        for key in [k for k, _ in self.inputs.items() if k not in BaseInterfaceInputSpec().trait_names()]:
             value = getattr(self.inputs, key)
             if isdefined(value):
                 if key in ['mean_volume', 'reference_volume']:
@@ -54,5 +56,3 @@ class ComputeMask(BaseInterface):
         outputs = self._outputs().get()
         outputs["brain_mask"] = self._brain_mask_path
         return outputs
-
-

@@ -91,7 +91,7 @@ def add_traits(base, names, trait_type=None):
     base.trait_set(trait_change_notify=False, **undefined_traits)
     # access each trait
     for key in names:
-        value = getattr(base, key)
+        _ = getattr(base, key)
     return base
 
 class IOBase(BaseInterface):
@@ -232,7 +232,6 @@ class DataSink(IOBase):
         for key,files in self.inputs._outputs.items():
             iflogger.debug("key: %s files: %s"%(key, str(files)))
             files = filename_to_list(files)
-            outfiles = []
             tempoutdir = outdir
             for d in key.split('.'):
                 if d[0] == '@':
