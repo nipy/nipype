@@ -36,6 +36,7 @@ from nipype.interfaces.base import (CommandLine, traits, CommandLineInputSpec,
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+
 class Info(object):
     """Handle fsl output type and version information.
 
@@ -125,9 +126,10 @@ class Info(object):
             fsldir = os.environ['FSLDIR']
         except KeyError:
             raise Exception('FSL environment variables not set')
-        stdpath = os.path.join(fsldir, 'data','standard')
+        stdpath = os.path.join(fsldir, 'data', 'standard')
         if img_name is None:
-            return [filename.replace(stdpath+'/','') for filename in glob(os.path.join(stdpath,'*nii*'))]
+            return [filename.replace(stdpath + '/', '')
+                    for filename in glob(os.path.join(stdpath, '*nii*'))]
         return os.path.join(stdpath, img_name)
 
 
@@ -142,8 +144,9 @@ class FSLCommandInputSpec(CommandLineInputSpec):
     -------
     fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
     """
-    output_type =  traits.Enum('NIFTI', Info.ftypes.keys(),
+    output_type = traits.Enum('NIFTI', Info.ftypes.keys(),
                               desc='FSL output type')
+
 
 class FSLCommand(CommandLine):
     """Base support for FSL commands.
@@ -184,7 +187,8 @@ class FSLCommand(CommandLine):
         else:
             raise AttributeError('Invalid FSL output_type: %s' % output_type)
 
-    def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True, ext=None):
+    def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True,
+                   ext=None):
         """Generate a filename based on the given parameters.
 
         The filename will take the form: cwd/basename<suffix><ext>.
@@ -225,9 +229,10 @@ class FSLCommand(CommandLine):
                 suffix = ext
         if suffix is None:
             suffix = ''
-        fname = fname_presuffix(basename, suffix = suffix,
-                                use_ext = False, newpath = cwd)
+        fname = fname_presuffix(basename, suffix=suffix,
+                                use_ext=False, newpath=cwd)
         return fname
+
 
 def check_fsl():
     ver = Info.version()
@@ -235,6 +240,7 @@ def check_fsl():
         return 0
     else:
         return 1
+
 
 def no_fsl():
     """Checks if FSL is NOT installed
@@ -246,7 +252,9 @@ def no_fsl():
     else:
         return False
 
+
 def no_fsl_course_data():
     """check if FSL_COURSE_DATA is defined and point to a valid directory"""
 
-    return not ("FSL_COURSE_DATA" in os.environ and os.path.isdir(os.environ["FSL_COURSE_DATA"]))
+    return not ("FSL_COURSE_DATA" in os.environ and
+                os.path.isdir(os.environ["FSL_COURSE_DATA"]))
