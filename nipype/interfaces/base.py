@@ -22,7 +22,8 @@ from warnings import warn
 
 from nipype.interfaces.traits_extension import (traits, Undefined, TraitDictObject,
                                                 TraitListObject, TraitError,
-                                                isdefined, File, has_metadata)
+                                                isdefined, File, Directory,
+                                                has_metadata)
 from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                     hash_timestamp)
 from nipype.utils.misc import is_container
