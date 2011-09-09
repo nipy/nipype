@@ -66,5 +66,5 @@ test-coverage:
 	--cover-package=nipype nipype
 	stty sane
 
-test: test-code
+test: clean test-code
 
