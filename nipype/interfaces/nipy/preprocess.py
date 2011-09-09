@@ -1,14 +1,21 @@
 import os
+import warnings
 
 import nibabel as nb
 import numpy as np
 
 from nipype.utils.misc import package_check
-package_check('nipy')
-from nipy.labs.mask import compute_mask
+
+try:
+    package_check('nipy')
+except Exception, e:
+    warnings.warn('nipy not installed')
+else:
+    from nipy.labs.mask import compute_mask
 
 from nipype.interfaces.base import (TraitedSpec, BaseInterface, traits,
                                     BaseInterfaceInputSpec, isdefined, File)
+
 
 class ComputeMaskInputSpec(BaseInterfaceInputSpec):
     mean_volume = File(exists=True, mandatory=True, desc="mean EPI image, used to compute the threshold for the mask")
