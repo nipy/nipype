@@ -1187,6 +1187,9 @@ class Node(WorkflowBase):
             pkl_file = gzip.open(resultsoutputfile, 'rb')
             try:
                 resultoutputs = cPickle.load(pkl_file)
+                result = InterfaceResult(interface=None,
+                                         runtime=None,
+                                         outputs=resultoutputs)
             except (traits.TraitError, AttributeError, ImportError), err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
@@ -1194,16 +1197,19 @@ class Node(WorkflowBase):
                 else:
                     logger.debug('some file does not exist. hence trait cannot be set')
             else:
-                try:
-                    outputs = resultoutputs.get()
-                except TypeError:
-                    outputs = resultoutputs.dictcopy() # outputs was a bunch
-                try:
-                    resultoutputs.set(**modify_paths(outputs, relative=False, basedir=cwd))
-                except FileNotFoundError:
-                    logger.debug('conversion to full path results in non existent file')
-                else:
-                    aggregate = False
+                if result.outputs:
+                    try:
+                        outputs = result.outputs.get()
+                    except TypeError:
+                        outputs = result.outputs.dictcopy() # outputs was a bunch
+                    try:
+                        result.outputs.set(**modify_paths(outputs,
+                                                          relative=False,
+                                                          basedir=cwd))
+                    except FileNotFoundError:
+                        logger.debug('conversion to full path results in non existent file')
+                    else:
+                        aggregate = False
             pkl_file.close()
         logger.debug('Aggregate: %s', aggregate)
         # try aggregating first
