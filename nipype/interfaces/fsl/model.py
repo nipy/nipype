@@ -74,7 +74,7 @@ T-contrasts.")
 class Level1DesignOutputSpec(TraitedSpec):
     fsf_files = OutputMultiPath(File(exists=True),
                      desc='FSL feat specification files')
-    ev_files = traits.List(traits.List(File(exists=True)),
+    ev_files = OutputMultiPath(File(exists=True),
                      desc='condition information files')
 
 class Level1Design(BaseInterface):
@@ -326,7 +326,6 @@ class Level1Design(BaseInterface):
             usetd = int(self.inputs.bases[basis_key]['derivs'])
         for runno, runinfo in enumerate(self._format_session_info(self.inputs.session_info)):
             outputs['fsf_files'].append(os.path.join(cwd, 'run%d.fsf' % runno))
-            outputs['ev_files'].insert(runno,[])
             evname = []
             for field in ['cond', 'regress']:
                 for i, cond in enumerate(runinfo[field]):
@@ -334,10 +333,10 @@ class Level1Design(BaseInterface):
                     evname.append(name)
                     evfname = os.path.join(cwd, 'ev_%s_%d_%d.txt' % (name, runno,
                                                                      len(evname)))
-                    outputs['ev_files'][runno].append(evfname)
                     if field == 'cond':
                         if usetd:
                             evname.append(name + 'TD')
+            outputs['ev_files'].append(os.path.join(cwd, evfname))
         return outputs
 
 
