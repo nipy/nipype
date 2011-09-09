@@ -13,10 +13,7 @@ import glob
 from nipype.interfaces.base import BaseInterface
 from nipype.interfaces.traits_extension import File
 from nipype.pipeline.engine import Node
-try:
-    from traits.api import List
-except ImportError:
-    from enthought.traits.api import List
+from traits.api import List
 
 ################################################################################
 # Functions for hashing input arguments
