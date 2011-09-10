@@ -132,6 +132,24 @@ class _MemoryCallback(object):
 
 
 class Memory(object):
+    """ Memory context to provide caching for interfaces
+
+        Parameters
+        ==========
+        base_dir: string
+            The directory name of the location for the caching
+
+        Methods
+        =======
+        cache
+            Creates a cacheable function from an nipype Interface class
+        clear_previous_runs
+            Removes from the disk all the runs that where not used after
+            the creation time of the specific Memory instance
+        clear_previous_runs
+            Removes from the disk all the runs that where not used after
+            the given time
+    """
 
     def __init__(self, base_dir):
         base_dir = os.path.join(os.path.abspath(base_dir), 'nipype_mem')
@@ -143,7 +161,42 @@ class Memory(object):
         open(os.path.join(base_dir, 'log.current'), 'w')
 
     def cache(self, interface):
-        """ Returns a cached and callable interface
+        """ Returns a callable that caches the output of an interface
+
+            Parameters
+            ==========
+            interface: nipype interface
+                The nipype interface class to be wrapped and cached
+
+            Returns
+            =======
+            pipe_func: a PipeFunc callable object
+                An object that can be used as a function to apply the
+                interface to arguments. Inputs of the interface are given
+                as keyword arguments, bearing the same name as the name
+                in the inputs specs of the interface.
+
+            Examples
+            ========
+
+            >>> mem = Memory('tmp_dir')
+            >>> from nipype.interface import fsl
+
+            Here we create a callable that can be used to apply an
+            fsl.Merge interface to files
+
+            >>> fsl_merge = mem.cache(fsl.Merge)
+
+            Now we apply it to a list of files. We need to specify the
+            list of input files and the dimension along which the files
+            should be merged.
+
+            >>> results = fsl_merge(in_files=['a.nii', 'b.nii'], 
+            ...                     dimension='t')
+
+            We can retrieve the resulting file from the outputs:
+            >>> results.outputs.merged_file
+            '...'
         """
         return PipeFunc(interface, self.base_dir, _MemoryCallback(self))
 
@@ -174,6 +227,12 @@ class Memory(object):
         """ Remove all the cache that where not used in the latest run of 
             the memory object: i.e. since the corresponding Python object 
             was created.
+
+            Parameters
+            ==========
+            warn: boolean, optional
+                If true, echoes warning messages for all directory
+                removed
         """
         base_dir = self.base_dir
         latest_runs = read_log(os.path.join(base_dir, 'log.current'))
@@ -181,6 +240,16 @@ class Memory(object):
 
     def clear_runs_since(self, day=None, month=None, year=None, warn=True):
         """ Remove all the cache that where not used since the given date 
+
+            Parameters
+            ==========
+            day, month, year: integers, optional
+                The integers specifying the latest day (in localtime) that 
+                a node should have been accessed to be kept. If not
+                given, the current date is used.
+            warn: boolean, optional
+                If true, echoes warning messages for all directory
+                removed
         """
         t = time.localtime()
         day = day if day is not None else t.tm_mday
