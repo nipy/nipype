@@ -9,6 +9,7 @@ def configuration(parent_package='',top_path=None):
     config.add_subpackage('interfaces')
     config.add_subpackage('pipeline')
     config.add_subpackage('utils')
+    config.add_subpackage('caching')
     config.add_subpackage('testing')
     config.add_subpackage('workflows')
     config.add_subpackage('external')

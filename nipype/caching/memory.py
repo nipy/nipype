@@ -12,6 +12,7 @@ import glob
 
 from nipype.interfaces.base import BaseInterface
 from nipype.pipeline.engine import Node
+from nipype.pipeline.utils import modify_paths
 
 ################################################################################
 # PipeFunc object: callable interface to nipype.interface objects
@@ -56,6 +57,7 @@ class PipeFunc(object):
         self.callback = callback
 
     def __call__(self, **kwargs):
+        kwargs = modify_paths(kwargs, relative=False)
         interface = self.interface()
         # Set the inputs early to get some argument checking
         interface.inputs.set(**kwargs)
