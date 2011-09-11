@@ -47,7 +47,7 @@ Examples
 # files with a known name (derived from the script name) plus a counter
 figure_basename = None
 
-# We must change the show command to save instead 
+# We must change the show command to save instead
 def show():
     allfm = Gcf.get_all_fig_managers()
     for fcount, fm in enumerate(allfm):
@@ -93,4 +93,4 @@ else:
         figure_basename = pjoin('fig', os.path.splitext(script)[0])
         execfile(script)
         plt.close('all')
-    
+
