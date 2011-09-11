@@ -47,7 +47,7 @@ Requirements
   Analysis tutorials
 
   - FSL_, FreeSurfer_, Camino_, ConnectomeViewer and MATLAB_ are available and
-  callable from the command line
+    callable from the command line
 
   - SPM_ 5/8 is installed and callable in matlab
 
