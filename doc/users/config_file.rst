@@ -34,8 +34,8 @@ Execution
 ~~~~~~~~~~~
 
 *plugin*
-	This defines which execution plugin to use. (possible values: 
-    ``Linear``, ``MultiProc``, ``SGE``, ``IPython``; default value: ``Linear``)
+	This defines which execution plugin to use. (possible values: ``Linear``,
+	``MultiProc``, ``SGE``, ``IPython``; default value: ``Linear``)
 
 *stop_on_first_crash*
 	Should the workflow stop upon first node crashing or try to execute as many
@@ -70,10 +70,9 @@ Execution
 	set)
 
 *remove_unnecessary_outputs*
-	This will remove any interface outputs not needed by the
-    workflow. If the required outputs from a node changes, rerunning
-    the workflow will rerun the node. (possible values: ``true`` and
-    ``false``; default value: ``true``)
+	This will remove any interface outputs not needed by the workflow. If the
+	required outputs from a node changes, rerunning the workflow will rerun the
+	node. (possible values: ``true`` and ``false``; default value: ``true``)
 
 *use_relative_paths*
 	Should the paths stored in results (and used to look for inputs)
