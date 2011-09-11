@@ -33,7 +33,10 @@ examples_header = """
 
 .. _examples:
 
-   note_about_examples
+Examples
+========
+
+.. note_about_examples
 """
 #-----------------------------------------------------------------------------
 # Function defintions
@@ -68,6 +71,7 @@ sh('../../../tools/ex2rst --project Nipype --outdir . ../../../examples')
 sh('../../../tools/ex2rst --project Nipype --outdir . ../../../examples/frontiers_paper')
 
 # Make the index.rst file
+"""
 index = open('index.rst', 'w')
 index.write(examples_header)
 for name in [os.path.splitext(f)[0] for f in glob('*.rst')]:
@@ -76,6 +80,8 @@ for name in [os.path.splitext(f)[0] for f in glob('*.rst')]:
     if name not in(['index','note_about_examples']):
         index.write('   %s\n' % name)
 index.close()
+"""
+
 # Execute each python script in the directory.
 if '--no-exec' in sys.argv:
     pass

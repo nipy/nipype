@@ -1,33 +1,8 @@
 .. -*- rst -*- rest mode for emacs
 .. _development-quickstart:
 
-========================
- Development quickstart
-========================
+For installation instructions see documentation:
 
-Source Code
-===========
+http://nipy.org/nipype/
 
-Nipype uses sourceforge_ for our code hosting.  For immediate access
-to the source code, see `the nipype developer wiki
-<http://sourceforge.net/apps/trac/nipy/wiki>`_.
-
-For information on coding style, writing documentation, writing tests
-or using nipy tools, please see the `NIPY developer resources`_ site.
-
-.. _trunk_download:
-
-Check out the current version
-=============================
-
-To access the source code you need subversion_.  You can check out the
-current trunk with the following command::
-
-    svn co https://nipy.svn.sourceforge.net/svnroot/nipy/nipype/trunk/ nipype
-
-Then change into the source directory and install nipype::
-
-    cd nipype
-    python setup.py install
-
-.. include:: doc/links_names.txt
+or doc/users/install.rst

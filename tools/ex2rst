@@ -172,6 +172,13 @@ def exfile2rstfile(filename, opts):
     # write converted ReST
     dfile.write(exfile2rst(filename))
 
+    links = """
+
+.. include:: ../../links_names.txt
+
+"""
+    dfile.write(links)
+
     if opts.sourceref:
         # write post example see also box
         msg = """
