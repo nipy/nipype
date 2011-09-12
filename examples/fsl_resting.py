@@ -1,9 +1,12 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-   A pipeline example that uses intergrates several interfaces to
-   perform a first and second level analysis on a two-subject data
-   set.
+FSL resting pipeline with CSF signals regressed out
+===================================================
+
+A pipeline example that uses intergrates several interfaces to
+perform a first and second level analysis on a two-subject data
+set.
 
 
 1. Tell python where to find the appropriate functions.
@@ -158,7 +161,8 @@ modelfit.connect([(modelspec,level1design,[('session_info','session_info')]),
                   (modelgen,modelestimate,[('design_file','design_file')]),
                   ])
 
-"""The nipype tutorial contains data for two subjects.  Subject data
+"""
+The nipype tutorial contains data for two subjects.  Subject data
 is in two subdirectories, ``s1`` and ``s2``.  Each subject directory
 contains four functional volumes: f3.nii, f5.nii, f7.nii, f10.nii. And
 one anatomical volume named struct.nii.
@@ -172,7 +176,6 @@ the output fields of the ``datasource`` node in the pipeline.
 In the example below, run 'f3' is of type 'func' and gets mapped to a
 nifti filename through a template '%s.nii'. So 'f3' would become
 'f3.nii'.
-
 """
 
 # Specify the location of the data.
@@ -186,7 +189,8 @@ info = dict(func=[['subject_id', ['f3',]]], #'f5','f7','f10']]],
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
 
-"""Here we set up iteration over all the subjects. The following line
+"""
+Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
 ``datasource`` attribute ``iterables`` tells the pipeline engine that
 it should repeat the analysis on each of the items in the
@@ -252,6 +256,7 @@ modelfit.inputs.modelestimate.autocorr_noestimate = True
 """
 Band pass filter the data to remove frequencies below .1 Hz
 """
+
 bandPassFilterData = pe.Node(interface=fsl.ImageMaths(op_string = ' -bptf 128 12.5 '),
                              name='bandpassfiltermcdata_fslmaths')
 
