@@ -113,7 +113,8 @@ class Info(object):
         try:
             return os.environ['FSLOUTPUTTYPE']
         except KeyError:
-            raise Exception('FSL environment variables not set')
+            warnings.warn('FSL environment variables not set. setting output type to NIFTI')
+            return 'NIFTI'
 
     @staticmethod
     def standard_image(img_name=None):
