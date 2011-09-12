@@ -76,10 +76,10 @@ Slicer_
   3.6 or later
 
 Nipy_ 
-  0.1.2+20110404 or later (required for doc building)
+  0.1.2+20110404 or later
 
 Nitime_ 
-  (optional; required for doc building)
+  (optional)
   
 Camino_
   
@@ -169,6 +169,5 @@ tests::
 where, $pathtomatlabdir is the path to your matlab installation and
 $platform is the directory referring to x86 or x64 installations
 (typically glnxa64 on 64-bit installations).
-
 
 .. include:: ../links_names.txt

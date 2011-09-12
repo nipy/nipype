@@ -174,7 +174,7 @@ which provides information on each of the options one can assign.
     realignment_parameters: Estimated translation and rotation parameters
 
 
-Our :ref:`interfaces` documentation provides html versions of our
+Our :ref:`interface-index` documentation provides html versions of our
 docstrings and includes links to the specific package
 documentation. For instance, the :class:`nipype.interfaces.fsl.Bet`
 docstring has a direct link to the online BET Documentation.

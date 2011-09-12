@@ -6,7 +6,7 @@ from shutil import rmtree
 
 import numpy as np
 
-from nipype.testing import (assert_equal, assert_false, assert_true, 
+from nipype.testing import (assert_equal, assert_false, assert_true,
                             assert_raises, skipif)
 import nibabel as nb
 import nipype.interfaces.spm.model as spm
@@ -34,7 +34,7 @@ def create_files_in_directory():
         nb.save(nb.Nifti1Image(img,np.eye(4),hdr),
                  os.path.join(outdir,f))
     return filelist, outdir, cwd
-    
+
 def clean_directory(outdir, old_wd):
     if os.path.exists(outdir):
         rmtree(outdir)
@@ -141,7 +141,7 @@ def test_onesamplettestdesign():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-        
+
 def test_twosamplettestdesign():
     yield assert_equal, spm.TwoSampleTTestDesign._jobtype, 'stats'
     yield assert_equal, spm.TwoSampleTTestDesign._jobname, 'factorial_design'

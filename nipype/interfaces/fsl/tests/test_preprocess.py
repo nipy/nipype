@@ -94,7 +94,7 @@ def test_bet():
         realcmd =  ' '.join([better.cmd, tmp_infile, outpath, settings[0]])
         yield assert_equal, better.cmdline, realcmd
     teardown_infile(tmp_dir)
-    
+
 # test fast
 @skipif(no_fsl)
 def test_fast():
@@ -155,7 +155,7 @@ def test_fast():
                                                       settings[0],
                                                       "-S 1 %s"%tmp_infile])
     teardown_infile(tmp_dir)
-@skipif(no_fsl)    
+@skipif(no_fsl)
 def setup_flirt():
     ext = Info.output_type_to_ext(Info.output_type())
     tmpdir = tempfile.mkdtemp()
@@ -170,7 +170,7 @@ def teardown_flirt(tmpdir):
 def test_flirt():
     # setup
     tmpdir, infile, reffile = setup_flirt()
-    
+
     flirter = fsl.FLIRT()
     yield assert_equal, flirter.cmd, 'flirt'
 
@@ -178,7 +178,7 @@ def test_flirt():
     flirter.inputs.cost = 'mutualinfo'
 
     flirted = fsl.FLIRT(in_file=infile, reference=reffile,
-                          out_file='outfile', out_matrix_file='outmat.mat', 
+                          out_file='outfile', out_matrix_file='outmat.mat',
                           bins = 256,
                           cost = 'mutualinfo')
     flirt_est = fsl.FLIRT(in_file=infile, reference=reffile,
@@ -269,7 +269,7 @@ def test_flirt():
 @skipif(no_fsl)
 def test_mcflirt():
     tmpdir, infile, reffile = setup_flirt()
-    
+
     frt = fsl.MCFLIRT()
     yield assert_equal, frt.cmd, 'mcflirt'
     # Test generated outfile name
@@ -306,7 +306,7 @@ def test_mcflirt():
 
     for name, settings in opt_map.items():
         fnt = fsl.MCFLIRT(in_file = infile, **{name : settings[1]})
-        instr = '-in %s'%(infile) 
+        instr = '-in %s'%(infile)
         outstr = '-out %s'%(outfile)
         if name in ('init', 'cost', 'dof','mean_vol','bins'):
             yield assert_equal, fnt.cmdline, ' '.join([fnt.cmd,
@@ -318,7 +318,7 @@ def test_mcflirt():
                                                        instr,
                                                        outstr,
                                                        settings[0]])
-                                                   
+
 
     # Test error is raised when missing required args
     fnt = fsl.MCFLIRT()
@@ -351,7 +351,7 @@ def test_fnirt():
             cmd = 'fnirt --in=%s '\
                   '--logout=%s'\
                   ' %s=%s --ref=%s'\
-                  ' --iout=%s' % (infile, log, 
+                  ' --iout=%s' % (infile, log,
                                   flag, strval, reffile, iout)
         elif item in ('in_fwhm'):
             cmd = 'fnirt --in=%s %s=%s --logout=%s '\
@@ -362,14 +362,14 @@ def test_fnirt():
                   '--in=%s '\
                   '--logout=%s '\
                   '--ref=%s --iout=%s' % (flag,strval,
-                                                infile, log, 
+                                                infile, log,
                                                 reffile,
                                                 iout)
 
         else:
             cmd = 'fnirt '\
                   '--in=%s --logout=%s '\
-                  '--ref=%s %s=%s --iout=%s' % (infile, log, 
+                  '--ref=%s %s=%s --iout=%s' % (infile, log,
                                                 reffile,
                                                 flag, strval,
                                                 iout)
@@ -399,43 +399,43 @@ def test_fnirt():
         fnirt = fsl.FNIRT(in_file = infile,
                           ref_file = reffile,
                           **{name : infile})
-        
+
         if name in ('config_file', 'affine_file','field_file'):
             cmd = 'fnirt %s%s --in=%s '\
                   '--logout=%s '\
-                  '--ref=%s --iout=%s' % (settings, infile, infile, log, 
+                  '--ref=%s --iout=%s' % (settings, infile, infile, log,
                                           reffile, iout)
         elif name in ('refmask_file'):
             cmd = 'fnirt --in=%s '\
                   '--logout=%s --ref=%s '\
                   '%s%s '\
-                  '--iout=%s' % (infile, log, 
-                                 reffile, 
+                  '--iout=%s' % (infile, log,
+                                 reffile,
                                  settings,infile,
                                  iout)
         elif name in ('in_intensitymap_file', 'inwarp_file', 'inmask_file', 'jacobian_file'):
             cmd = 'fnirt --in=%s '\
                   '%s%s '\
                   '--logout=%s --ref=%s '\
-                  '--iout=%s' % (infile, 
+                  '--iout=%s' % (infile,
                                  settings,infile,
-                                 log, 
-                                 reffile, 
+                                 log,
+                                 reffile,
                                  iout)
         elif name in ('log_file'):
             cmd = 'fnirt --in=%s '\
                   '%s%s --ref=%s '\
-                  '--iout=%s' % (infile, 
-                                 settings,infile, 
-                                 reffile, 
+                  '--iout=%s' % (infile,
+                                 settings,infile,
+                                 reffile,
                                  iout)
         else:
             cmd = 'fnirt --in=%s '\
                   '--logout=%s %s%s '\
-                  '--ref=%s --iout=%s' % (infile,log, 
+                  '--ref=%s --iout=%s' % (infile,log,
                                           settings, infile,
                                           reffile,iout)
-                                       
+
         yield assert_equal, fnirt.cmdline, cmd
     teardown_flirt(tmpdir)
 

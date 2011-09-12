@@ -95,7 +95,7 @@ class WorkflowBase(object):
         fullname = self.name
         if self._hierarchy:
             fullname = self._hierarchy + '.' + self.name
-        return fullname            
+        return fullname
 
     def clone(self, name):
         """Clone a workflowbase object
@@ -149,14 +149,14 @@ class Workflow(WorkflowBase):
         .. note::
 
         Will reset attributes used for executing workflow. See
-        _init_runtime_fields. 
+        _init_runtime_fields.
 
         Parameters
         ----------
 
         name: string (mandatory )
             every clone requires a new name
-            
+
         """
         clone = super(Workflow, self).clone(name)
         clone._reset_hierarchy()
@@ -175,7 +175,7 @@ class Workflow(WorkflowBase):
 
         Parameters
         ----------
-        
+
         args : list or a set of four positional arguments
 
             Four positional arguments of the form::
@@ -233,7 +233,7 @@ class Workflow(WorkflowBase):
         for srcnode, destnode, connects in connection_list:
             connected_ports = []
             # check to see which ports of destnode are already
-            # connected. 
+            # connected.
             if not disconnect and (destnode in self._graph.nodes()):
                 for edge in self._graph.in_edges_iter(destnode):
                     data = self._graph.get_edge_data(*edge)
@@ -378,15 +378,15 @@ class Workflow(WorkflowBase):
 
         Parameters
         ----------
-        
+
         graph2use: 'orig', 'hierarchical' (default), 'flat', 'exec'
             orig - creates a top level graph without expanding internal
                    workflow nodes
             flat - expands workflow nodes recursively
             exec - expands workflows to depict iterables
-        
+
         format: 'png', 'svg'
-            
+
         """
         graphtypes = ['orig', 'flat', 'hierarchical', 'exec']
         if graph2use not in graphtypes:
@@ -431,7 +431,7 @@ class Workflow(WorkflowBase):
 
         Parameters
         ----------
-        
+
         plugin: plugin name or object
             Plugin to use for execution. You can create your own plugins for
             execution.
@@ -516,7 +516,7 @@ function readfile(srcfile, outputcontrol) {
 }
 
 function load(name, div) {
-  readfile(name, div); 
+  readfile(name, div);
   return false;
 }
 function loadimg(name, div) {
@@ -598,7 +598,7 @@ window.onload=beginrefresh
         fp.writelines('<div id="content">content</div>')
         fp.writelines('</div></body></html>')
         fp.close()
-        
+
     def _set_needed_outputs(self, graph):
         """Initialize node with list of which outputs are needed
         """
@@ -615,7 +615,7 @@ window.onload=beginrefresh
                         input_name = sourceinfo
                     if input_name not in node.needed_outputs:
                         node.needed_outputs += [input_name]
-                        
+
     def _configure_exec_nodes(self, graph):
         """Ensure that each node knows where to get inputs from
         """
@@ -630,7 +630,7 @@ window.onload=beginrefresh
 
     def _check_nodes(self, nodes):
         """Checks if any of the nodes are already in the graph
-        
+
         """
         node_names = [node.name for node in self._graph.nodes()]
         node_lineage = [node._hierarchy for node in self._graph.nodes()]
@@ -876,7 +876,7 @@ window.onload=beginrefresh
                         subnodename = subnodefullname.replace('.','_')
                         for _ in self._graph.get_edge_data(node, subnode)['connect']:
                             dotlist.append('%s -> %s;'%(nodename, subnodename))
-                        logger.debug('connection: ' + dotlist[-1]) 
+                        logger.debug('connection: ' + dotlist[-1])
         # add between workflow connections
         for u,v,d in self._graph.edges_iter(data=True):
             uname = '.'.join(hierarchy + [u.fullname])
@@ -899,7 +899,7 @@ window.onload=beginrefresh
                 if uname1.split('.')[:-1] != vname1.split('.')[:-1]:
                     dotlist.append('%s -> %s;'%(uname1.replace('.','_'),
                                                 vname1.replace('.','_')))
-                    logger.debug('cross connection: ' + dotlist[-1]) 
+                    logger.debug('cross connection: ' + dotlist[-1])
         return ('\n'+prefix).join(dotlist)
 
 
@@ -909,7 +909,7 @@ class Node(WorkflowBase):
 
     Parameters
     ----------
-    
+
     interface : interface object
         node specific interface  (fsl.Bet(), spm.Coregister())
     iterables : generator
@@ -922,14 +922,14 @@ class Node(WorkflowBase):
 
     Notes
     -----
-    
+
     creates output directory
     copies/discovers files to work with
     saves a hash.json file to indicate that a process has been completed
 
     Examples
     --------
-    
+
     >>> import nipype.interfaces.spm as spm
     >>> realign = Node(interface=spm.Realign(), name='realign')
     >>> realign.inputs.in_files = 'functional.nii'
@@ -977,7 +977,7 @@ class Node(WorkflowBase):
             outputdir = os.path.join(outputdir, *self.parameterization)
         return os.path.abspath(os.path.join(outputdir,
                                             self.name))
-    
+
     def set_input(self, parameter, val):
         """ Set interface input value or nodewrapper attribute
 
@@ -1091,7 +1091,7 @@ class Node(WorkflowBase):
             self._save_hashfile(hashfile, hashed_inputs)
         if force_execute or (not updatehash and (self.overwrite or not os.path.exists(hashfile))):
             logger.debug("Node hash: %s"%hashvalue)
-            
+
             #by rerunning we mean only nodes that did finish to run previously
             if os.path.exists(outdir) \
             and not isinstance(self, MapNode) \
@@ -1116,7 +1116,7 @@ class Node(WorkflowBase):
                                 pass
                             else:
                                 logdebug_dict_differences(prev_inputs, hashed_inputs)
-                if str2bool(self.config['execution']['stop_on_first_rerun']):        
+                if str2bool(self.config['execution']['stop_on_first_rerun']):
                     raise Exception("Cannot rerun when 'stop_on_first_rerun' is set to True")
             hashfile_unfinished = os.path.join(outdir, '_0x%s_unfinished.json' % hashvalue)
             if os.path.exists(hashfile):
@@ -1249,7 +1249,7 @@ class Node(WorkflowBase):
             except Exception, msg:
                 self._result.runtime.stderr = msg
                 raise
-            
+
             if str2bool(self.config['execution']['remove_unnecessary_outputs']):
                 dirs2keep = None
                 if isinstance(self, MapNode):
@@ -1277,7 +1277,7 @@ class Node(WorkflowBase):
             else:
                 out.append(f.replace(os.path.join(wd,'_tempinput'),wd))
         return out
-            
+
 
     def _copyfiles_to_wd(self, outdir, execute, linksonly=False):
         """ copy files over and change the inputs"""
@@ -1348,7 +1348,7 @@ class Node(WorkflowBase):
                 fp.writelines(write_rst_dict({'hostname' : self.result.runtime.hostname,
                                               'duration' : self.result.runtime.duration,
                                               'command' : self.result.runtime.cmdline}))
-            else: 
+            else:
                 fp.writelines(write_rst_dict({'hostname' : self.result.runtime.hostname,
                                               'duration' : self.result.runtime.duration}))
             if hasattr(self.result.runtime, 'merged'):
@@ -1370,7 +1370,7 @@ class MapNode(Node):
     >>> realign = MapNode(interface=fsl.MCFLIRT(), name='realign', iterfield=['in_file']) # doctest: +SKIP
     >>> realign.inputs.in_file = ['functional.nii', 'functional2.nii', 'functional3.nii'] # doctest: +SKIP
     >>> realign.run() # doctest: +SKIP
-    
+
     """
 
     def __init__(self, interface, iterfield=None, **kwargs):
@@ -1542,20 +1542,20 @@ class MapNode(Node):
                 subnode_report_files.insert(i, 'subnode %d'%i + ' : ' + os.path.join(cwd, 'mapflow', nodename, '_report', 'report.rst'))
             fp.writelines(write_rst_list(subnode_report_files))
             fp.close()
-        
+
     def get_subnodes(self):
         if not self._got_inputs:
             self._get_inputs()
             self._got_inputs = True
         self.write_report(report_type='preexec', cwd = self.output_dir())
         return [node for _, node in self._make_nodes()]
-    
+
     def num_subnodes(self):
         if not self._got_inputs:
             self._get_inputs()
             self._got_inputs = True
         return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
-    
+
     def _get_inputs(self):
         old_inputs = self._inputs.get()
         self._inputs = self._create_dynamic_traits(self._interface.inputs,

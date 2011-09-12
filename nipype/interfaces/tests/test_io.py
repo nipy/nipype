@@ -7,13 +7,13 @@ from tempfile import mkstemp, mkdtemp
 
 from nipype.testing import assert_equal, assert_true, assert_false
 import nipype.interfaces.io as nio
-from nipype.interfaces.base import Undefined 
+from nipype.interfaces.base import Undefined
 
 def test_datagrabber():
     dg = nio.DataGrabber()
     yield assert_equal, dg.inputs.template, Undefined
     yield assert_equal, dg.inputs.base_directory, Undefined
-    yield assert_equal, dg.inputs.template_args,{'outfiles': []} 
+    yield assert_equal, dg.inputs.template_args,{'outfiles': []}
 
 def test_datasink():
     ds = nio.DataSink()

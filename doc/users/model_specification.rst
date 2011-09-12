@@ -81,8 +81,8 @@ or with amplitudes::
 
 Together with this information, one needs to specify:
 
-- whether the durations and event onsets are specified in terms of scan volumes or
-secs.
+- whether the durations and event onsets are specified in terms of scan volumes
+  or secs.
 
 - the high-pass filter cutoff, 
 

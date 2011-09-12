@@ -23,7 +23,7 @@ class LinearPlugin(PluginBase):
         ----------
 
         graph : networkx digraph
-            defines order of execution          
+            defines order of execution
         """
 
         if not isinstance(graph, nx.DiGraph):

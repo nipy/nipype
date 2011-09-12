@@ -32,7 +32,7 @@ Interfaces
 
         b. execute workflows in parallel using IPython's parallel
         computing interface
-        
+
         c. tools for interfacing databases, repositories
 
         d. tools for provenance tracking

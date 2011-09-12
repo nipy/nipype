@@ -6,7 +6,7 @@ Using SPM and nipy for fMRI analysis
 ====================================
 
 
-The nipy_tutorial.py integrates several interfaces to perform a first level 
+The nipy_tutorial.py integrates several interfaces to perform a first level
 analysis on a two-subject data set. It is very similar to the spm_tutorial with
 the difference of using nipy for fitting GLM model and estimating contrasts.
 The tutorial can
@@ -184,7 +184,7 @@ cont2 = ('Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1])
 contrasts = [cont1,cont2]
 
 """Generate design information using
-:class:`nipype.interfaces.spm.SpecifyModel`. nipy accepts only design specified 
+:class:`nipype.interfaces.spm.SpecifyModel`. nipy accepts only design specified
 in seconds so "output_units" has always have to be set to "secs".
 """
 

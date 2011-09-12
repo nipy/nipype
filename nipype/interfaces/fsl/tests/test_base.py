@@ -8,7 +8,7 @@ import nipype.interfaces.fsl as fsl
 from nipype.interfaces.base import InterfaceResult
 from nipype.interfaces.fsl import check_fsl, no_fsl
 
-    
+
 @skipif(no_fsl)#skip if fsl not installed)
 def test_fslversion():
     ver = fsl.Info.version()
@@ -16,13 +16,13 @@ def test_fslversion():
         # If ver is None, fsl is not installed
         ver = ver.split('.')
         yield assert_equal, ver[0], '4'
-        
+
 @skipif(no_fsl)#skip if fsl not installed)
 def test_fsloutputtype():
     types = fsl.Info.ftypes.keys()
     orig_out_type = fsl.Info.output_type()
     yield assert_true, orig_out_type in types
-    
+
 
 def test_outputtype_to_ext():
     for ftype, ext in fsl.Info.ftypes.items():
@@ -30,7 +30,7 @@ def test_outputtype_to_ext():
         yield assert_equal, res, ext
 
     yield assert_raises, KeyError, fsl.Info.output_type_to_ext, 'JUNK'
-    
+
 @skipif(no_fsl)#skip if fsl not installed)
 def test_FSLCommand():
     # Most methods in FSLCommand are tested in the subclasses.  Only

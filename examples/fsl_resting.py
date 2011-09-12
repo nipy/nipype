@@ -1,13 +1,14 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-   A pipeline example that uses intergrates several interfaces to
-   perform a first and second level analysis on a two-subject data
-   set.
-"""
+FSL resting pipeline with CSF signals regressed out
+===================================================
+
+A pipeline example that uses intergrates several interfaces to
+perform a first and second level analysis on a two-subject data
+set.
 
 
-"""
 1. Tell python where to find the appropriate functions.
 """
 
@@ -45,6 +46,7 @@ extract_ref = pe.Node(interface=fsl.ExtractROI(t_min=42,
 in the provided data set, the nose is behind the head and causes problems for
 segmentation routines
 """
+
 nosestrip = pe.Node(interface=fsl.BET(frac=0.3),
                     name = 'nosestrip')
 skullstrip = pe.Node(interface=fsl.BET(mask = True),
@@ -64,6 +66,7 @@ motion_correct = pe.Node(interface=fsl.MCFLIRT(save_plots = True),
 """
 skull strip functional data
 """
+
 func_skullstrip = pe.Node(interface=fsl.BET(functional = True),
                           name='stripfunc')
                              #iterfield = ['in_file'])
@@ -72,24 +75,28 @@ func_skullstrip = pe.Node(interface=fsl.BET(functional = True),
 Run FAST on T1 anatomical image to obtain CSF mask.
 Create mask for three tissue types.
 """
+
 getCSFmasks = pe.Node(interface=fsl.FAST(no_pve=True,segments=True),
                       name = 'segment')
 
 """
 Apply registration matrix to CSF segmentation mask.
 """
+
 applyReg2CSFmask = pe.Node(interface=fsl.ApplyXfm(apply_xfm=True),
                            name = 'applyreg2csfmask')
 
 """
 Threshold CSF segmentation mask from  .90 to 1
 """
+
 threshCSFseg = pe.Node(interface = fsl.ImageMaths(op_string = ' -thr .90 -uthr 1 -bin '),
                        name = 'threshcsfsegmask')
 
 """
 Extract CSF timeseries
 """
+
 avgCSF = pe.Node(interface = fsl.ImageMeants(), name='extractcsfts')
 
 
@@ -100,6 +107,7 @@ def pickfirst(files):
 """
 Create the workflow
 """
+
 csffilter = pe.Workflow(name='csffilter')
 csffilter.connect([(extract_ref, motion_correct,[('roi_file', 'ref_file')]),
                    (extract_ref, refskullstrip,[('roi_file', 'in_file')]),
@@ -122,24 +130,28 @@ modelfit = pe.Workflow(name='modelfit')
    c. Use :class:`nipype.interfaces.spm.SpecifyModel` to generate
    SPM-specific design information.
 """
+
 modelspec = pe.Node(interface=model.SpecifyModel(),  name="modelspec")
 
 """
    d. Use :class:`nipype.interfaces.fsl.Level1Design` to generate a
    run specific fsf file for analysis
 """
+
 level1design = pe.Node(interface=fsl.Level1Design(), name="fsfdesign")
 
 """
    e. Use :class:`nipype.interfaces.fsl.FEATModel` to generate a
    run specific mat file for use by FILMGLS
 """
+
 modelgen = pe.Node(interface=fsl.FEATModel(), name='modelgen')
 
 """
    f. Use :class:`nipype.interfaces.fsl.FILMGLS` to estimate a model
    specified by a mat file and a functional run
 """
+
 modelestimate = pe.Node(interface=fsl.FILMGLS(), name='modelestimate')
                            #iterfield = ['design_file','in_file'])
 
@@ -149,7 +161,8 @@ modelfit.connect([(modelspec,level1design,[('session_info','session_info')]),
                   (modelgen,modelestimate,[('design_file','design_file')]),
                   ])
 
-"""The nipype tutorial contains data for two subjects.  Subject data
+"""
+The nipype tutorial contains data for two subjects.  Subject data
 is in two subdirectories, ``s1`` and ``s2``.  Each subject directory
 contains four functional volumes: f3.nii, f5.nii, f7.nii, f10.nii. And
 one anatomical volume named struct.nii.
@@ -163,7 +176,6 @@ the output fields of the ``datasource`` node in the pipeline.
 In the example below, run 'f3' is of type 'func' and gets mapped to a
 nifti filename through a template '%s.nii'. So 'f3' would become
 'f3.nii'.
-
 """
 
 # Specify the location of the data.
@@ -177,7 +189,8 @@ info = dict(func=[['subject_id', ['f3',]]], #'f5','f7','f10']]],
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
 
-"""Here we set up iteration over all the subjects. The following line
+"""
+Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
 ``datasource`` attribute ``iterables`` tells the pipeline engine that
 it should repeat the analysis on each of the items in the
@@ -243,6 +256,7 @@ modelfit.inputs.modelestimate.autocorr_noestimate = True
 """
 Band pass filter the data to remove frequencies below .1 Hz
 """
+
 bandPassFilterData = pe.Node(interface=fsl.ImageMaths(op_string = ' -bptf 128 12.5 '),
                              name='bandpassfiltermcdata_fslmaths')
 
@@ -270,11 +284,3 @@ l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
 
 l1pipeline.run()
 l1pipeline.write_graph()
-
-"""
-Store significant result-files in a special directory
-"""
-#datasink = pe.Node(interface=nio.DataSink(),name='datasink')
-#datasink.inputs.base_directory = os.path.abspath('csffiltered')
-#def getstripdir(subject_id):
-#    return os.path.join(os.path.abspath('nataliaPipeline'),'_subject_id_%s' % subject_id)
