@@ -173,10 +173,12 @@ class ModifyAffine(BaseInterface):
 class DistanceInputSpec(BaseInterfaceInputSpec):
     volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
     volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
-    method = traits.Enum("eucl_min", "eucl_cog", "eucl_mean", "eucl_wmean", desc='""eucl_min": Euclidean distance between two closest points\
+    method = traits.Enum("eucl_min", "eucl_cog", "eucl_mean", "eucl_wmean", "eucl_max", desc='""eucl_min": Euclidean distance between two closest points\
     "eucl_cog": mean Euclidian distance between the Center of Gravity of volume1 and CoGs of volume2\
     "eucl_mean": mean Euclidian minimum distance of all volume2 voxels to volume1\
-    "eucl_wmean": mean Euclidian minimum distance of all volume2 voxels to volume1 weighted by their values', usedefault = True)
+    "eucl_wmean": mean Euclidian minimum distance of all volume2 voxels to volume1 weighted by their values\
+    "eucl_max": mean Euclidian minimum distance of all volume2 voxels to volume1 weighted by their values',
+    usedefault = True)
 
 class DistanceOutputSpec(TraitedSpec):
     distance = traits.Float()
@@ -263,7 +265,23 @@ class Distance(BaseInterface):
         else:
             return np.mean(min_dist_matrix)
 
+    def _eucl_max(self, nii1, nii2):
+        origdata1 = nii1.get_data().astype(np.bool)
+        if origdata1.max() == 0:
+            return np.NaN
+        border1 = self._find_border(origdata1)
 
+        origdata2 = nii2.get_data().astype(np.bool)
+        if origdata2.max() == 0:
+            return np.NaN
+
+        set1_coordinates = self._get_coordinates(border1, nii1.get_affine())
+        set2_coordinates = self._get_coordinates(origdata2, nii2.get_affine())
+
+        dist_matrix = cdist(set1_coordinates.T, set2_coordinates.T)
+        min_dist_matrix = np.amin(dist_matrix, axis = 0)
+
+        return np.max(min_dist_matrix)
 
     def _run_interface(self, runtime):
         nii1 = nb.load(self.inputs.volume1)
@@ -280,8 +298,11 @@ class Distance(BaseInterface):
 
         elif self.inputs.method == "eucl_wmean":
             self._distance = self._eucl_mean(nii1, nii2, weighted=True)
+        elif self.inputs.method == "eucl_max":
+            self._distance = self._eucl_max(nii1, nii2)
 
         return runtime
+    
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['distance'] = self._distance
