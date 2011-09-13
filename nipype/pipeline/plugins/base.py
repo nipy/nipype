@@ -179,7 +179,7 @@ class DistributedPluginBase(PluginBase):
         crashfile = self._report_crash(self.procs[jobid],
                                        result=result)
         if self._status_callback:
-            self._status_callback('node', 'exception')
+            self._status_callback(self.procs[jobid], 'exception')
         if jobid in self.mapnodesubids:
             # remove current jobid
             self.proc_pending[jobid] = False
@@ -238,7 +238,7 @@ class DistributedPluginBase(PluginBase):
                     logger.info('Executing: %s ID: %d H:%s' % \
                                     (self.procs[jobid]._id, jobid, hashvalue))
                     if self._status_callback:
-                        self._status_callback('node', 'start')
+                        self._status_callback(self.procs[jobid], 'start')
                     tid = self._submit_job(deepcopy(self.procs[jobid]),
                                            updatehash=updatehash)
                     if tid is None:
@@ -257,7 +257,7 @@ class DistributedPluginBase(PluginBase):
         logger.info('[Job finished] jobname: %s jobid: %d' % \
                     (self.procs[jobid]._id, jobid))
         if self._status_callback:
-            self._status_callback('node', 'end')
+            self._status_callback(self.procs[jobid], 'end')
         # Update job and worker queues
         self.proc_pending[jobid] = False
         # update the job dependency structure
