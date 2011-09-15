@@ -82,7 +82,7 @@ def perm_test_robust(X,Y):
     print np.shape(X)
     X = np.squeeze(X)
     Y = np.squeeze(Y)
-    print np.shape(X)
+    print np.shape(Y)
     if len(np.shape(X)) >= 3:
         n = max(np.shape(X))
         X = np.reshape(X, (n, n, -1))
@@ -317,7 +317,6 @@ def average_networks(in_files, ntwk_res_file, group_id):
         print in_files
         print np.shape(allntwks)
         print np.shape(meanntwk)
-        1/0
     ntwk = init_ntwk(ntwk_res_file)        
     newdata = []
     for u in range(0,np.shape(meanntwk)[0]):
@@ -380,7 +379,11 @@ def group_bct_stats(in_group1,in_group2,significance,output_prefix, ntwk_res_fil
     return returnall
 
 def init_ntwk(ntwk_res_file):
-    gp = nx.read_graphml(ntwk_res_file)
+    path, name, ext = split_filename(ntwk_res_file)
+    if ext == '.pck':
+        gp = nx.read_gpickle(ntwk_res_file)
+    elif ext == '.graphml':
+        gp = nx.read_graphml(ntwk_res_file)
     nROIs = len(gp.nodes())
     initial_network = nx.Graph()
     for u,d in gp.nodes_iter(data=True):
@@ -434,7 +437,7 @@ def writenodemeasure(stats, measure, group_id, ntwk_res_file, key='p-value'):
     ntwk = nx.read_gpickle(op.abspath(network_name))
     network_name = measure + '_' + group_id + '_nodes.gexf'
     ntwk = fix_float_for_gexf(ntwk)
-    nx.write_gexf(ntwk, op.abspath(network_name))
+    #nx.write_gexf(ntwk, op.abspath(network_name))
     network_name = measure + '_' + group_id + '_nodes'
     return network_name
 
@@ -455,14 +458,18 @@ def writeedgemeasure(stats, measure, group_id, ntwk_res_file, significance, key=
     ntwk = nx.read_gpickle(op.abspath(network_name))
     network_name = measure + '_' + group_id + '_edges.gexf'
     ntwk = fix_float_for_gexf(ntwk)
-    nx.write_gexf(ntwk, op.abspath(network_name))
+    #nx.write_gexf(ntwk, op.abspath(network_name))
     network_name = measure + '_' + group_id + '_edges'
     return network_name
 
 def makenetworks(stats, subject_average, patient_average, ntwk_res_file, significance, group_id1, group_id2):
     print np.shape(stats)
     print np.shape(subject_average)
-    gp = nx.read_graphml(ntwk_res_file)
+    path, name, ext = split_filename(ntwk_res_file)
+    if ext == '.pck':
+        gp = nx.read_gpickle(ntwk_res_file)
+    elif ext == '.graphml':
+        gp = nx.read_graphml(ntwk_res_file)
     nROIs = len(gp.nodes())
     number_of_measures = len(subject_average.keys())
     global gexf

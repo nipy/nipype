@@ -60,7 +60,7 @@ class MRTrix2TrackVis(BaseInterface):
             vx=self.inputs.voxel_dims[0]
             vy=self.inputs.voxel_dims[1]
             vz=self.inputs.voxel_dims[2]
-            hdrpath = op.join(nipype.__path__[0], 'interfaces','mrtrix','defhdr')
+        hdrpath = op.join(nipype.__path__[0], 'interfaces','mrtrix','defhdr')
             
         out_filename = 'converted.trk'      
         d = dict(in_file=self.inputs.in_file,
@@ -181,9 +181,9 @@ orig
 % mrtrix tracks are a cell array 1xNtracks, each cell is nPoints x 3
 for i = 1:length(input.data)
     tracks(i).matrix = input.data{i};
-    tracks(i).matrix(:,1) = tracks(i).matrix(:,1) + dimx;
-    tracks(i).matrix(:,2) = tracks(i).matrix(:,2) + dimy;
-    tracks(i).matrix(:,3) = tracks(i).matrix(:,3) + dimz;
+    tracks(i).matrix(:,1) = tracks(i).matrix(:,1) + 0.5*dimx*vx;
+    tracks(i).matrix(:,2) = tracks(i).matrix(:,2) + 0.5*dimy*vy;
+    tracks(i).matrix(:,3) = tracks(i).matrix(:,3) + 0.5*dimz*vz;
     tracks(i).nPoints = length(tracks(i).matrix); 
 end
 
@@ -193,6 +193,8 @@ hdrpath = ['$headerpath' '.mat']
 load(hdrpath)
 a.n_count = str2num(orig.count);
 header = a;
+header.dim = [dimx, dimy, dimz];
+header.voxel_size = [vx, vy, vz];
 
 %% 3. Writing the TrackVis tracts
 % This section uses code taken from John Colby's trk_write MATLAB function

@@ -196,13 +196,22 @@ class EstimateResponseForSH(CommandLine):
 
 def concat_files(bvec_file, bval_file, invert_x, invert_y, invert_z):
     bvecs = np.loadtxt(bvec_file)
+    bvals = np.loadtxt(bval_file)
+    if np.shape(bvecs)[1] > np.shape(bvecs)[0]:
+        print 'b-vectors are in rows, transposing.'
+        flip = True
+        bvecs = np.transpose(bvecs)
     if invert_x:
         bvecs[:,0] = -bvecs[:,0]
+        print 'Inverting b-vectors in the x direction'
     if invert_y:
         bvecs[:,1] = -bvecs[:,1]
+        print 'Inverting b-vectors in the y direction'
     if invert_z:
         bvecs[:,2] = -bvecs[:,2]
-    bvals = np.loadtxt(bval_file)
+        print 'Inverting b-vectors in the z direction'
+    if flip:
+        bvecs = np.transpose(bvecs)    
     encoding = np.transpose(np.vstack((bvecs,bvals)))
     _, bvec , _ = split_filename(bvec_file)
     _, bval , _ = split_filename(bval_file)

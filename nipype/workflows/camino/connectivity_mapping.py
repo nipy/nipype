@@ -123,7 +123,7 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     coregister = pe.Node(interface=fsl.FLIRT(dof=6), name = 'coregister')
-    coregister.inputs.cost = ('corratio')
+    coregister.inputs.cost = ('normmi')
 
     convertxfm = pe.Node(interface=fsl.ConvertXFM(), name = 'convertxfm')
     convertxfm.inputs.invert_xfm = True

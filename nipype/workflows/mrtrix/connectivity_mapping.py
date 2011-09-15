@@ -133,9 +133,7 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     dwi2tensor = pe.Node(interface=mrtrix.DWI2Tensor(),name='dwi2tensor')
-    dwi2tensor.inputs.debug = True
     fsl2mrtrix = pe.Node(interface=mrtrix.FSL2MRTrix(),name='fsl2mrtrix')
-    fsl2mrtrix.inputs.invert_y = True
 
     binarizeWMparc = pe.Node(interface=fsl.UnaryMaths(),name='binarizeWMparc')
     binarizeWMparc.inputs.operation = 'bin'
@@ -148,12 +146,12 @@ def create_connectivity_pipeline(name="connectivity"):
     erode2 = pe.Node(interface=mrtrix.Erode(),name='erode2')
     threshold1 = pe.Node(interface=mrtrix.Threshold(),name='threshold1')
     threshold2 = pe.Node(interface=mrtrix.Threshold(),name='threshold2')
-    threshold2.inputs.absolute_threshold_value = 0.7
     threshold3 = pe.Node(interface=mrtrix.Threshold(),name='threshold3')
     threshold3.inputs.absolute_threshold_value = 0.4
 
     MRmultiply = pe.Node(interface=mrtrix.MRMultiply(),name='MRmultiply')
-    median3d = pe.Node(interface=mrtrix.MedianFilter3D(),name='median3D')
+    median3D1 = pe.Node(interface=mrtrix.MedianFilter3D(),name='median3D1')
+    median3D2 = pe.Node(interface=mrtrix.MedianFilter3D(),name='median3D2')
     MRconvert = pe.Node(interface=mrtrix.MRConvert(),name='MRconvert')
     
     MRview = pe.Node(interface=mrtrix.MRTrixViewer(),name='MRview')
@@ -162,16 +160,17 @@ def create_connectivity_pipeline(name="connectivity"):
     trackdensity = pe.Node(interface=mrtrix.Tracks2Prob(),name='trackdensity')
     gen_WM_mask = pe.Node(interface=mrtrix.GenerateWhiteMatterMask(),name='gen_WM_mask')
     estimateresponse = pe.Node(interface=mrtrix.EstimateResponseForSH(),name='estimateresponse')
-    estimateresponse.inputs.debug = True
     dwi2SH = pe.Node(interface=mrtrix.DWI2SphericalHarmonicsImage(),name='dwi2SH')
     probCSDstreamtrack = pe.Node(interface=mrtrix.ProbabilisticSphericallyDeconvolutedStreamlineTrack(),name='probCSDstreamtrack')
     probCSDstreamtrack.inputs.inputmodel = 'SD_PROB'
-    probCSDstreamtrack.inputs.maximum_number_of_tracks = 15000
+    probCSDstreamtrack.inputs.maximum_number_of_tracks = 150000
     probSHstreamtrack = probCSDstreamtrack.clone(name="probSHstreamtrack")
     tracks2prob = pe.Node(interface=mrtrix.Tracks2Prob(),name='tracks2prob')
     tracks2prob.inputs.colour = True
     tck2trk = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name='tck2trk')
     
+    csdeconv.inputs.maximum_harmonic_order = 4
+    estimateresponse.inputs.maximum_harmonic_order = 4
     
     MRconvert_vector = MRconvert.clone(name="MRconvert_vector")
     MRconvert_ADC = MRconvert.clone(name="MRconvert_ADC")
@@ -200,6 +199,8 @@ def create_connectivity_pipeline(name="connectivity"):
     cmp_config = cmp.configuration.PipelineConfiguration()
     cmp_config.parcellation_scheme = "Lausanne2008"
     creatematrix.inputs.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
+    ntwkMetrics = pe.Node(interface=cmtk.NetworkXMetrics(), name="NetworkXMetrics")
+
 
     """
     Here we define the endpoint of this tutorial, which is the CFFConverter node, as well as a few nodes which use
@@ -212,7 +213,7 @@ def create_connectivity_pipeline(name="connectivity"):
     giftiLabels = pe.Node(interface=util.Merge(2), name="GiftiLabels")
     niftiVolumes = pe.Node(interface=util.Merge(3), name="NiftiVolumes")
     fiberDataArrays = pe.Node(interface=util.Merge(4), name="FiberDataArrays")
-    gpickledNetworks = pe.Node(interface=util.Merge(1), name="NetworkFiles")
+    gpickledNetworks = pe.Node(interface=util.Merge(4), name="NetworkFiles")
 
     """
     Since we have now created all our nodes, we can define our workflow and start making connections.
@@ -235,7 +236,7 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(inputnode1, FreeSurferSourceRH,[("subjects_dir","subjects_dir")])])
     mapping.connect([(inputnode1, FreeSurferSourceRH,[("subject_id","subject_id")])])
     
-    mapping.connect([(inputnode1, bbregister,[("subject_id","subject_id")])])
+    #mapping.connect([(inputnode1, bbregister,[("subject_id","subject_id")])])
     mapping.connect([(inputnode1, parcellate,[("subjects_dir","subjects_dir")])])
 
     """
@@ -275,13 +276,13 @@ def create_connectivity_pipeline(name="connectivity"):
                                                     
     mapping.connect([(inputnode1, MRconvert,[("dwi","in_file")])])
     MRconvert.inputs.extract_at_axis = 3
-    #MRconvert.inputs.extract_at_axis = "TB"
     MRconvert.inputs.extract_at_coordinate = [0]
     MRmult_merge = pe.Node(interface=util.Merge(2), name="MRmultiply_merge")
     
     mapping.connect([(MRconvert, threshold1,[("converted","in_file")])])
-    mapping.connect([(threshold1, median3d,[("out_file","in_file")])])
-    mapping.connect([(median3d, erode1,[("out_file","in_file")])])
+    mapping.connect([(threshold1, median3D1,[("out_file","in_file")])])
+    mapping.connect([(median3D1, median3D2,[("out_file","in_file")])])
+    mapping.connect([(median3D2, erode1,[("out_file","in_file")])])
     mapping.connect([(erode1, erode2,[("out_file","in_file")])])
     mapping.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
     mapping.connect([(erode2, MRmult_merge,[("out_file","in2")])])
@@ -299,7 +300,7 @@ def create_connectivity_pipeline(name="connectivity"):
 
     mapping.connect([(inputnode1, bet,[("dwi","in_file")])])
     mapping.connect([(inputnode1, gen_WM_mask,[("dwi","in_file")])])
-    mapping.connect([(bet, gen_WM_mask,[("mask_file","binary_mask")])])
+    mapping.connect([(median3D2, gen_WM_mask,[("out_file","binary_mask")])])
     mapping.connect([(fsl2mrtrix, gen_WM_mask,[("encoding_file","encoding_file")])])
 
     mapping.connect([(inputnode1, estimateresponse,[("dwi","in_file")])])
@@ -319,6 +320,39 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(inputnode1, tck2trk,[(('dwi', get_vox_dims), 'voxel_dims'),
     (('dwi', get_data_dims), 'data_dims')])])
 
+    """
+    FLIRT OR BBREG
+    """
+
+    coregister = pe.Node(interface=fsl.FLIRT(dof=6), name = 'coregister')
+    coregister.inputs.cost = ('normmi')
+
+    convertxfm = pe.Node(interface=fsl.ConvertXFM(), name = 'convertxfm')
+    convertxfm.inputs.invert_xfm = True
+    
+    inverse = pe.Node(interface=fsl.FLIRT(), name = 'inverse')
+    inverse.inputs.interp = ('nearestneighbour')
+    inverse.inputs.apply_xfm = True
+    
+    inverse_AparcAseg = pe.Node(interface=fsl.FLIRT(), name = 'inverse_AparcAseg')
+    inverse_AparcAseg.inputs.interp = ('nearestneighbour')
+    inverse_AparcAseg.inputs.apply_xfm = True
+    
+    mapping.connect([(inputnode1, coregister,[('dwi','in_file')])])
+    mapping.connect([(mri_convert_Brain, coregister,[('out_file','reference')])])
+    mapping.connect([(coregister, convertxfm,[('out_matrix_file','in_file')])])
+    mapping.connect([(inputnode1, inverse,[('dwi','reference')])])
+    
+    mapping.connect([(convertxfm, inverse,[('out_file','in_matrix_file')])])
+    mapping.connect([(mri_convert_Brain, inverse,[('out_file','in_file')])])
+
+    mapping.connect([(inputnode1, inverse_AparcAseg,[('dwi','reference')])])
+    mapping.connect([(convertxfm, inverse_AparcAseg,[('out_file','in_matrix_file')])])
+    mapping.connect([(parcellate, inverse_AparcAseg,[('roi_file','in_file')])])
+    
+    """
+    FLIRT OR BBREG
+   
     mapping.connect([(inputnode1, bbregister,[('dwi','source_file')])])
 
     mapping.connect([(mri_convert_Brain, ApplyVolTransform_Brain,[('out_file','target_file')])])
@@ -332,13 +366,15 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(FreeSurferSource, mri_convert_AparcAseg, [(('aparc_aseg', select_aparc), 'in_file')])])
     mapping.connect([(bbregister, ApplyVolTransform_AparcAseg,[('out_reg_file','reg_file')])])
     mapping.connect([(inputnode1, ApplyVolTransform_AparcAseg,[('dwi','source_file')])])
+    mapping.connect([(parcellate, ApplyVolTransform_AparcAseg,[("roi_file","target_file")])])
+    mapping.connect([(ApplyVolTransform_AparcAseg, creatematrix,[("transformed_file","roi_file")])])
 
+    """
     mapping.connect([(inputnode1, creatematrix,[("subject_id","out_matrix_file")])])
     mapping.connect([(inputnode1, creatematrix,[("subject_id","out_matrix_mat_file")])])
 
     mapping.connect([(inputnode1, parcellate,[("subject_id","subject_id")])])
-    mapping.connect([(parcellate, ApplyVolTransform_AparcAseg,[("roi_file","target_file")])])
-    mapping.connect([(ApplyVolTransform_AparcAseg, creatematrix,[("transformed_file","roi_file")])])
+    mapping.connect([(inverse_AparcAseg, creatematrix,[("out_file","roi_file")])])
 
     mapping.connect([(csdeconv, probCSDstreamtrack,[("spherical_harmonics_image","in_file")])])
     mapping.connect([(probCSDstreamtrack, tck2trk,[("tracked","in_file")])])
@@ -361,7 +397,7 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(mris_convertLHlabels, giftiLabels,[("converted","in1")])])
     mapping.connect([(mris_convertRHlabels, giftiLabels,[("converted","in2")])])
 
-    mapping.connect([(ApplyVolTransform_AparcAseg, niftiVolumes,[("transformed_file","in1")])])
+    #mapping.connect([(ApplyVolTransform_AparcAseg, niftiVolumes,[("transformed_file","in1")])])
     mapping.connect([(inputnode1, niftiVolumes,[("dwi","in2")])])
     mapping.connect([(mri_convert_Brain, niftiVolumes,[("out_file","in3")])])
 
@@ -369,6 +405,11 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(creatematrix, fiberDataArrays,[("endpoint_file_mm","in2")])])
     mapping.connect([(creatematrix, fiberDataArrays,[("fiber_length_file","in3")])])
     mapping.connect([(creatematrix, fiberDataArrays,[("fiber_label_file","in4")])])
+    
+    mapping.connect([(creatematrix, ntwkMetrics,[("matrix_file","in_file")])])
+    mapping.connect([(creatematrix, gpickledNetworks,[("matrix_file","in1")])])
+    mapping.connect([(ntwkMetrics, gpickledNetworks,[("gpickled_network_files","in2")])])
+
 
     """
     This block actually connects the merged lists to the CFF converter. We pass the surfaces
@@ -381,8 +422,7 @@ def create_connectivity_pipeline(name="connectivity"):
     CFFConverter.inputs.script_files = os.path.abspath(inspect.getfile(inspect.currentframe()))
     mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
     mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
-    mapping.connect([(creatematrix, CFFConverter,[("matrix_file","gpickled_networks")])])
-
+    mapping.connect([(gpickledNetworks, CFFConverter,[("out","gpickled_networks")])])
     mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
     mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
     mapping.connect([(inputnode1, CFFConverter,[("subject_id","title")])])
@@ -426,7 +466,7 @@ def create_connectivity_pipeline(name="connectivity"):
         ("CreateMatrix.matrix_file", "gpickled_network"),
         ("Parcellate.roi_file", "rois"),
         ("tensor2fa.FA", "fa"),
-        ("applyreg_AparcAseg.transformed_file", "warped"),
+        ("inverse_AparcAseg.out_file", "warped"),
         ("mri_convert_Brain.out_file", "struct")])
         ])
 
