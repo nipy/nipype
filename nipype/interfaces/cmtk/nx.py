@@ -11,7 +11,7 @@ import scipy.io as sio
 from itertools import combinations as combo
 import random
 import pickle
-from nipype.interfaces.cmtk.bct import perm_test_robust, permutation_test, run_stats, makenetworks
+from nipype.interfaces.cmtk.bct import perm_test_robust, permutation_test, run_stats, makenetworks, fix_float_for_gexf
 import cmp
 
 def remove_all_edges(ntwk):
@@ -20,6 +20,50 @@ def remove_all_edges(ntwk):
     for edge in edges:
         ntwk.remove_edge(edge[0],edge[1])
     return ntwk
+
+def add_dicts_by_key(in_dict1, in_dict2):
+    sum = {}
+    for key1 in in_dict1:
+        for key2 in in_dict2:
+            if key1 == key2:
+                sum[key1] = in_dict1[key1] + in_dict2[key2]
+    return sum
+
+def average_networks(in_files, ntwk_res_file, group_id):
+    import networkx as nx
+    import os.path as op
+    from nipype.interfaces.cmtk.bct import fix_float_for_gexf
+    print "Creating average network for group: {grp}".format(grp=group_id)
+    if len(in_files) == 1:
+        ntwk = nx.read_gpickle(in_files[0])
+    else:
+        ntwk_res_file = nx.read_gpickle(ntwk_res_file)
+        ntwk = remove_all_edges(ntwk_res_file)
+        for index, subject in enumerate(in_files):
+            tmp = nx.read_gpickle(subject)
+            edges = tmp.edges_iter()
+            for edge in edges:
+                data = {}
+                data = tmp.edge[edge[0]][edge[1]]
+                if ntwk.has_edge(edge[0],edge[1]):
+                    current = {}
+                    current = ntwk.edge[edge[0]][edge[1]]
+                    data = add_dicts_by_key(current,data)
+                ntwk.add_edge(edge[0],edge[1],data)
+        
+        edges = ntwk.edges_iter()
+        for edge in edges:
+            data = ntwk.edge[edge[0]][edge[1]]
+            for key in data:
+                data[key] = data[key] / len(in_files)
+    network_name = group_id + '_average.pck'
+    nx.write_gpickle(ntwk, op.abspath(network_name))
+    #ntwk = nx.read_gpickle(op.abspath(network_name))
+    #ntwk = fix_float_for_gexf(ntwk)
+    #network_name = group_id + '_average.gexf'
+    #nx.write_gexf(ntwk, op.abspath(network_name))
+    network_name = group_id + '_average'
+    return op.abspath(network_name)
 
 def compute_node_measures(ntwk):
     """
@@ -30,6 +74,7 @@ def compute_node_measures(ntwk):
     measures = {}
     print 'Computing degree...'
     measures['degree'] = np.array(ntwk.degree().values())
+    """
     print 'Computing number of cliques for each node...'
     measures['number_of_cliques'] = np.array(nx.number_of_cliques(ntwk).values())
     print 'Computing load centrality...'
@@ -50,6 +95,8 @@ def compute_node_measures(ntwk):
     measures['triangles'] = np.array(nx.triangles(ntwk).values())
     print 'Computing clustering...'
     measures['clustering'] = np.array(nx.clustering(ntwk).values())
+
+    
     #print 'Computing closeness vitality...'
     #measures['closeness_vitality'] = np.array(nx.closeness_vitality(ntwk,weighted_edges=weighted).values())
     print 'Identifying network isolates'
@@ -61,6 +108,8 @@ def compute_node_measures(ntwk):
     measures['isolates'] = binarized
     print 'Computing k-core number'
     measures['core_number'] = np.array(nx.core_number(ntwk).values())
+    
+    """
     return measures
 
 def compute_edge_measures(ntwk):
@@ -72,10 +121,13 @@ def compute_edge_measures(ntwk):
     measures = {}
     #print 'Computing google matrix...' #Makes really large networks (500k+ edges)
     #measures['google_matrix'] = nx.google_matrix(ntwk)
+    """
     print 'Computing hub matrix...'
     measures['hub_matrix'] = nx.hub_matrix(ntwk)
     print 'Computing authority matrix...'
     measures['authority_matrix'] = nx.authority_matrix(ntwk)
+    """
+    
     """
     These return other sized arrays
     """
@@ -264,6 +316,12 @@ class NetworkXStats(BaseInterface):
         file = open(out_pickled_extra_measures_group2, 'w')
         pickle.dump(patient_dict_measures, file)
         file.close()
+        group1avg = average_networks(self.inputs.in_group1, ntwk_res_file, self.inputs.group_id1)
+        group2avg = average_networks(self.inputs.in_group2, ntwk_res_file, self.inputs.group_id2)
+        gpickled.append(group1avg + '.pck')
+        gpickled.append(group2avg + '.pck')
+        #gexf.append(group1avg + '.gexf')
+        #gexf.append(group2avg + '.gexf') #GEXF writing is broken...
         return runtime
 
     def _list_outputs(self):
@@ -329,8 +387,7 @@ def add_edge_data(edge_array, ntwk):
                     old_edge_dict = edge_ntwk.edge[x][y]
                     edge_ntwk.remove_edge(x,y)
                     data.update(old_edge_dict)
-                edge_ntwk.add_edge(x,y,data)
-                
+                edge_ntwk.add_edge(x,y,data)                
     return edge_ntwk
 
 
@@ -383,7 +440,7 @@ class NetworkXMetrics(BaseInterface):
                 out_file = op.abspath(self._gen_outfilename(self.inputs.out_k_crust, 'pck'))
             nx.write_gpickle(ntwk_measures[key], out_file)
             gpickled.append(out_file)
-           
+        
         return runtime
 
     def _list_outputs(self):

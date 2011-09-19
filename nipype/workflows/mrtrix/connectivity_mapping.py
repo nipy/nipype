@@ -331,11 +331,11 @@ def create_connectivity_pipeline(name="connectivity"):
     convertxfm.inputs.invert_xfm = True
     
     inverse = pe.Node(interface=fsl.FLIRT(), name = 'inverse')
-    inverse.inputs.interp = ('nearestneighbour')
+    #inverse.inputs.interp = ('nearestneighbour')
     inverse.inputs.apply_xfm = True
     
     inverse_AparcAseg = pe.Node(interface=fsl.FLIRT(), name = 'inverse_AparcAseg')
-    inverse_AparcAseg.inputs.interp = ('nearestneighbour')
+    #inverse_AparcAseg.inputs.interp = ('nearestneighbour')
     inverse_AparcAseg.inputs.apply_xfm = True
     
     mapping.connect([(inputnode1, coregister,[('dwi','in_file')])])

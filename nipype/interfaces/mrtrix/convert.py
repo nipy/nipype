@@ -10,6 +10,13 @@ from string import Template
 import nibabel as nb
 from nipype.workflows.camino.connectivity_mapping import get_data_dims, get_vox_dims
 
+def get_origin(volume):
+    import nibabel as nb
+    nii = nb.load(volume)
+    aff = nii.get_affine()
+    origin = aff[:,3]
+    return origin[0:3]
+
 class MRTrix2TrackVisInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, 
     desc='The input file for the tracks in MRTrix (.tck) format')
@@ -17,6 +24,8 @@ class MRTrix2TrackVisInputSpec(BaseInterfaceInputSpec):
     desc='The size of each voxel in mm.')
     data_dims = traits.List(traits.Int, minlen=3, maxlen=3, 
     desc='The size of the image in voxels.')
+    origin = traits.List(traits.Float, minlen=3, maxlen=3, 
+    desc='The origin (position of the anterior commissure) in mm')
     image_file = File(exists=True, 
     desc='An image through which to infer the voxel and data dimensions of the input tracks')
     out_filename = File('converted.trk', genfile=True, usedefault=True, desc='The output filename for the tracks in TrackVis (.trk) format')
@@ -53,6 +62,7 @@ class MRTrix2TrackVis(BaseInterface):
         if isdefined(self.inputs.image_file):
             dx, dy, dz = get_data_dims(self.inputs.image_file)
             vx, vy, vz = get_vox_dims(self.inputs.image_file)
+            ox, oy, oz = get_origin(self.inputs.image_file)
         else:
             dx=self.inputs.data_dims[0]
             dy=self.inputs.data_dims[1]
@@ -60,12 +70,15 @@ class MRTrix2TrackVis(BaseInterface):
             vx=self.inputs.voxel_dims[0]
             vy=self.inputs.voxel_dims[1]
             vz=self.inputs.voxel_dims[2]
+            ox=self.inputs.origin[0]
+            oy=self.inputs.origin[1]
+            oz=self.inputs.origin[2]
         hdrpath = op.join(nipype.__path__[0], 'interfaces','mrtrix','defhdr')
             
         out_filename = 'converted.trk'      
         d = dict(in_file=self.inputs.in_file,
         out_file=out_filename, dimx=dx, dimy=dy,dimz=dz,
-        voxx=vx,voxy=vy, voxz=vz, headerpath=hdrpath)
+        voxx=vx, voxy=vy, voxz=vz, orgx=ox, orgy=oy, orgz=oz, headerpath=hdrpath)
         script = Template("""%% For use in substitution
 in_file = '$in_file';
 out_file = '$out_file';
@@ -181,11 +194,20 @@ orig
 % mrtrix tracks are a cell array 1xNtracks, each cell is nPoints x 3
 for i = 1:length(input.data)
     tracks(i).matrix = input.data{i};
-    tracks(i).matrix(:,1) = tracks(i).matrix(:,1) + 0.5*dimx*vx;
-    tracks(i).matrix(:,2) = tracks(i).matrix(:,2) + 0.5*dimy*vy;
-    tracks(i).matrix(:,3) = tracks(i).matrix(:,3) + 0.5*dimz*vz;
+    tracks(i).matrix(:,1) = tracks(i).matrix(:,1) + $orgx;
+    tracks(i).matrix(:,2) = tracks(i).matrix(:,2) - $orgy;
+    tracks(i).matrix(:,3) = tracks(i).matrix(:,3) - $orgz;
     tracks(i).nPoints = length(tracks(i).matrix); 
+    mins = min(min(tracks(i).matrix));
+    maxs = max(max(tracks(i).matrix));
 end
+
+input.data{1}
+clear input
+tracks(1)
+
+min(mins)
+max(maxs)
 
 clear header
 % Save track data with new header
@@ -255,6 +277,7 @@ fwrite(fid, header.version, 'int');
 fwrite(fid, header.hdr_size, 'int');
 
 % Check orientation
+header.image_orientation_patient(1) = -1
 [tmp ix] = max(abs(header.image_orientation_patient(1:3)));
 [tmp iy] = max(abs(header.image_orientation_patient(4:6)));
 iz = 1:3;
@@ -283,6 +306,13 @@ for iTrk = 1:header.n_count
 end
 
 fclose(fid);
+
+header
+
+'tracks'
+tracks(1).matrix
+length(tracks(1).matrix)
+
 
 """).substitute(d)
 

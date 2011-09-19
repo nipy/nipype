@@ -1,5 +1,4 @@
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, File, TraitedSpec, Directory
-from nipype.utils.filemanip import split_filename
 import re
 from glob import glob
 from nibabel import load
