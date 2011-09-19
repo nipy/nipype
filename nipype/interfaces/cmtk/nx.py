@@ -20,6 +20,31 @@ def remove_all_edges(ntwk):
     for edge in edges:
         ntwk.remove_edge(edge[0],edge[1])
     return ntwk
+    
+def fix_keys_for_gexf(orig):
+    import networkx as nx
+    ntwk = nx.Graph()
+    nodes = orig.nodes_iter()
+    edges = orig.edges_iter()
+    for node in nodes:
+        newnodedata = {}
+        newnodedata.update(orig.node[node])
+        newnodedata['label'] = orig.node[node]['dn_fsname']
+        ntwk.add_node(str(node),newnodedata)
+        ntwk.node[str(node)]['dn_position'] = str(newnodedata['dn_position'])
+    for edge in edges:
+        data = {}
+        data = orig.edge[edge[0]][edge[1]]
+        ntwk.add_edge(str(edge[0]),str(edge[1]),data)
+        if ntwk.edge[str(edge[0])][str(edge[1])].has_key('fiber_length_mean'):
+            ntwk.edge[str(edge[0])][str(edge[1])]['fiber_length_mean'] = str(data['fiber_length_mean'])
+        if ntwk.edge[str(edge[0])][str(edge[1])].has_key('fiber_length_std'):
+            ntwk.edge[str(edge[0])][str(edge[1])]['fiber_length_std'] = str(data['fiber_length_std'])
+        if ntwk.edge[str(edge[0])][str(edge[1])].has_key('number_of_fibers'):
+            ntwk.edge[str(edge[0])][str(edge[1])]['number_of_fibers'] = str(data['number_of_fibers'])
+        if ntwk.edge[str(edge[0])][str(edge[1])].has_key('value'):
+            ntwk.edge[str(edge[0])][str(edge[1])]['value'] = str(data['value'])
+    return ntwk   
 
 def add_dicts_by_key(in_dict1, in_dict2):
     sum = {}
@@ -50,7 +75,6 @@ def average_networks(in_files, ntwk_res_file, group_id):
                     current = ntwk.edge[edge[0]][edge[1]]
                     data = add_dicts_by_key(current,data)
                 ntwk.add_edge(edge[0],edge[1],data)
-        
         edges = ntwk.edges_iter()
         for edge in edges:
             data = ntwk.edge[edge[0]][edge[1]]
@@ -58,10 +82,9 @@ def average_networks(in_files, ntwk_res_file, group_id):
                 data[key] = data[key] / len(in_files)
     network_name = group_id + '_average.pck'
     nx.write_gpickle(ntwk, op.abspath(network_name))
-    #ntwk = nx.read_gpickle(op.abspath(network_name))
-    #ntwk = fix_float_for_gexf(ntwk)
-    #network_name = group_id + '_average.gexf'
-    #nx.write_gexf(ntwk, op.abspath(network_name))
+    ntwk = fix_keys_for_gexf(ntwk)
+    network_name = group_id + '_average.gexf'
+    nx.write_gexf(ntwk, op.abspath(network_name))
     network_name = group_id + '_average'
     return op.abspath(network_name)
 
@@ -74,7 +97,6 @@ def compute_node_measures(ntwk):
     measures = {}
     print 'Computing degree...'
     measures['degree'] = np.array(ntwk.degree().values())
-    """
     print 'Computing number of cliques for each node...'
     measures['number_of_cliques'] = np.array(nx.number_of_cliques(ntwk).values())
     print 'Computing load centrality...'
@@ -95,8 +117,6 @@ def compute_node_measures(ntwk):
     measures['triangles'] = np.array(nx.triangles(ntwk).values())
     print 'Computing clustering...'
     measures['clustering'] = np.array(nx.clustering(ntwk).values())
-
-    
     #print 'Computing closeness vitality...'
     #measures['closeness_vitality'] = np.array(nx.closeness_vitality(ntwk,weighted_edges=weighted).values())
     print 'Identifying network isolates'
@@ -109,7 +129,6 @@ def compute_node_measures(ntwk):
     print 'Computing k-core number'
     measures['core_number'] = np.array(nx.core_number(ntwk).values())
     
-    """
     return measures
 
 def compute_edge_measures(ntwk):
@@ -121,12 +140,11 @@ def compute_edge_measures(ntwk):
     measures = {}
     #print 'Computing google matrix...' #Makes really large networks (500k+ edges)
     #measures['google_matrix'] = nx.google_matrix(ntwk)
-    """
     print 'Computing hub matrix...'
     measures['hub_matrix'] = nx.hub_matrix(ntwk)
     print 'Computing authority matrix...'
     measures['authority_matrix'] = nx.authority_matrix(ntwk)
-    """
+    
     
     """
     These return other sized arrays
@@ -138,21 +156,21 @@ def compute_dict_measures(ntwk):
     """
     Returns a dictionary
     """
-    print 'Computing single valued measures...'
+    print 'Computing measures which return a dictionary...'
     weighted = True
     measures = {}
-    #print 'Computing connected components...'
-    #measures['connected_components'] = nx.connected_components(ntwk) # list of lists, doesn't make sense to do stats
-    #print 'Computing neighbour connectivity...'
-    #measures['neighbor_connectivity'] = nx.neighbor_connectivity(ntwk)    
-    #print 'Computing rich club coefficient...'
-    #measures['rich_club_coef'] = nx.rich_club_coefficient(ntwk)
-    #print 'Computing edge load...'
-    #measures['edge_load'] = nx.edge_load(ntwk)
-    #print 'Computing betweenness centrality...'
-    #measures['edge_betweenness_centrality'] = nx.edge_betweenness_centrality(ntwk)
-    #print 'Computing shortest path length for each node...'
-    #measures['shortest_path_length'] = np.array(nx.shortest_path_length(ntwk, weighted).values())
+    print 'Computing connected components...'
+    measures['connected_components'] = nx.connected_components(ntwk) # list of lists, doesn't make sense to do stats
+    print 'Computing neighbour connectivity...'
+    measures['neighbor_connectivity'] = nx.neighbor_connectivity(ntwk)    
+    print 'Computing rich club coefficient...'
+    measures['rich_club_coef'] = nx.rich_club_coefficient(ntwk)
+    print 'Computing edge load...'
+    measures['edge_load'] = nx.edge_load(ntwk)
+    print 'Computing betweenness centrality...'
+    measures['edge_betweenness_centrality'] = nx.edge_betweenness_centrality(ntwk)
+    print 'Computing shortest path length for each node...'
+    measures['shortest_path_length'] = np.array(nx.shortest_path_length(ntwk, weighted).values())
     return measures
 
 def compute_singlevalued_measures(ntwk):
@@ -166,14 +184,12 @@ def compute_singlevalued_measures(ntwk):
     measures['degree_pearsonr'] = nx.degree_pearsonr(ntwk)
     print 'Computing degree assortativity...'
     measures['degree_assortativity'] = nx.degree_assortativity(ntwk)
-    #print 'Computing transitivity...'
-    #measures['transitivity'] = nx.transitivity(ntwk)
+    print 'Computing transitivity...'
+    measures['transitivity'] = nx.transitivity(ntwk)
     print 'Computing number of connected_components...'
     measures['number_connected_components'] = nx.number_connected_components(ntwk)
-    
-    #print 'Computing average clustering...'
-    #measures['average_clustering'] = nx.average_clustering(ntwk)
-    
+    print 'Computing average clustering...'
+    measures['average_clustering'] = nx.average_clustering(ntwk)
     #print 'Computing graph clique number...'
     #measures['graph_clique_number'] = nx.graph_clique_number(ntwk)
     #print 'Calculating average shortest path length...'
@@ -320,8 +336,8 @@ class NetworkXStats(BaseInterface):
         group2avg = average_networks(self.inputs.in_group2, ntwk_res_file, self.inputs.group_id2)
         gpickled.append(group1avg + '.pck')
         gpickled.append(group2avg + '.pck')
-        #gexf.append(group1avg + '.gexf')
-        #gexf.append(group2avg + '.gexf') #GEXF writing is broken...
+        gexf.append(group1avg + '.gexf')
+        gexf.append(group2avg + '.gexf')
         return runtime
 
     def _list_outputs(self):

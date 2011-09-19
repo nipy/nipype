@@ -317,9 +317,10 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(probCSDstreamtrack, tracks2prob,[("tracked","in_file")])])
     mapping.connect([(inputnode1, tracks2prob,[("dwi","template_file")])])
 
-    mapping.connect([(inputnode1, tck2trk,[(('dwi', get_vox_dims), 'voxel_dims'),
+    mapping.connect([(inputnode1, tck2trk,[(('dwi', get_vox_dims), 'voxel_dims'), 
     (('dwi', get_data_dims), 'data_dims')])])
-
+    
+    mapping.connect([(inputnode1, tck2trk,[("dwi","image_file")])])
     """
     FLIRT OR BBREG
     """
