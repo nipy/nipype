@@ -322,11 +322,20 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         if self._is_pending(taskid):
             return None
         node_dir = self._pending[taskid]
+        # MIT HACK
         # on the pbs system at mit the parent node directory needs to be
-        # accessed before internal directories become available.
-        logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,'..'))))
-        logger.debug(os.listdir(node_dir))
-        logger.debug(node_dir)
+        # accessed before internal directories become available. there
+        # is a disconnect when the queueing engine knows a job is
+        # finished to when the directories become statable.
+        while True:
+            try:
+                logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,'..'))))
+                logger.debug(os.listdir(node_dir))
+                glob(os.path.join(node_dir,'result_*.pklz')).pop()
+                break
+            except Exception, e:
+                logger.debug(e)
+            sleep(2)
         results_file = glob(os.path.join(node_dir,'result_*.pklz'))[0]
         result_data = loadpkl(results_file)
         result_out = dict(result=None, traceback=None)
@@ -346,7 +355,10 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         # pickle node
         timestamp = strftime('%Y%m%d_%H%M%S')
         suffix = '%s_%s'%(timestamp, node._id)
-        batch_dir = os.path.join(node.base_dir, 'batch')
+        if node._hierarchy:
+            batch_dir = os.path.join(node.base_dir, node._hierarchy.split('.')[0], 'batch')
+        else:
+            batch_dir = os.path.join(node.base_dir, 'batch')
         if not os.path.exists(batch_dir):
             os.makedirs(batch_dir)
         pkl_file = os.path.join(batch_dir,'node_%s.pklz'%suffix)
