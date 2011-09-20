@@ -179,6 +179,7 @@ class DistanceInputSpec(BaseInterfaceInputSpec):
     "eucl_wmean": mean Euclidian minimum distance of all volume2 voxels to volume1 weighted by their values\
     "eucl_max": mean Euclidian minimum distance of all volume2 voxels to volume1 weighted by their values',
     usedefault = True)
+    mask_volume = File(exists=True, desc="calculate overlap only within this mask.")
 
 class DistanceOutputSpec(TraitedSpec):
     distance = traits.Float()
@@ -266,22 +267,36 @@ class Distance(BaseInterface):
             return np.mean(min_dist_matrix)
 
     def _eucl_max(self, nii1, nii2):
-        origdata1 = nii1.get_data().astype(np.bool)
-        if origdata1.max() == 0:
-            return np.NaN
-        border1 = self._find_border(origdata1)
+        origdata1 = nii1.get_data()
+        origdata1 = np.logical_not(np.logical_or(origdata1 == 0, np.isnan(origdata1)))
+        origdata2 = nii2.get_data()
+        origdata2 = np.logical_not(np.logical_or(origdata2 == 0, np.isnan(origdata2)))
+        
+        if isdefined(self.inputs.mask_volume):
+            maskdata = nb.load(self.inputs.mask_volume).get_data()
+            maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
+            origdata1 = np.logical_and(maskdata, origdata1)
+            origdata2 = np.logical_and(maskdata, origdata2)
 
-        origdata2 = nii2.get_data().astype(np.bool)
-        if origdata2.max() == 0:
+        if origdata1.max() == 0 or origdata2.max() == 0:
             return np.NaN
+        
+        border1 = self._find_border(origdata1)
+        border2 = self._find_border(origdata2)
 
         set1_coordinates = self._get_coordinates(border1, nii1.get_affine())
-        set2_coordinates = self._get_coordinates(origdata2, nii2.get_affine())
-
-        dist_matrix = cdist(set1_coordinates.T, set2_coordinates.T)
-        min_dist_matrix = np.amin(dist_matrix, axis = 0)
-
-        return np.max(min_dist_matrix)
+        set2_coordinates = self._get_coordinates(border2, nii2.get_affine())
+        distances = cdist(set1_coordinates.T, set2_coordinates.T)
+        mins = np.concatenate((np.amin(distances, axis=0), np.amin(distances, axis=1)))
+        
+#        l1 = set1_coordinates.shape[1]
+#        l2 = set2_coordinates.shape[1]
+#        mins = np.zeros(l1+l2)
+#        for i in range(l1):
+#            mins[i] = np.min(cdist(set1_coordinates.T[i,:].reshape(1,3), set2_coordinates.T))
+#        for i in range(l2):
+#            mins[l1+i] = np.min(cdist(set2_coordinates.T[i,:].reshape(1,3), set1_coordinates.T))
+        return np.max(mins)
 
     def _run_interface(self, runtime):
         nii1 = nb.load(self.inputs.volume1)
@@ -356,6 +371,7 @@ class Overlap(BaseInterface):
         
         if isdefined(self.inputs.mask_volume):
             maskdata = nb.load(self.inputs.mask_volume).get_data()
+            maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
             origdata1 = np.logical_and(maskdata, origdata1)
             origdata2 = np.logical_and(maskdata, origdata2)
             
