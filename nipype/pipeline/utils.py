@@ -409,6 +409,13 @@ def _remove_identity_nodes(graph):
                                                         inport)]}
                             else:
                                 connect = {'connect': [(srcport, inport)]}
+                            old_connect = graph.get_edge_data(srcnode,destnode)
+                            if old_connect:
+                                if old_connect['connect']:
+                                    old_connect['connect'] += connect['connect']
+                                else:
+                                    old_connect['connect'] = connect['connect']
+                                connect = old_connect
                             graph.add_edges_from([(srcnode, destnode, connect)])
             graph.remove_nodes_from([node])
     return graph
