@@ -27,4 +27,4 @@ if __name__ == '__main__':
     for plugin in plugins:
         for example, pipelines in examples.items():
             run_examples(example, pipelines, plugin)
-    
+

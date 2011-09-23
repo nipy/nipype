@@ -43,7 +43,7 @@ def clean_directory(testdir, origdir, ftype):
 def test_maths_base():
     files, testdir, origdir, ftype = create_files_in_directory()
 
-    # Get some fslmaths 
+    # Get some fslmaths
     maths = fsl.MathsCommand()
 
     # Test that we got what we wanted
@@ -82,7 +82,7 @@ def test_maths_base():
 def test_changedt():
     files, testdir, origdir, ftype = create_files_in_directory()
 
-    # Get some fslmaths 
+    # Get some fslmaths
     cdt = fsl.ChangeDataType()
 
     # Test that we got what we wanted
@@ -141,7 +141,7 @@ def test_threshold():
 
     # Clean up our mess
     clean_directory(testdir, origdir, ftype)
-        
+
 
 @skipif(no_fsl)
 def test_meanimage():
@@ -168,7 +168,7 @@ def test_meanimage():
 
     # Clean up our mess
     clean_directory(testdir, origdir, ftype)
-        
+
 @skipif(no_fsl)
 def test_smooth():
     files, testdir, origdir, ftype = create_files_in_directory()
@@ -186,18 +186,18 @@ def test_smooth():
     cmdline = "fslmaths a.nii -s %.5f b.nii"
     for val in [0,1.,1,25,0.5,8/3]:
         smoother = fsl.IsotropicSmooth(in_file="a.nii",out_file="b.nii",sigma=val)
-        yield assert_equal, smoother.cmdline, cmdline%val 
+        yield assert_equal, smoother.cmdline, cmdline%val
         smoother = fsl.IsotropicSmooth(in_file="a.nii",out_file="b.nii",fwhm=val)
         val = float(val)/np.sqrt(8 * np.log(2))
         yield assert_equal, smoother.cmdline, cmdline%val
-   
+
     # Test automatic naming
     smoother = fsl.IsotropicSmooth(in_file="a.nii", sigma=5)
     yield assert_equal, smoother.cmdline, "fslmaths a.nii -s %.5f %s"%(5, os.path.join(testdir, "a_smooth.nii"))
 
     # Clean up our mess
     clean_directory(testdir, origdir, ftype)
-        
+
 @skipif(no_fsl)
 def test_mask():
     files, testdir, origdir, ftype = create_files_in_directory()
@@ -256,14 +256,14 @@ def test_dilation():
     diller.inputs.kernel_size = Undefined
     diller.inputs.kernel_file = "kernel.txt"
     yield assert_equal, diller.cmdline, "fslmaths a.nii -kernel file kernel.txt -dilF b.nii"
-    
+
     # Test that we don't need to request an out name
     dil = fsl.DilateImage(in_file="a.nii", operation="max")
     yield assert_equal, dil.cmdline, "fslmaths a.nii -dilF %s"%os.path.join(testdir, "a_dil.nii")
 
     # Clean up our mess
     clean_directory(testdir, origdir, ftype)
-    
+
 @skipif(no_fsl)
 def test_erosion():
     files, testdir, origdir, ftype = create_files_in_directory()
@@ -337,7 +337,7 @@ def test_unarymaths():
     for op in ops:
         maths = fsl.UnaryMaths(in_file="a.nii", operation=op)
         yield assert_equal, maths.cmdline, "fslmaths a.nii -%s %s"%(op, os.path.join(testdir, "a_%s.nii"%op))
-    
+
     # Clean up our mess
     clean_directory(testdir, origdir, ftype)
 
@@ -372,7 +372,7 @@ def test_binarymaths():
     for op in ops:
         maths = fsl.BinaryMaths(in_file="a.nii", operation=op, operand_file="b.nii")
         yield assert_equal, maths.cmdline, "fslmaths a.nii -%s b.nii %s"%(op,os.path.join(testdir,"a_maths.nii"))
-    
+
     # Clean up our mess
     clean_directory(testdir, origdir, ftype)
 
@@ -403,7 +403,7 @@ def test_multimaths():
     maths = fsl.MultiImageMaths(in_file="a.nii", op_string="-add %s -mul 5", operand_files=["b.nii"])
     yield assert_equal, maths.cmdline, \
     "fslmaths a.nii -add b.nii -mul 5 %s"%os.path.join(testdir,"a_maths.nii")
-    
+
     # Clean up our mess
     clean_directory(testdir, origdir, ftype)
 
@@ -429,10 +429,10 @@ def test_tempfilt():
         yield assert_equal, filt.cmdline, "fslmaths a.nii -bptf %.6f %.6f b.nii"%win
 
     # Test that we don't need to ask for an out file
-    filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma = 64) 
+    filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma = 64)
     yield assert_equal, filt.cmdline, \
     "fslmaths a.nii -bptf 64.000000 -1.000000 %s"%os.path.join(testdir,"a_filt.nii")
-    
+
     # Clean up our mess
     clean_directory(testdir, origdir, ftype)
 

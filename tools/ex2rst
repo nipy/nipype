@@ -1,22 +1,17 @@
 #!/usr/bin/env python
-"""Helper to automagically generate ReST versions of examples.
+#
+# Note: this file is copied (possibly with minor modifications) from the
+# sources of the PyMVPA project - http://pymvpa.org.  It remains licensed as
+# the rest of PyMVPA (MIT license as of October 2010).
+#
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ##
+#
+#   See COPYING file distributed along with the PyMVPA package for the
+#   copyright and license terms.
+#
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ##
 
-The MIT License
-
- Copyright (c) 2006-2009 Michael Hanke
-               2007-2009 Yaroslav Halchenko
-
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
-
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
-
-"""
+"""Helper to automagically generate ReST versions of examples"""
 
 __docformat__ = 'restructuredtext'
 
@@ -27,6 +22,31 @@ import re
 import glob
 from optparse import OptionParser
 
+
+def auto_image(line):
+    """Automatically replace generic image markers with ones that have full
+    size (width/height) info, plus a :target: link to the original png, to be
+    used in the html docs.
+    """
+    img_re = re.compile(r'(\s*)\.\. image::\s*(.*)$')
+    m = img_re.match(line)
+    if m is None:
+        # Not an image declaration, leave the line alone and return unmodified
+        return line
+
+    # Match means it's an image spec, we rewrite it with extra tags
+    ini_space = m.group(1)
+    lines = [line,
+             ini_space + '   :width: 500\n',
+             #ini_space + '   :height: 350\n'
+             ]
+    fspec = m.group(2)
+    if fspec.endswith('.*'):
+        fspec = fspec.replace('.*', '.png')
+    fspec = fspec.replace('fig/', '../_images/')
+    lines.append(ini_space + ('   :target: %s\n' % fspec) )
+    lines.append('\n')
+    return ''.join(lines)
 
 def exfile2rst(filename):
     """Open a Python script and convert it into an ReST string.
@@ -42,8 +62,6 @@ def exfile2rst(filename):
     indocs = False
     doc2code = False
     code2doc = False
-    interactiveblock = False
-    preserved_indent = False
     # an empty line found in the example enables the check for a potentially
     # indented docstring starting on the next line (as an attempt to exclude
     # function or class docstrings)
@@ -67,7 +85,6 @@ def exfile2rst(filename):
             cleanline = line[:line.find('#')].lstrip()
             indent_level = len(line) - len(cleanline) - 1
             cleanline = cleanline.rstrip()
-            interactiveblock = False
         else:
             cleanline = line[:line.find('#')].rstrip()
 
@@ -92,19 +109,16 @@ def exfile2rst(filename):
                     proc_line = cleanline[3:-3]
                 else:
                     # must be start of multiline block
-                    interactiveblock = False
                     indocs = True
                     code2doc = True
                     # rescue what is left on the line
                     proc_line = cleanline[3:] # strip """
-                first_codeline_in_block = False
             else:
                 # we are already in the docs
                 # handle doc end
                 if cleanline.endswith('"""') or cleanline.endswith("'''"):
                     indocs = False
                     doc2code = True
-                    preserved_indent = False
                     # rescue what is left on the line
                     proc_line = cleanline[:-3]
                     # reset the indentation
@@ -122,40 +136,18 @@ def exfile2rst(filename):
                 code2doc = False
                 s += '\n'
 
+            proc_line = auto_image(proc_line)
+            
             if proc_line:
                 s += proc_line.rstrip() + '\n'
 
         else:
-            # we are in a code block
-            if line.startswith("if cfg.getboolean('examples', 'interactive'"):
-                interactiveblock = True
-            elif not interactiveblock:
-                # we exclude the code that is used to disable the interactive
-                # plots.
-                if doc2code:
-                    doc2code = False
-                    first_codeline_in_block = True
-                    # the spaces at the end are crucial to get intentation of
-                    # indented code block -- otherwise sphinx removes common
-                    # whitespace
-                    s += '\n::\n'
+            if doc2code:
+                doc2code = False
+                s += '\n::\n'
 
-                # has to be code
-                leading_whitespace = len(line) > 2 \
-                                     and len(line) > len(line.lstrip())
-                line = line.rstrip()
-                # anything left?
-                if line:
-                    if first_codeline_in_block and leading_whitespace \
-                            and not preserved_indent:
-                        s += ' >>%s\n' % line
-                        preserved_indent = True
-                    else:
-                        s += '  %s\n' % line
-
-                    first_codeline_in_block = False
-                else:
-                    s += '\n'
+            # has to be code
+            s += '  %s' % line
 
     xfile.close()
 
@@ -179,15 +171,27 @@ def exfile2rstfile(filename, opts):
 
     # write converted ReST
     dfile.write(exfile2rst(filename))
-    
-    # add links
-    dfile.write('.. include:: ../../links_names.txt\n\n')
+
+    links = """
+
+.. include:: ../../links_names.txt
+
+"""
+    dfile.write(links)
 
     if opts.sourceref:
         # write post example see also box
-        dfile.write("\n.. seealso::\n  The full source code of this example is "
-                    "included in the %s source distribution (`%s`).\n"
-                    % (opts.project, filename))
+        msg = """
+        
+.. admonition:: Example source code
+
+   You can download :download:`the full source code of this example <%s>`.
+   This same script is also included in the %s source distribution under the
+   :file:`examples` directory.
+
+"""    % (filename, opts.project)
+
+        dfile.write(msg)
 
     dfile.close()
 
@@ -215,7 +219,7 @@ the respective indentation is removed in the ReST output.
 
 The parser algorithm automatically excludes file headers and starts with the
 first (module-level) docstring instead.
-""" )
+""" ) #'
 
     # define options
     parser.add_option('--verbose', action='store_true', dest='verbose',
@@ -269,7 +273,7 @@ Name of the project that contains the examples. This name is used in the
         print('Ignoring duplicate parse targets.')
 
     if not os.path.exists(opts.outdir):
-        os.mkdir(opts.outdir)
+        os.mkdir(outdir)
 
     # finally process all examples
     for t in toparse:

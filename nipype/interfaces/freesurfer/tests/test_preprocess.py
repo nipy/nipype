@@ -5,7 +5,7 @@ from shutil import rmtree
 import nibabel as nif
 import numpy as np
 from tempfile import mkdtemp
-from nipype.testing import (assert_equal, assert_false, assert_true, 
+from nipype.testing import (assert_equal, assert_false, assert_true,
                             assert_raises, skipif)
 import nipype.interfaces.freesurfer as freesurfer
 
@@ -14,7 +14,7 @@ def no_freesurfer():
         return True
     else:
         return False
-    
+
 @skipif(no_freesurfer)
 def test_applyvoltransform():
     input_map = dict(args = dict(argstr='%s',),
@@ -78,7 +78,7 @@ def test_dicomconvert():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
 
-@skipif(no_freesurfer)        
+@skipif(no_freesurfer)
 def test_mriconvert():
     input_map = dict(apply_inv_transform = dict(argstr='--apply_inverse_transform %s',),
                      apply_transform = dict(argstr='--apply_transform %s',),
@@ -159,7 +159,7 @@ def test_mriconvert():
                      template_info = dict(),
                      template_type = dict(argstr='--template_type %s',),
                      unwarp_gradient = dict(argstr='--unwarp_gradient_nonlinearity',),
-                     vox_size = dict(argstr='--voxsize %f %f %f',),
+                     vox_size = dict(argstr='-voxsize %f %f %f',),
                      zero_ge_z_offset = dict(argstr='--zero_ge_z_offset',),
                      zero_outlines = dict(argstr='--zero_outlines',),
                      )
@@ -167,7 +167,7 @@ def test_mriconvert():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-@skipif(no_freesurfer)        
+@skipif(no_freesurfer)
 def test_parsedicomdir():
     input_map = dict(args = dict(argstr='%s',),
                      dicom_dir = dict(mandatory=True,argstr='--d %s',),
@@ -181,7 +181,7 @@ def test_parsedicomdir():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-@skipif(no_freesurfer)            
+@skipif(no_freesurfer)
 def test_reconall():
     input_map = dict(T1_files = dict(argstr='-i %s...',),
                      args = dict(argstr='%s',),
@@ -196,7 +196,7 @@ def test_reconall():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value, "key = %s"%key
-@skipif(no_freesurfer)            
+@skipif(no_freesurfer)
 def test_resample():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -209,7 +209,7 @@ def test_resample():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-@skipif(no_freesurfer)            
+@skipif(no_freesurfer)
 def test_smooth():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(),
@@ -227,7 +227,7 @@ def test_smooth():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-@skipif(no_freesurfer)            
+@skipif(no_freesurfer)
 def test_unpacksdicomdir():
     input_map = dict(args = dict(argstr='%s',),
                      config = dict(mandatory=True,xor=('run_info', 'config', 'seq_config'),argstr='-cfg %s',),
@@ -263,7 +263,7 @@ def create_files_in_directory():
         nif.save(nif.Nifti1Image(img,np.eye(4),hdr),
                  os.path.join(outdir,f))
     return filelist, outdir, cwd
-    
+
 def clean_directory(outdir, old_wd):
     if os.path.exists(outdir):
         rmtree(outdir)

@@ -1,4 +1,4 @@
-""" 
+"""
     Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
@@ -41,10 +41,10 @@ class DTIFit(StdOutCommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  
-    >>> fit = cmon.DTIFit()                  
-    >>> fit.inputs.scheme_file = 'A.scheme'                  
-    >>> fit.inputs.in_file = 'tensor_fitted_data.Bfloat'                  
+    >>> import nipype.interfaces.camino as cmon
+    >>> fit = cmon.DTIFit()
+    >>> fit.inputs.scheme_file = 'A.scheme'
+    >>> fit.inputs.in_file = 'tensor_fitted_data.Bfloat'
     >>> fit.run()                  # doctest: +SKIP
     """
     _cmd = 'dtfit'
@@ -125,11 +125,11 @@ class ModelFit(StdOutCommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  
-    >>> fit = cmon.ModelFit()                  
-    >>> fit.model = 'dt'             
-    >>> fit.inputs.scheme_file = 'A.scheme'                  
-    >>> fit.inputs.in_file = 'tensor_fitted_data.Bfloat'                  
+    >>> import nipype.interfaces.camino as cmon
+    >>> fit = cmon.ModelFit()
+    >>> fit.model = 'dt'
+    >>> fit.inputs.scheme_file = 'A.scheme'
+    >>> fit.inputs.in_file = 'tensor_fitted_data.Bfloat'
     >>> fit.run()                  # doctest: +SKIP
     """
     _cmd = 'modelfit'

@@ -21,36 +21,36 @@ from nibabel import load
 from nipype.interfaces.matlab import MatlabCommand
 
 import nipype.utils.spm_docs as sd
-                                    
+
 import logging
 logger = logging.getLogger('iflogger')
 
 def func_is_3d(in_file):
     """Checks if input functional files are 3d."""
-    
+
     if isinstance(in_file, list):
         return func_is_3d(in_file[0])
     else:
         img = load(in_file)
-        shape = img.get_shape() 
+        shape = img.get_shape()
         if len(shape) == 3 or (len(shape)==4 and shape[3]==1):
             return True
         else:
             return False
-        
+
 def get_first_3dfile(in_files):
     if not func_is_3d(in_files):
         return None
     if isinstance(in_files[0], list):
         return in_files[0]
-    return in_files    
+    return in_files
 
 def scans_for_fname(fname):
     """Reads a nifti file and converts it to a numpy array storing
     individual nifti volumes.
-    
+
     Opens images so will fail if they are not found.
-    
+
     """
     if isinstance(fname,list):
         scans = np.zeros((len(fname),),dtype=object)
@@ -77,7 +77,7 @@ def scans_for_fnames(fnames,keep4d=False,separate_sessions=False):
     separate_sessions: boolean
         if 4d nifti files are being used, then separate_sessions
         ensures a cell array per session is created in the structure.
-        
+
     """
     flist = None
     if not isinstance(fnames[0], list):
@@ -116,7 +116,7 @@ class Info(object):
         Parameters
         ----------
         matlab_cmd : String specifying default matlab command
-        
+
             default None, will look for environment variable MATLABCMD
             and use if found, otherwise falls back on MatlabCommand
             default of 'matlab -nodesktop -nosplash'
@@ -168,7 +168,7 @@ def no_spm():
     else:
         return False
 
-    
+
 class SPMCommandInputSpec(BaseInterfaceInputSpec):
     matlab_cmd = traits.Str(desc='matlab command to use')
     paths = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
@@ -178,7 +178,7 @@ class SPMCommandInputSpec(BaseInterfaceInputSpec):
 
 class SPMCommand(BaseInterface):
     """Extends `BaseInterface` class to implement SPM specific interfaces.
-    
+
     WARNING: Pseudo prototype class, meant to be subclassed
     """
     input_spec = SPMCommandInputSpec
@@ -189,7 +189,7 @@ class SPMCommand(BaseInterface):
     _matlab_cmd = None
     _paths = None
     _use_mcr = None
-    
+
     def __init__(self, **inputs):
         super(SPMCommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._matlab_cmd_update, ['matlab_cmd',
@@ -204,7 +204,7 @@ class SPMCommand(BaseInterface):
         cls._matlab_cmd = matlab_cmd
         cls._paths = paths
         cls._use_mcr = use_mcr
-        
+
     def _matlab_cmd_update(self):
         # MatlabCommand has to be created here,
         # because matlab_cmb is not a proper input
@@ -215,7 +215,7 @@ class SPMCommand(BaseInterface):
                                   uses_mcr=self.inputs.use_mcr)
         self.mlab.inputs.script_file = 'pyscript_%s.m' % \
         self.__class__.__name__.split('.')[-1].lower()
-        
+
     @property
     def jobtype(self):
         return self._jobtype
@@ -231,7 +231,7 @@ class SPMCommand(BaseInterface):
             self.inputs.paths = self._paths
         if not isdefined(self.inputs.use_mcr) and self._use_mcr:
             self.inputs.use_mcr = self._use_mcr
-        
+
     def _run_interface(self, runtime):
         """Executes the SPM function using MATLAB."""
         self.mlab.inputs.script = self._make_matlab_command(deepcopy(self._parse_inputs()))
@@ -244,18 +244,18 @@ class SPMCommand(BaseInterface):
         runtime.stderr = results.runtime.stderr
         runtime.merged = results.runtime.merged
         return runtime
-    
+
     def _list_outputs(self):
         """Determine the expected outputs based on inputs."""
-        
+
         raise NotImplementedError
-    
-        
+
+
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for SPM."""
-        
+
         return val
-    
+
     def _parse_inputs(self, skip=()):
         spmdict = {}
         metadata=dict(field=lambda t : t is not None)
@@ -277,7 +277,7 @@ class SPMCommand(BaseInterface):
             else:
                 spmdict[field] = self._format_arg(name, spec, value)
         return [spmdict]
-    
+
     def _reformat_dict_for_savemat(self, contents):
         """Encloses a dict representation within hierarchical lists.
 
@@ -290,7 +290,7 @@ class SPMCommand(BaseInterface):
         >>> a = SPMCommand()._reformat_dict_for_savemat(dict(a=1,b=dict(c=2,d=3)))
         >>> print a
         [{'a': 1, 'b': [{'c': 2, 'd': 3}]}]
-        
+
         """
         newdict = {}
         try:
@@ -301,7 +301,7 @@ class SPMCommand(BaseInterface):
                     # if value is None, skip
                 else:
                     newdict[key] = value
-                
+
             return [newdict]
         except TypeError:
             print 'Requires dict input'
@@ -312,12 +312,12 @@ class SPMCommand(BaseInterface):
         Parameters
         ----------
         prefix : string
-            A string that needs to get  
+            A string that needs to get
         contents : dict
             A non-tuple Python structure containing spm job
             information gets converted to an appropriate sequence of
             matlab commands.
-            
+
         """
         jobstring = ''
         if contents is None:
@@ -362,7 +362,7 @@ class SPMCommand(BaseInterface):
             return jobstring
         jobstring += "%s = %s;\n" % (prefix,str(contents))
         return jobstring
-    
+
     def _make_matlab_command(self, contents, postscript=None):
         """Generates a mfile to build job structure
         Parameters
@@ -379,7 +379,7 @@ class SPMCommand(BaseInterface):
         -------
         mscript : string
             contents of a script called by matlab
-            
+
         """
         cwd = os.getcwd()
         mscript  = """
@@ -391,7 +391,7 @@ class SPMCommand(BaseInterface):
         fprintf('SPM version: %s Release: %s\\n',name, ver);
         fprintf('SPM path: %s\\n',which('spm'));
         spm('Defaults','fMRI');
-                  
+
         if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');end\n
         """
         if self.mlab.inputs.mfile:
@@ -409,10 +409,10 @@ class SPMCommand(BaseInterface):
                                          (contents[0])}]}]}
             savemat(os.path.join(cwd,'pyjobs_%s.mat'%self.jobname), jobdef)
             mscript += "load pyjobs_%s;\n\n" % self.jobname
-        mscript += """ 
-        if strcmp(spm('ver'),'SPM8'), 
+        mscript += """
+        if strcmp(spm('ver'),'SPM8'),
            jobs=spm_jobman('spm5tospm8',{jobs});
-        end 
+        end
         spm_jobman(\'run_nogui\',jobs);\n
         """
         if postscript is not None:

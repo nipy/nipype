@@ -221,7 +221,7 @@ mergenode = pe.Node(interface=util.Merge(2, axis='hstack'),
 preproc.connect(meanfunc2,'out_file', mergenode, 'in1')
 preproc.connect(medianval,'out_stat', mergenode, 'in2')
 
-                       
+
 """
 Smooth each run using SUSAN with the brightness threshold set to 75% of the
 median value for each run and a mask consituting the mean functional

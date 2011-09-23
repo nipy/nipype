@@ -134,8 +134,8 @@ dtlutgen.inputs.inversion = 1
 
 """
 In this tutorial we implement probabilistic tractography using the PICo algorithm.
-PICo tractography requires an estimate of the fibre direction and a model of its uncertainty in each voxel;
-this is produced using the following node.
+PICo tractography requires an estimate of the fibre direction and a model of its
+uncertainty in each voxel; this is produced using the following node.
 """
 picopdfs = pe.Node(interface=camino.PicoPDFs(), name="picopdfs")
 picopdfs.inputs.inputmodel = 'dt'

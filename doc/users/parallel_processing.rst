@@ -66,14 +66,14 @@ Once the clients have been started, any pipeline executed with::
 
 will automatically start getting distributed to the
 clients. Alternatively, a config file may be used to define the
-plugin. See :ref:`config_file_` for details.
+plugin. See :ref:`config_file` for details.
 
 To prevent prevent parallel execution type::
 
     workflow.run(plugin='Linear')
 
 Using the pipeline engine with SGE/OGE/PBS
---------------------------------------
+------------------------------------------
 
 In order to use nipype with SGE_/OGE_ (not tested) or PBS_ you simply need to
 call::
@@ -89,7 +89,7 @@ sending a dictionary containing any of the following keys::
  qsub_args - any other command line args to be passed to qsub.
 
 For example, the following snippet executes the workflow on myqueue with
-a custom template:
+a custom template::
  
        workflow.run(plugin='SGE',
           plugin_args=dict(template='mytemplate.sh', qsub_args='-q myqueue')

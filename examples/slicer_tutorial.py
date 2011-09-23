@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 Using slicer for analysis
-=======================
+=========================
 
 The slicer_tutorial.py
 
@@ -14,6 +14,7 @@ It will be fixed in a later release
     python slicer_tutorial.py
 
 """
+
 raise RuntimeWarning, 'Slicer not fully implmented'
 from nipype.interfaces.slicer import SlicerCommandLine
 
@@ -118,6 +119,6 @@ pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                   (datasource,reslice,[('func','inputVolume')]),
                   (datasource,reslice,[('struct','referenceVolume')])
                   ])
-                    
+
 pipeline.run()
 pipeline.write_graph()

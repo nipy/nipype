@@ -26,11 +26,11 @@ class OutputSpec(nib.TraitedSpec):
 class TestInterface(nib.BaseInterface):
     input_spec = InputSpec
     output_spec = OutputSpec
-    
+
     def _run_interface(self, runtime):
         runtime.returncode = 0
         return runtime
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['output1'] = [1, self.inputs.input1]
@@ -109,7 +109,7 @@ def test2():
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 4
     yield assert_equal, len(pipe._execgraph.edges()), 0
-    
+
 def test3():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
@@ -121,7 +121,7 @@ def test3():
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 3
     yield assert_equal, len(pipe._execgraph.edges()), 2
-    
+
 def test4():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
@@ -222,12 +222,11 @@ def test_expansion():
 
 def test_iterable_expansion():
     import nipype.pipeline.engine as pe
-    from nipype.interfaces.utility import IdentityInterface
     wf1 = pe.Workflow(name='test')
-    node1 = pe.Node(IdentityInterface(fields=['in1']),name='node1')
-    node2 = pe.Node(IdentityInterface(fields=['in2']),name='node2')
-    node1.iterables = ('in1',[1,2])
-    wf1.connect(node1,'in1', node2, 'in2')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node2 = pe.Node(TestInterface(),name='node2')
+    node1.iterables = ('input1',[1,2])
+    wf1.connect(node1,'output1', node2, 'input2')
     wf3 = pe.Workflow(name='group')
     for i in [0,1,2]:
         wf3.add_nodes([wf1.clone(name='test%d'%i)])
@@ -347,4 +346,3 @@ def test_workflow_add():
     yield assert_raises, IOError, w1.add_nodes, [n2]
     yield assert_raises, IOError, w1.add_nodes, [n3]
     yield assert_raises, IOError, w1.connect, [(w1,n2,[('n1.a','d')])]
-    
