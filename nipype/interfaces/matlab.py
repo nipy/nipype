@@ -109,12 +109,13 @@ class MatlabCommand(CommandLine):
 
     def _run_interface(self,runtime):
         runtime = super(MatlabCommand, self)._run_interface(runtime)
+        try:
+            # Matlab can leave the terminal in a barbbled state
+            os.system('stty sane')
+        except:
+            # We might be on a system where stty doesn't exist
+            pass
         if 'MATLAB code threw an exception' in runtime.stderr:
-            try:
-                os.system('stty sane')
-            except:
-                # We might be on a system where stty doesn't exist
-                pass
             self.raise_exception(runtime)
         return runtime
 
