@@ -4,14 +4,15 @@
 """
 import os
 
-from .base import (PluginBase, logger, report_crash, report_nodes_not_run)
-from ..utils import (nx, dfs_preorder, config)
+from .base import (PluginBase, logger, report_crash, report_nodes_not_run,
+                   str2bool)
+from ..utils import (nx, dfs_preorder)
 
 class LinearPlugin(PluginBase):
     """Execute workflow in series
     """
 
-    def run(self, graph, updatehash=False):
+    def run(self, graph, config, updatehash=False):
         """Executes a pre-defined pipeline in a serial order.
 
         Parameters
@@ -34,7 +35,7 @@ class LinearPlugin(PluginBase):
                 node.run(updatehash=updatehash)
             except:
                 os.chdir(old_wd)
-                if config.getboolean('execution', 'stop_on_first_crash'):
+                if str2bool(config['execution']['stop_on_first_crash']):
                     raise
                 # bare except, but i really don't know where a
                 # node might fail

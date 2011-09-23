@@ -12,6 +12,8 @@
 .. _`NIPY developer resources`: http://nipy.org/devel
 .. _`Brain Imaging Center`: http://bic.berkeley.edu/
 .. _nitime: http://nipy.sourceforge.net/nitime/
+.. _nibabel: http://nipy.sourceforge.net/nibabel/
+.. _ConnectomeViewer: http://www.connectomeviewer.org/viewer/
 
 .. Documentation tools
 .. _graphviz: http://www.graphviz.org/
@@ -85,6 +87,8 @@
 .. _FreeSurfer: http://surfer.nmr.mgh.harvard.edu
 .. _voxbo: http://www.voxbo.org
 .. _Slicer: http://slicer.org
+.. _Camino: http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php
+.. _Camino2Trackvis: http://camino-trackvis.sourceforge.net/
 
 .. General software
 .. _gcc: http://gcc.gnu.org

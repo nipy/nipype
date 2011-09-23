@@ -30,8 +30,8 @@ import os
 import warnings
 
 from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.base import CommandLine, traits, CommandLineInputSpec
-from nipype.utils.misc import isdefined
+from nipype.interfaces.base import (CommandLine, traits, CommandLineInputSpec,
+                                    isdefined)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)

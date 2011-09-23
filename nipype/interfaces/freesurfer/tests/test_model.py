@@ -113,7 +113,7 @@ def test_glmfit():
                      sim_sign = dict(argstr='--sim-sign %s',),
                      simulation = dict(argstr='--sim %s %d %f %s',),
                      subjects_dir = dict(),
-                     surf = dict(),
+                     surf = dict(argstr="--surf %s %s %s"),
                      synth = dict(argstr='--synth',),
                      uniform = dict(argstr='--uniform %f %f',),
                      var_fwhm = dict(argstr='--var-fwhm %f',),

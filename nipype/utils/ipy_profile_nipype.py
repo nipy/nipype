@@ -10,7 +10,11 @@ off.
 """
 #__test__ = False
 
-import IPython.ipapi
+from IPython import __version__ as IPyversion
+if IPyversion >= "0.11":
+    from IPython.core import ipapi
+else:
+    from IPython import ipapi
 
 
 
@@ -64,7 +68,7 @@ def nipype_mode_on():
     """
     from ipy_traits_completer import activate
 
-    ip = IPython.ipapi.get()
+    ip = ipapi.get()
     activate()
     print 'nipype_mode is ON'
 
@@ -72,7 +76,7 @@ def nipype_mode_off():
     """Turn traits completer off"""
     from IPython.strdispatch import StrDispatch
 
-    ip = IPython.ipapi.get()
+    ip = ipapi.get()
     sdisp = StrDispatch()
     ip.IP.strdispatchers['complete_command'] = sdisp
     ip.IP.Completer.custom_completers = sdisp
@@ -81,7 +85,7 @@ def nipype_mode_off():
 def main():
     """When we use the nipype profile we turn nipype_mode on."""
     
-    ip = IPython.ipapi.get()
+    ip = ipapi.get()
 
     mode = get_nipype_mode() # initialize nipype_mode in user_ns
     nipype_mode_on()

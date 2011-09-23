@@ -10,8 +10,7 @@ code template, and define approriate inputs and outputs.
 .. testcode::
 
 	from nipype.interfaces.matlab import MatlabCommand
-	from nipype.interfaces.traits import File
-	from nipype.interfaces.base import TraitedSpec, BaseInterface, BaseInterfaceInputSpec
+	from nipype.interfaces.base import TraitedSpec, BaseInterface, BaseInterfaceInputSpec, File
 	import os
 	from string import Template
 	

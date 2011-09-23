@@ -24,8 +24,7 @@ from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath,
                                     OutputMultiPath, CommandLine,
-                                    CommandLineInputSpec)
-from nipype.utils.misc import isdefined
+                                    CommandLineInputSpec, isdefined)
 
 
 class ParseDICOMDirInputSpec(FSTraitedSpec):
@@ -839,7 +838,7 @@ class SmoothInputSpec(FSTraitedSpec):
     vol_fwhm = traits.Float(min=0, argstr= '--vol-fwhm %d',
                             desc='volumesmoothing outside of surface')
 
-class SmoothOutputSpec(FSTraitedSpec):
+class SmoothOutputSpec(TraitedSpec):
     smoothed_file= File(exist=True,desc='smoothed input volume')	
          
 class Smooth(FSCommand):

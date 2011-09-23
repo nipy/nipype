@@ -18,32 +18,26 @@
     >>> os.chdir(datadir)
 
 """
-from copy import deepcopy
 import glob
 import os
 import shutil
-import hashlib
 import re
 import tempfile
 from warnings import warn
 
-from enthought.traits.trait_errors import TraitError
+import sqlite3
 
 try:
     import pyxnat
 except:
     pass
 
-from nipype.interfaces.base import (Interface, CommandLine, Bunch,
-                                    InterfaceResult, Interface,
-                                    TraitedSpec, traits, File, Directory,
-                                    BaseInterface, InputMultiPath,
+from nipype.interfaces.base import (TraitedSpec, traits, File, Directory,
+                                    BaseInterface, InputMultiPath, isdefined,
                                     OutputMultiPath, DynamicTraitedSpec,
-                                    BaseTraitedSpec, Undefined,
-    BaseInterfaceInputSpec)
-from nipype.utils.misc import isdefined
+                                    Undefined, BaseInterfaceInputSpec)
 from nipype.utils.filemanip import (copyfile, list_to_filename,
-                                    filename_to_list, FileNotFoundError)
+                                    filename_to_list)
 
 import logging
 iflogger = logging.getLogger('interface')
@@ -73,7 +67,7 @@ def copytree(src, dst):
             if os.path.isdir(srcname):
                 copytree(srcname, dstname)
             else:
-                copyfile(srcname, dstname, True)
+                copyfile(srcname, dstname, True, hashmethod='content')
         except (IOError, os.error), why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
@@ -266,7 +260,7 @@ class DataSink(IOBase):
                             else:
                                 raise(inst)
                     iflogger.debug("copyfile: %s %s"%(src, dst))
-                    copyfile(src, dst, copy=True)
+                    copyfile(src, dst, copy=True, hashmethod='content')
                 elif os.path.isdir(src):
                     dst = self._get_dst(os.path.join(src,''))
                     dst = os.path.join(tempoutdir, dst)
@@ -1049,3 +1043,50 @@ def capture_provenance():
 
 def push_provenance():
     pass
+
+class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    database_file = File(exists=True, mandatory = True)
+    table_name = traits.Str(mandatory=True)
+
+class SQLiteSink(IOBase):
+    """Very simple frontend for storing values into SQLite database. input_names
+    correspond to input_names.
+    
+        Notes
+        -----
+
+            Unlike most nipype-nodes this is not a thread-safe node because it can
+            write to a common shared location. When run in parallel it will 
+            occasionally crash.
+            
+    
+        Examples
+        --------
+
+        >>> sql = SQLiteSink(input_names=['subject_id', 'some_measurement'])
+        >>> sql.inputs.database_file = 'my_database.db'
+        >>> sql.inputs.table_name = 'experiment_results'
+        >>> sql.inputs.subject_id = 's1'
+        >>> sql.inputs.some_measurement = 11.4
+        >>> sql.run() # doctest: +SKIP
+        
+    """
+    input_spec = SQLiteSinkInputSpec
+    
+    def __init__(self, input_names, **inputs):
+        
+        super(SQLiteSink, self).__init__(**inputs)
+
+        self._input_names = filename_to_list(input_names)
+        add_traits(self.inputs, [name for name in self._input_names])
+
+    def _list_outputs(self):
+        """Execute this module.
+        """
+        conn = sqlite3.connect(self.inputs.database_file, check_same_thread = False)
+        c = conn.cursor()
+        c.execute("INSERT OR REPLACE INTO %s ("%self.inputs.table_name + ",".join(self._input_names) + ") VALUES (" + ",".join(["?"]*len(self._input_names)) + ")", 
+                  [getattr(self.inputs,name) for name in self._input_names])
+        conn.commit()
+        c.close()
+        return None

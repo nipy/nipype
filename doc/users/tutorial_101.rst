@@ -135,9 +135,11 @@ and load them in a graphviz visualizer elsewhere. You can specify how detailed
 the graph is going to be, by using "graph2use" argument which takes the following 
 options:
 
+* hierarchical - creates a graph showing all embedded workflows (default)
 * orig - creates a top level graph without expanding internal workflow nodes
 * flat - expands workflow nodes recursively
-* exec - expands workflows to depict iterables
+* exec - expands workflows to depict iterables (be careful - can generate really
+  large graphs)
 
 
 **7. Extend it**

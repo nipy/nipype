@@ -9,6 +9,7 @@ import logging
 import os
 import re
 
+import numpy as np
 from nipype.utils.misc import package_check
 package_check('networkx', '1.3')
 import networkx as nx
@@ -94,51 +95,34 @@ def modify_paths(object, relative=True, basedir=None):
                 out = object
     return out
 
-def _create_pickleable_graph(graph, show_connectinfo=False):
-    """Create a graph that can be pickled.
+def get_print_name(node):
+    """Get the name of the node
 
-    Ensures that edge info is pickleable.
+    For example, a node containing an instance of interfaces.fsl.BET
+    would be called nodename.BET.fsl
+    
     """
-    logger.debug('creating pickleable graph')
-    pklgraph = deepcopy(graph)
-    for edge in pklgraph.edges():
-        data = pklgraph.get_edge_data(*edge)
-        pklgraph.remove_edge(*edge)
-        if show_connectinfo:
-            pklgraph.add_edge(edge[0], edge[1], l=str(data['connect']))
-        else:
-            pklgraph.add_edge(edge[0], edge[1])
-    return pklgraph
-
+    name = node.name
+    if hasattr(node, '_interface'):
+        pkglist = node._interface.__class__.__module__.split('.')
+        interface = node._interface.__class__.__name__
+        destclass = ''
+        if len(pkglist) > 2:
+            destclass = '.%s'%pkglist[2]
+        name = '.'.join([node.name, interface]) + destclass
+    return name
+    
 def _create_dot_graph(graph, show_connectinfo=False):
     """Create a graph that can be pickled.
 
     Ensures that edge info is pickleable.
     """
-    logger.debug('creating pickleable graph')
+    logger.debug('creating dot graph')
     pklgraph = nx.DiGraph()
     for edge in graph.edges():
         data = graph.get_edge_data(*edge)
-        if hasattr(edge[0], '_interface'):
-            pkglist = edge[0]._interface.__class__.__module__.split('.')
-            if len(pkglist) > 1:
-                srcclass = pkglist[-2]
-            else:
-                srcclass = ''
-        else:
-            srcclass = ''
-        srcname = '.'.join(str(edge[0]).split('.')[1:])
-        srcname = '.'.join((srcname, srcclass))
-        if hasattr(edge[1], '_interface'):
-            pkglist = edge[1]._interface.__class__.__module__.split('.')
-            if len(pkglist) > 1:
-                destclass = pkglist[-2]
-            else:
-                destclass = ''
-        else:
-            destclass = ''
-        destname = '.'.join(str(edge[1]).split('.')[1:])
-        destname = '.'.join((destname, destclass))
+        srcname = get_print_name(edge[0])
+        destname = get_print_name(edge[1])
         if show_connectinfo:
             pklgraph.add_edge(srcname, destname, l=str(data['connect']))
         else:
@@ -257,7 +241,7 @@ def get_levels(G):
     return levels
 
 
-def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
+def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables, prefix):
     """Merges two graphs that share a subset of nodes.
 
     If the subgraph needs to be replicated for multiple iterables, the
@@ -289,6 +273,11 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
     # nodes of the supergraph.
     supernodes = supergraph.nodes()
     ids = [n._hierarchy+n._id for n in supernodes]
+    if len(np.unique(ids)) != len(ids):
+        # This should trap the problem of miswiring when multiple iterables are
+        # used at the same level. The use of the template below for naming
+        # updates to nodes is the general solution.
+        raise Exception('Execution graph does not have a unique set of node names. Please rerun the workflow')
     edgeinfo = {}
     for n in subgraph.nodes():
         nidx = ids.index(n._hierarchy+n._id)
@@ -301,6 +290,10 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
                                        supergraph.get_edge_data(*edge)))
     supergraph.remove_nodes_from(nodes)
     # Add copies of the subgraph depending on the number of iterables
+    count = 0
+    for i, params in enumerate(walk(iterables.items())):
+        count += 1
+    template = '.%s%%0%dd'%(prefix, np.ceil(np.log10(count)))
     for i, params in enumerate(walk(iterables.items())):
         Gc = deepcopy(subgraph)
         ids = [n._hierarchy+n._id for n in Gc.nodes()]
@@ -335,7 +328,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables):
             if node._hierarchy+node._id in edgeinfo.keys():
                 for info in edgeinfo[node._hierarchy+node._id]:
                     supergraph.add_edges_from([(info[0], node, info[1])])
-            node._id += str(i)
+            node._id += template%i
     return supergraph
 
 def generate_expanded_graph(graph_in):
@@ -356,6 +349,8 @@ def generate_expanded_graph(graph_in):
         if isinstance(node.iterables, list):
             node.iterables = dict(map(lambda(x):(x[0], lambda:x[1]),
                                       node.iterables))
+    allprefixes = list('0abcdefghijklmnopqrstuvwxyz')
+    iterable_prefix = '0'
     while moreiterables:
         nodes = nx.topological_sort(graph_in)
         nodes.reverse()
@@ -363,16 +358,17 @@ def generate_expanded_graph(graph_in):
         if inodes:
             node = inodes[0]
             iterables = node.iterables.copy()
+            iterable_prefix = allprefixes[allprefixes.index(iterable_prefix)+1]
             logger.debug('node: %s iterables: %s'%(node, iterables))
             #nx.write_dot(graph_in, '%s_pre.dot'%node)
             node.iterables = None
-            node._id += 'I'
+            node._id += ('.' + iterable_prefix + 'I')
             subnodes = [s for s in dfs_preorder(graph_in, node)]
             logger.debug(('subnodes:' , subnodes))
             subgraph = graph_in.subgraph(subnodes)
             graph_in = _merge_graphs(graph_in, subnodes,
                                      subgraph, node._hierarchy+node._id,
-                                     iterables)
+                                     iterables, iterable_prefix)
             #nx.write_dot(graph_in, '%s_post.dot'%node)
         else:
             moreiterables = False
@@ -510,7 +506,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
     input_files.extend(walk_outputs(inputdict))
     needed_files += [path for path, type in input_files if type == 'f']
     for extra in ['_0x*.json', 'provenance.xml', 'pyscript*.m',
-                  'command.txt', 'result*.pklz']:
+                  'command.txt', 'result*.pklz', '_inputs.pklz']:
         needed_files.extend(glob(os.path.join(cwd, extra)))
     if files2keep:
         needed_files.extend(filename_to_list(files2keep))
@@ -535,3 +531,32 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
         if key not in needed_outputs:
             setattr(outputs, key, Undefined)
     return outputs
+
+def merge_dict(d1, d2, merge=lambda x,y:y):
+    """
+    Merges two dictionaries, non-destructively, combining 
+    values on duplicate keys as defined by the optional merge
+    function.  The default behavior replaces the values in d1
+    with corresponding values in d2.  (There is no other generally
+    applicable merge strategy, but often you'll have homogeneous 
+    types in your dicts, so specifying a merge technique can be 
+    valuable.)
+
+    Examples:
+
+    >>> d1 = {'a': 1, 'c': 3, 'b': 2}
+    >>> merge_dict(d1, d1)
+    {'a': 1, 'c': 3, 'b': 2}
+    >>> merge_dict(d1, d1, lambda x,y: x+y)
+    {'a': 2, 'c': 6, 'b': 4}
+
+    """
+    if not isinstance(d1, dict):
+        return merge(d1, d2)
+    result = dict(d1)
+    for k,v in d2.iteritems():
+        if k in result:
+            result[k] = merge_dict(result[k], v, merge=merge)
+        else:
+            result[k] = v
+    return result

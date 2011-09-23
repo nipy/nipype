@@ -176,9 +176,10 @@ procstreamlines.inputs.outputtracts = 'oogl'
 We can also produce a variety of scalar values from our fitted tensors. The following nodes generate the
 fractional anisotropy and diffusivity trace maps and their associated headers.
 """
-fa = pe.Node(interface=camino.FA(),name='fa')
-#md = pe.Node(interface=camino.MD(),name='md')
-trace = pe.Node(interface=camino.TrD(),name='trace')
+
+fa = pe.Node(interface=camino.ComputeFractionalAnisotropy(),name='fa')
+trace = pe.Node(interface=camino.ComputeTensorTrace(),name='trace')
+dteig = pe.Node(interface=camino.ComputeEigensystem(), name='dteig')
 
 analyzeheader_fa = pe.Node(interface= camino.AnalyzeHeader(), name = "analyzeheader_fa")
 analyzeheader_fa.inputs.datatype = "double"

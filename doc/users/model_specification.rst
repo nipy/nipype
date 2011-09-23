@@ -30,10 +30,9 @@ Required for most designs
 Optional
 --------
 
-- regressors : list of dicts specifying additional regressors for each run
-   - names : list of names corresponding to each column. Should be None if
-        automatically assigned.
-   - values : lists of values for each regressors
+- regressor_names : list of names corresponding to each column. Should be None if  automatically assigned.
+
+- regressors : list of lists. values for each regressor - must correspond to the number of volumes in the functional run
 
 - amplitudes : lists of amplitudes for each event. This will be ignored by
       SPM's Level1Design.

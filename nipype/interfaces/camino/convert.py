@@ -1,9 +1,17 @@
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,\
-    StdOutCommandLine, StdOutCommandLineInputSpec
-from nipype.utils.filemanip import split_filename
-from nipype.utils.misc import isdefined
+""" 
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
 import os
-import nibabel as nb
+
+from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
+                                    TraitedSpec, File, StdOutCommandLine,
+                                    StdOutCommandLineInputSpec, isdefined)
+from nipype.utils.filemanip import split_filename
 
 class Image2VoxelInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-4dimage %s',
@@ -34,9 +42,9 @@ class Image2Voxel(StdOutCommandLine):
     Examples
     --------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> img2vox = cmon.Image2Voxel()                  # doctest: +SKIP
-    >>> img2vox.inputs.in_file = '4d_dwi.nii'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> img2vox = cmon.Image2Voxel()
+    >>> img2vox.inputs.in_file = '4d_dwi.nii'
     >>> img2vox.run()                  # doctest: +SKIP
     """
     _cmd = 'image2voxel'
@@ -87,10 +95,10 @@ class FSL2Scheme(StdOutCommandLine):
     Examples
     --------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> makescheme = cmon.FSL2Scheme()                  # doctest: +SKIP
-    >>> makescheme.inputs.bvec_file = 'bvecs'                  # doctest: +SKIP
-    >>> makescheme.inputs.bvec_file = 'bvals'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> makescheme = cmon.FSL2Scheme()
+    >>> makescheme.inputs.bvec_file = 'bvecs'
+    >>> makescheme.inputs.bvec_file = 'bvals'
     >>> makescheme.run()                  # doctest: +SKIP
 
     """
@@ -144,10 +152,10 @@ class VtkStreamlines(StdOutCommandLine):
     Examples
     --------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> vtk = cmon.VtkStreamlines()                  # doctest: +SKIP
-    >>> vtk.inputs.in_file = 'tract_data.Bfloat'                  # doctest: +SKIP
-    >>> vtk.inputs.voxeldims = [1,1,1]                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> vtk = cmon.VtkStreamlines()
+    >>> vtk.inputs.in_file = 'tract_data.Bfloat'
+    >>> vtk.inputs.voxeldims = [1,1,1]
     >>> vtk.run()                  # doctest: +SKIP
     """
     _cmd = 'vtkstreamlines'
@@ -247,10 +255,10 @@ class ProcStreamlines(StdOutCommandLine):
     Examples
     --------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> proc = cmon.ProcStreamlines()                  # doctest: +SKIP
-    >>> proc.inputs.in_file = 'tract_data.Bfloat'                  # doctest: +SKIP
-    >>> proc.inputs.outputtracts = 'oogl'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> proc = cmon.ProcStreamlines()
+    >>> proc.inputs.in_file = 'tract_data.Bfloat'
+    >>> proc.inputs.outputtracts = 'oogl'
     >>> proc.run()                  # doctest: +SKIP
     """
     _cmd = 'procstreamlines'
@@ -294,12 +302,12 @@ class TractShredder(StdOutCommandLine):
     Examples
     --------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> shred = cmon.TractShredder()                  # doctest: +SKIP
-    >>> shred.inputs.in_file = 'tract_data.Bfloat'                  # doctest: +SKIP
-    >>> shred.inputs.offset = 0                  # doctest: +SKIP
-    >>> shred.inputs.bunchsize = 1                  # doctest: +SKIP
-    >>> shred.inputs.space = 2                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> shred = cmon.TractShredder()
+    >>> shred.inputs.in_file = 'tract_data.Bfloat'
+    >>> shred.inputs.offset = 0
+    >>> shred.inputs.bunchsize = 1
+    >>> shred.inputs.space = 2
     >>> shred.run()                  # doctest: +SKIP
     """
     _cmd = 'tractshredder'
@@ -433,6 +441,7 @@ class NIfTIDT2Camino(CommandLine):
             _, filename , _ = split_filename(self.inputs.in_file)
         return filename
 
+<<<<<<< HEAD
 class MRTrixSphericalHarmonics2CaminoInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s',
                     mandatory=True, position=-2, desc='4d image file')
@@ -474,8 +483,129 @@ class MRTrixSphericalHarmonics2Camino(StdOutCommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['caminoSHcoef'] = os.path.abspath(self._gen_outfilename())
+=======
+class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
+    in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
+        desc='Tensor-fitted data filename') # Took out < %s from argstr
+
+    scheme_file = File(exists=True, argstr='%s', mandatory=False, position=2,
+        desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
+
+    readheader = File(exists=True, argstr='-readheader %s',
+        mandatory=False, position=3,
+        desc='Reads header information from file and prints to stdout. If this option is not' \
+        'specified, then the program writes a header based on the other arguments.')
+
+    printimagedims = File(exists=True, argstr='-printimagedims %s',
+        mandatory=False, position=3,
+        desc='Prints image data and voxel dimensions as Camino arguments and exits.')
+
+    # How do we implement both file and enum (for the program) in one argument? Is this option useful anyway?
+    #-printprogargs <file> <prog>
+    #Prints data dimension (and type, if relevant) arguments for a specific Camino program, where prog is one of shredder, scanner2voxel, vcthreshselect, pdview, track.
+    printprogargs = File(exists=True, argstr='-printprogargs %s',
+        mandatory=False, position=3,
+        desc='Prints data dimension (and type, if relevant) arguments for a specific Camino' \
+        'program, where prog is one of shredder, scanner2voxel, vcthreshselect, pdview, track.')
+
+    printintelbyteorder = File(exists=True, argstr='-printintelbyteorder %s',
+        mandatory=False, position=3,
+        desc='Prints 1 if the header is little-endian, 0 otherwise.')
+
+    printbigendian = File(exists=True, argstr='-printbigendian %s',
+        mandatory=False, position=3,
+        desc='Prints 1 if the header is big-endian, 0 otherwise.')
+
+    initfromheader = File(exists=True, argstr='-initfromheader %s',
+        mandatory=False, position=3,
+        desc='Reads header information from file and intializes a new header with the values' \
+        'read from the file. You may replace any combination of fields in the new header by specifying'\
+        'subsequent options.')
+
+    data_dims = traits.List(traits.Int, desc = 'data dimensions in voxels',
+        argstr='-datadims %s', minlen=3, maxlen=3, units='voxels')
+
+    voxel_dims = traits.List(traits.Float, desc = 'voxel dimensions in mm',
+        argstr='-voxeldims %s', minlen=3, maxlen=3, units='mm')
+
+    centre = traits.List(traits.Int, desc = 'Voxel specifying origin of Talairach coordinate system for SPM, default \
+        [0 0 0].', argstr='-centre %s', minlen=3, maxlen=3, units='mm')
+
+    picoseed = traits.List(traits.Int, desc = 'Voxel specifying the seed (for PICo maps), default [0 0 0].',
+        argstr='-picoseed %s', minlen=3, maxlen=3, units='mm')
+
+    nimages = traits.Int(argstr='-nimages %d', units='NA',
+        desc="Number of images in the img file. Default 1.")
+
+    datatype = traits.Enum('byte', 'char', '[u]short', '[u]int', 'float', 'complex', 'double',
+        argstr='-datatype %s',
+        desc='The char datatype is 8 bit (not the 16 bit char of Java), as specified by the Analyze 7.5 standard. \
+     The byte, ushort and uint types are not part of the Analyze specification but are supported by SPM.', mandatory=True)
+
+    offset = traits.Int(argstr='-offset %d', units='NA',
+        desc='According to the Analyze 7.5 standard, this is the byte offset in the .img file' \
+        'at which voxels start. This value can be negative to specify that the absolute value is' \
+        'applied for every image in the file.')
+
+    greylevels = traits.List(traits.Int, desc = 'Minimum and maximum greylevels. Stored as shorts in the header.',
+        argstr='-gl %s', minlen=2, maxlen=2, units='NA')
+
+    scaleslope = traits.Float(argstr='-scaleslope %d', units='NA',
+        desc='Intensities in the image are scaled by this factor by SPM and MRICro. Default is 1.0.')
+
+    scaleinter = traits.Float(argstr='-scaleinter %d', units='NA',
+        desc='Constant to add to the image intensities. Used by SPM and MRIcro.')
+
+    description = traits.String(argstr='-description %s',
+        desc='Short description - No spaces, max length 79 bytes. Will be null terminated automatically.')
+
+    intelbyteorder = traits.Bool(argstr='-intelbyteorder',
+        desc="Write header in intel byte order (little-endian).")
+
+    networkbyteorder = traits.Bool(argstr='-networkbyteorder',
+        desc="Write header in network byte order (big-endian). This is the default for new headers.")
+
+class AnalyzeHeaderOutputSpec(TraitedSpec):
+    header = File(exists=True, desc='Analyze header')
+
+class AnalyzeHeader(StdOutCommandLine):
+    """
+    Create or read an Analyze 7.5 header file.
+
+    Analyze image header, provides support for the most common header fields.
+    Some fields, such as patient_id, are not currently supported. The program allows
+    three nonstandard options: the field image_dimension.funused1 is the image scale.
+    The intensity of each pixel in the associated .img file is (image value from file) * scale.
+    Also, the origin of the Talairach coordinates (midline of the anterior commisure) are encoded
+    in the field data_history.originator. These changes are included for compatibility with SPM.
+
+    All headers written with this program are big endian by default.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.camino as cmon
+    >>> hdr = cmon.AnalyzeHeader()
+    >>> hdr.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> hdr.inputs.scheme_file = 'A.scheme'
+    >>> hdr.inputs.data_dims = [256,256,256]
+    >>> hdr.inputs.voxel_dims = [1,1,1]
+    >>> hdr.run()                  # doctest: +SKIP
+    """
+    _cmd = 'analyzeheader'
+    input_spec=AnalyzeHeaderInputSpec
+    output_spec=AnalyzeHeaderOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['header'] = os.path.abspath(self._gen_outfilename())
+>>>>>>> upstream/master
         return outputs
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
+<<<<<<< HEAD
         return name + '.B'+ self.inputs.output_type
+=======
+        return name + ".hdr"
+>>>>>>> upstream/master

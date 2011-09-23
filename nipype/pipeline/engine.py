@@ -23,7 +23,6 @@ from socket import gethostname
 import sys
 from tempfile import mkdtemp
 
-from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
 import numpy as np
 
 from nipype.utils.misc import package_check, str2bool
@@ -32,16 +31,20 @@ import networkx as nx
 
 from nipype.interfaces.base import (traits, InputMultiPath, CommandLine,
                                     Undefined, TraitedSpec, DynamicTraitedSpec,
-                                    Bunch, InterfaceResult, md5, Interface)
-from nipype.utils.misc import isdefined, getsource, create_function_from_source
+                                    Bunch, InterfaceResult, md5, Interface,
+                                    TraitDictObject, TraitListObject, isdefined)
+from nipype.utils.misc import getsource, create_function_from_source
 from nipype.utils.filemanip import (save_json, FileNotFoundError,
                                     filename_to_list, list_to_filename,
                                     copyfiles, fnames_presuffix, loadpkl,
-    split_filename, load_json)
+                                    split_filename, load_json, savepkl,
+                                    write_rst_header, write_rst_dict,
+                                    write_rst_list)
 
 from nipype.pipeline.utils import (generate_expanded_graph, modify_paths,
                                    export_graph, make_output_dir,
-                                   clean_working_directory, format_dot)
+                                   clean_working_directory, format_dot,
+                                   get_print_name, merge_dict)
 from nipype.utils.logger import (logger, config, logdebug_dict_differences)
 
 class WorkflowBase(object):
@@ -68,7 +71,7 @@ class WorkflowBase(object):
         """
         self.base_dir = base_dir
         self.overwrite = overwrite
-        self.config = {}
+        self.config = deepcopy(config._sections)
         if name is None:
             raise Exception("init requires a name for this %s" % self.__class__.__name__)
         if '.' in name:
@@ -264,7 +267,14 @@ class Workflow(WorkflowBase):
                                                               info[2])]
         if not_found:
             raise Exception('\n'.join(['Some connections were not found']+infostr))
-        
+
+        # turn functions into strings
+        for srcnode, destnode, connects in connection_list:
+            for idx, (src, dest) in enumerate(connects):
+                if isinstance(src, tuple) and not isinstance(src[1], str):
+                    function_source = getsource(src[1])
+                    connects[idx] = ((src[0], function_source, src[2:]), dest)
+
         # add connections
         for srcnode, destnode, connects in connection_list:
             edge_data = self._graph.get_edge_data(srcnode, destnode, None)
@@ -368,7 +378,7 @@ class Workflow(WorkflowBase):
         Parameters
         ----------
         
-        graph2use: 'orig', 'hierarchical', 'flat' (default), 'exec'
+        graph2use: 'orig', 'hierarchical' (default), 'flat', 'exec'
             orig - creates a top level graph without expanding internal
                    workflow nodes
             flat - expands workflow nodes recursively
@@ -391,20 +401,21 @@ class Workflow(WorkflowBase):
         base_dir = make_output_dir(base_dir)
         if graph2use == 'hierarchical':
             dotfilename = os.path.join(base_dir, dotfilename)
-            self.write_hierarchical_dotfile(dotfilename=dotfilename)
+            self.write_hierarchical_dotfile(dotfilename=dotfilename, colored=False)
             format_dot(dotfilename, format=format)
-            return
-        graph = self._graph
-        if graph2use in ['flat', 'exec']:
-            graph = self._create_flat_graph()
-        if graph2use == 'exec':
-            graph = generate_expanded_graph(deepcopy(graph))
+        else:
+            graph = self._graph
+            if graph2use in ['flat', 'exec']:
+                graph = self._create_flat_graph()
+            if graph2use == 'exec':
+                graph = generate_expanded_graph(deepcopy(graph))
+            export_graph(graph, base_dir, dotfilename=dotfilename, format=format)
 
-        export_graph(graph, base_dir, dotfilename=dotfilename, format=format)
-
-    def write_hierarchical_dotfile(self, dotfilename=None):
+    def write_hierarchical_dotfile(self, dotfilename=None, colored=True):
         dotlist = ['digraph %s{'%self.name]
-        dotlist.append(self._get_dot(prefix='  '))
+        if colored:
+            dotlist.append('  '+'colorscheme=pastel28;')
+        dotlist.append(self._get_dot(prefix='  ', colored=colored))
         dotlist.append('}')
         dotstr = '\n'.join(dotlist)
         if dotfilename:
@@ -441,25 +452,156 @@ class Workflow(WorkflowBase):
             else:
                 runner = getattr(sys.modules[name], '%sPlugin'%plugin)(plugin_args=plugin_args)
         flatgraph = self._create_flat_graph()
+        self.config = merge_dict(deepcopy(config._sections), self.config)
+        logger.info(str(sorted(self.config)))
         self._set_needed_outputs(flatgraph)
         execgraph = generate_expanded_graph(deepcopy(flatgraph))
         for index, node in enumerate(execgraph.nodes()):
-            node.config = deepcopy(config._sections)
-            node.config.update(self.config)
+            node.config = self.config
             node.base_dir = self.base_dir
             node.index = index
             if isinstance(node, MapNode):
                 node.use_plugin = (plugin, plugin_args)
         self._configure_exec_nodes(execgraph)
-        runner.run(execgraph, updatehash=updatehash)
+        self._write_report_info(self.base_dir, self.name, execgraph)
+        runner.run(execgraph, updatehash=updatehash, config=self.config)
         return execgraph
 
     # PRIVATE API AND FUNCTIONS
 
+    def _write_report_info(self, workingdir, name, graph):
+        if workingdir is None:
+            workingdir = os.getcwd()
+        report_dir = os.path.join(workingdir, name, 'report')
+        if os.path.exists(report_dir):
+            shutil.rmtree(report_dir)
+        os.makedirs(report_dir)
+        fp = open(os.path.join(report_dir,'index.html'), 'wt')
+        fp.writelines('<html>')
+        script="""
+<head>
+<style type="text/css">
+  #page_container{width:1200px;margin:0;}
+  #toc{width:450px;float:left;}
+  #content{width:750px;float:left;}
+  pre {
+   white-space: pre-wrap;       /* css-3 */
+   white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+   white-space: -pre-wrap;      /* Opera 4-6 */
+   white-space: -o-pre-wrap;    /* Opera 7 */
+   word-wrap: break-word;       /* Internet Explorer 5.5+ */
+  }
+</style>
+
+<script type="text/javascript">
+<!--
+function readfile(srcfile, outputcontrol) {
+  try {
+    netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+  } catch (e) {
+    alert("Permission to read file was denied.");
+  }
+  var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+  file.initWithPath( srcfile );
+  if ( file.exists() == false ) {
+    alert("File does not exist");
+  }
+  var is = Components.classes["@mozilla.org/network/file-input-stream;1"].createInstance( Components.interfaces.nsIFileInputStream );
+  is.init( file,0x01, 00004, null);
+  var sis = Components.classes["@mozilla.org/scriptableinputstream;1"].createInstance( Components.interfaces.nsIScriptableInputStream );
+  sis.init( is );
+  var output = sis.read( sis.available() );
+  document.getElementById(outputcontrol).innerHTML = '<pre>'+output+'</pre>';
+}
+
+function load(name, div) {
+  readfile(name, div); 
+  return false;
+}
+function loadimg(name, div) {
+  document.getElementById(div).innerHTML = '<img src="'+name+'"></img>';
+  return false;
+}
+
+var report_files = new Array(%d);
+var result_files = new Array(%d);
+%s
+function isnodedone(srcfile){
+  try {
+    netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+  } catch (e) {
+    alert("Permission to read file was denied.");
+  }
+  var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+  file.initWithPath( srcfile );
+  if ( file.exists() == false ) {
+    return false;
+  }
+  return true;
+}
+
+function beginrefresh(){
+  var num_nodes = %d;
+  var nodes_done = -1;
+  for(counter=nodes_done+1;counter<num_nodes;counter++){
+    cell_id = 'td'+counter;
+    if (isnodedone(report_files[counter]) == true){
+      document.getElementById(cell_id).style.backgroundColor = "#afa";
+      if (isnodedone(result_files[counter]) == true){
+        document.getElementById(cell_id).style.backgroundColor = "#fff";
+        nodes_done += 1;
+      }
+    }
+    else{
+      document.getElementById(cell_id).style.backgroundColor = "#aaa";
+    }
+  }
+  if (nodes_done+1 < num_nodes){
+    setTimeout("beginrefresh()", 1000);
+  }
+  else{
+    alert('Workflow finished running');
+  }
+}
+
+window.onload=beginrefresh
+-->
+</script>
+</head>
+"""
+        nodes = nx.topological_sort(graph)
+        report_files = []
+        for i, node in enumerate(nodes):
+            report_files.append('result_files[%d] = "%s/result_%s.pklz";'%(i, os.path.realpath(node.output_dir()), node.name))
+            report_files.append('report_files[%d] = "%s/_report/report.rst";'%(i, os.path.realpath(node.output_dir())))
+        report_files = '\n'.join(report_files)
+        fp.writelines(script%(len(nodes), len(nodes), report_files, len(nodes)))
+        fp.writelines('<body><div id="page_container">\n')
+        fp.writelines('<div id="toc">\n')
+        fp.writelines('<pre>Works only with mozilla/firefox browsers</pre><br>\n')
+        script_file = os.path.join(os.path.dirname(sys.argv[0]), sys.argv[0])
+        fp.writelines('<a href="#" onclick="load(\'%s\',\'content\');return false;">Script</a><br>\n'%(script_file))
+        if self.base_dir:
+            graph_file = 'file://'+os.path.join(self.base_dir, self.name, 'graph.dot.png')
+            fp.writelines('<a href="#" onclick="loadimg(\'%s\',\'content\');return false;">Graph - requires write_graph() in script</a><br>\n'%(graph_file))
+        fp.writelines('<table>\n')
+        fp.writelines('<tr><td>Name</td><td>Hierarchy</td><td>Source</td></tr>\n')
+        for i, node in enumerate(nodes):
+            report_file = '%s/_report/report.rst'%os.path.realpath(node.output_dir())
+            local_file = '%s.rst'%node._id
+            url = '<tr><td id="td%d"><a href="#" onclick="load(\'%s\',\'content\');return false;">%s</a></td>'%(i,report_file, node._id)
+            url += '<td>%s</td>'%('.'.join(node.fullname.split('.')[:-1]))
+            url += '<td>%s</td></tr>\n'%('.'.join(get_print_name(node).split('.')[1:]))
+            fp.writelines(url)
+        fp.writelines('</table></div>')
+        fp.writelines('<div id="content">content</div>')
+        fp.writelines('</div></body></html>')
+        fp.close()
+        
     def _set_needed_outputs(self, graph):
         """Initialize node with list of which outputs are needed
         """
-        if not config.getboolean('execution', 'remove_unnecessary_outputs'):
+        if not str2bool(self.config['execution']['remove_unnecessary_outputs']):
             return
         for node in graph.nodes():
             node.needed_outputs = []
@@ -481,15 +623,9 @@ class Workflow(WorkflowBase):
             for edge in graph.in_edges_iter(node):
                 data = graph.get_edge_data(*edge)
                 for sourceinfo, field in sorted(data['connect']):
-                    if isinstance(sourceinfo, tuple):
-                        node.input_source[field] = (os.path.join(edge[0].output_dir(),
-                                                             'result_%s.pklz'%edge[0].name),
-                                                (sourceinfo[0], getsource(sourceinfo[1]), sourceinfo[2:]))
-                    else:
-                        node.input_source[field] = (os.path.join(edge[0].output_dir(),
+                    node.input_source[field] = (os.path.join(edge[0].output_dir(),
                                                              'result_%s.pklz'%edge[0].name),
                                                 sourceinfo)
-
 
     def _check_nodes(self, nodes):
         """Checks if any of the nodes are already in the graph
@@ -697,45 +833,49 @@ class Workflow(WorkflowBase):
             self._graph.remove_nodes_from(nodes2remove)
         logger.debug('finished expanding workflow: %s', self)
 
-    def _get_dot(self, prefix=None, hierarchy=None):
+    def _get_dot(self, prefix=None, hierarchy=None, colored=True):
         """Create a dot file with connection info
         """
         if prefix is None:
             prefix='  '
         if hierarchy is None:
             hierarchy = []
+        level = len(prefix)/2+1
         dotlist = ['%slabel="%s";'%(prefix,self.name)]
-        dotlist.append('%scolor=grey;'%(prefix))
+        if colored:
+            dotlist.append('%scolor=%d;'%(prefix, level))
         for node in nx.topological_sort(self._graph):
             fullname = '.'.join(hierarchy + [node.fullname])
             nodename = fullname.replace('.','_')
             if not isinstance(node, Workflow):
-                pkglist = node._interface.__class__.__module__.split('.')
-                interface = node._interface.__class__.__name__
-                destclass = ''
-                if len(pkglist) > 2:
-                    destclass = '.%s'%pkglist[2]
-                node_class_name = '.'.join([node.name, interface]) + destclass
+                node_class_name = get_print_name(node)
                 if hasattr(node, 'iterables') and node.iterables:
-                    dotlist.append('%s[label="%s", style=filled, color=lightgrey];'%(nodename, node_class_name))
+                    dotlist.append('%s[label="%s", style=filled, colorscheme=greys7 color=2];'%(nodename, node_class_name))
                 else:
                     dotlist.append('%s[label="%s"];'%(nodename, node_class_name))
         for node in nx.topological_sort(self._graph):
             if isinstance(node, Workflow):
                 fullname = '.'.join(hierarchy + [node.fullname])
                 nodename = fullname.replace('.','_')
-                dotlist.append('subgraph cluster_%s {'%nodename)
+                dotlist.append('subgraph cluster_%s {'%(nodename))
+                if colored:
+                    dotlist.append(prefix+prefix+'style=filled;')
                 dotlist.append(node._get_dot(prefix=prefix + prefix,
-                                             hierarchy=hierarchy+[self.name]))
+                                             hierarchy=hierarchy+[self.name],
+                                             colored=colored))
                 dotlist.append('}')
             else:
                 for subnode in self._graph.successors_iter(node):
+                    if node._hierarchy != subnode._hierarchy:
+                        continue
                     if not isinstance(subnode, Workflow):
                         nodefullname = '.'.join(hierarchy + [node.fullname])
                         subnodefullname = '.'.join(hierarchy + [subnode.fullname])
                         nodename = nodefullname.replace('.','_')
                         subnodename = subnodefullname.replace('.','_')
-                        dotlist.append('%s -> %s;'%(nodename, subnodename))
+                        for _ in self._graph.get_edge_data(node, subnode)['connect']:
+                            dotlist.append('%s -> %s;'%(nodename, subnodename))
+                        logger.debug('connection: ' + dotlist[-1]) 
         # add between workflow connections
         for u,v,d in self._graph.edges_iter(data=True):
             uname = '.'.join(hierarchy + [u.fullname])
@@ -758,6 +898,7 @@ class Workflow(WorkflowBase):
                 if uname1.split('.')[:-1] != vname1.split('.')[:-1]:
                     dotlist.append('%s -> %s;'%(uname1.replace('.','_'),
                                                 vname1.replace('.','_')))
+                    logger.debug('cross connection: ' + dotlist[-1]) 
         return ('\n'+prefix).join(dotlist)
 
 
@@ -903,8 +1044,14 @@ class Node(WorkflowBase):
                 func = create_function_from_source(info[1][1])
                 value = getattr(results.outputs, output_name)
                 if isdefined(value):
-                    output_value = func(value,
+                    try:
+                        output_value = func(value,
                                         *list(info[1][2]))
+                    except NameError as e:
+                        if e.args[0].startswith("global name") and e.args[0].endswith("is not defined"):
+                            e.args = (e.args[0], "Due to engine constraints all imports have to be done inside each function definition")
+                        raise e
+                        
             else:
                 output_name = info[1]
                 try:
@@ -974,10 +1121,8 @@ class Node(WorkflowBase):
                                 pass
                             else:
                                 logdebug_dict_differences(prev_inputs, hashed_inputs)
-                            
                 if str2bool(self.config['execution']['stop_on_first_rerun']):        
                     raise Exception("Cannot rerun when 'stop_on_first_rerun' is set to True")
-                
             hashfile_unfinished = os.path.join(outdir, '_0x%s_unfinished.json' % hashvalue)
             if os.path.exists(hashfile):
                 os.remove(hashfile)
@@ -986,23 +1131,25 @@ class Node(WorkflowBase):
                not isinstance(self, MapNode):
                 logger.debug("Removing old %s and its contents"%outdir)
                 rmtree(outdir)
-                
             else:
                 logger.debug("%s found and can_resume is True or Node is a MapNode - resuming execution" % hashfile_unfinished)
-            
             outdir = make_output_dir(outdir)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
+            self.write_report(report_type='preexec', cwd=outdir)
+            savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
             try:
                 self._run_interface(execute=True)
             except:
                 os.remove(hashfile_unfinished)
                 raise
-                
             shutil.move(hashfile_unfinished, hashfile)
+            self.write_report(report_type='postexec', cwd=outdir)
         else:
+            if not os.path.exists(os.path.join(outdir, '_inputs.pklz')):
+                logger.debug('%s: creating inputs file'%self.name)
+                savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
             logger.debug("Hashfile exists. Skipping execution")
             self._run_interface(execute=False, updatehash=updatehash)
-            
         logger.debug('Finished running %s in dir: %s\n'%(self._id,outdir))
         return self._result
 
@@ -1022,9 +1169,8 @@ class Node(WorkflowBase):
             except TypeError:
                 outputs = result.outputs.dictcopy() # outputs was a bunch
             result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
-        pkl_file = gzip.open(resultsfile, 'wb')
-        cPickle.dump(result, pkl_file)
-        pkl_file.close()
+        logger.debug('saving results in %s'%resultsfile)
+        savepkl(resultsfile, result)
         if result.outputs:
             result.outputs.set(**outputs)
 
@@ -1032,12 +1178,17 @@ class Node(WorkflowBase):
         resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
         aggregate = True
         result = None
+        attribute_error = False
         if os.path.exists(resultsfile):
             pkl_file = gzip.open(resultsfile, 'rb')
             try:
                 result = cPickle.load(pkl_file)
-            except traits.TraitError:
-                logger.debug('some file does not exist. hence trait cannot be set')
+            except (traits.TraitError, AttributeError, ImportError), err:
+                if isinstance(err, (AttributeError, ImportError)):
+                    attribute_error = True
+                    logger.debug('attribute error: %s probably using different trait pickled file'%str(err))
+                else:
+                    logger.debug('some file does not exist. hence trait cannot be set')
             else:
                 if result.outputs:
                     try:
@@ -1054,24 +1205,22 @@ class Node(WorkflowBase):
         logger.debug('Aggregate: %s', aggregate)
         # try aggregating first
         if aggregate:
+            logger.debug('aggregating results')
+            if attribute_error:
+                old_inputs = loadpkl(os.path.join(cwd, '_inputs.pklz'))
+                self.inputs.set(**old_inputs)
             if not isinstance(self, MapNode):
                 self._copyfiles_to_wd(cwd, True, linksonly=True)
-                aggouts = self._interface.aggregate_outputs()
+                aggouts = self._interface.aggregate_outputs(needed_outputs=self.needed_outputs)
                 runtime = Bunch(cwd=cwd,returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
                 result = InterfaceResult(interface=None,
                                          runtime=runtime,
                                          outputs=aggouts)
-                pkl_file = gzip.open(resultsfile, 'wb')
-                if result.outputs:
-                    try:
-                        outputs = result.outputs.get()
-                    except TypeError:
-                        outputs = result.outputs.dictcopy() # outputs was a bunch
-                    result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
-                cPickle.dump(result, pkl_file)
-                pkl_file.close()
-                if result.outputs:
-                    result.outputs.set(**outputs)
+                self._save_results(result, cwd)
+            else:
+                logger.debug('aggregating mapnode results')
+                self._run_interface()
+                result = self._result
         return result
 
     def _run_command(self, execute, copyfiles=True):
@@ -1119,15 +1268,31 @@ class Node(WorkflowBase):
             logger.info("Collecting precomputed outputs")
             try:
                 result = self._load_results(cwd)
-            except FileNotFoundError:
+            except (FileNotFoundError, AttributeError):
                 # if aggregation does not work, rerun the node
                 logger.info("Some of the outputs were not found: rerunning node.")
                 result = self._run_command(execute=True, copyfiles=False)
         return result
 
+    def _strip_temp(self, files, wd):
+        out = []
+        for f in files:
+            if isinstance(f, list):
+                out.append(self._strip_temp(f, wd))
+            else:
+                out.append(f.replace(os.path.join(wd,'_tempinput'),wd))
+        return out
+            
+
     def _copyfiles_to_wd(self, outdir, execute, linksonly=False):
         """ copy files over and change the inputs"""
         if hasattr(self._interface,'_get_filecopy_info'):
+            logger.debug('copying files to wd [execute=%s, linksonly=%s]'%(str(execute),
+                                                                           str(linksonly)))
+            if execute and linksonly:
+                olddir = outdir
+                outdir = os.path.join(outdir, '_tempinput')
+                os.makedirs(outdir)
             for info in self._interface._get_filecopy_info():
                 files = self.inputs.get().get(info['key'])
                 if not isdefined(files):
@@ -1140,6 +1305,8 @@ class Node(WorkflowBase):
                                 newfiles = copyfiles(infiles, [outdir], copy=info['copy'], create_new=True)
                             else:
                                 newfiles = fnames_presuffix(infiles, newpath=outdir)
+                            newfiles = self._strip_temp(newfiles,
+                                                        os.path.abspath(olddir).split(os.path.sep)[-1])
                         else:
                             newfiles = copyfiles(infiles, [outdir], copy=info['copy'], create_new=True)
                     else:
@@ -1147,9 +1314,55 @@ class Node(WorkflowBase):
                     if not isinstance(files, list):
                         newfiles = list_to_filename(newfiles)
                     setattr(self.inputs, info['key'], newfiles)
+            if execute and linksonly:
+                rmtree(outdir)
 
     def update(self, **opts):
         self.inputs.update(**opts)
+
+    def write_report(self, report_type=None, cwd=None):
+        report_dir = os.path.join(cwd, '_report')
+        report_file = os.path.join(report_dir, 'report.rst')
+        if not os.path.exists(report_dir):
+            os.makedirs(report_dir)
+        if report_type == 'preexec':
+            logger.debug('writing pre-exec report to %s'%report_file)
+            fp = open(report_file, 'wt')
+            fp.writelines(write_rst_header('Node: %s'%get_print_name(self), level=0))
+            fp.writelines(write_rst_list(['Hierarchy : %s'%self.fullname,
+                                          'Exec ID : %s'%self._id]))
+            fp.writelines(write_rst_header('Original Inputs', level=1))
+            fp.writelines(write_rst_dict(self.inputs.get()))
+        if report_type == 'postexec':
+            logger.debug('writing post-exec report to %s'%report_file)
+            fp = open(report_file, 'at')
+            fp.writelines(write_rst_header('Execution Inputs', level=1))
+            fp.writelines(write_rst_dict(self.inputs.get()))
+            if not hasattr(self.result, 'outputs') or self.result.outputs is None:
+                return
+            fp.writelines(write_rst_header('Execution Outputs', level=1))
+            if isinstance(self.result.outputs, Bunch):
+                fp.writelines(write_rst_dict(self.result.outputs.dictcopy()))
+            elif self.result.outputs:
+                fp.writelines(write_rst_dict(self.result.outputs.get()))
+            if isinstance(self, MapNode):
+                fp.close()
+                return
+            fp.writelines(write_rst_header('Runtime info', level=1))
+            if hasattr(self.result.runtime, 'cmdline'):
+                fp.writelines(write_rst_dict({'hostname' : self.result.runtime.hostname,
+                                              'duration' : self.result.runtime.duration,
+                                              'command' : self.result.runtime.cmdline}))
+            else: 
+                fp.writelines(write_rst_dict({'hostname' : self.result.runtime.hostname,
+                                              'duration' : self.result.runtime.duration}))
+            if hasattr(self.result.runtime, 'merged'):
+                fp.writelines(write_rst_header('Terminal output', level=2))
+                fp.writelines(write_rst_list(self.result.runtime.merged))
+            if hasattr(self.result.runtime, 'environ'):
+                fp.writelines(write_rst_header('Environment', level=2))
+                fp.writelines(write_rst_dict(self.result.runtime.environ))
+        fp.close()
 
 
 class MapNode(Node):
@@ -1202,6 +1415,9 @@ class MapNode(Node):
             else:
                 output.add_trait(name, traits.Trait(spec))
             setattr(output, name, Undefined)
+            value = getattr(basetraits, name)
+            if isdefined(value):
+                setattr(output, name, value)
             value = getattr(output, name)
         return output
 
@@ -1291,26 +1507,21 @@ class MapNode(Node):
                 self._result.interface.insert(i, node.result.interface)
                 self._result.runtime[i] = node.result.runtime
             returncode.insert(i, err)
-            for key, _ in self.outputs.items():
-                if str2bool(self.config['execution']['remove_unnecessary_outputs']) and \
-                self.needed_outputs:
-                    if key not in self.needed_outputs:
-                        continue
-                values = getattr(self._result.outputs, key)
-                if not isdefined(values):
-                    values = []
-                if node.result.outputs:
-                    values.insert(i, node.result.outputs.get()[key])
-                else:
-                    values.insert(i, None)
-                if any([val != Undefined for val in values]) and self._result.outputs:
-                    setattr(self._result.outputs, key, values)
-                    
-#        for key, _ in self.outputs.items():
-#            values = getattr(self._result.outputs, key)
-#            if isdefined(values) and isinstance(values, list) and len(values) == 1:
-#                setattr(self._result.outputs, key, values[0])
-                
+            if self.outputs:
+                for key, _ in self.outputs.items():
+                    if str2bool(self.config['execution']['remove_unnecessary_outputs']) and \
+                    self.needed_outputs:
+                        if key not in self.needed_outputs:
+                            continue
+                    values = getattr(self._result.outputs, key)
+                    if not isdefined(values):
+                        values = []
+                    if node.result.outputs:
+                        values.insert(i, node.result.outputs.get()[key])
+                    else:
+                        values.insert(i, None)
+                    if any([val != Undefined for val in values]) and self._result.outputs:
+                        setattr(self._result.outputs, key, values)
         if returncode and any([code is not None for code in returncode]):
             msg = []
             for i, code in enumerate(returncode):
@@ -1320,10 +1531,28 @@ class MapNode(Node):
             raise Exception('Subnodes of node: %s failed:\n%s'%(self.name,
                                                                 '\n'.join(msg)))
 
+    def write_report(self, report_type=None, cwd=None):
+        if report_type == 'preexec':
+            super(MapNode, self).write_report(report_type=report_type, cwd=cwd)
+        if report_type == 'postexec':
+            super(MapNode, self).write_report(report_type=report_type, cwd=cwd)
+            report_dir = os.path.join(cwd, '_report')
+            report_file = os.path.join(report_dir, 'report.rst')
+            fp = open(report_file, 'at')
+            fp.writelines(write_rst_header('Subnode reports', level=1))
+            nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
+            subnode_report_files = []
+            for i in range(nitems):
+                nodename = '_' + self.name+str(i)
+                subnode_report_files.insert(i, 'subnode %d'%i + ' : ' + os.path.join(cwd, 'mapflow', nodename, '_report', 'report.rst'))
+            fp.writelines(write_rst_list(subnode_report_files))
+            fp.close()
+        
     def get_subnodes(self):
         if not self._got_inputs:
             self._get_inputs()
             self._got_inputs = True
+        self.write_report(report_type='preexec', cwd = self.output_dir())
         return [node for _, node in self._make_nodes()]
     
     def num_subnodes(self):
@@ -1332,6 +1561,13 @@ class MapNode(Node):
             self._got_inputs = True
         return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
     
+    def _get_inputs(self):
+        old_inputs = self._inputs.get()
+        self._inputs = self._create_dynamic_traits(self._interface.inputs,
+                                                   fields=self.iterfield)
+        self._inputs.set(**old_inputs)
+        super(MapNode, self)._get_inputs()
+
     def _run_interface(self, execute=True, updatehash=False):
         """Run the mapnode interface
 
@@ -1341,6 +1577,14 @@ class MapNode(Node):
         old_cwd = os.getcwd()
         cwd = self.output_dir()
         os.chdir(cwd)
+        for iterfield in self.iterfield:
+            if not isdefined(getattr(self.inputs, iterfield)):
+                raise ValueError("Input %s is not defined but listed in iterfields."%iterfield)
+        if len(self.iterfield) > 1:
+            first_len = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
+            for iterfield in self.iterfield[1:]:
+                if first_len != len(filename_to_list(getattr(self.inputs, iterfield))):
+                    raise ValueError("All iterfields of a MapNode have to have the same length.")
 
         if execute:
             nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))

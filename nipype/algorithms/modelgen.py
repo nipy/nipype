@@ -26,10 +26,11 @@ import numpy as np
 from scipy.special import gammaln
 
 from nipype.interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
-                                    traits, File, Bunch, BaseInterfaceInputSpec)
-from nipype.utils.misc import isdefined
+                                    traits, File, Bunch, BaseInterfaceInputSpec,
+                                    isdefined)
 from nipype.utils.filemanip import filename_to_list
 from nipype.utils.logger import iflogger
+from nipype.utils.config import config
 
 def gcd(a, b):
     """Returns the greatest common divisor of two integers
@@ -204,12 +205,13 @@ class SpecifyModel(BaseInterface):
     Optional
     ~~~~~~~~
 
-     - regressors : list of dicts
-
-       - names : list of names corresponding to each column. Should be None if 
+     - regressor_names : list of str
+         list of names corresponding to each column. Should be None if 
          automatically assigned.
 
-       - values : lists of values for each regressors
+     - regressors : list of lists
+        values for each regressor - must correspond to the number of
+        volumes in the functional run
 
      - amplitudes : lists of amplitudes for each event. This will be ignored by 
        SPM's Level1Design.
@@ -541,6 +543,8 @@ class SpecifySparseModel(SpecifyModel):
         bplot = False
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
             bplot=True
+            import matplotlib
+            matplotlib.use(config.get("execution", "matplotlib_backend"))
             import matplotlib.pyplot as plt
         TR = np.round(self.inputs.time_repetition*1000)  # in ms
         if self.inputs.time_acquisition:

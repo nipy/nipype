@@ -62,6 +62,7 @@ examples2rst:
 			../examples/dtk_dti_tutorial.py \
 			../examples/dtk_odf_tutorial.py \
 			../examples/spm_tutorial2.py \
+			../examples/spm_dartel_tutorial.py \
 			../examples/dartmouth_workshop_2010.py \
 			../examples/nipy_tutorial.py
 	@echo "examples2rst finished."

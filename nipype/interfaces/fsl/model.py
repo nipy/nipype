@@ -12,25 +12,19 @@ was written to work with FSL version 4.1.4.
 """
 
 import os
-from copy import deepcopy
 from glob import glob
 import warnings
 from shutil import rmtree
 
 import numpy as np
 
-from nipype.interfaces.fsl.base import (FSLCommand, Info, FSLCommandInputSpec)
-from nipype.interfaces.base import (Bunch, load_template,
-                                    InterfaceResult, File, traits,
-                                    TraitedSpec,
-                                    BaseInterface,
+from nipype.interfaces.fsl.base import (FSLCommand, FSLCommandInputSpec)
+from nipype.interfaces.base import (load_template, File, traits, isdefined,
+                                    TraitedSpec, BaseInterface, Directory,
                                     InputMultiPath, OutputMultiPath,
-    BaseInterfaceInputSpec)
-from nipype.utils.filemanip import (list_to_filename, filename_to_list,
-                                    loadflat)
+                                    BaseInterfaceInputSpec)
+from nipype.utils.filemanip import (list_to_filename, filename_to_list)
 from nibabel import load
-from nipype.utils.misc import isdefined
-from nipype.interfaces.traits import Directory
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -80,7 +74,7 @@ T-contrasts.")
 class Level1DesignOutputSpec(TraitedSpec):
     fsf_files = OutputMultiPath(File(exists=True),
                      desc='FSL feat specification files')
-    ev_files = OutputMultiPath(File(exists=True),
+    ev_files = traits.List(traits.List(File(exists=True)),
                      desc='condition information files')
 
 class Level1Design(BaseInterface):
@@ -291,8 +285,6 @@ class Level1Design(BaseInterface):
                     n_tcon += 1
                 elif c[1] == 'F':
                     n_fcon += 1
-                else:
-                    print "unknown contrast type: %s" % str(c)
 
         for i, info in enumerate(session_info):
             do_tempfilter = 1
@@ -334,6 +326,7 @@ class Level1Design(BaseInterface):
             usetd = int(self.inputs.bases[basis_key]['derivs'])
         for runno, runinfo in enumerate(self._format_session_info(self.inputs.session_info)):
             outputs['fsf_files'].append(os.path.join(cwd, 'run%d.fsf' % runno))
+            outputs['ev_files'].insert(runno,[])
             evname = []
             for field in ['cond', 'regress']:
                 for i, cond in enumerate(runinfo[field]):
@@ -341,7 +334,7 @@ class Level1Design(BaseInterface):
                     evname.append(name)
                     evfname = os.path.join(cwd, 'ev_%s_%d_%d.txt' % (name, runno,
                                                                      len(evname)))
-                    outputs['ev_files'].append(evfname)
+                    outputs['ev_files'][runno].append(evfname)
                     if field == 'cond':
                         if usetd:
                             evname.append(name + 'TD')
@@ -1105,61 +1098,61 @@ class SMM(FSLCommand):
 
 
 class MELODICInputSpec(FSLCommandInputSpec):
-    in_files = InputMultiPath(File(exists=True),argst="-i %s",mandatory=True,position=0,
+    in_files = InputMultiPath(File(exists=True),argstr="-i %s",mandatory=True,position=0,
                               desc="input file names (either single file name or a list)")
-    out_dir = Directory(exists=True,argst="-o %s",desc="output directory name")
-    mask = File(exists=True, argst="-m %s",desc="file name of mask for thresholding")
-    no_mask = traits.Bool(argst="--nomask",desc="switch off masking")
-    update_mask = traits.Bool(argst="--update_mask",desc="switch off mask updating")
-    no_bet = traits.Bool(argst="--nobet",desc="switch off BET")
-    bg_threshold = traits.Float(argst="--bgthreshold=%f",desc="brain/non-brain threshold used to mask non-brain voxels, as a percentage (only if --nobet selected)")
-    dim = traits.Int(argst="-d %d",desc="dimensionality reduction into #num dimensions"\
+    out_dir = Directory(argstr="-o %s",desc="output directory name", genfile=True)
+    mask = File(exists=True, argstr="-m %s",desc="file name of mask for thresholding")
+    no_mask = traits.Bool(argstr="--nomask",desc="switch off masking")
+    update_mask = traits.Bool(argstr="--update_mask",desc="switch off mask updating")
+    no_bet = traits.Bool(argstr="--nobet",desc="switch off BET")
+    bg_threshold = traits.Float(argstr="--bgthreshold=%f",desc="brain/non-brain threshold used to mask non-brain voxels, as a percentage (only if --nobet selected)")
+    dim = traits.Int(argstr="-d %d",desc="dimensionality reduction into #num dimensions"\
                      "(default: automatic estimation)")
-    dim_est = traits.Str(argst="--dimest=%s",desc="use specific dim. estimation technique:"\
+    dim_est = traits.Str(argstr="--dimest=%s",desc="use specific dim. estimation technique:"\
                          " lap, bic, mdl, aic, mean (default: lap)")
-    sep_whiten = traits.Bool(argst="--sep_whiten",desc="switch on separate whitening")
-    sep_vn = traits.Bool(argst="--sep_vn",desc="switch off joined variance normalization")
-    num_ICs = traits.Int(argst="-n %d",desc="number of IC's to extract (for deflation approach)")
-    approach = traits.Str(argst="-a %s",desc="approach for decomposition, 2D: defl, symm (default),"\
+    sep_whiten = traits.Bool(argstr="--sep_whiten",desc="switch on separate whitening")
+    sep_vn = traits.Bool(argstr="--sep_vn",desc="switch off joined variance normalization")
+    num_ICs = traits.Int(argstr="-n %d",desc="number of IC's to extract (for deflation approach)")
+    approach = traits.Str(argstr="-a %s",desc="approach for decomposition, 2D: defl, symm (default),"\
                           " 3D: tica (default), concat")
-    non_linearity = traits.Str(argst="--nl=%s",desc="nonlinearity: gauss, tanh, pow3, pow4")
-    var_norm = traits.Bool(argst="--vn",desc="switch off variance normalization")
-    pbsc = traits.Bool(argst="--pbsc",desc="switch off conversion to percent BOLD signal change")
-    cov_weight = traits.Float(argst="--covarweight=%f",desc="voxel-wise weights for the covariance "\
+    non_linearity = traits.Str(argstr="--nl=%s",desc="nonlinearity: gauss, tanh, pow3, pow4")
+    var_norm = traits.Bool(argstr="--vn",desc="switch off variance normalization")
+    pbsc = traits.Bool(argstr="--pbsc",desc="switch off conversion to percent BOLD signal change")
+    cov_weight = traits.Float(argstr="--covarweight=%f",desc="voxel-wise weights for the covariance "\
                               "matrix (e.g. segmentation information)")
-    epsilon = traits.Float(argst="--eps=%f",desc="minimum error change")
-    epsilonS = traits.Float(argst="--epsS=%f",desc="minimum error change for rank-1 approximation in TICA")
-    maxit = traits.Int(argst="--maxit=%d",desc="maximum number of iterations before restart")
-    max_restart = traits.Int(argst="--maxrestart=%d",desc="maximum number of restarts")
-    mm_thresh = traits.Float(argst="--mmthresh=%f",desc="threshold for Mixture Model based inference")
-    no_mm = traits.Bool(argst="--no_mm",desc="switch off mixture modelling on IC maps")
-    ICs = File(exists=True,argst="--ICs=%s",desc="filename of the IC components file for mixture modelling")
-    mix = File(exists=True,argst="--mix=%s",desc="mixing matrix for mixture modelling / filtering")
-    smode = File(exists=True,argst="--smode=%s",desc="matrix of session modes for report generation")
-    rem_cmp = traits.List(traits.Int,argst="-f %d",desc="component numbers to remove")
-    report = traits.Bool(argst="--report",desc="generate Melodic web report")
-    bg_image = File(exists=True, argst="--bgimage=%s",desc="specify background image for report"\
+    epsilon = traits.Float(argstr="--eps=%f",desc="minimum error change")
+    epsilonS = traits.Float(argstr="--epsS=%f",desc="minimum error change for rank-1 approximation in TICA")
+    maxit = traits.Int(argstr="--maxit=%d",desc="maximum number of iterations before restart")
+    max_restart = traits.Int(argstr="--maxrestart=%d",desc="maximum number of restarts")
+    mm_thresh = traits.Float(argstr="--mmthresh=%f",desc="threshold for Mixture Model based inference")
+    no_mm = traits.Bool(argstr="--no_mm",desc="switch off mixture modelling on IC maps")
+    ICs = File(exists=True,argstr="--ICs=%s",desc="filename of the IC components file for mixture modelling")
+    mix = File(exists=True,argstr="--mix=%s",desc="mixing matrix for mixture modelling / filtering")
+    smode = File(exists=True,argstr="--smode=%s",desc="matrix of session modes for report generation")
+    rem_cmp = traits.List(traits.Int,argstr="-f %d",desc="component numbers to remove")
+    report = traits.Bool(argstr="--report",desc="generate Melodic web report")
+    bg_image = File(exists=True, argstr="--bgimage=%s",desc="specify background image for report"\
                     " (default: mean image)")
-    tr_sec = traits.Float(argst="--tr=%f",desc="TR in seconds")
-    log_power = traits.Bool(argst="--logPower",desc="calculate log of power for frequency spectrum")
-    t_des = File(exists=True, argst="--Tdes=%s",desc="design matrix across time-domain")
-    t_con = File(exists=True, argst="--Tcon=%s",desc="t-contrast matrix across time-domain")
-    s_des = File(exists=True, argst="--Sdes=%s",desc="design matrix across subject-domain")
-    s_con = File(exists=True, argst="--Scon=%s",desc="t-contrast matrix across subject-domain")
-    out_all = traits.Bool(argst="--Oall",desc="output everything")
-    out_unmix = traits.Bool(argst="--Ounmix",desc="output unmixing matrix")
-    out_stats = traits.Bool(argst="--Ostats",desc="output thresholded maps and probability maps")
-    out_pca = traits.Bool(argst="--Opca",desc="output PCA results")
-    out_white = traits.Bool(argst="--Owhite",desc="output whitening/dewhitening matrices")
-    out_orig = traits.Bool(argst="--Oorig",desc="output the original ICs")
-    out_mean = traits.Bool(argst="--Omean",desc="output mean volume")
-    report_maps = traits.Str(argst="--report_maps=%s",desc="control string for spatial map images (see slicer)")
-    remove_deriv = traits.Bool(argst="--remove_deriv",desc="removes every second entry in paradigm"\
+    tr_sec = traits.Float(argstr="--tr=%f",desc="TR in seconds")
+    log_power = traits.Bool(argstr="--logPower",desc="calculate log of power for frequency spectrum")
+    t_des = File(exists=True, argstr="--Tdes=%s",desc="design matrix across time-domain")
+    t_con = File(exists=True, argstr="--Tcon=%s",desc="t-contrast matrix across time-domain")
+    s_des = File(exists=True, argstr="--Sdes=%s",desc="design matrix across subject-domain")
+    s_con = File(exists=True, argstr="--Scon=%s",desc="t-contrast matrix across subject-domain")
+    out_all = traits.Bool(argstr="--Oall",desc="output everything")
+    out_unmix = traits.Bool(argstr="--Ounmix",desc="output unmixing matrix")
+    out_stats = traits.Bool(argstr="--Ostats",desc="output thresholded maps and probability maps")
+    out_pca = traits.Bool(argstr="--Opca",desc="output PCA results")
+    out_white = traits.Bool(argstr="--Owhite",desc="output whitening/dewhitening matrices")
+    out_orig = traits.Bool(argstr="--Oorig",desc="output the original ICs")
+    out_mean = traits.Bool(argstr="--Omean",desc="output mean volume")
+    report_maps = traits.Str(argstr="--report_maps=%s",desc="control string for spatial map images (see slicer)")
+    remove_deriv = traits.Bool(argstr="--remove_deriv",desc="removes every second entry in paradigm"\
                                " file (EV derivatives)")
-    out_dir = Directory(argst="-o %s",desc="output directory name")
 
 class MELODICOutputSpec(TraitedSpec):
     out_dir = Directory(exists=True)
+    report_dir = Directory(exists=True)
 
 class MELODIC(FSLCommand):
     """Multivariate Exploratory Linear Optimised Decomposition into Independent Components
@@ -1192,8 +1185,15 @@ class MELODIC(FSLCommand):
         outputs = self.output_spec().get()
         outputs['out_dir'] = self.inputs.out_dir
         if not isdefined(outputs['out_dir']):
-            outputs['out_dir'] = os.makedirs(os.path.join(os.getcwd(),'melodic_out'))
+            outputs['out_dir'] = self._gen_filename("out_dir")
+        if isdefined(self.inputs.report) and self.inputs.report:
+            outputs['report_dir'] = os.path.join(self._gen_filename("out_dir"), "report")
         return outputs
+    
+    def _gen_filename(self, name):
+        if name == "out_dir":
+            return os.getcwd()
+        
 
 class SmoothEstimateInputSpec(FSLCommandInputSpec):
     dof = traits.Int(argstr='--dof=%d', mandatory=True,
@@ -1232,7 +1232,7 @@ class SmoothEstimate(FSLCommand):
     output_spec = SmoothEstimateOutputSpec
     _cmd = 'smoothest'
 
-    def aggregate_outputs(self, runtime=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
         stdout = runtime.stdout.split('\n')
         outputs.dlh = float(stdout[0].split()[1])
@@ -1359,3 +1359,74 @@ class Cluster(FSLCommand):
                 fname = value
             return spec.argstr % fname
         return super(Cluster, self)._format_arg(name, spec, value)
+    
+class RandomiseInputSpec(FSLCommandInputSpec):    
+    in_file = File(exists=True,desc = '4D input file',argstr='-i %s', position=0, mandatory=True)
+    base_name = traits.Str('tbss_',desc = 'the rootname that all generated files will have',
+                          argstr='-o %s', position=1, usedefault=True)
+    design_mat = File(exists=True,desc = 'design matrix file',argstr='-d %s', position=2, mandatory=True)
+    tcon = File(exists=True,desc = 't contrasts file',argstr='-t %s', position=3, mandatory=True)
+    fcon = File(exists=True,desc = 'f contrasts file',argstr='-f %s')
+    mask = File(exists=True,desc = 'mask image',argstr='-m %s')
+    x_block_labels = File(exists=True,desc = 'exchangeability block labels file',argstr='-e %s')   
+    demean = traits.Bool(desc = 'demean data temporally before model fitting', argstr='-D')
+    one_sample_group_mean =  traits.Bool(desc = 'perform 1-sample group-mean test instead of generic permutation test',
+                                  argstr='-l')
+    show_total_perms = traits.Bool(desc = 'print out how many unique permutations would be generated and exit',
+                                 argstr='-q')
+    show_info_parallel_mode = traits.Bool(desc = 'print out information required for parallel mode and exit',
+                                  argstr='-Q')
+    vox_p_values = traits.Bool(desc = 'output voxelwise (corrected and uncorrected) p-value images',
+                            argstr='-x')
+    tfce = traits.Bool(desc = 'carry out Threshold-Free Cluster Enhancement', argstr='-T')
+    tfce2D = traits.Bool(desc = 'carry out Threshold-Free Cluster Enhancement with 2D optimisation',
+                         argstr='--T2')
+    f_only = traits.Bool(desc = 'calculate f-statistics only', argstr='--f_only')    
+    raw_stats_imgs = traits.Bool(desc = 'output raw ( unpermuted ) statistic images', argstr='-R')
+    p_vec_n_dist_files = traits.Bool(desc = 'output permutation vector and null distribution text files',
+                                 argstr='-P')
+    num_perm = traits.Int(argstr='-n %d', desc='number of permutations (default 5000, set to 0 for exhaustive)')
+    seed = traits.Int(argstr='--seed %d', desc='specific integer seed for random number generator')
+    var_smooth = traits.Int(argstr='-v %d', desc='use variance smoothing (std is in mm)')   
+    c_thresh = traits.Float(argstr='-c %.2f', desc='carry out cluster-based thresholding')
+    cm_thresh = traits.Float(argstr='-C %.2f', desc='carry out cluster-mass-based thresholding')
+    f_c_thresh = traits.Float(argstr='-F %.2f', desc='carry out f cluster thresholding')
+    f_cm_thresh = traits.Float(argstr='-S %.2f', desc='carry out f cluster-mass thresholding')    
+    tfce_H = traits.Float(argstr='--tfce_H %.2f', desc='TFCE height parameter (default=2)')
+    tfce_E = traits.Float(argstr='--tfce_E %.2f', desc='TFCE extent parameter (default=0.5)')
+    tfce_C = traits.Float(argstr='--tfce_C %.2f', desc='TFCE connectivity (6 or 26; default=6)')    
+    vxl = traits.List(traits.Int,argstr='--vxl %d', desc='list of numbers indicating voxelwise EVs'+
+                      'position in the design matrix (list order corresponds to files in vxf option)')
+    vxf = traits.List(traits.Int,argstr='--vxf %d', desc='list of 4D images containing voxelwise EVs'+
+                      '(list order corresponds to numbers in vxl option)')
+             
+class RandomiseOutputSpec(TraitedSpec):
+    tstat1_file = File(exists=True,desc = 'path/name of tstat image corresponding to the first t contrast')  
+
+class Randomise(FSLCommand):
+    """XXX UNSTABLE DO NOT USE
+
+    FSL Randomise: feeds the 4D projected FA data into GLM
+    modelling and thresholding
+    in order to find voxels which correlate with your model
+        
+    Example
+    -------
+    >>> import nipype.interfaces.fsl as fsl
+    >>> rand = fsl.Randomise(in_file='allFA.nii', \
+    mask = 'mask.nii', \
+    tcon='design.con', \
+    design_mat='design.mat')
+    >>> rand.cmdline
+    'randomise -i allFA.nii -o tbss_ -d design.mat -t design.con -m mask.nii'
+    
+    """
+    
+    _cmd = 'randomise'
+    input_spec = RandomiseInputSpec
+    output_spec = RandomiseOutputSpec
+   
+    def _list_outputs(self):        
+        outputs = self.output_spec().get()        
+        outputs['tstat1_file'] = self._gen_fname(self.inputs.base_name,suffix='_tstat1')
+        return outputs

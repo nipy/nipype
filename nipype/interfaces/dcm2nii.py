@@ -1,7 +1,7 @@
-from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
-    InputMultiPath, traits, TraitedSpec, OutputMultiPath
-from nipype.interfaces.traits import File, Directory
-from nipype.utils.misc import isdefined
+from nipype.interfaces.base import (CommandLine, CommandLineInputSpec,
+                                    InputMultiPath, traits, TraitedSpec,
+                                    OutputMultiPath, isdefined,
+                                    File, Directory)
 import os
 from copy import deepcopy
 from nipype.utils.filemanip import split_filename

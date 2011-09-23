@@ -20,31 +20,17 @@ import subprocess
 from time import time
 from warnings import warn
 
-import enthought.traits.api as traits
-from enthought.traits.trait_handlers import TraitDictObject, TraitListObject
-from enthought.traits.trait_errors import TraitError
-
-from nipype.interfaces.traits import Undefined
+from nipype.interfaces.traits_extension import (traits, Undefined, TraitDictObject,
+                                                TraitListObject, TraitError,
+                                                isdefined, File, Directory, has_metadata)
 from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                     hash_timestamp)
 from nipype.utils.misc import is_container
 from nipype.utils.config import config
 from nipype.utils.logger import iflogger
-from nipype.utils.misc import isdefined
 
 
 __docformat__ = 'restructuredtext'
-
-# We'll use our versions of File and Directory until error reporting
-# will be fixed upstream
-#try:
-#    class dummy(traits.HasTraits):
-#        foo = traits.File
-#    dummy().foo = 'bar'
-#    from enthought.traits.api import File, Directory
-#except:
-#    warn('traitsUI unavailable')
-from nipype.interfaces.traits import File, Directory
 
 def load_template(name):
     """Load a template from the script_templates directory
@@ -392,7 +378,18 @@ class BaseTraitedSpec(traits.HasTraits):
         out = self._clean_container(out, Undefined)
         return out
 
-    def _clean_container(self, object, undefinedval=None):
+    def get_traitsfree(self, **kwargs):
+        """ Returns traited class as a dict
+
+        Augments the trait get function to return a dictionary without
+        any traits. The dictionary does not contain any attributes that
+        were Undefined
+        """
+        out = super(BaseTraitedSpec, self).get(**kwargs)
+        out = self._clean_container(out, skipundefined=True)
+        return out
+    
+    def _clean_container(self, object, undefinedval=None, skipundefined=False):
         """Convert a traited obejct into a pure python representation.
         """
         if isinstance(object, TraitDictObject) or isinstance(object, dict):
@@ -401,7 +398,8 @@ class BaseTraitedSpec(traits.HasTraits):
                 if isdefined(val):
                     out[key] = self._clean_container(val, undefinedval)
                 else:
-                    out[key] = undefinedval
+                    if not skipundefined:
+                        out[key] = undefinedval
         elif isinstance(object, TraitListObject) or isinstance(object, list) or \
                 isinstance(object, tuple):
             out = []
@@ -409,14 +407,18 @@ class BaseTraitedSpec(traits.HasTraits):
                 if isdefined(val):
                     out.append(self._clean_container(val, undefinedval))
                 else:
-                    out.append(undefinedval)
+                    if not skipundefined:
+                        out.append(undefinedval)
+                    else:
+                        out.append(None)
             if isinstance(object, tuple):
                 out = tuple(out)
         else:
             if isdefined(object):
                 out = object
             else:
-                out = undefinedval
+                if not skipundefined:
+                    out = undefinedval
         return out
 
     def get_hashval(self, hash_method=None):
@@ -440,26 +442,32 @@ class BaseTraitedSpec(traits.HasTraits):
 
         """
         
-        dict_withhash = self._get_sorteddict(self.get(),True, hash_method=hash_method)
-        dict_nofilename = self._get_sorteddict(self.get(), hash_method=hash_method)
+        dict_withhash = {}
+        dict_nofilename = {}
+        for name, val in sorted(self.get().items()):
+            if isdefined(val):
+                trait = self.trait(name)
+                hash_files = not has_metadata(trait.trait_type, "hash_files", False)
+                dict_nofilename[name] = self._get_sorteddict(val, hash_method=hash_method, hash_files=hash_files)
+                dict_withhash[name] = self._get_sorteddict(val,True, hash_method=hash_method, hash_files=hash_files)
         return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
 
-    def _get_sorteddict(self, object, dictwithhash=False, hash_method=None):
+    def _get_sorteddict(self, object, dictwithhash=False, hash_method=None, hash_files=True):
         if isinstance(object, dict):
             out = {}
             for key, val in sorted(object.items()):
                 if isdefined(val):
-                    out[key] = self._get_sorteddict(val, dictwithhash, hash_method=hash_method)
+                    out[key] = self._get_sorteddict(val, dictwithhash, hash_method=hash_method, hash_files=hash_files)
         elif isinstance(object, (list,tuple)):
             out = []
             for val in object:
                 if isdefined(val):
-                    out.append(self._get_sorteddict(val, dictwithhash, hash_method=hash_method))
+                    out.append(self._get_sorteddict(val, dictwithhash, hash_method=hash_method, hash_files=hash_files))
             if isinstance(object, tuple):
                 out = tuple(out)
         else:
             if isdefined(object):
-                if isinstance(object, str) and os.path.isfile(object):
+                if hash_files and isinstance(object, str) and os.path.isfile(object):
                     if hash_method == None:
                         hash_method = config.get('execution', 'hash_method')
   
@@ -555,7 +563,7 @@ class Interface(object):
         """Execute the command."""
         raise NotImplementedError
 
-    def aggregate_outputs(self, runtime=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
         """Called to populate outputs"""
         raise NotImplementedError
 
@@ -790,10 +798,10 @@ class BaseInterface(Interface):
             if hasattr(self.inputs,'ignore_exception') and \
             isdefined(self.inputs.ignore_exception) and \
             self.inputs.ignore_exception:
-                    import traceback, sys
-                    print traceback.print_exc(file=sys.stdout)
-                    print e.args
-                    return InterfaceResult(interface, runtime)
+                import traceback, sys
+                runtime.traceback = traceback.format_exc()
+                runtime.traceback_args = e.args
+                return InterfaceResult(interface, runtime)
             else:
                 raise
         return results
@@ -806,13 +814,15 @@ class BaseInterface(Interface):
         else:
             return None
 
-    def aggregate_outputs(self, runtime=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
         """ Collate expected outputs and check for existence
         """
         predicted_outputs = self._list_outputs()
         outputs = self._outputs()
         if predicted_outputs:
             for key, val in predicted_outputs.items():
+                if needed_outputs and key not in needed_outputs:
+                    continue
                 try:
                     setattr(outputs, key, val)
                     value = getattr(outputs, key)
@@ -1082,7 +1092,10 @@ class CommandLine(BaseInterface):
                     "string for attr '%s' with value '%s'."  \
                     % (self, trait_spec.name, value)
                 raise ValueError(msg)
-        elif trait_spec.is_trait_type(traits.List):
+        #traits.Either turns into traits.TraitCompound and does not have any inner_traits
+        elif trait_spec.is_trait_type(traits.List) \
+        or (trait_spec.is_trait_type(traits.TraitCompound) \
+        and isinstance(value, list)):
             # This is a bit simple-minded at present, and should be
             # construed as the default. If more sophisticated behavior
             # is needed, it can be accomplished with metadata (e.g.
@@ -1169,7 +1182,14 @@ class MultiPath(traits.List):
         if not isdefined(value) or (isinstance(value, list) and len(value) == 0):
             return Undefined
         newvalue = value
-        if not isinstance(value, list):
+
+        if not isinstance(value, list) \
+        or (self.inner_traits() \
+            and isinstance(self.inner_traits()[0].trait_type, traits.List) \
+            and not isinstance(self.inner_traits()[0].trait_type, InputMultiPath) \
+            and isinstance(value, list) \
+            and value \
+            and not isinstance(value[0], list)):
             newvalue = [value]
         value = super(MultiPath, self).validate(object, name, newvalue)
 

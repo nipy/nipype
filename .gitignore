@@ -7,3 +7,4 @@
 /doc/_build
 /doc/users/examples
 *.pyc
+*.so

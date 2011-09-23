@@ -55,9 +55,6 @@ __url__     = 'http://nipy.org/'
 # We require numpy 1.2 for our test suite.  If Tester fails to import,
 # check the version of numpy the user has and inform them they need to
 # upgrade.
-
-from nipype.utils.misc import package_check
-package_check('numpy', version='1.1')
 import numpy as np
 from distutils.version import LooseVersion
 if LooseVersion(np.__version__) >= '1.2':

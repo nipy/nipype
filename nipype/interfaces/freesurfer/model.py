@@ -15,9 +15,8 @@ import os
 
 from nipype.utils.filemanip import fname_presuffix, split_filename
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.interfaces.base import (TraitedSpec, File,
-                                    traits, InputMultiPath, OutputMultiPath, Directory)
-from nipype.utils.misc import isdefined
+from nipype.interfaces.base import (TraitedSpec, File, traits, InputMultiPath,
+                                    OutputMultiPath, Directory, isdefined)
 
 class MRISPreprocInputSpec(FSTraitedSpec):
     out_file = File(argstr='--out %s', genfile=True,
@@ -181,10 +180,12 @@ class GLMFitInputSpec(FSTraitedSpec):
                                desc='save residual error (eres)')
     save_res_corr_mtx = traits.Bool(argstr='--eres-scm',
        desc='save residual error spatial correlation matrix (eres.scm). Big!')
-    surf = traits.Tuple(traits.Str, traits.Enum('lh', 'rh'),
-                        traits.Enum('white','pial','smoothwm','inflated'),
-                        argstr='--surf %s %s %s',
-                        desc='needed for some flags (uses white by default)')
+    surf = traits.Bool(argstr="--surf %s %s %s", requires=["subject_id", "hemi"],
+                       desc="analysis is on a surface mesh")
+    subject_id = traits.Str(desc="subject id for surface geometry")
+    hemi = traits.Enum("lh", "rh", desc="surface hemisphere")
+    surf_geo = traits.Str("white", usedefault=True,
+                          desc="surface geometry name (e.g. white, pial)")
     simulation = traits.Tuple(traits.Enum('perm','mc-full','mc-z'),
                               traits.Int(min=1), traits.Float, traits.Str,
                               argstr='--sim %s %d %f %s',
@@ -259,7 +260,13 @@ class GLMFit(FSCommand):
     _cmd = 'mri_glmfit'
     input_spec = GLMFitInputSpec
     output_spec = GLMFitOutputSpec
-    
+
+    def _format_arg(self, name, spec, value):
+        if name == "surf":
+            _si = self.inputs
+            return spec.argstr%(_si.subject_id, _si.hemi, _si.surf_geo)
+        return super(GLMFit, self)._format_arg(name, spec, value)
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         # Get the top-level output directory

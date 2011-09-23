@@ -326,13 +326,14 @@ images in the functional series are outliers based on deviations in
 intensity and/or movement.
 """
 
-art = pe.Node(interface=ra.ArtifactDetect(use_differences = [False,True],
-                                          use_norm = True,
-                                          norm_threshold = 0.5,
-                                          zintensity_threshold = 3,
-                                          parameter_source = 'FSL',
-                                          mask_type = 'file'),
-              name="art")
+art = pe.MapNode(interface=ra.ArtifactDetect(use_differences = [True, False],
+                                             use_norm = True,
+                                             norm_threshold = 1,
+                                             zintensity_threshold = 3,
+                                             parameter_source = 'FSL',
+                                             mask_type = 'file'),
+                 iterfield=['realigned_files', 'realignment_parameters'],
+                 name="art")
 
 
 preproc.connect([(inputnode, nosestrip,[('struct','in_file')]),
@@ -630,7 +631,8 @@ generate any output. To actually run the analysis on the data the
 """
 
 if __name__ == '__main__':
+    l1pipeline.write_graph()
     l1pipeline.run()
-    l1pipeline.write_graph(graph2use='flat')
+    #l1pipeline.run(plugin='MultiProc', plugin_args={'n_procs':2})
 
 

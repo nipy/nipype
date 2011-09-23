@@ -41,11 +41,11 @@ def create_camino_dti_pipeline(name="dtiproc"):
     -------
 
     >>> import os
-    >>> import nipype.workflows.camino as cmonwk                     # doctest: +SKIP
-    >>> nipype_camino_dti = cmonwk.camino_dti_processing.create_camino_dti_pipeline("nipype_camino_dti")                     # doctest: +SKIP
-    >>> nipype_camino_dti.inputs.inputnode.dwi = os.path.abspath('dwi.nii')                   # doctest: +SKIP
-    >>> nipype_camino_dti.inputs.inputnode.bvecs = os.path.abspath('bvecs')                   # doctest: +SKIP
-    >>> nipype_camino_dti.inputs.inputnode.bvals = os.path.abspath('bvals')                  # doctest: +SKIP
+    >>> import nipype.workflows.camino as cmonwk
+    >>> nipype_camino_dti = cmonwk.diffusion.create_camino_dti_pipeline("nipype_camino_dti")
+    >>> nipype_camino_dti.inputs.inputnode.dwi = os.path.abspath('dwi.nii')
+    >>> nipype_camino_dti.inputs.inputnode.bvecs = os.path.abspath('bvecs')
+    >>> nipype_camino_dti.inputs.inputnode.bvals = os.path.abspath('bvals')
     >>> nipype_camino_dti.run()                  # doctest: +SKIP
 
     Inputs::
@@ -151,10 +151,10 @@ def create_camino_dti_pipeline(name="dtiproc"):
     We can also produce a variety of scalar values from our fitted tensors. The following nodes generate        the fractional anisotropy and diffusivity trace maps and their associated headers.
     """
 
-    fa = pe.Node(interface=camino.FA(),name='fa')
+    fa = pe.Node(interface=camino.ComputeFractionalAnisotropy(),name='fa')
     #md = pe.Node(interface=camino.MD(),name='md')
-    trace = pe.Node(interface=camino.TrD(),name='trace')
-    dteig = pe.Node(interface=camino.DTEig(), name='dteig')
+    trace = pe.Node(interface=camino.ComputeTensorTrace(),name='trace')
+    dteig = pe.Node(interface=camino.ComputeEigensystem(), name='dteig')
 
     analyzeheader_fa = pe.Node(interface= camino.AnalyzeHeader(), name = "analyzeheader_fa")
     analyzeheader_fa.inputs.datatype = "double"

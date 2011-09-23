@@ -19,7 +19,26 @@ This pipeline also requires the Freesurfer directory for 'subj1' from the FSL co
 To save time, this data can be downloaded from here:
     http://dl.dropbox.com/u/315714/subj1.zip?dl=1
 
-Import necessary modules from nipype.
+
+Along with Camino (http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php?n=Main.HomePage),
+Camino-Trackvis (http://www.nitrc.org/projects/camino-trackvis/), FSL (http://www.fmrib.ox.ac.uk/fsl/),
+and Freesurfer (http://surfer.nmr.mgh.harvard.edu/), you must also have the Connectome File Format
+library installed as well as the Connectome Mapper.
+
+These are written by Stephan Gerhard and can be obtained from:
+
+    http://www.cmtk.org/
+    
+Or on github at:
+
+    CFFlib: https://github.com/LTS5/cfflib
+    CMP: https://github.com/LTS5/cmp
+
+Output data can be visualized in the ConnectomeViewer
+
+    ConnectomeViewer: https://github.com/LTS5/connectomeviewer
+
+First, we import the necessary modules from nipype.
 """
 
 import nipype.interfaces.io as nio           # Data i/o
@@ -149,10 +168,13 @@ inverse.inputs.interp = ('nearestneighbour')
 """
 A number of conversion operations are required to obtain NIFTI files from the FreesurferSource for each subject.
 Nodes are used to convert the following:
-    -Original structural image to NIFTI
-    -Parcellated white matter image to NIFTI
-    -Parcellated whole-brain image to NIFTI
-    -Left and Right hemisphere surfaces to GIFTI (for visualization in ConnectomeViewer)
+
+    * Original structural image to NIFTI
+    * Parcellated white matter image to NIFTI
+    * Parcellated whole-brain image to NIFTI
+    * Pial, white, inflated, and spherical surfaces for both the left and right hemispheres
+        are converted to GIFTI for visualization in ConnectomeViewer
+    * Parcellated annotation files for the left and right hemispheres are also converted to GIFTI
 """
 mri_convert_Brain = pe.Node(interface=fs.MRIConvert(), name='mri_convert_Brain')
 mri_convert_Brain.inputs.out_type = 'nii'
@@ -242,9 +264,11 @@ procstreamlines.inputs.outputtracts = 'oogl'
 We can also produce a variety of scalar values from our fitted tensors. The following nodes generate the
 fractional anisotropy and diffusivity trace maps and their associated headers.
 """
-fa = pe.Node(interface=camino.FA(),name='fa')
-trd = pe.Node(interface=camino.TrD(),name='trd')
-#md = pe.Node(interface=camino.MD(),name='md')
+
+fa = pe.Node(interface=camino.ComputeFractionalAnisotropy(),name='fa')
+trace = pe.Node(interface=camino.ComputeTensorTrace(),name='trace')
+dteig = pe.Node(interface=camino.ComputeEigensystem(), name='dteig')
+
 analyzeheader_fa = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_fa')
 analyzeheader_fa.inputs.datatype = 'double'
 analyzeheader_trace = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_trace')
@@ -420,6 +444,13 @@ The following functions run the whole workflow and produce a .dot and .png graph
 connectivity.run()
 connectivity.write_graph()
 """
-This outputted .dot graph can be converted to a vector image for use in figures via the following command-line function:
-dot -Tps graph.dot > graph.eps
+The output CFF file of this pipeline can be loaded in the Connectome Viewer (http://www.cmtk.org)
+After loading the network into memory it can be examined in 3D or as a connectivity matrix
+using the default scripts produced by the Code Oracle.
+To compare networks, one must use the MergeCNetworks interface to merge two networks into
+a single CFF file. Statistics can then be run using the Network Brain Statistics (NBS) plugin
+Surfaces can also be loaded along with their labels from the aparc+aseg file. The tractography
+is included in the file so that region-to-region fibers can be individually plotted using the
+Code Oracle.
+
 """

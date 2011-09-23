@@ -29,30 +29,18 @@ import os                                    # system functions
 Preliminaries
 -------------
 
-Confirm package dependencies are installed.  (This is only for the
-tutorial, rarely would you put this in your own code.)
-"""
-
-from nipype.utils.misc import package_check
-
-package_check('numpy', '1.3', 'tutorial1')
-package_check('scipy', '0.7', 'tutorial1')
-package_check('networkx', '1.0', 'tutorial1')
-package_check('IPython', '0.10', 'tutorial1')
-
-"""Set any package specific configuration. The output file format
+Set any package specific configuration. The output file format
 for FSL routines is being set to uncompressed NIFTI and a specific
 version of matlab is being used. The uncompressed format is required
 because SPM does not handle compressed NIFTI.
 """
 
 # Tell fsl to generate all output in uncompressed nifti format
-print fsl.Info.version()
 fsl.FSLCommand.set_default_output_type('NIFTI')
 
 # Set the way matlab should be called
-mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
-mlab.MatlabCommand.set_default_paths('/software/spm8')
+#mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
+#mlab.MatlabCommand.set_default_paths('/software/spm8')
 
 
 """
@@ -86,9 +74,9 @@ intensity or movement.
 """
 
 art = pe.Node(interface=ra.ArtifactDetect(), name="art")
-art.inputs.use_differences      = [True,True]
+art.inputs.use_differences      = [True, False]
 art.inputs.use_norm             = True
-art.inputs.norm_threshold       = 0.5
+art.inputs.norm_threshold       = 1
 art.inputs.zintensity_threshold = 3
 art.inputs.mask_type            = 'file'
 art.inputs.parameter_source     = 'SPM'
@@ -452,7 +440,7 @@ l2source.iterables = [('fwhm',fwhmlist),
                       ('con',contrast_ids)]
 
 
-"""Use :class:`nipype.interfaces.spm.OneSampleTTest` to perform a
+"""Use :class:`nipype.interfaces.spm.OneSampleTTestDesign` to perform a
 simple statistical analysis of the contrasts from the group of
 subjects (n=2 in this example).
 """

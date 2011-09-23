@@ -14,8 +14,12 @@ try:
 except:
     matlab_cmd = 'matlab'
 
-res = CommandLine(command='which', args=matlab_cmd).run()
-matlab_path = res.runtime.stdout.strip()
+try:
+    res = CommandLine(command='which', args=matlab_cmd).run()
+    matlab_path = res.runtime.stdout.strip()
+except Exception, e:
+    # exception in above would be thrown if which finds no matlab
+    matlab_path = ''
 
 no_matlab = True
 if matlab_path != '':

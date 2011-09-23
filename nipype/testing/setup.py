@@ -5,7 +5,6 @@ def configuration(parent_package='',top_path=None):
 
     config = Configuration('testing', parent_package, top_path)
 
-    config.add_subpackage('numpytesting')
     config.add_data_dir('data')
 
     return config

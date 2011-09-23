@@ -1,5 +1,14 @@
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,\
-    StdOutCommandLine, StdOutCommandLineInputSpec
+""" 
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
+from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
+                                    TraitedSpec, File, StdOutCommandLine,
+                                    StdOutCommandLineInputSpec)
 from nipype.utils.filemanip import split_filename
 import os
 
@@ -32,10 +41,10 @@ class DTIFit(StdOutCommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> fit = cmon.DTIFit()                  # doctest: +SKIP
-    >>> fit.inputs.scheme_file = 'A.scheme'                  # doctest: +SKIP
-    >>> fit.inputs.in_file = 'tensor_fitted_data.Bfloat'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon                  
+    >>> fit = cmon.DTIFit()                  
+    >>> fit.inputs.scheme_file = 'A.scheme'                  
+    >>> fit.inputs.in_file = 'tensor_fitted_data.Bfloat'                  
     >>> fit.run()                  # doctest: +SKIP
     """
     _cmd = 'dtfit'
@@ -116,12 +125,11 @@ class ModelFit(StdOutCommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> fit = cmon.ModelFit()                  # doctest: +SKIP
-    >>> fit.model = 'dt'                  # doctest: +SKIP
-    >>> fit.inputs.snr = 16                  # doctest: +SKIP
-    >>> fit.inputs.scheme_file = 'A.scheme'                  # doctest: +SKIP
-    >>> fit.inputs.in_file = 'tensor_fitted_data.Bfloat'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon                  
+    >>> fit = cmon.ModelFit()                  
+    >>> fit.model = 'dt'             
+    >>> fit.inputs.scheme_file = 'A.scheme'                  
+    >>> fit.inputs.in_file = 'tensor_fitted_data.Bfloat'                  
     >>> fit.run()                  # doctest: +SKIP
     """
     _cmd = 'modelfit'
@@ -200,11 +208,11 @@ class DTLUTGen(StdOutCommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> dtl = cmon.DTLUTGen()                  # doctest: +SKIP
-    >>> dtl.inputs.snr = 16                  # doctest: +SKIP
-    >>> dtl.inputs.scheme_file = 'A.scheme'                  # doctest: +SKIP
-    >>> dtl.inputs.in_file = 'tensor_fitted_data.Bfloat'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> dtl = cmon.DTLUTGen()
+    >>> dtl.inputs.snr = 16
+    >>> dtl.inputs.scheme_file = 'A.scheme'
+    >>> dtl.inputs.in_file = 'tensor_fitted_data.Bfloat'
     >>> dtl.run()                  # doctest: +SKIP
     """
     _cmd = 'dtlutgen'
@@ -262,11 +270,11 @@ class PicoPDFs(StdOutCommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> pdf = cmon.PicoPDFs()                  # doctest: +SKIP
-    >>> pdf.inputs.inputmodel = 'dt'                  # doctest: +SKIP
-    >>> pdf.inputs.luts = 'lut_file'                  # doctest: +SKIP
-    >>> pdf.inputs.in_file = 'voxel-order_data.Bfloat'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> pdf = cmon.PicoPDFs()
+    >>> pdf.inputs.inputmodel = 'dt'
+    >>> pdf.inputs.luts = 'lut_file'
+    >>> pdf.inputs.in_file = 'voxel-order_data.Bfloat'
     >>> pdf.run()                  # doctest: +SKIP
     """
     _cmd = 'picopdfs'
@@ -334,11 +342,11 @@ class Track(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> track = cmon.Track()                  # doctest: +SKIP
-    >>> track.inputs.inputmodel = 'dt'                  # doctest: +SKIP
-    >>> track.inputs.in_file = 'data.Bfloat'                  # doctest: +SKIP
-    >>> track.inputs.seed_file = 'seed_mask.nii'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> track = cmon.Track()
+    >>> track.inputs.inputmodel = 'dt'
+    >>> track.inputs.in_file = 'data.Bfloat'
+    >>> track.inputs.seed_file = 'seed_mask.nii'
     >>> track.run()                  # doctest: +SKIP
     """
 
@@ -369,10 +377,10 @@ class TrackDT(Track):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> track = cmon.TrackDT()                  # doctest: +SKIP
-    >>> track.inputs.in_file = 'tensor_fitted_data.Bfloat'                 # doctest: +SKIP
-    >>> track.inputs.seed_file = 'seed_mask.nii'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> track = cmon.TrackDT()
+    >>> track.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> track.inputs.seed_file = 'seed_mask.nii'
     >>> track.run()                 # doctest: +SKIP
     """
 
@@ -394,10 +402,10 @@ class TrackPICo(Track):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> track = cmon.TrackPICo()                  # doctest: +SKIP
-    >>> track.inputs.in_file = 'pdfs.Bfloat'                  # doctest: +SKIP
-    >>> track.inputs.seed_file = 'seed_mask.nii'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> track = cmon.TrackPICo()
+    >>> track.inputs.in_file = 'pdfs.Bfloat'
+    >>> track.inputs.seed_file = 'seed_mask.nii'
     >>> track.run()                  # doctest: +SKIP
     """
 
@@ -433,11 +441,11 @@ class TrackBayesDirac(Track):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> track = cmon.TrackBayesDirac()                  # doctest: +SKIP
-    >>> track.inputs.in_file = 'tensor_fitted_data.Bfloat'                  # doctest: +SKIP
-    >>> track.inputs.seed_file = 'seed_mask.nii'                  # doctest: +SKIP
-    >>> track.inputs.scheme_file = 'bvecs.scheme'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> track = cmon.TrackBayesDirac()
+    >>> track.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> track.inputs.seed_file = 'seed_mask.nii'
+    >>> track.inputs.scheme_file = 'bvecs.scheme'
     >>> track.run()                  # doctest: +SKIP
     """
 
@@ -454,10 +462,10 @@ class TrackBallStick(Track):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> track = cmon.TrackBallStick()                  # doctest: +SKIP
-    >>> track.inputs.in_file = 'ballstickfit_data.Bfloat'                  # doctest: +SKIP
-    >>> track.inputs.seed_file = 'seed_mask.nii'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> track = cmon.TrackBallStick()
+    >>> track.inputs.in_file = 'ballstickfit_data.Bfloat'
+    >>> track.inputs.seed_file = 'seed_mask.nii'
     >>> track.run()                  # doctest: +SKIP
     """
 
@@ -487,11 +495,11 @@ class TrackBootstrap(Track):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> track = cmon.TrackBootstrap()                  # doctest: +SKIP
-    >>> track.inputs.scheme_file = 'bvecs.scheme'                  # doctest: +SKIP
-    >>> track.inputs.bsdatafiles = ['fitted_data1.Bfloat', 'fitted_data2.Bfloat']                  # doctest: +SKIP
-    >>> track.inputs.seedfile = 'seed_mask.nii'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> track = cmon.TrackBootstrap()
+    >>> track.inputs.scheme_file = 'bvecs.scheme'
+    >>> track.inputs.bsdatafiles = ['fitted_data1.Bfloat', 'fitted_data2.Bfloat']
+    >>> track.inputs.seed_file = 'seed_mask.nii'
     >>> track.run()                  # doctest: +SKIP
     """
 
@@ -501,7 +509,7 @@ class TrackBootstrap(Track):
         inputs["inputmodel"] = "bootstrap"
         return super(TrackBootstrap, self).__init__(command, **inputs)
 
-class MDInputSpec(CommandLineInputSpec):
+class ComputeMeanDiffusivityInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='Tensor-fitted data filename')
 
@@ -527,25 +535,25 @@ class MDInputSpec(CommandLineInputSpec):
         desc='Specifies the data type of the output data. The data type can be any of the' \
         'following strings: "char", "short", "int", "long", "float" or "double".')
 
-class MDOutputSpec(TraitedSpec):
+class ComputeMeanDiffusivityOutputSpec(TraitedSpec):
     md = File(exists=True, desc='Mean Diffusivity Map')
 
-class MD(StdOutCommandLine):
+class ComputeMeanDiffusivity(StdOutCommandLine):
     """
     Computes the mean diffusivity (trace/3) from diffusion tensors.
 
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> md = cmon.MD()                  # doctest: +SKIP
-    >>> md.inputs.in_file = 'tensor_fitted_data.Bfloat'                  # doctest: +SKIP
-    >>> md.inputs.scheme_file = 'A.scheme'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> md = cmon.ComputeMeanDiffusivity()
+    >>> md.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> md.inputs.scheme_file = 'A.scheme'
     >>> md.run()                  # doctest: +SKIP
     """
     _cmd = 'md'
-    input_spec=MDInputSpec
-    output_spec=MDOutputSpec
+    input_spec=ComputeMeanDiffusivityInputSpec
+    output_spec=ComputeMeanDiffusivityOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -556,7 +564,7 @@ class MD(StdOutCommandLine):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + "_MD.img" #Need to change to self.inputs.outputdatatype
 
-class FAInputSpec(StdOutCommandLineInputSpec):
+class ComputeFractionalAnisotropyInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='Tensor-fitted data filename')
 
@@ -580,10 +588,10 @@ class FAInputSpec(StdOutCommandLineInputSpec):
         desc='Specifies the data type of the output data. The data type can be any of the' \
         'following strings: "char", "short", "int", "long", "float" or "double".')
 
-class FAOutputSpec(TraitedSpec):
+class ComputeFractionalAnisotropyOutputSpec(TraitedSpec):
     fa = File(exists=True, desc='Fractional Anisotropy Map')
 
-class FA(StdOutCommandLine):
+class ComputeFractionalAnisotropy(StdOutCommandLine):
     """
     Computes the fractional anisotropy of tensors.
 
@@ -596,15 +604,15 @@ class FA(StdOutCommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> fa = cmon.FA()                  # doctest: +SKIP
-    >>> fa.inputs.in_file = 'tensor_fitted_data.Bfloat'                  # doctest: +SKIP
-    >>> fa.inputs.scheme_file = 'A.scheme'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> fa = cmon.ComputeFractionalAnisotropy()
+    >>> fa.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> fa.inputs.scheme_file = 'A.scheme'
     >>> fa.run()                  # doctest: +SKIP
     """
     _cmd = 'fa'
-    input_spec=FAInputSpec
-    output_spec=FAOutputSpec
+    input_spec=ComputeFractionalAnisotropyInputSpec
+    output_spec=ComputeFractionalAnisotropyOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -615,7 +623,7 @@ class FA(StdOutCommandLine):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + '_FA.img' #Need to change to self.inputs.outputdatatype
 
-class TrDInputSpec(StdOutCommandLineInputSpec):
+class ComputeTensorTraceInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='Tensor-fitted data filename')
 
@@ -639,10 +647,10 @@ class TrDInputSpec(StdOutCommandLineInputSpec):
         desc='Specifies the data type of the output data. The data type can be any of the' \
         'following strings: "char", "short", "int", "long", "float" or "double".')
 
-class TrDOutputSpec(TraitedSpec):
+class ComputeTensorTraceOutputSpec(TraitedSpec):
     trace = File(exists=True, desc='Trace of the diffusion tensor')
 
-class TrD(StdOutCommandLine):
+class ComputeTensorTrace(StdOutCommandLine):
     """
     Computes the trace of tensors.
 
@@ -657,15 +665,15 @@ class TrD(StdOutCommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> trace = cmon.TrD()                  # doctest: +SKIP
-    >>> trace.inputs.in_file = 'tensor_fitted_data.Bfloat'                  # doctest: +SKIP
-    >>> trace.inputs.scheme_file = 'A.scheme'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> trace = cmon.ComputeTensorTrace()
+    >>> trace.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> trace.inputs.scheme_file = 'A.scheme'
     >>> trace.run()                 # doctest: +SKIP
     """
     _cmd = 'trd'
-    input_spec=TrDInputSpec
-    output_spec=TrDOutputSpec
+    input_spec=ComputeTensorTraceInputSpec
+    output_spec=ComputeTensorTraceOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -676,129 +684,8 @@ class TrD(StdOutCommandLine):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + '_TrD.img' #Need to change to self.inputs.outputdatatype
 
-class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
-    in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
-        desc='Tensor-fitted data filename') # Took out < %s from argstr
 
-    scheme_file = File(exists=True, argstr='%s', mandatory=False, position=2,
-        desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
-
-    readheader = File(exists=True, argstr='-readheader %s',
-        mandatory=False, position=3,
-        desc='Reads header information from file and prints to stdout. If this option is not' \
-        'specified, then the program writes a header based on the other arguments.')
-
-    printimagedims = File(exists=True, argstr='-printimagedims %s',
-        mandatory=False, position=3,
-        desc='Prints image data and voxel dimensions as Camino arguments and exits.')
-
-    # How do we implement both file and enum (for the program) in one argument? Is this option useful anyway?
-    #-printprogargs <file> <prog>
-    #Prints data dimension (and type, if relevant) arguments for a specific Camino program, where prog is one of shredder, scanner2voxel, vcthreshselect, pdview, track.
-    printprogargs = File(exists=True, argstr='-printprogargs %s',
-        mandatory=False, position=3,
-        desc='Prints data dimension (and type, if relevant) arguments for a specific Camino' \
-        'program, where prog is one of shredder, scanner2voxel, vcthreshselect, pdview, track.')
-
-    printintelbyteorder = File(exists=True, argstr='-printintelbyteorder %s',
-        mandatory=False, position=3,
-        desc='Prints 1 if the header is little-endian, 0 otherwise.')
-
-    printbigendian = File(exists=True, argstr='-printbigendian %s',
-        mandatory=False, position=3,
-        desc='Prints 1 if the header is big-endian, 0 otherwise.')
-
-    initfromheader = File(exists=True, argstr='-initfromheader %s',
-        mandatory=False, position=3,
-        desc='Reads header information from file and intializes a new header with the values' \
-        'read from the file. You may replace any combination of fields in the new header by specifying'\
-        'subsequent options.')
-
-    data_dims = traits.List(traits.Int, desc = 'data dimensions in voxels',
-        argstr='-datadims %s', minlen=3, maxlen=3, units='voxels')
-
-    voxel_dims = traits.List(traits.Float, desc = 'voxel dimensions in mm',
-        argstr='-voxeldims %s', minlen=3, maxlen=3, units='mm')
-
-    centre = traits.List(traits.Int, desc = 'Voxel specifying origin of Talairach coordinate system for SPM, default \
-        [0 0 0].', argstr='-centre %s', minlen=3, maxlen=3, units='mm')
-
-    picoseed = traits.List(traits.Int, desc = 'Voxel specifying the seed (for PICo maps), default [0 0 0].',
-        argstr='-picoseed %s', minlen=3, maxlen=3, units='mm')
-
-    nimages = traits.Int(argstr='-nimages %d', units='NA',
-        desc="Number of images in the img file. Default 1.")
-
-    datatype = traits.Enum('byte', 'char', '[u]short', '[u]int', 'float', 'complex', 'double',
-        argstr='-datatype %s',
-        desc='The char datatype is 8 bit (not the 16 bit char of Java), as specified by the Analyze 7.5 standard. \
-     The byte, ushort and uint types are not part of the Analyze specification but are supported by SPM.', mandatory=True)
-
-    offset = traits.Int(argstr='-offset %d', units='NA',
-        desc='According to the Analyze 7.5 standard, this is the byte offset in the .img file' \
-        'at which voxels start. This value can be negative to specify that the absolute value is' \
-        'applied for every image in the file.')
-
-    greylevels = traits.List(traits.Int, desc = 'Minimum and maximum greylevels. Stored as shorts in the header.',
-        argstr='-gl %s', minlen=2, maxlen=2, units='NA')
-
-    scaleslope = traits.Float(argstr='-scaleslope %d', units='NA',
-        desc='Intensities in the image are scaled by this factor by SPM and MRICro. Default is 1.0.')
-
-    scaleinter = traits.Float(argstr='-scaleinter %d', units='NA',
-        desc='Constant to add to the image intensities. Used by SPM and MRIcro.')
-
-    description = traits.String(argstr='-description %s',
-        desc='Short description - No spaces, max length 79 bytes. Will be null terminated automatically.')
-
-    intelbyteorder = traits.Bool(argstr='-intelbyteorder',
-        desc="Write header in intel byte order (little-endian).")
-
-    networkbyteorder = traits.Bool(argstr='-networkbyteorder',
-        desc="Write header in network byte order (big-endian). This is the default for new headers.")
-
-class AnalyzeHeaderOutputSpec(TraitedSpec):
-    header = File(exists=True, desc='Analyze header')
-
-class AnalyzeHeader(StdOutCommandLine):
-    """
-    Create or read an Analyze 7.5 header file.
-
-    Analyze image header, provides support for the most common header fields.
-    Some fields, such as patient_id, are not currently supported. The program allows
-    three nonstandard options: the field image_dimension.funused1 is the image scale.
-    The intensity of each pixel in the associated .img file is (image value from file) * scale.
-    Also, the origin of the Talairach coordinates (midline of the anterior commisure) are encoded
-    in the field data_history.originator. These changes are included for compatibility with SPM.
-
-    All headers written with this program are big endian by default.
-
-    Example
-    -------
-
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> hdr = cmon.AnalyzeHeader()                  # doctest: +SKIP
-    >>> hdr.inputs.in_file = 'tensor_fitted_data.Bfloat'                  # doctest: +SKIP
-    >>> hdr.inputs.scheme_file = 'A.scheme'                  # doctest: +SKIP
-    >>> hdr.inputs.data_dims = [256,256,256]                  # doctest: +SKIP
-    >>> hdr.inputs.voxel_dims = [1,1,1]                  # doctest: +SKIP
-    >>> hdr.run()                  # doctest: +SKIP
-    """
-    _cmd = 'analyzeheader'
-    input_spec=AnalyzeHeaderInputSpec
-    output_spec=AnalyzeHeaderOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['header'] = os.path.abspath(self._gen_outfilename())
-        return outputs
-
-    def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
-        return name + ".hdr"
-
-
-class DTEigInputSpec(StdOutCommandLineInputSpec):
+class ComputeEigensystemInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1, desc='Tensor-fitted data filename')
 
     inputmodel = traits.Enum('dt', 'multitensor', argstr='-inputmodel %s', desc='Specifies the model that the input data contains parameters for. Possible model types are: "dt" (diffusion-tensor data) and "multitensor"')
@@ -809,10 +696,10 @@ class DTEigInputSpec(StdOutCommandLineInputSpec):
 
     outputdatatype = traits.Enum("double", "char", "short", "int", "long", "float", argstr='-outputdatatype %s', desc='Specifies the data type of the output data. The data type can be any of the following strings: "char", "short", "int", "long", "float" or "double".')
 
-class DTEigOutputSpec(TraitedSpec):
+class ComputeEigensystemOutputSpec(TraitedSpec):
     eigen = File(exists=True, desc='Trace of the diffusion tensor')
 
-class DTEig(StdOutCommandLine):
+class ComputeEigensystem(StdOutCommandLine):
     """
     Computes the eigensystem from tensor fitted data.
 
@@ -827,14 +714,14 @@ class DTEig(StdOutCommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.camino as cmon                  # doctest: +SKIP
-    >>> dteig = cmon.DTEig()                  # doctest: +SKIP
-    >>> dteig.inputs.in_file = 'tensor_fitted_data.Bfloat'                  # doctest: +SKIP
+    >>> import nipype.interfaces.camino as cmon
+    >>> dteig = cmon.ComputeEigensystem()
+    >>> dteig.inputs.in_file = 'tensor_fitted_data.Bfloat'
     >>> dteig.run()                  # doctest: +SKIP
     """
     _cmd = 'dteig'
-    input_spec=DTEigInputSpec
-    output_spec=DTEigOutputSpec
+    input_spec=ComputeEigensystemInputSpec
+    output_spec=ComputeEigensystemOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

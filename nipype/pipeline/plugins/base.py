@@ -4,6 +4,7 @@
 """
 
 from copy import deepcopy
+from glob import glob
 import logging
 import os
 import pwd
@@ -16,8 +17,11 @@ from traceback import format_exception
 import numpy as np
 import scipy.sparse as ssp
 
-from ..utils import (nx, dfs_preorder, config)
-from ..engine import MapNode
+from ..utils import (nx, dfs_preorder)
+from ..engine import (MapNode, str2bool)
+
+from nipype.utils.filemanip import savepkl, loadpkl
+import traceback
 
 logger = logging.getLogger('workflow')
 
@@ -82,7 +86,7 @@ class PluginBase(object):
     def __init__(self, plugin_args=None):
         pass
 
-    def run(self, graph):
+    def run(self, graph, config):
         raise NotImplementedError
 
 
@@ -111,10 +115,11 @@ class DistributedPluginBase(PluginBase):
         self.proc_done = None
         self.proc_pending = None
 
-    def run(self, graph, updatehash=False):
+    def run(self, graph, config, updatehash=False):
         """Executes a pre-defined pipeline using distributed approaches
         """
         logger.info("Running in parallel.")
+        self._config = config
         # Generate appropriate structures for worker-manager model
         self._generate_dependency_list(graph)
         self.pending_tasks = []
@@ -132,27 +137,18 @@ class DistributedPluginBase(PluginBase):
                     result = self._get_result(taskid)
                     if result:
                         if result['traceback']:
-                            crashfile = self._report_crash(self.procs[jobid],
-                                                           result)
-                            if jobid in self.mapnodesubids:
-                                jobid = self.mapnodesubids[jobid]
-                            # remove dependencies from queue
-                            notrun.append(self._remove_node_deps(jobid,
-                                                                 crashfile,
-                                                                 graph))
+                            notrun.append(self._clean_queue(jobid, graph,
+                                                            result=result))
                         else:
                             self._task_finished_cb(jobid)
                             self._remove_node_dirs()
                         self._clear_task(taskid)
                     else:
                         toappend.insert(0, (taskid, jobid))
-                except:
-                    crashfile = self._report_crash(self.procs[jobid])
-                    # remove dependencies from queue
-                    if jobid in self.mapnodesubids:
-                        jobid = self.mapnodesubids[jobid]
-                    notrun.append(self._remove_node_deps(jobid, crashfile,
-                                                         graph))
+                except Exception, e:
+                    result = {'result' : None,
+                              'traceback' : traceback.format_exc()}
+                    notrun.append(self._clean_queue(jobid, graph, result=result))
             if toappend:
                 self.pending_tasks.extend(toappend)
             self._send_procs_to_workers(updatehash=updatehash)
@@ -171,6 +167,22 @@ class DistributedPluginBase(PluginBase):
 
     def _clear_task(self, taskid):
         raise NotImplementedError
+
+    def _clean_queue(self, jobid, graph, result=None):
+        if str2bool(self._config['execution']['stop_on_first_crash']):
+            raise RuntimeError(result)
+        crashfile = self._report_crash(self.procs[jobid],
+                                       result=result)
+        if jobid in self.mapnodesubids:
+            # remove current jobid
+            self.proc_pending[jobid] = False
+            self.proc_done[jobid] = True
+            # remove parent mapnode
+            jobid = self.mapnodesubids[jobid]
+            self.proc_pending[jobid] = False
+            self.proc_done[jobid] = True
+        # remove dependencies from queue
+        return self._remove_node_deps(jobid, crashfile, graph)
 
     def _submit_mapnode(self, jobid):
         if jobid in self.mapnodes:
@@ -218,9 +230,13 @@ class DistributedPluginBase(PluginBase):
                     _, hashvalue = self.procs[jobid]._get_hashval()
                     logger.info('Executing: %s ID: %d H:%s' % \
                                     (self.procs[jobid]._id, jobid, hashvalue))
-                    tid = self._submit_job(self.procs[jobid],
+                    tid = self._submit_job(deepcopy(self.procs[jobid]),
                                            updatehash=updatehash)
-                    self.pending_tasks.insert(0, (tid, jobid))
+                    if tid is None:
+                        self.proc_done[jobid] = False
+                        self.proc_pending[jobid] = False
+                    else:
+                        self.pending_tasks.insert(0, (tid, jobid))
             else:
                 break
 
@@ -234,7 +250,8 @@ class DistributedPluginBase(PluginBase):
         # Update job and worker queues
         self.proc_pending[jobid] = False
         # update the job dependency structure
-        self.depidx[jobid, :] = 0.
+        rowview = self.depidx.getrowview(jobid)
+        rowview[rowview.nonzero()] = 0
         if jobid not in self.mapnodesubids:
             self.refidx[self.refidx[:,jobid].nonzero()[0],jobid] = 0
 
@@ -261,7 +278,7 @@ class DistributedPluginBase(PluginBase):
     def _remove_node_dirs(self):
         """Removes directories whose outputs have already been used up
         """
-        if config.getboolean('execution', 'remove_node_directories'):
+        if str2bool(self._config['execution']['remove_node_directories']):
             for idx in np.nonzero((self.refidx.sum(axis=1)==0).__array__())[0]:
                 if idx in self.mapnodesubids:
                     continue
@@ -272,3 +289,105 @@ class DistributedPluginBase(PluginBase):
                                  'removing node: %s from directory %s') % \
                                 (self.procs[idx]._id, outdir))
                     shutil.rmtree(outdir)
+
+class SGELikeBatchManagerBase(DistributedPluginBase):
+    """Execute workflow with SGE/OGE/PBS like batch system
+    """
+
+    def __init__(self, template, plugin_args=None):
+        self._template = template
+        self._qsub_args = None
+        if plugin_args:
+            if 'template' in plugin_args:
+                self._template = plugin_args['template']
+                if os.path.isfile(self._template):
+                    self._template = open(self._template).readlines()
+            if 'qsub_args' in plugin_args:
+                self._qsub_args = plugin_args['qsub_args']
+        self._pending = {}
+
+    def _is_pending(self, taskid):
+        """Check if a task is pending in the batch system
+        """
+        raise NotImplementedError
+
+    def _submit_batchtask(self, scriptfile):
+        """Submit a task to the batch system
+        """
+        raise NotImplementedError
+    
+    def _get_result(self, taskid):
+        if taskid not in self._pending:
+            raise Exception('Task %d not found'%taskid)
+        if self._is_pending(taskid):
+            return None
+        node_dir = self._pending[taskid]
+        # on the pbs system at mit the parent node directory needs to be
+        # accessed before internal directories become available.
+        logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,'..'))))
+        logger.debug(os.listdir(node_dir))
+        logger.debug(node_dir)
+        results_file = glob(os.path.join(node_dir,'result_*.pklz'))[0]
+        result_data = loadpkl(results_file)
+        result_out = dict(result=None, traceback=None)
+        if isinstance(result_data, dict):
+            result_out['result'] = result_data['result']
+            result_out['traceback'] = result_data['traceback']
+            result_out['hostname'] = result_data['hostname']
+            crash_file = os.path.join(node_dir,'crashstore.pklz')
+            os.rename(results_file, crash_file)
+        else:
+            result_out['result'] = result_data
+        return result_out
+
+    def _submit_job(self, node, updatehash=False):
+        """submit job and return taskid
+        """
+        # pickle node
+        timestamp = strftime('%Y%m%d_%H%M%S')
+        suffix = '%s_%s'%(timestamp, node._id)
+        batch_dir = os.path.join(node.base_dir, 'batch')
+        if not os.path.exists(batch_dir):
+            os.makedirs(batch_dir)
+        pkl_file = os.path.join(batch_dir,'node_%s.pklz'%suffix)
+        savepkl(pkl_file, dict(node=node, updatehash=updatehash))
+        # create python script to load and trap exception
+        cmdstr = """import os
+import sys
+from socket import gethostname
+from traceback import format_exception
+from nipype.utils.filemanip import loadpkl, savepkl
+traceback=None
+print os.getcwd()
+try:
+    info = loadpkl('%s')
+    result = info['node'].run(updatehash=info['updatehash'])
+except:
+    etype, eval, etr = sys.exc_info()
+    traceback = format_exception(etype,eval,etr)
+    result = info['node'].result
+    resultsfile = os.path.join(info['node'].output_dir(), 'result_%%s.pklz'%%info['node'].name)
+    savepkl(resultsfile,dict(result=result, hostname=gethostname(), traceback=traceback))
+"""%pkl_file
+        pyscript = os.path.join(batch_dir, 'pyscript_%s.py'%suffix)
+        fp = open(pyscript, 'wt')
+        fp.writelines(cmdstr)
+        fp.close()
+        batchscript = '\n'.join((self._template, 'python %s'%pyscript))
+        batchscriptfile = os.path.join(batch_dir, 'batchscript_%s.sh'%suffix)
+        fp = open(batchscriptfile, 'wt')
+        fp.writelines(batchscript)
+        fp.close()
+        return self._submit_batchtask(batchscriptfile, node)
+
+    def _report_crash(self, node, result=None):
+        if result and result['traceback']:
+            node._result = result['result']
+            node._traceback = result['traceback']
+            return report_crash(node,
+                                traceback=result['traceback'])
+        else:
+            return report_crash(node)
+
+    def _clear_task(self, taskid):
+        del self._pending[taskid]

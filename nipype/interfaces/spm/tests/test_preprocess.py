@@ -77,7 +77,7 @@ def test_realign():
                      wrap = dict(field='eoptions.wrap'),
                      write_which = dict(field='roptions.which'),
                      write_interp = dict(field='roptions.interp'),
-                     write_wrap = dict(field='eoptions.wrap'),
+                     write_wrap = dict(field='roptions.wrap'),
                      write_mask = dict(field='roptions.mask'))
     rlgn = spm.Realign()
     for key, metadata in input_map.items():
@@ -190,8 +190,13 @@ def test_newsegment():
     input_map = dict(affine_regularization = dict(field='warp.affreg',),
                      channel_files = dict(copyfile=False,mandatory=True,field='channel',),
                      channel_info = dict(field='channel',),
+                     ignore_exception = dict(usedefault=True,),
+                     matlab_cmd = dict(),
+                     mfile = dict(usedefault=True,),
+                     paths = dict(),
                      sampling_distance = dict(field='warp.samp',),
-                     tissues = dict(copyfile=False,field='tissue',),
+                     tissues = dict(field='tissue',),
+                     use_mcr = dict(),
                      warping_regularization = dict(field='warp.reg',),
                      write_deformation_fields = dict(field='warp.write',),
                      )
@@ -199,7 +204,6 @@ def test_newsegment():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
 
 def test_smooth():
     yield assert_equal, spm.Smooth._jobtype, 'spatial'
@@ -212,7 +216,47 @@ def test_smooth():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-    
+
+def test_dartel():
+    yield assert_equal, spm.DARTEL._jobtype, 'tools'
+    yield assert_equal, spm.DARTEL._jobname, 'dartel'
+    input_map = dict(ignore_exception = dict(usedefault=True,),
+                     image_files = dict(copyfile=False,mandatory=True,field='warp.images',),
+                     iteration_parameters = dict(field='warp.settings.param',),
+                     matlab_cmd = dict(),
+                     mfile = dict(usedefault=True,),
+                     optimization_parameters = dict(field='warp.settings.optim',),
+                     paths = dict(),
+                     regularization_form = dict(field='warp.settings.rform',),
+                     template_prefix = dict(field='warp.settings.template',usedefault=True,),
+                     use_mcr = dict(),
+                     )
+    instance = spm.DARTEL()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+def test_dartelnorm2mni():
+    yield assert_equal, spm.DARTELNorm2MNI._jobtype, 'tools'
+    yield assert_equal, spm.DARTELNorm2MNI._jobname, 'dartel'
+    input_map = dict(apply_to_files = dict(copyfile=False,mandatory=True,field='mni_norm.data.subjs.images',),
+                     bounding_box = dict(field='mni_norm.bb',),
+                     flowfield_files = dict(field='mni_norm.data.subjs.flowfields',mandatory=True,),
+                     fwhm = dict(field='mni_norm.fwhm',),
+                     ignore_exception = dict(usedefault=True,),
+                     matlab_cmd = dict(),
+                     mfile = dict(usedefault=True,),
+                     modulate = dict(field='mni_norm.preserve',),
+                     paths = dict(),
+                     template_file = dict(copyfile=False,mandatory=True,field='mni_norm.template',),
+                     use_mcr = dict(),
+                     voxel_size = dict(field='mni_norm.vox',),
+                     )
+    instance = spm.DARTELNorm2MNI()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
 #@skipif(no_spm, "SPM not found")
 #def test_spm_realign_inputs():
 #    pass

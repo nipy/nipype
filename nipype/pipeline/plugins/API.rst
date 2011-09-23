@@ -5,4 +5,4 @@ Current status:
 
 class plugin_runner(PluginBase):
 
-    def run(graph, updatehash)
+    def run(graph, config, updatehash)

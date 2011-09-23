@@ -10,6 +10,8 @@ def configuration(parent_package='',top_path=None):
     config.add_subpackage('pipeline')
     config.add_subpackage('utils')
     config.add_subpackage('testing')
+    config.add_subpackage('workflows')
+    config.add_subpackage('external')
 
     # List all data directories to be loaded here
     return config

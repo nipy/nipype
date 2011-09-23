@@ -5,7 +5,7 @@
 
 import sys
 
-from IPython.Release import version as IPyversion
+from IPython import __version__ as IPyversion
 try:
     from IPython.kernel.contexts import ConnectionRefusedError
 except:
@@ -22,7 +22,7 @@ class IPythonPlugin(DistributedPluginBase):
         self.ipyclient = None
         self.taskclient = None
 
-    def run(self, graph, updatehash=False):
+    def run(self, graph, config, updatehash=False):
         """Executes a pre-defined pipeline is distributed approaches
         based on IPython's parallel processing interface
         """
@@ -41,7 +41,7 @@ class IPythonPlugin(DistributedPluginBase):
                 raise Exception("No IPython clients found.")
             if isinstance(e, ValueError):
                 raise Exception("Ipython kernel not installed")
-        return super(IPythonPlugin, self).run(graph, updatehash=updatehash)
+        return super(IPythonPlugin, self).run(graph, config, updatehash=updatehash)
 
     def _get_result(self, taskid):
         return self.taskclient.get_task_result(taskid, block=False)
@@ -50,6 +50,7 @@ class IPythonPlugin(DistributedPluginBase):
         cmdstr = """import sys
 from traceback import format_exception
 traceback=None
+result=None
 try:
     result = task.run(updatehash=updatehash)
 except:

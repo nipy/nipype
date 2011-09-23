@@ -18,7 +18,7 @@ from nipype.interfaces.fsl.model import (Level1Design, FEAT, FEATModel,
                                          FLAMEO, ContrastMgr,
                                          MultipleRegressDesign,
                                          L2Model, SMM, MELODIC,
-                                         SmoothEstimate, Cluster)
+                                         SmoothEstimate, Cluster, Randomise)
 from nipype.interfaces.fsl.utils import (Smooth, Merge, ExtractROI, Split,
                                          ImageMaths, ImageMeants, ImageStats,
                                          FilterRegressor, Overlay, Slicer,
