@@ -241,7 +241,7 @@ class CoregisterInputSpec(SPMCommandInputSpec):
                         desc='acceptable tolerance for each of 12 params')
     write_interp = traits.Range(low=0, hign=7, field='roptions.interp',
                         desc='degree of b-spline used for interpolation')
-    write_wrap = traits.List(traits.Bool(), minlen=3, maxlen=3,
+    write_wrap = traits.List(traits.Int(), minlen=3, maxlen=3,
                              field='roptions.wrap',
                      desc='Check if interpolation should wrap in [x,y,z]')
     write_mask = traits.Bool(field='roptions.mask',
@@ -281,7 +281,7 @@ class Coregister(SPMCommand):
             return scans_for_fnames(filename_to_list(val),
                                     keep4d=True)
         if opt == 'apply_to_files':
-            return scans_for_fnames(filename_to_list(val))
+            return np.array(filename_to_list(val), dtype=object)
         if opt == 'source' and self.inputs.jobtype == "write":
             if isdefined(self.inputs.apply_to_files):
                 return scans_for_fnames(val+self.inputs.apply_to_files)
@@ -357,7 +357,7 @@ class NormalizeInputSpec(SPMCommandInputSpec):
     write_voxel_sizes = traits.List(traits.Float(), field='roptions.vox', minlen=3, maxlen=3, desc='3-element list (opt)')
     write_interp = traits.Range(low=0, hign=7, field='roptions.interp',
                         desc='degree of b-spline used for interpolation')
-    write_wrap = traits.List(traits.Bool(), field='roptions.wrap',
+    write_wrap = traits.List(traits.Int(), field='roptions.wrap',
                         desc='Check if interpolation should wrap in [x,y,z] - list of bools (opt)')
 
 
@@ -782,8 +782,8 @@ class DARTELInputSpec(SPMCommandInputSpec):
     iteration_parameters = traits.List(traits.Tuple(traits.Range(1,10), traits.Tuple(traits.Float, traits.Float, traits.Float),
                                                     traits.Enum(1,2,4,8,16,32,64,128,256,512),
                                                     traits.Enum(0,0.5,1,2,4,8,16,32)),
-                                       minlen=6,
-                                       maxlen=6,
+                                       minlen=3,
+                                       maxlen=12,
                                        field = 'warp.settings.param',
                                        desc="""List of tuples for each iteration
                                        - Inner iterations
@@ -957,3 +957,68 @@ class DARTELNorm2MNI(SPMCommand):
                                                                           ext)))
 
         return outputs
+
+
+class CreateWarpedInputSpec(SPMCommandInputSpec):
+    image_files = InputMultiPath(File(exists=True),
+                              desc="A list of files to be warped",
+                              field='crt_warped.images', copyfile=False, 
+                              mandatory=True)
+    flowfield_files = InputMultiPath(File(exists=True),
+                                     desc="DARTEL flow fields u_rc1*",
+                                     field='crt_warped.flowfields',
+                                     copyfile=False, 
+                                     mandatory=True)
+    iterations = traits.Range(low=0, high=9,
+                desc="The number of iterations: log2(number of time steps)",
+                field='crt_warped.K',
+                )
+    interp = traits.Range(low=0, high=7, field='crt_warped.interp',
+                          desc='degree of b-spline used for interpolation')
+
+class CreateWarpedOutputSpec(TraitedSpec):
+    warped_files = traits.List(
+                File(exists=True, desc='final warped files'))
+
+class CreateWarped(SPMCommand):
+    """Apply a flow field estimated by DARTEL to create warped images
+
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=202
+
+    Examples
+    --------
+    >>> import nipype.interfaces.spm as spm
+    >>> create_warped = spm.CreateWarped()
+    >>> create_warped.inputs.image_files = [['rc1s1.nii','rc1s2.nii'],['rc2s1.nii', 'rc2s2.nii']]
+    >>> create_warped.inputs.flowfield_files = ['u_rc1s1.nii', 'u_rc2s1.nii'] 
+    >>> create_warped.run() # doctest: +SKIP
+
+    """
+
+    input_spec = CreateWarpedInputSpec
+    output_spec = CreateWarpedOutputSpec
+    _jobtype = 'tools'
+    _jobname = 'dartel'
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+
+        if opt in ['image_files']:
+            return scans_for_fnames(val, keep4d=True,
+                                    separate_sessions=True)
+        if opt in ['flowfield_files']:
+            return scans_for_fnames(val, keep4d=True)
+        else:
+            return val
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['warped_files'] = []
+        for filename in self.inputs.image_files:
+            pth, base, ext = split_filename(filename)
+            outputs['warped_files'].append(os.path.realpath('w%s%s'%(base,
+                                                            ext)))
+        return outputs
+
+
