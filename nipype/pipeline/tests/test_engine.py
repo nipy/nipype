@@ -6,14 +6,12 @@ import os
 from copy import deepcopy
 from tempfile import mkdtemp
 from shutil import rmtree
-from nose import with_setup
 
 import networkx as nx
 
 from nipype.testing import (assert_raises, assert_equal, assert_true,
-                            assert_false, skipif)
+                            assert_false)
 import nipype.interfaces.base as nib
-from nipype.utils.filemanip import cleandir
 import nipype.pipeline.engine as pe
 
 class InputSpec(nib.TraitedSpec):
@@ -346,4 +344,4 @@ def test_workflow_add():
     yield assert_raises, IOError, w1.add_nodes, [n2]
     yield assert_raises, IOError, w1.add_nodes, [n3]
     yield assert_raises, IOError, w1.connect, [(w1,n2,[('n1.a','d')])]
-    
+ 
