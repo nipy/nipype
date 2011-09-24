@@ -1157,27 +1157,39 @@ class Node(WorkflowBase):
         os.chdir(old_cwd)
 
     def _save_results(self, result, cwd):
-        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        resultsruntimefile = os.path.join(cwd, 'result_runtime_%s.pklz' % self.name)
+        resultsoutputfile = os.path.join(cwd, 'result_outputs_%s.pklz' % self.name)
+        resultsinterfacefile = os.path.join(cwd, 'result_interface_%s.pklz' % self.name)
+
         if result.outputs:
             try:
                 outputs = result.outputs.get()
             except TypeError:
                 outputs = result.outputs.dictcopy() # outputs was a bunch
             result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
-        logger.debug('saving results in %s'%resultsfile)
-        savepkl(resultsfile, result)
+
+        logger.debug('saving results runtime in %s'%resultsruntimefile)
+        savepkl(resultsruntimefile, result.runtime)
+        logger.debug('saving results output in %s'%resultsoutputfile)
+        savepkl(resultsoutputfile, result.outputs)
+        logger.debug('saving results interface in %s'%resultsinterfacefile)
+        savepkl(resultsinterfacefile, result.interface)
+
         if result.outputs:
             result.outputs.set(**outputs)
 
     def _load_results(self, cwd):
-        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        resultsoutputfile = os.path.join(cwd, 'result_outputs_%s.pklz' % self.name)
         aggregate = True
         result = None
         attribute_error = False
-        if os.path.exists(resultsfile):
-            pkl_file = gzip.open(resultsfile, 'rb')
+        if os.path.exists(resultsoutputfile):
+            pkl_file = gzip.open(resultsoutputfile, 'rb')
             try:
-                result = cPickle.load(pkl_file)
+                resultoutputs = cPickle.load(pkl_file)
+                result = InterfaceResult(interface=None,
+                                         runtime=None,
+                                         outputs=resultoutputs)
             except (traits.TraitError, AttributeError, ImportError), err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
@@ -1191,7 +1203,9 @@ class Node(WorkflowBase):
                     except TypeError:
                         outputs = result.outputs.dictcopy() # outputs was a bunch
                     try:
-                        result.outputs.set(**modify_paths(outputs, relative=False, basedir=cwd))
+                        result.outputs.set(**modify_paths(outputs,
+                                                          relative=False,
+                                                          basedir=cwd))
                     except FileNotFoundError:
                         logger.debug('conversion to full path results in non existent file')
                     else:
