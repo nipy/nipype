@@ -61,28 +61,27 @@ def test_add_nodes():
     yield assert_true, mod2 in pipe._graph.nodes()
 
 def test_run_in_series():
-    cur_dir = os.getcwd()
-    temp_dir = mkdtemp(prefix='test_engine_')
-    os.chdir(temp_dir)
+    try:
+        cur_dir = os.getcwd()
+        temp_dir = mkdtemp(prefix='test_engine_')
+        os.chdir(temp_dir)
 
-    pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
-    mod2 = pe.MapNode(interface=TestInterface(),
-                      iterfield=['input1'],
-                      name='mod2')
-    pipe.connect([(mod1,mod2,[('output1','input1')])])
-    pipe.base_dir = os.getcwd()
-    mod1.inputs.input1 = 1
-    execgraph = pipe.run()
-    names = ['.'.join((node._hierarchy,node.name)) for node in execgraph.nodes()]
-    node = execgraph.nodes()[names.index('pipe.mod1')]
-    result = node.get_output('output1')
-    # NOTE: yield statements in nose cause the setup function to be
-    # called at this point in the code, after all of the above is
-    # executed!
-    yield assert_equal, result, [1, 1]
-    os.chdir(cur_dir)
-    rmtree(temp_dir)
+        pipe = pe.Workflow(name='pipe')
+        mod1 = pe.Node(interface=TestInterface(),name='mod1')
+        mod2 = pe.MapNode(interface=TestInterface(),
+                        iterfield=['input1'],
+                        name='mod2')
+        pipe.connect([(mod1,mod2,[('output1','input1')])])
+        pipe.base_dir = os.getcwd()
+        mod1.inputs.input1 = 1
+        execgraph = pipe.run()
+        names = ['.'.join((node._hierarchy,node.name)) for node in execgraph.nodes()]
+        node = execgraph.nodes()[names.index('pipe.mod1')]
+        result = node.get_output('output1')
+        assert_equal(result, [1, 1])
+    finally:
+        os.chdir(cur_dir)
+        rmtree(temp_dir)
 
 # Test graph expansion.  The following set tests the building blocks
 # of the graph expansion routine.
