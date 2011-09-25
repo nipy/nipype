@@ -1035,9 +1035,9 @@ class Node(WorkflowBase):
         """
         logger.debug('Setting node inputs')
         for key, info in self.input_source.items():
-            logger.debug('input: %s'%key)
+            logger.debug('input: %s' % key)
             results_file = info[0]
-            logger.debug('results file: %s'%results_file)
+            logger.debug('results file: %s' % results_file)
             results = loadpkl(results_file)
             output_value = Undefined
             if isinstance(info[1], tuple):
@@ -1053,15 +1053,15 @@ class Node(WorkflowBase):
                     output_value = results.outputs.get()[output_name]
                 except TypeError:
                     output_value = results.outputs.dictcopy()[output_name]
-            logger.debug('output: %s'%output_name)
+            logger.debug('output: %s' % output_name)
             try:
                 self.set_input(key, deepcopy(output_value))
             except traits.TraitError, e:
                 msg = ['Error setting node input:',
-                       'Node: %s'%self.name,
-                       'input: %s'%key,
-                       'results_file: %s'%results_file,
-                       'value: %s'%str(output_value)]
+                       'Node: %s' % self.name,
+                       'input: %s' % key,
+                       'results_file: %s' % results_file,
+                       'value: %s' % str(output_value)]
                 e.args = (e.args[0] + "\n" + '\n'.join(msg),)
                 raise
 
