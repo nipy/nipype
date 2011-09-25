@@ -67,6 +67,8 @@ def test_run_in_series():
         os.chdir(temp_dir)
 
         pipe = pe.Workflow(name='pipe')
+        # Make it easier to debug crashes
+        pipe.config['execution']['stop_on_first_crash'] = 'true'
         mod1 = pe.Node(interface=TestInterface(),name='mod1')
         mod2 = pe.MapNode(interface=TestInterface(),
                         iterfield=['input1'],
@@ -81,7 +83,7 @@ def test_run_in_series():
         assert_equal(result, [1, 1])
     finally:
         os.chdir(cur_dir)
-        rmtree(temp_dir)
+        #rmtree(temp_dir)
 
 # Test graph expansion.  The following set tests the building blocks
 # of the graph expansion routine.
