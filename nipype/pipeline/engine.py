@@ -625,7 +625,7 @@ window.onload=beginrefresh
                 data = graph.get_edge_data(*edge)
                 for sourceinfo, field in sorted(data['connect']):
                     node.input_source[field] = (os.path.join(edge[0].output_dir(),
-                                                             'result_%s.pklz'%edge[0].name),
+                                                             'result_outputs_%s.pklz'%edge[0].name),
                                                 sourceinfo)
 
     def _check_nodes(self, nodes):
@@ -1038,7 +1038,10 @@ class Node(WorkflowBase):
             logger.debug('input: %s' % key)
             results_file = info[0]
             logger.debug('results file: %s' % results_file)
-            results = loadpkl(results_file)
+            result_outputs = loadpkl(results_file)
+            results = InterfaceResult(interface=None,
+                                     runtime=None,
+                                     outputs=result_outputs)
             output_value = Undefined
             if isinstance(info[1], tuple):
                 output_name = info[1][0]
