@@ -642,16 +642,11 @@ class ThreedAllineateOutputSpec(AFNITraitedSpec):
                     exists = True)
 
 class ThreedAllineate(AFNICommand):
-    """
-<<<<<<< HEAD
-For complete details, see the `3dAllineate Documentation.
-<http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html>`_
 """
 =======
     For complete details, see the `3dAllineate Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html>`_
     """
->>>>>>> 2d53ac8c33641bea510ec1dc819a58855d831fc8
 
     _cmd = '3dAllineate'
     input_spec = ThreedAllineateInputSpec
@@ -740,11 +735,7 @@ class ThreedBrickStatInputSpec(AFNITraitedSpec):
                   position = -1,
                   mandatory = True,
                   exists = True)
-
-    #min_val = traits.Bool(desc = 'output min val',
-     #              argstr = '',
-     #              position = 3,
-     #              mandatory = True)
+    
     mask = File(desc = '-mask dset = use dset as mask to include/exclude voxels',
                   argstr = '-mask %s',
                   position = 2)
@@ -790,59 +781,6 @@ class ThreedBrickStat(AFNICommand):
 		
 		return outputs
 
-
-#    def _list_outputs(self):
-#        outputs = self.output_spec().get()
-#        outputs['min_val'] = self.inputs.out_file
-#        return outputs
-
-#class ThreedSkullStrip(AFNICommand):
-#    """
-#For complete details, see the `3dSkullStrip Documentation.
-#<http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSkullStrip.html>`_
-#"""
-#
-#    @property
-#    def cmd(self):
-#        """Base command for ThreedSkullStrip"""
-#        return '3dSkullStrip'
-#
-#    def inputs_help(self):
-#        doc = """
-#"""
-#        print doc
-#
-#    def _populate_inputs(self):
-#        """Initialize the inputs attribute."""
-#
-#        self.inputs = Bunch(outfile=None,
-#                            infile=None)
-#
-#    def _parseinputs(self):
-#        """Parse valid input options for ThreedSkullStrip command.
-#
-#Ignore options set to None.
-#
-#"""
-#
-#        out_inputs = []
-#        inputs = {}
-#        [inputs.update({k:v}) for k, v in self.inputs.items() \
-#             if v is not None]
-#
-#        if inputs.has_key('outfile'):
-#            val = inputs.pop('outfile')
-#            out_inputs.append('-prefix %s' % val)
-#        if inputs.has_key('infile'):
-#            val = inputs.pop('infile')
-#            out_inputs.append('-input %s' % val)
-#
-#        if len(inputs) > 0:
-#            print '%s: unsupported options: %s' % (
-#                self.__class__.__name__, inputs.keys())
-#
-#        return out_inputs
-#
 
 
 """
