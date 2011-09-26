@@ -1,6 +1,12 @@
 """
 Using nipype with persistence and lazy recomputation but without explicit
 name-steps pipeline: getting back scope in command-line based programming.
+
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+   >>> os.chdir(datadir)
 """
 
 import os
@@ -179,8 +185,9 @@ class Memory(object):
             Examples
             ========
 
-            >>> mem = Memory('tmp_dir')
-            >>> from nipype.interface import fsl
+            >>> from tempfile import mkdtemp
+            >>> mem = Memory(mkdtemp())
+            >>> from nipype.interfaces import fsl
 
             Here we create a callable that can be used to apply an
             fsl.Merge interface to files
@@ -192,10 +199,10 @@ class Memory(object):
             should be merged.
 
             >>> results = fsl_merge(in_files=['a.nii', 'b.nii'],
-            ...                     dimension='t')
+            ...                     dimension='t') # doctest: +SKIP
 
             We can retrieve the resulting file from the outputs:
-            >>> results.outputs.merged_file
+            >>> results.outputs.merged_file # doctest: +SKIP
             '...'
         """
         return PipeFunc(interface, self.base_dir, _MemoryCallback(self))
