@@ -625,7 +625,7 @@ window.onload=beginrefresh
                 data = graph.get_edge_data(*edge)
                 for sourceinfo, field in sorted(data['connect']):
                     node.input_source[field] = (os.path.join(edge[0].output_dir(),
-                                                             'result_%s.pklz'%edge[0].name),
+                                                             'result_outputs_%s.pklz'%edge[0].name),
                                                 sourceinfo)
 
     def _check_nodes(self, nodes):
@@ -1035,10 +1035,13 @@ class Node(WorkflowBase):
         """
         logger.debug('Setting node inputs')
         for key, info in self.input_source.items():
-            logger.debug('input: %s'%key)
+            logger.debug('input: %s' % key)
             results_file = info[0]
-            logger.debug('results file: %s'%results_file)
-            results = loadpkl(results_file)
+            logger.debug('results file: %s' % results_file)
+            result_outputs = loadpkl(results_file)
+            results = InterfaceResult(interface=None,
+                                     runtime=None,
+                                     outputs=result_outputs)
             output_value = Undefined
             if isinstance(info[1], tuple):
                 output_name = info[1][0]
@@ -1053,15 +1056,15 @@ class Node(WorkflowBase):
                     output_value = results.outputs.get()[output_name]
                 except TypeError:
                     output_value = results.outputs.dictcopy()[output_name]
-            logger.debug('output: %s'%output_name)
+            logger.debug('output: %s' % output_name)
             try:
                 self.set_input(key, deepcopy(output_value))
             except traits.TraitError, e:
                 msg = ['Error setting node input:',
-                       'Node: %s'%self.name,
-                       'input: %s'%key,
-                       'results_file: %s'%results_file,
-                       'value: %s'%str(output_value)]
+                       'Node: %s' % self.name,
+                       'input: %s' % key,
+                       'results_file: %s' % results_file,
+                       'value: %s' % str(output_value)]
                 e.args = (e.args[0] + "\n" + '\n'.join(msg),)
                 raise
 
@@ -1157,27 +1160,39 @@ class Node(WorkflowBase):
         os.chdir(old_cwd)
 
     def _save_results(self, result, cwd):
-        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        resultsruntimefile = os.path.join(cwd, 'result_runtime_%s.pklz' % self.name)
+        resultsoutputfile = os.path.join(cwd, 'result_outputs_%s.pklz' % self.name)
+        resultsinterfacefile = os.path.join(cwd, 'result_interface_%s.pklz' % self.name)
+
         if result.outputs:
             try:
                 outputs = result.outputs.get()
             except TypeError:
                 outputs = result.outputs.dictcopy() # outputs was a bunch
             result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
-        logger.debug('saving results in %s'%resultsfile)
-        savepkl(resultsfile, result)
+
+        logger.debug('saving results runtime in %s'%resultsruntimefile)
+        savepkl(resultsruntimefile, result.runtime)
+        logger.debug('saving results output in %s'%resultsoutputfile)
+        savepkl(resultsoutputfile, result.outputs)
+        logger.debug('saving results interface in %s'%resultsinterfacefile)
+        savepkl(resultsinterfacefile, result.interface)
+
         if result.outputs:
             result.outputs.set(**outputs)
 
     def _load_results(self, cwd):
-        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        resultsoutputfile = os.path.join(cwd, 'result_outputs_%s.pklz' % self.name)
         aggregate = True
         result = None
         attribute_error = False
-        if os.path.exists(resultsfile):
-            pkl_file = gzip.open(resultsfile, 'rb')
+        if os.path.exists(resultsoutputfile):
+            pkl_file = gzip.open(resultsoutputfile, 'rb')
             try:
-                result = cPickle.load(pkl_file)
+                resultoutputs = cPickle.load(pkl_file)
+                result = InterfaceResult(interface=None,
+                                         runtime=None,
+                                         outputs=resultoutputs)
             except (traits.TraitError, AttributeError, ImportError), err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
@@ -1191,7 +1206,9 @@ class Node(WorkflowBase):
                     except TypeError:
                         outputs = result.outputs.dictcopy() # outputs was a bunch
                     try:
-                        result.outputs.set(**modify_paths(outputs, relative=False, basedir=cwd))
+                        result.outputs.set(**modify_paths(outputs,
+                                                          relative=False,
+                                                          basedir=cwd))
                     except FileNotFoundError:
                         logger.debug('conversion to full path results in non existent file')
                     else:
