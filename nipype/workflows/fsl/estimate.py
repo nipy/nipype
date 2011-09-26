@@ -4,6 +4,7 @@ import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 
+
 def create_modelfit_workflow(name='modelfit'):
     """Create an FSL individual modelfitting workflow
 
@@ -34,8 +35,9 @@ def create_modelfit_workflow(name='modelfit'):
          outputspec.outlier_plots : images of outliers
          outputspec.mask_file : binary mask file in reference image space
          outputspec.reg_file : registration file that maps reference image to
-                                 freesurfer space
-         outputspec.reg_cost : cost of registration (useful for detecting misalignment)
+                               freesurfer space
+         outputspec.reg_cost : cost of registration (useful for detecting
+                               misalignment)
     """
 
     modelfit = pe.Workflow(name=name)
@@ -54,20 +56,20 @@ def create_modelfit_workflow(name='modelfit'):
                         name='inputspec')
     level1design = pe.Node(interface=fsl.Level1Design(), name="level1design")
     modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
-                          iterfield = ['fsf_file', 'ev_files'])
+                          iterfield=['fsf_file', 'ev_files'])
     modelestimate = pe.MapNode(interface=fsl.FILMGLS(smooth_autocorr=True,
                                                      mask_size=5),
                                name='modelestimate',
-                               iterfield = ['design_file','in_file'])
+                               iterfield=['design_file', 'in_file'])
     conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
-                             iterfield = ['tcon_file','param_estimates',
-                                          'sigmasquareds', 'corrections',
-                                          'dof_file'])
+                             iterfield=['tcon_file', 'param_estimates',
+                                        'sigmasquareds', 'corrections',
+                                        'dof_file'])
     ztopval = pe.MapNode(interface=fsl.ImageMaths(op_string='-ztop',
                                                   suffix='_pval'),
                          name='ztop',
                          iterfield=['in_file'])
-    outputspec = pe.Node(util.IdentityInterface(fields=['copes','varcopes',
+    outputspec = pe.Node(util.IdentityInterface(fields=['copes', 'varcopes',
                                                         'dof_file', 'pfiles',
                                                         'parameter_estimates']),
                          name='outputspec')
@@ -76,7 +78,7 @@ def create_modelfit_workflow(name='modelfit'):
     Utility function
     """
 
-    pop_lambda = lambda x : x[0]
+    pop_lambda = lambda x: x[0]
 
     """
     Setup the connections
@@ -84,22 +86,22 @@ def create_modelfit_workflow(name='modelfit'):
 
     modelfit.connect([
         (inputspec, level1design, [('interscan_interval', 'interscan_interval'),
-                                   ('session_info','session_info'),
+                                   ('session_info', 'session_info'),
                                    ('contrasts', 'contrasts'),
                                    ('bases', 'bases'),
                                    ('model_serial_correlations',
                                     'model_serial_correlations')]),
         (inputspec, modelestimate, [('film_threshold', 'threshold'),
                                     ('functional_data', 'in_file')]),
-        (level1design,modelgen,[('fsf_files', 'fsf_file'),
+        (level1design, modelgen, [('fsf_files', 'fsf_file'),
                                 ('ev_files', 'ev_files')]),
         (modelgen, modelestimate, [('design_file', 'design_file')]),
         (modelgen, conestimate, [('con_file', 'tcon_file')]),
-        (modelestimate, conestimate,[('param_estimates', 'param_estimates'),
+        (modelestimate, conestimate, [('param_estimates', 'param_estimates'),
                                     ('sigmasquareds', 'sigmasquareds'),
                                     ('corrections', 'corrections'),
                                     ('dof_file', 'dof_file')]),
-        (conestimate, ztopval, [(('zstats', pop_lambda),'in_file')]),
+        (conestimate, ztopval, [(('zstats', pop_lambda), 'in_file')]),
         (ztopval, outputspec, [('out_file', 'pfiles')]),
         (modelestimate, outputspec, [('param_estimates', 'parameter_estimates'),
                                      ('dof_file', 'dof_file')]),
@@ -116,10 +118,11 @@ def create_overlay_workflow(name='overlay'):
     overlay = pe.Workflow(name='overlay')
     overlaystats = pe.MapNode(interface=fsl.Overlay(), name="overlaystats",
                               iterfield=['stat_image'])
-    overlaystats.inputs.show_negative_stats=True
-    overlaystats.inputs.auto_thresh_bg=True
-    
-    slicestats = pe.MapNode(interface=fsl.Slicer(), name="slicestats",
+    overlaystats.inputs.show_negative_stats = True
+    overlaystats.inputs.auto_thresh_bg = True
+
+    slicestats = pe.MapNode(interface=fsl.Slicer(),
+                            name="slicestats",
                             iterfield=['in_file'])
     slicestats.inputs.all_axial = True
     slicestats.inputs.image_width = 512
@@ -129,14 +132,39 @@ def create_overlay_workflow(name='overlay'):
 
 
 def create_fixed_effects_flow(name='fixedfx'):
-    """
-    Set up fixed-effects workflow
-    -----------------------------
+    """Create a fixed-effects workflow
 
+    This workflow is used to combine registered copes and varcopes across runs
+    for an individual subject
+
+    Example
+    -------
+
+    >>> fixedfx = create_fixed_effects_flow()
+    >>> fixedfx.base_dir = '.'
+    >>> fixedfx.inputs.inputspec.copes = [['cope1run1.nii.gz', 'cope1run2.nii.gz'], ['cope2run1.nii.gz', 'cope2run2.nii.gz']] # per contrast
+    >>> fixedfx.inputs.inputspec.varcopes = [['varcope1run1.nii.gz', 'varcope1run2.nii.gz'], ['varcope2run1.nii.gz', 'varcope2run2.nii.gz']] # per contrast
+    >>> fixedfx.inputs.inputspec.dof_files = ['dofrun1', 'dofrun2'] # per run
+    >>> fixedfx.run() #doctest: +SKIP
+
+    Inputs::
+
+         inputspec.copes : list of list of cope files (one list per contrast)
+         inputspec.varcopes : list of list of varcope files (one list per
+                              contrast)
+         inputspec.dof_files : degrees of freedom files for each run
+
+    Outputs::
+
+         outputspec.res4d : 4d residual time series
+         outputspec.copes : contrast parameter estimates
+         outputspec.varcopes : variance of contrast parameter estimates
+         outputspec.zstats : z statistics of contrasts
+         outputspec.tstats : t statistics of contrasts
     """
 
     fixed_fx = pe.Workflow(name=name)
-    
+
     inputspec = pe.Node(util.IdentityInterface(fields=['copes',
                                                        'varcopes',
                                                        'dof_files'
@@ -148,9 +176,9 @@ def create_fixed_effects_flow(name='fixedfx'):
     varcopes for each condition
     """
 
-    copemerge    = pe.MapNode(interface=fsl.Merge(dimension='t'),
-                              iterfield=['in_files'],
-                              name="copemerge")
+    copemerge = pe.MapNode(interface=fsl.Merge(dimension='t'),
+                           iterfield=['in_files'],
+                           name="copemerge")
 
     varcopemerge = pe.MapNode(interface=fsl.Merge(dimension='t'),
                            iterfield=['in_files'],
@@ -169,7 +197,7 @@ def create_fixed_effects_flow(name='fixedfx'):
     """
 
     flameo = pe.MapNode(interface=fsl.FLAMEO(run_mode='fe'), name="flameo",
-                        iterfield=['cope_file','var_cope_file'])
+                        iterfield=['cope_file', 'var_cope_file'])
 
     def get_dofvolumes(dof_files, cope_files):
         import os
@@ -179,26 +207,38 @@ def create_fixed_effects_flow(name='fixedfx'):
         out_data = np.zeros(img.get_shape())
         for i in range(out_data.shape[-1]):
             dof = np.loadtxt(dof_files[i])
-            out_data[:,:,:,i] = dof
+            out_data[:, :, :, i] = dof
         filename = os.path.join(os.getcwd(), 'dof_file.nii.gz')
         newimg = nb.Nifti1Image(out_data, None, img.get_header())
         newimg.to_filename(filename)
         return filename
 
-    gendof = pe.Node(util.Function(input_names=['dof_files','cope_files'],
+    gendof = pe.Node(util.Function(input_names=['dof_files', 'cope_files'],
                                    output_names=['dof_volume'],
                                    function=get_dofvolumes),
                      name='gendofvolume')
+
+    outputspec = pe.Node(util.IdentityInterface(fields=['res4d',
+                                                        'copes', 'varcopes',
+                                                        'zstats', 'tstats']),
+                         name='outputspec')
 
     fixed_fx.connect([(inputspec, copemerge, [('copes', 'in_files')]),
                       (inputspec, varcopemerge, [('varcopes', 'in_files')]),
                       (inputspec, gendof, [('dof_files', 'dof_files')]),
                       (copemerge, gendof, [('merged_file', 'cope_files')]),
                       (copemerge, flameo, [('merged_file', 'cope_file')]),
-                      (varcopemerge, flameo, [('merged_file', 'var_cope_file')]),
+                      (varcopemerge, flameo, [('merged_file',
+                                               'var_cope_file')]),
                       (level2model, flameo, [('design_mat', 'design_file'),
                                             ('design_con', 't_con_file'),
                                             ('design_grp', 'cov_split_file')]),
-                      (gendof, flameo, [('dof_volume', 'dof_var_cope_file')])
+                      (gendof, flameo, [('dof_volume', 'dof_var_cope_file')]),
+                      (flameo, outputspec, [('res4d', 'res4d'),
+                                            ('copes', 'copes'),
+                                            ('var_copes', 'varcopes'),
+                                            ('zstats', 'zstats'),
+                                            ('tstats', 'tstats')
+                                            ])
                       ])
     return fixed_fx
