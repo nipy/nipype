@@ -579,7 +579,7 @@ window.onload=beginrefresh
         nodes = nx.topological_sort(graph)
         report_files = []
         for i, node in enumerate(nodes):
-            report_files.append('result_files[%d] = "%s/result_%s.pklz";'%(i, os.path.realpath(node.output_dir()), node.name))
+            report_files.append('result_files[%d] = "%s/result_outputs_%s.pklz";'%(i, os.path.realpath(node.output_dir()), node.name))
             report_files.append('report_files[%d] = "%s/_report/report.rst";'%(i, os.path.realpath(node.output_dir())))
         report_files = '\n'.join(report_files)
         fp.writelines(script%(len(nodes), len(nodes), report_files, len(nodes)))
