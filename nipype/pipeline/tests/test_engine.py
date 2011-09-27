@@ -168,7 +168,7 @@ def test7():
     mod1.iterables = dict(input1=lambda:[1,2])
     mod2.iterables = {}
     mod3.iterables = {}
-    pipe.connect([(mod1,mod3,[('output1','input2')]),
+    pipe.connect([(mod1,mod3,[('output1','input1')]),
                   (mod2,mod3,[('output1','input2')])])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
@@ -183,7 +183,7 @@ def test8():
     mod1.iterables = dict(input1=lambda:[1,2])
     mod2.iterables = dict(input1=lambda:[1,2])
     mod3.iterables = {}
-    pipe.connect([(mod1,mod3,[('output1','input2')]),
+    pipe.connect([(mod1,mod3,[('output1','input1')]),
                   (mod2,mod3,[('output1','input2')])])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
@@ -250,6 +250,10 @@ def test_doubleconnect():
     flow1 = pe.Workflow(name='test')
     flow1.connect(a,'a',b,'a')
     x = lambda: flow1.connect(a,'b',b,'a')
+    yield assert_raises, Exception, x
+    c = pe.Node(IdentityInterface(fields=['a','b']),name='c')
+    flow1 = pe.Workflow(name='test2')
+    x = lambda : flow1.connect([(a, c, [('b', 'b')]), (b, c, [('a', 'b')])])
     yield assert_raises, Exception, x
 
 

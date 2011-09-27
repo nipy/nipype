@@ -588,10 +588,11 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
     for output in needed_outputs:
         output_files.extend(walk_outputs(outputdict[output]))
     needed_files = [path for path, type in output_files if type == 'f']
-    input_files = []
-    inputdict = inputs.get()
-    input_files.extend(walk_outputs(inputdict))
-    needed_files += [path for path, type in input_files if type == 'f']
+    if config.getboolean('execution', 'keep_inputs'):
+        input_files = []
+        inputdict = inputs.get()
+        input_files.extend(walk_outputs(inputdict))
+        needed_files += [path for path, type in input_files if type == 'f']
     for extra in ['_0x*.json', 'provenance.xml', 'pyscript*.m',
                   'command.txt', 'result*.pklz', '_inputs.pklz']:
         needed_files.extend(glob(os.path.join(cwd, extra)))
