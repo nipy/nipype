@@ -1596,7 +1596,7 @@ class MapNode(Node):
             first_len = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
             for iterfield in self.iterfield[1:]:
                 if first_len != len(filename_to_list(getattr(self.inputs, iterfield))):
-                    raise ValueError("All iterfields of a MapNode have to have the same length.")
+                    raise ValueError("All iterfields of a MapNode have to have the same length." + str(self.inputs))
 
         if execute:
             nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))

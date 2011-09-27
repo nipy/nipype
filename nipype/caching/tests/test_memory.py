@@ -20,7 +20,7 @@ class SideEffectInterface(TestInterface):
         nb_runs += 1
         runtime.returncode = 0
         return runtime
- 
+
 
 def test_caching():
     temp_dir = mkdtemp(prefix='test_memory_')

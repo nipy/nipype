@@ -962,12 +962,12 @@ class DARTELNorm2MNI(SPMCommand):
 class CreateWarpedInputSpec(SPMCommandInputSpec):
     image_files = InputMultiPath(File(exists=True),
                               desc="A list of files to be warped",
-                              field='crt_warped.images', copyfile=False, 
+                              field='crt_warped.images', copyfile=False,
                               mandatory=True)
     flowfield_files = InputMultiPath(File(exists=True),
                                      desc="DARTEL flow fields u_rc1*",
                                      field='crt_warped.flowfields',
-                                     copyfile=False, 
+                                     copyfile=False,
                                      mandatory=True)
     iterations = traits.Range(low=0, high=9,
                 desc="The number of iterations: log2(number of time steps)",
@@ -989,8 +989,8 @@ class CreateWarped(SPMCommand):
     --------
     >>> import nipype.interfaces.spm as spm
     >>> create_warped = spm.CreateWarped()
-    >>> create_warped.inputs.image_files = [['rc1s1.nii','rc1s2.nii'],['rc2s1.nii', 'rc2s2.nii']]
-    >>> create_warped.inputs.flowfield_files = ['u_rc1s1.nii', 'u_rc2s1.nii'] 
+    >>> create_warped.inputs.image_files = ['rc1s1.nii', 'rc1s2.nii']
+    >>> create_warped.inputs.flowfield_files = ['u_rc1s1_Template.nii', 'u_rc1s2_Template.nii']
     >>> create_warped.run() # doctest: +SKIP
 
     """
