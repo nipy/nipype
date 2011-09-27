@@ -6,7 +6,7 @@ from nipype.interfaces.spm.base import (Info, SPMCommand, logger, no_spm,
                                         scans_for_fname, scans_for_fnames)
 from nipype.interfaces.spm.preprocess import (SliceTiming, Realign, Coregister,
                                               Normalize, Segment, Smooth,
-                                              NewSegment, DARTEL, 
+                                              NewSegment, DARTEL,
                                               DARTELNorm2MNI, CreateWarped)
 from nipype.interfaces.spm.model import (Level1Design, EstimateModel,
                                          EstimateContrast, Threshold,
