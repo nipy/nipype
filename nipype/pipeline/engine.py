@@ -230,22 +230,27 @@ class Workflow(WorkflowBase):
                 if node._hierarchy is None:
                     node._hierarchy = self.name
         not_found = []
+        connected_ports = {}
         for srcnode, destnode, connects in connection_list:
-            connected_ports = []
+            if destnode not in connected_ports:
+                connected_ports[destnode] = []
             # check to see which ports of destnode are already
             # connected.
             if not disconnect and (destnode in self._graph.nodes()):
                 for edge in self._graph.in_edges_iter(destnode):
                     data = self._graph.get_edge_data(*edge)
                     for sourceinfo, destname in data['connect']:
-                        connected_ports += [destname]
+                        if destname not in connected_ports[destnode]:
+                            connected_ports[destnode] += [destname]
             for source, dest in connects:
                 # Currently datasource/sink/grabber.io modules
                 # determine their inputs/outputs depending on
                 # connection settings.  Skip these modules in the check
-                if dest in connected_ports:
-                    raise Exception('Input %s of node %s is already ' \
-                                        'connected'%(dest,destnode))
+                if dest in connected_ports[destnode]:
+                    raise Exception("""
+Trying to connect %s:%s to %s:%s but input '%s' of node '%s' is already
+connected.
+"""%(srcnode, source, destnode, dest, dest, destnode))
                 if not (hasattr(destnode, '_interface') and '.io' in str(destnode._interface.__class__)):
                     if not destnode._check_inputs(dest):
                         not_found.append(['in', destnode.name, dest])
@@ -262,6 +267,7 @@ class Workflow(WorkflowBase):
                                         srcnode.name)
                     if sourcename and not srcnode._check_outputs(sourcename):
                         not_found.append(['out', srcnode.name, sourcename])
+                connected_ports[destnode] += [dest]
         infostr = []
         for info in not_found:
             infostr += ["Module %s has no %sput called %s\n"%(info[1], info[0],
@@ -573,7 +579,7 @@ window.onload=beginrefresh
         nodes = nx.topological_sort(graph)
         report_files = []
         for i, node in enumerate(nodes):
-            report_files.append('result_files[%d] = "%s/result_%s.pklz";'%(i, os.path.realpath(node.output_dir()), node.name))
+            report_files.append('result_files[%d] = "%s/result_outputs_%s.pklz";'%(i, os.path.realpath(node.output_dir()), node.name))
             report_files.append('report_files[%d] = "%s/_report/report.rst";'%(i, os.path.realpath(node.output_dir())))
         report_files = '\n'.join(report_files)
         fp.writelines(script%(len(nodes), len(nodes), report_files, len(nodes)))
@@ -1182,6 +1188,26 @@ class Node(WorkflowBase):
             result.outputs.set(**outputs)
 
     def _load_results(self, cwd):
+        # backward compatibility fix
+        oldresultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        if os.path.exists(oldresultsfile):
+            result = cPickle.load(gzip.open(oldresultsfile, 'rb'))
+            if result.outputs:
+                try:
+                    outputs = result.outputs.get()
+                except TypeError:
+                    outputs = result.outputs.dictcopy() # outputs was a bunch
+                try:
+                    result.outputs.set(**modify_paths(outputs,
+                                                      relative=False,
+                                                      basedir=cwd))
+                except FileNotFoundError:
+                    logger.debug((
+                    "Conversion to full path results in non existent file"))
+                else:
+                    self._save_results(result, cwd)
+            logger.info('Removing old results file: %s' % oldresultsfile)
+            os.remove(oldresultsfile)
         resultsoutputfile = os.path.join(cwd, 'result_outputs_%s.pklz' % self.name)
         aggregate = True
         result = None

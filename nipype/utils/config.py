@@ -26,6 +26,7 @@ log_rotate = 4
 plugin = Linear
 stop_on_first_crash = false
 stop_on_first_rerun = false
+keep_inputs = false
 hash_method = timestamp
 single_thread_matlab = true
 remove_node_directories = false
@@ -34,7 +35,30 @@ use_relative_paths = false
 matplotlib_backend = Agg
 """%(homedir))
 
-config = ConfigParser.ConfigParser()
+class NipypeConfig(ConfigParser.ConfigParser):
+    """Base nipype config class
+    """
+
+    def enable_debug_mode(self):
+        """Enables debug configuration
+        """
+        config.set('execution', 'stop_on_first_crash', 'true')
+        config.set('execution', 'remove_unnecessary_outputs', 'false')
+        config.set('logging', 'workflow_level', 'DEBUG')
+        config.set('logging', 'interface_level', 'DEBUG')
+
+    def set_log_dir(self, log_dir):
+        """Sets logging directory
+
+        This should be the first thing that is done before any nipype class
+        with logging is imported.
+        """
+        config.set('logging', 'log_directory', log_dir)
+
+"""
+Initialize the config object in module load
+"""
+
+config = NipypeConfig()
 config.readfp(default_cfg)
 config.read([os.path.expanduser('~/.nipype.cfg'), 'nipype.cfg'])
-
