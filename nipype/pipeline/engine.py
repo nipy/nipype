@@ -1188,6 +1188,26 @@ class Node(WorkflowBase):
             result.outputs.set(**outputs)
 
     def _load_results(self, cwd):
+        # backward compatibility fix
+        oldresultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        if os.path.exists(oldresultsfile):
+            result = cPickle.load(gzip.open(oldresultsfile, 'rb'))
+            if result.outputs:
+                try:
+                    outputs = result.outputs.get()
+                except TypeError:
+                    outputs = result.outputs.dictcopy() # outputs was a bunch
+                try:
+                    result.outputs.set(**modify_paths(outputs,
+                                                      relative=False,
+                                                      basedir=cwd))
+                except FileNotFoundError:
+                    logger.debug((
+                    "Conversion to full path results in non existent file"))
+                else:
+                    self._save_results(result, cwd)
+            logger.info('Removing old results file: %s' % oldresultsfile)
+            os.remove(oldresultsfile)
         resultsoutputfile = os.path.join(cwd, 'result_outputs_%s.pklz' % self.name)
         aggregate = True
         result = None
