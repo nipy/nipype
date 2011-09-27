@@ -26,6 +26,7 @@ log_rotate = 4
 plugin = Linear
 stop_on_first_crash = false
 stop_on_first_rerun = false
+keep_inputs = false
 hash_method = timestamp
 single_thread_matlab = true
 remove_node_directories = false
