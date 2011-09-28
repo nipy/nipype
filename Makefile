@@ -32,6 +32,8 @@ upload_to_pypi: zipdoc
 
 trailing-spaces:
 	find . -name "*.py" | xargs perl -pi -e 's/[ \t]*$$//'
+	@echo "Reverting test_docparse"
+	git co nipype/utils/tests/test_docparse.py
 
 clean-pyc:
 	find . -name "*.pyc" | xargs rm -f
@@ -64,4 +66,15 @@ test-coverage:
 	--cover-package=nipype nipype
 
 test: clean test-code
+
+html:
+	@echo "building docs"
+	make -C doc clean html
+
+check-before-commit: trailing-spaces html test
+	@echo "removed spaces"
+	@echo "built docs"
+	@echo "ran test"
+
+
 

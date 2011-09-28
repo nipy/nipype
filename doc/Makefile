@@ -40,9 +40,8 @@ api:
 	python ../tools/build_interface_docs.py
 	@echo "Build API docs finished."
 
-html: examples2rst api htmlonly
+html: clean examples2rst api htmlonly
 	@echo "Build HTML and API finished."
-	stty sane
 
 examples2rst:
 	mkdir -p users/examples
