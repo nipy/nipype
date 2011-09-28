@@ -84,7 +84,11 @@ class PluginBase(object):
     """Base class for plugins"""
 
     def __init__(self, plugin_args=None):
-        pass
+        if plugin_args and 'status_callback' in plugin_args:
+            self._status_callback = plugin_args['status_callback']
+        else:
+            self._status_callback = None
+        return
 
     def run(self, graph, config):
         raise NotImplementedError
@@ -107,6 +111,7 @@ class DistributedPluginBase(PluginBase):
         depidx: a boolean matrix (NxN) storing the dependency structure accross
             processes. Process dependencies are derived from each column.
         """
+        super(DistributedPluginBase, self).__init__(plugin_args=plugin_args)
         self.procs = None
         self.depidx = None
         self.refidx = None
@@ -173,6 +178,8 @@ class DistributedPluginBase(PluginBase):
             raise RuntimeError(result)
         crashfile = self._report_crash(self.procs[jobid],
                                        result=result)
+        if self._status_callback:
+            self._status_callback(self.procs[jobid], 'exception')
         if jobid in self.mapnodesubids:
             # remove current jobid
             self.proc_pending[jobid] = False
@@ -230,6 +237,8 @@ class DistributedPluginBase(PluginBase):
                     _, hashvalue = self.procs[jobid]._get_hashval()
                     logger.info('Executing: %s ID: %d H:%s' % \
                                     (self.procs[jobid]._id, jobid, hashvalue))
+                    if self._status_callback:
+                        self._status_callback(self.procs[jobid], 'start')
                     tid = self._submit_job(deepcopy(self.procs[jobid]),
                                            updatehash=updatehash)
                     if tid is None:
@@ -247,6 +256,8 @@ class DistributedPluginBase(PluginBase):
         """
         logger.info('[Job finished] jobname: %s jobid: %d' % \
                     (self.procs[jobid]._id, jobid))
+        if self._status_callback:
+            self._status_callback(self.procs[jobid], 'end')
         # Update job and worker queues
         self.proc_pending[jobid] = False
         # update the job dependency structure
@@ -295,6 +306,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
     """
 
     def __init__(self, template, plugin_args=None):
+        super(SGELikeBatchManagerBase, self).__init__(plugin_args=plugin_args)
         self._template = template
         self._qsub_args = None
         if plugin_args:
