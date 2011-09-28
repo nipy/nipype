@@ -325,4 +325,11 @@ def test_workflow_add():
     yield assert_raises, IOError, w1.add_nodes, [n3]
     yield assert_raises, IOError, w1.connect, [(w1,n2,[('n1.a','d')])]
 
- 
+
+def test_node_get_output():
+    mod1 = pe.Node(interface=TestInterface(),name='mod1')
+    mod1.inputs.input1 = 1
+    mod1.run()
+    yield assert_equal, mod1.get_output('output1'), [1, 1]
+    mod1._result = None
+    yield assert_equal, mod1.get_output('output1'), [1, 1]

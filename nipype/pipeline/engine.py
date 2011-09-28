@@ -52,8 +52,7 @@ class WorkflowBase(object):
     """ Define common attributes and functions for workflows and nodes
     """
 
-    def __init__(self, name=None, base_dir=None,
-                 overwrite=False, **kwargs):
+    def __init__(self, name=None, base_dir=None, **kwargs):
         """ Initialize base parameters of a workflow or node
 
         Parameters
@@ -62,16 +61,11 @@ class WorkflowBase(object):
         base_dir : directory
             base output directory (will be hashed before creations)
             default=None, which results in the use of mkdtemp
-        overwrite : Boolean
-            Whether to overwrite contents of output directory if it already
-            exists. If directory exists and hash matches it
-            assumes that process has been executed (default : False)
         name : string (mandatory)
             Name of this node. Name must be alphanumeric and not contain any
             special characters (e.g., '.', '@').
         """
         self.base_dir = base_dir
-        self.overwrite = overwrite
         self.config = deepcopy(config._sections)
         if name is None:
             raise Exception("init requires a name for this %s" % self.__class__.__name__)
@@ -925,6 +919,10 @@ class Node(WorkflowBase):
         of tuples
         node.iterables = ('frac',[0.5,0.6,0.7])
         node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
+    overwrite : Boolean
+        Whether to overwrite contents of output directory if it already
+        exists. If directory exists and hash matches it
+        assumes that process has been executed (default : False)
 
     Notes
     -----
@@ -943,7 +941,7 @@ class Node(WorkflowBase):
     >>> realign.run() # doctest: +SKIP
 
     """
-    def __init__(self, interface, iterables=None, **kwargs):
+    def __init__(self, interface, iterables=None, overwrite=False, **kwargs):
         # interface can only be set at initialization
         super(Node, self).__init__(**kwargs)
         if interface is None:
@@ -953,6 +951,7 @@ class Node(WorkflowBase):
         self._interface  = interface
         self._result     = None
         self.iterables  = iterables
+        self.overwrite = overwrite
         self.parameterization = None
         self.input_source = {}
         self.needed_outputs = []
@@ -996,6 +995,11 @@ class Node(WorkflowBase):
         val = None
         if self._result:
             val = getattr(self._result.outputs, parameter)
+        else:
+            cwd = self.output_dir()
+            result, aggregate, attribute_error = self._load_resultfile(cwd)
+            if result and result.outputs:
+                val = getattr(result.outputs, parameter)
         return val
 
     def help(self):
@@ -1187,29 +1191,25 @@ class Node(WorkflowBase):
         if result.outputs:
             result.outputs.set(**outputs)
 
-    def _load_results(self, cwd):
-        # backward compatibility fix
-        oldresultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
-        if os.path.exists(oldresultsfile):
-            result = cPickle.load(gzip.open(oldresultsfile, 'rb'))
-            if result.outputs:
-                try:
-                    outputs = result.outputs.get()
-                except TypeError:
-                    outputs = result.outputs.dictcopy() # outputs was a bunch
-                try:
-                    result.outputs.set(**modify_paths(outputs,
-                                                      relative=False,
-                                                      basedir=cwd))
-                except FileNotFoundError:
-                    logger.debug((
-                    "Conversion to full path results in non existent file"))
-                else:
-                    self._save_results(result, cwd)
-            logger.info('Removing old results file: %s' % oldresultsfile)
-            os.remove(oldresultsfile)
-        resultsoutputfile = os.path.join(cwd, 'result_outputs_%s.pklz' % self.name)
+    def _load_resultfile(self, cwd):
+        """Load results if it exists in cwd
+
+        Parameter
+        ---------
+
+        cwd : working directory of node
+
+        Returns
+        -------
+
+        result : InterfaceResult structure
+        aggregate : boolean indicating whether node should aggregate_outputs
+        attribute error : boolean indicating whether there was some mismatch in
+            versions of traits used to store result and hence node needs to
+            rerun
+        """
         aggregate = True
+        resultsoutputfile = os.path.join(cwd, 'result_outputs_%s.pklz' % self.name)
         result = None
         attribute_error = False
         if os.path.exists(resultsoutputfile):
@@ -1241,6 +1241,30 @@ class Node(WorkflowBase):
                         aggregate = False
             pkl_file.close()
         logger.debug('Aggregate: %s', aggregate)
+        return result, aggregate, attribute_error
+
+    def _load_results(self, cwd):
+        # backward compatibility fix
+        oldresultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        if os.path.exists(oldresultsfile):
+            result = cPickle.load(gzip.open(oldresultsfile, 'rb'))
+            if result.outputs:
+                try:
+                    outputs = result.outputs.get()
+                except TypeError:
+                    outputs = result.outputs.dictcopy() # outputs was a bunch
+                try:
+                    result.outputs.set(**modify_paths(outputs,
+                                                      relative=False,
+                                                      basedir=cwd))
+                except FileNotFoundError:
+                    logger.debug((
+                    "Conversion to full path results in non existent file"))
+                else:
+                    self._save_results(result, cwd)
+            logger.info('Removing old results file: %s' % oldresultsfile)
+            os.remove(oldresultsfile)
+        result, aggregate, attribute_error = self._load_resultfile(cwd)
         # try aggregating first
         if aggregate:
             logger.debug('aggregating results')
