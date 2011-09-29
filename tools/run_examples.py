@@ -5,10 +5,12 @@ from shutil import rmtree
 
 def run_examples(example, pipelines, plugin):
     print 'running example: %s with plugin: %s'%(example, plugin)
+    from nipype.utils.config import config
+    config.enable_debug_mode()
     __import__(example)
     for pipeline in pipelines:
         wf = getattr(sys.modules[example], pipeline)
-        wf.base_dir = os.path.join(os.getcwd(),example, plugin)
+        wf.base_dir = os.path.join(os.getcwd(), 'output', example, plugin)
         if os.path.exists(wf.base_dir):
             rmtree(wf.base_dir)
         wf.config = {'execution' :{'hash_method': 'timestamp', 'stop_on_first_rerun': 'true'}}
@@ -23,7 +25,7 @@ if __name__ == '__main__':
                 'spm_tutorial2':['level1','l2pipeline'],
                 'spm_dartel_tutorial':['level1','l2pipeline'],
                 'fsl_feeds_tutorial':['l1pipeline']}
-    plugins = ['Linear', 'MultiProc', 'IPython']
+    plugins = ['Linear', 'MultiProc', 'IPythonXI']
     for plugin in plugins:
         for example, pipelines in examples.items():
             run_examples(example, pipelines, plugin)
