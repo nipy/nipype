@@ -1144,6 +1144,7 @@ class Node(WorkflowBase):
             outdir = make_output_dir(outdir)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             self.write_report(report_type='preexec', cwd=outdir)
+            savepkl(os.path.join(outdir, '_node.pklz'), self)
             savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
             try:
                 self._run_interface()
@@ -1156,6 +1157,9 @@ class Node(WorkflowBase):
             if not os.path.exists(os.path.join(outdir, '_inputs.pklz')):
                 logger.debug('%s: creating inputs file'%self.name)
                 savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
+            if not os.path.exists(os.path.join(outdir, '_node.pklz')):
+                logger.debug('%s: creating node file'%self.name)
+                savepkl(os.path.join(outdir, '_node.pklz'), self)
             logger.debug("Hashfile exists. Skipping execution")
             self._run_interface(execute=False, updatehash=updatehash)
         logger.debug('Finished running %s in dir: %s\n'%(self._id,outdir))
