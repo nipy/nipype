@@ -302,7 +302,10 @@ def pickFieldFlow(dartel_flow_fields, subject_id):
 
     raise Exception
 
-pick_flow = pe.Node(util.Function(input_names=['dartel_flow_fields', 'subject_id'], output_names=['dartel_flow_field'], function = pickFieldFlow),
+pick_flow = pe.Node(util.Function(input_names=['dartel_flow_fields',
+                                               'subject_id'],
+                                  output_names=['dartel_flow_field'],
+                                  function = pickFieldFlow),
                     name = "pick_flow")
 
 """
