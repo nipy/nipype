@@ -1,7 +1,6 @@
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
+from nipype.interfaces.base import CommandLineInputSpec, CommandLine
 from nipype.utils.filemanip import split_filename
-from nipype.utils.misc import isdefined
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, File, TraitedSpec, Directory, InputMultiPath, OutputMultiPath
+from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, File, TraitedSpec, Directory, InputMultiPath, OutputMultiPath, isdefined
 import os, os.path as op
 import numpy as np
 import nibabel as nb

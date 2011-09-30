@@ -441,7 +441,6 @@ class NIfTIDT2Camino(CommandLine):
             _, filename , _ = split_filename(self.inputs.in_file)
         return filename
 
-<<<<<<< HEAD
 class MRTrixSphericalHarmonics2CaminoInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s',
                     mandatory=True, position=-2, desc='4d image file')
@@ -483,7 +482,7 @@ class MRTrixSphericalHarmonics2Camino(StdOutCommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['caminoSHcoef'] = os.path.abspath(self._gen_outfilename())
-=======
+
 class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='Tensor-fitted data filename') # Took out < %s from argstr
@@ -599,13 +598,9 @@ class AnalyzeHeader(StdOutCommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['header'] = os.path.abspath(self._gen_outfilename())
->>>>>>> upstream/master
         return outputs
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
-<<<<<<< HEAD
-        return name + '.B'+ self.inputs.output_type
-=======
         return name + ".hdr"
->>>>>>> upstream/master
+

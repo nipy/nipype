@@ -1,6 +1,5 @@
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File, InputMultiPath
+from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File, InputMultiPath, isdefined
 from nipype.utils.filemanip import split_filename
-from nipype.utils.misc import isdefined
 import os, os.path as op
 
 class MRConvertInputSpec(CommandLineInputSpec):

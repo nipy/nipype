@@ -1,5 +1,6 @@
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, File, TraitedSpec, Directory
-import re
+from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
+                                    File, TraitedSpec, Directory, InputMultiPath,
+                                    OutputMultiPath, isdefined)
 from glob import glob
 from nibabel import load
 from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
@@ -11,7 +12,6 @@ from time import time
 import numpy as np
 import nibabel as nb
 import networkx as nx
-from nipype.utils.misc import isdefined
 import sys
 import shutil
 import subprocess

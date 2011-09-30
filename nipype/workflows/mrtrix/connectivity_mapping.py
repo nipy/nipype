@@ -14,8 +14,8 @@ import nibabel as nb
 import os                                    # system functions
 import cmp                                    # connectome mapper
 from nipype.workflows.camino.connectivity_mapping import (get_vox_dims, get_data_dims,
- get_affine, select_aparc, select_aparc_annot)
-
+ get_affine, select_aparc, select_aparc_annot, get_first_image)
+ 
 def create_connectivity_pipeline(name="connectivity"):
     """Creates a pipeline that does the same connectivity processing as in the
     connectivity_tutorial example script. Given a subject id (and completed Freesurfer reconstruction)
@@ -146,6 +146,7 @@ def create_connectivity_pipeline(name="connectivity"):
     erode2 = pe.Node(interface=mrtrix.Erode(),name='erode2')
     threshold1 = pe.Node(interface=mrtrix.Threshold(),name='threshold1')
     threshold2 = pe.Node(interface=mrtrix.Threshold(),name='threshold2')
+    threshold2.inputs.absolute_threshold_value = 0.7
     threshold3 = pe.Node(interface=mrtrix.Threshold(),name='threshold3')
     threshold3.inputs.absolute_threshold_value = 0.4
 
@@ -208,12 +209,14 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     CFFConverter = pe.Node(interface=cmtk.CFFConverter(), name="CFFConverter")
+    NxStatsCFFConverter = pe.Node(interface=cmtk.CFFConverter(), name="NxStatsCFFConverter")
+
 
     giftiSurfaces = pe.Node(interface=util.Merge(8), name="GiftiSurfaces")
     giftiLabels = pe.Node(interface=util.Merge(2), name="GiftiLabels")
     niftiVolumes = pe.Node(interface=util.Merge(3), name="NiftiVolumes")
     fiberDataArrays = pe.Node(interface=util.Merge(4), name="FiberDataArrays")
-    gpickledNetworks = pe.Node(interface=util.Merge(4), name="NetworkFiles")
+    gpickledNetworks = pe.Node(interface=util.Merge(2), name="NetworkFiles")
 
     """
     Since we have now created all our nodes, we can define our workflow and start making connections.
@@ -332,11 +335,11 @@ def create_connectivity_pipeline(name="connectivity"):
     convertxfm.inputs.invert_xfm = True
     
     inverse = pe.Node(interface=fsl.FLIRT(), name = 'inverse')
-    #inverse.inputs.interp = ('nearestneighbour')
+    inverse.inputs.interp = ('nearestneighbour')
     inverse.inputs.apply_xfm = True
     
     inverse_AparcAseg = pe.Node(interface=fsl.FLIRT(), name = 'inverse_AparcAseg')
-    #inverse_AparcAseg.inputs.interp = ('nearestneighbour')
+    inverse_AparcAseg.inputs.interp = ('nearestneighbour')
     inverse_AparcAseg.inputs.apply_xfm = True
     
     mapping.connect([(inputnode1, coregister,[('dwi','in_file')])])
@@ -347,7 +350,12 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(convertxfm, inverse,[('out_file','in_matrix_file')])])
     mapping.connect([(mri_convert_Brain, inverse,[('out_file','in_file')])])
 
-    mapping.connect([(inputnode1, inverse_AparcAseg,[('dwi','reference')])])
+    resampleb0 = pe.Node(interface=fs.MRIConvert(), name='resampleb0')
+    resampleb0.inputs.out_type = 'nii'
+    resampleb0.inputs.vox_size = (1, 1, 1)
+
+    mapping.connect([(inputnode1, resampleb0,[(('dwi', get_first_image), 'in_file')])])
+    mapping.connect([(resampleb0, inverse_AparcAseg,[('out_file','reference')])])
     mapping.connect([(convertxfm, inverse_AparcAseg,[('out_file','in_matrix_file')])])
     mapping.connect([(parcellate, inverse_AparcAseg,[('roi_file','in_file')])])
     
@@ -397,7 +405,7 @@ def create_connectivity_pipeline(name="connectivity"):
 
     mapping.connect([(mris_convertLHlabels, giftiLabels,[("converted","in1")])])
     mapping.connect([(mris_convertRHlabels, giftiLabels,[("converted","in2")])])
-
+    
     #mapping.connect([(ApplyVolTransform_AparcAseg, niftiVolumes,[("transformed_file","in1")])])
     mapping.connect([(inputnode1, niftiVolumes,[("dwi","in2")])])
     mapping.connect([(mri_convert_Brain, niftiVolumes,[("out_file","in3")])])
@@ -409,8 +417,6 @@ def create_connectivity_pipeline(name="connectivity"):
     
     mapping.connect([(creatematrix, ntwkMetrics,[("matrix_file","in_file")])])
     mapping.connect([(creatematrix, gpickledNetworks,[("matrix_file","in1")])])
-    mapping.connect([(ntwkMetrics, gpickledNetworks,[("gpickled_network_files","in2")])])
-
 
     """
     This block actually connects the merged lists to the CFF converter. We pass the surfaces
@@ -423,23 +429,38 @@ def create_connectivity_pipeline(name="connectivity"):
     CFFConverter.inputs.script_files = os.path.abspath(inspect.getfile(inspect.currentframe()))
     mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
     mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
-    mapping.connect([(gpickledNetworks, CFFConverter,[("out","gpickled_networks")])])
+    mapping.connect([(creatematrix, CFFConverter,[("matrix_file","gpickled_networks")])])    
     mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
     mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
     mapping.connect([(inputnode1, CFFConverter,[("subject_id","title")])])
+
+    mapping.connect([(ntwkMetrics, gpickledNetworks,[("gpickled_network_files","in2")])])
+    NxStatsCFFConverter.inputs.script_files = os.path.abspath(inspect.getfile(inspect.currentframe()))
+    mapping.connect([(giftiSurfaces, NxStatsCFFConverter,[("out","gifti_surfaces")])])
+    mapping.connect([(giftiLabels, NxStatsCFFConverter,[("out","gifti_labels")])])
+    mapping.connect([(gpickledNetworks, NxStatsCFFConverter,[("out","gpickled_networks")])])    
+    mapping.connect([(niftiVolumes, NxStatsCFFConverter,[("out","nifti_volumes")])])
+    mapping.connect([(fiberDataArrays, NxStatsCFFConverter,[("out","data_files")])])
+    mapping.connect([(inputnode1, NxStatsCFFConverter,[("subject_id","title")])])
 
     """
     Finally, we create another higher-level workflow to connect our mapping workflow with the info and datagrabbing nodes
     declared at the beginning. Our tutorial can is now extensible to any arbitrary number of subjects by simply adding
     their names to the subject list and their data to the proper folders.
     """
-
+    #fsl2mrtrix.overwrite = True
+    #ntwkMetrics.overwrite = True
+    #tck2trk.overwrite = True
+    #inverse_AparcAseg.overwrite = True
+    #creatematrix.overwrite = True
+    #CFFConverter.overwrite = True
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["subject_id", "dwi", "bvecs", "bvals", "subjects_dir"]), name="inputnode")
 
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["fa",
                                                                 "struct",
                                                                 "tracts",
                                                                 "connectome",
+                                                                "nxstatscff",
                                                                 "cmatrix",
                                                                 "gpickled_network",
                                                                 "rois",
@@ -461,6 +482,7 @@ def create_connectivity_pipeline(name="connectivity"):
 
     connectivity.connect([(mapping, outputnode, [("tck2trk.out_file", "tracts"),
         ("CFFConverter.connectome_file", "connectome"),
+        ("NxStatsCFFConverter.connectome_file", "nxstatscff"),
         ("CreateMatrix.matrix_mat_file", "cmatrix"),
         ("CreateMatrix.mean_fiber_length_matrix_mat_file", "mean_fiber_length"),
         ("CreateMatrix.fiber_length_std_matrix_mat_file", "fiber_length_std"),

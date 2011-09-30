@@ -8,7 +8,6 @@ import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.cmtk as cmtk
 from nipype.workflows.camino.connectivity_mapping import create_connectivity_pipeline
 import nipype.algorithms.misc as misc
-from nipype.utils.misc import isdefined
 import inspect
 import nibabel as nb
 import os, os.path as op                      # system functions
@@ -287,7 +286,8 @@ def create_group_cff_pipeline_part4(group_list, data_dir, subjects_dir, output_d
     l4pipeline.connect([(fibdev_bctstats, merge_gexfs, [('out_gexf_group2avg', 'in6')])])
     
     l4pipeline.connect([(merge_gexfs, l4datasink, [('out', '@l4output.gexf')])])
-"""
+
+    
     l4pipeline.connect([(l4inputnode,nxstats,[('networks_grp1','in_group1')])])
     l4pipeline.connect([(l4inputnode,nxstats,[('networks_grp2','in_group2')])])
     l4pipeline.connect([(l4infosource,nxstats,[('group_id1','group_id1')])])
@@ -297,4 +297,5 @@ def create_group_cff_pipeline_part4(group_list, data_dir, subjects_dir, output_d
     l4pipeline.connect([(nxstats, l4datasink, [('out_gexf_network_files', '@l4output.gexf')])])
     l4pipeline.connect([(nxstats, l4datasink, [('stats_file', '@l4output.nxstats.mat')])])
     l4pipeline.connect([(nxstatscff, l4datasink, [('connectome_file', '@l4output.nxstats')])])
+    """
     return l4pipeline

@@ -1,14 +1,14 @@
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, File, TraitedSpec, Directory, InputMultiPath, OutputMultiPath
+from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
+                                    File, TraitedSpec, Directory, InputMultiPath,
+                                    OutputMultiPath, isdefined)
 import re
 from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile, list_to_filename
 import os, os.path as op
 import numpy as np
 import nibabel as nb
 import networkx as nx
-from nipype.utils.misc import isdefined
 import sys
 import scipy.io as sio
-#from cviewer.libs.pyconto.bct import measures as bct
 from itertools import combinations as combo
 import itertools as it
 import random

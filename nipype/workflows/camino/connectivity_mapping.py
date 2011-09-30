@@ -48,6 +48,14 @@ def select_aparc_annot(list_of_files):
             idx = list_of_files.index(in_file)
     return list_of_files[idx]
 
+def get_first_image(volume):
+    import nibabel as nb
+    a = nb.load(volume)
+    b = nb.four_to_three(a)
+    name = 'b0.nii'
+    nb.save(b[0], name)
+    return name
+
 def create_connectivity_pipeline(name="connectivity"):
     """Creates a pipeline that does the same connectivity processing as in the
     connectivity_tutorial example script. Given a subject id (and completed Freesurfer reconstruction)

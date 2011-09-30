@@ -9,7 +9,6 @@ import nipype.interfaces.cmtk as cmtk
 import nipype.interfaces.mrtrix as mrtrix
 from nipype.workflows.mrtrix.connectivity_mapping import create_connectivity_pipeline
 import nipype.algorithms.misc as misc
-from nipype.utils.misc import isdefined
 import inspect
 import nibabel as nb
 import os, os.path as op

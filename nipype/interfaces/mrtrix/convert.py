@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-  
 import nipype
 from nipype.interfaces.matlab import MatlabCommand
-from nipype.interfaces.base import TraitedSpec, BaseInterface, BaseInterfaceInputSpec, File
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
+from nipype.interfaces.base import TraitedSpec, BaseInterface, BaseInterfaceInputSpec, File, isdefined
+from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits
 from nipype.utils.filemanip import split_filename
-from nipype.utils.misc import isdefined
 import os, os.path as op
 from string import Template
 import nibabel as nb
