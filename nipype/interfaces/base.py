@@ -253,12 +253,14 @@ class InterfaceResult(object):
     """
 
     def __init__(self, interface, runtime, inputs=None, outputs=None):
-        self._version = 1.0
         self.interface = interface
         self.runtime = runtime
         self.inputs = inputs
         self.outputs = outputs
-
+    
+    @property
+    def version():
+        return 1.0
 
 class BaseTraitedSpec(traits.HasTraits):
     """Provide a few methods necessary to support nipype interface api
