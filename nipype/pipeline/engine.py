@@ -52,8 +52,7 @@ class WorkflowBase(object):
     """ Define common attributes and functions for workflows and nodes
     """
 
-    def __init__(self, name=None, base_dir=None,
-                 overwrite=False, **kwargs):
+    def __init__(self, name=None, base_dir=None, **kwargs):
         """ Initialize base parameters of a workflow or node
 
         Parameters
@@ -62,16 +61,11 @@ class WorkflowBase(object):
         base_dir : directory
             base output directory (will be hashed before creations)
             default=None, which results in the use of mkdtemp
-        overwrite : Boolean
-            Whether to overwrite contents of output directory if it already
-            exists. If directory exists and hash matches it
-            assumes that process has been executed (default : False)
         name : string (mandatory)
             Name of this node. Name must be alphanumeric and not contain any
             special characters (e.g., '.', '@').
         """
         self.base_dir = base_dir
-        self.overwrite = overwrite
         self.config = deepcopy(config._sections)
         if name is None:
             raise Exception("init requires a name for this %s" % self.__class__.__name__)
@@ -230,22 +224,27 @@ class Workflow(WorkflowBase):
                 if node._hierarchy is None:
                     node._hierarchy = self.name
         not_found = []
+        connected_ports = {}
         for srcnode, destnode, connects in connection_list:
-            connected_ports = []
+            if destnode not in connected_ports:
+                connected_ports[destnode] = []
             # check to see which ports of destnode are already
             # connected.
             if not disconnect and (destnode in self._graph.nodes()):
                 for edge in self._graph.in_edges_iter(destnode):
                     data = self._graph.get_edge_data(*edge)
                     for sourceinfo, destname in data['connect']:
-                        connected_ports += [destname]
+                        if destname not in connected_ports[destnode]:
+                            connected_ports[destnode] += [destname]
             for source, dest in connects:
                 # Currently datasource/sink/grabber.io modules
                 # determine their inputs/outputs depending on
                 # connection settings.  Skip these modules in the check
-                if dest in connected_ports:
-                    raise Exception('Input %s of node %s is already ' \
-                                        'connected'%(dest,destnode))
+                if dest in connected_ports[destnode]:
+                    raise Exception("""
+Trying to connect %s:%s to %s:%s but input '%s' of node '%s' is already
+connected.
+"""%(srcnode, source, destnode, dest, dest, destnode))
                 if not (hasattr(destnode, '_interface') and '.io' in str(destnode._interface.__class__)):
                     if not destnode._check_inputs(dest):
                         not_found.append(['in', destnode.name, dest])
@@ -262,6 +261,7 @@ class Workflow(WorkflowBase):
                                         srcnode.name)
                     if sourcename and not srcnode._check_outputs(sourcename):
                         not_found.append(['out', srcnode.name, sourcename])
+                connected_ports[destnode] += [dest]
         infostr = []
         for info in not_found:
             infostr += ["Module %s has no %sput called %s\n"%(info[1], info[0],
@@ -573,7 +573,7 @@ window.onload=beginrefresh
         nodes = nx.topological_sort(graph)
         report_files = []
         for i, node in enumerate(nodes):
-            report_files.append('result_files[%d] = "%s/result_%s.pklz";'%(i, os.path.realpath(node.output_dir()), node.name))
+            report_files.append('result_files[%d] = "%s/result_outputs_%s.pklz";'%(i, os.path.realpath(node.output_dir()), node.name))
             report_files.append('report_files[%d] = "%s/_report/report.rst";'%(i, os.path.realpath(node.output_dir())))
         report_files = '\n'.join(report_files)
         fp.writelines(script%(len(nodes), len(nodes), report_files, len(nodes)))
@@ -625,7 +625,7 @@ window.onload=beginrefresh
                 data = graph.get_edge_data(*edge)
                 for sourceinfo, field in sorted(data['connect']):
                     node.input_source[field] = (os.path.join(edge[0].output_dir(),
-                                                             'result_%s.pklz'%edge[0].name),
+                                                             'result_outputs_%s.pklz'%edge[0].name),
                                                 sourceinfo)
 
     def _check_nodes(self, nodes):
@@ -919,6 +919,10 @@ class Node(WorkflowBase):
         of tuples
         node.iterables = ('frac',[0.5,0.6,0.7])
         node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
+    overwrite : Boolean
+        Whether to overwrite contents of output directory if it already
+        exists. If directory exists and hash matches it
+        assumes that process has been executed (default : False)
 
     Notes
     -----
@@ -937,7 +941,7 @@ class Node(WorkflowBase):
     >>> realign.run() # doctest: +SKIP
 
     """
-    def __init__(self, interface, iterables=None, **kwargs):
+    def __init__(self, interface, iterables=None, overwrite=False, **kwargs):
         # interface can only be set at initialization
         super(Node, self).__init__(**kwargs)
         if interface is None:
@@ -947,6 +951,7 @@ class Node(WorkflowBase):
         self._interface  = interface
         self._result     = None
         self.iterables  = iterables
+        self.overwrite = overwrite
         self.parameterization = None
         self.input_source = {}
         self.needed_outputs = []
@@ -990,6 +995,11 @@ class Node(WorkflowBase):
         val = None
         if self._result:
             val = getattr(self._result.outputs, parameter)
+        else:
+            cwd = self.output_dir()
+            result, aggregate, attribute_error = self._load_resultfile(cwd)
+            if result and result.outputs:
+                val = getattr(result.outputs, parameter)
         return val
 
     def help(self):
@@ -1035,10 +1045,13 @@ class Node(WorkflowBase):
         """
         logger.debug('Setting node inputs')
         for key, info in self.input_source.items():
-            logger.debug('input: %s'%key)
+            logger.debug('input: %s' % key)
             results_file = info[0]
-            logger.debug('results file: %s'%results_file)
-            results = loadpkl(results_file)
+            logger.debug('results file: %s' % results_file)
+            result_outputs = loadpkl(results_file)
+            results = InterfaceResult(interface=None,
+                                     runtime=None,
+                                     outputs=result_outputs)
             output_value = Undefined
             if isinstance(info[1], tuple):
                 output_name = info[1][0]
@@ -1053,15 +1066,15 @@ class Node(WorkflowBase):
                     output_value = results.outputs.get()[output_name]
                 except TypeError:
                     output_value = results.outputs.dictcopy()[output_name]
-            logger.debug('output: %s'%output_name)
+            logger.debug('output: %s' % output_name)
             try:
                 self.set_input(key, deepcopy(output_value))
             except traits.TraitError, e:
                 msg = ['Error setting node input:',
-                       'Node: %s'%self.name,
-                       'input: %s'%key,
-                       'results_file: %s'%results_file,
-                       'value: %s'%str(output_value)]
+                       'Node: %s' % self.name,
+                       'input: %s' % key,
+                       'results_file: %s' % results_file,
+                       'value: %s' % str(output_value)]
                 e.args = (e.args[0] + "\n" + '\n'.join(msg),)
                 raise
 
@@ -1157,27 +1170,55 @@ class Node(WorkflowBase):
         os.chdir(old_cwd)
 
     def _save_results(self, result, cwd):
-        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        resultsruntimefile = os.path.join(cwd, 'result_runtime_%s.pklz' % self.name)
+        resultsoutputfile = os.path.join(cwd, 'result_outputs_%s.pklz' % self.name)
+        resultsinterfacefile = os.path.join(cwd, 'result_interface_%s.pklz' % self.name)
+
         if result.outputs:
             try:
                 outputs = result.outputs.get()
             except TypeError:
                 outputs = result.outputs.dictcopy() # outputs was a bunch
             result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
-        logger.debug('saving results in %s'%resultsfile)
-        savepkl(resultsfile, result)
+
+        logger.debug('saving results runtime in %s'%resultsruntimefile)
+        savepkl(resultsruntimefile, result.runtime)
+        logger.debug('saving results output in %s'%resultsoutputfile)
+        savepkl(resultsoutputfile, result.outputs)
+        logger.debug('saving results interface in %s'%resultsinterfacefile)
+        savepkl(resultsinterfacefile, result.interface)
+
         if result.outputs:
             result.outputs.set(**outputs)
 
-    def _load_results(self, cwd):
-        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+    def _load_resultfile(self, cwd):
+        """Load results if it exists in cwd
+
+        Parameter
+        ---------
+
+        cwd : working directory of node
+
+        Returns
+        -------
+
+        result : InterfaceResult structure
+        aggregate : boolean indicating whether node should aggregate_outputs
+        attribute error : boolean indicating whether there was some mismatch in
+            versions of traits used to store result and hence node needs to
+            rerun
+        """
         aggregate = True
+        resultsoutputfile = os.path.join(cwd, 'result_outputs_%s.pklz' % self.name)
         result = None
         attribute_error = False
-        if os.path.exists(resultsfile):
-            pkl_file = gzip.open(resultsfile, 'rb')
+        if os.path.exists(resultsoutputfile):
+            pkl_file = gzip.open(resultsoutputfile, 'rb')
             try:
-                result = cPickle.load(pkl_file)
+                resultoutputs = cPickle.load(pkl_file)
+                result = InterfaceResult(interface=None,
+                                         runtime=None,
+                                         outputs=resultoutputs)
             except (traits.TraitError, AttributeError, ImportError), err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
@@ -1191,13 +1232,39 @@ class Node(WorkflowBase):
                     except TypeError:
                         outputs = result.outputs.dictcopy() # outputs was a bunch
                     try:
-                        result.outputs.set(**modify_paths(outputs, relative=False, basedir=cwd))
+                        result.outputs.set(**modify_paths(outputs,
+                                                          relative=False,
+                                                          basedir=cwd))
                     except FileNotFoundError:
                         logger.debug('conversion to full path results in non existent file')
                     else:
                         aggregate = False
             pkl_file.close()
         logger.debug('Aggregate: %s', aggregate)
+        return result, aggregate, attribute_error
+
+    def _load_results(self, cwd):
+        # backward compatibility fix
+        oldresultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        if os.path.exists(oldresultsfile):
+            result = cPickle.load(gzip.open(oldresultsfile, 'rb'))
+            if result.outputs:
+                try:
+                    outputs = result.outputs.get()
+                except TypeError:
+                    outputs = result.outputs.dictcopy() # outputs was a bunch
+                try:
+                    result.outputs.set(**modify_paths(outputs,
+                                                      relative=False,
+                                                      basedir=cwd))
+                except FileNotFoundError:
+                    logger.debug((
+                    "Conversion to full path results in non existent file"))
+                else:
+                    self._save_results(result, cwd)
+            logger.info('Removing old results file: %s' % oldresultsfile)
+            os.remove(oldresultsfile)
+        result, aggregate, attribute_error = self._load_resultfile(cwd)
         # try aggregating first
         if aggregate:
             logger.debug('aggregating results')
@@ -1579,7 +1646,7 @@ class MapNode(Node):
             first_len = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
             for iterfield in self.iterfield[1:]:
                 if first_len != len(filename_to_list(getattr(self.inputs, iterfield))):
-                    raise ValueError("All iterfields of a MapNode have to have the same length.")
+                    raise ValueError("All iterfields of a MapNode have to have the same length." + str(self.inputs))
 
         if execute:
             nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))

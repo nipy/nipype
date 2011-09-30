@@ -18,7 +18,7 @@ class IPythonPlugin(DistributedPluginBase):
     """
 
     def __init__(self, plugin_args=None):
-        super(IPythonPlugin, self).__init__()
+        super(IPythonPlugin, self).__init__(plugin_args=plugin_args)
         self.ipyclient = None
         self.taskclient = None
 

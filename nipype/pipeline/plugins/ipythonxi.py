@@ -30,7 +30,7 @@ class IPythonXIPlugin(DistributedPluginBase):
     """
 
     def __init__(self, plugin_args=None):
-        super(IPythonXIPlugin, self).__init__()
+        super(IPythonXIPlugin, self).__init__(plugin_args=plugin_args)
         self.iparallel = None
         self.taskclient = None
         self.taskmap = {}
