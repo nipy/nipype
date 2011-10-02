@@ -573,7 +573,7 @@ window.onload=beginrefresh
         nodes = nx.topological_sort(graph)
         report_files = []
         for i, node in enumerate(nodes):
-            report_files.append('result_files[%d] = "%s/result_outputs_%s.pklz";'%(i, os.path.realpath(node.output_dir()), node.name))
+            report_files.append('result_files[%d] = "%s/result_%s.pklz";'%(i, os.path.realpath(node.output_dir()), node.name))
             report_files.append('report_files[%d] = "%s/_report/report.rst";'%(i, os.path.realpath(node.output_dir())))
         report_files = '\n'.join(report_files)
         fp.writelines(script%(len(nodes), len(nodes), report_files, len(nodes)))
@@ -625,7 +625,7 @@ window.onload=beginrefresh
                 data = graph.get_edge_data(*edge)
                 for sourceinfo, field in sorted(data['connect']):
                     node.input_source[field] = (os.path.join(edge[0].output_dir(),
-                                                             'result_outputs_%s.pklz'%edge[0].name),
+                                                             'result_%s.pklz'%edge[0].name),
                                                 sourceinfo)
 
     def _check_nodes(self, nodes):
@@ -1048,10 +1048,7 @@ class Node(WorkflowBase):
             logger.debug('input: %s' % key)
             results_file = info[0]
             logger.debug('results file: %s' % results_file)
-            result_outputs = loadpkl(results_file)
-            results = InterfaceResult(interface=None,
-                                     runtime=None,
-                                     outputs=result_outputs)
+            results = loadpkl(results_file)
             output_value = Undefined
             if isinstance(info[1], tuple):
                 output_name = info[1][0]
@@ -1111,12 +1108,15 @@ class Node(WorkflowBase):
             and len(glob(os.path.join(outdir, '_0x*.json'))) != 0 \
             and len(glob(os.path.join(outdir, '_0x*_unfinished.json'))) == 0:
                 logger.debug("Rerunning node")
-                logger.debug("force_execute = %s, updatehash = %s, self.overwrite = %s, os.path.exists(%s) = %s, hash_method = ,%s,"%(str(force_execute),
-                                                                                                                  str(updatehash),
-                                                                                                                  str(self.overwrite),
-                                                                                                                  hashfile,
-                                                                                                                  str(os.path.exists(hashfile)),
-                                                                                                                  self.config['execution']['hash_method'].lower()))
+                logger.debug(("force_execute = %s, updatehash = %s, "
+                              "self.overwrite = %s, os.path.exists(%s) = %s, "
+                              "hash_method = %s") %
+                             (str(force_execute),
+                              str(updatehash),
+                              str(self.overwrite),
+                              hashfile,
+                              str(os.path.exists(hashfile)),
+                              self.config['execution']['hash_method'].lower()))
                 if config.get('logging','workflow_level') == 'DEBUG' and not os.path.exists(hashfile):
                         exp_hash_paths = glob(os.path.join(outdir, '_0x*.json'))
                         if len(exp_hash_paths) == 1:
@@ -1144,9 +1144,10 @@ class Node(WorkflowBase):
             outdir = make_output_dir(outdir)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             self.write_report(report_type='preexec', cwd=outdir)
+            savepkl(os.path.join(outdir, '_node.pklz'), self)
             savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
             try:
-                self._run_interface(execute=True)
+                self._run_interface()
             except:
                 os.remove(hashfile_unfinished)
                 raise
@@ -1156,6 +1157,9 @@ class Node(WorkflowBase):
             if not os.path.exists(os.path.join(outdir, '_inputs.pklz')):
                 logger.debug('%s: creating inputs file'%self.name)
                 savepkl(os.path.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
+            if not os.path.exists(os.path.join(outdir, '_node.pklz')):
+                logger.debug('%s: creating node file'%self.name)
+                savepkl(os.path.join(outdir, '_node.pklz'), self)
             logger.debug("Hashfile exists. Skipping execution")
             self._run_interface(execute=False, updatehash=updatehash)
         logger.debug('Finished running %s in dir: %s\n'%(self._id,outdir))
@@ -1170,10 +1174,7 @@ class Node(WorkflowBase):
         os.chdir(old_cwd)
 
     def _save_results(self, result, cwd):
-        resultsruntimefile = os.path.join(cwd, 'result_runtime_%s.pklz' % self.name)
-        resultsoutputfile = os.path.join(cwd, 'result_outputs_%s.pklz' % self.name)
-        resultsinterfacefile = os.path.join(cwd, 'result_interface_%s.pklz' % self.name)
-
+        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
         if result.outputs:
             try:
                 outputs = result.outputs.get()
@@ -1181,12 +1182,8 @@ class Node(WorkflowBase):
                 outputs = result.outputs.dictcopy() # outputs was a bunch
             result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
 
-        logger.debug('saving results runtime in %s'%resultsruntimefile)
-        savepkl(resultsruntimefile, result.runtime)
-        logger.debug('saving results output in %s'%resultsoutputfile)
-        savepkl(resultsoutputfile, result.outputs)
-        logger.debug('saving results interface in %s'%resultsinterfacefile)
-        savepkl(resultsinterfacefile, result.interface)
+        savepkl(resultsfile, result)
+        logger.debug('saved results in %s'%resultsfile)
 
         if result.outputs:
             result.outputs.set(**outputs)
@@ -1209,16 +1206,13 @@ class Node(WorkflowBase):
             rerun
         """
         aggregate = True
-        resultsoutputfile = os.path.join(cwd, 'result_outputs_%s.pklz' % self.name)
+        resultsoutputfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
         result = None
         attribute_error = False
         if os.path.exists(resultsoutputfile):
             pkl_file = gzip.open(resultsoutputfile, 'rb')
             try:
-                resultoutputs = cPickle.load(pkl_file)
-                result = InterfaceResult(interface=None,
-                                         runtime=None,
-                                         outputs=resultoutputs)
+                result = cPickle.load(pkl_file)
             except (traits.TraitError, AttributeError, ImportError), err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
@@ -1244,26 +1238,6 @@ class Node(WorkflowBase):
         return result, aggregate, attribute_error
 
     def _load_results(self, cwd):
-        # backward compatibility fix
-        oldresultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
-        if os.path.exists(oldresultsfile):
-            result = cPickle.load(gzip.open(oldresultsfile, 'rb'))
-            if result.outputs:
-                try:
-                    outputs = result.outputs.get()
-                except TypeError:
-                    outputs = result.outputs.dictcopy() # outputs was a bunch
-                try:
-                    result.outputs.set(**modify_paths(outputs,
-                                                      relative=False,
-                                                      basedir=cwd))
-                except FileNotFoundError:
-                    logger.debug((
-                    "Conversion to full path results in non existent file"))
-                else:
-                    self._save_results(result, cwd)
-            logger.info('Removing old results file: %s' % oldresultsfile)
-            os.remove(oldresultsfile)
         result, aggregate, attribute_error = self._load_resultfile(cwd)
         # try aggregating first
         if aggregate:
@@ -1275,8 +1249,9 @@ class Node(WorkflowBase):
                 self._copyfiles_to_wd(cwd, True, linksonly=True)
                 aggouts = self._interface.aggregate_outputs(needed_outputs=self.needed_outputs)
                 runtime = Bunch(cwd=cwd,returncode = 0, environ = deepcopy(os.environ.data), hostname = gethostname())
-                result = InterfaceResult(interface=None,
+                result = InterfaceResult(interface=self._interface.__class__,
                                          runtime=runtime,
+                                         inputs=self._interface.inputs.get_traitsfree(),
                                          outputs=aggouts)
                 self._save_results(result, cwd)
             else:
@@ -1293,8 +1268,9 @@ class Node(WorkflowBase):
             runtime = Bunch(returncode = 1,
                             environ = deepcopy(os.environ.data),
                             hostname = gethostname())
-            result = InterfaceResult(interface=self._interface,
+            result = InterfaceResult(interface=self._interface.__class__,
                                      runtime=runtime,
+                                     inputs=self._interface.inputs.get_traitsfree(),
                                      outputs=None)
             self._result = result
             logger.debug('Executing node')
