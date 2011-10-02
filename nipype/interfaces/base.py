@@ -230,7 +230,7 @@ class InterfaceResult(object):
 
     Attributes
     ----------
-    _version : version of this Interface result object
+    version : version of this Interface result object (a readonly property)
     interface : class type
         A copy of the `Interface` class that was run to generate this result.
     inputs :  a traits free representation of the inputs
