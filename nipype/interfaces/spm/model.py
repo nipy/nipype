@@ -441,8 +441,9 @@ class Threshold(SPMCommand):
         script += "cluster_extent_p_fdr_thr = %f;\n"% self.inputs.extent_fdr_p_threshold
         script += "stat_filename = '%s';\n"% self.inputs.stat_image
         script += "extent_threshold = %d;\n" % self.inputs.extent_threshold
+       
+        script += "load %s;\n" % self.inputs.spm_mat_file
         script +="""
-load SPM.mat
 FWHM  = SPM.xVol.FWHM;
 df = [SPM.xCon(con_index).eidf SPM.xX.erdf];
 STAT = SPM.xCon(con_index).STAT;
