@@ -580,12 +580,13 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
                             files2keep=None, dirs2keep=None):
     """Removes all files not needed for further analysis from the directory
     """
-    if not needed_outputs:
-        return outputs
+    outputs_to_keep = outputs.get().keys()
+    if needed_outputs:
+        outputs_to_keep = needed_outputs
     # build a list of needed files
     output_files = []
     outputdict = outputs.get()
-    for output in needed_outputs:
+    for output in outputs_to_keep:
         output_files.extend(walk_outputs(outputdict[output]))
     needed_files = [path for path, type in output_files if type == 'f']
     if config.getboolean('execution', 'keep_inputs'):
@@ -616,7 +617,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
     for f in files2remove:
         os.remove(f)
     for key in outputs.copyable_trait_names():
-        if key not in needed_outputs:
+        if key not in outputs_to_keep:
             setattr(outputs, key, Undefined)
     return outputs
 
