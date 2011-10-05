@@ -20,9 +20,9 @@ logging.basicConfig(stream=sys.stdout)
 logger = logging.getLogger('workflow')
 fmlogger = logging.getLogger('filemanip')
 iflogger = logging.getLogger('interface')
-hdlr = RHandler(LOG_FILENAME,
-                maxBytes=int(config.get('logging', 'log_size')),
-                backupCount=int(config.get('logging', 'log_rotate')))
+hdlr = RFHandler(LOG_FILENAME,
+                 maxBytes=int(config.get('logging', 'log_size')),
+                 backupCount=int(config.get('logging', 'log_rotate')))
 formatter = logging.Formatter(fmt=('%(asctime)s,%(msecs)d %(name)-2s '
                                    '%(levelname)-2s:\n\t %(message)s'),
                               datefmt='%y%m%d-%H:%M:%S')
