@@ -632,9 +632,9 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
                             files2keep=None, dirs2keep=None):
     """Removes all files not needed for further analysis from the directory
     """
-    outputs_to_keep = []
-    if outputs:
-        outputs_to_keep = outputs.get().keys()
+    if not outputs:
+        return
+    outputs_to_keep = outputs.get().keys()
     if needed_outputs:
         outputs_to_keep = needed_outputs
     # build a list of needed files
