@@ -615,6 +615,8 @@ window.onload=beginrefresh
                         input_name = sourceinfo
                     if input_name not in node.needed_outputs:
                         node.needed_outputs += [input_name]
+            if node.needed_outputs:
+                node.needed_outputs = sorted(node.needed_outputs)
 
     def _configure_exec_nodes(self, graph):
         """Ensure that each node knows where to get inputs from
@@ -912,6 +914,7 @@ class Node(WorkflowBase):
 
     interface : interface object
         node specific interface  (fsl.Bet(), spm.Coregister())
+
     iterables : generator
         input field and list to iterate using the pipeline engine
         for example to iterate over different frac values in fsl.Bet()
@@ -919,10 +922,17 @@ class Node(WorkflowBase):
         of tuples
         node.iterables = ('frac',[0.5,0.6,0.7])
         node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
+
     overwrite : Boolean
         Whether to overwrite contents of output directory if it already
         exists. If directory exists and hash matches it
         assumes that process has been executed (default : False)
+
+    needed_outputs : list of output_names
+        Force the node to keep only specific outputs. By default all outputs are
+        kept. Setting this attribute will delete any output files and
+        directories from the node's working directory that are not part of the
+        `needed_outputs`.
 
     Notes
     -----
@@ -941,7 +951,10 @@ class Node(WorkflowBase):
     >>> realign.run() # doctest: +SKIP
 
     """
-    def __init__(self, interface, iterables=None, overwrite=False, **kwargs):
+
+
+    def __init__(self, interface, iterables=None, overwrite=False,
+                 needed_outputs=None, **kwargs):
         # interface can only be set at initialization
         super(Node, self).__init__(**kwargs)
         if interface is None:
@@ -955,6 +968,8 @@ class Node(WorkflowBase):
         self.parameterization = None
         self.input_source = {}
         self.needed_outputs = []
+        if needed_outputs:
+            self.needed_outputs = sorted(needed_outputs)
 
     @property
     def interface(self):
