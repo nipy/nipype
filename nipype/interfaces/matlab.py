@@ -9,7 +9,7 @@ from nipype.utils.config import config
 
 class MatlabInputSpec(CommandLineInputSpec):
     """ Basic expected inputs to Matlab interface """
-    
+
     script  = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
                          mandatory=True, position=-1)
     uses_mcr = traits.Bool(desc='use MCR interface',
@@ -52,7 +52,7 @@ class MatlabCommand(CommandLine):
     _default_mfile = None
     _default_paths = None
     input_spec = MatlabInputSpec
-    
+
     def __init__(self, matlab_cmd = None, **inputs):
         """initializes interface to matlab
         (default 'matlab -nodesktop -nosplash')
@@ -62,18 +62,18 @@ class MatlabCommand(CommandLine):
             self._cmd = matlab_cmd
         elif self._default_matlab_cmd:
             self._cmd = self._default_matlab_cmd
-            
+
         if self._default_mfile and not isdefined(self.inputs.mfile):
             self.inputs.mfile = self._default_mfile
-            
+
         if self._default_paths and not isdefined(self.inputs.paths):
             self.inputs.paths = self._default_paths
-            
+
         if not isdefined(self.inputs.single_comp_thread) and \
                 not isdefined(self.inputs.uses_mcr):
             if config.getboolean('execution','single_thread_matlab'):
                 self.inputs.single_comp_thread = True
-            
+
     @classmethod
     def set_default_matlab_cmd(cls, matlab_cmd):
         """Set the default MATLAB command line for MATLAB classes.
@@ -84,7 +84,7 @@ class MatlabCommand(CommandLine):
         <instance>.inputs.matlab_cmd.
         """
         cls._default_matlab_cmd = matlab_cmd
-        
+
     @classmethod
     def set_default_mfile(cls, mfile):
         """Set the default MATLAB script file format for MATLAB classes.
@@ -95,7 +95,7 @@ class MatlabCommand(CommandLine):
         <instance>.inputs.mfile.
         """
         cls._default_mfile = mfile
-        
+
     @classmethod
     def set_default_paths(cls, paths):
         """Set the default MATLAB paths for MATLAB classes.
@@ -109,6 +109,12 @@ class MatlabCommand(CommandLine):
 
     def _run_interface(self,runtime):
         runtime = super(MatlabCommand, self)._run_interface(runtime)
+        try:
+            # Matlab can leave the terminal in a barbbled state
+            os.system('stty sane')
+        except:
+            # We might be on a system where stty doesn't exist
+            pass
         if 'MATLAB code threw an exception' in runtime.stderr:
             self.raise_exception(runtime)
         return runtime
@@ -130,7 +136,7 @@ class MatlabCommand(CommandLine):
         # prescript
         prescript = self.inputs.prescript
         postscript = self.inputs.postscript
-        
+
         #postcript takes different default value depending on the mfile argument
         if mfile:
             prescript.insert(0,"fprintf(1,'Executing %s at %s:\\n',mfilename,datestr(now));")
@@ -138,7 +144,7 @@ class MatlabCommand(CommandLine):
             prescript.insert(0,"fprintf(1,'Executing code at %s:\\n',datestr(now));")
         for path in paths:
             prescript.append("addpath('%s');\n" % path)
-            
+
         if not mfile:
             #clean up the code of comments and replace newlines with commas
             script_lines = ','.join([line for line in script_lines.split("\n") if not line.strip().startswith("%")])

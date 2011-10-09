@@ -383,7 +383,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
         inputspec.highpass : HWHM in TRs (if created with highpass=True)
 
     Outputs::
-    
+
         outputspec.reference : volume to which runs are realigned
         outputspec.motion_parameters : motion correction parameters
         outputspec.realigned_files : motion corrected files
@@ -679,7 +679,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
         featpreproc.connect(highpass, ('out_file', pickfirst), meanfunc3, 'in_file')
     else:
         featpreproc.connect(meanscale, ('out_file', pickfirst), meanfunc3, 'in_file')
-        
+
     featpreproc.connect(meanfunc3, 'out_file', outputnode, 'mean')
 
 
@@ -700,7 +700,7 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
         inputnode.in_files : functional runs (filename or list of filenames)
         inputnode.fwhm : fwhm for smoothing with SUSAN
         inputnode.mask_file : mask used for estimating SUSAN thresholds (but not for smoothing)
-        
+
     Outputs::
 
         outputnode.smoothed_files : functional runs (filename or list of filenames)
@@ -716,9 +716,9 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     >>> smooth.run() # doctest: +SKIP
 
     """
-    
-    susan_smooth = pe.Workflow(name=name)    
-    
+
+    susan_smooth = pe.Workflow(name=name)
+
     """
     Set up a node to define all inputs required for the preprocessing workflow
 
@@ -728,7 +728,7 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
                                                                  'fwhm',
                                                                  'mask_file']),
                         name='inputnode')
-    
+
     """
     Smooth each run using SUSAN with the brightness threshold set to 75%
     of the median value for each run and a mask consituting the mean
@@ -738,7 +738,7 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     smooth = pe.MapNode(interface=fsl.SUSAN(),
                         iterfield=['in_file', 'brightness_threshold','usans'],
                         name='smooth')
-    
+
     """
     Determine the median value of the functional runs using the mask
     """
@@ -754,7 +754,7 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
                             name='median')
     susan_smooth.connect(inputnode, 'in_files', median, 'in_file')
     susan_smooth.connect(inputnode, 'mask_file', median, 'mask_file')
-    
+
     """
     Mask the motion corrected functional runs with the dilated mask
     """
@@ -771,7 +771,7 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
                           name='mask')
     susan_smooth.connect(inputnode, 'in_files', mask, 'in_file')
     susan_smooth.connect(inputnode, 'mask_file', mask, 'in_file2')
-    
+
     """
     Determine the mean image from each functional run
     """
@@ -781,7 +781,7 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
                            iterfield=['in_file'],
                            name='meanfunc2')
     susan_smooth.connect(mask, 'out_file', meanfunc, 'in_file')
-    
+
     """
     Merge the median values with the mean functional images into a coupled list
     """
@@ -801,9 +801,9 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
 
     outputnode = pe.Node(interface=util.IdentityInterface(fields=['smoothed_files']),
                     name='outputnode')
-    
+
     susan_smooth.connect(smooth, 'smoothed_file', outputnode, 'smoothed_files')
-    
+
     return susan_smooth
 
 

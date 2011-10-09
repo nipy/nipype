@@ -8,7 +8,7 @@ from nipype.interfaces import matlab
 
 def grab_doc(task_name):
     """Grab the SPM documentation for the given SPM task named `task_name`
-    
+
     Parameters
     ----------
     task_name : string
@@ -20,7 +20,7 @@ def grab_doc(task_name):
     --------
     spm_flat_config.m : This function can print out all the possible
         task names.
-   
+
     """
 
     cmd = matlab.MatlabCommandLine()

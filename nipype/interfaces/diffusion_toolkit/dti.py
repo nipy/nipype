@@ -20,7 +20,7 @@ from nipype.interfaces.base import (TraitedSpec, File, traits, CommandLine,
 class DTIReconInputSpec(CommandLineInputSpec):
     DWI = File(desc='Input diffusion volume', argstr='%s',exists=True, mandatory=True,position=1)
     out_prefix = traits.Str("dti", desc='Output file prefix', argstr='%s', usedefault=True,position=2)
-    output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-ot %s', desc='output file type', usedefault=True)    
+    output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-ot %s', desc='output file type', usedefault=True)
     bvecs = File(exists=True, desc = 'b vectors file',
                 argstr='-gm %s', mandatory=True)
     bvals = File(exists=True,desc = 'b values file', mandatory=True)
@@ -38,8 +38,8 @@ class DTIReconInputSpec(CommandLineInputSpec):
     b0_threshold = traits.Float(desc="""program will use b0 image with the given threshold to mask out high
         background of fa/adc maps. by default it will calculate threshold
         automatically. but if it failed, you need to set it manually.""", argstr="-b0_th")
-    
-    
+
+
 class DTIReconOutputSpec(TraitedSpec):
     ADC = File(exists=True)
     B0 = File(exists=True)
@@ -57,12 +57,12 @@ class DTIReconOutputSpec(TraitedSpec):
 class DTIRecon(CommandLine):
     """Use dti_recon to generate tensors and other maps
     """
-    
+
     input_spec=DTIReconInputSpec
     output_spec=DTIReconOutputSpec
-    
+
     _cmd = 'dti_recon'
-    
+
     def _create_gradient_matrix(self, bvecs_file, bvals_file):
         _gradient_matrix_file = 'gradient_matrix.txt'
         bvals = [val for val in  re.split('\s+', open(bvals_file).readline().strip())]
@@ -76,7 +76,7 @@ class DTIRecon(CommandLine):
             gradient_matrix_f.write("%s, %s, %s, %s\n"%(bvecs_x[i], bvecs_y[i], bvecs_z[i], bvals[i]))
         gradient_matrix_f.close()
         return _gradient_matrix_file
-    
+
     def _format_arg(self, name, spec, value):
         if name == "bvecs":
             new_val = self._create_gradient_matrix(self.inputs.bvecs, self.inputs.bvals)
@@ -102,7 +102,7 @@ class DTIRecon(CommandLine):
         outputs['V3'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_v3.'+ output_type))
 
         return outputs
-    
+
 class DTITrackerInputSpec(CommandLineInputSpec):
     tensor_file = File(exists=True, desc="reconstructed tensor file")
     input_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', desc="""input and output file type. accepted values are:
@@ -143,23 +143,23 @@ class DTITrackerInputSpec(CommandLineInputSpec):
 class DTITrackerOutputSpec(TraitedSpec):
     track_file = File(exists=True)
     mask_file = File(exists=True)
-    
+
 class DTITracker(CommandLine):
     input_spec=DTITrackerInputSpec
     output_spec=DTITrackerOutputSpec
-    
+
     _cmd = 'dti_tracker'
-    
+
     def _run_interface(self, runtime):
         _, _, ext = split_filename(self.inputs.tensor_file)
         copyfile(self.inputs.tensor_file, os.path.abspath(self.inputs.input_data_prefix + "_tensor" + ext), copy=False)
-        
+
         return super(DTITracker, self)._run_interface(runtime)
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['track_file'] = os.path.abspath(self.inputs.output_file)
         if isdefined(self.inputs.output_mask) and self.inputs.output_mask:
             outputs['mask_file'] = os.path.abspath(self.inputs.output_mask)
-        
+
         return outputs

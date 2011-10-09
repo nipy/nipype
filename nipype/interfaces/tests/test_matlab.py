@@ -4,7 +4,7 @@ import os
 from tempfile import mkdtemp
 from shutil import rmtree
 
-from nipype.testing import (assert_equal, assert_true, assert_false, 
+from nipype.testing import (assert_equal, assert_true, assert_false,
                             assert_raises, skipif)
 import nipype.interfaces.matlab as mlab
 from nipype.interfaces.base import CommandLine, Bunch
@@ -25,7 +25,7 @@ no_matlab = True
 if matlab_path != '':
     no_matlab = False
     mlab.MatlabCommand.set_default_matlab_cmd(matlab_cmd)
-    
+
 # If a test requires matlab, prefix it with the skipif decorator like
 # below.  Must import skipif from nipype.testing
 #
@@ -38,10 +38,10 @@ def test_cmdline():
     basedir = mkdtemp()
     mi = mlab.MatlabCommand(script='whos',
                             script_file='testscript', mfile=False)
-                                
+
     yield assert_equal, mi.cmdline, \
         matlab_cmd + ' -nodesktop -nosplash -singleCompThread -r "fprintf(1,\'Executing code at %s:\\n\',datestr(now));ver,try,whos,catch ME,fprintf(2,\'MATLAB code threw an exception:\\n\');fprintf(2,\'%s\\n\',ME.message);if length(ME.stack) ~= 0, fprintf(2,\'File:%s\\nName:%s\\nLine:%d\\n\',ME.stack.file,ME.stack.name,ME.stack.line);, end;end;;exit"'
- 
+
     yield assert_equal, mi.inputs.script, 'whos'
     yield assert_equal, mi.inputs.script_file, 'testscript'
     path_exists = os.path.exists(os.path.join(basedir,'testscript.m'))
@@ -84,11 +84,11 @@ def test_run_interface():
     yield assert_equal, res.runtime.returncode, 0
     os.chdir(cwd)
     rmtree(basedir)
-    
+
 @skipif(no_matlab)
 def test_set_matlabcmd():
     mi = mlab.MatlabCommand()
     mi.set_default_matlab_cmd('foo')
     yield assert_equal, mi._default_matlab_cmd, 'foo'
     mi.set_default_matlab_cmd(matlab_cmd)
-    
+

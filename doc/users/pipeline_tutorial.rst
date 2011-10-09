@@ -8,8 +8,8 @@ This section presents several tutorials on how to setup and use pipelines. Make
 sure that you have the requirements satisfied and go through the steps required
 for the analysis tutorials.
 
-Tutorials
-=========
+Essential reading
+=================
 
 .. toctree::
    :maxdepth: 1
@@ -20,6 +20,21 @@ Tutorials
    tutorial_103
    mapnode_and_iterables
    grabbing_and_sinking
+
+Beginner's guide
+================
+
+By Michael Notter. `Available here`__
+
+__ http://miykael.github.com/nipype-beginner-s-guide/index.html
+
+Example workflows
+=================
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
    examples/*
 
 Requirements
@@ -32,7 +47,7 @@ Requirements
   Analysis tutorials
 
   - FSL_, FreeSurfer_, Camino_, ConnectomeViewer and MATLAB_ are available and
-  callable from the command line
+    callable from the command line
 
   - SPM_ 5/8 is installed and callable in matlab
 
@@ -48,9 +63,9 @@ Step 0
 ~~~~~~
 
 Download and extract the `Pipeline tutorial data (429MB). 
-<http://cirl.berkeley.edu/nipy/nipype-tutorial-0.2.tar.gz>`_  
+<http://sourceforge.net/projects/nipy/files/nipype/nipype-0.2/nipype-tutorial.tar.bz2/download>`_  
 
-(checksum: f91b81050e1262f0508d35135c2369f5)
+(checksum: 56ed4b7e0aac5627d1724e9c10cd26a7)
 
 
 Step 1.

@@ -1,4 +1,4 @@
-""" 
+"""
     Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
@@ -7,14 +7,26 @@
 
 """
 
-from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                                    File, TraitedSpec, InputMultiPath, isdefined)
-import networkx as nx
-import cfflib as cf
 import os
-from nipype.utils.filemanip import split_filename
 import datetime
 import string
+import warnings
+import networkx as nx
+
+from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
+                                    File, TraitedSpec, InputMultiPath, isdefined)
+from nipype.utils.filemanip import split_filename
+from nipype.utils.misc import package_check
+
+have_cfflib = True
+try:
+    package_check('cfflib')
+except Exception, e:
+    have_cfflib = False
+    warnings.warn('cfflib not installed')
+else:
+    import cfflib as cf
+
 
 class CFFConverterInputSpec(BaseInterfaceInputSpec):
     graphml_networks = InputMultiPath(File(exists=True), desc='list of graphML networks')

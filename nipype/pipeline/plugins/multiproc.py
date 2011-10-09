@@ -26,11 +26,11 @@ class MultiProcPlugin(DistributedPluginBase):
     execution. Currently supported options are:
 
     - n_procs : number of processes to use
-    
+
     """
 
     def __init__(self, plugin_args=None):
-        super(MultiProcPlugin, self).__init__()
+        super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
         self._taskresult = {}
         self._taskid = 0
         n_procs = 1

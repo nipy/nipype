@@ -15,7 +15,7 @@ These functions include:
    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
-  
+
 """
 
 from copy import deepcopy
@@ -32,21 +32,23 @@ from nipype.utils.filemanip import filename_to_list
 from nipype.utils.logger import iflogger
 from nipype.utils.config import config
 
+
 def gcd(a, b):
     """Returns the greatest common divisor of two integers
 
     uses Euclid's algorithm
 
-    >>> gcd(4,5)
+    >>> gcd(4, 5)
     1
-    >>> gcd(4,8)
+    >>> gcd(4, 8)
     4
-    >>> gcd(22,55)
+    >>> gcd(22, 55)
     11
-    
+
     """
-    while b > 0: a,b = b, a%b
+    while b > 0: a, b = b, a % b
     return a
+
 
 def spm_hrf(RT, P=None, fMRI_T=16):
     """ python implementation of spm_hrf
@@ -70,7 +72,7 @@ def spm_hrf(RT, P=None, fMRI_T=16):
 
     the following code using scipy.stats.distributions.gamma
     doesn't return the same result as the spm_Gpdf function
-    hrf   = gamma.pdf(u,p[0]/p[2],scale=dt/p[2]) - gamma.pdf(u,p[1]/p[3],scale=dt/p[3])/p[4]
+    hrf   = gamma.pdf(u, p[0]/p[2], scale=dt/p[2]) - gamma.pdf(u, p[1]/p[3], scale=dt/p[3])/p[4]
 
     >>> print spm_hrf(2)
     [  0.00000000e+00   8.65660810e-02   3.74888236e-01   3.84923382e-01
@@ -78,38 +80,40 @@ def spm_hrf(RT, P=None, fMRI_T=16):
       -3.73060781e-02  -3.08373716e-02  -2.05161334e-02  -1.16441637e-02
       -5.82063147e-03  -2.61854250e-03  -1.07732374e-03  -4.10443522e-04
       -1.46257507e-04]
-    
+
     """
-    p     = np.array([6,16,1,1,6,0,32],dtype=float)
+    p     = np.array([6, 16, 1, 1, 6, 0, 32], dtype=float)
     if P is not None:
         p[0:len(P)] = P
 
-    _spm_Gpdf = lambda x,h,l: np.exp(h*np.log(l)+(h-1)*np.log(x)-(l*x)-gammaln(h))
+    _spm_Gpdf = lambda x, h, l: np.exp(h * np.log(l) + (h - 1) * np.log(x) - (l * x) - gammaln(h))
     # modelled hemodynamic response function - {mixture of Gammas}
     dt    = RT/float(fMRI_T)
-    u     = np.arange(0,int(p[6]/dt+1)) - p[5]/dt
-    hrf   = _spm_Gpdf(u,p[0]/p[2],dt/p[2]) - _spm_Gpdf(u,p[1]/p[3],dt/p[3])/p[4]
-    idx   = np.arange(0,int((p[6]/RT)+1))*fMRI_T
+    u     = np.arange(0, int(p[6]/dt+1)) - p[5]/dt
+    hrf   = _spm_Gpdf(u, p[0]/p[2], dt/p[2]) - _spm_Gpdf(u, p[1]/p[3], dt/p[3])/p[4]
+    idx   = np.arange(0, int((p[6]/RT)+1))*fMRI_T
     hrf   = hrf[idx]
     hrf   = hrf/np.sum(hrf)
     return hrf
 
+
 def orth(x_in, y_in):
     """Orthoganlize y_in with respect to x_in
 
-    >>> err = np.abs(np.array(orth([1,2,3],[4,5,6]) - np.array([1.7142857142857144, 0.42857142857142883, -0.85714285714285676])))
+    >>> err = np.abs(np.array(orth([1, 2, 3],[4, 5, 6]) - np.array([1.7142857142857144, 0.42857142857142883, -0.85714285714285676])))
     >>> all(err<np.finfo(float).eps)
     True
 
     """
-    x = np.array(x_in)[:,None]
-    y = np.array(y_in)[:,None]
-    y = y - np.dot(x,np.dot(np.linalg.inv(np.dot(x.T,x)),np.dot(x.T,y)))
-    if np.linalg.norm(y,1) > np.exp(-32):
-        y = y[:,0].tolist()
+    x = np.array(x_in)[:, None]
+    y = np.array(y_in)[:, None]
+    y = y - np.dot(x, np.dot(np.linalg.inv(np.dot(x.T, x)), np.dot(x.T, y)))
+    if np.linalg.norm(y, 1) > np.exp(-32):
+        y = y[:, 0].tolist()
     else:
         y = y_in
     return y
+
 
 def scale_timings(timelist, input_units, output_units, time_repetition):
     """Scales timings given input and output units (scans/secs)
@@ -121,7 +125,7 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
     input_units: 'secs' or 'scans'
     output_units: Ibid.
     time_repetition: float in seconds
-    
+
     """
     if input_units==output_units:
         _scalefactor = 1.
@@ -131,6 +135,7 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
         _scalefactor = 1./time_repetition
     timelist = [np.max([0., _scalefactor*t]) for t in timelist]
     return timelist
+
 
 def gen_info(run_event_files):
     """Generate subject_info structure from a list of event files
@@ -143,24 +148,25 @@ def gen_info(run_event_files):
             name, _ = name.split('.run%03d'%(i+1))
             runinfo.cond.append(name)
             event_info = np.loadtxt(event_file)
-            runinfo.onsets.append(event_info[:,0].tolist())
+            runinfo.onsets.append(event_info[:, 0].tolist())
             if event_info.shape[1] > 1:
-                runinfo.durations.append(event_info[:,1].tolist())
+                runinfo.durations.append(event_info[:, 1].tolist())
             else:
                 runinfo.durations.append([0])
             if event_info.shape[1] > 2:
-                runinfo.amplitudes.append(event_info[:,2].tolist())
+                runinfo.amplitudes.append(event_info[:, 2].tolist())
             else:
                 delattr(runinfo, 'amplitudes')
         info.append(runinfo)
     return info
 
+
 class SpecifyModelInputSpec(BaseInterfaceInputSpec):
     subject_info = InputMultiPath(Bunch, mandatory=True, xor=['event_info'],
-                          desc= "Bunch of List(Bunch) subject specific condition information. " \
+                          desc="Bunch of List(Bunch) subject specific condition information. " \
                           "see :class:`SpecifyModel` or SpecifyModel.__doc__ for details")
     event_info = InputMultiPath(traits.List(File(exists=True)), mandatory=True, xor=['subject_info'],
-                              desc='list of event description files 1,2 or 3 column format corresponding to onsets, durations and amplitudes')
+                              desc='list of event description files 1, 2 or 3 column format corresponding to onsets, durations and amplitudes')
     realignment_parameters = InputMultiPath(File(exists=True),
        desc = "Realignment parameters returned by motion correction algorithm",
                                          filecopy=False)
@@ -185,8 +191,10 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
     #polynomial_order = traits.Range(0, low=0,
     #        desc ="Number of polynomial functions to model high pass filter.")
 
+
 class SpecifyModelOutputSpec(TraitedSpec):
     session_info = traits.Any(desc="session info for level1designs")
+
 
 class SpecifyModel(BaseInterface):
     """Makes a model specification compatible with spm/fsl designers.
@@ -206,20 +214,20 @@ class SpecifyModel(BaseInterface):
     ~~~~~~~~
 
      - regressor_names : list of str
-         list of names corresponding to each column. Should be None if 
+         list of names corresponding to each column. Should be None if
          automatically assigned.
 
      - regressors : list of lists
         values for each regressor - must correspond to the number of
         volumes in the functional run
 
-     - amplitudes : lists of amplitudes for each event. This will be ignored by 
+     - amplitudes : lists of amplitudes for each event. This will be ignored by
        SPM's Level1Design.
 
-     The following two (tmod, pmod) will be ignored by any Level1Design class 
+     The following two (tmod, pmod) will be ignored by any Level1Design class
      other than SPM:
 
-     - tmod : lists of conditions that should be temporally modulated. Should 
+     - tmod : lists of conditions that should be temporally modulated. Should
        default to None if not being used.
 
      - pmod : list of Bunch corresponding to conditions
@@ -232,7 +240,7 @@ class SpecifyModel(BaseInterface):
 
     Alternatively, you can provide information through event files.
 
-    The event files have to be in 1,2 or 3 column format with the columns
+    The event files have to be in 1, 2 or 3 column format with the columns
     corresponding to Onsets, Durations and Amplitudes and they have to have the
     name event_name.runXXX... e.g.: Words.run001.txt. The event_name part will
     be used to create the condition names.
@@ -251,9 +259,9 @@ class SpecifyModel(BaseInterface):
     >>> s.inputs.subject_info = info
 
     Using pmod:
-    
-    >>> info = [Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 50],[100, 180]], durations=[[0],[0]], pmod=[Bunch(name=['amp'],poly=[2],param=[[1,2]]), None]), \
-        Bunch(conditions=['cond1', 'cond2'], onsets=[[20, 120],[80, 160]], durations=[[0],[0]], pmod=[Bunch(name=['amp'],poly=[2],param=[[1,2]]), None])]
+
+    >>> info = [Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 50],[100, 180]], durations=[[0],[0]], pmod=[Bunch(name=['amp'], poly=[2], param=[[1, 2]]), None]), \
+        Bunch(conditions=['cond1', 'cond2'], onsets=[[20, 120],[80, 160]], durations=[[0],[0]], pmod=[Bunch(name=['amp'], poly=[2], param=[[1, 2]]), None])]
     >>> s.inputs.subject_info = info
 
     """
@@ -268,13 +276,13 @@ class SpecifyModel(BaseInterface):
             each run
         """
         sessinfo = []
-        for i,info in enumerate(infolist):
-            sessinfo.insert(i,dict(cond=[]))
+        for i, info in enumerate(infolist):
+            sessinfo.insert(i, dict(cond=[]))
             if isdefined(self.inputs.high_pass_filter_cutoff):
                 sessinfo[i]['hpf'] = np.float(self.inputs.high_pass_filter_cutoff)
             if hasattr(info, 'conditions') and info.conditions:
-                for cid,cond in enumerate(info.conditions):
-                    sessinfo[i]['cond'].insert(cid,dict())
+                for cid, cond in enumerate(info.conditions):
+                    sessinfo[i]['cond'].insert(cid, dict())
                     sessinfo[i]['cond'][cid]['name']  = info.conditions[cid]
                     sessinfo[i]['cond'][cid]['onset'] = scale_timings(info.onsets[cid],
                                                                      self.inputs.input_units,
@@ -291,15 +299,15 @@ class SpecifyModel(BaseInterface):
                     if hasattr(info, 'pmod') and info.pmod and len(info.pmod)>cid:
                         if info.pmod[cid]:
                             sessinfo[i]['cond'][cid]['pmod'] = []
-                            for j,name in enumerate(info.pmod[cid].name):
+                            for j, name in enumerate(info.pmod[cid].name):
                                 sessinfo[i]['cond'][cid]['pmod'].insert(j,{})
                                 sessinfo[i]['cond'][cid]['pmod'][j]['name'] = name
                                 sessinfo[i]['cond'][cid]['pmod'][j]['poly'] = info.pmod[cid].poly[j]
                                 sessinfo[i]['cond'][cid]['pmod'][j]['param'] = info.pmod[cid].param[j]
             sessinfo[i]['regress']= []
             if hasattr(info, 'regressors') and info.regressors is not None:
-                for j,r in enumerate(info.regressors):
-                    sessinfo[i]['regress'].insert(j,dict(name='',val=[]))
+                for j, r in enumerate(info.regressors):
+                    sessinfo[i]['regress'].insert(j, dict(name='', val=[]))
                     if hasattr(info, 'regressor_names') and info.regressor_names is not None:
                         sessinfo[i]['regress'][j]['name'] = info.regressor_names[j]
                     else:
@@ -307,23 +315,23 @@ class SpecifyModel(BaseInterface):
                     sessinfo[i]['regress'][j]['val'] = info.regressors[j]
             sessinfo[i]['scans'] = functional_runs[i]
         if realignment_parameters is not None:
-            for i,rp in enumerate(realignment_parameters):
+            for i, rp in enumerate(realignment_parameters):
                 mc = realignment_parameters[i]
                 for col in range(mc.shape[1]):
                     colidx = len(sessinfo[i]['regress'])
-                    sessinfo[i]['regress'].insert(colidx,dict(name='',val=[]))
+                    sessinfo[i]['regress'].insert(colidx, dict(name='', val=[]))
                     sessinfo[i]['regress'][colidx]['name'] = 'Realign%d'%(col+1)
-                    sessinfo[i]['regress'][colidx]['val']  = mc[:,col].tolist()
+                    sessinfo[i]['regress'][colidx]['val']  = mc[:, col].tolist()
         if outliers is not None:
-            for i,out in enumerate(outliers):
+            for i, out in enumerate(outliers):
                 numscans = 0
                 for f in filename_to_list(sessinfo[i]['scans']):
                     numscans += load(f).get_shape()[3]
-                for j,scanno in enumerate(out):
+                for j, scanno in enumerate(out):
                     colidx = len(sessinfo[i]['regress'])
-                    sessinfo[i]['regress'].insert(colidx,dict(name='',val=[]))
+                    sessinfo[i]['regress'].insert(colidx, dict(name='', val=[]))
                     sessinfo[i]['regress'][colidx]['name'] = 'Outlier%d'%(j+1)
-                    sessinfo[i]['regress'][colidx]['val']  = np.zeros((1,numscans))[0].tolist()
+                    sessinfo[i]['regress'][colidx]['val']  = np.zeros((1, numscans))[0].tolist()
                     sessinfo[i]['regress'][colidx]['val'][int(scanno)] = 1
         return sessinfo
 
@@ -368,8 +376,9 @@ class SpecifyModel(BaseInterface):
         if not hasattr(self, '_sessinfo'):
             self._generate_design()
         outputs['session_info'] = self._sessinfo
-        
+
         return outputs
+
 
 class SpecifySPMModelInputSpec(SpecifyModelInputSpec):
     concatenate_runs = traits.Bool(False, usedefault=True,
@@ -377,6 +386,7 @@ class SpecifySPMModelInputSpec(SpecifyModelInputSpec):
     output_units = traits.Enum('secs', 'scans', usedefault=True,
              desc = "Units of design event onsets and durations " \
                                    "(secs or scans)")
+
 
 class SpecifySPMModel(SpecifyModel):
     """Adds SPM specific options to SpecifyModel
@@ -404,51 +414,51 @@ class SpecifySPMModel(SpecifyModel):
 
     input_spec = SpecifySPMModelInputSpec
 
-    def _concatenate_info(self,infolist):
+    def _concatenate_info(self, infolist):
         nscans = []
-        for i,f in enumerate(self.inputs.functional_runs):
-            if isinstance(f,list):
+        for i, f in enumerate(self.inputs.functional_runs):
+            if isinstance(f, list):
                 numscans = len(f)
-            elif isinstance(f,str):
+            elif isinstance(f, str):
                 img = load(f)
                 numscans = img.get_shape()[3]
             else:
                 raise Exception('Functional input not specified correctly')
             nscans.insert(i, numscans)
         # now combine all fields into 1
-        # names,onsets,durations,amplitudes,pmod,tmod,regressor_names,regressors
+        # names, onsets, durations, amplitudes, pmod, tmod, regressor_names, regressors
         infoout = infolist[0]
-        for i,info in enumerate(infolist[1:]):
-            #info.[conditions,tmod] remain the same
+        for i, info in enumerate(infolist[1:]):
+            #info.[conditions, tmod] remain the same
             if info.onsets:
-                for j,val in enumerate(info.onsets):
+                for j, val in enumerate(info.onsets):
                     if self.inputs.input_units == 'secs':
                         infoout.onsets[j].extend((np.array(info.onsets[j])+
                                                   self.inputs.time_repetition*sum(nscans[0:(i+1)])).tolist())
                     else:
                         infoout.onsets[j].extend((np.array(info.onsets[j])+sum(nscans[0:(i+1)])).tolist())
-                for j,val in enumerate(info.durations):
+                for j, val in enumerate(info.durations):
                     if len(val) > 1:
                         infoout.durations[j].extend(info.durations[j])
                 if hasattr(info, 'amplitudes') and info.amplitudes:
-                    for j,val in enumerate(info.amplitudes):
+                    for j, val in enumerate(info.amplitudes):
                         infoout.amplitudes[j].extend(info.amplitudes[j])
                 if hasattr(info, 'pmod') and info.pmod:
-                    for j,val in enumerate(info.pmod):
+                    for j, val in enumerate(info.pmod):
                         if val:
-                            for key,data in enumerate(val.param):
+                            for key, data in enumerate(val.param):
                                 infoout.pmod[j].param[key].extend(data)
             if hasattr(info, 'regressors') and info.regressors:
                 #assumes same ordering of regressors across different
                 #runs and the same names for the regressors
-                for j,v in enumerate(info.regressors):
+                for j, v in enumerate(info.regressors):
                     infoout.regressors[j].extend(info.regressors[j])
             #insert session regressors
             if not hasattr(infoout, 'regressors') or not infoout.regressors:
                 infoout.regressors = []
-            onelist = np.zeros((1,sum(nscans)))
-            onelist[0,sum(nscans[0:(i)]):sum(nscans[0:(i+1)])] = 1
-            infoout.regressors.insert(len(infoout.regressors),onelist.tolist()[0])
+            onelist = np.zeros((1, sum(nscans)))
+            onelist[0, sum(nscans[0:(i)]):sum(nscans[0:(i+1)])] = 1
+            infoout.regressors.insert(len(infoout.regressors), onelist.tolist()[0])
         return [infoout], nscans
 
     def _generate_design(self, infolist=None):
@@ -467,9 +477,9 @@ class SpecifySPMModel(SpecifyModel):
             for parfile in self.inputs.realignment_parameters:
                 mc = np.loadtxt(parfile)
                 if not realignment_parameters:
-                    realignment_parameters.insert(0,mc)
+                    realignment_parameters.insert(0, mc)
                 else:
-                    realignment_parameters[0] = np.concatenate((realignment_parameters[0],mc))
+                    realignment_parameters[0] = np.concatenate((realignment_parameters[0], mc))
         outliers = []
         if isdefined(self.inputs.outlier_files):
             outliers = [[]]
@@ -487,6 +497,7 @@ class SpecifySPMModel(SpecifyModel):
                                                   functional_runs=functional_runs,
                                                   realignment_parameters=realignment_parameters,
                                                   outliers=outliers)
+
 
 class SpecifySparseModelInputSpec(SpecifyModelInputSpec):
     time_acquisition = traits.Float(0, mandatory=True,
@@ -507,9 +518,11 @@ class SpecifySparseModelInputSpec(SpecifyModelInputSpec):
     save_plot = traits.Bool(desc='save plot of sparse design calculation ' \
                             '(Requires matplotlib)')
 
+
 class SpecifySparseModelOutputSpec(SpecifyModelOutputSpec):
     sparse_png_file = File(desc='PNG file showing sparse design')
     sparse_svg_file = File(desc='SVG file showing sparse design')
+
 
 class SpecifySparseModel(SpecifyModel):
     """Makes a model specification compatible with spm/fsl designers for
@@ -517,7 +530,7 @@ class SpecifySparseModel(SpecifyModel):
 
     see Ghosh et al. (2009) OHBM 2009
     http://dl.dropbox.com/u/363467/OHBM2009_HRF.pdf
-    
+
     Examples
     --------
 
@@ -537,7 +550,7 @@ class SpecifySparseModel(SpecifyModel):
     input_spec = SpecifySparseModelInputSpec
     output_spec = SpecifySparseModelOutputSpec
 
-    def _gen_regress(self,i_onsets,i_durations,i_amplitudes,nscans):
+    def _gen_regress(self, i_onsets, i_durations, i_amplitudes, nscans):
         """Generates a regressor for a sparse/clustered-sparse acquisition
         """
         bplot = False
@@ -560,15 +573,15 @@ class SpecifySparseModel(SpecifyModel):
         if len(durations) == 1:
             durations = durations*np.ones((len(i_onsets)))
         onsets = np.round(np.array(i_onsets)*1000)
-        dttemp = gcd(TA, gcd(SILENCE,TR))
+        dttemp = gcd(TA, gcd(SILENCE, TR))
         if dt < dttemp:
             if dttemp % dt != 0:
-                dt = gcd(dttemp,dt)
+                dt = gcd(dttemp, dt)
         if dt < 1:
             raise Exception("Time multiple less than 1 ms")
         iflogger.info("Setting dt = %d ms\n" % dt)
         npts = int(total_time/dt)
-        times = np.arange(0,total_time,dt)*1e-3
+        times = np.arange(0, total_time, dt)*1e-3
         timeline = np.zeros((npts))
         timeline2 = np.zeros((npts))
         if isdefined(self.inputs.model_hrf) and self.inputs.model_hrf:
@@ -586,7 +599,7 @@ class SpecifySparseModel(SpecifyModel):
                 reg_scale = 1./response.max()
                 iflogger.info('response sum: %.4f max: %.4f'%(response.sum(), response.max()))
             iflogger.info('reg_scale: %.4f'%reg_scale)
-        for i,t in enumerate(onsets):
+        for i, t in enumerate(onsets):
             idx = int(t/dt)
             if i_amplitudes:
                 if len(i_amplitudes)>1:
@@ -596,8 +609,8 @@ class SpecifySparseModel(SpecifyModel):
             else:
                 timeline2[idx] = 1
             if bplot:
-                plt.subplot(4,1,1)
-                plt.plot(times,timeline2)
+                plt.subplot(4, 1, 1)
+                plt.plot(times, timeline2)
             if not self.inputs.stimuli_as_impulses:
                 if durations[i] == 0:
                     durations[i] = TA*nvol
@@ -606,38 +619,38 @@ class SpecifySparseModel(SpecifyModel):
             timeline += timeline2
             timeline2[:] = 0
         if bplot:
-            plt.subplot(4,1,2)
-            plt.plot(times,timeline)
+            plt.subplot(4, 1, 2)
+            plt.plot(times, timeline)
         if isdefined(self.inputs.model_hrf) and self.inputs.model_hrf:
             timeline = np.convolve(timeline, hrf)[0:len(timeline)]
             if isdefined(self.inputs.use_temporal_deriv) and self.inputs.use_temporal_deriv:
                 #create temporal deriv
-                timederiv = np.concatenate(([0],np.diff(timeline)))
+                timederiv = np.concatenate(([0], np.diff(timeline)))
         if bplot:
-            plt.subplot(4,1,3)
-            plt.plot(times,timeline)
+            plt.subplot(4, 1, 3)
+            plt.plot(times, timeline)
             if isdefined(self.inputs.use_temporal_deriv) and self.inputs.use_temporal_deriv:
-                plt.plot(times,timederiv)
+                plt.plot(times, timederiv)
         # sample timeline
         timeline2 = np.zeros((npts))
         reg = []
         regderiv = []
-        for i,trial in enumerate(np.arange(nscans)/nvol):
+        for i, trial in enumerate(np.arange(nscans)/nvol):
             scanstart = int((SCANONSET + trial*TR + (i%nvol)*TA)/dt)
             #print total_time/dt, SCANONSET, TR, TA, scanstart, trial, i%2, int(TA/dt)
             scanidx = scanstart+np.arange(int(TA/dt))
             timeline2[scanidx] = np.max(timeline)
-            reg.insert(i,np.mean(timeline[scanidx])*reg_scale)
+            reg.insert(i, np.mean(timeline[scanidx])*reg_scale)
             if isdefined(self.inputs.use_temporal_deriv) and self.inputs.use_temporal_deriv:
-                regderiv.insert(i,np.mean(timederiv[scanidx])*reg_scale)
+                regderiv.insert(i, np.mean(timederiv[scanidx])*reg_scale)
         if isdefined(self.inputs.use_temporal_deriv) and self.inputs.use_temporal_deriv:
             iflogger.info('orthoganlizing derivative w.r.t. main regressor')
             regderiv = orth(reg, regderiv)
         if bplot:
-            plt.subplot(4,1,3)
-            plt.plot(times,timeline2)
-            plt.subplot(4,1,4)
-            plt.bar(np.arange(len(reg)),reg,width=0.5)
+            plt.subplot(4, 1, 3)
+            plt.plot(times, timeline2)
+            plt.subplot(4, 1, 4)
+            plt.bar(np.arange(len(reg)), reg, width=0.5)
             plt.savefig('sparse.png')
             plt.savefig('sparse.svg')
         if regderiv:
@@ -645,12 +658,12 @@ class SpecifySparseModel(SpecifyModel):
         else:
             return reg
 
-    def _cond_to_regress(self,info,nscans):
+    def _cond_to_regress(self, info, nscans):
         """Converts condition information to full regressors
         """
         reg = []
         regnames = []
-        for i,cond in enumerate(info.conditions):
+        for i, cond in enumerate(info.conditions):
             if hasattr(info, 'amplitudes') and info.amplitudes:
                 amplitudes = info.amplitudes[i]
             else:
@@ -677,36 +690,36 @@ class SpecifySparseModel(SpecifyModel):
         nvol = self.inputs.volumes_in_cluster
         if nvol > 1:
             for i in range(nvol-1):
-                treg = np.zeros((nscans/nvol,nvol))
-                treg[:,i] = 1
-                reg.insert(len(reg),treg.ravel().tolist())
+                treg = np.zeros((nscans/nvol, nvol))
+                treg[:, i] = 1
+                reg.insert(len(reg), treg.ravel().tolist())
                 regnames.insert(len(regnames), 'T1effect_%d'%i)
         return reg, regnames
 
-    def _generate_clustered_design(self,infolist):
+    def _generate_clustered_design(self, infolist):
         """Generates condition information for sparse-clustered
         designs.
 
         """
         infoout = deepcopy(infolist)
-        for i,info in enumerate(infolist):
+        for i, info in enumerate(infolist):
             infoout[i].conditions = None
             infoout[i].onsets = None
             infoout[i].durations = None
             if info.conditions:
                 img = load(self.inputs.functional_runs[i])
                 nscans = img.get_shape()[3]
-                reg, regnames = self._cond_to_regress(info,nscans)
+                reg, regnames = self._cond_to_regress(info, nscans)
                 if hasattr(infoout[i], 'regressors') and infoout[i].regressors:
                     if not infoout[i].regressor_names:
                         infoout[i].regressor_names = ['R%d'%j for j in range(len(infoout[i].regressors))]
                 else:
                     infoout[i].regressors = []
                     infoout[i].regressor_names = []
-                for j,r in enumerate(reg):
+                for j, r in enumerate(reg):
                     regidx = len(infoout[i].regressors)
-                    infoout[i].regressor_names.insert(regidx,regnames[j])
-                    infoout[i].regressors.insert(regidx,r)
+                    infoout[i].regressor_names.insert(regidx, regnames[j])
+                    infoout[i].regressors.insert(regidx, r)
         return infoout
 
     def _generate_design(self, infolist=None):

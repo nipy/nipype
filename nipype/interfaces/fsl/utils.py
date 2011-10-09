@@ -24,11 +24,12 @@ from nipype.utils.filemanip import load_json, save_json, split_filename, fname_p
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+
 class ImageMeantsInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, desc = 'input file for computing the average timeseries',
-                  argstr='-i %s', position=0, mandatory=True)
-    out_file = File(desc = 'name of output text matrix',argstr='-o %s', genfile=True)
-    mask = File(exists=True, desc='input 3D mask',argstr='-m %s')
+    in_file = File(exists=True, desc='input file for computing the average timeseries',
+                   argstr='-i %s', position=0, mandatory=True)
+    out_file = File(desc='name of output text matrix', argstr='-o %s', genfile=True)
+    mask = File(exists=True, desc='input 3D mask', argstr='-m %s')
     spatial_coord = traits.List(traits.Int, desc='<x y z>	requested spatial coordinate (instead of mask)',
                                argstr='-c %s')
     use_mm = traits.Bool(desc='use mm instead of voxel coordinates (for -c option)',
@@ -37,14 +38,16 @@ class ImageMeantsInputSpec(FSLCommandInputSpec):
                           argstr='--showall')
     eig = traits.Bool(desc='calculate Eigenvariate(s) instead of mean (output will have 0 mean)',
                       argstr='--eig')
-    order = traits.Int(1,desc='select number of Eigenvariates',argstr='--order=%d',usedefault=True)
+    order = traits.Int(1, desc='select number of Eigenvariates', argstr='--order=%d', usedefault=True)
     nobin = traits.Bool(desc='do not binarise the mask for calculation of Eigenvariates',
                         argstr='--no_bin')
     transpose = traits.Bool(desc='output results in transpose format (one row per voxel/mean)',
                             argstr='--transpose')
 
+
 class ImageMeantsOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="path/name of output text matrix")
+
 
 class ImageMeants(FSLCommand):
     """ Use fslmeants for printing the average timeseries (intensities) to
@@ -61,7 +64,7 @@ class ImageMeants(FSLCommand):
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                                  suffix = '_ts',
+                                                  suffix='_ts',
                                                   ext='.txt',
                                                   change_ext=True)
         return outputs
@@ -71,14 +74,17 @@ class ImageMeants(FSLCommand):
             return self._list_outputs()[name]
         return None
 
+
 class SmoothInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", position=0, mandatory=True)
     fwhm = traits.Float(argstr="-kernel gauss %f -fmean", position=1,
-                            mandatory=True)
+                        mandatory=True)
     smoothed_file = File(argstr="%s", position=2, genfile=True)
+
 
 class SmoothOutputSpec(TraitedSpec):
     smoothed_file = File(exists=True)
+
 
 class Smooth(FSLCommand):
     '''Use fslmaths to smooth the image
@@ -98,7 +104,7 @@ class Smooth(FSLCommand):
         outputs['smoothed_file'] = self.inputs.smoothed_file
         if not isdefined(outputs['smoothed_file']):
             outputs['smoothed_file'] = self._gen_fname(self.inputs.in_file,
-                                              suffix = '_smooth')
+                                              suffix='_smooth')
         return outputs
 
     def _format_arg(self, name, trait_spec, value):
@@ -107,6 +113,7 @@ class Smooth(FSLCommand):
             return super(Smooth, self)._format_arg(name, trait_spec, float(value) / np.sqrt(8 * np.log(2)))
         return super(Smooth, self)._format_arg(name, trait_spec, value)
 
+
 class MergeInputSpec(FSLCommandInputSpec):
     in_files = traits.List(File(exists=True), argstr="%s", position=2, mandatory=True)
     dimension = traits.Enum('t', 'x', 'y', 'z', argstr="-%s", position=0,
@@ -114,8 +121,10 @@ class MergeInputSpec(FSLCommandInputSpec):
                             mandatory=True)
     merged_file = File(argstr="%s", position=1, genfile=True)
 
+
 class MergeOutputSpec(TraitedSpec):
     merged_file = File(exists=True)
+
 
 class Merge(FSLCommand):
     """Use fslmerge to concatenate images
@@ -130,10 +139,10 @@ class Merge(FSLCommand):
         outputs['merged_file'] = self.inputs.merged_file
         if not isdefined(outputs['merged_file']):
             outputs['merged_file'] = self._gen_fname(self.inputs.in_files[0],
-                                              suffix = '_merged')
+                                              suffix='_merged')
         else:
             outputs['merged_file'] = os.path.realpath(self.inputs.merged_file)
-            
+
         return outputs
 
     def _gen_filename(self, name):
@@ -158,8 +167,10 @@ class ExtractROIInputSpec(FSLCommandInputSpec):
                             argstr="%s", position=2, xor=_crop_xor,
                             help="list of two tuples specifying crop options")
 
+
 class ExtractROIOutputSpec(TraitedSpec):
     roi_file = File(exists=True)
+
 
 class ExtractROI(FSLCommand):
     """Uses FSL Fslroi command to extract region of interest (ROI)
@@ -212,7 +223,7 @@ class ExtractROI(FSLCommand):
         outputs['roi_file'] = self.inputs.roi_file
         if not isdefined(outputs['roi_file']):
             outputs['roi_file'] = self._gen_fname(self.inputs.in_file,
-                                              suffix = '_roi')
+                                              suffix='_roi')
         return outputs
 
     def _gen_filename(self, name):
@@ -220,13 +231,19 @@ class ExtractROI(FSLCommand):
             return self._list_outputs()[name]
         return None
 
+
 class SplitInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, argstr="%s", position = 0, desc="input filename")
+    in_file = File(exists=True, argstr="%s", position=0, mandatory=True,
+                   desc="input filename")
     out_base_name = traits.Str(argstr="%s", position=1, desc="outputs prefix")
-    dimension = traits.Enum('t','x','y','z', argstr="-%s", position=2, desc="dimension along which the file will be split")
+    dimension = traits.Enum('t', 'x', 'y', 'z', argstr="-%s", position=2,
+                            mandatory=True,
+                            desc="dimension along which the file will be split")
+
 
 class SplitOutputSpec(TraitedSpec):
     out_files = OutputMultiPath(File(exists=True))
+
 
 class Split(FSLCommand):
     """Uses FSL Fslsplit command to separate a volume into images in
@@ -252,13 +269,14 @@ class Split(FSLCommand):
 
         """
         outputs = self._outputs().get()
-        ext =  Info.output_type_to_ext(self.inputs.output_type)
+        ext = Info.output_type_to_ext(self.inputs.output_type)
         outbase = 'vol*'
         if isdefined(self.inputs.out_base_name):
             outbase = '%s*' % self.inputs.out_base_name
         outputs['out_files'] = sorted(glob(os.path.join(os.getcwd(),
                                                     outbase + ext)))
         return outputs
+
 
 class ImageMathsInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", mandatory=True, position=1)
@@ -271,17 +289,19 @@ class ImageMathsInputSpec(FSLCommandInputSpec):
                                 'input', argstr="-odt %s", position=5,
                                 desc="output datatype, one of (char, short, int, float, double, input)")
 
+
 class ImageMathsOutputSpec(TraitedSpec):
     out_file = File(exists=True)
+
 
 class ImageMaths(FSLCommand):
     """Use FSL fslmaths command to allow mathematical manipulation of images
 
     `FSL info <http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/intro/index.htm#fslutils>`_
-    
+
     Examples
     --------
-    
+
     >>> from nipype.interfaces import fsl
     >>> from nipype.testing import anatfile
     >>> maths = fsl.ImageMaths(in_file=anatfile, op_string= '-add 5', \
@@ -316,24 +336,26 @@ class ImageMaths(FSLCommand):
 
 
 class FilterRegressorInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True,argstr="-i %s",desc="input file name (4D image)",mandatory=True,position=1)
-    out_file = File(argstr="-o %s",desc="output file name for the filtered data",genfile=True,position=2)
-    design_file = File(exists=True,argstr="-d %s",position=3,mandatory=True,
+    in_file = File(exists=True, argstr="-i %s", desc="input file name (4D image)", mandatory=True, position=1)
+    out_file = File(argstr="-o %s", desc="output file name for the filtered data", genfile=True, position=2)
+    design_file = File(exists=True, argstr="-d %s", position=3, mandatory=True,
                        desc="name of the matrix with time courses (e.g. GLM design or MELODIC mixing matrix)")
-    filter_columns = traits.List(traits.Int,argstr="-f '%s'", xor=["filter_all"], mandatory=True, position=4,
+    filter_columns = traits.List(traits.Int, argstr="-f '%s'", xor=["filter_all"], mandatory=True, position=4,
                         desc="(1-based) column indices to filter out of the data")
     filter_all = traits.Bool(mandatory=True, argstr="-f '%s'", xor=["filter_columns"], position=4,
                              desc="use all columns in the design file in denoising")
-    mask = File(exists=True,argstr="-m %s",desc="mask image file name")
-    var_norm = traits.Bool(argstr="--vn",desc="perform variance-normalization on data")
-    out_vnscales = traits.Bool(argstr="--out_vnscales",desc="output scaling factors for variance normalization")
+    mask = File(exists=True, argstr="-m %s", desc="mask image file name")
+    var_norm = traits.Bool(argstr="--vn", desc="perform variance-normalization on data")
+    out_vnscales = traits.Bool(argstr="--out_vnscales", desc="output scaling factors for variance normalization")
+
 
 class FilterRegressorOutputSpec(TraitedSpec):
-    out_file = File(exists=True,desc="output file name for the filtered data")
+    out_file = File(exists=True, desc="output file name for the filtered data")
+
 
 class FilterRegressor(FSLCommand):
     """Data de-noising by regressing out part of a design matrix
-    
+
     Uses simple OLS regression on 4D images
     """
     input_spec = FilterRegressorInputSpec
@@ -356,13 +378,14 @@ class FilterRegressor(FSLCommand):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,suffix='_regfilt')
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file, suffix='_regfilt')
         return outputs
 
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._list_outputs()[name]
         return None
+
 
 class ImageStatsInputSpec(FSLCommandInputSpec):
     split_4d = traits.Bool(argstr='-t', position=1,
@@ -375,17 +398,19 @@ class ImageStatsInputSpec(FSLCommandInputSpec):
     "threshold and then report the new nonzero mean")
     mask_file = File(exists=True, argstr="", desc='mask file used for option -k %s')
 
+
 class ImageStatsOutputSpec(TraitedSpec):
     out_stat = traits.Any(desc='stats output')
+
 
 class ImageStats(FSLCommand):
     """Use FSL fslstats command to calculate stats from images
 
     `FSL info <http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/intro/index.htm#fslutils>`_
-    
+
     Examples
     --------
-    
+
     >>> from nipype.interfaces.fsl import ImageStats
     >>> from nipype.testing import funcfile
     >>> stats = ImageStats(in_file=funcfile, op_string= '-M')
@@ -404,11 +429,11 @@ class ImageStats(FSLCommand):
         if name == 'op_string':
             if '-k %s' in self.inputs.op_string:
                 if isdefined(self.inputs.mask_file):
-                    return self.inputs.op_string%self.inputs.mask_file
+                    return self.inputs.op_string % self.inputs.mask_file
                 else:
                     raise ValueError('-k %s option in op_string requires mask_file')
         return super(ImageStats, self)._format_arg(name, trait_spec, value)
-    
+
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
         # local caching for backward compatibility
@@ -423,11 +448,11 @@ class ImageStats(FSLCommand):
             for line in runtime.stdout.split('\n'):
                 if line:
                     values = line.split()
-                    if len(values)>1:
+                    if len(values) > 1:
                         out_stat.append([float(val) for val in values])
                     else:
                         out_stat.extend([float(val) for val in values])
-            if len(out_stat)==1:
+            if len(out_stat) == 1:
                 out_stat = out_stat[0]
             save_json(outfile, dict(stat=out_stat))
         outputs.out_stat = out_stat
@@ -436,12 +461,12 @@ class ImageStats(FSLCommand):
 
 class OverlayInputSpec(FSLCommandInputSpec):
     transparency = traits.Bool(desc='make overlay colors semi-transparent',
-                               position=1, argstr='%s',usedefault=True, default_value=True)
-    out_type = traits.Enum('float', 'int', position=2, usedefault=True ,argstr='%s',
+                               position=1, argstr='%s', usedefault=True, default_value=True)
+    out_type = traits.Enum('float', 'int', position=2, usedefault=True, argstr='%s',
                             desc='write output with float or int')
     use_checkerboard = traits.Bool(desc='use checkerboard mask for overlay',
                                    argstr='-c', position=3)
-    background_image = File(exists=True, position=4, mandatory=True,argstr='%s',
+    background_image = File(exists=True, position=4, mandatory=True, argstr='%s',
                             desc='image to use as background')
     _xor_inputs = ('auto_thresh_bg', 'full_bg_range', 'bg_thresh')
     auto_thresh_bg = traits.Bool(desc='automatically threhsold the background image',
@@ -451,22 +476,24 @@ class OverlayInputSpec(FSLCommandInputSpec):
     bg_thresh = traits.Tuple(traits.Float, traits.Float, argstr='%.3f %.3f', position=5,
                              desc='min and max values for background intensity',
                              xor=_xor_inputs, mandatory=True)
-    stat_image = File(exists=True, position=6, mandatory=True,argstr='%s',
+    stat_image = File(exists=True, position=6, mandatory=True, argstr='%s',
                              desc='statistical image to overlay in color')
     stat_thresh = traits.Tuple(traits.Float, traits.Float, position=7, mandatory=True,
                                desc='min and max values for the statistical overlay',
                                argstr='%.2f %.2f')
     show_negative_stats = traits.Bool(desc='display negative statistics in overlay',
-                                      xor=['stat_image2'], argstr = '%s', position=8)
-    stat_image2 = File(exists=True, position=9, xor=['show_negative_stats'],argstr='%s',
+                                      xor=['stat_image2'], argstr='%s', position=8)
+    stat_image2 = File(exists=True, position=9, xor=['show_negative_stats'], argstr='%s',
                               desc='second statistical image to overlay in color')
     stat_thresh2 = traits.Tuple(traits.Float, traits.Float, position=10,
                                 desc='min and max values for second statistical overlay',
                                 argstr='%.2f %.2f')
-    out_file = File(desc='combined image volume', position=-1, argstr='%s',genfile=True)
+    out_file = File(desc='combined image volume', position=-1, argstr='%s', genfile=True)
+
 
 class OverlayOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='combined image volume')
+
 
 class Overlay(FSLCommand):
     """ Use FSL's overlay command to combine background and statistical images into one volume
@@ -499,9 +526,9 @@ class Overlay(FSLCommand):
             else:
                 return '1'
         if name == 'show_negative_stats':
-            return '%s %.2f %.2f'% (self.inputs.stat_image,
-                                    self.inputs.stat_thresh[0]*-1,
-                                    self.inputs.stat_thresh[1]*-1)
+            return '%s %.2f %.2f' % (self.inputs.stat_image,
+                                    self.inputs.stat_thresh[0] * -1,
+                                    self.inputs.stat_thresh[1] * -1)
         return super(Overlay, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
@@ -511,8 +538,8 @@ class Overlay(FSLCommand):
             if isdefined(self.inputs.stat_image2) and (
                 not isdefined(self.inputs.show_negative_stats)
                 or not self.inputs.show_negative_stats):
-                    stem = "%s_and_%s"%(split_filename(self.inputs.stat_image)[1],
-                                        split_filename(self.inputs.stat_image2)[1])
+                    stem = "%s_and_%s" % (split_filename(self.inputs.stat_image)[1],
+                                          split_filename(self.inputs.stat_image2)[1])
             else:
                 stem = split_filename(self.inputs.stat_image)[1]
             out_file = self._gen_fname(stem, suffix='_overlay')
@@ -543,25 +570,26 @@ class SlicerInputSpec(FSLCommandInputSpec):
                                     desc='use nearest neighbour interpolation for output')
     show_orientation = traits.Bool(position=9, argstr='%s', usedefault=True, default_value=True,
                                     desc='label left-right orientation')
-    _xor_options = ('single_slice','middle_slices','all_axial','sample_axial')
-    single_slice = traits.Enum('x','y','z', position=10, argstr='-%s',
+    _xor_options = ('single_slice', 'middle_slices', 'all_axial', 'sample_axial')
+    single_slice = traits.Enum('x', 'y', 'z', position=10, argstr='-%s',
                                xor=_xor_options, requires=['slice_number'],
                                desc='output picture of single slice in the x, y, or z plane')
-    slice_number = traits.Int(position=11, argstr='-%d',desc='slice number to save in picture')
-    middle_slices = traits.Bool(position=10, argstr='-a',xor=_xor_options,
+    slice_number = traits.Int(position=11, argstr='-%d', desc='slice number to save in picture')
+    middle_slices = traits.Bool(position=10, argstr='-a', xor=_xor_options,
                                 desc='output picture of mid-sagital, axial, and coronal slices')
     all_axial = traits.Bool(position=10, argstr='-A', xor=_xor_options, requires=['image_width'],
                             desc='output all axial slices into one picture')
-    sample_axial = traits.Int(position=10,argstr='-S %d',
+    sample_axial = traits.Int(position=10, argstr='-S %d',
                               xor=_xor_options, requires=['image_width'],
                               desc='output every n axial slices into one picture')
-    image_width = traits.Int(position=-2, argstr='%d',desc='max picture width')
+    image_width = traits.Int(position=-2, argstr='%d', desc='max picture width')
     out_file = File(position=-1, genfile=True, argstr='%s', desc='picture to write')
-    scaling = traits.Float(position=0, argstr='-s %f',desc='image scale')
-    
+    scaling = traits.Float(position=0, argstr='-s %f', desc='image scale')
+
 
 class SlicerOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='picture to write')
+
 
 class Slicer(FSLCommand):
     """Use FSL's slicer command to output a png image from a volume.
@@ -607,36 +635,39 @@ class Slicer(FSLCommand):
             return self._list_outputs()['out_file']
         return None
 
+
 class PlotTimeSeriesInputSpec(FSLCommandInputSpec):
 
     in_file = traits.Either(File(exists=True), traits.List(File(exists=True)),
-                           mandatory=True,argstr="%s",position=1,
+                           mandatory=True, argstr="%s", position=1,
                            desc="file or list of files with columns of timecourse information")
-    plot_start = traits.Int(argstr="--start=%d",xor=("plot_range",),
+    plot_start = traits.Int(argstr="--start=%d", xor=("plot_range",),
                             desc="first column from in-file to plot")
-    plot_finish = traits.Int(argstr="--finish=%d",xor=("plot_range",),
+    plot_finish = traits.Int(argstr="--finish=%d", xor=("plot_range",),
                              desc="final column from in-file to plot")
-    plot_range = traits.Tuple(traits.Int,traits.Int,argstr="%s",xor=("plot_start","plot_finish"),
+    plot_range = traits.Tuple(traits.Int, traits.Int, argstr="%s", xor=("plot_start", "plot_finish"),
                               desc="first and last columns from the in-file to plot")
-    title = traits.Str(argstr="%s",desc="plot title")
-    legend_file = File(exists=True,argstr="--legend=%s",desc="legend file")
+    title = traits.Str(argstr="%s", desc="plot title")
+    legend_file = File(exists=True, argstr="--legend=%s", desc="legend file")
     labels = traits.Either(traits.Str, traits.List(traits.Str),
-                           argstr="%s",desc="label or list of labels")
-    y_min = traits.Float(argstr="--ymin=%.2f",desc="minumum y value",xor=("y_range",))
-    y_max = traits.Float(argstr="--ymax=%.2f",desc="maximum y value",xor=("y_range",))
-    y_range = traits.Tuple(traits.Float,traits.Float,argstr="%s",xor=("y_min","y_max"),
+                           argstr="%s", desc="label or list of labels")
+    y_min = traits.Float(argstr="--ymin=%.2f", desc="minumum y value", xor=("y_range",))
+    y_max = traits.Float(argstr="--ymax=%.2f", desc="maximum y value", xor=("y_range",))
+    y_range = traits.Tuple(traits.Float, traits.Float, argstr="%s", xor=("y_min", "y_max"),
                            desc="min and max y axis values")
-    x_units = traits.Int(argstr="-u %d",usedefault=True,default_value=1,
+    x_units = traits.Int(argstr="-u %d", usedefault=True, default_value=1,
                          desc="scaling units for x-axis (between 1 and length of in file)")
-    plot_size = traits.Tuple(traits.Int,traits.Int,argstr="%s",
+    plot_size = traits.Tuple(traits.Int, traits.Int, argstr="%s",
                              desc="plot image height and width")
-    x_precision = traits.Int(argstr="--precision=%d",desc="precision of x-axis labels")
-    sci_notation = traits.Bool(argstr="--sci",desc="switch on scientific notation")
-    out_file = File(argstr="-o %s",genfile=True,desc="image to write")
+    x_precision = traits.Int(argstr="--precision=%d", desc="precision of x-axis labels")
+    sci_notation = traits.Bool(argstr="--sci", desc="switch on scientific notation")
+    out_file = File(argstr="-o %s", genfile=True, desc="image to write")
+
 
 class PlotTimeSeriesOutputSpec(TraitedSpec):
-    
+
     out_file = File(exists=True, desc='image to write')
+
 
 class PlotTimeSeries(FSLCommand):
     """Use fsl_tsplot to create images of time course plots.
@@ -659,23 +690,23 @@ class PlotTimeSeries(FSLCommand):
         if name == "in_file":
             if isinstance(value, list):
                 args = ",".join(value)
-                return "-i %s"%args
+                return "-i %s" % args
             else:
-                return "-i %s"%value
+                return "-i %s" % value
         elif name == "labels":
             if isinstance(value, list):
                 args = ",".join(value)
-                return "-a %s"%args
+                return "-a %s" % args
             else:
-                return "-a %s"%value
+                return "-a %s" % value
         elif name == "title":
-            return "-t \'%s\'"%value
+            return "-t \'%s\'" % value
         elif name == "plot_range":
-            return "--start=%d --finish=%d"%value
+            return "--start=%d --finish=%d" % value
         elif name == "y_range":
-            return "--ymin=%d --ymax=%d"%value
+            return "--ymin=%d --ymax=%d" % value
         elif name == "plot_size":
-            return "-h %d -w %d"%value
+            return "-h %d -w %d" % value
         return super(PlotTimeSeries, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
@@ -699,19 +730,21 @@ class PlotTimeSeries(FSLCommand):
 class PlotMotionParamsInputSpec(FSLCommandInputSpec):
 
     in_file = traits.Either(File(exists=True), traits.List(File(exists=True)),
-                            mandatory=True,argstr="%s",position=1,
+                            mandatory=True, argstr="%s", position=1,
                             desc="file with motion parameters")
     in_source = traits.Enum("spm", "fsl", mandatory=True,
                             desc="which program generated the motion parameter file - fsl, spm")
-    plot_type = traits.Enum("rotations","translations", "displacement",argstr="%s",mandatory=True,
+    plot_type = traits.Enum("rotations", "translations", "displacement", argstr="%s", mandatory=True,
                          desc="which motion type to plot - rotations, translations, displacement")
-    plot_size = traits.Tuple(traits.Int,traits.Int,argstr="%s",
+    plot_size = traits.Tuple(traits.Int, traits.Int, argstr="%s",
                              desc="plot image height and width")
-    out_file = File(argstr="-o %s",genfile=True,desc="image to write")
+    out_file = File(argstr="-o %s", genfile=True, desc="image to write")
+
 
 class PlotMotionParamsOutputSpec(TraitedSpec):
 
     out_file = File(exists=True, desc='image to write')
+
 
 class PlotMotionParams(FSLCommand):
     """Use fsl_tsplot to plot the estimated motion parameters from a realignment program.
@@ -729,9 +762,9 @@ class PlotMotionParams(FSLCommand):
     -----
     The 'in_source' attribute determines the order of columns that are expected in the
     source file.  FSL prints motion parameters in the order rotations, translations,
-    while SPM prints them in the opposite order.  This interface should be able to 
+    while SPM prints them in the opposite order.  This interface should be able to
     plot timecourses of motion parameters generated from other sources as long as
-    they fall under one of these two patterns.  For more flexibilty, see the 
+    they fall under one of these two patterns.  For more flexibilty, see the
     :class:`fsl.PlotTimeSeries` interface.
 
     """
@@ -743,31 +776,31 @@ class PlotMotionParams(FSLCommand):
 
         if name == "plot_type":
             source = self.inputs.in_source
-            
+
             if self.inputs.plot_type == 'displacement':
-                title='-t \'MCFLIRT estimated mean displacement (mm)\''
+                title = '-t \'MCFLIRT estimated mean displacement (mm)\''
                 labels = '-a abs,rel'
-                return '%s %s'%(title, labels)
+                return '%s %s' % (title, labels)
 
             # Get the right starting and ending position depending on source package
-            sfdict = dict(fsl_rot=(1,3),fsl_tra=(4,6),spm_rot=(4,6),spm_tra=(1,3))
-            
+            sfdict = dict(fsl_rot=(1, 3), fsl_tra=(4, 6), spm_rot=(4, 6), spm_tra=(1, 3))
+
             # Format the title properly
-            sfstr = "--start=%d --finish=%d"%sfdict["%s_%s"%(source, value[:3])]
-            titledict = dict(fsl="MCFLIRT",spm="Realign")
-            unitdict = dict(rot="radians",tra="mm")
-            
-            title = "\'%s estimated %s (%s)\'"%(titledict[source],value,unitdict[value[:3]])
-            
-            return "-t %s %s -a x,y,z"%(title, sfstr)
+            sfstr = "--start=%d --finish=%d" % sfdict["%s_%s" % (source, value[:3])]
+            titledict = dict(fsl="MCFLIRT", spm="Realign")
+            unitdict = dict(rot="radians", tra="mm")
+
+            title = "\'%s estimated %s (%s)\'" % (titledict[source], value, unitdict[value[:3]])
+
+            return "-t %s %s -a x,y,z" % (title, sfstr)
         elif name == "plot_size":
-            return "-h %d -w %d"%value
+            return "-h %d -w %d" % value
         elif name == "in_file":
             if isinstance(value, list):
                 args = ",".join(value)
-                return "-i %s"%args
+                return "-i %s" % args
             else:
-                return "-i %s"%value
+                return "-i %s" % value
 
         return super(PlotMotionParams, self)._format_arg(name, spec, value)
 
@@ -779,8 +812,8 @@ class PlotMotionParams(FSLCommand):
                 infile = self.inputs.in_file[0]
             else:
                 infile = self.inputs.in_file
-            plttype = dict(rot="rot",tra="trans",dis="disp")[self.inputs.plot_type[:3]]
-            out_file = fname_presuffix(infile, suffix="_%s.png"%plttype, use_ext=False)
+            plttype = dict(rot="rot", tra="trans", dis="disp")[self.inputs.plot_type[:3]]
+            out_file = fname_presuffix(infile, suffix="_%s.png" % plttype, use_ext=False)
         outputs['out_file'] = out_file
         return outputs
 
@@ -792,28 +825,30 @@ class PlotMotionParams(FSLCommand):
 
 class ConvertXFMInputSpec(FSLCommandInputSpec):
 
-    in_file = File(exists=True,mandatory=True,argstr="%s",position=-1,
+    in_file = File(exists=True, mandatory=True, argstr="%s", position=-1,
                    desc="input transformation matrix")
-    in_file2 = File(exists=True,argstr="%s",position=-2,
+    in_file2 = File(exists=True, argstr="%s", position=-2,
                     desc="second input matrix (for use with fix_scale_skew or concat_xfm")
-    _options = ["invert_xfm","concat_xfm","fix_scale_skew"]
-    invert_xfm = traits.Bool(argstr="-inverse",position=-3,xor=_options,
+    _options = ["invert_xfm", "concat_xfm", "fix_scale_skew"]
+    invert_xfm = traits.Bool(argstr="-inverse", position=-3, xor=_options,
                              desc="invert input transformation")
-    concat_xfm = traits.Bool(argstr="-concat",position=-3,xor=_options,requires=["in_file2"],
+    concat_xfm = traits.Bool(argstr="-concat", position=-3, xor=_options, requires=["in_file2"],
                              desc="write joint transformation of two input matrices")
-    fix_scale_skew = traits.Bool(argstr="-fixscaleskew",position=-3,
-                                  xor=_options,requires=["in_file2"],
+    fix_scale_skew = traits.Bool(argstr="-fixscaleskew", position=-3,
+                                  xor=_options, requires=["in_file2"],
                                   desc="use secondary matrix to fix scale and skew")
-    out_file = File(genfile=True,argstr="-omat %s",position=1,
+    out_file = File(genfile=True, argstr="-omat %s", position=1,
                     desc="final transformation matrix")
+
 
 class ConvertXFMOutputSpec(TraitedSpec):
 
-    out_file = File(exists=True,desc="output transformation matrix")
+    out_file = File(exists=True, desc="output transformation matrix")
+
 
 class ConvertXFM(FSLCommand):
     """Use the FSL utility convert_xfm to modify FLIRT transformation matrices.
-    
+
     Examples
     --------
     >>> import nipype.interfaces.fsl as fsl
@@ -841,11 +876,11 @@ class ConvertXFM(FSLCommand):
                                           use_ext=False)
             else:
                 if self.inputs.concat_xfm:
-                   path, infile2, ext = split_filename(self.inputs.in_file2)
-                   outfile = fname_presuffix("%s_%s"%(infile1,infile2),
-                                             suffix=".mat",
-                                             newpath=os.getcwd(),
-                                             use_ext=False)
+                    path, infile2, ext = split_filename(self.inputs.in_file2)
+                    outfile = fname_presuffix("%s_%s" % (infile1, infile2),
+                                              suffix=".mat",
+                                              newpath=os.getcwd(),
+                                              use_ext=False)
                 else:
                     outfile = fname_presuffix(infile1,
                                               suffix="_fix.mat",
@@ -864,15 +899,17 @@ class SwapDimensionsInputSpec(FSLCommandInputSpec):
 
     in_file = File(exists=True, mandatory=True, argstr="%s", position="1",
                    desc="input image")
-    _dims = ["x","-x","y","-y","z","-z","RL","LR","AP","PA","IS","SI"]
+    _dims = ["x", "-x", "y", "-y", "z", "-z", "RL", "LR", "AP", "PA", "IS", "SI"]
     new_dims = traits.Tuple(traits.Enum(_dims), traits.Enum(_dims), traits.Enum(_dims),
                             argstr="%s %s %s", mandatory=True,
                             desc="3-tuple of new dimension order")
     out_file = File(genfile=True, argstr="%s", desc="image to write")
 
+
 class SwapDimensionsOutputSpec(TraitedSpec):
 
     out_file = File(exists=True, desc="image with new dimensions")
+
 
 class SwapDimensions(FSLCommand):
     """Use fslswapdim to alter the orientation of an image.
@@ -900,19 +937,21 @@ class SwapDimensions(FSLCommand):
         if name == "out_file":
             return self._list_outputs()["out_file"]
         return None
-    
+
+
 class PowerSpectrumInputSpec(FSLCommandInputSpec):
     # We use position args here as list indices - so a negative number
     # will put something on the end
     in_file = File(exists=True,
                   desc="input 4D file to estimate the power spectrum",
                   argstr='%s', position=0, mandatory=True)
-    out_file = File(desc = 'name of output 4D file for power spectrum',
+    out_file = File(desc='name of output 4D file for power spectrum',
                    argstr='%s', position=1, genfile=True)
-    
+
 
 class PowerSpectrumOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="path/name of the output 4D power spectrum file")
+
 
 class PowerSpectrum(FSLCommand):
     """Use FSL PowerSpectrum command for power spectrum estimation.
@@ -934,7 +973,7 @@ class PowerSpectrum(FSLCommand):
         out_file = self.inputs.out_file
         if not isdefined(out_file) and isdefined(self.inputs.in_file):
             out_file = self._gen_fname(self.inputs.in_file,
-                                       suffix = '_ps')
+                                       suffix='_ps')
         return out_file
 
     def _list_outputs(self):
@@ -946,4 +985,3 @@ class PowerSpectrum(FSLCommand):
         if name == 'out_file':
             return self._gen_outfilename()
         return None
-

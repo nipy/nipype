@@ -1,4 +1,4 @@
-""" 
+"""
     Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )

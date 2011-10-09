@@ -21,6 +21,7 @@ if __name__ == '__main__':
                                         '\.utils$',
                                         '\.pipeline',
                                         '\.testing',
+                                        '\.caching',
                                         ]
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += ['\.version$',

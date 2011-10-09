@@ -5,13 +5,13 @@ import shutil
 from tempfile import mkdtemp
 
 from nipype.testing import assert_equal, assert_true
-from nipype.interfaces import utility 
+from nipype.interfaces import utility
 
 def test_rename():
     tempdir = os.path.realpath(mkdtemp())
     origdir = os.getcwd()
     os.chdir(tempdir)
-   
+
     # Test very simple rename
     _ = open("file.txt","w").close()
     rn = utility.Rename(in_file="file.txt", format_string="test_file1.txt")
@@ -30,7 +30,7 @@ def test_rename():
     rn.inputs.field2 = 2
     res = rn.run()
     outfile = os.path.join(tempdir, "test_file2.txt")
-    yield assert_equal, res.outputs.out_file, outfile 
+    yield assert_equal, res.outputs.out_file, outfile
     yield assert_true, os.path.exists(outfile)
 
     # Clean up

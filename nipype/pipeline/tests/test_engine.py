@@ -6,14 +6,12 @@ import os
 from copy import deepcopy
 from tempfile import mkdtemp
 from shutil import rmtree
-from nose import with_setup
 
 import networkx as nx
 
 from nipype.testing import (assert_raises, assert_equal, assert_true,
-                            assert_false, skipif)
+                            assert_false)
 import nipype.interfaces.base as nib
-from nipype.utils.filemanip import cleandir
 import nipype.pipeline.engine as pe
 
 class InputSpec(nib.TraitedSpec):
@@ -26,11 +24,11 @@ class OutputSpec(nib.TraitedSpec):
 class TestInterface(nib.BaseInterface):
     input_spec = InputSpec
     output_spec = OutputSpec
-    
+
     def _run_interface(self, runtime):
         runtime.returncode = 0
         return runtime
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['output1'] = [1, self.inputs.input1]
@@ -62,30 +60,6 @@ def test_add_nodes():
     yield assert_true, mod1 in pipe._graph.nodes()
     yield assert_true, mod2 in pipe._graph.nodes()
 
-def test_run_in_series():
-    cur_dir = os.getcwd()
-    temp_dir = mkdtemp(prefix='test_engine_')
-    os.chdir(temp_dir)
-
-    pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
-    mod2 = pe.MapNode(interface=TestInterface(),
-                      iterfield=['input1'],
-                      name='mod2')
-    pipe.connect([(mod1,mod2,[('output1','input1')])])
-    pipe.base_dir = os.getcwd()
-    mod1.inputs.input1 = 1
-    execgraph = pipe.run()
-    names = ['.'.join((node._hierarchy,node.name)) for node in execgraph.nodes()]
-    node = execgraph.nodes()[names.index('pipe.mod1')]
-    result = node.get_output('output1')
-    # NOTE: yield statements in nose cause the setup function to be
-    # called at this point in the code, after all of the above is
-    # executed!
-    yield assert_equal, result, [1, 1]
-    os.chdir(cur_dir)
-    rmtree(temp_dir)
-
 # Test graph expansion.  The following set tests the building blocks
 # of the graph expansion routine.
 # XXX - SG I'll create a graphical version of these tests and actually
@@ -109,7 +83,7 @@ def test2():
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 4
     yield assert_equal, len(pipe._execgraph.edges()), 0
-    
+
 def test3():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
@@ -121,7 +95,7 @@ def test3():
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 3
     yield assert_equal, len(pipe._execgraph.edges()), 2
-    
+
 def test4():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(),name='mod1')
@@ -169,7 +143,7 @@ def test7():
     mod1.iterables = dict(input1=lambda:[1,2])
     mod2.iterables = {}
     mod3.iterables = {}
-    pipe.connect([(mod1,mod3,[('output1','input2')]),
+    pipe.connect([(mod1,mod3,[('output1','input1')]),
                   (mod2,mod3,[('output1','input2')])])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
@@ -184,7 +158,7 @@ def test8():
     mod1.iterables = dict(input1=lambda:[1,2])
     mod2.iterables = dict(input1=lambda:[1,2])
     mod3.iterables = {}
-    pipe.connect([(mod1,mod3,[('output1','input2')]),
+    pipe.connect([(mod1,mod3,[('output1','input1')]),
                   (mod2,mod3,[('output1','input2')])])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
@@ -222,12 +196,11 @@ def test_expansion():
 
 def test_iterable_expansion():
     import nipype.pipeline.engine as pe
-    from nipype.interfaces.utility import IdentityInterface
     wf1 = pe.Workflow(name='test')
-    node1 = pe.Node(IdentityInterface(fields=['in1']),name='node1')
-    node2 = pe.Node(IdentityInterface(fields=['in2']),name='node2')
-    node1.iterables = ('in1',[1,2])
-    wf1.connect(node1,'in1', node2, 'in2')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node2 = pe.Node(TestInterface(),name='node2')
+    node1.iterables = ('input1',[1,2])
+    wf1.connect(node1,'output1', node2, 'input2')
     wf3 = pe.Workflow(name='group')
     for i in [0,1,2]:
         wf3.add_nodes([wf1.clone(name='test%d'%i)])
@@ -252,6 +225,10 @@ def test_doubleconnect():
     flow1 = pe.Workflow(name='test')
     flow1.connect(a,'a',b,'a')
     x = lambda: flow1.connect(a,'b',b,'a')
+    yield assert_raises, Exception, x
+    c = pe.Node(IdentityInterface(fields=['a','b']),name='c')
+    flow1 = pe.Workflow(name='test2')
+    x = lambda : flow1.connect([(a, c, [('b', 'b')]), (b, c, [('a', 'b')])])
     yield assert_raises, Exception, x
 
 
@@ -347,4 +324,12 @@ def test_workflow_add():
     yield assert_raises, IOError, w1.add_nodes, [n2]
     yield assert_raises, IOError, w1.add_nodes, [n3]
     yield assert_raises, IOError, w1.connect, [(w1,n2,[('n1.a','d')])]
-    
+
+
+def test_node_get_output():
+    mod1 = pe.Node(interface=TestInterface(),name='mod1')
+    mod1.inputs.input1 = 1
+    mod1.run()
+    yield assert_equal, mod1.get_output('output1'), [1, 1]
+    mod1._result = None
+    yield assert_equal, mod1.get_output('output1'), [1, 1]

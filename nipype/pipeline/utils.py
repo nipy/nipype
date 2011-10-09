@@ -15,8 +15,11 @@ package_check('networkx', '1.3')
 import networkx as nx
 
 from nipype.interfaces.base import CommandLine, isdefined, Undefined
-from nipype.utils.filemanip import fname_presuffix, FileNotFoundError
+from nipype.utils.filemanip import fname_presuffix, FileNotFoundError,\
+    filename_to_list
 from nipype.utils.config import config
+from nipype.utils.misc import create_function_from_source
+from nipype.interfaces.utility import IdentityInterface
 
 logger = logging.getLogger('workflow')
 
@@ -100,18 +103,18 @@ def get_print_name(node):
 
     For example, a node containing an instance of interfaces.fsl.BET
     would be called nodename.BET.fsl
-    
+
     """
-    name = node.name
+    name = node.fullname
     if hasattr(node, '_interface'):
         pkglist = node._interface.__class__.__module__.split('.')
         interface = node._interface.__class__.__name__
         destclass = ''
         if len(pkglist) > 2:
             destclass = '.%s'%pkglist[2]
-        name = '.'.join([node.name, interface]) + destclass
+        name = '.'.join([node.fullname, interface]) + destclass
     return name
-    
+
 def _create_dot_graph(graph, show_connectinfo=False):
     """Create a graph that can be pickled.
 
@@ -232,6 +235,19 @@ def walk(children, level=0, path=None, usename=True):
         for child_paths in walk(tail, level+1, path, usename):
             yield child_paths
 
+def evaluate_connect_function(function_source, args, first_arg):
+    func = create_function_from_source(function_source)
+    try:
+        output_value = func(first_arg,
+                            *list(args))
+    except NameError as e:
+        if e.args[0].startswith("global name") and e.args[0].endswith(
+            "is not defined"):
+            e.args = (e.args[0],
+                      "Due to engine constraints all imports have to be done inside each function definition")
+        raise e
+    return output_value
+
 def get_levels(G):
     levels = {}
     for n in nx.topological_sort(G):
@@ -267,7 +283,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables, prefix):
     -------
     Returns a merged graph containing copies of the subgraph with
     appropriate edge connections to the supergraph.
-    
+
     """
     # Retrieve edge information connecting nodes of the subgraph to other
     # nodes of the supergraph.
@@ -331,13 +347,84 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables, prefix):
             node._id += template%i
     return supergraph
 
+def _connect_nodes(graph, srcnode, destnode, connection_info):
+    """Add a connection between two nodes
+    """
+    data = graph.get_edge_data(srcnode, destnode, default=None)
+    if not data:
+        data={'connect': connection_info}
+        graph.add_edges_from([(srcnode, destnode, data)])
+    else:
+        data['connect'].extend(connection_info)
+
+def _remove_identity_nodes(graph):
+    """Remove identity nodes from an execution graph
+    """
+    identity_nodes = []
+    for node in nx.topological_sort(graph):
+        if isinstance(node._interface,IdentityInterface):
+            identity_nodes.append(node)
+    if identity_nodes:
+        for node in identity_nodes:
+            portinputs = {}
+            portoutputs = {}
+            for u,_,d in graph.in_edges_iter(node, data=True):
+                for src, dest in d['connect']:
+                    portinputs[dest] = (u, src)
+            for  _,v,d in graph.out_edges_iter(node, data=True):
+                for src, dest in d['connect']:
+                    if isinstance(src, tuple):
+                        srcport = src[0]
+                    else:
+                        srcport = src
+                    if srcport not in portoutputs:
+                        portoutputs[srcport] = []
+                    portoutputs[srcport].append((v, dest, src))
+            if not portoutputs:
+                pass
+            elif not portinputs:
+                for key, connections in portoutputs.items():
+                    for destnode, inport, src in connections:
+                        value = getattr(node.inputs, key)
+                        if isinstance(src, tuple):
+                            value = evaluate_connect_function(src[1], src[2],
+                                                              value)
+                        destnode.set_input(inport, value)
+            else:
+                for key, connections in portoutputs.items():
+                    for destnode, inport, src in connections:
+                        if key not in portinputs:
+                            value = getattr(node.inputs, key)
+                            if isinstance(src, tuple):
+                                value = evaluate_connect_function(src[1], src[2],
+                                                                  value)
+                            destnode.set_input(inport, value)
+                        else:
+                            srcnode, srcport = portinputs[key]
+                            if isinstance(srcport, tuple) and isinstance(src, tuple):
+                                raise ValueError('Does not support two inline functions in series (\'%s\' and \'%s\'). Please use a Function node'%(srcport[1].split("\\n")[0][6:-1],
+                                                                                                                                                    src[1].split("\\n")[0][6:-1]))
+                            connect = graph.get_edge_data(srcnode, destnode,
+                                                          default={'connect':[]})
+                            if isinstance(src, tuple):
+                                connect['connect'].append(((srcport, src[1], src[2]),
+                                                        inport))
+                            else:
+                                connect = {'connect': [(srcport, inport)]}
+                            old_connect = graph.get_edge_data(srcnode,destnode, default = {'connect':[]})
+                            old_connect['connect'] += connect['connect']
+                            graph.add_edges_from([(srcnode, destnode, old_connect)])
+            graph.remove_nodes_from([node])
+    return graph
+
+
 def generate_expanded_graph(graph_in):
     """Generates an expanded graph based on node parameterization
-    
+
     Parameterization is controlled using the `iterables` field of the
     pipeline elements.  Thus if there are two nodes with iterables a=[1,2]
     and b=[3,4] this procedure will generate a graph with sub-graphs
-    parameterized as (a=1,b=3), (a=1,b=4), (a=2,b=3) and (a=2,b=4). 
+    parameterized as (a=1,b=3), (a=1,b=4), (a=2,b=3) and (a=2,b=4).
     """
     logger.debug("PE: expanding iterables")
     moreiterables = True
@@ -376,26 +463,26 @@ def generate_expanded_graph(graph_in):
         if node.parameterization:
            node.parameterization = [param for _, param in sorted(node.parameterization)]
     logger.debug("PE: expanding iterables ... done")
-    return graph_in
+    return _remove_identity_nodes(graph_in)
 
 def export_graph(graph_in, base_dir=None, show = False, use_execgraph=False,
                  show_connectinfo=False, dotfilename='graph.dot', format='png'):
     """ Displays the graph layout of the pipeline
-    
+
     This function requires that pygraphviz and matplotlib are available on
     the system.
-    
+
     Parameters
     ----------
-    
+
     show : boolean
     Indicate whether to generate pygraphviz output fromn
     networkx. default [False]
-    
+
     use_execgraph : boolean
     Indicates whether to use the specification graph or the
     execution graph. default [False]
-    
+
     show_connectioninfo : boolean
     Indicates whether to show the edge data on the graph. This
     makes the graph rather cluttered. default [False]
@@ -448,7 +535,7 @@ def make_output_dir(outdir):
     Parameters
     ----------
     outdir : output directory to create
-    
+
     """
     if not os.path.exists(os.path.abspath(outdir)):
         logger.debug("Creating %s" % outdir)
@@ -501,12 +588,13 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
     for output in needed_outputs:
         output_files.extend(walk_outputs(outputdict[output]))
     needed_files = [path for path, type in output_files if type == 'f']
-    input_files = []
-    inputdict = inputs.get()
-    input_files.extend(walk_outputs(inputdict))
-    needed_files += [path for path, type in input_files if type == 'f']
+    if config.getboolean('execution', 'keep_inputs'):
+        input_files = []
+        inputdict = inputs.get()
+        input_files.extend(walk_outputs(inputdict))
+        needed_files += [path for path, type in input_files if type == 'f']
     for extra in ['_0x*.json', 'provenance.xml', 'pyscript*.m',
-                  'command.txt', 'result*.pklz', '_inputs.pklz']:
+                  'command.txt', 'result*.pklz', '_inputs.pklz', '_node.pklz']:
         needed_files.extend(glob(os.path.join(cwd, extra)))
     if files2keep:
         needed_files.extend(filename_to_list(files2keep))
@@ -534,12 +622,12 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
 
 def merge_dict(d1, d2, merge=lambda x,y:y):
     """
-    Merges two dictionaries, non-destructively, combining 
+    Merges two dictionaries, non-destructively, combining
     values on duplicate keys as defined by the optional merge
     function.  The default behavior replaces the values in d1
     with corresponding values in d2.  (There is no other generally
-    applicable merge strategy, but often you'll have homogeneous 
-    types in your dicts, so specifying a merge technique can be 
+    applicable merge strategy, but often you'll have homogeneous
+    types in your dicts, so specifying a merge technique can be
     valuable.)
 
     Examples:

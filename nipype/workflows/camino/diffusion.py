@@ -1,11 +1,10 @@
-import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.camino as camino
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.algorithms.misc as misc
-import os                                    # system functions
+
 
 def get_vox_dims(volume):
     import nibabel as nb
@@ -16,6 +15,7 @@ def get_vox_dims(volume):
     voxdims = hdr.get_zooms()
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
 
+
 def get_data_dims(volume):
     import nibabel as nb
     if isinstance(volume, list):
@@ -25,10 +25,12 @@ def get_data_dims(volume):
     datadims = hdr.get_data_shape()
     return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
 
+
 def get_affine(volume):
     import nibabel as nb
     nii = nb.load(volume)
     return nii.get_affine()
+
 
 def create_camino_dti_pipeline(name="dtiproc"):
     """Creates a pipeline that does the same diffusion processing as in the
@@ -134,8 +136,6 @@ def create_camino_dti_pipeline(name="dtiproc"):
     cam2trk_pico = pe.Node(interface=cam2trk.Camino2Trackvis(), name="cam2trk_pico")
     cam2trk_pico.inputs.min_length = 30
     cam2trk_pico.inputs.voxel_order = 'LAS'
-
-    trk2camino = pe.Node(interface=cam2trk.Trackvis2Camino(), name="trk2camino")
 
     """
     Tracts can also be converted to VTK and OOGL formats, for use in programs such as GeomView and      Paraview, using the following two nodes.

@@ -102,7 +102,7 @@ class InterfaceHelpWriter(object):
         class_skip_patterns : None or sequence
             Sequence of strings giving classes to be excluded
             Default is: None
-           
+
         '''
         if package_skip_patterns is None:
             package_skip_patterns = ['\\.tests$']
@@ -215,7 +215,7 @@ class InterfaceHelpWriter(object):
         functions, classes = self._parse_lines(f, uri)
         f.close()
         return functions, classes
-    
+
     def _parse_lines(self, linesource, module):
         ''' Parse lines of text for functions and classes '''
         functions = []
@@ -246,7 +246,7 @@ class InterfaceHelpWriter(object):
         fhandle = open(fname)
         for line in fhandle:
             ad += '\t' + line + '\n'
-        
+
         fhandle.close()
         os.remove(fname)
         os.remove(fname + ".png")
@@ -275,19 +275,19 @@ class InterfaceHelpWriter(object):
                 workflow = finst()
             except TypeError:
                 continue
-            
+
             if isinstance(workflow, Workflow):
                 workflows.append((workflow,function, finst))
-        
+
         if not classes and not workflows:
             print 'WARNING: Empty -',uri  # dbg
             return ''
 
         # Make a shorter version of the uri that omits the package name for
-        # titles 
+        # titles
         #uri_short = re.sub(r'^%s\.' % self.package_name,'',uri)
         uri_short = uri
-        
+
         ad = '.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n'
 
         chap_title = uri_short
@@ -348,7 +348,7 @@ class InterfaceHelpWriter(object):
                     setattr(classinst.inputs,i, None)
                 except TraitError, excp:
                     fieldstr += " : (%s)\n\t"%excp.info
-                    
+
                 try:
                     fieldstr += '\t' + getattr(v, 'desc')
                 except:
@@ -365,7 +365,7 @@ class InterfaceHelpWriter(object):
                     if not opthelpstr:
                         opthelpstr = ['[Optional]']
                     opthelpstr += [fieldstr]
-                        
+
             if mandhelpstr:
                 helpstr += '\n\t'.join(mandhelpstr)
                 helpstr += '\n\n\t'
@@ -373,7 +373,7 @@ class InterfaceHelpWriter(object):
                 helpstr += '\n\t'.join(opthelpstr)
             if helpstr:
                 helpstr += '\n\n'
-                
+
             if classinst._outputs():
                 iterator = classinst._outputs().items
             else:
@@ -381,12 +381,12 @@ class InterfaceHelpWriter(object):
             outstr = []
             for i,v in sorted(iterator()):
                 fieldstr =  i
-                
+
                 try:
                     setattr(classinst._outputs(),i, None)
                 except TraitError, excp:
                     fieldstr += " : (%s)\n\t"%excp.info
-                    
+
                 try:
                     fieldstr += '\t' + getattr(v, 'desc')
                 except:
@@ -410,20 +410,20 @@ class InterfaceHelpWriter(object):
                   '\n' \
                   '  .. automethod:: __init__\n'
         """
-        
+
         for workflow, name, finst in workflows:
             ad += '\n:class:`' + name + '()`\n' \
                   + self.rst_section_levels[2] * \
                   (len(name)+11) + '\n\n'
             helpstr = trim(finst.__doc__, self.rst_section_levels[3]) + "\n\n"
             ad += '\n' + helpstr + '\n'
-            
-            
+
+
             (_,fname) =  tempfile.mkstemp(suffix=".dot")
             workflow.write_graph(dotfilename=fname, graph2use='hierarchical')
-            
+
             ad += self._write_graph_section(fname, 'Graph')
-            
+
         return ad
 
     def _survives_exclude(self, matchstr, match_type):
@@ -454,7 +454,7 @@ class InterfaceHelpWriter(object):
         elif match_type == 'class':
             patterns = self.class_skip_patterns
         else:
-            raise ValueError('Cannot interpret match type "%s"' 
+            raise ValueError('Cannot interpret match type "%s"'
                              % match_type)
         # Match to URI without package name
         L = len(self.package_name)
@@ -470,7 +470,7 @@ class InterfaceHelpWriter(object):
         return True
 
     def discover_modules(self):
-        ''' Return module sequence discovered from ``self.package_name`` 
+        ''' Return module sequence discovered from ``self.package_name``
 
 
         Parameters
@@ -491,7 +491,7 @@ class InterfaceHelpWriter(object):
         >>> dw.package_skip_patterns.append('\.util$')
         >>> 'sphinx.util' in dw.discover_modules()
         False
-        >>> 
+        >>>
         '''
         modules = [self.package_name]
         # raw directory parsing
@@ -514,7 +514,7 @@ class InterfaceHelpWriter(object):
                     self._survives_exclude(module_uri, 'module')):
                     modules.append(module_uri)
         return sorted(modules)
-    
+
     def write_modules_api(self, modules,outdir):
         # write the list
         written_modules = []
@@ -539,7 +539,7 @@ class InterfaceHelpWriter(object):
         outdir : string
             Directory name in which to store files
             We create automatic filenames for each module
-            
+
         Returns
         -------
         None
@@ -553,7 +553,7 @@ class InterfaceHelpWriter(object):
         # compose list of modules
         modules = self.discover_modules()
         self.write_modules_api(modules,outdir)
-        
+
     def write_index(self, outdir, froot='gen', relative_to=None):
         """Make a reST API index file from written files
 
