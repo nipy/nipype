@@ -12,7 +12,7 @@ from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, trait
 from nipype.utils.filemanip import split_filename
 import pickle
 import scipy.io as sio
-import os
+import os, os.path as op
 import numpy as np
 import nibabel as nb
 import networkx as nx

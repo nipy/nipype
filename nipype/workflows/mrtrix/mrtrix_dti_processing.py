@@ -7,7 +7,7 @@ import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.algorithms.misc as misc
 import nipype.interfaces.mrtrix as mrtrix
 import os, os.path as op
-from nipype.workflows.camino.camino_dti_processing import get_vox_dims, get_data_dims, get_affine
+from nipype.workflows.camino.diffusion import get_vox_dims, get_data_dims, get_affine
  
 def create_mrtrix_dti_pipeline(name="dtiproc"):
     """Creates a pipeline that does the same diffusion processing as in the

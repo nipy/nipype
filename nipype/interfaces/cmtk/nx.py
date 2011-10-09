@@ -445,10 +445,11 @@ class NetworkXMetricsInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True, desc='Input network')
     resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary' \
                                 ', but if included, the interface will output the statistical maps as NetworkX graphs.')
-    subject_id = traits.Str(desc='Subject ID for the input network')
+    subject_id = traits.Str('subject', usedefault=True, desc='Subject ID for the input network')
     out_k_core = File('k_core', usedefault=True, desc='Computed k-core network stored as a NetworkX pickle.')
     out_k_shell = File('k_shell', usedefault=True, desc='Computed k-shell network stored as a NetworkX pickle.')
     out_k_crust = File('k_crust', usedefault=True, desc='Computed k-crust network stored as a NetworkX pickle.')
+    out_pickled_extra_measures = File('extra_measures', usedefault=True, desc='Network measures for group 1 that return dictionaries stored as a Pickle.')
 
 class NetworkXMetricsOutputSpec(TraitedSpec):
     gpickled_network_files = OutputMultiPath(File(desc='Output gpickled network files'))
@@ -458,8 +459,26 @@ class NetworkXMetricsOutputSpec(TraitedSpec):
     k_core = File(desc='Computed k-core network stored as a NetworkX pickle.')
     k_shell = File(desc='Computed k-shell network stored as a NetworkX pickle.')
     k_crust = File(desc='Computed k-crust network stored as a NetworkX pickle.')
+    out_pickled_extra_measures = File(desc='Network measures for the group that return dictionaries, stored as a Pickle.')
+    matlab_dict_measures = OutputMultiPath(File(desc='Network measures for the group that return dictionaries, stored as matlab matrices.'))
 
 class NetworkXMetrics(BaseInterface):
+    """
+    Calculates and outputs NetworkX-based measures for an input network
+
+    Example
+    -------
+    
+    >>> import nipype.interfaces.cmtk as cmtk
+    >>> import cmp
+    >>> nxmetrics = cmtk.NetworkXMetrics()
+    >>> nxmetrics.inputs.in_file = 'subj1.pck'
+    >>> cmp_config = cmp.configuration.PipelineConfiguration()
+    >>> cmp_config.parcellation_scheme = "Lausanne2008"
+    >>> nxmetrics.inputs.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
+    >>> nxmetrics.inputs.subject_id = 'subj1'
+    >>> nxmetrics.run()                 # doctest: +SKIP
+    """
     input_spec = NetworkXMetricsInputSpec
     output_spec = NetworkXMetricsOutputSpec
 
@@ -469,9 +488,7 @@ class NetworkXMetrics(BaseInterface):
         nodentwks = list()
         edgentwks = list()
         kntwks = list()
-       
         ntwk = nx.read_gpickle(op.abspath(self.inputs.in_file))
-        #ntwk_res_file = nx.read_gpickle(self.inputs.resolution_network_file)
 
         node_measures = compute_node_measures(ntwk)
         for key in node_measures.keys():
@@ -500,6 +517,33 @@ class NetworkXMetrics(BaseInterface):
             nx.write_gpickle(ntwk_measures[key], out_file)
             kntwks.append(out_file)
         gpickled.extend(kntwks)
+        
+        out_pickled_extra_measures = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
+        dict_measures = compute_dict_measures(ntwk)
+        print 'Saving extra measure file to {path} in Pickle format'.format(path=os.path.abspath(out_pickled_extra_measures))
+        file = open(out_pickled_extra_measures, 'w')
+        pickle.dump(dict_measures, file)
+        file.close()
+        
+        global dicts
+        dicts = list()
+        for idx, key in enumerate(dict_measures.keys()):
+            for idxd, keyd in enumerate(dict_measures[key].keys()):
+                if idxd == 0:
+                    nparraykeys = np.array(keyd)
+                    nparrayvalues = np.array(dict_measures[key][keyd])
+                else:
+                    nparraykeys = np.append(nparraykeys,np.array(keyd))
+                    values = np.array(dict_measures[key][keyd])
+                    nparrayvalues = np.append(nparrayvalues,values)
+            nparray = np.vstack((nparraykeys,nparrayvalues))
+            out_file = op.abspath(self._gen_outfilename(key, 'mat'))
+            npdict = {}
+            npdict[key] = nparray
+            print np.shape(nparray)
+            print type(nparray)
+            sio.savemat(out_file, npdict)
+            dicts.append(out_file)
         return runtime
 
     def _list_outputs(self):
@@ -512,7 +556,47 @@ class NetworkXMetrics(BaseInterface):
         outputs["k_networks"] = kntwks
         outputs["node_measure_networks"] = nodentwks
         outputs["edge_measure_networks"] = edgentwks
+        outputs["matlab_dict_measures"] = dicts
+        outputs["out_pickled_extra_measures"] = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
         return outputs
 
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext
+        
+class AverageNetworksInputSpec(TraitedSpec):
+    in_networks = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for a group of subjects')
+    resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary' \
+                                ', but if included, the interface will output the statistical maps as networkx graphs.')
+    group_id = traits.Str('group1', usedefault=True, desc='ID for group')
+    out_group_average = File('group1_average.mat', usedefault=True, desc='Group 1 measures saved as a Matlab .mat')
+    out_gpickled_groupavg = File('group1_average.pck', usedefault=True, desc='Group 1 measures saved as a NetworkX .pck')
+
+class AverageNetworksOutputSpec(TraitedSpec):
+    out_gpickled_groupavg = File(desc='Average connectome for the group in gpickled format')
+    out_group_average = File(desc='Some simple image statistics saved as a Matlab .mat')
+
+class AverageNetworks(BaseInterface):
+    input_spec = AverageNetworksInputSpec
+    output_spec = AverageNetworksOutputSpec
+
+    def _run_interface(self, runtime):
+        if isdefined(self.inputs.resolution_network_file):
+            ntwk_res_file = self.inputs.resolution_network_file
+        else:
+            cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme = "NativeFreesurfer")
+            cmp_config.parcellation_scheme = "NativeFreesurfer"
+            ntwk_res_file = cmp_config.parcellation['freesurferaparc']['node_information_graphml']
+
+        groupavg = average_networks(self.inputs.in_networks, ntwk_res_file, self.inputs.group_id)
+        gpickled.append(groupavg + '.pck')
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_group_average"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'mat'))
+        outputs["out_gpickled_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','pck'))
+        return outputs
+
+    def _gen_outfilename(self, name, ext):
+        return name + '.' + ext
+

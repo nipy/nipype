@@ -7,7 +7,7 @@
 
 """
 
-import os
+import os, os.path as op
 import datetime
 import string
 import warnings

@@ -50,9 +50,10 @@ def select_aparc_annot(list_of_files):
 
 def get_first_image(volume):
     import nibabel as nb
+    import os.path as op
     a = nb.load(volume)
     b = nb.four_to_three(a)
-    name = 'b0.nii'
+    name = op.abspath('b0.nii')
     nb.save(b[0], name)
     return name
 

@@ -349,6 +349,21 @@ class ParcellateOutputSpec(TraitedSpec):
     roi_file = File(desc='Region of Interest file for connectivity mapping')
 
 class Parcellate(BaseInterface):
+    """
+    Subdivides segmented ROI file into smaller subregions
+
+    Example
+    -------
+    
+    >>> import nipype.interfaces.cmtk as cmtk
+    >>> parcellate = cmtk.Parcellate()
+    >>> parcellate.inputs.freesurfer_dir = '/software/freesurfer'
+    >>> parcellate.inputs.subjects_dir = '/software/freesurfer/subjects'
+    >>> parcellate.inputs.subject_id = 'subj1'
+    >>> parcellate.inputs.parcellation_name = 'scale500'
+    >>> parcellate.run()                 # doctest: +SKIP
+    """
+    
     input_spec = ParcellateInputSpec
     output_spec = ParcellateOutputSpec
 

@@ -49,10 +49,10 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.matlab as mlab      # how to run matlab
-import nipype.interfaces.cmtk.cmtk as cmtk
-import nipype.interfaces.cmtk.base as cmtkbase
+import nipype.interfaces.cmtk as cmtk
 import nibabel as nb
 import os                                    # system functions
+import cmp
 
 """
 We use the following functions to scrape the voxel and data dimensions of the input images. This allows the
@@ -88,7 +88,7 @@ Alternatively, the reconstructed subject data can be downloaded from: http://dl.
 # that instead...
 
 fs_dir = os.path.abspath('/usr/local/freesurfer')
-subjects_dir = os.path.abspath('freesurfer')
+subjects_dir = os.path.abspath('subjects')
 
 """
 This needs to point to the fdt folder you can find after extracting
@@ -286,10 +286,12 @@ roigen = pe.Node(interface=cmtk.ROIGen(), name="ROIGen")
 """ This line must point to the adapted lookup table given in the example data"""
 roigen.inputs.LUT_file = '/home/erik/Dropbox/Code/forked/nipype/examples/FreeSurferColorLUT_adapted.txt'
 creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
-""" This line must point to the resolution network file given in the example data"""
-creatematrix.inputs.resolution_network_file = '/home/erik/Dropbox/Code/forked/nipype/examples/resolution83.graphml'
 
-CFFConverter = pe.Node(interface=cmtkbase.CFFConverter(), name="CFFConverter")
+cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme = "NativeFreesurfer")
+cmp_config.parcellation_scheme = "NativeFreesurfer"
+creatematrix.inputs.resolution_network_file = cmp_config.parcellation['freesurferaparc']['node_information_graphml']
+
+CFFConverter = pe.Node(interface=cmtk.CFFConverter(), name="CFFConverter")
 
 """
 Here is one example case for using the Nipype Select utility.
@@ -375,8 +377,8 @@ mapping.connect([(fa, analyzeheader_fa,[('fa','in_file')])])
 mapping.connect([(inputnode, analyzeheader_fa,[(('dwi', get_vox_dims), 'voxel_dims'),
 (('dwi', get_data_dims), 'data_dims')])])
 
-mapping.connect([(dtifit, trd,[("tensor_fitted","in_file")])])
-mapping.connect([(trd, analyzeheader_trace,[("trace","in_file")])])
+mapping.connect([(dtifit, trace,[("tensor_fitted","in_file")])])
+mapping.connect([(trace, analyzeheader_trace,[("trace","in_file")])])
 mapping.connect([(inputnode, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
 (('dwi', get_data_dims), 'data_dims')])])
 
