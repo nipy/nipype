@@ -33,3 +33,4 @@ from nipype.interfaces.fsl.maths import (ChangeDataType, Threshold, MeanImage,
                                          ApplyMask, IsotropicSmooth, TemporalFilter,
                                          DilateImage, ErodeImage, SpatialFilter,
                                          UnaryMaths, BinaryMaths, MultiImageMaths)
+from nipype.interfaces.fsl.first import (FIRST)
