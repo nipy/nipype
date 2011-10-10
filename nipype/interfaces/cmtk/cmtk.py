@@ -8,7 +8,7 @@
 """
 
 from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                                    File, TraitedSpec, Directory, isdefined)
+                                    File, TraitedSpec, InputMultiPath, Directory, isdefined)
 from nipype.utils.filemanip import split_filename
 import pickle
 import scipy.io as sio
@@ -569,3 +569,99 @@ class ROIGen(BaseInterface):
             prefix = lutname
         return prefix + '_' + name + '.' + ext
 
+def merge_images(image_names, out_file):
+    images = list()
+    for idx, image_name in enumerate(image_names):
+        image = nb.load(image_name)
+        data = image.get_data().astype(int)
+        rois = np.unique(data)
+        nROIs = len(rois)
+        
+        if idx == 0:
+            new = image
+        else:
+            newdata = new.get_data().astype(int)
+            newheader = new.get_header()
+            newaffine = new.get_affine()
+            imgdata = image.get_data().astype(int)
+            np.unique(imgdata)
+            num_new_nonzero = len(np.transpose(np.nonzero(newdata)))
+            print num_new_nonzero
+            num_img_nonzero = len(np.transpose(np.nonzero(imgdata)))
+            print num_img_nonzero
+            
+            if num_new_nonzero > num_img_nonzero:
+                voxels = np.transpose(np.nonzero(imgdata))
+                writedata = imgdata
+                addeddata = newdata
+            else:
+                voxels = np.transpose(np.nonzero(newdata))
+                writedata = newdata
+                addeddata = imgdata
+                
+            for idx, voxel in enumerate(voxels):
+                print voxel
+                value = writedata[voxel[0]][voxel[1]][voxel[2]]
+                print idx
+                print len(voxels)
+                if not value == 0:
+                    addeddata[voxel] = writedata[voxel] + nROIs
+        images.append(image)            
+    newimage = nb.Nifti1Image(newdata, newaffine, newheader)
+    nb.save(newimage, out_file)
+    return out_file
+
+class MergeParcellationsInputSpec(BaseInterfaceInputSpec):
+    in_files = InputMultiPath(File(exists=True), mandatory=True, desc='Region segmented files, in increasing order of priority')
+    out_file = File('merged_parcellations.nii', usedefault=True)
+    out_network = File('merged_roi_nodes.pck', usedefault=True)
+
+class MergeParcellationsOutputSpec(TraitedSpec):
+    parcellation_file = File(exist=True, desc='Single ROI image with the merged parcellation scheme')
+    resolution_network_file = File(exist=True, desc='Nodes generated from the parcellation with add label information as a NetworkX Pickle')
+
+class MergeParcellations(BaseInterface):
+    """ Merges segmented images into one new image file.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.cmtk as cmtk       
+    >>> mrg = cmtk.MergeParcellations()
+    >>> mrg.inputs.in_files = ['ROI_scale500.nii.gz','segmented_all_fast_firstseg.nii.gz']
+    >>> mrg.run()                  # doctest: +SKIP
+
+    """
+
+    input_spec = MergeParcellationsInputSpec
+    output_spec = MergeParcellationsOutputSpec
+
+    def _run_interface(self, runtime):
+        merged = merge_images(self.inputs.in_files, self.inputs.out_file)
+        roi_image = nb.load(merged)
+        roiData = roi_image.get_data()
+        rois = np.unique(roiData)
+        # Create the matrix
+        G = nx.Graph()
+
+        for idx,roi in enumerate(rois):
+            data = {}
+            data['dn_correspondence_id'] = roi
+            #data['dn_fs_aseg_val'] =  u'16'
+            #if roi == 
+            #itemindex=numpy.where(array==item)
+            #data['dn_fsname'] = u'Brain-Stem'
+            #data['dn_hemisphere'] = u'left'
+            #data['dn_name']: 'Brain-Stem'
+            #data['dn_region']: u'subcortical'
+            G.add_node(roi, data)
+            G.node[roi]['dn_position'] = tuple(np.mean( np.where(roiData== int(roi) ) , axis = 1))
+        
+        nx.write_gpickle(G, op.abspath(self.inputs.out_network))
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['parcellation_file'] = self.inputs.out_file
+        outputs['resolution_network_file'] = self.inputs.out_network
+        return outputs
