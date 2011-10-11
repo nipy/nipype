@@ -5,7 +5,7 @@ import logging
 import os
 import sys
 try:
-    from cloghandler import ConcurrentRotatingFileHandler as RFHandler
+    from ..external.cloghandler import ConcurrentRotatingFileHandler as RFHandler
 except ImportError:
     # Next 2 lines are optional:  issue a warning to the user
     from warnings import warn

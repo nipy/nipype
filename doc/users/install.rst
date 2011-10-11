@@ -42,10 +42,6 @@ Nibabel_
 Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
 
-`ConcurrentLogHandler <http://pypi.python.org/pypi/ConcurrentLogHandler/>`_
-  Allows log files to be written concurrently. This is an optional dependency as
-  the Nipype can work in serial mode without requiring this.
-
 IPython_ 0.10.2 or 0.11
   Interactive python environment. This is necessary for some parallel
   components of the pipeline engine.
