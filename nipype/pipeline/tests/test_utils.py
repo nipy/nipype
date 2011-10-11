@@ -11,6 +11,8 @@ from nipype.testing import (assert_equal, assert_true,
                             assert_false)
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as niu
+from nipype.utils.config import config
+from nipype.pipeline.utils import merge_dict
 
 
 def test_identitynode_removal():
@@ -64,6 +66,8 @@ def test_outputs_removal():
                  base_dir=out_dir,
                  name='testoutputs')
     n1.inputs.arg1 = 1
+    n1.config = {'execution': {'remove_unnecessary_outputs': True}}
+    n1.config = merge_dict(deepcopy(config._sections), n1.config)
     n1.run()
     yield assert_true, os.path.exists(os.path.join(out_dir,
                                                    n1.name,
