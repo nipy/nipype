@@ -66,18 +66,17 @@ def create_connectivity_pipeline(name="connectivity"):
     Example
     -------
 
-    >>> import os
-    >>> import os
+    >>> import os.path as op
     >>> import nipype.interfaces.freesurfer as fs
-    >>> import nipype.workflows.camino as cmonwk
-    >>> subjects_dir = os.path.abspath('freesurfer')
+    >>> from nipype.workflows.camino import create_connectivity_pipeline
+    >>> subjects_dir = op.abspath('freesurfer')
     >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
-    >>> conmapper = cmonwk.create_connectivity_pipeline("nipype_conmap")
+    >>> conmapper = create_connectivity_pipeline("nipype_conmap")
     >>> conmapper.inputs.inputnode.subjects_dir = subjects_dir
     >>> conmapper.inputs.inputnode.subject_id = 'subj1'
-    >>> conmapper.inputs.inputnode.dwi = os.path.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
-    >>> conmapper.inputs.inputnode.bvecs = os.path.abspath('fsl_course_data/fdt/subj1/bvecs')
-    >>> conmapper.inputs.inputnode.bvals = os.path.abspath('fsl_course_data/fdt/subj1/bvals')
+    >>> conmapper.inputs.inputnode.dwi = op.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
+    >>> conmapper.inputs.inputnode.bvecs = op.abspath('fsl_course_data/fdt/subj1/bvecs')
+    >>> conmapper.inputs.inputnode.bvals = op.abspath('fsl_course_data/fdt/subj1/bvals')
     >>> conmapper.run()                 # doctest: +SKIP
 
     Inputs::
@@ -259,9 +258,9 @@ def create_connectivity_pipeline(name="connectivity"):
     into a single .nii file.
     """
 
-    fa = pe.Node(interface=camino.FA(),name='fa')
-    trace = pe.Node(interface=camino.TrD(),name='trace')
-    dteig = pe.Node(interface=camino.DTEig(), name='dteig')
+    fa = pe.Node(interface=camino.ComputeFractionalAnisotropy(),name='fa')
+    trace = pe.Node(interface=camino.ComputeTensorTrace(),name='trace')
+    dteig = pe.Node(interface=camino.ComputeEigensystem(), name='dteig')
 
     analyzeheader_fa = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_fa')
     analyzeheader_fa.inputs.datatype = 'double'

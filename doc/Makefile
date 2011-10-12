@@ -44,26 +44,6 @@ html: clean examples2rst api htmlonly
 	@echo "Build HTML and API finished."
 
 examples2rst:
-	python ../tools/ex2rst \
-			--project Nipype \
-			--outdir $(CURDIR)/users/examples \
-			../examples/freesurfer_tutorial.py \
-			../examples/fsl_tutorial2.py \
-			../examples/fsl_feeds_tutorial.py \
-			../examples/spm_tutorial.py \
-			../examples/spm_face_tutorial.py \
-			../examples/spm_auditory_tutorial.py \
-			../examples/fsl_dti_tutorial.py \
-			../examples/camino_dti_tutorial.py \
-			../examples/mrtrix_dti_tutorial.py \
-			../examples/connectivity_tutorial.py \
-			../examples/group_connectivity.py \
-			../examples/dtk_dti_tutorial.py \
-			../examples/dtk_odf_tutorial.py \
-			../examples/spm_tutorial2.py \
-			../examples/spm_dartel_tutorial.py \
-			../examples/dartmouth_workshop_2010.py \
-			../examples/nipy_tutorial.py
 	mkdir -p users/examples
 	../tools/make_examples.py --no-exec
 	@echo "examples2rst finished."

@@ -63,15 +63,18 @@ class MRTrix2TrackVis(BaseInterface):
             vx, vy, vz = get_vox_dims(self.inputs.image_file)
             ox, oy, oz = get_origin(self.inputs.image_file)
         else:
-            dx=self.inputs.data_dims[0]
-            dy=self.inputs.data_dims[1]
-            dz=self.inputs.data_dims[2]
-            vx=self.inputs.voxel_dims[0]
-            vy=self.inputs.voxel_dims[1]
-            vz=self.inputs.voxel_dims[2]
-            ox=self.inputs.origin[0]
-            oy=self.inputs.origin[1]
-            oz=self.inputs.origin[2]
+            if isdefined(self.inputs.data_dims):
+                dx=self.inputs.data_dims[0]
+                dy=self.inputs.data_dims[1]
+                dz=self.inputs.data_dims[2]
+            if isdefined(self.inputs.data_dims):
+                vx=self.inputs.voxel_dims[0]
+                vy=self.inputs.voxel_dims[1]
+                vz=self.inputs.voxel_dims[2]
+            if isdefined(self.inputs.data_dims):
+                ox=self.inputs.origin[0]
+                oy=self.inputs.origin[1]
+                oz=self.inputs.origin[2]
         hdrpath = op.join(nipype.__path__[0], 'interfaces','mrtrix','defhdr')
             
         out_filename = 'converted.trk'      
@@ -324,7 +327,7 @@ length(tracks(1).matrix)
         print script
         result = MatlabCommand(script=script, mfile=True)
         r = result.run()
-        return r
+        return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()

@@ -39,7 +39,7 @@ class MRConvert(CommandLine):
     region of interest, flip the images, or to scale the intensity of the images.
 
     Example
-	-------
+    -------
 
     >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
     >>> mrconvert = mrt.MRConvert()                     # doctest: +SKIP
@@ -47,6 +47,7 @@ class MRConvert(CommandLine):
     >>> mrconvert.inputs.out_filename = 'dwi_FA.nii'    # doctest: +SKIP
     >>> mrconvert.run()                                 # doctest: +SKIP
     """
+    
     _cmd = 'mrconvert'
     input_spec=MRConvertInputSpec
     output_spec=MRConvertOutputSpec
@@ -89,7 +90,7 @@ class DWI2Tensor(CommandLine):
     Converts diffusion-weighted images to tensor images.
 
     Example
-	-------
+    -------
 
     >>> import nipype.interfaces.mrtrix as mrt             # doctest: +SKIP
     >>> dwi2tensor = mrt.DWI2Tensor()                      # doctest: +SKIP
@@ -97,6 +98,7 @@ class DWI2Tensor(CommandLine):
     >>> dwi2tensor.inputs.encoding_file = 'encoding.txt'   # doctest: +SKIP
     >>> dwi2tensor.run()                                   # doctest: +SKIP
     """
+    
     _cmd = 'dwi2tensor'
     input_spec=DWI2TensorInputSpec
     output_spec=DWI2TensorOutputSpec
@@ -130,13 +132,14 @@ class Tensor2Vector(CommandLine):
     Generates a map of the major eigenvectors of the tensors in each voxel.
 
     Example
-	-------
+    -------
 
     >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
     >>> tensor2vector = mrt.Tensor2Vector()             # doctest: +SKIP
     >>> tensor2vector.inputs.in_file = 'dwi_tensor.mif' # doctest: +SKIP
     >>> tensor2vector.run()                             # doctest: +SKIP
     """
+    
     _cmd = 'tensor2vector'
     input_spec=Tensor2VectorInputSpec
     output_spec=Tensor2VectorOutputSpec
@@ -170,13 +173,14 @@ class Tensor2FractionalAnisotropy(CommandLine):
     Generates a map of the fractional anisotropy in each voxel.
 
     Example
-	-------
+    -------
 
     >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
     >>> tensor2FA = mrt.Tensor2FractionalAnisotropy()   # doctest: +SKIP
     >>> tensor2FA.inputs.in_file = 'dwi_tensor.mif'     # doctest: +SKIP
     >>> tensor2FA.run()                                 # doctest: +SKIP
     """
+    
     _cmd = 'tensor2FA'
     input_spec=Tensor2FractionalAnisotropyInputSpec
     output_spec=Tensor2FractionalAnisotropyOutputSpec
@@ -210,13 +214,14 @@ class Tensor2ApparentDiffusion(CommandLine):
     Generates a map of the apparent diffusion coefficient (ADC) in each voxel
 
     Example
-	-------
+    -------
 
     >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
     >>> tensor2ADC = mrt.Tensor2ApparentDiffusion()     # doctest: +SKIP
     >>> tensor2ADC.inputs.in_file = 'dwi_tensor.mif'    # doctest: +SKIP
     >>> tensor2ADC.run()                                # doctest: +SKIP    
     """
+    
     _cmd = 'tensor2ADC'
     input_spec=Tensor2ApparentDiffusionInputSpec
     output_spec=Tensor2ApparentDiffusionOutputSpec
@@ -250,13 +255,14 @@ class MRMultiply(CommandLine):
     Multiplies two images.
     
     Example
-	-------
+    -------
 
     >>> import nipype.interfaces.mrtrix as mrt                   # doctest: +SKIP
     >>> MRmult = mrt.MRMultiply()                                # doctest: +SKIP
     >>> MRmult.inputs.in_files = ['dwi.mif', 'dwi_WMProb.mif']   # doctest: +SKIP
     >>> MRmult.run()                                             # doctest: +SKIP    
     """
+    
     _cmd = 'mrmult'
     input_spec=MRMultiplyInputSpec
     output_spec=MRMultiplyOutputSpec
@@ -288,7 +294,15 @@ class MRTrixViewer(CommandLine):
     """
     Loads the input images in the MRTrix Viewer.
     
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> MRview = mrt.MRTrixViewer()
+    >>> MRview.inputs.in_files = 'dwi.mif'
+    >>> MRview.run()                                    # doctest: +SKIP    
     """
+    
     _cmd = 'mrview'
     input_spec=MRTrixViewerInputSpec
     output_spec=MRTrixViewerOutputSpec
@@ -307,7 +321,15 @@ class MRTrixInfo(CommandLine):
     """
     Prints out relevant header information found in the image specified.
     
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> MRinfo = mrt.MRTrixInfo()
+    >>> MRinfo.inputs.in_file = 'dwi.mif'
+    >>> MRinfo.run()                                    # doctest: +SKIP    
     """
+    
     _cmd = 'mrinfo'
     input_spec=MRTrixInfoInputSpec
     output_spec=MRTrixInfoOutputSpec
@@ -331,7 +353,7 @@ class GenerateWhiteMatterMask(CommandLine):
     Generates a white matter probability mask from the DW images.
 
     Example
-	-------
+    -------
 
     >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
     >>> genWM = mrt.GenerateWhiteMatterMask()           # doctest: +SKIP
@@ -339,6 +361,7 @@ class GenerateWhiteMatterMask(CommandLine):
     >>> genWM.inputs.encoding_file = 'encoding.txt'     # doctest: +SKIP
     >>> genWM.run()                                     # doctest: +SKIP    
     """
+    
     _cmd = 'gen_WM_mask'
     input_spec=GenerateWhiteMatterMaskInputSpec
     output_spec=GenerateWhiteMatterMaskOutputSpec
@@ -374,7 +397,7 @@ class Erode(CommandLine):
     Erode (or dilates) a mask (i.e. binary) image
    
     Example
-	-------
+    -------
 
     >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
     >>> erode = mrt.Erode()                             # doctest: +SKIP
@@ -423,13 +446,14 @@ class Threshold(CommandLine):
     Note that only the first study is used for thresholding.
 
     Example
-	-------
+    -------
 
-    >>> import nipype.interfaces.mrtrix as mrt                   # doctest: +SKIP
-    >>> MRmult = mrt.MRMultiply()                                # doctest: +SKIP
-    >>> MRmult.inputs.in_files = ['dwi.mif', 'dwi_WMProb.mif']   # doctest: +SKIP
-    >>> MRmult.run()                                             # doctest: +SKIP    
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> thresh = mrt.Threshold()
+    >>> thresh.inputs.in_file = 'wm_mask.mif'
+    >>> thresh.run()                                             # doctest: +SKIP    
     """
+    
     _cmd = 'threshold'
     input_spec=ThresholdInputSpec
     output_spec=ThresholdOutputSpec
@@ -463,13 +487,14 @@ class MedianFilter3D(CommandLine):
     Smooth images using a 3x3x3 median filter.
     
     Example
-	-------
+    -------
 
     >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
     >>> median3d = mrt.MedianFilter3D()                 # doctest: +SKIP
     >>> median3d.inputs.in_file = 'mask.mif'            # doctest: +SKIP
     >>> median3d.run()                                  # doctest: +SKIP    
     """
+    
     _cmd = 'median3D'
     input_spec=MedianFilter3DInputSpec
     output_spec=MedianFilter3DOutputSpec
@@ -512,13 +537,14 @@ class MRTransform(CommandLine):
     Apply spatial transformations or reslice images
     
     Example
-	-------
+    -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> MRxform = mrt.MRTransform()                     # doctest: +SKIP
-    >>> MRxform.inputs.in_files = 'anat_coreg.mif'      # doctest: +SKIP
-    >>> MRxform.run()                                   # doctest: +SKIP    
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> MRxform = mrt.MRTransform()
+    >>> MRxform.inputs.in_files = 'anat_coreg.mif'
+    >>> MRxform.run()                                   # doctest: +SKIP
     """
+    
     _cmd = 'mrtransform'
     input_spec=MRTransformInputSpec
     output_spec=MRTransformOutputSpec

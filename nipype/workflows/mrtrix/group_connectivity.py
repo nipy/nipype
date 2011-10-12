@@ -1,23 +1,66 @@
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.interfaces.camino as camino
 import nipype.interfaces.fsl as fsl
-import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.cmtk as cmtk
 import nipype.interfaces.mrtrix as mrtrix
-from nipype.workflows.mrtrix.connectivity_mapping import create_connectivity_pipeline
 import nipype.algorithms.misc as misc
 import inspect
 import nibabel as nb
 import os, os.path as op
 import cmp                                    # connectome mapper
+from nipype.workflows.mrtrix.connectivity_mapping import create_connectivity_pipeline
 from nipype.workflows.camino.connectivity_mapping import (get_vox_dims, get_data_dims,
  get_affine, select_aparc, select_aparc_annot)
 from nipype.workflows.camino.group_connectivity import (get_subj_in_group, getoutdir, get_nsubs)
 
 def create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir, output_dir, template_args_dict=0):
+    """Creates a group-level pipeline that does the same connectivity processing as in the
+    connectivity_tutorial_advanced example script and the mrtrix create_connectivity_pipeline workflow. 
+
+    Given a subject id (and completed Freesurfer reconstruction), diffusion-weighted image,
+    b-values, and b-vectors, the workflow will return the subject's connectome
+    as a Connectome File Format (CFF) file for use in Connectome Viewer (http://www.cmtk.org)
+    as well as the outputs of many other stages of the processing.
+
+    Example
+    -------
+
+    >>> import os.path as op
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> from nipype.workflows.mrtrix import create_connectivity_pipeline
+    >>> subjects_dir = op.abspath('freesurfer')
+    >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
+    >>> cff = cmonwk.create_connectivity_pipeline("mrtrix_cmtk")
+    >>> cff.inputs.inputnode.subjects_dir = subjects_dir
+    >>> cff.inputs.inputnode.subject_id = 'subj1'
+    >>> cff.inputs.inputnode.dwi = op.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
+    >>> cff.inputs.inputnode.bvecs = op.abspath('fsl_course_data/fdt/subj1/bvecs')
+    >>> cff.inputs.inputnode.bvals = op.abspath('fsl_course_data/fdt/subj1/bvals')
+    >>> cff.run()                 # doctest: +SKIP
+
+    Inputs::
+
+        inputnode.subject_id
+        inputnode.subjects_dir
+        inputnode.dwi
+        inputnode.bvecs
+        inputnode.bvals
+
+    Outputs::
+
+        outputnode.connectome
+        outputnode.cmatrix
+        outputnode.gpickled_network
+        outputnode.fa
+        outputnode.struct
+        outputnode.trace
+        outputnode.tracts
+        outputnode.tensors
+
+    """
+    
     group_infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id']), name="group_infosource")
     group_infosource.inputs.group_id = group_id
     subject_list = group_list[group_id]
@@ -67,6 +110,8 @@ def create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subje
                                               ("outputnode.tracts", "@l1output.tracts"),
                                               ("outputnode.cmatrix", "@l1output.cmatrix"),
                                               ("outputnode.rois", "@l1output.rois"),
+                                              ("outputnode.rois_orig", "@l1output.rois_orig"),
+                                              ("outputnode.odfs", "@l1output.odfs"),
                                               ("outputnode.struct", "@l1output.struct"),
                                               ("outputnode.gpickled_network", "@l1output.gpickled_network"),
                                               ("outputnode.mean_fiber_length", "@l1output.mean_fiber_length"),

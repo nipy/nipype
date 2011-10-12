@@ -54,6 +54,7 @@ class DWI2SphericalHarmonicsImage(CommandLine):
     >>> dwi2SH.inputs.encoding_file = 'encoding.txt'    # doctest: +SKIP
     >>> dwi2SH.run()                                    # doctest: +SKIP
     """
+    
     _cmd = 'dwi2SH'
     input_spec=DWI2SphericalHarmonicsImageInputSpec
     output_spec=DWI2SphericalHarmonicsImageOutputSpec
@@ -101,26 +102,26 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     """
     Perform non-negativity constrained spherical deconvolution.
 
-	Note that this program makes use of implied symmetries in the diffusion profile.
-	First, the fact the signal attenuation profile is real implies that it has conjugate symmetry, 
-	i.e. Y(l,-m) = Y(l,m)* (where * denotes the complex conjugate). Second, the diffusion profile should be 
-	antipodally symmetric (i.e. S(x) = S(-x)), implying that all odd l components should be zero. 
-	Therefore, this program only computes the even elements. 	Note that the spherical harmonics equations used here
-	differ slightly from those conventionally used, in that the (-1)^m factor has been omitted. This should be taken 
-	into account in all subsequent calculations. Each volume in the output image corresponds to a different spherical 
-	harmonic component, according to the following convention:
+    Note that this program makes use of implied symmetries in the diffusion profile.
+    First, the fact the signal attenuation profile is real implies that it has conjugate symmetry, 
+    i.e. Y(l,-m) = Y(l,m)* (where * denotes the complex conjugate). Second, the diffusion profile should be 
+    antipodally symmetric (i.e. S(x) = S(-x)), implying that all odd l components should be zero. 
+    Therefore, this program only computes the even elements. 	Note that the spherical harmonics equations used here
+    differ slightly from those conventionally used, in that the (-1)^m factor has been omitted. This should be taken 
+    into account in all subsequent calculations. Each volume in the output image corresponds to a different spherical 
+    harmonic component, according to the following convention:
 
-	[0] Y(0,0)
-	[1] Im {Y(2,2)}
-	[2] Im {Y(2,1)}
-	[3] Y(2,0)
-	[4] Re {Y(2,1)}
-	[5] Re {Y(2,2)}
-	[6] Im {Y(4,4)}
-	[7] Im {Y(4,3)} 
+    [0] Y(0,0)
+    [1] Im {Y(2,2)}
+    [2] Im {Y(2,1)}
+    [3] Y(2,0)
+    [4] Re {Y(2,1)}
+    [5] Re {Y(2,2)}
+    [6] Im {Y(4,4)}
+    [7] Im {Y(4,3)} 
 	
-	Example
-	-------
+    Example
+    -------
 
     >>> import nipype.interfaces.mrtrix as mrt                  # doctest: +SKIP
     >>> csdeconv = mrt.ConstrainedSphericalDeconvolution()      # doctest: +SKIP
@@ -129,6 +130,7 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     >>> csdeconv.inputs.offset = 0                              # doctest: +SKIP
     >>> csdeconv.run()                                          # doctest: +SKIP
     """
+    
     _cmd = 'csdeconv'
     input_spec=ConstrainedSphericalDeconvolutionInputSpec
     output_spec=ConstrainedSphericalDeconvolutionOutputSpec
@@ -166,7 +168,7 @@ class EstimateResponseForSH(CommandLine):
     Estimates the fibre response function for use in spherical deconvolution.
     
     Example
-	-------
+    -------
 
     >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
     >>> estresp = mrt.EstimateResponseForSH()           # doctest: +SKIP
@@ -175,6 +177,7 @@ class EstimateResponseForSH(CommandLine):
     >>> estresp.inputs.encoding_file = 'encoding.txt'   # doctest: +SKIP
     >>> estresp.run()                                   # doctest: +SKIP
     """
+    
     _cmd = 'estimate_response'
     input_spec=EstimateResponseForSHInputSpec
     output_spec=EstimateResponseForSHOutputSpec
@@ -238,7 +241,7 @@ class FSL2MRTrix(BaseInterface):
     b-value in units (1000 s/mm^2).
     
     Example
-	-------
+    -------
 
     >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
     >>> fsl2mrtrix = mrt.FSL2MRTrix()                   # doctest: +SKIP
@@ -247,6 +250,7 @@ class FSL2MRTrix(BaseInterface):
     >>> fsl2mrtrix.inputs.invert_y = True               # doctest: +SKIP
     >>> fsl2mrtrix.run()                                # doctest: +SKIP
     """
+    
     input_spec = FSL2MRTrixInputSpec
     output_spec = FSL2MRTrixOutputSpec
 

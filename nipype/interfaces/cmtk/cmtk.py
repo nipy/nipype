@@ -574,8 +574,6 @@ def merge_images(image_names, out_file):
     for idx, image_name in enumerate(image_names):
         image = nb.load(image_name)
         data = image.get_data().astype(int)
-        rois = np.unique(data)
-        nROIs = len(rois)
         
         if idx == 0:
             new = image
@@ -598,6 +596,8 @@ def merge_images(image_names, out_file):
                 voxels = np.transpose(np.nonzero(newdata))
                 writedata = newdata
                 addeddata = imgdata
+            rois = np.unique(addeddata)
+            nROIs = len(rois)
                 
             for idx, voxel in enumerate(voxels):
                 print voxel
@@ -605,7 +605,7 @@ def merge_images(image_names, out_file):
                 print idx
                 print len(voxels)
                 if not value == 0:
-                    addeddata[voxel] = writedata[voxel] + nROIs
+                    addeddata[voxel[0]][voxel[1]][voxel[2]] = value + nROIs
         images.append(image)            
     newimage = nb.Nifti1Image(newdata, newaffine, newheader)
     nb.save(newimage, out_file)

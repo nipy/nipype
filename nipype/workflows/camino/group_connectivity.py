@@ -79,6 +79,50 @@ def get_nsubs(group_list):
     return nsubs
 
 def create_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir, output_dir, template_args_dict=0):
+    """Creates a group-level pipeline that does the same connectivity processing as in the
+    connectivity_tutorial example script and the camino create_connectivity_pipeline workflow. 
+
+    Given a subject id (and completed Freesurfer reconstruction), diffusion-weighted image,
+    b-values, and b-vectors, the workflow will return the subject's connectome
+    as a Connectome File Format (CFF) file for use in Connectome Viewer (http://www.cmtk.org)
+    as well as the outputs of many other stages of the processing.
+
+    Example
+    -------
+
+    >>> import os.path as op
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> from nipype.workflows.mrtrix import create_connectivity_pipeline
+    >>> subjects_dir = op.abspath('freesurfer')
+    >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
+    >>> cff = cmonwk.create_connectivity_pipeline("mrtrix_cmtk")
+    >>> cff.inputs.inputnode.subjects_dir = subjects_dir
+    >>> cff.inputs.inputnode.subject_id = 'subj1'
+    >>> cff.inputs.inputnode.dwi = op.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
+    >>> cff.inputs.inputnode.bvecs = op.abspath('fsl_course_data/fdt/subj1/bvecs')
+    >>> cff.inputs.inputnode.bvals = op.abspath('fsl_course_data/fdt/subj1/bvals')
+    >>> cff.run()                 # doctest: +SKIP
+
+    Inputs::
+
+        inputnode.subject_id
+        inputnode.subjects_dir
+        inputnode.dwi
+        inputnode.bvecs
+        inputnode.bvals
+
+    Outputs::
+
+        outputnode.connectome
+        outputnode.cmatrix
+        outputnode.gpickled_network
+        outputnode.fa
+        outputnode.struct
+        outputnode.trace
+        outputnode.tracts
+        outputnode.tensors
+
+    """
     group_infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id']), name="group_infosource")
     group_infosource.inputs.group_id = group_id
     subject_list = group_list[group_id]
@@ -129,6 +173,7 @@ def create_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir
                                               ("outputnode.trace", "@l1output.trace"),
                                               ("outputnode.cmatrix", "@l1output.cmatrix"),
                                               ("outputnode.rois", "@l1output.rois"),
+                                              ("outputnode.rois_orig", "@l1output.rois_orig"),
                                               ("outputnode.struct", "@l1output.struct"),
                                               ("outputnode.gpickled_network", "@l1output.gpickled_network"),
                                               ("outputnode.mean_fiber_length", "@l1output.mean_fiber_length"),
