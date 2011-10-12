@@ -1248,7 +1248,10 @@ class FIRSTInputSpec(FSLCommandInputSpec):
         desc="Method must be one of auto, fast, none, or a numerical threshold value")
     list_of_specific_structures = traits.List(traits.Str, argstr='-s %s', sep=',',
         position=5, minlen=1, 
-        desc='Runs only on the specified structures (e.g. L_Hipp)')
+        desc='Runs only on the specified structures (e.g. L_Hipp, R_Hipp'
+                          'L_Accu, R_Accu, L_Amyg, R_Amyg'
+                          'L_Caud, R_Caud, L_Pall, R_Pall'
+                          'L_Puta, R_Puta, L_Thal, R_Thal, BrStem')
     affine_file = File(exists=True, position=6,
                   argstr='-a %s',
                   desc='Affine matrix to use (e.g. img2std.mat) (does not re-run registration)')
@@ -1295,7 +1298,6 @@ class FIRST(FSLCommand):
                           'L_Puta', 'R_Puta',
                           'L_Thal', 'R_Thal',
                           'BrStem']
-        print structures
         outputs['original_segmentations'] = self._gen_fname('original_segmentations')
         outputs['segmentation_file'] = self._gen_fname('segmentation_file')
         outputs['vtk_surfaces'] = self._gen_mesh_names('vtk_surfaces', structures)
@@ -1303,30 +1305,25 @@ class FIRST(FSLCommand):
         return outputs
         
     def _gen_fname(self, name):
-        print name
+        path, name, ext = split_filename(self.inputs.out_file)
         if name == 'original_segmentations':
-            path, name, ext = split_filename(self.inputs.out_file)
             return op.abspath(name + '_all_fast_origsegs.nii.gz')
         if name == 'segmentation_file':
-            path, name, ext = split_filename(self.inputs.out_file)
             return op.abspath(name + '_all_fast_firstseg.nii.gz')
         return None
 
     def _gen_mesh_names(self, name, structures):
-        print name
         path, prefix, ext = split_filename(self.inputs.out_file)
         if name == 'vtk_surfaces':
             vtks = list()
             for struct in structures:
                 vtk =  prefix + '-' + struct + '_first.vtk'
-                print vtk
             vtks.append(op.abspath(vtk))
             return vtks
         if name == 'bvars':
             bvars = list()
             for struct in structures:
                 bvar = prefix + '-' + struct + '_first.bvars'
-                print bvar
             bvars.append(op.abspath(bvar))
             return bvars
         return None
