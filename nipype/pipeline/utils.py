@@ -21,6 +21,7 @@ from ..utils.misc import create_function_from_source, str2bool
 from ..interfaces.base import CommandLine, isdefined, Undefined, Bunch
 from ..interfaces.utility import IdentityInterface
 
+from .. import __version__ as nipype_version
 from .. import logging, config
 logger = logging.getLogger('workflow')
 
@@ -793,6 +794,9 @@ def write_opmx(graph, filename=None):
         filename = os.path.join(os.getcwd(), 'graph_opm.xml')
     import xml.etree.ElementTree as ET
     docroot = ET.Element('opmGraph', dict(id='graph_1'))
+    annot = ET.SubElement(docroot, 'annotation')
+    ET.SubElement(annot, 'created-by', dict(value='nipype'))
+    ET.SubElement(annot, 'version', dict(value=nipype_version))
     # add accounts
     accounts = ET.SubElement(docroot, 'accounts')
     userinfo = pwd.getpwuid(os.geteuid())
@@ -804,8 +808,10 @@ def write_opmx(graph, filename=None):
         process = ET.SubElement(procs, 'process', dict(id=str(node)))
         ET.SubElement(process, 'account', dict(ref=accountref))
         ET.SubElement(process, 'label', dict(value=str(node)))
-        ET.SubElement(process, 'interface', dict(value=get_print_name(node)))
-        inputs = ET.SubElement(process, 'inputs')
+        annot = ET.SubElement(process, 'annotation')
+        ET.SubElement(annot, 'interface', dict(value=get_print_name(node),
+                                               version=node._interface.version))
+        inputs = ET.SubElement(annot, 'inputs')
         for idx, inputval in enumerate(sorted(node.inputs.get().items())):
             if isdefined(inputval[1]):
                 inport = inputval[0]
@@ -815,8 +821,17 @@ def write_opmx(graph, filename=None):
                         used_ports.append(dest)
                 if inport not in used_ports:
                     input = ET.SubElement(inputs, 'param', dict(id=inport))
-                    value = ET.SubElement(input, 'value')
-                    value.text = str(inputval[1])
+                    #value = ET.SubElement(input, 'value')
+                    input.text = str(inputval[1])
+        runtime = ET.SubElement(annot, 'runtime')
+        node_runtime = node.result.runtime
+        if isinstance(node_runtime, list):
+            pass
+        for key, value in sorted(node_runtime.items()):
+            runtime_key = ET.SubElement(runtime, 'key', dict(name=key))
+            #runtime_value = ET.SubElement(runtime_key, 'value')
+            runtime_key.text = str(value)
+
     # add dependencies (edges)
     dependencies = ET.SubElement(docroot, 'dependencies')
     # add artifacts (files)
@@ -840,12 +855,12 @@ def write_opmx(graph, filename=None):
         for outidx, nameval in enumerate(sorted(outputs.items())):
             if not isdefined(nameval[1]):
                 continue
-            artifactref = 'a%d_%d'%(idx, outidx)
+            artifactref = 'a%d_o%d'%(idx, outidx)
             artifact = ET.SubElement(artifacts, 'artifact', dict(id=artifactref))
             ET.SubElement(artifact, 'account', dict(ref=accountref))
             ET.SubElement(artifact, 'label', dict(value=nameval[0]))
-            value = ET.SubElement(artifact, 'value')
-            value.text = str(nameval[1])
+            #value = ET.SubElement(artifact, 'value')
+            artifact.text = str(nameval[1])
             if nameval[0] in used_ports:
                 for destnode, portname in used_ports[nameval[0]]:
                     counter += 1
@@ -855,6 +870,22 @@ def write_opmx(graph, filename=None):
                     ET.SubElement(used, 'effect', dict(ref=str(destnode)))
                     ET.SubElement(used, 'account', dict(ref=accountref))
                     ET.SubElement(used, 'label', dict(value=portname))
+        if not graph.in_edges(nbunch=node):
+            for inidx, nameval in enumerate(sorted(node.inputs.get().items())):
+                if not isdefined(nameval[1]):
+                    continue
+                artifactref = 'a%d_i%d'%(idx, inidx)
+                artifact = ET.SubElement(artifacts, 'artifact', dict(id=artifactref))
+                ET.SubElement(artifact, 'account', dict(ref=accountref))
+                #ET.SubElement(artifact, 'label', dict(value=nameval[0]))
+                artifact.text = str(nameval[1])
+                counter += 1
+                used = ET.SubElement(dependencies, 'used', dict(id='u_%d'%counter))
+                ET.SubElement(used, 'cause', dict(ref=artifactref))
+                ET.SubElement(used, 'effect', dict(ref=str(node)))
+                ET.SubElement(used, 'account', dict(ref=accountref))
+                ET.SubElement(used, 'label', dict(value=nameval[0]))
+
     # add agents (users)
     agents = ET.SubElement(docroot, 'agents')
     agent = ET.SubElement(agents, 'agent', dict(id='%s'%userinfo.pw_name))
@@ -867,13 +898,15 @@ def write_opmx(graph, filename=None):
             outputs = node.result.outputs.dictcopy()
         else:
             outputs = node.result.outputs.get()
-        for outidx, name in enumerate(sorted(outputs)):
+        for outidx, nameval in enumerate(sorted(outputs.items())):
+            if not isdefined(nameval[1]):
+                continue
             counter+=1
             wgb = ET.SubElement(dependencies, 'wasGeneratedBy', dict(id='g_%d'%counter))
             ET.SubElement(wgb, 'cause', dict(ref=str(node)))
-            ET.SubElement(wgb, 'effect', dict(ref='a%d_%d'%(idx, outidx)))
+            ET.SubElement(wgb, 'effect', dict(ref='a%d_o%d'%(idx, outidx)))
             ET.SubElement(wgb, 'account', dict(ref=accountref))
-            ET.SubElement(wgb, 'label', dict(value=name))
+            ET.SubElement(wgb, 'label', dict(value=nameval[0]))
     # WDF: Artifact->Artifact
     # WCB: Agent->Process
     # WTB: Process->Process
@@ -885,3 +918,25 @@ def write_opmx(graph, filename=None):
     ET.dump(docroot)
     ET.ElementTree(docroot).write(filename)
     return docroot
+
+"""
+from nipype.pipeline.engine import Workflow, Node
+from nipype.interfaces.fsl import BET, FLIRT, Info
+from nipype.pipeline.utils import write_opmx
+import os
+wf1 = Workflow(name='opm')
+n1 = Node(BET(in_file=os.path.abspath('struct.nii')), name='nosestrip')
+wf1.add_nodes([n1])
+wf1.base_dir = '.'
+eg1 = wf1.run()
+write_opmx(eg1, 'graph_opm1.xml')
+
+n1 = Node(BET(in_file=os.path.abspath('struct.nii')), name='nosestrip')
+n2 = Node(FLIRT(reference=Info.standard_image('MNI152_T1_2mm.nii.gz')),
+          name='register')
+wf2 = Workflow(name='opm2')
+wf2.connect(n1, 'out_file', n2, 'in_file')
+wf2.base_dir = '.'
+eg2 = wf2.run()
+write_opmx(eg2, 'graph_opm2.xml')
+"""
