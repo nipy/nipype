@@ -1152,8 +1152,12 @@ class Node(WorkflowBase):
 
     @property
     def result(self):
-        """Return the result object after the node has run"""
-        return self._result
+        if self._result:
+            return self._result
+        else:
+            cwd = self.output_dir()
+            result, _, _ = self._load_resultfile(cwd)
+            return result
 
     @property
     def inputs(self):
@@ -1191,7 +1195,7 @@ class Node(WorkflowBase):
             val = getattr(self._result.outputs, parameter)
         else:
             cwd = self.output_dir()
-            result, aggregate, attribute_error = self._load_resultfile(cwd)
+            result, _, _ = self._load_resultfile(cwd)
             if result and result.outputs:
                 val = getattr(result.outputs, parameter)
         return val
