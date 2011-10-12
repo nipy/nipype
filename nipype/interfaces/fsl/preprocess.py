@@ -1242,10 +1242,10 @@ class FIRSTInputSpec(FSLCommandInputSpec):
         desc="Input structural image is already brain-extracted")
     no_cleanup = traits.Bool(argstr='-d', position=3,
         desc="Input structural image is already brain-extracted")
-    method = traits.Enum('auto','fast','none', argstr='-m', position=4,
-        desc="Method must be one of auto, fast, none, or a numerical threshold value")
+    method = traits.Enum('auto','fast','none', xor=['method_as_numerical_threshold'], argstr='-m', position=4,
+        desc="Method must be one of auto, fast, none, or it can be entered using the 'method_as_numerical_threshold' input")
     method_as_numerical_threshold = traits.Float(argstr='-m', position=4,
-        desc="Method must be one of auto, fast, none, or a numerical threshold value")
+        desc="Specify a numerical threshold value or use the 'method' input to choose auto, fast, or none")
     list_of_specific_structures = traits.List(traits.Str, argstr='-s %s', sep=',',
         position=5, minlen=1, 
         desc='Runs only on the specified structures (e.g. L_Hipp, R_Hipp'
@@ -1262,13 +1262,15 @@ class FIRSTOutputSpec(TraitedSpec):
     bvars = OutputMultiPath(File(exists=True),
           desc='bvars for each subcortical region')
     original_segmentations = File(exists=True,
-          desc='4D image file containing a single image per segmented region')
+          desc='3D image file containing the segmented regions as integer values. Uses CMA labelling')
     segmentation_file = File(exists=True,
-          desc='4D image file containing a single image per segmented region')
+          desc='4D image file containing a single volume per segmented region')
 
 class FIRST(FSLCommand):
     """Use FSL's run_first_all command to segment subcortical volumes
 
+    http://www.fmrib.ox.ac.uk/fsl/first/index.html
+    
     Examples
     --------
 
