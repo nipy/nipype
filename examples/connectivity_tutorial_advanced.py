@@ -1,7 +1,7 @@
 """
-==================================================
+==========================================================
 Using MRtrix and CMTK for structural connectivity analysis
-==================================================
+==========================================================
 
 Introduction
 ============
@@ -37,7 +37,7 @@ the Lausanne2008 parcellation scheme.
 	The ConnectomeMapper (https://github.com/LTS5/cmp or www.cmtk.org) must be installed for this tutorial to function!
 	
 Packages and Data Setup
-============
+=======================
 
 Import necessary modules from nipype.
 """
@@ -67,6 +67,7 @@ This needs to point to the freesurfer subjects directory (Recon-all must have be
 Alternatively, the reconstructed subject data can be downloaded from: 
 
 	http://dl.dropbox.com/u/315714/subj1.zip
+    
 """
 
 fs_dir = op.abspath('/software/freesurfer')
@@ -78,6 +79,7 @@ fsl.FSLCommand.set_default_output_type('NIFTI')
 This needs to point to the fdt folder you can find after extracting
 	
 	http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
+    
 """
 
 data_dir = op.abspath(op.join(op.curdir,'exdata/'))
@@ -108,7 +110,6 @@ datasource.inputs.template = "%s/%s"
 datasource.inputs.base_directory = data_dir
 datasource.inputs.field_template = dict(dwi='%s/%s.nii')
 datasource.inputs.template_args = info
-datasource.inputs.base_directory = data_dir
 
 """
 The input node and Freesurfer sources declared here will be the main 
@@ -126,21 +127,21 @@ FreeSurferSourceRH.inputs.hemi = 'rh'
 
 """
 Creating the workflow's nodes
-============
+=============================
 """
 
 """
 Conversion nodes
---------------------------------------
+----------------
 """
 
 """
 A number of conversion operations are required to obtain NIFTI files from the FreesurferSource for each subject.
 Nodes are used to convert the following:
-	* Original structural image to NIFTI
-	* Pial, white, inflated, and spherical surfaces for both the left and right hemispheres
-		are converted to GIFTI for visualization in ConnectomeViewer
-	* Parcellated annotation files for the left and right hemispheres are also converted to GIFTI
+    * Original structural image to NIFTI
+    * Pial, white, inflated, and spherical surfaces for both the left and right hemispheres are converted to GIFTI for visualization in ConnectomeViewer
+    * Parcellated annotation files for the left and right hemispheres are also converted to GIFTI
+
 """
 
 mri_convert_Brain = pe.Node(interface=fs.MRIConvert(), name='mri_convert_Brain')
@@ -159,12 +160,12 @@ mris_convertRHlabels = mris_convertLH.clone('mris_convertRHlabels')
 
 """
 Diffusion processing nodes
---------------------------------------
+--------------------------
 
 .. seealso::
 
 	mrtrix_dti_tutorial.py
-		Tutorial with further detail on the MRtrix diffusion processing
+		Tutorial that focuses solely on the MRtrix diffusion processing
 
 	http://www.brain.org.au/software/mrtrix/index.html
 		MRtrix's online documentation
@@ -254,7 +255,7 @@ tck2trk = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name='tck2trk')
 
 """
 Structural segmentation nodes
---------------------------------------
+-----------------------------
 """
 
 """
@@ -335,14 +336,14 @@ NxStatsCFFConverter.inputs.script_files = op.abspath(inspect.getfile(inspect.cur
 
 """
 Connecting the workflow
-============
+=======================
 Here we connect our processing pipeline.
 """
 
 
 """
 Connecting the inputs, FreeSurfer nodes, and conversions
---------------------------------------
+--------------------------------------------------------
 """
 
 mapping = pe.Workflow(name='mapping')
@@ -395,7 +396,7 @@ mapping.connect([(FreeSurferSourceRH, mris_convertRHlabels, [(('annot', select_a
 
 """
 Diffusion Processing
---------------------------------------
+--------------------
 Now we connect the tensor computations:
 """
 
@@ -462,7 +463,7 @@ mapping.connect([(inputnode, tracks2prob,[("dwi","template_file")])])
 
 """
 Structural Processing
---------------------------------------
+---------------------
 First, we coregister the structural image to the diffusion image and then obtain the inverse of transformation.
 """
 
@@ -558,7 +559,7 @@ mapping.connect([(inputnode, NxStatsCFFConverter,[("subject_id","title")])])
 
 """
 Create a higher-level workflow
---------------------------------------
+------------------------------
 Finally, we create another higher-level workflow to connect our mapping workflow with the info and datagrabbing nodes
 declared at the beginning. Our tutorial is now extensible to any arbitrary number of subjects by simply adding
 their names to the subject list and their data to the proper folders.

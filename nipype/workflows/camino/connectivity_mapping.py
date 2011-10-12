@@ -10,31 +10,10 @@ import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
 import inspect
 import nibabel as nb
-import os                                    # system functions
+import os, os.path as op
 import cmp                                    # connectome mapper
+from nipype.workflows.camino.diffusion import (get_vox_dims, get_data_dims, get_affine)
 
-def get_vox_dims(volume):
-    import nibabel as nb
-    if isinstance(volume, list):
-        volume = volume[0]
-    nii = nb.load(volume)
-    hdr = nii.get_header()
-    voxdims = hdr.get_zooms()
-    return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
-
-def get_data_dims(volume):
-    import nibabel as nb
-    if isinstance(volume, list):
-        volume = volume[0]
-    nii = nb.load(volume)
-    hdr = nii.get_header()
-    datadims = hdr.get_data_shape()
-    return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
-
-def get_affine(volume):
-    import nibabel as nb
-    nii = nb.load(volume)
-    return nii.get_affine()
 
 def select_aparc(list_of_files):
     for in_file in list_of_files:
@@ -42,11 +21,13 @@ def select_aparc(list_of_files):
             idx = list_of_files.index(in_file)
     return list_of_files[idx]
 
+
 def select_aparc_annot(list_of_files):
     for in_file in list_of_files:
         if '.aparc.annot' in in_file:
             idx = list_of_files.index(in_file)
     return list_of_files[idx]
+
 
 def get_first_image(volume):
     import nibabel as nb
@@ -56,6 +37,7 @@ def get_first_image(volume):
     name = op.abspath('b0.nii')
     nb.save(b[0], name)
     return name
+
 
 def create_connectivity_pipeline(name="connectivity"):
     """Creates a pipeline that does the same connectivity processing as in the
@@ -504,7 +486,7 @@ def create_connectivity_pipeline(name="connectivity"):
     product.
     """
 
-    CFFConverter.inputs.script_files = os.path.abspath(inspect.getfile(inspect.currentframe()))
+    CFFConverter.inputs.script_files = op.abspath(inspect.getfile(inspect.currentframe()))
     mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
     mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
     mapping.connect([(creatematrix, CFFConverter,[("matrix_file","gpickled_networks")])])

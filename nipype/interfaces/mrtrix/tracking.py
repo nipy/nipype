@@ -113,7 +113,7 @@ class StreamlineTrack(CommandLine):
     Performs tractography using one of the following models:
     'dt_prob', 'dt_stream', 'sd_prob', 'sd_stream',
     Where 'dt' stands for diffusion tensor, 'sd' stands for spherical
-    deconvolution, and 'prob' stands from probabilistic. 
+    deconvolution, and 'prob' stands for probabilistic. 
 
     Example
     -------

@@ -63,8 +63,8 @@ class CFFConverter(BaseInterface):
     Example
     -------
 
-    >>> from nipype.interfaces.cmtk.convert import CFFConverter
-    >>> cvt = CFFConverter()
+    >>> import nipype.interfaces.cmtk as cmtk
+    >>> cvt = cmtk.CFFConverter()
     >>> cvt.inputs.title = 'subject 1'
     >>> cvt.inputs.gifti_surfaces = ['lh.pial_converted.gii', 'rh.pial_converted.gii']
     >>> cvt.inputs.tract_files = ['streamlines.trk']
@@ -216,9 +216,9 @@ class MergeCNetworks(BaseInterface):
     Example
     -------
 
-    >>> import nipype.interfaces.cmtk.base as ba                  # doctest: +SKIP
-    >>> mrg = ba.MergeCNetworks()                  # doctest: +SKIP
-    >>> mrg.inputs.in_files = ['subj1.cff','subj2.cff']                  # doctest: +SKIP
+    >>> import nipype.interfaces.cmtk as cmtk
+    >>> mrg = cmtk.MergeCNetworks()
+    >>> mrg.inputs.in_files = ['subj1.cff','subj2.cff']
     >>> mrg.run()                  # doctest: +SKIP
 
     """
@@ -238,7 +238,6 @@ class MergeCNetworks(BaseInterface):
                 contitle = mycon.get_connectome_meta().get_title()
                 ne.set_name( str(i) + ': ' + contitle + ' - ' + ne.get_name() )
                 ne.set_src(ne.get_name())
-                #ne.set_description( str(i) + ': ' + contitle + ' - ' + ne.get_name() )
                 extracted_networks.append(ne)
 
         # Add networks to new connectome
@@ -249,8 +248,8 @@ class MergeCNetworks(BaseInterface):
         metadata.set_email('My Email')
 
         _, name, ext = split_filename(self.inputs.out_file)
-        #if not ext == '.cff':
-        ext = '.cff'
+        if not ext == '.cff':
+            ext = '.cff'
         cf.save_to_cff(newcon, op.abspath(name + ext))
 
         return runtime
@@ -258,7 +257,7 @@ class MergeCNetworks(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         _, name, ext = split_filename(self.inputs.out_file)
-        #if not ext == '.cff':
-        ext = '.cff'
+        if not ext == '.cff':
+            ext = '.cff'
         outputs['connectome_file'] = op.abspath(name + ext)
         return outputs

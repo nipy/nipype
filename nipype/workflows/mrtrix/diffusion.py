@@ -1,10 +1,7 @@
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.interfaces.camino as camino
 import nipype.interfaces.fsl as fsl
-import nipype.interfaces.camino2trackvis as cam2trk
-import nipype.algorithms.misc as misc
 import nipype.interfaces.mrtrix as mrtrix
 import os, os.path as op
 from nipype.workflows.camino.diffusion import get_vox_dims, get_data_dims, get_affine
@@ -19,7 +16,7 @@ def create_mrtrix_dti_pipeline(name="dtiproc"):
     -------
 
     >>> from nipype.workflows.mrtrix import create_mrtrix_dti_pipeline
-    >>> dti = create_mrtrix_dti_pipeline("eriktest")
+    >>> dti = create_mrtrix_dti_pipeline("mrtrix_dti")
     >>> dti.inputs.inputnode.dwi = 'data.nii'
     >>> dti.inputs.inputnode.bvals = 'bvals'
     >>> dti.inputs.inputnode.bvecs = 'bvecs'
@@ -34,10 +31,10 @@ def create_mrtrix_dti_pipeline(name="dtiproc"):
     Outputs::
 
         outputnode.fa
-        outputnode.trace
-        outputnode.tracts_pico
-        outputnode.tracts_dt
-        outputnode.tensors
+        outputnode.tdi
+        outputnode.tracts_tck
+        outputnode.tracts_trk
+        outputnode.csdeconv
 
     """
 

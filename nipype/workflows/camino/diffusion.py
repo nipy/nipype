@@ -5,6 +5,7 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.algorithms.misc as misc
 
+
 def get_vox_dims(volume):
     import nibabel as nb
     if isinstance(volume, list):

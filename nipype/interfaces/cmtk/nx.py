@@ -86,7 +86,6 @@ def average_networks(in_files, ntwk_res_file, group_id):
                 if tmp[node].has_key('value'):
                     data['value'] = data['value'] + tmp.node[node]['value']
                 ntwk.add_node(node,data)
-        # Divide by number of files
         nodes = ntwk.nodes_iter()
         edges = ntwk.edges_iter()
 
@@ -378,9 +377,21 @@ class AverageNetworksInputSpec(BaseInterfaceInputSpec):
 
 class AverageNetworksOutputSpec(TraitedSpec):
     out_gpickled_groupavg = File(desc='Average connectome for the group in gpickled format')
+    out_gexf_groupavg = File(desc='Average connectome for the group in gexf format')
     out_group_average = File(desc='Some simple image statistics saved as a Matlab .mat')
 
 class AverageNetworks(BaseInterface):
+    """
+    Calculates and outputs the average network given a set of input NetworkX gpickle files
+
+    Example
+    -------
+    
+    >>> import nipype.interfaces.cmtk as cmtk
+    >>> avg = cmtk.NetworkXMetrics()
+    >>> avg.inputs.in_files = ['subj1.pck', 'subj2.pck']
+    >>> avg.run()                 # doctest: +SKIP
+    """
     input_spec = AverageNetworksInputSpec
     output_spec = AverageNetworksOutputSpec
 
@@ -393,13 +404,13 @@ class AverageNetworks(BaseInterface):
             ntwk_res_file = cmp_config.parcellation['freesurferaparc']['node_information_graphml']
 
         groupavg = average_networks(self.inputs.in_networks, ntwk_res_file, self.inputs.group_id)
-        gpickled.append(groupavg + '.pck')
         return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["out_group_average"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'mat'))
         outputs["out_gpickled_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','pck'))
+        outputs["out_gexf_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','gexf'))
         return outputs
 
     def _gen_outfilename(self, name, ext):
