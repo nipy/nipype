@@ -190,11 +190,9 @@ class FSLCommand(CommandLine):
         else:
             raise AttributeError('Invalid FSL output_type: %s' % output_type)
 
-
     @property
     def version(self):
         return Info.version()
-
 
     def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True,
                    ext=None):
