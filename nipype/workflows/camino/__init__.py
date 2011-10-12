@@ -1,3 +1,1 @@
-from connectivity_mapping import create_connectivity_pipeline
-from group_connectivity import create_group_cff_pipeline_part1, create_group_cff_pipeline_part2, create_group_cff_pipeline_part3, create_group_cff_pipeline_part4
-from nipype.workflows.camino import diffusion
+from nipype.workflows.camino import (diffusion, connectivity_mapping, group_connectivity)

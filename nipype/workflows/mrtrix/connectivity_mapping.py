@@ -23,32 +23,16 @@ def create_connectivity_pipeline(name="connectivity"):
 
 	>>> import os.path as op
 	>>> import nipype.interfaces.freesurfer as fs
-	>>> from nipype.workflows.mrtrix import create_connectivity_pipeline
+	>>> from nipype.workflows.mrtrix.connectivity_mapping as mrwork
 	>>> subjects_dir = op.abspath('freesurfer')
 	>>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
-	>>> cff = cmonwk.create_connectivity_pipeline("mrtrix_cmtk")
+	>>> cff = mrwork.create_connectivity_pipeline("mrtrix_cmtk")
 	>>> cff.inputs.inputnode.subjects_dir = subjects_dir
 	>>> cff.inputs.inputnode.subject_id = 'subj1'
 	>>> cff.inputs.inputnode.dwi = op.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
 	>>> cff.inputs.inputnode.bvecs = op.abspath('fsl_course_data/fdt/subj1/bvecs')
 	>>> cff.inputs.inputnode.bvals = op.abspath('fsl_course_data/fdt/subj1/bvals')
 	>>> cff.run()                 # doctest: +SKIP
-
-    Example
-    -------
-
-    >>> import os
-    >>> import nipype.interfaces.freesurfer as fs
-    >>> import nipype.workflows.camino as cmonwk
-    >>> subjects_dir = os.path.abspath('freesurfer')
-    >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
-    >>> conmapper = cmonwk.create_connectivity_pipeline("nipype_conmap")
-    >>> conmapper.inputs.inputnode.subjects_dir = subjects_dir
-    >>> conmapper.inputs.inputnode.subject_id = 'subj1'
-    >>> conmapper.inputs.inputnode.dwi = os.path.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
-    >>> conmapper.inputs.inputnode.bvecs = os.path.abspath('fsl_course_data/fdt/subj1/bvecs')
-    >>> conmapper.inputs.inputnode.bvals = os.path.abspath('fsl_course_data/fdt/subj1/bvals')
-    >>> conmapper.run()                 # doctest: +SKIP
 
     Inputs::
 
@@ -61,13 +45,18 @@ def create_connectivity_pipeline(name="connectivity"):
     Outputs::
 
         outputnode.connectome
+        outputnode.nxstatscff
         outputnode.cmatrix
         outputnode.gpickled_network
+        outputnode.mean_fiber_length
+        outputnode.fiber_length_std
         outputnode.fa
+        outputnode.rois
+        outputnode.rois_orig
+        outputnode.odfs
+        outputnode.warped
         outputnode.struct
-        outputnode.trace
         outputnode.tracts
-        outputnode.tensors
 
     """
 

@@ -1,2 +1,2 @@
-from mrtrix_dti_processing import create_mrtrix_dti_pipeline
-from connectivity_mapping import create_connectivity_pipeline
+from nipype.workflows.mrtrix import (diffusion, connectivity_mapping, group_connectivity)
+
