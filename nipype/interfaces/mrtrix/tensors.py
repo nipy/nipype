@@ -1,6 +1,6 @@
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine
+from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, BaseInterface, BaseInterfaceInputSpec, 
+                                    traits, File, TraitedSpec, Directory, InputMultiPath, OutputMultiPath, isdefined)
 from nipype.utils.filemanip import split_filename
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, File, TraitedSpec, Directory, InputMultiPath, OutputMultiPath, isdefined
 import os, os.path as op
 import numpy as np
 import nibabel as nb
@@ -61,7 +61,7 @@ class DWI2SphericalHarmonicsImage(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['spherical_harmonics_image'] = os.path.abspath(self._gen_outfilename())
+        outputs['spherical_harmonics_image'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -137,7 +137,7 @@ class ConstrainedSphericalDeconvolution(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['spherical_harmonics_image'] = os.path.abspath(self._gen_outfilename())
+        outputs['spherical_harmonics_image'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -184,7 +184,7 @@ class EstimateResponseForSH(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['response'] = os.path.abspath(self._gen_outfilename())
+        outputs['response'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -260,7 +260,7 @@ class FSL2MRTrix(BaseInterface):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['encoding_file'] = os.path.abspath(self._gen_filename('out_encoding_file'))
+        outputs['encoding_file'] = op.abspath(self._gen_filename('out_encoding_file'))
         return outputs
         
     def _gen_filename(self, name):

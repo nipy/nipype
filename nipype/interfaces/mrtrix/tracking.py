@@ -1,6 +1,6 @@
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from nipype.utils.filemanip import split_filename
-import os
+import os, os.path as op
 
 class Tracks2ProbInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
@@ -42,7 +42,7 @@ class Tracks2Prob(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['tract_image'] = os.path.abspath(self._gen_outfilename())
+        outputs['tract_image'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -131,7 +131,7 @@ class StreamlineTrack(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['tracked'] = os.path.abspath(self._gen_outfilename())
+        outputs['tracked'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):

@@ -1,21 +1,11 @@
 from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                                    File, TraitedSpec, Directory, InputMultiPath,
-                                    OutputMultiPath, isdefined)
-from glob import glob
-from nibabel import load
-from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
-import pickle
-import scipy as sp
-import scipy.io as sio
+                                    File, TraitedSpec, Directory, isdefined)
 import os, os.path as op
-from time import time
 import numpy as np
 import nibabel as nb
 import networkx as nx
-import sys
 import shutil
-import subprocess
-from cmp.util import mymove, runCmd
+from cmp.util import runCmd
 import cmp
 
 def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):

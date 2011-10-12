@@ -54,7 +54,7 @@ class MRConvert(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['converted'] = os.path.abspath(self._gen_outfilename())
+        outputs['converted'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -105,7 +105,7 @@ class DWI2Tensor(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['tensor'] = os.path.abspath(self._gen_outfilename())
+        outputs['tensor'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -146,7 +146,7 @@ class Tensor2Vector(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['vector'] = os.path.abspath(self._gen_outfilename())
+        outputs['vector'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -187,7 +187,7 @@ class Tensor2FractionalAnisotropy(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['FA'] = os.path.abspath(self._gen_outfilename())
+        outputs['FA'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -228,7 +228,7 @@ class Tensor2ApparentDiffusion(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['ADC'] = os.path.abspath(self._gen_outfilename())
+        outputs['ADC'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -269,7 +269,7 @@ class MRMultiply(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
+        outputs['out_file'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -368,7 +368,7 @@ class GenerateWhiteMatterMask(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['WMprobabilitymap'] = os.path.abspath(self._gen_outfilename())
+        outputs['WMprobabilitymap'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -410,7 +410,7 @@ class Erode(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
+        outputs['out_file'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -460,7 +460,7 @@ class Threshold(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
+        outputs['out_file'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -501,7 +501,7 @@ class MedianFilter3D(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
+        outputs['out_file'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -551,7 +551,7 @@ class MRTransform(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
+        outputs['out_file'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):

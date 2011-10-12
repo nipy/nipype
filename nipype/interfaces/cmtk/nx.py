@@ -1,19 +1,13 @@
 from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                                    File, TraitedSpec, Directory, InputMultiPath,
+                                    File, TraitedSpec, InputMultiPath,
                                     OutputMultiPath, isdefined)
-import re
-from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile, list_to_filename
+from nipype.utils.filemanip import split_filename
 import os, os.path as op
 import numpy as np
-import nibabel as nb
 import networkx as nx
-import sys
 import scipy.io as sio
-from itertools import combinations as combo
-import random
 import pickle
 import cmp
-
 
 def read_unknown_ntwk(ntwk):
     path, name, ext = split_filename(ntwk)
@@ -122,27 +116,27 @@ def compute_node_measures(ntwk):
     measures = {}
     print '...Computing degree...'
     measures['degree'] = np.array(ntwk.degree().values())
-    ##print '...Computing number of cliques for each node...'
-    ##measures['number_of_cliques'] = np.array(nx.number_of_cliques(ntwk).values())
+    print '...Computing number of cliques for each node...'
+    measures['number_of_cliques'] = np.array(nx.number_of_cliques(ntwk).values())
     print '...Computing load centrality...'
     measures['load_centrality'] = np.array(nx.load_centrality(ntwk).values())
-    ##print '...Computing betweenness centrality...'
-    ##measures['betweenness_centrality'] = np.array(nx.betweenness_centrality(ntwk).values())
-    ##print '...Computing degree centrality...'
-    ##measures['degree_centrality'] = np.array(nx.degree_centrality(ntwk).values())
-    ##print '...Computing closeness centrality...'
-    ##measures['closeness_centrality'] = np.array(nx.closeness_centrality(ntwk).values())
-    ##print '...Computing eigenvector centrality...'
-    ##measures['eigenvector_centrality'] = np.array(nx.eigenvector_centrality(ntwk).values())
-    ##print '...Calculating node clique number'
-    ##measures['node_clique_number'] = np.array(nx.node_clique_number(ntwk).values())
-    ##print '...Computing pagerank...'
-    ##measures['pagerank'] = np.array(nx.pagerank(ntwk).values())
-    ##print '...Computing triangles...'
-    ##measures['triangles'] = np.array(nx.triangles(ntwk).values())
+    print '...Computing betweenness centrality...'
+    measures['betweenness_centrality'] = np.array(nx.betweenness_centrality(ntwk).values())
+    print '...Computing degree centrality...'
+    measures['degree_centrality'] = np.array(nx.degree_centrality(ntwk).values())
+    print '...Computing closeness centrality...'
+    measures['closeness_centrality'] = np.array(nx.closeness_centrality(ntwk).values())
+    print '...Computing eigenvector centrality...'
+    measures['eigenvector_centrality'] = np.array(nx.eigenvector_centrality(ntwk).values())
+    print '...Calculating node clique number'
+    measures['node_clique_number'] = np.array(nx.node_clique_number(ntwk).values())
+    print '...Computing pagerank...'
+    measures['pagerank'] = np.array(nx.pagerank(ntwk).values())
+    print '...Computing triangles...'
+    measures['triangles'] = np.array(nx.triangles(ntwk).values())
     print '...Computing clustering...'
     measures['clustering'] = np.array(nx.clustering(ntwk).values())
-    #print 'Computing closeness vitality...'
+    #print 'Computing closeness vitality...' #broken?
     #measures['closeness_vitality'] = np.array(nx.closeness_vitality(ntwk,weighted_edges=weighted).values())
     print '...Identifying network isolates...'
     measures['isolates'] = nx.isolates(ntwk)
@@ -167,14 +161,8 @@ def compute_edge_measures(ntwk):
     #measures['google_matrix'] = nx.google_matrix(ntwk)
     print '...Computing hub matrix...'
     measures['hub_matrix'] = nx.hub_matrix(ntwk)
-    ##print '...Computing authority matrix...'
-    ##measures['authority_matrix'] = nx.authority_matrix(ntwk)
-    
-    
-    """
-    These return other sized arrays
-    """
-    #dict_measures['degree_mixing_matrix'] = nx.degree_mixing_matrix(ntwk)
+    print '...Computing authority matrix...'
+    measures['authority_matrix'] = nx.authority_matrix(ntwk)
     return measures
     
 def compute_dict_measures(ntwk):
@@ -184,18 +172,20 @@ def compute_dict_measures(ntwk):
     print 'Computing measures which return a dictionary:'
     weighted = True
     measures = {}
-    ##print '...Computing connected components...'
-    ##measures['connected_components'] = nx.connected_components(ntwk) # list of lists, doesn't make sense to do stats
-    ##print '...Computing neighbour connectivity...'
-    ##measures['neighbor_connectivity'] = nx.neighbor_connectivity(ntwk)    
+    print '...Computing connected components...'
+    measures['connected_components'] = nx.connected_components(ntwk) # list of lists, doesn't make sense to do stats
+    print '...Computing neighbour connectivity...'
+    measures['neighbor_connectivity'] = nx.neighbor_connectivity(ntwk)    
     print '...Computing rich club coefficient...'
     measures['rich_club_coef'] = nx.rich_club_coefficient(ntwk)
-    ##print '...Computing edge load...'
-    ##measures['edge_load'] = nx.edge_load(ntwk)
-    ##print '...Computing betweenness centrality...'
-    ##measures['edge_betweenness_centrality'] = nx.edge_betweenness_centrality(ntwk)
-    ##print '...Computing shortest path length for each node...'
-    ##measures['shortest_path_length'] = np.array(nx.shortest_path_length(ntwk, weighted).values())
+    print '...Computing edge load...'
+    measures['edge_load'] = nx.edge_load(ntwk)
+    print '...Computing betweenness centrality...'
+    measures['edge_betweenness_centrality'] = nx.edge_betweenness_centrality(ntwk)
+    print '...Computing shortest path length for each node...'
+    measures['shortest_path_length'] = np.array(nx.shortest_path_length(ntwk, weighted).values())
+    print '...Computing degree mixing matrix...'
+    measures['degree_mixing_matrix'] = nx.degree_mixing_matrix(ntwk)
     return measures
 
 def compute_singlevalued_measures(ntwk):
@@ -215,195 +205,11 @@ def compute_singlevalued_measures(ntwk):
     measures['number_connected_components'] = nx.number_connected_components(ntwk)
     print '...Computing average clustering...'
     measures['average_clustering'] = nx.average_clustering(ntwk)
-    #print '...Computing graph clique number...'
-    #measures['graph_clique_number'] = nx.graph_clique_number(ntwk)
-    #print '...Calculating average shortest path length...'
-    #measures['average_shortest_path_length'] = nx.average_shortest_path_length(ntwk, weighted)
+    print '...Computing graph clique number...'
+    measures['graph_clique_number'] = nx.graph_clique_number(ntwk)
+    print '...Calculating average shortest path length...'
+    measures['average_shortest_path_length'] = nx.average_shortest_path_length(ntwk, weighted)
     return measures
-    
-def compute_nx_measures(ntwk):
-    measures = {}
-    node = compute_node_measures(ntwk)
-    edge = compute_edge_measures(ntwk)
-    singlevalued = compute_singlevalued_measures(ntwk)
-    measures.update(node)
-    measures.update(edge)
-    measures.update(singlevalued)
-    return measures
-
-def group_nx_stats(in_networks, output_prefix, group_id, subject_ids_group, ntwk_res_file):
-    print 'Running group-level NetworkX stats...'
-    if not subject_ids_group == 0:
-        print 'Subject IDs: {subj_IDs}'.format(subj_IDs=subject_ids_group)
-    node_measures = {}
-    edge_measures = {}
-    ntwk_measures = {}
-    dict_measures = {}
-
-    print in_networks    
-    print ntwk_res_file
-    average = average_networks(in_networks, ntwk_res_file, group_id)
-    ntwk_res_file = read_unknown_ntwk(ntwk_res_file)
-    tmp = []
-    for subject in in_networks:
-        print subject
-        tmp = nx.read_gpickle(subject)
-        node_measures[subject] = compute_node_measures(tmp)
-        edge_measures[subject] = compute_edge_measures(tmp)
-        ntwk_measures[subject] = compute_singlevalued_measures(tmp)
-        dict_measures[subject] = compute_dict_measures(tmp)
-    
-    data = np.array((ntwk_res_file.number_of_nodes()))
-    node_keys = node_measures[subject].keys()
-    nodes = {}
-    for measure in node_keys:
-        for idx, subject in enumerate(node_measures.keys()):
-            tmp = node_measures[subject][measure]
-            n = max(np.shape(tmp))
-            tmp = np.reshape(tmp, (n, -1))
-            if idx == 0:
-                data = tmp
-            else:
-                data = np.dstack((data,tmp))
-        print np.shape(data)
-        nodes[measure] = np.mean(data,2)
-
-    edge_keys = edge_measures[subject].keys()    
-    edges = {}
-    for measure in edge_keys:
-        for idx, subject in enumerate(edge_measures.keys()):
-            tmp = np.array(edge_measures[subject][measure])
-            n = max(np.shape(tmp))
-            tmp = np.reshape(tmp, (n, n, -1))
-            if idx == 0:
-                data = tmp
-            else:
-                data = np.concatenate((data,tmp),2)
-        edges[measure] = np.mean(data,2)
-    
-    ntwk_keys = ntwk_measures[subject].keys()
-    singles = {}
-    for measure in ntwk_keys:
-        for idx, subject in enumerate(ntwk_measures.keys()):
-            tmp = ntwk_measures[subject][measure]
-            if idx == 0:
-                data = tmp
-            else:
-                data = np.dstack((data,tmp))
-        print np.shape(data)
-        singles[measure] = np.mean(data)
-    
-    returnall = {'node_measures':nodes, 'edge_measures':edges, 'ntwk_measures':singles, 'average':average, 'dict_measures':dict_measures}
-    return returnall
-
-class NetworkXStatsInputSpec(TraitedSpec):
-    in_networks = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for a group of subjects')
-    resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary' \
-                                ', but if included, the interface will output the statistical maps as networkx graphs.')
-    subject_ids = traits.List(traits.Str, desc='Subject IDs for each input file')
-    output_prefix = traits.Str('nxstats_', usedefault=True, desc='Prefix to append to output files')
-    group_id = traits.Str('group1', usedefault=True, desc='ID for group')
-    out_stats_file = File('nxstats.mat', usedefault=True, desc='Some simple image statistics saved as a Matlab .mat')
-    out_group_average = File('group1_average.mat', usedefault=True, desc='Group 1 measures saved as a Matlab .mat')
-    out_group_measures = File('group1_measures.mat', usedefault=True, desc='Group 1 measures saved as a Matlab .mat')
-    out_pickled_extra_measures_group = File('group1_extra_measures.pck', usedefault=True, desc='Network measures for group 1 that return dictionaries stored as a Pickle.')
-
-class NetworkXStatsOutputSpec(TraitedSpec):
-    stats_file = File(desc='Some simple image statistics for the original and normalized images saved as a Matlab .mat')
-    out_gpickled_network_files = OutputMultiPath(File(desc='Output gpickled network files'))
-    out_gpickled_groupavg = File(desc='Average connectome for the group in gpickled format')
-    out_gexf_network_files = OutputMultiPath(File(desc='Output gexf network files'))
-    out_gexf_groupavg = File(desc='Average connectome for the group in gexf format (for Gephi)')
-    out_group_measures = File(desc='Some simple image statistics saved as a Matlab .mat')
-    out_group_average = File(desc='Some simple image statistics saved as a Matlab .mat')
-    out_pickled_extra_measures = File(desc='Network measures for the group that return dictionaries, stored as a Pickle.')
-
-class NetworkXStats(BaseInterface):
-    input_spec = NetworkXStatsInputSpec
-    output_spec = NetworkXStatsOutputSpec
-
-    def _run_interface(self, runtime):
-        if isdefined(self.inputs.subject_ids):
-            subject_ids = self.inputs.subject_ids
-        else:
-            subject_ids = 0
-
-        if isdefined(self.inputs.resolution_network_file):
-            ntwk_res_file = self.inputs.resolution_network_file
-        else:
-            cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme = "NativeFreesurfer")
-            cmp_config.parcellation_scheme = "NativeFreesurfer"
-            ntwk_res_file = cmp_config.parcellation['freesurferaparc']['node_information_graphml']
-        global gpickled
-        global gexf
-        gpickled = []
-        gexf = []
-
-        returnall = group_nx_stats(self.inputs.in_networks, self.inputs.output_prefix, self.inputs.group_id, subject_ids, ntwk_res_file)
-
-        node_measures = returnall['node_measures']
-        edge_measures = returnall['edge_measures']
-        ntwk_measures = returnall['ntwk_measures']
-        subject_average = returnall['average']
-        subject_dict_measures = returnall['dict_measures']
-
-        out_node_measures = op.abspath(self._gen_outfilename(self.inputs.group_id + '_node_measures', 'mat'))
-        out_edge_measures = op.abspath(self._gen_outfilename(self.inputs.group_id + '_edge_measures', 'mat'))
-        out_ntwk_measures = op.abspath(self._gen_outfilename(self.inputs.group_id + '_ntwk_measures', 'mat'))
-        out_average = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'mat'))
-        out_pickled_extra_measures = op.abspath(self._gen_outfilename(self.inputs.group_id + '_extra_measures', 'pck'))
-        print 'Saving node measures as {file}'.format(file=out_node_measures)
-        sio.savemat(out_node_measures, node_measures)
-        print 'Saving edge measures as {file}'.format(file=out_edge_measures)
-        sio.savemat(out_edge_measures, edge_measures)
-        print 'Saving single valued measures as {file}'.format(file=out_ntwk_measures)
-        sio.savemat(out_ntwk_measures, ntwk_measures)
-
-        nodentwks = []
-        for key in node_measures.keys():
-            newntwk = add_node_data(node_measures[key], ntwk_res_file)
-            out_file = op.abspath(self._gen_outfilename(key, 'pck'))
-            nx.write_gpickle(newntwk, out_file)
-            nodentwks.append(out_file)
-        gpickled.extend(nodentwks)
-
-        edgentwks = []
-        for key in edge_measures.keys():
-            newntwk = add_edge_data(edge_measures[key], ntwk_res_file)
-            out_file = op.abspath(self._gen_outfilename(key, 'pck'))
-            nx.write_gpickle(newntwk, out_file)
-            edgentwks.append(out_file)
-        gpickled.extend(edgentwks)
-        
-        #print 'Saving subject average as {file}'.format(file=out_average)
-        #sio.savemat(out_average, subject_average)
-
-        print 'Saving extra measure File for group 1 to {path} in Pickle format'.format(path=os.path.abspath(out_pickled_extra_measures))
-        file = open(out_pickled_extra_measures, 'w')
-        pickle.dump(subject_dict_measures, file)
-        file.close()        
-
-        groupavg = average_networks(self.inputs.in_networks, ntwk_res_file, self.inputs.group_id)
-        gpickled.append(groupavg + '.pck')
-        gexf.append(groupavg + '.gexf')
-        return runtime
-
-    def _list_outputs(self):
-        global gpickled
-        global gexf
-        outputs = self.output_spec().get()
-        outputs["out_group_measures"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_measures', 'mat'))
-        outputs["out_group_average"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'mat'))
-        outputs["out_pickled_extra_measures"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_extra_measures', 'pck'))
-        outputs["out_gpickled_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','pck'))
-        outputs["out_gexf_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','gexf'))
-        outputs["stats_file"] = op.abspath(self.inputs.out_stats_file)
-        outputs["out_gpickled_network_files"] = gpickled
-        outputs["out_gexf_network_files"] = gexf
-        return outputs
-
-    def _gen_outfilename(self, name, ext):
-        return name + '.' + ext
 
 def compute_network_measures(ntwk):
     measures = {}
@@ -440,8 +246,7 @@ def add_edge_data(edge_array, ntwk):
                 edge_ntwk.add_edge(x,y,data)                
     return edge_ntwk
 
-
-class NetworkXMetricsInputSpec(TraitedSpec):
+class NetworkXMetricsInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='Input network')
     resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary' \
                                 ', but if included, the interface will output the statistical maps as NetworkX graphs.')
@@ -563,7 +368,7 @@ class NetworkXMetrics(BaseInterface):
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext
         
-class AverageNetworksInputSpec(TraitedSpec):
+class AverageNetworksInputSpec(BaseInterfaceInputSpec):
     in_networks = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for a group of subjects')
     resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary' \
                                 ', but if included, the interface will output the statistical maps as networkx graphs.')

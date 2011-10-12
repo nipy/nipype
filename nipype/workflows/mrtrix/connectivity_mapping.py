@@ -7,7 +7,7 @@ import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.cmtk as cmtk
 import inspect
 import nibabel as nb
-import os                                    # system functions
+import os, os.path as op
 import cmp                                    # connectome mapper
 from nipype.workflows.camino.connectivity_mapping import (get_vox_dims, get_data_dims,
  get_affine, select_aparc, select_aparc_annot, get_first_image)
@@ -215,8 +215,8 @@ def create_connectivity_pipeline(name="connectivity"):
 	inverse_AparcAseg = pe.Node(interface=fsl.FLIRT(), name = 'inverse_AparcAseg')
 	inverse_AparcAseg.inputs.interp = ('nearestneighbour')
 	inverse_AparcAseg.inputs.apply_xfm = True
-	CFFConverter.inputs.script_files = os.path.abspath(inspect.getfile(inspect.currentframe()))
-	NxStatsCFFConverter.inputs.script_files = os.path.abspath(inspect.getfile(inspect.currentframe()))
+	CFFConverter.inputs.script_files = op.abspath(inspect.getfile(inspect.currentframe()))
+	NxStatsCFFConverter.inputs.script_files = op.abspath(inspect.getfile(inspect.currentframe()))
 
 	"""
 	Connecting the mapping workflow

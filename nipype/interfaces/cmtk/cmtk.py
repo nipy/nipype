@@ -136,8 +136,8 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
 
     print 'Running cmat function'
     # Identify the endpoints of each fiber
-    en_fname = os.path.abspath(endpoint_name + '_endpoints.npy')
-    en_fnamemm = os.path.abspath(endpoint_name + '_endpointsmm.npy')
+    en_fname = op.abspath(endpoint_name + '_endpoints.npy')
+    en_fnamemm = op.abspath(endpoint_name + '_endpointsmm.npy')
 
     print 'Reading Trackvis file {trk}'.format(trk=track_file)
     fib, hdr = nb.trackvis.read(track_file, False)
@@ -269,7 +269,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
             fibdev.add_edge(u, v, weight=di['fiber_length_std'] )
 
     print 'Writing network as {ntwk}'.format(ntwk=matrix_name)
-    nx.write_gpickle(G, os.path.abspath(matrix_name))
+    nx.write_gpickle(G, op.abspath(matrix_name))
 
     numfib_mlab = nx.to_numpy_matrix(numfib, dtype=np.float64)
     numfib_dict = {}
@@ -293,11 +293,11 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     print 'Writing matlab fiber length deviation matrix as {mat}'.format(mat=fiber_length_std_matrix_name)
     sio.savemat(fiber_length_std_matrix_name, fibdev_dict)
 
-    fiberlengths_fname = os.path.abspath(endpoint_name + '_lengths.npy')
+    fiberlengths_fname = op.abspath(endpoint_name + '_lengths.npy')
     print 'Saving fiber length array: {array}'.format(array=fiberlengths_fname)
     np.save(fiberlengths_fname, final_fiberlength_array)
 
-    fiberlabels_fname = os.path.abspath(endpoint_name + '_labels.npy')
+    fiberlabels_fname = op.abspath(endpoint_name + '_labels.npy')
     print 'Saving fiber label array: {array}'.format(array=fiberlabels_fname)
     np.save(fiberlabels_fname, np.array(fiberlabels, dtype = np.int32), )
 
@@ -343,12 +343,12 @@ class CreateMatrix(BaseInterface):
     def _run_interface(self, runtime):
         if isdefined(self.inputs.out_matrix_file):
             path, name, _ = split_filename(self.inputs.out_matrix_file)
-            matrix_file = os.path.abspath(name + '.pck')
+            matrix_file = op.abspath(name + '.pck')
         else:
             matrix_file = self._gen_outfilename('pck')
         if isdefined(self.inputs.out_matrix_mat_file):
             path, name, _ = split_filename(self.inputs.out_matrix_mat_file)
-            matrix_mat_file = os.path.abspath(name + '.mat')
+            matrix_mat_file = op.abspath(name + '.mat')
         else:
             matrix_mat_file = self._gen_outfilename('mat')
 
@@ -370,37 +370,37 @@ class CreateMatrix(BaseInterface):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.out_matrix_file):
             path, name, _ = split_filename(self.inputs.out_matrix_file)
-            outputs['matrix_file']= os.path.abspath(name + '.pck')
+            outputs['matrix_file']= op.abspath(name + '.pck')
         else:
-            outputs['matrix_file']=os.path.abspath(self._gen_outfilename('pck'))
+            outputs['matrix_file']=op.abspath(self._gen_outfilename('pck'))
         if isdefined(self.inputs.out_matrix_mat_file):
             path, name, _ = split_filename(self.inputs.out_matrix_mat_file)
-            outputs['matrix_mat_file']= os.path.abspath(name + '.mat')
-            outputs['mean_fiber_length_matrix_mat_file']= os.path.abspath(name + '_mean_fiber_length.mat')
-            outputs['fiber_length_std_matrix_mat_file']= os.path.abspath(name + '_fiber_length_std.mat')
+            outputs['matrix_mat_file']= op.abspath(name + '.mat')
+            outputs['mean_fiber_length_matrix_mat_file']= op.abspath(name + '_mean_fiber_length.mat')
+            outputs['fiber_length_std_matrix_mat_file']= op.abspath(name + '_fiber_length_std.mat')
         else:
-            name = os.path.abspath(self._gen_outfilename('mat'))
+            name = op.abspath(self._gen_outfilename('mat'))
             outputs['matrix_mat_file'] = name
-            outputs['mean_fiber_length_matrix_mat_file'] = os.path.abspath(name + '_mean_fiber_length.mat')
-            outputs['fiber_length_std_matrix_mat_file'] = os.path.abspath(name + '_fiber_length_std.mat')
+            outputs['mean_fiber_length_matrix_mat_file'] = op.abspath(name + '_mean_fiber_length.mat')
+            outputs['fiber_length_std_matrix_mat_file'] = op.abspath(name + '_fiber_length_std.mat')
 
         if isdefined(self.inputs.out_matrix_mat_file):
             path, name, _ = split_filename(self.inputs.out_matrix_mat_file)
-            outputs['matrix_mat_file']= os.path.abspath(name + '.mat')
+            outputs['matrix_mat_file']= op.abspath(name + '.mat')
         else:
-            outputs['matrix_mat_file']=os.path.abspath(self._gen_outfilename('mat'))
+            outputs['matrix_mat_file']=op.abspath(self._gen_outfilename('mat'))
 
         if isdefined(self.inputs.out_endpoint_array_name):
-            outputs['endpoint_file'] = os.path.abspath(self.inputs.out_endpoint_array_name + '_endpoints.npy')
-            outputs['endpoint_file_mm'] = os.path.abspath(self.inputs.out_endpoint_array_name + '_endpointsmm.npy')
-            outputs['fiber_length_file'] = os.path.abspath(self.inputs.out_endpoint_array_name + '_lengths.npy')
-            outputs['fiber_label_file'] = os.path.abspath(self.inputs.out_endpoint_array_name + '_labels.npy')
+            outputs['endpoint_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_endpoints.npy')
+            outputs['endpoint_file_mm'] = op.abspath(self.inputs.out_endpoint_array_name + '_endpointsmm.npy')
+            outputs['fiber_length_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_lengths.npy')
+            outputs['fiber_label_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_labels.npy')
         else:
             _, endpoint_name , _ = split_filename(self.inputs.tract_file)
-            outputs['endpoint_file'] = os.path.abspath(endpoint_name + '_endpoints.npy')
-            outputs['endpoint_file_mm'] = os.path.abspath(endpoint_name + '_endpointsmm.npy')
-            outputs['fiber_length_file'] = os.path.abspath(endpoint_name + '_lengths.npy')
-            outputs['fiber_label_file'] = os.path.abspath(endpoint_name + '_labels.npy')
+            outputs['endpoint_file'] = op.abspath(endpoint_name + '_endpoints.npy')
+            outputs['endpoint_file_mm'] = op.abspath(endpoint_name + '_endpointsmm.npy')
+            outputs['fiber_length_file'] = op.abspath(endpoint_name + '_lengths.npy')
+            outputs['fiber_label_file'] = op.abspath(endpoint_name + '_labels.npy')
 
         return outputs
 
@@ -454,20 +454,20 @@ class ROIGen(BaseInterface):
             print 'Using Freesurfer LUT: {name}'.format(name=self.LUT_file)
             prefix = 'fsLUT'
         elif not self.inputs.use_freesurfer_LUT and isdefined(self.inputs.LUT_file):
-            self.LUT_file = os.path.abspath(self.inputs.LUT_file)
+            self.LUT_file = op.abspath(self.inputs.LUT_file)
             lutpath, lutname, lutext = split_filename(self.LUT_file)
             print 'Using Custom LUT file: {name}'.format(name=lutname+lutext)
             prefix = lutname
 
-        self.roi_file = os.path.abspath(prefix + '_' + aparcname + '.nii')
-        self.dict_file = os.path.abspath(prefix + '_' + aparcname + '.pck')
+        self.roi_file = op.abspath(prefix + '_' + aparcname + '.nii')
+        self.dict_file = op.abspath(prefix + '_' + aparcname + '.pck')
         print 'Output names generated'
 
         if isdefined(self.inputs.out_roi_file):
-            self.roi_file = os.path.abspath(self.inputs.out_roi_file)
+            self.roi_file = op.abspath(self.inputs.out_roi_file)
 
         if isdefined(self.inputs.out_dict_file):
-            self.dict_file = os.path.abspath(self.inputs.out_dict_file)
+            self.dict_file = op.abspath(self.inputs.out_dict_file)
 
         MAPPING = [[1,2012],[2,2019],[3,2032],[4,2014],[5,2020],[6,2018],[7,2027],[8,2028],[9,2003],[10,2024],[11,2017],[12,2026],
                [13,2002],[14,2023],[15,2010],[16,2022],[17,2031],[18,2029],[19,2008],[20,2025],[21,2005],[22,2021],[23,2011],
@@ -478,11 +478,11 @@ class ROIGen(BaseInterface):
                [70,1009],[71,1015],[72,1001],[73,1030],[74,1034],[75,1035],[76,10],[77,11],[78,12],[79,13],[80,26],[81,17],
                [82,18],[83,16]]
 
-        print 'Lookup table: {name}'.format(name=os.path.abspath(self.LUT_file))
+        print 'Lookup table: {name}'.format(name=op.abspath(self.LUT_file))
         LUTlabelsRGBA = np.loadtxt(self.LUT_file, skiprows=4, usecols=[0,1,2,3,4,5], comments='#',
                         dtype={'names': ('index', 'label', 'R', 'G', 'B', 'A'),'formats': ('int', '|S30', 'int', 'int', 'int', 'int')})
         print LUTlabelsRGBA
-        self.aparc_aseg_file = os.path.abspath(self.inputs.aparc_aseg_file)
+        self.aparc_aseg_file = op.abspath(self.inputs.aparc_aseg_file)
         print 'Aparc path: {name}'.format(name=self.aparc_aseg_file)
         niiAPARCimg = nb.load(self.aparc_aseg_file)
         niiAPARCdata = niiAPARCimg.get_data()
@@ -539,10 +539,10 @@ class ROIGen(BaseInterface):
 
         roi_image = nb.Nifti1Image(niiGM, niiAPARCimg.get_affine(), niiAPARCimg.get_header())
 
-        print 'Saving ROI File to {path}'.format(path=os.path.abspath(self.roi_file))
-        nb.save(roi_image, os.path.abspath(self.roi_file))
-        print 'Saving Dictionary File to {path} in Pickle format'.format(path=os.path.abspath(self.dict_file))
-        file = open(os.path.abspath(self.dict_file), 'w')
+        print 'Saving ROI File to {path}'.format(path=op.abspath(self.roi_file))
+        nb.save(roi_image, op.abspath(self.roi_file))
+        print 'Saving Dictionary File to {path} in Pickle format'.format(path=op.abspath(self.dict_file))
+        file = open(op.abspath(self.dict_file), 'w')
         pickle.dump(labelDict, file)
         file.close()
 
@@ -551,13 +551,13 @@ class ROIGen(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         if isdefined(self.inputs.out_roi_file):
-            outputs['roi_file'] = os.path.abspath(self.inputs.out_roi_file)
+            outputs['roi_file'] = op.abspath(self.inputs.out_roi_file)
         else:
-            outputs['roi_file'] = os.path.abspath(self._gen_outfilename('nii'))
+            outputs['roi_file'] = op.abspath(self._gen_outfilename('nii'))
         if isdefined(self.inputs.out_dict_file):
-            outputs['dict_file'] = os.path.abspath(self.inputs.out_dict_file)
+            outputs['dict_file'] = op.abspath(self.inputs.out_dict_file)
         else:
-            outputs['dict_file'] = os.path.abspath(self._gen_outfilename('pck'))
+            outputs['dict_file'] = op.abspath(self._gen_outfilename('pck'))
         return outputs
 
     def _gen_outfilename(self, ext):
