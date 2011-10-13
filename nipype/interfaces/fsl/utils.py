@@ -396,7 +396,9 @@ class ImageStatsInputSpec(FSLCommandInputSpec):
                            desc="string defining the operation, options are " \
     "applied in order, e.g. -M -l 10 -M will report the non-zero mean, apply a" \
     "threshold and then report the new nonzero mean")
-    mask_file = File(exists=True, argstr="", desc='mask file used for option -k %s')
+    mask_file = File(exists=True, argstr="-k %s", desc='use the specified \
+image (filename) for masking - overrides lower and upper thresholds', 
+                     position = 4)
 
 
 class ImageStatsOutputSpec(TraitedSpec):
