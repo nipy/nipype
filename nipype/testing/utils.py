@@ -7,7 +7,7 @@ import os
 import shutil
 __docformat__ = 'restructuredtext'
 
-from nipype.utils.misc import package_check
+from ..utils.misc import package_check
 from nose import SkipTest
 
 def skip_if_no_package(*args, **kwargs):
