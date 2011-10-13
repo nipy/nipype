@@ -11,7 +11,7 @@ be specified a default value will be assumed. The file is divided into following
 sections:
 
 Logging
-~~~~~~~~~
+~~~~~~~
 
 *workflow_level*
 	How detailed the logs regarding workflow should be (possible values:
@@ -31,7 +31,7 @@ Logging
 	How many rotation should the log file make. (integer, default value: 4)
 
 Execution
-~~~~~~~~~~~
+~~~~~~~~~
 
 *plugin*
 	This defines which execution plugin to use. (possible values: ``Linear``,
@@ -53,6 +53,11 @@ Execution
 	100% accurate) or just their size and modification date (fast, but
 	potentially prone to errors)? (possible values: ``content`` and
 	``timestamp``; default value: ``content``)
+
+*keep_inputs*
+    Ensures that all inputs that are created in the nodes working directory are
+    kept after node execution (possible values: ``true`` and ``false``; default
+    value: ``false``)
 
 *single_thread_matlab*
 	Should all of the Matlab interfaces (including SPM) use only one thread?
@@ -89,6 +94,7 @@ Execution
 
 Example
 ~~~~~~~
+
 ::
 
 	[logging]
@@ -127,6 +133,22 @@ pipeline or the logger. Otherwise logging level will not be reset.
   """)
   
   config.readfp(cfg)
+
+Debug configuration
+~~~~~~~~~~~~~~~~~~~
+
+To enable debug mode, one can insert the following lines at the beginning of any
+script.::
+
+  from nipype.utils.config import config
+  config.enable_debug_mode()
+
+In this mode the following variables are set::
+
+  config.set('execution', 'stop_on_first_crash', 'true')
+  config.set('execution', 'remove_unnecessary_outputs', 'false')
+  config.set('logging', 'workflow_level', 'DEBUG')
+  config.set('logging', 'interface_level', 'DEBUG')
 
 
 .. include:: ../links_names.txt
