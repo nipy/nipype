@@ -35,7 +35,7 @@ def getTestCaseNames(self, testCaseClass):
             return sel.wantFunction(item)
         return False
         # END MONKEYPATCH
-    
+
     cases = filter(wanted, dir(testCaseClass))
     for base in testCaseClass.__bases__:
         for case in self.getTestCaseNames(base):
