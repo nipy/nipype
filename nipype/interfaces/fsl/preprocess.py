@@ -4,10 +4,11 @@
 <http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.  This
 was written to work with FSL version 4.1.4.
 
-Examples
---------
-See the docstrings of the individual classes for examples.
-
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
 """
 
 import os, os.path as op
@@ -1229,6 +1230,7 @@ class PRELUDE(FSLCommand):
             return self._list_outputs()['unwrapped_phase_file']
         return None
 
+
 class FIRSTInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, position=-2,
                   argstr='-i %s',
@@ -1242,19 +1244,25 @@ class FIRSTInputSpec(FSLCommandInputSpec):
         desc="Input structural image is already brain-extracted")
     no_cleanup = traits.Bool(argstr='-d', position=3,
         desc="Input structural image is already brain-extracted")
-    method = traits.Enum('auto','fast','none', xor=['method_as_numerical_threshold'], argstr='-m', position=4,
-        desc="Method must be one of auto, fast, none, or it can be entered using the 'method_as_numerical_threshold' input")
+    method = traits.Enum('auto', 'fast', 'none',
+                         xor=['method_as_numerical_threshold'],
+                         argstr='-m', position=4,
+        desc=("Method must be one of auto, fast, none, or it can be entered "
+              "using the 'method_as_numerical_threshold' input"))
     method_as_numerical_threshold = traits.Float(argstr='-m', position=4,
-        desc="Specify a numerical threshold value or use the 'method' input to choose auto, fast, or none")
-    list_of_specific_structures = traits.List(traits.Str, argstr='-s %s', sep=',',
-        position=5, minlen=1, 
+        desc=("Specify a numerical threshold value or use the 'method' input "
+              "to choose auto, fast, or none"))
+    list_of_specific_structures = traits.List(traits.Str, argstr='-s %s',
+                                              sep=',', position=5, minlen=1,
         desc='Runs only on the specified structures (e.g. L_Hipp, R_Hipp'
                           'L_Accu, R_Accu, L_Amyg, R_Amyg'
                           'L_Caud, R_Caud, L_Pall, R_Pall'
                           'L_Puta, R_Puta, L_Thal, R_Thal, BrStem')
     affine_file = File(exists=True, position=6,
                   argstr='-a %s',
-                  desc='Affine matrix to use (e.g. img2std.mat) (does not re-run registration)')
+                  desc=('Affine matrix to use (e.g. img2std.mat) (does not '
+                        're-run registration)'))
+
 
 class FIRSTOutputSpec(TraitedSpec):
     vtk_surfaces = OutputMultiPath(File(exists=True),
@@ -1262,21 +1270,23 @@ class FIRSTOutputSpec(TraitedSpec):
     bvars = OutputMultiPath(File(exists=True),
           desc='bvars for each subcortical region')
     original_segmentations = File(exists=True,
-          desc='3D image file containing the segmented regions as integer values. Uses CMA labelling')
+          desc=('3D image file containing the segmented regions as integer '
+                'values. Uses CMA labelling'))
     segmentation_file = File(exists=True,
           desc='4D image file containing a single volume per segmented region')
+
 
 class FIRST(FSLCommand):
     """Use FSL's run_first_all command to segment subcortical volumes
 
     http://www.fmrib.ox.ac.uk/fsl/first/index.html
-    
+
     Examples
     --------
 
     >>> from nipype.interfaces import fsl
     >>> first = fsl.FIRST()
-    >>> first.inputs.in_file = 'struct.nii'
+    >>> first.inputs.in_file = 'structural.nii'
     >>> first.inputs.out_file = 'segmented.nii'
     >>> res = first.run() #doctest: +SKIP
 
@@ -1288,7 +1298,7 @@ class FIRST(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        
+
         if isdefined(self.inputs.list_of_specific_structures):
             structures = self.inputs.list_of_specific_structures
         else:
@@ -1300,12 +1310,14 @@ class FIRST(FSLCommand):
                           'L_Puta', 'R_Puta',
                           'L_Thal', 'R_Thal',
                           'BrStem']
-        outputs['original_segmentations'] = self._gen_fname('original_segmentations')
+        outputs['original_segmentations'] = \
+                                      self._gen_fname('original_segmentations')
         outputs['segmentation_file'] = self._gen_fname('segmentation_file')
-        outputs['vtk_surfaces'] = self._gen_mesh_names('vtk_surfaces', structures)
+        outputs['vtk_surfaces'] = self._gen_mesh_names('vtk_surfaces',
+                                                       structures)
         outputs['bvars'] = self._gen_mesh_names('bvars', structures)
         return outputs
-        
+
     def _gen_fname(self, name):
         path, name, ext = split_filename(self.inputs.out_file)
         if name == 'original_segmentations':
@@ -1319,7 +1331,7 @@ class FIRST(FSLCommand):
         if name == 'vtk_surfaces':
             vtks = list()
             for struct in structures:
-                vtk =  prefix + '-' + struct + '_first.vtk'
+                vtk = prefix + '-' + struct + '_first.vtk'
             vtks.append(op.abspath(vtk))
             return vtks
         if name == 'bvars':
@@ -1329,4 +1341,3 @@ class FIRST(FSLCommand):
             bvars.append(op.abspath(bvar))
             return bvars
         return None
-
