@@ -94,7 +94,7 @@ if os.name == 'nt':
             else:
                 # Q:  Are there exceptions/codes we should be dealing with here?
                 raise
-    
+
     def unlock(file):
         hfile = win32file._get_osfhandle(file.fileno())
         try:
@@ -116,7 +116,7 @@ elif os.name == 'posix':
             # The exception code varies on different systems so we'll catch
             # every IO error
             raise LockException(*exc_value)
-    
+
     def unlock(file):
         fcntl.flock(file.fileno(), fcntl.LOCK_UN)
 
