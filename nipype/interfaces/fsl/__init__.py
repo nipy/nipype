@@ -12,7 +12,7 @@ from nipype.interfaces.fsl.base import (FSLCommand, Info, check_fsl, no_fsl,
 from nipype.interfaces.fsl.preprocess import (FAST, FLIRT, ApplyXfm,
                                               BET, MCFLIRT, FNIRT, ApplyWarp,
                                               SliceTimer, SUSAN,
-                                              PRELUDE, FUGUE)
+                                              PRELUDE, FUGUE, FIRST)
 from nipype.interfaces.fsl.model import (Level1Design, FEAT, FEATModel,
                                          FILMGLS, FEATRegister,
                                          FLAMEO, ContrastMgr,
