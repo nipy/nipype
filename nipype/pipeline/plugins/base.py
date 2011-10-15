@@ -23,7 +23,9 @@ from ..engine import (MapNode, str2bool)
 from nipype.utils.filemanip import savepkl, loadpkl
 import traceback
 
+
 logger = logging.getLogger('workflow')
+
 
 def report_crash(node, traceback=None):
     """Writes crash related information to a file
@@ -62,6 +64,7 @@ def report_crash(node, traceback=None):
     np.savez(crashfile, node=node, traceback=traceback)
     return crashfile
 
+
 def report_nodes_not_run(notrun):
     """List nodes that crashed with crashfile info
 
@@ -71,14 +74,17 @@ def report_nodes_not_run(notrun):
     if notrun:
         logger.info("***********************************")
         for info in notrun:
-            logger.error("could not run node: %s" % '.'.join((info['node']._hierarchy,
-                                                              info['node']._id)))
+            logger.error("could not run node: %s" %
+                         '.'.join((info['node']._hierarchy,
+                                   info['node']._id)))
             logger.info("crashfile: %s" % info['crashfile'])
             logger.debug("The following dependent nodes were not run")
             for subnode in info['dependents']:
                 logger.debug(subnode._id)
         logger.info("***********************************")
-        raise RuntimeError('Workflow did not execute cleanly. Check log for details')
+        raise RuntimeError(('Workflow did not execute cleanly. '
+                            'Check log for details'))
+
 
 class PluginBase(object):
     """Base class for plugins"""
@@ -136,7 +142,8 @@ class DistributedPluginBase(PluginBase):
         self.mapnodesubids = {}
         # setup polling - TODO: change to threaded model
         notrun = []
-        while np.any(self.proc_done==False) | np.any(self.proc_pending==True):
+        while np.any(self.proc_done == False) | \
+              np.any(self.proc_pending == True):
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
@@ -154,9 +161,10 @@ class DistributedPluginBase(PluginBase):
                     else:
                         toappend.insert(0, (taskid, jobid))
                 except Exception, e:
-                    result = {'result' : None,
-                              'traceback' : traceback.format_exc()}
-                    notrun.append(self._clean_queue(jobid, graph, result=result))
+                    result = {'result': None,
+                              'traceback': traceback.format_exc()}
+                    notrun.append(self._clean_queue(jobid, graph,
+                                                    result=result))
             if toappend:
                 self.pending_tasks.extend(toappend)
             if len(self.pending_tasks) < self.max_jobs:
@@ -201,15 +209,18 @@ class DistributedPluginBase(PluginBase):
         self.mapnodes.append(jobid)
         mapnodesubids = self.procs[jobid].get_subnodes()
         numnodes = len(mapnodesubids)
-        logger.info('Adding %d jobs for mapnode %s'%(numnodes, self.procs[jobid]._id))
+        logger.info('Adding %d jobs for mapnode %s' % (numnodes,
+                                                       self.procs[jobid]._id))
         for i in range(numnodes):
-            self.mapnodesubids[self.depidx.shape[0]+i] = jobid
+            self.mapnodesubids[self.depidx.shape[0] + i] = jobid
         self.procs.extend(mapnodesubids)
         self.depidx = ssp.vstack((self.depidx,
-                                  ssp.lil_matrix(np.zeros((numnodes, self.depidx.shape[1])))),
+                                  ssp.lil_matrix(np.zeros((numnodes,
+                                                    self.depidx.shape[1])))),
                                  'lil')
         self.depidx = ssp.hstack((self.depidx,
-                                  ssp.lil_matrix(np.zeros((self.depidx.shape[0], numnodes)))),
+                                  ssp.lil_matrix(np.zeros((self.depidx.shape[0],
+                                                           numnodes)))),
                                  'lil')
         self.depidx[-numnodes:, jobid] = 1
         self.proc_done = np.concatenate((self.proc_done,
@@ -224,13 +235,13 @@ class DistributedPluginBase(PluginBase):
         while np.any(self.proc_done == False):
             # Check to see if a job is available
             jobids = np.flatnonzero((self.proc_done == False) & \
-                                        (self.depidx.sum(axis=0)==0).__array__())
-            if len(jobids)>0:
+                                    (self.depidx.sum(axis=0) == 0).__array__())
+            if len(jobids) > 0:
                 # send all available jobs
                 logger.info('Submitting %d jobs' % len(jobids))
                 for jobid in jobids:
                     if isinstance(self.procs[jobid], MapNode) and \
-                            self.procs[jobid].num_subnodes()>1:
+                            self.procs[jobid].num_subnodes() > 1:
                         submit = self._submit_mapnode(jobid)
                         if not submit:
                             continue
@@ -268,7 +279,7 @@ class DistributedPluginBase(PluginBase):
         rowview = self.depidx.getrowview(jobid)
         rowview[rowview.nonzero()] = 0
         if jobid not in self.mapnodesubids:
-            self.refidx[self.refidx[:,jobid].nonzero()[0],jobid] = 0
+            self.refidx[self.refidx[:, jobid].nonzero()[0], jobid] = 0
 
     def _generate_dependency_list(self, graph):
         """ Generates a dependency list for a list of graphs.
@@ -277,7 +288,7 @@ class DistributedPluginBase(PluginBase):
         self.depidx = ssp.lil_matrix(nx.adj_matrix(graph).__array__())
         self.refidx = deepcopy(self.depidx)
         self.refidx.astype = np.int
-        self.proc_done    = np.zeros(len(self.procs), dtype=bool)
+        self.proc_done = np.zeros(len(self.procs), dtype=bool)
         self.proc_pending = np.zeros(len(self.procs), dtype=bool)
 
     def _remove_node_deps(self, jobid, crashfile, graph):
@@ -286,24 +297,25 @@ class DistributedPluginBase(PluginBase):
             idx = self.procs.index(node)
             self.proc_done[idx] = True
             self.proc_pending[idx] = False
-        return dict(node = self.procs[jobid],
-                    dependents = subnodes,
-                    crashfile = crashfile)
+        return dict(node=self.procs[jobid],
+                    dependents=subnodes,
+                    crashfile=crashfile)
 
     def _remove_node_dirs(self):
         """Removes directories whose outputs have already been used up
         """
         if str2bool(self._config['execution']['remove_node_directories']):
-            for idx in np.nonzero((self.refidx.sum(axis=1)==0).__array__())[0]:
+            for idx in np.nonzero((self.refidx.sum(axis=1) == 0).__array__())[0]:
                 if idx in self.mapnodesubids:
                     continue
                 if self.proc_done[idx] and (not self.proc_pending[idx]):
-                    self.refidx[idx,idx] = -1
+                    self.refidx[idx, idx] = -1
                     outdir = self.procs[idx]._output_directory()
                     logger.info(('[node dependencies finished] '
                                  'removing node: %s from directory %s') % \
                                 (self.procs[idx]._id, outdir))
                     shutil.rmtree(outdir)
+
 
 class SGELikeBatchManagerBase(DistributedPluginBase):
     """Execute workflow with SGE/OGE/PBS like batch system
@@ -334,7 +346,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
 
     def _get_result(self, taskid):
         if taskid not in self._pending:
-            raise Exception('Task %d not found'%taskid)
+            raise Exception('Task %d not found' % taskid)
         if self._is_pending(taskid):
             return None
         node_dir = self._pending[taskid]
@@ -345,21 +357,22 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         # finished to when the directories become statable.
         while True:
             try:
-                logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,'..'))))
+                logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,
+                                                                      '..'))))
                 logger.debug(os.listdir(node_dir))
-                glob(os.path.join(node_dir,'result_*.pklz')).pop()
+                glob(os.path.join(node_dir, 'result_*.pklz')).pop()
                 break
             except Exception, e:
                 logger.debug(e)
             sleep(2)
-        results_file = glob(os.path.join(node_dir,'result_*.pklz'))[0]
+        results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]
         result_data = loadpkl(results_file)
         result_out = dict(result=None, traceback=None)
         if isinstance(result_data, dict):
             result_out['result'] = result_data['result']
             result_out['traceback'] = result_data['traceback']
             result_out['hostname'] = result_data['hostname']
-            crash_file = os.path.join(node_dir,'crashstore.pklz')
+            crash_file = os.path.join(node_dir, 'crashstore.pklz')
             os.rename(results_file, crash_file)
         else:
             result_out['result'] = result_data
@@ -370,14 +383,15 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         """
         # pickle node
         timestamp = strftime('%Y%m%d_%H%M%S')
-        suffix = '%s_%s'%(timestamp, node._id)
+        suffix = '%s_%s' % (timestamp, node._id)
         if node._hierarchy:
-            batch_dir = os.path.join(node.base_dir, node._hierarchy.split('.')[0], 'batch')
+            batch_dir = os.path.join(node.base_dir,
+                                     node._hierarchy.split('.')[0], 'batch')
         else:
             batch_dir = os.path.join(node.base_dir, 'batch')
         if not os.path.exists(batch_dir):
             os.makedirs(batch_dir)
-        pkl_file = os.path.join(batch_dir,'node_%s.pklz'%suffix)
+        pkl_file = os.path.join(batch_dir, 'node_%s.pklz' % suffix)
         savepkl(pkl_file, dict(node=node, updatehash=updatehash))
         # create python script to load and trap exception
         cmdstr = """import os
@@ -394,15 +408,18 @@ except:
     etype, eval, etr = sys.exc_info()
     traceback = format_exception(etype,eval,etr)
     result = info['node'].result
-    resultsfile = os.path.join(info['node'].output_dir(), 'result_%%s.pklz'%%info['node'].name)
-    savepkl(resultsfile,dict(result=result, hostname=gethostname(), traceback=traceback))
-"""%pkl_file
-        pyscript = os.path.join(batch_dir, 'pyscript_%s.py'%suffix)
+    resultsfile = os.path.join(info['node'].output_dir(),
+                               'result_%%s.pklz'%%info['node'].name)
+    savepkl(resultsfile,dict(result=result, hostname=gethostname(),
+                             traceback=traceback))
+""" % pkl_file
+        pyscript = os.path.join(batch_dir, 'pyscript_%s.py' % suffix)
         fp = open(pyscript, 'wt')
         fp.writelines(cmdstr)
         fp.close()
-        batchscript = '\n'.join((self._template, '%s %s'%(sys.executable, pyscript)))
-        batchscriptfile = os.path.join(batch_dir, 'batchscript_%s.sh'%suffix)
+        batchscript = '\n'.join((self._template,
+                                 '%s %s' % (sys.executable, pyscript)))
+        batchscriptfile = os.path.join(batch_dir, 'batchscript_%s.sh' % suffix)
         fp = open(batchscriptfile, 'wt')
         fp.writelines(batchscript)
         fp.close()
