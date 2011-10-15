@@ -119,6 +119,9 @@ class DistributedPluginBase(PluginBase):
         self.mapnodesubids = None
         self.proc_done = None
         self.proc_pending = None
+        self.max_jobs = np.inf
+        if 'max_jobs' in plugin_args:
+            self.max_jobs = plugin_args['max_jobs']
 
     def run(self, graph, config, updatehash=False):
         """Executes a pre-defined pipeline using distributed approaches
@@ -156,7 +159,8 @@ class DistributedPluginBase(PluginBase):
                     notrun.append(self._clean_queue(jobid, graph, result=result))
             if toappend:
                 self.pending_tasks.extend(toappend)
-            self._send_procs_to_workers(updatehash=updatehash)
+            if len(self.pending_tasks) < self.max_jobs:
+                self._send_procs_to_workers(updatehash=updatehash)
             sleep(2)
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
