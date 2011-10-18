@@ -458,7 +458,7 @@ switch thresDesc
         cluster_forming_thr = spm_uc(cluster_forming_thr,df,STAT,R,n,S);
 
     case 'none'
-        if height_threshold_type == 'p-value'
+        if strcmp(height_threshold_type, 'p-value')
             cluster_forming_thr = spm_u(cluster_forming_thr^(1/n),df,STAT);
         end
 end
