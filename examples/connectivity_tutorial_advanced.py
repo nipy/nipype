@@ -117,9 +117,9 @@ conduits for the raw data to the rest of the processing pipeline.
 """
 
 inputnode = pe.Node(interface=util.IdentityInterface(fields=["subject_id","dwi", "bvecs", "bvals", "subjects_dir"]), name="inputnode")
+inputnode.inputs.subjects_dir = subjects_dir
 
 FreeSurferSource = pe.Node(interface=nio.FreeSurferSource(), name='fssource')
-FreeSurferSource.inputs.subjects_dir = subjects_dir
 FreeSurferSourceLH = FreeSurferSource.clone('fssourceLH')
 FreeSurferSourceLH.inputs.hemi = 'lh'
 FreeSurferSourceRH = FreeSurferSource.clone('fssourceRH')
@@ -324,6 +324,7 @@ giftiLabels = pe.Node(interface=util.Merge(2), name="GiftiLabels")
 niftiVolumes = pe.Node(interface=util.Merge(3), name="NiftiVolumes")
 fiberDataArrays = pe.Node(interface=util.Merge(4), name="FiberDataArrays")
 gpickledNetworks = pe.Node(interface=util.Merge(2), name="NetworkFiles")
+trkTracts = pe.Node(interface=util.Merge(2), name="trkTracts")
 
 """
 We also create a node to calculate several network metrics on our resulting file, and another CFF converter
@@ -527,6 +528,9 @@ mapping.connect([(creatematrix, fiberDataArrays,[("endpoint_file_mm","in2")])])
 mapping.connect([(creatematrix, fiberDataArrays,[("fiber_length_file","in3")])])
 mapping.connect([(creatematrix, fiberDataArrays,[("fiber_label_file","in4")])])
 
+mapping.connect([(tck2trk, trkTracts,[("out_file","in1")])])
+mapping.connect([(creatematrix, trkTracts,[("filtered_tractography","in2")])])
+
 """
 This block actually connects the merged lists to the CFF converter. We pass the surfaces
 and volumes that are to be included, as well as the tracts and the network itself. The currently
@@ -540,6 +544,7 @@ mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
 mapping.connect([(creatematrix, CFFConverter,[("matrix_file","gpickled_networks")])])    
 mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
 mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
+mapping.connect([(trkTracts, CFFConverter,[("out","tract_files")])])
 mapping.connect([(inputnode, CFFConverter,[("subject_id","title")])])
 
 """
@@ -567,7 +572,7 @@ their names to the subject list and their data to the proper folders.
 
 connectivity = pe.Workflow(name="connectivity")
 
-connectivity.base_dir = op.abspath('connectivity_tutorial')
+connectivity.base_dir = op.abspath('connectivity_tutorial_advanced')
 connectivity.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,mapping,[('dwi','inputnode.dwi'),

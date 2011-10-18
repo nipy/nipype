@@ -33,7 +33,7 @@ class CFFConverterInputSpec(BaseInterfaceInputSpec):
     gpickled_networks = InputMultiPath(File(exists=True), desc='list of gpickled Networkx graphs')
 
     gifti_surfaces = InputMultiPath(File(exists=True), desc='list of GIFTI surfaces')
-    gifti_labels = InputMultiPath(File(exists=True), desc='list of GIFTI surfaces')
+    gifti_labels = InputMultiPath(File(exists=True), desc='list of GIFTI labels')
     nifti_volumes = InputMultiPath(File(exists=True), desc='list of NIFTI volumes')
     tract_files = InputMultiPath(File(exists=True), desc='list of Trackvis fiber files')
 
@@ -56,6 +56,7 @@ class CFFConverterInputSpec(BaseInterfaceInputSpec):
 
 class CFFConverterOutputSpec(TraitedSpec):
     connectome_file = File(exists=True, desc='Output connectome file')
+    
 class CFFConverter(BaseInterface):
     """
     Creates a Connectome File Format (CFF) file from input networks, surfaces, volumes, tracts, etcetera....
@@ -127,7 +128,6 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.gpickled_networks):
             unpickled = []
             for ntwk in self.inputs.gpickled_networks:
-                #ntwk_name = 'Network {cnt}'.format(cnt=count)
                 _, ntwk_name, _ = split_filename(ntwk)
                 unpickled = nx.read_gpickle(ntwk)
                 cnet = cf.CNetwork(name = ntwk_name)

@@ -92,7 +92,6 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
     aseg = nb.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
     asegd = aseg.get_data()
     
-    #for parkey, parval in cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name].items():
     print "Working on parcellation: "
     print cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]
     print "========================"
@@ -280,7 +279,6 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     print "Add corpus callosum and unknown to wm mask"
     wmmask[idx] = 1
 
-    #for parkey, parval in cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name].items():
     # check if we should subtract the cortical rois from this parcellation
     parval = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]
     print "Loading %s to subtract cortical ROIs from white matter mask" % ('ROI_%s.nii.gz' % parcellation_name) 
@@ -341,6 +339,8 @@ class ParcellateOutputSpec(TraitedSpec):
 class Parcellate(BaseInterface):
     """
     Subdivides segmented ROI file into smaller subregions
+    
+    This interface implements the same procedure as in the ConnectomeMapper's parcellation stage (cmp/stages/parcellation/maskcreation.py) for a single parcellation scheme (e.g. 'scale500').
 
     Example
     -------

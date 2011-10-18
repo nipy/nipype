@@ -48,10 +48,10 @@ class MRTrix2TrackVis(BaseInterface):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> tck2trk = mrt.MRTrix2TrackVis()                 # doctest: +SKIP
-    >>> tck2trk.inputs.in_file = 'dwi_CSD_tracked.tck'  # doctest: +SKIP
-    >>> tck2trk.inputs.image_file = 'dwi.nii'           # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> tck2trk = mrt.MRTrix2TrackVis()
+    >>> tck2trk.inputs.in_file = 'dwi_CSD_tracked.tck'
+    >>> tck2trk.inputs.image_file = 'dwi.nii'
     >>> tck2trk.run()                                   # doctest: +SKIP
     """
     input_spec = MRTrix2TrackVisInputSpec

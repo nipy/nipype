@@ -30,10 +30,10 @@ class Tracks2Prob(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> tdi = mrt.Tracks2Prob()                         # doctest: +SKIP
-    >>> tdi.inputs.in_file = 'dwi_CSD_tracked.tck'      # doctest: +SKIP
-    >>> tdi.inputs.colour = True                        # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> tdi = mrt.Tracks2Prob()
+    >>> tdi.inputs.in_file = 'dwi_CSD_tracked.tck'
+    >>> tdi.inputs.colour = True
     >>> tdi.run()                                       # doctest: +SKIP
     """
     _cmd = 'tracks2prob'
@@ -118,11 +118,11 @@ class StreamlineTrack(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> strack = mrt.StreamlineTrack()                  # doctest: +SKIP
-    >>> strack.inputs.inputmodel = 'DT_PROB'            # doctest: +SKIP
-    >>> strack.inputs.in_file = 'data.Bfloat'           # doctest: +SKIP
-    >>> strack.inputs.seed_file = 'seed_mask.nii'       # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> strack = mrt.StreamlineTrack()
+    >>> strack.inputs.inputmodel = 'DT_PROB'
+    >>> strack.inputs.in_file = 'data.Bfloat'
+    >>> strack.inputs.seed_file = 'seed_mask.nii'
     >>> strack.run()                                    # doctest: +SKIP
     """
     _cmd = 'streamtrack'
@@ -157,10 +157,10 @@ class DiffusionTensorStreamlineTrack(StreamlineTrack):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> dtstrack = mrt.DiffusionTensorStreamlineTrack() # doctest: +SKIP
-    >>> dtstrack.inputs.in_file = 'data.Bfloat'         # doctest: +SKIP
-    >>> dtstrack.inputs.seed_file = 'seed_mask.nii'     # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> dtstrack = mrt.DiffusionTensorStreamlineTrack()
+    >>> dtstrack.inputs.in_file = 'data.Bfloat'
+    >>> dtstrack.inputs.seed_file = 'seed_mask.nii'
     >>> dtstrack.run()                                  # doctest: +SKIP
     """
     
@@ -185,10 +185,10 @@ class ProbabilisticSphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt                                  # doctest: +SKIP
-    >>> sdprobtrack = mrt.ProbabilisticSphericallyDeconvolutedStreamlineTrack() # doctest: +SKIP
-    >>> sdprobtrack.inputs.in_file = 'data.Bfloat'                              # doctest: +SKIP
-    >>> sdprobtrack.inputs.seed_file = 'seed_mask.nii'                          # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> sdprobtrack = mrt.ProbabilisticSphericallyDeconvolutedStreamlineTrack()
+    >>> sdprobtrack.inputs.in_file = 'data.Bfloat'
+    >>> sdprobtrack.inputs.seed_file = 'seed_mask.nii'
     >>> sdprobtrack.run()                                                       # doctest: +SKIP
     """
     input_spec = ProbabilisticSphericallyDeconvolutedStreamlineTrackInputSpec
@@ -208,10 +208,10 @@ class SphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt                 # doctest: +SKIP
-    >>> sdtrack = mrt.SphericallyDeconvolutedStreamlineTrack() # doctest: +SKIP
-    >>> sdtrack.inputs.in_file = 'data.Bfloat'                 # doctest: +SKIP
-    >>> sdtrack.inputs.seed_file = 'seed_mask.nii'             # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> sdtrack = mrt.SphericallyDeconvolutedStreamlineTrack()
+    >>> sdtrack.inputs.in_file = 'data.Bfloat'
+    >>> sdtrack.inputs.seed_file = 'seed_mask.nii'
     >>> sdtrack.run()                                          # doctest: +SKIP
     """
     input_spec = StreamlineTrackInputSpec

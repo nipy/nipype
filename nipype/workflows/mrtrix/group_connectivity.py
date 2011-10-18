@@ -51,14 +51,19 @@ def create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subje
     Outputs::
 
         outputnode.connectome
-        outputnode.cmatrix
-        outputnode.gpickled_network
+        outputnode.nxstatscff
         outputnode.fa
-        outputnode.struct
-        outputnode.trace
         outputnode.tracts
-        outputnode.tensors
-
+        outputnode.filtered_tractography
+        outputnode.cmatrix
+        outputnode.b0resampled
+        outputnode.rois
+        outputnode.rois_orig
+        outputnode.odfs
+        outputnode.struct
+        outputnode.gpickled_network
+        outputnode.mean_fiber_length
+        outputnode.fiber_length_std
     """
     
     group_infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id']), name="group_infosource")
@@ -109,6 +114,7 @@ def create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subje
                                               ("outputnode.nxstatscff", "@l1output.nxstatscff"),
                                               ("outputnode.fa", "@l1output.fa"),
                                               ("outputnode.tracts", "@l1output.tracts"),
+                                              ("outputnode.filtered_tracts", "@l1output.filtered_tracts"),
                                               ("outputnode.cmatrix", "@l1output.cmatrix"),
                                               ("outputnode.b0_resampled", "@l1output.b0_resampled"),
                                               ("outputnode.rois", "@l1output.rois"),

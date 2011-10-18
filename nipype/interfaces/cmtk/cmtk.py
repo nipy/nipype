@@ -63,8 +63,7 @@ def length(xyz, along=False):
     return np.sum(dists)
 
 def create_endpoints_array(fib, voxelSize):
-    """
-    Create the endpoints arrays for each fiber
+    """ Create the endpoints arrays for each fiber
     Parameters
     ----------
     fib: the fibers data
@@ -75,8 +74,7 @@ def create_endpoints_array(fib, voxelSize):
     index of its first and last point in the voxelSize volume
     endpointsmm) : endpoints in milimeter coordinates
     """
-
-    #print 'Creating endpoint array'
+    
     # Init
     n = len(fib)
     endpoints = np.zeros( (n, 2, 3) )
@@ -85,24 +83,25 @@ def create_endpoints_array(fib, voxelSize):
 
     # Computation for each fiber
     for i, fi in enumerate(fib):
-
+    
         # Percent counter
         pcN = int(round( float(100*i)/n ))
         if pcN > pc and pcN%1 == 0:
             pc = pcN
+            print '%4.0f%%' % (pc)
 
         f = fi[0]
-
+    
         # store startpoint
         endpoints[i,0,:] = f[0,:]
         # store endpoint
         endpoints[i,1,:] = f[-1,:]
-
+        
         # store startpoint
         endpointsmm[i,0,:] = f[0,:]
         # store endpoint
         endpointsmm[i,1,:] = f[-1,:]
-
+        
         # Translate from mm to index
         endpoints[i,0,0] = int( endpoints[i,0,0] / float(voxelSize[0]))
         endpoints[i,0,1] = int( endpoints[i,0,1] / float(voxelSize[1]))
@@ -110,26 +109,10 @@ def create_endpoints_array(fib, voxelSize):
         endpoints[i,1,0] = int( endpoints[i,1,0] / float(voxelSize[0]))
         endpoints[i,1,1] = int( endpoints[i,1,1] / float(voxelSize[1]))
         endpoints[i,1,2] = int( endpoints[i,1,2] / float(voxelSize[2]))
-
+        
     # Return the matrices
     print 'Returning the endpoint matrix'
     return (endpoints, endpointsmm)
-
-
-def save_fibers(oldhdr, oldfib, fname, indices):
-    """ Stores a new trackvis file fname using only given indices """
-
-    hdrnew = oldhdr.copy()
-
-    outstreams = []
-    for i in indices:
-        outstreams.append( oldfib[i] )
-
-    n_fib_out = len(outstreams)
-    hdrnew['n_count'] = n_fib_out
-
-    nb.trackvis.write(fname, outstreams, hdrnew)
-
 
 def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_name, endpoint_name, dict_file=-1):
     """ Create the connection matrix for each resolution using fibers and ROIs. """
@@ -192,10 +175,9 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
 		G.add_node(int(u), d)
 		# compute a position for the node based on the mean position of the
 		# ROI in voxel coordinates (segmentation volume )
-		G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
-		
+		G.node[int(u)]['dn_position'] = str(tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1)))
+    
     dis = 0
-
     for i in range(endpoints.shape[0]):
 
         # ROI start => ROI end
@@ -219,7 +201,8 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
             sys.stderr.write("This needs bugfixing!")
             continue
 
-        # Switch the rois in order to enforce startROI < endROI
+        # Update fiber label
+        # switch the rois in order to enforce startROI < endROI
         if endROI < startROI:
             tmp = startROI
             startROI = endROI
@@ -231,24 +214,26 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
         final_fiberlabels.append( [ startROI, endROI ] )
         final_fibers_idx.append(i)
 
+        # Add edge to graph
         if G.has_edge(startROI, endROI):
             G.edge[startROI][endROI]['fiblist'].append(i)
         else:
             G.add_edge(startROI, endROI, fiblist = [i])
+                
+        print "Found %i (%f percent out of %i fibers) fibers that start or terminate in a voxel which is not labeled. (orphans)" % (dis, dis*100.0/n, n)
+        print "Valid fibers: %i (%f percent)" % (n-dis, 100 - dis*100.0/n)
 
-    finalfiberlength = []
-    for idx in final_fibers_idx:
-        finalfiberlength.append( length(fib[idx][0]) )
+        # create a final fiber length array
+        finalfiberlength = []
+        for idx in final_fibers_idx:
+            # compute length of fiber
+            finalfiberlength.append( length(fib[idx][0]) )
 
-    print 'Convert to array'
-    final_fiberlength_array = np.array( finalfiberlength )
-    print 'Make final fiber labels as array'
-    final_fiberlabels_array = np.array(final_fiberlabels, dtype = np.int32)
-
-    numfib = np.zeros([len(G.nodes())+1,len(G.nodes())+1]) #Plus 1 because of zero indexing
-    fibmean = np.zeros([len(G.nodes())+1,len(G.nodes())+1])
-    fibdev = np.zeros([len(G.nodes())+1,len(G.nodes())+1])
-    print 'Matlab matrix shape: {shp}'.format(shp=len(G.nodes())+1)
+        # convert to array
+        final_fiberlength_array = np.array( finalfiberlength )
+        
+        # make final fiber labels as array
+        final_fiberlabels_array = np.array(final_fiberlabels, dtype = np.int32)
 
     numfib = nx.Graph()
     numfib.add_nodes_from(G)
@@ -259,9 +244,15 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     for u,v,d in G.edges_iter(data=True):
         G.remove_edge(u,v)
         di = { 'number_of_fibers' : len(d['fiblist']), }
+
         idx = np.where( (final_fiberlabels_array[:,0] == int(u)) & (final_fiberlabels_array[:,1] == int(v)) )[0]
-        di['fiber_length_mean'] = np.mean(final_fiberlength_array[idx])
-        di['fiber_length_std'] = np.std(final_fiberlength_array[idx])
+        di['fiber_length_mean'] = float( np.mean(final_fiberlength_array[idx]) )
+        di['fiber_length_std'] = float( np.std(final_fiberlength_array[idx]) )
+
+        # this is indexed into the fibers that are valid in the sense of touching start
+        # and end roi and not going out of the volume
+        idx_valid = np.where( (fiberlabels[:,0] == int(u)) & (fiberlabels[:,1] == int(v)) )[0]
+
         if not u==v: #Fix for self loop problem
             G.add_edge(u, v, di)
             numfib.add_edge(u, v, weight=di['number_of_fibers'] )
@@ -283,23 +274,50 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     fibdev_dict = {}
     fibdev_dict['cmatrix'] = fibdev_mlab
 
+    path, name, ext = split_filename(matrix_mat_name)
     print 'Writing matlab matrix as {mat}'.format(mat=matrix_mat_name)
     sio.savemat(matrix_mat_name, numfib_dict)
-    path, name, ext = split_filename(matrix_mat_name)
+    
     mean_fiber_length_matrix_name = op.join(path, name + '_mean_fiber_length') + ext
-    fiber_length_std_matrix_name = op.join(path, name + '_fiber_length_std') + ext
     print 'Writing matlab mean fiber length matrix as {mat}'.format(mat=mean_fiber_length_matrix_name)
     sio.savemat(mean_fiber_length_matrix_name, fibmean_dict)
+    
+    fiber_length_std_matrix_name = op.join(path, name + '_fiber_length_std') + ext
     print 'Writing matlab fiber length deviation matrix as {mat}'.format(mat=fiber_length_std_matrix_name)
     sio.savemat(fiber_length_std_matrix_name, fibdev_dict)
 
-    fiberlengths_fname = op.abspath(endpoint_name + '_lengths.npy')
-    print 'Saving fiber length array: {array}'.format(array=fiberlengths_fname)
+    fiberlengths_fname = op.abspath(endpoint_name + '_final_fiberslength.npy')
+    print "Storing final fiber length array as %s" % fiberlengths_fname
     np.save(fiberlengths_fname, final_fiberlength_array)
 
-    fiberlabels_fname = op.abspath(endpoint_name + '_labels.npy')
-    print 'Saving fiber label array: {array}'.format(array=fiberlabels_fname)
+    fiberlabels_fname  = op.abspath(endpoint_name + '_filtered_fiberslabel.npy')
+    print "Storing all fiber labels (with orphans) as %s" % fiberlabels_fname
     np.save(fiberlabels_fname, np.array(fiberlabels, dtype = np.int32), )
+
+    fiberlabels_noorphans_fname  = op.abspath(endpoint_name + '_final_fiberlabels.npy')
+    print "Storing final fiber labels (no orphans) as %s" % fiberlabels_noorphans_fname
+    np.save(fiberlabels_noorphans_fname, final_fiberlabels_array)
+
+    print "Filtering tractography - keeping only no orphan fibers"
+    finalfibers_fname = op.abspath(endpoint_name + '_streamline_final.trk')
+    save_fibers(hdr, fib, finalfibers_fname, final_fibers_idx)
+
+def save_fibers(oldhdr, oldfib, fname, indices):
+    """ Stores a new trackvis file fname using only given indices """
+    import nibabel.trackvis as tv
+    import cPickle
+    
+    hdrnew = oldhdr.copy()
+
+    outstreams = []
+    for i in indices:
+        outstreams.append( oldfib[i] )
+
+    n_fib_out = len(outstreams)
+    hdrnew['n_count'] = n_fib_out
+
+    print "Writing final no orphan fibers as %s" % fname 
+    tv.write(fname,outstreams,hdrnew)
 
 class CreateMatrixInputSpec(TraitedSpec):
     roi_file = File(exists=True, mandatory=True, desc='Freesurfer aparc+aseg file')
@@ -321,6 +339,8 @@ class CreateMatrixOutputSpec(TraitedSpec):
     endpoint_file_mm = File(desc='Saved Numpy array with the endpoints of each fiber (in millimeters)')
     fiber_length_file = File(desc='Saved Numpy array with the lengths of each fiber')
     fiber_label_file = File(desc='Saved Numpy array with the labels for each fiber')
+    fiber_labels_noorphans = File(desc='Saved Numpy array with the labels for each non-orphan fiber')
+    filtered_tractography = File(desc='TrackVis file containing only those fibers which connect two regions')
 
 class CreateMatrix(BaseInterface):
     """
@@ -393,15 +413,19 @@ class CreateMatrix(BaseInterface):
         if isdefined(self.inputs.out_endpoint_array_name):
             outputs['endpoint_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_endpoints.npy')
             outputs['endpoint_file_mm'] = op.abspath(self.inputs.out_endpoint_array_name + '_endpointsmm.npy')
-            outputs['fiber_length_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_lengths.npy')
-            outputs['fiber_label_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_labels.npy')
+            outputs['fiber_length_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_final_fiberslength.npy')
+            outputs['fiber_label_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_filtered_fiberslabel.npy')
+            outputs['fiber_labels_noorphans'] = op.abspath(self.inputs.out_endpoint_array_name + '_final_fiberslabels.npy')
         else:
             _, endpoint_name , _ = split_filename(self.inputs.tract_file)
             outputs['endpoint_file'] = op.abspath(endpoint_name + '_endpoints.npy')
             outputs['endpoint_file_mm'] = op.abspath(endpoint_name + '_endpointsmm.npy')
-            outputs['fiber_length_file'] = op.abspath(endpoint_name + '_lengths.npy')
-            outputs['fiber_label_file'] = op.abspath(endpoint_name + '_labels.npy')
+            outputs['fiber_length_file'] = op.abspath(endpoint_name + '_final_fiberslength.npy')
+            outputs['fiber_label_file'] = op.abspath(endpoint_name + '_filtered_fiberslabel.npy')
+            outputs['fiber_labels_noorphans'] = op.abspath(endpoint_name + '_final_fiberslabels.npy')
 
+        _, name , _ = split_filename(self.inputs.tract_file)
+        outputs['filtered_tractography'] = op.abspath(name + '_streamline_final.trk')
         return outputs
 
     def _gen_outfilename(self, ext):
@@ -568,100 +592,3 @@ class ROIGen(BaseInterface):
             lutpath, lutname, lutext = split_filename(self.inputs.LUT_file)
             prefix = lutname
         return prefix + '_' + name + '.' + ext
-
-def merge_images(image_names, out_file):
-    images = list()
-    for idx, image_name in enumerate(image_names):
-        image = nb.load(image_name)
-        data = image.get_data().astype(int)
-        
-        if idx == 0:
-            new = image
-        else:
-            newdata = new.get_data().astype(int)
-            newheader = new.get_header()
-            newaffine = new.get_affine()
-            imgdata = image.get_data().astype(int)
-            np.unique(imgdata)
-            num_new_nonzero = len(np.transpose(np.nonzero(newdata)))
-            print num_new_nonzero
-            num_img_nonzero = len(np.transpose(np.nonzero(imgdata)))
-            print num_img_nonzero
-            
-            if num_new_nonzero > num_img_nonzero:
-                voxels = np.transpose(np.nonzero(imgdata))
-                writedata = imgdata
-                addeddata = newdata
-            else:
-                voxels = np.transpose(np.nonzero(newdata))
-                writedata = newdata
-                addeddata = imgdata
-            rois = np.unique(addeddata)
-            nROIs = len(rois)
-                
-            for idx, voxel in enumerate(voxels):
-                print voxel
-                value = writedata[voxel[0]][voxel[1]][voxel[2]]
-                print idx
-                print len(voxels)
-                if not value == 0:
-                    addeddata[voxel[0]][voxel[1]][voxel[2]] = value + nROIs
-        images.append(image)            
-    newimage = nb.Nifti1Image(newdata, newaffine, newheader)
-    nb.save(newimage, out_file)
-    return out_file
-
-class MergeParcellationsInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiPath(File(exists=True), mandatory=True, desc='Region segmented files, in increasing order of priority')
-    out_file = File('merged_parcellations.nii', usedefault=True)
-    out_network = File('merged_roi_nodes.pck', usedefault=True)
-
-class MergeParcellationsOutputSpec(TraitedSpec):
-    parcellation_file = File(exist=True, desc='Single ROI image with the merged parcellation scheme')
-    resolution_network_file = File(exist=True, desc='Nodes generated from the parcellation with add label information as a NetworkX Pickle')
-
-class MergeParcellations(BaseInterface):
-    """ Merges segmented images into one new image file.
-
-    Example
-    -------
-
-    >>> import nipype.interfaces.cmtk as cmtk       
-    >>> mrg = cmtk.MergeParcellations()
-    >>> mrg.inputs.in_files = ['ROI_scale500.nii.gz','segmented_all_fast_firstseg.nii.gz']
-    >>> mrg.run()                  # doctest: +SKIP
-
-    """
-
-    input_spec = MergeParcellationsInputSpec
-    output_spec = MergeParcellationsOutputSpec
-
-    def _run_interface(self, runtime):
-        merged = merge_images(self.inputs.in_files, self.inputs.out_file)
-        roi_image = nb.load(merged)
-        roiData = roi_image.get_data()
-        rois = np.unique(roiData)
-        # Create the matrix
-        G = nx.Graph()
-
-        for idx,roi in enumerate(rois):
-            data = {}
-            data['dn_correspondence_id'] = roi
-            #data['dn_fs_aseg_val'] =  u'16'
-            #if roi == 
-            #itemindex=numpy.where(array==item)
-            #data['dn_fsname'] = u'Brain-Stem'
-            #data['dn_hemisphere'] = u'left'
-            #data['dn_name']: 'Brain-Stem'
-            #data['dn_region']: u'subcortical'
-            G.add_node(roi, data)
-            G.node[roi]['dn_position'] = tuple(np.mean( np.where(roiData== int(roi) ) , axis = 1))
-        
-        nx.write_gpickle(G, op.abspath(self.inputs.out_network))
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['parcellation_file'] = self.inputs.out_file
-        outputs['resolution_network_file'] = self.inputs.out_network
-        return outputs

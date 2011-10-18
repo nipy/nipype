@@ -41,10 +41,10 @@ class MRConvert(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> mrconvert = mrt.MRConvert()                     # doctest: +SKIP
-    >>> mrconvert.inputs.in_file = 'dwi_FA.mif'         # doctest: +SKIP
-    >>> mrconvert.inputs.out_filename = 'dwi_FA.nii'    # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> mrconvert = mrt.MRConvert()
+    >>> mrconvert.inputs.in_file = 'dwi_FA.mif'
+    >>> mrconvert.inputs.out_filename = 'dwi_FA.nii'
     >>> mrconvert.run()                                 # doctest: +SKIP
     """
     
@@ -92,10 +92,10 @@ class DWI2Tensor(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt             # doctest: +SKIP
-    >>> dwi2tensor = mrt.DWI2Tensor()                      # doctest: +SKIP
-    >>> dwi2tensor.inputs.in_file = 'dwi.mif'              # doctest: +SKIP
-    >>> dwi2tensor.inputs.encoding_file = 'encoding.txt'   # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> dwi2tensor = mrt.DWI2Tensor()
+    >>> dwi2tensor.inputs.in_file = 'dwi.mif'
+    >>> dwi2tensor.inputs.encoding_file = 'encoding.txt'
     >>> dwi2tensor.run()                                   # doctest: +SKIP
     """
     
@@ -134,9 +134,9 @@ class Tensor2Vector(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> tensor2vector = mrt.Tensor2Vector()             # doctest: +SKIP
-    >>> tensor2vector.inputs.in_file = 'dwi_tensor.mif' # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> tensor2vector = mrt.Tensor2Vector()
+    >>> tensor2vector.inputs.in_file = 'dwi_tensor.mif'
     >>> tensor2vector.run()                             # doctest: +SKIP
     """
     
@@ -175,9 +175,9 @@ class Tensor2FractionalAnisotropy(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> tensor2FA = mrt.Tensor2FractionalAnisotropy()   # doctest: +SKIP
-    >>> tensor2FA.inputs.in_file = 'dwi_tensor.mif'     # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> tensor2FA = mrt.Tensor2FractionalAnisotropy()
+    >>> tensor2FA.inputs.in_file = 'dwi_tensor.mif'
     >>> tensor2FA.run()                                 # doctest: +SKIP
     """
     
@@ -216,9 +216,9 @@ class Tensor2ApparentDiffusion(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> tensor2ADC = mrt.Tensor2ApparentDiffusion()     # doctest: +SKIP
-    >>> tensor2ADC.inputs.in_file = 'dwi_tensor.mif'    # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> tensor2ADC = mrt.Tensor2ApparentDiffusion()
+    >>> tensor2ADC.inputs.in_file = 'dwi_tensor.mif'
     >>> tensor2ADC.run()                                # doctest: +SKIP    
     """
     
@@ -257,9 +257,9 @@ class MRMultiply(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt                   # doctest: +SKIP
-    >>> MRmult = mrt.MRMultiply()                                # doctest: +SKIP
-    >>> MRmult.inputs.in_files = ['dwi.mif', 'dwi_WMProb.mif']   # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> MRmult = mrt.MRMultiply()
+    >>> MRmult.inputs.in_files = ['dwi.mif', 'dwi_WMProb.mif']
     >>> MRmult.run()                                             # doctest: +SKIP    
     """
     
@@ -355,10 +355,10 @@ class GenerateWhiteMatterMask(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> genWM = mrt.GenerateWhiteMatterMask()           # doctest: +SKIP
-    >>> genWM.inputs.in_file = 'dwi.mif'                # doctest: +SKIP
-    >>> genWM.inputs.encoding_file = 'encoding.txt'     # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> genWM = mrt.GenerateWhiteMatterMask()
+    >>> genWM.inputs.in_file = 'dwi.mif'
+    >>> genWM.inputs.encoding_file = 'encoding.txt'
     >>> genWM.run()                                     # doctest: +SKIP    
     """
     
@@ -399,9 +399,9 @@ class Erode(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> erode = mrt.Erode()                             # doctest: +SKIP
-    >>> erode.inputs.in_file = 'mask.mif'               # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> erode = mrt.Erode()
+    >>> erode.inputs.in_file = 'mask.mif'
     >>> erode.run()                                     # doctest: +SKIP    
     """
     _cmd = 'erode'
@@ -489,9 +489,9 @@ class MedianFilter3D(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> median3d = mrt.MedianFilter3D()                 # doctest: +SKIP
-    >>> median3d.inputs.in_file = 'mask.mif'            # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> median3d = mrt.MedianFilter3D()
+    >>> median3d.inputs.in_file = 'mask.mif'
     >>> median3d.run()                                  # doctest: +SKIP    
     """
     

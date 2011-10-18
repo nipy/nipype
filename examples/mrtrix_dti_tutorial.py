@@ -175,69 +175,71 @@ Creating the workflow
 In this section we connect the nodes for the diffusion processing.
 """
 
-mapping.connect([(inputnode, fsl2mrtrix, [("bvecs", "bvec_file"),
-												("bvals", "bval_file")])])
-mapping.connect([(inputnode, dwi2tensor,[("dwi","in_file")])])
-mapping.connect([(fsl2mrtrix, dwi2tensor,[("encoding_file","encoding_file")])])
+tractography = pe.Workflow(name='tractography')
 
-mapping.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
+tractography.connect([(inputnode, fsl2mrtrix, [("bvecs", "bvec_file"),
+												("bvals", "bval_file")])])
+tractography.connect([(inputnode, dwi2tensor,[("dwi","in_file")])])
+tractography.connect([(fsl2mrtrix, dwi2tensor,[("encoding_file","encoding_file")])])
+
+tractography.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
 					   (dwi2tensor, tensor2adc,[['tensor','in_file']]),
 					   (dwi2tensor, tensor2fa,[['tensor','in_file']]),
 					  ])
-mapping.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
+tractography.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
                       
 """
 This block creates the rough brain mask to be multiplied, mulitplies it with the
 fractional anisotropy image, and thresholds it to get the single-fiber voxels.
 """
 
-mapping.connect([(inputnode, MRconvert,[("dwi","in_file")])])
-mapping.connect([(MRconvert, threshold_b0,[("converted","in_file")])])
-mapping.connect([(threshold_b0, median3d,[("out_file","in_file")])])
-mapping.connect([(median3d, erode_mask_firstpass,[("out_file","in_file")])])
-mapping.connect([(erode_mask_firstpass, erode_mask_secondpass,[("out_file","in_file")])])
-mapping.connect([(erode_mask_secondpass, MRmult_merge,[("out_file","in2")])])
-mapping.connect([(MRmult_merge, MRmultiply,[("out","in_files")])])
-mapping.connect([(MRmultiply, threshold_FA,[("out_file","in_file")])])
+tractography.connect([(inputnode, MRconvert,[("dwi","in_file")])])
+tractography.connect([(MRconvert, threshold_b0,[("converted","in_file")])])
+tractography.connect([(threshold_b0, median3d,[("out_file","in_file")])])
+tractography.connect([(median3d, erode_mask_firstpass,[("out_file","in_file")])])
+tractography.connect([(erode_mask_firstpass, erode_mask_secondpass,[("out_file","in_file")])])
+tractography.connect([(erode_mask_secondpass, MRmult_merge,[("out_file","in2")])])
+tractography.connect([(MRmult_merge, MRmultiply,[("out","in_files")])])
+tractography.connect([(MRmultiply, threshold_FA,[("out_file","in_file")])])
 
 """
 Here the thresholded white matter mask is created for seeding the tractography.
 """
 
-mapping.connect([(inputnode, bet,[("dwi","in_file")])])
-mapping.connect([(inputnode, gen_WM_mask,[("dwi","in_file")])])
-mapping.connect([(bet, gen_WM_mask,[("mask_file","binary_mask")])])
-mapping.connect([(fsl2mrtrix, gen_WM_mask,[("encoding_file","encoding_file")])])
-mapping.connect([(gen_WM_mask, threshold_wmmask,[("WMprobabilitymap","in_file")])])
+tractography.connect([(inputnode, bet,[("dwi","in_file")])])
+tractography.connect([(inputnode, gen_WM_mask,[("dwi","in_file")])])
+tractography.connect([(bet, gen_WM_mask,[("mask_file","binary_mask")])])
+tractography.connect([(fsl2mrtrix, gen_WM_mask,[("encoding_file","encoding_file")])])
+tractography.connect([(gen_WM_mask, threshold_wmmask,[("WMprobabilitymap","in_file")])])
 
 """
 Next we estimate the fiber response distribution.
 """
 
-mapping.connect([(inputnode, estimateresponse,[("dwi","in_file")])])
-mapping.connect([(fsl2mrtrix, estimateresponse,[("encoding_file","encoding_file")])])
-mapping.connect([(threshold_FA, estimateresponse,[("out_file","mask_image")])])
+tractography.connect([(inputnode, estimateresponse,[("dwi","in_file")])])
+tractography.connect([(fsl2mrtrix, estimateresponse,[("encoding_file","encoding_file")])])
+tractography.connect([(threshold_FA, estimateresponse,[("out_file","mask_image")])])
 
 """
 Run constrained spherical deconvolution.
 """
 
-mapping.connect([(inputnode, csdeconv,[("dwi","in_file")])])
-mapping.connect([(gen_WM_mask, csdeconv,[("WMprobabilitymap","mask_image")])])
-mapping.connect([(estimateresponse, csdeconv,[("response","response_file")])])
-mapping.connect([(fsl2mrtrix, csdeconv,[("encoding_file","encoding_file")])])
+tractography.connect([(inputnode, csdeconv,[("dwi","in_file")])])
+tractography.connect([(gen_WM_mask, csdeconv,[("WMprobabilitymap","mask_image")])])
+tractography.connect([(estimateresponse, csdeconv,[("response","response_file")])])
+tractography.connect([(fsl2mrtrix, csdeconv,[("encoding_file","encoding_file")])])
 
 """
 Connect the tractography and compute the tract density image.
 """
 
-mapping.connect([(threshold_wmmask, probCSDstreamtrack,[("out_file","seed_file")])])
-mapping.connect([(csdeconv, probCSDstreamtrack,[("spherical_harmonics_image","in_file")])])
-mapping.connect([(probCSDstreamtrack, tracks2prob,[("tracked","in_file")])])
-mapping.connect([(inputnode, tracks2prob,[("dwi","template_file")])])
+tractography.connect([(threshold_wmmask, probCSDstreamtrack,[("out_file","seed_file")])])
+tractography.connect([(csdeconv, probCSDstreamtrack,[("spherical_harmonics_image","in_file")])])
+tractography.connect([(probCSDstreamtrack, tracks2prob,[("tracked","in_file")])])
+tractography.connect([(inputnode, tracks2prob,[("dwi","template_file")])])
 
 """
-Finally, we create another higher-level workflow to connect our mapping workflow with the info and datagrabbing nodes
+Finally, we create another higher-level workflow to connect our tractography workflow with the info and datagrabbing nodes
 declared at the beginning. Our tutorial is now extensible to any arbitrary number of subjects by simply adding
 their names to the subject list and their data to the proper folders.
 """

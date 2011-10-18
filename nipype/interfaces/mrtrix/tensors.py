@@ -36,25 +36,24 @@ class DWI2SphericalHarmonicsImage(CommandLine):
 
     Each volume in the output image corresponds to a different spherical harmonic component, according to the following convention:
 
-    [0] Y(0,0)
-    [1] Im {Y(2,2)}
-    [2] Im {Y(2,1)}
-    [3] Y(2,0)
-    [4] Re {Y(2,1)}
-    [5] Re {Y(2,2)}
-    [6] Im {Y(4,4)}
-    [7] Im {Y(4,3)}
+    * [0] Y(0,0)
+    * [1] Im {Y(2,2)}
+    * [2] Im {Y(2,1)}
+    * [3] Y(2,0)
+    * [4] Re {Y(2,1)}
+    * [5] Re {Y(2,2)}
+    * [6] Im {Y(4,4)}
+    * [7] Im {Y(4,3)}
 
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> dwi2SH = mrt.DWI2SphericalHarmonicsImage()      # doctest: +SKIP
-    >>> dwi2SH.inputs.in_file = 'dwi.nii'               # doctest: +SKIP
-    >>> dwi2SH.inputs.encoding_file = 'encoding.txt'    # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> dwi2SH = mrt.DWI2SphericalHarmonicsImage()
+    >>> dwi2SH.inputs.in_file = 'dwi.nii'
+    >>> dwi2SH.inputs.encoding_file = 'encoding.txt'
     >>> dwi2SH.run()                                    # doctest: +SKIP
     """
-    
     _cmd = 'dwi2SH'
     input_spec=DWI2SphericalHarmonicsImageInputSpec
     output_spec=DWI2SphericalHarmonicsImageOutputSpec
@@ -111,26 +110,25 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     into account in all subsequent calculations. Each volume in the output image corresponds to a different spherical 
     harmonic component, according to the following convention:
 
-    [0] Y(0,0)
-    [1] Im {Y(2,2)}
-    [2] Im {Y(2,1)}
-    [3] Y(2,0)
-    [4] Re {Y(2,1)}
-    [5] Re {Y(2,2)}
-    [6] Im {Y(4,4)}
-    [7] Im {Y(4,3)} 
+    * [0] Y(0,0)
+    * [1] Im {Y(2,2)}
+    * [2] Im {Y(2,1)}
+    * [3] Y(2,0)
+    * [4] Re {Y(2,1)}
+    * [5] Re {Y(2,2)}
+    * [6] Im {Y(4,4)}
+    * [7] Im {Y(4,3)} 
 	
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt                  # doctest: +SKIP
-    >>> csdeconv = mrt.ConstrainedSphericalDeconvolution()      # doctest: +SKIP
-    >>> csdeconv.inputs.in_file = 'dwi.mif'                     # doctest: +SKIP
-    >>> csdeconv.inputs.encoding_file = 'encoding.txt'          # doctest: +SKIP
-    >>> csdeconv.inputs.offset = 0                              # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> csdeconv = mrt.ConstrainedSphericalDeconvolution()
+    >>> csdeconv.inputs.in_file = 'dwi.mif'
+    >>> csdeconv.inputs.encoding_file = 'encoding.txt'
+    >>> csdeconv.inputs.offset = 0
     >>> csdeconv.run()                                          # doctest: +SKIP
     """
-    
     _cmd = 'csdeconv'
     input_spec=ConstrainedSphericalDeconvolutionInputSpec
     output_spec=ConstrainedSphericalDeconvolutionOutputSpec
@@ -170,14 +168,13 @@ class EstimateResponseForSH(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> estresp = mrt.EstimateResponseForSH()           # doctest: +SKIP
-    >>> estresp.inputs.in_file = 'dwi.mif'              # doctest: +SKIP
-    >>> estresp.inputs.mask_image = 'dwi_WMProb.mif'    # doctest: +SKIP
-    >>> estresp.inputs.encoding_file = 'encoding.txt'   # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> estresp = mrt.EstimateResponseForSH()
+    >>> estresp.inputs.in_file = 'dwi.mif'
+    >>> estresp.inputs.mask_image = 'dwi_WMProb.mif'
+    >>> estresp.inputs.encoding_file = 'encoding.txt'
     >>> estresp.run()                                   # doctest: +SKIP
     """
-    
     _cmd = 'estimate_response'
     input_spec=EstimateResponseForSHInputSpec
     output_spec=EstimateResponseForSHOutputSpec
@@ -243,14 +240,13 @@ class FSL2MRTrix(BaseInterface):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt          # doctest: +SKIP
-    >>> fsl2mrtrix = mrt.FSL2MRTrix()                   # doctest: +SKIP
-    >>> fsl2mrtrix.inputs.bvec_file = 'bvecs'           # doctest: +SKIP
-    >>> fsl2mrtrix.inputs.bval_file = 'bvals'           # doctest: +SKIP
-    >>> fsl2mrtrix.inputs.invert_y = True               # doctest: +SKIP
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> fsl2mrtrix = mrt.FSL2MRTrix()
+    >>> fsl2mrtrix.inputs.bvec_file = 'bvecs'
+    >>> fsl2mrtrix.inputs.bval_file = 'bvals'
+    >>> fsl2mrtrix.inputs.invert_y = True
     >>> fsl2mrtrix.run()                                # doctest: +SKIP
     """
-    
     input_spec = FSL2MRTrixInputSpec
     output_spec = FSL2MRTrixOutputSpec
 
