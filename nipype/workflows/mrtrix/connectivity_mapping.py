@@ -392,14 +392,6 @@ def create_connectivity_pipeline(name="connectivity"):
 	their names to the subject list and their data to the proper folders.
 	"""
 
-	#fsl2mrtrix.overwrite = True
-	#ntwkMetrics.overwrite = True
-	#csdeconv.overwrite = True
-	#probCSDstreamtrack.overwrite = True
-	#tck2trk.overwrite = True
-	#inverse_AparcAseg.overwrite = True
-	#creatematrix.overwrite = True
-	#CFFConverter.overwrite = True
 	inputnode = pe.Node(interface=util.IdentityInterface(fields=["subject_id", "dwi", "bvecs", "bvals", "subjects_dir"]), name="inputnode")
 
 	outputnode = pe.Node(interface = util.IdentityInterface(fields=["fa",
@@ -409,7 +401,8 @@ def create_connectivity_pipeline(name="connectivity"):
 																"nxstatscff",
 																"cmatrix",
 																"gpickled_network",
-																"rois",
+																"b0_resampled",
+                                                                "rois",
 																"rois_orig",
                                                                 "odfs",
 																"warped",
@@ -435,9 +428,11 @@ def create_connectivity_pipeline(name="connectivity"):
 		("CreateMatrix.mean_fiber_length_matrix_mat_file", "mean_fiber_length"),
 		("CreateMatrix.fiber_length_std_matrix_mat_file", "fiber_length_std"),
 		("CreateMatrix.matrix_file", "gpickled_network"),
-		("inverse_AparcAseg.out_file", "rois_orig"),
-		("Parcellate.roi_file", "rois"),
+		("resampleb0.out_file", "b0_resampled"),
+        ("inverse_AparcAseg.out_file", "rois"),
+		("Parcellate.roi_file", "rois_orig"),
 		("tensor2fa.FA", "fa"),
+        ("csdeconv.spherical_harmonics_image", "odfs"),
 		("inverse_AparcAseg.out_file", "warped"),
 		("mri_convert_Brain.out_file", "struct")])
 		])

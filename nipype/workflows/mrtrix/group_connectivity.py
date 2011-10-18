@@ -106,9 +106,11 @@ def create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subje
                                               ("bvecs", "inputnode.bvecs"),
                                               ])])
     l1pipeline.connect([(conmapper, datasink, [("outputnode.connectome", "@l1output.cff"),
+                                              ("outputnode.nxstatscff", "@l1output.nxstatscff"),
                                               ("outputnode.fa", "@l1output.fa"),
                                               ("outputnode.tracts", "@l1output.tracts"),
                                               ("outputnode.cmatrix", "@l1output.cmatrix"),
+                                              ("outputnode.b0_resampled", "@l1output.b0_resampled"),
                                               ("outputnode.rois", "@l1output.rois"),
                                               ("outputnode.rois_orig", "@l1output.rois_orig"),
                                               ("outputnode.odfs", "@l1output.odfs"),

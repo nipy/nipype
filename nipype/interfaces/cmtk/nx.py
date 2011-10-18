@@ -171,20 +171,18 @@ def compute_dict_measures(ntwk):
     print 'Computing measures which return a dictionary:'
     weighted = True
     measures = {}
-    print '...Computing connected components...'
-    measures['connected_components'] = nx.connected_components(ntwk) # list of lists, doesn't make sense to do stats
-    print '...Computing neighbour connectivity...'
-    measures['neighbor_connectivity'] = nx.neighbor_connectivity(ntwk)    
+    #print '...Computing connected components...'
+    #measures['connected_components'] = nx.connected_components(ntwk)   
     print '...Computing rich club coefficient...'
     measures['rich_club_coef'] = nx.rich_club_coefficient(ntwk)
-    print '...Computing edge load...'
-    measures['edge_load'] = nx.edge_load(ntwk)
-    print '...Computing betweenness centrality...'
-    measures['edge_betweenness_centrality'] = nx.edge_betweenness_centrality(ntwk)
-    print '...Computing shortest path length for each node...'
-    measures['shortest_path_length'] = np.array(nx.shortest_path_length(ntwk, weighted).values())
-    print '...Computing degree mixing matrix...'
-    measures['degree_mixing_matrix'] = nx.degree_mixing_matrix(ntwk)
+    #print '...Computing edge load...'
+    #measures['edge_load'] = nx.edge_load(ntwk)
+    #print '...Computing betweenness centrality...'
+    #measures['edge_betweenness_centrality'] = nx.edge_betweenness_centrality(ntwk)
+    #print '...Computing shortest path length for each node...'
+    #measures['shortest_path_length'] = np.array(nx.shortest_path_length(ntwk, weighted).values())
+    #print '...Computing degree mixing matrix...'
+    #measures['degree_mixing_matrix'] = nx.degree_mixing_matrix(ntwk)
     return measures
 
 def compute_singlevalued_measures(ntwk):

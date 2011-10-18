@@ -131,7 +131,7 @@ def save_fibers(oldhdr, oldfib, fname, indices):
     nb.trackvis.write(fname, outstreams, hdrnew)
 
 
-def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_name,endpoint_name, dict_file=-1):
+def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_name, endpoint_name, dict_file=-1):
     """ Create the connection matrix for each resolution using fibers and ROIs. """
 
     print 'Running cmat function'
