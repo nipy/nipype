@@ -167,8 +167,10 @@ class DistributedPluginBase(PluginBase):
                                                     result=result))
             if toappend:
                 self.pending_tasks.extend(toappend)
-            if len(self.pending_tasks) < self.max_jobs:
-                self._send_procs_to_workers(updatehash=updatehash)
+            num_jobs = len(self.pending_tasks)
+            if num_jobs < self.max_jobs:
+                self._send_procs_to_workers(updatehash=updatehash,
+                                            slots=self.max_jobs - num_jobs)
             sleep(2)
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
@@ -229,7 +231,7 @@ class DistributedPluginBase(PluginBase):
                                             np.zeros(numnodes, dtype=bool)))
         return False
 
-    def _send_procs_to_workers(self, updatehash=False):
+    def _send_procs_to_workers(self, updatehash=False, slots=None):
         """ Sends jobs to workers using ipython's taskclient interface
         """
         while np.any(self.proc_done == False):
@@ -239,7 +241,7 @@ class DistributedPluginBase(PluginBase):
             if len(jobids) > 0:
                 # send all available jobs
                 logger.info('Submitting %d jobs' % len(jobids))
-                for jobid in jobids:
+                for jobid in jobids[:slots]:
                     if isinstance(self.procs[jobid], MapNode) and \
                             self.procs[jobid].num_subnodes() > 1:
                         submit = self._submit_mapnode(jobid)
