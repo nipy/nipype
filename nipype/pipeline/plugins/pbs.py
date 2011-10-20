@@ -3,7 +3,7 @@
 
 import os
 
-from .base import (SGELikeBatchManagerBase, logger)
+from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
 from nipype.interfaces.base import CommandLine
 
@@ -29,7 +29,10 @@ class PBSPlugin(SGELikeBatchManagerBase):
         cmd = CommandLine('qstat')
         cmd.inputs.args = '%s'%taskid
         # check pbs task
+        oldlevel = iflogger.level
+        iflogger.setLevel(logging.getLevelName('CRITICAL'))
         result = cmd.run(ignore_exception=True)
+        iflogger.setLevel(oldlevel)
         if 'Unknown Job Id' in result.runtime.stderr:
             return False
         return True
@@ -41,14 +44,19 @@ class PBSPlugin(SGELikeBatchManagerBase):
             qsubargs = self._qsub_args
         cmd.inputs.args = '%s -N %s %s'%(qsubargs,
                                          '.'.join((os.environ.data['LOGNAME'],
+                                                   node._hierarchy,
                                                    node._id)),
                                          scriptfile)
+        oldlevel = iflogger.level
+        iflogger.setLevel(logging.getLevelName('CRITICAL'))
         try:
             result = cmd.run()
         except Exception, e:
+            iflogger.setLevel(oldlevel)
             raise RuntimeError('\n'.join(('Could not submit pbs task for node %s'%node._id,
                                           str(e))))
         else:
+            iflogger.setLevel(oldlevel)
             # retrieve pbs taskid
             taskid = result.runtime.stdout.split('.')[0]
             self._pending[taskid] = node.output_dir()

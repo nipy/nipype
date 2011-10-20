@@ -24,6 +24,7 @@ from nipype.utils.filemanip import savepkl, loadpkl
 import traceback
 
 logger = logging.getLogger('workflow')
+iflogger = logging.getLogger('interface')
 
 def report_crash(node, traceback=None):
     """Writes crash related information to a file
@@ -323,7 +324,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         """
         raise NotImplementedError
 
-    def _submit_batchtask(self, scriptfile):
+    def _submit_batchtask(self, scriptfile, node):
         """Submit a task to the batch system
         """
         raise NotImplementedError
@@ -366,7 +367,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         """
         # pickle node
         timestamp = strftime('%Y%m%d_%H%M%S')
-        suffix = '%s_%s'%(timestamp, node._id)
+        suffix = '%s_%s_%s'%(timestamp, node._hierarchy, node._id)
         if node._hierarchy:
             batch_dir = os.path.join(node.base_dir, node._hierarchy.split('.')[0], 'batch')
         else:
