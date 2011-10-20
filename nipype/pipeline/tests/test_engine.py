@@ -336,13 +336,13 @@ def test_node_get_output():
 
 
 def test_mapnode_iterfield_check():
-    mod1 = pe.MapNode(TestInterface,
-                      iterfield=['input3'],
+    mod1 = pe.MapNode(TestInterface(),
+                      iterfield=['input1'],
                       name='mod1')
-    yield assert_raises, ValueError, mod1._check_iterfield()
-    mod1 = pe.MapNode(TestInterface,
+    yield assert_raises, ValueError, mod1._check_iterfield
+    mod1 = pe.MapNode(TestInterface(),
                       iterfield=['input1', 'input2'],
                       name='mod1')
     mod1.inputs.input1 = [1,2]
     mod1.inputs.input2 = 3
-    yield assert_raises, ValueError, mod1._check_iterfield()
+    yield assert_raises, ValueError, mod1._check_iterfield
