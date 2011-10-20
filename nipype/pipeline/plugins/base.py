@@ -126,7 +126,7 @@ class DistributedPluginBase(PluginBase):
         self.proc_done = None
         self.proc_pending = None
         self.max_jobs = np.inf
-        if 'max_jobs' in plugin_args:
+        if plugin_args and 'max_jobs' in plugin_args:
             self.max_jobs = plugin_args['max_jobs']
 
     def run(self, graph, config, updatehash=False):
@@ -169,8 +169,12 @@ class DistributedPluginBase(PluginBase):
                 self.pending_tasks.extend(toappend)
             num_jobs = len(self.pending_tasks)
             if num_jobs < self.max_jobs:
+                if np.isinf(self.max_jobs):
+                    slots = None
+                else:
+                    slots = self.max_jobs - num_jobs
                 self._send_procs_to_workers(updatehash=updatehash,
-                                            slots=self.max_jobs - num_jobs)
+                                            slots=slots)
             sleep(2)
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
