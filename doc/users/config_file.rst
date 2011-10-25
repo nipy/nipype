@@ -4,8 +4,8 @@
  Configuration File
 =======================
 
-Some of the system wide options of NiPyPe can be configured using a
-configuration file. NiPyPe looks for the file in the local folder under the name
+Some of the system wide options of Nipype can be configured using a
+configuration file. Nipype looks for the file in the local folder under the name
 ``nipype.cfg`` and in ``~/.nipype.cfg`` (in this order). If an option will not
 be specified a default value will be assumed. The file is divided into following
 sections:
