@@ -111,3 +111,6 @@
 .. Mathematical methods
 .. _`wikipedia ICA`: http://en.wikipedia.org/wiki/Independent_component_analysis
 .. _`wikipedia PCA`: http://en.wikipedia.org/wiki/Principal_component_analysis
+
+.. Nipype Paper
+.. _paper: http://www.frontiersin.org/Neuroinformatics/10.3389/fninf.2011.00013/abstract

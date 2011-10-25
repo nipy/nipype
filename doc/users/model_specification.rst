@@ -4,7 +4,7 @@
  Model Specification for First Level fMRI Analysis
 ===================================================
 
-NiPyPE provides a general purpose model specification mechanism with
+Nipype provides a general purpose model specification mechanism with
 specialized subclasses for package specific extensions.
 
 
