@@ -367,10 +367,11 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         """
         # pickle node
         timestamp = strftime('%Y%m%d_%H%M%S')
-        suffix = '%s_%s_%s'%(timestamp, node._hierarchy, node._id)
         if node._hierarchy:
+            suffix = '%s_%s_%s'%(timestamp, node._hierarchy, node._id)
             batch_dir = os.path.join(node.base_dir, node._hierarchy.split('.')[0], 'batch')
         else:
+            suffix = '%s_%s'%(timestamp, node._id)
             batch_dir = os.path.join(node.base_dir, 'batch')
         if not os.path.exists(batch_dir):
             os.makedirs(batch_dir)
