@@ -1,35 +1,51 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Simple utility to pull in all the testing functions we're likely to use.
+"""The testing directory contains a small set of imaging files to be
+used for doctests only.  More thorough tests and example data will be
+stored in a nipy data packages that you can download separately.
+
+.. note:
+
+   We use the ``nose`` testing framework for tests.
+
+   Nose is a dependency for the tests, but should not be a dependency
+   for running the algorithms in the NIPY library.  This file should
+   import without nose being present on the python path.
+
+Examples
+--------
+
+>>> from nipy.testing import funcfile
+>>> from nipy.io.api import load_image
+>>> img = load_image(funcfile)
+>>> img.shape
+(17, 21, 3, 20)
+
 """
 
 import os
 
-import numpy as np
-from distutils.version import LooseVersion
-
-from nose.tools import (assert_true, assert_false, assert_not_equal,
-                        assert_raises)
-from nose import SkipTest, with_setup
-
-if LooseVersion(np.__version__) >= '1.2':
-    from numpy.testing import *
-    from numpy.testing.decorators import *
-else:
-    from numpytesting import *
-    from numpytesting.decorators import *
-
-from utils import *
-
-# import datasets for doctests
+# Discover directory path
 filepath = os.path.abspath(__file__)
 basedir = os.path.dirname(filepath)
 
-
 funcfile = os.path.join(basedir, 'data', 'functional.nii')
-anatfile = funcfile
+anatfile = os.path.join(basedir, 'data', 'structural.nii')
 template = funcfile
 transfm = funcfile
+
+from nose.tools import *
+from numpy.testing import *
+
+# Overwrites numpy.testing.Tester
+from .nosetester import NipyNoseTester as Tester
+test = Tester().test
+bench = Tester().bench
+
+from . import decorators as dec
+from .utils import skip_if_no_package, package_check
+
+skipif = dec.skipif
 
 def example_data(infile='functional.nii'):
     """returns path to empty example data files for doc tests
@@ -42,3 +58,10 @@ def example_data(infile='functional.nii'):
         raise IOError('%s empty data file does NOT exist'%(outfile))
 
     return outfile
+
+# Allow failed import of nose if not now running tests
+try:
+    from nose.tools import assert_true, assert_false
+    from lightunit import ParametricTestCase, parametric
+except ImportError:
+    pass
