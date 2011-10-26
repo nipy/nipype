@@ -1601,10 +1601,12 @@ class MapNode(Node):
             fp.writelines(write_rst_list(subnode_report_files))
             fp.close()
 
+
     def get_subnodes(self):
         if not self._got_inputs:
             self._get_inputs()
             self._got_inputs = True
+        self._check_iterfield()
         self.write_report(report_type='preexec', cwd = self.output_dir())
         return [node for _, node in self._make_nodes()]
 
@@ -1612,6 +1614,7 @@ class MapNode(Node):
         if not self._got_inputs:
             self._get_inputs()
             self._got_inputs = True
+        self._check_iterfield()
         return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
 
     def _get_inputs(self):
@@ -1620,6 +1623,27 @@ class MapNode(Node):
                                                    fields=self.iterfield)
         self._inputs.set(**old_inputs)
         super(MapNode, self)._get_inputs()
+
+    def _check_iterfield(self):
+        """Checks iterfield
+
+        * iterfield must be in inputs
+        * number of elements must match across iterfield
+        """
+        for iterfield in self.iterfield:
+            if not isdefined(getattr(self.inputs, iterfield)):
+                raise ValueError(("Input %s is not defined but listed "
+                                  "in iterfields.") % iterfield)
+        if len(self.iterfield) > 1:
+            first_len = len(filename_to_list(getattr(self.inputs,
+                                                     self.iterfield[0])))
+            for iterfield in self.iterfield[1:]:
+                if first_len != len(filename_to_list(getattr(self.inputs,
+                                                             iterfield))):
+                    raise ValueError(("All iterfields of a MapNode have to "
+                                      "have the same length. %s") %
+                                     str(self.inputs))
+
 
     def _run_interface(self, execute=True, updatehash=False):
         """Run the mapnode interface
@@ -1630,15 +1654,7 @@ class MapNode(Node):
         old_cwd = os.getcwd()
         cwd = self.output_dir()
         os.chdir(cwd)
-        for iterfield in self.iterfield:
-            if not isdefined(getattr(self.inputs, iterfield)):
-                raise ValueError("Input %s is not defined but listed in iterfields."%iterfield)
-        if len(self.iterfield) > 1:
-            first_len = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
-            for iterfield in self.iterfield[1:]:
-                if first_len != len(filename_to_list(getattr(self.inputs, iterfield))):
-                    raise ValueError("All iterfields of a MapNode have to have the same length." + str(self.inputs))
-
+        self._check_iterfield()
         if execute:
             nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
             nodenames = ['_' + self.name+str(i) for i in range(nitems)]
