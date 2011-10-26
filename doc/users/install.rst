@@ -170,4 +170,13 @@ where, $pathtomatlabdir is the path to your matlab installation and
 $platform is the directory referring to x86 or x64 installations
 (typically glnxa64 on 64-bit installations).
 
+Avoiding any MATLAB calls from testing
+--------------------------------------
+
+On unix systems, set an empty environment variable::
+
+    export NIPYPE_NO_MATLAB=
+
+This will skip any tests that require matlab.
+
 .. include:: ../links_names.txt
