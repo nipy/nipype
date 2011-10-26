@@ -255,14 +255,18 @@ def create_DARTEL_template(name='dartel_template'):
                              name='segment')
     workflow.connect(inputnode, 'structural_files', segment, 'channel_files')
     if not no_matlab:
-        spm_path = spm.Info.version()['path']
-        tissue1 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 1), 2, (True,True), (False, False))
-        tissue2 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 2), 2, (True,True), (False, False))
-        tissue3 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 3), 2, (True,False), (False, False))
-        tissue4 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 4), 3, (False,False), (False, False))
-        tissue5 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 5), 4, (False,False), (False, False))
-        tissue6 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 6), 2, (False,False), (False, False))
-        segment.inputs.tissues = [tissue1, tissue2, tissue3, tissue4, tissue5, tissue6]
+        version = spm.Info.version()
+        if version['name'] == 'SPM8':
+            spm_path = version['path']
+            tissue1 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 1), 2, (True,True), (False, False))
+            tissue2 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 2), 2, (True,True), (False, False))
+            tissue3 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 3), 2, (True,False), (False, False))
+            tissue4 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 4), 3, (False,False), (False, False))
+            tissue5 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 5), 4, (False,False), (False, False))
+            tissue6 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 6), 2, (False,False), (False, False))
+            segment.inputs.tissues = [tissue1, tissue2, tissue3, tissue4, tissue5, tissue6]
+        else:
+            logger.critical('SPM8 not found: DARTEL not available')
     else:
         logger.critical('MATLAB not found: DARTEL not setting tissue templates')
     dartel = pe.Node(spm.DARTEL(), name='dartel')
