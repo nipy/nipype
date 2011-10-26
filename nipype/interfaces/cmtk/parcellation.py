@@ -371,9 +371,9 @@ class Parcellate(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         if isdefined(self.inputs.out_roi_file):
-            outputs['roi_file'] = os.path.abspath(self.inputs.out_roi_file)
+            outputs['roi_file'] = op.abspath(self.inputs.out_roi_file)
         else:
-            outputs['roi_file'] = os.path.abspath(self._gen_outfilename('nii.gz', 'ROI'))
+            outputs['roi_file'] = op.abspath(self._gen_outfilename('nii.gz', 'ROI'))
         return outputs
 
     def _gen_outfilename(self, ext, prefix='ROI'):

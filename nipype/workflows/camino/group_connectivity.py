@@ -144,7 +144,6 @@ def create_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir
     datasource.inputs.base_directory = data_dir
     datasource.inputs.field_template = dict(dwi='%s/%s.nii')
     datasource.inputs.template_args = info
-    datasource.inputs.base_directory = data_dir
 
     """
     Create a connectivity mapping workflow

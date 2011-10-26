@@ -4,8 +4,17 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.mrtrix as mrtrix
 import os, os.path as op
-from nipype.workflows.camino.diffusion import get_vox_dims, get_data_dims, get_affine
+from nipype.workflows.camino.diffusion import get_data_dims, get_affine
  
+def get_vox_dims_as_tuple(volume):
+    import nibabel as nb
+    if isinstance(volume, list):
+        volume = volume[0]
+    nii = nb.load(volume)
+    hdr = nii.get_header()
+    voxdims = hdr.get_zooms()
+    return tuple([float(voxdims[0]), float(voxdims[1]), float(voxdims[2])])
+
 def create_mrtrix_dti_pipeline(name="dtiproc"):
     """Creates a pipeline that does the same diffusion processing as in the
     mrtrix_dti_tutorial example script. Given a diffusion-weighted image,

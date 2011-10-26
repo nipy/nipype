@@ -138,12 +138,10 @@ def compute_node_measures(ntwk):
     measures['degree_centrality'] = np.array(nx.degree_centrality(ntwk).values())
     print '...Computing closeness centrality...'
     measures['closeness_centrality'] = np.array(nx.closeness_centrality(ntwk).values())
-    print '...Computing eigenvector centrality...'
-    measures['eigenvector_centrality'] = np.array(nx.eigenvector_centrality(ntwk).values())
+    #print '...Computing eigenvector centrality...'
+    #measures['eigenvector_centrality'] = np.array(nx.eigenvector_centrality(ntwk).values())
     print '...Calculating node clique number'
     measures['node_clique_number'] = np.array(nx.node_clique_number(ntwk).values())
-    print '...Computing pagerank...'
-    measures['pagerank'] = np.array(nx.pagerank(ntwk).values())
     print '...Computing triangles...'
     measures['triangles'] = np.array(nx.triangles(ntwk).values())
     print '...Computing clustering...'
@@ -252,10 +250,15 @@ class NetworkXMetricsInputSpec(BaseInterfaceInputSpec):
     out_k_core = File('k_core', usedefault=True, desc='Computed k-core network stored as a NetworkX pickle.')
     out_k_shell = File('k_shell', usedefault=True, desc='Computed k-shell network stored as a NetworkX pickle.')
     out_k_crust = File('k_crust', usedefault=True, desc='Computed k-crust network stored as a NetworkX pickle.')
+    out_node_metrics_matlab = File(genfile=True, desc='Output node metrics in MATLAB .mat format')
+    out_edge_metrics_matlab = File(genfile=True, desc='Output edge metrics in MATLAB .mat format')
     out_pickled_extra_measures = File('extra_measures', usedefault=True, desc='Network measures for group 1 that return dictionaries stored as a Pickle.')
 
 class NetworkXMetricsOutputSpec(TraitedSpec):
     gpickled_network_files = OutputMultiPath(File(desc='Output gpickled network files'))
+    matlab_matrix_files = OutputMultiPath(File(desc='Output network metrics in MATLAB .mat format'))
+    node_measures_matlab = File(desc='Output node metrics in MATLAB .mat format')
+    edge_measures_matlab = File(desc='Output edge metrics in MATLAB .mat format')
     node_measure_networks = OutputMultiPath(File(desc='Output gpickled network files for all node-based measures'))
     edge_measure_networks = OutputMultiPath(File(desc='Output gpickled network files for all edge-based measures'))
     k_networks = OutputMultiPath(File(desc='Output gpickled network files for the k-core, k-shell, and k-crust networks'))
@@ -286,77 +289,90 @@ class NetworkXMetrics(BaseInterface):
     output_spec = NetworkXMetricsOutputSpec
 
     def _run_interface(self, runtime):
-        global gpickled, nodentwks, edgentwks, kntwks
-        gpickled = list()
-        nodentwks = list()
-        edgentwks = list()
-        kntwks = list()
-        ntwk = nx.read_gpickle(op.abspath(self.inputs.in_file))
-        
-        # Each block computes, writes, and saves a measure
-        # The names are then added to the output .pck file list
-        # In the case of the degeneracy networks, they are given specified output names
-        
-        node_measures = compute_node_measures(ntwk)
-        for key in node_measures.keys():
-            newntwk = add_node_data(node_measures[key],self.inputs.in_file)
-            out_file = op.abspath(self._gen_outfilename(key, 'pck'))
-            nx.write_gpickle(newntwk, out_file)
-            nodentwks.append(out_file)
-        gpickled.extend(nodentwks)
+		global gpickled, nodentwks, edgentwks, kntwks, matlab
+		gpickled = list()
+		nodentwks = list()
+		edgentwks = list()
+		kntwks = list()
+		matlab = list()
+		ntwk = nx.read_gpickle(op.abspath(self.inputs.in_file))
 
-        edge_measures = compute_edge_measures(ntwk)
-        for key in edge_measures.keys():
-            newntwk = add_edge_data(edge_measures[key],self.inputs.in_file)
-            out_file = op.abspath(self._gen_outfilename(key, 'pck'))
-            nx.write_gpickle(newntwk, out_file)
-            edgentwks.append(out_file)
-        gpickled.extend(edgentwks)
+		# Each block computes, writes, and saves a measure
+		# The names are then added to the output .pck file list
+		# In the case of the degeneracy networks, they are given specified output names
 
-        ntwk_measures = compute_network_measures(ntwk)
-        for key in ntwk_measures.keys():
-            if key == 'k_core':
-                out_file = op.abspath(self._gen_outfilename(self.inputs.out_k_core, 'pck'))
-            if key == 'k_shell':
-                out_file = op.abspath(self._gen_outfilename(self.inputs.out_k_shell, 'pck'))
-            if key == 'k_crust':
-                out_file = op.abspath(self._gen_outfilename(self.inputs.out_k_crust, 'pck'))
-            nx.write_gpickle(ntwk_measures[key], out_file)
-            kntwks.append(out_file)
-        gpickled.extend(kntwks)
-        
-        out_pickled_extra_measures = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
-        dict_measures = compute_dict_measures(ntwk)
-        print 'Saving extra measure file to {path} in Pickle format'.format(path=os.path.abspath(out_pickled_extra_measures))
-        file = open(out_pickled_extra_measures, 'w')
-        pickle.dump(dict_measures, file)
-        file.close()
-        
-        
-        # Loops through the measures which return a dictionary, 
-        # converts the keys and values to a Numpy array, 
-        # stacks them together, and saves them in a MATLAB .mat file via Scipy
-        global dicts
-        dicts = list()
-        for idx, key in enumerate(dict_measures.keys()):
-            for idxd, keyd in enumerate(dict_measures[key].keys()):
-                if idxd == 0:
-                    nparraykeys = np.array(keyd)
-                    nparrayvalues = np.array(dict_measures[key][keyd])
-                else:
-                    nparraykeys = np.append(nparraykeys,np.array(keyd))
-                    values = np.array(dict_measures[key][keyd])
-                    nparrayvalues = np.append(nparrayvalues,values)
-            nparray = np.vstack((nparraykeys,nparrayvalues))
-            out_file = op.abspath(self._gen_outfilename(key, 'mat'))
-            npdict = {}
-            npdict[key] = nparray
-            sio.savemat(out_file, npdict)
-            dicts.append(out_file)
-        return runtime
+		node_measures = compute_node_measures(ntwk)
+		for key in node_measures.keys():
+			newntwk = add_node_data(node_measures[key],self.inputs.in_file)
+			out_file = op.abspath(self._gen_outfilename(key, 'pck'))
+			nx.write_gpickle(newntwk, out_file)
+			nodentwks.append(out_file)
+		if isdefined(self.inputs.out_node_metrics_matlab):
+			node_out_file = op.abspath(self.inputs.out_node_metrics_matlab)
+		else:
+			node_out_file = op.abspath(self._gen_outfilename('nodemetrics', 'mat'))
+		sio.savemat(node_out_file, node_measures, oned_as='column')
+		matlab.append(node_out_file)
+		gpickled.extend(nodentwks)
+
+		edge_measures = compute_edge_measures(ntwk)
+		for key in edge_measures.keys():
+			newntwk = add_edge_data(edge_measures[key],self.inputs.in_file)
+			out_file = op.abspath(self._gen_outfilename(key, 'pck'))
+			nx.write_gpickle(newntwk, out_file)
+			edgentwks.append(out_file)
+		if isdefined(self.inputs.out_edge_metrics_matlab):
+			edge_out_file = op.abspath(self.inputs.out_edge_metrics_matlab)
+		else:
+			edge_out_file = op.abspath(self._gen_outfilename('edgemetrics', 'mat'))
+		sio.savemat(edge_out_file, edge_measures, oned_as='column')
+		matlab.append(edge_out_file)
+		gpickled.extend(edgentwks)
+
+		ntwk_measures = compute_network_measures(ntwk)
+		for key in ntwk_measures.keys():
+			if key == 'k_core':
+				out_file = op.abspath(self._gen_outfilename(self.inputs.out_k_core, 'pck'))
+			if key == 'k_shell':
+				out_file = op.abspath(self._gen_outfilename(self.inputs.out_k_shell, 'pck'))
+			if key == 'k_crust':
+				out_file = op.abspath(self._gen_outfilename(self.inputs.out_k_crust, 'pck'))
+			nx.write_gpickle(ntwk_measures[key], out_file)
+			kntwks.append(out_file)
+		gpickled.extend(kntwks)
+
+		out_pickled_extra_measures = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
+		dict_measures = compute_dict_measures(ntwk)
+		print 'Saving extra measure file to {path} in Pickle format'.format(path=op.abspath(out_pickled_extra_measures))
+		file = open(out_pickled_extra_measures, 'w')
+		pickle.dump(dict_measures, file)
+		file.close()
+
+		print 'Saving MATLAB measures as {m}'.format(m=matlab)
+
+		# Loops through the measures which return a dictionary, 
+		# converts the keys and values to a Numpy array, 
+		# stacks them together, and saves them in a MATLAB .mat file via Scipy
+		global dicts
+		dicts = list()
+		for idx, key in enumerate(dict_measures.keys()):
+			for idxd, keyd in enumerate(dict_measures[key].keys()):
+				if idxd == 0:
+					nparraykeys = np.array(keyd)
+					nparrayvalues = np.array(dict_measures[key][keyd])
+				else:
+					nparraykeys = np.append(nparraykeys,np.array(keyd))
+					values = np.array(dict_measures[key][keyd])
+					nparrayvalues = np.append(nparrayvalues,values)
+			nparray = np.vstack((nparraykeys,nparrayvalues))
+			out_file = op.abspath(self._gen_outfilename(key, 'mat'))
+			npdict = {}
+			npdict[key] = nparray
+			sio.savemat(out_file, npdict, oned_as='column')
+			dicts.append(out_file)
+		return runtime
 
     def _list_outputs(self):
-        global gpickled
         outputs = self.output_spec().get()
         outputs["k_core"] = op.abspath(self._gen_outfilename(self.inputs.out_k_core, 'pck'))
         outputs["k_shell"] = op.abspath(self._gen_outfilename(self.inputs.out_k_shell, 'pck'))
@@ -366,6 +382,9 @@ class NetworkXMetrics(BaseInterface):
         outputs["node_measure_networks"] = nodentwks
         outputs["edge_measure_networks"] = edgentwks
         outputs["matlab_dict_measures"] = dicts
+        outputs["matlab_matrix_files"] = [op.abspath(self._gen_outfilename('nodemetrics', 'mat')), op.abspath(self._gen_outfilename('edgemetrics', 'mat'))]
+        outputs["node_measures_matlab"] = op.abspath(self._gen_outfilename('nodemetrics', 'mat'))
+        outputs["edge_measures_matlab"] = op.abspath(self._gen_outfilename('edgemetrics', 'mat'))
         outputs["out_pickled_extra_measures"] = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
         return outputs
 
@@ -377,13 +396,12 @@ class AverageNetworksInputSpec(BaseInterfaceInputSpec):
     resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary' \
                                 ', but if included, the interface will output the statistical maps as networkx graphs.')
     group_id = traits.Str('group1', usedefault=True, desc='ID for group')
-    out_group_average = File('group1_average.mat', usedefault=True, desc='Group 1 measures saved as a Matlab .mat')
-    out_gpickled_groupavg = File('group1_average.pck', usedefault=True, desc='Group 1 measures saved as a NetworkX .pck')
+    out_gpickled_groupavg = File('group1_average.pck', usedefault=True, desc='Average network saved as a NetworkX .pck')
+    out_gexf_groupavg = File('group1_average.pck', usedefault=True, desc='Average network saved as a .gexf file')
 
 class AverageNetworksOutputSpec(TraitedSpec):
-    out_gpickled_groupavg = File(desc='Average connectome for the group in gpickled format')
-    out_gexf_groupavg = File(desc='Average connectome for the group in gexf format')
-    out_group_average = File(desc='Some simple image statistics saved as a Matlab .mat')
+    out_gpickled_groupavg = File(desc='Average network saved as a NetworkX .pck')
+    out_gexf_groupavg = File(desc='Average network saved as a .gexf file')
 
 class AverageNetworks(BaseInterface):
     """
@@ -415,7 +433,6 @@ class AverageNetworks(BaseInterface):
         outputs = self.output_spec().get()
         outputs["out_gpickled_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','pck'))
         outputs["out_gexf_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','gexf'))
-        outputs["out_group_average"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'mat'))
         return outputs
 
     def _gen_outfilename(self, name, ext):

@@ -27,6 +27,9 @@ class MRTrix2TrackVisInputSpec(BaseInterfaceInputSpec):
     desc='The origin (position of the anterior commissure) in mm')
     image_file = File(exists=True, 
     desc='An image through which to infer the voxel and data dimensions of the input tracks')
+    flipx = traits.Bool(False, usedefault=True, desc='Flip the tracks in the x direction')
+    flipy = traits.Bool(True, usedefault=True, desc='Flip the tracks in the y direction')
+    flipz = traits.Bool(True, usedefault=True, desc='Flip the tracks in the z direction')
     out_filename = File('converted.trk', genfile=True, usedefault=True, desc='The output filename for the tracks in TrackVis (.trk) format')
 
 class MRTrix2TrackVisOutputSpec(TraitedSpec):
@@ -75,12 +78,20 @@ class MRTrix2TrackVis(BaseInterface):
                 ox=self.inputs.origin[0]
                 oy=self.inputs.origin[1]
                 oz=self.inputs.origin[2]
+        fx = fy = fz = 1
+        if self.inputs.flipx == True:
+            fx = -1
+        if self.inputs.flipy == True:
+            fy = -1
+        if self.inputs.flipz == True:
+            fz = -1
         hdrpath = op.join(nipype.__path__[0], 'interfaces','mrtrix','defhdr')
             
         out_filename = 'converted.trk'      
         d = dict(in_file=self.inputs.in_file,
         out_file=out_filename, dimx=dx, dimy=dy,dimz=dz,
-        voxx=vx, voxy=vy, voxz=vz, orgx=ox, orgy=oy, orgz=oz, headerpath=hdrpath)
+        voxx=vx, voxy=vy, voxz=vz, orgx=ox, orgy=oy, orgz=oz, 
+        flipx=fx, flipy=fy, flipz=fz, headerpath=hdrpath)
         script = Template("""%% For use in substitution
 in_file = '$in_file';
 out_file = '$out_file';
@@ -196,22 +207,15 @@ orig
 % mrtrix tracks are a cell array 1xNtracks, each cell is nPoints x 3
 for i = 1:length(input.data)
     tracks(i).matrix = input.data{i};
-    tracks(i).matrix(:,1) = tracks(i).matrix(:,1) + $orgx;
-    tracks(i).matrix(:,2) = tracks(i).matrix(:,2) - $orgy;
-    tracks(i).matrix(:,3) = tracks(i).matrix(:,3) - $orgz;
+    tracks(i).matrix(:,1) = tracks(i).matrix(:,1) + $flipx*$orgx;
+    tracks(i).matrix(:,2) = tracks(i).matrix(:,2) + $flipy*$orgy;
+    tracks(i).matrix(:,3) = tracks(i).matrix(:,3) + $flipz*$orgz;
     tracks(i).nPoints = length(tracks(i).matrix); 
-    mins = min(min(tracks(i).matrix));
-    maxs = max(max(tracks(i).matrix));
 end
 
-input.data{1}
 clear input
-tracks(1)
-
-min(mins)
-max(maxs)
-
 clear header
+
 % Save track data with new header
 hdrpath = ['$headerpath' '.mat']
 load(hdrpath)
@@ -314,7 +318,7 @@ header
 'tracks'
 tracks(1).matrix
 length(tracks(1).matrix)
-
+clear all
 
 """).substitute(d)
 

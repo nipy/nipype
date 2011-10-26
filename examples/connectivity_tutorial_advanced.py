@@ -53,14 +53,8 @@ import inspect
 import nibabel as nb
 import os, os.path as op                     # system functions
 import cmp                                   # connectome mapper
-
-"""
-We import several voxel, data, and affine grabbing functions from the Camino workflows, as well as 
-some functions to select the correct files (in our case, aparc+aseg.mgz) from the list outputted by the FreeSurferSource interfaces.
-"""
-
-from nipype.workflows.camino.connectivity_mapping import (get_vox_dims, get_data_dims,
- get_affine, select_aparc, select_aparc_annot, get_first_image)
+from nipype.workflows.camino.connectivity_mapping import select_aparc_annot, get_first_image
+from nipype.workflows.mrtrix.diffusion import get_vox_dims_as_tuple
 
 """
 This needs to point to the freesurfer subjects directory (Recon-all must have been run on subj1 from the FSL course data)
@@ -178,6 +172,14 @@ b-values and b-vectors stored in FSL's format are converted into a single encodi
 fsl2mrtrix = pe.Node(interface=mrtrix.FSL2MRTrix(),name='fsl2mrtrix')
 
 """
+Distortions induced by eddy currents are corrected prior to fitting the tensors.
+The first image is used as a reference for which to warp the others.
+"""
+
+eddycorrect = pe.Node(interface=fsl.EddyCorrect(),name='eddycorrect')
+eddycorrect.inputs.ref_num = 1
+
+"""
 Tensors are fitted to each voxel in the diffusion-weighted image and from these three maps are created:
 	* Major eigenvector in each voxel
 	* Apparent diffusion coefficient
@@ -252,6 +254,8 @@ probCSDstreamtrack.inputs.maximum_number_of_tracks = 150000
 tracks2prob = pe.Node(interface=mrtrix.Tracks2Prob(),name='tracks2prob')
 tracks2prob.inputs.colour = True
 tck2trk = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name='tck2trk')
+tck2trk.inputs.flipy = True
+tck2trk.inputs.flipz = True
 
 """
 Structural segmentation nodes
@@ -283,6 +287,7 @@ inverse = pe.Node(interface=fsl.FLIRT(), name = 'inverse')
 inverse.inputs.interp = ('nearestneighbour')
 inverse.inputs.apply_xfm = True
 inverse_AparcAseg = inverse.clone('inverse_AparcAseg')
+inverseROIsToB0 = inverse.clone('inverseROIsToB0')
 
 """
 Parcellation is performed given the aparc+aseg image from Freesurfer.
@@ -403,7 +408,8 @@ Now we connect the tensor computations:
 
 mapping.connect([(inputnode, fsl2mrtrix, [("bvecs", "bvec_file"),
 												("bvals", "bval_file")])])
-mapping.connect([(inputnode, dwi2tensor,[("dwi","in_file")])])
+mapping.connect([(inputnode, eddycorrect,[("dwi","in_file")])])
+mapping.connect([(eddycorrect, dwi2tensor,[("eddy_corrected","in_file")])])
 mapping.connect([(fsl2mrtrix, dwi2tensor,[("encoding_file","encoding_file")])])
 
 mapping.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
@@ -417,7 +423,7 @@ This block creates the rough brain mask to be multiplied, mulitplies it with the
 fractional anisotropy image, and thresholds it to get the single-fiber voxels.
 """
 
-mapping.connect([(inputnode, MRconvert,[("dwi","in_file")])])
+mapping.connect([(eddycorrect, MRconvert,[("eddy_corrected","in_file")])])
 mapping.connect([(MRconvert, threshold_b0,[("converted","in_file")])])
 mapping.connect([(threshold_b0, median3d,[("out_file","in_file")])])
 mapping.connect([(median3d, erode_mask_firstpass,[("out_file","in_file")])])
@@ -430,8 +436,8 @@ mapping.connect([(MRmultiply, threshold_FA,[("out_file","in_file")])])
 Here the thresholded white matter mask is created for seeding the tractography.
 """
 
-mapping.connect([(inputnode, bet,[("dwi","in_file")])])
-mapping.connect([(inputnode, gen_WM_mask,[("dwi","in_file")])])
+mapping.connect([(eddycorrect, bet,[("eddy_corrected","in_file")])])
+mapping.connect([(eddycorrect, gen_WM_mask,[("eddy_corrected","in_file")])])
 mapping.connect([(bet, gen_WM_mask,[("mask_file","binary_mask")])])
 mapping.connect([(fsl2mrtrix, gen_WM_mask,[("encoding_file","encoding_file")])])
 mapping.connect([(gen_WM_mask, threshold_wmmask,[("WMprobabilitymap","in_file")])])
@@ -440,7 +446,7 @@ mapping.connect([(gen_WM_mask, threshold_wmmask,[("WMprobabilitymap","in_file")]
 Next we estimate the fiber response distribution.
 """
 
-mapping.connect([(inputnode, estimateresponse,[("dwi","in_file")])])
+mapping.connect([(eddycorrect, estimateresponse,[("eddy_corrected","in_file")])])
 mapping.connect([(fsl2mrtrix, estimateresponse,[("encoding_file","encoding_file")])])
 mapping.connect([(threshold_FA, estimateresponse,[("out_file","mask_image")])])
 
@@ -448,7 +454,7 @@ mapping.connect([(threshold_FA, estimateresponse,[("out_file","mask_image")])])
 Run constrained spherical deconvolution.
 """
 
-mapping.connect([(inputnode, csdeconv,[("dwi","in_file")])])
+mapping.connect([(eddycorrect, csdeconv,[("eddy_corrected","in_file")])])
 mapping.connect([(gen_WM_mask, csdeconv,[("WMprobabilitymap","mask_image")])])
 mapping.connect([(estimateresponse, csdeconv,[("response","response_file")])])
 mapping.connect([(fsl2mrtrix, csdeconv,[("encoding_file","encoding_file")])])
@@ -460,7 +466,7 @@ Connect the tractography and compute the tract density image.
 mapping.connect([(threshold_wmmask, probCSDstreamtrack,[("out_file","seed_file")])])
 mapping.connect([(csdeconv, probCSDstreamtrack,[("spherical_harmonics_image","in_file")])])
 mapping.connect([(probCSDstreamtrack, tracks2prob,[("tracked","in_file")])])
-mapping.connect([(inputnode, tracks2prob,[("dwi","template_file")])])
+mapping.connect([(eddycorrect, tracks2prob,[("eddy_corrected","template_file")])])
 
 """
 Structural Processing
@@ -468,10 +474,10 @@ Structural Processing
 First, we coregister the structural image to the diffusion image and then obtain the inverse of transformation.
 """
 
-mapping.connect([(inputnode, coregister,[('dwi','in_file')])])
+mapping.connect([(eddycorrect, coregister,[("eddy_corrected","in_file")])])
 mapping.connect([(mri_convert_Brain, coregister,[('out_file','reference')])])
 mapping.connect([(coregister, convertxfm,[('out_matrix_file','in_file')])])
-mapping.connect([(inputnode, inverse,[('dwi','reference')])])
+mapping.connect([(eddycorrect, inverse,[("eddy_corrected","reference")])])
 mapping.connect([(convertxfm, inverse,[('out_file','in_matrix_file')])])
 mapping.connect([(mri_convert_Brain, inverse,[('out_file','in_file')])])
 
@@ -479,9 +485,11 @@ mapping.connect([(mri_convert_Brain, inverse,[('out_file','in_file')])])
 The b0 image is upsampled to the same dimensions as the parcellated structural image to improve their coregistration.
 """
 
-mapping.connect([(inputnode, resampleb0,[(('dwi', get_first_image), 'in_file')])])
+mapping.connect([(eddycorrect, resampleb0,[(('eddy_corrected', get_first_image), 'in_file')])])
 mapping.connect([(resampleb0, inverse_AparcAseg,[('out_file','reference')])])
 mapping.connect([(convertxfm, inverse_AparcAseg,[('out_file','in_matrix_file')])])
+mapping.connect([(eddycorrect, inverseROIsToB0,[(('eddy_corrected', get_first_image), 'reference')])])
+mapping.connect([(convertxfm, inverseROIsToB0,[('out_file','in_matrix_file')])])
 
 """
 The parcellation is connected for transformation into diffusion space.
@@ -489,13 +497,14 @@ The parcellation is connected for transformation into diffusion space.
 
 mapping.connect([(inputnode, parcellate,[("subject_id","subject_id")])])
 mapping.connect([(parcellate, inverse_AparcAseg,[('roi_file','in_file')])])
+mapping.connect([(parcellate, inverseROIsToB0,[('roi_file','in_file')])])
 
 """
 The MRtrix-tracked fibers are converted to TrackVis format (with voxel and data dimensions grabbed from the DWI).
 The connectivity matrix is created with the .trk fibers and the coregistered parcellation file.
 """
 
-mapping.connect([(inputnode, tck2trk,[("dwi","image_file")])])
+mapping.connect([(eddycorrect, tck2trk,[("eddy_corrected","image_file")])])
 mapping.connect([(probCSDstreamtrack, tck2trk,[("tracked","in_file")])])
 mapping.connect([(tck2trk, creatematrix,[("out_file","tract_file")])])
 mapping.connect([(inputnode, creatematrix,[("subject_id","out_matrix_file")])])
@@ -519,7 +528,8 @@ mapping.connect([(mris_convertRHsphere, giftiSurfaces,[("converted","in8")])])
 mapping.connect([(mris_convertLHlabels, giftiLabels,[("converted","in1")])])
 mapping.connect([(mris_convertRHlabels, giftiLabels,[("converted","in2")])])
 
-mapping.connect([(inputnode, niftiVolumes,[("dwi","in2")])])
+mapping.connect([(eddycorrect, niftiVolumes,[("eddy_corrected","in2")])])
+
 mapping.connect([(mri_convert_Brain, niftiVolumes,[("out_file","in3")])])
 mapping.connect([(inverse_AparcAseg, niftiVolumes,[("out_file","in1")])])
 

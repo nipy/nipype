@@ -87,7 +87,6 @@ def create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subje
     datasource.inputs.base_directory = data_dir
     datasource.inputs.field_template = dict(dwi='%s/%s.nii')
     datasource.inputs.template_args = info
-    datasource.inputs.base_directory = data_dir
 
     """
     Create a connectivity mapping workflow
@@ -112,12 +111,15 @@ def create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subje
                                               ])])
     l1pipeline.connect([(conmapper, datasink, [("outputnode.connectome", "@l1output.cff"),
                                               ("outputnode.nxstatscff", "@l1output.nxstatscff"),
+                                              ("outputnode.nxmatlab", "@l1output.nxmatlab"),
                                               ("outputnode.fa", "@l1output.fa"),
                                               ("outputnode.tracts", "@l1output.tracts"),
                                               ("outputnode.filtered_tracts", "@l1output.filtered_tracts"),
                                               ("outputnode.cmatrix", "@l1output.cmatrix"),
                                               ("outputnode.b0_resampled", "@l1output.b0_resampled"),
                                               ("outputnode.rois", "@l1output.rois"),
+                                              ("outputnode.brain_overlay", "@l1output.brain_overlay"),
+                                              ("outputnode.GM_overlay", "@l1output.GM_overlay"),
                                               ("outputnode.rois_orig", "@l1output.rois_orig"),
                                               ("outputnode.odfs", "@l1output.odfs"),
                                               ("outputnode.struct", "@l1output.struct"),
