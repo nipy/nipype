@@ -3,7 +3,7 @@
 
 import os
 
-from .base import (SGELikeBatchManagerBase, logger)
+from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
 from nipype.interfaces.base import CommandLine
 
@@ -27,7 +27,10 @@ class SGEPlugin(SGELikeBatchManagerBase):
         cmd = CommandLine('qstat')
         cmd.inputs.args = '-j %d'%taskid
         # check sge task
+        oldlevel = iflogger.level
+        iflogger.setLevel(logging.getLevelName('CRITICAL'))
         result = cmd.run(ignore_exception=True)
+        iflogger.setLevel(oldlevel)
         if result.runtime.stdout.startswith('='):
             return True
         return False
@@ -38,12 +41,16 @@ class SGEPlugin(SGELikeBatchManagerBase):
         if self._qsub_args:
             qsubargs = self._qsub_args
         cmd.inputs.args = '%s %s'%(qsubargs, scriptfile)
+        oldlevel = iflogger.level
+        iflogger.setLevel(logging.getLevelName('CRITICAL'))
         try:
             result = cmd.run()
         except Exception, e:
+            iflogger.setLevel(oldlevel)
             raise RuntimeError('\n'.join(('Could not submit sge task for node %s'%node._id,
                                           str(e))))
         else:
+            iflogger.setLevel(oldlevel)
             # retrieve sge taskid
             taskid = int(result.runtime.stdout.split(' ')[2])
             self._pending[taskid] = node.output_dir()

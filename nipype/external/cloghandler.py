@@ -195,6 +195,9 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
                 self.stream.flush()
                 if self._rotateFailed:
                     self.stream.close()
+        except IOError:
+            if self._rotateFailed:
+                self.stream.close()
         finally:
             try:
                 unlock(self.stream_lock)
@@ -313,7 +316,10 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
 
     def _shouldRollover(self):
         if self.maxBytes > 0:                   # are we rolling over?
-            self.stream.seek(0, 2)  #due to non-posix-compliant Windows feature
+            try:
+                self.stream.seek(0, 2)  #due to non-posix-compliant Windows feature
+            except IOError:
+                return True
             if self.stream.tell() >= self.maxBytes:
                 return True
             else:
