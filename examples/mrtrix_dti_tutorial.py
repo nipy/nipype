@@ -23,14 +23,8 @@ import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.mrtrix as mrtrix   #<---- The important new part!
 import nipype.interfaces.fsl as fsl
-import nibabel as nb
+import nipype.algorithms.misc as misc
 import os, os.path as op                     # system functions
-
-"""
-We import the voxel-, data-, and affine-grabbing functions from the Camino DTI processing workflow
-"""
-
-from nipype.workflows.camino.diffusion import get_vox_dims, get_data_dims, get_affine
 
 """
 This needs to point to the fdt folder you can find after extracting
@@ -50,7 +44,7 @@ For our purposes, these are the diffusion-weighted MR image, b vectors, and b va
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
 infosource.iterables = ('subject_id', subject_list)
 
-info = dict(dwi=[['subject_id', 'dwi']],
+info = dict(dwi=[['subject_id', 'data']],
             bvecs=[['subject_id','bvecs']],
             bvals=[['subject_id','bvals']])
 
@@ -65,7 +59,7 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
 
 datasource.inputs.template = "%s/%s"
 datasource.inputs.base_directory = data_dir
-datasource.inputs.field_template = dict(dwi='%s/%s.nii')
+datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz')
 datasource.inputs.template_args = info
 
 """
@@ -99,7 +93,7 @@ Tensors are fitted to each voxel in the diffusion-weighted image and from these 
 	* Apparent diffusion coefficient
 	* Fractional anisotropy
 """
-
+gunzip = pe.Node(interface=misc.Gunzip(), name='gunzip')
 dwi2tensor = pe.Node(interface=mrtrix.DWI2Tensor(),name='dwi2tensor')
 tensor2vector = pe.Node(interface=mrtrix.Tensor2Vector(),name='tensor2vector')
 tensor2adc = pe.Node(interface=mrtrix.Tensor2ApparentDiffusion(),name='tensor2adc')
@@ -179,7 +173,8 @@ tractography = pe.Workflow(name='tractography')
 
 tractography.connect([(inputnode, fsl2mrtrix, [("bvecs", "bvec_file"),
 												("bvals", "bval_file")])])
-tractography.connect([(inputnode, dwi2tensor,[("dwi","in_file")])])
+tractography.connect([(inputnode, gunzip,[("dwi","in_file")])])
+tractography.connect([(gunzip, dwi2tensor,[("out_file","in_file")])])
 tractography.connect([(fsl2mrtrix, dwi2tensor,[("encoding_file","encoding_file")])])
 
 tractography.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
@@ -193,7 +188,7 @@ This block creates the rough brain mask to be multiplied, mulitplies it with the
 fractional anisotropy image, and thresholds it to get the single-fiber voxels.
 """
 
-tractography.connect([(inputnode, MRconvert,[("dwi","in_file")])])
+tractography.connect([(gunzip, MRconvert,[("out_file","in_file")])])
 tractography.connect([(MRconvert, threshold_b0,[("converted","in_file")])])
 tractography.connect([(threshold_b0, median3d,[("out_file","in_file")])])
 tractography.connect([(median3d, erode_mask_firstpass,[("out_file","in_file")])])
@@ -206,8 +201,8 @@ tractography.connect([(MRmultiply, threshold_FA,[("out_file","in_file")])])
 Here the thresholded white matter mask is created for seeding the tractography.
 """
 
-tractography.connect([(inputnode, bet,[("dwi","in_file")])])
-tractography.connect([(inputnode, gen_WM_mask,[("dwi","in_file")])])
+tractography.connect([(gunzip, bet,[("out_file","in_file")])])
+tractography.connect([(gunzip, gen_WM_mask,[("out_file","in_file")])])
 tractography.connect([(bet, gen_WM_mask,[("mask_file","binary_mask")])])
 tractography.connect([(fsl2mrtrix, gen_WM_mask,[("encoding_file","encoding_file")])])
 tractography.connect([(gen_WM_mask, threshold_wmmask,[("WMprobabilitymap","in_file")])])
@@ -216,7 +211,7 @@ tractography.connect([(gen_WM_mask, threshold_wmmask,[("WMprobabilitymap","in_fi
 Next we estimate the fiber response distribution.
 """
 
-tractography.connect([(inputnode, estimateresponse,[("dwi","in_file")])])
+tractography.connect([(gunzip, estimateresponse,[("out_file","in_file")])])
 tractography.connect([(fsl2mrtrix, estimateresponse,[("encoding_file","encoding_file")])])
 tractography.connect([(threshold_FA, estimateresponse,[("out_file","mask_image")])])
 
@@ -224,7 +219,7 @@ tractography.connect([(threshold_FA, estimateresponse,[("out_file","mask_image")
 Run constrained spherical deconvolution.
 """
 
-tractography.connect([(inputnode, csdeconv,[("dwi","in_file")])])
+tractography.connect([(gunzip, csdeconv,[("out_file","in_file")])])
 tractography.connect([(gen_WM_mask, csdeconv,[("WMprobabilitymap","mask_image")])])
 tractography.connect([(estimateresponse, csdeconv,[("response","response_file")])])
 tractography.connect([(fsl2mrtrix, csdeconv,[("encoding_file","encoding_file")])])
@@ -236,7 +231,10 @@ Connect the tractography and compute the tract density image.
 tractography.connect([(threshold_wmmask, probCSDstreamtrack,[("out_file","seed_file")])])
 tractography.connect([(csdeconv, probCSDstreamtrack,[("spherical_harmonics_image","in_file")])])
 tractography.connect([(probCSDstreamtrack, tracks2prob,[("tracked","in_file")])])
-tractography.connect([(inputnode, tracks2prob,[("dwi","template_file")])])
+tractography.connect([(gunzip, tracks2prob,[("out_file","template_file")])])
+
+tractography.connect([(gunzip, tck2trk,[("out_file","image_file")])])
+tractography.connect([(probCSDstreamtrack, tck2trk,[("tracked","in_file")])])
 
 """
 Finally, we create another higher-level workflow to connect our tractography workflow with the info and datagrabbing nodes

@@ -328,7 +328,6 @@ clear all
         # as a commandline argument to the matlab executable (without creating any files).
         # This, however, is less reliable and harder to debug (code will be reduced to
         # a single line and stripped of any comments).
-        print script
         result = MatlabCommand(script=script, mfile=True)
         r = result.run()
         return runtime
