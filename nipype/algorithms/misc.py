@@ -459,6 +459,39 @@ class TSNR(BaseInterface):
             outputs['detrended_file'] = self._gen_output_file_name('detrended')
         return outputs
 
+class GunzipInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True)
+
+class GunzipOutputSpec(TraitedSpec):
+    out_file = File(exists=True)
+
+class Gunzip(BaseInterface):
+    """
+
+    """
+    input_spec = GunzipInputSpec
+    output_spec = GunzipOutputSpec
+
+    def _gen_output_file_name(self):
+        _, base, ext = split_filename(self.inputs.in_file)
+        if ext[-2:].lower() == ".gz":
+            ext = ext[:-3]
+        return os.path.abspath(base + ext[:-3])
+
+    def _run_interface(self, runtime):
+        import gzip
+        in_file = gzip.open(self.inputs.in_file, 'rb')
+        out_file = open(self._gen_output_file_name(), 'wb')
+        out_file.write(in_file.read())
+        out_file.close()
+        in_file.close()
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_file'] = self._gen_output_file_name()
+        return outputs
+
 def replaceext(in_list, ext):
     out_list = list()
     for filename in in_list:
