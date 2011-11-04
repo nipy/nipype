@@ -4,14 +4,16 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.mrtrix as mrtrix
+import nipype.interfaces.camino as camino
 import nipype.interfaces.cmtk as cmtk
+import nipype.algorithms.misc as misc
 import inspect
 import nibabel as nb
 import os, os.path as op                      # system functions
 import cmp                                    # connectome mapper
-from nipype.workflows.camino.connectivity_mapping import select_aparc_annot, get_first_image
-from nipype.workflows.mrtrix.diffusion import get_vox_dims_as_tuple
- 
+from nipype.workflows.camino.connectivity_mapping import (select_aparc_annot, get_first_image, get_vox_dims, get_data_dims, get_affine)
+from nipype.workflows.camino.group_connectivity import pullnodeIDs
+
 def create_connectivity_pipeline(name="connectivity"):
     """Creates a pipeline that does the same connectivity processing as in the
     connectivity_tutorial_advanced example script. Given a subject id (and completed Freesurfer reconstruction)
@@ -23,10 +25,11 @@ def create_connectivity_pipeline(name="connectivity"):
 
     >>> import os
     >>> import nipype.interfaces.freesurfer as fs
-    >>> import nipype.workflows.camino as cmonwk
-    >>> subjects_dir = os.path.abspath('freesurfer')
+    >>> import nipype.workflows.mrtrix.connectivity_mapping as mrwork
+    >>> from nipype.testing import example_data
+    >>> subjects_dir = example_data('subjects')
     >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
-    >>> conmapper = cmonwk.create_connectivity_pipeline("nipype_conmap")
+    >>> conmapper = mrwork.create_connectivity_pipeline("nipype_conmap")
     >>> conmapper.inputs.inputnode.subjects_dir = subjects_dir
     >>> conmapper.inputs.inputnode.subject_id = 'subj1'
     >>> conmapper.inputs.inputnode.dwi = os.path.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
@@ -46,10 +49,17 @@ def create_connectivity_pipeline(name="connectivity"):
 
         outputnode.connectome
         outputnode.nxstatscff
+        outputnode.nxmatlab
+        outputnode.nxcsv
+        outputnode.nxmergedcsv
         outputnode.fa
         outputnode.tracts
         outputnode.filtered_tractography
         outputnode.cmatrix
+        outputnode.cmatrix_csv
+        outputnode.meanfib_csv
+        outputnode.fibstd_csv
+        outputnode.cmatrices_csv
         outputnode.b0resampled
         outputnode.rois
         outputnode.rois_orig
@@ -139,6 +149,48 @@ def create_connectivity_pipeline(name="connectivity"):
     tensor2vector = pe.Node(interface=mrtrix.Tensor2Vector(),name='tensor2vector')
     tensor2adc = pe.Node(interface=mrtrix.Tensor2ApparentDiffusion(),name='tensor2adc')
     tensor2fa = pe.Node(interface=mrtrix.Tensor2FractionalAnisotropy(),name='tensor2fa')
+
+
+    """
+    A few Camino Nodes
+    ------------------
+	There are currently issues converting scalar maps from MRtrix's .mif format to Nifti, so we will use the Camino nodes for now
+    """
+
+    """
+    Since the b values and b vectors come from the FSL course, we must convert it to a scheme file
+    for use in Camino.
+    """
+
+    fsl2scheme = pe.Node(interface=camino.FSL2Scheme(), name="fsl2scheme")
+    fsl2scheme.inputs.usegradmod = True
+
+    """
+    In this section we create the nodes necessary for diffusion analysis.
+    First, the diffusion image is converted to voxel order, since this is the format in which Camino does
+    its processing.
+    """
+
+    image2voxel = pe.Node(interface=camino.Image2Voxel(), name="image2voxel")
+
+    """
+    Second, diffusion tensors are fit to the voxel-order data.
+    If desired, these tensors can be converted to a Nifti tensor image using the DT2NIfTI interface.
+    """
+
+    dtifit = pe.Node(interface=camino.DTIFit(),name='dtifit')
+
+    fa = pe.Node(interface=camino.ComputeFractionalAnisotropy(),name='fa')
+    trace = pe.Node(interface=camino.ComputeTensorTrace(),name='trace')
+    dteig = pe.Node(interface=camino.ComputeEigensystem(), name='dteig')
+
+    analyzeheader_fa = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_fa')
+    analyzeheader_fa.inputs.datatype = 'double'
+    analyzeheader_trace = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_trace')
+    analyzeheader_trace.inputs.datatype = 'double'
+
+    fa2nii = pe.Node(interface=misc.CreateNifti(),name='fa2nii')
+    trace2nii = fa2nii.clone("trace2nii")
 
     """
     These nodes are used to create a rough brain mask from the b0 image.
@@ -287,6 +339,19 @@ def create_connectivity_pipeline(name="connectivity"):
     NxStatsCFFConverter = pe.Node(interface=cmtk.CFFConverter(), name="NxStatsCFFConverter")
     NxStatsCFFConverter.inputs.script_files = op.abspath(inspect.getfile(inspect.currentframe()))
 
+    Matlab2CSV_node = pe.Node(interface=misc.Matlab2CSV(), name="Matlab2CSV_node")
+    Matlab2CSV_cmatrix = Matlab2CSV_node.clone(name="Matlab2CSV_cmatrix")
+    Matlab2CSV_meanfib = Matlab2CSV_node.clone(name="Matlab2CSV_meanfib")
+    Matlab2CSV_fibstd = Matlab2CSV_node.clone(name="Matlab2CSV_fibstd")
+
+    MergeCSVFiles_node = pe.Node(interface=misc.MergeCSVFiles(), name="MergeCSVFiles_node")
+    rowIDs = pullnodeIDs(op.abspath(cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']))
+    MergeCSVFiles_node.inputs.row_headings = rowIDs
+    MergeCSVFiles_node.inputs.extra_column_heading = 'subject'
+    mergeCSVMatrices = pe.Node(interface=util.Merge(3), name="mergeCSVMatrices")
+    MergeCSVFiles_cmatrices = pe.Node(interface=misc.MergeCSVFiles(), name="MergeCSVFiles_cmatrices")
+    MergeCSVFiles_cmatrices.inputs.extra_column_heading = 'subject'
+
     """
     Connecting the workflow
     =======================
@@ -364,7 +429,42 @@ def create_connectivity_pipeline(name="connectivity"):
                            (dwi2tensor, tensor2fa,[['tensor','in_file']]),
                           ])
     mapping.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
-                          
+
+    """
+    Required conversions for processing in Camino:
+    """
+
+    mapping.connect([(inputnode_within, image2voxel, [("dwi", "in_file")]),
+                           (inputnode_within, fsl2scheme, [("bvecs", "bvec_file"),
+                                                    ("bvals", "bval_file")]),
+                           (image2voxel, dtifit,[['voxel_order','in_file']]),
+                           (fsl2scheme, dtifit,[['scheme','scheme_file']])
+                          ])
+
+    """
+    Connecting the Fractional Anisotropy and Trace nodes is simple, as they obtain their input from the
+    tensor fitting. This is also where our voxel- and data-grabbing functions come in. We pass these functions,
+    along with the original DWI image from the input node, to the header-generating nodes. This ensures that the
+    files will be correct and readable.
+    """
+
+    mapping.connect([(dtifit, fa,[("tensor_fitted","in_file")])])
+    mapping.connect([(fa, analyzeheader_fa,[("fa","in_file")])])
+    mapping.connect([(inputnode_within, analyzeheader_fa,[(('dwi', get_vox_dims), 'voxel_dims'),
+        (('dwi', get_data_dims), 'data_dims')])])
+    mapping.connect([(fa, fa2nii,[('fa','data_file')])])
+    mapping.connect([(inputnode_within, fa2nii,[(('dwi', get_affine), 'affine')])])
+    mapping.connect([(analyzeheader_fa, fa2nii,[('header', 'header_file')])])
+
+
+    mapping.connect([(dtifit, trace,[("tensor_fitted","in_file")])])
+    mapping.connect([(trace, analyzeheader_trace,[("trace","in_file")])])
+    mapping.connect([(inputnode_within, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
+        (('dwi', get_data_dims), 'data_dims')])])
+    mapping.connect([(trace, trace2nii,[('trace','data_file')])])
+    mapping.connect([(inputnode_within, trace2nii,[(('dwi', get_affine), 'affine')])])
+    mapping.connect([(analyzeheader_trace, trace2nii,[('header', 'header_file')])])
+
     """
     This block creates the rough brain mask to be multiplied, mulitplies it with the
     fractional anisotropy image, and thresholds it to get the single-fiber voxels.
@@ -509,7 +609,7 @@ def create_connectivity_pipeline(name="connectivity"):
 
     mapping.connect([(creatematrix, ntwkMetrics,[("matrix_file","in_file")])])
     mapping.connect([(creatematrix, gpickledNetworks,[("matrix_file","in1")])])
-    mapping.connect([(ntwkMetrics, gpickledNetworks,[("gpickled_network_files","in2")])])    
+    mapping.connect([(ntwkMetrics, gpickledNetworks,[("gpickled_network_files","in2")])])
     mapping.connect([(gpickledNetworks, NxStatsCFFConverter,[("out","gpickled_networks")])])
 
     mapping.connect([(giftiSurfaces, NxStatsCFFConverter,[("out","gifti_surfaces")])])
@@ -518,6 +618,20 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(fiberDataArrays, NxStatsCFFConverter,[("out","data_files")])])
     mapping.connect([(inputnode_within, NxStatsCFFConverter,[("subject_id","title")])])
 
+    mapping.connect([(ntwkMetrics, Matlab2CSV_node,[("node_measures_matlab","in_file")])])
+    mapping.connect([(creatematrix, Matlab2CSV_cmatrix,[("matrix_mat_file","in_file")])])
+    mapping.connect([(creatematrix, Matlab2CSV_meanfib,[("mean_fiber_length_matrix_mat_file","in_file")])])
+    mapping.connect([(creatematrix, Matlab2CSV_fibstd,[("fiber_length_std_matrix_mat_file","in_file")])])
+    mapping.connect([(Matlab2CSV_node, MergeCSVFiles_node,[("csv_files","in_files")])])
+    mapping.connect([(inputnode_within, MergeCSVFiles_node,[("subject_id","out_file")])])
+    mapping.connect([(inputnode_within, MergeCSVFiles_node,[("subject_id","extra_field")])])
+
+    mapping.connect([(Matlab2CSV_cmatrix, mergeCSVMatrices,[("csv_files","in1")])])
+    mapping.connect([(Matlab2CSV_meanfib, mergeCSVMatrices,[("csv_files","in2")])])
+    mapping.connect([(Matlab2CSV_fibstd, mergeCSVMatrices,[("csv_files","in3")])])
+    mapping.connect([(mergeCSVMatrices, MergeCSVFiles_cmatrices,[("out","in_files")])])
+    mapping.connect([(inputnode_within, MergeCSVFiles_cmatrices,[("subject_id","out_file")])])
+    mapping.connect([(inputnode_within, MergeCSVFiles_cmatrices,[("subject_id","extra_field")])])    
     """
     Create a higher-level workflow
     --------------------------------------
@@ -534,6 +648,12 @@ def create_connectivity_pipeline(name="connectivity"):
                                                                 "connectome",
                                                                 "nxstatscff",
                                                                 "nxmatlab",
+                                                                "nxcsv",
+                                                                "cmatrix_csv",
+                                                                "meanfib_csv",
+                                                                "fibstd_csv",
+                                                                "cmatrices_csv",
+                                                                "nxmergedcsv",
                                                                 "cmatrix",
                                                                 "gpickled_network",
                                                                 "filtered_tracts",
@@ -544,6 +664,7 @@ def create_connectivity_pipeline(name="connectivity"):
                                                                 "rois_orig",
                                                                 "odfs",
                                                                 "warped",
+                                                                "trace",
                                                                 "mean_fiber_length",
                                                                 "fiber_length_std"]),
                                         name="outputnode")
@@ -563,6 +684,12 @@ def create_connectivity_pipeline(name="connectivity"):
 		("CFFConverter.connectome_file", "connectome"),
 		("NxStatsCFFConverter.connectome_file", "nxstatscff"),
 		("NetworkXMetrics.matlab_matrix_files", "nxmatlab"),
+        ("Matlab2CSV_node.csv_files", "nxcsv"),
+        ("Matlab2CSV_cmatrix.csv_files", "cmatrix_csv"),
+        ("Matlab2CSV_meanfib.csv_files", "meanfib_csv"),
+        ("Matlab2CSV_fibstd.csv_files", "fibstd_csv"),
+        ("MergeCSVFiles_node.csv_file", "nxmergedcsv"),
+        ("MergeCSVFiles_cmatrices.csv_file", "cmatrices_csv"),
 		("CreateMatrix.matrix_mat_file", "cmatrix"),
 		("CreateMatrix.mean_fiber_length_matrix_mat_file", "mean_fiber_length"),
 		("CreateMatrix.fiber_length_std_matrix_mat_file", "fiber_length_std"),
@@ -573,7 +700,8 @@ def create_connectivity_pipeline(name="connectivity"):
 		("inverse.out_file", "brain_overlay"),
 		("inverseROIsToB0.out_file", "GM_overlay"),
 		("Parcellate.roi_file", "rois_orig"),
-		("tensor2fa.FA", "fa"),
+        ("fa2nii.nifti_file", "fa"),
+        ("trace2nii.nifti_file", "trace"),
 		("csdeconv.spherical_harmonics_image", "odfs"),
 		("inverse_AparcAseg.out_file", "warped"),
 		("mri_convert_Brain.out_file", "struct")])

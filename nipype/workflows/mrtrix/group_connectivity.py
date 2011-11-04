@@ -52,6 +52,8 @@ def create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subje
 
         outputnode.connectome
         outputnode.nxstatscff
+        outputnode.nxmatlab
+        outputnode.nxcsv
         outputnode.fa
         outputnode.tracts
         outputnode.filtered_tractography
@@ -112,6 +114,12 @@ def create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subje
     l1pipeline.connect([(conmapper, datasink, [("outputnode.connectome", "@l1output.cff"),
                                               ("outputnode.nxstatscff", "@l1output.nxstatscff"),
                                               ("outputnode.nxmatlab", "@l1output.nxmatlab"),
+                                              ("outputnode.nxcsv", "@l1output.nxcsv"),
+                                              ("outputnode.cmatrix_csv", "@l1output.cmatrix_csv"),
+                                              ("outputnode.meanfib_csv", "@l1output.meanfib_csv"),
+                                              ("outputnode.fibstd_csv", "@l1output.fibstd_csv"),
+                                              ("outputnode.cmatrices_csv", "@l1output.cmatrices_csv"),
+                                              ("outputnode.nxmergedcsv", "@l1output.nxmergedcsv"),
                                               ("outputnode.fa", "@l1output.fa"),
                                               ("outputnode.tracts", "@l1output.tracts"),
                                               ("outputnode.filtered_tracts", "@l1output.filtered_tracts"),

@@ -32,10 +32,10 @@ class MRConvertOutputSpec(TraitedSpec):
 class MRConvert(CommandLine):
     """
     Perform conversion between different file types and optionally extract a subset of the input image.
-    
+
     If used correctly, this program can be a very useful workhorse.
-    In addition to converting images between different formats, it can 
-    be used to extract specific studies from a data set, extract a specific 
+    In addition to converting images between different formats, it can
+    be used to extract specific studies from a data set, extract a specific
     region of interest, flip the images, or to scale the intensity of the images.
 
     Example
@@ -47,7 +47,7 @@ class MRConvert(CommandLine):
     >>> mrconvert.inputs.out_filename = 'dwi_FA.nii'
     >>> mrconvert.run()                                 # doctest: +SKIP
     """
-    
+
     _cmd = 'mrconvert'
     input_spec=MRConvertInputSpec
     output_spec=MRConvertOutputSpec
@@ -69,7 +69,7 @@ class MRConvert(CommandLine):
         else:
             outname = name + '_mrconvert.' + self.inputs.extension
         return outname
-        
+
 class DWI2TensorInputSpec(CommandLineInputSpec):
     in_file = InputMultiPath(exists=True, argstr='%s', mandatory=True, position=-2,
         desc='Diffusion-weighted images')
@@ -81,7 +81,7 @@ class DWI2TensorInputSpec(CommandLineInputSpec):
         desc='Requires two values (i.e. [2 5 6] for [Volumes] Ignores the image volumes specified when computing the tensor.')
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
-    
+
 class DWI2TensorOutputSpec(TraitedSpec):
     tensor = File(exists=True, desc='path/name of output diffusion tensor image')
 
@@ -98,7 +98,7 @@ class DWI2Tensor(CommandLine):
     >>> dwi2tensor.inputs.encoding_file = 'encoding.txt'
     >>> dwi2tensor.run()                                   # doctest: +SKIP
     """
-    
+
     _cmd = 'dwi2tensor'
     input_spec=DWI2TensorInputSpec
     output_spec=DWI2TensorOutputSpec
@@ -120,7 +120,7 @@ class DWI2Tensor(CommandLine):
 class Tensor2VectorInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
         desc='Diffusion tensor image')
-    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output vector filename')    
+    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output vector filename')
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
@@ -139,7 +139,7 @@ class Tensor2Vector(CommandLine):
     >>> tensor2vector.inputs.in_file = 'dwi_tensor.mif'
     >>> tensor2vector.run()                             # doctest: +SKIP
     """
-    
+
     _cmd = 'tensor2vector'
     input_spec=Tensor2VectorInputSpec
     output_spec=Tensor2VectorOutputSpec
@@ -161,7 +161,7 @@ class Tensor2Vector(CommandLine):
 class Tensor2FractionalAnisotropyInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
         desc='Diffusion tensor image')
-    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output Fractional Anisotropy filename')    
+    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output Fractional Anisotropy filename')
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
@@ -180,7 +180,7 @@ class Tensor2FractionalAnisotropy(CommandLine):
     >>> tensor2FA.inputs.in_file = 'dwi_tensor.mif'
     >>> tensor2FA.run()                                 # doctest: +SKIP
     """
-    
+
     _cmd = 'tensor2FA'
     input_spec=Tensor2FractionalAnisotropyInputSpec
     output_spec=Tensor2FractionalAnisotropyOutputSpec
@@ -202,7 +202,7 @@ class Tensor2FractionalAnisotropy(CommandLine):
 class Tensor2ApparentDiffusionInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
         desc='Diffusion tensor image')
-    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output Fractional Anisotropy filename')    
+    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output Fractional Anisotropy filename')
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
@@ -219,9 +219,9 @@ class Tensor2ApparentDiffusion(CommandLine):
     >>> import nipype.interfaces.mrtrix as mrt
     >>> tensor2ADC = mrt.Tensor2ApparentDiffusion()
     >>> tensor2ADC.inputs.in_file = 'dwi_tensor.mif'
-    >>> tensor2ADC.run()                                # doctest: +SKIP    
+    >>> tensor2ADC.run()                                # doctest: +SKIP
     """
-    
+
     _cmd = 'tensor2ADC'
     input_spec=Tensor2ApparentDiffusionInputSpec
     output_spec=Tensor2ApparentDiffusionOutputSpec
@@ -243,7 +243,7 @@ class Tensor2ApparentDiffusion(CommandLine):
 class MRMultiplyInputSpec(CommandLineInputSpec):
     in_files = InputMultiPath(exists=True, argstr='%s', mandatory=True, position=-2,
         desc='Input images to be multiplied')
-    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output image filename')    
+    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output image filename')
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
@@ -253,16 +253,16 @@ class MRMultiplyOutputSpec(TraitedSpec):
 class MRMultiply(CommandLine):
     """
     Multiplies two images.
-    
+
     Example
     -------
 
     >>> import nipype.interfaces.mrtrix as mrt
     >>> MRmult = mrt.MRMultiply()
     >>> MRmult.inputs.in_files = ['dwi.mif', 'dwi_WMProb.mif']
-    >>> MRmult.run()                                             # doctest: +SKIP    
+    >>> MRmult.run()                                             # doctest: +SKIP
     """
-    
+
     _cmd = 'mrmult'
     input_spec=MRMultiplyInputSpec
     output_spec=MRMultiplyOutputSpec
@@ -293,23 +293,23 @@ class MRTrixViewerOutputSpec(TraitedSpec):
 class MRTrixViewer(CommandLine):
     """
     Loads the input images in the MRTrix Viewer.
-    
+
     Example
     -------
 
     >>> import nipype.interfaces.mrtrix as mrt
     >>> MRview = mrt.MRTrixViewer()
     >>> MRview.inputs.in_files = 'dwi.mif'
-    >>> MRview.run()                                    # doctest: +SKIP    
+    >>> MRview.run()                                    # doctest: +SKIP
     """
-    
+
     _cmd = 'mrview'
     input_spec=MRTrixViewerInputSpec
     output_spec=MRTrixViewerOutputSpec
 
     def _list_outputs(self):
-        return 
-        
+        return
+
 class MRTrixInfoInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
         desc='Input images to be read')
@@ -320,31 +320,31 @@ class MRTrixInfoOutputSpec(TraitedSpec):
 class MRTrixInfo(CommandLine):
     """
     Prints out relevant header information found in the image specified.
-    
+
     Example
     -------
 
     >>> import nipype.interfaces.mrtrix as mrt
     >>> MRinfo = mrt.MRTrixInfo()
     >>> MRinfo.inputs.in_file = 'dwi.mif'
-    >>> MRinfo.run()                                    # doctest: +SKIP    
+    >>> MRinfo.run()                                    # doctest: +SKIP
     """
-    
+
     _cmd = 'mrinfo'
     input_spec=MRTrixInfoInputSpec
     output_spec=MRTrixInfoOutputSpec
 
     def _list_outputs(self):
-        return 
+        return
 
 class GenerateWhiteMatterMaskInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3, desc='Diffusion-weighted images')
     binary_mask = File(exists=True, argstr='%s', mandatory=True, position = -2, desc='Binary brain mask')
     out_WMProb_filename = File(genfile=True, argstr='%s', position = -1, desc='Output WM probability image filename')
-    encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=1, 
-    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')	
+    encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=1,
+    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     noise_level_margin = traits.Float(argstr='-margin %s', desc='Specify the width of the margin on either side of the image to be used to estimate the noise level (default = 10)')
-    
+
 class GenerateWhiteMatterMaskOutputSpec(TraitedSpec):
     WMprobabilitymap = File(exists=True, desc='WMprobabilitymap')
 
@@ -359,9 +359,9 @@ class GenerateWhiteMatterMask(CommandLine):
     >>> genWM = mrt.GenerateWhiteMatterMask()
     >>> genWM.inputs.in_file = 'dwi.mif'
     >>> genWM.inputs.encoding_file = 'encoding.txt'
-    >>> genWM.run()                                     # doctest: +SKIP    
+    >>> genWM.run()                                     # doctest: +SKIP
     """
-    
+
     _cmd = 'gen_WM_mask'
     input_spec=GenerateWhiteMatterMaskInputSpec
     output_spec=GenerateWhiteMatterMaskOutputSpec
@@ -395,14 +395,14 @@ class ErodeOutputSpec(TraitedSpec):
 class Erode(CommandLine):
     """
     Erode (or dilates) a mask (i.e. binary) image
-   
+
     Example
     -------
 
     >>> import nipype.interfaces.mrtrix as mrt
     >>> erode = mrt.Erode()
     >>> erode.inputs.in_file = 'mask.mif'
-    >>> erode.run()                                     # doctest: +SKIP    
+    >>> erode.run()                                     # doctest: +SKIP
     """
     _cmd = 'erode'
     input_spec=ErodeInputSpec
@@ -432,7 +432,7 @@ class ThresholdInputSpec(CommandLineInputSpec):
     replace_zeros_with_NaN = traits.Bool(argstr='-nan', position=1, desc="Replace all zero values with NaN")
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
-    
+
 class ThresholdOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='The output binary image mask.')
 
@@ -441,8 +441,8 @@ class Threshold(CommandLine):
     Create bitwise image by thresholding image intensity.
 
     By default, the threshold level is determined using a histogram analysis
-    to cut out the background. Otherwise, the threshold intensity can be 
-    specified using command line options. 
+    to cut out the background. Otherwise, the threshold intensity can be
+    specified using command line options.
     Note that only the first study is used for thresholding.
 
     Example
@@ -451,9 +451,9 @@ class Threshold(CommandLine):
     >>> import nipype.interfaces.mrtrix as mrt
     >>> thresh = mrt.Threshold()
     >>> thresh.inputs.in_file = 'wm_mask.mif'
-    >>> thresh.run()                                             # doctest: +SKIP    
+    >>> thresh.run()                                             # doctest: +SKIP
     """
-    
+
     _cmd = 'threshold'
     input_spec=ThresholdInputSpec
     output_spec=ThresholdOutputSpec
@@ -471,11 +471,11 @@ class Threshold(CommandLine):
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + '_thresh.mif'
-        
+
 class MedianFilter3DInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
         desc='Input images to be smoothed')
-    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output image filename')    
+    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output image filename')
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
@@ -485,16 +485,16 @@ class MedianFilter3DOutputSpec(TraitedSpec):
 class MedianFilter3D(CommandLine):
     """
     Smooth images using a 3x3x3 median filter.
-    
+
     Example
     -------
 
     >>> import nipype.interfaces.mrtrix as mrt
     >>> median3d = mrt.MedianFilter3D()
     >>> median3d.inputs.in_file = 'mask.mif'
-    >>> median3d.run()                                  # doctest: +SKIP    
+    >>> median3d.run()                                  # doctest: +SKIP
     """
-    
+
     _cmd = 'median3D'
     input_spec=MedianFilter3DInputSpec
     output_spec=MedianFilter3DOutputSpec
@@ -516,7 +516,7 @@ class MedianFilter3D(CommandLine):
 class MRTransformInputSpec(CommandLineInputSpec):
     in_files = InputMultiPath(exists=True, argstr='%s', mandatory=True, position=-2,
         desc='Input images to be transformed')
-    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output image')        
+    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output image')
     invert = traits.Bool(argstr='-inverse', position=1, desc="Invert the specified transform before using it")
     replace_transform = traits.Bool(argstr='-replace', position=1, desc="replace the current transform by that specified, rather than applying it to the current transform")
     transformation_file = File(exists=True, argstr='-transform %s', position=1,
@@ -535,7 +535,7 @@ class MRTransformOutputSpec(TraitedSpec):
 class MRTransform(CommandLine):
     """
     Apply spatial transformations or reslice images
-    
+
     Example
     -------
 
@@ -544,7 +544,7 @@ class MRTransform(CommandLine):
     >>> MRxform.inputs.in_files = 'anat_coreg.mif'
     >>> MRxform.run()                                   # doctest: +SKIP
     """
-    
+
     _cmd = 'mrtransform'
     input_spec=MRTransformInputSpec
     output_spec=MRTransformOutputSpec

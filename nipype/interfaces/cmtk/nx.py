@@ -9,6 +9,15 @@ import scipy.io as sio
 import pickle
 import cmp
 
+def get_data_dims(volume):
+    import nibabel as nb
+    if isinstance(volume, list):
+        volume = volume[0]
+    nii = nb.load(volume)
+    hdr = nii.get_header()
+    datadims = hdr.get_data_shape()
+    return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
+
 def read_unknown_ntwk(ntwk):
     path, name, ext = split_filename(ntwk)
     if ext == '.pck':
@@ -23,7 +32,7 @@ def remove_all_edges(ntwk):
     for edge in edges:
         ntwk.remove_edge(edge[0],edge[1])
     return ntwk
-    
+
 def fix_keys_for_gexf(orig):
     """
     GEXF Networks can be read in Gephi, however, the keys for the node and edge IDs must be converted to strings
@@ -51,7 +60,7 @@ def fix_keys_for_gexf(orig):
             ntwk.edge[str(edge[0])][str(edge[1])]['number_of_fibers'] = str(data['number_of_fibers'])
         if ntwk.edge[str(edge[0])][str(edge[1])].has_key('value'):
             ntwk.edge[str(edge[0])][str(edge[1])]['value'] = str(data['value'])
-    return ntwk   
+    return ntwk
 
 def add_dicts_by_key(in_dict1, in_dict2):
     """
@@ -68,16 +77,16 @@ def average_networks(in_files, ntwk_res_file, group_id):
     """
     Sums the edges of input networks and divides by the number of networks
     Writes the average network as .pck and .gexf and returns the name of the written networks
-    """    
+    """
     import networkx as nx
     import os.path as op
     print "Creating average network for group: {grp}".format(grp=group_id)
-    if len(in_files) == 1:     
+    if len(in_files) == 1:
         ntwk = read_unknown_ntwk(in_files[0])
     else:
         ntwk_res_file = read_unknown_ntwk(ntwk_res_file)
         ntwk = remove_all_edges(ntwk_res_file)
-        
+
     # Sums all the relevant variables
         for index, subject in enumerate(in_files):
             tmp = nx.read_gpickle(subject)
@@ -97,7 +106,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
                 if tmp[node].has_key('value'):
                     data['value'] = data['value'] + tmp.node[node]['value']
                 ntwk.add_node(node,data)
-                
+
     # Divides each value by the number of files
         nodes = ntwk.nodes_iter()
         edges = ntwk.edges_iter()
@@ -155,7 +164,7 @@ def compute_node_measures(ntwk):
     measures['isolates'] = binarized
     print '...Computing k-core number'
     measures['core_number'] = np.array(nx.core_number(ntwk).values())
-    
+
     return measures
 
 def compute_edge_measures(ntwk):
@@ -172,7 +181,7 @@ def compute_edge_measures(ntwk):
     print '...Computing authority matrix...'
     measures['authority_matrix'] = nx.authority_matrix(ntwk)
     return measures
-    
+
 def compute_dict_measures(ntwk):
     """
     Returns a dictionary
@@ -239,7 +248,7 @@ def add_edge_data(edge_array, ntwk):
                     old_edge_dict = edge_ntwk.edge[x][y]
                     edge_ntwk.remove_edge(x,y)
                     data.update(old_edge_dict)
-                edge_ntwk.add_edge(x,y,data)                
+                edge_ntwk.add_edge(x,y,data)
     return edge_ntwk
 
 class NetworkXMetricsInputSpec(BaseInterfaceInputSpec):
@@ -274,7 +283,7 @@ class NetworkXMetrics(BaseInterface):
 
     Example
     -------
-    
+
     >>> import nipype.interfaces.cmtk as cmtk
     >>> import cmp
     >>> nxmetrics = cmtk.NetworkXMetrics()
@@ -350,8 +359,8 @@ class NetworkXMetrics(BaseInterface):
 
 		print 'Saving MATLAB measures as {m}'.format(m=matlab)
 
-		# Loops through the measures which return a dictionary, 
-		# converts the keys and values to a Numpy array, 
+		# Loops through the measures which return a dictionary,
+		# converts the keys and values to a Numpy array,
 		# stacks them together, and saves them in a MATLAB .mat file via Scipy
 		global dicts
 		dicts = list()
@@ -390,7 +399,7 @@ class NetworkXMetrics(BaseInterface):
 
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext
-        
+
 class AverageNetworksInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for a group of subjects')
     resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary' \
@@ -409,7 +418,7 @@ class AverageNetworks(BaseInterface):
 
     Example
     -------
-    
+
     >>> import nipype.interfaces.cmtk as cmtk
     >>> avg = cmtk.NetworkXMetrics()
     >>> avg.inputs.in_files = ['subj1.pck', 'subj2.pck']
@@ -438,3 +447,141 @@ class AverageNetworks(BaseInterface):
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext
 
+class RegionalValuesInputSpec(TraitedSpec):
+    in_file = File(exists=True, mandatory=True, desc='Functional (e.g. Positron Emission Tomography) image')
+    segmentation_file = File(exists=True, mandatory=True, desc='Image with segmented regions (e.g. aparc+aseg.nii or the output from cmtk.Parcellate()')
+    resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary' \
+                                ', but if included, the interface will output the statistical maps as networkx graphs.')
+    subject_id = traits.Str(desc='Subject ID')
+    skip_unknown = traits.Bool(True, usedefault=True, desc='Skips calculation for regions with ID = 0 (default=True)')
+    out_stats_file = File('stats.mat', usedefault=True, desc='Some simple image statistics for regions saved as a Matlab .mat')
+
+class RegionalValuesOutputSpec(TraitedSpec):
+    stats_file = File(desc='Some simple image statistics for the original and normalized images saved as a Matlab .mat')
+    networks = OutputMultiPath(File(desc='Output gpickled network files for all statistical measures'))
+
+class RegionalValues(BaseInterface):
+    input_spec = RegionalValuesInputSpec
+    output_spec = RegionalValuesOutputSpec
+
+    def _run_interface(self, runtime):
+        print 'Functional image: {img}'.format(img=self.inputs.in_file)
+        print 'Segmentation image: {img}'.format(img=self.inputs.segmentation_file)
+        if not get_data_dims(self.inputs.in_file) == get_data_dims(self.inputs.segmentation_file):
+            print 'Image dimensions are not the same, please reslice the images to the same dimensions'
+            dx,dy,dz = get_data_dims(self.inputs.in_file)
+            print 'Functional image dimensions: {dimx}, {dimy}, {dimz}'.format(dimx=dx,dimy=dy,dimz=dz)
+            dx,dy,dz = get_data_dims(self.inputs.segmentation_file)
+            print 'Segmentation image dimensions: {dimx}, {dimy}, {dimz}'.format(dimx=dx,dimy=dy,dimz=dz)
+            
+        
+        """Record intensity values"""
+        functional = nb.load(self.inputs.in_file)
+        functionaldata = functional.get_data()
+        segmentation = nb.load(self.inputs.segmentation_file)
+        segmentationdata = segmentation.get_data()
+
+        rois = np.unique(segmentationdata)
+        print 'Found {roi} unique region values'.format(roi=len(rois))
+
+        func_mean = []
+        func_max = []
+        func_min = []
+        func_stdev = []
+        voxels = []
+        for idx, roi in enumerate(rois):
+            values = []
+            if self.inputs.skip_unknown:
+                if not roi == 0:
+                    x,y,z = np.where(segmentationdata == roi)
+                    print 'Region ID: {id}'.format(id=roi)
+                    for index in range(0,len(x)):
+                        value = functionaldata[x[index]][y[index]][z[index]]
+                        values.append(value)
+                    func_mean.append(np.mean(values))
+                    func_max.append(np.max(values))
+                    func_min.append(np.min(values))
+                    func_stdev.append(np.std(values))
+                    voxels.append(len(values))
+                    print 'Mean Value: {avg}'.format(avg=np.mean(values))
+                    print 'Number of Voxels: {vox}'.format(vox=len(values))
+            else:
+                x,y,z = np.where(segmentationdata == roi)
+                print 'Region ID: {id}'.format(id=roi)
+                for index in range(0,len(x)):
+                    value = functionaldata[x[index]][y[index]][z[index]]
+                    values.append(value)
+                func_mean.append(np.mean(values))
+                func_max.append(np.max(values))
+                func_min.append(np.min(values))
+                func_stdev.append(np.std(values))
+                voxels.append(len(values))
+                print 'Mean Value: {avg}'.format(avg=np.mean(values))
+                print 'Number of Voxels: {vox}'.format(vox=len(values))
+
+        stats = {}
+        stats['func_max'] = func_max
+        stats['func_mean'] = func_mean
+        stats['func_min'] = func_min
+        stats['func_stdev'] = func_stdev
+        stats['number_of_voxels'] = voxels
+
+        if isdefined(self.inputs.resolution_network_file):
+			gp = read_unknown_ntwk(self.inputs.resolution_network_file)
+			nROIs = len(gp.nodes())
+			nodesdict = gp.node
+			if nodesdict.has_key('1'):
+				nodedict = gp.node['1']
+			elif nodesdict.has_key(1):
+				nodedict = gp.node[1]
+			else:
+				nodedict = gp.node[gp.nodes()[0].key]
+			if not nodedict.has_key('dn_position'):
+				print "Creating node positions from segmentation"
+				G = nx.Graph()
+				for u,d in gp.nodes_iter(data=True):
+					print 'Node ID {id}'.format(id=int(u))
+					G.add_node(int(u), d)
+					xyz = tuple(np.mean( np.where(segmentationdata == int(d["dn_correspondence_id"]) ) , axis = 1))
+					tmp = tuple()
+					a = float(xyz[0])
+					b = float(xyz[2])
+					c = float(xyz[1])
+					tmp = tuple([a,b,c])
+					xyz = tmp
+					G.node[int(u)]['dn_position'] = tuple(xyz)
+				ntwkname = op.abspath('nodepositions.pck')
+				nx.write_gpickle(G,ntwkname)
+			else:
+				ntwkname = self.inputs.resolution_network_file
+            
+			global ntwks
+			ntwks = list()
+			for key in stats.keys():
+				print key
+				print np.shape(stats[key])
+				newntwk = add_node_data(stats[key],ntwkname)
+				out_file = op.abspath(self._gen_outfilename(key, 'pck'))
+				nx.write_gpickle(newntwk, out_file)
+				ntwks.append(out_file)
+
+        if isdefined(self.inputs.subject_id):
+            stats['subject_id'] = self.inputs.subject_id
+
+        out_stats_file = op.abspath(self.inputs.out_stats_file)
+        print 'Saving image statistics as {stats}'.format(stats=out_stats_file)
+        sio.savemat(out_stats_file, stats)
+        return runtime
+
+    def _list_outputs(self):
+		outputs = self.output_spec().get()
+		out_stats_file = op.abspath(self.inputs.out_stats_file)
+		outputs["stats_file"] = out_stats_file
+		if isdefined(self.inputs.resolution_network_file):
+			outputs["networks"] = ntwks
+		else:
+			outputs["networks"] = ''
+		return outputs
+
+    def _gen_outfilename(self, name, ext):
+        return name + '.' + ext

@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-  
+# -*- coding: utf-8 -*-
 from nipype.interfaces.matlab import MatlabCommand
-from nipype.interfaces.base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec, 
+from nipype.interfaces.base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
                                     File, isdefined, traits)
 from nipype.utils.filemanip import split_filename
 import os, os.path as op
@@ -17,15 +17,15 @@ def get_origin(volume):
     return origin[0:3]
 
 class MRTrix2TrackVisInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, 
+    in_file = File(exists=True, mandatory=True,
     desc='The input file for the tracks in MRTrix (.tck) format')
     voxel_dims = traits.List(traits.Float, minlen=3, maxlen=3,
     desc='The size of each voxel in mm.')
-    data_dims = traits.List(traits.Int, minlen=3, maxlen=3, 
+    data_dims = traits.List(traits.Int, minlen=3, maxlen=3,
     desc='The size of the image in voxels.')
-    origin = traits.List(traits.Float, minlen=3, maxlen=3, 
+    origin = traits.List(traits.Float, minlen=3, maxlen=3,
     desc='The origin (position of the anterior commissure) in mm')
-    image_file = File(exists=True, 
+    image_file = File(exists=True,
     desc='An image through which to infer the voxel and data dimensions of the input tracks')
     flipx = traits.Bool(False, usedefault=True, desc='Flip the tracks in the x direction')
     flipy = traits.Bool(True, usedefault=True, desc='Flip the tracks in the y direction')
@@ -38,16 +38,16 @@ class MRTrix2TrackVisOutputSpec(TraitedSpec):
 class MRTrix2TrackVis(BaseInterface):
     """
     Converts MRtrix (.tck) tract files into TrackVis (.trk) format
-    
-    This interface wraps MATLAB code adapted from the MRtrix matlab 
+
+    This interface wraps MATLAB code adapted from the MRtrix matlab
     package:
-    
+
     https://code.google.com/p/mrtrix/source/browse/trunk/matlab/
-    
+
     and from John Colby's Along Tract Stats package:
-    
+
     https://github.com/johncolby/along-tract-stats
-    
+
     Example
     -------
 
@@ -86,11 +86,11 @@ class MRTrix2TrackVis(BaseInterface):
         if self.inputs.flipz == True:
             fz = -1
         hdrpath = op.join(nipype.__path__[0], 'interfaces','mrtrix','defhdr')
-            
-        out_filename = 'converted.trk'      
+
+        out_filename = 'converted.trk'
         d = dict(in_file=self.inputs.in_file,
         out_file=out_filename, dimx=dx, dimy=dy,dimz=dz,
-        voxx=vx, voxy=vy, voxz=vz, orgx=ox, orgy=oy, orgz=oz, 
+        voxx=vx, voxy=vy, voxz=vz, orgx=ox, orgy=oy, orgz=oz,
         flipx=fx, flipy=fy, flipz=fz, headerpath=hdrpath)
         script = Template("""%% For use in substitution
 in_file = '$in_file';
@@ -109,7 +109,7 @@ ox = 0; oy = ox; oz = ox;
 % https://code.google.com/p/mrtrix/source/browse/trunk/matlab/read_mrtrix_tracks.m?r=258
 image.comments = {};
 f = fopen (in_file, 'r');
-if (f<1) 
+if (f<1)
   disp (['error opening ' in_file ]);
   return
 end
@@ -137,7 +137,7 @@ while 1
       file = value;
     elseif strcmp(key, 'datatype')
       tracks.datatype = value;
-    else 
+    else
       tracks = setfield (tracks, key, value);
     end
   end
@@ -175,7 +175,7 @@ else
   return;
 end
 
-if (f<1) 
+if (f<1)
   disp (['error opening ' in_file ]);
   return
 end
@@ -210,7 +210,7 @@ for i = 1:length(input.data)
     tracks(i).matrix(:,1) = tracks(i).matrix(:,1) + $flipx*$orgx;
     tracks(i).matrix(:,2) = tracks(i).matrix(:,2) + $flipy*$orgy;
     tracks(i).matrix(:,3) = tracks(i).matrix(:,3) + $flipz*$orgz;
-    tracks(i).nPoints = length(tracks(i).matrix); 
+    tracks(i).nPoints = length(tracks(i).matrix);
 end
 
 clear input
@@ -303,7 +303,7 @@ for iTrk = 1:header.n_count
         coords(:,iy) = header.dim(iy)*header.voxel_size(iy) - coords(:,iy);
     end
     tracks(iTrk).matrix(:,1:3) = coords;
-    
+
     fwrite(fid, tracks(iTrk).nPoints, 'int');
     fwrite(fid, tracks(iTrk).matrix', 'float');
     if header.n_properties
@@ -337,7 +337,7 @@ clear all
         outputs = self._outputs().get()
         outputs['out_file'] = op.abspath(self.inputs.out_filename)
         return outputs
-        
+
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()

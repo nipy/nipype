@@ -56,7 +56,7 @@ class CFFConverterInputSpec(BaseInterfaceInputSpec):
 
 class CFFConverterOutputSpec(TraitedSpec):
     connectome_file = File(exists=True, desc='Output connectome file')
-    
+
 class CFFConverter(BaseInterface):
     """
     Creates a Connectome File Format (CFF) file from input networks, surfaces, volumes, tracts, etcetera....

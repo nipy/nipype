@@ -6,12 +6,16 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.cmtk as cmtk
+import nipype.interfaces.R as R
 from nipype.workflows.camino.connectivity_mapping import create_connectivity_pipeline
 import nipype.algorithms.misc as misc
 import inspect
 import nibabel as nb
+import numpy as np
+import networkx as nx
 import os, os.path as op                      # system functions
 import cmp                                    # connectome mapper
+from nipype.interfaces.cmtk.nx import read_unknown_ntwk
 
 def get_vox_dims(volume):
     import nibabel as nb
@@ -270,9 +274,9 @@ def create_group_cff_pipeline_part4(group_list, data_dir, subjects_dir, output_d
     l4inputnode = pe.Node(interface=util.IdentityInterface(fields=['networks_grp1','networks_grp2','CMatrices_grp1','CMatrices_grp2',
         'fibmean_grp1','fibmean_grp2','fibdev_grp1','fibdev_grp2']), name='l4inputnode')
 
-    average_networks_grp1 = pe.Node(interface=cmtk.AverageNetworks(), name='average_networks_grp1')
+    average_networks_grp1 = pe.Node(interface=cmtk.AverageNetworks(), name='average_networks_grp1') 
     average_networks_grp2 = average_networks_grp1.clone('average_networks_grp2')
-        
+
     averagecff = pe.Node(interface=cmtk.CFFConverter(), name="averagecff")
     averagecff.inputs.out_file = title + '_average'
 
@@ -315,3 +319,154 @@ def create_group_cff_pipeline_part4(group_list, data_dir, subjects_dir, output_d
 
     l4pipeline.connect([(merge_gexf_averages, l4datasink, [('out', '@l4output.gexf')])])
     return l4pipeline
+
+def pullnodeIDs(in_network):
+    print in_network
+    ntwk = read_unknown_ntwk(in_network)
+    nodedata = ntwk.node
+    ids = []
+    integer_nodelist = []
+    for node in nodedata.keys():
+        integer_nodelist.append(int(node))
+    for node in np.sort(integer_nodelist):
+        nodeid = nodedata[str(node)]['dn_name']
+        ids.append(nodeid)
+    print nodeid
+    return ids
+
+def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir, subjects_dir, output_dir):
+    """
+    Level 2 pipeline starts here
+    """
+    group_infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id']), name="group_infosource")
+    group_infosource.inputs.group_id = group_id
+
+    l2infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id',
+    'degree',
+    'clustering',
+    'isolates',
+    'node_clique_number',
+    'betweenness_centrality',
+    'closeness_centrality',
+    'load_centrality',
+    'core_number',
+    'triangles',
+    ]), name='l2infosource')
+
+    l2source = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=['CFFfiles',
+    'degree',
+    'clustering',
+    'isolates',
+    'node_clique_number',
+    'betweenness_centrality',
+    'closeness_centrality',
+    'load_centrality',
+    'core_number',
+    'triangles',
+    ]), name='l2source')
+    
+    l2source.inputs.template_args = dict(CFFfiles=[['group_id']],
+        degree=[['group_id']],
+        clustering=[['group_id']],
+        isolates=[['group_id']],
+        node_clique_number=[['group_id']],
+        betweenness_centrality=[['group_id']],
+        closeness_centrality=[['group_id']],
+        load_centrality=[['group_id']],
+        core_number=[['group_id']],
+        triangles=[['group_id']])
+    l2source.inputs.base_directory = data_dir
+    l2source.inputs.template = '%s/%s'
+    l2source.inputs.field_template=dict(CFFfiles=op.join(output_dir,'%s/cff/*/connectome.cff'), 
+        degree=op.join(output_dir,'%s/nxcsv/*/*degree.csv'),
+        clustering=op.join(output_dir,'%s/nxcsv/*/*clustering.csv'),
+        isolates=op.join(output_dir,'%s/nxcsv/*/*isolates.csv'),
+        node_clique_number=op.join(output_dir,'%s/nxcsv/*/*node_clique_number.csv'),
+        betweenness_centrality=op.join(output_dir,'%s/nxcsv/*/*betweenness_centrality.csv'),
+        closeness_centrality=op.join(output_dir,'%s/nxcsv/*/*closeness_centrality.csv'),
+        load_centrality=op.join(output_dir,'%s/nxcsv/*/*load_centrality.csv'),
+        core_number=op.join(output_dir,'%s/nxcsv/*/*core_number.csv'),
+        triangles=op.join(output_dir,'%s/nxcsv/*/*triangles.csv'),
+        )
+    
+    l2inputnode = pe.Node(interface=util.IdentityInterface(fields=['CFFfiles', 
+    'degree',
+    'clustering',
+    'isolates',
+    'node_clique_number',
+    'betweenness_centrality',
+    'closeness_centrality',
+    'load_centrality',
+    'core_number',
+    'triangles',
+     ]), name='l2inputnode')
+    
+    MergeCNetworks = pe.Node(interface=cmtk.MergeCNetworks(), name="MergeCNetworks")
+    
+    MergeCSVFiles_degree = pe.Node(interface=R.MergeCSVFiles(), name="MergeCSVFiles_degree")
+    cmp_config = cmp.configuration.PipelineConfiguration()
+    cmp_config.parcellation_scheme = "Lausanne2008"
+    parcellation_name = 'scale500'
+    rowIDs = pullnodeIDs(op.abspath(cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']))
+    MergeCSVFiles_degree.inputs.row_headings = rowIDs
+    MergeCSVFiles_degree.inputs.extra_column_heading = 'group'
+    MergeCSVFiles_degree.inputs.extra_field = group_id
+
+    MergeCSVFiles_clustering = MergeCSVFiles_degree.clone(name="MergeCSVFiles_clustering")
+    MergeCSVFiles_isolates = MergeCSVFiles_degree.clone(name="MergeCSVFiles_isolates")
+    MergeCSVFiles_node_clique_number = MergeCSVFiles_degree.clone(name="MergeCSVFiles_node_clique_number")
+    MergeCSVFiles_betweenness_centrality = MergeCSVFiles_degree.clone(name="MergeCSVFiles_betweenness_centrality")
+    MergeCSVFiles_closeness_centrality = MergeCSVFiles_degree.clone(name="MergeCSVFiles_closeness_centrality")
+    MergeCSVFiles_load_centrality = MergeCSVFiles_degree.clone(name="MergeCSVFiles_load_centrality")
+    MergeCSVFiles_core_number = MergeCSVFiles_degree.clone(name="MergeCSVFiles_core_number")
+    MergeCSVFiles_triangles = MergeCSVFiles_degree.clone(name="MergeCSVFiles_triangles")
+    
+    l2datasink = pe.Node(interface=nio.DataSink(), name="l2datasink")
+    l2datasink.inputs.base_directory = output_dir
+    l2datasink.inputs.container = group_id
+    l2datasink.inputs.cff_dir = getoutdir(group_id, output_dir)
+
+    l2pipeline = pe.Workflow(name="l2output")
+    l2pipeline.base_dir = op.join(output_dir, 'l2output')
+    l2pipeline.connect([(group_infosource, l2infosource,[('group_id','group_id')])])
+
+    l2pipeline.connect([
+                        (l2infosource,l2source,[('group_id', 'group_id')]),
+                        (l2source,l2inputnode,[('CFFfiles','CFFfiles')]),
+                        (l2source,l2inputnode,[('degree','degree')]),
+                        (l2source,l2inputnode,[('clustering','clustering')]),
+                        (l2source,l2inputnode,[('isolates','isolates')]),
+                        (l2source,l2inputnode,[('node_clique_number','node_clique_number')]),
+                        (l2source,l2inputnode,[('betweenness_centrality','betweenness_centrality')]),
+                        (l2source,l2inputnode,[('closeness_centrality','closeness_centrality')]),
+                        (l2source,l2inputnode,[('load_centrality','load_centrality')]),
+                        (l2source,l2inputnode,[('core_number','core_number')]),
+                        (l2source,l2inputnode,[('triangles','triangles')]),
+                    ])
+
+    l2pipeline.connect([(l2inputnode,MergeCNetworks,[('CFFfiles','in_files')])])
+    
+    l2pipeline.connect([(l2inputnode,MergeCSVFiles_degree,[('degree','in_files')])])
+    l2pipeline.connect([(l2inputnode,MergeCSVFiles_clustering,[('clustering','in_files')])])
+    l2pipeline.connect([(l2inputnode,MergeCSVFiles_isolates,[('isolates','in_files')])])
+    l2pipeline.connect([(l2inputnode,MergeCSVFiles_node_clique_number,[('node_clique_number','in_files')])])
+    l2pipeline.connect([(l2inputnode,MergeCSVFiles_betweenness_centrality,[('betweenness_centrality','in_files')])])
+    l2pipeline.connect([(l2inputnode,MergeCSVFiles_closeness_centrality,[('closeness_centrality','in_files')])])
+    l2pipeline.connect([(l2inputnode,MergeCSVFiles_load_centrality,[('load_centrality','in_files')])])
+    l2pipeline.connect([(l2inputnode,MergeCSVFiles_core_number,[('core_number','in_files')])])
+    l2pipeline.connect([(l2inputnode,MergeCSVFiles_triangles,[('triangles','in_files')])])
+    
+    l2pipeline.connect([(group_infosource,MergeCNetworks,[('group_id','out_file')])])
+    l2pipeline.connect([(MergeCNetworks, l2datasink, [('connectome_file', '@l2output')])])
+    l2pipeline.connect([(MergeCSVFiles_degree, l2datasink, [('csv_file', '@l2output.degree')])])
+    l2pipeline.connect([(MergeCSVFiles_clustering, l2datasink, [('csv_file', '@l2output.clustering')])])
+    l2pipeline.connect([(MergeCSVFiles_isolates, l2datasink, [('csv_file', '@l2output.isolates')])])
+    l2pipeline.connect([(MergeCSVFiles_node_clique_number, l2datasink, [('csv_file', '@l2output.node_clique_number')])])
+    l2pipeline.connect([(MergeCSVFiles_betweenness_centrality, l2datasink, [('csv_file', '@l2output.betweenness_centrality')])])
+    l2pipeline.connect([(MergeCSVFiles_closeness_centrality, l2datasink, [('csv_file', '@l2output.closeness_centrality')])])
+    l2pipeline.connect([(MergeCSVFiles_load_centrality, l2datasink, [('csv_file', '@l2output.load_centrality')])])
+    l2pipeline.connect([(MergeCSVFiles_core_number, l2datasink, [('csv_file', '@l2output.core_number')])])
+    l2pipeline.connect([(MergeCSVFiles_triangles, l2datasink, [('csv_file', '@l2output.triangles')])])
+    
+    l2pipeline.connect([(group_infosource, l2datasink,[('group_id','@group_id')])])
+    return l2pipeline

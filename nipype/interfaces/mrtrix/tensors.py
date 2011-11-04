@@ -1,4 +1,4 @@
-from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, BaseInterface, BaseInterfaceInputSpec, 
+from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, BaseInterface, BaseInterfaceInputSpec,
                                     traits, File, TraitedSpec, Directory, InputMultiPath, OutputMultiPath, isdefined)
 from nipype.utils.filemanip import split_filename
 import os, os.path as op
@@ -8,11 +8,11 @@ import nibabel as nb
 class DWI2SphericalHarmonicsImageInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='Diffusion-weighted images')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filename')
-    encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=1, 
-    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')	
+    encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=1,
+    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     maximum_harmonic_order = traits.Float(argstr='-lmax %s', desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
     normalise = traits.Bool(argstr='-normalise', position=3, desc="normalise the DW signal to the b=0 image")
-	
+
 class DWI2SphericalHarmonicsImageOutputSpec(TraitedSpec):
     spherical_harmonics_image = File(exists=True, desc='Spherical harmonics image')
 
@@ -22,16 +22,16 @@ class DWI2SphericalHarmonicsImage(CommandLine):
 
     This program outputs the spherical harmonic decomposition for the set measured signal attenuations.
     The signal attenuations are calculated by identifying the b-zero images from the diffusion encoding supplied
-    (i.e. those with zero as the b-value), and dividing the remaining signals by the mean b-zero signal intensity. 
+    (i.e. those with zero as the b-value), and dividing the remaining signals by the mean b-zero signal intensity.
     The spherical harmonic decomposition is then calculated by least-squares linear fitting.
-    Note that this program makes use of implied symmetries in the diffusion profile. 
+    Note that this program makes use of implied symmetries in the diffusion profile.
 
-    First, the fact the signal attenuation profile is real implies that it has conjugate symmetry, 
-    i.e. Y(l,-m) = Y(l,m)* (where * denotes the complex conjugate). Second, the diffusion profile should be 
-    antipodally symmetric (i.e. S(x) = S(-x)), implying that all odd l components should be zero. Therefore, 
+    First, the fact the signal attenuation profile is real implies that it has conjugate symmetry,
+    i.e. Y(l,-m) = Y(l,m)* (where * denotes the complex conjugate). Second, the diffusion profile should be
+    antipodally symmetric (i.e. S(x) = S(-x)), implying that all odd l components should be zero. Therefore,
     this program only computes the even elements.
 
-    Note that the spherical harmonics equations used here differ slightly from those conventionally used, 
+    Note that the spherical harmonics equations used here differ slightly from those conventionally used,
     in that the (-1)^m factor has been omitted. This should be taken into account in all subsequent calculations.
 
     Each volume in the output image corresponds to a different spherical harmonic component, according to the following convention:
@@ -71,29 +71,29 @@ class DWI2SphericalHarmonicsImage(CommandLine):
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + '_SH.mif'
-        
+
 class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3, desc='diffusion-weighted image')
-    response_file = File(exists=True, argstr='%s', mandatory=True, position=-2, 
+    response_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
     desc='the diffusion-weighted signal response function for a single fibre population (see EstimateResponse)')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filename')
     mask_image = File(exists=True, argstr='-mask %s', position=2, desc='only perform computation within the specified binary brain mask image')
-    encoding_file = File(exists=True, argstr='-grad %s', position=1, 
+    encoding_file = File(exists=True, argstr='-grad %s', position=1,
     desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     filter_file = File(exists=True, argstr='-filter %s', position=-2,
     desc='a text file containing the filtering coefficients for each even harmonic order.' \
     'the linear frequency filtering parameters used for the initial linear spherical deconvolution step (default = [ 1 1 1 0 0 ]).')
-    
+
     lambda_value = traits.Float(argstr='-lambda %s', desc='the regularisation parameter lambda that controls the strength of the constraint (default = 1.0).')
     maximum_harmonic_order = traits.Float(argstr='-lmax %s', desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
     threshold_value = traits.Float(argstr='-threshold %s', desc='the threshold below which the amplitude of the FOD is assumed to be zero, expressed as a fraction of the mean value of the initial FOD (default = 0.1)')
     iterations = traits.Int(argstr='-niter %s', desc='the maximum number of iterations to perform for each voxel (default = 50)')
-    
+
     directions_file = File(exists=True, argstr='-directions %s', position=-2,
     desc='a text file containing the [ el az ] pairs for the directions: Specify the directions over which to apply the non-negativity constraint (by default, the built-in 300 direction set is used)')
-	
+
     normalise = traits.Bool(argstr='-normalise', position=3, desc="normalise the DW signal to the b=0 image")
-	
+
 class ConstrainedSphericalDeconvolutionOutputSpec(TraitedSpec):
     spherical_harmonics_image = File(exists=True, desc='Spherical harmonics image')
 
@@ -102,12 +102,12 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     Perform non-negativity constrained spherical deconvolution.
 
     Note that this program makes use of implied symmetries in the diffusion profile.
-    First, the fact the signal attenuation profile is real implies that it has conjugate symmetry, 
-    i.e. Y(l,-m) = Y(l,m)* (where * denotes the complex conjugate). Second, the diffusion profile should be 
-    antipodally symmetric (i.e. S(x) = S(-x)), implying that all odd l components should be zero. 
+    First, the fact the signal attenuation profile is real implies that it has conjugate symmetry,
+    i.e. Y(l,-m) = Y(l,m)* (where * denotes the complex conjugate). Second, the diffusion profile should be
+    antipodally symmetric (i.e. S(x) = S(-x)), implying that all odd l components should be zero.
     Therefore, this program only computes the even elements. 	Note that the spherical harmonics equations used here
-    differ slightly from those conventionally used, in that the (-1)^m factor has been omitted. This should be taken 
-    into account in all subsequent calculations. Each volume in the output image corresponds to a different spherical 
+    differ slightly from those conventionally used, in that the (-1)^m factor has been omitted. This should be taken
+    into account in all subsequent calculations. Each volume in the output image corresponds to a different spherical
     harmonic component, according to the following convention:
 
     * [0] Y(0,0)
@@ -117,8 +117,8 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     * [4] Re {Y(2,1)}
     * [5] Re {Y(2,2)}
     * [6] Im {Y(4,4)}
-    * [7] Im {Y(4,3)} 
-	
+    * [7] Im {Y(4,3)}
+
     Example
     -------
 
@@ -146,25 +146,25 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + '_CSD.mif'
-        
+
 class EstimateResponseForSHInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3, desc='Diffusion-weighted images')
     mask_image = File(exists=True, mandatory=True, argstr='%s', position=-2, desc='only perform computation within the specified binary brain mask image')
-    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filename')    
-    encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=1, 
-    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')	
+    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filename')
+    encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=1,
+    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     maximum_harmonic_order = traits.Float(argstr='-lmax %s', desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
     normalise = traits.Bool(argstr='-normalise', desc='normalise the DW signal to the b=0 image')
     quiet = traits.Bool(argstr='-quiet', desc='Do not display information messages or progress status.')
     debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
-	
+
 class EstimateResponseForSHOutputSpec(TraitedSpec):
     response = File(exists=True, desc='Spherical harmonics image')
 
 class EstimateResponseForSH(CommandLine):
     """
     Estimates the fibre response function for use in spherical deconvolution.
-    
+
     Example
     -------
 
@@ -208,7 +208,7 @@ def concat_files(bvec_file, bval_file, invert_x, invert_y, invert_z):
         print 'Inverting b-vectors in the y direction'
     if invert_z:
         bvecs[2,:] = -bvecs[2,:]
-        print 'Inverting b-vectors in the z direction' 
+        print 'Inverting b-vectors in the z direction'
     print np.shape(bvecs)
     print np.shape(bvals)
     encoding = np.transpose(np.vstack((bvecs,bvals)))
@@ -232,11 +232,11 @@ class FSL2MRTrixOutputSpec(TraitedSpec):
 
 class FSL2MRTrix(BaseInterface):
     """
-    Converts separate b-values and b-vectors from text files (FSL style) into a 
+    Converts separate b-values and b-vectors from text files (FSL style) into a
     4xN text file in which each line is in the format [ X Y Z b ], where [ X Y Z ]
-    describe the direction of the applied gradient, and b gives the 
+    describe the direction of the applied gradient, and b gives the
     b-value in units (1000 s/mm^2).
-    
+
     Example
     -------
 
@@ -258,13 +258,13 @@ class FSL2MRTrix(BaseInterface):
         outputs = self.output_spec().get()
         outputs['encoding_file'] = op.abspath(self._gen_filename('out_encoding_file'))
         return outputs
-        
+
     def _gen_filename(self, name):
         if name is 'out_encoding_file':
             return self._gen_outfilename()
         else:
             return None
-            
+
     def _gen_outfilename(self):
         _, bvec , _ = split_filename(self.inputs.bvec_file)
         _, bval , _ = split_filename(self.inputs.bval_file)

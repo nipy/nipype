@@ -58,7 +58,7 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the image containing the source data.' \
     'The type of data required depends on the type of tracking as set in the preceeding argument. For DT methods, ' \
     'the base DWI are needed. For SD methods, the SH harmonic coefficients of the FOD are needed.')
-    
+
     seed_file = File(exists=True, argstr='-seed %s', mandatory=False, position=2, desc='seed file')
     seed_spec = traits.List(traits.Int, desc='seed specification in voxels and radius (x y z r)', position=2,
         argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='voxels')
@@ -74,12 +74,12 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
 
     inputmodel = traits.Enum('DT_STREAM', 'SD_PROB', 'SD_STREAM',
         argstr='%s', desc='input model type', usedefault=True, position=-3)
-        
+
     stop = traits.Bool(argstr='-gzip', desc="stop track as soon as it enters any of the include regions.")
     do_not_precompute = traits.Bool(argstr='-noprecomputed', desc="Turns off precomputation of the legendre polynomial values. Warning: this will slow down the algorithm by a factor of approximately 4.")
     unidirectional = traits.Bool(argstr='-unidirectional', desc="Track from the seed point in one direction only (default is to track in both directions).")
     no_mask_interpolation = traits.Bool(argstr='-nomaskinterp', desc="Turns off trilinear interpolation of mask images.")
-    
+
     step_size = traits.Float(argstr='-step %s', units='mm',
         desc="Set the step size of the algorithm in mm (default is 0.2).")
     minimum_radius_of_curvature = traits.Float(argstr='-curvature %s', units='mm',
@@ -113,7 +113,7 @@ class StreamlineTrack(CommandLine):
     Performs tractography using one of the following models:
     'dt_prob', 'dt_stream', 'sd_prob', 'sd_stream',
     Where 'dt' stands for diffusion tensor, 'sd' stands for spherical
-    deconvolution, and 'prob' stands for probabilistic. 
+    deconvolution, and 'prob' stands for probabilistic.
 
     Example
     -------
@@ -145,15 +145,15 @@ class StreamlineTrack(CommandLine):
         return name + '_tracked'
 
 class DiffusionTensorStreamlineTrackInputSpec(StreamlineTrackInputSpec):
-    gradient_encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=-2, 
-    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')	
+    gradient_encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=-2,
+    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
 
 class DiffusionTensorStreamlineTrack(StreamlineTrack):
     """
     Specialized interface to StreamlineTrack. This interface is used for
     streamline tracking from diffusion tensor data, and calls the MRtrix
     function 'streamtrack' with the option 'DT_STREAM'
-    
+
     Example
     -------
 
@@ -163,17 +163,17 @@ class DiffusionTensorStreamlineTrack(StreamlineTrack):
     >>> dtstrack.inputs.seed_file = 'seed_mask.nii'
     >>> dtstrack.run()                                  # doctest: +SKIP
     """
-    
+
     input_spec = DiffusionTensorStreamlineTrackInputSpec
-    
+
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "DT_STREAM"
         return super(DiffusionTensorStreamlineTrack, self).__init__(command, **inputs)
-        
+
 class ProbabilisticSphericallyDeconvolutedStreamlineTrackInputSpec(StreamlineTrackInputSpec):
     maximum_number_of_trials = traits.Int(argstr='-trials %s', units='mm',
         desc="Set the maximum number of sampling trials at each point (only used for probabilistic tracking).")
-        
+
 class ProbabilisticSphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
     """
     Performs probabilistic tracking using spherically deconvolved data
@@ -181,7 +181,7 @@ class ProbabilisticSphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
     Specialized interface to StreamlineTrack. This interface is used for
     probabilistic tracking from spherically deconvolved data, and calls
     the MRtrix function 'streamtrack' with the option 'SD_PROB'
-    
+
     Example
     -------
 
@@ -192,7 +192,7 @@ class ProbabilisticSphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
     >>> sdprobtrack.run()                                                       # doctest: +SKIP
     """
     input_spec = ProbabilisticSphericallyDeconvolutedStreamlineTrackInputSpec
-    
+
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "SD_PROB"
         return super(ProbabilisticSphericallyDeconvolutedStreamlineTrack, self).__init__(command, **inputs)
@@ -204,7 +204,7 @@ class SphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
     Specialized interface to StreamlineTrack. This interface is used for
     streamline tracking from spherically deconvolved data, and calls
     the MRtrix function 'streamtrack' with the option 'SD_STREAM'
-    
+
     Example
     -------
 
@@ -215,7 +215,7 @@ class SphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
     >>> sdtrack.run()                                          # doctest: +SKIP
     """
     input_spec = StreamlineTrackInputSpec
-    
+
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "SD_STREAM"
         return super(SphericallyDeconvolutedStreamlineTrack, self).__init__(command, **inputs)
