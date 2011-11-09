@@ -23,6 +23,7 @@ log_size = 16384000
 log_rotate = 4
 
 [execution]
+create_report = true
 plugin = Linear
 stop_on_first_crash = false
 stop_on_first_rerun = false
