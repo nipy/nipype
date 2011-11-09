@@ -461,6 +461,19 @@ class RegionalValuesOutputSpec(TraitedSpec):
     networks = OutputMultiPath(File(desc='Output gpickled network files for all statistical measures'))
 
 class RegionalValues(BaseInterface):
+    """
+    Extracts the regional mean, max, min, and standard deviation for a functional image given a segmentated image.
+    Output is saved in a MATLAB file, and if a network resolution file is provided (e.g. resolution1015.graphml), the regions are output as nodes in a NetworkX graph.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.cmtk as cmtk
+    >>> regval = cmtk.RegionalValues()
+    >>> regval.inputs.in_file = 'pet_resliced.nii'
+    >>> regval.inputs.segmentation_file = 'ROI_scale500.nii.gz'
+    >>> regval.run() # doctest: +SKIP
+    """
     input_spec = RegionalValuesInputSpec
     output_spec = RegionalValuesOutputSpec
 
