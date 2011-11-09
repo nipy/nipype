@@ -30,7 +30,7 @@ def create_connectivity_pipeline(name="connectivity"):
     >>> subjects_dir = example_data('subjects')
     >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
     >>> conmapper = mrwork.create_connectivity_pipeline("nipype_conmap")
-    >>> conmapper.inputs.inputnode.subjects_dir = subjects_dir
+    >>> conmapper.inputs.inputnode.subjects_dir = subjects_dir # doctest: +SKIP
     >>> conmapper.inputs.inputnode.subject_id = 'subj1'
     >>> conmapper.inputs.inputnode.dwi = os.path.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
     >>> conmapper.inputs.inputnode.bvecs = os.path.abspath('fsl_course_data/fdt/subj1/bvecs')

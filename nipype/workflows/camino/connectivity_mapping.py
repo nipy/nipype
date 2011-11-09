@@ -51,10 +51,10 @@ def create_connectivity_pipeline(name="connectivity"):
     >>> import os.path as op
     >>> import nipype.interfaces.freesurfer as fs
     >>> from nipype.workflows.camino.connectivity_mapping import create_connectivity_pipeline
-    >>> subjects_dir = op.abspath('freesurfer')
+    >>> subjects_dir = op.abspath('freesurfer') 
     >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
     >>> conmapper = create_connectivity_pipeline("nipype_conmap")
-    >>> conmapper.inputs.inputnode.subjects_dir = subjects_dir
+    >>> conmapper.inputs.inputnode.subjects_dir = subjects_dir # doctest: +SKIP
     >>> conmapper.inputs.inputnode.subject_id = 'subj1'
     >>> conmapper.inputs.inputnode.dwi = op.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
     >>> conmapper.inputs.inputnode.bvecs = op.abspath('fsl_course_data/fdt/subj1/bvecs')

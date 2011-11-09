@@ -99,7 +99,7 @@ def create_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir
     >>> subjects_dir = op.abspath('freesurfer')
     >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
     >>> cff = cmonwk.create_connectivity_pipeline("mrtrix_cmtk")
-    >>> cff.inputs.inputnode.subjects_dir = subjects_dir
+    >>> cff.inputs.inputnode.subjects_dir = subjects_dir # doctest: +SKIP
     >>> cff.inputs.inputnode.subject_id = 'subj1'
     >>> cff.inputs.inputnode.dwi = op.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
     >>> cff.inputs.inputnode.bvecs = op.abspath('fsl_course_data/fdt/subj1/bvecs')
