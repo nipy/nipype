@@ -527,8 +527,8 @@ class Matlab2CSV(BaseInterface):
     Example
     -------
     
-    >>> import nipype.interfaces.R as R
-    >>> mat2csv = R.Matlab2CSV()
+    >>> import nipype.algorithms.misc as misc
+    >>> mat2csv = misc.Matlab2CSV()
     >>> mat2csv.inputs.in_file = 'cmatrix.mat'
     >>> mat2csv.run() # doctest: +SKIP
     """
@@ -586,16 +586,29 @@ class Matlab2CSV(BaseInterface):
         return outputs
 
 def merge_csvs(in_list):
-    for idx, in_file in enumerate(in_list):
-        in_array = np.loadtxt(in_file, delimiter=',')
-        if idx == 0:
-            out_array = in_array
-        else:
-            out_array = np.dstack((out_array, in_array))
-    out_array = np.squeeze(out_array)
-    print 'Final output array shape:'
-    print np.shape(out_array)
-    return out_array
+	for idx, in_file in enumerate(in_list):
+		try:
+			in_array = np.loadtxt(in_file, delimiter=',')
+		except ValueError, ex:
+			try:
+				in_array = np.loadtxt(in_file, delimiter=',', skiprows=1)	
+			except ValueError, ex:
+				first = open(in_file, 'r')
+				header_line = first.readline()
+				header_list = header_line.split(',')
+				n_cols = len(header_list)
+				try:
+					in_array = np.loadtxt(in_file, delimiter=',', skiprows=1, usecols=range(1,n_cols))
+				except ValueError, ex:
+					in_array = np.loadtxt(in_file, delimiter=',', skiprows=1, usecols=range(1,n_cols-1))
+		if idx == 0:
+			out_array = in_array
+		else:
+			out_array = np.dstack((out_array, in_array))
+	out_array = np.squeeze(out_array)
+	print 'Final output array shape:'
+	print np.shape(out_array)
+	return out_array
     
 def remove_identical_paths(in_files):
     import os.path as op
@@ -669,8 +682,8 @@ class MergeCSVFiles(BaseInterface):
     Example
     -------
     
-    >>> import nipype.interfaces.R as R
-    >>> mat2csv = R.MergeCSVFiles()
+    >>> import nipype.algorithms.misc as misc
+    >>> mat2csv = misc.MergeCSVFiles()
     >>> mat2csv.inputs.in_file = ['degree.mat','clustering.mat']
     >>> mat2csv.inputs.column_headings = ['degree','clustering']
     >>> mat2csv.run() # doctest: +SKIP
@@ -706,11 +719,11 @@ class MergeCSVFiles(BaseInterface):
         
         if isdefined(self.inputs.row_headings):
             print 'Row headings have been provided. Adding "labels" column header.'
-            csv_headings = '"labels","' + '","'.join(itertools.chain(headings)) + '"\n'
+            csv_headings = '"labels","' + '","'.join(itertools.chain(headings)) + '"'
             rowheadingsBool = True
         else:
             print 'Row headings have not been provided.'
-            csv_headings = '"' + '","'.join(itertools.chain(headings)) + '"\n'
+            csv_headings = '"' + '","'.join(itertools.chain(headings)) + '"'
         
         print 'Final Headings:'
         print csv_headings
@@ -753,6 +766,59 @@ class MergeCSVFiles(BaseInterface):
         np.savetxt(file_handle, output, fmt, delimiter=',')
         file_handle.close()
         return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        _, name, ext = split_filename(self.inputs.out_file)
+        if not ext == '.csv':
+            ext = '.csv'
+        out_file = op.abspath(name + ext)
+        outputs['csv_file'] = out_file
+        return outputs
+
+class AddCSVColumnInputSpec(TraitedSpec):
+    in_file = File(exists=True, mandatory=True, desc='Input comma-separated value (CSV) files')
+    out_file = File('extra_heading.csv', usedefault=True, desc='Output filename for merged CSV file')
+    extra_column_heading = traits.Str(desc='New heading to add for the added field.')
+    extra_field = traits.Str(desc='New field to add to each row. This is useful for saving the group or subject ID in the file.')
+    
+class AddCSVColumnOutputSpec(TraitedSpec):
+    csv_file = File(desc='Output CSV file containing columns ')
+
+class AddCSVColumn(BaseInterface):
+    """
+    Short interface to add an extra column and field to a text file
+        
+    Example
+    -------
+    
+    >>> import nipype.algorithms.misc as misc
+    >>> addcol = misc.AddCSVColumn()
+    >>> addcol.inputs.in_file = 'degree.csv'
+    >>> addcol.inputs.extra_column_heading = 'group'
+    >>> addcol.inputs.extra_field = 'male'
+    >>> addcol.run() # doctest: +SKIP
+    """
+    input_spec = AddCSVColumnInputSpec
+    output_spec = AddCSVColumnOutputSpec
+
+    def _run_interface(self, runtime):
+		in_file = open(self.inputs.in_file, 'r')
+		_, name, ext = split_filename(self.inputs.out_file)
+		if not ext == '.csv':
+			ext = '.csv'
+		out_file = op.abspath(name + ext)
+
+		out_file = open(out_file, 'w')
+		firstline = in_file.readline()
+		firstline = firstline.replace('\n','')
+		new_firstline = firstline + ',"' + self.inputs.extra_column_heading + '"\n'
+		out_file.write(new_firstline)
+		for line in in_file:
+			new_line = line.replace('\n','')
+			new_line = new_line + ',' + self.inputs.extra_field + '\n'
+			out_file.write(new_line)
+		return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
