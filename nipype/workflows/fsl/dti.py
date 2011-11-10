@@ -194,7 +194,7 @@ def create_eddy_correct_pipeline(name="eddy_correct"):
 
     pipeline = pe.Workflow(name=name)
 
-    split = pe.Node(fsl.Split(), name="split")
+    split = pe.Node(fsl.Split(dimension='t'), name="split")
     pipeline.connect([(inputnode, split, [("in_file", "in_file")])])
 
     pick_ref = pe.Node(util.Select(), name="pick_ref")
