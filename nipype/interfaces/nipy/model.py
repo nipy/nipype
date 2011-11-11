@@ -117,6 +117,8 @@ class FitGLM(BaseInterface):
             conditions += [cond['name']]*len(cond['onset'])
             if len(cond['duration']) == 1:
                 duration += cond['duration']*len(cond['onset'])
+            else:
+                duration += cond['duration']
 
 
         paradigm =  BlockParadigm(con_id=conditions, onset=onsets, duration=duration)
