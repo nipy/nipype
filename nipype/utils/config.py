@@ -23,17 +23,18 @@ log_size = 16384000
 log_rotate = 4
 
 [execution]
-plugin = Linear
-stop_on_first_crash = false
-stop_on_first_rerun = false
-keep_inputs = false
+crashdump_dir = %s
 hash_method = timestamp
-single_thread_matlab = true
+keep_inputs = false
+matplotlib_backend = Agg
+plugin = Linear
 remove_node_directories = false
 remove_unnecessary_outputs = true
+single_thread_matlab = true
+stop_on_first_crash = false
+stop_on_first_rerun = false
 use_relative_paths = false
-matplotlib_backend = Agg
-"""%(homedir))
+""" % (homedir, os.getcwd()))
 
 class NipypeConfig(ConfigParser.ConfigParser):
     """Base nipype config class

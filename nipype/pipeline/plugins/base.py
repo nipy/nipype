@@ -13,6 +13,7 @@ from socket import gethostname
 import sys
 from time import strftime, sleep
 from traceback import format_exception
+from warnings import warn
 
 import numpy as np
 import scipy.sparse as ssp
@@ -53,13 +54,12 @@ def report_crash(node, traceback=None):
     crashfile = 'crash-%s-%s-%s.npz' % (timeofcrash,
                                         login_name,
                                         name)
-    if hasattr(node, 'config') and ('crashdump_dir' in node.config.keys()):
-        if not os.path.exists(node.config['crashdump_dir']):
-            os.makedirs(node.config['crashdump_dir'])
-        crashfile = os.path.join(node.config['crashdump_dir'],
-                                 crashfile)
-    else:
-        crashfile = os.path.join(os.getcwd(), crashfile)
+    crashdir = node.config['execution']['crashdump_dir']
+    if crashdir is None:
+        crashdir=os.getcwd()
+    if not os.path.exists(crashdir):
+        os.makedirs(crashdir)
+    crashfile = os.path.join(crashdir, crashfile)
     logger.info('Saving crash info to %s' % crashfile)
     logger.info(''.join(traceback))
     np.savez(crashfile, node=node, traceback=traceback)
