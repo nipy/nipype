@@ -464,7 +464,8 @@ connected.
             if isinstance(node, MapNode):
                 node.use_plugin = (plugin, plugin_args)
         self._configure_exec_nodes(execgraph)
-        self._write_report_info(self.base_dir, self.name, execgraph)
+        if not str2bool(self.config['execution']['create_report']):
+            self._write_report_info(self.base_dir, self.name, execgraph)
         runner.run(execgraph, updatehash=updatehash, config=self.config)
         return execgraph
 
@@ -1374,6 +1375,8 @@ class Node(WorkflowBase):
         self.inputs.update(**opts)
 
     def write_report(self, report_type=None, cwd=None):
+        if not str2bool(self.config['execution']['create_report']):
+            return
         report_dir = os.path.join(cwd, '_report')
         report_file = os.path.join(report_dir, 'report.rst')
         if not os.path.exists(report_dir):
@@ -1585,6 +1588,8 @@ class MapNode(Node):
                                                                 '\n'.join(msg)))
 
     def write_report(self, report_type=None, cwd=None):
+        if not str2bool(self.config['execution']['create_report']):
+            return
         if report_type == 'preexec':
             super(MapNode, self).write_report(report_type=report_type, cwd=cwd)
         if report_type == 'postexec':

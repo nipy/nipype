@@ -139,7 +139,7 @@ def str2bool(v):
     lower = v.lower()
     if lower in ("yes", "true", "t", "1"):
         return True
-    elif lower in ("no", "false", "n", "0"):
+    elif lower in ("no", "false", "n", "f", "0"):
         return False
     else:
         raise ValueError("%s cannot be converted to bool"%v)
