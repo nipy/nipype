@@ -719,11 +719,11 @@ class MergeCSVFiles(BaseInterface):
         
         if isdefined(self.inputs.row_headings):
             print 'Row headings have been provided. Adding "labels" column header.'
-            csv_headings = '"labels","' + '","'.join(itertools.chain(headings)) + '"'
+            csv_headings = '"labels","' + '","'.join(itertools.chain(headings)) + '"\n'
             rowheadingsBool = True
         else:
             print 'Row headings have not been provided.'
-            csv_headings = '"' + '","'.join(itertools.chain(headings)) + '"'
+            csv_headings = '"' + '","'.join(itertools.chain(headings)) + '"\n'
         
         print 'Final Headings:'
         print csv_headings

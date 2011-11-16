@@ -473,35 +473,40 @@ def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir
     l2pipeline.connect([(MergeCSVFiles_core_number, l2datasink, [('csv_file', '@l2output.core_number')])])
     l2pipeline.connect([(MergeCSVFiles_triangles, l2datasink, [('csv_file', '@l2output.triangles')])])
 
+    AddCSVColumn_metrics = pe.Node(interface=misc.AddCSVColumn(), name="AddCSVColumn_metrics")
+    AddCSVColumn_metrics.inputs.extra_column_heading = 'group'
+    AddCSVColumn_matrices = AddCSVColumn_metrics.clone(name="AddCSVColumn_matrices")
 
-    AddCSVColumn = pe.Node(interface=misc.AddCSVColumn(), name="AddCSVColumn")
-    AddCSVColumn.inputs.extra_column_heading = 'group'
-   
-    l2pipeline.connect([(l2inputnode, AddCSVColumn,[(('merged', concatcsv), 'in_file')])])
-    l2pipeline.connect([(group_infosource, AddCSVColumn,[('group_id','extra_field')])])
-    l2pipeline.connect([(AddCSVColumn, l2datasink,[('csv_file','@l2output.csv')])])
+    l2pipeline.connect([(l2inputnode, AddCSVColumn_metrics,[(('merged', concatcsv), 'in_file')])])
+    l2pipeline.connect([(group_infosource, AddCSVColumn_metrics,[('group_id','extra_field')])])
+    l2pipeline.connect([(AddCSVColumn_metrics, l2datasink,[('csv_file','@l2output.csv')])])
     l2pipeline.connect([(group_infosource, l2datasink,[('group_id','@group_id')])])
+
+    l2pipeline.connect([(l2inputnode, AddCSVColumn_matrices,[(('merged', concatcsv), 'in_file')])])
+    l2pipeline.connect([(group_infosource, AddCSVColumn_matrices,[('group_id','extra_field')])])
+    l2pipeline.connect([(AddCSVColumn_matrices, l2datasink,[('csv_file','@l2output.cmatrices_csv')])])
     return l2pipeline
 	
 def concatcsv(in_files):
-	import os.path as op
-	print in_files
-	print type(in_files)
-	print in_files[0]
-	if not isinstance(in_files,list):
-		return in_files
-	first = open(in_files[0], 'r')
-	out_name = op.abspath('concat.csv')
-	out_file = open(out_name, 'w')
-	out_file.write(first.readline())
-	for in_file in in_files:
-		file_to_read = open(in_file, 'r')
-		scrap_first_line = file_to_read.readline()
-		print scrap_first_line
-		for line in file_to_read:
-			out_file.write(line)
-	print out_name
-	return out_name
+    import os.path as op
+    print in_files
+    print type(in_files)
+    print in_files[0]
+    if not isinstance(in_files,list):
+        return in_files
+    first = open(in_files[0], 'r')
+    out_name = op.abspath('concat.csv')
+    out_file = open(out_name, 'w')
+    out_file.write(first.readline())
+    first.close()
+    for in_file in in_files:
+        file_to_read = open(in_file, 'r')
+        scrap_first_line = file_to_read.readline()
+        print scrap_first_line
+        for line in file_to_read:
+            out_file.write(line)
+    print out_name
+    return out_name
     
 def create_group_cff_pipeline_part3_with_CSVstats(group_list, data_dir ,subjects_dir, output_dir, title='group'):
     """
@@ -510,13 +515,13 @@ def create_group_cff_pipeline_part3_with_CSVstats(group_list, data_dir ,subjects
     l3infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id']), name='l3infosource')
     l3infosource.inputs.group_id = group_list.keys()
     
-    l3source = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=['CFFfiles', 'CSVfiles']), name='l3source')
-    l3source.inputs.template_args = dict(CFFfiles=[['group_id']], CSVfiles=[['group_id']])
+    l3source = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=['CFFfiles', 'CSVmetrics', 'CSVmatrices']), name='l3source')
+    l3source.inputs.template_args = dict(CFFfiles=[['group_id']], CSVmetrics=[['group_id']], CSVmatrices=[['group_id']])
     l3source.inputs.template=op.join(output_dir,'%s/%s')
     
-    l3source.inputs.field_template=dict(CFFfiles=op.join(output_dir,'%s/*.cff'), CSVfiles=op.join(output_dir,'%s/csv/*.csv'))
+    l3source.inputs.field_template=dict(CFFfiles=op.join(output_dir,'%s/*.cff'), CSVmetrics=op.join(output_dir,'%s/csv/*.csv'), CSVmatrices=op.join(output_dir,'%s/cmatrices_csv/*/*.csv'))
     
-    l3inputnode = pe.Node(interface=util.IdentityInterface(fields=['Group_CFFs', 'Group_CSVs']), name='l3inputnode')
+    l3inputnode = pe.Node(interface=util.IdentityInterface(fields=['Group_CFFs', 'Group_CSVmetrics', 'Group_CSVmatrices']), name='l3inputnode')
     
     MergeCNetworks_grp = pe.Node(interface=cmtk.MergeCNetworks(), name="MergeCNetworks_grp")
     MergeCNetworks_grp.inputs.out_file = title
@@ -529,10 +534,12 @@ def create_group_cff_pipeline_part3_with_CSVstats(group_list, data_dir ,subjects
     l3pipeline.connect([
                         (l3infosource,l3source,[('group_id', 'group_id')]),
                         (l3source,l3inputnode,[('CFFfiles','Group_CFFs')]),
-                        (l3source,l3inputnode,[('CSVfiles','Group_CSVs')]),
+                        (l3source,l3inputnode,[('CSVmetrics','Group_CSVmetrics')]),
+                        (l3source,l3inputnode,[('CSVmatrices','Group_CSVmatrices')]),
                     ])
 
     l3pipeline.connect([(l3inputnode,MergeCNetworks_grp,[('Group_CFFs','in_files')])])    
     l3pipeline.connect([(MergeCNetworks_grp, l3datasink, [('connectome_file', '@l3output')])])
-    l3pipeline.connect([(l3inputnode, l3datasink,[(('Group_CSVs', concatcsv), '@l3output.csv')])])
+    l3pipeline.connect([(l3inputnode, l3datasink,[(('Group_CSVmetrics', concatcsv), '@l3output.csvmetrics')])])
+    l3pipeline.connect([(l3inputnode, l3datasink,[(('Group_CSVmatrices', concatcsv), '@l3output.csvmatrices')])])
     return l3pipeline
