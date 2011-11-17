@@ -146,6 +146,8 @@ def analyze_openfmri_dataset(data_dir, work_dir=None):
     wf.connect(infosource, 'subject_id', subjinfo, 'subject_id')
     wf.connect(infosource, 'subject_id', datasource, 'subject_id')
     wf.connect(subjinfo, 'run_id', datasource, 'run_id')
+    wf.connect([(datasource, preproc, [('bold', 'inputspec.func')]),
+                ])
 
     def get_highpass(TR, hpcutoff):
         return hpcutoff / (2 * TR)
@@ -235,8 +237,39 @@ def analyze_openfmri_dataset(data_dir, work_dir=None):
                                         'l2model.num_copes'),
                                        ])
                 ])
-    wf.connect([(datasource, preproc, [('bold', 'inputspec.func')]),
-                ])
+
+    """
+    Connect to a datasink
+    """
+
+    def get_subs(subject_id, n_conds):
+        subs = [('_subject_id_%s/' % subject_id, '')]
+        for i in range(n_conds):
+            subs.append(('_flameo%d/cope1.' % i, 'cope%02d.' % (i + 1)))
+            subs.append(('_flameo%d/varcope1.' % i, 'varcope%02d.' % (i + 1)))
+            subs.append(('_flameo%d/zstat1.' % i, 'zstat%02d.' % (i + 1)))
+            subs.append(('_flameo%d/tstat1.' % i, 'tstat%02d.' % (i + 1)))
+            subs.append(('_flameo%d/res4d.' % i, 'res4d%02d.' % (i + 1)))
+        return subs
+
+    subsgen = pe.Node(niu.Function(input_names=['subject_id', 'n_conds'],
+                                   output_names=['substitutions'],
+                                   function=get_subs),
+                      name='subsgen')
+
+    datasink = pe.Node(interface=nio.DataSink(),
+                       name="datasink")
+    wf.connect(infosource, 'subject_id', datasink, 'container')
+    wf.connect(infosource, 'subject_id', subsgen, 'subject_id')
+    wf.connect(subjinfo, 'n_conds', subsgen, 'n_conds')
+    wf.connect(subsgen, 'substitutions', datasink, 'substitutions')
+    wf.connect([(fixed_fx.get_node('outputspec'), datasink,
+                                 [('res4d', 'res4d'),
+                                  ('copes', 'copes'),
+                                  ('varcopes', 'varcopes'),
+                                  ('zstats', 'zstats'),
+                                  ('tstats', 'tstats')])
+                                 ])
 
     """
     Set processing parameters
@@ -254,9 +287,11 @@ def analyze_openfmri_dataset(data_dir, work_dir=None):
     if work_dir is None:
         work_dir = os.path.join(os.getcwd(), 'working')
     wf.base_dir = work_dir
-    wf.config['execution'] = dict(crashdump_dir=os.path.join(workdir,
+    datasink.inputs.base_directory = os.path.join(work_dir, 'output')
+    wf.config['execution'] = dict(crashdump_dir=os.path.join(work_dir,
                                                              'crashdumps'),
                                   stop_on_first_crash=True)
+    wf.run()  #'MultiProc', plugin_args={'n_procs': 2})
 
 if __name__ == '__main__':
     data_dir = '/software/temp/openfmri/ds107'
