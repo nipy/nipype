@@ -455,8 +455,8 @@ connected.
                 runner = getattr(sys.modules[name], '%sPlugin'%plugin)(plugin_args=plugin_args)
         flatgraph = self._create_flat_graph()
         if 'crashdump_dir' in self.config:
-            warnings.warn(("Deprecated: workflow.config['crashdump_dir']\n"
-                           "Please use config['execution']['crashdump_dir']"))
+            warn(("Deprecated: workflow.config['crashdump_dir']\n"
+                  "Please use config['execution']['crashdump_dir']"))
             self.config['execution']['crashdump_dir'] = self.config['crashdump_dir']
             del self.config['crashdump_dir']
         self.config = merge_dict(deepcopy(config._sections), self.config)
