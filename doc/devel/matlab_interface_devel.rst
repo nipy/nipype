@@ -40,7 +40,8 @@ code template, and define approriate inputs and outputs.
 	        # as a commandline argument to the matlab executable (without creating any files).
 	        # This, however, is less reliable and harder to debug (code will be reduced to
 	        # a single line and stripped of any comments).
-	        result = MatlabCommand(script=script, mfile=True)    
+	        mlab = MatlabCommand(script=script, mfile=True)
+					result = mlab.run()
 	        return result.runtime
 	
 	    def _list_outputs(self): 
