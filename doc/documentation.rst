@@ -18,6 +18,7 @@ Contents:
 
    users/index
    interfaces/index
+   api/index
    devel/index
    changes
 
