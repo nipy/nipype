@@ -328,11 +328,12 @@ class SpecifyModel(BaseInterface):
                 for f in filename_to_list(sessinfo[i]['scans']):
                     numscans += load(f).get_shape()[3]
                 for j, scanno in enumerate(out):
-                    colidx = len(sessinfo[i]['regress'])
-                    sessinfo[i]['regress'].insert(colidx, dict(name='', val=[]))
-                    sessinfo[i]['regress'][colidx]['name'] = 'Outlier%d'%(j+1)
-                    sessinfo[i]['regress'][colidx]['val']  = np.zeros((1, numscans))[0].tolist()
-                    sessinfo[i]['regress'][colidx]['val'][int(scanno)] = 1
+                    if scanno < numscans:
+                        colidx = len(sessinfo[i]['regress'])
+                        sessinfo[i]['regress'].insert(colidx, dict(name='', val=[]))
+                        sessinfo[i]['regress'][colidx]['name'] = 'Outlier%d'%(j+1)
+                        sessinfo[i]['regress'][colidx]['val']  = np.zeros((1, numscans))[0].tolist()
+                        sessinfo[i]['regress'][colidx]['val'][int(scanno)] = 1
         return sessinfo
 
     def _generate_design(self, infolist=None):
