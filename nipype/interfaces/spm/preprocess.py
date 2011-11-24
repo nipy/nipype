@@ -612,6 +612,8 @@ class NewSegmentOutputSpec(TraitedSpec):
     transformation_mat = OutputMultiPath(File(exists=True), desc='Normalization transformation')
     bias_corrected_images = OutputMultiPath(File(exists=True), desc='bias corrected images')
     bias_field_images = OutputMultiPath(File(exists=True), desc='bias field images')
+    forward_deformation_field = OutputMultiPath(File(exists=True))
+    inverse_deformation_field = OutputMultiPath(File(exists=True))
 
 class NewSegment(SPMCommand):
     """Use spm_preproc8 (New Segment) to separate structural images into different
@@ -673,6 +675,10 @@ class NewSegment(SPMCommand):
                 new_tissue['warped'] = [int(tissue[3][0]), int(tissue[3][1])]
                 new_tissues.append(new_tissue)
             return new_tissues
+        elif opt == 'write_deformation_fields':
+            return super(NewSegment, self)._format_arg(opt, spec, [int(val[0]), int(val[0])])
+        else:
+            return super(NewSegment, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -683,6 +689,8 @@ class NewSegment(SPMCommand):
         outputs['transformation_mat'] = []
         outputs['bias_corrected_images'] = []
         outputs['bias_field_images'] = []
+        outputs['inverse_deformation_field'] = []
+        outputs['forward_deformation_field'] = []
 
         n_classes = 5
         if isdefined(self.inputs.tissues):
@@ -709,6 +717,13 @@ class NewSegment(SPMCommand):
                 for i in range(n_classes):
                     outputs['native_class_images'][i].append(os.path.join(pth,"c%d%s%s"%(i+1, base, ext)))
             outputs['transformation_mat'].append(os.path.join(pth, "%s_seg8.mat" % base))
+            
+            if isdefined(self.inputs.write_deformation_fields):
+                if self.inputs.write_deformation_fields[0]:
+                    outputs['inverse_deformation_field'].append(os.path.join(pth, "iy_%s.nii" % base))
+                if self.inputs.write_deformation_fields[1]:
+                    outputs['forward_deformation_field'].append(os.path.join(pth, "y_%s.nii" % base))
+                    
             if isdefined(self.inputs.channel_info):
                 if self.inputs.channel_info[2][0]:
                     outputs['bias_corrected_images'].append(os.path.join(pth, "m%s%s" % (base, ext)))
@@ -948,7 +963,7 @@ class DARTELNorm2MNI(SPMCommand):
         prefix = "w"
         if isdefined(self.inputs.modulate) and self.inputs.modulate:
             prefix = 'm' + prefix
-        if isdefined(self.inputs.fwhm) and self.inputs.fwhm > 0:
+        if not isdefined(self.inputs.fwhm) or self.inputs.fwhm > 0:
             prefix = 's' + prefix
         for filename in self.inputs.apply_to_files:
             pth, base, ext = split_filename(filename)
@@ -1020,5 +1035,42 @@ class CreateWarped(SPMCommand):
             outputs['warped_files'].append(os.path.realpath('w%s%s'%(base,
                                                             ext)))
         return outputs
+    
+class ApplyDeformationFieldInputSpec(SPMCommandInputSpec):
+    in_files = InputMultiPath(File(exists=True), mandatory=True, field='fnames')
+    deformation_field = File(exists=True, mandatory=True, field='comp{1}.def' )
+    reference_volume = File(exists=True, mandatory=True, field='comp{2}.id.space')
+    interp = traits.Range(low=0, high=7, field='interp',
+                          desc='degree of b-spline used for interpolation')
 
+class ApplyDeformationFieldOutputSpec(TraitedSpec):
+    out_files = OutputMultiPath(File(exists=True))
 
+class ApplyDeformations(SPMCommand):
+    input_spec = ApplyDeformationFieldInputSpec
+    output_spec = ApplyDeformationFieldOutputSpec
+    
+    _jobtype = 'util'
+    _jobname = 'defs'
+    
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt in ['deformation_field', 'reference_volume']:
+            val = [val]
+
+        if opt in ['deformation_field']:
+            return scans_for_fnames(val, keep4d=True, separate_sessions=False)
+        if opt in ['in_files', 'reference_volume']:
+            return scans_for_fnames(val, keep4d=False, separate_sessions=False)
+        
+        else:
+            return super(ApplyDeformations, self)._format_arg(opt, spec, val)
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_files'] = []
+        for filename in self.inputs.in_files:
+            _, fname = os.path.split(filename)
+            outputs['out_files'].append(os.path.realpath('w%s'%fname))
+        return outputs
