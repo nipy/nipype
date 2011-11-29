@@ -5,8 +5,16 @@ import numpy as np
 import nibabel as nb
 import networkx as nx
 import shutil
-from cmp.util import runCmd
-import cmp
+from nipype.utils.misc import package_check
+import warnings
+
+try:
+    package_check('cmp')
+except Exception, e:
+    warnings.warn('cmp not installed')
+else:
+    import cmp
+    from cmp.util import runCmd
 
 def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
     print "Create the cortical labels necessary for our ROIs"

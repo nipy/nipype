@@ -9,7 +9,14 @@ import nipype.algorithms.misc as misc
 import inspect
 import nibabel as nb
 import os, os.path as op
-import cmp                                    # connectome mapper
+from nipype.utils.misc import package_check
+import warnings
+try:
+    package_check('cmp')
+except Exception, e:
+    warnings.warn('cmp not installed')
+else:
+    import cmp
 from nipype.workflows.mrtrix.connectivity_mapping import create_connectivity_pipeline
 from nipype.workflows.camino.connectivity_mapping import (get_vox_dims, get_data_dims,
  get_affine, select_aparc, select_aparc_annot)
