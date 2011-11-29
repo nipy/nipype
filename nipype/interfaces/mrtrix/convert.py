@@ -7,7 +7,7 @@ import os, os.path as op
 from string import Template
 import nibabel as nb
 import nipype
-from nipype.workflows.camino.connectivity_mapping import get_data_dims, get_vox_dims
+from nipype.workflows.utils import get_data_dims, get_vox_dims
 
 def get_origin(volume):
     import nibabel as nb
