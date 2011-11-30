@@ -5,14 +5,23 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.camino as camino
-import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
+import nipype.interfaces.cmtk as cmtk
 import inspect
 import nibabel as nb
 import os, os.path as op                      # system functions
-import cmp                                    # connectome mapper
 from nipype.workflows.camino.connectivity_mapping import (select_aparc_annot, get_first_image, get_vox_dims, get_data_dims, get_affine)
 from nipype.workflows.camino.group_connectivity import pullnodeIDs
+
+from nipype.utils.misc import package_check
+import warnings
+
+try:
+    package_check('cmp')
+except Exception, e:
+    warnings.warn('cmp not installed')
+else:
+    import cmp
 
 def create_connectivity_pipeline(name="connectivity"):
     """Creates a pipeline that does the same connectivity processing as in the
@@ -69,6 +78,7 @@ def create_connectivity_pipeline(name="connectivity"):
         outputnode.mean_fiber_length
         outputnode.fiber_length_std
     """
+    
     inputnode_within = pe.Node(interface=util.IdentityInterface(fields=["subject_id","dwi", "bvecs", "bvals", "subjects_dir"]), name="inputnode_within")
     
     FreeSurferSource = pe.Node(interface=nio.FreeSurferSource(), name='fssource')

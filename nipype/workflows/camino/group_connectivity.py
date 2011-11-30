@@ -13,7 +13,16 @@ import nibabel as nb
 import numpy as np
 import networkx as nx
 import os, os.path as op                      # system functions
-import cmp                                    # connectome mapper
+from nipype.utils.misc import package_check
+import warnings
+
+try:
+    package_check('cmp')
+except Exception, e:
+    warnings.warn('cmp not installed')
+else:
+    import cmp
+    
 from nipype.interfaces.cmtk.nx import read_unknown_ntwk
 
 def get_vox_dims(volume):

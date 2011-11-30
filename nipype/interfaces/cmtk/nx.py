@@ -7,7 +7,15 @@ import numpy as np
 import networkx as nx
 import scipy.io as sio
 import pickle
-import cmp
+from nipype.utils.misc import package_check
+import warnings
+
+try:
+    package_check('cmp')
+except Exception, e:
+    warnings.warn('cmp not installed')
+else:
+    import cmp
 
 def get_data_dims(volume):
     import nibabel as nb
