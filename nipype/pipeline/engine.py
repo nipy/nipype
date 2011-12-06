@@ -885,38 +885,11 @@ connected.
 class Node(WorkflowBase):
     """Wraps interface objects for use in pipeline
 
-
-    Parameters
-    ----------
-
-    interface : interface object
-        node specific interface  (fsl.Bet(), spm.Coregister())
-
-    iterables : generator
-        input field and list to iterate using the pipeline engine
-        for example to iterate over different frac values in fsl.Bet()
-        for a single field the input can be a tuple, otherwise a list
-        of tuples
-        node.iterables = ('frac',[0.5,0.6,0.7])
-        node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
-
-    overwrite : Boolean
-        Whether to overwrite contents of output directory if it already
-        exists. If directory exists and hash matches it
-        assumes that process has been executed (default : False)
-
-    needed_outputs : list of output_names
-        Force the node to keep only specific outputs. By default all outputs are
-        kept. Setting this attribute will delete any output files and
-        directories from the node's working directory that are not part of the
-        `needed_outputs`.
-
-    Notes
-    -----
-
-    creates output directory
-    copies/discovers files to work with
-    saves a hash.json file to indicate that a process has been completed
+    A Node creates a sandbox-like directory for executing the underlying
+    interface. It will copy or link inputs into this directory to ensure that
+    input data are not overwritten. A hash of the input state is used to
+    determine if the Node inputs have changed and whether the node needs to be
+    re-executed.
 
     Examples
     --------
@@ -931,7 +904,32 @@ class Node(WorkflowBase):
 
     def __init__(self, interface, iterables=None, overwrite=False,
                  needed_outputs=None, **kwargs):
-        # interface can only be set at initialization
+        """
+        Parameters
+        ----------
+
+        interface : interface object
+            node specific interface  (fsl.Bet(), spm.Coregister())
+
+        iterables : generator
+            input field and list to iterate using the pipeline engine
+            for example to iterate over different frac values in fsl.Bet()
+            for a single field the input can be a tuple, otherwise a list
+            of tuples
+            node.iterables = ('frac',[0.5,0.6,0.7])
+            node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
+
+        overwrite : Boolean
+            Whether to overwrite contents of output directory if it already
+            exists. If directory exists and hash matches it
+            assumes that process has been executed (default : False)
+
+        needed_outputs : list of output_names
+            Force the node to keep only specific outputs. By default all outputs are
+            kept. Setting this attribute will delete any output files and
+            directories from the node's working directory that are not part of the
+            `needed_outputs`.
+        """
         super(Node, self).__init__(**kwargs)
         if interface is None:
             raise IOError('Interface must be provided')
@@ -949,21 +947,26 @@ class Node(WorkflowBase):
 
     @property
     def interface(self):
+        """Return the underlying interface object"""
         return self._interface
 
     @property
     def result(self):
+        """Return the result object after the node has run"""
         return self._result
 
     @property
     def inputs(self):
+        """Return the inputs of the underlying interface"""
         return self._interface.inputs
 
     @property
     def outputs(self):
+        """Return the output fields of the underlying interface"""
         return self._interface._outputs()
 
     def output_dir(self):
+        """Return the location of the output directory for the node"""
         if self.base_dir is None:
             self.base_dir = mkdtemp()
         outputdir = self.base_dir
@@ -975,16 +978,14 @@ class Node(WorkflowBase):
                                             self.name))
 
     def set_input(self, parameter, val):
-        """ Set interface input value or nodewrapper attribute
-
-        Priority goes to interface.
-        """
+        """ Set interface input value"""
         logger.debug('setting nodelevel(%s) input %s = %s' % (str(self),
                                                               parameter,
                                                               str(val)))
         setattr(self.inputs, parameter, deepcopy(val))
 
     def get_output(self, parameter):
+        """Retrieve a particular output of the node"""
         val = None
         if self._result:
             val = getattr(self._result.outputs, parameter)
@@ -996,87 +997,18 @@ class Node(WorkflowBase):
         return val
 
     def help(self):
-        """ Print interface help
-        """
+        """ Print interface help"""
         self._interface.help()
 
-    def _get_hashval(self):
-        hashed_inputs, hashvalue = self.inputs.get_hashval(
-            hash_method=self.config['execution']['hash_method'])
-        if str2bool(self.config['execution']['remove_unnecessary_outputs']) \
-            and self.needed_outputs:
-            hashobject = md5()
-            hashobject.update(hashvalue)
-            sorted_outputs = sorted(self.needed_outputs)
-            hashobject.update(str(sorted_outputs))
-            hashvalue = hashobject.hexdigest()
-            hashed_inputs['needed_outputs'] = sorted_outputs
-        return hashed_inputs, hashvalue
-
-    def _save_hashfile(self, hashfile, hashed_inputs):
-        try:
-            save_json(hashfile, hashed_inputs)
-        except (IOError, TypeError):
-            err_type = sys.exc_info()[0]
-            if err_type is TypeError:
-                # XXX - SG current workaround is to just
-                # create the hashed file and not put anything
-                # in it
-                fd = open(hashfile, 'wt')
-                fd.writelines(str(hashed_inputs))
-                fd.close()
-                logger.debug(('Unable to write a particular type to the json '
-                              'file'))
-            else:
-                logger.critical('Unable to open the file in write mode: %s' %
-                                hashfile)
-
-    def _get_inputs(self):
-        """Retrieve inputs from pointers to results file
-
-        This mechanism can be easily extended/replaced to retrieve data from
-        other data sources (e.g., XNAT, HTTP, etc.,.)
-        """
-        logger.debug('Setting node inputs')
-        for key, info in self.input_source.items():
-            logger.debug('input: %s' % key)
-            results_file = info[0]
-            logger.debug('results file: %s' % results_file)
-            results = loadpkl(results_file)
-            output_value = Undefined
-            if isinstance(info[1], tuple):
-                output_name = info[1][0]
-                value = getattr(results.outputs, output_name)
-                if isdefined(value):
-                    output_value = evaluate_connect_function(info[1][1],
-                                                             info[1][2],
-                                                             value)
-            else:
-                output_name = info[1]
-                try:
-                    output_value = results.outputs.get()[output_name]
-                except TypeError:
-                    output_value = results.outputs.dictcopy()[output_name]
-            logger.debug('output: %s' % output_name)
-            try:
-                self.set_input(key, deepcopy(output_value))
-            except traits.TraitError, e:
-                msg = ['Error setting node input:',
-                       'Node: %s' % self.name,
-                       'input: %s' % key,
-                       'results_file: %s' % results_file,
-                       'value: %s' % str(output_value)]
-                e.args = (e.args[0] + "\n" + '\n'.join(msg),)
-                raise
-
     def run(self, updatehash=False, force_execute=False):
-        """Executes an interface within a directory.
+        """Execute the node in its directory.
 
         Parameters
         ----------
 
         updatehash: boolean
             Update the hash stored in the output directory
+
         force_execute: boolean
             Force rerunning the node
         """
@@ -1170,6 +1102,77 @@ class Node(WorkflowBase):
             self._run_interface(execute=False, updatehash=updatehash)
         logger.debug('Finished running %s in dir: %s\n' % (self._id, outdir))
         return self._result
+
+    # Private functions
+    def _get_hashval(self):
+        """Return a hash of the input state"""
+        hashed_inputs, hashvalue = self.inputs.get_hashval(
+            hash_method=self.config['execution']['hash_method'])
+        if str2bool(self.config['execution']['remove_unnecessary_outputs']) \
+            and self.needed_outputs:
+            hashobject = md5()
+            hashobject.update(hashvalue)
+            sorted_outputs = sorted(self.needed_outputs)
+            hashobject.update(str(sorted_outputs))
+            hashvalue = hashobject.hexdigest()
+            hashed_inputs['needed_outputs'] = sorted_outputs
+        return hashed_inputs, hashvalue
+
+    def _save_hashfile(self, hashfile, hashed_inputs):
+        try:
+            save_json(hashfile, hashed_inputs)
+        except (IOError, TypeError):
+            err_type = sys.exc_info()[0]
+            if err_type is TypeError:
+                # XXX - SG current workaround is to just
+                # create the hashed file and not put anything
+                # in it
+                fd = open(hashfile, 'wt')
+                fd.writelines(str(hashed_inputs))
+                fd.close()
+                logger.debug(('Unable to write a particular type to the json '
+                              'file'))
+            else:
+                logger.critical('Unable to open the file in write mode: %s' %
+                                hashfile)
+
+    def _get_inputs(self):
+        """Retrieve inputs from pointers to results file
+
+        This mechanism can be easily extended/replaced to retrieve data from
+        other data sources (e.g., XNAT, HTTP, etc.,.)
+        """
+        logger.debug('Setting node inputs')
+        for key, info in self.input_source.items():
+            logger.debug('input: %s' % key)
+            results_file = info[0]
+            logger.debug('results file: %s' % results_file)
+            results = loadpkl(results_file)
+            output_value = Undefined
+            if isinstance(info[1], tuple):
+                output_name = info[1][0]
+                value = getattr(results.outputs, output_name)
+                if isdefined(value):
+                    output_value = evaluate_connect_function(info[1][1],
+                                                             info[1][2],
+                                                             value)
+            else:
+                output_name = info[1]
+                try:
+                    output_value = results.outputs.get()[output_name]
+                except TypeError:
+                    output_value = results.outputs.dictcopy()[output_name]
+            logger.debug('output: %s' % output_name)
+            try:
+                self.set_input(key, deepcopy(output_value))
+            except traits.TraitError, e:
+                msg = ['Error setting node input:',
+                       'Node: %s' % self.name,
+                       'input: %s' % key,
+                       'results_file: %s' % results_file,
+                       'value: %s' % str(output_value)]
+                e.args = (e.args[0] + "\n" + '\n'.join(msg),)
+                raise
 
     def _run_interface(self, execute=True, updatehash=False):
         if updatehash:
