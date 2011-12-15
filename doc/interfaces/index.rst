@@ -1,8 +1,8 @@
 .. _interface-index:
 
-###########################
- Interfaces and Algorithms
-###########################
+#########################
+Interfaces and Algorithms
+#########################
 
 :Release: |version|
 :Date: |today|
