@@ -1,0 +1,89 @@
+<head>
+<style type="text/css">
+  #page_container{width:1200px;margin:0;}
+  #toc{width:450px;float:left;}
+  #content{width:750px;float:left;}
+  pre {
+   white-space: pre-wrap;       /* css-3 */
+   white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+   white-space: -pre-wrap;      /* Opera 4-6 */
+   white-space: -o-pre-wrap;    /* Opera 7 */
+   word-wrap: break-word;       /* Internet Explorer 5.5+ */
+  }
+</style>
+
+<script type="text/javascript">
+<!--
+function readfile(srcfile, outputcontrol) {
+  try {
+    netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+  } catch (e) {
+    alert("Permission to read file was denied.");
+  }
+  var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+  file.initWithPath( srcfile );
+  if ( file.exists() == false ) {
+    alert("File does not exist");
+  }
+  var is = Components.classes["@mozilla.org/network/file-input-stream;1"].createInstance( Components.interfaces.nsIFileInputStream );
+  is.init( file,0x01, 00004, null);
+  var sis = Components.classes["@mozilla.org/scriptableinputstream;1"].createInstance( Components.interfaces.nsIScriptableInputStream );
+  sis.init( is );
+  var output = sis.read( sis.available() );
+  document.getElementById(outputcontrol).innerHTML = '<pre>'+output+'</pre>';
+}
+
+function load(name, div) {
+  readfile(name, div);
+  return false;
+}
+function loadimg(name, div) {
+  document.getElementById(div).innerHTML = '<img src="'+name+'"></img>';
+  return false;
+}
+
+var report_files = new Array(${num_nodes});
+var result_files = new Array(${num_nodes});
+${report_files}
+function isnodedone(srcfile){
+  try {
+    netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+  } catch (e) {
+    alert("Permission to read file was denied.");
+  }
+  var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+  file.initWithPath( srcfile );
+  if ( file.exists() == false ) {
+    return false;
+  }
+  return true;
+}
+
+function beginrefresh(){
+  var num_nodes = ${num_nodes};
+  var nodes_done = -1;
+  for(counter=nodes_done+1;counter<num_nodes;counter++){
+    cell_id = 'td'+counter;
+    if (isnodedone(report_files[counter]) == true){
+      document.getElementById(cell_id).style.backgroundColor = "#afa";
+      if (isnodedone(result_files[counter]) == true){
+        document.getElementById(cell_id).style.backgroundColor = "#fff";
+        nodes_done += 1;
+      }
+    }
+    else{
+      document.getElementById(cell_id).style.backgroundColor = "#aaa";
+    }
+  }
+  if (nodes_done+1 < num_nodes){
+    setTimeout("beginrefresh()", 1000);
+  }
+  else{
+    alert('Workflow finished running');
+  }
+}
+
+window.onload=beginrefresh
+-->
+</script>
+</head>
