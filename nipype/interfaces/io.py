@@ -523,6 +523,20 @@ class FSSourceOutputSpec(TraitedSpec):
                            desc='Aparc parcellation projected into aseg volume')
     sphere_reg = OutputMultiPath(File(exists=True), loc='surf', altkey='sphere.reg',
                            desc='Spherical registration file')
+    aseg_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='aseg',
+                           desc='Automated segmentation statistics file')
+    wmparc_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='wmparc',
+                           desc='White matter parcellation statistics file')
+    aparc_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='aparc',
+                           desc='Aparc parcellation statistics files')
+    BA_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='BA',
+                           desc='Brodmann Area statistics files')
+    aparc_a2009s_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='aparc.a2009s',
+                           desc='Aparc a2009s parcellation statistics files')
+    curv_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='curv',
+                           desc='Curvature statistics files')
+    entorhinal_exvivo_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='entorhinal_exvivo',
+                           desc='Entorhinal exvivo statistics files')
 
 class FreeSurferSource(IOBase):
     """Generates freesurfer subject info from their directories
@@ -547,12 +561,16 @@ class FreeSurferSource(IOBase):
         globsuffix = ''
         if dirval == 'mri':
             globsuffix = '.mgz'
+        elif dirval == 'stats':
+            globsuffix = '.stats'
         globprefix = ''
-        if key == 'ribbon' or dirval in ['surf', 'label']:
+        if key == 'ribbon' or dirval in ['surf', 'label', 'stats']:
             if self.inputs.hemi != 'both':
                 globprefix = self.inputs.hemi+'.'
             else:
                 globprefix = '*'
+        if key == 'aseg_stats' or key == 'wmparc_stats':
+			globprefix = ''
         keydir = os.path.join(path,dirval)
         if altkey:
             key = altkey
