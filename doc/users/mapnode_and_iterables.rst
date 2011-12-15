@@ -135,10 +135,13 @@ Assuming that you want to try out values 1, 2, and 3 of input "n" of the node
 "B". This will also create three different versions of node "C" - each with 
 inputs from instances of node "C" with different values of "n".
 
-Iterables are also commonly used to execute the same workflow for many subjects.
+Additionally, you can set multiple iterables for a node with a list of tuples
+in the above format.
+
+Iterables are commonly used to execute the same workflow for many subjects.
 Usually one parametrises DataGrabber node with subject ID. This is achieved by
-connecting an IdentityNode in front of DataGrabber. When you set iterables of the
-IdentityNode to the list of subjects IDs, the same workflow will be executed 
+connecting an IdentityInterface in front of DataGrabber. When you set iterables of the
+IdentityInterface to the list of subjects IDs, the same workflow will be executed
 for every subject. See :doc:`examples/spm_tutorial` to see this pattern in action.
 
 .. include:: ../links_names.txt
