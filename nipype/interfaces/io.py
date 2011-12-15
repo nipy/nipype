@@ -526,7 +526,6 @@ class FSSourceOutputSpec(TraitedSpec):
     aseg_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='aseg',
                            desc='Automated segmentation statistics file')
     wmparc_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='wmparc',
-    wmparc_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='wmparc',
                            desc='White matter parcellation statistics file')
     aparc_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='aparc',
                            desc='Aparc parcellation statistics files')
