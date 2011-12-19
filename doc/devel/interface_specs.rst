@@ -252,6 +252,13 @@ Common
 	check_mandatory_inputs ensures that all requirements (both mandatory and
 	via the requires metadata are satisfied). These are also reflected in
 	the help function.
+
+``copyfile``
+	This is metadata for a File or Directory trait that is relevant only in 
+	the context of wrapping an interface in a `Node` and `MapNode`. `copyfile` 
+	can be set to either `True` or `False`. `False` indicates that contents 
+	should be symlinked, while `True` indicates that the contents should be 
+	copied over.
 	
 CommandLine
 ^^^^^^^^^^^
