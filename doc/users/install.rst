@@ -42,7 +42,7 @@ Nibabel_
 Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
 
-IPython_ 0.10.2 or 0.11
+IPython_ 0.10.2 - 0.12
   Interactive python environment. This is necessary for some parallel
   components of the pipeline engine.
 
