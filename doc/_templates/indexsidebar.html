@@ -1,23 +1,11 @@
 {% block nipypelinks %}
-<h3>Nipype Project</h3>
+<h3>{{ _('Links') }}</h3>
 
 <ul>
-<li><a href="{{ pathto('documentation') }}">Documentation</a></li>
-<li><a href="http://github.com/nipy/nipype">Developer Site</a></li>
-<li><a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Mailing list</a></li>
-<li><a href="http://nipy.org/software/license/index.html">License</a></li>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
 </ul>
 
 {% endblock %}
-
-<h3>Search devel list archive</h3>
-<script type="text/javascript">
-  function mlsearch(curobj)
-  {
-    curobj.q.value="site:lists.neuroimaging.scipy.org/pipermail/nipy-devel/ "+curobj.userquery.value
-  }
-</script>
-<form action="http://www.google.com/search" method="get" onSubmit="mlsearch(this)">
-<input name="userquery" size="18" type="text" /> <input type="submit" value="Go" />
-<input name="q" type="hidden" />
-</form>
