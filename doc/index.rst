@@ -29,12 +29,7 @@ systems.
 
 :ref:`install` : lists software dependencies and installation instructions
 
-A paper_ describing Nipype was recently published in the journal *Frontiers
-in Neuroinformatics*. Please cite it if you find Nipype useful in your research:
-
-Gorgolewski K, Burns CD, Madison C, Clark D, Halchenko YO, Waskom ML, Ghosh SS. (2011).
-Nipype: a flexible, lightweight and extensible neuroimaging data processing framework in Python.
-Front. Neuroimform. 5:13. Epub 2011.
+:ref:`citation` : a paper_ describing nipype
 
 .. toctree::
    :hidden:
