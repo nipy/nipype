@@ -33,3 +33,7 @@ word-wrap: break-word; /* Internet Explorer 5.5+ */
 p.graphviz img {
     max-width: 100%;
 }
+
+th.field-name {
+    white-space: nowrap;
+}
