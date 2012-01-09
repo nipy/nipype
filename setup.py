@@ -90,7 +90,6 @@ def main(**extra_args):
 
     install_requires=['numpy >=1.1',
               'scipy >=0.7',
-              'matplotlib >=1.0.0',
               'networkx >=1.0',
               'nibabel >=1.0.0',
               'traits >=4.0.0',]
