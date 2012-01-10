@@ -1016,7 +1016,7 @@ class Node(WorkflowBase):
             for file in glob(os.path.join(outdir, '_0x*.json')):
                 os.remove(file)
             self._save_hashfile(hashfile, hashed_inputs)
-        return os.path.exists(hashfile), hashfile
+        return os.path.exists(hashfile), hashvalue, hashfile, hashed_inputs
 
     def run(self, updatehash=False, force_execute=False):
         """Execute the node in its directory.
@@ -1035,7 +1035,7 @@ class Node(WorkflowBase):
         self._get_inputs()
         outdir = self.output_dir()
         logger.info("Executing node %s in dir: %s" % (self._id, outdir))
-        hash_exists, hashfile = self.hash_exists(updatehash=updatehash)
+        hash_exists, hashvalue, hashfile, hashed_inputs = self.hash_exists(updatehash=updatehash)
         if force_execute or (not updatehash and (self.overwrite or
                                                  not hash_exists)):
             logger.debug("Node hash: %s" % hashvalue)

@@ -236,7 +236,7 @@ class DistributedPluginBase(PluginBase):
                                             np.zeros(numnodes, dtype=bool)))
         return False
 
-    def _send_procs_to_workers(self, updatehash=False, slots=None, graph=Npne):
+    def _send_procs_to_workers(self, updatehash=False, slots=None, graph=None):
         """ Sends jobs to workers using ipython's taskclient interface
         """
         while np.any(self.proc_done == False):
@@ -262,9 +262,9 @@ class DistributedPluginBase(PluginBase):
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
                     continue_with_submission = True
-                    if str2bool(self.config['execution']['local_hash_check']):
+                    if str2bool(self.procs[jobid].config['execution']['local_hash_check']):
                         try:
-                            hash_exists, _ = self.procs[jobid].hash_exists()
+                            hash_exists, _, _, _ = self.procs[jobid].hash_exists()
                             if hash_exists:
                                 self.proc_pending[jobid] = False
                                 continue_with_submission = False
