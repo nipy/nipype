@@ -58,6 +58,9 @@ class PBSPlugin(SGELikeBatchManagerBase):
         else:
             jobname = '.'.join((os.environ.data['LOGNAME'],
                                 node._id))
+        jobnameitems = jobname.split('.')
+        jobnameitems.reverse()
+        jobname = '.'.join(jobnameitems)
         cmd.inputs.args = '%s -N %s %s'%(qsubargs,
                                          jobname,
                                          scriptfile)
