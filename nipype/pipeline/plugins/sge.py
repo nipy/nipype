@@ -40,7 +40,16 @@ class SGEPlugin(SGELikeBatchManagerBase):
         qsubargs = ''
         if self._qsub_args:
             qsubargs = self._qsub_args
-        cmd.inputs.args = '%s %s'%(qsubargs, scriptfile)
+        if node._hierarchy:
+            jobname = '.'.join((os.environ.data['LOGNAME'],
+                                node._hierarchy,
+                                node._id))
+        else:
+            jobname = '.'.join((os.environ.data['LOGNAME'],
+                                node._id))
+        cmd.inputs.args = '%s -N %s %s'%(qsubargs,
+                                         jobname,
+                                         scriptfile)
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
         try:
