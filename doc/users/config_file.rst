@@ -86,6 +86,12 @@ Execution
 	symlinks. (possible values: ``true`` and ``false``; default
 	value: ``false``)
 
+*local_hash_check*
+    Perform the hash check on the job submission machine. This option minimizes
+    the number of jobs submitted to a cluster engine or a multiprocessing pool
+    to only those that need to be rerun. (possible values: ``true`` and
+    ``false``; default value: ``false``)
+
 *remove_node_directories (EXPERIMENTAL)*
 	Removes directories whose outputs have already been used
 	up. Doesn't work with IdentiInterface or any node that patches

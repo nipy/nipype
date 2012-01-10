@@ -175,7 +175,7 @@ class DistributedPluginBase(PluginBase):
                 else:
                     slots = self.max_jobs - num_jobs
                 self._send_procs_to_workers(updatehash=updatehash,
-                                            slots=slots)
+                                            slots=slots, graph=graph)
             sleep(2)
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
@@ -236,7 +236,7 @@ class DistributedPluginBase(PluginBase):
                                             np.zeros(numnodes, dtype=bool)))
         return False
 
-    def _send_procs_to_workers(self, updatehash=False, slots=None):
+    def _send_procs_to_workers(self, updatehash=False, slots=None, graph=Npne):
         """ Sends jobs to workers using ipython's taskclient interface
         """
         while np.any(self.proc_done == False):
@@ -261,13 +261,32 @@ class DistributedPluginBase(PluginBase):
                                     (self.procs[jobid]._id, jobid, hashvalue))
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
-                    tid = self._submit_job(deepcopy(self.procs[jobid]),
-                                           updatehash=updatehash)
-                    if tid is None:
-                        self.proc_done[jobid] = False
-                        self.proc_pending[jobid] = False
-                    else:
-                        self.pending_tasks.insert(0, (tid, jobid))
+                    continue_with_submission = True
+                    if str2bool(self.config['execution']['local_hash_check']):
+                        try:
+                            hash_exists, _ = self.procs[jobid].hash_exists()
+                            if hash_exists:
+                                self.proc_pending[jobid] = False
+                                continue_with_submission = False
+                        except Exception, e:
+                            self._clean_queue(jobid, graph)
+                            self.proc_pending[jobid] = False
+                            continue_with_submission = False
+                    if continue_with_submission:
+                        if self.procs[jobid].run_without_submitting:
+                            try:
+                                self.procs[jobid].run()
+                            except Exception, e:
+                                self._clean_queue(jobid, graph)
+                            self.proc_pending[jobid] = False
+                        else:
+                            tid = self._submit_job(deepcopy(self.procs[jobid]),
+                                                   updatehash=updatehash)
+                            if tid is None:
+                                self.proc_done[jobid] = False
+                                self.proc_pending[jobid] = False
+                            else:
+                                self.pending_tasks.insert(0, (tid, jobid))
             else:
                 break
 

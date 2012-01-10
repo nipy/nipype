@@ -39,6 +39,7 @@ single_thread_matlab = true
 stop_on_first_crash = false
 stop_on_first_rerun = false
 use_relative_paths = false
+local_hash_check = false
 """ % (homedir, os.getcwd()))
 
 class NipypeConfig(ConfigParser.ConfigParser):
