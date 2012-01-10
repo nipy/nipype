@@ -263,22 +263,30 @@ class DistributedPluginBase(PluginBase):
                         self._status_callback(self.procs[jobid], 'start')
                     continue_with_submission = True
                     if str2bool(self.procs[jobid].config['execution']['local_hash_check']):
+                        logger.debug('checking hash locally')
                         try:
                             hash_exists, _, _, _ = self.procs[jobid].hash_exists()
+                            logger.debug('Hash exists %s' % str(hash_exists))
                             if hash_exists:
                                 self.proc_pending[jobid] = False
                                 continue_with_submission = False
+                                self._task_finished_cb(jobid)
+                                self._remove_node_dirs()
                         except Exception, e:
                             self._clean_queue(jobid, graph)
                             self.proc_pending[jobid] = False
                             continue_with_submission = False
+                    logger.debug('Finished checking hash %s' % str(continue_with_submission))
                     if continue_with_submission:
                         if self.procs[jobid].run_without_submitting:
+                            logger.debug('Running node %s on master thread' % self.procs[jobid])
                             try:
                                 self.procs[jobid].run()
                             except Exception, e:
                                 self._clean_queue(jobid, graph)
                             self.proc_pending[jobid] = False
+                            self._task_finished_cb(jobid)
+                            self._remove_node_dirs()
                         else:
                             tid = self._submit_job(deepcopy(self.procs[jobid]),
                                                    updatehash=updatehash)
