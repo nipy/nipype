@@ -228,7 +228,7 @@ modelfit.inputs.inputspec.model_serial_correlations = True
 modelfit.inputs.inputspec.film_threshold = 1000
 
 level1_workflow.base_dir = os.path.abspath('./fsl/workingdir')
-level1_workflow.config = dict(crashdump_dir=os.path.abspath('./fsl/crashdumps'))
+level1_workflow.config['execution'] = dict(crashdump_dir=os.path.abspath('./fsl/crashdumps'))
 
 level1_workflow.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                          (infosource, modelspec, [(('subject_id', subjectinfo),
@@ -247,8 +247,8 @@ generate any output. To actually run the analysis on the data the
 """
 
 if __name__ == '__main__':
-    level1_workflow.write_graph()
-    #level1_workflow.run()
+    #level1_workflow.write_graph()
+    level1_workflow.run()
     #level1_workflow.run(plugin='MultiProc', plugin_args={'n_procs':2})
 
 
