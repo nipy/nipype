@@ -1,9 +1,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-===========================
-Using FSL for fMRI analysis
-===========================
+=======================================
+Reusing FSL workflows for fMRI analysis
+=======================================
 
 A workflow that uses fsl to perform a first level analysis on the nipype
 tutorial data set::
@@ -15,6 +15,15 @@ First tell python where to find the appropriate functions.
 """
 
 import os                                    # system functions
+
+"""
+.. note::
+    config for logging should be set before anything else
+"""
+
+from nipype.utils.config import config
+config.set('logging', 'log_to_file', 'false')
+config.set_log_dir(os.getcwd())
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl

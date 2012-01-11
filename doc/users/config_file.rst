@@ -23,6 +23,9 @@ Logging
 *interface_level*
 	How detailed the logs regarding interface execution should be (possible
 	values: ``INFO`` and ``DEBUG``; default value: ``INFO``)
+*log_to_file*
+    Indicates whether logging should also send the output to a file (possible
+    values: ``true`` and ``false``; default value: ``true``)
 *log_directory*
 	Where to store logs. (string, default value: home directory)
 *log_size*
