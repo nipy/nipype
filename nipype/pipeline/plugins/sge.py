@@ -20,7 +20,17 @@ class SGEPlugin(SGELikeBatchManagerBase):
     """
 
     def __init__(self, **kwargs):
-        template="""#$ -V\n#$ -S /bin/sh\n"""
+        template="""
+#$ -V
+#$ -S /bin/sh
+        """
+        self._retry_timeout = 2
+        self._max_tries = 2
+        if 'plugin_args' in kwargs and kwargs['plugin_args']:
+            if 'retry_timeout' in kwargs['plugin_args']:
+                self._retry_timeout = kwargs['plugin_args']['retry_timeout']
+            if  'max_tries' in kwargs['plugin_args']:
+                self._max_tries = kwargs['plugin_args']['max_tries']
         super(SGEPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
@@ -55,16 +65,24 @@ class SGEPlugin(SGELikeBatchManagerBase):
                                          scriptfile)
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
-        try:
-            result = cmd.run()
-        except Exception, e:
-            iflogger.setLevel(oldlevel)
-            raise RuntimeError('\n'.join(('Could not submit sge task for node %s'%node._id,
-                                          str(e))))
-        else:
-            iflogger.setLevel(oldlevel)
-            # retrieve sge taskid
-            taskid = int(result.runtime.stdout.split(' ')[2])
-            self._pending[taskid] = node.output_dir()
-            logger.debug('submitted sge task: %d for node %s'%(taskid, node._id))
+        tries = 0
+        while True:
+            try:
+                result = cmd.run()
+            except Exception, e:
+                if tries<self._max_tries:
+                    tries += 1
+                    sleep(self._retry_timeout) # sleep 2 seconds and try again.
+                else:
+                    iflogger.setLevel(oldlevel)
+                    raise RuntimeError('\n'.join((('Could not submit sge task'
+                                                   ' for node %s') % node._id,
+                                                  str(e))))
+            else:
+                break
+        iflogger.setLevel(oldlevel)
+        # retrieve sge taskid
+        taskid = int(result.runtime.stdout.split(' ')[2])
+        self._pending[taskid] = node.output_dir()
+        logger.debug('submitted sge task: %d for node %s'%(taskid, node._id))
         return taskid

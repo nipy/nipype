@@ -31,7 +31,6 @@ class PBSPlugin(SGELikeBatchManagerBase):
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
             if  'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
-
         super(PBSPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
