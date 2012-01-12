@@ -7,7 +7,7 @@
 
 """
 
-import os
+import os, os.path as op
 import datetime
 import string
 import warnings
@@ -33,7 +33,7 @@ class CFFConverterInputSpec(BaseInterfaceInputSpec):
     gpickled_networks = InputMultiPath(File(exists=True), desc='list of gpickled Networkx graphs')
 
     gifti_surfaces = InputMultiPath(File(exists=True), desc='list of GIFTI surfaces')
-    gifti_labels = InputMultiPath(File(exists=True), desc='list of GIFTI surfaces')
+    gifti_labels = InputMultiPath(File(exists=True), desc='list of GIFTI labels')
     nifti_volumes = InputMultiPath(File(exists=True), desc='list of NIFTI volumes')
     tract_files = InputMultiPath(File(exists=True), desc='list of Trackvis fiber files')
 
@@ -52,10 +52,10 @@ class CFFConverterInputSpec(BaseInterfaceInputSpec):
     species = traits.Str('Homo sapiens',desc='Species',usedefault=True)
     description = traits.Str('Created with the Nipype CFF converter', desc='Description', usedefault=True)
 
-    out_file = File('connectome.cff', usedefault = True)
+    out_file = File('connectome.cff', usedefault = True, genfile = True, desc='Output connectome file')
 
 class CFFConverterOutputSpec(TraitedSpec):
-    connectome_file = File(exist=True)
+    connectome_file = File(exists=True, desc='Output connectome file')
 
 class CFFConverter(BaseInterface):
     """
@@ -64,8 +64,8 @@ class CFFConverter(BaseInterface):
     Example
     -------
 
-    >>> from nipype.interfaces.cmtk.convert import CFFConverter
-    >>> cvt = CFFConverter()
+    >>> import nipype.interfaces.cmtk as cmtk
+    >>> cvt = cmtk.CFFConverter()
     >>> cvt.inputs.title = 'subject 1'
     >>> cvt.inputs.gifti_surfaces = ['lh.pial_converted.gii', 'rh.pial_converted.gii']
     >>> cvt.inputs.tract_files = ['streamlines.trk']
@@ -78,7 +78,6 @@ class CFFConverter(BaseInterface):
 
     def _run_interface(self, runtime):
         a = cf.connectome()
-
 
         if isdefined(self.inputs.title):
             a.connectome_meta.set_title(self.inputs.title)
@@ -129,7 +128,7 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.gpickled_networks):
             unpickled = []
             for ntwk in self.inputs.gpickled_networks:
-                ntwk_name = 'Network {cnt}'.format(cnt=count)
+                _, ntwk_name, _ = split_filename(ntwk)
                 unpickled = nx.read_gpickle(ntwk)
                 cnet = cf.CNetwork(name = ntwk_name)
                 cnet.set_with_nxgraph(unpickled)
@@ -189,21 +188,27 @@ class CFFConverter(BaseInterface):
                 a.add_connectome_data(cda)
 
         a.print_summary()
-        cf.save_to_cff(a,self.inputs.out_file)
+        _, name, ext = split_filename(self.inputs.out_file)
+        if not ext == '.cff':
+            ext = '.cff'
+        cf.save_to_cff(a,op.abspath(name + ext))
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['connectome_file'] = self.inputs.out_file
+        _, name, ext = split_filename(self.inputs.out_file)
+        if not ext == '.cff':
+            ext = '.cff'
+        outputs['connectome_file'] = op.abspath(name + ext)
         return outputs
 
 class MergeCNetworksInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File, exists=True, mandatory=True, desc='List of CFF files to extract networks from')
-    out_file = File('merged_network_connectome.cff', usedefault = True)
+    out_file = File('merged_network_connectome.cff', usedefault = True, genfile = True, desc='Output CFF file with all the networks added')
 
 class MergeCNetworksOutputSpec(TraitedSpec):
-    connectome_file = File(exist=True, desc='Single CFF file with all the networks added')
+    connectome_file = File(exists=True, desc='Output CFF file with all the networks added')
 
 class MergeCNetworks(BaseInterface):
     """ Merges networks from multiple CFF files into one new CFF file.
@@ -211,13 +216,12 @@ class MergeCNetworks(BaseInterface):
     Example
     -------
 
-    >>> import nipype.interfaces.cmtk.base as ba                  # doctest: +SKIP
-    >>> mrg = ba.MergeCNetworks()                  # doctest: +SKIP
-    >>> mrg.inputs.in_files = ['subj1.cff','subj2.cff']                  # doctest: +SKIP
+    >>> import nipype.interfaces.cmtk as cmtk
+    >>> mrg = cmtk.MergeCNetworks()
+    >>> mrg.inputs.in_files = ['subj1.cff','subj2.cff']
     >>> mrg.run()                  # doctest: +SKIP
 
     """
-
     input_spec = MergeCNetworksInputSpec
     output_spec = MergeCNetworksOutputSpec
 
@@ -233,19 +237,27 @@ class MergeCNetworks(BaseInterface):
                 ne.load()
                 contitle = mycon.get_connectome_meta().get_title()
                 ne.set_name( str(i) + ': ' + contitle + ' - ' + ne.get_name() )
+                ne.set_src(ne.get_name())
                 extracted_networks.append(ne)
 
         # Add networks to new connectome
-        newcon = cf.connectome(title = 'All CNetworks', connectome_network = extracted_networks )
+        newcon = cf.connectome(title = 'All CNetworks', connectome_network = extracted_networks)
         # Setting additional metadata
         metadata = newcon.get_connectome_meta()
         metadata.set_creator('My Name')
         metadata.set_email('My Email')
-        cf.save_to_cff(newcon, self.inputs.out_file)
+
+        _, name, ext = split_filename(self.inputs.out_file)
+        if not ext == '.cff':
+            ext = '.cff'
+        cf.save_to_cff(newcon, op.abspath(name + ext))
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['connectome_file'] = self.inputs.out_file
+        _, name, ext = split_filename(self.inputs.out_file)
+        if not ext == '.cff':
+            ext = '.cff'
+        outputs['connectome_file'] = op.abspath(name + ext)
         return outputs

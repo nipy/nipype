@@ -3,14 +3,8 @@
 def configuration(parent_package='',top_path=None):
     from numpy.distutils.misc_util import Configuration
 
-    config = Configuration('workflows', parent_package, top_path)
+    config = Configuration('mrtrix', parent_package, top_path)
 
-    config.add_subpackage('fsl')
-    config.add_subpackage('freesurfer')
-    config.add_subpackage('spm')
-    config.add_subpackage('camino')
-    config.add_subpackage('mrtrix')
-    
     return config
 
 if __name__ == '__main__':

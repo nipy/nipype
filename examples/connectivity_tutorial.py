@@ -55,7 +55,7 @@ import nipype.algorithms.misc as misc
 import inspect
 
 import nibabel as nb
-import os                                    # system functions
+import os, os.path as op                      # system functions
 import cmp                                    # connectome mapper
 
 """
@@ -109,8 +109,8 @@ No assumptions are made about where the directory of subjects is placed.
 Recon-all must have been run on subj1 from the FSL course data.
 """
 
-fs_dir = os.path.abspath('/usr/local/freesurfer')
-subjects_dir = os.path.abspath('freesurfer')
+fs_dir = op.abspath('/usr/local/freesurfer')
+subjects_dir = op.abspath(op.join(op.curdir,'./subjects'))
 fsl.FSLCommand.set_default_output_type('NIFTI')
 
 """
@@ -118,7 +118,7 @@ This needs to point to the fdt folder you can find after extracting
 http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 """
 
-data_dir = os.path.abspath('fsl_course_data/fdt/')
+data_dir = op.abspath('fsl_course_data/fdt/')
 fs.FSCommand.set_default_subjects_dir(subjects_dir)
 subject_list = ['subj1']
 
@@ -562,7 +562,7 @@ makes it easy for the user to examine the entire processing pathway used to gene
 product.
 """
 
-CFFConverter.inputs.script_files = os.path.abspath(inspect.getfile(inspect.currentframe()))
+CFFConverter.inputs.script_files = op.abspath(inspect.getfile(inspect.currentframe()))
 mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
 mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
 mapping.connect([(gpickledNetworks, CFFConverter,[("out","gpickled_networks")])])
@@ -578,7 +578,7 @@ their names to the subject list and their data to the proper folders.
 """
 
 connectivity = pe.Workflow(name="connectivity")
-connectivity.base_dir = os.path.abspath('connectivity_tutorial')
+connectivity.base_dir = op.abspath('connectivity_tutorial')
 connectivity.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,mapping,[('dwi','inputnode.dwi'),

@@ -10,7 +10,7 @@ Miscellaneous algorithms
     >>> os.chdir(datadir)
 
 '''
-import os
+import os, os.path as op
 
 import nibabel as nb
 import numpy as np
@@ -20,6 +20,8 @@ from scipy.ndimage.morphology import binary_erosion
 from scipy.spatial.distance import cdist, euclidean, dice, jaccard
 from scipy.ndimage.measurements import center_of_mass, label
 from scipy.special import legendre
+import scipy.io as sio
+import itertools
 
 from nipype.utils.config import config
 import matplotlib
@@ -455,4 +457,374 @@ class TSNR(BaseInterface):
         outputs['stddev_file'] = self._gen_output_file_name('stddev')
         if isdefined(self.inputs.regress_poly):
             outputs['detrended_file'] = self._gen_output_file_name('detrended')
+        return outputs
+
+class GunzipInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True)
+
+class GunzipOutputSpec(TraitedSpec):
+    out_file = File(exists=True)
+
+class Gunzip(BaseInterface):
+    """
+
+    """
+    input_spec = GunzipInputSpec
+    output_spec = GunzipOutputSpec
+
+    def _gen_output_file_name(self):
+        _, base, ext = split_filename(self.inputs.in_file)
+        if ext[-2:].lower() == ".gz":
+            ext = ext[:-3]
+        return os.path.abspath(base + ext[:-3])
+
+    def _run_interface(self, runtime):
+        import gzip
+        in_file = gzip.open(self.inputs.in_file, 'rb')
+        out_file = open(self._gen_output_file_name(), 'wb')
+        out_file.write(in_file.read())
+        out_file.close()
+        in_file.close()
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_file'] = self._gen_output_file_name()
+        return outputs
+
+def replaceext(in_list, ext):
+    out_list = list()
+    for filename in in_list:
+        path, name, _ = split_filename(op.abspath(filename))
+        out_name = op.join(path,name) + ext
+        out_list.append(out_name)
+    return out_list
+
+def matlab2csv(in_array, name, reshape):
+    output_array = np.asarray(in_array)
+    if reshape == True:
+		if len(np.shape(output_array)) > 1:
+			output_array = np.reshape(output_array,(np.shape(output_array)[0]*np.shape(output_array)[1],1))
+			print np.shape(output_array)
+    output_name = op.abspath(name + '.csv')
+    np.savetxt(output_name, output_array, delimiter=',')
+    return output_name
+
+class Matlab2CSVInputSpec(TraitedSpec):
+    in_file = File(exists=True, mandatory=True, desc='Input MATLAB .mat file')
+    reshape_matrix = traits.Bool(True, usedefault=True, desc='The output of this interface is meant for R, so matrices will be reshaped to vectors by default.')
+    
+class Matlab2CSVOutputSpec(TraitedSpec):
+    csv_files = OutputMultiPath(File(desc='Output CSV files for each variable saved in the input .mat file'))
+
+class Matlab2CSV(BaseInterface):
+    """
+    Simple interface to save the components of a MATLAB .mat file as a text file with comma-separated values (CSVs).
+    
+    CSV files are easily loaded in R, for use in statistical processing. 
+    For further information, see cran.r-project.org/doc/manuals/R-data.pdf
+    
+    Example
+    -------
+    
+    >>> import nipype.algorithms.misc as misc
+    >>> mat2csv = misc.Matlab2CSV()
+    >>> mat2csv.inputs.in_file = 'cmatrix.mat'
+    >>> mat2csv.run() # doctest: +SKIP
+    """
+    input_spec = Matlab2CSVInputSpec
+    output_spec = Matlab2CSVOutputSpec
+
+    def _run_interface(self, runtime):
+        in_dict = sio.loadmat(op.abspath(self.inputs.in_file))
+        
+        # Check if the file has multiple variables in it. If it does, loop through them and save them as individual CSV files. 
+        # If not, save the variable as a single CSV file using the input file name and a .csv extension.
+        
+        saved_variables = list()
+        for key in in_dict.keys():
+            if not key.startswith('__'):
+				if isinstance(in_dict[key][0],np.ndarray):
+					saved_variables.append(key)
+				else:
+					print 'One of the keys in the input file, {k}, is not a Numpy array'.format(k=key)
+
+        if len(saved_variables) > 1:
+            print '{N} variables found:'.format(N=len(saved_variables))
+            print saved_variables
+            for variable in saved_variables:
+                print '...Converting {var} - type {ty} - to CSV'.format(var=variable, ty=type(in_dict[variable]))
+                matlab2csv(in_dict[variable], variable, self.inputs.reshape_matrix)
+        elif len(saved_variables) == 1:
+            _, name, _ = split_filename(self.inputs.in_file)
+            variable = saved_variables[0]
+            print 'Single variable found {var}, type {ty}:'.format(var=variable, ty=type(in_dict[variable]))
+            print '...Converting {var} to CSV from {f}'.format(var=variable, f=self.inputs.in_file)
+            matlab2csv(in_dict[variable], name, self.inputs.reshape_matrix)
+        else:
+            print 'No values in the MATLAB file?!'
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        in_dict = sio.loadmat(op.abspath(self.inputs.in_file))
+        saved_variables = list()
+        for key in in_dict.keys():
+            if not key.startswith('__'):
+				if isinstance(in_dict[key][0],np.ndarray):
+					saved_variables.append(key)
+				else:
+					print 'One of the keys in the input file, {k}, is not a Numpy array'.format(k=key)
+					
+        if len(saved_variables) > 1:
+            outputs['csv_files'] = replaceext(saved_variables, '.csv')
+        elif len(saved_variables) == 1:
+            _, name, ext = split_filename(self.inputs.in_file)
+            outputs['csv_files'] = op.abspath(name + '.csv')
+        else:
+            print 'No values in the MATLAB file?!'
+        return outputs
+
+def merge_csvs(in_list):
+	for idx, in_file in enumerate(in_list):
+		try:
+			in_array = np.loadtxt(in_file, delimiter=',')
+		except ValueError, ex:
+			try:
+				in_array = np.loadtxt(in_file, delimiter=',', skiprows=1)	
+			except ValueError, ex:
+				first = open(in_file, 'r')
+				header_line = first.readline()
+				header_list = header_line.split(',')
+				n_cols = len(header_list)
+				try:
+					in_array = np.loadtxt(in_file, delimiter=',', skiprows=1, usecols=range(1,n_cols))
+				except ValueError, ex:
+					in_array = np.loadtxt(in_file, delimiter=',', skiprows=1, usecols=range(1,n_cols-1))
+		if idx == 0:
+			out_array = in_array
+		else:
+			out_array = np.dstack((out_array, in_array))
+	out_array = np.squeeze(out_array)
+	print 'Final output array shape:'
+	print np.shape(out_array)
+	return out_array
+    
+def remove_identical_paths(in_files):
+    import os.path as op
+    if len(in_files) > 1:
+        out_names = list()
+        commonprefix = op.commonprefix(in_files)
+        lastslash = commonprefix.rfind('/')
+        commonpath = commonprefix[0:(lastslash+1)]
+        for fileidx, in_file in enumerate(in_files):
+            path, name, ext = split_filename(in_file)
+            in_file = op.join(path, name)
+            name = in_file.replace(commonpath, '')
+            name = name.replace('_subject_id_', '')
+            out_names.append(name)
+    else:
+        path, name, ext = split_filename(in_files[0])
+        out_names = [name]
+    return out_names
+
+def maketypelist(rowheadings, shape, extraheadingBool, extraheading):
+    typelist = []
+    if rowheadings:
+        typelist.append(('heading','a40'))
+    if len(shape) > 1:
+        for idx in range(1,(min(shape)+1)):
+            typelist.append((str(idx), float))
+    else:
+        typelist.append((str(1), float))
+    if extraheadingBool:
+        typelist.append((extraheading, 'a40'))
+    print typelist
+    return typelist
+
+def makefmtlist(output_array, typelist, rowheadingsBool, shape, extraheadingBool):
+    output = np.zeros(max(shape), typelist)
+    fmtlist = []
+    if rowheadingsBool:
+        fmtlist.append('%s')
+    if len(shape) > 1:
+        for idx in range(1,min(shape)+1):
+            output[str(idx)] = output_array[:,idx-1]
+            fmtlist.append('%f')
+    else:
+        output[str(1)] = output_array
+        fmtlist.append('%f')
+    if extraheadingBool:
+        fmtlist.append('%s')
+    fmt = ','.join(fmtlist)
+    return fmt, output
+
+class MergeCSVFilesInputSpec(TraitedSpec):
+    in_files = InputMultiPath(File(exists=True), mandatory=True, desc='Input comma-separated value (CSV) files')
+    out_file = File('merged.csv', usedefault=True, desc='Output filename for merged CSV file')
+    column_headings = traits.List(traits.Str, desc='List of column headings to save in merged CSV file (must be equal to number of input files). If left undefined, these will be pulled from the input filenames.')
+    row_headings = traits.List(traits.Str, desc='List of row headings to save in merged CSV file (must be equal to number of rows in the input files).')
+    extra_column_heading = traits.Str(desc='New heading to add for the added field.')
+    extra_field = traits.Str(desc='New field to add to each row. This is useful for saving the group or subject ID in the file.')
+    
+class MergeCSVFilesOutputSpec(TraitedSpec):
+    csv_file = File(desc='Output CSV file containing columns ')
+
+class MergeCSVFiles(BaseInterface):
+    """
+    This interface is designed to facilitate data loading in the R environment.
+    It takes input CSV files and merges them into a single CSV file. 
+    If provided, it will also incorporate column heading names into the resulting CSV file.
+    
+    CSV files are easily loaded in R, for use in statistical processing. 
+    For further information, see cran.r-project.org/doc/manuals/R-data.pdf
+    
+    Example
+    -------
+    
+    >>> import nipype.algorithms.misc as misc
+    >>> mat2csv = misc.MergeCSVFiles()
+    >>> mat2csv.inputs.in_file = ['degree.mat','clustering.mat']
+    >>> mat2csv.inputs.column_headings = ['degree','clustering']
+    >>> mat2csv.run() # doctest: +SKIP
+    """
+    input_spec = MergeCSVFilesInputSpec
+    output_spec = MergeCSVFilesOutputSpec
+
+    def _run_interface(self, runtime):
+        extraheadingBool = False
+        rowheadingsBool = False
+        """
+        This block defines the column headings.
+        """
+        if isdefined(self.inputs.column_headings):
+            print 'Column headings have been provided:'
+            headings = self.inputs.column_headings
+        else:
+            print 'Column headings not provided! Pulled from input filenames:'
+            headings = remove_identical_paths(self.inputs.in_files)
+        
+        if isdefined(self.inputs.extra_field):
+            if isdefined(self.inputs.extra_column_heading):
+                extraheading = self.inputs.extra_column_heading
+                print 'Extra column heading provided: {col}'.format(col=extraheading)
+            else:
+                extraheading = 'type'
+                print 'Extra column heading was not defined. Using "type"'
+            headings.append(extraheading)
+            extraheadingBool = True
+
+        if len(self.inputs.in_files) == 1:
+            print 'Only one file input!'
+        
+        if isdefined(self.inputs.row_headings):
+            print 'Row headings have been provided. Adding "labels" column header.'
+            csv_headings = '"labels","' + '","'.join(itertools.chain(headings)) + '"\n'
+            rowheadingsBool = True
+        else:
+            print 'Row headings have not been provided.'
+            csv_headings = '"' + '","'.join(itertools.chain(headings)) + '"\n'
+        
+        print 'Final Headings:'
+        print csv_headings
+
+        """
+        Next we merge the arrays and define the output text file
+        """
+        
+        output_array = merge_csvs(self.inputs.in_files)
+        _, name, ext = split_filename(self.inputs.out_file)
+        if not ext == '.csv':
+            ext = '.csv'
+
+        out_file = op.abspath(name + ext)
+        file_handle = open(out_file,'w')
+        file_handle.write(csv_headings)
+
+        shape = np.shape(output_array)
+        typelist = maketypelist(rowheadingsBool, shape, extraheadingBool, extraheading)
+        fmt, output = makefmtlist(output_array, typelist, rowheadingsBool, shape, extraheadingBool)
+
+        if rowheadingsBool:
+            row_heading_list = self.inputs.row_headings
+            row_heading_list_with_quotes = []
+            for row_heading in row_heading_list:
+                row_heading_with_quotes = '"' + row_heading + '"'
+                row_heading_list_with_quotes.append(row_heading_with_quotes)
+            row_headings = np.array(row_heading_list_with_quotes)
+            output['heading'] = row_headings
+
+        if isdefined(self.inputs.extra_field):
+            extrafieldlist = []
+            for idx in range(0,max(shape)):
+                extrafieldlist.append(self.inputs.extra_field)
+            print len(extrafieldlist)
+            output[extraheading] = extrafieldlist
+        
+        print output
+        print fmt
+        np.savetxt(file_handle, output, fmt, delimiter=',')
+        file_handle.close()
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        _, name, ext = split_filename(self.inputs.out_file)
+        if not ext == '.csv':
+            ext = '.csv'
+        out_file = op.abspath(name + ext)
+        outputs['csv_file'] = out_file
+        return outputs
+
+class AddCSVColumnInputSpec(TraitedSpec):
+    in_file = File(exists=True, mandatory=True, desc='Input comma-separated value (CSV) files')
+    out_file = File('extra_heading.csv', usedefault=True, desc='Output filename for merged CSV file')
+    extra_column_heading = traits.Str(desc='New heading to add for the added field.')
+    extra_field = traits.Str(desc='New field to add to each row. This is useful for saving the group or subject ID in the file.')
+    
+class AddCSVColumnOutputSpec(TraitedSpec):
+    csv_file = File(desc='Output CSV file containing columns ')
+
+class AddCSVColumn(BaseInterface):
+    """
+    Short interface to add an extra column and field to a text file
+        
+    Example
+    -------
+    
+    >>> import nipype.algorithms.misc as misc
+    >>> addcol = misc.AddCSVColumn()
+    >>> addcol.inputs.in_file = 'degree.csv'
+    >>> addcol.inputs.extra_column_heading = 'group'
+    >>> addcol.inputs.extra_field = 'male'
+    >>> addcol.run() # doctest: +SKIP
+    """
+    input_spec = AddCSVColumnInputSpec
+    output_spec = AddCSVColumnOutputSpec
+
+    def _run_interface(self, runtime):
+		in_file = open(self.inputs.in_file, 'r')
+		_, name, ext = split_filename(self.inputs.out_file)
+		if not ext == '.csv':
+			ext = '.csv'
+		out_file = op.abspath(name + ext)
+
+		out_file = open(out_file, 'w')
+		firstline = in_file.readline()
+		firstline = firstline.replace('\n','')
+		new_firstline = firstline + ',"' + self.inputs.extra_column_heading + '"\n'
+		out_file.write(new_firstline)
+		for line in in_file:
+			new_line = line.replace('\n','')
+			new_line = new_line + ',' + self.inputs.extra_field + '\n'
+			out_file.write(new_line)
+		return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        _, name, ext = split_filename(self.inputs.out_file)
+        if not ext == '.csv':
+            ext = '.csv'
+        out_file = op.abspath(name + ext)
+        outputs['csv_file'] = out_file
         return outputs
