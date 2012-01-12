@@ -10,11 +10,12 @@ import nipype.interfaces.cmtk as cmtk
 import inspect
 import nibabel as nb
 import os, os.path as op                      # system functions
-from nipype.workflows.camino.connectivity_mapping import (select_aparc_annot, get_first_image, get_vox_dims, get_data_dims, get_affine)
+from nipype.workflows.camino.connectivity_mapping import (select_aparc_annot, get_vox_dims, get_data_dims, get_affine)
 from nipype.workflows.camino.group_connectivity import pullnodeIDs
 
 from nipype.utils.misc import package_check
 import warnings
+from nipype.workflows.fsl.dti import create_eddy_correct_pipeline
 
 try:
     package_check('cmp')
@@ -145,8 +146,8 @@ def create_connectivity_pipeline(name="connectivity"):
     The first image is used as a reference for which to warp the others.
     """
 
-    eddycorrect = pe.Node(interface=fsl.EddyCorrect(),name='eddycorrect')
-    eddycorrect.inputs.ref_num = 1
+    eddycorrect = create_eddy_correct_pipeline(name='eddycorrect')
+    eddycorrect.inputs.inputnode.ref_num = 1
 
     """
     Tensors are fitted to each voxel in the diffusion-weighted image and from these three maps are created:
@@ -430,8 +431,8 @@ def create_connectivity_pipeline(name="connectivity"):
 
     mapping.connect([(inputnode_within, fsl2mrtrix, [("bvecs", "bvec_file"),
                                                     ("bvals", "bval_file")])])
-    mapping.connect([(inputnode_within, eddycorrect,[("dwi","in_file")])])
-    mapping.connect([(eddycorrect, dwi2tensor,[("eddy_corrected","in_file")])])
+    mapping.connect([(inputnode_within, eddycorrect,[("dwi","inputnode.in_file")])])
+    mapping.connect([(eddycorrect, dwi2tensor,[("outputnode.eddy_corrected","in_file")])])
     mapping.connect([(fsl2mrtrix, dwi2tensor,[("encoding_file","encoding_file")])])
 
     mapping.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
@@ -480,7 +481,7 @@ def create_connectivity_pipeline(name="connectivity"):
     fractional anisotropy image, and thresholds it to get the single-fiber voxels.
     """
 
-    mapping.connect([(eddycorrect, MRconvert,[("eddy_corrected","in_file")])])
+    mapping.connect([(eddycorrect, MRconvert,[("outputnode.eddy_corrected","in_file")])])
     mapping.connect([(MRconvert, threshold_b0,[("converted","in_file")])])
     mapping.connect([(threshold_b0, median3d,[("out_file","in_file")])])
     mapping.connect([(median3d, erode_mask_firstpass,[("out_file","in_file")])])
@@ -493,8 +494,8 @@ def create_connectivity_pipeline(name="connectivity"):
     Here the thresholded white matter mask is created for seeding the tractography.
     """
 
-    mapping.connect([(eddycorrect, bet,[("eddy_corrected","in_file")])])
-    mapping.connect([(eddycorrect, gen_WM_mask,[("eddy_corrected","in_file")])])
+    mapping.connect([(eddycorrect, bet,[("outputnode.eddy_corrected","in_file")])])
+    mapping.connect([(eddycorrect, gen_WM_mask,[("outputnode.eddy_corrected","in_file")])])
     mapping.connect([(bet, gen_WM_mask,[("mask_file","binary_mask")])])
     mapping.connect([(fsl2mrtrix, gen_WM_mask,[("encoding_file","encoding_file")])])
     mapping.connect([(gen_WM_mask, threshold_wmmask,[("WMprobabilitymap","in_file")])])
@@ -503,7 +504,7 @@ def create_connectivity_pipeline(name="connectivity"):
     Next we estimate the fiber response distribution.
     """
 
-    mapping.connect([(eddycorrect, estimateresponse,[("eddy_corrected","in_file")])])
+    mapping.connect([(eddycorrect, estimateresponse,[("outputnode.eddy_corrected","in_file")])])
     mapping.connect([(fsl2mrtrix, estimateresponse,[("encoding_file","encoding_file")])])
     mapping.connect([(threshold_FA, estimateresponse,[("out_file","mask_image")])])
 
@@ -511,7 +512,7 @@ def create_connectivity_pipeline(name="connectivity"):
     Run constrained spherical deconvolution.
     """
 
-    mapping.connect([(eddycorrect, csdeconv,[("eddy_corrected","in_file")])])
+    mapping.connect([(eddycorrect, csdeconv,[("outputnode.eddy_corrected","in_file")])])
     mapping.connect([(gen_WM_mask, csdeconv,[("WMprobabilitymap","mask_image")])])
     mapping.connect([(estimateresponse, csdeconv,[("response","response_file")])])
     mapping.connect([(fsl2mrtrix, csdeconv,[("encoding_file","encoding_file")])])
@@ -523,7 +524,7 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(threshold_wmmask, probCSDstreamtrack,[("out_file","seed_file")])])
     mapping.connect([(csdeconv, probCSDstreamtrack,[("spherical_harmonics_image","in_file")])])
     mapping.connect([(probCSDstreamtrack, tracks2prob,[("tracked","in_file")])])
-    mapping.connect([(eddycorrect, tracks2prob,[("eddy_corrected","template_file")])])
+    mapping.connect([(eddycorrect, tracks2prob,[("outputnode.eddy_corrected","template_file")])])
     
     """
     Structural Processing
@@ -531,10 +532,10 @@ def create_connectivity_pipeline(name="connectivity"):
     First, we coregister the structural image to the diffusion image and then obtain the inverse of transformation.
     """
 
-    mapping.connect([(eddycorrect, coregister,[("eddy_corrected","in_file")])])
+    mapping.connect([(eddycorrect, coregister,[("outputnode.eddy_corrected","in_file")])])
     mapping.connect([(mri_convert_Brain, coregister,[('out_file','reference')])])
     mapping.connect([(coregister, convertxfm,[('out_matrix_file','in_file')])])
-    mapping.connect([(eddycorrect, inverse,[("eddy_corrected","reference")])])
+    mapping.connect([(eddycorrect, inverse,[("outputnode.eddy_corrected","reference")])])
     mapping.connect([(convertxfm, inverse,[('out_file','in_matrix_file')])])
     mapping.connect([(mri_convert_Brain, inverse,[('out_file','in_file')])])
 
@@ -542,10 +543,10 @@ def create_connectivity_pipeline(name="connectivity"):
     The b0 image is upsampled to the same dimensions as the parcellated structural image to improve their coregistration.
     """
 
-    mapping.connect([(eddycorrect, resampleb0,[(('eddy_corrected', get_first_image), 'in_file')])])
+    mapping.connect([(eddycorrect, resampleb0,[('pick_ref.out', 'in_file')])])
     mapping.connect([(resampleb0, inverse_AparcAseg,[('out_file','reference')])])
     mapping.connect([(convertxfm, inverse_AparcAseg,[('out_file','in_matrix_file')])])
-    mapping.connect([(eddycorrect, inverseROIsToB0,[(('eddy_corrected', get_first_image), 'reference')])])
+    mapping.connect([(eddycorrect, inverseROIsToB0,[('pick_ref.out', 'reference')])])
     mapping.connect([(convertxfm, inverseROIsToB0,[('out_file','in_matrix_file')])])
 
     """
@@ -561,7 +562,7 @@ def create_connectivity_pipeline(name="connectivity"):
     The connectivity matrix is created with the .trk fibers and the coregistered parcellation file.
     """
 
-    mapping.connect([(eddycorrect, tck2trk,[("eddy_corrected","image_file")])])
+    mapping.connect([(eddycorrect, tck2trk,[("outputnode.eddy_corrected","image_file")])])
     mapping.connect([(probCSDstreamtrack, tck2trk,[("tracked","in_file")])])
     mapping.connect([(tck2trk, creatematrix,[("out_file","tract_file")])])
     mapping.connect([(inputnode_within, creatematrix,[("subject_id","out_matrix_file")])])
@@ -585,7 +586,7 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(mris_convertLHlabels, giftiLabels,[("converted","in1")])])
     mapping.connect([(mris_convertRHlabels, giftiLabels,[("converted","in2")])])
 
-    mapping.connect([(eddycorrect, niftiVolumes,[("eddy_corrected","in2")])])
+    mapping.connect([(eddycorrect, niftiVolumes,[("outputnode.eddy_corrected","in2")])])
     mapping.connect([(mri_convert_Brain, niftiVolumes,[("out_file","in3")])])
     mapping.connect([(inverse_AparcAseg, niftiVolumes,[("out_file","in1")])])
 

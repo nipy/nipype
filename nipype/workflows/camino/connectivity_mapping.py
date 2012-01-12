@@ -38,15 +38,6 @@ def select_aparc_annot(list_of_files):
     return list_of_files[idx]
 
 
-def get_first_image(volume):
-    import nibabel as nb
-    import os.path as op
-    a = nb.load(volume)
-    b = nb.four_to_three(a)
-    name = op.abspath('b0.nii')
-    nb.save(b[0], name)
-    return name
-
 
 def create_connectivity_pipeline(name="connectivity"):
     """Creates a pipeline that does the same connectivity processing as in the
