@@ -16,6 +16,11 @@ except Exception, e:
 else:
     import nipy.modalities.fmri.design_matrix as dm
     import nipy.labs.glm as GLM
+    
+try:
+    BlockParadigm = dm.BlockParadigm
+except AttributeError:
+    from nipy.modalities.fmri.experimental_paradigm import BlockParadigm
 
 from nipype.interfaces.base import (BaseInterface, TraitedSpec, traits, File,
                                     OutputMultiPath, BaseInterfaceInputSpec,
@@ -112,9 +117,11 @@ class FitGLM(BaseInterface):
             conditions += [cond['name']]*len(cond['onset'])
             if len(cond['duration']) == 1:
                 duration += cond['duration']*len(cond['onset'])
+            else:
+                duration += cond['duration']
 
 
-        paradigm =  dm.BlockParadigm(con_id=conditions, onset=onsets, duration=duration)
+        paradigm =  BlockParadigm(con_id=conditions, onset=onsets, duration=duration)
         design_matrix, self._reg_names = dm.dmtx_light(frametimes, paradigm, drift_model=drift_model, hfcut=hpf,
                hrf_model=self.inputs.hrf_model,
                add_regs=reg_vals,
