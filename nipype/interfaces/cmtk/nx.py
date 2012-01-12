@@ -198,7 +198,7 @@ def compute_dict_measures(ntwk):
     weighted = True
     measures = {}
     print '...Computing rich club coefficient...'
-    measures['rich_club_coef'] = nx.rich_club_coefficient(ntwk)
+    measures['rich_club_coef'] = nx.rich_club_coefficient(ntwk,1000)
     return measures
 
 def compute_singlevalued_measures(ntwk):
