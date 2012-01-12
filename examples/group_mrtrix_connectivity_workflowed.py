@@ -42,9 +42,9 @@ the MRtrix Viewer (mrview), and anything that can view Nifti files.
     
 The fiber data is available in Numpy arrays, and the connectivity matrix
 is also produced as a MATLAB matrix. 
-"""
 
-"""
+
+
 Import the workflows
 --------------------
 First, we import the necessary modules from nipype.
@@ -69,7 +69,6 @@ Set the proper directories
 First, we import the necessary modules from nipype.
 """
 
-fs_dir = op.abspath('/usr/local/freesurfer')
 subjects_dir = op.abspath('groupcondatapackage/subjects/')
 data_dir = op.abspath('groupcondatapackage/data/')
 fs.FSCommand.set_default_subjects_dir(subjects_dir)
@@ -108,27 +107,25 @@ for idx, group_id in enumerate(group_list.keys()):
         title += '-'
 
     """
-.. warning::
-
-    The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
-    The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
+    
+    .. warning::
+        The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
+        The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
+    
+    
     """
-
     info = dict(dwi=[['subject_id', 'dwi']],
                     bvecs=[['subject_id', 'bvecs']],
                     bvals=[['subject_id', 'bvals']])
 
     """
-This line creates the processing workflow given the information input about the groups and subjects.
-
-.. seealso::
-
-    * nipype/workflows/mrtrix/group_connectivity.py
+    This line creates the processing workflow given the information input about the groups and subjects.
     
-    * nipype/workflows/mrtrix/connectivity_mapping.py
+    .. seealso::
+        * nipype/workflows/mrtrix/group_connectivity.py
+        * nipype/workflows/mrtrix/connectivity_mapping.py
+        * connectivity_tutorial_advanced.py
     
-    * connectivity_tutorial_advanced.py
-
     """
 
     l1pipeline = create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir, output_dir, info)
@@ -184,15 +181,15 @@ The first level pipeline we have tweaked here is run within the for loop.
     l1pipeline.write_graph(format='eps', graph2use='flat')
 
     """
-Next we create and run the second-level pipeline. The purpose of this workflow is simple:
-It is used to merge each subject's CFF file into one, so that there is a single file containing
-all of the networks for each group. This can be useful for performing Network Brain Statistics
-using the NBS plugin in ConnectomeViewer.
-
-.. seealso::
-
-    http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html
-
+    Next we create and run the second-level pipeline. The purpose of this workflow is simple:
+    It is used to merge each subject's CFF file into one, so that there is a single file containing
+    all of the networks for each group. This can be useful for performing Network Brain Statistics
+    using the NBS plugin in ConnectomeViewer.
+    
+    .. seealso::
+    
+        http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html
+    
     """
 
     l2pipeline = create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir, subjects_dir, output_dir)

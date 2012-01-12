@@ -69,20 +69,18 @@ An inputnode is used to pass the data obtained by the data grabber to the actual
 inputnode = pe.Node(interface=util.IdentityInterface(fields=["dwi", "bvecs", "bvals"]), name="inputnode")
 
 """
-Diffusion processing nodes
---------------------------
-
-.. seealso::
-
-	connectivity_tutorial_advanced.py
-		Tutorial with further detail on using MRtrix tractography for connectivity analysis
-
-	http://www.brain.org.au/software/mrtrix/index.html
-		MRtrix's online documentation
-"""
-
-"""
-b-values and b-vectors stored in FSL's format are converted into a single encoding file for MRTrix.
+    Diffusion processing nodes
+    --------------------------
+    
+    .. seealso::
+    
+    	connectivity_tutorial_advanced.py
+    		Tutorial with further detail on using MRtrix tractography for connectivity analysis
+    
+    	http://www.brain.org.au/software/mrtrix/index.html
+    		MRtrix's online documentation
+    
+    b-values and b-vectors stored in FSL's format are converted into a single encoding file for MRTrix.
 """
 
 fsl2mrtrix = pe.Node(interface=mrtrix.FSL2MRTrix(),name='fsl2mrtrix')
@@ -137,13 +135,13 @@ threshold_wmmask = pe.Node(interface=mrtrix.Threshold(),name='threshold_wmmask')
 threshold_wmmask.inputs.absolute_threshold_value = 0.4
 
 """
-The spherical deconvolution step depends on the estimate of the response function 
-in the highly anisotropic voxels we obtained above.
-
-.. warning::
-
-	For damaged or pathological brains one should take care to lower the maximum harmonic order of these steps.
-	
+    The spherical deconvolution step depends on the estimate of the response function 
+    in the highly anisotropic voxels we obtained above.
+    
+    .. warning::
+    
+    	For damaged or pathological brains one should take care to lower the maximum harmonic order of these steps.
+    	
 """
 
 estimateresponse = pe.Node(interface=mrtrix.EstimateResponseForSH(),name='estimateresponse')

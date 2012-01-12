@@ -64,7 +64,6 @@ Alternatively, the reconstructed subject data can be downloaded from:
     
 """
 
-fs_dir = op.abspath('/software/freesurfer')
 subjects_dir = op.abspath(op.join(op.curdir,'./subjects'))
 fs.FSCommand.set_default_subjects_dir(subjects_dir)
 fsl.FSLCommand.set_default_output_type('NIFTI')
@@ -87,7 +86,7 @@ For our purposes, these are the diffusion-weighted MR image, b vectors, and b va
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
 infosource.iterables = ('subject_id', subject_list)
 
-info = dict(dwi=[['subject_id', 'dwi']],
+info = dict(dwi=[['subject_id', 'data']],
             bvecs=[['subject_id','bvecs']],
             bvals=[['subject_id','bvals']])
 
@@ -102,7 +101,7 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
 
 datasource.inputs.template = "%s/%s"
 datasource.inputs.base_directory = data_dir
-datasource.inputs.field_template = dict(dwi='%s/%s.nii')
+datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz')
 datasource.inputs.template_args = info
 
 """
@@ -122,16 +121,16 @@ FreeSurferSourceRH.inputs.hemi = 'rh'
 """
 Creating the workflow's nodes
 =============================
-"""
 
-"""
+
 Conversion nodes
 ----------------
-"""
 
-"""
+
+
 A number of conversion operations are required to obtain NIFTI files from the FreesurferSource for each subject.
 Nodes are used to convert the following:
+
     * Original structural image to NIFTI
     * Pial, white, inflated, and spherical surfaces for both the left and right hemispheres are converted to GIFTI for visualization in ConnectomeViewer
     * Parcellated annotation files for the left and right hemispheres are also converted to GIFTI
@@ -153,20 +152,20 @@ mris_convertLHlabels = mris_convertLH.clone('mris_convertLHlabels')
 mris_convertRHlabels = mris_convertLH.clone('mris_convertRHlabels')
 
 """
-Diffusion processing nodes
---------------------------
-
-.. seealso::
-
-	mrtrix_dti_tutorial.py
-		Tutorial that focuses solely on the MRtrix diffusion processing
-
-	http://www.brain.org.au/software/mrtrix/index.html
-		MRtrix's online documentation
-"""
-
-"""
-b-values and b-vectors stored in FSL's format are converted into a single encoding file for MRTrix.
+    Diffusion processing nodes
+    --------------------------
+    
+    .. seealso::
+    
+    	mrtrix_dti_tutorial.py
+    		Tutorial that focuses solely on the MRtrix diffusion processing
+    
+    	http://www.brain.org.au/software/mrtrix/index.html
+    		MRtrix's online documentation
+    
+    
+    
+    b-values and b-vectors stored in FSL's format are converted into a single encoding file for MRTrix.
 """
 
 fsl2mrtrix = pe.Node(interface=mrtrix.FSL2MRTrix(),name='fsl2mrtrix')
@@ -229,13 +228,13 @@ threshold_wmmask = pe.Node(interface=mrtrix.Threshold(),name='threshold_wmmask')
 threshold_wmmask.inputs.absolute_threshold_value = 0.4
 
 """
-The spherical deconvolution step depends on the estimate of the response function 
-in the highly anisotropic voxels we obtained above.
-
-.. warning::
-
-	For damaged or pathological brains one should take care to lower the maximum harmonic order of these steps.
-	
+    The spherical deconvolution step depends on the estimate of the response function 
+    in the highly anisotropic voxels we obtained above.
+    
+    .. warning::
+    
+    	For damaged or pathological brains one should take care to lower the maximum harmonic order of these steps.
+    	
 """
 
 estimateresponse = pe.Node(interface=mrtrix.EstimateResponseForSH(),name='estimateresponse')
@@ -260,9 +259,9 @@ tck2trk.inputs.flipz = True
 """
 Structural segmentation nodes
 -----------------------------
-"""
 
-"""
+
+
 In order to improve the coregistration of the parcellation scheme 
 with the diffusion-weighted image, we resample the b0 image to use 
 as a reference in the FLIRT steps below.
@@ -344,10 +343,9 @@ NxStatsCFFConverter.inputs.script_files = op.abspath(inspect.getfile(inspect.cur
 Connecting the workflow
 =======================
 Here we connect our processing pipeline.
-"""
 
 
-"""
+
 Connecting the inputs, FreeSurfer nodes, and conversions
 --------------------------------------------------------
 """
