@@ -6,5 +6,6 @@ from .linear import LinearPlugin
 from .ipython import IPythonPlugin
 from .pbs import PBSPlugin
 from .sge import SGEPlugin
+from .condor import CondorPlugin
 from .multiproc import MultiProcPlugin
 from .ipythonxi import IPythonXIPlugin
