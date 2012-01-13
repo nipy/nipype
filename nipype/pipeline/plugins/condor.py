@@ -73,7 +73,6 @@ class CondorPlugin(SGELikeBatchManagerBase):
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
-        batch_dir = os.path.dirname(scriptfile)
         cmd.inputs.args = '%s -N %s %s'%(qsubargs,
                                          jobname,
                                          scriptfile)
