@@ -11,8 +11,8 @@ import pwd
 import shutil
 from socket import gethostname
 import sys
-from time import strftime, sleep
-from traceback import format_exception
+from time import strftime, sleep, time
+from traceback import format_exception, format_exc
 from warnings import warn
 
 import numpy as np
@@ -268,7 +268,6 @@ class DistributedPluginBase(PluginBase):
                             hash_exists, _, _, _ = self.procs[jobid].hash_exists()
                             logger.debug('Hash exists %s' % str(hash_exists))
                             if hash_exists:
-                                self.proc_pending[jobid] = False
                                 continue_with_submission = False
                                 self._task_finished_cb(jobid)
                                 self._remove_node_dirs()
@@ -284,7 +283,6 @@ class DistributedPluginBase(PluginBase):
                                 self.procs[jobid].run()
                             except Exception, e:
                                 self._clean_queue(jobid, graph)
-                            self.proc_pending[jobid] = False
                             self._task_finished_cb(jobid)
                             self._remove_node_dirs()
                         else:
@@ -389,18 +387,32 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         # accessed before internal directories become available. there
         # is a disconnect when the queueing engine knows a job is
         # finished to when the directories become statable.
-        while True:
+        t = time()
+        timeout = float(self._config['execution']['job_finished_timeout'])
+        timed_out = True
+        while (time()-t) < timeout:
             try:
                 logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,
                                                                       '..'))))
                 logger.debug(os.listdir(node_dir))
                 glob(os.path.join(node_dir, 'result_*.pklz')).pop()
+                timed_out = False
                 break
             except Exception, e:
                 logger.debug(e)
             sleep(2)
-        results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]
-        result_data = loadpkl(results_file)
+        if timed_out:
+            result_data = {'hostname': 'unknown',
+                           'result': None,
+                           'traceback': None}
+            try:
+                raise IOError(('Job finished or terminated. Results file does '
+                               'not exist'))
+            except IOError, e:
+                result_data['traceback'] = format_exc()
+        else:
+            results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]
+            result_data = loadpkl(results_file)
         result_out = dict(result=None, traceback=None)
         if isinstance(result_data, dict):
             result_out['result'] = result_data['result']

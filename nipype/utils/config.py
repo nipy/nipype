@@ -41,6 +41,7 @@ stop_on_first_crash = false
 stop_on_first_rerun = false
 use_relative_paths = false
 local_hash_check = false
+job_finished_timeout = 20
 """ % (homedir, os.getcwd()))
 
 class NipypeConfig(ConfigParser.ConfigParser):

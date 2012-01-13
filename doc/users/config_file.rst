@@ -95,6 +95,11 @@ Execution
     to only those that need to be rerun. (possible values: ``true`` and
     ``false``; default value: ``false``)
 
+*job_finished_timeout*
+    When batch jobs are submitted they could be killed externally. Nipype checks
+    to see if a results file exists. This timeout determines how long this check
+    is done after a job finish is detected. (float; default value: 20)
+
 *remove_node_directories (EXPERIMENTAL)*
 	Removes directories whose outputs have already been used
 	up. Doesn't work with IdentiInterface or any node that patches
