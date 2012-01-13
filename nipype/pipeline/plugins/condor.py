@@ -73,12 +73,9 @@ class CondorPlugin(SGELikeBatchManagerBase):
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
-        batch_dir = os.path.dirname(scriptfile)
-        cmd.inputs.args = '-e %s -o %s %s -N %s %s'%(batch_dir,
-                                                     batch_dir,
-                                                     qsubargs,
-                                                     jobname,
-                                                     scriptfile)
+        cmd.inputs.args = '%s -N %s %s'%(qsubargs,
+                                         jobname,
+                                         scriptfile)
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
         tries = 0
