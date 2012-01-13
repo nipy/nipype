@@ -56,7 +56,7 @@ def report_crash(node, traceback=None):
                                         name)
     crashdir = node.config['execution']['crashdump_dir']
     if crashdir is None:
-        crashdir=os.getcwd()
+        crashdir = os.getcwd()
     if not os.path.exists(crashdir):
         os.makedirs(crashdir)
     crashfile = os.path.join(crashdir, crashfile)
@@ -275,10 +275,12 @@ class DistributedPluginBase(PluginBase):
                             self._clean_queue(jobid, graph)
                             self.proc_pending[jobid] = False
                             continue_with_submission = False
-                    logger.debug('Finished checking hash %s' % str(continue_with_submission))
+                    logger.debug('Finished checking hash %s' %
+                                 str(continue_with_submission))
                     if continue_with_submission:
                         if self.procs[jobid].run_without_submitting:
-                            logger.debug('Running node %s on master thread' % self.procs[jobid])
+                            logger.debug('Running node %s on master thread' %
+                                         self.procs[jobid])
                             try:
                                 self.procs[jobid].run()
                             except Exception, e:
@@ -390,7 +392,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         t = time()
         timeout = float(self._config['execution']['job_finished_timeout'])
         timed_out = True
-        while (time()-t) < timeout:
+        while (time() - t) < timeout:
             try:
                 logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,
                                                                       '..'))))
@@ -430,10 +432,12 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         # pickle node
         timestamp = strftime('%Y%m%d_%H%M%S')
         if node._hierarchy:
-            suffix = '%s_%s_%s'%(timestamp, node._hierarchy, node._id)
-            batch_dir = os.path.join(node.base_dir, node._hierarchy.split('.')[0], 'batch')
+            suffix = '%s_%s_%s' % (timestamp, node._hierarchy, node._id)
+            batch_dir = os.path.join(node.base_dir,
+                                     node._hierarchy.split('.')[0],
+                                     'batch')
         else:
-            suffix = '%s_%s'%(timestamp, node._id)
+            suffix = '%s_%s' % (timestamp, node._id)
             batch_dir = os.path.join(node.base_dir, 'batch')
         if not os.path.exists(batch_dir):
             os.makedirs(batch_dir)

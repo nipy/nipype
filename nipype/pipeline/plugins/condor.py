@@ -7,6 +7,7 @@ from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
 from nipype.interfaces.base import CommandLine
 
+
 class CondorPlugin(SGELikeBatchManagerBase):
     """Execute using Condor
 
@@ -28,7 +29,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
     """
 
     def __init__(self, **kwargs):
-        template="""
+        template = """
 #$ -V
 #$ -S /bin/sh
         """
@@ -43,7 +44,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
 
     def _is_pending(self, taskid):
         cmd = CommandLine('condor_q')
-        cmd.inputs.args = '%d'%taskid
+        cmd.inputs.args = '%d' % taskid
         # check condor cluster
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
@@ -73,9 +74,9 @@ class CondorPlugin(SGELikeBatchManagerBase):
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
-        cmd.inputs.args = '%s -N %s %s'%(qsubargs,
-                                         jobname,
-                                         scriptfile)
+        cmd.inputs.args = '%s -N %s %s' % (qsubargs,
+                                           jobname,
+                                           scriptfile)
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
         tries = 0
@@ -83,12 +84,13 @@ class CondorPlugin(SGELikeBatchManagerBase):
             try:
                 result = cmd.run()
             except Exception, e:
-                if tries<self._max_tries:
+                if tries < self._max_tries:
                     tries += 1
-                    sleep(self._retry_timeout) # sleep 2 seconds and try again.
+                    sleep(self._retry_timeout)  # sleep 2 seconds and try again.
                 else:
                     iflogger.setLevel(oldlevel)
-                    raise RuntimeError('\n'.join((('Could not submit condor cluster'
+                    raise RuntimeError('\n'.join((('Could not submit condor '
+                                                   'cluster'
                                                    ' for node %s') % node._id,
                                                   str(e))))
             else:
@@ -97,5 +99,6 @@ class CondorPlugin(SGELikeBatchManagerBase):
         # retrieve condor clusterid
         taskid = int(result.runtime.stdout.split(' ')[2])
         self._pending[taskid] = node.output_dir()
-        logger.debug('submitted condor cluster: %d for node %s'%(taskid, node._id))
+        logger.debug('submitted condor cluster: %d for node %s' % (taskid,
+                                                                   node._id))
         return taskid

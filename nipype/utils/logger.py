@@ -5,7 +5,8 @@ import logging
 import os
 import sys
 try:
-    from ..external.cloghandler import ConcurrentRotatingFileHandler as RFHandler
+    from ..external.cloghandler import ConcurrentRotatingFileHandler as \
+    RFHandler
 except ImportError:
     # Next 2 lines are optional:  issue a warning to the user
     from warnings import warn
@@ -17,9 +18,9 @@ from nipype.utils.misc import str2bool
 #Sets up logging for pipeline and nodewrapper execution
 LOG_FILENAME = os.path.join(config.get('logging', 'log_directory'),
                             'pypeline.log')
-fmt=('%(asctime)s,%(msecs)d %(name)-2s '
-     '%(levelname)-2s:\n\t %(message)s')
-datefmt='%y%m%d-%H:%M:%S'
+fmt = ('%(asctime)s,%(msecs)d %(name)-2s '
+       '%(levelname)-2s:\n\t %(message)s')
+datefmt = '%y%m%d-%H:%M:%S'
 #logging.basicConfig(format=fmt, datefmt=datefmt, stream=sys.stdout)
 logging.basicConfig(stream=sys.stdout)
 logger = logging.getLogger('workflow')
