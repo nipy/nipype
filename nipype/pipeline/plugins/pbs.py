@@ -47,9 +47,14 @@ class PBSPlugin(SGELikeBatchManagerBase):
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine('qsub', environ=os.environ.data)
+        path = os.path.dirname(scriptfile)
         qsubargs = ''
         if self._qsub_args:
             qsubargs = self._qsub_args
+        if '-o' not in qsubargs:
+            qsubargs = '%s -o %s' % (qsubargs, path)
+        if '-e' not in qsubargs:
+            qsubargs = '%s -e %s' % (qsubargs, path)
         if node._hierarchy:
             jobname = '.'.join((os.environ.data['LOGNAME'],
                                 node._hierarchy,
