@@ -96,8 +96,8 @@ a custom template::
 
 .. include:: ../links_names.txt
 
-.. _SGE: www.oracle.com/us/products/tools/oracle-grid-engine-075549.html
-.. _OGE: www.oracle.com/us/products/tools/oracle-grid-engine-075549.html
+.. _SGE: http://www.oracle.com/us/products/tools/oracle-grid-engine-075549.html
+.. _OGE: http://www.oracle.com/us/products/tools/oracle-grid-engine-075549.html
 .. _Soma: http://brainvisa.info/soma/soma-workflow/
 .. _PBS: http://www.clusterresources.com/products/torque-resource-manager.php
 .. _LSF: http://www.platform.com/Products/platform-lsf
