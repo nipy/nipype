@@ -99,7 +99,7 @@ Execution
     When batch jobs are submitted through, SGE/PBS/Condor they could be killed
     externally. Nipype checks to see if a results file exists to determine if
     the node has completed. This timeout determines for how long this check is
-    done after a job finish is detected. (float; default value: 5)
+    done after a job finish is detected. (float in seconds; default value: 5)
 
 *remove_node_directories (EXPERIMENTAL)*
 	Removes directories whose outputs have already been used
