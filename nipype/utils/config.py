@@ -18,6 +18,7 @@ default_cfg = StringIO("""
 workflow_level = INFO
 filemanip_level = INFO
 interface_level = INFO
+log_to_file = true
 log_directory = %s
 log_size = 16384000
 log_rotate = 4
@@ -39,6 +40,8 @@ single_thread_matlab = true
 stop_on_first_crash = false
 stop_on_first_rerun = false
 use_relative_paths = false
+local_hash_check = false
+job_finished_timeout = 5
 """ % (homedir, os.getcwd()))
 
 class NipypeConfig(ConfigParser.ConfigParser):

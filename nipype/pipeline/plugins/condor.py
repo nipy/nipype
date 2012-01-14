@@ -1,29 +1,37 @@
-"""Parallel workflow execution via PBS/Torque
+"""Parallel workflow execution via Condor
 """
 
 import os
-from time import sleep
 
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
 from nipype.interfaces.base import CommandLine
 
 
-class PBSPlugin(SGELikeBatchManagerBase):
-    """Execute using PBS/Torque
+class CondorPlugin(SGELikeBatchManagerBase):
+    """Execute using Condor
 
-    The plugin_args input to run can be used to control the SGE execution.
+    This plugin doesn't work with a plain stock-Condor installation, but
+    requires a 'qsub' emulation script for Condor, called 'condor_qsub'.
+    This script is shipped with the Condor package from NeuroDebian, or can be
+    downloaded from its Git repository at
+
+    http://anonscm.debian.org/gitweb/?p=pkg-exppsy/condor.git;a=blob_plain;f=debian/condor_qsub;hb=HEAD
+
+    The plugin_args input to run can be used to control the Condor execution.
     Currently supported options are:
 
-    - template : template to use for batch job submission
+    - template : template to use for batch job submission. This can be an
+                 SGE-style script with the (limited) set of options supported
+                 by condor_qsub
     - qsub_args : arguments to be prepended to the job execution script in the
                   qsub call
-
     """
 
     def __init__(self, **kwargs):
         template = """
-#PBS -V
+#$ -V
+#$ -S /bin/sh
         """
         self._retry_timeout = 2
         self._max_tries = 2
@@ -32,22 +40,22 @@ class PBSPlugin(SGELikeBatchManagerBase):
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
             if  'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
-        super(PBSPlugin, self).__init__(template, **kwargs)
+        super(CondorPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
-        cmd = CommandLine('qstat')
-        cmd.inputs.args = '%s' % taskid
-        # check pbs task
+        cmd = CommandLine('condor_q')
+        cmd.inputs.args = '%d' % taskid
+        # check condor cluster
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
         result = cmd.run(ignore_exception=True)
         iflogger.setLevel(oldlevel)
-        if 'Unknown Job Id' in result.runtime.stderr:
-            return False
-        return True
+        if result.runtime.stdout.count('\n%d' % taskid):
+            return True
+        return False
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('qsub', environ=os.environ.data)
+        cmd = CommandLine('condor_qsub', environ=os.environ.data)
         path = os.path.dirname(scriptfile)
         qsubargs = ''
         if self._qsub_args:
@@ -69,7 +77,6 @@ class PBSPlugin(SGELikeBatchManagerBase):
         cmd.inputs.args = '%s -N %s %s' % (qsubargs,
                                            jobname,
                                            scriptfile)
-
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
         tries = 0
@@ -82,15 +89,16 @@ class PBSPlugin(SGELikeBatchManagerBase):
                     sleep(self._retry_timeout)  # sleep 2 seconds and try again.
                 else:
                     iflogger.setLevel(oldlevel)
-                    raise RuntimeError('\n'.join((('Could not submit pbs task'
+                    raise RuntimeError('\n'.join((('Could not submit condor '
+                                                   'cluster'
                                                    ' for node %s') % node._id,
                                                   str(e))))
             else:
                 break
         iflogger.setLevel(oldlevel)
-        # retrieve pbs taskid
-        taskid = result.runtime.stdout.split('.')[0]
+        # retrieve condor clusterid
+        taskid = int(result.runtime.stdout.split(' ')[2])
         self._pending[taskid] = node.output_dir()
-        logger.debug('submitted pbs task: %s for node %s' % (taskid, node._id))
-
+        logger.debug('submitted condor cluster: %d for node %s' % (taskid,
+                                                                   node._id))
         return taskid

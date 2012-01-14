@@ -211,10 +211,10 @@ def copyfile(originalfile, newfile, copy=False, create_new=False, hashmethod=Non
             else:
                 fname += "_c%04d"%i
             newfile = base + os.sep + fname + ext
-            
+
     if hashmethod is None:
         hashmethod = config.get('execution', 'hash_method').lower()
-        
+
     elif os.path.exists(newfile):
         if hashmethod == 'timestamp':
             newhash = hash_timestamp(newfile)

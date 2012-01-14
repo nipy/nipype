@@ -23,6 +23,9 @@ Logging
 *interface_level*
 	How detailed the logs regarding interface execution should be (possible
 	values: ``INFO`` and ``DEBUG``; default value: ``INFO``)
+*log_to_file*
+    Indicates whether logging should also send the output to a file (possible
+    values: ``true`` and ``false``; default value: ``true``)
 *log_directory*
 	Where to store logs. (string, default value: home directory)
 *log_size*
@@ -85,6 +88,18 @@ Execution
 	working directory around but may cause problems with
 	symlinks. (possible values: ``true`` and ``false``; default
 	value: ``false``)
+
+*local_hash_check*
+    Perform the hash check on the job submission machine. This option minimizes
+    the number of jobs submitted to a cluster engine or a multiprocessing pool
+    to only those that need to be rerun. (possible values: ``true`` and
+    ``false``; default value: ``false``)
+
+*job_finished_timeout*
+    When batch jobs are submitted through, SGE/PBS/Condor they could be killed
+    externally. Nipype checks to see if a results file exists to determine if
+    the node has completed. This timeout determines for how long this check is
+    done after a job finish is detected. (float in seconds; default value: 5)
 
 *remove_node_directories (EXPERIMENTAL)*
 	Removes directories whose outputs have already been used

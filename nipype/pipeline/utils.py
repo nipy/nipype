@@ -388,13 +388,16 @@ def _connect_nodes(graph, srcnode, destnode, connection_info):
         data['connect'].extend(connection_info)
 
 
-def _remove_identity_nodes(graph):
+def _remove_identity_nodes(graph, keep_iterables=False):
     """Remove identity nodes from an execution graph
     """
     identity_nodes = []
     for node in nx.topological_sort(graph):
         if isinstance(node._interface, IdentityInterface):
-            identity_nodes.append(node)
+            if keep_iterables and getattr(node, 'iterables') is not None:
+                pass
+            else:
+                identity_nodes.append(node)
     if identity_nodes:
         for node in identity_nodes:
             portinputs = {}
@@ -470,6 +473,7 @@ def generate_expanded_graph(graph_in):
     parameterized as (a=1,b=3), (a=1,b=4), (a=2,b=3) and (a=2,b=4).
     """
     logger.debug("PE: expanding iterables")
+    graph_in = _remove_identity_nodes(graph_in, keep_iterables=True)
     moreiterables = True
     # convert list of tuples to dict fields
     for node in graph_in.nodes():

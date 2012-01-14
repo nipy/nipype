@@ -903,7 +903,7 @@ class Node(WorkflowBase):
     """
 
     def __init__(self, interface, iterables=None, overwrite=False,
-                 needed_outputs=None, **kwargs):
+                 needed_outputs=None, run_without_submitting=False, **kwargs):
         """
         Parameters
         ----------
@@ -929,6 +929,10 @@ class Node(WorkflowBase):
             kept. Setting this attribute will delete any output files and
             directories from the node's working directory that are not part of the
             `needed_outputs`.
+
+        run_without_submitting : boolean
+            Run the node without submitting to a job engine or to a
+            multiprocessing pool
         """
         super(Node, self).__init__(**kwargs)
         if interface is None:
@@ -940,6 +944,7 @@ class Node(WorkflowBase):
         self.iterables = iterables
         self.overwrite = overwrite
         self.parameterization = None
+        self.run_without_submitting = run_without_submitting
         self.input_source = {}
         self.needed_outputs = []
         if needed_outputs:
@@ -1000,6 +1005,19 @@ class Node(WorkflowBase):
         """ Print interface help"""
         self._interface.help()
 
+    def hash_exists(self, updatehash=False):
+        # Get a dictionary with hashed filenames and a hashvalue
+        # of the dictionary itself.
+        hashed_inputs, hashvalue = self._get_hashval()
+        outdir = self.output_dir()
+        hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
+        if updatehash and os.path.exists(outdir):
+            logger.debug("Updating hash: %s" % hashvalue)
+            for file in glob(os.path.join(outdir, '_0x*.json')):
+                os.remove(file)
+            self._save_hashfile(hashfile, hashed_inputs)
+        return os.path.exists(hashfile), hashvalue, hashfile, hashed_inputs
+
     def run(self, updatehash=False, force_execute=False):
         """Execute the node in its directory.
 
@@ -1017,17 +1035,9 @@ class Node(WorkflowBase):
         self._get_inputs()
         outdir = self.output_dir()
         logger.info("Executing node %s in dir: %s" % (self._id, outdir))
-        # Get a dictionary with hashed filenames and a hashvalue
-        # of the dictionary itself.
-        hashed_inputs, hashvalue = self._get_hashval()
-        hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
-        if updatehash and os.path.exists(outdir):
-            logger.debug("Updating hash: %s" % hashvalue)
-            for file in glob(os.path.join(outdir, '_0x*.json')):
-                os.remove(file)
-            self._save_hashfile(hashfile, hashed_inputs)
+        hash_exists, hashvalue, hashfile, hashed_inputs = self.hash_exists(updatehash=updatehash)
         if force_execute or (not updatehash and (self.overwrite or
-                                                 not os.path.exists(hashfile))):
+                                                 not hash_exists)):
             logger.debug("Node hash: %s" % hashvalue)
 
             #by rerunning we mean only nodes that did finish to run previously
@@ -1547,6 +1557,7 @@ class MapNode(Node):
             nodename = '_' + self.name + str(i)
             node = Node(deepcopy(self._interface), name=nodename)
             node.overwrite = self.overwrite
+            node.run_without_submitting = self.run_without_submitting
             node._interface.inputs.set(**deepcopy(self._interface.inputs.get()))
             for field in self.iterfield:
                 fieldvals = filename_to_list(getattr(self.inputs, field))

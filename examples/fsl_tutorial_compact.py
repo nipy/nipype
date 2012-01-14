@@ -1,9 +1,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-===========================
-Using FSL for fMRI analysis
-===========================
+=======================================
+Reusing FSL workflows for fMRI analysis
+=======================================
 
 A workflow that uses fsl to perform a first level analysis on the nipype
 tutorial data set::
@@ -15,6 +15,15 @@ First tell python where to find the appropriate functions.
 """
 
 import os                                    # system functions
+
+"""
+.. note::
+    config for logging should be set before anything else
+"""
+
+from nipype.utils.config import config
+config.set('logging', 'log_to_file', 'false')
+config.set_log_dir(os.getcwd())
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
@@ -228,7 +237,7 @@ modelfit.inputs.inputspec.model_serial_correlations = True
 modelfit.inputs.inputspec.film_threshold = 1000
 
 level1_workflow.base_dir = os.path.abspath('./fsl/workingdir')
-level1_workflow.config = dict(crashdump_dir=os.path.abspath('./fsl/crashdumps'))
+level1_workflow.config['execution'] = dict(crashdump_dir=os.path.abspath('./fsl/crashdumps'))
 
 level1_workflow.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                          (infosource, modelspec, [(('subject_id', subjectinfo),
@@ -247,8 +256,8 @@ generate any output. To actually run the analysis on the data the
 """
 
 if __name__ == '__main__':
-    level1_workflow.write_graph()
-    #level1_workflow.run()
+    #level1_workflow.write_graph()
+    level1_workflow.run()
     #level1_workflow.run(plugin='MultiProc', plugin_args={'n_procs':2})
 
 
