@@ -764,6 +764,8 @@ class ContrastMgrOutputSpec(TraitedSpec):
                                  desc='t-stat file for each contrast')
     fstats = OutputMultiPath(File(exists=True),
                                  desc='f-stat file for each contrast')
+    zfstats = OutputMultiPath(File(exists=True),
+                              desc='z-stat file for each F contrast')
     neffs = OutputMultiPath(File(exists=True),
                                  desc='neff file ?? for each contrast')
 
@@ -850,11 +852,15 @@ class ContrastMgr(FSLCommand):
             outputs['tstats'] = tstats
             outputs['neffs'] = neffs
         fstats = []
+        zfstats = []
         for i in range(numfcons):
             fstats.append(self._gen_fname('fstat%d.nii' % (base_contrast + i),
                                         cwd=pth))
+            zfstats.append(self._gen_fname('zfstat%d.nii' % (base_contrast + i),
+                           cwd=pth))
         if fstats:
             outputs['fstats'] = fstats
+            outputs['zfstats'] = zfstats
         return outputs
 
 
