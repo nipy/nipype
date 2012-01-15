@@ -11,8 +11,8 @@ import pwd
 import shutil
 from socket import gethostname
 import sys
-from time import strftime, sleep
-from traceback import format_exception
+from time import strftime, sleep, time
+from traceback import format_exception, format_exc
 from warnings import warn
 
 import numpy as np
@@ -56,7 +56,7 @@ def report_crash(node, traceback=None):
                                         name)
     crashdir = node.config['execution']['crashdump_dir']
     if crashdir is None:
-        crashdir=os.getcwd()
+        crashdir = os.getcwd()
     if not os.path.exists(crashdir):
         os.makedirs(crashdir)
     crashfile = os.path.join(crashdir, crashfile)
@@ -175,7 +175,7 @@ class DistributedPluginBase(PluginBase):
                 else:
                     slots = self.max_jobs - num_jobs
                 self._send_procs_to_workers(updatehash=updatehash,
-                                            slots=slots)
+                                            slots=slots, graph=graph)
             sleep(2)
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
@@ -236,7 +236,7 @@ class DistributedPluginBase(PluginBase):
                                             np.zeros(numnodes, dtype=bool)))
         return False
 
-    def _send_procs_to_workers(self, updatehash=False, slots=None):
+    def _send_procs_to_workers(self, updatehash=False, slots=None, graph=None):
         """ Sends jobs to workers using ipython's taskclient interface
         """
         while np.any(self.proc_done == False):
@@ -261,13 +261,40 @@ class DistributedPluginBase(PluginBase):
                                     (self.procs[jobid]._id, jobid, hashvalue))
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
-                    tid = self._submit_job(deepcopy(self.procs[jobid]),
-                                           updatehash=updatehash)
-                    if tid is None:
-                        self.proc_done[jobid] = False
-                        self.proc_pending[jobid] = False
-                    else:
-                        self.pending_tasks.insert(0, (tid, jobid))
+                    continue_with_submission = True
+                    if str2bool(self.procs[jobid].config['execution']['local_hash_check']):
+                        logger.debug('checking hash locally')
+                        try:
+                            hash_exists, _, _, _ = self.procs[jobid].hash_exists()
+                            logger.debug('Hash exists %s' % str(hash_exists))
+                            if hash_exists:
+                                continue_with_submission = False
+                                self._task_finished_cb(jobid)
+                                self._remove_node_dirs()
+                        except Exception, e:
+                            self._clean_queue(jobid, graph)
+                            self.proc_pending[jobid] = False
+                            continue_with_submission = False
+                    logger.debug('Finished checking hash %s' %
+                                 str(continue_with_submission))
+                    if continue_with_submission:
+                        if self.procs[jobid].run_without_submitting:
+                            logger.debug('Running node %s on master thread' %
+                                         self.procs[jobid])
+                            try:
+                                self.procs[jobid].run()
+                            except Exception, e:
+                                self._clean_queue(jobid, graph)
+                            self._task_finished_cb(jobid)
+                            self._remove_node_dirs()
+                        else:
+                            tid = self._submit_job(deepcopy(self.procs[jobid]),
+                                                   updatehash=updatehash)
+                            if tid is None:
+                                self.proc_done[jobid] = False
+                                self.proc_pending[jobid] = False
+                            else:
+                                self.pending_tasks.insert(0, (tid, jobid))
             else:
                 break
 
@@ -362,18 +389,32 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         # accessed before internal directories become available. there
         # is a disconnect when the queueing engine knows a job is
         # finished to when the directories become statable.
-        while True:
+        t = time()
+        timeout = float(self._config['execution']['job_finished_timeout'])
+        timed_out = True
+        while (time() - t) < timeout:
             try:
                 logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,
                                                                       '..'))))
                 logger.debug(os.listdir(node_dir))
                 glob(os.path.join(node_dir, 'result_*.pklz')).pop()
+                timed_out = False
                 break
             except Exception, e:
                 logger.debug(e)
             sleep(2)
-        results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]
-        result_data = loadpkl(results_file)
+        if timed_out:
+            result_data = {'hostname': 'unknown',
+                           'result': None,
+                           'traceback': None}
+            try:
+                raise IOError(('Job finished or terminated. Results file does '
+                               'not exist'))
+            except IOError, e:
+                result_data['traceback'] = format_exc()
+        else:
+            results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]
+            result_data = loadpkl(results_file)
         result_out = dict(result=None, traceback=None)
         if isinstance(result_data, dict):
             result_out['result'] = result_data['result']
@@ -391,10 +432,12 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         # pickle node
         timestamp = strftime('%Y%m%d_%H%M%S')
         if node._hierarchy:
-            suffix = '%s_%s_%s'%(timestamp, node._hierarchy, node._id)
-            batch_dir = os.path.join(node.base_dir, node._hierarchy.split('.')[0], 'batch')
+            suffix = '%s_%s_%s' % (timestamp, node._hierarchy, node._id)
+            batch_dir = os.path.join(node.base_dir,
+                                     node._hierarchy.split('.')[0],
+                                     'batch')
         else:
-            suffix = '%s_%s'%(timestamp, node._id)
+            suffix = '%s_%s' % (timestamp, node._id)
             batch_dir = os.path.join(node.base_dir, 'batch')
         if not os.path.exists(batch_dir):
             os.makedirs(batch_dir)
