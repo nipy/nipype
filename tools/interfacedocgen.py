@@ -357,9 +357,9 @@ class InterfaceHelpWriter(object):
                 except:
                     fieldstr += '\tUnknown'
                 if getattr(v,'xor'):
-                    fieldstr += '\n\t\texclusive: %s'%','.join(getattr(v,'xor'))
+                    fieldstr += '\n\t\texclusive: %s'%', '.join(getattr(v,'xor'))
                 if getattr(v,'requires'):
-                    fieldstr += '\n\t\trequires: %s'%','.join(getattr(v,'requires'))
+                    fieldstr += '\n\t\trequires: %s'%', '.join(getattr(v,'requires'))
                 if getattr(v, 'mandatory'):
                     if not mandhelpstr:
                         mandhelpstr = ['[Mandatory]']
