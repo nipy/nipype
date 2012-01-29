@@ -59,7 +59,7 @@ Linear
 ------
 
 This plugin runs the workflow one node at a time in a single process locally.
-The order of the nodes is determined by a topological sort of the workflow.
+The order of the nodes is determined by a topological sort of the workflow::
 
     workflow.run(plugin='Linear')
 
