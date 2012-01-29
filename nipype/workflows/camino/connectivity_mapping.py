@@ -18,9 +18,10 @@ try:
     package_check('cmp')
 except Exception, e:
     warnings.warn('cmp not installed')
+    cmp = None
 else:
     import cmp
-    
+
 from nipype.workflows.camino.diffusion import (get_vox_dims, get_data_dims, get_affine)
 
 
@@ -264,9 +265,12 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     roigen = pe.Node(interface=cmtk.ROIGen(), name="ROIGen")
-    cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme = "NativeFreesurfer")
-    cmp_config.parcellation_scheme = "NativeFreesurfer"
-    roigen.inputs.LUT_file = cmp_config.get_freeview_lut("NativeFreesurfer")['freesurferaparc']
+    if cmp:
+        cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme = "NativeFreesurfer")
+        cmp_config.parcellation_scheme = "NativeFreesurfer"
+        roigen.inputs.LUT_file = cmp_config.get_freeview_lut("NativeFreesurfer")['freesurferaparc']
+    else:
+        warnings.warn('CMP not found. Workflow may be incorrect')
 
     """
     The CreateMatrix interface takes in the remapped aparc+aseg image as well as the label dictionary and fiber tracts
@@ -278,7 +282,10 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
-    creatematrix.inputs.resolution_network_file = cmp_config.parcellation['freesurferaparc']['node_information_graphml']
+    if cmp:
+        creatematrix.inputs.resolution_network_file = cmp_config.parcellation['freesurferaparc']['node_information_graphml']
+    else:
+        warnings.warn('CMP not found. Workflow may be incorrect')
 
     """
     Here we define the endpoint of this tutorial, which is the CFFConverter node, as well as a few nodes which use
