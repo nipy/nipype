@@ -31,7 +31,6 @@ stop_on_first_rerun = false
 keep_inputs = false
 crashdump_dir = %s
 hash_method = timestamp
-keep_inputs = false
 matplotlib_backend = Agg
 plugin = Linear
 remove_node_directories = false
