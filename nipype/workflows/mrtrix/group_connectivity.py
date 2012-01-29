@@ -24,7 +24,7 @@ from nipype.workflows.camino.group_connectivity import (get_subj_in_group, getou
 
 def create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir, output_dir, template_args_dict=0):
     """Creates a group-level pipeline that does the same connectivity processing as in the
-    connectivity_tutorial_advanced example script and the mrtrix create_connectivity_pipeline workflow. 
+    connectivity_tutorial_advanced example script and the mrtrix create_connectivity_pipeline workflow.
 
     Given a subject id (and completed Freesurfer reconstruction), diffusion-weighted image,
     b-values, and b-vectors, the workflow will return the subject's connectome
@@ -74,20 +74,20 @@ def create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subje
         outputnode.mean_fiber_length
         outputnode.fiber_length_std
     """
-    
+
     group_infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id']), name="group_infosource")
     group_infosource.inputs.group_id = group_id
     subject_list = group_list[group_id]
     subj_infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="subj_infosource")
     subj_infosource.iterables = ('subject_id', subject_list)
-    
+
     if template_args_dict == 0:
         info = dict(dwi=[['subject_id', 'dwi']],
                     bvecs=[['subject_id','bvecs']],
                     bvals=[['subject_id','bvals']])
     else:
         info = template_args_dict
-        
+
     datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                    outfields=info.keys()),
                          name = 'datasource')

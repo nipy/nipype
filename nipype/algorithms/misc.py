@@ -513,20 +513,20 @@ def matlab2csv(in_array, name, reshape):
 class Matlab2CSVInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True, desc='Input MATLAB .mat file')
     reshape_matrix = traits.Bool(True, usedefault=True, desc='The output of this interface is meant for R, so matrices will be reshaped to vectors by default.')
-    
+
 class Matlab2CSVOutputSpec(TraitedSpec):
     csv_files = OutputMultiPath(File(desc='Output CSV files for each variable saved in the input .mat file'))
 
 class Matlab2CSV(BaseInterface):
     """
     Simple interface to save the components of a MATLAB .mat file as a text file with comma-separated values (CSVs).
-    
-    CSV files are easily loaded in R, for use in statistical processing. 
+
+    CSV files are easily loaded in R, for use in statistical processing.
     For further information, see cran.r-project.org/doc/manuals/R-data.pdf
-    
+
     Example
     -------
-    
+
     >>> import nipype.algorithms.misc as misc
     >>> mat2csv = misc.Matlab2CSV()
     >>> mat2csv.inputs.in_file = 'cmatrix.mat'
@@ -537,10 +537,10 @@ class Matlab2CSV(BaseInterface):
 
     def _run_interface(self, runtime):
         in_dict = sio.loadmat(op.abspath(self.inputs.in_file))
-        
-        # Check if the file has multiple variables in it. If it does, loop through them and save them as individual CSV files. 
+
+        # Check if the file has multiple variables in it. If it does, loop through them and save them as individual CSV files.
         # If not, save the variable as a single CSV file using the input file name and a .csv extension.
-        
+
         saved_variables = list()
         for key in in_dict.keys():
             if not key.startswith('__'):
@@ -575,7 +575,7 @@ class Matlab2CSV(BaseInterface):
 					saved_variables.append(key)
 				else:
 					print 'One of the keys in the input file, {k}, is not a Numpy array'.format(k=key)
-					
+
         if len(saved_variables) > 1:
             outputs['csv_files'] = replaceext(saved_variables, '.csv')
         elif len(saved_variables) == 1:
@@ -591,7 +591,7 @@ def merge_csvs(in_list):
 			in_array = np.loadtxt(in_file, delimiter=',')
 		except ValueError, ex:
 			try:
-				in_array = np.loadtxt(in_file, delimiter=',', skiprows=1)	
+				in_array = np.loadtxt(in_file, delimiter=',', skiprows=1)
 			except ValueError, ex:
 				first = open(in_file, 'r')
 				header_line = first.readline()
@@ -609,7 +609,7 @@ def merge_csvs(in_list):
 	print 'Final output array shape:'
 	print np.shape(out_array)
 	return out_array
-    
+
 def remove_identical_paths(in_files):
     import os.path as op
     if len(in_files) > 1:
@@ -666,22 +666,22 @@ class MergeCSVFilesInputSpec(TraitedSpec):
     row_headings = traits.List(traits.Str, desc='List of row headings to save in merged CSV file (must be equal to number of rows in the input files).')
     extra_column_heading = traits.Str(desc='New heading to add for the added field.')
     extra_field = traits.Str(desc='New field to add to each row. This is useful for saving the group or subject ID in the file.')
-    
+
 class MergeCSVFilesOutputSpec(TraitedSpec):
     csv_file = File(desc='Output CSV file containing columns ')
 
 class MergeCSVFiles(BaseInterface):
     """
     This interface is designed to facilitate data loading in the R environment.
-    It takes input CSV files and merges them into a single CSV file. 
+    It takes input CSV files and merges them into a single CSV file.
     If provided, it will also incorporate column heading names into the resulting CSV file.
-    
-    CSV files are easily loaded in R, for use in statistical processing. 
+
+    CSV files are easily loaded in R, for use in statistical processing.
     For further information, see cran.r-project.org/doc/manuals/R-data.pdf
-    
+
     Example
     -------
-    
+
     >>> import nipype.algorithms.misc as misc
     >>> mat2csv = misc.MergeCSVFiles()
     >>> mat2csv.inputs.in_file = ['degree.mat','clustering.mat']
@@ -703,7 +703,7 @@ class MergeCSVFiles(BaseInterface):
         else:
             print 'Column headings not provided! Pulled from input filenames:'
             headings = remove_identical_paths(self.inputs.in_files)
-        
+
         if isdefined(self.inputs.extra_field):
             if isdefined(self.inputs.extra_column_heading):
                 extraheading = self.inputs.extra_column_heading
@@ -716,7 +716,7 @@ class MergeCSVFiles(BaseInterface):
 
         if len(self.inputs.in_files) == 1:
             print 'Only one file input!'
-        
+
         if isdefined(self.inputs.row_headings):
             print 'Row headings have been provided. Adding "labels" column header.'
             csv_headings = '"labels","' + '","'.join(itertools.chain(headings)) + '"\n'
@@ -724,14 +724,14 @@ class MergeCSVFiles(BaseInterface):
         else:
             print 'Row headings have not been provided.'
             csv_headings = '"' + '","'.join(itertools.chain(headings)) + '"\n'
-        
+
         print 'Final Headings:'
         print csv_headings
 
         """
         Next we merge the arrays and define the output text file
         """
-        
+
         output_array = merge_csvs(self.inputs.in_files)
         _, name, ext = split_filename(self.inputs.out_file)
         if not ext == '.csv':
@@ -760,7 +760,7 @@ class MergeCSVFiles(BaseInterface):
                 extrafieldlist.append(self.inputs.extra_field)
             print len(extrafieldlist)
             output[extraheading] = extrafieldlist
-        
+
         print output
         print fmt
         np.savetxt(file_handle, output, fmt, delimiter=',')
@@ -781,17 +781,17 @@ class AddCSVColumnInputSpec(TraitedSpec):
     out_file = File('extra_heading.csv', usedefault=True, desc='Output filename for merged CSV file')
     extra_column_heading = traits.Str(desc='New heading to add for the added field.')
     extra_field = traits.Str(desc='New field to add to each row. This is useful for saving the group or subject ID in the file.')
-    
+
 class AddCSVColumnOutputSpec(TraitedSpec):
     csv_file = File(desc='Output CSV file containing columns ')
 
 class AddCSVColumn(BaseInterface):
     """
     Short interface to add an extra column and field to a text file
-        
+
     Example
     -------
-    
+
     >>> import nipype.algorithms.misc as misc
     >>> addcol = misc.AddCSVColumn()
     >>> addcol.inputs.in_file = 'degree.csv'

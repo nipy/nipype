@@ -494,8 +494,8 @@ class RegionalValues(BaseInterface):
             print 'Functional image dimensions: {dimx}, {dimy}, {dimz}'.format(dimx=dx,dimy=dy,dimz=dz)
             dx,dy,dz = get_data_dims(self.inputs.segmentation_file)
             print 'Segmentation image dimensions: {dimx}, {dimy}, {dimz}'.format(dimx=dx,dimy=dy,dimz=dz)
-            
-        
+
+
         """Record intensity values"""
         functional = nb.load(self.inputs.in_file)
         functionaldata = functional.get_data()
@@ -575,7 +575,7 @@ class RegionalValues(BaseInterface):
 				nx.write_gpickle(G,ntwkname)
 			else:
 				ntwkname = self.inputs.resolution_network_file
-            
+
 			global ntwks
 			ntwks = list()
 			for key in stats.keys():
