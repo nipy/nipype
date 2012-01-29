@@ -20,6 +20,8 @@ User guides
 
    users/interface_tutorial
    users/pipeline_tutorial
+   users/plugins
+   users/debug
 
 Developer guides
 ================
