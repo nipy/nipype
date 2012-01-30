@@ -21,7 +21,6 @@ def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilisti
     Example
     -------
 
-    >>> from nipype.workflows.mrtrix import create_mrtrix_dti_pipeline
     >>> dti = create_mrtrix_dti_pipeline("mrtrix_dti")
     >>> dti.inputs.inputnode.dwi = 'data.nii'
     >>> dti.inputs.inputnode.bvals = 'bvals'

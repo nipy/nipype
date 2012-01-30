@@ -8,14 +8,14 @@ import nipype.interfaces.camino as camino
 import nipype.algorithms.misc as misc
 import nipype.interfaces.cmtk as cmtk
 import inspect
-import nibabel as nb
 import os, os.path as op                      # system functions
-from nipype.workflows.camino.connectivity_mapping import (select_aparc_annot, get_vox_dims, get_data_dims, get_affine)
-from nipype.workflows.camino.group_connectivity import pullnodeIDs
+from ..camino.connectivity_mapping import (select_aparc_annot, get_vox_dims,
+                                           get_data_dims, get_affine)
+from ..camino.group_connectivity import pullnodeIDs
 
 from nipype.utils.misc import package_check
 import warnings
-from nipype.workflows.fsl.dti import create_eddy_correct_pipeline
+from ..fsl.dti import create_eddy_correct_pipeline
 
 try:
     package_check('cmp')
@@ -34,18 +34,12 @@ def create_connectivity_pipeline(name="connectivity"):
     Example
     -------
 
-    >>> import os
-    >>> import nipype.interfaces.freesurfer as fs
-    >>> import nipype.workflows.mrtrix.connectivity_mapping as mrwork
-    >>> from nipype.testing import example_data
-    >>> subjects_dir = example_data('subjects')
-    >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
-    >>> conmapper = mrwork.create_connectivity_pipeline("nipype_conmap")
-    >>> conmapper.inputs.inputnode.subjects_dir = subjects_dir # doctest: +SKIP
+    >>> conmapper = create_connectivity_pipeline("nipype_conmap")
+    >>> conmapper.inputs.inputnode.subjects_dir = '.'
     >>> conmapper.inputs.inputnode.subject_id = 'subj1'
-    >>> conmapper.inputs.inputnode.dwi = os.path.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
-    >>> conmapper.inputs.inputnode.bvecs = os.path.abspath('fsl_course_data/fdt/subj1/bvecs')
-    >>> conmapper.inputs.inputnode.bvals = os.path.abspath('fsl_course_data/fdt/subj1/bvals')
+    >>> conmapper.inputs.inputnode.dwi = 'data.nii.gz'
+    >>> conmapper.inputs.inputnode.bvecs = 'bvecs'
+    >>> conmapper.inputs.inputnode.bvals = 'bvals'
     >>> conmapper.run()                 # doctest: +SKIP
 
     Inputs::

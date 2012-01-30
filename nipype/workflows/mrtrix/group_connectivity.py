@@ -1,13 +1,6 @@
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.freesurfer as fs    # freesurfer
-import nipype.interfaces.cmtk as cmtk
-import nipype.interfaces.mrtrix as mrtrix
-import nipype.algorithms.misc as misc
-import inspect
-import nibabel as nb
 import os, os.path as op
 from nipype.utils.misc import package_check
 import warnings
@@ -17,10 +10,8 @@ except Exception, e:
     warnings.warn('cmp not installed')
 else:
     import cmp
-from nipype.workflows.mrtrix.connectivity_mapping import create_connectivity_pipeline
-from nipype.workflows.camino.connectivity_mapping import (get_vox_dims, get_data_dims,
- get_affine, select_aparc, select_aparc_annot)
-from nipype.workflows.camino.group_connectivity import (get_subj_in_group, getoutdir, get_nsubs)
+from .connectivity_mapping import create_connectivity_pipeline
+from ..camino.group_connectivity import getoutdir
 
 def create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir, output_dir, template_args_dict=0):
     """Creates a group-level pipeline that does the same connectivity processing as in the
@@ -34,17 +25,12 @@ def create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subje
     Example
     -------
 
-    >>> import os.path as op
-    >>> import nipype.interfaces.freesurfer as fs
-    >>> from nipype.workflows.mrtrix import create_connectivity_pipeline
-    >>> subjects_dir = op.abspath('freesurfer')
-    >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
-    >>> cff = cmonwk.create_connectivity_pipeline("mrtrix_cmtk")
-    >>> cff.inputs.inputnode.subjects_dir = subjects_dir # doctest: +SKIP
+    >>> cff = create_connectivity_pipeline("mrtrix_cmtk")
+    >>> cff.inputs.inputnode.subjects_dir = '.'
     >>> cff.inputs.inputnode.subject_id = 'subj1'
-    >>> cff.inputs.inputnode.dwi = op.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
-    >>> cff.inputs.inputnode.bvecs = op.abspath('fsl_course_data/fdt/subj1/bvecs')
-    >>> cff.inputs.inputnode.bvals = op.abspath('fsl_course_data/fdt/subj1/bvals')
+    >>> cff.inputs.inputnode.dwi = 'data.nii.gz'
+    >>> cff.inputs.inputnode.bvecs = 'bvecs'
+    >>> cff.inputs.inputnode.bvals = 'bvals'
     >>> cff.run()                 # doctest: +SKIP
 
     Inputs::
