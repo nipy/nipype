@@ -22,7 +22,7 @@ except Exception, e:
 else:
     import cmp
 
-from nipype.workflows.camino.diffusion import (get_vox_dims, get_data_dims, get_affine)
+from .diffusion import (get_vox_dims, get_data_dims, get_affine)
 
 
 def select_aparc(list_of_files):
@@ -49,17 +49,12 @@ def create_connectivity_pipeline(name="connectivity"):
     Example
     -------
 
-    >>> import os.path as op
-    >>> import nipype.interfaces.freesurfer as fs
-    >>> from nipype.workflows.camino.connectivity_mapping import create_connectivity_pipeline
-    >>> subjects_dir = op.abspath('freesurfer')
-    >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
     >>> conmapper = create_connectivity_pipeline("nipype_conmap")
-    >>> conmapper.inputs.inputnode.subjects_dir = subjects_dir # doctest: +SKIP
+    >>> conmapper.inputs.inputnode.subjects_dir = '.'
     >>> conmapper.inputs.inputnode.subject_id = 'subj1'
-    >>> conmapper.inputs.inputnode.dwi = op.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
-    >>> conmapper.inputs.inputnode.bvecs = op.abspath('fsl_course_data/fdt/subj1/bvecs')
-    >>> conmapper.inputs.inputnode.bvals = op.abspath('fsl_course_data/fdt/subj1/bvals')
+    >>> conmapper.inputs.inputnode.dwi = 'data.nii.gz'
+    >>> conmapper.inputs.inputnode.bvecs = 'bvecs'
+    >>> conmapper.inputs.inputnode.bvals = 'bvals'
     >>> conmapper.run()                 # doctest: +SKIP
 
     Inputs::

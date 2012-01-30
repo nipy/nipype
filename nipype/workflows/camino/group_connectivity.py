@@ -1,17 +1,11 @@
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.interfaces.camino as camino
 import nipype.interfaces.fsl as fsl
-import nipype.interfaces.camino2trackvis as cam2trk
-import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.cmtk as cmtk
-from nipype.workflows.camino.connectivity_mapping import create_connectivity_pipeline
+from .connectivity_mapping import create_connectivity_pipeline
 import nipype.algorithms.misc as misc
-import inspect
-import nibabel as nb
 import numpy as np
-import networkx as nx
 import os, os.path as op                      # system functions
 from nipype.utils.misc import package_check
 import warnings
@@ -104,17 +98,12 @@ def create_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir
     Example
     -------
 
-    >>> import os.path as op
-    >>> import nipype.interfaces.freesurfer as fs
-    >>> from nipype.workflows.mrtrix import create_connectivity_pipeline
-    >>> subjects_dir = op.abspath('freesurfer')
-    >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
-    >>> cff = cmonwk.create_connectivity_pipeline("mrtrix_cmtk")
-    >>> cff.inputs.inputnode.subjects_dir = subjects_dir # doctest: +SKIP
+    >>> cff = create_connectivity_pipeline("mrtrix_cmtk")
+    >>> cff.inputs.inputnode.subjects_dir = '.'
     >>> cff.inputs.inputnode.subject_id = 'subj1'
-    >>> cff.inputs.inputnode.dwi = op.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
-    >>> cff.inputs.inputnode.bvecs = op.abspath('fsl_course_data/fdt/subj1/bvecs')
-    >>> cff.inputs.inputnode.bvals = op.abspath('fsl_course_data/fdt/subj1/bvals')
+    >>> cff.inputs.inputnode.dwi = 'data.nii.gz'
+    >>> cff.inputs.inputnode.bvecs = 'bvecs'
+    >>> cff.inputs.inputnode.bvals = 'bvals'
     >>> cff.run()                 # doctest: +SKIP
 
     Inputs::
