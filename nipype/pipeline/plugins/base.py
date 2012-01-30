@@ -319,7 +319,10 @@ class DistributedPluginBase(PluginBase):
         """ Generates a dependency list for a list of graphs.
         """
         self.procs = graph.nodes()
-        self.depidx = nx.to_scipy_sparse_matrix(graph, format='lil')
+        try:
+            self.depidx = nx.to_scipy_sparse_matrix(graph, format='lil')
+        except:
+            self.depidx = nx.to_scipy_sparse_matrix(graph)
         self.refidx = deepcopy(self.depidx)
         self.refidx.astype = np.int
         self.proc_done = np.zeros(len(self.procs), dtype=bool)

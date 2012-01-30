@@ -1005,20 +1005,6 @@ class CommandLine(BaseInterface):
     >>> cli.inputs.trait_get() #doctest: +SKIP
     {'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}
 
-    >>> cli.help()
-    Inputs
-    ------
-    <BLANKLINE>
-    Optional:
-     args: Additional parameters to the command
-     environ: Environment variables (default={})
-     ignore_exception: Print an error message instead of throwing an exception in case the interface fails to run (default=False)
-    <BLANKLINE>
-    Outputs
-    -------
-    None
-
-
     >>> cli.inputs.get_hashval()
     ({'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}, 'b1faf85652295456a906f053d48daef6')
 
