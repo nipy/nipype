@@ -10,6 +10,7 @@ Miscellaneous algorithms
     >>> os.chdir(datadir)
 
 '''
+
 import os, os.path as op
 
 import nibabel as nb
@@ -684,7 +685,7 @@ class MergeCSVFiles(BaseInterface):
 
     >>> import nipype.algorithms.misc as misc
     >>> mat2csv = misc.MergeCSVFiles()
-    >>> mat2csv.inputs.in_file = ['degree.mat','clustering.mat']
+    >>> mat2csv.inputs.in_files = ['degree.mat','clustering.mat']
     >>> mat2csv.inputs.column_headings = ['degree','clustering']
     >>> mat2csv.run() # doctest: +SKIP
     """

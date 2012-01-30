@@ -21,6 +21,9 @@ else:
 
 from nipype.interfaces.cmtk.nx import read_unknown_ntwk
 
+# This should be done inside a function, not globally
+# fsl.FSLCommand.set_default_output_type('NIFTI')
+
 def get_vox_dims(volume):
     import nibabel as nb
     if isinstance(volume, list):
@@ -57,8 +60,6 @@ def make_inlist(n, from_node):
         inlist = (from_node,str('in{num}'.format(num=i)))
         connections.append(inlist)
     return inlist, connections
-
-fsl.FSLCommand.set_default_output_type('NIFTI')
 
 def select_aparc(list_of_files):
     for in_file in list_of_files:
