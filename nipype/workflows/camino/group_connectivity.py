@@ -321,7 +321,6 @@ def create_group_cff_pipeline_part4(group_list, data_dir, subjects_dir, output_d
     return l4pipeline
 
 def pullnodeIDs(in_network):
-    print in_network
     ntwk = read_unknown_ntwk(in_network)
     nodedata = ntwk.node
     ids = []
@@ -331,7 +330,6 @@ def pullnodeIDs(in_network):
     for node in np.sort(integer_nodelist):
         nodeid = nodedata[str(node)]['dn_name']
         ids.append(nodeid)
-    print nodeid
     return ids
 
 def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir, subjects_dir, output_dir):
@@ -494,9 +492,6 @@ def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir
 
 def concatcsv(in_files):
     import os.path as op
-    print in_files
-    print type(in_files)
-    print in_files[0]
     if not isinstance(in_files,list):
         return in_files
     first = open(in_files[0], 'r')
@@ -507,10 +502,8 @@ def concatcsv(in_files):
     for in_file in in_files:
         file_to_read = open(in_file, 'r')
         scrap_first_line = file_to_read.readline()
-        print scrap_first_line
         for line in file_to_read:
             out_file.write(line)
-    print out_name
     return out_name
 
 def create_group_cff_pipeline_part3_with_CSVstats(group_list, data_dir ,subjects_dir, output_dir, title='group'):
