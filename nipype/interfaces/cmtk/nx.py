@@ -1,3 +1,14 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
+
 from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
                                     File, TraitedSpec, InputMultiPath,
                                     OutputMultiPath, isdefined)
@@ -10,9 +21,11 @@ import pickle
 from nipype.utils.misc import package_check
 import warnings
 
+have_cmp = True
 try:
     package_check('cmp')
 except Exception, e:
+    have_cmp = False
     warnings.warn('cmp not installed')
 else:
     import cmp
@@ -293,13 +306,13 @@ class NetworkXMetrics(BaseInterface):
     -------
 
     >>> import nipype.interfaces.cmtk as cmtk
-    >>> import cmp
     >>> nxmetrics = cmtk.NetworkXMetrics()
     >>> nxmetrics.inputs.in_file = 'subj1.pck'
-    >>> cmp_config = cmp.configuration.PipelineConfiguration()
-    >>> cmp_config.parcellation_scheme = "Lausanne2008"
-    >>> nxmetrics.inputs.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
     >>> nxmetrics.inputs.subject_id = 'subj1'
+    >>> #import cmp
+    >>> #cmp_config = cmp.configuration.PipelineConfiguration()
+    >>> #cmp_config.parcellation_scheme = "Lausanne2008"
+    >>> #nxmetrics.inputs.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
     >>> nxmetrics.run()                 # doctest: +SKIP
     """
     input_spec = NetworkXMetricsInputSpec
@@ -427,10 +440,10 @@ class AverageNetworks(BaseInterface):
     Example
     -------
 
-    >>> import nipype.interfaces.cmtk as cmtk
-    >>> avg = cmtk.NetworkXMetrics()
+    >>> avg = AverageNetworks()
     >>> avg.inputs.in_files = ['subj1.pck', 'subj2.pck']
     >>> avg.run()                 # doctest: +SKIP
+
     """
     input_spec = AverageNetworksInputSpec
     output_spec = AverageNetworksOutputSpec

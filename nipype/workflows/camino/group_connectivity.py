@@ -16,9 +16,11 @@ import os, os.path as op                      # system functions
 from nipype.utils.misc import package_check
 import warnings
 
+have_cmp = True
 try:
     package_check('cmp')
 except Exception, e:
+    have_cmp = False
     warnings.warn('cmp not installed')
 else:
     import cmp
@@ -417,11 +419,15 @@ def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir
     MergeCNetworks = pe.Node(interface=cmtk.MergeCNetworks(), name="MergeCNetworks")
 
     MergeCSVFiles_degree = pe.Node(interface=misc.MergeCSVFiles(), name="MergeCSVFiles_degree")
-    cmp_config = cmp.configuration.PipelineConfiguration()
-    cmp_config.parcellation_scheme = "Lausanne2008"
-    parcellation_name = 'scale500'
-    rowIDs = pullnodeIDs(op.abspath(cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']))
-    MergeCSVFiles_degree.inputs.row_headings = rowIDs
+    if cmp:
+        cmp_config = cmp.configuration.PipelineConfiguration()
+        cmp_config.parcellation_scheme = "Lausanne2008"
+        parcellation_name = 'scale500'
+        rowIDs = pullnodeIDs(op.abspath(cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']))
+        MergeCSVFiles_degree.inputs.row_headings = rowIDs
+    else:
+        warnings.warn(('cmp not installed. Workflow may not be configured '
+                       'properly.'))
     MergeCSVFiles_degree.inputs.extra_column_heading = 'group'
     MergeCSVFiles_degree.inputs.extra_field = group_id
 
