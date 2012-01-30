@@ -15,7 +15,7 @@ class SlicerCommandLine(CommandLine):
     """Experimental Slicer wrapper. Work in progress.
 
     """
-
+    _cmd = "Slicer3"
     input_spec = SlicerCommandLineInputSpec
     output_spec = DynamicTraitedSpec
 
