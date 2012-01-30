@@ -1,3 +1,14 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
+
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File, InputMultiPath, isdefined
 from nipype.utils.filemanip import split_filename
 import os, os.path as op
@@ -539,8 +550,7 @@ class MRTransform(CommandLine):
     Example
     -------
 
-    >>> import nipype.interfaces.mrtrix as mrt
-    >>> MRxform = mrt.MRTransform()
+    >>> MRxform = MRTransform()
     >>> MRxform.inputs.in_files = 'anat_coreg.mif'
     >>> MRxform.run()                                   # doctest: +SKIP
     """
