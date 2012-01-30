@@ -29,6 +29,7 @@ from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
 from nipype.utils.misc import is_container
 from nipype.utils.config import config
 from nipype.utils.logger import iflogger
+from nipype.utils.misc import trim
 
 
 __docformat__ = 'restructuredtext'
@@ -624,53 +625,63 @@ class BaseInterface(Interface):
     def help(cls, returnhelp=False):
         """ Prints class help
         """
-        allhelp = '\n'.join(cls._inputs_help() + [''] + cls._outputs_help())
+        
+        if cls.__doc__:
+            docstring = cls.__doc__.split('\n')
+            docstring = [trim(line, '') for line in docstring]
+        else:
+            docstring = ['']
+        
+        allhelp = '\n'.join(docstring + 
+                            cls._inputs_help() + [''] + cls._outputs_help())
         if returnhelp:
             return allhelp
         else:
             print allhelp
 
     @classmethod
+    def _get_trait_desc(self, inputs, name, spec):
+        desc = spec.desc
+        xor = spec.xor
+        requires = spec.requires
+
+        manhelpstr = ['\t%s' % name]
+        try:
+            setattr(inputs, name, None)
+        except TraitError as excp:
+            def_val = ''
+            if getattr(spec, 'usedefault'):
+                def_val = ', nipype default value: %s' % str(getattr(spec, 'default_value')()[1])
+            manhelpstr[-1] += " : (%s%s)" % (excp.info, def_val)
+        manhelpstr += ['\t\t%s' % desc]
+        if xor:
+            manhelpstr += ['\t\tmutually exclusive: %s' % ', '.join(xor)]
+        if requires: # and name not in xor_done:
+            others = [field for field in requires if field != name]
+            manhelpstr += ['\t\trequires: %s' % ', '.join(others)]
+        return manhelpstr
+
+    @classmethod
     def _inputs_help(cls):
         """ Prints description for input parameters
         """
-        helpstr = ['Inputs', '------']
-        opthelpstr = None
-        manhelpstr = None
+        helpstr = ['Inputs::']
+
         if cls.input_spec is None:
             helpstr += ['None']
             print '\n'.join(helpstr)
             return
-        xor_done = []
-        for name, spec in sorted(cls.input_spec().traits(mandatory=True).items()):
-            desc = spec.desc
-            xor = spec.xor
-            requires = spec.requires
-            if not manhelpstr:
-                manhelpstr = ['', 'Mandatory:']
-            manhelpstr += [' %s: %s' % (name, desc)]
-            if xor:  # and name not in xor_done:
-                xor_done.extend(xor)
-                manhelpstr += ['  mutually exclusive: %s' % ', '.join(xor)]
-            if requires:  # and name not in xor_done:
-                others = [field for field in requires if field != name]
-                manhelpstr += ['  requires: %s' % ', '.join(others)]
-        for name, spec in sorted(cls.input_spec().traits(mandatory=None,
-                                                         transient=None).items()):
-            desc = spec.desc
-            xor = spec.xor
-            requires = spec.requires
-            if not opthelpstr:
-                opthelpstr = ['', 'Optional:']
-            opthelpstr += [' %s: %s' % (name, desc)]
-            if spec.usedefault:
-                opthelpstr[-1] += ' (default=%s)' % spec.default
-            if xor:  # and name not in xor_done:
-                xor_done.extend(xor)
-                opthelpstr += ['  mutually exclusive: %s' % ', '.join(xor)]
-            if requires:  # and name not in xor_done:
-                others = [field for field in requires if field != name]
-                opthelpstr += ['  requires: %s' % ', '.join(others)]
+        
+        inputs = cls.input_spec()
+        manhelpstr = ['', '\t[Mandatory]']
+        for name, spec in sorted(inputs.traits(mandatory=True).items()):     
+            manhelpstr += cls._get_trait_desc(inputs, name, spec)
+        
+        opthelpstr = ['', '\t[Optional]']
+        for name, spec in sorted(inputs.traits(mandatory=None,
+                                               transient=None).items()):
+            opthelpstr += cls._get_trait_desc(inputs, name, spec)
+            
         if manhelpstr:
             helpstr += manhelpstr
         if opthelpstr:
@@ -681,10 +692,11 @@ class BaseInterface(Interface):
     def _outputs_help(cls):
         """ Prints description for output parameters
         """
-        helpstr = ['Outputs', '-------']
+        helpstr = ['Outputs::', '']
         if cls.output_spec:
+            outputs = cls.output_spec()
             for name, spec in sorted(cls.output_spec().traits(transient=None).items()):
-                helpstr += ['%s: %s' % (name, spec.desc)]
+                helpstr += cls._get_trait_desc(outputs, name, spec)
         else:
             helpstr += ['None']
         return helpstr
@@ -1039,6 +1051,18 @@ class CommandLine(BaseInterface):
         message += "Standard error:\n" + runtime.stderr + "\n"
         message += "Return code: " + str(runtime.returncode)
         raise RuntimeError(message)
+    
+    @classmethod
+    def help(cls, returnhelp=False):
+        allhelp = super(CommandLine, cls).help(returnhelp=True)
+        
+        allhelp = "Wraps command **%s**\n\n"%cls._cmd + allhelp
+        
+        if returnhelp:
+            return allhelp
+        else:
+            print allhelp
+    
 
     def _run_interface(self, runtime):
         """Execute command via subprocess

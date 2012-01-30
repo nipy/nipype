@@ -691,14 +691,14 @@ class TractSkeleton(FSLCommand):
     is set to True by default.  This mask controls where the projection algorithm searches
     within a circular space around a tract, rather than in a single perpindicular direction.
 
-    Examples
-    --------
+    Example
+    -------
 
-    import nipype.interfaces.fsl as fsl
-    skeletor = fsl.TractSkeleton()
-    skeletor.inputs.in_file = "all_FA.nii.gz"
-    skeletor.inputs.skeleton_file = True
-    skeletor.run() # doctest: +SKIP
+    >>> import nipype.interfaces.fsl as fsl
+    >>> skeletor = fsl.TractSkeleton()
+    >>> skeletor.inputs.in_file = "all_FA.nii.gz"
+    >>> skeletor.inputs.skeleton_file = True
+    >>> skeletor.run() # doctest: +SKIP
 
     """
 
@@ -771,13 +771,13 @@ class DistanceMapOutputSpec(TraitedSpec):
 class DistanceMap(FSLCommand):
     """Use FSL's distancemap to generate a map of the distance to the nearest nonzero voxel.
 
-    Examples
-    --------
+    Example
+    -------
 
-    import nipype.interfaces.fsl as fsl
-    mapper = fsl.DistanceMap()
-    mapper.inputs.in_file = "skeleton_mask.nii.gz"
-    mapper.run() # doctest: +SKIP
+    >>> import nipype.interfaces.fsl as fsl
+    >>> mapper = fsl.DistanceMap()
+    >>> mapper.inputs.in_file = "skeleton_mask.nii.gz"
+    >>> mapper.run() # doctest: +SKIP
 
     """
 

@@ -24,40 +24,11 @@ import os
 import re
 import sys
 
-from nipype.interfaces.base import CommandLine, TraitError
+from nipype.interfaces.base import CommandLine, TraitError, BaseInterface
 import warnings
 from nipype.pipeline.engine import Workflow
 import tempfile
-
-def trim(docstring, marker):
-    if not docstring:
-        return ''
-    # Convert tabs to spaces (following the normal Python rules)
-    # and split into a list of lines:
-    lines = docstring.expandtabs().splitlines()
-    # Determine minimum indentation (first line doesn't count):
-    indent = sys.maxint
-    for line in lines[1:]:
-        stripped = line.lstrip()
-        if stripped:
-            indent = min(indent, len(line) - len(stripped))
-    # Remove indentation (first line is special):
-    trimmed = [lines[0].strip()]
-    if indent < sys.maxint:
-        for line in lines[1:]:
-            # replace existing REST marker with doc level marker
-            stripped = line.lstrip().strip().rstrip()
-            if stripped and all([s==stripped[0] for s in stripped]):
-                line = line.replace(stripped[0], marker)
-            trimmed.append(line[indent:].rstrip())
-    # Strip off trailing and leading blank lines:
-    while trimmed and not trimmed[-1]:
-        trimmed.pop()
-    while trimmed and not trimmed[0]:
-        trimmed.pop(0)
-    # Return a single string:
-    return '\n'.join(trimmed)
-
+from nipype.utils.misc import trim
 
 # Functions and classes
 class InterfaceHelpWriter(object):
@@ -305,111 +276,24 @@ class InterfaceHelpWriter(object):
         #ad += '\n' + 'Classes' + '\n' + \
         #    self.rst_section_levels[2] * 7 + '\n'
         for c in classes:
-            ad += '\n:class:`' + c + '`\n' \
-                  + self.rst_section_levels[2] * \
-                  (len(c)+9) + '\n\n'
             __import__(uri)
             print c
             try:
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
-                    if c == "Function":
-                        classinst = sys.modules[uri].__dict__[c](input_names=['arg1', 'arg2'], output_names=['out'])
-                    elif c == "IdentityInterface":
-                        classinst = sys.modules[uri].__dict__[c](fields=['a','b'])
-                    else:
-                        classinst = sys.modules[uri].__dict__[c]()
+                    classinst = sys.modules[uri].__dict__[c]
             except Exception as inst:
                 print inst
                 continue
-            helpstr = ''
-            if isinstance(classinst, CommandLine):
-                helpstr += trim("Wraps command **%s**"%classinst._cmd, self.rst_section_levels[3]) + "\n\n"
-            helpstr += trim(classinst.__doc__, self.rst_section_levels[3]) + "\n\n"
-            print 'Generating inputs/outputs doc for:', uri, \
-                classinst.__class__.__name__
-            if hasattr(classinst, 'inputs'):
-                iterator = classinst.inputs.items
-            else:
-                if helpstr:
-                    ad += '\n' + helpstr + '\n'
+
+            if not issubclass(classinst, BaseInterface):
                 continue
-            mandhelpstr = None # mandatory inputs
-            opthelpstr = None  # optional inputs
-            if not helpstr:
-                helpstr = 'Inputs:: \n\n\t'
-            else:
-                helpstr += 'Inputs:: \n\n\t'
-            for i,v in sorted(iterator()):
 
-                fieldstr =  i
+            ad += '\n:class:`' + c + '`\n' \
+                  + self.rst_section_levels[2] * \
+                  (len(c)+9) + '\n\n'
 
-                try:
-                    setattr(classinst.inputs,i, None)
-                except TraitError, excp:
-                    fieldstr += " : (%s)\n\t"%excp.info
-
-                try:
-                    fieldstr += '\t' + getattr(v, 'desc')
-                except:
-                    fieldstr += '\tUnknown'
-                if getattr(v,'xor'):
-                    fieldstr += '\n\t\texclusive: %s'%','.join(getattr(v,'xor'))
-                if getattr(v,'requires'):
-                    fieldstr += '\n\t\trequires: %s'%','.join(getattr(v,'requires'))
-                if getattr(v, 'mandatory'):
-                    if not mandhelpstr:
-                        mandhelpstr = ['[Mandatory]']
-                    mandhelpstr += [fieldstr]
-                else:
-                    if not opthelpstr:
-                        opthelpstr = ['[Optional]']
-                    opthelpstr += [fieldstr]
-
-            if mandhelpstr:
-                helpstr += '\n\t'.join(mandhelpstr)
-                helpstr += '\n\n\t'
-            if opthelpstr:
-                helpstr += '\n\t'.join(opthelpstr)
-            if helpstr:
-                helpstr += '\n\n'
-
-            if classinst._outputs():
-                iterator = classinst._outputs().items
-            else:
-                iterator = {}.items
-            outstr = []
-            for i,v in sorted(iterator()):
-                fieldstr =  i
-
-                try:
-                    setattr(classinst._outputs(),i, None)
-                except TraitError, excp:
-                    fieldstr += " : (%s)\n\t"%excp.info
-
-                try:
-                    fieldstr += '\t' + getattr(v, 'desc')
-                except:
-                    fieldstr += '\tUnknown'
-                outstr += [fieldstr]
-            if outstr:
-                if not helpstr:
-                    helpstr = '\nOutputs:: \n\n\t'
-                else:
-                    helpstr += '\nOutputs:: \n\n\t'
-                helpstr += '\n\t'.join(outstr)
-            if helpstr:
-                ad += '\n' + helpstr + '\n'
-        """
-            ad += '\n.. autoclass:: ' + c + '\n'
-            # must NOT exclude from index to keep cross-refs working
-            ad += '  :members:\n' \
-                  '  :undoc-members:\n' \
-                  '  :show-inheritance:\n' \
-                  '  :inherited-members:\n' \
-                  '\n' \
-                  '  .. automethod:: __init__\n'
-        """
+            ad += classinst.help(returnhelp=True)
 
         for workflow, name, finst in workflows:
             ad += '\n:class:`' + name + '()`\n' \
