@@ -17,6 +17,7 @@ from socket import gethostname
 from string import Template
 import select
 import subprocess
+from textwrap import wrap
 from time import time
 from warnings import warn
 
@@ -652,13 +653,22 @@ class BaseInterface(Interface):
             def_val = ''
             if getattr(spec, 'usedefault'):
                 def_val = ', nipype default value: %s' % str(getattr(spec, 'default_value')()[1])
-            manhelpstr[-1] += " : (%s%s)" % (excp.info, def_val)
-        manhelpstr += ['\t\t%s' % desc]
+            line = "(%s%s)" % (excp.info, def_val)
+            manhelpstr = wrap(line, 90, initial_indent=manhelpstr[0]+': ',
+                              subsequent_indent='\t\t ')
+        if desc:
+            for line in desc.split('\n'):
+                manhelpstr += wrap(line, 90, initial_indent='\t\t',
+                                   subsequent_indent='\t\t')
         if xor:
-            manhelpstr += ['\t\tmutually exclusive: %s' % ', '.join(xor)]
+            line = '%s' % ', '.join(xor)
+            manhelpstr += wrap(line, 90, initial_indent='\t\tmutually_exclusive: ',
+                               subsequent_indent='\t\t ')
         if requires: # and name not in xor_done:
             others = [field for field in requires if field != name]
-            manhelpstr += ['\t\trequires: %s' % ', '.join(others)]
+            line = '%s' % ', '.join(others)
+            manhelpstr += wrap(line, 90, initial_indent='\t\trequires: ',
+                               subsequent_indent='\t\t ')
         return manhelpstr
 
     @classmethod
