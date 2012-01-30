@@ -626,14 +626,14 @@ class BaseInterface(Interface):
     def help(cls, returnhelp=False):
         """ Prints class help
         """
-        
+
         if cls.__doc__:
             docstring = cls.__doc__.split('\n')
             docstring = [trim(line, '') for line in docstring]
         else:
             docstring = ['']
-        
-        allhelp = '\n'.join(docstring + 
+
+        allhelp = '\n'.join(docstring +
                             cls._inputs_help() + [''] + cls._outputs_help())
         if returnhelp:
             return allhelp
@@ -681,17 +681,17 @@ class BaseInterface(Interface):
             helpstr += ['None']
             print '\n'.join(helpstr)
             return
-        
+
         inputs = cls.input_spec()
         manhelpstr = ['', '\t[Mandatory]']
-        for name, spec in sorted(inputs.traits(mandatory=True).items()):     
+        for name, spec in sorted(inputs.traits(mandatory=True).items()):
             manhelpstr += cls._get_trait_desc(inputs, name, spec)
-        
+
         opthelpstr = ['', '\t[Optional]']
         for name, spec in sorted(inputs.traits(mandatory=None,
                                                transient=None).items()):
             opthelpstr += cls._get_trait_desc(inputs, name, spec)
-            
+
         if manhelpstr:
             helpstr += manhelpstr
         if opthelpstr:
@@ -1025,6 +1025,7 @@ class CommandLine(BaseInterface):
     """
 
     input_spec = CommandLineInputSpec
+    _cmd = None
 
     def __init__(self, command=None, **inputs):
         super(CommandLine, self).__init__(**inputs)
@@ -1061,18 +1062,18 @@ class CommandLine(BaseInterface):
         message += "Standard error:\n" + runtime.stderr + "\n"
         message += "Return code: " + str(runtime.returncode)
         raise RuntimeError(message)
-    
+
     @classmethod
     def help(cls, returnhelp=False):
         allhelp = super(CommandLine, cls).help(returnhelp=True)
-        
+
         allhelp = "Wraps command **%s**\n\n"%cls._cmd + allhelp
-        
+
         if returnhelp:
             return allhelp
         else:
             print allhelp
-    
+
 
     def _run_interface(self, runtime):
         """Execute command via subprocess
