@@ -1,25 +1,16 @@
+import os.path as op                      # system functions
+
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.cmtk as cmtk
-from .connectivity_mapping import create_connectivity_pipeline
-import nipype.algorithms.misc as misc
-import numpy as np
-import os, os.path as op                      # system functions
-from nipype.utils.misc import package_check
-import warnings
-
-have_cmp = True
-try:
-    package_check('cmp')
-except Exception, e:
-    have_cmp = False
-    warnings.warn('cmp not installed')
-else:
-    import cmp
-
 from nipype.interfaces.cmtk.nx import read_unknown_ntwk
+import nipype.interfaces.cmtk as cmtk
+import nipype.algorithms.misc as misc
+import nipype.pipeline.engine as pe          # pypeline engine
+import numpy as np
+
+from .connectivity_mapping import create_connectivity_pipeline
+
+
 
 # This should be done inside a function, not globally
 # fsl.FSLCommand.set_default_output_type('NIFTI')
@@ -402,20 +393,12 @@ def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir
     'load_centrality',
     'core_number',
     'triangles',
+    'network_file',
      ]), name='l2inputnode')
 
     MergeCNetworks = pe.Node(interface=cmtk.MergeCNetworks(), name="MergeCNetworks")
 
     MergeCSVFiles_degree = pe.Node(interface=misc.MergeCSVFiles(), name="MergeCSVFiles_degree")
-    if cmp:
-        cmp_config = cmp.configuration.PipelineConfiguration()
-        cmp_config.parcellation_scheme = "Lausanne2008"
-        parcellation_name = 'scale500'
-        rowIDs = pullnodeIDs(op.abspath(cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']))
-        MergeCSVFiles_degree.inputs.row_headings = rowIDs
-    else:
-        warnings.warn(('cmp not installed. Workflow may not be configured '
-                       'properly.'))
     MergeCSVFiles_degree.inputs.extra_column_heading = 'group'
     MergeCSVFiles_degree.inputs.extra_field = group_id
 
@@ -463,6 +446,8 @@ def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir
     l2pipeline.connect([(l2inputnode,MergeCSVFiles_load_centrality,[('load_centrality','in_files')])])
     l2pipeline.connect([(l2inputnode,MergeCSVFiles_core_number,[('core_number','in_files')])])
     l2pipeline.connect([(l2inputnode,MergeCSVFiles_triangles,[('triangles','in_files')])])
+    l2pipeline.connect(l2inputnode, ('network_file', pullnodeIDs),
+                       MergeCSVFiles_degree, 'row_headings')
 
     l2pipeline.connect([(group_infosource,MergeCNetworks,[('group_id','out_file')])])
     l2pipeline.connect([(MergeCNetworks, l2datasink, [('connectome_file', '@l2output')])])

@@ -5,22 +5,10 @@ import nipype.interfaces.camino as camino
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.interfaces.freesurfer as fs    # freesurfer
-import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
 import inspect
-import nibabel as nb
-import os, os.path as op
-from nipype.utils.misc import package_check
-import warnings
-
-try:
-    package_check('cmp')
-except Exception, e:
-    warnings.warn('cmp not installed')
-    cmp = None
-else:
-    import cmp
+import os.path as op
 
 from .diffusion import (get_vox_dims, get_data_dims, get_affine)
 
@@ -64,6 +52,8 @@ def create_connectivity_pipeline(name="connectivity"):
         inputnode.dwi
         inputnode.bvecs
         inputnode.bvals
+        inputnode.resolution_network_file
+        inputnode.roi_LUT_file
 
     Outputs::
 
@@ -78,7 +68,15 @@ def create_connectivity_pipeline(name="connectivity"):
 
     """
 
-    inputnode1 = pe.Node(interface=util.IdentityInterface(fields=["subject_id","dwi", "bvecs", "bvals", "subjects_dir"]), name="inputnode1")
+    inputnode1 = pe.Node(interface=util.IdentityInterface(fields=["subject_id",
+                                                                  "dwi",
+                                                                  "bvecs",
+                                                                  "bvals",
+                                                                  "subjects_dir",
+                                                                  "resolution_network_file",
+                                                                  "roi_LUT_file"
+                                                                  ]),
+                         name="inputnode1")
 
     FreeSurferSource = pe.Node(interface=nio.FreeSurferSource(), name='fssource')
 
@@ -260,12 +258,6 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     roigen = pe.Node(interface=cmtk.ROIGen(), name="ROIGen")
-    if cmp:
-        cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme = "NativeFreesurfer")
-        cmp_config.parcellation_scheme = "NativeFreesurfer"
-        roigen.inputs.LUT_file = cmp_config.get_freeview_lut("NativeFreesurfer")['freesurferaparc']
-    else:
-        warnings.warn('CMP not found. Workflow may be incorrect')
 
     """
     The CreateMatrix interface takes in the remapped aparc+aseg image as well as the label dictionary and fiber tracts
@@ -277,10 +269,6 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
-    if cmp:
-        creatematrix.inputs.resolution_network_file = cmp_config.parcellation['freesurferaparc']['node_information_graphml']
-    else:
-        warnings.warn('CMP not found. Workflow may be incorrect')
 
     """
     Here we define the endpoint of this tutorial, which is the CFFConverter node, as well as a few nodes which use
@@ -439,6 +427,10 @@ def create_connectivity_pipeline(name="connectivity"):
     original tracts, and label file are then given to CreateMatrix.
     """
 
+    mapping.connect(inputnode1, 'roi_LUT_file',
+                    roigen, 'LUT_file')
+    mapping.connect(inputnode1, 'resolution_network_file',
+                    creatematrix, 'resolution_network_file')
     mapping.connect([(FreeSurferSource, mri_convert_AparcAseg, [(('aparc_aseg', select_aparc), 'in_file')])])
 
     mapping.connect([(b0Strip, inverse_AparcAseg,[('out_file','reference')])])
