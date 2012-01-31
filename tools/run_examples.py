@@ -14,7 +14,7 @@ def run_examples(example, pipelines, plugin):
         if os.path.exists(wf.base_dir):
             rmtree(wf.base_dir)
         wf.config = {'execution' :{'hash_method': 'timestamp', 'stop_on_first_rerun': 'true'}}
-        wf.run(plugin=plugin)
+        wf.run(plugin=plugin, plugin_args={'n_procs': 4})
         #run twice to check if nothing is rerunning
         wf.run(plugin=plugin)
 

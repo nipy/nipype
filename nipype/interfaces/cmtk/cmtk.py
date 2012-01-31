@@ -8,11 +8,11 @@
 """
 
 from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                                    File, TraitedSpec, Directory, isdefined)
+                                    File, TraitedSpec, InputMultiPath, Directory, isdefined)
 from nipype.utils.filemanip import split_filename
 import pickle
 import scipy.io as sio
-import os
+import os, os.path as op
 import numpy as np
 import nibabel as nb
 import networkx as nx
@@ -63,8 +63,7 @@ def length(xyz, along=False):
     return np.sum(dists)
 
 def create_endpoints_array(fib, voxelSize):
-    """
-    Create the endpoints arrays for each fiber
+    """ Create the endpoints arrays for each fiber
     Parameters
     ----------
     fib: the fibers data
@@ -75,8 +74,7 @@ def create_endpoints_array(fib, voxelSize):
     index of its first and last point in the voxelSize volume
     endpointsmm) : endpoints in milimeter coordinates
     """
-
-    #print 'Creating endpoint array'
+    
     # Init
     n = len(fib)
     endpoints = np.zeros( (n, 2, 3) )
@@ -85,24 +83,25 @@ def create_endpoints_array(fib, voxelSize):
 
     # Computation for each fiber
     for i, fi in enumerate(fib):
-
+    
         # Percent counter
         pcN = int(round( float(100*i)/n ))
         if pcN > pc and pcN%1 == 0:
             pc = pcN
+            print '%4.0f%%' % (pc)
 
         f = fi[0]
-
+    
         # store startpoint
         endpoints[i,0,:] = f[0,:]
         # store endpoint
         endpoints[i,1,:] = f[-1,:]
-
+        
         # store startpoint
         endpointsmm[i,0,:] = f[0,:]
         # store endpoint
         endpointsmm[i,1,:] = f[-1,:]
-
+        
         # Translate from mm to index
         endpoints[i,0,0] = int( endpoints[i,0,0] / float(voxelSize[0]))
         endpoints[i,0,1] = int( endpoints[i,0,1] / float(voxelSize[1]))
@@ -110,34 +109,18 @@ def create_endpoints_array(fib, voxelSize):
         endpoints[i,1,0] = int( endpoints[i,1,0] / float(voxelSize[0]))
         endpoints[i,1,1] = int( endpoints[i,1,1] / float(voxelSize[1]))
         endpoints[i,1,2] = int( endpoints[i,1,2] / float(voxelSize[2]))
-
+        
     # Return the matrices
     print 'Returning the endpoint matrix'
     return (endpoints, endpointsmm)
 
-
-def save_fibers(oldhdr, oldfib, fname, indices):
-    """ Stores a new trackvis file fname using only given indices """
-
-    hdrnew = oldhdr.copy()
-
-    outstreams = []
-    for i in indices:
-        outstreams.append( oldfib[i] )
-
-    n_fib_out = len(outstreams)
-    hdrnew['n_count'] = n_fib_out
-
-    nb.trackvis.write(fname, outstreams, hdrnew)
-
-
-def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, matrix_mat_name,endpoint_name):
+def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_name, endpoint_name, dict_file=-1):
     """ Create the connection matrix for each resolution using fibers and ROIs. """
 
     print 'Running cmat function'
     # Identify the endpoints of each fiber
-    en_fname = os.path.abspath(endpoint_name + '_endpoints.npy')
-    en_fnamemm = os.path.abspath(endpoint_name + '_endpointsmm.npy')
+    en_fname = op.abspath(endpoint_name + '_endpoints.npy')
+    en_fnamemm = op.abspath(endpoint_name + '_endpointsmm.npy')
 
     print 'Reading Trackvis file {trk}'.format(trk=track_file)
     fib, hdr = nb.trackvis.read(track_file, False)
@@ -164,9 +147,10 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
     print 'Number of fibers {num}'.format(num=n)
 
     # Load Pickled label dictionary (not currently used)
-    file = open(dict_file, 'r')
-    labelDict = pickle.load(file)
-    file.close()
+    if not dict_file == -1:
+        file = open(dict_file, 'r')
+        labelDict = pickle.load(file)
+        file.close()
 
     # Create empty fiber label array
     fiberlabels = np.zeros( (n, 2) )
@@ -185,11 +169,15 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
     gp = nx.read_graphml(resolution_network_file)
     nROIs = len(gp.nodes())
 
+	
+    # add node information from parcellation
     for u,d in gp.nodes_iter(data=True):
-        G.add_node(int(u), d)
-
+		G.add_node(int(u), d)
+		# compute a position for the node based on the mean position of the
+		# ROI in voxel coordinates (segmentation volume )
+		G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
+    
     dis = 0
-
     for i in range(endpoints.shape[0]):
 
         # ROI start => ROI end
@@ -213,7 +201,8 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
             sys.stderr.write("This needs bugfixing!")
             continue
 
-        # Switch the rois in order to enforce startROI < endROI
+        # Update fiber label
+        # switch the rois in order to enforce startROI < endROI
         if endROI < startROI:
             tmp = startROI
             startROI = endROI
@@ -225,64 +214,133 @@ def cmat(track_file, roi_file, dict_file, resolution_network_file, matrix_name, 
         final_fiberlabels.append( [ startROI, endROI ] )
         final_fibers_idx.append(i)
 
+        # Add edge to graph
         if G.has_edge(startROI, endROI):
             G.edge[startROI][endROI]['fiblist'].append(i)
         else:
             G.add_edge(startROI, endROI, fiblist = [i])
+                
+        print "Found %i (%f percent out of %i fibers) fibers that start or terminate in a voxel which is not labeled. (orphans)" % (dis, dis*100.0/n, n)
+        print "Valid fibers: %i (%f percent)" % (n-dis, 100 - dis*100.0/n)
 
-    finalfiberlength = []
-    for idx in final_fibers_idx:
-        finalfiberlength.append( length(fib[idx][0]) )
+        # create a final fiber length array
+        finalfiberlength = []
+        for idx in final_fibers_idx:
+            # compute length of fiber
+            finalfiberlength.append( length(fib[idx][0]) )
 
-    print 'Convert to array'
-    final_fiberlength_array = np.array( finalfiberlength )
-    print 'Make final fiber labels as array'
-    final_fiberlabels_array = np.array(final_fiberlabels, dtype = np.int32)
+        # convert to array
+        final_fiberlength_array = np.array( finalfiberlength )
+        
+        # make final fiber labels as array
+        final_fiberlabels_array = np.array(final_fiberlabels, dtype = np.int32)
 
-    mlab = np.empty([len(G.nodes())+1,len(G.nodes())+1]) #Plus 1 because of zero indexing
-    print 'Matlab matrix shape: {shp}'.format(shp=len(G.nodes())+1)
-
+    numfib = nx.Graph()
+    numfib.add_nodes_from(G)
+    fibmean = nx.Graph()
+    fibmean.add_nodes_from(G)
+    fibdev = nx.Graph()
+    fibdev.add_nodes_from(G)
     for u,v,d in G.edges_iter(data=True):
         G.remove_edge(u,v)
-        mlab[u][v] = len(d['fiblist'])
         di = { 'number_of_fibers' : len(d['fiblist']), }
+
         idx = np.where( (final_fiberlabels_array[:,0] == int(u)) & (final_fiberlabels_array[:,1] == int(v)) )[0]
-        di['fiber_length_mean'] = np.mean(final_fiberlength_array[idx])
-        di['fiber_length_std'] = np.std(final_fiberlength_array[idx])
-        G.add_edge(u,v, di)
+        di['fiber_length_mean'] = float( np.mean(final_fiberlength_array[idx]) )
+        di['fiber_length_std'] = float( np.std(final_fiberlength_array[idx]) )
+
+        # this is indexed into the fibers that are valid in the sense of touching start
+        # and end roi and not going out of the volume
+        idx_valid = np.where( (fiberlabels[:,0] == int(u)) & (fiberlabels[:,1] == int(v)) )[0]
+
+        if not u==v: #Fix for self loop problem
+            G.add_edge(u, v, di)
+            numfib.add_edge(u, v, weight=di['number_of_fibers'] )
+            fibmean.add_edge(u, v, weight=di['fiber_length_mean'] )
+            fibdev.add_edge(u, v, weight=di['fiber_length_std'] )
 
     print 'Writing network as {ntwk}'.format(ntwk=matrix_name)
-    nx.write_gpickle(G, os.path.abspath(matrix_name))
+    nx.write_gpickle(G, op.abspath(matrix_name))
 
-    mlab_dict = {}
-    mlab_dict['cmatrix'] = mlab
+    numfib_mlab = nx.to_numpy_matrix(numfib, dtype=np.float64)
+    numfib_dict = {}
+    numfib_dict['cmatrix'] = numfib_mlab
+
+    fibmean_mlab = nx.to_numpy_matrix(fibmean, dtype=np.float64)
+    fibmean_dict = {}
+    fibmean_dict['cmatrix'] = fibmean_mlab
+
+    fibdev_mlab = nx.to_numpy_matrix(fibdev, dtype=np.float64)
+    fibdev_dict = {}
+    fibdev_dict['cmatrix'] = fibdev_mlab
+
+    path, name, ext = split_filename(matrix_mat_name)
+    if not ext == '.mat':
+        ext = '.mat'
+        matrix_mat_name = matrix_mat_name + ext
+
     print 'Writing matlab matrix as {mat}'.format(mat=matrix_mat_name)
-    sio.savemat(matrix_mat_name,mlab_dict)
+    sio.savemat(matrix_mat_name, numfib_dict)
+    
+    mean_fiber_length_matrix_name = op.join(path, name + '_mean_fiber_length') + ext
+    print 'Writing matlab mean fiber length matrix as {mat}'.format(mat=mean_fiber_length_matrix_name)
+    sio.savemat(mean_fiber_length_matrix_name, fibmean_dict)
+    
+    fiber_length_std_matrix_name = op.join(path, name + '_fiber_length_std') + ext
+    print 'Writing matlab fiber length deviation matrix as {mat}'.format(mat=fiber_length_std_matrix_name)
+    sio.savemat(fiber_length_std_matrix_name, fibdev_dict)
 
-    fiberlengths_fname = os.path.abspath(endpoint_name + '_lengths.npy')
-    print 'Saving fiber length array: {array}'.format(array=fiberlengths_fname)
+    fiberlengths_fname = op.abspath(endpoint_name + '_final_fiberslength.npy')
+    print "Storing final fiber length array as %s" % fiberlengths_fname
     np.save(fiberlengths_fname, final_fiberlength_array)
 
-    fiberlabels_fname = os.path.abspath(endpoint_name + '_labels.npy')
-    print 'Saving fiber label array: {array}'.format(array=fiberlabels_fname)
+    fiberlabels_fname  = op.abspath(endpoint_name + '_filtered_fiberslabel.npy')
+    print "Storing all fiber labels (with orphans) as %s" % fiberlabels_fname
     np.save(fiberlabels_fname, np.array(fiberlabels, dtype = np.int32), )
+
+    fiberlabels_noorphans_fname  = op.abspath(endpoint_name + '_final_fiberlabels.npy')
+    print "Storing final fiber labels (no orphans) as %s" % fiberlabels_noorphans_fname
+    np.save(fiberlabels_noorphans_fname, final_fiberlabels_array)
+
+    print "Filtering tractography - keeping only no orphan fibers"
+    finalfibers_fname = op.abspath(endpoint_name + '_streamline_final.trk')
+    save_fibers(hdr, fib, finalfibers_fname, final_fibers_idx)
+
+def save_fibers(oldhdr, oldfib, fname, indices):
+    """ Stores a new trackvis file fname using only given indices """
+    import nibabel.trackvis as tv
+    import cPickle
+    hdrnew = oldhdr.copy()
+    outstreams = []
+    for i in indices:
+        outstreams.append( oldfib[i] )
+    n_fib_out = len(outstreams)
+    hdrnew['n_count'] = n_fib_out
+    print "Writing final no orphan fibers as %s" % fname 
+    tv.write(fname,outstreams,hdrnew)
 
 class CreateMatrixInputSpec(TraitedSpec):
     roi_file = File(exists=True, mandatory=True, desc='Freesurfer aparc+aseg file')
-    dict_file = File(exists=True, mandatory=True, desc='Pickle file containing the label dictionary (see ROIGen)')
+    dict_file = File(exists=True, desc='Pickle file containing the label dictionary (see ROIGen)')
     tract_file = File(exists=True, mandatory=True, desc='Trackvis tract file')
     resolution_network_file = File(exists=True, mandatory=True, desc='Parcellation files from Connectome Mapping Toolkit')
     out_matrix_file = File(genfile = True, desc='NetworkX graph describing the connectivity')
-    out_matrix_mat_file = File(genfile = True, desc='Matlab matrix describing the connectivity')
-    out_endpoint_array_name = File(genfile = True, desc='Name for the generated endpoint arrays')
+    out_matrix_mat_file = File('cmatrix.mat', usedefault=True, desc='Matlab matrix describing the connectivity')
+    out_mean_fiber_length_matrix_mat_file = File(genfile=True, desc='Matlab matrix describing the mean fiber lengths between each node.')
+    out_fiber_length_std_matrix_mat_file = File(genfile=True, desc='Matlab matrix describing the deviation in fiber lengths connecting each node.')
+    out_endpoint_array_name = File(genfile=True, desc='Name for the generated endpoint arrays')
 
 class CreateMatrixOutputSpec(TraitedSpec):
     matrix_file = File(desc='NetworkX graph describing the connectivity')
     matrix_mat_file = File(desc='Matlab matrix describing the connectivity')
+    mean_fiber_length_matrix_mat_file = File(desc='Matlab matrix describing the mean fiber lengths between each node.')
+    fiber_length_std_matrix_mat_file = File(desc='Matlab matrix describing the deviation in fiber lengths connecting each node.')
     endpoint_file = File(desc='Saved Numpy array with the endpoints of each fiber')
     endpoint_file_mm = File(desc='Saved Numpy array with the endpoints of each fiber (in millimeters)')
     fiber_length_file = File(desc='Saved Numpy array with the lengths of each fiber')
     fiber_label_file = File(desc='Saved Numpy array with the labels for each fiber')
+    fiber_labels_noorphans = File(desc='Saved Numpy array with the labels for each non-orphan fiber')
+    filtered_tractography = File(desc='TrackVis file containing only those fibers which connect two regions')
 
 class CreateMatrix(BaseInterface):
     """
@@ -291,8 +349,8 @@ class CreateMatrix(BaseInterface):
     Example
     -------
 
-    >>> import nipype.interfaces.cmtk.cmtk as ck
-    >>> conmap = ck.CreateMatrix()
+    >>> import nipype.interfaces.cmtk as cmtk
+    >>> conmap = cmtk.CreateMatrix()
     >>> conmap.roi_file = 'fsLUT_aparc+aseg.nii'
     >>> conmap.dict_file = 'fsLUT_aparc+aseg.pck'
     >>> conmap.tract_file = 'fibers.trk'
@@ -304,52 +362,91 @@ class CreateMatrix(BaseInterface):
 
     def _run_interface(self, runtime):
         if isdefined(self.inputs.out_matrix_file):
-            matrix_file = self.inputs.out_matrix_file
+            path, name, _ = split_filename(self.inputs.out_matrix_file)
+            matrix_file = op.abspath(name + '.pck')
         else:
-            matrix_file = self._gen_outfilename('gpickle')
-        if isdefined(self.inputs.out_matrix_mat_file):
-            matrix_mat_file = self.inputs.out_matrix_mat_file
-        else:
-            matrix_mat_file = self._gen_outfilename('mat')
+            matrix_file = self._gen_outfilename('.pck')
 
+        matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
+        path, name, ext = split_filename(matrix_mat_file)
+        if not ext == '.mat':
+            ext = '.mat'
+            matrix_mat_file = matrix_mat_file + ext
+            
+        if isdefined(self.inputs.out_mean_fiber_length_matrix_mat_file):
+            mean_fiber_length_matrix_mat_file = op.abspath(self.inputs.out_mean_fiber_length_matrix_mat_file)
+        else:
+            mean_fiber_length_matrix_name = op.abspath(self._gen_outfilename('_mean_fiber_length'))
+        
+        if isdefined(self.inputs.out_fiber_length_std_matrix_mat_file):
+            fiber_length_std_matrix_mat_file = op.abspath(self.inputs.out_fiber_length_std_matrix_mat_file)
+        else:
+            fiber_length_std_matrix_name = op.abspath(self._gen_outfilename('_fiber_length_std.mat'))
+        
         if not isdefined(self.inputs.out_endpoint_array_name):
             _, endpoint_name , _ = split_filename(self.inputs.tract_file)
+            endpoint_name = op.abspath(endpoint_name)
         else:
-            endpoint_name = self.inputs.out_endpoint_array_name
+            endpoint_name = op.abspath(self.inputs.out_endpoint_array_name)
 
-        cmat(self.inputs.tract_file, self.inputs.roi_file, self.inputs.dict_file, self.inputs.resolution_network_file,
-        matrix_file, matrix_mat_file, endpoint_name)
+        if isdefined(self.inputs.dict_file):
+            cmat(self.inputs.tract_file, self.inputs.roi_file, self.inputs.resolution_network_file,
+            matrix_file, matrix_mat_file, endpoint_name, self.inputs.dict_file)
+        else:        
+            cmat(self.inputs.tract_file, self.inputs.roi_file, self.inputs.resolution_network_file,
+            matrix_file, matrix_mat_file, endpoint_name)
 
         return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.out_matrix_file):
-            outputs['matrix_file']= os.path.abspath(self.inputs.out_matrix_file)
+            path, name, _ = split_filename(self.inputs.out_matrix_file)
+            outputs['matrix_file'] = op.abspath(name + '.pck')
         else:
-            outputs['matrix_file']=os.path.abspath(self._gen_outfilename('gpickle'))
-        if isdefined(self.inputs.out_matrix_mat_file):
-            outputs['matrix_mat_file']= os.path.abspath(self.inputs.out_matrix_mat_file)
-        else:
-            outputs['matrix_mat_file']=os.path.abspath(self._gen_outfilename('mat'))
+            outputs['matrix_file'] = op.abspath(self._gen_outfilename('.pck'))
 
+        matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
+        path, name, ext = split_filename(matrix_mat_file)
+        if not ext == '.mat':
+            ext = '.mat'
+            matrix_mat_file = matrix_mat_file + ext
+
+        outputs['matrix_mat_file'] = matrix_mat_file        
+        if isdefined(self.inputs.out_mean_fiber_length_matrix_mat_file):
+            outputs['mean_fiber_length_matrix_mat_file']= op.abspath(self.inputs.out_mean_fiber_length_matrix_mat_file)
+        else:
+            outputs['mean_fiber_length_matrix_mat_file']=op.abspath(self._gen_outfilename('_mean_fiber_length.mat'))
+        
+        if isdefined(self.inputs.out_fiber_length_std_matrix_mat_file):
+            outputs['fiber_length_std_matrix_mat_file']= op.abspath(self.inputs.out_fiber_length_std_matrix_mat_file)
+        else:
+            outputs['fiber_length_std_matrix_mat_file']= op.abspath(self._gen_outfilename('_fiber_length_std.mat'))
+        
         if isdefined(self.inputs.out_endpoint_array_name):
-            outputs['endpoint_file'] = os.path.abspath(self.inputs.out_endpoint_array_name + '_endpoints.npy')
-            outputs['endpoint_file_mm'] = os.path.abspath(self.inputs.out_endpoint_array_name + '_endpointsmm.npy')
-            outputs['fiber_length_file'] = os.path.abspath(self.inputs.out_endpoint_array_name + '_lengths.npy')
-            outputs['fiber_label_file'] = os.path.abspath(self.inputs.out_endpoint_array_name + '_labels.npy')
+            outputs['endpoint_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_endpoints.npy')
+            outputs['endpoint_file_mm'] = op.abspath(self.inputs.out_endpoint_array_name + '_endpointsmm.npy')
+            outputs['fiber_length_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_final_fiberslength.npy')
+            outputs['fiber_label_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_filtered_fiberslabel.npy')
+            outputs['fiber_labels_noorphans'] = op.abspath(self.inputs.out_endpoint_array_name + '_final_fiberslabels.npy')
         else:
             _, endpoint_name , _ = split_filename(self.inputs.tract_file)
-            outputs['endpoint_file'] = os.path.abspath(endpoint_name + '_endpoints.npy')
-            outputs['endpoint_file_mm'] = os.path.abspath(endpoint_name + '_endpointsmm.npy')
-            outputs['fiber_length_file'] = os.path.abspath(endpoint_name + '_lengths.npy')
-            outputs['fiber_label_file'] = os.path.abspath(endpoint_name + '_labels.npy')
+            outputs['endpoint_file'] = op.abspath(endpoint_name + '_endpoints.npy')
+            outputs['endpoint_file_mm'] = op.abspath(endpoint_name + '_endpointsmm.npy')
+            outputs['fiber_length_file'] = op.abspath(endpoint_name + '_final_fiberslength.npy')
+            outputs['fiber_label_file'] = op.abspath(endpoint_name + '_filtered_fiberslabel.npy')
+            outputs['fiber_labels_noorphans'] = op.abspath(endpoint_name + '_final_fiberslabels.npy')
 
+        _, name , _ = split_filename(self.inputs.tract_file)
+        outputs['filtered_tractography'] = op.abspath(name + '_streamline_final.trk')
         return outputs
 
     def _gen_outfilename(self, ext):
-        _, name , _ = split_filename(self.inputs.tract_file)
-        return name + '.' + ext
+		if isdefined(self.inputs.out_matrix_file):
+			_, name , _ = split_filename(self.inputs.out_matrix_file)
+		else:
+			_, name , _ = split_filename(self.inputs.tract_file)
+		return name + ext
 
 class ROIGenInputSpec(BaseInterfaceInputSpec):
     aparc_aseg_file = File(exists=True, mandatory=True, desc='Freesurfer aparc+aseg file')
@@ -370,8 +467,8 @@ class ROIGen(BaseInterface):
     Example
     -------
 
-    >>> import nipype.interfaces.cmtk.cmtk as ck
-    >>> rg = ck.ROIGen()
+    >>> import nipype.interfaces.cmtk as cmtk
+    >>> rg = cmtk.ROIGen()
     >>> rg.inputs.aparc_aseg_file = 'aparc+aseg.nii'
     >>> rg.inputs.use_freesurfer_LUT = True
     >>> rg.inputs.freesurfer_dir = '/usr/local/freesurfer'
@@ -397,20 +494,20 @@ class ROIGen(BaseInterface):
             print 'Using Freesurfer LUT: {name}'.format(name=self.LUT_file)
             prefix = 'fsLUT'
         elif not self.inputs.use_freesurfer_LUT and isdefined(self.inputs.LUT_file):
-            self.LUT_file = os.path.abspath(self.inputs.LUT_file)
+            self.LUT_file = op.abspath(self.inputs.LUT_file)
             lutpath, lutname, lutext = split_filename(self.LUT_file)
             print 'Using Custom LUT file: {name}'.format(name=lutname+lutext)
             prefix = lutname
 
-        self.roi_file = os.path.abspath(prefix + '_' + aparcname + '.nii')
-        self.dict_file = os.path.abspath(prefix + '_' + aparcname + '.pck')
+        self.roi_file = op.abspath(prefix + '_' + aparcname + '.nii')
+        self.dict_file = op.abspath(prefix + '_' + aparcname + '.pck')
         print 'Output names generated'
 
         if isdefined(self.inputs.out_roi_file):
-            self.roi_file = os.path.abspath(self.inputs.out_roi_file)
+            self.roi_file = op.abspath(self.inputs.out_roi_file)
 
         if isdefined(self.inputs.out_dict_file):
-            self.dict_file = os.path.abspath(self.inputs.out_dict_file)
+            self.dict_file = op.abspath(self.inputs.out_dict_file)
 
         MAPPING = [[1,2012],[2,2019],[3,2032],[4,2014],[5,2020],[6,2018],[7,2027],[8,2028],[9,2003],[10,2024],[11,2017],[12,2026],
                [13,2002],[14,2023],[15,2010],[16,2022],[17,2031],[18,2029],[19,2008],[20,2025],[21,2005],[22,2021],[23,2011],
@@ -421,11 +518,11 @@ class ROIGen(BaseInterface):
                [70,1009],[71,1015],[72,1001],[73,1030],[74,1034],[75,1035],[76,10],[77,11],[78,12],[79,13],[80,26],[81,17],
                [82,18],[83,16]]
 
-        print 'Lookup table: {name}'.format(name=os.path.abspath(self.LUT_file))
+        print 'Lookup table: {name}'.format(name=op.abspath(self.LUT_file))
         LUTlabelsRGBA = np.loadtxt(self.LUT_file, skiprows=4, usecols=[0,1,2,3,4,5], comments='#',
                         dtype={'names': ('index', 'label', 'R', 'G', 'B', 'A'),'formats': ('int', '|S30', 'int', 'int', 'int', 'int')})
         print LUTlabelsRGBA
-        self.aparc_aseg_file = os.path.abspath(self.inputs.aparc_aseg_file)
+        self.aparc_aseg_file = op.abspath(self.inputs.aparc_aseg_file)
         print 'Aparc path: {name}'.format(name=self.aparc_aseg_file)
         niiAPARCimg = nb.load(self.aparc_aseg_file)
         niiAPARCdata = niiAPARCimg.get_data()
@@ -482,10 +579,10 @@ class ROIGen(BaseInterface):
 
         roi_image = nb.Nifti1Image(niiGM, niiAPARCimg.get_affine(), niiAPARCimg.get_header())
 
-        print 'Saving ROI File to {path}'.format(path=os.path.abspath(self.roi_file))
-        nb.save(roi_image, os.path.abspath(self.roi_file))
-        print 'Saving Dictionary File to {path} in Pickle format'.format(path=os.path.abspath(self.dict_file))
-        file = open(os.path.abspath(self.dict_file), 'w')
+        print 'Saving ROI File to {path}'.format(path=op.abspath(self.roi_file))
+        nb.save(roi_image, op.abspath(self.roi_file))
+        print 'Saving Dictionary File to {path} in Pickle format'.format(path=op.abspath(self.dict_file))
+        file = open(op.abspath(self.dict_file), 'w')
         pickle.dump(labelDict, file)
         file.close()
 
@@ -494,13 +591,13 @@ class ROIGen(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         if isdefined(self.inputs.out_roi_file):
-            outputs['roi_file'] = os.path.abspath(self.inputs.out_roi_file)
+            outputs['roi_file'] = op.abspath(self.inputs.out_roi_file)
         else:
-            outputs['roi_file'] = os.path.abspath(self._gen_outfilename('nii'))
+            outputs['roi_file'] = op.abspath(self._gen_outfilename('nii'))
         if isdefined(self.inputs.out_dict_file):
-            outputs['dict_file'] = os.path.abspath(self.inputs.out_dict_file)
+            outputs['dict_file'] = op.abspath(self.inputs.out_dict_file)
         else:
-            outputs['dict_file'] = os.path.abspath(self._gen_outfilename('pck'))
+            outputs['dict_file'] = op.abspath(self._gen_outfilename('pck'))
         return outputs
 
     def _gen_outfilename(self, ext):
@@ -511,4 +608,3 @@ class ROIGen(BaseInterface):
             lutpath, lutname, lutext = split_filename(self.inputs.LUT_file)
             prefix = lutname
         return prefix + '_' + name + '.' + ext
-

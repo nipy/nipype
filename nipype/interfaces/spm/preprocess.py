@@ -327,8 +327,8 @@ class NormalizeInputSpec(SPMCommandInputSpec):
                             desc='file to normalize to template',
                             xor=['parameter_file'],
                             mandatory=True, copyfile=True)
-    jobtype = traits.Enum('estwrite', 'estimate', 'write',
-                          desc='one of: estimate, write, estwrite (opt, estwrite)',
+    jobtype = traits.Enum('estwrite', 'est', 'write',
+                          desc='one of: est, write, estwrite (opt, estwrite)',
                           usedefault=True)
     apply_to_files = InputMultiPath(File(exists=True), field='subj.resample',
                                desc='files to apply transformation to (opt)', copyfile=True)

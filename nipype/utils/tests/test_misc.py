@@ -1,9 +1,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from nipype.testing import assert_equal, assert_true
+from nipype.testing import assert_equal, assert_true, assert_false
 
-from nipype.utils.misc import container_to_string, \
-     getsource, create_function_from_source
+from nipype.utils.misc import (container_to_string, getsource,
+                               create_function_from_source, str2bool)
 
 def test_cont_to_str():
     # list
@@ -39,3 +39,15 @@ def test_func_to_str():
         f_src = getsource(f)
         f_recreated = create_function_from_source(f_src)
         yield assert_equal, f(2.3), f_recreated(2.3)
+
+def test_str2bool():
+    yield assert_true, str2bool("yes")
+    yield assert_true, str2bool("true")
+    yield assert_true, str2bool("t")
+    yield assert_true, str2bool("1")
+    yield assert_false, str2bool("no")
+    yield assert_false, str2bool("false")
+    yield assert_false, str2bool("n")
+    yield assert_false, str2bool("f")
+    yield assert_false, str2bool("0")
+

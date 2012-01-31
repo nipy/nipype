@@ -1,6 +1,50 @@
 Release 0.4.2 (Future)
 ============================
+
+* API: FSL defaults to Nifti when OUTPUTTYPE environment variable not found
+* API: By default inputs are removed from Node working directory
+* API: InterfaceResult class is now versioned and stores class type not instance
+* API: Added FIRST interface
+* API: Added max_jobs paramter to plugin_args. limits the number of jobs
+       executing at any given point in time
+* API: crashdump_dir is now a config execution option
+* API: new config execution options for controlling hash checking, execution and
+       logging behavior when running in distributed mode.
+* API: Node/MapNode has new attribute that allows it to run on master thread.
+
 * ENH: Added fsl resting state workflow based on behzadi 2007 CompCorr method.
+* ENH: TSNR node produces mean and std-dev maps; allows polynomial detrending
+* ENH: IdentityNodes are removed prior to execution
+* ENH: Added Michael Notter's beginner's guide
+* ENH: Added engine support for status callback functions
+* ENH: SPM create warped node
+* ENH: All underlying interfaces (including python ones) are now optional
+* ENH: Added imperative programming option with Nodes and caching
+* ENH: Added debug mode to configuration
+* ENH: Results can be stored and loaded without traits exceptions
+* ENH: Added concurrent log handler for distributed writing to log file
+* ENH: Reporting can be turned off using config
+* ENH: Added stats files to FreeSurferOutput
+* ENH: Support for Condor through qsub emulation
+* ENH: IdentityNode with iterable expansion takes place after remaining Identity
+       Node removal
+
+* FIX: Fixed spm preproc workflow to cater to multiple functional runs
+* FIX: Workflow outputs displays nodes with empty outputs
+* FIX: SUSAN workflow works without usans
+* FIX: SGE fixed for reading custom templates
+* FIX: warping in SPM realign, Dartel and interpolation parameters
+* FIX: Fixed voxel size parameter in freesurfer mri_convert
+* FIX: 4D images in spm coregister
+* FIX: Works around matlab tty bug
+* FIX: Overwriting connection raises exception
+* FIX: Outputs are loaded from results and not stored in memory for during
+       distributed operation
+* FIX: SPM threshold uses SPM.mat name and improved error detection
+* FIX: Removing directory contents works even when a node has no outputs
+* FIX: DARTEL workflows will run only when SPM 8 is available
+* FIX: SPM Normalize estimate field fixed
+* FIX: hashmethod argument now used for calculating hash of old file
 
 Release 0.4.1 (Jun 16, 2011)
 ============================

@@ -7,8 +7,8 @@
 The workflow engine is designed to support plugin interfaces for
 distributed processing. Current plugins are available for multiprocessing,
 IPython_ (0.10.1/2) distributed processing platforms and for direct
-processing on SGE_/OGE_, PBS_. We anticipate future plugins for the Soma_ workflow,
-LSF_ and Condor_.
+processing on SGE_/OGE_, PBS_, and Condor_. We anticipate future plugins for the Soma_ workflow,
+and LSF_.
 
 Parallel distributed processing relies on the availability of a shared
 filesystem across computational nodes.
@@ -94,10 +94,35 @@ a custom template::
        workflow.run(plugin='SGE',
           plugin_args=dict(template='mytemplate.sh', qsub_args='-q myqueue')
 
+Using the pipeline engine with Condor
+-------------------------------------
+
+Despite the differences between Condor and SGE-like batch systems the plugin
+usage (incl. supported arguments) is almost identical. The Condor plugin relies
+on a ``qsub`` emulation script for Condor, called ``condor_qsub`` that can be
+obtained from a `Git repository on git.debian.org`_. This script is currently
+not shipped with a standard Condor distribution, but is included in the Condor
+package from http://neuro.debian.net. It is sufficient to download this script
+and install it in any location on a system that is included in the ``PATH``
+configuration.
+
+.. _Git repository on git.debian.org: http://anonscm.debian.org/gitweb/?p=pkg-exppsy/condor.git;a=blob_plain;f=debian/condor_qsub;hb=HEAD
+
+Running a workflow in a Condor pool is done by calling::
+
+       workflow.run(plugin='Condor')
+
+The plugin supports a limited set of qsub arguments (``qsub_args``) that cover
+the most common use cases. The ``condor_qsub`` emulation script translates qsub
+arguments into the corresponding Condor terminology and handles the actual job
+submission. For details on supported options see the manpage of ``condor_qsub``.
+
+
+
 .. include:: ../links_names.txt
 
-.. _SGE: www.oracle.com/us/products/tools/oracle-grid-engine-075549.html
-.. _OGE: www.oracle.com/us/products/tools/oracle-grid-engine-075549.html
+.. _SGE: http://www.oracle.com/us/products/tools/oracle-grid-engine-075549.html
+.. _OGE: http://www.oracle.com/us/products/tools/oracle-grid-engine-075549.html
 .. _Soma: http://brainvisa.info/soma/soma-workflow/
 .. _PBS: http://www.clusterresources.com/products/torque-resource-manager.php
 .. _LSF: http://www.platform.com/Products/platform-lsf

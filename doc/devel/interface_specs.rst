@@ -4,7 +4,7 @@ Interface Specifications
 
 Before you start
 ----------------
-NiPyPe is a young project maintained by an enthusiastic group of developers. Even though the documentation might be sparse or cryptic at times we strongly encourage you to contact us on the official nipype developers mailing list in case of any troubles: nipy-devel@neuroimaging.scipy.org (we are sharing a mailing list with the nipy community therefore please add ``[nipype]`` to the messsage title).
+Nipype is a young project maintained by an enthusiastic group of developers. Even though the documentation might be sparse or cryptic at times we strongly encourage you to contact us on the official nipype developers mailing list in case of any troubles: nipy-devel@neuroimaging.scipy.org (we are sharing a mailing list with the nipy community therefore please add ``[nipype]`` to the messsage title).
 
 
 Overview
@@ -252,6 +252,13 @@ Common
 	check_mandatory_inputs ensures that all requirements (both mandatory and
 	via the requires metadata are satisfied). These are also reflected in
 	the help function.
+
+``copyfile``
+	This is metadata for a File or Directory trait that is relevant only in 
+	the context of wrapping an interface in a `Node` and `MapNode`. `copyfile` 
+	can be set to either `True` or `False`. `False` indicates that contents 
+	should be symlinked, while `True` indicates that the contents should be 
+	copied over.
 	
 CommandLine
 ^^^^^^^^^^^

@@ -1,4 +1,3 @@
-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ Set of interfaces that allow interaction with data. Currently
@@ -158,6 +157,9 @@ class DataSink(IOBase):
             Unlike most nipype-nodes this is not a thread-safe node because it can
             write to a common shared location. It will not complain when it
             overwrites a file.
+            
+            If both substitutions and regexp_substitutions are used, then 
+            substitutions are applied first followed by regexp_substitutions.
 
         Examples
         --------

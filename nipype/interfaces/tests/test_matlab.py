@@ -7,31 +7,12 @@ from shutil import rmtree
 from nipype.testing import (assert_equal, assert_true, assert_false,
                             assert_raises, skipif)
 import nipype.interfaces.matlab as mlab
-from nipype.interfaces.base import CommandLine, Bunch
 
-try:
-    matlab_cmd = os.environ['MATLABCMD']
-except:
-    matlab_cmd = 'matlab'
-
-try:
-    res = CommandLine(command='which', args=matlab_cmd).run()
-    matlab_path = res.runtime.stdout.strip()
-except Exception, e:
-    # exception in above would be thrown if which finds no matlab
-    matlab_path = ''
-
-no_matlab = True
-if matlab_path != '':
-    no_matlab = False
+matlab_cmd = mlab.get_matlab_command()
+no_matlab = matlab_cmd is None
+if not no_matlab:
     mlab.MatlabCommand.set_default_matlab_cmd(matlab_cmd)
 
-# If a test requires matlab, prefix it with the skipif decorator like
-# below.  Must import skipif from nipype.testing
-#
-#@skipif(no_matlab)
-#def test_func():
-#    pass
 
 @skipif(no_matlab)
 def test_cmdline():
@@ -40,13 +21,20 @@ def test_cmdline():
                             script_file='testscript', mfile=False)
 
     yield assert_equal, mi.cmdline, \
-        matlab_cmd + ' -nodesktop -nosplash -singleCompThread -r "fprintf(1,\'Executing code at %s:\\n\',datestr(now));ver,try,whos,catch ME,fprintf(2,\'MATLAB code threw an exception:\\n\');fprintf(2,\'%s\\n\',ME.message);if length(ME.stack) ~= 0, fprintf(2,\'File:%s\\nName:%s\\nLine:%d\\n\',ME.stack.file,ME.stack.name,ME.stack.line);, end;end;;exit"'
+        matlab_cmd + (' -nodesktop -nosplash -singleCompThread -r "fprintf(1,'
+                      '\'Executing code at %s:\\n\',datestr(now));ver,try,'
+                      'whos,catch ME,fprintf(2,\'MATLAB code threw an '
+                      'exception:\\n\');fprintf(2,\'%s\\n\',ME.message);if '
+                      'length(ME.stack) ~= 0, fprintf(2,\'File:%s\\nName:%s\\n'
+                      'Line:%d\\n\',ME.stack.file,ME.stack.name,'
+                      'ME.stack.line);, end;end;;exit"')
 
     yield assert_equal, mi.inputs.script, 'whos'
     yield assert_equal, mi.inputs.script_file, 'testscript'
-    path_exists = os.path.exists(os.path.join(basedir,'testscript.m'))
+    path_exists = os.path.exists(os.path.join(basedir, 'testscript.m'))
     yield assert_false, path_exists
     rmtree(basedir)
+
 
 @skipif(no_matlab)
 def test_mlab_inputspec():
@@ -59,6 +47,7 @@ def test_mlab_inputspec():
     yield assert_true, spec.mfile
     yield assert_equal, spec.script_file, 'pyscript.m'
 
+
 @skipif(no_matlab)
 def test_mlab_init():
     yield assert_equal, mlab.MatlabCommand._cmd, 'matlab'
@@ -68,22 +57,25 @@ def test_mlab_init():
     mc = mlab.MatlabCommand(matlab_cmd='foo_m')
     yield assert_equal, mc.cmd, 'foo_m'
 
+
 @skipif(no_matlab)
 def test_run_interface():
     mc = mlab.MatlabCommand(matlab_cmd='foo_m')
-    yield assert_raises, ValueError, mc.run # script is mandatory
+    yield assert_raises, ValueError, mc.run  # script is mandatory
     mc.inputs.script = 'a=1;'
-    yield assert_raises, IOError, mc.run # foo_m is not an executable
+    yield assert_raises, IOError, mc.run  # foo_m is not an executable
     cwd = os.getcwd()
     basedir = mkdtemp()
     os.chdir(basedir)
     # bypasses ubuntu dash issue
     mc = mlab.MatlabCommand(script='foo;', paths=[basedir], mfile=True)
     yield assert_raises, RuntimeError, mc.run
-    res = mlab.MatlabCommand(script='a=1;', paths=[basedir], mfile=True).run() # bypasses ubuntu dash issue
+    # bypasses ubuntu dash issue
+    res = mlab.MatlabCommand(script='a=1;', paths=[basedir], mfile=True).run()
     yield assert_equal, res.runtime.returncode, 0
     os.chdir(cwd)
     rmtree(basedir)
+
 
 @skipif(no_matlab)
 def test_set_matlabcmd():
@@ -91,4 +83,3 @@ def test_set_matlabcmd():
     mi.set_default_matlab_cmd('foo')
     yield assert_equal, mi._default_matlab_cmd, 'foo'
     mi.set_default_matlab_cmd(matlab_cmd)
-

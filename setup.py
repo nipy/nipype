@@ -28,7 +28,6 @@ def configuration(parent_package='',top_path=None):
 
     config.get_version('nipype/version.py') # sets config.version
     config.add_subpackage('nipype', 'nipype')
-    config.add_subpackage('nipype.testing.numpytesting')
 
     return config
 
@@ -91,7 +90,6 @@ def main(**extra_args):
 
     install_requires=['numpy >=1.1',
               'scipy >=0.7',
-              'matplotlib >=1.0.0',
               'networkx >=1.0',
               'nibabel >=1.0.0',
               'traits >=4.0.0',]
