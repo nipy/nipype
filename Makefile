@@ -33,7 +33,7 @@ upload_to_pypi: zipdoc
 trailing-spaces:
 	find . -name "*.py" | xargs perl -pi -e 's/[ \t]*$$//'
 	@echo "Reverting test_docparse"
-	git co nipype/utils/tests/test_docparse.py
+	git checkout nipype/utils/tests/test_docparse.py
 
 clean-pyc:
 	find . -name "*.pyc" | xargs rm -f
