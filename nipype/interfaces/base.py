@@ -17,6 +17,7 @@ from socket import gethostname
 from string import Template
 import select
 import subprocess
+from textwrap import wrap
 from time import time
 from warnings import warn
 
@@ -625,14 +626,14 @@ class BaseInterface(Interface):
     def help(cls, returnhelp=False):
         """ Prints class help
         """
-        
+
         if cls.__doc__:
             docstring = cls.__doc__.split('\n')
             docstring = [trim(line, '') for line in docstring]
         else:
             docstring = ['']
-        
-        allhelp = '\n'.join(docstring + 
+
+        allhelp = '\n'.join(docstring +
                             cls._inputs_help() + [''] + cls._outputs_help())
         if returnhelp:
             return allhelp
@@ -652,13 +653,22 @@ class BaseInterface(Interface):
             def_val = ''
             if getattr(spec, 'usedefault'):
                 def_val = ', nipype default value: %s' % str(getattr(spec, 'default_value')()[1])
-            manhelpstr[-1] += " : (%s%s)" % (excp.info, def_val)
-        manhelpstr += ['\t\t%s' % desc]
+            line = "(%s%s)" % (excp.info, def_val)
+            manhelpstr = wrap(line, 90, initial_indent=manhelpstr[0]+': ',
+                              subsequent_indent='\t\t ')
+        if desc:
+            for line in desc.split('\n'):
+                manhelpstr += wrap(line, 90, initial_indent='\t\t',
+                                   subsequent_indent='\t\t')
         if xor:
-            manhelpstr += ['\t\tmutually exclusive: %s' % ', '.join(xor)]
+            line = '%s' % ', '.join(xor)
+            manhelpstr += wrap(line, 90, initial_indent='\t\tmutually_exclusive: ',
+                               subsequent_indent='\t\t ')
         if requires: # and name not in xor_done:
             others = [field for field in requires if field != name]
-            manhelpstr += ['\t\trequires: %s' % ', '.join(others)]
+            line = '%s' % ', '.join(others)
+            manhelpstr += wrap(line, 90, initial_indent='\t\trequires: ',
+                               subsequent_indent='\t\t ')
         return manhelpstr
 
     @classmethod
@@ -667,21 +677,20 @@ class BaseInterface(Interface):
         """
         helpstr = ['Inputs::']
 
-        if cls.input_spec is None:
-            helpstr += ['None']
-            print '\n'.join(helpstr)
-            return
-        
         inputs = cls.input_spec()
+        if len(inputs.traits(transient=None).items()) == 0:
+            helpstr += ['', '\tNone']
+            return helpstr
+
         manhelpstr = ['', '\t[Mandatory]']
-        for name, spec in sorted(inputs.traits(mandatory=True).items()):     
+        for name, spec in sorted(inputs.traits(mandatory=True).items()):
             manhelpstr += cls._get_trait_desc(inputs, name, spec)
-        
+
         opthelpstr = ['', '\t[Optional]']
         for name, spec in sorted(inputs.traits(mandatory=None,
                                                transient=None).items()):
             opthelpstr += cls._get_trait_desc(inputs, name, spec)
-            
+
         if manhelpstr:
             helpstr += manhelpstr
         if opthelpstr:
@@ -697,8 +706,8 @@ class BaseInterface(Interface):
             outputs = cls.output_spec()
             for name, spec in sorted(cls.output_spec().traits(transient=None).items()):
                 helpstr += cls._get_trait_desc(outputs, name, spec)
-        else:
-            helpstr += ['None']
+        if len(helpstr) == 2:
+            helpstr += ['\tNone']
         return helpstr
 
     def _outputs(self):
@@ -995,26 +1004,13 @@ class CommandLine(BaseInterface):
     >>> cli.inputs.trait_get() #doctest: +SKIP
     {'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}
 
-    >>> cli.help()
-    Inputs
-    ------
-    <BLANKLINE>
-    Optional:
-     args: Additional parameters to the command
-     environ: Environment variables (default={})
-     ignore_exception: Print an error message instead of throwing an exception in case the interface fails to run (default=False)
-    <BLANKLINE>
-    Outputs
-    -------
-    None
-
-
     >>> cli.inputs.get_hashval()
     ({'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}, 'b1faf85652295456a906f053d48daef6')
 
     """
 
     input_spec = CommandLineInputSpec
+    _cmd = None
 
     def __init__(self, command=None, **inputs):
         super(CommandLine, self).__init__(**inputs)
@@ -1051,18 +1047,18 @@ class CommandLine(BaseInterface):
         message += "Standard error:\n" + runtime.stderr + "\n"
         message += "Return code: " + str(runtime.returncode)
         raise RuntimeError(message)
-    
+
     @classmethod
     def help(cls, returnhelp=False):
         allhelp = super(CommandLine, cls).help(returnhelp=True)
-        
+
         allhelp = "Wraps command **%s**\n\n"%cls._cmd + allhelp
-        
+
         if returnhelp:
             return allhelp
         else:
             print allhelp
-    
+
 
     def _run_interface(self, runtime):
         """Execute command via subprocess

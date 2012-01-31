@@ -19,7 +19,8 @@
    mapnode_and_iterables
    caching_tutorial
    model_specification
-   parallel_processing
+   plugins
+   debug
 
 
  

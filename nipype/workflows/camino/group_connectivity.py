@@ -1,29 +1,19 @@
+import os.path as op                      # system functions
+
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.interfaces.camino as camino
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.camino2trackvis as cam2trk
-import nipype.interfaces.freesurfer as fs    # freesurfer
-import nipype.interfaces.cmtk as cmtk
-from nipype.workflows.camino.connectivity_mapping import create_connectivity_pipeline
-import nipype.algorithms.misc as misc
-import inspect
-import nibabel as nb
-import numpy as np
-import networkx as nx
-import os, os.path as op                      # system functions
-from nipype.utils.misc import package_check
-import warnings
-
-try:
-    package_check('cmp')
-except Exception, e:
-    warnings.warn('cmp not installed')
-else:
-    import cmp
-    
 from nipype.interfaces.cmtk.nx import read_unknown_ntwk
+import nipype.interfaces.cmtk as cmtk
+import nipype.algorithms.misc as misc
+import nipype.pipeline.engine as pe          # pypeline engine
+import numpy as np
+
+from .connectivity_mapping import create_connectivity_pipeline
+
+
+
+# This should be done inside a function, not globally
+# fsl.FSLCommand.set_default_output_type('NIFTI')
 
 def get_vox_dims(volume):
     import nibabel as nb
@@ -62,8 +52,6 @@ def make_inlist(n, from_node):
         connections.append(inlist)
     return inlist, connections
 
-fsl.FSLCommand.set_default_output_type('NIFTI')
-
 def select_aparc(list_of_files):
     for in_file in list_of_files:
         if 'aparc+aseg.mgz' in in_file:
@@ -92,7 +80,7 @@ def get_nsubs(group_list):
 
 def create_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir, output_dir, template_args_dict=0):
     """Creates a group-level pipeline that does the same connectivity processing as in the
-    connectivity_tutorial example script and the camino create_connectivity_pipeline workflow. 
+    connectivity_tutorial example script and the camino create_connectivity_pipeline workflow.
 
     Given a subject id (and completed Freesurfer reconstruction), diffusion-weighted image,
     b-values, and b-vectors, the workflow will return the subject's connectome
@@ -102,17 +90,12 @@ def create_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir
     Example
     -------
 
-    >>> import os.path as op
-    >>> import nipype.interfaces.freesurfer as fs
-    >>> from nipype.workflows.mrtrix import create_connectivity_pipeline
-    >>> subjects_dir = op.abspath('freesurfer')
-    >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
-    >>> cff = cmonwk.create_connectivity_pipeline("mrtrix_cmtk")
-    >>> cff.inputs.inputnode.subjects_dir = subjects_dir # doctest: +SKIP
+    >>> cff = create_connectivity_pipeline("mrtrix_cmtk")
+    >>> cff.inputs.inputnode.subjects_dir = '.'
     >>> cff.inputs.inputnode.subject_id = 'subj1'
-    >>> cff.inputs.inputnode.dwi = op.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
-    >>> cff.inputs.inputnode.bvecs = op.abspath('fsl_course_data/fdt/subj1/bvecs')
-    >>> cff.inputs.inputnode.bvals = op.abspath('fsl_course_data/fdt/subj1/bvals')
+    >>> cff.inputs.inputnode.dwi = 'data.nii.gz'
+    >>> cff.inputs.inputnode.bvecs = 'bvecs'
+    >>> cff.inputs.inputnode.bvals = 'bvals'
     >>> cff.run()                 # doctest: +SKIP
 
     Inputs::
@@ -140,14 +123,14 @@ def create_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir
     subject_list = group_list[group_id]
     subj_infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="subj_infosource")
     subj_infosource.iterables = ('subject_id', subject_list)
-    
+
     if template_args_dict == 0:
         info = dict(dwi=[['subject_id', 'dwi']],
                     bvecs=[['subject_id','bvecs']],
                     bvals=[['subject_id','bvals']])
     else:
         info = template_args_dict
-        
+
     datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                    outfields=info.keys()),
                          name = 'datasource')
@@ -235,19 +218,19 @@ def create_group_cff_pipeline_part3(group_list, data_dir ,subjects_dir, output_d
     """
     l3infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id']), name='l3infosource')
     l3infosource.inputs.group_id = group_list.keys()
-    
+
     l3source = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=['CFFfiles']), name='l3source')
     l3source.inputs.template_args = dict(CFFfiles=[['group_id','group_id']])
     l3source.inputs.template=op.join(output_dir,'%s/%s.cff')
-    
+
     l3inputnode = pe.Node(interface=util.IdentityInterface(fields=['Group_CFFs']), name='l3inputnode')
-    
+
     MergeCNetworks_grp = pe.Node(interface=cmtk.MergeCNetworks(), name="MergeCNetworks_grp")
     MergeCNetworks_grp.inputs.out_file = title
-    
+
     l3datasink = pe.Node(interface=nio.DataSink(), name="l3datasink")
     l3datasink.inputs.base_directory = output_dir
-    
+
     l3pipeline = pe.Workflow(name="l3output")
     l3pipeline.base_dir = output_dir
     l3pipeline.connect([
@@ -282,7 +265,7 @@ def create_group_cff_pipeline_part4(group_list, data_dir, subjects_dir, output_d
     l4inputnode = pe.Node(interface=util.IdentityInterface(fields=['networks_grp1','networks_grp2','CMatrices_grp1','CMatrices_grp2',
         'fibmean_grp1','fibmean_grp2','fibdev_grp1','fibdev_grp2']), name='l4inputnode')
 
-    average_networks_grp1 = pe.Node(interface=cmtk.AverageNetworks(), name='average_networks_grp1') 
+    average_networks_grp1 = pe.Node(interface=cmtk.AverageNetworks(), name='average_networks_grp1')
     average_networks_grp2 = average_networks_grp1.clone('average_networks_grp2')
 
     averagecff = pe.Node(interface=cmtk.CFFConverter(), name="averagecff")
@@ -290,10 +273,10 @@ def create_group_cff_pipeline_part4(group_list, data_dir, subjects_dir, output_d
 
     merge_gpickled_averages = pe.Node(interface=util.Merge(2), name='merge_gpickled_averages')
     merge_gexf_averages = merge_gpickled_averages.clone('merge_gexf_averages')
-    
+
     l4datasink = pe.Node(interface=nio.DataSink(), name="l4datasink")
     l4datasink.inputs.base_directory = output_dir
-    
+
     l4pipeline = pe.Workflow(name="l4output")
     l4pipeline.base_dir = output_dir
     l4pipeline.connect([
@@ -311,16 +294,16 @@ def create_group_cff_pipeline_part4(group_list, data_dir, subjects_dir, output_d
 
     l4pipeline.connect([(l4inputnode, average_networks_grp1,[('networks_grp1','in_files')])])
     l4pipeline.connect([(l4infosource, average_networks_grp1,[('group_id1','group_id')])])
-    
+
     l4pipeline.connect([(l4inputnode, average_networks_grp2,[('networks_grp2','in_files')])])
     l4pipeline.connect([(l4infosource, average_networks_grp2,[('group_id2','group_id')])])
-    
+
     l4pipeline.connect([(average_networks_grp1, merge_gpickled_averages,[('out_gpickled_groupavg','in1')])])
     l4pipeline.connect([(average_networks_grp2, merge_gpickled_averages,[('out_gpickled_groupavg','in2')])])
 
     l4pipeline.connect([(average_networks_grp1, merge_gexf_averages,[('out_gexf_groupavg','in1')])])
     l4pipeline.connect([(average_networks_grp2, merge_gexf_averages,[('out_gexf_groupavg','in2')])])
-    
+
     l4pipeline.connect([(merge_gpickled_averages, l4datasink, [('out', '@l4output.gpickled')])])
     l4pipeline.connect([(merge_gpickled_averages, averagecff, [('out', 'gpickled_networks')])])
     l4pipeline.connect([(averagecff, l4datasink, [('connectome_file', '@l4output.averagecff')])])
@@ -329,7 +312,6 @@ def create_group_cff_pipeline_part4(group_list, data_dir, subjects_dir, output_d
     return l4pipeline
 
 def pullnodeIDs(in_network):
-    print in_network
     ntwk = read_unknown_ntwk(in_network)
     nodedata = ntwk.node
     ids = []
@@ -339,7 +321,6 @@ def pullnodeIDs(in_network):
     for node in np.sort(integer_nodelist):
         nodeid = nodedata[str(node)]['dn_name']
         ids.append(nodeid)
-    print nodeid
     return ids
 
 def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir, subjects_dir, output_dir):
@@ -374,7 +355,7 @@ def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir
     'core_number',
     'triangles',
     ]), name='l2source')
-    
+
     l2source.inputs.template_args = dict(CFFfiles=[['group_id']],
         merged=[['group_id']],
         degree=[['group_id']],
@@ -388,7 +369,7 @@ def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir
         triangles=[['group_id']])
     l2source.inputs.base_directory = data_dir
     l2source.inputs.template = '%s/%s'
-    l2source.inputs.field_template=dict(CFFfiles=op.join(output_dir,'%s/cff/*/connectome.cff'), 
+    l2source.inputs.field_template=dict(CFFfiles=op.join(output_dir,'%s/cff/*/connectome.cff'),
 		merged=op.join(output_dir,'%s/nxmergedcsv/*/*.csv'),
 		degree=op.join(output_dir,'%s/nxcsv/*/*degree.csv'),
 		clustering=op.join(output_dir,'%s/nxcsv/*/*clustering.csv'),
@@ -400,8 +381,8 @@ def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir
 		core_number=op.join(output_dir,'%s/nxcsv/*/*core_number.csv'),
 		triangles=op.join(output_dir,'%s/nxcsv/*/*triangles.csv'),
         )
-    
-    l2inputnode = pe.Node(interface=util.IdentityInterface(fields=['CFFfiles', 
+
+    l2inputnode = pe.Node(interface=util.IdentityInterface(fields=['CFFfiles',
     'merged',
     'degree',
     'clustering',
@@ -412,16 +393,12 @@ def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir
     'load_centrality',
     'core_number',
     'triangles',
+    'network_file',
      ]), name='l2inputnode')
-    
+
     MergeCNetworks = pe.Node(interface=cmtk.MergeCNetworks(), name="MergeCNetworks")
-    
+
     MergeCSVFiles_degree = pe.Node(interface=misc.MergeCSVFiles(), name="MergeCSVFiles_degree")
-    cmp_config = cmp.configuration.PipelineConfiguration()
-    cmp_config.parcellation_scheme = "Lausanne2008"
-    parcellation_name = 'scale500'
-    rowIDs = pullnodeIDs(op.abspath(cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']))
-    MergeCSVFiles_degree.inputs.row_headings = rowIDs
     MergeCSVFiles_degree.inputs.extra_column_heading = 'group'
     MergeCSVFiles_degree.inputs.extra_field = group_id
 
@@ -433,7 +410,7 @@ def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir
     MergeCSVFiles_load_centrality = MergeCSVFiles_degree.clone(name="MergeCSVFiles_load_centrality")
     MergeCSVFiles_core_number = MergeCSVFiles_degree.clone(name="MergeCSVFiles_core_number")
     MergeCSVFiles_triangles = MergeCSVFiles_degree.clone(name="MergeCSVFiles_triangles")
-    
+
     l2datasink = pe.Node(interface=nio.DataSink(), name="l2datasink")
     l2datasink.inputs.base_directory = output_dir
     l2datasink.inputs.container = group_id
@@ -459,7 +436,7 @@ def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir
                     ])
 
     l2pipeline.connect([(l2inputnode,MergeCNetworks,[('CFFfiles','in_files')])])
-    
+
     l2pipeline.connect([(l2inputnode,MergeCSVFiles_degree,[('degree','in_files')])])
     l2pipeline.connect([(l2inputnode,MergeCSVFiles_clustering,[('clustering','in_files')])])
     l2pipeline.connect([(l2inputnode,MergeCSVFiles_isolates,[('isolates','in_files')])])
@@ -469,7 +446,9 @@ def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir
     l2pipeline.connect([(l2inputnode,MergeCSVFiles_load_centrality,[('load_centrality','in_files')])])
     l2pipeline.connect([(l2inputnode,MergeCSVFiles_core_number,[('core_number','in_files')])])
     l2pipeline.connect([(l2inputnode,MergeCSVFiles_triangles,[('triangles','in_files')])])
-    
+    l2pipeline.connect(l2inputnode, ('network_file', pullnodeIDs),
+                       MergeCSVFiles_degree, 'row_headings')
+
     l2pipeline.connect([(group_infosource,MergeCNetworks,[('group_id','out_file')])])
     l2pipeline.connect([(MergeCNetworks, l2datasink, [('connectome_file', '@l2output')])])
     l2pipeline.connect([(MergeCSVFiles_degree, l2datasink, [('csv_file', '@l2output.degree')])])
@@ -495,12 +474,9 @@ def create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir
     l2pipeline.connect([(group_infosource, AddCSVColumn_matrices,[('group_id','extra_field')])])
     l2pipeline.connect([(AddCSVColumn_matrices, l2datasink,[('csv_file','@l2output.cmatrices_csv')])])
     return l2pipeline
-	
+
 def concatcsv(in_files):
     import os.path as op
-    print in_files
-    print type(in_files)
-    print in_files[0]
     if not isinstance(in_files,list):
         return in_files
     first = open(in_files[0], 'r')
@@ -511,33 +487,31 @@ def concatcsv(in_files):
     for in_file in in_files:
         file_to_read = open(in_file, 'r')
         scrap_first_line = file_to_read.readline()
-        print scrap_first_line
         for line in file_to_read:
             out_file.write(line)
-    print out_name
     return out_name
-    
+
 def create_group_cff_pipeline_part3_with_CSVstats(group_list, data_dir ,subjects_dir, output_dir, title='group'):
     """
     Next the groups are combined in the 3rd level pipeline.
     """
     l3infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id']), name='l3infosource')
     l3infosource.inputs.group_id = group_list.keys()
-    
+
     l3source = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=['CFFfiles', 'CSVmetrics', 'CSVmatrices']), name='l3source')
     l3source.inputs.template_args = dict(CFFfiles=[['group_id']], CSVmetrics=[['group_id']], CSVmatrices=[['group_id']])
     l3source.inputs.template=op.join(output_dir,'%s/%s')
-    
+
     l3source.inputs.field_template=dict(CFFfiles=op.join(output_dir,'%s/*.cff'), CSVmetrics=op.join(output_dir,'%s/csv/*.csv'), CSVmatrices=op.join(output_dir,'%s/cmatrices_csv/*/*.csv'))
-    
+
     l3inputnode = pe.Node(interface=util.IdentityInterface(fields=['Group_CFFs', 'Group_CSVmetrics', 'Group_CSVmatrices']), name='l3inputnode')
-    
+
     MergeCNetworks_grp = pe.Node(interface=cmtk.MergeCNetworks(), name="MergeCNetworks_grp")
     MergeCNetworks_grp.inputs.out_file = title
-    
+
     l3datasink = pe.Node(interface=nio.DataSink(), name="l3datasink")
     l3datasink.inputs.base_directory = output_dir
-    
+
     l3pipeline = pe.Workflow(name="l3output")
     l3pipeline.base_dir = output_dir
     l3pipeline.connect([
@@ -547,7 +521,7 @@ def create_group_cff_pipeline_part3_with_CSVstats(group_list, data_dir ,subjects
                         (l3source,l3inputnode,[('CSVmatrices','Group_CSVmatrices')]),
                     ])
 
-    l3pipeline.connect([(l3inputnode,MergeCNetworks_grp,[('Group_CFFs','in_files')])])    
+    l3pipeline.connect([(l3inputnode,MergeCNetworks_grp,[('Group_CFFs','in_files')])])
     l3pipeline.connect([(MergeCNetworks_grp, l3datasink, [('connectome_file', '@l3output')])])
     l3pipeline.connect([(l3inputnode, l3datasink,[(('Group_CSVmetrics', concatcsv), '@l3output.csvmetrics')])])
     l3pipeline.connect([(l3inputnode, l3datasink,[(('Group_CSVmatrices', concatcsv), '@l3output.csvmatrices')])])

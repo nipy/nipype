@@ -1,3 +1,14 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
+
 from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
                                     File, TraitedSpec, Directory, isdefined)
 import os, os.path as op
@@ -8,9 +19,11 @@ import shutil
 from nipype.utils.misc import package_check
 import warnings
 
+have_cmp = True
 try:
     package_check('cmp')
 except Exception, e:
+    have_cmp = False
     warnings.warn('cmp not installed')
 else:
     import cmp
@@ -345,18 +358,19 @@ class ParcellateOutputSpec(TraitedSpec):
     roi_file = File(desc='Region of Interest file for connectivity mapping')
 
 class Parcellate(BaseInterface):
-    """
-    Subdivides segmented ROI file into smaller subregions
+    """Subdivides segmented ROI file into smaller subregions
 
-    This interface implements the same procedure as in the ConnectomeMapper's parcellation stage (cmp/stages/parcellation/maskcreation.py) for a single parcellation scheme (e.g. 'scale500').
+    This interface implements the same procedure as in the ConnectomeMapper's
+    parcellation stage (cmp/stages/parcellation/maskcreation.py) for a single
+    parcellation scheme (e.g. 'scale500').
 
     Example
     -------
 
     >>> import nipype.interfaces.cmtk as cmtk
     >>> parcellate = cmtk.Parcellate()
-    >>> parcellate.inputs.freesurfer_dir = '/software/freesurfer'
-    >>> parcellate.inputs.subjects_dir = '/software/freesurfer/subjects'
+    >>> parcellate.inputs.freesurfer_dir = '.'
+    >>> parcellate.inputs.subjects_dir = '.'
     >>> parcellate.inputs.subject_id = 'subj1'
     >>> parcellate.inputs.parcellation_name = 'scale500'
     >>> parcellate.run()                 # doctest: +SKIP

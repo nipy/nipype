@@ -16,7 +16,7 @@ except Exception, e:
 else:
     import nipy.modalities.fmri.design_matrix as dm
     import nipy.labs.glm as GLM
-    
+
 try:
     BlockParadigm = dm.BlockParadigm
 except AttributeError:
