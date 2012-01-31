@@ -29,6 +29,7 @@ systems.
 
 :ref:`install` : lists software dependencies and installation instructions
 
+:ref:`citation` : a paper_ describing nipype
 
 .. toctree::
    :hidden:
