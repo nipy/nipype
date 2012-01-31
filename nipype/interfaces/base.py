@@ -677,12 +677,11 @@ class BaseInterface(Interface):
         """
         helpstr = ['Inputs::']
 
-        if cls.input_spec is None:
-            helpstr += ['None']
-            print '\n'.join(helpstr)
-            return
-
         inputs = cls.input_spec()
+        if len(inputs.traits(transient=None).items()) == 0:
+            helpstr += ['', '\tNone']
+            return helpstr
+
         manhelpstr = ['', '\t[Mandatory]']
         for name, spec in sorted(inputs.traits(mandatory=True).items()):
             manhelpstr += cls._get_trait_desc(inputs, name, spec)
@@ -707,8 +706,8 @@ class BaseInterface(Interface):
             outputs = cls.output_spec()
             for name, spec in sorted(cls.output_spec().traits(transient=None).items()):
                 helpstr += cls._get_trait_desc(outputs, name, spec)
-        else:
-            helpstr += ['None']
+        if len(helpstr) == 2:
+            helpstr += ['\tNone']
         return helpstr
 
     def _outputs(self):
