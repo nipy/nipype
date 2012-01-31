@@ -1,3 +1,14 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
+
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from nipype.utils.filemanip import split_filename
 import os, os.path as op
@@ -36,6 +47,7 @@ class Tracks2Prob(CommandLine):
     >>> tdi.inputs.colour = True
     >>> tdi.run()                                       # doctest: +SKIP
     """
+
     _cmd = 'tracks2prob'
     input_spec=Tracks2ProbInputSpec
     output_spec=Tracks2ProbOutputSpec
@@ -120,7 +132,7 @@ class StreamlineTrack(CommandLine):
 
     >>> import nipype.interfaces.mrtrix as mrt
     >>> strack = mrt.StreamlineTrack()
-    >>> strack.inputs.inputmodel = 'DT_PROB'
+    >>> strack.inputs.inputmodel = 'SD_PROB'
     >>> strack.inputs.in_file = 'data.Bfloat'
     >>> strack.inputs.seed_file = 'seed_mask.nii'
     >>> strack.run()                                    # doctest: +SKIP

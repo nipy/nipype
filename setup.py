@@ -108,6 +108,7 @@ def main(**extra_args):
            configuration = configuration,
            cmdclass = cmdclass,
            install_requires=install_requires,
+           scripts=['bin/nipype_display_crash'],
            **extra_args)
 
 

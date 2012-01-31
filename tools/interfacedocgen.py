@@ -293,7 +293,8 @@ class InterfaceHelpWriter(object):
                   + self.rst_section_levels[2] * \
                   (len(c)+9) + '\n\n'
 
-            ad += classinst.help(returnhelp=True)
+            ad += trim(classinst.help(returnhelp=True),
+                       self.rst_section_levels[3])
 
         for workflow, name, finst in workflows:
             ad += '\n:class:`' + name + '()`\n' \

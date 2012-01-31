@@ -1,3 +1,6 @@
+import inspect
+import os.path as op                      # system functions
+
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
@@ -7,22 +10,11 @@ import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.camino as camino
 import nipype.algorithms.misc as misc
 import nipype.interfaces.cmtk as cmtk
-import inspect
-import nibabel as nb
-import os, os.path as op                      # system functions
-from nipype.workflows.camino.connectivity_mapping import (select_aparc_annot, get_vox_dims, get_data_dims, get_affine)
-from nipype.workflows.camino.group_connectivity import pullnodeIDs
 
-from nipype.utils.misc import package_check
-import warnings
-from nipype.workflows.fsl.dti import create_eddy_correct_pipeline
-
-try:
-    package_check('cmp')
-except Exception, e:
-    warnings.warn('cmp not installed')
-else:
-    import cmp
+from ..camino.connectivity_mapping import (select_aparc_annot, get_vox_dims,
+                                           get_data_dims, get_affine)
+from ..camino.group_connectivity import pullnodeIDs
+from ..fsl.dti import create_eddy_correct_pipeline
 
 def create_connectivity_pipeline(name="connectivity"):
     """Creates a pipeline that does the same connectivity processing as in the
@@ -33,18 +25,12 @@ def create_connectivity_pipeline(name="connectivity"):
     Example
     -------
 
-    >>> import os
-    >>> import nipype.interfaces.freesurfer as fs
-    >>> import nipype.workflows.mrtrix.connectivity_mapping as mrwork
-    >>> from nipype.testing import example_data
-    >>> subjects_dir = example_data('subjects')
-    >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
-    >>> conmapper = mrwork.create_connectivity_pipeline("nipype_conmap")
-    >>> conmapper.inputs.inputnode.subjects_dir = subjects_dir # doctest: +SKIP
+    >>> conmapper = create_connectivity_pipeline("nipype_conmap")
+    >>> conmapper.inputs.inputnode.subjects_dir = '.'
     >>> conmapper.inputs.inputnode.subject_id = 'subj1'
-    >>> conmapper.inputs.inputnode.dwi = os.path.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
-    >>> conmapper.inputs.inputnode.bvecs = os.path.abspath('fsl_course_data/fdt/subj1/bvecs')
-    >>> conmapper.inputs.inputnode.bvals = os.path.abspath('fsl_course_data/fdt/subj1/bvals')
+    >>> conmapper.inputs.inputnode.dwi = 'data.nii.gz'
+    >>> conmapper.inputs.inputnode.bvecs = 'bvecs'
+    >>> conmapper.inputs.inputnode.bvals = 'bvals'
     >>> conmapper.run()                 # doctest: +SKIP
 
     Inputs::
@@ -54,6 +40,8 @@ def create_connectivity_pipeline(name="connectivity"):
         inputnode.dwi
         inputnode.bvecs
         inputnode.bvals
+        inputnode.resolution_network_file
+        inputnode.network_file
 
     Outputs::
 
@@ -79,9 +67,16 @@ def create_connectivity_pipeline(name="connectivity"):
         outputnode.mean_fiber_length
         outputnode.fiber_length_std
     """
-    
-    inputnode_within = pe.Node(interface=util.IdentityInterface(fields=["subject_id","dwi", "bvecs", "bvals", "subjects_dir"]), name="inputnode_within")
-    
+
+    inputnode_within = pe.Node(util.IdentityInterface(fields=["subject_id",
+                                                              "dwi",
+                                                              "bvecs",
+                                                              "bvals",
+                                                              "subjects_dir",
+                                                              "resolution_network_file",
+                                                              "network_file"]),
+                               name="inputnode_within")
+
     FreeSurferSource = pe.Node(interface=nio.FreeSurferSource(), name='fssource')
     FreeSurferSourceLH = pe.Node(interface=nio.FreeSurferSource(), name='fssourceLH')
     FreeSurferSourceLH.inputs.hemi = 'lh'
@@ -205,7 +200,7 @@ def create_connectivity_pipeline(name="connectivity"):
 
     """
     These nodes are used to create a rough brain mask from the b0 image.
-    The b0 image is extracted from the original diffusion-weighted image, 
+    The b0 image is extracted from the original diffusion-weighted image,
     put through a simple thresholding routine, and smoothed using a 3x3 median filter.
     """
 
@@ -216,8 +211,8 @@ def create_connectivity_pipeline(name="connectivity"):
     median3d = pe.Node(interface=mrtrix.MedianFilter3D(),name='median3d')
 
     """
-    The brain mask is also used to help identify single-fiber voxels. 
-    This is done by passing the brain mask through two erosion steps, 
+    The brain mask is also used to help identify single-fiber voxels.
+    This is done by passing the brain mask through two erosion steps,
     multiplying the remaining mask with the fractional anisotropy map, and
     thresholding the result to obtain some highly anisotropic within-brain voxels.
     """
@@ -241,13 +236,13 @@ def create_connectivity_pipeline(name="connectivity"):
     threshold_wmmask.inputs.absolute_threshold_value = 0.4
 
     """
-    The spherical deconvolution step depends on the estimate of the response function 
+    The spherical deconvolution step depends on the estimate of the response function
     in the highly anisotropic voxels we obtained above.
 
     .. warning::
 
         For damaged or pathological brains one should take care to lower the maximum harmonic order of these steps.
-        
+
     """
 
     estimateresponse = pe.Node(interface=mrtrix.EstimateResponseForSH(),name='estimateresponse')
@@ -273,8 +268,8 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     """
-    In order to improve the coregistration of the parcellation scheme 
-    with the diffusion-weighted image, we resample the b0 image to use 
+    In order to improve the coregistration of the parcellation scheme
+    with the diffusion-weighted image, we resample the b0 image to use
     as a reference in the FLIRT steps below.
     """
 
@@ -283,7 +278,7 @@ def create_connectivity_pipeline(name="connectivity"):
     resampleb0.inputs.vox_size = (1, 1, 1)
 
     """
-    The following nodes identify the transformation between the diffusion-weighted 
+    The following nodes identify the transformation between the diffusion-weighted
     image and the structural image. This transformation is then inverted and applied
     to the structural image and it's parcellated equivalent, in order to get the parcellation
     and the tractography into the same space.
@@ -321,14 +316,11 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
-    cmp_config = cmp.configuration.PipelineConfiguration()
-    cmp_config.parcellation_scheme = "Lausanne2008"
-    creatematrix.inputs.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
 
     """
     Next we define the endpoint of this tutorial, which is the CFFConverter node, as well as a few nodes which use
     the Nipype Merge utility. These are useful for passing lists of the files we want packaged in our CFF file.
-    The inspect.getfile command is used to package this script into the resulting CFF file, so that it is easy to 
+    The inspect.getfile command is used to package this script into the resulting CFF file, so that it is easy to
     look back at the processing parameters that were used.
     """
 
@@ -356,8 +348,6 @@ def create_connectivity_pipeline(name="connectivity"):
     Matlab2CSV_fibstd = Matlab2CSV_node.clone(name="Matlab2CSV_fibstd")
 
     MergeCSVFiles_node = pe.Node(interface=misc.MergeCSVFiles(), name="MergeCSVFiles_node")
-    rowIDs = pullnodeIDs(op.abspath(cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']))
-    MergeCSVFiles_node.inputs.row_headings = rowIDs
     MergeCSVFiles_node.inputs.extra_column_heading = 'subject'
     mergeCSVMatrices = pe.Node(interface=util.Merge(3), name="mergeCSVMatrices")
     MergeCSVFiles_cmatrices = pe.Node(interface=misc.MergeCSVFiles(), name="MergeCSVFiles_cmatrices")
@@ -525,7 +515,7 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(csdeconv, probCSDstreamtrack,[("spherical_harmonics_image","in_file")])])
     mapping.connect([(probCSDstreamtrack, tracks2prob,[("tracked","in_file")])])
     mapping.connect([(eddycorrect, tracks2prob,[("outputnode.eddy_corrected","template_file")])])
-    
+
     """
     Structural Processing
     ---------------------
@@ -565,6 +555,8 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(eddycorrect, tck2trk,[("outputnode.eddy_corrected","image_file")])])
     mapping.connect([(probCSDstreamtrack, tck2trk,[("tracked","in_file")])])
     mapping.connect([(tck2trk, creatematrix,[("out_file","tract_file")])])
+    mapping.connect(inputnode_within, 'resolution_network_file',
+                    creatematrix, 'resolution_network_file')
     mapping.connect([(inputnode_within, creatematrix,[("subject_id","out_matrix_file")])])
     mapping.connect([(inputnode_within, creatematrix,[("subject_id","out_matrix_mat_file")])])
     mapping.connect([(inverse_AparcAseg, creatematrix,[("out_file","roi_file")])])
@@ -608,7 +600,7 @@ def create_connectivity_pipeline(name="connectivity"):
 
     mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
     mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
-    mapping.connect([(creatematrix, CFFConverter,[("matrix_file","gpickled_networks")])])    
+    mapping.connect([(creatematrix, CFFConverter,[("matrix_file","gpickled_networks")])])
     mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
     mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
     mapping.connect([(trkTracts, CFFConverter,[("out","tract_files")])])
@@ -636,13 +628,15 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(Matlab2CSV_node, MergeCSVFiles_node,[("csv_files","in_files")])])
     mapping.connect([(inputnode_within, MergeCSVFiles_node,[("subject_id","out_file")])])
     mapping.connect([(inputnode_within, MergeCSVFiles_node,[("subject_id","extra_field")])])
+    mapping.connect(inputnode_within, ('network_file', pullnodeIDs),
+                    MergeCSVFiles_node, 'row_headings')
 
     mapping.connect([(Matlab2CSV_cmatrix, mergeCSVMatrices,[("csv_files","in1")])])
     mapping.connect([(Matlab2CSV_meanfib, mergeCSVMatrices,[("csv_files","in2")])])
     mapping.connect([(Matlab2CSV_fibstd, mergeCSVMatrices,[("csv_files","in3")])])
     mapping.connect([(mergeCSVMatrices, MergeCSVFiles_cmatrices,[("out","in_files")])])
     mapping.connect([(inputnode_within, MergeCSVFiles_cmatrices,[("subject_id","out_file")])])
-    mapping.connect([(inputnode_within, MergeCSVFiles_cmatrices,[("subject_id","extra_field")])])    
+    mapping.connect([(inputnode_within, MergeCSVFiles_cmatrices,[("subject_id","extra_field")])])
     """
     Create a higher-level workflow
     --------------------------------------

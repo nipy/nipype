@@ -157,8 +157,8 @@ class DataSink(IOBase):
             Unlike most nipype-nodes this is not a thread-safe node because it can
             write to a common shared location. It will not complain when it
             overwrites a file.
-            
-            If both substitutions and regexp_substitutions are used, then 
+
+            If both substitutions and regexp_substitutions are used, then
             substitutions are applied first followed by regexp_substitutions.
 
         Examples

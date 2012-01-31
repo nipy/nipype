@@ -1,4 +1,14 @@
-# -*- coding: utf-8 -*-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
+
 from nipype.interfaces.matlab import MatlabCommand
 from nipype.interfaces.base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
                                     File, isdefined, traits)
@@ -54,7 +64,7 @@ class MRTrix2TrackVis(BaseInterface):
     >>> import nipype.interfaces.mrtrix as mrt
     >>> tck2trk = mrt.MRTrix2TrackVis()
     >>> tck2trk.inputs.in_file = 'dwi_CSD_tracked.tck'
-    >>> tck2trk.inputs.image_file = 'dwi.nii'
+    >>> tck2trk.inputs.image_file = 'diffusion.nii'
     >>> tck2trk.run()                                   # doctest: +SKIP
     """
     input_spec = MRTrix2TrackVisInputSpec
