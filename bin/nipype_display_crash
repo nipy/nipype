@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""Displays crash information and can try to rerun a failed node
+"""Displays crash information from Nipype crash files. For certain crash files,
+one can rerun a failed node in a temp directory.
 """
 
 import argparse
@@ -40,12 +41,8 @@ def display_crash_files(crashfile, rerun):
         print "\n"
 
 if __name__ == "__main__":
-    docstr= '''
-    Display crash information from a nipype crash file
-    '''
-
     parser = argparse.ArgumentParser(prog='nipype_display_crash',
-                                     description=docstr)
+                                     description=__doc__)
     parser.add_argument('crashfile', metavar='f', type=str,
                    help='crash file to display')
     parser.add_argument('-r','--rerun', dest='rerun',
