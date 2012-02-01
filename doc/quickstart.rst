@@ -12,6 +12,13 @@ Downloading and installing
 
    users/install
 
+Beginner's guide
+================
+
+By Michael Notter. `Available here`__
+
+__ http://miykael.github.com/nipype-beginner-s-guide/index.html
+
 User guides
 ===========
 
