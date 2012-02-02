@@ -26,9 +26,9 @@ package_check('IPython', '0.10', 'tbss_test')
 """
 Specify the related directories
 """
-dataDir = '/nfs/j3/userhome/kongxiangzhen/mywork/tbssdata'
-workingdir = '/nfs/j3/userhome/kongxiangzhen/tbss_test_workingdir'
-subject_list = ['1260','1549']
+dataDir = '/nfs/s2/dticenter/data4test/tbss/mydata'
+workingdir = '/nfs/s2/dticenter/data4test/tbss/tbss_test_workingdir'
+subject_list = ['S0001', 'S0005', 'S0036', 'S0038', 'S0085', 'S0099', 'S0004', 'S0032', 'S0037', 'S0057', 'S0098']
 """
 Here we get the FA list including all the subjects.
 """
@@ -39,7 +39,7 @@ def getFAList(subject_list):
     return fa_list
 tbss_source = pe.Node(interface=nio.DataGrabber(outfiles=['fa_list']),name='tbss_source')
 tbss_source.inputs.base_directory = os.path.abspath(dataDir)
-tbss_source.inputs.template = '%s.nii.gz'
+tbss_source.inputs.template = '%s_FA.nii.gz'
 tbss_source.inputs.template_args = dict(fa_list=[[getFAList(subject_list)]])
 
 '''
