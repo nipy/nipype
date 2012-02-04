@@ -1,12 +1,5 @@
 <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
 <style type="text/css">
-    input.gsc-input {
-        border-color: #BCCDF0;
-    }
-    input.gsc-search-button {
-        border-color: #666666;
-        background-color: #CECECE;
-    }
     a.navbar {
     color: {{ theme_linkcolor }};
     letter-spacing: .05em;
@@ -19,22 +12,4 @@
 <a class="navbar" href="{{pathto('documentation')}}">Documentation</a> ·
 <a class="navbar" href="{{pathto('citation')}}">Citation</a> ·
 <a class="navbar" href="http://nipy.org">NiPy</a>
-
-<div style="float: right; width: 25%;">
-    <div id="cse-search-form" style="width: 100%;">Loading</div>
-</div>
-
-<script src="http://www.google.com/jsapi" type="text/javascript"></script>
-<script type="text/javascript">
-    google.load('search', '1', {language : 'en'});
-    google.setOnLoadCallback(function() {
-        var customSearchControl = new google.search.CustomSearchControl(
-                '010960497803984932957:u8pmqf7fdoq');
-
-        customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
-        var options = new google.search.DrawOptions();
-        options.enableSearchboxOnly("{{pathto('searchresults')}}");
-        customSearchControl.draw('cse-search-form', options);
-    }, true);
-</script>
 
