@@ -24,16 +24,11 @@ systems.
 * make your research easily reproducible
 * share your processing workflows with the community
 
-
-:ref:`documentation` : details and tutorials showing how to use nipype
-
-:ref:`install` : lists software dependencies and installation instructions
-
 :ref:`citation` : a paper_ describing nipype
 
-.. toctree::
-   :hidden:
-   
-   documentation
+.. note::
+
+   To get started, click on Quickstart above. Also, the Links box on 
+   the right is available on any page of this website.
 
 .. include:: links_names.txt
