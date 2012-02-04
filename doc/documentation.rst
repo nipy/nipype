@@ -9,8 +9,6 @@ Documentation
    :Release: |version|
    :Date: |today|
 
-Follow this link for: `Developer version documentation <http://www.mit.edu/~satra/nipype-nightly/>`_
-
 Contents:
 
 .. toctree::
