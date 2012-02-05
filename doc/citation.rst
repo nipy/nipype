@@ -4,15 +4,15 @@
 Citation
 ========
 
-Please cite the following if you find Nipype useful in your research::
+.. admonition:: Reference
 
    Gorgolewski K, Burns CD, Madison C, Clark D, Halchenko YO, Waskom ML,
    Ghosh SS. (2011). Nipype: a flexible, lightweight and extensible neuroimaging
    data processing framework in Python. Front. Neuroimform. 5:13.
 
-`Download`__
+   `Download`__
 
-__ paper_
+   __ paper_
 
 ::
 

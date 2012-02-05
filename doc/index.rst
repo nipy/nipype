@@ -30,13 +30,15 @@
       * make your research easily reproducible
       * share your processing workflows with the community
 
-::
+.. admonition:: Reference
 
-  Gorgolewski K, Burns CD, Madison C, Clark D, Halchenko YO, Waskom ML, Ghosh SS.
-  (2011). Nipype: a flexible, lightweight and extensible neuroimaging data
-  processing framework in Python. Front. Neuroimform. 5:13.
+   Gorgolewski K, Burns CD, Madison C, Clark D, Halchenko YO, Waskom ML, Ghosh SS.
+   (2011). Nipype: a flexible, lightweight and extensible neuroimaging data
+   processing framework in Python. Front. Neuroimform. 5:13. `Download`__
 
-.. note::
+   __ paper_
+
+.. tip::
 
    To get started, click Quickstart above. The Links box on the right is
    available on any page of this website.
