@@ -256,8 +256,8 @@ class InterfaceHelpWriter(object):
 
         # Make a shorter version of the uri that omits the package name for
         # titles
-        #uri_short = re.sub(r'^%s\.' % self.package_name,'',uri)
-        uri_short = uri
+        uri_short = re.sub(r'^%s\.' % self.package_name, '', uri)
+        #uri_short = uri
 
         ad = '.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n'
 
@@ -294,7 +294,7 @@ class InterfaceHelpWriter(object):
                   (len(c)+9) + '\n\n'
 
             ad += trim(classinst.help(returnhelp=True),
-                       self.rst_section_levels[3])
+                       self.rst_section_levels[3]) + '\n'
 
         for workflow, name, finst in workflows:
             ad += '\n:class:`' + name + '()`\n' \
@@ -307,7 +307,7 @@ class InterfaceHelpWriter(object):
             (_,fname) =  tempfile.mkstemp(suffix=".dot")
             workflow.write_graph(dotfilename=fname, graph2use='hierarchical')
 
-            ad += self._write_graph_section(fname, 'Graph')
+            ad += self._write_graph_section(fname, 'Graph') + '\n'
 
         return ad
 
