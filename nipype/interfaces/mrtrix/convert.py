@@ -121,7 +121,6 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
             if n_streams % (float(stream_count)/100) == 0:
                 percent = int(float(n_streams)/float(stream_count)*100)
                 iflogger.info('{p}% : {n} tracks read'.format(p=percent, n=n_streams))
-
     track_points, nonfinite_list = points_per_track(offset)
     fileobj.seek(offset)
     streamlines = track_gen(track_points)
