@@ -28,7 +28,9 @@ def trim(docstring, marker=None):
         for line in lines[1:]:
             # replace existing REST marker with doc level marker
             stripped = line.lstrip().strip().rstrip()
-            if marker is not None and stripped and all([s==stripped[0] for s in stripped]):
+            if marker is not None and stripped and \
+               all([s==stripped[0] for s in stripped]) and \
+               stripped[0] not in [':']:
                 line = line.replace(stripped[0], marker)
             trimmed.append(line[indent:].rstrip())
     # Strip off trailing and leading blank lines:

@@ -20,15 +20,18 @@ PyMVPA project, which we've adapted for NIPY use.  PyMVPA is an MIT-licensed
 project."""
 
 # Stdlib imports
+import inspect
 import os
 import re
 import sys
-
-from nipype.interfaces.base import CommandLine, TraitError, BaseInterface
-import warnings
-from nipype.pipeline.engine import Workflow
 import tempfile
+import warnings
+
+from nipype.interfaces.base import BaseInterface
+from nipype.pipeline.engine import Workflow
 from nipype.utils.misc import trim
+
+from github import create_hash_map, get_file_url
 
 # Functions and classes
 class InterfaceHelpWriter(object):
@@ -212,7 +215,7 @@ class InterfaceHelpWriter(object):
 
 
     def _write_graph_section(self, fname, title):
-        ad = '\n%s\n%s\n'%(title,'~'*len(title))
+        ad = '\n%s\n%s\n\n' % (title, self.rst_section_levels[3] * len(title))
         ad += '.. graphviz::\n\n'
         fhandle = open(fname)
         for line in fhandle:
@@ -275,6 +278,7 @@ class InterfaceHelpWriter(object):
 
         #ad += '\n' + 'Classes' + '\n' + \
         #    self.rst_section_levels[2] * 7 + '\n'
+        hashmap = create_hash_map()
         for c in classes:
             __import__(uri)
             print c
@@ -289,20 +293,29 @@ class InterfaceHelpWriter(object):
             if not issubclass(classinst, BaseInterface):
                 continue
 
-            ad += '\n:class:`' + c + '`\n' \
-                  + self.rst_section_levels[2] * \
-                  (len(c)+9) + '\n\n'
-
+            label = uri + '.' + c + ':'
+            ad += '\n.. _%s\n\n' % label
+            ad += c + '\n' + self.rst_section_levels[2] * len(c) + '\n\n'
+            ad += "Code: %s\n\n" % get_file_url(classinst, hashmap)
             ad += trim(classinst.help(returnhelp=True),
                        self.rst_section_levels[3]) + '\n'
 
-        for workflow, name, finst in workflows:
-            ad += '\n:class:`' + name + '()`\n' \
-                  + self.rst_section_levels[2] * \
-                  (len(name)+11) + '\n\n'
-            helpstr = trim(finst.__doc__, self.rst_section_levels[3]) + "\n\n"
-            ad += '\n' + helpstr + '\n'
+        if workflows:
+            ad += '\n.. module:: %s\n\n' % uri
 
+        for workflow, name, finst in workflows:
+            label = ':func:`' + name + '`'
+            ad += '\n.. _%s:\n\n' % (uri + '.' + name)
+            ad += '\n'.join((label, self.rst_section_levels[2] * len(label)))
+            ad += "\n\nCode: %s\n\n" % get_file_url(finst, hashmap)
+            helpstr = trim(finst.__doc__, self.rst_section_levels[3])
+            ad += '\n\n' + helpstr + '\n\n'
+
+            """
+            # use sphinx autodoc for function signature
+            ad += '\n.. _%s:\n\n' % (uri + '.' + name)
+            ad += '.. autofunction:: %s\n\n' % name
+            """
 
             (_,fname) =  tempfile.mkstemp(suffix=".dot")
             workflow.write_graph(dotfilename=fname, graph2use='hierarchical')
