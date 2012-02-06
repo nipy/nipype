@@ -33,6 +33,10 @@ from nipype.interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                     InputMultiPath, OutputMultiPath,
                                     BaseInterfaceInputSpec, isdefined)
 from nipype.utils.filemanip import fname_presuffix, split_filename
+import logging
+
+logging.basicConfig()
+iflogger = logging.getLogger('interface')
 
 
 class PickAtlasInputSpec(BaseInterfaceInputSpec):
@@ -559,7 +563,7 @@ def matlab2csv(in_array, name, reshape):
     if reshape == True:
 		if len(np.shape(output_array)) > 1:
 			output_array = np.reshape(output_array,(np.shape(output_array)[0]*np.shape(output_array)[1],1))
-			print np.shape(output_array)
+			iflogger.info(np.shape(output_array))
     output_name = op.abspath(name + '.csv')
     np.savetxt(output_name, output_array, delimiter=',')
     return output_name
@@ -601,22 +605,22 @@ class Matlab2CSV(BaseInterface):
 				if isinstance(in_dict[key][0],np.ndarray):
 					saved_variables.append(key)
 				else:
-					print 'One of the keys in the input file, {k}, is not a Numpy array'.format(k=key)
+					iflogger.info('One of the keys in the input file, {k}, is not a Numpy array'.format(k=key))
 
         if len(saved_variables) > 1:
-            print '{N} variables found:'.format(N=len(saved_variables))
-            print saved_variables
+            iflogger.info('{N} variables found:'.format(N=len(saved_variables)))
+            iflogger.info(saved_variables)
             for variable in saved_variables:
-                print '...Converting {var} - type {ty} - to CSV'.format(var=variable, ty=type(in_dict[variable]))
+                iflogger.info('...Converting {var} - type {ty} - to CSV'.format(var=variable, ty=type(in_dict[variable])))
                 matlab2csv(in_dict[variable], variable, self.inputs.reshape_matrix)
         elif len(saved_variables) == 1:
             _, name, _ = split_filename(self.inputs.in_file)
             variable = saved_variables[0]
-            print 'Single variable found {var}, type {ty}:'.format(var=variable, ty=type(in_dict[variable]))
-            print '...Converting {var} to CSV from {f}'.format(var=variable, f=self.inputs.in_file)
+            iflogger.info('Single variable found {var}, type {ty}:'.format(var=variable, ty=type(in_dict[variable])))
+            iflogger.info('...Converting {var} to CSV from {f}'.format(var=variable, f=self.inputs.in_file))
             matlab2csv(in_dict[variable], name, self.inputs.reshape_matrix)
         else:
-            print 'No values in the MATLAB file?!'
+            iflogger.error('No values in the MATLAB file?!')
         return runtime
 
     def _list_outputs(self):
@@ -628,7 +632,7 @@ class Matlab2CSV(BaseInterface):
 				if isinstance(in_dict[key][0],np.ndarray):
 					saved_variables.append(key)
 				else:
-					print 'One of the keys in the input file, {k}, is not a Numpy array'.format(k=key)
+					iflogger.error('One of the keys in the input file, {k}, is not a Numpy array'.format(k=key))
 
         if len(saved_variables) > 1:
             outputs['csv_files'] = replaceext(saved_variables, '.csv')
@@ -636,7 +640,7 @@ class Matlab2CSV(BaseInterface):
             _, name, ext = split_filename(self.inputs.in_file)
             outputs['csv_files'] = op.abspath(name + '.csv')
         else:
-            print 'No values in the MATLAB file?!'
+            iflogger.error('No values in the MATLAB file?!')
         return outputs
 
 def merge_csvs(in_list):
@@ -660,8 +664,8 @@ def merge_csvs(in_list):
 		else:
 			out_array = np.dstack((out_array, in_array))
 	out_array = np.squeeze(out_array)
-	print 'Final output array shape:'
-	print np.shape(out_array)
+	iflogger.info('Final output array shape:')
+	iflogger.info(np.shape(out_array))
 	return out_array
 
 def remove_identical_paths(in_files):
@@ -693,7 +697,7 @@ def maketypelist(rowheadings, shape, extraheadingBool, extraheading):
         typelist.append((str(1), float))
     if extraheadingBool:
         typelist.append((extraheading, 'a40'))
-    print typelist
+    iflogger.info(typelist)
     return typelist
 
 def makefmtlist(output_array, typelist, rowheadingsBool, shape, extraheadingBool):
@@ -752,35 +756,35 @@ class MergeCSVFiles(BaseInterface):
         This block defines the column headings.
         """
         if isdefined(self.inputs.column_headings):
-            print 'Column headings have been provided:'
+            iflogger.info('Column headings have been provided:')
             headings = self.inputs.column_headings
         else:
-            print 'Column headings not provided! Pulled from input filenames:'
+            iflogger.info('Column headings not provided! Pulled from input filenames:')
             headings = remove_identical_paths(self.inputs.in_files)
 
         if isdefined(self.inputs.extra_field):
             if isdefined(self.inputs.extra_column_heading):
                 extraheading = self.inputs.extra_column_heading
-                print 'Extra column heading provided: {col}'.format(col=extraheading)
+                iflogger.info('Extra column heading provided: {col}'.format(col=extraheading))
             else:
                 extraheading = 'type'
-                print 'Extra column heading was not defined. Using "type"'
+                iflogger.info('Extra column heading was not defined. Using "type"')
             headings.append(extraheading)
             extraheadingBool = True
 
         if len(self.inputs.in_files) == 1:
-            print 'Only one file input!'
-
+            iflogger.warn('Only one file input!')
+        
         if isdefined(self.inputs.row_headings):
-            print 'Row headings have been provided. Adding "labels" column header.'
+            iflogger.info('Row headings have been provided. Adding "labels" column header.')
             csv_headings = '"labels","' + '","'.join(itertools.chain(headings)) + '"\n'
             rowheadingsBool = True
         else:
-            print 'Row headings have not been provided.'
+            iflogger.info('Row headings have not been provided.')
             csv_headings = '"' + '","'.join(itertools.chain(headings)) + '"\n'
 
-        print 'Final Headings:'
-        print csv_headings
+        iflogger.info('Final Headings:')
+        iflogger.info(csv_headings)
 
         """
         Next we merge the arrays and define the output text file
@@ -812,11 +816,10 @@ class MergeCSVFiles(BaseInterface):
             extrafieldlist = []
             for idx in range(0,max(shape)):
                 extrafieldlist.append(self.inputs.extra_field)
-            print len(extrafieldlist)
-            output[extraheading] = extrafieldlist
-
-        print output
-        print fmt
+            iflogger.info(len(extrafieldlist))
+            output[extraheading] = extrafieldlist      
+        iflogger.info(output)
+        iflogger.info(fmt)
         np.savetxt(file_handle, output, fmt, delimiter=',')
         file_handle.close()
         return runtime

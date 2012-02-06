@@ -98,6 +98,8 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
                     raise HeaderError(
                         'Expecting %s points, found only %s' % (
                                 stream_count, n_streams))
+                    iflogger.error('Expecting %s points, found only %s' % (
+                                stream_count, n_streams))
                 break
             pts = np.ndarray(
                 shape = (n_pts, pt_cols),
@@ -176,7 +178,6 @@ class MRTrix2TrackVis(BaseInterface):
             iflogger.info('Applying transformation from matrix file {m}'.format(m=self.inputs.matrix_file))
             xfm = np.genfromtxt(self.inputs.matrix_file)
             iflogger.info(xfm)
-
             registration_image_file = nb.load(self.inputs.registration_image_file)
             reg_affine = registration_image_file.get_affine()
             r_dx, r_dy, r_dz = get_data_dims(self.inputs.registration_image_file)
