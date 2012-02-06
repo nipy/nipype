@@ -174,7 +174,7 @@ class DataSink(IOBase):
         >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
         >>> ds.run() # doctest: +SKIP
 
-        To use DataSink in a MapNode, it's inputs have to be defined at the
+        To use DataSink in a MapNode, its inputs have to be defined at the
         time the interface is created.
 
         >>> ds = DataSink(infields=['contasts.@con'])
