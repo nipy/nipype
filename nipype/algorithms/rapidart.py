@@ -433,11 +433,11 @@ class StimulusCorrelation(BaseInterface):
     """Determines if stimuli are correlated with motion or intensity
     parameters.
 
-    Currently this class supports an SPM generated design matrix and
-    requires intensity parameters. This implies that one must run
-    ArtifactDetect and :class:`nipype.interfaces.spm.Level1Design`
-    prior to running this or provide an SPM.mat file and intensity
-    parameters through some other means.
+    Currently this class supports an SPM generated design matrix and requires
+    intensity parameters. This implies that one must run
+    :ref:`nipype.algorithms.rapidart.ArtifactDetect`
+    and :ref:`nipype.interfaces.spm.model.Level1Design` prior to running this or
+    provide an SPM.mat file and intensity parameters through some other means.
 
     Examples
     --------
