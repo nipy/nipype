@@ -54,13 +54,15 @@ tolist = lambda x: [x]
 highpass_operand = lambda x:'-bptf %.10f -1'%x
 
 def create_parallelfeat_preproc(name='featpreproc', highpass=True):
-    """Create a FEAT preprocessing workflow that preprocess each run independently of the others
+    """Preprocess each run with FSL independently of the others
 
     Parameters
     ----------
 
-    name : name of workflow (default: featpreproc)
-    highpass : boolean (default: True)
+    ::
+
+      name : name of workflow (default: featpreproc)
+      highpass : boolean (default: True)
 
     Inputs::
 
@@ -372,9 +374,11 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     Parameters
     ----------
 
-    name : name of workflow (default: featpreproc)
-    highpass : boolean (default: True)
-    whichvol : which volume of the first run to register to ('first', 'middle', 'mean')
+    ::
+
+        name : name of workflow (default: featpreproc)
+        highpass : boolean (default: True)
+        whichvol : which volume of the first run to register to ('first', 'middle', 'mean')
 
     Inputs::
 
@@ -692,8 +696,10 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     Parameters
     ----------
 
-    name : name of workflow (default: susan_smooth)
-    separate_masks : separate masks for each run
+    ::
+
+        name : name of workflow (default: susan_smooth)
+        separate_masks : separate masks for each run
 
     Inputs::
 
@@ -813,9 +819,11 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     Parameters
     ----------
 
-    name : name of workflow (default: preproc)
-    highpass : boolean (default: True)
-    whichvol : which volume of the first run to register to ('first', 'middle', 'mean')
+    ::
+
+        name : name of workflow (default: preproc)
+        highpass : boolean (default: True)
+        whichvol : which volume of the first run to register to ('first', 'middle', 'mean')
 
     Inputs::
 

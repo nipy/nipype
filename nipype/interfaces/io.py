@@ -147,19 +147,30 @@ class DataSink(IOBase):
 
         where parts between [] are optional.
 
-        An attribute such as contrasts.@con will create a 'contrasts' directory to
-        store the results linked to the attribute. If the @ is left out, such as in
-        'contrasts.con', a subdirectory 'con' will be created under 'contrasts'.
+        An attribute such as contrasts.@con will create a 'contrasts' directory
+        to store the results linked to the attribute. If the @ is left out, such
+        as in 'contrasts.con', a subdirectory 'con' will be created under
+        'contrasts'.
 
-        Notes
-        -----
+        the general form of the output is::
 
-            Unlike most nipype-nodes this is not a thread-safe node because it can
-            write to a common shared location. It will not complain when it
-            overwrites a file.
+           'base_directory/container/parameterization/destloc/filename'
+
+           destloc = string[[.[@]]string[[.[@]]string]] and
+           filename comesfrom the input to the connect statement.
+
+        .. warning::
+
+            This is not a thread-safe node because it can write to a common
+            shared location. It will not complain when it overwrites a file.
+
+        .. note::
 
             If both substitutions and regexp_substitutions are used, then
             substitutions are applied first followed by regexp_substitutions.
+
+            This interface **cannot** be used in a MapNode as the inputs are
+            defined only when the connect statement is executed.
 
         Examples
         --------
@@ -301,7 +312,8 @@ class DataGrabber(IOBase):
         intelligent way for neuroimaging tasks to grab files
 
 
-        .. note::
+        .. attention::
+
            Doesn't support directories currently
 
         Examples
@@ -1068,16 +1080,12 @@ class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     table_name = traits.Str(mandatory=True)
 
 class SQLiteSink(IOBase):
-    """Very simple frontend for storing values into SQLite database. input_names
-    correspond to input_names.
+    """ Very simple frontend for storing values into SQLite database.
 
-        Notes
-        -----
+        .. warning::
 
-            Unlike most nipype-nodes this is not a thread-safe node because it can
-            write to a common shared location. When run in parallel it will
-            occasionally crash.
-
+            This is not a thread-safe node because it can write to a common
+            shared location. It will not complain when it overwrites a file.
 
         Examples
         --------
@@ -1102,9 +1110,12 @@ class SQLiteSink(IOBase):
     def _list_outputs(self):
         """Execute this module.
         """
-        conn = sqlite3.connect(self.inputs.database_file, check_same_thread = False)
+        conn = sqlite3.connect(self.inputs.database_file,
+                               check_same_thread = False)
         c = conn.cursor()
-        c.execute("INSERT OR REPLACE INTO %s ("%self.inputs.table_name + ",".join(self._input_names) + ") VALUES (" + ",".join(["?"]*len(self._input_names)) + ")",
+        c.execute("INSERT OR REPLACE INTO %s (" % self.inputs.table_name +
+                  ",".join(self._input_names) + ") VALUES (" +
+                  ",".join(["?"]*len(self._input_names)) + ")",
                   [getattr(self.inputs,name) for name in self._input_names])
         conn.commit()
         c.close()

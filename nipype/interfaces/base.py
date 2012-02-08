@@ -628,13 +628,14 @@ class BaseInterface(Interface):
         """
 
         if cls.__doc__:
-            docstring = cls.__doc__.split('\n')
-            docstring = [trim(line, '') for line in docstring]
+            #docstring = cls.__doc__.split('\n')
+            #docstring = [trim(line, '') for line in docstring]
+            docstring = trim(cls.__doc__).split('\n') + ['']
         else:
             docstring = ['']
 
-        allhelp = '\n'.join(docstring +
-                            cls._inputs_help() + [''] + cls._outputs_help())
+        allhelp = '\n'.join(docstring + cls._inputs_help() + [''] +
+                            cls._outputs_help() + [''])
         if returnhelp:
             return allhelp
         else:
