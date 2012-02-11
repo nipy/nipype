@@ -462,8 +462,8 @@ from nipype.utils.filemanip import loadpkl, savepkl
                      "matplotlib" in node.inputs.function_str)
 
         if does_plot:
-            cmdstr += "import matplotlib"
-            cmdstr += "matplotlib.use('Agg')"
+            cmdstr += "import matplotlib\n"
+            cmdstr += "matplotlib.use('Agg')\n"
 
         cmdstr += """
 traceback=None
