@@ -395,7 +395,7 @@ class ThresholdInputSpec(SPMCommandInputSpec):
     height_threshold_type = traits.Enum('p-value','stat', usedefault=True, desc="Is the cluster forming threshold a stat value or p-value?")
     extent_fdr_p_threshold = traits.Float(0.05, usedefault=True, desc='p threshold on FDR corrected cluster size probabilities')
     extent_threshold = traits.Int(0, usedefault=True, desc="Minimum cluster size in voxels")
-    force_activation = traits.Bool(False, usedefault=True)
+    force_activation = traits.Bool(False, usedefault=True, desc="In case no clusters survive the topological inference step this will pick a culster with the highes sum of t-values. Use with care.")
 
 class ThresholdOutputSpec(TraitedSpec):
     thresholded_map = File(exists=True)
