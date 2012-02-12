@@ -184,7 +184,7 @@ class DistanceInputSpec(BaseInterfaceInputSpec):
     "eucl_cog": mean Euclidian distance between the Center of Gravity of volume1 and CoGs of volume2\
     "eucl_mean": mean Euclidian minimum distance of all volume2 voxels to volume1\
     "eucl_wmean": mean Euclidian minimum distance of all volume2 voxels to volume1 weighted by their values\
-    "eucl_max": mean Euclidian minimum distance of all volume2 voxels to volume1 weighted by their values',
+    "eucl_max": maximum over minimum Euclidian distances of all volume2 voxels to volume1 (also known as the Hausdorff distance)',
     usedefault=True)
     mask_volume = File(exists=True, desc="calculate overlap only within this mask.")
 
