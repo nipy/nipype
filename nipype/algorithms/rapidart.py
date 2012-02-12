@@ -74,6 +74,8 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
             "True)")
     save_plot = traits.Bool(True, desc="save plots containing outliers",
                             usedefault=True)
+    plot_type = traits.Enum('png', 'svg', 'eps', 'pdf', desc="file type of the outlier plot",
+                            usedefault=True)
 
 
 class ArtifactDetectOutputSpec(TraitedSpec):
@@ -138,7 +140,7 @@ class ArtifactDetect(BaseInterface):
         intensityfile = os.path.join(output_dir, ''.join(('global_intensity.', filename, '.txt')))
         statsfile = os.path.join(output_dir, ''.join(('stats.', filename, '.txt')))
         normfile = os.path.join(output_dir, ''.join(('norm.', filename, '.txt')))
-        plotfile = os.path.join(output_dir, ''.join(('plot.', filename, '.png')))
+        plotfile = os.path.join(output_dir, ''.join(('plot.', filename, '.', self.inputs.plot_type)))
         return artifactfile, intensityfile, statsfile, normfile, plotfile
 
     def _list_outputs(self):
