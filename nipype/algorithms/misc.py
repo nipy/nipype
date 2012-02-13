@@ -40,12 +40,14 @@ class PickAtlasInputSpec(BaseInterfaceInputSpec):
     labels = traits.Either(traits.Int, traits.List(traits.Int),
                            desc="Labels of regions that will be included in the mask. Must be \
 compatible with the atlas used.", compulsory=True)
-    hemi = traits.Enum('both','left','right', desc="Restrict the mask to only one hemisphere: left or right", usedefault=True)
-    dilation_size = traits.Int(desc="Defines how much the mask will be dilated (expanded in 3D).", usedefault = True)
+    hemi = traits.Enum('both', 'left', 'right', desc="Restrict the mask to only one hemisphere: left or right", usedefault=True)
+    dilation_size = traits.Int(desc="Defines how much the mask will be dilated (expanded in 3D).", usedefault=True)
     output_file = File(desc="Where to store the output mask.")
+
 
 class PickAtlasOutputSpec(TraitedSpec):
     mask_file = File(exists=True, desc="output mask file")
+
 
 class PickAtlas(BaseInterface):
     '''
@@ -63,8 +65,8 @@ class PickAtlas(BaseInterface):
 
     def _gen_output_filename(self):
         if not isdefined(self.inputs.output_file):
-            output = fname_presuffix(fname=self.inputs.atlas, suffix = "_mask",
-                                     newpath= os.getcwd(), use_ext = True)
+            output = fname_presuffix(fname=self.inputs.atlas, suffix="_mask",
+                                     newpath=os.getcwd(), use_ext=True)
         else:
             output = os.path.realpath(self.inputs.output_file)
         return output
@@ -96,6 +98,7 @@ class PickAtlas(BaseInterface):
         outputs = self._outputs().get()
         outputs['mask_file'] = self._gen_output_filename()
         return outputs
+
 
 class SimpleThresholdInputSpec(BaseInterfaceInputSpec):
     volumes = InputMultiPath(File(exists=True), desc='volumes to be thresholded', mandatory=True)
@@ -134,12 +137,15 @@ class SimpleThreshold(BaseInterface):
             outputs["thresholded_volumes"].append(os.path.abspath(base + '_thresholded.nii'))
         return outputs
 
+
 class ModifyAffineInputSpec(BaseInterfaceInputSpec):
     volumes = InputMultiPath(File(exists=True), desc='volumes which affine matrices will be modified', mandatory=True)
-    transformation_matrix = traits.Array(value=np.eye(4), shape=(4,4), desc="transformation matrix that will be left multiplied by the affine matrix", usedefault=True)
+    transformation_matrix = traits.Array(value=np.eye(4), shape=(4, 4), desc="transformation matrix that will be left multiplied by the affine matrix", usedefault=True)
+
 
 class ModifyAffineOutputSpec(TraitedSpec):
     transformed_volumes = OutputMultiPath(File(exist=True))
+
 
 class ModifyAffine(BaseInterface):
     '''
@@ -157,7 +163,7 @@ class ModifyAffine(BaseInterface):
             img = nb.load(fname)
 
             affine = img.get_affine()
-            affine = np.dot(self.inputs.transformation_matrix,affine)
+            affine = np.dot(self.inputs.transformation_matrix, affine)
 
             nb.save(nb.Nifti1Image(img.get_data(), affine, img.get_header()), self._gen_output_filename(fname))
 
@@ -170,19 +176,25 @@ class ModifyAffine(BaseInterface):
             outputs['transformed_volumes'].append(self._gen_output_filename(fname))
         return outputs
 
+
 class DistanceInputSpec(BaseInterfaceInputSpec):
     volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
     volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
-    method = traits.Enum("eucl_min", "eucl_cog", "eucl_mean", "eucl_wmean", desc='""eucl_min": Euclidean distance between two closest points\
+    method = traits.Enum("eucl_min", "eucl_cog", "eucl_mean", "eucl_wmean", "eucl_max", desc='""eucl_min": Euclidean distance between two closest points\
     "eucl_cog": mean Euclidian distance between the Center of Gravity of volume1 and CoGs of volume2\
     "eucl_mean": mean Euclidian minimum distance of all volume2 voxels to volume1\
-    "eucl_wmean": mean Euclidian minimum distance of all volume2 voxels to volume1 weighted by their values', usedefault = True)
+    "eucl_wmean": mean Euclidian minimum distance of all volume2 voxels to volume1 weighted by their values\
+    "eucl_max": maximum over minimum Euclidian distances of all volume2 voxels to volume1 (also known as the Hausdorff distance)',
+    usedefault=True)
+    mask_volume = File(exists=True, desc="calculate overlap only within this mask.")
+
 
 class DistanceOutputSpec(TraitedSpec):
     distance = traits.Float()
     point1 = traits.Array(shape=(3,))
     point2 = traits.Array(shape=(3,))
     histogram = File()
+
 
 class Distance(BaseInterface):
     '''
@@ -193,18 +205,18 @@ class Distance(BaseInterface):
 
     _hist_filename = "hist.pdf"
 
-    def _find_border(self,data):
+    def _find_border(self, data):
         eroded = binary_erosion(data)
         border = np.logical_and(data, np.logical_not(eroded))
         return border
 
     def _get_coordinates(self, data, affine):
         if len(data.shape) == 4:
-            data = data[:,:,:,0]
+            data = data[:, :, :, 0]
         indices = np.vstack(np.nonzero(data))
         indices = np.vstack((indices, np.ones(indices.shape[1])))
-        coordinates = np.dot(affine,indices)
-        return coordinates[:3,:]
+        coordinates = np.dot(affine, indices)
+        return coordinates[:3, :]
 
     def _eucl_min(self, nii1, nii2):
         origdata1 = nii1.get_data().astype(np.bool)
@@ -219,23 +231,23 @@ class Distance(BaseInterface):
 
         dist_matrix = cdist(set1_coordinates.T, set2_coordinates.T)
         (point1, point2) = np.unravel_index(np.argmin(dist_matrix), dist_matrix.shape)
-        return (euclidean(set1_coordinates.T[point1,:], set2_coordinates.T[point2,:]), set1_coordinates.T[point1,:], set2_coordinates.T[point2,:])
+        return (euclidean(set1_coordinates.T[point1, :], set2_coordinates.T[point2, :]), set1_coordinates.T[point1, :], set2_coordinates.T[point2, :])
 
     def _eucl_cog(self, nii1, nii2):
         origdata1 = nii1.get_data().astype(np.bool)
-        cog_t = np.array(center_of_mass(origdata1)).reshape(-1,1)
+        cog_t = np.array(center_of_mass(origdata1)).reshape(-1, 1)
         cog_t = np.vstack((cog_t, np.array([1])))
-        cog_t_coor = np.dot(nii1.get_affine(),cog_t)[:3,:]
+        cog_t_coor = np.dot(nii1.get_affine(), cog_t)[:3, :]
 
         origdata2 = nii2.get_data().astype(np.bool)
         (labeled_data, n_labels) = label(origdata2)
 
-        cogs = np.ones((4,n_labels))
+        cogs = np.ones((4, n_labels))
 
         for i in range(n_labels):
-            cogs[:3,i] = np.array(center_of_mass(origdata2, labeled_data, i+1))
+            cogs[:3, i] = np.array(center_of_mass(origdata2, labeled_data, i + 1))
 
-        cogs_coor = np.dot(nii2.get_affine(),cogs)[:3,:]
+        cogs_coor = np.dot(nii2.get_affine(), cogs)[:3, :]
 
         dist_matrix = cdist(cog_t_coor.T, cogs_coor.T)
 
@@ -251,7 +263,7 @@ class Distance(BaseInterface):
         set2_coordinates = self._get_coordinates(origdata2, nii2.get_affine())
 
         dist_matrix = cdist(set1_coordinates.T, set2_coordinates.T)
-        min_dist_matrix = np.amin(dist_matrix, axis = 0)
+        min_dist_matrix = np.amin(dist_matrix, axis=0)
         plt.figure()
         plt.hist(min_dist_matrix, 50, normed=1, facecolor='green')
         plt.savefig(self._hist_filename)
@@ -263,7 +275,30 @@ class Distance(BaseInterface):
         else:
             return np.mean(min_dist_matrix)
 
+    def _eucl_max(self, nii1, nii2):
+        origdata1 = nii1.get_data()
+        origdata1 = np.logical_not(np.logical_or(origdata1 == 0, np.isnan(origdata1)))
+        origdata2 = nii2.get_data()
+        origdata2 = np.logical_not(np.logical_or(origdata2 == 0, np.isnan(origdata2)))
 
+        if isdefined(self.inputs.mask_volume):
+            maskdata = nb.load(self.inputs.mask_volume).get_data()
+            maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
+            origdata1 = np.logical_and(maskdata, origdata1)
+            origdata2 = np.logical_and(maskdata, origdata2)
+
+        if origdata1.max() == 0 or origdata2.max() == 0:
+            return np.NaN
+
+        border1 = self._find_border(origdata1)
+        border2 = self._find_border(origdata2)
+
+        set1_coordinates = self._get_coordinates(border1, nii1.get_affine())
+        set2_coordinates = self._get_coordinates(border2, nii2.get_affine())
+        distances = cdist(set1_coordinates.T, set2_coordinates.T)
+        mins = np.concatenate((np.amin(distances, axis=0), np.amin(distances, axis=1)))
+
+        return np.max(mins)
 
     def _run_interface(self, runtime):
         nii1 = nb.load(self.inputs.volume1)
@@ -280,8 +315,11 @@ class Distance(BaseInterface):
 
         elif self.inputs.method == "eucl_wmean":
             self._distance = self._eucl_mean(nii1, nii2, weighted=True)
+        elif self.inputs.method == "eucl_max":
+            self._distance = self._eucl_max(nii1, nii2)
 
         return runtime
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['distance'] = self._distance
@@ -292,16 +330,20 @@ class Distance(BaseInterface):
             outputs['histogram'] = os.path.abspath(self._hist_filename)
         return outputs
 
+
 class OverlapInputSpec(BaseInterfaceInputSpec):
     volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
     volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
+    mask_volume = File(exists=True, desc="calculate overlap only within this mask.")
     out_file = File("diff.nii", usedefault=True)
+
 
 class OverlapOutputSpec(TraitedSpec):
     jaccard = traits.Float()
     dice = traits.Float()
     volume_difference = traits.Int()
     diff_file = File(exists=True)
+
 
 class Overlap(BaseInterface):
     """
@@ -331,9 +373,15 @@ class Overlap(BaseInterface):
 
         origdata1 = np.logical_not(np.logical_or(nii1.get_data() == 0, np.isnan(nii1.get_data())))
         origdata2 = np.logical_not(np.logical_or(nii2.get_data() == 0, np.isnan(nii2.get_data())))
-        for method in ("dice", "jaccard"):
 
-            setattr(self, '_' + method, self._bool_vec_dissimilarity(origdata1, origdata2, method = method))
+        if isdefined(self.inputs.mask_volume):
+            maskdata = nb.load(self.inputs.mask_volume).get_data()
+            maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
+            origdata1 = np.logical_and(maskdata, origdata1)
+            origdata2 = np.logical_and(maskdata, origdata2)
+
+        for method in ("dice", "jaccard"):
+            setattr(self, '_' + method, self._bool_vec_dissimilarity(origdata1, origdata2, method=method))
 
         self._volume = int(origdata1.sum() - origdata2.sum())
 
@@ -348,18 +396,21 @@ class Overlap(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         for method in ("dice", "jaccard"):
-            outputs[method] = getattr(self, '_'+method)
+            outputs[method] = getattr(self, '_' + method)
         outputs['volume_difference'] = self._volume
         outputs['diff_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
 
 class CreateNiftiInputSpec(BaseInterfaceInputSpec):
     data_file = File(exists=True, mandatory=True, desc="ANALYZE img file")
     header_file = File(exists=True, mandatory=True, desc="corresponding ANALYZE hdr file")
     affine = traits.Array(exists=True, desc="affine transformation array")
 
+
 class CreateNiftiOutputSpec(TraitedSpec):
     nifti_file = File(exists=True)
+
 
 class CreateNifti(BaseInterface):
     input_spec = CreateNiftiInputSpec
@@ -379,7 +430,7 @@ class CreateNifti(BaseInterface):
 
         data = hdr.data_from_fileobj(open(self.inputs.data_file, 'rb'))
         img = nb.Nifti1Image(data, affine, hdr)
-        nb.save(img,  self._gen_output_file_name())
+        nb.save(img, self._gen_output_file_name())
 
         return runtime
 
@@ -394,11 +445,13 @@ class TSNRInputSpec(BaseInterfaceInputSpec):
                    desc='realigned 4D file')
     regress_poly = traits.Int(min=1, desc='Remove polynomials')
 
+
 class TSNROutputSpec(TraitedSpec):
     tsnr_file = File(exists=True, desc='tsnr image file')
     mean_file = File(exists=True, desc='mean image file')
     stddev_file = File(exists=True, desc='std dev image file')
     detrended_file = File(desc='detrended input file')
+
 
 class TSNR(BaseInterface):
     """Computes the time-course SNR for a time series
