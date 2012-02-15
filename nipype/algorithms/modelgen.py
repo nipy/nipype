@@ -163,7 +163,7 @@ def gen_info(run_event_files):
 
 class SpecifyModelInputSpec(BaseInterfaceInputSpec):
     subject_info = InputMultiPath(Bunch, mandatory=True, xor=['event_info'],
-                          desc="Bunch of List(Bunch) subject specific condition information. " \
+                          desc="Bunch or List(Bunch) subject specific condition information. " \
                           "see :class:`SpecifyModel` or SpecifyModel.__doc__ for details")
     event_info = InputMultiPath(traits.List(File(exists=True)), mandatory=True, xor=['subject_info'],
                               desc='list of event description files 1, 2 or 3 column format corresponding to onsets, durations and amplitudes')
@@ -200,27 +200,22 @@ class SpecifyModel(BaseInterface):
     """Makes a model specification compatible with spm/fsl designers.
 
     The subject_info field should contain paradigm information in the form of
-    a Bunch of a list of Bunch. The Bunch should contain the following
-    information.
+    a Bunch or a list of Bunch. The Bunch should contain the following
+    information::
 
-    Required for most designs
-    ~~~~~~~~~~~~~~~~~~~~~~~~~
+     [Mandatory]
 
      - conditions : list of names
      - onsets : lists of onsets corresponding to each condition
      - durations : lists of durations corresponding to each condition. Should be left to a single 0 if all events are being modelled as impulses.
 
-    Optional
-    ~~~~~~~~
-
+     [Optional]
      - regressor_names : list of str
          list of names corresponding to each column. Should be None if
          automatically assigned.
-
      - regressors : list of lists
         values for each regressor - must correspond to the number of
         volumes in the functional run
-
      - amplitudes : lists of amplitudes for each event. This will be ignored by
        SPM's Level1Design.
 
@@ -229,13 +224,9 @@ class SpecifyModel(BaseInterface):
 
      - tmod : lists of conditions that should be temporally modulated. Should
        default to None if not being used.
-
      - pmod : list of Bunch corresponding to conditions
-
        - name : name of parametric modulator
-
        - param : values of the modulator
-
        - poly : degree of modulation
 
     Alternatively, you can provide information through event files.
@@ -525,11 +516,12 @@ class SpecifySparseModelOutputSpec(SpecifyModelOutputSpec):
 
 
 class SpecifySparseModel(SpecifyModel):
-    """Makes a model specification compatible with spm/fsl designers for
-    sparse and sparse-clustered designs
+    """ Specify a sparse model that is compatible with spm/fsl designers
 
-    see Ghosh et al. (2009) OHBM 2009
-    http://dl.dropbox.com/u/363467/OHBM2009_HRF.pdf
+    References
+    ----------
+
+    .. [1] Ghosh et al. (2009) OHBM http://dl.dropbox.com/u/363467/OHBM2009_HRF.pdf
 
     Examples
     --------
