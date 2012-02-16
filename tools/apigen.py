@@ -302,12 +302,12 @@ class ApiDocWriter(object):
         if matchstr[:L] == self.package_name:
             matchstr = matchstr[L:]
         for pat in patterns:
-            #print pat, matchstr, match_type  #dbg
+            #print (pat, matchstr, match_type)  #dbg
             try:
                 pat.search
             except AttributeError:
                 pat = re.compile(pat)
-            #print pat.search(matchstr)  #dbg
+            #print (pat.search(matchstr))  #dbg
             if pat.search(matchstr):
                 return False
         return True
