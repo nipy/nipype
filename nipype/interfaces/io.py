@@ -132,6 +132,8 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         if key not in self.copyable_trait_names():
             self._outputs[key] = value
         else:
+            if key in self._outputs:
+                self._outputs[key] = value
             super(DataSinkInputSpec, self).__setattr__(key, value)
 
 class DataSink(IOBase):
@@ -183,19 +185,50 @@ class DataSink(IOBase):
         >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
         >>> ds.run() # doctest: +SKIP
 
+        To use DataSink in a MapNode, its inputs have to be defined at the
+        time the interface is created.
+
+        >>> ds = DataSink(infields=['contasts.@con'])
+        >>> ds.inputs.base_directory = 'results_dir'
+        >>> ds.inputs.container = 'subject'
+        >>> ds.inputs.structural = 'structural.nii'
+        >>> setattr(ds.inputs, 'contrasts.@con', ['cont1.nii', 'cont2.nii'])
+        >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
+        >>> ds.run() # doctest: +SKIP
+
     """
     input_spec = DataSinkInputSpec
+
+    def __init__(self, infields=None, **kwargs):
+        """
+        Parameters
+        ----------
+        infields : list of str
+            Indicates the input fields to be dynamically created
+        """
+
+        super(DataSink, self).__init__(**kwargs)
+        undefined_traits = {}
+        # used for mandatory inputs check
+        self._infields = infields
+        if infields:
+            for key in infields:
+                self.inputs.add_trait(key, traits.Any)
+                self.inputs._outputs[key] = Undefined
+                undefined_traits[key] = Undefined
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
     def _get_dst(self, src):
         path, fname = os.path.split(src)
         if self.inputs.parameterization:
             dst = path
             if isdefined(self.inputs.strip_dir):
-                dst = dst.replace(self.inputs.strip_dir,'')
-            folders = [folder for folder in dst.split(os.path.sep) if folder.startswith('_')]
+                dst = dst.replace(self.inputs.strip_dir, '')
+            folders = [folder for folder in dst.split(os.path.sep) if
+                       folder.startswith('_')]
             dst = os.path.sep.join(folders)
             if fname:
-                dst = os.path.join(dst,fname)
+                dst = os.path.join(dst, fname)
         else:
             if fname:
                 dst = fname
@@ -242,7 +275,9 @@ class DataSink(IOBase):
                     pass
                 else:
                     raise(inst)
-        for key,files in self.inputs._outputs.items():
+        for key, files in self.inputs._outputs.items():
+            if not isdefined(files):
+                continue
             iflogger.debug("key: %s files: %s"%(key, str(files)))
             files = filename_to_list(files)
             tempoutdir = outdir
