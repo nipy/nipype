@@ -20,6 +20,7 @@ import scipy.io as sio
 import pickle
 import logging
 from nipype.utils.misc import package_check
+from nipype.workflows.utils import get_data_dims
 import warnings
 
 logging.basicConfig()
@@ -33,15 +34,6 @@ except Exception, e:
     warnings.warn('cmp not installed')
 else:
     import cmp
-
-def get_data_dims(volume):
-    import nibabel as nb
-    if isinstance(volume, list):
-        volume = volume[0]
-    nii = nb.load(volume)
-    hdr = nii.get_header()
-    datadims = hdr.get_data_shape()
-    return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
 
 def read_unknown_ntwk(ntwk):
 	if not isinstance(ntwk, nx.classes.graph.Graph):

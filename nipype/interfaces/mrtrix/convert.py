@@ -14,7 +14,7 @@ from nipype.interfaces.base import (TraitedSpec, BaseInterface, BaseInterfaceInp
                                     File, isdefined, traits)
 from nipype.utils.filemanip import split_filename
 import os, os.path as op
-from nipype.workflows.camino.connectivity_mapping import get_data_dims, get_vox_dims
+from nipype.workflows.utils import get_data_dims, get_vox_dims
 import nibabel as nb, nibabel.trackvis as trk
 import numpy as np
 from nibabel.trackvis import HeaderError

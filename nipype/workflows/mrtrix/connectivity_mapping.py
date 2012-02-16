@@ -10,10 +10,10 @@ import nipype.interfaces.dipy as dipy
 import inspect
 import nibabel as nb
 import os, os.path as op                      # system functions
-from nipype.workflows.fsl.dti import create_eddy_correct_pipeline
+from ..fsl.dti import create_eddy_correct_pipeline
 from nipype.interfaces.utility import Function
-from nipype.workflows.camino.connectivity_mapping import select_aparc_annot
-from nipype.workflows.camino.group_connectivity import pullnodeIDs
+from ..camino.connectivity_mapping import select_aparc_annot
+from ..camino.group_connectivity import pullnodeIDs
 from nipype.utils.misc import package_check
 import warnings
 

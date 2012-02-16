@@ -9,9 +9,7 @@ import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
 import inspect
 import os.path as op
-
-from .diffusion import (get_vox_dims, get_data_dims, get_affine)
-
+from nipype.workflows.utils import get_data_dims, get_vox_dims, get_affine
 
 def select_aparc(list_of_files):
     for in_file in list_of_files:
