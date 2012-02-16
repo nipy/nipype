@@ -26,8 +26,9 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
     Example
     --------
     
-    >>>tbss1 = tbss.create_tbss_1_preproc(name='tbss1')
-    >>>tbss1.run()
+    >>> from nipype.workflows.fsl import tbss
+    >>> tbss1 = tbss.create_tbss_1_preproc()
+    >>> tbss1.inputs.inputnode.fa_list = ['s1_FA.nii', 's2_FA.nii', 's3_FA.nii']
     
     Inputs::
     
@@ -55,16 +56,22 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
                         iterfield=['in_file'])
     
     # Create a mask
-    getmask = pe.MapNode(fsl.ImageMaths(op_string="-bin", suffix="_mask"),
-                        name="getmask",
+    getmask1 = pe.MapNode(fsl.ImageMaths(op_string="-bin", suffix="_mask"),
+                        name="getmask1",
                         iterfield=['in_file'])
+    getmask2 = pe.MapNode(fsl.MultiImageMaths(op_string="-dilD -dilD -sub 1 -abs -add %s"),
+                        name="getmask2",
+                        iterfield=['in_file', 'operand_files'])
     
+#    $FSLDIR/bin/fslmaths FA/${f}_FA_mask -dilD -dilD -sub 1 -abs -add FA/${f}_FA_mask FA/${f}_FA_mask -odt char
     # Define the tbss1 workflow
     tbss1 = pe.Workflow(name="tbss1")
     tbss1.connect([
         (inputnode, prepfa, [("fa_list", "in_file")]),
         (inputnode, prepfa, [(("fa_list", tbss1_op_string), "op_string")]),
-        (prepfa, getmask, [("out_file", "in_file")]),
+        (prepfa, getmask1, [("out_file", "in_file")]),
+        (getmask1, getmask2, [("out_file", "in_file"),
+                              ("out_file", "operand_files")]),
         (prepfa, slicer,[('out_file', 'in_file')]),
         ])
     
@@ -74,7 +81,7 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
                         name="outputnode")
     tbss1.connect([
                 (prepfa, outputnode, [("out_file", "fa_list")]),
-                (getmask, outputnode, [("out_file","mask_list")]),
+                (getmask2, outputnode, [("out_file","mask_list")]),
                 ])
     return tbss1
 
@@ -85,9 +92,11 @@ def create_tbss_2_reg(name="tbss_2_reg"):
     Example
     ------
     
+    >>> from nipype.workflows.fsl import tbss
     >>> tbss2 = create_tbss_2_reg(name="tbss2")
     >>> tbss2.inputs.inputnode.target = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
-    >>> ...
+    >>> tbss2.inputs.inputnode.fa_list = ['s1_FA.nii', 's2_FA.nii', 's3_FA.nii']
+    >>> tbss2.inputs.inputnode.mask_list = ['s1_mask.nii', 's2_mask.nii', 's3_mask.nii']
     
     Inputs::
 
@@ -151,12 +160,15 @@ def create_tbss_3_postreg(name='tbss_3_postreg'):
     Example
     --------
     
-    >>>tbss3 = create_tbss_3_postreg(name='tbss3')
-    >>>...
+    >>> from nipype.workflows.fsl import tbss
+    >>> tbss3 = tbss.create_tbss_3_postreg()
+    >>> tbss3.inputs.inputnode.fa_list = ['s1_wrapped_FA.nii', 's2_wrapped_FA.nii', 's3_wrapped_FA.nii']
     
     Inputs::
     
-        inputnode.wraped_fa_list
+        inputnode.field_list
+        inputnode.fa_list
+        inputnode.target
     
     Outputs::
     
@@ -239,9 +251,9 @@ def create_tbss_4_prestats(name='tbss_4_prestats'):
     Example
     --------
     
-    >>>tbss4 = create_tbss_4_prestats(name='tbss4')
-    >>>tbss.inputs.inputnode.skeleton_thresh = 0.2
-    >>>...
+    >>> from nipype.workflows.fsl import tbss
+    >>> tbss4 = tbss.create_tbss_4_prestats(name='tbss4')
+    >>> tbss4.inputs.inputnode.skeleton_thresh = 0.2
     
     Inputs::
     
@@ -323,10 +335,10 @@ def create_tbss_all(name='tbss_all'):
     Example
     --------
     
-    >>>tbss = tbss.create_tbss_all('tbss')
-    >>>tbss.base_dir = os.path.abspath(workingdir)
-    >>>tbss.inputs.inputnode.target = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
-    >>>tbss.inputs.inputnode.skeleton_thresh = 0.2
+    >>> from nipype.workflows.fsl import tbss
+    >>> tbss = tbss.create_tbss_all('tbss')
+    >>> tbss.inputs.inputnode.target = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
+    >>> tbss.inputs.inputnode.skeleton_thresh = 0.2
     
     Inputs::
     
@@ -426,3 +438,94 @@ def create_tbss_all(name='tbss_all'):
                                     ]),
                     ])
     return tbss_all
+
+def create_tbss_non_FA(name='tbss_non_FA'):
+    """
+    A pipeline that implemet tbss_non_FA in FSL
+    
+    Example
+    --------
+    
+    >>> from nipype.workflows.fsl import tbss
+    >>> tbss_nonFA = tbss.create_tbss_non_FA()
+    >>> tbss_nonFA.inputs.inputnode.file_list = []
+    >>> tbss_nonFA.inputs.inputnode.target = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
+    >>> tbss_nonFA.inputs.inputnode.field_list = []
+    >>> tbss_nonFA.inputs.inputnode.skeleton_thresh = 0.2
+    >>> tbss_nonFA.inputs.inputnode.mean_FA_mask = './xxx'
+    >>> tbss_nonFA.inputs.inputnode.meanfa_file = './xxx'
+    >>> tbss_nonFA.inputs.inputnode.distance_map = []
+    
+    Inputs::
+    
+        inputnode.file_list
+        inputnode.target
+        inputnode.field_list
+        inputnode.skeleton_thresh
+        inputnode.merged_file
+        inputnode.mean_FA_mask
+        inputnode.meanfa_file
+        inputnode.distance_map
+    
+    Outputs::
+        outputnode.projected_nonFA_file
+        
+    """
+
+    # Define the inputnode
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=['file_list',
+                                                                'target',
+                                                                'field_list',
+                                                                'skeleton_thresh',
+                                                                'merged_file',
+                                                                'mean_FA_mask',
+                                                                'meanfa_file',
+                                                                'distance_map']),
+                        name='inputnode')
+    
+    # Apply the warpfield to the non FA image
+    applywarp = pe.MapNode(interface=fsl.ApplyWarp(),
+                            iterfield=['in_file','field_file'],
+                            name="applywarp")
+    # Merge the non FA files into a 4D file
+    merge = pe.Node(fsl.Merge(dimension="t"), name="merge")
+    #merged_file="all_FA.nii.gz"
+    maskgroup = pe.Node(fsl.ImageMaths(op_string="-mas",
+                                       suffix="_masked"),
+                        name="maskgroup")
+    projectfa = pe.Node(fsl.TractSkeleton(project_data=True,
+                                        #projected_data = 'test.nii.gz',
+                                        use_cingulum_mask=True
+                                      ),
+                        name="projectfa")
+    
+    tbss_nonFA = pe.Workflow(name="tbss_nonFA")
+    tbss_nonFA.connect([
+                    (inputnode, applywarp,[('file_list','in_file'),
+                                            ('target','ref_file'),
+                                            ('field_list','field_file'),
+                                            ]),
+                    (inputnode, merge, [('merged_file','merged_file'),]),
+                    (applywarp, merge,[("out_file", "in_files")]),
+                        
+                    (merge, maskgroup, [("merged_file", "in_file")]),
+                        
+                    (inputnode, maskgroup, [('mean_FA_mask', 'in_file2')]),
+                        
+                    (maskgroup, projectfa,[('out_file','data_file')]),
+                    (inputnode, projectfa,[('skeleton_thresh','threshold'),
+                                            ("meanfa_file", "in_file"),
+                                            ("distance_map", "distance_map"),
+                                            ]),
+                ])
+    
+    # Define the outputnode
+    outputnode = pe.Node(interface=util.IdentityInterface(
+                                            fields=['projected_nonFA_file']),
+                         name='outputnode')
+    tbss_nonFA.connect([
+            (projectfa, outputnode,[('projected_data','projected_nonFA_file'),
+                                    ]),
+            ])
+    return tbss_nonFA
+
