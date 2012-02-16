@@ -37,3 +37,7 @@ p.graphviz img {
 th.field-name {
     white-space: nowrap;
 }
+
+div.body tbody {
+    vertical-align: top;
+}
