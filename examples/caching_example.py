@@ -1,4 +1,8 @@
 """
+==============================
+Caching without using Workflow
+==============================
+
 Using nipype in an imperative way: caching without workflow
 
 Note that in the following example, we are calling command-lines with

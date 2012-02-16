@@ -1,7 +1,7 @@
 """
-========================================
-Using Diffusion Toolkit for ODF analysis
-========================================
+==============================
+HARDI - Diffusion Toolkit, FSL
+==============================
 
 A pipeline example that uses several interfaces to perform analysis on
 diffusion weighted images using Diffusion Toolkit tools.
@@ -204,7 +204,8 @@ dwiproc.inputs.compute_ODF.odf_recon.n_directions = 31
 dwiproc.inputs.compute_ODF.odf_recon.n_b0 = 5
 dwiproc.inputs.compute_ODF.odf_recon.n_output_directions = 181
 
-dwiproc.run()
-dwiproc.write_graph()
+if __name__ == '__main__':
+    dwiproc.run()
+    dwiproc.write_graph()
 
 
