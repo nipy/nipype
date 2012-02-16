@@ -12,7 +12,7 @@ import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import os                                    # system functions
-import tbss
+from nipype.workflows.fsl import tbss
 
 """
 Confirm package dependencies installed.

@@ -10,7 +10,7 @@ import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
-import tbss_nonFA
+from nipype.workflows.fsl import tbss_nonFA
 
 """Specify the related directories
 

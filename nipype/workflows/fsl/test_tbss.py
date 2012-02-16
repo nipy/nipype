@@ -22,7 +22,7 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.io as nio 
 from nipype.testing.utils import setup_test_dir, remove_test_dir
 import warnings
-import tbss
+from nipype.workflows.fsl import tbss
 
 
 '''
