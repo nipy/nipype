@@ -179,7 +179,7 @@ def create_tbss_3_postreg(name='tbss_3_postreg'):
                         name="applywarp")
     
     # Merge the FA files into a 4D file
-    mergefa = pe.Node(fsl.Merge(dimension="t", merged_file="all_FA.nii.gz"),
+    mergefa = pe.Node(fsl.Merge(dimension="t"),
                     name="mergefa")
     
     # Get a group mask
