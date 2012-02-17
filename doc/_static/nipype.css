@@ -37,3 +37,24 @@ p.graphviz img {
 th.field-name {
     white-space: nowrap;
 }
+
+div.doc2.container tbody {
+    vertical-align: top;
+}
+
+div.doc2.container li {
+    list-style-type: none;
+}
+
+div.doc2.container p.first{
+    font-weight: bold;
+    font-size: 14px;
+}
+
+div.doc2.container ul{
+    margin: 10px;
+}
+
+div.doc2 .reference.internal{
+    font-size: 14px;
+}

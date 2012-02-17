@@ -1,7 +1,7 @@
 """
-==================================================
-Using Camino for pipelined diffusion analysis
-==================================================
+==================
+Diffusion - Camino
+==================
 
 Introduction
 ============
@@ -306,8 +306,9 @@ workflow.connect([(infosource,datasource,[('subject_id', 'subject_id')]),
 The following functions run the whole workflow and produce a .dot and .png graph of the processing pipeline.
 """
 
-workflow.run()
-workflow.write_graph()
+if __name__ == '__main__':
+    workflow.run()
+    workflow.write_graph()
 
 """
 You can choose the format of the experted graph with the ``format`` option. For example ``workflow.write_graph(format='eps')``

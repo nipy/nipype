@@ -6,10 +6,12 @@ from subprocess import Popen, PIPE
 
 import nipype
 
+
 def is_git_repo():
     """Does the current nipype module have a git folder
     """
-    sourcepath = os.path.realpath(os.path.join(os.path.dirname(nipype.__file__), os.path.pardir))
+    sourcepath = os.path.realpath(os.path.join(os.path.dirname(nipype.__file__),
+                                               os.path.pardir))
     gitpathgit = os.path.join(sourcepath, '.git')
     if os.path.exists(gitpathgit):
         return True
@@ -39,17 +41,22 @@ def create_hash_map():
     """Create a hash map for all objects
     """
 
-    conn = httplib.HTTPSConnection("api.github.com")
-    conn.request("GET", "/repos/nipy/nipype/git/trees/master?recursive=1")
-    r1 = conn.getresponse()
-    if r1.reason != 'OK':
-        raise Exception('HTTP Response  %s:%s' % (r1.status, r1.reason))
-    payload = json.loads(r1.read())
     hashmap = {}
-    for infodict in payload['tree']:
-        if infodict['type'] == "blob":
-            hashmap[infodict['sha']] = infodict['path']
+    conn = httplib.HTTPSConnection("api.github.com")
+    try:
+        conn.request("GET", "/repos/nipy/nipype/git/trees/master?recursive=1")
+    except:
+        pass
+    else:
+        r1 = conn.getresponse()
+        if r1.reason != 'OK':
+            raise Exception('HTTP Response  %s:%s' % (r1.status, r1.reason))
+        payload = json.loads(r1.read())
+        for infodict in payload['tree']:
+            if infodict['type'] == "blob":
+                hashmap[infodict['sha']] = infodict['path']
     return hashmap
+
 
 def get_repo_url(force_github=False):
     """Returns github url or local url
@@ -59,13 +66,15 @@ def get_repo_url(force_github=False):
     URI: str
        filesystem path or github repo url
     """
-    sourcepath = os.path.realpath(os.path.join(os.path.dirname(nipype.__file__), os.path.pardir))
+    sourcepath = os.path.realpath(os.path.join(os.path.dirname(nipype.__file__),
+                                               os.path.pardir))
     gitpathgit = os.path.join(sourcepath, '.git')
     if not os.path.exists(gitpathgit) and not force_github:
         uri = 'file://%s' % sourcepath
     else:
         uri = 'http://github.com/nipy/nipype/blob/master'
     return uri
+
 
 def get_file_url(object, hashmap):
     """Returns local or remote url for an object

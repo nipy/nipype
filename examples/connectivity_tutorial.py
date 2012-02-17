@@ -1,7 +1,7 @@
 """
-==========================================================
-Using Camino and CMTK for structural connectivity analysis
-==========================================================
+==================================================
+Structural connectivity - Camino, CMTK, FreeSurfer
+==================================================
 
 Introduction
 ============
@@ -594,8 +594,9 @@ By default, write_graph outputs a .dot file and a .png image, but here we set it
 as a vector graphic, by passing the format='eps' argument.
 """
 
-connectivity.run()
-connectivity.write_graph(format='eps')
+if __name__ == '__main__':
+    connectivity.run()
+    connectivity.write_graph(format='eps')
 
 """
 The output CFF file of this pipeline can be loaded in the Connectome Viewer (http://www.cmtk.org)

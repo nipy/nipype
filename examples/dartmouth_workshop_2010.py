@@ -1,6 +1,6 @@
 """
 =================================
- Dartmouth College Workshop 2010
+Workshop - Dartmouth College 2010
 =================================
 
 First lets go to the directory with the data we'll be working on and start the interactive python interpreter
