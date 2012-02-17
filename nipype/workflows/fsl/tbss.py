@@ -87,7 +87,7 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
 
 def create_tbss_2_reg(name="tbss_2_reg"):
     """TBSS nonlinear registration: 
-    A pipeline that does the same as tbss_2_reg script in FSL.
+    A pipeline that does the same as 'tbss_2_reg -t' script in FSL.
         
     Example
     ------
@@ -155,7 +155,7 @@ def create_tbss_2_reg(name="tbss_2_reg"):
 def create_tbss_3_postreg(name='tbss_3_postreg'):
     """Post-registration processing: derive mean_FA and mean_FA_skeleton from 
     mean of all subjects in study.
-    A pipeline that does the same as tbss_3_postreg script from FSL
+    A pipeline that does the same as 'tbss_3_postreg -T' script from FSL
     
     Example
     --------
@@ -203,26 +203,37 @@ def create_tbss_3_postreg(name='tbss_3_postreg'):
     maskgroup = pe.Node(fsl.ImageMaths(op_string="-mas",
                                        suffix="_masked"),
                         name="maskgroup")
-    
-    # Take the mean over the fourth dimension
-    meanfa = pe.Node(fsl.ImageMaths(op_string="-Tmean",
-                                     suffix="_mean"),
-                      name="meanfa")
-    
-    # Use the mean FA volume to generate a tract skeleton
-    makeskeleton = pe.Node(fsl.TractSkeleton(skeleton_file=True),
-                           name="makeskeleton")
+
+    #$FSLDIR/bin/fslmaths $FSLDIR/data/standard/FMRIB58_FA_1mm -mas mean_FA_mask mean_FA
+    maskstd = pe.Node(fsl.ImageMaths(op_string="-mas",
+                                       suffix="_masked"),
+                        name="maskstd")
+    maskstd.inputs.in_file = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
+
+    #$FSLDIR/bin/fslmaths mean_FA -bin mean_FA_mask
+    binmaskstd = pe.Node(fsl.ImageMaths(op_string="-bin"),
+                        name="binmaskstd")
+
+    #$FSLDIR/bin/fslmaths all_FA -mas mean_FA_mask all_FA
+    maskgroup2 = pe.Node(fsl.ImageMaths(op_string="-mas",
+                                       suffix="_masked"),
+                        name="maskgroup2")
+
+    #$FSLDIR/bin/imcp $FSLDIR/data/standard/FMRIB58_FA-skeleton_1mm mean_FA_skeleton
+
     tbss3 = pe.Workflow(name=name)
     tbss3.connect([
-        (inputnode,applywarp,[("fa_list", "in_file"),
-                              ("target","ref_file"),
+        (inputnode, applywarp,[("fa_list", "in_file"),
+                              ("target", "ref_file"),
                               ("field_list", "field_file")]),
         (applywarp, mergefa, [("out_file", "in_files")]),
         (mergefa, groupmask, [("merged_file", "in_file")]),
         (mergefa, maskgroup, [("merged_file", "in_file")]),
         (groupmask, maskgroup, [("out_file", "in_file2")]),
-        (maskgroup, meanfa, [("out_file", "in_file")]),
-        (meanfa, makeskeleton, [("out_file", "in_file")])
+        (groupmask, maskstd, [("out_file", "in_file2")]),
+        (maskstd, binmaskstd, [("out_file", "in_file")]),
+        (maskgroup, maskgroup2, [("out_file", "in_file")]),
+        (binmaskstd, maskgroup2, [("out_file", "in_file2")])
         ])
     
     # Create outputnode
@@ -231,11 +242,11 @@ def create_tbss_3_postreg(name='tbss_3_postreg'):
                                                                 'meanfa_file',
                                                                 'mergefa_file']),
                          name='outputnode')
+    outputnode.inputs.skeleton_file = fsl.Info.standard_image("FMRIB58_FA-skeleton_1mm.nii.gz")
     tbss3.connect([
-            (groupmask, outputnode,[('out_file', 'groupmask')]),
-            (makeskeleton, outputnode,[('skeleton_file', 'skeleton_file')]),
-            (meanfa, outputnode,[('out_file', 'meanfa_file')]),
-            (maskgroup, outputnode,[('out_file', 'mergefa_file')])
+            (binmaskstd, outputnode,[('out_file', 'groupmask')]),
+            (maskstd, outputnode,[('out_file', 'meanfa_file')]),
+            (maskgroup2, outputnode,[('out_file', 'mergefa_file')])
             ])
     return tbss3
 
