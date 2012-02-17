@@ -1,9 +1,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-==============================
-Using FreeSurfer for smoothing
-==============================
+=====================================
+fMRI surface smooth - FreeSurfer, SPM
+=====================================
 
 This tutorial illustrates how to perform surface-based smoothing of
 cortical data using FreeSurfer_ and then perform firstlevel model and

@@ -1,7 +1,7 @@
 """
-==================================================
-Using MRtrix for advanced diffusion analysis
-==================================================
+=================
+DTI - MRtrix, FSL
+=================
 
 Introduction
 ============
@@ -250,5 +250,6 @@ dwiproc.connect([
                                                ])
                 ])
 
-dwiproc.run()
-dwiproc.write_graph()
+if __name__ == '__main__':
+    dwiproc.run()
+    dwiproc.write_graph()

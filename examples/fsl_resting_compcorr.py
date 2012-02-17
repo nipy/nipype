@@ -1,9 +1,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-==========================================================
-Using FSL and Python to perform resting data preprocessing
-==========================================================
+================================
+rc-fMRI - FSL, Nipype, tCompCorr
+================================
 
 Performs preprocessing for resting state data based on the tCompCorr method
 described in Behzadi et al. (2007).
@@ -98,5 +98,6 @@ l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                                                '@filteredfile')])
                     ])
 
-l1pipeline.run()
-l1pipeline.write_graph()
+if __name__ == '__main__':
+    l1pipeline.run()
+    l1pipeline.write_graph()

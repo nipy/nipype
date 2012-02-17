@@ -1,7 +1,7 @@
 """
-==========================
-Using FSL for DTI analysis
-==========================
+=========
+DTI - FSL
+=========
 
 A pipeline example that uses several interfaces to perform analysis on
 diffusion weighted images using FSL FDT tools.
@@ -269,7 +269,8 @@ dwiproc.connect([
                     (tractography,datasink,[('findthebiggest.out_file','fbiggest.@biggestsegmentation')])
                 ])
 
-dwiproc.run()
-dwiproc.write_graph()
+if __name__ == '__main__':
+    dwiproc.run()
+    dwiproc.write_graph()
 
 

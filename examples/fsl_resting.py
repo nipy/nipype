@@ -1,8 +1,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-FSL resting pipeline with CSF signals regressed out
-===================================================
+=============================
+rc-fMRI - FSL - CSF regressed
+=============================
 
 A pipeline example that uses intergrates several interfaces to
 perform a first and second level analysis on a two-subject data
@@ -282,5 +283,6 @@ l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                     (modelfit, bandPassFilterData, [('modelestimate.residual4d', 'in_file')]),
                     ])
 
-l1pipeline.run()
-l1pipeline.write_graph()
+if __name__ == '__main__':
+    l1pipeline.run()
+    l1pipeline.write_graph()
