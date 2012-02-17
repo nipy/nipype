@@ -1,7 +1,7 @@
 """
-==============================================================
-Using MRtrix and CMTK for advanced group connectivity analysis
-==============================================================
+============================================
+Group connectivity - MRtrix, FSL, FreeSurfer
+============================================
 
 Introduction
 ============
@@ -39,9 +39,9 @@ the MRtrix Viewer (mrview), and anything that can view Nifti files.
     ConnectomeViewer: https://github.com/LTS5/connectomeviewer
     TrackVis: http://trackvis.org/
     Gephi: http://gephi.org/
-    
+
 The fiber data is available in Numpy arrays, and the connectivity matrix
-is also produced as a MATLAB matrix. 
+is also produced as a MATLAB matrix.
 
 
 
@@ -107,12 +107,12 @@ for idx, group_id in enumerate(group_list.keys()):
         title += '-'
 
     """
-    
+
     .. warning::
         The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
         The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
-    
-    
+
+
     """
     info = dict(dwi=[['subject_id', 'dwi']],
                     bvecs=[['subject_id', 'bvecs']],
@@ -120,12 +120,12 @@ for idx, group_id in enumerate(group_list.keys()):
 
     """
     This line creates the processing workflow given the information input about the groups and subjects.
-    
+
     .. seealso::
         * nipype/workflows/mrtrix/group_connectivity.py
         * nipype/workflows/mrtrix/connectivity_mapping.py
         * connectivity_tutorial_advanced.py
-    
+
     """
 
     l1pipeline = create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir, output_dir, info)
@@ -148,7 +148,7 @@ to reduce the threshold, since their brains are have lower average fractional an
         l1pipeline.inputs.connectivity.mapping.fsl2mrtrix.invert_y = True
 
     """
-These lines relate to inverting the b-vectors in the encoding file, and setting the 
+These lines relate to inverting the b-vectors in the encoding file, and setting the
 maximum harmonic order of the pre-tractography spherical deconvolution step. This is
 done to show how to set inputs that will affect both groups.
     """
@@ -185,11 +185,11 @@ The first level pipeline we have tweaked here is run within the for loop.
     It is used to merge each subject's CFF file into one, so that there is a single file containing
     all of the networks for each group. This can be useful for performing Network Brain Statistics
     using the NBS plugin in ConnectomeViewer.
-    
+
     .. seealso::
-    
+
         http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html
-    
+
     """
 
     l2pipeline = create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir, subjects_dir, output_dir)

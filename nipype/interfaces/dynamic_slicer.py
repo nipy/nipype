@@ -15,7 +15,7 @@ class SlicerCommandLine(CommandLine):
     """Experimental Slicer wrapper. Work in progress.
 
     """
-
+    _cmd = "Slicer3"
     input_spec = SlicerCommandLineInputSpec
     output_spec = DynamicTraitedSpec
 
@@ -151,17 +151,16 @@ class SlicerCommandLine(CommandLine):
             return spec.argstr % fname
         return super(SlicerCommandLine, self)._format_arg(name, spec, value)
 
-if __name__ == "__main__":
-    test = SlicerCommandLine(module="BRAINSFit")
-    test.inputs.fixedVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/10_co_COR_3D_IR_PREP.nii"
-    test.inputs.movingVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/2_line_bisection.nii"
-    test.inputs.outputTransform = True
-    test.inputs.transformType = ["Affine"]
-    print test.cmdline
-    print test.inputs
-    print test._outputs()
-    ret = test.run()
-
+#    test = SlicerCommandLine(module="BRAINSFit")
+#    test.inputs.fixedVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/10_co_COR_3D_IR_PREP.nii"
+#    test.inputs.movingVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/2_line_bisection.nii"
+#    test.inputs.outputTransform = True
+#    test.inputs.transformType = ["Affine"]
+#    print test.cmdline
+#    print test.inputs
+#    print test._outputs()
+#    ret = test.run()
+    
 #    test = SlicerCommandLine(name="BRAINSResample")
 #    test.inputs.referenceVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/10_co_COR_3D_IR_PREP.nii"
 #    test.inputs.inputVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/2_line_bisection.nii"

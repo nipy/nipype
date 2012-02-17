@@ -149,8 +149,8 @@ class Workflow(WorkflowBase):
 
         .. note::
 
-        Will reset attributes used for executing workflow. See
-        _init_runtime_fields.
+          Will reset attributes used for executing workflow. See
+          _init_runtime_fields.
 
         Parameters
         ----------
@@ -390,6 +390,21 @@ connected.
         else:
             outnode = None
         return outnode
+
+
+    def list_node_names(self):
+        """List names of all nodes in a workflow
+        """
+        outlist = []
+        for node in nx.topological_sort(self._graph):
+            print node.fullname #dbg
+            if isinstance(node, Workflow):
+                outlist.extend(['.'.join((node.name, nodename)) for nodename in
+                                node.list_nodes()])
+            else:
+                outlist.append(node.name)
+        return sorted(outlist)
+
 
     def write_graph(self, dotfilename='graph.dot', graph2use='hierarchical',
                     format="png"):

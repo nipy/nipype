@@ -384,7 +384,10 @@ def loadflat(infile, *args):
     return out
 
 def loadcrash(infile, *args):
-    return loadflat(infile, *args)
+    if '.pkl' in infile:
+        return loadpkl(infile)
+    else:
+        return loadflat(infile, *args)
 
 def loadpkl(infile):
     """Load a zipped or plain cPickled file

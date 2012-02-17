@@ -319,7 +319,10 @@ class DistributedPluginBase(PluginBase):
         """ Generates a dependency list for a list of graphs.
         """
         self.procs = graph.nodes()
-        self.depidx = nx.to_scipy_sparse_matrix(graph)
+        try:
+            self.depidx = nx.to_scipy_sparse_matrix(graph, format='lil')
+        except:
+            self.depidx = nx.to_scipy_sparse_matrix(graph)
         self.refidx = deepcopy(self.depidx)
         self.refidx.astype = np.int
         self.proc_done = np.zeros(len(self.procs), dtype=bool)
@@ -407,9 +410,11 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
             result_data = {'hostname': 'unknown',
                            'result': None,
                            'traceback': None}
+            results_file = None
             try:
-                raise IOError(('Job finished or terminated. Results file does '
-                               'not exist'))
+                raise IOError(('Job finished or terminated, but results file '
+                               'does not exist. Batch dir contains crashdump '
+                               'file if node raised an exception'))
             except IOError, e:
                 result_data['traceback'] = format_exc()
         else:
@@ -420,8 +425,9 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
             result_out['result'] = result_data['result']
             result_out['traceback'] = result_data['traceback']
             result_out['hostname'] = result_data['hostname']
-            crash_file = os.path.join(node_dir, 'crashstore.pklz')
-            os.rename(results_file, crash_file)
+            if results_file:
+                crash_file = os.path.join(node_dir, 'crashstore.pklz')
+                os.rename(results_file, crash_file)
         else:
             result_out['result'] = result_data
         return result_out
@@ -450,19 +456,27 @@ from socket import gethostname
 from traceback import format_exception
 from nipype.utils.filemanip import loadpkl, savepkl
 traceback=None
-print os.getcwd()
+cwd = os.getcwd()
+print cwd
+pklfile = '%s'
+batchdir = '%s'
+info = None
 try:
-    info = loadpkl('%s')
+    info = loadpkl(pklfile)
     result = info['node'].run(updatehash=info['updatehash'])
 except:
     etype, eval, etr = sys.exc_info()
     traceback = format_exception(etype,eval,etr)
-    result = info['node'].result
-    resultsfile = os.path.join(info['node'].output_dir(),
+    if info is None:
+        result = None
+        resultsfile = os.path.join(batchdir, 'crashdump_%s.pklz')
+    else:
+        result = info['node'].result
+        resultsfile = os.path.join(info['node'].output_dir(),
                                'result_%%s.pklz'%%info['node'].name)
-    savepkl(resultsfile,dict(result=result, hostname=gethostname(),
-                             traceback=traceback))
-""" % pkl_file
+    savepkl(resultsfile, dict(result=result, hostname=gethostname(),
+                              traceback=traceback))
+""" % (pkl_file, batch_dir, suffix)
         pyscript = os.path.join(batch_dir, 'pyscript_%s.py' % suffix)
         fp = open(pyscript, 'wt')
         fp.writelines(cmdstr)

@@ -1,3 +1,14 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
+
 from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, BaseInterface, BaseInterfaceInputSpec,
                                     traits, File, TraitedSpec, Directory, InputMultiPath, OutputMultiPath, isdefined)
 from nipype.utils.filemanip import split_filename
@@ -50,7 +61,7 @@ class DWI2SphericalHarmonicsImage(CommandLine):
 
     >>> import nipype.interfaces.mrtrix as mrt
     >>> dwi2SH = mrt.DWI2SphericalHarmonicsImage()
-    >>> dwi2SH.inputs.in_file = 'dwi.nii'
+    >>> dwi2SH.inputs.in_file = 'diffusion.nii'
     >>> dwi2SH.inputs.encoding_file = 'encoding.txt'
     >>> dwi2SH.run()                                    # doctest: +SKIP
     """
@@ -126,9 +137,9 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     >>> csdeconv = mrt.ConstrainedSphericalDeconvolution()
     >>> csdeconv.inputs.in_file = 'dwi.mif'
     >>> csdeconv.inputs.encoding_file = 'encoding.txt'
-    >>> csdeconv.inputs.offset = 0
     >>> csdeconv.run()                                          # doctest: +SKIP
     """
+
     _cmd = 'csdeconv'
     input_spec=ConstrainedSphericalDeconvolutionInputSpec
     output_spec=ConstrainedSphericalDeconvolutionOutputSpec

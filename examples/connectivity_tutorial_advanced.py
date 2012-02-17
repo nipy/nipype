@@ -1,7 +1,7 @@
 """
-==========================================================
-Using MRtrix and CMTK for structural connectivity analysis
-==========================================================
+==================================================
+Structural connectivity - MRtrix, CMTK, FreeSurfer
+==================================================
 
 Introduction
 ============
@@ -13,15 +13,15 @@ and tractography, and the Connectome Mapping Toolkit (CMTK) for further parcella
     python connectivity_tutorial_advanced.py
 
 We perform this analysis using the FSL course data, which can be acquired from here:
-    
+
     http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 
 This pipeline also requires the Freesurfer directory for 'subj1' from the FSL course data.
 To save time, this data can be downloaded from here:
-    
+
     http://dl.dropbox.com/u/315714/subj1.zip?dl=1
 
-The result of this processing will be the connectome for subj1 as a Connectome File Format (CFF) File, using 
+The result of this processing will be the connectome for subj1 as a Connectome File Format (CFF) File, using
 the Lausanne2008 parcellation scheme.
 
 .. seealso::
@@ -35,7 +35,7 @@ the Lausanne2008 parcellation scheme.
 .. warning::
 
 	The ConnectomeMapper (https://github.com/LTS5/cmp or www.cmtk.org) must be installed for this tutorial to function!
-	
+
 Packages and Data Setup
 =======================
 
@@ -59,10 +59,10 @@ from nipype.workflows.fsl.dti import create_eddy_correct_pipeline
 
 """
 This needs to point to the freesurfer subjects directory (Recon-all must have been run on subj1 from the FSL course data)
-Alternatively, the reconstructed subject data can be downloaded from: 
+Alternatively, the reconstructed subject data can be downloaded from:
 
 	http://dl.dropbox.com/u/315714/subj1.zip
-    
+
 """
 
 subjects_dir = op.abspath(op.join(op.curdir,'./subjects'))
@@ -71,9 +71,9 @@ fsl.FSLCommand.set_default_output_type('NIFTI')
 
 """
 This needs to point to the fdt folder you can find after extracting
-	
+
 	http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
-    
+
 """
 
 data_dir = op.abspath(op.join(op.curdir,'exdata/'))
@@ -106,7 +106,7 @@ datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz')
 datasource.inputs.template_args = info
 
 """
-The input node and Freesurfer sources declared here will be the main 
+The input node and Freesurfer sources declared here will be the main
 conduits for the raw data to the rest of the processing pipeline.
 """
 
@@ -155,17 +155,17 @@ mris_convertRHlabels = mris_convertLH.clone('mris_convertRHlabels')
 """
     Diffusion processing nodes
     --------------------------
-    
+
     .. seealso::
-    
+
     	mrtrix_dti_tutorial.py
     		Tutorial that focuses solely on the MRtrix diffusion processing
-    
+
     	http://www.brain.org.au/software/mrtrix/index.html
     		MRtrix's online documentation
-    
-    
-    
+
+
+
     b-values and b-vectors stored in FSL's format are converted into a single encoding file for MRTrix.
 """
 
@@ -193,7 +193,7 @@ tensor2fa = pe.Node(interface=mrtrix.Tensor2FractionalAnisotropy(),name='tensor2
 
 """
 These nodes are used to create a rough brain mask from the b0 image.
-The b0 image is extracted from the original diffusion-weighted image, 
+The b0 image is extracted from the original diffusion-weighted image,
 put through a simple thresholding routine, and smoothed using a 3x3 median filter.
 """
 
@@ -204,8 +204,8 @@ threshold_b0 = pe.Node(interface=mrtrix.Threshold(),name='threshold_b0')
 median3d = pe.Node(interface=mrtrix.MedianFilter3D(),name='median3d')
 
 """
-The brain mask is also used to help identify single-fiber voxels. 
-This is done by passing the brain mask through two erosion steps, 
+The brain mask is also used to help identify single-fiber voxels.
+This is done by passing the brain mask through two erosion steps,
 multiplying the remaining mask with the fractional anisotropy map, and
 thresholding the result to obtain some highly anisotropic within-brain voxels.
 """
@@ -229,13 +229,13 @@ threshold_wmmask = pe.Node(interface=mrtrix.Threshold(),name='threshold_wmmask')
 threshold_wmmask.inputs.absolute_threshold_value = 0.4
 
 """
-    The spherical deconvolution step depends on the estimate of the response function 
+    The spherical deconvolution step depends on the estimate of the response function
     in the highly anisotropic voxels we obtained above.
-    
+
     .. warning::
-    
+
     	For damaged or pathological brains one should take care to lower the maximum harmonic order of these steps.
-    	
+
 """
 
 estimateresponse = pe.Node(interface=mrtrix.EstimateResponseForSH(),name='estimateresponse')
@@ -263,8 +263,8 @@ Structural segmentation nodes
 
 
 
-In order to improve the coregistration of the parcellation scheme 
-with the diffusion-weighted image, we resample the b0 image to use 
+In order to improve the coregistration of the parcellation scheme
+with the diffusion-weighted image, we resample the b0 image to use
 as a reference in the FLIRT steps below.
 """
 
@@ -273,7 +273,7 @@ resampleb0.inputs.out_type = 'nii'
 resampleb0.inputs.vox_size = (1, 1, 1)
 
 """
-The following nodes identify the transformation between the diffusion-weighted 
+The following nodes identify the transformation between the diffusion-weighted
 image and the structural image. This transformation is then inverted and applied
 to the structural image and it's parcellated equivalent, in order to get the parcellation
 and the tractography into the same space.
@@ -318,7 +318,7 @@ creatematrix.inputs.resolution_network_file = cmp_config._get_lausanne_parcellat
 """
 Next we define the endpoint of this tutorial, which is the CFFConverter node, as well as a few nodes which use
 the Nipype Merge utility. These are useful for passing lists of the files we want packaged in our CFF file.
-The inspect.getfile command is used to package this script into the resulting CFF file, so that it is easy to 
+The inspect.getfile command is used to package this script into the resulting CFF file, so that it is easy to
 look back at the processing parameters that were used.
 """
 
@@ -416,7 +416,7 @@ mapping.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
 					   (dwi2tensor, tensor2fa,[['tensor','in_file']]),
 					  ])
 mapping.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
-                      
+
 """
 This block creates the rough brain mask to be multiplied, mulitplies it with the
 fractional anisotropy image, and thresholds it to get the single-fiber voxels.
@@ -550,7 +550,7 @@ product.
 
 mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
 mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
-mapping.connect([(creatematrix, CFFConverter,[("matrix_file","gpickled_networks")])])    
+mapping.connect([(creatematrix, CFFConverter,[("matrix_file","gpickled_networks")])])
 mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
 mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
 mapping.connect([(trkTracts, CFFConverter,[("out","tract_files")])])
@@ -595,5 +595,6 @@ connectivity.connect([
 The following functions run the whole workflow and produce a .dot and .png graph of the processing pipeline.
 """
 
-connectivity.run()
-connectivity.write_graph()
+if __name__ == '__main__':
+    connectivity.run()
+    connectivity.write_graph()

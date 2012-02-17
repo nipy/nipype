@@ -1,7 +1,7 @@
 """
-==================================================
-Using MRtrix for advanced diffusion analysis
-==================================================
+=================
+DTI - MRtrix, FSL
+=================
 
 Introduction
 ============
@@ -12,7 +12,7 @@ in a Nipype pipeline.
     python mrtrix_dti_tutorial.py
 
 We perform this analysis using the FSL course data, which can be acquired from here:
-    
+
     http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 
 Import necessary modules from nipype.
@@ -28,9 +28,9 @@ import os, os.path as op                     # system functions
 
 """
 This needs to point to the fdt folder you can find after extracting
-	
+
 	http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
-    
+
 """
 
 data_dir = op.abspath(op.join(op.curdir,'exdata/'))
@@ -71,15 +71,15 @@ inputnode = pe.Node(interface=util.IdentityInterface(fields=["dwi", "bvecs", "bv
 """
     Diffusion processing nodes
     --------------------------
-    
+
     .. seealso::
-    
+
     	connectivity_tutorial_advanced.py
     		Tutorial with further detail on using MRtrix tractography for connectivity analysis
-    
+
     	http://www.brain.org.au/software/mrtrix/index.html
     		MRtrix's online documentation
-    
+
     b-values and b-vectors stored in FSL's format are converted into a single encoding file for MRTrix.
 """
 
@@ -99,7 +99,7 @@ tensor2fa = pe.Node(interface=mrtrix.Tensor2FractionalAnisotropy(),name='tensor2
 
 """
 These nodes are used to create a rough brain mask from the b0 image.
-The b0 image is extracted from the original diffusion-weighted image, 
+The b0 image is extracted from the original diffusion-weighted image,
 put through a simple thresholding routine, and smoothed using a 3x3 median filter.
 """
 
@@ -110,8 +110,8 @@ threshold_b0 = pe.Node(interface=mrtrix.Threshold(),name='threshold_b0')
 median3d = pe.Node(interface=mrtrix.MedianFilter3D(),name='median3d')
 
 """
-The brain mask is also used to help identify single-fiber voxels. 
-This is done by passing the brain mask through two erosion steps, 
+The brain mask is also used to help identify single-fiber voxels.
+This is done by passing the brain mask through two erosion steps,
 multiplying the remaining mask with the fractional anisotropy map, and
 thresholding the result to obtain some highly anisotropic within-brain voxels.
 """
@@ -135,13 +135,13 @@ threshold_wmmask = pe.Node(interface=mrtrix.Threshold(),name='threshold_wmmask')
 threshold_wmmask.inputs.absolute_threshold_value = 0.4
 
 """
-    The spherical deconvolution step depends on the estimate of the response function 
+    The spherical deconvolution step depends on the estimate of the response function
     in the highly anisotropic voxels we obtained above.
-    
+
     .. warning::
-    
+
     	For damaged or pathological brains one should take care to lower the maximum harmonic order of these steps.
-    	
+
 """
 
 estimateresponse = pe.Node(interface=mrtrix.EstimateResponseForSH(),name='estimateresponse')
@@ -180,7 +180,7 @@ tractography.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
 					   (dwi2tensor, tensor2fa,[['tensor','in_file']]),
 					  ])
 tractography.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
-                      
+
 """
 This block creates the rough brain mask to be multiplied, mulitplies it with the
 fractional anisotropy image, and thresholds it to get the single-fiber voxels.
@@ -250,5 +250,6 @@ dwiproc.connect([
                                                ])
                 ])
 
-dwiproc.run()
-dwiproc.write_graph()
+if __name__ == '__main__':
+    dwiproc.run()
+    dwiproc.write_graph()

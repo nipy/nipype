@@ -207,6 +207,12 @@ The syntax for the input port of DataSink takes the following form:
   string[[.[@]]string[[.[@]]string] ...]
   where parts between paired [] are optional.
 
+MapNode
+-------
+
+In order to use :ref:`nipype.interfaces.io.DataSink` inside a MapNode, it's
+inputs have to be defined inside the constructor using the `infields` keyword
+arg.
 
 Parameterization
 ----------------

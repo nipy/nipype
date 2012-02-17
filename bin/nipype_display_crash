@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+"""Displays crash information from Nipype crash files. For certain crash files,
+one can rerun a failed node in a temp directory.
+"""
+
+import argparse
+from nipype.utils.filemanip import loadcrash
+
+def display_crash_files(crashfile, rerun):
+    """display crash file content and rerun if required"""
+
+    crash_data = loadcrash(crashfile)
+    node = None
+    if 'node' in crash_data:
+        node = crash_data['node']
+    tb = crash_data['traceback']
+    print "\n"
+    print "File: %s"%crashfile
+    if node:
+        print "Node: %s"%node
+        if node.base_dir:
+            print "Working directory: %s"%node.output_dir()
+        else:
+            print "Node crashed before execution"
+        print "\n"
+        print "Node inputs:"
+        print node.inputs
+        print "\n"
+    print "Traceback: "
+    print ''.join(tb)
+    print "\n"
+
+    if rerun:
+        if node is None:
+            print "No node in crashfile. Cannot rerun"
+            return
+        print "Rerunning node"
+        node.base_dir = None
+        node.config = {'execution': {'crashdump_dir': '/tmp'}}
+        node.run()
+        print "\n"
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(prog='nipype_display_crash',
+                                     description=__doc__)
+    parser.add_argument('crashfile', metavar='f', type=str,
+                   help='crash file to display')
+    parser.add_argument('-r','--rerun', dest='rerun',
+                        default=False, action="store_true",
+                        help='rerun crashed node')
+    args = parser.parse_args()
+
+    display_crash_files(args.crashfile, args.rerun)

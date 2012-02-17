@@ -17,6 +17,7 @@ from socket import gethostname
 from string import Template
 import select
 import subprocess
+from textwrap import wrap
 from time import time
 from warnings import warn
 
@@ -29,6 +30,7 @@ from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
 from nipype.utils.misc import is_container
 from nipype.utils.config import config
 from nipype.utils.logger import iflogger
+from nipype.utils.misc import trim
 
 
 __docformat__ = 'restructuredtext'
@@ -624,53 +626,72 @@ class BaseInterface(Interface):
     def help(cls, returnhelp=False):
         """ Prints class help
         """
-        allhelp = '\n'.join(cls._inputs_help() + [''] + cls._outputs_help())
+
+        if cls.__doc__:
+            #docstring = cls.__doc__.split('\n')
+            #docstring = [trim(line, '') for line in docstring]
+            docstring = trim(cls.__doc__).split('\n') + ['']
+        else:
+            docstring = ['']
+
+        allhelp = '\n'.join(docstring + cls._inputs_help() + [''] +
+                            cls._outputs_help() + [''])
         if returnhelp:
             return allhelp
         else:
             print allhelp
 
     @classmethod
+    def _get_trait_desc(self, inputs, name, spec):
+        desc = spec.desc
+        xor = spec.xor
+        requires = spec.requires
+
+        manhelpstr = ['\t%s' % name]
+        try:
+            setattr(inputs, name, None)
+        except TraitError as excp:
+            def_val = ''
+            if getattr(spec, 'usedefault'):
+                def_val = ', nipype default value: %s' % str(getattr(spec, 'default_value')()[1])
+            line = "(%s%s)" % (excp.info, def_val)
+            manhelpstr = wrap(line, 90, initial_indent=manhelpstr[0]+': ',
+                              subsequent_indent='\t\t ')
+        if desc:
+            for line in desc.split('\n'):
+                manhelpstr += wrap(line, 90, initial_indent='\t\t',
+                                   subsequent_indent='\t\t')
+        if xor:
+            line = '%s' % ', '.join(xor)
+            manhelpstr += wrap(line, 90, initial_indent='\t\tmutually_exclusive: ',
+                               subsequent_indent='\t\t ')
+        if requires: # and name not in xor_done:
+            others = [field for field in requires if field != name]
+            line = '%s' % ', '.join(others)
+            manhelpstr += wrap(line, 90, initial_indent='\t\trequires: ',
+                               subsequent_indent='\t\t ')
+        return manhelpstr
+
+    @classmethod
     def _inputs_help(cls):
         """ Prints description for input parameters
         """
-        helpstr = ['Inputs', '------']
-        opthelpstr = None
-        manhelpstr = None
-        if cls.input_spec is None:
-            helpstr += ['None']
-            print '\n'.join(helpstr)
-            return
-        xor_done = []
-        for name, spec in sorted(cls.input_spec().traits(mandatory=True).items()):
-            desc = spec.desc
-            xor = spec.xor
-            requires = spec.requires
-            if not manhelpstr:
-                manhelpstr = ['', 'Mandatory:']
-            manhelpstr += [' %s: %s' % (name, desc)]
-            if xor:  # and name not in xor_done:
-                xor_done.extend(xor)
-                manhelpstr += ['  mutually exclusive: %s' % ', '.join(xor)]
-            if requires:  # and name not in xor_done:
-                others = [field for field in requires if field != name]
-                manhelpstr += ['  requires: %s' % ', '.join(others)]
-        for name, spec in sorted(cls.input_spec().traits(mandatory=None,
-                                                         transient=None).items()):
-            desc = spec.desc
-            xor = spec.xor
-            requires = spec.requires
-            if not opthelpstr:
-                opthelpstr = ['', 'Optional:']
-            opthelpstr += [' %s: %s' % (name, desc)]
-            if spec.usedefault:
-                opthelpstr[-1] += ' (default=%s)' % spec.default
-            if xor:  # and name not in xor_done:
-                xor_done.extend(xor)
-                opthelpstr += ['  mutually exclusive: %s' % ', '.join(xor)]
-            if requires:  # and name not in xor_done:
-                others = [field for field in requires if field != name]
-                opthelpstr += ['  requires: %s' % ', '.join(others)]
+        helpstr = ['Inputs::']
+
+        inputs = cls.input_spec()
+        if len(inputs.traits(transient=None).items()) == 0:
+            helpstr += ['', '\tNone']
+            return helpstr
+
+        manhelpstr = ['', '\t[Mandatory]']
+        for name, spec in sorted(inputs.traits(mandatory=True).items()):
+            manhelpstr += cls._get_trait_desc(inputs, name, spec)
+
+        opthelpstr = ['', '\t[Optional]']
+        for name, spec in sorted(inputs.traits(mandatory=None,
+                                               transient=None).items()):
+            opthelpstr += cls._get_trait_desc(inputs, name, spec)
+
         if manhelpstr:
             helpstr += manhelpstr
         if opthelpstr:
@@ -681,12 +702,13 @@ class BaseInterface(Interface):
     def _outputs_help(cls):
         """ Prints description for output parameters
         """
-        helpstr = ['Outputs', '-------']
+        helpstr = ['Outputs::', '']
         if cls.output_spec:
+            outputs = cls.output_spec()
             for name, spec in sorted(cls.output_spec().traits(transient=None).items()):
-                helpstr += ['%s: %s' % (name, spec.desc)]
-        else:
-            helpstr += ['None']
+                helpstr += cls._get_trait_desc(outputs, name, spec)
+        if len(helpstr) == 2:
+            helpstr += ['\tNone']
         return helpstr
 
     def _outputs(self):
@@ -983,26 +1005,13 @@ class CommandLine(BaseInterface):
     >>> cli.inputs.trait_get() #doctest: +SKIP
     {'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}
 
-    >>> cli.help()
-    Inputs
-    ------
-    <BLANKLINE>
-    Optional:
-     args: Additional parameters to the command
-     environ: Environment variables (default={})
-     ignore_exception: Print an error message instead of throwing an exception in case the interface fails to run (default=False)
-    <BLANKLINE>
-    Outputs
-    -------
-    None
-
-
     >>> cli.inputs.get_hashval()
     ({'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}, 'b1faf85652295456a906f053d48daef6')
 
     """
 
     input_spec = CommandLineInputSpec
+    _cmd = None
 
     def __init__(self, command=None, **inputs):
         super(CommandLine, self).__init__(**inputs)
@@ -1039,6 +1048,18 @@ class CommandLine(BaseInterface):
         message += "Standard error:\n" + runtime.stderr + "\n"
         message += "Return code: " + str(runtime.returncode)
         raise RuntimeError(message)
+
+    @classmethod
+    def help(cls, returnhelp=False):
+        allhelp = super(CommandLine, cls).help(returnhelp=True)
+
+        allhelp = "Wraps command **%s**\n\n"%cls._cmd + allhelp
+
+        if returnhelp:
+            return allhelp
+        else:
+            print allhelp
+
 
     def _run_interface(self, runtime):
         """Execute command via subprocess

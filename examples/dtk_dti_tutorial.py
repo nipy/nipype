@@ -1,7 +1,7 @@
 """
-========================================
-Using Diffusion Toolkit for DTI analysis
-========================================
+============================
+DTI - Diffusion Toolkit, FSL
+============================
 
 A pipeline example that uses several interfaces to perform analysis on
 diffusion weighted images using Diffusion Toolkit tools.
@@ -209,7 +209,8 @@ dwiproc.connect([
                                                  ])
                 ])
 
-dwiproc.run()
-dwiproc.write_graph()
+if __name__ == '__main__':
+    dwiproc.run()
+    dwiproc.write_graph()
 
 

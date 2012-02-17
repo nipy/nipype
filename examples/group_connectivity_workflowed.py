@@ -1,7 +1,7 @@
 """
-=====================================================
-Using Camino and CMTK for group connectivity analysis
-=====================================================
+============================================
+Group connectivity - Camino, FSL, FreeSurfer
+============================================
 
 Introduction
 ============
@@ -34,14 +34,14 @@ Or on github at:
     CFFlib: https://github.com/LTS5/cfflib
     CMP: https://github.com/LTS5/cmp
 
-Output data can be visualized in ConnectomeViewer, TrackVis, 
+Output data can be visualized in ConnectomeViewer, TrackVis,
 and anything that can view Nifti files.
 
     ConnectomeViewer: https://github.com/LTS5/connectomeviewer
     TrackVis: http://trackvis.org/
-    
+
 The fiber data is available in Numpy arrays, and the connectivity matrix
-is also produced as a MATLAB matrix. 
+is also produced as a MATLAB matrix.
 
 
 
@@ -107,7 +107,7 @@ for idx, group_id in enumerate(group_list.keys()):
 """
 
 .. warning::
-    
+
     The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
     The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
 
@@ -119,9 +119,9 @@ for idx, group_id in enumerate(group_list.keys()):
 
     """
     This line creates the processing workflow given the information input about the groups and subjects.
-    
+
     .. seealso::
-        
+
         * nipype/workflows/camino/group_connectivity.py
         * nipype/workflows/camino/connectivity_mapping.py
         * :ref:`example_connectivity_tutorial`
@@ -142,11 +142,11 @@ The first level pipeline we have tweaked here is run within the for loop.
     It is used to merge each subject's CFF file into one, so that there is a single file containing
     all of the networks for each group. This can be useful for performing Network Brain Statistics
     using the NBS plugin in ConnectomeViewer.
-    
+
     .. seealso::
-    
+
         http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html
-    
+
 
     """
 

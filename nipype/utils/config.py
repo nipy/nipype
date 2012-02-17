@@ -25,13 +25,11 @@ log_rotate = 4
 
 [execution]
 create_report = true
-plugin = Linear
-stop_on_first_crash = false
-stop_on_first_rerun = false
-keep_inputs = false
 crashdump_dir = %s
 hash_method = timestamp
+job_finished_timeout = 5
 keep_inputs = false
+local_hash_check = false
 matplotlib_backend = Agg
 plugin = Linear
 remove_node_directories = false
@@ -40,8 +38,6 @@ single_thread_matlab = true
 stop_on_first_crash = false
 stop_on_first_rerun = false
 use_relative_paths = false
-local_hash_check = false
-job_finished_timeout = 5
 """ % (homedir, os.getcwd()))
 
 class NipypeConfig(ConfigParser.ConfigParser):

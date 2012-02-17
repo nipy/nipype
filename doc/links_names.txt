@@ -11,8 +11,9 @@
 .. _nipy: http://nipy.org
 .. _`NIPY developer resources`: http://nipy.org/devel
 .. _`Brain Imaging Center`: http://bic.berkeley.edu/
-.. _nitime: http://nipy.sourceforge.net/nitime/
-.. _nibabel: http://nipy.sourceforge.net/nibabel/
+.. _nitime: http://nipy.org/nitime/
+.. _nibabel: http://nipy.org/nibabel/
+.. _nipype: http://nipy.org/nipype/
 .. _ConnectomeViewer: http://www.connectomeviewer.org/viewer/
 
 .. Documentation tools
@@ -89,6 +90,7 @@
 .. _Slicer: http://slicer.org
 .. _Camino: http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php
 .. _Camino2Trackvis: http://camino-trackvis.sourceforge.net/
+.. _MRtrix: http://www.brain.org.au/software/mrtrix/index.html
 
 .. General software
 .. _gcc: http://gcc.gnu.org

@@ -2,7 +2,7 @@ import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.mrtrix as mrtrix
- 
+
 def get_vox_dims_as_tuple(volume):
     import nibabel as nb
     if isinstance(volume, list):
@@ -21,7 +21,6 @@ def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilisti
     Example
     -------
 
-    >>> from nipype.workflows.mrtrix import create_mrtrix_dti_pipeline
     >>> dti = create_mrtrix_dti_pipeline("mrtrix_dti")
     >>> dti.inputs.inputnode.dwi = 'data.nii'
     >>> dti.inputs.inputnode.bvals = 'bvals'
@@ -43,10 +42,10 @@ def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilisti
         outputnode.csdeconv
 
     """
-    
-    inputnode = pe.Node(interface = util.IdentityInterface(fields=["dwi", 
-                                                                   "bvecs", 
-                                                                   "bvals"]), 
+
+    inputnode = pe.Node(interface = util.IdentityInterface(fields=["dwi",
+                                                                   "bvecs",
+                                                                   "bvals"]),
                         name="inputnode")
 
     bet = pe.Node(interface=fsl.BET(), name="bet")
@@ -95,7 +94,7 @@ def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilisti
 
     estimateresponse = pe.Node(interface=mrtrix.EstimateResponseForSH(),
                                name='estimateresponse')
-    
+
     if tractography_type == 'probabilistic':
         CSDstreamtrack = pe.Node(interface=mrtrix.ProbabilisticSphericallyDeconvolutedStreamlineTrack(),
                                  name='CSDstreamtrack')
@@ -156,7 +155,7 @@ def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilisti
 
     workflow.connect([(CSDstreamtrack, tck2trk,[("tracked","in_file")])])
     workflow.connect([(inputnode, tck2trk,[("dwi","image_file")])])
-    
+
     output_fields = ["fa", "tracts_trk", "csdeconv", "tracts_tck"]
     if tractography_type == 'probabilistic':
         output_fields.append("tdi")
