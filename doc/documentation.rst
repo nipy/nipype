@@ -9,57 +9,59 @@ Documentation
    :Release: |version|
    :Date: |today|
 
-Guides
-------
 
-.. hlist::
-   :columns: 2
+.. container:: doc2
 
-   * User
+  .. admonition:: Guides
 
-     .. toctree::
-        :maxdepth: 2
+    .. hlist::
+       :columns: 2
 
-        users/index
-     .. toctree::
-        :maxdepth: 1
+       * User
 
-        changes
-   * Developer
+         .. toctree::
+            :maxdepth: 2
 
-     .. toctree::
-        :maxdepth: 2
+            users/index
+         .. toctree::
+            :maxdepth: 1
 
-        api/index
-        devel/index
+            changes
+       * Developer
 
-Interfaces, Workflows and Examples
-----------------------------------
+         .. toctree::
+            :maxdepth: 2
 
-.. hlist::
-   :columns: 2
+            api/index
+            devel/index
 
-   * Interfaces
 
-     .. toctree::
-        :maxdepth: 1
-        :glob:
+  .. admonition:: Interfaces, Workflows and Examples
 
-        interfaces/generated/*algorithms*
-        interfaces/generated/*interfaces*
-   * Workflows
+    .. hlist::
+       :columns: 2
 
-     .. toctree::
-        :maxdepth: 1
-        :glob:
+       * Workflows
 
-        interfaces/generated/*workflows*
-   * Examples
+         .. toctree::
+            :maxdepth: 1
+            :glob:
 
-     .. toctree::
-        :maxdepth: 1
-        :glob:
+            interfaces/generated/*workflows*
+       * Examples
 
-        users/examples/*
+         .. toctree::
+            :maxdepth: 1
+            :glob:
+
+            users/examples/*
+       * Interfaces
+
+         .. toctree::
+            :maxdepth: 1
+            :glob:
+
+            interfaces/generated/*algorithms*
+            interfaces/generated/*interfaces*
 
 .. include:: links_names.txt
