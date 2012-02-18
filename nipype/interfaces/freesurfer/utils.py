@@ -780,3 +780,57 @@ class MRIsConvert(FSCommand):
             _, name, ext = split_filename(self.inputs.in_file)
 
         return name + ext + "_converted." + self.inputs.out_datatype
+
+class MRITessellateInputSpec(FSTraitedSpec):
+    """
+    Uses Freesurfer's mri_tessellate to create surfaces by tessellating a given input volume
+    """
+
+    in_file = File(exists=True, mandatory=True, position=-3, argstr='%s', desc='Input volume to tesselate voxels from.')
+    label_value = traits.Int(position=-2, argstr='%d', mandatory=True,
+        desc='Label value which to tesselate from the input volume. (integer, if input is "filled.mgz" volume, 127 is rh, 255 is lh)')
+    out_file = File(argstr='./%s', position=-1, genfile=True, desc='output filename or True to generate one')
+    tesselate_all_voxels = traits.Bool(argstr='-a', desc='Tessellate the surface of all voxels with different labels')
+    use_real_RAS_coordinates = traits.Bool(argstr='-n', desc='Saves surface with real RAS coordinates where c_(r,a,s) != 0')
+
+class MRITessellateOutputSpec(TraitedSpec):
+    """
+    Uses Freesurfer's mri_tessellate to create surfaces by tessellating a given input volume
+    """
+    surface = File(exists=True, desc='binary surface of the tessellation ')
+
+
+class MRITessellate(FSCommand):
+    """
+    Uses Freesurfer's mri_tessellate to create surfaces by tessellating a given input volume
+
+    Example:
+
+    import nipype.interfaces.freesurfer as fs
+    tess = fs.MRITessellate()
+    tess.inputs.in_file = 'aseg.mgz'
+    tess.inputs.label_value = 17
+    tess.inputs.out_file = 'lh.hippocampus'
+    tess.run()
+    """
+    _cmd = 'mri_tessellate'
+    input_spec = MRITessellateInputSpec
+    output_spec = MRITessellateOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['surface'] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_file':
+            return self._gen_outfilename()
+        else:
+            return None
+
+    def _gen_outfilename(self):
+        if isdefined(self.inputs.out_file):
+            return self.inputs.out_file
+        else:
+            _, name, ext = split_filename(self.inputs.in_file)
+            return name + ext + '_' + str(self.inputs.label_value)
