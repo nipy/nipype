@@ -203,7 +203,8 @@ dwi2tensor = pe.Node(interface=mrtrix.DWI2Tensor(),name='dwi2tensor')
 tensor2vector = pe.Node(interface=mrtrix.Tensor2Vector(),name='tensor2vector')
 tensor2adc = pe.Node(interface=mrtrix.Tensor2ApparentDiffusion(),name='tensor2adc')
 tensor2fa = pe.Node(interface=mrtrix.Tensor2FractionalAnisotropy(),name='tensor2fa')
-
+MRconvert_fa = pe.Node(interface=mrtrix.MRConvert(),name='MRconvert_fa')
+MRconvert_fa.inputs.extension = 'nii'
 
 """
 
@@ -268,6 +269,7 @@ probCSDstreamtrack.inputs.inputmodel = 'SD_PROB'
 probCSDstreamtrack.inputs.maximum_number_of_tracks = 150000
 tracks2prob = pe.Node(interface=mrtrix.Tracks2Prob(),name='tracks2prob')
 tracks2prob.inputs.colour = True
+MRconvert_tracks2prob = MRconvert_fa.clone(name='MRconvert_tracks2prob')
 tck2trk = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name='tck2trk')
 trk2tdi = pe.Node(interface=dipy.TrackDensityMap(),name='trk2tdi')
 
@@ -430,6 +432,7 @@ mapping.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
                        (dwi2tensor, tensor2fa,[['tensor','in_file']]),
                       ])
 mapping.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
+mapping.connect([(tensor2fa, MRconvert_fa,[("FA","in_file")])])
 
 """
 
@@ -481,6 +484,7 @@ mapping.connect([(threshold_wmmask, probCSDstreamtrack,[("out_file","seed_file")
 mapping.connect([(csdeconv, probCSDstreamtrack,[("spherical_harmonics_image","in_file")])])
 mapping.connect([(probCSDstreamtrack, tracks2prob,[("tracked","in_file")])])
 mapping.connect([(eddycorrect, tracks2prob,[("outputnode.eddy_corrected","template_file")])])
+mapping.connect([(tracks2prob, MRconvert_tracks2prob,[("tract_image","in_file")])])
 
 """
 Structural Processing

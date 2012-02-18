@@ -160,7 +160,8 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     tensor2vector = pe.Node(interface=mrtrix.Tensor2Vector(),name='tensor2vector')
     tensor2adc = pe.Node(interface=mrtrix.Tensor2ApparentDiffusion(),name='tensor2adc')
     tensor2fa = pe.Node(interface=mrtrix.Tensor2FractionalAnisotropy(),name='tensor2fa')
-
+    MRconvert_fa = pe.Node(interface=mrtrix.MRConvert(),name='MRconvert_fa')
+    MRconvert_fa.inputs.extension = 'nii'
 
     """
 
@@ -225,6 +226,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     probCSDstreamtrack.inputs.maximum_number_of_tracks = 150000
     tracks2prob = pe.Node(interface=mrtrix.Tracks2Prob(),name='tracks2prob')
     tracks2prob.inputs.colour = True
+    MRconvert_tracks2prob = MRconvert_fa.clone(name='MRconvert_tracks2prob')
     tck2trk = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name='tck2trk')
     trk2tdi = pe.Node(interface=dipy.TrackDensityMap(),name='trk2tdi')
 
@@ -386,6 +388,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
                            (dwi2tensor, tensor2fa,[['tensor','in_file']]),
                           ])
     mapping.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
+    mapping.connect([(tensor2fa, MRconvert_fa,[("FA","in_file")])])
 
     """
 
@@ -437,7 +440,8 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     mapping.connect([(csdeconv, probCSDstreamtrack,[("spherical_harmonics_image","in_file")])])
     mapping.connect([(probCSDstreamtrack, tracks2prob,[("tracked","in_file")])])
     mapping.connect([(eddycorrect, tracks2prob,[("outputnode.eddy_corrected","template_file")])])
-    
+    mapping.connect([(tracks2prob, MRconvert_tracks2prob,[("tract_image","in_file")])])
+
     """
     Structural Processing
     ---------------------
@@ -552,6 +556,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["fa",
                                                                 "struct",
                                                                 "tracts",
+                                                                "tracks2prob",
                                                                 "connectome",
                                                                 "nxstatscff",
                                                                 "nxmatlab",
@@ -602,6 +607,8 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
         ("mri_convert_ROI_scale500.out_file", "rois"),
         ("trk2tdi.out_file", "tdi"),
         ("csdeconv.spherical_harmonics_image", "odfs"),
-        ("mri_convert_Brain.out_file", "struct")])
+        ("mri_convert_Brain.out_file", "struct"),
+        ("MRconvert_fa.converted", "fa"),
+        ("MRconvert_tracks2prob.converted", "tracks2prob")])
         ])
     return connectivity
