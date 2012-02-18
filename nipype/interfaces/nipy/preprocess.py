@@ -60,18 +60,18 @@ class ComputeMask(BaseInterface):
         return outputs
 
 class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc = "File to realign")
-    tr = traits.Float(desc="TR in seconds")
-    slice_order = traits.Enum("ascending","descending",desc = "slice order",mandatory=True)
+    in_file = traits.List(File(exists=True), mandatory=True, desc = "File to realign")
+    tr = traits.Float(desc="TR in seconds",mandatory=True)
+    slice_order = traits.Either(traits.List(traits.Int), traits.Enum("ascending","descending"), mandatory = True, desc= 'slice order')
     interleaved = traits.Bool(desc = "True if interleaved",mandatory=True)
     tr_slices = traits.Float(desc = "TR slices")
     start = traits.Float(desc="start")
     time_interp = traits.Bool(desc = "time interpolation")
-    ref_scan = File(exists=True, desc = "Reference Scan")
+    #ref_scan = File(exists=True, desc = "Reference Scan")
 
 class FmriRealign4dOutputSpec(TraitedSpec):
-    out_file = File()
-    par_file = File()
+    out_file = traits.List(File(),desc="Realigned files")
+    par_file = traits.List(File(),desc="Motion parameter files")
 
 class FmriRealign4d(BaseInterface):
     """ realign using nipy's FmriRealign4d
@@ -83,19 +83,22 @@ class FmriRealign4d(BaseInterface):
     >>> realigner.inputs.tr = 2
     >>> realigner.inputs.slice_order = 'ascending'
     >>> realigner.inputs.interleaved = True
-    >>> res = realigner.run()
+    >>> res = realigner.run() # doctest: +SKIP
     """
     
     input_spec = FmriRealign4dInputSpec
     output_spec = FmriRealign4dOutputSpec
     
     def _run_interface(self, runtime):
-        im = nb.load(self.inputs.in_file)
-        im.affine = im.get_affine()
-        if not isdefined(self.inputs.tr):
-            TR = None
-        else:
-            TR = self.inputs.tr
+        all_ims = []
+        
+        for image in self.inputs.in_file:
+            im = nb.load(image)
+            im.affine = im.get_affine()
+            all_ims.append(im)
+        
+        
+        
         if not isdefined(self.inputs.tr_slices):
             TR_slices = None
         else:
@@ -109,26 +112,31 @@ class FmriRealign4d(BaseInterface):
         else:
             time_interp = self.inputs.time_interp
             
-        R = FR4d(im, tr=TR, slice_order=self.inputs.slice_order, interleaved=self.inputs.interleaved, tr_slices = TR_slices, time_interp = time_interp, start = start)
-        if not isdefined(self.inputs.ref_scan):
-            R.estimate()
-        else:
-            R.estimate()#refscan=self.inputs.ref_scan)??
+        R = FR4d(all_ims, tr=self.inputs.tr, slice_order=self.inputs.slice_order, interleaved=self.inputs.interleaved, tr_slices = TR_slices, time_interp = time_interp, start = start)
+        
+        R.estimate()
+        
         corr_run = R.resample()
-        self._out_file_path = 'corr_%s'%(os.path.split(self.inputs.in_file)[1])
-        save_image(corr_run[0],self._out_file_path)
-        self._par_file_path = '%s.par'%(os.path.split(self.inputs.in_file)[1])
-        mfile = open(self._par_file_path,'w')
-        motion = R._transforms[0]
-        #output a .par file that looks like fsl.mcflirt's .par file
-        for i, mo in enumerate(motion):
-            string = str(mo.rotation[0])+"  "+str(mo.rotation[1])+"  "+str(mo.rotation[2])+"  "+str(mo.translation[0])+"  "+str(mo.translation[1])+"  "+str(mo.translation[2])+"  \n"
-            mfile.write(string)
-        mfile.close()
+        self._out_file_path = []
+        self._par_file_path = []
+        
+        for j, corr in enumerate(corr_run):
+            self._out_file_path.append(os.path.abspath('corr_%s'%(os.path.split(self.inputs.in_file[j])[1])))
+            save_image(corr,self._out_file_path[j])
+            
+            self._par_file_path.append(os.path.abspath('%s.par'%(os.path.split(self.inputs.in_file[j])[1])))
+            mfile = open(self._par_file_path[j],'w')
+            motion = R._transforms[j]
+            #output a .par file that looks like fsl.mcflirt's .par file
+            for i, mo in enumerate(motion):
+                string = str(mo.rotation[0])+"  "+str(mo.rotation[1])+"  "+str(mo.rotation[2])+"  "+str(mo.translation[0])+"  "+str(mo.translation[1])+"  "+str(mo.translation[2])+"  \n"
+                mfile.write(string)
+            mfile.close()
+        
         return runtime  
         
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = os.path.abspath(self._out_file_path)
-        outputs['par_file'] = os.path.abspath(self._par_file_path)
+        outputs['out_file'] = self._out_file_path
+        outputs['par_file'] = self._par_file_path
         return outputs    
