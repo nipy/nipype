@@ -421,6 +421,11 @@ connected.
 
         format: 'png', 'svg'
 
+        simple_form: boolean (default: True)
+            Determines if the node name used in the graph should be of the form
+            'nodename (package)' when True or 'nodename.Class.package' when
+            False.
+
         """
         graphtypes = ['orig', 'flat', 'hierarchical', 'exec']
         if graph2use not in graphtypes:
