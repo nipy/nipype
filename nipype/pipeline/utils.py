@@ -111,7 +111,7 @@ def modify_paths(object, relative=True, basedir=None):
     return out
 
 
-def get_print_name(node):
+def get_print_name(node, simple_form=True):
     """Get the name of the node
 
     For example, a node containing an instance of interfaces.fsl.BET
@@ -125,11 +125,16 @@ def get_print_name(node):
         destclass = ''
         if len(pkglist) > 2:
             destclass = '.%s' % pkglist[2]
-        name = '.'.join([node.fullname, interface]) + destclass
-    return name
+        if simple_form:
+            name = node.fullname + destclass
+        else:
+            name = '.'.join([node.fullname, interface]) + destclass
+    if simple_form:
+        return ' ('.join(name.split('.')[1:])+')'
+    else:
+        return name
 
-
-def _create_dot_graph(graph, show_connectinfo=False):
+def _create_dot_graph(graph, show_connectinfo=False, simple_form=True):
     """Create a graph that can be pickled.
 
     Ensures that edge info is pickleable.
@@ -138,8 +143,8 @@ def _create_dot_graph(graph, show_connectinfo=False):
     pklgraph = nx.DiGraph()
     for edge in graph.edges():
         data = graph.get_edge_data(*edge)
-        srcname = get_print_name(edge[0])
-        destname = get_print_name(edge[1])
+        srcname = get_print_name(edge[0], simple_form=simple_form)
+        destname = get_print_name(edge[1], simple_form=simple_form)
         if show_connectinfo:
             pklgraph.add_edge(srcname, destname, l=str(data['connect']))
         else:
@@ -516,7 +521,8 @@ def generate_expanded_graph(graph_in):
 
 
 def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
-                 show_connectinfo=False, dotfilename='graph.dot', format='png'):
+                 show_connectinfo=False, dotfilename='graph.dot', format='png',
+                 simple_form=True):
     """ Displays the graph layout of the pipeline
 
     This function requires that pygraphviz and matplotlib are available on
@@ -557,7 +563,7 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
     res = CommandLine(cmd).run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
-    pklgraph = _create_dot_graph(graph, show_connectinfo)
+    pklgraph = _create_dot_graph(graph, show_connectinfo, simple_form)
     outfname = fname_presuffix(dotfilename,
                                suffix='.dot',
                                use_ext=False,
