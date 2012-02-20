@@ -61,7 +61,7 @@ class ComputeMask(BaseInterface):
 
 class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
     
-    in_file = InputMultiPath(mandatory = True, desc = "File to realign")
+    in_file = InputMultiPath(exists = True, mandatory = True, desc = "File to realign")
     tr = traits.Float(desc="TR in seconds",mandatory=True)
     slice_order = traits.Either(traits.List(traits.Int), traits.Enum("ascending","descending"), mandatory = True, desc= 'slice order')
     interleaved = traits.Bool(desc = "True if interleaved",mandatory=True)
