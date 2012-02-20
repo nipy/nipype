@@ -18,7 +18,7 @@ from nipype.interfaces.base import CommandLine, isdefined, Undefined
 from nipype.utils.filemanip import fname_presuffix, FileNotFoundError,\
     filename_to_list
 from nipype.utils.config import config
-from nipype.utils.misc import create_function_from_source
+from nipype.utils.misc import create_function_from_source, str2bool
 from nipype.interfaces.utility import IdentityInterface
 
 logger = logging.getLogger('workflow')
@@ -638,14 +638,15 @@ def walk_files(cwd):
             yield os.path.join(path, f)
 
 
-def clean_working_directory(outputs, cwd, inputs, needed_outputs,
+def clean_working_directory(outputs, cwd, inputs, needed_outputs, config,
                             files2keep=None, dirs2keep=None):
     """Removes all files not needed for further analysis from the directory
     """
     if not outputs:
         return
     outputs_to_keep = outputs.get().keys()
-    if needed_outputs:
+    if needed_outputs and \
+       str2bool(config['execution']['remove_unnecessary_outputs']):
         outputs_to_keep = needed_outputs
     # build a list of needed files
     output_files = []
@@ -653,7 +654,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
     for output in outputs_to_keep:
         output_files.extend(walk_outputs(outputdict[output]))
     needed_files = [path for path, type in output_files if type == 'f']
-    if config.getboolean('execution', 'keep_inputs'):
+    if str2bool(config['execution']['keep_inputs']):
         input_files = []
         inputdict = inputs.get()
         input_files.extend(walk_outputs(inputdict))

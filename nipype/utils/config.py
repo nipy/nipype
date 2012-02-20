@@ -49,6 +49,7 @@ class NipypeConfig(ConfigParser.ConfigParser):
         """
         config.set('execution', 'stop_on_first_crash', 'true')
         config.set('execution', 'remove_unnecessary_outputs', 'false')
+        config.set('execution', 'keep_inputs', 'true')
         config.set('logging', 'workflow_level', 'DEBUG')
         config.set('logging', 'interface_level', 'DEBUG')
 
