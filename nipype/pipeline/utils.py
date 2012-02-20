@@ -133,10 +133,9 @@ def get_print_name(node, simple_form=True):
         parts = name.split('.')
         if len(parts)>2:
             return ' ('.join(parts[1:])+')'
-        else:
+        elif len(parts)==2:
             return parts[1]
-    else:
-        return name
+    return name
 
 def _create_dot_graph(graph, show_connectinfo=False, simple_form=True):
     """Create a graph that can be pickled.
