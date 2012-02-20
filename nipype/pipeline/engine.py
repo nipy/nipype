@@ -846,7 +846,8 @@ connected.
             nodename = fullname.replace('.', '_')
             if not isinstance(node, Workflow):
                 node_class_name = get_print_name(node, simple_form=simple_form)
-                node_class_name = '.'.join(node_class_name.split('.')[1:])
+                if not simple_form:
+                    node_class_name = '.'.join(node_class_name.split('.')[1:])
                 if hasattr(node, 'iterables') and node.iterables:
                     dotlist.append(('%s[label="%s", style=filled, colorscheme'
                                     '=greys7 color=2];') % (nodename,
