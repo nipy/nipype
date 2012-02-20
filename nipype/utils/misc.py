@@ -10,7 +10,7 @@ import numpy as np
 from textwrap import dedent
 import sys
 
-def trim(docstring, marker):
+def trim(docstring, marker=None):
     if not docstring:
         return ''
     # Convert tabs to spaces (following the normal Python rules)
@@ -28,7 +28,9 @@ def trim(docstring, marker):
         for line in lines[1:]:
             # replace existing REST marker with doc level marker
             stripped = line.lstrip().strip().rstrip()
-            if stripped and all([s==stripped[0] for s in stripped]):
+            if marker is not None and stripped and \
+               all([s==stripped[0] for s in stripped]) and \
+               stripped[0] not in [':']:
                 line = line.replace(stripped[0], marker)
             trimmed.append(line[indent:].rstrip())
     # Strip off trailing and leading blank lines:

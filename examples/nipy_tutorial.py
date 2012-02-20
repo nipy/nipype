@@ -1,9 +1,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-====================================
-Using SPM and nipy for fMRI analysis
-====================================
+================
+fMRI - NiPy, SPM
+================
 
 
 The nipy_tutorial.py integrates several interfaces to perform a first level
@@ -243,8 +243,8 @@ l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                   (realign, compute_mask, [('mean_image','mean_volume')]),
                   (realign, coregister,[('mean_image', 'source'),
                                         ('realigned_files','apply_to_files')]),
-		          (datasource, coregister,[('struct', 'target')]),
-		          (coregister, smooth, [('coregistered_files', 'in_files')]),
+                  (datasource, coregister,[('struct', 'target')]),
+                  (coregister, smooth, [('coregistered_files', 'in_files')]),
                   (realign, modelspec,[('realignment_parameters','realignment_parameters')]),
                   (smooth, modelspec,[('smoothed_files','functional_runs')]),
                   (realign, art,[('realignment_parameters','realignment_parameters')]),

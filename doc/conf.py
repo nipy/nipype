@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'nipype'
-copyright = u'2009-11, Neuroimaging in Python team'
+copyright = u'2009-12, Neuroimaging in Python team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -165,7 +165,8 @@ html_index = 'index.html'
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-html_sidebars = {'**': ['localtoc.html', 'sidebar_versions.html', 'indexsidebar.html']}
+html_sidebars = {'**': ['gse.html','localtoc.html', 'sidebar_versions.html', 'indexsidebar.html'],
+                 'searchresults' : ['sidebar_versions.html', 'indexsidebar.html']}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -231,4 +232,4 @@ latex_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
 
-exclude_patterns = ['interfaces/generated/gen.rst']
+exclude_patterns = ['interfaces/generated/gen.rst', 'api/generated/gen.rst']

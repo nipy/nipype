@@ -1,7 +1,7 @@
 """
-==========================================================
-Using MRtrix and CMTK for structural connectivity analysis
-==========================================================
+==================================================
+Structural connectivity - MRtrix, CMTK, FreeSurfer
+==================================================
 
 Introduction
 ============
@@ -595,5 +595,6 @@ connectivity.connect([
 The following functions run the whole workflow and produce a .dot and .png graph of the processing pipeline.
 """
 
-connectivity.run()
-connectivity.write_graph()
+if __name__ == '__main__':
+    connectivity.run()
+    connectivity.write_graph()

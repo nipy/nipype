@@ -18,7 +18,7 @@ from nipype.interfaces.base import CommandLine, isdefined, Undefined
 from nipype.utils.filemanip import fname_presuffix, FileNotFoundError,\
     filename_to_list
 from nipype.utils.config import config
-from nipype.utils.misc import create_function_from_source
+from nipype.utils.misc import create_function_from_source, str2bool
 from nipype.interfaces.utility import IdentityInterface
 
 logger = logging.getLogger('workflow')
@@ -111,7 +111,7 @@ def modify_paths(object, relative=True, basedir=None):
     return out
 
 
-def get_print_name(node):
+def get_print_name(node, simple_form=True):
     """Get the name of the node
 
     For example, a node containing an instance of interfaces.fsl.BET
@@ -125,11 +125,20 @@ def get_print_name(node):
         destclass = ''
         if len(pkglist) > 2:
             destclass = '.%s' % pkglist[2]
-        name = '.'.join([node.fullname, interface]) + destclass
-    return name
+        if simple_form:
+            name = node.fullname + destclass
+        else:
+            name = '.'.join([node.fullname, interface]) + destclass
+    if simple_form:
+        parts = name.split('.')
+        if len(parts)>2:
+            return ' ('.join(parts[1:])+')'
+        else:
+            return parts[1]
+    else:
+        return name
 
-
-def _create_dot_graph(graph, show_connectinfo=False):
+def _create_dot_graph(graph, show_connectinfo=False, simple_form=True):
     """Create a graph that can be pickled.
 
     Ensures that edge info is pickleable.
@@ -138,8 +147,8 @@ def _create_dot_graph(graph, show_connectinfo=False):
     pklgraph = nx.DiGraph()
     for edge in graph.edges():
         data = graph.get_edge_data(*edge)
-        srcname = get_print_name(edge[0])
-        destname = get_print_name(edge[1])
+        srcname = get_print_name(edge[0], simple_form=simple_form)
+        destname = get_print_name(edge[1], simple_form=simple_form)
         if show_connectinfo:
             pklgraph.add_edge(srcname, destname, l=str(data['connect']))
         else:
@@ -516,7 +525,8 @@ def generate_expanded_graph(graph_in):
 
 
 def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
-                 show_connectinfo=False, dotfilename='graph.dot', format='png'):
+                 show_connectinfo=False, dotfilename='graph.dot', format='png',
+                 simple_form=True):
     """ Displays the graph layout of the pipeline
 
     This function requires that pygraphviz and matplotlib are available on
@@ -557,7 +567,7 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
     res = CommandLine(cmd).run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
-    pklgraph = _create_dot_graph(graph, show_connectinfo)
+    pklgraph = _create_dot_graph(graph, show_connectinfo, simple_form)
     outfname = fname_presuffix(dotfilename,
                                suffix='.dot',
                                use_ext=False,
@@ -632,14 +642,15 @@ def walk_files(cwd):
             yield os.path.join(path, f)
 
 
-def clean_working_directory(outputs, cwd, inputs, needed_outputs,
+def clean_working_directory(outputs, cwd, inputs, needed_outputs, config,
                             files2keep=None, dirs2keep=None):
     """Removes all files not needed for further analysis from the directory
     """
     if not outputs:
         return
     outputs_to_keep = outputs.get().keys()
-    if needed_outputs:
+    if needed_outputs and \
+       str2bool(config['execution']['remove_unnecessary_outputs']):
         outputs_to_keep = needed_outputs
     # build a list of needed files
     output_files = []
@@ -647,7 +658,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs,
     for output in outputs_to_keep:
         output_files.extend(walk_outputs(outputdict[output]))
     needed_files = [path for path, type in output_files if type == 'f']
-    if config.getboolean('execution', 'keep_inputs'):
+    if str2bool(config['execution']['keep_inputs']):
         input_files = []
         inputdict = inputs.get()
         input_files.extend(walk_outputs(inputdict))
