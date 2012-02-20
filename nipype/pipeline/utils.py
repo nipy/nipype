@@ -130,7 +130,11 @@ def get_print_name(node, simple_form=True):
         else:
             name = '.'.join([node.fullname, interface]) + destclass
     if simple_form:
-        return ' ('.join(name.split('.')[1:])+')'
+        parts = name.split('.')
+        if len(parts)>2:
+            return ' ('.join(parts[1:])+')'
+        else:
+            return parts[1]
     else:
         return name
 
