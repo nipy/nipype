@@ -16,7 +16,7 @@ else:
     from nipy import save_image
 
 from nipype.interfaces.base import (TraitedSpec, BaseInterface, traits,
-                                    BaseInterfaceInputSpec, isdefined, File)
+                                    BaseInterfaceInputSpec, isdefined, File, InputMultiPath, OutputMultiPath)
 
 
 class ComputeMaskInputSpec(BaseInterfaceInputSpec):
@@ -60,26 +60,28 @@ class ComputeMask(BaseInterface):
         return outputs
 
 class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
-    in_file = traits.List(File(exists=True), mandatory=True, desc = "File to realign")
+    
+    in_file = InputMultiPath(mandatory = True, desc = "File to realign")
     tr = traits.Float(desc="TR in seconds",mandatory=True)
     slice_order = traits.Either(traits.List(traits.Int), traits.Enum("ascending","descending"), mandatory = True, desc= 'slice order')
     interleaved = traits.Bool(desc = "True if interleaved",mandatory=True)
     tr_slices = traits.Float(desc = "TR slices")
     start = traits.Float(desc="start")
     time_interp = traits.Bool(desc = "time interpolation")
-    #ref_scan = File(exists=True, desc = "Reference Scan")
+    
 
 class FmriRealign4dOutputSpec(TraitedSpec):
-    out_file = traits.List(File(),desc="Realigned files")
-    par_file = traits.List(File(),desc="Motion parameter files")
-
+    
+    out_file = OutputMultiPath(desc = "Realigned files")
+    par_file = OutputMultiPath(desc = "Motion parameter files")
+    
 class FmriRealign4d(BaseInterface):
     """ realign using nipy's FmriRealign4d
     Examples
     --------
     >>> from nipype.interfaces.nipy.preprocess import FmriRealign4d
     >>> realigner = FmriRealign4d()
-    >>> realigner.inputs.in_file = 'functional.nii'
+    >>> realigner.inputs.in_file = ['functional.nii']
     >>> realigner.inputs.tr = 2
     >>> realigner.inputs.slice_order = 'ascending'
     >>> realigner.inputs.interleaved = True
