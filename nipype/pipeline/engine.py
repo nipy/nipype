@@ -1344,14 +1344,14 @@ class Node(WorkflowBase):
                 self._result.runtime.stderr = msg
                 raise
 
-            if str2bool(self.config['execution']['remove_unnecessary_outputs']):
-                dirs2keep = None
-                if isinstance(self, MapNode):
-                    dirs2keep = [os.path.join(cwd, 'mapflow')]
-                result.outputs = clean_working_directory(result.outputs, cwd,
-                                                         self._interface.inputs,
-                                                         self.needed_outputs,
-                                                         dirs2keep=dirs2keep)
+            dirs2keep = None
+            if isinstance(self, MapNode):
+                dirs2keep = [os.path.join(cwd, 'mapflow')]
+            result.outputs = clean_working_directory(result.outputs, cwd,
+                                                     self._interface.inputs,
+                                                     self.needed_outputs,
+                                                     self.config,
+                                                     dirs2keep=dirs2keep)
             self._save_results(result, cwd)
         else:
             logger.info("Collecting precomputed outputs")
