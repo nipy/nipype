@@ -53,7 +53,8 @@ class ComputeMask(BaseInterface):
         brain_mask = compute_mask(**args)
 
         self._brain_mask_path = os.path.abspath("brain_mask.nii")
-        nb.save(nb.Nifti1Image(brain_mask.astype(np.uint8), nii.get_affine()), self._brain_mask_path)
+        nb.save(nb.Nifti1Image(brain_mask.astype(np.uint8),
+                nii.get_affine()), self._brain_mask_path)
 
         return runtime
 
@@ -65,10 +66,16 @@ class ComputeMask(BaseInterface):
 
 class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
 
-    in_file = InputMultiPath(exists=True, mandatory=True, desc="File to realign")
-    tr = traits.Float(desc="TR in seconds", mandatory=True)
-    slice_order = traits.Either(traits.List(traits.Int), traits.Enum("ascending", "descending"), mandatory=True, desc='slice order')
-    interleaved = traits.Bool(desc="True if interleaved", mandatory=True)
+    in_file = InputMultiPath(exists=True,
+                             mandatory=True,
+                             desc="File to realign")
+    tr = traits.Float(desc="TR in seconds",
+                      mandatory=True)
+    slice_order = traits.Either(traits.List(traits.Int),
+                  traits.Enum("ascending", "descending"),
+                  mandatory=True, desc='slice order')
+    interleaved = traits.Bool(desc="True if interleaved",
+                  mandatory=True)
     tr_slices = traits.Float(desc="TR slices")
     start = traits.Float(desc="start")
     time_interp = traits.Bool(desc="time interpolation")
@@ -117,7 +124,11 @@ class FmriRealign4d(BaseInterface):
         else:
             time_interp = self.inputs.time_interp
 
-        R = FR4d(all_ims, tr=self.inputs.tr, slice_order=self.inputs.slice_order, interleaved=self.inputs.interleaved, tr_slices=TR_slices, time_interp=time_interp, start=start)
+        R = FR4d(all_ims, tr=self.inputs.tr,
+            slice_order=self.inputs.slice_order,
+            interleaved=self.inputs.interleaved,
+            tr_slices=TR_slices, time_interp=time_interp,
+            start=start)
 
         R.estimate()
 
@@ -126,15 +137,20 @@ class FmriRealign4d(BaseInterface):
         self._par_file_path = []
 
         for j, corr in enumerate(corr_run):
-            self._out_file_path.append(os.path.abspath('corr_%s' % (os.path.split(self.inputs.in_file[j])[1])))
+            self._out_file_path.append(os.path.abspath('corr_%s' %
+            (os.path.split(self.inputs.in_file[j])[1])))
             save_image(corr, self._out_file_path[j])
 
-            self._par_file_path.append(os.path.abspath('%s.par' % (os.path.split(self.inputs.in_file[j])[1])))
+            self._par_file_path.append(os.path.abspath('%s.par' %
+            (os.path.split(self.inputs.in_file[j])[1])))
             mfile = open(self._par_file_path[j], 'w')
             motion = R._transforms[j]
             #output a .par file that looks like fsl.mcflirt's .par file
             for i, mo in enumerate(motion):
-                string = str(mo.rotation[0]) + "  " + str(mo.rotation[1]) + "  " + str(mo.rotation[2]) + "  " + str(mo.translation[0]) + "  " + str(mo.translation[1]) + "  " + str(mo.translation[2]) + "  \n"
+                string = str(mo.rotation[0]) + "  " + str(mo.rotation[1])
+                + "  " + str(mo.rotation[2]) + "  " + str(mo.translation[0])
+                + "  " + str(mo.translation[1]) + "  " + str(mo.translation[2])
+                + "  \n"
                 mfile.write(string)
             mfile.close()
 
