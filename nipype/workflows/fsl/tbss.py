@@ -60,7 +60,7 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
 
 #    $FSLDIR/bin/fslmaths FA/${f}_FA_mask -dilD -dilD -sub 1 -abs -add FA/${f}_FA_mask FA/${f}_FA_mask -odt char
     # Define the tbss1 workflow
-    tbss1 = pe.Workflow(name="tbss1")
+    tbss1 = pe.Workflow(name=name)
     tbss1.connect([
         (inputnode, prepfa, [("fa_list", "in_file")]),
         (inputnode, prepfa, [(("fa_list", tbss1_op_string), "op_string")]),
@@ -297,6 +297,8 @@ def create_tbss_4_prestats(name='tbss_4_prestats'):
 
         outputnode.all_FA_skeletonised
         outputnode.mean_FA_skeleton_mask
+        outputnode.distance_map
+        outputnode.skeleton_file
 
     """
     # Create inputnode
@@ -395,7 +397,7 @@ def create_tbss_all(name='tbss_all', estimate_skeleton=True):
     tbss3 = create_tbss_3_postreg(name='tbss3', estimate_skeleton=estimate_skeleton)
     tbss4 = create_tbss_4_prestats(name='tbss4')
 
-    tbss_all = pe.Workflow(name="tbss_all")
+    tbss_all = pe.Workflow(name=name)
     tbss_all.connect([
                 (inputnode, tbss1, [('fa_list', 'inputnode.fa_list')]),
                 (inputnode, tbss4, [('skeleton_thresh', 'inputnode.skeleton_thresh')]),
@@ -475,21 +477,20 @@ def create_tbss_non_FA(name='tbss_non_FA'):
     --------
 
     >>> from nipype.workflows.fsl import tbss
-    >>> tbss_nonFA = tbss.create_tbss_non_FA()
-    >>> tbss_nonFA.inputs.inputnode.file_list = []
-    >>> tbss_nonFA.inputs.inputnode.field_list = []
-    >>> tbss_nonFA.inputs.inputnode.skeleton_thresh = 0.2
-    >>> tbss_nonFA.inputs.inputnode.mean_FA_mask = './xxx'
-    >>> tbss_nonFA.inputs.inputnode.meanfa_file = './xxx'
-    >>> tbss_nonFA.inputs.inputnode.distance_map = []
+    >>> tbss_MD = tbss.create_tbss_non_FA()
+    >>> tbss_MD.inputs.inputnode.file_list = []
+    >>> tbss_MD.inputs.inputnode.field_list = []
+    >>> tbss_MD.inputs.inputnode.skeleton_thresh = 0.2
+    >>> tbss_MD.inputs.inputnode.groupmask = './xxx'
+    >>> tbss_MD.inputs.inputnode.meanfa_file = './xxx'
+    >>> tbss_MD.inputs.inputnode.distance_map = []
 
     Inputs::
 
         inputnode.file_list
         inputnode.field_list
         inputnode.skeleton_thresh
-        inputnode.merged_file
-        inputnode.mean_FA_mask
+        inputnode.groupmask
         inputnode.meanfa_file
         inputnode.distance_map
 
@@ -500,18 +501,17 @@ def create_tbss_non_FA(name='tbss_non_FA'):
 
     # Define the inputnode
     inputnode = pe.Node(interface=util.IdentityInterface(fields=['file_list',
-                                                                'field_list',
-                                                                'skeleton_thresh',
-                                                                'merged_file',
-                                                                'mean_FA_mask',
-                                                                'meanfa_file',
-                                                                'distance_map']),
+                                                                 'field_list',
+                                                                 'skeleton_thresh',
+                                                                 'groupmask',
+                                                                 'meanfa_file',
+                                                                 'distance_map']),
                         name='inputnode')
 
     # Apply the warpfield to the non FA image
     applywarp = pe.MapNode(interface=fsl.ApplyWarp(),
-                            iterfield=['in_file', 'field_file'],
-                            name="applywarp")
+                           iterfield=['in_file', 'field_file'],
+                           name="applywarp")
     applywarp.inputs.ref_file = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
     # Merge the non FA files into a 4D file
     merge = pe.Node(fsl.Merge(dimension="t"), name="merge")
@@ -525,17 +525,16 @@ def create_tbss_non_FA(name='tbss_non_FA'):
                                       ),
                         name="projectfa")
 
-    tbss_nonFA = pe.Workflow(name="tbss_nonFA")
-    tbss_nonFA.connect([
+    tbss_non_FA = pe.Workflow(name=name)
+    tbss_non_FA.connect([
                     (inputnode, applywarp, [('file_list', 'in_file'),
                                             ('field_list', 'field_file'),
                                             ]),
-                    (inputnode, merge, [('merged_file', 'merged_file'), ]),
                     (applywarp, merge, [("out_file", "in_files")]),
 
                     (merge, maskgroup, [("merged_file", "in_file")]),
 
-                    (inputnode, maskgroup, [('mean_FA_mask', 'in_file2')]),
+                    (inputnode, maskgroup, [('groupmask', 'in_file2')]),
 
                     (maskgroup, projectfa, [('out_file', 'data_file')]),
                     (inputnode, projectfa, [('skeleton_thresh', 'threshold'),
@@ -548,8 +547,8 @@ def create_tbss_non_FA(name='tbss_non_FA'):
     outputnode = pe.Node(interface=util.IdentityInterface(
                                             fields=['projected_nonFA_file']),
                          name='outputnode')
-    tbss_nonFA.connect([
+    tbss_non_FA.connect([
             (projectfa, outputnode, [('projected_data', 'projected_nonFA_file'),
                                     ]),
             ])
-    return tbss_nonFA
+    return tbss_non_FA
