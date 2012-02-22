@@ -1,10 +1,10 @@
-# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
-# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-A pipeline to perform TBSS.
+==========================================
+A pipeline to perform TBSS on NKI RS data.
+==========================================
 """
 from nipype.workflows.fsl.dti import create_eddy_correct_pipeline
-from nipype.pipeline.plugins.multiproc import MultiProcPlugin
+from nipype.workflows.fsl.tbss import create_tbss_non_FA, create_tbss_all
 
 """
 Tell python where to find the appropriate functions.
@@ -14,7 +14,6 @@ import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import os                                    # system functions
-from nipype.workflows.fsl import tbss
 
 """
 Confirm package dependencies installed.
@@ -28,11 +27,11 @@ package_check('IPython', '0.10', 'tbss_test')
 fsl.FSLCommand.set_default_output_type('NIFTI')
 
 """
-Specify the related directories http://fcon_1000.projects.nitrc.org/indi/pro/eNKI_RS_TRT/FrontPage.html
+You can get the data from http://fcon_1000.projects.nitrc.org/indi/pro/eNKI_RS_TRT/FrontPage.html
 """
 dataDir = os.path.abspath('nki_rs_data')
 workingdir = './tbss_example'
-subjects_list = ['2475376', '3313349']#, '3808535', '3893245', '8735778', '9630905']
+subjects_list = ['2475376', '3313349', '3808535', '3893245', '8735778', '9630905']
 
 gen_fa = pe.Workflow(name="gen_fa")
 gen_fa.base_dir = os.path.join(os.path.abspath(workingdir), 'l1')
@@ -68,32 +67,44 @@ datasink = pe.Node(interface=nio.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.join(os.path.abspath(workingdir), 'l1_results')
 datasink.inputs.parameterization = False
 gen_fa.connect(dtifit, 'FA', datasink, 'FA')
+gen_fa.connect(dtifit, 'MD', datasink, 'MD')
 
 if __name__ == '__main__':
     gen_fa.write_graph()
-    gen_fa.run()#plugin=MultiProcPlugin(plugin_args={'n_procs': 4}))
+    gen_fa.run()
 
 
 """
 Here we get the FA list including all the subjects.
 """
 
-tbss_source = pe.Node(interface=nio.DataGrabber(outfiles=['fa_list']), name='tbss_source')
+tbss_source = pe.Node(interface=nio.DataGrabber(outfiles=['fa_list', 'md_list']), name='tbss_source')
 tbss_source.inputs.base_directory = datasink.inputs.base_directory
-tbss_source.inputs.template = 'FA/%s_FA.nii'
-tbss_source.inputs.template_args = dict(fa_list=[[subjects_list]])
+tbss_source.inputs.template = '%s/%s_%s.nii'
+tbss_source.inputs.template_args = dict(fa_list=[['FA', subjects_list, 'FA']],
+                                        md_list=[['MD', subjects_list, 'MD']])
 
-'''
+"""
 TBSS analysis
-'''
-tbss_all = tbss.create_tbss_all()
-tbss_all.inputs.inputnode.target = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
+"""
+
+tbss_all = create_tbss_all()
 tbss_all.inputs.inputnode.skeleton_thresh = 0.2
 
 tbssproc = pe.Workflow(name="tbssproc")
 tbssproc.base_dir = os.path.join(os.path.abspath(workingdir), 'l2')
 tbssproc.connect(tbss_source, 'fa_list', tbss_all, 'inputnode.fa_list')
 
+tbss_MD = create_tbss_non_FA(name='tbss_MD')
+tbss_MD.inputs.inputnode.skeleton_thresh = tbss_all.inputs.inputnode.skeleton_thresh
+
+tbssproc.connect([(tbss_all, tbss_MD, [('tbss2.outputnode.field_list', 'inputnode.field_list'),
+                                       ('tbss3.outputnode.groupmask', 'inputnode.groupmask'),
+                                       ('tbss3.outputnode.meanfa_file', 'inputnode.meanfa_file'),
+                                       ('tbss4.outputnode.distance_map', 'inputnode.distance_map')]),
+                  (tbss_source, tbss_MD, [('md_list', 'inputnode.file_list')]),
+            ])
+
 if __name__ == '__main__':
     tbssproc.write_graph()
-    tbssproc.run(plugin=MultiProcPlugin(plugin_args={'n_procs': 4}))
+    tbssproc.run()
