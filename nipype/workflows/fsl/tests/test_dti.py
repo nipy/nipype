@@ -8,7 +8,6 @@ from nipype.interfaces.fsl import no_fsl, no_fsl_course_data
 
 import nipype.pipeline.engine as pe
 import warnings
-from nipype.pipeline.plugins.linear import LinearPlugin
 import tempfile
 import shutil
 
@@ -39,7 +38,7 @@ def test_create_eddy_correct_pipeline():
                       (original_eddycorrect, test, [("eddy_corrected", "volume2")]),
                       ])
 
-    pipeline.run(plugin=LinearPlugin())
+    pipeline.run(plugin='Linear')
     shutil.rmtree(pipeline.base_dir)
 
 
@@ -109,5 +108,5 @@ def test_create_bedpostx_pipeline():
                       (original_bedpostx, test_ph2, [(("mean_phsamples", pickSecond), "volume2")])
                       ])
 
-    pipeline.run(plugin=LinearPlugin())
+    pipeline.run(plugin='Linear')
     shutil.rmtree(pipeline.base_dir)
