@@ -50,6 +50,11 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
                                     name="prepfa",
                                     iterfield=['in_file', 'op_string'])
 
+    # Slicer
+    slicer = pe.MapNode(fsl.Slicer(all_axial=True, image_width=1280),
+                        name='slicer',
+                        iterfield=['in_file'])
+
     # Create a mask
     getmask1 = pe.MapNode(fsl.ImageMaths(op_string="-bin", suffix="_mask"),
                         name="getmask1",
@@ -66,7 +71,8 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
         (inputnode, prepfa, [(("fa_list", tbss1_op_string), "op_string")]),
         (prepfa, getmask1, [("out_file", "in_file")]),
         (getmask1, getmask2, [("out_file", "in_file"),
-                              ("out_file", "operand_files")])
+                              ("out_file", "operand_files")]),
+        (prepfa, slicer, [('out_file', 'in_file')]),
         ])
 
     # Define the outputnode
