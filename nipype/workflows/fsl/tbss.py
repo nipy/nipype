@@ -2,11 +2,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 import os
-import nibabel as nib
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 import nipype.interfaces.fsl as fsl
-import nipype.interfaces.io as nio
 
 def tbss1_op_string(in_files):
     import nibabel as nib
@@ -87,7 +85,8 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
 
 def create_tbss_2_reg(name="tbss_2_reg"):
     """TBSS nonlinear registration: 
-    A pipeline that does the same as 'tbss_2_reg -t' script in FSL.
+    A pipeline that does the same as 'tbss_2_reg -t' script in FSL. '-n' option 
+    is not supported at the moment.
         
     Example
     ------
@@ -152,10 +151,12 @@ def create_tbss_2_reg(name="tbss_2_reg"):
         ])
     return tbss2
 
-def create_tbss_3_postreg(name='tbss_3_postreg'):
+def create_tbss_3_postreg(name='tbss_3_postreg', estimate_skeleton = True):
     """Post-registration processing: derive mean_FA and mean_FA_skeleton from 
-    mean of all subjects in study.
-    A pipeline that does the same as 'tbss_3_postreg -T' script from FSL
+    mean of all subjects in study. Target is assumed to be FMRIB58_FA_1mm.
+    A pipeline that does the same as 'tbss_3_postreg -S' script from FSL
+    Setting 'estimate_skeleton to False will use precomputed FMRIB58_FA-skeleton_1mm 
+    skeleton (same as 'tbss_3_postreg -T').
     
     Example
     --------
@@ -168,7 +169,6 @@ def create_tbss_3_postreg(name='tbss_3_postreg'):
     
         inputnode.field_list
         inputnode.fa_list
-        inputnode.target
     
     Outputs::
     
@@ -181,14 +181,14 @@ def create_tbss_3_postreg(name='tbss_3_postreg'):
     
     # Create the inputnode
     inputnode = pe.Node(interface = util.IdentityInterface(fields=['field_list',
-                                                                'fa_list',
-                                                                'target']),
+                                                                'fa_list']),
                         name='inputnode')
     
     # Apply the warpfield to the masked FA image
     applywarp = pe.MapNode(interface=fsl.ApplyWarp(),
                            iterfield=['in_file','field_file'],
                         name="applywarp")
+    applywarp.inputs.ref_file = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
     
     # Merge the FA files into a 4D file
     mergefa = pe.Node(fsl.Merge(dimension="t"),
@@ -204,36 +204,14 @@ def create_tbss_3_postreg(name='tbss_3_postreg'):
                                        suffix="_masked"),
                         name="maskgroup")
 
-    #$FSLDIR/bin/fslmaths $FSLDIR/data/standard/FMRIB58_FA_1mm -mas mean_FA_mask mean_FA
-    maskstd = pe.Node(fsl.ImageMaths(op_string="-mas",
-                                       suffix="_masked"),
-                        name="maskstd")
-    maskstd.inputs.in_file = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
-
-    #$FSLDIR/bin/fslmaths mean_FA -bin mean_FA_mask
-    binmaskstd = pe.Node(fsl.ImageMaths(op_string="-bin"),
-                        name="binmaskstd")
-
-    #$FSLDIR/bin/fslmaths all_FA -mas mean_FA_mask all_FA
-    maskgroup2 = pe.Node(fsl.ImageMaths(op_string="-mas",
-                                       suffix="_masked"),
-                        name="maskgroup2")
-
-    #$FSLDIR/bin/imcp $FSLDIR/data/standard/FMRIB58_FA-skeleton_1mm mean_FA_skeleton
-
     tbss3 = pe.Workflow(name=name)
     tbss3.connect([
         (inputnode, applywarp,[("fa_list", "in_file"),
-                              ("target", "ref_file"),
-                              ("field_list", "field_file")]),
+                               ("field_list", "field_file")]),
         (applywarp, mergefa, [("out_file", "in_files")]),
         (mergefa, groupmask, [("merged_file", "in_file")]),
         (mergefa, maskgroup, [("merged_file", "in_file")]),
         (groupmask, maskgroup, [("out_file", "in_file2")]),
-        (groupmask, maskstd, [("out_file", "in_file2")]),
-        (maskstd, binmaskstd, [("out_file", "in_file")]),
-        (maskgroup, maskgroup2, [("out_file", "in_file")]),
-        (binmaskstd, maskgroup2, [("out_file", "in_file2")])
         ])
     
     # Create outputnode
@@ -242,12 +220,53 @@ def create_tbss_3_postreg(name='tbss_3_postreg'):
                                                                 'meanfa_file',
                                                                 'mergefa_file']),
                          name='outputnode')
-    outputnode.inputs.skeleton_file = fsl.Info.standard_image("FMRIB58_FA-skeleton_1mm.nii.gz")
-    tbss3.connect([
-            (binmaskstd, outputnode,[('out_file', 'groupmask')]),
-            (maskstd, outputnode,[('out_file', 'meanfa_file')]),
-            (maskgroup2, outputnode,[('out_file', 'mergefa_file')])
-            ])
+    
+    if estimate_skeleton:
+        # Take the mean over the fourth dimension
+        meanfa = pe.Node(fsl.ImageMaths(op_string="-Tmean",
+                                         suffix="_mean"),
+                          name="meanfa")
+        
+        # Use the mean FA volume to generate a tract skeleton
+        makeskeleton = pe.Node(fsl.TractSkeleton(skeleton_file=True),
+                               name="makeskeleton")
+        tbss3.connect([
+                       (maskgroup, meanfa, [("out_file", "in_file")]),
+                       (meanfa, makeskeleton, [("out_file", "in_file")]),
+                       (groupmask, outputnode,[('out_file', 'groupmask')]),
+                       (makeskeleton, outputnode,[('skeleton_file', 'skeleton_file')]),
+                       (meanfa, outputnode,[('out_file', 'meanfa_file')]),
+                       (maskgroup, outputnode,[('out_file', 'mergefa_file')])
+                       ])
+    else:
+        #$FSLDIR/bin/fslmaths $FSLDIR/data/standard/FMRIB58_FA_1mm -mas mean_FA_mask mean_FA
+        maskstd = pe.Node(fsl.ImageMaths(op_string="-mas",
+                                           suffix="_masked"),
+                            name="maskstd")
+        maskstd.inputs.in_file = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
+    
+        #$FSLDIR/bin/fslmaths mean_FA -bin mean_FA_mask
+        binmaskstd = pe.Node(fsl.ImageMaths(op_string="-bin"),
+                            name="binmaskstd")
+    
+        #$FSLDIR/bin/fslmaths all_FA -mas mean_FA_mask all_FA
+        maskgroup2 = pe.Node(fsl.ImageMaths(op_string="-mas",
+                                           suffix="_masked"),
+                            name="maskgroup2")
+        
+        tbss3.connect([
+                        (groupmask, maskstd, [("out_file", "in_file2")]),
+                        (maskstd, binmaskstd, [("out_file", "in_file")]),
+                        (maskgroup, maskgroup2, [("out_file", "in_file")]),
+                        (binmaskstd, maskgroup2, [("out_file", "in_file2")])
+        ])
+                
+        outputnode.inputs.skeleton_file = fsl.Info.standard_image("FMRIB58_FA-skeleton_1mm.nii.gz")
+        tbss3.connect([
+                (binmaskstd, outputnode,[('out_file', 'groupmask')]),
+                (maskstd, outputnode,[('out_file', 'meanfa_file')]),
+                (maskgroup2, outputnode,[('out_file', 'mergefa_file')])
+                ])
     return tbss3
 
 def tbss4_op_string(skeleton_thresh):
@@ -340,7 +359,7 @@ def create_tbss_4_prestats(name='tbss_4_prestats'):
     
     return tbss4
 
-def create_tbss_all(name='tbss_all'):
+def create_tbss_all(name='tbss_all', estimate_skeleton = True):
     """Create a pipeline that combines create_tbss_* pipelines
     
     Example
@@ -348,13 +367,11 @@ def create_tbss_all(name='tbss_all'):
     
     >>> from nipype.workflows.fsl import tbss
     >>> tbss = tbss.create_tbss_all('tbss')
-    >>> tbss.inputs.inputnode.target = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
     >>> tbss.inputs.inputnode.skeleton_thresh = 0.2
     
     Inputs::
     
         inputnode.fa_list
-        inputnode.target
         inputnode.skeleton_thresh
     
     Outputs::
@@ -368,20 +385,18 @@ def create_tbss_all(name='tbss_all'):
 
     # Define the inputnode
     inputnode = pe.Node(interface=util.IdentityInterface(fields=['fa_list',
-                                                                'target',
                                                                 'skeleton_thresh']),
                         name='inputnode')
     
     tbss1 = create_tbss_1_preproc(name='tbss1')
     tbss2 = create_tbss_2_reg(name='tbss2')
-    tbss3 = create_tbss_3_postreg(name='tbss3')    
+    tbss2.inputs.inputnode.target = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
+    tbss3 = create_tbss_3_postreg(name='tbss3', estimate_skeleton=estimate_skeleton)    
     tbss4 = create_tbss_4_prestats(name='tbss4')
     
     tbss_all = pe.Workflow(name="tbss_all")
     tbss_all.connect([
                 (inputnode, tbss1,[('fa_list', 'inputnode.fa_list')]),
-                (inputnode, tbss2,[('target', 'inputnode.target')]),
-                (inputnode, tbss3,[('target', 'inputnode.target')]),
                 (inputnode, tbss4,[('skeleton_thresh', 'inputnode.skeleton_thresh')]),
                     
                 (tbss1, tbss2,[('outputnode.fa_list', 'inputnode.fa_list'),
@@ -460,7 +475,6 @@ def create_tbss_non_FA(name='tbss_non_FA'):
     >>> from nipype.workflows.fsl import tbss
     >>> tbss_nonFA = tbss.create_tbss_non_FA()
     >>> tbss_nonFA.inputs.inputnode.file_list = []
-    >>> tbss_nonFA.inputs.inputnode.target = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
     >>> tbss_nonFA.inputs.inputnode.field_list = []
     >>> tbss_nonFA.inputs.inputnode.skeleton_thresh = 0.2
     >>> tbss_nonFA.inputs.inputnode.mean_FA_mask = './xxx'
@@ -470,7 +484,6 @@ def create_tbss_non_FA(name='tbss_non_FA'):
     Inputs::
     
         inputnode.file_list
-        inputnode.target
         inputnode.field_list
         inputnode.skeleton_thresh
         inputnode.merged_file
@@ -485,7 +498,6 @@ def create_tbss_non_FA(name='tbss_non_FA'):
 
     # Define the inputnode
     inputnode = pe.Node(interface=util.IdentityInterface(fields=['file_list',
-                                                                'target',
                                                                 'field_list',
                                                                 'skeleton_thresh',
                                                                 'merged_file',
@@ -498,6 +510,7 @@ def create_tbss_non_FA(name='tbss_non_FA'):
     applywarp = pe.MapNode(interface=fsl.ApplyWarp(),
                             iterfield=['in_file','field_file'],
                             name="applywarp")
+    applywarp.inputs.ref_file = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
     # Merge the non FA files into a 4D file
     merge = pe.Node(fsl.Merge(dimension="t"), name="merge")
     #merged_file="all_FA.nii.gz"
@@ -513,7 +526,6 @@ def create_tbss_non_FA(name='tbss_non_FA'):
     tbss_nonFA = pe.Workflow(name="tbss_nonFA")
     tbss_nonFA.connect([
                     (inputnode, applywarp,[('file_list','in_file'),
-                                            ('target','ref_file'),
                                             ('field_list','field_file'),
                                             ]),
                     (inputnode, merge, [('merged_file','merged_file'),]),
