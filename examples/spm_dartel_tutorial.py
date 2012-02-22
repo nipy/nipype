@@ -16,8 +16,7 @@ Import necessary modules from nipype."""
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
-import nipype.workflows.spm as spm_wf          # spm
-import nipype.interfaces.matlab as mlab      # how to run matlab
+import nipype.workflows.fmri.spm as spm_wf          # spm
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine

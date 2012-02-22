@@ -7,10 +7,10 @@ import nipype.algorithms.rapidart as ra
 import nipype.interfaces.spm as spm
 import nipype.interfaces.utility as niu
 import nipype.pipeline.engine as pe
-from ...utils.logger import logger
-from ...interfaces.matlab import no_matlab
+from ....utils.logger import logger
+from ....interfaces.matlab import no_matlab
 
-from ..freesurfer.utils import create_getmask_flow
+from ...smri.freesurfer.utils import create_getmask_flow
 
 def create_spm_preproc(name='preproc'):
     """Create an spm preprocessing workflow with freesurfer registration and

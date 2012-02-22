@@ -13,11 +13,10 @@ from nipype.interfaces.matlab import MatlabCommand
 from nipype.interfaces.base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
                                     File, isdefined, traits)
 from nipype.utils.filemanip import split_filename
-import os, os.path as op
+import  os.path as op
 from string import Template
-import nibabel as nb
 import nipype
-from nipype.workflows.utils import get_data_dims, get_vox_dims
+from nipype.workflows.misc.utils import get_data_dims, get_vox_dims
 
 def get_origin(volume):
     import nibabel as nb
