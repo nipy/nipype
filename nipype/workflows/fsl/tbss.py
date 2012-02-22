@@ -38,6 +38,7 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
 
         outputnode.fa_list
         outputnode.mask_list
+        outputnode.slices
 
     """
 
@@ -82,6 +83,7 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
     tbss1.connect([
                 (prepfa, outputnode, [("out_file", "fa_list")]),
                 (getmask2, outputnode, [("out_file", "mask_list")]),
+                (slicer, outputnode, [('out_file', 'slices')])
                 ])
     return tbss1
 
