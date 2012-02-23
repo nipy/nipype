@@ -20,7 +20,7 @@ import nipype.interfaces.utility as util
 #####################################################################
 # Preliminaries
 
-from nipype.workflows.fsl import create_resting_preproc
+from nipype.workflows.fmri.fsl import create_resting_preproc
 
 """
 Set up parameters for the resting state preprocessing workflow.

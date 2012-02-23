@@ -14,7 +14,7 @@ import nipype.interfaces.nipy as nipy
 import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model specification
-import nipype.workflows.fsl as fsl_wf
+import nipype.workflows.fmri.fsl as fsl_wf
 from nipype.interfaces.base import Bunch
 import os                                    # system functions
 

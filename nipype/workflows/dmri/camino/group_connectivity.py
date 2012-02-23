@@ -69,7 +69,6 @@ def get_subj_in_group(group_id):
     return group_list[group_id]
 
 def getoutdir(group_id, output_dir):
-    import os
     return op.join(op.join(output_dir, 'workingdir'),'%s' % group_id)
 
 def get_nsubs(group_list):
