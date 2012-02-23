@@ -3,8 +3,8 @@
 A pipeline to perform TBSS on NKI RS data.
 ==========================================
 """
-from nipype.workflows.fsl.dti import create_eddy_correct_pipeline
-from nipype.workflows.fsl.tbss import create_tbss_non_FA, create_tbss_all
+from nipype.workflows.dmri.fsl.dti import create_eddy_correct_pipeline
+from nipype.workflows.dmri.fsl.tbss import create_tbss_non_FA, create_tbss_all
 
 """
 Tell python where to find the appropriate functions.

@@ -1,7 +1,7 @@
 import os
 
 from nipype.testing import (skipif)
-import nipype.workflows.fsl as fsl_wf
+import nipype.workflows.fmri.fsl as fsl_wf
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.utility as util
 from nipype.interfaces.fsl import no_fsl, no_fsl_course_data
