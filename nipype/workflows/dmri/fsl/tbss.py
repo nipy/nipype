@@ -78,7 +78,8 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
 
     # Define the outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["fa_list",
-                                                                "mask_list"]),
+                                                                "mask_list",
+                                                                "slices"]),
                         name="outputnode")
     tbss1.connect([
                 (prepfa, outputnode, [("out_file", "fa_list")]),
