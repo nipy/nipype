@@ -4,7 +4,7 @@ import nipype.interfaces.camino as camino
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.algorithms.misc as misc
-from nipype.workflows.utils import get_affine, get_data_dims, get_vox_dims
+from ...misc.utils import get_affine, get_data_dims, get_vox_dims
 
 
 
@@ -18,8 +18,7 @@ def create_camino_dti_pipeline(name="dtiproc"):
     -------
 
     >>> import os
-    >>> import nipype.workflows.camino as cmonwk
-    >>> nipype_camino_dti = cmonwk.diffusion.create_camino_dti_pipeline("nipype_camino_dti")
+    >>> nipype_camino_dti = create_camino_dti_pipeline("nipype_camino_dti")
     >>> nipype_camino_dti.inputs.inputnode.dwi = os.path.abspath('dwi.nii')
     >>> nipype_camino_dti.inputs.inputnode.bvecs = os.path.abspath('bvecs')
     >>> nipype_camino_dti.inputs.inputnode.bvals = os.path.abspath('bvals')

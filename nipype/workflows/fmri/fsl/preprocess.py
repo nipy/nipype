@@ -5,7 +5,7 @@ import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 
-from nipype.workflows.freesurfer.utils import create_getmask_flow
+from ...smri.freesurfer.utils import create_getmask_flow
 
 def getthreshop(thresh):
     return ['-thr %.10f -Tmin -bin'%(0.1*val[1]) for val in thresh]
@@ -84,8 +84,6 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     Example
     -------
 
-    >>> from nipype.workflows.fsl import create_parallelfeat_preproc
-    >>> import os
     >>> preproc = create_parallelfeat_preproc()
     >>> preproc.inputs.inputspec.func = ['f3.nii', 'f5.nii']
     >>> preproc.inputs.inputspec.fwhm = 5
@@ -400,8 +398,6 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     Example
     -------
 
-    >>> from nipype.workflows.fsl import create_featreg_preproc
-    >>> import os
     >>> preproc = create_featreg_preproc()
     >>> preproc.inputs.inputspec.func = ['f3.nii', 'f5.nii']
     >>> preproc.inputs.inputspec.fwhm = 5
@@ -714,7 +710,6 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     Example
     -------
 
-    >>> from nipype.workflows.fsl import create_susan_smooth
     >>> smooth = create_susan_smooth()
     >>> smooth.inputs.inputnode.in_files = 'f3.nii'
     >>> smooth.inputs.inputnode.fwhm = 5
@@ -848,8 +843,6 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     Example
     -------
 
-    >>> import os
-    >>> from nipype.workflows.fsl import create_fsl_fs_preproc
     >>> preproc = create_fsl_fs_preproc(whichvol='first')
     >>> preproc.inputs.inputspec.highpass = 128./(2*2.5)
     >>> preproc.inputs.inputspec.func = ['f3.nii', 'f5.nii']
