@@ -77,8 +77,8 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
     interleaved = traits.Bool(desc="True if interleaved",
                   mandatory=True)
     tr_slices = traits.Float(desc="TR slices")
-    start = traits.Float(desc="start")
-    time_interp = traits.Bool(desc="time interpolation")
+    start = traits.Float(0.0, usedefault=True, desc="start")
+    time_interp = traits.Bool(True, usedefault=True, desc="time interpolation")
 
 
 class FmriRealign4dOutputSpec(TraitedSpec):
@@ -88,7 +88,26 @@ class FmriRealign4dOutputSpec(TraitedSpec):
 
 
 class FmriRealign4d(BaseInterface):
-    """ realign using nipy's FmriRealign4d
+    """ 
+    Simultaneous motion and slice timing correction algorithm 
+    wrapped from nipy's FmriRealign4d algorithm [1]_. 
+    
+
+    Attributes
+    ----------
+    inputs.in_file :     List of existing files
+                         The path to files to realign.
+    inputs.tr :          Float
+                         TR in seconds.
+    inputs.slice_order : List of Ints or "ascending" or "descending"
+                         slice order.
+    inputs.interleaved:  Bool
+                         True if interleaved.
+    inputs.start:        Float
+                         start time.
+    inputs.time_interp:  Bool
+                         True for time interpolation.
+    
     Examples
     --------
     >>> from nipype.interfaces.nipy.preprocess import FmriRealign4d
@@ -98,11 +117,20 @@ class FmriRealign4d(BaseInterface):
     >>> realigner.inputs.slice_order = 'ascending'
     >>> realigner.inputs.interleaved = True
     >>> res = realigner.run() # doctest: +SKIP
+    
+    References
+    ----------
+    .. [1] Roche A. A four-dimensional registration algorithm with \
+       application to joint correction of motion and slice timing \
+       in fMRI. IEEE Trans Med Imaging. 2011 Aug;30(8):1546-54. DOI_.
+
+    .. _DOI: http://dx.doi.org/10.1109/TMI.2011.2131152
+    
     """
 
     input_spec = FmriRealign4dInputSpec
     output_spec = FmriRealign4dOutputSpec
-
+    keywords = ['slice timing', 'motion correction']
     def _run_interface(self, runtime):
         all_ims = []
 
@@ -115,20 +143,13 @@ class FmriRealign4d(BaseInterface):
             TR_slices = None
         else:
             TR_slices = self.inputs.tr_slices
-        if not isdefined(self.inputs.start):
-            start = 0.0
-        else:
-            start = self.inputs.start
-        if not isdefined(self.inputs.time_interp):
-            time_interp = True
-        else:
-            time_interp = self.inputs.time_interp
 
         R = FR4d(all_ims, tr=self.inputs.tr,
             slice_order=self.inputs.slice_order,
             interleaved=self.inputs.interleaved,
-            tr_slices=TR_slices, time_interp=time_interp,
-            start=start)
+            tr_slices=TR_slices,
+            time_interp=self.inputs.time_interp,
+            start=self.inputs.start)
 
         R.estimate()
 
@@ -147,9 +168,9 @@ class FmriRealign4d(BaseInterface):
             motion = R._transforms[j]
             #output a .par file that looks like fsl.mcflirt's .par file
             for i, mo in enumerate(motion):
-                string = str(mo.rotation[0]) + "  " + str(mo.rotation[1])
-                + "  " + str(mo.rotation[2]) + "  " + str(mo.translation[0])
-                + "  " + str(mo.translation[1]) + "  " + str(mo.translation[2])
+                string = str(mo.rotation[0]) + "  " + str(mo.rotation[1])\
+                + "  " + str(mo.rotation[2]) + "  " + str(mo.translation[0])\
+                + "  " + str(mo.translation[1]) + "  " + str(mo.translation[2])\
                 + "  \n"
                 mfile.write(string)
             mfile.close()
