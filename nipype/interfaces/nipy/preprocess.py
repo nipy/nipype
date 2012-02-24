@@ -88,10 +88,9 @@ class FmriRealign4dOutputSpec(TraitedSpec):
 
 
 class FmriRealign4d(BaseInterface):
-    """ 
-    Simultaneous motion and slice timing correction algorithm 
-    wrapped from nipy's FmriRealign4d algorithm [1]_. 
-    
+    """
+    Simultaneous motion and slice timing correction algorithm \
+    wrapped from nipy's FmriRealign4d algorithm [1]_.
 
     Attributes
     ----------
@@ -107,7 +106,7 @@ class FmriRealign4d(BaseInterface):
                          start time.
     inputs.time_interp:  Bool
                          True for time interpolation.
-    
+
     Examples
     --------
     >>> from nipype.interfaces.nipy.preprocess import FmriRealign4d
@@ -117,7 +116,7 @@ class FmriRealign4d(BaseInterface):
     >>> realigner.inputs.slice_order = 'ascending'
     >>> realigner.inputs.interleaved = True
     >>> res = realigner.run() # doctest: +SKIP
-    
+
     References
     ----------
     .. [1] Roche A. A four-dimensional registration algorithm with \
@@ -125,13 +124,15 @@ class FmriRealign4d(BaseInterface):
        in fMRI. IEEE Trans Med Imaging. 2011 Aug;30(8):1546-54. DOI_.
 
     .. _DOI: http://dx.doi.org/10.1109/TMI.2011.2131152
-    
+
     """
 
     input_spec = FmriRealign4dInputSpec
     output_spec = FmriRealign4dOutputSpec
     keywords = ['slice timing', 'motion correction']
+
     def _run_interface(self, runtime):
+
         all_ims = []
 
         for image in self.inputs.in_file:
