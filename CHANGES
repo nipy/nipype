@@ -12,6 +12,7 @@ Release 0.4.2 (Future)
        logging behavior when running in distributed mode.
 * API: Node/MapNode has new attribute that allows it to run on master thread.
 * API: IPython plugin now invokes IPython 0.11 or greater
+* API: Canned workflows are now all under a different package structure
 
 * ENH: Added fsl resting state workflow based on behzadi 2007 CompCorr method.
 * ENH: TSNR node produces mean and std-dev maps; allows polynomial detrending
@@ -30,6 +31,7 @@ Release 0.4.2 (Future)
 * ENH: IdentityNode with iterable expansion takes place after remaining Identity
        Node removal
 * ENH: Crashfile display script added
+* ENH: Added TBSS workflows and examples
 
 * FIX: Fixed spm preproc workflow to cater to multiple functional runs
 * FIX: Workflow outputs displays nodes with empty outputs

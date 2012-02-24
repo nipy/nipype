@@ -50,12 +50,10 @@ import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.cmtk as cmtk
 import inspect
-import nibabel as nb
-import os, os.path as op                     # system functions
+import  os.path as op                     # system functions
 import cmp                                   # connectome mapper
-from nipype.workflows.camino.connectivity_mapping import select_aparc_annot
-from nipype.workflows.mrtrix.diffusion import get_vox_dims_as_tuple
-from nipype.workflows.fsl.dti import create_eddy_correct_pipeline
+from nipype.workflows.dmri.camino.connectivity_mapping import select_aparc_annot
+from nipype.workflows.dmri.fsl.dti import create_eddy_correct_pipeline
 
 """
 This needs to point to the freesurfer subjects directory (Recon-all must have been run on subj1 from the FSL course data)
