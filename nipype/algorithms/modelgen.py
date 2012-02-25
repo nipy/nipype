@@ -165,7 +165,7 @@ def gen_info(run_event_files):
 
 
 class SpecifyModelInputSpec(BaseInterfaceInputSpec):
-    subject_info = InputMultiPath(Bunch, mandatory=True, xor=['event_info'],
+    subject_info = InputMultiPath(Bunch, mandatory=True, xor=['event_files'],
           desc=("Bunch or List(Bunch) subject specific condition information. "
                 "see :ref:`SpecifyModel` or SpecifyModel.__doc__ for details"))
     event_files = InputMultiPath(traits.List(File(exists=True)), mandatory=True,
