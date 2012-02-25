@@ -15,51 +15,6 @@ else:
     import cmp
 
 def create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir, output_dir, template_args_dict=0):
-    """Creates a group-level pipeline that does the same connectivity processing as in the
-    connectivity_tutorial_advanced example script and the mrtrix create_connectivity_pipeline workflow.
-
-    Given a subject id (and completed Freesurfer reconstruction), diffusion-weighted image,
-    b-values, and b-vectors, the workflow will return the subject's connectome
-    as a Connectome File Format (CFF) file for use in Connectome Viewer (http://www.cmtk.org)
-    as well as the outputs of many other stages of the processing.
-
-    Example
-    -------
-
-    >>> cff = create_connectivity_pipeline("mrtrix_cmtk")
-    >>> cff.inputs.inputnode.subjects_dir = '.'
-    >>> cff.inputs.inputnode.subject_id = 'subj1'
-    >>> cff.inputs.inputnode.dwi = 'data.nii.gz'
-    >>> cff.inputs.inputnode.bvecs = 'bvecs'
-    >>> cff.inputs.inputnode.bvals = 'bvals'
-    >>> cff.run()                 # doctest: +SKIP
-
-    Inputs::
-
-        inputnode.subject_id
-        inputnode.subjects_dir
-        inputnode.dwi
-        inputnode.bvecs
-        inputnode.bvals
-
-    Outputs::
-
-        outputnode.connectome
-        outputnode.nxstatscff
-        outputnode.nxmatlab
-        outputnode.nxcsv
-        outputnode.fa
-        outputnode.tracts
-        outputnode.filtered_tractography
-        outputnode.cmatrix
-        outputnode.rois
-        outputnode.odfs
-        outputnode.struct
-        outputnode.gpickled_network
-        outputnode.mean_fiber_length
-        outputnode.fiber_length_std
-    """
-
     group_infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id']), name="group_infosource")
     group_infosource.inputs.group_id = group_id
     subject_list = group_list[group_id]
