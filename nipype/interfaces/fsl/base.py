@@ -255,7 +255,6 @@ def no_fsl():
 
 
 def no_fsl_course_data():
-    """check if FSL_COURSE_DATA is defined and point to a valid directory"""
+    """check if fsl_course data is present"""
 
-    return not ("FSL_COURSE_DATA" in os.environ and
-                os.path.isdir(os.environ["FSL_COURSE_DATA"]))
+    return not (os.path.isdir(os.path.abspath('fsl_course_data')))

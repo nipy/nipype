@@ -295,6 +295,7 @@ class InterfaceHelpWriter(object):
 
             label = uri + '.' + c + ':'
             ad += '\n.. _%s\n\n' % label
+            ad += '\n.. index:: %s\n\n' % c
             ad += c + '\n' + self.rst_section_levels[2] * len(c) + '\n\n'
             ad += "Code: %s\n\n" % get_file_url(classinst, hashmap)
             ad += trim(classinst.help(returnhelp=True),

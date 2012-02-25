@@ -14,12 +14,18 @@ from nipype.interfaces.base import (TraitedSpec, BaseInterface, BaseInterfaceInp
                                     File, isdefined, traits)
 from nipype.utils.filemanip import split_filename
 import os, os.path as op
-from nipype.workflows.utils import get_data_dims, get_vox_dims
+from nipype.workflows.misc.utils import get_data_dims, get_vox_dims
 import nibabel as nb, nibabel.trackvis as trk
 import numpy as np
 from nibabel.trackvis import HeaderError
 from nibabel.volumeutils import native_code
-from dipy.tracking.utils import move_streamlines, affine_from_fsl_mat_file
+from nipype.utils.misc import package_check
+import warnings
+try:
+    package_check('dipy')
+    from dipy.tracking.utils import move_streamlines, affine_from_fsl_mat_file
+except Exception, e:
+    warnings.warn('dipy not installed')
 from nibabel.orientations import aff2axcodes
 import logging
 

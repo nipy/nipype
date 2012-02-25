@@ -20,7 +20,7 @@ import scipy.io as sio
 import pickle
 import logging
 from nipype.utils.misc import package_check
-from nipype.workflows.utils import get_data_dims
+from nipype.workflows.misc.utils import get_data_dims
 import warnings
 
 logging.basicConfig()

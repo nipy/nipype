@@ -7,7 +7,7 @@ import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
 import nipype.pipeline.engine as pe          # pypeline engine
 import numpy as np
-from nipype.workflows.utils import get_data_dims, get_vox_dims
+from nipype.workflows.misc.utils import get_data_dims, get_vox_dims
 from .connectivity_mapping import create_connectivity_pipeline
 
 # This should be done inside a function, not globally
@@ -44,7 +44,6 @@ def get_subj_in_group(group_id):
     return group_list[group_id]
 
 def getoutdir(group_id, output_dir):
-    import os
     return op.join(op.join(output_dir, 'workingdir'),'%s' % group_id)
 
 def get_nsubs(group_list):

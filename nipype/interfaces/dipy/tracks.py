@@ -14,10 +14,10 @@ iflogger = logging.getLogger('interface')
 
 try:
     package_check('dipy')
+    from dipy.tracking.utils import density_map
 except Exception, e:
     warnings.warn('dipy not installed')
-else:
-    from dipy.tracking.utils import density_map
+    
 
 class TrackDensityMapInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,

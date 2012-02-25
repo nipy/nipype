@@ -1,7 +1,7 @@
 """
-==============================================================
-Using MRtrix and CMTK for advanced group connectivity analysis
-==============================================================
+============================================
+Group connectivity - MRtrix, FSL, FreeSurfer
+============================================
 
 Introduction
 ============
@@ -50,17 +50,12 @@ Import the workflows
 First, we import the necessary modules from nipype.
 """
 
-import nipype.interfaces.io as nio           # Data i/o
-import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs    # freesurfer
-import nipype.interfaces.cmtk as cmtk
-import nipype.interfaces.mrtrix as mrtrix
-import os, os.path as op                     # system functions
+import  os.path as op                     # system functions
 import cmp
-from nipype.workflows.mrtrix.group_connectivity import create_mrtrix_group_cff_pipeline_part1
-from nipype.workflows.camino.group_connectivity import (create_group_cff_pipeline_part2_with_CSVstats,
+from nipype.workflows.dmri.mrtrix.group_connectivity import create_mrtrix_group_cff_pipeline_part1
+from nipype.workflows.dmri.camino.group_connectivity import (create_group_cff_pipeline_part2_with_CSVstats,
 create_group_cff_pipeline_part3_with_CSVstats, create_group_cff_pipeline_part4)
 
 """

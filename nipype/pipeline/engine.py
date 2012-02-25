@@ -149,8 +149,8 @@ class Workflow(WorkflowBase):
 
         .. note::
 
-        Will reset attributes used for executing workflow. See
-        _init_runtime_fields.
+          Will reset attributes used for executing workflow. See
+          _init_runtime_fields.
 
         Parameters
         ----------
@@ -391,8 +391,23 @@ connected.
             outnode = None
         return outnode
 
+
+    def list_node_names(self):
+        """List names of all nodes in a workflow
+        """
+        outlist = []
+        for node in nx.topological_sort(self._graph):
+            print node.fullname #dbg
+            if isinstance(node, Workflow):
+                outlist.extend(['.'.join((node.name, nodename)) for nodename in
+                                node.list_nodes()])
+            else:
+                outlist.append(node.name)
+        return sorted(outlist)
+
+
     def write_graph(self, dotfilename='graph.dot', graph2use='hierarchical',
-                    format="png"):
+                    format="png", simple_form=True):
         """Generates a graphviz dot file and a png file
 
         Parameters
@@ -405,6 +420,11 @@ connected.
             exec - expands workflows to depict iterables
 
         format: 'png', 'svg'
+
+        simple_form: boolean (default: True)
+            Determines if the node name used in the graph should be of the form
+            'nodename (package)' when True or 'nodename.Class.package' when
+            False.
 
         """
         graphtypes = ['orig', 'flat', 'hierarchical', 'exec']
@@ -423,7 +443,8 @@ connected.
         if graph2use == 'hierarchical':
             dotfilename = os.path.join(base_dir, dotfilename)
             self.write_hierarchical_dotfile(dotfilename=dotfilename,
-                                            colored=False)
+                                            colored=False,
+                                            simple_form=simple_form)
             format_dot(dotfilename, format=format)
         else:
             graph = self._graph
@@ -432,13 +453,15 @@ connected.
             if graph2use == 'exec':
                 graph = generate_expanded_graph(deepcopy(graph))
             export_graph(graph, base_dir, dotfilename=dotfilename,
-                         format=format)
+                         format=format, simple_form=simple_form)
 
-    def write_hierarchical_dotfile(self, dotfilename=None, colored=True):
+    def write_hierarchical_dotfile(self, dotfilename=None, colored=True,
+                                   simple_form=True):
         dotlist = ['digraph %s{' % self.name]
         if colored:
             dotlist.append('  ' + 'colorscheme=pastel28;')
-        dotlist.append(self._get_dot(prefix='  ', colored=colored))
+        dotlist.append(self._get_dot(prefix='  ', colored=colored,
+                                     simple_form=simple_form))
         dotlist.append('}')
         dotstr = '\n'.join(dotlist)
         if dotfilename:
@@ -806,7 +829,8 @@ connected.
             self._graph.remove_nodes_from(nodes2remove)
         logger.debug('finished expanding workflow: %s', self)
 
-    def _get_dot(self, prefix=None, hierarchy=None, colored=True):
+    def _get_dot(self, prefix=None, hierarchy=None, colored=True,
+                 simple_form=True):
         """Create a dot file with connection info
         """
         if prefix is None:
@@ -821,7 +845,9 @@ connected.
             fullname = '.'.join(hierarchy + [node.fullname])
             nodename = fullname.replace('.', '_')
             if not isinstance(node, Workflow):
-                node_class_name = get_print_name(node)
+                node_class_name = get_print_name(node, simple_form=simple_form)
+                if not simple_form:
+                    node_class_name = '.'.join(node_class_name.split('.')[1:])
                 if hasattr(node, 'iterables') and node.iterables:
                     dotlist.append(('%s[label="%s", style=filled, colorscheme'
                                     '=greys7 color=2];') % (nodename,
@@ -838,7 +864,8 @@ connected.
                     dotlist.append(prefix + prefix + 'style=filled;')
                 dotlist.append(node._get_dot(prefix=prefix + prefix,
                                              hierarchy=hierarchy + [self.name],
-                                             colored=colored))
+                                             colored=colored,
+                                             simple_form=simple_form))
                 dotlist.append('}')
             else:
                 for subnode in self._graph.successors_iter(node):
@@ -1318,14 +1345,14 @@ class Node(WorkflowBase):
                 self._result.runtime.stderr = msg
                 raise
 
-            if str2bool(self.config['execution']['remove_unnecessary_outputs']):
-                dirs2keep = None
-                if isinstance(self, MapNode):
-                    dirs2keep = [os.path.join(cwd, 'mapflow')]
-                result.outputs = clean_working_directory(result.outputs, cwd,
-                                                         self._interface.inputs,
-                                                         self.needed_outputs,
-                                                         dirs2keep=dirs2keep)
+            dirs2keep = None
+            if isinstance(self, MapNode):
+                dirs2keep = [os.path.join(cwd, 'mapflow')]
+            result.outputs = clean_working_directory(result.outputs, cwd,
+                                                     self._interface.inputs,
+                                                     self.needed_outputs,
+                                                     self.config,
+                                                     dirs2keep=dirs2keep)
             self._save_results(result, cwd)
         else:
             logger.info("Collecting precomputed outputs")

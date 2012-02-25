@@ -1,7 +1,7 @@
 """
-========================================
-Using Diffusion Toolkit for DTI analysis
-========================================
+============================
+DTI - Diffusion Toolkit, FSL
+============================
 
 A pipeline example that uses several interfaces to perform analysis on
 diffusion weighted images using Diffusion Toolkit tools.
@@ -21,7 +21,7 @@ Tell python where to find the appropriate functions.
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
-import nipype.workflows.fsl as fsl_wf          # fsl
+import nipype.workflows.fmri.fsl as fsl_wf          # fsl
 import nipype.interfaces.diffusion_toolkit as dtk
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
@@ -209,7 +209,8 @@ dwiproc.connect([
                                                  ])
                 ])
 
-dwiproc.run()
-dwiproc.write_graph()
+if __name__ == '__main__':
+    dwiproc.run()
+    dwiproc.write_graph()
 
 

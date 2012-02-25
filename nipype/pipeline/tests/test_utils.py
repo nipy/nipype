@@ -10,6 +10,7 @@ from shutil import rmtree
 from nipype.testing import (assert_equal, assert_true,
                             assert_false)
 import nipype.pipeline.engine as pe
+import nipype.interfaces.base as nib
 import nipype.interfaces.utility as niu
 from nipype.utils.config import config
 from nipype.pipeline.utils import merge_dict
@@ -83,4 +84,48 @@ def test_outputs_removal():
     yield assert_true, os.path.exists(os.path.join(out_dir,
                                                    n1.name,
                                                    'file2.txt'))
+    rmtree(out_dir)
+
+class InputSpec(nib.TraitedSpec):
+    in_file = nib.File(exists=True, copyfile=True)
+
+class OutputSpec(nib.TraitedSpec):
+    output1 = nib.traits.List(nib.traits.Int, desc='outputs')
+
+class TestInterface(nib.BaseInterface):
+    input_spec = InputSpec
+    output_spec = OutputSpec
+
+    def _run_interface(self, runtime):
+        runtime.returncode = 0
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['output1'] = [1]
+        return outputs
+
+def test_inputs_removal():
+    out_dir = mkdtemp()
+    file1 = os.path.join(out_dir, 'file1.txt')
+    fp = open(file1, 'wt')
+    fp.write('dummy_file')
+    fp.close()
+    n1 = pe.Node(TestInterface(),
+                 base_dir=out_dir,
+                 name='testinputs')
+    n1.inputs.in_file = file1
+    n1.config = {'execution': {'keep_inputs': True}}
+    n1.config = merge_dict(deepcopy(config._sections), n1.config)
+    n1.run()
+    yield assert_true, os.path.exists(os.path.join(out_dir,
+                                                   n1.name,
+                                                   'file1.txt'))
+    n1.inputs.in_file = file1
+    n1.config = {'execution': {'keep_inputs': False}}
+    n1.config = merge_dict(deepcopy(config._sections), n1.config)
+    n1.run(force_execute=True)
+    yield assert_false, os.path.exists(os.path.join(out_dir,
+                                                   n1.name,
+                                                   'file1.txt'))
     rmtree(out_dir)

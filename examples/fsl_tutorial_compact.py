@@ -1,9 +1,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-=======================================
-Reusing FSL workflows for fMRI analysis
-=======================================
+==========================
+fMRI - FSL reuse workflows
+==========================
 
 A workflow that uses fsl to perform a first level analysis on the nipype
 tutorial data set::
@@ -32,7 +32,7 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model generation
 import nipype.algorithms.rapidart as ra      # artifact detection
 
-from nipype.workflows.fsl import (create_featreg_preproc,
+from nipype.workflows.fmri.fsl import (create_featreg_preproc,
                                   create_modelfit_workflow,
                                   create_fixed_effects_flow)
 

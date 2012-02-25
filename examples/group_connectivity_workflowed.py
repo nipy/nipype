@@ -1,7 +1,7 @@
 """
-=====================================================
-Using Camino and CMTK for group connectivity analysis
-=====================================================
+============================================
+Group connectivity - Camino, FSL, FreeSurfer
+============================================
 
 Introduction
 ============
@@ -50,14 +50,10 @@ Import the workflows
 First, we import the necessary modules from nipype.
 """
 
-import nipype.interfaces.io as nio           # Data i/o
-import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs    # freesurfer
-import nipype.interfaces.cmtk as cmtk
-import os, os.path as op                      # system functions
-from nipype.workflows.camino.group_connectivity import (create_group_cff_pipeline_part1,
+import  os.path as op                      # system functions
+from nipype.workflows.dmri.camino.group_connectivity import (create_group_cff_pipeline_part1,
 create_group_cff_pipeline_part2, create_group_cff_pipeline_part3, create_group_cff_pipeline_part4)
 
 """
