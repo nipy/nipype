@@ -9,7 +9,7 @@ from nipype.testing import skipif
 import tempfile
 import shutil
 from subprocess import call
-from nipype.workflows.fsl.tbss import create_tbss_all
+from nipype.workflows.dmri.fsl.tbss import create_tbss_all
 import nipype.interfaces.io as nio
 from nipype.interfaces import fsl
 
