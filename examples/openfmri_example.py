@@ -5,9 +5,9 @@
 Analyzing data from openfMRI.org
 ================================
 
-A growing number of datasets are available on openfmri.org. This script
-demonstrates how to use nipype to analyze a data set.
-
+A growing number of datasets are available on `OpenfMRI <openfmri.org>`_. This
+script demonstrates how to use nipype to analyze a data set.
+c
     python openfmri_example.py --datasetdir ds107
 """
 
