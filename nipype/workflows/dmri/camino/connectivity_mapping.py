@@ -35,6 +35,7 @@ def create_connectivity_pipeline(name="connectivity"):
     Example
     -------
 
+    >>> from nipype.workflows.dmri.camino.connectivity_mapping import create_connectivity_pipeline
     >>> conmapper = create_connectivity_pipeline("nipype_conmap")
     >>> conmapper.inputs.inputnode.subjects_dir = '.'
     >>> conmapper.inputs.inputnode.subject_id = 'subj1'
@@ -437,7 +438,6 @@ def create_connectivity_pipeline(name="connectivity"):
 
     mapping.connect([(inverse_AparcAseg, roigen,[("out_file","aparc_aseg_file")])])
     mapping.connect([(roigen, creatematrix,[("roi_file","roi_file")])])
-    mapping.connect([(roigen, creatematrix,[("dict_file","dict_file")])])
     mapping.connect([(camino2trackvis, creatematrix,[("trackvis","tract_file")])])
     mapping.connect([(inputnode1, creatematrix,[("subject_id","out_matrix_file")])])
     mapping.connect([(inputnode1, creatematrix,[("subject_id","out_matrix_mat_file")])])
