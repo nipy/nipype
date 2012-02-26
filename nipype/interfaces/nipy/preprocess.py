@@ -5,6 +5,7 @@ import nibabel as nb
 import numpy as np
 
 from nipype.utils.misc import package_check
+from nipype.utils.filemanip import split_filename
 
 try:
     package_check('nipy')
@@ -28,7 +29,8 @@ class ComputeMaskInputSpec(BaseInterfaceInputSpec):
         mean volume is used.")
     m = traits.Float(desc="lower fraction of the histogram to be discarded")
     M = traits.Float(desc="upper fraction of the histogram to be discarded")
-    cc = traits.Bool(desc="if True, only the largest connect component is kept")
+    cc = traits.Bool(desc="if True, only the largest connect component\
+                           is kept")
 
 
 class ComputeMaskOutputSpec(TraitedSpec):
@@ -88,24 +90,9 @@ class FmriRealign4dOutputSpec(TraitedSpec):
 
 
 class FmriRealign4d(BaseInterface):
-    """
-    Simultaneous motion and slice timing correction algorithm \
-    wrapped from nipy's FmriRealign4d algorithm [1]_.
+    """Simultaneous motion and slice timing correction algorithm \
 
-    Attributes
-    ----------
-    inputs.in_file :     List of existing files
-                         The path to files to realign.
-    inputs.tr :          Float
-                         TR in seconds.
-    inputs.slice_order : List of Ints or "ascending" or "descending"
-                         slice order.
-    inputs.interleaved:  Bool
-                         True if interleaved.
-    inputs.start:        Float
-                         start time.
-    inputs.time_interp:  Bool
-                         True for time interpolation.
+    This interface wraps nipy's FmriRealign4d algorithm [1]_.
 
     Examples
     --------
@@ -159,8 +146,8 @@ class FmriRealign4d(BaseInterface):
         self._par_file_path = []
 
         for j, corr in enumerate(corr_run):
-            self._out_file_path.append(os.path.abspath('corr_%s' %
-            (os.path.split(self.inputs.in_file[j])[1])))
+            self._out_file_path.append(os.path.abspath('corr_%s.nii.gz' %
+            (split_filename(self.inputs.in_file[j])[1])))
             save_image(corr, self._out_file_path[j])
 
             self._par_file_path.append(os.path.abspath('%s.par' %
@@ -169,10 +156,9 @@ class FmriRealign4d(BaseInterface):
             motion = R._transforms[j]
             #output a .par file that looks like fsl.mcflirt's .par file
             for i, mo in enumerate(motion):
-                string = str(mo.rotation[0]) + "  " + str(mo.rotation[1])\
-                + "  " + str(mo.rotation[2]) + "  " + str(mo.translation[0])\
-                + "  " + str(mo.translation[1]) + "  " + str(mo.translation[2])\
-                + "  \n"
+                params = ['%.10f' % item for item in np.hstack((mo.rotation,
+                                                             mo.translation))]
+                string = ' '.join(params) + '\n'
                 mfile.write(string)
             mfile.close()
 
