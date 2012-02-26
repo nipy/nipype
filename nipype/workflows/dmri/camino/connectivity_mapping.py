@@ -9,9 +9,7 @@ import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
 import inspect
 import os.path as op
-
-from .diffusion import (get_vox_dims, get_data_dims, get_affine)
-
+from nipype.workflows.misc.utils import get_data_dims, get_vox_dims, get_affine
 
 def select_aparc(list_of_files):
     for in_file in list_of_files:
@@ -37,6 +35,7 @@ def create_connectivity_pipeline(name="connectivity"):
     Example
     -------
 
+    >>> from nipype.workflows.dmri.camino.connectivity_mapping import create_connectivity_pipeline
     >>> conmapper = create_connectivity_pipeline("nipype_conmap")
     >>> conmapper.inputs.inputnode.subjects_dir = '.'
     >>> conmapper.inputs.inputnode.subject_id = 'subj1'
@@ -439,7 +438,6 @@ def create_connectivity_pipeline(name="connectivity"):
 
     mapping.connect([(inverse_AparcAseg, roigen,[("out_file","aparc_aseg_file")])])
     mapping.connect([(roigen, creatematrix,[("roi_file","roi_file")])])
-    mapping.connect([(roigen, creatematrix,[("dict_file","dict_file")])])
     mapping.connect([(camino2trackvis, creatematrix,[("trackvis","tract_file")])])
     mapping.connect([(inputnode1, creatematrix,[("subject_id","out_matrix_file")])])
     mapping.connect([(inputnode1, creatematrix,[("subject_id","out_matrix_mat_file")])])

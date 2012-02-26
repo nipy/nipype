@@ -15,6 +15,10 @@ from nipype.utils.filemanip import split_filename
 import os, os.path as op
 import numpy as np
 import nibabel as nb
+import logging
+
+logging.basicConfig()
+iflogger = logging.getLogger('interface')
 
 class DWI2SphericalHarmonicsImageInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='Diffusion-weighted images')
@@ -213,15 +217,15 @@ def concat_files(bvec_file, bval_file, invert_x, invert_y, invert_z):
         bvecs = np.transpose(bvecs)
     if invert_x:
         bvecs[0,:] = -bvecs[0,:]
-        print 'Inverting b-vectors in the x direction'
+        iflogger.info('Inverting b-vectors in the x direction')
     if invert_y:
         bvecs[1,:] = -bvecs[1,:]
-        print 'Inverting b-vectors in the y direction'
+        iflogger.info('Inverting b-vectors in the y direction')
     if invert_z:
         bvecs[2,:] = -bvecs[2,:]
-        print 'Inverting b-vectors in the z direction'
-    print np.shape(bvecs)
-    print np.shape(bvals)
+        iflogger.info('Inverting b-vectors in the z direction')
+    iflogger.info(np.shape(bvecs))
+    iflogger.info(np.shape(bvals))
     encoding = np.transpose(np.vstack((bvecs,bvals)))
     _, bvec , _ = split_filename(bvec_file)
     _, bval , _ = split_filename(bval_file)

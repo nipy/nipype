@@ -7,36 +7,11 @@ import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
 import nipype.pipeline.engine as pe          # pypeline engine
 import numpy as np
-
+from nipype.workflows.misc.utils import get_data_dims, get_vox_dims
 from .connectivity_mapping import create_connectivity_pipeline
-
-
 
 # This should be done inside a function, not globally
 # fsl.FSLCommand.set_default_output_type('NIFTI')
-
-def get_vox_dims(volume):
-    import nibabel as nb
-    if isinstance(volume, list):
-        volume = volume[0]
-    nii = nb.load(volume)
-    hdr = nii.get_header()
-    voxdims = hdr.get_zooms()
-    return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
-
-def get_data_dims(volume):
-    import nibabel as nb
-    if isinstance(volume, list):
-        volume = volume[0]
-    nii = nb.load(volume)
-    hdr = nii.get_header()
-    datadims = hdr.get_data_shape()
-    return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
-
-def get_affine(volume):
-    import nibabel as nb
-    nii = nb.load(volume)
-    return nii.get_affine()
 
 def get_nsubs(group_list):
     nsubs = 0
@@ -78,44 +53,8 @@ def get_nsubs(group_list):
     return nsubs
 
 def create_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir, output_dir, template_args_dict=0):
-    """Creates a group-level pipeline that does the same connectivity processing as in the
-    connectivity_tutorial example script and the camino create_connectivity_pipeline workflow.
-
-    Given a subject id (and completed Freesurfer reconstruction), diffusion-weighted image,
-    b-values, and b-vectors, the workflow will return the subject's connectome
-    as a Connectome File Format (CFF) file for use in Connectome Viewer (http://www.cmtk.org)
-    as well as the outputs of many other stages of the processing.
-
-    Example
-    -------
-
-    >>> cff = create_connectivity_pipeline("mrtrix_cmtk")
-    >>> cff.inputs.inputnode.subjects_dir = '.'
-    >>> cff.inputs.inputnode.subject_id = 'subj1'
-    >>> cff.inputs.inputnode.dwi = 'data.nii.gz'
-    >>> cff.inputs.inputnode.bvecs = 'bvecs'
-    >>> cff.inputs.inputnode.bvals = 'bvals'
-    >>> cff.run()                 # doctest: +SKIP
-
-    Inputs::
-
-        inputnode.subject_id
-        inputnode.subjects_dir
-        inputnode.dwi
-        inputnode.bvecs
-        inputnode.bvals
-
-    Outputs::
-
-        outputnode.connectome
-        outputnode.cmatrix
-        outputnode.gpickled_network
-        outputnode.fa
-        outputnode.struct
-        outputnode.trace
-        outputnode.tracts
-        outputnode.tensors
-
+    """
+    Level 1 pipeline starts here
     """
     group_infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id']), name="group_infosource")
     group_infosource.inputs.group_id = group_id

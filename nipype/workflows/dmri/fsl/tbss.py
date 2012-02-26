@@ -26,7 +26,7 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
     Example
     --------
 
-    >>> from nipype.workflows.fsl import tbss
+    >>> from nipype.workflows.dmri.fsl import tbss
     >>> tbss1 = tbss.create_tbss_1_preproc()
     >>> tbss1.inputs.inputnode.fa_list = ['s1_FA.nii', 's2_FA.nii', 's3_FA.nii']
 
@@ -97,7 +97,7 @@ def create_tbss_2_reg(name="tbss_2_reg"):
     Example
     ------
 
-    >>> from nipype.workflows.fsl import tbss
+    >>> from nipype.workflows.dmri.fsl import tbss
     >>> tbss2 = create_tbss_2_reg(name="tbss2")
     >>> tbss2.inputs.inputnode.target = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
     >>> tbss2.inputs.inputnode.fa_list = ['s1_FA.nii', 's2_FA.nii', 's3_FA.nii']
@@ -168,7 +168,7 @@ def create_tbss_3_postreg(name='tbss_3_postreg', estimate_skeleton=True):
     Example
     --------
 
-    >>> from nipype.workflows.fsl import tbss
+    >>> from nipype.workflows.dmri.fsl import tbss
     >>> tbss3 = tbss.create_tbss_3_postreg()
     >>> tbss3.inputs.inputnode.fa_list = ['s1_wrapped_FA.nii', 's2_wrapped_FA.nii', 's3_wrapped_FA.nii']
 
@@ -290,7 +290,7 @@ def create_tbss_4_prestats(name='tbss_4_prestats'):
     Example
     --------
 
-    >>> from nipype.workflows.fsl import tbss
+    >>> from nipype.workflows.dmri.fsl import tbss
     >>> tbss4 = tbss.create_tbss_4_prestats(name='tbss4')
     >>> tbss4.inputs.inputnode.skeleton_thresh = 0.2
 
@@ -377,7 +377,7 @@ def create_tbss_all(name='tbss_all', estimate_skeleton=True):
     Example
     --------
 
-    >>> from nipype.workflows.fsl import tbss
+    >>> from nipype.workflows.dmri.fsl import tbss
     >>> tbss = tbss.create_tbss_all('tbss')
     >>> tbss.inputs.inputnode.skeleton_thresh = 0.2
 
@@ -485,7 +485,7 @@ def create_tbss_non_FA(name='tbss_non_FA'):
     Example
     --------
 
-    >>> from nipype.workflows.fsl import tbss
+    >>> from nipype.workflows.dmri.fsl import tbss
     >>> tbss_MD = tbss.create_tbss_non_FA()
     >>> tbss_MD.inputs.inputnode.file_list = []
     >>> tbss_MD.inputs.inputnode.field_list = []
