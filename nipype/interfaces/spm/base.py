@@ -324,7 +324,10 @@ class SPMCommand(BaseInterface):
             return jobstring
         if isinstance(contents, list):
             for i,value in enumerate(contents):
-                newprefix = "%s(%d)" % (prefix, i+1)
+                if prefix.endswith(")"):
+                    newprefix = "%s,%d)" % (prefix[:-1], i+1)
+                else:
+                    newprefix = "%s(%d)" % (prefix, i+1)
                 jobstring += self._generate_job(newprefix, value)
             return jobstring
         if isinstance(contents, dict):
