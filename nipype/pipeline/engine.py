@@ -515,7 +515,7 @@ connected.
             if isinstance(node, MapNode):
                 node.use_plugin = (plugin, plugin_args)
         self._configure_exec_nodes(execgraph)
-        if not str2bool(self.config['execution']['create_report']):
+        if str2bool(self.config['execution']['create_report']):
             self._write_report_info(self.base_dir, self.name, execgraph)
         runner.run(execgraph, updatehash=updatehash, config=self.config)
         return execgraph
@@ -532,8 +532,8 @@ connected.
         fp = open(os.path.join(report_dir, 'index.html'), 'wt')
         fp.writelines('<html>')
         with open(os.path.join(os.path.dirname(__file__),
-                               'report_template.html')) as fp:
-            script = Template(fp.read())
+                               'report_template.html')) as fpt:
+            script = Template(fpt.read())
         nodes = nx.topological_sort(graph)
         report_files = []
         for i, node in enumerate(nodes):
@@ -543,9 +543,8 @@ connected.
             report_files.append('report_files[%d] = "%s/_report/report.rst";' %
                                 (i, os.path.realpath(node.output_dir())))
         report_files = '\n'.join(report_files)
-        script.substitute(num_nodes=len(nodes),
-                          report_files=report_files)
-        fp.writelines(script)
+        fp.writelines(script.substitute(num_nodes=len(nodes),
+                                        report_files=report_files))
         fp.writelines('<body><div id="page_container">\n')
         fp.writelines('<div id="toc">\n')
         fp.writelines(('<pre>Works only with mozilla/firefox browsers</pre>'

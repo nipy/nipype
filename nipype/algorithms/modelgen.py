@@ -142,11 +142,14 @@ def gen_info(run_event_files):
     """
     info = []
     for i, event_files in enumerate(run_event_files):
-        runinfo = Bunch(cond=[], onsets=[], durations=[], amplitudes=[])
+        runinfo = Bunch(conditions=[], onsets=[], durations=[], amplitudes=[])
         for event_file in event_files:
             _, name = os.path.split(event_file)
-            name, _ = name.split('.run%03d'%(i+1))
-            runinfo.cond.append(name)
+            if '.run' in name:
+                name, _ = name.split('.run%03d'%(i+1))
+            elif '.txt' in name:
+                name, _ = name.split('.txt')
+            runinfo.conditions.append(name)
             event_info = np.loadtxt(event_file)
             runinfo.onsets.append(event_info[:, 0].tolist())
             if event_info.shape[1] > 1:
@@ -162,11 +165,13 @@ def gen_info(run_event_files):
 
 
 class SpecifyModelInputSpec(BaseInterfaceInputSpec):
-    subject_info = InputMultiPath(Bunch, mandatory=True, xor=['event_info'],
-                          desc="Bunch or List(Bunch) subject specific condition information. " \
-                          "see :class:`SpecifyModel` or SpecifyModel.__doc__ for details")
-    event_info = InputMultiPath(traits.List(File(exists=True)), mandatory=True, xor=['subject_info'],
-                              desc='list of event description files 1, 2 or 3 column format corresponding to onsets, durations and amplitudes')
+    subject_info = InputMultiPath(Bunch, mandatory=True, xor=['event_files'],
+          desc=("Bunch or List(Bunch) subject specific condition information. "
+                "see :ref:`SpecifyModel` or SpecifyModel.__doc__ for details"))
+    event_files = InputMultiPath(traits.List(File(exists=True)), mandatory=True,
+                                 xor=['subject_info'],
+          desc=('list of event description files 1, 2 or 3 column format '
+                'corresponding to onsets, durations and amplitudes'))
     realignment_parameters = InputMultiPath(File(exists=True),
        desc = "Realignment parameters returned by motion correction algorithm",
                                          filecopy=False)
