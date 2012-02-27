@@ -7,7 +7,7 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
-miximport nipype.algorithms.misc as misc
+import nipype.algorithms.misc as misc
 from nipype.interfaces.utility import Function
 from nipype.workflows.utils import region_list_from_volume, id_list_from_lookup_table
 import os, os.path as op

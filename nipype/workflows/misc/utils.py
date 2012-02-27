@@ -26,6 +26,7 @@ def get_affine(volume):
     nii = nb.load(volume)
     return nii.get_affine()
 
+
 def region_list_from_volume(in_file):
     import nibabel as nb
     import numpy as np
@@ -37,7 +38,8 @@ def region_list_from_volume(in_file):
     region_list.remove(0)
     region_list = map(int, region_list)
     return region_list
-    
+
+
 def id_list_from_lookup_table(lookup_file, region_list):
     import numpy as np
     LUTlabelsRGBA = np.loadtxt(lookup_file, skiprows=4, usecols=[0,1,2,3,4,5], comments='#',
