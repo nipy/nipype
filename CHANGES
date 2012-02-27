@@ -32,8 +32,10 @@ Changes since release 0.4.1
 * ENH: IdentityNode with iterable expansion takes place after remaining Identity
        Node removal
 * ENH: Crashfile display script added
+* ENH: Added FmriRealign4d node wrapped from nipy 
 * ENH: Added TBSS workflows and examples
 * ENH: Support for openfmri data processing
+
 
 * FIX: Fixed spm preproc workflow to cater to multiple functional runs
 * FIX: Workflow outputs displays nodes with empty outputs
