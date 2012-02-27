@@ -5,7 +5,9 @@ import nibabel as nb
 import numpy as np
 
 from nipype.utils.misc import package_check
+#from ...utils.misc import package_check
 from nipype.utils.filemanip import split_filename
+#from ...utils.filemanip import split_filename
 
 try:
     package_check('nipy')
@@ -90,7 +92,7 @@ class FmriRealign4dOutputSpec(TraitedSpec):
 
 
 class FmriRealign4d(BaseInterface):
-    """Simultaneous motion and slice timing correction algorithm \
+    """Simultaneous motion and slice timing correction algorithm 
 
     This interface wraps nipy's FmriRealign4d algorithm [1]_.
 
