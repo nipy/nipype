@@ -747,7 +747,7 @@ class SmoothInputSpec(SPMCommandInputSpec):
     fwhm = traits.Either(traits.List(traits.Float(), minlen=3, maxlen=3), traits.Float(), field='fwhm', desc='3-list of fwhm for each dimension (opt)')
     data_type = traits.Int(field='dtype', desc='Data type of the output images (opt)')
     implicit_masking = traits.Bool(field='im', desc='A mask implied by a particular voxel value')
-    out_prefix = traits.String('s', field='roptions.prefix',
+    out_prefix = traits.String('s', field='prefix',
                                desc = 'smoothed output prefix')
 
 
