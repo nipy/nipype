@@ -83,19 +83,19 @@ def get_rois_crossed(pointsmm, roiData, voxelSize):
 	return rois_crossed
 
 def get_connectivity_matrix(n_rois, list_of_roi_crossed_lists):
-	connectivity_matrix = np.zeros( (n_rois, n_rois), dtype = np.uint8)
+	connectivity_matrix = np.zeros( (n_rois, n_rois), dtype = int)
 	for rois_crossed in list_of_roi_crossed_lists:
 		for idx_i, roi_i in enumerate(rois_crossed):
 			for idx_j, roi_j in enumerate(rois_crossed):
-				if not roi_i == roi_j:
-					connectivity_matrix[roi_i-1,roi_j-1] += 1
+				if idx_i > idx_j:
+					if not roi_i == roi_j:
+						connectivity_matrix[roi_i-1,roi_j-1] += 1
 	connectivity_matrix = connectivity_matrix + connectivity_matrix.T
 	return connectivity_matrix
 
-def create_allpoints_cmat(streamlines, roiData, voxelSize):
+def create_allpoints_cmat(streamlines, roiData, voxelSize, n_rois):
 	""" Create the intersection arrays for each fiber
 	"""
-	n_rois = len(np.unique(roiData)) - 1
 	n_fib = len(streamlines)
 	pc = -1
 	# Computation for each fiber
@@ -193,19 +193,6 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
 	final_fiberlabels = []
 	final_fibers_idx = []
 
-	if intersections:
-		iflogger.info("Filtering tractography from intersections")
-		intersection_matrix, final_fiber_ids = create_allpoints_cmat(fib, roiData, roiVoxelSize)
-		path, name, ext = split_filename(matrix_name)
-		finalfibers_fname = op.join(path, name + '_intersections_streamline_final.trk')
-		save_fibers(hdr, fib, finalfibers_fname, final_fiber_ids)
-
-	# Create the matrix
-	if intersections:
-		intersection_matrix = np.matrix(intersection_matrix) 
-		H = nx.from_numpy_matrix(intersection_matrix)
-		H=nx.relabel_nodes(H, lambda x: x + 1) #relabel nodes so they start at 1
-
 	# Add node information from specified parcellation scheme
 	path, name, ext = split_filename(resolution_network_file)
 	if ext == '.pck':
@@ -225,9 +212,18 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
 			# ROI in voxel coordinates (segmentation volume )
 			xyz = tuple(np.mean( np.where(np.flipud(roiData)== int(d["dn_correspondence_id"]) ) , axis = 1))
 			G.node[int(u)]['dn_position'] = tuple([xyz[0],xyz[1],xyz[2]])
-	
+			
 	if intersections:
+		iflogger.info("Filtering tractography from intersections")
+		intersection_matrix, final_fiber_ids = create_allpoints_cmat(fib, roiData, roiVoxelSize, nROIs)
+		path, name, ext = split_filename(matrix_name)
+		finalfibers_fname = op.join(path, name + '_intersections_streamline_final.trk')
+		save_fibers(hdr, fib, finalfibers_fname, final_fiber_ids)
+		intersection_matrix = np.matrix(intersection_matrix) 
 		I = G.copy()
+		H = nx.from_numpy_matrix(np.matrix(intersection_matrix))
+		H=nx.relabel_nodes(H, lambda x: x + 1) #relabel nodes so they start at 1		
+		I.add_weighted_edges_from(((u,v,d['weight']) for u,v,d in H.edges(data=True)))
 		
 	dis = 0
 	for i in xrange(endpoints.shape[0]):
@@ -276,7 +272,6 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
 	finalfiberlength = []
 	if intersections:
 		final_fibers_indices = final_fiber_ids
-		I.add_weighted_edges_from(((u,v,d['weight']) for u,v,d in H.edges(data=True)))
 	else:
 		final_fibers_indices = final_fibers_idx	
 		
@@ -288,7 +283,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
 	final_fiberlength_array = np.array( finalfiberlength )
 
 	# make final fiber labels as array
-	final_fiberlabels_array = np.array(final_fiberlabels, dtype = np.int32)
+	final_fiberlabels_array = np.array(final_fiberlabels, dtype = int)
 
 	iflogger.info("Found %i (%f percent out of %i fibers) fibers that start or terminate in a voxel which is not labeled. (orphans)" % (dis, dis*100.0/n, n))
 	iflogger.info("Valid fibers: %i (%f percent)" % (n-dis, 100 - dis*100.0/n))
@@ -528,8 +523,8 @@ class CreateMatrix(BaseInterface):
 		outputs['filtered_tractography'] = op.abspath(name + '_streamline_final.trk')
 		
 		if self.inputs.count_region_intersections == True:
-			outputs['filtered_tractography_by_intersections'] = op.abspath(self._gen_outfilename('intersections_streamline_final.trk'))
-			outputs['intersection_matrix_mat_file'] = op.abspath(self._gen_outfilename('_intersections.mat'))
+			outputs['filtered_tractography_by_intersections'] = op.join(path, name + '_intersections_streamline_final.trk')
+			outputs['intersection_matrix_mat_file'] = op.join(path, name + '_intersections') + ext
 		return outputs
 
 	def _gen_outfilename(self, ext):
@@ -638,7 +633,7 @@ class ROIGen(BaseInterface):
         iflogger.info(LUTlabelDict)
 
         """ Create empty grey matter mask, Populate with only those regions defined in the mapping."""
-        niiGM = np.zeros( niiAPARCdata.shape, dtype = np.uint8 )
+        niiGM = np.zeros( niiAPARCdata.shape, dtype = int )
         for ma in MAPPING:
             niiGM[ niiAPARCdata == ma[1]] = ma[0]
             mapDict[ma[0]] = ma[1]
