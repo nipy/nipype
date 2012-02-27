@@ -5,9 +5,8 @@ import nibabel as nb
 import numpy as np
 
 from nipype.utils.misc import package_check
-#from ...utils.misc import package_check
 from nipype.utils.filemanip import split_filename
-#from ...utils.filemanip import split_filename
+
 
 try:
     package_check('nipy')
