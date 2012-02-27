@@ -7,6 +7,7 @@ def configuration(parent_package='',top_path=None):
 
     config.add_subpackage('plugins')
     config.add_data_dir('tests')
+    config.add_data_files('report_template.html')
 
     return config
 
