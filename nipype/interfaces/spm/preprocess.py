@@ -48,7 +48,7 @@ class SliceTimingInputSpec(SPMCommandInputSpec):
     ref_slice = traits.Int(field='refslice',
                            desc='1-based Number of the reference slice',
                            mandatory=True)
-    out_prefix = traits.String('a', field='prefix',
+    out_prefix = traits.String('a', field='prefix', usedefault=True,
                                desc = 'slicetimed output prefix')
 
 class SliceTimingOutputSpec(TraitedSpec):
@@ -137,7 +137,7 @@ class RealignInputSpec(SPMCommandInputSpec):
                    desc='Check if interpolation should wrap in [x,y,z]')
     write_mask = traits.Bool(field='roptions.mask',
                              desc='True/False mask output image')
-    out_prefix = traits.String('r', field='prefix',
+    out_prefix = traits.String('r', field='prefix', usedefault=True,
                                desc = 'slicetimed output prefix')
 
 
@@ -251,7 +251,7 @@ class CoregisterInputSpec(SPMCommandInputSpec):
                      desc='Check if interpolation should wrap in [x,y,z]')
     write_mask = traits.Bool(field='roptions.mask',
                              desc='True/False mask output image')
-    out_prefix = traits.String('r', field='roptions.prefix',
+    out_prefix = traits.String('r', field='roptions.prefix', usedefault=True,
                                desc = 'coregistered output prefix')
 
 
@@ -368,7 +368,7 @@ class NormalizeInputSpec(SPMCommandInputSpec):
     write_wrap = traits.List(traits.Int(), field='roptions.wrap',
                         desc='Check if interpolation should wrap in [x,y,z] - list of bools (opt)')
 
-    out_prefix = traits.String('w', field='roptions.prefix',
+    out_prefix = traits.String('w', field='roptions.prefix', usedefault=True,
                                desc = 'normalized output prefix')
 
 
@@ -747,7 +747,7 @@ class SmoothInputSpec(SPMCommandInputSpec):
     fwhm = traits.Either(traits.List(traits.Float(), minlen=3, maxlen=3), traits.Float(), field='fwhm', desc='3-list of fwhm for each dimension (opt)')
     data_type = traits.Int(field='dtype', desc='Data type of the output images (opt)')
     implicit_masking = traits.Bool(field='im', desc='A mask implied by a particular voxel value')
-    out_prefix = traits.String('s', field='prefix',
+    out_prefix = traits.String('s', field='prefix', usedefault=True,
                                desc = 'smoothed output prefix')
 
 
