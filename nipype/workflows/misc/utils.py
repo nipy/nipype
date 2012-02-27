@@ -25,3 +25,32 @@ def get_affine(volume):
     import nibabel as nb
     nii = nb.load(volume)
     return nii.get_affine()
+
+def region_list_from_volume(in_file):
+    import nibabel as nb
+    import numpy as np
+    segmentation = nb.load(in_file)
+    segmentationdata = segmentation.get_data()
+    rois = np.unique(segmentationdata)
+    region_list = list(rois)
+    region_list.sort()
+    region_list.remove(0)
+    region_list = map(int, region_list)
+    return region_list
+    
+def id_list_from_lookup_table(lookup_file, region_list):
+    import numpy as np
+    LUTlabelsRGBA = np.loadtxt(lookup_file, skiprows=4, usecols=[0,1,2,3,4,5], comments='#',
+                dtype={'names': ('index', 'label', 'R', 'G', 'B', 'A'),'formats': ('int', '|S30', 'int', 'int', 'int', 'int')})
+    numLUTLabels = np.size(LUTlabelsRGBA)
+    LUTlabelDict = {}
+    for labels in range(0,numLUTLabels):
+        LUTlabelDict[LUTlabelsRGBA[labels][0]] = [LUTlabelsRGBA[labels][1], 
+        LUTlabelsRGBA[labels][2], LUTlabelsRGBA[labels][3], 
+        LUTlabelsRGBA[labels][4], LUTlabelsRGBA[labels][5]]
+    id_list = []
+    for region in region_list:
+        label = LUTlabelDict[region][0]
+        id_list.append(label)
+    id_list = map(str, id_list)
+    return id_list
