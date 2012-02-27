@@ -1,5 +1,5 @@
-Release 0.4.2 (Future)
-============================
+Changes since release 0.4.1
+===========================
 
 * API: FSL defaults to Nifti when OUTPUTTYPE environment variable not found
 * API: By default inputs are removed from Node working directory
@@ -13,6 +13,7 @@ Release 0.4.2 (Future)
 * API: Node/MapNode has new attribute that allows it to run on master thread.
 * API: IPython plugin now invokes IPython 0.11 or greater
 * API: Canned workflows are now all under a different package structure
+* API: SpecifyModel event_info renamed to event_files
 
 * ENH: Added fsl resting state workflow based on behzadi 2007 CompCorr method.
 * ENH: TSNR node produces mean and std-dev maps; allows polynomial detrending
@@ -32,6 +33,7 @@ Release 0.4.2 (Future)
        Node removal
 * ENH: Crashfile display script added
 * ENH: Added TBSS workflows and examples
+* ENH: Support for openfmri data processing
 
 * FIX: Fixed spm preproc workflow to cater to multiple functional runs
 * FIX: Workflow outputs displays nodes with empty outputs
@@ -49,6 +51,7 @@ Release 0.4.2 (Future)
 * FIX: DARTEL workflows will run only when SPM 8 is available
 * FIX: SPM Normalize estimate field fixed
 * FIX: hashmethod argument now used for calculating hash of old file
+* FIX: Modelgen now allows FSL style event files
 
 Release 0.4.1 (Jun 16, 2011)
 ============================
