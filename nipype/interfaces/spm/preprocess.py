@@ -447,12 +447,12 @@ class Normalize(SPMCommand):
             outputs['normalized_files'] = []
             if isdefined(self.inputs.apply_to_files):
                 for imgf in filename_to_list(self.inputs.apply_to_files):
-                    outputs['normalized_files'].append(fname_presuffix(imgf, prefix='w'))
+                    outputs['normalized_files'].append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
 
             if isdefined(self.inputs.source):
                 outputs['normalized_source'] = []
                 for imgf in filename_to_list(self.inputs.source):
-                    outputs['normalized_source'].append(fname_presuffix(imgf, prefix='w'))
+                    outputs['normalized_source'].append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
 
         return outputs
 
@@ -794,7 +794,7 @@ class Smooth(SPMCommand):
         outputs['smoothed_files'] = []
 
         for imgf in filename_to_list(self.inputs.in_files):
-            outputs['smoothed_files'].append(fname_presuffix(imgf, prefix='s'))
+            outputs['smoothed_files'].append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
         return outputs
 
 
