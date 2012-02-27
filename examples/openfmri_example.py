@@ -138,6 +138,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None, work_dir=Non
     """
     Return data components as anat, bold and behav
     """
+
     datasource = pe.Node(nio.DataGrabber(infields=['subject_id', 'run_id',
                                                    'model_id'],
                                          outfields=['anat', 'bold', 'behav']),
