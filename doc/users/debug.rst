@@ -49,4 +49,8 @@ performance issues.
    is a reasonable option when you would expect 90% of the data to execute
    properly.
 
+#. Sometimes nipype will hang as if nothing is going on and if you hit Ctrl+C
+   you will get a `ConcurrentLogHandler` error. Simply remove the pypeline.lock
+   file in your home directory and continue.
+
 .. include:: ../links_names.txt

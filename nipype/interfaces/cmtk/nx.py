@@ -18,8 +18,13 @@ import numpy as np
 import networkx as nx
 import scipy.io as sio
 import pickle
+import logging
 from nipype.utils.misc import package_check
+from nipype.workflows.misc.utils import get_data_dims
 import warnings
+
+logging.basicConfig()
+iflogger = logging.getLogger('interface')
 
 have_cmp = True
 try:
@@ -30,22 +35,14 @@ except Exception, e:
 else:
     import cmp
 
-def get_data_dims(volume):
-    import nibabel as nb
-    if isinstance(volume, list):
-        volume = volume[0]
-    nii = nb.load(volume)
-    hdr = nii.get_header()
-    datadims = hdr.get_data_shape()
-    return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
-
 def read_unknown_ntwk(ntwk):
-    path, name, ext = split_filename(ntwk)
-    if ext == '.pck':
-        ntwk = nx.read_gpickle(ntwk)
-    elif ext == '.graphml':
-        ntwk = nx.read_graphml(ntwk)
-    return ntwk
+	if not isinstance(ntwk, nx.classes.graph.Graph):
+		path, name, ext = split_filename(ntwk)
+		if ext == '.pck':
+			ntwk = nx.read_gpickle(ntwk)
+		elif ext == '.graphml':
+			ntwk = nx.read_graphml(ntwk)
+	return ntwk
 
 def remove_all_edges(ntwk):
     ntwktmp = ntwk.copy()
@@ -101,185 +98,226 @@ def average_networks(in_files, ntwk_res_file, group_id):
     """
     import networkx as nx
     import os.path as op
-    print "Creating average network for group: {grp}".format(grp=group_id)
+    iflogger.info("Creating average network for group: {grp}".format(grp=group_id))
+    matlab_network_list = []
     if len(in_files) == 1:
-        ntwk = read_unknown_ntwk(in_files[0])
+        avg_ntwk = read_unknown_ntwk(in_files[0])
     else:
+        count_to_keep_edge = len(in_files)/2 + 1
+        iflogger.info("Number of networks: {L}, an edge must occur in at least {c} to remain in the average network".format(L=len(in_files), c=count_to_keep_edge))
         ntwk_res_file = read_unknown_ntwk(ntwk_res_file)
+        iflogger.info("{n} Nodes found in network resolution file".format(n=ntwk_res_file.number_of_nodes()))
         ntwk = remove_all_edges(ntwk_res_file)
-
-    # Sums all the relevant variables
+        counting_ntwk = ntwk.copy()
+        # Sums all the relevant variables
         for index, subject in enumerate(in_files):
             tmp = nx.read_gpickle(subject)
+            iflogger.info('File {s} has {n} edges'.format(s=subject, n=tmp.number_of_edges()))
             edges = tmp.edges_iter()
             for edge in edges:
                 data = {}
                 data = tmp.edge[edge[0]][edge[1]]
+                data['count'] = 1
                 if ntwk.has_edge(edge[0],edge[1]):
                     current = {}
                     current = ntwk.edge[edge[0]][edge[1]]
+                    #current['count'] = current['count'] + 1
                     data = add_dicts_by_key(current,data)
                 ntwk.add_edge(edge[0],edge[1],data)
             nodes = tmp.nodes_iter()
             for node in nodes:
                 data = {}
-                data = tmp.node[node]
-                if tmp[node].has_key('value'):
+                data = ntwk.node[node]
+                if tmp.node[node].has_key('value'):
                     data['value'] = data['value'] + tmp.node[node]['value']
                 ntwk.add_node(node,data)
 
-    # Divides each value by the number of files
+        # Divides each value by the number of files
         nodes = ntwk.nodes_iter()
         edges = ntwk.edges_iter()
-        for edge in edges:
-            data = ntwk.edge[edge[0]][edge[1]]
-            for key in data:
-                data[key] = data[key] / len(in_files)
+        iflogger.info('Total network has {n} edges'.format(n=ntwk.number_of_edges()))
+        avg_ntwk = nx.Graph()
+        newdata = {}
         for node in nodes:
             data = ntwk.node[node]
+            newdata = data
             if data.has_key('value'):
-                ntwk.node[node]['value'] = data['value'] / len(in_files)
+                newdata['value'] = data['value'] / len(in_files)
+                ntwk.node[node]['value'] = newdata
+            avg_ntwk.add_node(node, newdata)
 
+        edge_dict = {}
+        edge_dict['count'] = np.zeros((avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes()))        
+        for edge in edges:
+            data = ntwk.edge[edge[0]][edge[1]]
+            if ntwk.edge[edge[0]][edge[1]]['count'] >= count_to_keep_edge:
+                iflogger.info('Count: {c} is greater than or equal to the minimum, {n}, for edge {e1}-{e2}'.format(c=ntwk.edge[edge[0]][edge[1]]['count'], n=count_to_keep_edge, e1=edge[0], e2=edge[1]))
+                for key in data.keys():
+                    if not key == 'count':
+                        data[key] = data[key] / len(in_files)
+                ntwk.edge[edge[0]][edge[1]] = data                
+                avg_ntwk.add_edge(edge[0],edge[1],data)
+            edge_dict['count'][edge[0]-1][edge[1]-1] = ntwk.edge[edge[0]][edge[1]]['count']
+            
+        iflogger.info('After thresholding, the average network has has {n} edges'.format(n=avg_ntwk.number_of_edges()))
+
+        avg_edges = avg_ntwk.edges_iter()
+        for edge in avg_edges:
+            data = avg_ntwk.edge[edge[0]][edge[1]]
+            for key in data.keys():
+                if not key == 'count':
+                    edge_dict[key] = np.zeros((avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes()))        
+                    edge_dict[key][edge[0]-1][edge[1]-1] = data[key]
+
+        for key in edge_dict.keys():
+            tmp = {}
+            network_name = group_id + '_' + key + '_average.mat'
+            matlab_network_list.append(op.abspath(network_name))
+            tmp[key] = edge_dict[key]
+            sio.savemat(op.abspath(network_name), tmp)
+            iflogger.info('Saving average network for key: {k} as {out}'.format(k=key, out=op.abspath(network_name)))
+                
     # Writes the networks and returns the name
     network_name = group_id + '_average.pck'
-    nx.write_gpickle(ntwk, op.abspath(network_name))
-    ntwk = fix_keys_for_gexf(ntwk)
+    nx.write_gpickle(avg_ntwk, op.abspath(network_name))
+    iflogger.info('Saving average network as {out}'.format(out=op.abspath(network_name)))
+    avg_ntwk = fix_keys_for_gexf(avg_ntwk)
     network_name = group_id + '_average.gexf'
-    nx.write_gexf(ntwk, op.abspath(network_name))
-    network_name = group_id + '_average'
-    return op.abspath(network_name)
+    nx.write_gexf(avg_ntwk, op.abspath(network_name))
+    iflogger.info('Saving average network as {out}'.format(out=op.abspath(network_name)))
+    return network_name, matlab_network_list
 
 def compute_node_measures(ntwk):
     """
     These return node-based measures
     """
-    print 'Computing node measures:'
+    iflogger.info('Computing node measures:')
     weighted = True
     measures = {}
-    print '...Computing degree...'
+    iflogger.info('...Computing degree...')
     measures['degree'] = np.array(ntwk.degree().values())
-    print '...Computing number of cliques for each node...'
-    measures['number_of_cliques'] = np.array(nx.number_of_cliques(ntwk).values())
-    print '...Computing load centrality...'
+    #iflogger.info('...Computing number of cliques for each node...')
+    #measures['number_of_cliques'] = np.array(nx.number_of_cliques(ntwk).values())
+    iflogger.info('...Computing load centrality...')
     measures['load_centrality'] = np.array(nx.load_centrality(ntwk).values())
-    print '...Computing betweenness centrality...'
+    iflogger.info('...Computing betweenness centrality...')
     measures['betweenness_centrality'] = np.array(nx.betweenness_centrality(ntwk).values())
-    print '...Computing degree centrality...'
+    iflogger.info('...Computing degree centrality...')
     measures['degree_centrality'] = np.array(nx.degree_centrality(ntwk).values())
-    print '...Computing closeness centrality...'
+    iflogger.info('...Computing closeness centrality...')
     measures['closeness_centrality'] = np.array(nx.closeness_centrality(ntwk).values())
-    #print '...Computing eigenvector centrality...'
+    #iflogger.info('...Computing eigenvector centrality...')
     #measures['eigenvector_centrality'] = np.array(nx.eigenvector_centrality(ntwk).values())
-    print '...Calculating node clique number'
-    measures['node_clique_number'] = np.array(nx.node_clique_number(ntwk).values())
-    print '...Computing triangles...'
+    #iflogger.info('...Calculating node clique number')
+    #measures['node_clique_number'] = np.array(nx.node_clique_number(ntwk).values())
+    iflogger.info('...Computing triangles...')
     measures['triangles'] = np.array(nx.triangles(ntwk).values())
-    print '...Computing clustering...'
+    iflogger.info('...Computing clustering...')
     measures['clustering'] = np.array(nx.clustering(ntwk).values())
-    print '...Identifying network isolates...'
+    iflogger.info('...Identifying network isolates...')
     measures['isolates'] = nx.isolates(ntwk)
     binarized = np.zeros((ntwk.number_of_nodes(),1))
     for value in measures['isolates']:
         value = value - 1 # Zero indexing
         binarized[value] = 1
     measures['isolates'] = binarized
-    print '...Computing k-core number'
+    iflogger.info('...Computing k-core number')
     measures['core_number'] = np.array(nx.core_number(ntwk).values())
-
     return measures
 
 def compute_edge_measures(ntwk):
     """
     These return edge-based measures
     """
-    print 'Computing edge measures:'
+    iflogger.info('Computing edge measures:')
     weighted = True
     measures = {}
-    #print '...Computing google matrix...' #Makes really large networks (500k+ edges)
+    #iflogger.info('...Computing google matrix...' #Makes really large networks (500k+ edges))
     #measures['google_matrix'] = nx.google_matrix(ntwk)
-    print '...Computing hub matrix...'
-    measures['hub_matrix'] = nx.hub_matrix(ntwk)
-    print '...Computing authority matrix...'
-    measures['authority_matrix'] = nx.authority_matrix(ntwk)
+    #iflogger.info('...Computing hub matrix...')
+    #measures['hub_matrix'] = nx.hub_matrix(ntwk)
+    #iflogger.info('...Computing authority matrix...')
+    #measures['authority_matrix'] = nx.authority_matrix(ntwk)
     return measures
 
 def compute_dict_measures(ntwk):
     """
     Returns a dictionary
     """
-    print 'Computing measures which return a dictionary:'
+    #iflogger.info('Computing measures which return a dictionary:')
     weighted = True
     measures = {}
-    print '...Computing rich club coefficient...'
-    measures['rich_club_coef'] = nx.rich_club_coefficient(ntwk,1000)
+    #iflogger.info('...Computing rich club coefficient...')
+    #measures['rich_club_coef'] = nx.rich_club_coefficient(ntwk)
     return measures
 
 def compute_singlevalued_measures(ntwk):
     """
     Returns a single value per network
     """
-    print 'Computing single valued measures:'
+    iflogger.info('Computing single valued measures:')
     weighted = True
     measures = {}
-    print '...Computing degree assortativity (pearson number) ...'
+    iflogger.info('...Computing degree assortativity (pearson number) ...')
     measures['degree_pearsonr'] = nx.degree_pearsonr(ntwk)
-    print '...Computing degree assortativity...'
+    iflogger.info('...Computing degree assortativity...')
     measures['degree_assortativity'] = nx.degree_assortativity(ntwk)
-    print '...Computing transitivity...'
+    iflogger.info('...Computing transitivity...')
     measures['transitivity'] = nx.transitivity(ntwk)
-    print '...Computing number of connected_components...'
+    iflogger.info('...Computing number of connected_components...')
     measures['number_connected_components'] = nx.number_connected_components(ntwk)
-    print '...Computing average clustering...'
+    iflogger.info('...Computing average clustering...')
     measures['average_clustering'] = nx.average_clustering(ntwk)
-    print '...Computing graph clique number...'
-    measures['graph_clique_number'] = nx.graph_clique_number(ntwk)
-    print '...Calculating average shortest path length...'
-    measures['average_shortest_path_length'] = nx.average_shortest_path_length(ntwk, weighted)
+    #iflogger.info('...Computing graph clique number...')
+    #measures['graph_clique_number'] = nx.graph_clique_number(ntwk) #out of memory error
+    #iflogger.info('...Calculating average shortest path length...')
+    #measures['average_shortest_path_length'] = nx.average_shortest_path_length(ntwk, weighted)
     return measures
 
 def compute_network_measures(ntwk):
     measures = {}
-    print 'Identifying k-core'
-    measures['k_core'] = nx.k_core(ntwk)
-    print 'Identifying k-shell'
-    measures['k_shell'] = nx.k_shell(ntwk)
-    print 'Identifying k-crust'
-    measures['k_crust'] = nx.k_crust(ntwk)
+    #iflogger.info('Identifying k-core')
+    #measures['k_core'] = nx.k_core(ntwk)
+    #iflogger.info('Identifying k-shell')
+    #measures['k_shell'] = nx.k_shell(ntwk)
+    #iflogger.info('Identifying k-crust')
+    #measures['k_crust'] = nx.k_crust(ntwk)
     return measures
 
 def add_node_data(node_array, ntwk):
     ntwk = read_unknown_ntwk(ntwk)
-    node_ntwk = ntwk.copy()
+    node_ntwk = nx.Graph()
     newdata = {}
     for idx, data in ntwk.nodes_iter(data=True):
-        newdata['value'] = node_array[int(idx)-1]
-        data.update(newdata)
-        node_ntwk.node[idx] = data
+        if not int(idx) == 0:
+            newdata['value'] = node_array[int(idx)-1]
+            data.update(newdata)
+            node_ntwk.add_node(int(idx), data)
     return node_ntwk
 
-def add_edge_data(edge_array, ntwk):
+def add_edge_data(edge_array, ntwk, above=0, below=0):
     ntwk = read_unknown_ntwk(ntwk)
     edge_ntwk = ntwk.copy()
     data = {}
     for x, row in enumerate(edge_array):
         for y in range(0,np.max(np.shape(edge_array[x]))):
             if not edge_array[x, y] == 0:
-                data['value'] = edge_array[x, y]
-                if edge_ntwk.has_edge(x,y):
-                    old_edge_dict = edge_ntwk.edge[x][y]
-                    edge_ntwk.remove_edge(x,y)
-                    data.update(old_edge_dict)
-                edge_ntwk.add_edge(x,y,data)
+				data['value'] = edge_array[x, y]
+				if data['value'] <= below or data['value'] >= above:
+					if edge_ntwk.has_edge(x+1,y+1):
+						old_edge_dict = edge_ntwk.edge[x+1][y+1]
+						edge_ntwk.remove_edge(x+1,y+1)
+						data.update(old_edge_dict)
+					edge_ntwk.add_edge(x+1,y+1,data)
     return edge_ntwk
 
 class NetworkXMetricsInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='Input network')
-    resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary' \
-                                ', but if included, the interface will output the statistical maps as NetworkX graphs.')
     subject_id = traits.Str('subject', usedefault=True, desc='Subject ID for the input network')
     out_k_core = File('k_core', usedefault=True, desc='Computed k-core network stored as a NetworkX pickle.')
     out_k_shell = File('k_shell', usedefault=True, desc='Computed k-shell network stored as a NetworkX pickle.')
     out_k_crust = File('k_crust', usedefault=True, desc='Computed k-crust network stored as a NetworkX pickle.')
+    out_global_metrics_matlab = File(genfile=True, desc='Output node metrics in MATLAB .mat format')
     out_node_metrics_matlab = File(genfile=True, desc='Output node metrics in MATLAB .mat format')
     out_edge_metrics_matlab = File(genfile=True, desc='Output edge metrics in MATLAB .mat format')
     out_pickled_extra_measures = File('extra_measures', usedefault=True, desc='Network measures for group 1 that return dictionaries stored as a Pickle.')
@@ -287,6 +325,7 @@ class NetworkXMetricsInputSpec(BaseInterfaceInputSpec):
 class NetworkXMetricsOutputSpec(TraitedSpec):
     gpickled_network_files = OutputMultiPath(File(desc='Output gpickled network files'))
     matlab_matrix_files = OutputMultiPath(File(desc='Output network metrics in MATLAB .mat format'))
+    global_measures_matlab = File(desc='Output global metrics in MATLAB .mat format')
     node_measures_matlab = File(desc='Output node metrics in MATLAB .mat format')
     edge_measures_matlab = File(desc='Output edge metrics in MATLAB .mat format')
     node_measure_networks = OutputMultiPath(File(desc='Output gpickled network files for all node-based measures'))
@@ -295,7 +334,7 @@ class NetworkXMetricsOutputSpec(TraitedSpec):
     k_core = File(desc='Computed k-core network stored as a NetworkX pickle.')
     k_shell = File(desc='Computed k-shell network stored as a NetworkX pickle.')
     k_crust = File(desc='Computed k-crust network stored as a NetworkX pickle.')
-    out_pickled_extra_measures = File(desc='Network measures for the group that return dictionaries, stored as a Pickle.')
+    pickled_extra_measures = File(desc='Network measures for the group that return dictionaries, stored as a Pickle.')
     matlab_dict_measures = OutputMultiPath(File(desc='Network measures for the group that return dictionaries, stored as matlab matrices.'))
 
 class NetworkXMetrics(BaseInterface):
@@ -331,6 +370,14 @@ class NetworkXMetrics(BaseInterface):
 		# The names are then added to the output .pck file list
 		# In the case of the degeneracy networks, they are given specified output names
 
+		global_measures = compute_singlevalued_measures(ntwk)
+		if isdefined(self.inputs.out_global_metrics_matlab):
+			global_out_file = op.abspath(self.inputs.out_global_metrics_matlab)
+		else:
+			global_out_file = op.abspath(self._gen_outfilename('globalmetrics', 'mat'))
+		sio.savemat(global_out_file, global_measures, oned_as='column')
+		matlab.append(global_out_file)
+		
 		node_measures = compute_node_measures(ntwk)
 		for key in node_measures.keys():
 			newntwk = add_node_data(node_measures[key],self.inputs.in_file)
@@ -373,12 +420,12 @@ class NetworkXMetrics(BaseInterface):
 
 		out_pickled_extra_measures = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
 		dict_measures = compute_dict_measures(ntwk)
-		print 'Saving extra measure file to {path} in Pickle format'.format(path=op.abspath(out_pickled_extra_measures))
+		iflogger.info('Saving extra measure file to {path} in Pickle format'.format(path=op.abspath(out_pickled_extra_measures)))
 		file = open(out_pickled_extra_measures, 'w')
 		pickle.dump(dict_measures, file)
 		file.close()
 
-		print 'Saving MATLAB measures as {m}'.format(m=matlab)
+		iflogger.info('Saving MATLAB measures as {m}'.format(m=matlab))
 
 		# Loops through the measures which return a dictionary,
 		# converts the keys and values to a Numpy array,
@@ -412,10 +459,11 @@ class NetworkXMetrics(BaseInterface):
         outputs["node_measure_networks"] = nodentwks
         outputs["edge_measure_networks"] = edgentwks
         outputs["matlab_dict_measures"] = dicts
-        outputs["matlab_matrix_files"] = [op.abspath(self._gen_outfilename('nodemetrics', 'mat')), op.abspath(self._gen_outfilename('edgemetrics', 'mat'))]
+        outputs["matlab_matrix_files"] = [op.abspath(self._gen_outfilename('nodemetrics', 'mat')), op.abspath(self._gen_outfilename('edgemetrics', 'mat')), op.abspath(self._gen_outfilename('globalmetrics', 'mat'))]
+        outputs["global_measures_matlab"] = op.abspath(self._gen_outfilename('globalmetrics', 'mat'))
         outputs["node_measures_matlab"] = op.abspath(self._gen_outfilename('nodemetrics', 'mat'))
         outputs["edge_measures_matlab"] = op.abspath(self._gen_outfilename('edgemetrics', 'mat'))
-        outputs["out_pickled_extra_measures"] = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
+        outputs["pickled_extra_measures"] = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
         return outputs
 
     def _gen_outfilename(self, name, ext):
@@ -426,12 +474,13 @@ class AverageNetworksInputSpec(BaseInterfaceInputSpec):
     resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary' \
                                 ', but if included, the interface will output the statistical maps as networkx graphs.')
     group_id = traits.Str('group1', usedefault=True, desc='ID for group')
-    out_gpickled_groupavg = File('group1_average.pck', usedefault=True, desc='Average network saved as a NetworkX .pck')
-    out_gexf_groupavg = File('group1_average.pck', usedefault=True, desc='Average network saved as a .gexf file')
-
-class AverageNetworksOutputSpec(TraitedSpec):
     out_gpickled_groupavg = File(desc='Average network saved as a NetworkX .pck')
     out_gexf_groupavg = File(desc='Average network saved as a .gexf file')
+
+class AverageNetworksOutputSpec(TraitedSpec):
+    gpickled_groupavg = File(desc='Average network saved as a NetworkX .pck')
+    gexf_groupavg = File(desc='Average network saved as a .gexf file')
+    matlab_groupavgs = OutputMultiPath(File(desc='Average network saved as a .gexf file'))
 
 class AverageNetworks(BaseInterface):
     """
@@ -440,7 +489,8 @@ class AverageNetworks(BaseInterface):
     Example
     -------
 
-    >>> avg = AverageNetworks()
+    >>> import nipype.interfaces.cmtk as cmtk
+    >>> avg = cmtk.AverageNetworks()
     >>> avg.inputs.in_files = ['subj1.pck', 'subj2.pck']
     >>> avg.run()                 # doctest: +SKIP
 
@@ -452,170 +502,26 @@ class AverageNetworks(BaseInterface):
         if isdefined(self.inputs.resolution_network_file):
             ntwk_res_file = self.inputs.resolution_network_file
         else:
-            cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme = "NativeFreesurfer")
-            cmp_config.parcellation_scheme = "NativeFreesurfer"
-            ntwk_res_file = cmp_config.parcellation['freesurferaparc']['node_information_graphml']
+            ntwk_res_file = self.inputs.in_files[0]
 
-        groupavg = average_networks(self.inputs.in_files, ntwk_res_file, self.inputs.group_id)
+        global matlab_network_list
+        network_name, matlab_network_list = average_networks(self.inputs.in_files, ntwk_res_file, self.inputs.group_id)
         return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_gpickled_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','pck'))
-        outputs["out_gexf_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','gexf'))
+        if not isdefined(self.inputs.out_gpickled_groupavg):
+            outputs["gpickled_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','pck'))
+        else:
+            outputs["gpickled_groupavg"] = op.abspath(self.inputs.out_gpickled_groupavg)
+        
+        if not isdefined(self.inputs.out_gexf_groupavg):
+            outputs["gexf_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','gexf'))
+        else:
+            outputs["gexf_groupavg"] = op.abspath(self.inputs.out_gexf_groupavg)
+        
+        outputs["matlab_groupavgs"] = matlab_network_list
         return outputs
-
-    def _gen_outfilename(self, name, ext):
-        return name + '.' + ext
-
-class RegionalValuesInputSpec(TraitedSpec):
-    in_file = File(exists=True, mandatory=True, desc='Functional (e.g. Positron Emission Tomography) image')
-    segmentation_file = File(exists=True, mandatory=True, desc='Image with segmented regions (e.g. aparc+aseg.nii or the output from cmtk.Parcellate()')
-    resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary' \
-                                ', but if included, the interface will output the statistical maps as networkx graphs.')
-    subject_id = traits.Str(desc='Subject ID')
-    skip_unknown = traits.Bool(True, usedefault=True, desc='Skips calculation for regions with ID = 0 (default=True)')
-    out_stats_file = File('stats.mat', usedefault=True, desc='Some simple image statistics for regions saved as a Matlab .mat')
-
-class RegionalValuesOutputSpec(TraitedSpec):
-    stats_file = File(desc='Some simple image statistics for the original and normalized images saved as a Matlab .mat')
-    networks = OutputMultiPath(File(desc='Output gpickled network files for all statistical measures'))
-
-class RegionalValues(BaseInterface):
-    """
-    Extracts the regional mean, max, min, and standard deviation for a functional image given a segmentated image.
-    Output is saved in a MATLAB file, and if a network resolution file is provided (e.g. resolution1015.graphml), the regions are output as nodes in a NetworkX graph.
-
-    Example
-    -------
-
-    >>> import nipype.interfaces.cmtk as cmtk
-    >>> regval = cmtk.RegionalValues()
-    >>> regval.inputs.in_file = 'pet_resliced.nii'
-    >>> regval.inputs.segmentation_file = 'ROI_scale500.nii.gz'
-    >>> regval.run() # doctest: +SKIP
-    """
-    input_spec = RegionalValuesInputSpec
-    output_spec = RegionalValuesOutputSpec
-
-    def _run_interface(self, runtime):
-        print 'Functional image: {img}'.format(img=self.inputs.in_file)
-        print 'Segmentation image: {img}'.format(img=self.inputs.segmentation_file)
-        if not get_data_dims(self.inputs.in_file) == get_data_dims(self.inputs.segmentation_file):
-            print 'Image dimensions are not the same, please reslice the images to the same dimensions'
-            dx,dy,dz = get_data_dims(self.inputs.in_file)
-            print 'Functional image dimensions: {dimx}, {dimy}, {dimz}'.format(dimx=dx,dimy=dy,dimz=dz)
-            dx,dy,dz = get_data_dims(self.inputs.segmentation_file)
-            print 'Segmentation image dimensions: {dimx}, {dimy}, {dimz}'.format(dimx=dx,dimy=dy,dimz=dz)
-
-
-        """Record intensity values"""
-        functional = nb.load(self.inputs.in_file)
-        functionaldata = functional.get_data()
-        segmentation = nb.load(self.inputs.segmentation_file)
-        segmentationdata = segmentation.get_data()
-
-        rois = np.unique(segmentationdata)
-        print 'Found {roi} unique region values'.format(roi=len(rois))
-
-        func_mean = []
-        func_max = []
-        func_min = []
-        func_stdev = []
-        voxels = []
-        for idx, roi in enumerate(rois):
-            values = []
-            if self.inputs.skip_unknown:
-                if not roi == 0:
-                    x,y,z = np.where(segmentationdata == roi)
-                    print 'Region ID: {id}'.format(id=roi)
-                    for index in range(0,len(x)):
-                        value = functionaldata[x[index]][y[index]][z[index]]
-                        values.append(value)
-                    func_mean.append(np.mean(values))
-                    func_max.append(np.max(values))
-                    func_min.append(np.min(values))
-                    func_stdev.append(np.std(values))
-                    voxels.append(len(values))
-                    print 'Mean Value: {avg}'.format(avg=np.mean(values))
-                    print 'Number of Voxels: {vox}'.format(vox=len(values))
-            else:
-                x,y,z = np.where(segmentationdata == roi)
-                print 'Region ID: {id}'.format(id=roi)
-                for index in range(0,len(x)):
-                    value = functionaldata[x[index]][y[index]][z[index]]
-                    values.append(value)
-                func_mean.append(np.mean(values))
-                func_max.append(np.max(values))
-                func_min.append(np.min(values))
-                func_stdev.append(np.std(values))
-                voxels.append(len(values))
-                print 'Mean Value: {avg}'.format(avg=np.mean(values))
-                print 'Number of Voxels: {vox}'.format(vox=len(values))
-
-        stats = {}
-        stats['func_max'] = func_max
-        stats['func_mean'] = func_mean
-        stats['func_min'] = func_min
-        stats['func_stdev'] = func_stdev
-        stats['number_of_voxels'] = voxels
-
-        if isdefined(self.inputs.resolution_network_file):
-			gp = read_unknown_ntwk(self.inputs.resolution_network_file)
-			nROIs = len(gp.nodes())
-			nodesdict = gp.node
-			if nodesdict.has_key('1'):
-				nodedict = gp.node['1']
-			elif nodesdict.has_key(1):
-				nodedict = gp.node[1]
-			else:
-				nodedict = gp.node[gp.nodes()[0].key]
-			if not nodedict.has_key('dn_position'):
-				print "Creating node positions from segmentation"
-				G = nx.Graph()
-				for u,d in gp.nodes_iter(data=True):
-					print 'Node ID {id}'.format(id=int(u))
-					G.add_node(int(u), d)
-					xyz = tuple(np.mean( np.where(segmentationdata == int(d["dn_correspondence_id"]) ) , axis = 1))
-					tmp = tuple()
-					a = float(xyz[0])
-					b = float(xyz[2])
-					c = float(xyz[1])
-					tmp = tuple([a,b,c])
-					xyz = tmp
-					G.node[int(u)]['dn_position'] = tuple(xyz)
-				ntwkname = op.abspath('nodepositions.pck')
-				nx.write_gpickle(G,ntwkname)
-			else:
-				ntwkname = self.inputs.resolution_network_file
-
-			global ntwks
-			ntwks = list()
-			for key in stats.keys():
-				print key
-				print np.shape(stats[key])
-				newntwk = add_node_data(stats[key],ntwkname)
-				out_file = op.abspath(self._gen_outfilename(key, 'pck'))
-				nx.write_gpickle(newntwk, out_file)
-				ntwks.append(out_file)
-
-        if isdefined(self.inputs.subject_id):
-            stats['subject_id'] = self.inputs.subject_id
-
-        out_stats_file = op.abspath(self.inputs.out_stats_file)
-        print 'Saving image statistics as {stats}'.format(stats=out_stats_file)
-        sio.savemat(out_stats_file, stats)
-        return runtime
-
-    def _list_outputs(self):
-		outputs = self.output_spec().get()
-		out_stats_file = op.abspath(self.inputs.out_stats_file)
-		outputs["stats_file"] = out_stats_file
-		if isdefined(self.inputs.resolution_network_file):
-			outputs["networks"] = ntwks
-		else:
-			outputs["networks"] = ''
-		return outputs
 
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext
