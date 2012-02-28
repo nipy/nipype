@@ -103,7 +103,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
     if len(in_files) == 1:
         avg_ntwk = read_unknown_ntwk(in_files[0])
     else:
-        count_to_keep_edge = len(in_files)/2 + 1
+        count_to_keep_edge = np.round(float(len(in_files))/2)
         iflogger.info("Number of networks: {L}, an edge must occur in at least {c} to remain in the average network".format(L=len(in_files), c=count_to_keep_edge))
         ntwk_res_file = read_unknown_ntwk(ntwk_res_file)
         iflogger.info("{n} Nodes found in network resolution file".format(n=ntwk_res_file.number_of_nodes()))

@@ -83,7 +83,7 @@ def get_rois_crossed(pointsmm, roiData, voxelSize):
 	return rois_crossed
 
 def get_connectivity_matrix(n_rois, list_of_roi_crossed_lists):
-	connectivity_matrix = np.zeros( (n_rois, n_rois), dtype = int)
+	connectivity_matrix = np.zeros( (n_rois, n_rois), dtype = np.uint)
 	for rois_crossed in list_of_roi_crossed_lists:
 		for idx_i, roi_i in enumerate(rois_crossed):
 			for idx_j, roi_j in enumerate(rois_crossed):
@@ -519,12 +519,12 @@ class CreateMatrix(BaseInterface):
 			outputs['fiber_label_file'] = op.abspath(endpoint_name + '_filtered_fiberslabel.npy')
 			outputs['fiber_labels_noorphans'] = op.abspath(endpoint_name + '_final_fiberslabels.npy')
 
-		_, name , _ = split_filename(self.inputs.tract_file)
-		outputs['filtered_tractography'] = op.abspath(name + '_streamline_final.trk')
-		
 		if self.inputs.count_region_intersections == True:
 			outputs['filtered_tractography_by_intersections'] = op.join(path, name + '_intersections_streamline_final.trk')
 			outputs['intersection_matrix_mat_file'] = op.join(path, name + '_intersections') + ext
+
+		_, name , _ = split_filename(self.inputs.tract_file)
+		outputs['filtered_tractography'] = op.abspath(name + '_streamline_final.trk')
 		return outputs
 
 	def _gen_outfilename(self, ext):
@@ -633,7 +633,7 @@ class ROIGen(BaseInterface):
         iflogger.info(LUTlabelDict)
 
         """ Create empty grey matter mask, Populate with only those regions defined in the mapping."""
-        niiGM = np.zeros( niiAPARCdata.shape, dtype = int )
+        niiGM = np.zeros( niiAPARCdata.shape, dtype = np.uint )
         for ma in MAPPING:
             niiGM[ niiAPARCdata == ma[1]] = ma[0]
             mapDict[ma[0]] = ma[1]
