@@ -9,7 +9,7 @@ import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
 import nipype.algorithms.misc as misc
 from nipype.interfaces.utility import Function
-from nipype.workflows.utils import region_list_from_volume, id_list_from_lookup_table
+from nipype.workflows.misc.utils import region_list_from_volume, id_list_from_lookup_table
 import os, os.path as op
 
 def create_getmask_flow(name='getmask', dilate_mask=True):
@@ -307,7 +307,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
                        name = 'fssource')
     volconvert = pe.Node(fs.MRIConvert(out_type='nii'),
                        name = 'volconvert')
-    tessellate = pe.MapNode(fs.MRITessellate(),
+    tessellate = pe.MapNode(fs.MRIMarchingCubes(),
                         iterfield=['label_value','out_file'],
                         name='tessellate')
     surfconvert = pe.MapNode(fs.MRIsConvert(out_datatype=out_format),

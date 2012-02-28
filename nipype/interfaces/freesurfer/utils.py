@@ -748,7 +748,7 @@ class MRIsConvert(FSCommand):
     mris = fs.MRIs_Convert()
     mris.inputs.in_file = 'lh.pial'
     mris.inputs.out_datatype = 'gii'
-    mris.run()
+    mris.run() # doctest: +SKIP
     """
     _cmd = 'mris_convert'
     input_spec = MRIsConvertInputSpec
@@ -811,11 +811,65 @@ class MRITessellate(FSCommand):
     tess.inputs.in_file = 'aseg.mgz'
     tess.inputs.label_value = 17
     tess.inputs.out_file = 'lh.hippocampus'
-    tess.run()
+    tess.run() # doctest: +SKIP
     """
     _cmd = 'mri_tessellate'
     input_spec = MRITessellateInputSpec
     output_spec = MRITessellateOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['surface'] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_file':
+            return self._gen_outfilename()
+        else:
+            return None
+
+    def _gen_outfilename(self):
+        if isdefined(self.inputs.out_file):
+            return self.inputs.out_file
+        else:
+            _, name, ext = split_filename(self.inputs.in_file)
+            return name + ext + '_' + str(self.inputs.label_value)
+            
+class MRIMarchingCubesInputSpec(FSTraitedSpec):
+    """
+    Uses Freesurfer's mri_mc to create surfaces by tessellating a given input volume
+    """
+
+    in_file = File(exists=True, mandatory=True, position=1, argstr='%s', desc='Input volume to tesselate voxels from.')
+    label_value = traits.Int(position=2, argstr='%d', mandatory=True,
+        desc='Label value which to tesselate from the input volume. (integer, if input is "filled.mgz" volume, 127 is rh, 255 is lh)')
+    connectivity_value = traits.Int(1, position=-1, argstr='%d', usedefault=True,
+        desc='Alter the marching cubes connectivity: 1=6+,2=18,3=6,4=26 (default=1)')
+    out_file = File(argstr='./%s', position=-2, genfile=True, desc='output filename or True to generate one')
+
+class MRIMarchingCubesOutputSpec(TraitedSpec):
+    """
+    Uses Freesurfer's mri_mc to create surfaces by tessellating a given input volume
+    """
+    surface = File(exists=True, desc='binary surface of the tessellation ')
+
+
+class MRIMarchingCubes(FSCommand):
+    """
+    Uses Freesurfer's mri_mc to create surfaces by tessellating a given input volume
+
+    Example:
+
+    import nipype.interfaces.freesurfer as fs
+    mc = fs.MRIMarchingCubes()
+    mc.inputs.in_file = 'aseg.mgz'
+    mc.inputs.label_value = 17
+    mc.inputs.out_file = 'lh.hippocampus'
+    mc.run() # doctest: +SKIP
+    """
+    _cmd = 'mri_mc'
+    input_spec = MRIMarchingCubesInputSpec
+    output_spec = MRIMarchingCubesOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
