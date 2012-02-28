@@ -259,7 +259,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
 
     Example
     -------
-    >>> from nipype.workflows.freesurfer.mne import create_tessellation_flow
+    >>> from nipype.workflows.smri.freesurfer import create_tessellation_flow
     >>> tessflow = create_tessellation_flow()
     >>> tessflow.inputs.inputspec.subject_id = 'subj1'
     >>> tessflow.inputs.inputspec.subjects_dir = '.'
