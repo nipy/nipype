@@ -546,7 +546,18 @@ class Interface(object):
 
     input_spec = None  # A traited input specification
     output_spec = None  # A traited output specification
-    can_resume = False  # defines if the interface can reuse partial results after interruption
+    
+    _can_resume = False  # defines if the interface can reuse partial results after interruption
+    
+    @property
+    def can_resume(self):
+        return self._can_resume
+    
+    _always_run = False # should the interface be always run even if the inputs were not changed? 
+    
+    @property
+    def always_run(self):
+        return self._always_run
 
     def __init__(self, **inputs):
         """Initialize command with given args and inputs."""
