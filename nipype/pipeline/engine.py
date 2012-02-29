@@ -928,7 +928,7 @@ class Node(WorkflowBase):
 
     """
 
-    def __init__(self, interface, iterables=None, overwrite=False,
+    def __init__(self, interface, iterables=None, overwrite=None,
                  needed_outputs=None, run_without_submitting=False, **kwargs):
         """
         Parameters
@@ -948,7 +948,7 @@ class Node(WorkflowBase):
         overwrite : Boolean
             Whether to overwrite contents of output directory if it already
             exists. If directory exists and hash matches it
-            assumes that process has been executed (default : False)
+            assumes that process has been executed
 
         needed_outputs : list of output_names
             Force the node to keep only specific outputs. By default all outputs are
@@ -1062,7 +1062,10 @@ class Node(WorkflowBase):
         outdir = self.output_dir()
         logger.info("Executing node %s in dir: %s" % (self._id, outdir))
         hash_exists, hashvalue, hashfile, hashed_inputs = self.hash_exists(updatehash=updatehash)
-        if force_execute or (not updatehash and (self.overwrite or
+
+        if force_execute or (not updatehash and (((self.overwrite == None
+                                                   and self._interface.always_run)
+                                                  or self.overwrite) or
                                                  not hash_exists)):
             logger.debug("Node hash: %s" % hashvalue)
 
@@ -1073,11 +1076,13 @@ class Node(WorkflowBase):
             and len(glob(os.path.join(outdir, '_0x*_unfinished.json'))) == 0:
                 logger.debug("Rerunning node")
                 logger.debug(("force_execute = %s, updatehash = %s, "
-                              "self.overwrite = %s, os.path.exists(%s) = %s, "
+                              "self.overwrite = %s, self._interface.always_run = %s, "
+                              "os.path.exists(%s) = %s, "
                               "hash_method = %s") %
                              (str(force_execute),
                               str(updatehash),
                               str(self.overwrite),
+                              str(self._interface.always_run),
                               hashfile,
                               str(os.path.exists(hashfile)),
                               self.config['execution']['hash_method'].lower()))
@@ -1095,7 +1100,8 @@ class Node(WorkflowBase):
                             else:
                                 logdebug_dict_differences(prev_inputs,
                                                           hashed_inputs)
-                if str2bool(self.config['execution']['stop_on_first_rerun']):
+                if (str2bool(self.config['execution']['stop_on_first_rerun']) and
+                    not (self.overwrite == None and self._interface.always_run)):
                     raise Exception(("Cannot rerun when 'stop_on_first_rerun' "
                                      "is set to True"))
             hashfile_unfinished = os.path.join(outdir,
