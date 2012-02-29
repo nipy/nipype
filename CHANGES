@@ -14,6 +14,10 @@ Changes since release 0.4.1
 * API: IPython plugin now invokes IPython 0.11 or greater
 * API: Canned workflows are now all under a different package structure
 * API: SpecifyModel event_info renamed to event_files
+* API: DataGrabber is always being rerun (unless overwrite is set to False on 
+	   Node level)
+* API: "stop_on_first_rerun" does not stop for DataGrabber (unless overwrite is 
+	   set to True on Node level)
 
 * ENH: Added fsl resting state workflow based on behzadi 2007 CompCorr method.
 * ENH: TSNR node produces mean and std-dev maps; allows polynomial detrending
