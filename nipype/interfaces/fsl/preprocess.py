@@ -530,7 +530,7 @@ class MCFLIRTInputSpec(FSLCommandInputSpec):
     stages = traits.Int(argstr='-stages %d',
                         desc="stages (if 4, perform final search with sinc interpolation")
     init = File(exists=True, argstr='-init %s', desc="inital transformation matrix")
-    interpolation = traits.Enum("trilinear", "nn", "sinc", argstr="-%s_final",
+    interpolation = traits.Enum("spline", "nn", "sinc", argstr="-%s_final",
                                 desc="interpolation method for transformation")
     use_gradient = traits.Bool(argstr='-gdt', desc="run search on gradient images")
     use_contour = traits.Bool(argstr='-edge', desc="run search on contour images")
