@@ -395,7 +395,7 @@ class DataGrabber(IOBase):
     """
     input_spec = DataGrabberInputSpec
     output_spec = DynamicTraitedSpec
-    always_run = True
+    _always_run = True
 
     def __init__(self, infields=None, outfields=None, **kwargs):
         """

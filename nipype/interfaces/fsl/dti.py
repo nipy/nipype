@@ -213,7 +213,7 @@ class BEDPOSTX(FSLCommand):
     _cmd = 'bedpostx'
     input_spec = BEDPOSTXInputSpec
     output_spec = BEDPOSTXOutputSpec
-    can_resume = True
+    _can_resume = True
 
     def __init__(self, **inputs):
         warnings.warn("Deprecated: Please use create_bedpostx_pipeline instead", DeprecationWarning)
