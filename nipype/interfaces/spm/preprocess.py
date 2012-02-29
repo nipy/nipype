@@ -138,7 +138,7 @@ class RealignInputSpec(SPMCommandInputSpec):
     write_mask = traits.Bool(field='roptions.mask',
                              desc='True/False mask output image')
     out_prefix = traits.String('r', field='prefix', usedefault=True,
-                               desc = 'slicetimed output prefix')
+                               desc = 'realigned output prefix')
 
 
 class RealignOutputSpec(TraitedSpec):
