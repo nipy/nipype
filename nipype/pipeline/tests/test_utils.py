@@ -124,7 +124,8 @@ def test_inputs_removal():
     n1.inputs.in_file = file1
     n1.config = {'execution': {'keep_inputs': False}}
     n1.config = merge_dict(deepcopy(config._sections), n1.config)
-    n1.run(force_execute=True)
+    n1.overwrite = True
+    n1.run()
     yield assert_false, os.path.exists(os.path.join(out_dir,
                                                    n1.name,
                                                    'file1.txt'))
