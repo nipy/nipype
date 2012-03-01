@@ -355,7 +355,9 @@ class ProbTrackXInputSpec(FSLCommandInputSpec):
     random_seed = traits.Bool(argstr='--rseed', desc='random seed')
     s2tastext = traits.Bool(argstr='--s2tastext', desc='output seed-to-target counts as a' +
                             ' text file (useful when seeding from a mesh)')
-    verbose = traits.Enum(0, 1, 2, desc="Verbose level, [0-2]", argstr="--verbose=%d")
+    verbose = traits.Enum(0, 1, 2, desc="Verbose level, [0-2]." +
+                          "Level 2 is required to output particle files.", 
+                          argstr="--verbose=%d")
 
 
 class ProbTrackXOutputSpec(TraitedSpec):
@@ -366,7 +368,9 @@ class ProbTrackXOutputSpec(TraitedSpec):
                     'corresponding to the total number of generated tracts that ' +
                     'have not been rejected by inclusion/exclusion mask criteria')
     targets = traits.List(File, exists=True, desc='a list with all generated seeds_to_target files')
-    particle_files = traits.List(File, exists=True)
+    particle_files = traits.List(File, exists=True, desc='Files describing ' +
+                                 'all of the tract samples. Generated only if ' +
+                                 'verbose is set to 2')
 
 
 class ProbTrackX(FSLCommand):
