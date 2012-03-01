@@ -52,10 +52,8 @@ import nipype.algorithms.misc as misc
 import nipype.interfaces.cmtk as cmtk
 import nipype.interfaces.dipy as dipy
 import inspect
-import nibabel as nb
-import os, os.path as op                      # system functions
+import os.path as op                      # system functions
 from nipype.workflows.dmri.fsl.dti import create_eddy_correct_pipeline
-from nipype.interfaces.utility import Function
 from nipype.workflows.dmri.camino.connectivity_mapping import select_aparc_annot
 from nipype.workflows.dmri.camino.group_connectivity import pullnodeIDs
 from nipype.utils.misc import package_check
