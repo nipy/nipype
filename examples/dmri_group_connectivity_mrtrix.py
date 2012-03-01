@@ -1,7 +1,7 @@
 """
-============================================
-Group connectivity - MRtrix, FSL, FreeSurfer
-============================================
+==================================================
+dMRI: Group connectivity - MRtrix, FSL, FreeSurfer
+==================================================
 
 Introduction
 ============
@@ -10,7 +10,7 @@ This script, group_connectivity.py, runs group-based connectivity analysis using
 the connectivity_mapping_advanced Nipype workflow. Further detail on the processing can be
 found in connectivity_tutorial.py. This tutorial can be run using:
 
-    python group_mrtrix_connectivity_workflowed.py
+    python dmri_group_connectivity_mrtrix.py
 
 We perform this analysis using two healthy subjects: subj1 (from the FSL course data) and subj2.
 We also process one coma patient who has suffers from traumatic brain damage.
@@ -119,7 +119,7 @@ for idx, group_id in enumerate(group_list.keys()):
     .. seealso::
         * nipype/workflows/mrtrix/group_connectivity.py
         * nipype/workflows/mrtrix/connectivity_mapping.py
-        * connectivity_tutorial_advanced.py
+        * dmri_connectivity_advanced.py
 
     """
 

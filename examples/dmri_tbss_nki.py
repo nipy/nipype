@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 =========================
-dmri: TBSS on NKI RS data
+dMRI: TBSS on NKI RS data
 =========================
 
 A pipeline to do a TBSS analysis on the NKI rockland sample data

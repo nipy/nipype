@@ -1,16 +1,16 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-===============
-fMRI - SPM, FSL
-===============
+==============
+fMRI: SPM, FSL
+==============
 
-The spm_tutorial.py integrates several interfaces to perform a first
+The fmri_spm.py integrates several interfaces to perform a first
 and second level analysis on a two-subject data set.  The tutorial can
 be found in the examples folder.  Run the tutorial from inside the
 nipype tutorial directory:
 
-    python spm_tutorial.py
+    python fmri_spm.py
 
 Import necessary modules from nipype."""
 
