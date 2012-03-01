@@ -380,8 +380,6 @@ def create_connectivity_pipeline(name="connectivity"):
     original tracts, and label file are then given to CreateMatrix.
     """
 
-    mapping.connect(inputnode_within, 'roi_LUT_file',
-                    roigen, 'LUT_file')
     mapping.connect(inputnode_within, 'resolution_network_file',
                     creatematrix, 'resolution_network_file')
     mapping.connect([(FreeSurferSource, mri_convert_AparcAseg, [(('aparc_aseg', select_aparc), 'in_file')])])

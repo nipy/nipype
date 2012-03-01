@@ -505,6 +505,9 @@ class AverageNetworks(BaseInterface):
     """
     Calculates and outputs the average network given a set of input NetworkX gpickle files
 
+    This interface will only keep an edge in the averaged network if that edge is present in 
+    at least half of the input networks.
+
     Example
     -------
 
