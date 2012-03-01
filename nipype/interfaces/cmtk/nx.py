@@ -35,6 +35,7 @@ except Exception, e:
 else:
     import cmp
 
+
 def read_unknown_ntwk(ntwk):
 	if not isinstance(ntwk, nx.classes.graph.Graph):
 		path, name, ext = split_filename(ntwk)
@@ -44,12 +45,14 @@ def read_unknown_ntwk(ntwk):
 			ntwk = nx.read_graphml(ntwk)
 	return ntwk
 
+
 def remove_all_edges(ntwk):
     ntwktmp = ntwk.copy()
     edges = ntwktmp.edges_iter()
     for edge in edges:
         ntwk.remove_edge(edge[0],edge[1])
     return ntwk
+
 
 def fix_keys_for_gexf(orig):
     """
@@ -80,6 +83,7 @@ def fix_keys_for_gexf(orig):
             ntwk.edge[str(edge[0])][str(edge[1])]['value'] = str(data['value'])
     return ntwk
 
+
 def add_dicts_by_key(in_dict1, in_dict2):
     """
     Combines two dictionaries and adds the values for those keys that are shared
@@ -90,6 +94,7 @@ def add_dicts_by_key(in_dict1, in_dict2):
             if key1 == key2:
                 both[key1] = in_dict1[key1] + in_dict2[key2]
     return both
+
 
 def average_networks(in_files, ntwk_res_file, group_id):
     """
@@ -187,17 +192,17 @@ def average_networks(in_files, ntwk_res_file, group_id):
     iflogger.info('Saving average network as {out}'.format(out=op.abspath(network_name)))
     return network_name, matlab_network_list
 
+
 def compute_node_measures(ntwk):
     """
     These return node-based measures
     """
     iflogger.info('Computing node measures:')
     weighted = True
+    calculate_cliques = True
     measures = {}
     iflogger.info('...Computing degree...')
     measures['degree'] = np.array(ntwk.degree().values())
-    #iflogger.info('...Computing number of cliques for each node...')
-    #measures['number_of_cliques'] = np.array(nx.number_of_cliques(ntwk).values())
     iflogger.info('...Computing load centrality...')
     measures['load_centrality'] = np.array(nx.load_centrality(ntwk).values())
     iflogger.info('...Computing betweenness centrality...')
@@ -206,24 +211,28 @@ def compute_node_measures(ntwk):
     measures['degree_centrality'] = np.array(nx.degree_centrality(ntwk).values())
     iflogger.info('...Computing closeness centrality...')
     measures['closeness_centrality'] = np.array(nx.closeness_centrality(ntwk).values())
-    #iflogger.info('...Computing eigenvector centrality...')
-    #measures['eigenvector_centrality'] = np.array(nx.eigenvector_centrality(ntwk).values())
-    #iflogger.info('...Calculating node clique number')
-    #measures['node_clique_number'] = np.array(nx.node_clique_number(ntwk).values())
+    iflogger.info('...Computing eigenvector centrality...')
+    measures['eigenvector_centrality'] = np.array(nx.eigenvector_centrality(ntwk).values())
     iflogger.info('...Computing triangles...')
     measures['triangles'] = np.array(nx.triangles(ntwk).values())
     iflogger.info('...Computing clustering...')
     measures['clustering'] = np.array(nx.clustering(ntwk).values())
+    iflogger.info('...Computing k-core number')
+    measures['core_number'] = np.array(nx.core_number(ntwk).values())
     iflogger.info('...Identifying network isolates...')
-    measures['isolates'] = nx.isolates(ntwk)
+    isolate_list = nx.isolates(ntwk)
     binarized = np.zeros((ntwk.number_of_nodes(),1))
-    for value in measures['isolates']:
+    for value in isolate_list:
         value = value - 1 # Zero indexing
         binarized[value] = 1
     measures['isolates'] = binarized
-    iflogger.info('...Computing k-core number')
-    measures['core_number'] = np.array(nx.core_number(ntwk).values())
+    if calculate_cliques:
+        iflogger.info('...Calculating node clique number')
+        measures['node_clique_number'] = np.array(nx.node_clique_number(ntwk).values())
+        iflogger.info('...Computing number of cliques for each node...')
+        measures['number_of_cliques'] = np.array(nx.number_of_cliques(ntwk).values())
     return measures
+
 
 def compute_edge_measures(ntwk):
     """
@@ -231,6 +240,7 @@ def compute_edge_measures(ntwk):
     """
     iflogger.info('Computing edge measures:')
     weighted = True
+    calculate_cliques = True
     measures = {}
     #iflogger.info('...Computing google matrix...' #Makes really large networks (500k+ edges))
     #measures['google_matrix'] = nx.google_matrix(ntwk)
@@ -240,16 +250,18 @@ def compute_edge_measures(ntwk):
     #measures['authority_matrix'] = nx.authority_matrix(ntwk)
     return measures
 
+
 def compute_dict_measures(ntwk):
     """
     Returns a dictionary
     """
-    #iflogger.info('Computing measures which return a dictionary:')
+    iflogger.info('Computing measures which return a dictionary:')
     weighted = True
     measures = {}
-    #iflogger.info('...Computing rich club coefficient...')
-    #measures['rich_club_coef'] = nx.rich_club_coefficient(ntwk)
+    iflogger.info('...Computing rich club coefficient...')
+    measures['rich_club_coef'] = nx.rich_club_coefficient(ntwk)
     return measures
+
 
 def compute_singlevalued_measures(ntwk):
     """
@@ -257,22 +269,26 @@ def compute_singlevalued_measures(ntwk):
     """
     iflogger.info('Computing single valued measures:')
     weighted = True
+    calculate_cliques = True
     measures = {}
     iflogger.info('...Computing degree assortativity (pearson number) ...')
-    measures['degree_pearsonr'] = nx.degree_pearsonr(ntwk)
+    measures['degree_pearsonr'] = nx.degree_pearson_correlation_coefficient(ntwk)
     iflogger.info('...Computing degree assortativity...')
-    measures['degree_assortativity'] = nx.degree_assortativity(ntwk)
+    measures['degree_assortativity'] = nx.nx.degree_assortativity_coefficient(ntwk)
     iflogger.info('...Computing transitivity...')
     measures['transitivity'] = nx.transitivity(ntwk)
     iflogger.info('...Computing number of connected_components...')
     measures['number_connected_components'] = nx.number_connected_components(ntwk)
     iflogger.info('...Computing average clustering...')
     measures['average_clustering'] = nx.average_clustering(ntwk)
-    #iflogger.info('...Computing graph clique number...')
-    #measures['graph_clique_number'] = nx.graph_clique_number(ntwk) #out of memory error
-    #iflogger.info('...Calculating average shortest path length...')
-    #measures['average_shortest_path_length'] = nx.average_shortest_path_length(ntwk, weighted)
+    if nx.is_connected(ntwk):
+        iflogger.info('...Calculating average shortest path length...')
+        measures['average_shortest_path_length'] = nx.average_shortest_path_length(ntwk, weighted)
+    if calculate_cliques:
+        iflogger.info('...Computing graph clique number...')
+        measures['graph_clique_number'] = nx.graph_clique_number(ntwk) #out of memory error
     return measures
+
 
 def compute_network_measures(ntwk):
     measures = {}
@@ -284,6 +300,7 @@ def compute_network_measures(ntwk):
     #measures['k_crust'] = nx.k_crust(ntwk)
     return measures
 
+
 def add_node_data(node_array, ntwk):
     ntwk = read_unknown_ntwk(ntwk)
     node_ntwk = nx.Graph()
@@ -294,6 +311,7 @@ def add_node_data(node_array, ntwk):
             data.update(newdata)
             node_ntwk.add_node(int(idx), data)
     return node_ntwk
+
 
 def add_edge_data(edge_array, ntwk, above=0, below=0):
     ntwk = read_unknown_ntwk(ntwk)
@@ -310,6 +328,7 @@ def add_edge_data(edge_array, ntwk, above=0, below=0):
 						data.update(old_edge_dict)
 					edge_ntwk.add_edge(x+1,y+1,data)
     return edge_ntwk
+
 
 class NetworkXMetricsInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='Input network')

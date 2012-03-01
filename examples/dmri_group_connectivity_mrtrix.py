@@ -54,9 +54,8 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import  os.path as op                     # system functions
 import cmp
-from nipype.workflows.dmri.mrtrix.group_connectivity import create_mrtrix_group_cff_pipeline_part1
-from nipype.workflows.dmri.camino.group_connectivity import (create_group_cff_pipeline_part2_with_CSVstats,
-create_group_cff_pipeline_part3_with_CSVstats, create_group_cff_pipeline_part4)
+from nipype.workflows.dmri.mrtrix.group_connectivity import (create_group_connectivity_pipeline, 
+create_merge_network_results_by_group_workflow, create_merge_group_network_results_workflow, create_average_networks_by_group_workflow)
 
 """
 Set the proper directories
@@ -78,7 +77,7 @@ with group IDs ('controls', 'coma') as keys, and subject/patient names as values
 """
 
 group_list = {}
-group_list['controls'] = ['subj1', 'subj2']
+#group_list['controls'] = ['subj1', 'subj2']
 group_list['coma'] = ['traumatic']
 
 """
@@ -123,7 +122,7 @@ for idx, group_id in enumerate(group_list.keys()):
 
     """
 
-    l1pipeline = create_mrtrix_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir, output_dir, info)
+    l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
 
     """
 This is used to demonstrate the ease through which different parameters can be set for each group.
@@ -149,8 +148,6 @@ done to show how to set inputs that will affect both groups.
     """
 
     l1pipeline.inputs.connectivity.mapping.csdeconv.maximum_harmonic_order = 6
-    l1pipeline.inputs.connectivity.mapping.tck2trk.flipy = True
-    l1pipeline.inputs.connectivity.mapping.tck2trk.flipz = True
 
     """
 Define the parcellation scheme to use.
@@ -160,13 +157,13 @@ Define the parcellation scheme to use.
     l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name
     cmp_config = cmp.configuration.PipelineConfiguration()
     cmp_config.parcellation_scheme = "Lausanne2008"
-    l1pipeline.inputs.connectivity.mapping.CreateMatrix.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
+    l1pipeline.inputs.connectivity.mapping.inputnode_within.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
 
     """
 Set the maximum number of tracks to obtain
     """
 
-    l1pipeline.inputs.connectivity.mapping.probCSDstreamtrack.maximum_number_of_tracks = 100000
+    l1pipeline.inputs.connectivity.mapping.probCSDstreamtrack.desired_number_of_tracks = 100000
 
     """
 The first level pipeline we have tweaked here is run within the for loop.
@@ -187,7 +184,8 @@ The first level pipeline we have tweaked here is run within the for loop.
 
     """
 
-    l2pipeline = create_group_cff_pipeline_part2_with_CSVstats(group_list, group_id, data_dir, subjects_dir, output_dir)
+    l2pipeline = create_merge_network_results_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
+    l2pipeline.inputs.l2inputnode.network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
     l2pipeline.run()
     l2pipeline.write_graph(format='eps', graph2use='flat')
 
@@ -196,7 +194,7 @@ Now that the for loop is complete there are two grouped CFF files each containin
 It is also convenient to have every subject in a single CFF file, so that is what the third-level pipeline does.
 """
 
-l3pipeline = create_group_cff_pipeline_part3_with_CSVstats(group_list, data_dir, subjects_dir, output_dir, title)
+l3pipeline = create_merge_group_network_results_workflow(group_list, data_dir, subjects_dir, output_dir, title)
 l3pipeline.run()
 l3pipeline.write_graph(format='eps', graph2use='flat')
 
@@ -204,6 +202,6 @@ l3pipeline.write_graph(format='eps', graph2use='flat')
 The fourth and final workflow averages the networks and saves them in another CFF file
 """
 
-l4pipeline = create_group_cff_pipeline_part4(group_list, data_dir, subjects_dir, output_dir, title)
+l4pipeline = create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir, output_dir, title)
 l4pipeline.run()
 l4pipeline.write_graph(format='eps', graph2use='flat')

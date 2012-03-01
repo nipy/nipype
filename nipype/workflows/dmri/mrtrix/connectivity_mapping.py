@@ -4,16 +4,15 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.mrtrix as mrtrix
-import nipype.algorithms.misc as misc
 import nipype.interfaces.cmtk as cmtk
 import nipype.interfaces.dipy as dipy
+import nipype.algorithms.misc as misc
 import inspect
-import nibabel as nb
 import os, os.path as op                      # system functions
 from ..fsl.dti import create_eddy_correct_pipeline
 from nipype.interfaces.utility import Function
-from ..camino.connectivity_mapping import select_aparc_annot
-from ..camino.group_connectivity import pullnodeIDs
+from ...misc.utils import select_aparc_annot
+
 
 def create_connectivity_pipeline(name="connectivity", parcellation_name='scale500'):
     """Creates a pipeline that does the same connectivity processing as in the
@@ -46,7 +45,6 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
         inputnode.bvecs
         inputnode.bvals
         inputnode.resolution_network_file
-        inputnode.network_file
 
     Outputs::
 
@@ -76,8 +74,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
                                                               "bvecs",
                                                               "bvals",
                                                               "subjects_dir",
-                                                              "resolution_network_file",
-                                                              "network_file"]),
+                                                              "resolution_network_file"]),
                                name="inputnode_within")
 
     FreeSurferSource = pe.Node(interface=nio.FreeSurferSource(), name='fssource')
