@@ -274,7 +274,7 @@ def compute_singlevalued_measures(ntwk):
     iflogger.info('...Computing degree assortativity (pearson number) ...')
     measures['degree_pearsonr'] = nx.degree_pearson_correlation_coefficient(ntwk)
     iflogger.info('...Computing degree assortativity...')
-    measures['degree_assortativity'] = nx.nx.degree_assortativity_coefficient(ntwk)
+    measures['degree_assortativity'] = nx.degree_assortativity_coefficient(ntwk)
     iflogger.info('...Computing transitivity...')
     measures['transitivity'] = nx.transitivity(ntwk)
     iflogger.info('...Computing number of connected_components...')

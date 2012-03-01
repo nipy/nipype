@@ -23,18 +23,13 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     Example
     -------
 
-    >>> import os
-    >>> import nipype.interfaces.freesurfer as fs
-    >>> import nipype.workflows.dmri.mrtrix.connectivity_mapping as mrwork
-    >>> from nipype.testing import example_data
-    >>> subjects_dir = '.'
-    >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
-    >>> conmapper = mrwork.create_connectivity_pipeline("nipype_conmap")
-    >>> conmapper.inputs.inputnode.subjects_dir = subjects_dir # doctest: +SKIP
+    >>> from nipype.workflows.dmri.mrtrix.connectivity_mapping import create_connectivity_pipeline
+    >>> conmapper = create_connectivity_pipeline("nipype_conmap")
+    >>> conmapper.inputs.inputnode.subjects_dir = '.'
     >>> conmapper.inputs.inputnode.subject_id = 'subj1'
-    >>> conmapper.inputs.inputnode.dwi = os.path.abspath('fsl_course_data/fdt/subj1/data.nii.gz')
-    >>> conmapper.inputs.inputnode.bvecs = os.path.abspath('fsl_course_data/fdt/subj1/bvecs')
-    >>> conmapper.inputs.inputnode.bvals = os.path.abspath('fsl_course_data/fdt/subj1/bvals')
+    >>> conmapper.inputs.inputnode.dwi = 'data.nii.gz'
+    >>> conmapper.inputs.inputnode.bvecs = 'bvecs'
+    >>> conmapper.inputs.inputnode.bvals = 'bvals'
     >>> conmapper.run()                 # doctest: +SKIP
 
     Inputs::
@@ -49,24 +44,24 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     Outputs::
 
         outputnode.connectome
+        outputnode.cmatrix
+        outputnode.gpickled_network
+        outputnode.fa
+        outputnode.struct
+        outputnode.tracts
+        outputnode.rois
+        outputnode.odfs
+        outputnode.filtered_tractography
         outputnode.nxstatscff
         outputnode.nxmatlab
         outputnode.nxcsv
         outputnode.nxmergedcsv
-        outputnode.fa
-        outputnode.tracts
-        outputnode.filtered_tractography
-        outputnode.cmatrix
         outputnode.cmatrix_csv
-        outputnode.meanfib_csv
-        outputnode.fibstd_csv
         outputnode.cmatrices_csv
-        outputnode.rois
-        outputnode.odfs
-        outputnode.struct
-        outputnode.gpickled_network
         outputnode.mean_fiber_length
+        outputnode.meanfib_csv
         outputnode.fiber_length_std
+        outputnode.fibstd_csv
     """
 
     inputnode_within = pe.Node(util.IdentityInterface(fields=["subject_id",
@@ -495,7 +490,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
 
     mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
     mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
-    mapping.connect([(creatematrix, CFFConverter,[("matrix_file","gpickled_networks")])])    
+    mapping.connect([(creatematrix, CFFConverter,[("matrix_files","gpickled_networks")])])    
     mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
     mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
     mapping.connect([(creatematrix, CFFConverter,[("filtered_tractography","tract_files")])])
@@ -505,8 +500,8 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     The graph theoretical metrics which have been generated are placed into another CFF file.
     """
 
-    mapping.connect([(creatematrix, ntwkMetrics,[("matrix_file","in_file")])])
-    mapping.connect([(creatematrix, gpickledNetworks,[("matrix_file","in1")])])
+    mapping.connect([(creatematrix, ntwkMetrics,[("intersection_matrix_file","in_file")])])
+    mapping.connect([(creatematrix, gpickledNetworks,[("intersection_matrix_file","in1")])])
     mapping.connect([(ntwkMetrics, gpickledNetworks,[("gpickled_network_files","in2")])])
     mapping.connect([(gpickledNetworks, NxStatsCFFConverter,[("out","gpickled_networks")])])
 
