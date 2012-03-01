@@ -1,14 +1,14 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-=============================
-fMRI - OpenfMRI.org data, FSL
-=============================
+============================
+fMRI: OpenfMRI.org data, FSL
+============================
 
 A growing number of datasets are available on `OpenfMRI <http://openfmri.org>`_. 
 This script demonstrates how to use nipype to analyze a data set.
 
-    python openfmri_example.py --datasetdir ds107
+    python fmri_openfmri.py --datasetdir ds107
 """
 
 from glob import glob
@@ -327,7 +327,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None, work_dir=Non
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(prog='openfmri_example.py',
+    parser = argparse.ArgumentParser(prog='fmri_openfmri.py',
                                      description=__doc__)
     parser.add_argument('--datasetdir', required=True)
     parser.add_argument('--subject', default=None)

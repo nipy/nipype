@@ -1,19 +1,19 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-================
-fMRI - NiPy, SPM
-================
+===================
+fMRI: NiPy GLM, SPM
+===================
 
 
-The nipy_tutorial.py integrates several interfaces to perform a first level
+The fmri_nipy_glm.py integrates several interfaces to perform a first level
 analysis on a two-subject data set. It is very similar to the spm_tutorial with
 the difference of using nipy for fitting GLM model and estimating contrasts.
 The tutorial can
 be found in the examples folder. Run the tutorial from inside the
 nipype tutorial directory:
 
-    python nipy_tutorial.py
+    python fmri_nipy_glm.py
 
 """
 from nipype.interfaces.nipy.model import FitGLM, EstimateContrast

@@ -1,17 +1,17 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-===========================
-fMRI - SPM Auditory dataset
-===========================
+==========================
+fMRI: SPM Auditory dataset
+==========================
 
 Introduction
 ============
 
-The spm_auditory_tutorial.py recreates the classical workflow described in the SPM8 manual (http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf)
+The fmri_spm_auditory.py recreates the classical workflow described in the SPM8 manual (http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf)
 using auditory dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/auditory/:
 
-    python spm_auditory_tutorial.py
+    python fmri_spm_auditory.py
 
 Import necessary modules from nipype."""
 

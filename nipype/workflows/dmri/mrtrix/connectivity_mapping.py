@@ -128,7 +128,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
 
     .. seealso::
 
-        mrtrix_dti_tutorial.py
+        dmri_mrtrix_dti.py
             Tutorial that focuses solely on the MRtrix diffusion processing
 
         http://www.brain.org.au/software/mrtrix/index.html
@@ -491,7 +491,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     """
     This block actually connects the merged lists to the CFF converter. We pass the surfaces
     and volumes that are to be included, as well as the tracts and the network itself. The currently
-    running pipeline (connectivity_tutorial_advanced.py) is also scraped and included in the CFF file. This
+    running pipeline (dmri_connectivity_advanced.py) is also scraped and included in the CFF file. This
     makes it easy for the user to examine the entire processing pathway used to generate the end
     product.
     """

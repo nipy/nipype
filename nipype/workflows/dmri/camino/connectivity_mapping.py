@@ -364,7 +364,7 @@ def create_connectivity_pipeline(name="connectivity"):
 
     """
     The tractography pipeline consists of the following nodes. Further information about the tractography
-    can be found in nipype/examples/camino_dti_tutorial.py.
+    can be found in nipype/examples/dmri_camino_dti.py.
     """
 
     mapping.connect([(b0Strip, track,[("mask_file","seed_file")])])
@@ -473,7 +473,7 @@ def create_connectivity_pipeline(name="connectivity"):
     """
     This block actually connects the merged lists to the CFF converter. We pass the surfaces
     and volumes that are to be included, as well as the tracts and the network itself. The currently
-    running pipeline (connectivity_tutorial.py) is also scraped and included in the CFF file. This
+    running pipeline (dmri_connectivity.py) is also scraped and included in the CFF file. This
     makes it easy for the user to examine the entire processing pathway used to generate the end
     product.
     """

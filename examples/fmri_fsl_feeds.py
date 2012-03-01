@@ -1,17 +1,15 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-==========
-fMRI - FSL
-==========
+=================
+fMRI: FEEDS - FSL
+=================
 
-A workflow that uses fsl to perform a first level analysis on the nipype
-tutorial data set::
+A pipeline example that data from the FSL FEEDS set. Single subject, two
+stimuli.
 
-    python fsl_tutorial2.py
+You can find it at http://www.fmrib.ox.ac.uk/fsl/feeds/doc/index.html
 
-
-First tell python where to find the appropriate functions.
 """
 
 import os                                    # system functions
@@ -21,8 +19,6 @@ import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model generation
-import nipype.algorithms.rapidart as ra      # artifact detection
-
 
 
 """
@@ -118,17 +114,6 @@ motion_correct = pe.MapNode(interface=fsl.MCFLIRT(save_mats = True,
 preproc.connect(img2float, 'out_file', motion_correct, 'in_file')
 preproc.connect(extract_ref, 'roi_file', motion_correct, 'ref_file')
 
-
-"""
-Plot the estimated motion parameters
-"""
-
-plot_motion = pe.MapNode(interface=fsl.PlotMotionParams(in_source='fsl'),
-                        name='plot_motion',
-                        iterfield=['in_file'])
-plot_motion.iterables = ('plot_type', ['rotations', 'translations'])
-preproc.connect(motion_correct, 'par_file', plot_motion, 'in_file')
-
 """
 Extract the mean volume of the first functional run
 """
@@ -176,7 +161,7 @@ Threshold the first run of the functional data at 10% of the 98th percentile
 
 threshold = pe.Node(interface=fsl.ImageMaths(out_data_type='char',
                                              suffix='_thresh'),
-                    name='threshold')
+                       name='threshold')
 preproc.connect(maskfunc, ('out_file', pickfirst), threshold, 'in_file')
 
 """
@@ -203,7 +188,7 @@ Dilate the mask
 
 dilatemask = pe.Node(interface=fsl.ImageMaths(suffix='_dil',
                                               op_string='-dilF'),
-                     name='dilatemask')
+                       name='dilatemask')
 preproc.connect(threshold, 'out_file', dilatemask, 'in_file')
 
 """
@@ -212,8 +197,8 @@ Mask the motion corrected functional runs with the dilated mask
 
 maskfunc2 = pe.MapNode(interface=fsl.ImageMaths(suffix='_mask',
                                                 op_string='-mas'),
-                       iterfield=['in_file'],
-                       name='maskfunc2')
+                      iterfield=['in_file'],
+                      name='maskfunc2')
 preproc.connect(motion_correct, 'out_file', maskfunc2, 'in_file')
 preproc.connect(dilatemask, 'out_file', maskfunc2, 'in_file2')
 
@@ -239,7 +224,7 @@ preproc.connect(medianval,'out_stat', mergenode, 'in2')
 
 """
 Smooth each run using SUSAN with the brightness threshold set to 75% of the
-median value for each run and a mask constituting the mean functional
+median value for each run and a mask consituting the mean functional
 """
 
 smooth = pe.MapNode(interface=fsl.SUSAN(),
@@ -253,12 +238,12 @@ Define a function to get the brightness threshold for SUSAN
 def getbtthresh(medianvals):
     return [0.75*val for val in medianvals]
 
-def getusans(x):
+def convert_th(x):
     return [[tuple([val[0],0.75*val[1]])] for val in x]
 
 preproc.connect(maskfunc2, 'out_file', smooth, 'in_file')
 preproc.connect(medianval, ('out_stat', getbtthresh), smooth, 'brightness_threshold')
-preproc.connect(mergenode, ('out', getusans), smooth, 'usans')
+preproc.connect(mergenode, ('out', convert_th), smooth, 'usans')
 
 """
 Mask the smoothed data with the dilated mask
@@ -266,8 +251,8 @@ Mask the smoothed data with the dilated mask
 
 maskfunc3 = pe.MapNode(interface=fsl.ImageMaths(suffix='_mask',
                                                 op_string='-mas'),
-                       iterfield=['in_file'],
-                       name='maskfunc3')
+                      iterfield=['in_file'],
+                      name='maskfunc3')
 preproc.connect(smooth, 'smoothed_file', maskfunc3, 'in_file')
 preproc.connect(dilatemask, 'out_file', maskfunc3, 'in_file2')
 
@@ -276,8 +261,8 @@ Scale each volume of the run so that the median value of the run is set to 10000
 """
 
 intnorm = pe.MapNode(interface=fsl.ImageMaths(suffix='_intnorm'),
-                     iterfield=['in_file','op_string'],
-                     name='intnorm')
+                      iterfield=['in_file','op_string'],
+                      name='intnorm')
 preproc.connect(maskfunc3, 'out_file', intnorm, 'in_file')
 
 """
@@ -304,11 +289,11 @@ Generate a mean functional image from the first run
 meanfunc3 = pe.MapNode(interface=fsl.ImageMaths(op_string='-Tmean',
                                                 suffix='_mean'),
                        iterfield=['in_file'],
-                       name='meanfunc3')
+                      name='meanfunc3')
 preproc.connect(highpass, ('out_file', pickfirst), meanfunc3, 'in_file')
 
 """
-Strip the structural image and coregister the mean functional image to the
+Strip the structural image a coregister the mean functional image to the
 structural image
 """
 
@@ -320,29 +305,10 @@ skullstrip = pe.Node(interface=fsl.BET(mask = True),
 coregister = pe.Node(interface=fsl.FLIRT(dof=6),
                      name = 'coregister')
 
-"""
-Use :class:`nipype.algorithms.rapidart` to determine which of the
-images in the functional series are outliers based on deviations in
-intensity and/or movement.
-"""
-
-art = pe.MapNode(interface=ra.ArtifactDetect(use_differences = [True, False],
-                                             use_norm = True,
-                                             norm_threshold = 1,
-                                             zintensity_threshold = 3,
-                                             parameter_source = 'FSL',
-                                             mask_type = 'file'),
-                 iterfield=['realigned_files', 'realignment_parameters'],
-                 name="art")
-
-
 preproc.connect([(inputnode, nosestrip,[('struct','in_file')]),
                  (nosestrip, skullstrip, [('out_file','in_file')]),
                  (skullstrip, coregister,[('out_file','in_file')]),
                  (meanfunc2, coregister,[(('out_file',pickfirst),'reference')]),
-                 (motion_correct, art, [('par_file','realignment_parameters')]),
-                 (maskfunc2, art, [('out_file','realigned_files')]),
-                 (dilatemask, art, [('out_file', 'mask_file')]),
                  ])
 
 """
@@ -374,7 +340,6 @@ file for use by FILMGLS
 modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
                       iterfield = ['fsf_file', 'ev_files'])
 
-
 """
 Use :class:`nipype.interfaces.fsl.FILMGLS` to estimate a model specified by a
 mat file and a functional run
@@ -391,16 +356,17 @@ Use :class:`nipype.interfaces.fsl.ContrastMgr` to generate contrast estimates
 """
 
 conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
-                         iterfield = ['tcon_file','param_estimates',
+                         iterfield = ['fcon_file', 'tcon_file','param_estimates',
                                       'sigmasquareds', 'corrections',
                                       'dof_file'])
 
 modelfit.connect([
    (modelspec,level1design,[('session_info','session_info')]),
-   (level1design,modelgen,[('fsf_files', 'fsf_file'),
+   (level1design,modelgen,[('fsf_files','fsf_file'),
                            ('ev_files', 'ev_files')]),
    (modelgen,modelestimate,[('design_file','design_file')]),
    (modelgen,conestimate,[('con_file','tcon_file')]),
+   (modelgen,conestimate,[('fcon_file','fcon_file')]),
    (modelestimate,conestimate,[('param_estimates','param_estimates'),
                                ('sigmasquareds', 'sigmasquareds'),
                                ('corrections','corrections'),
@@ -421,8 +387,8 @@ varcopes for each condition
 """
 
 copemerge    = pe.MapNode(interface=fsl.Merge(dimension='t'),
-                          iterfield=['in_files'],
-                          name="copemerge")
+                       iterfield=['in_files'],
+                       name="copemerge")
 
 varcopemerge = pe.MapNode(interface=fsl.Merge(dimension='t'),
                        iterfield=['in_files'],
@@ -471,7 +437,6 @@ def num_copes(files):
 
 firstlevel = pe.Workflow(name='firstlevel')
 firstlevel.connect([(preproc, modelfit, [('highpass.out_file', 'modelspec.functional_runs'),
-                                         ('art.outlier_files', 'modelspec.outlier_files'),
                                          ('highpass.out_file','modelestimate.in_file')]),
                     (preproc, fixed_fx, [('coregister.out_file', 'flameo.mask_file')]),
                     (modelfit, fixed_fx,[(('conestimate.copes', sort_copes),'copemerge.in_files'),
@@ -485,70 +450,33 @@ firstlevel.connect([(preproc, modelfit, [('highpass.out_file', 'modelspec.functi
 Experiment specific components
 ------------------------------
 
-The nipype tutorial contains data for two subjects.  Subject data
-is in two subdirectories, ``s1`` and ``s2``.  Each subject directory
-contains four functional volumes: f3.nii, f5.nii, f7.nii, f10.nii. And
-one anatomical volume named struct.nii.
-
-Below we set some variables to inform the ``datasource`` about the
-layout of our data.  We specify the location of the data, the subject
-sub-directories and a dictionary that maps each run to a mnemonic (or
-field) for the run type (``struct`` or ``func``).  These fields become
-the output fields of the ``datasource`` node in the pipeline.
-
-In the example below, run 'f3' is of type 'func' and gets mapped to a
-nifti filename through a template '%s.nii'. So 'f3' would become
-'f3.nii'.
-
+This tutorial does a single subject analysis so we are not using infosource and
+iterables
 """
 
-# Specify the location of the data.
-data_dir = os.path.abspath('data')
+# Specify the location of the FEEDS data. You can find it at http://www.fmrib.ox.ac.uk/fsl/feeds/doc/index.html
+feeds_data_dir = os.path.abspath('feeds_data')
 # Specify the subject directories
-subject_list = ['s1'] #, 's3']
 # Map field names to individual subject runs.
-info = dict(func=[['subject_id', ['f3','f5','f7','f10']]],
-            struct=[['subject_id','struct']])
-
-infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
-                     name="infosource")
-
-"""Here we set up iteration over all the subjects. The following line
-is a particular example of the flexibility of the system.  The
-``datasource`` attribute ``iterables`` tells the pipeline engine that
-it should repeat the analysis on each of the items in the
-``subject_list``. In the current example, the entire first level
-preprocessing and estimation will be repeated for each subject
-contained in subject_list.
-"""
-
-infosource.iterables = ('subject_id', subject_list)
+info = dict(func=[['fmri']],
+            struct=[['structural']])
 
 """
-Now we create a :class:`nipype.interfaces.io.DataSource` object and
-fill in the information from above about the layout of our data.  The
-:class:`nipype.pipeline.NodeWrapper` module wraps the interface object
-and provides additional housekeeping and pipeline specific
-functionality.
+Now we create a :class:`nipype.interfaces.io.DataSource` object and fill in the
+information from above about the layout of our data.  The
+:class:`nipype.pipeline.Node` module wraps the interface object and provides
+additional housekeeping and pipeline specific functionality.
 """
 
-datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                               outfields=['func', 'struct']),
+datasource = pe.Node(interface=nio.DataGrabber(outfields=['func', 'struct']),
                      name = 'datasource')
-datasource.inputs.base_directory = data_dir
-datasource.inputs.template = '%s/%s.nii'
+datasource.inputs.base_directory = feeds_data_dir
+datasource.inputs.template = '%s.nii.gz'
 datasource.inputs.template_args = info
 
-"""
-Use the get_node function to retrieve an internal node by name. Then set the
-iterables on this node to perform two different extents of smoothing.
-"""
+firstlevel.inputs.preproc.smooth.fwhm = 5
 
-smoothnode = firstlevel.get_node('preproc.smooth')
-assert(str(smoothnode)=='preproc.smooth')
-smoothnode.iterables = ('fwhm', [5.,10.])
-
-hpcutoff = 120
+hpcutoff = 100
 TR = 3.
 firstlevel.inputs.preproc.highpass.suffix = '_hpf'
 firstlevel.inputs.preproc.highpass.op_string = '-bptf %d -1'%(hpcutoff/TR)
@@ -563,25 +491,16 @@ for every participant. Other examples of this function are available in the
 `doc/examples` folder. Note: Python knowledge required here.
 """
 
-def subjectinfo(subject_id):
-    from nipype.interfaces.base import Bunch
-    from copy import deepcopy
-    print "Subject ID: %s\n"%str(subject_id)
-    output = []
-    names = ['Task-Odd','Task-Even']
-    for r in range(4):
-        onsets = [range(15,240,60),range(45,240,60)]
-        output.insert(r,
-                      Bunch(conditions=names,
-                            onsets=deepcopy(onsets),
-                            durations=[[15] for s in names],
-                            amplitudes=None,
-                            tmod=None,
-                            pmod=None,
-                            regressor_names=None,
-                            regressors=None))
-    return output
+from nipype.interfaces.base import Bunch
 
+firstlevel.inputs.modelfit.modelspec.subject_info = [Bunch(conditions=['Visual','Auditory'],
+                        onsets=[range(0,int(180*TR),60),range(0,int(180*TR),90)],
+                        durations=[[30], [45]],
+                        amplitudes=None,
+                        tmod=None,
+                        pmod=None,
+                        regressor_names=None,
+                        regressors=None)]
 """
 Setup the contrast structure that needs to be evaluated. This is a list of
 lists. The inner list specifies the contrasts and has the following format -
@@ -590,19 +509,22 @@ condition names must match the `names` listed in the `subjectinfo` function
 described above.
 """
 
-cont1 = ['Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5]]
-cont2 = ['Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1]]
+cont1 = ['Visual>Baseline','T', ['Visual','Auditory'],[1,0]]
+cont2 = ['Auditory>Baseline','T', ['Visual','Auditory'],[0,1]]
 cont3 = ['Task','F', [cont1, cont2]]
-contrasts = [cont1,cont2]
+contrasts = [cont1,cont2,cont3]
+
+model_serial_correlations = True
 
 firstlevel.inputs.modelfit.modelspec.input_units = 'secs'
 firstlevel.inputs.modelfit.modelspec.time_repetition = TR
 firstlevel.inputs.modelfit.modelspec.high_pass_filter_cutoff = hpcutoff
 
+
 firstlevel.inputs.modelfit.level1design.interscan_interval = TR
-firstlevel.inputs.modelfit.level1design.bases = {'dgamma':{'derivs': False}}
+firstlevel.inputs.modelfit.level1design.bases = {'dgamma':{'derivs': True}}
 firstlevel.inputs.modelfit.level1design.contrasts = contrasts
-firstlevel.inputs.modelfit.level1design.model_serial_correlations = True
+firstlevel.inputs.modelfit.level1design.model_serial_correlations = model_serial_correlations
 
 """
 Set up complete workflow
@@ -610,15 +532,30 @@ Set up complete workflow
 """
 
 l1pipeline = pe.Workflow(name= "level1")
-l1pipeline.base_dir = os.path.abspath('./fsl/workingdir')
-l1pipeline.config = dict(crashdump_dir=os.path.abspath('./fsl/crashdumps'))
+l1pipeline.base_dir = os.path.abspath('./fsl_feeds/workingdir')
+l1pipeline.config = dict(crashdump_dir=os.path.abspath('./fsl_feeds/crashdumps'))
 
-l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                    (infosource, firstlevel, [(('subject_id', subjectinfo), 'modelfit.modelspec.subject_info')]),
-                    (datasource, firstlevel, [('struct','preproc.inputspec.struct'),
+l1pipeline.connect([(datasource, firstlevel, [('struct','preproc.inputspec.struct'),
                                               ('func', 'preproc.inputspec.func'),
                                               ]),
                     ])
+
+"""
+Setup the datasink
+"""
+
+datasink = pe.Node(interface=nio.DataSink(parameterization=False), name="datasink")
+datasink.inputs.base_directory = os.path.abspath('./fsl_feeds/l1out')
+datasink.inputs.substitutions = [('dtype_mcf_mask_mean', 'meanfunc'),
+                                 ('brain_brain_flirt','coregistered')]
+# store relevant outputs from various stages of the 1st level analysis
+l1pipeline.connect([(firstlevel, datasink,[('fixedfx.flameo.stats_dir',"fixedfx.@con"),
+                                            ('preproc.coregister.out_file','coregstruct'),
+                                            ('preproc.meanfunc2.out_file','meanfunc'),
+                                            ('modelfit.conestimate.zstats', 'level1.@Z'),
+                                            ])
+                    ])
+
 
 """
 Execute the pipeline
@@ -631,8 +568,6 @@ generate any output. To actually run the analysis on the data the
 """
 
 if __name__ == '__main__':
-    l1pipeline.write_graph()
     l1pipeline.run()
-    #l1pipeline.run(plugin='MultiProc', plugin_args={'n_procs':2})
-
+#    l2pipeline.run()
 
