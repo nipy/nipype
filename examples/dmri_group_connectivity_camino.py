@@ -1,7 +1,7 @@
 """
-============================================
-Group connectivity - Camino, FSL, FreeSurfer
-============================================
+==================================================
+dMRI: Group connectivity - Camino, FSL, FreeSurfer
+==================================================
 
 Introduction
 ============
@@ -10,7 +10,7 @@ This script, group_connectivity.py, runs group-based connectivity analysis using
 the connectivity_mapping Nipype workflow. Further detail on the processing can be
 found in connectivity_tutorial.py. This tutorial can be run using:
 
-    python group_connectivity.py
+    python dmri_group_connectivity_camino.py
 
 We perform this analysis using two healthy subjects: subj1 (from the FSL course data) and subj2.
 We also process one coma patient who has suffers from traumatic brain damage.

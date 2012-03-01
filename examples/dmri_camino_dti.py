@@ -1,7 +1,7 @@
 """
-==================
-Diffusion - Camino
-==================
+=================
+dMRI: Camino, DTI
+=================
 
 Introduction
 ============
@@ -9,7 +9,7 @@ Introduction
 This script, camino_dti_tutorial.py, demonstrates the ability to perform basic diffusion analysis
 in a Nipype pipeline.
 
-    python camino_dti_tutorial.py
+    python dmri_camino_dti.py
 
 We perform this analysis using the FSL course data, which can be acquired from here:
 http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
@@ -29,7 +29,7 @@ import os                                    # system functions
 """
 We use the following functions to scrape the voxel and data dimensions of the input images. This allows the
 pipeline to be flexible enough to accept and process images of varying size. The SPM Face tutorial
-(spm_face_tutorial.py) also implements this inferral of voxel size from the data.
+(fmri_spm_face.py) also implements this inferral of voxel size from the data.
 """
 
 def get_vox_dims(volume):

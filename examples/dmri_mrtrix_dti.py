@@ -1,7 +1,7 @@
 """
-=================
-DTI - MRtrix, FSL
-=================
+=======================
+dMRI: DTI - MRtrix, FSL
+=======================
 
 Introduction
 ============
@@ -9,7 +9,7 @@ Introduction
 This script, mrtrix_dti_tutorial.py, demonstrates the ability to perform advanced diffusion analysis
 in a Nipype pipeline.
 
-    python mrtrix_dti_tutorial.py
+    python dmri_mrtrix_dti.py
 
 We perform this analysis using the FSL course data, which can be acquired from here:
 
@@ -74,7 +74,7 @@ inputnode = pe.Node(interface=util.IdentityInterface(fields=["dwi", "bvecs", "bv
 
     .. seealso::
 
-    	connectivity_tutorial_advanced.py
+    	dmri_connectivity_advanced.py
     		Tutorial with further detail on using MRtrix tractography for connectivity analysis
 
     	http://www.brain.org.au/software/mrtrix/index.html

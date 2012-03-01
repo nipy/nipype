@@ -1,7 +1,7 @@
 """
-==================================================
-Structural connectivity - Camino, CMTK, FreeSurfer
-==================================================
+=============================================
+dMRI: Connectivity - Camino, CMTK, FreeSurfer
+=============================================
 
 Introduction
 ============
@@ -61,7 +61,7 @@ import cmp                                    # connectome mapper
 """
 We define the following functions to scrape the voxel and data dimensions of the input images. This allows the
 pipeline to be flexible enough to accept and process images of varying size. The SPM Face tutorial
-(spm_face_tutorial.py) also implements this inferral of voxel size from the data. We also define functions to
+(fmri_spm_face.py) also implements this inferral of voxel size from the data. We also define functions to
 select the proper parcellation/segregation file from Freesurfer's output for each subject. For the mapping in
 this tutorial, we use the aparc+seg.mgz file. While it is possible to change this to use the regions defined in
 aparc.a2009s+aseg.mgz, one would also have to write/obtain a network resolution map defining the nodes based on those
@@ -452,7 +452,7 @@ mapping.connect([(mri_convert_WMParc, inverse,[('out_file','in_file')])])
 
 """
 The tractography pipeline consists of the following nodes. Further information about the tractography
-can be found in nipype/examples/camino_dti_tutorial.py.
+can be found in nipype/examples/dmri_camino_dti.py.
 """
 
 mapping.connect([(b0Strip, track,[("mask_file","seed_file")])])
@@ -557,7 +557,7 @@ mapping.connect([(creatematrix, fiberDataArrays,[("fiber_label_file","in4")])])
 """
 This block actually connects the merged lists to the CFF converter. We pass the surfaces
 and volumes that are to be included, as well as the tracts and the network itself. The currently
-running pipeline (connectivity_tutorial.py) is also scraped and included in the CFF file. This
+running pipeline (dmri_connectivity.py) is also scraped and included in the CFF file. This
 makes it easy for the user to examine the entire processing pathway used to generate the end
 product.
 """

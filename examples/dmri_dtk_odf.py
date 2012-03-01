@@ -1,7 +1,7 @@
 """
-==============================
-HARDI - Diffusion Toolkit, FSL
-==============================
+====================================
+dMRI: HARDI - Diffusion Toolkit, FSL
+====================================
 
 A pipeline example that uses several interfaces to perform analysis on
 diffusion weighted images using Diffusion Toolkit tools.

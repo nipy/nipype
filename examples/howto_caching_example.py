@@ -1,7 +1,7 @@
 """
-==============================
-Caching without using Workflow
-==============================
+===========================================
+HOWTO: Using caching without using Workflow
+===========================================
 
 Using nipype in an imperative way: caching without workflow
 

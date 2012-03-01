@@ -1,7 +1,7 @@
 """
-=================================
-Workshop - Dartmouth College 2010
-=================================
+================================
+Workshop: Dartmouth College 2010
+================================
 
 First lets go to the directory with the data we'll be working on and start the interactive python interpreter
 (with some nipype specific configuration). Note that nipype does not need to be run through ipython - it is
@@ -167,7 +167,7 @@ The beauty of the workflows is that they are reusable. We can just import a work
 else and feed it with our data.
 """
 
-from fsl_tutorial2 import preproc
+from fmri_fsl import preproc
 preproc.base_dir = os.path.abspath('.')
 preproc.inputs.inputspec.func = os.path.abspath('data/s1/f3.nii')
 preproc.inputs.inputspec.struct = os.path.abspath('data/s1/struct.nii')
