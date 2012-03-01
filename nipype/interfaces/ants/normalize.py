@@ -26,20 +26,19 @@ from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath,
                                     OutputMultiPath, CommandLine,
                                     CommandLineInputSpec, isdefined)
-from nipype.interfaces.ants.base import (ANTSCommand, ANTSCommandInputSpec)
 from nipype.utils.filemanip import (filename_to_list,copyfiles, list_to_filename,
                                     split_filename, fname_presuffix)
 
 class BuildTemplateInputSpec(CommandLineInputSpec):
-    dimension = traits.Enum(3, 2, argstr='%d', usedefault=True,
-                             desc='image dimension (2 or 3)')
-    out_prefix = traits.Str('antsTMPL_',argstr='%s',usedefault=True,
+    dimension = traits.Enum(3, 2, argstr='-d %d',usedefault=True,
+                             desc='image dimension (2 or 3)', position=1)
+    out_prefix = traits.Str('antsTMPL_',argstr='-o %s',usedefault=True,
                              desc='Prefix that is prepended to all output files \
                              (default = antsTMPL_)')
     in_files = traits.List(File(exists=True), mandatory=True,
                              desc='list of images to generate template from',argstr='%s',position=-1,
                              copyfile=True)
-    parallelization = traits.Enum(0,1,2,argstr='%d',usedefault=True,
+    parallelization = traits.Enum(0,1,2,argstr='-c %d',usedefault=True,
                              desc='control for parallel processing (0 = serial, \
                              1 = use PBS, 2 = use PEXEC, 3 = use Apple XGrid')
     gradient_step_size = traits.Float(argstr='-g %f',desc='smaller magnitude \
@@ -82,7 +81,7 @@ class BuildTemplateOutputSpec(TraitedSpec):
                              and warped image (deformed)')
 
 
-class BuildTemplate(ANTSCommand):
+class BuildTemplate(CommandLine):
     """Uses the ANTS command buildtemplateparallel.sh to generate a template from the files listed in in_files.
     Note: This can take a VERY long time to complete
     Examples
@@ -104,24 +103,11 @@ class BuildTemplate(ANTSCommand):
 
 
     def _format_arg(self, opt, spec, val):
-
-
-        if opt == 'transformation_model':
-            return '-t %s'%val
-        if opt == 'parallelization':
-            return '-c %d'%val
-        if opt == 'out_prefix':
-            return '-o %s'%val
-        if opt == 'dimension':
-            return '-d %d'%val
         if opt == 'num_cores':
             if self.inputs.parallelization == 2:
-                return val
+                return '-j '+val
             else: 
                 return ''
-        if opt == 'rigid_body_registration':
-            if self.inputs.rigid_body_registration:
-                return '-r 1'
         if opt == 'in_files':
             series = ''
             if self.inputs.use_first_as_target:
@@ -130,7 +116,7 @@ class BuildTemplate(ANTSCommand):
                 pth, base, ext = split_filename(image_path)
                 series=series+base+ext+' '
             return series
-        return val
+        return super(BuildTemplate,self)._format_arg(opt,spec,val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -152,15 +138,15 @@ class BuildTemplate(ANTSCommand):
 
 
 class WarpImageMultiTransformInputSpec(CommandLineInputSpec):
-    dimension = traits.Enum(3, 2, argstr='%d', usedefault=True,
-                             desc='image dimension (2 or 3)')
+    dimension = traits.Enum(3, 2, argstr='%d',usedefault=True,
+                             desc='image dimension (2 or 3)',position=1)
     moving_image = File(argstr='%s',desc='image to apply transformation \
                              to (generally a coregistered functional)',
                               mandatory=True, copyfile=True)
     out_postfix = traits.Str('_wimt',argstr='%s',
                              desc='Postfix that is prepended to all output files \
                              (default = _wimt)',usedefault=True)
-    reference_image = File(argstr='%s',desc='reference image space that you \
+    reference_image = File(argstr='-R %s',desc='reference image space that you \
                              wish to warp INTO',xor=['tightest_box'])
     tightest_box = traits.Bool(argstr='--tightest-bounding-box',
                              desc='computes tightest bounding box (overrided by \
@@ -186,7 +172,7 @@ class WarpImageMultiTransformOutputSpec(TraitedSpec):
     output_images = traits.Either(traits.List(File(exists=True)),
                              File(exists=True))
 
-class WarpImageMultiTransform(ANTSCommand):
+class WarpImageMultiTransform(CommandLine):
     """Uses the ANTS command WarpImageMultiTransform to warp an image (moving image) from one space to another (fixed/template space)
 
     Examples
@@ -209,10 +195,6 @@ class WarpImageMultiTransform(ANTSCommand):
     output_spec = WarpImageMultiTransformOutputSpec
 
     def _format_arg(self, opt, spec, val):
-        if opt == 'reference_image':
-            return '-R %s'%val
-        if opt == 'dimension':
-            return '%d'%val
         if opt == 'out_postfix':
             return os.path.split(self.inputs.moving_image)[-1].partition('.')[0]+val+'.'+os.path.split(self.inputs.moving_image)[-1].partition('.')[2]
         if opt == 'transformation_series':
@@ -224,7 +206,7 @@ class WarpImageMultiTransform(ANTSCommand):
                 else:
                      series=series+transformation+' '
             return series
-        return val
+        return super(WarpImageMultiTransform,self)._format_arg(opt,spec,val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -234,8 +216,8 @@ class WarpImageMultiTransform(ANTSCommand):
 
 
 class AntsIntroductionInputSpec(CommandLineInputSpec):
-    dimension = traits.Enum(3, 2, argstr='%d',usedefault=True,
-                             desc='image dimension (2 or 3)')
+    dimension = traits.Enum(3, 2, argstr='-d %d',usedefault=True,
+                             desc='image dimension (2 or 3)', position=1)
     reference_image = File(argstr='-r %s',desc='template file to warp to',
                              mandatory=True, copyfile=True)
     input_image = File(argstr='-i %s',desc='input image to warp to template',
@@ -254,7 +236,7 @@ class AntsIntroductionInputSpec(CommandLineInputSpec):
                              iterations')
     bias_field_correction = traits.Bool(argstr='-n 1', 
                              desc='Applies bias field correction to moving image')
-    out_prefix = traits.Str('ants_',argstr='%s', usedefault=True,
+    out_prefix = traits.Str('ants_',argstr='-o %s', usedefault=True,
                              desc='Prefix that is prepended to all output files \
                              (default = ants_)')
     quality_check = traits.Bool(argstr='-q 1', 
@@ -278,7 +260,7 @@ class AntsIntroductionOutputSpec(TraitedSpec):
     input_file = File(exists=True, desc='input image (prefix_repaired.nii)')
     output_file = File(exists=True, desc='output image (prefix_deformed.nii)')
 
-class GenWarpFields(ANTSCommand):
+class GenWarpFields(CommandLine):
     """Uses the ANTS command antsIntroduction to generate warp and inverse warp fields that transform structural data
     from anatomical images of a subject to the input template space.
 
@@ -298,15 +280,6 @@ class GenWarpFields(ANTSCommand):
     _cmd = 'antsIntroduction.sh'
     input_spec = AntsIntroductionInputSpec
     output_spec = AntsIntroductionOutputSpec
-
-
-    def _format_arg(self, opt, spec, val):
-        print val
-        print opt
-        if opt == 'out_prefix':
-            return '-o %s'%val
-        if opt == 'dimension':
-            return '-d %d'%val
 
     def _list_outputs(self):
         outputs = self._outputs().get()

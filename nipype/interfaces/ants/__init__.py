@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Top-level namespace for ants."""
 
-from nipype.interfaces.ants.base import (ANTSCommand, logger)
+from nipype.interfaces.ants.base import (logger)
 from nipype.interfaces.ants.normalize import (BuildTemplate, 
                                          WarpImageMultiTransform, GenWarpFields)
 
