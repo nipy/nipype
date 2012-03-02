@@ -26,7 +26,7 @@ help:
 	@echo "  sf_satra copy html files to sourceforge (satra only)"
 
 clean:
-	-rm -rf _build/* *~ api/generated users/examples documentation.zip
+	-rm -rf _build/* *~ api/generated interfaces/generated users/examples documentation.zip
 
 htmlonly:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
@@ -35,14 +35,13 @@ htmlonly:
 
 api:
 	rm -rf api/generated
-	#python ../tools/build_modref_templates.py
+	python ../tools/build_modref_templates.py
 	rm -rf interfaces/generated
 	python ../tools/build_interface_docs.py
 	@echo "Build API docs finished."
 
-html: examples2rst api htmlonly
+html: clean examples2rst api htmlonly
 	@echo "Build HTML and API finished."
-	stty sane
 
 examples2rst:
 	mkdir -p users/examples

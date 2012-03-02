@@ -163,7 +163,7 @@ def no_spm():
     used with nosetests skipif to skip tests
     that will fail if spm is not installed"""
 
-    if Info.version() == None:
+    if Info.version() == None or 'NIPYPE_NO_MATLAB' in os.environ:
         return True
     else:
         return False
@@ -324,7 +324,10 @@ class SPMCommand(BaseInterface):
             return jobstring
         if isinstance(contents, list):
             for i,value in enumerate(contents):
-                newprefix = "%s(%d)" % (prefix, i+1)
+                if prefix.endswith(")"):
+                    newprefix = "%s,%d)" % (prefix[:-1], i+1)
+                else:
+                    newprefix = "%s(%d)" % (prefix, i+1)
                 jobstring += self._generate_job(newprefix, value)
             return jobstring
         if isinstance(contents, dict):
@@ -396,7 +399,7 @@ class SPMCommand(BaseInterface):
         """
         if self.mlab.inputs.mfile:
             if self.jobname in ['st','smooth','preproc','preproc8','fmri_spec','fmri_est',
-                                'factorial_design'] :
+                                'factorial_design', 'defs'] :
                 # parentheses
                 mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' %
                                               (self.jobtype,self.jobname), contents[0])

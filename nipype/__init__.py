@@ -1,56 +1,12 @@
 # emacs: -*- coding: utf-8; mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set fileencoding=utf-8 ft=python sts=4 ts=4 sw=4 et:
-"""
-Neuroimaging tools for Python (NIPY).
 
-The aim of NIPY is to produce a platform-independent Python environment for
-the analysis of brain imaging data using an open development model.
+import os
 
-The main website for NIPY is here:
-http://nipy.org/
-
-Nipype is the Neuroimaging in Python Pipelines and Interfaces package.
-It's aim is to create Python Interfaces to other neuroimaging packages
-and create an API for specifying a full analysis pipeline in Python.
-
-Interfaces
-
-    1. provide interface for using other packages through Python
-
-        a. fsl (fsl 4.0 and above) http://www.fmrib.ox.ac.uk/fsl/
-
-        b. spm (spm5, spm 8) http://www.fil.ion.ucl.ac.uk/spm/
-
-        c. freesurfer
-
-        d. afni
-
-    2. pipeline functionality for batch processing data
-
-        a. tools to construct hierarchically complex workflows for
-        analysis of neuroimaging data
-
-        b. execute workflows in parallel using IPython's parallel
-        computing interface
-
-        c. tools for interfacing databases, repositories
-
-        d. tools for provenance tracking
-
-Package Organization
-====================
-The nipy package contains the following subpackages and modules:
-
-.. packagetree::
-   :style: UML
-"""
-
-from version import version as __version__
-
-__status__   = 'alpha'
-__url__     = 'http://nipy.org/'
-
-
+from info import (LONG_DESCRIPTION as __doc__,
+                  URL as __url__,
+                  STATUS as __status__,
+                  __version__)
 
 # We require numpy 1.2 for our test suite.  If Tester fails to import,
 # check the version of numpy the user has and inform them they need to
@@ -95,6 +51,10 @@ def _test_local_install():
                      'trigger some failures')
 
 _test_local_install()
+
+# Set up package information function
+from pkg_info import get_pkg_info as _get_pkg_info
+get_info = lambda : _get_pkg_info(os.path.dirname(__file__))
 
 # Cleanup namespace
 del _test_local_install

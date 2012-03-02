@@ -1,4 +1,3 @@
-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ Set of interfaces that allow interaction with data. Currently
@@ -133,6 +132,8 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         if key not in self.copyable_trait_names():
             self._outputs[key] = value
         else:
+            if key in self._outputs:
+                self._outputs[key] = value
             super(DataSinkInputSpec, self).__setattr__(key, value)
 
 class DataSink(IOBase):
@@ -148,16 +149,30 @@ class DataSink(IOBase):
 
         where parts between [] are optional.
 
-        An attribute such as contrasts.@con will create a 'contrasts' directory to
-        store the results linked to the attribute. If the @ is left out, such as in
-        'contrasts.con', a subdirectory 'con' will be created under 'contrasts'.
+        An attribute such as contrasts.@con will create a 'contrasts' directory
+        to store the results linked to the attribute. If the @ is left out, such
+        as in 'contrasts.con', a subdirectory 'con' will be created under
+        'contrasts'.
 
-        Notes
-        -----
+        the general form of the output is::
 
-            Unlike most nipype-nodes this is not a thread-safe node because it can
-            write to a common shared location. It will not complain when it
-            overwrites a file.
+           'base_directory/container/parameterization/destloc/filename'
+
+           destloc = string[[.[@]]string[[.[@]]string]] and
+           filename comesfrom the input to the connect statement.
+
+        .. warning::
+
+            This is not a thread-safe node because it can write to a common
+            shared location. It will not complain when it overwrites a file.
+
+        .. note::
+
+            If both substitutions and regexp_substitutions are used, then
+            substitutions are applied first followed by regexp_substitutions.
+
+            This interface **cannot** be used in a MapNode as the inputs are
+            defined only when the connect statement is executed.
 
         Examples
         --------
@@ -170,19 +185,50 @@ class DataSink(IOBase):
         >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
         >>> ds.run() # doctest: +SKIP
 
+        To use DataSink in a MapNode, its inputs have to be defined at the
+        time the interface is created.
+
+        >>> ds = DataSink(infields=['contasts.@con'])
+        >>> ds.inputs.base_directory = 'results_dir'
+        >>> ds.inputs.container = 'subject'
+        >>> ds.inputs.structural = 'structural.nii'
+        >>> setattr(ds.inputs, 'contrasts.@con', ['cont1.nii', 'cont2.nii'])
+        >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
+        >>> ds.run() # doctest: +SKIP
+
     """
     input_spec = DataSinkInputSpec
+
+    def __init__(self, infields=None, **kwargs):
+        """
+        Parameters
+        ----------
+        infields : list of str
+            Indicates the input fields to be dynamically created
+        """
+
+        super(DataSink, self).__init__(**kwargs)
+        undefined_traits = {}
+        # used for mandatory inputs check
+        self._infields = infields
+        if infields:
+            for key in infields:
+                self.inputs.add_trait(key, traits.Any)
+                self.inputs._outputs[key] = Undefined
+                undefined_traits[key] = Undefined
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
     def _get_dst(self, src):
         path, fname = os.path.split(src)
         if self.inputs.parameterization:
             dst = path
             if isdefined(self.inputs.strip_dir):
-                dst = dst.replace(self.inputs.strip_dir,'')
-            folders = [folder for folder in dst.split(os.path.sep) if folder.startswith('_')]
+                dst = dst.replace(self.inputs.strip_dir, '')
+            folders = [folder for folder in dst.split(os.path.sep) if
+                       folder.startswith('_')]
             dst = os.path.sep.join(folders)
             if fname:
-                dst = os.path.join(dst,fname)
+                dst = os.path.join(dst, fname)
         else:
             if fname:
                 dst = fname
@@ -229,7 +275,9 @@ class DataSink(IOBase):
                     pass
                 else:
                     raise(inst)
-        for key,files in self.inputs._outputs.items():
+        for key, files in self.inputs._outputs.items():
+            if not isdefined(files):
+                continue
             iflogger.debug("key: %s files: %s"%(key, str(files)))
             files = filename_to_list(files)
             tempoutdir = outdir
@@ -299,7 +347,8 @@ class DataGrabber(IOBase):
         intelligent way for neuroimaging tasks to grab files
 
 
-        .. note::
+        .. attention::
+
            Doesn't support directories currently
 
         Examples
@@ -346,6 +395,7 @@ class DataGrabber(IOBase):
     """
     input_spec = DataGrabberInputSpec
     output_spec = DynamicTraitedSpec
+    _always_run = True
 
     def __init__(self, infields=None, outfields=None, **kwargs):
         """
@@ -523,6 +573,20 @@ class FSSourceOutputSpec(TraitedSpec):
                            desc='Aparc parcellation projected into aseg volume')
     sphere_reg = OutputMultiPath(File(exists=True), loc='surf', altkey='sphere.reg',
                            desc='Spherical registration file')
+    aseg_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='aseg',
+                           desc='Automated segmentation statistics file')
+    wmparc_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='wmparc',
+                           desc='White matter parcellation statistics file')
+    aparc_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='aparc',
+                           desc='Aparc parcellation statistics files')
+    BA_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='BA',
+                           desc='Brodmann Area statistics files')
+    aparc_a2009s_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='aparc.a2009s',
+                           desc='Aparc a2009s parcellation statistics files')
+    curv_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='curv',
+                           desc='Curvature statistics files')
+    entorhinal_exvivo_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='entorhinal_exvivo',
+                           desc='Entorhinal exvivo statistics files')
 
 class FreeSurferSource(IOBase):
     """Generates freesurfer subject info from their directories
@@ -547,12 +611,16 @@ class FreeSurferSource(IOBase):
         globsuffix = ''
         if dirval == 'mri':
             globsuffix = '.mgz'
+        elif dirval == 'stats':
+            globsuffix = '.stats'
         globprefix = ''
-        if key == 'ribbon' or dirval in ['surf', 'label']:
+        if key == 'ribbon' or dirval in ['surf', 'label', 'stats']:
             if self.inputs.hemi != 'both':
                 globprefix = self.inputs.hemi+'.'
             else:
                 globprefix = '*'
+        if key == 'aseg_stats' or key == 'wmparc_stats':
+			globprefix = ''
         keydir = os.path.join(path,dirval)
         if altkey:
             key = altkey
@@ -1048,16 +1116,12 @@ class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     table_name = traits.Str(mandatory=True)
 
 class SQLiteSink(IOBase):
-    """Very simple frontend for storing values into SQLite database. input_names
-    correspond to input_names.
+    """ Very simple frontend for storing values into SQLite database.
 
-        Notes
-        -----
+        .. warning::
 
-            Unlike most nipype-nodes this is not a thread-safe node because it can
-            write to a common shared location. When run in parallel it will
-            occasionally crash.
-
+            This is not a thread-safe node because it can write to a common
+            shared location. It will not complain when it overwrites a file.
 
         Examples
         --------
@@ -1082,9 +1146,12 @@ class SQLiteSink(IOBase):
     def _list_outputs(self):
         """Execute this module.
         """
-        conn = sqlite3.connect(self.inputs.database_file, check_same_thread = False)
+        conn = sqlite3.connect(self.inputs.database_file,
+                               check_same_thread = False)
         c = conn.cursor()
-        c.execute("INSERT OR REPLACE INTO %s ("%self.inputs.table_name + ",".join(self._input_names) + ") VALUES (" + ",".join(["?"]*len(self._input_names)) + ")",
+        c.execute("INSERT OR REPLACE INTO %s (" % self.inputs.table_name +
+                  ",".join(self._input_names) + ") VALUES (" +
+                  ",".join(["?"]*len(self._input_names)) + ")",
                   [getattr(self.inputs,name) for name in self._input_names])
         conn.commit()
         c.close()

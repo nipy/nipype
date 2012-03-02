@@ -48,6 +48,8 @@ class SliceTimingInputSpec(SPMCommandInputSpec):
     ref_slice = traits.Int(field='refslice',
                            desc='1-based Number of the reference slice',
                            mandatory=True)
+    out_prefix = traits.String('a', field='prefix', usedefault=True,
+                               desc = 'slicetimed output prefix')
 
 class SliceTimingOutputSpec(TraitedSpec):
     timecorrected_files = OutputMultiPath(File(exist=True, desc='slice time corrected files'))
@@ -97,7 +99,8 @@ class SliceTiming(SPMCommand):
             run = []
             if isinstance(f,list):
                 for inner_f in filename_to_list(f):
-                    run.append(fname_presuffix(inner_f, prefix='a'))
+                    run.append(fname_presuffix(inner_f,
+                                               prefix=self.inputs.out_prefix))
             else:
                 realigned_run = fname_presuffix(f, prefix='a')
             outputs['timecorrected_files'].append(realigned_run)
@@ -134,6 +137,8 @@ class RealignInputSpec(SPMCommandInputSpec):
                    desc='Check if interpolation should wrap in [x,y,z]')
     write_mask = traits.Bool(field='roptions.mask',
                              desc='True/False mask output image')
+    out_prefix = traits.String('r', field='prefix', usedefault=True,
+                               desc = 'realigned output prefix')
 
 
 class RealignOutputSpec(TraitedSpec):
@@ -208,9 +213,9 @@ class Realign(SPMCommand):
                 realigned_run = []
                 if isinstance(imgf,list):
                     for inner_imgf in filename_to_list(imgf):
-                        realigned_run.append(fname_presuffix(inner_imgf, prefix='r'))
+                        realigned_run.append(fname_presuffix(inner_imgf, prefix=self.inputs.out_prefix))
                 else:
-                    realigned_run = fname_presuffix(imgf, prefix='r')
+                    realigned_run = fname_presuffix(imgf, prefix=self.inputs.out_prefix)
                 outputs['realigned_files'].append(realigned_run)
         return outputs
 
@@ -246,6 +251,9 @@ class CoregisterInputSpec(SPMCommandInputSpec):
                      desc='Check if interpolation should wrap in [x,y,z]')
     write_mask = traits.Bool(field='roptions.mask',
                              desc='True/False mask output image')
+    out_prefix = traits.String('r', field='roptions.prefix', usedefault=True,
+                               desc = 'coregistered output prefix')
+
 
 class CoregisterOutputSpec(TraitedSpec):
     coregistered_source = OutputMultiPath(File(exists=True),
@@ -310,11 +318,11 @@ class Coregister(SPMCommand):
             if isdefined(self.inputs.apply_to_files):
                 outputs['coregistered_files'] = []
                 for imgf in filename_to_list(self.inputs.apply_to_files):
-                    outputs['coregistered_files'].append(fname_presuffix(imgf, prefix='r'))
+                    outputs['coregistered_files'].append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
 
             outputs['coregistered_source'] = []
             for imgf in filename_to_list(self.inputs.source):
-                outputs['coregistered_source'].append(fname_presuffix(imgf, prefix='r'))
+                outputs['coregistered_source'].append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
 
         return outputs
 
@@ -327,8 +335,8 @@ class NormalizeInputSpec(SPMCommandInputSpec):
                             desc='file to normalize to template',
                             xor=['parameter_file'],
                             mandatory=True, copyfile=True)
-    jobtype = traits.Enum('estwrite', 'estimate', 'write',
-                          desc='one of: estimate, write, estwrite (opt, estwrite)',
+    jobtype = traits.Enum('estwrite', 'est', 'write',
+                          desc='one of: est, write, estwrite (opt, estwrite)',
                           usedefault=True)
     apply_to_files = InputMultiPath(File(exists=True), field='subj.resample',
                                desc='files to apply transformation to (opt)', copyfile=True)
@@ -353,12 +361,15 @@ class NormalizeInputSpec(SPMCommandInputSpec):
                                             desc='the amount of the regularization for the nonlinear part of the normalization (opt)')
     write_preserve = traits.Bool(field='roptions.preserve',
                      desc='True/False warped images are modulated (opt,)')
-    write_bounding_box = traits.List(traits.Float(), field='roptions.bb', minlen=6, maxlen=6, desc='6-element list (opt)')
+    write_bounding_box = traits.List(traits.List(traits.Float(), minlen=3, maxlen=3), field='roptions.bb', minlen=2, maxlen=2, desc='3x2-element list of lists (opt)')
     write_voxel_sizes = traits.List(traits.Float(), field='roptions.vox', minlen=3, maxlen=3, desc='3-element list (opt)')
     write_interp = traits.Range(low=0, hign=7, field='roptions.interp',
                         desc='degree of b-spline used for interpolation')
     write_wrap = traits.List(traits.Int(), field='roptions.wrap',
                         desc='Check if interpolation should wrap in [x,y,z] - list of bools (opt)')
+
+    out_prefix = traits.String('w', field='roptions.prefix', usedefault=True,
+                               desc = 'normalized output prefix')
 
 
 class NormalizeOutputSpec(TraitedSpec):
@@ -436,12 +447,12 @@ class Normalize(SPMCommand):
             outputs['normalized_files'] = []
             if isdefined(self.inputs.apply_to_files):
                 for imgf in filename_to_list(self.inputs.apply_to_files):
-                    outputs['normalized_files'].append(fname_presuffix(imgf, prefix='w'))
+                    outputs['normalized_files'].append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
 
             if isdefined(self.inputs.source):
                 outputs['normalized_source'] = []
                 for imgf in filename_to_list(self.inputs.source):
-                    outputs['normalized_source'].append(fname_presuffix(imgf, prefix='w'))
+                    outputs['normalized_source'].append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
 
         return outputs
 
@@ -612,6 +623,8 @@ class NewSegmentOutputSpec(TraitedSpec):
     transformation_mat = OutputMultiPath(File(exists=True), desc='Normalization transformation')
     bias_corrected_images = OutputMultiPath(File(exists=True), desc='bias corrected images')
     bias_field_images = OutputMultiPath(File(exists=True), desc='bias field images')
+    forward_deformation_field = OutputMultiPath(File(exists=True))
+    inverse_deformation_field = OutputMultiPath(File(exists=True))
 
 class NewSegment(SPMCommand):
     """Use spm_preproc8 (New Segment) to separate structural images into different
@@ -673,6 +686,10 @@ class NewSegment(SPMCommand):
                 new_tissue['warped'] = [int(tissue[3][0]), int(tissue[3][1])]
                 new_tissues.append(new_tissue)
             return new_tissues
+        elif opt == 'write_deformation_fields':
+            return super(NewSegment, self)._format_arg(opt, spec, [int(val[0]), int(val[0])])
+        else:
+            return super(NewSegment, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -683,6 +700,8 @@ class NewSegment(SPMCommand):
         outputs['transformation_mat'] = []
         outputs['bias_corrected_images'] = []
         outputs['bias_field_images'] = []
+        outputs['inverse_deformation_field'] = []
+        outputs['forward_deformation_field'] = []
 
         n_classes = 5
         if isdefined(self.inputs.tissues):
@@ -709,6 +728,13 @@ class NewSegment(SPMCommand):
                 for i in range(n_classes):
                     outputs['native_class_images'][i].append(os.path.join(pth,"c%d%s%s"%(i+1, base, ext)))
             outputs['transformation_mat'].append(os.path.join(pth, "%s_seg8.mat" % base))
+
+            if isdefined(self.inputs.write_deformation_fields):
+                if self.inputs.write_deformation_fields[0]:
+                    outputs['inverse_deformation_field'].append(os.path.join(pth, "iy_%s.nii" % base))
+                if self.inputs.write_deformation_fields[1]:
+                    outputs['forward_deformation_field'].append(os.path.join(pth, "y_%s.nii" % base))
+
             if isdefined(self.inputs.channel_info):
                 if self.inputs.channel_info[2][0]:
                     outputs['bias_corrected_images'].append(os.path.join(pth, "m%s%s" % (base, ext)))
@@ -721,6 +747,9 @@ class SmoothInputSpec(SPMCommandInputSpec):
     fwhm = traits.Either(traits.List(traits.Float(), minlen=3, maxlen=3), traits.Float(), field='fwhm', desc='3-list of fwhm for each dimension (opt)')
     data_type = traits.Int(field='dtype', desc='Data type of the output images (opt)')
     implicit_masking = traits.Bool(field='im', desc='A mask implied by a particular voxel value')
+    out_prefix = traits.String('s', field='prefix', usedefault=True,
+                               desc = 'smoothed output prefix')
+
 
 class SmoothOutputSpec(TraitedSpec):
     smoothed_files = OutputMultiPath(File(exists=True), desc='smoothed files')
@@ -765,7 +794,7 @@ class Smooth(SPMCommand):
         outputs['smoothed_files'] = []
 
         for imgf in filename_to_list(self.inputs.in_files):
-            outputs['smoothed_files'].append(fname_presuffix(imgf, prefix='s'))
+            outputs['smoothed_files'].append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
         return outputs
 
 
@@ -948,7 +977,7 @@ class DARTELNorm2MNI(SPMCommand):
         prefix = "w"
         if isdefined(self.inputs.modulate) and self.inputs.modulate:
             prefix = 'm' + prefix
-        if isdefined(self.inputs.fwhm) and self.inputs.fwhm > 0:
+        if not isdefined(self.inputs.fwhm) or self.inputs.fwhm > 0:
             prefix = 's' + prefix
         for filename in self.inputs.apply_to_files:
             pth, base, ext = split_filename(filename)
@@ -962,12 +991,12 @@ class DARTELNorm2MNI(SPMCommand):
 class CreateWarpedInputSpec(SPMCommandInputSpec):
     image_files = InputMultiPath(File(exists=True),
                               desc="A list of files to be warped",
-                              field='crt_warped.images', copyfile=False, 
+                              field='crt_warped.images', copyfile=False,
                               mandatory=True)
     flowfield_files = InputMultiPath(File(exists=True),
                                      desc="DARTEL flow fields u_rc1*",
                                      field='crt_warped.flowfields',
-                                     copyfile=False, 
+                                     copyfile=False,
                                      mandatory=True)
     iterations = traits.Range(low=0, high=9,
                 desc="The number of iterations: log2(number of time steps)",
@@ -989,8 +1018,8 @@ class CreateWarped(SPMCommand):
     --------
     >>> import nipype.interfaces.spm as spm
     >>> create_warped = spm.CreateWarped()
-    >>> create_warped.inputs.image_files = [['rc1s1.nii','rc1s2.nii'],['rc2s1.nii', 'rc2s2.nii']]
-    >>> create_warped.inputs.flowfield_files = ['u_rc1s1.nii', 'u_rc2s1.nii'] 
+    >>> create_warped.inputs.image_files = ['rc1s1.nii', 'rc1s2.nii']
+    >>> create_warped.inputs.flowfield_files = ['u_rc1s1_Template.nii', 'u_rc1s2_Template.nii']
     >>> create_warped.run() # doctest: +SKIP
 
     """
@@ -1021,4 +1050,42 @@ class CreateWarped(SPMCommand):
                                                             ext)))
         return outputs
 
+class ApplyDeformationFieldInputSpec(SPMCommandInputSpec):
+    in_files = InputMultiPath(File(exists=True), mandatory=True, field='fnames')
+    deformation_field = File(exists=True, mandatory=True, field='comp{1}.def' )
+    reference_volume = File(exists=True, mandatory=True, field='comp{2}.id.space')
+    interp = traits.Range(low=0, high=7, field='interp',
+                          desc='degree of b-spline used for interpolation')
+    
 
+class ApplyDeformationFieldOutputSpec(TraitedSpec):
+    out_files = OutputMultiPath(File(exists=True))
+
+class ApplyDeformations(SPMCommand):
+    input_spec = ApplyDeformationFieldInputSpec
+    output_spec = ApplyDeformationFieldOutputSpec
+
+    _jobtype = 'util'
+    _jobname = 'defs'
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt in ['deformation_field', 'reference_volume']:
+            val = [val]
+
+        if opt in ['deformation_field']:
+            return scans_for_fnames(val, keep4d=True, separate_sessions=False)
+        if opt in ['in_files', 'reference_volume']:
+            return scans_for_fnames(val, keep4d=False, separate_sessions=False)
+
+        else:
+            return super(ApplyDeformations, self)._format_arg(opt, spec, val)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_files'] = []
+        for filename in self.inputs.in_files:
+            _, fname = os.path.split(filename)
+            outputs['out_files'].append(os.path.realpath('w%s'%fname))
+        return outputs

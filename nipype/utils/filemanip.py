@@ -211,9 +211,11 @@ def copyfile(originalfile, newfile, copy=False, create_new=False, hashmethod=Non
             else:
                 fname += "_c%04d"%i
             newfile = base + os.sep + fname + ext
+
+    if hashmethod is None:
+        hashmethod = config.get('execution', 'hash_method').lower()
+
     elif os.path.exists(newfile):
-        if hashmethod is None:
-            hashmethod = config.get('execution', 'hash_method').lower()
         if hashmethod == 'timestamp':
             newhash = hash_timestamp(newfile)
         elif hashmethod == 'content':
@@ -227,9 +229,9 @@ def copyfile(originalfile, newfile, copy=False, create_new=False, hashmethod=Non
     #        newhash = None
     if os.name is 'posix' and not copy:
         if os.path.lexists(newfile):
-            if config.get('execution', 'hash_method').lower() == 'timestamp':
+            if hashmethod == 'timestamp':
                 orighash = hash_timestamp(originalfile)
-            elif config.get('execution', 'hash_method').lower() == 'content':
+            elif hashmethod == 'content':
                 orighash = hash_infile(originalfile)
             fmlogger.debug('Original hash: %s, %s'%(originalfile, orighash))
             if newhash != orighash:
@@ -238,9 +240,9 @@ def copyfile(originalfile, newfile, copy=False, create_new=False, hashmethod=Non
             os.symlink(originalfile,newfile)
     else:
         if newhash:
-            if config.get('execution', 'hash_method').lower() == 'timestamp':
+            if hashmethod == 'timestamp':
                 orighash = hash_timestamp(originalfile)
-            elif config.get('execution', 'hash_method').lower() == 'content':
+            elif hashmethod == 'content':
                 orighash = hash_infile(originalfile)
         if (newhash is None) or (newhash != orighash):
             try:
@@ -382,7 +384,10 @@ def loadflat(infile, *args):
     return out
 
 def loadcrash(infile, *args):
-    return loadflat(infile, *args)
+    if '.pkl' in infile:
+        return loadpkl(infile)
+    else:
+        return loadflat(infile, *args)
 
 def loadpkl(infile):
     """Load a zipped or plain cPickled file

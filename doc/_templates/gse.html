@@ -1,0 +1,43 @@
+{% block gse %}
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("{{pathto('searchresults')}}");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+{% endblock %}

@@ -7,6 +7,24 @@ from nipype.interfaces.base import (CommandLineInputSpec, InputMultiPath, isdefi
                                     CommandLine, traits, File, Directory)
 from nipype.utils.config import config
 
+def get_matlab_command():
+    if 'NIPYPE_NO_MATLAB' in os.environ:
+        return None
+
+    try:
+        matlab_cmd = os.environ['MATLABCMD']
+    except:
+        matlab_cmd = 'matlab'
+
+    try:
+        res = CommandLine(command='which', args=matlab_cmd).run()
+        matlab_path = res.runtime.stdout.strip()
+    except Exception, e:
+        return None
+    return matlab_cmd
+
+no_matlab = get_matlab_command() is None
+
 class MatlabInputSpec(CommandLineInputSpec):
     """ Basic expected inputs to Matlab interface """
 

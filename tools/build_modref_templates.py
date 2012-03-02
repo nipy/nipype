@@ -10,23 +10,27 @@ import sys
 #*****************************************************************************
 if __name__ == '__main__':
     nipypepath = os.path.abspath('..')
-    sys.path.insert(1,nipypepath)
+    sys.path.insert(1, nipypepath)
     package = 'nipype'
     # local imports
     from apigen import ApiDocWriter
-    outdir = os.path.join('api','generated')
+    outdir = os.path.join('api', 'generated')
     docwriter = ApiDocWriter(package)
     # Packages that should not be included in generated API docs.
-    docwriter.package_skip_patterns += ['\.externals$',
+    docwriter.package_skip_patterns += ['\.external$',
                                         '\.utils$',
-                                        '\.interfaces\.pymvpa$',
+                                        '\.interfaces\.',
+                                        '\.workflows$',
+                                        '\.pipeline\.plugins$',
+                                        '\.testing$',
+                                        '\.fixes$',
+                                        '\.algorithms$',
                                         ]
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += ['\.version$',
-                                       '\.interfaces\.afni$',
-                                       '\.pipeline\.alloy$',
+                                       '\.interfaces\.(?!(base|matlab))',
+                                       '\.pipeline\.utils$',
                                        '\.interfaces\.pymvpa$',
-                                       '\.pipeline\.s3_node_wrapper$',
                                        ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'gen', relative_to='api')

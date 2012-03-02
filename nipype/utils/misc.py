@@ -8,6 +8,38 @@ import inspect
 from distutils.version import LooseVersion
 import numpy as np
 from textwrap import dedent
+import sys
+
+def trim(docstring, marker=None):
+    if not docstring:
+        return ''
+    # Convert tabs to spaces (following the normal Python rules)
+    # and split into a list of lines:
+    lines = docstring.expandtabs().splitlines()
+    # Determine minimum indentation (first line doesn't count):
+    indent = sys.maxint
+    for line in lines[1:]:
+        stripped = line.lstrip()
+        if stripped:
+            indent = min(indent, len(line) - len(stripped))
+    # Remove indentation (first line is special):
+    trimmed = [lines[0].strip()]
+    if indent < sys.maxint:
+        for line in lines[1:]:
+            # replace existing REST marker with doc level marker
+            stripped = line.lstrip().strip().rstrip()
+            if marker is not None and stripped and \
+               all([s==stripped[0] for s in stripped]) and \
+               stripped[0] not in [':']:
+                line = line.replace(stripped[0], marker)
+            trimmed.append(line[indent:].rstrip())
+    # Strip off trailing and leading blank lines:
+    while trimmed and not trimmed[-1]:
+        trimmed.pop()
+    while trimmed and not trimmed[0]:
+        trimmed.pop(0)
+    # Return a single string:
+    return '\n'.join(trimmed)
 
 def getsource(function):
     """Returns the source code of a function"""
@@ -139,7 +171,7 @@ def str2bool(v):
     lower = v.lower()
     if lower in ("yes", "true", "t", "1"):
         return True
-    elif lower in ("no", "false", "n", "0"):
+    elif lower in ("no", "false", "n", "f", "0"):
         return False
     else:
         raise ValueError("%s cannot be converted to bool"%v)

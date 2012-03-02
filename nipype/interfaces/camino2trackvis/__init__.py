@@ -3,12 +3,4 @@
 """Camino2Trackvis top level namespace
 """
 
-from nipype.interfaces.camino2trackvis.convert import Camino2Trackvis, Trackvis2Camino
-import nose
-
-
-def setup():
-    print 'camino2trackvis setup test'
-
-def teardown():
-    print 'camino2trackvis teardown test'
+from .convert import Camino2Trackvis, Trackvis2Camino

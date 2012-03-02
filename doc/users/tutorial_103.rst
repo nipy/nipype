@@ -51,11 +51,11 @@ Distributed computation
 
 The pipeline engine has built-in support for distributed computation on
 clusters. This can be achieved via plugin-modules for Python_ multiprocessing or
-the IPython_ distributed computing interface or SGE, provided the user sets up a
-workflow on a shared filesystem. These modules can take arguments that specify
-additional distribution engine parameters. For IPython_ the environment needs to
-be configured for distributed operation. Details are available at
-:ref:`parallel_processing`.
+the IPython_ distributed computing interface or SGE/PBS/Condor, provided the
+user sets up a workflow on a shared filesystem. These modules can take arguments
+that specify additional distribution engine parameters. For IPython_ the
+environment needs to be configured for distributed operation. Details are
+available at :ref:`plugins`.
 
 The default behavior is to run in series using the Linear plugin.
 
@@ -63,9 +63,9 @@ The default behavior is to run in series using the Linear plugin.
 
    workflow.run()
 
-In some cases it may be advantageous to run the workflow in series
-locally (e.g., debugging, small-short pipelines, large memory only
-interfaces, relocating working directory/updating hashes).
+In some cases it may be advantageous to run the workflow in series locally
+(e.g., debugging, small-short pipelines, large memory only interfaces,
+relocating working directory/updating hashes).
 
 Debugging
 =========
@@ -85,7 +85,8 @@ We keep extending the information contained in the file and making
 it easier to troubleshoot the failures. However, in the meantime the following
 can help to recover information related to the failure.
 
-in IPython_ do (``%pdb`` in IPython_ is similar to ``dbstop`` if error in Matlab):
+in IPython_ do (``%pdb`` in IPython_ is similar to ``dbstop`` if error in
+Matlab):
 
 .. testcode::
 

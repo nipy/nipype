@@ -10,7 +10,19 @@ python.
 """
 
 import sys
+from glob import glob
 
+# Import build helpers
+try:
+    from nisext.sexts import package_check, get_comrec_build
+except ImportError:
+    raise RuntimeError('Need nisext package from nibabel installation'
+                       ' - please install nibabel first')
+
+from build_docs import cmdclass, INFO_VARS
+
+# Add custom commit-recording build command
+cmdclass['build_py'] = get_comrec_build('nipype')
 
 def configuration(parent_package='',top_path=None):
     from numpy.distutils.misc_util import Configuration
@@ -25,11 +37,8 @@ def configuration(parent_package='',top_path=None):
     #    'nipy.core.image')
     # Robert Kern recommends setting quiet=True on the numpy list, stating
     # these messages are probably only used in debugging numpy distutils.
-
-    config.get_version('nipype/version.py') # sets config.version
+    config.get_version('nipype/__init__.py') # sets config.version
     config.add_subpackage('nipype', 'nipype')
-    config.add_subpackage('nipype.testing.numpytesting')
-
     return config
 
 ################################################################################
@@ -46,6 +55,12 @@ if len(set(('develop', 'bdist_egg', 'bdist_rpm', 'bdist', 'bdist_dumb',
 if not 'extra_setuptools_args' in globals():
     extra_setuptools_args = dict()
 
+# Hard and soft dependency checking
+package_check('networkx', INFO_VARS['NETWORKX_MIN_VERSION'])
+package_check('nibabel', INFO_VARS['NIBABEL_MIN_VERSION'])
+package_check('numpy', INFO_VARS['NUMPY_MIN_VERSION'])
+package_check('scipy', INFO_VARS['SCIPY_MIN_VERSION'])
+package_check('traits', INFO_VARS['TRAITS_MIN_VERSION'])
 
 ################################################################################
 # Import the documentation building classes.
@@ -60,57 +75,28 @@ except ImportError:
 
 ################################################################################
 
-desc = """Current neuroimaging software offer users an incredible opportunity to
-analyze data using a variety of different algorithms. However, this has
-resulted in a heterogeneous collection of specialized applications
-without transparent interoperability or a uniform operating interface.
-
-*Nipype*, an open-source, community-developed initiative under the
-umbrella of NiPy, is a Python project that provides a uniform interface
-to existing neuroimaging software and facilitates interaction between
-these packages within a single workflow. Nipype provides an environment
-that encourages interactive exploration of algorithms from different
-packages (e.g., SPM, FSL, FreeSurfer, AFNI, Slicer), eases the
-design of workflows within and between packages, and reduces the
-learning curve necessary to use different packages. Nipype is creating a
-collaborative platform for neuroimaging software development in a
-high-level language and addressing limitations of existing pipeline
-systems.
-
-*Nipype* allows you to:
-
-* easily interact with tools from different software packages
-* combine processing steps from different software packages
-* develop new workflows faster by reusing common steps from old ones
-* process data faster by running it in parallel on many cores/machines
-* make your research easily reproducible
-* share your processing workflows with the community"""
-
 def main(**extra_args):
     from numpy.distutils.core import setup
 
-    install_requires=['numpy >=1.1',
-              'scipy >=0.7',
-              'matplotlib >=1.0.0',
-              'networkx >=1.0',
-              'nibabel >=1.0.0',
-              'traits >=4.0.0',]
+    setup(name=INFO_VARS['NAME'],
+          maintainer=INFO_VARS['MAINTAINER'],
+          maintainer_email=INFO_VARS['MAINTAINER_EMAIL'],
+          description=INFO_VARS['DESCRIPTION'],
+          long_description=INFO_VARS['LONG_DESCRIPTION'],
+          url=INFO_VARS['URL'],
+          download_url=INFO_VARS['DOWNLOAD_URL'],
+          license=INFO_VARS['LICENSE'],
+          classifiers=INFO_VARS['CLASSIFIERS'],
+          author=INFO_VARS['AUTHOR'],
+          author_email=INFO_VARS['AUTHOR_EMAIL'],
+          platforms=INFO_VARS['PLATFORMS'],
+          version=INFO_VARS['VERSION'],
+          requires=INFO_VARS['REQUIRES'],
+          configuration = configuration,
+          cmdclass = cmdclass,
+          scripts = glob('bin/*'),
+          **extra_args)
 
-    try:
-        import json
-    except ImportError:
-        install_requires.append('simplejson')
-
-    setup( name = 'nipype',
-           description = 'Neuroimaging in Python: Pipelines and Interfaces',
-           author = 'Various',
-           author_email = 'nipy-devel@neuroimaging.scipy.org',
-           url = 'http://nipy.org/nipype',
-           long_description = desc,
-           configuration = configuration,
-           cmdclass = cmdclass,
-           install_requires=install_requires,
-           **extra_args)
 
 
 if __name__ == "__main__":
