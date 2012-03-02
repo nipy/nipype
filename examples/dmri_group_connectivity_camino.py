@@ -109,31 +109,31 @@ for idx, group_id in enumerate(group_list.keys()):
 
 """
 
-    info = dict(dwi=[['subject_id', 'dwi']],
-                    bvecs=[['subject_id', 'bvecs']],
-                    bvals=[['subject_id', 'bvals']])
+info = dict(dwi=[['subject_id', 'dwi']],
+            bvecs=[['subject_id', 'bvecs']],
+            bvals=[['subject_id', 'bvals']])
 
-    """
-    This line creates the processing workflow given the information input about the groups and subjects.
+"""
+This line creates the processing workflow given the information input about the groups and subjects.
 
-    .. seealso::
+.. seealso::
 
-        * nipype/workflows/dmri/mrtrix/group_connectivity.py
-        * nipype/workflows/dmri/camino/connectivity_mapping.py
-        * :ref:`dmri_connectivity`
+    * nipype/workflows/dmri/mrtrix/group_connectivity.py
+    * nipype/workflows/dmri/camino/connectivity_mapping.py
+    * :ref:`dmri_connectivity`
 
-    """
+"""
 
-    l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
+l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
 
-    """
+"""
 The first level pipeline we have tweaked here is run within the for loop.
-    """
+"""
 
-    l1pipeline.run()
-    l1pipeline.write_graph(format='eps', graph2use='flat')
+l1pipeline.run()
+l1pipeline.write_graph(format='eps', graph2use='flat')
 
-    """
+"""
 Next we create and run the second-level pipeline. The purpose of this workflow is simple:
 It is used to merge each subject's CFF file into one, so that there is a single file containing
 all of the networks for each group. This can be useful for performing Network Brain Statistics
@@ -143,11 +143,11 @@ using the NBS plugin in ConnectomeViewer.
 
     http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html
 
-    """
+"""
 
-    l2pipeline = create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
-    l2pipeline.run()
-    l2pipeline.write_graph(format='eps', graph2use='flat')
+l2pipeline = create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
+l2pipeline.run()
+l2pipeline.write_graph(format='eps', graph2use='flat')
 
 """
 Now that the for loop is complete there are two grouped CFF files each containing the appropriate subjects.
