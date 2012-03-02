@@ -50,7 +50,7 @@ def remove_all_edges(ntwk):
     ntwktmp = ntwk.copy()
     edges = ntwktmp.edges_iter()
     for edge in edges:
-        ntwk.remove_edge(edge[0],edge[1])
+        ntwk.remove_edge(edge[0], edge[1])
     return ntwk
 
 
@@ -66,13 +66,13 @@ def fix_keys_for_gexf(orig):
         newnodedata = {}
         newnodedata.update(orig.node[node])
         newnodedata['label'] = orig.node[node]['dn_fsname']
-        ntwk.add_node(str(node),newnodedata)
+        ntwk.add_node(str(node), newnodedata)
         if ntwk.node[str(node)].has_key('dn_position') and newnodedata.has_key('dn_position'):
             ntwk.node[str(node)]['dn_position'] = str(newnodedata['dn_position'])
     for edge in edges:
         data = {}
         data = orig.edge[edge[0]][edge[1]]
-        ntwk.add_edge(str(edge[0]),str(edge[1]),data)
+        ntwk.add_edge(str(edge[0]), str(edge[1]), data)
         if ntwk.edge[str(edge[0])][str(edge[1])].has_key('fiber_length_mean'):
             ntwk.edge[str(edge[0])][str(edge[1])]['fiber_length_mean'] = str(data['fiber_length_mean'])
         if ntwk.edge[str(edge[0])][str(edge[1])].has_key('fiber_length_std'):
@@ -108,7 +108,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
     if len(in_files) == 1:
         avg_ntwk = read_unknown_ntwk(in_files[0])
     else:
-        count_to_keep_edge = np.round(float(len(in_files))/2)
+        count_to_keep_edge = np.round(float(len(in_files)) / 2)
         iflogger.info("Number of networks: {L}, an edge must occur in at least {c} to remain in the average network".format(L=len(in_files), c=count_to_keep_edge))
         ntwk_res_file = read_unknown_ntwk(ntwk_res_file)
         iflogger.info("{n} Nodes found in network resolution file".format(n=ntwk_res_file.number_of_nodes()))
@@ -123,19 +123,19 @@ def average_networks(in_files, ntwk_res_file, group_id):
                 data = {}
                 data = tmp.edge[edge[0]][edge[1]]
                 data['count'] = 1
-                if ntwk.has_edge(edge[0],edge[1]):
+                if ntwk.has_edge(edge[0], edge[1]):
                     current = {}
                     current = ntwk.edge[edge[0]][edge[1]]
                     #current['count'] = current['count'] + 1
-                    data = add_dicts_by_key(current,data)
-                ntwk.add_edge(edge[0],edge[1],data)
+                    data = add_dicts_by_key(current, data)
+                ntwk.add_edge(edge[0], edge[1], data)
             nodes = tmp.nodes_iter()
             for node in nodes:
                 data = {}
                 data = ntwk.node[node]
                 if tmp.node[node].has_key('value'):
                     data['value'] = data['value'] + tmp.node[node]['value']
-                ntwk.add_node(node,data)
+                ntwk.add_node(node, data)
 
         # Divides each value by the number of files
         nodes = ntwk.nodes_iter()
@@ -152,7 +152,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
             avg_ntwk.add_node(node, newdata)
 
         edge_dict = {}
-        edge_dict['count'] = np.zeros((avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes()))        
+        edge_dict['count'] = np.zeros((avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes()))
         for edge in edges:
             data = ntwk.edge[edge[0]][edge[1]]
             if ntwk.edge[edge[0]][edge[1]]['count'] >= count_to_keep_edge:
@@ -160,10 +160,10 @@ def average_networks(in_files, ntwk_res_file, group_id):
                 for key in data.keys():
                     if not key == 'count':
                         data[key] = data[key] / len(in_files)
-                ntwk.edge[edge[0]][edge[1]] = data                
-                avg_ntwk.add_edge(edge[0],edge[1],data)
-            edge_dict['count'][edge[0]-1][edge[1]-1] = ntwk.edge[edge[0]][edge[1]]['count']
-            
+                ntwk.edge[edge[0]][edge[1]] = data
+                avg_ntwk.add_edge(edge[0], edge[1], data)
+            edge_dict['count'][edge[0] - 1][edge[1] - 1] = ntwk.edge[edge[0]][edge[1]]['count']
+
         iflogger.info('After thresholding, the average network has has {n} edges'.format(n=avg_ntwk.number_of_edges()))
 
         avg_edges = avg_ntwk.edges_iter()
@@ -171,8 +171,8 @@ def average_networks(in_files, ntwk_res_file, group_id):
             data = avg_ntwk.edge[edge[0]][edge[1]]
             for key in data.keys():
                 if not key == 'count':
-                    edge_dict[key] = np.zeros((avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes()))        
-                    edge_dict[key][edge[0]-1][edge[1]-1] = data[key]
+                    edge_dict[key] = np.zeros((avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes()))
+                    edge_dict[key][edge[0] - 1][edge[1] - 1] = data[key]
 
         for key in edge_dict.keys():
             tmp = {}
@@ -181,7 +181,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
             tmp[key] = edge_dict[key]
             sio.savemat(op.abspath(network_name), tmp)
             iflogger.info('Saving average network for key: {k} as {out}'.format(k=key, out=op.abspath(network_name)))
-                
+
     # Writes the networks and returns the name
     network_name = group_id + '_average.pck'
     nx.write_gpickle(avg_ntwk, op.abspath(network_name))
@@ -221,7 +221,7 @@ def compute_node_measures(ntwk):
     measures['core_number'] = np.array(nx.core_number(ntwk).values())
     iflogger.info('...Identifying network isolates...')
     isolate_list = nx.isolates(ntwk)
-    binarized = np.zeros((ntwk.number_of_nodes(),1))
+    binarized = np.zeros((ntwk.number_of_nodes(), 1))
     for value in isolate_list:
         value = value - 1 # Zero indexing
         binarized[value] = 1
@@ -272,9 +272,9 @@ def compute_singlevalued_measures(ntwk):
     calculate_cliques = True
     measures = {}
     iflogger.info('...Computing degree assortativity (pearson number) ...')
-    measures['degree_pearsonr'] = nx.degree_pearson_correlation_coefficient(ntwk)
+    measures['degree_pearsonr'] = nx.degree_pearsonr(ntwk)
     iflogger.info('...Computing degree assortativity...')
-    measures['degree_assortativity'] = nx.degree_assortativity_coefficient(ntwk)
+    measures['degree_assortativity'] = nx.degree_assortativity(ntwk)
     iflogger.info('...Computing transitivity...')
     measures['transitivity'] = nx.transitivity(ntwk)
     iflogger.info('...Computing number of connected_components...')
@@ -307,7 +307,7 @@ def add_node_data(node_array, ntwk):
     newdata = {}
     for idx, data in ntwk.nodes_iter(data=True):
         if not int(idx) == 0:
-            newdata['value'] = node_array[int(idx)-1]
+            newdata['value'] = node_array[int(idx) - 1]
             data.update(newdata)
             node_ntwk.add_node(int(idx), data)
     return node_ntwk
@@ -318,15 +318,15 @@ def add_edge_data(edge_array, ntwk, above=0, below=0):
     edge_ntwk = ntwk.copy()
     data = {}
     for x, row in enumerate(edge_array):
-        for y in range(0,np.max(np.shape(edge_array[x]))):
+        for y in range(0, np.max(np.shape(edge_array[x]))):
             if not edge_array[x, y] == 0:
 				data['value'] = edge_array[x, y]
 				if data['value'] <= below or data['value'] >= above:
-					if edge_ntwk.has_edge(x+1,y+1):
-						old_edge_dict = edge_ntwk.edge[x+1][y+1]
-						edge_ntwk.remove_edge(x+1,y+1)
+					if edge_ntwk.has_edge(x + 1, y + 1):
+						old_edge_dict = edge_ntwk.edge[x + 1][y + 1]
+						edge_ntwk.remove_edge(x + 1, y + 1)
 						data.update(old_edge_dict)
-					edge_ntwk.add_edge(x+1,y+1,data)
+					edge_ntwk.add_edge(x + 1, y + 1, data)
     return edge_ntwk
 
 
@@ -396,10 +396,10 @@ class NetworkXMetrics(BaseInterface):
 			global_out_file = op.abspath(self._gen_outfilename('globalmetrics', 'mat'))
 		sio.savemat(global_out_file, global_measures, oned_as='column')
 		matlab.append(global_out_file)
-		
+
 		node_measures = compute_node_measures(ntwk)
 		for key in node_measures.keys():
-			newntwk = add_node_data(node_measures[key],self.inputs.in_file)
+			newntwk = add_node_data(node_measures[key], self.inputs.in_file)
 			out_file = op.abspath(self._gen_outfilename(key, 'pck'))
 			nx.write_gpickle(newntwk, out_file)
 			nodentwks.append(out_file)
@@ -413,7 +413,7 @@ class NetworkXMetrics(BaseInterface):
 
 		edge_measures = compute_edge_measures(ntwk)
 		for key in edge_measures.keys():
-			newntwk = add_edge_data(edge_measures[key],self.inputs.in_file)
+			newntwk = add_edge_data(edge_measures[key], self.inputs.in_file)
 			out_file = op.abspath(self._gen_outfilename(key, 'pck'))
 			nx.write_gpickle(newntwk, out_file)
 			edgentwks.append(out_file)
@@ -457,10 +457,10 @@ class NetworkXMetrics(BaseInterface):
 					nparraykeys = np.array(keyd)
 					nparrayvalues = np.array(dict_measures[key][keyd])
 				else:
-					nparraykeys = np.append(nparraykeys,np.array(keyd))
+					nparraykeys = np.append(nparraykeys, np.array(keyd))
 					values = np.array(dict_measures[key][keyd])
-					nparrayvalues = np.append(nparrayvalues,values)
-			nparray = np.vstack((nparraykeys,nparrayvalues))
+					nparrayvalues = np.append(nparrayvalues, values)
+			nparray = np.vstack((nparraykeys, nparrayvalues))
 			out_file = op.abspath(self._gen_outfilename(key, 'mat'))
 			npdict = {}
 			npdict[key] = nparray
@@ -533,15 +533,15 @@ class AverageNetworks(BaseInterface):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_gpickled_groupavg):
-            outputs["gpickled_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','pck'))
+            outputs["gpickled_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'pck'))
         else:
             outputs["gpickled_groupavg"] = op.abspath(self.inputs.out_gpickled_groupavg)
-        
+
         if not isdefined(self.inputs.out_gexf_groupavg):
-            outputs["gexf_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','gexf'))
+            outputs["gexf_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'gexf'))
         else:
             outputs["gexf_groupavg"] = op.abspath(self.inputs.out_gexf_groupavg)
-        
+
         outputs["matlab_groupavgs"] = matlab_network_list
         return outputs
 
