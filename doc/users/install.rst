@@ -114,24 +114,23 @@ Must Have
 
 Python_ 2.6 -2.7
 
-Matplotlib_ 1.0
-  Plotting library
+Nibabel_ 1.0
+  Neuroimaging file i/o library
 
 NetworkX_ 1.0 - 1.4
   Python package for working with complex networks.
 
-NumPy_ 1.3 - 1.5
+NumPy_ 1.3 - 1.6
 
-SciPy_ 0.7 - 0.9
+SciPy_ 0.7 - 0.10
   Numpy and Scipy are high-level, optimized scientific computing libraries.
 
 Enthought_ Traits_ 4.0.0
 
 .. note::
 
-    Full distributions such as pythonxy_ or EPD_ provide the above packages. 
-
-Nibabel_
+    Full distributions such as pythonxy_ or EPD_ provide the above packages,
+    except Nibabel_.
 
 Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -139,6 +138,9 @@ Strong Recommendations
 IPython_ 0.10.2 - 0.12
   Interactive python environment. This is necessary for some parallel
   components of the pipeline engine.
+
+Matplotlib_ 1.0
+  Plotting library
 
 Sphinx_
   Required for building the documentation
