@@ -75,7 +75,7 @@ def test_cmd_update():
     yield assert_equal, dc.mlab._cmd, 'foo'
 
 
-def test_cmd_update():
+def test_cmd_update2():
     class TestClass(spm.SPMCommand):
         _jobtype = 'jobtype'
         _jobname = 'jobname'
