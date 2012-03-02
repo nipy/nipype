@@ -160,7 +160,7 @@ class SlicerCommandLine(CommandLine):
 #    print test.inputs
 #    print test._outputs()
 #    ret = test.run()
-    
+
 #    test = SlicerCommandLine(name="BRAINSResample")
 #    test.inputs.referenceVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/10_co_COR_3D_IR_PREP.nii"
 #    test.inputs.inputVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/2_line_bisection.nii"

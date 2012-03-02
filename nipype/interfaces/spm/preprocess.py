@@ -717,13 +717,13 @@ class NewSegment(SPMCommand):
                 for i in range(n_classes):
                     outputs['native_class_images'][i].append(os.path.join(pth,"c%d%s%s"%(i+1, base, ext)))
             outputs['transformation_mat'].append(os.path.join(pth, "%s_seg8.mat" % base))
-            
+
             if isdefined(self.inputs.write_deformation_fields):
                 if self.inputs.write_deformation_fields[0]:
                     outputs['inverse_deformation_field'].append(os.path.join(pth, "iy_%s.nii" % base))
                 if self.inputs.write_deformation_fields[1]:
                     outputs['forward_deformation_field'].append(os.path.join(pth, "y_%s.nii" % base))
-                    
+
             if isdefined(self.inputs.channel_info):
                 if self.inputs.channel_info[2][0]:
                     outputs['bias_corrected_images'].append(os.path.join(pth, "m%s%s" % (base, ext)))
@@ -1035,7 +1035,7 @@ class CreateWarped(SPMCommand):
             outputs['warped_files'].append(os.path.realpath('w%s%s'%(base,
                                                             ext)))
         return outputs
-    
+
 class ApplyDeformationFieldInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, field='fnames')
     deformation_field = File(exists=True, mandatory=True, field='comp{1}.def' )
@@ -1049,10 +1049,10 @@ class ApplyDeformationFieldOutputSpec(TraitedSpec):
 class ApplyDeformations(SPMCommand):
     input_spec = ApplyDeformationFieldInputSpec
     output_spec = ApplyDeformationFieldOutputSpec
-    
+
     _jobtype = 'util'
     _jobname = 'defs'
-    
+
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
@@ -1063,10 +1063,10 @@ class ApplyDeformations(SPMCommand):
             return scans_for_fnames(val, keep4d=True, separate_sessions=False)
         if opt in ['in_files', 'reference_volume']:
             return scans_for_fnames(val, keep4d=False, separate_sessions=False)
-        
+
         else:
             return super(ApplyDeformations, self)._format_arg(opt, spec, val)
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['out_files'] = []

@@ -65,7 +65,7 @@ except Exception, e:
     warnings.warn('cmp not installed')
 else:
     import cmp
-    
+
 """
 This needs to point to the freesurfer subjects directory (Recon-all must have been run on subj1 from the FSL course data)
 Alternatively, the reconstructed subject data can be downloaded from:
@@ -243,13 +243,13 @@ threshold_wmmask = pe.Node(interface=mrtrix.Threshold(),name='threshold_wmmask')
 threshold_wmmask.inputs.absolute_threshold_value = 0.4
 
 """
-The spherical deconvolution step depends on the estimate of the response function 
+The spherical deconvolution step depends on the estimate of the response function
 in the highly anisotropic voxels we obtained above.
 
 .. warning::
 
     For damaged or pathological brains one should take care to lower the maximum harmonic order of these steps.
-    
+
 """
 
 estimateresponse = pe.Node(interface=mrtrix.EstimateResponseForSH(),name='estimateresponse')
@@ -277,7 +277,7 @@ Structural segmentation nodes
 """
 
 """
-The following node identifies the transformation between the diffusion-weighted 
+The following node identifies the transformation between the diffusion-weighted
 image and the structural image. This transformation is then applied to the tracts
 so that they are in the same space as the regions of interest.
 """
