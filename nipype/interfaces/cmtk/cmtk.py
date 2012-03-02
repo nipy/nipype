@@ -482,7 +482,10 @@ class CreateMatrix(BaseInterface):
 			out_intersection_matrix_file = op.abspath(self._gen_outfilename('_intersections.pck'))
 		outputs['matrix_file'] = out_matrix_file
 		outputs['intersection_matrix_file'] = out_intersection_matrix_file
-		outputs['matrix_files'] = [out_matrix_file, out_intersection_matrix_file]
+		if self.inputs.count_region_intersections == True:
+			outputs['matrix_files'] = [out_matrix_file, out_intersection_matrix_file]
+		else:
+			outputs['matrix_files'] = [out_matrix_file]
 		
 		matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
 		path, name, ext = split_filename(matrix_mat_file)
@@ -520,9 +523,8 @@ class CreateMatrix(BaseInterface):
 			outputs['fiber_label_file'] = op.abspath(endpoint_name + '_filtered_fiberslabel.npy')
 			outputs['fiber_labels_noorphans'] = op.abspath(endpoint_name + '_final_fiberslabels.npy')
 
-		if self.inputs.count_region_intersections == True:
-			outputs['filtered_tractography_by_intersections'] = op.join(path, name + '_intersections_streamline_final.trk')
-			outputs['intersection_matrix_mat_file'] = op.join(path, name + '_intersections') + ext
+		outputs['filtered_tractography_by_intersections'] = op.join(path, name + '_intersections_streamline_final.trk')
+		outputs['intersection_matrix_mat_file'] = op.join(path, name + '_intersections') + ext
 
 		_, name , _ = split_filename(self.inputs.tract_file)
 		outputs['filtered_tractography'] = op.abspath(name + '_streamline_final.trk')
