@@ -10,6 +10,8 @@ import nipype.pipeline.engine as pe
 import warnings
 import tempfile
 import shutil
+from nipype.workflows.dmri.fsl.dti import create_eddy_correct_pipeline,\
+    create_bedpostx_pipeline
 
 
 @skipif(no_fsl)
@@ -19,7 +21,7 @@ def test_create_eddy_correct_pipeline():
 
     dwi_file = os.path.join(fsl_course_dir, "fdt/subj1/data.nii.gz")
 
-    nipype_eddycorrect = fsl_wf.create_eddy_correct_pipeline("nipype_eddycorrect")
+    nipype_eddycorrect = create_eddy_correct_pipeline("nipype_eddycorrect")
     nipype_eddycorrect.inputs.inputnode.in_file = dwi_file
     nipype_eddycorrect.inputs.inputnode.ref_num = 0
 
@@ -52,7 +54,7 @@ def test_create_bedpostx_pipeline():
     bvals_file = os.path.join(fsl_course_dir, "fdt/subj1/bvals")
     dwi_file = os.path.join(fsl_course_dir, "fdt/subj1/data.nii.gz")
 
-    nipype_bedpostx = fsl_wf.create_bedpostx_pipeline("nipype_bedpostx")
+    nipype_bedpostx = create_bedpostx_pipeline("nipype_bedpostx")
     nipype_bedpostx.inputs.inputnode.dwi = dwi_file
     nipype_bedpostx.inputs.inputnode.mask = mask_file
     nipype_bedpostx.inputs.inputnode.bvecs = bvecs_file

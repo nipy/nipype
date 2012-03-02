@@ -155,7 +155,8 @@ def concatcsv(in_files):
     all but the first file.
     """
     import os.path as op
-    
+    from nipype.utils.filemanip import split_filename
+
     if not isinstance(in_files,list):
         return in_files
     if isinstance(in_files[0],list):

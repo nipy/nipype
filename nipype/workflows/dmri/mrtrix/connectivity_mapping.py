@@ -16,7 +16,7 @@ from ...misc.utils import select_aparc_annot
 
 def create_connectivity_pipeline(name="connectivity", parcellation_name='scale500'):
     """Creates a pipeline that does the same connectivity processing as in the
-    connectivity_tutorial_advanced example script. Given a subject id (and completed Freesurfer reconstruction)
+    :ref:`example_dmri_connectivity_advanced` example script. Given a subject id (and completed Freesurfer reconstruction)
     diffusion-weighted image, b-values, and b-vectors, the workflow will return the subject's connectome
     as a Connectome File Format (CFF) file for use in Connectome Viewer (http://www.cmtk.org).
 
