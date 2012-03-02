@@ -1,6 +1,33 @@
-===============================================
- Neuroimaging in Python (NIPY) Pipeline: NYPIPE
-===============================================
+========================================================
+NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
+========================================================
+
+
+Current neuroimaging software offer users an incredible opportunity to
+analyze data using a variety of different algorithms. However, this has
+resulted in a heterogeneous collection of specialized applications
+without transparent interoperability or a uniform operating interface.
+
+*Nipype*, an open-source, community-developed initiative under the
+umbrella of NiPy, is a Python project that provides a uniform interface
+to existing neuroimaging software and facilitates interaction between
+these packages within a single workflow. Nipype provides an environment
+that encourages interactive exploration of algorithms from different
+packages (e.g., SPM, FSL, FreeSurfer, AFNI, Slicer), eases the
+design of workflows within and between packages, and reduces the
+learning curve necessary to use different packages. Nipype is creating a
+collaborative platform for neuroimaging software development in a
+high-level language and addressing limitations of existing pipeline
+systems.
+
+*Nipype* allows you to:
+
+* easily interact with tools from different software packages
+* combine processing steps from different software packages
+* develop new workflows faster by reusing common steps from old ones
+* process data faster by running it in parallel on many cores/machines
+* make your research easily reproducible
+* share your processing workflows with the community
 
 Documentation
 -------------
@@ -13,20 +40,19 @@ Website
 
 Information specific to NIPYPE is located here::
 	    
-    http://nipy.sourceforge.net
-
-Current information can always be found at the NIPY website is located
-here::
-
-    http://neuroimaging.scipy.org/
+    http://nipy.org/nipype
 
 
 Mailing Lists
 -------------
 
-For core NIPY related issues, please see the developer's list here::
+For core NIPYPE related issues, please see the developer's list here::
        
        http://projects.scipy.org/mailman/listinfo/nipy-devel
+
+For user NIPYPE related issues, please see the user's list here::
+
+       http://groups.google.com/group/nipy-user
 
 For NIPYPE related issues, please add *NIPYPE* to the subject line
 
@@ -74,5 +100,5 @@ are interfaces to some GNU code but these are entirely optional.
 All trademarks referenced herein are property of their respective
 holders.
 
-Copyright (c) 2006-2009, NIPY Developers
+Copyright (c) 2009-2012, NIPY Developers
 All rights reserved.
