@@ -35,14 +35,14 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
     >>> group_list['group1'] = ['subj1', 'subj2']
     >>> group_list['group2'] = ['subj3', 'subj4']
     >>> template_args = dict(dwi=[['subject_id', 'dwi']], bvecs=[['subject_id', 'bvecs']], bvals=[['subject_id', 'bvals']])
-    >>> for group_id in group_list.keys():
-    >>>     l1pipeline = groupwork.create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, template_args)
-    >>>     parcellation_name = 'scale500'
-    >>>     l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name
-    >>>     cmp_config = cmp.configuration.PipelineConfiguration()
-    >>>     cmp_config.parcellation_scheme = "Lausanne2008"
-    >>>     l1pipeline.inputs.connectivity.mapping.CreateMatrix.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
-    >>>     l1pipeline.run()                 # doctest: +SKIP
+    >>> group_id = 'group1'
+    >>> l1pipeline = groupwork.create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, template_args)
+    >>> parcellation_name = 'scale500'
+    >>> l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name
+    >>> cmp_config = cmp.configuration.PipelineConfiguration()
+    >>> cmp_config.parcellation_scheme = "Lausanne2008"
+    >>> l1pipeline.inputs.connectivity.mapping.CreateMatrix.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
+    >>> l1pipeline.run()                 # doctest: +SKIP
 
 
     Inputs::
@@ -189,9 +189,9 @@ def create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subj
     >>> group_list = {}
     >>> group_list['group1'] = ['subj1', 'subj2']
     >>> group_list['group2'] = ['subj3', 'subj4']
-    >>> for group_id in group_list.keys():
-    >>>     l2pipeline = groupwork.create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
-    >>>     l2pipeline.run()                 # doctest: +SKIP
+    >>> group_id = 'group1'
+    >>> l2pipeline = groupwork.create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
+    >>> l2pipeline.run()                 # doctest: +SKIP
 
     Inputs::
 
@@ -248,9 +248,9 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
     >>> group_list = {}
     >>> group_list['group1'] = ['subj1', 'subj2']
     >>> group_list['group2'] = ['subj3', 'subj4']
-    >>> for group_id in group_list.keys():
-    >>>     l2pipeline = groupwork.create_merge_network_results_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
-    >>>     l2pipeline.run()                 # doctest: +SKIP
+    >>> group_id = 'group1'
+    >>> l2pipeline = groupwork.create_merge_network_results_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
+    >>> l2pipeline.run()                 # doctest: +SKIP
 
     Inputs::
 
