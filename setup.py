@@ -19,7 +19,7 @@ except ImportError:
     raise RuntimeError('Need nisext package from nibabel installation'
                        ' - please install nibabel first')
 
-from build_docs import cmdclass
+from build_docs import cmdclass, INFO_VARS
 
 # Add custom commit-recording build command
 cmdclass['build_py'] = get_comrec_build('nipype')
