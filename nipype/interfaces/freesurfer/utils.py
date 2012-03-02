@@ -834,7 +834,7 @@ class MRITessellate(FSCommand):
         else:
             _, name, ext = split_filename(self.inputs.in_file)
             return name + ext + '_' + str(self.inputs.label_value)
-            
+
 class MRIMarchingCubesInputSpec(FSTraitedSpec):
     """
     Uses Freesurfer's mri_mc to create surfaces by tessellating a given input volume

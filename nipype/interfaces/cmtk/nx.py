@@ -147,7 +147,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
             avg_ntwk.add_node(node, newdata)
 
         edge_dict = {}
-        edge_dict['count'] = np.zeros((avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes()))        
+        edge_dict['count'] = np.zeros((avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes()))
         for edge in edges:
             data = ntwk.edge[edge[0]][edge[1]]
             if ntwk.edge[edge[0]][edge[1]]['count'] >= count_to_keep_edge:
@@ -155,10 +155,10 @@ def average_networks(in_files, ntwk_res_file, group_id):
                 for key in data.keys():
                     if not key == 'count':
                         data[key] = data[key] / len(in_files)
-                ntwk.edge[edge[0]][edge[1]] = data                
+                ntwk.edge[edge[0]][edge[1]] = data
                 avg_ntwk.add_edge(edge[0],edge[1],data)
             edge_dict['count'][edge[0]-1][edge[1]-1] = ntwk.edge[edge[0]][edge[1]]['count']
-            
+
         iflogger.info('After thresholding, the average network has has {n} edges'.format(n=avg_ntwk.number_of_edges()))
 
         avg_edges = avg_ntwk.edges_iter()
@@ -166,7 +166,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
             data = avg_ntwk.edge[edge[0]][edge[1]]
             for key in data.keys():
                 if not key == 'count':
-                    edge_dict[key] = np.zeros((avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes()))        
+                    edge_dict[key] = np.zeros((avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes()))
                     edge_dict[key][edge[0]-1][edge[1]-1] = data[key]
 
         for key in edge_dict.keys():
@@ -176,7 +176,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
             tmp[key] = edge_dict[key]
             sio.savemat(op.abspath(network_name), tmp)
             iflogger.info('Saving average network for key: {k} as {out}'.format(k=key, out=op.abspath(network_name)))
-                
+
     # Writes the networks and returns the name
     network_name = group_id + '_average.pck'
     nx.write_gpickle(avg_ntwk, op.abspath(network_name))
@@ -377,7 +377,7 @@ class NetworkXMetrics(BaseInterface):
 			global_out_file = op.abspath(self._gen_outfilename('globalmetrics', 'mat'))
 		sio.savemat(global_out_file, global_measures, oned_as='column')
 		matlab.append(global_out_file)
-		
+
 		node_measures = compute_node_measures(ntwk)
 		for key in node_measures.keys():
 			newntwk = add_node_data(node_measures[key],self.inputs.in_file)
@@ -514,12 +514,12 @@ class AverageNetworks(BaseInterface):
             outputs["gpickled_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','pck'))
         else:
             outputs["gpickled_groupavg"] = op.abspath(self.inputs.out_gpickled_groupavg)
-        
+
         if not isdefined(self.inputs.out_gexf_groupavg):
             outputs["gexf_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average','gexf'))
         else:
             outputs["gexf_groupavg"] = op.abspath(self.inputs.out_gexf_groupavg)
-        
+
         outputs["matlab_groupavgs"] = matlab_network_list
         return outputs
 

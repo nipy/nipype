@@ -142,7 +142,7 @@ class Merge(FSLCommand):
                                               suffix='_merged')
         else:
             outputs['merged_file'] = os.path.realpath(self.inputs.merged_file)
-        
+
         return outputs
 
     def _gen_filename(self, name):

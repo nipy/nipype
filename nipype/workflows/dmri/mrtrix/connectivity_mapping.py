@@ -166,7 +166,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     """
 
     These nodes are used to create a rough brain mask from the b0 image.
-    The b0 image is extracted from the original diffusion-weighted image, 
+    The b0 image is extracted from the original diffusion-weighted image,
     put through a simple thresholding routine, and smoothed using a 3x3 median filter.
     """
 
@@ -177,8 +177,8 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     median3d = pe.Node(interface=mrtrix.MedianFilter3D(),name='median3d')
 
     """
-    The brain mask is also used to help identify single-fiber voxels. 
-    This is done by passing the brain mask through two erosion steps, 
+    The brain mask is also used to help identify single-fiber voxels.
+    This is done by passing the brain mask through two erosion steps,
     multiplying the remaining mask with the fractional anisotropy map, and
     thresholding the result to obtain some highly anisotropic within-brain voxels.
     """
@@ -202,13 +202,13 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     threshold_wmmask.inputs.absolute_threshold_value = 0.4
 
     """
-    The spherical deconvolution step depends on the estimate of the response function 
+    The spherical deconvolution step depends on the estimate of the response function
     in the highly anisotropic voxels we obtained above.
 
     .. warning::
 
         For damaged or pathological brains one should take care to lower the maximum harmonic order of these steps.
-        
+
     """
 
     estimateresponse = pe.Node(interface=mrtrix.EstimateResponseForSH(),name='estimateresponse')
@@ -236,7 +236,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     """
 
     """
-    The following node identifies the transformation between the diffusion-weighted 
+    The following node identifies the transformation between the diffusion-weighted
     image and the structural image. This transformation is then applied to the tracts
     so that they are in the same space as the regions of interest.
     """
@@ -269,7 +269,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     """
     Next we define the endpoint of this tutorial, which is the CFFConverter node, as well as a few nodes which use
     the Nipype Merge utility. These are useful for passing lists of the files we want packaged in our CFF file.
-    The inspect.getfile command is used to package this script into the resulting CFF file, so that it is easy to 
+    The inspect.getfile command is used to package this script into the resulting CFF file, so that it is easy to
     look back at the processing parameters that were used.
     """
 
@@ -498,7 +498,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
 
     mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
     mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
-    mapping.connect([(creatematrix, CFFConverter,[("matrix_file","gpickled_networks")])])    
+    mapping.connect([(creatematrix, CFFConverter,[("matrix_file","gpickled_networks")])])
     mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
     mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
     mapping.connect([(creatematrix, CFFConverter,[("filtered_tractography","tract_files")])])
@@ -535,7 +535,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     mapping.connect([(Matlab2CSV_fibstd, mergeCSVMatrices,[("csv_files","in4")])])
     mapping.connect([(mergeCSVMatrices, MergeCSVFiles_cmatrices,[("out","in_files")])])
     mapping.connect([(inputnode_within, MergeCSVFiles_cmatrices,[("subject_id","out_file")])])
-    mapping.connect([(inputnode_within, MergeCSVFiles_cmatrices,[("subject_id","extra_field")])])    
+    mapping.connect([(inputnode_within, MergeCSVFiles_cmatrices,[("subject_id","extra_field")])])
 
     """
     Create a higher-level workflow

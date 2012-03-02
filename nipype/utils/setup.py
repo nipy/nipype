@@ -9,18 +9,6 @@ def configuration(parent_package='',top_path=None):
 
     config.add_data_dir('tests')
 
-    try:
-        # If the user has IPython installed, this will install the
-        # nipype profile under their '~/.ipython' directory so they
-        # can launch ipython with 'ipython -p nipype' and the traits
-        # completer will be enabled by default.
-        from IPython.genutils import get_ipython_dir
-        pth = get_ipython_dir()
-        #config.data_files = [(pth, [join('nipype','utils','ipy_profile_nipype.py')])]
-    except ImportError:
-        # Don't do anything if they haven't installed IPython
-        pass
-
     return config
 
 if __name__ == '__main__':

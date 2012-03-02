@@ -1,1 +1,1 @@
-from nipype.interfaces.dipy.tracks import TrackDensityMap
+from .tracks import TrackDensityMap

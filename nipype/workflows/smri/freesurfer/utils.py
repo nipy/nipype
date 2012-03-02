@@ -281,7 +281,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     """
     Initialize the workflow
     """
-        
+
     tessflow = pe.Workflow(name=name)
 
     """
@@ -317,7 +317,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     region_list_from_volume_interface = Function(input_names=["in_file"],
                              output_names=["region_list"],
                              function=region_list_from_volume)
-                             
+
     id_list_from_lookup_table_interface = Function(input_names=["lookup_file", "region_list"],
                              output_names=["id_list"],
                              function=id_list_from_lookup_table)

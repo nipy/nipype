@@ -47,8 +47,8 @@ def id_list_from_lookup_table(lookup_file, region_list):
     numLUTLabels = np.size(LUTlabelsRGBA)
     LUTlabelDict = {}
     for labels in range(0,numLUTLabels):
-        LUTlabelDict[LUTlabelsRGBA[labels][0]] = [LUTlabelsRGBA[labels][1], 
-        LUTlabelsRGBA[labels][2], LUTlabelsRGBA[labels][3], 
+        LUTlabelDict[LUTlabelsRGBA[labels][0]] = [LUTlabelsRGBA[labels][1],
+        LUTlabelsRGBA[labels][2], LUTlabelsRGBA[labels][3],
         LUTlabelsRGBA[labels][4], LUTlabelsRGBA[labels][5]]
     id_list = []
     for region in region_list:
