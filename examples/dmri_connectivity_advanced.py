@@ -57,7 +57,7 @@ from nipype.workflows.dmri.fsl.dti import create_eddy_correct_pipeline
 from nipype.workflows.dmri.camino.connectivity_mapping import select_aparc_annot
 from nipype.utils.misc import package_check
 import warnings
-from nipype.workflows.dmri.camino.group_connectivity import pullnodeIDs
+from nipype.workflows.dmri.connectivity.group_connectivity import pullnodeIDs
 
 try:
     package_check('cmp')

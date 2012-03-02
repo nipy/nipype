@@ -53,8 +53,8 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import  os.path as op                     # system functions
 import cmp
-from nipype.workflows.dmri.mrtrix.group_connectivity import (create_group_connectivity_pipeline,
-create_merge_network_results_by_group_workflow, create_merge_group_network_results_workflow, create_average_networks_by_group_workflow)
+from nipype.workflows.dmri.mrtrix.group_connectivity import create_group_connectivity_pipeline
+from nipype.workflows.dmri.connectivity.group_connectivity import (create_merge_network_results_by_group_workflow, create_merge_group_network_results_workflow, create_average_networks_by_group_workflow)
 
 """
 Set the proper directories
