@@ -504,6 +504,7 @@ def create_tbss_non_FA(name='tbss_non_FA'):
         inputnode.distance_map
 
     Outputs::
+    
         outputnode.projected_nonFA_file
 
     """

@@ -7,6 +7,8 @@ from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
 from nipype.interfaces.base import CommandLine
 
+from time import sleep
+
 
 class CondorPlugin(SGELikeBatchManagerBase):
     """Execute using Condor

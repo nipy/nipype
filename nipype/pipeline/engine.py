@@ -415,8 +415,8 @@ connected.
 
         graph2use: 'orig', 'hierarchical' (default), 'flat', 'exec'
             orig - creates a top level graph without expanding internal
-                   workflow nodes
-            flat - expands workflow nodes recursively
+            workflow nodes;
+            flat - expands workflow nodes recursively;
             exec - expands workflows to depict iterables
 
         format: 'png', 'svg'

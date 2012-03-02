@@ -3,18 +3,9 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.mrtrix as mrtrix
 
-def get_vox_dims_as_tuple(volume):
-    import nibabel as nb
-    if isinstance(volume, list):
-        volume = volume[0]
-    nii = nb.load(volume)
-    hdr = nii.get_header()
-    voxdims = hdr.get_zooms()
-    return tuple([float(voxdims[0]), float(voxdims[1]), float(voxdims[2])])
-
 def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilistic'):
     """Creates a pipeline that does the same diffusion processing as in the
-    mrtrix_dti_tutorial example script. Given a diffusion-weighted image,
+    :ref:`example_mrtrix_dti` example script. Given a diffusion-weighted image,
     b-values, and b-vectors, the workflow will return the tractography
     computed from spherical deconvolution and probabilistic streamline tractography
 

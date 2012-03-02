@@ -242,18 +242,24 @@ class InterfaceHelpWriter(object):
         # get the names of all classes and functions
         functions, classes = self._parse_module(uri)
         workflows = []
+        helper_functions = []
         for function in functions:
+
             try:
                 __import__(uri)
                 finst = sys.modules[uri].__dict__[function]
-                workflow = finst()
             except TypeError:
+                continue
+            try:
+                workflow = finst()
+            except Exception:
+                helper_functions.append((function, finst))
                 continue
 
             if isinstance(workflow, Workflow):
                 workflows.append((workflow,function, finst))
 
-        if not classes and not workflows:
+        if not classes and not workflows and not helper_functions:
             print 'WARNING: Empty -',uri  # dbg
             return ''
 
@@ -301,7 +307,7 @@ class InterfaceHelpWriter(object):
             ad += trim(classinst.help(returnhelp=True),
                        self.rst_section_levels[3]) + '\n'
 
-        if workflows:
+        if workflows or helper_functions:
             ad += '\n.. module:: %s\n\n' % uri
 
         for workflow, name, finst in workflows:
@@ -322,6 +328,14 @@ class InterfaceHelpWriter(object):
             workflow.write_graph(dotfilename=fname, graph2use='hierarchical')
 
             ad += self._write_graph_section(fname, 'Graph') + '\n'
+            
+        for name, finst in helper_functions:
+            label = ':func:`' + name + '`'
+            ad += '\n.. _%s:\n\n' % (uri + '.' + name)
+            ad += '\n'.join((label, self.rst_section_levels[2] * len(label)))
+            ad += "\n\nCode: %s\n\n" % get_file_url(finst, hashmap)
+            helpstr = trim(finst.__doc__, self.rst_section_levels[3])
+            ad += '\n\n' + helpstr + '\n\n'
 
         return ad
 

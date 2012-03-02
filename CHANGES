@@ -18,6 +18,8 @@ Changes since release 0.4.1
 	   Node level)
 * API: "stop_on_first_rerun" does not stop for DataGrabber (unless overwrite is 
 	   set to True on Node level)
+* API: Output prefix can be set for spm nodes (SliceTiming, Realign, Coregister, 
+       Normalize, Smooth)
 
 * ENH: Added fsl resting state workflow based on behzadi 2007 CompCorr method.
 * ENH: TSNR node produces mean and std-dev maps; allows polynomial detrending
