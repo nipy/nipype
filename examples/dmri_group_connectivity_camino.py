@@ -109,7 +109,7 @@ for idx, group_id in enumerate(group_list.keys()):
 
 """
 
-info = dict(dwi=[['subject_id', 'dwi']],
+info = dict(dwi=[['subject_id', 'dti']],
             bvecs=[['subject_id', 'bvecs']],
             bvals=[['subject_id', 'bvals']])
 
