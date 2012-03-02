@@ -52,14 +52,13 @@ class To3DOutputSpec(TraitedSpec):
 
 class To3D(AFNICommand):
     """Create a 3D dataset from 2D image files using AFNI to3d command.
-    For complete details, see the `to3d Documentation.
+
+    For complete details, see the `to3d Documentation
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
 
-    To print out the command line help, use:
-    To3d().inputs_help()
-
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni
     >>> To3D = afni.To3d()
     AFNI has no environment variable that sets filetype
@@ -133,14 +132,16 @@ class TShiftOutputSpec(AFNITraitedSpec):
 
 
 class TShift(AFNICommand):
-    """
-    Shifts voxel time series from input
+    """Shifts voxel time series from input
     so that seperate slices are aligned to the same
-    temporal origin.
+    temporal origin
+
     For complete details, see the `3dTshift Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTshift.html>
+
     Examples
-    ________
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> tshift = afni.TShift()
@@ -149,6 +150,7 @@ class TShift(AFNICommand):
     >>> tshift.inputs.tpattern = 'alt+z'
     >>> tshift.inputs.tzero = 0.0
     >>> res = tshift.run()   # doctest: +SKIP
+
     """
 
     _cmd = '3dTshift'
@@ -201,21 +203,21 @@ class RefitOutputSpec(AFNITraitedSpec):
 
 
 class Refit(AFNICommand):
-    """
-    Changes some of the information inside a 3D dataset's header
+    """Changes some of the information inside a 3D dataset's header
+
     For complete details, see the `3drefit Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3drefit.html>
-    NOTES
-    -----
-    The original file is returned but it is CHANGED
+
     Examples
-    ________
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> refit = afni.Refit()
     >>> refit.inputs.in_file = example_data('structural.nii')
     >>> refit.inputs.deoblique=True
     >>> res = refit.run() # doctest: +SKIP
+
     """
 
     _cmd = '3drefit'
@@ -275,18 +277,21 @@ class WarpOutputSpec(AFNITraitedSpec):
 
 
 class Warp(AFNICommand):
-    """
-    Use 3dWarp for spatially transforming a dataset
+    """Use 3dWarp for spatially transforming a dataset
+
     For complete details, see the `3dWarp Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dWarp.html>`_
+
     Examples
-    ________
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> warp = afni.Warp()
     >>> warp.inputs.in_file = example_data('structural.nii')
     >>> warp.inputs.deoblique = True
     >>> res = warp.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dWarp'
@@ -338,18 +343,21 @@ class ResampleOutputSpec(AFNITraitedSpec):
 
 
 class Resample(AFNICommand):
-    """
-    Resample or reorient an image using AFNI 3dresample command.
+    """Resample or reorient an image using AFNI 3dresample command
+
     For complete details, see the `3dresample Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dresample.html>`_
+
     Examples
-    ________
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> resample = afni.Resample()
     >>> resample.inputs.in_file = example_data('functional.nii')
     >>> resample.inputs.orientation= 'RPI'
     >>> res = resample.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dresample'
@@ -400,18 +408,21 @@ class TStatOutputSpec(AFNITraitedSpec):
 
 
 class TStat(AFNICommand):
-    """
-    Compute voxel-wise statistics using AFNI 3dTstat command.
+    """Compute voxel-wise statistics using AFNI 3dTstat command.
+
     For complete details, see the `3dTstat Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html>`_
+
     Examples
-    ________
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> tstat = afni.TStat()
     >>> tstat.inputs.in_file = example_data('functional.nii')
     >>> tstat.inputs.options= '-mean'
     >>> res = tstat.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dTstat'
@@ -455,19 +466,22 @@ class DetrendOutputSpec(AFNITraitedSpec):
 
 
 class Detrend(AFNICommand):
-    """
-    This program removes components from voxel time series using
-    linear least squares.  Each voxel is treated independently.
-    For complete details, see the `3dTstat Documentation.
+    """This program removes components from voxel time series using
+    linear least squares
+
+    For complete details, see the `3dDetrend Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDetrend.html>`_
+
     Examples
-    ________
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> detrend = afni.Detrend()
     >>> detrend.inputs.in_file = example_data('functional.nii')
     >>> detrend.inputs.options = '-polort 2'
     >>> res = detrend.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dDetrend'
@@ -514,19 +528,20 @@ class DespikeOutputSpec(AFNITraitedSpec):
 
 
 class Despike(AFNICommand):
-    """
-    Removes 'spikes' from the 3D+time input dataset and writes
-    a new dataset with the spike values replaced by something
-    more pleasing to the eye.
+    """Removes 'spikes' from the 3D+time input dataset
+
     For complete details, see the `3dDespike Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDespike.html>`_
+
     Examples
-    ________
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> despike = afni.Despike()
     >>> despike.inputs.in_file = example_data('functional.nii')
     >>> res = despike.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dDespike'
@@ -593,18 +608,21 @@ class AutomaskOutputSpec(AFNITraitedSpec):
 
 
 class Automask(AFNICommand):
-    """
-    Create a brain-only mask of the image using AFNI 3dAutomask command.
+    """Create a brain-only mask of the image using AFNI 3dAutomask command
+
     For complete details, see the `3dAutomask Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutomask.html>`_
+
     Examples
-    ________
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> automask = afni.Automask()
     >>> automask.inputs.in_file = example_data('functional.nii')
     >>> automask.inputs.dilate = 1
     >>> res = automask.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dAutomask'
@@ -676,12 +694,14 @@ class VolregOutputSpec(AFNITraitedSpec):
 
 
 class Volreg(AFNICommand):
-    """
-    Register input volumes to a base volume using AFNI 3dvolreg command.
+    """Register input volumes to a base volume using AFNI 3dvolreg command
+
     For complete details, see the `3dvolreg Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dvolreg.html>`_
+
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> volreg = afni.Volreg()
@@ -689,6 +709,7 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.other = '-Fourier -twopass'
     >>> volreg.inputs.zpad = '4'
     >>> res = volreg.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dvolreg'
@@ -747,12 +768,14 @@ class MergeOutputSpec(AFNITraitedSpec):
 
 
 class Merge(AFNICommand):
-    """
-    Merge or edit volumes using AFNI 3dmerge command.
+    """Merge or edit volumes using AFNI 3dmerge command
+
     For complete details, see the `3dmerge Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html>`_
+
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> merge = afni.Merge()
@@ -761,6 +784,7 @@ class Merge(AFNICommand):
     >>> merge.inputs.doall = True
     >>> merge.inputs.outfile = 'e7.nii'
     >>> res = merge.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dmerge'
@@ -790,17 +814,22 @@ class CopyOutputSpec(AFNITraitedSpec):
 
 
 class Copy(AFNICommand):
-    """
-    Copies an image of one type to an image of the same
-    or different type using 3dcopy command.
+    """Copies an image of one type to an image of the same
+    or different type using 3dcopy command
+
+    For complete details, see the `3dcopy Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcopy.html>`_
+
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> copy = afni.Copy()
     >>> copy.inputs.in_file = example_data('functional.nii')
     >>> copy.inputs.out_file = 'new_func.nii'
     >>> res = copy.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dcopy'
@@ -852,11 +881,15 @@ class FourierOutputSpec(AFNITraitedSpec):
 
 
 class Fourier(AFNICommand):
-    """
+    """Program to lowpass and/or highpass each voxel time series in a
+    dataset, via the FFT
+
     For complete details, see the `3dFourier Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dfourier.html>`_
+
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> fourier = afni.Fourier()
@@ -865,6 +898,7 @@ class Fourier(AFNICommand):
     >>> fourier.inputs.highpass = 0.005
     >>> fourier.inputs.lowpass = 0.1
     >>> res = fourier.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dFourier'
@@ -910,12 +944,14 @@ class ZCutUpOutputSpec(AFNITraitedSpec):
 
 
 class ZCutUp(AFNICommand):
-    """
-    Cut z-slices from a volume using AFNI 3dZcutup command.
+    """Cut z-slices from a volume using AFNI 3dZcutup command
+
     For complete details, see the `3dZcutup Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcutup.html>`_
+
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> zcutup = afni.Zcutup()
@@ -923,6 +959,7 @@ class ZCutUp(AFNICommand):
     >>> zcutup.inputs.outfile= 'functional_zcutup.nii'
     >>> zcutup.inputs.keep= '0 10'
     >>> res = zcutup.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dZcutup'
@@ -956,12 +993,14 @@ class AllineateOutputSpec(AFNITraitedSpec):
 
 
 class Allineate(AFNICommand):
-    """
-    Program to align one dataset (the 'source') to a base dataset.
+    """Program to align one dataset (the 'source') to a base dataset
+
     For complete details, see the `3dAllineate Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html>`_
+
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> allineate = afni.Allineate()
@@ -969,6 +1008,7 @@ class Allineate(AFNICommand):
     >>> allineate.inputs.outfile= 'functional_allineate.nii'
     >>> allineate.inputs.matrix= example_data('cmatrix.mat')
     >>> res = allineate.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dAllineate'
@@ -1006,14 +1046,15 @@ class MaskaveOutputSpec(AFNITraitedSpec):
 
 
 class Maskave(AFNICommand):
-    """
-    Computes average of all voxels in the input dataset
-    which satisfy the criterion in the options list.
-    If no options are given, then all voxels are included.
+    """Computes average of all voxels in the input dataset
+    which satisfy the criterion in the options list
+
     For complete details, see the `3dmaskave Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmaskave.html>`_
+
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> maskave = afni.Maskave()
@@ -1022,6 +1063,7 @@ class Maskave(AFNICommand):
     >>> maskave.inputs.quiet= True
     >>> maskave.inputs.out_file= 'maskave.1D'
     >>> res = maskave.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dmaskave'
@@ -1064,19 +1106,22 @@ class SkullStripOutputSpec(AFNITraitedSpec):
 
 
 class SkullStrip(AFNICommand):
-    """
-    A program to extract the brain from surrounding
-    tissue from MRI T1-weighted images.
+    """A program to extract the brain from surrounding
+    tissue from MRI T1-weighted images
+
     For complete details, see the `3dSkullStrip Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSkullStrip.html>`_
+
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> skullstrip = afni.Skullstrip()
     >>> skullstrip.inputs.in_file = example_data('functional.nii')
     >>> skullstrip.inputs.options = '-o_ply'
     >>> res = skullstrip.run() # doctest: +SKIP
+
     """
     _cmd = '3dSkullStrip'
     input_spec = SkullStripInputSpec
@@ -1119,13 +1164,15 @@ class TCatOutputSpec(AFNITraitedSpec):
 
 
 class TCat(AFNICommand):
-    """
-    Concatenate sub-bricks from input datasets into
-    one big 3D+time dataset.
+    """Concatenate sub-bricks from input datasets into
+    one big 3D+time dataset
+
     For complete details, see the `3dTcat Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcat.html>`_
+
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> tcat = afni.TCat()
@@ -1133,6 +1180,7 @@ class TCat(AFNICommand):
     >>> tcat.inputs.out_file= 'functional_tcat.nii'
     >>> tcat.inputs.rlt = '+'
     >>> res = tcat.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dTcat'
@@ -1183,14 +1231,16 @@ class FimOutputSpec(AFNITraitedSpec):
 
 
 class Fim(AFNICommand):
-    """
-    Program to calculate the cross-correlation of
-    an ideal reference waveform
-    with the measured FMRI time series for each voxel.
+    """Program to calculate the cross-correlation of
+    an ideal reference waveform with the measured FMRI
+    time series for each voxel
+
     For complete details, see the `3dfim+ Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dfim+.html>`_
+
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> fim = afni.Fim()
@@ -1200,6 +1250,7 @@ class Fim(AFNICommand):
     >>> fim.inputs.out = 'Correlation'
     >>> fim.inputs.fim_thr = 0.0009
     >>> res = fim.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dfim+'
@@ -1257,14 +1308,15 @@ class TCorrelateOutputSpec(AFNITraitedSpec):
 
 
 class TCorrelate(AFNICommand):
-    """
-    Computes the correlation coefficient between corresponding voxel
-    time series in two input 3D+time datasets 'xset' and 'yset', and
-    stores the output in a new 1 sub-brick dataset.
-    For complete details, see the `3dfim+ Documentation.
+    """Computes the correlation coefficient between corresponding voxel
+    time series in two input 3D+time datasets 'xset' and 'yset'
+
+    For complete details, see the `3dTcorrelate Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorrelate.html>`_
+
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> tcorrelate = afni.TCorrelate()
@@ -1275,6 +1327,7 @@ class TCorrelate(AFNICommand):
     >>> tcorrelate.inputs.polort = -1
     >>> tcorrelate.inputs.pearson = True
     >>> res = tcarrelate.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dTcorrelate'
@@ -1318,12 +1371,14 @@ class BrickStatOutputSpec(AFNITraitedSpec):
 
 
 class BrickStat(AFNICommand):
-    """
-    Compute maximum and/or minimum voxel values of an input dataset.
+    """Compute maximum and/or minimum voxel values of an input dataset
+
     For complete details, see the `3dBrickStat Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBrickStat.html>`_
+
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> brickstat = afni.BrickStat()
@@ -1331,6 +1386,7 @@ class BrickStat(AFNICommand):
     >>> brickstat.inputs.mask = example_data('skeleton_mask.nii.gz')
     >>> brickstat.inputs.min = True
     >>> res = brickstat.run() # doctest: +SKIP
+
     """
     _cmd = '3dBrickStat'
     input_spec = BrickStatInputSpec
@@ -1392,12 +1448,14 @@ class ROIStatsOutputSpec(AFNITraitedSpec):
 
 
 class ROIStats(AFNICommand):
-    """
-    Display statistics over masked regions.
+    """Display statistics over masked regions
+
     For complete details, see the `3dROIstats Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dROIstats.html>`_
+
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> roistats = afni.ROIStats()
@@ -1405,6 +1463,7 @@ class ROIStats(AFNICommand):
     >>> roistats.inputs.mask = example_data('skeleton_mask.nii.gz')
     >>> roistats.inputs.quiet=True
     >>> res = roistats.run() # doctest: +SKIP
+
     """
     _cmd = '3dROIstats'
     input_spec = ROIStatsInputSpec
@@ -1478,12 +1537,14 @@ class CalcOutputSpec(TraitedSpec):
 
 
 class Calc(CommandLine):
-    """
-    This program does voxel-by-voxel arithmetic on 3D datasets
+    """This program does voxel-by-voxel arithmetic on 3D datasets
+
     For complete details, see the `3dcalc Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcalc.html>`_
+
     Examples
-    --------
+    ========
+
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> calc = afni.Calc()
@@ -1492,6 +1553,7 @@ class Calc(CommandLine):
     >>> calc.inputs.expr='a*b'
     >>> calc.inputs.out_file =  'functional_calc.nii.gz'
     >>> res = calc.run() # doctest: +SKIP
+
     """
 
     _cmd = '3dcalc'
