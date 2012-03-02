@@ -3,16 +3,10 @@
 """Camino top level namespace
 """
 
-from nipype.interfaces.camino.connectivity import Conmap
-from nipype.interfaces.camino.convert import Image2Voxel, FSL2Scheme, VtkStreamlines, ProcStreamlines, TractShredder, DT2NIfTI, NIfTIDT2Camino, AnalyzeHeader
-from nipype.interfaces.camino.dti import DTIFit, ModelFit, DTLUTGen, PicoPDFs, Track, TrackPICo, TrackBayesDirac, TrackDT, TrackBallStick, TrackBootstrap, ComputeFractionalAnisotropy, ComputeMeanDiffusivity, ComputeTensorTrace,  ComputeEigensystem
-
-import nose
-
-
-
-def setup():
-    print 'camino setup test'
-
-def teardown():
-    print 'camino teardown test'
+from .connectivity import Conmap
+from .convert import (Image2Voxel, FSL2Scheme, VtkStreamlines, ProcStreamlines,
+                      TractShredder, DT2NIfTI, NIfTIDT2Camino, AnalyzeHeader)
+from .dti import (DTIFit, ModelFit, DTLUTGen, PicoPDFs, Track, TrackPICo,
+                  TrackBayesDirac, TrackDT, TrackBallStick, TrackBootstrap,
+                  ComputeFractionalAnisotropy, ComputeMeanDiffusivity,
+                  ComputeTensorTrace,  ComputeEigensystem)
