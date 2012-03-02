@@ -16,7 +16,7 @@ We perform this analysis using one healthy subject and two subjects who suffer f
 
 The whole package (754 mb as .tar.gz / 1 gb uncompressed) including the Freesurfer directories for these subjects, can be acquired from here:
 
-    * Dropbox link to come shortly....
+    * http://db.tt/b6F1t0QV
     
 Along with MRtrix, FSL, and Freesurfer, you must also have the Connectome File Format
 library installed as well as the Connectome Mapper (cmp).

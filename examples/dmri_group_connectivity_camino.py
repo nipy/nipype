@@ -16,22 +16,22 @@ We perform this analysis using one healthy subject and two subjects who suffer f
 
 The whole package (754 mb as .tar.gz / 1 gb uncompressed) including the Freesurfer directories for these subjects, can be acquired from here:
 
-    http://dl.dropbox.com/u/315714/groupcondatapackage.zip?dl=1
+    * http://db.tt/b6F1t0QV
 
 Along with Camino, Camino-Trackvis, FSL, and Freesurfer, you must also have the Connectome File Format
 library installed as well as the Connectome Mapper.
 
-    Camino: http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php?n=Main.HomePage
-    Camino-Trackvis: http://www.nitrc.org/projects/camino-trackvis/
-    FSL: http://www.fmrib.ox.ac.uk/fsl/
-    Freesurfer: http://surfer.nmr.mgh.harvard.edu/
-    CTMK: http://www.cmtk.org/
-    CFF: sudo apt-get install python-cfflib
+    * Camino: http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php?n=Main.HomePage
+    * Camino-Trackvis: http://www.nitrc.org/projects/camino-trackvis/
+    * FSL: http://www.fmrib.ox.ac.uk/fsl/
+    * Freesurfer: http://surfer.nmr.mgh.harvard.edu/
+    * CTMK: http://www.cmtk.org/
+    * CFF: sudo apt-get install python-cfflib
 
 Or on github at:
 
-    CFFlib: https://github.com/LTS5/cfflib
-    CMP: https://github.com/LTS5/cmp
+    * CFFlib: https://github.com/LTS5/cfflib
+    * CMP: https://github.com/LTS5/cmp
 
 Output data can be visualized in ConnectomeViewer, TrackVis,
 and anything that can view Nifti files.
