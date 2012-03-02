@@ -7,6 +7,7 @@ from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
 from nipype.interfaces.base import CommandLine
 
+from time import sleep
 
 class SGEPlugin(SGELikeBatchManagerBase):
     """Execute using SGE (OGE not tested)
