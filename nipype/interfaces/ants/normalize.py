@@ -33,52 +33,51 @@ class BuildTemplateInputSpec(CommandLineInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d',usedefault=True,
                              desc='image dimension (2 or 3)', position=1)
     out_prefix = traits.Str('antsTMPL_',argstr='-o %s',usedefault=True,
-                             desc='Prefix that is prepended to all output files \
-                             (default = antsTMPL_)')
+                             desc='Prefix that is prepended to all output files '
+                             '(default = antsTMPL_)')
     in_files = traits.List(File(exists=True), mandatory=True,
-                             desc='list of images to generate template from',argstr='%s',position=-1,
-                             copyfile=True)
+                             desc='list of images to generate template from',argstr='%s',position=-1)
     parallelization = traits.Enum(0,1,2,argstr='-c %d',usedefault=True,
-                             desc='control for parallel processing (0 = serial, \
-                             1 = use PBS, 2 = use PEXEC, 3 = use Apple XGrid')
-    gradient_step_size = traits.Float(argstr='-g %f',desc='smaller magnitude \
-                             results in more cautious steps (default = .25)')
-    iteration_limit = traits.Int(argstr='-i %d',desc='iterations of template \
-                             construction (default 4)')
-    num_cores = traits.Int(argstr='-j %d',desc='Requires parallelization = 2 (PEXEC). \
-                             Sets number of cpu cores to use (default 2)')
-    max_iterations = traits.Str('30x90x20',argstr='-m %s',
-                             desc='maximum number of iterations (must be string \
-                             in the form JxKxL: J = coarsest resolution iterations, \
-                             K = middle resolution interations, L = fine resolution \
-                             iterations')
-    bias_field_correction = traits.Bool( 
+                             desc='control for parallel processing (0 = serial, '
+                             '1 = use PBS, 2 = use PEXEC, 3 = use Apple XGrid')
+    gradient_step_size = traits.Float(argstr='-g %f',desc='smaller magnitude '
+                             'results in more cautious steps (default = .25)')
+    iteration_limit = traits.Int(argstr='-i %d',desc='iterations of template '
+                             'construction (default 4)')
+    num_cores = traits.Int(argstr='-j %d',requires=['parallelization'],desc='Requires parallelization = 2 (PEXEC). '
+                             'Sets number of cpu cores to use (default 2)')
+    max_iterations = traits.List(traits.Int,argstr='-m %s',sep='x',
+                             desc='maximum number of iterations (must be list of integers '
+                             'in the form [J,K,L...]: J = coarsest resolution iterations, '
+                             'K = middle resolution interations, L = fine resolution '
+                             'iterations')
+    bias_field_correction = traits.Bool(argstr = '-n 1',
                              desc='Applies bias field correction to moving image')
     rigid_body_registration = traits.Bool(argstr='-r 1',
-                             desc='registers inputs before creating template (useful\
-                             if no initial template available)')
+                             desc='registers inputs before creating template (useful'
+                             'if no initial template available)')
     similarity_metric = traits.Enum('PR','CC','MI','MSQ',argstr='-s %s',
-                             desc='Type of similartiy metric used for registration \
-                             (CC = cross correlation, MI = mutual information, \
-                             PR = probability mapping, MSQ = mean square difference)')
+                             desc='Type of similartiy metric used for registration '
+                             '(CC = cross correlation, MI = mutual information, '
+                             'PR = probability mapping, MSQ = mean square difference)')
     transformation_model = traits.Enum('GR','EL','SY','S2','EX','DD',argstr='-t %s',usedefault=True,
-                             desc='Type of transofmration model used for registration \
-                             (EL = elastic transformation model, SY = SyN with time, \
-                             arbitrary number of time points, S2 =  SyN with time \
-                             optimized for 2 time points, GR = greedy SyN, EX = \
-                             exponential, DD = diffeomorphic demons style exponential \
-                             mapping')
-    use_first_as_target = traits.Bool(desc='uses first volume as target of all inputs. \
-                             When not used, an unbiased average image is used to start.')
+                             desc='Type of transofmration model used for registration '
+                             '(EL = elastic transformation model, SY = SyN with time, '
+                             'arbitrary number of time points, S2 =  SyN with time '
+                             'optimized for 2 time points, GR = greedy SyN, EX = '
+                             'exponential, DD = diffeomorphic demons style exponential '
+                             'mapping')
+    use_first_as_target = traits.Bool(desc='uses first volume as target of all inputs. '
+                             'When not used, an unbiased average image is used to start.')
 
 class BuildTemplateOutputSpec(TraitedSpec):
     final_template_file = File(exists=True, desc='final ANTS template')
-    template_files =  traits.Either(traits.List(File(exists=True)),
+    template_files = traits.Either(traits.List(File(exists=True)),
                              File(exists=True), desc='Templates from different stages of iteration')
-    subject_outfiles =     output_images = traits.Either(traits.List(File(exists=True)),
-                             File(exists=True), desc='Outputs for each input image. \
-                             Includes warp field, inverse warp, Affine, original image (repaired) \
-                             and warped image (deformed)')
+    subject_outfiles = output_images = traits.Either(traits.List(File(exists=True)),
+                             File(exists=True), desc='Outputs for each input image. '
+                             'Includes warp field, inverse warp, Affine, original image (repaired) '
+                             'and warped image (deformed)')
 
 
 class BuildTemplate(CommandLine):
@@ -87,12 +86,12 @@ class BuildTemplate(CommandLine):
     Examples
     --------
 
-    >>> from nipype.interfaces.ANTS import BuildTemplate
-    >>> BTP = BuildTemplate()
-    >>> BTP.inputs.out_prefix = 'antsTMPL_'
-    >>> BTP.inputs.in_files={'sub01':'foo.nii','sub02':'bar.nii'}
-    >>> BTP.cmdline
-    'buildtemplateparallel.sh -d 3 -o antsTMPL_ foo.nii bar.nii'
+    >>> from nipype.interfaces.ants import BuildTemplate
+    >>> tmpl = BuildTemplate()
+    >>> tmpl.inputs.in_files = ['foo.nii','bar.nii']
+    >>> tmpl.inputs.max_iterations = [30,90,20]
+    >>> tpml.cmdline
+    'buildtemplateparallel.sh -d 3 -m 30x90x20 -o antsTMPL_ -c 0 -t GR foo.nii bar.nii'
 
     """
 
@@ -109,13 +108,11 @@ class BuildTemplate(CommandLine):
             else: 
                 return ''
         if opt == 'in_files':
-            series = ''
             if self.inputs.use_first_as_target:
-                series=series+'-z '
-            for image_path in val:
-                pth, base, ext = split_filename(image_path)
-                series=series+base+ext+' '
-            return series
+                start='-z '
+            else:
+                start=''
+            return start+' '.join([os.path.split(name)[1] for name in val])
         return super(BuildTemplate,self)._format_arg(opt,spec,val)
 
     def _list_outputs(self):
@@ -140,29 +137,30 @@ class BuildTemplate(CommandLine):
 class WarpImageMultiTransformInputSpec(CommandLineInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d',usedefault=True,
                              desc='image dimension (2 or 3)',position=1)
-    moving_image = File(argstr='%s',desc='image to apply transformation \
-                             to (generally a coregistered functional)',
+    moving_image = File(argstr='%s',desc='image to apply transformation '
+                             'to (generally a coregistered functional)',
                               mandatory=True, copyfile=True)
     out_postfix = traits.Str('_wimt',argstr='%s',
-                             desc='Postfix that is prepended to all output files \
-                             (default = _wimt)',usedefault=True)
-    reference_image = File(argstr='-R %s',desc='reference image space that you \
-                             wish to warp INTO',xor=['tightest_box'])
+                             desc='Postfix that is prepended to all output files '
+                             '(default = _wimt)',usedefault=True)
+    reference_image = File(argstr='-R %s',desc='reference image space that you '
+                             'wish to warp INTO',xor=['tightest_box'])
     tightest_box = traits.Bool(argstr='--tightest-bounding-box',
-                             desc='computes tightest bounding box (overrided by \
-                             reference_image if given)',xor=['reference_image'])
+                             desc='computes tightest bounding box (overrided by '
+                             'reference_image if given)',xor=['reference_image'])
     reslice_by_header = traits.Bool(argstr='--reslice-by-header',
-                             desc='Uses orientation matrix and origin encoded in \
-                             reference image file header. Not typically used with \
-                             additional transforms')
+                             desc='Uses orientation matrix and origin encoded in '
+                             'reference image file header. Not typically used with '
+                             'additional transforms')
     use_nearest = traits.Bool(argstr='--use-NN',desc='Use nearest neighbor interpolation')
-    use_bspline = traits.Bool(argstr='--use-Bspline',desc='Use 3rd order\
-                             B-Spline interpolation')
-    transformation_series = InputMultiPath(traits.Either(traits.List(File(exists=True)),
-                             File(exists=True)),argstr='%s',
+    use_bspline = traits.Bool(argstr='--use-Bspline',desc='Use 3rd order'
+                             'B-Spline interpolation')
+    transformation_series = InputMultiPath(File(exists=True),argstr='%s',
                              desc='transformation file(s) to be applied',
                              mandatory=True, copyfile=False)
-    invert_affine = traits.Bool(desc='apply inverse of given affine')
+    invert_affine = traits.List(traits.Int, desc='List of Affine transformations to invert. '
+                             'E.g.: [1,4,5] inverts the 1st, 4th, and 5th Affines '
+                             'found in transformation_series')
 
 
 
@@ -178,15 +176,13 @@ class WarpImageMultiTransform(CommandLine):
     Examples
     --------
 
-    >>> from nipype.interfaces.ANTS import WarpImageMultiTransform
-    >>> WIMT = WarpImageMultiTransform()
-    >>> WIMT.inputs.dimension = 3
-    >>> WIMT.inputs.moving_image = 'con_0001.nii'
-    >>> WIMT.inputs.out_postfix = '_wimt'
-    >>> WIMT.inputs.reference_image = 'ants_deformed.nii.gz'
-    >>> WIMT.inputs.transformation_series = ['ants_Warp.nii.gz','ants_Affine.txt']
-    >>> WIMT.cmdline
-    'WarpImageMultiTransform 3 con_0001.nii con_0001_wimt -R ants_deformed.nii.gz ants_Warp.nii.gz ants_Affine.txt'
+    >>> from nipype.interfaces.ants import WarpImageMultiTransform
+    >>> wimt = WarpImageMultiTransform()
+    >>> wimt.inputs.moving_image = 'foo.nii'
+    >>> wimt.inputs.reference_image = 'ants_deformed.nii.gz'
+    >>> wimt.inputs.transformation_series = ['ants_Warp.nii.gz','ants_Affine.txt']
+    >>> wimt.cmdline
+    'WarpImageMultiTransform 3 foo.nii foo_wimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz ants_Affine.txt'
 
     """
 
@@ -199,12 +195,17 @@ class WarpImageMultiTransform(CommandLine):
             return os.path.split(self.inputs.moving_image)[-1].partition('.')[0]+val+'.'+os.path.split(self.inputs.moving_image)[-1].partition('.')[2]
         if opt == 'transformation_series':
             series = ''
-            val=filename_to_list(val)
-            for transformation in val: 
-                if transformation.find('Affine')!=-1 and self.inputs.invert_affine:
-                     series=series+'-i '+transformation+' '
+            affine_counter = 0
+            for transformation in val:
+                if transformation.find('Affine')!=-1 and isdefined(self.inputs.invert_affine):
+                     affine_counter = affine_counter + 1
+                     if self.inputs.invert_affine.__contains__(affine_counter):
+                         series=series+'-i '+transformation+' '
+                     else:
+                         series=series+transformation+' '
                 else:
                      series=series+transformation+' '
+                
             return series
         return super(WarpImageMultiTransform,self)._format_arg(opt,spec,val)
 
@@ -223,35 +224,35 @@ class AntsIntroductionInputSpec(CommandLineInputSpec):
     input_image = File(argstr='-i %s',desc='input image to warp to template',
                              mandatory=True, copyfile=False)
     force_proceed = traits.Bool(argstr='-f 1',
-                             desc='force script to proceed even if headers may \
-                             be incompatible')
+                             desc='force script to proceed even if headers may '
+                             'be incompatible')
     inverse_warp_template_labels = traits.Bool(argstr='-l', 
-                             desc='Applies inverse warp to the template labels \
-                             to estimate label positions in target space (use \
-                             for template-based segmentation)')
-    max_iterations = traits.Str('30x90x20',argstr='-m %s',
-                             desc='maximum number of iterations (must be string \
-                             in the form JxKxL: J = coarsest resolution iterations, \
-                             K = middle resolution interations, L = fine resolution \
-                             iterations')
+                             desc='Applies inverse warp to the template labels '
+                             'to estimate label positions in target space (use '
+                             'for template-based segmentation)')
+    max_iterations = traits.List(traits.Int,argstr='-m %s',sep='x',
+                             desc='maximum number of iterations (must be list of integers '
+                             'in the form [J,K,L...]: J = coarsest resolution iterations, '
+                             'K = middle resolution interations, L = fine resolution '
+                             'iterations')
     bias_field_correction = traits.Bool(argstr='-n 1', 
                              desc='Applies bias field correction to moving image')
     out_prefix = traits.Str('ants_',argstr='-o %s', usedefault=True,
-                             desc='Prefix that is prepended to all output files \
-                             (default = ants_)')
+                             desc='Prefix that is prepended to all output files '
+                             '(default = ants_)')
     quality_check = traits.Bool(argstr='-q 1', 
                              desc='Perform a quality check of the result')
     similarity_metric = traits.Enum('PR','CC','MI','MSQ',argstr='-s %s',
-                             desc='Type of similartiy metric used for registration \
-                             (CC = cross correlation, MI = mutual information, \
-                             PR = probability mapping, MSQ = mean square difference)')
+                             desc='Type of similartiy metric used for registration '
+                             '(CC = cross correlation, MI = mutual information, '
+                             'PR = probability mapping, MSQ = mean square difference)')
     transformation_model = traits.Enum('GR','EL','SY','S2','EX','DD','RI','RA',argstr='-t %s',
-                             desc='Type of transofmration model used for registration \
-                             (EL = elastic transformation model, SY = SyN with time, \
-                             arbitrary number of time points, S2 =  SyN with time \
-                             optimized for 2 time points, GR = greedy SyN, EX = \
-                             exponential, DD = diffeomorphic demons style exponential \
-                             mapping, RI = purely rigid, RA = affine rigid')
+                             desc='Type of transofmration model used for registration '
+                             '(EL = elastic transformation model, SY = SyN with time, '
+                             'arbitrary number of time points, S2 =  SyN with time '
+                             'optimized for 2 time points, GR = greedy SyN, EX = '
+                             'exponential, DD = diffeomorphic demons style exponential '
+                             'mapping, RI = purely rigid, RA = affine rigid')
 
 class AntsIntroductionOutputSpec(TraitedSpec):
     affine_transformation = File(exists=True, desc='affine (prefix_Affine.txt)')
@@ -267,13 +268,13 @@ class GenWarpFields(CommandLine):
     Examples
     --------
 
-    >>> from nipype.interfaces.ANTS import GenWarpFields
+    >>> from nipype.interfaces.ants import GenWarpFields
     >>> warp = GenWarpFields()
     >>> warp.inputs.reference_image = 'template.nii'
     >>> warp.inputs.input_image = 'brain.nii'
-    >>> warp.inputs.output_prefix = 'ants_'
+    >>> warp.inputs.max_iterations = [30,90,20]
     >>> warp.cmdline
-    'antsIntroduction -d 3 -r template.nii -i brain.nii -o ants_'
+    'antsIntroduction -d 3 -i brain.nii -m 30x90x20 -o ants_ -r template.nii'
 
     """
 
