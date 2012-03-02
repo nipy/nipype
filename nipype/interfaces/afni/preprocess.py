@@ -3,18 +3,12 @@
 __docformat__ = 'restructuredtext'
 import warnings
 import os
-import nibabel as nb
-import numpy as np
-from string import Template
-from nipype.utils.filemanip import split_filename
-from nipype.interfaces.matlab import MatlabCommand
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec
-from nipype.interfaces.afni.base import AFNITraitedSpec, AFNICommand, Info
-from nipype.interfaces.base import Bunch, Directory
+from nipype.interfaces.afni.base import AFNITraitedSpec, AFNICommand
+from nipype.interfaces.base import Directory
 from nipype.interfaces.base import (CommandLineInputSpec,
 CommandLine, TraitedSpec, traits, isdefined, File)
 from nipype.utils.filemanip import (load_json, save_json,
-split_filename, fname_presuffix)
+split_filename)
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
@@ -58,23 +52,22 @@ class To3DOutputSpec(TraitedSpec):
 
 class To3D(AFNICommand):
     """Create a 3D dataset from 2D image files using AFNI to3d command.
+    For complete details, see the `to3d Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
 
-For complete details, see the `to3d Documentation.
-<http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
+    To print out the command line help, use:
+    To3d().inputs_help()
 
-To print out the command line help, use:
-To3d().inputs_help()
-
-Examples
---------
->>> from nipype.interfaces import afni
->>> To3D = afni.To3d()
-AFNI has no environment variable that sets filetype
-Nipype uses NIFTI_GZ as default
->>> To3D.inputs.datatype = 'float'
->>> To3D.inputs.infolder = 'dicomdir'
->>> To3D.inputs.filetype = "anat"
->>> res = To3D.run() #doctest: +SKIP
+    Examples
+    --------
+    >>> from nipype.interfaces import afni
+    >>> To3D = afni.To3d()
+    AFNI has no environment variable that sets filetype
+    Nipype uses NIFTI_GZ as default
+    >>> To3D.inputs.datatype = 'float'
+    >>> To3D.inputs.infolder = 'dicomdir'
+    >>> To3D.inputs.filetype = "anat"
+    >>> res = To3D.run() #doctest: +SKIP
 
    """
 
@@ -215,7 +208,6 @@ class Refit(AFNICommand):
     NOTES
     -----
     The original file is returned but it is CHANGED
-
     Examples
     ________
     >>> from nipype.interfaces import afni as afni
@@ -308,14 +300,15 @@ class Warp(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']):
+        if not isdefined(self.inputs.out_file):
             if isdefined(self.inputs.suffix):
                 suffix = self.inputs.suffix
             else:
                 suffix = "_warp"
-        outputs['out_file'] = self._gen_fname(
-            self.inputs.in_file, suffix=suffix)
+            outputs['out_file'] = self._gen_fname(
+                self.inputs.in_file, suffix=suffix)
+        else:
+            outputs['out_file'] = self.inputs.out_file
         return outputs
 
 
@@ -370,8 +363,7 @@ class Resample(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']):
+        if not isdefined(self.inputs.out_file):
             if isdefined(self.inputs.suffix):
                 suffix = self.inputs.suffix
             else:
@@ -379,8 +371,10 @@ class Resample(AFNICommand):
                 if self.inputs.orientation:
                     suffix.append("_RPI")
                 suffix = "".join(suffix)
-        outputs['out_file'] = self._gen_fname(
-            self.inputs.in_file, suffix=suffix)
+            outputs['out_file'] = self._gen_fname(
+                self.inputs.in_file, suffix=suffix)
+        else:
+            outputs['out_file'] = self.inputs.out_file
         return outputs
 
 
@@ -410,7 +404,6 @@ class TStat(AFNICommand):
     Compute voxel-wise statistics using AFNI 3dTstat command.
     For complete details, see the `3dTstat Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html>`_
-
     Examples
     ________
     >>> from nipype.interfaces import afni as afni
@@ -527,7 +520,6 @@ class Despike(AFNICommand):
     more pleasing to the eye.
     For complete details, see the `3dDespike Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDespike.html>`_
-
     Examples
     ________
     >>> from nipype.interfaces import afni as afni
@@ -535,7 +527,6 @@ class Despike(AFNICommand):
     >>> despike = afni.Despike()
     >>> despike.inputs.in_file = example_data('functional.nii')
     >>> res = despike.run() # doctest: +SKIP
-
     """
 
     _cmd = '3dDespike'
@@ -607,7 +598,7 @@ class Automask(AFNICommand):
     For complete details, see the `3dAutomask Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutomask.html>`_
     Examples
-    ______________
+    ________
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> automask = afni.Automask()
@@ -628,9 +619,8 @@ class Automask(AFNICommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['brain_file'] = self.inputs.apply_mask
-        outputs['out_file'] = self.inputs.out_file
 
-        if not isdefined(outputs['out_file']):
+        if not isdefined(self.inputs.out_file):
             if isdefined(self.inputs.suffix):
                 suffix = self.inputs.suffix
             else:
@@ -638,6 +628,8 @@ class Automask(AFNICommand):
 
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                 suffix=suffix)
+        else:
+            outputs['out_file'] = self.inputs.out_file
         return outputs
 
 
@@ -689,7 +681,7 @@ class Volreg(AFNICommand):
     For complete details, see the `3dvolreg Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dvolreg.html>`_
     Examples
-    -------------
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> volreg = afni.Volreg()
@@ -759,8 +751,8 @@ class Merge(AFNICommand):
     Merge or edit volumes using AFNI 3dmerge command.
     For complete details, see the `3dmerge Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html>`_
-      Examples
-    -------------
+    Examples
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> merge = afni.Merge()
@@ -802,7 +794,7 @@ class Copy(AFNICommand):
     Copies an image of one type to an image of the same
     or different type using 3dcopy command.
     Examples
-    -------------
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> copy = afni.Copy()
@@ -864,7 +856,7 @@ class Fourier(AFNICommand):
     For complete details, see the `3dFourier Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dfourier.html>`_
     Examples
-    -------------
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> fourier = afni.Fourier()
@@ -918,11 +910,12 @@ class ZCutUpOutputSpec(AFNITraitedSpec):
 
 
 class ZCutUp(AFNICommand):
-    """Cut z-slices from a volume using AFNI 3dZcutup command.
+    """
+    Cut z-slices from a volume using AFNI 3dZcutup command.
     For complete details, see the `3dZcutup Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcutup.html>`_
     Examples
-    -------------
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> zcutup = afni.Zcutup()
@@ -964,10 +957,11 @@ class AllineateOutputSpec(AFNITraitedSpec):
 
 class Allineate(AFNICommand):
     """
+    Program to align one dataset (the 'source') to a base dataset.
     For complete details, see the `3dAllineate Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html>`_
     Examples
-    -------------
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> allineate = afni.Allineate()
@@ -1013,10 +1007,13 @@ class MaskaveOutputSpec(AFNITraitedSpec):
 
 class Maskave(AFNICommand):
     """
+    Computes average of all voxels in the input dataset
+    which satisfy the criterion in the options list.
+    If no options are given, then all voxels are included.
     For complete details, see the `3dmaskave Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmaskave.html>`_
     Examples
-    -------------
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> maskave = afni.Maskave()
@@ -1068,10 +1065,12 @@ class SkullStripOutputSpec(AFNITraitedSpec):
 
 class SkullStrip(AFNICommand):
     """
+    A program to extract the brain from surrounding
+    tissue from MRI T1-weighted images.
     For complete details, see the `3dSkullStrip Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSkullStrip.html>`_
     Examples
-    -------------
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> skullstrip = afni.Skullstrip()
@@ -1121,10 +1120,12 @@ class TCatOutputSpec(AFNITraitedSpec):
 
 class TCat(AFNICommand):
     """
+    Concatenate sub-bricks from input datasets into
+    one big 3D+time dataset.
     For complete details, see the `3dTcat Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcat.html>`_
     Examples
-    -------------
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> tcat = afni.TCat()
@@ -1183,10 +1184,13 @@ class FimOutputSpec(AFNITraitedSpec):
 
 class Fim(AFNICommand):
     """
+    Program to calculate the cross-correlation of
+    an ideal reference waveform
+    with the measured FMRI time series for each voxel.
     For complete details, see the `3dfim+ Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dfim+.html>`_
     Examples
-    -------------
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> fim = afni.Fim()
@@ -1260,7 +1264,7 @@ class TCorrelate(AFNICommand):
     For complete details, see the `3dfim+ Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorrelate.html>`_
     Examples
-    -------------
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> tcorrelate = afni.TCorrelate()
@@ -1279,9 +1283,10 @@ class TCorrelate(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        if not isdefined(outputs['out_file']):
+        if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_filename('out_file')
+        else:
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1314,10 +1319,11 @@ class BrickStatOutputSpec(AFNITraitedSpec):
 
 class BrickStat(AFNICommand):
     """
-    For complete details, see the `3dfim+ Documentation.
+    Compute maximum and/or minimum voxel values of an input dataset.
+    For complete details, see the `3dBrickStat Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBrickStat.html>`_
     Examples
-    -------------
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> brickstat = afni.BrickStat()
@@ -1391,7 +1397,7 @@ class ROIStats(AFNICommand):
     For complete details, see the `3dROIstats Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dROIstats.html>`_
     Examples
-    -------------
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> roistats = afni.ROIStats()
@@ -1477,7 +1483,7 @@ class Calc(CommandLine):
     For complete details, see the `3dcalc Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcalc.html>`_
     Examples
-    -------------
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> calc = afni.Calc()
@@ -1513,13 +1519,13 @@ class Calc(CommandLine):
 
     def _parse_inputs(self, skip=None):
         """Skip the arguments without argstr metadata
-"""
+        """
         return super(Calc, self)._parse_inputs(
             skip=('start_idx', 'stop_idx', 'other'))
 
     def _gen_filename(self, name):
         """Generate output file name
-"""
+        """
         if name == 'out_file':
             _, fname, ext = split_filename(self.inputs.infile_a)
             return os.path.join(os.getcwd(), ''.join((fname, '_3dc', ext)))
