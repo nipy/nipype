@@ -115,9 +115,9 @@ for idx, group_id in enumerate(group_list.keys()):
 This line creates the processing workflow given the information input about the groups and subjects.
 
 .. seealso::
-    * nipype/workflows/mrtrix/group_connectivity.py
-    * nipype/workflows/mrtrix/connectivity_mapping.py
-    * connectivity_tutorial_advanced.py
+    * nipype/workflows/dmri/mrtrix/group_connectivity.py
+    * nipype/workflows/dmri/mrtrix/connectivity_mapping.py
+    * dmri_connectivity_advanced.py
 
     """
 

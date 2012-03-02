@@ -8,7 +8,7 @@ from .connectivity_mapping import create_connectivity_pipeline
 
 
 def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, template_args_dict=0):
-    """Creates a pipeline that performs MRtrix structural connectivity processing 
+    """Creates a pipeline that performs basic Camino structural connectivity processing 
     on groups of subjects. Given a diffusion-weighted image, and text files containing 
     the associated b-values and b-vectors, the workflow will return each subjects' connectomes
     in a Connectome File Format (CFF) file, for use in Connectome Viewer (http://www.cmtk.org).
@@ -16,9 +16,9 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
     Example
     -------
 
-    >>> import os
     >>> import nipype.interfaces.freesurfer as fs
-    >>> import nipype.workflows.dmri.mrtrix.group_connectivity as groupwork
+    >>> import nipype.workflows.dmri.camino.group_connectivity as groupwork
+    >>> import cmp
     >>> from nipype.testing import example_data
     >>> subjects_dir = '.'
     >>> data_dir = '.'
@@ -27,16 +27,15 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
     >>> group_list = {}
     >>> group_list['group1'] = ['subj1', 'subj2']
     >>> group_list['group2'] = ['subj3', 'subj4']
-    >>> template_args = dict(dwi=[['subject_id', 'dwi']],
-    >>>             bvecs=[['subject_id', 'bvecs']],
-    >>>             bvals=[['subject_id', 'bvals']])
-    >>> l1pipeline = groupwork.create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, template_args)
-    >>> parcellation_name = 'scale500'
-    >>> l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name
-    >>> cmp_config = cmp.configuration.PipelineConfiguration()
-    >>> cmp_config.parcellation_scheme = "Lausanne2008"
-    >>> l1pipeline.inputs.connectivity.mapping.CreateMatrix.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
-    >>> l1pipeline.run()                 # doctest: +SKIP
+    >>> template_args = dict(dwi=[['subject_id', 'dwi']], bvecs=[['subject_id', 'bvecs']], bvals=[['subject_id', 'bvals']])
+    >>> for group_id in group_list.keys():
+    >>>     l1pipeline = groupwork.create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, template_args)
+    >>>     parcellation_name = 'scale500'
+    >>>     l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name
+    >>>     cmp_config = cmp.configuration.PipelineConfiguration()
+    >>>     cmp_config.parcellation_scheme = "Lausanne2008"
+    >>>     l1pipeline.inputs.connectivity.mapping.CreateMatrix.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
+    >>>     l1pipeline.run()                 # doctest: +SKIP
 
     Inputs::
 

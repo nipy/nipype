@@ -15,6 +15,48 @@ else:
     import cmp
 
 def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, template_args_dict=0):
+    """Creates a pipeline that performs MRtrix structural connectivity processing 
+    on groups of subjects. Given a diffusion-weighted image, and text files containing 
+    the associated b-values and b-vectors, the workflow will return each subjects' connectomes
+    in a Connectome File Format (CFF) file, for use in Connectome Viewer (http://www.cmtk.org).
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> import nipype.workflows.dmri.mrtrix.group_connectivity as groupwork
+    >>> import cmp
+    >>> from nipype.testing import example_data
+    >>> subjects_dir = '.'
+    >>> data_dir = '.'
+    >>> output_dir = '.'
+    >>> fs.FSCommand.set_default_subjects_dir(subjects_dir)
+    >>> group_list = {}
+    >>> group_list['group1'] = ['subj1', 'subj2']
+    >>> group_list['group2'] = ['subj3', 'subj4']
+    >>> template_args = dict(dwi=[['subject_id', 'dwi']], bvecs=[['subject_id', 'bvecs']], bvals=[['subject_id', 'bvals']])
+    >>> for group_id in group_list.keys():
+    >>>     l1pipeline = groupwork.create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, template_args)
+    >>>     parcellation_name = 'scale500'
+    >>>     l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name
+    >>>     cmp_config = cmp.configuration.PipelineConfiguration()
+    >>>     cmp_config.parcellation_scheme = "Lausanne2008"
+    >>>     l1pipeline.inputs.connectivity.mapping.CreateMatrix.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
+    >>>     l1pipeline.run()                 # doctest: +SKIP
+
+
+    Inputs::
+
+        group_list: Dictionary of subject lists, keyed by group name
+        group_id: String containing the group name
+        data_dir: Path to the data directory
+        subjects_dir: Path to the Freesurfer 'subjects' directory
+        output_dir: Path for the output files
+        template_args_dict: Dictionary of template arguments for the connectivity pipeline datasource
+                                e.g.    info = dict(dwi=[['subject_id', 'dwi']],
+                                                bvecs=[['subject_id','bvecs']],
+                                                bvals=[['subject_id','bvals']])
+    """
     group_infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id']), name="group_infosource")
     group_infosource.inputs.group_id = group_id
     subject_list = group_list[group_id]
@@ -139,7 +181,7 @@ def create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subj
     Example
     -------
 
-    >>> import nipype.workflows.dmri.group.group_connectivity as groupwork
+    >>> import nipype.workflows.dmri.mrtrix.group_connectivity as groupwork
     >>> from nipype.testing import example_data
     >>> subjects_dir = '.'
     >>> data_dir = '.'
@@ -147,8 +189,9 @@ def create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subj
     >>> group_list = {}
     >>> group_list['group1'] = ['subj1', 'subj2']
     >>> group_list['group2'] = ['subj3', 'subj4']
-    >>> l2pipeline = groupwork.create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
-    >>> l2pipeline.run()                 # doctest: +SKIP
+    >>> for group_id in group_list.keys():
+    >>>     l2pipeline = groupwork.create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
+    >>>     l2pipeline.run()                 # doctest: +SKIP
 
     Inputs::
 
@@ -197,7 +240,7 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
     Example
     -------
 
-    >>> import nipype.workflows.dmri.group.group_connectivity as groupwork
+    >>> import nipype.workflows.dmri.mrtrix.group_connectivity as groupwork
     >>> from nipype.testing import example_data
     >>> subjects_dir = '.'
     >>> data_dir = '.'
@@ -205,8 +248,9 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
     >>> group_list = {}
     >>> group_list['group1'] = ['subj1', 'subj2']
     >>> group_list['group2'] = ['subj3', 'subj4']
-    >>> l2pipeline = groupwork.create_merge_network_results_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
-    >>> l2pipeline.run()                 # doctest: +SKIP
+    >>> for group_id in group_list.keys():
+    >>>     l2pipeline = groupwork.create_merge_network_results_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
+    >>>     l2pipeline.run()                 # doctest: +SKIP
 
     Inputs::
 
@@ -371,7 +415,7 @@ def create_merge_group_networks_workflow(group_list, data_dir, subjects_dir, out
     Example
     -------
 
-    >>> import nipype.workflows.dmri.group.group_connectivity as groupwork
+    >>> import nipype.workflows.dmri.mrtrix.group_connectivity as groupwork
     >>> from nipype.testing import example_data
     >>> subjects_dir = '.'
     >>> data_dir = '.'
@@ -426,7 +470,7 @@ def create_merge_group_network_results_workflow(group_list, data_dir, subjects_d
     Example
     -------
 
-    >>> import nipype.workflows.dmri.group.group_connectivity as groupwork
+    >>> import nipype.workflows.dmri.mrtrix.group_connectivity as groupwork
     >>> from nipype.testing import example_data
     >>> subjects_dir = '.'
     >>> data_dir = '.'
@@ -486,7 +530,7 @@ def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir
     Example
     -------
 
-    >>> import nipype.workflows.dmri.group.group_connectivity as groupwork
+    >>> import nipype.workflows.dmri.mrtrix.group_connectivity as groupwork
     >>> from nipype.testing import example_data
     >>> subjects_dir = '.'
     >>> data_dir = '.'
