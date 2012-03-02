@@ -49,13 +49,11 @@ import nipype.interfaces.camino as camino
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.interfaces.freesurfer as fs    # freesurfer
-import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
 import inspect
 
-import nibabel as nb
-import os, os.path as op                      # system functions
+import os.path as op                      # system functions
 import cmp                                    # connectome mapper
 
 """

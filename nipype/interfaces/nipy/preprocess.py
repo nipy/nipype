@@ -91,7 +91,7 @@ class FmriRealign4dOutputSpec(TraitedSpec):
 
 
 class FmriRealign4d(BaseInterface):
-    """Simultaneous motion and slice timing correction algorithm 
+    """Simultaneous motion and slice timing correction algorithm
 
     This interface wraps nipy's FmriRealign4d algorithm [1]_.
 

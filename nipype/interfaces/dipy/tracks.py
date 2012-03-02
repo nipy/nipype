@@ -17,7 +17,7 @@ try:
     from dipy.tracking.utils import density_map
 except Exception, e:
     warnings.warn('dipy not installed')
-    
+
 
 class TrackDensityMapInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
@@ -52,14 +52,14 @@ class TrackDensityMap(BaseInterface):
 			data_dims = header['dim']
 		else:
 			data_dims = self.inputs.data_dims
-			
+
 		if not isdefined(self.inputs.voxel_dims):
 			voxel_size = header['voxel_size']
 		else:
 			voxel_size = self.inputs.voxel_dims
-			
+
 		affine = header['vox_to_ras']
-			
+
 		streams = ((ii[0]) for ii in tracks)
 		data = density_map(streams, data_dims, voxel_size)
 		if data.max() < 2**15:

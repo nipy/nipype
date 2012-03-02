@@ -1,7 +1,7 @@
 """This script generates Slicer Interfaces based on the CLI modules XML. CLI
 modules are selected from the hardcoded list below and generated code is placed
-in the cli_modules.py file (and imported in __init__.py). For this to work 
-correctly you must have your CLI executabes in $PATH""" 
+in the cli_modules.py file (and imported in __init__.py). For this to work
+correctly you must have your CLI executabes in $PATH"""
 
 import xml.dom.minidom
 import subprocess
@@ -30,7 +30,7 @@ import os\n\n\n"""
         class_defs.append(code)
     f.write("\n\n\n".join(class_defs))
     f.close()
-    
+
     f = open("__init__.py", "w")
     f.write("from cli_modules import %s\n"%", ".join(modules_list))
     f.close()
@@ -43,9 +43,9 @@ def generate_class(module,launcher):
     outputs_filenames = {}
 
     #self._outputs_nodes = []
-    
+
     class_string = "\"\"\""
-    
+
     for desc_str in ['title','category','description','version',
                      'documentation-url','license','contributor',
                      'acknowledgements']:
@@ -76,15 +76,15 @@ def generate_class(module,launcher):
                 name = param.getElementsByTagName('name')[0].firstChild.nodeValue
                 name = name.lstrip().rstrip()
                 traitsParams["argstr"] = "--" + name + " "
-                
+
             if param.getElementsByTagName('description'):
                 traitsParams["desc"] = param.getElementsByTagName('description')[0].firstChild.nodeValue.replace('"', "\\\"").replace("\n", ", ")
-            
 
-            argsDict = {'directory': '%s', 'file': '%s', 'integer': "%d", 
-                        'double': "%f", 'float': "%f", 'image': "%s", 
-                        'transform': "%s", 'boolean': '', 
-                        'string-enumeration': '%s', 'string': "%s", 
+
+            argsDict = {'directory': '%s', 'file': '%s', 'integer': "%d",
+                        'double': "%f", 'float': "%f", 'image': "%s",
+                        'transform': "%s", 'boolean': '',
+                        'string-enumeration': '%s', 'string': "%s",
                         'integer-enumeration' : '%s',
                         'table' : '%s', 'point': '%s', 'region': '%s'}
 
@@ -133,9 +133,9 @@ def generate_class(module,launcher):
 
             if param.nodeName in ['file', 'directory', 'image', 'transform', 'table'] and param.getElementsByTagName('channel')[0].firstChild.nodeValue == 'output':
                 traitsParams["hash_files"] = False
-                inputTraits.append("%s = traits.Either(traits.Bool, %s(%s), %s)"%(name, 
-                                                                                 type, 
-                                                                                 parse_values(values).replace("exists=True",""), 
+                inputTraits.append("%s = traits.Either(traits.Bool, %s(%s), %s)"%(name,
+                                                                                 type,
+                                                                                 parse_values(values).replace("exists=True",""),
                                                                                  parse_params(traitsParams)))
                 traitsParams["exists"] = True
                 traitsParams.pop("argstr")
@@ -195,7 +195,7 @@ def generate_class(module,launcher):
                 else:
                     return ""
         return super(%name%, self)._format_arg(name, spec, value)\n"""
-        
+
 
     main_class = template.replace('%class_str%', class_string).replace("%name%", module).replace("%output_filenames_code%", output_filenames_code).replace("%launcher%"," ".join(launcher))
 
@@ -248,15 +248,15 @@ if __name__ == "__main__":
     ##        AND calling the module with --xml must be supported and compliant.
     modules_list = ['Add',
                     'AffineRegistration',
-                    'BSplineDeformableRegistration', 
+                    'BSplineDeformableRegistration',
                     #'BSplineToDeformationField', http://na-mic.org/Mantis/view.php?id=1647
-                    'Cast', 'CheckerBoard', 
-                    'ComputeSUVBodyWeight', 'ConfidenceConnected', 
-                    'CurvatureAnisotropicDiffusion', 'DicomToNrrdConverter', 
-                    'ResampleDTI', 'dwiNoiseFilter', 'dwiUNLM', 
-                    'jointLMMSE', 'DiffusionTensorEstimation', 
-                    'DiffusionTensorMathematics', 'DiffusionTensorTest', 
-                    'DiffusionWeightedMasking', 
+                    'Cast', 'CheckerBoard',
+                    'ComputeSUVBodyWeight', 'ConfidenceConnected',
+                    'CurvatureAnisotropicDiffusion', 'DicomToNrrdConverter',
+                    'ResampleDTI', 'dwiNoiseFilter', 'dwiUNLM',
+                    'jointLMMSE', 'DiffusionTensorEstimation',
+                    'DiffusionTensorMathematics', 'DiffusionTensorTest',
+                    'DiffusionWeightedMasking',
                     'BRAINSFit',
 #'BRAINSABC',
 #'BRAINSCut',

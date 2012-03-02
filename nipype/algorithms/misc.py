@@ -774,7 +774,7 @@ class MergeCSVFiles(BaseInterface):
 
         if len(self.inputs.in_files) == 1:
             iflogger.warn('Only one file input!')
-        
+
         if isdefined(self.inputs.row_headings):
             iflogger.info('Row headings have been provided. Adding "labels" column header.')
             csv_headings = '"labels","' + '","'.join(itertools.chain(headings)) + '"\n'
@@ -817,7 +817,7 @@ class MergeCSVFiles(BaseInterface):
             for idx in range(0,max(shape)):
                 extrafieldlist.append(self.inputs.extra_field)
             iflogger.info(len(extrafieldlist))
-            output[extraheading] = extrafieldlist      
+            output[extraheading] = extrafieldlist
         iflogger.info(output)
         iflogger.info(fmt)
         np.savetxt(file_handle, output, fmt, delimiter=',')

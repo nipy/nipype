@@ -356,7 +356,7 @@ class ProbTrackXInputSpec(FSLCommandInputSpec):
     s2tastext = traits.Bool(argstr='--s2tastext', desc='output seed-to-target counts as a' +
                             ' text file (useful when seeding from a mesh)')
     verbose = traits.Enum(0, 1, 2, desc="Verbose level, [0-2]." +
-                          "Level 2 is required to output particle files.", 
+                          "Level 2 is required to output particle files.",
                           argstr="--verbose=%d")
 
 
