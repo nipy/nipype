@@ -520,7 +520,6 @@ mapping.connect([(mri_convert_AparcAseg, inverse_AparcAseg,[('out_file','in_file
 
 mapping.connect([(inverse_AparcAseg, roigen,[("out_file","aparc_aseg_file")])])
 mapping.connect([(roigen, creatematrix,[("roi_file","roi_file")])])
-mapping.connect([(roigen, creatematrix,[("dict_file","dict_file")])])
 mapping.connect([(camino2trackvis, creatematrix,[("trackvis","tract_file")])])
 mapping.connect([(inputnode, creatematrix,[("subject_id","out_matrix_file")])])
 
