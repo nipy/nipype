@@ -1,14 +1,13 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft = python sts = 4 ts = 4 sw = 4 et:
-__docformat__ = 'restructuredtext'
+
 import warnings
 import os
-from nipype.interfaces.afni.base import AFNITraitedSpec, AFNICommand
-from nipype.interfaces.base import Directory
-from nipype.interfaces.base import (CommandLineInputSpec,
-CommandLine, TraitedSpec, traits, isdefined, File)
-from nipype.utils.filemanip import (load_json, save_json,
-split_filename)
+from .base import AFNITraitedSpec, AFNICommand
+from ..base import (Directory, CommandLineInputSpec, CommandLine, TraitedSpec,
+                    traits, isdefined, File)
+from ...utils.filemanip import (load_json, save_json, split_filename)
+
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
