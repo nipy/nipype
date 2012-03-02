@@ -51,7 +51,7 @@ class To3DOutputSpec(TraitedSpec):
 
 
 class To3D(AFNICommand):
-    """Create a 3D dataset from 2D image files using AFNI to3d command.
+    """Create a 3D dataset from 2D image files using AFNI to3d command
 
     For complete details, see the `to3d Documentation
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
@@ -408,7 +408,7 @@ class TStatOutputSpec(AFNITraitedSpec):
 
 
 class TStat(AFNICommand):
-    """Compute voxel-wise statistics using AFNI 3dTstat command.
+    """Compute voxel-wise statistics using AFNI 3dTstat command
 
     For complete details, see the `3dTstat Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html>`_
