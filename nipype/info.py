@@ -3,6 +3,7 @@ settings in setup.py, the nipy top-level docstring, and for building the
 docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
 
+
 # nipy version information.  An empty _version_extra corresponds to a
 # full release.  '.dev' as a _version_extra string means this is a development
 # version
@@ -19,8 +20,14 @@ def get_nipype_gitversion():
     None or str
       Version of NiPype according to git.
     """
-    gitpath = os.path.realpath(os.path.join(os.path.dirname(nipype.__file__),
-                                            os.path.pardir))
+    import os
+    import subprocess
+    try:
+        import nipype
+        gitpath = os.path.realpath(os.path.join(os.path.dirname(nipype.__file__),
+                                                os.path.pardir))
+    except:
+        gitpath = os.getcwd()
     gitpathgit = os.path.join(gitpath, '.git')
     if not os.path.exists(gitpathgit):
         return None
@@ -115,6 +122,6 @@ MINOR               = _version_minor
 MICRO               = _version_micro
 ISRELEASE           = _version_extra == ''
 VERSION             = __version__
-REQUIRES            = ["nibabel >=1.0", "networkx >=1.0", "numpy >=1.3",
-                       "scipy >=0.7", "traits >=4.0"]
+REQUIRES            = ["nibabel (>=1.0)", "networkx (>=1.0)", "numpy (>=1.3)",
+                       "scipy (>=0.7)", "traits (>=4.0)"]
 STATUS              = 'stable'

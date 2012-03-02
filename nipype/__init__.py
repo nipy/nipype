@@ -3,10 +3,10 @@
 
 import os
 
-from .info import (LONG_DESCRIPTION as __doc__,
-                   URL as __url__,
-                   STATUS as __status__,
-                   __version__)
+from info import (LONG_DESCRIPTION as __doc__,
+                  URL as __url__,
+                  STATUS as __status__,
+                  __version__)
 
 # We require numpy 1.2 for our test suite.  If Tester fails to import,
 # check the version of numpy the user has and inform them they need to
@@ -51,6 +51,10 @@ def _test_local_install():
                      'trigger some failures')
 
 _test_local_install()
+
+# Set up package information function
+from pkg_info import get_pkg_info as _get_pkg_info
+get_info = lambda : _get_pkg_info(os.path.dirname(__file__))
 
 # Cleanup namespace
 del _test_local_install
