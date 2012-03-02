@@ -14,7 +14,7 @@ found in connectivity_tutorial_advanced.py. This tutorial can be run using:
 
 We perform this analysis using one healthy subject and two subjects who suffer from Parkinson's disease.
 
-The whole package including the Freesurfer directories for these subjects, can be acquired from here:
+The whole package (754 mb as .tar.gz / 1 gb uncompressed) including the Freesurfer directories for these subjects, can be acquired from here:
 
     * Dropbox link to come shortly....
     
@@ -84,7 +84,7 @@ The output directory must be named as well.
 """
 
 global output_dir
-output_dir = op.abspath('mrtrix_groupcon_workflowed')
+output_dir = op.abspath('dmri_group_connectivity_mrtrix')
 
 """
 Main processing loop
@@ -115,9 +115,10 @@ for idx, group_id in enumerate(group_list.keys()):
 This line creates the processing workflow given the information input about the groups and subjects.
 
 .. seealso::
+
     * nipype/workflows/dmri/mrtrix/group_connectivity.py
     * nipype/workflows/dmri/mrtrix/connectivity_mapping.py
-    * dmri_connectivity_advanced.py
+    * :ref:`dmri_connectivity_advanced
 
     """
 

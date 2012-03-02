@@ -41,7 +41,7 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
     >>> l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name
     >>> cmp_config = cmp.configuration.PipelineConfiguration()
     >>> cmp_config.parcellation_scheme = "Lausanne2008"
-    >>> l1pipeline.inputs.connectivity.mapping.CreateMatrix.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
+    >>> l1pipeline.inputs.connectivity.mapping.inputnode_within.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
     >>> l1pipeline.run()                 # doctest: +SKIP
 
 
@@ -601,11 +601,11 @@ def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir
     l4pipeline.connect([(l4inputnode, average_networks_grp2,[('networks_grp2','in_files')])])
     l4pipeline.connect([(l4infosource, average_networks_grp2,[('group_id2','group_id')])])
 
-    l4pipeline.connect([(average_networks_grp1, merge_gpickled_averages,[('out_gpickled_groupavg','in1')])])
-    l4pipeline.connect([(average_networks_grp2, merge_gpickled_averages,[('out_gpickled_groupavg','in2')])])
+    l4pipeline.connect([(average_networks_grp1, merge_gpickled_averages,[('gpickled_groupavg','in1')])])
+    l4pipeline.connect([(average_networks_grp2, merge_gpickled_averages,[('gpickled_groupavg','in2')])])
 
-    l4pipeline.connect([(average_networks_grp1, merge_gexf_averages,[('out_gexf_groupavg','in1')])])
-    l4pipeline.connect([(average_networks_grp2, merge_gexf_averages,[('out_gexf_groupavg','in2')])])
+    l4pipeline.connect([(average_networks_grp1, merge_gexf_averages,[('gexf_groupavg','in1')])])
+    l4pipeline.connect([(average_networks_grp2, merge_gexf_averages,[('gexf_groupavg','in2')])])
 
     l4pipeline.connect([(merge_gpickled_averages, l4datasink, [('out', '@l4output.gpickled')])])
     l4pipeline.connect([(merge_gpickled_averages, averagecff, [('out', 'gpickled_networks')])])

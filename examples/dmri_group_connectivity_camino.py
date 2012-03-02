@@ -12,10 +12,9 @@ found in connectivity_tutorial.py. This tutorial can be run using:
 
     python dmri_group_connectivity_camino.py
 
-We perform this analysis using two healthy subjects: subj1 (from the FSL course data) and subj2.
-We also process one coma patient who has suffers from traumatic brain damage.
+We perform this analysis using one healthy subject and two subjects who suffer from Parkinson's disease.
 
-The whole package (845 MB zipped, 1.2 GB unzipped) including the Freesurfer directories for these subjects, can be acquired from here:
+The whole package (754 mb as .tar.gz / 1 gb uncompressed) including the Freesurfer directories for these subjects, can be acquired from here:
 
     http://dl.dropbox.com/u/315714/groupcondatapackage.zip?dl=1
 
@@ -53,8 +52,9 @@ First, we import the necessary modules from nipype.
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import  os.path as op                      # system functions
-from nipype.workflows.dmri.camino.group_connectivity import (create_group_cff_pipeline_part1,
-create_group_cff_pipeline_part2, create_group_cff_pipeline_part3, create_group_cff_pipeline_part4)
+from nipype.workflows.dmri.camino.group_connectivity import create_group_connectivity_pipeline
+from nipype.workflows.dmri.mrtrix.group_connectivity import (create_merge_networks_by_group_workflow, 
+create_merge_group_networks_workflow, create_average_networks_by_group_workflow)
 
 """
 Set the proper directories
@@ -73,25 +73,25 @@ Define the groups
 -----------------
 Here we define the groups for this study. We would like to search for differences between the healthy subject and the two
 vegetative patients. The group list is defined as a Python dictionary (see http://docs.python.org/tutorial/datastructures.html),
-with group IDs ('controls', 'coma') as keys, and subject/patient names as values. We set the main output directory as 'groupcon'.
+with group IDs ('controls', 'parkinsons') as keys, and subject/patient names as values. We set the main output directory as 'groupcon'.
 """
 
 group_list = {}
-group_list['controls'] = ['subj1', 'subj2']
-group_list['coma'] = ['traumatic']
+group_list['controls'] = ['cont17']
+group_list['parkinsons'] = ['pat07', 'pat20']
 
 """
 The output directory must be named as well.
 """
 
 global output_dir
-output_dir = op.abspath('groupcon_workflowed')
+output_dir = op.abspath('dmri_group_connectivity_camino')
 
 """
 Main processing loop
 ====================
 The title for the final grouped-network connectome file is dependent on the group names. The resulting file for this example
-is 'coma-controls.cff'. The following code implements the format a-b-c-...x.cff for an arbitary number of groups.
+is 'parkinsons-controls.cff'. The following code implements the format a-b-c-...x.cff for an arbitary number of groups.
 """
 
 title = ''
@@ -118,13 +118,13 @@ for idx, group_id in enumerate(group_list.keys()):
 
     .. seealso::
 
-        * nipype/workflows/camino/group_connectivity.py
-        * nipype/workflows/camino/connectivity_mapping.py
-        * :ref:`example_connectivity_tutorial`
+        * nipype/workflows/dmri/mrtrix/group_connectivity.py
+        * nipype/workflows/dmri/camino/connectivity_mapping.py
+        * :ref:`dmri_connectivity`
 
     """
 
-    l1pipeline = create_group_cff_pipeline_part1(group_list, group_id, data_dir, subjects_dir, output_dir, info)
+    l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
 
     """
 The first level pipeline we have tweaked here is run within the for loop.
@@ -134,19 +134,18 @@ The first level pipeline we have tweaked here is run within the for loop.
     l1pipeline.write_graph(format='eps', graph2use='flat')
 
     """
-    Next we create and run the second-level pipeline. The purpose of this workflow is simple:
-    It is used to merge each subject's CFF file into one, so that there is a single file containing
-    all of the networks for each group. This can be useful for performing Network Brain Statistics
-    using the NBS plugin in ConnectomeViewer.
+Next we create and run the second-level pipeline. The purpose of this workflow is simple:
+It is used to merge each subject's CFF file into one, so that there is a single file containing
+all of the networks for each group. This can be useful for performing Network Brain Statistics
+using the NBS plugin in ConnectomeViewer.
 
-    .. seealso::
+.. seealso::
 
-        http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html
-
+    http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html
 
     """
 
-    l2pipeline = create_group_cff_pipeline_part2(group_list, group_id, data_dir, subjects_dir, output_dir)
+    l2pipeline = create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
     l2pipeline.run()
     l2pipeline.write_graph(format='eps', graph2use='flat')
 
@@ -155,7 +154,7 @@ Now that the for loop is complete there are two grouped CFF files each containin
 It is also convenient to have every subject in a single CFF file, so that is what the third-level pipeline does.
 """
 
-l3pipeline = create_group_cff_pipeline_part3(group_list, data_dir, subjects_dir, output_dir, title)
+l3pipeline = create_merge_group_networks_workflow(group_list, data_dir, subjects_dir, output_dir, title)
 l3pipeline.run()
 l3pipeline.write_graph(format='eps', graph2use='flat')
 
@@ -163,6 +162,6 @@ l3pipeline.write_graph(format='eps', graph2use='flat')
 The fourth and final workflow averages the networks and saves them in another CFF file
 """
 
-l4pipeline = create_group_cff_pipeline_part4(group_list, data_dir, subjects_dir, output_dir, title)
+l4pipeline = create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir, output_dir, title)
 l4pipeline.run()
 l4pipeline.write_graph(format='eps', graph2use='flat')
