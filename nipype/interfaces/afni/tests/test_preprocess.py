@@ -83,7 +83,6 @@ def test_calc():
                      ignore_exception = dict(usedefault=True,),
                      infile_a = dict(argstr='-a %s',mandatory=True,),
                      infile_b = dict(argstr=' -b %s',),
-                     infile_b_prime = dict(argstr=' -b %s',),
                      other = dict(argstr='',),
                      out_file = dict(argstr='-prefix %s',),
                      single_idx = dict(),
