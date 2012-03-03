@@ -21,6 +21,10 @@ from distutils.command.clean import clean
 # Sphinx import.
 from sphinx.setup_command import BuildDoc
 
+_info_fname = pjoin('nipype', 'info.py')
+INFO_VARS = {}
+exec(open(_info_fname, 'rt').read(), {}, INFO_VARS)
+
 DOC_BUILD_DIR = os.path.join('doc', '_build', 'html')
 DOC_DOCTREES_DIR = os.path.join('doc', '_build', 'doctrees')
 

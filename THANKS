@@ -1,29 +1,61 @@
-NIPY is an open source project for neuroimaging analysis using Python.
-It is a community project.  Many people have contributed to NIPY (and NIPYPE),
+NIPYPE is an open source project for neuroimaging analysis using Python.
+It is a community project.  Many people have contributed to NIPYPE (and NIPY),
 in code development, suggestions, and financial support.  Below is a
 partial list.  If you've been left off, please let us know
 (nipy-devel at neuroimaging.scipy.org), and you'll be added.
 
-Matthew Brett
+Contributors to the code-base
+-----------------------------
+
+Alexandre Gramfort
+Anisha Keshavan
+Ariel Rokem
+Basile Pinsard
+Charl Linssen
+Chris Filo Gorgolewski
+Christian Haselgrove
 Christopher Burns
-Michael Castelle 
+Cindee Madison
+Colin Buchanan
+Daniel Ginsburg
+Drew Erickson
+Erik Ziegler
+Gael varoquaux
+Hans Johnson
+Jarrod Millman
+Jeff Lai
+John Salvatore
+Lijie Huang
+Michael Hallquist
+Michael Hanke
+Michael Waskom
+Oliver Hinds
+Rosalia Tungaraza
+Satrajit Ghosh
+Stephan Gerhard
+Valentin Haenel
+Xiangzhen Kong
+Xu Wang
+Yannick Schwartz
+Yaroslav Halchenko
+
+Other contributors
+------------------
+
+Matthew Brett
+Michael Castelle
 Philippe Ciuciu
-Dav Clark
 Yann Cointepas
 Mark D'Esposito
 Susan Gabrieli
-Satrajit Ghosh
-Chris Filo Gorgolewski
-Yaroslav Halchenko
 Brian Hawthorne
 Tim Leslie
-Cindee Madison
-Jarrod Millman
 Fernando Perez
 Tyler Perrachione
 Jean-Baptiste Poline
 Alexis Roche
 Denis Riviere
+Gretchen Reynolds
 Yannick Schwartz
 Jonathan Taylor
 Bertrand Thirion

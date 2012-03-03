@@ -2,34 +2,47 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 import logging
-import logging.handlers
 import os
-
-from nipype.utils.config import config
 import sys
+try:
+    from ..external.cloghandler import ConcurrentRotatingFileHandler as \
+    RFHandler
+except ImportError:
+    # Next 2 lines are optional:  issue a warning to the user
+    from warnings import warn
+    warn("ConcurrentLogHandler not installed. Using builtin log handler")
+    from logging.handlers import RotatingFileHandler as RFHandler
+from nipype.utils.config import config
+from nipype.utils.misc import str2bool
 
 #Sets up logging for pipeline and nodewrapper execution
-LOG_FILENAME = os.path.join(config.get('logging','log_directory'),
+LOG_FILENAME = os.path.join(config.get('logging', 'log_directory'),
                             'pypeline.log')
+fmt = ('%(asctime)s,%(msecs)d %(name)-2s '
+       '%(levelname)-2s:\n\t %(message)s')
+datefmt = '%y%m%d-%H:%M:%S'
+#logging.basicConfig(format=fmt, datefmt=datefmt, stream=sys.stdout)
 logging.basicConfig(stream=sys.stdout)
 logger = logging.getLogger('workflow')
 fmlogger = logging.getLogger('filemanip')
 iflogger = logging.getLogger('interface')
-hdlr = logging.handlers.RotatingFileHandler(LOG_FILENAME,
-                                            maxBytes=int(config.get('logging',
-                                                                    'log_size')),
-                                            backupCount=int(config.get('logging',
-                                                                       'log_rotate')))
-formatter = logging.Formatter(fmt='%(asctime)s,%(msecs)d %(name)-2s '\
-                                  '%(levelname)-2s:\n\t %(message)s',
-                              datefmt='%y%m%d-%H:%M:%S')
-hdlr.setFormatter(formatter)
-logger.addHandler(hdlr)
-logger.setLevel(logging.getLevelName(config.get('logging','workflow_level')))
-fmlogger.addHandler(hdlr)
-fmlogger.setLevel(logging.getLevelName(config.get('logging','filemanip_level')))
-iflogger.addHandler(hdlr)
-iflogger.setLevel(logging.getLevelName(config.get('logging','interface_level')))
+
+if str2bool(config.get('logging', 'log_to_file')):
+    hdlr = RFHandler(LOG_FILENAME,
+                     maxBytes=int(config.get('logging', 'log_size')),
+                     backupCount=int(config.get('logging', 'log_rotate')))
+    formatter = logging.Formatter(fmt=fmt, datefmt=datefmt)
+    hdlr.setFormatter(formatter)
+    logger.addHandler(hdlr)
+    fmlogger.addHandler(hdlr)
+    iflogger.addHandler(hdlr)
+
+logger.setLevel(logging.getLevelName(config.get('logging', 'workflow_level')))
+fmlogger.setLevel(logging.getLevelName(config.get('logging',
+                                                  'filemanip_level')))
+iflogger.setLevel(logging.getLevelName(config.get('logging',
+                                                  'interface_level')))
+
 
 def logdebug_dict_differences(dold, dnew, prefix=""):
     """Helper to log what actually changed from old to new values of
@@ -67,4 +80,5 @@ def logdebug_dict_differences(dold, dnew, prefix=""):
             msgs += ["%s: %r != %r"
                      % (k, dnew[k], dold[k])]
     if len(msgs):
-        logger.debug("%s values differ in fields: %s" % (prefix, ", ".join(msgs)))
+        logger.debug("%s values differ in fields: %s" % (prefix,
+                                                         ", ".join(msgs)))

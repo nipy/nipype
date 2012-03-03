@@ -142,11 +142,14 @@ def gen_info(run_event_files):
     """
     info = []
     for i, event_files in enumerate(run_event_files):
-        runinfo = Bunch(cond=[], onsets=[], durations=[], amplitudes=[])
+        runinfo = Bunch(conditions=[], onsets=[], durations=[], amplitudes=[])
         for event_file in event_files:
             _, name = os.path.split(event_file)
-            name, _ = name.split('.run%03d'%(i+1))
-            runinfo.cond.append(name)
+            if '.run' in name:
+                name, _ = name.split('.run%03d'%(i+1))
+            elif '.txt' in name:
+                name, _ = name.split('.txt')
+            runinfo.conditions.append(name)
             event_info = np.loadtxt(event_file)
             runinfo.onsets.append(event_info[:, 0].tolist())
             if event_info.shape[1] > 1:
@@ -162,11 +165,13 @@ def gen_info(run_event_files):
 
 
 class SpecifyModelInputSpec(BaseInterfaceInputSpec):
-    subject_info = InputMultiPath(Bunch, mandatory=True, xor=['event_info'],
-                          desc="Bunch of List(Bunch) subject specific condition information. " \
-                          "see :class:`SpecifyModel` or SpecifyModel.__doc__ for details")
-    event_info = InputMultiPath(traits.List(File(exists=True)), mandatory=True, xor=['subject_info'],
-                              desc='list of event description files 1, 2 or 3 column format corresponding to onsets, durations and amplitudes')
+    subject_info = InputMultiPath(Bunch, mandatory=True, xor=['event_files'],
+          desc=("Bunch or List(Bunch) subject specific condition information. "
+                "see :ref:`SpecifyModel` or SpecifyModel.__doc__ for details"))
+    event_files = InputMultiPath(traits.List(File(exists=True)), mandatory=True,
+                                 xor=['subject_info'],
+          desc=('list of event description files 1, 2 or 3 column format '
+                'corresponding to onsets, durations and amplitudes'))
     realignment_parameters = InputMultiPath(File(exists=True),
        desc = "Realignment parameters returned by motion correction algorithm",
                                          filecopy=False)
@@ -200,27 +205,22 @@ class SpecifyModel(BaseInterface):
     """Makes a model specification compatible with spm/fsl designers.
 
     The subject_info field should contain paradigm information in the form of
-    a Bunch of a list of Bunch. The Bunch should contain the following
-    information.
+    a Bunch or a list of Bunch. The Bunch should contain the following
+    information::
 
-    Required for most designs
-    ~~~~~~~~~~~~~~~~~~~~~~~~~
+     [Mandatory]
 
      - conditions : list of names
      - onsets : lists of onsets corresponding to each condition
      - durations : lists of durations corresponding to each condition. Should be left to a single 0 if all events are being modelled as impulses.
 
-    Optional
-    ~~~~~~~~
-
+     [Optional]
      - regressor_names : list of str
          list of names corresponding to each column. Should be None if
          automatically assigned.
-
      - regressors : list of lists
         values for each regressor - must correspond to the number of
         volumes in the functional run
-
      - amplitudes : lists of amplitudes for each event. This will be ignored by
        SPM's Level1Design.
 
@@ -229,13 +229,9 @@ class SpecifyModel(BaseInterface):
 
      - tmod : lists of conditions that should be temporally modulated. Should
        default to None if not being used.
-
      - pmod : list of Bunch corresponding to conditions
-
        - name : name of parametric modulator
-
        - param : values of the modulator
-
        - poly : degree of modulation
 
     Alternatively, you can provide information through event files.
@@ -525,11 +521,12 @@ class SpecifySparseModelOutputSpec(SpecifyModelOutputSpec):
 
 
 class SpecifySparseModel(SpecifyModel):
-    """Makes a model specification compatible with spm/fsl designers for
-    sparse and sparse-clustered designs
+    """ Specify a sparse model that is compatible with spm/fsl designers
 
-    see Ghosh et al. (2009) OHBM 2009
-    http://dl.dropbox.com/u/363467/OHBM2009_HRF.pdf
+    References
+    ----------
+
+    .. [1] Ghosh et al. (2009) OHBM http://dl.dropbox.com/u/363467/OHBM2009_HRF.pdf
 
     Examples
     --------

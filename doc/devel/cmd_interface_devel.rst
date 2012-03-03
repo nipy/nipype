@@ -14,7 +14,7 @@ inputs.
 
 Defining inputs and outputs
 ===========================
-In NiPyPe we have decided to use Enthought Traits to define inputs and outputs of the interfaces. 
+In Nipype we have decided to use Enthought Traits to define inputs and outputs of the interfaces. 
 This allows to introduce easy type checking. Inputs and outputs are grouped into separate classes 
 (usually suffixed with InputSpec and OutputSpec). For example:
 
@@ -27,11 +27,11 @@ This allows to introduce easy type checking. Inputs and outputs are grouped into
 	class ExampleOutputSpec(TraitedSpec):
 		output_volume = File(desc = "Output volume", exists = True)
 		
-For the Traits (and NiPyPe) to work correctly output and input spec has to be inherited from TraitedSpec 
+For the Traits (and Nipype) to work correctly output and input spec has to be inherited from TraitedSpec 
 (however, this does not have to be direct inheritance). 
 
 Traits (File, Int etc.) have different parameters (called metadata). In the above example we have used the desc metadata 
-which holds human readable description of the input. mandatory flag forces NiPyPe to throw an exception if the input was not set.
+which holds human readable description of the input. mandatory flag forces Nipype to throw an exception if the input was not set.
 exists is a special flag that works only for File traits and checks if the provided file exists.
 
 The input and output specifications have to be connected to the our example interface class:

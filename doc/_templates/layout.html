@@ -1,12 +1,6 @@
 {% extends "!layout.html" %}
-{% set title = 'Neuroimaging in Python' %}
-
-{% block rootrellink %}
-  <li><a href="https://github.com/nipy/nipype">Develop</a> |&nbsp;</li>
-  <li><a href="http://groups.google.com/group/nipy-user">Mailing list</a> |&nbsp;</li>
-  <li><a href="http://nipy.org/software/license">License</a> |&nbsp;</li>
-  <li><a href="http://nipy.org/">Nipy</a> |&nbsp;</li>
-{% endblock %}
+{% set title = 'Neuroimaging in Python - Pipelines and Interfaces' %}
+{% set short_title = 'Nipype' %}
 
 {% block extrahead %}
 {{ super() }}
@@ -29,15 +23,25 @@
 {% endblock %}
 
 {% block header %}
-<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
- <a href="{{pathto('index') }}">
-  <img src="{{ pathto("_static/nipype-banner-bg.png", 1) }}" alt="NIPY logo"  border="0" />
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+        {%- block headertitle %}
+            <a href="{{pathto('index') }}">
+            <img src="{{ pathto("_static/nipype-banner-bg.png", 1) }}" alt="NIPY logo"  border="0" />
+        {%- endblock %}
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            {% include 'navbar.html' %}
+        </div>
+    </div>
 </div>
 {% endblock %}
 
-
+{% block relbar1 %}{% endblock %}
 {% block relbar2 %}{% endblock %}
-
 {% block sidebar1 %}{{ sidebar() }}{% endblock %}
 {% block sidebar2 %}{% endblock %}
 
