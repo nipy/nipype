@@ -28,6 +28,7 @@ from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     CommandLineInputSpec, isdefined)
 from nipype.utils.filemanip import (filename_to_list,copyfiles, list_to_filename,
                                     split_filename, fname_presuffix)
+from nipype.interfaces.ants.base import ANTSCommand
 
 class BuildTemplateInputSpec(CommandLineInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d',usedefault=True,
@@ -80,9 +81,12 @@ class BuildTemplateOutputSpec(TraitedSpec):
                              'and warped image (deformed)')
 
 
-class BuildTemplate(CommandLine):
+class BuildTemplate(ANTSCommand):
     """Uses the ANTS command buildtemplateparallel.sh to generate a template from the files listed in in_files.
-    Note: This can take a VERY long time to complete
+
+    Note:: 
+    This can take a VERY long time to complete
+
     Examples
     --------
 
@@ -170,7 +174,7 @@ class WarpImageMultiTransformOutputSpec(TraitedSpec):
     output_images = traits.Either(traits.List(File(exists=True)),
                              File(exists=True))
 
-class WarpImageMultiTransform(CommandLine):
+class WarpImageMultiTransform(ANTSCommand):
     """Uses the ANTS command WarpImageMultiTransform to warp an image (moving image) from one space to another (fixed/template space)
 
     Examples
@@ -261,9 +265,8 @@ class AntsIntroductionOutputSpec(TraitedSpec):
     input_file = File(exists=True, desc='input image (prefix_repaired.nii)')
     output_file = File(exists=True, desc='output image (prefix_deformed.nii)')
 
-class GenWarpFields(CommandLine):
-    """Uses the ANTS command antsIntroduction to generate warp and inverse warp fields that transform structural data
-    from anatomical images of a subject to the input template space.
+class GenWarpFields(ANTSCommand):
+    """Uses ANTS to generate matrices to warp data from one space to another.
 
     Examples
     --------
