@@ -54,7 +54,7 @@ import nipype.interfaces.freesurfer as fs    # freesurfer
 import  os.path as op                      # system functions
 import cmp
 from nipype.workflows.dmri.camino.group_connectivity import create_group_connectivity_pipeline
-from nipype.workflows.dmri.connectivity.group_connectivity import (create_merge_networks_by_group_workflow, 
+from nipype.workflows.dmri.connectivity.group_connectivity import (create_merge_networks_by_group_workflow,
 create_merge_group_networks_workflow, create_average_networks_by_group_workflow)
 
 """
