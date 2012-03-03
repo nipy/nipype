@@ -328,7 +328,7 @@ class InterfaceHelpWriter(object):
             workflow.write_graph(dotfilename=fname, graph2use='hierarchical')
 
             ad += self._write_graph_section(fname, 'Graph') + '\n'
-            
+
         for name, finst in helper_functions:
             label = ':func:`' + name + '`'
             ad += '\n.. _%s:\n\n' % (uri + '.' + name)
