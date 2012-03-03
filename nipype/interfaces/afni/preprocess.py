@@ -1,14 +1,20 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft = python sts = 4 ts = 4 sw = 4 et:
-__docformat__ = 'restructuredtext'
+"""Afni preprocessing interfaces
+
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+    >>> os.chdir(datadir)
+"""
 import warnings
 import os
-from nipype.interfaces.afni.base import AFNITraitedSpec, AFNICommand
-from nipype.interfaces.base import Directory
-from nipype.interfaces.base import (CommandLineInputSpec,
-CommandLine, TraitedSpec, traits, isdefined, File)
-from nipype.utils.filemanip import (load_json, save_json,
-split_filename)
+from .base import AFNITraitedSpec, AFNICommand
+from ..base import (Directory, CommandLineInputSpec, CommandLine, TraitedSpec,
+                    traits, isdefined, File)
+from ...utils.filemanip import (load_json, save_json, split_filename)
+
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
