@@ -3,7 +3,6 @@ import os.path as op                      # system functions
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
-from ...misc.utils import (get_affine, get_data_dims, get_vox_dims, select_aparc, select_aparc_annot)
 from .connectivity_mapping import create_connectivity_pipeline
 
 
@@ -18,8 +17,6 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
 
     >>> import nipype.interfaces.freesurfer as fs
     >>> import nipype.workflows.dmri.camino.group_connectivity as groupwork
-    >>> import cmp
-    >>> from nipype.testing import example_data
     >>> subjects_dir = '.'
     >>> data_dir = '.'
     >>> output_dir = '.'
