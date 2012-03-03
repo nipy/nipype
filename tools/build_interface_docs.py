@@ -25,7 +25,6 @@ if __name__ == '__main__':
                                         ]
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += ['\.version$',
-                                       '\.interfaces\.afni$',
                                        '\.interfaces\.base$',
                                        '\.interfaces\.matlab$',
                                        '\.interfaces\.rest$',
@@ -40,7 +39,6 @@ if __name__ == '__main__':
                                       'Spm',
                                       'Tester',
                                       'Spec$',
-                                      'afni',
                                       'Numpy'
                                       # NipypeTester raises an
                                       # exception when instantiated in

@@ -7,13 +7,8 @@ was written to work with AFNI version 4.1.4.
 Top-level namespace for afni.  Perhaps should just make afni a package!
 """
 
-"""XXX: This is an temporary warning for the 0.3 release to let users know that the afni interface is under construction and unstable."""
-import warnings
-warnings.warn('AFNI interface unstable.  Use at own risk.')
-
-
-from nipype.interfaces.afni.base import Info, AFNICommand, AFNITraitedSpec
-from nipype.interfaces.afni.preprocess import (To3D, Refit, Resample, TStat,
-Automask, Volreg, Merge, ZCutUp, Calc, TShift, Warp,
-Detrend, Despike, Copy, Fourier, Allineate, Maskave,
-SkullStrip, TCat, Fim, TCorrelate, BrickStat, ROIStats)
+from .base import Info
+from .preprocess import (To3D, Refit, Resample, TStat, Automask, Volreg, Merge,
+                         ZCutUp, Calc, TShift, Warp, Detrend, Despike, Copy,
+                         Fourier, Allineate, Maskave, SkullStrip, TCat, Fim,
+                         TCorrelate, BrickStat, ROIStats)
