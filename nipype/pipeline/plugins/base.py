@@ -22,6 +22,7 @@ from ..utils import (nx, dfs_preorder)
 from ..engine import (MapNode, str2bool)
 
 from nipype.utils.filemanip import savepkl, loadpkl
+from nipype.interfaces.utility import Function
 import traceback
 
 
@@ -458,6 +459,16 @@ import sys
 from socket import gethostname
 from traceback import format_exception
 from nipype.utils.filemanip import loadpkl, savepkl
+"""
+
+        does_plot = (isinstance(node, Function) and
+                     "matplotlib" in node.inputs.function_str)
+
+        if does_plot:
+            cmdstr += "import matplotlib\n"
+            cmdstr += "matplotlib.use('Agg')\n"
+
+        cmdstr += """
 traceback=None
 cwd = os.getcwd()
 print cwd
