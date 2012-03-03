@@ -298,11 +298,11 @@ class GenWarpFields(ANTSCommand):
 
     >>> from nipype.interfaces.ants import GenWarpFields
     >>> warp = GenWarpFields()
-    >>> warp.inputs.reference_image = 'template_6.nii'
+    >>> warp.inputs.reference_image = 'Template_6.nii'
     >>> warp.inputs.input_image = 'structural.nii'
     >>> warp.inputs.max_iterations = [30,90,20]
     >>> warp.cmdline
-    'antsIntroduction.sh -d 3 -i structural.nii -m 30x90x20 -o ants_ -r template_6.nii -t GR'
+    'antsIntroduction.sh -d 3 -i structural.nii -m 30x90x20 -o ants_ -r Template_6.nii -t GR'
 
     """
 
