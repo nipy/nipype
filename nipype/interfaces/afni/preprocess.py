@@ -66,9 +66,7 @@ class To3D(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni
-    >>> To3D = afni.To3d()
-    AFNI has no environment variable that sets filetype
-    Nipype uses NIFTI_GZ as default
+    >>> To3D = afni.To3D()
     >>> To3D.inputs.datatype = 'float'
     >>> To3D.inputs.infolder = 'dicomdir'
     >>> To3D.inputs.filetype = "anat"
