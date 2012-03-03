@@ -74,7 +74,7 @@ def create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subj
     Example
     -------
 
-    >>> import nipype.workflows.dmri.mrtrix.group_connectivity as groupwork
+    >>> import nipype.workflows.dmri.connectivity.group_connectivity as groupwork
     >>> from nipype.testing import example_data
     >>> subjects_dir = '.'
     >>> data_dir = '.'
@@ -133,7 +133,7 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
     Example
     -------
 
-    >>> import nipype.workflows.dmri.mrtrix.group_connectivity as groupwork
+    >>> import nipype.workflows.dmri.connectivity.group_connectivity as groupwork
     >>> from nipype.testing import example_data
     >>> subjects_dir = '.'
     >>> data_dir = '.'
@@ -308,7 +308,7 @@ def create_merge_group_networks_workflow(group_list, data_dir, subjects_dir, out
     Example
     -------
 
-    >>> import nipype.workflows.dmri.mrtrix.group_connectivity as groupwork
+    >>> import nipype.workflows.dmri.connectivity.group_connectivity as groupwork
     >>> from nipype.testing import example_data
     >>> subjects_dir = '.'
     >>> data_dir = '.'
@@ -363,7 +363,7 @@ def create_merge_group_network_results_workflow(group_list, data_dir, subjects_d
     Example
     -------
 
-    >>> import nipype.workflows.dmri.mrtrix.group_connectivity as groupwork
+    >>> import nipype.workflows.dmri.connectivity.group_connectivity as groupwork
     >>> from nipype.testing import example_data
     >>> subjects_dir = '.'
     >>> data_dir = '.'
@@ -423,7 +423,7 @@ def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir
     Example
     -------
 
-    >>> import nipype.workflows.dmri.mrtrix.group_connectivity as groupwork
+    >>> import nipype.workflows.dmri.connectivity.group_connectivity as groupwork
     >>> from nipype.testing import example_data
     >>> subjects_dir = '.'
     >>> data_dir = '.'

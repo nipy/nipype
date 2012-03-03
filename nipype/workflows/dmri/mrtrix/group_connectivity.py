@@ -25,7 +25,7 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
 
     >>> import nipype.interfaces.freesurfer as fs
     >>> import nipype.workflows.dmri.mrtrix.group_connectivity as groupwork
-    >>> import cmp
+    >>> import cmp # doctest: +SKIP
     >>> from nipype.testing import example_data
     >>> subjects_dir = '.'
     >>> data_dir = '.'
@@ -39,9 +39,9 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
     >>> l1pipeline = groupwork.create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, template_args)
     >>> parcellation_name = 'scale500'
     >>> l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name
-    >>> cmp_config = cmp.configuration.PipelineConfiguration()
-    >>> cmp_config.parcellation_scheme = "Lausanne2008"
-    >>> l1pipeline.inputs.connectivity.mapping.inputnode_within.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
+    >>> cmp_config = cmp.configuration.PipelineConfiguration() # doctest: +SKIP
+    >>> cmp_config.parcellation_scheme = "Lausanne2008" # doctest: +SKIP
+    >>> l1pipeline.inputs.connectivity.mapping.inputnode_within.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml'] # doctest: +SKIP
     >>> l1pipeline.run()                 # doctest: +SKIP
 
 
