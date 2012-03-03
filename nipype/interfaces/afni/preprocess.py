@@ -458,7 +458,7 @@ class DetrendInputSpec(AFNITraitedSpec):
         position=-1,
         mandatory=True,
         exists=True)
-    out_file = File(desc='output file from 3dTstat',
+    out_file = File(desc='output file from 3dDetrend',
          argstr='-prefix %s',
          position=-2,
          genfile=True)
@@ -1523,8 +1523,6 @@ class CalcInputSpec(CommandLineInputSpec):
     infile_a = File(desc='input file to 3dcalc',
         argstr='-a %s', position=0, mandatory=True)
     infile_b = File(desc='operand file to 3dcalc',
-        argstr=' -b %s', position=1)
-    infile_b_prime = traits.Str(desc='operand file to 3dcalc',
         argstr=' -b %s', position=1)
     expr = traits.Str(desc='expr', argstr='-expr %s', position=2,
         mandatory=True)
