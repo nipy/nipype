@@ -5,8 +5,6 @@ def configuration(parent_package='',top_path=None):
 
     config = Configuration('fsl', parent_package, top_path)
 
-    config.add_data_dir('tests')
-
     return config
 
 if __name__ == '__main__':
