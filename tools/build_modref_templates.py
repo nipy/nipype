@@ -28,6 +28,7 @@ if __name__ == '__main__':
                                         ]
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += ['\.version$',
+                                       'info',
                                        '\.interfaces\.(?!(base|matlab))',
                                        '\.pipeline\.utils$',
                                        '\.interfaces\.pymvpa$',

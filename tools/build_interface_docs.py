@@ -18,6 +18,7 @@ if __name__ == '__main__':
     docwriter = InterfaceHelpWriter(package)
     # Packages that should not be included in generated API docs.
     docwriter.package_skip_patterns += ['\.external$',
+                                        '\.fixes$',
                                         '\.utils$',
                                         '\.pipeline',
                                         '\.testing',
@@ -29,14 +30,19 @@ if __name__ == '__main__':
                                        '\.interfaces\.matlab$',
                                        '\.interfaces\.rest$',
                                        '\.interfaces\.pymvpa$',
+                                       '\.interfaces\.slicer\.generate_classes$',
+                                       '\.interfaces\.spm\.base$',
                                        '\.interfaces\.traits',
                                        '\.pipeline\.alloy$',
                                        '\.pipeline\.s3_node_wrapper$',
                                        '.\testing',
                                        ]
-    docwriter.class_skip_patterns += ['FSL',
+    docwriter.class_skip_patterns += ['AFNI',
+                                      'ANTS',
+                                      'FSL',
                                       'FS',
-                                      'Spm',
+                                      'Info',
+                                      'SPM',
                                       'Tester',
                                       'Spec$',
                                       'Numpy'
