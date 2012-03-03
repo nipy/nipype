@@ -52,6 +52,7 @@ First, we import the necessary modules from nipype.
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import  os.path as op                      # system functions
+import cmp
 from nipype.workflows.dmri.camino.group_connectivity import create_group_connectivity_pipeline
 from nipype.workflows.dmri.connectivity.group_connectivity import (create_merge_networks_by_group_workflow, 
 create_merge_group_networks_workflow, create_average_networks_by_group_workflow)
@@ -131,10 +132,9 @@ Define the parcellation scheme to use.
 """
 
 parcellation_name = 'scale500'
-l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name
 cmp_config = cmp.configuration.PipelineConfiguration()
 cmp_config.parcellation_scheme = "Lausanne2008"
-l1pipeline.inputs.connectivity.mapping.inputnode_within.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
+l1pipeline.inputs.connectivity.inputnode.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
 
 """
 The first level pipeline we have tweaked here is run within the for loop.
@@ -156,7 +156,6 @@ using the NBS plugin in ConnectomeViewer.
 """
 
 l2pipeline = create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
-l2pipeline.inputs.l2inputnode.network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
 l2pipeline.run()
 l2pipeline.write_graph(format='eps', graph2use='flat')
 

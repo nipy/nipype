@@ -257,6 +257,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     """
 
     creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
+    creatematrix.inputs.count_region_intersections = True
 
     """
     Next we define the endpoint of this tutorial, which is the CFFConverter node, as well as a few nodes which use
