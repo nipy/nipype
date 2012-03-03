@@ -1056,7 +1056,7 @@ class ApplyDeformationFieldInputSpec(SPMCommandInputSpec):
     reference_volume = File(exists=True, mandatory=True, field='comp{2}.id.space')
     interp = traits.Range(low=0, high=7, field='interp',
                           desc='degree of b-spline used for interpolation')
-    
+
 
 class ApplyDeformationFieldOutputSpec(TraitedSpec):
     out_files = OutputMultiPath(File(exists=True))
