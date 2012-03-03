@@ -84,8 +84,8 @@ class BuildTemplateOutputSpec(TraitedSpec):
 class BuildTemplate(ANTSCommand):
     """Uses the ANTS command buildtemplateparallel.sh to generate a template from the files listed in in_files.
 
-    Note:: 
-    This can take a VERY long time to complete
+    .. note::
+      This can take a VERY long time to complete
 
     Examples
     --------
