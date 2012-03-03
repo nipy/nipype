@@ -20,6 +20,6 @@ import logging
 logger = logging.getLogger('iflogger')
 
 class ANTSCommand(CommandLine):
-    def _run_interface(self, runtime):
+    def __init__(self, **inputs):
         self.inputs.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS']='1'
-        return super(ANTSCommand,self)._run_interface(runtime)
+        return super(ANTSCommand, self).__init__(**inputs)
