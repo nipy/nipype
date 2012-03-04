@@ -54,7 +54,7 @@ import nipype.interfaces.freesurfer as fs    # freesurfer
 import  os.path as op                      # system functions
 import cmp
 from nipype.workflows.dmri.camino.group_connectivity import create_group_connectivity_pipeline
-from nipype.workflows.dmri.connectivity.group_connectivity import (create_merge_networks_by_group_workflow,
+from nipype.workflows.dmri.connectivity.group_connectivity import (create_merge_networks_by_group_workflow, 
 create_merge_group_networks_workflow, create_average_networks_by_group_workflow)
 
 """
@@ -101,63 +101,63 @@ for idx, group_id in enumerate(group_list.keys()):
     if not idx == len(group_list.keys()) - 1:
         title += '-'
 
-"""
+    """
 
-.. warning::
+    .. warning::
 
-    The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
-    The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
+        The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
+        The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
 
-"""
+    """
 
-info = dict(dwi=[['subject_id', 'dti']],
-            bvecs=[['subject_id', 'bvecs']],
-            bvals=[['subject_id', 'bvals']])
+    info = dict(dwi=[['subject_id', 'dti']],
+                bvecs=[['subject_id', 'bvecs']],
+                bvals=[['subject_id', 'bvals']])
 
-"""
-This line creates the processing workflow given the information input about the groups and subjects.
+    """
+    This line creates the processing workflow given the information input about the groups and subjects.
 
-.. seealso::
+    .. seealso::
 
-    * nipype/workflows/dmri/mrtrix/group_connectivity.py
-    * nipype/workflows/dmri/camino/connectivity_mapping.py
-    * :ref:`dmri_connectivity`
+        * nipype/workflows/dmri/mrtrix/group_connectivity.py
+        * nipype/workflows/dmri/camino/connectivity_mapping.py
+        * :ref:`dmri_connectivity`
 
-"""
+    """
 
-l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
+    l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
 
-"""
-Define the parcellation scheme to use.
-"""
+    """
+    Define the parcellation scheme to use.
+    """
 
-parcellation_name = 'scale500'
-cmp_config = cmp.configuration.PipelineConfiguration()
-cmp_config.parcellation_scheme = "Lausanne2008"
-l1pipeline.inputs.connectivity.inputnode.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
+    parcellation_name = 'scale500'
+    cmp_config = cmp.configuration.PipelineConfiguration()
+    cmp_config.parcellation_scheme = "Lausanne2008"
+    l1pipeline.inputs.connectivity.inputnode.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
 
-"""
-The first level pipeline we have tweaked here is run within the for loop.
-"""
+    """
+    The first level pipeline we have tweaked here is run within the for loop.
+    """
 
-l1pipeline.run()
-l1pipeline.write_graph(format='eps', graph2use='flat')
+    l1pipeline.run()
+    l1pipeline.write_graph(format='eps', graph2use='flat')
 
-"""
-Next we create and run the second-level pipeline. The purpose of this workflow is simple:
-It is used to merge each subject's CFF file into one, so that there is a single file containing
-all of the networks for each group. This can be useful for performing Network Brain Statistics
-using the NBS plugin in ConnectomeViewer.
+    """
+    Next we create and run the second-level pipeline. The purpose of this workflow is simple:
+    It is used to merge each subject's CFF file into one, so that there is a single file containing
+    all of the networks for each group. This can be useful for performing Network Brain Statistics
+    using the NBS plugin in ConnectomeViewer.
 
-.. seealso::
+    .. seealso::
 
-    http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html
+        http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html
 
-"""
+    """
 
-l2pipeline = create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
-l2pipeline.run()
-l2pipeline.write_graph(format='eps', graph2use='flat')
+    l2pipeline = create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
+    l2pipeline.run()
+    l2pipeline.write_graph(format='eps', graph2use='flat')
 
 """
 Now that the for loop is complete there are two grouped CFF files each containing the appropriate subjects.
