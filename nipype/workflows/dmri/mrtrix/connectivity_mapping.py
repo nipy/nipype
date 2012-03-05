@@ -46,23 +46,20 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
 
         outputnode.connectome
         outputnode.cmatrix
-        outputnode.gpickled_network
+        outputnode.networks
         outputnode.fa
         outputnode.struct
         outputnode.tracts
         outputnode.rois
         outputnode.odfs
         outputnode.filtered_tractography
+        outputnode.tdi
         outputnode.nxstatscff
-        outputnode.nxmatlab
         outputnode.nxcsv
-        outputnode.nxmergedcsv
-        outputnode.cmatrix_csv
         outputnode.cmatrices_csv
         outputnode.mean_fiber_length
-        outputnode.meanfib_csv
+        outputnode.median_fiber_length
         outputnode.fiber_length_std
-        outputnode.fibstd_csv
     """
 
     inputnode_within = pe.Node(util.IdentityInterface(fields=["subject_id",

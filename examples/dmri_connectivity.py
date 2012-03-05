@@ -279,24 +279,6 @@ such as Bayesian tracking with Dirac priors (TrackBayesDirac).
 track = pe.Node(interface=camino.TrackPICo(), name="track")
 track.inputs.iterations = 1
 
-"""
-This tutorial demonstrates two methods of connectivity mapping. The first uses the conmap function of Camino.
-The problem with this method is that it can be very memory intensive. To deal with this, we add a "shredding" node
-which removes roughly half of the tracts in the file.
-"""
-
-tractshred = pe.Node(interface=camino.TractShredder(), name='tractshred')
-tractshred.inputs.offset = 0
-tractshred.inputs.bunchsize = 2
-tractshred.inputs.space = 1
-
-"""
-Here we create the Camino-based connectivity mapping node. For visualization, it can be beneficial to set a
-threshold for the minimum number of fiber connections that are required for an edge to be drawn on the graph.
-"""
-
-conmap = pe.Node(interface=camino.Conmap(), name='conmap')
-conmap.inputs.threshold = 100
 
 """
 Currently, the best program for visualizing tracts is TrackVis. For this reason, a node is included to
@@ -350,6 +332,7 @@ roigen = pe.Node(interface=cmtk.ROIGen(), name="ROIGen")
 cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme = "NativeFreesurfer")
 cmp_config.parcellation_scheme = "NativeFreesurfer"
 roigen.inputs.LUT_file = cmp_config.get_freeview_lut("NativeFreesurfer")['freesurferaparc']
+roigen_structspace = roigen.clone('ROIGen_structspace')
 
 """
 The CreateMatrix interface takes in the remapped aparc+aseg image as well as the label dictionary and fiber tracts
@@ -361,7 +344,9 @@ specific tracts that connect between user-selected regions.
 """
 
 creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
-creatematrix.inputs.resolution_network_file = cmp_config.parcellation['freesurferaparc']['node_information_graphml']
+creatematrix.inputs.count_region_intersections = True
+createnodes = pe.Node(interface=cmtk.CreateNodes(), name="CreateNodes")
+createnodes.inputs.resolution_network_file = cmp_config.parcellation['freesurferaparc']['node_information_graphml']
 
 """
 Here we define the endpoint of this tutorial, which is the CFFConverter node, as well as a few nodes which use
@@ -447,7 +432,6 @@ mapping.connect([(coregister, convertxfm,[('out_matrix_file','in_file')])])
 mapping.connect([(b0Strip, inverse,[('out_file','reference')])])
 mapping.connect([(convertxfm, inverse,[('out_file','in_matrix_file')])])
 mapping.connect([(mri_convert_WMParc, inverse,[('out_file','in_file')])])
-#mapping.connect([(inverse, conmap,[('out_file','roi_file')])])
 
 """
 The tractography pipeline consists of the following nodes. Further information about the tractography
@@ -459,14 +443,6 @@ mapping.connect([(fsl2scheme, dtlutgen,[("scheme","scheme_file")])])
 mapping.connect([(dtlutgen, picopdfs,[("dtLUT","luts")])])
 mapping.connect([(dtifit, picopdfs,[("tensor_fitted","in_file")])])
 mapping.connect([(picopdfs, track,[("pdfs","in_file")])])
-
-"""
-The tractography is passed to the shredder in preparation for connectivity mapping.
-Again, the required conmap connection is left commented out.
-"""
-
-mapping.connect([(track, tractshred,[("tracked","in_file")])])
-#mapping.connect([(tractshred, conmap,[("shredded","in_file")])])
 
 """
 Connecting the Fractional Anisotropy and Trace nodes is simple, as they obtain their input from the
@@ -513,23 +489,28 @@ the diffusion image and delivered to the ROIGen node. The remapped parcellation,
 original tracts, and label file are then given to CreateMatrix.
 """
 
+mapping.connect(createnodes, 'node_network',
+                creatematrix, 'resolution_network_file')
 mapping.connect([(FreeSurferSource, mri_convert_AparcAseg, [(('aparc_aseg', select_aparc), 'in_file')])])
 
 mapping.connect([(b0Strip, inverse_AparcAseg,[('out_file','reference')])])
 mapping.connect([(convertxfm, inverse_AparcAseg,[('out_file','in_matrix_file')])])
 mapping.connect([(mri_convert_AparcAseg, inverse_AparcAseg,[('out_file','in_file')])])
+mapping.connect([(mri_convert_AparcAseg, roigen_structspace,[('out_file','aparc_aseg_file')])])
+mapping.connect([(roigen_structspace, createnodes,[("roi_file","roi_file")])])
 
 mapping.connect([(inverse_AparcAseg, roigen,[("out_file","aparc_aseg_file")])])
 mapping.connect([(roigen, creatematrix,[("roi_file","roi_file")])])
 mapping.connect([(camino2trackvis, creatematrix,[("trackvis","tract_file")])])
 mapping.connect([(inputnode, creatematrix,[("subject_id","out_matrix_file")])])
+mapping.connect([(inputnode, creatematrix,[("subject_id","out_matrix_mat_file")])])
 
 """
 The merge nodes defined earlier are used here to create lists of the files which are
 destined for the CFFConverter.
 """
 
-mapping.connect([(creatematrix, gpickledNetworks,[("matrix_file","in1")])])
+mapping.connect([(creatematrix, gpickledNetworks,[("matrix_files","in1")])])
 
 mapping.connect([(mris_convertLH, giftiSurfaces,[("converted","in1")])])
 mapping.connect([(mris_convertRH, giftiSurfaces,[("converted","in2")])])
@@ -576,7 +557,7 @@ their names to the subject list and their data to the proper folders.
 """
 
 connectivity = pe.Workflow(name="connectivity")
-connectivity.base_dir = op.abspath('connectivity_tutorial')
+connectivity.base_dir = op.abspath('dmri_connectivity')
 connectivity.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,mapping,[('dwi','inputnode.dwi'),
