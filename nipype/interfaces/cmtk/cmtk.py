@@ -212,7 +212,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
             xyz = tuple(np.mean(np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])) , axis=1))
-            G.node[int(u)]['dn_position'] = tuple([xyz[0], xyz[1], xyz[2]])
+            G.node[int(u)]['dn_position'] = tuple([xyz[0], xyz[2], -xyz[1]])
 
     if intersections:
         iflogger.info("Filtering tractography from intersections")

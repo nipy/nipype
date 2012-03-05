@@ -90,7 +90,7 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
                                               ("outputnode.cmatrix", "@l1output.cmatrix"),
                                               ("outputnode.rois", "@l1output.rois"),
                                               ("outputnode.struct", "@l1output.struct"),
-                                              ("outputnode.gpickled_network", "@l1output.gpickled_network"),
+                                              ("outputnode.networks", "@l1output.networks"),
                                               ("outputnode.mean_fiber_length", "@l1output.mean_fiber_length"),
                                               ("outputnode.fiber_length_std", "@l1output.fiber_length_std"),
                                               ])])

@@ -14,7 +14,7 @@ found in connectivity_tutorial.py. This tutorial can be run using:
 
 We perform this analysis using one healthy subject and two subjects who suffer from Parkinson's disease.
 
-The whole package (754 mb as .tar.gz / 1 gb uncompressed) including the Freesurfer directories for these subjects, can be acquired from here:
+The whole package (960 mb as .tar.gz / 1.3 gb uncompressed) including the Freesurfer directories for these subjects, can be acquired from here:
 
     * http://db.tt/b6F1t0QV
 
@@ -79,7 +79,7 @@ with group IDs ('controls', 'parkinsons') as keys, and subject/patient names as 
 
 group_list = {}
 group_list['controls'] = ['cont17']
-group_list['parkinsons'] = ['pat07', 'pat20']
+group_list['parkinsons'] = ['pat10', 'pat20']
 
 """
 The output directory must be named as well.
@@ -131,10 +131,10 @@ for idx, group_id in enumerate(group_list.keys()):
     Define the parcellation scheme to use.
     """
 
-    parcellation_name = 'scale500'
+    parcellation_scheme = 'NativeFreesurfer'
     cmp_config = cmp.configuration.PipelineConfiguration()
-    cmp_config.parcellation_scheme = "Lausanne2008"
-    l1pipeline.inputs.connectivity.inputnode.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
+    cmp_config.parcellation_scheme = parcellation_scheme
+    l1pipeline.inputs.connectivity.inputnode.resolution_network_file = cmp_config._get_lausanne_parcellation(parcellation_scheme)['freesurferaparc']['node_information_graphml']
 
     """
     The first level pipeline we have tweaked here is run within the for loop.

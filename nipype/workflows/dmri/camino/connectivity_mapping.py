@@ -221,6 +221,7 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     roigen = pe.Node(interface=cmtk.ROIGen(), name="ROIGen")
+    roigen_structspace = roigen.clone("ROIGen_structspace")
 
     """
     The CreateMatrix interface takes in the remapped aparc+aseg image as well as the label dictionary and fiber tracts
@@ -231,6 +232,7 @@ def create_connectivity_pipeline(name="connectivity"):
     specific tracts that connect between user-selected regions.
     """
 
+    createnodes = pe.Node(interface=cmtk.CreateNodes(), name="CreateNodes")
     creatematrix = pe.Node(interface=cmtk.CreateMatrix(), name="CreateMatrix")
     creatematrix.inputs.count_region_intersections = True
 
@@ -382,12 +384,16 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     mapping.connect(inputnode_within, 'resolution_network_file',
+                    createnodes, 'resolution_network_file')
+    mapping.connect(createnodes, 'node_network',
                     creatematrix, 'resolution_network_file')
     mapping.connect([(FreeSurferSource, mri_convert_AparcAseg, [(('aparc_aseg', select_aparc), 'in_file')])])
 
     mapping.connect([(b0Strip, inverse_AparcAseg,[('out_file','reference')])])
     mapping.connect([(convertxfm, inverse_AparcAseg,[('out_file','in_matrix_file')])])
     mapping.connect([(mri_convert_AparcAseg, inverse_AparcAseg,[('out_file','in_file')])])
+    mapping.connect([(mri_convert_AparcAseg, roigen_structspace,[('out_file','aparc_aseg_file')])])
+    mapping.connect([(roigen_structspace, createnodes,[("roi_file","roi_file")])])
 
     mapping.connect([(inverse_AparcAseg, roigen,[("out_file","aparc_aseg_file")])])
     mapping.connect([(roigen, creatematrix,[("roi_file","roi_file")])])
@@ -432,13 +438,13 @@ def create_connectivity_pipeline(name="connectivity"):
     CFFConverter.inputs.script_files = op.abspath(inspect.getfile(inspect.currentframe()))
     mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
     mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
-    mapping.connect([(creatematrix, CFFConverter,[("matrix_file","gpickled_networks")])])
+    mapping.connect([(creatematrix, CFFConverter,[("matrix_files","gpickled_networks")])])
 
     mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
     mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
     mapping.connect([(camino2trackvis, CFFConverter,[("trackvis","tract_files")])])
     mapping.connect([(inputnode_within, CFFConverter,[("subject_id","title")])])
-
+	
     """
     Finally, we create another higher-level workflow to connect our mapping workflow with the info and datagrabbing nodes
     declared at the beginning. Our tutorial can is now extensible to any arbitrary number of subjects by simply adding
@@ -453,7 +459,7 @@ def create_connectivity_pipeline(name="connectivity"):
                                                                 "tracts",
                                                                 "connectome",
                                                                 "cmatrix",
-                                                                "gpickled_network",
+                                                                "networks",
                                                                 "rois",
                                                                 "mean_fiber_length",
                                                                 "fiber_length_std",
@@ -477,7 +483,7 @@ def create_connectivity_pipeline(name="connectivity"):
         ("CreateMatrix.mean_fiber_length_matrix_mat_file", "mean_fiber_length"),
         ("CreateMatrix.fiber_length_std_matrix_mat_file", "fiber_length_std"),
         ("fa2nii.nifti_file", "fa"),
-        ("CreateMatrix.matrix_file", "gpickled_network"),
+        ("CreateMatrix.matrix_files", "networks"),
         ("ROIGen.roi_file", "rois"),
         ("mri_convert_Brain.out_file", "struct"),
         ("trace2nii.nifti_file", "trace"),

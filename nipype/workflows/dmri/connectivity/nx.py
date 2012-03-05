@@ -4,6 +4,32 @@ import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
 
 def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
+    """Creates a workflow to calculate various graph measures (via NetworkX) on
+    an input network. The output measures are then converted to comma-separated value
+    text files, and an extra column / field is also added. Typically, the user would
+    connect the subject name to this field. 
+
+    Example
+    -------
+
+    >>> from nipype.workflows.dmri.connectivity.nx import create_networkx_pipeline
+    >>> nx = create_networkx_pipeline("networkx", "subject_id")
+    >>> nx.inputs.inputnode.extra_field = 'subj1'
+    >>> nx.inputs.inputnode.network_file = 'subj1.pck'
+    >>> nx.run()                 # doctest: +SKIP
+
+    Inputs::
+
+        inputnode.extra_field
+        inputnode.network_file
+
+    Outputs::
+
+        outputnode.network_files
+        outputnode.csv_files
+        outputnode.matlab_files
+
+    """
     inputnode = pe.Node(interface = util.IdentityInterface(fields=["extra_field", "network_file"]),
                         name="inputnode")
 
@@ -45,6 +71,29 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     return pipeline
 
 def create_cmats_to_csv_pipeline(name="cmats_to_csv", extra_column_heading="subject"):
+    """Creates a workflow to convert the outputs from CreateMatrix into a single 
+    comma-separated value text file. An extra column / field is also added to the 
+    text file. Typically, the user would connect the subject name to this field.
+    
+    Example
+    -------
+
+    >>> from nipype.workflows.dmri.connectivity.nx import create_cmats_to_csv_pipeline
+    >>> csv = create_cmats_to_csv_pipeline("cmats_to_csv", "subject_id")
+    >>> csv.inputs.inputnode.extra_field = 'subj1'
+    >>> csv.inputs.inputnode.matlab_matrix_files = ['subj1_cmatrix.mat', 'subj1_mean_fiber_length.mat', 'subj1_median_fiber_length.mat', 'subj1_fiber_length_std.mat']
+    >>> csv.run()                 # doctest: +SKIP
+
+    Inputs::
+
+        inputnode.extra_field
+        inputnode.matlab_matrix_files
+
+    Outputs::
+
+        outputnode.csv_file
+
+    """
     inputnode = pe.Node(interface = util.IdentityInterface(fields=["extra_field", "matlab_matrix_files"]),
                         name="inputnode")
 

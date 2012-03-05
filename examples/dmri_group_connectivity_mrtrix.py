@@ -14,7 +14,7 @@ found in connectivity_tutorial_advanced.py. This tutorial can be run using:
 
 We perform this analysis using one healthy subject and two subjects who suffer from Parkinson's disease.
 
-The whole package (754 mb as .tar.gz / 1 gb uncompressed) including the Freesurfer directories for these subjects, can be acquired from here:
+The whole package (960 mb as .tar.gz / 1.3 gb uncompressed) including the Freesurfer directories for these subjects, can be acquired from here:
 
     * http://db.tt/b6F1t0QV
 
@@ -77,7 +77,7 @@ with group IDs ('controls', 'parkinsons') as keys, and subject/patient names as 
 
 group_list = {}
 group_list['controls'] = ['cont17']
-group_list['parkinsons'] = ['pat07', 'pat20']
+group_list['parkinsons'] = ['pat10', 'pat20']
 
 """
 The output directory must be named as well.
