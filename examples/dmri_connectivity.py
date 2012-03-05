@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 =============================================
 dMRI: Connectivity - Camino, CMTK, FreeSurfer

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 ====================================
 dMRI: HARDI - Diffusion Toolkit, FSL
