@@ -18,6 +18,10 @@ import networkx as nx
 import shutil
 from nipype.utils.misc import package_check
 import warnings
+import logging
+
+logging.basicConfig()
+iflogger = logging.getLogger('interface')
 
 have_cmp = True
 try:
@@ -30,8 +34,8 @@ else:
     from cmp.util import runCmd
 
 def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
-    print "Create the cortical labels necessary for our ROIs"
-    print "================================================="
+    iflogger.info("Create the cortical labels necessary for our ROIs")
+    iflogger.info("=================================================")
     fs_label_dir = op.join(op.join(subjects_dir,subject_id), 'label')
     output_dir = op.abspath(op.curdir)
     paths = []
@@ -68,15 +72,15 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
         mris_cmd = 'mris_ca_label %s %s "%s/surf/%s.sphere.reg" "%s" "%s" ' % (subject_id, out[0],
 		    op.join(subjects_dir,subject_id), out[0], cmp_config.get_lausanne_atlas(out[1]), op.join(fs_label_dir, out[2]))
         runCmd( mris_cmd, log )
-        print '-----------'
+        iflogger.info('-----------')
 
         annot = '--annotation "%s"' % out[4]
 
         mri_an_cmd = 'mri_annotation2label --subject %s --hemi %s --outdir "%s" %s' % (subject_id, out[0], op.join(output_dir, out[3]), annot)
-        print mri_an_cmd
+        iflogger.info(mri_an_cmd)
         runCmd( mri_an_cmd, log )
-        print '-----------'
-        print os.environ['SUBJECTS_DIR']
+        iflogger.info('-----------')
+        iflogger.info(os.environ['SUBJECTS_DIR'])
     # extract cc and unknown to add to tractography mask, we do not want this as a region of interest
     # in FS 5.0, unknown and corpuscallosum are not available for the 35 scale (why?),
     # but for the other scales only, take the ones from _60
@@ -97,12 +101,12 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
     mri_cmd = 'mri_convert -i "%s/mri/aseg.mgz" -o "%s/mri/aseg.nii.gz"' % (op.join(subjects_dir,subject_id), op.join(subjects_dir,subject_id))
     runCmd( mri_cmd, log )
 
-    print "[ DONE ]"
+    iflogger.info("[ DONE ]")
 
 def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
     """ Creates the ROI_%s.nii.gz files using the given parcellation information
     from networks. Iteratively create volume. """
-    print "Create the ROIs:"
+    iflogger.info("Create the ROIs:")
     output_dir = op.abspath(op.curdir)
     fs_dir = op.join(subjects_dir, subject_id)
     cmp_config = cmp.configuration.PipelineConfiguration()
@@ -113,9 +117,9 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
     aseg = nb.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
     asegd = aseg.get_data()
 
-    print "Working on parcellation: "
-    print cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]
-    print "========================"
+    iflogger.info("Working on parcellation: ")
+    iflogger.info(cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name])
+    iflogger.info("========================")
     pg = nx.read_graphml(pgpath)
     # each node represents a brain region
     # create a big 256^3 volume for storage of all ROIs
@@ -124,30 +128,30 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
     count = 0
     for brk, brv in pg.nodes_iter(data=True):
         count = count + 1
-        print brv
-        print brk
+        iflogger.info(brv)
+        iflogger.info(brk)
         if brv['dn_hemisphere'] == 'left':
             hemi = 'lh'
         elif brv['dn_hemisphere'] == 'right':
             hemi = 'rh'
         if brv['dn_region'] == 'subcortical':
-            print brv
-            print "---------------------"
-            print "Work on brain region: %s" % (brv['dn_region'])
-            print "Freesurfer Name: %s" %  brv['dn_fsname']
-            print "Region %s of %s " % (count, pg.number_of_nodes())
-            print "---------------------"
+            iflogger.info(brv)
+            iflogger.info("---------------------")
+            iflogger.info("Work on brain region: %s" % (brv['dn_region']))
+            iflogger.info("Freesurfer Name: %s" %  brv['dn_fsname'])
+            iflogger.info("Region %s of %s " % (count, pg.number_of_nodes()))
+            iflogger.info("---------------------")
             # if it is subcortical, retrieve roi from aseg
             idx = np.where(asegd == int(brv['dn_fs_aseg_val']))
             rois[idx] = int(brv['dn_correspondence_id'])
 
         elif brv['dn_region'] == 'cortical':
-            print brv
-            print "---------------------"
-            print "Work on brain region: %s" % (brv['dn_region'])
-            print "Freesurfer Name: %s" %  brv['dn_fsname']
-            print "Region %s of %s " % (count, pg.number_of_nodes())
-            print "---------------------"
+            iflogger.info(brv)
+            iflogger.info("---------------------")
+            iflogger.info("Work on brain region: %s" % (brv['dn_region']))
+            iflogger.info("Freesurfer Name: %s" %  brv['dn_fsname'])
+            iflogger.info("Region %s of %s " % (count, pg.number_of_nodes()))
+            iflogger.info("---------------------")
 
             labelpath = op.join(output_dir, parval['fs_label_subdir_name'] % hemi)
             # construct .label file name
@@ -180,11 +184,11 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
         img = nb.Nifti1Image(rois, aseg.get_affine(), hdr2)
         nb.save(img, out_roi)
 
-    print "[ DONE ]"
+    iflogger.info("[ DONE ]")
 
 
 def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
-    print "Create white matter mask"
+    iflogger.info("Create white matter mask")
     fs_dir = op.join(subjects_dir, subject_id)
     cmp_config = cmp.configuration.PipelineConfiguration()
     cmp_config.parcellation_scheme = "Lausanne2008"
@@ -291,32 +295,32 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     # now remove all the structures from the white matter
     idx = np.where( (csfA != 0) | (csfB != 0) | (gr_ncl != 0) | (remaining != 0) )
     wmmask[idx] = 0
-    print "Removing lateral ventricles and eroded grey nuclei and brainstem from white matter mask"
+    iflogger.info("Removing lateral ventricles and eroded grey nuclei and brainstem from white matter mask")
 
     # ADD voxels from 'cc_unknown.nii.gz' dataset
     ccun = nb.load(op.join(fs_dir, 'label', 'cc_unknown.nii.gz'))
     ccund = ccun.get_data()
     idx = np.where(ccund != 0)
-    print "Add corpus callosum and unknown to wm mask"
+    iflogger.info("Add corpus callosum and unknown to wm mask")
     wmmask[idx] = 1
 
     # check if we should subtract the cortical rois from this parcellation
     parval = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]
-    print "Loading %s to subtract cortical ROIs from white matter mask" % ('ROI_%s.nii.gz' % parcellation_name)
+    iflogger.info("Loading %s to subtract cortical ROIs from white matter mask" % ('ROI_%s.nii.gz' % parcellation_name))
     roi = nb.load(op.join(op.curdir, 'ROI_%s.nii.gz' % parcellation_name))
     roid = roi.get_data()
     assert roid.shape[0] == wmmask.shape[0]
     pg = nx.read_graphml(pgpath)
     for brk, brv in pg.nodes_iter(data=True):
         if brv['dn_region'] == 'cortical':
-            print "Subtracting region %s with intensity value %s" % (brv['dn_region'], brv['dn_correspondence_id'])
+            iflogger.info("Subtracting region %s with intensity value %s" % (brv['dn_region'], brv['dn_correspondence_id']))
             idx = np.where(roid == int(brv['dn_correspondence_id']))
             wmmask[idx] = 0
 
     # output white matter mask. crop and move it afterwards
     wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz')
     img = nb.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header() )
-    print "Save white matter mask: %s" % wm_out
+    iflogger.info("Save white matter mask: %s" % wm_out)
     nb.save(img, wm_out)
 
 def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, out_roi_file):
@@ -328,7 +332,7 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
     reg_path = out_roi_file
     output_dir = op.abspath(op.curdir)
 
-    print "Cropping and moving datasets to %s" % output_dir
+    iflogger.info("Cropping and moving datasets to %s" % output_dir)
     ds = [
           (op.join(fs_dir, 'mri', 'aseg.nii.gz'), op.join(output_dir, 'aseg.nii.gz') ),
           (op.join(fs_dir, 'mri', 'ribbon.nii.gz'), op.join(output_dir, 'ribbon.nii.gz') ),
@@ -339,7 +343,7 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
     ds.append( (op.join(op.curdir, 'ROI_%s.nii.gz' % parcellation_name), op.join(op.curdir, 'ROI_HR_th.nii.gz')) )
     orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
     for d in ds:
-        print "Processing %s:" % d[0]
+        iflogger.info("Processing %s:" % d[0])
         if not op.exists(d[0]):
             raise Exception('File %s does not exist.' % d[0])
         # reslice to original volume because the roi creation with freesurfer
@@ -382,8 +386,8 @@ class Parcellate(BaseInterface):
     def _run_interface(self, runtime):
         if self.inputs.subjects_dir:
            os.environ.update({'SUBJECTS_DIR': self.inputs.subjects_dir})
-        print "ROI_HR_th.nii.gz / fsmask_1mm.nii.gz CREATION"
-        print "============================================="
+        iflogger.info("ROI_HR_th.nii.gz / fsmask_1mm.nii.gz CREATION")
+        iflogger.info("=============================================")
         create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
         create_roi(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
         create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
@@ -396,6 +400,11 @@ class Parcellate(BaseInterface):
             outputs['roi_file'] = op.abspath(self.inputs.out_roi_file)
         else:
             outputs['roi_file'] = op.abspath(self._gen_outfilename('nii.gz', 'ROI'))
+        outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
+        outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
+        outputs['ribbon_file'] = op.abspath('ribbon.nii.gz')
+        outputs['aseg_file'] = op.abspath('aseg.nii.gz')
+        outputs['ROI_HR_th_file'] = op.abspath('ROI_HR_th.nii.gz')
         return outputs
 
     def _gen_outfilename(self, ext, prefix='ROI'):

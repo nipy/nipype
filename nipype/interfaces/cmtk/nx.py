@@ -193,13 +193,11 @@ def average_networks(in_files, ntwk_res_file, group_id):
     return network_name, matlab_network_list
 
 
-def compute_node_measures(ntwk):
+def compute_node_measures(ntwk, calculate_cliques=False):
     """
     These return node-based measures
     """
     iflogger.info('Computing node measures:')
-    weighted = True
-    calculate_cliques = True
     measures = {}
     iflogger.info('...Computing degree...')
     measures['degree'] = np.array(ntwk.degree().values())
@@ -239,8 +237,6 @@ def compute_edge_measures(ntwk):
     These return edge-based measures
     """
     iflogger.info('Computing edge measures:')
-    weighted = True
-    calculate_cliques = True
     measures = {}
     #iflogger.info('...Computing google matrix...' #Makes really large networks (500k+ edges))
     #measures['google_matrix'] = nx.google_matrix(ntwk)
@@ -256,25 +252,28 @@ def compute_dict_measures(ntwk):
     Returns a dictionary
     """
     iflogger.info('Computing measures which return a dictionary:')
-    weighted = True
     measures = {}
     iflogger.info('...Computing rich club coefficient...')
     measures['rich_club_coef'] = nx.rich_club_coefficient(ntwk)
     return measures
 
 
-def compute_singlevalued_measures(ntwk):
+def compute_singlevalued_measures(ntwk, weighted=True, calculate_cliques=False):
     """
     Returns a single value per network
     """
     iflogger.info('Computing single valued measures:')
-    weighted = True
-    calculate_cliques = True
     measures = {}
     iflogger.info('...Computing degree assortativity (pearson number) ...')
-    measures['degree_pearsonr'] = nx.degree_pearsonr(ntwk)
+    try:
+        measures['degree_pearsonr'] = nx.degree_pearsonr(ntwk)
+    except AttributeError: # For NetworkX 1.6
+        measures['degree_pearsonr'] = nx.degree_pearson_correlation_coefficient(ntwk)
     iflogger.info('...Computing degree assortativity...')
-    measures['degree_assortativity'] = nx.degree_assortativity(ntwk)
+    try:
+        measures['degree_assortativity'] = nx.degree_assortativity(ntwk)
+    except AttributeError:
+        measures['degree_assortativity'] = nx.degree_assortativity_coefficient(ntwk)
     iflogger.info('...Computing transitivity...')
     measures['transitivity'] = nx.transitivity(ntwk)
     iflogger.info('...Computing number of connected_components...')
@@ -332,10 +331,11 @@ def add_edge_data(edge_array, ntwk, above=0, below=0):
 
 class NetworkXMetricsInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='Input network')
-    subject_id = traits.Str('subject', usedefault=True, desc='Subject ID for the input network')
     out_k_core = File('k_core', usedefault=True, desc='Computed k-core network stored as a NetworkX pickle.')
     out_k_shell = File('k_shell', usedefault=True, desc='Computed k-shell network stored as a NetworkX pickle.')
     out_k_crust = File('k_crust', usedefault=True, desc='Computed k-crust network stored as a NetworkX pickle.')
+    treat_as_weighted_graph = traits.Bool(True, usedefault=True, desc='Some network metrics can be calculated while considering only a binarized version of the graph')
+    compute_clique_related_measures = traits.Bool(False, usedefault=True, desc='Computing clique-related measures (e.g. node clique number) can be very time consuming')
     out_global_metrics_matlab = File(genfile=True, desc='Output node metrics in MATLAB .mat format')
     out_node_metrics_matlab = File(genfile=True, desc='Output node metrics in MATLAB .mat format')
     out_edge_metrics_matlab = File(genfile=True, desc='Output edge metrics in MATLAB .mat format')
@@ -366,107 +366,105 @@ class NetworkXMetrics(BaseInterface):
     >>> import nipype.interfaces.cmtk as cmtk
     >>> nxmetrics = cmtk.NetworkXMetrics()
     >>> nxmetrics.inputs.in_file = 'subj1.pck'
-    >>> nxmetrics.inputs.subject_id = 'subj1'
-    >>> #import cmp
-    >>> #cmp_config = cmp.configuration.PipelineConfiguration()
-    >>> #cmp_config.parcellation_scheme = "Lausanne2008"
-    >>> #nxmetrics.inputs.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
     >>> nxmetrics.run()                 # doctest: +SKIP
     """
     input_spec = NetworkXMetricsInputSpec
     output_spec = NetworkXMetricsOutputSpec
 
     def _run_interface(self, runtime):
-		global gpickled, nodentwks, edgentwks, kntwks, matlab
-		gpickled = list()
-		nodentwks = list()
-		edgentwks = list()
-		kntwks = list()
-		matlab = list()
-		ntwk = nx.read_gpickle(op.abspath(self.inputs.in_file))
+        global gpickled, nodentwks, edgentwks, kntwks, matlab
+        gpickled = list()
+        nodentwks = list()
+        edgentwks = list()
+        kntwks = list()
+        matlab = list()
+        ntwk = nx.read_gpickle(self.inputs.in_file)
 
-		# Each block computes, writes, and saves a measure
-		# The names are then added to the output .pck file list
-		# In the case of the degeneracy networks, they are given specified output names
+        # Each block computes, writes, and saves a measure
+        # The names are then added to the output .pck file list
+        # In the case of the degeneracy networks, they are given specified output names
 
-		global_measures = compute_singlevalued_measures(ntwk)
-		if isdefined(self.inputs.out_global_metrics_matlab):
-			global_out_file = op.abspath(self.inputs.out_global_metrics_matlab)
-		else:
-			global_out_file = op.abspath(self._gen_outfilename('globalmetrics', 'mat'))
-		sio.savemat(global_out_file, global_measures, oned_as='column')
-		matlab.append(global_out_file)
+        calculate_cliques = self.inputs.compute_clique_related_measures
+        weighted = self.inputs.treat_as_weighted_graph
+        
+        global_measures = compute_singlevalued_measures(ntwk, weighted, calculate_cliques)
+        if isdefined(self.inputs.out_global_metrics_matlab):
+            global_out_file = op.abspath(self.inputs.out_global_metrics_matlab)
+        else:
+            global_out_file = op.abspath(self._gen_outfilename('globalmetrics', 'mat'))
+        sio.savemat(global_out_file, global_measures, oned_as='column')
+        matlab.append(global_out_file)
 
-		node_measures = compute_node_measures(ntwk)
-		for key in node_measures.keys():
-			newntwk = add_node_data(node_measures[key], self.inputs.in_file)
-			out_file = op.abspath(self._gen_outfilename(key, 'pck'))
-			nx.write_gpickle(newntwk, out_file)
-			nodentwks.append(out_file)
-		if isdefined(self.inputs.out_node_metrics_matlab):
-			node_out_file = op.abspath(self.inputs.out_node_metrics_matlab)
-		else:
-			node_out_file = op.abspath(self._gen_outfilename('nodemetrics', 'mat'))
-		sio.savemat(node_out_file, node_measures, oned_as='column')
-		matlab.append(node_out_file)
-		gpickled.extend(nodentwks)
+        node_measures = compute_node_measures(ntwk, calculate_cliques)
+        for key in node_measures.keys():
+            newntwk = add_node_data(node_measures[key], self.inputs.in_file)
+            out_file = op.abspath(self._gen_outfilename(key, 'pck'))
+            nx.write_gpickle(newntwk, out_file)
+            nodentwks.append(out_file)
+        if isdefined(self.inputs.out_node_metrics_matlab):
+            node_out_file = op.abspath(self.inputs.out_node_metrics_matlab)
+        else:
+            node_out_file = op.abspath(self._gen_outfilename('nodemetrics', 'mat'))
+        sio.savemat(node_out_file, node_measures, oned_as='column')
+        matlab.append(node_out_file)
+        gpickled.extend(nodentwks)
 
-		edge_measures = compute_edge_measures(ntwk)
-		for key in edge_measures.keys():
-			newntwk = add_edge_data(edge_measures[key], self.inputs.in_file)
-			out_file = op.abspath(self._gen_outfilename(key, 'pck'))
-			nx.write_gpickle(newntwk, out_file)
-			edgentwks.append(out_file)
-		if isdefined(self.inputs.out_edge_metrics_matlab):
-			edge_out_file = op.abspath(self.inputs.out_edge_metrics_matlab)
-		else:
-			edge_out_file = op.abspath(self._gen_outfilename('edgemetrics', 'mat'))
-		sio.savemat(edge_out_file, edge_measures, oned_as='column')
-		matlab.append(edge_out_file)
-		gpickled.extend(edgentwks)
+        edge_measures = compute_edge_measures(ntwk)
+        for key in edge_measures.keys():
+            newntwk = add_edge_data(edge_measures[key], self.inputs.in_file)
+            out_file = op.abspath(self._gen_outfilename(key, 'pck'))
+            nx.write_gpickle(newntwk, out_file)
+            edgentwks.append(out_file)
+        if isdefined(self.inputs.out_edge_metrics_matlab):
+            edge_out_file = op.abspath(self.inputs.out_edge_metrics_matlab)
+        else:
+            edge_out_file = op.abspath(self._gen_outfilename('edgemetrics', 'mat'))
+        sio.savemat(edge_out_file, edge_measures, oned_as='column')
+        matlab.append(edge_out_file)
+        gpickled.extend(edgentwks)
 
-		ntwk_measures = compute_network_measures(ntwk)
-		for key in ntwk_measures.keys():
-			if key == 'k_core':
-				out_file = op.abspath(self._gen_outfilename(self.inputs.out_k_core, 'pck'))
-			if key == 'k_shell':
-				out_file = op.abspath(self._gen_outfilename(self.inputs.out_k_shell, 'pck'))
-			if key == 'k_crust':
-				out_file = op.abspath(self._gen_outfilename(self.inputs.out_k_crust, 'pck'))
-			nx.write_gpickle(ntwk_measures[key], out_file)
-			kntwks.append(out_file)
-		gpickled.extend(kntwks)
+        ntwk_measures = compute_network_measures(ntwk)
+        for key in ntwk_measures.keys():
+            if key == 'k_core':
+                out_file = op.abspath(self._gen_outfilename(self.inputs.out_k_core, 'pck'))
+            if key == 'k_shell':
+                out_file = op.abspath(self._gen_outfilename(self.inputs.out_k_shell, 'pck'))
+            if key == 'k_crust':
+                out_file = op.abspath(self._gen_outfilename(self.inputs.out_k_crust, 'pck'))
+            nx.write_gpickle(ntwk_measures[key], out_file)
+            kntwks.append(out_file)
+        gpickled.extend(kntwks)
 
-		out_pickled_extra_measures = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
-		dict_measures = compute_dict_measures(ntwk)
-		iflogger.info('Saving extra measure file to {path} in Pickle format'.format(path=op.abspath(out_pickled_extra_measures)))
-		file = open(out_pickled_extra_measures, 'w')
-		pickle.dump(dict_measures, file)
-		file.close()
+        out_pickled_extra_measures = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
+        dict_measures = compute_dict_measures(ntwk)
+        iflogger.info('Saving extra measure file to {path} in Pickle format'.format(path=op.abspath(out_pickled_extra_measures)))
+        file = open(out_pickled_extra_measures, 'w')
+        pickle.dump(dict_measures, file)
+        file.close()
 
-		iflogger.info('Saving MATLAB measures as {m}'.format(m=matlab))
+        iflogger.info('Saving MATLAB measures as {m}'.format(m=matlab))
 
-		# Loops through the measures which return a dictionary,
-		# converts the keys and values to a Numpy array,
-		# stacks them together, and saves them in a MATLAB .mat file via Scipy
-		global dicts
-		dicts = list()
-		for idx, key in enumerate(dict_measures.keys()):
-			for idxd, keyd in enumerate(dict_measures[key].keys()):
-				if idxd == 0:
-					nparraykeys = np.array(keyd)
-					nparrayvalues = np.array(dict_measures[key][keyd])
-				else:
-					nparraykeys = np.append(nparraykeys, np.array(keyd))
-					values = np.array(dict_measures[key][keyd])
-					nparrayvalues = np.append(nparrayvalues, values)
-			nparray = np.vstack((nparraykeys, nparrayvalues))
-			out_file = op.abspath(self._gen_outfilename(key, 'mat'))
-			npdict = {}
-			npdict[key] = nparray
-			sio.savemat(out_file, npdict, oned_as='column')
-			dicts.append(out_file)
-		return runtime
+        # Loops through the measures which return a dictionary,
+        # converts the keys and values to a Numpy array,
+        # stacks them together, and saves them in a MATLAB .mat file via Scipy
+        global dicts
+        dicts = list()
+        for idx, key in enumerate(dict_measures.keys()):
+            for idxd, keyd in enumerate(dict_measures[key].keys()):
+                if idxd == 0:
+                    nparraykeys = np.array(keyd)
+                    nparrayvalues = np.array(dict_measures[key][keyd])
+                else:
+                    nparraykeys = np.append(nparraykeys, np.array(keyd))
+                    values = np.array(dict_measures[key][keyd])
+                    nparrayvalues = np.append(nparrayvalues, values)
+            nparray = np.vstack((nparraykeys, nparrayvalues))
+            out_file = op.abspath(self._gen_outfilename(key, 'mat'))
+            npdict = {}
+            npdict[key] = nparray
+            sio.savemat(out_file, npdict, oned_as='column')
+            dicts.append(out_file)
+        return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -478,10 +476,10 @@ class NetworkXMetrics(BaseInterface):
         outputs["node_measure_networks"] = nodentwks
         outputs["edge_measure_networks"] = edgentwks
         outputs["matlab_dict_measures"] = dicts
-        outputs["matlab_matrix_files"] = [op.abspath(self._gen_outfilename('nodemetrics', 'mat')), op.abspath(self._gen_outfilename('edgemetrics', 'mat')), op.abspath(self._gen_outfilename('globalmetrics', 'mat'))]
         outputs["global_measures_matlab"] = op.abspath(self._gen_outfilename('globalmetrics', 'mat'))
         outputs["node_measures_matlab"] = op.abspath(self._gen_outfilename('nodemetrics', 'mat'))
         outputs["edge_measures_matlab"] = op.abspath(self._gen_outfilename('edgemetrics', 'mat'))
+        outputs["matlab_matrix_files"] = [outputs["global_measures_matlab"], outputs["node_measures_matlab"], outputs["edge_measures_matlab"]]
         outputs["pickled_extra_measures"] = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
         return outputs
 
@@ -505,7 +503,7 @@ class AverageNetworks(BaseInterface):
     """
     Calculates and outputs the average network given a set of input NetworkX gpickle files
 
-    This interface will only keep an edge in the averaged network if that edge is present in
+    This interface will only keep an edge in the averaged network if that edge is present in 
     at least half of the input networks.
 
     Example
