@@ -8,7 +8,7 @@ from ...misc.utils import get_affine, get_data_dims, get_vox_dims
 
 def create_camino_dti_pipeline(name="dtiproc"):
     """Creates a pipeline that does the same diffusion processing as in the
-    camino_dti_tutorial example script. Given a diffusion-weighted image,
+    :ref:`dmri_camino_dti` example script. Given a diffusion-weighted image,
     b-values, and b-vectors, the workflow will return the tractography
     computed from diffusion tensors and from PICo probabilistic tractography.
 

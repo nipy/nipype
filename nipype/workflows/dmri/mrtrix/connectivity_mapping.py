@@ -10,6 +10,7 @@ import nipype.algorithms.misc as misc
 import inspect
 import os, os.path as op                      # system functions
 from ..fsl.dti import create_eddy_correct_pipeline
+from ..connectivity.nx import create_networkx_pipeline, create_cmats_to_csv_pipeline
 from nipype.interfaces.utility import Function
 from ...misc.utils import select_aparc_annot
 
@@ -45,23 +46,20 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
 
         outputnode.connectome
         outputnode.cmatrix
-        outputnode.gpickled_network
+        outputnode.networks
         outputnode.fa
         outputnode.struct
         outputnode.tracts
         outputnode.rois
         outputnode.odfs
         outputnode.filtered_tractography
+        outputnode.tdi
         outputnode.nxstatscff
-        outputnode.nxmatlab
         outputnode.nxcsv
-        outputnode.nxmergedcsv
-        outputnode.cmatrix_csv
         outputnode.cmatrices_csv
         outputnode.mean_fiber_length
-        outputnode.meanfib_csv
+        outputnode.median_fiber_length
         outputnode.fiber_length_std
-        outputnode.fibstd_csv
     """
 
     inputnode_within = pe.Node(util.IdentityInterface(fields=["subject_id",
@@ -272,29 +270,16 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     giftiLabels = pe.Node(interface=util.Merge(2), name="GiftiLabels")
     niftiVolumes = pe.Node(interface=util.Merge(3), name="NiftiVolumes")
     fiberDataArrays = pe.Node(interface=util.Merge(4), name="FiberDataArrays")
-    gpickledNetworks = pe.Node(interface=util.Merge(2), name="NetworkFiles")
 
     """
     We also create a node to calculate several network metrics on our resulting file, and another CFF converter
     which will be used to package these networks into a single file.
     """
 
-    ntwkMetrics = pe.Node(interface=cmtk.NetworkXMetrics(), name="NetworkXMetrics")
+    networkx = create_networkx_pipeline(name='networkx')
+    cmats_to_csv = create_cmats_to_csv_pipeline(name='cmats_to_csv')
     NxStatsCFFConverter = pe.Node(interface=cmtk.CFFConverter(), name="NxStatsCFFConverter")
     NxStatsCFFConverter.inputs.script_files = op.abspath(inspect.getfile(inspect.currentframe()))
-
-    Matlab2CSV_node = pe.Node(interface=misc.Matlab2CSV(), name="Matlab2CSV_node")
-    Matlab2CSV_global = Matlab2CSV_node.clone(name="Matlab2CSV_global")
-    Matlab2CSV_cmatrix = Matlab2CSV_node.clone(name="Matlab2CSV_cmatrix")
-    Matlab2CSV_meanfib = Matlab2CSV_node.clone(name="Matlab2CSV_meanfib")
-    Matlab2CSV_medianfib = Matlab2CSV_node.clone(name="Matlab2CSV_medianfib")
-    Matlab2CSV_fibstd = Matlab2CSV_node.clone(name="Matlab2CSV_fibstd")
-
-    MergeCSVFiles_node = pe.Node(interface=misc.MergeCSVFiles(), name="MergeCSVFiles_node")
-    MergeCSVFiles_node.inputs.extra_column_heading = 'subject'
-    mergeCSVMatrices = pe.Node(interface=util.Merge(4), name="mergeCSVMatrices")
-    MergeCSVFiles_cmatrices = pe.Node(interface=misc.MergeCSVFiles(), name="MergeCSVFiles_cmatrices")
-    MergeCSVFiles_cmatrices.inputs.extra_column_heading = 'subject'
 
     """
     Connecting the workflow
@@ -491,7 +476,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
 
     mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
     mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
-    mapping.connect([(creatematrix, CFFConverter,[("matrix_files","gpickled_networks")])])
+    mapping.connect([(creatematrix, CFFConverter,[("matrix_files","gpickled_networks")])])    
     mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
     mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
     mapping.connect([(creatematrix, CFFConverter,[("filtered_tractography","tract_files")])])
@@ -501,34 +486,18 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     The graph theoretical metrics which have been generated are placed into another CFF file.
     """
 
-    mapping.connect([(creatematrix, ntwkMetrics,[("intersection_matrix_file","in_file")])])
-    mapping.connect([(creatematrix, gpickledNetworks,[("intersection_matrix_file","in1")])])
-    mapping.connect([(ntwkMetrics, gpickledNetworks,[("gpickled_network_files","in2")])])
-    mapping.connect([(gpickledNetworks, NxStatsCFFConverter,[("out","gpickled_networks")])])
-
+    mapping.connect([(inputnode_within, networkx,[("subject_id","inputnode.extra_field")])])
+    mapping.connect([(creatematrix, networkx,[("intersection_matrix_file","inputnode.network_file")])])
+    
+    mapping.connect([(networkx, NxStatsCFFConverter,[("outputnode.network_files","gpickled_networks")])])
     mapping.connect([(giftiSurfaces, NxStatsCFFConverter,[("out","gifti_surfaces")])])
     mapping.connect([(giftiLabels, NxStatsCFFConverter,[("out","gifti_labels")])])
     mapping.connect([(niftiVolumes, NxStatsCFFConverter,[("out","nifti_volumes")])])
     mapping.connect([(fiberDataArrays, NxStatsCFFConverter,[("out","data_files")])])
     mapping.connect([(inputnode_within, NxStatsCFFConverter,[("subject_id","title")])])
 
-    mapping.connect([(ntwkMetrics, Matlab2CSV_node,[("node_measures_matlab","in_file")])])
-    mapping.connect([(ntwkMetrics, Matlab2CSV_global,[("global_measures_matlab","in_file")])])
-    mapping.connect([(creatematrix, Matlab2CSV_cmatrix,[("matrix_mat_file","in_file")])])
-    mapping.connect([(creatematrix, Matlab2CSV_meanfib,[("mean_fiber_length_matrix_mat_file","in_file")])])
-    mapping.connect([(creatematrix, Matlab2CSV_medianfib,[("median_fiber_length_matrix_mat_file","in_file")])])
-    mapping.connect([(creatematrix, Matlab2CSV_fibstd,[("fiber_length_std_matrix_mat_file","in_file")])])
-    mapping.connect([(Matlab2CSV_node, MergeCSVFiles_node,[("csv_files","in_files")])])
-    mapping.connect([(inputnode_within, MergeCSVFiles_node,[("subject_id","out_file")])])
-    mapping.connect([(inputnode_within, MergeCSVFiles_node,[("subject_id","extra_field")])])
-
-    mapping.connect([(Matlab2CSV_cmatrix, mergeCSVMatrices,[("csv_files","in1")])])
-    mapping.connect([(Matlab2CSV_meanfib, mergeCSVMatrices,[("csv_files","in2")])])
-    mapping.connect([(Matlab2CSV_medianfib, mergeCSVMatrices,[("csv_files","in3")])])
-    mapping.connect([(Matlab2CSV_fibstd, mergeCSVMatrices,[("csv_files","in4")])])
-    mapping.connect([(mergeCSVMatrices, MergeCSVFiles_cmatrices,[("out","in_files")])])
-    mapping.connect([(inputnode_within, MergeCSVFiles_cmatrices,[("subject_id","out_file")])])
-    mapping.connect([(inputnode_within, MergeCSVFiles_cmatrices,[("subject_id","extra_field")])])
+    mapping.connect([(inputnode_within, cmats_to_csv,[("subject_id","inputnode.extra_field")])])
+    mapping.connect([(creatematrix, cmats_to_csv,[("matlab_matrix_files","inputnode.matlab_matrix_files")])])
 
     """
     Create a higher-level workflow
@@ -548,13 +517,10 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
                                                                 "nxstatscff",
                                                                 "nxmatlab",
                                                                 "nxcsv",
-                                                                "cmatrix_csv",
-                                                                "meanfib_csv",
-                                                                "fibstd_csv",
                                                                 "cmatrices_csv",
                                                                 "nxmergedcsv",
                                                                 "cmatrix",
-                                                                "gpickled_network",
+                                                                "networks",
                                                                 "filtered_tracts",
                                                                 "rois",
                                                                 "odfs",
@@ -578,18 +544,11 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     connectivity.connect([(mapping, outputnode, [("tck2trk.out_file", "tracts"),
         ("CFFConverter.connectome_file", "connectome"),
         ("NxStatsCFFConverter.connectome_file", "nxstatscff"),
-        ("NetworkXMetrics.matlab_matrix_files", "nxmatlab"),
-        ("Matlab2CSV_node.csv_files", "nxcsv"),
-        ("Matlab2CSV_cmatrix.csv_files", "cmatrix_csv"),
-        ("Matlab2CSV_meanfib.csv_files", "meanfib_csv"),
-        ("Matlab2CSV_fibstd.csv_files", "fibstd_csv"),
-        ("MergeCSVFiles_node.csv_file", "nxmergedcsv"),
-        ("MergeCSVFiles_cmatrices.csv_file", "cmatrices_csv"),
         ("CreateMatrix.matrix_mat_file", "cmatrix"),
         ("CreateMatrix.mean_fiber_length_matrix_mat_file", "mean_fiber_length"),
         ("CreateMatrix.median_fiber_length_matrix_mat_file", "median_fiber_length"),
         ("CreateMatrix.fiber_length_std_matrix_mat_file", "fiber_length_std"),
-        ("CreateMatrix.matrix_file", "gpickled_network"),
+        ("CreateMatrix.matrix_files", "networks"),
         ("CreateMatrix.filtered_tractography", "filtered_tracts"),
         ("mri_convert_ROI_scale500.out_file", "rois"),
         ("trk2tdi.out_file", "tdi"),
@@ -598,4 +557,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
         ("MRconvert_fa.converted", "fa"),
         ("MRconvert_tracks2prob.converted", "tracks2prob")])
         ])
+
+    connectivity.connect([(cmats_to_csv, outputnode,[("outputnode.csv_file","cmatrices_csv")])])
+    connectivity.connect([(networkx, outputnode,[("outputnode.csv_files","nxcsv")])])
     return connectivity

@@ -6,17 +6,21 @@ dMRI: Group connectivity - MRtrix, FSL, FreeSurfer
 Introduction
 ============
 
-This script, group_mrtrix_connectivity_workflowed.py, runs group-based connectivity analysis using
-the MRtrix group_connectivity_pipeline Nipype workflow. Further detail on the processing can be
-found in connectivity_tutorial_advanced.py. This tutorial can be run using:
+This script, dmri_group_connectivity_mrtrix.py, runs group-based connectivity analysis using
+the dmri.mrtrix.connectivity_mapping Nipype workflow. Further detail on the processing can be
+found in :ref:`dmri_connectivity_advanced. This tutorial can be run using:
 
     python dmri_group_connectivity_mrtrix.py
 
 We perform this analysis using one healthy subject and two subjects who suffer from Parkinson's disease.
 
-The whole package (754 mb as .tar.gz / 1 gb uncompressed) including the Freesurfer directories for these subjects, can be acquired from here:
+The whole package (960 mb as .tar.gz / 1.3 gb uncompressed) including the Freesurfer directories for these subjects, can be acquired from here:
 
     * http://db.tt/b6F1t0QV
+    
+A data package containing the outputs of this pipeline can be obtained from here:
+
+    * http://db.tt/elmMnIt1
 
 Along with MRtrix, FSL, and Freesurfer, you must also have the Connectome File Format
 library installed as well as the Connectome Mapper (cmp).
@@ -77,7 +81,7 @@ with group IDs ('controls', 'parkinsons') as keys, and subject/patient names as 
 
 group_list = {}
 group_list['controls'] = ['cont17']
-group_list['parkinsons'] = ['pat07', 'pat20']
+group_list['parkinsons'] = ['pat10', 'pat20']
 
 """
 The output directory must be named as well.
@@ -91,84 +95,28 @@ Main processing loop
 ====================
 The title for the final grouped-network connectome file is dependent on the group names. The resulting file for this example
 is 'parkinsons-controls.cff'. The following code implements the format a-b-c-...x.cff for an arbitary number of groups.
-"""
-
-title = ''
-for idx, group_id in enumerate(group_list.keys()):
-    title += group_id
-    if not idx == len(group_list.keys()) - 1:
-        title += '-'
-
-"""
 
 .. warning::
-    The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
+
+    The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dti'.
     The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
 
-
-"""
-info = dict(dwi=[['subject_id', 'dti']],
-            bvecs=[['subject_id', 'bvecs']],
-            bvals=[['subject_id', 'bvals']])
-
-"""
-This line creates the processing workflow given the information input about the groups and subjects.
+The workflow is created given the information input about the groups and subjects.
 
 .. seealso::
 
     * nipype/workflows/dmri/mrtrix/group_connectivity.py
     * nipype/workflows/dmri/mrtrix/connectivity_mapping.py
-    * :ref:`dmri_connectivity_advanced
+    * :ref:`dmri_connectivity_advanced`
 
-"""
-
-l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
-
-"""
-This is used to demonstrate the ease through which different parameters can be set for each group.
-These values relate to the absolute threshold used on the fractional anisotropy map. This is done
+We set values for absolute threshold used on the fractional anisotropy map. This is done
 in order to identify single-fiber voxels. In brains with more damage, however, it may be necessary
 to reduce the threshold, since their brains are have lower average fractional anisotropy values.
-    """
 
-if group_id == 'parkinsons':
-    l1pipeline.inputs.connectivity.mapping.threshold_FA.absolute_threshold_value = 0.5
-else:
-    l1pipeline.inputs.connectivity.mapping.threshold_FA.absolute_threshold_value = 0.7
+We invert the b-vectors in the encoding file, and set the maximum harmonic order 
+of the pre-tractography spherical deconvolution step. This is done to show 
+how to set inputs that will affect both groups.
 
-"""
-These lines relate to inverting the b-vectors in the encoding file, and setting the
-maximum harmonic order of the pre-tractography spherical deconvolution step. This is
-done to show how to set inputs that will affect both groups.
-"""
-
-l1pipeline.inputs.connectivity.mapping.fsl2mrtrix.invert_y = True
-l1pipeline.inputs.connectivity.mapping.csdeconv.maximum_harmonic_order = 6
-
-"""
-Define the parcellation scheme to use.
-"""
-
-parcellation_name = 'scale500'
-l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name
-cmp_config = cmp.configuration.PipelineConfiguration()
-cmp_config.parcellation_scheme = "Lausanne2008"
-l1pipeline.inputs.connectivity.mapping.inputnode_within.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
-
-"""
-Set the maximum number of tracks to obtain
-"""
-
-l1pipeline.inputs.connectivity.mapping.probCSDstreamtrack.desired_number_of_tracks = 100000
-
-"""
-The first level pipeline we have tweaked here is run within the for loop.
-"""
-
-l1pipeline.run()
-l1pipeline.write_graph(format='eps', graph2use='flat')
-
-"""
 Next we create and run the second-level pipeline. The purpose of this workflow is simple:
 It is used to merge each subject's CFF file into one, so that there is a single file containing
 all of the networks for each group. This can be useful for performing Network Brain Statistics
@@ -180,10 +128,45 @@ using the NBS plugin in ConnectomeViewer.
 
 """
 
-l2pipeline = create_merge_network_results_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
-l2pipeline.inputs.l2inputnode.network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
-l2pipeline.run()
-l2pipeline.write_graph(format='eps', graph2use='flat')
+title = ''
+for idx, group_id in enumerate(group_list.keys()):
+    title += group_id
+    if not idx == len(group_list.keys()) - 1:
+        title += '-'
+
+    info = dict(dwi=[['subject_id', 'dti']],
+                bvecs=[['subject_id', 'bvecs']],
+                bvals=[['subject_id', 'bvals']])
+
+    l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
+
+    # This is used to demonstrate the ease through which different parameters can be set for each group.
+    if group_id == 'parkinsons':
+        l1pipeline.inputs.connectivity.mapping.threshold_FA.absolute_threshold_value = 0.5
+    else:
+        l1pipeline.inputs.connectivity.mapping.threshold_FA.absolute_threshold_value = 0.7
+
+    # Here with invert the b-vectors in the Y direction and set the maximum harmonic order of the
+    # spherical deconvolution step
+    l1pipeline.inputs.connectivity.mapping.fsl2mrtrix.invert_y = True
+    l1pipeline.inputs.connectivity.mapping.csdeconv.maximum_harmonic_order = 6
+    
+    # Here we define the parcellation scheme and the number of tracks to produce
+    parcellation_name = 'scale500'
+    l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name
+    cmp_config = cmp.configuration.PipelineConfiguration()
+    cmp_config.parcellation_scheme = "Lausanne2008"
+    l1pipeline.inputs.connectivity.mapping.inputnode_within.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
+    l1pipeline.inputs.connectivity.mapping.probCSDstreamtrack.desired_number_of_tracks = 100000
+
+    l1pipeline.run()
+    l1pipeline.write_graph(format='eps', graph2use='flat')
+
+    # The second-level pipeline is created here
+    l2pipeline = create_merge_network_results_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
+    l2pipeline.inputs.l2inputnode.network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
+    l2pipeline.run()
+    l2pipeline.write_graph(format='eps', graph2use='flat')
 
 """
 Now that the for loop is complete there are two grouped CFF files each containing the appropriate subjects.

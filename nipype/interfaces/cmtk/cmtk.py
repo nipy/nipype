@@ -212,7 +212,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
             xyz = tuple(np.mean(np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])) , axis=1))
-            G.node[int(u)]['dn_position'] = tuple([xyz[0], xyz[1], xyz[2]])
+            G.node[int(u)]['dn_position'] = tuple([xyz[0], xyz[2], -xyz[1]])
 
     if intersections:
         iflogger.info("Filtering tractography from intersections")
@@ -402,7 +402,8 @@ class CreateMatrixInputSpec(TraitedSpec):
 class CreateMatrixOutputSpec(TraitedSpec):
     matrix_file = File(desc='NetworkX graph describing the connectivity', exists=True)
     intersection_matrix_file = File(desc='NetworkX graph describing the connectivity', exists=True)
-    matrix_files = OutputMultiPath(File(desc='NetworkX graph describing the connectivity', exists=True))
+    matrix_files = OutputMultiPath(File(desc='All of the gpickled network files output by this interface', exists=True))
+    matlab_matrix_files = OutputMultiPath(File(desc='All of the MATLAB .mat files output by this interface', exists=True))
     matrix_mat_file = File(desc='Matlab matrix describing the connectivity', exists=True)
     intersection_matrix_mat_file = File(desc='Matlab matrix describing the mean fiber lengths between each node.', exists=True)
     mean_fiber_length_matrix_mat_file = File(desc='Matlab matrix describing the mean fiber lengths between each node.', exists=True)
@@ -472,64 +473,70 @@ class CreateMatrix(BaseInterface):
     	return runtime
 
     def _list_outputs(self):
-    	outputs = self.output_spec().get()
-    	if isdefined(self.inputs.out_matrix_file):
-    		path, name, _ = split_filename(self.inputs.out_matrix_file)
-    		out_matrix_file = op.abspath(name + '.pck')
-    		out_intersection_matrix_file = op.abspath(name + '_intersections.pck')
-    	else:
-    		out_matrix_file = op.abspath(self._gen_outfilename('.pck'))
-    		out_intersection_matrix_file = op.abspath(self._gen_outfilename('_intersections.pck'))
-    	outputs['matrix_file'] = out_matrix_file
-    	if self.inputs.count_region_intersections == True:
-            outputs['intersection_matrix_file'] = out_intersection_matrix_file
-            outputs['matrix_files'] = [out_matrix_file, out_intersection_matrix_file]
-    	else:
-    		outputs['matrix_files'] = [out_matrix_file]
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_matrix_file):
+            path, name, _ = split_filename(self.inputs.out_matrix_file)
+            out_matrix_file = op.abspath(name + '.pck')
+            out_intersection_matrix_file = op.abspath(name + '_intersections.pck')
+        else:
+            out_matrix_file = op.abspath(self._gen_outfilename('.pck'))
+            out_intersection_matrix_file = op.abspath(self._gen_outfilename('_intersections.pck'))
+        outputs['matrix_file'] = out_matrix_file
 
-    	matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
-    	path, name, ext = split_filename(matrix_mat_file)
-    	if not ext == '.mat':
-    		ext = '.mat'
-    		matrix_mat_file = matrix_mat_file + ext
+        matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
+        path, name, ext = split_filename(matrix_mat_file)
+        if not ext == '.mat':
+            ext = '.mat'
+            matrix_mat_file = matrix_mat_file + ext
 
-    	outputs['matrix_mat_file'] = matrix_mat_file
-    	if isdefined(self.inputs.out_mean_fiber_length_matrix_mat_file):
-    		outputs['mean_fiber_length_matrix_mat_file'] = op.abspath(self.inputs.out_mean_fiber_length_matrix_mat_file)
-    	else:
-    		outputs['mean_fiber_length_matrix_mat_file'] = op.abspath(self._gen_outfilename('_mean_fiber_length.mat'))
+        outputs['matrix_mat_file'] = matrix_mat_file
+        if isdefined(self.inputs.out_mean_fiber_length_matrix_mat_file):
+            outputs['mean_fiber_length_matrix_mat_file'] = op.abspath(self.inputs.out_mean_fiber_length_matrix_mat_file)
+        else:
+            outputs['mean_fiber_length_matrix_mat_file'] = op.abspath(self._gen_outfilename('_mean_fiber_length.mat'))
 
-    	if isdefined(self.inputs.out_median_fiber_length_matrix_mat_file):
-    		outputs['median_fiber_length_matrix_mat_file'] = op.abspath(self.inputs.out_median_fiber_length_matrix_mat_file)
-    	else:
-    		outputs['median_fiber_length_matrix_mat_file'] = op.abspath(self._gen_outfilename('_median_fiber_length.mat'))
+        if isdefined(self.inputs.out_median_fiber_length_matrix_mat_file):
+            outputs['median_fiber_length_matrix_mat_file'] = op.abspath(self.inputs.out_median_fiber_length_matrix_mat_file)
+        else:
+            outputs['median_fiber_length_matrix_mat_file'] = op.abspath(self._gen_outfilename('_median_fiber_length.mat'))
 
-    	if isdefined(self.inputs.out_fiber_length_std_matrix_mat_file):
-    		outputs['fiber_length_std_matrix_mat_file'] = op.abspath(self.inputs.out_fiber_length_std_matrix_mat_file)
-    	else:
-    		outputs['fiber_length_std_matrix_mat_file'] = op.abspath(self._gen_outfilename('_fiber_length_std.mat'))
+        if isdefined(self.inputs.out_fiber_length_std_matrix_mat_file):
+            outputs['fiber_length_std_matrix_mat_file'] = op.abspath(self.inputs.out_fiber_length_std_matrix_mat_file)
+        else:
+            outputs['fiber_length_std_matrix_mat_file'] = op.abspath(self._gen_outfilename('_fiber_length_std.mat'))
 
-    	if isdefined(self.inputs.out_endpoint_array_name):
-    		outputs['endpoint_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_endpoints.npy')
-    		outputs['endpoint_file_mm'] = op.abspath(self.inputs.out_endpoint_array_name + '_endpointsmm.npy')
-    		outputs['fiber_length_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_final_fiberslength.npy')
-    		outputs['fiber_label_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_filtered_fiberslabel.npy')
-    		outputs['fiber_labels_noorphans'] = op.abspath(self.inputs.out_endpoint_array_name + '_final_fiberslabels.npy')
-    	else:
-    		_, endpoint_name , _ = split_filename(self.inputs.tract_file)
-    		outputs['endpoint_file'] = op.abspath(endpoint_name + '_endpoints.npy')
-    		outputs['endpoint_file_mm'] = op.abspath(endpoint_name + '_endpointsmm.npy')
-    		outputs['fiber_length_file'] = op.abspath(endpoint_name + '_final_fiberslength.npy')
-    		outputs['fiber_label_file'] = op.abspath(endpoint_name + '_filtered_fiberslabel.npy')
-    		outputs['fiber_labels_noorphans'] = op.abspath(endpoint_name + '_final_fiberslabels.npy')
+        if isdefined(self.inputs.out_endpoint_array_name):
+            outputs['endpoint_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_endpoints.npy')
+            outputs['endpoint_file_mm'] = op.abspath(self.inputs.out_endpoint_array_name + '_endpointsmm.npy')
+            outputs['fiber_length_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_final_fiberslength.npy')
+            outputs['fiber_label_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_filtered_fiberslabel.npy')
+            outputs['fiber_labels_noorphans'] = op.abspath(self.inputs.out_endpoint_array_name + '_final_fiberslabels.npy')
+        else:
+            _, endpoint_name , _ = split_filename(self.inputs.tract_file)
+            outputs['endpoint_file'] = op.abspath(endpoint_name + '_endpoints.npy')
+            outputs['endpoint_file_mm'] = op.abspath(endpoint_name + '_endpointsmm.npy')
+            outputs['fiber_length_file'] = op.abspath(endpoint_name + '_final_fiberslength.npy')
+            outputs['fiber_label_file'] = op.abspath(endpoint_name + '_filtered_fiberslabel.npy')
+            outputs['fiber_labels_noorphans'] = op.abspath(endpoint_name + '_final_fiberslabels.npy')
+
+        outputs['filtered_tractography_by_intersections'] = op.join(path, name + '_intersections_streamline_final.trk')
+        outputs['intersection_matrix_mat_file'] = op.join(path, name + '_intersections') + ext
+        outputs['intersection_matrix_file'] = out_intersection_matrix_file
 
         if self.inputs.count_region_intersections:
-            outputs['filtered_tractography_by_intersections'] = op.join(path, name + '_intersections_streamline_final.trk')
-            outputs['intersection_matrix_mat_file'] = op.join(path, name + '_intersections') + ext
+            outputs['matrix_files'] = [out_matrix_file, out_intersection_matrix_file]
+            outputs['matlab_matrix_files'] = [outputs['matrix_mat_file'],
+            outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'], 
+            outputs['fiber_length_std_matrix_mat_file'], outputs['intersection_matrix_mat_file']]
+        else:
+            outputs['matrix_files'] = [out_matrix_file]
+            outputs['matlab_matrix_files'] = [outputs['matrix_mat_file'],
+            outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'], 
+            outputs['fiber_length_std_matrix_mat_file']]
 
-    	_, name , _ = split_filename(self.inputs.tract_file)
-    	outputs['filtered_tractography'] = op.abspath(name + '_streamline_final.trk')
-    	return outputs
+        _, name , _ = split_filename(self.inputs.tract_file)
+        outputs['filtered_tractography'] = op.abspath(name + '_streamline_final.trk')
+        return outputs
 
     def _gen_outfilename(self, ext):
         if ext.endswith("mat") and isdefined(self.inputs.out_matrix_mat_file):

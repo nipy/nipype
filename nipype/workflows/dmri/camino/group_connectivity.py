@@ -7,8 +7,8 @@ from .connectivity_mapping import create_connectivity_pipeline
 
 
 def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, template_args_dict=0):
-    """Creates a pipeline that performs basic Camino structural connectivity processing
-    on groups of subjects. Given a diffusion-weighted image, and text files containing
+    """Creates a pipeline that performs basic Camino structural connectivity processing 
+    on groups of subjects. Given a diffusion-weighted image, and text files containing 
     the associated b-values and b-vectors, the workflow will return each subjects' connectomes
     in a Connectome File Format (CFF) file, for use in Connectome Viewer (http://www.cmtk.org).
 
@@ -90,7 +90,7 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
                                               ("outputnode.cmatrix", "@l1output.cmatrix"),
                                               ("outputnode.rois", "@l1output.rois"),
                                               ("outputnode.struct", "@l1output.struct"),
-                                              ("outputnode.gpickled_network", "@l1output.gpickled_network"),
+                                              ("outputnode.networks", "@l1output.networks"),
                                               ("outputnode.mean_fiber_length", "@l1output.mean_fiber_length"),
                                               ("outputnode.fiber_length_std", "@l1output.fiber_length_std"),
                                               ])])
