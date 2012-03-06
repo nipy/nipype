@@ -15,12 +15,16 @@ and tractography, and the Connectome Mapping Toolkit (CMTK) for connectivity ana
 
 We perform this analysis using the FSL course data, which can be acquired from here:
 
-    http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
+    * http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 
 This pipeline also requires the Freesurfer directory for 'subj1' from the FSL course data.
 To save time, this data can be downloaded from here:
 
-    http://dl.dropbox.com/u/315714/subj1.zip?dl=1
+    * http://dl.dropbox.com/u/315714/subj1.zip?dl=1
+    
+A data package containing the outputs of this pipeline can be obtained from here:
+    
+    * http://db.tt/1vx4vLeP
 
 Along with Camino (http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php?n=Main.HomePage),
 Camino-Trackvis (http://www.nitrc.org/projects/camino-trackvis/), FSL (http://www.fmrib.ox.ac.uk/fsl/),

@@ -15,15 +15,18 @@ and tractography, and the Connectome Mapping Toolkit (CMTK) for further parcella
 
 We perform this analysis using the FSL course data, which can be acquired from here:
 
-    http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
+    * http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 
 This pipeline also requires the Freesurfer directory for 'subj1' from the FSL course data.
 To save time, this data can be downloaded from here:
 
-    http://dl.dropbox.com/u/315714/subj1.zip?dl=1
+    * http://dl.dropbox.com/u/315714/subj1.zip?dl=1
 
 The result of this processing will be the connectome for subj1 as a Connectome File Format (CFF) File, using
-the Lausanne2008 parcellation scheme.
+the Lausanne2008 parcellation scheme. A data package containing the outputs of this pipeline can be obtained
+from here:
+
+    * http://db.tt/909Q3AC1
 
 .. seealso::
 

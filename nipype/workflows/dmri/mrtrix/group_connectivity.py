@@ -115,5 +115,4 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
                                               ("outputnode.fiber_length_std", "@l1output.fiber_length_std"),
                                               ])])
     l1pipeline.connect([(group_infosource, datasink,[('group_id','@group_id')])])
-    datasink.overwrite = True
     return l1pipeline

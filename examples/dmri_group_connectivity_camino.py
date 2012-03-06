@@ -6,9 +6,9 @@ dMRI: Group connectivity - Camino, FSL, FreeSurfer
 Introduction
 ============
 
-This script, group_connectivity.py, runs group-based connectivity analysis using
-the connectivity_mapping Nipype workflow. Further detail on the processing can be
-found in connectivity_tutorial.py. This tutorial can be run using:
+This script, dmri_group_connectivity_camino.py, runs group-based connectivity analysis using
+the dmri.camino.connectivity_mapping Nipype workflow. Further detail on the processing can be
+found in :ref:`dmri_connectivity. This tutorial can be run using:
 
     python dmri_group_connectivity_camino.py
 
@@ -17,6 +17,10 @@ We perform this analysis using one healthy subject and two subjects who suffer f
 The whole package (960 mb as .tar.gz / 1.3 gb uncompressed) including the Freesurfer directories for these subjects, can be acquired from here:
 
     * http://db.tt/b6F1t0QV
+    
+A data package containing the outputs of this pipeline can be obtained from here:
+
+    * http://db.tt/kNvAI751
 
 Along with Camino, Camino-Trackvis, FSL, and Freesurfer, you must also have the Connectome File Format
 library installed as well as the Connectome Mapper.
