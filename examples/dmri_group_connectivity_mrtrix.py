@@ -100,31 +100,31 @@ is 'parkinsons-controls.cff'. The following code implements the format a-b-c-...
 """
 
 .. warning::
+
     The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
     The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
 
-
 """
 
 """
-This line creates the processing workflow given the information input about the groups and subjects.
+The workflow is created given the information input about the groups and subjects.
 
 .. seealso::
 
     * nipype/workflows/dmri/mrtrix/group_connectivity.py
     * nipype/workflows/dmri/mrtrix/connectivity_mapping.py
-    * :ref:`dmri_connectivity_advanced
+    * :ref:`dmri_connectivity_advanced`
 
 """
 
 """
-These values relate to the absolute threshold used on the fractional anisotropy map. This is done
+We set values for absolute threshold used on the fractional anisotropy map. This is done
 in order to identify single-fiber voxels. In brains with more damage, however, it may be necessary
 to reduce the threshold, since their brains are have lower average fractional anisotropy values.
 """
 
 """
-These lines relate to inverting the b-vectors in the encoding file, and setting the
+We invert the b-vectors in the encoding file, and set the
 maximum harmonic order of the pre-tractography spherical deconvolution step. This is
 done to show how to set inputs that will affect both groups.
 """
@@ -159,9 +159,12 @@ for idx, group_id in enumerate(group_list.keys()):
     else:
         l1pipeline.inputs.connectivity.mapping.threshold_FA.absolute_threshold_value = 0.7
 
+    # Here with invert the b-vectors in the Y direction and set the maximum harmonic order of the
+    # spherical deconvolution step
     l1pipeline.inputs.connectivity.mapping.fsl2mrtrix.invert_y = True
     l1pipeline.inputs.connectivity.mapping.csdeconv.maximum_harmonic_order = 6
     
+    # Here we define the parcellation scheme and the number of tracks to produce
     parcellation_name = 'scale500'
     l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name
     cmp_config = cmp.configuration.PipelineConfiguration()
@@ -172,6 +175,7 @@ for idx, group_id in enumerate(group_list.keys()):
     l1pipeline.run()
     l1pipeline.write_graph(format='eps', graph2use='flat')
 
+    # The second-level pipeline is created here
     l2pipeline = create_merge_network_results_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
     l2pipeline.inputs.l2inputnode.network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
     l2pipeline.run()
