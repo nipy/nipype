@@ -91,7 +91,9 @@ Tensors are fitted to each voxel in the diffusion-weighted image and from these 
 	* Major eigenvector in each voxel
 	* Apparent diffusion coefficient
 	* Fractional anisotropy
+    
 """
+
 gunzip = pe.Node(interface=misc.Gunzip(), name='gunzip')
 dwi2tensor = pe.Node(interface=mrtrix.DWI2Tensor(),name='dwi2tensor')
 tensor2vector = pe.Node(interface=mrtrix.Tensor2Vector(),name='tensor2vector')

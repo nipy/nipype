@@ -99,26 +99,16 @@ The title for the final grouped-network connectome file is dependent on the grou
 is 'parkinsons-controls.cff'. The following code implements the format a-b-c-...x.cff for an arbitary number of groups.
 """
 
-title = ''
-for idx, group_id in enumerate(group_list.keys()):
-    title += group_id
-    if not idx == len(group_list.keys()) - 1:
-        title += '-'
-
-    """
+"""
 
 .. warning::
 
-    The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
-    The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
+The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
+The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
 
-    """
+"""
 
-    info = dict(dwi=[['subject_id', 'dti']],
-                bvecs=[['subject_id', 'bvecs']],
-                bvals=[['subject_id', 'bvals']])
-
-    """
+"""
 This line creates the processing workflow given the information input about the groups and subjects.
 
 .. seealso::
@@ -127,27 +117,9 @@ This line creates the processing workflow given the information input about the 
     * nipype/workflows/dmri/camino/connectivity_mapping.py
     * :ref:`dmri_connectivity`
 
-    """
+"""
 
-    l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
-
-    """
-Define the parcellation scheme to use.
-    """
-
-    parcellation_scheme = 'NativeFreesurfer'
-    cmp_config = cmp.configuration.PipelineConfiguration()
-    cmp_config.parcellation_scheme = parcellation_scheme
-    l1pipeline.inputs.connectivity.inputnode.resolution_network_file = cmp_config._get_lausanne_parcellation(parcellation_scheme)['freesurferaparc']['node_information_graphml']
-
-    """
-The first level pipeline we have tweaked here is run within the for loop.
-    """
-
-    l1pipeline.run()
-    l1pipeline.write_graph(format='eps', graph2use='flat')
-
-    """
+"""
 Next we create and run the second-level pipeline. The purpose of this workflow is simple:
 It is used to merge each subject's CFF file into one, so that there is a single file containing
 all of the networks for each group. This can be useful for performing Network Brain Statistics
@@ -157,7 +129,26 @@ using the NBS plugin in ConnectomeViewer.
 
     http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html
 
-    """
+"""
+
+
+title = ''
+for idx, group_id in enumerate(group_list.keys()):
+    title += group_id
+    if not idx == len(group_list.keys()) - 1:
+        title += '-'
+    info = dict(dwi=[['subject_id', 'dti']],
+                bvecs=[['subject_id', 'bvecs']],
+                bvals=[['subject_id', 'bvals']])
+    l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
+
+    parcellation_scheme = 'NativeFreesurfer'
+    cmp_config = cmp.configuration.PipelineConfiguration()
+    cmp_config.parcellation_scheme = parcellation_scheme
+    l1pipeline.inputs.connectivity.inputnode.resolution_network_file = cmp_config._get_lausanne_parcellation(parcellation_scheme)['freesurferaparc']['node_information_graphml']
+
+    l1pipeline.run()
+    l1pipeline.write_graph(format='eps', graph2use='flat')
 
     l2pipeline = create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
     l2pipeline.run()

@@ -97,25 +97,16 @@ The title for the final grouped-network connectome file is dependent on the grou
 is 'parkinsons-controls.cff'. The following code implements the format a-b-c-...x.cff for an arbitary number of groups.
 """
 
-title = ''
-for idx, group_id in enumerate(group_list.keys()):
-    title += group_id
-    if not idx == len(group_list.keys()) - 1:
-        title += '-'
-
-    """
+"""
 
 .. warning::
     The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
     The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
 
 
-    """
-    info = dict(dwi=[['subject_id', 'dti']],
-                bvecs=[['subject_id', 'bvecs']],
-                bvals=[['subject_id', 'bvals']])
+"""
 
-    """
+"""
 This line creates the processing workflow given the information input about the groups and subjects.
 
 .. seealso::
@@ -124,55 +115,21 @@ This line creates the processing workflow given the information input about the 
     * nipype/workflows/dmri/mrtrix/connectivity_mapping.py
     * :ref:`dmri_connectivity_advanced
 
-    """
+"""
 
-    l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
-
-    """
-This is used to demonstrate the ease through which different parameters can be set for each group.
+"""
 These values relate to the absolute threshold used on the fractional anisotropy map. This is done
 in order to identify single-fiber voxels. In brains with more damage, however, it may be necessary
 to reduce the threshold, since their brains are have lower average fractional anisotropy values.
-    """
+"""
 
-    if group_id == 'parkinsons':
-        l1pipeline.inputs.connectivity.mapping.threshold_FA.absolute_threshold_value = 0.5
-    else:
-        l1pipeline.inputs.connectivity.mapping.threshold_FA.absolute_threshold_value = 0.7
-
-    """
+"""
 These lines relate to inverting the b-vectors in the encoding file, and setting the
 maximum harmonic order of the pre-tractography spherical deconvolution step. This is
 done to show how to set inputs that will affect both groups.
-    """
+"""
 
-    l1pipeline.inputs.connectivity.mapping.fsl2mrtrix.invert_y = True
-    l1pipeline.inputs.connectivity.mapping.csdeconv.maximum_harmonic_order = 6
-
-    """
-Define the parcellation scheme to use.
-    """
-
-    parcellation_name = 'scale500'
-    l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name
-    cmp_config = cmp.configuration.PipelineConfiguration()
-    cmp_config.parcellation_scheme = "Lausanne2008"
-    l1pipeline.inputs.connectivity.mapping.inputnode_within.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
-
-    """
-Set the maximum number of tracks to obtain
-    """
-
-    l1pipeline.inputs.connectivity.mapping.probCSDstreamtrack.desired_number_of_tracks = 100000
-
-    """
-The first level pipeline we have tweaked here is run within the for loop.
-    """
-
-    l1pipeline.run()
-    l1pipeline.write_graph(format='eps', graph2use='flat')
-
-    """
+"""
 Next we create and run the second-level pipeline. The purpose of this workflow is simple:
 It is used to merge each subject's CFF file into one, so that there is a single file containing
 all of the networks for each group. This can be useful for performing Network Brain Statistics
@@ -182,7 +139,38 @@ using the NBS plugin in ConnectomeViewer.
 
     http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html
 
-    """
+"""
+
+title = ''
+for idx, group_id in enumerate(group_list.keys()):
+    title += group_id
+    if not idx == len(group_list.keys()) - 1:
+        title += '-'
+
+    info = dict(dwi=[['subject_id', 'dti']],
+                bvecs=[['subject_id', 'bvecs']],
+                bvals=[['subject_id', 'bvals']])
+
+    l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
+
+    # This is used to demonstrate the ease through which different parameters can be set for each group.
+    if group_id == 'parkinsons':
+        l1pipeline.inputs.connectivity.mapping.threshold_FA.absolute_threshold_value = 0.5
+    else:
+        l1pipeline.inputs.connectivity.mapping.threshold_FA.absolute_threshold_value = 0.7
+
+    l1pipeline.inputs.connectivity.mapping.fsl2mrtrix.invert_y = True
+    l1pipeline.inputs.connectivity.mapping.csdeconv.maximum_harmonic_order = 6
+    
+    parcellation_name = 'scale500'
+    l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name
+    cmp_config = cmp.configuration.PipelineConfiguration()
+    cmp_config.parcellation_scheme = "Lausanne2008"
+    l1pipeline.inputs.connectivity.mapping.inputnode_within.resolution_network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
+    l1pipeline.inputs.connectivity.mapping.probCSDstreamtrack.desired_number_of_tracks = 100000
+
+    l1pipeline.run()
+    l1pipeline.write_graph(format='eps', graph2use='flat')
 
     l2pipeline = create_merge_network_results_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
     l2pipeline.inputs.l2inputnode.network_file = cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name]['node_information_graphml']
