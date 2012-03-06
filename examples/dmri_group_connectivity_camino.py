@@ -40,8 +40,8 @@ Or on github at:
 Output data can be visualized in ConnectomeViewer, TrackVis,
 and anything that can view Nifti files.
 
-    ConnectomeViewer: https://github.com/LTS5/connectomeviewer
-    TrackVis: http://trackvis.org/
+    * ConnectomeViewer: https://github.com/LTS5/connectomeviewer
+    * TrackVis: http://trackvis.org/
 
 The fiber data is available in Numpy arrays, and the connectivity matrix
 is also produced as a MATLAB matrix.
@@ -107,10 +107,10 @@ for idx, group_id in enumerate(group_list.keys()):
 
     """
 
-    .. warning::
+.. warning::
 
-        The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
-        The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
+    The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
+    The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
 
     """
 
@@ -119,20 +119,20 @@ for idx, group_id in enumerate(group_list.keys()):
                 bvals=[['subject_id', 'bvals']])
 
     """
-    This line creates the processing workflow given the information input about the groups and subjects.
+This line creates the processing workflow given the information input about the groups and subjects.
 
-    .. seealso::
+.. seealso::
 
-        * nipype/workflows/dmri/mrtrix/group_connectivity.py
-        * nipype/workflows/dmri/camino/connectivity_mapping.py
-        * :ref:`dmri_connectivity`
+    * nipype/workflows/dmri/mrtrix/group_connectivity.py
+    * nipype/workflows/dmri/camino/connectivity_mapping.py
+    * :ref:`dmri_connectivity`
 
     """
 
     l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
 
     """
-    Define the parcellation scheme to use.
+Define the parcellation scheme to use.
     """
 
     parcellation_scheme = 'NativeFreesurfer'
@@ -141,21 +141,21 @@ for idx, group_id in enumerate(group_list.keys()):
     l1pipeline.inputs.connectivity.inputnode.resolution_network_file = cmp_config._get_lausanne_parcellation(parcellation_scheme)['freesurferaparc']['node_information_graphml']
 
     """
-    The first level pipeline we have tweaked here is run within the for loop.
+The first level pipeline we have tweaked here is run within the for loop.
     """
 
     l1pipeline.run()
     l1pipeline.write_graph(format='eps', graph2use='flat')
 
     """
-    Next we create and run the second-level pipeline. The purpose of this workflow is simple:
-    It is used to merge each subject's CFF file into one, so that there is a single file containing
-    all of the networks for each group. This can be useful for performing Network Brain Statistics
-    using the NBS plugin in ConnectomeViewer.
+Next we create and run the second-level pipeline. The purpose of this workflow is simple:
+It is used to merge each subject's CFF file into one, so that there is a single file containing
+all of the networks for each group. This can be useful for performing Network Brain Statistics
+using the NBS plugin in ConnectomeViewer.
 
-    .. seealso::
+.. seealso::
 
-        http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html
+    http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html
 
     """
 

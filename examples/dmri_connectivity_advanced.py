@@ -74,7 +74,7 @@ else:
 This needs to point to the freesurfer subjects directory (Recon-all must have been run on subj1 from the FSL course data)
 Alternatively, the reconstructed subject data can be downloaded from:
 
-	http://dl.dropbox.com/u/315714/subj1.zip
+	* http://dl.dropbox.com/u/315714/subj1.zip
 
 """
 
@@ -85,7 +85,7 @@ fsl.FSLCommand.set_default_output_type('NIFTI')
 """
 This needs to point to the fdt folder you can find after extracting
 
-	http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
+	* http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 
 """
 

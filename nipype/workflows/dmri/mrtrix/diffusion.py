@@ -5,7 +5,7 @@ import nipype.interfaces.mrtrix as mrtrix
 
 def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilistic'):
     """Creates a pipeline that does the same diffusion processing as in the
-    :ref:`example_mrtrix_dti` example script. Given a diffusion-weighted image,
+    :ref:`dmri_mrtrix_dti` example script. Given a diffusion-weighted image,
     b-values, and b-vectors, the workflow will return the tractography
     computed from spherical deconvolution and probabilistic streamline tractography
 
