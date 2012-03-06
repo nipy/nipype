@@ -95,18 +95,12 @@ Main processing loop
 ====================
 The title for the final grouped-network connectome file is dependent on the group names. The resulting file for this example
 is 'parkinsons-controls.cff'. The following code implements the format a-b-c-...x.cff for an arbitary number of groups.
-"""
-
-"""
 
 .. warning::
 
-    The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
+    The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dti'.
     The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
 
-"""
-
-"""
 The workflow is created given the information input about the groups and subjects.
 
 .. seealso::
@@ -115,21 +109,14 @@ The workflow is created given the information input about the groups and subject
     * nipype/workflows/dmri/mrtrix/connectivity_mapping.py
     * :ref:`dmri_connectivity_advanced`
 
-"""
-
-"""
 We set values for absolute threshold used on the fractional anisotropy map. This is done
 in order to identify single-fiber voxels. In brains with more damage, however, it may be necessary
 to reduce the threshold, since their brains are have lower average fractional anisotropy values.
-"""
 
-"""
-We invert the b-vectors in the encoding file, and set the
-maximum harmonic order of the pre-tractography spherical deconvolution step. This is
-done to show how to set inputs that will affect both groups.
-"""
+We invert the b-vectors in the encoding file, and set the maximum harmonic order 
+of the pre-tractography spherical deconvolution step. This is done to show 
+how to set inputs that will affect both groups.
 
-"""
 Next we create and run the second-level pipeline. The purpose of this workflow is simple:
 It is used to merge each subject's CFF file into one, so that there is a single file containing
 all of the networks for each group. This can be useful for performing Network Brain Statistics

@@ -97,18 +97,12 @@ Main processing loop
 ====================
 The title for the final grouped-network connectome file is dependent on the group names. The resulting file for this example
 is 'parkinsons-controls.cff'. The following code implements the format a-b-c-...x.cff for an arbitary number of groups.
-"""
-
-"""
 
 .. warning::
-
+    
     The 'info' dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string 'dwi'.
     The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.
 
-"""
-
-"""
 This line creates the processing workflow given the information input about the groups and subjects.
 
 .. seealso::
@@ -117,9 +111,6 @@ This line creates the processing workflow given the information input about the 
     * nipype/workflows/dmri/camino/connectivity_mapping.py
     * :ref:`dmri_connectivity`
 
-"""
-
-"""
 The purpose of the second-level workflow is simple: It is used to merge each 
 subject's CFF file into one, so that there is a single file containing all of the
 networks for each group. This can be useful for performing Network Brain Statistics
