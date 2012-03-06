@@ -17,7 +17,7 @@ We perform this analysis using one healthy subject and two subjects who suffer f
 The whole package (960 mb as .tar.gz / 1.3 gb uncompressed) including the Freesurfer directories for these subjects, can be acquired from here:
 
     * http://db.tt/b6F1t0QV
-    
+
 A data package containing the outputs of this pipeline can be obtained from here:
 
     * http://db.tt/elmMnIt1
@@ -113,8 +113,8 @@ We set values for absolute threshold used on the fractional anisotropy map. This
 in order to identify single-fiber voxels. In brains with more damage, however, it may be necessary
 to reduce the threshold, since their brains are have lower average fractional anisotropy values.
 
-We invert the b-vectors in the encoding file, and set the maximum harmonic order 
-of the pre-tractography spherical deconvolution step. This is done to show 
+We invert the b-vectors in the encoding file, and set the maximum harmonic order
+of the pre-tractography spherical deconvolution step. This is done to show
 how to set inputs that will affect both groups.
 
 Next we create and run the second-level pipeline. The purpose of this workflow is simple:
@@ -150,7 +150,7 @@ for idx, group_id in enumerate(group_list.keys()):
     # spherical deconvolution step
     l1pipeline.inputs.connectivity.mapping.fsl2mrtrix.invert_y = True
     l1pipeline.inputs.connectivity.mapping.csdeconv.maximum_harmonic_order = 6
-    
+
     # Here we define the parcellation scheme and the number of tracks to produce
     parcellation_name = 'scale500'
     l1pipeline.inputs.connectivity.mapping.Parcellate.parcellation_name = parcellation_name

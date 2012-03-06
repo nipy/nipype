@@ -15,8 +15,8 @@ else:
     import cmp
 
 def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, template_args_dict=0):
-    """Creates a pipeline that performs MRtrix structural connectivity processing 
-    on groups of subjects. Given a diffusion-weighted image, and text files containing 
+    """Creates a pipeline that performs MRtrix structural connectivity processing
+    on groups of subjects. Given a diffusion-weighted image, and text files containing
     the associated b-values and b-vectors, the workflow will return each subjects' connectomes
     in a Connectome File Format (CFF) file, for use in Connectome Viewer (http://www.cmtk.org).
 

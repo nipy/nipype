@@ -21,9 +21,9 @@ This pipeline also requires the Freesurfer directory for 'subj1' from the FSL co
 To save time, this data can be downloaded from here:
 
     * http://dl.dropbox.com/u/315714/subj1.zip?dl=1
-    
+
 A data package containing the outputs of this pipeline can be obtained from here:
-    
+
     * http://db.tt/1vx4vLeP
 
 Along with Camino (http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php?n=Main.HomePage),

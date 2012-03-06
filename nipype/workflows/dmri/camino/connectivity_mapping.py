@@ -444,7 +444,7 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
     mapping.connect([(camino2trackvis, CFFConverter,[("trackvis","tract_files")])])
     mapping.connect([(inputnode_within, CFFConverter,[("subject_id","title")])])
-	
+
     """
     Finally, we create another higher-level workflow to connect our mapping workflow with the info and datagrabbing nodes
     declared at the beginning. Our tutorial can is now extensible to any arbitrary number of subjects by simply adding
