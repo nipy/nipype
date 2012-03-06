@@ -80,8 +80,10 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
     interleaved = traits.Bool(desc="True if interleaved",
                   mandatory=True)
     tr_slices = traits.Float(desc="TR slices")
-    start = traits.Float(0.0, usedefault=True, desc="start")
-    time_interp = traits.Bool(True, usedefault=True, desc="time interpolation")
+    start = traits.Float(0.0, usedefault=True, 
+                         desc="time offset into TR to align slices to")
+    time_interp = traits.Bool(True, usedefault=True, 
+                              desc="Assume smooth changes across time e.g., fmri series")
 
 
 class FmriRealign4dOutputSpec(TraitedSpec):
