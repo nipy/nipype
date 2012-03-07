@@ -31,6 +31,7 @@ if __name__ == '__main__':
                                        'info',
                                        '\.interfaces\.(?!(base|matlab))',
                                        '\.pipeline\.utils$',
+                                       '\.interfaces\.slicer\.generate_classes$',
                                        '\.interfaces\.pymvpa$',
                                        ]
     docwriter.write_api_docs(outdir)
