@@ -1,12 +1,12 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-Extend numpy's decorators to use nipy's gui and data labels.
+Extend numpy's decorators to use nipype's gui and data labels.
 """
 
 from numpy.testing.decorators import *
 
-from nipy.utils import templates, example_data, DataError
+from nibabel.data import DataError
 
 
 def make_label_dec(label, ds=None):
@@ -64,12 +64,6 @@ def make_label_dec(label, ds=None):
         decor.__doc__ = ds
     return decor
 
-
-# Nipy specific labels
-gui = make_label_dec('gui')
-data = make_label_dec('data')
-
-
 # For tests that need further review
 def needs_review(msg):
     """ Skip a test that needs further review.
@@ -95,11 +89,3 @@ def if_datasource(ds, msg):
     except DataError:
         return skipif(True, msg)
     return lambda f : f
-
-
-def if_templates(f):
-    return if_datasource(templates, 'Cannot find template data')(f)
-
-
-def if_example_data(f):
-    return if_datasource(example_data, 'Cannot find example data')(f)

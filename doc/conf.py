@@ -166,7 +166,8 @@ html_index = 'index.html'
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {'**': ['gse.html','localtoc.html', 'sidebar_versions.html', 'indexsidebar.html'],
-                 'searchresults' : ['sidebar_versions.html', 'indexsidebar.html']}
+                 'searchresults' : ['sidebar_versions.html', 'indexsidebar.html'],
+                 'version' : []}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.

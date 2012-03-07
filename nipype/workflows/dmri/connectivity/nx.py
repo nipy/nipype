@@ -7,7 +7,7 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     """Creates a workflow to calculate various graph measures (via NetworkX) on
     an input network. The output measures are then converted to comma-separated value
     text files, and an extra column / field is also added. Typically, the user would
-    connect the subject name to this field. 
+    connect the subject name to this field.
 
     Example
     -------
@@ -34,7 +34,7 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
                         name="inputnode")
 
     pipeline = pe.Workflow(name=name)
-  
+
     ntwkMetrics = pe.Node(interface=cmtk.NetworkXMetrics(), name="NetworkXMetrics")
     Matlab2CSV_node = pe.Node(interface=misc.Matlab2CSV(), name="Matlab2CSV_node")
     MergeCSVFiles_node = pe.Node(interface=misc.MergeCSVFiles(), name="MergeCSVFiles_node")
@@ -48,14 +48,14 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     pipeline.connect([(inputnode, ntwkMetrics,[("network_file","in_file")])])
     pipeline.connect([(ntwkMetrics, Matlab2CSV_node,[("node_measures_matlab","in_file")])])
     pipeline.connect([(ntwkMetrics, Matlab2CSV_global,[("global_measures_matlab","in_file")])])
-    
+
     pipeline.connect([(Matlab2CSV_node, MergeCSVFiles_node,[("csv_files","in_files")])])
     pipeline.connect([(inputnode, MergeCSVFiles_node,[("extra_field","out_file")])])
     pipeline.connect([(inputnode, MergeCSVFiles_node,[("extra_field","extra_field")])])
 
     pipeline.connect([(inputnode, mergeNetworks,[("network_file","in1")])])
     pipeline.connect([(ntwkMetrics, mergeNetworks,[("gpickled_network_files","in2")])])
-    
+
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["network_files",
     "csv_files", "matlab_files", "node_csv", "global_csv"]),
                         name="outputnode")
@@ -64,17 +64,17 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     pipeline.connect([(Matlab2CSV_global, outputnode, [("csv_files", "global_csv")])])
 
     pipeline.connect([(MergeCSVFiles_node, mergeCSVs, [("csv_file", "in1")])])
-    pipeline.connect([(Matlab2CSV_global, mergeCSVs, [("csv_files", "in2")])])    
+    pipeline.connect([(Matlab2CSV_global, mergeCSVs, [("csv_files", "in2")])])
     pipeline.connect([(mergeNetworks, outputnode, [("out", "network_files")])])
     pipeline.connect([(mergeCSVs, outputnode, [("out", "csv_files")])])
     pipeline.connect([(ntwkMetrics, outputnode,[("matlab_matrix_files","matlab_files")])])
     return pipeline
 
 def create_cmats_to_csv_pipeline(name="cmats_to_csv", extra_column_heading="subject"):
-    """Creates a workflow to convert the outputs from CreateMatrix into a single 
-    comma-separated value text file. An extra column / field is also added to the 
+    """Creates a workflow to convert the outputs from CreateMatrix into a single
+    comma-separated value text file. An extra column / field is also added to the
     text file. Typically, the user would connect the subject name to this field.
-    
+
     Example
     -------
 
@@ -98,15 +98,15 @@ def create_cmats_to_csv_pipeline(name="cmats_to_csv", extra_column_heading="subj
                         name="inputnode")
 
     pipeline = pe.Workflow(name=name)
-   
+
     Matlab2CSV = pe.MapNode(interface=misc.Matlab2CSV(), name="Matlab2CSV", iterfield=["in_file"])
     MergeCSVFiles = pe.Node(interface=misc.MergeCSVFiles(), name="MergeCSVFiles")
     MergeCSVFiles.inputs.extra_column_heading = extra_column_heading
-   
+
     pipeline.connect([(inputnode, Matlab2CSV,[("matlab_matrix_files","in_file")])])
     pipeline.connect([(Matlab2CSV, MergeCSVFiles,[("csv_files","in_files")])])
     pipeline.connect([(inputnode, MergeCSVFiles,[("extra_field","extra_field")])])
-    
+
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["csv_file"]),
                         name="outputnode")
 

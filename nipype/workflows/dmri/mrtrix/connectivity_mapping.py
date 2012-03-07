@@ -476,7 +476,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
 
     mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
     mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
-    mapping.connect([(creatematrix, CFFConverter,[("matrix_files","gpickled_networks")])])    
+    mapping.connect([(creatematrix, CFFConverter,[("matrix_files","gpickled_networks")])])
     mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
     mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
     mapping.connect([(creatematrix, CFFConverter,[("filtered_tractography","tract_files")])])
@@ -488,7 +488,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
 
     mapping.connect([(inputnode_within, networkx,[("subject_id","inputnode.extra_field")])])
     mapping.connect([(creatematrix, networkx,[("intersection_matrix_file","inputnode.network_file")])])
-    
+
     mapping.connect([(networkx, NxStatsCFFConverter,[("outputnode.network_files","gpickled_networks")])])
     mapping.connect([(giftiSurfaces, NxStatsCFFConverter,[("out","gifti_surfaces")])])
     mapping.connect([(giftiLabels, NxStatsCFFConverter,[("out","gifti_labels")])])

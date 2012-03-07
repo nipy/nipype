@@ -22,7 +22,7 @@ def pullnodeIDs(in_network, name_key='dn_name'):
     from nipype.interfaces.base import isdefined
     if not isdefined(in_network):
         raise ValueError
-        return None        
+        return None
     try:
         ntwk = nx.read_graphml(in_network)
     except:
@@ -42,7 +42,7 @@ def pullnodeIDs(in_network, name_key='dn_name'):
 
 
 def concatcsv(in_files):
-    """ This function will contatenate two "comma-separated value" 
+    """ This function will contatenate two "comma-separated value"
     text files, but remove the first row (usually column headers) from
     all but the first file.
     """
@@ -65,11 +65,11 @@ def concatcsv(in_files):
         for line in file_to_read:
             out_file.write(line)
     return out_name
-    
+
 
 def create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir):
-    """Creates a second-level pipeline to merge the Connectome File Format (CFF) outputs from the group-level 
-    MRtrix structural connectivity processing pipeline into a single CFF file for each group. 
+    """Creates a second-level pipeline to merge the Connectome File Format (CFF) outputs from the group-level
+    MRtrix structural connectivity processing pipeline into a single CFF file for each group.
 
     Example
     -------
@@ -127,8 +127,8 @@ def create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subj
     return l2pipeline
 
 def create_merge_network_results_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir):
-    """Creates a second-level pipeline to merge the Connectome File Format (CFF) outputs from the group-level 
-    MRtrix structural connectivity processing pipeline into a single CFF file for each group. 
+    """Creates a second-level pipeline to merge the Connectome File Format (CFF) outputs from the group-level
+    MRtrix structural connectivity processing pipeline into a single CFF file for each group.
 
     Example
     -------
@@ -214,7 +214,7 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
 
 def create_merge_group_networks_workflow(group_list, data_dir, subjects_dir, output_dir, title='group'):
     """Creates a third-level pipeline to merge the Connectome File Format (CFF) outputs from each group
-    and combines them into a single CFF file for each group. 
+    and combines them into a single CFF file for each group.
 
     Example
     -------
@@ -268,7 +268,7 @@ def create_merge_group_networks_workflow(group_list, data_dir, subjects_dir, out
 def create_merge_group_network_results_workflow(group_list, data_dir, subjects_dir, output_dir, title='group'):
     """Creates a third-level pipeline to merge the Connectome File Format (CFF) outputs from each group
     and combines them into a single CFF file for each group. This version of the third-level pipeline also
-    concatenates the comma-separated value files for the NetworkX metrics and the connectivity matrices 
+    concatenates the comma-separated value files for the NetworkX metrics and the connectivity matrices
     into single files.
 
     Example
@@ -327,7 +327,7 @@ def create_merge_group_network_results_workflow(group_list, data_dir, subjects_d
 
 
 def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir, output_dir, title='group_average'):
-    """Creates a fourth-level pipeline to average the networks for two groups and merge them into a single 
+    """Creates a fourth-level pipeline to average the networks for two groups and merge them into a single
     CFF file. This pipeline will also output the average networks in .gexf format, for visualization in other
     graph viewers, such as Gephi.
 
