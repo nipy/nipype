@@ -4,8 +4,8 @@ import warnings
 import nibabel as nb
 import numpy as np
 
-from nipype.utils.misc import package_check
-from nipype.utils.filemanip import split_filename
+from ...utils.misc import package_check
+from ...utils.filemanip import split_filename
 
 
 try:
@@ -17,9 +17,9 @@ else:
     from nipy.algorithms.registration import FmriRealign4d as FR4d
     from nipy import save_image
 
-from nipype.interfaces.base import (TraitedSpec, BaseInterface, traits,
-                                    BaseInterfaceInputSpec, isdefined, File,
-                                    InputMultiPath, OutputMultiPath)
+from ..base import (TraitedSpec, BaseInterface, traits,
+                    BaseInterfaceInputSpec, isdefined, File,
+                    InputMultiPath, OutputMultiPath)
 
 
 class ComputeMaskInputSpec(BaseInterfaceInputSpec):
