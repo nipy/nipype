@@ -386,7 +386,7 @@ class NetworkXMetrics(BaseInterface):
 
         calculate_cliques = self.inputs.compute_clique_related_measures
         weighted = self.inputs.treat_as_weighted_graph
-        
+
         global_measures = compute_singlevalued_measures(ntwk, weighted, calculate_cliques)
         if isdefined(self.inputs.out_global_metrics_matlab):
             global_out_file = op.abspath(self.inputs.out_global_metrics_matlab)
@@ -503,7 +503,7 @@ class AverageNetworks(BaseInterface):
     """
     Calculates and outputs the average network given a set of input NetworkX gpickle files
 
-    This interface will only keep an edge in the averaged network if that edge is present in 
+    This interface will only keep an edge in the averaged network if that edge is present in
     at least half of the input networks.
 
     Example
