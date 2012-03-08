@@ -1442,8 +1442,15 @@ class RandomiseInputSpec(FSLCommandInputSpec):
 
 
 class RandomiseOutputSpec(TraitedSpec):
-    tstat1_file = File(exists=True, desc='path/name of tstat image corresponding to the first t contrast')
-
+    tstat_files = traits.List(
+        File(exists=True),
+        desc='path/name of tstat image corresponding to the first t contrast')
+    p_files = traits.List(
+        File(exists=True), 
+        desc='p uncorrected files')
+    corrected_p_files = traits.List(
+        File(exists=True), 
+        desc='p FWE (Family-wise error) corrected files')
 
 class Randomise(FSLCommand):
     """XXX UNSTABLE DO NOT USE
@@ -1470,5 +1477,20 @@ class Randomise(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['tstat1_file'] = self._gen_fname(self.inputs.base_name, suffix='_tstat1')
+        import glob
+        outputs['tstat_files'] = glob.glob('%s/%s_tstat*.nii'%(
+                os.getcwd(),self.inputs.base_name))
+        prefix = False
+        if self.inputs.tfce or self.inputs.tfce2D:
+            prefix='tfce'
+        elif self.inputs.vox_p_values:
+            prefix='vox'
+        if prefix:
+            outputs['p_files'] = glob.glob('%s/%s_%s_p_tstat*.nii'%(
+                    os.getcwd(),self.inputs.base_name,prefix))
+            outputs['corrected_p_files'] = glob.glob(
+                '%s/%s_%s_corrp_tstat*.nii'%(
+                    os.getcwd(),self.inputs.base_name,prefix))
+
+        #self._gen_fname(self.inputs.base_name, suffix='_tstat1')
         return outputs
