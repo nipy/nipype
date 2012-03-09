@@ -984,7 +984,7 @@ class MultipleRegressDesign(BaseInterface):
     Examples
     --------
 
-    >>> from nipype.interfaces.fsl import L2Model
+    >>> from nipype.interfaces.fsl import MultipleRegressDesign
     >>> model = MultipleRegressDesign()
     >>> model.inputs.contrasts = [['group mean', 'T',['reg1'],[1]]]
     >>> model.inputs.regressors = dict(reg1=[1, 1, 1], reg2=[2.,-4, 3])
