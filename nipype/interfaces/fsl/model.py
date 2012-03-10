@@ -1444,13 +1444,22 @@ class RandomiseInputSpec(FSLCommandInputSpec):
 class RandomiseOutputSpec(TraitedSpec):
     tstat_files = traits.List(
         File(exists=True),
-        desc='path/name of tstat image corresponding to the first t contrast')
-    p_files = traits.List(
+        desc='t contrast raw statistic')
+    fstat_files = traits.List(
+        File(exists=True),
+        desc='f contrast raw statistic')
+    t_p_files = traits.List(
         File(exists=True), 
-        desc='p uncorrected files')
-    corrected_p_files = traits.List(
+        desc='f contrast uncorrected p values files')
+    f_p_files = traits.List(
+        File(exists=True),
+        desc='f contrast uncorrected p values files')
+    t_corrected_p_files = traits.List(
         File(exists=True), 
-        desc='p FWE (Family-wise error) corrected files')
+        desc='t contrast FWE (Family-wise error) corrected p values files')
+    f_corrected_p_files = traits.List(
+        File(exists=True),
+        desc='f contrast FWE (Family-wise error) corrected p values files')
 
 class Randomise(FSLCommand):
     """XXX UNSTABLE DO NOT USE
@@ -1480,17 +1489,28 @@ class Randomise(FSLCommand):
         import glob
         outputs['tstat_files'] = glob.glob('%s/%s_tstat*.nii'%(
                 os.getcwd(),self.inputs.base_name))
+        outputs['fstat_files'] = glob.glob('%s/%s_fstat*.nii'%(
+                os.getcwd(),self.inputs.base_name))
         prefix = False
         if self.inputs.tfce or self.inputs.tfce2D:
             prefix='tfce'
         elif self.inputs.vox_p_values:
             prefix='vox'
+        elif self.inputs.c_thresh or self.inputs.f_c_thresh:
+            prefix='clustere'
+        elif self.inputs.cm_thresh or self.inputs.f_cm_thresh:
+            prefix='clusterm'
         if prefix:
-            outputs['p_files'] = glob.glob('%s/%s_%s_p_tstat*.nii'%(
+            outputs['t_p_files'] = glob.glob('%s/%s_%s_p_tstat*.nii'%(
                     os.getcwd(),self.inputs.base_name,prefix))
-            outputs['corrected_p_files'] = glob.glob(
-                '%s/%s_%s_corrp_tstat*.nii'%(
+            outputs['t_corrected_p_files'] = glob.glob(
+                '%s/%s_%s_corrp_fstat*.nii'%(
                     os.getcwd(),self.inputs.base_name,prefix))
 
-        #self._gen_fname(self.inputs.base_name, suffix='_tstat1')
+            outputs['f_p_files'] = glob.glob('%s/%s_%s_p_tstat*.nii'%(
+                    os.getcwd(),self.inputs.base_name,prefix))
+            outputs['f_corrected_p_files'] = glob.glob(
+                '%s/%s_%s_corrp_fstat*.nii'%(
+                    os.getcwd(),self.inputs.base_name,prefix))
+
         return outputs
