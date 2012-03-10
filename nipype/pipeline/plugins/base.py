@@ -461,6 +461,7 @@ from traceback import format_exception
 from nipype import config, logging
 config_dict=%s
 config.update_config(config_dict)
+logging.update_logging(config)
 from nipype.utils.filemanip import loadpkl, savepkl
 """
 

@@ -22,6 +22,7 @@ class Logging(object):
            '%(levelname)-2s:\n\t %(message)s')
     datefmt = '%y%m%d-%H:%M:%S'
     def __init__(self, config):
+        self._config = config
         logging.basicConfig(format=self.fmt, datefmt=self.datefmt,
                             stream=sys.stdout)
         #logging.basicConfig(stream=sys.stdout)
@@ -29,32 +30,45 @@ class Logging(object):
         self._fmlogger = logging.getLogger('filemanip')
         self._iflogger = logging.getLogger('interface')
 
-        self._logger.setLevel(logging.getLevelName(config.get('logging',
-                                                              'workflow_level')))
-        self._fmlogger.setLevel(logging.getLevelName(config.get('logging',
-                                                          'filemanip_level')))
-        self._iflogger.setLevel(logging.getLevelName(config.get('logging',
-                                                          'interface_level')))
         self.loggers = {'workflow': self._logger,
                         'filemanip': self._fmlogger,
                         'interface': self._iflogger}
+        self.update_logging(self._config)
+        self._hdlr = None
 
-    def add_file_handler(self, config=None):
-        if config is None:
-            config = NipypeConfig()
+    def enable_file_logging(self):
+        config = self._config
+        LOG_FILENAME = os.path.join(config.get('logging', 'log_directory'),
+                                    'pypeline.log')
+        hdlr = RFHandler(LOG_FILENAME,
+                         maxBytes=int(config.get('logging', 'log_size')),
+                         backupCount=int(config.get('logging',
+                                                    'log_rotate')))
+        formatter = logging.Formatter(fmt=self.fmt, datefmt=self.datefmt)
+        hdlr.setFormatter(formatter)
+        self._logger.addHandler(hdlr)
+        self._fmlogger.addHandler(hdlr)
+        self._iflogger.addHandler(hdlr)
+        self._hdlr = hdlr
+
+    def disable_file_logging(self):
+        if self._hdlr:
+            self._logger.removeHandler(self._hdlr)
+            self._fmlogger.removeHandler(self._hdlr)
+            self._iflogger.removeHandler(self._hdlr)
+            self._hdlr = None
+
+    def update_logging(self, config):
+        self._config = config
+        self._logger.setLevel(logging.getLevelName(config.get('logging',
+                                                              'workflow_level')))
+        self._fmlogger.setLevel(logging.getLevelName(config.get('logging',
+                                                                'filemanip_level')))
+        self._iflogger.setLevel(logging.getLevelName(config.get('logging',
+                                                                'interface_level')))
         if str2bool(config.get('logging', 'log_to_file')):
-            LOG_FILENAME = os.path.join(config.get('logging', 'log_directory'),
-                                        'pypeline.log')
-            hdlr = RFHandler(LOG_FILENAME,
-                             maxBytes=int(config.get('logging', 'log_size')),
-                             backupCount=int(config.get('logging',
-                                                        'log_rotate')))
-            formatter = logging.Formatter(fmt=self.fmt, datefmt=self.datefmt)
-            hdlr.setFormatter(formatter)
-            self._logger.addHandler(hdlr)
-            self._fmlogger.addHandler(hdlr)
-            self._iflogger.addHandler(hdlr)
-            self._hdlr = hdlr
+            self.disable_file_logging()
+            self.enable_file_logging()
 
     def getLogger(self, name):
         if name in self.loggers:

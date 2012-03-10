@@ -18,13 +18,14 @@ from .base import (DistributedPluginBase, logger, report_crash)
 def execute_task(pckld_task, node_config, updatehash):
     from socket import gethostname
     from traceback import format_exc
-    from nipype import config
-    config.update_config(node_config)
-    from cPickle import loads
-    task = loads(pckld_task)
+    from nipype import config, logging
     traceback=None
     result=None
     try:
+        config.update_config(node_config)
+        logging.update_logging(config)
+        from cPickle import loads
+        task = loads(pckld_task)
         result = task.run(updatehash=updatehash)
     except:
         traceback = format_exc()
