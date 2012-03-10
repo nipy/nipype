@@ -88,15 +88,15 @@ def check_for_updates():
     print "Current stable version: %s" % rel_ver
     print "Current dev version: %s" % dev_ver
 
-
-from time import time
-t = time()
-last_check = config.get_data('last_check')
-if last_check is None or (t - last_check) > float(config.get('check',
-                                                             'interval')):
-    try:
-        check_for_updates()
-    except Exception, e:
-        print e
-    finally:
-        config.save_data('last_check', t)
+if int(config.get('check', 'interval')) > 0:
+    from time import time
+    t = time()
+    last_check = config.get_data('last_check')
+    if last_check is None or (t - last_check) > int(config.get('check',
+                                                               'interval')):
+        try:
+            check_for_updates()
+        except Exception, e:
+            print e
+        finally:
+            config.save_data('last_check', t)
