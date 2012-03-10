@@ -52,7 +52,7 @@ __version__ = "%s.%s.%s%s" % (_version_major,
                               _version_micro,
                               _version_extra)
 
-CLASSIFIERS = ["Development Status :: 5 - Stable",
+CLASSIFIERS = ["Development Status :: 5 - Production/Stable",
                "Environment :: Console",
                "Intended Audience :: Science/Research",
                "License :: OSI Approved :: BSD License",
