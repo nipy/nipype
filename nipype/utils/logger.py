@@ -60,6 +60,7 @@ class Logging(object):
 
     def update_logging(self, config):
         self._config = config
+        self.disable_file_logging()
         self._logger.setLevel(logging.getLevelName(config.get('logging',
                                                               'workflow_level')))
         self._fmlogger.setLevel(logging.getLevelName(config.get('logging',
@@ -67,7 +68,6 @@ class Logging(object):
         self._iflogger.setLevel(logging.getLevelName(config.get('logging',
                                                                 'interface_level')))
         if str2bool(config.get('logging', 'log_to_file')):
-            self.disable_file_logging()
             self.enable_file_logging()
 
     def getLogger(self, name):

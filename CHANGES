@@ -1,7 +1,9 @@
 Changes since 0.5
 =================
 
-None
+* API: Logging to file is disabled by default
+
+* ENH: Changing logging options via config works for distributed processing
 
 Release 0.5 (Mar 10, 2012)
 ==========================
