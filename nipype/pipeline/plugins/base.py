@@ -5,7 +5,6 @@
 
 from copy import deepcopy
 from glob import glob
-import logging
 import os
 import pwd
 import shutil
@@ -26,6 +25,7 @@ from nipype.interfaces.utility import Function
 import traceback
 
 
+from ... import logging
 logger = logging.getLogger('workflow')
 iflogger = logging.getLogger('interface')
 
@@ -458,7 +458,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
 import sys
 from socket import gethostname
 from traceback import format_exception
-from nipype.utils.config import config
+from nipype import config, logging
 config_dict=%s
 config.update_config(config_dict)
 from nipype.utils.filemanip import loadpkl, savepkl

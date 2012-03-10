@@ -27,9 +27,7 @@ try:
 except Exception, e:
     warnings.warn('dipy not installed')
 from nibabel.orientations import aff2axcodes
-import logging
-
-logging.basicConfig()
+from ... import logging
 iflogger = logging.getLogger('interface')
 
 def transform_to_affine(streams, header, affine):

@@ -20,9 +20,8 @@ import numpy as np
 import nibabel as nb
 import networkx as nx
 import sys
-import logging
 
-logging.basicConfig()
+from ... import logging
 iflogger = logging.getLogger('interface')
 
 def length(xyz, along=False):
