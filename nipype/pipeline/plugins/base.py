@@ -458,6 +458,9 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
 import sys
 from socket import gethostname
 from traceback import format_exception
+from nipype.utils.config import config
+config_dict=%s
+config.update_config(config_dict)
 from nipype.utils.filemanip import loadpkl, savepkl
 """
 
@@ -490,7 +493,7 @@ except:
                                'result_%%s.pklz'%%info['node'].name)
     savepkl(resultsfile, dict(result=result, hostname=gethostname(),
                               traceback=traceback))
-""" % (pkl_file, batch_dir, suffix)
+""" % (node.config, pkl_file, batch_dir, suffix)
         pyscript = os.path.join(batch_dir, 'pyscript_%s.py' % suffix)
         fp = open(pyscript, 'wt')
         fp.writelines(cmdstr)

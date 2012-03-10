@@ -108,6 +108,12 @@ class NipypeConfig(ConfigParser.ConfigParser):
             datadict[key] = value
             dump(datadict, file)
 
+    def update_config(self, config_dict):
+        for section in ['execution', 'logging', 'check']:
+            if section in config_dict:
+                for key, val in config_dict[section]:
+                    config.set(section, key, str(val))
+
 config = NipypeConfig()
 config.readfp(default_cfg)
 config.read([new_config_file, old_config_file, 'nipype.cfg'])
