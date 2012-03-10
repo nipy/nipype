@@ -1507,7 +1507,7 @@ class Randomise(FSLCommand):
                 '%s/%s_%s_corrp_fstat*.nii'%(
                     os.getcwd(),self.inputs.base_name,prefix))
 
-            outputs['f_p_files'] = glob.glob('%s/%s_%s_p_tstat*.nii'%(
+            outputs['f_p_files'] = glob.glob('%s/%s_%s_p_fstat*.nii'%(
                     os.getcwd(),self.inputs.base_name,prefix))
             outputs['f_corrected_p_files'] = glob.glob(
                 '%s/%s_%s_corrp_fstat*.nii'%(
