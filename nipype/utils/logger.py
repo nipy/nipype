@@ -33,8 +33,8 @@ class Logging(object):
         self.loggers = {'workflow': self._logger,
                         'filemanip': self._fmlogger,
                         'interface': self._iflogger}
-        self.update_logging(self._config)
         self._hdlr = None
+        self.update_logging(self._config)
 
     def enable_file_logging(self):
         config = self._config
