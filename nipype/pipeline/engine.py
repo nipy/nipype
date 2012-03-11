@@ -973,6 +973,7 @@ class Node(WorkflowBase):
         self.run_without_submitting = run_without_submitting
         self.input_source = {}
         self.needed_outputs = []
+        self.plugin_args = {}
         if needed_outputs:
             self.needed_outputs = sorted(needed_outputs)
 
