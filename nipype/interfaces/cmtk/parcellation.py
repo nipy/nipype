@@ -360,6 +360,11 @@ class ParcellateInputSpec(BaseInterfaceInputSpec):
 
 class ParcellateOutputSpec(TraitedSpec):
     roi_file = File(desc='Region of Interest file for connectivity mapping')
+    white_matter_mask_file = File(desc='White matter mask file')
+    cc_unknown_file = File(desc='Image file with regions labelled as unknown cortical structures')
+    ribbon_file = File(desc='Image file detailing the cortical ribbon')
+    aseg_file = File(desc='Automated segmentation file converted from Freesurfer "subjects" directory')
+    roi_file_in_structural_space = File(desc='ROI image resliced to the dimensions of the original structural image')
 
 class Parcellate(BaseInterface):
     """Subdivides segmented ROI file into smaller subregions
@@ -404,7 +409,7 @@ class Parcellate(BaseInterface):
         outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
         outputs['ribbon_file'] = op.abspath('ribbon.nii.gz')
         outputs['aseg_file'] = op.abspath('aseg.nii.gz')
-        outputs['ROI_HR_th_file'] = op.abspath('ROI_HR_th.nii.gz')
+        outputs['roi_file_in_structural_space'] = op.abspath('ROI_HR_th.nii.gz')
         return outputs
 
     def _gen_outfilename(self, ext, prefix='ROI'):
