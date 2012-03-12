@@ -1505,16 +1505,16 @@ class Randomise(FSLCommand):
         if prefix:
             outputs['t_p_files'] = glob.glob(os.path.join(
                 os.getcwd(),
-                '%s_%s_p_tstat*.nii'%(self.inputs.base_name,prefix))
+                '%s_%s_p_tstat*.nii'%(self.inputs.base_name,prefix) ))
             outputs['t_corrected_p_files'] = glob.glob(os.path.join(
                 os.getcwd(),
-                '%s_%s_corrp_tstat*.nii'%(self.inputs.base_name,prefix))
+                '%s_%s_corrp_tstat*.nii'%(self.inputs.base_name,prefix)))
 
             outputs['f_p_files'] = glob.glob(os.path.join(
                 os.getcwd(),
-                '%s_%s_p_fstat*.nii'%(self.inputs.base_name,prefix))
+                '%s_%s_p_fstat*.nii'%(self.inputs.base_name,prefix)))
             outputs['f_corrected_p_files'] = glob.glob(os.path.join(
                 os.getcwd(),
-                '%s_%s_corrp_fstat*.nii'%(self.inputs.base_name,prefix))
+                '%s_%s_corrp_fstat*.nii'%(self.inputs.base_name,prefix)))
 
         return outputs
