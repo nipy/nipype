@@ -984,7 +984,7 @@ class MultipleRegressDesign(BaseInterface):
     Examples
     --------
 
-    >>> from nipype.interfaces.fsl import L2Model
+    >>> from nipype.interfaces.fsl import MultipleRegressDesign
     >>> model = MultipleRegressDesign()
     >>> model.inputs.contrasts = [['group mean', 'T',['reg1'],[1]]]
     >>> model.inputs.regressors = dict(reg1=[1, 1, 1], reg2=[2.,-4, 3])
@@ -1442,8 +1442,24 @@ class RandomiseInputSpec(FSLCommandInputSpec):
 
 
 class RandomiseOutputSpec(TraitedSpec):
-    tstat1_file = File(exists=True, desc='path/name of tstat image corresponding to the first t contrast')
-
+    tstat_files = traits.List(
+        File(exists=True),
+        desc='t contrast raw statistic')
+    fstat_files = traits.List(
+        File(exists=True),
+        desc='f contrast raw statistic')
+    t_p_files = traits.List(
+        File(exists=True), 
+        desc='f contrast uncorrected p values files')
+    f_p_files = traits.List(
+        File(exists=True),
+        desc='f contrast uncorrected p values files')
+    t_corrected_p_files = traits.List(
+        File(exists=True), 
+        desc='t contrast FWE (Family-wise error) corrected p values files')
+    f_corrected_p_files = traits.List(
+        File(exists=True),
+        desc='f contrast FWE (Family-wise error) corrected p values files')
 
 class Randomise(FSLCommand):
     """XXX UNSTABLE DO NOT USE
@@ -1470,5 +1486,35 @@ class Randomise(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['tstat1_file'] = self._gen_fname(self.inputs.base_name, suffix='_tstat1')
+        import glob
+        outputs['tstat_files'] = glob.glob(os.path.join(
+                os.getcwd(),
+                '%s_tstat*.nii'%self.inputs.base_name))
+        outputs['fstat_files'] = glob.glob(os.path.join(
+                os.getcwd(),
+                '%s_fstat*.nii'%self.inputs.base_name))
+        prefix = False
+        if self.inputs.tfce or self.inputs.tfce2D:
+            prefix='tfce'
+        elif self.inputs.vox_p_values:
+            prefix='vox'
+        elif self.inputs.c_thresh or self.inputs.f_c_thresh:
+            prefix='clustere'
+        elif self.inputs.cm_thresh or self.inputs.f_cm_thresh:
+            prefix='clusterm'
+        if prefix:
+            outputs['t_p_files'] = glob.glob(os.path.join(
+                os.getcwd(),
+                '%s_%s_p_tstat*.nii'%(self.inputs.base_name,prefix) ))
+            outputs['t_corrected_p_files'] = glob.glob(os.path.join(
+                os.getcwd(),
+                '%s_%s_corrp_tstat*.nii'%(self.inputs.base_name,prefix)))
+
+            outputs['f_p_files'] = glob.glob(os.path.join(
+                os.getcwd(),
+                '%s_%s_p_fstat*.nii'%(self.inputs.base_name,prefix)))
+            outputs['f_corrected_p_files'] = glob.glob(os.path.join(
+                os.getcwd(),
+                '%s_%s_corrp_fstat*.nii'%(self.inputs.base_name,prefix)))
+
         return outputs
