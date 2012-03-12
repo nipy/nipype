@@ -1487,10 +1487,12 @@ class Randomise(FSLCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         import glob
-        outputs['tstat_files'] = glob.glob('%s/%s_tstat*.nii'%(
-                os.getcwd(),self.inputs.base_name))
-        outputs['fstat_files'] = glob.glob('%s/%s_fstat*.nii'%(
-                os.getcwd(),self.inputs.base_name))
+        outputs['tstat_files'] = glob.glob(os.path.join(
+                os.getcwd(),
+                '%s_tstat*.nii'%self.inputs.base_name))
+        outputs['fstat_files'] = glob.glob(os.path.join(
+                os.getcwd(),
+                '%s_fstat*.nii'%self.inputs.base_name))
         prefix = False
         if self.inputs.tfce or self.inputs.tfce2D:
             prefix='tfce'
@@ -1501,16 +1503,18 @@ class Randomise(FSLCommand):
         elif self.inputs.cm_thresh or self.inputs.f_cm_thresh:
             prefix='clusterm'
         if prefix:
-            outputs['t_p_files'] = glob.glob('%s/%s_%s_p_tstat*.nii'%(
-                    os.getcwd(),self.inputs.base_name,prefix))
-            outputs['t_corrected_p_files'] = glob.glob(
-                '%s/%s_%s_corrp_fstat*.nii'%(
-                    os.getcwd(),self.inputs.base_name,prefix))
+            outputs['t_p_files'] = glob.glob(os.path.join(
+                os.getcwd(),
+                '%s_%s_p_tstat*.nii'%(self.inputs.base_name,prefix))
+            outputs['t_corrected_p_files'] = glob.glob(os.path.join(
+                os.getcwd(),
+                '%s_%s_corrp_tstat*.nii'%(self.inputs.base_name,prefix))
 
-            outputs['f_p_files'] = glob.glob('%s/%s_%s_p_fstat*.nii'%(
-                    os.getcwd(),self.inputs.base_name,prefix))
-            outputs['f_corrected_p_files'] = glob.glob(
-                '%s/%s_%s_corrp_fstat*.nii'%(
-                    os.getcwd(),self.inputs.base_name,prefix))
+            outputs['f_p_files'] = glob.glob(os.path.join(
+                os.getcwd(),
+                '%s_%s_p_fstat*.nii'%(self.inputs.base_name,prefix))
+            outputs['f_corrected_p_files'] = glob.glob(os.path.join(
+                os.getcwd(),
+                '%s_%s_corrp_fstat*.nii'%(self.inputs.base_name,prefix))
 
         return outputs
