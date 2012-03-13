@@ -2,6 +2,7 @@ import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
+from .group_connectivity import pullnodeIDs
 
 def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     """Creates a workflow to calculate various graph measures (via NetworkX) on
@@ -52,6 +53,7 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     pipeline.connect([(Matlab2CSV_node, MergeCSVFiles_node,[("csv_files","in_files")])])
     pipeline.connect([(inputnode, MergeCSVFiles_node,[("extra_field","out_file")])])
     pipeline.connect([(inputnode, MergeCSVFiles_node,[("extra_field","extra_field")])])
+    pipeline.connect([(inputnode, MergeCSVFiles_node, [(("network_file", pullnodeIDs), "row_headings")])])
 
     pipeline.connect([(inputnode, mergeNetworks,[("network_file","in1")])])
     pipeline.connect([(ntwkMetrics, mergeNetworks,[("gpickled_network_files","in2")])])
@@ -67,7 +69,7 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     pipeline.connect([(Matlab2CSV_global, mergeCSVs, [("csv_files", "in2")])])
     pipeline.connect([(mergeNetworks, outputnode, [("out", "network_files")])])
     pipeline.connect([(mergeCSVs, outputnode, [("out", "csv_files")])])
-    pipeline.connect([(ntwkMetrics, outputnode,[("matlab_matrix_files","matlab_files")])])
+    pipeline.connect([(ntwkMetrics, outputnode,[("matlab_matrix_files", "matlab_files")])])
     return pipeline
 
 def create_cmats_to_csv_pipeline(name="cmats_to_csv", extra_column_heading="subject"):
