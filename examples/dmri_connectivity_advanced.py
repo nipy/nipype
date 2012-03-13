@@ -268,7 +268,7 @@ The tracts are then used to generate a tract-density image, and they are also co
 
 probCSDstreamtrack = pe.Node(interface=mrtrix.ProbabilisticSphericallyDeconvolutedStreamlineTrack(),name='probCSDstreamtrack')
 probCSDstreamtrack.inputs.inputmodel = 'SD_PROB'
-probCSDstreamtrack.inputs.maximum_number_of_tracks = 150000
+probCSDstreamtrack.inputs.desired_number_of_tracks = 150000
 tracks2prob = pe.Node(interface=mrtrix.Tracks2Prob(),name='tracks2prob')
 tracks2prob.inputs.colour = True
 MRconvert_tracks2prob = MRconvert_fa.clone(name='MRconvert_tracks2prob')
@@ -542,7 +542,7 @@ mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
 mapping.connect([(creatematrix, CFFConverter,[("matrix_files","gpickled_networks")])])
 mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
 mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
-mapping.connect([(creatematrix, CFFConverter,[("filtered_tractography","tract_files")])])
+mapping.connect([(creatematrix, CFFConverter,[("filtered_tractographies","tract_files")])])
 mapping.connect([(inputnode, CFFConverter,[("subject_id","title")])])
 
 """
