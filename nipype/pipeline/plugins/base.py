@@ -494,7 +494,8 @@ except:
                                'result_%%s.pklz'%%info['node'].name)
     savepkl(resultsfile, dict(result=result, hostname=gethostname(),
                               traceback=traceback))
-""" % (node.config, pkl_file, batch_dir, suffix)
+"""
+        cmdstr = cmdstr % (node.config, pkl_file, batch_dir, suffix)
         pyscript = os.path.join(batch_dir, 'pyscript_%s.py' % suffix)
         fp = open(pyscript, 'wt')
         fp.writelines(cmdstr)
