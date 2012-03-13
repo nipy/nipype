@@ -1094,8 +1094,8 @@ class Node(WorkflowBase):
                             except:
                                 pass
                             else:
-                                logdebug_dict_differences(prev_inputs,
-                                                          hashed_inputs)
+                                logging.logdebug_dict_differences(prev_inputs,
+                                                                  hashed_inputs)
                 if (str2bool(self.config['execution']['stop_on_first_rerun']) and
                     not (self.overwrite == None and self._interface.always_run)):
                     raise Exception(("Cannot rerun when 'stop_on_first_rerun' "
