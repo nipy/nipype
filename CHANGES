@@ -2,6 +2,7 @@ Changes since 0.5
 =================
 
 * API: Logging to file is disabled by default
+* API: New location of log file -> .nipype/nipype.cfg
 
 * ENH: Changing logging options via config works for distributed processing
 
