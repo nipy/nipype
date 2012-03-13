@@ -1,7 +1,7 @@
 Changes since 0.5
 =================
 
-None
+* API: Node now allows specifying node level configuration for SGE/PBS clusters
 
 Release 0.5 (Mar 10, 2012)
 ==========================
