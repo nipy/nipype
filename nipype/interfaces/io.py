@@ -129,12 +129,12 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                   desc='remove dest directory when copying dirs')
 
     def __setattr__(self, key, value):
+        super(DataSinkInputSpec, self).__setattr__(key, value)
         if key not in self.copyable_trait_names():
             self._outputs[key] = value
         else:
             if key in self._outputs:
                 self._outputs[key] = value
-            super(DataSinkInputSpec, self).__setattr__(key, value)
 
 class DataSink(IOBase):
     """ Generic datasink module to store structured outputs
