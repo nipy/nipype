@@ -38,7 +38,7 @@ from nipype.interfaces.base import (TraitedSpec, traits, File, Directory,
 from nipype.utils.filemanip import (copyfile, list_to_filename,
                                     filename_to_list)
 
-import logging
+from .. import logging
 iflogger = logging.getLogger('interface')
 
 

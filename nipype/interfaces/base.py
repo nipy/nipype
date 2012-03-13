@@ -21,16 +21,16 @@ from textwrap import wrap
 from time import time
 from warnings import warn
 
-from nipype.interfaces.traits_extension import (traits, Undefined, TraitDictObject,
-                                                TraitListObject, TraitError,
-                                                isdefined, File, Directory,
-                                                has_metadata)
-from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError,
-                                    hash_timestamp)
-from nipype.utils.misc import is_container
-from nipype.utils.config import config
-from nipype.utils.logger import iflogger
-from nipype.utils.misc import trim
+from .traits_extension import (traits, Undefined, TraitDictObject,
+                               TraitListObject, TraitError,
+                               isdefined, File, Directory,
+                               has_metadata)
+from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
+                               hash_timestamp)
+from ..utils.misc import is_container, trim
+from .. import config, logging
+
+iflogger = logging.getLogger('interface')
 
 
 __docformat__ = 'restructuredtext'
