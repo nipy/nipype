@@ -7,7 +7,6 @@
 import cPickle
 from glob import glob
 import gzip
-import logging
 import os
 import re
 import shutil
@@ -32,8 +31,8 @@ import numpy as np
 
 from nipype.interfaces.traits_extension import isdefined
 from nipype.utils.misc import is_container
-from nipype.utils.config import config
 
+from .. import logging, config
 fmlogger = logging.getLogger("filemanip")
 
 

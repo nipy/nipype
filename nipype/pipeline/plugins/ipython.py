@@ -3,6 +3,8 @@
 """Parallel workflow execution via IPython controller
 """
 
+from cPickle import dumps
+
 import sys
 
 from IPython import __version__ as IPyversion
@@ -13,12 +15,17 @@ except:
 
 from .base import (DistributedPluginBase, logger, report_crash)
 
-def execute_task(task, updatehash):
+def execute_task(pckld_task, node_config, updatehash):
     from socket import gethostname
     from traceback import format_exc
+    from nipype import config, logging
     traceback=None
     result=None
     try:
+        config.update_config(node_config)
+        logging.update_logging(config)
+        from cPickle import loads
+        task = loads(pckld_task)
         result = task.run(updatehash=updatehash)
     except:
         traceback = format_exc()
@@ -71,7 +78,11 @@ class IPythonPlugin(DistributedPluginBase):
             return None
 
     def _submit_job(self, node, updatehash=False):
-        result_object = self.taskclient.load_balanced_view().apply(execute_task, node, updatehash)
+        pckld_node = dumps(node, 2)
+        result_object = self.taskclient.load_balanced_view().apply(execute_task,
+                                                                   pckld_node,
+                                                                   node.config,
+                                                                   updatehash)
         self._taskid += 1
         self.taskmap[self._taskid] = result_object
         return self._taskid

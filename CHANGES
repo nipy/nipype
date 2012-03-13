@@ -2,6 +2,10 @@ Changes since 0.5
 =================
 
 * API: Node now allows specifying node level configuration for SGE/PBS clusters
+* API: Logging to file is disabled by default
+* API: New location of log file -> .nipype/nipype.cfg
+
+* ENH: Changing logging options via config works for distributed processing
 
 Release 0.5 (Mar 10, 2012)
 ==========================

@@ -5,7 +5,6 @@
 
 from copy import deepcopy
 from glob import glob
-import logging
 import os
 import re
 
@@ -17,10 +16,10 @@ import networkx as nx
 from nipype.interfaces.base import CommandLine, isdefined, Undefined
 from nipype.utils.filemanip import fname_presuffix, FileNotFoundError,\
     filename_to_list
-from nipype.utils.config import config
 from nipype.utils.misc import create_function_from_source, str2bool
 from nipype.interfaces.utility import IdentityInterface
 
+from .. import logging, config
 logger = logging.getLogger('workflow')
 
 try:

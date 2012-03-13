@@ -6,7 +6,7 @@
 from nipype.interfaces.base import (CommandLine, CommandLineInputSpec, traits,
 isdefined)
 
-import logging
+from ... import logging
 logger = logging.getLogger('iflogger')
 
 
