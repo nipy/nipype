@@ -138,7 +138,7 @@ class CFFConverter(BaseInterface):
         count = 0
         if isdefined(self.inputs.tract_files):
             for trk in self.inputs.tract_files:
-                trk_name = 'Tract file {cnt}'.format(cnt=count)
+                _, trk_name, _ = split_filename(trk)
                 ctrack = cf.CTrack(trk_name, trk)
                 a.add_connectome_track(ctrack)
                 count += 1
