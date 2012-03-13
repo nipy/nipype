@@ -22,7 +22,7 @@ from nipype.interfaces.matlab import MatlabCommand
 
 import nipype.utils.spm_docs as sd
 
-import logging
+from ... import logging
 logger = logging.getLogger('iflogger')
 
 def func_is_3d(in_file):

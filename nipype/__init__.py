@@ -6,7 +6,10 @@ from info import (LONG_DESCRIPTION as __doc__,
                   URL as __url__,
                   STATUS as __status__,
                   __version__)
-from utils.config import config
+from utils.config import NipypeConfig
+config = NipypeConfig()
+from utils.logger import Logging
+logging = Logging(config)
 
 # We require numpy 1.2 for our test suite.  If Tester fails to import,
 # check the version of numpy the user has and inform them they need to

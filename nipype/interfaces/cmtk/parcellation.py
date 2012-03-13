@@ -18,9 +18,8 @@ import networkx as nx
 import shutil
 from nipype.utils.misc import package_check
 import warnings
-import logging
 
-logging.basicConfig()
+from ... import logging
 iflogger = logging.getLogger('interface')
 
 have_cmp = True

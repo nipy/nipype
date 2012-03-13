@@ -29,9 +29,8 @@ from nipype.interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                     traits, File, Bunch, BaseInterfaceInputSpec,
                                     isdefined)
 from nipype.utils.filemanip import filename_to_list
-from nipype.utils.logger import iflogger
-from nipype.utils.config import config
-
+from .. import config, logging
+iflogger = logging.getLogger('interface')
 
 def gcd(a, b):
     """Returns the greatest common divisor of two integers

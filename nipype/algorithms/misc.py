@@ -24,28 +24,30 @@ from scipy.special import legendre
 import scipy.io as sio
 import itertools
 
-from nipype.utils.config import config
+from .. import config, logging
 import matplotlib
 matplotlib.use(config.get("execution", "matplotlib_backend"))
 import matplotlib.pyplot as plt
 
-from nipype.interfaces.base import (BaseInterface, traits, TraitedSpec, File,
-                                    InputMultiPath, OutputMultiPath,
-                                    BaseInterfaceInputSpec, isdefined)
-from nipype.utils.filemanip import fname_presuffix, split_filename
-import logging
-
-logging.basicConfig()
+from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
+                               InputMultiPath, OutputMultiPath,
+                               BaseInterfaceInputSpec, isdefined)
+from ..utils.filemanip import fname_presuffix, split_filename
 iflogger = logging.getLogger('interface')
 
 
 class PickAtlasInputSpec(BaseInterfaceInputSpec):
-    atlas = File(exists=True, desc="Location of the atlas that will be used.", mandatory=True)
+    atlas = File(exists=True, desc="Location of the atlas that will be used.",
+                 mandatory=True)
     labels = traits.Either(traits.Int, traits.List(traits.Int),
-                           desc="Labels of regions that will be included in the mask. Must be \
-compatible with the atlas used.", compulsory=True)
-    hemi = traits.Enum('both', 'left', 'right', desc="Restrict the mask to only one hemisphere: left or right", usedefault=True)
-    dilation_size = traits.Int(desc="Defines how much the mask will be dilated (expanded in 3D).", usedefault=True)
+                           desc=("Labels of regions that will be included in"
+                           "the mask. Must be compatible with the atlas used."),
+                           compulsory=True)
+    hemi = traits.Enum('both', 'left', 'right',
+                desc="Restrict the mask to only one hemisphere: left or right",
+                       usedefault=True)
+    dilation_size = traits.Int(usedefault=True,
+            desc="Defines how much the mask will be dilated (expanded in 3D).")
     output_file = File(desc="Where to store the output mask.")
 
 
