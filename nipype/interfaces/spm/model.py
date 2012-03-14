@@ -30,7 +30,7 @@ from nipype.utils.filemanip import (filename_to_list, list_to_filename,
                                     split_filename)
 
 from ... import logging
-logger = logging.getLogger('spmlogger')
+logger = logging.getLogger('interface')
 
 
 class Level1DesignInputSpec(SPMCommandInputSpec):
