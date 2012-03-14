@@ -88,16 +88,20 @@ that the input file came from a different directory::
 
     def Hello():
        import os
+       from nipype import logging
+       iflogger = logging.getLogger('interface')
        message = "Hello "
        file_name =  'hello.txt'
-       print message
+       iflogger.info(message)
        with open(file_name, 'w') as fp:
            fp.write(message)
        return os.path.abspath(file_name)
 
     def World(in_file):
+       from nipype import logging
+       iflogger = logging.getLogger('interface')
        message = "World!"
-       print message
+       iflogger.info(message)
        with open(in_file, 'a') as fp:
            fp.write(message)
 
