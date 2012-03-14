@@ -130,3 +130,30 @@ def test_inputs_removal():
                                                    n1.name,
                                                    'file1.txt'))
     rmtree(out_dir)
+
+def fwhm(fwhm):
+    return fwhm
+
+def create_wf(name):
+    pipe = pe.Workflow(name=name)
+    process = pe.Node(niu.Function(input_names=['fwhm'],
+                            output_names=['fwhm'],
+                            function=fwhm),
+                   name='proc')
+    process.iterables = ('fwhm', [0])
+    process2 = pe.Node(niu.Function(input_names=['fwhm'],
+                                   output_names=['fwhm'],
+                                   function=fwhm),
+                      name='proc2')
+    process2.iterables = ('fwhm', [0])
+    pipe.connect(process, 'fwhm', process2, 'fwhm')
+    return pipe
+
+def test_multi_disconnected_iterable():
+    out_dir = mkdtemp()
+    metawf = pe.Workflow(name='meta')
+    metawf.base_dir = out_dir
+    metawf.add_nodes([create_wf('wf%d' % i) for i in range(30)])
+    eg = metawf.run(plugin='Linear')
+    yield assert_equal, len(eg.nodes()), 60
+    rmtree(out_dir)
