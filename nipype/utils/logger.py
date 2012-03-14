@@ -75,8 +75,7 @@ class Logging(object):
             return self.loggers[name]
         return None
 
-    @classmethod
-    def getLevelName(name):
+    def getLevelName(self, name):
         return logging.getLevelName(name)
 
     def logdebug_dict_differences(self, dold, dnew, prefix=""):
