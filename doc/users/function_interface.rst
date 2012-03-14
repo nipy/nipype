@@ -74,6 +74,8 @@ would fail.
 Hello World - Function interface in a workflow
 ----------------------------------------------
 
+Contributed by: Hänel Nikolaus Valentin 
+
 The following snippet of code demonstrates the use of the function interface in
 the context of a workflow. Note the use of `import os` within the function as
 well as returning the absolute path from the Hello function. The `import` inside
