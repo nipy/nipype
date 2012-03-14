@@ -397,10 +397,9 @@ connected.
         """
         outlist = []
         for node in nx.topological_sort(self._graph):
-            print node.fullname #dbg
             if isinstance(node, Workflow):
                 outlist.extend(['.'.join((node.name, nodename)) for nodename in
-                                node.list_nodes()])
+                                node.list_node_names()])
             else:
                 outlist.append(node.name)
         return sorted(outlist)
