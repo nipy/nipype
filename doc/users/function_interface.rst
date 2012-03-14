@@ -76,10 +76,10 @@ Hello World - Function interface in a workflow
 
 The following snippet of code demonstrates the use of the function interface in
 the context of a workflow. Note the use of `import os` within the function as
-well as returning the absolute path from the Hello function. These are
-necessary, because functions are coded as strings and do not have to be on the
+well as returning the absolute path from the Hello function. The `import` inside
+is necessary because functions are coded as strings and do not have to be on the
 PYTHONPATH. However any function called by this function has to be available on
-the PYTHONPATH. The absolute path is necessary because all workflow nodes are
+the PYTHONPATH. The `absolute path` is necessary because all workflow nodes are
 executed in their own directory and therefore there is no way of determining
 that the input file came from a different directory::
 
