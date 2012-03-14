@@ -86,9 +86,6 @@ that the input file came from a different directory::
     import nipype.pipeline.engine as pe
     from nipype.interfaces.utility import Function
 
-    from nipype import config
-    config.set('execution', 'remove_unnecessary_outputs', 'false')
-
     def Hello():
        import os
        message = "Hello "
