@@ -23,7 +23,7 @@ from nipype.interfaces.matlab import MatlabCommand
 import nipype.utils.spm_docs as sd
 
 from ... import logging
-logger = logging.getLogger('iflogger')
+logger = logging.getLogger('interface')
 
 def func_is_3d(in_file):
     """Checks if input functional files are 3d."""
