@@ -1,5 +1,5 @@
-Changes since 0.5
-=================
+Release 0.5.1 (Mar 14, 2012)
+============================
 
 * API: Node now allows specifying node level configuration for SGE/PBS clusters
 * API: Logging to file is disabled by default
