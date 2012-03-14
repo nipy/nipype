@@ -8,10 +8,7 @@ from cPickle import dumps
 import sys
 
 from IPython import __version__ as IPyversion
-try:
-    from IPython.parallel.contexts import ConnectionRefusedError
-except:
-    pass
+from IPython.parallel.error import TimeoutError
 
 from .base import (DistributedPluginBase, logger, report_crash)
 
@@ -58,10 +55,11 @@ class IPythonPlugin(DistributedPluginBase):
         try:
             self.taskclient = self.iparallel.Client()
         except Exception, e:
-            if isinstance(e, ConnectionRefusedError):
+            if isinstance(e, TimeoutError):
                 raise Exception("No IPython clients found.")
             if isinstance(e, ValueError):
                 raise Exception("Ipython kernel not installed")
+            raise e
         return super(IPythonPlugin, self).run(graph, config, updatehash=updatehash)
 
     def _get_result(self, taskid):
