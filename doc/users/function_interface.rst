@@ -114,7 +114,6 @@ that the input file came from a different directory::
                                       function=World))
 
     pipeline = pe.Workflow(name='nipype_demo')
-    pipeline.add_nodes([hello, world])
     pipeline.connect([(hello, world, [('out_file', 'in_file')])])
     pipeline.run()
     pipeline.write_graph(graph2use='flat')
