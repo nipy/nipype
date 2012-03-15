@@ -95,8 +95,8 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
 
 class FmriRealign4dOutputSpec(TraitedSpec):
 
-    out_file = OutputMultiPath(desc="Realigned files")
-    par_file = OutputMultiPath(desc="Motion parameter files")
+    out_file = OutputMultiPath(File(exists=True), desc="Realigned files")
+    par_file = OutputMultiPath(File(exists=True), desc="Motion parameter files")
 
 
 class FmriRealign4d(BaseInterface):
