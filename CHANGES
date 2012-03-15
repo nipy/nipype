@@ -1,4 +1,4 @@
-Release 0.5.1 (Mar 14, 2012)
+Release 0.5.2 (Mar 14, 2012)
 ============================
 
 * API: Node now allows specifying node level configuration for SGE/PBS clusters
@@ -6,6 +6,8 @@ Release 0.5.1 (Mar 14, 2012)
 * API: New location of log file -> .nipype/nipype.cfg
 
 * ENH: Changing logging options via config works for distributed processing
+
+* FIX: Unittests on debian (logging and ipython)
 
 Release 0.5 (Mar 10, 2012)
 ==========================
