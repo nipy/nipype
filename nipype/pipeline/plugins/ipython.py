@@ -7,8 +7,12 @@ from cPickle import dumps
 
 import sys
 
-from IPython import __version__ as IPyversion
-from IPython.parallel.error import TimeoutError
+IPython_not_loaded = False
+try:
+    from IPython import __version__ as IPyversion
+    from IPython.parallel.error import TimeoutError
+except:
+    IPython_not_loaded = True
 
 from .base import (DistributedPluginBase, logger, report_crash)
 
@@ -34,6 +38,8 @@ class IPythonPlugin(DistributedPluginBase):
     """
 
     def __init__(self, plugin_args=None):
+        if IPython_not_loaded:
+            raise ImportError('IPython parallel could not be imported')
         super(IPythonPlugin, self).__init__(plugin_args=plugin_args)
         self.iparallel = None
         self.taskclient = None
