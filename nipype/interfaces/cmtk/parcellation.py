@@ -354,15 +354,13 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
 class ParcellateInputSpec(BaseInterfaceInputSpec):
     subject_id = traits.String(mandatory=True, desc='Subject ID')
     parcellation_name = traits.Enum('scale500', ['scale33', 'scale60', 'scale125', 'scale250', 'scale500'], usedefault=True)
-    freesurfer_dir = Directory(desc='Freesurfer main directory')
-    subjects_dir = Directory(desc='Freesurfer main directory')
-    out_roi_file = File(genfile=True, desc='Region of Interest file for connectivity mapping')
-
+    freesurfer_dir = Directory(exists=True, desc='Freesurfer main directory')
+    subjects_dir = Directory(exists=True, desc='Freesurfer subjects directory')
+    out_roi_file = File(genfile = True, desc='Region of Interest file for connectivity mapping')
 
 class ParcellateOutputSpec(TraitedSpec):
-    roi_file = File(desc='Region of Interest file for connectivity mapping',
-                    exists=True)
-    white_matter_mask_file = File(desc='White matter mask file')
+    roi_file = File(exists=True, desc='Region of Interest file for connectivity mapping')
+    white_matter_mask_file = File(exists=True, desc='White matter mask file')
     cc_unknown_file = File(desc='Image file with regions labelled as unknown cortical structures',
                     exists=True)
     ribbon_file = File(desc='Image file detailing the cortical ribbon',

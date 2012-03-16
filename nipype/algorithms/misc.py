@@ -671,6 +671,7 @@ def merge_csvs(in_list):
 
 def remove_identical_paths(in_files):
     import os.path as op
+    from nipype.utils.filemanip import split_filename
     if len(in_files) > 1:
         out_names = list()
         commonprefix = op.commonprefix(in_files)
@@ -723,6 +724,7 @@ class MergeCSVFilesInputSpec(TraitedSpec):
     out_file = File('merged.csv', usedefault=True, desc='Output filename for merged CSV file')
     column_headings = traits.List(traits.Str, desc='List of column headings to save in merged CSV file (must be equal to number of input files). If left undefined, these will be pulled from the input filenames.')
     row_headings = traits.List(traits.Str, desc='List of row headings to save in merged CSV file (must be equal to number of rows in the input files).')
+    row_heading_title = traits.Str('label', usedefault=True, desc='Column heading for the row headings added')
     extra_column_heading = traits.Str(desc='New heading to add for the added field.')
     extra_field = traits.Str(desc='New field to add to each row. This is useful for saving the group or subject ID in the file.')
 
@@ -778,7 +780,8 @@ class MergeCSVFiles(BaseInterface):
 
         if isdefined(self.inputs.row_headings):
             iflogger.info('Row headings have been provided. Adding "labels" column header.')
-            csv_headings = '"labels","' + '","'.join(itertools.chain(headings)) + '"\n'
+            prefix = '"{p}","'.format(p=self.inputs.row_heading_title)
+            csv_headings = prefix + '","'.join(itertools.chain(headings)) + '"\n'
             rowheadingsBool = True
         else:
             iflogger.info('Row headings have not been provided.')

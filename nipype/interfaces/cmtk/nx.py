@@ -124,7 +124,6 @@ def average_networks(in_files, ntwk_res_file, group_id):
                 if ntwk.has_edge(edge[0], edge[1]):
                     current = {}
                     current = ntwk.edge[edge[0]][edge[1]]
-                    #current['count'] = current['count'] + 1
                     data = add_dicts_by_key(current, data)
                 ntwk.add_edge(edge[0], edge[1], data)
             nodes = tmp.nodes_iter()

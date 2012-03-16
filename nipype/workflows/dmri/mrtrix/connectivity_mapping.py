@@ -479,7 +479,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     mapping.connect([(creatematrix, CFFConverter,[("matrix_files","gpickled_networks")])])
     mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
     mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
-    mapping.connect([(creatematrix, CFFConverter,[("filtered_tractographies","tract_files")])])
+    mapping.connect([(creatematrix, CFFConverter,[("filtered_tractography","tract_files")])])
     mapping.connect([(inputnode_within, CFFConverter,[("subject_id","title")])])
 
     """
