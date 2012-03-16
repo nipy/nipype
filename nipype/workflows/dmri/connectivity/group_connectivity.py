@@ -362,7 +362,7 @@ def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir
 
     l4source_grp1 = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=l4info.keys()), name='l4source_grp1')
     l4source_grp1.inputs.template = '%s/%s'
-    l4source_grp1.inputs.field_template=dict(networks=op.join(output_dir,'%s/networks/*/*%s*.pck'), CMatrices=op.join(output_dir,'%s/cmatrix/*/*%s*.mat'),
+    l4source_grp1.inputs.field_template=dict(networks=op.join(output_dir,'%s/networks/*/*%s*intersections*.pck'), CMatrices=op.join(output_dir,'%s/cmatrix/*/*%s*.mat'),
         fibmean=op.join(output_dir,'%s/mean_fiber_length/*/*%s*.mat'), fibdev=op.join(output_dir,'%s/fiber_length_std/*/*%s*.mat'))
     l4source_grp1.inputs.base_directory = output_dir
     l4source_grp1.inputs.template_args = l4info
