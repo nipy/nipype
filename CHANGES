@@ -26,6 +26,8 @@ Release 0.5.3 (Mar 23, 2012)
 
 * FIX: SPM model generation when output units is in scans
 
+* ENH: Added ICC interface
+
 Release 0.5.2 (Mar 14, 2012)
 ============================
 
