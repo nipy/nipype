@@ -1,3 +1,8 @@
+Since 0.5.2
+===========
+
+* FIX: SPM model generation when output units is in scans
+
 Release 0.5.2 (Mar 14, 2012)
 ============================
 
