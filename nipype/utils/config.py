@@ -62,9 +62,15 @@ class NipypeConfig(object):
         new_config_file = os.path.join(config_dir, 'nipype.cfg')
         # To be deprecated in two releases
         if os.path.exists(old_config_file):
-            warn("Moving old config file from: %s to %s" % (old_config_file,
-                                                            new_config_file))
-            shutil.move(old_config_file, new_config_file)
+            if os.path.exists(new_config_file):
+                warn(("Please remove or merge old/new "
+                      "[%s]/[%s] config file. Will "
+                      "proceed with new config.") % (old_config_file,
+                                                    new_config_file))
+            else:
+                warn("Moving old config file from: %s to %s" % (old_config_file,
+                                                                new_config_file))
+                shutil.move(old_config_file, new_config_file)
         self.data_file = os.path.join(config_dir, 'nipype.json')
         self._config.readfp(StringIO(default_cfg))
         self._config.read([new_config_file, old_config_file, 'nipype.cfg'])
