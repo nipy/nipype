@@ -10,6 +10,11 @@ def add_global_to_filename(in_file):
     path, name, ext = split_filename(in_file)
     return name + '_global' + ext
 
+def add_nodal_to_filename(in_file):
+    from nipype.utils.filemanip import split_filename
+    path, name, ext = split_filename(in_file)
+    return name + '_nodal' + ext
+
 def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     """Creates a workflow to calculate various graph measures (via NetworkX) on
     an input network. The output measures are then converted to comma-separated value
@@ -58,7 +63,7 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     pipeline.connect([(ntwkMetrics, Matlab2CSV_global,[("global_measures_matlab","in_file")])])
 
     pipeline.connect([(Matlab2CSV_node, MergeCSVFiles_node,[("csv_files","in_files")])])
-    pipeline.connect([(inputnode, MergeCSVFiles_node,[("extra_field","out_file")])])
+    pipeline.connect([(inputnode, MergeCSVFiles_node, [(("extra_field", add_nodal_to_filename), "out_file")])])
     pipeline.connect([(inputnode, MergeCSVFiles_node,[("extra_field","extra_field")])])
     pipeline.connect([(inputnode, MergeCSVFiles_node, [(("network_file", pullnodeIDs), "row_headings")])])
 
