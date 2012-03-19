@@ -133,6 +133,7 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
     if (input_units == 'secs') and (output_units == 'scans'):
         _scalefactor = 1./time_repetition
     timelist = [np.max([0., _scalefactor*t]) for t in timelist]
+    print timelist, input_units, output_units #dbg
     return timelist
 
 
@@ -271,6 +272,9 @@ class SpecifyModel(BaseInterface):
             each run
         """
         sessinfo = []
+        output_units = 'secs'
+        if 'output_units' in self.inputs.traits():
+            output_units = self.inputs.output_units
         for i, info in enumerate(infolist):
             sessinfo.insert(i, dict(cond=[]))
             if isdefined(self.inputs.high_pass_filter_cutoff):
@@ -281,11 +285,11 @@ class SpecifyModel(BaseInterface):
                     sessinfo[i]['cond'][cid]['name']  = info.conditions[cid]
                     sessinfo[i]['cond'][cid]['onset'] = scale_timings(info.onsets[cid],
                                                                      self.inputs.input_units,
-                                                                     'secs',
+                                                                     output_units,
                                                                      self.inputs.time_repetition)
                     sessinfo[i]['cond'][cid]['duration'] = scale_timings(info.durations[cid],
                                                                         self.inputs.input_units,
-                                                                        'secs',
+                                                                        output_units,
                                                                         self.inputs.time_repetition)
                     if hasattr(info, 'amplitudes') and info.amplitudes:
                         sessinfo[i]['cond'][cid]['amplitudes']  = info.amplitudes[cid]
