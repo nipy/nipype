@@ -457,7 +457,7 @@ class SpecifySPMModel(SpecifyModel):
         return [infoout], nscans
 
     def _generate_design(self, infolist=None):
-        if not isdefined(self.inputs.concatenate_runs):
+        if not isdefined(self.inputs.concatenate_runs) or not self.inputs.concatenate_runs:
             super(SpecifySPMModel, self)._generate_design(infolist=infolist)
             return
         if isdefined(self.inputs.subject_info):
