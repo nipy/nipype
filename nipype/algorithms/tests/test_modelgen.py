@@ -48,10 +48,9 @@ def test_modelgen_spm_concat():
     Nifti1Image(np.random.rand(10, 10, 10, 50), np.eye(4)).to_filename(filename2)
     s = SpecifySPMModel()
     s.inputs.input_units = 'secs'
-    s.inputs.output_units = 'scans'
     s.inputs.concatenate_runs = True
-    setattr(s.inputs, 'output_units', 'scans')
-    yield assert_equal, s.inputs.output_units, 'scans'
+    setattr(s.inputs, 'output_units', 'secs')
+    yield assert_equal, s.inputs.output_units, 'secs'
     s.inputs.functional_runs = [filename1, filename2]
     s.inputs.time_repetition = 6
     s.inputs.high_pass_filter_cutoff = 128.

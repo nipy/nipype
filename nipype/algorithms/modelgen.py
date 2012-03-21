@@ -133,7 +133,6 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
     if (input_units == 'secs') and (output_units == 'scans'):
         _scalefactor = 1./time_repetition
     timelist = [np.max([0., _scalefactor*t]) for t in timelist]
-    print timelist, input_units, output_units #dbg
     return timelist
 
 
