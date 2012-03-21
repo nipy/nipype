@@ -56,7 +56,7 @@ def concatcsv(in_files):
         in_files = in_files[0]
     first = open(in_files[0], 'r')
     path, name, ext = split_filename(in_files[0])
-    out_name = op.join(path, 'concat.csv')
+    out_name = op.abspath('concat.csv')
     out_file = open(out_name, 'w')
     out_file.write(first.readline())
     first.close()
