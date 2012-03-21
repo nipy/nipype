@@ -217,7 +217,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
         iflogger.info("Filtering tractography from intersections")
         intersection_matrix, final_fiber_ids = create_allpoints_cmat(fib, roiData, roiVoxelSize, nROIs)
         path, name, ext = split_filename(matrix_name)
-        finalfibers_fname = op.join(path, name + '_intersections_streamline_final.trk')
+        finalfibers_fname = op.abspath(name + '_intersections_streamline_final.trk')
         save_fibers(hdr, fib, finalfibers_fname, final_fiber_ids)
         intersection_matrix = np.matrix(intersection_matrix)
         I = G.copy()
@@ -329,9 +329,9 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
 
     if intersections:
         path, name, ext = split_filename(matrix_name)
-        intersection_matrix_name = op.join(path, name + '_intersections') + ext
+        intersection_matrix_name = op.abspath(name + '_intersections') + ext
         iflogger.info('Writing intersection network as {ntwk}'.format(ntwk=intersection_matrix_name))
-        nx.write_gpickle(I, op.abspath(intersection_matrix_name))
+        nx.write_gpickle(I, intersection_matrix_name)
 
     path, name, ext = split_filename(matrix_mat_name)
     if not ext == '.mat':
@@ -343,19 +343,19 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
 
     if intersections:
         intersect_dict = {'intersections': intersection_matrix}
-        intersection_matrix_mat_name = op.join(path, name + '_intersections') + ext
+        intersection_matrix_mat_name = op.abspath(name + '_intersections') + ext
         iflogger.info('Writing intersection matrix as {mat}'.format(mat=intersection_matrix_mat_name))
         sio.savemat(intersection_matrix_mat_name, intersect_dict)
 
-    mean_fiber_length_matrix_name = op.join(path, name + '_mean_fiber_length') + ext
+    mean_fiber_length_matrix_name = op.abspath(name + '_mean_fiber_length') + ext
     iflogger.info('Writing matlab mean fiber length matrix as {mat}'.format(mat=mean_fiber_length_matrix_name))
     sio.savemat(mean_fiber_length_matrix_name, fibmean_dict)
 
-    median_fiber_length_matrix_name = op.join(path, name + '_median_fiber_length') + ext
+    median_fiber_length_matrix_name = op.abspath(name + '_median_fiber_length') + ext
     iflogger.info('Writing matlab median fiber length matrix as {mat}'.format(mat=median_fiber_length_matrix_name))
     sio.savemat(median_fiber_length_matrix_name, fibmedian_dict)
 
-    fiber_length_std_matrix_name = op.join(path, name + '_fiber_length_std') + ext
+    fiber_length_std_matrix_name = op.abspath(name + '_fiber_length_std') + ext
     iflogger.info('Writing matlab fiber length deviation matrix as {mat}'.format(mat=fiber_length_std_matrix_name))
     sio.savemat(fiber_length_std_matrix_name, fibdev_dict)
 
@@ -396,6 +396,7 @@ class CreateMatrixInputSpec(TraitedSpec):
     out_mean_fiber_length_matrix_mat_file = File(genfile=True, desc='Matlab matrix describing the mean fiber lengths between each node.')
     out_median_fiber_length_matrix_mat_file = File(genfile=True, desc='Matlab matrix describing the mean fiber lengths between each node.')
     out_fiber_length_std_matrix_mat_file = File(genfile=True, desc='Matlab matrix describing the deviation in fiber lengths connecting each node.')
+    out_intersection_matrix_mat_file = File(genfile=True, desc='Matlab connectivity matrix if all region/fiber intersections are counted.')
     out_endpoint_array_name = File(genfile=True, desc='Name for the generated endpoint arrays')
 
 class CreateMatrixOutputSpec(TraitedSpec):
@@ -481,8 +482,10 @@ class CreateMatrix(BaseInterface):
         else:
             out_matrix_file = op.abspath(self._gen_outfilename('.pck'))
             out_intersection_matrix_file = op.abspath(self._gen_outfilename('_intersections.pck'))
-        outputs['matrix_file'] = out_matrix_file
 
+        outputs['matrix_file'] = out_matrix_file
+        outputs['intersection_matrix_file'] = out_intersection_matrix_file
+        
         matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
         path, name, ext = split_filename(matrix_mat_file)
         if not ext == '.mat':
@@ -505,6 +508,11 @@ class CreateMatrix(BaseInterface):
         else:
             outputs['fiber_length_std_matrix_mat_file'] = op.abspath(self._gen_outfilename('_fiber_length_std.mat'))
 
+        if isdefined(self.inputs.out_intersection_matrix_mat_file):
+            outputs['intersection_matrix_mat_file'] = op.abspath(self.inputs.out_intersection_matrix_mat_file)
+        else:
+            outputs['intersection_matrix_mat_file'] = op.abspath(self._gen_outfilename('_intersections.mat'))
+
         if isdefined(self.inputs.out_endpoint_array_name):
             outputs['endpoint_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_endpoints.npy')
             outputs['endpoint_file_mm'] = op.abspath(self.inputs.out_endpoint_array_name + '_endpointsmm.npy')
@@ -519,10 +527,6 @@ class CreateMatrix(BaseInterface):
             outputs['fiber_label_file'] = op.abspath(endpoint_name + '_filtered_fiberslabel.npy')
             outputs['fiber_labels_noorphans'] = op.abspath(endpoint_name + '_final_fiberslabels.npy')
 
-        outputs['filtered_tractography_by_intersections'] = op.join(path, name + '_intersections_streamline_final.trk')
-        outputs['intersection_matrix_mat_file'] = op.join(path, name + '_intersections') + ext
-        outputs['intersection_matrix_file'] = out_intersection_matrix_file
-
         if self.inputs.count_region_intersections:
             outputs['matrix_files'] = [out_matrix_file, out_intersection_matrix_file]
             outputs['matlab_matrix_files'] = [outputs['matrix_mat_file'],
@@ -536,6 +540,7 @@ class CreateMatrix(BaseInterface):
 
         _, name , _ = split_filename(self.inputs.tract_file)
         outputs['filtered_tractography'] = op.abspath(name + '_streamline_final.trk')
+        outputs['filtered_tractography_by_intersections'] = op.abspath(name + '_intersections_streamline_final.trk')
         outputs['filtered_tractographies'] = [outputs['filtered_tractography'], outputs['filtered_tractography_by_intersections']]
         return outputs
 
