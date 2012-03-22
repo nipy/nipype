@@ -1032,6 +1032,14 @@ class EPIDeWarpOutputSpec(TraitedSpec):
 class EPIDeWarp(FSLCommand):
     """Wraps fieldmap unwarping script from Freesurfer's epidewarp.fsl_
 
+    Examples
+    --------
+    >>> dewarp = interface=EpiDeWarp()
+    >>> dewarp.inputs.epi_file = "functional.nii"
+    >>> dewarp.inputs.mag_file = "magnitude.nii"
+    >>> dewarp.inputs.dph_file = "phase.nii"
+    >>> res = dewarp.run()
+
     References
     ----------
     _epidewarp.fsl: http://surfer.nmr.mgh.harvard.edu/fswiki/epidewarp.fsl
