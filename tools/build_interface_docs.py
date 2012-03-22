@@ -42,7 +42,7 @@ if __name__ == '__main__':
                                       'FSL',
                                       'FS',
                                       'Info',
-                                      'SPM',
+                                      '^SPM',
                                       'Tester',
                                       'Spec$',
                                       'Numpy'
