@@ -102,7 +102,8 @@ class SliceTiming(SPMCommand):
                     run.append(fname_presuffix(inner_f,
                                                prefix=self.inputs.out_prefix))
             else:
-                realigned_run = fname_presuffix(f, prefix='a')
+                realigned_run = fname_presuffix(f, 
+                                                prefix=self.inputs.out_prefix)
             outputs['timecorrected_files'].append(realigned_run)
         return outputs
 
