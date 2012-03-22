@@ -44,8 +44,8 @@ def test_modelgen_spm_concat():
     tempdir = mkdtemp()
     filename1 = os.path.join(tempdir, 'test1.nii')
     filename2 = os.path.join(tempdir, 'test2.nii')
-    Nifti1Image(np.random.rand(10, 10, 10, 50), np.eye(4)).to_filename(filename1)
-    Nifti1Image(np.random.rand(10, 10, 10, 50), np.eye(4)).to_filename(filename2)
+    Nifti1Image(np.random.rand(10, 10, 10, 30), np.eye(4)).to_filename(filename1)
+    Nifti1Image(np.random.rand(10, 10, 10, 30), np.eye(4)).to_filename(filename2)
     s = SpecifySPMModel()
     s.inputs.input_units = 'secs'
     s.inputs.concatenate_runs = True
@@ -54,16 +54,21 @@ def test_modelgen_spm_concat():
     s.inputs.functional_runs = [filename1, filename2]
     s.inputs.time_repetition = 6
     s.inputs.high_pass_filter_cutoff = 128.
-    info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 180]], durations=[[1]], amplitudes=None,
-                  pmod=None, regressors=None, regressor_names=None, tmod=None),
-            Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], durations=[[1]], amplitudes=None,
-                  pmod=None, regressors=None, regressor_names=None, tmod=None)]
+    info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 170]], durations=[[1]]),
+            Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], durations=[[1]])]
     s.inputs.subject_info = info
     res = s.run()
     yield assert_equal, len(res.outputs.session_info), 1
     yield assert_equal, len(res.outputs.session_info[0]['regress']), 1
     yield assert_equal, len(res.outputs.session_info[0]['cond']), 1
-    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 180.0, 330.0, 340.0, 400.0, 450.0])
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 170.0, 210.0, 220.0, 280.0, 330.0])
+    setattr(s.inputs, 'output_units', 'scans')
+    yield assert_equal, s.inputs.output_units, 'scans'
+    info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 170]], durations=[[1]]),
+            Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], durations=[[1]])]
+    s.inputs.subject_info = info
+    res = s.run()
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 170.0, 210.0, 220.0, 280.0, 330.0])/6
     rmtree(tempdir)
 
 
