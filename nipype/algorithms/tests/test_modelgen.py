@@ -1,5 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from copy import deepcopy
 import os
 from shutil import rmtree
 from tempfile import mkdtemp
@@ -56,19 +57,23 @@ def test_modelgen_spm_concat():
     s.inputs.high_pass_filter_cutoff = 128.
     info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 170]], durations=[[1]]),
             Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], durations=[[1]])]
-    s.inputs.subject_info = info
+    s.inputs.subject_info = deepcopy(info)
     res = s.run()
     yield assert_equal, len(res.outputs.session_info), 1
     yield assert_equal, len(res.outputs.session_info[0]['regress']), 1
+    yield assert_equal, np.sum(res.outputs.session_info[0]['regress'][0]['val']), 30
     yield assert_equal, len(res.outputs.session_info[0]['cond']), 1
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 170.0, 210.0, 220.0, 280.0, 330.0])
     setattr(s.inputs, 'output_units', 'scans')
     yield assert_equal, s.inputs.output_units, 'scans'
-    info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 170]], durations=[[1]]),
-            Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], durations=[[1]])]
-    s.inputs.subject_info = info
+    s.inputs.subject_info = deepcopy(info)
     res = s.run()
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 170.0, 210.0, 220.0, 280.0, 330.0])/6
+    s.inputs.concatenate_runs = False
+    s.inputs.subject_info = deepcopy(info)
+    s.inputs.output_units = 'secs'
+    res = s.run()
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 170.0])
     rmtree(tempdir)
 
 
