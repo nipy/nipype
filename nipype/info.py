@@ -8,9 +8,9 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 # full release.  '.dev' as a _version_extra string means this is a development
 # version
 _version_major = 0
-_version_minor = 6
-_version_micro = 0
-_version_extra = '.dev'
+_version_minor = 5
+_version_micro = 3
+_version_extra = ''
 
 def get_nipype_gitversion():
     """Nipype version as reported by the last commit in git
