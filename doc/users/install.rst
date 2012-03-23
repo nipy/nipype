@@ -10,7 +10,7 @@ Download
 --------
 
 Release 0.5.3: [`zip <http://github.com/nipy/nipype/zipball/0.5.3>`_ `tar
-<http://github.com/nipy/nipype/tarball/0.5.2>`_]
+<http://github.com/nipy/nipype/tarball/0.5.3>`_]
 
 Development: [`zip <http://github.com/nipy/nipype/zipball/master>`_ `tar
 <http://github.com/nipy/nipype/tarball/master>`_]
