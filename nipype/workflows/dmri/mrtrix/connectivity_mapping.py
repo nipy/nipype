@@ -549,7 +549,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
         ("CreateMatrix.median_fiber_length_matrix_mat_file", "median_fiber_length"),
         ("CreateMatrix.fiber_length_std_matrix_mat_file", "fiber_length_std"),
         ("CreateMatrix.matrix_files", "networks"),
-        ("CreateMatrix.filtered_tractography", "filtered_tracts"),
+        ("CreateMatrix.filtered_tractographies", "filtered_tracts"),
         ("mri_convert_ROI_scale500.out_file", "rois"),
         ("trk2tdi.out_file", "tdi"),
         ("csdeconv.spherical_harmonics_image", "odfs"),
