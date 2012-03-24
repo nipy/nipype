@@ -512,10 +512,10 @@ class CreateMatrix(BaseInterface):
         else:
             outputs['median_fiber_length_matrix_mat_file'] = op.abspath(self._gen_outfilename('_median_fiber_length.mat'))
 
-        if isdefined(self.inputs.out_fiber_length_std_matrix_mat_file):
-            outputs['fiber_length_std_matrix_mat_file'] = op.abspath(self.inputs.out_fiber_length_std_matrix_mat_file)
-        else:
-            outputs['fiber_length_std_matrix_mat_file'] = op.abspath(self._gen_outfilename('_fiber_length_std.mat'))
+		if isdefined(self.inputs.out_fiber_length_std_matrix_mat_file):
+			outputs['fiber_length_std_matrix_mat_file'] = op.abspath(self.inputs.out_fiber_length_std_matrix_mat_file)
+		else:
+			outputs['fiber_length_std_matrix_mat_file'] = op.abspath(self._gen_outfilename('_fiber_length_std.mat'))
 
         if isdefined(self.inputs.out_intersection_matrix_mat_file):
             outputs['intersection_matrix_mat_file'] = op.abspath(self.inputs.out_intersection_matrix_mat_file)
@@ -548,14 +548,8 @@ class CreateMatrix(BaseInterface):
             outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'], 
             outputs['fiber_length_std_matrix_mat_file']]
 
-<<<<<<< HEAD
         outputs['filtered_tractography'] = op.abspath(endpoint_name + '_streamline_final.trk')
         outputs['filtered_tractography_by_intersections'] = op.abspath(endpoint_name + '_intersections_streamline_final.trk')
-=======
-        _, name , _ = split_filename(self.inputs.tract_file)
-        outputs['filtered_tractography'] = op.abspath(name + '_streamline_final.trk')
-        outputs['filtered_tractography_by_intersections'] = op.abspath(name + '_intersections_streamline_final.trk')
->>>>>>> ConcatCSV interface and CreateMatrix output fixes
         outputs['filtered_tractographies'] = [outputs['filtered_tractography'], outputs['filtered_tractography_by_intersections']]
         outputs['stats_file'] = op.abspath(endpoint_name + '_statistics.mat')
         return outputs
