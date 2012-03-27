@@ -985,7 +985,7 @@ class PowerSpectrum(FSLCommand):
         if name == 'out_file':
             return self._gen_outfilename()
         return None
-        
+
 class EPIDeWarpInputSpec(FSLCommandInputSpec):
 
     mag_file = File(exists=True,
@@ -1034,11 +1034,11 @@ class EPIDeWarp(FSLCommand):
 
     Examples
     --------
-    >>> dewarp = interface=EpiDeWarp()
+    >>> dewarp = EPIDeWarp()
     >>> dewarp.inputs.epi_file = "functional.nii"
     >>> dewarp.inputs.mag_file = "magnitude.nii"
     >>> dewarp.inputs.dph_file = "phase.nii"
-    >>> res = dewarp.run()
+    >>> res = dewarp.run() # doctest: +SKIP
 
     References
     ----------
@@ -1049,17 +1049,17 @@ class EPIDeWarp(FSLCommand):
     _cmd = 'epidewarp.fsl'
     input_spec = EPIDeWarpInputSpec
     output_spec = EPIDeWarpOutputSpec
-    
+
     def _gen_filename(self, name):
         if name == 'exfdw':
             if isdefined(self.inputs.exf_file):
-                return self._gen_fname(split_filename(self.inputs.exf_file)[1],
+                return self._gen_fname(self.inputs.exf_file,
                                   suffix="_exfdw")
             else:
                 return self._gen_fname("exfdw")
         if name == 'epidw':
             if isdefined(self.inputs.epi_file):
-                return self._gen_fname(split_filename(self.inputs.epi_file)[1],
+                return self._gen_fname(self.inputs.epi_file,
                                   suffix="_epidw")
         if name == 'vsm':
             return self._gen_fname('vsm')
