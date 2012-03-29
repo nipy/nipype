@@ -33,6 +33,8 @@ class Analyze2nii(SPMCommand):
         return outputs
 
 class CalcCoregAffineInputSpec(MatlabInputSpec):
+    target = File(exists=True, desc='target for generating affine transform')
+    moving = File(exists=True, 
+                  desc='volume that transform can be applied to register with target')
     
-
 
