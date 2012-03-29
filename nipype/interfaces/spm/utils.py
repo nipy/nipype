@@ -1,6 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from nipype.interfaces.spm.base import SPMCommandInputSpec, SPMCommand
+from nipype.interfaces.spm.base import SPMCommandInputSpec, SPMCommand, Info
 from nipype.interfaces.matlab import MatlabCommand
 from nipype.interfaces.base import TraitedSpec, BaseInterface, BaseInterfaceInputSpec
 from nipype.interfaces.base import File
@@ -70,6 +70,14 @@ class CalcCoregAffine(SPMCommand):
     output_spec = CalcCoregAffineOutputSpec
 
     def _make_matlab_command(self, _):
+        """checks for SPM, generates script"""
+        try:
+            ver = Info.version(matlab_cmd = self.inputs.matlab_cmd)
+        except:
+            ver = Info.version()
+        if ver is None:
+            raise RuntimeError('spm not found')
+            # No spm
         script = """
         target = '%s';
         moving = '%s';
@@ -89,3 +97,4 @@ class CalcCoregAffine(SPMCommand):
         return outputs
 
 class ApplyTransformInputSpec(SPMCommandInputSpec):
+    pass
