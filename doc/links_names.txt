@@ -95,6 +95,7 @@
 .. _Camino2Trackvis: http://camino-trackvis.sourceforge.net/
 .. _MRtrix: http://www.brain.org.au/software/mrtrix/index.html
 .. _MNE: https://martinos.org/mne/index.html
+.. _gmsh: http://geuz.org/gmsh/
 
 .. General software
 .. _gcc: http://gcc.gnu.org
