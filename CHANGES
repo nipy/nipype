@@ -1,6 +1,8 @@
 Release 0.5.3 (Mar 23, 2012)
 ============================
 
+* ENH: Interface for WatershedBEM from the MNE software package
+
 * FIX: SPM model generation when output units is in scans
 
 Release 0.5.2 (Mar 14, 2012)
