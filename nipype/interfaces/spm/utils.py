@@ -2,9 +2,10 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from nipype.interfaces.spm.base import SPMCommandInputSpec, SPMCommand, Info
 from nipype.interfaces.matlab import MatlabCommand
-from nipype.interfaces.base import TraitedSpec, BaseInterface, BaseInterfaceInputSpec
-from nipype.interfaces.base import File
-from nipype.utils.filemanip import split_filename
+from nipype.interfaces.base import (TraitedSpec, BaseInterface, 
+                                    BaseInterfaceInputSpec, isdefined)
+from nipype.interfaces.base import File, traits
+from nipype.utils.filemanip import split_filename, fname_presuffix
 import os
 
 class Analyze2niiInputSpec(SPMCommandInputSpec):
@@ -34,18 +35,23 @@ class Analyze2nii(SPMCommand):
         return outputs
 
 class CalcCoregAffineInputSpec(SPMCommandInputSpec):
-    target = File(exists=True, mandatory=True,
-                  desc='target for generating affine transform')
-    moving = File(exists=True,mandatory=True, 
-                  desc='volume transform can be applied to register with target')
-    mat = File( desc = 'Filename used to store affine matrix')
+    target = File( exists=True, mandatory=True,
+                   desc='target for generating affine transform')
+    moving = File( exists=True,mandatory=True, 
+                   desc='volume transform can be applied to register with target')
+    mat = File( desc='Filename used to store affine matrix')
+    invmat = File( desc='Filename used to store inverse affine matrix')
+
 
 class CalcCoregAffineOutputSpec(SPMCommandInputSpec):
     mat = File(exists=True, desc = 'Matlab file holding transform')
+    invmat = File( desc = 'Matlab file holding inverse transform')
+
 
 class CalcCoregAffine(SPMCommand):
     """ Uses SPM (spm_coreg) to calculate the transform mapping
     moving to target. Saves Transform in mat (matlab binary file)
+    Also saves inverse transform
     
     Examples
     --------
@@ -69,6 +75,74 @@ class CalcCoregAffine(SPMCommand):
     input_spec = CalcCoregAffineInputSpec
     output_spec = CalcCoregAffineOutputSpec
 
+    def _make_inv_file(self):
+        """ makes filename to hold inverse transform if not specified"""
+        invmat = fname_presuffix(self.inputs.mat, prefix='inverse_')
+        return invmat 
+
+    def _make_matlab_command(self, _):
+        """checks for SPM, generates script"""
+        try:
+            ver = Info.version(matlab_cmd = self.inputs.matlab_cmd)
+        except:
+            ver = Info.version()
+        if ver is None:
+            raise RuntimeError('spm not found')
+            # No spm
+        if not isdefined(self.inputs.invmat):
+            self.inputs.invmat = self._make_inv_file() 
+        script = """
+        target = '%s';
+        moving = '%s';
+        targetv = spm_vol(target);
+        movingv = spm_vol(moving);
+        x = spm_coreg(movingv, targetv);
+        M = spm_matrix(x(:)');
+        save('%s' , 'M' );            
+        M = inv(spm_matrix(x(:)'));
+        save('%s','M') 
+        """%(self.inputs.target, 
+             self.inputs.moving,
+             self.inputs.mat,
+             self.inputs.invmat)
+        return script        
+        
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['mat'] = os.path.abspath(self.inputs.mat)
+        outputs['invmat'] = os.path.abspath(self.inputs.invmat)
+        return outputs
+
+class ApplyTransformInputSpec(SPMCommandInputSpec):
+    in_file = File( exists=True, mandatory=True,
+                   desc='file to apply transform to, (only updates header)')
+    mat = File( exists=True, mandatory=True,
+                desc='file holding transform to apply')
+
+
+class ApplyTransformOutputSpec(SPMCommandInputSpec):
+    out_file = File(exists=True, desc = 'File with updated header')
+
+
+class ApplyTransform(SPMCommand):
+    """ Uses spm to apply transform stored in a .mat file to given file
+ 
+    Examples
+    --------
+
+    >>> import nipype.interfaces.spm.utils as spmu
+    >>> applymat = spmu.ApplyTransform(matlab_cmd='matlab-spm8')
+    >>> applymat.inputs.in_file = 'functional.nii'
+    >>> applymat.inputs.mat = 'func_to_struct.mat'
+    >>> applymat.run() # doctest: +SKIP
+
+    Notes
+    -----
+    CHANGES YOUR INPUT FILE (applies transform by updating the header)
+    """
+    input_spec = ApplyTransformInputSpec
+    output_spec = ApplyTransformOutputSpec
+
     def _make_matlab_command(self, _):
         """checks for SPM, generates script"""
         try:
@@ -79,22 +153,68 @@ class CalcCoregAffine(SPMCommand):
             raise RuntimeError('spm not found')
             # No spm
         script = """
-        target = '%s';
-        moving = '%s';
-        targetv = spm_vol(target);
-        movingv = spm_vol(moving);
-        x = spm_coreg(movingv, targetv);
-        M = spm_matrix(x(:)');
-        save('%s' , 'M' );            
-        """%(self.inputs.target, 
-             self.inputs.moving,
+        infile = '%s';
+        transform = load('%s');
+        img_space = spm_get_space(infile);
+        spm_get_space(infile, transform.M * img_space);
+        """%(self.inputs.in_file,
              self.inputs.mat)
-        return script        
-        
+        return script
+
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['mat'] = os.path.abspath(self.inputs.mat)
+        outputs['out_file'] = os.path.abspath(self.inputs.mat)
         return outputs
 
-class ApplyTransformInputSpec(SPMCommandInputSpec):
-    pass
+class ResliceInputSpec(SPMCommandInputSpec):
+    in_file = File( exists=True, mandatory=True,
+                    desc='file to apply transform to, (only updates header)')
+    space_defining = File ( exists=True, mandatory=True,
+                            desc = 'Volume defining space to slice in_file into')
+
+    interp = traits.Range(low=0, high=7,usedefault=True,
+                          desc='degree of b-spline used for interpolation'\
+                                '0 is nearest neighbor (default)')
+    
+
+    out_file = File(desc = 'Optional file to save resliced volume')
+
+class ResliceOutputSpec(SPMCommandInputSpec):   
+    out_file = File( exists=True, desc='resliced volume')
+
+class Reslice(SPMCommand):
+    """ uses  spm_reslice to resample in_file into space of space_defining"""
+
+    input_spec = ResliceInputSpec
+    output_spec = ResliceOutputSpec
+
+    def _make_matlab_command(self, _):
+        """checks for SPM, generates script"""
+        try:
+            ver = Info.version(matlab_cmd = self.inputs.matlab_cmd)
+        except:
+            ver = Info.version()
+        if ver is None:
+            raise RuntimeError('spm not found')
+            # No spm
+        if not isdefined(self.inputs.out_file):
+            self.inputs.out_file = fname_presuffix(self.inputs.in_file,
+                                                   prefix='r')
+        script = """
+        flags.mean = 0;
+        flags.which = 1;
+        flags.mask = 0;
+        flags.interp = %d;
+        infiles = strvcat(\'%s\', \'%s\');
+        invols = spm_vol(infiles);
+        spm_reslice(invols, flags);     
+        """%(self.inputs.interp,
+             self.inputs.space_defining,
+             self.inputs.in_file)
+        return script
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
