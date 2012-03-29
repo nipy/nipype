@@ -1,4 +1,7 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 from nipype.interfaces.spm.base import SPMCommandInputSpec, SPMCommand
+from nipype.interfaces.matlab import MatlabInputSpec, MatlabCommand
 from nipype.interfaces.base import File
 from nipype.utils.filemanip import split_filename
 import os
@@ -28,3 +31,8 @@ class Analyze2nii(SPMCommand):
         outputs = self._outputs().get()
         outputs['nifti_file'] = self.output_name
         return outputs
+
+class CalcCoregAffineInputSpec(MatlabInputSpec):
+    
+
+
