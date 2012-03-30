@@ -79,16 +79,18 @@ class CalcCoregAffine(SPMCommand):
         """ makes filename to hold inverse transform if not specified"""
         invmat = fname_presuffix(self.inputs.mat, prefix='inverse_')
         return invmat 
+ 
+    def _make_mat_file(self):
+        """ makes name for matfile if doesn exist"""
+        pth, mv, _  = split_filename(self.inputs.moving)
+        _, tgt, _ = split_filename(self.inputs.target)
+        mat = os.path.join(pth, '%s_to_%s.mat'%(mv,tgt))
+        return mat    
 
     def _make_matlab_command(self, _):
         """checks for SPM, generates script"""
-        try:
-            ver = Info.version(matlab_cmd = self.inputs.matlab_cmd)
-        except:
-            ver = Info.version()
-        if ver is None:
-            raise RuntimeError('spm not found')
-            # No spm
+        if not isdefined(self.inputs.mat):
+            self.inputs.mat = self._make_mat_file()
         if not isdefined(self.inputs.invmat):
             self.inputs.invmat = self._make_inv_file() 
         script = """
@@ -145,13 +147,6 @@ class ApplyTransform(SPMCommand):
 
     def _make_matlab_command(self, _):
         """checks for SPM, generates script"""
-        try:
-            ver = Info.version(matlab_cmd = self.inputs.matlab_cmd)
-        except:
-            ver = Info.version()
-        if ver is None:
-            raise RuntimeError('spm not found')
-            # No spm
         script = """
         infile = '%s';
         transform = load('%s');
@@ -189,14 +184,7 @@ class Reslice(SPMCommand):
     output_spec = ResliceOutputSpec
 
     def _make_matlab_command(self, _):
-        """checks for SPM, generates script"""
-        try:
-            ver = Info.version(matlab_cmd = self.inputs.matlab_cmd)
-        except:
-            ver = Info.version()
-        if ver is None:
-            raise RuntimeError('spm not found')
-            # No spm
+        """ generates script"""
         if not isdefined(self.inputs.out_file):
             self.inputs.out_file = fname_presuffix(self.inputs.in_file,
                                                    prefix='r')
