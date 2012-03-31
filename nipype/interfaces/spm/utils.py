@@ -63,8 +63,7 @@ class CalcCoregAffine(SPMCommand):
     >>> coreg.inputs.mat = 'func_to_struct.mat'
     >>> coreg.run() # doctest: +SKIP
 
-    Notes
-    -----
+    .. note::
     
      * the output file mat is saves as a matlab binary file
      * calculating the transforms does NOT change either input image
@@ -116,7 +115,7 @@ class CalcCoregAffine(SPMCommand):
         return outputs
 
 class ApplyTransformInputSpec(SPMCommandInputSpec):
-    in_file = File( exists = True, mandatory = True,
+    in_file = File( exists = True, mandatory = True, copyfile=True,
                    desc='file to apply transform to, (only updates header)')
     mat = File( exists = True, mandatory = True,
                 desc='file holding transform to apply')
@@ -138,9 +137,10 @@ class ApplyTransform(SPMCommand):
     >>> applymat.inputs.mat = 'func_to_struct.mat'
     >>> applymat.run() # doctest: +SKIP
 
-    Notes
-    -----
-    CHANGES YOUR INPUT FILE (applies transform by updating the header)
+    .. warning::
+    
+       CHANGES YOUR INPUT FILE (applies transform by updating the header)
+       except when used with nipype caching or workflow.
     """
     input_spec = ApplyTransformInputSpec
     output_spec = ApplyTransformOutputSpec
