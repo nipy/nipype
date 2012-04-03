@@ -187,7 +187,7 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
 
 
 class WarpImageMultiTransformOutputSpec(TraitedSpec):
-    output_images = OutputMultiPath(File(exists=True), desc='Warped images')
+    output_image = File(exists=True, desc='Warped image')
 
 
 class WarpImageMultiTransform(ANTSCommand):
@@ -229,11 +229,11 @@ class WarpImageMultiTransform(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        path, name, ext = split_filename(os.path.abspath(self.inputs.moving_image))
-        outputs['output_images'] = glob(os.path.join(os.getcwd(),
+        _, name, ext = split_filename(os.path.abspath(self.inputs.moving_image))
+        outputs['output_image'] = os.path.join(os.getcwd(),
                                              ''.join((name,
                                                       self.inputs.out_postfix,
-                                                      '*'))))
+                                                      ext))))
         return outputs
 
 
@@ -270,7 +270,7 @@ class WarpTimeSeriesImageMultiTransformInputSpec(ANTSCommandInputSpec):
 
 
 class WarpTimeSeriesImageMultiTransformOutputSpec(TraitedSpec):
-    output_images = OutputMultiPath(File(exists=True), desc='Warped images')
+    output_image = File(exists=True, desc='Warped image')
 
 
 class WarpTimeSeriesImageMultiTransform(ANTSCommand):
@@ -312,11 +312,11 @@ class WarpTimeSeriesImageMultiTransform(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        path, name, ext = split_filename(os.path.abspath(self.inputs.moving_image))
-        outputs['output_images'] = glob(os.path.join(os.getcwd(),
+        _, name, ext = split_filename(os.path.abspath(self.inputs.moving_image))
+        outputs['output_image'] = os.path.join(os.getcwd(),
                                              ''.join((name,
                                                       self.inputs.out_postfix,
-                                                      '*'))))
+                                                      ext))))
         return outputs
 
 
