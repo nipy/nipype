@@ -81,7 +81,7 @@ with group IDs ('controls', 'parkinsons') as keys, and subject/patient names as 
 
 group_list = {}
 group_list['controls'] = ['cont17']
-#group_list['parkinsons'] = ['pat10', 'pat20']
+group_list['parkinsons'] = ['pat10', 'pat20']
 
 """
 The output directory must be named as well.

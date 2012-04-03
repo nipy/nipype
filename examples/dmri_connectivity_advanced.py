@@ -83,7 +83,7 @@ subjects_dir = op.abspath(op.join(op.curdir,'./subjects'))
 fs.FSCommand.set_default_subjects_dir(subjects_dir)
 fsl.FSLCommand.set_default_output_type('NIFTI')
 
-fs_dir = '/software/freesurfer'
+fs_dir = os.environ['FREESURFER_HOME']
 lookup_file = op.join(fs_dir,'FreeSurferColorLUT.txt')
 
 """
