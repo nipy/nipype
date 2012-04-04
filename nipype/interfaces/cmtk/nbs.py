@@ -7,7 +7,7 @@ from nipype.utils.filemanip import split_filename
 import os, os.path as op
 import numpy as np
 import networkx as nx
-from .cmtk import CFFConverter
+from ..cmtk import CFFConverter
 from nipype.utils.misc import package_check
 import warnings
 
@@ -41,6 +41,7 @@ class NetworkBrainStatisticInputSpec(BaseInterfaceInputSpec):
     in_group2 = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for the second group of subjects')
     group_id1 = traits.Str('group1', usedefault=True, desc='ID for the first group')
     group_id2 = traits.Str('group2', usedefault=True, desc='ID for the second group')
+    node_position_network = File(desc='An optional network used to position the nodes for the output networks')
     number_of_permutations = traits.Int(1000, usedefault=True, desc='Number of permutations to perform')
     threshold = traits.Int(2, usedefault=True, desc='Threshold for the number of components')
     t_tail = traits.Enum('left', 'right', 'both', usedefault=True, desc='Can be one of "left", "right", or "both"')
@@ -52,8 +53,8 @@ class NetworkBrainStatisticInputSpec(BaseInterfaceInputSpec):
 
 class NetworkBrainStatisticOutputSpec(TraitedSpec):
     connectome_file = File(desc='Output of both networks as a CFF file')
-    nbs_network = File(desc='Output network with edges identified by the NBS')
-    nbs_pval_network = File(desc='Output network with p-values to weight the edges identified by the NBS')
+    nbs_network = File(exists=True, desc='Output network with edges identified by the NBS')
+    nbs_pval_network = File(exists=True, desc='Output network with p-values to weight the edges identified by the NBS')
 
 class NetworkBrainStatistic(BaseInterface):
     """
@@ -86,21 +87,29 @@ class NetworkBrainStatistic(BaseInterface):
         Y = ntwks_to_matrices(self.inputs.in_group2, edge_key)
 
         PVAL, ADJ, NULL = nbs.compute_nbs(X,Y,THRESH,K,TAIL)
+        
         pADJ = ADJ.copy()
         for idx, p in enumerate(PVAL):
             x, y = np.where(ADJ == idx+1)
             pADJ[x,y] = PVAL[idx]
 
-        # we create a networkx graph again from the adjacency matrix
+        # Create networkx graphs from the adjacency matrix
         nbsgraph = nx.from_numpy_matrix(ADJ)
         nbs_pval_graph = nx.from_numpy_matrix(pADJ)
-        # relabel nodes because the should not start at zero for our convention
+        
+        # Relabel nodes because they should not start at zero for our convention
         nbsgraph=nx.relabel_nodes(nbsgraph, lambda x: x + 1)
         nbs_pval_graph = nx.relabel_nodes(nbs_pval_graph, lambda x: x + 1)
-        # populate node dictionaries with attributes from first network of the first group
-        # it must include some location information to display it
-        first = nx.read_gpickle(self.inputs.in_group1[0])
-        for nid, ndata in first.nodes_iter(data=True):
+        
+        if isdefined(self.inputs.node_position_network):
+			node_ntwk_name = self.inputs.node_position_network
+		else:
+			node_ntwk_name = self.inputs.in_group1[0]
+
+        node_network = nx.read_gpickle(node_ntwk_name)
+        iflogger.info('Populate node dictionaries with attributes from {node}'.format(node=node_ntwk_name))
+        
+        for nid, ndata in node_network.nodes_iter(data=True):
             nbsgraph.node[nid] = ndata
             nbs_pval_graph.node[nid] = ndata
 
@@ -116,11 +125,11 @@ class NetworkBrainStatistic(BaseInterface):
         
         if self.inputs.output_as_cff:
             output_cff_name = 'NBS_' + edge_key + '_' + '-thresh-' + str(THRESH) + '-k-' + str(K) + '-tail-' + TAIL + '.cff'
-            a = CFFConverter()
-            a.inputs.gpickled_networks = [path, pval_path]
-            a.inputs.out_file = output_cff_name
+            cff = CFFConverter()
+            cff.inputs.gpickled_networks = [path, pval_path]
+            cff.inputs.out_file = output_cff_name
             iflogger.info('Saving output cff as {out}'.format(out=output_cff_name))
-            a.run()
+            cff.run()
 
         return runtime
 
