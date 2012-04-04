@@ -18,7 +18,7 @@ from shutil import rmtree
 
 import numpy as np
 
-from nipype.interfaces.fsl.base import (FSLCommand, FSLCommandInputSpec)
+from nipype.interfaces.fsl.base import (FSLCommand, FSLCommandInputSpec, Info)
 from nipype.interfaces.base import (load_template, File, traits, isdefined,
                                     TraitedSpec, BaseInterface, Directory,
                                     InputMultiPath, OutputMultiPath,
