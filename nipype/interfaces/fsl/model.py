@@ -23,7 +23,7 @@ from nipype.interfaces.base import (load_template, File, traits, isdefined,
                                     TraitedSpec, BaseInterface, Directory,
                                     InputMultiPath, OutputMultiPath,
                                     BaseInterfaceInputSpec)
-from nipype.utils.filemanip import (list_to_filename, filename_to_list)
+from nipype.utils.filemanip import (list_to_filename, filename_to_list, split_filename)
 from nibabel import load
 
 warn = warnings.warn
