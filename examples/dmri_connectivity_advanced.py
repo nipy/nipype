@@ -56,7 +56,7 @@ import nipype.algorithms.misc as misc
 import nipype.interfaces.cmtk as cmtk
 import nipype.interfaces.dipy as dipy
 import inspect
-import os.path as op                      # system functions
+import os, os.path as op                      # system functions
 from nipype.workflows.dmri.fsl.dti import create_eddy_correct_pipeline
 from nipype.workflows.dmri.camino.connectivity_mapping import select_aparc_annot
 from nipype.utils.misc import package_check
