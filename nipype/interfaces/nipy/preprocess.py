@@ -84,12 +84,19 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
                          desc="time offset into TR to align slices to")
     time_interp = traits.Bool(True, usedefault=True,
                     desc="Assume smooth changes across time e.g., fmri series")
+    loops = traits.Int(5, usedefault=True, desc="loops within each run")
+    between_loops = traits.Int(5, usedefault=True, desc="loops used to \
+                                                          realign different \
+                                                          runs")
+    speedup = traits.Int(5, usedefault=True, desc="successive image \
+                                                    sub-sampling factors \
+                                                    for acceleration")
 
 
 class FmriRealign4dOutputSpec(TraitedSpec):
 
-    out_file = OutputMultiPath(desc="Realigned files")
-    par_file = OutputMultiPath(desc="Motion parameter files")
+    out_file = OutputMultiPath(File(exists=True), desc="Realigned files")
+    par_file = OutputMultiPath(File(exists=True), desc="Motion parameter files")
 
 
 class FmriRealign4d(BaseInterface):
@@ -142,7 +149,9 @@ class FmriRealign4d(BaseInterface):
             time_interp=self.inputs.time_interp,
             start=self.inputs.start)
 
-        R.estimate()
+        R.estimate(loops=self.inputs.loops,
+                   between_loops=self.inputs.between_loops,
+                   speedup=self.inputs.speedup)
 
         corr_run = R.resample()
         self._out_file_path = []

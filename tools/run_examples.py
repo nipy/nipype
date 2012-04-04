@@ -5,7 +5,8 @@ from shutil import rmtree
 
 def run_examples(example, pipelines, plugin):
     print 'running example: %s with plugin: %s'%(example, plugin)
-    from nipype.utils.config import config
+    from nipype.utils.config import NipypeConfig
+    config = NipypeConfig()
     config.enable_debug_mode()
     __import__(example)
     for pipeline in pipelines:
@@ -21,10 +22,10 @@ def run_examples(example, pipelines, plugin):
 if __name__ == '__main__':
     path, file = os.path.split(__file__)
     sys.path.insert(0, os.path.realpath(os.path.join(path, '..', 'examples')))
-    examples = {'fsl_tutorial2':['l1pipeline'],
-                'spm_tutorial2':['level1','l2pipeline'],
-                'spm_dartel_tutorial':['level1','l2pipeline'],
-                'fsl_feeds_tutorial':['l1pipeline']}
+    examples = {'fmri_fsl_reuse':['l1pipeline'],
+                'fmri_spm_nested':['level1','l2pipeline'],
+                'fmri_spm_dartel':['level1','l2pipeline'],
+                'fmri_fsl_feeds':['l1pipeline']}
     plugins = ['Linear', 'MultiProc', 'IPython']
     for plugin in plugins:
         for example, pipelines in examples.items():

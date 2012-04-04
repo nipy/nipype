@@ -5,7 +5,7 @@ import os
 
 from nipype.interfaces.base import (CommandLineInputSpec, InputMultiPath, isdefined,
                                     CommandLine, traits, File, Directory)
-from nipype.utils.config import config
+from .. import config
 
 def get_matlab_command():
     if 'NIPYPE_NO_MATLAB' in os.environ:

@@ -24,7 +24,7 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
     A pipeline that does the same as tbss_1_preproc script in FSL
 
     Example
-    --------
+    -------
 
     >>> from nipype.workflows.dmri.fsl import tbss
     >>> tbss1 = tbss.create_tbss_1_preproc()
@@ -95,7 +95,7 @@ def create_tbss_2_reg(name="tbss_2_reg"):
     is not supported at the moment.
 
     Example
-    ------
+    -------
 
     >>> from nipype.workflows.dmri.fsl import tbss
     >>> tbss2 = create_tbss_2_reg(name="tbss2")
@@ -166,7 +166,7 @@ def create_tbss_3_postreg(name='tbss_3_postreg', estimate_skeleton=True):
     skeleton (same as 'tbss_3_postreg -T').
 
     Example
-    --------
+    -------
 
     >>> from nipype.workflows.dmri.fsl import tbss
     >>> tbss3 = tbss.create_tbss_3_postreg()
@@ -288,7 +288,7 @@ def create_tbss_4_prestats(name='tbss_4_prestats'):
     A pipeline that does the same as tbss_4_prestats script from FSL
 
     Example
-    --------
+    -------
 
     >>> from nipype.workflows.dmri.fsl import tbss
     >>> tbss4 = tbss.create_tbss_4_prestats(name='tbss4')
@@ -375,7 +375,7 @@ def create_tbss_all(name='tbss_all', estimate_skeleton=True):
     """Create a pipeline that combines create_tbss_* pipelines
 
     Example
-    --------
+    -------
 
     >>> from nipype.workflows.dmri.fsl import tbss
     >>> tbss = tbss.create_tbss_all('tbss')
@@ -480,10 +480,10 @@ def create_tbss_all(name='tbss_all', estimate_skeleton=True):
 
 def create_tbss_non_FA(name='tbss_non_FA'):
     """
-    A pipeline that implemet tbss_non_FA in FSL
+    A pipeline that implement tbss_non_FA in FSL
 
     Example
-    --------
+    -------
 
     >>> from nipype.workflows.dmri.fsl import tbss
     >>> tbss_MD = tbss.create_tbss_non_FA()
@@ -504,7 +504,7 @@ def create_tbss_non_FA(name='tbss_non_FA'):
         inputnode.distance_map
 
     Outputs::
-    
+
         outputnode.projected_nonFA_file
 
     """

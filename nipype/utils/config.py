@@ -19,12 +19,12 @@ from warnings import warn
 from ..external import portalocker
 
 homedir = os.environ['HOME']
-default_cfg = StringIO("""
+default_cfg = """
 [logging]
 workflow_level = INFO
 filemanip_level = INFO
 interface_level = INFO
-log_to_file = true
+log_to_file = false
 log_directory = %s
 log_size = 16384000
 log_rotate = 4
@@ -47,37 +47,48 @@ use_relative_paths = false
 
 [check]
 interval = 1209600
-""" % (homedir, os.getcwd()))
+""" % (homedir, os.getcwd())
 
-"""
-Initialize the config object in module load
-"""
-
-config_dir = os.path.expanduser('~/.nipype')
-if not os.path.exists(config_dir):
-    os.makedirs(config_dir)
-old_config_file = os.path.expanduser('~/.nipype.cfg')
-new_config_file = os.path.join(config_dir, 'nipype.cfg')
-# To be deprecated in two releases
-if os.path.exists(old_config_file):
-    warn("Moving old config file from: %s to %s" % (old_config_file,
-                                                    new_config_file))
-    shutil.move(old_config_file, new_config_file)
-data_file = os.path.join(config_dir, 'nipype.json')
-
-
-class NipypeConfig(ConfigParser.ConfigParser):
+class NipypeConfig(object):
     """Base nipype config class
     """
+
+    def __init__(self, *args, **kwargs):
+        self._config = ConfigParser.ConfigParser()
+        config_dir = os.path.expanduser('~/.nipype')
+        if not os.path.exists(config_dir):
+            os.makedirs(config_dir)
+        old_config_file = os.path.expanduser('~/.nipype.cfg')
+        new_config_file = os.path.join(config_dir, 'nipype.cfg')
+        # To be deprecated in two releases
+        if os.path.exists(old_config_file):
+            if os.path.exists(new_config_file):
+                msg=("Detected presence of both old (%s, used by versions "
+                     "< 0.5.2) and new (%s) config files.  This version will "
+                     "proceed with the new one. We advise to merge settings "
+                     "and remove old config file if you are not planning to "
+                     "use previous releases of nipype.") % (old_config_file,
+                                                            new_config_file)
+                warn(msg)
+            else:
+                warn("Moving old config file from: %s to %s" % (old_config_file,
+                                                                new_config_file))
+                shutil.move(old_config_file, new_config_file)
+        self.data_file = os.path.join(config_dir, 'nipype.json')
+        self._config.readfp(StringIO(default_cfg))
+        self._config.read([new_config_file, old_config_file, 'nipype.cfg'])
+
+    def set_default_config(self):
+        self._config.readfp(StringIO(default_cfg))
 
     def enable_debug_mode(self):
         """Enables debug configuration
         """
-        config.set('execution', 'stop_on_first_crash', 'true')
-        config.set('execution', 'remove_unnecessary_outputs', 'false')
-        config.set('execution', 'keep_inputs', 'true')
-        config.set('logging', 'workflow_level', 'DEBUG')
-        config.set('logging', 'interface_level', 'DEBUG')
+        self._config.set('execution', 'stop_on_first_crash', 'true')
+        self._config.set('execution', 'remove_unnecessary_outputs', 'false')
+        self._config.set('execution', 'keep_inputs', 'true')
+        self._config.set('logging', 'workflow_level', 'DEBUG')
+        self._config.set('logging', 'interface_level', 'DEBUG')
 
     def set_log_dir(self, log_dir):
         """Sets logging directory
@@ -85,12 +96,28 @@ class NipypeConfig(ConfigParser.ConfigParser):
         This should be the first thing that is done before any nipype class
         with logging is imported.
         """
-        config.set('logging', 'log_directory', log_dir)
+        self._config.set('logging', 'log_directory', log_dir)
+
+    def get(self, section, option):
+        return self._config.get(section, option)
+
+    def set(self, section, option, value):
+        return self._config.set(section, option, value)
+
+    def getboolean(self, section, option):
+        return self._config.getboolean(section, option)
+
+    def has_option(self, section, option):
+        return self._config.has_option(section, option)
+
+    @property
+    def _sections(self):
+        return self._config._sections
 
     def get_data(self, key):
-        if not os.path.exists(data_file):
+        if not os.path.exists(self.data_file):
             return None
-        with open(data_file, 'rt') as file:
+        with open(self.data_file, 'rt') as file:
             portalocker.lock(file, portalocker.LOCK_EX)
             datadict = load(file)
         if key in datadict:
@@ -99,15 +126,18 @@ class NipypeConfig(ConfigParser.ConfigParser):
 
     def save_data(self, key, value):
         datadict = {}
-        if os.path.exists(data_file):
-            with open(data_file, 'rt') as file:
+        if os.path.exists(self.data_file):
+            with open(self.data_file, 'rt') as file:
                 portalocker.lock(file, portalocker.LOCK_EX)
                 datadict = load(file)
-        with open(data_file, 'wt') as file:
+        with open(self.data_file, 'wt') as file:
             portalocker.lock(file, portalocker.LOCK_EX)
             datadict[key] = value
             dump(datadict, file)
 
-config = NipypeConfig()
-config.readfp(default_cfg)
-config.read([new_config_file, old_config_file, 'nipype.cfg'])
+    def update_config(self, config_dict):
+        for section in ['execution', 'logging', 'check']:
+            if section in config_dict:
+                for key, val in config_dict[section].items():
+                    if not key.startswith('__'):
+                        self._config.set(section, key, str(val))

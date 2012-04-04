@@ -14,7 +14,6 @@ and spm to access spm tools.
 __docformat__ = 'restructuredtext'
 
 # Standard library imports
-import logging
 import os
 from glob import glob
 
@@ -30,7 +29,8 @@ from nipype.interfaces.spm.base import (SPMCommand, SPMCommandInputSpec,
 from nipype.utils.filemanip import (filename_to_list, list_to_filename,
                                     split_filename)
 
-logger = logging.getLogger('spmlogger')
+from ... import logging
+logger = logging.getLogger('interface')
 
 
 class Level1DesignInputSpec(SPMCommandInputSpec):

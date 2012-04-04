@@ -18,9 +18,8 @@ import networkx as nx
 import shutil
 from nipype.utils.misc import package_check
 import warnings
-import logging
 
-logging.basicConfig()
+from ... import logging
 iflogger = logging.getLogger('interface')
 
 have_cmp = True
@@ -351,15 +350,28 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
         mri_cmd = 'mri_convert -rl "%s" -rt nearest "%s" -nc "%s"' % (orig, d[0], d[1])
         runCmd( mri_cmd,log )
 
+
 class ParcellateInputSpec(BaseInterfaceInputSpec):
     subject_id = traits.String(mandatory=True, desc='Subject ID')
-    parcellation_name = traits.Enum('scale500', ['scale33', 'scale60', 'scale125', 'scale250','scale500'], usedefault=True)
+    parcellation_name = traits.Enum('scale500', ['scale33', 'scale60', 'scale125', 'scale250', 'scale500'], usedefault=True)
     freesurfer_dir = Directory(desc='Freesurfer main directory')
     subjects_dir = Directory(desc='Freesurfer main directory')
-    out_roi_file = File(genfile = True, desc='Region of Interest file for connectivity mapping')
+    out_roi_file = File(genfile=True, desc='Region of Interest file for connectivity mapping')
+
 
 class ParcellateOutputSpec(TraitedSpec):
-    roi_file = File(desc='Region of Interest file for connectivity mapping')
+    roi_file = File(desc='Region of Interest file for connectivity mapping',
+                    exists=True)
+    white_matter_mask_file = File(desc='White matter mask file')
+    cc_unknown_file = File(desc='Image file with regions labelled as unknown cortical structures',
+                    exists=True)
+    ribbon_file = File(desc='Image file detailing the cortical ribbon',
+                    exists=True)
+    aseg_file = File(desc='Automated segmentation file converted from Freesurfer "subjects" directory',
+                    exists=True)
+    roi_file_in_structural_space = File(desc='ROI image resliced to the dimensions of the original structural image',
+                    exists=True)
+
 
 class Parcellate(BaseInterface):
     """Subdivides segmented ROI file into smaller subregions
@@ -404,7 +416,7 @@ class Parcellate(BaseInterface):
         outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
         outputs['ribbon_file'] = op.abspath('ribbon.nii.gz')
         outputs['aseg_file'] = op.abspath('aseg.nii.gz')
-        outputs['ROI_HR_th_file'] = op.abspath('ROI_HR_th.nii.gz')
+        outputs['roi_file_in_structural_space'] = op.abspath('ROI_HR_th.nii.gz')
         return outputs
 
     def _gen_outfilename(self, ext, prefix='ROI'):

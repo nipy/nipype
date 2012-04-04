@@ -71,6 +71,57 @@ be imported within the function itself::
 Without explicitly importing Nibabel in the body of the function, this
 would fail.
 
+Hello World - Function interface in a workflow
+----------------------------------------------
+
+Contributed by: Hänel Nikolaus Valentin 
+
+The following snippet of code demonstrates the use of the function interface in
+the context of a workflow. Note the use of `import os` within the function as
+well as returning the absolute path from the Hello function. The `import` inside
+is necessary because functions are coded as strings and do not have to be on the
+PYTHONPATH. However any function called by this function has to be available on
+the PYTHONPATH. The `absolute path` is necessary because all workflow nodes are
+executed in their own directory and therefore there is no way of determining
+that the input file came from a different directory::
+
+    import nipype.pipeline.engine as pe
+    from nipype.interfaces.utility import Function
+
+    def Hello():
+       import os
+       from nipype import logging
+       iflogger = logging.getLogger('interface')
+       message = "Hello "
+       file_name =  'hello.txt'
+       iflogger.info(message)
+       with open(file_name, 'w') as fp:
+           fp.write(message)
+       return os.path.abspath(file_name)
+
+    def World(in_file):
+       from nipype import logging
+       iflogger = logging.getLogger('interface')
+       message = "World!"
+       iflogger.info(message)
+       with open(in_file, 'a') as fp:
+           fp.write(message)
+
+    hello = pe.Node(name='hello',
+                   interface=Function(input_names=[],
+                                      output_names=['out_file'],
+                                      function=Hello))
+    world = pe.Node(name='world',
+                   interface=Function(input_names=['in_file'],
+                                      output_names=[],
+                                      function=World))
+
+    pipeline = pe.Workflow(name='nipype_demo')
+    pipeline.connect([(hello, world, [('out_file', 'in_file')])])
+    pipeline.run()
+    pipeline.write_graph(graph2use='flat')
+
+
 Advanced Use
 ------------
 

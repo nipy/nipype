@@ -23,6 +23,8 @@ def test_datasink():
     yield assert_equal, ds.inputs._outputs, {}
     ds = nio.DataSink(base_directory = 'foo')
     yield assert_equal, ds.inputs.base_directory, 'foo'
+    ds = nio.DataSink(infields=['test'])
+    yield assert_true, 'test' in ds.inputs.copyable_trait_names()
 
 def test_datasink_substitutions():
     indir = mkdtemp(prefix='-Tmp-nipype_ds_subs_in')

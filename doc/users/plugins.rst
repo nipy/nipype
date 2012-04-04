@@ -115,6 +115,22 @@ a custom template::
        workflow.run(plugin='SGE',
           plugin_args=dict(template='mytemplate.sh', qsub_args='-q myqueue')
 
+In addition to overall workflow configuration, you can use node level
+configuration for PBS/SGE::
+
+    node.plugin_args = {'qsub_args': '-l nodes=1:ppn=3'}
+
+this would apply only to the node and is useful in situations, where a
+particular node might use more resources than other nodes in a workflow.
+
+.. note::
+
+  Setting the keyword `overwrite` would overwrite any global configuration with
+  this local configuration::
+
+     node.plugin_args = {'qsub_args': '-l nodes=1:ppn=3', 'overwrite': True}
+
+
 Condor
 ------
 

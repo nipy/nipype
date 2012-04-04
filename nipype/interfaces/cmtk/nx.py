@@ -18,12 +18,10 @@ import numpy as np
 import networkx as nx
 import scipy.io as sio
 import pickle
-import logging
 from nipype.utils.misc import package_check
-from nipype.workflows.misc.utils import get_data_dims
 import warnings
 
-logging.basicConfig()
+from ... import logging
 iflogger = logging.getLogger('interface')
 
 have_cmp = True

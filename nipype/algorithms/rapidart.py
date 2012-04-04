@@ -26,7 +26,7 @@ import numpy as np
 from scipy import signal
 import scipy.io as sio
 
-from nipype.utils.config import config
+from .. import config
 import matplotlib
 matplotlib.use(config.get("execution", "matplotlib_backend"))
 import matplotlib.pyplot as plt

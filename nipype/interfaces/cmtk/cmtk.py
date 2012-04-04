@@ -20,9 +20,8 @@ import numpy as np
 import nibabel as nb
 import networkx as nx
 import sys
-import logging
 
-logging.basicConfig()
+from ... import logging
 iflogger = logging.getLogger('interface')
 
 def length(xyz, along=False):
@@ -416,6 +415,7 @@ class CreateMatrixOutputSpec(TraitedSpec):
     fiber_labels_noorphans = File(desc='Saved Numpy array with the labels for each non-orphan fiber', exists=True)
     filtered_tractography = File(desc='TrackVis file containing only those fibers originate in one and terminate in another region', exists=True)
     filtered_tractography_by_intersections = File(desc='TrackVis file containing all fibers which connect two regions', exists=True)
+    filtered_tractographies = OutputMultiPath(File(desc='TrackVis file containing only those fibers originate in one and terminate in another region', exists=True))
 
 class CreateMatrix(BaseInterface):
     """
@@ -536,6 +536,7 @@ class CreateMatrix(BaseInterface):
 
         _, name , _ = split_filename(self.inputs.tract_file)
         outputs['filtered_tractography'] = op.abspath(name + '_streamline_final.trk')
+        outputs['filtered_tractographies'] = [outputs['filtered_tractography'], outputs['filtered_tractography_by_intersections']]
         return outputs
 
     def _gen_outfilename(self, ext):

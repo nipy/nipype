@@ -1410,7 +1410,7 @@ class RandomiseInputSpec(FSLCommandInputSpec):
     mask = File(exists=True, desc='mask image', argstr='-m %s')
     x_block_labels = File(exists=True, desc='exchangeability block labels file', argstr='-e %s')
     demean = traits.Bool(desc='demean data temporally before model fitting', argstr='-D')
-    one_sample_group_mean =  traits.Bool(desc='perform 1-sample group-mean test instead of generic permutation test',
+    one_sample_group_mean = traits.Bool(desc='perform 1-sample group-mean test instead of generic permutation test',
                                   argstr='-l')
     show_total_perms = traits.Bool(desc='print out how many unique permutations would be generated and exit',
                                  argstr='-q')
@@ -1449,17 +1449,18 @@ class RandomiseOutputSpec(TraitedSpec):
         File(exists=True),
         desc='f contrast raw statistic')
     t_p_files = traits.List(
-        File(exists=True), 
+        File(exists=True),
         desc='f contrast uncorrected p values files')
     f_p_files = traits.List(
         File(exists=True),
         desc='f contrast uncorrected p values files')
     t_corrected_p_files = traits.List(
-        File(exists=True), 
+        File(exists=True),
         desc='t contrast FWE (Family-wise error) corrected p values files')
     f_corrected_p_files = traits.List(
         File(exists=True),
         desc='f contrast FWE (Family-wise error) corrected p values files')
+
 
 class Randomise(FSLCommand):
     """XXX UNSTABLE DO NOT USE
@@ -1486,36 +1487,35 @@ class Randomise(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        import glob
-        outputs['tstat_files'] = glob.glob(os.path.join(
+        outputs['tstat_files'] = glob(os.path.join(
                 os.getcwd(),
-                '%s_tstat*.nii'%self.inputs.base_name))
-        outputs['fstat_files'] = glob.glob(os.path.join(
+                '%s_tstat*.nii' % self.inputs.base_name))
+        outputs['fstat_files'] = glob(os.path.join(
                 os.getcwd(),
-                '%s_fstat*.nii'%self.inputs.base_name))
+                '%s_fstat*.nii' % self.inputs.base_name))
         prefix = False
         if self.inputs.tfce or self.inputs.tfce2D:
-            prefix='tfce'
+            prefix = 'tfce'
         elif self.inputs.vox_p_values:
-            prefix='vox'
+            prefix = 'vox'
         elif self.inputs.c_thresh or self.inputs.f_c_thresh:
-            prefix='clustere'
+            prefix = 'clustere'
         elif self.inputs.cm_thresh or self.inputs.f_cm_thresh:
-            prefix='clusterm'
+            prefix = 'clusterm'
         if prefix:
-            outputs['t_p_files'] = glob.glob(os.path.join(
+            outputs['t_p_files'] = glob(os.path.join(
                 os.getcwd(),
-                '%s_%s_p_tstat*.nii'%(self.inputs.base_name,prefix) ))
-            outputs['t_corrected_p_files'] = glob.glob(os.path.join(
+                '%s_%s_p_tstat*.nii' % (self.inputs.base_name, prefix)))
+            outputs['t_corrected_p_files'] = glob(os.path.join(
                 os.getcwd(),
-                '%s_%s_corrp_tstat*.nii'%(self.inputs.base_name,prefix)))
+                '%s_%s_corrp_tstat*.nii' % (self.inputs.base_name, prefix)))
 
-            outputs['f_p_files'] = glob.glob(os.path.join(
+            outputs['f_p_files'] = glob(os.path.join(
                 os.getcwd(),
-                '%s_%s_p_fstat*.nii'%(self.inputs.base_name,prefix)))
-            outputs['f_corrected_p_files'] = glob.glob(os.path.join(
+                '%s_%s_p_fstat*.nii' % (self.inputs.base_name, prefix)))
+            outputs['f_corrected_p_files'] = glob(os.path.join(
                 os.getcwd(),
-                '%s_%s_corrp_fstat*.nii'%(self.inputs.base_name,prefix)))
+                '%s_%s_corrp_fstat*.nii' % (self.inputs.base_name, prefix)))
 
         return outputs
 

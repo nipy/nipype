@@ -1,7 +1,18 @@
-Changes since 0.5
-=================
+Release 0.5.3 (Mar 23, 2012)
+============================
 
-None
+* FIX: SPM model generation when output units is in scans
+
+Release 0.5.2 (Mar 14, 2012)
+============================
+
+* API: Node now allows specifying node level configuration for SGE/PBS clusters
+* API: Logging to file is disabled by default
+* API: New location of log file -> .nipype/nipype.cfg
+
+* ENH: Changing logging options via config works for distributed processing
+
+* FIX: Unittests on debian (logging and ipython)
 
 Release 0.5 (Mar 10, 2012)
 ==========================

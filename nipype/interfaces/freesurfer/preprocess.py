@@ -362,7 +362,7 @@ class MRIConvert(FSCommand):
                                       newpath=os.getcwd(),
                                       suffix=suffix,
                                       use_ext=False)
-        return outfile
+        return os.path.abspath(outfile)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
