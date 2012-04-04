@@ -1,6 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from nipype.interfaces.spm.base import SPMCommandInputSpec, SPMCommand, Info, scans_for_fnames, scans_for_fname,
+from nipype.interfaces.spm.base import SPMCommandInputSpec, SPMCommand, Info, scans_for_fnames, scans_for_fname
 from nipype.interfaces.matlab import MatlabCommand
 from nipype.interfaces.base import (TraitedSpec, BaseInterface, 
                                     BaseInterfaceInputSpec, isdefined, 
