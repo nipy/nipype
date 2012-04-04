@@ -10,7 +10,7 @@ import nipype.interfaces.utility as niu
 import os, os.path as op
 
 
-def create_bem_flow(name='tessellate', out_format='stl'):
+def create_bem_flow(name='bem', out_format='stl'):
     """Uses MNE's Watershed algorithm to create Boundary Element Meshes (BEM)
      for a subject's brain, inner/outer skull, and skin. The surfaces are 
      returned in the desired (by default, stereolithic .stl) format.

@@ -17,11 +17,12 @@ iflogger = logging.getLogger('interface')
 
 class WatershedBEMInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--subject %s', mandatory=True,
-                           desc='file to which results are written')
+                           desc='Subject ID (must have a complete Freesurfer directory)')
     subjects_dir = Directory(exists=True, mandatory=True, usedefault=True,
                            desc='Path to Freesurfer subjects directory')
-    volume = File('T1', argstr='--volume %s', usedefault=True,
-                           desc='Volume to use (defaults to T1)')
+    volume = traits.Enum('T1', 'aparc+aseg', 'aseg', 'brain', 'orig', 'brainmask',  'ribbon',
+                           argstr='--volume %s', usedefault=True,
+                           desc='The volume from the "mri" directory to use (defaults to T1)')
     overwrite = traits.Bool(True, usedefault=True, argstr='--overwrite',
                             desc='Overwrites the existing files')
     atlas_mode = traits.Bool(argstr='--atlas',
@@ -86,8 +87,17 @@ class WatershedBEM(FSCommand):
                                       output_traits.traits()[k].loc,
                                       output_traits.traits()[k].altkey)
                 if val:
-                    outputs[k] = list_to_filename(val)
+                    value_list = list_to_filename(val)
+                    if isinstance(value_list, list):
+                        out_files = []
+                        for value in value_list:
+                            out_files.append(op.abspath(value))
+                    elif isinstance(value_list, str):
+                        out_files = op.abspath(value_list)
+                    else:
+                        raise TypeError
+                    outputs[k] = out_files
                     if not k.rfind('surface') == -1:
-                        mesh_paths.append(list_to_filename(val))
+                        mesh_paths.append(out_files)
         outputs['mesh_files'] = mesh_paths
         return outputs
