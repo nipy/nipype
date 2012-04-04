@@ -1,5 +1,21 @@
-Changes since release 0.4.1
-===========================
+Release 0.5.3 (Mar 23, 2012)
+============================
+
+* FIX: SPM model generation when output units is in scans
+
+Release 0.5.2 (Mar 14, 2012)
+============================
+
+* API: Node now allows specifying node level configuration for SGE/PBS clusters
+* API: Logging to file is disabled by default
+* API: New location of log file -> .nipype/nipype.cfg
+
+* ENH: Changing logging options via config works for distributed processing
+
+* FIX: Unittests on debian (logging and ipython)
+
+Release 0.5 (Mar 10, 2012)
+==========================
 
 * API: FSL defaults to Nifti when OUTPUTTYPE environment variable not found
 * API: By default inputs are removed from Node working directory
@@ -41,7 +57,7 @@ Changes since release 0.4.1
 * ENH: Added FmriRealign4d node wrapped from nipy 
 * ENH: Added TBSS workflows and examples
 * ENH: Support for openfmri data processing
-
+* ENH: Package version check
 
 * FIX: Fixed spm preproc workflow to cater to multiple functional runs
 * FIX: Workflow outputs displays nodes with empty outputs

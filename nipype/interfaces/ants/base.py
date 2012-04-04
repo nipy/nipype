@@ -6,8 +6,8 @@
 from nipype.interfaces.base import (CommandLine, CommandLineInputSpec, traits,
 isdefined)
 
-import logging
-logger = logging.getLogger('iflogger')
+from ... import logging
+logger = logging.getLogger('interface')
 
 
 class ANTSCommandInputSpec(CommandLineInputSpec):

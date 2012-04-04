@@ -5,7 +5,6 @@
 
 from copy import deepcopy
 from glob import glob
-import logging
 import os
 import re
 
@@ -17,10 +16,10 @@ import networkx as nx
 from nipype.interfaces.base import CommandLine, isdefined, Undefined
 from nipype.utils.filemanip import fname_presuffix, FileNotFoundError,\
     filename_to_list
-from nipype.utils.config import config
 from nipype.utils.misc import create_function_from_source, str2bool
 from nipype.interfaces.utility import IdentityInterface
 
+from .. import logging, config
 logger = logging.getLogger('workflow')
 
 try:
@@ -492,8 +491,7 @@ def generate_expanded_graph(graph_in):
             node.iterables = dict(map(lambda(x): (x[0],
                                                   lambda: x[1]),
                                       node.iterables))
-    allprefixes = list('0abcdefghijklmnopqrstuvwxyz')
-    iterable_prefix = '0'
+    allprefixes = list('abcdefghijklmnopqrstuvwxyz')
     while moreiterables:
         nodes = nx.topological_sort(graph_in)
         nodes.reverse()
@@ -501,12 +499,21 @@ def generate_expanded_graph(graph_in):
         if inodes:
             node = inodes[0]
             iterables = node.iterables.copy()
-            iterable_prefix = \
-                            allprefixes[allprefixes.index(iterable_prefix) + 1]
-            logger.debug('node: %s iterables: %s' % (node, iterables))
             node.iterables = None
-            node._id += ('.' + iterable_prefix + 'I')
+            logger.debug('node: %s iterables: %s' % (node, iterables))
             subnodes = [s for s in dfs_preorder(graph_in, node)]
+            prior_prefix = []
+            for s in subnodes:
+                prior_prefix.extend(re.findall('\.(.)I', s._id))
+            prior_prefix = sorted(prior_prefix)
+            if not len(prior_prefix):
+                iterable_prefix = 'a'
+            else:
+                if prior_prefix[-1] == 'z':
+                    raise ValueError('Too many iterables in the workflow')
+                iterable_prefix =\
+                allprefixes[allprefixes.index(prior_prefix[-1]) + 1]
+            node._id += ('.' + iterable_prefix + 'I')
             logger.debug(('subnodes:', subnodes))
             subgraph = graph_in.subgraph(subnodes)
             graph_in = _merge_graphs(graph_in, subnodes,

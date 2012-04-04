@@ -12,12 +12,10 @@
 from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, BaseInterface, BaseInterfaceInputSpec,
                                     traits, File, TraitedSpec, Directory, InputMultiPath, OutputMultiPath, isdefined)
 from nipype.utils.filemanip import split_filename
-import os, os.path as op
+import os.path as op
 import numpy as np
-import nibabel as nb
-import logging
 
-logging.basicConfig()
+from ... import logging
 iflogger = logging.getLogger('interface')
 
 class DWI2SphericalHarmonicsImageInputSpec(CommandLineInputSpec):

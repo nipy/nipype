@@ -36,7 +36,7 @@ def test_callback_normal():
                      name='f_node')
     wf.add_nodes([f_node])
     wf.config['execution'] = {'crashdump_dir': wf.base_dir}
-    wf.run(plugin_args={'status_callback': so.callback})
+    wf.run(plugin="Linear", plugin_args={'status_callback': so.callback})
     assert_equal(len(so.statuses), 2)
     for (n, s) in so.statuses:
         yield assert_equal, n.name, 'f_node'
@@ -54,7 +54,7 @@ def test_callback_exception():
     wf.add_nodes([f_node])
     wf.config['execution'] = {'crashdump_dir': wf.base_dir}
     try:
-        wf.run(plugin_args={'status_callback': so.callback})
+        wf.run(plugin="Linear", plugin_args={'status_callback': so.callback})
     except:
         pass
     assert_equal(len(so.statuses), 2)

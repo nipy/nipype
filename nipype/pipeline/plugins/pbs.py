@@ -52,6 +52,12 @@ class PBSPlugin(SGELikeBatchManagerBase):
         qsubargs = ''
         if self._qsub_args:
             qsubargs = self._qsub_args
+        if 'qsub_args' in node.plugin_args:
+            if 'overwrite' in node.plugin_args and \
+               node.plugin_args['overwrite']:
+                qsubargs = node.plugin_args['qsub_args']
+            else:
+                qsubargs += (" " + node.plugin_args['qsub_args'])
         if '-o' not in qsubargs:
             qsubargs = '%s -o %s' % (qsubargs, path)
         if '-e' not in qsubargs:

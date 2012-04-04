@@ -29,9 +29,8 @@ from nipype.interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                     traits, File, Bunch, BaseInterfaceInputSpec,
                                     isdefined)
 from nipype.utils.filemanip import filename_to_list
-from nipype.utils.logger import iflogger
-from nipype.utils.config import config
-
+from .. import config, logging
+iflogger = logging.getLogger('interface')
 
 def gcd(a, b):
     """Returns the greatest common divisor of two integers
@@ -272,6 +271,9 @@ class SpecifyModel(BaseInterface):
             each run
         """
         sessinfo = []
+        output_units = 'secs'
+        if 'output_units' in self.inputs.traits():
+            output_units = self.inputs.output_units
         for i, info in enumerate(infolist):
             sessinfo.insert(i, dict(cond=[]))
             if isdefined(self.inputs.high_pass_filter_cutoff):
@@ -282,11 +284,11 @@ class SpecifyModel(BaseInterface):
                     sessinfo[i]['cond'][cid]['name']  = info.conditions[cid]
                     sessinfo[i]['cond'][cid]['onset'] = scale_timings(info.onsets[cid],
                                                                      self.inputs.input_units,
-                                                                     'secs',
+                                                                     output_units,
                                                                      self.inputs.time_repetition)
                     sessinfo[i]['cond'][cid]['duration'] = scale_timings(info.durations[cid],
                                                                         self.inputs.input_units,
-                                                                        'secs',
+                                                                        output_units,
                                                                         self.inputs.time_repetition)
                     if hasattr(info, 'amplitudes') and info.amplitudes:
                         sessinfo[i]['cond'][cid]['amplitudes']  = info.amplitudes[cid]
@@ -458,7 +460,7 @@ class SpecifySPMModel(SpecifyModel):
         return [infoout], nscans
 
     def _generate_design(self, infolist=None):
-        if not isdefined(self.inputs.concatenate_runs):
+        if not isdefined(self.inputs.concatenate_runs) or not self.inputs.concatenate_runs:
             super(SpecifySPMModel, self)._generate_design(infolist=infolist)
             return
         if isdefined(self.inputs.subject_info):

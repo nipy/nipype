@@ -38,7 +38,7 @@ from nipype.interfaces.base import (TraitedSpec, traits, File, Directory,
 from nipype.utils.filemanip import (copyfile, list_to_filename,
                                     filename_to_list)
 
-import logging
+from .. import logging
 iflogger = logging.getLogger('interface')
 
 
@@ -130,6 +130,8 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
+            if not isdefined(value):
+                super(DataSinkInputSpec, self).__setattr__(key, value)
             self._outputs[key] = value
         else:
             if key in self._outputs:

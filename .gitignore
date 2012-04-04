@@ -6,5 +6,9 @@
 /nipype/nipype.egg-info
 /doc/_build
 /doc/users/examples
+/doc/api/generated
 *.pyc
 *.so
+.project
+.settings
+.pydevproject

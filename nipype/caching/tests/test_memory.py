@@ -8,7 +8,9 @@ from nose.tools import assert_equal
 
 from nipype.caching import Memory
 from nipype.pipeline.tests.test_engine import TestInterface
-from nipype.utils.config import config
+from nipype.utils.config import NipypeConfig
+config = NipypeConfig()
+config.set_default_config()
 
 nb_runs = 0
 

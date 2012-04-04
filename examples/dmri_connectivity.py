@@ -551,7 +551,7 @@ mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
 mapping.connect([(gpickledNetworks, CFFConverter,[("out","gpickled_networks")])])
 mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
 mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
-mapping.connect([(camino2trackvis, CFFConverter,[("trackvis","tract_files")])])
+mapping.connect([(creatematrix, CFFConverter,[("filtered_tractographies","tract_files")])])
 mapping.connect([(inputnode, CFFConverter,[("subject_id","title")])])
 
 """

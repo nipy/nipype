@@ -9,6 +9,7 @@ Documentation
    :Release: |version|
    :Date: |today|
 
+Previous version: `0.4.1 <http://nipy.org/nipype/0.4.1>`_
 
 .. container:: doc2
 

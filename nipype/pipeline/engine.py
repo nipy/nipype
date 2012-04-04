@@ -27,29 +27,29 @@ from warnings import warn
 
 import numpy as np
 
-from nipype.utils.misc import package_check, str2bool
+from ..utils.misc import package_check, str2bool
 package_check('networkx', '1.3')
 import networkx as nx
 
-from nipype.interfaces.base import (traits, InputMultiPath, CommandLine,
-                                    Undefined, TraitedSpec, DynamicTraitedSpec,
-                                    Bunch, InterfaceResult, md5, Interface,
-                                    TraitDictObject, TraitListObject, isdefined)
-from nipype.utils.misc import getsource
-from nipype.utils.filemanip import (save_json, FileNotFoundError,
-                                    filename_to_list, list_to_filename,
-                                    copyfiles, fnames_presuffix, loadpkl,
-                                    split_filename, load_json, savepkl,
-                                    write_rst_header, write_rst_dict,
-                                    write_rst_list)
+from .. import config, logging
+logger = logging.getLogger('workflow')
+from ..interfaces.base import (traits, InputMultiPath, CommandLine,
+                               Undefined, TraitedSpec, DynamicTraitedSpec,
+                               Bunch, InterfaceResult, md5, Interface,
+                               TraitDictObject, TraitListObject, isdefined)
+from ..utils.misc import getsource
+from ..utils.filemanip import (save_json, FileNotFoundError,
+                               filename_to_list, list_to_filename,
+                               copyfiles, fnames_presuffix, loadpkl,
+                               split_filename, load_json, savepkl,
+                               write_rst_header, write_rst_dict,
+                               write_rst_list)
 
-from nipype.pipeline.utils import (generate_expanded_graph, modify_paths,
-                                   export_graph, make_output_dir,
-                                   clean_working_directory, format_dot,
-                                   get_print_name, merge_dict,
-                                   evaluate_connect_function)
-from nipype.utils.logger import (logger, config, logdebug_dict_differences)
-
+from .utils import (generate_expanded_graph, modify_paths,
+                    export_graph, make_output_dir,
+                    clean_working_directory, format_dot,
+                    get_print_name, merge_dict,
+                    evaluate_connect_function)
 
 class WorkflowBase(object):
     """ Define common attributes and functions for workflows and nodes
@@ -397,10 +397,9 @@ connected.
         """
         outlist = []
         for node in nx.topological_sort(self._graph):
-            print node.fullname #dbg
             if isinstance(node, Workflow):
                 outlist.extend(['.'.join((node.name, nodename)) for nodename in
-                                node.list_nodes()])
+                                node.list_node_names()])
             else:
                 outlist.append(node.name)
         return sorted(outlist)
@@ -973,6 +972,7 @@ class Node(WorkflowBase):
         self.run_without_submitting = run_without_submitting
         self.input_source = {}
         self.needed_outputs = []
+        self.plugin_args = {}
         if needed_outputs:
             self.needed_outputs = sorted(needed_outputs)
 
@@ -1094,8 +1094,8 @@ class Node(WorkflowBase):
                             except:
                                 pass
                             else:
-                                logdebug_dict_differences(prev_inputs,
-                                                          hashed_inputs)
+                                logging.logdebug_dict_differences(prev_inputs,
+                                                                  hashed_inputs)
                 if (str2bool(self.config['execution']['stop_on_first_rerun']) and
                     not (self.overwrite == None and self._interface.always_run)):
                     raise Exception(("Cannot rerun when 'stop_on_first_rerun' "
