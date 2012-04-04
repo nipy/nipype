@@ -38,8 +38,6 @@ def ntwks_to_matrices(in_files, edge_key):
 class NetworkBrainStatisticInputSpec(BaseInterfaceInputSpec):
     in_group1 = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for the first group of subjects')
     in_group2 = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for the second group of subjects')
-    group_id1 = traits.Str('group1', usedefault=True, desc='ID for the first group')
-    group_id2 = traits.Str('group2', usedefault=True, desc='ID for the second group')
     node_position_network = File(desc='An optional network used to position the nodes for the output networks')
     number_of_permutations = traits.Int(1000, usedefault=True, desc='Number of permutations to perform')
     threshold = traits.Int(2, usedefault=True, desc='Threshold for the number of components')
@@ -79,6 +77,7 @@ class NetworkBrainStatistic(BaseInterface):
 		K = self.inputs.number_of_permutations
 		TAIL = self.inputs.t_tail
 		edge_key = self.inputs.edge_key
+		details = edge_key + '-thresh-' + str(THRESH) + '-k-' + str(K) + '-tail-' + TAIL + '.pck'
 		
 		# Fill in the data from the networks
 		X = ntwks_to_matrices(self.inputs.in_group1, edge_key)
@@ -108,18 +107,18 @@ class NetworkBrainStatistic(BaseInterface):
 			node_ntwk_name = self.inputs.in_group1[0]
 
 		node_network = nx.read_gpickle(node_ntwk_name)
-		iflogger.info('Populate node dictionaries with attributes from {node}'.format(node=node_ntwk_name))
+		iflogger.info('Populating node dictionaries with attributes from {node}'.format(node=node_ntwk_name))
 		
 		for nid, ndata in node_network.nodes_iter(data=True):
 			nbsgraph.node[nid] = ndata
 			nbs_pval_graph.node[nid] = ndata
 
-		path = op.abspath('NBS_Result_' + '_' + edge_key + '-thresh-' + str(THRESH) + '-k-' + str(K) + '-tail-' + TAIL + '.pck')
+		path = op.abspath('NBS_Result_' + details)
 		iflogger.info(path)
 		nx.write_gpickle(nbsgraph, path)
 		iflogger.info('Saving output NBS edge network as {out}'.format(out=path))
 
-		pval_path = op.abspath('NBS_P_vals_' + '_' + edge_key + '-thresh-' + str(THRESH) + '-k-' + str(K) + '-tail-' + TAIL + '.pck')
+		pval_path = op.abspath('NBS_P_vals_' + details)
 		iflogger.info(pval_path)
 		nx.write_gpickle(nbs_pval_graph, pval_path)
 		iflogger.info('Saving output p-value network as {out}'.format(out=pval_path))
@@ -132,8 +131,9 @@ class NetworkBrainStatistic(BaseInterface):
 		K = self.inputs.number_of_permutations
 		TAIL = self.inputs.t_tail
 		edge_key = self.inputs.edge_key
-		path = op.abspath('NBS_Result_' + '_' + edge_key + '-thresh-' + str(THRESH) + '-k-' + str(K) + '-tail-' + TAIL + '.pck')
-		pval_path = op.abspath('NBS_P_vals_' + '_' + edge_key + '-thresh-' + str(THRESH) + '-k-' + str(K) + '-tail-' + TAIL + '.pck')
+		details = edge_key + '-thresh-' + str(THRESH) + '-k-' + str(K) + '-tail-' + TAIL + '.pck'
+		path = op.abspath('NBS_Result_' + details)
+		pval_path = op.abspath('NBS_P_vals_' + details)
 	
 		outputs['nbs_network'] = path
 		outputs['nbs_pval_network'] = pval_path
