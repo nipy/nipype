@@ -785,8 +785,8 @@ class Smooth(SPMCommand):
                     return [val[0], val[0], val[0]]
                 else:
                     return val
-            if opt == 'implicit_masking':
-                return int(val)
+        if opt == 'implicit_masking':
+            return int(val)
 
         return val
 
