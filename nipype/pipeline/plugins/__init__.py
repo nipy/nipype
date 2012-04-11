@@ -9,3 +9,5 @@ from .sge import SGEPlugin
 from .condor import CondorPlugin
 from .multiproc import MultiProcPlugin
 from .ipython import IPythonPlugin
+from .somaflow import SomaFlowPlugin
+from .pbsgraph import PBSGraphPlugin
