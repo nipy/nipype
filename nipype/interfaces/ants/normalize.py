@@ -233,7 +233,7 @@ class WarpImageMultiTransform(ANTSCommand):
         outputs['output_image'] = os.path.join(os.getcwd(),
                                              ''.join((name,
                                                       self.inputs.out_postfix,
-                                                      ext))))
+                                                      ext)))
         return outputs
 
 
@@ -316,7 +316,7 @@ class WarpTimeSeriesImageMultiTransform(ANTSCommand):
         outputs['output_image'] = os.path.join(os.getcwd(),
                                              ''.join((name,
                                                       self.inputs.out_postfix,
-                                                      ext))))
+                                                      ext)))
         return outputs
 
 
