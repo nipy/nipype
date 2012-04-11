@@ -29,4 +29,5 @@ class SomaFlowPlugin(GraphPluginBase):
         Helper.serialize('workflow', wf)
         controller = WorkflowController()
         logger.info('submitting workflow')
-        controller.submit_workflow(wf)
+        wf_id = controller.submit_workflow(wf)
+        Helper.wait_workflow(wf_id, controller)

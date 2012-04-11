@@ -41,8 +41,6 @@ def test_run_somaflow():
     pipe.base_dir = os.getcwd()
     mod1.inputs.input1 = 1
     execgraph = pipe.run(plugin="SomaFlow")
-    # Sleep necessary as soma runs without blocking
-    sleep(10)
     names = ['.'.join((node._hierarchy,node.name)) for node in execgraph.nodes()]
     node = execgraph.nodes()[names.index('pipe.mod1')]
     result = node.get_output('output1')
