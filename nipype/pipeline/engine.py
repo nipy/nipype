@@ -975,6 +975,7 @@ class Node(WorkflowBase):
         self.plugin_args = {}
         if needed_outputs:
             self.needed_outputs = sorted(needed_outputs)
+        self._got_inputs = False
 
     @property
     def interface(self):
@@ -1144,6 +1145,9 @@ class Node(WorkflowBase):
     # Private functions
     def _get_hashval(self):
         """Return a hash of the input state"""
+        if not self._got_inputs:
+            self._get_inputs()
+            self._got_inputs = True
         hashed_inputs, hashvalue = self.inputs.get_hashval(
             hash_method=self.config['execution']['hash_method'])
         if str2bool(self.config['execution']['remove_unnecessary_outputs']) \
@@ -1547,6 +1551,10 @@ class MapNode(Node):
     def _get_hashval(self):
         """ Compute hash including iterfield lists
         """
+        if not self._got_inputs:
+            self._get_inputs()
+            self._got_inputs = True
+        self._check_iterfield()
         hashinputs = deepcopy(self._interface.inputs)
         for name in self.iterfield:
             hashinputs.remove_trait(name)

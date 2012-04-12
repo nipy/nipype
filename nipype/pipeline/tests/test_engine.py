@@ -343,3 +343,15 @@ def test_mapnode_iterfield_check():
     mod1.inputs.input1 = [1,2]
     mod1.inputs.input2 = 3
     yield assert_raises, ValueError, mod1._check_iterfield
+
+
+def test_node_hash():
+    from nipype.interfaces.utility import IdentityInterface as ii
+    n1 = pe.Node(ii(fields=['a','b']),name='n1')
+    n2 = pe.Node(ii(fields=['c','d']),name='n2')
+    w1 = pe.Workflow(name='test')
+    modify = lambda x: x+1
+    n1.inputs.a = 1
+    w1.connect(n1, ('a', modify), n2,'c')
+    w1._configure_exec_nodes(w1._graph)
+    yield assert_raises, IOError, n2._get_hashval
