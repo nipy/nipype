@@ -1056,7 +1056,9 @@ class Node(WorkflowBase):
         """
         # check to see if output directory and hash exist
         self.config = merge_dict(deepcopy(config._sections), self.config)
-        self._get_inputs()
+        if not self._got_inputs:
+            self._get_inputs()
+            self._got_inputs = True
         outdir = self.output_dir()
         logger.info("Executing node %s in dir: %s" % (self._id, outdir))
         hash_exists, hashvalue, hashfile, hashed_inputs = self.hash_exists(updatehash=updatehash)
