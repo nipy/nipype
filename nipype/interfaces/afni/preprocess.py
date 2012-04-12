@@ -131,7 +131,7 @@ class TShiftInputSpec(AFNITraitedSpec):
         # todo: give it a default-value
 
 
-class TShiftOutputSpec(AFNITraitedSpec):
+class TShiftOutputSpec(TraitedSpec):
     out_file = File(desc='post slice time shifted 4D image')
 
 
@@ -201,7 +201,7 @@ class RefitInputSpec(AFNITraitedSpec):
         argstr='-zorigin %s')
 
 
-class RefitOutputSpec(AFNITraitedSpec):
+class RefitOutputSpec(TraitedSpec):
     out_file = File(desc='Same file as original infile with modified matrix',
         exists=True)
 
@@ -276,7 +276,7 @@ class WarpInputSpec(AFNITraitedSpec):
         # todo: give it a default-value
 
 
-class WarpOutputSpec(AFNITraitedSpec):
+class WarpOutputSpec(TraitedSpec):
     out_file = File(desc='spatially transformed input image', exists=True)
 
 
@@ -341,7 +341,7 @@ class ResampleInputSpec(AFNITraitedSpec):
         # todo: give it a default-value
 
 
-class ResampleOutputSpec(AFNITraitedSpec):
+class ResampleOutputSpec(TraitedSpec):
     out_file = File(desc='reoriented or resampled file',
         exists=True)
 
@@ -406,7 +406,7 @@ class TStatInputSpec(AFNITraitedSpec):
         argstr='%s')
 
 
-class TStatOutputSpec(AFNITraitedSpec):
+class TStatOutputSpec(TraitedSpec):
     out_file = File(desc='statistical file',
         exists=True)
 
@@ -464,7 +464,7 @@ class DetrendInputSpec(AFNITraitedSpec):
         argstr='%s')
 
 
-class DetrendOutputSpec(AFNITraitedSpec):
+class DetrendOutputSpec(TraitedSpec):
     out_file = File(desc='statistical file',
         exists=True)
 
@@ -526,7 +526,7 @@ class DespikeInputSpec(AFNITraitedSpec):
         argstr='%s')
 
 
-class DespikeOutputSpec(AFNITraitedSpec):
+class DespikeOutputSpec(TraitedSpec):
     out_file = File(desc='despiked img',
                exists=True)
 
@@ -603,7 +603,7 @@ class AutomaskInputSpec(AFNITraitedSpec):
         # todo: give it a default-value
 
 
-class AutomaskOutputSpec(AFNITraitedSpec):
+class AutomaskOutputSpec(TraitedSpec):
     out_file = File(desc='mask file',
         exists=True)
 
@@ -690,7 +690,7 @@ class VolregInputSpec(AFNITraitedSpec):
         argstr='%s')
 
 
-class VolregOutputSpec(AFNITraitedSpec):
+class VolregOutputSpec(TraitedSpec):
     out_file = File(desc='registered file',
         exists=True)
     md1d_file = File(desc='max displacement info file')
@@ -766,7 +766,7 @@ class MergeInputSpec(AFNITraitedSpec):
          argstr='%s')
 
 
-class MergeOutputSpec(AFNITraitedSpec):
+class MergeOutputSpec(TraitedSpec):
     out_file = File(desc='smoothed file',
         exists=True)
 
@@ -813,7 +813,7 @@ class CopyInputSpec(AFNITraitedSpec):
         genfile=True)
 
 
-class CopyOutputSpec(AFNITraitedSpec):
+class CopyOutputSpec(TraitedSpec):
     out_file = File(desc='copied file')
 
 
@@ -879,7 +879,7 @@ class FourierInputSpec(AFNITraitedSpec):
         argstr='%s')
 
 
-class FourierOutputSpec(AFNITraitedSpec):
+class FourierOutputSpec(TraitedSpec):
     out_file = File(desc='band-pass filtered file',
         exists=True)
 
@@ -942,7 +942,7 @@ class ZCutUpInputSpec(AFNITraitedSpec):
                argstr='%s')
 
 
-class ZCutUpOutputSpec(AFNITraitedSpec):
+class ZCutUpOutputSpec(TraitedSpec):
     out_file = File(desc='cut file',
         exists=True)
 
@@ -991,7 +991,7 @@ class AllineateInputSpec(AFNITraitedSpec):
         position=-3)
 
 
-class AllineateOutputSpec(AFNITraitedSpec):
+class AllineateOutputSpec(TraitedSpec):
     out_file = File(desc='cut file',
           exists=True)
 
@@ -1044,7 +1044,7 @@ class MaskaveInputSpec(AFNITraitedSpec):
         position=2)
 
 
-class MaskaveOutputSpec(AFNITraitedSpec):
+class MaskaveOutputSpec(TraitedSpec):
     out_file = File(desc='outfile',
           exists=True)
 
@@ -1104,7 +1104,7 @@ class SkullStripInputSpec(AFNITraitedSpec):
     options = traits.Str(desc='options', argstr='%s', position=2)
 
 
-class SkullStripOutputSpec(AFNITraitedSpec):
+class SkullStripOutputSpec(TraitedSpec):
     out_file = File(desc='outfile',
         exists=True)
 
@@ -1162,7 +1162,7 @@ class TCatInputSpec(AFNITraitedSpec):
     rlt = traits.Str(desc='options', argstr='-rlt%s', position=1)
 
 
-class TCatOutputSpec(AFNITraitedSpec):
+class TCatOutputSpec(TraitedSpec):
     out_file = File(desc='outfile',
         exists=True)
 
@@ -1229,7 +1229,7 @@ class FimInputSpec(AFNITraitedSpec):
         position=-1, genfile=True)
 
 
-class FimOutputSpec(AFNITraitedSpec):
+class FimOutputSpec(TraitedSpec):
     out_file = File(desc='outfile',
         exists=True)
 
@@ -1306,7 +1306,7 @@ class TCorrelateInputSpec(AFNITraitedSpec):
         argstr='%s', position=4)
 
 
-class TCorrelateOutputSpec(AFNITraitedSpec):
+class TCorrelateOutputSpec(TraitedSpec):
     out_file = File(desc='outfile',
         exists=True)
 
@@ -1370,7 +1370,7 @@ class BrickStatInputSpec(AFNITraitedSpec):
         position=1)
 
 
-class BrickStatOutputSpec(AFNITraitedSpec):
+class BrickStatOutputSpec(TraitedSpec):
     min_val = traits.Float(desc='output')
 
 
@@ -1447,7 +1447,7 @@ class ROIStatsInputSpec(AFNITraitedSpec):
         position=1)
 
 
-class ROIStatsOutputSpec(AFNITraitedSpec):
+class ROIStatsOutputSpec(TraitedSpec):
     stats = File(desc='output')
 
 
