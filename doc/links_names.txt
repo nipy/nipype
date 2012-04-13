@@ -91,6 +91,7 @@
 .. _Camino: http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php
 .. _Camino2Trackvis: http://camino-trackvis.sourceforge.net/
 .. _MRtrix: http://www.brain.org.au/software/mrtrix/index.html
+.. _MNE: https://martinos.org/mne/index.html
 
 .. General software
 .. _gcc: http://gcc.gnu.org
