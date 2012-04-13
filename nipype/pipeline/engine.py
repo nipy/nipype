@@ -1697,7 +1697,7 @@ class MapNode(Node):
         """
         for iterfield in self.iterfield:
             if not isdefined(getattr(self.inputs, iterfield)):
-                raise ValueError(("Input %s is not defined but listed "
+                raise ValueError(("Input %s was not set but it is listed "
                                   "in iterfields.") % iterfield)
         if len(self.iterfield) > 1:
             first_len = len(filename_to_list(getattr(self.inputs,
