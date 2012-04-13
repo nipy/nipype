@@ -447,8 +447,8 @@ class CreateNifti(BaseInterface):
 
 
 class TSNRInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True,
-                   desc='realigned 4D file')
+    in_file = InputMultiPath(File(exists=True), mandatory=True,
+                   desc='realigned 4D file or a list of 3D files')
     regress_poly = traits.Int(min=1, desc='Remove polynomials')
 
 
@@ -476,17 +476,18 @@ class TSNR(BaseInterface):
     output_spec = TSNROutputSpec
 
     def _gen_output_file_name(self, out_ext=None):
-        _, base, _ = split_filename(self.inputs.in_file)
+        _, base, _ = split_filename(self.inputs.in_file[0])
         if out_ext in ['mean', 'stddev']:
-            return os.path.abspath(base + "_tsnr_" + out_ext + ".nii.gz")
+            return os.path.abspath(base + "_tsnr_" + out_ext + ".nii")
         elif out_ext in ['detrended']:
-            return os.path.abspath(base + "_" + out_ext + ".nii.gz")
+            return os.path.abspath(base + "_" + out_ext + ".nii")
         else:
-            return os.path.abspath(base + "_tsnr.nii.gz")
+            return os.path.abspath(base + "_tsnr.nii")
 
     def _run_interface(self, runtime):
-        img = nb.load(self.inputs.in_file)
-        data = img.get_data()
+        img = nb.load(self.inputs.in_file[0])
+        vollist = [nb.load(filename) for filename in self.inputs.in_file]
+        data = np.concatenate([vol.get_data().reshape(vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
         if isdefined(self.inputs.regress_poly):
             timepoints = img.get_shape()[-1]
             X = np.ones((timepoints,1))
