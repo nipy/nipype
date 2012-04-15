@@ -490,25 +490,25 @@ class TSNR(BaseInterface):
         data = np.concatenate([vol.get_data().reshape(vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
         if isdefined(self.inputs.regress_poly):
             timepoints = img.get_shape()[-1]
-            X = np.ones((timepoints,1))
+            X = np.ones((timepoints, 1))
             for i in range(self.inputs.regress_poly):
-                X = np.hstack((X,legendre(i+1)(np.linspace(-1, 1, timepoints))[:, None]))
+                X = np.hstack((X, legendre(i + 1)(np.linspace(-1, 1, timepoints))[:, None]))
             betas = np.dot(np.linalg.pinv(X), np.rollaxis(data, 3, 2))
-            datahat = np.rollaxis(np.dot(X[:,1:],
+            datahat = np.rollaxis(np.dot(X[:, 1:],
                                          np.rollaxis(betas[1:, :, :, :], 0, 3)),
                                   0, 4)
             data = data - datahat
             img = nb.Nifti1Image(data, img.get_affine(), img.get_header())
-            nb.save(img,  self._gen_output_file_name('detrended'))
+            nb.save(img, self._gen_output_file_name('detrended'))
         meanimg = np.mean(data, axis=3)
         stddevimg = np.std(data, axis=3)
-        tsnr = meanimg/stddevimg
+        tsnr = meanimg / stddevimg
         img = nb.Nifti1Image(tsnr, img.get_affine(), img.get_header())
-        nb.save(img,  self._gen_output_file_name())
+        nb.save(img, self._gen_output_file_name())
         img = nb.Nifti1Image(meanimg, img.get_affine(), img.get_header())
-        nb.save(img,  self._gen_output_file_name('mean'))
+        nb.save(img, self._gen_output_file_name('mean'))
         img = nb.Nifti1Image(stddevimg, img.get_affine(), img.get_header())
-        nb.save(img,  self._gen_output_file_name('stddev'))
+        nb.save(img, self._gen_output_file_name('stddev'))
         return runtime
 
     def _list_outputs(self):
