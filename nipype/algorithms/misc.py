@@ -475,14 +475,14 @@ class TSNR(BaseInterface):
     input_spec = TSNRInputSpec
     output_spec = TSNROutputSpec
 
-    def _gen_output_file_name(self, out_ext=None):
-        _, base, _ = split_filename(self.inputs.in_file[0])
-        if out_ext in ['mean', 'stddev']:
-            return os.path.abspath(base + "_tsnr_" + out_ext + ".nii")
-        elif out_ext in ['detrended']:
-            return os.path.abspath(base + "_" + out_ext + ".nii")
+    def _gen_output_file_name(self, suffix=None):
+        _, base, ext = split_filename(self.inputs.in_file[0])
+        if suffix in ['mean', 'stddev']:
+            return os.path.abspath(base + "_tsnr_" + suffix + ext)
+        elif suffix in ['detrended']:
+            return os.path.abspath(base + "_" + suffix + ext)
         else:
-            return os.path.abspath(base + "_tsnr.nii")
+            return os.path.abspath(base + "_tsnr" + ext)
 
     def _run_interface(self, runtime):
         img = nb.load(self.inputs.in_file[0])
