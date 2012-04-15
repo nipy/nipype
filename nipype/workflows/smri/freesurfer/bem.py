@@ -5,14 +5,12 @@ import nipype.pipeline.engine as pe
 
 import nipype.interfaces.mne as mne
 import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
-import os, os.path as op
 
 
 def create_bem_flow(name='bem', out_format='stl'):
     """Uses MNE's Watershed algorithm to create Boundary Element Meshes (BEM)
-     for a subject's brain, inner/outer skull, and skin. The surfaces are 
+     for a subject's brain, inner/outer skull, and skin. The surfaces are
      returned in the desired (by default, stereolithic .stl) format.
 
     Example
@@ -63,15 +61,15 @@ def create_bem_flow(name='bem', out_format='stl'):
     surfconvert = pe.MapNode(fs.MRIsConvert(out_datatype=out_format),
                           iterfield=['in_file'],
                           name='surfconvert')
-                          
+
     """
     Connect the nodes
     """
 
     bemflow.connect([
-            (inputnode, watershed_bem, [('subject_id','subject_id'),
-                                   ('subjects_dir','subjects_dir')]),
-            (watershed_bem, surfconvert, [('mesh_files','in_file')]),
+            (inputnode, watershed_bem, [('subject_id', 'subject_id'),
+                                   ('subjects_dir', 'subjects_dir')]),
+            (watershed_bem, surfconvert, [('mesh_files', 'in_file')]),
             ])
 
     """

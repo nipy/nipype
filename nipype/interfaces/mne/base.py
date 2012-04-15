@@ -1,12 +1,6 @@
-from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                                    File, Directory, TraitedSpec, InputMultiPath,
-                                    OutputMultiPath, isdefined)
-from nipype.utils.filemanip import split_filename
-import numpy as np
-import nibabel as nb
-import os, os.path as op
-import numpy as np
-import networkx as nx
+from nipype.interfaces.base import (traits, File, Directory, TraitedSpec,
+                                    OutputMultiPath)
+import os.path as op
 import glob
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.utils.filemanip import list_to_filename
@@ -15,12 +9,13 @@ import logging
 logging.basicConfig()
 iflogger = logging.getLogger('interface')
 
+
 class WatershedBEMInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--subject %s', mandatory=True,
                            desc='Subject ID (must have a complete Freesurfer directory)')
     subjects_dir = Directory(exists=True, mandatory=True, usedefault=True,
                            desc='Path to Freesurfer subjects directory')
-    volume = traits.Enum('T1', 'aparc+aseg', 'aseg', 'brain', 'orig', 'brainmask',  'ribbon',
+    volume = traits.Enum('T1', 'aparc+aseg', 'aseg', 'brain', 'orig', 'brainmask', 'ribbon',
                            argstr='--volume %s', usedefault=True,
                            desc='The volume from the "mri" directory to use (defaults to T1)')
     overwrite = traits.Bool(True, usedefault=True, argstr='--overwrite',
@@ -45,6 +40,7 @@ class WatershedBEMOutputSpec(TraitedSpec):
     cor_files = OutputMultiPath(File(exists=True), loc='bem/watershed/ws', altkey='COR',
                            desc='"COR" format files')
 
+
 class WatershedBEM(FSCommand):
     """Uses mne_watershed_bem to get information from dicom directories
 
@@ -56,8 +52,8 @@ class WatershedBEM(FSCommand):
     >>> bem.inputs.subject_id = 'subj1'
     >>> bem.inputs.subjects_dir = '.'
     >>> bem.cmdline
+    'mne_watershed_bem --overwrite --subject subj1 --volume T1'
     >>> bem.run() 				# doctest: +SKIP
-    'mne_watershed_bem --subject subj1 --volume T1'
 
    """
 
@@ -68,10 +64,10 @@ class WatershedBEM(FSCommand):
     def _get_files(self, path, key, dirval, altkey=None):
         globsuffix = '*'
         globprefix = '*'
-        keydir = op.join(path,dirval)
+        keydir = op.join(path, dirval)
         if altkey:
             key = altkey
-        globpattern = op.join(keydir,''.join((globprefix,key,globsuffix)))
+        globpattern = op.join(keydir, ''.join((globprefix, key, globsuffix)))
         return glob.glob(globpattern)
 
     def _list_outputs(self):
@@ -79,7 +75,6 @@ class WatershedBEM(FSCommand):
         subjects_dir = self.inputs.subjects_dir
         subject_path = op.join(subjects_dir, self.inputs.subject_id)
         output_traits = self._outputs()
-        outputs = output_traits.get()
         mesh_paths = []
         for k in outputs.keys():
             if k != 'mesh_files':
