@@ -888,3 +888,69 @@ class MRIMarchingCubes(FSCommand):
         else:
             _, name, ext = split_filename(self.inputs.in_file)
             return name + ext + '_' + str(self.inputs.label_value)
+
+class MRIsSmoothInputSpec(FSTraitedSpec):
+    """
+    This program smooths the tessellation of a surface using 'mris_smooth'
+    """
+
+    in_file = File(exists=True, mandatory=True, position=-3, argstr='%s', desc='Input volume to tesselate voxels from.')
+    '''
+    curvature_averaging_iterations = traits.Int(10, usedefault=True, argstr='-a %d', desc='Number of curvature averaging iterations (default=10)')
+    smoothing_iterations = traits.Int(10, usedefault=True, argstr='-n %d', desc='Number of smoothing iterations (default=10)')
+    snapshot_writing_iterations = traits.Int(argstr='-w %d', desc='Write snapshot every "n" iterations')
+    
+    use_gaussian_curvature_smoothing = traits.Bool(argstr='-g', position=2, desc='Use Gaussian curvature smoothing')
+    gaussian_curvature_norm_steps = traits.Int(argstr='%d ', position=3, desc='Use Gaussian curvature smoothing')
+    gaussian_curvature_smoothing_steps = traits.Int(argstr='%d', position=4, desc='Use Gaussian curvature smoothing')
+    
+    disable_estimates = traits.Bool(False, argstr='-nw', usedefault=True, desc='Disables the writing of curvature and area estimates')
+    normalize_area = traits.Bool(False, argstr='-area', usedefault=True, desc='Normalizes the area after smoothing')
+    use_momentum = traits.Bool(False, argstr='-m', usedefault=True, desc='Uses momentum')
+    '''
+    out_file = File(argstr='./%s', position=-1, genfile=True, desc='output filename or True to generate one')   
+    out_curvature_file = File('curv', argstr='-c %s', usedefault=True, desc='Write curvature to ?h.curvname (default "curv")')
+    out_area_file = File('area', argstr='-b %s', usedefault=True, desc='Write area to ?h.areaname (default "area")')
+    
+class MRIsSmoothOutputSpec(TraitedSpec):
+    """
+    This program smooths the tessellation of a surface using 'mris_smooth'
+    """
+    surface = File(exists=True, desc='Smoothed surface file ')
+
+
+class MRIsSmooth(FSCommand):
+    """
+    This program smooths the tessellation of a surface using 'mris_smooth'
+
+    Example:
+
+    import nipype.interfaces.freesurfer as fs
+    smooth = fs.MRIsSmooth()
+    smooth.inputs.in_file = 'aseg.mgz'
+    smooth.inputs.label_value = 17
+    smooth.inputs.out_file = 'lh.hippocampus'
+    smooth.run() # doctest: +SKIP
+    """
+    _cmd = 'mris_smooth'
+    input_spec = MRIsSmoothInputSpec
+    output_spec = MRIsSmoothOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['surface'] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_file':
+            return self._gen_outfilename()
+        else:
+            return None
+
+    def _gen_outfilename(self):
+        if isdefined(self.inputs.out_file):
+            return self.inputs.out_file
+        else:
+            _, name, ext = split_filename(self.inputs.in_file)
+            return name + '_smoothed' + ext
+

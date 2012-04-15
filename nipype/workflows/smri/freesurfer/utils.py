@@ -313,7 +313,10 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     surfconvert = pe.MapNode(fs.MRIsConvert(out_datatype=out_format),
                           iterfield=['in_file'],
                           name='surfconvert')
-
+    smoother = pe.MapNode(fs.MRIsSmooth,
+                          iterfield=['in_file'],
+                          name='smoother')
+                          
     region_list_from_volume_interface = Function(input_names=["in_file"],
                              output_names=["region_list"],
                              function=region_list_from_volume)
@@ -340,6 +343,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
             (id_list_from_lookup_table_node, tessellate, [('id_list', 'out_file')]),
             (fssource, tessellate, [('aseg', 'in_file')]),
             (tessellate, surfconvert, [('surface','in_file')]),
+            (surfconvert, smoother, [('surface','in_file')]),
             ])
 
     """
@@ -349,6 +353,6 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     outputnode = pe.Node(niu.IdentityInterface(fields=["meshes"]),
                          name="outputspec")
     tessflow.connect([
-            (surfconvert, outputnode, [("converted", "meshes")]),
+            (smoother, outputnode, [("surface", "meshes")]),
             ])
     return tessflow
