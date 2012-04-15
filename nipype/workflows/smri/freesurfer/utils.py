@@ -313,7 +313,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     surfconvert = pe.MapNode(fs.MRIsConvert(out_datatype=out_format),
                           iterfield=['in_file'],
                           name='surfconvert')
-    smoother = pe.MapNode(fs.MRIsSmooth,
+    smoother = pe.MapNode(fs.MRIsSmooth(),
                           iterfield=['in_file'],
                           name='smoother')
                           
@@ -343,7 +343,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
             (id_list_from_lookup_table_node, tessellate, [('id_list', 'out_file')]),
             (fssource, tessellate, [('aseg', 'in_file')]),
             (tessellate, surfconvert, [('surface','in_file')]),
-            (surfconvert, smoother, [('surface','in_file')]),
+            (surfconvert, smoother, [('converted','in_file')]),
             ])
 
     """
