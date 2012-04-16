@@ -40,8 +40,9 @@ class SimilarityOutputSpec(TraitedSpec):
 
 
 class Similarity(BaseInterface):
-    """Calculates similarity between two 3D volumes. Both volumes have to be in 
-    the same cordinate system.
+    """Calculates similarity between two 3D volumes. Both volumes have to be in
+    the same coordinate system, same space within that coordinate system and
+    with the same voxel dimensions.
 
     Example
     -------
