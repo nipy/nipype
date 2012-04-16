@@ -1,7 +1,7 @@
 Since last release
 ==================
 
-* ENH: Interface for WatershedBEM from the MNE software package
+* ENH: New interfaces: nipy.Similarity, WatershedBEM
 
 * FIX: Afni outputs should inherit from TraitedSpec
 
