@@ -1172,11 +1172,6 @@ class MySQLSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 class MySQLSink(IOBase):
     """ Very simple frontend for storing values into MySQL database.
 
-        .. warning::
-
-            This is not a thread-safe node because it can write to a common
-            shared location. It will not complain when it overwrites a file.
-
         Examples
         --------
 
