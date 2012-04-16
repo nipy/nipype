@@ -1162,9 +1162,12 @@ class SQLiteSink(IOBase):
 
 
 class MySQLSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    host = traits.Str('localhost', mandatory=True,
+                      requires=['username', 'password'],
+                      xor=['config'], usedefault=True)
+    config = File(mandatory=True, xor=['host'], desc="MySQL Options File (same format as my.cnf)")
     database_name = traits.Str(mandatory=True, desc='Otherwise known as the schema name')
     table_name = traits.Str(mandatory=True)
-    host = traits.Str('localhost', mandatory=True, usedefault=True)
     username = traits.Str(mandatory=True)
     password = traits.Str(mandatory=True)
 
@@ -1198,10 +1201,14 @@ class MySQLSink(IOBase):
         """Execute this module.
         """
         import MySQLdb
-        conn = MySQLdb.connect(host=self.inputs.host,
-                               user=self.inputs.username,
-                               passwd=self.inputs.password,
-                               db=self.inputs.database_name)
+        if isdefined(self.inputs.config):
+            conn = MySQLdb.connect(db=self.inputs.database_name, 
+                                   read_default_file=self.inputs.config)
+        else:
+            conn = MySQLdb.connect(host=self.inputs.host,
+                                   user=self.inputs.username,
+                                   passwd=self.inputs.password,
+                                   db=self.inputs.database_name)
         c = conn.cursor()
         c.execute("REPLACE INTO %s (" % self.inputs.table_name +
                   ",".join(self._input_names) + ") VALUES (" +
