@@ -1168,8 +1168,8 @@ class MySQLSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     config = File(mandatory=True, xor=['host'], desc="MySQL Options File (same format as my.cnf)")
     database_name = traits.Str(mandatory=True, desc='Otherwise known as the schema name')
     table_name = traits.Str(mandatory=True)
-    username = traits.Str(mandatory=True)
-    password = traits.Str(mandatory=True)
+    username = traits.Str()
+    password = traits.Str()
 
 
 class MySQLSink(IOBase):
