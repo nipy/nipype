@@ -270,4 +270,6 @@ class ApplyInverseDeformation(SPMCommand):
             
             outputs['out_files'].append(
                 fname_presuffix(imgf,prefix='w',newpath=os.getcwd()))
+
         return outputs
+
