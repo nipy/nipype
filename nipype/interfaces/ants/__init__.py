@@ -3,5 +3,6 @@
 
 """Top-level namespace for ants."""
 
-from .normalize import (BuildTemplate, WarpImageMultiTransform, GenWarpFields)
+from .normalize import (BuildTemplate, WarpImageMultiTransform, 
+                        WarpTimeSeriesImageMultiTransform, GenWarpFields)
 

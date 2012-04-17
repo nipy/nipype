@@ -3,6 +3,9 @@
 """Tests for the engine module
 """
 from copy import deepcopy
+import os
+from shutil import rmtree
+from tempfile import mkdtemp
 
 import networkx as nx
 
@@ -343,3 +346,62 @@ def test_mapnode_iterfield_check():
     mod1.inputs.input1 = [1,2]
     mod1.inputs.input2 = 3
     yield assert_raises, ValueError, mod1._check_iterfield
+
+
+def test_node_hash():
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+    from nipype.interfaces.utility import Function
+    def func1():
+        return 1
+    def func2(a):
+        return a+1
+    n1 = pe.Node(Function(input_names=[],
+                          output_names=['a'],
+                          function=func1),
+                 name='n1')
+    n2 = pe.Node(Function(input_names=['a'],
+                          output_names=['b'],
+                          function=func2),
+                 name='n2')
+    w1 = pe.Workflow(name='test')
+    modify = lambda x: x+1
+    n1.inputs.a = 1
+    w1.connect(n1, ('a', modify), n2,'a')
+    w1.base_dir = wd
+    # generate outputs
+    w1.run(plugin='Linear')
+    # ensure plugin is being called
+    w1.config['execution'] = {'stop_on_first_crash': 'true',
+                              'local_hash_check': 'false',
+                              'crashdump_dir': wd}
+    error_raised = False
+    # create dummy distributed plugin class
+    from nipype.pipeline.plugins.base import DistributedPluginBase
+    class RaiseError(DistributedPluginBase):
+        def _submit_job(self, node, updatehash=False):
+            raise Exception('Submit called')
+    try:
+        w1.run(plugin=RaiseError())
+    except Exception, e:
+        pe.logger.info('Exception: %s' % str(e))
+        error_raised = True
+    yield assert_true, error_raised
+    #yield assert_true, 'Submit called' in e
+    # rerun to ensure we have outputs
+    w1.run(plugin='Linear')
+    # set local check
+    w1.config['execution'] = {'stop_on_first_crash': 'true',
+                              'local_hash_check': 'true',
+                              'crashdump_dir': wd}
+    error_raised = False
+    try:
+        w1.run(plugin=RaiseError())
+    except Exception, e:
+        pe.logger.info('Exception: %s' % str(e))
+        error_raised = True
+    yield assert_false, error_raised
+    os.chdir(cwd)
+    rmtree(wd)
+

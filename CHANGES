@@ -1,3 +1,10 @@
+Since last release
+==================
+
+* ENH: New interfaces: MySQLSink, nipy.Similarity, WatershedBEM
+
+* FIX: Afni outputs should inherit from TraitedSpec
+
 Release 0.5.3 (Mar 23, 2012)
 ============================
 
