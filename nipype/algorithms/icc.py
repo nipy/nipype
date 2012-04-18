@@ -1,4 +1,4 @@
-from numpy import ones, kron, mean, diag, eye, hstack, dot, tile
+from numpy import ones, kron, mean, eye, hstack, dot, tile
 from scipy.linalg import pinv
 from ..interfaces.base import BaseInterfaceInputSpec, TraitedSpec, \
     BaseInterface, traits, File
@@ -8,21 +8,23 @@ import os
 
 
 class ICCInputSpec(BaseInterfaceInputSpec):
-    first_session_t_maps = traits.List(File(exists=True),
-                                       desc="both list have to have the same length")
-    second_session_t_maps = traits.List(File(exists=True),
-                                        desc="both list have to have the same length")
-    mask = File(exists=True)
+    subjects_sessions = traits.List(traits.List(File(exists=True)),
+                           desc="n subjects m sessions 3D stat files",
+                           mandatory=True)
+    mask = File(exists=True, mandatory=True)
 
 
 class ICCOutputSpec(TraitedSpec):
     icc_map = File(exists=True)
+    sessions_F_map = File(exists=True, desc="F statistics for the effect of session")
+    sessions_df_1 = traits.Int()
+    sessions_df_2 = traits.Int()
 
 
 class ICC(BaseInterface):
     '''
     Calculates Interclass Correlation Coefficient (3,1) as defined in
-    P. E. Shrout & Joseph L. Fleiss (1979). "Intraclass Correlations: Uses in 
+    P. E. Shrout & Joseph L. Fleiss (1979). "Intraclass Correlations: Uses in
     Assessing Rater Reliability". Psychological Bulletin 86 (2): 420-428. This
     particular implementation is aimed at relaibility (test-retest) studies.
     '''
@@ -33,39 +35,48 @@ class ICC(BaseInterface):
         maskdata = nb.load(self.inputs.mask).get_data()
         maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
 
-        first_session_nims = [nb.load(fname).get_data()[maskdata].reshape(-1, 1) for fname in self.inputs.first_session_t_maps]
-        second_session_nims = [nb.load(fname).get_data()[maskdata].reshape(-1, 1) for fname in self.inputs.second_session_t_maps]
-        all_data = np.dstack([np.hstack(first_session_nims), np.hstack(second_session_nims)])
-
-        icc = np.zeros(first_session_nims[0].shape)
+        session_datas = [[nb.load(fname).get_data()[maskdata].reshape(-1, 1) for fname in sessions] for sessions in self.inputs.subjects_sessions]
+        list_of_sessions = [np.hstack(session_data) for session_data in session_datas]
+        all_data = np.dstack(list_of_sessions)
+        icc = np.zeros(session_datas[0][0].shape)
+        session_F = np.zeros(session_datas[0][0].shape)
 
         for x in range(icc.shape[0]):
             Y = all_data[x, :, :]
-            icc[x] = ICC_rep_anova(Y)
+            icc[x], session_F[x], self._df1, self._df2 = ICC_rep_anova(Y)
 
-        nim = nb.load(self.inputs.first_session_t_maps[0])
+        nim = nb.load(self.inputs.subjects_sessions[0][0])
         new_data = np.zeros(nim.get_shape())
         new_data[maskdata] = icc.reshape(-1,)
         new_img = nb.Nifti1Image(new_data, nim.get_affine(), nim.get_header())
         nb.save(new_img, 'icc_map.nii')
+
+        new_data = np.zeros(nim.get_shape())
+        new_data[maskdata] = session_F.reshape(-1,)
+        new_img = nb.Nifti1Image(new_data, nim.get_affine(), nim.get_header())
+        nb.save(new_img, 'sessions_F_map.nii')
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['icc_map'] = os.path.abspath('icc_map.nii')
+        outputs['sessions_F_map'] = os.path.abspath('sessions_F_map.nii')
+        outputs['sessions_df_1'] = self._df1
+        outputs['sessions_df_2'] = self._df2
         return outputs
 
 
 def ICC_rep_anova(Y):
+    '''
+    the data Y are entered as a 'table' ie subjects are in rows and repeated
+    measures in columns
 
-    # the data Y are entered as a 'table' ie subjects are in rows and repeated
-    # measures in columns
-    #
-    # ------------------------------------------------------------------------------------------
-    #                   One Sample Repeated measure ANOVA
-    #                   Y = XB + E with X = [FaTor / SubjeT]
-    # ------------------------------------------------------------------------------------------
+    --------------------------------------------------------------------------
+                       One Sample Repeated measure ANOVA
+                       Y = XB + E with X = [FaTor / Subjects]
+    --------------------------------------------------------------------------
+    '''
 
     [nb_subjects, nb_conditions] = Y.shape
     dfc = nb_conditions - 1
@@ -83,23 +94,27 @@ def ICC_rep_anova(Y):
     x = kron(eye(nb_conditions), ones((nb_subjects, 1)))  # sessions
     x0 = tile(eye(nb_subjects), (nb_conditions, 1))  # subjects
     X = hstack([x, x0])
-    
+
     # Sum Square Error
     predicted_Y = dot(dot(dot(X, pinv(dot(X.T, X))), X.T), Y.flatten('F'))
     residuals = Y.flatten('F') - predicted_Y
     SSE = (residuals ** 2).sum()
 
+    residuals.shape = Y.shape
+
     MSE = SSE / dfe
 
     # Sum square session effect - between colums/sessions
     SSC = ((mean(Y, 0) - mean_Y) ** 2).sum() * nb_subjects
-    MSC = SSC / dfc
+    MSC = SSC / dfc / nb_subjects
 
-    F_value = MSC / MSE
+    session_effect_F = MSC / MSE
 
     # Sum Square subject effect - between rows/subjects
     SSR = SST - SSC - SSE
     MSR = SSR / dfr
 
     # ICC(3,1) = (mean square subjeT - mean square error) / (mean square subjeT + (k-1)*-mean square error)
-    return (MSR - MSE) / (MSR + dfc * MSE)
+    ICC = (MSR - MSE) / (MSR + dfc * MSE)
+
+    return ICC, session_effect_F, dfc, dfe
