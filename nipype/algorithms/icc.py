@@ -23,7 +23,7 @@ class ICC(BaseInterface):
     '''
     Calculates Interclass Correlation Coefficient (3,1) as defined in
     P. E. Shrout & Joseph L. Fleiss (1979). "Intraclass Correlations: Uses in 
-    Assessing Rater Reliability". Psychological Bulletin 86 (2): 420–428. This
+    Assessing Rater Reliability". Psychological Bulletin 86 (2): 420-428. This
     particular implementation is aimed at relaibility (test-retest) studies.
     '''
     input_spec = ICCInputSpec
@@ -68,39 +68,38 @@ def ICC_rep_anova(Y):
     # ------------------------------------------------------------------------------------------
 
     [nb_subjects, nb_conditions] = Y.shape
-    #print nb_subjects, nb_conditions
-    df = nb_conditions - 1
-    dfe = nb_subjects * nb_conditions - nb_subjects - df
-    dfmodel = nb_subjects - df
-
-    # create the design matrix for the different levels
-    # ------------------------------------------------
-
-    x = kron(eye(nb_conditions), ones((nb_subjects, 1)))  # effect
-    x0 = tile(eye(nb_subjects), (nb_conditions, 1))  # subjeT
-    X = hstack([x, x0])
+    dfc = nb_conditions - 1
+    dfe = (nb_subjects - 1) * dfc
+    dfr = nb_subjects - 1
 
     # Compute the repeated measure effect
     # ------------------------------------
-    Y = Y.flatten(1)
 
     # Sum Square Total
-    SST = dot((Y.reshape(-1, 1) - tile(mean(Y), (Y.shape[0], 1))).T, (Y.reshape(-1, 1) - tile(mean(Y), (Y.shape[0], 1))))
+    mean_Y = mean(Y)
+    SST = ((Y - mean_Y) ** 2).sum()
 
-    # Sum Square SubjeT (error in the ANOVA model)
-    M = dot(dot(X, pinv(dot(X.T, X))), X.T)
-    R = eye(Y.shape[0]) - M
-    SSS = dot(dot(Y.T, R), Y)
-    MSS = SSS / dfe
+    # create the design matrix for the different levels
+    x = kron(eye(nb_conditions), ones((nb_subjects, 1)))  # sessions
+    x0 = tile(eye(nb_subjects), (nb_conditions, 1))  # subjects
+    X = hstack([x, x0])
+    
+    # Sum Square Error
+    predicted_Y = dot(dot(dot(X, pinv(dot(X.T, X))), X.T), Y.flatten('F'))
+    residuals = Y.flatten('F') - predicted_Y
+    SSE = (residuals ** 2).sum()
 
-    # Sum square effect (repeated measure)
-    Betas = dot(pinv(x), Y)  # compute without cst/subjects
-    yhat = dot(x, Betas)
-    SSE = diag(dot((yhat.reshape(-1, 1) - tile(mean(yhat), (yhat.shape[0], 1))).T, (yhat.reshape(-1, 1) - tile(mean(yhat), (yhat.shape[0], 1)))))
+    MSE = SSE / dfe
 
-    # Sum Square error
-    SSError = SST - SSS - SSE
-    MSError = SSError / dfmodel
+    # Sum square session effect - between colums/sessions
+    SSC = ((mean(Y, 0) - mean_Y) ** 2).sum() * nb_subjects
+    MSC = SSC / dfc
+
+    F_value = MSC / MSE
+
+    # Sum Square subject effect - between rows/subjects
+    SSR = SST - SSC - SSE
+    MSR = SSR / dfr
 
     # ICC(3,1) = (mean square subjeT - mean square error) / (mean square subjeT + (k-1)*-mean square error)
-    return -((MSS - MSError) / (MSS + df * MSError))
+    return (MSR - MSE) / (MSR + dfc * MSE)
