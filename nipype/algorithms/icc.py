@@ -38,8 +38,8 @@ class ICC(BaseInterface):
         maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
 
         session_datas = [[nb.load(fname).get_data()[maskdata].reshape(-1, 1) for fname in sessions] for sessions in self.inputs.subjects_sessions]
-        list_of_sessions = [np.hstack(session_data) for session_data in session_datas]
-        all_data = np.dstack(list_of_sessions)
+        list_of_sessions = [np.dstack(session_data) for session_data in session_datas]
+        all_data = np.hstack(list_of_sessions)
         icc = np.zeros(session_datas[0][0].shape)
         session_F = np.zeros(session_datas[0][0].shape)
         session_var = np.zeros(session_datas[0][0].shape)
@@ -47,7 +47,7 @@ class ICC(BaseInterface):
 
         for x in range(icc.shape[0]):
             Y = all_data[x, :, :]
-            icc[x], session_var[x], subject_var[x], session_F[x], self._df1, self._df2 = ICC_rep_anova(Y)
+            icc[x], subject_var[x], session_var[x],  session_F[x], self._df1, self._df2 = ICC_rep_anova(Y)
 
         nim = nb.load(self.inputs.subjects_sessions[0][0])
         new_data = np.zeros(nim.get_shape())
@@ -79,7 +79,7 @@ class ICC(BaseInterface):
         outputs['sessions_df_1'] = self._df1
         outputs['sessions_df_2'] = self._df2
         outputs['session_var_map'] = os.path.abspath('session_var_map.nii')
-        outputs['session_var_map'] = os.path.abspath('session_var_map.nii')
+        outputs['subject_var_map'] = os.path.abspath('subject_var_map.nii')
         return outputs
 
 
