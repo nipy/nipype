@@ -975,6 +975,7 @@ class Node(WorkflowBase):
         self.plugin_args = {}
         if needed_outputs:
             self.needed_outputs = sorted(needed_outputs)
+        self._got_inputs = False
 
     @property
     def interface(self):
@@ -1055,7 +1056,9 @@ class Node(WorkflowBase):
         """
         # check to see if output directory and hash exist
         self.config = merge_dict(deepcopy(config._sections), self.config)
-        self._get_inputs()
+        if not self._got_inputs:
+            self._get_inputs()
+            self._got_inputs = True
         outdir = self.output_dir()
         logger.info("Executing node %s in dir: %s" % (self._id, outdir))
         hash_exists, hashvalue, hashfile, hashed_inputs = self.hash_exists(updatehash=updatehash)
@@ -1144,6 +1147,9 @@ class Node(WorkflowBase):
     # Private functions
     def _get_hashval(self):
         """Return a hash of the input state"""
+        if not self._got_inputs:
+            self._get_inputs()
+            self._got_inputs = True
         hashed_inputs, hashvalue = self.inputs.get_hashval(
             hash_method=self.config['execution']['hash_method'])
         if str2bool(self.config['execution']['remove_unnecessary_outputs']) \
@@ -1547,6 +1553,10 @@ class MapNode(Node):
     def _get_hashval(self):
         """ Compute hash including iterfield lists
         """
+        if not self._got_inputs:
+            self._get_inputs()
+            self._got_inputs = True
+        self._check_iterfield()
         hashinputs = deepcopy(self._interface.inputs)
         for name in self.iterfield:
             hashinputs.remove_trait(name)
@@ -1697,7 +1707,7 @@ class MapNode(Node):
         """
         for iterfield in self.iterfield:
             if not isdefined(getattr(self.inputs, iterfield)):
-                raise ValueError(("Input %s is not defined but listed "
+                raise ValueError(("Input %s was not set but it is listed "
                                   "in iterfields.") % iterfield)
         if len(self.iterfield) > 1:
             first_len = len(filename_to_list(getattr(self.inputs,
