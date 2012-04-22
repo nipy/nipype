@@ -74,7 +74,8 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
     smooth_vol = traits.Float(argstr="--fwhm %.3f", desc="smooth input volume (mm fwhm)")
     smooth_surf = traits.Float(argstr="--surf-fwhm %.3f", desc="smooth output surface (mm fwhm)")
 
-    interp_method = traits.Enum("nearest", "trilinear", desc="interpolation method")
+    interp_method = traits.Enum("nearest", "trilinear", argstr="--interp %s",
+                                desc="interpolation method")
 
     cortex_mask = traits.Bool(argstr="--cortex", xor=["mask_label"],
                               desc="mask the target surface with hemi.cortex.label")
