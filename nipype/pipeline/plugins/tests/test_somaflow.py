@@ -4,8 +4,10 @@ from tempfile import mkdtemp
 from time import sleep
 
 import nipype.interfaces.base as nib
-from nipype.testing import assert_equal
+from nipype.testing import assert_equal, skipif
 import nipype.pipeline.engine as pe
+
+from nipype.pipeline.plugins.somaflow import soma_not_loaded
 
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
@@ -27,6 +29,7 @@ class TestInterface(nib.BaseInterface):
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
 
+@skipif(soma_not_loaded)
 def test_run_somaflow():
     cur_dir = os.getcwd()
     temp_dir = mkdtemp(prefix='test_engine_')

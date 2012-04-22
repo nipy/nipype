@@ -27,7 +27,7 @@ class TestInterface(nib.BaseInterface):
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
 
-@skipif(False)
+@skipif(True)
 def test_run_pbsgraph():
     cur_dir = os.getcwd()
     temp_dir = mkdtemp(prefix='test_engine_')

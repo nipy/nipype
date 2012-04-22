@@ -4,13 +4,24 @@
 import os
 import sys
 
-from soma.workflow.client import Job, Workflow, WorkflowController, Helper
+soma_not_loaded = False
+try:
+    from soma.workflow.client import (Job, Workflow, WorkflowController,
+                                      Helper)
+except:
+    soma_not_loaded = True
+
 
 from .base import (GraphPluginBase, logger)
 
 class SomaFlowPlugin(GraphPluginBase):
     """Execute using Soma workflow
     """
+
+    def __init__(self, plugin_args=None):
+        if soma_not_loaded:
+            raise ImportError('SomaFlow could not be imported')
+        super(SomaFlowPlugin, self).__init__(plugin_args=plugin_args)
 
     def _submit_graph(self, pyfiles, dependencies):
         jobs = []
