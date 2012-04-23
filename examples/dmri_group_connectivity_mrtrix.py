@@ -80,8 +80,8 @@ with group IDs ('controls', 'parkinsons') as keys, and subject/patient names as 
 """
 
 group_list = {}
-group_list['controls'] = ['cont17']
-group_list['parkinsons'] = ['pat10', 'pat20']
+#group_list['controls'] = ['cont17']
+group_list['parkinsons'] = ['pat10'] #, 'pat20']
 
 """
 The output directory must be named as well.
@@ -139,12 +139,6 @@ for idx, group_id in enumerate(group_list.keys()):
                 bvals=[['subject_id', 'bvals']])
 
     l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
-
-    # This is used to demonstrate the ease through which different parameters can be set for each group.
-    if group_id == 'parkinsons':
-        l1pipeline.inputs.connectivity.mapping.threshold_FA.absolute_threshold_value = 0.5
-    else:
-        l1pipeline.inputs.connectivity.mapping.threshold_FA.absolute_threshold_value = 0.7
 
     # Here with invert the b-vectors in the Y direction and set the maximum harmonic order of the
     # spherical deconvolution step
