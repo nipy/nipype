@@ -397,7 +397,7 @@ class Parcellate(BaseInterface):
 		if self.inputs.subjects_dir:
 		   os.environ.update({'SUBJECTS_DIR': self.inputs.subjects_dir})
 		   
-		if not os.path.exists(op.join(self.inputs.subjects_dir, self.inputs.subject_id)):
+		if not os.path_exists(op.join(self.inputs.subjects_dir, self.inputs.subject_id)):
 			raise Exception
 		iflogger.info("ROI_HR_th.nii.gz / fsmask_1mm.nii.gz CREATION")
 		iflogger.info("=============================================")
