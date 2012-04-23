@@ -251,6 +251,11 @@ class SurfaceSmooth(FSCommand):
     smoothing process.  If the latter, the underlying program will calculate
     the correct number of iterations internally.
 
+    .. seealso::
+
+        MRIsSmooth() Interface
+            For smoothing a tessellated surface (e.g. in gifti or .stl)
+
     Examples
     --------
 
@@ -923,13 +928,16 @@ class MRIsSmooth(FSCommand):
     """
     This program smooths the tessellation of a surface using 'mris_smooth'
 
+    .. seealso::
+
+        SurfaceSmooth() Interface
+            For smoothing a scalar field along a surface manifold
+
     Example:
 
     import nipype.interfaces.freesurfer as fs
     smooth = fs.MRIsSmooth()
-    smooth.inputs.in_file = 'aseg.mgz'
-    smooth.inputs.label_value = 17
-    smooth.inputs.out_file = 'lh.hippocampus'
+    smooth.inputs.in_file = 'lh.hippocampus.stl'
     smooth.run() # doctest: +SKIP
     """
     _cmd = 'mris_smooth'
