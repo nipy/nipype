@@ -394,15 +394,18 @@ class Parcellate(BaseInterface):
     output_spec = ParcellateOutputSpec
 
     def _run_interface(self, runtime):
-        if self.inputs.subjects_dir:
-           os.environ.update({'SUBJECTS_DIR': self.inputs.subjects_dir})
-        iflogger.info("ROI_HR_th.nii.gz / fsmask_1mm.nii.gz CREATION")
-        iflogger.info("=============================================")
-        create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
-        create_roi(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
-        create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
-        crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file)
-        return runtime
+		if self.inputs.subjects_dir:
+		   os.environ.update({'SUBJECTS_DIR': self.inputs.subjects_dir})
+		   
+		if not os.path.exists(op.join(self.inputs.subjects_dir, self.inputs.subject_id)):
+			raise Exception
+		iflogger.info("ROI_HR_th.nii.gz / fsmask_1mm.nii.gz CREATION")
+		iflogger.info("=============================================")
+		create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
+		create_roi(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
+		create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
+		crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file)
+		return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
