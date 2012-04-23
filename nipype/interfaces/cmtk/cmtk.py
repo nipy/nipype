@@ -777,26 +777,23 @@ def backwards_from_adjmat(streamlines, roiData, voxelSize, adjacency_matrix, int
         if len(rois_crossed) > 2:
             indexed_list_of_roi_crossed_lists.append((i,list(rois_crossed)))
 
-    final_fiber_ids = backwards_from_adjacency_matrix_and_roicrossings(adjacency_matrix, indexed_list_of_roi_crossed_lists, intersections, threshold, above)
+    final_fiber_ids, final_fiber_ids_intersections = backwards_from_adjacency_matrix_and_roicrossings(adjacency_matrix, indexed_list_of_roi_crossed_lists, intersections, threshold, above)
     dis = n_fib - len(final_fiber_ids)
     iflogger.info("Found %i (%f percent out of %i fibers) fibers that start or terminate in a voxel which is not labeled. (orphans)" % (dis, dis * 100.0 / n_fib, n_fib))
     iflogger.info("Valid fibers: %i (%f percent)" % (n_fib - dis, 100 - dis * 100.0 / n_fib))
     if intersections:
-        iflogger.info('Returning the intersecting point connectivity matrix')
+        iflogger.info('Returning the intersecting point fiber ids')
     else:
-        iflogger.info('Returning the endpoint connectivity matrix')
-    return connectivity_matrix, final_fiber_ids
+        iflogger.info('Returning the endpoint fiber ids')
+    return final_fiber_ids, final_fiber_ids_intersections
 
 
 def backwards_from_adjacency_matrix_and_roicrossings(adjacency_matrix, indexed_list_of_roi_crossed_lists, intersections=False, threshold=0.05, above=False):
-    import ipdb
-    ipdb.set_trace()
     final_fiber_ids = []
     final_fiber_ids_intersections = []
     for fiber_idx, roi_tuple in enumerate(indexed_list_of_roi_crossed_lists):
         fiber_index = indexed_list_of_roi_crossed_lists[fiber_idx][0]
         rois_crossed = roi_tuple[1]
-        
         if intersections:
             for idx_i, roi_i in enumerate(rois_crossed):
                 for idx_j, roi_j in enumerate(rois_crossed):
@@ -810,13 +807,13 @@ def backwards_from_adjacency_matrix_and_roicrossings(adjacency_matrix, indexed_l
 
 
 def adjacency_matrix_from_cmat(connectivity_matrix, threshold, above):
-    import ipdb
-    ipdb.set_trace()
+    adjacency_matrix = np.empty(np.shape(connectivity_matrix))
     if above:
-        adjacency_matrix = connectivity_matrix >= threshold
+        passed = connectivity_matrix >= threshold
     else:
-        adjacency_matrix = connectivity_matrix < threshold
-    return np.array(adjacency_matrix)
+        passed = connectivity_matrix < threshold
+    adjacency_matrix = passed*connectivity_matrix != 0
+    return adjacency_matrix
     
 
 class TractsBetweenInputSpec(TraitedSpec):
@@ -877,34 +874,29 @@ class TractsBetween(BaseInterface):
             ntwk = nx.read_graphml(self.inputs.network_file)
                 
         connectivity_matrix = np.array(nx.to_numpy_matrix(ntwk))
-        from matplotlib.pyplot import imshow, show
-        imshow(connectivity_matrix)
-        show()
-        import ipdb
-        ipdb.set_trace()
         adjacency_matrix = adjacency_matrix_from_cmat(connectivity_matrix, self.inputs.weight_threshold, self.inputs.above_threshold)
-        
-        imshow(adjacency_matrix)
-        show()
         final_fiber_ids, final_fiber_ids_intersections = backwards_from_adjmat(fib, roiData, roiVoxelSize, adjacency_matrix, self.inputs.consider_region_intersections)
+
         _, name , _ = split_filename(self.inputs.out_tract_name)
+        filtered_tractography = op.abspath(name + '_filtered.trk')
+        filtered_tractography_by_intersections = op.abspath(name + '_filt_intersections.trk')
+        
         outputs = {}
-        outputs['filtered_tractography'] = op.abspath(name + '_filtered.trk')
         if self.inputs.consider_region_intersections:
-            filtered_tractography_by_intersections = op.abspath(name + '_filt_intersections.trk')
             save_fibers(hdr, fib, filtered_tractography_by_intersections, final_fiber_ids)
             iflogger.info('Saving tract file considering intersections to {path}'.format(path=filtered_tractography_by_intersections))
-        import ipdb
-        ipdb.set_trace()
-        filtered_tractography = op.abspath(name + '_filtered.trk')
         save_fibers(hdr, fib, filtered_tractography, final_fiber_ids)
-        iflogger.info('Saving tract file to {path}'.format(path=filtered_tractography_by_intersections))
+        iflogger.info('Saving tract file to {path}'.format(path=filtered_tractography))
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         _, name , _ = split_filename(self.inputs.out_tract_name)
-        outputs['filtered_tractography'] = op.abspath(name + '_filtered.trk')
-        outputs['filtered_tractography_by_intersections'] = op.abspath(name + '_filt_intersections.trk')
-        outputs['filtered_tractographies'] = [outputs['filtered_tractography'], outputs['filtered_tractography_by_intersections']]
+        filtered_tractography = op.abspath(name + '_filtered.trk')
+        outputs['filtered_tractography'] = filtered_tractography
+        outputs['filtered_tractographies'] = [outputs['filtered_tractography']]
+        if self.inputs.consider_region_intersections:
+            filtered_tractography_by_intersections = op.abspath(name + '_filt_intersections.trk')
+            outputs['filtered_tractography_by_intersections'] = filtered_tractography_by_intersections
+            outputs['filtered_tractographies'] = [outputs['filtered_tractography'], outputs['filtered_tractography_by_intersections']]
         return outputs
