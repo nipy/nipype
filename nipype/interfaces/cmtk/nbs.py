@@ -35,7 +35,7 @@ def ntwks_to_matrices(in_files, edge_key):
         matrix[:,:,idx] = nx.to_numpy_matrix(graph) # Retrieve the matrix
     return matrix
     
-class NetworkBrainStatisticInputSpec(BaseInterfaceInputSpec):
+class NetworkBasedStatisticInputSpec(BaseInterfaceInputSpec):
     in_group1 = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for the first group of subjects')
     in_group2 = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for the second group of subjects')
     node_position_network = File(desc='An optional network used to position the nodes for the output networks')
@@ -47,12 +47,12 @@ class NetworkBrainStatisticInputSpec(BaseInterfaceInputSpec):
     out_nbs_network = File(desc='Output network with edges identified by the NBS')
     out_nbs_pval_network = File(desc='Output network with p-values to weight the edges identified by the NBS')
 
-class NetworkBrainStatisticOutputSpec(TraitedSpec):
+class NetworkBasedStatisticOutputSpec(TraitedSpec):
     nbs_network = File(exists=True, desc='Output network with edges identified by the NBS')
     nbs_pval_network = File(exists=True, desc='Output network with p-values to weight the edges identified by the NBS')
     network_files = OutputMultiPath(File(exists=True), desc='Output network with edges identified by the NBS')
 
-class NetworkBrainStatistic(BaseInterface):
+class NetworkBasedStatistic(BaseInterface):
 	"""
 	Calculates and outputs the average network given a set of input NetworkX gpickle files
 
@@ -64,13 +64,13 @@ class NetworkBrainStatistic(BaseInterface):
 	-------
 
 	>>> import nipype.interfaces.cmtk as cmtk
-	>>> nbs = cmtk.NetworkBrainStatistic()
+	>>> nbs = cmtk.NetworkBasedStatistic()
 	>>> nbs.inputs.in_group1 = ['subj1.pck', 'subj2.pck'] # doctest: +SKIP
 	>>> nbs.inputs.in_group2 = ['pat1.pck', 'pat2.pck'] # doctest: +SKIP
 	>>> nbs.run()                 # doctest: +SKIP
 	"""
-	input_spec = NetworkBrainStatisticInputSpec
-	output_spec = NetworkBrainStatisticOutputSpec
+	input_spec = NetworkBasedStatisticInputSpec
+	output_spec = NetworkBasedStatisticOutputSpec
 
 	def _run_interface(self, runtime):
 		THRESH = self.inputs.threshold
