@@ -313,7 +313,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     surfconvert = pe.MapNode(fs.MRIsConvert(out_datatype=out_format),
                           iterfield=['in_file'],
                           name='surfconvert')
-    smoother = pe.MapNode(fs.MRIsSmooth(),
+    smoother = pe.MapNode(fs.SmoothTessellation(),
                           iterfield=['in_file'],
                           name='smoother')
 

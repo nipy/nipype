@@ -894,7 +894,7 @@ class MRIMarchingCubes(FSCommand):
             _, name, ext = split_filename(self.inputs.in_file)
             return name + ext + '_' + str(self.inputs.label_value)
 
-class MRIsSmoothInputSpec(FSTraitedSpec):
+class SmoothTessellationInputSpec(FSTraitedSpec):
     """
     This program smooths the tessellation of a surface using 'mris_smooth'
     """
@@ -917,14 +917,14 @@ class MRIsSmoothInputSpec(FSTraitedSpec):
     out_curvature_file = File(argstr='-c ./%s', desc='Write curvature to ?h.curvname (default "curv")')
     out_area_file = File(argstr='-b ./%s', desc='Write area to ?h.areaname (default "area")')
     
-class MRIsSmoothOutputSpec(TraitedSpec):
+class SmoothTessellationOutputSpec(TraitedSpec):
     """
     This program smooths the tessellation of a surface using 'mris_smooth'
     """
     surface = File(exists=True, desc='Smoothed surface file ')
 
 
-class MRIsSmooth(FSCommand):
+class SmoothTessellation(FSCommand):
     """
     This program smooths the tessellation of a surface using 'mris_smooth'
 
@@ -936,13 +936,13 @@ class MRIsSmooth(FSCommand):
     Example:
 
     import nipype.interfaces.freesurfer as fs
-    smooth = fs.MRIsSmooth()
+    smooth = fs.SmoothTessellation()
     smooth.inputs.in_file = 'lh.hippocampus.stl'
     smooth.run() # doctest: +SKIP
     """
     _cmd = 'mris_smooth'
-    input_spec = MRIsSmoothInputSpec
-    output_spec = MRIsSmoothOutputSpec
+    input_spec = SmoothTessellationInputSpec
+    output_spec = SmoothTessellationOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
