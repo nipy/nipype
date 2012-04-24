@@ -823,6 +823,7 @@ class TractsBetweenInputSpec(TraitedSpec):
     consider_region_intersections = traits.Bool(False, usedefault=True, desc='Counts all of the fiber-region traversals in the connectivity matrix (requires significantly more computational time)')
     above_threshold = traits.Bool(False, usedefault=True, desc='Only connectivity values greater than or equal to the threshold will be used')
     weight_threshold = traits.Float(0.05, usedefault=True, desc='Connectivity weight threshold (default 0.05, for NBS graph analysis)')
+    edge_key = traits.Str('weight', usedefault=True, desc='Connectivity edge key to threshold')
     out_tract_name = File('between.trk', usedefault=True, desc='Name for output tract file')
 
 class TractsBetweenOutputSpec(TraitedSpec):
@@ -873,7 +874,7 @@ class TractsBetween(BaseInterface):
         elif ext == '.graphml':
             ntwk = nx.read_graphml(self.inputs.network_file)
                 
-        connectivity_matrix = np.array(nx.to_numpy_matrix(ntwk))
+        connectivity_matrix = np.array(nx.to_numpy_matrix(ntwk, weight=self.inputs.edge_key))
         adjacency_matrix = adjacency_matrix_from_cmat(connectivity_matrix, self.inputs.weight_threshold, self.inputs.above_threshold)
         final_fiber_ids, final_fiber_ids_intersections = backwards_from_adjmat(fib, roiData, roiVoxelSize, adjacency_matrix, self.inputs.consider_region_intersections)
 
@@ -883,7 +884,7 @@ class TractsBetween(BaseInterface):
         
         outputs = {}
         if self.inputs.consider_region_intersections:
-            save_fibers(hdr, fib, filtered_tractography_by_intersections, final_fiber_ids)
+            save_fibers(hdr, fib, filtered_tractography_by_intersections, final_fiber_ids_intersections)
             iflogger.info('Saving tract file considering intersections to {path}'.format(path=filtered_tractography_by_intersections))
         save_fibers(hdr, fib, filtered_tractography, final_fiber_ids)
         iflogger.info('Saving tract file to {path}'.format(path=filtered_tractography))
