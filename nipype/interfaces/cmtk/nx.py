@@ -58,7 +58,7 @@ def fix_keys_for_gexf(orig):
     """
     import networkx as nx
     ntwk = nx.Graph()
-    nodes = orig.nodes_iter()
+    nodes = origcou.nodes_iter()
     edges = orig.edges_iter()
     for node in nodes:
         newnodedata = {}
