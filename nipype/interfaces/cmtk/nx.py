@@ -58,12 +58,13 @@ def fix_keys_for_gexf(orig):
     """
     import networkx as nx
     ntwk = nx.Graph()
-    nodes = orig.nodes_iter()
+    nodes = origcou.nodes_iter()
     edges = orig.edges_iter()
     for node in nodes:
         newnodedata = {}
         newnodedata.update(orig.node[node])
-        newnodedata['label'] = orig.node[node]['dn_fsname']
+        if orig.node[node].has_key('dn_fsname'):
+			newnodedata['label'] = orig.node[node]['dn_fsname']
         ntwk.add_node(str(node), newnodedata)
         if ntwk.node[str(node)].has_key('dn_position') and newnodedata.has_key('dn_position'):
             ntwk.node[str(node)]['dn_position'] = str(newnodedata['dn_position'])
@@ -153,7 +154,6 @@ def average_networks(in_files, ntwk_res_file, group_id):
         for edge in edges:
             data = ntwk.edge[edge[0]][edge[1]]
             if ntwk.edge[edge[0]][edge[1]]['count'] >= count_to_keep_edge:
-                iflogger.info('Count: {c} is greater than or equal to the minimum, {n}, for edge {e1}-{e2}'.format(c=ntwk.edge[edge[0]][edge[1]]['count'], n=count_to_keep_edge, e1=edge[0], e2=edge[1]))
                 for key in data.keys():
                     if not key == 'count':
                         data[key] = data[key] / len(in_files)
