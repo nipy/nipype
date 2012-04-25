@@ -721,7 +721,7 @@ class Volreg(AFNICommand):
 
 
 class MergeInputSpec(AFNITraitedSpec):
-    in_file = InputMultiPath(
+    in_files = InputMultiPath(
         File(desc='input file to 3dmerge',exists=True),
         argstr='%s',
         position=-1,
@@ -773,7 +773,7 @@ class Merge(AFNICommand):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file[0],
+            outputs['out_file'] = self._gen_fname(self.inputs.in_files[0],
                                                   suffix=self.inputs.suffix)
         return outputs
 
@@ -1135,7 +1135,7 @@ class SkullStrip(AFNICommand):
 
 
 class TCatInputSpec(AFNITraitedSpec):
-    in_file = InputMultiPath(
+    in_files = InputMultiPath(
         File(exists=True),
         desc='input file to 3dTcat',
         argstr=' %s',
@@ -1182,7 +1182,7 @@ class TCat(AFNICommand):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+            outputs['out_file'] = self._gen_fname(self.inputs.in_files[0],
                                                   suffix=self.inputs.suffix)
         return outputs
 
