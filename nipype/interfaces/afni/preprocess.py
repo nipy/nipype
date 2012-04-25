@@ -80,7 +80,7 @@ class To3D(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -771,7 +771,7 @@ class Merge(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_files[0],
                                                   suffix=self.inputs.suffix)
@@ -825,7 +825,7 @@ class Copy(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                   suffix=self.inputs.suffix)
@@ -891,7 +891,7 @@ class Fourier(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                   suffix=self.inputs.suffix)
@@ -948,7 +948,7 @@ class ZCutUp(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                   suffix=self.inputs.suffix)
@@ -1005,7 +1005,7 @@ class Allineate(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                   suffix=self.inputs.suffix)
@@ -1069,7 +1069,7 @@ class Maskave(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                   suffix=self.inputs.suffix)
@@ -1123,7 +1123,7 @@ class SkullStrip(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                   suffix=self.inputs.suffix)
@@ -1180,7 +1180,7 @@ class TCat(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_files[0],
                                                   suffix=self.inputs.suffix)
@@ -1246,7 +1246,7 @@ class Fim(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                   suffix=self.inputs.suffix)
@@ -1317,7 +1317,7 @@ class TCorrelate(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.xset,
                                                   suffix=self.inputs.suffix)
@@ -1540,7 +1540,7 @@ class Calc(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file_a,
                                                   suffix=self.inputs.suffix)
