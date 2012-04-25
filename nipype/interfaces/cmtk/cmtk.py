@@ -901,3 +901,91 @@ class TractsBetween(BaseInterface):
             outputs['filtered_tractography_by_intersections'] = filtered_tractography_by_intersections
             outputs['filtered_tractographies'] = [outputs['filtered_tractography'], outputs['filtered_tractography_by_intersections']]
         return outputs
+
+
+def unconnected_list_from_adjmat(adjacency_matrix):
+	iflogger.info('Creating list of unconnected regions from adjacency matrix...')
+	unconnected_list = np.empty((np.shape(adjacency_matrix)[0]))
+	connected = 0
+	for idx, row in enumerate(adjacency_matrix):
+		row = np.array(row)
+		if row.any() == False:
+			unconnected_list[idx] = True
+		else:
+			unconnected_list[idx] = False
+			connected += 1
+	iflogger.info('{c} regions are connected'.format(c=connected))
+	return unconnected_list
+	
+
+def filter_image_from_roi_list(roi_image, unconnected_list):
+	iflogger.info('Filtering ROI file from list of unconnected regions...')
+	roiData = roi_image.get_data()
+	filtered_roiData = roiData.copy()
+	roiHeader = roi_image.get_header()
+	for idx, unconnected_bool in enumerate(unconnected_list):
+		roi = idx+1
+		if unconnected_bool:
+			filtered_roiData[roiData == roi] = 0
+	filtered_roi_image = nb.Nifti1Image(filtered_roiData, roi_image.get_affine(), roi_image.get_header())
+	return filtered_roi_image
+
+
+class NetworkBasedROIFilteringInputSpec(TraitedSpec):
+    roi_file = File(exists=True, mandatory=True, desc='Freesurfer aparc+aseg file')
+    network_file = File(exists=True, mandatory=True, desc="Subject's connectivity graph")
+    above_threshold = traits.Bool(False, usedefault=True, desc='Only connectivity values greater than or equal to the threshold will be used')
+    weight_threshold = traits.Float(0.05, usedefault=True, desc='Connectivity weight threshold (default 0.05, for NBS graph analysis)')
+    edge_key = traits.Str('weight', usedefault=True, desc='Connectivity edge key to threshold')
+    out_filtered_roi_file = File('connected.nii', usedefault=True, desc='Name for output tract file')
+
+class NetworkBasedROIFilteringOutputSpec(TraitedSpec):
+    filtered_roi_file = File(desc='Region-of-interest file containing only those regions which have supra(sub)-threshold edges', exists=True)
+
+class NetworkBasedROIFiltering(BaseInterface):
+	"""
+	Given a set of ROIs and a connectivity graph, this 
+	interface will remove all ROIs with edges below/above the
+	user-specified threshold.
+
+	Example
+	-------
+
+	>>> import nipype.interfaces.cmtk as cmtk
+	>>> filtroi = cmtk.NetworkBasedROIFiltering()
+	>>> filtroi.inputs.roi_file = 'fsLUT_aparc+aseg.nii'
+	>>> filtroi.inputs.network_file = 'fsLUT_aparc+aseg.pck'
+	>>> filtroi.run()                 # doctest: +SKIP
+	"""
+
+	input_spec = NetworkBasedROIFilteringInputSpec
+	output_spec = NetworkBasedROIFilteringOutputSpec
+
+	def _run_interface(self, runtime):
+		iflogger.info('Reading ROI file {ntwk}'.format(ntwk=self.inputs.roi_file))
+		roi_image = nb.load(self.inputs.roi_file)
+
+		iflogger.info('Reading Network file {ntwk}'.format(ntwk=self.inputs.network_file))
+		path, name, ext = split_filename(self.inputs.network_file)
+		if ext == '.pck':
+			ntwk = nx.read_gpickle(self.inputs.network_file)
+		elif ext == '.graphml':
+			ntwk = nx.read_graphml(self.inputs.network_file)
+				
+		connectivity_matrix = np.array(nx.to_numpy_matrix(ntwk, weight=self.inputs.edge_key))
+		adjacency_matrix = adjacency_matrix_from_cmat(connectivity_matrix, self.inputs.weight_threshold, self.inputs.above_threshold)
+		unconnected_list = unconnected_list_from_adjmat(adjacency_matrix)
+		filtered_roi_image = filter_image_from_roi_list(roi_image, unconnected_list)
+
+		_, name , _ = split_filename(self.inputs.out_filtered_roi_file)
+		filtered_roi_name = op.abspath(name + '.nii.gz')
+		nb.save(filtered_roi_image, filtered_roi_name)
+		iflogger.info('Saving filtered image file to {path}'.format(path=self.inputs.out_filtered_roi_file))
+		return runtime
+
+	def _list_outputs(self):
+		outputs = self._outputs().get()
+		_, name , _ = split_filename(self.inputs.out_filtered_roi_file)
+		filtered_roi_name = op.abspath(name + '.nii.gz')
+		outputs['filtered_roi_file'] = filtered_roi_name
+		return outputs
