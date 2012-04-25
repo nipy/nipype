@@ -114,18 +114,9 @@ from nipype import config, logging
 from ordereddict import OrderedDict
 config_dict=%s
 config.update_config(config_dict)
+config.update_matplotlib()
 logging.update_logging(config)
 from nipype.utils.filemanip import loadpkl, savepkl
-"""
-
-    does_plot = (isinstance(node, Function) and
-                 "matplotlib" in node.inputs.function_str)
-
-    if does_plot:
-        cmdstr += "import matplotlib\n"
-        cmdstr += "matplotlib.use('Agg')\n"
-
-    cmdstr += """
 traceback=None
 cwd = os.getcwd()
 print cwd
@@ -556,6 +547,7 @@ class GraphPluginBase(PluginBase):
     def run(self, graph, config, updatehash=False):
         pyfiles = []
         dependencies = {}
+        self._config = config
         nodes = nx.topological_sort(graph)
         logger.debug('Creating executable python files for each node')
         for idx, node in enumerate(nodes):
