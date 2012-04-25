@@ -26,7 +26,7 @@ class To3DInputSpec(AFNITraitedSpec):
         mandatory=True,
         exists=True)
 
-    outfile = File(desc='converted image file',
+    out_file = File(desc='converted image file',
         argstr='-prefix %s',
         position=-2,
         mandatory=True)
@@ -80,7 +80,7 @@ class To3D(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.outfile
+        outputs['out_file'] = self.inputs.out_file
         return outputs
 
 
@@ -127,8 +127,7 @@ class TShiftInputSpec(AFNITraitedSpec):
         'later put back the mean',
         argstr="-rlt+")
 
-    suffix = traits.Str('tshift',desc="out_file suffix",usedefault=True)
-        # todo: give it a default-value
+    suffix = traits.Str('_tshift',desc="out_file suffix",usedefault=True)
 
 
 class TShiftOutputSpec(TraitedSpec):
@@ -194,6 +193,8 @@ class RefitInputSpec(AFNITraitedSpec):
         argstr='-yorigin %s')
     zorigin = traits.Str(desc='z distance for edge voxel offset',
         argstr='-zorigin %s')
+
+    suffix = traits.Str('_refit',desc="out_file suffix",usedefault=True)
 
 
 class RefitOutputSpec(TraitedSpec):
@@ -273,9 +274,7 @@ class WarpInputSpec(AFNITraitedSpec):
         " of zero on all sides.",
         argstr="-zpad %s")
 
-    suffix = traits.Str('warp',desc="out_file suffix",usedefault=True)
-        # todo: give it a default-value
-
+    suffix = traits.Str('_warp',desc="out_file suffix",usedefault=True)
 
 class WarpOutputSpec(TraitedSpec):
     out_file = File(desc='spatially transformed input image', exists=True)
@@ -333,8 +332,7 @@ class ResampleInputSpec(AFNITraitedSpec):
     orientation = traits.Str(desc='new orientation code',
         argstr='-orient %s')
 
-    suffix = traits.Str(desc="out_file suffix")
-        # todo: give it a default-value
+    suffix = traits.Str('_resample', desc="out_file suffix",usedefault=True)
 
 
 class ResampleOutputSpec(TraitedSpec):
@@ -393,7 +391,7 @@ class TStatInputSpec(AFNITraitedSpec):
     options = traits.Str(desc='selected statistical output',
         argstr='%s')
 
-    suffix = traits.Str('_3dT', desc="out_file suffix", usedefault=True)
+    suffix = traits.Str('_tstat', desc="out_file suffix", usedefault=True)
 
 
 class TStatOutputSpec(TraitedSpec):
@@ -449,7 +447,7 @@ class DetrendInputSpec(AFNITraitedSpec):
          genfile=True)
     options = traits.Str(desc='selected statistical output',
         argstr='%s')
-    suffix = traits.Str('_3dD', desc="out_file suffix", usedefault=True)
+    suffix = traits.Str('_detrend', desc="out_file suffix", usedefault=True)
 
 
 class DetrendOutputSpec(TraitedSpec):
@@ -508,7 +506,7 @@ class DespikeInputSpec(AFNITraitedSpec):
 
     options = traits.Str(desc='additional args',
         argstr='%s')
-    suffix = traits.Str('_3dDe', desc="out_file suffix", usedefault=True)
+    suffix = traits.Str('_despike', desc="out_file suffix", usedefault=True)
 
 
 class DespikeOutputSpec(TraitedSpec):
@@ -580,8 +578,8 @@ class AutomaskInputSpec(AFNITraitedSpec):
     options = traits.Str(desc='automask settings',
         argstr='%s')
 
-    mask_suffix = traits.Str('mask',desc="out_file suffix",usedefault=True)
-    apply_suffix = traits.Str('mask',desc="out_file suffix",usedefault=True)
+    mask_suffix = traits.Str('_mask',desc="out_file suffix",usedefault=True)
+    apply_suffix = traits.Str('_masked',desc="out_file suffix",usedefault=True)
 
 
 
@@ -668,7 +666,7 @@ class VolregInputSpec(AFNITraitedSpec):
         argstr='-twodup')
     other = traits.Str(desc='other options',
         argstr='%s')
-    suffix = traits.Str('_3dv', desc="out_file suffix", usedefault=True)
+    suffix = traits.Str('_volreg', desc="out_file suffix", usedefault=True)
 
 
 class VolregOutputSpec(TraitedSpec):
@@ -857,7 +855,7 @@ class FourierInputSpec(AFNITraitedSpec):
         mandatory=True)
     other = traits.Str(desc='other options',
         argstr='%s')
-    suffix = traits.Str('_3dF', desc="out_file suffix", usedefault=True)
+    suffix = traits.Str('_fourier', desc="out_file suffix", usedefault=True)
 
 
 class FourierOutputSpec(TraitedSpec):
@@ -974,7 +972,7 @@ class AllineateInputSpec(AFNITraitedSpec):
     matrix = File(desc='matrix to align input file',
         argstr='-1dmatrix_apply %s',
         position=-3)
-    suffix = traits.Str('_3dAl', desc="out_file suffix", usedefault=True)
+    suffix = traits.Str('_allineate', desc="out_file suffix", usedefault=True)
 
 
 class AllineateOutputSpec(TraitedSpec):
@@ -1035,7 +1033,7 @@ class MaskaveInputSpec(AFNITraitedSpec):
     quiet = traits.Bool(desc='matrix to align input file',
         argstr='-quiet',
         position=2)
-    suffix = traits.Str('_3dm', desc="out_file suffix", usedefault=True)
+    suffix = traits.Str('_maskave', desc="out_file suffix", usedefault=True)
 
 
 class MaskaveOutputSpec(TraitedSpec):
@@ -1092,7 +1090,7 @@ class SkullStripInputSpec(AFNITraitedSpec):
          position=-1,
         genfile=True)
     options = traits.Str(desc='options', argstr='%s', position=2)
-    suffix = traits.Str('_3dSk', desc="out_file suffix", usedefault=True)
+    suffix = traits.Str('_skullstrip', desc="out_file suffix", usedefault=True)
 
 
 class SkullStripOutputSpec(TraitedSpec):
@@ -1148,7 +1146,7 @@ class TCatInputSpec(AFNITraitedSpec):
          position=-2,
          genfile=True)
     rlt = traits.Str(desc='options', argstr='-rlt%s', position=1)
-    suffix = traits.Str('_3dT', desc="out_file suffix", usedefault=True)
+    suffix = traits.Str('_tcat', desc="out_file suffix", usedefault=True)
 
 
 class TCatOutputSpec(TraitedSpec):
@@ -1211,7 +1209,7 @@ class FimInputSpec(AFNITraitedSpec):
 
     out_file = File(desc='output file from 3dfim+', argstr='-bucket %s',
         position=-1, genfile=True)
-    suffix = traits.Str('_3dFim', desc="out_file suffix", usedefault=True)
+    suffix = traits.Str('_fim', desc="out_file suffix", usedefault=True)
 
 
 class FimOutputSpec(TraitedSpec):
@@ -1282,7 +1280,7 @@ class TCorrelateInputSpec(AFNITraitedSpec):
 
     options = traits.Str(desc='other options',
         argstr='%s', position=4)
-    suffix = traits.Str('_3dTcor', desc="out_file suffix", usedefault=True)
+    suffix = traits.Str('_tcor', desc="out_file suffix", usedefault=True)
 
 
 class TCorrelateOutputSpec(TraitedSpec):
@@ -1508,7 +1506,7 @@ class CalcInputSpec(CommandLineInputSpec):
         requires=['start_idx'])
     single_idx = traits.Int(desc='volume index for infile_a')
     other = File(desc='other options', argstr='')
-    suffix = traits.Str('_3dc', desc="out_file suffix", usedefault=True)
+    suffix = traits.Str('_calc', desc="out_file suffix", usedefault=True)
 
 
 class CalcOutputSpec(TraitedSpec):
