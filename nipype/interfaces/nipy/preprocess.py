@@ -77,8 +77,6 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
     slice_order = traits.Either(traits.List(traits.Int),
                   traits.Enum("ascending", "descending"),
                   mandatory=True, desc='slice order')
-    interleaved = traits.Bool(desc="True if interleaved",
-                  mandatory=True)
     tr_slices = traits.Float(desc="TR slices")
     start = traits.Float(0.0, usedefault=True,
                          desc="time offset into TR to align slices to")
@@ -111,7 +109,6 @@ class FmriRealign4d(BaseInterface):
     >>> realigner.inputs.in_file = ['functional.nii']
     >>> realigner.inputs.tr = 2
     >>> realigner.inputs.slice_order = 'ascending'
-    >>> realigner.inputs.interleaved = True
     >>> res = realigner.run() # doctest: +SKIP
 
     References
@@ -144,7 +141,6 @@ class FmriRealign4d(BaseInterface):
 
         R = FR4d(all_ims, tr=self.inputs.tr,
             slice_order=self.inputs.slice_order,
-            interleaved=self.inputs.interleaved,
             tr_slices=TR_slices,
             time_interp=self.inputs.time_interp,
             start=self.inputs.start)
