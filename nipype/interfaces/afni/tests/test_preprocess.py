@@ -19,7 +19,7 @@ def test_allineate():
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='-source %s',mandatory=True,),
                      matrix = dict(argstr='-1dmatrix_apply %s',),
-                     out_file = dict(argstr='-prefix %s',mandatory=True,),
+                     out_file = dict(argstr='-prefix %s',genfile=True,),
                      outputtype = dict(),
                      )
     instance = afni.Allineate()
@@ -290,7 +290,7 @@ def test_merge():
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='%s',mandatory=True,),
                      other = dict(argstr='%s',),
-                     out_file = dict(argstr='-prefix %s',mandatory=True,),
+                     out_file = dict(argstr='-prefix %s',genfile=True,),
                      outputtype = dict(),
                      )
     instance = afni.Merge()
