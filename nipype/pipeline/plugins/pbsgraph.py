@@ -21,25 +21,26 @@ class PBSGraphPlugin(GraphPluginBase):
 
     """
 
-    def __init__(self, **plugin_args):
+    def __init__(self, **kwargs):
         self._template = """
 #PBS -V
         """
         self._qsub_args = None
-        if plugin_args:
+        if 'plugin_args' in kwargs:
+            plugin_args = kwargs['plugin_args']
             if 'template' in plugin_args:
                 self._template = plugin_args['template']
                 if os.path.isfile(self._template):
                     self._template = open(self._template).read()
             if 'qsub_args' in plugin_args:
                 self._qsub_args = plugin_args['qsub_args']
-        super(PBSGraphPlugin, self).__init__(**plugin_args)
+        super(PBSGraphPlugin, self).__init__(**kwargs)
 
     def _submit_graph(self, pyfiles, dependencies):
         batch_dir, _ = os.path.split(pyfiles[0])
         submitjobsfile = os.path.join(batch_dir, 'submit_jobs.sh')
         with open(submitjobsfile, 'wt') as fp:
-            fp.writelines('#!/usr/bin/env sh')
+            fp.writelines('#!/usr/bin/env sh\n')
             for idx, pyscript in enumerate(pyfiles):
                 batch_dir, name = os.path.split(pyscript)
                 name = '.'.join(name.split('.')[:-1])
@@ -52,10 +53,12 @@ class PBSGraphPlugin(GraphPluginBase):
                     batchfp.close()
                 deps = ''
                 if idx in dependencies:
-                    values = ['$job%05d' for jobid in dependencies[idx]]
-                    deps = '-W depend=afterok:%s' % ':'.join(values)
-                fp.writelines('job%05d=`qsub %s %s`' % (idx, deps,
-                                                        batchscriptfile))
+                    values = ['$job%05d' % jobid for jobid in dependencies[idx]]
+                    if len(values):
+                        deps = '-W depend=afterok:%s' % ':'.join(values)
+                fp.writelines('job%05d=`qsub %s %s %s`\n' % (idx, deps,
+                                                             self._qsub_args,
+                                                             batchscriptfile))
         cmd = CommandLine('sh', environ=os.environ.data)
         cmd.inputs.args = '%s' % submitjobsfile
         cmd.run()

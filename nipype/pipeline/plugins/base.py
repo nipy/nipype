@@ -111,6 +111,7 @@ import sys
 from socket import gethostname
 from traceback import format_exception
 from nipype import config, logging
+from ordereddict import OrderedDict
 config_dict=%s
 config.update_config(config_dict)
 logging.update_logging(config)

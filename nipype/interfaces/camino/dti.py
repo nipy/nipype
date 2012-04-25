@@ -183,9 +183,6 @@ class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
     trace = traits.Float(argstr='-trace %d', units='NA',
         desc='Trace of the diffusion tensor(s) used in the test function in the LUT generation. The default is 2100E-12 m^2 s^-1.')
 
-    in_file = File(exists=True, argstr='%s', mandatory=False, position=1,
-        desc='diffusion tensor datafile')
-
     scheme_file = File(argstr='-schemefile %s', mandatory=True, position=2,
         desc='The scheme file of the images to be processed using this LUT.')
 
