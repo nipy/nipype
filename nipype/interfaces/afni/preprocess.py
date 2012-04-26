@@ -169,7 +169,7 @@ class TShift(AFNICommand):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix = self.inputs.suffix
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -312,7 +312,7 @@ class Warp(AFNICommand):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix = self.inputs.suffix
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -373,7 +373,7 @@ class Resample(AFNICommand):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix = self.inputs.suffix
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -433,7 +433,7 @@ class TStat(AFNICommand):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix = self.inputs.suffix
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -491,7 +491,7 @@ class Detrend(AFNICommand):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix = self.inputs.suffix
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -549,7 +549,7 @@ class Despike(AFNICommand):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix = self.inputs.suffix
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -906,7 +906,7 @@ class Fourier(AFNICommand):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix = self.inputs.suffix
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -964,7 +964,7 @@ class ZCutUp(AFNICommand):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix = self.inputs.suffix
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -1022,7 +1022,7 @@ class Allineate(AFNICommand):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix = self.inputs.suffix
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -1087,7 +1087,7 @@ class Maskave(AFNICommand):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix = self.inputs.suffix
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -1142,7 +1142,7 @@ class SkullStrip(AFNICommand):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix = self.inputs.suffix
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -1267,9 +1267,9 @@ class Fim(AFNICommand):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix = self.inputs.suffix
+                suffix = self.inputs.suffix)
         else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)x)
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
