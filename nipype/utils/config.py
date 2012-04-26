@@ -32,6 +32,7 @@ log_rotate = 4
 [execution]
 create_report = true
 crashdump_dir = %s
+display_variable = :1
 hash_method = timestamp
 job_finished_timeout = 5
 keep_inputs = false

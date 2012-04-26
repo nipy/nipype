@@ -1082,16 +1082,16 @@ class CommandLine(BaseInterface):
         setattr(runtime, 'stdout', None)
         setattr(runtime, 'stderr', None)
         setattr(runtime, 'cmdline', self.cmdline)
-        environ = self.inputs.environ
-        if isdefined(environ):
-            out_environ = environ
-            try:
-                display_var = config.get('execution', 'display_variable')
-                out_environ = {'DISPLAY': display_var}
-                out_environ.update(environ)
-            except NoOptionError:
-                pass
-            runtime.environ.update(environ)
+        out_environ = {}
+        try:
+            display_var = config.get('execution', 'display_variable')
+            out_environ = {'DISPLAY': display_var}
+        except NoOptionError:
+            pass
+        iflogger.info(out_environ)
+        if isdefined(self.inputs.environ):
+            out_environ.update(self.inputs.environ)
+        runtime.environ.update(out_environ)
         if not self._exists_in_path(self.cmd.split()[0]):
             raise IOError("%s could not be found on host %s" % (self.cmd.split()[0],
                                                                 runtime.hostname))
