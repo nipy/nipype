@@ -1513,7 +1513,7 @@ ${rest}_ss.nii.gz
 """
 
 
-class CalcInputSpec(CommandLineInputSpec):
+class CalcInputSpec(AFNITraitedSpec):
     in_file_a = File(desc='input file to 3dcalc',
         argstr='-a %s', position=0, mandatory=True)
     in_file_b = File(desc='operand file to 3dcalc',
