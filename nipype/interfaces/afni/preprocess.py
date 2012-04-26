@@ -1535,7 +1535,7 @@ class CalcOutputSpec(TraitedSpec):
     out_file = File(desc=' output file', exists=True)
 
 
-class Calc(CommandLine):
+class Calc(AFNICommand):
     """This program does voxel-by-voxel arithmetic on 3D datasets
 
     For complete details, see the `3dcalc Documentation.
