@@ -1084,9 +1084,11 @@ class CommandLine(BaseInterface):
         setattr(runtime, 'cmdline', self.cmdline)
         environ = self.inputs.environ
         if isdefined(environ):
+            out_environ = environ
             try:
                 display_var = config.get('execution', 'display_variable')
-                environ.update({'DISPLAY': display_var})
+                out_environ = {'DISPLAY': display_var}
+                out_environ.update(environ)
             except NoOptionError:
                 pass
             runtime.environ.update(environ)
