@@ -1033,11 +1033,6 @@ class CommandLine(BaseInterface):
             raise Exception("Missing command")
         if command:
             self._cmd = command
-        try:
-            display_var = config.get('execution', 'display_variable')
-            self.inputs.environ['DISPLAY'] = display_var
-        except NoOptionError:
-            pass
 
     @property
     def cmd(self):
@@ -1087,7 +1082,14 @@ class CommandLine(BaseInterface):
         setattr(runtime, 'stdout', None)
         setattr(runtime, 'stderr', None)
         setattr(runtime, 'cmdline', self.cmdline)
-        runtime.environ.update(self.inputs.environ)
+        environ = self.inputs.environ
+        if isdefined(environ):
+            try:
+                display_var = config.get('execution', 'display_variable')
+                environ.update({'DISPLAY': display_var})
+            except NoOptionError:
+                pass
+            runtime.environ.update(environ)
         if not self._exists_in_path(self.cmd.split()[0]):
             raise IOError("%s could not be found on host %s" % (self.cmd.split()[0],
                                                                 runtime.hostname))
