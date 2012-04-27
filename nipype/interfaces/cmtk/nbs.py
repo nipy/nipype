@@ -85,13 +85,13 @@ class NetworkBasedStatistic(BaseInterface):
         X = ntwks_to_matrices(self.inputs.in_group1, edge_key)
         Y = ntwks_to_matrices(self.inputs.in_group2, edge_key)
 
-        PVAL, ADJ, NULL = nbs.compute_nbs(X, Y, THRESH, K, TAIL)
+        PVAL, ADJ, _ = nbs.compute_nbs(X, Y, THRESH, K, TAIL)
 
         iflogger.info('p-values:')
         iflogger.info(PVAL)
 
         pADJ = ADJ.copy()
-        for idx, p in enumerate(PVAL):
+        for idx, _ in enumerate(PVAL):
             x, y = np.where(ADJ == idx + 1)
             pADJ[x, y] = PVAL[idx]
 
