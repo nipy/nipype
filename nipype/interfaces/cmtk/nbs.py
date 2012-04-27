@@ -3,8 +3,7 @@
 from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
                                     File, TraitedSpec, InputMultiPath,
                                     OutputMultiPath, isdefined)
-from nipype.utils.filemanip import split_filename
-import os, os.path as op
+import os.path as op
 import numpy as np
 import networkx as nx
 from nipype.utils.misc import package_check
