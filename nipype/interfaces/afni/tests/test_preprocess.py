@@ -17,9 +17,9 @@ def test_allineate():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
-                     infile = dict(argstr='-source %s',mandatory=True,),
+                     in_file = dict(argstr='-source %s',mandatory=True,),
                      matrix = dict(argstr='-1dmatrix_apply %s',),
-                     outfile = dict(argstr='-prefix %s',mandatory=True,),
+                     out_file = dict(argstr='-prefix %s',genfile=True,),
                      outputtype = dict(),
                      )
     instance = afni.Allineate()
@@ -81,8 +81,8 @@ def test_calc():
                      environ = dict(usedefault=True,),
                      expr = dict(argstr='-expr %s',mandatory=True,),
                      ignore_exception = dict(usedefault=True,),
-                     infile_a = dict(argstr='-a %s',mandatory=True,),
-                     infile_b = dict(argstr=' -b %s',),
+                     in_file_a = dict(argstr='-a %s',mandatory=True,),
+                     in_file_b = dict(argstr=' -b %s',),
                      other = dict(argstr='',),
                      out_file = dict(argstr='-prefix %s',),
                      single_idx = dict(),
@@ -103,7 +103,7 @@ def test_to3d():
                      funcparams = dict(argstr='-time:zt %s alt+z2',),
                      ignore_exception = dict(usedefault=True,),
                      infolder = dict(argstr='%s/*.dcm',mandatory=True,),
-                     outfile = dict(argstr='-prefix %s',mandatory=True,),
+                     out_file = dict(argstr='-prefix %s',mandatory=True,),
                      outputtype = dict(),
                      skipoutliers = dict(argstr='-skip_outliers',),
                      )
@@ -132,7 +132,7 @@ def test_tcat():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
-                     in_file = dict(argstr=' %s',mandatory=True,),
+                     in_files = dict(argstr=' %s',mandatory=True,),
                      out_file = dict(argstr='-prefix %s',),
                      outputtype = dict(),
                      rlt = dict(argstr='-rlt%s',),
@@ -271,10 +271,10 @@ def test_zcutup():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
-                     infile = dict(argstr='%s',mandatory=True,),
+                     in_file = dict(argstr='%s',mandatory=True,),
                      keep = dict(argstr='-keep %s',),
                      other = dict(argstr='%s',),
-                     outfile = dict(argstr='-prefix %s',mandatory=True,),
+                     out_file = dict(argstr='-prefix %s',mandatory=True,),
                      outputtype = dict(),
                      )
     instance = afni.ZCutUp()
@@ -288,9 +288,9 @@ def test_merge():
                      doall = dict(argstr='-doall',),
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
-                     infile = dict(argstr='%s',mandatory=True,),
+                     in_files = dict(argstr='%s',mandatory=True,),
                      other = dict(argstr='%s',),
-                     outfile = dict(argstr='-prefix %s',mandatory=True,),
+                     out_file = dict(argstr='-prefix %s',genfile=True,),
                      outputtype = dict(),
                      )
     instance = afni.Merge()
