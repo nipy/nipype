@@ -263,3 +263,18 @@ def test_Commandline():
     ci6 = DerivedClass(command='cmd')
     yield assert_equal, ci6._parse_inputs()[0], 'filename'
     nib.CommandLine.input_spec = nib.CommandLineInputSpec
+
+
+def test_Commandline_environ():
+    from nipype import config
+    config.set_default_config()
+    ci3 = nib.CommandLine(command='echo')
+    res = ci3.run()
+    yield assert_equal, res.runtime.environ['DISPLAY'], ':1'
+    config.set('execution', 'display_variable', ':3')
+    res = ci3.run()
+    yield assert_false, 'DISPLAY' in ci3.inputs.environ
+    yield assert_equal, res.runtime.environ['DISPLAY'], ':3'
+    ci3.inputs.environ = {'DISPLAY' : ':2'}
+    res = ci3.run()
+    yield assert_equal, res.runtime.environ['DISPLAY'], ':2'
