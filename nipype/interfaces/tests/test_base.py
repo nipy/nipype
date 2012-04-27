@@ -273,6 +273,7 @@ def test_Commandline_environ():
     yield assert_equal, res.runtime.environ['DISPLAY'], ':1'
     config.set('execution', 'display_variable', ':3')
     res = ci3.run()
+    yield assert_false, 'DISPLAY' in ci3.inputs.environ
     yield assert_equal, res.runtime.environ['DISPLAY'], ':3'
     ci3.inputs.environ = {'DISPLAY' : ':2'}
     res = ci3.run()
