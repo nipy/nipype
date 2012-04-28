@@ -17,10 +17,15 @@ performance issues.
 
 #. Use the debug config mode. This can be done by setting::
 
-      import config
+      from nipype import config
       config.enable_debug_mode()
 
    as the first import of your nipype script.
+
+   .. note::
+
+     Turning on debug will rerun your workflows and will rerun them after debugging
+     is turned off.
 
 #. There are several configuration options that can help with debugging. See
    :ref:`config_file` for more details::
