@@ -1,6 +1,3 @@
-import os
-from glob import glob
-
 # Local imports
 from ..base import (TraitedSpec, File, traits, InputMultiPath, OutputMultiPath,
                     isdefined)
@@ -10,7 +7,7 @@ from .base import ANTSCommand, ANTSCommandInputSpec
 
 class ApplyTransformInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='--dimensionality %d', usedefault=True,
-                            desc='image dimension (2 or 3)', position=1)
+                            desc='image dimension (2 or 3)')
     input_image = File(argstr='--input %s', mandatory=True, 
                         desc=('image to apply transformation to (generally a '
                               'coregistered functional)'))
@@ -32,7 +29,6 @@ class ApplyTransformInputSpec(ANTSCommandInputSpec):
           "when the input point maps outside the output domain")
 
 
-
 class ApplyTransformOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc='Warped image')
 
@@ -45,11 +41,11 @@ class ApplyTransform(ANTSCommand):
 
     >>> from nipype.interfaces.ants import ApplyTransform
     >>> wimt = ApplyTransform()
-    >>> wimt.inputs.input = 'structural.nii'
+    >>> wimt.inputs.input_image = 'structural.nii'
     >>> wimt.inputs.reference_image = 'ants_deformed.nii.gz'
     >>> wimt.inputs.transformation_files = ['ants_Warp.nii.gz','ants_Affine.txt']
     >>> wimt.cmdline
-    'ApplyTransform --dimensionality 3 --input structural.nii --output structural_trans.nii --reference ants_deformed.nii.gz --transform ants_Warp.nii.gz --transform ants_Affine.txt'
+    'antsApplyTransforms --dimensionality 3 --input structural.nii --output structural_trans.nii --reference-image ants_deformed.nii.gz --transform ants_Warp.nii.gz --transform ants_Affine.txt'
 
     """
 
@@ -57,16 +53,13 @@ class ApplyTransform(ANTSCommand):
     input_spec = ApplyTransformInputSpec
     output_spec = ApplyTransformOutputSpec
 
-    def _gen_outfilename(self):
-        output = self.inputs.output_image
-        if not isdefined(output):
-            _, name, ext = split_filename(self.inputs.input_image)
-            output = name + '_trans' + ext
-        return os.path.abspath(output)
-
     def _gen_filename(self, name):
         if name == 'output_image':
-            return self._gen_outfilename()
+            output = self.inputs.output_image
+            if not isdefined(output):
+                _, name, ext = split_filename(self.inputs.input_image)
+                output = name + '_trans' + ext
+            return output
         return None
 
     def _format_arg(self, opt, spec, val):
@@ -84,5 +77,60 @@ class ApplyTransform(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_image'] = self._gen_outfilename()
+        outputs['output_image'] = self._gen_filename('output_image')
+        return outputs
+
+
+class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(3, 2, argstr='--image-dimension %d', usedefault=True,
+                            desc='image dimension (2 or 3)')
+    input_image = File(argstr='--input-image %s', mandatory=True, 
+                        desc=('image to apply transformation to (generally a '
+                              'coregistered functional)'))
+    output_image = traits.Str(argstr='--output %s',
+                             desc=('output file name'), genfile=True)
+    bspline_fitting_distance = traits.Float(argstr="--bsline-fitting [%g]")
+    shrink_factor = traits.Int(argstr="--shrink-factor %d")
+    n_iterations = traits.List(traits.Int(), argstr="--convergence [ %s", sep="x", requires=['convergence_threshold'], position=1)
+    convergence_threshold = traits.Float(argstr=",%g]", requires=['n_iterations'], position=2)
+
+
+class N4BiasFieldCorrectionOutputSpec(TraitedSpec):
+    output_image = File(exists=True, desc='Warped image')
+
+
+class N4BiasFieldCorrection(ANTSCommand):
+    """Warps an image from one space to another
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.ants.utils import N4BiasFieldCorrection
+    >>> n4 = N4BiasFieldCorrection()
+    >>> n4.inputs.dimension = 3
+    >>> n4.inputs.input_image = 'structural.nii'
+    >>> n4.inputs.bspline_fitting_distance = 300
+    >>> n4.inputs.shrink_factor = 3
+    >>> n4.inputs.n_iterations = [50,50,30,20]
+    >>> n4.inputs.convergence_threshold = 1e-6
+    >>> n4.cmdline
+    'N4BiasFieldCorrection --convergence [ 50x50x30x20 ,1e-06] --bsline-fitting [300] --image-dimension 3 --input-image structural.nii --output structural_corrected.nii --shrink-factor 3'
+    """
+
+    _cmd = 'N4BiasFieldCorrection'
+    input_spec = N4BiasFieldCorrectionInputSpec
+    output_spec = N4BiasFieldCorrectionOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'output_image':
+            output = self.inputs.output_image
+            if not isdefined(output):
+                _, name, ext = split_filename(self.inputs.input_image)
+                output = name + '_corrected' + ext
+            return output
+        return None
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['output_image'] = self._gen_filename('output_image')
         return outputs

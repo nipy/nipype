@@ -5,3 +5,4 @@
 
 from .normalize import (BuildTemplate, WarpImageMultiTransform,
                         WarpTimeSeriesImageMultiTransform, GenWarpFields)
+from .utils import ApplyTransform, N4BiasFieldCorrection
