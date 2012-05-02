@@ -330,7 +330,7 @@ def add_edge_data(edge_array, ntwk, above=0, below=0):
     return edge_ntwk
 
 
-def difference_graph(in_file1, in_file2, ntwk_res_file, keep_only_common_edges=False):
+def difference_graph(in_file1, in_file2, ntwk_res_file, keep_only_common_edges=-1):
     """
     Subtracts the edges from in_file1 from in_file2.
     
@@ -360,16 +360,35 @@ def difference_graph(in_file1, in_file2, ntwk_res_file, keep_only_common_edges=F
     for edge in edges2:
         data = {}
         dict2 = ntwk2.edge[edge[0]][edge[1]]
-        if keep_only_common_edges:
+        if keep_only_common_edges == False:
+            # Retain only edges in network 2 and not in network 1
+            if not ntwk1.has_edge(edge[0], edge[1]):
+                data = dict2
+                diff_ntwk.add_edge(edge[0], edge[1], data)
+                
+        elif keep_only_common_edges == True:
+            # Retain only edges in both networks and calculate the difference for each key at those edges
             if ntwk1.has_edge(edge[0], edge[1]):
                 dict1 = ntwk1.edge[edge[0]][edge[1]]
                 data = add_dicts_by_key(dict1, dict2, subtract=True)
                 diff_ntwk.add_edge(edge[0], edge[1], data)
-        else:
-            if not ntwk1.has_edge(edge[0], edge[1]):
-                data = dict2
-                diff_ntwk.add_edge(edge[0], edge[1], data)
 
+        elif keep_only_common_edges == -1:
+            # Calculate the difference for each key at of all the edges in network 2
+            if ntwk1.has_edge(edge[0], edge[1]):
+                dict1 = ntwk1.edge[edge[0]][edge[1]]
+                data = add_dicts_by_key(dict1, dict2, subtract=True)
+                diff_ntwk.add_edge(edge[0], edge[1], data)
+                
+    if keep_only_common_edges == -1:
+        # Calculate the difference for each key at all of the edges in network 1
+        for edge in edges1:
+            if ntwk2.has_edge(edge[0], edge[1]):
+                data = dict2
+                dict1 = ntwk1.edge[edge[0]][edge[1]]
+                data = add_dicts_by_key(dict1, dict2, subtract=True)
+                diff_ntwk.add_edge(edge[0], edge[1], data)
+    
     nodes = ntwk_res_file.nodes_iter()
     for node in nodes:
         data = {}
@@ -381,14 +400,20 @@ def difference_graph(in_file1, in_file2, ntwk_res_file, keep_only_common_edges=F
 
     # Writes the networks and returns the name
     name = str(name2) + '-' + str(name1)
+    
+    if keep_only_common_edges == True:
+        name = name + '_common_edges'
+    elif keep_only_common_edges == False:
+        name = name + '_uncommon'        
+                
     network_name = 'difference_' + name
    
     nx.write_gpickle(diff_ntwk, op.abspath(network_name + '.pck'))
-    iflogger.info('Saving average network as {out}'.format(out=op.abspath(network_name + '.pck')))
+    iflogger.info('Saving difference graph as {out}'.format(out=op.abspath(network_name + '.pck')))
     diff_ntwk = fix_keys_for_gexf(diff_ntwk)
     
     nx.write_gexf(diff_ntwk, op.abspath(network_name + '.gexf'))
-    iflogger.info('Saving average network as {out}'.format(out=op.abspath(network_name + '.gexf')))
+    iflogger.info('Saving difference graph as {out}'.format(out=op.abspath(network_name + '.gexf')))
     return network_name, matlab_network_list
 
 
@@ -612,7 +637,7 @@ class AverageNetworks(BaseInterface):
 class DifferenceGraphInputSpec(BaseInterfaceInputSpec):
     in_file1 = File(exists=True, mandatory=True, desc='Network 1 for the equation: difference graph = in_file2 - in_file1')
     in_file2 = File(exists=True, mandatory=True, desc='Network 2 for the equation: difference graph = in_file2 - in_file1')
-    keep_only_common_edges = traits.Bool(True, usedefault=True, desc='Only the edges common to both networks are kept in the difference graph. If False, only uncommon edges are kept.')
+    keep_only_common_edges = traits.Bool(desc='Only the edges common to both networks are kept in the difference graph. If False, only uncommon edges are kept.')
     resolution_network_file = File(exists=True, desc='A network which defines where to place the nodes for the difference graph' \
                                 'If this is not provided, the interface will take node positions from in_file2.')
     out_gpickled_difference = File(desc='Difference network saved as a NetworkX .pck')
@@ -626,8 +651,10 @@ class DifferenceGraphOutputSpec(TraitedSpec):
 class DifferenceGraph(BaseInterface):
     """
     Calculates and outputs the difference network given two input NetworkX gpickle files
+    By default, only edges common to both graphs are kept.
     
     * difference graph = in_file2 - in_file1
+    
 
 
     Example
@@ -635,7 +662,8 @@ class DifferenceGraph(BaseInterface):
 
     >>> import nipype.interfaces.cmtk as cmtk
     >>> diff = cmtk.DifferenceGraph()
-    >>> diff.inputs.in_files = ['subj1.pck', 'subj2.pck']
+    >>> diff.inputs.in_file1 = 'subj1.pck'
+    >>> diff.inputs.in_file1 = 'subj2.pck'
     >>> diff.run()                 # doctest: +SKIP
 
     """
@@ -649,14 +677,24 @@ class DifferenceGraph(BaseInterface):
             ntwk_res_file = self.inputs.in_file2
 
         global matlab_network_list
-        network_name, matlab_network_list = difference_graph(self.inputs.in_file1, self.inputs.in_file2, ntwk_res_file, self.inputs.keep_only_common_edges)
+        if isdefined(self.inputs.keep_only_common_edges):
+            network_name, matlab_network_list = difference_graph(self.inputs.in_file1, self.inputs.in_file2, ntwk_res_file, self.inputs.keep_only_common_edges)
+        else:
+            network_name, matlab_network_list = difference_graph(self.inputs.in_file1, self.inputs.in_file2, ntwk_res_file)
         return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         _, name1, _  = split_filename(self.inputs.in_file1)
         _, name2, _  = split_filename(self.inputs.in_file2)
+
         name = str(name2) + '-' + str(name1)
+
+        if isdefined(self.inputs.keep_only_common_edges):
+            if self.inputs.keep_only_common_edges == True:
+                name = name + '_common_edges'
+            elif self.inputs.keep_only_common_edges == False:
+                name = name + '_uncommon'        
         
         if not isdefined(self.inputs.out_gpickled_difference):
             outputs["gpickled_difference_graph"] = op.abspath(self._gen_outfilename('difference_' + name, 'pck'))
