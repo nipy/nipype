@@ -133,7 +133,7 @@ class BET(FSLCommand):
         if not isdefined(out_file) and isdefined(self.inputs.in_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                        suffix='_brain')
-        return out_file
+        return os.path.abspath(out_file)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -474,6 +474,7 @@ class FLIRT(FSLCommand):
         if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                  suffix='_flirt')
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         outputs['out_matrix_file'] = self.inputs.out_matrix_file
         # Generate an out_matrix file if one is not provided
         if not isdefined(outputs['out_matrix_file']) and \
@@ -904,7 +905,7 @@ class ApplyWarp(FSLCommand):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                              suffix='_warp')
         else:
-            outputs['out_file'] = self.inputs.out_file
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -963,7 +964,7 @@ class SliceTimer(FSLCommand):
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                       suffix='_st')
-        outputs['slice_time_corrected_file'] = out_file
+        outputs['slice_time_corrected_file'] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1041,7 +1042,7 @@ class SUSAN(FSLCommand):
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                       suffix='_smooth')
-        outputs['smoothed_file'] = out_file
+        outputs['smoothed_file'] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1143,7 +1144,7 @@ class FUGUE(FSLCommand):
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                       suffix='_unwarped')
-        outputs['unwarped_file'] = out_file
+        outputs['unwarped_file'] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1222,7 +1223,7 @@ class PRELUDE(FSLCommand):
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                       suffix='_unwrapped')
-        outputs['unwrapped_phase_file'] = out_file
+        outputs['unwrapped_phase_file'] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):

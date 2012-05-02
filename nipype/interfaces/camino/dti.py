@@ -209,7 +209,6 @@ class DTLUTGen(StdOutCommandLine):
     >>> dtl = cmon.DTLUTGen()
     >>> dtl.inputs.snr = 16
     >>> dtl.inputs.scheme_file = 'A.scheme'
-    >>> dtl.inputs.in_file = 'tensor_fitted_data.Bfloat'
     >>> dtl.run()                  # doctest: +SKIP
     """
     _cmd = 'dtlutgen'

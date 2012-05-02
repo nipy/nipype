@@ -1,7 +1,10 @@
 Since last release
 ==================
 
-* ENH: New interfaces: MySQLSink, nipy.Similarity, WatershedBEM
+* API: display variable no longer encoded as inputs in commandline interfaces
+
+* ENH: New interfaces: MySQLSink, nipy.Similarity, WatershedBEM,
+       NetworkBasedStatistic
 
 * FIX: Afni outputs should inherit from TraitedSpec
 

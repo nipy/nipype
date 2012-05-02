@@ -146,7 +146,7 @@ class BuildTemplate(ANTSCommand):
                                    self.inputs.out_prefix)
         outputs['subject_outfiles'] = []
         for filename in self.inputs.in_files:
-            pth, base, ext = split_filename(filename)
+            _, base, _ = split_filename(filename)
             temp = glob(os.path.realpath('%s%s*' % (self.inputs.out_prefix,
                                                     base)))
             for file_ in temp:
@@ -222,7 +222,7 @@ class WarpImageMultiTransform(ANTSCommand):
                     isdefined(self.inputs.invert_affine):
                     affine_counter += 1
                     if affine_counter in self.inputs.invert_affine:
-                        series += ['-i'],
+                        series += ['-i']
                 series += [transformation]
             return ' '.join(series)
         return super(WarpImageMultiTransform, self)._format_arg(opt, spec, val)
