@@ -253,7 +253,7 @@ class SurfaceSmooth(FSCommand):
 
     .. seealso::
 
-        MRIsSmooth() Interface
+        SmoothTessellation() Interface
             For smoothing a tessellated surface (e.g. in gifti or .stl)
 
     Examples

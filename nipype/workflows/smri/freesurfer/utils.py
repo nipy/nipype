@@ -300,6 +300,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
       mri_convert : converts aseg.mgz to aseg.nii
       tessellate : tessellates regions in aseg.mgz
       surfconvert : converts regions to stereolithographic (.stl) format
+      smoother: smooths the tessellated regions
 
     """
 
