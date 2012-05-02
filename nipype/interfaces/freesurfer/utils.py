@@ -878,7 +878,7 @@ class MRIMarchingCubes(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['surface'] = os.path.abspath(self._gen_outfilename())
+        outputs['surface'] = self._gen_outfilename()
         return outputs
 
     def _gen_filename(self, name):
@@ -889,10 +889,10 @@ class MRIMarchingCubes(FSCommand):
 
     def _gen_outfilename(self):
         if isdefined(self.inputs.out_file):
-            return self.inputs.out_file
+            return os.path.abspath(self.inputs.out_file)
         else:
             _, name, ext = split_filename(self.inputs.in_file)
-            return name + ext + '_' + str(self.inputs.label_value)
+            return os.path.abspath(name + ext + '_' + str(self.inputs.label_value))
 
 class SmoothTessellationInputSpec(FSTraitedSpec):
     """
@@ -946,7 +946,7 @@ class SmoothTessellation(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['surface'] = os.path.abspath(self._gen_outfilename())
+        outputs['surface'] = self._gen_outfilename()
         return outputs
 
     def _gen_filename(self, name):
@@ -957,8 +957,8 @@ class SmoothTessellation(FSCommand):
 
     def _gen_outfilename(self):
         if isdefined(self.inputs.out_file):
-            return self.inputs.out_file
+            return os.path.abspath(self.inputs.out_file)
         else:
             _, name, ext = split_filename(self.inputs.in_file)
-            return name + '_smoothed' + ext
+            return os.path.abspath(name + '_smoothed' + ext)
 
