@@ -3,6 +3,9 @@
 
 """Top-level namespace for ants."""
 
-from .normalize import (BuildTemplate, WarpImageMultiTransform,
-                        WarpTimeSeriesImageMultiTransform, GenWarpFields)
-from .utils import ApplyTransform, N4BiasFieldCorrection
+from .coregister import GenWarpFields
+from .normalize import BuildTemplate
+from .preprocess import N4BiasFieldCorrection
+from .segment import Atropos
+from .utils import (ApplyTransforms, WarpImageMultiTransform,
+                    WarpTimeSeriesImageMultiTransform)
