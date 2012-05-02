@@ -1,4 +1,13 @@
-# Local imports
+"""The ants module provides basic functions for interfacing with ants functions.
+
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+   >>> os.chdir(datadir)
+
+"""
+
 from ..base import (TraitedSpec, File, traits, InputMultiPath, OutputMultiPath,
                     isdefined)
 from ...utils.filemanip import split_filename
@@ -11,7 +20,7 @@ class AtroposInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, 4, argstr='--image-dimensionality %d', usedefault=True,
                             desc='image dimension (2, 3, or 4)')
     intensity_images = InputMultiPath(File(exists=True), argstr="--intensity-image %s...", madatory=True)
-    mask_image = File(exists=True, argstr='--mask-image %s')
+    mask_image = File(exists=True, argstr='--mask-image %s', mandatory=True)
     initialization = traits.Enum('Random', 'Otsu', 'KMeans',
                                  'PriorProbabilityImages', 'PriorLabelImage',
                                  argstr="%s",
@@ -42,6 +51,39 @@ class AtroposOutputSpec(TraitedSpec):
 
 
 class Atropos(ANTSCommand):
+    """
+    A finite mixture modeling (FMM) segmentation approach with possibilities for 
+    specifying prior constraints. These prior constraints include the specification 
+    of a prior label image, prior probability images (one for each class), and/or an 
+    MRF prior to enforce spatial smoothing of the labels. Similar algorithms include 
+    FAST and SPM. 
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.ants import Atropos
+    >>> at = Atropos()
+    >>> at.inputs.dimension = 3
+    >>> at.inputs.intensity_images = 'structural.nii'
+    >>> at.inputs.mask_image = 'mask.nii'
+    >>> at.inputs.initialization = 'PriorProbabilityImages'
+    >>> at.inputs.prior_probability_images = ['rc1s1.nii', 'rc1s2.nii']
+    >>> at.inputs.number_of_tissue_classes = 2
+    >>> at.inputs.prior_weighting = 0.8
+    >>> at.inputs.prior_probability_threshold = 0.0000001
+    >>> at.inputs.likelihood_model = 'Gaussian'
+    >>> at.inputs.mrf_smoothing_factor = 0.2
+    >>> at.inputs.mrf_radius = [1, 1, 1]
+    >>> at.inputs.icm_use_synchronous_update = True
+    >>> at.inputs.maximum_number_of_icm_terations = 1
+    >>> at.inputs.n_iterations = 5
+    >>> at.inputs.convergence_threshold = 0.000001
+    >>> at.inputs.posterior_formulation = 'Socrates'
+    >>> at.inputs.use_mixture_model_proportions = True
+    >>> at.inputs.save_posteriors = True
+    >>> at.cmdline
+    'Atropos --image-dimensionality 3 --icm [1,1] --initialization PriorProbabilityImages[2,priors/priorProbImages%02d.nii,0.8,1e-07] --intensity-image structural.nii --likelihood-model Gaussian --mask-image mask.nii --mrf [0.2,1x1x1] --convergence [5,1e-06] --output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] --posterior-formulation Socrates[1]'
+    """
     input_spec = AtroposInputSpec
     output_spec = AtroposOutputSpec
     _cmd = 'Atropos'
