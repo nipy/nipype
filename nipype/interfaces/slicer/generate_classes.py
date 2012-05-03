@@ -18,7 +18,8 @@ def generate_all_classes(modules_list = [], launcher=[]):
     init_imports = ""
     f = open("cli_modules.py", 'w')
     imports = """from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined, InputMultiPath, OutputMultiPath
-import os\n\n\n"""
+import os
+from nipype.interfaces.slicer.base import SlicerCommandLine\n\n\n"""
     f.write(imports)
     class_defs = []
     for module in modules_list:
@@ -165,36 +166,13 @@ def generate_class(module,launcher):
     input_spec_code += "\n\n"
     output_spec_code += "\n\n"
 
-    template = """class %name%(CommandLine):
+    template = """class %name%(SlicerCommandLine):
     %class_str%
 
     input_spec = %name%InputSpec
     output_spec = %name%OutputSpec
     _cmd = "%launcher% %name% "
-    %output_filenames_code%
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(%name%, self)._format_arg(name, spec, value)\n"""
+    %output_filenames_code%\n"""
 
 
     main_class = template.replace('%class_str%', class_string).replace("%name%", module).replace("%output_filenames_code%", output_filenames_code).replace("%launcher%"," ".join(launcher))

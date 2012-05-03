@@ -1,5 +1,6 @@
 from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined, InputMultiPath, OutputMultiPath
 import os
+from nipype.interfaces.slicer.base import SlicerCommandLine
 
 
 class AddInputSpec(CommandLineInputSpec):
@@ -13,12 +14,12 @@ class AddOutputSpec(TraitedSpec):
     outputVolume = File(position="2", desc="Volume1 + Volume2", exists=True)
 
 
-class Add(CommandLine):
+class Add(SlicerCommandLine):
     """title: Add Images
 
 category: Filtering.Arithmetic
 
-description:
+description: 
 Adds two images. Although all image types are supported on input, only signed types are produced. The two images do not have to have the same dimensions.
 
 
@@ -28,7 +29,7 @@ documentation-url: http://slicer.org/slicerWiki/index.php/Documentation/4.0/Modu
 
 contributor: Bill Lorensen
 
-acknowledgements:
+acknowledgements: 
 This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
 
 
@@ -38,29 +39,6 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
     output_spec = AddOutputSpec
     _cmd = " Add "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(Add, self)._format_arg(name, spec, value)
 
 
 
@@ -83,7 +61,7 @@ class AffineRegistrationOutputSpec(TraitedSpec):
     resampledmovingfilename = File(desc="Resampled moving image to the fixed image coordinate frame. Optional (specify an output transform or an output volume or both).", exists=True)
 
 
-class AffineRegistration(CommandLine):
+class AffineRegistration(SlicerCommandLine):
     """title: Fast Affine registration
 
 category: Legacy.Registration
@@ -100,7 +78,7 @@ documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.0
 
 contributor: Daniel Blezek
 
-acknowledgements:
+acknowledgements: 
 This module was developed by Daniel Blezek while at GE Research with contributions from Jim Miller.
 
 This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
@@ -112,29 +90,6 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
     output_spec = AffineRegistrationOutputSpec
     _cmd = " AffineRegistration "
     _outputs_filenames = {'resampledmovingfilename':'resampledmovingfilename.nii','outputtransform':'outputtransform.txt'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(AffineRegistration, self)._format_arg(name, spec, value)
 
 
 
@@ -160,7 +115,7 @@ class BSplineDeformableRegistrationOutputSpec(TraitedSpec):
     resampledmovingfilename = File(desc="Resampled moving image to fixed image coordinate frame. Optional (specify an output transform or an output volume or both).", exists=True)
 
 
-class BSplineDeformableRegistration(CommandLine):
+class BSplineDeformableRegistration(SlicerCommandLine):
     """title: Fast Nonrigid BSpline registration
 
 category: Legacy.Registration
@@ -173,7 +128,7 @@ documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.0
 
 contributor: Bill Lorensen
 
-acknowledgements:
+acknowledgements: 
 This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
 
 
@@ -183,29 +138,6 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
     output_spec = BSplineDeformableRegistrationOutputSpec
     _cmd = " BSplineDeformableRegistration "
     _outputs_filenames = {'resampledmovingfilename':'resampledmovingfilename.nii','outputtransform':'outputtransform.txt','outputwarp':'outputwarp.nrrd'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(BSplineDeformableRegistration, self)._format_arg(name, spec, value)
 
 
 
@@ -219,12 +151,12 @@ class CastOutputSpec(TraitedSpec):
     OutputVolume = File(position="1", desc="Output volume, cast to the new type.", exists=True)
 
 
-class Cast(CommandLine):
+class Cast(SlicerCommandLine):
     """title: Cast Image
 
 category: Filtering.Arithmetic
 
-description:
+description: 
 Cast a volume to a given data type.
 Use at your own risk when casting an input volume into a lower precision type!
 Allows casting to the same type as the input volume.
@@ -235,7 +167,7 @@ documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.0
 
 contributor: Nicole Aucoin, BWH (Ron Kikinis, BWH)
 
-acknowledgements:
+acknowledgements: 
 This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
 
 
@@ -245,29 +177,6 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
     output_spec = CastOutputSpec
     _cmd = " Cast "
     _outputs_filenames = {'OutputVolume':'OutputVolume.nii'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(Cast, self)._format_arg(name, spec, value)
 
 
 
@@ -282,18 +191,18 @@ class CheckerBoardOutputSpec(TraitedSpec):
     outputVolume = File(position="2", desc="Output filtered", exists=True)
 
 
-class CheckerBoard(CommandLine):
-    """title:
+class CheckerBoard(SlicerCommandLine):
+    """title: 
   CheckerBoard Filter
+  
 
-
-category:
+category: 
   Filtering
+  
 
-
-description:
+description: 
 Create a checkerboard volume of two volumes. The output volume will show the two inputs alternating according to the user supplied checkerPattern. This filter is often used to compare the results of image registration. Note that the second input is resampled to the same origin, spacing and direction before it is composed with the first input. The scalar type of the output volume will be the same as the input image scalar type.
-
+  
 
 version: 0.1.0.$Revision: 18864 $(alpha)
 
@@ -301,7 +210,7 @@ documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.0
 
 contributor: Bill Lorensen
 
-acknowledgements:
+acknowledgements: 
 This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
 
 
@@ -311,29 +220,6 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
     output_spec = CheckerBoardOutputSpec
     _cmd = " CheckerBoard "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(CheckerBoard, self)._format_arg(name, spec, value)
 
 
 
@@ -354,12 +240,12 @@ class ComputeSUVBodyWeightOutputSpec(TraitedSpec):
     csvFile = File(desc="A file holding the output SUV values in comma separated lines, one per label. Optional.", exists=True)
 
 
-class ComputeSUVBodyWeight(CommandLine):
+class ComputeSUVBodyWeight(SlicerCommandLine):
     """title: SUVComputation
 
 category: Quantification
 
-description:
+description: 
 Computes the standardized uptake value based on body weight. Takes an input PET image in DICOM and NRRD format (DICOM header must contain Radiopharmaceutical parameters). Produces a CSV file that contains patientID, studyDate, dose, labelID, suvmin, suvmax, suvmean, labelName for each volume of interest. It also displays some of the information as output strings in the GUI, the CSV file is optional in that case. The CSV file is appended to on each execution of the CLI.
 
 version: 0.1.0.$Revision: 8595 $(alpha)
@@ -368,7 +254,7 @@ documentation-url: http://www.slicer.org/slicerWiki/index.php/Documentation/4.0/
 
 contributor: Wendy Plesniak, BWH (Nicole Aucoin, BWH, Ron Kikinis, BWH)
 
-acknowledgements:
+acknowledgements: 
 This work is funded by the Harvard Catalyst, and the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
 
 
@@ -378,29 +264,6 @@ This work is funded by the Harvard Catalyst, and the National Alliance for Medic
     output_spec = ComputeSUVBodyWeightOutputSpec
     _cmd = " ComputeSUVBodyWeight "
     _outputs_filenames = {'csvFile':'csvFile.csv'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(ComputeSUVBodyWeight, self)._format_arg(name, spec, value)
 
 
 
@@ -420,18 +283,18 @@ class ConfidenceConnectedOutputSpec(TraitedSpec):
     outputVolume = File(position="1", desc="Output filtered", exists=True)
 
 
-class ConfidenceConnected(CommandLine):
-    """title:
+class ConfidenceConnected(SlicerCommandLine):
+    """title: 
   Simple region growing
+  
 
-
-category:
+category: 
   Segmentation
+  
 
-
-description:
+description: 
   A simple region growing segmentation algorithm based on intensity statistics. To create a list of fiducials (Seeds) for this algorithm, click on the tool bar icon of an arrow pointing to a starburst fiducial to enter the 'place a new object mode' and then use the fiducials module. This module uses the Slicer Command Line Interface (CLI) and the ITK filters CurvatureFlowImageFilter and ConfidenceConnectedImageFilter.
-
+  
 
 version: 0.1.0.$Revision: 18864 $(alpha)
 
@@ -448,29 +311,6 @@ acknowledgements: This command module was derived from Insight/Examples (copyrig
     _cmd = " ConfidenceConnected "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(ConfidenceConnected, self)._format_arg(name, spec, value)
-
 
 
 class CurvatureAnisotropicDiffusionInputSpec(CommandLineInputSpec):
@@ -485,15 +325,15 @@ class CurvatureAnisotropicDiffusionOutputSpec(TraitedSpec):
     outputVolume = File(position="1", desc="Output filtered", exists=True)
 
 
-class CurvatureAnisotropicDiffusion(CommandLine):
+class CurvatureAnisotropicDiffusion(SlicerCommandLine):
     """title: Curvature Anisotropic Diffusion
 
 category: Filtering.Denoising
 
-description:
+description: 
 Performs anisotropic diffusion on an image using a modified curvature diffusion equation (MCDE).
 
-MCDE does not exhibit the edge enhancing properties of classic anisotropic diffusion, which can under certain conditions undergo a 'negative' diffusion, which enhances the contrast of edges.  Equations of the form of MCDE always undergo positive diffusion, with the conductance term only varying the strength of that diffusion.
+MCDE does not exhibit the edge enhancing properties of classic anisotropic diffusion, which can under certain conditions undergo a 'negative' diffusion, which enhances the contrast of edges.  Equations of the form of MCDE always undergo positive diffusion, with the conductance term only varying the strength of that diffusion. 
 
  Qualitatively, MCDE compares well with other non-linear diffusion techniques.  It is less sensitive to contrast than classic Perona-Malik style diffusion, and preserves finer detailed structures in images.  There is a potential speed trade-off for using this function in place of Gradient Anisotropic Diffusion.  Each iteration of the solution takes roughly twice as long.  Fewer iterations, however, may be required to reach an acceptable solution.
 
@@ -513,29 +353,6 @@ acknowledgements: This command module was derived from Insight/Examples (copyrig
     _cmd = " CurvatureAnisotropicDiffusion "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(CurvatureAnisotropicDiffusion, self)._format_arg(name, spec, value)
-
 
 
 class DicomToNrrdConverterInputSpec(CommandLineInputSpec):
@@ -552,28 +369,28 @@ class DicomToNrrdConverterOutputSpec(TraitedSpec):
     outputDirectory = Directory(desc="Directory holding the output NRRD format", exists=True)
 
 
-class DicomToNrrdConverter(CommandLine):
-    """title:
-  Dicom to Nrrd Converter
+class DicomToNrrdConverter(SlicerCommandLine):
+    """title: 
+  Dicom to Nrrd Converter 
+  
 
-
-category:
+category: 
   Converters
+  
 
-
-description:
+description: 
 Converts diffusion weighted MR images in dicom series into Nrrd format for analysis in Slicer. This program has been tested on only a limited subset of DTI dicom formats available from Siemens, GE, and Phillips scanners. Work in progress to support dicom multi-frame data. The program parses dicom header to extract necessary information about measurement frame, diffusion weighting directions, b-values, etc, and write out a nrrd image. For non-diffusion weighted dicom images, it loads in an entire dicom series and writes out a single dicom volume in a .nhdr/.raw pair.
-
+  
 
 version: 0.2.0.$Revision: 916 $(alpha)
 
 documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.0/Modules/DicomToNrrdConverter
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt 
 
 contributor: Xiaodong Tao
 
-acknowledgements:
+acknowledgements: 
 This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.  Additional support for DTI data produced on Philips scanners was contributed by Vincent Magnotta and Hans Johnson at the University of Iowa.
 
 
@@ -583,29 +400,6 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
     output_spec = DicomToNrrdConverterOutputSpec
     _cmd = " DicomToNrrdConverter "
     _outputs_filenames = {'outputDirectory':'outputDirectory'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(DicomToNrrdConverter, self)._format_arg(name, spec, value)
 
 
 
@@ -642,12 +436,12 @@ class ResampleDTIOutputSpec(TraitedSpec):
     outputVolume = File(position="1", desc="Resampled Volume", exists=True)
 
 
-class ResampleDTI(CommandLine):
+class ResampleDTI(SlicerCommandLine):
     """title: Resample DTI Volume
 
 category: Diffusion.Utilities
 
-description:
+description: 
 Resampling an image is a very important task in image analysis. It is especially important in the frame of image registration. This module implements DT image resampling through the use of itk Transforms. The resampling is controlled by the Output Spacing. "Resampling" is performed in space coordinates, not pixel/grid coordinates. It is quite important to ensure that image spacing is properly set on the images involved. The interpolator is required since the mapping from one space to the other will often require evaluation of the intensity of the image at non-grid positions.
 
 
@@ -657,7 +451,7 @@ documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.0
 
 contributor: Francois Budin
 
-acknowledgements:
+acknowledgements: 
 This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149. Information on the National Centers for Biomedical Computing can be obtained from http://nihroadmap.nih.gov/bioinformatics
 
 
@@ -667,29 +461,6 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
     output_spec = ResampleDTIOutputSpec
     _cmd = " ResampleDTI "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(ResampleDTI, self)._format_arg(name, spec, value)
 
 
 
@@ -711,16 +482,16 @@ class dwiNoiseFilterOutputSpec(TraitedSpec):
     outputVolume = File(position="1", desc="Output DWI volume.", exists=True)
 
 
-class dwiNoiseFilter(CommandLine):
+class dwiNoiseFilter(SlicerCommandLine):
     """title: Rician LMMSE Image Filter
 
 category: Diffusion.Denoising
 
-description:
+description: 
 This module reduces noise (or unwanted detail) on a set of diffusion weighted images. For this, it filters the image in the mean squared error sense using a Rician noise model. Images corresponding to each gradient direction, including baseline, are processed individually. The noise parameter is automatically estimated (noise estimation improved but slower).
 Note that this is a general purpose filter for MRi images. The module jointLMMSE has been specifically designed for DWI volumes and shows a better performance, so its use is recommended instead.
 A complete description of the algorithm in this module can be found in:
-S. Aja-Fernandez, M. Niethammer, M. Kubicki, M. Shenton, and C.-F. Westin. Restoration of DWI data using a Rician LMMSE estimator. IEEE Transactions on Medical Imaging, 27(10): pp. 1389-1403, Oct. 2008.
+S. Aja-Fernandez, M. Niethammer, M. Kubicki, M. Shenton, and C.-F. Westin. Restoration of DWI data using a Rician LMMSE estimator. IEEE Transactions on Medical Imaging, 27(10): pp. 1389-1403, Oct. 2008. 
 
 
 version: 0.1.1.$Revision: 1 $(alpha)
@@ -735,29 +506,6 @@ contributor: Antonio Tristan Vega, Santiago Aja Fernandez and Marc Niethammer. P
     output_spec = dwiNoiseFilterOutputSpec
     _cmd = " dwiNoiseFilter "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(dwiNoiseFilter, self)._format_arg(name, spec, value)
 
 
 
@@ -775,25 +523,25 @@ class dwiUNLMOutputSpec(TraitedSpec):
     outputVolume = File(position="1", desc="Output DWI volume.", exists=True)
 
 
-class dwiUNLM(CommandLine):
+class dwiUNLM(SlicerCommandLine):
     """title: Unbiased Non Local Means filter for DWI
 
 category: Legacy.Diffusion.Denoising
 
-description:
+description: 
 This module reduces noise (or unwanted detail) on a set of diffusion weighted images. For this, it filters the images using a Unbiased Non Local Means for Rician noise algorithm. It exploits not only the spatial redundancy, but the redundancy in similar gradient directions as well; it takes into account the N closest gradient directions to the direction being processed (a maximum of 5 gradient directions is allowed to keep a reasonable computational load, since we do not use neither similarity maps nor block-wise implementation).
 The noise parameter is automatically estimated in the same way as in the jointLMMSE module.
 A complete description of the algorithm may be found in:
 Antonio Tristan-Vega and Santiago Aja-Fernandez, DWI filtering using joint information for DTI and HARDI, Medical Image Analysis, Volume 14, Issue 2, Pages 205-218. 2010.
-Please, note that the execution of this filter is extremely slow, son only very conservative parameters (block size and search size as small as possible) should be used. Even so, its execution may take several hours. The advantage of this filter over joint LMMSE is its better preservation of edges and fine structures.
-
+Please, note that the execution of this filter is extremely slow, son only very conservative parameters (block size and search size as small as possible) should be used. Even so, its execution may take several hours. The advantage of this filter over joint LMMSE is its better preservation of edges and fine structures. 
+  
 
 version: 0.0.1.$Revision: 1 $(alpha)
 
 documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.0/Modules/UnbiasedNonLocalMeansFilterForDWI
 
 contributor: Antonio Tristan Vega, Santiago Aja Fernandez. University of Valladolid (SPAIN). Partially founded by grant number TEC2007-67073/TCM from the Comision Interministerial de Ciencia y Tecnologia (Spain).
-
+  
 
 """
 
@@ -801,29 +549,6 @@ contributor: Antonio Tristan Vega, Santiago Aja Fernandez. University of Vallado
     output_spec = dwiUNLMOutputSpec
     _cmd = " dwiUNLM "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(dwiUNLM, self)._format_arg(name, spec, value)
 
 
 
@@ -839,24 +564,24 @@ class jointLMMSEOutputSpec(TraitedSpec):
     outputVolume = File(position="1", desc="Output DWI volume.", exists=True)
 
 
-class jointLMMSE(CommandLine):
+class jointLMMSE(SlicerCommandLine):
     """title: Joint Rician LMMSE Image Filter
 
 category: Diffusion.Denoising
 
-description:
+description: 
 This module reduces Rician noise (or unwanted detail) on a set of diffusion weighted images. For this, it filters the image in the mean squared error sense using a Rician noise model. The N closest gradient directions to the direction being processed are filtered together to improve the results: the noise-free signal is seen as an n-diemensional vector which has to be estimated with the LMMSE method from a set of corrupted measurements. To that end, the covariance matrix of the noise-free vector and the cross covariance between this signal and the noise have to be estimated, which is done taking into account the image formation process.
 The noise parameter is automatically estimated from a rough segmentation of the background of the image. In this area the signal is simply 0, so that Rician statistics reduce to Rayleigh and the noise power can be easily estimated from the mode of the histogram.
 A complete description of the algorithm may be found in:
-Antonio Tristan-Vega and Santiago Aja-Fernandez, DWI filtering using joint information for DTI and HARDI, Medical Image Analysis, Volume 14, Issue 2, Pages 205-218. 2010.
-
+Antonio Tristan-Vega and Santiago Aja-Fernandez, DWI filtering using joint information for DTI and HARDI, Medical Image Analysis, Volume 14, Issue 2, Pages 205-218. 2010. 
+  
 
 version: 0.1.1.$Revision: 1 $(alpha)
 
 documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.0/Modules/JointRicianLMMSEImageFilter
 
 contributor: Antonio Tristan Vega, Santiago Aja Fernandez. University of Valladolid (SPAIN). Partially founded by grant number TEC2007-67073/TCM from the Comision Interministerial de Ciencia y Tecnologia (Spain).
-
+  
 
 """
 
@@ -864,29 +589,6 @@ contributor: Antonio Tristan Vega, Santiago Aja Fernandez. University of Vallado
     output_spec = jointLMMSEOutputSpec
     _cmd = " jointLMMSE "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(jointLMMSE, self)._format_arg(name, spec, value)
 
 
 
@@ -904,20 +606,20 @@ class DiffusionTensorEstimationOutputSpec(TraitedSpec):
     outputBaseline = File(position="2", desc="Estimated baseline volume", exists=True)
 
 
-class DiffusionTensorEstimation(CommandLine):
-    """title:
+class DiffusionTensorEstimation(SlicerCommandLine):
+    """title: 
   Diffusion Tensor Estimation
+  
 
-
-category:
+category: 
   Diffusion.Utilities
+  
 
-
-description:
-  Performs a tensor model estimation from diffusion weighted images.
+description: 
+  Performs a tensor model estimation from diffusion weighted images. 
 
 There are three estimation methods available: least squares, weigthed least squares and non-linear estimation. The first method is the traditional method for tensor estimation and the fastest one. Weighted least squares takes into account the noise characteristics of the MRI images to weight the DWI samples used in the estimation based on its intensity magnitude. The last method is the more complex.
-
+  
 
 version: 0.1.0.$Revision: 1892 $(alpha)
 
@@ -927,7 +629,7 @@ license: slicer3
 
 contributor: Raul San Jose
 
-acknowledgements: This command module is based on the estimation functionality provided by the Teem library. This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+acknowledgements: This command module is based on the estimation functionality provided by the Teem library. This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149. 
 
 """
 
@@ -935,29 +637,6 @@ acknowledgements: This command module is based on the estimation functionality p
     output_spec = DiffusionTensorEstimationOutputSpec
     _cmd = " DiffusionTensorEstimation "
     _outputs_filenames = {'outputTensor':'outputTensor.nii','outputBaseline':'outputBaseline.nii'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(DiffusionTensorEstimation, self)._format_arg(name, spec, value)
 
 
 
@@ -971,18 +650,18 @@ class DiffusionTensorMathematicsOutputSpec(TraitedSpec):
     outputScalar = File(position="2", desc="Scalar volume derived from tensor", exists=True)
 
 
-class DiffusionTensorMathematics(CommandLine):
-    """title:
+class DiffusionTensorMathematics(SlicerCommandLine):
+    """title: 
   Diffusion Tensor Scalar Measurements
+  
 
-
-category:
+category: 
   Diffusion.Utilities
+  
 
-
-description:
+description: 
   Compute a set of different scalar measurements from a tensor field, specially oriented for Diffusion Tensors where some rotationally invariant measurements, like Fractional Anisotropy, are highly used to describe the anistropic behaviour of the tensor.
-
+  
 
 version: 0.1.0.$Revision: 1892 $(alpha)
 
@@ -999,29 +678,6 @@ acknowledgements: LMI
     _cmd = " DiffusionTensorMathematics "
     _outputs_filenames = {'outputScalar':'outputScalar.nii'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(DiffusionTensorMathematics, self)._format_arg(name, spec, value)
-
 
 
 class DiffusionTensorTestInputSpec(CommandLineInputSpec):
@@ -1033,18 +689,18 @@ class DiffusionTensorTestOutputSpec(TraitedSpec):
     outputVolume = File(position="1", desc="Filtered tensor volume", exists=True)
 
 
-class DiffusionTensorTest(CommandLine):
-    """title:
+class DiffusionTensorTest(SlicerCommandLine):
+    """title: 
   Simple IO Test
+  
 
-
-category:
+category: 
   Legacy.Work in Progress.Diffusion Tensor.Test
+  
 
-
-description:
+description: 
   Simple test of tensor IO
-
+  
 
 version: 0.1.0.$Revision: 18864 $(alpha)
 
@@ -1056,29 +712,6 @@ contributor: Bill Lorensen
     output_spec = DiffusionTensorTestOutputSpec
     _cmd = " DiffusionTensorTest "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(DiffusionTensorTest, self)._format_arg(name, spec, value)
 
 
 
@@ -1095,14 +728,14 @@ class DiffusionWeightedMaskingOutputSpec(TraitedSpec):
     thresholdMask = File(position="3", desc="Otsu Threshold Mask", exists=True)
 
 
-class DiffusionWeightedMasking(CommandLine):
-    """title:
+class DiffusionWeightedMasking(SlicerCommandLine):
+    """title: 
   Mask from Diffusion Weighted Images
+  
 
-
-category:
+category: 
   Diffusion.Utilities
-
+  
 
 description: <p>Performs a mask calculation from a diffusion weighted (DW) image.</p><p>Starting from a dw image, this module computes the baseline image averaging all the images without diffusion weighting and then applies the otsu segmentation algorithm in order to produce a mask. this mask can then be used when estimating the diffusion tensor (dt) image, not to estimate tensors all over the volume.</p>
 
@@ -1120,29 +753,6 @@ contributor: Demian Wassermann
     output_spec = DiffusionWeightedMaskingOutputSpec
     _cmd = " DiffusionWeightedMasking "
     _outputs_filenames = {'outputBaseline':'outputBaseline.nii','thresholdMask':'thresholdMask.nii'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(DiffusionWeightedMasking, self)._format_arg(name, spec, value)
 
 
 
@@ -1220,7 +830,7 @@ class BRAINSFitOutputSpec(TraitedSpec):
     outputTransform = File(desc="(optional) Filename to which save the (optional) estimated transform. NOTE: You must select either the outputTransform or the outputVolume option.", exists=True)
 
 
-class BRAINSFit(CommandLine):
+class BRAINSFit(SlicerCommandLine):
     """title: General Registration (BRAINS)
 
 category: Registration
@@ -1231,7 +841,7 @@ version: 3.0.0
 
 documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:BRAINSFit
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt 
 
 contributor: Hans J. Johnson, hans-johnson -at- uiowa.edu, http://wwww.psychiatry.uiowa.edu
 
@@ -1243,29 +853,6 @@ acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); Gregory Harris(1), Vinc
     output_spec = BRAINSFitOutputSpec
     _cmd = " BRAINSFit "
     _outputs_filenames = {'outputVolume':'outputVolume.nii','bsplineTransform':'bsplineTransform.mat','outputTransform':'outputTransform.mat','outputFixedVolumeROI':'outputFixedVolumeROI.nii','strippedOutputTransform':'strippedOutputTransform.mat','outputMovingVolumeROI':'outputMovingVolumeROI.nii','linearTransform':'linearTransform.mat'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(BRAINSFit, self)._format_arg(name, spec, value)
 
 
 
@@ -1318,25 +905,25 @@ class BRAINSDemonWarpOutputSpec(TraitedSpec):
     outputCheckerboardVolume = File(desc="Genete a checkerboard image volume between the fixedVolume and the deformed movingVolume.", exists=True)
 
 
-class BRAINSDemonWarp(CommandLine):
+class BRAINSDemonWarp(SlicerCommandLine):
     """title: Demon Registration (BRAINS)
 
 category: Registration
 
-description:
+description: 
     This program finds a deformation field to warp a moving image onto a fixed image.  The images must be of the same signal kind, and contain an image of the same kind of object.  This program uses the Thirion Demons warp software in ITK, the Insight Toolkit.  Additional information is available at: http://www.nitrc.org/projects/brainsdemonwarp.
 
-
+  
 
 version: 3.0.0
 
 documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:BRAINSDemonWarp
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt 
 
 contributor: This tool was developed by Hans J. Johnson and Greg Harris.
 
-acknowledgements: The development of this tool was supported by funding from grants NS050568 and NS40068 from the National Institute of Neurological Disorders and Stroke and grants MH31593, MH40856, from the National Institute of Mental Health.
+acknowledgements: The development of this tool was supported by funding from grants NS050568 and NS40068 from the National Institute of Neurological Disorders and Stroke and grants MH31593, MH40856, from the National Institute of Mental Health.  
 
 """
 
@@ -1344,29 +931,6 @@ acknowledgements: The development of this tool was supported by funding from gra
     output_spec = BRAINSDemonWarpOutputSpec
     _cmd = " BRAINSDemonWarp "
     _outputs_filenames = {'outputVolume':'outputVolume.nii','outputCheckerboardVolume':'outputCheckerboardVolume.nii','outputDeformationFieldVolume':'outputDeformationFieldVolume.nrrd'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(BRAINSDemonWarp, self)._format_arg(name, spec, value)
 
 
 
@@ -1389,21 +953,21 @@ class BRAINSROIAutoOutputSpec(TraitedSpec):
     outputVolume = File(desc="The inputVolume with optional [maskOutput|cropOutput] to the region of the brain mask.", exists=True)
 
 
-class BRAINSROIAuto(CommandLine):
+class BRAINSROIAuto(SlicerCommandLine):
     """title: Foreground masking (BRAINS)
 
 category: Segmentation.Specialized
 
 description: This program is used to create a mask over the most prominant forground region in an image.  This is accomplished via a combination of otsu thresholding and a closing operation.  More documentation is available here: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.0/Modules/ForegroundMasking.
-
+  
 
 version: 2.4.1
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt 
 
 contributor: Hans J. Johnson, hans-johnson -at- uiowa.edu, http://wwww.psychiatry.uiowa.edu
 
-acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); Gregory Harris(1), Vincent Magnotta(1,2,3);  Andriy Fedorov(5), fedorov -at- bwh.harvard.edu (Slicer integration); (1=University of Iowa Department of Psychiatry, 2=University of Iowa Department of Radiology, 3=University of Iowa Department of Biomedical Engineering, 4=University of Iowa Department of Electrical and Computer Engineering, 5=Surgical Planning Lab, Harvard)
+acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); Gregory Harris(1), Vincent Magnotta(1,2,3);  Andriy Fedorov(5), fedorov -at- bwh.harvard.edu (Slicer integration); (1=University of Iowa Department of Psychiatry, 2=University of Iowa Department of Radiology, 3=University of Iowa Department of Biomedical Engineering, 4=University of Iowa Department of Electrical and Computer Engineering, 5=Surgical Planning Lab, Harvard)  
 
 """
 
@@ -1411,29 +975,6 @@ acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); Gregory Harris(1), Vinc
     output_spec = BRAINSROIAutoOutputSpec
     _cmd = " BRAINSROIAuto "
     _outputs_filenames = {'outputVolume':'outputVolume.nii','outputROIMaskVolume':'outputROIMaskVolume.nii'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(BRAINSROIAuto, self)._format_arg(name, spec, value)
 
 
 
@@ -1455,24 +996,24 @@ class BRAINSResampleOutputSpec(TraitedSpec):
     outputVolume = File(desc="Resulting deformed image", exists=True)
 
 
-class BRAINSResample(CommandLine):
+class BRAINSResample(SlicerCommandLine):
     """title: Resample Image (BRAINS)
 
 category: Registration
 
-description:
+description: 
 	  This program collects together three common image processing tasks that all involve resampling an image volume: Resampling to a new resolution and spacing, applying a transformation (using an ITK transform IO mechanisms) and Warping (using a vector image deformation field).  Full documentation available here: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.0/Modules/BRAINSResample.
-
+  
 
 version: 3.0.0
 
 documentation-url: http://www.slicer.org/slicerWiki/index.php/Modules:BRAINSResample
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt 
 
 contributor: This tool was developed by Vincent Magnotta, Greg Harris, and Hans Johnson.
 
-acknowledgements: The development of this tool was supported by funding from grants NS050568 and NS40068 from the National Institute of Neurological Disorders and Stroke and grants MH31593, MH40856, from the National Institute of Mental Health.
+acknowledgements: The development of this tool was supported by funding from grants NS050568 and NS40068 from the National Institute of Neurological Disorders and Stroke and grants MH31593, MH40856, from the National Institute of Mental Health.  
 
 """
 
@@ -1480,29 +1021,6 @@ acknowledgements: The development of this tool was supported by funding from gra
     output_spec = BRAINSResampleOutputSpec
     _cmd = " BRAINSResample "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(BRAINSResample, self)._format_arg(name, spec, value)
 
 
 
@@ -1556,25 +1074,25 @@ class VBRAINSDemonWarpOutputSpec(TraitedSpec):
     outputCheckerboardVolume = File(desc="Genete a checkerboard image volume between the fixedVolume and the deformed movingVolume.", exists=True)
 
 
-class VBRAINSDemonWarp(CommandLine):
+class VBRAINSDemonWarp(SlicerCommandLine):
     """title: Vector Demon Registration (BRAINS)
 
 category: Registration
 
-description:
+description: 
     This program finds a deformation field to warp a moving image onto a fixed image.  The images must be of the same signal kind, and contain an image of the same kind of object.  This program uses the Thirion Demons warp software in ITK, the Insight Toolkit.  Additional information is available at: http://www.nitrc.org/projects/brainsdemonwarp.
 
-
+  
 
 version: 3.0.0
 
 documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:BRAINSDemonWarp
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt 
 
 contributor: This tool was developed by Hans J. Johnson and Greg Harris.
 
-acknowledgements: The development of this tool was supported by funding from grants NS050568 and NS40068 from the National Institute of Neurological Disorders and Stroke and grants MH31593, MH40856, from the National Institute of Mental Health.
+acknowledgements: The development of this tool was supported by funding from grants NS050568 and NS40068 from the National Institute of Neurological Disorders and Stroke and grants MH31593, MH40856, from the National Institute of Mental Health.  
 
 """
 
@@ -1582,29 +1100,6 @@ acknowledgements: The development of this tool was supported by funding from gra
     output_spec = VBRAINSDemonWarpOutputSpec
     _cmd = " VBRAINSDemonWarp "
     _outputs_filenames = {'outputVolume':'outputVolume.nii','outputCheckerboardVolume':'outputCheckerboardVolume.nii','outputDeformationFieldVolume':'outputDeformationFieldVolume.nrrd'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(VBRAINSDemonWarp, self)._format_arg(name, spec, value)
 
 
 
@@ -1620,7 +1115,7 @@ class extractNrrdVectorIndexOutputSpec(TraitedSpec):
     outputVolume = File(desc="Required: name of output NRRD file containing the vector image at the given index", exists=True)
 
 
-class extractNrrdVectorIndex(CommandLine):
+class extractNrrdVectorIndex(SlicerCommandLine):
     """title: Extract Nrrd Index
 
 category: Diffusion.GTRACT
@@ -1644,29 +1139,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " extractNrrdVectorIndex "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(extractNrrdVectorIndex, self)._format_arg(name, spec, value)
-
 
 
 class gtractAnisotropyMapInputSpec(CommandLineInputSpec):
@@ -1680,7 +1152,7 @@ class gtractAnisotropyMapOutputSpec(TraitedSpec):
     outputVolume = File(desc="Required: name of output NRRD file containing the selected kind of anisotropy scalar.", exists=True)
 
 
-class gtractAnisotropyMap(CommandLine):
+class gtractAnisotropyMap(SlicerCommandLine):
     """title: Anisotropy Map
 
 category: Diffusion.GTRACT
@@ -1704,29 +1176,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractAnisotropyMap "
     _outputs_filenames = {'outputVolume':'outputVolume.nrrd'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractAnisotropyMap, self)._format_arg(name, spec, value)
-
 
 
 class gtractAverageBvaluesInputSpec(CommandLineInputSpec):
@@ -1741,7 +1190,7 @@ class gtractAverageBvaluesOutputSpec(TraitedSpec):
     outputVolume = File(desc="Required: name of output NRRD file containing directly averaged baseline images", exists=True)
 
 
-class gtractAverageBvalues(CommandLine):
+class gtractAverageBvalues(SlicerCommandLine):
     """title: Average B-Values
 
 category: Diffusion.GTRACT
@@ -1765,29 +1214,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractAverageBvalues "
     _outputs_filenames = {'outputVolume':'outputVolume.nrrd'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractAverageBvalues, self)._format_arg(name, spec, value)
-
 
 
 class gtractClipAnisotropyInputSpec(CommandLineInputSpec):
@@ -1802,7 +1228,7 @@ class gtractClipAnisotropyOutputSpec(TraitedSpec):
     outputVolume = File(desc="Required: name of output NRRD file containing the clipped anisotropy image", exists=True)
 
 
-class gtractClipAnisotropy(CommandLine):
+class gtractClipAnisotropy(SlicerCommandLine):
     """title: Clip Anisotropy
 
 category: Diffusion.GTRACT
@@ -1825,29 +1251,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     output_spec = gtractClipAnisotropyOutputSpec
     _cmd = " gtractClipAnisotropy "
     _outputs_filenames = {'outputVolume':'outputVolume.nrrd'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractClipAnisotropy, self)._format_arg(name, spec, value)
 
 
 
@@ -1881,7 +1284,7 @@ class gtractCoRegAnatomyOutputSpec(TraitedSpec):
     outputTransformName = File(desc="Required: filename for the  fit transform.", exists=True)
 
 
-class gtractCoRegAnatomy(CommandLine):
+class gtractCoRegAnatomy(SlicerCommandLine):
     """title: Coregister B0 to Anatomy B-Spline
 
 category: Diffusion.GTRACT
@@ -1905,29 +1308,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractCoRegAnatomy "
     _outputs_filenames = {'outputTransformName':'outputTransformName.mat'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractCoRegAnatomy, self)._format_arg(name, spec, value)
-
 
 
 class gtractConcatDwiInputSpec(CommandLineInputSpec):
@@ -1940,7 +1320,7 @@ class gtractConcatDwiOutputSpec(TraitedSpec):
     outputVolume = File(desc="Required: name of output NRRD file containing the combined diffusion weighted images.", exists=True)
 
 
-class gtractConcatDwi(CommandLine):
+class gtractConcatDwi(SlicerCommandLine):
     """title: Concat DWI Images
 
 category: Diffusion.GTRACT
@@ -1964,29 +1344,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractConcatDwi "
     _outputs_filenames = {'outputVolume':'outputVolume.nrrd'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractConcatDwi, self)._format_arg(name, spec, value)
-
 
 
 class gtractCopyImageOrientationInputSpec(CommandLineInputSpec):
@@ -2000,7 +1357,7 @@ class gtractCopyImageOrientationOutputSpec(TraitedSpec):
     outputVolume = File(desc="Required: name of output NRRD or Nifti file containing the reoriented image in reference image space.", exists=True)
 
 
-class gtractCopyImageOrientation(CommandLine):
+class gtractCopyImageOrientation(SlicerCommandLine):
     """title: Copy Image Orientation
 
 category: Diffusion.GTRACT
@@ -2023,29 +1380,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     output_spec = gtractCopyImageOrientationOutputSpec
     _cmd = " gtractCopyImageOrientation "
     _outputs_filenames = {'outputVolume':'outputVolume.nrrd'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractCopyImageOrientation, self)._format_arg(name, spec, value)
 
 
 
@@ -2072,7 +1406,7 @@ class gtractCoregBvaluesOutputSpec(TraitedSpec):
     outputTransform = File(desc="Registration 3D transforms concatenated in a single output file.  There are no tools that can use this, but can be used for debugging purposes.", exists=True)
 
 
-class gtractCoregBvalues(CommandLine):
+class gtractCoregBvalues(SlicerCommandLine):
     """title: Coregister B-Values
 
 category: Diffusion.GTRACT
@@ -2096,29 +1430,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractCoregBvalues "
     _outputs_filenames = {'outputVolume':'outputVolume.nrrd','outputTransform':'outputTransform.mat'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractCoregBvalues, self)._format_arg(name, spec, value)
-
 
 
 class gtractCostFastMarchingInputSpec(CommandLineInputSpec):
@@ -2139,12 +1450,12 @@ class gtractCostFastMarchingOutputSpec(TraitedSpec):
     outputSpeedVolume = File(desc="Output speed image", exists=True)
 
 
-class gtractCostFastMarching(CommandLine):
+class gtractCostFastMarching(SlicerCommandLine):
     """title: Cost Fast Marching
 
 category: Diffusion.GTRACT
 
-description:  This program will use a fast marching fiber tracking algorithm to identify fiber tracts from a tensor image. This program is the first portion of the algorithm. The user must first run gtractFastMarchingTracking to generate the actual fiber tracts.  This algorithm is roughly based on the work by G. Parker et al. from IEEE Transactions On Medical Imaging, 21(5): 505-512, 2002. An additional feature of including anisotropy into the vcl_cost function calculation is included.
+description:  This program will use a fast marching fiber tracking algorithm to identify fiber tracts from a tensor image. This program is the first portion of the algorithm. The user must first run gtractFastMarchingTracking to generate the actual fiber tracts.  This algorithm is roughly based on the work by G. Parker et al. from IEEE Transactions On Medical Imaging, 21(5): 505-512, 2002. An additional feature of including anisotropy into the vcl_cost function calculation is included.  
 
 version: 4.0.0
 
@@ -2163,29 +1474,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractCostFastMarching "
     _outputs_filenames = {'outputCostVolume':'outputCostVolume.nrrd','outputSpeedVolume':'outputSpeedVolume.nrrd'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractCostFastMarching, self)._format_arg(name, spec, value)
-
 
 
 class gtractImageConformityInputSpec(CommandLineInputSpec):
@@ -2199,7 +1487,7 @@ class gtractImageConformityOutputSpec(TraitedSpec):
     outputVolume = File(desc="Required: name of output Nrrd or Nifti file containing the reoriented image in reference image space.", exists=True)
 
 
-class gtractImageConformity(CommandLine):
+class gtractImageConformity(SlicerCommandLine):
     """title: Image Conformity
 
 category: Diffusion.GTRACT
@@ -2223,29 +1511,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractImageConformity "
     _outputs_filenames = {'outputVolume':'outputVolume.nrrd'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractImageConformity, self)._format_arg(name, spec, value)
-
 
 
 class gtractInvertBSplineTransformInputSpec(CommandLineInputSpec):
@@ -2260,7 +1525,7 @@ class gtractInvertBSplineTransformOutputSpec(TraitedSpec):
     outputTransform = File(desc="Required: output transform file name", exists=True)
 
 
-class gtractInvertBSplineTransform(CommandLine):
+class gtractInvertBSplineTransform(SlicerCommandLine):
     """title: B-Spline Transform Inversion
 
 category: Diffusion.GTRACT
@@ -2284,29 +1549,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractInvertBSplineTransform "
     _outputs_filenames = {'outputTransform':'outputTransform.mat'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractInvertBSplineTransform, self)._format_arg(name, spec, value)
-
 
 
 class gtractInvertDeformationFieldInputSpec(CommandLineInputSpec):
@@ -2321,7 +1563,7 @@ class gtractInvertDeformationFieldOutputSpec(TraitedSpec):
     outputVolume = File(desc="Required: Output deformation field", exists=True)
 
 
-class gtractInvertDeformationField(CommandLine):
+class gtractInvertDeformationField(SlicerCommandLine):
     """title: Invert Deformation Field
 
 category: Diffusion.GTRACT
@@ -2345,29 +1587,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractInvertDeformationField "
     _outputs_filenames = {'outputVolume':'outputVolume.nrrd'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractInvertDeformationField, self)._format_arg(name, spec, value)
-
 
 
 class gtractInvertRigidTransformInputSpec(CommandLineInputSpec):
@@ -2380,7 +1599,7 @@ class gtractInvertRigidTransformOutputSpec(TraitedSpec):
     outputTransform = File(desc="Required: output transform file name", exists=True)
 
 
-class gtractInvertRigidTransform(CommandLine):
+class gtractInvertRigidTransform(SlicerCommandLine):
     """title: Rigid Transform Inversion
 
 category: Diffusion.GTRACT
@@ -2404,29 +1623,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractInvertRigidTransform "
     _outputs_filenames = {'outputTransform':'outputTransform.mat'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractInvertRigidTransform, self)._format_arg(name, spec, value)
-
 
 
 class gtractResampleAnisotropyInputSpec(CommandLineInputSpec):
@@ -2442,7 +1638,7 @@ class gtractResampleAnisotropyOutputSpec(TraitedSpec):
     outputVolume = File(desc="Required: name of output NRRD file containing the resampled transformed anisotropy image.", exists=True)
 
 
-class gtractResampleAnisotropy(CommandLine):
+class gtractResampleAnisotropy(SlicerCommandLine):
     """title: Resample Anisotropy
 
 category: Diffusion.GTRACT
@@ -2466,29 +1662,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractResampleAnisotropy "
     _outputs_filenames = {'outputVolume':'outputVolume.nrrd'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractResampleAnisotropy, self)._format_arg(name, spec, value)
-
 
 
 class gtractResampleB0InputSpec(CommandLineInputSpec):
@@ -2505,7 +1678,7 @@ class gtractResampleB0OutputSpec(TraitedSpec):
     outputVolume = File(desc="Required: name of output NRRD file containing the resampled input image.", exists=True)
 
 
-class gtractResampleB0(CommandLine):
+class gtractResampleB0(SlicerCommandLine):
     """title: Resample B0
 
 category: Diffusion.GTRACT
@@ -2529,29 +1702,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractResampleB0 "
     _outputs_filenames = {'outputVolume':'outputVolume.nrrd'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractResampleB0, self)._format_arg(name, spec, value)
-
 
 
 class gtractResampleCodeImageInputSpec(CommandLineInputSpec):
@@ -2567,7 +1717,7 @@ class gtractResampleCodeImageOutputSpec(TraitedSpec):
     outputVolume = File(desc="Required: name of output NRRD file containing the resampled code image in acquisition space.", exists=True)
 
 
-class gtractResampleCodeImage(CommandLine):
+class gtractResampleCodeImage(SlicerCommandLine):
     """title: Resample Code Image
 
 category: Diffusion.GTRACT
@@ -2591,29 +1741,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractResampleCodeImage "
     _outputs_filenames = {'outputVolume':'outputVolume.nrrd'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractResampleCodeImage, self)._format_arg(name, spec, value)
-
 
 
 class gtractResampleDWIInPlaceInputSpec(CommandLineInputSpec):
@@ -2628,7 +1755,7 @@ class gtractResampleDWIInPlaceOutputSpec(TraitedSpec):
     outputVolume = File(desc="Required: output image (NRRD file) that has been transformed into the space of the structural image.", exists=True)
 
 
-class gtractResampleDWIInPlace(CommandLine):
+class gtractResampleDWIInPlace(SlicerCommandLine):
     """title: Resample DWI In Place
 
 category: Diffusion.GTRACT
@@ -2652,29 +1779,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractResampleDWIInPlace "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractResampleDWIInPlace, self)._format_arg(name, spec, value)
-
 
 
 class gtractTensorInputSpec(CommandLineInputSpec):
@@ -2696,7 +1800,7 @@ class gtractTensorOutputSpec(TraitedSpec):
     outputVolume = File(desc="Required: name of output NRRD file containing the Tensor vector image", exists=True)
 
 
-class gtractTensor(CommandLine):
+class gtractTensor(SlicerCommandLine):
     """title: Tensor Estimation
 
 category: Diffusion.GTRACT
@@ -2720,29 +1824,6 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     _cmd = " gtractTensor "
     _outputs_filenames = {'outputVolume':'outputVolume.nrrd'}
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractTensor, self)._format_arg(name, spec, value)
-
 
 
 class gtractTransformToDeformationFieldInputSpec(CommandLineInputSpec):
@@ -2756,7 +1837,7 @@ class gtractTransformToDeformationFieldOutputSpec(TraitedSpec):
     outputDeformationFieldVolume = File(desc="Output deformation field", exists=True)
 
 
-class gtractTransformToDeformationField(CommandLine):
+class gtractTransformToDeformationField(SlicerCommandLine):
     """title: Create Deformation Field
 
 category: Diffusion.GTRACT
@@ -2769,7 +1850,7 @@ documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
 license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta, Madhura Ingalhalikar, and Greg Harris
+contributor: This tool was developed by Vincent Magnotta, Madhura Ingalhalikar, and Greg Harris 
 
 acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
 
@@ -2779,26 +1860,3 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     output_spec = gtractTransformToDeformationFieldOutputSpec
     _cmd = " gtractTransformToDeformationField "
     _outputs_filenames = {'outputDeformationFieldVolume':'outputDeformationFieldVolume.nii'}
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for name in outputs.keys():
-            coresponding_input = getattr(self.inputs, name)
-            if isdefined(coresponding_input):
-                if isinstance(coresponding_input, bool) and coresponding_input == True:
-                    outputs[name] = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    if isinstance(coresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
-                    else:
-                        outputs[name] = os.path.abspath(coresponding_input)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
-            if isinstance(value, bool):
-                if value == True:
-                    value = os.path.abspath(self._outputs_filenames[name])
-                else:
-                    return ""
-        return super(gtractTransformToDeformationField, self)._format_arg(name, spec, value)
