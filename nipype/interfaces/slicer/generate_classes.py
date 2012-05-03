@@ -147,8 +147,11 @@ def generate_class(module, launcher):
         input_spec_code += "    " + trait + "\n"
 
     output_spec_code = "class " + module + "OutputSpec(TraitedSpec):\n"
-    for trait in outputTraits:
-        output_spec_code += "    " + trait + "\n"
+    if not outputTraits:
+        output_spec_code += "    pass\n"
+    else:
+        for trait in outputTraits:
+            output_spec_code += "    " + trait + "\n"
 
     output_filenames_code = "_outputs_filenames = {"
     output_filenames_code += ",".join(["'%s':'%s'" % (key, value) for key, value in outputs_filenames.iteritems()])
