@@ -110,20 +110,19 @@ def create_pyscript(node, updatehash=False, store_exception=True):
 import sys
 from socket import gethostname
 from traceback import format_exception
-from nipype import config, logging
-from ordereddict import OrderedDict
-config_dict=%s
-config.update_config(config_dict)
-config.update_matplotlib()
-logging.update_logging(config)
-from nipype.utils.filemanip import loadpkl, savepkl
-traceback=None
-cwd = os.getcwd()
-print cwd
+info = None
 pklfile = '%s'
 batchdir = '%s'
-info = None
 try:
+    from nipype import config, logging
+    from ordereddict import OrderedDict
+    config_dict=%s
+    config.update_config(config_dict)
+    config.update_matplotlib()
+    logging.update_logging(config)
+    from nipype.utils.filemanip import loadpkl, savepkl
+    traceback=None
+    cwd = os.getcwd()
     info = loadpkl(pklfile)
     result = info['node'].run(updatehash=info['updatehash'])
 except Exception, e:
@@ -152,7 +151,7 @@ except Exception, e:
         report_crash(node, traceback, gethostname())
     raise Exception(e)
 """
-    cmdstr = cmdstr % (node.config, pkl_file, batch_dir, suffix)
+    cmdstr = cmdstr % (pkl_file, batch_dir, node.config, suffix)
     pyscript = os.path.join(batch_dir, 'pyscript_%s.py' % suffix)
     fp = open(pyscript, 'wt')
     fp.writelines(cmdstr)
