@@ -416,9 +416,9 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
                            'traceback': None}
             results_file = None
             try:
-                raise IOError(('Job finished or terminated, but results file '
+                raise IOError(('Job (%s) finished or terminated, but results file '
                                'does not exist. Batch dir contains crashdump '
-                               'file if node raised an exception'))
+                               'file if node raised an exception' % node_dir))
             except IOError, e:
                 result_data['traceback'] = format_exc()
         else:
