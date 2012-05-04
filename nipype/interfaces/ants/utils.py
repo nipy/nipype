@@ -36,17 +36,18 @@ class ApplyTransformsOutputSpec(TraitedSpec):
 
 
 class ApplyTransforms(ANTSCommand):
-    """Warps an image from one space to another
+    """antsApplyTransforms, applied to an input image, transforms it according to a
+    reference image and a transform (or a set of transforms).
 
     Examples
     --------
 
     >>> from nipype.interfaces.ants import ApplyTransforms
-    >>> wimt = ApplyTransforms()
-    >>> wimt.inputs.input_image = 'structural.nii'
-    >>> wimt.inputs.reference_image = 'ants_deformed.nii.gz'
-    >>> wimt.inputs.transformation_files = ['ants_Warp.nii.gz','ants_Affine.txt']
-    >>> wimt.cmdline
+    >>> atms = ApplyTransforms()
+    >>> atms.inputs.input_image = 'structural.nii'
+    >>> atms.inputs.reference_image = 'ants_deformed.nii.gz'
+    >>> atms.inputs.transformation_files = ['ants_Warp.nii.gz','ants_Affine.txt']
+    >>> atms.cmdline
     'antsApplyTransforms --dimensionality 3 --input structural.nii --output structural_trans.nii --reference-image ants_deformed.nii.gz --transform ants_Warp.nii.gz --transform ants_Affine.txt'
 
     """

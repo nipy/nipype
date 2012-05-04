@@ -34,7 +34,16 @@ class N4BiasFieldCorrectionOutputSpec(TraitedSpec):
 
 
 class N4BiasFieldCorrection(ANTSCommand):
-    """Warps an image from one space to another
+    """N4 is a variant of the popular N3 (nonparameteric nonuniform normalization)
+    retrospective bias correction algorithm. Based on the assumption that the
+    corruption of the low frequency bias field can be modeled as a convolution of
+    the intensity histogram by a Gaussian, the basic algorithmic protocol is to
+    iterate between deconvolving the intensity histogram by a Gaussian, remapping
+    the intensities, and then spatially smoothing this result by a B-spline modeling
+    of the bias field itself. The modifications from and improvements obtained over
+    the original N3 algorithm are described in the following paper: N. Tustison et
+    al., N4ITK: Improved N3 Bias Correction, IEEE Transactions on Medical Imaging,
+    29(6):1310-1320, June 2010.
 
     Examples
     --------

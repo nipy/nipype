@@ -51,12 +51,11 @@ class AtroposOutputSpec(TraitedSpec):
 
 
 class Atropos(ANTSCommand):
-    """
-    A finite mixture modeling (FMM) segmentation approach with possibilities for 
-    specifying prior constraints. These prior constraints include the specification 
-    of a prior label image, prior probability images (one for each class), and/or an 
-    MRF prior to enforce spatial smoothing of the labels. Similar algorithms include 
-    FAST and SPM. 
+    """A finite mixture modeling (FMM) segmentation approach with possibilities for
+    specifying prior constraints. These prior constraints include the specification
+    of a prior label image, prior probability images (one for each class), and/or an
+    MRF prior to enforce spatial smoothing of the labels. Similar algorithms include
+    FAST and SPM.
 
     Examples
     --------
