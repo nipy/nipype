@@ -1343,7 +1343,7 @@ class Node(WorkflowBase):
                     raise
                 cmdfile = os.path.join(cwd, 'command.txt')
                 fd = open(cmdfile, 'wt')
-                fd.writelines(cmd)
+                fd.writelines(cmd + "\n")
                 fd.close()
                 logger.info('Running: %s' % cmd)
             try:
