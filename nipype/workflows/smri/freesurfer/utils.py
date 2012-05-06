@@ -320,7 +320,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
 
     smoother.inputs.curvature_averaging_iterations = 1
     smoother.inputs.smoothing_iterations = 1
-  
+
     region_list_from_volume_interface = Function(input_names=["in_file"],
                              output_names=["region_list"],
                              function=region_list_from_volume)

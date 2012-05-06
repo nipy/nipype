@@ -913,10 +913,10 @@ class SmoothTessellationInputSpec(FSTraitedSpec):
     normalize_area = traits.Bool(argstr='-area', desc='Normalizes the area after smoothing')
     use_momentum = traits.Bool(argstr='-m', desc='Uses momentum')
 
-    out_file = File(argstr='./%s', position=2, genfile=True, desc='output filename or True to generate one')   
+    out_file = File(argstr='./%s', position=2, genfile=True, desc='output filename or True to generate one')
     out_curvature_file = File(argstr='-c ./%s', desc='Write curvature to ?h.curvname (default "curv")')
     out_area_file = File(argstr='-b ./%s', desc='Write area to ?h.areaname (default "area")')
-    
+
 class SmoothTessellationOutputSpec(TraitedSpec):
     """
     This program smooths the tessellation of a surface using 'mris_smooth'
