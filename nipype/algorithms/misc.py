@@ -645,29 +645,29 @@ class Matlab2CSV(BaseInterface):
         return outputs
 
 def merge_csvs(in_list):
-	for idx, in_file in enumerate(in_list):
-		try:
-			in_array = np.loadtxt(in_file, delimiter=',')
-		except ValueError, ex:
-			try:
-				in_array = np.loadtxt(in_file, delimiter=',', skiprows=1)
-			except ValueError, ex:
-				first = open(in_file, 'r')
-				header_line = first.readline()
-				header_list = header_line.split(',')
-				n_cols = len(header_list)
-				try:
-					in_array = np.loadtxt(in_file, delimiter=',', skiprows=1, usecols=range(1,n_cols))
-				except ValueError, ex:
-					in_array = np.loadtxt(in_file, delimiter=',', skiprows=1, usecols=range(1,n_cols-1))
-		if idx == 0:
-			out_array = in_array
-		else:
-			out_array = np.dstack((out_array, in_array))
-	out_array = np.squeeze(out_array)
-	iflogger.info('Final output array shape:')
-	iflogger.info(np.shape(out_array))
-	return out_array
+    for idx, in_file in enumerate(in_list):
+        try:
+            in_array = np.loadtxt(in_file, delimiter=',')
+        except ValueError, ex:
+            try:
+                in_array = np.loadtxt(in_file, delimiter=',', skiprows=1)
+            except ValueError, ex:
+                first = open(in_file, 'r')
+                header_line = first.readline()
+                header_list = header_line.split(',')
+                n_cols = len(header_list)
+                try:
+                    in_array = np.loadtxt(in_file, delimiter=',', skiprows=1, usecols=range(1,n_cols))
+                except ValueError, ex:
+                    in_array = np.loadtxt(in_file, delimiter=',', skiprows=1, usecols=range(1,n_cols-1))
+        if idx == 0:
+            out_array = in_array
+        else:
+            out_array = np.dstack((out_array, in_array))
+    out_array = np.squeeze(out_array)
+    iflogger.info('Final output array shape:')
+    iflogger.info(np.shape(out_array))
+    return out_array
 
 def remove_identical_paths(in_files):
     import os.path as op
@@ -690,30 +690,37 @@ def remove_identical_paths(in_files):
 
 def maketypelist(rowheadings, shape, extraheadingBool, extraheading):
     typelist = []
+    import ipdb
+    ipdb.set_trace()
     if rowheadings:
         typelist.append(('heading','a40'))
     if len(shape) > 1:
         for idx in range(1,(min(shape)+1)):
             typelist.append((str(idx), float))
     else:
-        typelist.append((str(1), float))
+        for idx in range(1,(shape[0]+1)):
+            typelist.append((str(idx), float))
     if extraheadingBool:
         typelist.append((extraheading, 'a40'))
     iflogger.info(typelist)
     return typelist
 
 def makefmtlist(output_array, typelist, rowheadingsBool, shape, extraheadingBool):
-    output = np.zeros(max(shape), typelist)
     fmtlist = []
     if rowheadingsBool:
         fmtlist.append('%s')
+    import ipdb
+    ipdb.set_trace()
     if len(shape) > 1:
+        output = np.zeros(max(shape), typelist)
         for idx in range(1,min(shape)+1):
             output[str(idx)] = output_array[:,idx-1]
             fmtlist.append('%f')
     else:
-        output[str(1)] = output_array
-        fmtlist.append('%f')
+        output = np.zeros(1, typelist)
+        for idx in range(1,len(output_array)+1):
+            output[str(idx)] = output_array[idx-1]
+            fmtlist.append('%f')
     if extraheadingBool:
         fmtlist.append('%s')
     fmt = ','.join(fmtlist)
@@ -754,6 +761,7 @@ class MergeCSVFiles(BaseInterface):
 
     def _run_interface(self, runtime):
         extraheadingBool = False
+        extraheading = ''
         rowheadingsBool = False
         """
         This block defines the column headings.
@@ -773,7 +781,7 @@ class MergeCSVFiles(BaseInterface):
                 extraheading = 'type'
                 iflogger.info('Extra column heading was not defined. Using "type"')
             headings.append(extraheading)
-            extraheadingBool = True
+            extraheadingBool = True            
 
         if len(self.inputs.in_files) == 1:
             iflogger.warn('Only one file input!')
