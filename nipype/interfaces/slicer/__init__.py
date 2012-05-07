@@ -1,20 +1,41 @@
-from .cli_modules import (Add, AffineRegistration,
-                          BSplineDeformableRegistration, Cast, CheckerBoard,
-                          ComputeSUVBodyWeight, ConfidenceConnected,
-                          CurvatureAnisotropicDiffusion, DicomToNrrdConverter,
-                          ResampleDTI, dwiNoiseFilter, dwiUNLM, jointLMMSE,
-                          DiffusionTensorEstimation, DiffusionTensorMathematics,
-                          DiffusionTensorTest, DiffusionWeightedMasking,
-                          BRAINSFit, BRAINSDemonWarp, BRAINSROIAuto,
-                          BRAINSResample, VBRAINSDemonWarp,
-                          extractNrrdVectorIndex, gtractAnisotropyMap,
-                          gtractAverageBvalues, gtractClipAnisotropy,
-                          gtractCoRegAnatomy, gtractConcatDwi,
-                          gtractCopyImageOrientation, gtractCoregBvalues,
-                          gtractCostFastMarching, gtractImageConformity,
-                          gtractInvertBSplineTransform,
-                          gtractInvertDeformationField,
-                          gtractInvertRigidTransform, gtractResampleAnisotropy,
-                          gtractResampleB0, gtractResampleCodeImage,
-                          gtractResampleDWIInPlace, gtractTensor,
-                          gtractTransformToDeformationField)
+from Add import Add
+from AffineRegistration import AffineRegistration
+from BSplineDeformableRegistration import BSplineDeformableRegistration
+from Cast import Cast
+from CheckerBoard import CheckerBoard
+from ComputeSUVBodyWeight import ComputeSUVBodyWeight
+from ConfidenceConnected import ConfidenceConnected
+from CurvatureAnisotropicDiffusion import CurvatureAnisotropicDiffusion
+from DicomToNrrdConverter import DicomToNrrdConverter
+from ResampleDTI import ResampleDTI
+from dwiNoiseFilter import dwiNoiseFilter
+from dwiUNLM import dwiUNLM
+from jointLMMSE import jointLMMSE
+from DiffusionTensorEstimation import DiffusionTensorEstimation
+from DiffusionTensorMathematics import DiffusionTensorMathematics
+from DiffusionTensorTest import DiffusionTensorTest
+from DiffusionWeightedMasking import DiffusionWeightedMasking
+from BRAINSFit import BRAINSFit
+from BRAINSDemonWarp import BRAINSDemonWarp
+from BRAINSROIAuto import BRAINSROIAuto
+from BRAINSResample import BRAINSResample
+from VBRAINSDemonWarp import VBRAINSDemonWarp
+from extractNrrdVectorIndex import extractNrrdVectorIndex
+from gtractAnisotropyMap import gtractAnisotropyMap
+from gtractAverageBvalues import gtractAverageBvalues
+from gtractClipAnisotropy import gtractClipAnisotropy
+from gtractCoRegAnatomy import gtractCoRegAnatomy
+from gtractConcatDwi import gtractConcatDwi
+from gtractCopyImageOrientation import gtractCopyImageOrientation
+from gtractCoregBvalues import gtractCoregBvalues
+from gtractCostFastMarching import gtractCostFastMarching
+from gtractImageConformity import gtractImageConformity
+from gtractInvertBSplineTransform import gtractInvertBSplineTransform
+from gtractInvertDeformationField import gtractInvertDeformationField
+from gtractInvertRigidTransform import gtractInvertRigidTransform
+from gtractResampleAnisotropy import gtractResampleAnisotropy
+from gtractResampleB0 import gtractResampleB0
+from gtractResampleCodeImage import gtractResampleCodeImage
+from gtractResampleDWIInPlace import gtractResampleDWIInPlace
+from gtractTensor import gtractTensor
+from gtractTransformToDeformationField import gtractTransformToDeformationField
