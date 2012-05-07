@@ -696,7 +696,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs, config,
             input_files.extend(walk_outputs(inputdict))
             input_files = [path for path, type in input_files if type == 'f']
             for f in walk_files(cwd):
-                if f in input_files:
+                if f in input_files and f not in needed_files:
                     files2remove.append(f)
     logger.debug('Removing files: %s' % (';'.join(files2remove)))
     for f in files2remove:
