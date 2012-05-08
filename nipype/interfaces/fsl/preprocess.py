@@ -469,20 +469,20 @@ class FLIRT(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
         # Generate an out_file if one is not provided
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                  suffix='_flirt')
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
+        else:
+			outputs['out_file'] = os.path.abspath(outputs['out_file'])
 
-        outputs['out_matrix_file'] = self.inputs.out_matrix_file
         # Generate an out_matrix file if one is not provided
         if not isdefined(outputs['out_matrix_file']):
             outputs['out_matrix_file'] = self._gen_fname(self.inputs.in_file,
                                                    suffix='_flirt.mat',
                                                    change_ext=False)
-        outputs['out_matrix_file'] = os.path.abspath(outputs['out_matrix_file'])
+        else:
+			outputs['out_matrix_file'] = os.path.abspath(outputs['out_matrix_file'])
         return outputs
 
     def _gen_filename(self, name):
