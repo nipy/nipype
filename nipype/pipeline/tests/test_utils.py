@@ -199,9 +199,12 @@ def test_outputs_removal_wf():
         wf = pe.Workflow(name="node_rem_test" + plugin, base_dir=out_dir)
         wf.connect(n1, "out_file1", n2, "in_file")
 
+        wf.run(plugin='Linear')
+
         for remove_unnecessary_outputs in [True, False]:
+            config.set_default_config()
             wf.config = {'execution': {'remove_unnecessary_outputs': remove_unnecessary_outputs}}
-            wf.config = merge_dict(deepcopy(config._sections), wf.config)
+            rmtree(os.path.join(wf.base_dir, wf.name))
             wf.run(plugin=plugin)
 
             yield assert_true, os.path.exists(os.path.join(wf.base_dir,
@@ -243,8 +246,8 @@ def test_outputs_removal_wf():
         wf.connect(n4, ("output1", pick_first), n3, "arg")
         for remove_unnecessary_outputs in [True, False]:
             for keep_inputs in [True, False]:
+                config.set_default_config()
                 wf.config = {'execution': {'keep_inputs': keep_inputs, 'remove_unnecessary_outputs': remove_unnecessary_outputs}}
-                wf.config = merge_dict(deepcopy(config._sections), wf.config)
                 rmtree(os.path.join(wf.base_dir, wf.name))
                 wf.run(plugin=plugin)
                 yield assert_true, os.path.exists(os.path.join(wf.base_dir,
