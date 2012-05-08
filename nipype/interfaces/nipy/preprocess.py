@@ -74,9 +74,8 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
                              desc="File to realign")
     tr = traits.Float(desc="TR in seconds",
                       mandatory=True)
-    slice_order = traits.Either(traits.List(traits.Int),
-                  traits.Enum("ascending", "descending"),
-                  mandatory=True, desc='slice order')
+    slice_order = traits.List(traits.Int(),
+                    mandatory=True, desc='0 based slice order')
     tr_slices = traits.Float(desc="TR slices")
     start = traits.Float(0.0, usedefault=True,
                          desc="time offset into TR to align slices to")
@@ -108,7 +107,7 @@ class FmriRealign4d(BaseInterface):
     >>> realigner = FmriRealign4d()
     >>> realigner.inputs.in_file = ['functional.nii']
     >>> realigner.inputs.tr = 2
-    >>> realigner.inputs.slice_order = 'ascending'
+    >>> realigner.inputs.slice_order = range(0,67)
     >>> res = realigner.run() # doctest: +SKIP
 
     References

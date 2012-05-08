@@ -464,9 +464,15 @@ class AvScaleInputSpec(FSLCommandInputSpec):
 
 
 class AvScaleOutputSpec(TraitedSpec):
-    out_stat = traits.Any(desc='json file')
+    rotation_translation_matrix=traits.Any(desc='Rotation and Translation Matrix')
+    scales = traits.Any(desc='Scales (x,y,z)')
+    skews = traits.Any(desc='Skews')
+    average_scaling = traits.Any(desc='Average Scaling')
+    determinant = traits.Any(desc='Determinant')
+    forward_half_transform = traits.Any(desc='Forward Half Transform')
+    backward_half_transform = traits.Any(desc='Backwards Half Transform')
+    left_right_orientation_preserved = traits.Bool(desc='True if LR orientation preserved')
     
-
 class AvScale(FSLCommand):
     """Use FSL avscale command to extract info from mat file output of FLIRT
 
@@ -474,7 +480,7 @@ class AvScale(FSLCommand):
     --------
     avscale = AvScale()
     avscale.inputs.mat_file = 'flirt.mat'
-    res = avscale.run()
+    res = avscale.run()  # doctest: +SKIP
 
     """
     input_spec = AvScaleInputSpec
@@ -487,36 +493,28 @@ class AvScale(FSLCommand):
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
-        # local caching for backward compatibility
-        outfile = os.path.join(os.getcwd(), 'avscale_result.json')
-        if runtime is None:
-            try:
-                out_file = load_json(outfile)
-            except IOError:
-                return self.run().outputs
+
+        def lines_to_float(lines):
+            out = []
+            for line in lines:
+                values = line.split()
+                out.append([float(val) for val in values])
+            return out
+            
+        out = runtime.stdout.split('\n')
+
+        outputs.rotation_translation_matrix = lines_to_float(out[1:5])
+        outputs.scales = lines_to_float([out[6].split(" = ")[1]])
+        outputs.skews = lines_to_float([out[8].split(" = ")[1]])
+        outputs.average_scaling = lines_to_float([out[10].split(" = ")[1]])
+        outputs.determinant = lines_to_float([out[12].split(" = ")[1]])
+        if out[13].split(": ")[1] == 'preserved':
+            outputs.left_right_orientation_preserved = True
         else:
-            def lines_to_float(lines):
-                out = []
-                for line in lines:
-                    values = line.split()
-                    out.append([float(val) for val in values])
-                return out
-                
-            out = runtime.stdout.split('\n')
-            out_stat = {}
-            out_stat["Rotation_Translation_Matrix"] = lines_to_float(out[1:5])
-            out_stat["Scales"] = lines_to_float([out[6].split(" = ")[1]])
-            out_stat["Skews"] = lines_to_float([out[8].split(" = ")[1]])
-            out_stat["Average_Scaling"] = lines_to_float([out[10].split(" = ")[1]])
-            out_stat["Determinant"] = lines_to_float([out[12].split(" = ")[1]])
-            if out[13].split(": ")[1] == 'preserved':
-                out_stat["Left_Right_Orientation_Preserved"] = True
-            else:
-                out_stat["Left_Right_Orientation_Preserved"] = False
-            out_stat["Forward_Half_Transform"] = lines_to_float(out[16:20])
-            out_stat["Backward_Half_Transform"] = lines_to_float(out[22:-1])
-            save_json(outfile, out_stat)
-        outputs.out_stat = out_stat
+            outputs.left_right_orientation_preserved = False
+        outputs.forward_half_transform = lines_to_float(out[16:20])
+        outputs.backward_half_transform = lines_to_float(out[22:-1])
+
         return outputs
 
 class OverlayInputSpec(FSLCommandInputSpec):
