@@ -259,8 +259,10 @@ def test_flirt():
     flirter.inputs.out_file = ''.join(['foo', ext])
     flirter.inputs.out_matrix_file = ''.join(['bar', ext])
     outs = flirter._list_outputs()
-    yield assert_equal, outs['out_file'], flirter.inputs.out_file
-    yield assert_equal, outs['out_matrix_file'], flirter.inputs.out_matrix_file
+    yield assert_equal, outs['out_file'], \
+          os.path.join(os.getcwd(), flirter.inputs.out_file)
+    yield assert_equal, outs['out_matrix_file'], \
+          os.path.join(os.getcwd(), flirter.inputs.out_matrix_file)
 
     teardown_flirt(tmpdir)
 
