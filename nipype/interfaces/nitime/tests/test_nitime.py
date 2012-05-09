@@ -3,18 +3,12 @@
 import tempfile
 
 import numpy as np
-from matplotlib.mlab import csv2rec
-
-from nipype.utils.misc import package_check
 
 from nipype.testing import (assert_equal, assert_raises, skipif)
-
 from nipype.testing import example_data
-
 import nipype.interfaces.nitime as nitime
 
 no_nitime = not nitime.analysis.have_nitime
-
 
 @skipif(no_nitime)
 def test_read_csv():
@@ -51,7 +45,7 @@ def test_coherence_analysis():
 
     #This is the nitime analysis:
     TR=1.89
-    data_rec = csv2rec(example_data('fmri_timeseries.csv'))
+    data_rec = np.recfromcsv(example_data('fmri_timeseries.csv'))
     roi_names= np.array(data_rec.dtype.names)
     n_samples = data_rec.shape[0]
     data = np.zeros((len(roi_names),n_samples))
