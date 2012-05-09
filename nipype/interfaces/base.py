@@ -1088,7 +1088,7 @@ class CommandLine(BaseInterface):
             out_environ = {'DISPLAY': display_var}
         except NoOptionError:
             pass
-        iflogger.info(out_environ)
+        iflogger.debug(out_environ)
         if isdefined(self.inputs.environ):
             out_environ.update(self.inputs.environ)
         runtime.environ.update(out_environ)
