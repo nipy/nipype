@@ -24,10 +24,7 @@ from scipy.special import legendre
 import scipy.io as sio
 import itertools
 
-from .. import config, logging
-import matplotlib
-matplotlib.use(config.get("execution", "matplotlib_backend"))
-import matplotlib.pyplot as plt
+from .. import logging
 
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
@@ -270,6 +267,7 @@ class Distance(BaseInterface):
 
         dist_matrix = cdist(set1_coordinates.T, set2_coordinates.T)
         min_dist_matrix = np.amin(dist_matrix, axis=0)
+        import matplotlib.pyplot as plt
         plt.figure()
         plt.hist(min_dist_matrix, 50, normed=1, facecolor='green')
         plt.savefig(self._hist_filename)

@@ -142,3 +142,7 @@ class NipypeConfig(object):
                 for key, val in config_dict[section].items():
                     if not key.startswith('__'):
                         self._config.set(section, key, str(val))
+
+    def update_matplotlib(self):
+        import matplotlib
+        matplotlib.use(self.get('execution', 'matplotlib_backend'))

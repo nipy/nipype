@@ -3,10 +3,12 @@ import os
 
 import nibabel as nb
 import numpy as np
+
+pylab_available = True
 try:
     import pylab
 except:
-    warn('pylab not installed required for nipype')
+    pylab_available = False
 
 from ...utils.misc import package_check
 
@@ -135,10 +137,13 @@ class FitGLM(BaseInterface):
                 design_matrix[:,i] = (design_matrix[:,i]-design_matrix[:,i].mean())/design_matrix[:,i].std()
 
         if self.inputs.plot_design_matrix:
-            pylab.pcolor(design_matrix)
-            pylab.savefig("design_matrix.pdf")
-            pylab.close()
-            pylab.clf()
+            if pylab_available:
+                pylab.pcolor(design_matrix)
+                pylab.savefig("design_matrix.pdf")
+                pylab.close()
+                pylab.clf()
+            else:
+                Exception('Pylab not available for saving design matrix image')
 
         glm = GLM.glm()
         glm.fit(timeseries.T, design_matrix, method=self.inputs.method, model=self.inputs.model)
