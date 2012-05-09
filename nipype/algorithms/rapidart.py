@@ -67,7 +67,7 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
             "brain mask.  *file* specifies a brain mask file (should be an image" \
             "file consisting of 0s and 1s). *thresh* specifies a threshold to" \
             "use.  By default all voxels are used, unless one of these mask" \
-            "types are defined.")
+            "types are defined.", mandatory=True)
     mask_file = File(exists=True, desc="Mask file to be used if mask_type is 'file'.")
     mask_threshold = traits.Float(desc="Mask threshold to be used if mask_type is 'thresh'.")
     intersect_mask = traits.Bool(True, desc="Intersect the masks when computed from spm_global. (default is" \
