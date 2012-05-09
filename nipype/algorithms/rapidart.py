@@ -26,11 +26,6 @@ import numpy as np
 from scipy import signal
 import scipy.io as sio
 
-from .. import config
-import matplotlib
-matplotlib.use(config.get("execution", "matplotlib_backend"))
-import matplotlib.pyplot as plt
-
 from nipype.interfaces.base import (BaseInterface, traits, InputMultiPath,
                                     OutputMultiPath, TraitedSpec, File,
                                     BaseInterfaceInputSpec, isdefined)
@@ -250,6 +245,7 @@ class ArtifactDetect(BaseInterface):
             return np.nansum(a) / np.sum(1 - np.isnan(a))
 
     def _plot_outliers_with_wave(self, wave, outliers, name):
+        import matplotlib.pyplot as plt
         plt.plot(wave)
         plt.ylim([wave.min(), wave.max()])
         plt.xlim([0, len(wave) - 1])
@@ -357,6 +353,7 @@ class ArtifactDetect(BaseInterface):
             np.savetxt(normfile, normval, fmt='%.4f', delimiter=' ')
 
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
+            import matplotlib.pyplot as plt
             fig = plt.figure()
             if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
                 plt.subplot(211)
