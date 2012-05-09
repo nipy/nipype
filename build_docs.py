@@ -21,7 +21,7 @@ from distutils.command.clean import clean
 # Sphinx import.
 from sphinx.setup_command import BuildDoc
 
-_info_fname = pjoin('nipype', 'info.py')
+_info_fname = pjoin(os.path.dirname(__file__), 'nipype', 'info.py')
 INFO_VARS = {}
 exec(open(_info_fname, 'rt').read(), {}, INFO_VARS)
 

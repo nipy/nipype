@@ -300,6 +300,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
       mri_convert : converts aseg.mgz to aseg.nii
       tessellate : tessellates regions in aseg.mgz
       surfconvert : converts regions to stereolithographic (.stl) format
+      smoother: smooths the tessellated regions
 
     """
 
@@ -313,6 +314,12 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     surfconvert = pe.MapNode(fs.MRIsConvert(out_datatype=out_format),
                           iterfield=['in_file'],
                           name='surfconvert')
+    smoother = pe.MapNode(fs.SmoothTessellation(),
+                          iterfield=['in_file'],
+                          name='smoother')
+
+    smoother.inputs.curvature_averaging_iterations = 1
+    smoother.inputs.smoothing_iterations = 1
 
     region_list_from_volume_interface = Function(input_names=["in_file"],
                              output_names=["region_list"],
@@ -340,6 +347,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
             (id_list_from_lookup_table_node, tessellate, [('id_list', 'out_file')]),
             (fssource, tessellate, [('aseg', 'in_file')]),
             (tessellate, surfconvert, [('surface','in_file')]),
+            (surfconvert, smoother, [('converted','in_file')]),
             ])
 
     """
@@ -349,6 +357,6 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     outputnode = pe.Node(niu.IdentityInterface(fields=["meshes"]),
                          name="outputspec")
     tessflow.connect([
-            (surfconvert, outputnode, [("converted", "meshes")]),
+            (smoother, outputnode, [("surface", "meshes")]),
             ])
     return tessflow

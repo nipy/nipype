@@ -252,6 +252,11 @@ class SurfaceSmooth(FSCommand):
     smoothing process.  If the latter, the underlying program will calculate
     the correct number of iterations internally.
 
+    .. seealso::
+
+        SmoothTessellation() Interface
+            For smoothing a tessellated surface (e.g. in gifti or .stl)
+
     Examples
     --------
 
@@ -874,7 +879,7 @@ class MRIMarchingCubes(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['surface'] = os.path.abspath(self._gen_outfilename())
+        outputs['surface'] = self._gen_outfilename()
         return outputs
 
     def _gen_filename(self, name):
@@ -885,7 +890,76 @@ class MRIMarchingCubes(FSCommand):
 
     def _gen_outfilename(self):
         if isdefined(self.inputs.out_file):
-            return self.inputs.out_file
+            return os.path.abspath(self.inputs.out_file)
         else:
             _, name, ext = split_filename(self.inputs.in_file)
-            return name + ext + '_' + str(self.inputs.label_value)
+            return os.path.abspath(name + ext + '_' + str(self.inputs.label_value))
+
+class SmoothTessellationInputSpec(FSTraitedSpec):
+    """
+    This program smooths the tessellation of a surface using 'mris_smooth'
+    """
+
+    in_file = File(exists=True, mandatory=True, argstr='%s', position=1, desc='Input volume to tesselate voxels from.')
+
+    curvature_averaging_iterations = traits.Int(10, usedefault=True, argstr='-a %d', position=-1, desc='Number of curvature averaging iterations (default=10)')
+    smoothing_iterations = traits.Int(10, usedefault=True, argstr='-n %d', position=-2, desc='Number of smoothing iterations (default=10)')
+    snapshot_writing_iterations = traits.Int(argstr='-w %d', desc='Write snapshot every "n" iterations')
+
+    use_gaussian_curvature_smoothing = traits.Bool(argstr='-g', position=3, desc='Use Gaussian curvature smoothing')
+    gaussian_curvature_norm_steps = traits.Int(argstr='%d ', position=4, desc='Use Gaussian curvature smoothing')
+    gaussian_curvature_smoothing_steps = traits.Int(argstr='%d', position=5, desc='Use Gaussian curvature smoothing')
+
+    disable_estimates = traits.Bool(argstr='-nw', desc='Disables the writing of curvature and area estimates')
+    normalize_area = traits.Bool(argstr='-area', desc='Normalizes the area after smoothing')
+    use_momentum = traits.Bool(argstr='-m', desc='Uses momentum')
+
+    out_file = File(argstr='./%s', position=2, genfile=True, desc='output filename or True to generate one')
+    out_curvature_file = File(argstr='-c ./%s', desc='Write curvature to ?h.curvname (default "curv")')
+    out_area_file = File(argstr='-b ./%s', desc='Write area to ?h.areaname (default "area")')
+
+class SmoothTessellationOutputSpec(TraitedSpec):
+    """
+    This program smooths the tessellation of a surface using 'mris_smooth'
+    """
+    surface = File(exists=True, desc='Smoothed surface file ')
+
+
+class SmoothTessellation(FSCommand):
+    """
+    This program smooths the tessellation of a surface using 'mris_smooth'
+
+    .. seealso::
+
+        SurfaceSmooth() Interface
+            For smoothing a scalar field along a surface manifold
+
+    Example:
+
+    import nipype.interfaces.freesurfer as fs
+    smooth = fs.SmoothTessellation()
+    smooth.inputs.in_file = 'lh.hippocampus.stl'
+    smooth.run() # doctest: +SKIP
+    """
+    _cmd = 'mris_smooth'
+    input_spec = SmoothTessellationInputSpec
+    output_spec = SmoothTessellationOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['surface'] = self._gen_outfilename()
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_file':
+            return self._gen_outfilename()
+        else:
+            return None
+
+    def _gen_outfilename(self):
+        if isdefined(self.inputs.out_file):
+            return os.path.abspath(self.inputs.out_file)
+        else:
+            _, name, ext = split_filename(self.inputs.in_file)
+            return os.path.abspath(name + '_smoothed' + ext)
+
