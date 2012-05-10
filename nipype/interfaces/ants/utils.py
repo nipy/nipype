@@ -152,7 +152,7 @@ class WarpImageMultiTransform(ANTSCommand):
                     isdefined(self.inputs.invert_affine):
                     affine_counter += 1
                     if affine_counter in self.inputs.invert_affine:
-                        series += ['-i']
+                        series += '-i'
                 series += [transformation]
             return ' '.join(series)
         return super(WarpImageMultiTransform, self)._format_arg(opt, spec, val)
