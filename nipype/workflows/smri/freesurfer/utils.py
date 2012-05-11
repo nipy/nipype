@@ -73,7 +73,7 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
       fssource: used to retrieve aseg.mgz
       threshold : binarize aseg
       register : coregister source file to freesurfer space
-      voltransform: convert binarized aseg to source file space
+      voltransform: convert binarized aparc+aseg to source file space
 
     """
 
@@ -101,7 +101,7 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
                                    ('contrast_type', 'contrast_type')]),
             (inputnode, voltransform, [('subjects_dir', 'subjects_dir'),
                                        ('source_file', 'source_file')]),
-            (fssource, threshold, [('aseg', 'in_file')]),
+            (fssource, threshold, [('aparc_aseg', 'in_file')]),
             (register, voltransform, [('out_reg_file','reg_file')]),
             (threshold, voltransform, [('binary_file','target_file')])
             ])
