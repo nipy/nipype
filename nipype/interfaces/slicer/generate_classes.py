@@ -24,20 +24,20 @@ from nipype.interfaces.slicer.base import SlicerCommandLine\n\n\n"""
 
 
 def crawl_code_struct(code_struct, package_dir):
-    for k, v in object.iteritems():
+    for k, v in code_struct.iteritems():
         if isinstance(v, str) or isinstance(v, unicode):
-            module_name = k
+            module_name = k.lower()
             class_name = k
             class_code = v
             add_class_to_package([class_code], [class_name], module_name, package_dir)
         elif isinstance(v[v.keys()[0]], str) or isinstance(v[v.keys()[0]], unicode):
-            module_name = k
+            module_name = k.lower()
             add_class_to_package(v.values(), v.keys(), module_name, package_dir)
         else:
             f_i = open(os.path.join(package_dir, "__init__.py"), 'a+')
-            f_i.write("from %s import *\n" % k)
+            f_i.write("from %s import *\n" % k.lower())
             f_i.close()
-            new_pkg_dir = os.path.join(package_dir, k)
+            new_pkg_dir = os.path.join(package_dir, k.lower())
             if os.path.exists(new_pkg_dir):
                 rmtree(new_pkg_dir)
             os.mkdir(new_pkg_dir)
@@ -64,7 +64,8 @@ def generate_all_classes(modules_list=[], launcher=[]):
         if module_name not in cur_package:
             cur_package[module_name] = {}
         cur_package[module_name][module] = code
-    os.unlink("__init__.py")
+    if os.path.exists("__init__.py"):
+        os.unlink("__init__.py")
     crawl_code_struct(all_code, os.getcwd())
 
 
