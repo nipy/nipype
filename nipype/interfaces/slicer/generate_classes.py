@@ -5,6 +5,43 @@ correctly you must have your CLI executabes in $PATH"""
 
 import xml.dom.minidom
 import subprocess
+import os
+from shutil import rmtree
+
+
+def add_class_to_package(class_codes, class_names, module_name, package_dir):
+    module_python_filename = os.path.join(package_dir, "%s.py" % module_name)
+    f_m = open(module_python_filename, 'w')
+    f_i = open(os.path.join(package_dir, "__init__.py"), 'a+')
+    imports = """from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined, InputMultiPath, OutputMultiPath
+import os
+from nipype.interfaces.slicer.base import SlicerCommandLine\n\n\n"""
+    f_m.write(imports)
+    f_m.write("\n\n".join(class_codes))
+    f_i.write("from %s import %s\n" % (module_name, ", ".join(class_names)))
+    f_m.close()
+    f_i.close()
+
+
+def crawl_code_struct(code_struct, package_dir):
+    for k, v in object.iteritems():
+        if isinstance(v, str) or isinstance(v, unicode):
+            module_name = k
+            class_name = k
+            class_code = v
+            add_class_to_package([class_code], [class_name], module_name, package_dir)
+        elif isinstance(v[v.keys()[0]], str) or isinstance(v[v.keys()[0]], unicode):
+            module_name = k
+            add_class_to_package(v.values(), v.keys(), module_name, package_dir)
+        else:
+            f_i = open(os.path.join(package_dir, "__init__.py"), 'a+')
+            f_i.write("from %s import *\n" % k)
+            f_i.close()
+            new_pkg_dir = os.path.join(package_dir, k)
+            if os.path.exists(new_pkg_dir):
+                rmtree(new_pkg_dir)
+            os.mkdir(new_pkg_dir)
+            crawl_code_struct(v, new_pkg_dir)
 
 
 def generate_all_classes(modules_list=[], launcher=[]):
@@ -12,28 +49,23 @@ def generate_all_classes(modules_list=[], launcher=[]):
         launcher containtains the command line prefix wrapper arugments needed to prepare
         a proper environment for each of the modules.
     """
-    init_imports = ""
-    f = open("cli_modules.py", 'w')
-    imports = """from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined, InputMultiPath, OutputMultiPath
-import os\n\n\n"""
-    f.write(imports)
-    class_defs = []
-    packages = {}
+    all_code = {}
     for module in modules_list:
-        module_python_filename="%s.py"%module
-        print("="*80)
-        print("Generating Definition for module {0} in {1}".format(module,module_python_filename))
-        print("^"*80)
-        package, code = generate_class(module,launcher)
-        for package in package.strip().split(" ")[0].split("."):
-            packages[package]
-        class_defs.append(code)
-    f.write("\n\n\n".join(class_defs))
-    f.close()
-
-    f = open("__init__.py", "w")
-    f.write("from cli_modules import %s\n"%", ".join(modules_list))
-    f.close()
+        print("=" * 80)
+        print("Generating Definition for module {0}".format(module))
+        print("^" * 80)
+        package, code = generate_class(module, launcher)
+        cur_package = all_code
+        module_name = package.strip().split(" ")[0].split(".")[-1]
+        for package in package.strip().split(" ")[0].split(".")[:-1]:
+            if package not in cur_package:
+                cur_package[package] = {}
+            cur_package = cur_package[package]
+        if module_name not in cur_package:
+            cur_package[module_name] = {}
+        cur_package[module_name][module] = code
+    os.unlink("__init__.py")
+    crawl_code_struct(all_code, os.getcwd())
 
 
 def generate_class(module,launcher):
@@ -52,6 +84,8 @@ def generate_class(module,launcher):
         el = dom.getElementsByTagName(desc_str)
         if el and el[0].firstChild:
             class_string += desc_str + ": " + el[0].firstChild.nodeValue + "\n\n"
+        if desc_str == 'category':
+            category = el[0].firstChild.nodeValue
     class_string += "\"\"\""
 
     for paramGroup in dom.getElementsByTagName("parameters"):
@@ -176,7 +210,7 @@ def generate_class(module,launcher):
 
     main_class = template.replace('%class_str%', class_string).replace("%name%", module).replace("%output_filenames_code%", output_filenames_code).replace("%launcher%", " ".join(launcher))
 
-    return input_spec_code + output_spec_code + main_class
+    return category, input_spec_code + output_spec_code + main_class
 
 
 def grab_xml(module, launcher):
