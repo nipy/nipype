@@ -21,8 +21,11 @@ datasource.inputs.template_args = dict(struct=[['subject_id', 'struct']])
 datasource.inputs.subject_id = subject_list
 
 recon_all = pe.MapNode(interface=ReconAll(), name='recon_all',
-                       iterfield=['subject_id'])
+                       iterfield=['subject_id', 'T1_files'])
 recon_all.inputs.subject_id = subject_list
+if not os.path.exists(subjects_dir):
+    os.mkdir(subjects_dir)
+recon_all.inputs.subjects_dir = subjects_dir
 
 wf.connect(datasource, 'struct', recon_all, 'T1_files')
 
