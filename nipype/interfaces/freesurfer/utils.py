@@ -963,3 +963,36 @@ class SmoothTessellation(FSCommand):
             _, name, ext = split_filename(self.inputs.in_file)
             return os.path.abspath(name + '_smoothed' + ext)
 
+
+class MakeAverageSubjectInputSpec(FSTraitedSpec):
+    subjects_ids = traits.List(traits.Str(), argstr='--subjects %s',
+                               desc='freesurfer subjects ids to average',
+                               mandatory=True, sep=' ')
+    out_name = File('average', argstr='--out %s',
+                    desc='name for the average subject', usedefault=True)
+
+
+class MakeAverageSubjectOutputSpec(TraitedSpec):
+    average_subject_name = traits.Str(desc='Output registration file')
+
+
+class MakeAverageSubject(FSCommand):
+    """
+    Examples
+    --------
+
+    >>> from nipype.interfaces.freesurfer import MakeAverageSubject
+    >>> avg = MakeAverageSubject(subjects_ids=['s1', 's2'])
+    >>> avg.cmdline
+    'make_average_subject --out average --subjects s1 s2'
+
+    """
+
+    _cmd = 'make_average_subject'
+    input_spec = MakeAverageSubjectInputSpec
+    output_spec = MakeAverageSubjectOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['average_subject_name'] = self.inputs.out_name
+        return outputs

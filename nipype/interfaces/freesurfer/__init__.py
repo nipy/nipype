@@ -11,4 +11,4 @@ from .model import (MRISPreproc, GLMFit, OneSampleTTest, Binarize, Concatenate,
                     SegStats, Label2Vol)
 from .utils import (SampleToSurface, SurfaceSmooth, SurfaceTransform,
                     SurfaceSnapshots,ApplyMask, MRIsConvert, MRITessellate,
-                    MRIMarchingCubes, SmoothTessellation)
+                    MRIMarchingCubes, SmoothTessellation, MakeAverageSubject)
