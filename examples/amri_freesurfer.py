@@ -33,7 +33,7 @@ wf.connect(datasource, 'struct', recon_all, 'T1_files')
 def MakeAverageSubject(subjects_dir, subjects_list, out_name):
     from nipype.interfaces.base import CommandLine
     mas = CommandLine(command='make_average_subject')
-    mas.inputs.args = "--sdir %s --subjects %s --out %s"%(subjects_dir, " "%subject_list, out_name)
+    mas.inputs.args = "--sdir %s --subjects %s --out %s"%(subjects_dir[0], " "%subjects_list, out_name)
     mas.run()
     return subjects_dir, out_name
 
