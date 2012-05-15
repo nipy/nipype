@@ -1,8 +1,8 @@
 import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
-import nipype.interfaces.utility as util
 import os
 from nipype.interfaces.freesurfer.preprocess import ReconAll
+from nipype.interfaces.freesurfer.utils import MakeAverageSubject
 
 subject_list = ['s1', 's3']
 data_dir = os.path.abspath('data')
@@ -29,25 +29,9 @@ recon_all.inputs.subjects_dir = subjects_dir
 
 wf.connect(datasource, 'struct', recon_all, 'T1_files')
 
+average = pe.Node(interface=MakeAverageSubject(), name="average")
+average.inputs.subjects_dir = subjects_dir
 
-def MakeAverageSubject(subjects_dir, subjects_list, out_name):
-    from nipype.interfaces.base import CommandLine
-    mas = CommandLine(command='make_average_subject')
-    mas.inputs.args = "--sdir %s --subjects %s --out %s"%(subjects_dir[0], " ".join(subjects_list), out_name)
-    mas.run()
-    return subjects_dir, out_name
-
-average = pe.Node(interface=util.Function(input_names=['subjects_dir',
-                                                       'subjects_list',
-                                                       'out_name'],
-                                          output_names=['subjects_dir',
-                                                        'out_name'],
-                                          function=MakeAverageSubject),
-                  name="average")
-
-average.inputs.out_name = "average"
-
-wf.connect(recon_all, 'subjects_dir', average, 'subjects_dir')
-wf.connect(recon_all, 'subject_id', average, 'subjects_list')
+wf.connect(recon_all, 'subject_id', average, 'subjects_ids')
 
 wf.run("MultiProc", plugin_args={'n_procs': 4})
