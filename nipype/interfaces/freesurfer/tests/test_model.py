@@ -288,3 +288,19 @@ def test_segstats():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+def test_MS_LDA():
+    input_map = dict(images = dict(mandatory=True, argstr='%s',copyfile=False),
+                     lda_labels = dict(argstr='-lda %d %d', mandatory=True, minlen=2, maxlen=2),
+                     label_file = dict(argstr='-label %s', exists=True),
+                     mask_file = dict(argstr='-mask %s', exists=True),
+                     weight = dict(argstr='-weight %s', mandatory=True),
+                     shift = dict(argstr='-shift %d'),
+                     synth = dict(exists=False, argstr='-synth %s'),
+                     conform = dict(argstr='-conform'),
+                     use_weights = dict(argstr='-W')
+                     )
+    instance = freesurfer.MS_LDA()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
