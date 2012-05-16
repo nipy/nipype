@@ -12,6 +12,7 @@
 __docformat__ = 'restructuredtext'
 
 import os
+import os.path as op
 from glob import glob
 #import itertools
 import numpy as np
@@ -726,28 +727,32 @@ class BBRegister(FSCommand):
     def _list_outputs(self):
 
         outputs = self.output_spec().get()
-        _source_file = self.inputs.source_file
-        outputs['out_reg_file'] = self.inputs.out_reg_file
+        _in = self.inputs
 
-        if not isdefined(self.inputs.out_reg_file) and _source_file:
-            suffix = suffix='_bbreg_%s.dat' % self.inputs.subject_id
-            outputs['out_reg_file'] = fname_presuffix(_source_file,
+        if isdefined(_in.out_reg_file):
+            outputs['out_reg_file'] = op.abspath(_in.out_reg_file)
+        elif _in.source_file:
+            suffix = '_bbreg_%s.dat' % self.inputs.subject_id
+            outputs['out_reg_file'] = fname_presuffix(_in.source_file,
                                                       suffix=suffix,
                                                       use_ext=False)
 
-        if isdefined(self.inputs.registered_file):
-            outputs['registered_file'] = self.inputs.registered_file
-            if isinstance(self.inputs.registered_file, bool):
-                outputs['registered_file'] = fname_presuffix(_source_file,
+        if isdefined(_in.registered_file):
+            if isinstance(_in.registered_file, bool):
+                outputs['registered_file'] = fname_presuffix(_in.source_file,
                                                              suffix='_bbreg')
+            else:
+                outputs['registered_file'] = op.abspath(_in.registered_file)
 
-        if isdefined(self.inputs.out_fsl_file):
-            outputs['out_fsl_file'] = self.inputs.out_fsl_file
-            if isinstance(self.inputs.out_fsl_file, bool):
-                suffix='_bbreg_%s.mat' % self.inputs.subject_id,
-                out_fsl_file = fname_presuffix(self.inputs.source_file,
-                                               suffix=suffix, use_ext=False)
+        if isdefined(_in.out_fsl_file):
+            if isinstance(_in.out_fsl_file, bool):
+                suffix='_bbreg_%s.mat' % _in.subject_id,
+                out_fsl_file = fname_presuffix(_in.source_file,
+                                               suffix=suffix,
+                                               use_ext=False)
                 outputs['out_fsl_file'] = out_fsl_file
+            else:
+                outputs['out_fsl_file'] = op.abspath(_in.out_fsl_file)
 
         outputs['min_cost_file'] = outputs['out_reg_file'] + '.mincost'
         return outputs
