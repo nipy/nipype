@@ -14,7 +14,7 @@ class ANTSCommandInputSpec(CommandLineInputSpec):
     """Base Input Specification for all ANTS Commands
     """
 
-    num_threads = traits.Int(1, usedefault=True,
+    num_threads = traits.Int(1, usedefault=True, nohash=True,
                              desc="Number of ITK threads to use")
 
 
