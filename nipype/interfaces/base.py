@@ -457,6 +457,8 @@ class BaseTraitedSpec(traits.HasTraits):
         for name, val in sorted(self.get().items()):
             if isdefined(val):
                 trait = self.trait(name)
+                if has_metadata(trait.trait_type, "nohash", True):
+                    continue
                 hash_files = not has_metadata(trait.trait_type, "hash_files", False)
                 dict_nofilename[name] = self._get_sorteddict(val, hash_method=hash_method, hash_files=hash_files)
                 dict_withhash[name] = self._get_sorteddict(val, True, hash_method=hash_method, hash_files=hash_files)
@@ -604,7 +606,8 @@ class Interface(object):
 
 class BaseInterfaceInputSpec(TraitedSpec):
     ignore_exception = traits.Bool(False, desc="Print an error message instead \
-of throwing an exception in case the interface fails to run", usedefault=True)
+of throwing an exception in case the interface fails to run", usedefault=True,
+                                   nohash=True)
 
 
 class BaseInterface(Interface):
@@ -987,7 +990,8 @@ def run_command(runtime, timeout=0.2):
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
-    environ = traits.DictStrStr(desc='Environment variables', usedefault=True)
+    environ = traits.DictStrStr(desc='Environment variables', usedefault=True,
+                                nohash=True)
 
 
 class CommandLine(BaseInterface):
