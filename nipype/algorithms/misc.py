@@ -825,7 +825,7 @@ class MergeCSVFiles(BaseInterface):
         if isdefined(self.inputs.extra_field):
             extrafieldlist = []
             if len(shape) > 1:
-                mx = shape[1]
+                mx = shape[0]
             else:
                 mx = 1
             for idx in range(0,mx):

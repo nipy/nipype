@@ -275,6 +275,12 @@ def compute_singlevalued_measures(ntwk, weighted=True, calculate_cliques=False):
     measures['transitivity'] = nx.transitivity(ntwk)
     iflogger.info('...Computing number of connected_components...')
     measures['number_connected_components'] = nx.number_connected_components(ntwk)
+    iflogger.info('...Computing graph density...')
+    measures['graph_density'] = nx.density(ntwk)
+    iflogger.info('...Recording number of edges...')
+    measures['number_of_edges'] = nx.number_of_edges(ntwk)
+    iflogger.info('...Recording number of nodes...')
+    measures['number_of_nodes'] = nx.number_of_nodes(ntwk)
     iflogger.info('...Computing average clustering...')
     measures['average_clustering'] = nx.average_clustering(ntwk)
     if nx.is_connected(ntwk):
