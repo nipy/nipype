@@ -692,8 +692,6 @@ def remove_identical_paths(in_files):
 
 def maketypelist(rowheadings, shape, extraheadingBool, extraheading):
     typelist = []
-    import ipdb
-    ipdb.set_trace()
     if rowheadings:
         typelist.append(('heading','a40'))
     if len(shape) > 1:
@@ -711,8 +709,6 @@ def makefmtlist(output_array, typelist, rowheadingsBool, shape, extraheadingBool
     fmtlist = []
     if rowheadingsBool:
         fmtlist.append('%s')
-    import ipdb
-    ipdb.set_trace()
     if len(shape) > 1:
         output = np.zeros(max(shape), typelist)
         for idx in range(1,min(shape)+1):
@@ -823,12 +819,16 @@ class MergeCSVFiles(BaseInterface):
             for row_heading in row_heading_list:
                 row_heading_with_quotes = '"' + row_heading + '"'
                 row_heading_list_with_quotes.append(row_heading_with_quotes)
-            row_headings = np.array(row_heading_list_with_quotes)
+            row_headings = np.array(row_heading_list_with_quotes, dtype='|S40')
             output['heading'] = row_headings
 
         if isdefined(self.inputs.extra_field):
             extrafieldlist = []
-            for idx in range(0,max(shape)):
+            if len(shape) > 1:
+                mx = shape[1]
+            else:
+                mx = 1
+            for idx in range(0,mx):
                 extrafieldlist.append(self.inputs.extra_field)
             iflogger.info(len(extrafieldlist))
             output[extraheading] = extrafieldlist

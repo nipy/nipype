@@ -54,6 +54,8 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
    
     Matlab2CSV_global = Matlab2CSV_node.clone(name="Matlab2CSV_global")
     MergeCSVFiles_global = MergeCSVFiles_node.clone(name="MergeCSVFiles_global")
+    MergeCSVFiles_global.inputs.extra_column_heading = extra_column_heading
+
 
     mergeNetworks = pe.Node(interface=util.Merge(2), name="mergeNetworks")
     mergeCSVs = mergeNetworks.clone("mergeCSVs")
@@ -68,9 +70,9 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     pipeline.connect([(inputnode, MergeCSVFiles_node, [(("network_file", pullnodeIDs), "row_headings")])])
 
     pipeline.connect([(Matlab2CSV_global, MergeCSVFiles_global,[("csv_files","in_files")])])
-    pipeline.connect([(Matlab2CSV_global, MergeCSVFiles_global, [(("csv_files", remove_identical_paths), "row_headings")])])
-    MergeCSVFiles_global.inputs.row_heading_title = 'metric'
-    MergeCSVFiles_global.inputs.column_headings = ['average']
+    pipeline.connect([(Matlab2CSV_global, MergeCSVFiles_global, [(("csv_files", remove_identical_paths), "column_headings")])])
+    #MergeCSVFiles_global.inputs.row_heading_title = 'metric'
+    #MergeCSVFiles_global.inputs.column_headings = ['average']
 
     pipeline.connect([(inputnode, MergeCSVFiles_global, [(("extra_field", add_global_to_filename), "out_file")])])
     pipeline.connect([(inputnode, MergeCSVFiles_global,[("extra_field","extra_field")])])
