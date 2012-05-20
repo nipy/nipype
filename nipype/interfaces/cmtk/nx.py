@@ -280,6 +280,9 @@ def compute_singlevalued_measures(ntwk, weighted=True, calculate_cliques=False):
     if nx.is_connected(ntwk):
         iflogger.info('...Calculating average shortest path length...')
         measures['average_shortest_path_length'] = nx.average_shortest_path_length(ntwk, weighted)
+    else:
+        iflogger.info('...Calculating average shortest path length...')
+        measures['average_shortest_path_length'] = nx.average_shortest_path_length(nx.connected_component_subgraphs(ntwk)[0], weighted)
     if calculate_cliques:
         iflogger.info('...Computing graph clique number...')
         measures['graph_clique_number'] = nx.graph_clique_number(ntwk) #out of memory error
