@@ -732,7 +732,7 @@ class BBRegister(FSCommand):
         if isdefined(_in.out_reg_file):
             outputs['out_reg_file'] = op.abspath(_in.out_reg_file)
         elif _in.source_file:
-            suffix = '_bbreg_%s.dat' % self.inputs.subject_id
+            suffix = '_bbreg_%s.dat' % _in.subject_id
             outputs['out_reg_file'] = fname_presuffix(_in.source_file,
                                                       suffix=suffix,
                                                       use_ext=False)
@@ -746,7 +746,7 @@ class BBRegister(FSCommand):
 
         if isdefined(_in.out_fsl_file):
             if isinstance(_in.out_fsl_file, bool):
-                suffix='_bbreg_%s.mat' % _in.subject_id,
+                suffix='_bbreg_%s.mat' % _in.subject_id
                 out_fsl_file = fname_presuffix(_in.source_file,
                                                suffix=suffix,
                                                use_ext=False)
