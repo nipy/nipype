@@ -872,7 +872,7 @@ class DARTEL(SPMCommand):
                 new_param['slam'] = param[3]
                 params.append(new_param)
             return params
-        elif opt == 'optimization parameters':
+        elif opt == 'optimization_parameters':
             new_param = {}
             new_param['lmreg'] = val[0]
             new_param['cyc'] = val[1]
