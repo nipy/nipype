@@ -1222,8 +1222,12 @@ class PRELUDE(FSLCommand):
         outputs = self._outputs().get()
         out_file = self.inputs.unwrapped_phase_file
         if not isdefined(out_file):
-            out_file = self._gen_fname(self.inputs.in_file,
-                                      suffix='_unwrapped')
+            if isdefined(self.inputs.phase_file):
+                out_file = self._gen_fname(self.inputs.phase_file,
+                                           suffix='_unwrapped')
+            elif isdefined(self.inputs.complex_phase_file):
+                out_file = self._gen_fname(self.inputs.phase_file,
+                                           suffix='_phase_unwrapped')
         outputs['unwrapped_phase_file'] = os.path.abspath(out_file)
         return outputs
 
