@@ -964,7 +964,7 @@ class DARTELNorm2MNI(SPMCommand):
             if not isinstance(val, tuple):
                 return [val, val, val]
             if isinstance(val, tuple):
-                return val
+                return list( val )
         elif opt == 'modulate':
             return int(val)
         else:
