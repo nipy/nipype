@@ -748,13 +748,14 @@ class MRIsConvert(FSCommand):
     """
     Uses Freesurfer's mris_convert to convert surface files to various formats
 
-    Example:
+    Example
+    -------
 
-    import nipype.interfaces.freesurfer as fs
-    mris = fs.MRIs_Convert()
-    mris.inputs.in_file = 'lh.pial'
-    mris.inputs.out_datatype = 'gii'
-    mris.run() # doctest: +SKIP
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> mris = fs.MRIs_Convert()
+    >>> mris.inputs.in_file = 'lh.pial'
+    >>> mris.inputs.out_datatype = 'gii'
+    >>> mris.run() # doctest: +SKIP
     """
     _cmd = 'mris_convert'
     input_spec = MRIsConvertInputSpec
@@ -810,14 +811,15 @@ class MRITessellate(FSCommand):
     """
     Uses Freesurfer's mri_tessellate to create surfaces by tessellating a given input volume
 
-    Example:
+    Example
+    -------
 
-    import nipype.interfaces.freesurfer as fs
-    tess = fs.MRITessellate()
-    tess.inputs.in_file = 'aseg.mgz'
-    tess.inputs.label_value = 17
-    tess.inputs.out_file = 'lh.hippocampus'
-    tess.run() # doctest: +SKIP
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> tess = fs.MRITessellate()
+    >>> tess.inputs.in_file = 'aseg.mgz'
+    >>> tess.inputs.label_value = 17
+    >>> tess.inputs.out_file = 'lh.hippocampus'
+    >>> tess.run() # doctest: +SKIP
     """
     _cmd = 'mri_tessellate'
     input_spec = MRITessellateInputSpec
@@ -864,14 +866,15 @@ class MRIMarchingCubes(FSCommand):
     """
     Uses Freesurfer's mri_mc to create surfaces by tessellating a given input volume
 
-    Example:
+    Example
+    -------
 
-    import nipype.interfaces.freesurfer as fs
-    mc = fs.MRIMarchingCubes()
-    mc.inputs.in_file = 'aseg.mgz'
-    mc.inputs.label_value = 17
-    mc.inputs.out_file = 'lh.hippocampus'
-    mc.run() # doctest: +SKIP
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> mc = fs.MRIMarchingCubes()
+    >>> mc.inputs.in_file = 'aseg.mgz'
+    >>> mc.inputs.label_value = 17
+    >>> mc.inputs.out_file = 'lh.hippocampus'
+    >>> mc.run() # doctest: +SKIP
     """
     _cmd = 'mri_mc'
     input_spec = MRIMarchingCubesInputSpec
@@ -934,12 +937,13 @@ class SmoothTessellation(FSCommand):
         SurfaceSmooth() Interface
             For smoothing a scalar field along a surface manifold
 
-    Example:
+    Example
+    -------
 
-    import nipype.interfaces.freesurfer as fs
-    smooth = fs.SmoothTessellation()
-    smooth.inputs.in_file = 'lh.hippocampus.stl'
-    smooth.run() # doctest: +SKIP
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> smooth = fs.SmoothTessellation()
+    >>> smooth.inputs.in_file = 'lh.hippocampus.stl'
+    >>> smooth.run() # doctest: +SKIP
     """
     _cmd = 'mris_smooth'
     input_spec = SmoothTessellationInputSpec
@@ -977,7 +981,8 @@ class MakeAverageSubjectOutputSpec(TraitedSpec):
 
 
 class MakeAverageSubject(FSCommand):
-    """
+    """Make an average freesurfer subject
+    
     Examples
     --------
 
