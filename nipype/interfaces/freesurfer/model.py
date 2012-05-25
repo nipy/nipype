@@ -1,6 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The freesurfer module provides basic functions for interfacing with freesurfer tools.
+"""The freesurfer module provides basic functions for interfacing with
+   freesurfer tools.
 
    Change directory to provide relative paths for doctests
    >>> import os
@@ -769,21 +770,35 @@ class Label2Vol(FSCommand):
             return self._list_outputs()[name]
         return None
 
+
 class MS_LDAInputSpec(FSTraitedSpec):
-    lda_labels = traits.List(traits.Int(), argstr='-lda %s', mandatory=True, minlen=2, maxlen=2, sep=' ', position=1,
+    lda_labels = traits.List(traits.Int(), argstr='-lda %s', mandatory=True,
+                             minlen=2, maxlen=2, sep=' ', position=1,
                              desc='pair of class labels to optimize')
-    weight_file = traits.File(argstr='-weight %s', mandatory=True, position=2, desc='filename for the LDA weights (input or output)')
-    output_synth = traits.File(exists=False, argstr='-synth %s', mandatory=True, position=3, desc='filename for the synthesized output volume')
-    label_file = traits.File(exists=True, argstr='-label %s', position=4, desc='filename of the label volume')
-    mask_file = traits.File(exists=True, argstr='-mask %s', position=5, desc='filename of the brain mask volume')
-    shift = traits.Int(argstr='-shift %d', position=6, desc='shift all values equal to the given value to zero')
-    conform = traits.Bool(argstr='-conform', position=7, desc='Conform the input volumes (brain mask typically already conformed)')
-    use_weights = traits.Bool(argstr='-W', position=8, desc='Use the weights from a previously generated weight file')
-    images = InputMultiPath(File(exists=True), argstr='%s', mandatory=True, copyfile=False, desc='list of input FLASH images' )
+    weight_file = traits.File(argstr='-weight %s', mandatory=True,
+                              position=2,
+                              desc='filename for the LDA weights (input or output)')
+    output_synth = traits.File(exists=False, argstr='-synth %s',
+                               mandatory=True, position=3,
+                               desc='filename for the synthesized output volume')
+    label_file = traits.File(exists=True, argstr='-label %s', position=4,
+                             desc='filename of the label volume')
+    mask_file = traits.File(exists=True, argstr='-mask %s', position=5,
+                            desc='filename of the brain mask volume')
+    shift = traits.Int(argstr='-shift %d', position=6,
+                       desc='shift all values equal to the given value to zero')
+    conform = traits.Bool(argstr='-conform', position=7,
+                          desc='Conform the input volumes (brain mask typically already conformed)')
+    use_weights = traits.Bool(argstr='-W', position=8,
+                              desc='Use the weights from a previously generated weight file')
+    images = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
+                            copyfile=False, desc='list of input FLASH images')
+
 
 class MS_LDAOutputSpec(TraitedSpec):
     weight_file = File(exists=True, desc='')
     vol_synth_file = File(exists=True, desc='')
+
 
 class MS_LDA(FSCommand):
     """Perform LDA reduction on the intensity space of an arbitrary # of FLASH images
@@ -821,7 +836,8 @@ class MS_LDA(FSCommand):
         if name is 'use_weights':
             if self.inputs.use_weights is True:
                 self._verify_weights_file_exists()
-            else: return ''
+            else:
+                return ''
                 # TODO: Fix bug when boolean values are set explicitly to false
         return super(MS_LDA, self)._format_arg(name, spec, value)
 
