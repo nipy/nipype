@@ -134,6 +134,16 @@ class WarpImageMultiTransform(ANTSCommand):
     >>> wimt.cmdline
     'WarpImageMultiTransform 3 structural.nii structural_wimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz ants_Affine.txt'
 
+
+    >>> from nipype.interfaces.ants import WarpImageMultiTransform
+    >>> wimt = WarpImageMultiTransform()
+    >>> wimt.inputs.moving_image = 'diffusion_weighted.nii'
+    >>> wimt.inputs.reference_image = 'functional.nii'
+    >>> wimt.inputs.transformation_series = ['func2anat_coreg_Affine.txt','func2anat_InverseWarp.nii.gz','dwi2anat_Warp.nii.gz','dwi2anat_coreg_Affine.txt']
+    >>> wimt.inputs.invert_affine = [1]
+    >>> wimt.cmdline
+    'WarpImageMultiTransform 3 diffusion_weighted.nii diffusion_weighted_wimt.nii -R functional.nii -i func2anat_coreg_Affine.txt func2anat_InverseWarp.nii.gz dwi2anat_Warp.nii.gz dwi2anat_coreg_Affine.txt'
+
     """
 
     _cmd = 'WarpImageMultiTransform'
@@ -152,7 +162,7 @@ class WarpImageMultiTransform(ANTSCommand):
                     isdefined(self.inputs.invert_affine):
                     affine_counter += 1
                     if affine_counter in self.inputs.invert_affine:
-                        series += ['-i']
+                        series += '-i'
                 series += [transformation]
             return ' '.join(series)
         return super(WarpImageMultiTransform, self)._format_arg(opt, spec, val)
@@ -217,6 +227,14 @@ class WarpTimeSeriesImageMultiTransform(ANTSCommand):
     >>> wtsimt.cmdline
     'WarpTimeSeriesImageMultiTransform 4 resting.nii resting_wtsimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz ants_Affine.txt'
 
+    >>> from nipype.interfaces.ants import WarpTimeSeriesImageMultiTransform
+    >>> wtsimt = WarpTimeSeriesImageMultiTransform()
+    >>> wtsimt.inputs.moving_image = 'resting.nii'
+    >>> wtsimt.inputs.reference_image = 'diffusion_weighted.nii'
+    >>> wtsimt.inputs.transformation_series = ['dwi2anat_coreg_Affine.txt','dwi2anat_InverseWarp.nii.gz','resting2anat_Warp.nii.gz','resting2anat_coreg_Affine.txt']
+    >>> wtsimt.inputs.invert_affine = [1]
+    >>> wtsimt.cmdline
+    'WarpTimeSeriesImageMultiTransform 4 resting.nii resting_wtsimt.nii -R diffusion_weighted.nii -i dwi2anat_coreg_Affine.txt dwi2anat_InverseWarp.nii.gz resting2anat_Warp.nii.gz resting2anat_coreg_Affine.txt'
     """
 
     _cmd = 'WarpTimeSeriesImageMultiTransform'
@@ -235,7 +253,7 @@ class WarpTimeSeriesImageMultiTransform(ANTSCommand):
                     isdefined(self.inputs.invert_affine):
                     affine_counter += 1
                     if affine_counter in self.inputs.invert_affine:
-                        series += ['-i'],
+                        series += '-i',
                 series += [transformation]
             return ' '.join(series)
         return super(WarpTimeSeriesImageMultiTransform, self)._format_arg(opt, spec, val)
