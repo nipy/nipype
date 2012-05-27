@@ -294,9 +294,11 @@ class SurfaceSmooth(FSCommand):
 
 
 class SurfaceTransformInputSpec(FSTraitedSpec):
-
     source_file = File(exists=True, mandatory=True, argstr="--sval %s",
                        help="surface file with source values")
+    source_annot_file = File(exists=True, mandatory=True, argstr="--sval-annot %s",
+                             xor=['source_file'],
+                             help="surface annotation file")
     source_subject = traits.String(mandatory=True, argstr="--srcsubject %s",
                                    help="subject id for source surface")
     hemi = traits.Enum("lh", "rh", argstr="--hemi %s", mandatory=True,
@@ -305,14 +307,15 @@ class SurfaceTransformInputSpec(FSTraitedSpec):
                                    help="subject id of target surface")
     target_ico_order = traits.Enum(1, 2, 3, 4, 5, 6, 7, argstr="--trgicoorder %d",
                                    help="order of the icosahedron if target_subject is 'ico'")
-    target_type = traits.Enum(filetypes, help="output format")
+    source_type = traits.Enum(filetypes, argstr='--sfmt %s', requires=['source_file'], 
+                              help="source file format")
+    target_type = traits.Enum(filetypes, argstr='--tfmt %s', help="output format")
     reshape = traits.Bool(argstr="--reshape", help="reshape output surface to conform with Nifti")
     reshape_factor = traits.Int(argstr="--reshape-factor", help="number of slices in reshaped image")
     out_file = File(argstr="--tval %s", genfile=True, desc="surface file to write")
 
 
 class SurfaceTransformOutputSpec(TraitedSpec):
-
     out_file = File(exists=True, desc="transformed surface file")
 
 
