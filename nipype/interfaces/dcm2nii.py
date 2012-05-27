@@ -8,7 +8,7 @@ from nipype.utils.filemanip import split_filename
 import re
 
 class Dcm2niiInputSpec(CommandLineInputSpec):
-    source_names = InputMultiPath(File(exists=True), argstr="%s", position=9, mandatory=True)
+    source_names = InputMultiPath(File(exists=True), argstr="%s", position=10, mandatory=True)
     gzip_output = traits.Bool(False, argstr='-g', position=0, usedefault=True)
     nii_output = traits.Bool(True, argstr='-n', position=1, usedefault=True)
     anonymize = traits.Bool(argstr='-a', position=2)
@@ -18,6 +18,7 @@ class Dcm2niiInputSpec(CommandLineInputSpec):
     output_dir = Directory(exists=True, argstr='-o %s', genfile=True, position=6)
     config_file = File(exists=True, argstr="-b %s", genfile=True, position=7)
     convert_all_pars = traits.Bool(argstr='-v', position=8)
+    args = traits.Str(argstr='%s', desc='Additional parameters to the command', position=9)
 
 class Dcm2niiOutputSpec(TraitedSpec):
     converted_files = OutputMultiPath(File(exists=True))
