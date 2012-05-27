@@ -31,7 +31,7 @@ class Dcm2nii(CommandLine):
     _cmd = 'dcm2nii'
 
     def _format_arg(self, opt, spec, val):
-        if opt in ['gzip_output', 'nii_output', 'anonymize', 'id_in_filename']:
+        if opt in ['gzip_output', 'nii_output', 'anonymize', 'id_in_filename', 'reorient', 'reorient_and_crop']:
             spec = deepcopy(spec)
             if val:
                 spec.argstr += ' y'
