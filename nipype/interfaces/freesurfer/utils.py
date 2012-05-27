@@ -365,6 +365,8 @@ class SurfaceTransform(FSCommand):
                                                   suffix=".%s%s" % (self.inputs.target_subject, ext),
                                                   newpath=os.getcwd(),
                                                   use_ext=use_ext)
+        else:
+            outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
