@@ -295,6 +295,7 @@ class SurfaceSmooth(FSCommand):
 
 class SurfaceTransformInputSpec(FSTraitedSpec):
     source_file = File(exists=True, mandatory=True, argstr="--sval %s",
+                       xor=['source_annot_file'],
                        help="surface file with source values")
     source_annot_file = File(exists=True, mandatory=True, argstr="--sval-annot %s",
                              xor=['source_file'],
