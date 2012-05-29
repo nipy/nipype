@@ -336,12 +336,15 @@ def difference_graph(in_file1, in_file2, ntwk_res_file, keep_only_common_edges=-
     
     Writes the difference network as 'in_file2-in_file1_difference' [.pck, .gexf]
     and returns the name of the written networks
+    
+    By default it will do basic subtraction as described (if keep_only_common_edges is left undefined). 
+    The user can also specify  whether to retain only the common (keep_only_common_edges = True) or 
+    uncommon (keep_only_common_edges = False) edges between the two graphs. 
     """
     import networkx as nx
     import os.path as op
     from nipype.utils.filemanip import split_filename
     iflogger.info("Creating difference network: {in2} - {in1}".format(in2=in_file2, in1=in_file1))
-    matlab_network_list = []
     
     _, name1, _ = split_filename(in_file1)
     _, name2, _ = split_filename(in_file2)
@@ -414,7 +417,13 @@ def difference_graph(in_file1, in_file2, ntwk_res_file, keep_only_common_edges=-
     
     nx.write_gexf(diff_ntwk, op.abspath(network_name + '.gexf'))
     iflogger.info('Saving difference graph as {out}'.format(out=op.abspath(network_name + '.gexf')))
-    return network_name, matlab_network_list
+    diff_array = nx.to_numpy_matrix(diff_ntwk)
+    diff_array = np.array(diff_array)
+    diff_dict = {}
+    diff_dict[network_name] = diff_array
+    sio.savemat(op.abspath(network_name + '.mat'), diff_dict)
+    iflogger.info('Saving difference graph as {out}'.format(out=op.abspath(network_name + '.mat')))
+    return network_name
 
 
 class NetworkXMetricsInputSpec(BaseInterfaceInputSpec):
@@ -637,25 +646,31 @@ class AverageNetworks(BaseInterface):
 class DifferenceGraphInputSpec(BaseInterfaceInputSpec):
     in_file1 = File(exists=True, mandatory=True, desc='Network 1 for the equation: difference graph = in_file2 - in_file1')
     in_file2 = File(exists=True, mandatory=True, desc='Network 2 for the equation: difference graph = in_file2 - in_file1')
-    keep_only_common_edges = traits.Bool(desc='Only the edges common to both networks are kept in the difference graph. If False, only uncommon edges are kept.')
+    keep_only_common_edges = traits.Bool(desc='Only the edges common to both networks are kept in the difference graph.' \
+                                 'If False, only uncommon edges are kept. If undefined, all edges are considered')
     resolution_network_file = File(exists=True, desc='A network which defines where to place the nodes for the difference graph' \
                                 'If this is not provided, the interface will take node positions from in_file2.')
     out_gpickled_difference = File(desc='Difference network saved as a NetworkX .pck')
     out_gexf_difference = File(desc='Difference network saved as a .gexf file')
+    out_matlab_difference = File(desc='Difference network saved as a .mat file')
 
 class DifferenceGraphOutputSpec(TraitedSpec):
     gpickled_difference_graph = File(desc='Difference network saved as a NetworkX .pck')
     gexf_difference_graph = File(desc='Difference network saved as a .gexf file')
-    matlab_difference_graph = OutputMultiPath(File(desc='Difference network saved as a .gexf file'))
+    matlab_difference_graph = File(desc='Difference network saved as a MATLAB .mat file')
 
 class DifferenceGraph(BaseInterface):
     """
     Calculates and outputs the difference network given two input NetworkX gpickle files
-    By default, only edges common to both graphs are kept.
     
     * difference graph = in_file2 - in_file1
     
-
+    By default this interface will perform basic subtraction (if keep_only_common_edges is left undefined). 
+    The user can also specify whether to retain only the common (keep_only_common_edges = True) or 
+    uncommon (keep_only_common_edges = False) edges between the two graphs.
+    
+    Node positions and data can be input using a network resolution file. If one is not specified, they 
+    will be pulled from in_file2.
 
     Example
     -------
@@ -663,7 +678,7 @@ class DifferenceGraph(BaseInterface):
     >>> import nipype.interfaces.cmtk as cmtk
     >>> diff = cmtk.DifferenceGraph()
     >>> diff.inputs.in_file1 = 'subj1.pck'
-    >>> diff.inputs.in_file1 = 'subj2.pck'
+    >>> diff.inputs.in_file2 = 'subj2.pck'
     >>> diff.run()                 # doctest: +SKIP
 
     """
@@ -676,11 +691,10 @@ class DifferenceGraph(BaseInterface):
         else:
             ntwk_res_file = self.inputs.in_file2
 
-        global matlab_network_list
         if isdefined(self.inputs.keep_only_common_edges):
-            network_name, matlab_network_list = difference_graph(self.inputs.in_file1, self.inputs.in_file2, ntwk_res_file, self.inputs.keep_only_common_edges)
+            network_name = difference_graph(self.inputs.in_file1, self.inputs.in_file2, ntwk_res_file, self.inputs.keep_only_common_edges)
         else:
-            network_name, matlab_network_list = difference_graph(self.inputs.in_file1, self.inputs.in_file2, ntwk_res_file)
+            network_name = difference_graph(self.inputs.in_file1, self.inputs.in_file2, ntwk_res_file)
         return runtime
 
     def _list_outputs(self):
@@ -706,7 +720,11 @@ class DifferenceGraph(BaseInterface):
         else:
             outputs["gexf_difference_graph"] = op.abspath(self.inputs.out_gexf_difference)
 
-        outputs["matlab_difference_graph"] = matlab_network_list
+        if not isdefined(self.inputs.out_gexf_difference):
+            outputs["matlab_difference_graph"] = op.abspath(self._gen_outfilename('difference_' + name, 'mat'))
+        else:
+            outputs["matlab_difference_graph"] = op.abspath(self.inputs.out_gexf_difference)
+            
         return outputs
 
     def _gen_outfilename(self, name, ext):
