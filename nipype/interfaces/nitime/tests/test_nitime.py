@@ -1,5 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+import os
 import tempfile
 
 import numpy as np
@@ -9,6 +10,7 @@ from nipype.testing import example_data
 import nipype.interfaces.nitime as nitime
 
 no_nitime = not nitime.analysis.have_nitime
+display_available = 'DISPLAY' in os.environ and os.environ['DISPLAY']
 
 @skipif(no_nitime)
 def test_read_csv():
@@ -35,8 +37,9 @@ def test_coherence_analysis():
     CA = nitime.CoherenceAnalyzer()
     CA.inputs.TR = 1.89
     CA.inputs.in_file = example_data('fmri_timeseries.csv')
-    tmp_png = tempfile.mkstemp(suffix='.png')[1]
-    CA.inputs.output_figure_file = tmp_png
+    if display_available:
+        tmp_png = tempfile.mkstemp(suffix='.png')[1]
+        CA.inputs.output_figure_file = tmp_png
     tmp_csv = tempfile.mkstemp(suffix='.csv')[1]
     CA.inputs.output_csv_file = tmp_csv
 
