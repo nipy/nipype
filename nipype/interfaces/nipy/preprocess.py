@@ -75,25 +75,38 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
     tr = traits.Float(desc="TR in seconds",
                       mandatory=True)
     slice_order = traits.List(traits.Int(),
-                              desc='0 based slice order', requires=["time_interp"])
+                              desc='0 based slice order', 
+                              requires=["time_interp"])
     tr_slices = traits.Float(desc="TR slices")
     start = traits.Float(0.0, usedefault=True,
                          desc="time offset into TR to align slices to")
     time_interp = traits.Enum(True, requires=["slice_order"],
-                    desc="Assume smooth changes across time e.g., fmri series. If you don't want slice timing correction set this to undefined")
-    loops = traits.Either(traits.Int(5,usedefault=True), traits.List(traits.Int), usedefault=True, desc="loops within each run")
-    between_loops = traits.Either(traits.Int(5),traits.List(traits.Int), usedefault=True, desc="loops used to \
+                    desc="Assume smooth changes across time e.g.,\
+                     fmri series. If you don't want slice timing \
+                     correction set this to undefined")
+    loops = traits.Either(traits.Int(5,usedefault=True), 
+                          traits.List(traits.Int), 
+                          usedefault=True, 
+                          desc="loops within each run")
+    between_loops = traits.Either(traits.Int(5),
+                                  traits.List(traits.Int), 
+                                  usedefault=True, desc="loops used to \
                                                           realign different \
                                                           runs")
-    speedup = traits.Either(traits.Int(5),traits.List(traits.Int(5)), usedefault=True, desc="successive image \
-                                                    sub-sampling factors \
-                                                    for acceleration")
+    speedup = traits.Either(traits.Int(5),
+                            traits.List(traits.Int(5)),
+                            usedefault=True, 
+                            desc="successive image \
+                                  sub-sampling factors \
+                                  for acceleration")
 
 
 class FmriRealign4dOutputSpec(TraitedSpec):
 
-    out_file = OutputMultiPath(File(exists=True), desc="Realigned files")
-    par_file = OutputMultiPath(File(exists=True), desc="Motion parameter files")
+    out_file = OutputMultiPath(File(exists=True), 
+                               desc="Realigned files")
+    par_file = OutputMultiPath(File(exists=True),
+                               desc="Motion parameter files")
 
 
 class FmriRealign4d(BaseInterface):
