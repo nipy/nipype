@@ -758,7 +758,7 @@ class MRIsConvert(FSCommand):
     -------
 
     >>> import nipype.interfaces.freesurfer as fs
-    >>> mris = fs.MRIs_Convert()
+    >>> mris = fs.MRIsConvert()
     >>> mris.inputs.in_file = 'lh.pial'
     >>> mris.inputs.out_datatype = 'gii'
     >>> mris.run() # doctest: +SKIP
