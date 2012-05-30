@@ -302,17 +302,22 @@ def test_segstats():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
 def test_MS_LDA():
-    input_map = dict(lda_labels = dict(argstr='-lda %s', mandatory=True, minlen=2, maxlen=2),
-                     weight_file = dict(argstr='-weight %s', mandatory=True),
-                     output_synth = dict(exists=False, argstr='-synth %s', mandatory=True),
-                     label_file = dict(argstr='-label %s', exists=True),
-                     mask_file = dict(argstr='-mask %s', exists=True),
-                     shift = dict(argstr='-shift %d'),
-                     conform = dict(argstr='-conform'),
-                     use_weights = dict(argstr='-W'),
-                     images = dict(mandatory=True, argstr='%s', copyfile=False),
+    input_map = dict(args = dict(argstr='%s',),
+                     conform = dict(argstr='-conform',),
+                     environ = dict(usedefault=True,),
+                     ignore_exception = dict(usedefault=True,),
+                     images = dict(copyfile=False,mandatory=True,argstr='%s',),
+                     label_file = dict(argstr='-label %s',),
+                     lda_labels = dict(mandatory=True,sep=' ',argstr='-lda %s',),
+                     mask_file = dict(argstr='-mask %s',),
+                     output_synth = dict(mandatory=True,argstr='-synth %s',),
+                     shift = dict(argstr='-shift %d',),
+                     subjects_dir = dict(),
+                     use_weights = dict(argstr='-W',),
+                     weight_file = dict(mandatory=True,argstr='-weight %s',),
                      )
     instance = freesurfer.MS_LDA()
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+            yield assert_equal, getattr(instance.inputs.traits()[key],
+                                        metakey), value
