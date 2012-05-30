@@ -773,26 +773,28 @@ class Label2Vol(FSCommand):
 
 class MS_LDAInputSpec(FSTraitedSpec):
     lda_labels = traits.List(traits.Int(), argstr='-lda %s', mandatory=True,
-                             minlen=2, maxlen=2, sep=' ', position=1,
+                             minlen=2, maxlen=2, sep=' ',
                              desc='pair of class labels to optimize')
     weight_file = traits.File(argstr='-weight %s', mandatory=True,
-                              position=2,
-                              desc='filename for the LDA weights (input or output)')
+                        desc='filename for the LDA weights (input or output)')
     output_synth = traits.File(exists=False, argstr='-synth %s',
-                               mandatory=True, position=3,
-                               desc='filename for the synthesized output volume')
-    label_file = traits.File(exists=True, argstr='-label %s', position=4,
+                               mandatory=True,
+                             desc='filename for the synthesized output volume')
+    label_file = traits.File(exists=True, argstr='-label %s',
                              desc='filename of the label volume')
-    mask_file = traits.File(exists=True, argstr='-mask %s', position=5,
+    mask_file = traits.File(exists=True, argstr='-mask %s',
                             desc='filename of the brain mask volume')
-    shift = traits.Int(argstr='-shift %d', position=6,
-                       desc='shift all values equal to the given value to zero')
-    conform = traits.Bool(argstr='-conform', position=7,
-                          desc='Conform the input volumes (brain mask typically already conformed)')
-    use_weights = traits.Bool(argstr='-W', position=8,
-                              desc='Use the weights from a previously generated weight file')
+    shift = traits.Int(argstr='-shift %d',
+                      desc='shift all values equal to the given value to zero')
+    conform = traits.Bool(argstr='-conform',
+                          desc=('Conform the input volumes (brain mask '
+                                'typically already conformed)'))
+    use_weights = traits.Bool(argstr='-W',
+                              desc=('Use the weights from a previously '
+                                    'generated weight file'))
     images = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
-                            copyfile=False, desc='list of input FLASH images')
+                            copyfile=False, desc='list of input FLASH images',
+                            position=-1)
 
 
 class MS_LDAOutputSpec(TraitedSpec):
@@ -809,12 +811,13 @@ class MS_LDA(FSCommand):
     >>> grey_label = 2
     >>> white_label = 3
     >>> zero_value = 1
-    >>> optimalWeights = MS_LDA(lda_labels=[grey_label, white_label], label_file='label.mgz', weight_file='weights.txt',
-                               shift=zero_value, synth='synth_out.mgz', conform=True, use_weights=True, images=['FLASH1.mgz',
-                               'FLASH2.mgz', 'FLASH3.mgz'])
+    >>> optimalWeights = MS_LDA(lda_labels=[grey_label, white_label], \
+                                label_file='label.mgz', weight_file='weights.txt', \
+                                shift=zero_value, output_synth='synth_out.mgz', \
+                                conform=True, use_weights=True, \
+                                images=['FLASH1.mgz', 'FLASH2.mgz', 'FLASH3.mgz'])
     >>> optimalWeights.cmdline
-    'mri_ms_LDA -lda 2 3 -label label.mgz -weight weights.txt -shift 0 -synth synth_out.mgz -conform -W FLASH1.mgz FLASH2.mgz
-    FLASH3.mgz'
+    'mri_ms_LDA -conform -label label.mgz -lda 2 3 -synth synth_out.mgz -shift 1 -W -weight weights.txt FLASH1.mgz FLASH2.mgz FLASH3.mgz'
     """
 
     _cmd = 'mri_ms_LDA'
