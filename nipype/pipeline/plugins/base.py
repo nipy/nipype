@@ -328,9 +328,8 @@ class DistributedPluginBase(PluginBase):
                     self.proc_done[jobid] = True
                     self.proc_pending[jobid] = True
                     # Send job to task manager and add to pending tasks
-                    _, hashvalue = self.procs[jobid]._get_hashval()
-                    logger.info('Executing: %s ID: %d H:%s' % \
-                                    (self.procs[jobid]._id, jobid, hashvalue))
+                    logger.info('Executing: %s ID: %d' % \
+                                    (self.procs[jobid]._id, jobid))
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
                     continue_with_submission = True
