@@ -162,7 +162,7 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
     ]), name='l2infosource')
 
     l2source = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=['CFFfiles', 'CSVmatrices',
-    'CSVnodal', 'CSVglobal']), name='l2source')
+    'CSVfibers', 'CSVnodal', 'CSVglobal']), name='l2source')
 
     l2source.inputs.template_args = dict(CFFfiles=[['group_id']], CSVmatrices=[['group_id']],
     CSVnodal=[['group_id']], CSVglobal=[['group_id']], CSVfibers=[['group_id']])
@@ -173,7 +173,7 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
      CSVglobal=op.join(output_dir,'%s/nxcsv/*/*global*.csv'), CSVfibers=op.join(output_dir,'%s/fiber_csv/*/*fibers*.csv'))
 
     l2inputnode = pe.Node(interface=util.IdentityInterface(fields=['CFFfiles',
-    'CSVmatrices', 'CSVnodal', 'CSVglobal', 'network_file']), name='l2inputnode')
+    'CSVfibers', 'CSVmatrices', 'CSVnodal', 'CSVglobal', 'network_file']), name='l2inputnode')
 
     MergeCNetworks = pe.Node(interface=cmtk.MergeCNetworks(), name="MergeCNetworks")
 
