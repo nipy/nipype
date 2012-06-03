@@ -961,13 +961,10 @@ class DARTELNorm2MNI(SPMCommand):
         elif opt == 'bounding_box':
             return list(val)
         elif opt == 'fwhm':
-            if not isinstance(val, list):
-                return [val, val, val]
             if isinstance(val, list):
-                if len(val) == 1:
-                    return [val[0], val[0], val[0]]
-                else:
-                    return val 
+                return val
+            else:
+                return [val, val, val]
         elif opt == 'modulate':
             return int(val)
         else:
