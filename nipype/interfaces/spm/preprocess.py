@@ -917,7 +917,7 @@ class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
                                 field='mni_norm.bb')
     modulate = traits.Bool(field='mni_norm.preserve',
                            desc="Modulate out images - no modulation preserves concentrations")
-    fwhm = traits.Either(traits.Tuple(traits.Float(), traits.Float, traits.Float),
+    fwhm = traits.Either(traits.List(traits.Float(), minlen=3, maxlen=3),
                          traits.Float(), field='mni_norm.fwhm',
                          desc='3-list of fwhm for each dimension')
 
@@ -961,10 +961,13 @@ class DARTELNorm2MNI(SPMCommand):
         elif opt == 'bounding_box':
             return list(val)
         elif opt == 'fwhm':
-            if not isinstance(val, tuple):
+            if not isinstance(val, list):
                 return [val, val, val]
-            if isinstance(val, tuple):
-                return val
+            if isinstance(val, list):
+                if len(val) == 1:
+                    return [val[0], val[0], val[0]]
+                else:
+                    return val 
         elif opt == 'modulate':
             return int(val)
         else:
