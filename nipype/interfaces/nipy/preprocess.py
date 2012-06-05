@@ -75,7 +75,7 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
     tr = traits.Float(desc="TR in seconds",
                       mandatory=True)
     slice_order = traits.List(traits.Int(),
-                              desc='0 based slice order', 
+                              desc='0 based slice order',
                               requires=["time_interp"])
     tr_slices = traits.Float(desc="TR slices")
     start = traits.Float(0.0, usedefault=True,
@@ -84,18 +84,18 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
                     desc="Assume smooth changes across time e.g.,\
                      fmri series. If you don't want slice timing \
                      correction set this to undefined")
-    loops = traits.Either(traits.Int(5,usedefault=True), 
-                          traits.List(traits.Int), 
-                          usedefault=True, 
+    loops = traits.Either(traits.Int(5,usedefault=True),
+                          traits.List(traits.Int),
+                          usedefault=True,
                           desc="loops within each run")
     between_loops = traits.Either(traits.Int(5),
-                                  traits.List(traits.Int), 
+                                  traits.List(traits.Int),
                                   usedefault=True, desc="loops used to \
                                                           realign different \
                                                           runs")
     speedup = traits.Either(traits.Int(5),
                             traits.List(traits.Int(5)),
-                            usedefault=True, 
+                            usedefault=True,
                             desc="successive image \
                                   sub-sampling factors \
                                   for acceleration")
@@ -103,7 +103,7 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
 
 class FmriRealign4dOutputSpec(TraitedSpec):
 
-    out_file = OutputMultiPath(File(exists=True), 
+    out_file = OutputMultiPath(File(exists=True),
                                desc="Realigned files")
     par_file = OutputMultiPath(File(exists=True),
                                desc="Motion parameter files")
@@ -150,16 +150,24 @@ class FmriRealign4d(BaseInterface):
             TR_slices = None
         else:
             TR_slices = self.inputs.tr_slices
+        if not self.inputs.loops:
+            loops = 5
+        else:
+            loops = self.inputs.loops
+        if not self.inputs.speedup:
+            speedup=5
+        else:
+            speedup = self.inputs.speedup
 
         R = FR4d(all_ims, tr=self.inputs.tr,
             slice_order=self.inputs.slice_order,
             tr_slices=TR_slices,
             time_interp=self.inputs.time_interp,
             start=self.inputs.start)
-
-        R.estimate(loops=self.inputs.loops,
+        
+        R.estimate(loops=loops,
                    between_loops=self.inputs.between_loops,
-                   speedup=self.inputs.speedup)
+                   speedup=speedup)
 
         corr_run = R.resample()
         self._out_file_path = []
