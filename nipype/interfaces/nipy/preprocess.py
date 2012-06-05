@@ -86,7 +86,6 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
                      correction set this to undefined")
     loops = traits.Either(traits.Int(5,usedefault=True),
                           traits.List(traits.Int),
-                          usedefault=True,
                           desc="loops within each run")
     between_loops = traits.Either(traits.Int(5),
                                   traits.List(traits.Int),
@@ -95,7 +94,6 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
                                                           runs")
     speedup = traits.Either(traits.Int(5),
                             traits.List(traits.Int(5)),
-                            usedefault=True,
                             desc="successive image \
                                   sub-sampling factors \
                                   for acceleration")
@@ -150,11 +148,11 @@ class FmriRealign4d(BaseInterface):
             TR_slices = None
         else:
             TR_slices = self.inputs.tr_slices
-        if not self.inputs.loops:
+        if not isdefined(self.inputs.loops):
             loops = 5
         else:
             loops = self.inputs.loops
-        if not self.inputs.speedup:
+        if not isdefined(self.inputs.speedup):
             speedup=5
         else:
             speedup = self.inputs.speedup
@@ -164,7 +162,7 @@ class FmriRealign4d(BaseInterface):
             tr_slices=TR_slices,
             time_interp=self.inputs.time_interp,
             start=self.inputs.start)
-        
+
         R.estimate(loops=loops,
                    between_loops=self.inputs.between_loops,
                    speedup=speedup)
